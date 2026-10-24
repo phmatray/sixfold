@@ -508,7 +508,8 @@ pub static CARDS: &[CardDef] = &[
 - `set.rs` already has `#[test] fn set_is_valid()`, which calls `validate_cards(CARDS)`. That checks for unique names, `evolves_from` naming a creature one stage below in the set, HP and damage in tens, no Colorless basic energy, weakness or resistance, trainers that have effects, and `AttachPlus10`, `AttachMinus20` and `StageSkip` used only on trainers.
 - Also add `assert_eq!(card_id("Blaze Hound"), Some(BLAZE_HOUND))` for every constant.
 - Don't reuse names from the test fixtures in `engine/src/fixtures.rs` ("Mossling", "Field Notes", …). The engine resolves evolution chains by name, and in tests the fixture cards are looked up first.
-- Prebuilt decks go in `decks.rs` as `Vec<CardId>` builders, and each needs a test that it passes `validate_deck`. Running a few seeded `Game::new` games with them and random `legal_actions` play is a cheap smoke test.
+- Ids are positions: the set only grows at the end (old saves store ids). `every_colour_has_a_full_line` and `set_size_by_kind` check that each colour has a Basic → Stage 1 → Stage 2 line and the set's size.
+- Prebuilt decks go in `decks.rs` as `Prebuilt { name, description, list }` statics. `PREBUILT` (the six decks the duel setup offers and the AI plays: Ember Rush, Tide Mind, Grove Bloom, Storm Front, Stone Fist, Dream Veil) and `STARTER` (Trailhead, the deck a new player owns; not in `PREBUILT`) are checked by `validate_deck` and a random-play smoke run. `ai::tests::prebuilt_decks_round_robin_is_balanced` plays a seeded Normal-vs-Normal round robin and keeps every prebuilt between 30% and 70% wins (16 games per pair; the `#[ignore]`d `_big` variant plays 100, run it in release when tuning cards).
 
 ---
 
@@ -547,7 +548,7 @@ Pure data and functions with no I/O: the UI decides where strings are stored and
 **Collection.** Owned copies per `CardId`. Basic energy is unlimited: it is never stored, `count` reports `usize::MAX`, and `add` / `remove` on it are no-ops (`remove` returns true).
 
 ```rust
-let mut c = Collection::new();          // or starter_collection(): both prebuilt decks' cards
+let mut c = Collection::new();          // or starter_collection(): the cards of decks::STARTER
 c.add(id, n); c.add_all(&pack);         // add copies / a booster's contents
 c.remove(id, n) -> bool                 // false, and nothing removed, when fewer are owned
 c.count(id) -> usize
@@ -565,7 +566,7 @@ c.can_build(&deck) -> bool
 
 Ids are positions in `set::CARDS`, so the set may only grow at the end: reordering or removing cards would change what old saves mean.
 
-**Boosters (`booster::*`).** `PACK_SIZE = 10`. `Booster { name, description, colors }`; `BOOSTERS = [&EMBER_PACK, &TIDE_PACK, &WILD_PACK]`.
+**Boosters (`booster::*`).** `PACK_SIZE = 10`. `Booster { name, description, colors }`; `BOOSTERS = [&EMBER_PACK, &TIDE_PACK, &WILD_PACK, &GROVE_PACK, &STORM_PACK, &STONE_PACK, &DREAM_PACK]`. Wallets count packs by index into `BOOSTERS`, so a new booster goes at the end.
 
 | Slot (reveal order) | Cards | Drawn |
 |---|---|---|
@@ -574,7 +575,7 @@ Ids are positions in `set::CARDS`, so the set may only grow at the end: reorderi
 | 7–9 | 3 `Uncommon` | distinct |
 | 10 | 1 `Rare` | |
 
-`booster.open(seed) -> Vec<CardId>` always gives the same pack for the same seed (the engine's PCG32). A pack holds trainers, the special energy and colorless creatures always, and creatures and basic energy only of its `colors`: Ember is Fire / Fighting, Tide is Water / Psychic, Wild is everything. `booster.holds(id)` and `booster.pool(rarity)` list what it can contain, for odds in the UI. Each card of a pool is equally likely.
+`booster.open(seed) -> Vec<CardId>` always gives the same pack for the same seed (the engine's PCG32). A pack holds trainers, the special energy and colorless creatures always, and creatures and basic energy only of its `colors`: Ember is Fire / Fighting, Tide is Water / Psychic, Grove is Grass / Lightning, Storm is Lightning / Water, Stone is Fighting (plus the colorless creatures every pack has), Dream is Psychic / Grass, Wild is everything. `booster.holds(id)` and `booster.pool(rarity)` list what it can contain, for odds in the UI. Each card of a pool is equally likely.
 
 **Deck lists.** `DeckList { pub name: String, pub cards: Vec<CardId> }`, for decks a player builds.
 
@@ -598,12 +599,12 @@ d.validate(&owned) -> Result<(), DeckListError> // Illegal(DeckError), then NotO
 **Profile (`profile::*`).** What a player keeps between duels: `Profile { pub collection, pub decks: Vec<DeckList>, pub wallet: Wallet }`.
 
 ```rust
-let mut p = Profile::new_player();   // starter_collection(), both prebuilt decks as deck lists, STARTING_PACKS = [1, 1, 1]
+let mut p = Profile::new_player();   // starter_collection(), the STARTER deck as its one deck list, STARTING_PACKS = one Ember, Tide and Wild pack
 p.open_pack(b, seed) -> Option<Vec<(CardId, bool)>> // spends a pack of BOOSTERS[b], adds its cards; true = first copy
 p.record_duel(won) -> Option<usize>  // a win grants one WIN_REWARD (Wild) pack and returns its booster index; a loss nothing
 p.wallet.packs(b) / .total() / .grant(b, n) -> bool / .take(b) -> bool
-p.wallet.save()                      // p1;<ember>,<tide>,<wild>;<checksum>
-Wallet::load(&s) -> Result<Wallet, LoadError>    // missing trailing counts are 0
+p.wallet.save()                      // p1;<count>,... one per booster in BOOSTERS order;<checksum>
+Wallet::load(&s) -> Result<Wallet, LoadError>    // missing trailing counts are 0 (a 0.3 save has three)
 ```
 
 ---
