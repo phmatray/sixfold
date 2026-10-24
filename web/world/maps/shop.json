@@ -176,7 +176,8 @@
         {
           "if": "beat:warden",
           "lines": [
-            "The Hex Warden, beaten in my shop's back room! I'm framing the scorch marks."
+            "The Hex Warden, beaten in my shop's back room! I'm framing the scorch marks.",
+            "Sable keeps a ladder back there now: the Gauntlet, and a new duel every day."
           ]
         },
         {

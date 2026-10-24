@@ -120,10 +120,20 @@
       "idle": "Idle",
       "dialogue": [
         {
+          "if": "won:warden&flag:thanked_warden",
+          "lines": [
+            "Again, then. The chair stays yours."
+          ]
+        },
+        {
           "if": "won:warden",
           "lines": [
             "...So the seals chose well.",
-            "The Warden's chair is yours whenever you want it. I'll keep it warm, though."
+            "The Warden's chair is yours whenever you want it. I'll keep it warm, though.",
+            "Take Hexcrest. It was my first card. It never minded conditions, and neither should you."
+          ],
+          "do": [
+            "flag:thanked_warden"
           ]
         },
         {
@@ -142,10 +152,11 @@
         {
           "if": "beat:warden",
           "lines": [
-            "Champion. You came back. Good, I've rebuilt my deck since."
+            "Champion. The chair suits you.",
+            "For those who want more, I keep a ladder: the Gauntlet, six rivals in a row, and a new duel every day."
           ],
           "do": [
-            "duel:warden"
+            "show:ladder"
           ]
         },
         {

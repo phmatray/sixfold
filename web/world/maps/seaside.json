@@ -91,16 +91,36 @@
       "facing": "s",
       "dialogue": [
         {
+          "if": "won:marlo&flag:thanked_marlo",
+          "lines": [
+            "Washed out twice. The tide likes you today."
+          ]
+        },
+        {
           "if": "won:marlo",
           "lines": [
             "Washed out, fair and square.",
-            "Take my seal, it's still a little damp."
+            "Take my seal, it's still a little damp.",
+            "This Brinemoth washed up with it. Yours now."
+          ],
+          "do": [
+            "flag:thanked_marlo"
           ]
         },
         {
           "if": "lost:marlo",
           "lines": [
             "Low tide for you today. The water always comes back in."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "The champion, back on my pier. The tide tables never mentioned you.",
+            "One more round? Three prizes, and I won't go easy."
+          ],
+          "do": [
+            "duel:marlo"
           ]
         },
         {
@@ -136,10 +156,20 @@
       "facing": "s",
       "dialogue": [
         {
+          "if": "won:quill&flag:thanked_quill",
+          "lines": [
+            "Another one for the notebook. Your column is getting long."
+          ]
+        },
+        {
           "if": "won:quill",
           "lines": [
             "Well. I'll be recording that one as a downpour.",
-            "My seal is yours. Mark it in your own notebook."
+            "My seal is yours. Mark it in your own notebook.",
+            "Squallkite comes with it. Fly it on a windy day."
+          ],
+          "do": [
+            "flag:thanked_quill"
           ]
         },
         {
@@ -156,6 +186,16 @@
           ]
         },
         {
+          "if": "beat:warden",
+          "lines": [
+            "I wrote up your duel with the Warden. Three pages, and a storm on every one.",
+            "Care to give me a fourth?"
+          ],
+          "do": [
+            "duel:quill"
+          ]
+        },
+        {
           "if": "beat:quill",
           "lines": [
             "New page, same storm. Ready?"
@@ -166,7 +206,7 @@
         },
         {
           "lines": [
-            "Clouds are stacking up over the sea. Good dueling weather.",
+            "Clouds are stacking up over the sea. Good duelling weather.",
             "I'm Quill. I note the wind, the rain and every duel I play.",
             "Four prizes, and I'll be writing it all down."
           ],
@@ -186,6 +226,13 @@
       "z": 5,
       "facing": "w",
       "dialogue": [
+        {
+          "if": "beat:warden&flag:letter_delivered",
+          "lines": [
+            "I saw the hall's lamps burning all night from up here. Hob says that was you.",
+            "A champion carried my letter. I'll tell the gulls."
+          ]
+        },
         {
           "if": "flag:letter_delivered",
           "lines": [
@@ -224,6 +271,13 @@
       "facing": "e",
       "dialogue": [
         {
+          "if": "beat:warden",
+          "lines": [
+            "Marlo says the new champion fishes better than me.",
+            "Marlo's never even seen you fish. Marlo's still right."
+          ]
+        },
+        {
           "if": "beat:marlo",
           "lines": [
             "You beat Marlo? Marlo doesn't lose. Marlo told me Marlo doesn't lose."
@@ -231,7 +285,7 @@
         },
         {
           "lines": [
-            "Nothing's biting. I think the fish are dueling too.",
+            "Nothing's biting. I think the fish are duelling too.",
             "Marlo sits at the end of the pier. Bring a good deck, the tide's on Marlo's side."
           ]
         }

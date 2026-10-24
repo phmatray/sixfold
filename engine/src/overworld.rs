@@ -9,7 +9,7 @@
 //!   `beat:<rival>` (beaten at least once), `open:<rival>` (enough seals to
 //!   duel them), `won:<rival>` / `lost:<rival>` (the result of the last
 //!   campaign duel, until [`Progress::settle`]), optionally negated with `!`;
-//!   an empty condition always holds
+//!   several joined with `&` must all hold; an empty condition always holds
 //! - effect `show:<panel>` asks the UI to open one of its panels (`ladder`:
 //!   the Gauntlet and the daily duel)
 //! - save string: comma-separated `i:<item>`, `f:<flag>`, `won:<rival>` /
@@ -112,6 +112,11 @@ impl Progress {
         let cond = cond.trim();
         if cond.is_empty() {
             return true;
+        }
+        if cond.contains('&') {
+            return cond
+                .split('&')
+                .all(|c| !c.trim().is_empty() && self.check(c));
         }
         let (negate, cond) = match cond.strip_prefix('!') {
             Some(rest) => (true, rest),
@@ -270,6 +275,17 @@ mod tests {
         // Malformed conditions never hold, negated or not.
         assert!(!p.check("weather:sunny"));
         assert!(!p.check("!weather:sunny"));
+    }
+
+    #[test]
+    fn conditions_joined_with_and_must_all_hold() {
+        let mut p = Progress::default();
+        p.apply("flag:met").unwrap();
+        assert!(p.check("flag:met & !item:running_shoes"));
+        assert!(!p.check("flag:met&item:running_shoes"));
+        p.apply("give:running_shoes").unwrap();
+        assert!(p.check("flag:met&item:running_shoes"));
+        assert!(!p.check("flag:met&") && !p.check("flag:met&weather:sunny"));
     }
 
     #[test]

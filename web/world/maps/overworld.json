@@ -560,6 +560,13 @@
           ]
         },
         {
+          "if": "beat:warden",
+          "lines": [
+            "The champion, out on my loop! Everyone will say I overtook you.",
+            "I won't correct them."
+          ]
+        },
+        {
           "if": "item:running_shoes",
           "lines": [
             "Are those running shoes? Don't lap me, it's rude."
@@ -596,6 +603,13 @@
           ]
         },
         {
+          "if": "beat:warden",
+          "lines": [
+            "You beat the Hex Warden? With cards? Real cards?",
+            "Sable runs a Gauntlet in the back room now. I'm not ready. I'll watch."
+          ]
+        },
+        {
           "if": "seals:1",
           "lines": [
             "Is that a seal? A real one? Bramble never gave ME one.",
@@ -620,6 +634,13 @@
       "facing": "w",
       "idle": "Idle",
       "dialogue": [
+        {
+          "if": "beat:warden",
+          "lines": [
+            "The champion, in my flowerbeds. I'll allow it, just this once.",
+            "Bramble says the hedges grew back thicker the day you won. Coincidence, surely."
+          ]
+        },
         {
           "if": "item:running_shoes",
           "lines": [
