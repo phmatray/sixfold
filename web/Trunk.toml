@@ -1,0 +1,5 @@
+# Writes dist/sw.js with the list of files to precache (see sw-manifest.sh).
+[[hooks]]
+stage = "post_build"
+command = "sh"
+command_arguments = ["-c", "sh \"$TRUNK_SOURCE_DIR/sw-manifest.sh\""]
