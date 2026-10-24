@@ -860,3 +860,905 @@ impl Game {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::action::{Action, Event, PromptKind, RuleError};
+    use crate::card::Color::*;
+    use crate::condition::{Condition, Placed, Shield, Special, Status};
+    use crate::effect::{Choice, Effect::*, Phase};
+    use crate::fixtures::*;
+    use crate::testkit::*;
+
+    fn pos(ev: &[Event], f: impl Fn(&Event) -> bool) -> usize {
+        ev.iter().position(f).expect("event")
+    }
+
+    fn applied(ev: &[Event], player: usize) -> Vec<Status> {
+        ev.iter()
+            .filter_map(|e| match e {
+                Event::ConditionApplied { player: p, status } if *p == player => Some(*status),
+                _ => None,
+            })
+            .collect()
+    }
+
+    fn choose_options(g: &crate::Game) -> (usize, Vec<Choice>, bool) {
+        match prompt_of(g) {
+            (
+                p,
+                PromptKind::Choose {
+                    options,
+                    can_cancel,
+                    ..
+                },
+            ) => (p, options, can_cancel),
+            other => panic!("expected a Choose prompt, got {other:?}"),
+        }
+    }
+
+    // ----- Framework -----
+
+    /// R-EFFECT-01: each effect runs at its phase, whatever its place in the
+    /// list; a missing phase is a success.
+    #[test]
+    fn effect_phases_called_in_pipeline_order() {
+        assert_eq!(DiscardAllEnergy.phase(), Phase::Cost);
+        assert_eq!(
+            Inflict {
+                status: Status::Asleep,
+                coin: true
+            }
+            .phase(),
+            Phase::Before
+        );
+        assert_eq!(Recoil(10).phase(), Phase::After);
+        let mut g = main_phase(0);
+        g.force_coins(&[true, true]);
+        let ev = attack_with(&mut g, 0, &[Heal(10), AddPerHeads { coins: 2, per: 10 }]);
+        assert_eq!(
+            damage_to(&ev, 1, 0),
+            vec![40],
+            "phase 3 decides the damage: 20 ×2"
+        );
+        let ev = attack_with(&mut main_phase(0), 10, &[]);
+        assert!(ev.contains(&Event::TurnEnded { player: 0 }));
+    }
+
+    /// R-EFFECT-02: costs → phase 3 → damage → phase 4 → conditions → end.
+    #[test]
+    fn attack_pipeline_order() {
+        let mut g = main_phase(0);
+        g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E, FIRE_E];
+        g.force_coins(&[true]);
+        let ev = attack_with(
+            &mut g,
+            10,
+            &[
+                Recoil(10),
+                Inflict {
+                    status: Status::Poisoned,
+                    coin: false,
+                },
+                AddPerHeads { coins: 1, per: 10 },
+                DiscardEnergy {
+                    color: Fire,
+                    count: 1,
+                },
+            ],
+        );
+        let order = [
+            pos(&ev, |e| matches!(e, Event::AttackUsed { .. })),
+            pos(&ev, |e| {
+                matches!(e, Event::EnergyDiscarded { card: FIRE_E, .. })
+            }),
+            pos(&ev, |e| matches!(e, Event::CoinFlip { .. })),
+            pos(&ev, |e| matches!(e, Event::Damage { player: 1, .. })),
+            pos(&ev, |e| matches!(e, Event::Damage { player: 0, .. })),
+            pos(&ev, |e| matches!(e, Event::ConditionApplied { .. })),
+            pos(&ev, |e| matches!(e, Event::TurnEnded { .. })),
+        ];
+        assert!(order.windows(2).all(|w| w[0] < w[1]), "{order:?}");
+        assert_eq!(damage_to(&ev, 1, 0)[0], 40, "(10 + 10) ×2");
+    }
+
+    /// R-EFFECT-02: the accuracy coin is flipped once per turn, before costs.
+    #[test]
+    fn accuracy_coin_cached_for_turn() {
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(ROCKLET, &[FIGHTING_E, FIGHTING_E]));
+        g.players[0].effects.placed = Some(Placed::Accuracy);
+        g.force_coins(&[true]);
+        let ev = ok(&mut g, Action::Attack(1));
+        assert_eq!(coins(&ev), 1);
+        assert!(choose_options(&g).2, "the selection can be cancelled");
+        ok(&mut g, Action::Cancel);
+        let ev = ok(&mut g, Action::Attack(1));
+        assert_eq!(coins(&ev), 0, "cached");
+        ok(&mut g, Action::Choose(0));
+        assert_eq!(g.players[1].effects.placed, Some(Placed::DisabledAttack(0)));
+        // Tails: the turn ends, nothing paid.
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(SPARKLET, &[LIGHTNING_E, LIGHTNING_E]));
+        g.players[0].effects.placed = Some(Placed::Accuracy);
+        g.force_coins(&[false]);
+        let ev = ok(&mut g, Action::Attack(0));
+        assert!(ev.contains(&Event::AttackFailed { player: 0 }));
+        assert!(ev.contains(&Event::TurnEnded { player: 0 }));
+        assert!(damage_to(&ev, 1, 0).is_empty());
+        assert_eq!(g.players[0].active.as_ref().unwrap().energy.len(), 2);
+    }
+
+    /// R-EFFECT-03
+    #[test]
+    fn flip_coins_counts_heads_with_seeded_rng() {
+        let mut g = main_phase(0);
+        g.force_coins(&[true, false, true]);
+        let mut ev = Vec::new();
+        assert_eq!(g.flip_many(0, 3, &mut ev), 2);
+        assert_eq!(coins(&ev), 3, "all coins are flipped");
+        let flips = |g: &mut crate::Game| {
+            (0..32)
+                .map(|_| g.flip(0, &mut Vec::new()))
+                .collect::<Vec<_>>()
+        };
+        let (a, b) = (flips(&mut main_phase(0)), flips(&mut main_phase(0)));
+        assert_eq!(a, b);
+        assert!(a.contains(&true) && a.contains(&false));
+    }
+
+    // ----- Conditions in attacks -----
+
+    /// R-STATUS-03
+    #[test]
+    fn protected_defender_drops_status_but_attacker_self_status_applies() {
+        let mut g = main_phase(0);
+        g.players[1].effects.shield = Some(Shield::PreventAll);
+        let ev = attack_with(
+            &mut g,
+            10,
+            &[
+                Inflict {
+                    status: Status::Poisoned,
+                    coin: false,
+                },
+                InflictSelf(Status::Confused),
+            ],
+        );
+        assert!(applied(&ev, 1).is_empty());
+        assert_eq!(applied(&ev, 0), vec![Status::Confused]);
+    }
+
+    /// R-STATUS-03
+    #[test]
+    fn trainer_as_basic_immune_to_status() {
+        let asleep = &[Inflict {
+            status: Status::Asleep,
+            coin: false,
+        }];
+        let mut g = main_phase(0);
+        g.players[1].active = Some(creature(STRAW_DECOY, &[]));
+        assert!(applied(&attack_with(&mut g, 0, asleep), 1).is_empty());
+        // An immunity Power works the same way, while it works.
+        let mut g = main_phase(0);
+        g.players[1].active = Some(creature(WARDEN, &[]));
+        assert!(applied(&attack_with(&mut g, 0, asleep), 1).is_empty());
+        let mut g = main_phase(0);
+        g.players[1].active = Some(creature(WARDEN, &[]));
+        g.players[0].bench.push(creature(HUSHMOTH, &[]));
+        assert_eq!(
+            applied(&attack_with(&mut g, 0, asleep), 1),
+            vec![Status::Asleep]
+        );
+    }
+
+    /// R-STATUS-06
+    #[test]
+    fn confused_tails_pays_cost_takes_20_and_ends_turn() {
+        let effects = &[
+            DiscardEnergy {
+                color: Fire,
+                count: 1,
+            },
+            Inflict {
+                status: Status::Poisoned,
+                coin: false,
+            },
+        ];
+        let mut g = main_phase(0);
+        g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E, FIRE_E];
+        g.players[0].condition.apply(Status::Confused);
+        g.force_coins(&[false]);
+        let ev = attack_with(&mut g, 30, effects);
+        assert!(ev.contains(&Event::EnergyDiscarded {
+            player: 0,
+            slot: 0,
+            card: FIRE_E
+        }));
+        assert_eq!(damage_to(&ev, 0, 0), vec![20]);
+        assert!(damage_to(&ev, 1, 0).is_empty());
+        assert!(applied(&ev, 1).is_empty());
+        assert_eq!(prompt_of(&g), (1, PromptKind::MainPhase));
+        // Heads: the attack resolves normally.
+        let mut g = main_phase(0);
+        g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E, FIRE_E];
+        g.players[0].condition.apply(Status::Confused);
+        g.force_coins(&[true]);
+        let ev = attack_with(&mut g, 30, effects);
+        assert_eq!(damage_to(&ev, 1, 0)[0], 60);
+    }
+
+    /// R-STATUS-12
+    #[test]
+    fn evolving_active_clears_all_conditions() {
+        let mut g = main_phase(2);
+        g.players[0].condition.apply(Status::Asleep);
+        g.players[0].effects.shield = Some(Shield::Halve);
+        g.players[0].effects.weakness = Some(Water);
+        g.players[0].effects.doubling = Some(1);
+        g.players[0].trainer_locked = true;
+        set_hand(&mut g, 0, &[MOSSBACK]);
+        ok(&mut g, Action::Evolve { hand: 0, slot: 0 });
+        assert_eq!(g.players[0].condition, Condition::default());
+        assert_eq!(g.players[0].effects, Default::default());
+        assert!(g.players[0].trainer_locked, "the player-wide lock stays");
+    }
+
+    /// R-STATUS-12
+    #[test]
+    fn cure_trainer_requires_condition() {
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[TONIC]);
+        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+        assert_eq!(g.players[0].hand, vec![TONIC]);
+        g.players[0].condition.apply(Status::Asleep);
+        g.players[0].condition.apply(Status::Poisoned);
+        let ev = ok(&mut g, Action::PlayTrainer(0));
+        assert!(ev.contains(&Event::ConditionRemoved {
+            player: 0,
+            status: Status::Poisoned
+        }));
+        assert_eq!(g.players[0].condition, Condition::default());
+        assert_eq!(g.players[0].discard, vec![TONIC]);
+    }
+
+    /// R-STATUS-12: a cure for both Actives.
+    #[test]
+    fn cure_both_actives() {
+        let mut g = main_phase(0);
+        g.players[1].condition.apply(Status::Confused);
+        trainer_with(&mut g, &[Cure { both: true }]);
+        assert!(g.players[1].condition.is_empty());
+    }
+
+    /// R-STATUS-13, R-TURN-06
+    #[test]
+    fn last_inflicted_status_recorded() {
+        let mut g = main_phase(0);
+        attack_with(
+            &mut g,
+            10,
+            &[
+                Inflict {
+                    status: Status::Poisoned,
+                    coin: false,
+                },
+                Inflict {
+                    status: Status::Confused,
+                    coin: false,
+                },
+            ],
+        );
+        let last = g.players[1].effects.last_inflicted;
+        assert_eq!(
+            (last.special, last.poison),
+            (Some(Special::Confused), crate::Poison::Poisoned)
+        );
+        // Done clears the opponent's record.
+        g.players[0].effects.last_inflicted.apply(Status::Asleep);
+        ok(&mut g, Action::Done);
+        assert!(g.players[0].effects.last_inflicted.is_empty());
+    }
+
+    /// R-STATUS-14
+    #[test]
+    fn self_confusion_survives_negation() {
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(WARDEN, &[]));
+        g.players[1].effects.shield = Some(Shield::PreventAll);
+        let ev = attack_with(&mut g, 20, &[InflictSelf(Status::Confused)]);
+        assert!(ev.contains(&Event::AttackNegated { player: 1 }));
+        assert_eq!(
+            applied(&ev, 0),
+            vec![Status::Confused],
+            "no immunity check either"
+        );
+    }
+
+    /// R-STATUS-02: the coin variant applies only on heads.
+    #[test]
+    fn inflict_on_heads_only() {
+        let sleep = &[Inflict {
+            status: Status::Asleep,
+            coin: true,
+        }];
+        let mut g = main_phase(0);
+        g.force_coins(&[false]);
+        assert!(applied(&attack_with(&mut g, 0, sleep), 1).is_empty());
+        let mut g = main_phase(0);
+        g.force_coins(&[true]);
+        assert_eq!(
+            applied(&attack_with(&mut g, 0, sleep), 1),
+            vec![Status::Asleep]
+        );
+    }
+
+    // ----- Damage effects -----
+
+    /// R-EFFECT-04
+    #[test]
+    fn add_per_heads_counts_heads() {
+        let mut g = main_phase(0);
+        g.force_coins(&[true, false, true]);
+        let ev = attack_with(
+            &mut g,
+            0,
+            &[AddPerHeads { coins: 3, per: 10 }, IgnoreWeaknessResistance],
+        );
+        assert_eq!(damage_to(&ev, 1, 0)[0], 20);
+    }
+
+    /// R-DMG-08: set now, used on the owner's next turn, then gone.
+    #[test]
+    fn double_next_attack_applies_on_next_own_turn() {
+        let plain = &[IgnoreWeaknessResistance];
+        let mut g = main_phase(0);
+        let ev = attack_with(&mut g, 10, &[DoubleNextAttack, IgnoreWeaknessResistance]);
+        assert_eq!(damage_to(&ev, 1, 0)[0], 10);
+        ok(&mut g, Action::Done);
+        assert_eq!(damage_to(&attack_with(&mut g, 10, plain), 1, 0)[0], 20);
+        ok(&mut g, Action::Done);
+        assert_eq!(damage_to(&attack_with(&mut g, 10, plain), 1, 0)[0], 10);
+    }
+
+    /// R-EFFECT-04
+    #[test]
+    fn bench_damage_ignores_weakness() {
+        let mut g = main_phase(0);
+        g.players[1].bench = vec![creature(PEBBLET, &[]), creature(EMBERKIT, &[])];
+        let ev = attack_with(
+            &mut g,
+            0,
+            &[BenchDamage {
+                amount: 10,
+                own: false,
+                opponent: true,
+            }],
+        );
+        assert_eq!(
+            (damage_to(&ev, 1, 1), damage_to(&ev, 1, 2)),
+            (vec![10], vec![10])
+        );
+    }
+
+    /// R-DMG-04: one chosen opposing creature; cancelling abandons the attack.
+    #[test]
+    fn snipe_picks_any_opposing_creature() {
+        let mut g = main_phase(0);
+        g.players[1].bench.push(creature(EMBERKIT, &[]));
+        attack_with(&mut g, 0, &[Snipe(20)]);
+        let (p, options, can_cancel) = choose_options(&g);
+        assert_eq!((p, can_cancel), (0, true));
+        assert_eq!(
+            options,
+            vec![
+                Choice::Slot { player: 1, slot: 0 },
+                Choice::Slot { player: 1, slot: 1 }
+            ]
+        );
+        ok(&mut g, Action::Cancel);
+        assert_eq!(prompt_of(&g), (0, PromptKind::MainPhase));
+        attack_with(&mut g, 0, &[Snipe(20)]);
+        let ev = ok(&mut g, Action::Choose(1));
+        assert_eq!(damage_to(&ev, 1, 1), vec![20]);
+        assert_eq!(hp(&g, 1, 0), 60);
+    }
+
+    /// R-EFFECT-04: healing the Active, capped at max HP.
+    #[test]
+    fn heal_capped_at_max_hp() {
+        let mut g = main_phase(0);
+        g.players[0].active.as_mut().unwrap().hp = 40;
+        let ev = attack_with(&mut g, 0, &[Heal(30)]);
+        assert!(ev.contains(&Event::Healed {
+            player: 0,
+            slot: 0,
+            amount: 10
+        }));
+        assert_eq!(hp(&g, 0, 0), 50);
+    }
+
+    // ----- Shields and placed effects -----
+
+    /// R-DMG-09, R-TURN-03 step 1: lasts through the opponent's turn.
+    #[test]
+    fn protect_shield_lasts_until_own_next_turn() {
+        let mut g = main_phase(0);
+        attack_with(
+            &mut g,
+            0,
+            &[Protect {
+                shield: Shield::PreventDamage,
+                coin: false,
+            }],
+        );
+        assert_eq!(g.players[0].effects.shield, Some(Shield::PreventDamage));
+        g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
+        let ev = ok(&mut g, Action::Attack(0));
+        assert_eq!(damage_to(&ev, 0, 0), vec![0]);
+        assert_eq!(
+            g.players[0].effects.shield, None,
+            "cleared at its owner's turn start"
+        );
+        // Coin variant: tails, no shield.
+        let mut g = main_phase(0);
+        g.force_coins(&[false]);
+        attack_with(
+            &mut g,
+            0,
+            &[Protect {
+                shield: Shield::Halve,
+                coin: true,
+            }],
+        );
+        assert_eq!(g.players[0].effects.shield, None);
+    }
+
+    /// R-RETREAT-01, R-TURN-05, R-DMG-09 (4): effects on the defender for its next turn.
+    #[test]
+    fn placed_effects_last_through_defender_turn() {
+        let mut g = main_phase(0);
+        g.players[1].bench.push(creature(EMBERKIT, &[]));
+        g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E, FIGHTING_E];
+        attack_with(
+            &mut g,
+            0,
+            &[Place {
+                placed: Placed::CantRetreat,
+                coin: false,
+            }],
+        );
+        assert_eq!(err(&mut g, Action::Retreat), RuleError::CantRetreat);
+        ok(&mut g, Action::Done);
+        assert_eq!(
+            g.players[1].effects.placed, None,
+            "cleared at the end of its turn"
+        );
+
+        let mut g = main_phase(0);
+        g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
+        attack_with(
+            &mut g,
+            0,
+            &[Place {
+                placed: Placed::CantAttack,
+                coin: false,
+            }],
+        );
+        assert_eq!(err(&mut g, Action::Attack(0)), RuleError::CantAttack);
+
+        let mut g = main_phase(0);
+        g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
+        attack_with(
+            &mut g,
+            0,
+            &[Place {
+                placed: Placed::Weaken(20),
+                coin: false,
+            }],
+        );
+        let ev = ok(&mut g, Action::Attack(0));
+        assert_eq!(damage_to(&ev, 0, 0), vec![0], "20 −20");
+
+        let mut g = main_phase(0);
+        g.force_coins(&[false]);
+        attack_with(
+            &mut g,
+            0,
+            &[Place {
+                placed: Placed::CantAttack,
+                coin: true,
+            }],
+        );
+        assert_eq!(g.players[1].effects.placed, None, "tails");
+    }
+
+    /// R-TURN-05: the player picks which of the defender's attacks to disable.
+    #[test]
+    fn disable_attack_blocks_chosen_attack() {
+        let mut g = main_phase(0);
+        attack_with(&mut g, 0, &[DisableAttack]);
+        assert_eq!(choose_options(&g).1, vec![Choice::Attack(0)]);
+        ok(&mut g, Action::Choose(0));
+        g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
+        assert_eq!(err(&mut g, Action::Attack(0)), RuleError::AttackDisabled);
+    }
+
+    /// R-TRAINER-04
+    #[test]
+    fn trainer_lock_lasts_one_opponent_turn() {
+        let mut g = main_phase(0);
+        g.players[1].effects.shield = Some(Shield::PreventAll);
+        let ev = attack_with(&mut g, 10, &[TrainerLock]);
+        assert!(
+            ev.contains(&Event::AttackNegated { player: 1 }),
+            "set even when negated"
+        );
+        set_hand(&mut g, 1, &[FIELD_NOTES]);
+        assert_eq!(
+            err(&mut g, Action::PlayTrainer(0)),
+            RuleError::TrainerLocked
+        );
+        ok(&mut g, Action::Done);
+        ok(&mut g, Action::Done);
+        set_hand(&mut g, 1, &[FIELD_NOTES]);
+        ok(&mut g, Action::PlayTrainer(0));
+    }
+
+    /// R-DMG-03: changed weakness and resistance.
+    #[test]
+    fn change_weakness_and_resistance() {
+        let mut g = main_phase(0);
+        attack_with(
+            &mut g,
+            0,
+            &[DefenderWeakness(Fire), OwnResistance(Fighting)],
+        );
+        assert_eq!(g.players[1].effects.weakness, Some(Fire));
+        g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
+        let ev = ok(&mut g, Action::Attack(0));
+        assert_eq!(
+            damage_to(&ev, 0, 0),
+            vec![0],
+            "20 −30 against the changed resistance"
+        );
+    }
+
+    // ----- Energy -----
+
+    /// R-EFFECT-04: energy costs.
+    #[test]
+    fn discard_energy_costs() {
+        let mut g = main_phase(0);
+        g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E, FIRE_E, TWIN_E];
+        attack_with(
+            &mut g,
+            0,
+            &[DiscardEnergy {
+                color: Colorless,
+                count: 2,
+            }],
+        );
+        assert_eq!(g.players[0].active.as_ref().unwrap().energy, vec![GRASS_E]);
+        let mut g = main_phase(0);
+        g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E, FIRE_E];
+        attack_with(&mut g, 0, &[DiscardAllEnergy]);
+        assert!(g.players[0].active.as_ref().unwrap().energy.is_empty());
+        assert_eq!(g.players[0].discard.len(), 2);
+        let g = main_phase(0);
+        let cost = DiscardEnergy {
+            color: Fire,
+            count: 1,
+        };
+        assert_eq!(
+            g.effect_check(0, 0, &cost, super::Source::Attack),
+            Err(RuleError::NotEnoughEnergy)
+        );
+    }
+
+    /// R-EFFECT-04
+    #[test]
+    fn discard_defender_energy_by_choice() {
+        let mut g = main_phase(0);
+        g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, TWIN_E];
+        attack_with(&mut g, 0, &[DiscardDefenderEnergy]);
+        assert_eq!(
+            choose_options(&g).1,
+            vec![Choice::Energy(0), Choice::Energy(1)]
+        );
+        ok(&mut g, Action::Choose(1));
+        assert_eq!(
+            g.players[1].active.as_ref().unwrap().energy,
+            vec![FIGHTING_E]
+        );
+        assert_eq!(g.players[1].discard, vec![TWIN_E]);
+    }
+
+    // ----- Moving creatures -----
+
+    /// R-EFFECT-04: the defender's owner picks after the announcement; an
+    /// empty Bench only skips the switch.
+    #[test]
+    fn force_switch_with_empty_bench_still_attacks() {
+        let switch = &[SwitchDefender {
+            chooser_is_attacker: false,
+        }];
+        let mut g = main_phase(0);
+        let ev = attack_with(&mut g, 20, switch);
+        assert_eq!(damage_to(&ev, 1, 0), vec![40]);
+        assert!(ev.contains(&Event::TurnEnded { player: 0 }));
+        let mut g = main_phase(0);
+        g.players[1].bench.push(creature(EMBERKIT, &[]));
+        attack_with(&mut g, 20, switch);
+        assert_eq!(
+            choose_options(&g),
+            (1, vec![Choice::Slot { player: 1, slot: 1 }], false)
+        );
+        let ev = ok(&mut g, Action::Choose(0));
+        assert!(
+            pos(&ev, |e| matches!(e, Event::Damage { player: 1, .. }))
+                < pos(&ev, |e| matches!(e, Event::Switched { player: 1, slot: 1 }))
+        );
+        assert_eq!(g.players[1].active.as_ref().unwrap().top(), EMBERKIT);
+        assert_eq!(
+            g.players[1].bench[0].hp, 20,
+            "the damage stays on the old Active"
+        );
+    }
+
+    /// R-EFFECT-04, R-TRAINER-02: the player picks; cancelling keeps the card.
+    #[test]
+    fn gust_trainer_cancel_keeps_card_then_switches() {
+        let mut g = main_phase(0);
+        g.players[1].bench.push(creature(EMBERKIT, &[]));
+        set_hand(&mut g, 0, &[GRASS_E, GALE_FAN, FIRE_E]);
+        ok(&mut g, Action::PlayTrainer(1));
+        assert_eq!(
+            choose_options(&g),
+            (0, vec![Choice::Slot { player: 1, slot: 1 }], true)
+        );
+        let ev = ok(&mut g, Action::Cancel);
+        assert!(!ev.iter().any(|e| matches!(e, Event::TrainerPlayed { .. })));
+        assert_eq!(g.players[0].hand, vec![GRASS_E, GALE_FAN, FIRE_E]);
+        ok(&mut g, Action::PlayTrainer(1));
+        ok(&mut g, Action::Choose(0));
+        assert_eq!(g.players[1].active.as_ref().unwrap().top(), EMBERKIT);
+        assert_eq!(g.players[0].discard, vec![GALE_FAN]);
+        // Nothing to switch with: refused.
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[GALE_FAN]);
+        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+    }
+
+    /// R-RETREAT-04: an effect switch clears the outgoing Active's state.
+    #[test]
+    fn switch_self_after_attacking() {
+        let mut g = main_phase(0);
+        g.players[0].bench.push(creature(EMBERKIT, &[]));
+        g.players[0].condition.apply(Status::Poisoned);
+        attack_with(&mut g, 10, &[SwitchSelf]);
+        let ev = ok(&mut g, Action::Choose(0));
+        assert!(ev.contains(&Event::Switched { player: 0, slot: 1 }));
+        assert_eq!(g.players[0].active.as_ref().unwrap().top(), EMBERKIT);
+        assert!(g.players[0].condition.is_empty());
+    }
+
+    /// R-EVO-12
+    #[test]
+    fn devolve_keeps_damage_and_clears_flags() {
+        let mut g = main_phase(2);
+        let mut target = creature(MOSSLING, &[GRASS_E]);
+        target.stack.push(MOSSBACK);
+        target.hp = 50; // 30 damage
+        target.power_used = true;
+        g.players[1].active = Some(target);
+        g.players[1].condition.apply(Status::Poisoned);
+        set_hand(&mut g, 0, &[REWIND_MIST]);
+        let ev = ok(&mut g, Action::PlayTrainer(0));
+        assert!(ev.contains(&Event::Devolved {
+            player: 1,
+            slot: 0,
+            card: MOSSBACK
+        }));
+        let a = g.players[1].active.as_ref().unwrap();
+        assert_eq!(
+            (a.stack.clone(), a.hp, a.energy.clone()),
+            (vec![MOSSLING], 20, vec![GRASS_E])
+        );
+        assert!(!a.settled && !a.power_used, "can't evolve again this turn");
+        assert!(g.players[1].condition.is_empty());
+        assert_eq!(g.players[1].hand, vec![MOSSBACK]);
+        // A Basic can't be devolved.
+        set_hand(&mut g, 0, &[REWIND_MIST]);
+        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+    }
+
+    /// R-EVO-12: damage at least the lower stage's max knocks it out.
+    #[test]
+    fn devolve_can_knock_out() {
+        let mut g = main_phase(2);
+        let mut target = creature(MOSSLING, &[]);
+        target.stack.push(MOSSBACK);
+        target.hp = 20; // 60 damage, Mossling has 50
+        g.players[1].active = Some(target);
+        g.players[1].bench.push(creature(EMBERKIT, &[]));
+        let ev = attack_with(&mut g, 0, &[Devolve]);
+        assert!(ev.contains(&Event::KnockedOut {
+            player: 1,
+            slot: 0,
+            card: MOSSLING
+        }));
+    }
+
+    /// R-EVO-10
+    #[test]
+    fn stage_skip_trainer_requires_settled_basic() {
+        let mut g = main_phase(2);
+        g.players[0].active.as_mut().unwrap().hp = 40;
+        set_hand(&mut g, 0, &[LEAP_SEED, MOSSGIANT]);
+        ok(&mut g, Action::PlayTrainer(0));
+        assert_eq!(
+            choose_options(&g).1,
+            vec![Choice::Evolve { hand: 0, slot: 0 }]
+        );
+        let ev = ok(&mut g, Action::Choose(0));
+        assert!(ev.contains(&Event::Evolved {
+            player: 0,
+            slot: 0,
+            card: MOSSGIANT
+        }));
+        assert_eq!(hp(&g, 0, 0), 110, "damage kept");
+        // Not settled (turn 1): nothing to evolve.
+        let mut g = main_phase(1);
+        set_hand(&mut g, 0, &[LEAP_SEED, MOSSGIANT]);
+        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+        // The evolution lock still applies.
+        let mut g = main_phase(2);
+        g.players[1].bench.push(creature(STILLSTONE, &[]));
+        set_hand(&mut g, 0, &[LEAP_SEED, MOSSGIANT]);
+        assert_eq!(
+            err(&mut g, Action::PlayTrainer(0)),
+            RuleError::EvolutionLocked
+        );
+    }
+
+    // ----- Cards -----
+
+    /// R-EFFECT-04, R-ZONE-03
+    #[test]
+    fn search_deck_takes_card_and_shuffles() {
+        let mut g = main_phase(0);
+        g.players[0].deck = vec![GRASS_E, GRASS_E, MOSSLING, PEBBLET];
+        set_hand(&mut g, 0, &[SCOUT_MAP]);
+        ok(&mut g, Action::PlayTrainer(0));
+        assert_eq!(
+            choose_options(&g).1,
+            vec![Choice::Card(MOSSLING), Choice::Card(PEBBLET)]
+        );
+        let ev = ok(&mut g, Action::Choose(1));
+        assert!(ev.contains(&Event::Shuffled { player: 0 }));
+        assert_eq!(g.players[0].hand, vec![PEBBLET]);
+        assert_eq!(g.players[0].deck.len(), 3);
+        // No match: played anyway, the deck is shuffled.
+        set_hand(&mut g, 0, &[SCOUT_MAP]);
+        g.players[0].deck = vec![GRASS_E; 3];
+        let ev = ok(&mut g, Action::PlayTrainer(0));
+        assert!(ev.contains(&Event::Shuffled { player: 0 }));
+        g.players[0].deck.clear();
+        set_hand(&mut g, 0, &[SCOUT_MAP]);
+        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::DeckEmpty);
+    }
+
+    /// R-ZONE-05: taking a specific card back from the discard pile.
+    #[test]
+    fn recover_from_discard() {
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[OLD_BONES]);
+        g.players[0].discard = vec![GRASS_E];
+        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+        g.players[0].discard = vec![EMBERKIT, GRASS_E];
+        ok(&mut g, Action::PlayTrainer(0));
+        assert_eq!(choose_options(&g).1, vec![Choice::Card(EMBERKIT)]);
+        ok(&mut g, Action::Choose(0));
+        assert_eq!(g.players[0].hand, vec![EMBERKIT]);
+        assert_eq!(g.players[0].discard, vec![GRASS_E, OLD_BONES]);
+    }
+
+    /// R-EFFECT-04, R-TURN-02: discard the hand, then draw 7.
+    #[test]
+    fn discard_hand_then_draw_seven() {
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[GRASS_E, FRESH_START, FIRE_E]);
+        ok(&mut g, Action::PlayTrainer(1));
+        assert_eq!(g.players[0].discard, vec![GRASS_E, FIRE_E, FRESH_START]);
+        assert_eq!(g.players[0].hand.len(), 7);
+    }
+
+    /// R-EFFECT-05
+    #[test]
+    fn once_per_stay_attack_rejected_second_time() {
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(MOTHWING, &[PSYCHIC_E]));
+        ok(&mut g, Action::Attack(0));
+        ok(&mut g, Action::Done);
+        assert_eq!(err(&mut g, Action::Attack(0)), RuleError::AlreadyUsed);
+        // Set at the cost phase: a confusion tails still uses it up.
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(MOTHWING, &[PSYCHIC_E]));
+        g.players[0].condition.apply(Status::Confused);
+        g.force_coins(&[false]);
+        ok(&mut g, Action::Attack(0));
+        assert!(g.players[0].active.as_ref().unwrap().once_used);
+    }
+
+    /// R-EFFECT-06
+    #[test]
+    fn copy_attack_runs_defender_effect_list() {
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(FOGLET, &[PSYCHIC_E, PSYCHIC_E]));
+        g.players[1].active = Some(creature(BRAMBLET, &[]));
+        ok(&mut g, Action::Attack(1));
+        assert_eq!(
+            choose_options(&g).1,
+            vec![Choice::Attack(0), Choice::Attack(1)]
+        );
+        let ev = ok(&mut g, Action::Choose(0));
+        assert_eq!(damage_to(&ev, 1, 0)[0], 10);
+        assert_eq!(applied(&ev, 1), vec![Status::Poisoned]);
+        // A copying attack can't be copied.
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(FOGLET, &[PSYCHIC_E, PSYCHIC_E]));
+        g.players[1].active = Some(creature(FOGLET, &[]));
+        ok(&mut g, Action::Attack(1));
+        assert_eq!(choose_options(&g).1, vec![Choice::Attack(0)]);
+    }
+
+    // ----- Trainers -----
+
+    /// R-TRAINER-01
+    #[test]
+    fn three_trainers_same_turn_on_turn_zero() {
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[FIELD_NOTES; 3]);
+        for _ in 0..3 {
+            ok(&mut g, Action::PlayTrainer(0));
+        }
+        assert_eq!(prompt_of(&g), (0, PromptKind::MainPhase));
+        assert_eq!(g.players[0].discard, vec![FIELD_NOTES; 3]);
+        assert_eq!(g.turn(), 0);
+    }
+
+    /// R-TRAINER-02
+    #[test]
+    fn trainer_failed_precondition_stays_in_hand() {
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[SALVE]);
+        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+        assert_eq!(g.players[0].hand, vec![SALVE]);
+        g.players[0].active.as_mut().unwrap().hp = 20;
+        ok(&mut g, Action::PlayTrainer(0));
+        assert_eq!(hp(&g, 0, 0), 40);
+    }
+
+    /// R-TRAINER-03
+    #[test]
+    fn trainer_as_basic_stays_in_play_after_resolving() {
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[STRAW_DECOY]);
+        ok(&mut g, Action::PlayBasic(0));
+        assert_eq!(g.players[0].bench[0].top(), STRAW_DECOY);
+        assert!(g.players[0].discard.is_empty());
+    }
+
+    /// R-TRAINER-03, R-TRAINER-05: an attached trainer isn't discarded.
+    #[test]
+    fn attached_trainer_skips_discard() {
+        let mut g = main_phase(0);
+        g.players[0].bench.push(creature(EMBERKIT, &[]));
+        set_hand(&mut g, 0, &[BUCKLER]);
+        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::Choose(1));
+        assert_eq!(g.players[0].bench[0].trainers, vec![BUCKLER]);
+        assert!(g.players[0].discard.is_empty());
+    }
+}
