@@ -8,6 +8,7 @@
 
 mod action;
 mod card;
+mod collection;
 mod condition;
 mod damage;
 mod deck;
@@ -40,6 +41,7 @@ pub use card::{
     can_pay, card, card_id, energy_units, total_units, try_card, validate_cards, Attack, CardDef,
     CardId, CardKind, Color, Creature, EnergyCard, Power, PowerKind, Rarity, Stage, Trainer, Units,
 };
+pub use collection::{starter_collection, Collection, LoadError};
 pub use condition::{ActiveEffects, Condition, Placed, Poison, Shield, Special, Status};
 pub use damage::Hit;
 pub use deck::{validate_deck, DeckError, DECK_SIZE, MAX_COPIES};
