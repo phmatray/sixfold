@@ -1176,13 +1176,20 @@ mod tests {
         attack_with(&mut g, 10, effects);
         let ev = ok(&mut g, Action::Choose(0));
         assert_eq!(g.players[1].active.as_ref().unwrap().top(), WARDEN);
-        assert_eq!(applied(&ev, 1), vec![Status::Asleep], "queued before the switch");
+        assert_eq!(
+            applied(&ev, 1),
+            vec![Status::Asleep],
+            "queued before the switch"
+        );
         let mut g = main_phase(0);
         g.players[1].active = Some(creature(WARDEN, &[]));
         g.players[1].bench.push(creature(PEBBLET, &[]));
         attack_with(&mut g, 10, effects);
         let ev = ok(&mut g, Action::Choose(0));
-        assert!(applied(&ev, 1).is_empty(), "the immune defender queued nothing");
+        assert!(
+            applied(&ev, 1).is_empty(),
+            "the immune defender queued nothing"
+        );
     }
 
     /// R-STATUS-03
@@ -1283,13 +1290,19 @@ mod tests {
         assert_eq!(g.players[0].discard, vec![TONIC]);
     }
 
-    /// R-STATUS-12: a cure for both Actives.
+    /// R-STATUS-12: a cure for both Actives. As a Power it is usable when
+    /// only the opponent's Active has a condition (0B:4E66-4E74).
     #[test]
     fn cure_both_actives() {
         let mut g = main_phase(0);
         g.players[1].condition.apply(Status::Confused);
         trainer_with(&mut g, &[Cure { both: true }]);
         assert!(g.players[1].condition.is_empty());
+        let mut g = main_phase(0);
+        g.players[1].condition.apply(Status::Asleep);
+        power_with(&mut g, &[Cure { both: true }]);
+        assert!(g.players[1].condition.is_empty());
+        assert!(g.players[0].condition.is_empty());
     }
 
     /// R-STATUS-13, R-TURN-06
@@ -1346,7 +1359,10 @@ mod tests {
             let ev = ok(&mut g, Action::Attack(0));
             assert!(ev.contains(&Event::AttackFailed { player: 0 }));
             assert!(g.players[1].effects.last_inflicted.is_empty(), "{confused}");
-            assert!(!g.players[0].effects.last_inflicted.is_empty(), "{confused}");
+            assert!(
+                !g.players[0].effects.last_inflicted.is_empty(),
+                "{confused}"
+            );
         }
     }
 
@@ -1842,6 +1858,10 @@ mod tests {
             }
         )));
         assert_eq!(hp(&g, 0, 0), 110, "damage kept");
+        // R-EVO-10: devolving a stage-skipped Stage 2 goes back to the Basic
+        // (01:713B treats stage 3 like stage 1).
+        g.devolve(0, 0, &mut Vec::new());
+        assert_eq!(g.players[0].active.as_ref().unwrap().top(), MOSSLING);
         // Not settled (turn 1): nothing to evolve.
         let mut g = main_phase(1);
         set_hand(&mut g, 0, &[LEAP_SEED, MOSSGIANT]);
@@ -1913,8 +1933,13 @@ mod tests {
     fn once_per_stay_attack_rejected_second_time() {
         let mut g = main_phase(0);
         g.players[0].active = Some(creature(MOTHWING, &[PSYCHIC_E]));
+        g.players[0].bench.push(creature(EMBERKIT, &[]));
         ok(&mut g, Action::Attack(0));
         ok(&mut g, Action::Done);
+        assert_eq!(err(&mut g, Action::Attack(0)), RuleError::AlreadyUsed);
+        // It survives switching out and back in (evolving resets it: R-EVO-08).
+        g.switch(0, 1);
+        g.switch(0, 1);
         assert_eq!(err(&mut g, Action::Attack(0)), RuleError::AlreadyUsed);
         // Set at the cost phase: a confusion tails still uses it up.
         let mut g = main_phase(0);

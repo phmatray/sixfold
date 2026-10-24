@@ -12,8 +12,13 @@ use crate::resolve::Source;
 /// Player 0: Mossling Active. Player 1: Pebblet Active. No Bench, empty hands
 /// (plus the drawn card), 20 Grass energy in each deck, 6 prizes each.
 pub fn main_phase(turn: u32) -> Game {
+    main_phase_with(turn, [MOSSLING, PEBBLET])
+}
+
+/// `main_phase` with other Actives, in play before the turn starts.
+pub fn main_phase_with(turn: u32, actives: [CardId; 2]) -> Game {
     let mut g = Game::blank([deck(), deck()], 1, 6);
-    for (p, active) in [(0, MOSSLING), (1, PEBBLET)] {
+    for (p, active) in [(0, actives[0]), (1, actives[1])] {
         let pl = &mut g.players[p];
         pl.deck = vec![GRASS_E; 20];
         pl.prizes = vec![Some(FIRE_E); 6];

@@ -240,10 +240,12 @@ mod tests {
         g.players[0].active.as_mut().unwrap().hp = 30;
         ok(&mut g, Action::UsePower(0));
         assert_eq!(hp(&g, 0, 0), 50);
-        let mut g = main_phase(1);
-        g.players[0].active = Some(crate::InPlay::new(MENDLEAF));
-        g.players[0].active.as_mut().unwrap().hp = 30;
-        assert_eq!(err(&mut g, Action::UsePower(0)), RuleError::NotThisTurn);
+        // In play before the turn starts: settled only from turn 2 on (01:4231).
+        for (turn, usable) in [(1, false), (2, true)] {
+            let mut g = main_phase_with(turn, [MENDLEAF, PEBBLET]);
+            g.players[0].active.as_mut().unwrap().hp = 30;
+            assert_eq!(g.apply(Action::UsePower(0)).is_ok(), usable, "turn {turn}");
+        }
     }
 
     /// R-POWER-06

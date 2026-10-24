@@ -576,6 +576,22 @@ mod tests {
             }
         )));
         assert_eq!(g.players[0].discard, vec![WHETSTONE]);
+        // Benched slots too (any in-play location, 00:1B73).
+        let mut g = main_phase(0);
+        let mut ember = creature(EMBERKIT, &[]);
+        ember.trainers = vec![WHETSTONE];
+        g.players[0].bench.push(ember);
+        let ev = ok(&mut g, Action::Done);
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::TrainerDiscarded {
+                player: 0,
+                slot: 1,
+                card: WHETSTONE,
+                ..
+            }
+        )));
+        assert!(g.players[0].bench[0].trainers.is_empty());
     }
 
     /// R-TRAINER-05: a −20 lasts through the opponent's following turn.

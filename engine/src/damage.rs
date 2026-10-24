@@ -724,10 +724,9 @@ mod tests {
         g.force_coins(&[true]);
         let ev = attack_with(&mut g, 0, sleep);
         assert_eq!(coins(&ev), 1);
-        assert!(!ev.iter().any(|e| matches!(
-            e,
-            Event::ConditionApplied { player: 1, .. }
-        )));
+        assert!(!ev
+            .iter()
+            .any(|e| matches!(e, Event::ConditionApplied { player: 1, .. })));
         let mut g = luck();
         g.force_coins(&[false]);
         let ev = attack_with(&mut g, 0, sleep);

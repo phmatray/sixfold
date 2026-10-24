@@ -275,17 +275,126 @@ mod tests {
         assert_eq!(g.players[0].prizes[3], None);
     }
 
-    /// R-KO-03: both sides' knock-outs go through one handler run (the recoil
-    /// case is simulated by zeroing both Actives).
+    /// Answer every prompt with the first legal action until the main phase.
+    fn prompts_until_main(g: &mut Game) -> Vec<(usize, PromptKind)> {
+        let mut order = Vec::new();
+        while let Some((p, kind)) = g.prompt_kind() {
+            if kind == PromptKind::MainPhase {
+                break;
+            }
+            order.push((p, kind.clone()));
+            let a = g.legal_actions()[0];
+            ok(g, a);
+        }
+        order
+    }
+
+    /// R-KO-03: the handler runs once after the whole attack, so the
+    /// defender's knock-out and the attacker's recoil knock-out are handled
+    /// together (00:1764-177D).
     #[test]
     fn recoil_ko_and_defender_ko_resolved_together() {
         let mut g = main_phase(0);
         g.players[0].bench = vec![creature(EMBERKIT, &[])];
         g.players[1].bench = vec![creature(EMBERKIT, &[])];
-        ko(&mut g, 0, 0);
-        ko(&mut g, 1, 0);
-        let ev = resolve(&mut g);
+        g.players[0].active.as_mut().unwrap().hp = 10;
+        g.players[1].active.as_mut().unwrap().hp = 20;
+        let ev = attack_with(&mut g, 10, &[crate::Effect::Recoil(10)]);
         assert_eq!(kos(&ev), 2);
+        assert_eq!(
+            prompts_until_main(&mut g),
+            vec![
+                (0, PromptKind::ChoosePrize { count: 1 }),
+                (1, PromptKind::ChoosePrize { count: 1 }),
+                (1, PromptKind::ChooseReplacement),
+                (0, PromptKind::ChooseReplacement),
+            ]
+        );
+    }
+
+    /// R-KO-03, R-STATUS-06: a confusion self-hit knock-out goes through the
+    /// handler (00:17A3): the opponent takes a prize, then the turn ends.
+    #[test]
+    fn confused_tails_self_ko_gives_opponent_prize() {
+        let mut g = main_phase(0);
+        g.players[0].bench = vec![creature(EMBERKIT, &[])];
+        g.players[0].condition.apply(Status::Confused);
+        g.players[0].active.as_mut().unwrap().hp = 20;
+        g.force_coins(&[false]);
+        let ev = attack_with(&mut g, 10, &[]);
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::KnockedOut {
+                player: 0,
+                slot: 0,
+                ..
+            }
+        )));
+        assert_eq!(
+            prompts_until_main(&mut g),
+            vec![
+                (1, PromptKind::ChoosePrize { count: 1 }),
+                (0, PromptKind::ChooseReplacement),
+            ]
+        );
+        assert_eq!(g.prompt_kind(), Some((1, PromptKind::MainPhase)));
+        assert_eq!(g.players[1].prizes_left(), 5);
+    }
+
+    /// R-KO-06: every entry of the table at 01:6F7F, built from board states.
+    /// Index = pT<<3 | pO<<2 | nO<<1 | nT (T took its last prize, N took its
+    /// last prize, N has no creatures, T has no creatures); 1 = T wins,
+    /// 2 = T loses, 3 = draw.
+    #[test]
+    fn result_table_matches_all_sixteen_entries() {
+        const TABLE: [u8; 16] = [0, 2, 1, 3, 2, 2, 3, 2, 1, 3, 1, 1, 3, 2, 1, 3];
+        for (i, &want) in TABLE.iter().enumerate() {
+            let bit = |b: usize| i & (1 << b) != 0;
+            let (p_t, p_o, n_o, n_t) = (bit(3), bit(2), bit(1), bit(0));
+            let mut g = main_phase(0);
+            // `side` loses a creature when the other side takes its last
+            // prize (`last`) or when it has no creatures left (`none`).
+            for (side, last, none) in [(1, p_t, n_o), (0, p_o, n_t)] {
+                let pl = &mut g.players[side];
+                if none {
+                    pl.active.as_mut().unwrap().hp = 0;
+                } else if last {
+                    pl.bench = vec![creature(EMBERKIT, &[]), creature(EMBERKIT, &[])];
+                    pl.bench[0].hp = 0;
+                } else {
+                    pl.bench = vec![creature(EMBERKIT, &[])];
+                }
+                if last {
+                    g.players[1 - side].prizes = vec![Some(FIRE_E)];
+                }
+            }
+            let ev = resolve(&mut g);
+            let got = match g.winner() {
+                Some(0) => 1,
+                Some(_) => 2,
+                None if ev.contains(&Event::SuddenDeath) => 3,
+                None => 0,
+            };
+            assert_eq!(got, want, "index {i}: pT {p_t} pO {p_o} nO {n_o} nT {n_t}");
+        }
+    }
+
+    /// R-STATUS-12: a creature put into the empty Active spot starts clean
+    /// (01:6FD7 → 00:13C6).
+    #[test]
+    fn promotion_after_ko_has_clean_condition() {
+        let mut g = main_phase(0);
+        g.players[1].bench = vec![creature(EMBERKIT, &[])];
+        ko(&mut g, 1, 0);
+        resolve(&mut g);
+        let prize = g.legal_actions()[0];
+        ok(&mut g, prize); // T's prize
+        assert_eq!(g.prompt_kind(), Some((1, PromptKind::ChooseReplacement)));
+        g.players[1].condition.apply(Status::Poisoned);
+        g.players[1].effects.placed = Some(Placed::CantRetreat);
+        ok(&mut g, Action::Promote(1));
+        assert_eq!(g.players[1].condition, Default::default());
+        assert_eq!(g.players[1].effects, Default::default());
     }
 
     /// R-KO-04

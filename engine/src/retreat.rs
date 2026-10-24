@@ -367,7 +367,10 @@ mod tests {
         assert!(g.players[0].trainer_locked, "the player-wide lock stays");
         let b = &g.players[0].bench[0];
         assert_eq!((b.top(), b.hp), (MOSSLING, 20));
-        assert_eq!((b.energy.clone(), b.trainers.clone()), (vec![FIRE_E], vec![WHETSTONE]));
+        assert_eq!(
+            (b.energy.clone(), b.trainers.clone()),
+            (vec![FIRE_E], vec![WHETSTONE])
+        );
     }
 
     /// R-RETREAT-05

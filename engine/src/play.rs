@@ -533,16 +533,21 @@ mod tests {
         assert_eq!(g.players[0].active.as_ref().unwrap().hp, 60);
     }
 
-    /// R-EVO-07
+    /// R-EVO-07: energy and attached trainers stay, and the trainers keep
+    /// counting (evolve leaves `+DA/+E0` alone).
     #[test]
     fn evolve_keeps_attached_energy() {
         let mut g = main_phase(2);
-        g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E, TWIN_E];
+        let a = g.players[0].active.as_mut().unwrap();
+        a.energy = vec![GRASS_E, TWIN_E];
+        a.trainers = vec![WHETSTONE, BUCKLER];
         set_hand(&mut g, 0, &[MOSSBACK]);
         ok(&mut g, evolve(0));
         let a = g.players[0].active.as_ref().unwrap();
         assert_eq!(a.energy, vec![GRASS_E, TWIN_E]);
         assert_eq!(a.stack, vec![MOSSLING, MOSSBACK]);
+        assert_eq!(a.trainers, vec![WHETSTONE, BUCKLER]);
+        assert_eq!(a.attached(crate::Effect::AttachPlus10), 1);
     }
 
     /// R-EVO-08, R-STATUS-12
@@ -563,7 +568,10 @@ mod tests {
     fn evolve_bench_keeps_slot_state() {
         let mut g = main_phase(2);
         g.players[0].condition.apply_poison(Poison::Poisoned);
-        g.players[0].bench.push(creature(MOSSLING, &[GRASS_E]));
+        let mut mossling = creature(MOSSLING, &[GRASS_E]);
+        mossling.color_override = Some(crate::Color::Fire);
+        mossling.once_used = true;
+        g.players[0].bench.push(mossling);
         set_hand(&mut g, 0, &[MOSSBACK]);
         ok(&mut g, evolve(1));
         assert_eq!(
@@ -573,6 +581,8 @@ mod tests {
         );
         let b = &g.players[0].bench[0];
         assert_eq!((b.energy.clone(), b.settled), (vec![GRASS_E], false));
+        // All `+C2` flags and `+D4` are cleared (00:133C, 00:1342).
+        assert_eq!((b.color_override, b.once_used), (None, false));
     }
 
     /// R-EVO-09

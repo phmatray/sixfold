@@ -252,7 +252,16 @@ mod tests {
         assert!(g.players[0].prizes.is_empty());
         // From the top of the deck (the last element), in draw order.
         let tops: Vec<Vec<Option<CardId>>> = (0..2)
-            .map(|p| g.players[p].deck.iter().rev().take(6).copied().map(Some).collect())
+            .map(|p| {
+                g.players[p]
+                    .deck
+                    .iter()
+                    .rev()
+                    .take(6)
+                    .copied()
+                    .map(Some)
+                    .collect()
+            })
             .collect();
         place_both(&mut g);
         for p in 0..2 {
