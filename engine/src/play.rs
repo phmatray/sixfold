@@ -270,6 +270,10 @@ impl Game {
     /// substatus, cached for the turn; tails ends the turn with nothing paid.
     /// Then the rest of the pipeline (see `resolve`).
     fn attack(&mut self, p: usize, i: usize, ev: &mut Vec<Event>) {
+        // R-STATUS-13, R-EFFECT-02: every attack clears the defender's
+        // last-attack record first (00:1691 → 01:7227), so a miss or a
+        // confusion tails leaves it empty too.
+        self.players[1 - p].effects.last_inflicted = Default::default();
         if self.players[p].effects.placed == Some(Placed::Accuracy) {
             let heads = match self.accuracy {
                 Some(heads) => heads,

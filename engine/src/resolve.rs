@@ -852,11 +852,13 @@ impl Game {
         let pd = self.pd_mut();
         let queue = std::mem::take(&mut pd.queue);
         let (p, negated) = (pd.player, pd.negated);
-        if queue.is_empty() {
-            return;
-        }
-        for pl in &mut self.players {
-            pl.effects.last_inflicted = Default::default();
+        // R-STATUS-13: both records are cleared before the queue is read, so
+        // every completed attack clears them, even with nothing queued
+        // (01:6E9E). Trainers never get there, and Powers only to apply one.
+        if pd.source == Source::Attack || !queue.is_empty() {
+            for pl in &mut self.players {
+                pl.effects.last_inflicted = Default::default();
+            }
         }
         for (target, status) in queue {
             if target != p && negated {
@@ -1227,10 +1229,39 @@ mod tests {
             (last.special, last.poison),
             (Some(Special::Confused), crate::Poison::Poisoned)
         );
-        // Done clears the opponent's record.
+        // Any completed attack clears both records, even with nothing queued (01:6E9E).
+        g.players[1].condition = Default::default();
         g.players[0].effects.last_inflicted.apply(Status::Asleep);
-        ok(&mut g, Action::Done);
+        attack_with(&mut g, 10, &[]);
         assert!(g.players[0].effects.last_inflicted.is_empty());
+        assert!(g.players[1].effects.last_inflicted.is_empty());
+        // Done clears the opponent's record.
+        g.players[1].effects.last_inflicted.apply(Status::Asleep);
+        ok(&mut g, Action::Done);
+        assert!(g.players[1].effects.last_inflicted.is_empty());
+    }
+
+    /// R-STATUS-13, R-EFFECT-02: an accuracy miss or a confusion tails never
+    /// applies the queue, but still clears the defender's record (01:7227);
+    /// the attacker's own is kept.
+    #[test]
+    fn failed_attack_clears_defender_record() {
+        for confused in [false, true] {
+            let mut g = main_phase(0);
+            g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
+            if confused {
+                g.players[0].condition.apply(Status::Confused);
+            } else {
+                g.players[0].effects.placed = Some(Placed::Accuracy);
+            }
+            g.players[0].effects.last_inflicted.apply(Status::Poisoned);
+            g.players[1].effects.last_inflicted.apply(Status::Asleep);
+            g.force_coins(&[false]);
+            let ev = ok(&mut g, Action::Attack(0));
+            assert!(ev.contains(&Event::AttackFailed { player: 0 }));
+            assert!(g.players[1].effects.last_inflicted.is_empty(), "{confused}");
+            assert!(!g.players[0].effects.last_inflicted.is_empty(), "{confused}");
+        }
     }
 
     /// R-STATUS-14

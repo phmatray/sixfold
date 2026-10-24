@@ -565,12 +565,25 @@ unit test that should cover it.
 
 ### R-STATUS-13: Record of the last inflicted conditions *(verifier-found)*
 - **Rule.** The engine records which conditions the most recent attack inflicted. A copy-effect can
-  re-apply those recorded conditions to the other side through the normal helpers.
-- **Parameters.** `+F5` is cleared on both sides at each queue apply and mirrors the mask and value.
-  The reader is at `0B:69F4-6A23`.
-- **Status.** CONFIRMED (verifier-found)
-- **Evidence.** `01:6E9E`, `01:6EED`, `0B:6A8F`.
-- **Test.** `last_inflicted_status_recorded`
+  re-apply those recorded conditions to the other side through the normal helpers. Every completed
+  attack clears both sides' records, even when it queued nothing. An attack that fails its accuracy
+  coin or its confusion coin never applies the queue, but the defender's record is still cleared
+  (the attacker's is kept). Switching, evolving and a new Active also clear the record.
+- **Parameters.** Both `+F5` are zeroed at the start of `01:6E9E` (`6E9F-6EA2`), before the
+  empty-queue test at `6EA8`. `01:6E9E` runs at the end of every completed attack (`00:1770`) and after
+  the paralysing Power (`0B:531D`); trainers never reach it. The defender's `+F2..F9`, which includes
+  `+F5`, is also zeroed by `01:7227`: at the start of every attack attempt (`00:1691 → 01:7236`), on
+  confusion tails (`00:17A6`), on an accuracy miss (`00:1783`) and on Done. `00:13C6` clears `+F2..F9`
+  on switch, evolve and new Active. The reader `0B:69F4-6A23` reads the turn duelist's own record
+  (`+F5`, and `+F3/+F4` for the last damage) and writes the opponent's `+F0`.
+- **Status.** CORRECTED (verifier-found). The original text had the clear only "at each queue apply".
+  Runtime: `01:6E9E` with `C2F5 = $80`, `C3F5 = 2` and an empty queue left both 0; `00:1788` and
+  `00:1783` zeroed `C3F2..F9` and kept `C2F2..F9`.
+- **Evidence.** `01:6E9E`, `01:6EED`, `01:7227`, `00:1691`, `00:1783`, `00:17A6`, `0B:6A8F`.
+- **Test.** `last_inflicted_status_recorded`, `failed_attack_clears_defender_record`
+
+  The clean engine clears the defender's record when an attack starts, after the attack passed its
+  checks. A refused attack changes nothing, though the source's phase-1 refusal runs after `00:1691`.
 
 ### R-STATUS-14: Conditions applied directly and self-confusion *(verifier-found)*
 - **Rule.** Some effects write a condition directly, without the queue. Those still check immunity,
@@ -1117,9 +1130,11 @@ unit test that should cover it.
 
 ### R-EFFECT-02: Attack resolution pipeline
 - **Rule.** An attack resolves in this order:
-  1. Phase 1 check (failure: no attack, the turn continues).
+  1. Phase 1 check (failure: no attack, the turn continues). The defender's last-attack memory
+     (`+F2..F9`) is cleared first (`00:1691 → 01:7227`).
   2. Accuracy coin from the attacker's own substatus. The result is cached for the turn, and tails
-     ends the turn with no costs paid.
+     ends the turn with no costs paid. Tails clears the defender's last-attack memory again
+     (`00:1783 → 01:7227`), as does a confusion tails (`00:17A6`).
   3. Phase 2.
   4. Phase 6 costs.
   5. Confusion coin.
