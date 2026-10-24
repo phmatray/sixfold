@@ -25,3 +25,4 @@ node_modules/
 
 # Source textures (the build ships the .webp conversions)
 web/world/textures/*.png
+__pycache__/

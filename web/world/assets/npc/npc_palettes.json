@@ -1,0 +1,32 @@
+{
+  "npc_shopkeeper": {
+    "primary": "#2f7f86",
+    "secondary": "#e9dcc0",
+    "hair": "#8e8a90",
+    "accent": "#e9b949"
+  },
+  "npc_gardener": {
+    "primary": "#4a6fa5",
+    "secondary": "#f2d26b",
+    "hair": "#6b4a2b",
+    "accent": "#e6c87e"
+  },
+  "npc_wanderer": {
+    "primary": "#6b7d4a",
+    "secondary": "#c8473d",
+    "hair": "#d9783a",
+    "accent": "#e0a13a"
+  },
+  "npc_kid": {
+    "primary": "#7fb6ff",
+    "secondary": "#3f4a6e",
+    "hair": "#5a3a28",
+    "accent": "#7b5ea7"
+  },
+  "npc_rival": {
+    "primary": "#c8303a",
+    "secondary": "#1f1f26",
+    "hair": "#1f1f26",
+    "accent": "#e0303a"
+  }
+}
