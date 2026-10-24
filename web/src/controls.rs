@@ -201,7 +201,7 @@ pub fn ActionBar() -> impl IntoView {
         ctl.act(a);
     };
     view! {
-        <div class="action-bar" class:mine=move || bar.with(|b| b.mine) role="region" aria-label="Actions">
+        <div class="action-bar" class:mine=move || bar.with(|b| b.mine) role="region" aria-label="Actions" tabindex="-1" data-focus-home="">
             <div class="bar-status">
                 <h2 class="bar-title" aria-live="polite">{move || bar.with(|b| b.title.clone())}</h2>
                 {move || bar.with(|b| b.hint.clone()).map(|h| view! { <p class="bar-hint">{h}</p> })}

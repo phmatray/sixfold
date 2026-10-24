@@ -87,6 +87,10 @@ pub struct Ctl {
     pub revealed: RwSignal<bool>,
     pub seed: RwSignal<u64>,
     pub error: RwSignal<Option<String>>,
+    /// For screen readers: what happened since the human last had to act
+    /// (the AI's whole turn, or the result of the human's own action).
+    pub announce: RwSignal<String>,
+    heard: StoredValue<Vec<String>>,
     pub setup: StoredValue<Option<Setup>>,
     real: StoredValue<Option<Game>>,
     ai: StoredValue<Option<Ai>>,
@@ -116,6 +120,8 @@ impl Ctl {
             revealed: RwSignal::new(false),
             seed: RwSignal::new(0),
             error: RwSignal::new(None),
+            announce: RwSignal::new(String::new()),
+            heard: StoredValue::new(vec![]),
             setup: StoredValue::new(None),
             real: StoredValue::new(None),
             ai: StoredValue::new(None),
@@ -158,6 +164,8 @@ impl Ctl {
             .set_value(Some(Ai::new(seed ^ 0x5eed_0a11, setup.difficulty)));
         self.setup.set_value(Some(setup));
         self.log.set(vec![]);
+        self.heard.set_value(vec![]);
+        self.announce.set(String::new());
         self.fx.set(Fx::default());
         self.revealed.set(false);
         self.busy.set(true);
@@ -245,6 +253,13 @@ impl Ctl {
                 .is_some_and(|g| g.winner().is_none() && g.view(HUMAN).waiting_on == Some(AI))
         });
         if !ai_turn {
+            let heard = self
+                .heard
+                .try_update_value(std::mem::take)
+                .unwrap_or_default();
+            if !heard.is_empty() {
+                self.announce.set(summary(&heard));
+            }
             return;
         }
         let setup = self.real.with_value(|g| {
@@ -325,6 +340,13 @@ impl Ctl {
         let key = self.next_key();
         let text = event.describe(HUMAN);
         let kind = log_kind(event);
+        if !matches!(
+            event,
+            Event::Shuffled { .. } | Event::BetweenTurns | Event::TurnEnded { .. }
+        ) && !text.is_empty()
+        {
+            self.heard.update_value(|h| h.push(text.clone()));
+        }
         let reason = match event {
             Event::PrizesSet { .. } => Some("Who goes first?".to_string()),
             Event::TurnStarted { .. } => Some("Coin flip".into()),
@@ -555,6 +577,24 @@ impl Ctl {
             _ => 0,
         }
     }
+}
+
+/// The lines heard since the human last acted, as one sentence each; a line
+/// repeated in a row ("Opponent drew a card") is said once with a count.
+fn summary(lines: &[String]) -> String {
+    let mut out: Vec<String> = vec![];
+    let mut i = 0;
+    while i < lines.len() {
+        let n = lines[i..].iter().take_while(|l| **l == lines[i]).count();
+        let line = lines[i].trim_end_matches('.');
+        out.push(if n > 1 {
+            format!("{line} ({n} times).")
+        } else {
+            format!("{line}.")
+        });
+        i += n;
+    }
+    out.join(" ")
 }
 
 fn status_word(s: Status) -> &'static str {

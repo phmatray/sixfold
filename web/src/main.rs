@@ -108,11 +108,15 @@ fn App() -> impl IntoView {
     provide_context(Legal(legal));
     store::provide();
     // Each screen starts at the top with nothing selected in the inspector.
-    Effect::new(move |_| {
+    // Keyboard and screen-reader users land on the new screen's heading.
+    Effect::new(move |first: Option<()>| {
         screen.track();
         ui.inspect.set(None);
         ui.sheet.set(false);
         window().scroll_to_with_x_and_y(0.0, 0.0);
+        if first.is_some() {
+            request_animation_frame(focus_heading);
+        }
     });
     // The world picks its own track (meadow or indoors) as each map loads.
     Effect::new(move |_| match screen.get() {
@@ -183,7 +187,8 @@ fn MatchScreen() -> impl IntoView {
     view! {
         <div class="match" on:keydown=on_key>
             <header class="topbar">
-                <span class="wordmark small">"Sixfold"</span>
+                <span class="wordmark small" aria-hidden="true">"Sixfold"</span>
+                <h1 class="sr-only">"Duel"</h1>
                 <span class="matchup">
                     <span class="me-name">{names[HUMAN].clone()}</span>
                     " against "
@@ -213,6 +218,9 @@ fn MatchScreen() -> impl IntoView {
                 <Inspector />
                 <LogPanel />
             </div>
+            // One polite summary per turn instead of every event (the coin and
+            // callouts are visual only; the log is there to read back).
+            <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">{move || ctl.announce.get()}</p>
             <PromptModal />
             <CalloutOverlay />
             <CoinOverlay />

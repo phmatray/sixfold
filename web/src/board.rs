@@ -220,7 +220,7 @@ pub fn Creature(player: usize, uid: u32) -> impl IntoView {
                             let pct = hp() as u32 * 100 / max() as u32;
                             if pct <= 25 { "fill low" } else if pct <= 50 { "fill mid" } else { "fill" }
                         }
-                        style=move || format!("width:{}%", hp() as u32 * 100 / max() as u32)
+                        style=move || format!("transform:scaleX({})", f32::from(hp()) / f32::from(max().max(1)))
                     ></span>
                     <span class="hp-text">{hp} "/" {max}</span>
                 </div>
@@ -411,7 +411,7 @@ pub fn Hand() -> impl IntoView {
             .unwrap_or_default()
     });
     view! {
-        <div class="hand-wrap">
+        <div class="hand-wrap" data-focus-home="">
             <ul class="hand" aria-label=move || format!("Your hand: {}", cards(hand.with(|h| h.len())))>
                 <For
                     each=move || hand.get()
