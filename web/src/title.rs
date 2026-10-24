@@ -38,6 +38,23 @@ fn deck_star(cards: &[CardId]) -> Option<CardId> {
         .max_by_key(|&id| card(id).creature().map_or(0, |c| c.hp))
 }
 
+/// A duel between two of the offered decks.
+fn setup_for(mine: usize, theirs: usize, prizes: u8, difficulty: Difficulty) -> Setup {
+    let (a, b) = (decks()[mine], decks()[theirs]);
+    Setup {
+        decks: [a.cards(), b.cards()],
+        names: [a.name.to_string(), b.name.to_string()],
+        prizes,
+        difficulty,
+    }
+}
+
+/// The duel the title screen starts with untouched settings.
+pub fn default_setup() -> Option<Setup> {
+    let n = decks().len();
+    (n > 0).then(|| setup_for(0, 1 % n, 6, Difficulty::Normal))
+}
+
 #[component]
 fn DeckPicker(legend: &'static str, name: &'static str, choice: RwSignal<usize>) -> impl IntoView {
     view! {
@@ -91,17 +108,12 @@ pub fn TitleScreen() -> impl IntoView {
         .take(3)
         .collect();
     let start = move |_| {
-        let (a, b) = (decks()[mine.get()], decks()[theirs.get()]);
-        let setup = Setup {
-            decks: [a.cards(), b.cards()],
-            names: [a.name.to_string(), b.name.to_string()],
-            prizes: prizes.get(),
-            difficulty: if normal.get() {
-                Difficulty::Normal
-            } else {
-                Difficulty::Easy
-            },
+        let difficulty = if normal.get() {
+            Difficulty::Normal
+        } else {
+            Difficulty::Easy
         };
+        let setup = setup_for(mine.get(), theirs.get(), prizes.get(), difficulty);
         if ctl.start(setup, seed.get()) {
             screen.set(Screen::Match);
         }
@@ -155,6 +167,7 @@ pub fn TitleScreen() -> impl IntoView {
                     </form>
                 }.into_any()
             }}
+            <button type="button" class="btn ghost world-link" on:click=move |_| screen.set(Screen::World)>"Explore the world"</button>
             <footer class="foot">"Original cards and art. The rules follow a classic handheld version of the game."</footer>
         </main>
     }

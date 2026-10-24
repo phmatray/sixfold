@@ -894,3 +894,217 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
     transition-duration: 1ms !important;
   }
 }
+
+/* ---------- World ---------- */
+
+.world-link { display: block; margin: 28px auto 0; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.world {
+  --world-bg: #a8d98a; /* replaced by the map's light.background */
+  --world-panel: color-mix(in srgb, var(--felt-deep) 92%, transparent);
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--world-bg);
+}
+.world-stage { position: absolute; inset: 0; outline: none; }
+.world-host { position: absolute; inset: 0; touch-action: none; }
+.world-host canvas { display: block; }
+/* Soft vignette over the scene, under the UI. */
+.world-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 75% 70% at 50% 48%, transparent 55%, color-mix(in srgb, var(--felt-deep) 40%, transparent));
+}
+.world-top, .world-prompt, .world-controls, .world-loading, .world-error, .world-legend { position: absolute; z-index: 2; }
+.world-top {
+  top: max(12px, env(safe-area-inset-top));
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 14px;
+  background: var(--world-panel); /* opaque enough for small text, no backdrop blur over a live canvas */
+}
+.world-hint { flex: 1; min-width: 0; color: var(--ink); font-size: 13px; }
+.world-top .btn { margin-left: auto; }
+
+.world-loading {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--world-panel);
+}
+.world-error {
+  top: 80px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--world-panel);
+  border: 1px solid rgba(255, 93, 82, 0.5);
+}
+.world-error p { margin: 0; flex: 1 1 220px; }
+
+.world-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--felt-deep);
+  opacity: 0;
+  transition: opacity 340ms ease;
+}
+.world-fade.on { opacity: 1; }
+
+.world-legend {
+  top: 84px;
+  left: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--world-panel);
+  font-size: 13px;
+}
+.world-legend[hidden] { display: none; }
+.world-legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 6px; border-radius: 3px; vertical-align: -1px; }
+.k-block::before { background: #ff2d55; }
+.k-act::before { background: #ffd60a; }
+.k-warp::before { background: #3fa9ff; }
+.k-npc::before { background: #34e07a; }
+
+.world-prompt {
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px));
+  left: 0;
+  right: 0;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  font-size: 17px;
+  white-space: nowrap;
+  border: 2px solid var(--felt-deep); /* stays distinct on the dirt path */
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.55);
+  animation: prompt-pop 300ms cubic-bezier(0.3, 1.25, 0.5, 1) both;
+}
+@keyframes prompt-pop { from { opacity: 0; transform: translateY(10px) scale(0.92); } }
+.world-prompt kbd {
+  font: 700 13px var(--body);
+  padding: 1px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(30, 22, 6, 0.4);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* D-pad and Run, built by world.js; touch screens only. */
+.world-controls {
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(20px, calc(env(safe-area-inset-bottom) + 8px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.world-run { order: -1; } /* above the pad */
+.world-pad {
+  display: grid;
+  grid-template: repeat(3, 52px) / repeat(3, 52px);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.world-pad button, .world-run {
+  color: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+  background: var(--world-panel);
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.world-pad button { display: grid; place-items: center; padding: 0; }
+.world-pad svg { width: 22px; height: 22px; }
+.world-pad button:active { background: var(--brass); color: #1e1606; }
+.pad-n { grid-area: 1 / 2; }
+.pad-w { grid-area: 2 / 1; } .pad-w svg { transform: rotate(-90deg); }
+.pad-e { grid-area: 2 / 3; } .pad-e svg { transform: rotate(90deg); }
+.pad-s { grid-area: 3 / 2; } .pad-s svg { transform: rotate(180deg); }
+.world-run {
+  min-width: 56px;
+  min-height: 44px;
+  padding: 8px 12px;
+  font: 700 14px var(--body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.world-run[hidden] { display: none; }
+.world-run[aria-pressed="true"] { background: var(--brass); color: #1e1606; border-color: var(--brass-hi); }
+@media (hover: hover) and (pointer: fine) { .world-controls { display: none; } }
+
+/* Dialogs: a text box anchored at the bottom (a bottom sheet on phones), so the
+   hero and what it faces stay in view. */
+.world-sheet {
+  position: fixed;
+  inset: auto 0 max(16px, env(safe-area-inset-bottom));
+  width: min(640px, calc(100% - 32px));
+  max-height: calc(100dvh - 120px);
+  margin: 0 auto;
+  padding: 18px 20px;
+  border-radius: 18px;
+  color: var(--ink);
+  background: linear-gradient(180deg, #172845, #111d33);
+  border: 1px solid rgba(214, 172, 74, 0.45);
+  box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.8);
+  animation: rise 220ms ease both;
+}
+.world-sheet::backdrop { background: color-mix(in srgb, var(--felt-deep) 25%, transparent); }
+.world-sheet h2 { font-size: 22px; }
+.world-sheet .dialog-sub { margin-bottom: 4px; }
+.talk-box {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  min-height: 112px;
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font-size: 17px;
+}
+.talk-box:focus-visible { outline-width: 2px; outline-offset: 6px; border-radius: 6px; }
+.talk-name { font: 700 14px var(--display); color: var(--brass-hi); letter-spacing: 0.02em; }
+.talk-line { min-height: 3em; }
+.talk-next { justify-self: end; color: var(--brass-hi); font-size: 14px; }
+.item-got { display: flex; gap: 16px; align-items: center; }
+.item-preview { flex: none; width: 140px; height: 140px; border-radius: 14px; background: radial-gradient(circle, #24406a, #111d33 70%); }
+@media (max-width: 520px) { .item-got { flex-direction: column; text-align: center; } .item-got .dialog-foot { justify-content: center; } }
+
+@media (hover: none) {
+  /* Phones: just the wordmark and Leave up top; 44 px targets. */
+  .world-hint { display: none; }
+  .world .btn { min-height: 44px; }
+  /* The pad is bottom-left, so the prompt sits bottom-right, like an action button. */
+  .world-prompt { left: auto; right: max(16px, env(safe-area-inset-right)); margin: 0; max-width: calc(100% - 210px); white-space: normal; font-size: 16px; padding: 12px 14px; }
+  .world-prompt kbd { display: none; }
+}
+@media (max-width: 520px) and (hover: hover) { .world-hint { font-size: 12px; line-height: 1.25; } }

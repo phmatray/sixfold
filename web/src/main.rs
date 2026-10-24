@@ -7,6 +7,7 @@ mod controls;
 mod ctl;
 mod overlays;
 mod title;
+mod world;
 
 use leptos::prelude::*;
 use pkmntcg_engine::{Action, CardId};
@@ -25,6 +26,7 @@ fn main() {
 pub enum Screen {
     Title,
     Match,
+    World,
 }
 
 /// A card to show in the inspector; `at` = (player, uid) when it is in play.
@@ -89,6 +91,7 @@ fn App() -> impl IntoView {
     move || match screen.get() {
         Screen::Title => view! { <title::TitleScreen /> }.into_any(),
         Screen::Match => view! { <MatchScreen /> }.into_any(),
+        Screen::World => view! { <world::WorldScreen /> }.into_any(),
     }
 }
 

@@ -18,3 +18,11 @@ node_modules/
 .DS_Store
 .idea/
 .vscode/
+
+# Blender working files (art/Sixfold.blend is local, not shipped)
+*.blend
+*.blend1
+
+# Source textures (the build ships the .webp conversions)
+web/world/textures/*.png
+__pycache__/

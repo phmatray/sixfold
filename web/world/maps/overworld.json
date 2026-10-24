@@ -1,0 +1,268 @@
+{
+  "width": 28,
+  "height": 24,
+  "tiles": [
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "..................ffffff....",
+    ".............p....f....f....",
+    ".............p....f....f....",
+    ".............p....f....f....",
+    ".............p....f....f....",
+    ".............p....ff.fff....",
+    ".............p..............",
+    "....ffffffff.p.ffffffff.....",
+    ".............p..............",
+    ".............p..............",
+    ".............p..............",
+    ".............p..............",
+    "............................",
+    "............................"
+  ],
+  "props": [
+    { "asset": "house", "x": 10, "z": 6, "rot": 0 },
+    { "asset": "sign", "x": 16, "z": 11, "rot": 0 },
+    { "asset": "flowers", "x": 9, "z": 11, "rot": 0 },
+    { "asset": "flowers", "x": 10, "z": 11, "rot": 0 },
+    { "asset": "flowers", "x": 11, "z": 12, "rot": 0 },
+    { "asset": "flowers", "x": 9, "z": 12, "rot": 0 },
+    { "asset": "flowers", "x": 15, "z": 12, "rot": 0 },
+    { "asset": "flowers", "x": 16, "z": 13, "rot": 0 },
+    { "asset": "flowers", "x": 19, "z": 11, "rot": 0 },
+    { "asset": "flowers", "x": 20, "z": 11, "rot": 0 },
+    { "asset": "flowers", "x": 22, "z": 12, "rot": 0 },
+    { "asset": "flowers", "x": 21, "z": 13, "rot": 0 },
+    { "asset": "flowers", "x": 19, "z": 14, "rot": 0 },
+    { "asset": "bush", "x": 5, "z": 10, "rot": 0 },
+    { "asset": "bush", "x": 21, "z": 8, "rot": 0 },
+    { "asset": "bush", "x": 7, "z": 20, "rot": 0 },
+    { "asset": "bush", "x": 19, "z": 20, "rot": 0 },
+    { "asset": "bush", "x": 3, "z": 14, "rot": 0 },
+    { "asset": "bush", "x": 24, "z": 13, "rot": 0 },
+    { "asset": "rock", "x": 22, "z": 11, "rot": 0 },
+    { "asset": "rock", "x": 6, "z": 5, "rot": 0 },
+    { "asset": "rock", "x": 22, "z": 4, "rot": 0 },
+    { "asset": "tree", "x": 0, "z": 0, "rot": 0 },
+    { "asset": "tree", "x": 0, "z": 22, "rot": 90 },
+    { "asset": "tree", "x": 2, "z": 0, "rot": 180 },
+    { "asset": "tree", "x": 2, "z": 22, "rot": 270 },
+    { "asset": "tree", "x": 4, "z": 0, "rot": 0 },
+    { "asset": "tree", "x": 4, "z": 22, "rot": 90 },
+    { "asset": "tree", "x": 6, "z": 0, "rot": 180 },
+    { "asset": "tree", "x": 6, "z": 22, "rot": 270 },
+    { "asset": "tree", "x": 8, "z": 0, "rot": 0 },
+    { "asset": "tree", "x": 8, "z": 22, "rot": 90 },
+    { "asset": "tree", "x": 10, "z": 0, "rot": 180 },
+    { "asset": "tree", "x": 10, "z": 22, "rot": 270 },
+    { "asset": "tree", "x": 12, "z": 0, "rot": 0 },
+    { "asset": "tree", "x": 12, "z": 22, "rot": 90 },
+    { "asset": "tree", "x": 14, "z": 0, "rot": 180 },
+    { "asset": "tree", "x": 14, "z": 22, "rot": 270 },
+    { "asset": "tree", "x": 16, "z": 0, "rot": 0 },
+    { "asset": "tree", "x": 16, "z": 22, "rot": 90 },
+    { "asset": "tree", "x": 18, "z": 0, "rot": 180 },
+    { "asset": "tree", "x": 18, "z": 22, "rot": 270 },
+    { "asset": "tree", "x": 20, "z": 0, "rot": 0 },
+    { "asset": "tree", "x": 20, "z": 22, "rot": 90 },
+    { "asset": "tree", "x": 22, "z": 0, "rot": 180 },
+    { "asset": "tree", "x": 22, "z": 22, "rot": 270 },
+    { "asset": "tree", "x": 24, "z": 0, "rot": 0 },
+    { "asset": "tree", "x": 24, "z": 22, "rot": 90 },
+    { "asset": "tree", "x": 26, "z": 0, "rot": 180 },
+    { "asset": "tree", "x": 26, "z": 22, "rot": 270 },
+    { "asset": "tree", "x": 0, "z": 2, "rot": 180 },
+    { "asset": "tree", "x": 26, "z": 2, "rot": 0 },
+    { "asset": "tree", "x": 0, "z": 4, "rot": 0 },
+    { "asset": "tree", "x": 26, "z": 4, "rot": 180 },
+    { "asset": "tree", "x": 0, "z": 6, "rot": 180 },
+    { "asset": "tree", "x": 26, "z": 6, "rot": 0 },
+    { "asset": "tree", "x": 0, "z": 8, "rot": 0 },
+    { "asset": "tree", "x": 26, "z": 8, "rot": 180 },
+    { "asset": "tree", "x": 0, "z": 10, "rot": 180 },
+    { "asset": "tree", "x": 26, "z": 10, "rot": 0 },
+    { "asset": "tree", "x": 0, "z": 12, "rot": 0 },
+    { "asset": "tree", "x": 26, "z": 12, "rot": 180 },
+    { "asset": "tree", "x": 0, "z": 14, "rot": 180 },
+    { "asset": "tree", "x": 26, "z": 14, "rot": 0 },
+    { "asset": "tree", "x": 0, "z": 16, "rot": 0 },
+    { "asset": "tree", "x": 26, "z": 16, "rot": 180 },
+    { "asset": "tree", "x": 0, "z": 18, "rot": 180 },
+    { "asset": "tree", "x": 26, "z": 18, "rot": 0 },
+    { "asset": "tree", "x": 0, "z": 20, "rot": 0 },
+    { "asset": "tree", "x": 26, "z": 20, "rot": 180 },
+    { "asset": "tree", "x": 4, "z": 3, "rot": 270 },
+    { "asset": "tree", "x": 20, "z": 2, "rot": 180 },
+    { "asset": "tree", "x": 3, "z": 7, "rot": 180 },
+    { "asset": "tree", "x": 23, "z": 7, "rot": 180 },
+    { "asset": "tree", "x": 8, "z": 3, "rot": 270 },
+    { "asset": "tree", "x": 5, "z": 19, "rot": 0 },
+    { "asset": "tree", "x": 21, "z": 20, "rot": 90 },
+    { "asset": "tree", "x": 24, "z": 16, "rot": 0 },
+    { "asset": "tree", "x": 2, "z": 11, "rot": 90 }
+  ],
+  "spawn": {
+    "x": 13,
+    "z": 14,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 16,
+      "z": 11,
+      "kind": "sign",
+      "text": "Sixfold Meadow. The shop by the path has duels, snacks and shoes."
+    }
+  ],
+  "warps": [
+    {
+      "x": 13,
+      "z": 10,
+      "to": "shop",
+      "label": "Go inside",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "wren",
+      "name": "Wren",
+      "model": "npc_wanderer",
+      "tint": "#7fb6ff",
+      "scale": 0.94,
+      "x": 6,
+      "z": 13,
+      "facing": "e",
+      "idle": "Idle",
+      "route": [
+        "e",
+        "e",
+        "s",
+        "s",
+        "w",
+        "w",
+        "n",
+        "n"
+      ],
+      "dialogue": [
+        {
+          "if": "!flag:talked_wren",
+          "lines": [
+            "Lovely day for a walk. I do this loop a hundred times before lunch.",
+            "Some call it a rut. I call it a route."
+          ]
+        },
+        {
+          "if": "item:running_shoes",
+          "lines": [
+            "Are those running shoes? Don't lap me, it's rude."
+          ]
+        },
+        {
+          "lines": [
+            "Round and round. Still lovely."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pip",
+      "name": "Pip",
+      "model": "npc_kid",
+      "tint": "#ffd36e",
+      "scale": 0.82,
+      "x": 9,
+      "z": 19,
+      "facing": "s",
+      "idle": "Idle",
+      "route": [
+        "e",
+        "e",
+        "w",
+        "w"
+      ],
+      "dialogue": [
+        {
+          "if": "!flag:talked_pip",
+          "lines": [
+            "I'm practising my shuffle. Watch! ...Okay, don't watch."
+          ]
+        },
+        {
+          "lines": [
+            "One day I'll beat whoever sits at that duel table. One day."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "moss",
+      "name": "Moss",
+      "model": "npc_gardener",
+      "tint": "#9be08a",
+      "scale": 1.04,
+      "x": 21,
+      "z": 12,
+      "facing": "w",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "item:running_shoes",
+          "lines": [
+            "New shoes? Lovely. Now keep them out of my beds."
+          ]
+        },
+        {
+          "lines": [
+            "These flowers took three summers to settle in.",
+            "Juniper's shop up the path sells more than seeds. Ask about shoes."
+          ]
+        }
+      ]
+    }
+  ],
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [0, 0.75, 0],
+    "clamp": false,
+    "note": "Camera sits at hero + lookAtOffset + distance * (0, sin(pitch), cos(pitch)), looking at hero + lookAtOffset; fov is vertical, in degrees. Portrait values apply when the viewport is taller than wide."
+  },
+  "ground": {
+    "base": "grass",
+    "path": "dirt",
+    "margin": 9
+  },
+  "light": {
+    "sun": {
+      "color": "#fff0cf",
+      "intensity": 2.6,
+      "fromHero": [8, 18, 6]
+    },
+    "hemisphere": {
+      "sky": "#fff6dc",
+      "ground": "#3d7a2a",
+      "intensity": 1.6
+    },
+    "background": "#a8d98a",
+    "fog": {
+      "near": 18,
+      "far": 36
+    },
+    "note": "The sun shines from hero + fromHero toward the hero (direction = -normalize(fromHero))."
+  }
+}
