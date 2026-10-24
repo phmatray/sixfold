@@ -6,7 +6,6 @@
 # Rust / WASM
 /target
 **/*.rs.bk
-Cargo.lock
 dist/
 pkg/
 *.wasm
