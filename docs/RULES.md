@@ -1384,6 +1384,11 @@ unit test that should cover it.
   - change weakness or resistance;
   - devolve;
   - lock the opponent's trainers.
+- **Engine extensions.** Built from the same helpers, for the original set: add damage per 10
+  damage on the attacker or the defender; heal every own creature; attach a basic energy found in
+  the deck to the acting creature, then shuffle (R-ZONE-03). Tests:
+  `add_per_damage_counts_damage_on_self_or_defender`, `heal_all_heals_every_own_creature`,
+  `attach_from_deck_puts_chosen_energy_on_self_and_shuffles`.
 - **Status.** CORRECTED. The force-switch is a phase-5 selection, not a precondition, and healing
   targets slot 0.
 - **Evidence.** `0B:4117`, `0B:4221`, `0B:425B`, `0B:4140`, `0B:4149`, `0B:6539`, `0B:500E`.

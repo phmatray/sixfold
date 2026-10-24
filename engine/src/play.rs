@@ -198,6 +198,12 @@ impl Game {
             // RULES: R-EFFECT-04 — "requiring some damage" is a precondition for
             // trainers and Powers; an attack's heal just does nothing.
             Heal(_) if !attack => need(pl.active.as_ref().is_some_and(|a| a.damage() > 0)),
+            HealAll(_) if !attack => need(pl.in_play().any(|(_, c)| c.damage() > 0)),
+            AttachFromDeck(color) if !attack => need(
+                pl.deck
+                    .iter()
+                    .any(|&c| crate::resolve::is_energy_of(color, c)),
+            ),
             Cure { both } if !attack => {
                 need(!pl.condition.is_empty() || (both && !opp.condition.is_empty()))
             }

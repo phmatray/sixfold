@@ -400,7 +400,8 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
     - `OnceWhileInPlay` must not have been used yet.
     - `CopyAttack` needs an attack it can copy: not a copying attack, and one whose own checks pass for the copier.
   - **Trainers and Powers only:**
-    - `Heal` needs damage on your Active.
+    - `Heal` needs damage on your Active; `HealAll` needs damage on one of your creatures.
+    - `AttachFromDeck` needs a matching basic energy in the deck.
     - `Cure` needs a condition to clear.
     - `SwitchSelf` and `SwitchDefender` need a live Bench on the side being switched.
     - `DiscardDefenderEnergy` needs energy on the defender.
@@ -410,6 +411,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 | Effect | Meaning |
 |---|---|
 | `AddPerHeads { coins, per }` | Flip `coins` coins: +`per` damage for each heads. With printed damage 0, this *is* the damage. |
+| `AddPerDamage { per, own }` | +`per` damage for each 10 damage on self (`own`) or on the defender, counted before weakness. `preview_attack` includes it. |
 | `IgnoreWeaknessResistance` | The attack's damage skips weakness and resistance. |
 | `DoubleNextAttack` | Self's attacks on its owner's next turn do double damage. Using it again on that turn is doubled too and sets it again. |
 | `Recoil(n)` | n damage to self after the attack, using its own weakness, resistance and trainers. |
@@ -429,6 +431,8 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 | `SwitchDefender { chooser_is_attacker }` | Switch the defender with a Benched creature. The attacker picks when `chooser_is_attacker` is true, the defender's owner when it is false. |
 | `SwitchSelf` | Switch your Active with one of your Benched creatures. |
 | `Heal(n)` | Remove up to n damage from your Active. |
+| `HealAll(n)` | Remove up to n damage from each of your creatures. |
+| `AttachFromDeck(Color)` | The player picks a basic energy of that colour (`Colorless`: any) from the deck; it is attached to self (the holder for a Power, your Active for a trainer), then the deck is shuffled. It doesn't use up the turn's attachment. |
 | `Devolve` | The defender returns to its previous stage; the top card goes to its owner's hand. |
 | `StageSkip` | Trainer only: put a Stage 2 from the hand straight onto a matching settled Basic. |
 | `Draw(n)`, `DiscardHand` | Draw, or discard the hand. Use `[DiscardHand, Draw(7)]` for "discard your hand and draw 7". |

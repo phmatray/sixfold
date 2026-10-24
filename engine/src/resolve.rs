@@ -115,7 +115,12 @@ fn does_direct_damage(damage: u16, effects: &[Effect]) -> bool {
     damage > 0
         || effects
             .iter()
-            .any(|e| matches!(e, Effect::AddPerHeads { .. }))
+            .any(|e| matches!(e, Effect::AddPerHeads { .. } | Effect::AddPerDamage { .. }))
+}
+
+/// A basic energy card of `color` (`Colorless`: any basic energy).
+pub(crate) fn is_energy_of(color: crate::Color, id: CardId) -> bool {
+    matches!(card(id).kind, CardKind::Energy(EnergyCard::Basic(c)) if color == crate::Color::Colorless || c == color)
 }
 
 /// Card filters for `Search` / `Recover`.
@@ -310,6 +315,10 @@ impl Game {
             // RULES: R-ZONE-04 — a search can't be declined while a match exists.
             Search(find) => distinct(&me.deck, find),
             Recover(find) => distinct(&me.discard, find),
+            AttachFromDeck(color) => distinct(&me.deck, Find::BasicEnergy)
+                .into_iter()
+                .filter(|c| matches!(c, Choice::Card(id) if is_energy_of(color, *id)))
+                .collect(),
             AttachMinus20 => all(p),
             StageSkip => self.stage_skip_options(p),
             _ => return None,
@@ -586,6 +595,10 @@ impl Game {
                 let heads = self.flip_many(p, coins, ev);
                 self.pd_mut().damage += heads as i32 * per as i32;
             }
+            AddPerDamage { .. } => {
+                let bonus = self.effect_bonus(p, &[effect]);
+                self.pd_mut().damage += bonus;
+            }
             IgnoreWeaknessResistance => self.pd_mut().ignore_wr = true,
             DoubleNextAttack => {
                 self.players[p].effects.doubling_pending = true;
@@ -717,6 +730,42 @@ impl Game {
                         amount,
                     });
                 }
+            }
+            HealAll(n) => {
+                let pl = &mut self.players[p];
+                for s in 0..=pl.bench.len() {
+                    let Some(c) = pl.slot_mut(s) else { continue };
+                    let amount = n.min(c.damage());
+                    if amount > 0 {
+                        c.hp += amount;
+                        ev.push(Event::Healed {
+                            player: p,
+                            slot: s,
+                            uid: c.uid,
+                            creature: c.top(),
+                            amount,
+                        });
+                    }
+                }
+            }
+            AttachFromDeck(_) => {
+                if let Some(Choice::Card(id)) = choice {
+                    let pl = &mut self.players[p];
+                    if let (Some(card), true) = (pl.take_from_deck(id), pl.slot(slot).is_some()) {
+                        let c = pl.slot_mut(slot).expect("checked");
+                        c.energy.push(card);
+                        ev.push(Event::EnergyAttached {
+                            player: p,
+                            slot,
+                            uid: c.uid,
+                            creature: c.top(),
+                            card,
+                        });
+                    }
+                }
+                // R-ZONE-03: searching shuffles afterwards.
+                self.players[p].shuffle(&mut self.rng);
+                ev.push(Event::Shuffled { player: p });
             }
             Devolve => {
                 if !negated {
@@ -997,6 +1046,7 @@ mod tests {
     use crate::condition::{Condition, Placed, Shield, Special, Status};
     use crate::effect::{Choice, Effect::*, Phase};
     use crate::fixtures::*;
+    use crate::resolve::Source;
     use crate::testkit::*;
 
     fn pos(ev: &[Event], f: impl Fn(&Event) -> bool) -> usize {
@@ -1501,6 +1551,100 @@ mod tests {
             }
         )));
         assert_eq!(hp(&g, 0, 0), 50);
+    }
+
+    /// R-EFFECT-04 (extension): heal every own creature; as a trainer it
+    /// needs damage somewhere.
+    #[test]
+    fn heal_all_heals_every_own_creature() {
+        let mut g = main_phase(0);
+        g.players[0].bench = vec![creature(EMBERKIT, &[]), creature(PEBBLET, &[])];
+        assert_eq!(
+            g.effect_check(0, 0, &HealAll(20), Source::Trainer),
+            Err(RuleError::NoTarget)
+        );
+        g.players[0].active.as_mut().unwrap().hp = 20; // 30 damage
+        g.players[0].bench[1].hp = 50; // 10 damage
+        let ev = trainer_with(&mut g, &[HealAll(20)]);
+        assert_eq!((hp(&g, 0, 0), hp(&g, 0, 2)), (40, 60));
+        let healed: Vec<(usize, u16)> = ev
+            .iter()
+            .filter_map(|e| match e {
+                Event::Healed { slot, amount, .. } => Some((*slot, *amount)),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(healed, [(0, 20), (2, 10)]);
+    }
+
+    /// R-EFFECT-04 (extension): +damage for each 10 damage on the attacker
+    /// or on the defender, before weakness; the preview agrees.
+    #[test]
+    fn add_per_damage_counts_damage_on_self_or_defender() {
+        let mut g = main_phase(0);
+        g.players[0].active.as_mut().unwrap().hp = 30; // 20 damage on Mossling
+        g.players[1].active.as_mut().unwrap().hp = 50; // 10 damage on Pebblet
+        static OWN: [crate::Effect; 1] = [AddPerDamage { per: 10, own: true }];
+        // (10 + 2×10) ×2 weakness = 60.
+        let ev = attack_with(&mut g, 10, &OWN);
+        assert_eq!(damage_to(&ev, 1, 0), vec![60]);
+        let mut g = main_phase(0);
+        g.players[1].active.as_mut().unwrap().hp = 40; // 20 damage
+        assert_eq!(
+            g.effect_bonus(
+                0,
+                &[AddPerDamage {
+                    per: 20,
+                    own: false
+                }]
+            ),
+            40
+        );
+        let ev = attack_with(
+            &mut g,
+            10,
+            &[AddPerDamage {
+                per: 20,
+                own: false,
+            }],
+        );
+        // (10 + 2×20) ×2 = 100.
+        assert_eq!(damage_to(&ev, 1, 0), vec![100]);
+    }
+
+    /// R-EFFECT-04 (extension), R-ZONE-03: take a basic energy of the colour
+    /// (Colorless: any) from the deck onto the acting creature, then shuffle.
+    #[test]
+    fn attach_from_deck_puts_chosen_energy_on_self_and_shuffles() {
+        let mut g = main_phase(0);
+        g.players[0].deck = vec![GRASS_E, FIRE_E, MOSSLING, GRASS_E];
+        attack_with(&mut g, 0, &[AttachFromDeck(Colorless)]);
+        let (p, options, _) = choose_options(&g);
+        assert_eq!(
+            (p, options),
+            (0, vec![Choice::Card(GRASS_E), Choice::Card(FIRE_E)])
+        );
+        let ev = ok(&mut g, Action::Choose(1));
+        assert!(ev
+            .iter()
+            .any(|e| matches!(e, Event::EnergyAttached { player: 0, slot: 0, card, .. } if *card == FIRE_E)));
+        assert!(ev.contains(&Event::Shuffled { player: 0 }));
+        assert_eq!(g.players[0].active.as_ref().unwrap().energy, [FIRE_E]);
+        assert_eq!(g.players[0].deck.len(), 3);
+        // Only that colour; none in the deck refuses the trainer.
+        let mut g = main_phase(0);
+        g.players[0].deck = vec![FIRE_E, MOSSLING];
+        assert_eq!(
+            g.effect_check(0, 0, &AttachFromDeck(Grass), Source::Trainer),
+            Err(RuleError::NoTarget)
+        );
+        assert_eq!(
+            g.effect_check(0, 0, &AttachFromDeck(Fire), Source::Trainer),
+            Ok(())
+        );
+        // An attack without a match just goes on.
+        let ev = attack_with(&mut g, 10, &[AttachFromDeck(Grass)]);
+        assert_eq!(damage_to(&ev, 1, 0), vec![20]);
     }
 
     // ----- Shields and placed effects -----

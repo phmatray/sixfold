@@ -555,6 +555,15 @@ fn trainer_step(x: &Ctx, effects: &[Effect]) -> Option<Step> {
         Search(find) => yes(Step::Draw, deck >= 5 && search_wanted(x, find)),
         Recover(_) => Some(Step::Draw),
         Heal(n) => yes(Step::Support, active.damage() >= n.min(20)),
+        HealAll(n) => yes(Step::Support, side_damage(x.mine(), n) >= 20),
+        AttachFromDeck(_) => {
+            let short = active
+                .creature()
+                .attacks
+                .iter()
+                .any(|a| missing(&active.units(), a.cost) > 0);
+            yes(Step::Support, short)
+        }
         // R-AI-13
         SwitchDefender { .. } => yes(Step::Support, !sure_ko(x) && ko_able_bench(x)),
         // R-AI-11
@@ -606,6 +615,7 @@ fn power_wanted(x: &Ctx, slot: usize, effects: &[Effect]) -> bool {
     };
     match effects.first() {
         Some(Heal(_)) => active.damage() >= 10,
+        Some(HealAll(n)) => side_damage(x.mine(), *n) >= 10,
         Some(Draw(_)) => x.mine().deck_count >= 10,
         Some(Search(_)) => x.mine().deck_count >= 5,
         Some(SetOwnColor(c)) => {
@@ -614,6 +624,15 @@ fn power_wanted(x: &Ctx, slot: usize, effects: &[Effect]) -> bool {
         }
         _ => true,
     }
+}
+
+/// How much a heal of `n` on each creature would remove on this side.
+fn side_damage(side: &Side, n: u16) -> u16 {
+    side.active
+        .into_iter()
+        .chain(side.bench)
+        .map(|c| n.min(c.damage()))
+        .sum()
 }
 
 /// R-AI-11: the +10 trainer turns a hit that falls 10 short into a knock-out.
@@ -774,6 +793,8 @@ fn effect_value(x: &Ctx, me: &InPlay, def: &InPlay, e: &Effect) -> f32 {
         DiscardEnergy { count, .. } => -10.0 * count as f32,
         DiscardAllEnergy => -10.0 * me.energy.len() as f32,
         Heal(n) => n.min(me.damage()) as f32,
+        HealAll(n) => side_damage(x.mine(), n) as f32,
+        AttachFromDeck(_) if x.mine().deck_count > 0 => 15.0,
         // Worth half the best attack I could pay for next turn.
         DoubleNextAttack => {
             me.creature()
