@@ -1,11 +1,14 @@
 //! Keeps the player's [`Profile`] in localStorage: one versioned key each for
 //! the collection, the deck lists (one save string per line) and the packs.
+//! The world's [`Progress`] (items, flags, seals, the last campaign duel), where
+//! the hero stands, and the deck last taken into a campaign duel live here too.
 //!
 //! localStorage can be missing or throw (private mode, blocked storage): then
 //! the profile simply lives in memory for this visit. A saved string that no
 //! longer reads is copied to `<key>.bad` before anything overwrites it.
 
 use leptos::prelude::*;
+use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::{Profile, Wallet};
 use sixfold_engine::{starter_collection, Collection, DeckList};
 
@@ -13,6 +16,10 @@ const COLLECTION: &str = "sixfold.v1.collection";
 const DECKS: &str = "sixfold.v1.decks";
 const WALLET: &str = "sixfold.v1.wallet";
 const WORLD: &str = "sixfold.world.progress";
+/// `map,x,z,facing` of the hero, so the world resumes where it was left.
+const WORLD_AT: &str = "sixfold.world.at";
+/// Name of the deck last taken into a campaign duel.
+const CAMPAIGN_DECK: &str = "sixfold.campaign.deck";
 
 fn storage() -> Option<web_sys::Storage> {
     web_sys::window()?.local_storage().ok().flatten()
@@ -84,6 +91,22 @@ pub fn load() -> (Profile, Option<String>) {
     )
 }
 
+pub fn world_at() -> Option<String> {
+    get(WORLD_AT)
+}
+
+pub fn set_world_at(at: &str) {
+    set(WORLD_AT, at);
+}
+
+pub fn campaign_deck() -> Option<String> {
+    get(CAMPAIGN_DECK)
+}
+
+pub fn set_campaign_deck(name: &str) {
+    set(CAMPAIGN_DECK, name);
+}
+
 pub fn save(p: &Profile) {
     set(COLLECTION, &p.collection.save());
     let decks: Vec<String> = p.decks.iter().map(DeckList::save).collect();
@@ -94,20 +117,22 @@ pub fn save(p: &Profile) {
 /// Forget everything: cards, decks, packs and the world's progress.
 pub fn reset() {
     if let Some(s) = storage() {
-        for key in [COLLECTION, DECKS, WALLET, WORLD] {
+        for key in [COLLECTION, DECKS, WALLET, WORLD, WORLD_AT, CAMPAIGN_DECK] {
             let _ = s.remove_item(key);
         }
     }
 }
 
-/// The profile in context, saved on every change.
-pub fn provide() -> RwSignal<Profile> {
+/// The profile and the world's progress in context, each saved on every change.
+pub fn provide() {
     let (profile, note) = load();
     let profile = RwSignal::new(profile);
     Effect::new(move |_| profile.with(save));
     provide_context(profile);
     provide_context(Notice(RwSignal::new(note)));
-    profile
+    let progress = RwSignal::new(Progress::decode(&get(WORLD).unwrap_or_default()));
+    Effect::new(move |_| progress.with(|p| set(WORLD, &p.encode())));
+    provide_context(progress);
 }
 
 /// A one-off message shown on the title screen (e.g. a save that didn't read).

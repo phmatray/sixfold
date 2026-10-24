@@ -1,7 +1,9 @@
 //! Title screen: the hero and the main menu, plus a small settings menu.
 
 use leptos::prelude::*;
+use sixfold_engine::campaign::{seals, RIVALS, SEALS};
 use sixfold_engine::decks::PREBUILT;
+use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{card, CardId};
 
@@ -37,11 +39,13 @@ fn MenuItem(
 #[component]
 fn Settings() -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
+    let progress = expect_context::<RwSignal<Progress>>();
     let confirm = RwSignal::new(false);
     let done = RwSignal::new(false);
     let reset = move |_| {
         store::reset();
         profile.set(Profile::new_player());
+        progress.set(Progress::default());
         confirm.set(false);
         done.set(true);
     };
@@ -109,6 +113,17 @@ pub fn TitleScreen() -> impl IntoView {
             format!("{have} of {all} cards found")
         })
     };
+    let progress = expect_context::<RwSignal<Progress>>();
+    let campaign_sub = move || {
+        progress.with(|p| {
+            let next = RIVALS.iter().find(|r| r.open(p) && !r.beaten(p));
+            match (seals(p), next) {
+                (n, _) if RIVALS.iter().all(|r| r.beaten(p)) => format!("All {n} seals. Champion!"),
+                (n, Some(r)) => format!("{n} of {SEALS} seals · next: {}", r.name),
+                (n, None) => format!("{n} of {SEALS} seals"),
+            }
+        })
+    };
     let pack_sub = move || match packs.get() {
         0 => "Win a duel to earn one".to_string(),
         1 => "1 pack to open".to_string(),
@@ -133,6 +148,7 @@ pub fn TitleScreen() -> impl IntoView {
                     <nav aria-label="Main menu">
                         <ul class="menu">
                             <MenuItem label="Play a duel" sub="Your deck against the AI" to=Screen::Duel primary=true />
+                            <MenuItem label="Campaign" sub=Signal::derive(campaign_sub) to=Screen::Campaign />
                             <MenuItem label="Open packs" sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
                             <MenuItem label="My decks" sub=Signal::derive(decks) to=Screen::Decks />
                             <MenuItem label="Collection" sub=Signal::derive(found) to=Screen::Collection />

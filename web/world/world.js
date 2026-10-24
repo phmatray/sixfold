@@ -274,7 +274,7 @@ export function mount(el, controls, cb, start) {
   async function warp(wp) {
     if (warping) return;
     warping = true;
-    sound("door");
+    sound(wp.if ? "gate" : "door"); // a gated door opening sounds grander
     held.length = 0;
     world.path = [];
     fade.classList.add("on");

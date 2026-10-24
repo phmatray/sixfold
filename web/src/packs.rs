@@ -103,6 +103,16 @@ pub fn PacksScreen() -> impl IntoView {
     }
 }
 
+/// The CSS theme of booster `b`'s wrapper: `p-<theme>`.
+pub fn pack_theme(b: usize) -> &'static str {
+    let colors = BOOSTERS[b].colors;
+    match colors.first() {
+        Some(_) if colors.len() > 2 => "wild",
+        Some(&c) => color_key(c),
+        None => "colorless",
+    }
+}
+
 /// The three boosters, with how many of each the player holds.
 #[component]
 fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
@@ -121,7 +131,7 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
         <ul class="shelf">
             {BOOSTERS.iter().enumerate().map(|(i, b)| {
                 let n = move || profile.with(|p| p.wallet.packs(i));
-                let theme = b.colors.first().map_or("colorless", |&c| if b.colors.len() > 2 { "wild" } else { color_key(c) });
+                let theme = pack_theme(i);
                 view! {
                     <li class="shelf-item">
                         <div class=format!("pack p-{theme}") aria-hidden="true">

@@ -1,30 +1,33 @@
 //! The overworld test: a 3D tile-grid world drawn by `world/world.js`
 //! (three.js) from `world/maps/*.json`. Leptos owns everything that is not
 //! drawing: the prompt, the dialogs (a native modal `<dialog>`), NPC dialogue
-//! with a typewriter, the item popup, and progression, which is the engine's
-//! [`Progress`] saved in localStorage.
+//! with a typewriter, the item popup, campaign duels, and progression, which
+//! is the engine's [`Progress`] (in context, saved by `store`).
 
 use std::time::Duration;
 
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
+use sixfold_engine::booster::BOOSTERS;
+use sixfold_engine::campaign;
 use sixfold_engine::overworld::{Applied, Progress};
 use wasm_bindgen::prelude::*;
 
 use crate::audio::MuteToggle;
+use crate::campaign::{Challenge, Roster, SealBadge};
 use crate::ctl::Ctl;
-use crate::Screen;
+use crate::{store, Screen};
 
 // The scene module is loaded at runtime from the copied `world/` folder, so
 // three.js comes from the import map in index.html and never touches the wasm.
 // Calls made before the module is in (items, pause) are replayed once it is.
 #[wasm_bindgen(inline_js = r#"
 let api = null, gen = 0, items = "", paused = false;
-export function world_mount(el, controls, cb) {
+export function world_mount(el, controls, cb, start) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb); api.setItems(items); api.pause(paused); })
+    .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb, start); api.setItems(items); api.pause(paused); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
@@ -35,7 +38,8 @@ export function world_preview(el, name) { api?.preview(el, name); }
 export function world_preview_stop() { api?.previewStop(); }
 "#)]
 extern "C" {
-    fn world_mount(el: &JsValue, controls: &JsValue, cb: &JsValue);
+    /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
+    fn world_mount(el: &JsValue, controls: &JsValue, cb: &JsValue, start: &str);
     fn world_unmount();
     /// Act on the faced tile, as E does.
     fn world_act();
@@ -47,25 +51,8 @@ extern "C" {
     fn world_preview_stop();
 }
 
-const SAVE_KEY: &str = "sixfold.world.progress";
-
-// localStorage can be missing or throw (private mode, blocked storage): then
-// progress simply lives in memory for this visit.
-fn storage() -> Option<web_sys::Storage> {
-    web_sys::window()?.local_storage().ok().flatten()
-}
-
-fn load_progress() -> Progress {
-    storage()
-        .and_then(|s| s.get_item(SAVE_KEY).ok().flatten())
-        .map(|s| Progress::decode(&s))
-        .unwrap_or_default()
-}
-
-fn save_progress(p: &Progress) {
-    if let Some(s) = storage() {
-        let _ = s.set_item(SAVE_KEY, &p.encode());
-    }
+/// Hand the owned items to the scene (the shoes unlock running).
+fn push_items(p: &Progress) {
     world_items(&p.items().collect::<Vec<_>>().join(","));
 }
 
@@ -142,9 +129,13 @@ fn voice(id: &str) -> f64 {
 #[derive(Clone, PartialEq)]
 enum Sheet {
     Duel(String),
-    Sign(String),
+    /// A sign, a locked door, a gift: a title and a line.
+    Note(&'static str, String),
     Talk(Talk),
     Item(String),
+    /// A campaign rival's duel offer, by id.
+    Challenge(String),
+    Roster,
 }
 
 /// The prompt's label for what the hero faces.
@@ -161,6 +152,7 @@ fn prompt_label(kind: &str, text: &str) -> String {
 pub fn WorldScreen() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let screen = expect_context::<RwSignal<Screen>>();
+    let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
     let host = NodeRef::<html::Div>::new();
     let controls = NodeRef::<html::Div>::new();
     let stage = NodeRef::<html::Main>::new();
@@ -174,7 +166,14 @@ pub fn WorldScreen() -> impl IntoView {
     let loading = RwSignal::new(true);
     let failed = RwSignal::new(None::<String>);
     let announce = RwSignal::new(String::new());
-    let progress = RwSignal::new(load_progress());
+    let progress = expect_context::<RwSignal<Progress>>();
+    // A campaign duel just ended: once the scene is up, the hero (put back on
+    // its tile, facing the rival) talks to them so the post-duel line plays.
+    let returning = progress.with_untracked(|p| {
+        p.last_duel()
+            .and_then(|(id, _)| campaign::rival(id))
+            .map(|r| r.name)
+    });
     let reduced = web_sys::window()
         .and_then(|w| {
             w.match_media("(prefers-reduced-motion: reduce)")
@@ -203,32 +202,46 @@ pub fn WorldScreen() -> impl IntoView {
     };
 
     // ponytail: the callback is leaked once per visit (a few bytes); keep a handle if visits ever get frequent.
-    let cb = Closure::<dyn Fn(String, String, String)>::new(
-        move |event: String, a: String, b: String| match event.as_str() {
-            "near" => {
-                let now = (!a.is_empty()).then(|| (a.clone(), b.clone()));
-                if let Some((k, t)) = &now {
-                    _ = announce.try_set(format!("{}. Press E.", prompt_label(k, t)));
+    let cb = Closure::<dyn Fn(String, String, String) -> bool>::new(
+        move |event: String, a: String, b: String| {
+            match event.as_str() {
+                // A gated warp asks whether its condition holds.
+                "check" => return progress.with_untracked(|p| p.check(&a)),
+                "at" => store::set_world_at(&format!("{a},{b}")),
+                "near" => {
+                    let now = (!a.is_empty()).then(|| (a.clone(), b.clone()));
+                    if let Some((k, t)) = &now {
+                        _ = announce.try_set(format!("{}. Press E.", prompt_label(k, t)));
+                    }
+                    _ = near.try_set(now);
                 }
-                _ = near.try_set(now);
+                "use" if a == "duel" => _ = sheet.try_set(Some(Sheet::Duel(b))),
+                "use" if a == "locked" => _ = sheet.try_set(Some(Sheet::Note("Locked", b))),
+                "use" => _ = sheet.try_set(Some(Sheet::Note("It says", b))),
+                "talk" => start_talk(a, b),
+                "ready" => {
+                    _ = loading.try_set(false);
+                    let facing = near.try_get_untracked().flatten();
+                    if returning.is_some_and(|n| facing == Some(("npc".into(), n.into()))) {
+                        world_act();
+                    }
+                }
+                _ => _ = failed.try_set(Some(b)),
             }
-            "use" if a == "duel" => _ = sheet.try_set(Some(Sheet::Duel(b))),
-            "use" => _ = sheet.try_set(Some(Sheet::Sign(b))),
-            "talk" => start_talk(a, b),
-            "ready" => _ = loading.try_set(false),
-            _ => _ = failed.try_set(Some(b)),
+            false
         },
     )
     .into_js_value();
     let cb = StoredValue::new_local(cb);
     let mount = move || {
         if let (Some(h), Some(c)) = (host.get_untracked(), controls.get_untracked()) {
-            cb.with_value(|cb| world_mount(&h, &c, cb));
+            let start = store::world_at().unwrap_or_default();
+            cb.with_value(|cb| world_mount(&h, &c, cb, &start));
         }
     };
     Effect::new(move |_| {
         if host.get().is_some() && controls.get().is_some() {
-            progress.with_untracked(save_progress); // hands the owned items to the scene
+            progress.with_untracked(push_items);
             mount();
         }
     });
@@ -305,10 +318,15 @@ pub fn WorldScreen() -> impl IntoView {
     });
 
     // Talk to the end: apply the branch's effects (and a talked-to flag) in the
-    // engine, save, and show any new item.
+    // engine (saved by the store), then show what follows: a duel offer, a new
+    // item or a pack. Talking to the rival of the last duel settles its result.
     let finish = move |t: Talk| {
-        let mut got = None;
+        let mut next = None;
+        let mut packs = vec![];
         progress.update(|p| {
+            if p.last_duel().is_some_and(|(id, _)| id == t.id) {
+                p.settle();
+            }
             for e in t
                 .effects
                 .iter()
@@ -316,18 +334,30 @@ pub fn WorldScreen() -> impl IntoView {
                 .chain([format!("flag:talked_{}", t.id)])
             {
                 match p.apply(&e) {
-                    Ok(Applied::GotItem(item)) => got = Some(item),
+                    Ok(Applied::GotItem(item)) => next = Some(Sheet::Item(item)),
+                    Ok(Applied::Duel(id)) => next = Some(Sheet::Challenge(id)),
+                    Ok(Applied::Pack(b)) => packs.push(b),
                     Ok(Applied::Nothing) => {}
                     Err(err) => leptos::logging::warn!("world: {err}"),
                 }
             }
         });
-        progress.with_untracked(save_progress);
-        if let Some(item) = &got {
+        progress.with_untracked(push_items);
+        if !packs.is_empty() {
+            profile.update(|p| packs.iter().for_each(|&b| _ = p.wallet.grant(b, 1)));
+            let names: Vec<&str> = packs.iter().map(|&b| BOOSTERS[b].name).collect();
+            let text = format!(
+                "You got {}. Open it from the title screen.",
+                names.join(" and ")
+            );
+            next = next.or(Some(Sheet::Note("A gift", text.clone())));
+            announce.set(text);
+        }
+        if let Some(Sheet::Item(item)) = &next {
             crate::audio::sfx("jingle", 0.0);
             announce.set(format!("You got {}.", item_info(item).0));
         }
-        sheet.set(got.map(Sheet::Item));
+        sheet.set(next);
     };
     let advance = move || {
         let Some(Sheet::Talk(mut t)) = sheet.get_untracked() else {
@@ -379,6 +409,7 @@ pub fn WorldScreen() -> impl IntoView {
             <header class="world-top">
                 <span class="wordmark small">"Sixfold"</span>
                 <span class="world-hint">"Arrows or WASD to walk · E to act · Shift to run · G for the grid"</span>
+                <SealBadge on_open=move || sheet.set(Some(Sheet::Roster)) />
                 <MuteToggle />
                 <button class="btn ghost" on:click=move |_| screen.set(Screen::Title)>"Leave"</button>
             </header>
@@ -443,9 +474,19 @@ pub fn WorldScreen() -> impl IntoView {
                             <button class="btn primary" autofocus on:click=duel>"Duel"</button>
                         </div>
                     }.into_any(),
-                    Sheet::Sign(text) => view! {
-                        <h2 id="world-sheet-title">"It says"</h2>
+                    Sheet::Note(title, text) => view! {
+                        <h2 id="world-sheet-title">{title}</h2>
                         <p class="dialog-sub">{text}</p>
+                        <div class="dialog-foot">
+                            <button class="btn primary" autofocus on:click=close>"Close"</button>
+                        </div>
+                    }.into_any(),
+                    Sheet::Challenge(id) => view! {
+                        <Challenge id=id on_cancel=move || sheet.set(None) before=move || sheet.set(None) />
+                    }.into_any(),
+                    Sheet::Roster => view! {
+                        <h2 id="world-sheet-title">"Rivals and seals"</h2>
+                        <Roster />
                         <div class="dialog-foot">
                             <button class="btn primary" autofocus on:click=close>"Close"</button>
                         </div>

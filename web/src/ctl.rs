@@ -73,6 +73,8 @@ pub struct Setup {
     pub names: [String; 2],
     pub prizes: u8,
     pub difficulty: Difficulty,
+    /// The campaign rival's id, for a duel started from the world.
+    pub rival: Option<&'static str>,
 }
 
 #[derive(Clone, Copy)]

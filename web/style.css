@@ -1500,3 +1500,56 @@ select option { background: var(--panel); color: var(--ink); }
   .selects .field { flex: 1 1 40%; }
   .selects .field select { width: 100%; }
 }
+
+/* ---------- Campaign: seals, rivals, the pre-duel sheet ---------- */
+
+.seal {
+  display: inline-block;
+  width: 26px;
+  aspect-ratio: 1 / 1.1;
+  flex: none;
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+}
+.seal.earned { background: radial-gradient(circle at 40% 35%, var(--tint), var(--c) 60%, var(--c2)); box-shadow: none; }
+.seal-badge { display: inline-flex; align-items: center; gap: 8px; min-width: 44px; min-height: 44px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.seal-badge .seal { width: 20px; background: radial-gradient(circle at 40% 35%, var(--brass-hi), var(--brass) 60%, #7b5a17); }
+.world-top .seal-badge { margin-left: auto; }
+.world-top .seal-badge + .btn { margin-left: 0; }
+
+.campaign { display: grid; gap: 20px; max-width: 880px; justify-items: start; }
+.roster { display: grid; gap: 16px; width: 100%; }
+.seal-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+.seals { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; }
+.seals .seal { width: 34px; }
+.seal-count { margin: 0; color: var(--muted); }
+.seal-count b { font: 800 22px var(--display); color: var(--brass-hi); }
+.rivals { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+.rival { padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: rgba(19, 33, 58, 0.75); display: grid; gap: 4px; }
+.rival p { margin: 0; }
+.rival-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.rival-name { font: 700 19px var(--display); }
+.rival-title { color: var(--muted); font-size: 14px; }
+.rival-colors { display: flex; gap: 4px; margin-left: auto; }
+.rival-status { font-weight: 700; font-size: 14px; }
+.rival-meta, .rival-reward { color: var(--muted); font-size: 13px; }
+.rival.open { border-color: rgba(214, 172, 74, 0.55); }
+.rival.open .rival-status { color: var(--brass-hi); }
+.rival.beaten .rival-status { color: var(--heal); }
+.rival.locked { opacity: 0.72; }
+.rival.champion { grid-column: 1 / -1; background: linear-gradient(120deg, rgba(138, 79, 201, 0.25), rgba(19, 33, 58, 0.75)); }
+.world-sheet .roster { margin-top: 12px; }
+
+.world-sheet { overflow-y: auto; }
+.challenge { display: grid; gap: 4px; }
+.challenge .dialog-sub b { color: var(--ink); }
+.challenge .deck-picker legend { font-size: 16px; margin: 8px 0 6px; }
+.challenge .deck-star .card { --w: 52px; }
+.challenge .deck-tile { padding: 8px 10px; min-height: 44px; }
+.campaign-reward .seal { width: 40px; }
+
+@media (max-width: 520px) {
+  .world-top .seal-badge { padding-inline: 8px; }
+  .rival-colors { margin-left: 0; }
+}
