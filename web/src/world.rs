@@ -167,7 +167,11 @@ pub fn WorldScreen() -> impl IntoView {
     let announce = RwSignal::new(String::new());
     let progress = RwSignal::new(load_progress());
     let reduced = web_sys::window()
-        .and_then(|w| w.match_media("(prefers-reduced-motion: reduce)").ok().flatten())
+        .and_then(|w| {
+            w.match_media("(prefers-reduced-motion: reduce)")
+                .ok()
+                .flatten()
+        })
         .is_some_and(|m| m.matches());
 
     let start_talk = move |id: String, json: String| {
@@ -176,14 +180,22 @@ pub fn WorldScreen() -> impl IntoView {
             return;
         };
         let pick = progress.with_untracked(|p| p.pick(branches.iter().map(|b| b.cond.as_str())));
-        let Some(b) = pick.and_then(|i| branches.into_iter().nth(i)) else { return };
+        let Some(b) = pick.and_then(|i| branches.into_iter().nth(i)) else {
+            return;
+        };
         typed.set(0);
-        sheet.set(Some(Sheet::Talk(Talk { id, name, lines: b.lines, effects: b.effects, at: 0 })));
+        sheet.set(Some(Sheet::Talk(Talk {
+            id,
+            name,
+            lines: b.lines,
+            effects: b.effects,
+            at: 0,
+        })));
     };
 
     // ponytail: the callback is leaked once per visit (a few bytes); keep a handle if visits ever get frequent.
-    let cb = Closure::<dyn Fn(String, String, String)>::new(move |event: String, a: String, b: String| {
-        match event.as_str() {
+    let cb = Closure::<dyn Fn(String, String, String)>::new(
+        move |event: String, a: String, b: String| match event.as_str() {
             "near" => {
                 let now = (!a.is_empty()).then(|| (a.clone(), b.clone()));
                 if let Some((k, t)) = &now {
@@ -196,8 +208,8 @@ pub fn WorldScreen() -> impl IntoView {
             "talk" => start_talk(a, b),
             "ready" => _ = loading.try_set(false),
             _ => _ = failed.try_set(Some(b)),
-        }
-    })
+        },
+    )
     .into_js_value();
     let cb = StoredValue::new_local(cb);
     let mount = move || {
@@ -228,7 +240,11 @@ pub fn WorldScreen() -> impl IntoView {
             if let Some(Some(Sheet::Talk(t))) = sheet.try_get_untracked() {
                 let len = t.line().chars().count();
                 if typed.get_untracked() < len {
-                    typed.set(if reduced { len } else { typed.get_untracked() + 1 });
+                    typed.set(if reduced {
+                        len
+                    } else {
+                        typed.get_untracked() + 1
+                    });
                 }
             }
         },
@@ -258,7 +274,10 @@ pub fn WorldScreen() -> impl IntoView {
     // Each new sheet (also when one replaces another in the open dialog) takes focus.
     Effect::new(move |_| {
         if sheet.with(Option::is_some) {
-            if let Some(Ok(Some(el))) = dlg.get_untracked().map(|d| d.query_selector(".talk-box, [autofocus]")) {
+            if let Some(Ok(Some(el))) = dlg
+                .get_untracked()
+                .map(|d| d.query_selector(".talk-box, [autofocus]"))
+            {
                 if let Ok(el) = el.dyn_into::<web_sys::HtmlElement>() {
                     let _ = el.focus();
                 }
@@ -266,7 +285,8 @@ pub fn WorldScreen() -> impl IntoView {
         }
     });
     Effect::new(move |_| {
-        if let (Some(el), Some(Some(Sheet::Item(id)))) = (preview.get(), sheet.try_get_untracked()) {
+        if let (Some(el), Some(Some(Sheet::Item(id)))) = (preview.get(), sheet.try_get_untracked())
+        {
             world_preview(&el, item_info(&id).1);
         }
     });
@@ -276,7 +296,12 @@ pub fn WorldScreen() -> impl IntoView {
     let finish = move |t: Talk| {
         let mut got = None;
         progress.update(|p| {
-            for e in t.effects.iter().cloned().chain([format!("flag:talked_{}", t.id)]) {
+            for e in t
+                .effects
+                .iter()
+                .cloned()
+                .chain([format!("flag:talked_{}", t.id)])
+            {
                 match p.apply(&e) {
                     Ok(Applied::GotItem(item)) => got = Some(item),
                     Ok(Applied::Nothing) => {}
@@ -291,7 +316,9 @@ pub fn WorldScreen() -> impl IntoView {
         sheet.set(got.map(Sheet::Item));
     };
     let advance = move || {
-        let Some(Sheet::Talk(mut t)) = sheet.get_untracked() else { return };
+        let Some(Sheet::Talk(mut t)) = sheet.get_untracked() else {
+            return;
+        };
         let len = t.line().chars().count();
         if typed.get_untracked() < len {
             typed.set(len); // finish the line first
@@ -307,13 +334,18 @@ pub fn WorldScreen() -> impl IntoView {
     let on_cancel = move |e: web_sys::Event| {
         e.prevent_default();
         match sheet.get_untracked() {
-            Some(Sheet::Talk(t)) if typed.get_untracked() < t.line().chars().count() => typed.set(usize::MAX),
+            Some(Sheet::Talk(t)) if typed.get_untracked() < t.line().chars().count() => {
+                typed.set(usize::MAX)
+            }
             Some(Sheet::Talk(t)) => finish(t),
             _ => sheet.set(None),
         }
     };
     let on_key = move |e: web_sys::KeyboardEvent| {
-        if matches!(e.key().as_str(), "e" | "E") && !e.repeat() && sheet.with_untracked(|s| matches!(s, Some(Sheet::Talk(_)))) {
+        if matches!(e.key().as_str(), "e" | "E")
+            && !e.repeat()
+            && sheet.with_untracked(|s| matches!(s, Some(Sheet::Talk(_))))
+        {
             e.prevent_default();
             advance();
         }
