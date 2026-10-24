@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [0.2.0](https://github.com/phmatray/sixfold/compare/v0.1.0...v0.2.0) (2026-10-24)
+
+
+### Added
+
+* **world:** explore a 3D overworld with an enterable duel hall, NPCs and running shoes ([#2](https://github.com/phmatray/sixfold/issues/2)) ([b7782af](https://github.com/phmatray/sixfold/commit/b7782afd0edc888b570aa906c03966218fb5c99d))
+
 ## [0.1.0](https://github.com/phmatray/sixfold/releases/tag/v0.1.0) (2026-10-24)
 
 ### Added
