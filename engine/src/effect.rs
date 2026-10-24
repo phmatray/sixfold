@@ -86,12 +86,13 @@ pub enum Effect {
     StageSkip,
 
     // ----- Cards -----
-    /// Draw up to N cards. Clamped to the deck, never a loss; refused on an
-    /// empty deck (R-TURN-02).
+    /// Draw up to N cards. Clamped to the deck, never a loss; playable on an
+    /// empty deck, where it draws nothing (R-TURN-02).
     Draw(u8),
     /// Discard the whole hand.
     DiscardHand,
-    /// Put a matching card from the deck into the hand, then shuffle (R-ZONE-03/04).
+    /// Put a matching card from the deck into the hand, then shuffle
+    /// (R-ZONE-03/04). Refused on an empty deck (R-TURN-02).
     Search(Find),
     /// Put a matching card from the discard pile into the hand (R-ZONE-05).
     Recover(Find),

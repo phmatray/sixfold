@@ -389,7 +389,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 - An effect that needs a decision prompts `Choose` before anything is paid.
 - Some effects have checks that run before anything happens. When a check fails, the card, attack or Power can't be used, and the action is missing from `legal_actions()`:
   - **Always checked:**
-    - `Draw` and `Search` need a non-empty deck.
+    - `Search` needs a non-empty deck. `Draw` does not: on an empty deck it draws nothing.
     - `Recover` needs a match in the discard pile.
     - `StageSkip` needs a target, and no evolution lock.
     - A `DiscardEnergy` cost needs enough matching energy.

@@ -138,20 +138,27 @@ unit test that should cover it.
 
 ### R-TURN-02: Deck-out happens only at the turn draw
 - **Rule.** If the deck is empty at the turn draw, the turn player loses immediately, before taking
-  any action. Draws caused by effects are capped at the cards left in the deck. An effect that needs
-  deck cards is refused when the deck is empty. Running out because of an effect is **not** a loss.
-  Only the turn player's own deck at their own draw is checked.
+  any action. Draws caused by effects are capped at the cards left in the deck. Search effects (the
+  callers of `0B:42E0`) are refused on an empty deck. Plain draw effects can still be played and draw
+  nothing (`01:4939` clamps, `01:4973` message); a discard-hand-then-draw trainer still discards the
+  hand. Running out because of an effect is **not** a loss. Only the turn player's own deck at their
+  own draw is checked.
 - **Parameters.** A draw fails when cards drawn `[BA] ≥ 60`. The result becomes `cc07 = 2`
   (turn player loses).
-- **Status.** CONFIRMED
+- **Status.** CORRECTED. The empty-deck refusal covers search effects only, not plain draws.
 - **Evidence.**
   - `01:4241-424B`: `call 1034; jr nc; ld a,2; ld (cc07),a; ret`.
   - `00:1034`: `cp $3C → scf`.
   - `01:4945-4973`: the draw-N screen clamps N.
   - `0B:6B46`, `0B:73B9`: effect draw loops stop on carry and set no result.
-  - `0B:42E0`: an effect precondition fails on an empty deck.
+  - `0B:42E0` (CheckDeckNotEmpty): the empty-deck precondition. Its only 6 callers (`0B:484A`, `49DB`,
+    `4C40`, `4F5D`, `6100`, `6877`) are search-type effects. The draw-2 trainer (list `06:4FAC`), the
+    discard-hand-draw-7 trainer (`06:4F0F`) and the draw-1 attack (`06:4DC7`) have no phase-1 entry.
+  - Runtime: with `C2BA = $3C`, both draw trainers were played: `01:4973` was hit, the card (and for
+    the draw-7 trainer the whole hand) went to the discard, 0 cards were drawn, `cc07` stayed 0.
   - `cc07` is written only at `4092`, `4248`, `6F79` and `7158`.
-- **Test.** `empty_deck_at_turn_draw_loses`, `effect_draw_clamped_to_remaining_deck_no_loss`
+- **Test.** `empty_deck_at_turn_draw_loses`, `effect_draw_clamped_to_remaining_deck_no_loss`,
+  `search_refused_on_empty_deck`
 
 ### R-TURN-03: Turn sequence
 - **Rule.** Each turn runs in this order:
@@ -1288,7 +1295,7 @@ notes give the decision order and the weightings to copy where helpful.
 5. Prizes: N prize cards from the top of the deck, set after placement. N is configurable from 1 to 6 (default 6). Sudden death uses 1.
 6. First player: one coin after prizes. Heads means the flipper goes first. No choice is offered.
 7. Every turn starts with a draw of 1, including turn 0. An empty deck at that draw means the turn player loses immediately.
-8. Effect draws are capped at the cards left in the deck. Effects that need deck cards fail on an empty deck. Neither case is ever a loss.
+8. Effect draws are capped at the cards left in the deck. Search effects (`0B:42E0` callers) are refused on an empty deck. Plain draw effects can still be played and draw nothing (`01:4939` clamps, `01:4973` message). Neither case is ever a loss.
 9. Turn start: clear own-turn substatus. If the turn counter ≥ 2, mark all of the turn player's in-play creatures as settled and clear their Power-used flags. Reset energy-attached, retreat-failed and accuracy-cache. Then draw.
 10. Main phase: any number of actions in any order (bench, evolve, attach, trainer, Power, retreat). Only an attack or Done ends the turn.
 11. Done ends the turn without a prompt and clears the opponent's last-attack and disabled-attack memory.

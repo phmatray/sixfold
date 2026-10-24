@@ -162,7 +162,8 @@ mod tests {
         assert_eq!(g.apply(Action::Done), Err(RuleError::GameOver));
     }
 
-    /// R-TURN-02: effect draws stop at the deck size and never lose.
+    /// R-TURN-02: effect draws stop at the deck size and never lose. A plain
+    /// draw can still be played on an empty deck and draws nothing (01:4939).
     #[test]
     fn effect_draw_clamped_to_remaining_deck_no_loss() {
         let mut g = main_phase(0);
@@ -171,8 +172,25 @@ mod tests {
         ok(&mut g, Action::PlayTrainer(0));
         assert_eq!(g.players[0].hand, vec![FIELD_NOTES, FIRE_E]);
         assert_eq!(g.winner(), None);
+        ok(&mut g, Action::PlayTrainer(0));
+        assert_eq!(g.players[0].hand, vec![FIRE_E]);
+        assert_eq!(g.players[0].discard, vec![FIELD_NOTES, FIELD_NOTES]);
+        assert_eq!(g.winner(), None);
+        // The discard-hand trainer still discards the hand.
+        set_hand(&mut g, 0, &[FRESH_START, GRASS_E]);
+        ok(&mut g, Action::PlayTrainer(0));
+        assert!(g.players[0].hand.is_empty());
+        assert_eq!(g.winner(), None);
+    }
+
+    /// R-TURN-02: a search effect is refused on an empty deck (0B:42E0).
+    #[test]
+    fn search_refused_on_empty_deck() {
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[SCOUT_MAP]);
+        g.players[0].deck.clear();
         assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::DeckEmpty);
-        assert_eq!(g.players[0].hand.len(), 2);
+        assert_eq!(g.players[0].hand, vec![SCOUT_MAP]);
     }
 
     /// R-TURN-03

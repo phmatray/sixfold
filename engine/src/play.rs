@@ -191,7 +191,9 @@ impl Game {
         let attack = source == Source::Attack;
         let need = |ok: bool| if ok { Ok(()) } else { Err(RuleError::NoTarget) };
         match *effect {
-            Draw(_) | Search(_) if pl.deck.is_empty() => Err(RuleError::DeckEmpty),
+            // RULES: R-TURN-02 — only a search needs deck cards (0B:42E0); a plain
+            // draw can be played on an empty deck and draws nothing (01:4939).
+            Search(_) if pl.deck.is_empty() => Err(RuleError::DeckEmpty),
             Recover(find) => need(pl.discard.iter().any(|&c| matches(find, c))),
             // RULES: R-EFFECT-04 — "requiring some damage" is a precondition for
             // trainers and Powers; an attack's heal just does nothing.
