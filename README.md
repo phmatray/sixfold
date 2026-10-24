@@ -2,7 +2,7 @@
 
 A clean-room creature card duel with the old handheld rules, written in **Rust**,
 compiled to **WebAssembly** and played in the browser (Leptos, client-side only).
-You play one of two original prebuilt decks against an AI opponent.
+Collect cards from booster packs, build your own decks and duel an AI opponent.
 
 **Play it:** https://phmatray.github.io/sixfold/
 
@@ -12,7 +12,7 @@ Playable from start to finish:
 
 - **Rules engine** (`engine/`): the whole duel, from setup and mulligans through
   attacks, conditions, Powers, trainers, knock-outs, prizes and sudden death.
-  Pure Rust, no browser needed; 223 unit tests.
+  Pure Rust, no browser needed; 273 unit tests.
 - **Card set**: 34 original cards and two 60-card decks, Ember Rush
   (Fire / Fighting aggro) and Tide Mind (Water / Psychic control). In
   AI-against-AI play, Ember Rush wins about 45% of games and Tide Mind about 55%. A test
@@ -22,8 +22,13 @@ Playable from start to finish:
 - **Web app** (`web/`): deck select, the table, animated coins, damage and
   knock-outs, a battle log, a card inspector, and the game-over screen with a
   rematch. Works on desktop and on phones, in portrait and landscape.
+- **Collection and deck building**: a binder of every card, booster packs
+  (Ember, Tide, Wild) revealed card by card, saved decks you create, copy,
+  rename and edit, and a Wild Pack for every duel you win. New players start
+  with both prebuilt decks and three packs. Progress is kept in the browser
+  (localStorage) and can be reset from Settings.
 
-Not done yet: deck building, a second human player, sound.
+Not done yet: a second human player, sound.
 
 ## How to play
 

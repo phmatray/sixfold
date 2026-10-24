@@ -1,7 +1,9 @@
 //! Card faces, card backs, energy pips and the full-text card details.
 
 use leptos::prelude::*;
-use sixfold_engine::{card, Attack, CardDef, CardId, CardKind, Color, Effect, EnergyCard, Stage};
+use sixfold_engine::{
+    card, Attack, CardDef, CardId, CardKind, Color, Effect, EnergyCard, Rarity, Stage,
+};
 
 use crate::art::{card_art, card_color, color_key, glyph_svg};
 
@@ -12,6 +14,39 @@ pub fn kind_label(def: &CardDef) -> String {
         CardKind::Energy(EnergyCard::Basic(_)) => "Basic energy".into(),
         CardKind::Energy(EnergyCard::DoubleColorless) => "Special energy".into(),
         CardKind::Trainer(_) => "Trainer".into(),
+    }
+}
+
+/// The basic energy colours a deck runs, most-used first.
+pub fn deck_colors(cards: &[CardId]) -> Vec<Color> {
+    let mut counts: Vec<(Color, usize)> = vec![];
+    for &id in cards {
+        if let CardKind::Energy(EnergyCard::Basic(c)) = card(id).kind {
+            match counts.iter_mut().find(|(k, _)| *k == c) {
+                Some((_, n)) => *n += 1,
+                None => counts.push((c, 1)),
+            }
+        }
+    }
+    counts.sort_by_key(|c| std::cmp::Reverse(c.1));
+    counts.into_iter().map(|(c, _)| c).collect()
+}
+
+/// A deck's showpiece: its highest-HP creature.
+pub fn deck_star(cards: &[CardId]) -> Option<CardId> {
+    cards
+        .iter()
+        .copied()
+        .filter(|&id| matches!(card(id).kind, CardKind::Creature(_)))
+        .max_by_key(|&id| card(id).creature().map_or(0, |c| c.hp))
+}
+
+pub fn rarity_label(r: Rarity) -> &'static str {
+    match r {
+        Rarity::Energy => "Basic energy",
+        Rarity::Common => "Common",
+        Rarity::Uncommon => "Uncommon",
+        Rarity::Rare => "Rare",
     }
 }
 
