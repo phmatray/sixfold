@@ -41,9 +41,21 @@ pub enum Stage {
     Stage2,
 }
 
+/// How often a card turns up in boosters (see [`crate::booster`]). Basic
+/// energy has its own tier: it is never rare and a collection owns it without
+/// limit.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum Rarity {
+    Energy,
+    Common,
+    Uncommon,
+    Rare,
+}
+
 #[derive(Debug)]
 pub struct CardDef {
     pub name: &'static str,
+    pub rarity: Rarity,
     pub kind: CardKind,
 }
 
@@ -158,6 +170,11 @@ impl CardDef {
         matches!(&self.kind, CardKind::Creature(c) if c.stage == Stage::Basic)
     }
 
+    /// A basic energy card: unlimited in decks (R-DECK-03) and collections.
+    pub fn is_basic_energy(&self) -> bool {
+        matches!(self.kind, CardKind::Energy(EnergyCard::Basic(_)))
+    }
+
     /// May be put into play as a Basic: a Basic or a Trainer-as-Basic (R-SETUP-04).
     pub fn plays_as_basic(&self) -> bool {
         self.is_basic() || matches!(self.kind, CardKind::TrainerBasic(_))
@@ -194,13 +211,19 @@ pub fn card_id(name: &str) -> Option<CardId> {
 /// Integrity check for a card set, meant for a unit test next to the set:
 /// unique names; every evolution names a creature of the stage below in the
 /// same set; HP and damage in tens; no colorless basic energy, weakness or
-/// resistance; the attach and stage-skip effects only on trainers. Returns
+/// resistance; the attach and stage-skip effects only on trainers; rarity
+/// `Energy` on exactly the basic energy cards. Returns
 /// the first problem found.
 pub fn validate_cards(cards: &[CardDef]) -> Result<(), String> {
     for (i, c) in cards.iter().enumerate() {
         let what = format!("{} (CardId({i}))", c.name);
         if cards[..i].iter().any(|d| d.name == c.name) {
             return Err(format!("{what}: duplicate name"));
+        }
+        if c.is_basic_energy() != (c.rarity == Rarity::Energy) {
+            return Err(format!(
+                "{what}: rarity Energy is for basic energy only, and basic energy has it"
+            ));
         }
         let effects: Vec<&[Effect]> = match &c.kind {
             CardKind::Energy(EnergyCard::Basic(Color::Colorless)) => {
@@ -328,6 +351,7 @@ mod tests {
         assert_eq!(card_id("Mossling"), Some(MOSSLING));
         static BROKEN: [CardDef; 1] = [CardDef {
             name: "Lonely",
+            rarity: Rarity::Common,
             kind: CardKind::Creature(Creature {
                 stage: Stage::Stage1,
                 evolves_from: Some("Nobody"),
@@ -342,6 +366,28 @@ mod tests {
         }];
         let err = validate_cards(&BROKEN).unwrap_err();
         assert!(err.contains("Nobody"), "{err}");
+    }
+
+    /// Basic energy, and only basic energy, has rarity `Energy`.
+    #[test]
+    fn validate_cards_checks_energy_rarity() {
+        static COMMON_FIRE: [CardDef; 1] = [CardDef {
+            name: "Fire",
+            rarity: Rarity::Common,
+            kind: CardKind::Energy(EnergyCard::Basic(Fire)),
+        }];
+        static ENERGY_TRAINER: [CardDef; 1] = [CardDef {
+            name: "Tool",
+            rarity: Rarity::Energy,
+            kind: CardKind::Trainer(Trainer {
+                text: "",
+                effects: &[Effect::Draw(1)],
+            }),
+        }];
+        assert!(validate_cards(&COMMON_FIRE).unwrap_err().contains("rarity"));
+        assert!(validate_cards(&ENERGY_TRAINER)
+            .unwrap_err()
+            .contains("rarity"));
     }
 
     /// R-ENERGY-03

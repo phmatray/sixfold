@@ -2,7 +2,7 @@
 //! battle log, discard viewer and the game-over screen.
 
 use leptos::prelude::*;
-use pkmntcg_engine::{card, Color, Event};
+use sixfold_engine::{card, Color, Event};
 
 use crate::art::glyph_svg;
 use crate::board::{find_mon, slot_name, status_class};
@@ -212,6 +212,20 @@ pub fn GameOver() -> impl IntoView {
             Some((w, v.sudden_death, left, why))
         })
     });
+    // The reward is granted once per match, when its result first shows.
+    let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
+    let reward = RwSignal::new(None::<usize>);
+    Effect::new(move |_| {
+        if let Some((winner, ..)) = result.get() {
+            if ctl.take_result() {
+                reward.set(
+                    profile
+                        .try_update(|p| p.record_duel(winner == HUMAN))
+                        .flatten(),
+                );
+            }
+        }
+    });
     let rematch = move |_| {
         if let Some(setup) = ctl.setup.get_value() {
             ctl.start(setup, crate::new_seed());
@@ -229,9 +243,23 @@ pub fn GameOver() -> impl IntoView {
                         {format!("Prizes left: you {}, opponent {}.", left[HUMAN], left[1 - HUMAN])}
                         {sudden.then_some(" Decided in sudden death.")}
                     </p>
+                    {move || reward.get().map(|b| {
+                        let packs = profile.with(|p| p.wallet.total());
+                        view! {
+                        <div class="reward" role="status">
+                            <span class="pack mini p-wild" aria-hidden="true">
+                                <span class="pack-crimp"></span><span class="pack-crimp bottom"></span>
+                            </span>
+                            <p><b>{format!("+1 {}", sixfold_engine::booster::BOOSTERS[b].name)}</b>
+                                <span>{format!("You have {packs} to open.", packs = if packs == 1 { "1 pack".to_string() } else { format!("{packs} packs") })}</span></p>
+                        </div>
+                    }})}
                     <div class="dialog-foot">
+                        {won.then(|| view! {
+                            <button class="btn" on:click=move |_| { ctl.stop(); screen.set(Screen::Packs) }>"Open packs"</button>
+                        })}
                         <button class="btn primary" on:click=rematch autofocus>"Rematch"</button>
-                        <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(Screen::Title) }>"Change decks"</button>
+                        <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(Screen::Duel) }>"Change decks"</button>
                     </div>
                 </div>
             </div>

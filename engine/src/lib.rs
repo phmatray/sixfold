@@ -8,6 +8,7 @@
 
 mod action;
 mod card;
+mod collection;
 mod condition;
 mod damage;
 mod deck;
@@ -26,8 +27,10 @@ mod turn;
 mod view;
 
 pub mod ai;
+pub mod booster;
 pub mod decks;
 pub mod overworld;
+pub mod profile;
 pub mod set;
 
 #[cfg(test)]
@@ -38,11 +41,14 @@ mod testkit;
 pub use action::{Action, Event, Prompt, PromptKind, RuleError};
 pub use card::{
     can_pay, card, card_id, energy_units, total_units, try_card, validate_cards, Attack, CardDef,
-    CardId, CardKind, Color, Creature, EnergyCard, Power, PowerKind, Stage, Trainer, Units,
+    CardId, CardKind, Color, Creature, EnergyCard, Power, PowerKind, Rarity, Stage, Trainer, Units,
 };
+pub use collection::{starter_collection, Collection, LoadError};
 pub use condition::{ActiveEffects, Condition, Placed, Poison, Shield, Special, Status};
 pub use damage::Hit;
-pub use deck::{validate_deck, DeckError, DECK_SIZE, MAX_COPIES};
+pub use deck::{
+    validate_deck, AddError, DeckError, DeckList, DeckListError, SortBy, DECK_SIZE, MAX_COPIES,
+};
 pub use effect::{Choice, Effect, Find};
 pub use game::{Config, Game, SetupError, MAX_BENCH};
 pub use player::InPlay;

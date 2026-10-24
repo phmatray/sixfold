@@ -9,8 +9,8 @@
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         { "type": "toml", "path": "Cargo.toml", "jsonpath": "$.workspace.package.version" },
-        { "type": "toml", "path": "Cargo.lock", "jsonpath": "$.package[?(@.name.value == 'pkmntcg-engine')].version" },
-        { "type": "toml", "path": "Cargo.lock", "jsonpath": "$.package[?(@.name.value == 'pkmntcg-web')].version" }
+        { "type": "toml", "path": "Cargo.lock", "jsonpath": "$.package[?(@.name.value == 'sixfold-engine')].version" },
+        { "type": "toml", "path": "Cargo.lock", "jsonpath": "$.package[?(@.name.value == 'sixfold-web')].version" }
       ],
       "changelog-sections": [
         { "type": "feat", "section": "Added" },

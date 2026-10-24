@@ -1,103 +1,89 @@
-//! Title screen: pick your deck and the AI's, see the seed, start.
+//! Title screen: the hero and the main menu, plus a small settings menu.
 
 use leptos::prelude::*;
-use pkmntcg_engine::ai::Difficulty;
-use pkmntcg_engine::decks::{Prebuilt, PREBUILT};
-use pkmntcg_engine::{card, CardId, CardKind, Color, EnergyCard};
+use sixfold_engine::decks::PREBUILT;
+use sixfold_engine::profile::Profile;
+use sixfold_engine::{card, CardId};
 
-use crate::cards::{CardFace, Pip};
-use crate::ctl::{Ctl, Setup};
+use crate::binder::progress;
+use crate::cards::{deck_star, CardFace};
+use crate::store::{self, Notice};
 use crate::Screen;
 
-/// The decks on offer. Swap this one line to change the menu.
-fn decks() -> &'static [&'static Prebuilt] {
-    &PREBUILT
-}
-
-/// The basic energy colours a deck runs, most-used first.
-fn deck_colors(cards: &[CardId]) -> Vec<Color> {
-    let mut counts: Vec<(Color, usize)> = vec![];
-    for &id in cards {
-        if let CardKind::Energy(EnergyCard::Basic(c)) = card(id).kind {
-            match counts.iter_mut().find(|(k, _)| *k == c) {
-                Some((_, n)) => *n += 1,
-                None => counts.push((c, 1)),
-            }
-        }
+#[component]
+fn MenuItem(
+    label: &'static str,
+    #[prop(into)] sub: Signal<String>,
+    to: Screen,
+    #[prop(optional)] primary: bool,
+    #[prop(optional, into)] badge: Option<Signal<u32>>,
+) -> impl IntoView {
+    let screen = expect_context::<RwSignal<Screen>>();
+    view! {
+        <li>
+            <button type="button" class="menu-item" class:primary=primary on:click=move |_| screen.set(to)>
+                <span class="menu-label">{label}</span>
+                <span class="menu-sub">{move || sub.get()}</span>
+                {badge.map(|b| view! {
+                    <span class="count-badge" class:zero=move || b.get() == 0 aria-hidden="true">{move || b.get()}</span>
+                })}
+                <svg class="menu-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+            </button>
+        </li>
     }
-    counts.sort_by_key(|c| std::cmp::Reverse(c.1));
-    counts.into_iter().map(|(c, _)| c).collect()
-}
-
-/// The deck's showpiece: its highest-HP creature.
-fn deck_star(cards: &[CardId]) -> Option<CardId> {
-    cards
-        .iter()
-        .copied()
-        .filter(|&id| matches!(card(id).kind, CardKind::Creature(_)))
-        .max_by_key(|&id| card(id).creature().map_or(0, |c| c.hp))
-}
-
-/// A duel between two of the offered decks.
-fn setup_for(mine: usize, theirs: usize, prizes: u8, difficulty: Difficulty) -> Setup {
-    let (a, b) = (decks()[mine], decks()[theirs]);
-    Setup {
-        decks: [a.cards(), b.cards()],
-        names: [a.name.to_string(), b.name.to_string()],
-        prizes,
-        difficulty,
-    }
-}
-
-/// The duel the title screen starts with untouched settings.
-pub fn default_setup() -> Option<Setup> {
-    let n = decks().len();
-    (n > 0).then(|| setup_for(0, 1 % n, 6, Difficulty::Normal))
 }
 
 #[component]
-fn DeckPicker(legend: &'static str, name: &'static str, choice: RwSignal<usize>) -> impl IntoView {
+fn Settings() -> impl IntoView {
+    let profile = expect_context::<RwSignal<Profile>>();
+    let confirm = RwSignal::new(false);
+    let done = RwSignal::new(false);
+    let reset = move |_| {
+        store::reset();
+        profile.set(Profile::new_player());
+        confirm.set(false);
+        done.set(true);
+    };
     view! {
-        <fieldset class="deck-picker">
-            <legend>{legend}</legend>
-            {decks().iter().enumerate().map(|(i, d)| {
-                let cards = d.cards();
-                let colors = deck_colors(&cards);
-                let creatures = cards.iter().filter(|&&id| card(id).creature().is_some()).count();
-                let id = format!("{name}-{i}");
-                let for_id = id.clone();
-                view! {
-                    <label class="deck-tile" class:chosen=move || choice.get() == i for=for_id>
-                        <input type="radio" id=id name=name aria-label=d.name prop:checked=move || choice.get() == i on:change=move |_| choice.set(i) />
-                        {deck_star(&cards).map(|s| view! { <span class="deck-star" aria-hidden="true"><CardFace id=s /></span> })}
-                        <span class="deck-info">
-                            <span class="deck-name">{d.name}</span>
-                            <span class="deck-colors">{colors.into_iter().map(|c| view! { <Pip color=c /> }).collect_view()}</span>
-                            <span class="deck-desc">{d.description}</span>
-                            <span class="deck-count">{format!("{} cards, {creatures} creatures", cards.len())}</span>
-                        </span>
-                    </label>
-                }
-            }).collect_view()}
-        </fieldset>
+        <details class="settings" on:toggle=move |_| { confirm.set(false); done.set(false) }>
+            <summary class="btn ghost">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg>
+                "Settings"
+            </summary>
+            <div class="settings-body">
+                {move || if confirm.get() {
+                    view! {
+                        <div class="confirm" role="group" aria-labelledby="reset-q">
+                            <p id="reset-q">"Delete your cards, decks, packs and world progress, and start again as a new player?"</p>
+                            <div class="row">
+                                <button type="button" class="btn danger" on:click=reset>"Reset progress"</button>
+                                <button type="button" class="btn ghost" on:click=move |_| confirm.set(false) autofocus>"Keep my progress"</button>
+                            </div>
+                        </div>
+                    }.into_any()
+                } else {
+                    view! {
+                        <div class="row">
+                            <button type="button" class="btn" on:click=move |_| confirm.set(true)>"Reset progress…"</button>
+                            {move || done.get().then(|| view! { <span class="note" role="status">"Progress reset. You start with 3 packs."</span> })}
+                        </div>
+                    }.into_any()
+                }}
+            </div>
+        </details>
     }
 }
 
 #[component]
 pub fn TitleScreen() -> impl IntoView {
-    let ctl = expect_context::<Ctl>();
-    let screen = expect_context::<RwSignal<Screen>>();
-    let mine = RwSignal::new(0usize);
-    let theirs = RwSignal::new(if decks().len() > 1 { 1 } else { 0 });
-    let seed = RwSignal::new(crate::new_seed());
-    let prizes = RwSignal::new(6u8);
-    let normal = RwSignal::new(true);
-    // Three cards fanned in the hero, taken from the first deck.
-    let hero: Vec<CardId> = decks()
+    let profile = expect_context::<RwSignal<Profile>>();
+    let notice = expect_context::<Notice>().0;
+    // Three cards fanned in the hero: each prebuilt's star, then a Basic.
+    let hero: Vec<CardId> = PREBUILT
         .iter()
         .filter_map(|d| deck_star(&d.cards()))
         .chain(
-            decks()
+            PREBUILT
                 .first()
                 .map(|d| d.cards())
                 .unwrap_or_default()
@@ -107,16 +93,24 @@ pub fn TitleScreen() -> impl IntoView {
         )
         .take(3)
         .collect();
-    let start = move |_| {
-        let difficulty = if normal.get() {
-            Difficulty::Normal
-        } else {
-            Difficulty::Easy
-        };
-        let setup = setup_for(mine.get(), theirs.get(), prizes.get(), difficulty);
-        if ctl.start(setup, seed.get()) {
-            screen.set(Screen::Match);
-        }
+    let packs = Signal::derive(move || profile.with(|p| p.wallet.total()));
+    let decks = move || {
+        profile.with(|p| match p.decks.len() {
+            0 => "Build your first deck".to_string(),
+            1 => "1 deck".to_string(),
+            n => format!("{n} decks"),
+        })
+    };
+    let found = move || {
+        profile.with(|p| {
+            let (have, all) = progress(&p.collection);
+            format!("{have} of {all} cards found")
+        })
+    };
+    let pack_sub = move || match packs.get() {
+        0 => "Win a duel to earn one".to_string(),
+        1 => "1 pack to open".to_string(),
+        n => format!("{n} packs to open"),
     };
     view! {
         <main class="title">
@@ -129,46 +123,26 @@ pub fn TitleScreen() -> impl IntoView {
                 <div class="hero-text">
                     <h1 class="wordmark">"Sixfold"</h1>
                     <p class="tagline">"A creature card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand."</p>
+                    {move || notice.get().map(|n| view! {
+                        <p class="error" role="alert">{n} " "
+                            <button type="button" class="btn ghost" on:click=move |_| notice.set(None)>"Dismiss"</button>
+                        </p>
+                    })}
+                    <nav aria-label="Main menu">
+                        <ul class="menu">
+                            <MenuItem label="Play a duel" sub="Your deck against the AI" to=Screen::Duel primary=true />
+                            <MenuItem label="Open packs" sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
+                            <MenuItem label="My decks" sub=Signal::derive(decks) to=Screen::Decks />
+                            <MenuItem label="Collection" sub=Signal::derive(found) to=Screen::Collection />
+                            <MenuItem label="Explore the world" sub="Walk the meadow, visit the duel hall" to=Screen::World />
+                        </ul>
+                    </nav>
                 </div>
             </section>
-            {if decks().is_empty() {
-                view! { <p class="empty-note">"No decks are available yet."</p> }.into_any()
-            } else {
-                view! {
-                    <form class="setup" on:submit=move |e| { e.prevent_default(); start(()) }>
-                        <div class="pickers">
-                            <DeckPicker legend="Your deck" name="mine" choice=mine />
-                            <DeckPicker legend="The AI plays" name="theirs" choice=theirs />
-                        </div>
-                        <div class="options">
-                            <label class="field">
-                                <span>"Seed"</span>
-                                <input type="number" name="seed" min="0" inputmode="numeric"
-                                    prop:value=move || seed.get().to_string()
-                                    on:input=move |e| { if let Ok(n) = event_target_value(&e).parse() { seed.set(n) } } />
-                            </label>
-                            <button type="button" class="btn ghost" on:click=move |_| seed.set(crate::new_seed())>"New seed"</button>
-                            <label class="field">
-                                <span>"Prizes"</span>
-                                <select name="prizes" on:change=move |e| { if let Ok(n) = event_target_value(&e).parse() { prizes.set(n) } }>
-                                    {(1..=6u8).rev().map(|n| view! { <option value=n.to_string() selected=n == 6>{n}</option> }).collect_view()}
-                                </select>
-                            </label>
-                            <label class="field">
-                                <span>"AI"</span>
-                                <select name="difficulty" on:change=move |e| normal.set(event_target_value(&e) == "normal")>
-                                    <option value="normal" selected>"Normal"</option>
-                                    <option value="easy">"Easy: sometimes skips a play"</option>
-                                </select>
-                            </label>
-                            <button type="submit" class="btn primary start">"Start the duel"</button>
-                        </div>
-                        {move || ctl.error.get().map(|e| view! { <p class="error" role="alert">{e}</p> })}
-                    </form>
-                }.into_any()
-            }}
-            <button type="button" class="btn ghost world-link" on:click=move |_| screen.set(Screen::World)>"Explore the world"</button>
-            <footer class="foot">"Original cards and art. The rules follow a classic handheld version of the game."</footer>
+            <footer class="foot">
+                <span>"Original cards and art. The rules follow a classic handheld version of the game."</span>
+                <Settings />
+            </footer>
         </main>
     }
 }

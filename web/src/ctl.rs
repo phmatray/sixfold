@@ -11,8 +11,8 @@ use std::collections::{HashMap, VecDeque};
 use std::time::Duration;
 
 use leptos::prelude::*;
-use pkmntcg_engine::ai::{Ai, Difficulty};
-use pkmntcg_engine::{card, Action, CardId, Config, Event, Game, PromptKind, Status};
+use sixfold_engine::ai::{Ai, Difficulty};
+use sixfold_engine::{card, Action, CardId, Config, Event, Game, PromptKind, Status};
 
 pub const HUMAN: usize = 0;
 pub const AI: usize = 1;
@@ -94,6 +94,8 @@ pub struct Ctl {
     /// Bumped on every new match so stale timers from the last one stop.
     generation: StoredValue<u32>,
     counter: StoredValue<u32>,
+    /// The finished match's result hasn't been rewarded yet.
+    unrewarded: StoredValue<bool>,
     reduced_motion: bool,
 }
 
@@ -119,6 +121,7 @@ impl Ctl {
             coin_reason: StoredValue::new(String::new()),
             generation: StoredValue::new(0),
             counter: StoredValue::new(0),
+            unrewarded: StoredValue::new(false),
             reduced_motion,
         }
     }
@@ -145,6 +148,7 @@ impl Ctl {
             }
         };
         self.generation.update_value(|g| *g += 1);
+        self.unrewarded.set_value(true);
         self.error.set(None);
         self.seed.set(seed);
         // Its own seed, so the AI's random choices don't mirror the game's coins.
@@ -161,6 +165,13 @@ impl Ctl {
         self.queue.set_value(events.into());
         self.step(self.generation.get_value());
         true
+    }
+
+    /// True once per match: whoever shows its result grants the reward.
+    pub fn take_result(&self) -> bool {
+        let first = self.unrewarded.get_value();
+        self.unrewarded.set_value(false);
+        first
     }
 
     /// Leave the match (title screen): stops every pending timer.

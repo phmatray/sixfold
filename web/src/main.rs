@@ -1,16 +1,21 @@
-//! Sixfold: a single-player duel against the AI, rendering `pkmntcg_engine`.
+//! Sixfold: a single-player duel against the AI, rendering `sixfold_engine`.
 
 mod art;
+mod binder;
 mod board;
 mod cards;
 mod controls;
 mod ctl;
+mod decks;
+mod duel;
 mod overlays;
+mod packs;
+mod store;
 mod title;
 mod world;
 
 use leptos::prelude::*;
-use pkmntcg_engine::{Action, CardId};
+use sixfold_engine::{Action, CardId};
 
 use board::{Hand, SideRow};
 use controls::{ActionBar, PromptModal};
@@ -25,8 +30,15 @@ fn main() {
 #[derive(Clone, Copy, PartialEq)]
 pub enum Screen {
     Title,
+    /// Duel setup: pick your deck and the AI's.
+    Duel,
     Match,
     World,
+    Collection,
+    Packs,
+    Decks,
+    /// The deck editor, on the profile's deck at this index.
+    Editor(usize),
 }
 
 /// A card to show in the inspector; `at` = (player, uid) when it is in play.
@@ -88,10 +100,23 @@ fn App() -> impl IntoView {
     provide_context(ui);
     provide_context(screen);
     provide_context(Legal(legal));
+    store::provide();
+    // Each screen starts at the top with nothing selected in the inspector.
+    Effect::new(move |_| {
+        screen.track();
+        ui.inspect.set(None);
+        ui.sheet.set(false);
+        window().scroll_to_with_x_and_y(0.0, 0.0);
+    });
     move || match screen.get() {
         Screen::Title => view! { <title::TitleScreen /> }.into_any(),
+        Screen::Duel => view! { <duel::DuelSetup /> }.into_any(),
         Screen::Match => view! { <MatchScreen /> }.into_any(),
         Screen::World => view! { <world::WorldScreen /> }.into_any(),
+        Screen::Collection => view! { <binder::CollectionScreen /> }.into_any(),
+        Screen::Packs => view! { <packs::PacksScreen /> }.into_any(),
+        Screen::Decks => view! { <decks::DecksScreen /> }.into_any(),
+        Screen::Editor(i) => view! { <decks::Editor index=i /> }.into_any(),
     }
 }
 

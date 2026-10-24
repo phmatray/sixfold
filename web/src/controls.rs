@@ -3,7 +3,7 @@
 
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
-use pkmntcg_engine::{
+use sixfold_engine::{
     card, energy_units, total_units, Action, CardId, Choice, Color, Effect as CardEffect, Game,
     PromptKind, RuleError,
 };

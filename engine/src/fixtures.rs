@@ -155,6 +155,7 @@ const fn basic(
 ) -> CardDef {
     CardDef {
         name,
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Basic,
             evolves_from: None,
@@ -172,6 +173,7 @@ const fn basic(
 const fn trainer(name: &'static str, effects: &'static [Effect]) -> CardDef {
     CardDef {
         name,
+        rarity: Rarity::Common,
         kind: CardKind::Trainer(Trainer { text: "", effects }),
     }
 }
@@ -199,6 +201,10 @@ const fn power(kind: PowerKind) -> Option<Power> {
 const fn energy(name: &'static str, kind: EnergyCard) -> CardDef {
     CardDef {
         name,
+        rarity: match kind {
+            EnergyCard::Basic(_) => Rarity::Energy,
+            EnergyCard::DoubleColorless => Rarity::Common,
+        },
         kind: CardKind::Energy(kind),
     }
 }
@@ -206,6 +212,7 @@ const fn energy(name: &'static str, kind: EnergyCard) -> CardDef {
 pub static CARDS: &[CardDef] = &[
     CardDef {
         name: "Mossling",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Basic,
             evolves_from: None,
@@ -220,6 +227,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Mossback",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Stage1,
             evolves_from: Some("Mossling"),
@@ -234,6 +242,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Mossgiant",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Stage2,
             evolves_from: Some("Mossback"),
@@ -248,6 +257,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Emberkit",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Basic,
             evolves_from: None,
@@ -262,6 +272,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Pebblet",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Basic,
             evolves_from: None,
@@ -276,6 +287,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Driftling",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Basic,
             evolves_from: None,
@@ -290,6 +302,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Sproutwing",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Basic,
             evolves_from: None,
@@ -304,6 +317,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Hushmoth",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Basic,
             evolves_from: None,
@@ -318,6 +332,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Stillstone",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Basic,
             evolves_from: None,
@@ -332,6 +347,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Straw Decoy",
+        rarity: Rarity::Common,
         kind: CardKind::TrainerBasic(Creature {
             stage: Stage::Basic,
             evolves_from: None,
@@ -346,6 +362,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Field Notes",
+        rarity: Rarity::Common,
         kind: CardKind::Trainer(Trainer {
             text: "Draw 2 cards.",
             effects: &[Effect::Draw(2)],
@@ -392,6 +409,7 @@ pub static CARDS: &[CardDef] = &[
     ),
     CardDef {
         name: "Greeter Elder",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Stage1,
             evolves_from: Some("Greeter"),
@@ -588,6 +606,7 @@ pub static CARDS: &[CardDef] = &[
     ),
     CardDef {
         name: "Rocklet",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Basic,
             evolves_from: None,
@@ -628,6 +647,7 @@ pub static CARDS: &[CardDef] = &[
     },
     CardDef {
         name: "Mothwing",
+        rarity: Rarity::Common,
         kind: CardKind::Creature(Creature {
             stage: Stage::Stage1,
             evolves_from: Some("Foglet"),

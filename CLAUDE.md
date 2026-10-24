@@ -22,10 +22,10 @@ cd web && trunk serve
 cd web && trunk build --release
 
 # Test the rules engine (host-native, fast)
-cargo test -p pkmntcg-engine
+cargo test -p sixfold-engine
 
 # Run a single engine test by name
-cargo test -p pkmntcg-engine draw_moves_card_from_deck_to_hand
+cargo test -p sixfold-engine draw_moves_card_from_deck_to_hand
 ```
 
 ## Architecture

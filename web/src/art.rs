@@ -3,7 +3,7 @@
 
 use std::fmt::Write;
 
-use pkmntcg_engine::{CardDef, CardKind, Color, Creature, EnergyCard, Stage};
+use sixfold_engine::{CardDef, CardKind, Color, Creature, EnergyCard, Stage};
 
 /// CSS class suffix for a colour (`t-fire` etc. in style.css).
 pub fn color_key(c: Color) -> &'static str {

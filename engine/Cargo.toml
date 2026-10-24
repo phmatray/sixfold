@@ -1,5 +1,5 @@
 [package]
-name = "pkmntcg-engine"
+name = "sixfold-engine"
 edition.workspace = true
 version.workspace = true
 license.workspace = true

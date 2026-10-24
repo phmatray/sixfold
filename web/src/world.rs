@@ -9,7 +9,7 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
-use pkmntcg_engine::overworld::{Applied, Progress};
+use sixfold_engine::overworld::{Applied, Progress};
 use wasm_bindgen::prelude::*;
 
 use crate::ctl::Ctl;
@@ -352,7 +352,7 @@ pub fn WorldScreen() -> impl IntoView {
     };
 
     let duel = move |_| {
-        if let Some(setup) = crate::title::default_setup() {
+        if let Some(setup) = crate::duel::default_setup() {
             if ctl.start(setup, crate::new_seed()) {
                 screen.set(Screen::Match);
             }
