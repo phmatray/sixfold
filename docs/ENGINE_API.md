@@ -609,6 +609,9 @@ p.wallet.save()                      // p1;<count>,... one per booster in BOOSTE
 Wallet::load(&s) -> Result<Wallet, LoadError>    // missing trailing counts are 0 (a 0.3 save has three)
 ```
 
+
+**Promos.** `set::PROMOS: [CardId; 7]` (ids 103–109, all Rare Basics) and `set::is_promo(id)`.
+`Booster::holds` refuses them, so they never come from a pack; the campaign hands them out.
 ---
 
 ## 11. Campaign (`campaign::*`) and world progress (`overworld::Progress`)
@@ -635,8 +638,11 @@ campaign::rival(id) -> Option<&'static Rival>
 campaign::seals(&progress) -> usize
 r.beaten(&progress) / r.open(&progress) -> bool
 r.prize_packs(&progress) -> (booster, count)  // what a win would give now
-campaign::record(r, won, &mut progress, &mut wallet) -> Reward
-pub struct Reward { pub won: bool, pub first: bool, pub seal: bool, pub packs: (usize, u32) }
+campaign::record(r, won, &mut progress, &mut profile) -> Reward  // packs to the wallet, promo to the collection
+pub struct Reward { pub won: bool, pub first: bool, pub seal: bool, pub packs: (usize, u32), pub promo: Option<CardId> }
+campaign::champion(&progress) -> bool            // the Warden is beaten
+r.promo() -> CardId                              // set::PROMOS[i] for RIVALS[i]
+campaign::backfill_promos(&progress, &mut profile) -> Vec<CardId>  // older saves: promos of rivals already beaten
 ```
 
 | # | Rival | Colours | Deck | AI | Prizes | Needs | First win |
@@ -649,6 +655,9 @@ pub struct Reward { pub won: bool, pub first: bool, pub seal: bool, pub packs: (
 | 6 | Lumen, Night Gardener | Psychic / Water | Moonlit Tide | Hard | 6 | 5 | seal + 2 Dream |
 | — | Sable, the Hex Warden | Water / Fighting | Sixfold Crown | Hard | 6 | 6 | 3 Wild |
 
+Every first win also adds that rival's promo card (Thistlewick, Brinemoth, Kilnfox, Squallkite,
+Slatebrow, Moonmoth; Hexcrest for the Warden) to the collection.
+
 A rematch win grants `REMATCH_PACKS` of the same booster; a loss grants nothing. `record` sets
 `beat_<id>` on a win and always remembers the result as the last duel. Against the starter deck
 (Normal AI, 60 seeded games, `rival_strength_against_the_starter`, `#[ignore]`d) the rivals win
@@ -659,10 +668,38 @@ lowercase ASCII letters, digits and `_`):
 
 | | Accepted | Notes |
 |---|---|---|
-| `p.apply(effect)` | `give:x` → `Applied::GotItem(x)` (first time), `flag:x`, `duel:<rival>` → `Applied::Duel(id)`, `pack:<booster>` → `Applied::Pack(index)` | Anything else is `Err`. `pack:` takes the booster's first name word (`ember`, `tide`, `wild`, `grove`, `storm`, `stone`, `dream`). The UI grants the pack and opens the duel offer. |
-| `p.check(cond)` | `item:x`, `flag:x`, `seals:n`, `beat:<rival>`, `open:<rival>`, `won:<rival>`, `lost:<rival>`, each negatable with `!`; empty holds | Malformed conditions and unknown rivals never hold, negated or not. |
+| `p.apply(effect)` | `give:x` → `Applied::GotItem(x)` (first time), `flag:x`, `duel:<rival>` → `Applied::Duel(id)`, `pack:<booster>` → `Applied::Pack(index)`, `show:<panel>` → `Applied::Show(panel)` (the UI knows `ladder`) | Anything else is `Err`. `pack:` takes the booster's first name word (`ember`, `tide`, `wild`, `grove`, `storm`, `stone`, `dream`). The UI grants the pack and opens the duel offer. |
+| `p.check(cond)` | `item:x`, `flag:x`, `seals:n`, `beat:<rival>`, `open:<rival>`, `won:<rival>`, `lost:<rival>`, each negatable with `!`; several joined with `&` must all hold; empty holds | Malformed conditions and unknown rivals never hold, negated or not. |
 | `p.last_duel() -> Option<(&str, bool)>` / `p.settle()` | | The last campaign duel (rival id, won), until `settle` (the UI settles when the player next talks to that rival). |
-| `p.encode()` / `Progress::decode(s)` | `i:<item>`, `f:<flag>`, `won:<id>` / `lost:<id>` | Sorted and stable; junk tokens are skipped. |
+| `p.encode()` / `Progress::decode(s)` | `i:<item>`, `f:<flag>`, `won:<id>` / `lost:<id>`, `g:<beaten>_<print>`, `d:<day>` | Sorted and stable; junk tokens are skipped, and a string without `g:` / `d:` reads as no Gauntlet run and no daily claim. |
+| `p.gauntlet() -> Option<(usize, u32)>` / `p.daily() -> Option<u32>` | | The Gauntlet run (rungs beaten, deck fingerprint) and the last day whose daily pack was claimed. Set only through `endgame::*`. |
+
+### Post-game (`endgame::*`)
+
+```rust
+// The Gauntlet: open to the champion, six rungs in campaign order.
+pub struct Rung { pub rival: &'static str, pub deck: Prebuilt, pub prizes: u8, pub difficulty: Difficulty }
+pub static GAUNTLET: [Rung; 6];           // each deck holds its rival's promo; Normal, Normal, then Hard
+pub const CLEAR_PACKS: u32 = 3;           // Wild Packs for clearing all six
+pub const CLEAR_FLAG: &str = "gauntlet_clear";
+endgame::fingerprint(&cards) -> u32       // order-independent: the run's deck can't change
+endgame::gauntlet_open(&p) -> bool
+endgame::start_run(&mut p, &deck) -> bool // false before the Warden falls
+endgame::next_rung(&p) -> Option<&'static Rung>
+endgame::run_deck(&p, &deck) -> bool      // the deck the run started with?
+endgame::record_rung(&mut p, &mut profile, won) -> Option<RungResult>  // a loss ends the run
+endgame::abandon(&mut p)
+pub struct RungResult { pub won: bool, pub packs: (usize, u32), pub beaten: usize, pub cleared: bool }
+
+// The daily duel: open to everyone; the UI turns the local date into a day number.
+pub struct Daily { pub rival: &'static Rival, pub seed: u64 }
+endgame::daily(day) -> Daily              // pure: the same day, the same rival deck and game seed
+endgame::daily_unclaimed(&p, day) -> bool
+endgame::record_daily(&mut p, &mut profile, day, won) -> Option<usize>  // the first win of the day: one pack of the rival's booster
+```
+
+A Gauntlet rung pays one pack of its rival's booster; clearing it sets `gauntlet_clear` and pays
+`CLEAR_PACKS` Wild Packs. The UI ends the run when a Gauntlet duel is quit before it ends.
 
 ---
 
@@ -682,7 +719,7 @@ Save 1
 
 - The header is `sixfold-save;<version>;<checksum>`: `save::VERSION = 1`, and the checksum is FNV-1a (8 lowercase hex digits) over every line after the header, joined with `\n`.
 - A section is `[name]` (lowercase ASCII letters, digits and `_`) followed by its lines. A content line that is empty or starts with `[` or `\` is written with a `\` in front.
-- Sections this build reads: `name`, `collection` (`Collection::save`), `decks` (one `DeckList::save` per line), `wallet` (`Wallet::save`), `progress` (`Progress::encode`), `world_at` (`map,x,z,facing`) and `campaign_deck`. Any other section (from a newer build) is kept and written back unchanged.
+- Sections this build reads: `name`, `collection` (`Collection::save`), `decks` (one `DeckList::save` per line), `wallet` (`Wallet::save`), `progress` (`Progress::encode`), `world_at` (`map,x,z,facing`) and `campaign_deck`. The 0.9 endgame state needs no new section: the champion, the Gauntlet run and the daily claim are in `progress`, and promos are collection entries (ids 103–109, which an older build drops and reports as unknown). Any other section (from a newer build) is kept and written back unchanged.
 
 ```rust
 let mut s = Save::new_player("Save 1");         // name + a new player's profile
