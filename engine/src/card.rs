@@ -181,12 +181,14 @@ pub(crate) fn find_named(name: &str) -> Option<&'static CardDef> {
 
 /// The id of the card with this name (for deck lists and tests).
 pub fn card_id(name: &str) -> Option<CardId> {
+    if let Some(i) = crate::set::CARDS.iter().position(|c| c.name == name) {
+        return Some(CardId(i as u16));
+    }
     #[cfg(test)]
     if let Some(i) = crate::fixtures::CARDS.iter().position(|c| c.name == name) {
         return Some(CardId(crate::fixtures::FIRST + i as u16));
     }
-    let i = crate::set::CARDS.iter().position(|c| c.name == name)?;
-    Some(CardId(i as u16))
+    None
 }
 
 /// Integrity check for a card set, meant for a unit test next to the set:
