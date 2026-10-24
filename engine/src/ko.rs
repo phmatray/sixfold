@@ -68,6 +68,14 @@ impl Game {
         // R-KO-06/07: the table result. An early win or loss skips the remaining
         // prize picks and replacements, as in the source.
         if decided {
+            // The prizes earned in this step still leave the prize area, with
+            // no pick (R-KO-07): the first ones still face down.
+            for q in [t, n] {
+                for _ in 0..take[q] {
+                    let i = self.players[q].prizes.iter().position(Option::is_some);
+                    self.take_prize(q, i.expect("capped at prizes left"), 1, ev);
+                }
+            }
             match mine.cmp(&theirs) {
                 std::cmp::Ordering::Greater => self.game_over(t, ev),
                 std::cmp::Ordering::Less => self.game_over(n, ev),
@@ -389,6 +397,21 @@ mod tests {
         ko(&mut g, 0, 0);
         resolve(&mut g);
         assert_eq!(g.winner(), Some(1));
+    }
+
+    /// R-KO-04 step 3, R-KO-07: the prizes earned in the deciding step still
+    /// count (T's last prize leaves the prize area, N's count is reduced
+    /// silently), so the final prize counts show how the duel was won.
+    #[test]
+    fn early_win_still_takes_the_last_prize() {
+        let mut g = main_phase(0);
+        g.players[0].prizes = vec![None, Some(FIRE_E), None];
+        g.players[1].bench = vec![creature(MOSSLING, &[])];
+        ko(&mut g, 1, 0);
+        resolve(&mut g);
+        assert_eq!(g.winner(), Some(0));
+        assert_eq!(g.players[0].prizes_left(), 0);
+        assert!(g.players[0].hand.contains(&FIRE_E));
     }
 
     /// R-TURN-08

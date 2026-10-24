@@ -539,7 +539,44 @@ impl Event {
                 format!("{} Active is no longer {status}", whose(*player))
             }
             Event::EffectApplied { player, effect } => {
-                format!("On {} side: {effect}", their(*player))
+                let p = *player;
+                let active = if p == viewer {
+                    "your Active"
+                } else {
+                    "the opponent's Active"
+                };
+                let next = |q: usize| format!("During {} next turn", their(q));
+                match *effect {
+                    Effect::Protect { shield, .. } => format!(
+                        "{}, {}",
+                        next(1 - p),
+                        shield.to_string().replace("this creature", active)
+                    ),
+                    Effect::Place { placed, .. } => format!(
+                        "{}, {}",
+                        next(p),
+                        placed.to_string().replace("the defending creature", active)
+                    ),
+                    Effect::DisableAttack => {
+                        format!("{}, one of {active}'s attacks can't be used", next(p))
+                    }
+                    Effect::TrainerLock => format!(
+                        "{} can't play trainer cards during {} next turn",
+                        who(p),
+                        their(p)
+                    ),
+                    Effect::DefenderWeakness(c) => {
+                        format!("{} Active's weakness is now {c}", whose(p))
+                    }
+                    Effect::OwnResistance(c) => {
+                        format!("{} Active's resistance is now {c}", whose(p))
+                    }
+                    Effect::DoubleNextAttack => {
+                        format!("{} Active's next attack does double damage", whose(p))
+                    }
+                    Effect::SetOwnColor(c) => format!("{} creature is now {c}", whose(p)),
+                    _ => format!("On {} side: {effect}", their(p)),
+                }
             }
             Event::Healed {
                 player,
@@ -695,6 +732,46 @@ mod tests {
         assert_eq!(v.describe_action(Action::Attack(0)), "Vine Poke (10)");
         assert_eq!(v.describe_action(Action::Done), "End turn");
         assert_eq!(v.prompt.unwrap().kind.to_string(), "Your turn");
+    }
+
+    /// A lasting effect is logged as what now holds, not as the card's rules
+    /// text (no "Flip a coin" after the coin has landed).
+    #[test]
+    fn effect_events_read_as_what_happened() {
+        let protect = Event::EffectApplied {
+            player: 1,
+            effect: Effect::Protect {
+                shield: Shield::PreventDamage,
+                coin: true,
+            },
+        };
+        assert_eq!(
+            protect.describe(0),
+            "During your next turn, prevent all damage done to the opponent's Active by attacks"
+        );
+        let jaw = Event::EffectApplied {
+            player: 0,
+            effect: Effect::Place {
+                placed: Placed::CantRetreat,
+                coin: false,
+            },
+        };
+        assert_eq!(
+            jaw.describe(0),
+            "During your next turn, your Active can't retreat"
+        );
+        assert_eq!(
+            jaw.describe(1),
+            "During their next turn, the opponent's Active can't retreat"
+        );
+        let lock = Event::EffectApplied {
+            player: 0,
+            effect: Effect::TrainerLock,
+        };
+        assert_eq!(
+            lock.describe(0),
+            "You can't play trainer cards during your next turn"
+        );
     }
 
     #[test]
