@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [0.5.0](https://github.com/phmatray/sixfold/compare/v0.4.0...v0.5.0) (2026-10-24)
+
+
+### Added
+
+* **audio:** add original synthesised music and sound effects ([#8](https://github.com/phmatray/sixfold/issues/8)) ([cbaeee1](https://github.com/phmatray/sixfold/commit/cbaeee14f0e8d03fb898972e02e584055f07d306))
+
 ## [0.4.0](https://github.com/phmatray/sixfold/compare/v0.3.0...v0.4.0) (2026-10-24)
 
 
