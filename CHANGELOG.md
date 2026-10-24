@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [0.9.0](https://github.com/phmatray/sixfold/compare/v0.8.0...v0.9.0) (2026-10-24)
+
+
+### Added
+
+* **endgame:** credits, a post-game Gauntlet, daily duels, promo cards and a balance pass ([#16](https://github.com/phmatray/sixfold/issues/16)) ([55e95e1](https://github.com/phmatray/sixfold/commit/55e95e10bc39eeb23d7662092b0fb09e18465c68))
+
 ## [0.8.0](https://github.com/phmatray/sixfold/compare/v0.7.0...v0.8.0) (2026-10-24)
 
 
