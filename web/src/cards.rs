@@ -143,11 +143,12 @@ pub fn attack_text(a: &Attack) -> String {
         .join(" ")
 }
 
-/// The damage as printed: "30", "10+" when coins add to it, "20×" when the
-/// coins are all of it, nothing for an attack that does no damage.
+/// The damage as printed: "30", "10+" when coins or damage counters add to
+/// it, "20×" when the coins are all of it, nothing for an attack that does no
+/// damage.
 pub fn damage_label(a: &Attack) -> Option<String> {
     let per = a.effects.iter().find_map(|e| match e {
-        Effect::AddPerHeads { per, .. } => Some(*per),
+        Effect::AddPerHeads { per, .. } | Effect::AddPerDamage { per, .. } => Some(*per),
         _ => None,
     });
     match (a.damage, per) {
