@@ -116,11 +116,15 @@ fn creature_art(name: &str, c: &Creature) -> String {
         base * 1.25
     );
     if c.stage == Stage::Stage2 {
-        let _ = write!(s, r#"<circle class="aura" cx="{cx}" cy="{cy}" r="{:.1}"/>"#, base + 9.0);
+        let _ = write!(
+            s,
+            r#"<circle class="aura" cx="{cx}" cy="{cy}" r="{:.1}"/>"#,
+            base + 9.0
+        );
     }
     // Body: n jittered points, smoothed with quadratic curves through midpoints.
     let n = 6 + (r.next() * 4.0) as usize;
-    let spin = r.range(0.0, 6.283);
+    let spin = r.range(0.0, std::f32::consts::TAU);
     let pts: Vec<(f32, f32)> = (0..n)
         .map(|i| {
             let a = spin + i as f32 / n as f32 * std::f32::consts::TAU + r.range(-0.25, 0.25);

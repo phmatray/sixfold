@@ -101,7 +101,11 @@ pub fn attack_text(a: &Attack) -> String {
     if !a.text.is_empty() {
         return a.text.to_string();
     }
-    a.effects.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(" ")
+    a.effects
+        .iter()
+        .map(|e| e.to_string())
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 /// Everything printed on a card, for the inspector.
@@ -176,7 +180,9 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
         }
         .into_any(),
     };
-    let hp = def.creature().map(|c| view! { <span class="detail-hp">{c.hp} " HP"</span> });
+    let hp = def
+        .creature()
+        .map(|c| view! { <span class="detail-hp">{c.hp} " HP"</span> });
     view! {
         <div class="details">
             <header class="details-head">

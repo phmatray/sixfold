@@ -69,9 +69,17 @@ pub fn Inspector() -> impl IntoView {
             .with(|m| m.as_ref().map(|(_, m)| m.top))
             .or_else(|| ui.inspect.get().map(|i| i.card))
     };
+    let close = NodeRef::<leptos::html::Button>::new();
+    Effect::new(move |_| {
+        if ui.sheet.get() {
+            if let Some(b) = close.get() {
+                let _ = b.focus();
+            }
+        }
+    });
     view! {
         <aside class="inspector" class:open=move || ui.sheet.get() aria-label="Card details">
-            <button class="btn ghost close" on:click=move |_| ui.sheet.set(false) aria-label="Close card details">"Close"</button>
+            <button class="btn ghost close" node_ref=close on:click=move |_| ui.sheet.set(false) aria-label="Close card details">"Close"</button>
             {move || match shown_card() {
                 None => view! { <p class="empty-note">"Hover a card, or press and hold it, to read it here."</p> }.into_any(),
                 Some(id) => view! {
@@ -143,9 +151,16 @@ pub fn DiscardViewer() -> impl IntoView {
         let player = ui.discard.get()?;
         let cards = ctl
             .shown
-            .with(|g| g.as_ref().map(|g| g.view(HUMAN).sides[player].discard.to_vec()))
+            .with(|g| {
+                g.as_ref()
+                    .map(|g| g.view(HUMAN).sides[player].discard.to_vec())
+            })
             .unwrap_or_default();
-        let whose = if player == HUMAN { "Your" } else { "Opponent's" };
+        let whose = if player == HUMAN {
+            "Your"
+        } else {
+            "Opponent's"
+        };
         let close = move |_| ui.discard.set(None);
         Some(view! {
             <div class="scrim" on:keydown=move |e| { if e.key() == "Escape" { ui.discard.set(None) } }>
@@ -177,7 +192,10 @@ pub fn GameOver() -> impl IntoView {
             let g = g.as_ref()?;
             let v = g.view(HUMAN);
             let w = v.winner?;
-            let left = v.sides.clone().map(|s| s.prizes.iter().filter(|p| **p).count());
+            let left = v
+                .sides
+                .clone()
+                .map(|s| s.prizes.iter().filter(|p| **p).count());
             let loser = 1 - w;
             let you = |p: usize| if p == HUMAN { "You" } else { "Your opponent" };
             let deck_out = g
@@ -209,7 +227,7 @@ pub fn GameOver() -> impl IntoView {
                     <p class="dialog-sub">
                         {why} " "
                         {format!("Prizes left: you {}, opponent {}.", left[HUMAN], left[1 - HUMAN])}
-                        {sudden.then(|| " Decided in sudden death.")}
+                        {sudden.then_some(" Decided in sudden death.")}
                     </p>
                     <div class="dialog-foot">
                         <button class="btn primary" on:click=rematch autofocus>"Rematch"</button>

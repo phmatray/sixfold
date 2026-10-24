@@ -4,7 +4,8 @@
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
 use pkmntcg_engine::{
-    card, energy_units, total_units, Action, CardId, Choice, Color, Effect as CardEffect, Game, PromptKind, RuleError,
+    card, energy_units, total_units, Action, CardId, Choice, Color, Effect as CardEffect, Game,
+    PromptKind, RuleError,
 };
 
 use crate::board::{hand_index, keyed_hand};
@@ -142,7 +143,10 @@ fn bar_model(ctl: Ctl, ui: Ui, legal: &[Action]) -> Bar {
             .selected
             .get()
             .and_then(|k| keys.iter().position(|x| *x == k));
-        let playable = legal.iter().filter_map(|&a| hand_index(a)).collect::<Vec<_>>();
+        let playable = legal
+            .iter()
+            .filter_map(|&a| hand_index(a))
+            .collect::<Vec<_>>();
         for &a in legal {
             let btn = Btn {
                 action: a,
@@ -163,9 +167,10 @@ fn bar_model(ctl: Ctl, ui: Ui, legal: &[Action]) -> Bar {
             bar.attacks = attack_buttons(g, legal);
         }
         bar.hint = match (selected, playable.is_empty()) {
-            (Some(i), _) if bar.hand.is_empty() => {
-                Some(format!("{} can't be played right now.", card(v.hand[i]).name))
-            }
+            (Some(i), _) if bar.hand.is_empty() => Some(format!(
+                "{} can't be played right now.",
+                card(v.hand[i]).name
+            )),
             (Some(_), _) => None,
             (None, false) => Some(match prompt.kind {
                 PromptKind::ChooseActive => "Pick a Basic creature from your hand.".into(),
@@ -173,7 +178,10 @@ fn bar_model(ctl: Ctl, ui: Ui, legal: &[Action]) -> Bar {
                 _ => {
                     let mut n = playable;
                     n.dedup();
-                    format!("Select a card in your hand to play it ({} playable).", n.len())
+                    format!(
+                        "Select a card in your hand to play it ({} playable).",
+                        n.len()
+                    )
                 }
             }),
             (None, true) => None,
@@ -290,7 +298,8 @@ fn dialog_model(g: &Game, legal: &[Action]) -> Option<Dialog> {
         }
     };
     let hp_note = |player: usize, slot: usize| {
-        creature_at(player, slot).map(|c| format!("{}/{} HP, {} energy", c.hp, c.creature().hp, c.energy.len()))
+        creature_at(player, slot)
+            .map(|c| format!("{}/{} HP, {} energy", c.hp, c.creature().hp, c.energy.len()))
     };
     let mut options = vec![];
     for &a in legal {
@@ -301,7 +310,10 @@ fn dialog_model(g: &Game, legal: &[Action]) -> Option<Dialog> {
                 hp_note(HUMAN, slot),
             ),
             Action::DiscardEnergy(i) => (
-                v.sides[HUMAN].active.and_then(|c| c.energy.get(i)).map_or(Visual::Text, |&e| Visual::Energy(e)),
+                v.sides[HUMAN]
+                    .active
+                    .and_then(|c| c.energy.get(i))
+                    .map_or(Visual::Text, |&e| Visual::Energy(e)),
                 None,
             ),
             Action::TakePrize(_) => (Visual::Prize, None),
@@ -312,11 +324,19 @@ fn dialog_model(g: &Game, legal: &[Action]) -> Option<Dialog> {
                         hp_note(player, slot),
                     ),
                     Some(&Choice::Energy(e)) => (
-                        v.sides[1 - HUMAN].active.and_then(|c| c.energy.get(e)).map_or(Visual::Text, |&e| Visual::Energy(e)),
+                        v.sides[1 - HUMAN]
+                            .active
+                            .and_then(|c| c.energy.get(e))
+                            .map_or(Visual::Text, |&e| Visual::Energy(e)),
                         None,
                     ),
                     Some(&Choice::Card(id)) => (Visual::Card(id), None),
-                    Some(&Choice::Evolve { hand, .. }) => (v.hand.get(hand).map_or(Visual::Text, |&id| Visual::Card(id)), None),
+                    Some(&Choice::Evolve { hand, .. }) => (
+                        v.hand
+                            .get(hand)
+                            .map_or(Visual::Text, |&id| Visual::Card(id)),
+                        None,
+                    ),
                     Some(&Choice::Attack(_)) | None => (Visual::Text, None),
                 },
                 _ => (Visual::Text, None),
@@ -335,15 +355,24 @@ fn dialog_model(g: &Game, legal: &[Action]) -> Option<Dialog> {
         PromptKind::ChooseRetreatEnergy { cost, chosen } => {
             let active = v.sides[HUMAN].active;
             let picked: Vec<CardId> = active
-                .map(|a| chosen.iter().filter_map(|&i| a.energy.get(i).copied()).collect())
+                .map(|a| {
+                    chosen
+                        .iter()
+                        .filter_map(|&i| a.energy.get(i).copied())
+                        .collect()
+                })
                 .unwrap_or_default();
             Some(format!(
                 "Paid {} of {cost}. The chosen energy is discarded when you pick who comes in.",
                 total_units(&energy_units(&picked)).min(*cost as u32)
             ))
         }
-        PromptKind::ChoosePrize { .. } => Some("Prizes are face down: any one is a surprise.".into()),
-        PromptKind::ChooseReplacement => Some("Pick a Benched creature to become your Active.".into()),
+        PromptKind::ChoosePrize { .. } => {
+            Some("Prizes are face down: any one is a surprise.".into())
+        }
+        PromptKind::ChooseReplacement => {
+            Some("Pick a Benched creature to become your Active.".into())
+        }
         _ => None,
     };
     let grid = options.iter().all(|o| o.visual != Visual::Text);
@@ -363,7 +392,10 @@ pub fn PromptModal() -> impl IntoView {
     let Legal(legal) = expect_context::<Legal>();
     let peek = RwSignal::new(false);
     let dialog = Memo::new(move |_| {
-        legal.with(|l| ctl.shown.with(|g| g.as_ref().and_then(|g| dialog_model(g, l))))
+        legal.with(|l| {
+            ctl.shown
+                .with(|g| g.as_ref().and_then(|g| dialog_model(g, l)))
+        })
     });
     // A new prompt always opens the dialog again.
     Effect::new(move |_| {
@@ -394,25 +426,36 @@ pub fn PromptModal() -> impl IntoView {
                 .into_any(),
             );
         }
-        let options = d.options.into_iter().map(|o| {
-            let action = o.action;
-            let art = match o.visual {
-                Visual::Card(id) => view! { <span class="opt-card"><CardFace id=id /></span> }.into_any(),
-                Visual::Energy(id) => view! { <span class="opt-energy">{energy_pips(id)}</span> }.into_any(),
-                Visual::Prize => view! { <span class="opt-card"><CardBack /></span> }.into_any(),
-                Visual::Text => ().into_any(),
-            };
-            view! {
-                <button class="opt" on:click=move |_| ctl.act(action)>
-                    {art}
-                    <span class="opt-label">{o.label}</span>
-                    {o.extra.map(|e| view! { <span class="opt-extra">{e}</span> })}
-                </button>
-            }
-        }).collect_view();
+        let cancel = d.cancel;
+        let options = d
+            .options
+            .into_iter()
+            .map(|o| {
+                let action = o.action;
+                let art = match o.visual {
+                    Visual::Card(id) => {
+                        view! { <span class="opt-card"><CardFace id=id /></span> }.into_any()
+                    }
+                    Visual::Energy(id) => {
+                        view! { <span class="opt-energy">{energy_pips(id)}</span> }.into_any()
+                    }
+                    Visual::Prize => {
+                        view! { <span class="opt-card"><CardBack /></span> }.into_any()
+                    }
+                    Visual::Text => ().into_any(),
+                };
+                view! {
+                    <button class="opt" on:click=move |_| ctl.act(action)>
+                        {art}
+                        <span class="opt-label">{o.label}</span>
+                        {o.extra.map(|e| view! { <span class="opt-extra">{e}</span> })}
+                    </button>
+                }
+            })
+            .collect_view();
         Some(
             view! {
-                <div class="scrim">
+                <div class="scrim" on:keydown=move |e| { if cancel && e.key() == "Escape" { ctl.act(Action::Cancel) } }>
                     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" node_ref=panel>
                         <h2 id="dialog-title">{d.title}</h2>
                         {d.sub.map(|s| view! { <p class="dialog-sub">{s}</p> })}

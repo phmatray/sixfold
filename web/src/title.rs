@@ -25,7 +25,7 @@ fn deck_colors(cards: &[CardId]) -> Vec<Color> {
             }
         }
     }
-    counts.sort_by(|a, b| b.1.cmp(&a.1));
+    counts.sort_by_key(|c| std::cmp::Reverse(c.1));
     counts.into_iter().map(|(c, _)| c).collect()
 }
 
@@ -79,7 +79,15 @@ pub fn TitleScreen() -> impl IntoView {
     let hero: Vec<CardId> = decks()
         .iter()
         .filter_map(|d| deck_star(&d.cards()))
-        .chain(decks().first().map(|d| d.cards()).unwrap_or_default().into_iter().filter(|&id| card(id).is_basic()).take(1))
+        .chain(
+            decks()
+                .first()
+                .map(|d| d.cards())
+                .unwrap_or_default()
+                .into_iter()
+                .filter(|&id| card(id).is_basic())
+                .take(1),
+        )
         .take(3)
         .collect();
     let start = move |_| {
@@ -88,7 +96,11 @@ pub fn TitleScreen() -> impl IntoView {
             decks: [a.cards(), b.cards()],
             names: [a.name.to_string(), b.name.to_string()],
             prizes: prizes.get(),
-            difficulty: if normal.get() { Difficulty::Normal } else { Difficulty::Easy },
+            difficulty: if normal.get() {
+                Difficulty::Normal
+            } else {
+                Difficulty::Easy
+            },
         };
         if ctl.start(setup, seed.get()) {
             screen.set(Screen::Match);

@@ -82,7 +82,11 @@ pub fn status_class(s: Status) -> &'static str {
 }
 
 pub fn slot_name(player: usize, slot: usize) -> String {
-    let whose = if player == HUMAN { "Your" } else { "Opponent's" };
+    let whose = if player == HUMAN {
+        "Your"
+    } else {
+        "Opponent's"
+    };
     if slot == 0 {
         format!("{whose} Active")
     } else {
@@ -96,7 +100,10 @@ pub fn slot_name(player: usize, slot: usize) -> String {
 pub fn Creature(player: usize, uid: u32) -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let ui = expect_context::<Ui>();
-    let mon = Memo::new(move |_| ctl.shown.with(|g| g.as_ref().and_then(|g| find_mon(g, player, uid))));
+    let mon = Memo::new(move |_| {
+        ctl.shown
+            .with(|g| g.as_ref().and_then(|g| find_mon(g, player, uid)))
+    });
     let top = Memo::new(move |_| mon.with(|m| m.as_ref().map(|m| m.top)));
     let hidden = move || player != HUMAN && !ctl.revealed.get();
     let hp_now = Memo::new(move |_| ctl.fx.with(|f| f.hp.get(&uid).copied()));
@@ -111,8 +118,13 @@ pub fn Creature(player: usize, uid: u32) -> impl IntoView {
         })
     });
     let pops = Memo::new(move |_| {
-        ctl.fx
-            .with(|f| f.pops.iter().filter(|p| p.uid == uid).cloned().collect::<Vec<_>>())
+        ctl.fx.with(|f| {
+            f.pops
+                .iter()
+                .filter(|p| p.uid == uid)
+                .cloned()
+                .collect::<Vec<_>>()
+        })
     });
     let hp = move || {
         hp_now
@@ -122,12 +134,29 @@ pub fn Creature(player: usize, uid: u32) -> impl IntoView {
     };
     let max = move || mon.with(|m| m.as_ref().map_or(1, |m| m.max.max(1)));
     let energy = move || {
-        mon.with(|m| m.as_ref().map_or(vec![], |m| m.energy.iter().copied().enumerate().collect::<Vec<(usize, CardId)>>()))
+        mon.with(|m| {
+            m.as_ref().map_or(vec![], |m| {
+                m.energy
+                    .iter()
+                    .copied()
+                    .enumerate()
+                    .collect::<Vec<(usize, CardId)>>()
+            })
+        })
     };
     let class = move || {
         let (lunge, hit, glow, ko) = fx.get();
-        let mut c = String::from(if player == HUMAN { "mon mine" } else { "mon theirs" });
-        for (on, name) in [(lunge, " lunge"), (hit, " hit"), (glow, " glow"), (ko, " ko")] {
+        let mut c = String::from(if player == HUMAN {
+            "mon mine"
+        } else {
+            "mon theirs"
+        });
+        for (on, name) in [
+            (lunge, " lunge"),
+            (hit, " hit"),
+            (glow, " glow"),
+            (ko, " ko"),
+        ] {
             if on {
                 c.push_str(name);
             }
@@ -272,9 +301,20 @@ pub fn SideRow(player: usize) -> impl IntoView {
     });
     let me = player == HUMAN;
     let who = if me { "Your" } else { "Opponent's" };
-    let prize_list = move || info.with(|i| i.prizes.iter().copied().enumerate().collect::<Vec<(usize, bool)>>());
+    let prize_list = move || {
+        info.with(|i| {
+            i.prizes
+                .iter()
+                .copied()
+                .enumerate()
+                .collect::<Vec<(usize, bool)>>()
+        })
+    };
     let opp_backs = move || (0..info.with(|i| i.hand).min(10)).collect::<Vec<usize>>();
-    let prize_fx = Memo::new(move |_| ctl.fx.with(|f| f.prize.filter(|p| p.0 == player).map(|p| p.1)));
+    let prize_fx = Memo::new(move |_| {
+        ctl.fx
+            .with(|f| f.prize.filter(|p| p.0 == player).map(|p| p.1))
+    });
     view! {
         <section
             class=move || format!("side {} {}", if me { "me" } else { "opp" }, if info.with(|i| i.turn) { "on-turn" } else { "" })
@@ -396,7 +436,11 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
         let n = hand.with(|h| h.len()).max(1) as f32;
         let o = index.get().unwrap_or(0) as f32 - (n - 1.0) / 2.0;
         let spread = if n > 8.0 { 2.0 } else { 3.5 };
-        format!("--rot:{:.1}deg;--lift:{:.1}px", o * spread, o.abs() * o.abs() * 0.9)
+        format!(
+            "--rot:{:.1}deg;--lift:{:.1}px",
+            o * spread,
+            o.abs() * o.abs() * 0.9
+        )
     };
     let id = key.0;
     let name = card(id).name;
