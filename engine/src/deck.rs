@@ -3,7 +3,10 @@
 use std::collections::{BTreeMap, HashMap};
 
 use crate::card::{card, try_card, CardId, CardKind, Color, EnergyCard};
-use crate::collection::Collection;
+use crate::collection::{counts_body, parse_counts, sign, unsign, Collection, LoadError};
+
+/// The deck-list save string version this build writes and reads.
+const DECK_VERSION: &str = "d1";
 
 pub const DECK_SIZE: usize = 60;
 pub const MAX_COPIES: usize = 4;
@@ -181,6 +184,40 @@ impl DeckList {
     /// of its creatures in proportion to how many creature cards each colour
     /// has (energy already in the deck counts). Returns how many were added;
     /// none when the deck has no coloured creature.
+    /// `d1;<id>:<count>,...;<name>;<checksum>`, in the style of
+    /// [`Collection::save`]: ids ascending, FNV-1a checksum. Line breaks in the
+    /// name become spaces, so saved lists can be stored one per line.
+    pub fn save(&self) -> String {
+        let name: String = self
+            .name
+            .chars()
+            .map(|c| if c.is_control() { ' ' } else { c })
+            .collect();
+        sign(&format!(
+            "{DECK_VERSION};{};{name}",
+            counts_body(self.counts().into_iter())
+        ))
+    }
+
+    /// Reads a [`save`](Self::save) string. Card order isn't kept (ids come
+    /// back ascending); ids the set doesn't have are dropped and returned.
+    pub fn load(s: &str) -> Result<(DeckList, Vec<(CardId, usize)>), LoadError> {
+        let body = unsign(s, DECK_VERSION)?;
+        let (counts, name) = body.split_once(';').ok_or(LoadError::Malformed)?;
+        let (known, dropped) = parse_counts(counts)?;
+        let cards = known
+            .into_iter()
+            .flat_map(|(id, n)| std::iter::repeat_n(id, n))
+            .collect();
+        Ok((
+            DeckList {
+                name: name.to_string(),
+                cards,
+            },
+            dropped,
+        ))
+    }
+
     pub fn fill_energy(&mut self) -> usize {
         let (mut weight, mut have) = ([0usize; 6], [0usize; 6]);
         for &id in &self.cards {
@@ -416,5 +453,47 @@ mod deck_list_tests {
         d.cards.retain(|&id| !card(id).is_basic_energy());
         d.fill_energy();
         assert_eq!(d.validate(&starter_collection()), Ok(()));
+    }
+
+    #[test]
+    fn deck_list_save_round_trips() {
+        let d = DeckList {
+            name: "Fire; and ice\nfast".into(),
+            cards: EMBER_RUSH.cards(),
+        };
+        let s = d.save();
+        assert!(s.starts_with("d1;0:4,"), "{s}");
+        assert!(!s.contains('\n'));
+        let (back, dropped) = DeckList::load(&s).unwrap();
+        assert!(dropped.is_empty());
+        assert_eq!(back.name, "Fire; and ice fast");
+        assert_eq!(back.counts(), d.counts());
+        let empty = DeckList::new("");
+        assert_eq!(DeckList::load(&empty.save()).unwrap().0, empty);
+    }
+
+    #[test]
+    fn deck_list_load_rejects_bad_strings() {
+        let s = list(&EMBER_RUSH.cards()).save();
+        assert_eq!(DeckList::load(""), Err(LoadError::Version));
+        // A collection string is not a deck list.
+        let c = starter_collection().save();
+        assert_eq!(DeckList::load(&c), Err(LoadError::Version));
+        assert_eq!(DeckList::load(&s[..s.len() - 2]), Err(LoadError::Checksum));
+        assert_eq!(
+            DeckList::load(&s.replacen("Test", "Tost", 1)),
+            Err(LoadError::Checksum)
+        );
+        let signed = crate::collection::sign;
+        assert_eq!(DeckList::load(&signed("d1;0:1")), Err(LoadError::Malformed));
+        assert_eq!(
+            DeckList::load(&signed("d1;0:0;X")),
+            Err(LoadError::Malformed)
+        );
+        let (d, dropped) = DeckList::load(&signed("d1;0:2,9999:1;X")).unwrap();
+        assert_eq!(
+            (d.cards, dropped),
+            (vec![CINDREL; 2], vec![(CardId(9999), 1)])
+        );
     }
 }

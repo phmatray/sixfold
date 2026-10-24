@@ -105,45 +105,68 @@ impl Collection {
     /// checksum the FNV-1a hash of everything before the last `;`, as 8 hex
     /// digits. The same collection always gives the same string.
     pub fn save(&self) -> String {
-        let body: Vec<String> = self.iter().map(|(id, n)| format!("{}:{n}", id.0)).collect();
-        let head = format!("{VERSION};{}", body.join(","));
-        format!("{head};{:08x}", fnv1a(&head))
+        sign(&format!("{VERSION};{}", counts_body(self.iter())))
     }
 
     /// Reads a [`save`](Self::save) string. Ids that aren't in the card set
     /// (e.g. from a newer build) are dropped and returned with their counts;
     /// basic energy entries are ignored.
     pub fn load(s: &str) -> Result<(Collection, Vec<(CardId, usize)>), LoadError> {
-        let (head, sum) = s.rsplit_once(';').ok_or(LoadError::Version)?;
-        let (version, body) = head.split_once(';').ok_or(LoadError::Version)?;
-        if version != VERSION {
-            return Err(LoadError::Version);
-        }
-        if sum.len() != 8 || u32::from_str_radix(sum, 16).ok() != Some(fnv1a(head)) {
-            return Err(LoadError::Checksum);
-        }
+        let (known, dropped) = parse_counts(unsign(s, VERSION)?)?;
         let mut c = Collection::new();
-        let mut seen = std::collections::BTreeSet::new();
-        let mut dropped = vec![];
-        let entries = if body.is_empty() {
-            vec![]
-        } else {
-            body.split(',').collect()
-        };
-        for entry in entries {
-            let (id, n) = entry.split_once(':').ok_or(LoadError::Malformed)?;
-            let id = CardId(id.parse().map_err(|_| LoadError::Malformed)?);
-            let n: usize = n.parse().map_err(|_| LoadError::Malformed)?;
-            if n == 0 || !seen.insert(id) {
-                return Err(LoadError::Malformed);
-            }
-            match try_card(id) {
-                Some(_) => c.add(id, n),
-                None => dropped.push((id, n)),
-            }
-        }
+        known.into_iter().for_each(|(id, n)| c.add(id, n));
         Ok((c, dropped))
     }
+}
+
+/// Appends `;<checksum>` to a save string's head.
+pub(crate) fn sign(head: &str) -> String {
+    format!("{head};{:08x}", fnv1a(head))
+}
+
+/// Checks the version tag and checksum of a [`sign`]ed string and returns
+/// what lies between them.
+pub(crate) fn unsign<'a>(s: &'a str, version: &str) -> Result<&'a str, LoadError> {
+    let (head, sum) = s.rsplit_once(';').ok_or(LoadError::Version)?;
+    let (v, body) = head.split_once(';').ok_or(LoadError::Version)?;
+    if v != version {
+        return Err(LoadError::Version);
+    }
+    if sum.len() != 8 || u32::from_str_radix(sum, 16).ok() != Some(fnv1a(head)) {
+        return Err(LoadError::Checksum);
+    }
+    Ok(body)
+}
+
+/// `<id>:<count>,...` for a list of counts.
+pub(crate) fn counts_body(counts: impl Iterator<Item = (CardId, usize)>) -> String {
+    counts
+        .map(|(id, n)| format!("{}:{n}", id.0))
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+/// Parses `<id>:<count>,...` into (cards in the set, unknown ids), each with
+/// its count. Rejects zero counts and repeated ids.
+#[allow(clippy::type_complexity)]
+pub(crate) fn parse_counts(
+    body: &str,
+) -> Result<(Vec<(CardId, usize)>, Vec<(CardId, usize)>), LoadError> {
+    let mut seen = std::collections::BTreeSet::new();
+    let (mut known, mut dropped) = (vec![], vec![]);
+    for entry in body.split(',').filter(|_| !body.is_empty()) {
+        let (id, n) = entry.split_once(':').ok_or(LoadError::Malformed)?;
+        let id = CardId(id.parse().map_err(|_| LoadError::Malformed)?);
+        let n: usize = n.parse().map_err(|_| LoadError::Malformed)?;
+        if n == 0 || !seen.insert(id) {
+            return Err(LoadError::Malformed);
+        }
+        match try_card(id) {
+            Some(_) => known.push((id, n)),
+            None => dropped.push((id, n)),
+        }
+    }
+    Ok((known, dropped))
 }
 
 /// 32-bit FNV-1a: enough to catch a truncated or edited save string.
@@ -228,7 +251,7 @@ mod tests {
 
     /// Build a string with a valid checksum around any body.
     fn signed(head: &str) -> String {
-        format!("{head};{:08x}", fnv1a(head))
+        sign(head)
     }
 
     #[test]
