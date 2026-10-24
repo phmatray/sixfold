@@ -1,7 +1,7 @@
 //! Card faces, card backs, energy pips and the full-text card details.
 
 use leptos::prelude::*;
-use pkmntcg_engine::{card, Attack, CardDef, CardId, CardKind, Color, EnergyCard, Stage};
+use pkmntcg_engine::{card, Attack, CardDef, CardId, CardKind, Color, Effect, EnergyCard, Stage};
 
 use crate::art::{card_art, card_color, color_key, glyph_svg};
 
@@ -108,6 +108,21 @@ pub fn attack_text(a: &Attack) -> String {
         .join(" ")
 }
 
+/// The damage as printed: "30", "10+" when coins add to it, "20×" when the
+/// coins are all of it, nothing for an attack that does no damage.
+pub fn damage_label(a: &Attack) -> Option<String> {
+    let per = a.effects.iter().find_map(|e| match e {
+        Effect::AddPerHeads { per, .. } => Some(*per),
+        _ => None,
+    });
+    match (a.damage, per) {
+        (0, Some(per)) => Some(format!("{per}×")),
+        (0, None) => None,
+        (d, Some(_)) => Some(format!("{d}+")),
+        (d, None) => Some(d.to_string()),
+    }
+}
+
 /// Everything printed on a card, for the inspector.
 #[component]
 pub fn CardDetails(id: CardId) -> impl IntoView {
@@ -132,7 +147,7 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
                             <div class="detail-attack-head">
                                 {cost_pips(a.cost)}
                                 <h4>{a.name}</h4>
-                                <span class="detail-dmg">{(a.damage > 0).then(|| a.damage.to_string())}</span>
+                                <span class="detail-dmg">{damage_label(a)}</span>
                             </div>
                             <p>{attack_text(a)}</p>
                         </div>

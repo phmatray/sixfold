@@ -9,7 +9,7 @@ use pkmntcg_engine::{
 };
 
 use crate::board::{hand_index, keyed_hand};
-use crate::cards::{attack_text, cost_pips, energy_pips, CardBack, CardFace};
+use crate::cards::{attack_text, cost_pips, damage_label, energy_pips, CardBack, CardFace};
 use crate::ctl::{Ctl, AI, HUMAN};
 use crate::{Legal, Ui};
 
@@ -33,7 +33,7 @@ struct AttackBtn {
     action: Action,
     name: &'static str,
     cost: &'static [Color],
-    damage: u16,
+    damage: Option<String>,
     /// (amount, weakness, resistance) against the opposing Active now.
     preview: Option<(u16, bool, bool)>,
     /// Coins can add damage on top of the preview (which assumes tails).
@@ -87,7 +87,7 @@ fn attack_buttons(g: &Game, legal: &[Action]) -> Vec<AttackBtn> {
                 action,
                 name: a.name,
                 cost: a.cost,
-                damage: a.damage,
+                damage: damage_label(a),
                 preview,
                 coins: a.effects.iter().any(|e| matches!(e, CardEffect::AddPerHeads { .. })),
                 ko: matches!((preview, defender_hp), (Some((amt, ..)), Some(hp)) if amt >= hp && amt > 0),
@@ -212,7 +212,11 @@ pub fn ActionBar() -> impl IntoView {
                         let label = format!(
                             "{}{}{}",
                             a.name,
-                            a.preview.map(|p| format!(", deals {}{} now", if a.coins { "at least " } else { "" }, p.0)).unwrap_or_default(),
+                            a.preview.map(|p| match (a.coins, p.0) {
+                                (true, 0) => ", damage depends on coin flips".to_string(),
+                                (true, n) => format!(", deals at least {n} now"),
+                                (false, n) => format!(", deals {n} now"),
+                            }).unwrap_or_default(),
                             a.blocked.map(|r| format!(". Unavailable: {r}")).unwrap_or_default(),
                         );
                         let action = a.action;
@@ -227,7 +231,7 @@ pub fn ActionBar() -> impl IntoView {
                             >
                                 <span class="attack-cost">{cost_pips(a.cost)}</span>
                                 <span class="attack-name">{a.name}</span>
-                                <span class="attack-dmg">{(a.damage > 0).then(|| a.damage.to_string())}</span>
+                                <span class="attack-dmg">{a.damage.clone()}</span>
                                 <span class="attack-note">
                                     {match (a.blocked, a.preview) {
                                         (Some(r), _) => r.to_string(),

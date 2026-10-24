@@ -773,7 +773,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 
 .log { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
 .log h2 { font-size: 15px; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
-.log-list { flex: 1; overflow: auto; margin: 0; padding: 0 4px 0 0; list-style: none; font-size: 13px; }
+.log-list { flex: 1; overflow: auto; mask-image: linear-gradient(to bottom, transparent, #000 18px); -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18px); margin: 0; padding: 0 4px 0 0; list-style: none; font-size: 13px; }
 .log-list li { margin-bottom: 3px; padding: 2px 0 2px 8px; border-left: 2px solid transparent; }
 .log-list li.l-quiet { color: #8391a6; }
 .log-list li.l-turn { margin-top: 8px; color: var(--brass-hi); font-weight: 700; border-left-color: var(--brass); }
@@ -842,11 +842,19 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   .side.me { grid-template-areas: "rail active ." "bench bench bench"; }
   .rail, .side.me .rail { align-self: center; flex-direction: column; }
   .bench, .side.me .bench { justify-content: center; flex-wrap: nowrap; gap: 6px; }
-  .action-bar { position: static; padding-top: 12px; }
+  /* The bar stays on screen: compact, attacks side by side. */
+  .action-bar { padding-top: 8px; gap: 6px; }
+  .bar-status { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
   .bar-title { font-size: 16px; }
+  .bar-hint { margin: 0; font-size: 12px; }
+  .bar-groups, .bar-group { flex: 1 1 100%; gap: 6px; justify-content: flex-start; }
+  .bar-group.attacks { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  .bar-group.plays .btn { flex: 1 1 auto; }
+  .btn.attack { min-width: 0; padding: 6px 10px; }
   .btn.attack .attack-dmg { font-size: 22px; }
-  .bar-groups { justify-content: flex-start; }
-  .btn.attack { min-width: 0; flex: 1 1 160px; }
+  .attack-note { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .table { padding-top: 6px; gap: 2px; }
+  .hand-wrap { padding-top: 16px; }
   .inspect-body { grid-template-columns: 1fr; }
   .callout { padding: 12px 24px; }
   .btn.start { margin-left: 0; width: 100%; text-align: center; }

@@ -331,7 +331,7 @@ pub fn SideRow(player: usize) -> impl IntoView {
                     />
                 </div>
                 <div class="piles">
-                    <div class="pile deck" role="img" aria-label=move || format!("{who} deck: {} cards", info.with(|i| i.deck))>
+                    <div class="pile deck" role="img" aria-label=move || format!("{who} deck: {}", cards(info.with(|i| i.deck)))>
                         <div class="pile-card" style=move || format!("--depth:{}", info.with(|i| i.deck.div_ceil(8)))>
                             {move || (info.with(|i| i.deck) > 0).then(|| view! { <CardBack /> })}
                         </div>
@@ -339,7 +339,7 @@ pub fn SideRow(player: usize) -> impl IntoView {
                     </div>
                     <button
                         class="pile discard"
-                        aria-label=move || format!("{who} discard pile: {} cards. Open", info.with(|i| i.discard))
+                        aria-label=move || format!("{who} discard pile: {}. Open", cards(info.with(|i| i.discard)))
                         on:click=move |_| ui.discard.set(Some(player))
                     >
                         <div class="pile-card">
@@ -348,7 +348,7 @@ pub fn SideRow(player: usize) -> impl IntoView {
                         <span class="pile-count">{move || info.with(|i| i.discard)}</span>
                     </button>
                     {(!me).then(|| view! {
-                        <div class="pile hand-count" role="img" aria-label=move || format!("Opponent's hand: {} cards", info.with(|i| i.hand))>
+                        <div class="pile hand-count" role="img" aria-label=move || format!("Opponent's hand: {}", cards(info.with(|i| i.hand)))>
                             <div class="mini-fan">
                                 <For
                                     each=opp_backs
@@ -410,7 +410,7 @@ pub fn Hand() -> impl IntoView {
     });
     view! {
         <div class="hand-wrap">
-            <ul class="hand" aria-label=move || format!("Your hand: {} cards", hand.with(|h| h.len()))>
+            <ul class="hand" aria-label=move || format!("Your hand: {}", cards(hand.with(|h| h.len())))>
                 <For
                     each=move || hand.get()
                     key=|k| *k
@@ -485,5 +485,14 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
                 <CardFace id=id />
             </button>
         </li>
+    }
+}
+
+/// "1 card", "3 cards".
+pub fn cards(n: usize) -> String {
+    if n == 1 {
+        "1 card".to_string()
+    } else {
+        format!("{n} cards")
     }
 }

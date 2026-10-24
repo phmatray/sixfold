@@ -166,7 +166,7 @@ pub fn DiscardViewer() -> impl IntoView {
             <div class="scrim" on:keydown=move |e| { if e.key() == "Escape" { ui.discard.set(None) } }>
                 <div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="discard-title">
                     <h2 id="discard-title">{format!("{whose} discard pile")}</h2>
-                    <p class="dialog-sub">{if cards.is_empty() { "Empty.".to_string() } else { format!("{} cards, newest last.", cards.len()) }}</p>
+                    <p class="dialog-sub">{if cards.is_empty() { "Empty.".to_string() } else { format!("{}, newest last.", crate::board::cards(cards.len())) }}</p>
                     <div class="discard-grid">
                         {cards.into_iter().map(|id| view! {
                             <button class="discard-card" aria-label=card(id).name on:click=move |_| ui.open(Inspect { card: id, at: None })>

@@ -131,20 +131,20 @@ pub fn TitleScreen() -> impl IntoView {
                         <div class="options">
                             <label class="field">
                                 <span>"Seed"</span>
-                                <input type="number" min="0" inputmode="numeric"
+                                <input type="number" name="seed" min="0" inputmode="numeric"
                                     prop:value=move || seed.get().to_string()
                                     on:input=move |e| { if let Ok(n) = event_target_value(&e).parse() { seed.set(n) } } />
                             </label>
                             <button type="button" class="btn ghost" on:click=move |_| seed.set(crate::new_seed())>"New seed"</button>
                             <label class="field">
                                 <span>"Prizes"</span>
-                                <select on:change=move |e| { if let Ok(n) = event_target_value(&e).parse() { prizes.set(n) } }>
+                                <select name="prizes" on:change=move |e| { if let Ok(n) = event_target_value(&e).parse() { prizes.set(n) } }>
                                     {(1..=6u8).rev().map(|n| view! { <option value=n.to_string() selected=n == 6>{n}</option> }).collect_view()}
                                 </select>
                             </label>
                             <label class="field">
                                 <span>"AI"</span>
-                                <select on:change=move |e| normal.set(event_target_value(&e) == "normal")>
+                                <select name="difficulty" on:change=move |e| normal.set(event_target_value(&e) == "normal")>
                                     <option value="normal" selected>"Normal"</option>
                                     <option value="easy">"Easy: sometimes skips a play"</option>
                                 </select>
