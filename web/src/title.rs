@@ -5,6 +5,7 @@ use sixfold_engine::decks::PREBUILT;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{card, CardId};
 
+use crate::audio::AudioSettings;
 use crate::binder::progress;
 use crate::cards::{deck_star, CardFace};
 use crate::store::{self, Notice};
@@ -51,6 +52,7 @@ fn Settings() -> impl IntoView {
                 "Settings"
             </summary>
             <div class="settings-body">
+                <AudioSettings />
                 {move || if confirm.get() {
                     view! {
                         <div class="confirm" role="group" aria-labelledby="reset-q">

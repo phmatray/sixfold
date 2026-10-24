@@ -71,7 +71,9 @@ pub fn PacksScreen() -> impl IntoView {
             cards,
         }));
         done.set(false);
-        let ms = if reduced_motion() { 50 } else { REVEAL_MS };
+        let instant = reduced_motion();
+        crate::audio::sfx("pack", f64::from(u8::from(instant)));
+        let ms = if instant { 50 } else { REVEAL_MS };
         set_timeout(
             move || {
                 if opened.with_untracked(|o| o.as_ref().map(|o| o.key)) == Some(key) {
@@ -86,6 +88,7 @@ pub fn PacksScreen() -> impl IntoView {
             ui.sheet.set(false);
         }
     };
+    on_cleanup(|| crate::audio::sfx("packstop", 0.0));
     view! {
         <div class="page with-side" on:keydown=on_key>
             <PageBar title="Open packs" />
@@ -215,7 +218,12 @@ fn Reveal(
                 }.into_any()
             } else {
                 view! {
-                    <button type="button" class="btn ghost" on:click=move |_| { instant.set(true); skip() }>"Show all"</button>
+                    <button type="button" class="btn ghost" on:click=move |_| {
+                        instant.set(true);
+                        skip();
+                        crate::audio::sfx("packstop", 0.0);
+                        crate::audio::sfx("rare", 0.0);
+                    }>"Show all"</button>
                 }.into_any()
             }}
         </div>

@@ -163,6 +163,7 @@ impl Ctl {
         self.real.set_value(Some(game.clone()));
         self.shown.set(Some(game));
         self.queue.set_value(events.into());
+        crate::audio::music("duel");
         self.step(self.generation.get_value());
         true
     }
@@ -233,6 +234,8 @@ impl Ctl {
 
     fn commit(self, generation: u32) {
         self.shown.set(self.real.get_value());
+        self.shown
+            .with_untracked(|g| g.as_ref().map(crate::audio::duel_state));
         self.fx.set(Fx::default());
         self.busy.set(false);
         let ai_turn = self.real.with_value(|g| {
@@ -316,6 +319,7 @@ impl Ctl {
 
     /// Log one event, start its effect, and return how long to pause (ms).
     fn play(&self, event: &Event) -> u64 {
+        crate::audio::duel_event(event);
         let key = self.next_key();
         let text = event.describe(HUMAN);
         let kind = log_kind(event);

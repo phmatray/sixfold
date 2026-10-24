@@ -60,6 +60,9 @@ function assetNames(map) {
 
 // ---------- Mount ----------
 
+// Sounds come from web/audio/audio.js (loaded with the wasm), when it is there.
+const sound = (name, n = 0) => globalThis.sixfoldAudio?.sfx(name, n);
+
 export function mount(el, controls, cb) {
   const mq = matchMedia("(prefers-reduced-motion: reduce)");
   let reduced = mq.matches;
@@ -262,6 +265,7 @@ export function mount(el, controls, cb) {
   async function warp(wp) {
     if (warping) return;
     warping = true;
+    sound("door");
     held.length = 0;
     world.path = [];
     fade.classList.add("on");
@@ -299,6 +303,7 @@ export function mount(el, controls, cb) {
     renderer.setClearColor(L.background);
     scene.fog = L.fog ? new THREE.Fog(L.background, L.fog.near, L.fog.far) : null;
     el.closest(".world")?.style.setProperty("--world-bg", L.background);
+    globalThis.sixfoldAudio?.music(L.indoor ? "interior" : "overworld");
     const s = spawn ?? map.spawn;
     Object.assign(hero, { x: s.x, z: s.z, face: s.facing, step: null, idle: 0, turnedAt: -Infinity }); // a fresh map clock
     hero.obj.rotation.y = angle(s.facing);
@@ -364,7 +369,10 @@ export function mount(el, controls, cb) {
         if (!tryStep(w.path.shift(), carry)) w.path = [];
       }
     }
-    if (h.step && h.step !== prevStep) w.life.puff(h.x + 0.5, h.z + 0.5); // footstep dust
+    if (h.step && h.step !== prevStep) {
+      w.life.puff(h.x + 0.5, h.z + 0.5); // footstep dust
+      sound("step", w.map.tiles[h.step.z]?.[h.step.x] === "w" ? 1 : 0); // "w": a wooden floor
+    }
     h.idle = h.step || held.length ? 0 : h.idle + dt;
     h.running = !!h.step && h.step.dur < STEP;
 

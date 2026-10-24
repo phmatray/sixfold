@@ -1194,6 +1194,17 @@ select option { background: var(--panel); color: var(--ink); }
 }
 .confirm p { margin: 0 0 10px; }
 
+/* Sound: the Settings sliders, and the mute button in the duel and world headers. */
+.audio-settings { display: grid; gap: 10px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.audio-settings legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
+.vol-mute { display: flex; align-items: center; gap: 10px; min-height: 32px; }
+.vol-mute input { width: 18px; height: 18px; accent-color: var(--brass); }
+.vol { display: grid; grid-template-columns: 64px minmax(0, 1fr) 44px; align-items: center; gap: 10px; min-height: 32px; }
+.vol input { width: 100%; accent-color: var(--brass); }
+.vol .vol-pct { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.btn.mute { padding-inline: 10px; }
+.btn.mute[aria-pressed="true"] { color: var(--muted); }
+
 /* ---------- Menu screens ---------- */
 
 .page { min-height: 100dvh; display: grid; grid-template-rows: auto 1fr; align-content: start; }

@@ -1,6 +1,7 @@
 //! Sixfold: a single-player duel against the AI, rendering `sixfold_engine`.
 
 mod art;
+mod audio;
 mod binder;
 mod board;
 mod cards;
@@ -17,6 +18,7 @@ mod world;
 use leptos::prelude::*;
 use sixfold_engine::{Action, CardId};
 
+use audio::MuteToggle;
 use board::{Hand, SideRow};
 use controls::{ActionBar, PromptModal};
 use ctl::{Ctl, AI, HUMAN};
@@ -108,6 +110,12 @@ fn App() -> impl IntoView {
         ui.sheet.set(false);
         window().scroll_to_with_x_and_y(0.0, 0.0);
     });
+    // The world picks its own track (meadow or indoors) as each map loads.
+    Effect::new(move |_| match screen.get() {
+        Screen::Match => audio::music("duel"),
+        Screen::World => {}
+        _ => audio::music("title"),
+    });
     move || match screen.get() {
         Screen::Title => view! { <title::TitleScreen /> }.into_any(),
         Screen::Duel => view! { <duel::DuelSetup /> }.into_any(),
@@ -149,6 +157,7 @@ fn MatchScreen() -> impl IntoView {
                 <span class="seed">"Seed " {move || ctl.seed.get()}</span>
                 <button class="btn ghost log-toggle" aria-expanded=move || ui.log_open.get().to_string()
                     on:click=move |_| ui.log_open.update(|o| *o = !*o)>"Log"</button>
+                <MuteToggle />
                 <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(Screen::Title) }>"Quit"</button>
             </header>
             <main class="table">
