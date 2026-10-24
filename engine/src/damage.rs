@@ -3,14 +3,14 @@
 //! only at the end (R-DMG-01).
 
 use crate::action::Event;
-use crate::card::{Color, PowerKind};
+use crate::card::{Color, PowerKind, Stage};
 use crate::condition::{Placed, Shield};
 use crate::effect::Effect;
 use crate::game::Game;
 
 /// The outcome of a damage calculation, for the event and the UI (R-DMG-11).
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub(crate) struct Hit {
+pub struct Hit {
     pub amount: u16,
     pub weakness: bool,
     pub resistance: bool,
@@ -26,6 +26,37 @@ pub(crate) fn halve(d: i32) -> i32 {
 }
 
 impl Game {
+    /// What player `p`'s Active would do to the opposing Active with its attack
+    /// `attack` right now (R-DMG-01): the printed damage with every coin tails,
+    /// weakness, resistance, trainers, shields, reduction Powers and whole-attack
+    /// prevention, but no prevention coin. Ignores whose turn it is, so it also
+    /// answers "what can the opponent do to me next turn". Reads only public
+    /// board state. `None` when either Active is missing or there is no such attack.
+    pub fn preview_attack(&self, p: usize, attack: usize) -> Option<Hit> {
+        let a = self.players[p]
+            .active
+            .as_ref()?
+            .creature()
+            .attacks
+            .get(attack)?;
+        self.players[1 - p].active.as_ref()?;
+        let ignore_wr = a.effects.contains(&Effect::IgnoreWeaknessResistance);
+        Some(self.attack_damage(p, a.damage as i32, ignore_wr, self.attack_negated(p)))
+    }
+
+    /// R-DMG-12: the opposing Active is protected from all of player `p`'s
+    /// attack effects (a whole-attack shield, or an evolved attacker against
+    /// a `ShieldFromEvolved` Power).
+    pub(crate) fn attack_negated(&self, p: usize) -> bool {
+        let q = 1 - p;
+        let evolved = self.players[p]
+            .active
+            .as_ref()
+            .is_some_and(|a| a.creature().stage != Stage::Basic);
+        self.players[q].effects.shield == Some(Shield::PreventAll)
+            || (evolved && self.passive(q, 0) == Some(PowerKind::ShieldFromEvolved))
+    }
+
     /// R-DMG-03: the colour weakness and resistance are compared with. A
     /// Power-made colour counts only while that Power works; a Trainer-as-Basic
     /// is colour index 6 (colorless).
@@ -266,6 +297,28 @@ mod tests {
 
     fn attach_trainer(g: &mut Game, p: usize, slot: usize, card: crate::CardId) {
         g.players[p].slot_mut(slot).unwrap().trainers.push(card);
+    }
+
+    /// R-DMG-01, R-DMG-11, R-DMG-12: the public preview runs the same
+    /// calculation as the attack, for either side.
+    #[test]
+    fn preview_attack_matches_dealt_damage() {
+        let mut g = duel();
+        attach_trainer(&mut g, 0, 0, WHETSTONE);
+        let hit = g.preview_attack(0, 0).unwrap();
+        // Vine Poke 10 ×2 (Pebblet is weak to Grass) +10.
+        assert_eq!(
+            (hit.amount, hit.weakness, hit.resistance),
+            (30, true, false)
+        );
+        assert_eq!(g.preview_attack(1, 0).unwrap().amount, 20, "Pebble Toss");
+        assert_eq!(g.preview_attack(0, 5), None);
+        g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
+        let ev = ok(&mut g, crate::Action::Attack(0));
+        assert_eq!(damage_to(&ev, 1, 0), vec![30]);
+        let mut g = duel();
+        g.players[1].effects.shield = Some(Shield::PreventAll);
+        assert_eq!(g.preview_attack(0, 0).unwrap().amount, 0);
     }
 
     /// R-DMG-01

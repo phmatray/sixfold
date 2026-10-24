@@ -35,8 +35,11 @@ impl Game {
             .count()
     }
 
-    /// R-POWER-02/03, R-STATUS-05: the Power of the creature at (p, slot) works.
-    pub(crate) fn power_works(&self, p: usize, slot: usize) -> bool {
+    /// The Power of the creature at (p, slot) works now (R-POWER-02/03,
+    /// R-STATUS-05): it has one, it isn't a Confused / Asleep / Paralyzed
+    /// Active, and no blocker is in play (a blocker always works). `false`
+    /// for an empty slot or a creature without a Power.
+    pub fn power_works(&self, p: usize, slot: usize) -> bool {
         let pl = &self.players[p];
         let Some(power) = pl.slot(slot).and_then(|c| c.creature().power.as_ref()) else {
             return false;

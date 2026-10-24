@@ -39,6 +39,7 @@ pub use card::{
     Creature, EnergyCard, Power, PowerKind, Stage, Trainer, Units,
 };
 pub use condition::{ActiveEffects, Condition, Placed, Poison, Shield, Special, Status};
+pub use damage::Hit;
 pub use deck::{validate_deck, DeckError, DECK_SIZE, MAX_COPIES};
 pub use effect::{Choice, Effect, Find};
 pub use game::{Config, Game, SetupError, MAX_BENCH};

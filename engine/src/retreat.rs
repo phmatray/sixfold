@@ -6,8 +6,9 @@ use crate::condition::Placed;
 use crate::game::{Game, Step};
 
 impl Game {
-    /// R-RETREAT-02: printed cost −1 per working reducer on the own Bench, floored at 0.
-    pub(crate) fn retreat_cost(&self, p: usize) -> u8 {
+    /// Player `p`'s Active's retreat cost now (R-RETREAT-02): printed cost −1
+    /// per working reducer on the own Bench, floored at 0. 0 without an Active.
+    pub fn retreat_cost(&self, p: usize) -> u8 {
         let printed = self.players[p]
             .active
             .as_ref()

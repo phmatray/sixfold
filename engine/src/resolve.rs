@@ -7,7 +7,7 @@
 
 use crate::action::{Event, PromptKind};
 use crate::card::{card, CardId, CardKind, EnergyCard, PowerKind, Stage as CardStage};
-use crate::condition::{Shield, Status};
+use crate::condition::Status;
 use crate::effect::{Choice, Effect, Find, Phase};
 use crate::game::{Game, Step};
 
@@ -441,13 +441,7 @@ impl Game {
             return;
         }
         let (p, q) = (pd.player, 1 - pd.player);
-        let evolved = self.players[p]
-            .active
-            .as_ref()
-            .is_some_and(|a| a.creature().stage != CardStage::Basic);
-        let shielded = self.players[q].effects.shield == Some(Shield::PreventAll)
-            || (evolved && self.passive(q, 0) == Some(PowerKind::ShieldFromEvolved));
-        if shielded {
+        if self.attack_negated(p) {
             self.pd_mut().negated = true;
             ev.push(Event::AttackNegated { player: q });
         }
