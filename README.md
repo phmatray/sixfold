@@ -12,7 +12,7 @@ Playable from start to finish:
 
 - **Rules engine** (`engine/`): the whole duel, from setup and mulligans through
   attacks, conditions, Powers, trainers, knock-outs, prizes and sudden death.
-  Pure Rust, no browser needed; 285 unit tests.
+  Pure Rust, no browser needed; 297 unit tests.
 - **Card set**: 103 original cards (71 creatures in full evolution lines across
   all seven colours, 25 trainers, 6 basic energies and a special energy), and
   six prebuilt 60-card decks: Ember Rush (Fire / Fighting), Tide Mind
@@ -20,8 +20,14 @@ Playable from start to finish:
   (Lightning / Water), Stone Fist (Fighting / Colorless) and Dream Veil
   (Psychic / Grass). In an AI-against-AI round robin every deck wins between
   40% and 61% of its games; a test keeps each between 30% and 70%.
-- **AI opponent** (`engine/src/ai.rs`): Normal or Easy (Easy skips a trainer or
-  Power play one time in four). It sees only what its player may see.
+- **AI opponent** (`engine/src/ai.rs`): Easy, Normal or Hard. Easy skips a
+  trainer or Power play one time in four; Hard thinks a turn ahead: it tries
+  its candidate moves on copies of the game where every card it can't see and
+  every coming coin are dealt anew, plays each out through the opponent's
+  reply, and keeps the one a win model rates best. It beats Normal in 63% of
+  seeded mirror matches, in a few milliseconds per move. Every level sees only
+  what its player may see. Pick the level in **Play a duel**; the last rival
+  and the Hex Warden play Hard.
 - **Web app** (`web/`): deck select, the table, animated coins, damage and
   knock-outs, a battle log, a card inspector, and the game-over screen with a
   rematch. Works on desktop and on phones, in portrait and landscape.
@@ -29,8 +35,21 @@ Playable from start to finish:
   (Ember, Tide, Grove, Storm, Stone, Dream and Wild) revealed card by card,
   saved decks you create, copy, rename and edit, and a Wild Pack for every duel
   you win. New players start with one starter deck, Trailhead (Fire / Water),
-  and three packs; every prebuilt deck can still be played against the AI. Progress is kept in the browser
-  (localStorage) and can be reset from Settings.
+  and three packs; every prebuilt deck can still be played against the AI.
+- **Saves**: three save slots, picked, renamed and deleted from the title
+  screen, each saved by itself as you play (a small "Saved" pill says so).
+  Settings exports the current slot as a `.txt` file and imports one from a
+  file or a paste; an import is checked first and shown next to the save it
+  would replace, and a damaged file never touches your progress. A 0.6 save
+  moves into slot 1 on its own.
+- **Offline**: Sixfold installs as an app (Add to Home Screen / Install) and
+  plays without a connection once it has loaded; the world is kept after your
+  first visit to each area. When a new version is out, a toast offers to
+  reload.
+- **Accessible**: every screen works with the keyboard alone, with visible
+  focus; a screen reader hears one summary of each turn (what the AI did),
+  controls are at least 44 px on touch screens, and animations calm down with
+  the system's reduced-motion setting.
 - **Campaign**: six original rivals out on the roads around the meadow, one per
   colour theme, each with their own deck, AI level and prize count. Beat one
   for their seal and packs of their colours (a rematch win gives a pack);
@@ -72,6 +91,19 @@ and press **Duel**. Win for their seal and packs; lose and they will be waiting
 for a rematch. After the duel, **Back to the world** puts you where you stood,
 and the rival has a word for you. The seal count sits in the world's top bar;
 press it for the roster. Your progress and position are saved as you play.
+
+**Install and play offline.** Open the game once online, then use the
+browser's Install button (Chrome, Edge) or Share → Add to Home Screen (Safari
+on iPhone and iPad). The app shell is stored on the device, so it starts with
+no connection; the world's areas are kept after you first walk into them. The
+release zip works the same way when served from any static host.
+
+**Saves.** **Save slot** on the title screen lists the three slots: play one
+(an empty slot starts a new player), rename it or delete it. **Settings →
+Export save** downloads the current slot as a text file; **Import a file…** or
+**Check pasted save** shows what the file holds next to what it would
+replace, and **Replace my save** writes it (the old one is kept as a backup in
+the browser).
 
 **A quick duel.** Choose **Play a duel**, pick your deck and the AI's, then
 press **Start the duel**.

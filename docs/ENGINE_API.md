@@ -666,7 +666,43 @@ lowercase ASCII letters, digits and `_`):
 
 ---
 
-## 12. Known engine gaps (current)
+## 12. Save file (`save::*`)
+
+One text envelope holds everything a player keeps, for a save slot, Export and Import. Pure: the UI decides where the string lives (`web/src/store.rs` keeps three slots in localStorage).
+
+```text
+sixfold-save;1;<checksum>
+[collection]
+v1;0:2,5:1;1a2b3c4d
+[decks]
+d1;...;My deck;...
+[name]
+Save 1
+```
+
+- The header is `sixfold-save;<version>;<checksum>`: `save::VERSION = 1`, and the checksum is FNV-1a (8 lowercase hex digits) over every line after the header, joined with `\n`.
+- A section is `[name]` (lowercase ASCII letters, digits and `_`) followed by its lines. A content line that is empty or starts with `[` or `\` is written with a `\` in front.
+- Sections this build reads: `name`, `collection` (`Collection::save`), `decks` (one `DeckList::save` per line), `wallet` (`Wallet::save`), `progress` (`Progress::encode`), `world_at` (`map,x,z,facing`) and `campaign_deck`. Any other section (from a newer build) is kept and written back unchanged.
+
+```rust
+let mut s = Save::new_player("Save 1");         // name + a new player's profile
+s.get(section) -> Option<&str>; s.set(section, value); s.remove(section); s.sections()
+s.name() / s.set_name(name)                     // control characters become spaces
+s.encode() -> String                            // sections in name order: stable
+Save::decode(&text) -> Result<Save, SaveError>  // NotASave | Newer(version) | Checksum | Malformed
+s.profile() -> (Profile, Vec<&'static str>)     // parts that didn't read are reset and named
+s.set_profile(&p); s.progress(); s.set_progress(&p)
+s.summary() -> Summary { name, cards, distinct, decks, packs, seals, champion }
+Save::from_legacy(name, |key| storage.get(key)) -> Option<Save>  // a 0.6 save, key by key
+```
+
+- `decode` accepts surrounding whitespace, a BOM and `\r\n` line ends, refuses a newer version, and checks the whole file before anything is read, so an import can be validated (and summarised for a confirm) before it replaces a save.
+- `profile` mirrors the old per-key loading: no `collection` section is a new player; a collection, deck or wallet string that doesn't load is reset (starter collection, deck dropped, no packs) and reported, while the section keeps the bad string until the next `set_profile`.
+- `save::LEGACY_KEYS` lists the 0.6 localStorage keys (`sixfold.v1.collection`, `sixfold.v1.decks`, `sixfold.v1.wallet`, `sixfold.world.progress`, `sixfold.world.at`, `sixfold.campaign.deck`) and the section each becomes. Audio settings stay a per-device preference outside the save.
+
+---
+
+## 13. Known engine gaps (current)
 
 - A search can't decline to take a matching card. `DiscardEnergy` with `Colorless` discards the newest energy, and the player doesn't choose.
 - There is no "revive onto the Bench" effect and no "return a card to the top of the deck" effect.
