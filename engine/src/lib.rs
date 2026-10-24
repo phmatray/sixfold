@@ -30,6 +30,7 @@ pub mod ai;
 pub mod booster;
 pub mod decks;
 pub mod overworld;
+pub mod profile;
 pub mod set;
 
 #[cfg(test)]

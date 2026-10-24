@@ -589,6 +589,18 @@ d.validate(&owned) -> Result<(), DeckListError> // Illegal(DeckError), then NotO
 - `SortBy::key(id)` sorts any card list (e.g. the collection) the same way: `v.sort_by_key(|&(id, _)| by.key(id))`. Colour puts each colour's creatures then its basic energy, with trainers and the special energy last; Kind is Basics, Stage 1, Stage 2, trainers, special energy, basic energy; Rarity is rarest first. Ties go by id, which keeps evolution lines together.
 - `fill_energy` shares the free slots between the colours of the deck's creatures, in proportion to the number of creature cards of each colour (D'Hondt, counting the basic energy already in the deck). A deck with no coloured creature gets nothing.
 - `set::basic_energy(color) -> Option<CardId>` is the basic energy card of a colour.
+- `d.save()` gives `d1;<id>:<count>,...;<name>;<checksum>`, in the collection's style (ids ascending, FNV-1a over everything before the last `;`). Control characters in the name become spaces, so lists can be stored one per line; the name may contain `;`. `DeckList::load(&s) -> Result<(DeckList, Vec<(CardId, usize)>), LoadError>` gives the cards back in id order and drops (and reports) unknown ids. A collection string is refused with `LoadError::Version`.
+
+**Profile (`profile::*`).** What a player keeps between duels: `Profile { pub collection, pub decks: Vec<DeckList>, pub wallet: Wallet }`.
+
+```rust
+let mut p = Profile::new_player();   // starter_collection(), both prebuilt decks as deck lists, STARTING_PACKS = [1, 1, 1]
+p.open_pack(b, seed) -> Option<Vec<(CardId, bool)>> // spends a pack of BOOSTERS[b], adds its cards; true = first copy
+p.record_duel(won) -> Option<usize>  // a win grants one WIN_REWARD (Wild) pack and returns its booster index; a loss nothing
+p.wallet.packs(b) / .total() / .grant(b, n) -> bool / .take(b) -> bool
+p.wallet.save()                      // p1;<ember>,<tide>,<wild>;<checksum>
+Wallet::load(&s) -> Result<Wallet, LoadError>    // missing trailing counts are 0
+```
 
 ---
 
