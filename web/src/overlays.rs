@@ -170,7 +170,7 @@ pub fn DiscardViewer() -> impl IntoView {
                     <p class="dialog-sub">{if cards.is_empty() { "Empty.".to_string() } else { format!("{}, newest last.", crate::board::cards(cards.len())) }}</p>
                     <div class="discard-grid">
                         {cards.into_iter().map(|id| view! {
-                            <button class="discard-card" aria-label=card(id).name on:click=move |_| ui.open(Inspect { card: id, at: None })>
+                            <button class="discard-card" aria-label=crate::cards::face_text(id) on:click=move |_| ui.open(Inspect { card: id, at: None })>
                                 <CardFace id=id />
                             </button>
                         }).collect_view()}

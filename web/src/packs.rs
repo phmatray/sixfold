@@ -11,7 +11,7 @@ use sixfold_engine::{card, CardId, Rarity};
 
 use crate::art::color_key;
 use crate::binder::{inspect_handlers, PageBar};
-use crate::cards::{CardBack, CardFace, Pip};
+use crate::cards::{face_text, CardBack, CardFace, Pip};
 use crate::overlays::Inspector;
 use crate::{Screen, Ui};
 
@@ -204,7 +204,7 @@ fn Reveal(
                 let (peek, open) = inspect_handlers(id);
                 view! {
                     <li class="flip" class:rare=rare style=format!("--i:{i}")>
-                        <button type="button" class="flip-inner" aria-label=format!("{}{}", card(id).name, if new { ", new" } else { "" })
+                        <button type="button" class="flip-inner" aria-label=format!("{}{}", face_text(id), if new { ", new" } else { "" })
                             on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
                             <span class="face back-face"><CardBack /></span>
                             <span class="face front-face"><CardFace id=id /></span>

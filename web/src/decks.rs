@@ -9,7 +9,7 @@ use sixfold_engine::{
 
 use crate::art::card_color;
 use crate::binder::{inspect_handlers, FilterBar, Filters, Own, PageBar};
-use crate::cards::{deck_colors, deck_star, CardFace, Pip};
+use crate::cards::{deck_colors, deck_star, face_text, CardFace, Pip};
 use crate::overlays::Inspector;
 use crate::{Screen, Ui};
 
@@ -422,7 +422,7 @@ fn PickTile(id: CardId, draft: RwSignal<DeckList>, msg: RwSignal<Option<String>>
     };
     view! {
         <li class="pick" class:blocked=move || blocked().is_some()>
-            <button type="button" class="bind-card" aria-label=format!("{}: details", def.name)
+            <button type="button" class="bind-card" aria-label=format!("{}, details", face_text(id))
                 on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
                 <CardFace id=id />
             </button>

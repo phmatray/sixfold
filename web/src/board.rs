@@ -172,9 +172,9 @@ pub fn Creature(player: usize, uid: u32) -> impl IntoView {
         mon.with(|m| {
             m.as_ref().map_or(String::new(), |m| {
                 let mut s = format!(
-                    "{}: {}, {} of {} HP, {} energy",
+                    "{}, {}, {} of {} HP, {} energy",
+                    crate::cards::face_text(m.top),
                     slot_name(player, m.slot),
-                    card(m.top).name,
                     hp(),
                     m.max,
                     m.energy.len()
@@ -445,7 +445,7 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
         )
     };
     let id = key.0;
-    let name = card(id).name;
+    let face = crate::cards::face_text(id);
     let peek = Inspect { card: id, at: None };
     let long = StoredValue::new(false);
     let timer = StoredValue::new(None::<TimeoutHandle>);
@@ -462,7 +462,7 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
                 class:playable=playable
                 class:selected=selected
                 aria-pressed=move || selected().to_string()
-                aria-label=move || format!("{name}{}", if playable() { ", playable" } else { "" })
+                aria-label=move || format!("{face}{}", if playable() { ", playable" } else { "" })
                 on:click=move |_| {
                     if long.get_value() {
                         long.set_value(false);
