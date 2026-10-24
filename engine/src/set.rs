@@ -6,3 +6,11 @@
 use crate::card::CardDef;
 
 pub static CARDS: &[CardDef] = &[];
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn set_is_valid() {
+        assert_eq!(crate::card::validate_cards(super::CARDS), Ok(()));
+    }
+}

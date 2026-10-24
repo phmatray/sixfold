@@ -179,6 +179,96 @@ pub(crate) fn find_named(name: &str) -> Option<&'static CardDef> {
     crate::set::CARDS.iter().find(|c| c.name == name)
 }
 
+/// The id of the card with this name (for deck lists and tests).
+pub fn card_id(name: &str) -> Option<CardId> {
+    #[cfg(test)]
+    if let Some(i) = crate::fixtures::CARDS.iter().position(|c| c.name == name) {
+        return Some(CardId(crate::fixtures::FIRST + i as u16));
+    }
+    let i = crate::set::CARDS.iter().position(|c| c.name == name)?;
+    Some(CardId(i as u16))
+}
+
+/// Integrity check for a card set, meant for a unit test next to the set:
+/// unique names; every evolution names a creature of the stage below in the
+/// same set; HP and damage in tens; no colorless basic energy, weakness or
+/// resistance; the attach and stage-skip effects only on trainers. Returns
+/// the first problem found.
+pub fn validate_cards(cards: &[CardDef]) -> Result<(), String> {
+    for (i, c) in cards.iter().enumerate() {
+        let what = format!("{} (CardId({i}))", c.name);
+        if cards[..i].iter().any(|d| d.name == c.name) {
+            return Err(format!("{what}: duplicate name"));
+        }
+        let effects: Vec<&[Effect]> = match &c.kind {
+            CardKind::Energy(EnergyCard::Basic(Color::Colorless)) => {
+                return Err(format!("{what}: basic energy can't be Colorless"))
+            }
+            CardKind::Energy(_) => vec![],
+            CardKind::Trainer(t) => {
+                if t.effects.is_empty() {
+                    return Err(format!("{what}: trainer without effects"));
+                }
+                continue;
+            }
+            CardKind::TrainerBasic(cr) | CardKind::Creature(cr) => {
+                check_creature(cr, cards).map_err(|e| format!("{what}: {e}"))?;
+                if matches!(c.kind, CardKind::TrainerBasic(_)) && cr.stage != Stage::Basic {
+                    return Err(format!("{what}: a Trainer-as-Basic must be Basic"));
+                }
+                let mut v: Vec<&[Effect]> = cr.attacks.iter().map(|a| a.effects).collect();
+                match cr.power.as_ref().map(|p| p.kind) {
+                    Some(PowerKind::OnPlay(e)) => v.push(e),
+                    Some(PowerKind::Activated { effects, .. }) => v.push(effects),
+                    _ => {}
+                }
+                v
+            }
+        };
+        let trainer_only = |e: &&Effect| {
+            matches!(
+                e,
+                Effect::AttachPlus10 | Effect::AttachMinus20 | Effect::StageSkip
+            )
+        };
+        if let Some(e) = effects.iter().flat_map(|l| l.iter()).find(trainer_only) {
+            return Err(format!("{what}: {e:?} only works on a trainer"));
+        }
+    }
+    Ok(())
+}
+
+fn check_creature(cr: &Creature, cards: &[CardDef]) -> Result<(), String> {
+    if cr.hp == 0 || !cr.hp.is_multiple_of(10) {
+        return Err(format!("HP {} must be a positive multiple of 10", cr.hp));
+    }
+    if cr.weakness == Some(Color::Colorless) || cr.resistance == Some(Color::Colorless) {
+        return Err("weakness and resistance can't be Colorless".into());
+    }
+    if let Some(a) = cr.attacks.iter().find(|a| !a.damage.is_multiple_of(10)) {
+        return Err(format!("attack {} damage must be a multiple of 10", a.name));
+    }
+    let below = match cr.stage {
+        Stage::Basic => {
+            return match cr.evolves_from {
+                Some(_) => Err("a Basic doesn't evolve from anything".into()),
+                None => Ok(()),
+            }
+        }
+        Stage::Stage1 => Stage::Basic,
+        Stage::Stage2 => Stage::Stage1,
+    };
+    let Some(from) = cr.evolves_from else {
+        return Err("an evolution needs evolves_from".into());
+    };
+    match cards.iter().find(|d| d.name == from).map(|d| &d.kind) {
+        Some(CardKind::Creature(f)) if f.stage == below => Ok(()),
+        _ => Err(format!(
+            "evolves from \"{from}\", which isn't a {below:?} creature in the set"
+        )),
+    }
+}
+
 pub fn try_card(id: CardId) -> Option<&'static CardDef> {
     #[cfg(test)]
     if id.0 >= crate::fixtures::FIRST {
@@ -228,6 +318,29 @@ mod tests {
     use super::*;
     use crate::fixtures::*;
     use Color::*;
+
+    /// The fixture set passes the set check; a broken evolution doesn't.
+    #[test]
+    fn validate_cards_checks_evolution_chain() {
+        assert_eq!(validate_cards(crate::fixtures::CARDS), Ok(()));
+        assert_eq!(card_id("Mossling"), Some(MOSSLING));
+        static BROKEN: [CardDef; 1] = [CardDef {
+            name: "Lonely",
+            kind: CardKind::Creature(Creature {
+                stage: Stage::Stage1,
+                evolves_from: Some("Nobody"),
+                hp: 70,
+                color: Grass,
+                weakness: None,
+                resistance: None,
+                retreat_cost: 1,
+                attacks: &[],
+                power: None,
+            }),
+        }];
+        let err = validate_cards(&BROKEN).unwrap_err();
+        assert!(err.contains("Nobody"), "{err}");
+    }
 
     /// R-ENERGY-03
     #[test]
