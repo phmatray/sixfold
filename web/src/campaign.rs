@@ -32,6 +32,7 @@ fn difficulty(d: Difficulty) -> &'static str {
     match d {
         Difficulty::Easy => "Easy AI",
         Difficulty::Normal => "Normal AI",
+        Difficulty::Hard => "Hard AI",
     }
 }
 
