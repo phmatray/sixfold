@@ -167,7 +167,7 @@ pub fn TitleScreen() -> impl IntoView {
                     </form>
                 }.into_any()
             }}
-            <button type="button" class="btn ghost world-link" on:click=move |_| screen.set(Screen::World)>"Explore the world (test)"</button>
+            <button type="button" class="btn ghost world-link" on:click=move |_| screen.set(Screen::World)>"Explore the world"</button>
             <footer class="foot">"Original cards and art. The rules follow a classic handheld version of the game."</footer>
         </main>
     }
