@@ -1,7 +1,7 @@
 //! Card faces, card backs, energy pips and the full-text card details.
 
 use leptos::prelude::*;
-use pkmntcg_engine::{card, Attack, CardDef, CardId, CardKind, Color, Effect, EnergyCard, Stage};
+use sixfold_engine::{card, Attack, CardDef, CardId, CardKind, Color, Effect, EnergyCard, Stage};
 
 use crate::art::{card_art, card_color, color_key, glyph_svg};
 

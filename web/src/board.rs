@@ -1,7 +1,7 @@
 //! The playmat: both sides (Active, Bench, prizes, deck, discard) and the hand.
 
 use leptos::prelude::*;
-use pkmntcg_engine::{card, Action, CardId, Game, Poison, Special, Status, MAX_BENCH};
+use sixfold_engine::{card, Action, CardId, Game, Poison, Special, Status, MAX_BENCH};
 
 use crate::cards::{energy_pips, CardBack, CardFace};
 use crate::ctl::{Ctl, HUMAN};

@@ -9,7 +9,7 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
-use pkmntcg_engine::overworld::{Applied, Progress};
+use sixfold_engine::overworld::{Applied, Progress};
 use wasm_bindgen::prelude::*;
 
 use crate::ctl::Ctl;

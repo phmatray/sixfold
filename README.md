@@ -37,7 +37,7 @@ cargo install trunk
 cd web && trunk serve            # http://localhost:8080 (first build takes ~2 min)
 cd web && trunk build --release  # static site in web/dist
 
-cargo test -p pkmntcg-engine     # rules, card set and AI tests
+cargo test -p sixfold-engine     # rules, card set and AI tests
 ```
 
 In the app, pick your deck and the AI's, then press **Start the duel**.

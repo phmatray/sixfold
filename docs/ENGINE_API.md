@@ -1,6 +1,6 @@
-# Engine API reference (`pkmntcg-engine`)
+# Engine API reference (`sixfold-engine`)
 
-This is the contract between the rules engine (`engine/`) and its three consumers: the card set (`engine/src/set.rs`, `engine/src/decks.rs`), the AI (`engine/src/ai.rs`) and the Leptos UI (`web/`). The rules themselves are in `docs/RULES.md`. Everything listed here is re-exported from the crate root (`use pkmntcg_engine::*;`).
+This is the contract between the rules engine (`engine/`) and its three consumers: the card set (`engine/src/set.rs`, `engine/src/decks.rs`), the AI (`engine/src/ai.rs`) and the Leptos UI (`web/`). The rules themselves are in `docs/RULES.md`. Everything listed here is re-exported from the crate root (`use sixfold_engine::*;`).
 
 **Legal scope:** only mechanics. Every card name, attack, Power and line of text must be original. Use neutral words: "creature", "Power", "Basic / Stage 1 / Stage 2", and the colours Grass, Fire, Water, Lightning, Fighting, Psychic and Colorless.
 
@@ -538,7 +538,7 @@ impl Ai {
 
 ## 10. Collection, boosters and deck building
 
-Pure data and functions with no I/O: the UI decides where strings are stored and where booster seeds come from. `Collection`, `starter_collection`, `LoadError`, `DeckList`, `DeckListError`, `AddError` and `SortBy` are re-exported from the crate root; boosters live in `pkmntcg_engine::booster`.
+Pure data and functions with no I/O: the UI decides where strings are stored and where booster seeds come from. `Collection`, `starter_collection`, `LoadError`, `DeckList`, `DeckListError`, `AddError` and `SortBy` are re-exported from the crate root; boosters live in `sixfold_engine::booster`.
 
 **Collection.** Owned copies per `CardId`. Basic energy is unlimited: it is never stored, `count` reports `usize::MAX`, and `add` / `remove` on it are no-ops (`remove` returns true).
 

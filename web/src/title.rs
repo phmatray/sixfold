@@ -1,9 +1,9 @@
 //! Title screen: pick your deck and the AI's, see the seed, start.
 
 use leptos::prelude::*;
-use pkmntcg_engine::ai::Difficulty;
-use pkmntcg_engine::decks::{Prebuilt, PREBUILT};
-use pkmntcg_engine::{card, CardId, CardKind, Color, EnergyCard};
+use sixfold_engine::ai::Difficulty;
+use sixfold_engine::decks::{Prebuilt, PREBUILT};
+use sixfold_engine::{card, CardId, CardKind, Color, EnergyCard};
 
 use crate::cards::{CardFace, Pip};
 use crate::ctl::{Ctl, Setup};

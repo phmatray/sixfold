@@ -2,7 +2,7 @@
 //! battle log, discard viewer and the game-over screen.
 
 use leptos::prelude::*;
-use pkmntcg_engine::{card, Color, Event};
+use sixfold_engine::{card, Color, Event};
 
 use crate::art::glyph_svg;
 use crate::board::{find_mon, slot_name, status_class};

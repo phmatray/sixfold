@@ -1,4 +1,4 @@
-//! Sixfold: a single-player duel against the AI, rendering `pkmntcg_engine`.
+//! Sixfold: a single-player duel against the AI, rendering `sixfold_engine`.
 
 mod art;
 mod board;
@@ -10,7 +10,7 @@ mod title;
 mod world;
 
 use leptos::prelude::*;
-use pkmntcg_engine::{Action, CardId};
+use sixfold_engine::{Action, CardId};
 
 use board::{Hand, SideRow};
 use controls::{ActionBar, PromptModal};

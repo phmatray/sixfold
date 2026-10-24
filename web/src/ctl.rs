@@ -11,8 +11,8 @@ use std::collections::{HashMap, VecDeque};
 use std::time::Duration;
 
 use leptos::prelude::*;
-use pkmntcg_engine::ai::{Ai, Difficulty};
-use pkmntcg_engine::{card, Action, CardId, Config, Event, Game, PromptKind, Status};
+use sixfold_engine::ai::{Ai, Difficulty};
+use sixfold_engine::{card, Action, CardId, Config, Event, Game, PromptKind, Status};
 
 pub const HUMAN: usize = 0;
 pub const AI: usize = 1;
