@@ -1,0 +1,20 @@
+# Copyrighted reference material — never commit (Nintendo ROM)
+*.gbc
+*.gb
+*.gba
+
+# Rust / WASM
+/target
+**/*.rs.bk
+Cargo.lock
+dist/
+pkg/
+*.wasm
+
+# Node (if a JS front-end is added)
+node_modules/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
