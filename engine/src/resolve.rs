@@ -307,7 +307,7 @@ impl Game {
                 chooser_is_attacker: true,
             } => bench(q),
             SwitchSelf => bench(p),
-            // RULES: R-ZONE-04 — a search must take a match when there is one.
+            // RULES: R-ZONE-04 — a search can't be declined while a match exists.
             Search(find) => distinct(&me.deck, find),
             Recover(find) => distinct(&me.discard, find),
             AttachMinus20 => all(p),
@@ -339,8 +339,8 @@ impl Game {
 
     /// R-EVO-10: a Stage 2 in hand onto a settled Basic named as the
     /// evolves-from of the Stage 1 it evolves from.
-    /// RULES: R-EVO-10 open question — the source then records stage 3; nothing
-    /// here reads a stage beyond the card's own, so it isn't stored.
+    /// RULES: R-EVO-10 — the source records stage 3, which devolving reads as
+    /// "back to the Basic"; the evolution stack gives the same, so it isn't stored.
     pub(crate) fn stage_skip_options(&self, p: usize) -> Vec<Choice> {
         let pl = &self.players[p];
         let mut out = Vec::new();
@@ -916,7 +916,8 @@ impl Game {
         c.hp = c.creature().hp.saturating_sub(damage);
         c.clear_flags();
         let (uid, creature) = (c.uid, c.top());
-        // RULES: R-EVO-12 — the removed stage goes to its owner's hand.
+        // RULES: R-EVO-12 — the removed stage goes to its owner's hand, for the
+        // trainer too (the source's devolve trainer discards it).
         pl.hand.push(card);
         if slot == 0 {
             pl.clear_active_state();

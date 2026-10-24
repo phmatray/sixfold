@@ -11,7 +11,9 @@ unit test that should cover it.
 - **Method.** Static, read-only disassembly using custom SM83 tooling kept in the session scratchpad.
   The REA tool could not open the Game Boy format, because it has no SM83 architecture. Each claim
   went through two passes. An investigator located code and bytes. A verifier then re-disassembled
-  the same code on its own and marked the claim confirmed or corrected.
+  the same code on its own and marked the claim confirmed or corrected. A later pass settled the
+  remaining questions with targeted runtime probes: single routines run in an emulator harness from
+  duel save states, with watchpoints and stubbed UI. Those results are marked "Runtime".
 - **Legal scope.** This file describes game **rules and mechanics only**, in our own words. It
   contains no card names, attack names, flavor or UI text, art, or card data tables. Internal IDs
   (`$CB`, text `$3E`, and so on) appear only as evidence pointers. The engine must model every
@@ -47,10 +49,19 @@ unit test that should cover it.
 - **Rule.** At setup each player's state is reset, with every card back in the deck. The deck is
   shuffled and the player draws 7 cards.
 - **Parameters.** 7 draws. 2 shuffle passes. The shuffle is skipped only in a scripted practice
-  duel. A card counts as Basic when it is a creature (type < 8) with stage 0.
+  duel (`cc09 == $80`), which also seeds the RNG with `57 57 57`. A card counts as Basic when it is
+  a creature (type < 8) with stage 0.
 - **Status.** CONFIRMED
 - **Evidence.**
-  - `01:4D96-4DB0`: reset (`01:71B4`), `call 00:1021` twice, then `ld b,7` loop of draw + add-to-hand.
+  - `01:4D96-4DB0`: reset (`01:71B4`), `call 00:1021` twice (skipped at `01:4D9C` when
+    `cc09 == $80`), then `ld b,7` loop of draw + add-to-hand.
+  - `01:7178-718F` InitDuelGlobals: `cc09` (wDuelType) is the first duelist type that is link (`$01`)
+    or AI (bit 7), else 0; for the AI it copies the AI side's `+F1`.
+  - `00:2AFB-2B41` InitAIDuelVars: the AI side's `+F1 = $80 | wAIOpponentIndex`. Index 0 (the scripted
+    tutorial, which also sets `cc13`) and index 2 are both rewritten to 0 and get the fixed seed
+    (`00:2B09`, `00:2B0D`, `00:2B1C`), so only those two practice duels have `cc09 == $80`. Every
+    other AI duel has `$81` or more and shuffles. Runtime: index 5 gave `C3F1 = $85` and `cc09 = $85`,
+    and `01:4D96` then called the shuffle (`00:1021 → 11E4 → 0843`).
   - `01:71B4`: zeroes the duel page, sets all 60 locations to deck, sets the deck order to 0..59.
   - `01:4DB1-4DED`: scans the 7 hand cards with the Basic test.
 - **Test.** `setup_draws_seven_cards_each_player`
@@ -94,7 +105,7 @@ unit test that should cover it.
   - `01:4D22-4D46`: the Active pick loops until a card is chosen. With `cbfc=0`, B (cancel) loops back.
   - `01:4D5E-4D8B`: the Bench loop. Cancel ends it, and 6 in play shows the bench-full message.
   - `01:5525-5538`, `01:4DD0`: the selection filter.
-  - `01:4BCF-4BE2`: player first, then opponent. `01:51ED` is a practice-duel hook only (`cc13`).
+  - `01:4BCF-4BE2`: player first, then opponent. `01:51ED` is a scripted-tutorial hook only (`cc13`).
 - **Test.** `setup_requires_exactly_one_basic_active`, `setup_rejects_evolution_card`, `setup_bench_limit_five`
 
 ### R-SETUP-05: Prizes are set after placement; count is 1 to 6
@@ -243,8 +254,8 @@ unit test that should cover it.
 - **Parameters.** `01:51ED` is a practice-only hook (`cc13 ≠ 0`). `01:7227` zeroes the non-turn
   player's `+F2..F9`.
 - **Status.** CORRECTED. The original claim said Done asks for confirmation.
-- **Evidence.** `01:439E-43AE`. `01:51ED` returns immediately when `cc13 == 0`. `cc13` is set only at
-  `00:2AFB`.
+- **Evidence.** `01:439E-43AE`. `01:51ED` returns immediately when `cc13 == 0`. `cc13` is the
+  scripted-tutorial flag (R-TURN-07).
 - **Test.** `end_turn_passes_turn_without_prompt`
 
 ### R-TURN-07: Result codes and when a duel ends
@@ -254,9 +265,16 @@ unit test that should cover it.
   during between-turns ends the duel before the turn counter goes up. The AI's turn loop stops the
   same way.
 - **Parameters.** `cc07`. Checks at `01:42A5`, `01:4102` and `01:4114`. The AI loop checks at
-  `01:68A0` and `01:6A17`.
+  `01:68A0` and `01:6A17`. The only other duel exit is the scripted tutorial's 15-turn stop
+  (`01:411E-4135`), which needs both `cc09 == $80` and `cc13 ≠ 0`.
 - **Status.** CONFIRMED
 - **Evidence.** `01:4161-41B9` (the result screens), `01:42A2-42A9`, `01:40FC-4118`.
+  - `cc13` is the **scripted tutorial flag** (AI opponent index 0 only). Writers: `00:2AFC` (clear)
+    and `00:2B0A` (set to 1 when wAIOpponentIndex is 0) in InitAIDuelVars, and `01:40CB` (clear) in
+    StartDuelAltEntry. Readers: `01:51F0` (PracticeDuelHook) and `01:412A` (the 15-turn exit).
+    `find_bytes 13 CC` finds only these 5 sites. Runtime: `01:411A` with `cc06 = $0E` and
+    `cc09 = $80` stopped the duel at `01:4135` when `cc13 = 1`, and swapped the turn at `01:4125`
+    when `cc13 = 0`.
 - **Test.** `ko_mid_turn_ends_duel_immediately`, `poison_ko_between_turns_ends_before_next_draw`
 
 ### R-TURN-08: A draw becomes sudden death
@@ -279,8 +297,9 @@ unit test that should cover it.
 
 ### R-ENERGY-01: One energy attachment per turn
 - **Rule.** A player may attach at most one energy card from hand per turn, to the Active or to any
-  Benched creature. The limit is checked before the target is chosen. The flag is set only when the
-  attachment is committed, so cancelling the target choice keeps the attachment available. This
+  Benched creature. The limit is checked before the target is chosen, except when the free-attach
+  exception may apply (R-ENERGY-02): then the target is picked first and the play is refused
+  afterwards if the exception does not cover it. The flag is set only when the attachment is committed, so cancelling the target choice keeps the attachment available. This
   applies on any turn, including both players' first turns. The flag resets every turn.
 - **Parameters.** Flag `cc0b`: 0 means an attachment is still allowed, 1 means it has been used. The
   attach primitive `00:1437` sets the card's location to `$10|slot`.
@@ -290,6 +309,9 @@ unit test that should cover it.
   - `01:448B-4496`: picker, cancel → menu, otherwise set the flag.
   - `01:7193`: per-turn reset.
   - `01:6A65`: the AI/link executor sets the same flag.
+  - `01:447C-4483 → 01:44B3`: with the free-attach energy type and a working holder, the target is
+    picked first (`44B6`), then the match (`44BC`) and the flag (`44C1-44C7`, text `$3E`, back to the
+    hand menu at `443A`). The clean engine's attach is one action, so this order has no effect there.
 - **Test.** `second_energy_attach_same_turn_rejected`, `cancel_attach_keeps_allowance`, `energy_attach_allowed_turn_zero`
 
 ### R-ENERGY-02: Free-attach Power exception
@@ -301,14 +323,24 @@ unit test that should cover it.
   Counting rule (R-POWER-03): a Benched holder always counts. An Active holder counts only if it is
   not Confused, Asleep or Paralyzed (Poison does not matter). The blocker is counted the same way:
   a Confused, Asleep or Paralyzed Active blocker does not block. If the exception does not apply and
-  the normal attachment is already used, the play is refused. The AI/link executor always sets the
-  flag.
+  the normal attachment is already used, the play is refused. The target's colour is its effective
+  colour: a Power-made colour counts only while that Power works.
+
+  The AI/link executor always sets the flag (`01:6A65`), and the default AI asks for an attachment
+  only while the flag is 0 (`05:4D17`, `05:4D4A`). One deck-specific AI (opponent index `$12`,
+  `08:6790`) runs after its Powers step and, while it has the holder in its own play area and no
+  blocker is in play, repeats matching attachments with no check of `cc0b`. **Engine:** the exception
+  applies to every player, the AI included, through the same action as a human.
 - **Parameters.** Energy type `$0B`. Holder ID `$43` (own side only). Blocker ID `$27` (both sides).
   Target colour from `00:36AE` must equal 3. The free branch goes to `01:4499` and skips the flag write.
 - **Status.** CORRECTED. The verifier refined the status test, the blocker counting, the effective
-  colour and the AI case.
-- **Evidence.** `01:447B-4483`, `00:35CC-35D8`, `00:34DC-34FF`, `00:35D9-35EE`, `01:44B3-44C7`, `01:6A65`.
-- **Test.** `free_attach_power_allows_extra_matching_energy`, `free_attach_power_off_when_holder_active_asleep`
+  colour and the AI case. Runtime (`08:6790`, `cc0e = $12`, holder `$43` Active, three `$0B` energies
+  in hand, `cc0b = 1`): AIActAttachEnergy ran 3 times; with only other energy types it attached
+  nothing. Other AI indexes return at `08:6795`.
+- **Evidence.** `01:447B-4483`, `00:35CC-35D8`, `00:34DC-34FF`, `00:35D9-35EE` (the target colour via
+  `00:36AE`, after the slot pick), `01:44B3-44C7`, `01:6A65`, `08:6790-6795`.
+- **Test.** `free_attach_power_allows_extra_matching_energy`, `free_attach_power_off_when_holder_active_asleep`,
+  `free_attach_needs_matching_target_colour`
 
 ### R-ENERGY-03: Energy counting
 - **Rule.** Attached energy is counted per colour. A basic energy gives 1 unit of its colour. The
@@ -355,7 +387,8 @@ unit test that should cover it.
   retreat-failed flag is checked first (R-RETREAT-03).
 - **Status.** CONFIRMED
 - **Evidence.** `01:45BF-45F7` (the chain), `00:354E-355F`, `01:491E-4938`, `01:5FF6`, `01:45F8-4614`.
-- **Test.** `retreat_rejected_when_asleep_or_paralyzed`, `retreat_rejected_without_live_bench`, `poisoned_active_can_retreat`
+- **Test.** `retreat_rejected_when_asleep_or_paralyzed`, `retreat_rejected_without_live_bench`, `poisoned_active_can_retreat`,
+  `retreat_preconditions_checked_in_order`
 
 ### R-RETREAT-02: Retreat cost and payment
 - **Rule.** The retreat cost is the printed cost, minus 1 for each copy of a generic retreat-reducer
@@ -380,9 +413,10 @@ unit test that should cover it.
   The flag is cleared on a successful retreat and at the start of every turn. The flag is read only
   on the confused path, so if confusion is cured later that turn, a normal retreat is allowed again.
 - **Parameters.** Flag `cc0c`. Carry means heads, which means success.
-- **Status.** CONFIRMED
+- **Status.** CONFIRMED. Runtime: a Confused retreat at cost 0 reached TossCoin at `01:65DE`; a
+  forced tails left the Active in place, set `cc0c = 1` and returned to the turn menu (`01:4299`).
 - **Evidence.** `01:43AF-43C0`, `01:65D0-65F4` (discard at `65AE` before the coin at `3034`). `cc0c`
-  is written only at `65E5/65F1/7197`.
+  is written only at `65E5/65F1/7197`; `01:65F1` clears it after a successful switch.
 - **Test.** `confused_retreat_tails_discards_energy_and_stays`, `confused_retreat_failure_blocks_retry_same_turn`
 
 ### R-RETREAT-04: Switching clears the outgoing Active's conditions
@@ -403,18 +437,23 @@ unit test that should cover it.
 - **Rule.** A creature that is not Confused may retreat any number of times per turn, paying each
   time. Retreating does not end the turn, and the new Active may attack. Retreat is available on every
   turn, including first turns.
-- **Parameters.** The only per-turn retreat state is `cc0c` (R-RETREAT-03).
+- **Parameters.** The only per-turn retreat state for players is `cc0c` (R-RETREAT-03). The AI has
+  its own once-per-turn flag (R-AI-07).
 - **Status.** CONFIRMED
-- **Evidence.** `01:43F5-4420` (no flag read, `jp 4271`). `05:4078-408E`: the AI retreats twice in
-  one turn.
+- **Evidence.** `01:43F5-4420` (no flag read, `jp 4271`). `05:4078-408E`: the one AI handler without
+  the AI's retreat flag (opponent index `$35`) retreats twice in one turn.
 - **Test.** `retreat_twice_same_turn_then_attack`
 
 ### R-RETREAT-06: Cancelling a retreat costs nothing
 - **Rule.** Cancelling during energy or Bench selection abandons the retreat at no cost. Energy that
-  was discarded for display is re-attached.
+  was discarded for display is re-attached. A single energy choice cannot be undone: B at the energy
+  picker abandons the whole retreat.
 - **Parameters.** `01:65BA` re-attaches the cards to slot 0. Cancel goes to `jp 4271`.
 - **Status.** CONFIRMED
-- **Evidence.** `01:43FF-4415`, `01:65BA-65CE`.
+- **Evidence.** `01:43FF-4415`, `01:65BA-65CE` (the non-confused path). `01:43C7-43D5` (the confused
+  path: nothing is discarded until DoRetreat). The energy picker `01:4615/46BB` (RetreatEnergyPickOne)
+  only records the choices in the `$FFA3` list (`00:1294`, RemoveCardFromTempList, edits only the
+  display list); B returns carry and cancels the whole retreat.
 - **Test.** `cancel_retreat_keeps_energy`
 
 ---
@@ -501,7 +540,7 @@ unit test that should cover it.
 - **Status.** CORRECTED. `01:7227` only clears the opponent's last-attack variables.
 - **Evidence.** `00:16E1-16E9`, `00:1848-1856`, `00:1788-17AA`. The AI path `01:6B4C` uses the same
   order.
-- **Test.** `confused_tails_pays_cost_takes_20_and_ends_turn`
+- **Test.** `confused_tails_pays_cost_takes_20_and_ends_turn`, `confused_tails_self_ko_gives_opponent_prize`
 
 ### R-STATUS-07: Between-turns order
 - **Rule.** After the turn ends (with T = the player whose turn just ended), these steps run in order:
@@ -572,12 +611,14 @@ unit test that should cover it.
   - a card effect removes or replaces it.
 
   Generic cure effects also exist: a trainer that requires the Active to have a condition and then
-  clears it, and a once-per-turn Power that clears both Actives.
+  clears it, and a once-per-turn Power that clears both Actives (usable when either Active has a
+  condition).
 - **Parameters.** `00:13C6`, called from `00:14A8`, `00:134A`, `00:142E`, `01:6FD7`, `0B:4462`,
   `0B:703A` and `0B:77F9`. Trainer cure at `0B:74C5/74D6`. Power cure at `0B:4E5C-4EAA`.
 - **Status.** CONFIRMED
 - **Evidence.** As listed in Parameters.
-- **Test.** `evolving_active_clears_all_conditions`, `cure_trainer_requires_condition`
+- **Test.** `evolving_active_clears_all_conditions`, `cure_trainer_requires_condition`, `cure_both_actives`,
+  `promotion_after_ko_has_clean_condition`
 
 ### R-STATUS-13: Record of the last inflicted conditions *(verifier-found)*
 - **Rule.** The engine records which conditions the most recent attack inflicted. A copy-effect can
@@ -605,9 +646,20 @@ unit test that should cover it.
 - **Rule.** Some effects write a condition directly, without the queue. Those still check immunity,
   but negation does not stop them. An attack may confuse both the defender and the attacker. The
   self copy skips the immunity checks and survives negation.
-- **Status.** CONFIRMED (verifier-found)
-- **Evidence.** `0B:7216-7251`, `0B:4793-479C`, `0B:5300-531F` (paralysis plus an immediate apply).
+- **Parameters.** `0B:7216` (DirectConfuseTurnActive) is the only phase-3 entry of list `06:4EE7`,
+  used by a trainer: playing it confuses the player's own Active at once (`+F0 = (old & $F0) | 1`),
+  with the immunity checks (`$CB/$CC`, `$BE` through `34A7`) and without consulting `cccd`. The
+  attack self-confusion is `0B:4793`: InflictConfusion after `SwapTurn`, so `hWhoseTurn ≠
+  wTurnStartDuelist` at `0B:4035-403B` skips immunity, and the entry is queued.
+- **Status.** CONFIRMED (verifier-found). Runtime: playing the `$C8` trainer hit `0B:7216` with
+  `ff98 = cc05 = $C2` and left `C2F0 = 1`, `C3F0 = 0`.
+- **Evidence.** `0B:7216-7251`, `06:4EE7`, `0B:4793-479C`, `0B:5300-531F` (paralysis plus an
+  immediate apply).
 - **Test.** `self_confusion_survives_negation`
+
+  The clean engine models queued conditions and the attack self-condition (`InflictSelf`, which
+  ignores immunity and negation). A direct-write "confuse your own Active" trainer is not modelled;
+  an original card set that wants one needs a new effect that applies at once and checks immunity.
 
 ---
 
@@ -634,10 +686,14 @@ unit test that should cover it.
 - **Test.** `damage_order_weakness_then_resistance_then_trainers`, `resisted_10_with_plus10_is_zero`
 
 ### R-DMG-02: Zero base damage skips all modifiers
-- **Rule.** An attack with 0 base damage stays at 0. The same happens if the attacker step leaves it
-  at 0.
-- **Status.** CONFIRMED. Edge case: the weakness/resistance-ignore flag path skips the second zero
-  check. This does not occur with real data.
+- **Rule.** An attack whose damage word is 0 deals 0, with no modifiers. Only with the
+  ignore-weakness-and-resistance flag set would a 0 word still get the trainers and the defender's
+  effects, which never occurs.
+- **Status.** CONFIRMED. The second zero check (`00:191B`) never fires on its own, because the
+  doubling (`31D4`) only doubles a nonzero word (`31F2-31F4`). The real edge is the ignore flag: bit
+  15 on a 0 word (`$8000`) passes the first test at `18FD`, and after `res 7` (`190D`) it jumps to
+  `1953`, so 0 base plus one +10 trainer would give 10. The only bit-15 setters (`0B:6758`,
+  `0B:6870`) belong to attacks with fixed damage. The clean engine returns 0 for every 0 base.
 - **Evidence.** `00:18F8-1902`, `00:191B-191D`.
 - **Test.** `zero_base_damage_ignores_weakness_and_plus10`
 
@@ -695,7 +751,11 @@ unit test that should cover it.
   the self-hit, so self-damage cannot be prevented.
 - **Parameters.** Confusion hit base 20. `18BC → 1982`, with no turn swap.
 - **Status.** CONFIRMED
-- **Evidence.** `00:1788-179D`, `00:18BC-18F0`, `00:1982-19C8`. `18B5` has 18 recoil callers.
+- **Evidence.** `00:1788-179D`, `00:18BC-18F0`, `00:1982-19C8`. `18B5` (DealRecoilDamage) has 17
+  static call sites, all in bank `0B`: one inside a Power routine (`0B:5381`) and one inside the
+  copy-attack routine (`0B:6DA8`). DealSelfDamage `18BC` is reached only from the confusion hit
+  (`00:179D`). Self-damage passes through `01:74C2` and `01:7516` (`rst $18` at `18CA` and `18E5`) and
+  sets `ccca = ccc9` while it runs.
 - **Test.** `confusion_self_hit_weak_to_own_type_takes_40`, `confusion_self_hit_resists_own_type_takes_0`
 
 ### R-DMG-06: HP storage and the knock-out test
@@ -711,7 +771,11 @@ unit test that should cover it.
 - **Rule.** A halving effect rounds down to a multiple of 10: 30 → 10, 50 → 20, 60 → 30. Every built-in
   constant is a multiple of 10.
 - **Parameters.** `e>>1`, then −5 if the result is odd. This is only correct up to 255, which covers
-  all values that occur.
+  all values that occur. HalveDamageRoundTo10 `00:3281` is `sla d; rr e`: it shifts D **left**, so
+  for 256 and up the result is wrong (300 = `$012C` becomes `$0296` = 662). A negative input
+  (`D = $FF`) stays negative and is clamped later. SubtractHP `00:19F6-1A02` floors HP only when bit 7
+  of `(0 − D − borrow)` is set, so a damage high byte ≥ `$81` skips the floor and HP wraps. Neither
+  happens with real data; the clean engine uses plain integers.
 - **Status.** CONFIRMED
 - **Evidence.** `00:3281-328E`, `00:32A0`.
 - **Test.** `halve_damage_rounds_down_to_ten`
@@ -894,14 +958,17 @@ unit test that should cover it.
 - **Status.** CONFIRMED
 - **Evidence.** `00:1311-1327`, `00:1437`. The Bench path zeroes `E0/DA` at `00:1418`, and evolve
   does not.
-- **Test.** `evolve_keeps_attached_energy`
+- **Test.** `evolve_keeps_attached_energy` (also checks the attached trainers and their count)
 
 ### R-EVO-08: Evolving clears the slot's flags, and clears the Active's conditions
-- **Rule.** For any slot, evolving clears the slot flags and the changed colour, and writes the new
-  stage. For the Active only, all conditions and effects are cleared as well (R-STATUS-12). The
-  player-wide trainer lock is not cleared.
+- **Rule.** For any slot, evolving clears all the slot flags (settled, Power-used, once-while-in-play)
+  and the changed colour, and writes the new stage. So a once-while-in-play attack (R-EFFECT-05) is
+  usable again after evolving. For the Active only, all conditions and effects are cleared as well
+  (R-STATUS-12). The player-wide trainer lock is not cleared.
+- **Parameters.** EvolvePokemonNoCheck zeroes the whole `+C2` byte (`00:133C`: bit 7 settled, bit 5
+  Power used, bit 6 once-while-in-play) and `+D4` (`00:1342`).
 - **Status.** CONFIRMED
-- **Evidence.** `00:1342`, `00:13C6`, `00:134D`.
+- **Evidence.** `00:133C`, `00:1342`, `00:13C6`, `00:134D`.
 - **Test.** `evolve_active_clears_conditions`, `evolve_bench_keeps_slot_state`
 
 ### R-EVO-09: Evolution-lock Power
@@ -909,7 +976,11 @@ unit test that should cover it.
   can evolve, whether from hand or through the stage-skip trainer. The holder counts as in play when
   it is on the Bench, or when it is the Active without Confused, Asleep or Paralyzed. The lock is
   lifted while a power blocker is in play, using the same counting rule. The "nothing to evolve" and
-  "not this turn" errors take priority over the lock.
+  "not this turn" errors take priority over the lock. That priority is judged over the whole play
+  area: EvolveFromHand `01:4528` scans every slot first, shows "none" or "not this turn" only if no
+  slot works, then checks the lock (`01:455A`), and only then opens the target picker. The clean
+  engine judges the one slot the player named, so with a lock up and another slot eligible it
+  reports "no matching creature" where the source reports the lock. Both refuse the play.
 - **Parameters.** `00:356E` is blocked when `count($8D) > 0` and `count($27) == 0`.
 - **Status.** CORRECTED. The verifier refined how the blocker is counted.
 - **Evidence.** `00:356E`, `00:34C0`, `00:34DC`, `01:455A`, `0B:76B8`.
@@ -919,9 +990,11 @@ unit test that should cover it.
 - **Rule.** A trainer effect may put a Stage 2 from hand directly onto a settled Basic. The Basic's
   name must match the evolves-from name of the Stage 1 that the Stage 2 evolves from. The usual
   eligibility rules and the evolution lock still apply. The normal evolve body runs, and the stage is
-  then recorded as 3.
+  then recorded as 3. Stage 3 means "a skipped Stage 1": devolving such a creature returns it to the
+  Basic.
 - **Status.** CONFIRMED
-- **Evidence.** `0B:76B3-7716`, `00:1390`, `00:2E84`.
+- **Evidence.** `0B:76B3-7716`, `00:1390`, `00:2E84`, `01:70F2` / `01:713B` (devolve reads 1 and 3
+  alike, see §15).
 - **Test.** `stage_skip_trainer_requires_settled_basic`
 
 ### R-EVO-11: Evolving refreshes a once-per-turn Power *(verifier-found)*
@@ -934,9 +1007,16 @@ unit test that should cover it.
 ### R-EVO-12: Devolve effect *(verifier-found)*
 - **Rule.** A devolve effect sets HP to (the lower stage's max − damage), clamped at 0, restores the
   lower stage, clears the Active's conditions, and clears the slot flags. A devolved creature cannot
-  evolve again that turn.
+  evolve again that turn. Where the removed stage goes depends on the effect:
+  - the devolve **attack** (`0B:5D17-5D2E`) puts it into its owner's hand;
+  - the devolve **trainer** (`0B:7C99-7CCC`) devolves a creature on the player's own side, puts the
+    removed stages into the discard pile, then runs the knock-out handler (`01:6EF6`).
+
+  The clean engine always returns the removed stage to its owner's hand, for attacks and trainers
+  alike (an engine choice, marked by a `RULES: R-EVO-12` comment).
 - **Status.** CONFIRMED (verifier-found)
-- **Evidence.** `0B:4440-4475`.
+- **Evidence.** `0B:4431-4475` (DevolveEffect `0B:4431`, DevolveClearSlotState `0B:445D`),
+  `0B:5D17-5D2E`, `0B:7C99-7CCC`.
 - **Test.** `devolve_keeps_damage_and_clears_flags`
 
 ### R-EVO-13: The evolve target picker *(verifier-found)*
@@ -975,7 +1055,7 @@ unit test that should cover it.
   processing.
 - **Status.** CONFIRMED
 - **Evidence.** `00:1764-177D`, `00:17A3`, `01:6CED`, `0B:58FF/6789/7CCC`.
-- **Test.** `recoil_ko_and_defender_ko_resolved_together`
+- **Test.** `recoil_ko_and_defender_ko_resolved_together`, `confused_tails_self_ko_gives_opponent_prize`
 
 ### R-KO-04: Order inside the knock-out handler
 - **Rule.** With T as the turn player:
@@ -999,7 +1079,12 @@ unit test that should cover it.
 - **Rule.** A player whose Active is at 0 HP must immediately choose a new Active from Benched
   creatures with HP above 0. The choice cannot be cancelled. If none exists, that player has no
   creatures (a win condition for the opponent).
-- **Status.** CONFIRMED. The AI's own filter was not traced, so the engine must enforce the rule.
+- **Status.** CONFIRMED. The default AI never picks a 0-HP creature (AIDefaultReplaceHandler
+  `05:4683 → AIScoreSwitchIn` scores it 0). The scripted practice AI (opponent index 0, replacement
+  entry `05:47E7`) looks for two fixed card IDs on the Bench (`05:55EF`) or falls back to slot 1 with
+  no HP check while the turn counter / 2 < 7, so it can pick a 0-HP slot (runtime: `00:2B52` with
+  `cc0e = 0` returned the 0-HP slot, with `cc0e = 5` the live one). The engine validates every AI
+  replacement anyway.
 - **Evidence.** `01:6FD0-7034`, `01:5FF6-6024`, `01:60BD-60C7`.
 - **Test.** `ko_active_must_be_replaced_by_live_bench`, `no_live_bench_means_no_creatures`
 
@@ -1014,16 +1099,26 @@ unit test that should cover it.
   `00 02 01 03 02 02 03 02 01 03 01 01 03 02 01 03`.
 - **Status.** CONFIRMED. All 16 entries were checked.
 - **Evidence.** `01:6F58-6F7C`, `01:6FA3-6FB4`, `01:4161-4197`.
-- **Test.** `last_prize_but_own_active_ko_no_bench_is_draw`, `both_take_last_prize_is_draw`
+- **Test.** `last_prize_but_own_active_ko_no_bench_is_draw`, `both_take_last_prize_is_draw`,
+  `result_table_matches_all_sixteen_entries`
 
 ### R-KO-07: Early win and early loss
 - **Rule.** If T takes its last prize, still has a creature with HP above 0, and N cannot also finish
-  its prizes in this step, T wins at once. N's prize count is reduced silently, and no replacements
-  happen. If only N finishes its prizes and N still has a live creature, T loses at once. The result
-  always matches the table, so an engine may use the table path every time. The knock-out discard
-  still happens.
-- **Status.** CONFIRMED
-- **Evidence.** `01:6F09-6F4A`, `01:720E-7226`, `01:70A4`.
+  its prizes in this step, T wins at once. T still picks its deciding prizes the normal way (a human
+  with the prize cursor, the AI at random). N's prizes are only removed from the count: no card goes to
+  N's hand, and the mask keeps the lowest slots, so the highest go first. No replacements happen. If
+  only N finishes its prizes and N still has a live creature, T loses at once. On the full table path
+  both replacements are still asked for before the result. The result always matches the table, so
+  an engine may use the table path every time. The knock-out discard still happens.
+- **Status.** CONFIRMED. Runtime (T one prize left, both Actives knocked out): the human prize cursor
+  `02:4AAC` ran, then `01:720E` lowered N's `+EC` from 3 to 1 while N's prize cards kept location `$08`
+  and N's hand count stayed the same; `cc07 = 1`.
+- **Evidence.** `01:6F03 → 01:7052 → 01:5807` (TakeKOPrizes, TakePrizes), `01:6F09-6F4A`, `01:6F4C`,
+  `01:720E-7226` (DeductPrizesSilently, from PrizeMaskTable), `01:70A4`, `02:4AAC`.
+
+  The clean engine, once the duel is decided, takes the first face-down prizes of both players into
+  their hands with no pick and asks for no replacement. The duel is over, so only the final hand and
+  prize counts differ (a `RULES: R-KO-07` comment marks this).
 - **Test.** `early_win_matches_table_result`
 
 ### R-KO-08: Knock-outs between turns
@@ -1051,8 +1146,11 @@ unit test that should cover it.
 
 ### R-KO-10: Knock-out clears linked effects
 - **Rule.** When one side's Active is knocked out, these values in the other side's `+E8` are
-  cleared: 3, 5, 6, 7 and `$12` (effects that depended on it).
-- **Status.** CONFIRMED
+  cleared: 3, 5, 6, 7 and `$12` (effects that depended on it). The third attack-lock code `$0B`
+  (R-TURN-05; set by `0B:6312-6318` on a coin) is not in that set, so that lock outlives the
+  knock-out of the creature that placed it.
+- **Status.** CONFIRMED. The clean engine's single attack lock is always linked (it models codes 5
+  and 6); an unlinked lock would need its own effect.
 - **Evidence.** `01:6F8F-6FA2`, `00:357E-359C`.
 - **Test.** `ko_clears_effects_placed_by_defender`
 
@@ -1076,18 +1174,33 @@ unit test that should cover it.
 - **Rule.** A deck may hold at most 4 cards that share a **name**. Different versions with the same
   name count together. Basic energy is exempt. The special 2-unit energy, trainers and creatures are
   limited.
-- **Parameters.** Limit `cfd9 = 4`. Types `$08-$0D` are exempt.
+- **Parameters.** Limit `cfd9 = 4`. The exemption test is exactly: type `$0E` (the special energy)
+  is counted; otherwise any type with bit 3 set is exempt, which is `$08-$0D` (basic energy) in
+  practice. The limits are a 2-byte record copied by `02:4D9F` into `cfd8/cfd9`: the deck editor's
+  record `02:4DAB` is 80 cards while editing and 4 copies.
 - **Status.** CONFIRMED
-- **Evidence.** `02:5D9F-5DDA`, `02:5D4D`.
+- **Evidence.** `02:5D9F-5DDA`, `02:5DA5-5DAD`, `02:5D4D`, `02:4D9F`, `02:4DAB`.
+  - A second caller (`02:61E7`, the tail of `02:61D1`, called only from `02:6F67`) loads record
+    `02:61F1 = 3C 3C` (60 cards, 60 copies). That is the card-sending picker (it follows the
+    send-procedure texts `$0287-$0289` and the "cards chosen to send" header `$032E`, then copies the
+    list to wTempCardList and calls `01:7619`), not a deck builder, so it never makes a duel deck. The
+    rule for duel decks stays 4. Runtime: `02:4D9F` with `HL = 61F1` wrote `3C 3C`, with `HL = 4DAB`
+    wrote `50 04`.
 - **Test.** `max_four_copies_by_name`, `basic_energy_unlimited`, `special_energy_limited_to_four`
+
+  In the clean engine every card name belongs to exactly one card id (`validate_cards` rejects a
+  duplicate name), so counting by name and by id agree; "different versions with the same name"
+  cannot occur in a valid card set.
 
 ### R-ZONE-01: Bench limit and placing a creature
 - **Rule.** A player can have at most 6 creatures in play: 1 Active and 5 Benched. This is enforced
   for playing from hand, for setup placement and for effects. A newly placed creature has full HP, its
   flags cleared (so it cannot evolve this turn), and its stage recorded. If it goes to slot 0, its
-  conditions are cleared.
+  conditions and Active effects are cleared (`00:13C6`: `+F0`, `+E7..+EA`, `+EB` bit 0, `+F2..+F9`;
+  the player-wide trainer lock stays). The new slot is the old in-play count (`+EF`), so slot 0 is
+  used only when nothing is in play.
 - **Status.** CONFIRMED
-- **Evidence.** `00:13EA` (`cp 6`), `01:44E5`, `01:4D68`, `0B:631C/6325/74B3`.
+- **Evidence.** `00:13EA` (`cp 6`), `00:142E → 00:13C6`, `01:44E5`, `01:4D68`, `0B:631C/6325/74B3`.
 - **Test.** `bench_full_rejects_basic`
 
 ### R-ZONE-02: No hand-size limit
@@ -1107,16 +1220,27 @@ unit test that should cover it.
 
 ### R-ZONE-04: Searching and returning to the deck
 - **Rule.** Searching removes one specific card. The rest keep their order, and the card waits in
-  limbo until an effect places it. A card can also be returned to the top of the deck.
-- **Status.** CONFIRMED
-- **Evidence.** `00:1061`, `00:104D`.
+  limbo until an effect places it. A card can also be returned to the top of the deck. A search
+  cannot be declined while a matching card exists: B is refused and the list reopens. With no match
+  the search may end empty (when nothing matches, the source first says so and offers to view the
+  deck).
+- **Parameters.** Location byte bit 6 is the limbo state: DrawCardFromDeck sets the location to
+  `$40` (`00:1045`), RemoveCardFromDeck does `set 6` (`00:1071`), AddCardToHand sets it to `$01`
+  (`00:1090`).
+- **Status.** CONFIRMED. Runtime (the energy-search attack, list `06:4D67`, phase 5 `0B:687B`): with
+  B forced at the deck list (`01:55F2` carry) and basic energy in the deck it never returned (the
+  list reopened 76 times through `00:374B`); with no match it returned with `FFA1 = $FF` (nothing
+  taken). Other search trainers were not probed.
+- **Evidence.** `00:1061`, `00:104D`, `00:1045`, `00:1071`, `00:1090`, `0B:42EC`, `0B:687B-68CD`.
 - **Test.** `search_deck_removes_exact_card`
 
 ### R-ZONE-05: Discard pile
 - **Rule.** The discard pile is an ordered public list, and new cards go on top. Only cards in hand
   can be discarded from hand. A knocked-out creature goes there with every card in its slot (all
-  stages, energy and trainers). In the source these are added in deck-index order. The play area is
-  then compacted, starting from slot 0. Effects can take specific cards back from the discard pile.
+  stages, energy and trainers). In the source these are added in deck-index order (`00:1442-145C`
+  loops locations 0..`$3B`). The order within a single knock-out is not a rule; the clean engine
+  discards the stack, then energy, then trainers. The play area is then compacted, starting from
+  slot 0. Effects can take specific cards back from the discard pile.
 - **Status.** CONFIRMED
 - **Evidence.** `00:10D2`, `00:10C5`, `00:1442-145C`, `00:1490`, `00:10E7`.
 - **Test.** `ko_stage1_with_two_energy_discards_four_cards`
@@ -1152,7 +1276,9 @@ unit test that should cover it.
   is.
 - **Status.** CONFIRMED
 - **Evidence.** `00:10C5`.
-- **Test.** `trainer_as_basic_stays_in_play_after_resolving`
+- **Test.** `attached_trainer_skips_discard` (the card its own effect attached stays where it is).
+  `trainer_as_basic_stays_in_play_after_resolving` covers placement only: in the clean engine a
+  Trainer-as-Basic is placed by `PlayBasic`, outside the trainer pipeline.
 
 ### R-TRAINER-04: Trainer lock
 - **Rule.** An attack effect can stop the defending **player** from playing trainers. It lasts through
@@ -1165,12 +1291,22 @@ unit test that should cover it.
 
 ### R-TRAINER-05: Attached damage-modifier trainers
 - **Rule.** The +10 and −20 trainers stay attached. They are counted per slot and move with the
-  creature. At between-turns, T's +10 trainers are discarded (so they last for the turn they were
-  played) and N's −20 trainers are discarded (so they last through the opponent's following turn).
-- **Parameters.** `01:6CF1` (T's `$D8` cards, `E0`), `01:6D03` (N's `$D9` cards, `DA`).
-- **Status.** UNCERTAIN. Only the call sites were traced.
-- **Evidence.** `01:6CF1`, `01:6D03`, `00:19C9/19DE`.
-- **Test.** `plus10_trainer_discarded_end_of_turn`, `minus20_trainer_lasts_opponent_turn`
+  creature. At every between-turns step, all of T's +10 trainers in play (Active and Bench) are
+  discarded, so they last for the turn they were played. Then all of N's −20 trainers in play are
+  discarded, so a −20 its owner attached survives the owner's own turn end and lasts through the
+  opponent's following turn. Both discards run on the full path and on the no-conditions fast path.
+- **Parameters.** DiscardPlusDamageTrainers `01:6CF1` zeroes T's `+E0..E5` and jumps to `00:1B73`
+  with `DE = $00D8`; DiscardMinusDamageTrainers `01:6D03` zeroes N's `+DA..DF` (after `SwapTurn`) and
+  jumps there with `DE = $00D9`. DiscardInPlayCardsWithId `00:1B73` scans all 60 card locations of
+  that duelist and discards every in-play card (`loc & $10`) with that ID. Order: T poison / sleep /
+  paralysis → T +10 → N poison / sleep → N −20 (`6CC7`, `6CE7`; fast path `6C70-6C79`).
+- **Status.** CONFIRMED. Runtime (from `duel-free-main`, T = `$C2`): with T holding `$D8` cards on the
+  Active and on Bench 1 and a `$D9` on the Active, and N holding one of each on its Active,
+  `01:6C5C` (fast path) discarded T's two `$D8` and N's `$D9` and kept T's `$D9` and N's `$D8`; a
+  second call with `ff98 = $C3` discarded the other two. The slow path (T paralysed) gave the same
+  result through `6CC7 → 6CF1` and `6CE7 → 6D03`.
+- **Evidence.** `01:6CF1`, `01:6D03`, `00:1B73`, `01:6C70-6C79`, `01:6CC7`, `01:6CE7`, `00:19C9/19DE`.
+- **Test.** `plus10_trainer_discarded_end_of_turn` (also a Benched slot), `minus20_trainer_lasts_opponent_turn`
 
 ### R-EFFECT-01: Effect-command framework
 - **Rule.** Every attack, Power and trainer has a list of entries, each a phase byte plus a handler,
@@ -1192,8 +1328,11 @@ unit test that should cover it.
   | 9 | AI damage estimate |
   | 10 | AI |
 
+  Only the first entry for a phase is used: EffectCommandLookup returns the first match and stops,
+  so a list has at most one live handler per phase. The clean engine composes several primitive
+  effects per phase by design, run in list order.
 - **Status.** CORRECTED. The example list address and the call sites were fixed.
-- **Evidence.** `00:2F90-2FE2`, list `06:48B8`.
+- **Evidence.** `00:2F90-2FE2`, `00:2FB5-2FDC` (EffectCommandLookup), list `06:48B8`.
 - **Test.** `effect_phases_called_in_pipeline_order`
 
 ### R-EFFECT-02: Attack resolution pipeline
@@ -1286,8 +1425,11 @@ unit test that should cover it.
 ### R-POWER-01: Activating a Power
 - **Rule.** The player chooses an in-play creature whose first ability is a Power.
   - A passive Power (one with a phase-1 entry) cannot be activated.
-  - An activated Power runs, in order: the usability check (conditions, blocker, once per turn,
-    specific checks), selection, then the effect.
+  - An activated Power runs, in order: the usability check, selection, then the effect. The source's
+    usability checks test the once-per-turn bit first, then conditions and the blocker
+    (CheckSlotPowerUsable), then the Power's specific checks (for example `0B:4D09-4D18`: `+C2 & $20`
+    → error `$CA`, then `34A7`). The clean engine reports "blocked" before "already used"; which
+    refusal is reported is not a rule.
 
   A Power has no cost phase, no confusion coin and no after-damage phase. It may be used on any turn
   before attacking, and it does not end the turn.
@@ -1319,7 +1461,7 @@ unit test that should cover it.
   harmless, because the bit starts at 0.
 - **Status.** CONFIRMED
 - **Evidence.** `0B:4D12/4DB1/4E5C/5808/62A5/6ADC` (checks), `0B:4D6E/4E0A/4E9F/58C2/62BB/6AF3`
-  (sets), `00:14C2`.
+  (sets), `00:14C2`. The colour-change Power (`0B:4D12` check, `0B:4D6E` set) is one of the six.
 - **Test.** `once_per_turn_power_second_use_rejected`
 
 ### R-POWER-05: "Not on the turn it was played" (optional per Power)
@@ -1328,7 +1470,8 @@ unit test that should cover it.
   marking is skipped while the turn counter is below 2.
 - **Status.** CORRECTED. The verifier added the first-turn consequence.
 - **Evidence.** `0B:5293-52AD`, `01:4231-4236`, `00:1410`, `00:1340`.
-- **Test.** `settled_power_unusable_on_turn_played`
+- **Test.** `settled_power_unusable_on_turn_played` (a creature in play before the turn starts:
+  refused on turn 1, usable on turn 2)
 
 ### R-POWER-06: Powers that trigger on placement
 - **Rule.** When a creature with a phase-7 Power is placed on the Bench **or evolves**, the effect
@@ -1352,8 +1495,12 @@ unit test that should cover it.
   - whole-attack prevention (R-DMG-12);
   - coin prevention (R-DMG-13);
   - retaliation (R-DMG-14);
-  - colour change (R-DMG-03);
   - power blocker (R-POWER-03).
+
+  The colour change (R-DMG-03) is not passive: it is an activated, once-per-turn Power (`0B:4D09`
+  tests `+C2` bit 5; its effect `0B:4D5D` sets bit 5 and `+D4 = colour | $80`). Only the resulting
+  override is gated by conditions and the blocker (`00:36AE`). The engine's fixture colour change is
+  deliberately not once per turn; the flag is a per-Power option.
 
   The engine should expose these as hooks that original cards can use.
 - **Status.** CONFIRMED
@@ -1371,18 +1518,18 @@ notes give the decision order and the weightings to copy where helpful.
 |---|---|---|---|
 | R-AI-01 | There are five entry points: take a turn, place at setup, choose a creature when forced to switch, choose a replacement after a knock-out, pick prizes. The AI acts only through the same action primitives as a human (`00:2B42-2B8A`, `05:4668`, `01:687E`). Some legality checks are done by the AI caller, not by the primitive, so the engine must validate every AI action. | CONFIRMED | `ai_never_emits_illegal_action` |
 | R-AI-02 | Turn order is fixed (see AI policy notes). The phase-14 trainers run inside attack selection, after the attack is chosen. The second pass stops at phase 13 (`05:468B-4785`, `05:6A48`). | CORRECTED | `ai_turn_benches_before_attach_before_attack` |
-| R-AI-03 | Random mistakes: weaker AIs skip a valid trainer or Power play with probability 1/4, and some with 1/2. Strong AIs never skip. Benching, evolving, energy, retreat and attacking are deterministic (`05:743B-7473`). | CONFIRMED | `ai_easy_skips_quarter_of_valid_trainer_plays` |
-| R-AI-04 | Benching a Basic: score = 130; +50 if fewer than 4 in play, otherwise −20; +20 if the Active could be knocked out next turn; +20 if usable energy is in hand; +20 if the evolution is in hand; +10 if the evolution is in the deck. Bench at ≥180 and fewer than 6 in play (`05:5EAE-5F4B`). | CONFIRMED | `ai_benches_basic_under_four_in_play` |
+| R-AI-03 | Random mistakes: weaker AIs skip a valid trainer or Power play with probability 1/4, and some with 1/2. Strong AIs never skip. Benching, evolving, energy, retreat and attacking are deterministic (`05:743B-7473`). The Powers step (`08:6386`) calls AIRandomSkipGate once and then skips **all** Powers for that pass; trainers are gated per card (`08:414A`); nothing is remembered across passes. Eligibility (`05:7426`, AIIsSkipEligible): SRAM `$A00A ≠ 0` turns the gate off for everyone, opponent indexes `$0C-$1B` never skip, and the 1/2 rate applies to indexes `$1C`, `$20`, `$22`, `$26`, `$2A`, `$33`. The clean AI gates each play and remembers a skip for the rest of the turn. | CONFIRMED | `ai_easy_skips_quarter_of_valid_trainer_plays` |
+| R-AI-04 | Benching a Basic: score = 130; +50 if fewer than 4 in play, otherwise −20; +20 if the Active could be knocked out next turn; +20 if usable energy is in hand; +20 if the evolution is in hand; +10 if the evolution is in the deck. Bench at ≥180 and fewer than 6 in play (`05:5EAE-5F4B`). So with 4 or 5 in play it still benches when all four bonuses apply (110 + 70 = 180; runtime: the score went `$82 → $6E → … → $B4` and AIExecuteAction ran). The clean AI benches only below 4 in play. | CONFIRMED | `ai_benches_basic_under_four_in_play` |
 | R-AI-05 | Evolving: score = 128, evolve at ≥133. It weighs: can attack after evolving, a knock-out gained or lost, leaving knock-out range, a cure for the Active's condition, the next stage being available, damage taken, and a small per-card AI byte (`05:5F4C-611F`). | CONFIRMED | `ai_evolves_statused_active` |
 | R-AI-06 | Energy target: score = 128 for each creature, attach at ≥133, ties go to the lowest slot. A creature that can't use any energy in hand is never chosen. Only the Active gets the knock-out bonus for one missing energy (`05:64E8-67DF`, `05:653A`, `05:674E`). | CORRECTED | `ai_attaches_to_active_for_ko` |
-| R-AI-07 | Retreat: at most once per turn, never after a failed confused retreat. Score = 128, retreat at ≥131, built from poison, confusion, knock-out threat, weakness and resistance matchups, a better creature on the Bench, retreat cost, the prize race, and turns without dealing damage (`05:58B2-5B32`). | CORRECTED | `ai_retreats_threatened_poisoned_active` |
+| R-AI-07 | Retreat: at most once per turn through wAIRetreatedThisTurn `$CE0A` (AIRetreatStep `05:4786`, cleared by `05:565A`), never after a failed confused retreat. Exception: the alternate turn routine `05:4078`, used only by opponent index `$35` (`05:406A`), has no `$CE0A` gate and may retreat twice. Score = 128, retreat at ≥131, built from poison, confusion, knock-out threat, weakness and resistance matchups, a better creature on the Bench, retreat cost, the prize race, and turns without dealing damage (`05:58B2-5B32`). | CORRECTED | `ai_retreats_threatened_poisoned_active` |
 | R-AI-08 | The AI plays a self-switch trainer instead of paying when the retreat cost is ≥3 or there isn't enough energy. In an urgent retreat only, and only if no energy was attached yet, it attaches one first when exactly 1 unit short (`08:462E`, `05:5D4F`). | CORRECTED | `ai_uses_switch_trainer_for_cost_three` |
 | R-AI-09 | Choosing a creature to bring in (retreat, forced switch, replacement after a knock-out): score = 50 plus knock-out potential, damage, weakness and resistance, retreat cost, threat and HP. A creature at 0 HP scores 0. The highest score wins, and ties go to the later slot (`05:5B72-5D4C`). | CORRECTED | `ai_promotes_creature_that_can_ko` |
 | R-AI-10 | Attack choice: score = 80 for each attack. An unusable attack scores 0. Adjustments include +20 for a knock-out, +damage/10, recoil, discard cost, condition value, and a prize-race check for Bench or self-knock-out effects. A tie goes to the 2nd attack. It attacks only if the best score is ≥80; otherwise it ends the turn (`05:69F8-6DCC`). | CORRECTED | `ai_picks_attack_that_kos`, `ai_ends_turn_with_useless_attack` |
 | R-AI-11 | The +10 trainer is played when it turns a non-knock-out into a knock-out, or 30% of the time afterwards. The −20 trainer is played when it prevents the Active being knocked out. The heal-20 trainer is played on the Active when it lets it survive and the AI isn't retreating (`08:4501`, `08:45A5`, `08:4406`, `08:41D1`, `08:4204`). | CORRECTED | `ai_plays_plus10_only_for_ko` |
 | R-AI-12 | Draw trainers: draw-2 needs ≥10 cards in the deck. Discard-hand-draw-7 needs ≥15 and a score ≥60. If it is played, the turn sequence runs again (`08:4878`, `08:4CC1-4D9B`). | CORRECTED | `ai_skips_draw_trainer_on_small_deck` |
-| R-AI-13 | Force-switch trainer: once per turn, only if the opponent has a Bench and the Active can't already knock out the defender. It prefers a creature it can knock out, then one weak to its colour, then one with no energy, then the lowest HP (`08:467E-4821`). | CORRECTED | `ai_force_switches_ko_able_bench` |
-| R-AI-14 | Setup: the AI places every Basic in hand order. The first becomes the Active, up to 6 in play. The AI makes no mulligan choice (`05:4226-4249`). | CONFIRMED | `ai_setup_first_basic_active` |
+| R-AI-13 | Force-switch trainer: once per turn, only if the opponent has a Bench and the Active can't already knock out the defender. It prefers a creature it can knock out (`47A9`), then one weak to its colour (`46C3-46D9`), then one with no energy (`46E2-4704`), then the lowest HP (`4705-473E` via `4821`), so it is played even with no knock-out-able target (`08:467E-4821`). The clean AI plays it only when a Benched target can be knocked out. | CORRECTED | `ai_force_switches_ko_able_bench` |
+| R-AI-14 | Setup: the AI places every real Basic in hand order. The first becomes the Active, up to 6 in play. Trainer-as-Basic cards are never placed by setup or by the bench step: AIDefaultSetup (`05:4232-4240`) and the bench scorer (`05:5ECD-5ED8`) skip any hand card with type ≥ 8 or stage ≠ 0, and these cards are type `$10` in hand (runtime: `05:4226` placed the real Basic and left the `$CB` card in hand). The AI makes no mulligan choice (`05:4226-4249`). The clean AI places real Basics first and then Trainer-as-Basics; that is legal. | CONFIRMED | `ai_setup_first_basic_active` |
 | R-AI-15 | Strong AIs stack their opening by reshuffling until the hand and next draws are good. **Do not implement.** This is unfair. A disabled prize filter (`cp a`) is also present (`05:72AF-7377`). | CONFIRMED | n/a (not implemented) |
 | R-AI-16 | Prizes: picked at random among those remaining (`05:41E5-421D`). | CONFIRMED | `ai_prize_pick_is_remaining_slot` |
 | R-AI-17 | Powers: each Power has its own heuristic. All Powers are skipped while a blocker is in play or the random gate fires. A condition on the Active skips only the Active's own Power (`08:637F-6401`). | CORRECTED | `ai_skips_active_power_when_confused` |
@@ -1406,7 +1553,7 @@ notes give the decision order and the weightings to copy where helpful.
 | Hand-size limit or discard at end of turn | `00:1088` has no bound. | Omit. |
 | Trainer subtypes (support, stadium, tool) or per-turn trainer limits | A single trainer type `$10` and no counter (`00:1859`, `01:7193`). | Omit. The attached ±damage trainers are the only trainers that stay in play. |
 | Creatures worth more than one prize | Exactly one `inc b` per knock-out (`01:7074`). | Omit. |
-| Turn or time limit in normal duels | The 15-turn exit `01:411E` is gated by `cc13` (scripted demo only). Note: `cc09 == $80` simply means "against the AI", contrary to the investigator. | Omit. |
+| Turn or time limit in normal duels | The 15-turn exit `01:411E` needs `cc09 == $80` (a practice duel) and `cc13 ≠ 0` (the scripted tutorial, AI index 0 only). Normal AI duels have `cc09` = `$80` plus the opponent index, so `$81` or more. | Omit. |
 | Losing by deck-out through an effect | `cc07` is set only at `01:4248` and `01:6F79`. | Omit. |
 | A plain draw ending the duel | `cc07 = 3` always leads to sudden death (`01:41B4`). | Omit. Sudden death is implemented as written. |
 | Other win conditions (concession, alternate wins) | `cc07` has no other writers. | Omit. A UI "concede" button could be offered as an extension. |
@@ -1489,7 +1636,7 @@ notes give the decision order and the weightings to copy where helpful.
 67. Discard pile: ordered, public, new cards on top. Only cards in hand can be discarded from hand.
 68. Trainers: unlimited per turn. Order is lock check → check → select (cancel keeps the card) → costs → effect → discard if still in hand.
 69. Trainer lock: set on the opponent player and lasts through their next turn. It survives switching and is set even if the attack was negated.
-70. Attached +10 and −20 trainers are counted per slot. +10 is discarded at the end of the owner's turn. −20 is discarded at the end of the opponent's following turn (UNCERTAIN).
+70. Attached +10 and −20 trainers are counted per slot. +10 is discarded at the end of the owner's turn. −20 is discarded at the end of the opponent's following turn. Both are discarded from every in-play slot, Bench included.
 71. Effects are lists of (phase, handler). A missing phase counts as success. Handlers may fail with an error.
 72. Coins are 50/50. A multi-flip flips all N and returns the heads count. Use a seedable RNG.
 73. Powers: activated only (not passive). The flow is usability → select → effect. A Power doesn't end the turn and can be used on any turn before attacking.
@@ -1505,26 +1652,40 @@ notes give the decision order and the weightings to copy where helpful.
 
 ## 15. Open questions
 
-- What the AI's setup and replacement handlers filter on (whether they skip 0-HP creatures). The engine
-  must enforce the rule regardless.
 - The linked-duel first-player and setup paths (`01:41F7`, `01:4CEB`). Not needed for single player.
-- Who reads stage value 3, which the stage-skip trainer writes (`0B:7716`).
 - The 8-bit HP formula on evolution when the new max is lower than the old one (it could wrap). The
   clean engine should use signed or saturating arithmetic.
-- Behaviour when the damage high byte is ≥ `$81`, and the halving routine for values > 255. Neither
-  happens with real data. The clean engine should use plain integers.
-- Exactly when the attached ±damage trainers are discarded (`01:6CF1/6D03`). This is R-TRAINER-05,
-  still UNCERTAIN.
-- The meaning of bit 6 in a card's location byte (limbo during play or search).
 - The full set of sources for the `cccd` prevention codes, and which effects set `+E7 = $16`,
   `+E8 = 9` and `+E8 ∈ {3,5,6,7,$12}`. For an original card set, the engine defines its own effects
   on these hooks.
-- Which activated Powers skip the once-per-turn flag (only 6 set it).
-- The exact AI hint flags (attack flags 0-`$11`). The mapping from flags 1/2/3 to conditions is unclear.
-- The remaining AI trainer checks (search, revive, energy removal), the deck-specific AI turn
-  routines, and SRAM `$A00A` (a debug or options flag).
+- Which activated Powers skip the once-per-turn flag (only 6 set it; the colour-change Power is one
+  of the six that do, R-POWER-04).
+- The remaining AI trainer checks (search, revive, energy removal) and the deck-specific AI turn
+  routines.
 - The step between phases 2 and 6 in trainer play (`00:66FF` / link 6). It looks like link sync or a
   display step, not a rule.
+
+**Settled since the first pass** (details in the rules named):
+
+- When the attached ±damage trainers are discarded: R-TRAINER-05, now CONFIRMED at runtime.
+- Bit 6 of a card's location byte is the limbo state (`00:1045`, `00:1071`, `00:1090`): R-ZONE-04.
+- Stage value 3, written by the stage-skip trainer (`0B:7716`), is read by the devolve helper
+  `01:70F2`: at `01:713B` it treats 1 and 3 alike and takes `ccd0`, the Basic underneath, so devolving
+  a stage-skipped Stage 2 goes straight back to its Basic (runtime: `C2CE = 3` gave the Basic,
+  `C2CE = 2` the Stage 1). Other `+CE` readers only test for zero (`00:334C`, `0B:7005`, `0B:5D59`);
+  `01:6344` indexes a 4-entry table at `01:63D5`. The clean engine keeps the evolution stack, so
+  devolving pops back to whatever is underneath: the Basic.
+- The damage high byte ≥ `$81` and halving above 255: R-DMG-07 (static answers).
+- The AI's setup and replacement filters: R-AI-14 (setup places only real Basics) and R-KO-05
+  (the default AI never picks 0 HP; the scripted practice AI can).
+- The AI attack-hint flags: the attack's flag byte (`+$0F`, loaded to `ccba`) has bit 0 = poison,
+  bit 1 = sleep, bit 2 = paralysis, bit 3 = confusion (flag n is tested by `00:1BB0` against `ccba`
+  bit n). Scoring at `05:6D25-6DA0` against the defender: poison +2 if not poisoned (−2 if
+  double-poisoned and flag `$0E` is set); sleep +1 unless already asleep; paralysis +1, or −1 if the
+  defender is asleep; confusion +1, 0 if already confused, −1 if asleep; −1 if the attacker is
+  Confused. Runtime: `05:6D25` with `wAIScore = $50` matched each case.
+- SRAM `$A00A`: when nonzero, the weak-AI random skip is off for every opponent (`05:7426`,
+  AIIsSkipEligible): R-AI-03.
 
 ---
 
@@ -1538,10 +1699,10 @@ threshold.
 2. Play "hand reset or gamble draw" trainers.
 3. Use Powers. Each Power has its own heuristic. All are skipped if a blocker is in play.
 4. Play search and draw trainers.
-5. Bench Basics: always while fewer than 4 are in play.
+5. Bench Basics: always while fewer than 4 are in play, and at 4-5 in play only when every bonus applies (knock-out threat, usable energy, evolution in hand and in deck).
 6. Evolve, where it helps (a knock-out, survival, a cure, attack readiness).
 7. Play disruption and support trainers: energy removal, revive, heal, force-switch, stage-skip.
-8. Decide whether to retreat, at most once per turn. If so, use a self-switch trainer when paying is
+8. Decide whether to retreat, at most once per turn (one opponent's alternate routine may retreat twice). If so, use a self-switch trainer when paying is
    expensive. The replacement is the best-scored Bench creature.
 9. Play more heal and force-switch trainers, then energy recovery or energy search trainers.
 10. Attach one energy, to the best target: the Active first when one more energy enables a knock-out.
@@ -1556,7 +1717,7 @@ threshold.
 - Strong opponents get a few extra deterministic terms.
 - The stacked-opening cheat must **not** be copied.
 
-Prizes are picked at random. Setup places every Basic in hand order.
+Prizes are picked at random. Setup places every real Basic in hand order (Trainer-as-Basics are never placed by setup or the bench step).
 
 ---
 
@@ -1576,7 +1737,8 @@ replaced:
 - **Knock-out handler step 8 "result OR discard".** False. Discarding always happens (R-KO-04).
 - **The free-attach exception uses a plain status test.** It was refined: the holder test is
   nibble-only, the blocker counting rule applies, the colour is the effective colour, and the AI
-  executor always sets the flag (R-ENERGY-02).
+  executor always sets the flag, though one deck-specific AI still repeats free attachments
+  (R-ENERGY-02).
 - **The changed attacker colour is always used.** False. It is gated by the holder's condition and
   by the blocker (R-DMG-03).
 - **Effect damage +10 and −20 details.** The +10 also applies to Power damage, and the Bench
@@ -1590,8 +1752,10 @@ replaced:
 - **On-play Powers fire only on bench placement.** False. They also fire on evolve (R-POWER-06).
 - **Evolution lock lifted by the blocker under any condition.** The blocker counting rule applies
   (R-EVO-09).
-- **The "no turn limit" claim said `cc09 == $80` means practice duel.** False. It means a duel
-  against the AI. The 15-turn exit is gated by `cc13` instead.
+- **`cc09 == $80` means "a duel against the AI".** False; this earlier verifier note was itself
+  wrong. `$80` = AI opponent index 0 or 2 (a scripted practice duel, fixed RNG seed); other AI duels
+  are `$81+`, link duels 1 (R-SETUP-01). Code that tests "any AI" uses `or a` (`01:6D59`, `0B:7A31`).
+  The 15-turn exit needs `cc09 == $80` and the tutorial flag `cc13` (R-TURN-07).
 - **The power-blocked message lists four conditions.** False. It lists three. The
   four-condition text is the cure message.
 - **Status AI-hint and AI rules.** Several weightings and gates were corrected. See the CORRECTED

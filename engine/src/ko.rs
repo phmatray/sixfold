@@ -65,11 +65,13 @@ impl Game {
             self.discard_knocked_out(p, ev);
         }
 
-        // R-KO-06/07: the table result. An early win or loss skips the remaining
-        // prize picks and replacements, as in the source.
+        // R-KO-06/07: the table result.
         if decided {
-            // The prizes earned in this step still leave the prize area, with
-            // no pick (R-KO-07): the first ones still face down.
+            // The prizes earned in this step still leave the prize area.
+            // RULES: R-KO-07 — the source lets T pick its deciding prizes,
+            // only lowers N's count (no cards to hand) and, on the table path,
+            // still asks for replacements; the duel is over either way, so the
+            // engine takes the first face-down prizes of both and asks nothing.
             for q in [t, n] {
                 for _ in 0..take[q] {
                     let i = self.players[q].prizes.iter().position(Option::is_some);

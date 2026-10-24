@@ -74,7 +74,7 @@ impl Game {
             });
         }
         // 2. T's +10 trainers. 3. N's poison and sleep coin. 4. N's −20 trainers.
-        // RULES: R-TRAINER-05 (UNCERTAIN) — discarded from every slot, as the ledger reads.
+        // R-TRAINER-05: discarded from every slot (00:1B73), on both paths.
         self.discard_trainers(t, Effect::AttachPlus10, ev);
         self.poison_and_sleep(n, ev);
         self.discard_trainers(n, Effect::AttachMinus20, ev);

@@ -395,7 +395,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
     - `StageSkip` needs a target, and no evolution lock.
     - A `DiscardEnergy` cost needs enough matching energy.
     - `OnceWhileInPlay` must not have been used yet.
-    - `CopyAttack` needs an attack it can copy.
+    - `CopyAttack` needs an attack it can copy: not a copying attack, and one whose own checks pass for the copier.
   - **Trainers and Powers only:**
     - `Heal` needs damage on your Active.
     - `Cure` needs a condition to clear.

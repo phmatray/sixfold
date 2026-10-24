@@ -183,6 +183,8 @@ impl Player {
     }
 
     /// R-ZONE-05: a creature leaves play with every card in its slot.
+    /// RULES: R-ZONE-05 — the order within one knock-out is not a rule (the
+    /// source uses deck-index order); here: stack, then energy, then trainers.
     pub fn discard_creature(&mut self, c: InPlay) {
         self.discard.extend(c.stack);
         self.discard.extend(c.energy);
