@@ -1147,7 +1147,7 @@ def validate_glb(path, name):
         problems.append(f"{len(j.get('scenes', []))} scenes")
     if len(clips) != len(set(clips)) or any("." in c for c in clips):
         problems.append(f"duplicate/suffixed clips {clips}")
-    npc = name.startswith("npc_")
+    npc = is_npc(name)
     if name != "hero" and hero_nodes:
         problems.append(f"hero nodes in {name}: {hero_nodes}")
     if name != "hero" and not npc and j.get("skins"):
@@ -1163,6 +1163,12 @@ def validate_glb(path, name):
 
 
 HERO_CLIPS = ["Idle", "Walk", "Run", "Fidget"]
+
+
+def is_npc(name):
+    """NPC and rival characters: the hero's rig with Idle/Walk/Fidget, exported to assets/npc/."""
+    return name.startswith(("npc_", "rival_"))
+
 NPC_CLIPS = ["Idle", "Walk", "Fidget"]
 
 
@@ -1178,12 +1184,12 @@ def export(built, out_dir):
         roots = [(o, o.location.copy()) for o in objs if o.parent is None]
         for o, _ in roots:
             o.location = (0, 0, 0)
-        sub = "interior" if name in INTERIOR else "npc" if name.startswith("npc_") else ""
+        sub = "interior" if name in INTERIOR else "npc" if is_npc(name) else ""
         path = os.path.join(out_dir, sub, name + ".glb")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         bpy.ops.export_scene.gltf(
             filepath=path, export_format="GLB", use_selection=True, use_active_scene=True, export_yup=True,
-            export_apply=True, export_animations=name in ("hero", "house") or name.startswith("npc_"),
+            export_apply=True, export_animations=name in ("hero", "house") or is_npc(name),
             export_vertex_color="ACTIVE" if name in WIND else "NONE",
             export_animation_mode="NLA_TRACKS", export_skins=True, export_def_bones=True,
             export_cameras=False, export_lights=False, export_image_format="JPEG", export_jpeg_quality=85)

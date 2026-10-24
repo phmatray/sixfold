@@ -19,14 +19,15 @@ def main(argv):
     for o in list(bpy.data.objects):
         bpy.data.objects.remove(o)
     scn = bpy.context.scene
-    for i, name in enumerate(ORDER):
-        path = os.path.join(assets, "npc" if name.startswith("npc_") else "", name + ".glb")
+    order = argv[argv.index("--names") + 1].split(",") if "--names" in argv else ORDER
+    for i, name in enumerate(order):
+        path = os.path.join(assets, "" if name == "hero" else "npc", name + ".glb")
         before = set(bpy.data.objects)
         acts = set(bpy.data.actions)
         bpy.ops.import_scene.gltf(filepath=os.path.abspath(path))
         new = [o for o in bpy.data.objects if o not in before]
         for root in (o for o in new if o.parent is None):  # rig and skinned mesh are both roots
-            root.location.x = (i - (len(ORDER) - 1) / 2) * 1.1
+            root.location.x = (i - (len(order) - 1) / 2) * 1.1
         rig = next(o for o in new if o.type == "ARMATURE")
         idle = next(a for a in bpy.data.actions if a not in acts and a.name.startswith("Idle"))
         ad = rig.animation_data or rig.animation_data_create()
@@ -37,7 +38,7 @@ def main(argv):
             ad.action_slot = idle.slots[0]
     scn.frame_set(30)
     scn.render.engine = "BLENDER_EEVEE"
-    scn.render.resolution_x, scn.render.resolution_y = 1500, 420
+    scn.render.resolution_x, scn.render.resolution_y = 250 * len(order), 420
     scn.view_settings.view_transform = "Standard"
     w = bpy.data.worlds.new("w")
     w.use_nodes = True
@@ -52,7 +53,7 @@ def main(argv):
     scn.collection.objects.link(cam)
     scn.camera = cam
     cam.data.type = "ORTHO"
-    cam.data.ortho_scale = 6.9
+    cam.data.ortho_scale = 1.15 * len(order)
     for label, d in (("front", (0, -1, 0.08)), ("game", (0, -math.cos(math.radians(50)), math.sin(math.radians(50))))):
         d = Vector(d).normalized()
         cam.location = Vector((0, 0, 0.8)) + d * 20
