@@ -12,6 +12,7 @@ use leptos::web_sys;
 use sixfold_engine::overworld::{Applied, Progress};
 use wasm_bindgen::prelude::*;
 
+use crate::audio::MuteToggle;
 use crate::ctl::Ctl;
 use crate::Screen;
 
@@ -378,6 +379,7 @@ pub fn WorldScreen() -> impl IntoView {
             <header class="world-top">
                 <span class="wordmark small">"Sixfold"</span>
                 <span class="world-hint">"Arrows or WASD to walk · E to act · Shift to run · G for the grid"</span>
+                <MuteToggle />
                 <button class="btn ghost" on:click=move |_| screen.set(Screen::Title)>"Leave"</button>
             </header>
             <main class="world-stage" node_ref=stage tabindex="-1"

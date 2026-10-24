@@ -18,6 +18,7 @@ mod world;
 use leptos::prelude::*;
 use sixfold_engine::{Action, CardId};
 
+use audio::MuteToggle;
 use board::{Hand, SideRow};
 use controls::{ActionBar, PromptModal};
 use ctl::{Ctl, AI, HUMAN};
@@ -156,6 +157,7 @@ fn MatchScreen() -> impl IntoView {
                 <span class="seed">"Seed " {move || ctl.seed.get()}</span>
                 <button class="btn ghost log-toggle" aria-expanded=move || ui.log_open.get().to_string()
                     on:click=move |_| ui.log_open.update(|o| *o = !*o)>"Log"</button>
+                <MuteToggle />
                 <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(Screen::Title) }>"Quit"</button>
             </header>
             <main class="table">
