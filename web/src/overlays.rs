@@ -233,7 +233,7 @@ pub fn GameOver() -> impl IntoView {
                 Some(r) => {
                     let mut got = None;
                     progress.update(|pr| {
-                        profile.update(|p| got = Some(campaign::record(r, won, pr, &mut p.wallet)))
+                        profile.update(|p| got = Some(campaign::record(r, won, pr, p)))
                     });
                     if got.as_ref().is_some_and(|g| g.seal || g.first) {
                         // After the win fanfare.

@@ -124,6 +124,31 @@ pub const SMOKE_PELLET: CardId = CardId(99);
 pub const VENOM_DART: CardId = CardId(100);
 pub const WIDE_SATCHEL: CardId = CardId(101);
 pub const HEARTY_BROTH: CardId = CardId(102);
+// ----- 0.9.0 promos: campaign rewards, never in packs (append only) -----
+pub const THISTLEWICK: CardId = CardId(103);
+pub const BRINEMOTH: CardId = CardId(104);
+pub const KILNFOX: CardId = CardId(105);
+pub const SQUALLKITE: CardId = CardId(106);
+pub const SLATEBROW: CardId = CardId(107);
+pub const MOONMOTH: CardId = CardId(108);
+pub const HEXCREST: CardId = CardId(109);
+
+/// The promo cards, in campaign order: one for the first win against each
+/// rival, the last for the champion. They never come from packs.
+pub const PROMOS: [CardId; 7] = [
+    THISTLEWICK,
+    BRINEMOTH,
+    KILNFOX,
+    SQUALLKITE,
+    SLATEBROW,
+    MOONMOTH,
+    HEXCREST,
+];
+
+/// A promo card: earned in the campaign, never found in a pack.
+pub fn is_promo(id: CardId) -> bool {
+    PROMOS.contains(&id)
+}
 
 /// Every card id in the set, in registry order (for card lists in the UI).
 pub fn ids() -> impl Iterator<Item = CardId> {
@@ -1038,6 +1063,84 @@ pub static CARDS: &[CardDef] = &[
             &[Inflict { status: Status::Poisoned, coin: true }]),
     trainer("Wide Satchel", Rare, "Draw 3 cards.", &[Draw(3)]),
     trainer("Hearty Broth", Uncommon, "Remove up to 50 damage from your Active creature.", &[Heal(50)]),
+    // ----- Promos (campaign rewards; see PROMOS) -----
+    creature("Thistlewick", Rare, Creature {
+        stage: Stage::Basic, evolves_from: None, hp: 70, color: Grass,
+        weakness: Some(Fire), resistance: None, retreat_cost: 1,
+        attacks: &[
+            atk("Prickle", "Flip a coin. If heads, the defending creature is now Poisoned.",
+                &[Grass], 10, &[Inflict { status: Status::Poisoned, coin: true }]),
+            atk("Bramble Lash", "", &[Grass, Colorless, Colorless], 40, &[]),
+        ],
+        power: None,
+    }),
+    creature("Brinemoth", Rare, Creature {
+        stage: Stage::Basic, evolves_from: None, hp: 60, color: Water,
+        weakness: Some(Lightning), resistance: None, retreat_cost: 1,
+        attacks: &[
+            atk("Undertow", "Switch the defending creature with 1 of your opponent's Benched creatures, chosen by you.",
+                &[Water, Colorless], 20, &[SwitchDefender { chooser_is_attacker: true }]),
+            atk("Brine Burst", "", &[Water, Water, Colorless], 50, &[]),
+        ],
+        power: None,
+    }),
+    creature("Kilnfox", Rare, Creature {
+        stage: Stage::Basic, evolves_from: None, hp: 60, color: Fire,
+        weakness: Some(Water), resistance: None, retreat_cost: 1,
+        attacks: &[
+            atk("Stoke", "Search your deck for a Fire energy card and attach it to this creature, then shuffle your deck.",
+                &[Fire], 10, &[AttachFromDeck(Fire)]),
+            atk("Flash Fire", "Discard 1 Fire energy card attached to this creature.",
+                &[Fire, Fire, Colorless], 60, &[DiscardEnergy { color: Fire, count: 1 }]),
+        ],
+        power: None,
+    }),
+    creature("Squallkite", Rare, Creature {
+        stage: Stage::Basic, evolves_from: None, hp: 60, color: Lightning,
+        weakness: Some(Fighting), resistance: None, retreat_cost: 0,
+        attacks: &[
+            atk("Static Gust", "Flip a coin. If heads, the defending creature is now Paralyzed.",
+                &[Lightning], 10, &[Inflict { status: Status::Paralyzed, coin: true }]),
+            atk("Thunder Dive", "This creature does 10 damage to itself.",
+                &[Lightning, Lightning, Colorless], 60, &[Recoil(10)]),
+        ],
+        power: None,
+    }),
+    creature("Slatebrow", Rare, Creature {
+        stage: Stage::Basic, evolves_from: None, hp: 80, color: Fighting,
+        weakness: Some(Grass), resistance: None, retreat_cost: 2,
+        attacks: &[
+            atk("Rock Brace", "During your opponent's next turn, this creature takes 20 less damage from attacks.",
+                &[Fighting, Colorless], 20, &[Protect { shield: Shield::Reduce(20), coin: false }]),
+            atk("Landslide", "", &[Fighting, Fighting, Colorless], 50, &[]),
+        ],
+        power: None,
+    }),
+    creature("Moonmoth", Rare, Creature {
+        stage: Stage::Basic, evolves_from: None, hp: 60, color: Psychic,
+        weakness: Some(Psychic), resistance: Some(Fighting), retreat_cost: 1,
+        attacks: &[
+            atk("Hush Wings", "The defending creature is now Asleep.",
+                &[Psychic, Colorless], 10, &[Inflict { status: Status::Asleep, coin: false }]),
+            atk("Moonbeam", "Flip 2 coins. This attack does 20 more damage for each heads.",
+                &[Psychic, Psychic, Colorless], 30, &[AddPerHeads { coins: 2, per: 20 }]),
+        ],
+        power: None,
+    }),
+    creature("Hexcrest", Rare, Creature {
+        stage: Stage::Basic, evolves_from: None, hp: 80, color: Colorless,
+        weakness: Some(Fighting), resistance: None, retreat_cost: 1,
+        attacks: &[
+            atk("Sixfold Guard", "During your opponent's next turn, this creature takes 20 less damage from attacks.",
+                &[Colorless, Colorless], 20, &[Protect { shield: Shield::Reduce(20), coin: false }]),
+            atk("Crown Strike", "", &[Colorless, Colorless, Colorless], 50, &[]),
+        ],
+        power: Some(Power {
+            name: "Champion's Calm",
+            text: "This creature can't be affected by conditions.",
+            kind: PowerKind::StatusImmune,
+        }),
+    }),
 ];
 
 #[cfg(test)]
@@ -1098,7 +1201,7 @@ mod tests {
             .iter()
             .filter(|c| matches!(c.kind, CardKind::Trainer(_)))
             .count();
-        assert_eq!((creatures, trainers, CARDS.len()), (71, 25, 103));
+        assert_eq!((creatures, trainers, CARDS.len()), (78, 25, 110));
         for color in crate::Color::ALL {
             let n = CARDS
                 .iter()
@@ -1204,6 +1307,13 @@ mod tests {
             (VENOM_DART, "Venom Dart"),
             (WIDE_SATCHEL, "Wide Satchel"),
             (HEARTY_BROTH, "Hearty Broth"),
+            (THISTLEWICK, "Thistlewick"),
+            (BRINEMOTH, "Brinemoth"),
+            (KILNFOX, "Kilnfox"),
+            (SQUALLKITE, "Squallkite"),
+            (SLATEBROW, "Slatebrow"),
+            (MOONMOTH, "Moonmoth"),
+            (HEXCREST, "Hexcrest"),
         ];
         assert_eq!(named.len(), CARDS.len());
         for (id, name) in named {

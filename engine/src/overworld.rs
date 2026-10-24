@@ -252,8 +252,8 @@ mod tests {
     #[test]
     fn campaign_conditions_read_seals_wins_and_the_last_duel() {
         use crate::campaign::{record, rival};
-        use crate::profile::Wallet;
-        let (mut p, mut w) = (Progress::default(), Wallet::default());
+        use crate::profile::Profile;
+        let (mut p, mut w) = (Progress::default(), Profile::new_player());
         assert!(p.check("seals:0") && !p.check("seals:1") && p.check("!seals:1"));
         assert!(p.check("open:bramble") && !p.check("open:quill") && !p.check("open:warden"));
         assert!(!p.check("beat:bramble") && !p.check("won:bramble") && !p.check("lost:bramble"));
