@@ -39,6 +39,8 @@ pub mod set;
 #[cfg(test)]
 mod fixtures;
 #[cfg(test)]
+mod playtest;
+#[cfg(test)]
 mod testkit;
 
 pub use action::{Action, Event, Prompt, PromptKind, RuleError};
