@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [0.6.0](https://github.com/phmatray/sixfold/compare/v0.5.0...v0.6.0) (2026-10-24)
+
+
+### Added
+
+* **campaign:** duel six rivals and the Hex Warden from the world for seals and packs ([#10](https://github.com/phmatray/sixfold/issues/10)) ([b9bc313](https://github.com/phmatray/sixfold/commit/b9bc313a847285e406a953cf306d137ca59a12dd))
+
 ## [0.5.0](https://github.com/phmatray/sixfold/compare/v0.4.0...v0.5.0) (2026-10-24)
 
 
