@@ -1,8 +1,9 @@
-//! Deck legality (R-DECK-*).
+//! Deck legality (R-DECK-*) and player-built deck lists for the deck editor.
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
-use crate::card::{try_card, CardId};
+use crate::card::{card, try_card, CardId, CardKind, Color, EnergyCard};
+use crate::collection::Collection;
 
 pub const DECK_SIZE: usize = 60;
 pub const MAX_COPIES: usize = 4;
@@ -41,6 +42,173 @@ pub fn validate_deck(deck: &[CardId]) -> Result<(), DeckError> {
         }
     }
     Ok(())
+}
+
+/// A deck a player builds from their [`Collection`].
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct DeckList {
+    pub name: String,
+    pub cards: Vec<CardId>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DeckListError {
+    /// Breaks a deck rule (R-DECK-*).
+    Illegal(DeckError),
+    /// Uses more copies of this card than the collection owns.
+    NotOwned(CardId),
+}
+
+/// Why [`DeckList::check_add`] refuses a card.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AddError {
+    UnknownCard,
+    /// The deck already has 60 cards.
+    DeckFull,
+    /// The deck already has 4 cards with this name (R-DECK-03).
+    TooManyCopies,
+    /// Every owned copy is already in the deck.
+    NotOwned,
+}
+
+/// Display orders for card lists; every order ends by card id, which keeps
+/// evolution lines together.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SortBy {
+    /// Creatures and basic energy by colour (each colour's energy after its
+    /// creatures), then trainers and the special energy.
+    Color,
+    /// Basics, Stage 1, Stage 2, trainers, special energy, basic energy.
+    Kind,
+    /// Rare first, basic energy last.
+    Rarity,
+}
+
+impl SortBy {
+    /// Sort key for one card: `cards.sort_by_key(|&id| by.key(id))`.
+    pub fn key(self, id: CardId) -> (u8, u8, CardId) {
+        let c = card(id);
+        let (kind, color) = match &c.kind {
+            CardKind::Creature(cr) => (cr.stage as u8, cr.color as u8),
+            CardKind::TrainerBasic(cr) => (3, cr.color as u8),
+            CardKind::Trainer(_) => (3, 7),
+            CardKind::Energy(EnergyCard::DoubleColorless) => (4, 7),
+            CardKind::Energy(EnergyCard::Basic(col)) => (5, *col as u8),
+        };
+        match self {
+            SortBy::Color => (color, kind, id),
+            SortBy::Kind => (kind, 0, id),
+            SortBy::Rarity => (3 - c.rarity as u8, 0, id),
+        }
+    }
+}
+
+impl DeckList {
+    pub fn new(name: impl Into<String>) -> Self {
+        DeckList {
+            name: name.into(),
+            cards: vec![],
+        }
+    }
+
+    /// Legal (R-DECK-*) and buildable from the collection.
+    pub fn validate(&self, owned: &Collection) -> Result<(), DeckListError> {
+        validate_deck(&self.cards).map_err(DeckListError::Illegal)?;
+        match owned.missing(&self.cards).first() {
+            Some(&(id, _)) => Err(DeckListError::NotOwned(id)),
+            None => Ok(()),
+        }
+    }
+
+    /// Cards with this name in the deck (the 4-copy rule counts names).
+    pub fn copies(&self, name: &str) -> usize {
+        self.cards
+            .iter()
+            .filter(|&&id| card(id).name == name)
+            .count()
+    }
+
+    /// Each distinct card with its number of copies, in id order.
+    pub fn counts(&self) -> Vec<(CardId, usize)> {
+        let mut m: BTreeMap<CardId, usize> = BTreeMap::new();
+        for &id in &self.cards {
+            *m.entry(id).or_default() += 1;
+        }
+        m.into_iter().collect()
+    }
+
+    /// [`counts`](Self::counts) in a display order.
+    pub fn sorted(&self, by: SortBy) -> Vec<(CardId, usize)> {
+        let mut v = self.counts();
+        v.sort_by_key(|&(id, _)| by.key(id));
+        v
+    }
+
+    /// Whether one more copy of `id` may go in.
+    pub fn check_add(&self, id: CardId, owned: &Collection) -> Result<(), AddError> {
+        let def = try_card(id).ok_or(AddError::UnknownCard)?;
+        if self.cards.len() >= DECK_SIZE {
+            return Err(AddError::DeckFull);
+        }
+        if !def.is_basic_energy() && self.copies(def.name) >= MAX_COPIES {
+            return Err(AddError::TooManyCopies);
+        }
+        if self.cards.iter().filter(|&&c| c == id).count() >= owned.count(id) {
+            return Err(AddError::NotOwned);
+        }
+        Ok(())
+    }
+
+    /// Adds one copy if [`check_add`](Self::check_add) allows it.
+    pub fn add(&mut self, id: CardId, owned: &Collection) -> Result<(), AddError> {
+        self.check_add(id, owned)?;
+        self.cards.push(id);
+        Ok(())
+    }
+
+    /// Removes one copy; false when the deck has none.
+    pub fn remove(&mut self, id: CardId) -> bool {
+        match self.cards.iter().rposition(|&c| c == id) {
+            Some(i) => {
+                self.cards.remove(i);
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// Fills the deck up to 60 with basic energy, shared between the colours
+    /// of its creatures in proportion to how many creature cards each colour
+    /// has (energy already in the deck counts). Returns how many were added;
+    /// none when the deck has no coloured creature.
+    pub fn fill_energy(&mut self) -> usize {
+        let (mut weight, mut have) = ([0usize; 6], [0usize; 6]);
+        for &id in &self.cards {
+            match &card(id).kind {
+                CardKind::Creature(cr) | CardKind::TrainerBasic(cr)
+                    if cr.color != Color::Colorless =>
+                {
+                    weight[cr.color as usize] += 1
+                }
+                CardKind::Energy(EnergyCard::Basic(c)) => have[*c as usize] += 1,
+                _ => {}
+            }
+        }
+        let start = self.cards.len();
+        while self.cards.len() < DECK_SIZE {
+            // D'Hondt: the next energy goes to the highest weight / (have + 1).
+            let best = (0..6).filter(|&c| weight[c] > 0).max_by(|&a, &b| {
+                (weight[a] * (have[b] + 1))
+                    .cmp(&(weight[b] * (have[a] + 1)))
+                    .then(b.cmp(&a))
+            });
+            let Some(c) = best else { break };
+            have[c] += 1;
+            self.cards
+                .push(crate::set::basic_energy(Color::ALL[c]).expect("set has every basic energy"));
+        }
+        self.cards.len() - start
+    }
 }
 
 #[cfg(test)]
@@ -108,5 +276,145 @@ mod tests {
             validate_deck(&with(&[MOSSLING, TWIN_E, TWIN_E, TWIN_E, TWIN_E, TWIN_E])),
             Err(DeckError::TooManyCopies("Twin Energy"))
         );
+    }
+}
+
+#[cfg(test)]
+mod deck_list_tests {
+    use super::*;
+    use crate::collection::starter_collection;
+    use crate::decks::EMBER_RUSH;
+    use crate::set::*;
+
+    fn list(cards: &[CardId]) -> DeckList {
+        DeckList {
+            name: "Test".into(),
+            cards: cards.to_vec(),
+        }
+    }
+
+    #[test]
+    fn validate_checks_rules_then_ownership() {
+        let ember = list(&EMBER_RUSH.cards());
+        assert_eq!(ember.validate(&starter_collection()), Ok(()));
+        assert_eq!(
+            ember.validate(&Collection::new()),
+            Err(DeckListError::NotOwned(CINDREL))
+        );
+        let short = list(&ember.cards[1..]);
+        assert_eq!(
+            short.validate(&starter_collection()),
+            Err(DeckListError::Illegal(DeckError::WrongSize(59)))
+        );
+    }
+
+    #[test]
+    fn check_add_explains_refusals() {
+        let mut owned = Collection::new();
+        owned.add(CINDREL, 5);
+        owned.add(PUDDOCK, 1);
+        let mut d = DeckList::new("Test");
+        for _ in 0..4 {
+            assert_eq!(d.add(CINDREL, &owned), Ok(()));
+        }
+        assert_eq!(d.check_add(CINDREL, &owned), Err(AddError::TooManyCopies));
+        assert_eq!(d.add(PUDDOCK, &owned), Ok(()));
+        assert_eq!(d.check_add(PUDDOCK, &owned), Err(AddError::NotOwned));
+        assert_eq!(d.check_add(FLARROW, &owned), Err(AddError::NotOwned));
+        assert_eq!(
+            d.check_add(CardId(9999), &owned),
+            Err(AddError::UnknownCard)
+        );
+        while d.cards.len() < DECK_SIZE {
+            assert_eq!(d.add(FIRE_ENERGY, &owned), Ok(()));
+        }
+        assert_eq!(d.check_add(FIRE_ENERGY, &owned), Err(AddError::DeckFull));
+        assert!(d.remove(CINDREL) && d.copies("Cindrel") == 3);
+        assert!(!d.remove(FLARROW));
+        assert_eq!(d.add(FIRE_ENERGY, &owned), Ok(()));
+        assert_eq!(d.validate(&owned), Ok(()));
+    }
+
+    #[test]
+    fn counts_and_sorted_views() {
+        let d = list(&[
+            FIRE_ENERGY,
+            PYREQUILL,
+            CINDREL,
+            CINDREL,
+            SNARE_HOOK,
+            KNOLLOP,
+            TWOFOLD_ENERGY,
+        ]);
+        assert_eq!(d.copies("Cindrel"), 2);
+        assert_eq!(d.counts()[0], (CINDREL, 2));
+        let order = |by| {
+            d.sorted(by)
+                .into_iter()
+                .map(|(id, _)| id)
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            order(SortBy::Kind),
+            [
+                CINDREL,
+                KNOLLOP,
+                PYREQUILL,
+                SNARE_HOOK,
+                TWOFOLD_ENERGY,
+                FIRE_ENERGY
+            ]
+        );
+        assert_eq!(
+            order(SortBy::Color),
+            [
+                CINDREL,
+                PYREQUILL,
+                FIRE_ENERGY,
+                KNOLLOP,
+                SNARE_HOOK,
+                TWOFOLD_ENERGY
+            ]
+        );
+        assert_eq!(
+            order(SortBy::Rarity),
+            [
+                PYREQUILL,
+                SNARE_HOOK,
+                TWOFOLD_ENERGY,
+                CINDREL,
+                KNOLLOP,
+                FIRE_ENERGY
+            ]
+        );
+    }
+
+    #[test]
+    fn fill_energy_splits_by_creature_colour() {
+        let mut d = list(&[CINDREL; 4]);
+        d.cards.extend([PUDDOCK, PUDDOCK, SCAMPIT, LUCKY_SATCHEL]);
+        assert_eq!(d.fill_energy(), 52);
+        assert_eq!((n(&d, FIRE_ENERGY), n(&d, WATER_ENERGY)), (35, 17));
+        assert_eq!(d.fill_energy(), 0, "already full");
+        // Energy already in the deck counts toward its colour's share.
+        let mut d = list(&[CINDREL, PUDDOCK]);
+        d.cards.extend([FIRE_ENERGY; 10]);
+        d.fill_energy();
+        assert_eq!((n(&d, FIRE_ENERGY), n(&d, WATER_ENERGY)), (29, 29));
+        // Nothing to go on: no coloured creature.
+        assert_eq!(list(&[SCAMPIT]).fill_energy(), 0);
+    }
+
+    fn n(d: &DeckList, id: CardId) -> usize {
+        d.cards.iter().filter(|&&c| c == id).count()
+    }
+
+    /// The editor flow: creatures and trainers by hand, energy auto-filled.
+    #[test]
+    fn prebuilt_without_energy_refills_to_a_legal_deck() {
+        let mut d = list(&EMBER_RUSH.cards());
+        d.cards.retain(|&id| !card(id).is_basic_energy());
+        d.fill_energy();
+        assert_eq!(d.validate(&starter_collection()), Ok(()));
     }
 }

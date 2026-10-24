@@ -60,6 +60,11 @@ pub fn ids() -> impl Iterator<Item = CardId> {
     (0..CARDS.len() as u16).map(CardId)
 }
 
+/// The basic energy card of a colour (`None` for Colorless).
+pub fn basic_energy(color: crate::Color) -> Option<CardId> {
+    ids().find(|&id| matches!(CARDS[id.0 as usize].kind, CardKind::Energy(EnergyCard::Basic(c)) if c == color))
+}
+
 const fn creature(name: &'static str, rarity: Rarity, c: Creature) -> CardDef {
     CardDef {
         name,
@@ -358,6 +363,13 @@ mod tests {
         for r in [Rarity::Energy, Common, Uncommon, Rare] {
             assert!(CARDS.iter().any(|c| c.rarity == r), "no {r:?} card");
         }
+    }
+
+    #[test]
+    fn basic_energy_by_colour() {
+        assert_eq!(basic_energy(Fire), Some(FIRE_ENERGY));
+        assert_eq!(basic_energy(Psychic), Some(PSYCHIC_ENERGY));
+        assert_eq!(basic_energy(Colorless), None);
     }
 
     /// Every constant names the card at its index.
