@@ -1,5 +1,13 @@
 use leptos::prelude::*;
-use pkmntcg_engine::{Card, Energy};
+use pkmntcg_engine::Color;
+
+/// Display-only demo card until the UI is rebuilt on the engine's `Game`.
+#[derive(Clone)]
+enum Card {
+    Creature { name: String, hp: u32, kind: Color },
+    Energy(Color),
+    Trainer { name: String },
+}
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -9,25 +17,23 @@ fn main() {
 /// Placeholder starter hand — original/placeholder content only.
 fn demo_hand() -> Vec<Card> {
     vec![
-        Card::Pokemon { name: "Ember Lizard".into(), hp: 60, kind: Energy::Fire },
-        Card::Pokemon { name: "Tide Otter".into(), hp: 70, kind: Energy::Water },
-        Card::Pokemon { name: "Sprout Fawn".into(), hp: 50, kind: Energy::Grass },
-        Card::Energy(Energy::Fire),
-        Card::Trainer { name: "Professor's Research".into() },
+        Card::Creature { name: "Ember Lizard".into(), hp: 60, kind: Color::Fire },
+        Card::Creature { name: "Tide Otter".into(), hp: 70, kind: Color::Water },
+        Card::Creature { name: "Sprout Fawn".into(), hp: 50, kind: Color::Grass },
+        Card::Energy(Color::Fire),
+        Card::Trainer { name: "Field Notes".into() },
     ]
 }
 
-fn energy_label(e: Energy) -> &'static str {
+fn energy_label(e: Color) -> &'static str {
     match e {
-        Energy::Grass => "Grass",
-        Energy::Fire => "Fire",
-        Energy::Water => "Water",
-        Energy::Lightning => "Lightning",
-        Energy::Psychic => "Psychic",
-        Energy::Fighting => "Fighting",
-        Energy::Darkness => "Darkness",
-        Energy::Metal => "Metal",
-        Energy::Colorless => "Colorless",
+        Color::Grass => "Grass",
+        Color::Fire => "Fire",
+        Color::Water => "Water",
+        Color::Lightning => "Lightning",
+        Color::Psychic => "Psychic",
+        Color::Fighting => "Fighting",
+        Color::Colorless => "Colorless",
     }
 }
 
@@ -56,8 +62,8 @@ fn App() -> impl IntoView {
 #[component]
 fn CardView(card: Card) -> impl IntoView {
     match card {
-        Card::Pokemon { name, hp, kind } => {
-            let cls = format!("card pokemon e-{}", energy_label(kind).to_lowercase());
+        Card::Creature { name, hp, kind } => {
+            let cls = format!("card creature e-{}", energy_label(kind).to_lowercase());
             view! {
                 <article class=cls>
                     <div class="card-top">
