@@ -1,6 +1,7 @@
 //! Sixfold: a single-player duel against the AI, rendering `sixfold_engine`.
 
 mod art;
+mod audio;
 mod binder;
 mod board;
 mod cards;
@@ -107,6 +108,12 @@ fn App() -> impl IntoView {
         ui.inspect.set(None);
         ui.sheet.set(false);
         window().scroll_to_with_x_and_y(0.0, 0.0);
+    });
+    // The world picks its own track (meadow or indoors) as each map loads.
+    Effect::new(move |_| match screen.get() {
+        Screen::Match => audio::music("duel"),
+        Screen::World => {}
+        _ => audio::music("title"),
     });
     move || match screen.get() {
         Screen::Title => view! { <title::TitleScreen /> }.into_any(),

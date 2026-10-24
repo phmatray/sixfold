@@ -129,6 +129,14 @@ impl Talk {
     }
 }
 
+/// A speaker's blip pitch, in semitones above the base voice (0..12).
+fn voice(id: &str) -> f64 {
+    let h = id
+        .bytes()
+        .fold(7u32, |h, b| h.wrapping_mul(31).wrapping_add(u32::from(b)));
+    f64::from(h % 12)
+}
+
 /// What the modal shows.
 #[derive(Clone, PartialEq)]
 enum Sheet {
@@ -239,12 +247,16 @@ pub fn WorldScreen() -> impl IntoView {
         move || {
             if let Some(Some(Sheet::Talk(t))) = sheet.try_get_untracked() {
                 let len = t.line().chars().count();
-                if typed.get_untracked() < len {
-                    typed.set(if reduced {
-                        len
-                    } else {
-                        typed.get_untracked() + 1
-                    });
+                let at = typed.get_untracked();
+                if at < len {
+                    typed.set(if reduced { len } else { at + 1 });
+                    // A voice blip on every other letter, pitched per speaker.
+                    if reduced
+                        || (at.is_multiple_of(2)
+                            && t.line().chars().nth(at).is_some_and(char::is_alphanumeric))
+                    {
+                        crate::audio::sfx("blip", voice(&t.id));
+                    }
                 }
             }
         },
@@ -311,6 +323,7 @@ pub fn WorldScreen() -> impl IntoView {
         });
         progress.with_untracked(save_progress);
         if let Some(item) = &got {
+            crate::audio::sfx("jingle", 0.0);
             announce.set(format!("You got {}.", item_info(item).0));
         }
         sheet.set(got.map(Sheet::Item));
