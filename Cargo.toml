@@ -1,0 +1,14 @@
+[workspace]
+resolver = "2"
+members = ["engine", "web"]
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+license = "MIT"
+
+# WASM release builds: optimize for size.
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1

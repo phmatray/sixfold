@@ -1,0 +1,8 @@
+[package]
+name = "pkmntcg-engine"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+description = "Pure-Rust rules engine for the trading card game (no WASM/UI deps)."
+
+[dependencies]
