@@ -55,7 +55,7 @@ pub fn find_mon(g: &Game, player: usize, uid: u32) -> Option<Mon> {
         if e.doubling_pending {
             effects.push("Its next attack does double damage".into());
         } else if e.doubled {
-            effects.push("Its attacks do double damage this turn".into());
+            effects.push("Its attack does double damage this turn".into());
         }
     }
     let cr = c.creature();
