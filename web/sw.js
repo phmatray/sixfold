@@ -5,14 +5,19 @@
 // - The app shell is cached on install and served cache-first (its file
 //   names carry a content hash); a page load goes to the network first and
 //   falls back to the cached index.html when offline.
-// - World assets, three.js from the CDN and the web fonts are cached the
-//   first time they are used, then served stale-while-revalidate.
+// - World assets (every area's models and textures), three.js from the CDN
+//   and the web fonts are cached the first time they are used, then served
+//   stale-while-revalidate. The world's cache is per build, so a deploy never
+//   mixes old models with new maps; data files (maps/*.json) go to the
+//   network first and fall back to the cache offline.
 // - A new version waits until the page asks it to take over (the "New
 //   version available" toast in pwa.js), so a duel is never cut mid-turn.
 
 const SCOPE = self.registration.scope;
 const SHELL = `sixfold-shell-${VERSION}-${SCOPE}`;
-const RUNTIME = `sixfold-runtime-${SCOPE}`;
+// Same-origin files cached on use belong to one build; CDN files are versioned by URL.
+const RUNTIME = `sixfold-runtime-${VERSION}-${SCOPE}`;
+const CDN = `sixfold-cdn-${SCOPE}`;
 const INDEX = new URL("./", SCOPE).href;
 const SHELL_URLS = new Set(PRECACHE.map((p) => new URL(p, SCOPE).href));
 
@@ -29,7 +34,13 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((k) => k.startsWith("sixfold-shell-") && k.endsWith(SCOPE) && k !== SHELL)
+            .filter(
+              (k) =>
+                (k.startsWith("sixfold-shell-") || k.startsWith("sixfold-runtime-")) &&
+                k.endsWith(SCOPE) &&
+                k !== SHELL &&
+                k !== RUNTIME,
+            )
             .map((k) => caches.delete(k)),
         ),
       )
@@ -51,8 +62,12 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(pageFirstNetwork(req));
   } else if (SHELL_URLS.has(url.origin + url.pathname)) {
     event.respondWith(caches.match(url.origin + url.pathname).then((r) => r || fetch(req)));
-  } else if (req.url.startsWith(SCOPE) || RUNTIME_HOSTS.includes(url.hostname)) {
-    event.respondWith(staleWhileRevalidate(event, req));
+  } else if (req.url.startsWith(SCOPE) && url.pathname.endsWith(".json")) {
+    event.respondWith(networkFirst(req));
+  } else if (req.url.startsWith(SCOPE)) {
+    event.respondWith(staleWhileRevalidate(event, req, RUNTIME));
+  } else if (RUNTIME_HOSTS.includes(url.hostname)) {
+    event.respondWith(staleWhileRevalidate(event, req, CDN));
   }
 });
 
@@ -69,8 +84,19 @@ async function pageFirstNetwork(req) {
   }
 }
 
-async function staleWhileRevalidate(event, req) {
+async function networkFirst(req) {
   const cache = await caches.open(RUNTIME);
+  try {
+    const res = await fetch(req);
+    if (res.ok) await cache.put(req, res.clone());
+    return res;
+  } catch (err) {
+    return (await cache.match(req)) || Response.error();
+  }
+}
+
+async function staleWhileRevalidate(event, req, name) {
+  const cache = await caches.open(name);
   const cached = await cache.match(req);
   const fresh = fetch(req)
     .then((res) => {
