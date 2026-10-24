@@ -899,7 +899,12 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
   }
+  /* Messages that come and go (turn banners, damage numbers) would vanish at
+     once without their animation: they fade in place for their time instead. */
+  .callout { transform: translate(-50%, -50%); animation: calm-show 1000ms linear both !important; }
+  .pop { animation: calm-show 1100ms linear forwards !important; }
 }
+@keyframes calm-show { 0%, 100% { opacity: 0; } 12%, 80% { opacity: 1; } }
 
 /* ---------- World ---------- */
 
