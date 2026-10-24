@@ -455,13 +455,21 @@ unit test that should cover it.
   written only after damage and the after-damage effects. If the defender was protected from the
   attack's effects, conditions aimed at the defender are dropped, and conditions the attacker puts on
   itself still apply. A Trainer-as-Basic creature can never receive a condition. A generic
-  "condition immunity" Power protects its holder while that Power is usable.
-- **Parameters.** The queue is at `ccd3/ccd4` as entries (target, mask, value). It is applied at
-  `01:6E9E`. Effects count as negated when `cccd ≠ 0`. Immune IDs are `$CB` and `$CC`, plus `$BE`
-  gated by `34A7`.
-- **Status.** CONFIRMED. The verifier raised it to high confidence.
+  "condition immunity" Power protects its holder while that Power is usable. Immunity is decided
+  when the condition is queued, against the defender at that moment. The queue entry names a side,
+  not a card, so if a later effect of the same attack switches the defender, the condition lands on
+  the new Active even if that one is immune; if the original defender was immune, nothing was
+  queued. A coin-prevention heads also drops the queued conditions (R-DMG-13).
+- **Parameters.** The queue is at `ccd3/ccd4` as entries (target side `$C2/$C3`, mask, value). It
+  is applied at `01:6E9E`, which writes side `+F0` (`01:6EE5`). Effects count as negated when
+  `cccd ≠ 0`. Immune IDs are `$CB` and `$CC`, plus `$BE` gated by `34A7`, checked against `ccca` at
+  queue time (`0B:4035`).
+- **Status.** CONFIRMED. The verifier raised it to high confidence. Runtime: `0B:4024` with
+  `ccca = $CB` queued nothing; with `ccca = $53` it queued `C2 F0 01`; after `00:14A8` switched in a
+  `$CB` card, `01:6E9E` still confused it.
 - **Evidence.** `06:4765` (phase-3 entries), `00:1715`, `00:1770`, `0B:4035-4060`, `01:6EB4-6EDF`.
-- **Test.** `protected_defender_drops_status_but_attacker_self_status_applies`, `trainer_as_basic_immune_to_status`
+- **Test.** `protected_defender_drops_status_but_attacker_self_status_applies`, `trainer_as_basic_immune_to_status`,
+  `immunity_decided_at_queue_time`
 
 ### R-STATUS-04: Asleep and Paralyzed block attacking and retreating
 - **Rule.** An Asleep or Paralyzed Active cannot attack or retreat. A Confused Active may try both,
@@ -728,11 +736,23 @@ unit test that should cover it.
 
 ### R-DMG-13: Coin prevention after the calculation *(verifier-found)*
 - **Rule.** After the damage is computed, a defender with a generic "flip: heads prevents the damage"
-  Power flips a coin, if its Power is usable and the damage is not from a Power. Heads makes the
-  damage 0 and sets the prevention flag.
-- **Status.** CONFIRMED (verifier-found)
-- **Evidence.** `00:17FD`, `00:3441-3460`.
-- **Test.** `coin_prevention_power_heads_zeroes_damage`
+  Power flips a coin, if its Power is usable and the damage is not from a Power. The hook is skipped
+  for attacks with no direct damage (`ccb7` bit 7) and when the attack is already negated
+  (R-DMG-12). Otherwise it flips when the damage is nonzero, **or** a condition is queued, **or** the
+  defender has a `+E8` effect (one this attack placed in phase 3, since `+E8` is cleared at the end of
+  its owner's turn). Heads makes the damage 0, sets the prevention flag (so the queued conditions
+  aimed at the defender are dropped) and clears the defender's `+E8`. Tails changes nothing.
+- **Parameters.** `00:17FD-1836` PostDamageDefenderChecks: skip on `ccb7` bit 7 or `cccd ≠ 0`; flip
+  when `de ≠ 0` (`17FD`), defender `+E8 ≠ 0` (`180C-1812`) or `ccd3 ≠ 0` (`1814-1818`). Heads:
+  `3441` sets `cccd = 4`; `182C-1831` zeroes the defender's `+E8`; `de = 0`. All 7 mapped writers of
+  `+E8` (through `0B:4149`) are phase-3 entries, so they run before this hook.
+- **Status.** CORRECTED. The original claim had the coin only for nonzero damage and missed the
+  `+E8` clear. Runtime (call_routine `00:17FD`, `de = 0`, `ccca = $96`): with `ccd3 = 1` and
+  `C3E8 = 3` heads gave `cccd = 4` and `C3E8 = 0`; with an empty queue and `+E8 = 0` no coin; with
+  `ccb7 = $80` no coin. `01:6E9E` with `cccd = 4` dropped the queued defender condition.
+- **Evidence.** `00:17FD-1836`, `00:3441-3460`, `01:6E9E`, `0B:4149`.
+- **Test.** `coin_prevention_power_heads_zeroes_damage`, `coin_prevention_heads_drops_status_on_zero_damage`,
+  `coin_prevention_heads_clears_placed_effect`
 
 ### R-DMG-14: Retaliation hook *(verifier-found)*
 - **Rule.** When a creature with a generic retaliation Power takes nonzero damage that is not from a
@@ -1334,7 +1354,7 @@ notes give the decision order and the weightings to copy where helpful.
 32. Report the weakness-applied and resistance-applied flags in the attack result.
 33. Conditions: one byte for the Active. Confused, Asleep and Paralyzed exclude each other. Poison or Double-Poison stacks with them. The Bench never has conditions.
 34. Applying a condition: the newest nibble condition replaces the old one and keeps poison. Poison overwrites the poison level.
-35. Conditions are queued after damage. A negated attack drops conditions on the defender but keeps the attacker's self-conditions. Trainer-as-Basic and immunity-Power holders are immune.
+35. Conditions are queued before damage and applied after it, to the side's Active of that moment. A negated attack drops conditions on the defender but keeps the attacker's self-conditions. Trainer-as-Basic and immunity-Power holders are immune, decided when the condition is queued.
 36. Asleep or Paralyzed: can't attack or retreat. Confused may try both, with a coin.
 37. Confused, Asleep or Paralyzed disables the Active's Powers, including passive "in play" counting. Poison doesn't.
 38. Confused attack: costs are paid, then a coin. Tails means 20 self-damage, a knock-out check and the end of the turn.
@@ -1378,7 +1398,7 @@ notes give the decision order and the weightings to copy where helpful.
 76. Optional settled-only Powers can't be used on the turn the creature was played or evolved, nor on either first turn.
 77. Phase-7 on-play Powers fire on bench placement and on evolve unless a blocker is in play. A blocker entering play wipes the opponent's Power-made colour changes.
 78. Optional attack flag "once while in play", set at the cost phase.
-79. Prevention hooks: a whole-attack prevention substatus or Power (negates damage, effect damage to the Active, and conditions), a coin-prevention Power, and a retaliation Power (flat 10).
+79. Prevention hooks: a whole-attack prevention substatus or Power (negates damage, effect damage to the Active, and conditions), a coin-prevention Power (flips for damage, a queued condition or a placed effect; heads drops all three), and a retaliation Power (flat 10).
 80. The AI must act only through engine actions, and every AI action must pass the same validation as a human action.
 
 ---

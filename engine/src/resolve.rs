@@ -454,14 +454,20 @@ impl Game {
             return;
         }
         let (p, q) = (pd.player, 1 - pd.player);
-        let mut hit = self.attack_damage(p, pd.damage, pd.ignore_wr, pd.negated);
-        // RULES: R-DMG-13 — we flip only when there is damage to prevent.
-        if hit.amount > 0
+        let (negated, queued) = (pd.negated, !pd.queue.is_empty());
+        let mut hit = self.attack_damage(p, pd.damage, pd.ignore_wr, negated);
+        // R-DMG-13: skipped once negated; otherwise it flips for damage, a
+        // queued condition or an effect placed on the defender (00:17FD-1818).
+        // Heads drops all three (00:1829-1833).
+        let something = hit.amount > 0 || queued || self.players[q].effects.placed.is_some();
+        if !negated
+            && something
             && self.passive(q, 0) == Some(PowerKind::CoinPrevention)
             && self.flip(q, ev)
         {
             hit = Default::default();
             self.pd_mut().negated = true;
+            self.players[q].effects.placed = None;
             ev.push(Event::AttackNegated { player: q });
         }
         self.hurt(q, 0, hit, true, ev);
@@ -525,8 +531,10 @@ impl Game {
                 let hit = self.effect_damage(p, player, s, n, power);
                 self.hurt(player, s, hit, !power, ev);
             }
+            // R-STATUS-03: immunity is decided now, against the current
+            // defender; the entry then targets the side (0B:4035).
             Inflict { status, coin } => {
-                if !coin || self.flip(p, ev) {
+                if (!coin || self.flip(p, ev)) && !self.status_immune(q) {
                     self.pd_mut().queue.push((q, status));
                 }
             }
@@ -836,9 +844,10 @@ impl Game {
         });
     }
 
-    /// R-STATUS-03: the queue, after damage. A negated attack drops the
-    /// defender's conditions; immune targets drop them too. Self-conditions
-    /// always apply (R-STATUS-14). The result is recorded (R-STATUS-13).
+    /// R-STATUS-03: the queue, after damage, onto each side's Active of the
+    /// moment. A negated attack drops the defender's conditions (immunity was
+    /// checked when queuing). Self-conditions always apply (R-STATUS-14). The
+    /// result is recorded (R-STATUS-13).
     fn statuses(&mut self, ev: &mut Vec<Event>) {
         let pd = self.pd_mut();
         let queue = std::mem::take(&mut pd.queue);
@@ -850,7 +859,7 @@ impl Game {
             pl.effects.last_inflicted = Default::default();
         }
         for (target, status) in queue {
-            if target != p && (negated || self.status_immune(target)) {
+            if target != p && negated {
                 continue;
             }
             let pl = &mut self.players[target];
@@ -1058,6 +1067,34 @@ mod tests {
         );
         assert!(applied(&ev, 1).is_empty());
         assert_eq!(applied(&ev, 0), vec![Status::Confused]);
+    }
+
+    /// R-STATUS-03: immunity is decided when the condition is queued, against
+    /// the defender at that time; the condition then lands on that side's
+    /// Active, whoever it is after a switch (0B:4035, 01:6EE5).
+    #[test]
+    fn immunity_decided_at_queue_time() {
+        let effects = &[
+            Inflict {
+                status: Status::Asleep,
+                coin: false,
+            },
+            SwitchDefender {
+                chooser_is_attacker: true,
+            },
+        ];
+        let mut g = main_phase(0);
+        g.players[1].bench.push(creature(WARDEN, &[]));
+        attack_with(&mut g, 10, effects);
+        let ev = ok(&mut g, Action::Choose(0));
+        assert_eq!(g.players[1].active.as_ref().unwrap().top(), WARDEN);
+        assert_eq!(applied(&ev, 1), vec![Status::Asleep], "queued before the switch");
+        let mut g = main_phase(0);
+        g.players[1].active = Some(creature(WARDEN, &[]));
+        g.players[1].bench.push(creature(PEBBLET, &[]));
+        attack_with(&mut g, 10, effects);
+        let ev = ok(&mut g, Action::Choose(0));
+        assert!(applied(&ev, 1).is_empty(), "the immune defender queued nothing");
     }
 
     /// R-STATUS-03

@@ -703,6 +703,72 @@ mod tests {
         );
     }
 
+    /// R-DMG-13, R-STATUS-03: a direct attack whose damage comes to 0 still
+    /// flips when it queues a condition or places an effect on the defender
+    /// (00:180C-1818); heads drops both (00:182C).
+    #[test]
+    fn coin_prevention_heads_drops_status_on_zero_damage() {
+        let sleep = &[
+            AddPerHeads { coins: 0, per: 0 },
+            Inflict {
+                status: crate::Status::Asleep,
+                coin: false,
+            },
+        ];
+        let luck = || {
+            let mut g = duel();
+            g.players[1].active = Some(creature(LUCKSHELL, &[]));
+            g
+        };
+        let mut g = luck();
+        g.force_coins(&[true]);
+        let ev = attack_with(&mut g, 0, sleep);
+        assert_eq!(coins(&ev), 1);
+        assert!(!ev.iter().any(|e| matches!(
+            e,
+            Event::ConditionApplied { player: 1, .. }
+        )));
+        let mut g = luck();
+        g.force_coins(&[false]);
+        let ev = attack_with(&mut g, 0, sleep);
+        assert!(
+            ev.contains(&Event::ConditionApplied {
+                player: 1,
+                status: crate::Status::Asleep
+            }),
+            "tails: it lands"
+        );
+        // Nothing to prevent: no coin.
+        let mut g = luck();
+        let ev = attack_with(&mut g, 0, &[AddPerHeads { coins: 0, per: 0 }]);
+        assert_eq!(coins(&ev), 0);
+    }
+
+    /// R-DMG-13: heads also clears the effect this attack placed on the
+    /// defender; no coin for a holder whose Power is off, or after the whole
+    /// attack was already negated.
+    #[test]
+    fn coin_prevention_heads_clears_placed_effect() {
+        let place = &[Place {
+            placed: Placed::CantRetreat,
+            coin: false,
+        }];
+        let mut g = duel();
+        g.players[1].active = Some(creature(LUCKSHELL, &[]));
+        g.force_coins(&[true]);
+        let ev = attack_with(&mut g, 30, place);
+        assert_eq!(damage_to(&ev, 1, 0), vec![0]);
+        assert_eq!(g.players[1].effects.placed, None);
+        let mut g = duel();
+        g.players[1].active = Some(creature(LUCKSHELL, &[]));
+        g.players[1].condition.apply_special(Special::Confused);
+        assert_eq!(coins(&attack_with(&mut g, 30, &[])), 0, "Power off");
+        let mut g = duel();
+        g.players[1].active = Some(creature(LUCKSHELL, &[]));
+        g.players[1].effects.shield = Some(Shield::PreventAll);
+        assert_eq!(coins(&attack_with(&mut g, 30, &[])), 0, "already negated");
+    }
+
     /// R-DMG-14
     #[test]
     fn retaliation_power_deals_flat_10() {
