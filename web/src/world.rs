@@ -14,7 +14,7 @@ use sixfold_engine::overworld::{Applied, Progress};
 use wasm_bindgen::prelude::*;
 
 use crate::audio::MuteToggle;
-use crate::campaign::{packs_label, Challenge, Roster, SealBadge};
+use crate::campaign::{packs_label, Challenge, Ladder, Roster, SealBadge};
 use crate::ctl::Ctl;
 use crate::{store, Screen};
 
@@ -145,6 +145,8 @@ enum Sheet {
     /// A campaign rival's duel offer, by id.
     Challenge(String),
     Roster,
+    /// The post-game ladder: the Gauntlet, the daily duel and a Warden rematch.
+    Ladder,
 }
 
 /// The prompt's label for what the hero faces.
@@ -348,6 +350,8 @@ pub fn WorldScreen() -> impl IntoView {
                     Ok(Applied::GotItem(item)) => next = Some(Sheet::Item(item)),
                     Ok(Applied::Duel(id)) => next = Some(Sheet::Challenge(id)),
                     Ok(Applied::Pack(b)) => packs.push(b),
+                    Ok(Applied::Show(panel)) if panel == "ladder" => next = Some(Sheet::Ladder),
+                    Ok(Applied::Show(panel)) => leptos::logging::warn!("world: no panel {panel}"),
                     Ok(Applied::Nothing) => {}
                     Err(err) => leptos::logging::warn!("world: {err}"),
                 }
@@ -494,6 +498,16 @@ pub fn WorldScreen() -> impl IntoView {
                     }.into_any(),
                     Sheet::Challenge(id) => view! {
                         <Challenge id=id on_cancel=move || sheet.set(None) before=move || sheet.set(None) />
+                    }.into_any(),
+                    Sheet::Ladder => view! {
+                        <div class="sheet-head">
+                            <h2 id="world-sheet-title">"The Warden's ladder"</h2>
+                            <button class="btn ghost" autofocus on:click=close>"Close"</button>
+                        </div>
+                        <Ladder back=Screen::World before=move || sheet.set(None) />
+                        <div class="dialog-foot">
+                            <button class="btn" on:click=move |_| sheet.set(Some(Sheet::Challenge("warden".into())))>"Duel Sable again"</button>
+                        </div>
                     }.into_any(),
                     Sheet::Roster => view! {
                         <div class="sheet-head">

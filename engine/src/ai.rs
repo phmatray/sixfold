@@ -2076,12 +2076,13 @@ mod tests {
         (wins, played, most)
     }
 
-    /// Hard wins at least 60% of mirror matches against Normal, and keeps
-    /// to its look-ahead budget.
+    /// Hard wins most mirror matches against Normal, and keeps to its
+    /// look-ahead budget. 60 games carry about ±6% of noise, so this quick
+    /// check asks for 55%; the big run below holds Hard to 60%.
     #[test]
     fn hard_beats_normal_in_mirrors() {
         let (wins, games, most) = hard_vs_normal(10);
-        assert!(wins * 10 >= games * 6, "Hard won only {wins}/{games}");
+        assert!(wins * 20 >= games * 11, "Hard won only {wins}/{games}");
         assert!(
             most <= NODE_BUDGET + CANDIDATES as u32 * ROLLOUT,
             "{most} applies in one decision"

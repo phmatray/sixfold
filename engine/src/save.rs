@@ -329,6 +329,33 @@ mod tests {
         s
     }
 
+    /// The 0.9 endgame state rides in the existing sections: the champion
+    /// and the Gauntlet run and daily claim in the progress, promos in the
+    /// collection. A progress string without them reads as no run, no claim.
+    #[test]
+    fn endgame_state_round_trips_and_old_progress_defaults() {
+        let mut s = Save::new_player("Champ");
+        let mut pr = Profile::new_player();
+        let mut p = Progress::default();
+        for r in &RIVALS {
+            crate::campaign::record(r, true, &mut p, &mut pr);
+        }
+        p.settle();
+        assert!(crate::endgame::start_run(&mut p, &pr.decks[0].cards));
+        crate::endgame::record_daily(&mut p, &mut pr, 20_385, true);
+        s.set_progress(&p);
+        s.set_profile(&pr);
+        let back = Save::decode(&s.encode()).unwrap();
+        let bp = back.progress();
+        assert!(crate::campaign::champion(&bp) && back.summary().champion);
+        assert_eq!(bp.gauntlet(), p.gauntlet());
+        assert_eq!(bp.daily(), Some(20_385));
+        let promos = back.profile().0.collection;
+        assert!(crate::set::PROMOS.iter().all(|&id| promos.count(id) == 1));
+        let old = Progress::decode("f:beat_bramble,won:bramble");
+        assert_eq!((old.gauntlet(), old.daily()), (None, None));
+    }
+
     #[test]
     fn save_round_trips_every_section() {
         let s = sample();

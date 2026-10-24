@@ -4,7 +4,8 @@
 //! A pack is 1 basic energy, 5 Commons, 3 Uncommons and 1 Rare, in that
 //! (reveal) order. Commons may repeat; the Uncommons are distinct. Themed packs
 //! only hold creatures and basic energy of their colours; trainers, the special
-//! energy and colorless creatures turn up in every pack.
+//! energy and colorless creatures turn up in every pack. Promo cards
+//! ([`crate::set::PROMOS`]) are campaign rewards and turn up in none.
 
 use crate::card::{card, CardId, CardKind, Color, EnergyCard, Rarity};
 use crate::rng::Rng;
@@ -82,8 +83,11 @@ pub static BOOSTERS: [&Booster; 7] = [
 ];
 
 impl Booster {
-    /// Whether this card can turn up in the pack.
+    /// Whether this card can turn up in the pack. Promos never do.
     pub fn holds(&self, id: CardId) -> bool {
+        if crate::set::is_promo(id) {
+            return false;
+        }
         let c = card(id);
         let color = match &c.kind {
             CardKind::Creature(cr) | CardKind::TrainerBasic(cr) => cr.color,
@@ -182,7 +186,7 @@ mod tests {
         assert!(!GROVE_PACK.holds(GULFWYRM) && STORM_PACK.holds(GULFWYRM));
         assert!(STONE_PACK.holds(WARRENKING) && !STONE_PACK.holds(PYREQUILL));
         assert!(DREAM_PACK.holds(HEXARCH) && !DREAM_PACK.holds(FULGUREX));
-        assert!(crate::set::ids().all(|id| WILD_PACK.holds(id)));
+        assert!(crate::set::ids().all(|id| WILD_PACK.holds(id) != crate::set::is_promo(id)));
     }
 
     #[test]

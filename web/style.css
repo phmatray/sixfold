@@ -1634,3 +1634,44 @@ select option { background: var(--panel); color: var(--ink); }
   .rival-colors { margin-left: 0; }
 }
 .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+/* ---------- Endgame: champion title, ladder, promos, credits ---------- */
+
+.champion-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font: 700 12px/1.4 var(--display); letter-spacing: 0.05em; text-transform: uppercase; color: var(--stock-ink); background: linear-gradient(120deg, var(--brass-hi), var(--brass)); }
+.seal-count .champion-chip { margin-left: 10px; vertical-align: 3px; }
+.seal-badge.champion { border-color: rgba(214, 172, 74, 0.55); }
+@media (max-width: 520px) { .world-top .champion-chip { display: none; } }
+
+.ladder-page { display: grid; gap: 10px; width: 100%; }
+.ladder { display: grid; gap: 12px; width: 100%; }
+.ladder-part { padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: rgba(19, 33, 58, 0.75); display: grid; gap: 4px; }
+.ladder-part h3 { font-size: 18px; }
+.ladder-part p { margin: 0; }
+.rungs { margin: 4px 0 0; padding-left: 22px; color: var(--muted); font-size: 13px; columns: 2 220px; }
+.ladder .deck-picker legend { font-size: 16px; margin: 4px 0 6px; }
+.ladder .deck-star .card { --w: 52px; }
+.ladder .deck-tile { padding: 8px 10px; min-height: 44px; }
+.ladder .dialog-foot { flex-wrap: wrap; }
+.world-sheet .ladder { margin-top: 12px; }
+
+.card-promo { margin-left: 0.35em; padding: 0 0.35em; border-radius: 0.5em; background: var(--brass); color: var(--stock-ink); font-weight: 800; }
+.bind-count { white-space: nowrap; }
+.promo-badge { padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--stock-ink); background: var(--brass-hi); }
+
+.credits { position: fixed; inset: 0; overflow: hidden; background: radial-gradient(ellipse 80% 70% at 50% 40%, #1d3657, var(--felt-deep) 80%); z-index: 10; }
+.credits-roll { width: min(560px, calc(100% - 32px)); margin: 0 auto; text-align: center; animation: credits-roll 50s linear both; }
+.credits-roll .wordmark { font-size: clamp(48px, 12vw, 96px); }
+.credits-lead { font: 700 20px var(--display); color: var(--brass-hi); margin: 12px 0 0; }
+.credits-roll section { margin: 56px 0; }
+.credits-roll h2 { font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brass-hi); margin-bottom: 14px; }
+.credits-roll ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.credits-roll li { display: grid; }
+.credits-roll li b { font: 700 19px var(--display); }
+.credits-roll li span, .credits-roll section p { color: var(--muted); }
+.credits-end { margin: 72px 0 0; font: 700 24px var(--display); }
+.credits-foot { position: fixed; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 11; }
+@keyframes credits-roll { from { transform: translateY(100vh); } to { transform: translateY(calc(50vh - 100%)); } }
+@media (prefers-reduced-motion: reduce) {
+  .credits { overflow-y: auto; }
+  .credits-roll { animation: none !important; padding: 48px 0 112px; }
+}

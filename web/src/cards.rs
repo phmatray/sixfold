@@ -72,7 +72,10 @@ pub fn CardFace(id: CardId) -> impl IntoView {
                 {hp.map(|hp| view! { <span class="card-hp">{hp}</span> })}
             </div>
             <div class="card-art" inner_html=card_art(def)></div>
-            <div class="card-foot">{foot(def)}</div>
+            <div class="card-foot">
+                {foot(def)}
+                {sixfold_engine::set::is_promo(id).then(|| view! { <span class="card-promo">"Promo"</span> })}
+            </div>
         </div>
     }
 }

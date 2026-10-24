@@ -6,14 +6,15 @@
 //! State lives in the world's [`Progress`]: a beaten rival is the flag
 //! `beat_<id>`, and the result of the last campaign duel is kept until its
 //! post-duel line has played (see [`Progress::last_duel`]). Packs go to the
-//! profile's [`Wallet`].
+//! profile's wallet, and the first win against each rival also adds its promo
+//! card ([`promo`]) to the collection.
 
 use crate::ai::Difficulty;
 
-use crate::card::Color;
+use crate::card::{CardId, Color};
 use crate::decks::{Prebuilt, EMBER_RUSH, STORM_FRONT};
 use crate::overworld::Progress;
-use crate::profile::Wallet;
+use crate::profile::Profile;
 use crate::set::*;
 
 /// Seals there are to earn: one per rival, the Warden excluded.
@@ -57,6 +58,15 @@ impl Rival {
         seals(p) >= self.needs
     }
 
+    /// The promo card the first win against this rival gives.
+    pub fn promo(&self) -> CardId {
+        let i = RIVALS
+            .iter()
+            .position(|r| r.id == self.id)
+            .expect("a rival from RIVALS");
+        PROMOS[i]
+    }
+
     /// Packs a win would grant now: (booster, count).
     pub fn prize_packs(&self, p: &Progress) -> (usize, u32) {
         let n = if self.beaten(p) {
@@ -78,6 +88,8 @@ pub struct Reward {
     pub seal: bool,
     /// (booster, count); count 0 on a loss.
     pub packs: (usize, u32),
+    /// The promo card added to the collection (first win only).
+    pub promo: Option<CardId>,
 }
 
 /// Rival by id.
@@ -90,9 +102,27 @@ pub fn seals(p: &Progress) -> usize {
     RIVALS.iter().filter(|r| r.seal && r.beaten(p)).count()
 }
 
+/// The Warden has been beaten: the player is the champion.
+pub fn champion(p: &Progress) -> bool {
+    RIVALS.iter().any(|r| !r.seal && r.beaten(p))
+}
+
+/// Saves from before promos existed: give the promo of every rival already
+/// beaten that the collection lacks. Returns the cards added.
+pub fn backfill_promos(p: &Progress, profile: &mut Profile) -> Vec<CardId> {
+    let missing: Vec<CardId> = RIVALS
+        .iter()
+        .filter(|r| r.beaten(p) && profile.collection.count(r.promo()) == 0)
+        .map(Rival::promo)
+        .collect();
+    missing.iter().for_each(|&id| profile.collection.add(id, 1));
+    missing
+}
+
 /// Record a finished duel against `r`: remember the result for the post-duel
-/// line, and on a win mark the rival beaten and grant the packs.
-pub fn record(r: &Rival, won: bool, p: &mut Progress, wallet: &mut Wallet) -> Reward {
+/// line, and on a win mark the rival beaten and grant the packs (and, the
+/// first time, the rival's promo card).
+pub fn record(r: &Rival, won: bool, p: &mut Progress, profile: &mut Profile) -> Reward {
     let first = won && !r.beaten(p);
     let packs = if won {
         r.prize_packs(p)
@@ -102,7 +132,11 @@ pub fn record(r: &Rival, won: bool, p: &mut Progress, wallet: &mut Wallet) -> Re
     if won {
         p.apply(&format!("flag:{}", r.flag()))
             .expect("rival ids are valid flag names");
-        wallet.grant(packs.0, packs.1);
+        profile.wallet.grant(packs.0, packs.1);
+    }
+    let promo = first.then(|| r.promo());
+    if let Some(id) = promo {
+        profile.collection.add(id, 1);
     }
     p.set_last_duel(r.id, won);
     Reward {
@@ -110,6 +144,7 @@ pub fn record(r: &Rival, won: bool, p: &mut Progress, wallet: &mut Wallet) -> Re
         first,
         seal: first && r.seal,
         packs,
+        promo,
     }
 }
 
@@ -341,9 +376,9 @@ mod tests {
     use crate::{validate_deck, Config, Game};
 
     fn beat(p: &mut Progress, ids: &[&str]) {
-        let mut w = Wallet::default();
+        let mut pr = Profile::new_player();
         for id in ids {
-            record(rival(id).unwrap(), true, p, &mut w);
+            record(rival(id).unwrap(), true, p, &mut pr);
         }
     }
 
@@ -366,25 +401,50 @@ mod tests {
 
     #[test]
     fn first_win_earns_a_seal_and_packs_rematch_one_pack_loss_nothing() {
-        let (mut p, mut w) = (Progress::default(), Wallet::default());
+        let mut p = Progress::default();
+        let mut pr = Profile::new_player();
+        pr.wallet = Default::default();
         let r = rival("bramble").unwrap();
-        let lost = record(r, false, &mut p, &mut w);
-        assert_eq!((lost.seal, lost.packs.1, w.total()), (false, 0, 0));
+        let lost = record(r, false, &mut p, &mut pr);
+        assert_eq!((lost.seal, lost.packs.1, pr.wallet.total()), (false, 0, 0));
+        assert_eq!((lost.promo, pr.collection.count(THISTLEWICK)), (None, 0));
         assert_eq!(p.last_duel(), Some(("bramble", false)));
         assert_eq!(seals(&p), 0);
 
-        let won = record(r, true, &mut p, &mut w);
+        let won = record(r, true, &mut p, &mut pr);
         assert!(won.first && won.seal);
         assert_eq!(won.packs, (3, 2));
-        assert_eq!(w.packs(3), 2);
+        assert_eq!(pr.wallet.packs(3), 2);
+        assert_eq!(
+            (won.promo, pr.collection.count(THISTLEWICK)),
+            (Some(THISTLEWICK), 1)
+        );
         assert!(p.has_flag("beat_bramble"));
         assert_eq!(p.last_duel(), Some(("bramble", true)));
         assert_eq!(seals(&p), 1);
 
-        let again = record(r, true, &mut p, &mut w);
-        assert!(!again.first && !again.seal);
+        let again = record(r, true, &mut p, &mut pr);
+        assert!(!again.first && !again.seal && again.promo.is_none());
         assert_eq!(again.packs, (3, REMATCH_PACKS));
-        assert_eq!((w.packs(3), seals(&p)), (3, 1));
+        assert_eq!((pr.wallet.packs(3), seals(&p)), (3, 1));
+        assert_eq!(pr.collection.count(THISTLEWICK), 1, "one promo per rival");
+    }
+
+    #[test]
+    fn old_saves_get_the_promos_of_rivals_already_beaten() {
+        let p = Progress::decode("f:beat_bramble,f:beat_orla");
+        let mut pr = Profile::new_player();
+        assert_eq!(backfill_promos(&p, &mut pr), [THISTLEWICK, SLATEBROW]);
+        assert_eq!(backfill_promos(&p, &mut pr), [], "only once");
+        assert_eq!(pr.collection.count(SLATEBROW), 1);
+    }
+
+    /// Each rival gives its own promo, the Warden the last one.
+    #[test]
+    fn every_rival_has_its_own_promo() {
+        let promos: Vec<CardId> = RIVALS.iter().map(Rival::promo).collect();
+        assert_eq!(promos, PROMOS);
+        assert_eq!(rival("warden").unwrap().promo(), HEXCREST);
     }
 
     #[test]
@@ -401,7 +461,9 @@ mod tests {
         assert!(!rival("warden").unwrap().open(&p));
         beat(&mut p, &["lumen"]);
         assert!(rival("warden").unwrap().open(&p));
+        assert!(!champion(&p));
         beat(&mut p, &["warden"]);
+        assert!(champion(&p));
         assert_eq!(seals(&p), SEALS);
         assert!(p.has_flag("beat_warden"));
     }

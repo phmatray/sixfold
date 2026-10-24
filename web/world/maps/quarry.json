@@ -127,16 +127,36 @@
       "facing": "e",
       "dialogue": [
         {
+          "if": "won:cinza&flag:thanked_cinza",
+          "lines": [
+            "Again?! Fine. The kiln needed cooling anyway."
+          ]
+        },
+        {
           "if": "won:cinza",
           "lines": [
             "Burnt out... You're quicker than you look.",
-            "Here, my seal. Don't let it cool off in a drawer."
+            "Here, my seal. Don't let it cool off in a drawer.",
+            "And take Kilnfox. It runs hotter than I do."
+          ],
+          "do": [
+            "flag:thanked_cinza"
           ]
         },
         {
           "if": "lost:cinza",
           "lines": [
             "Too slow! The road's still warm, come race me again."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "The champion, running the kiln road like the rest of us. Ha!",
+            "Four prizes. Let's see if the title made you any faster."
+          ],
+          "do": [
+            "duel:cinza"
           ]
         },
         {
@@ -172,10 +192,20 @@
       "facing": "s",
       "dialogue": [
         {
+          "if": "won:orla&flag:thanked_orla",
+          "lines": [
+            "Cracked it again. I'll need a harder rock."
+          ]
+        },
+        {
           "if": "won:orla",
           "lines": [
             "You cracked the bedrock. Respect.",
-            "My seal. Earned, not quarried."
+            "My seal. Earned, not quarried.",
+            "Slatebrow too. Built like my site hut, and twice as stubborn."
+          ],
+          "do": [
+            "flag:thanked_orla"
           ]
         },
         {
@@ -189,6 +219,16 @@
           "lines": [
             "Not yet. The quarry only opens to those with three seals.",
             "Go on, the others won't beat themselves."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "Champion on my quarry floor. Mind the gravel, it doesn't care about titles.",
+            "Five prizes, same as ever. Shall we?"
+          ],
+          "do": [
+            "duel:orla"
           ]
         },
         {
@@ -221,6 +261,13 @@
       "z": 12,
       "facing": "w",
       "dialogue": [
+        {
+          "if": "beat:warden",
+          "lines": [
+            "They're carving a seventh hexagon for the fountain. Yours, I hear.",
+            "I'll cut it myself. Stone lasts."
+          ]
+        },
         {
           "if": "item:field_lens",
           "lines": [

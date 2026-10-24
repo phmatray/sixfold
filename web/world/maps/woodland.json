@@ -194,10 +194,20 @@
       "facing": "s",
       "dialogue": [
         {
+          "if": "won:bramble&flag:thanked_bramble",
+          "lines": [
+            "Pruned again! Green thumbs and sharp cards, that's you."
+          ]
+        },
+        {
           "if": "won:bramble",
           "lines": [
             "Well! You pruned me right back.",
-            "Take my seal. Five more rivals carry one each."
+            "Take my seal. Five more rivals carry one each.",
+            "And a Thistlewick for your binder. It only pricks a little."
+          ],
+          "do": [
+            "flag:thanked_bramble"
           ]
         },
         {
@@ -205,6 +215,16 @@
           "lines": [
             "Ha, tangled up! Happens to everyone the first time.",
             "Catch your breath and come try again."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "Champion! The hedges stood up straighter when they heard.",
+            "Fancy a trim? Two prizes, as always."
+          ],
+          "do": [
+            "duel:bramble"
           ]
         },
         {
@@ -240,10 +260,20 @@
       "facing": "s",
       "dialogue": [
         {
+          "if": "won:lumen&flag:thanked_lumen",
+          "lines": [
+            "Wide awake again. I'll have to brew something stronger."
+          ]
+        },
+        {
           "if": "won:lumen",
           "lines": [
             "You stayed awake the whole time. Impressive.",
-            "My seal. With six, the sealed door in the duel hall is yours."
+            "My seal. With six, the sealed door in the duel hall is yours.",
+            "And Moonmoth. It sings, but only at night."
+          ],
+          "do": [
+            "flag:thanked_lumen"
           ]
         },
         {
@@ -257,6 +287,16 @@
           "lines": [
             "You look tired. Five seals first, then we'll talk.",
             "Rest up: the others are still waiting."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "You beat Sable and you're still not yawning. Remarkable.",
+            "The moon's up. One more? Six prizes."
+          ],
+          "do": [
+            "duel:lumen"
           ]
         },
         {
@@ -289,6 +329,12 @@
       "z": 4,
       "facing": "w",
       "dialogue": [
+        {
+          "if": "beat:warden&flag:lens_returned",
+          "lines": [
+            "I saw a champion through my lens today! ...Oh, it was you. It still counts."
+          ]
+        },
         {
           "if": "flag:lens_returned",
           "lines": [

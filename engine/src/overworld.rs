@@ -9,9 +9,12 @@
 //!   `beat:<rival>` (beaten at least once), `open:<rival>` (enough seals to
 //!   duel them), `won:<rival>` / `lost:<rival>` (the result of the last
 //!   campaign duel, until [`Progress::settle`]), optionally negated with `!`;
-//!   an empty condition always holds
-//! - save string: comma-separated `i:<item>`, `f:<flag>` and `won:<rival>` /
-//!   `lost:<rival>` tokens
+//!   several joined with `&` must all hold; an empty condition always holds
+//! - effect `show:<panel>` asks the UI to open one of its panels (`ladder`:
+//!   the Gauntlet and the daily duel)
+//! - save string: comma-separated `i:<item>`, `f:<flag>`, `won:<rival>` /
+//!   `lost:<rival>`, `g:<beaten>_<deck print>` (a Gauntlet run) and
+//!   `d:<day>` (the last daily duel reward) tokens
 //!
 //! Names are lowercase ASCII letters, digits and `_`.
 
@@ -26,6 +29,10 @@ pub struct Progress {
     flags: BTreeSet<String>,
     /// The last campaign duel (rival id, won), until its post-duel line played.
     last: Option<(String, bool)>,
+    /// The Gauntlet run under way: (rungs beaten, deck fingerprint).
+    gauntlet: Option<(usize, u32)>,
+    /// The last day whose daily duel reward was claimed.
+    daily: Option<u32>,
 }
 
 /// What applying an effect did.
@@ -39,6 +46,8 @@ pub enum Applied {
     Duel(String),
     /// Grant one pack of this booster (index into [`BOOSTERS`]).
     Pack(usize),
+    /// Open a UI panel by name.
+    Show(String),
 }
 
 /// The booster a `pack:` name means: the first word of its name, lowercase.
@@ -90,6 +99,7 @@ impl Progress {
                 Ok(Applied::Nothing)
             }
             Some(("duel", id)) if rival(id).is_some() => Ok(Applied::Duel(id.to_string())),
+            Some(("show", panel)) => Ok(Applied::Show(panel.to_string())),
             Some(("pack", name)) => booster(name)
                 .map(Applied::Pack)
                 .ok_or_else(|| format!("unknown booster in {effect:?}")),
@@ -102,6 +112,11 @@ impl Progress {
         let cond = cond.trim();
         if cond.is_empty() {
             return true;
+        }
+        if cond.contains('&') {
+            return cond
+                .split('&')
+                .all(|c| !c.trim().is_empty() && self.check(c));
         }
         let (negate, cond) = match cond.strip_prefix('!') {
             Some(rest) => (true, rest),
@@ -137,6 +152,24 @@ impl Progress {
         self.last = Some((id.to_string(), won));
     }
 
+    /// The Gauntlet run under way: (rungs beaten, deck fingerprint).
+    pub fn gauntlet(&self) -> Option<(usize, u32)> {
+        self.gauntlet
+    }
+
+    pub(crate) fn set_gauntlet(&mut self, run: Option<(usize, u32)>) {
+        self.gauntlet = run;
+    }
+
+    /// The last day whose daily duel reward was claimed.
+    pub fn daily(&self) -> Option<u32> {
+        self.daily
+    }
+
+    pub(crate) fn set_daily(&mut self, day: u32) {
+        self.daily = Some(day);
+    }
+
     /// The post-duel line played: forget the last result.
     pub fn settle(&mut self) {
         self.last = None;
@@ -155,7 +188,18 @@ impl Progress {
             .last
             .iter()
             .map(|(id, won)| format!("{}:{id}", if *won { "won" } else { "lost" }));
-        items.chain(flags).chain(last).collect::<Vec<_>>().join(",")
+        let run = self
+            .gauntlet
+            .iter()
+            .map(|(n, print)| format!("g:{n}_{print:08x}"));
+        let daily = self.daily.iter().map(|d| format!("d:{d}"));
+        items
+            .chain(flags)
+            .chain(last)
+            .chain(run)
+            .chain(daily)
+            .collect::<Vec<_>>()
+            .join(",")
     }
 
     /// Read a save string, skipping anything malformed (an old or tampered save
@@ -171,6 +215,12 @@ impl Progress {
                     p.flags.insert(flag.to_string());
                 }
                 Some((kind @ ("won" | "lost"), id)) => p.set_last_duel(id, kind == "won"),
+                Some(("g", run)) => {
+                    p.gauntlet = run.split_once('_').and_then(|(n, print)| {
+                        Some((n.parse().ok()?, u32::from_str_radix(print, 16).ok()?))
+                    })
+                }
+                Some(("d", day)) => p.daily = day.parse().ok(),
                 _ => {}
             }
         }
@@ -228,6 +278,17 @@ mod tests {
     }
 
     #[test]
+    fn conditions_joined_with_and_must_all_hold() {
+        let mut p = Progress::default();
+        p.apply("flag:met").unwrap();
+        assert!(p.check("flag:met & !item:running_shoes"));
+        assert!(!p.check("flag:met&item:running_shoes"));
+        p.apply("give:running_shoes").unwrap();
+        assert!(p.check("flag:met&item:running_shoes"));
+        assert!(!p.check("flag:met&") && !p.check("flag:met&weather:sunny"));
+    }
+
+    #[test]
     fn pick_takes_the_first_branch_that_holds() {
         let mut p = Progress::default();
         let branches = ["!item:running_shoes", ""];
@@ -252,8 +313,8 @@ mod tests {
     #[test]
     fn campaign_conditions_read_seals_wins_and_the_last_duel() {
         use crate::campaign::{record, rival};
-        use crate::profile::Wallet;
-        let (mut p, mut w) = (Progress::default(), Wallet::default());
+        use crate::profile::Profile;
+        let (mut p, mut w) = (Progress::default(), Profile::new_player());
         assert!(p.check("seals:0") && !p.check("seals:1") && p.check("!seals:1"));
         assert!(p.check("open:bramble") && !p.check("open:quill") && !p.check("open:warden"));
         assert!(!p.check("beat:bramble") && !p.check("won:bramble") && !p.check("lost:bramble"));
@@ -284,6 +345,19 @@ mod tests {
         assert_eq!(Progress::decode(&p.encode()), p);
         p.settle();
         assert_eq!(p.encode(), "f:beat_marlo");
+    }
+
+    #[test]
+    fn save_string_keeps_the_gauntlet_run_and_the_daily_claim() {
+        let mut p = Progress::decode("f:beat_warden");
+        p.set_gauntlet(Some((3, 0xdead_beef)));
+        p.set_daily(20_385);
+        let s = p.encode();
+        assert_eq!(s, "f:beat_warden,g:3_deadbeef,d:20385");
+        assert_eq!(Progress::decode(&s), p);
+        // Junk in the new tokens is skipped, like any other.
+        assert_eq!(Progress::decode("g:x_y,d:soon,g:3"), Progress::default());
+        assert_eq!(p.apply("show:ladder"), Ok(Applied::Show("ladder".into())));
     }
 
     #[test]

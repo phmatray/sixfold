@@ -72,6 +72,8 @@ pub fn default_setup() -> Option<Setup> {
         prizes: 6,
         difficulty: Difficulty::Normal,
         rival: None,
+        post: None,
+        back: Screen::Title,
     })
 }
 
@@ -144,6 +146,8 @@ pub fn DuelSetup() -> impl IntoView {
             prizes: prizes.get(),
             difficulty: difficulty.get(),
             rival: None,
+            post: None,
+            back: Screen::Title,
         };
         if ctl.start(setup, seed.get()) {
             screen.set(Screen::Match);

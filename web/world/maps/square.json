@@ -91,6 +91,13 @@
       "facing": "s",
       "dialogue": [
         {
+          "if": "beat:warden&flag:letter_delivered",
+          "lines": [
+            "The champion! Have a bun. Have two. Ottilie says heroes need feeding.",
+            "I'm putting a hexagon on the seed cake. Six, actually."
+          ]
+        },
+        {
           "if": "flag:letter_delivered",
           "lines": [
             "Bread's up! Well, it's always up. That's bread.",
@@ -128,6 +135,13 @@
       "z": 5,
       "facing": "s",
       "dialogue": [
+        {
+          "if": "beat:warden",
+          "lines": [
+            "A buttonhole for the champion, as promised. Well, it's a radish.",
+            "The marrow isn't for sale. Not even to you."
+          ]
+        },
         {
           "if": "seals:3",
           "lines": [

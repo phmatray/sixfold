@@ -7,6 +7,7 @@ mod board;
 mod campaign;
 mod cards;
 mod controls;
+mod credits;
 mod ctl;
 mod decks;
 mod duel;
@@ -45,6 +46,8 @@ pub enum Screen {
     Editor(usize),
     /// Seals and the rival roster.
     Campaign,
+    /// The credits; `true` right after the Warden falls (they end in the world).
+    Credits(bool),
 }
 
 /// A card to show in the inspector; `at` = (player, uid) when it is in play.
@@ -107,6 +110,12 @@ fn App() -> impl IntoView {
     provide_context(screen);
     provide_context(Legal(legal));
     store::provide();
+    // A save from before promos: hand over those of rivals already beaten.
+    let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
+    let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
+    profile.update(|pr| {
+        progress.with_untracked(|p| _ = sixfold_engine::campaign::backfill_promos(p, pr))
+    });
     // Each screen starts at the top with nothing selected in the inspector.
     // Keyboard and screen-reader users land on the new screen's heading.
     Effect::new(move |first: Option<()>| {
@@ -134,6 +143,7 @@ fn App() -> impl IntoView {
         Screen::Decks => view! { <decks::DecksScreen /> }.into_any(),
         Screen::Editor(i) => view! { <decks::Editor index=i /> }.into_any(),
         Screen::Campaign => view! { <campaign::CampaignScreen /> }.into_any(),
+        Screen::Credits(won) => view! { <credits::Credits won=won /> }.into_any(),
     };
     view! { {page} <saves::SaveIndicator /> }
 }
@@ -164,14 +174,23 @@ fn MatchScreen() -> impl IntoView {
     let ui = expect_context::<Ui>();
     let screen = expect_context::<RwSignal<Screen>>();
     let names = ctl.setup.get_value().map(|s| s.names).unwrap_or_default();
-    // Quitting a campaign duel goes back to the world, where it started.
-    let quit_to = if ctl
+    // Quitting goes back where the duel started (the world for a campaign duel).
+    let quit_to = ctl
         .setup
-        .with_value(|s| s.as_ref().is_some_and(|s| s.rival.is_some()))
-    {
-        Screen::World
-    } else {
-        Screen::Title
+        .with_value(|s| s.as_ref().map_or(Screen::Title, |s| s.back));
+    // Quitting a Gauntlet duel before it ends forfeits the run.
+    let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
+    let gauntlet = ctl.setup.with_value(|s| {
+        s.as_ref()
+            .is_some_and(|s| s.post == Some(ctl::Post::Gauntlet))
+    });
+    let forfeit = move || {
+        let over = ctl
+            .shown
+            .with_untracked(|g| g.as_ref().is_some_and(|g| g.winner().is_some()));
+        if gauntlet && !over {
+            progress.update(sixfold_engine::endgame::abandon);
+        }
     };
     let turn = Memo::new(move |_| {
         ctl.shown
@@ -198,7 +217,7 @@ fn MatchScreen() -> impl IntoView {
                 <button class="btn ghost log-toggle" aria-expanded=move || ui.log_open.get().to_string()
                     on:click=move |_| ui.log_open.update(|o| *o = !*o)>"Log"</button>
                 <MuteToggle />
-                <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(quit_to) }>"Quit"</button>
+                <button class="btn ghost" on:click=move |_| { forfeit(); ctl.stop(); screen.set(quit_to) }>"Quit"</button>
             </header>
             <main class="table">
                 <SideRow player=AI />

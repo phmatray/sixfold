@@ -290,14 +290,28 @@ fn BinderSlot(id: CardId) -> impl IntoView {
     let def = card(id);
     let count = Memo::new(move |_| profile.with(|p| p.collection.count(id)));
     let (peek, open) = inspect_handlers(id);
+    // A promo comes from one rival's first defeat, never from a pack.
+    let promo = set::is_promo(id);
+    let from = sixfold_engine::campaign::RIVALS
+        .iter()
+        .find(|r| promo && r.promo() == id);
     let label = move || {
         let n = count.get();
         let own = match n {
+            0 if promo => format!(
+                "not earned yet: beat {}",
+                from.map_or("a rival", |r| r.name)
+            ),
             0 => "not found yet".to_string(),
             usize::MAX => "unlimited".to_string(),
             n => format!("{n} owned"),
         };
-        format!("{}, {}, {own}", face_text(id), rarity_label(def.rarity))
+        let kind = if promo { " promo" } else { "" };
+        format!(
+            "{}, {}{kind}, {own}",
+            face_text(id),
+            rarity_label(def.rarity)
+        )
     };
     view! {
         <li class="bind-slot" class:missing=move || count.get() == 0>
@@ -306,8 +320,13 @@ fn BinderSlot(id: CardId) -> impl IntoView {
                 <CardFace id=id />
             </button>
             <span class="bind-meta" aria-hidden="true">
-                <RarityMark rarity=def.rarity />
+                {if promo {
+                    view! { <span class="promo-badge">"Promo"</span> }.into_any()
+                } else {
+                    view! { <RarityMark rarity=def.rarity /> }.into_any()
+                }}
                 <span class="bind-count">{move || match count.get() {
+                    0 if promo => format!("Beat {}", from.map_or("a rival", |r| r.name)),
                     0 => "Not found".to_string(),
                     usize::MAX => "Unlimited".to_string(),
                     n => format!("×{n}"),

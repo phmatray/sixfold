@@ -12,14 +12,17 @@ Playable from start to finish:
 
 - **Rules engine** (`engine/`): the whole duel, from setup and mulligans through
   attacks, conditions, Powers, trainers, knock-outs, prizes and sudden death.
-  Pure Rust, no browser needed; 297 unit tests.
-- **Card set**: 103 original cards (71 creatures in full evolution lines across
-  all seven colours, 25 trainers, 6 basic energies and a special energy), and
+  Pure Rust, no browser needed; 315 unit tests.
+- **Card set**: 110 original cards (78 creatures in full evolution lines across
+  all seven colours, 25 trainers, 6 basic energies and a special energy, seven
+  of them promos you earn in the campaign rather than in packs), and
   six prebuilt 60-card decks: Ember Rush (Fire / Fighting), Tide Mind
   (Water / Psychic), Grove Bloom (Grass / Lightning), Storm Front
   (Lightning / Water), Stone Fist (Fighting / Colorless) and Dream Veil
-  (Psychic / Grass). In an AI-against-AI round robin every deck wins between
-  40% and 61% of its games; a test keeps each between 30% and 70%.
+  (Psychic / Grass). In an AI-against-AI sweep over every prebuilt, rival and
+  Gauntlet deck, each prebuilt wins between 42% and 59% of its games and no two
+  prebuilts meet beyond 73/27 ([`docs/BALANCE.md`](docs/BALANCE.md)); a test
+  keeps each between 30% and 70%.
 - **AI opponent** (`engine/src/ai.rs`): Easy, Normal or Hard. Easy skips a
   trainer or Power play one time in four; Hard thinks a turn ahead: it tries
   its candidate moves on copies of the game where every card it can't see and
@@ -54,8 +57,16 @@ Playable from start to finish:
   colour theme, each with their own deck, AI level and prize count. Beat one
   for their seal and packs of their colours (a rematch win gives a pack);
   three seals open the next rivals, and all six open the sealed door to Sable,
-  the Hex Warden. A Campaign page on the title screen lists who is beaten,
-  open or locked.
+  the Hex Warden. Each rival's first defeat also gives their promo card. A
+  Campaign page on the title screen lists who is beaten, open or locked. A test
+  plays the whole campaign from a new player's collection and finishes it in 31
+  duels.
+- **Endgame**: beating the Warden rolls the credits and makes you champion (the
+  title shows in the world). Then Sable's ladder opens: the **Gauntlet**, all
+  six rivals in a row with sharper decks, more prizes and the Hard AI, one deck
+  for the whole run and one loss to end it; and the **daily duel**, open to
+  everyone, a rival deck and a deal picked by the date, with a pack for the
+  first win of the day. Every townsperson has something new to say.
 - **The world** (`web/world/`, three.js): five outdoor areas joined by their
   edges (walk off one to fade into the next), plus the duel hall and the Warden's
   room. Sixfold Meadow, with the duel hall, sits in the middle; Fernhollow Trail
@@ -91,6 +102,12 @@ and press **Duel**. Win for their seal and packs; lose and they will be waiting
 for a rematch. After the duel, **Back to the world** puts you where you stood,
 and the rival has a word for you. The seal count sits in the world's top bar;
 press it for the roster. Your progress and position are saved as you play.
+
+**After the campaign.** Beat Sable for the credits and the champion's title,
+then talk to Sable again (or open **Campaign** on the title screen) for the
+ladder. **Play today's duel** takes on the daily rival; **Start the Gauntlet**
+locks in the chosen deck for six duels in a row. **Watch the credits** on the
+Campaign page plays them again.
 
 **Install and play offline.** Open the game once online, then use the
 browser's Install button (Chrome, Edge) or Share → Add to Home Screen (Safari

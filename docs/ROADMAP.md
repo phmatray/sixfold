@@ -10,9 +10,9 @@ Each phase lands as one or more pull requests and ships as a minor release cut b
 | 0.4.0 | A larger original card set (about a hundred cards), more prebuilt decks and AI deck variety | Released |
 | 0.5.0 | Sound and feel: original music and sound effects, settings | Released |
 | 0.6.0 | Campaign: six rival duelists and the Hex Warden in the world, duels started from dialogue, seals, pack rewards and a champion's room | Released |
-| 0.7.0 | A bigger world: five outdoor areas joined by their edges, cliffs and decks, more buildings and NPCs, two small quests | In review |
+| 0.7.0 | A bigger world: five outdoor areas joined by their edges, cliffs and decks, more buildings and NPCs, two small quests | Released |
 | 0.8.0 | Saves and slots with export / import, offline play (PWA), a Hard AI that looks ahead, an accessibility pass, a smaller wasm | In review |
-| 0.9.0 | Content complete: endgame, balance pass, full playtest | Planned |
+| 0.9.0 | Content complete: credits and the champion's title, the Gauntlet and a daily duel, seven promo cards, a balance pass over every deck, a full campaign playthrough test | In review |
 | 1.0.0 | Final polish and release | Planned |
 
 Constraints that hold for every phase: only the rules and mechanics of the classic handheld game are

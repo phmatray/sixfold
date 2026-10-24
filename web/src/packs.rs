@@ -113,7 +113,7 @@ pub fn pack_theme(b: usize) -> &'static str {
     }
 }
 
-/// The three boosters, with how many of each the player holds.
+/// Every booster, with how many of each the player holds.
 #[component]
 fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
@@ -122,7 +122,7 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
     view! {
         <p class="page-lead">
             {move || match total() {
-                0 => "You have no packs left. Win a duel against the AI to earn a Wild Pack.".to_string(),
+                0 => "You have no packs left. Win a duel against the AI, beat a rival or win the daily duel to earn more.".to_string(),
                 1 => "You have 1 pack to open.".to_string(),
                 n => format!("You have {n} packs to open."),
             }}
