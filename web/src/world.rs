@@ -348,7 +348,7 @@ pub fn WorldScreen() -> impl IntoView {
                     Ok(Applied::GotItem(item)) => next = Some(Sheet::Item(item)),
                     Ok(Applied::Duel(id)) => next = Some(Sheet::Challenge(id)),
                     Ok(Applied::Pack(b)) => packs.push(b),
-                    Ok(Applied::Nothing) => {}
+                    Ok(Applied::Nothing | Applied::Show(_)) => {}
                     Err(err) => leptos::logging::warn!("world: {err}"),
                 }
             }

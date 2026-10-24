@@ -30,6 +30,7 @@ pub mod ai;
 pub mod booster;
 pub mod campaign;
 pub mod decks;
+pub mod endgame;
 pub mod overworld;
 pub mod profile;
 pub mod save;
