@@ -287,6 +287,7 @@ impl Game {
                 chooser_is_attacker: true,
             } => bench(q),
             SwitchSelf => bench(p),
+            // RULES: R-ZONE-04 — a search must take a match when there is one.
             Search(find) => distinct(&me.deck, find),
             Recover(find) => distinct(&me.discard, find),
             AttachMinus20 => all(p),
@@ -310,6 +311,8 @@ impl Game {
 
     /// R-EVO-10: a Stage 2 in hand onto a settled Basic named as the
     /// evolves-from of the Stage 1 it evolves from.
+    /// RULES: R-EVO-10 open question — the source then records stage 3; nothing
+    /// here reads a stage beyond the card's own, so it isn't stored.
     pub(crate) fn stage_skip_options(&self, p: usize) -> Vec<Choice> {
         let pl = &self.players[p];
         let mut out = Vec::new();
@@ -343,6 +346,8 @@ impl Game {
         if let (Effect::CopyAttack, Choice::Attack(i)) = (effect, choice) {
             // R-EFFECT-06: the copied attack replaces this one's effects and
             // damage, then makes its own selections.
+            // RULES: R-EFFECT-06 — the copied attack's phase-1 checks are not
+            // run and its costs are paid only as far as possible.
             let p = self.pd().player;
             let attacks = self.players[1 - p]
                 .active
@@ -584,6 +589,8 @@ impl Game {
                     card,
                 });
             }
+            // RULES: R-DMG-12 — a negated attack also skips its switch, energy
+            // discard, devolve and weakness change on the defender.
             SwitchDefender { .. } => {
                 if let (Some(Choice::Slot { slot: s, .. }), false) = (choice, negated) {
                     self.effect_switch(q, s, ev);
@@ -828,6 +835,7 @@ impl Game {
                 continue;
             }
             pl.condition.apply(status);
+            // RULES: R-STATUS-13 — recorded on the side that received it.
             pl.effects.last_inflicted.apply(status);
             ev.push(Event::ConditionApplied {
                 player: target,

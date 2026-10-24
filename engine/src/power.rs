@@ -106,6 +106,8 @@ impl Game {
                 }
                 false
             }
+            // RULES: R-POWER-06 — only main-phase bench placement and evolving
+            // fire it (01:451B / 01:457F); setup placement and stage skip don't.
             Some(PowerKind::OnPlay(effects)) if !self.blocker_in_play() => {
                 self.begin(Source::OnPlay, p, slot, effects, 0);
                 true

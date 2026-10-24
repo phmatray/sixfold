@@ -140,6 +140,8 @@ impl Game {
             Some(Shield::Halve) => d = halve(d),
             // Only without one of those does the reduction Power apply; never
             // to Power damage.
+            // RULES: R-DMG-09 — the whole-attack shield isn't one of the step-2
+            // values, so the reduction Power may still apply under it.
             Some(Shield::PreventAll | Shield::CounterKo) | None => {
                 if !power {
                     d = self.reduction_power(q, slot, d)
@@ -226,6 +228,9 @@ impl Game {
             weakness: hit.weakness,
             resistance: hit.resistance,
         });
+        // RULES: R-DMG-14 — one hook, at the damage itself, for any slot; the
+        // second after-phase-4 hook is not modelled separately. Self-damage,
+        // poison and Power damage never retaliate.
         if retaliate && hit.amount > 0 && self.passive(q, slot) == Some(PowerKind::Retaliate) {
             self.raw_damage(1 - q, 10, ev);
         }

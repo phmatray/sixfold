@@ -115,6 +115,7 @@ pub enum Placed {
 
 impl Placed {
     /// R-KO-10: effects that end when the Active that placed them is knocked out.
+    /// RULES: R-KO-10 — `+E8` 5/6 map to `CantAttack`, 3/7/$12 to `Weaken`.
     pub fn linked_to_placer(self) -> bool {
         matches!(self, Placed::CantAttack | Placed::Weaken(_))
     }

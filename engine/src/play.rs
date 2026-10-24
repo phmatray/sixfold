@@ -188,6 +188,8 @@ impl Game {
         match *effect {
             Draw(_) | Search(_) if pl.deck.is_empty() => Err(RuleError::DeckEmpty),
             Recover(find) => need(pl.discard.iter().any(|&c| matches(find, c))),
+            // RULES: R-EFFECT-04 — "requiring some damage" is a precondition for
+            // trainers and Powers; an attack's heal just does nothing.
             Heal(_) if !attack => need(pl.active.as_ref().is_some_and(|a| a.damage() > 0)),
             Cure { both } if !attack => {
                 need(!pl.condition.is_empty() || (both && !opp.condition.is_empty()))
