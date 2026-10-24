@@ -4,6 +4,7 @@ mod art;
 mod audio;
 mod binder;
 mod board;
+mod campaign;
 mod cards;
 mod controls;
 mod ctl;
@@ -41,6 +42,8 @@ pub enum Screen {
     Decks,
     /// The deck editor, on the profile's deck at this index.
     Editor(usize),
+    /// Seals and the rival roster.
+    Campaign,
 }
 
 /// A card to show in the inspector; `at` = (player, uid) when it is in play.
@@ -125,6 +128,7 @@ fn App() -> impl IntoView {
         Screen::Packs => view! { <packs::PacksScreen /> }.into_any(),
         Screen::Decks => view! { <decks::DecksScreen /> }.into_any(),
         Screen::Editor(i) => view! { <decks::Editor index=i /> }.into_any(),
+        Screen::Campaign => view! { <campaign::CampaignScreen /> }.into_any(),
     }
 }
 
@@ -134,6 +138,15 @@ fn MatchScreen() -> impl IntoView {
     let ui = expect_context::<Ui>();
     let screen = expect_context::<RwSignal<Screen>>();
     let names = ctl.setup.get_value().map(|s| s.names).unwrap_or_default();
+    // Quitting a campaign duel goes back to the world, where it started.
+    let quit_to = if ctl
+        .setup
+        .with_value(|s| s.as_ref().is_some_and(|s| s.rival.is_some()))
+    {
+        Screen::World
+    } else {
+        Screen::Title
+    };
     let turn = Memo::new(move |_| {
         ctl.shown
             .with(|g| g.as_ref().map(|g| (g.turn(), g.turn_player())))
@@ -158,7 +171,7 @@ fn MatchScreen() -> impl IntoView {
                 <button class="btn ghost log-toggle" aria-expanded=move || ui.log_open.get().to_string()
                     on:click=move |_| ui.log_open.update(|o| *o = !*o)>"Log"</button>
                 <MuteToggle />
-                <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(Screen::Title) }>"Quit"</button>
+                <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(quit_to) }>"Quit"</button>
             </header>
             <main class="table">
                 <SideRow player=AI />

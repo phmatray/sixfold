@@ -14,7 +14,7 @@ scene inside it and saves the file:
 | `Assets`  | `build_assets.py`        | every model side by side on a 1 m grid, one `sx_<name>` collection each; the .glb exports come from here |
 | `Preview` | `build_assets.py`        | contact-sheet layout (instances, grass, grid, camera) |
 | `World`   | `build_world_scene.py`   | `web/world/maps/overworld.json` assembled from the exported .glb files: fences auto-tiled, sway, smoke, hero Idle loop, game camera |
-| `NPCs`    | `build_npcs.py`          | five NPC variants on the hero's rig (shopkeeper, gardener, wanderer, kid, rival) -> `assets/npc/npc_*.glb` + `npc_palettes.json` |
+| `NPCs`    | `build_npcs.py`          | NPC variants on the hero's rig (shopkeeper, gardener, wanderer, kid, rival) and the campaign rivals (grass, fire, water, lightning, fighting, psychic, champion) -> `assets/npc/npc_*.glb`, `assets/npc/rival_*.glb` + `npc_palettes.json` |
 | `Interior`| `build_interior_scene.py`| `web/world/maps/shop.json`: walls auto-tiled with the fence rules (cutaway `wall_low*` on the camera-side south row, `wall_window` on chosen straight tiles), wood floor, furniture, lamp light, hero |
 
 ```bash
@@ -36,7 +36,8 @@ blender -b --factory-startup -P tools/blender/bake_ground_textures.py -- --out w
 
 # NPC variants (+ lineup sheet of hero and NPCs, front and game camera)
 blender -b art/Sixfold.blend -P tools/blender/build_npcs.py -- --out web/world/assets
-blender -b --factory-startup -P tools/blender/npc_lineup.py -- --assets web/world/assets --out /tmp/lineup
+blender -b --factory-startup -P tools/blender/npc_lineup.py -- --assets web/world/assets --out /tmp/lineup \
+    [--names hero,rival_grass,rival_fire,rival_water,rival_lightning,rival_fighting,rival_psychic,rival_champion]
 
 # Hero turnaround sheet (6 views + a strip per clip), always headless
 blender -b --factory-startup -P tools/blender/hero_turnaround.py -- --glb web/world/assets/hero.glb --out /tmp/hero.png

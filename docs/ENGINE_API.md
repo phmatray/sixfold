@@ -609,7 +609,62 @@ Wallet::load(&s) -> Result<Wallet, LoadError>    // missing trailing counts are 
 
 ---
 
-## 11. Known engine gaps (current)
+## 11. Campaign (`campaign::*`) and world progress (`overworld::Progress`)
+
+Pure data and functions; the UI stores `Progress::encode()` and the wallet wherever it likes.
+
+```rust
+pub struct Rival {
+    pub id: &'static str,          // dialogue `duel:<id>`, flag `beat_<id>`
+    pub name, title, place: &'static str,
+    pub colors: &'static [Color],
+    pub deck: Prebuilt,            // their own 60 cards (validated by a test)
+    pub difficulty: Difficulty,    // ai::Difficulty
+    pub prizes: u8,                // 1..=6
+    pub needs: usize,              // seals needed before they accept a duel
+    pub seal: bool,                // the first win earns a seal (all but the Warden)
+    pub booster: usize,            // index into BOOSTERS of the packs they give
+    pub packs: u32,                // packs the first win grants
+}
+pub static RIVALS: [Rival; 7];     // campaign order, the Warden (`warden`) last
+pub const SEALS: usize = 6;
+pub const REMATCH_PACKS: u32 = 1;
+campaign::rival(id) -> Option<&'static Rival>
+campaign::seals(&progress) -> usize
+r.beaten(&progress) / r.open(&progress) -> bool
+r.prize_packs(&progress) -> (booster, count)  // what a win would give now
+campaign::record(r, won, &mut progress, &mut wallet) -> Reward
+pub struct Reward { pub won: bool, pub first: bool, pub seal: bool, pub packs: (usize, u32) }
+```
+
+| # | Rival | Colours | Deck | AI | Prizes | Needs | First win |
+|---|---|---|---|---|---|---|---|
+| 1 | Bramble, Hedge Tender | Grass | Thicket | Easy | 2 | 0 | seal + 2 Grove |
+| 2 | Marlo, Tide Reader | Water / Psychic | Low Tide | Easy | 3 | 0 | seal + 2 Tide |
+| 3 | Cinza, Kiln Runner | Fire / Fighting | Ember Rush | Normal | 4 | 0 | seal + 2 Ember |
+| 4 | Quill, Weather Watcher | Lightning / Water | Storm Front | Normal | 4 | 3 | seal + 2 Storm |
+| 5 | Orla, Quarry Foreman | Fighting | Bedrock | Normal | 5 | 3 | seal + 2 Stone |
+| 6 | Lumen, Night Gardener | Psychic / Water | Moonlit Tide | Normal | 6 | 5 | seal + 2 Dream |
+| — | Sable, the Hex Warden | Water / Fighting | Sixfold Crown | Normal | 6 | 6 | 3 Wild |
+
+A rematch win grants `REMATCH_PACKS` of the same booster; a loss grants nothing. `record` sets
+`beat_<id>` on a win and always remembers the result as the last duel. Against the starter deck
+(Normal AI, 60 seeded games, `rival_strength_against_the_starter`, `#[ignore]`d) the rivals win
+about 20%, 53%, 60%, 66%, 70%, 61% and 70%.
+
+**Progress.** Items, flags and the last campaign duel. Dialogue strings (all names are
+lowercase ASCII letters, digits and `_`):
+
+| | Accepted | Notes |
+|---|---|---|
+| `p.apply(effect)` | `give:x` → `Applied::GotItem(x)` (first time), `flag:x`, `duel:<rival>` → `Applied::Duel(id)`, `pack:<booster>` → `Applied::Pack(index)` | Anything else is `Err`. `pack:` takes the booster's first name word (`ember`, `tide`, `wild`, `grove`, `storm`, `stone`, `dream`). The UI grants the pack and opens the duel offer. |
+| `p.check(cond)` | `item:x`, `flag:x`, `seals:n`, `beat:<rival>`, `open:<rival>`, `won:<rival>`, `lost:<rival>`, each negatable with `!`; empty holds | Malformed conditions and unknown rivals never hold, negated or not. |
+| `p.last_duel() -> Option<(&str, bool)>` / `p.settle()` | | The last campaign duel (rival id, won), until `settle` (the UI settles when the player next talks to that rival). |
+| `p.encode()` / `Progress::decode(s)` | `i:<item>`, `f:<flag>`, `won:<id>` / `lost:<id>` | Sorted and stable; junk tokens are skipped. |
+
+---
+
+## 12. Known engine gaps (current)
 
 - A search can't decline to take a matching card. `DiscardEnergy` with `Colorless` discards the newest energy, and the player doesn't choose.
 - There is no "revive onto the Bench" effect and no "return a card to the top of the deck" effect.

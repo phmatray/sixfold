@@ -28,85 +28,480 @@
     "............................"
   ],
   "props": [
-    { "asset": "house", "x": 10, "z": 6, "rot": 0 },
-    { "asset": "sign", "x": 16, "z": 11, "rot": 0 },
-    { "asset": "flowers", "x": 9, "z": 11, "rot": 0 },
-    { "asset": "flowers", "x": 10, "z": 11, "rot": 0 },
-    { "asset": "flowers", "x": 11, "z": 12, "rot": 0 },
-    { "asset": "flowers", "x": 9, "z": 12, "rot": 0 },
-    { "asset": "flowers", "x": 15, "z": 12, "rot": 0 },
-    { "asset": "flowers", "x": 16, "z": 13, "rot": 0 },
-    { "asset": "flowers", "x": 19, "z": 11, "rot": 0 },
-    { "asset": "flowers", "x": 20, "z": 11, "rot": 0 },
-    { "asset": "flowers", "x": 22, "z": 12, "rot": 0 },
-    { "asset": "flowers", "x": 21, "z": 13, "rot": 0 },
-    { "asset": "flowers", "x": 19, "z": 14, "rot": 0 },
-    { "asset": "bush", "x": 5, "z": 10, "rot": 0 },
-    { "asset": "bush", "x": 21, "z": 8, "rot": 0 },
-    { "asset": "bush", "x": 7, "z": 20, "rot": 0 },
-    { "asset": "bush", "x": 19, "z": 20, "rot": 0 },
-    { "asset": "bush", "x": 3, "z": 14, "rot": 0 },
-    { "asset": "bush", "x": 24, "z": 13, "rot": 0 },
-    { "asset": "rock", "x": 22, "z": 11, "rot": 0 },
-    { "asset": "rock", "x": 6, "z": 5, "rot": 0 },
-    { "asset": "rock", "x": 22, "z": 4, "rot": 0 },
-    { "asset": "tree", "x": 0, "z": 0, "rot": 0 },
-    { "asset": "tree", "x": 0, "z": 22, "rot": 90 },
-    { "asset": "tree", "x": 2, "z": 0, "rot": 180 },
-    { "asset": "tree", "x": 2, "z": 22, "rot": 270 },
-    { "asset": "tree", "x": 4, "z": 0, "rot": 0 },
-    { "asset": "tree", "x": 4, "z": 22, "rot": 90 },
-    { "asset": "tree", "x": 6, "z": 0, "rot": 180 },
-    { "asset": "tree", "x": 6, "z": 22, "rot": 270 },
-    { "asset": "tree", "x": 8, "z": 0, "rot": 0 },
-    { "asset": "tree", "x": 8, "z": 22, "rot": 90 },
-    { "asset": "tree", "x": 10, "z": 0, "rot": 180 },
-    { "asset": "tree", "x": 10, "z": 22, "rot": 270 },
-    { "asset": "tree", "x": 12, "z": 0, "rot": 0 },
-    { "asset": "tree", "x": 12, "z": 22, "rot": 90 },
-    { "asset": "tree", "x": 14, "z": 0, "rot": 180 },
-    { "asset": "tree", "x": 14, "z": 22, "rot": 270 },
-    { "asset": "tree", "x": 16, "z": 0, "rot": 0 },
-    { "asset": "tree", "x": 16, "z": 22, "rot": 90 },
-    { "asset": "tree", "x": 18, "z": 0, "rot": 180 },
-    { "asset": "tree", "x": 18, "z": 22, "rot": 270 },
-    { "asset": "tree", "x": 20, "z": 0, "rot": 0 },
-    { "asset": "tree", "x": 20, "z": 22, "rot": 90 },
-    { "asset": "tree", "x": 22, "z": 0, "rot": 180 },
-    { "asset": "tree", "x": 22, "z": 22, "rot": 270 },
-    { "asset": "tree", "x": 24, "z": 0, "rot": 0 },
-    { "asset": "tree", "x": 24, "z": 22, "rot": 90 },
-    { "asset": "tree", "x": 26, "z": 0, "rot": 180 },
-    { "asset": "tree", "x": 26, "z": 22, "rot": 270 },
-    { "asset": "tree", "x": 0, "z": 2, "rot": 180 },
-    { "asset": "tree", "x": 26, "z": 2, "rot": 0 },
-    { "asset": "tree", "x": 0, "z": 4, "rot": 0 },
-    { "asset": "tree", "x": 26, "z": 4, "rot": 180 },
-    { "asset": "tree", "x": 0, "z": 6, "rot": 180 },
-    { "asset": "tree", "x": 26, "z": 6, "rot": 0 },
-    { "asset": "tree", "x": 0, "z": 8, "rot": 0 },
-    { "asset": "tree", "x": 26, "z": 8, "rot": 180 },
-    { "asset": "tree", "x": 0, "z": 10, "rot": 180 },
-    { "asset": "tree", "x": 26, "z": 10, "rot": 0 },
-    { "asset": "tree", "x": 0, "z": 12, "rot": 0 },
-    { "asset": "tree", "x": 26, "z": 12, "rot": 180 },
-    { "asset": "tree", "x": 0, "z": 14, "rot": 180 },
-    { "asset": "tree", "x": 26, "z": 14, "rot": 0 },
-    { "asset": "tree", "x": 0, "z": 16, "rot": 0 },
-    { "asset": "tree", "x": 26, "z": 16, "rot": 180 },
-    { "asset": "tree", "x": 0, "z": 18, "rot": 180 },
-    { "asset": "tree", "x": 26, "z": 18, "rot": 0 },
-    { "asset": "tree", "x": 0, "z": 20, "rot": 0 },
-    { "asset": "tree", "x": 26, "z": 20, "rot": 180 },
-    { "asset": "tree", "x": 4, "z": 3, "rot": 270 },
-    { "asset": "tree", "x": 20, "z": 2, "rot": 180 },
-    { "asset": "tree", "x": 3, "z": 7, "rot": 180 },
-    { "asset": "tree", "x": 23, "z": 7, "rot": 180 },
-    { "asset": "tree", "x": 8, "z": 3, "rot": 270 },
-    { "asset": "tree", "x": 5, "z": 19, "rot": 0 },
-    { "asset": "tree", "x": 21, "z": 20, "rot": 90 },
-    { "asset": "tree", "x": 24, "z": 16, "rot": 0 },
-    { "asset": "tree", "x": 2, "z": 11, "rot": 90 }
+    {
+      "asset": "house",
+      "x": 10,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "sign",
+      "x": 16,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 9,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 10,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 11,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 9,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 15,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 16,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 19,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 20,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 22,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 21,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 19,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 19,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 24,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 22,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 6,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 22,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 22,
+      "rot": 90
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 0,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 22,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 22,
+      "rot": 90
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 0,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 22,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 8,
+      "z": 22,
+      "rot": 90
+    },
+    {
+      "asset": "tree",
+      "x": 10,
+      "z": 0,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 10,
+      "z": 22,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 12,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 12,
+      "z": 22,
+      "rot": 90
+    },
+    {
+      "asset": "tree",
+      "x": 14,
+      "z": 0,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 14,
+      "z": 22,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 22,
+      "rot": 90
+    },
+    {
+      "asset": "tree",
+      "x": 18,
+      "z": 0,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 18,
+      "z": 22,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 20,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 20,
+      "z": 22,
+      "rot": 90
+    },
+    {
+      "asset": "tree",
+      "x": 22,
+      "z": 0,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 22,
+      "z": 22,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 24,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 24,
+      "z": 22,
+      "rot": 90
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 0,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 22,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 2,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 4,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 6,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 8,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 10,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 12,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 14,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 16,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 18,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 20,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 3,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 20,
+      "z": 2,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 3,
+      "z": 7,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 23,
+      "z": 7,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 8,
+      "z": 3,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 5,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 21,
+      "z": 20,
+      "rot": 90
+    },
+    {
+      "asset": "tree",
+      "x": 24,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 11,
+      "rot": 90
+    }
   ],
   "spawn": {
     "x": 13,
@@ -118,7 +513,7 @@
       "x": 16,
       "z": 11,
       "kind": "sign",
-      "text": "Sixfold Meadow. The shop by the path has duels, snacks and shoes."
+      "text": "Sixfold Meadow. The shop by the path has duels, snacks and shoes. Six rivals duel for six seals."
     }
   ],
   "warps": [
@@ -200,6 +595,13 @@
           ]
         },
         {
+          "if": "seals:1",
+          "lines": [
+            "Is that a seal? A real one? Bramble never gave ME one.",
+            "...I never beat Bramble. Shh."
+          ]
+        },
+        {
           "lines": [
             "One day I'll beat whoever sits at that duel table. One day."
           ]
@@ -230,6 +632,200 @@
           ]
         }
       ]
+    },
+    {
+      "id": "bramble",
+      "name": "Bramble",
+      "model": "rival_grass",
+      "tint": "#8fd17a",
+      "scale": 1.0,
+      "x": 5,
+      "z": 8,
+      "facing": "s",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "won:bramble",
+          "lines": [
+            "Well! You pruned me right back.",
+            "Take my seal. Five more rivals carry one each."
+          ]
+        },
+        {
+          "if": "lost:bramble",
+          "lines": [
+            "Ha, tangled up! Happens to everyone the first time.",
+            "Catch your breath and come try again."
+          ]
+        },
+        {
+          "if": "beat:bramble",
+          "lines": [
+            "Back for more thorns? Two prizes, same as before."
+          ],
+          "do": [
+            "duel:bramble"
+          ]
+        },
+        {
+          "lines": [
+            "Mind the hedge, it bites. Only a little.",
+            "I'm Bramble. I keep this side of the meadow tidy, and I keep a deck for visitors.",
+            "A short one, two prizes. Shall we?"
+          ],
+          "do": [
+            "duel:bramble"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cinza",
+      "name": "Cinza",
+      "model": "rival_fire",
+      "tint": "#ff9a5c",
+      "scale": 1.0,
+      "x": 16,
+      "z": 19,
+      "facing": "w",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "won:cinza",
+          "lines": [
+            "Burnt out... You're quicker than you look.",
+            "Here, my seal. Don't let it cool off in a drawer."
+          ]
+        },
+        {
+          "if": "lost:cinza",
+          "lines": [
+            "Too slow! The road's still warm, come race me again."
+          ]
+        },
+        {
+          "if": "beat:cinza",
+          "lines": [
+            "Again? Good. I've been stoking the fire."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        },
+        {
+          "lines": [
+            "You walk like someone who's never been in a hurry.",
+            "I'm Cinza. I run the kiln road every morning and duel every afternoon.",
+            "Four prizes. Try to keep up."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quill",
+      "name": "Quill",
+      "model": "rival_lightning",
+      "tint": "#ffd84d",
+      "scale": 1.0,
+      "x": 20,
+      "z": 4,
+      "facing": "s",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "won:quill",
+          "lines": [
+            "Well. I'll be recording that one as a downpour.",
+            "My seal is yours. Mark it in your own notebook."
+          ]
+        },
+        {
+          "if": "lost:quill",
+          "lines": [
+            "Clear skies for me today. Check the forecast and come back."
+          ]
+        },
+        {
+          "if": "!open:quill",
+          "lines": [
+            "Hold on. You carry fewer than three seals.",
+            "I only write up duels worth reading. Come back with three."
+          ]
+        },
+        {
+          "if": "beat:quill",
+          "lines": [
+            "New page, same storm. Ready?"
+          ],
+          "do": [
+            "duel:quill"
+          ]
+        },
+        {
+          "lines": [
+            "Clouds are stacking up over the hills. Good dueling weather.",
+            "I'm Quill. I note the wind, the rain and every duel I play.",
+            "Four prizes, and I'll be writing it all down."
+          ],
+          "do": [
+            "duel:quill"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "orla",
+      "name": "Orla",
+      "model": "rival_fighting",
+      "tint": "#d39058",
+      "scale": 1.0,
+      "x": 14,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "won:orla",
+          "lines": [
+            "You cracked the bedrock. Respect.",
+            "My seal. Earned, not quarried."
+          ]
+        },
+        {
+          "if": "lost:orla",
+          "lines": [
+            "Solid stone stays solid. Come back with a sharper pick."
+          ]
+        },
+        {
+          "if": "!open:orla",
+          "lines": [
+            "Not yet. The quarry only opens to those with three seals.",
+            "Go on, the others won't beat themselves."
+          ]
+        },
+        {
+          "if": "beat:orla",
+          "lines": [
+            "Another shift? Five prizes, same as ever."
+          ],
+          "do": [
+            "duel:orla"
+          ]
+        },
+        {
+          "lines": [
+            "Hard hat zone. Well, it would be, if I had a hard hat.",
+            "Orla. I run the quarry past the trees. Five prizes, no shortcuts."
+          ],
+          "do": [
+            "duel:orla"
+          ]
+        }
+      ]
     }
   ],
   "camera": {
@@ -238,7 +834,11 @@
     "pitch": 50,
     "distance": 12,
     "distancePortrait": 15,
-    "lookAtOffset": [0, 0.75, 0],
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
     "clamp": false,
     "note": "Camera sits at hero + lookAtOffset + distance * (0, sin(pitch), cos(pitch)), looking at hero + lookAtOffset; fov is vertical, in degrees. Portrait values apply when the viewport is taller than wide."
   },
@@ -251,7 +851,11 @@
     "sun": {
       "color": "#fff0cf",
       "intensity": 2.6,
-      "fromHero": [8, 18, 6]
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
     },
     "hemisphere": {
       "sky": "#fff6dc",

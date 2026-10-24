@@ -2,6 +2,7 @@
 //! battle log, discard viewer and the game-over screen.
 
 use leptos::prelude::*;
+use sixfold_engine::campaign;
 use sixfold_engine::{card, Color, Event};
 
 use crate::art::glyph_svg;
@@ -212,17 +213,38 @@ pub fn GameOver() -> impl IntoView {
             Some((w, v.sudden_death, left, why))
         })
     });
-    // The reward is granted once per match, when its result first shows.
+    // The reward is granted once per match, when its result first shows. A
+    // campaign duel gives the rival's reward instead of the Wild pack.
     let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
+    let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
+    let rival = ctl
+        .setup
+        .with_value(|s| s.as_ref().and_then(|s| s.rival))
+        .and_then(campaign::rival);
     let reward = RwSignal::new(None::<usize>);
+    let campaign_reward = RwSignal::new(None::<campaign::Reward>);
     Effect::new(move |_| {
         if let Some((winner, ..)) = result.get() {
-            if ctl.take_result() {
-                reward.set(
-                    profile
-                        .try_update(|p| p.record_duel(winner == HUMAN))
-                        .flatten(),
-                );
+            if !ctl.take_result() {
+                return;
+            }
+            let won = winner == HUMAN;
+            match rival {
+                Some(r) => {
+                    let mut got = None;
+                    progress.update(|pr| {
+                        profile.update(|p| got = Some(campaign::record(r, won, pr, &mut p.wallet)))
+                    });
+                    if got.as_ref().is_some_and(|g| g.seal || g.first) {
+                        // After the win fanfare.
+                        set_timeout(
+                            || crate::audio::sfx("seal", 0.0),
+                            std::time::Duration::from_millis(1200),
+                        );
+                    }
+                    campaign_reward.set(got);
+                }
+                None => reward.set(profile.try_update(|p| p.record_duel(won)).flatten()),
             }
         }
     });
@@ -254,6 +276,37 @@ pub fn GameOver() -> impl IntoView {
                                 <span>{format!("You have {packs} to open.", packs = if packs == 1 { "1 pack".to_string() } else { format!("{packs} packs") })}</span></p>
                         </div>
                     }})}
+                    {move || campaign_reward.get().zip(rival).map(|(rw, r)| {
+                        let seals = progress.with(campaign::seals);
+                        let (b, n) = rw.packs;
+                        view! {
+                            <div class="reward campaign-reward" role="status">
+                                {if rw.seal {
+                                    view! { <crate::campaign::Seal r=r earned=true /> }.into_any()
+                                } else {
+                                    view! { <span class=format!("pack mini p-{}", crate::packs::pack_theme(b)) aria-hidden="true">
+                                        <span class="pack-crimp"></span><span class="pack-crimp bottom"></span>
+                                    </span> }.into_any()
+                                }}
+                                <p>
+                                    {match (rw.won, rw.seal, rw.first) {
+                                        (true, true, _) => view! { <b>{format!("{}'s seal!", r.name)}</b><span>{format!("{seals} of {} seals.", campaign::SEALS)}</span> }.into_any(),
+                                        (true, false, true) => view! { <b>"You beat the Hex Warden!"</b><span>"Every seal, and the champion's title."</span> }.into_any(),
+                                        (true, ..) => view! { <b>"Rematch won"</b> }.into_any(),
+                                        _ => view! { <b>"No reward this time"</b><span>{format!("Talk to {} again for a rematch.", r.name)}</span> }.into_any(),
+                                    }}
+                                    {(n > 0).then(|| view! { <span>{format!("+{}", crate::campaign::packs_label(b, n))}</span> })}
+                                </p>
+                            </div>
+                        }
+                    })}
+                    {match rival {
+                        Some(_) => view! {
+                            <div class="dialog-foot">
+                                <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(Screen::World) }>"Back to the world"</button>
+                            </div>
+                        }.into_any(),
+                        None => view! {
                     <div class="dialog-foot">
                         {won.then(|| view! {
                             <button class="btn" on:click=move |_| { ctl.stop(); screen.set(Screen::Packs) }>"Open packs"</button>
@@ -261,6 +314,8 @@ pub fn GameOver() -> impl IntoView {
                         <button class="btn primary" on:click=rematch autofocus>"Rematch"</button>
                         <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(Screen::Duel) }>"Change decks"</button>
                     </div>
+                        }.into_any(),
+                    }}
                 </div>
             </div>
         })

@@ -43,7 +43,7 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `interior/chair.glb`, `plant.glb`, `display_case.glb`, `lamp.glb` | Furniture | 1 × 1 | — |
 | `interior/rug.glb` | Rug, ≥ 1 cm thick (walkable) | 3 × 2 | — |
 | `interior/exit_mat.glb` | Door mat on the exit tile, ≥ 1 cm thick (walkable) | 1 × 1 | — |
-| `npc/<model>.glb` | NPC on the hero rig (`Idle`, `Walk`, `Fidget`) | — | ~1.45 m |
+| `npc/<model>.glb` | NPC on the hero rig (`Idle`, `Walk`, `Fidget`); campaign rivals are `rival_<colour>.glb` and `rival_champion.glb` | — | ~1.45 m |
 
 The house is 7 wide so the door sits on the centre column: door tile = footprint
 origin + (3, 4), the house's warp tile.
@@ -139,13 +139,26 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
 - **warps:** a door warp (no `dir`) sits on a solid tile; facing it shows `label`, and stepping
   into it (or E) walks in, fades, and loads map `to` with the hero on `spawn`. A warp with
   `dir` (the exit mat) fires when the hero steps onto it, or pushes `dir` while standing on it.
-- **npcs:** block their tile. `model` loads `assets/npc/<model>.glb`; until it exists the hero
-  model is used, lerped toward `tint` and scaled by `scale`. `route` (optional) is a loop of
-  one-tile steps. Speaking (E or tap while facing them, also across a counter) turns them to
-  the hero and runs `dialogue`: the first branch whose `if` holds plays its `lines`, then
-  applies its `do` effects. Conditions and effects are the engine's progression language
-  (`engine/src/overworld.rs`): `item:x` / `flag:x` (negate with `!`), `give:x` / `flag:x`.
-  Talking also sets `flag:talked_<id>`. Progress is saved in localStorage.
+  A door warp with `if` (a dialogue condition, e.g. `"seals:6"`) only opens while it holds;
+  until then it reads like a sign showing `locked`. A `#` tile in a wall row leaves a gap: a
+  dark doorway for such a door (the hall's sealed door to `warden`).
+- **npcs:** block their tile. `model` loads `assets/npc/<model>.glb` (`npc_*` and `rival_*`
+  names); until it exists the hero model is used, lerped toward `tint` and scaled by `scale`.
+  `route` (optional) is a loop of one-tile steps. Speaking (E or tap while facing them, also
+  across a counter or a duel table) turns them to the hero and runs `dialogue`: the first
+  branch whose `if` holds plays its `lines`, then applies its `do` effects. Conditions and
+  effects are the engine's progression language (`engine/src/overworld.rs`):
+  - conditions (negate with `!`): `item:x`, `flag:x`, `seals:n` (at least n seals),
+    `beat:<rival>`, `open:<rival>` (enough seals to duel them), `won:<rival>` /
+    `lost:<rival>` (the last campaign duel's result, until its rival is next talked to);
+  - effects: `give:x`, `flag:x`, `duel:<rival>` (after the lines, offer a duel with a deck
+    picker), `pack:<booster>` (`ember`, `tide`, `wild`, `grove`, `storm`, `stone`, `dream`).
+  A campaign rival is an NPC whose `id` is the rival's id in `engine/src/campaign.rs`; its
+  branches go `won:` / `lost:` (post-duel lines), `!open:` (locked), `beat:` (rematch, with
+  `duel:`), then the first meeting (with `duel:`). Talking also sets `flag:talked_<id>`.
+  Progress, and where the hero stands (`map,x,z,facing`), are saved in localStorage; the
+  world resumes there, and after a campaign duel the hero, back on its tile, talks to the
+  rival again so the post-duel line plays.
 - **ground:** the two layers (`base`, and `path` under `p` tiles) and how far the ground
   runs past the map edge.
 - **camera:** `fov` (vertical, degrees; `fovPortrait` when the view is taller than wide),

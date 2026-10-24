@@ -28,5 +28,47 @@
     "secondary": "#1f1f26",
     "hair": "#1f1f26",
     "accent": "#e0303a"
+  },
+  "rival_grass": {
+    "primary": "#3a8a35",
+    "secondary": "#e8e2c8",
+    "hair": "#7a4a2a",
+    "accent": "#f08ab0"
+  },
+  "rival_fire": {
+    "primary": "#f07a2a",
+    "secondary": "#ffd23f",
+    "hair": "#b0282e",
+    "accent": "#9fe0f0"
+  },
+  "rival_water": {
+    "primary": "#24365e",
+    "secondary": "#f4f1ea",
+    "hair": "#3d8fb0",
+    "accent": "#e9b949"
+  },
+  "rival_lightning": {
+    "primary": "#f4c531",
+    "secondary": "#3c3f47",
+    "hair": "#c9772a",
+    "accent": "#7fd4ff"
+  },
+  "rival_fighting": {
+    "primary": "#f1e7d2",
+    "secondary": "#8c2f2f",
+    "hair": "#2a2024",
+    "accent": "#efe6d6"
+  },
+  "rival_psychic": {
+    "primary": "#6b4a9b",
+    "secondary": "#e9b949",
+    "hair": "#d9d6ef",
+    "accent": "#c08cff"
+  },
+  "rival_champion": {
+    "primary": "#22283c",
+    "secondary": "#e9b949",
+    "hair": "#2b2638",
+    "accent": "#353d58"
   }
 }

@@ -14,11 +14,11 @@ use crate::Screen;
 
 /// A deck on offer; `problem` says why it can't be played.
 #[derive(Clone)]
-struct Opt {
-    name: String,
-    desc: String,
-    cards: Vec<CardId>,
-    problem: Option<String>,
+pub struct Opt {
+    pub name: String,
+    pub desc: String,
+    pub cards: Vec<CardId>,
+    pub problem: Option<String>,
 }
 
 fn prebuilt_opts() -> Vec<Opt> {
@@ -34,7 +34,7 @@ fn prebuilt_opts() -> Vec<Opt> {
 }
 
 /// Your saved decks first, then the prebuilts you don't already hold as-is.
-fn my_opts(p: &Profile) -> Vec<Opt> {
+pub fn my_opts(p: &Profile) -> Vec<Opt> {
     let mut held: Vec<Vec<CardId>> = p.decks.iter().map(|d| sorted(&d.cards)).collect();
     held.sort();
     p.decks
@@ -71,11 +71,12 @@ pub fn default_setup() -> Option<Setup> {
         names: [a.name.to_string(), b.name.to_string()],
         prizes: 6,
         difficulty: Difficulty::Normal,
+        rival: None,
     })
 }
 
 #[component]
-fn DeckPicker(
+pub fn DeckPicker(
     legend: &'static str,
     name: &'static str,
     opts: Vec<Opt>,
@@ -146,6 +147,7 @@ pub fn DuelSetup() -> impl IntoView {
             } else {
                 Difficulty::Easy
             },
+            rival: None,
         };
         if ctl.start(setup, seed.get()) {
             screen.set(Screen::Match);

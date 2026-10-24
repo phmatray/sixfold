@@ -12,7 +12,7 @@ Playable from start to finish:
 
 - **Rules engine** (`engine/`): the whole duel, from setup and mulligans through
   attacks, conditions, Powers, trainers, knock-outs, prizes and sudden death.
-  Pure Rust, no browser needed; 278 unit tests.
+  Pure Rust, no browser needed; 285 unit tests.
 - **Card set**: 103 original cards (71 creatures in full evolution lines across
   all seven colours, 25 trainers, 6 basic energies and a special energy), and
   six prebuilt 60-card decks: Ember Rush (Fire / Fighting), Tide Mind
@@ -31,8 +31,14 @@ Playable from start to finish:
   you win. New players start with one starter deck, Trailhead (Fire / Water),
   and three packs; every prebuilt deck can still be played against the AI. Progress is kept in the browser
   (localStorage) and can be reset from Settings.
+- **Campaign**: six original rivals in the meadow and the duel hall, one per
+  colour theme, each with their own deck, AI level and prize count. Beat one
+  for their seal and packs of their colours (a rematch win gives a pack);
+  three seals open the next rivals, and all six open the sealed door to Sable,
+  the Hex Warden. A Campaign page on the title screen lists who is beaten,
+  open or locked.
 
-Not done yet: a second human player, sound.
+Not done yet: a second human player.
 
 ## How to play
 
@@ -49,7 +55,16 @@ cd web && trunk build --release  # static site in web/dist
 cargo test -p sixfold-engine     # rules, card set and AI tests
 ```
 
-In the app, pick your deck and the AI's, then press **Start the duel**.
+**The campaign.** Choose **Explore the world** (or **Campaign** to see the
+rivals first). Walk with the arrow keys, WASD or the on-screen pad, and press
+**E** (or tap the prompt) to talk. Rivals offer a duel: pick one of your decks
+and press **Duel**. Win for their seal and packs; lose and they will be waiting
+for a rematch. After the duel, **Back to the world** puts you where you stood,
+and the rival has a word for you. The seal count sits in the world's top bar;
+press it for the roster. Your progress and position are saved as you play.
+
+**A quick duel.** Choose **Play a duel**, pick your deck and the AI's, then
+press **Start the duel**.
 
 1. **Setup.** Choose a Basic creature as your Active, put more Basics on your
    Bench, then press **Done**.

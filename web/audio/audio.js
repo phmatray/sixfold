@@ -249,6 +249,19 @@ const SFX = {
     notes(d, t, [84, 88, 91, 96], 0.08, { type: "triangle", peak: 0.12, dur: 0.4 });
     [0.05, 0.13, 0.21, 0.29].forEach((p) => noise(d, t + p, 0.05, { type: "highpass", f: 7000, peak: 0.06 }));
   },
+  // Campaign: a rival's duel accepted, a seal earned, the sealed door opening.
+  challenge: (d, t) => {
+    noise(d, t, 0.25, { f: 400, f2: 2400, q: 2, a: 0.1, peak: 0.25 });
+    notes(d, t + 0.18, [67, 74, 79], 0.07, { type: "square", peak: 0.05, dur: 0.18 });
+  },
+  seal: (d, t) => {
+    notes(d, t, [79, 83, 86, 91], 0.09, { type: "triangle", peak: 0.12, dur: 0.6 });
+    tone(d, t + 0.36, hz(55), 1.2, { peak: 0.12, lin: true, rel: 0.6 });
+  },
+  gate: (d, t) => {
+    SFX.door(d, t);
+    notes(d, t + 0.5, [72, 79, 84, 91], 0.1, { type: "triangle", peak: 0.09, dur: 0.7 });
+  },
   win: (d, t) => {
     notes(d, t, [72, 76, 79], 0.12, { type: "triangle", peak: 0.15, dur: 0.3 });
     [72, 76, 79, 84].forEach((m) => tone(d, t + 0.38, hz(m), 1.4, { type: "triangle", peak: 0.09, lin: true, rel: 0.6 }));

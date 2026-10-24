@@ -1,8 +1,11 @@
 // The overworld test: tile-grid maps (./maps/<name>.json) drawn with three.js.
-// `mount(host, controls, cb)` builds it and returns an api for Leptos
-// (stop, act, pause, setItems, preview, previewStop). `cb(event, a, b)` reports:
+// `mount(host, controls, cb, start)` builds it (at `start` = "map,x,z,facing"
+// when given) and returns an api for Leptos (stop, act, pause, setItems,
+// preview, previewStop). `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
-//   ("use", kind, text)    acted on a sign or the duel table
+//   ("use", kind, text)    acted on a sign, the duel table or a locked door
+//   ("at", map, "x,z,f")   the hero stands on a new tile or faces a new way
+//   ("check", cond, "")    asks whether a gated warp's `if` holds (returns a bool)
 //   ("talk", npcId, json)  spoke to an NPC: {"name", "dialogue"} for Leptos to run
 //   ("ready", "", "")      first frame drawn;  ("error", "", message)
 // Game rules (progression, dialogue effects) live in the engine crate; this file
@@ -34,7 +37,8 @@ const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
 
 const loader = new GLTFLoader();
 const assets = new Map();
-const folder = (n) => (INTERIOR.has(n) || n.startsWith("wall") ? "interior/" : n.startsWith("npc_") ? "npc/" : "");
+const PERSON = /^(npc|rival)_/; // models in assets/npc/
+const folder = (n) => (INTERIOR.has(n) || n.startsWith("wall") ? "interior/" : PERSON.test(n) ? "npc/" : "");
 const loadAsset = (n) => {
   if (!assets.has(n)) assets.set(n, loader.loadAsync(new URL(`assets/${folder(n)}${n}.glb`, BASE).href).catch(() => null));
   return assets.get(n);
@@ -63,7 +67,7 @@ function assetNames(map) {
 // Sounds come from web/audio/audio.js (loaded with the wasm), when it is there.
 const sound = (name, n = 0) => globalThis.sixfoldAudio?.sfx(name, n);
 
-export function mount(el, controls, cb) {
+export function mount(el, controls, cb, start) {
   const mq = matchMedia("(prefers-reduced-motion: reduce)");
   let reduced = mq.matches;
   const onMotion = (e) => ((reduced = e.matches), (U.uSway.value = reduced ? 0 : 1));
@@ -213,15 +217,20 @@ export function mount(el, controls, cb) {
 
   // ---------- Moving and acting ----------
 
-  // What the hero faces: a person (also across a counter), a sign or table, or a door.
+  // A warp with an `if` (e.g. "seals:6") opens only while it holds.
+  const opens = (wp) => !wp.if || cb("check", wp.if, "") === true;
+
+  // What the hero faces: a person (also across a counter or a duel table), a
+  // sign or table, or a door (a locked one reads like a sign).
   function facing() {
     const w = world, [dx, dz] = DIR[hero.face], fx = hero.x + dx, fz = hero.z + dz;
-    const npc = w.npcAt(fx, fz) ?? (w.propAt.get(key(fx, fz))?.asset === "counter" ? w.npcAt(fx + dx, fz + dz) : null);
+    const across = ["counter", "duel_table"].includes(w.propAt.get(key(fx, fz))?.asset);
+    const npc = w.npcAt(fx, fz) ?? (across ? w.npcAt(fx + dx, fz + dz) : null);
     if (npc) return { kind: "npc", text: npc.def.name, npc };
     const it = w.talk.get(key(fx, fz));
     if (it) return it;
     const wp = w.warps.get(key(fx, fz));
-    if (wp && !wp.dir) return { kind: "warp", text: wp.label ?? "Go in", warp: wp };
+    if (wp && !wp.dir) return opens(wp) ? { kind: "warp", text: wp.label ?? "Go in", warp: wp } : { kind: "locked", text: wp.locked ?? "It won't open." };
     return null;
   }
 
@@ -231,7 +240,7 @@ export function mount(el, controls, cb) {
     const w = world, x = hero.x + DIR[f][0], z = hero.z + DIR[f][1];
     hero.face = f;
     const door = w.warps.get(key(x, z));
-    if (door && !door.dir) return startStep(x, z, carry, door);
+    if (door && !door.dir && opens(door)) return startStep(x, z, carry, door);
     if (w.blocked(x, z) || w.npcAt(x, z)) {
       const here = w.warps.get(key(hero.x, hero.z));
       if (here?.dir === f) warp(here);
@@ -265,7 +274,7 @@ export function mount(el, controls, cb) {
   async function warp(wp) {
     if (warping) return;
     warping = true;
-    sound("door");
+    sound(wp.if ? "gate" : "door"); // a gated door opening sounds grander
     held.length = 0;
     world.path = [];
     fade.classList.add("on");
@@ -286,7 +295,7 @@ export function mount(el, controls, cb) {
     const loaded = await Promise.all(names.map(loadAsset));
     if (!alive) return;
     const got = Object.fromEntries(names.map((n, i) => [n, loaded[i]]));
-    const missing = names.filter((n) => !got[n] && !OPTIONAL.test(n) && !n.startsWith("npc_")); // NPCs fall back to a tinted hero
+    const missing = names.filter((n) => !got[n] && !OPTIONAL.test(n) && !PERSON.test(n)); // NPCs fall back to a tinted hero
     if (missing.length) console.info(`world (${name}): placeholders for ${missing.join(", ")}`);
     if (!hero) {
       hero = actor(got.hero, null, 1, "idle");
@@ -295,6 +304,7 @@ export function mount(el, controls, cb) {
     }
     const next = await build(map, got, reduced);
     if (!alive) return;
+    next.name = name;
     if (world) dispose(world.root);
     world = next;
     world.hero = hero;
@@ -304,7 +314,7 @@ export function mount(el, controls, cb) {
     scene.fog = L.fog ? new THREE.Fog(L.background, L.fog.near, L.fog.far) : null;
     el.closest(".world")?.style.setProperty("--world-bg", L.background);
     globalThis.sixfoldAudio?.music(L.indoor ? "interior" : "overworld");
-    const s = spawn ?? map.spawn;
+    const s = spawn && !next.blocked(spawn.x, spawn.z) && !next.npcAt(spawn.x, spawn.z) ? spawn : map.spawn; // a stale saved tile falls back
     Object.assign(hero, { x: s.x, z: s.z, face: s.facing, step: null, idle: 0, turnedAt: -Infinity }); // a fresh map clock
     hero.obj.rotation.y = angle(s.facing);
     cam = map.camera;
@@ -318,7 +328,10 @@ export function mount(el, controls, cb) {
     cb("error", "", String(e?.message ?? e));
   }
 
-  enter("overworld")
+  // Resume at a saved "map,x,z,facing"; a map that no longer loads falls back to the overworld.
+  const [sm, sx, sz, sf] = (start ?? "").split(",");
+  const at = sm && DIR[sf] && Number.isInteger(+sx) && Number.isInteger(+sz) ? { x: +sx, z: +sz, facing: sf } : null;
+  (at ? enter(sm, at).catch(() => enter("overworld")) : enter("overworld"))
     .then(() => {
       if (!alive) return;
       clock.getDelta();
@@ -383,7 +396,7 @@ export function mount(el, controls, cb) {
     w.life.update(dt, w.now, px, pz);
 
     const pos = `${h.x},${h.z},${h.face}`;
-    if (pos !== lastHero) el.dataset.hero = lastHero = pos; // for tests; written only on change
+    if (pos !== lastHero) (el.dataset.hero = lastHero = pos), cb("at", w.name, pos); // written only on change
 
     // What the hero faces, while standing still.
     const front = h.step || warping ? null : facing();
