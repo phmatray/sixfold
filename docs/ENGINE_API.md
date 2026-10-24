@@ -50,6 +50,7 @@ The game moves forward by itself through every step that needs no decision: draw
 
 ```rust
 let mut game = Game::new([deck_a, deck_b], seed, Config::default())?;
+let mut ai = ai::Ai::new(seed, ai::Difficulty::Normal); // one per AI player: it remembers the turn
 show(game.log());                          // setup so far: Shuffled, CardDrawn ×7, Mulligan…
 while game.winner().is_none() {
     let asked = game.view(HUMAN).waiting_on.expect("a prompt while the game runs");
@@ -57,7 +58,7 @@ while game.winner().is_none() {
         // Buttons are game.legal_actions(), labelled with view.describe_action(a).
         wait_for_click(game.view(HUMAN), game.legal_actions())
     } else {
-        ai::choose(&game, asked)           // must return one of game.legal_actions()
+        ai.choose_action(&game, asked)     // always one of game.legal_actions()
     };
     let events = game.apply(action).expect("listed actions are always accepted");
     animate(&events, HUMAN);               // see section 7
@@ -505,6 +506,14 @@ pub static CARDS: &[CardDef] = &[
 
 ## 9. Rules for the AI (`engine/src/ai.rs`, R-AI-*)
 
+```rust
+pub enum Difficulty { Easy, Normal }                 // Default = Normal
+impl Ai {
+    pub fn new(seed: u64, difficulty: Difficulty) -> Ai;
+    pub fn choose_action(&mut self, game: &Game, me: usize) -> Action; // panics if `me` isn't asked
+}
+```
+
 - **Inputs:** decide only from `game.view(me)` and `game.legal_actions()`, plus `game.preview_attack`, `game.retreat_cost` and `game.power_works`, which read only public state. Act only through `game.apply`, and only when `view.prompt` is `Some`. Never read `game.prompt()`, other `Game` internals, or the cards of events where `is_private(me)` is true. Never clone the game to look ahead: that would reveal the deck order and the opponent's hand.
 - **Prompts and the R-AI-01 entry points:**
   - `MainPhase` is "take a turn": it is called once per action until the AI answers `Attack`, or `Done` to end the turn.
@@ -529,4 +538,6 @@ pub static CARDS: &[CardDef] = &[
 - There is no "revive onto the Bench" effect and no "return a card to the top of the deck" effect.
 - An opponent-chooses `SwitchDefender` used in a Power is skipped, and the selections of on-play Powers can't be cancelled.
 - When an attack inflicts a condition and also force-switches, the condition lands on the new Active.
-- The AI is not implemented yet (R-AI-*).
+- Nothing in the engine stops a caller from looping. Retreat has no per-turn limit (R-RETREAT-05), an Activated Power with `once_per_turn: false` can be used again and again, and cancelling a `Choose` goes back to exactly the same state. `ai::Ai` guards against all three itself (one retreat per turn, each Power once per turn, a cancelled play isn't retried that turn, and at most 100 main-phase answers per turn).
+- A `Choose` prompt doesn't say which card or Power started it; remember the last play you started.
+- The AI doesn't use R-AI-15 (stacked openings, unfair by design). Easy differs from Normal only in R-AI-03's skipped trainer and Power plays.

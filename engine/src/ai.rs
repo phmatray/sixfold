@@ -13,7 +13,7 @@
 //! end of the turn. Each step is a small additive score with a threshold.
 //!
 //! Use one [`Ai`] per AI player: it remembers a little about the current turn
-//! (whether it retreated, which plays it skipped). Same seed, same choices.
+//! (whether it retreated, which plays it skipped, R-AI-18's no-damage count). Same seed, same choices.
 
 use crate::action::{Action, PromptKind};
 use crate::card::{
@@ -64,6 +64,11 @@ pub struct Ai {
     done: Vec<Play>,
     /// The last trainer or Power started, in case its choice is cancelled.
     last: Option<Play>,
+    /// R-AI-18: my turns in a row that this Active (by uid) ended without a
+    /// damaging attack, and whether this turn's attack does damage.
+    idle: u32,
+    idle_uid: Option<u32>,
+    hit: bool,
 }
 
 /// Main-phase answers per turn before the AI just ends its turn (a safety net).
@@ -79,6 +84,9 @@ impl Ai {
             retreated: false,
             done: Vec::new(),
             last: None,
+            idle: 0,
+            idle_uid: None,
+            hit: false,
         }
     }
 
@@ -121,6 +129,14 @@ impl Ai {
 
     fn main_phase(&mut self, x: &Ctx) -> Action {
         if self.turn != Some(x.v.turn) {
+            let uid = x.mine().active.map(|a| a.uid);
+            self.idle = if self.turn.is_none() || self.hit || uid != self.idle_uid {
+                0
+            } else {
+                self.idle + 1
+            };
+            self.idle_uid = uid;
+            self.hit = false;
             self.turn = Some(x.v.turn);
             self.actions = 0;
             self.retreated = false;
@@ -128,7 +144,7 @@ impl Ai {
         }
         self.actions += 1;
         if self.actions > MAX_ACTIONS {
-            return best_attack(x).map_or(Action::Done, Action::Attack);
+            return self.attack(x);
         }
         if let Some(a) = self.trainer(x, Step::Draw) {
             return a;
@@ -151,7 +167,16 @@ impl Ai {
         if let Some(a) = self.trainer(x, Step::PreAttack) {
             return a;
         }
-        best_attack(x).map_or(Action::Done, Action::Attack)
+        self.attack(x)
+    }
+
+    /// The best attack, or the end of the turn; remembers whether it hits.
+    fn attack(&mut self, x: &Ctx) -> Action {
+        let Some(i) = best_attack(x) else {
+            return Action::Done;
+        };
+        self.hit = outcomes(x, x.me, i).iter().any(|&(_, d)| d > 0);
+        Action::Attack(i)
     }
 
     /// R-AI-03: Easy skips a valid trainer or Power play one time in four,
@@ -231,9 +256,11 @@ impl Ai {
             .attacks
             .iter()
             .all(|a| missing(&active.units(), a.cost) > 1);
-        let trouble = in_danger(x) || !cond.is_empty() || stuck;
+        // R-AI-18: two idle turns in a row count as trouble, and each one
+        // makes the Bench look 10 points better.
+        let trouble = in_danger(x) || !cond.is_empty() || stuck || self.idle >= 2;
         let best = x.legal_bench().map(|c| bring_in_score(x, c)).max()?;
-        if !trouble || best <= active_score(x) + 20 {
+        if !trouble || best <= active_score(x) + 20 - 10 * self.idle as i32 {
             return None;
         }
         let switch = x.legal.iter().copied().find(|&a| {
@@ -747,10 +774,12 @@ fn effect_value(x: &Ctx, me: &InPlay, def: &InPlay, e: &Effect) -> f32 {
         DiscardEnergy { count, .. } => -10.0 * count as f32,
         DiscardAllEnergy => -10.0 * me.energy.len() as f32,
         Heal(n) => n.min(me.damage()) as f32,
+        // Worth half the best attack I could pay for next turn.
         DoubleNextAttack => {
             me.creature()
                 .attacks
                 .iter()
+                .filter(|a| missing(&me.units(), a.cost) <= 1)
                 .map(|a| a.damage)
                 .max()
                 .unwrap_or(0) as f32
@@ -1469,5 +1498,52 @@ mod tests {
         };
         assert!((260..=340).contains(&plays(Difficulty::Easy)));
         assert_eq!(plays(Difficulty::Normal), 400);
+    }
+
+    /// R-AI-18: each of my turns that ends without a damaging attack by the
+    /// same Active adds one to the no-damage counter; a hit or a new Active
+    /// resets it.
+    #[test]
+    fn ai_no_damage_counter_increments() {
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(SPARKLET, &[LIGHTNING_E]));
+        g.players[1].active = Some(creature(WARDEN, &[]));
+        let mut ai = normal();
+        let mut idle = Vec::new();
+        for _ in 0..3 {
+            assert_eq!(ai.choose_action(&g, 0), Action::Done);
+            idle.push(ai.idle);
+            ok(&mut g, Action::Done);
+            while prompt_of(&g) != (0, PromptKind::MainPhase) {
+                let a = g.legal_actions()[0];
+                ok(&mut g, a);
+            }
+            g.players[0].hand.clear();
+        }
+        assert_eq!(idle, [0, 1, 2]);
+        let mut fresh = creature(SPARKLET, &[LIGHTNING_E]);
+        fresh.uid = 99;
+        g.players[0].active = Some(fresh);
+        ai.choose_action(&g, 0);
+        assert_eq!(ai.idle, 0, "a new Active starts again");
+    }
+
+    /// Balance check for the prebuilt decks: in 200 Normal-vs-Normal games
+    /// (seats swapped every game) each deck wins at least 35%.
+    #[test]
+    fn ai_mirror_prebuilt_decks_are_balanced() {
+        use crate::decks::{ember_rush, tide_mind};
+        let mut ember = 0;
+        for seed in 0..200u64 {
+            let swap = seed % 2 == 1;
+            let mut pair = [ember_rush(), tide_mind()];
+            if swap {
+                pair.swap(0, 1);
+            }
+            let normal = Some(Difficulty::Normal);
+            let w = play(pair, seed, [normal, normal]);
+            ember += usize::from((w == 1) == swap);
+        }
+        assert!((70..=130).contains(&ember), "Ember Rush won {ember}/200");
     }
 }
