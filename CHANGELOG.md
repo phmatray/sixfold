@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [0.4.0](https://github.com/phmatray/sixfold/compare/v0.3.0...v0.4.0) (2026-10-24)
+
+
+### Added
+
+* **cards:** grow the set to 103 original cards with four new decks and a starter ([#6](https://github.com/phmatray/sixfold/issues/6)) ([17c4313](https://github.com/phmatray/sixfold/commit/17c43130d667db61c3384727fc920157f5e028e2))
+
 ## [0.3.0](https://github.com/phmatray/sixfold/compare/v0.2.0...v0.3.0) (2026-10-24)
 
 
