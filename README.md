@@ -2,13 +2,14 @@
 
 A clean-room creature card duel with the old handheld rules, written in **Rust**,
 compiled to **WebAssembly** and played in the browser (Leptos, client-side only).
-Collect cards from booster packs, build your own decks and duel an AI opponent.
+Walk a small world, collect cards from booster packs, build your own decks, beat
+six rivals and the Hex Warden, then take on the Gauntlet. It installs as an app
+and plays offline.
 
-**Play it:** https://phmatray.github.io/sixfold/
+**Play it:** https://phmatray.github.io/sixfold/ (free, no account, nothing to
+download first).
 
-## Status
-
-Playable from start to finish:
+## What's in 1.0
 
 - **Rules engine** (`engine/`): the whole duel, from setup and mulligans through
   attacks, conditions, Powers, trainers, knock-outs, prizes and sudden death.
@@ -78,22 +79,9 @@ Playable from start to finish:
   animated water, and only the area you stand in is built, so it stays at 60 fps
   on a phone.
 
-Not done yet: a second human player.
+Not in 1.0: a second human player (see [`docs/ROADMAP.md`](docs/ROADMAP.md)).
 
 ## How to play
-
-Prerequisites: [rustup](https://rustup.rs) with the `wasm32-unknown-unknown`
-target, and [Trunk](https://trunkrs.dev).
-
-```bash
-rustup target add wasm32-unknown-unknown
-cargo install trunk
-
-cd web && trunk serve            # http://localhost:8080 (first build takes ~2 min)
-cd web && trunk build --release  # static site in web/dist
-
-cargo test -p sixfold-engine     # rules, card set and AI tests
-```
 
 **The campaign.** Choose **Explore the world** (or **Campaign** to see the
 rivals first). Walk with the arrow keys, WASD or the on-screen pad, and press
@@ -136,6 +124,28 @@ press **Start the duel**.
 
 The seed on the title screen fixes the shuffles and coin flips, so a seed
 replays the same duel if both players make the same moves.
+
+## Build from source
+
+Prerequisites: [rustup](https://rustup.rs) with the `wasm32-unknown-unknown`
+target, and [Trunk](https://trunkrs.dev).
+
+```bash
+rustup target add wasm32-unknown-unknown
+cargo install trunk
+
+cd web && trunk serve            # http://localhost:8080 (first build takes ~2 min)
+cd web && trunk build --release  # static site in web/dist
+
+cargo test -p sixfold-engine     # rules, card set and AI tests
+```
+
+In a debug build (`trunk serve`), adding `?autoplay` to the URL lets the Hard AI
+play your seat too, which is handy for watching whole duels or reaching the
+credits. Release builds leave it out.
+
+The title screen shows the version, taken from the workspace's `Cargo.toml`.
+Releases are cut by release-please from Conventional Commits.
 
 ## Rules
 
