@@ -251,7 +251,7 @@ pub static CARDS: &[CardDef] = &[
     // ----- Ember Rush: Fighting -----
     creature("Knollop", Common, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 60, color: Fighting,
-        weakness: Some(Grass), resistance: Some(Lightning), retreat_cost: 2,
+        weakness: Some(Grass), resistance: None, retreat_cost: 2,
         attacks: &[
             Attack { name: "Clod Toss", text: "", cost: &[Fighting], damage: 20, effects: &[] },
             Attack { name: "Rumble", text: "Does 10 damage to each Benched creature, yours and your opponent's.",
@@ -262,7 +262,7 @@ pub static CARDS: &[CardDef] = &[
     }),
     creature("Knollgrim", Uncommon, Creature {
         stage: Stage::Stage1, evolves_from: Some("Knollop"), hp: 90, color: Fighting,
-        weakness: Some(Grass), resistance: Some(Lightning), retreat_cost: 3,
+        weakness: Some(Grass), resistance: None, retreat_cost: 3,
         attacks: &[
             Attack { name: "Granite Guard",
                      text: "During your opponent's next turn, this creature takes 20 less damage from attacks.",
@@ -471,7 +471,7 @@ pub static CARDS: &[CardDef] = &[
         power: None,
     }),
     creature("Elderhart", Rare, Creature {
-        stage: Stage::Stage2, evolves_from: Some("Thornbuck"), hp: 110, color: Grass,
+        stage: Stage::Stage2, evolves_from: Some("Thornbuck"), hp: 100, color: Grass,
         weakness: Some(Fire), resistance: Some(Water), retreat_cost: 3,
         attacks: &[
             atk("Grove Crush", "Remove 20 damage from this creature.",
@@ -703,7 +703,7 @@ pub static CARDS: &[CardDef] = &[
     }),
     creature("Arcfang", Uncommon, Creature {
         stage: Stage::Stage1, evolves_from: Some("Sparkit"), hp: 80, color: Lightning,
-        weakness: Some(Fighting), resistance: None, retreat_cost: 1,
+        weakness: None, resistance: None, retreat_cost: 1,
         attacks: &[
             atk("Arc Bite", "Flip a coin. If heads, the defending creature is now Paralyzed.",
                 &[Lightning, Colorless], 20, &[Inflict { status: Status::Paralyzed, coin: true }]),
@@ -817,7 +817,7 @@ pub static CARDS: &[CardDef] = &[
         power: None,
     }),
     creature("Ironbrawl", Uncommon, Creature {
-        stage: Stage::Stage1, evolves_from: Some("Brawlet"), hp: 90, color: Fighting,
+        stage: Stage::Stage1, evolves_from: Some("Brawlet"), hp: 80, color: Fighting,
         weakness: Some(Grass), resistance: None, retreat_cost: 2,
         attacks: &[
             atk("Counterblow", "This attack does 10 more damage for each 10 damage on this creature.",
@@ -848,7 +848,7 @@ pub static CARDS: &[CardDef] = &[
     }),
     creature("Cragmastiff", Rare, Creature {
         stage: Stage::Stage2, evolves_from: Some("Shalehound"), hp: 110, color: Fighting,
-        weakness: Some(Grass), resistance: Some(Lightning), retreat_cost: 3,
+        weakness: Some(Grass), resistance: None, retreat_cost: 3,
         attacks: &[
             atk("Tremor Bite", "During your opponent's next turn, the defending creature's attacks do 20 less damage.",
                 &[Fighting, Colorless], 30, &[Place { placed: Placed::Weaken(20), coin: false }]),
@@ -900,7 +900,7 @@ pub static CARDS: &[CardDef] = &[
     }),
     creature("Hexlet", Common, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 50, color: Psychic,
-        weakness: Some(Psychic), resistance: None, retreat_cost: 1,
+        weakness: None, resistance: None, retreat_cost: 1,
         attacks: &[
             atk("Small Hex", "Flip a coin. If heads, the defending creature is now Confused.",
                 &[Psychic], 10, &[Inflict { status: Status::Confused, coin: true }]),
