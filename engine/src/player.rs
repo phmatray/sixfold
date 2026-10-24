@@ -25,7 +25,14 @@ impl InPlay {
     /// R-ZONE-01: full HP, flags cleared.
     pub(crate) fn new(id: CardId) -> Self {
         let hp = card(id).creature().expect("placed card is a creature").hp;
-        InPlay { stack: vec![id], hp, energy: vec![], trainers: vec![], settled: false, power_used: false }
+        InPlay {
+            stack: vec![id],
+            hp,
+            energy: vec![],
+            trainers: vec![],
+            settled: false,
+            power_used: false,
+        }
     }
 
     pub fn top(&self) -> CardId {
@@ -33,7 +40,9 @@ impl InPlay {
     }
 
     pub fn creature(&self) -> &'static Creature {
-        card(self.top()).creature().expect("in-play card is a creature")
+        card(self.top())
+            .creature()
+            .expect("in-play card is a creature")
     }
 
     pub fn units(&self) -> Units {
@@ -65,7 +74,10 @@ pub(crate) struct Player {
 
 impl Player {
     pub fn new(deck: Vec<CardId>) -> Self {
-        Player { deck, ..Player::default() }
+        Player {
+            deck,
+            ..Player::default()
+        }
     }
 
     pub fn draw(&mut self) -> Option<CardId> {
@@ -79,12 +91,15 @@ impl Player {
         rng.shuffle(&mut self.deck);
     }
 
+    // Deck search / return primitives for stage-2 effects (R-ZONE-04).
+    #[allow(dead_code)]
     /// R-ZONE-04: remove one specific card; the rest keep their order.
     pub fn take_from_deck(&mut self, id: CardId) -> Option<CardId> {
         let i = self.deck.iter().position(|&c| c == id)?;
         Some(self.deck.remove(i))
     }
 
+    #[allow(dead_code)]
     /// R-ZONE-04
     pub fn put_on_top(&mut self, id: CardId) {
         self.deck.push(id);

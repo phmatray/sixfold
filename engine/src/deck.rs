@@ -68,7 +68,10 @@ mod tests {
     /// R-DECK-02: a Trainer-as-Basic doesn't count.
     #[test]
     fn deck_without_basic_rejected() {
-        assert_eq!(validate_deck(&with(&[STRAW_DECOY, MOSSBACK])), Err(DeckError::NoBasic));
+        assert_eq!(
+            validate_deck(&with(&[STRAW_DECOY, MOSSBACK])),
+            Err(DeckError::NoBasic)
+        );
         assert_eq!(validate_deck(&with(&[MOSSLING])), Ok(()));
     }
 
@@ -82,7 +85,10 @@ mod tests {
         );
         let mut d = with(&[MOSSLING]);
         d[1..6].fill(FIELD_NOTES);
-        assert_eq!(validate_deck(&d), Err(DeckError::TooManyCopies("Field Notes")));
+        assert_eq!(
+            validate_deck(&d),
+            Err(DeckError::TooManyCopies("Field Notes"))
+        );
     }
 
     /// R-DECK-03
@@ -94,7 +100,10 @@ mod tests {
     /// R-DECK-03
     #[test]
     fn special_energy_limited_to_four() {
-        assert_eq!(validate_deck(&with(&[MOSSLING, TWIN_E, TWIN_E, TWIN_E, TWIN_E])), Ok(()));
+        assert_eq!(
+            validate_deck(&with(&[MOSSLING, TWIN_E, TWIN_E, TWIN_E, TWIN_E])),
+            Ok(())
+        );
         assert_eq!(
             validate_deck(&with(&[MOSSLING, TWIN_E, TWIN_E, TWIN_E, TWIN_E, TWIN_E])),
             Err(DeckError::TooManyCopies("Twin Energy"))

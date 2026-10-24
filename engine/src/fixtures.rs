@@ -1,5 +1,6 @@
 //! Test-only card set: original placeholder cards covering every rule hook.
 //! Ids live at `FIRST..` so they never collide with the real set.
+#![allow(dead_code)]
 
 use crate::card::*;
 use crate::effect::Effect;
@@ -37,20 +38,55 @@ pub const PSYCHIC_E: CardId = id(16);
 /// The 2-unit colorless special energy.
 pub const TWIN_E: CardId = id(17);
 
-const VINE_POKE: Attack = Attack { name: "Vine Poke", text: "", cost: &[Grass], damage: 10, effects: &[] };
-const ROOT_SLAM: Attack =
-    Attack { name: "Root Slam", text: "", cost: &[Grass, Colorless, Colorless], damage: 30, effects: &[] };
-const SINGE: Attack = Attack { name: "Singe", text: "", cost: &[Fire], damage: 10, effects: &[] };
-const PEBBLE_TOSS: Attack =
-    Attack { name: "Pebble Toss", text: "", cost: &[Fighting, Colorless], damage: 20, effects: &[] };
-const BUMP: Attack = Attack { name: "Bump", text: "", cost: &[Colorless], damage: 10, effects: &[] };
+const VINE_POKE: Attack = Attack {
+    name: "Vine Poke",
+    text: "",
+    cost: &[Grass],
+    damage: 10,
+    effects: &[],
+};
+const ROOT_SLAM: Attack = Attack {
+    name: "Root Slam",
+    text: "",
+    cost: &[Grass, Colorless, Colorless],
+    damage: 30,
+    effects: &[],
+};
+const SINGE: Attack = Attack {
+    name: "Singe",
+    text: "",
+    cost: &[Fire],
+    damage: 10,
+    effects: &[],
+};
+const PEBBLE_TOSS: Attack = Attack {
+    name: "Pebble Toss",
+    text: "",
+    cost: &[Fighting, Colorless],
+    damage: 20,
+    effects: &[],
+};
+const BUMP: Attack = Attack {
+    name: "Bump",
+    text: "",
+    cost: &[Colorless],
+    damage: 10,
+    effects: &[],
+};
 
 const fn power(kind: PowerKind) -> Option<Power> {
-    Some(Power { name: "Test Power", text: "", kind })
+    Some(Power {
+        name: "Test Power",
+        text: "",
+        kind,
+    })
 }
 
 const fn energy(name: &'static str, kind: EnergyCard) -> CardDef {
-    CardDef { name, kind: CardKind::Energy(kind) }
+    CardDef {
+        name,
+        kind: CardKind::Energy(kind),
+    }
 }
 
 pub static CARDS: [CardDef; 18] = [
@@ -196,7 +232,10 @@ pub static CARDS: [CardDef; 18] = [
     },
     CardDef {
         name: "Field Notes",
-        kind: CardKind::Trainer(Trainer { text: "Draw 2 cards.", effects: &[Effect::Draw(2)] }),
+        kind: CardKind::Trainer(Trainer {
+            text: "Draw 2 cards.",
+            effects: &[Effect::Draw(2)],
+        }),
     },
     energy("Grass Energy", EnergyCard::Basic(Grass)),
     energy("Fire Energy", EnergyCard::Basic(Fire)),

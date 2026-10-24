@@ -8,7 +8,10 @@ pub(crate) struct Rng {
 
 impl Rng {
     pub fn new(seed: u64) -> Self {
-        let mut r = Rng { state: 0, inc: (seed << 1) | 1 };
+        let mut r = Rng {
+            state: 0,
+            inc: (seed << 1) | 1,
+        };
         r.next_u32();
         r.state = r.state.wrapping_add(seed);
         r.next_u32();
