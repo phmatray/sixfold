@@ -27,6 +27,7 @@ mod view;
 
 pub mod ai;
 pub mod decks;
+pub mod overworld;
 pub mod set;
 
 #[cfg(test)]
