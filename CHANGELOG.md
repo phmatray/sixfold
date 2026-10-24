@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [0.3.0](https://github.com/phmatray/sixfold/compare/v0.2.0...v0.3.0) (2026-10-24)
+
+
+### Added
+
+* collect cards, open booster packs and build your own decks ([#4](https://github.com/phmatray/sixfold/issues/4)) ([ac39bf9](https://github.com/phmatray/sixfold/commit/ac39bf99319a8273e516349f9e48ae1621f617bc))
+
 ## [0.2.0](https://github.com/phmatray/sixfold/compare/v0.1.0...v0.2.0) (2026-10-24)
 
 
