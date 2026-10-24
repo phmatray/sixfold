@@ -182,7 +182,7 @@
         {
           "if": "flag:juniper_gift",
           "lines": [
-            "How's the seal hunt? Marlo and Lumen take the tables in here, the rest are out in the meadow."
+            "How's the seal hunt? The rivals are out on the roads now: the trail west, the boardwalk east, the quarry north."
           ]
         },
         {
@@ -200,103 +200,7 @@
           "lines": [
             "How are the shoes? Hold Shift, or tap RUN, and off you go.",
             "The table by the window is free if you fancy a duel.",
-            "Rivals duel for seals around here. Marlo at the window table is a gentle start."
-          ]
-        }
-      ]
-    },
-    {
-      "id": "marlo",
-      "name": "Marlo",
-      "model": "rival_water",
-      "tint": "#73b8f2",
-      "scale": 1.0,
-      "x": 2,
-      "z": 3,
-      "facing": "s",
-      "idle": "Idle",
-      "dialogue": [
-        {
-          "if": "won:marlo",
-          "lines": [
-            "Washed out, fair and square.",
-            "Take my seal, it's still a little damp."
-          ]
-        },
-        {
-          "if": "lost:marlo",
-          "lines": [
-            "Low tide for you today. The water always comes back in."
-          ]
-        },
-        {
-          "if": "beat:marlo",
-          "lines": [
-            "The tide's turned. Another round?"
-          ],
-          "do": [
-            "duel:marlo"
-          ]
-        },
-        {
-          "lines": [
-            "Shh. Listen... that's the kettle, not the sea. Close, though.",
-            "I'm Marlo. I read the tide tables and the table here.",
-            "Three prizes. Sit down, the cards are already dealt."
-          ],
-          "do": [
-            "duel:marlo"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "lumen",
-      "name": "Lumen",
-      "model": "rival_psychic",
-      "tint": "#ba8ce9",
-      "scale": 1.0,
-      "x": 8,
-      "z": 4,
-      "facing": "s",
-      "idle": "Idle",
-      "dialogue": [
-        {
-          "if": "won:lumen",
-          "lines": [
-            "You stayed awake the whole time. Impressive.",
-            "My seal. With six, the door by the lamp is yours."
-          ]
-        },
-        {
-          "if": "lost:lumen",
-          "lines": [
-            "Sweet dreams. Wake up and try again."
-          ]
-        },
-        {
-          "if": "!open:lumen",
-          "lines": [
-            "You look tired. Five seals first, then we'll talk.",
-            "Rest up: the others are still waiting."
-          ]
-        },
-        {
-          "if": "beat:lumen",
-          "lines": [
-            "The moon's up again. Shall we?"
-          ],
-          "do": [
-            "duel:lumen"
-          ]
-        },
-        {
-          "lines": [
-            "You came in out of the light. Good. My garden only grows at night.",
-            "I'm Lumen. Six prizes, and I don't let anyone sleep through them."
-          ],
-          "do": [
-            "duel:lumen"
+            "Rivals duel for seals out on the roads. Bramble on the woodland trail is a gentle start."
           ]
         }
       ]

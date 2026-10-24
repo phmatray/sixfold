@@ -7,19 +7,25 @@
 //   ("at", map, "x,z,f")   the hero stands on a new tile or faces a new way
 //   ("check", cond, "")    asks whether a gated warp's `if` holds (returns a bool)
 //   ("talk", npcId, json)  spoke to an NPC: {"name", "dialogue"} for Leptos to run
+//   ("area", title, "")    entered an outdoor area that has a `title`
 //   ("ready", "", "")      first frame drawn;  ("error", "", message)
 // Game rules (progression, dialogue effects) live in the engine crate; this file
 // only moves and draws. Grid: 1 tile = 1 m; tile (x, z) covers [x, x+1] × [z, z+1].
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
-import { U, windify, ambience } from "./life.js";
-import { groundMesh } from "./ground.js";
-import { rng, mesh, group, PLACEHOLDER, FOOT, WALKABLE, WIND_H, AUTOTILE, armsPiece, prep } from "./props.js";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { U, windify, waterify, ambience } from "./life.js";
+import { groundMesh, groundLayers, layer } from "./ground.js";
+import { rng, mesh, group, toon, PLACEHOLDER, FOOT, WALKABLE, DECK, WIND_H, AUTOTILE, armsPiece, prep, placeholderBox } from "./props.js";
 
 const BASE = new URL("./", import.meta.url);
 const INTERIOR = new Set(["counter", "shelf", "duel_table", "chair", "rug", "plant", "display_case", "lamp", "exit_mat"]);
-const BATCHED = new Set(["tree", "bush", "flowers", "rock"]); // instanced: static, never animated
+// Instanced: static, never animated, never read like a sign (one draw per mesh of the model, not per prop).
+const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "reeds", "boardwalk", "pier", "bridge", "stairs",
+  "lantern", "stall", "stall_b", "crates", "bench"]);
+const TREES = new Set(["tree", "pine", "birch"]); // varied in size, turn and tint; half a tile out on the map edge
+const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
 const STEP = 0.25, RUN_STEP = 0.125, NPC_STEP = 0.45; // seconds per tile
 const TURN_SPEED = Math.PI / 2 / 0.12; // a quarter turn in 0.12 s
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
@@ -50,6 +56,7 @@ const loadMap = (name) => {
   return maps.get(name);
 };
 const OPTIONAL = /_b$|_c$|_dark$/; // variants: used when present, never missed
+const RING = ["tree", "tree_b", "tree_c", "bush_dark"]; // the default band of trees outside an outdoor map
 
 // Every model a map can use, so they load in parallel before it is built.
 function assetNames(map) {
@@ -58,7 +65,11 @@ function assetNames(map) {
   const pieces = (kind) => Object.keys(SUFFIX_ARMS).forEach((s) => names.add(kind + s));
   if (tiles.includes("f")) pieces("fence");
   if (/[WV]/.test(tiles)) pieces("wall"), pieces("wall_low"), names.add("wall_window");
-  if (!map.light.indoor) ["tree_b", "tree_c", "bush_dark", "grass_edge"].forEach((n) => names.add(n));
+  if (/[1-9]/.test(tiles)) names.add("cliff"), names.add("cliff_b");
+  if (tiles.includes("=")) names.add("boardwalk");
+  if (tiles.includes("H")) names.add("pier");
+  if (!map.light.indoor) [...(map.ring ?? RING), "grass_edge"].forEach((n) => names.add(n));
+  if (names.has("tree")) names.add("tree_b"), names.add("tree_c");
   return [...names];
 }
 
@@ -80,6 +91,7 @@ export function mount(el, controls, cb, start) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate = false; // updated once per frame, before the three passes
   renderer.autoClear = false;
+  renderer.info.autoReset = false; // counted over the whole frame (shadows and the three passes)
   renderer.domElement.setAttribute("aria-hidden", "true");
   el.appendChild(renderer.domElement);
 
@@ -136,7 +148,23 @@ export function mount(el, controls, cb, start) {
   legend.className = "world-legend";
   legend.hidden = true;
   legend.innerHTML = '<span class="k-block">Blocked</span><span class="k-act">Look or use</span><span class="k-warp">Door</span><span class="k-npc">Person</span>';
-  el.append(fade, legend);
+  // The area's name, shown for a moment on the way in.
+  const banner = document.createElement("div");
+  banner.setAttribute("aria-hidden", "true");
+  Object.assign(banner.style, {
+    position: "absolute", zIndex: 2, left: "50%", top: "22%", transform: "translateX(-50%)", pointerEvents: "none",
+    padding: "8px 18px", borderRadius: "999px", background: "rgba(13, 26, 44, 0.72)", color: "#f6ecd2",
+    font: "700 clamp(16px, 2.4vw, 22px) 'Bricolage Grotesque', system-ui, sans-serif", letterSpacing: "0.02em",
+    whiteSpace: "nowrap", opacity: 0, transition: "opacity 0.5s ease",
+  });
+  let bannerTimer = 0;
+  const showBanner = (text) => {
+    banner.textContent = text;
+    banner.style.opacity = 1;
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => (banner.style.opacity = 0), 2200);
+  };
+  el.append(fade, legend, banner);
 
   // ---------- Input ----------
   const held = []; // pressed inputs, newest last: key names or "pad-<dir>"
@@ -211,7 +239,15 @@ export function mount(el, controls, cb, start) {
     const b = renderer.domElement.getBoundingClientRect();
     ndc.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
-    if (ray.ray.intersectPlane(floor, hit)) world.path = route(world, hero, Math.floor(hit.x), Math.floor(hit.z));
+    // Raised ground first: the highest level whose tile under the ray stands at that height.
+    for (const y of world.levels) {
+      floor.constant = -y;
+      if (!ray.ray.intersectPlane(floor, hit)) continue;
+      const tx = Math.floor(hit.x), tz = Math.floor(hit.z);
+      if (y && Math.abs(world.floorAt(tx, tz) - y) > 0.3) continue;
+      world.path = route(world, hero, tx, tz);
+      break;
+    }
   };
   renderer.domElement.addEventListener("pointerdown", onTap);
 
@@ -224,7 +260,7 @@ export function mount(el, controls, cb, start) {
   // sign or table, or a door (a locked one reads like a sign).
   function facing() {
     const w = world, [dx, dz] = DIR[hero.face], fx = hero.x + dx, fz = hero.z + dz;
-    const across = ["counter", "duel_table"].includes(w.propAt.get(key(fx, fz))?.asset);
+    const across = ["counter", "duel_table", "stall", "stall_b"].includes(w.propAt.get(key(fx, fz))?.asset);
     const npc = w.npcAt(fx, fz) ?? (across ? w.npcAt(fx + dx, fz + dz) : null);
     if (npc) return { kind: "npc", text: npc.def.name, npc };
     const it = w.talk.get(key(fx, fz));
@@ -241,7 +277,13 @@ export function mount(el, controls, cb, start) {
     hero.face = f;
     const door = w.warps.get(key(x, z));
     if (door && !door.dir && opens(door)) return startStep(x, z, carry, door);
-    if (w.blocked(x, z) || w.npcAt(x, z)) {
+    const exit = w.exitAt(x, z);
+    if (exit) {
+      // Off the edge into the next area: take the step while the fade comes up.
+      warp({ to: exit.to, edge: true, spawn: arrival(w, exit, f) });
+      return startStep(x, z, carry, null);
+    }
+    if (w.blocked(x, z) || w.npcAt(x, z) || !w.climb(hero.x, hero.z, x, z)) {
       const here = w.warps.get(key(hero.x, hero.z));
       if (here?.dir === f) warp(here);
       return false;
@@ -267,14 +309,30 @@ export function mount(el, controls, cb, start) {
     } else if (it.kind === "warp") tryStep(hero.face, 0);
     else {
       if (it.obj && !reduced) it.obj.userData.wobble = 1;
-      cb("use", it.kind, it.text);
+      // A spot with its own `dialogue` (a lost item, a letter box) talks like a person.
+      if (it.dialogue) cb("talk", it.id, JSON.stringify({ name: it.name ?? "", dialogue: it.dialogue }));
+      else cb("use", it.kind, it.text);
     }
+  }
+
+  // Where the hero comes in after walking off `w` through `exit` (heading `f`): on the
+  // matching edge of the next map, at the same offset along the exit that leads back.
+  function arrival(w, exit, f) {
+    const along = "ns".includes(exit.side) ? hero.x : hero.z;
+    return (map) => {
+      const back = (map.exits ?? []).find((e) => e.side === BACK[exit.side] && e.to === w.name);
+      if (!back) return map.spawn;
+      const c = Math.min(back.span[1], back.span[0] + along - exit.span[0]);
+      const { width: W, height: H } = map;
+      const xz = { n: [c, H - 1], s: [c, 0], e: [0, c], w: [W - 1, c] }[exit.side];
+      return { x: xz[0], z: xz[1], facing: f };
+    };
   }
 
   async function warp(wp) {
     if (warping) return;
     warping = true;
-    sound(wp.if ? "gate" : "door"); // a gated door opening sounds grander
+    if (!wp.edge) sound(wp.if ? "gate" : "door"); // a gated door opening sounds grander
     held.length = 0;
     world.path = [];
     fade.classList.add("on");
@@ -288,9 +346,12 @@ export function mount(el, controls, cb, start) {
     warping = false;
   }
 
-  // Load a map (and its models), build it, and put the hero on `spawn`.
+  // Load a map (and its models), build it, and put the hero on `spawn` (or on
+  // `spawn(map)` for an edge exit). Only this map is built; its neighbours are
+  // fetched lazily once it is up, so the next walk off the edge is quick.
   async function enter(name, spawn) {
     const map = await loadMap(name);
+    if (typeof spawn === "function") spawn = spawn(map);
     const names = assetNames(map);
     const loaded = await Promise.all(names.map(loadAsset));
     if (!alive) return;
@@ -305,6 +366,7 @@ export function mount(el, controls, cb, start) {
     const next = await build(map, got, reduced);
     if (!alive) return;
     next.name = name;
+    next.glints.forEach((g) => (g.sprite.visible = opens({ if: g.cond })));
     if (world) dispose(world.root);
     world = next;
     world.hero = hero;
@@ -321,6 +383,28 @@ export function mount(el, controls, cb, start) {
     resize();
     first = true;
     await renderer.compileAsync(scene, camera).catch(() => {});
+    if (map.title && !L.indoor) showBanner(map.title), cb("area", map.title, "");
+    preload(map);
+  }
+
+  // Fetch and parse the maps, models and ground layers next door, one at a time while idle.
+  function preload(map) {
+    const idle = (f) => (globalThis.requestIdleCallback ? requestIdleCallback(f, { timeout: 2000 }) : setTimeout(f, 300));
+    const queue = [];
+    const pump = () => idle(() => alive && queue.length && loadAsset(queue.shift()).finally(pump));
+    const next = new Set([...(map.exits ?? []), ...(map.warps ?? [])].map((e) => e.to));
+    idle(() =>
+      next.forEach((n) =>
+        loadMap(n)
+          .then((m) => {
+            groundLayers(m).forEach(layer);
+            const was = queue.length;
+            queue.push(...assetNames(m).filter((a) => !assets.has(a)));
+            if (!was) pump();
+          })
+          .catch(() => {}),
+      ),
+    );
   }
 
   function fail(e) {
@@ -340,6 +424,7 @@ export function mount(el, controls, cb, start) {
     .catch(fail);
 
   // ---------- Loop ----------
+  let stats = { calls: 0, triangles: 0 };
   function frame() {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(clock.getDelta(), 0.05);
@@ -389,14 +474,15 @@ export function mount(el, controls, cb, start) {
     h.idle = h.step || held.length ? 0 : h.idle + dt;
     h.running = !!h.step && h.step.dur < STEP;
 
-    const [px, pz] = place(h, dt);
+    const [px, pz] = place(h, dt, w.floorAt);
     animateActor(h, dt, reduced);
     for (const n of w.npcs) updateNpc(w, n, dt, paused);
     animateProps(w, dt, reduced);
     w.life.update(dt, w.now, px, pz);
 
     const pos = `${h.x},${h.z},${h.face}`;
-    if (pos !== lastHero) (el.dataset.hero = lastHero = pos), cb("at", w.name, pos); // written only on change
+    const inside = h.x >= 0 && h.z >= 0 && h.x < w.map.width && h.z < w.map.height; // not mid-way off an edge
+    if (pos !== lastHero && inside) (el.dataset.hero = lastHero = pos), cb("at", w.name, pos); // written only on change
 
     // What the hero faces, while standing still.
     const front = h.step || warping ? null : facing();
@@ -411,7 +497,7 @@ export function mount(el, controls, cb, start) {
     // walking hero; leans in after a while idle; indoors, kept inside the room.
     const pitch = THREE.MathUtils.degToRad(cam.pitch), off = cam.lookAtOffset;
     const ahead = h.step && !reduced ? 0.7 : 0;
-    aim.set(px + off[0] + DIR[h.face][0] * ahead, off[1], pz + off[2] + DIR[h.face][1] * ahead);
+    aim.set(px + off[0] + DIR[h.face][0] * ahead, off[1] + h.fy, pz + off[2] + DIR[h.face][1] * ahead);
     if (cam.clamp) {
       // Keep the view inside the room: the ground it shows spans [aim + top, aim + bottom]
       // along z (perspective makes the far side longer) and ±halfW along x.
@@ -447,6 +533,7 @@ export function mount(el, controls, cb, start) {
     // Three passes: the scene without the hero; the hero's silhouette where
     // scenery hides it; then the hero itself where it shows.
     renderer.shadowMap.needsUpdate = true;
+    renderer.info.reset();
     renderer.clear();
     camera.layers.set(0);
     renderer.render(scene, camera);
@@ -456,8 +543,11 @@ export function mount(el, controls, cb, start) {
     scene.overrideMaterial = null;
     renderer.render(scene, camera);
     camera.layers.set(0);
+    stats = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles };
     if (!readySent) (readySent = true), cb("ready", "", "");
   }
+  // For measuring: draw calls and triangles of the last frame (shadows included), and the area.
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "" });
 
   // Item popup preview: the model turning in its own small canvas.
   let pv = null;
@@ -516,7 +606,8 @@ export function mount(el, controls, cb, start) {
     dispose(scene);
     renderer.dispose();
     renderer.domElement.remove();
-    for (const n of [pad, run, fade, legend]) n.remove();
+    clearTimeout(bannerTimer);
+    for (const n of [pad, run, fade, legend, banner]) n.remove();
   };
   return {
     stop,
@@ -528,6 +619,7 @@ export function mount(el, controls, cb, start) {
       if (!paused) {
         clock.getDelta();
         world?.npcs.forEach((n) => (n.busy = false));
+        world?.glints.forEach((g) => (g.sprite.visible = opens({ if: g.cond }))); // a find may be gone now
       }
     },
     setItems(list) {
@@ -556,7 +648,7 @@ function route(w, hero, tx, tz) {
   const { width: W, height: H } = w.map;
   if (tx === hero.x && tz === hero.z) return [];
   const solid = (x, z) => w.blocked(x, z) || !!w.npcAt(x, z);
-  const goal = solid(tx, tz) ? Object.values(DIR).map(([dx, dz]) => [tx - dx, tz - dz]).filter(([x, z]) => !solid(x, z)) : [[tx, tz]];
+  const goal = solid(tx, tz) ? Object.values(DIR).map(([dx, dz]) => [tx - dx, tz - dz]).filter(([x, z]) => !solid(x, z) && w.climb(x, z, tx, tz)) : [[tx, tz]];
   if (!goal.length) return [];
   const prev = new Map([[key(hero.x, hero.z), null]]);
   const queue = [[hero.x, hero.z]];
@@ -570,7 +662,7 @@ function route(w, hero, tx, tz) {
     }
     for (const [f, [dx, dz]] of Object.entries(DIR)) {
       const nx = x + dx, nz = z + dz, k = key(nx, nz);
-      if (nx < 0 || nz < 0 || nx >= W || nz >= H || prev.has(k) || solid(nx, nz)) continue;
+      if (nx < 0 || nz < 0 || nx >= W || nz >= H || prev.has(k) || solid(nx, nz) || !w.climb(x, z, nx, nz)) continue;
       prev.set(k, { from: key(x, z), f });
       queue.push([nx, nz]);
     }
@@ -619,13 +711,16 @@ function actor(src, tint, scale, idle) {
   return a;
 }
 
-// Put an actor on its tile, or between two while stepping; turn toward its facing.
-function place(a, dt) {
+// Put an actor on its tile, or between two while stepping, at the floor height
+// (`floorAt`: decks, stairs, cliff tops); turn toward its facing.
+function place(a, dt, floorAt) {
   const t = a.step ? a.step.t : 0;
   const px = a.x + 0.5 + (a.step ? (a.step.x - a.x) * t : 0);
   const pz = a.z + 0.5 + (a.step ? (a.step.z - a.z) * t : 0);
+  const y0 = floorAt(a.x, a.z);
+  a.fy = a.step ? y0 + (floorAt(a.step.x, a.step.z) - y0) * t : y0;
   a.obj.position.set(px, a.obj.position.y, pz);
-  a.blob.position.set(px, 0.015, pz);
+  a.blob.position.set(px, a.fy + 0.015, pz);
   const want = angle(a.face), cur = a.obj.rotation.y;
   const turn = Math.atan2(Math.sin(want - cur), Math.cos(want - cur));
   a.obj.rotation.y = cur + Math.sign(turn) * Math.min(Math.abs(turn), TURN_SPEED * dt);
@@ -661,7 +756,7 @@ function animateActor(a, dt, reduced) {
   // A small bounce per tile, squashed at each footfall.
   const up = walking && !reduced ? Math.sin(Math.PI * a.step.t) : 0;
   const squash = walking && !reduced ? 1 - up : 0;
-  a.obj.position.y = up * 0.05;
+  a.obj.position.y = a.fy + up * 0.05;
   a.obj.scale.set(a.base * (1 + squash * 0.04), a.base * (1 - squash * 0.06 + up * 0.02), a.base * (1 + squash * 0.04));
 }
 
@@ -682,7 +777,7 @@ function updateNpc(w, n, dt, paused) {
       const x = n.x + DIR[f][0], z = n.z + DIR[f][1];
       const h = w.hero;
       n.face = f;
-      if (w.blocked(x, z) || (h.x === x && h.z === z) || (h.step?.x === x && h.step?.z === z) || w.npcAt(x, z, n)) n.wait = 0.6;
+      if (w.blocked(x, z) || !w.climb(n.x, n.z, x, z) || (h.x === x && h.z === z) || (h.step?.x === x && h.step?.z === z) || w.npcAt(x, z, n)) n.wait = 0.6;
       else {
         n.step = { x, z, t: 0, dur: NPC_STEP };
         n.ri++;
@@ -690,12 +785,21 @@ function updateNpc(w, n, dt, paused) {
       }
     }
   }
-  place(n, dt);
+  place(n, dt, w.floorAt);
   animateActor(n, dt, false);
 }
 
-// The house door easing open or shut, and a sign wobbling after it was read.
+// The house door easing open or shut, a sign wobbling after it was read, boats
+// bobbing, the lighthouse beacon and the glint of something to find.
 function animateProps(w, dt, reduced) {
+  if (!reduced) {
+    for (const b of w.boats) {
+      b.obj.position.y = Math.sin(w.now * 1.4 + b.cx) * 0.035;
+      b.obj.rotation.z = Math.sin(w.now * 1.1 + b.cz) * 0.03;
+    }
+    for (const g of w.glows) g.material.opacity = 0.55 + 0.3 * Math.sin(w.now * 2.2);
+    for (const g of w.glints) g.sprite.material.opacity = 0.5 + 0.5 * Math.sin(w.now * 4 + g.sprite.position.x);
+  }
   const d = w.door;
   if (d) {
     d.open = reduced ? d.want : d.open + (d.want - d.open) * Math.min(1, dt * 7);
@@ -714,8 +818,45 @@ function animateProps(w, dt, reduced) {
 
 // ---------- Building a map ----------
 
+// One mesh for all the flat-coloured opaque parts of a model: each part's colour
+// moves into a vertex colour, so the model costs one draw (and one shadow draw)
+// instead of one per material. Textured and see-through parts stay apart. The
+// wind weight (COLOR_0) moves to `windw`. Cached on the model for the session.
+const SHADOWLESS = new Set(["grass_edge", "boardwalk", "flowers", "reeds"]); // low enough not to need a shadow pass
+function flatten(template) {
+  if (template.userData.flat) return template.userData.flat;
+  template.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(template.matrixWorld).invert(), keep = [], parts = [];
+  template.traverse((m) => {
+    if (!m.isMesh) return;
+    const rel = new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld);
+    if (m.material.map || m.material.transparent || m.isSkinnedMesh) return keep.push([m, rel]);
+    const src = m.geometry, n = src.attributes.position.count, c = m.material.color;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", src.attributes.position.clone());
+    g.setAttribute("normal", src.attributes.normal.clone());
+    g.setIndex(src.index ? src.index.clone() : [...Array(n).keys()]);
+    g.setAttribute("color", new THREE.Float32BufferAttribute(Array.from({ length: n }, () => [c.r, c.g, c.b]).flat(), 3));
+    const w = src.attributes.windw ?? src.attributes.color;
+    g.setAttribute("windw", new THREE.Float32BufferAttribute(Array.from({ length: n }, (_, i) => (w ? [w.getX(i), 1, 1, 1] : [-1, 1, 1, 1])).flat(), 4));
+    parts.push(g.applyMatrix4(rel));
+  });
+  const out = new THREE.Group();
+  if (parts.length) {
+    const merged = new THREE.Mesh(mergeGeometries(parts), toon("#ffffff", { vertexColors: true }));
+    merged.userData.flat = true;
+    out.add(merged);
+  }
+  for (const [m, rel] of keep) {
+    const k = new THREE.Mesh(m.geometry, m.material);
+    rel.decompose(k.position, k.quaternion, k.scale);
+    out.add(k);
+  }
+  return (template.userData.flat = out);
+}
+
 // Static props of one kind become InstancedMeshes: one draw per mesh of the
-// model, not one per prop. `add` records a placement; `build` makes the meshes.
+// (flattened) model, not one per prop. `add` records a placement; `build` makes the meshes.
 function batcher() {
   const kinds = new Map();
   return {
@@ -727,16 +868,18 @@ function batcher() {
       const white = new THREE.Color("#ffffff"), tmp = new THREE.Matrix4();
       for (const [name, { template, list }] of kinds) {
         prep(template, true);
-        template.updateMatrixWorld(true);
+        const flat = flatten(template);
+        flat.updateMatrixWorld(true);
         const tinted = list.some((p) => p.color);
-        template.traverse((m) => {
+        flat.traverse((m) => {
           if (!m.isMesh) return;
           const inst = new THREE.InstancedMesh(m.geometry, m.material, list.length);
           list.forEach(({ matrix, color }, i) => {
             inst.setMatrixAt(i, tmp.multiplyMatrices(matrix, m.matrixWorld));
             if (tinted) inst.setColorAt(i, color ?? white);
           });
-          inst.castShadow = inst.receiveShadow = true;
+          inst.castShadow = !m.material.transparent && !SHADOWLESS.has(name);
+          inst.receiveShadow = true;
           inst.userData.shared = true; // geometry and material belong to the cached model
           if (windH(name)) windify(inst, windH(name));
           parent.add(inst);
@@ -769,22 +912,36 @@ async function build(map, got, reduced) {
   }
   root.add(hemi, sun, sun.target);
 
-  // Collision: "#" rock, "f" fence, "W" wall and "V" window tiles, plus prop footprints.
+  // Collision: "#" rock, "f" fence, "W" wall, "V" window and "~" water tiles, plus
+  // prop footprints (decks clear them). The floor height: a digit is a raised cliff
+  // top that many metres up, "=" a boardwalk, "H" a pier; decks and stairs set
+  // their own. A step may climb or drop at most CLIMB.
   const solid = new Uint8Array(W * H);
+  const floor = new Float32Array(W * H);
   const tile = (x, z) => map.tiles[z]?.[x];
-  map.tiles.forEach((row, z) => [...row].forEach((c, x) => (solid[z * W + x] = "#fWV".includes(c) ? 1 : 0)));
-  const blocked = (x, z) => x < 0 || z < 0 || x >= W || z >= H || solid[z * W + x] === 1;
+  const FLOOR = { "=": DECK.boardwalk[0], H: DECK.pier[0] };
+  map.tiles.forEach((row, z) =>
+    [...row].forEach((c, x) => {
+      solid[z * W + x] = "#fWV~".includes(c) ? 1 : 0;
+      floor[z * W + x] = c >= "1" && c <= "9" ? +c : FLOOR[c] ?? 0;
+    }),
+  );
+  const inMap = (x, z) => x >= 0 && z >= 0 && x < W && z < H;
+  const blocked = (x, z) => !inMap(x, z) || solid[z * W + x] === 1;
+  const floorAt = (x, z) => (inMap(x, z) ? floor[z * W + x] : 0);
+  const climb = (ax, az, bx, bz) => Math.abs(floorAt(bx, bz) - floorAt(ax, az)) <= CLIMB;
 
-  root.add(await groundMesh(map, (x, z) => tile(x, z) === "p"));
+  root.add(await groundMesh(map, tile));
 
   const batch = batcher();
   const blobs = [];
-  const BLOB = { tree: 2.2, bush: 1.1, flowers: 0.95, rock: 1.0, sign: 0.6 };
-  const at = (x, z, rot, s = 1) =>
-    new THREE.Matrix4().compose(new THREE.Vector3(x, 0, z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rot), new THREE.Vector3(s, s, s));
+  const BLOB = { tree: 2.2, bush: 1.1, flowers: 0.95, rock: 1.0, sign: 0.6, pine: 1.4, birch: 1.4 };
+  const at = (x, z, rot, s = 1, y = 0) =>
+    new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rot), new THREE.Vector3(s, s, s));
   const templates = new Map();
+  const fallback = (n) => (PLACEHOLDER[n] ?? (() => placeholderBox(n)))();
   const tpl = (n, make) => {
-    if (!templates.has(n)) templates.set(n, got[n] ? got[n].scene : make ? make() : (PLACEHOLDER[n] ?? (() => group()))());
+    if (!templates.has(n)) templates.set(n, got[n] ? got[n].scene : make ? make() : fallback(n));
     return templates.get(n);
   };
   const variants = (n) => [n, `${n}_b`, `${n}_c`].filter((v) => v === n || got[v]);
@@ -796,36 +953,55 @@ async function build(map, got, reduced) {
   for (const p of map.props) {
     let [fw, fd] = FOOT[p.asset] ?? [1, 1];
     if (p.rot % 180 === 90) [fw, fd] = [fd, fw];
-    const cx = p.x + fw / 2, cz = p.z + fd / 2;
+    const cx = p.x + fw / 2, cz = p.z + fd / 2, y = p.y ?? 0; // `y` stacks a prop (a step on a cliff)
     let obj = null;
     if (BATCHED.has(p.asset)) {
       // Trees vary in model, size, tint and turn; the ones on the map edge sit half a tile out.
-      const isTree = p.asset === "tree";
+      const isTree = TREES.has(p.asset);
       const kinds = variants(p.asset);
-      const name = isTree ? kinds[Math.floor(r() * kinds.length)] : p.asset;
+      const name = p.asset === "tree" ? kinds[Math.floor(r() * kinds.length)] : p.asset;
       const ox = isTree ? (p.x === 0 ? -0.5 : p.x + fw === W ? 0.5 : 0) : 0;
       const oz = isTree ? (p.z === 0 ? -0.5 : p.z + fd === H ? 0.5 : 0) : 0;
       const s = isTree ? 0.88 + r() * 0.3 : 1;
       const rot = isTree ? r() * Math.PI * 2 : THREE.MathUtils.degToRad(p.rot);
-      batch.add(name, tpl(name), at(cx + ox, cz + oz, rot, s), isTree ? tint("#ffffff", 0.06) : null);
-      if (!got[name]) blobs.push([cx + ox, cz + oz, BLOB[p.asset] * s]); // models bake their own shadow disc
+      batch.add(name, tpl(name), at(cx + ox, cz + oz, rot, s, y), isTree ? tint("#ffffff", 0.06) : null);
+      if (!got[name] && BLOB[p.asset]) blobs.push([cx + ox, cz + oz, BLOB[p.asset] * s]); // models bake their own shadow disc
     } else {
-      obj = got[p.asset] ? got[p.asset].scene.clone(true) : (PLACEHOLDER[p.asset] ?? (() => group()))(p.x * 31 + p.z);
-      obj.position.set(cx, 0, cz);
+      obj = got[p.asset] ? got[p.asset].scene.clone(true) : fallback(p.asset);
+      obj.position.set(cx, y, cz);
       obj.rotation.y = THREE.MathUtils.degToRad(p.rot);
       prep(obj, true);
+      obj.traverse((o) => o.isMesh && /water/i.test(o.material.name) && waterify(o.material)); // the fountain's pool
       root.add(obj);
       if (BLOB[p.asset] && !got[p.asset]) blobs.push([cx, cz, BLOB[p.asset]]);
     }
     const rec = { ...p, obj, cx, cz };
     props.push(rec);
     for (const i of map.interactions) if (i.x >= p.x && i.x < p.x + fw && i.z >= p.z && i.z < p.z + fd) i.obj = obj;
+    const deck = DECK[p.asset];
     for (let x = p.x; x < p.x + fw; x++)
       for (let z = p.z; z < p.z + fd; z++) {
         propAt.set(key(x, z), rec);
-        if (!WALKABLE.has(p.asset)) solid[z * W + x] = 1;
+        if (deck) {
+          // The deck's rows run from its front (+Z at rot 0) to its back.
+          const row = { 0: p.z + fd - 1 - z, 90: p.x + fw - 1 - x, 180: z - p.z, 270: x - p.x }[p.rot % 360] ?? 0;
+          solid[z * W + x] = 0;
+          floor[z * W + x] = y + deck[Math.min(row, deck.length - 1)];
+        } else if (!WALKABLE.has(p.asset)) solid[z * W + x] = 1;
       }
   }
+
+  // Raised ground ("1".."9": stacked cliff blocks, a mossy top now and then) and deck tiles.
+  for (let z = 0; z < H; z++)
+    for (let x = 0; x < W; x++) {
+      const c = tile(x, z), turn = () => (Math.floor(r() * 4) * Math.PI) / 2;
+      if (c >= "1" && c <= "9")
+        for (let k = 0; k < +c; k++) {
+          const n = k === +c - 1 && got.cliff_b && r() < 0.35 ? "cliff_b" : "cliff";
+          batch.add(n, tpl(n), at(x + 0.5, z + 0.5, turn(), 1, k));
+        }
+      else if (c === "=" || c === "H") batch.add(c === "=" ? "boardwalk" : "pier", tpl(c === "=" ? "boardwalk" : "pier"), at(x + 0.5, z + 0.5, 0));
+    }
 
   // Fences ("f") and walls ("W", or "V" for a wall with a window) auto-tile from
   // their neighbours; walls on the south (camera-facing) row use the low cutaway pieces.
@@ -842,15 +1018,19 @@ async function build(map, got, reduced) {
       }
     }
 
-  const open = (x, z) => !blocked(x, z) && tile(x, z) !== "p";
+  // Open grass: plain base tiles, not under a prop, a deck or a cliff.
+  const wet = (x, z) => SIDES.some(([dx, dz]) => "~H".includes(tile(x + dx, z + dz) ?? "-"));
+  const open = (x, z) => !blocked(x, z) && tile(x, z) === "." && floor[z * W + x] === 0 && !wet(x, z);
+  const exits = map.exits ?? [];
+  const tufts = map.ground.tufts ?? 1800; // 0 on sand
   if (!L.indoor) {
-    scatter(root, W, H, open);
+    if (tufts) scatter(root, W, H, open, tufts);
     // Grass tufts along the path edges.
     for (let z = 0; z < H; z++)
       for (let x = 0; x < W; x++) {
-        if (!open(x, z)) continue;
+        if (!tufts || !open(x, z)) continue;
         for (const [dx, dz] of SIDES) {
-          if (tile(x + dx, z + dz) !== "p") continue;
+          if (!"pr".includes(tile(x + dx, z + dz) ?? "-")) continue;
           for (let k = 0; k < 2; k++) {
             const along = (r() - 0.5) * 0.8;
             const ex = x + 0.5 + dx * 0.4 + (dz ? along : 0), ez = z + 0.5 + dz * 0.4 + (dx ? along : 0);
@@ -858,14 +1038,18 @@ async function build(map, got, reduced) {
           }
         }
       }
-    // A denser, darker band of trees beyond the map edge hides the empty plain.
-    const outer = variants("tree").concat(got.bush_dark ? ["bush_dark"] : []);
-    const ring = (x, z) => {
+    // A denser, darker band of trees beyond the map edge hides the empty plain,
+    // on the sides the map asks for (not over the sea), with a gap at each exit.
+    const outer = (map.ring ?? RING).filter((n) => got[n] || !OPTIONAL.test(n));
+    const sides = map.ringSides ?? "nesw";
+    const gap = (side, c) => exits.some((e) => e.side === side && c > e.span[0] - 2.2 && c < e.span[1] + 3.2);
+    const ring = (side, x, z) => {
+      if (!sides.includes(side) || gap(side, "ns".includes(side) ? x : z)) return;
       const n = outer[Math.floor(r() * outer.length)];
       batch.add(n, tpl(n), at(x, z, r() * Math.PI * 2, 1.05 + r() * 0.45), tint("#b9c9a8", 0.05));
     };
-    for (let x = -5; x <= W + 5; x += 1.6 + r() * 0.6) ring(x, -1.6 - r() * 2.2), ring(x, H + 1.4 + r() * 2.2);
-    for (let z = -2; z <= H + 2; z += 1.6 + r() * 0.6) ring(-1.6 - r() * 2.2, z), ring(W + 1.6 + r() * 2.2, z);
+    for (let x = -5; x <= W + 5; x += 1.6 + r() * 0.6) ring("n", x, -1.6 - r() * 2.2), ring("s", x, H + 1.4 + r() * 2.2);
+    for (let z = -2; z <= H + 2; z += 1.6 + r() * 0.6) ring("w", -1.6 - r() * 2.2, z), ring("e", W + 1.6 + r() * 2.2, z);
   }
   batch.build(root, (n) => (n === "grass_edge" ? 0.35 : WIND_H[n.replace(OPTIONAL, "")] ?? 0));
 
@@ -895,12 +1079,41 @@ async function build(map, got, reduced) {
 
   const talk = new Map(map.interactions.map((i) => [key(i.x, i.z), i]));
   const warps = new Map((map.warps ?? []).map((wp) => [key(wp.x, wp.z), wp]));
+  // Edge exits: walking off side `side` at a tile within `span` leads to map `to`.
+  const exitAt = (x, z) => {
+    if (inMap(x, z)) return null;
+    const side = z < 0 ? "n" : z >= H ? "s" : x < 0 ? "w" : "e", c = "ns".includes(side) ? x : z;
+    return exits.find((e) => e.side === side && c >= e.span[0] && c <= e.span[1]) ?? null;
+  };
+  // Floor levels, highest first (taps on raised ground), and a glint over each find (`glint`: shown while it holds).
+  const levels = [...new Set([...floor].map(Math.round))].sort((a, b) => b - a);
+  const glints = map.interactions.filter((i) => i.glint).map((i) => {
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: "#fff6c8", transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    sprite.position.set(i.x + 0.5, floorAt(i.x, i.z) + 0.8, i.z + 0.5);
+    sprite.scale.setScalar(0.55);
+    root.add(sprite);
+    return { sprite, cond: i.glint };
+  });
+  // Boats bob; a lighthouse beacon glows at its `light_origin`.
+  const boats = props.filter((p) => p.asset === "boat" && p.obj);
+  root.updateMatrixWorld(true);
+  const glows = props
+    .filter((p) => p.asset === "lighthouse" && p.obj)
+    .map((p) => {
+      const g = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: "#ffe2a0", transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+      const o = p.obj.getObjectByName("light_origin");
+      if (o) o.getWorldPosition(g.position);
+      else g.position.set(p.cx, 6.2, p.cz);
+      g.scale.setScalar(2.4);
+      root.add(g);
+      return g;
+    });
 
   // NPCs: their own model when it exists, else the hero model, tinted and scaled.
   const npcs = (map.npcs ?? []).map((def) => {
     const own = got[def.model];
     const n = own ? actor(own, null, 1, def.idle) : actor(got.hero, def.tint, def.scale ?? 1, def.idle);
-    Object.assign(n, { def, x: def.x, z: def.z, face: def.facing ?? "s", step: null, ri: 0, wait: 1.5, busy: false });
+    Object.assign(n, { def, x: def.x, z: def.z, fy: floorAt(def.x, def.z), face: def.facing ?? "s", step: null, ri: 0, wait: 1.5, busy: false });
     n.obj.rotation.y = angle(n.face);
     root.add(n.obj, n.blob);
     return n;
@@ -928,10 +1141,11 @@ async function build(map, got, reduced) {
   }
 
   root.updateMatrixWorld(true);
-  const smoke = house?.getObjectByName("smoke_origin")?.getWorldPosition(new THREE.Vector3()) ?? null;
+  const chimney = house ?? props.find((p) => p.asset === "cottage")?.obj;
+  const smoke = chimney?.getObjectByName("smoke_origin")?.getWorldPosition(new THREE.Vector3()) ?? null;
   const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
   const life = ambience(root, { flowers, smoke }, reduced);
-  return { map, root, blocked, npcAt, propAt, talk, warps, npcs, grid, sun, door, life, path: [], now: 0, nearKey: null };
+  return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, door, life, boats, glows, glints, path: [], now: 0, nearKey: null };
 }
 
 // G toggles this: tile lines; red = blocked, gold = look/use, blue = door, green = person.
@@ -956,18 +1170,19 @@ function debugGrid(W, H, blocked, talk, warps, npcs) {
 }
 
 // Grass tufts and tiny flowers, instanced, only on open grass tiles.
-function scatter(root, W, H, open) {
+function scatter(root, W, H, open, count) {
   const r = rng(99);
   const blade = new THREE.ConeGeometry(0.05, 0.32, 3);
   blade.translate(0, 0.16, 0);
-  const tufts = new THREE.InstancedMesh(blade, new THREE.MeshLambertMaterial(), 1800);
-  const bloom = new THREE.InstancedMesh(new THREE.SphereGeometry(0.06, 6, 4), new THREE.MeshLambertMaterial(), 200);
+  const tufts = new THREE.InstancedMesh(blade, new THREE.MeshLambertMaterial(), count);
+  const bloom = new THREE.InstancedMesh(new THREE.SphereGeometry(0.06, 6, 4), new THREE.MeshLambertMaterial(), Math.ceil(count / 9));
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s = new THREE.Vector3(), v = new THREE.Vector3(), col = new THREE.Color();
+  const free = [];
+  for (let z = 0; z < H; z++) for (let x = 0; x < W; x++) if (open(x, z)) free.push([x, z]);
+  if (!free.length) return;
   const spot = () => {
-    for (;;) {
-      const x = r() * W, z = r() * H;
-      if (open(Math.floor(x), Math.floor(z))) return [x, z];
-    }
+    const [x, z] = free[Math.floor(r() * free.length)];
+    return [x + r(), z + r()];
   };
   for (let i = 0; i < tufts.count; ) {
     const [cx, cz] = spot();

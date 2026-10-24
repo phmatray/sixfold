@@ -1,0 +1,374 @@
+{
+  "title": "Fernhollow Trail",
+  "width": 30,
+  "height": 22,
+  "tiles": [
+    "..............~~..............",
+    "..............~~..............",
+    "..............~~..............",
+    "..............~~..............",
+    "..............~~..............",
+    "..............~~....p.........",
+    "......pp......~~....p.........",
+    "......pp.....~~~....p.........",
+    "......pp.....~~.....p.........",
+    "......pp.....~~.....p.........",
+    "......pp.....~~.....p.........",
+    "......pp.....~~.....p.........",
+    ".....pppppppp~~ppppppppppppppp",
+    ".....pppppppp~~ppppppppppppppp",
+    ".............~~...............",
+    ".............~~...............",
+    ".............~~...............",
+    ".............~~...............",
+    ".............~~...............",
+    ".............~~...............",
+    ".............~~...............",
+    ".............~~..............."
+  ],
+  "props": [
+    {"asset": "bridge", "x": 12, "z": 12, "rot": 90},
+    {"asset": "flowers", "x": 2, "z": 2, "rot": 0},
+    {"asset": "flowers", "x": 4, "z": 6, "rot": 0},
+    {"asset": "flowers", "x": 8, "z": 2, "rot": 0},
+    {"asset": "flowers", "x": 9, "z": 5, "rot": 0},
+    {"asset": "flowers", "x": 2, "z": 5, "rot": 0},
+    {"asset": "flowers", "x": 6, "z": 1, "rot": 0},
+    {"asset": "rock", "x": 3, "z": 3, "rot": 0},
+    {"asset": "bush", "x": 10, "z": 3, "rot": 0},
+    {"asset": "bush", "x": 1, "z": 7, "rot": 0},
+    {"asset": "reeds", "x": 12, "z": 9, "rot": 0},
+    {"asset": "reeds", "x": 12, "z": 16, "rot": 0},
+    {"asset": "reeds", "x": 15, "z": 16, "rot": 0},
+    {"asset": "reeds", "x": 16, "z": 9, "rot": 0},
+    {"asset": "reeds", "x": 16, "z": 4, "rot": 0},
+    {"asset": "reeds", "x": 13, "z": 3, "rot": 0},
+    {"asset": "reeds", "x": 12, "z": 19, "rot": 0},
+    {"asset": "reeds", "x": 15, "z": 20, "rot": 0},
+    {"asset": "rock", "x": 11, "z": 7, "rot": 0},
+    {"asset": "rock", "x": 16, "z": 15, "rot": 0},
+    {"asset": "rock", "x": 12, "z": 1, "rot": 0},
+    {"asset": "bush", "x": 22, "z": 15, "rot": 0},
+    {"asset": "bush", "x": 25, "z": 10, "rot": 0},
+    {"asset": "bush", "x": 9, "z": 15, "rot": 0},
+    {"asset": "signpost", "x": 24, "z": 11, "rot": 0},
+    {"asset": "sign", "x": 21, "z": 6, "rot": 0},
+    {"asset": "pine", "x": 17, "z": 0, "rot": 0},
+    {"asset": "birch", "x": 20, "z": 0, "rot": 0},
+    {"asset": "pine", "x": 21, "z": 0, "rot": 0},
+    {"asset": "birch", "x": 23, "z": 0, "rot": 0},
+    {"asset": "pine", "x": 24, "z": 0, "rot": 0},
+    {"asset": "birch", "x": 26, "z": 0, "rot": 0},
+    {"asset": "pine", "x": 28, "z": 0, "rot": 0},
+    {"asset": "pine", "x": 25, "z": 1, "rot": 0},
+    {"asset": "pine", "x": 27, "z": 1, "rot": 0},
+    {"asset": "pine", "x": 28, "z": 1, "rot": 0},
+    {"asset": "pine", "x": 29, "z": 1, "rot": 0},
+    {"asset": "birch", "x": 25, "z": 2, "rot": 0},
+    {"asset": "pine", "x": 28, "z": 2, "rot": 0},
+    {"asset": "pine", "x": 25, "z": 3, "rot": 0},
+    {"asset": "pine", "x": 26, "z": 3, "rot": 0},
+    {"asset": "pine", "x": 28, "z": 3, "rot": 0},
+    {"asset": "pine", "x": 25, "z": 4, "rot": 0},
+    {"asset": "birch", "x": 26, "z": 4, "rot": 0},
+    {"asset": "pine", "x": 27, "z": 4, "rot": 0},
+    {"asset": "pine", "x": 29, "z": 4, "rot": 0},
+    {"asset": "pine", "x": 12, "z": 5, "rot": 0},
+    {"asset": "pine", "x": 26, "z": 5, "rot": 0},
+    {"asset": "birch", "x": 28, "z": 5, "rot": 0},
+    {"asset": "pine", "x": 27, "z": 6, "rot": 0},
+    {"asset": "birch", "x": 29, "z": 6, "rot": 0},
+    {"asset": "pine", "x": 25, "z": 7, "rot": 0},
+    {"asset": "pine", "x": 28, "z": 7, "rot": 0},
+    {"asset": "pine", "x": 18, "z": 8, "rot": 0},
+    {"asset": "pine", "x": 26, "z": 8, "rot": 0},
+    {"asset": "pine", "x": 29, "z": 8, "rot": 0},
+    {"asset": "pine", "x": 0, "z": 9, "rot": 0},
+    {"asset": "pine", "x": 3, "z": 9, "rot": 0},
+    {"asset": "pine", "x": 18, "z": 9, "rot": 0},
+    {"asset": "birch", "x": 27, "z": 9, "rot": 0},
+    {"asset": "pine", "x": 29, "z": 9, "rot": 0},
+    {"asset": "pine", "x": 4, "z": 10, "rot": 0},
+    {"asset": "pine", "x": 0, "z": 11, "rot": 0},
+    {"asset": "pine", "x": 2, "z": 11, "rot": 0},
+    {"asset": "pine", "x": 1, "z": 12, "rot": 0},
+    {"asset": "pine", "x": 3, "z": 12, "rot": 0},
+    {"asset": "pine", "x": 2, "z": 13, "rot": 0},
+    {"asset": "birch", "x": 1, "z": 14, "rot": 0},
+    {"asset": "pine", "x": 0, "z": 15, "rot": 0},
+    {"asset": "birch", "x": 1, "z": 15, "rot": 0},
+    {"asset": "pine", "x": 2, "z": 15, "rot": 0},
+    {"asset": "pine", "x": 4, "z": 15, "rot": 0},
+    {"asset": "birch", "x": 6, "z": 15, "rot": 0},
+    {"asset": "birch", "x": 27, "z": 15, "rot": 0},
+    {"asset": "pine", "x": 28, "z": 15, "rot": 0},
+    {"asset": "pine", "x": 4, "z": 16, "rot": 0},
+    {"asset": "birch", "x": 7, "z": 16, "rot": 0},
+    {"asset": "birch", "x": 19, "z": 16, "rot": 0},
+    {"asset": "birch", "x": 20, "z": 16, "rot": 0},
+    {"asset": "pine", "x": 24, "z": 16, "rot": 0},
+    {"asset": "birch", "x": 29, "z": 16, "rot": 0},
+    {"asset": "pine", "x": 0, "z": 17, "rot": 0},
+    {"asset": "pine", "x": 2, "z": 17, "rot": 0},
+    {"asset": "birch", "x": 4, "z": 17, "rot": 0},
+    {"asset": "pine", "x": 5, "z": 17, "rot": 0},
+    {"asset": "birch", "x": 8, "z": 17, "rot": 0},
+    {"asset": "pine", "x": 9, "z": 17, "rot": 0},
+    {"asset": "pine", "x": 10, "z": 17, "rot": 0},
+    {"asset": "pine", "x": 17, "z": 17, "rot": 0},
+    {"asset": "pine", "x": 22, "z": 17, "rot": 0},
+    {"asset": "birch", "x": 23, "z": 17, "rot": 0},
+    {"asset": "birch", "x": 24, "z": 17, "rot": 0},
+    {"asset": "pine", "x": 26, "z": 17, "rot": 0},
+    {"asset": "pine", "x": 28, "z": 17, "rot": 0},
+    {"asset": "pine", "x": 1, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 2, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 4, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 6, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 7, "z": 18, "rot": 0},
+    {"asset": "birch", "x": 8, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 10, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 16, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 17, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 20, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 24, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 27, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 29, "z": 18, "rot": 0},
+    {"asset": "pine", "x": 0, "z": 19, "rot": 0},
+    {"asset": "pine", "x": 1, "z": 19, "rot": 0},
+    {"asset": "pine", "x": 3, "z": 19, "rot": 0},
+    {"asset": "pine", "x": 5, "z": 19, "rot": 0},
+    {"asset": "pine", "x": 6, "z": 19, "rot": 0},
+    {"asset": "pine", "x": 8, "z": 19, "rot": 0},
+    {"asset": "pine", "x": 19, "z": 19, "rot": 0},
+    {"asset": "pine", "x": 20, "z": 19, "rot": 0},
+    {"asset": "birch", "x": 22, "z": 19, "rot": 0},
+    {"asset": "birch", "x": 26, "z": 19, "rot": 0},
+    {"asset": "pine", "x": 29, "z": 19, "rot": 0},
+    {"asset": "pine", "x": 1, "z": 20, "rot": 0},
+    {"asset": "birch", "x": 4, "z": 20, "rot": 0},
+    {"asset": "birch", "x": 5, "z": 20, "rot": 0},
+    {"asset": "pine", "x": 6, "z": 20, "rot": 0},
+    {"asset": "pine", "x": 9, "z": 20, "rot": 0},
+    {"asset": "pine", "x": 17, "z": 20, "rot": 0},
+    {"asset": "pine", "x": 18, "z": 20, "rot": 0},
+    {"asset": "pine", "x": 19, "z": 20, "rot": 0},
+    {"asset": "pine", "x": 21, "z": 20, "rot": 0},
+    {"asset": "birch", "x": 23, "z": 20, "rot": 0},
+    {"asset": "pine", "x": 25, "z": 20, "rot": 0},
+    {"asset": "birch", "x": 26, "z": 20, "rot": 0},
+    {"asset": "pine", "x": 28, "z": 20, "rot": 0},
+    {"asset": "pine", "x": 2, "z": 21, "rot": 0},
+    {"asset": "pine", "x": 4, "z": 21, "rot": 0},
+    {"asset": "pine", "x": 7, "z": 21, "rot": 0},
+    {"asset": "pine", "x": 8, "z": 21, "rot": 0},
+    {"asset": "pine", "x": 10, "z": 21, "rot": 0},
+    {"asset": "pine", "x": 20, "z": 21, "rot": 0},
+    {"asset": "birch", "x": 22, "z": 21, "rot": 0},
+    {"asset": "pine", "x": 25, "z": 21, "rot": 0},
+    {"asset": "pine", "x": 27, "z": 21, "rot": 0}
+  ],
+  "spawn": {
+    "x": 27,
+    "z": 12,
+    "facing": "w"
+  },
+  "interactions": [
+    {"x": 24, "z": 11, "kind": "sign", "text": "Fernhollow Trail. East: back to Sixfold Meadow. Over the bridge and north: the moonflower glade."},
+    {"x": 21, "z": 6, "kind": "sign", "text": "Lookout. Herons nest by the stream in spring. Quiet feet, please."}
+  ],
+  "warps": [],
+  "exits": [
+    {"side": "e", "span": [12, 13], "to": "overworld"}
+  ],
+  "npcs": [
+    {
+      "id": "bramble",
+      "name": "Bramble",
+      "model": "rival_grass",
+      "tint": "#8fd17a",
+      "scale": 1.0,
+      "idle": "Idle",
+      "x": 10,
+      "z": 10,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "won:bramble",
+          "lines": [
+            "Well! You pruned me right back.",
+            "Take my seal. Five more rivals carry one each."
+          ]
+        },
+        {
+          "if": "lost:bramble",
+          "lines": [
+            "Ha, tangled up! Happens to everyone the first time.",
+            "Catch your breath and come try again."
+          ]
+        },
+        {
+          "if": "beat:bramble",
+          "lines": [
+            "Back for more thorns? Two prizes, same as before."
+          ],
+          "do": [
+            "duel:bramble"
+          ]
+        },
+        {
+          "lines": [
+            "Mind the hedge, it bites. Only a little.",
+            "I'm Bramble. I keep the hedges along this trail tidy, and I keep a deck for visitors.",
+            "A short one, two prizes. Shall we?"
+          ],
+          "do": [
+            "duel:bramble"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lumen",
+      "name": "Lumen",
+      "model": "rival_psychic",
+      "tint": "#ba8ce9",
+      "scale": 1.0,
+      "idle": "Idle",
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "won:lumen",
+          "lines": [
+            "You stayed awake the whole time. Impressive.",
+            "My seal. With six, the sealed door in the duel hall is yours."
+          ]
+        },
+        {
+          "if": "lost:lumen",
+          "lines": [
+            "Sweet dreams. Wake up and try again."
+          ]
+        },
+        {
+          "if": "!open:lumen",
+          "lines": [
+            "You look tired. Five seals first, then we'll talk.",
+            "Rest up: the others are still waiting."
+          ]
+        },
+        {
+          "if": "beat:lumen",
+          "lines": [
+            "The moon's up again. Shall we?"
+          ],
+          "do": [
+            "duel:lumen"
+          ]
+        },
+        {
+          "lines": [
+            "You found the shade. Good. My garden only grows at night.",
+            "I'm Lumen. Six prizes, and I don't let anyone sleep through them."
+          ],
+          "do": [
+            "duel:lumen"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fennel",
+      "name": "Fennel",
+      "model": "npc_wanderer",
+      "tint": "#a3d9a5",
+      "scale": 0.96,
+      "x": 19,
+      "z": 4,
+      "facing": "w",
+      "dialogue": [
+        {
+          "if": "flag:lens_returned",
+          "lines": [
+            "A grey heron! Right there! ...You missed it. It's fine, there'll be another.",
+            "Thanks again for the lens. Everything is so close now."
+          ]
+        },
+        {
+          "if": "item:field_lens",
+          "lines": [
+            "Is that my field lens? Scratched cap, brass ring... it is!",
+            "You found it up at the quarry? I must have set it down watching the falcons.",
+            "Please, take this pack. I'd only lose it too."
+          ],
+          "do": [
+            "flag:lens_returned",
+            "pack:grove"
+          ]
+        },
+        {
+          "if": "flag:talked_fennel",
+          "lines": [
+            "Still no lens. The last place I had it was the high ledge in Emberstep Quarry.",
+            "Up the steps past Orla, and up again. Watch the edges."
+          ]
+        },
+        {
+          "lines": [
+            "Shh... no, it's gone. A kingfisher, I think. Without my field lens it's all just blurs.",
+            "I lost it somewhere up at Emberstep Quarry, north of the meadow, watching the falcons on the high ledge.",
+            "If you're passing that way, keep an eye out? It glints."
+          ]
+        }
+      ],
+      "idle": "Idle"
+    }
+  ],
+  "ground": {
+    "base": "grass",
+    "path": "dirt",
+    "margin": 9
+  },
+  "ring": [
+    "pine",
+    "birch",
+    "pine",
+    "bush_dark"
+  ],
+  "light": {
+    "sun": {
+      "color": "#f4f0d8",
+      "intensity": 2.2,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#e8f4dc",
+      "ground": "#2f5a2a",
+      "intensity": 1.5
+    },
+    "background": "#93c49a",
+    "fog": {
+      "near": 16,
+      "far": 32
+    }
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  }
+}

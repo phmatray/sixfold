@@ -2,7 +2,9 @@
 
     blender -b --factory-startup -P tools/blender/bake_ground_textures.py -- --out web/world/textures
 
-grass.png, dirt.png, wood_floor.png: 1024 x 1024, tileable (all noise is periodic, every stroke
+    blender -b --factory-startup -P tools/blender/bake_ground_textures.py -- --out /tmp/tex --only sand,stone
+
+grass.png, dirt.png, wood_floor.png, sand.png, stone.png (cobbles): 1024 x 1024, tileable (all noise is periodic, every stroke
 wraps around the edges), low contrast, hand-painted look (soft tonal patches + brush strokes).
 """
 import math
@@ -119,6 +121,45 @@ def wood_floor(rng):
     return np.clip(img, 0, 1)
 
 
+def sand(rng):
+    img = ramp(spread(pnoise(rng, 240) * 0.55 + pnoise(rng, 80) * 0.3 + pnoise(rng, 24) * 0.15, 0.18),
+               ["#d6bb88", "#e2c999", "#ecd6a8", "#f4e3b9"])
+    stamp(img, rng, 1800, 46, 5, 0.15, 0.25, ["#d9bf8c", "#f1deb2", "#cdb07c"], 0.22)   # wind ripples, one way
+    stamp(img, rng, 700, 16, 12, 0.0, 3.0, ["#c9ab78", "#f6e8c4"], 0.18)               # soft blotches
+    stamp(img, rng, 2600, 2.2, 1.6, 0.0, 3.0, ["#a88e66", "#fff6de", "#b9a07a"], 0.6)  # grains and shell bits
+    return img
+
+
+def stone(rng, cells=16, gap=0.07):
+    """Cobbles: a jittered grid of periodic Voronoi cells, each a rounded stone, mortar between."""
+    pts = [((i + rng.uniform(0.15, 0.85)) * N / cells, (j + rng.uniform(0.15, 0.85)) * N / cells)
+           for i in range(cells) for j in range(cells)]
+    yy, xx = np.mgrid[0:N, 0:N].astype(np.float32)
+    d1 = np.full((N, N), 1e9, np.float32)
+    d2 = np.full((N, N), 1e9, np.float32)
+    idx = np.zeros((N, N), np.int32)
+    for k, (py, px) in enumerate(pts):
+        dy = np.abs(yy - py)
+        dx = np.abs(xx - px)
+        d = np.sqrt(np.minimum(dy, N - dy) ** 2 + np.minimum(dx, N - dx) ** 2)
+        closer = d < d1
+        d2 = np.where(closer, d1, np.minimum(d2, d))
+        idx = np.where(closer, k, idx)
+        d1 = np.where(closer, d, d1)
+    cell = N / cells
+    edge = (d2 - d1) / cell                          # 0 on the seams
+    tones = np.stack([hexrgb(["#b9b1a3", "#a9a194", "#c7beae", "#b3a58f", "#9f988c", "#c2b49a"][rng.integers(6)])
+                      * rng.uniform(0.93, 1.06) for _ in pts])
+    body = tones[idx]
+    dome = np.clip(1 - d1 / (cell * 0.7), 0, 1)[..., None]       # lighter crowns
+    grain = (pnoise(rng, 30) * 0.6 + pnoise(rng, 8) * 0.4)[..., None]
+    img = body * (0.82 + 0.22 * dome + 0.12 * (grain - 0.5))
+    mortar = np.clip((gap - edge) / 0.03, 0, 1)[..., None]       # soft, slightly dark seams
+    img = img * (1 - mortar) + hexrgb("#7d7366") * mortar * (0.9 + 0.2 * grain)
+    stamp(img, rng, 900, 10, 6, 0.0, 3.0, ["#d6cdbb", "#8f877a"], 0.15)  # painterly wear
+    return np.clip(img, 0, 1)
+
+
 def save(img, path):
     rgba = np.concatenate([np.clip(img, 0, 1), np.ones((N, N, 1), np.float32)], axis=2)
     im = bpy.data.images.new(os.path.basename(path), N, N)
@@ -131,9 +172,12 @@ def save(img, path):
 
 def main(argv):
     out = os.path.abspath(argv[argv.index("--out") + 1]) if "--out" in argv else "web/world/textures"
+    only = argv[argv.index("--only") + 1].split(",") if "--only" in argv else None
     os.makedirs(out, exist_ok=True)
-    for name, fn, seed in (("grass", grass, 1), ("dirt", dirt, 2), ("wood_floor", wood_floor, 3)):
-        save(fn(np.random.default_rng(seed)), os.path.join(out, name + ".png"))
+    for name, fn, seed in (("grass", grass, 1), ("dirt", dirt, 2), ("wood_floor", wood_floor, 3),
+                           ("sand", sand, 4), ("stone", stone, 5)):
+        if not only or name in only:
+            save(fn(np.random.default_rng(seed)), os.path.join(out, name + ".png"))
 
 
 if __name__ == "__main__":

@@ -63,6 +63,16 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "shoes",
             "Light soles, quick feet. Hold Shift, or switch on Run, to cover two tiles in the time of one.",
         ),
+        "field_lens" => (
+            "Field Lens".into(),
+            "lens",
+            "A brass birdwatcher's lens with a scratched cap. Somebody on the woodland trail will want it back.",
+        ),
+        "letter" => (
+            "Letter for Hob".into(),
+            "letter",
+            "Sealed with a wax hexagon and smelling faintly of the sea. Hob bakes in Brightwell Square.",
+        ),
         other => (other.replace('_', " "), "", ""),
     }
 }
@@ -219,6 +229,7 @@ pub fn WorldScreen() -> impl IntoView {
                 "use" if a == "locked" => _ = sheet.try_set(Some(Sheet::Note("Locked", b))),
                 "use" => _ = sheet.try_set(Some(Sheet::Note("It says", b))),
                 "talk" => start_talk(a, b),
+                "area" => _ = announce.try_set(a),
                 "ready" => {
                     _ = loading.try_set(false);
                     let facing = near.try_get_untracked().flatten();
@@ -414,7 +425,7 @@ pub fn WorldScreen() -> impl IntoView {
                 <button class="btn ghost" on:click=move |_| screen.set(Screen::Title)>"Leave"</button>
             </header>
             <main class="world-stage" node_ref=stage tabindex="-1"
-                aria-label="Sixfold Meadow, a small world to walk around. Use the arrow keys or the pad, and E to act.">
+                aria-label="The Sixfold world: a meadow, a square, a woodland trail, a boardwalk and a quarry to walk around. Use the arrow keys or the pad, and E to act.">
                 <div class="world-host" node_ref=host></div>
                 <p class="sr-only" aria-live="polite">{move || announce.get()}</p>
             </main>
@@ -426,7 +437,7 @@ pub fn WorldScreen() -> impl IntoView {
                 </button>
             })}
             {move || (loading.get() && failed.with(Option::is_none)).then(|| view! {
-                <p class="world-loading" role="status">"Loading the meadow…"</p>
+                <p class="world-loading" role="status">"Loading the world…"</p>
             })}
             {move || failed.get().map(|_| view! {
                 <div class="world-error" role="alert">

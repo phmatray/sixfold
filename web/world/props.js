@@ -246,16 +246,21 @@ export function armsPiece(kind, arms) {
   return g;
 }
 
-// Footprint in tiles [along X, along Z] at rot 0.
+// Footprint in tiles [along X, along Z] at rot 0 (1 x 1 when not listed).
 export const FOOT = {
-  house: [7, 5], tree: [2, 2], bush: [1, 1], flowers: [1, 1], rock: [1, 1], sign: [1, 1],
-  counter: [3, 1], shelf: [2, 1], duel_table: [2, 1], chair: [1, 1], rug: [3, 2], plant: [1, 1],
-  display_case: [1, 1], lamp: [1, 1], exit_mat: [1, 1],
+  house: [7, 5], tree: [2, 2], counter: [3, 1], shelf: [2, 1], duel_table: [2, 1], rug: [3, 2],
+  bridge: [2, 4], lighthouse: [2, 2], boat: [2, 1], stall: [2, 1], stall_b: [2, 1], cottage: [5, 4],
+  workshop: [3, 3], fountain: [3, 3], bench: [2, 1],
 };
 // Props the hero walks over; every other prop blocks its footprint.
 export const WALKABLE = new Set(["rug", "exit_mat"]);
+// Decks: walkable even over water, with the floor height the hero stands at, per
+// footprint row along the prop's own Z (front row first; one value for every row).
+export const DECK = { boardwalk: [0.1], pier: [0.3], bridge: [0.12, 0.24, 0.24, 0.12], stairs: [0.5] };
 // Sway reference height per prop (life.js wind).
-export const WIND_H = { tree: 3.5, bush: 0.8, flowers: 0.4 };
+export const WIND_H = { tree: 3.5, bush: 0.8, flowers: 0.4, pine: 3.8, birch: 3.6, reeds: 0.9 };
+// Rough height of a model, for the generic placeholder box of a model not yet built.
+export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0.24, stairs: 0.5, lighthouse: 7, cottage: 4.5, workshop: 3.8, pine: 3.8, birch: 3.6 };
 
 // Auto-tiling for fences ("f") and walls ("W"): neighbour mask (N=1, E=2, S=4, W=8)
 // -> [piece suffix, rot]. At rot 0: "" = arms W+E, _corner = W+S, _end = W,
@@ -276,9 +281,15 @@ export function prep(root, cast) {
     o.receiveShadow = true;
     if (!(o.material instanceof THREE.MeshToonMaterial) && !(o.material instanceof THREE.MeshLambertMaterial) && !(o.material instanceof THREE.MeshBasicMaterial)) {
       const m = o.material;
-      o.material = toon(m.color ?? "#ffffff", { map: m.map ?? null, transparent: m.transparent, alphaTest: m.alphaTest, opacity: m.opacity });
+      o.material = toon(m.color ?? "#ffffff", { name: m.name, map: m.map ?? null, transparent: m.transparent, alphaTest: m.alphaTest, opacity: m.opacity });
     }
     // COLOR_0 is a wind weight (read by the wind shader), never a tint.
     o.material.vertexColors = false;
   });
+}
+
+// A model that is not there yet: a plain box of its footprint, so maps work before the art lands.
+export function placeholderBox(name) {
+  const [w, d] = FOOT[name] ?? [1, 1], h = TALL[name] ?? 0.8;
+  return group(mesh(new THREE.BoxGeometry(w * 0.96, h, d * 0.96), toon(name.startsWith("cliff") ? "#b48a5e" : "#a08a70"), 0, h / 2, 0));
 }

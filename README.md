@@ -31,12 +31,22 @@ Playable from start to finish:
   you win. New players start with one starter deck, Trailhead (Fire / Water),
   and three packs; every prebuilt deck can still be played against the AI. Progress is kept in the browser
   (localStorage) and can be reset from Settings.
-- **Campaign**: six original rivals in the meadow and the duel hall, one per
+- **Campaign**: six original rivals out on the roads around the meadow, one per
   colour theme, each with their own deck, AI level and prize count. Beat one
   for their seal and packs of their colours (a rematch win gives a pack);
   three seals open the next rivals, and all six open the sealed door to Sable,
   the Hex Warden. A Campaign page on the title screen lists who is beaten,
   open or locked.
+- **The world** (`web/world/`, three.js): five outdoor areas joined by their
+  edges (walk off one to fade into the next), plus the duel hall and the Warden's
+  room. Sixfold Meadow, with the duel hall, sits in the middle; Fernhollow Trail
+  (woods, a stream and a footbridge; Bramble and Lumen) lies west, Saltwind
+  Boardwalk (beach, pier and lighthouse; Marlo and Quill) east, Emberstep Quarry
+  (cliff ledges you climb by stone steps; Cinza and Orla) north, and Brightwell
+  Square (fountain, market stalls, bakery) south. Townsfolk to talk to, two small
+  quests (a birdwatcher's lost lens, a letter for the baker) that pay in packs,
+  animated water, and only the area you stand in is built, so it stays at 60 fps
+  on a phone.
 
 Not done yet: a second human player.
 

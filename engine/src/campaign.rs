@@ -121,7 +121,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "bramble",
         name: "Bramble",
         title: "Hedge Tender",
-        place: "The meadow, west of the hall",
+        place: "Fernhollow Trail, by the bridge",
         colors: &[Grass],
         deck: Prebuilt {
             name: "Thicket",
@@ -153,7 +153,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "marlo",
         name: "Marlo",
         title: "Tide Reader",
-        place: "The duel hall, at the table by the window",
+        place: "Saltwind Boardwalk, at the end of the pier",
         colors: &[Water, Psychic],
         deck: Prebuilt {
             name: "Low Tide",
@@ -186,7 +186,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "cinza",
         name: "Cinza",
         title: "Kiln Runner",
-        place: "The meadow, by the south path",
+        place: "Emberstep Quarry, down on the quarry floor",
         colors: &[Fire, Fighting],
         deck: Prebuilt {
             name: EMBER_RUSH.name,
@@ -204,7 +204,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "quill",
         name: "Quill",
         title: "Weather Watcher",
-        place: "The meadow, north-east corner",
+        place: "Saltwind Boardwalk, under the lighthouse",
         colors: &[Lightning, Water],
         deck: Prebuilt {
             name: STORM_FRONT.name,
@@ -222,7 +222,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "orla",
         name: "Orla",
         title: "Quarry Foreman",
-        place: "The meadow, behind the hall",
+        place: "Emberstep Quarry, up on the ledge",
         colors: &[Fighting],
         deck: Prebuilt {
             name: "Bedrock",
@@ -259,7 +259,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "lumen",
         name: "Lumen",
         title: "Night Gardener",
-        place: "The duel hall, at the table by the lamp",
+        place: "Fernhollow Trail, in the moonflower glade",
         colors: &[Psychic, Water],
         deck: Prebuilt {
             name: "Moonlit Tide",

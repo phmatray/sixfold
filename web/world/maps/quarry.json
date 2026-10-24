@@ -1,0 +1,285 @@
+{
+  "title": "Emberstep Quarry",
+  "width": 28,
+  "height": 22,
+  "tiles": [
+    "2222222222222222222222222222",
+    "2222222222222222222222222222",
+    "1111111111111111111111111111",
+    "1111111111111111111111111111",
+    "1111111111111111111111111111",
+    "1111111111111111111111111111",
+    "111111111..........111111111",
+    "11111........rr........11111",
+    ".............rr.............",
+    ".............rr.............",
+    ".............rr.............",
+    ".............rr.............",
+    ".............rr.............",
+    ".........rrrrrr.............",
+    ".............rr.............",
+    ".............rr.............",
+    ".............rr.............",
+    ".............rr.............",
+    ".............rr.............",
+    ".............rr.............",
+    ".............rr.............",
+    ".............rr............."
+  ],
+  "props": [
+    {"asset": "stairs", "x": 13, "z": 6, "rot": 0},
+    {"asset": "stairs", "x": 14, "z": 6, "rot": 0},
+    {"asset": "stairs", "x": 20, "z": 2, "rot": 0, "y": 1},
+    {"asset": "rock", "x": 3, "z": 0, "rot": 0, "y": 2},
+    {"asset": "pine", "x": 1, "z": 3, "rot": 0, "y": 1},
+    {"asset": "pine", "x": 6, "z": 2, "rot": 0, "y": 1},
+    {"asset": "pine", "x": 25, "z": 3, "rot": 0, "y": 1},
+    {"asset": "pine", "x": 10, "z": 0, "rot": 0, "y": 2},
+    {"asset": "pine", "x": 16, "z": 1, "rot": 0, "y": 2},
+    {"asset": "pine", "x": 26, "z": 0, "rot": 0, "y": 2},
+    {"asset": "pine", "x": 9, "z": 4, "rot": 0, "y": 1},
+    {"asset": "pine", "x": 17, "z": 3, "rot": 0, "y": 1},
+    {"asset": "rock", "x": 24, "z": 6, "rot": 0, "y": 1},
+    {"asset": "rock", "x": 2, "z": 6, "rot": 0, "y": 1},
+    {"asset": "rock", "x": 11, "z": 3, "rot": 0, "y": 1},
+    {"asset": "rock", "x": 7, "z": 1, "rot": 0, "y": 2},
+    {"asset": "rock", "x": 6, "z": 9, "rot": 0},
+    {"asset": "rock", "x": 9, "z": 10, "rot": 0},
+    {"asset": "rock", "x": 20, "z": 9, "rot": 0},
+    {"asset": "rock", "x": 23, "z": 11, "rot": 0},
+    {"asset": "rock", "x": 3, "z": 15, "rot": 0},
+    {"asset": "rock", "x": 24, "z": 16, "rot": 0},
+    {"asset": "rock", "x": 7, "z": 18, "rot": 0},
+    {"asset": "rock", "x": 20, "z": 19, "rot": 0},
+    {"asset": "rock", "x": 17, "z": 10, "rot": 0},
+    {"asset": "rock", "x": 10, "z": 17, "rot": 0},
+    {"asset": "rock", "x": 25, "z": 13, "rot": 0},
+    {"asset": "crates", "x": 6, "z": 13, "rot": 0},
+    {"asset": "crates", "x": 6, "z": 14, "rot": 0},
+    {"asset": "crates", "x": 18, "z": 13, "rot": 0},
+    {"asset": "lantern", "x": 12, "z": 8, "rot": 0},
+    {"asset": "lantern", "x": 15, "z": 8, "rot": 0},
+    {"asset": "lantern", "x": 12, "z": 18, "rot": 0},
+    {"asset": "lantern", "x": 15, "z": 18, "rot": 0},
+    {"asset": "lantern", "x": 12, "z": 4, "rot": 0, "y": 1},
+    {"asset": "signpost", "x": 15, "z": 19, "rot": 0},
+    {"asset": "tree", "x": 0, "z": 9, "rot": 0},
+    {"asset": "tree", "x": 0, "z": 13, "rot": 0},
+    {"asset": "tree", "x": 0, "z": 17, "rot": 0},
+    {"asset": "tree", "x": 26, "z": 9, "rot": 0},
+    {"asset": "tree", "x": 26, "z": 14, "rot": 0},
+    {"asset": "tree", "x": 26, "z": 18, "rot": 0},
+    {"asset": "tree", "x": 3, "z": 19, "rot": 0},
+    {"asset": "tree", "x": 21, "z": 15, "rot": 0},
+    {"asset": "bush", "x": 2, "z": 11, "rot": 0},
+    {"asset": "bush", "x": 24, "z": 10, "rot": 0},
+    {"asset": "bush", "x": 6, "z": 20, "rot": 0},
+    {"asset": "bush", "x": 23, "z": 20, "rot": 0},
+    {"asset": "bush", "x": 10, "z": 20, "rot": 0}
+  ],
+  "spawn": {
+    "x": 13,
+    "z": 19,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 3,
+      "z": 0,
+      "kind": "sign",
+      "id": "lens_rock",
+      "name": "A glint under a rock",
+      "glint": "!item:field_lens",
+      "dialogue": [
+        {
+          "if": "item:field_lens",
+          "lines": [
+            "Just pebbles and a falcon feather now."
+          ]
+        },
+        {
+          "lines": [
+            "Something brass is wedged under the rock... a birdwatcher's field lens!",
+            "Somebody must be squinting at blurs without it."
+          ],
+          "do": [
+            "give:field_lens"
+          ]
+        }
+      ]
+    },
+    {"x": 15, "z": 19, "kind": "sign", "text": "Emberstep Quarry. South: back to Sixfold Meadow. The steps lead up to the ledges; mind the edges."}
+  ],
+  "warps": [],
+  "exits": [
+    {"side": "s", "span": [13, 14], "to": "overworld"}
+  ],
+  "npcs": [
+    {
+      "id": "cinza",
+      "name": "Cinza",
+      "model": "rival_fire",
+      "tint": "#ff9a5c",
+      "scale": 1.0,
+      "idle": "Idle",
+      "x": 8,
+      "z": 13,
+      "facing": "e",
+      "dialogue": [
+        {
+          "if": "won:cinza",
+          "lines": [
+            "Burnt out... You're quicker than you look.",
+            "Here, my seal. Don't let it cool off in a drawer."
+          ]
+        },
+        {
+          "if": "lost:cinza",
+          "lines": [
+            "Too slow! The road's still warm, come race me again."
+          ]
+        },
+        {
+          "if": "beat:cinza",
+          "lines": [
+            "Again? Good. I've been stoking the fire."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        },
+        {
+          "lines": [
+            "You walk like someone who's never been in a hurry.",
+            "I'm Cinza. I run the kiln road every morning and duel every afternoon.",
+            "Four prizes. Try to keep up."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "orla",
+      "name": "Orla",
+      "model": "rival_fighting",
+      "tint": "#d39058",
+      "scale": 1.0,
+      "idle": "Idle",
+      "x": 22,
+      "z": 4,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "won:orla",
+          "lines": [
+            "You cracked the bedrock. Respect.",
+            "My seal. Earned, not quarried."
+          ]
+        },
+        {
+          "if": "lost:orla",
+          "lines": [
+            "Solid stone stays solid. Come back with a sharper pick."
+          ]
+        },
+        {
+          "if": "!open:orla",
+          "lines": [
+            "Not yet. The quarry only opens to those with three seals.",
+            "Go on, the others won't beat themselves."
+          ]
+        },
+        {
+          "if": "beat:orla",
+          "lines": [
+            "Another shift? Five prizes, same as ever."
+          ],
+          "do": [
+            "duel:orla"
+          ]
+        },
+        {
+          "lines": [
+            "Hard hat zone. Well, it would be, if I had a hard hat.",
+            "Orla. I run this quarry. Five prizes, no shortcuts."
+          ],
+          "do": [
+            "duel:orla"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flint",
+      "name": "Flint",
+      "model": "npc_rival",
+      "tint": "#d9a066",
+      "scale": 1.02,
+      "x": 19,
+      "z": 12,
+      "facing": "w",
+      "dialogue": [
+        {
+          "if": "item:field_lens",
+          "lines": [
+            "Found something shiny up top? The falcons drop all sorts."
+          ]
+        },
+        {
+          "lines": [
+            "Every block in Brightwell's fountain came out of this pit. I cut half of them.",
+            "The high ledge has the best view. Falcons, mostly. And a birdwatcher's lost things, I'd bet."
+          ]
+        }
+      ],
+      "idle": "Idle"
+    }
+  ],
+  "ground": {
+    "base": "dirt",
+    "path": "stone",
+    "margin": 9,
+    "tufts": 0
+  },
+  "ring": [
+    "pine",
+    "tree_b",
+    "bush_dark"
+  ],
+  "light": {
+    "sun": {
+      "color": "#ffe6bf",
+      "intensity": 2.7,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#fff0d8",
+      "ground": "#7a5a3a",
+      "intensity": 1.5
+    },
+    "background": "#dcc9a0",
+    "fog": {
+      "near": 18,
+      "far": 36
+    }
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  }
+}

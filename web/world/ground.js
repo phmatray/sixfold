@@ -1,15 +1,17 @@
-// One flat ground mesh per map, at y = 0. Its shader blends two painted layers
-// (grass and dirt outside, wood inside) through a per-tile mask: an R8 texture,
-// one texel per tile, sampled bilinearly and pushed around by world-space noise
-// so path edges come out soft and organic instead of square. Cloud shadows
-// drift over it outdoors. Textures load from ./textures/<name>.webp, with a
-// procedural canvas fallback until those exist.
+// One flat ground mesh per map, at y = 0. Its shader paints a base layer (grass,
+// sand or wood) and up to four overlays through a per-tile mask: an RGBA8
+// texture, one texel per tile (R path, G sand, B stone, A water), sampled
+// bilinearly and pushed around by world-space noise so borders come out soft
+// and organic instead of square. Water is drawn here too (no extra mesh): an
+// animated, rippling surface with a foam line and wet sand along the shore.
+// Cloud shadows drift over it outdoors. Textures load from ./textures/<name>.webp,
+// with a procedural canvas fallback until those exist.
 import * as THREE from "three";
 import { U } from "./life.js";
 import { grassTexture, rng } from "./props.js";
 
 const TEX = new URL("./textures/", import.meta.url);
-const REPEAT = { grass: 6, dirt: 3, wood_floor: 2.4 }; // metres per texture tile
+const REPEAT = { grass: 6, dirt: 3, wood_floor: 2.4, sand: 5, stone: 2.5 }; // metres per texture tile
 const cache = new Map();
 
 function finish(t) {
@@ -34,6 +36,19 @@ export function layer(name) {
 
 const FALLBACK = {
   grass: grassTexture,
+  sand() {
+    const { c, g } = canvas("#e6cf9a");
+    const r = rng(29);
+    for (let i = 0; i < 400; i++) blot(g, r() * 512, r() * 512, 2 + r() * 14, r() < 0.5 ? "#d8bd84" : "#f2e0b4", 0.3);
+    return new THREE.CanvasTexture(c);
+  },
+  stone() {
+    const { c, g } = canvas("#9c968a");
+    const r = rng(31);
+    for (let y = 0; y < 512; y += 64)
+      for (let x = (y / 64) % 2 ? 32 : 0; x < 512 + 32; x += 64) blot(g, x, y + 32, 26 + r() * 4, ["#b3ad9f", "#a8a294", "#c0b9aa"][Math.floor(r() * 3)], 1);
+    return new THREE.CanvasTexture(c);
+  },
   dirt() {
     const { c, g } = canvas("#c99d62");
     const r = rng(17);
@@ -113,24 +128,40 @@ const clouds = (() => {
   return t;
 })();
 
-// `mask(x, z)` is 1 where the second layer shows (path tiles), else 0.
-export async function groundMesh(map, mask) {
+// Ground layers per tile character: the overlay channel each one paints.
+// "p" path (the map's `ground.path` layer), "s" and "=" sand, "r" stone,
+// "~" and "H" (a pier) water. Anything else shows the base layer.
+const CHANNEL = { p: 0, s: 1, "=": 1, r: 2, "~": 3, H: 3 };
+
+// Overlay textures a map uses (the base stands in for the unused ones).
+export const groundLayers = (map) => {
+  const g = map.ground, t = map.tiles.join("");
+  return [g.base, g.path ?? g.base, /[s=]/.test(t) ? "sand" : g.base, t.includes("r") ? "stone" : g.base];
+};
+
+// `tile(x, z)` is the map's tile character.
+export async function groundMesh(map, tile) {
   const { width: W, height: H } = map;
   const gd = map.ground;
-  const [a, b] = await Promise.all([layer(gd.base), layer(gd.path ?? gd.base)]);
-  const data = new Uint8Array(W * H);
-  for (let z = 0; z < H; z++) for (let x = 0; x < W; x++) data[z * W + x] = mask(x, z) ? 255 : 0;
-  const maskTex = new THREE.DataTexture(data, W, H, THREE.RedFormat, THREE.UnsignedByteType);
+  const names = groundLayers(map);
+  const [a, b, c, d] = await Promise.all(names.map(layer));
+  const data = new Uint8Array(W * H * 4);
+  for (let z = 0; z < H; z++) for (let x = 0; x < W; x++) {
+    const ch = CHANNEL[tile(x, z)];
+    if (ch !== undefined) data[(z * W + x) * 4 + ch] = 255;
+  }
+  const maskTex = new THREE.DataTexture(data, W, H, THREE.RGBAFormat, THREE.UnsignedByteType);
   maskTex.magFilter = maskTex.minFilter = THREE.LinearFilter;
   maskTex.needsUpdate = true;
+  const water = data.some((v, i) => i % 4 === 3 && v);
 
   const m = gd.margin ?? 0;
   const mat = new THREE.MeshLambertMaterial();
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, U, {
-      uA: { value: a }, uB: { value: b }, uMask: { value: maskTex }, uCloud: { value: clouds },
+      uA: { value: a }, uB: { value: b }, uC: { value: c }, uD: { value: d }, uMask: { value: maskTex }, uCloud: { value: clouds },
       uSize: { value: new THREE.Vector2(W, H) },
-      uRep: { value: new THREE.Vector2(REPEAT[gd.base] ?? 4, REPEAT[gd.path ?? gd.base] ?? 4) },
+      uRep: { value: new THREE.Vector4(...names.map((n) => REPEAT[n] ?? 4)) },
       uClouds: { value: map.light.indoor ? 0 : 1 },
     });
     sh.vertexShader = sh.vertexShader
@@ -141,8 +172,9 @@ export async function groundMesh(map, mask) {
         "#include <common>",
         `#include <common>
         varying vec2 vXZ;
-        uniform sampler2D uA, uB, uMask, uCloud;
-        uniform vec2 uSize, uRep;
+        uniform sampler2D uA, uB, uC, uD, uMask, uCloud;
+        uniform vec2 uSize;
+        uniform vec4 uRep;
         uniform float uDrift, uClouds;
         float h21(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
         float vnoise(vec2 p) {
@@ -155,15 +187,32 @@ export async function groundMesh(map, mask) {
         `{
           float n = vnoise(vXZ * 1.7) * 0.65 + vnoise(vXZ * 4.3) * 0.35;
           vec2 warp = vec2(vnoise(vXZ * 0.9 + 7.1), vnoise(vXZ * 0.9 - 3.7)) - 0.5;
-          float m = texture2D(uMask, (vXZ + warp * 0.55) / uSize).r;
-          float k = smoothstep(0.4, 0.6, m + (n - 0.5) * 0.35);
-          vec3 col = mix(texture2D(uA, vXZ / uRep.x).rgb, texture2D(uB, vXZ / uRep.y).rgb, k);
-          col *= 1.0 - 0.7 * k * (1.0 - k) * (0.6 + 0.4 * n); // a darker, damp rim along the border
+          vec4 m = texture2D(uMask, (vXZ + warp * 0.55) / uSize);
+          vec4 k = smoothstep(0.4, 0.6, m + (n - 0.5) * 0.35);
+          vec3 col = texture2D(uA, vXZ / uRep.x).rgb;
+          col = mix(col, texture2D(uC, vXZ / uRep.z).rgb, k.g);
+          col = mix(col, texture2D(uB, vXZ / uRep.y).rgb, k.r);
+          col = mix(col, texture2D(uD, vXZ / uRep.w).rgb, k.b);
+          float rim = max(max(k.r * (1.0 - k.r), k.b * (1.0 - k.b)), 0.0);
+          col *= 1.0 - 0.7 * rim * (0.6 + 0.4 * n); // a darker, damp rim along path borders
+          ${water ? `
+          // Water: wet sand toward the shore, a foam line, then shallow to deep with drifting ripples.
+          float w = m.a + (n - 0.5) * 0.3;
+          col *= 1.0 - 0.28 * smoothstep(0.18, 0.42, w);
+          float r1 = vnoise(vXZ * 1.1 + uDrift * vec2(0.21, 0.13)), r2 = vnoise(vXZ * 2.3 - uDrift * vec2(0.17, 0.27));
+          float rip = r1 * 0.6 + r2 * 0.4;
+          vec3 wat = mix(vec3(0.36, 0.74, 0.76), vec3(0.13, 0.45, 0.6), smoothstep(0.55, 1.0, m.a) * (0.75 + 0.25 * rip));
+          wat += vec3(0.85, 0.95, 1.0) * 0.32 * smoothstep(0.72, 0.9, rip) * smoothstep(0.6, 0.9, m.a);
+          float edge = smoothstep(0.42, 0.5, w);
+          col = mix(col, wat, edge);
+          float foam = smoothstep(0.1, 0.0, abs(w - 0.5 - 0.035 * sin(uDrift * 1.3 + n * 6.0)));
+          col = mix(col, vec3(0.96, 0.98, 0.95), foam * 0.8);` : ""}
           col *= 1.0 - 0.2 * uClouds * texture2D(uCloud, vXZ * 0.03 + uDrift * vec2(0.012, 0.007)).r;
           diffuseColor.rgb *= col;
         }`,
       );
   };
+  mat.customProgramCacheKey = () => (water ? "ground-w" : "ground");
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(W + 2 * m, H + 2 * m), mat);
   ground.rotation.x = -Math.PI / 2;
   ground.position.set(W / 2, 0, H / 2);
