@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.0.0](https://github.com/phmatray/sixfold/compare/v0.9.0...v1.0.0) (2026-10-24)
+
+
+### Added
+
+* final polish for the 1.0 release ([#18](https://github.com/phmatray/sixfold/issues/18)) ([2c7eac5](https://github.com/phmatray/sixfold/commit/2c7eac5afe9700f1a46ce878aa1cc78093bdb11d))
+
 ## [0.9.0](https://github.com/phmatray/sixfold/compare/v0.8.0...v0.9.0) (2026-10-24)
 
 
