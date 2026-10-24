@@ -38,6 +38,8 @@ pub(crate) enum Stage {
     Damage,
     /// Phase 4
     After,
+    /// R-DMG-14: the once-per-attack retaliation hook.
+    Retaliation,
     /// R-STATUS-03: the queued conditions.
     Statuses,
     KnockOuts,
@@ -50,8 +52,18 @@ impl Source {
         use Stage::*;
         match self {
             Source::Attack => &[
-                Select, Commit, Confusion, Phase5, Prevention, Before, Damage, After, Statuses,
-                KnockOuts, End,
+                Select,
+                Commit,
+                Confusion,
+                Phase5,
+                Prevention,
+                Before,
+                Damage,
+                After,
+                Retaliation,
+                Statuses,
+                KnockOuts,
+                End,
             ],
             Source::Trainer => &[
                 Select, Commit, Phase5, Before, After, Statuses, KnockOuts, End,
@@ -82,6 +94,8 @@ pub(crate) struct Pending {
     pub ignore_wr: bool,
     /// R-DMG-12/13: the defender is protected from this attack's effects.
     pub negated: bool,
+    /// R-DMG-14 `wDamageDealt`: direct plus effect damage to the defending Active.
+    pub dealt: u16,
     /// Index into `source.stages()`.
     pub stage: usize,
     /// Next effect a selection stage looks at.
@@ -146,6 +160,7 @@ impl Game {
             direct: source == Source::Attack && does_direct_damage(damage, effects),
             ignore_wr: false,
             negated: false,
+            dealt: 0,
             stage: 0,
             cursor: 0,
             choices: vec![None; effects.len()],
@@ -191,6 +206,10 @@ impl Game {
             }
             Stage::After => {
                 self.run_effects(Phase::After, ev);
+                true
+            }
+            Stage::Retaliation => {
+                self.retaliation(ev);
                 true
             }
             Stage::Statuses => {
@@ -470,7 +489,69 @@ impl Game {
             self.players[q].effects.placed = None;
             ev.push(Event::AttackNegated { player: q });
         }
-        self.hurt(q, 0, hit, true, ev);
+        self.hurt(q, 0, hit, false, ev);
+        self.pd_mut().dealt += hit.amount;
+    }
+
+    /// R-DMG-14: once per attack with direct damage, after phase 4: if the
+    /// defending Active took damage and its retaliation Power works, the
+    /// attacking side's Active of that moment takes 10 (00:3632-3671).
+    /// RULES: R-DMG-14 — the source keys on the defender at attack start and
+    /// gates on the current Active's Power; the engine asks that the current
+    /// Active be a working retaliator. They differ only if phase 4 switched
+    /// the defender.
+    fn retaliation(&mut self, ev: &mut Vec<Event>) {
+        let pd = self.pd();
+        let (p, q) = (pd.player, 1 - pd.player);
+        if pd.direct && pd.dealt > 0 && self.passive(q, 0) == Some(PowerKind::Retaliate) {
+            self.raw_damage(p, 10, ev);
+        }
+    }
+
+    /// Effect damage from the resolving item to (q, slot) (R-DMG-04/12/14).
+    fn effect_hit(&mut self, q: usize, slot: usize, amount: u16, ev: &mut Vec<Event>) {
+        let pd = self.pd();
+        let (p, power) = (pd.player, pd.source.is_power());
+        let defender = q != p && slot == 0;
+        if defender {
+            // R-DMG-12: the defending Active re-runs the whole-attack check,
+            // even for an attack without direct damage (00:1AB1); while
+            // negated, effect damage to it is cancelled (00:1A5C).
+            if !pd.negated && pd.source == Source::Attack && self.attack_negated(p) {
+                self.pd_mut().negated = true;
+                ev.push(Event::AttackNegated { player: q });
+            }
+            if self.pd().negated {
+                return;
+            }
+        }
+        let mut hit = self.effect_damage(p, q, slot, amount, power);
+        // R-DMG-04: after the clamp, for any slot, the evolved-attacker shield
+        // (not on the own side) and the coin prevention (00:32AE → 3418, 3441).
+        if !power {
+            let evolved = self.players[p]
+                .active
+                .as_ref()
+                .is_some_and(|a| a.creature().stage != CardStage::Basic);
+            let kind = self.passive(q, slot);
+            let shield = q != p && evolved && kind == Some(PowerKind::ShieldFromEvolved);
+            if shield || (kind == Some(PowerKind::CoinPrevention) && self.flip(q, ev)) {
+                hit = Default::default();
+                // RULES: R-DMG-12 — the source sets the negation code on any
+                // slot and resets it on every effect-damage call (00:1A68); the
+                // engine negates the attack only when its defending Active is
+                // protected, and keeps that for the whole attack.
+                if defender {
+                    self.pd_mut().negated = true;
+                    ev.push(Event::AttackNegated { player: q });
+                }
+            }
+        }
+        // R-DMG-14: the immediate hook, never for damage to the own side (00:32D1).
+        self.hurt(q, slot, hit, !power && q != p, ev);
+        if defender {
+            self.pd_mut().dealt += hit.amount;
+        }
     }
 
     fn run_effects(&mut self, phase: Phase, ev: &mut Vec<Event>) {
@@ -487,7 +568,6 @@ impl Game {
         let pd = self.pd();
         let (p, slot, effect, choice, negated) =
             (pd.player, pd.slot, pd.effects[i], pd.choices[i], pd.negated);
-        let power = pd.source.is_power();
         let q = 1 - p;
         let mark =
             |ev: &mut Vec<Event>, player: usize| ev.push(Event::EffectApplied { player, effect });
@@ -515,8 +595,7 @@ impl Game {
                         continue;
                     }
                     for s in 1..=self.players[side].bench.len() {
-                        let hit = self.effect_damage(p, side, s, amount, power);
-                        self.hurt(side, s, hit, !power, ev);
+                        self.effect_hit(side, s, amount, ev);
                     }
                 }
             }
@@ -524,12 +603,9 @@ impl Game {
                 let Some(Choice::Slot { player, slot: s }) = choice else {
                     return;
                 };
-                // R-DMG-12: effect damage to the protected defending Active is cancelled.
-                if self.players[player].slot(s).is_none() || (negated && s == 0) {
-                    return;
+                if self.players[player].slot(s).is_some() {
+                    self.effect_hit(player, s, n, ev);
                 }
-                let hit = self.effect_damage(p, player, s, n, power);
-                self.hurt(player, s, hit, !power, ev);
             }
             // R-STATUS-03: immunity is decided now, against the current
             // defender; the entry then targets the side (0B:4035).

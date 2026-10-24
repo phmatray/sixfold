@@ -237,8 +237,8 @@ impl Game {
         hit
     }
 
-    /// R-DMG-06: subtract, flooring HP at 0. `retaliate`: attack or effect
-    /// damage, which sets off a retaliation Power (R-DMG-14).
+    /// R-DMG-06: subtract, flooring HP at 0. `retaliate`: effect damage from
+    /// the other side, which sets off a retaliation Power at once (R-DMG-14).
     pub(crate) fn hurt(
         &mut self,
         q: usize,
@@ -261,9 +261,9 @@ impl Game {
             weakness: hit.weakness,
             resistance: hit.resistance,
         });
-        // RULES: R-DMG-14 — one hook, at the damage itself, for any slot; the
-        // second after-phase-4 hook is not modelled separately. Self-damage,
-        // poison and Power damage never retaliate.
+        // R-DMG-14: the effect-damage hook, at the damage itself, for any slot
+        // (00:32CE). Direct damage uses the after-phase-4 hook instead.
+        // Self-damage, poison, own-side and Power damage never retaliate.
         if retaliate && hit.amount > 0 && self.passive(q, slot) == Some(PowerKind::Retaliate) {
             self.raw_damage(1 - q, 10, ev);
         }
@@ -767,6 +767,100 @@ mod tests {
         g.players[1].active = Some(creature(LUCKSHELL, &[]));
         g.players[1].effects.shield = Some(Shield::PreventAll);
         assert_eq!(coins(&attack_with(&mut g, 30, &[])), 0, "already negated");
+    }
+
+    const BENCH_10: &[Effect] = &[BenchDamage {
+        amount: 10,
+        own: false,
+        opponent: true,
+    }];
+
+    /// R-DMG-04: after the clamp, any slot's evolved-attacker shield and
+    /// coin-prevention Powers still apply to effect damage (00:32AE → 3418, 3441).
+    #[test]
+    fn bench_power_hooks_on_effect_damage() {
+        let mirage = |evolved: bool| {
+            let mut g = main_phase(2);
+            g.players[1].bench.push(creature(MIRAGE, &[]));
+            if evolved {
+                g.players[0].active.as_mut().unwrap().stack.push(MOSSBACK);
+            }
+            damage_to(&attack_with(&mut g, 0, BENCH_10), 1, 1)
+        };
+        assert_eq!(mirage(true), vec![0], "shielded from an evolved attacker");
+        assert_eq!(mirage(false), vec![10]);
+        for (heads, dealt) in [(true, 0), (false, 10)] {
+            let mut g = duel();
+            g.players[1].bench.push(creature(LUCKSHELL, &[]));
+            g.force_coins(&[heads]);
+            let ev = attack_with(&mut g, 0, BENCH_10);
+            assert_eq!((coins(&ev), damage_to(&ev, 1, 1)), (1, vec![dealt]));
+        }
+    }
+
+    /// R-DMG-12: effect damage to the defending Active re-runs the
+    /// whole-attack check even for an attack without direct damage
+    /// (00:1AB1); a match cancels it and drops the conditions too.
+    #[test]
+    fn snipe_on_protected_active_without_direct_damage() {
+        let mut g = duel();
+        g.players[1].effects.shield = Some(Shield::PreventAll);
+        attack_with(
+            &mut g,
+            0,
+            &[
+                Inflict {
+                    status: crate::Status::Asleep,
+                    coin: false,
+                },
+                Snipe(10),
+            ],
+        );
+        let ev = ok(&mut g, crate::Action::Choose(0));
+        assert!(ev.contains(&Event::AttackNegated { player: 1 }));
+        assert!(damage_to(&ev, 1, 0).is_empty());
+        assert!(g.players[1].condition.is_empty());
+        assert_eq!(hp(&g, 1, 0), 60);
+    }
+
+    /// R-DMG-14: damage a player deals to its own side never retaliates (00:32D1).
+    #[test]
+    fn own_bench_damage_does_not_retaliate() {
+        let mut g = duel();
+        g.players[0].bench.push(creature(THORNBACK, &[]));
+        let ev = attack_with(
+            &mut g,
+            0,
+            &[BenchDamage {
+                amount: 10,
+                own: true,
+                opponent: false,
+            }],
+        );
+        assert_eq!(damage_to(&ev, 0, 1), vec![10]);
+        assert!(damage_to(&ev, 1, 0).is_empty());
+    }
+
+    /// R-DMG-14: the direct-damage hook runs once after phase 4 and hits the
+    /// attacking side's Active of that moment (00:3632, 00:3671); effect
+    /// damage to the Active also counts and retaliates at once, so both can
+    /// fire in one attack.
+    #[test]
+    fn retaliation_after_phase_4_hits_current_active() {
+        let mut g = duel();
+        g.players[1].active = Some(creature(THORNBACK, &[]));
+        g.players[0].bench.push(creature(EMBERKIT, &[]));
+        attack_with(&mut g, 20, &[SwitchSelf]);
+        ok(&mut g, crate::Action::Choose(0));
+        assert_eq!(g.players[0].active.as_ref().unwrap().top(), EMBERKIT);
+        assert_eq!(hp(&g, 0, 0), 30, "the creature switched in takes the 10");
+        assert_eq!(hp(&g, 0, 1), 50, "the attacker, now Benched, takes nothing");
+        // No direct damage, but a Snipe on the Active: 10 at once, 10 after phase 4.
+        let mut g = duel();
+        g.players[1].active = Some(creature(THORNBACK, &[]));
+        attack_with(&mut g, 0, &[AddPerHeads { coins: 0, per: 0 }, Snipe(10)]);
+        let ev = ok(&mut g, crate::Action::Choose(0));
+        assert_eq!(damage_to(&ev, 0, 0), vec![10, 10]);
     }
 
     /// R-DMG-14

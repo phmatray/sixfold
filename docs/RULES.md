@@ -665,14 +665,28 @@ unit test that should cover it.
     damage.
   - Effect damage to the Active also goes through the defender's reductions. It is cancelled
     entirely while the attack-prevention flag is set.
-  - After the clamp, a damaged Benched creature's own reduction Power still applies (prevent at ≥30,
-    or halve), unless the damage came from a Power or a power blocker is in play.
+  - After the clamp, unless the damage came from a Power or a power blocker is in play:
+    - a damaged Benched creature's own reduction Power still applies (prevent at ≥30, or halve);
+    - then, for **any** slot, a holder of the "protected from evolved attackers" Power takes 0 when
+      the attacker is evolved and the damage is not to the attacker's own side;
+    - then, for any slot, a holder of the coin-prevention Power (R-DMG-13) flips a coin, even when
+      the damage is already 0; heads makes it 0.
 - **Parameters.** `00:1A53`. The target slot goes to `ccf1`. `ccb7 == 4` means Power damage. The
-  clamp is at `1AB8`. The post hook `32AE` runs for every slot.
-- **Status.** CORRECTED. The original claim missed the +10 on Power damage and the post-clamp Bench
-  Power.
-- **Evidence.** `00:1A53-1AEC`, `0B:4117-412D` (the Bench helper).
-- **Test.** `bench_effect_damage_ignores_weakness`, `bench_minus20_trainer_reduces_effect_damage`
+  clamp is at `1AB8`. The post hook `00:32AE` runs for every slot: blocker → return; Bench →
+  `3252`; then `3418` (`ccca == $A0`, `ccec == 0`, attacker card `ccc9` with stage ≠ 0 → `cccd = 5`)
+  and `3441` (`ccca == $96`, `CheckSlotPowerUsable(ccf1)`, coin, heads → `cccd = 4`); either one
+  gives `de = 0`. Side effect: the `cccd` code they set drops later queued conditions on the
+  defender, unless another `1A53` call clears it again (R-DMG-12).
+- **Status.** CORRECTED. The original claim missed the +10 on Power damage, the post-clamp Bench
+  Power, and the two Power checks for every slot. Runtime: `00:1A53` with `b = 1`, `de = 10`: a Bench
+  `$96` with a heads coin gave `de = 0`, `cccd = 4`; a Bench `$A0` against a Stage 1 attacker gave
+  `de = 0`, `cccd = 5`, and against a Basic `de = 10`.
+- **Evidence.** `00:1A53-1AEC`, `00:32AE-32CD`, `00:3418-346D`, `0B:4117-412D` (the Bench helper).
+- **Test.** `bench_effect_damage_ignores_weakness`, `bench_minus20_trainer_reduces_effect_damage`,
+  `bench_power_hooks_on_effect_damage`
+
+  The clean engine applies both Power checks. It sets the negation only when the defending Active
+  itself is protected, and keeps it for the whole attack (see R-DMG-12).
 
 ### R-DMG-05: Self-damage uses the attacker's own modifiers
 - **Rule.** Damage a creature deals to itself (the confusion hit, or recoil) uses its **own**
@@ -756,12 +770,23 @@ unit test that should cover it.
   Powers and for attacks that do no direct damage. If the defender has a "prevent all effects of
   attacks" substatus, or a qualifying passive Power, the prevention flag is set. While the flag is
   set, direct damage is 0, effect damage to the defending Active is cancelled, conditions aimed at the
-  defender are dropped, and the post coin hook is skipped.
+  defender are dropped, and the post coin hook is skipped. Effect damage to the defending Active
+  re-runs the check, even for attacks without direct damage, and a match then also drops the
+  conditions.
 - **Parameters.** `00:33E9`: defender `+E7 ∈ {$0D,$14,$0C}` gives `cccd` 3/2/1. The Power hook
-  `3418` gives 5.
+  `3418` gives 5. `00:1A53` returns at once for an Active target while `cccd ≠ 0` (`1A5C-1A63`);
+  otherwise it zeroes `cccd` (`1A68`) and, for an Active target only, recomputes it (`1AB1`), so
+  the code stays set for the rest of the attack.
 - **Status.** CONFIRMED (verifier-found)
-- **Evidence.** `00:170C`, `00:33E9`, `00:1A5C-1A63`.
-- **Test.** `prevention_substatus_negates_damage_and_effects`
+- **Evidence.** `00:170C`, `00:33E9`, `00:1A5C-1A63`, `00:1A68`, `00:1AB1`.
+- **Test.** `prevention_substatus_negates_damage_and_effects`, `snipe_on_protected_active_without_direct_damage`
+
+  **Source quirk, not copied.** `00:1A68` clears `cccd` on every effect-damage call that gets past the
+  early return, Bench targets included, and never restores it. So a negated direct attack that also
+  damages the Bench loses its negation after the first Bench hit, and later queued conditions on the
+  defender then apply. Runtime: `00:1A53` with `b = 1`, `cccd = 3` left `cccd = 0`, and `00:346E`
+  then returned no carry. The clean engine keeps the negation for the whole attack (a `RULES:
+  R-DMG-12` comment marks this).
 
 ### R-DMG-13: Coin prevention after the calculation *(verifier-found)*
 - **Rule.** After the damage is computed, a defender with a generic "flip: heads prevents the damage"
@@ -784,13 +809,34 @@ unit test that should cover it.
   `coin_prevention_heads_clears_placed_effect`
 
 ### R-DMG-14: Retaliation hook *(verifier-found)*
-- **Rule.** When a creature with a generic retaliation Power takes nonzero damage that is not from a
-  Power (and no blocker is in play), the other side's Active takes a flat 10 with no modifiers. A
-  similar hook after phase 4 damages the attacker by 10 when a defender with a usable passive was
-  damaged.
-- **Status.** CONFIRMED (verifier-found)
-- **Evidence.** `00:32CE-3309`, `00:3632`.
-- **Test.** `retaliation_power_deals_flat_10`
+- **Rule.** One generic retaliation Power has two hooks. Each deals a flat 10 with no modifiers.
+  1. **Effect damage**, at once: when the holder takes nonzero effect damage in any slot, the other
+     side's Active takes 10. Not for damage the attacker deals to its own side, not for Power
+     damage, not while a blocker is in play, and for an Active holder only while its Power works.
+  2. **Direct damage**, once per attack, after phase 4: for an attack with direct damage, if the
+     total damage dealt to the defending Active (the direct damage plus effect damage to the Active)
+     is nonzero and the defending Active's Power works, the turn player's **current** Active takes
+     10. If a phase-4 effect switched the attacker, the creature switched in takes it.
+
+  So an attack with 0 direct damage whose phase-4 effect hits the holder's Active triggers both,
+  for 20 in total.
+- **Parameters.** `00:32CE-3335` RetaliationHook (inside `00:1A53`): `de ≠ 0`, `ccec == 0` (not own
+  side, set by the own-Bench routines `0B:673B-6745`, `0B:6764-676B`), `ccca == $7F`, no blocker,
+  `ccb7 ≠ 4`, and for slot 0 `CheckActivePowerUsable`. `00:3632-3671` AfterDamageRetaliationCheck,
+  called at `00:176D`: `ccca == $7F` (the defender at attack start, saved around phase 4 at
+  `1760-176A`), `ccb7` bit 7 clear, `wDamageDealt ≠ 0` (low byte; effect damage to the Active adds to
+  it at `00:1AC9`), the defender's Active Power usable, then 10 to the turn duelist's `+C8`.
+- **Status.** CORRECTED (verifier-found). The original text called the second hook "similar" and
+  did not say what it keys on or whom it hits. Runtime: after `00:14A8` swapped the attacker,
+  `00:3632` subtracted 10 from the new Active (`C2C8`) and left the Benched attacker alone; with 0
+  direct damage, `00:1A53` on a `$7F` Active hit the attacker for 10 and `00:3632` added another 10.
+- **Evidence.** `00:32CE-3335`, `00:3632-3677`, `00:1760-176D`, `00:1AC9`.
+- **Test.** `retaliation_power_deals_flat_10`, `own_bench_damage_does_not_retaliate`,
+  `retaliation_after_phase_4_hits_current_active`
+
+  The clean engine keys the second hook on the current defending Active being a working retaliator,
+  where the source keys on the defender at attack start. They differ only if phase 4 switched the
+  defender.
 
 ---
 
@@ -1162,7 +1208,7 @@ unit test that should cover it.
   11. Coin prevention hook (R-DMG-13).
   12. Apply damage.
   13. Phase 4.
-  14. Retaliation hook.
+  14. Retaliation hook (R-DMG-14 hook 2): the turn player's current Active takes 10.
   15. Status queue.
   16. Knock-out handler.
 - **Parameters.** The accuracy cache `cc0a` is reset per turn. `ccb7` bit 7 marks an attack with no
@@ -1376,7 +1422,7 @@ notes give the decision order and the weightings to copy where helpful.
 23. Damage order: base → attacker double → weakness ×2 → resistance −30 → +10 per +10 trainer → −20 per −20 trainer on the defender → defender prevention/reduction → attacker-placed reduction → clamp to 0. Clamp only at the end.
 24. Base damage 0 skips all modifiers.
 25. Weakness and resistance: use the defender's changed weakness or resistance if set. The attacker's changed colour applies only while its Power works (no condition, no blocker). Trainer-as-Basic is colour index 6.
-26. Effect damage never uses weakness or resistance. +10 applies only when the target is the Active (including Power damage). −20 applies on any slot (except Power damage). The defender's reductions apply on the Active. The Bench reduction Power applies after the clamp.
+26. Effect damage never uses weakness or resistance. +10 applies only when the target is the Active (including Power damage). −20 applies on any slot (except Power damage). The defender's reductions apply on the Active, and the whole-attack check runs again for it. After the clamp (not for Power damage, not under a blocker): the Bench reduction Power, then on any slot the evolved-attacker shield and the coin prevention.
 27. An ignore-weakness-and-resistance flag skips only those two steps.
 28. Defender reduction: the prevention flag, else one "until next turn" effect (0 / −10 / −20 / <40 → 0 / halve), else the defender's reduction Power (≥30 → 0, or halve). Then the attacker-placed −20/−10.
 29. Halving rounds down to a multiple of 10.
