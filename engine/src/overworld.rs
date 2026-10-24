@@ -2,19 +2,30 @@
 //! dialogue effects and read by dialogue conditions. The dialogue itself is data
 //! (the world's map JSON); this module only knows the small string language:
 //!
-//! - effect: `give:<item>` or `flag:<flag>`
-//! - condition: `item:<item>` or `flag:<flag>`, optionally negated with `!`;
+//! - effect: `give:<item>`, `flag:<flag>`, `duel:<rival>` (offer a campaign
+//!   duel) or `pack:<booster>` (grant a pack: `ember`, `tide`, `wild`, `grove`,
+//!   `storm`, `stone` or `dream`)
+//! - condition: `item:<item>`, `flag:<flag>`, `seals:<n>` (at least n seals),
+//!   `beat:<rival>` (beaten at least once), `open:<rival>` (enough seals to
+//!   duel them), `won:<rival>` / `lost:<rival>` (the result of the last
+//!   campaign duel, until [`Progress::settle`]), optionally negated with `!`;
 //!   an empty condition always holds
-//! - save string: comma-separated `i:<item>` and `f:<flag>` tokens
+//! - save string: comma-separated `i:<item>`, `f:<flag>` and `won:<rival>` /
+//!   `lost:<rival>` tokens
 //!
 //! Names are lowercase ASCII letters, digits and `_`.
 
 use std::collections::BTreeSet;
 
+use crate::booster::BOOSTERS;
+use crate::campaign::{rival, seals};
+
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Progress {
     items: BTreeSet<String>,
     flags: BTreeSet<String>,
+    /// The last campaign duel (rival id, won), until its post-duel line played.
+    last: Option<(String, bool)>,
 }
 
 /// What applying an effect did.
@@ -24,6 +35,20 @@ pub enum Applied {
     GotItem(String),
     /// Already owned, or a flag: nothing to announce.
     Nothing,
+    /// Offer a duel against this campaign rival (by id).
+    Duel(String),
+    /// Grant one pack of this booster (index into [`BOOSTERS`]).
+    Pack(usize),
+}
+
+/// The booster a `pack:` name means: the first word of its name, lowercase.
+fn booster(name: &str) -> Option<usize> {
+    BOOSTERS.iter().position(|b| {
+        b.name
+            .split(' ')
+            .next()
+            .is_some_and(|w| w.eq_ignore_ascii_case(name))
+    })
 }
 
 fn valid(name: &str) -> bool {
@@ -64,6 +89,10 @@ impl Progress {
                 self.flags.insert(flag.to_string());
                 Ok(Applied::Nothing)
             }
+            Some(("duel", id)) if rival(id).is_some() => Ok(Applied::Duel(id.to_string())),
+            Some(("pack", name)) => booster(name)
+                .map(Applied::Pack)
+                .ok_or_else(|| format!("unknown booster in {effect:?}")),
             _ => Err(format!("unknown dialogue effect {effect:?}")),
         }
     }
@@ -81,9 +110,36 @@ impl Progress {
         let held = match split(cond) {
             Some(("item", item)) => self.has_item(item),
             Some(("flag", flag)) => self.has_flag(flag),
+            Some(("seals", n)) => match n.parse::<usize>() {
+                Ok(n) => seals(self) >= n,
+                Err(_) => return false,
+            },
+            Some((kind @ ("beat" | "open" | "won" | "lost"), id)) => {
+                let Some(r) = rival(id) else { return false };
+                match kind {
+                    "beat" => r.beaten(self),
+                    "open" => r.open(self),
+                    "won" => self.last_duel() == Some((id, true)),
+                    _ => self.last_duel() == Some((id, false)),
+                }
+            }
             _ => return false,
         };
         held != negate
+    }
+
+    /// The last campaign duel's (rival id, won), until [`settle`](Self::settle).
+    pub fn last_duel(&self) -> Option<(&str, bool)> {
+        self.last.as_ref().map(|(id, won)| (id.as_str(), *won))
+    }
+
+    pub(crate) fn set_last_duel(&mut self, id: &str, won: bool) {
+        self.last = Some((id.to_string(), won));
+    }
+
+    /// The post-duel line played: forget the last result.
+    pub fn settle(&mut self) {
+        self.last = None;
     }
 
     /// The first branch whose condition holds.
@@ -95,7 +151,11 @@ impl Progress {
     pub fn encode(&self) -> String {
         let items = self.items.iter().map(|i| format!("i:{i}"));
         let flags = self.flags.iter().map(|f| format!("f:{f}"));
-        items.chain(flags).collect::<Vec<_>>().join(",")
+        let last = self
+            .last
+            .iter()
+            .map(|(id, won)| format!("{}:{id}", if *won { "won" } else { "lost" }));
+        items.chain(flags).chain(last).collect::<Vec<_>>().join(",")
     }
 
     /// Read a save string, skipping anything malformed (an old or tampered save
@@ -110,6 +170,7 @@ impl Progress {
                 Some(("f", flag)) => {
                     p.flags.insert(flag.to_string());
                 }
+                Some((kind @ ("won" | "lost"), id)) => p.set_last_duel(id, kind == "won"),
                 _ => {}
             }
         }
@@ -174,6 +235,55 @@ mod tests {
         p.apply("give:running_shoes").unwrap();
         assert_eq!(p.pick(branches), Some(1));
         assert_eq!(p.pick(["flag:nope"]), None);
+    }
+
+    #[test]
+    fn duel_and_pack_effects_name_a_rival_or_a_booster() {
+        let mut p = Progress::default();
+        assert_eq!(p.apply("duel:bramble"), Ok(Applied::Duel("bramble".into())));
+        assert_eq!(p.apply("pack:wild"), Ok(Applied::Pack(2)));
+        assert_eq!(p.apply("pack:dream"), Ok(Applied::Pack(6)));
+        for bad in ["duel:nobody", "pack:gold", "duel:", "pack:Wild"] {
+            assert!(p.apply(bad).is_err(), "{bad:?}");
+        }
+        assert_eq!(p, Progress::default());
+    }
+
+    #[test]
+    fn campaign_conditions_read_seals_wins_and_the_last_duel() {
+        use crate::campaign::{record, rival};
+        use crate::profile::Wallet;
+        let (mut p, mut w) = (Progress::default(), Wallet::default());
+        assert!(p.check("seals:0") && !p.check("seals:1") && p.check("!seals:1"));
+        assert!(p.check("open:bramble") && !p.check("open:quill") && !p.check("open:warden"));
+        assert!(!p.check("beat:bramble") && !p.check("won:bramble") && !p.check("lost:bramble"));
+        record(rival("bramble").unwrap(), false, &mut p, &mut w);
+        assert!(p.check("lost:bramble") && !p.check("won:bramble") && !p.check("lost:marlo"));
+        record(rival("bramble").unwrap(), true, &mut p, &mut w);
+        assert!(p.check("won:bramble") && !p.check("lost:bramble"));
+        assert!(p.check("beat:bramble") && p.check("seals:1"));
+        p.settle();
+        assert!(!p.check("won:bramble") && p.check("beat:bramble"));
+        // Unknown rivals and bad counts never hold, negated or not.
+        for bad in [
+            "beat:nobody",
+            "!beat:nobody",
+            "seals:x",
+            "!seals:x",
+            "won:nobody",
+        ] {
+            assert!(!p.check(bad), "{bad:?}");
+        }
+    }
+
+    #[test]
+    fn save_string_keeps_the_last_duel() {
+        let mut p = Progress::decode("f:beat_marlo,lost:marlo");
+        assert_eq!(p.last_duel(), Some(("marlo", false)));
+        assert_eq!(p.encode(), "f:beat_marlo,lost:marlo");
+        assert_eq!(Progress::decode(&p.encode()), p);
+        p.settle();
+        assert_eq!(p.encode(), "f:beat_marlo");
     }
 
     #[test]
