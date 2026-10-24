@@ -1263,9 +1263,11 @@ select option { background: var(--panel); color: var(--ink); }
 .update-toast {
   position: fixed;
   z-index: 95;
-  left: 50%;
+  left: 16px;
+  right: 16px;
   bottom: max(16px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
+  width: max-content;
+  margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
