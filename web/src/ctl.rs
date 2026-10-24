@@ -11,30 +11,11 @@ use std::collections::{HashMap, VecDeque};
 use std::time::Duration;
 
 use leptos::prelude::*;
+use pkmntcg_engine::ai::{Ai, Difficulty};
 use pkmntcg_engine::{card, Action, CardId, Config, Event, Game, PromptKind, Status};
 
 pub const HUMAN: usize = 0;
 pub const AI: usize = 1;
-
-/// The AI opponent's move. The only place the web app decides for the AI.
-pub fn ai_move(game: &Game, _me: usize) -> Action {
-    // Placeholder until `pkmntcg_engine::ai` lands: play cards, then attack,
-    // else end the turn. Skips Retreat and Powers so it can't loop.
-    let actions = game.legal_actions();
-    let other = |a: &&Action| {
-        !matches!(
-            a,
-            Action::Retreat | Action::UsePower(_) | Action::Attack(_) | Action::Done | Action::Cancel
-        )
-    };
-    let pick = actions
-        .iter()
-        .find(other)
-        .or_else(|| actions.iter().find(|a| matches!(a, Action::Attack(_))))
-        .or_else(|| actions.iter().find(|a| matches!(a, Action::Done)))
-        .or(actions.first());
-    *pick.expect("legal_actions is never empty while the game runs")
-}
 
 #[derive(Clone, PartialEq)]
 pub struct Coin {
@@ -91,6 +72,7 @@ pub struct Setup {
     pub decks: [Vec<CardId>; 2],
     pub names: [String; 2],
     pub prizes: u8,
+    pub difficulty: Difficulty,
 }
 
 #[derive(Clone, Copy)]
@@ -105,7 +87,10 @@ pub struct Ctl {
     pub error: RwSignal<Option<String>>,
     pub setup: StoredValue<Option<Setup>>,
     real: StoredValue<Option<Game>>,
+    ai: StoredValue<Option<Ai>>,
     queue: StoredValue<VecDeque<Event>>,
+    /// Why the next coin is flipped, from the events before it.
+    coin_reason: StoredValue<String>,
     /// Bumped on every new match so stale timers from the last one stop.
     generation: StoredValue<u32>,
     counter: StoredValue<u32>,
@@ -129,7 +114,9 @@ impl Ctl {
             error: RwSignal::new(None),
             setup: StoredValue::new(None),
             real: StoredValue::new(None),
+            ai: StoredValue::new(None),
             queue: StoredValue::new(VecDeque::new()),
+            coin_reason: StoredValue::new(String::new()),
             generation: StoredValue::new(0),
             counter: StoredValue::new(0),
             reduced_motion,
@@ -153,6 +140,8 @@ impl Ctl {
         self.generation.update_value(|g| *g += 1);
         self.error.set(None);
         self.seed.set(seed);
+        // Its own seed, so the AI's random choices don't mirror the game's coins.
+        self.ai.set_value(Some(Ai::new(seed ^ 0x5eed_0a11, setup.difficulty)));
         self.setup.set_value(Some(setup));
         self.log.set(vec![]);
         self.fx.set(Fx::default());
@@ -243,7 +232,13 @@ impl Ctl {
                 if self.generation.get_value() != generation {
                     return;
                 }
-                let action = self.real.with_value(|g| g.as_ref().map(|g| ai_move(g, AI)));
+                let action = self
+                    .ai
+                    .try_update_value(|ai| {
+                        let ai = ai.as_mut()?;
+                        self.real.with_value(|g| g.as_ref().map(|g| ai.choose_action(g, AI)))
+                    })
+                    .flatten();
                 if let Some(action) = action {
                     self.run(action);
                 }
@@ -295,7 +290,26 @@ impl Ctl {
         let key = self.next_key();
         let text = event.describe(HUMAN);
         let kind = log_kind(event);
-        let previous = self.log.with_untracked(|l| l.last().map(|l| l.text.clone()));
+        let reason = match event {
+            Event::PrizesSet { .. } => Some("Who goes first?".to_string()),
+            Event::TurnStarted { .. } => Some("Coin flip".into()),
+            Event::BetweenTurns => Some("Asleep: heads wakes it up".into()),
+            Event::EnergyDiscarded { .. } if self.coin_reason.get_value() == "Coin flip" => {
+                Some("Confused: heads lets it retreat".into())
+            }
+            Event::AttackUsed { creature, attack, .. } => card(*creature)
+                .creature()
+                .and_then(|c| c.attacks.get(*attack))
+                .map(|a| a.name.to_string()),
+            Event::PowerUsed { creature, .. } => card(*creature)
+                .creature()
+                .and_then(|c| c.power.as_ref())
+                .map(|p| p.name.to_string()),
+            _ => None,
+        };
+        if let Some(r) = reason {
+            self.coin_reason.set_value(r);
+        }
         self.log.update(|l| {
             l.push(LogLine { key, text, kind });
             if l.len() > 300 {
@@ -319,7 +333,7 @@ impl Ctl {
                 1200
             }
             Event::CoinFlip { player, heads } => {
-                let caption = previous.unwrap_or_default();
+                let caption = self.coin_reason.get_value();
                 let key = self.next_key();
                 self.fx.update(|f| {
                     f.callout = None;

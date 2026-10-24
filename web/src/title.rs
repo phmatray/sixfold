@@ -1,6 +1,7 @@
 //! Title screen: pick your deck and the AI's, see the seed, start.
 
 use leptos::prelude::*;
+use pkmntcg_engine::ai::Difficulty;
 use pkmntcg_engine::decks::{Prebuilt, PREBUILT};
 use pkmntcg_engine::{card, CardId, CardKind, Color, EnergyCard};
 
@@ -73,6 +74,7 @@ pub fn TitleScreen() -> impl IntoView {
     let theirs = RwSignal::new(if decks().len() > 1 { 1 } else { 0 });
     let seed = RwSignal::new(crate::new_seed());
     let prizes = RwSignal::new(6u8);
+    let normal = RwSignal::new(true);
     // Three cards fanned in the hero, taken from the first deck.
     let hero: Vec<CardId> = decks()
         .iter()
@@ -86,6 +88,7 @@ pub fn TitleScreen() -> impl IntoView {
             decks: [a.cards(), b.cards()],
             names: [a.name.to_string(), b.name.to_string()],
             prizes: prizes.get(),
+            difficulty: if normal.get() { Difficulty::Normal } else { Difficulty::Easy },
         };
         if ctl.start(setup, seed.get()) {
             screen.set(Screen::Match);
@@ -125,6 +128,13 @@ pub fn TitleScreen() -> impl IntoView {
                                 <span>"Prizes"</span>
                                 <select on:change=move |e| { if let Ok(n) = event_target_value(&e).parse() { prizes.set(n) } }>
                                     {(1..=6u8).rev().map(|n| view! { <option value=n.to_string() selected=n == 6>{n}</option> }).collect_view()}
+                                </select>
+                            </label>
+                            <label class="field">
+                                <span>"AI"</span>
+                                <select on:change=move |e| normal.set(event_target_value(&e) == "normal")>
+                                    <option value="normal" selected>"Normal"</option>
+                                    <option value="easy">"Easy: sometimes skips a play"</option>
                                 </select>
                             </label>
                             <button type="submit" class="btn primary start">"Start the duel"</button>

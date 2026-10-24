@@ -2,7 +2,7 @@
 //! battle log, discard viewer and the game-over screen.
 
 use leptos::prelude::*;
-use pkmntcg_engine::{card, Color};
+use pkmntcg_engine::{card, Color, Event};
 
 use crate::art::glyph_svg;
 use crate::board::{find_mon, slot_name, status_class};
@@ -177,7 +177,21 @@ pub fn GameOver() -> impl IntoView {
             let g = g.as_ref()?;
             let v = g.view(HUMAN);
             let w = v.winner?;
-            Some((w, v.sudden_death, v.sides.map(|s| s.prizes.iter().filter(|p| **p).count())))
+            let left = v.sides.clone().map(|s| s.prizes.iter().filter(|p| **p).count());
+            let loser = 1 - w;
+            let you = |p: usize| if p == HUMAN { "You" } else { "Your opponent" };
+            let deck_out = g
+                .log()
+                .iter()
+                .any(|e| matches!(e, Event::DeckOut { player } if *player == loser));
+            let why = if deck_out {
+                format!("{} couldn't draw a card.", you(loser))
+            } else if left[w] == 0 {
+                format!("{} took every prize.", you(w))
+            } else {
+                format!("{} had no creature left in play.", you(loser))
+            };
+            Some((w, v.sudden_death, left, why))
         })
     });
     let rematch = move |_| {
@@ -186,13 +200,14 @@ pub fn GameOver() -> impl IntoView {
         }
     };
     move || {
-        let (winner, sudden, left) = result.get()?;
+        let (winner, sudden, left, why) = result.get()?;
         let won = winner == HUMAN;
         Some(view! {
             <div class="scrim end">
                 <div class=if won { "dialog result won" } else { "dialog result lost" } role="dialog" aria-modal="true" aria-labelledby="result-title">
                     <h2 id="result-title">{if won { "You win" } else { "You lose" }}</h2>
                     <p class="dialog-sub">
+                        {why} " "
                         {format!("Prizes left: you {}, opponent {}.", left[HUMAN], left[1 - HUMAN])}
                         {sudden.then(|| " Decided in sudden death.")}
                     </p>
