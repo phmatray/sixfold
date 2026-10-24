@@ -12,8 +12,10 @@ export const U = { uTime: { value: 0 }, uSway: { value: 1 }, uDrift: { value: 0 
 // ponytail: shadows use the default depth material, so they don't sway; add a
 // customDepthMaterial with the same chunk if anyone notices.
 export function windify(mesh, height) {
-  const byColor = !!mesh.geometry.attributes.color;
-  if (byColor && !mesh.geometry.attributes.windw) mesh.geometry.setAttribute("windw", mesh.geometry.attributes.color);
+  // A flattened model (world.js) already carries `windw` (-1 where a part had none: use the height).
+  const flat = !!mesh.geometry.attributes.windw;
+  const byColor = flat || !!mesh.geometry.attributes.color;
+  if (byColor && !flat) mesh.geometry.setAttribute("windw", mesh.geometry.attributes.color);
   const mat = mesh.material;
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, U, { uWindH: { value: height } });
@@ -28,7 +30,7 @@ export function windify(mesh, height) {
             m = m * instanceMatrix;
           #endif
           vec3 wp = (m * vec4(position, 1.0)).xyz;
-          float wgt = ${byColor ? "windw.r" : "clamp(wp.y / uWindH, 0.0, 1.0)"};
+          float wgt = ${byColor ? "windw.r < 0.0 ? clamp(wp.y / uWindH, 0.0, 1.0) : windw.r" : "clamp(wp.y / uWindH, 0.0, 1.0)"};
           wgt *= wgt;
           float ph = dot(wp.xz, vec2(0.37, 0.61));
           float sway = sin(uTime * 1.6 + ph) * 0.6 + sin(uTime * 2.7 + ph * 1.7) * 0.3;
@@ -40,6 +42,31 @@ export function windify(mesh, height) {
       );
   };
   mat.customProgramCacheKey = () => (byColor ? "wind-c" : "wind-h");
+}
+
+// Still water in a model (the fountain's pool): drifting ripples and glints in
+// the fragment shader, on the shared clock (frozen with reduced motion).
+export function waterify(mat) {
+  mat.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, U);
+    sh.vertexShader = sh.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vWP;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvWP = (modelMatrix * vec4(position, 1.0)).xyz;");
+    sh.fragmentShader = sh.fragmentShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vWP;\nuniform float uDrift;")
+      .replace(
+        "#include <map_fragment>",
+        `#include <map_fragment>
+        {
+          vec2 p = vWP.xz * 3.0;
+          float rip = sin(p.x * 1.7 + uDrift * 2.1) * sin(p.y * 1.3 - uDrift * 1.7) * 0.5 + 0.5;
+          float rip2 = sin((p.x + p.y) * 2.3 - uDrift * 2.9) * 0.5 + 0.5;
+          diffuseColor.rgb *= 0.85 + 0.2 * rip;
+          diffuseColor.rgb += vec3(0.9, 0.97, 1.0) * 0.35 * smoothstep(0.82, 0.98, rip * rip2 + 0.25);
+        }`,
+      );
+  };
+  mat.customProgramCacheKey = () => "water";
 }
 
 // White blobs on black (or one soft dot when n = 1), tiling when `wrap`.
