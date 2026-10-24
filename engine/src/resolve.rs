@@ -384,10 +384,15 @@ impl Game {
         let pd = self.pd();
         let (p, slot) = (pd.player, pd.slot);
         match pd.source {
-            Source::Attack => ev.push(Event::AttackUsed {
-                player: p,
-                attack: pd.attack,
-            }),
+            Source::Attack => {
+                let a = self.players[p].active.as_ref().expect("attacker");
+                ev.push(Event::AttackUsed {
+                    player: p,
+                    attack: pd.attack,
+                    uid: a.uid,
+                    creature: a.top(),
+                })
+            }
             Source::Trainer => {
                 if let Some(card) = pd.card {
                     ev.push(Event::TrainerPlayed { player: p, card });
@@ -397,8 +402,13 @@ impl Game {
                 // R-POWER-04: the once-per-turn flag (only read when the Power has one).
                 if let Some(c) = self.players[p].slot_mut(slot) {
                     c.power_used = true;
+                    ev.push(Event::PowerUsed {
+                        player: p,
+                        slot,
+                        uid: c.uid,
+                        creature: c.top(),
+                    });
                 }
-                ev.push(Event::PowerUsed { player: p, slot });
             }
         }
         self.run_effects(Phase::Cost, ev);
@@ -582,10 +592,13 @@ impl Game {
                     return;
                 }
                 let card = active.energy.remove(k);
+                let (uid, creature) = (active.uid, active.top());
                 opp.discard.push(card);
                 ev.push(Event::EnergyDiscarded {
                     player: q,
                     slot: 0,
+                    uid,
+                    creature,
                     card,
                 });
             }
@@ -611,6 +624,8 @@ impl Game {
                     ev.push(Event::Healed {
                         player: p,
                         slot: 0,
+                        uid: active.uid,
+                        creature: active.top(),
                         amount,
                     });
                 }
@@ -747,11 +762,14 @@ impl Game {
                 picked.push(c.energy.remove(k));
             }
         }
+        let (uid, creature) = (c.uid, c.top());
         for card in picked {
             pl.discard.push(card);
             ev.push(Event::EnergyDiscarded {
                 player: p,
                 slot,
+                uid,
+                creature,
                 card,
             });
         }
@@ -765,7 +783,13 @@ impl Game {
             .is_some_and(|c| c.hp > 0)
         {
             self.switch(p, slot);
-            ev.push(Event::Switched { player: p, slot });
+            let a = self.players[p].active.as_ref().expect("switched in");
+            ev.push(Event::Switched {
+                player: p,
+                slot,
+                uid: a.uid,
+                creature: a.top(),
+            });
         }
     }
 
@@ -781,6 +805,8 @@ impl Game {
                 ev.push(Event::TrainerAttached {
                     player: p,
                     slot,
+                    uid: c.uid,
+                    creature: c.top(),
                     card,
                 });
             }
@@ -801,6 +827,7 @@ impl Game {
         let card = c.stack.pop().expect("evolved");
         c.hp = c.creature().hp.saturating_sub(damage);
         c.clear_flags();
+        let (uid, creature) = (c.uid, c.top());
         // RULES: R-EVO-12 — the removed stage goes to its owner's hand.
         pl.hand.push(card);
         if slot == 0 {
@@ -809,6 +836,8 @@ impl Game {
         ev.push(Event::Devolved {
             player: p,
             slot,
+            uid,
+            creature,
             card,
         });
     }
@@ -1078,11 +1107,15 @@ mod tests {
         g.players[0].condition.apply(Status::Confused);
         g.force_coins(&[false]);
         let ev = attack_with(&mut g, 30, effects);
-        assert!(ev.contains(&Event::EnergyDiscarded {
-            player: 0,
-            slot: 0,
-            card: FIRE_E
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::EnergyDiscarded {
+                player: 0,
+                slot: 0,
+                card: FIRE_E,
+                ..
+            }
+        )));
         assert_eq!(damage_to(&ev, 0, 0), vec![20]);
         assert!(damage_to(&ev, 1, 0).is_empty());
         assert!(applied(&ev, 1).is_empty());
@@ -1278,11 +1311,15 @@ mod tests {
         let mut g = main_phase(0);
         g.players[0].active.as_mut().unwrap().hp = 40;
         let ev = attack_with(&mut g, 0, &[Heal(30)]);
-        assert!(ev.contains(&Event::Healed {
-            player: 0,
-            slot: 0,
-            amount: 10
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::Healed {
+                player: 0,
+                slot: 0,
+                amount: 10,
+                ..
+            }
+        )));
         assert_eq!(hp(&g, 0, 0), 50);
     }
 
@@ -1505,7 +1542,14 @@ mod tests {
         let ev = ok(&mut g, Action::Choose(0));
         assert!(
             pos(&ev, |e| matches!(e, Event::Damage { player: 1, .. }))
-                < pos(&ev, |e| matches!(e, Event::Switched { player: 1, slot: 1 }))
+                < pos(&ev, |e| matches!(
+                    e,
+                    Event::Switched {
+                        player: 1,
+                        slot: 1,
+                        ..
+                    }
+                ))
         );
         assert_eq!(g.players[1].active.as_ref().unwrap().top(), EMBERKIT);
         assert_eq!(
@@ -1546,7 +1590,14 @@ mod tests {
         g.players[0].condition.apply(Status::Poisoned);
         attack_with(&mut g, 10, &[SwitchSelf]);
         let ev = ok(&mut g, Action::Choose(0));
-        assert!(ev.contains(&Event::Switched { player: 0, slot: 1 }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::Switched {
+                player: 0,
+                slot: 1,
+                ..
+            }
+        )));
         assert_eq!(g.players[0].active.as_ref().unwrap().top(), EMBERKIT);
         assert!(g.players[0].condition.is_empty());
     }
@@ -1563,11 +1614,15 @@ mod tests {
         g.players[1].condition.apply(Status::Poisoned);
         set_hand(&mut g, 0, &[REWIND_MIST]);
         let ev = ok(&mut g, Action::PlayTrainer(0));
-        assert!(ev.contains(&Event::Devolved {
-            player: 1,
-            slot: 0,
-            card: MOSSBACK
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::Devolved {
+                player: 1,
+                slot: 0,
+                card: MOSSBACK,
+                ..
+            }
+        )));
         let a = g.players[1].active.as_ref().unwrap();
         assert_eq!(
             (a.stack.clone(), a.hp, a.energy.clone()),
@@ -1591,11 +1646,15 @@ mod tests {
         g.players[1].active = Some(target);
         g.players[1].bench.push(creature(EMBERKIT, &[]));
         let ev = attack_with(&mut g, 0, &[Devolve]);
-        assert!(ev.contains(&Event::KnockedOut {
-            player: 1,
-            slot: 0,
-            card: MOSSLING
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::KnockedOut {
+                player: 1,
+                slot: 0,
+                card: MOSSLING,
+                ..
+            }
+        )));
     }
 
     /// R-EVO-10
@@ -1610,11 +1669,15 @@ mod tests {
             vec![Choice::Evolve { hand: 0, slot: 0 }]
         );
         let ev = ok(&mut g, Action::Choose(0));
-        assert!(ev.contains(&Event::Evolved {
-            player: 0,
-            slot: 0,
-            card: MOSSGIANT
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::Evolved {
+                player: 0,
+                slot: 0,
+                card: MOSSGIANT,
+                ..
+            }
+        )));
         assert_eq!(hp(&g, 0, 0), 110, "damage kept");
         // Not settled (turn 1): nothing to evolve.
         let mut g = main_phase(1);

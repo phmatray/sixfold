@@ -86,11 +86,15 @@ impl Game {
         discard.sort_unstable_by(|a, b| b.cmp(a));
         let pl = &mut self.players[p];
         for i in discard {
-            let card = pl.active.as_mut().expect("validated").energy.remove(i);
+            let active = pl.active.as_mut().expect("validated");
+            let card = active.energy.remove(i);
+            let (uid, creature) = (active.uid, active.top());
             pl.discard.push(card);
             ev.push(Event::EnergyDiscarded {
                 player: p,
                 slot: 0,
+                uid,
+                creature,
                 card,
             });
         }
@@ -102,7 +106,13 @@ impl Game {
         }
         self.switch(p, slot);
         self.retreat_failed = false;
-        ev.push(Event::Retreated { player: p, slot });
+        let a = self.players[p].active.as_ref().expect("switched in");
+        ev.push(Event::Retreated {
+            player: p,
+            slot,
+            uid: a.uid,
+            creature: a.top(),
+        });
     }
 
     /// R-RETREAT-04: swap the Active with a Benched creature; the outgoing

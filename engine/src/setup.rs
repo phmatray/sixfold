@@ -68,19 +68,26 @@ impl Game {
     /// R-ZONE-01: into the empty Active spot (clearing its conditions), else the
     /// Bench. Returns the slot.
     pub(crate) fn place(&mut self, p: usize, h: usize, ev: &mut Vec<Event>) -> usize {
+        self.last_uid += 1;
+        let uid = self.last_uid;
         let pl = &mut self.players[p];
         let card = pl.hand.remove(h);
+        let c = InPlay {
+            uid,
+            ..InPlay::new(card)
+        };
         let slot = if pl.active.is_none() {
-            pl.active = Some(InPlay::new(card));
+            pl.active = Some(c);
             pl.clear_active_state();
             0
         } else {
-            pl.bench.push(InPlay::new(card));
+            pl.bench.push(c);
             pl.bench.len()
         };
         ev.push(Event::Placed {
             player: p,
             slot,
+            uid,
             card,
         });
         slot

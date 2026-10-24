@@ -103,10 +103,13 @@ impl Game {
         }
         let pl = &mut self.players[p];
         let card = pl.hand.remove(hand);
-        pl.slot_mut(slot).expect("validated").energy.push(card);
+        let c = pl.slot_mut(slot).expect("validated");
+        c.energy.push(card);
         ev.push(Event::EnergyAttached {
             player: p,
             slot,
+            uid: c.uid,
+            creature: c.top(),
             card,
         });
     }
@@ -148,12 +151,14 @@ impl Game {
         c.hp = (c.hp as i32 + new_max - old_max).max(0) as u16;
         c.stack.push(id);
         c.clear_flags();
+        let uid = c.uid;
         if slot == 0 {
             pl.clear_active_state();
         }
         ev.push(Event::Evolved {
             player: p,
             slot,
+            uid,
             card: id,
         });
     }
@@ -272,9 +277,12 @@ impl Game {
                 }
             };
             if !heads {
+                let a = self.players[p].active.as_ref().expect("validated");
                 ev.push(Event::AttackUsed {
                     player: p,
                     attack: i,
+                    uid: a.uid,
+                    creature: a.top(),
                 });
                 ev.push(Event::AttackFailed { player: p });
                 return self.steps.push_front(Step::EndTurn);

@@ -146,7 +146,14 @@ mod tests {
         g.players[0].active = Some(creature(ZAPLING, &[]));
         ok(&mut g, Action::UsePower(0));
         let ev = ok(&mut g, Action::Choose(0));
-        assert!(ev.contains(&Event::PowerUsed { player: 0, slot: 0 }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::PowerUsed {
+                player: 0,
+                slot: 0,
+                ..
+            }
+        )));
         assert_eq!(damage_to(&ev, 1, 0), vec![10]);
         assert_eq!(prompt_of(&g), (0, PromptKind::MainPhase));
         assert_eq!(g.turn(), 0);
@@ -247,7 +254,14 @@ mod tests {
         let mut g = main_phase(2);
         set_hand(&mut g, 0, &[GREETER]);
         let ev = ok(&mut g, Action::PlayBasic(0));
-        assert!(ev.contains(&Event::PowerUsed { player: 0, slot: 1 }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::PowerUsed {
+                player: 0,
+                slot: 1,
+                ..
+            }
+        )));
         assert_eq!(drawn(&ev), 1);
         g.players[0].bench[0].settled = true;
         set_hand(&mut g, 0, &[GREETER_ELDER]);

@@ -9,6 +9,10 @@ use crate::rng::Rng;
 /// All of this moves with the creature when it switches slots (R-RETREAT-04).
 #[derive(Debug, Clone, PartialEq)]
 pub struct InPlay {
+    /// Stable identity for the UI: unique in the game, kept while the creature
+    /// stays in play (switching, retreating, evolving, devolving, the Bench
+    /// closing up). A card that leaves play and comes back gets a new one.
+    pub uid: u32,
     /// Evolution stack, Basic first; the last card is the current creature.
     pub stack: Vec<CardId>,
     /// Remaining HP (R-DMG-06): knocked out exactly at 0.
@@ -31,6 +35,7 @@ impl InPlay {
     pub(crate) fn new(id: CardId) -> Self {
         let hp = card(id).creature().expect("placed card is a creature").hp;
         InPlay {
+            uid: 0,
             stack: vec![id],
             hp,
             energy: vec![],

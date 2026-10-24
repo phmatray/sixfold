@@ -224,7 +224,10 @@ impl Game {
         ev.push(Event::Damage {
             player: q,
             slot,
+            uid: c.uid,
+            creature: c.top(),
             amount: hit.amount,
+            hp: c.hp,
             weakness: hit.weakness,
             resistance: hit.resistance,
         });
@@ -461,11 +464,15 @@ mod tests {
         g.players[1].bench.push(creature(EMBERKIT, &[]));
         g.players[1].active.as_mut().unwrap().hp = 20;
         let ev = attack_with(&mut g, 10, &[]);
-        assert!(ev.contains(&Event::KnockedOut {
-            player: 1,
-            slot: 0,
-            card: PEBBLET
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::KnockedOut {
+                player: 1,
+                slot: 0,
+                card: PEBBLET,
+                ..
+            }
+        )));
         let mut g = duel();
         g.players[1].active.as_mut().unwrap().hp = 30;
         attack_with(&mut g, 10, &[]);
@@ -554,13 +561,17 @@ mod tests {
         let mut g = duel();
         g.players[1].effects.resistance = Some(Grass);
         let ev = attack_with(&mut g, 30, &[]);
-        assert!(ev.contains(&Event::Damage {
-            player: 1,
-            slot: 0,
-            amount: 30,
-            weakness: true,
-            resistance: true,
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::Damage {
+                player: 1,
+                slot: 0,
+                amount: 30,
+                weakness: true,
+                resistance: true,
+                ..
+            }
+        )));
     }
 
     /// R-DMG-12

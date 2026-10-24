@@ -107,6 +107,7 @@ impl Game {
             ev.push(Event::KnockedOut {
                 player: p,
                 slot,
+                uid: c.uid,
                 card: c.top(),
             });
             pl.discard_creature(c);
@@ -134,9 +135,15 @@ impl Game {
     /// R-KO-05: a live Benched creature fills the empty Active spot.
     pub(crate) fn promote(&mut self, p: usize, slot: usize, ev: &mut Vec<Event>) {
         let pl = &mut self.players[p];
-        pl.active = Some(pl.bench.remove(slot - 1));
+        let c = pl.bench.remove(slot - 1);
+        ev.push(Event::Promoted {
+            player: p,
+            slot,
+            uid: c.uid,
+            creature: c.top(),
+        });
+        pl.active = Some(c);
         pl.clear_active_state();
-        ev.push(Event::Promoted { player: p, slot });
     }
 
     /// R-TURN-08: a draw restarts the duel with one prize each, turn 0, a full
@@ -424,11 +431,15 @@ mod tests {
         g.players[1].bench = vec![creature(PEBBLET, &[])];
         g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
         let ev = ok(&mut g, Action::Attack(0));
-        assert!(ev.contains(&Event::KnockedOut {
-            player: 1,
-            slot: 0,
-            card: MOSSBACK
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::KnockedOut {
+                player: 1,
+                slot: 0,
+                card: MOSSBACK,
+                ..
+            }
+        )));
         assert_eq!(g.players[1].discard.len(), 4);
         assert_eq!(
             g.prompt_kind(),

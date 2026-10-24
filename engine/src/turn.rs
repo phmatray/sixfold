@@ -112,13 +112,16 @@ impl Game {
                 matches!(&crate::card::card(id).kind, crate::CardKind::Trainer(t) if t.effects.contains(&kind))
             });
             c.trainers = keep;
-            gone.extend(drop.into_iter().map(|card| (slot, card)));
+            let (uid, creature) = (c.uid, c.top());
+            gone.extend(drop.into_iter().map(|card| (slot, uid, creature, card)));
         }
-        for (slot, card) in gone {
+        for (slot, uid, creature, card) in gone {
             pl.discard.push(card);
             ev.push(Event::TrainerDiscarded {
                 player: p,
                 slot,
+                uid,
+                creature,
                 card,
             });
         }
@@ -391,11 +394,15 @@ mod tests {
         g.players[0].active.as_mut().unwrap().hp = 10;
         let ev = ok(&mut g, Action::Done);
         assert_eq!(coins(&ev), 0, "knocked out by poison: no coin");
-        assert!(ev.contains(&Event::KnockedOut {
-            player: 0,
-            slot: 0,
-            card: MOSSLING
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::KnockedOut {
+                player: 0,
+                slot: 0,
+                card: MOSSLING,
+                ..
+            }
+        )));
     }
 
     /// R-STATUS-07: N's Active is processed after T's, both each between-turns step.
@@ -504,11 +511,15 @@ mod tests {
         g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
         let ev = ok(&mut g, Action::Attack(0));
         assert_eq!(damage_to(&ev, 1, 0), vec![30], "10 ×2 +10");
-        assert!(ev.contains(&Event::TrainerDiscarded {
-            player: 0,
-            slot: 0,
-            card: WHETSTONE
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::TrainerDiscarded {
+                player: 0,
+                slot: 0,
+                card: WHETSTONE,
+                ..
+            }
+        )));
         assert_eq!(g.players[0].discard, vec![WHETSTONE]);
     }
 
@@ -527,10 +538,14 @@ mod tests {
         g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
         let ev = ok(&mut g, Action::Attack(0));
         assert_eq!(damage_to(&ev, 0, 0), vec![0], "20 −20");
-        assert!(ev.contains(&Event::TrainerDiscarded {
-            player: 0,
-            slot: 0,
-            card: BUCKLER
-        }));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::TrainerDiscarded {
+                player: 0,
+                slot: 0,
+                card: BUCKLER,
+                ..
+            }
+        )));
     }
 }

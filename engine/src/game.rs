@@ -83,6 +83,8 @@ pub struct Game {
     pub(crate) steps: VecDeque<Step>,
     pub(crate) winner: Option<usize>,
     pub(crate) log: Vec<Event>,
+    /// The last `InPlay::uid` handed out.
+    pub(crate) last_uid: u32,
 }
 
 impl Game {
@@ -121,6 +123,7 @@ impl Game {
             steps: VecDeque::new(),
             winner: None,
             log: Vec::new(),
+            last_uid: 0,
         }
     }
 
@@ -408,6 +411,53 @@ mod tests {
         }
     }
 
+    /// UI identity (`InPlay::uid`): kept through evolving and retreating; a
+    /// newly placed creature gets a fresh one.
+    #[test]
+    fn creature_uid_stable_while_in_play() {
+        use crate::player::InPlay;
+        use crate::testkit::*;
+        let mut g = main_phase(2);
+        g.last_uid = 50;
+        g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
+        g.players[0].bench.push(InPlay {
+            uid: 41,
+            ..creature(MOSSLING, &[])
+        });
+        set_hand(&mut g, 0, &[MOSSBACK, EMBERKIT]);
+        let ev = ok(&mut g, Action::Evolve { hand: 0, slot: 1 });
+        assert!(matches!(
+            ev[..],
+            [Event::Evolved {
+                uid: 41,
+                slot: 1,
+                ..
+            }]
+        ));
+        let ev = ok(&mut g, Action::PlayBasic(0));
+        assert!(matches!(
+            ev[..],
+            [Event::Placed {
+                uid: 51,
+                slot: 2,
+                ..
+            }]
+        ));
+        ok(&mut g, Action::Retreat);
+        ok(&mut g, Action::DiscardEnergy(0));
+        let ev = ok(&mut g, Action::Promote(1));
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::Retreated {
+                uid: 41,
+                slot: 1,
+                creature: MOSSBACK,
+                ..
+            }
+        )));
+        assert_eq!(g.players[0].active.as_ref().unwrap().uid, 41);
+    }
+
     /// Every card a player owns, wherever it is (60 for a legal deck).
     fn cards_owned(g: &Game, p: usize) -> usize {
         let pl = &g.players[p];
@@ -456,6 +506,14 @@ mod tests {
                         "seed {seed}: player {p} after {a:?}"
                     );
                 }
+                let mut uids: Vec<u32> = (0..2)
+                    .flat_map(|p| g.players[p].in_play().map(|(_, c)| c.uid))
+                    .collect();
+                let n = uids.len();
+                uids.sort_unstable();
+                uids.dedup();
+                assert_eq!(uids.len(), n, "seed {seed}: uids must be unique");
+                assert!(!uids.contains(&0), "seed {seed}: uid 0 in play");
             }
             assert!(matches!(g.log().last(), Some(Event::GameOver { .. })));
         }

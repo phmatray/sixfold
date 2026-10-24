@@ -72,6 +72,11 @@ pub enum Action {
     Done,
 }
 
+/// Something that happened, in order. Every event about a creature in play
+/// carries its `slot` at that moment, its `uid` (stable while it stays in play,
+/// see [`InPlay::uid`](crate::InPlay::uid)) and its top card: `card` for
+/// `Placed`, `Evolved` and `KnockedOut`, `creature` everywhere else (there
+/// `card` is the energy or trainer card that moved).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Event {
     Shuffled {
@@ -91,6 +96,7 @@ pub enum Event {
     Placed {
         player: usize,
         slot: usize,
+        uid: u32,
         card: CardId,
     },
     PrizesSet {
@@ -111,11 +117,15 @@ pub enum Event {
     EnergyAttached {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
         card: CardId,
     },
+    /// `card` is the evolution card, now on top.
     Evolved {
         player: usize,
         slot: usize,
+        uid: u32,
         card: CardId,
     },
     TrainerPlayed {
@@ -125,20 +135,28 @@ pub enum Event {
     EnergyDiscarded {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
         card: CardId,
     },
-    /// The creature from `slot` became Active; the old Active is now in `slot`.
+    /// The creature from `slot` (`uid`) became Active; the old Active is now in `slot`.
     Retreated {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
     },
     /// R-RETREAT-03: confused retreat flipped tails.
     RetreatFailed {
         player: usize,
     },
+    /// The Active (`uid`, top card `creature`) announced its attack number
+    /// `attack`: `card(creature).creature().unwrap().attacks[attack]`.
     AttackUsed {
         player: usize,
         attack: usize,
+        uid: u32,
+        creature: CardId,
     },
     /// The attack did nothing more: accuracy or confusion tails (R-TURN-05).
     AttackFailed {
@@ -151,6 +169,8 @@ pub enum Event {
     PowerUsed {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
     },
     ConditionApplied {
         player: usize,
@@ -170,27 +190,38 @@ pub enum Event {
     Healed {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
         amount: u16,
     },
-    /// An effect switched this Active with the creature from `slot`.
+    /// An effect switched this Active with the creature from `slot` (`uid`).
     Switched {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
     },
-    /// The top card `card` left the creature in `slot` for its owner's hand.
+    /// The top card `card` left the creature in `slot` for its owner's hand;
+    /// `creature` is the card now on top.
     Devolved {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
         card: CardId,
     },
     TrainerAttached {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
         card: CardId,
     },
     TrainerDiscarded {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
         card: CardId,
     },
     HandDiscarded {
@@ -203,16 +234,22 @@ pub enum Event {
         card: CardId,
         from_deck: bool,
     },
+    /// `amount` was done (0 when fully prevented); `hp` is what is left.
     Damage {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
         amount: u16,
+        hp: u16,
         weakness: bool,
         resistance: bool,
     },
+    /// The creature left play; its cards are now in the discard pile.
     KnockedOut {
         player: usize,
         slot: usize,
+        uid: u32,
         card: CardId,
     },
     PrizeTaken {
@@ -220,10 +257,12 @@ pub enum Event {
         prize: usize,
         card: CardId,
     },
-    /// The creature from Bench `slot` replaced a knocked-out Active.
+    /// The creature from Bench `slot` (`uid`) replaced a knocked-out Active.
     Promoted {
         player: usize,
         slot: usize,
+        uid: u32,
+        creature: CardId,
     },
     TurnEnded {
         player: usize,
