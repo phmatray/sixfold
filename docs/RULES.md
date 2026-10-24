@@ -212,9 +212,9 @@ unit test that should cover it.
   confusion self-hit, or a miss caused by an accuracy effect). Only cancelling, or the attack's own
   precondition failing, returns to the menu. The first player **may** attack on turn 0.
 
-  Attacking is blocked when any of these is true:
-  - the Active is Asleep or Paralyzed;
+  Attacking is blocked when any of these is true (checked in this order):
   - the Active has an attack-lock substatus;
+  - the Active is Asleep or Paralyzed;
   - the Active has no attacks;
   - the attached energy is not enough;
   - the chosen attack was disabled by the opponent's last attack. The other attacks stay usable.
@@ -229,10 +229,12 @@ unit test that should cover it.
 - **Status.** CORRECTED. The original claim missed the disabled-attack check and the failures that
   still end the turn.
 - **Evidence.**
-  - `01:4700-470D`: the pre-checks. The turn counter is never read on this path.
+  - `01:4700-470D`: the pre-checks, attack lock (`01:4700 → 00:3378`) before Asleep/Paralyzed
+    (`01:4705 → 01:491E`). The turn counter is never read on this path.
   - `01:4772-4780`: `call 1695; jp c,4271; ret`, so no carry means the turn ends.
   - `00:1695`: carry returns to the menu only at `177E/1781`.
-- **Test.** `first_player_may_attack_turn_zero`, `attack_ends_turn`, `disabled_attack_only_blocks_that_attack`
+- **Test.** `first_player_may_attack_turn_zero`, `attack_ends_turn`, `disabled_attack_only_blocks_that_attack`,
+  `attack_blocked_without_energy_or_attacks`
 
 ### R-TURN-06: Done ends the turn without confirmation
 - **Rule.** Choosing Done ends the turn immediately. There is no confirmation prompt; the only
@@ -463,7 +465,8 @@ unit test that should cover it.
 
 ### R-STATUS-04: Asleep and Paralyzed block attacking and retreating
 - **Rule.** An Asleep or Paralyzed Active cannot attack or retreat. A Confused Active may try both,
-  with a coin. Poison blocks neither.
+  with a coin. Poison blocks neither. When an attack lock or a can't-retreat effect also applies, that
+  refusal is reported first (R-TURN-05, R-RETREAT-01).
 - **Status.** CONFIRMED
 - **Evidence.** `01:4700`, `01:45BF`, `05:4250` (the AI uses the same check).
 - **Test.** `paralyzed_cannot_attack_or_retreat`, `poisoned_can_attack_and_retreat`
@@ -1307,7 +1310,7 @@ notes give the decision order and the weightings to copy where helpful.
 17. Free-attach Power: a matching energy onto a matching-colour creature doesn't count toward the limit, while the holder (own side) is in play and no blocker is in play.
 18. Energy counting: a basic energy is 1 unit of its colour. The special energy is 2 colorless units.
 19. Attack cost: each typed requirement must be met by that colour, and the total minus the typed sum must cover colorless. Empty slots and Powers are never attacks.
-20. An attack is blocked by: Asleep or Paralyzed, an attack-lock substatus, no attacks, not enough energy, or the specific disabled attack.
+20. An attack is blocked by, in this order: an attack-lock substatus, Asleep or Paralyzed, no attacks, not enough energy, or the specific disabled attack.
 21. A committed attack always ends the turn, including a confusion tails or an accuracy miss. Only cancelling or a failed precondition returns to the menu.
 22. Attack pipeline: check → accuracy coin (cached per turn) → select → costs → confusion coin → phase 5 → prevention check → before-damage → damage calc → coin prevention → apply → after-damage → retaliation → status queue → knock-out handler.
 23. Damage order: base → attacker double → weakness ×2 → resistance −30 → +10 per +10 trainer → −20 per −20 trainer on the defender → defender prevention/reduction → attacker-placed reduction → clamp to 0. Clamp only at the end.

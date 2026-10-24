@@ -279,7 +279,8 @@ mod tests {
         ok(&mut g, Action::Attack(1));
     }
 
-    /// R-TURN-05: no attacks, not enough energy, attack lock.
+    /// R-TURN-05: no attacks, not enough energy, attack lock. The lock is
+    /// checked before Asleep/Paralyzed (01:4700, then 01:4705).
     #[test]
     fn attack_blocked_without_energy_or_attacks() {
         let mut g = main_phase(0);
@@ -288,6 +289,9 @@ mod tests {
         g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
         g.players[0].effects.placed = Some(crate::Placed::CantAttack);
         assert_eq!(err(&mut g, Action::Attack(0)), RuleError::CantAttack);
+        g.players[0].condition.apply(Status::Paralyzed);
+        assert_eq!(err(&mut g, Action::Attack(0)), RuleError::CantAttack);
+        g.players[0].condition = Default::default();
         g.players[0].active = Some(creature(STRAW_DECOY, &[]));
         g.players[0].effects.placed = None;
         assert_eq!(err(&mut g, Action::Attack(0)), RuleError::NoAttacks);

@@ -238,15 +238,16 @@ impl Game {
         }
     }
 
-    /// R-TURN-05 blocks, in order, then the attack's phase-1 checks.
+    /// R-TURN-05 blocks, in order (attack lock 01:4700, then Asleep/Paralyzed
+    /// 01:4705, ...), then the attack's phase-1 checks.
     fn check_attack(&self, p: usize, i: usize) -> Result<(), RuleError> {
         let pl = &self.players[p];
         let active = pl.active.as_ref().ok_or(RuleError::NoSuchSlot)?;
-        if pl.condition.blocks_actions() {
-            return Err(RuleError::AsleepOrParalyzed);
-        }
         if pl.effects.placed == Some(Placed::CantAttack) {
             return Err(RuleError::CantAttack);
+        }
+        if pl.condition.blocks_actions() {
+            return Err(RuleError::AsleepOrParalyzed);
         }
         let attacks = active.creature().attacks;
         if attacks.is_empty() {

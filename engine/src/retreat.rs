@@ -360,10 +360,12 @@ mod tests {
     /// R-STATUS-04
     #[test]
     fn paralyzed_cannot_attack_or_retreat() {
-        let mut g = with_bench();
-        g.players[0].condition.apply_special(Special::Paralyzed);
-        assert_eq!(err(&mut g, Action::Attack(0)), RuleError::AsleepOrParalyzed);
-        assert_eq!(err(&mut g, Action::Retreat), RuleError::AsleepOrParalyzed);
+        for special in [Special::Asleep, Special::Paralyzed] {
+            let mut g = with_bench();
+            g.players[0].condition.apply_special(special);
+            assert_eq!(err(&mut g, Action::Attack(0)), RuleError::AsleepOrParalyzed);
+            assert_eq!(err(&mut g, Action::Retreat), RuleError::AsleepOrParalyzed);
+        }
     }
 
     /// R-STATUS-04
