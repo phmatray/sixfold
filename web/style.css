@@ -894,3 +894,91 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
     transition-duration: 1ms !important;
   }
 }
+
+/* ---------- World (test) ---------- */
+
+.world-link { display: block; margin: 28px auto 0; }
+.world { position: fixed; inset: 0; overflow: hidden; background: #a8d98a; }
+.world-host { position: absolute; inset: 0; touch-action: none; }
+.world-host canvas { display: block; }
+/* Soft vignette over the scene, under the UI. */
+.world::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 75% 70% at 50% 48%, transparent 55%, rgba(20, 50, 18, 0.38));
+}
+.world-top, .world-prompt, .world-error { position: absolute; z-index: 2; }
+.world-top {
+  top: max(12px, env(safe-area-inset-top));
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 14px;
+  background: rgba(11, 23, 41, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.world-hint { flex: 1; min-width: 0; color: var(--muted); font-size: 13px; }
+.world-error { top: 76px; left: 16px; right: 16px; margin: 0; }
+.world-prompt {
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px));
+  left: 0;
+  right: 0;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  font-size: 17px;
+  white-space: nowrap;
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.5);
+  animation: rise 220ms ease both;
+}
+.world-prompt kbd {
+  font: 700 13px var(--body);
+  padding: 1px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(30, 22, 6, 0.4);
+  background: rgba(255, 255, 255, 0.35);
+}
+.world-dialog { max-width: 420px; }
+@media (hover: none) { .world-prompt kbd { display: none; } }
+@media (max-width: 520px) { .world-hint { font-size: 12px; line-height: 1.25; } }
+/* D-pad, built by world.js; touch screens only. */
+.world-pad {
+  position: absolute;
+  z-index: 2;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(20px, calc(env(safe-area-inset-bottom) + 8px));
+  display: grid;
+  grid-template: repeat(3, 52px) / repeat(3, 52px);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.world-pad button {
+  color: var(--ink);
+  font-size: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+  background: rgba(11, 23, 41, 0.55);
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.world-pad button:active { background: rgba(214, 172, 74, 0.75); }
+.pad-n { grid-area: 1 / 2; }
+.pad-w { grid-area: 2 / 1; }
+.pad-e { grid-area: 2 / 3; }
+.pad-s { grid-area: 3 / 2; }
+@media (hover: hover) and (pointer: fine) { .world-pad { display: none; } }
+/* With the pad on the left, the prompt moves to the right, like an action button. */
+@media (hover: none) {
+  .world-prompt { left: auto; right: max(16px, env(safe-area-inset-right)); margin: 0; max-width: calc(100% - 200px); white-space: normal; font-size: 16px; padding: 12px 14px; }
+}

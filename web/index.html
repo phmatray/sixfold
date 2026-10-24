@@ -6,6 +6,15 @@
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0d1a2c" />
     <title>Sixfold</title>
+    <!-- three.js for the world test (web/world/world.js); must come before any module script. -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -13,6 +22,7 @@
       href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"
     />
     <link data-trunk rel="css" href="style.css" />
+    <link data-trunk rel="copy-dir" href="world" />
   </head>
   <body></body>
 </html>
