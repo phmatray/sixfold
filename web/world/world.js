@@ -640,6 +640,8 @@ function prep(root, cast) {
       const m = o.material;
       o.material = toon(m.color ?? "#ffffff", { map: m.map ?? null, transparent: m.transparent, alphaTest: m.alphaTest });
     }
+    // COLOR_0 is a wind weight (read by the wind shader), never a tint.
+    o.material.vertexColors = false;
   });
 }
 
