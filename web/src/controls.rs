@@ -209,16 +209,25 @@ pub fn ActionBar() -> impl IntoView {
             <div class="bar-groups">
                 <div class="bar-group attacks">
                     {move || bar.with(|b| b.attacks.clone()).into_iter().map(|a| {
-                        let label = format!(
-                            "{}{}{}",
-                            a.name,
-                            a.preview.map(|p| match (a.coins, p.0) {
-                                (true, 0) => ", damage depends on coin flips".to_string(),
-                                (true, n) => format!(", deals at least {n} now"),
-                                (false, n) => format!(", deals {n} now"),
-                            }).unwrap_or_default(),
-                            a.blocked.map(|r| format!(". Unavailable: {r}")).unwrap_or_default(),
-                        );
+                        let note = match (a.blocked, a.preview) {
+                            (Some(r), _) => r.to_string(),
+                            (None, Some((0, ..))) if a.coins => "Damage depends on coin flips".to_string(),
+                            (None, Some((amt, w, r))) => format!(
+                                "{}{amt} to the defender{}{}{}",
+                                if a.coins { "At least " } else { "" },
+                                if w { ", weak ×2" } else { "" },
+                                if r { ", resisted" } else { "" },
+                                if a.ko { ", knocks it out" } else { "" }
+                            ),
+                            (None, None) => String::new(),
+                        };
+                        // The words on the button, in order (WCAG 2.5.3, label in name).
+                        let free = if a.cost.is_empty() { "Free" } else { "" };
+                        let label = [free, a.name, a.damage.as_deref().unwrap_or(""), &note]
+                            .into_iter()
+                            .filter(|s| !s.is_empty())
+                            .collect::<Vec<_>>()
+                            .join(" ");
                         let action = a.action;
                         view! {
                             <button
@@ -229,23 +238,10 @@ pub fn ActionBar() -> impl IntoView {
                                 title=a.text.clone()
                                 on:click=move |_| act(action)
                             >
-                                <span class="attack-cost">{cost_pips(a.cost)}</span>
-                                <span class="attack-name">{a.name}</span>
-                                <span class="attack-dmg">{a.damage.clone()}</span>
-                                <span class="attack-note">
-                                    {match (a.blocked, a.preview) {
-                                        (Some(r), _) => r.to_string(),
-                                        (None, Some((0, ..))) if a.coins => "Damage depends on coin flips".to_string(),
-                                        (None, Some((amt, w, r))) => format!(
-                                            "{}{amt} to the defender{}{}{}",
-                                            if a.coins { "At least " } else { "" },
-                                            if w { ", weak ×2" } else { "" },
-                                            if r { ", resisted" } else { "" },
-                                            if a.ko { ", knocks it out" } else { "" }
-                                        ),
-                                        (None, None) => String::new(),
-                                    }}
-                                </span>
+                                <span class="attack-cost">{cost_pips(a.cost)}</span>" "
+                                <span class="attack-name">{a.name}</span>" "
+                                <span class="attack-dmg">{a.damage.clone()}</span>" "
+                                <span class="attack-note">{note}</span>
                             </button>
                         }
                     }).collect_view()}

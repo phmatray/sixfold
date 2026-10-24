@@ -101,7 +101,7 @@ pub fn AudioSettings() -> impl IntoView {
         view! {
             <label class="vol">
                 <span>{label}</span>
-                <input type="range" min="0" max="100" step="5"
+                <input type="range" name=key min="0" max="100" step="5"
                     prop:value=move || value.get()
                     aria-valuetext=move || format!("{}%", value.get())
                     on:input=move |e| {
@@ -118,7 +118,7 @@ pub fn AudioSettings() -> impl IntoView {
         <fieldset class="audio-settings">
             <legend>"Sound"</legend>
             <label class="vol-mute">
-                <input type="checkbox" prop:checked=move || muted.get()
+                <input type="checkbox" name="muted" prop:checked=move || muted.get()
                     on:change=move |e| {
                         let m = event_target_checked(&e);
                         set_pref("muted", f64::from(u8::from(m)));

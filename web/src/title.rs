@@ -158,7 +158,8 @@ pub fn TitleScreen() -> impl IntoView {
                 </div>
             </section>
             <footer class="foot">
-                <span>"Original cards and art. The rules follow a classic handheld version of the game."</span>
+                <span>"Original cards and art. The rules follow a classic handheld version of the game. "
+                    <span class="version">{concat!("Version ", env!("CARGO_PKG_VERSION"))}</span></span>
                 <div class="foot-menus">
                     <SlotPicker />
                     <Settings />

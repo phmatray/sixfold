@@ -41,19 +41,19 @@ pub fn Credits(won: bool) -> impl IntoView {
         })
         .is_some_and(|m| m.matches());
     let ended = RwSignal::new(still);
-    // Focus starts on Skip, so Escape and Enter work straight away.
-    let skip = NodeRef::<leptos::html::Button>::new();
-    Effect::new(move |_| {
-        if let Some(b) = skip.get() {
-            let _ = b.focus();
-        }
-    });
     view! {
         <main class="credits" on:keydown=on_key aria-labelledby="credits-title">
             <div class="credits-roll" class:ended=move || ended.get()
                 on:animationend=move |_| ended.set(true)>
                 <h1 id="credits-title" class="wordmark">"Sixfold"</h1>
-                {won.then(|| view! { <p class="credits-lead">"Six seals, one Warden, and a new champion."</p> })}
+                {won.then(|| view! {
+                    <p class="credits-lead">"Six seals, one Warden, and a new champion."</p>
+                    <ul class="seals credits-seals" aria-hidden="true">
+                        {RIVALS.iter().filter(|r| r.seal).map(|r| view! {
+                            <li><crate::campaign::Seal r=r earned=true /></li>
+                        }).collect_view()}
+                    </ul>
+                })}
                 <section>
                     <h2>"The rivals"</h2>
                     <ul>
@@ -89,8 +89,9 @@ pub fn Credits(won: bool) -> impl IntoView {
                 <p class="credits-end">"Thank you for playing."</p>
             </div>
             <div class="credits-foot">
-                <button type="button" class="btn primary" node_ref=skip on:click=move |_| done()>
-                    {move || if ended.get() { "Continue" } else { "Skip" }}
+                // Focus starts on Skip (see `focus_heading`), so Enter works straight away.
+                <button type="button" class="btn primary" data-screen-focus on:click=move |_| done()>
+                    {move || if ended.get() { "Continue" } else { "Skip the credits" }}
                 </button>
             </div>
         </main>

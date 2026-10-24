@@ -186,7 +186,7 @@ pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView 
             <div class="selects">
                 <label class="field">
                     <span>"Kind"</span>
-                    <select prop:value=kind_value on:change=move |e| f.kind.set(match event_target_value(&e).as_str() {
+                    <select name="kind" prop:value=kind_value on:change=move |e| f.kind.set(match event_target_value(&e).as_str() {
                         "creature" => Kind::Creature, "trainer" => Kind::Trainer, "energy" => Kind::Energy, _ => Kind::All,
                     })>
                         <option value="all">"All kinds"</option>
@@ -197,7 +197,7 @@ pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView 
                 </label>
                 <label class="field">
                     <span>"Rarity"</span>
-                    <select prop:value=rarity_value on:change=move |e| f.rarity.set(match event_target_value(&e).as_str() {
+                    <select name="rarity" prop:value=rarity_value on:change=move |e| f.rarity.set(match event_target_value(&e).as_str() {
                         "energy" => Some(Rarity::Energy), "common" => Some(Rarity::Common),
                         "uncommon" => Some(Rarity::Uncommon), "rare" => Some(Rarity::Rare), _ => None,
                     })>
@@ -211,7 +211,7 @@ pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView 
                 {show_own.then(|| view! {
                     <label class="field">
                         <span>"Show"</span>
-                        <select prop:value=own_value on:change=move |e| f.own.set(match event_target_value(&e).as_str() {
+                        <select name="show" prop:value=own_value on:change=move |e| f.own.set(match event_target_value(&e).as_str() {
                             "owned" => Own::Owned, "missing" => Own::Missing, _ => Own::All,
                         })>
                             <option value="all">"Every card"</option>
@@ -222,7 +222,7 @@ pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView 
                 })}
                 <label class="field">
                     <span>"Sort"</span>
-                    <select prop:value=sort_value on:change=move |e| f.sort.set(match event_target_value(&e).as_str() {
+                    <select name="sort" prop:value=sort_value on:change=move |e| f.sort.set(match event_target_value(&e).as_str() {
                         "color" => Some(SortBy::Color), "kind" => Some(SortBy::Kind), "rarity" => Some(SortBy::Rarity), _ => None,
                     })>
                         <option value="number">"Set number"</option>
@@ -306,12 +306,7 @@ fn BinderSlot(id: CardId) -> impl IntoView {
             usize::MAX => "unlimited".to_string(),
             n => format!("{n} owned"),
         };
-        let kind = if promo { " promo" } else { "" };
-        format!(
-            "{}, {}{kind}, {own}",
-            face_text(id),
-            rarity_label(def.rarity)
-        )
+        format!("{}, {}, {own}", face_text(id), rarity_label(def.rarity))
     };
     view! {
         <li class="bind-slot" class:missing=move || count.get() == 0>

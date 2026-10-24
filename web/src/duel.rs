@@ -124,7 +124,9 @@ pub fn DuelSetup() -> impl IntoView {
     // Every prebuilt is listed, as your copy or on its own, so a deck is always playable.
     let first_legal = mine_opts.iter().position(|o| o.problem.is_none());
     let mine = RwSignal::new(first_legal.unwrap_or(0));
-    let theirs = RwSignal::new(if theirs_opts.len() > 1 { 1 } else { 0 });
+    // Ember Rush, a plain attacking deck: a gentler first opponent than a
+    // control deck that opens with sleep and paralysis.
+    let theirs = RwSignal::new(0);
     let seed = RwSignal::new(crate::new_seed());
     let prizes = RwSignal::new(6u8);
     let difficulty = RwSignal::new(Difficulty::Normal);
@@ -158,25 +160,40 @@ pub fn DuelSetup() -> impl IntoView {
             <PageBar title="Play a duel" />
             <main class="page-body">
                 <form class="setup" on:submit=move |e| { e.prevent_default(); start() }>
+                    <details class="how-to">
+                        <summary>"How a duel works"</summary>
+                        <ol>
+                            <li>"Put a Basic creature in your Active spot, and more Basics on your Bench (up to 5)."</li>
+                            <li>"Each turn you draw a card, may attach one energy, play Basics and trainers, evolve, and retreat."</li>
+                            <li>"Attack when the Active has the energy an attack shows. Attacking ends your turn."</li>
+                            <li>"Knock out a creature to take a prize. Take all your prizes, or leave the opponent with no creature in play, to win."</li>
+                        </ol>
+                        <p class="note">"Tap or hover any card to read it. Asleep and Paralyzed creatures can't attack or retreat; Confused ones may hurt themselves."</p>
+                    </details>
                     <div class="pickers">
                         <DeckPicker legend="Your deck" name="mine" opts=mine_opts choice=mine />
                         <DeckPicker legend="The AI plays" name="theirs" opts=theirs_opts choice=theirs />
                     </div>
                     <p class="note">"Win to earn a Wild Pack."</p>
                     <div class="options">
-                        <label class="field">
-                            <span>"Seed"</span>
-                            <input type="number" name="seed" min="0" inputmode="numeric"
-                                prop:value=move || seed.get().to_string()
-                                on:input=move |e| { if let Ok(n) = event_target_value(&e).parse() { seed.set(n) } } />
-                        </label>
-                        <button type="button" class="btn ghost" on:click=move |_| seed.set(crate::new_seed())>"New seed"</button>
-                        <label class="field">
-                            <span>"Prizes"</span>
-                            <select name="prizes" on:change=move |e| { if let Ok(n) = event_target_value(&e).parse() { prizes.set(n) } }>
-                                {(1..=6u8).rev().map(|n| view! { <option value=n.to_string() selected=n == 6>{n}</option> }).collect_view()}
-                            </select>
-                        </label>
+                        <details class="more-options">
+                            <summary>"Seed and prizes"</summary>
+                            <div class="more-body">
+                                <label class="field">
+                                    <span>"Seed"</span>
+                                    <input type="number" name="seed" min="0" inputmode="numeric"
+                                        prop:value=move || seed.get().to_string()
+                                        on:input=move |e| { if let Ok(n) = event_target_value(&e).parse() { seed.set(n) } } />
+                                </label>
+                                <button type="button" class="btn ghost" on:click=move |_| seed.set(crate::new_seed())>"New seed"</button>
+                                <label class="field">
+                                    <span>"Prizes"</span>
+                                    <select name="prizes" on:change=move |e| { if let Ok(n) = event_target_value(&e).parse() { prizes.set(n) } }>
+                                        {(1..=6u8).rev().map(|n| view! { <option value=n.to_string() selected=n == 6>{n}</option> }).collect_view()}
+                                    </select>
+                                </label>
+                            </div>
+                        </details>
                         <label class="field">
                             <span>"AI"</span>
                             <select name="difficulty" on:change=move |e| difficulty.set(match event_target_value(&e).as_str() {
