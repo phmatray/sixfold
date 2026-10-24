@@ -250,10 +250,23 @@ mod tests {
     fn prizes_set_after_placement_default_six() {
         let mut g = Game::new([deck(), deck()], 1, Config::default()).unwrap();
         assert!(g.players[0].prizes.is_empty());
+        // From the top of the deck (the last element), in draw order.
+        let tops: Vec<Vec<Option<CardId>>> = (0..2)
+            .map(|p| g.players[p].deck.iter().rev().take(6).copied().map(Some).collect())
+            .collect();
         place_both(&mut g);
         for p in 0..2 {
             assert_eq!(g.players[p].prizes_left(), 6);
+            assert_eq!(g.players[p].prizes, tops[p], "player {p}");
         }
+        // Player 0 first (01:4C0C, then 01:4C12).
+        let set = |player| {
+            g.log
+                .iter()
+                .position(|e| matches!(e, Event::PrizesSet { player: q, .. } if *q == player))
+                .unwrap()
+        };
+        assert!(set(0) < set(1));
         let first = g.turn_player;
         assert_eq!(g.players[first].deck.len(), 53 - 6 - 1);
         assert_eq!(g.players[1 - first].deck.len(), 53 - 6);

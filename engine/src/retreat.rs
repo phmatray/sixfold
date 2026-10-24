@@ -291,6 +291,43 @@ mod tests {
         // Cured later that turn: a normal retreat is allowed again.
         g.players[0].condition = Default::default();
         ok(&mut g, Action::Retreat);
+        // A successful retreat clears the flag (01:65F1), so the new Active may
+        // try a confused retreat later that turn.
+        ok(&mut g, Action::DiscardEnergy(0));
+        ok(&mut g, Action::Promote(1));
+        assert!(!g.retreat_failed);
+        g.players[0].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
+        g.players[0].condition.apply_special(Special::Confused);
+        ok(&mut g, Action::Retreat);
+    }
+
+    /// R-RETREAT-01: when several refusals apply, the first in the ledger's
+    /// order is reported (01:45BF-45F7; the failed flag first when Confused).
+    #[test]
+    fn retreat_preconditions_checked_in_order() {
+        let mut g = with_bench();
+        g.players[0].effects.placed = Some(Placed::CantRetreat);
+        g.players[0].condition.apply_special(Special::Asleep);
+        assert_eq!(err(&mut g, Action::Retreat), RuleError::CantRetreat);
+        g.players[0].effects.placed = None;
+        g.players[0].bench.clear();
+        assert_eq!(err(&mut g, Action::Retreat), RuleError::AsleepOrParalyzed);
+        g.players[0].condition = Default::default();
+        g.players[0].active = Some(creature(STRAW_DECOY, &[]));
+        assert_eq!(err(&mut g, Action::Retreat), RuleError::NoLiveBench);
+        g.players[0].bench.push(creature(PEBBLET, &[]));
+        assert_eq!(
+            err(&mut g, Action::Retreat),
+            RuleError::TrainerBasicCantRetreat
+        );
+        let mut g = with_bench();
+        g.players[0].condition.apply_special(Special::Confused);
+        g.retreat_failed = true;
+        g.players[0].effects.placed = Some(Placed::CantRetreat);
+        assert_eq!(
+            err(&mut g, Action::Retreat),
+            RuleError::RetreatFailedThisTurn
+        );
     }
 
     /// R-RETREAT-03: heads switches, and the coin is flipped even at cost 0.
@@ -315,16 +352,22 @@ mod tests {
     #[test]
     fn retreat_clears_status_keeps_damage() {
         let mut g = with_bench();
-        g.players[0].active.as_mut().unwrap().hp = 20;
+        let a = g.players[0].active.as_mut().unwrap();
+        a.hp = 20;
+        a.energy = vec![GRASS_E, FIRE_E];
+        a.trainers = vec![WHETSTONE];
         g.players[0].condition.apply_poison(Poison::DoublePoisoned);
         g.players[0].effects.placed = Some(Placed::DisabledAttack(0));
+        g.players[0].trainer_locked = true;
         ok(&mut g, Action::Retreat);
         ok(&mut g, Action::DiscardEnergy(0));
         ok(&mut g, Action::Promote(1));
         assert_eq!(g.players[0].condition, Default::default());
         assert_eq!(g.players[0].effects, Default::default());
+        assert!(g.players[0].trainer_locked, "the player-wide lock stays");
         let b = &g.players[0].bench[0];
         assert_eq!((b.top(), b.hp), (MOSSLING, 20));
+        assert_eq!((b.energy.clone(), b.trainers.clone()), (vec![FIRE_E], vec![WHETSTONE]));
     }
 
     /// R-RETREAT-05

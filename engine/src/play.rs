@@ -379,6 +379,29 @@ mod tests {
         assert_eq!(err(&mut g, attach(0)), RuleError::EnergyAlreadyAttached);
     }
 
+    /// R-ENERGY-02: the target's effective colour must match the energy: a
+    /// Power-made colour counts while that Power works (00:35D9-35EE → 36AE).
+    #[test]
+    fn free_attach_needs_matching_target_colour() {
+        let mut g = main_phase(0);
+        g.players[0].bench.push(creature(SPROUTWING, &[]));
+        g.players[0].bench.push(creature(EMBERKIT, &[]));
+        set_hand(&mut g, 0, &[GRASS_E, FIRE_E, GRASS_E]);
+        ok(&mut g, attach(0)); // free
+        ok(&mut g, attach(0)); // Fire: the normal attachment
+        assert_eq!(err(&mut g, attach(2)), RuleError::EnergyAlreadyAttached);
+        // A creature made Grass by its own working Power.
+        let mut shifter = creature(SHIFTER, &[]);
+        shifter.color_override = Some(crate::Color::Grass);
+        g.players[0].bench.push(shifter.clone());
+        ok(&mut g, attach(3));
+        // Its Power off (an Asleep Active): back to Colorless.
+        g.players[0].active = Some(shifter);
+        g.players[0].condition.apply_special(Special::Asleep);
+        set_hand(&mut g, 0, &[GRASS_E]);
+        assert_eq!(err(&mut g, attach(0)), RuleError::EnergyAlreadyAttached);
+    }
+
     /// R-ENERGY-02, R-POWER-03
     #[test]
     fn free_attach_power_off_when_holder_active_asleep() {

@@ -211,9 +211,11 @@ mod tests {
             RuleError::EnergyAlreadyAttached
         );
         g.retreat_failed = true;
+        g.accuracy = Some(true);
         ok(&mut g, Action::Done);
         ok(&mut g, Action::Done);
         assert!(!g.retreat_failed);
+        assert_eq!(g.accuracy, None, "the accuracy cache (cc0a)");
         ok(&mut g, Action::AttachEnergy { hand: 0, slot: 0 });
     }
 
