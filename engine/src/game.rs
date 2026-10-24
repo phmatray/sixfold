@@ -361,6 +361,7 @@ impl Game {
 mod tests {
     use super::*;
     use crate::fixtures::*;
+    use crate::rng::Rng;
 
     /// Play `n` actions, picking a varying legal one each time.
     fn play(g: &mut Game, n: usize) {
@@ -404,6 +405,59 @@ mod tests {
                 assert_eq!(legal.contains(&a), g.clone().apply(a).is_ok(), "{a:?}");
             }
             g.apply(*legal.last().unwrap()).unwrap();
+        }
+    }
+
+    /// Every card a player owns, wherever it is (60 for a legal deck).
+    fn cards_owned(g: &Game, p: usize) -> usize {
+        let pl = &g.players[p];
+        let in_play: usize = pl
+            .in_play()
+            .map(|(_, c)| c.stack.len() + c.energy.len() + c.trainers.len())
+            .sum();
+        let limbo = g
+            .pending
+            .as_ref()
+            .filter(|pd| pd.player == p && pd.card.is_some())
+            .map_or(0, |_| 1);
+        pl.deck.len() + pl.hand.len() + pl.discard.len() + pl.prizes_left() + in_play + limbo
+    }
+
+    /// Random legal play: 300 seeded games with the fixture decks never panic,
+    /// never list an action `apply` refuses, keep every card, and always end.
+    #[test]
+    fn random_legal_play_always_finishes() {
+        let decks = [power_deck(), attack_deck(), deck()];
+        for seed in 0..300u64 {
+            let pair = [
+                decks[seed as usize % 3].clone(),
+                decks[seed as usize / 3 % 3].clone(),
+            ];
+            let mut g = Game::new(pair, seed, Config::default()).unwrap();
+            let mut pick = Rng::new(seed ^ 0x5eed);
+            let mut actions = 0;
+            while g.winner().is_none() {
+                assert!(g.turn() < 500, "seed {seed}: turn cap hit");
+                actions += 1;
+                assert!(actions < 100_000, "seed {seed}: action cap hit");
+                let legal = g.legal_actions();
+                assert!(
+                    !legal.is_empty(),
+                    "seed {seed}: no action at {:?}",
+                    g.prompt()
+                );
+                let a = legal[pick.below(legal.len() as u32) as usize];
+                g.apply(a)
+                    .unwrap_or_else(|e| panic!("seed {seed}: listed {a:?} refused: {e:?}"));
+                for p in 0..2 {
+                    assert_eq!(
+                        cards_owned(&g, p),
+                        60,
+                        "seed {seed}: player {p} after {a:?}"
+                    );
+                }
+            }
+            assert!(matches!(g.log().last(), Some(Event::GameOver { .. })));
         }
     }
 }

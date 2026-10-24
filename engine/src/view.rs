@@ -18,7 +18,11 @@ pub struct View<'a> {
     pub turn_player: usize,
     /// The turn player already used this turn's energy attachment.
     pub energy_attached: bool,
+    /// The pending decision, only when it is this player's (a deck-search
+    /// prompt lists deck cards).
     pub prompt: Option<&'a Prompt>,
+    /// Whose decision the game is waiting for.
+    pub waiting_on: Option<usize>,
     pub winner: Option<usize>,
     pub sudden_death: bool,
 }
@@ -62,7 +66,8 @@ impl Game {
             turn: self.turn,
             turn_player: self.turn_player,
             energy_attached: self.energy_attached,
-            prompt: self.prompt.as_ref(),
+            prompt: self.prompt.as_ref().filter(|pr| pr.player == me),
+            waiting_on: self.prompt.as_ref().map(|pr| pr.player),
             winner: self.winner,
             sudden_death: self.sudden_death,
         }
@@ -82,5 +87,12 @@ mod tests {
         assert_eq!(v.sides[1].hand_count, 3);
         assert_eq!(v.sides[0].prizes, vec![true; 6]);
         assert_eq!(v.sides[1].deck_count, 20);
+        assert!(v.prompt.is_some());
+        let v = g.view(1);
+        assert_eq!(
+            (v.prompt, v.waiting_on),
+            (None, Some(0)),
+            "the other player's prompt is hidden"
+        );
     }
 }
