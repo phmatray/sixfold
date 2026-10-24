@@ -167,7 +167,8 @@ pub fn record_daily(p: &mut Progress, profile: &mut Profile, day: u32, won: bool
 }
 
 /// The Gauntlet, in campaign order: each rival's deck sharpened with their
-/// promo card and rarer lines, and more prizes.
+/// promo card and rarer lines, more prizes, and a stronger AI (Normal for the
+/// first two, Hard from Cinza on).
 pub static GAUNTLET: [Rung; 6] = [
     Rung {
         rival: "bramble",
@@ -250,7 +251,7 @@ pub static GAUNTLET: [Rung; 6] = [
             ],
         },
         prizes: 5,
-        difficulty: Difficulty::Normal,
+        difficulty: Difficulty::Hard,
     },
     Rung {
         rival: "quill",
@@ -281,7 +282,7 @@ pub static GAUNTLET: [Rung; 6] = [
             ],
         },
         prizes: 5,
-        difficulty: Difficulty::Normal,
+        difficulty: Difficulty::Hard,
     },
     Rung {
         rival: "orla",
@@ -310,7 +311,7 @@ pub static GAUNTLET: [Rung; 6] = [
             ],
         },
         prizes: 6,
-        difficulty: Difficulty::Normal,
+        difficulty: Difficulty::Hard,
     },
     Rung {
         rival: "lumen",
@@ -339,7 +340,7 @@ pub static GAUNTLET: [Rung; 6] = [
             ],
         },
         prizes: 6,
-        difficulty: Difficulty::Normal,
+        difficulty: Difficulty::Hard,
     },
 ];
 
@@ -372,6 +373,16 @@ mod tests {
                 g.deck.name
             );
             assert!(g.prizes >= g.rival().prizes, "{} is easier", g.deck.name);
+            let rank = |d| {
+                [Difficulty::Easy, Difficulty::Normal, Difficulty::Hard]
+                    .iter()
+                    .position(|&x| x == d)
+            };
+            assert!(
+                rank(g.difficulty) >= rank(g.rival().difficulty),
+                "{} plays worse",
+                g.deck.name
+            );
         }
     }
 
