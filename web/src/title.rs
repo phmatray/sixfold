@@ -116,7 +116,9 @@ pub fn TitleScreen() -> impl IntoView {
         progress.with(|p| {
             let next = RIVALS.iter().find(|r| r.open(p) && !r.beaten(p));
             match (seals(p), next) {
-                (n, _) if RIVALS.iter().all(|r| r.beaten(p)) => format!("All {n} seals. Champion!"),
+                (n, _) if RIVALS.iter().all(|r| r.beaten(p)) => {
+                    format!("All {n} seals. Champion! The Gauntlet is open")
+                }
                 (n, Some(r)) => format!("{n} of {SEALS} seals · next: {}", r.name),
                 (n, None) => format!("{n} of {SEALS} seals"),
             }

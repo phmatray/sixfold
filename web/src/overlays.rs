@@ -3,12 +3,13 @@
 
 use leptos::prelude::*;
 use sixfold_engine::campaign;
+use sixfold_engine::endgame::{self, RungResult, CLEAR_PACKS, GAUNTLET};
 use sixfold_engine::{card, Color, Event};
 
 use crate::art::glyph_svg;
 use crate::board::{find_mon, slot_name, status_class};
 use crate::cards::{energy_pips, CardDetails, CardFace};
-use crate::ctl::{Ctl, HUMAN};
+use crate::ctl::{Ctl, Post, HUMAN};
 use crate::{Inspect, Screen, Ui};
 
 #[component]
@@ -133,6 +134,9 @@ pub fn LogPanel() -> impl IntoView {
     view! {
         <section class="log" class:open=move || ui.log_open.get() aria-label="Battle log">
             <h2>"Battle log"</h2>
+            {move || ctl.log.with(Vec::is_empty).then(|| view! {
+                <p class="empty-note">"Every draw, attack and coin flip shows up here."</p>
+            })}
             <ol class="log-list" node_ref=list>
                 <For
                     each=move || ctl.log.get()
@@ -221,16 +225,36 @@ pub fn GameOver() -> impl IntoView {
         .setup
         .with_value(|s| s.as_ref().and_then(|s| s.rival))
         .and_then(campaign::rival);
+    let post = ctl.setup.with_value(|s| s.as_ref().and_then(|s| s.post));
+    let back = ctl
+        .setup
+        .with_value(|s| s.as_ref().map_or(Screen::Title, |s| s.back));
     let reward = RwSignal::new(None::<usize>);
     let campaign_reward = RwSignal::new(None::<campaign::Reward>);
+    let rung_result = RwSignal::new(None::<RungResult>);
+    // The daily duel's pack, if this win claimed it.
+    let daily_pack = RwSignal::new(None::<usize>);
     Effect::new(move |_| {
         if let Some((winner, ..)) = result.get() {
             if !ctl.take_result() {
                 return;
             }
             let won = winner == HUMAN;
-            match rival {
-                Some(r) => {
+            match (rival, post) {
+                (None, Some(Post::Gauntlet)) => {
+                    let mut got = None;
+                    progress
+                        .update(|pr| profile.update(|p| got = endgame::record_rung(pr, p, won)));
+                    rung_result.set(got);
+                }
+                (None, Some(Post::Daily(day))) => {
+                    let mut got = None;
+                    progress.update(|pr| {
+                        profile.update(|p| got = endgame::record_daily(pr, p, day, won))
+                    });
+                    daily_pack.set(got);
+                }
+                (Some(r), _) => {
                     let mut got = None;
                     progress.update(|pr| {
                         profile.update(|p| got = Some(campaign::record(r, won, pr, p)))
@@ -244,14 +268,38 @@ pub fn GameOver() -> impl IntoView {
                     }
                     campaign_reward.set(got);
                 }
-                None => reward.set(profile.try_update(|p| p.record_duel(won)).flatten()),
+                (None, None) => reward.set(profile.try_update(|p| p.record_duel(won)).flatten()),
             }
         }
     });
+    // A rematch deals anew; the daily duel deals the same game again.
     let rematch = move |_| {
         if let Some(setup) = ctl.setup.get_value() {
+            let seed = match setup.post {
+                Some(Post::Daily(day)) => endgame::daily(day).seed,
+                _ => crate::new_seed(),
+            };
+            ctl.start(setup, seed);
+        }
+    };
+    // After a Gauntlet win: the next rung, with the same deck.
+    let next_rung = move |_| {
+        let Some(s) = ctl.setup.get_value() else {
+            return;
+        };
+        if let Some(rung) = progress.with_untracked(endgame::next_rung) {
+            let [name, _] = s.names;
+            let [cards, _] = s.decks;
+            let setup = crate::campaign::gauntlet_setup(rung, name, cards, s.back);
             ctl.start(setup, crate::new_seed());
         }
+    };
+    // The champion's first win rolls the credits on the way back to the world.
+    let champion_now = move || {
+        campaign_reward
+            .get()
+            .zip(rival)
+            .is_some_and(|(rw, r)| rw.won && rw.first && !r.seal)
     };
     move || {
         let (winner, sudden, left, why) = result.get()?;
@@ -296,17 +344,60 @@ pub fn GameOver() -> impl IntoView {
                                         _ => view! { <b>"No reward this time"</b><span>{format!("Talk to {} again for a rematch.", r.name)}</span> }.into_any(),
                                     }}
                                     {(n > 0).then(|| view! { <span>{format!("+{}", crate::campaign::packs_label(b, n))}</span> })}
+                                    {rw.promo.map(|c| view! { <span>{format!("+ the promo card {}, now in your collection", card(c).name)}</span> })}
                                 </p>
                             </div>
                         }
                     })}
-                    {match rival {
-                        Some(_) => view! {
+                    {move || rung_result.get().map(|rr| {
+                        let (b, n) = rr.packs;
+                        view! {
+                            <div class="reward" role="status">
+                                <p>
+                                    {match (rr.won, rr.cleared) {
+                                        (true, true) => view! { <b>"Gauntlet cleared!"</b><span>{format!("All {} rivals in a row. +{CLEAR_PACKS} Wild Packs.", GAUNTLET.len())}</span> }.into_any(),
+                                        (true, false) => view! { <b>{format!("Rung {} of {} cleared", rr.beaten, GAUNTLET.len())}</b> }.into_any(),
+                                        _ => view! { <b>"The run ends here"</b><span>"Start a new Gauntlet from the ladder."</span> }.into_any(),
+                                    }}
+                                    {(n > 0).then(|| view! { <span>{format!("+{}", crate::campaign::packs_label(b, n))}</span> })}
+                                </p>
+                            </div>
+                        }
+                    })}
+                    {(post.is_some_and(|p| matches!(p, Post::Daily(_))) && won).then(|| view! {
+                        <div class="reward" role="status">
+                            <p>{move || match daily_pack.get() {
+                                Some(b) => view! { <b>"Daily duel won"</b><span>{format!("+{}. A new duel comes at midnight.", crate::campaign::packs_label(b, 1))}</span> }.into_any(),
+                                None => view! { <b>"Daily duel won"</b><span>"Today's pack was already claimed."</span> }.into_any(),
+                            }}</p>
+                        </div>
+                    })}
+                    {match (rival, post) {
+                        (Some(_), _) => view! {
                             <div class="dialog-foot">
-                                <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(Screen::World) }>"Back to the world"</button>
+                                {move || if champion_now() {
+                                    view! {
+                                        <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(Screen::Credits(true)) }>"Roll the credits"</button>
+                                    }.into_any()
+                                } else {
+                                    view! {
+                                        <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(Screen::World) }>"Back to the world"</button>
+                                    }.into_any()
+                                }}
                             </div>
                         }.into_any(),
-                        None => view! {
+                        (None, Some(p)) => view! {
+                            <div class="dialog-foot">
+                                {move || (p == Post::Gauntlet && rung_result.get().is_some_and(|r| r.won && !r.cleared)).then(|| view! {
+                                    <button class="btn" on:click=next_rung>"Next rung"</button>
+                                })}
+                                {matches!(p, Post::Daily(_)).then(|| view! {
+                                    <button class="btn" on:click=rematch>"Play it again"</button>
+                                })}
+                                <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(back) }>"Back"</button>
+                            </div>
+                        }.into_any(),
+                        (None, None) => view! {
                     <div class="dialog-foot">
                         {won.then(|| view! {
                             <button class="btn" on:click=move |_| { ctl.stop(); screen.set(Screen::Packs) }>"Open packs"</button>

@@ -107,6 +107,18 @@ pub fn champion(p: &Progress) -> bool {
     RIVALS.iter().any(|r| !r.seal && r.beaten(p))
 }
 
+/// Saves from before promos existed: give the promo of every rival already
+/// beaten that the collection lacks. Returns the cards added.
+pub fn backfill_promos(p: &Progress, profile: &mut Profile) -> Vec<CardId> {
+    let missing: Vec<CardId> = RIVALS
+        .iter()
+        .filter(|r| r.beaten(p) && profile.collection.count(r.promo()) == 0)
+        .map(Rival::promo)
+        .collect();
+    missing.iter().for_each(|&id| profile.collection.add(id, 1));
+    missing
+}
+
 /// Record a finished duel against `r`: remember the result for the post-duel
 /// line, and on a win mark the rival beaten and grant the packs (and, the
 /// first time, the rival's promo card).
@@ -416,6 +428,15 @@ mod tests {
         assert_eq!(again.packs, (3, REMATCH_PACKS));
         assert_eq!((pr.wallet.packs(3), seals(&p)), (3, 1));
         assert_eq!(pr.collection.count(THISTLEWICK), 1, "one promo per rival");
+    }
+
+    #[test]
+    fn old_saves_get_the_promos_of_rivals_already_beaten() {
+        let p = Progress::decode("f:beat_bramble,f:beat_orla");
+        let mut pr = Profile::new_player();
+        assert_eq!(backfill_promos(&p, &mut pr), [THISTLEWICK, SLATEBROW]);
+        assert_eq!(backfill_promos(&p, &mut pr), [], "only once");
+        assert_eq!(pr.collection.count(SLATEBROW), 1);
     }
 
     /// Each rival gives its own promo, the Warden the last one.

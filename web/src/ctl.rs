@@ -75,6 +75,19 @@ pub struct Setup {
     pub difficulty: Difficulty,
     /// The campaign rival's id, for a duel started from the world.
     pub rival: Option<&'static str>,
+    /// A post-game duel: what its result counts for.
+    pub post: Option<Post>,
+    /// Where Quit and the result's way out lead.
+    pub back: crate::Screen,
+}
+
+/// A duel of the post-game ladder.
+#[derive(Clone, Copy, PartialEq)]
+pub enum Post {
+    /// The next rung of the Gauntlet run under way.
+    Gauntlet,
+    /// The daily duel of this day number.
+    Daily(u32),
 }
 
 #[derive(Clone, Copy)]
