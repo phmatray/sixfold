@@ -12,20 +12,24 @@ Playable from start to finish:
 
 - **Rules engine** (`engine/`): the whole duel, from setup and mulligans through
   attacks, conditions, Powers, trainers, knock-outs, prizes and sudden death.
-  Pure Rust, no browser needed; 273 unit tests.
-- **Card set**: 34 original cards and two 60-card decks, Ember Rush
-  (Fire / Fighting aggro) and Tide Mind (Water / Psychic control). In
-  AI-against-AI play, Ember Rush wins about 45% of games and Tide Mind about 55%. A test
-  checks that each deck wins between 35% and 65%.
+  Pure Rust, no browser needed; 278 unit tests.
+- **Card set**: 103 original cards (71 creatures in full evolution lines across
+  all seven colours, 25 trainers, 6 basic energies and a special energy), and
+  six prebuilt 60-card decks: Ember Rush (Fire / Fighting), Tide Mind
+  (Water / Psychic), Grove Bloom (Grass / Lightning), Storm Front
+  (Lightning / Water), Stone Fist (Fighting / Colorless) and Dream Veil
+  (Psychic / Grass). In an AI-against-AI round robin every deck wins between
+  40% and 61% of its games; a test keeps each between 30% and 70%.
 - **AI opponent** (`engine/src/ai.rs`): Normal or Easy (Easy skips a trainer or
   Power play one time in four). It sees only what its player may see.
 - **Web app** (`web/`): deck select, the table, animated coins, damage and
   knock-outs, a battle log, a card inspector, and the game-over screen with a
   rematch. Works on desktop and on phones, in portrait and landscape.
 - **Collection and deck building**: a binder of every card, booster packs
-  (Ember, Tide, Wild) revealed card by card, saved decks you create, copy,
-  rename and edit, and a Wild Pack for every duel you win. New players start
-  with both prebuilt decks and three packs. Progress is kept in the browser
+  (Ember, Tide, Grove, Storm, Stone, Dream and Wild) revealed card by card,
+  saved decks you create, copy, rename and edit, and a Wild Pack for every duel
+  you win. New players start with one starter deck, Trailhead (Fire / Water),
+  and three packs; every prebuilt deck can still be played against the AI. Progress is kept in the browser
   (localStorage) and can be reset from Settings.
 
 Not done yet: a second human player, sound.

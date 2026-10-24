@@ -41,7 +41,28 @@ impl Game {
             .get(attack)?;
         self.players[1 - p].active.as_ref()?;
         let ignore_wr = a.effects.contains(&Effect::IgnoreWeaknessResistance);
-        Some(self.attack_damage(p, a.damage as i32, ignore_wr, self.attack_negated(p)))
+        let base = a.damage as i32 + self.effect_bonus(p, a.effects);
+        Some(self.attack_damage(p, base, ignore_wr, self.attack_negated(p)))
+    }
+
+    /// The fixed damage bonus of `AddPerDamage` effects for player `p`'s
+    /// Active attacking the opposing Active (no coins involved).
+    pub(crate) fn effect_bonus(&self, p: usize, effects: &[Effect]) -> i32 {
+        let damage = |pl: usize| {
+            self.players[pl]
+                .active
+                .as_ref()
+                .map_or(0, |c| c.damage() as i32)
+        };
+        effects
+            .iter()
+            .map(|e| match *e {
+                Effect::AddPerDamage { per, own } => {
+                    damage(if own { p } else { 1 - p }) / 10 * per as i32
+                }
+                _ => 0,
+            })
+            .sum()
     }
 
     /// R-DMG-12: the opposing Active is protected from all of player `p`'s

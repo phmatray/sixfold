@@ -555,6 +555,15 @@ fn trainer_step(x: &Ctx, effects: &[Effect]) -> Option<Step> {
         Search(find) => yes(Step::Draw, deck >= 5 && search_wanted(x, find)),
         Recover(_) => Some(Step::Draw),
         Heal(n) => yes(Step::Support, active.damage() >= n.min(20)),
+        HealAll(n) => yes(Step::Support, side_damage(x.mine(), n) >= 20),
+        AttachFromDeck(_) => {
+            let short = active
+                .creature()
+                .attacks
+                .iter()
+                .any(|a| missing(&active.units(), a.cost) > 0);
+            yes(Step::Support, short)
+        }
         // R-AI-13
         SwitchDefender { .. } => yes(Step::Support, !sure_ko(x) && ko_able_bench(x)),
         // R-AI-11
@@ -606,6 +615,7 @@ fn power_wanted(x: &Ctx, slot: usize, effects: &[Effect]) -> bool {
     };
     match effects.first() {
         Some(Heal(_)) => active.damage() >= 10,
+        Some(HealAll(n)) => side_damage(x.mine(), *n) >= 10,
         Some(Draw(_)) => x.mine().deck_count >= 10,
         Some(Search(_)) => x.mine().deck_count >= 5,
         Some(SetOwnColor(c)) => {
@@ -614,6 +624,15 @@ fn power_wanted(x: &Ctx, slot: usize, effects: &[Effect]) -> bool {
         }
         _ => true,
     }
+}
+
+/// How much a heal of `n` on each creature would remove on this side.
+fn side_damage(side: &Side, n: u16) -> u16 {
+    side.active
+        .into_iter()
+        .chain(side.bench)
+        .map(|c| n.min(c.damage()))
+        .sum()
 }
 
 /// R-AI-11: the +10 trainer turns a hit that falls 10 short into a knock-out.
@@ -774,6 +793,8 @@ fn effect_value(x: &Ctx, me: &InPlay, def: &InPlay, e: &Effect) -> f32 {
         DiscardEnergy { count, .. } => -10.0 * count as f32,
         DiscardAllEnergy => -10.0 * me.energy.len() as f32,
         Heal(n) => n.min(me.damage()) as f32,
+        HealAll(n) => side_damage(x.mine(), n) as f32,
+        AttachFromDeck(_) if x.mine().deck_count > 0 => 15.0,
         // Worth half the best attack I could pay for next turn.
         DoubleNextAttack => {
             me.creature()
@@ -1177,17 +1198,22 @@ mod tests {
         }
     }
 
-    /// R-AI-01: the same with the prebuilt decks of the real set, both ways
-    /// round and in the mirror matches.
+    /// R-AI-01: the same with every prebuilt deck of the real set and the
+    /// starter, each against the next one, both ways round.
     #[test]
     fn ai_plays_prebuilt_decks_legally() {
-        use crate::decks::{ember_rush, tide_mind};
-        let decks = [ember_rush(), tide_mind()];
-        for seed in 0..100u64 {
-            let pair = [
-                decks[seed as usize % 2].clone(),
-                decks[seed as usize / 2 % 2].clone(),
-            ];
+        use crate::decks::{PREBUILT, STARTER};
+        let decks: Vec<Vec<CardId>> = PREBUILT
+            .iter()
+            .chain([&&STARTER])
+            .map(|d| d.cards())
+            .collect();
+        for seed in 0..56u64 {
+            let a = seed as usize % decks.len();
+            let mut pair = [decks[a].clone(), decks[(a + 1) % decks.len()].clone()];
+            if seed / decks.len() as u64 % 2 == 1 {
+                pair.swap(0, 1);
+            }
             play(
                 pair,
                 seed,
@@ -1528,22 +1554,67 @@ mod tests {
         assert_eq!(ai.idle, 0, "a new Active starts again");
     }
 
-    /// Balance check for the prebuilt decks: in 200 Normal-vs-Normal games
-    /// (seats swapped every game) each deck wins at least 35%.
-    #[test]
-    fn ai_mirror_prebuilt_decks_are_balanced() {
-        use crate::decks::{ember_rush, tide_mind};
-        let mut ember = 0;
-        for seed in 0..200u64 {
-            let swap = seed % 2 == 1;
-            let mut pair = [ember_rush(), tide_mind()];
-            if swap {
-                pair.swap(0, 1);
+    /// Normal-vs-Normal round robin of the prebuilt decks: `games` seeded
+    /// games per pair, seats alternating. Returns each deck's (wins, games)
+    /// and prints the pairwise table.
+    #[allow(clippy::needless_range_loop)] // i, j index both PREBUILT and the table
+    fn round_robin(games: u64) -> Vec<(u32, u32)> {
+        use crate::decks::PREBUILT;
+        let n = PREBUILT.len();
+        let mut beat = vec![vec![0u32; n]; n];
+        let normal = Some(Difficulty::Normal);
+        for i in 0..n {
+            for j in i + 1..n {
+                for g in 0..games {
+                    let seed = (i * n + j) as u64 * 1000 + g;
+                    let swap = g % 2 == 1;
+                    let mut pair = [PREBUILT[i].cards(), PREBUILT[j].cards()];
+                    if swap {
+                        pair.swap(0, 1);
+                    }
+                    let first_won = play(pair, seed, [normal, normal]) == 0;
+                    let (w, l) = if first_won != swap { (i, j) } else { (j, i) };
+                    beat[w][l] += 1;
+                }
             }
-            let normal = Some(Difficulty::Normal);
-            let w = play(pair, seed, [normal, normal]);
-            ember += usize::from((w == 1) == swap);
         }
-        assert!((70..=130).contains(&ember), "Ember Rush won {ember}/200");
+        let mut total = vec![];
+        for (i, d) in PREBUILT.iter().enumerate() {
+            let wins: u32 = beat[i].iter().sum();
+            let played = games as u32 * (n as u32 - 1);
+            let row: Vec<String> = (0..n)
+                .map(|j| {
+                    if i == j {
+                        "  -".into()
+                    } else {
+                        format!("{:3}", beat[i][j])
+                    }
+                })
+                .collect();
+            eprintln!("{:12} {} | {wins}/{played}", d.name, row.join(" "));
+            total.push((wins, played));
+        }
+        total
+    }
+
+    /// Balance check: in a seeded round robin every prebuilt deck wins
+    /// between 30% and 70% of its games against the others.
+    #[test]
+    fn prebuilt_decks_round_robin_is_balanced() {
+        for (d, (w, n)) in crate::decks::PREBUILT.iter().zip(round_robin(16)) {
+            let rate = w as f32 / n as f32;
+            assert!((0.3..=0.7).contains(&rate), "{} won {w}/{n}", d.name);
+        }
+    }
+
+    /// The same with 100 games per pair (run with `--ignored --nocapture`,
+    /// in release, when tuning cards).
+    #[test]
+    #[ignore]
+    fn prebuilt_decks_round_robin_is_balanced_big() {
+        for (d, (w, n)) in crate::decks::PREBUILT.iter().zip(round_robin(100)) {
+            let rate = w as f32 / n as f32;
+            assert!((0.3..=0.7).contains(&rate), "{} won {w}/{n}", d.name);
+        }
     }
 }

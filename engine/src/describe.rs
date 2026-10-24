@@ -128,6 +128,10 @@ impl fmt::Display for Effect {
                 "Flip {}. This attack does {per} more damage for each heads.",
                 plural(coins, "coin")
             ),
+            AddPerDamage { per, own } => {
+                let on = if own { "this creature" } else { "the defending creature" };
+                write!(f, "This attack does {per} more damage for each 10 damage on {on}.")
+            }
             IgnoreWeaknessResistance => {
                 write!(f, "This attack's damage isn't affected by weakness or resistance.")
             }
@@ -207,6 +211,15 @@ impl fmt::Display for Effect {
             ),
             SwitchSelf => write!(f, "Switch your Active creature with 1 of your Benched creatures."),
             Heal(n) => write!(f, "Removes {n} damage from your Active creature."),
+            HealAll(n) => write!(f, "Removes {n} damage from each of your creatures."),
+            AttachFromDeck(Color::Colorless) => write!(
+                f,
+                "Search your deck for a basic energy card and attach it to this creature, then shuffle your deck."
+            ),
+            AttachFromDeck(c) => write!(
+                f,
+                "Search your deck for a {c} energy card and attach it to this creature, then shuffle your deck."
+            ),
             Devolve => write!(
                 f,
                 "The defending creature returns to its previous stage; the removed card goes to its owner's hand."
@@ -272,6 +285,7 @@ impl fmt::Display for PromptKind {
                 Search(find) => write!(f, "Choose {find} to take from your deck"),
                 Recover(find) => write!(f, "Choose {find} to take from your discard pile"),
                 AttachMinus20 => write!(f, "Choose the creature to attach this card to"),
+                AttachFromDeck(_) => write!(f, "Choose the energy to attach from your deck"),
                 StageSkip => write!(f, "Choose the Stage 2 card and the Basic it goes on"),
                 other => write!(f, "Choose: {other}"),
             },

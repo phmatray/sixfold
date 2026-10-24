@@ -15,6 +15,10 @@ pub enum Effect {
     /// Flip `coins` coins; the attack does `per` more damage for each heads.
     /// With 0 printed damage this sets the damage (R-EFFECT-04).
     AddPerHeads { coins: u8, per: u16 },
+    /// The attack does `per` more damage for each 10 damage on self (`own`)
+    /// or on the defender, counted before damage (R-EFFECT-04 "add to the
+    /// damage"; an engine extension).
+    AddPerDamage { per: u16, own: bool },
     /// This attack's damage skips weakness and resistance (R-DMG-10).
     IgnoreWeaknessResistance,
     /// Self's attack on its owner's next turn does double damage (R-DMG-08).
@@ -79,6 +83,13 @@ pub enum Effect {
     /// Heal self (the own Active), capped at max HP. As a trainer or Power it
     /// needs damage to heal (R-EFFECT-04).
     Heal(u16),
+    /// Heal every one of the player's creatures by up to N, capped at max HP.
+    /// As a trainer or Power it needs damage somewhere (an engine extension).
+    HealAll(u16),
+    /// Take a basic energy of this colour (`Colorless`: any) from the deck,
+    /// picked by the player, attach it to self, then shuffle (R-ZONE-03).
+    /// As a trainer or Power it needs a match in the deck (an engine extension).
+    AttachFromDeck(Color),
     /// The defender returns to its previous stage; the top card goes to its
     /// owner's hand (R-EVO-12).
     Devolve,
@@ -155,6 +166,7 @@ impl Effect {
         match self {
             DiscardEnergy { .. } | DiscardAllEnergy | OnceWhileInPlay => Phase::Cost,
             AddPerHeads { .. }
+            | AddPerDamage { .. }
             | IgnoreWeaknessResistance
             | DoubleNextAttack
             | Inflict { .. }

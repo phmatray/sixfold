@@ -45,8 +45,41 @@ pub static WILD_PACK: Booster = Booster {
     colors: &Color::ALL,
 };
 
-/// Every booster, for the shop.
-pub static BOOSTERS: [&Booster; 3] = [&EMBER_PACK, &TIDE_PACK, &WILD_PACK];
+pub static GROVE_PACK: Booster = Booster {
+    name: "Grove Pack",
+    description: "Grass and Lightning creatures, plus trainers.",
+    colors: &[Color::Grass, Color::Lightning],
+};
+
+pub static STORM_PACK: Booster = Booster {
+    name: "Storm Pack",
+    description: "Lightning and Water creatures, plus trainers.",
+    colors: &[Color::Lightning, Color::Water],
+};
+
+pub static STONE_PACK: Booster = Booster {
+    name: "Stone Pack",
+    description: "Fighting and Colorless creatures, plus trainers.",
+    colors: &[Color::Fighting],
+};
+
+pub static DREAM_PACK: Booster = Booster {
+    name: "Dream Pack",
+    description: "Psychic and Grass creatures, plus trainers.",
+    colors: &[Color::Psychic, Color::Grass],
+};
+
+/// Every booster, for the shop. Wallets count packs by index here, so new
+/// boosters go at the end.
+pub static BOOSTERS: [&Booster; 7] = [
+    &EMBER_PACK,
+    &TIDE_PACK,
+    &WILD_PACK,
+    &GROVE_PACK,
+    &STORM_PACK,
+    &STONE_PACK,
+    &DREAM_PACK,
+];
 
 impl Booster {
     /// Whether this card can turn up in the pack.
@@ -145,6 +178,10 @@ mod tests {
             .iter()
             .all(|&id| EMBER_PACK.holds(id)));
         assert!(!TIDE_PACK.holds(PYREQUILL) && TIDE_PACK.holds(TIDEMAW));
+        assert!(GROVE_PACK.holds(ELDERHART) && GROVE_PACK.holds(FULGUREX));
+        assert!(!GROVE_PACK.holds(GULFWYRM) && STORM_PACK.holds(GULFWYRM));
+        assert!(STONE_PACK.holds(WARRENKING) && !STONE_PACK.holds(PYREQUILL));
+        assert!(DREAM_PACK.holds(HEXARCH) && !DREAM_PACK.holds(FULGUREX));
         assert!(crate::set::ids().all(|id| WILD_PACK.holds(id)));
     }
 
