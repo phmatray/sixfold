@@ -32,6 +32,7 @@ pub mod campaign;
 pub mod decks;
 pub mod overworld;
 pub mod profile;
+pub mod save;
 pub mod set;
 
 #[cfg(test)]
