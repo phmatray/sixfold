@@ -9,13 +9,13 @@ use crate::booster::BOOSTERS;
 use crate::card::CardId;
 use crate::collection::{sign, starter_collection, unsign, Collection, LoadError};
 use crate::deck::DeckList;
-use crate::decks::PREBUILT;
+use crate::decks::STARTER;
 
 /// The wallet save string version this build writes and reads.
 const VERSION: &str = "p1";
 
-/// Packs a new player starts with, per booster (one of each).
-pub const STARTING_PACKS: [u32; 3] = [1, 1, 1];
+/// Packs a new player starts with, per booster: one Ember, Tide and Wild.
+pub const STARTING_PACKS: [u32; BOOSTERS.len()] = [1, 1, 1, 0, 0, 0, 0];
 
 /// The booster (index into [`BOOSTERS`]) a won duel against the AI grants.
 pub const WIN_REWARD: usize = 2;
@@ -23,7 +23,7 @@ pub const WIN_REWARD: usize = 2;
 /// Unopened packs, counted per booster in [`BOOSTERS`] order.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Wallet {
-    packs: [u32; 3], // one per booster in BOOSTERS (a [_; 3] static)
+    packs: [u32; BOOSTERS.len()],
 }
 
 impl Wallet {
@@ -58,7 +58,7 @@ impl Wallet {
         }
     }
 
-    /// `p1;<count>,<count>,<count>;<checksum>`, one count per booster.
+    /// `p1;<count>,...;<checksum>`, one count per booster.
     pub fn save(&self) -> String {
         let body: Vec<String> = self.packs.iter().map(u32::to_string).collect();
         sign(&format!("{VERSION};{}", body.join(",")))
@@ -89,18 +89,16 @@ pub struct Profile {
 }
 
 impl Profile {
-    /// A new player: the starter collection, the prebuilt decks as their own
-    /// deck lists, and [`STARTING_PACKS`].
+    /// A new player: the starter collection, the [`STARTER`] deck as their
+    /// own deck list, and [`STARTING_PACKS`]. (The prebuilt decks stay
+    /// playable against the AI without being owned.)
     pub fn new_player() -> Profile {
         Profile {
             collection: starter_collection(),
-            decks: PREBUILT
-                .iter()
-                .map(|p| DeckList {
-                    name: p.name.to_string(),
-                    cards: p.cards(),
-                })
-                .collect(),
+            decks: vec![DeckList {
+                name: STARTER.name.to_string(),
+                cards: STARTER.cards(),
+            }],
             wallet: Wallet {
                 packs: STARTING_PACKS,
             },
@@ -148,7 +146,7 @@ mod tests {
         assert_eq!(BOOSTERS.len(), STARTING_PACKS.len());
         assert_eq!(
             p.decks.iter().map(|d| d.name.as_str()).collect::<Vec<_>>(),
-            ["Ember Rush", "Tide Mind"]
+            ["Trailhead"]
         );
         assert!(p.decks.iter().all(|d| d.validate(&p.collection).is_ok()));
     }
@@ -191,14 +189,16 @@ mod tests {
         let mut w = Wallet::default();
         w.grant(0, 3);
         w.grant(2, 12);
-        assert!(!w.grant(3, 1));
+        assert!(!w.grant(BOOSTERS.len(), 1));
+        // A 0.3 save holds three counts.
+        assert_eq!(Wallet::load(&sign("p1;1,2,3")).unwrap().packs(2), 3);
         let s = w.save();
-        assert!(s.starts_with("p1;3,0,12;"), "{s}");
+        assert!(s.starts_with("p1;3,0,12,0,0,0,0;"), "{s}");
         assert_eq!(Wallet::load(&s), Ok(w));
         assert_eq!(Wallet::load(&sign("p1;5")).unwrap().packs(0), 5);
         assert_eq!(Wallet::load(&sign("v1;1,1,1")), Err(LoadError::Version));
         assert_eq!(Wallet::load(&s[..s.len() - 1]), Err(LoadError::Checksum));
-        for bad in ["p1;1,1,1,1", "p1;x", "p1;-1", "p1;"] {
+        for bad in ["p1;1,1,1,1,1,1,1,1", "p1;x", "p1;-1", "p1;"] {
             assert_eq!(Wallet::load(&sign(bad)), Err(LoadError::Malformed), "{bad}");
         }
     }

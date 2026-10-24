@@ -320,7 +320,7 @@ mod tests {
 mod deck_list_tests {
     use super::*;
     use crate::collection::starter_collection;
-    use crate::decks::EMBER_RUSH;
+    use crate::decks::{EMBER_RUSH, STARTER};
     use crate::set::*;
 
     fn list(cards: &[CardId]) -> DeckList {
@@ -332,7 +332,7 @@ mod deck_list_tests {
 
     #[test]
     fn validate_checks_rules_then_ownership() {
-        let ember = list(&EMBER_RUSH.cards());
+        let ember = list(&STARTER.cards());
         assert_eq!(ember.validate(&starter_collection()), Ok(()));
         assert_eq!(
             ember.validate(&Collection::new()),
@@ -449,7 +449,7 @@ mod deck_list_tests {
     /// The editor flow: creatures and trainers by hand, energy auto-filled.
     #[test]
     fn prebuilt_without_energy_refills_to_a_legal_deck() {
-        let mut d = list(&EMBER_RUSH.cards());
+        let mut d = list(&STARTER.cards());
         d.cards.retain(|&id| !card(id).is_basic_energy());
         d.fill_energy();
         assert_eq!(d.validate(&starter_collection()), Ok(()));

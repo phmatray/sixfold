@@ -7,7 +7,7 @@
 use std::collections::BTreeMap;
 
 use crate::card::{try_card, CardId};
-use crate::decks::PREBUILT;
+use crate::decks::STARTER;
 
 /// The saved-string version this build writes and reads.
 const VERSION: &str = "v1";
@@ -175,20 +175,18 @@ fn fnv1a(s: &str) -> u32 {
         .fold(0x811c_9dc5, |h, b| (h ^ b as u32).wrapping_mul(0x0100_0193))
 }
 
-/// What a new player starts with: the cards of every prebuilt deck, so each
-/// one can be built as it ships (basic energy is unlimited anyway).
+/// What a new player starts with: the cards of the [`STARTER`] deck, one
+/// deck's worth (basic energy is unlimited anyway). The rest comes from packs.
 pub fn starter_collection() -> Collection {
     let mut c = Collection::new();
-    for d in PREBUILT {
-        c.add_all(&d.cards());
-    }
+    c.add_all(&STARTER.cards());
     c
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::decks::{ember_rush, tide_mind};
+    use crate::decks::ember_rush;
     use crate::set::*;
 
     #[test]
@@ -217,28 +215,28 @@ mod tests {
 
     #[test]
     fn can_build_needs_enough_copies() {
-        let deck = ember_rush();
+        let deck = STARTER.cards();
         let mut c = starter_collection();
-        assert!(c.can_build(&deck) && c.can_build(&tide_mind()));
-        assert!(c.remove(PYREQUILL, 1));
-        assert_eq!(c.missing(&deck), [(PYREQUILL, 1)]);
+        assert!(c.can_build(&deck) && !c.can_build(&ember_rush()));
+        assert!(c.remove(FLARROW, 1));
+        assert_eq!(c.missing(&deck), [(FLARROW, 1)]);
         assert!(!c.can_build(&deck));
-        assert_eq!(Collection::new().missing(&deck).len(), 16); // all but the 2 basic energies
+        assert_eq!(Collection::new().missing(&deck).len(), 17); // all but the 2 basic energies
     }
 
     #[test]
-    fn starter_holds_both_prebuilts() {
+    fn starter_holds_one_starter_deck() {
         let c = starter_collection();
-        assert_eq!(c.count(SCAMPIT), 4); // 2 in each deck
-        assert_eq!(c.count(LUCKY_SATCHEL), 7);
-        assert_eq!(c.count(CINDREL), 4);
+        assert_eq!(c.iter().map(|(_, n)| n).sum::<usize>(), 60 - 26); // 26 basic energy
+        assert_eq!((c.count(CINDREL), c.count(SCAMPIT)), (3, 2));
+        assert_eq!(c.count(PYREQUILL), 0);
     }
 
     #[test]
     fn save_round_trips_and_is_stable() {
         let c = starter_collection();
         let s = c.save();
-        assert!(s.starts_with("v1;0:4,1:3,"), "{s}");
+        assert!(s.starts_with("v1;0:3,1:2,"), "{s}");
         assert_eq!(Collection::load(&s), Ok((c.clone(), vec![])));
         let mut again = Collection::new();
         for (id, n) in c.iter().collect::<Vec<_>>().into_iter().rev() {
@@ -265,7 +263,7 @@ mod tests {
             Err(LoadError::Checksum)
         );
         assert_eq!(
-            Collection::load(&s.replacen("0:4", "0:9", 1)),
+            Collection::load(&s.replacen("0:3", "0:9", 1)),
             Err(LoadError::Checksum)
         );
         for bad in [
