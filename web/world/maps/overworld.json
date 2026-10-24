@@ -730,9 +730,9 @@
       "model": "rival_lightning",
       "tint": "#ffd84d",
       "scale": 1.0,
-      "x": 24,
-      "z": 6,
-      "facing": "w",
+      "x": 20,
+      "z": 4,
+      "facing": "s",
       "idle": "Idle",
       "dialogue": [
         {
@@ -782,9 +782,9 @@
       "model": "rival_fighting",
       "tint": "#d39058",
       "scale": 1.0,
-      "x": 3,
-      "z": 20,
-      "facing": "n",
+      "x": 14,
+      "z": 3,
+      "facing": "s",
       "idle": "Idle",
       "dialogue": [
         {

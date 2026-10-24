@@ -9,13 +9,12 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::booster::BOOSTERS;
 use sixfold_engine::campaign;
 use sixfold_engine::overworld::{Applied, Progress};
 use wasm_bindgen::prelude::*;
 
 use crate::audio::MuteToggle;
-use crate::campaign::{Challenge, Roster, SealBadge};
+use crate::campaign::{packs_label, Challenge, Roster, SealBadge};
 use crate::ctl::Ctl;
 use crate::{store, Screen};
 
@@ -144,6 +143,7 @@ fn prompt_label(kind: &str, text: &str) -> String {
         "npc" => format!("Talk to {text}"),
         "warp" => text.to_string(),
         "duel" => "Play a duel".into(),
+        "locked" => "Try the door".into(),
         _ => "Take a look".into(),
     }
 }
@@ -345,9 +345,9 @@ pub fn WorldScreen() -> impl IntoView {
         progress.with_untracked(push_items);
         if !packs.is_empty() {
             profile.update(|p| packs.iter().for_each(|&b| _ = p.wallet.grant(b, 1)));
-            let names: Vec<&str> = packs.iter().map(|&b| BOOSTERS[b].name).collect();
+            let names: Vec<String> = packs.iter().map(|&b| packs_label(b, 1)).collect();
             let text = format!(
-                "You got {}. Open it from the title screen.",
+                "You got {}. Open packs from the title screen.",
                 names.join(" and ")
             );
             next = next.or(Some(Sheet::Note("A gift", text.clone())));
@@ -485,11 +485,11 @@ pub fn WorldScreen() -> impl IntoView {
                         <Challenge id=id on_cancel=move || sheet.set(None) before=move || sheet.set(None) />
                     }.into_any(),
                     Sheet::Roster => view! {
-                        <h2 id="world-sheet-title">"Rivals and seals"</h2>
-                        <Roster />
-                        <div class="dialog-foot">
+                        <div class="sheet-head">
+                            <h2 id="world-sheet-title">"Rivals and seals"</h2>
                             <button class="btn primary" autofocus on:click=close>"Close"</button>
                         </div>
+                        <Roster />
                     }.into_any(),
                 })}
             </dialog>

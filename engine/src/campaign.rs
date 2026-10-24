@@ -222,7 +222,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "orla",
         name: "Orla",
         title: "Quarry Foreman",
-        place: "The meadow, south-west corner",
+        place: "The meadow, behind the hall",
         colors: &[Fighting],
         deck: Prebuilt {
             name: "Bedrock",
