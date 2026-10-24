@@ -36,3 +36,11 @@ Cargo workspace, two crates with a one-way dependency `web -> engine`:
 - **`web/`** — the Leptos CSR app. Depends on `engine` by path and renders its types. Built by Trunk, whose entry point is `web/index.html` (not `main.rs` directly) — the `data-trunk` link tags there pull in `style.css` and the wasm bundle.
 
 When adding game logic, the model lives in `engine` with a unit test; the UI in `web` consumes it. A change that needs a browser to verify belongs in `web`; a change you can assert with plain Rust belongs in `engine`.
+
+## Releases
+
+Public repo `phmatray/sixfold`, deployed to https://phmatray.github.io/sixfold/ after CI passes on `main`.
+Releases are cut by **release-please** from **Conventional Commits** (`feat:`, `fix:`, `docs:`, `ci:`, `chore:` …),
+so commit messages and squash-merged PR titles must follow that form. Each phase of work lands as a PR and ships as
+a new minor version (0.x.0) until 1.0.0. Renovate keeps dependencies current (`renovate.json`).
+`scripts/check-no-game-data.sh` runs in CI and fails if a ROM, save, state, archive, `.blend` or any file over 2 MB is tracked.

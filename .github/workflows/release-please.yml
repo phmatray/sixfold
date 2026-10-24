@@ -1,0 +1,98 @@
+name: release-please
+
+# Conventional-Commits-driven releases. On every push to main, release-please keeps a release PR up
+# to date (CHANGELOG.md, .release-please-manifest.json and the version fields listed in
+# release-please-config.json). Merging that PR tags vX.Y.Z and creates the GitHub Release; the
+# `release_created` output then gates the `ci` and `package` jobs in this same run (a tag pushed with
+# GITHUB_TOKEN never triggers another workflow).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  # release-please creates and applies the `autorelease: pending` label (an Issues-scoped endpoint).
+  issues: write
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
+        id: release
+        with:
+          target-branch: main
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  # The release PR is pushed by github-actions[bot]; GitHub holds its CI run for approval. It only
+  # carries release-please's own version bumps, so its CI is approved here.
+  approve-release-pr-ci:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BRANCH: release-please--branches--main--components--sixfold
+    steps:
+      - name: Approve the release PR's pending CI run
+        run: |
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/branches/$BRANCH" --jq .commit.sha 2>/dev/null) || exit 0
+          for _ in $(seq 1 12); do
+            ids=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=$BRANCH&status=action_required&head_sha=$sha" --jq '.workflow_runs[].id')
+            [ -n "$ids" ] && break
+            sleep 5
+          done
+          for id in $ids; do gh api -X POST "repos/$GITHUB_REPOSITORY/actions/runs/$id/approve" && echo "approved run $id"; done
+
+  ci:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  # Attaches a root-path build of the web app to the Release.
+  package:
+    needs: [release-please, ci]
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ needs.release-please.outputs.tag_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Install Trunk
+        run: curl -sSfL https://github.com/trunk-rs/trunk/releases/download/v0.22.0/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C /usr/local/bin
+      - name: Build web app
+        working-directory: web
+        run: trunk build --release --public-url /
+      - name: Attach to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          (cd web/dist && zip -r "$GITHUB_WORKSPACE/sixfold-web-${TAG}.zip" .)
+          gh release upload "$TAG" "sixfold-web-${TAG}.zip" --clobber
+          gh release edit "$TAG" --title "Sixfold ${TAG}"

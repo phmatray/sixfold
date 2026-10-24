@@ -1,9 +1,11 @@
-name: Test and deploy to GitHub Pages
+name: Deploy to GitHub Pages
 
+# Deploys main only after CI passed on it.
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -12,23 +14,27 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
+    # Only a successful CI run of a push to main (not a pull request from a branch named main).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
-      - name: Engine tests
-        run: cargo test -p pkmntcg-engine
       - name: Install Trunk
         run: curl -sSfL https://github.com/trunk-rs/trunk/releases/download/v0.22.0/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C /usr/local/bin
-      - name: Build
+      - name: Build for the Pages sub-path
         working-directory: web
         run: trunk build --release --public-url "/${{ github.event.repository.name }}/"
       - uses: actions/upload-pages-artifact@v3
@@ -36,7 +42,6 @@ jobs:
           path: web/dist
 
   deploy:
-    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:

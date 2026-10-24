@@ -4,6 +4,8 @@ A clean-room creature card duel with the old handheld rules, written in **Rust**
 compiled to **WebAssembly** and played in the browser (Leptos, client-side only).
 You play one of two original prebuilt decks against an AI opponent.
 
+**Play it:** https://phmatray.github.io/sixfold/
+
 ## Status
 
 Playable from start to finish:
