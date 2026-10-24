@@ -307,7 +307,11 @@ fn BinderSlot(id: CardId) -> impl IntoView {
             n => format!("{n} owned"),
         };
         let kind = if promo { " promo" } else { "" };
-        format!("{}, {}{kind}, {own}", face_text(id), rarity_label(def.rarity))
+        format!(
+            "{}, {}{kind}, {own}",
+            face_text(id),
+            rarity_label(def.rarity)
+        )
     };
     view! {
         <li class="bind-slot" class:missing=move || count.get() == 0>
