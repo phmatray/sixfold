@@ -13,7 +13,7 @@ Each phase lands as one or more pull requests and ships as a minor release cut b
 | 0.7.0 | A bigger world: five outdoor areas joined by their edges, cliffs and decks, more buildings and NPCs, two small quests | Released |
 | 0.8.0 | Saves and slots with export / import, offline play (PWA), a Hard AI that looks ahead, an accessibility pass, a smaller wasm | Released |
 | 0.9.0 | Content complete: credits and the champion's title, the Gauntlet and a daily duel, seven promo cards, a balance pass over every deck, a full campaign playthrough test | Released |
-| 1.0.0 | Final polish and release: a last audit of every screen, accessibility and console fixes, a Low Tide balance nudge | In review |
+| 1.0.0 | Final polish and release: a last audit of every screen, accessibility and console fixes, a Low Tide balance nudge | Released |
 
 After 1.0: a second human player (two people on one device, or over the network).
 

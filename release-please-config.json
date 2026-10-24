@@ -4,7 +4,6 @@
     ".": {
       "$comment": "`simple` rather than `rust`: the root is a Cargo workspace whose version lives in [workspace.package]; the crates inherit it, and Cargo.lock pins both. Tags stay plain vX.Y.Z.",
       "release-type": "simple",
-      "release-as": "1.0.0",
       "package-name": "sixfold",
       "include-component-in-tag": false,
       "changelog-path": "CHANGELOG.md",
