@@ -150,7 +150,7 @@ pub fn TitleScreen() -> impl IntoView {
                             <MenuItem label="Open packs" sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
                             <MenuItem label="My decks" sub=Signal::derive(decks) to=Screen::Decks />
                             <MenuItem label="Collection" sub=Signal::derive(found) to=Screen::Collection />
-                            <MenuItem label="Explore the world" sub="Walk the meadow, visit the duel hall" to=Screen::World />
+                            <MenuItem label="Explore the world" sub="Explore the meadow and the four roads out of it" to=Screen::World />
                         </ul>
                     </nav>
                 </div>
