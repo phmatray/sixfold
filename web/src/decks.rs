@@ -290,6 +290,7 @@ pub fn Editor(index: usize) -> impl IntoView {
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                     "Decks"
                 </button>
+                <h1 class="sr-only">"Deck editor"</h1>
                 <label class="sr-only" for="deck-name">"Deck name"</label>
                 <input id="deck-name" class="deck-name-input" maxlength="40" prop:value=move || draft.with(|d| d.name.clone())
                     on:input=move |e| draft.update(|d| d.name = event_target_value(&e)) />

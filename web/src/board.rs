@@ -366,13 +366,13 @@ pub fn SideRow(player: usize) -> impl IntoView {
                     <span class="badge effect">"No trainers this turn"</span>
                 })}
             </div>
-            <div class="active-spot" aria-label=format!("{who} Active spot")>
+            <div class="active-spot" role="group" aria-label=format!("{who} Active spot")>
                 {move || match info.with(|i| i.active) {
                     Some(uid) => view! { <Creature player=player uid=uid /> }.into_any(),
                     None => view! { <div class="slot-empty active-empty"><span>"Active"</span></div> }.into_any(),
                 }}
             </div>
-            <div class="bench" aria-label=format!("{who} Bench")>
+            <div class="bench" role="group" aria-label=format!("{who} Bench")>
                 <For
                     each=move || info.with(|i| i.bench.clone())
                     key=|uid| *uid
