@@ -6,8 +6,11 @@
 //! published card game.
 
 use crate::card::{
-    Attack, CardDef, CardId, CardKind, Color::*, Creature, EnergyCard, Power, PowerKind, Stage,
-    Trainer,
+    Attack, CardDef, CardId, CardKind,
+    Color::*,
+    Creature, EnergyCard, Power, PowerKind, Rarity,
+    Rarity::{Common, Rare, Uncommon},
+    Stage, Trainer,
 };
 use crate::condition::{Placed, Shield, Status};
 use crate::effect::{Effect::*, Find};
@@ -57,27 +60,31 @@ pub fn ids() -> impl Iterator<Item = CardId> {
     (0..CARDS.len() as u16).map(CardId)
 }
 
-const fn creature(name: &'static str, c: Creature) -> CardDef {
+const fn creature(name: &'static str, rarity: Rarity, c: Creature) -> CardDef {
     CardDef {
         name,
+        rarity,
         kind: CardKind::Creature(c),
     }
 }
 
 const fn trainer(
     name: &'static str,
+    rarity: Rarity,
     text: &'static str,
     effects: &'static [crate::Effect],
 ) -> CardDef {
     CardDef {
         name,
+        rarity,
         kind: CardKind::Trainer(Trainer { text, effects }),
     }
 }
 
-const fn energy(name: &'static str, e: EnergyCard) -> CardDef {
+const fn energy(name: &'static str, rarity: Rarity, e: EnergyCard) -> CardDef {
     CardDef {
         name,
+        rarity,
         kind: CardKind::Energy(e),
     }
 }
@@ -85,7 +92,7 @@ const fn energy(name: &'static str, e: EnergyCard) -> CardDef {
 #[rustfmt::skip]
 pub static CARDS: &[CardDef] = &[
     // ----- Ember Rush: Fire line (Basic -> Stage 1 -> Stage 2) -----
-    creature("Cindrel", Creature {
+    creature("Cindrel", Common, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 50, color: Fire,
         weakness: Some(Water), resistance: None, retreat_cost: 1,
         attacks: &[
@@ -95,7 +102,7 @@ pub static CARDS: &[CardDef] = &[
         ],
         power: None,
     }),
-    creature("Flarrow", Creature {
+    creature("Flarrow", Uncommon, Creature {
         stage: Stage::Stage1, evolves_from: Some("Cindrel"), hp: 70, color: Fire,
         weakness: Some(Water), resistance: None, retreat_cost: 1,
         attacks: &[
@@ -108,7 +115,7 @@ pub static CARDS: &[CardDef] = &[
         ],
         power: None,
     }),
-    creature("Pyrequill", Creature {
+    creature("Pyrequill", Rare, Creature {
         stage: Stage::Stage2, evolves_from: Some("Flarrow"), hp: 100, color: Fire,
         weakness: Some(Water), resistance: None, retreat_cost: 2,
         attacks: &[
@@ -126,7 +133,7 @@ pub static CARDS: &[CardDef] = &[
         }),
     }),
     // ----- Ember Rush: Fighting -----
-    creature("Knollop", Creature {
+    creature("Knollop", Common, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 60, color: Fighting,
         weakness: Some(Grass), resistance: Some(Lightning), retreat_cost: 2,
         attacks: &[
@@ -137,7 +144,7 @@ pub static CARDS: &[CardDef] = &[
         ],
         power: None,
     }),
-    creature("Knollgrim", Creature {
+    creature("Knollgrim", Uncommon, Creature {
         stage: Stage::Stage1, evolves_from: Some("Knollop"), hp: 90, color: Fighting,
         weakness: Some(Grass), resistance: Some(Lightning), retreat_cost: 3,
         attacks: &[
@@ -155,7 +162,7 @@ pub static CARDS: &[CardDef] = &[
             kind: PowerKind::Retaliate,
         }),
     }),
-    creature("Tusklet", Creature {
+    creature("Tusklet", Common, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 50, color: Fighting,
         weakness: Some(Grass), resistance: None, retreat_cost: 1,
         attacks: &[
@@ -166,7 +173,7 @@ pub static CARDS: &[CardDef] = &[
         ],
         power: None,
     }),
-    creature("Gritfang", Creature {
+    creature("Gritfang", Uncommon, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 70, color: Fighting,
         weakness: Some(Grass), resistance: None, retreat_cost: 2,
         attacks: &[
@@ -180,7 +187,7 @@ pub static CARDS: &[CardDef] = &[
         power: None,
     }),
     // ----- Tide Mind: Water line (Basic -> Stage 1 -> Stage 2) -----
-    creature("Puddock", Creature {
+    creature("Puddock", Common, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 50, color: Water,
         weakness: Some(Lightning), resistance: None, retreat_cost: 1,
         attacks: &[
@@ -192,7 +199,7 @@ pub static CARDS: &[CardDef] = &[
         ],
         power: None,
     }),
-    creature("Brookhorn", Creature {
+    creature("Brookhorn", Uncommon, Creature {
         stage: Stage::Stage1, evolves_from: Some("Puddock"), hp: 70, color: Water,
         weakness: Some(Lightning), resistance: None, retreat_cost: 1,
         attacks: &[
@@ -204,7 +211,7 @@ pub static CARDS: &[CardDef] = &[
         ],
         power: None,
     }),
-    creature("Tidemaw", Creature {
+    creature("Tidemaw", Rare, Creature {
         stage: Stage::Stage2, evolves_from: Some("Brookhorn"), hp: 100, color: Water,
         weakness: Some(Lightning), resistance: Some(Fire), retreat_cost: 3,
         attacks: &[
@@ -220,7 +227,7 @@ pub static CARDS: &[CardDef] = &[
             kind: PowerKind::Activated { effects: &[Heal(10)], once_per_turn: true, settled_only: false },
         }),
     }),
-    creature("Shellmote", Creature {
+    creature("Shellmote", Uncommon, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 60, color: Water,
         weakness: Some(Lightning), resistance: None, retreat_cost: 2,
         attacks: &[
@@ -238,7 +245,7 @@ pub static CARDS: &[CardDef] = &[
         }),
     }),
     // ----- Tide Mind: Psychic -----
-    creature("Wispun", Creature {
+    creature("Wispun", Common, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 40, color: Psychic,
         weakness: Some(Fighting), resistance: None, retreat_cost: 1,
         attacks: &[
@@ -251,7 +258,7 @@ pub static CARDS: &[CardDef] = &[
         ],
         power: None,
     }),
-    creature("Wispelle", Creature {
+    creature("Wispelle", Uncommon, Creature {
         stage: Stage::Stage1, evolves_from: Some("Wispun"), hp: 70, color: Psychic,
         weakness: Some(Fighting), resistance: None, retreat_cost: 1,
         attacks: &[
@@ -264,7 +271,7 @@ pub static CARDS: &[CardDef] = &[
         ],
         power: None,
     }),
-    creature("Glimmox", Creature {
+    creature("Glimmox", Uncommon, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 50, color: Psychic,
         weakness: Some(Fighting), resistance: None, retreat_cost: 1,
         attacks: &[
@@ -281,7 +288,7 @@ pub static CARDS: &[CardDef] = &[
         }),
     }),
     // ----- Shared -----
-    creature("Scampit", Creature {
+    creature("Scampit", Common, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 40, color: Colorless,
         weakness: None, resistance: Some(Psychic), retreat_cost: 0,
         attacks: &[Attack { name: "Nibble", text: "", cost: &[Colorless], damage: 10, effects: &[] }],
@@ -292,39 +299,39 @@ pub static CARDS: &[CardDef] = &[
         }),
     }),
     // ----- Trainers -----
-    trainer("Trail Compass",
+    trainer("Trail Compass", Uncommon,
             "Search your deck for a Basic creature card, put it into your hand, then shuffle your deck.",
             &[Search(Find::Basic)]),
-    trainer("Lucky Satchel", "Draw 2 cards.", &[Draw(2)]),
-    trainer("Moss Poultice", "Remove up to 30 damage from your Active creature.", &[Heal(30)]),
-    trainer("Clearwater Vial", "Your Active creature recovers from all conditions.", &[Cure { both: false }]),
-    trainer("Relay Baton", "Switch your Active creature with 1 of your Benched creatures.", &[SwitchSelf]),
-    trainer("Snare Hook",
+    trainer("Lucky Satchel", Uncommon, "Draw 2 cards.", &[Draw(2)]),
+    trainer("Moss Poultice", Common, "Remove up to 30 damage from your Active creature.", &[Heal(30)]),
+    trainer("Clearwater Vial", Common, "Your Active creature recovers from all conditions.", &[Cure { both: false }]),
+    trainer("Relay Baton", Common, "Switch your Active creature with 1 of your Benched creatures.", &[SwitchSelf]),
+    trainer("Snare Hook", Rare,
             "Choose 1 of your opponent's Benched creatures and switch it with their Active creature.",
             &[SwitchDefender { chooser_is_attacker: true }]),
-    trainer("Drain Brush", "Discard 1 energy card attached to your opponent's Active creature.",
+    trainer("Drain Brush", Rare, "Discard 1 energy card attached to your opponent's Active creature.",
             &[DiscardDefenderEnergy]),
-    trainer("Spike Charm", "Attach to your Active creature. Its attacks do 10 more damage this turn.",
+    trainer("Spike Charm", Uncommon, "Attach to your Active creature. Its attacks do 10 more damage this turn.",
             &[AttachPlus10]),
-    trainer("Bark Shield",
+    trainer("Bark Shield", Uncommon,
             "Attach to 1 of your creatures. It takes 20 less damage from attacks until the end of your opponent's next turn.",
             &[AttachMinus20]),
-    trainer("Recall Horn", "Put a creature card from your discard pile into your hand.",
+    trainer("Recall Horn", Uncommon, "Put a creature card from your discard pile into your hand.",
             &[Recover(Find::Creature)]),
-    trainer("Bloom Seed",
+    trainer("Bloom Seed", Rare,
             "Put a Stage 2 creature card from your hand onto the matching Basic creature in play. The Basic must have been in play since the start of your turn.",
             &[StageSkip]),
-    trainer("Unwind Spray",
+    trainer("Unwind Spray", Rare,
             "Your opponent's evolved Active creature returns to its previous stage. Put the top card into your opponent's hand.",
             &[Devolve]),
     // ----- Energy -----
-    energy("Grass Energy", EnergyCard::Basic(Grass)),
-    energy("Fire Energy", EnergyCard::Basic(Fire)),
-    energy("Water Energy", EnergyCard::Basic(Water)),
-    energy("Lightning Energy", EnergyCard::Basic(Lightning)),
-    energy("Fighting Energy", EnergyCard::Basic(Fighting)),
-    energy("Psychic Energy", EnergyCard::Basic(Psychic)),
-    energy("Twofold Energy", EnergyCard::DoubleColorless),
+    energy("Grass Energy", Rarity::Energy, EnergyCard::Basic(Grass)),
+    energy("Fire Energy", Rarity::Energy, EnergyCard::Basic(Fire)),
+    energy("Water Energy", Rarity::Energy, EnergyCard::Basic(Water)),
+    energy("Lightning Energy", Rarity::Energy, EnergyCard::Basic(Lightning)),
+    energy("Fighting Energy", Rarity::Energy, EnergyCard::Basic(Fighting)),
+    energy("Psychic Energy", Rarity::Energy, EnergyCard::Basic(Psychic)),
+    energy("Twofold Energy", Rare, EnergyCard::DoubleColorless),
 ];
 
 #[cfg(test)]
@@ -335,6 +342,22 @@ mod tests {
     #[test]
     fn set_is_valid() {
         assert_eq!(crate::card::validate_cards(CARDS), Ok(()));
+    }
+
+    /// Evolutions are rarer than Basics (Stage 2 always Rare), and every
+    /// booster tier has cards.
+    #[test]
+    fn rarity_follows_stage() {
+        for c in CARDS {
+            match c.creature().map(|cr| cr.stage) {
+                Some(Stage::Stage1) => assert!(c.rarity >= Uncommon, "{}", c.name),
+                Some(Stage::Stage2) => assert_eq!(c.rarity, Rare, "{}", c.name),
+                _ => {}
+            }
+        }
+        for r in [Rarity::Energy, Common, Uncommon, Rare] {
+            assert!(CARDS.iter().any(|c| c.rarity == r), "no {r:?} card");
+        }
     }
 
     /// Every constant names the card at its index.

@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use crate::card::{try_card, CardId, CardKind, EnergyCard};
+use crate::card::{try_card, CardId};
 
 pub const DECK_SIZE: usize = 60;
 pub const MAX_COPIES: usize = 4;
@@ -31,7 +31,7 @@ pub fn validate_deck(deck: &[CardId]) -> Result<(), DeckError> {
     }
     let mut copies: HashMap<&str, usize> = HashMap::new();
     for d in defs {
-        if matches!(d.kind, CardKind::Energy(EnergyCard::Basic(_))) {
+        if d.is_basic_energy() {
             continue;
         }
         let n = copies.entry(d.name).or_default();

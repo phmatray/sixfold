@@ -333,7 +333,8 @@ Hand cards have no instance id. Key them by `(CardId, nth copy)`: copies look th
 The set is plain `static` data with no code. `CardId(i)` is the i-th entry of `set::CARDS`, so keep one `pub const NAME: CardId = CardId(i);` per card, in the same order, and check them with `card_id`.
 
 ```rust
-pub struct CardDef { pub name: &'static str, pub kind: CardKind }
+pub struct CardDef { pub name: &'static str, pub rarity: Rarity, pub kind: CardKind }
+pub enum Rarity { Energy, Common, Uncommon, Rare } // Energy = basic energy only (checked by validate_cards)
 pub enum CardKind {
     Creature(Creature),
     Energy(EnergyCard),
@@ -362,6 +363,8 @@ pub struct Power { pub name: &'static str, pub text: &'static str, pub kind: Pow
 pub enum EnergyCard { Basic(Color) /* never Colorless */, DoubleColorless /* 2 colorless units */ }
 pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 ```
+
+**Rarity.** Every card has one. Basic energy is `Energy` (and nothing else is); Stage 2 creatures are always `Rare` and Stage 1 at least `Uncommon` (both checked by the set's tests). In the shipped set the Basics and simple trainers are `Common`; Stage 1s, Basics with a Power or a big attack, and draw, search and attach trainers are `Uncommon`; Stage 2s, the switch, energy-removal, stage-skip and devolve trainers and the special energy are `Rare`. Rarity only drives boosters (§10).
 
 **Deck rules.** A deck has exactly 60 cards and at least one real Basic. A deck may hold at most 4 cards with the same name, except basic energy, which is unlimited. The special energy counts toward that limit. Evolving matches `evolves_from` against the **name** of the card on top.
 
