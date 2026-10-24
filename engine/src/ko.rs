@@ -6,9 +6,9 @@ use crate::game::{Game, Step};
 
 impl Game {
     /// The knock-out handler (R-KO-03/04), with T = the turn player. Runs after
-    /// a whole attack (`after_attack`), after other damaging effects and at the
-    /// end of between-turns; a no-op if nothing is at 0 HP.
-    pub(crate) fn knock_outs(&mut self, after_attack: bool, ev: &mut Vec<Event>) {
+    /// a whole attack, after other damaging effects (both with `counter_ko`)
+    /// and at the end of between-turns; a no-op if nothing is at 0 HP.
+    pub(crate) fn knock_outs(&mut self, counter_ko: bool, ev: &mut Vec<Event>) {
         if !self
             .players
             .iter()
@@ -20,8 +20,8 @@ impl Game {
         let n = 1 - t;
         let active_out =
             |g: &Game, q: usize| g.players[q].active.as_ref().is_some_and(|a| a.hp == 0);
-        // Step 1, R-KO-09: the knocked-out defender's counter-KO takes the attacker with it.
-        if after_attack
+        // Step 1, R-KO-09: the knocked-out defender's counter-KO takes T's Active with it.
+        if counter_ko
             && active_out(self, n)
             && self.players[n].effects.shield == Some(Shield::CounterKo)
         {
@@ -185,7 +185,7 @@ mod tests {
         g.prompt = None;
         g.steps.push_front(Step::Main);
         let mut ev = Vec::new();
-        g.knock_outs(false, &mut ev);
+        g.knock_outs(true, &mut ev);
         g.run(&mut ev);
         ev
     }
@@ -531,6 +531,28 @@ mod tests {
         let ev = ok(&mut g, Action::Done);
         assert_eq!(kos(&ev), 1);
         assert!(g.players[0].active.is_some());
+    }
+
+    /// R-KO-09: also when a trainer or a Power knocks the defender out during
+    /// the turn (0B:58FF / 6789 / 7CCC → 01:6EF6).
+    #[test]
+    fn counter_ko_also_after_trainer_or_power_damage() {
+        for power in [false, true] {
+            let mut g = main_phase(0);
+            for p in 0..2 {
+                g.players[p].bench = vec![creature(EMBERKIT, &[])];
+            }
+            g.players[1].effects.shield = Some(Shield::CounterKo);
+            g.players[1].active.as_mut().unwrap().hp = 10;
+            let snipe = &[crate::Effect::Snipe(10)];
+            if power {
+                power_with(&mut g, snipe);
+            } else {
+                trainer_with(&mut g, snipe);
+            }
+            let ev = ok(&mut g, Action::Choose(0));
+            assert_eq!(kos(&ev), 2, "power: {power}");
+        }
     }
 
     /// R-KO-10

@@ -218,8 +218,9 @@ impl Game {
             }
             Stage::KnockOuts => {
                 self.advance();
-                let counter_ko = self.pd().source == Source::Attack;
-                self.knock_outs(counter_ko, ev);
+                // R-KO-09: every knock-out check during a turn includes the
+                // counter-KO (01:6EF6); only between turns skips it (01:6EF9).
+                self.knock_outs(true, ev);
                 return;
             }
             Stage::End => return self.finish(),

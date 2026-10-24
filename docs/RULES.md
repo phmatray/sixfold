@@ -1034,14 +1034,20 @@ unit test that should cover it.
 - **Test.** `between_turns_double_poison_ko_turn_ender_takes_prize_first`
 
 ### R-KO-09: Counter-KO effect
-- **Rule.** If the defender was given a "counter-KO" effect during its own last turn, and the
-  attacker's attack knocks it out while the attacker survives, the attacker is knocked out too. This
-  is checked before prizes and is not checked between turns. The effect lasts through the opponent's
-  turn, because `+E7` is cleared at the start of its owner's turn.
-- **Parameters.** N's `+E7 == $16`.
-- **Status.** CONFIRMED
-- **Evidence.** `00:35F2-362E`, `00:359D`.
-- **Test.** `counter_ko_effect_knocks_out_attacker`
+- **Rule.** If N's Active was given a "counter-KO" effect during its own last turn and is knocked out
+  during T's turn while T's Active survives, T's Active is knocked out too. This is checked in every
+  knock-out check during a turn: after an attack, after a confusion self-hit, and after a damaging
+  Power or trainer. It is checked before prizes and is not checked between turns. The effect lasts
+  through the opponent's turn, because `+E7` is cleared at the start of its owner's turn. It hits T's
+  Active, which is not necessarily the Power holder.
+- **Parameters.** N's `+E7 == $16`. HandleKnockOuts `01:6EF6` starts with HandleCounterKnockOut
+  `00:35F2`; between-turns `01:6CED` calls the entry after it, `01:6EF9`.
+- **Status.** CORRECTED. The original text limited it to the attacker's attack. Runtime: the
+  damage-moving Power (`0B:58BB`) with N's `+E7 = $16` knocked out N's Active and set T's Active HP
+  to 0 at `00:3612`, caller `01:6EF9` inside the `01:6EF6` run.
+- **Evidence.** `00:35F2-362E`, `00:359D`, `0B:58FF`, `0B:6789`, `0B:7CCC`, `00:1779`, `00:17A3`
+  (all → `01:6EF6`), `01:6CED` (→ `01:6EF9`).
+- **Test.** `counter_ko_effect_knocks_out_attacker`, `counter_ko_also_after_trainer_or_power_damage`
 
 ### R-KO-10: Knock-out clears linked effects
 - **Rule.** When one side's Active is knocked out, these values in the other side's `+E8` are
@@ -1460,7 +1466,7 @@ notes give the decision order and the weightings to copy where helpful.
 61. Result = sign((T took last prize + N has no creatures) − (N took last prize + T has no creatures)). Positive means T wins, negative means T loses, equal and nonzero means a draw.
 62. A draw restarts as sudden death: 1 prize each, turn counter 0, full setup and a new coin flip. It can repeat.
 63. A result set mid-turn ends the turn at once and skips between-turns. A result set between turns ends the duel before the next turn.
-64. Counter-KO effect: if the defender with the effect is knocked out by the attack, the attacker is knocked out too (not between turns).
+64. Counter-KO effect: if the defender with the effect is knocked out during the turn (attack, confusion self-hit, damaging Power or trainer), the turn player's Active is knocked out too (not between turns).
 65. A knock-out clears effects (E8 ∈ {3,5,6,7,$12}) on the other side that were placed by the knocked-out Active.
 66. Shuffle permutes only the remaining deck. Searching removes one card. A card can be returned to the top.
 67. Discard pile: ordered, public, new cards on top. Only cards in hand can be discarded from hand.

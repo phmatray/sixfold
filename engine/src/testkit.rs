@@ -63,6 +63,11 @@ pub fn trainer_with(g: &mut Game, effects: &'static [Effect]) -> Vec<Event> {
     resolve(g, Source::Trainer, 0, effects)
 }
 
+/// The turn player's Active resolves these effects as an activated Power.
+pub fn power_with(g: &mut Game, effects: &'static [Effect]) -> Vec<Event> {
+    resolve(g, Source::Power, 0, effects)
+}
+
 fn resolve(g: &mut Game, source: Source, damage: u16, effects: &'static [Effect]) -> Vec<Event> {
     let p = g.turn_player;
     for e in effects {
