@@ -849,7 +849,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   .bar-hint { margin: 0; font-size: 12px; }
   .bar-groups, .bar-group { flex: 1 1 100%; gap: 6px; justify-content: flex-start; }
   .bar-group.attacks { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-  .bar-group.plays .btn { flex: 1 1 auto; }
+  .bar-group.plays .btn { flex: 1 1 auto; padding: 6px 10px; font-size: 14px; text-align: center; }
   .btn.attack { min-width: 0; padding: 6px 10px; }
   .btn.attack .attack-dmg { font-size: 22px; }
   .attack-note { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -862,7 +862,8 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 
 @media (max-height: 520px) and (orientation: landscape) {
   :root { --aw: clamp(54px, 16vh, 90px); --bw: clamp(44px, 13vh, 70px); --hw: clamp(50px, 18vh, 80px); }
-  .action-bar { position: static; }
+  .action-bar { padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+  .bar-hint { display: none; }
   .hand-wrap { padding-top: 22px; }
 }
 
