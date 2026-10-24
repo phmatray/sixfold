@@ -317,14 +317,22 @@ impl Game {
         Some((p, options))
     }
 
-    /// R-EFFECT-06: the defender's attacks, except ones that copy.
+    /// R-EFFECT-06: the defender's attacks, except ones that copy and ones
+    /// whose own phase-1 checks fail for the copier (0B:6D50). Their energy
+    /// cost is not needed.
     pub(crate) fn copy_options(&self, p: usize) -> Vec<Choice> {
         let attacks = self.players[1 - p]
             .active
             .as_ref()
             .map_or(&[][..], |a| a.creature().attacks);
         (0..attacks.len())
-            .filter(|&i| !attacks[i].effects.contains(&Effect::CopyAttack))
+            .filter(|&i| {
+                let effects = attacks[i].effects;
+                !effects.contains(&Effect::CopyAttack)
+                    && effects
+                        .iter()
+                        .all(|e| self.effect_check(p, 0, e, Source::Attack).is_ok())
+            })
             .map(Choice::Attack)
             .collect()
     }
@@ -365,9 +373,10 @@ impl Game {
     pub(crate) fn chosen(&mut self, effect: Effect, choice: Choice) {
         if let (Effect::CopyAttack, Choice::Attack(i)) = (effect, choice) {
             // R-EFFECT-06: the copied attack replaces this one's effects and
-            // damage, then makes its own selections.
-            // RULES: R-EFFECT-06 — the copied attack's phase-1 checks are not
-            // run and its costs are paid only as far as possible.
+            // damage, then makes its own selections. Its phase-1 checks passed
+            // when it was offered (`copy_options`).
+            // RULES: R-EFFECT-06 — the source offers every attack and refuses a
+            // failing one after the pick, at no cost; the engine leaves it out.
             let p = self.pd().player;
             let attacks = self.players[1 - p]
                 .active
@@ -1936,6 +1945,29 @@ mod tests {
         g.players[1].active = Some(creature(FOGLET, &[]));
         ok(&mut g, Action::Attack(1));
         assert_eq!(choose_options(&g).1, vec![Choice::Attack(0)]);
+    }
+
+    /// R-EFFECT-06: the copied attack's own phase-1 checks run for the copier
+    /// (0B:6D50); one that fails can't be copied, at no cost.
+    #[test]
+    fn copy_attack_runs_copied_phase_one_checks() {
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(FOGLET, &[PSYCHIC_E, PSYCHIC_E]));
+        g.players[1].active = Some(creature(SPARKLET, &[]));
+        ok(&mut g, Action::Attack(1));
+        assert_eq!(
+            choose_options(&g).1,
+            vec![Choice::Attack(1)],
+            "no Lightning energy to discard"
+        );
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(FOGLET, &[PSYCHIC_E, LIGHTNING_E]));
+        g.players[1].active = Some(creature(SPARKLET, &[]));
+        ok(&mut g, Action::Attack(1));
+        assert_eq!(
+            choose_options(&g).1,
+            vec![Choice::Attack(0), Choice::Attack(1)]
+        );
     }
 
     // ----- Trainers -----

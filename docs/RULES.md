@@ -1261,10 +1261,23 @@ unit test that should cover it.
 
 ### R-EFFECT-06: Copy one of the defender's attacks *(verifier-found)*
 - **Rule.** An effect can run one of the defending creature's attacks through the same pipeline. It
-  cannot copy the copying attack itself.
-- **Status.** CONFIRMED (verifier-found)
-- **Evidence.** `0B:6D20-6D7E`.
-- **Test.** `copy_attack_runs_defender_effect_list`
+  cannot copy the copying attack itself. The copied attack's phase-1 check and then its phase-2
+  selection run for the copier. If the check fails, the copy is refused with that attack's error:
+  nothing is paid and the player is back at the attack menu with the turn still going. The copied
+  attack's energy cost is not required.
+- **Parameters.** List `06:4E3D`: phase 1 → `0B:6D0B`, phase 2 → `0B:6D16` (the real entry;
+  CopyDefenderAttack at `0B:6D20` sits inside an instruction), phase 8 → `0B:6D12`. `6D16` loads the
+  chosen attack over `wSelectedAttack` (`00:1625`, 19 bytes), refuses one with the same effect list
+  (text `$45`), runs its phase 1 (`0B:6D50`; carry → `6D4B` prints its error and returns carry), then
+  its phase 2. `00:16D9 → 1781` returns to the menu.
+- **Status.** CORRECTED (verifier-found). The phase-1 run was missing. Runtime: copying a defender
+  attack whose phase 1 needs a non-empty deck, with `C2BA = $3C`, stopped at `0B:6D55` with carry and
+  `HL = $00B1`; the run returned carry with `cc06` unchanged and no phase-6 call.
+- **Evidence.** `0B:6D0B-6D7E`, `06:4E3D`, `00:1625`, `00:16D9`.
+- **Test.** `copy_attack_runs_defender_effect_list`, `copy_attack_runs_copied_phase_one_checks`
+
+  The clean engine leaves a failing attack out of the choice instead of refusing it after the pick.
+  With nothing left to copy, the copying attack itself is refused (its own phase-1 check).
 
 ---
 
