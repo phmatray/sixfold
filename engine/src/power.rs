@@ -98,13 +98,13 @@ impl Game {
 
     /// R-POWER-06: a creature just went to the Bench or evolved in the main
     /// phase. Its on-play Power fires unless a blocker is in play; a blocker
-    /// entering play wipes the opponent's Power-made colours. Returns whether
-    /// effects started resolving.
+    /// entering play wipes both sides' Power-made colours (00:3690). Returns
+    /// whether effects started resolving.
     pub(crate) fn on_play(&mut self, p: usize, slot: usize) -> bool {
         let c = self.players[p].slot(slot).expect("just placed");
         match c.creature().power.as_ref().map(|pw| pw.kind) {
             Some(PowerKind::Blocker) => {
-                for c in self.players[1 - p].in_play_mut() {
+                for c in self.players.iter_mut().flat_map(|pl| pl.in_play_mut()) {
                     c.color_override = None;
                 }
                 false
@@ -277,16 +277,20 @@ mod tests {
         assert_eq!(drawn(&ok(&mut g, Action::PlayBasic(0))), 0);
     }
 
-    /// R-POWER-06, R-DMG-03: a blocker entering play wipes the opponent's
-    /// Power-made colours.
+    /// R-POWER-06, R-DMG-03: a blocker entering play wipes both sides'
+    /// Power-made colours (00:3690 → 36A0 for each side).
     #[test]
-    fn blocker_entering_play_wipes_opponent_colours() {
+    fn blocker_entering_play_wipes_both_sides_colours() {
         let mut g = main_phase(0);
-        g.players[1].active = Some(creature(SHIFTER, &[]));
-        g.players[1].active.as_mut().unwrap().color_override = Some(Color::Fire);
+        for (p, color) in [(0, Color::Water), (1, Color::Fire)] {
+            g.players[p].active = Some(creature(SHIFTER, &[]));
+            g.players[p].active.as_mut().unwrap().color_override = Some(color);
+        }
         set_hand(&mut g, 0, &[HUSHMOTH]);
         ok(&mut g, Action::PlayBasic(0));
-        assert_eq!(g.players[1].active.as_ref().unwrap().color_override, None);
+        for p in 0..2 {
+            assert_eq!(g.players[p].active.as_ref().unwrap().color_override, None);
+        }
     }
 
     /// R-DMG-03: an activated colour change, usable any number of times.

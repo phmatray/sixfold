@@ -1320,10 +1320,14 @@ unit test that should cover it.
 ### R-POWER-06: Powers that trigger on placement
 - **Rule.** When a creature with a phase-7 Power is placed on the Bench **or evolves**, the effect
   fires automatically, unless a power blocker is in play. A blocker is not blocked by itself. When a
-  blocker enters play, the opponent's per-slot colour changes made by Powers are removed.
-- **Status.** CORRECTED. The original claim missed the evolve trigger and the colour reset.
+  blocker enters play, both sides' per-slot colour changes made by Powers are removed.
+- **Parameters.** `00:3690` checks for the blocker ID `$27`, then `SwapTurn`, `call 36A0` (zeroes the
+  opponent's `+D4..D9`), `SwapTurn`, and falls through into `36A0` again for the own side.
+- **Status.** CORRECTED. The original claim missed the evolve trigger and the colour reset, and the
+  reset covers both sides. Runtime: `00:3690` with a `$27` card and `C2D4.. = $81`, `C3D4.. = $82`
+  zeroed both; with another card both stayed.
 - **Evidence.** `00:1583-1611`, called from `01:451B` and `01:457F`. `00:3690/36A0`.
-- **Test.** `on_play_power_fires_on_bench_and_evolve`
+- **Test.** `on_play_power_fires_on_bench_and_evolve`, `blocker_entering_play_wipes_both_sides_colours`
 
 ### R-POWER-07: Passive Power kinds seen in the engine
 - **Rule.** The engine core references these generic passive Powers:
@@ -1479,7 +1483,7 @@ notes give the decision order and the weightings to copy where helpful.
 74. Power blocker: while it is in play (Bench, or an Active without a nibble condition), all other Powers are off. It doesn't block itself.
 75. Once-per-turn Powers: a per-slot flag that moves with the creature and is cleared at turn start, by evolving and by placement.
 76. Optional settled-only Powers can't be used on the turn the creature was played or evolved, nor on either first turn.
-77. Phase-7 on-play Powers fire on bench placement and on evolve unless a blocker is in play. A blocker entering play wipes the opponent's Power-made colour changes.
+77. Phase-7 on-play Powers fire on bench placement and on evolve unless a blocker is in play. A blocker entering play removes both sides' per-slot colour changes made by Powers (`00:3690 → 36A0` for each side).
 78. Optional attack flag "once while in play", set at the cost phase.
 79. Prevention hooks: a whole-attack prevention substatus or Power (negates damage, effect damage to the Active, and conditions), a coin-prevention Power (flips for damage, a queued condition or a placed effect; heads drops all three), and a retaliation Power (flat 10).
 80. The AI must act only through engine actions, and every AI action must pass the same validation as a human action.
