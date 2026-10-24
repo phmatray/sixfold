@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0d1a2c" />
     <title>Sixfold</title>
@@ -38,6 +38,10 @@
     <link data-trunk rel="copy-dir" href="world" />
   </head>
   <body>
+    <script>
+      // A game, not a page: iOS Safari ignores user-scalable=no, so stop its pinch zoom here.
+      for (const t of ["gesturestart", "gesturechange"]) addEventListener(t, (e) => e.preventDefault(), { passive: false });
+    </script>
     <script>
       // Offline play: register the service worker, and offer a reload when a
       // new version has installed (it waits until the player says so).

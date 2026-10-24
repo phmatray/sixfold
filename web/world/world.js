@@ -26,7 +26,7 @@ const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "re
   "lantern", "stall", "stall_b", "crates", "bench"]);
 const TREES = new Set(["tree", "pine", "birch"]); // varied in size, turn and tint; half a tile out on the map edge
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
-const STEP = 0.25, RUN_STEP = 0.125, NPC_STEP = 0.45; // seconds per tile
+const STEP = 0.25, RUN_STEP = 0.17, NPC_STEP = 0.45; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
 const TURN_SPEED = Math.PI / 2 / 0.12; // a quarter turn in 0.12 s
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
 const FIDGET_AFTER = 6; // seconds idle before the hero fidgets and the camera leans in
@@ -38,6 +38,7 @@ const angle = (f) => Math.atan2(DIR[f][0], DIR[f][1]);
 const key = (x, z) => `${x},${z}`;
 const SUFFIX_ARMS = { "": [[-1, 0], [1, 0]], _corner: [[-1, 0], [0, 1]], _end: [[-1, 0]], _t: [[-1, 0], [1, 0], [0, 1]] }; // rot-0 arms
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
+const ACROSS = new Set(["counter", "duel_table", "stall", "stall_b"]); // people are spoken to across these
 
 // ---------- Loading (cached for the session) ----------
 
@@ -231,25 +232,55 @@ export function mount(el, controls, cb, start) {
   pad.addEventListener("click", padClick);
   pad.addEventListener("contextmenu", (e) => e.preventDefault());
 
-  // Tap/click the ground: walk the shortest grid path there (BFS).
+  // Tap/click the ground: walk the shortest grid path there (BFS). Tap a person,
+  // a sign or a table: walk up to it, face it, then talk or use it (like E).
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), hit = new THREE.Vector3();
   const floor = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  const onTap = (e) => {
-    if (busy()) return;
-    const b = renderer.domElement.getBoundingClientRect();
-    ndc.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1);
-    ray.setFromCamera(ndc, camera);
+  const box = new THREE.Box3();
+  // The tile under the ray: a person or something to use first (a standing box
+  // per tile, so tapping a head or a signboard counts), else the floor.
+  const tapped = () => {
+    const w = world;
+    let best = null, bestD = Infinity;
+    const test = (x, z, cx, cz, top) => {
+      const y = w.floorAt(x, z);
+      box.min.set(cx - 0.5, y, cz - 0.5);
+      box.max.set(cx + 0.5, y + top, cz + 0.5);
+      if (ray.ray.intersectBox(box, hit) && hit.distanceTo(ray.ray.origin) < bestD) (bestD = hit.distanceTo(ray.ray.origin)), (best = [x, z]);
+    };
+    for (const n of w.npcs) test(n.x, n.z, n.obj.position.x, n.obj.position.z, 1.7);
+    for (const i of w.talk.values()) test(i.x, i.z, i.x + 0.5, i.z + 0.5, 1.1);
+    for (const wp of w.warps.values()) if (!wp.dir) test(wp.x, wp.z, wp.x + 0.5, wp.z + 0.5, 2.2); // a door: walking into it enters
+    if (best) return best;
     // Raised ground first: the highest level whose tile under the ray stands at that height.
-    for (const y of world.levels) {
+    for (const y of w.levels) {
       floor.constant = -y;
       if (!ray.ray.intersectPlane(floor, hit)) continue;
       const tx = Math.floor(hit.x), tz = Math.floor(hit.z);
-      if (y && Math.abs(world.floorAt(tx, tz) - y) > 0.3) continue;
-      world.path = route(world, hero, tx, tz);
-      break;
+      if (y && Math.abs(w.floorAt(tx, tz) - y) > 0.3) continue;
+      return [tx, tz];
     }
+    return null;
+  };
+  const onTap = (e) => {
+    if (busy() || e.button) return;
+    const b = renderer.domElement.getBoundingClientRect();
+    ndc.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    const t = tapped();
+    if (!t) return;
+    world.path = walkTo(t[0], t[1], world.npcAt(...t));
+  };
+  // Ends facing it (route's last move turns into the solid tile); "act" then uses it.
+  // `path.npc`: a person who may walk off, so the path is re-planned at every step.
+  const walkTo = (tx, tz, npc) => {
+    const path = route(world, hero, tx, tz);
+    if (path.length && (npc || world.talk.has(key(tx, tz)))) path.push("act");
+    path.npc = npc;
+    return path;
   };
   renderer.domElement.addEventListener("pointerdown", onTap);
+  renderer.domElement.addEventListener("contextmenu", (e) => e.preventDefault()); // long-press on the scene
 
   // ---------- Moving and acting ----------
 
@@ -260,7 +291,7 @@ export function mount(el, controls, cb, start) {
   // sign or table, or a door (a locked one reads like a sign).
   function facing() {
     const w = world, [dx, dz] = DIR[hero.face], fx = hero.x + dx, fz = hero.z + dz;
-    const across = ["counter", "duel_table", "stall", "stall_b"].includes(w.propAt.get(key(fx, fz))?.asset);
+    const across = ACROSS.has(w.propAt.get(key(fx, fz))?.asset);
     const npc = w.npcAt(fx, fz) ?? (across ? w.npcAt(fx + dx, fz + dz) : null);
     if (npc) return { kind: "npc", text: npc.def.name, npc };
     const it = w.talk.get(key(fx, fz));
@@ -464,7 +495,16 @@ export function mount(el, controls, cb, start) {
           if (chained) tryStep(f, carry); // already walking: turn and keep going
         } else if (chained || w.now - h.turnedAt >= TURN_HOLD) tryStep(f, carry);
       } else if (w.path.length) {
-        if (!tryStep(w.path.shift(), carry)) w.path = [];
+        const npc = w.path.npc, near = npc && Object.keys(DIR).find((d) => h.x + DIR[d][0] === npc.x && h.z + DIR[d][1] === npc.z);
+        if (near) {
+          h.face = near; // a walking person within reach: turn and talk
+          w.path = ["act"];
+        } else if (npc && w.path[0] !== "act") w.path = walkTo(npc.x, npc.z, npc);
+        const f = w.path.shift();
+        if (f === "act") act();
+        // Blocked: stop, unless that was the turn into what was tapped (then use it),
+        // or a person walked into the way (re-planned on the next frame).
+        else if (f && !tryStep(f, carry) && w.path[0] !== "act" && !npc) w.path = [];
       }
     }
     if (h.step && h.step !== prevStep) {
@@ -643,21 +683,28 @@ function dispose(root) {
 }
 
 // Shortest 4-way path from the hero to (tx, tz). A blocked target (a sign, a
-// person, the door) routes to a free neighbour and ends facing it.
+// person, the door) routes to a free neighbour, or across a counter to a person
+// behind it, and ends facing it.
 function route(w, hero, tx, tz) {
   const { width: W, height: H } = w.map;
   if (tx === hero.x && tz === hero.z) return [];
   const solid = (x, z) => w.blocked(x, z) || !!w.npcAt(x, z);
-  const goal = solid(tx, tz) ? Object.values(DIR).map(([dx, dz]) => [tx - dx, tz - dz]).filter(([x, z]) => !solid(x, z) && w.climb(x, z, tx, tz)) : [[tx, tz]];
+  const goal = !solid(tx, tz) ? [[tx, tz, null]] : Object.entries(DIR).flatMap(([f, [dx, dz]]) => {
+    const [x, z] = [tx - dx, tz - dz];
+    if (!solid(x, z)) return w.climb(x, z, tx, tz) ? [[x, z, f]] : [];
+    const far = [tx - 2 * dx, tz - 2 * dz, f];
+    return w.npcAt(tx, tz) && ACROSS.has(w.propAt.get(key(x, z))?.asset) && !solid(far[0], far[1]) ? [far] : [];
+  });
   if (!goal.length) return [];
   const prev = new Map([[key(hero.x, hero.z), null]]);
   const queue = [[hero.x, hero.z]];
   while (queue.length) {
     const [x, z] = queue.shift();
-    if (goal.some(([gx, gz]) => gx === x && gz === z)) {
+    const g = goal.find(([gx, gz]) => gx === x && gz === z);
+    if (g) {
       const dirs = [];
       for (let k = key(x, z); prev.get(k); k = prev.get(k).from) dirs.unshift(prev.get(k).f);
-      if (solid(tx, tz)) dirs.push(Object.keys(DIR).find((f) => x + DIR[f][0] === tx && z + DIR[f][1] === tz));
+      if (g[2]) dirs.push(g[2]); // turn to face it
       return dirs;
     }
     for (const [f, [dx, dz]] of Object.entries(DIR)) {
