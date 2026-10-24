@@ -125,13 +125,13 @@ pub fn Roster() -> impl IntoView {
                         <li class=move || format!("rival {}", state()) class:champion=!r.seal>
                             <div class="rival-head">
                                 <span class="rival-name">{r.name}</span>
-                                <span class="rival-title">{r.title}</span>
+                                <span class="rival-title">{r.title.get()}</span>
                                 <span class="rival-colors">{r.colors.iter().map(|&c| view! { <Pip color=c /> }).collect_view()}</span>
                             </div>
                             <p class="rival-status">{status}</p>
                             <p class="rival-meta">
                                 {format!("{}, {} prizes, {}. ", r.deck.name, r.prizes, difficulty(r.difficulty))}
-                                {r.place}
+                                {r.place.get()}
                             </p>
                             <p class="rival-reward">{move || progress.with(|p| reward_line(r, p))}</p>
                         </li>

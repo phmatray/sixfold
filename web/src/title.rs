@@ -5,7 +5,7 @@ use sixfold_engine::campaign::{seals, RIVALS, SEALS};
 use sixfold_engine::decks::PREBUILT;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
-use sixfold_engine::{card, CardId};
+use sixfold_engine::{card, tr, CardId, Lang};
 
 use crate::audio::AudioSettings;
 use crate::binder::progress;
@@ -37,6 +37,24 @@ fn MenuItem(
     }
 }
 
+/// EN | FR. Switching reloads the page in the other language.
+#[component]
+fn LangSwitch() -> impl IntoView {
+    let now = sixfold_engine::lang();
+    let button = move |l: Lang, short: &'static str, name: &'static str| {
+        view! {
+            <button type="button" lang=l.code() aria-label=name aria-pressed=(l == now).to_string()
+                on:click=move |_| if l != now { store::set_lang(l) }>{short}</button>
+        }
+    };
+    view! {
+        <div class="lang-switch" role="group" aria-label=tr("Language", "Langue")>
+            {button(Lang::En, "EN", "English")}
+            {button(Lang::Fr, "FR", "Français")}
+        </div>
+    }
+}
+
 #[component]
 fn Settings() -> impl IntoView {
     let confirm = RwSignal::new(false);
@@ -53,6 +71,7 @@ fn Settings() -> impl IntoView {
                 "Settings"
             </summary>
             <div class="settings-body">
+                <LangSwitch />
                 <AudioSettings />
                 <SaveSettings />
                 {move || if confirm.get() {
@@ -131,6 +150,7 @@ pub fn TitleScreen() -> impl IntoView {
     };
     view! {
         <main class="title">
+            <LangSwitch />
             <section class="hero">
                 <div class="hero-fan" aria-hidden="true">
                     {hero.into_iter().enumerate().map(|(i, id)| view! {

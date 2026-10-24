@@ -54,6 +54,7 @@ pub enum Applied {
 fn booster(name: &str) -> Option<usize> {
     BOOSTERS.iter().position(|b| {
         b.name
+            .en
             .split(' ')
             .next()
             .is_some_and(|w| w.eq_ignore_ascii_case(name))

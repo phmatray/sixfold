@@ -16,6 +16,7 @@ use crate::ai::Difficulty;
 use crate::campaign::{champion, rival, Rival, RIVALS};
 use crate::card::CardId;
 use crate::decks::Prebuilt;
+use crate::lang::T;
 use crate::overworld::Progress;
 use crate::profile::Profile;
 use crate::rng::Rng;
@@ -173,8 +174,8 @@ pub static GAUNTLET: [Rung; 6] = [
     Rung {
         rival: "bramble",
         deck: Prebuilt {
-            name: "Deep Thicket",
-            description: "The full Grass line to Stage 2, poison and plenty of healing.",
+            name: T::new("Deep Thicket", "Fourré profond"),
+            description: T::new("The full Grass line to Stage 2, poison and plenty of healing.", "Toute la lignée Herbe jusqu'au Stade 2, du poison et des soins à foison."),
             list: &[
                 (SPRIGGET, 4),
                 (THORNBUCK, 3),
@@ -200,9 +201,8 @@ pub static GAUNTLET: [Rung; 6] = [
     Rung {
         rival: "marlo",
         deck: Prebuilt {
-            name: "Spring Tide",
-            description:
-                "Water up to Stage 2, a Brinemoth to drag your Bench forward, Psychic on the side.",
+            name: T::new("Spring Tide", "Grande marée"),
+            description: T::new("Water up to Stage 2, a Brinemoth to drag your Bench forward, Psychic on the side.", "L'Eau jusqu'au Stade 2, une Saumite pour tirer votre Banc en avant, du Psychique en appoint."),
             list: &[
                 (PUDDOCK, 4),
                 (BROOKHORN, 3),
@@ -227,8 +227,8 @@ pub static GAUNTLET: [Rung; 6] = [
     Rung {
         rival: "cinza",
         deck: Prebuilt {
-            name: "White Heat",
-            description: "Ember Rush with Kilnfox fanning the flames.",
+            name: T::new("White Heat", "Chauffé à blanc"),
+            description: T::new("Ember Rush with Kilnfox fanning the flames.", "Ruée ardente, avec Fournard pour attiser les flammes."),
             list: &[
                 (CINDREL, 4),
                 (FLARROW, 3),
@@ -256,8 +256,8 @@ pub static GAUNTLET: [Rung; 6] = [
     Rung {
         rival: "quill",
         deck: Prebuilt {
-            name: "Eye of the Storm",
-            description: "Storm Front with Squallkite paralyzing from the first turn.",
+            name: T::new("Eye of the Storm", "Œil du cyclone"),
+            description: T::new("Storm Front with Squallkite paralyzing from the first turn.", "Front orageux, avec Milanorage qui paralyse dès le premier tour."),
             list: &[
                 (SPARKIT, 4),
                 (ARCFANG, 3),
@@ -287,8 +287,8 @@ pub static GAUNTLET: [Rung; 6] = [
     Rung {
         rival: "orla",
         deck: Prebuilt {
-            name: "Bedrock Deep",
-            description: "Bedrock with a Slatebrow wall in front.",
+            name: T::new("Bedrock Deep", "Tréfonds"),
+            description: T::new("Bedrock with a Slatebrow wall in front.", "Roche-mère, avec un mur d'Ardoisfront en première ligne."),
             list: &[
                 (BRAWLET, 4),
                 (IRONBRAWL, 3),
@@ -316,8 +316,8 @@ pub static GAUNTLET: [Rung; 6] = [
     Rung {
         rival: "lumen",
         deck: Prebuilt {
-            name: "New Moon",
-            description: "Moonlit Tide with Moonmoth to sing the opponent to sleep.",
+            name: T::new("New Moon", "Nouvelle lune"),
+            description: T::new("Moonlit Tide with Moonmoth to sing the opponent to sleep.", "Marée de lune, avec Phalune pour bercer l'adversaire jusqu'au sommeil."),
             list: &[
                 (WISPUN, 4),
                 (WISPELLE, 3),

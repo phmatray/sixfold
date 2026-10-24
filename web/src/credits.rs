@@ -58,7 +58,7 @@ pub fn Credits(won: bool) -> impl IntoView {
                     <h2>"The rivals"</h2>
                     <ul>
                         {RIVALS.iter().map(|r| view! {
-                            <li><b>{r.name}</b>" "<span>{r.title}</span></li>
+                            <li><b>{r.name}</b>" "<span>{r.title.get()}</span></li>
                         }).collect_view()}
                     </ul>
                 </section>

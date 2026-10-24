@@ -29,6 +29,11 @@ use overlays::{CalloutOverlay, CoinOverlay, DiscardViewer, GameOver, Inspector, 
 
 fn main() {
     console_error_panic_hook::set_once();
+    let lang = store::lang();
+    sixfold_engine::set_lang(lang);
+    if let Some(html) = document().document_element() {
+        let _ = html.set_attribute("lang", lang.code());
+    }
     mount_to_body(App);
 }
 

@@ -49,6 +49,27 @@ fn remove(key: &str) {
     }
 }
 
+const LANG: &str = "sixfold.lang";
+
+/// The display language: the player's choice, else the browser's (French for
+/// any `fr` locale). Kept beside the save, not in it: it belongs to the browser.
+pub fn lang() -> sixfold_engine::Lang {
+    let code = get(LANG).or_else(|| web_sys::window()?.navigator().language());
+    if code.is_some_and(|c| c.to_ascii_lowercase().starts_with("fr")) {
+        sixfold_engine::Lang::Fr
+    } else {
+        sixfold_engine::Lang::En
+    }
+}
+
+/// Keep the choice and reload in it: every text is built in one language.
+pub fn set_lang(l: sixfold_engine::Lang) {
+    set(LANG, l.code());
+    if let Some(w) = web_sys::window() {
+        let _ = w.location().reload();
+    }
+}
+
 /// The save in slot `n`: None when empty.
 fn read(n: usize) -> Option<Result<Save, SaveError>> {
     get(&slot_key(n)).map(|s| Save::decode(&s))

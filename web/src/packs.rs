@@ -136,14 +136,14 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
                     <li class="shelf-item">
                         <div class=format!("pack p-{theme}") aria-hidden="true">
                             <span class="pack-crimp"></span>
-                            <span class="pack-name">{b.name.trim_end_matches(" Pack")}</span>
+                            <span class="pack-name">{b.name.get().trim_end_matches(" Pack").trim_start_matches("Booster ")}</span>
                             <span class="pack-pips">{b.colors.iter().filter(|_| b.colors.len() <= 2).map(|&c| view! { <Pip color=c /> }).collect_view()}</span>
                             <span class="pack-crimp bottom"></span>
                             {move || (n() > 0).then(|| view! { <span class="count-badge">{n()}</span> })}
                         </div>
                         <div class="shelf-info">
-                            <h2>{b.name}</h2>
-                            <p>{b.description}</p>
+                            <h2>{b.name.get()}</h2>
+                            <p>{b.description.get()}</p>
                             <button type="button" class="btn primary" disabled=move || n() == 0
                                 aria-label=move || format!("Open one {}, {} left", b.name, n())
                                 on:click=move |_| open(i)>
@@ -184,7 +184,7 @@ fn Reveal(
         format!("You got {}.", names.join(", "))
     };
     let more = move || profile.with(|p| p.wallet.total());
-    let name = BOOSTERS[o.booster].name;
+    let name = BOOSTERS[o.booster].name.get();
     view! {
         <div class="reveal-head">
             <h2>{name}</h2>
