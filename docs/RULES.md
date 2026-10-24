@@ -965,7 +965,7 @@ unit test that should cover it.
   and the changed colour, and writes the new stage. So a once-while-in-play attack (R-EFFECT-05) is
   usable again after evolving. For the Active only, all conditions and effects are cleared as well
   (R-STATUS-12). The player-wide trainer lock is not cleared.
-- **Parameters.** EvolvePokemonNoCheck zeroes the whole `+C2` byte (`00:133C`: bit 7 settled, bit 5
+- **Parameters.** EvolveCreatureNoCheck zeroes the whole `+C2` byte (`00:133C`: bit 7 settled, bit 5
   Power used, bit 6 once-while-in-play) and `+D4` (`00:1342`).
 - **Status.** CONFIRMED
 - **Evidence.** `00:133C`, `00:1342`, `00:13C6`, `00:134D`.
