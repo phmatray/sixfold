@@ -9,7 +9,7 @@ use sixfold_engine::{
 
 use crate::art::card_color;
 use crate::binder::{inspect_handlers, FilterBar, Filters, Own, PageBar};
-use crate::cards::{deck_colors, deck_star, CardFace, Pip};
+use crate::cards::{deck_colors, deck_star, face_text, CardFace, Pip};
 use crate::overlays::Inspector;
 use crate::{Screen, Ui};
 
@@ -83,7 +83,7 @@ pub fn DecksScreen() -> impl IntoView {
                 {move || (rows() == 0).then(|| view! {
                     <p class="empty-note">"No decks yet. Start one and fill it from your collection."</p>
                 })}
-                <ul class="deck-list">
+                <ul class="deck-list" data-focus-home="">
                     {move || (0..rows()).map(|i| view! { <DeckRow i=i renaming=renaming deleting=deleting /> }).collect_view()}
                 </ul>
             </main>
@@ -290,6 +290,7 @@ pub fn Editor(index: usize) -> impl IntoView {
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                     "Decks"
                 </button>
+                <h1 class="sr-only">"Deck editor"</h1>
                 <label class="sr-only" for="deck-name">"Deck name"</label>
                 <input id="deck-name" class="deck-name-input" maxlength="40" prop:value=move || draft.with(|d| d.name.clone())
                     on:input=move |e| draft.update(|d| d.name = event_target_value(&e)) />
@@ -348,7 +349,7 @@ pub fn Editor(index: usize) -> impl IntoView {
                 <section class="pane pane-cards" id="pane-cards" role="tabpanel" aria-labelledby="tab-cards" class:inactive=move || tab.get() != Tab::Cards>
                     <h2 class="pane-title">"Your cards"</h2>
                     <FilterBar f=f />
-                    <ul class="pick-grid">
+                    <ul class="pick-grid" data-focus-home="">
                         <For each=move || cards.get() key=|id| id.0 let:id>
                             <PickTile id=id draft=draft msg=msg />
                         </For>
@@ -368,7 +369,7 @@ pub fn Editor(index: usize) -> impl IntoView {
                             let in_group: Vec<_> = rows.iter().copied().filter(|&(id, _)| group_of(id) == g).collect();
                             (!in_group.is_empty()).then(|| view! {
                                 <h3 class="deck-group">{g}" " <span>{in_group.iter().map(|r| r.1).sum::<usize>()}</span></h3>
-                                <ul class="deck-rows">
+                                <ul class="deck-rows" data-focus-home="">
                                     {in_group.into_iter().map(|(id, n)| view! { <DeckLine id=id n=n draft=draft msg=msg /> }).collect_view()}
                                 </ul>
                             })
@@ -422,7 +423,7 @@ fn PickTile(id: CardId, draft: RwSignal<DeckList>, msg: RwSignal<Option<String>>
     };
     view! {
         <li class="pick" class:blocked=move || blocked().is_some()>
-            <button type="button" class="bind-card" aria-label=format!("{}: details", def.name)
+            <button type="button" class="bind-card" aria-label=format!("{}, details", face_text(id))
                 on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
                 <CardFace id=id />
             </button>

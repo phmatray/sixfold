@@ -6,6 +6,7 @@
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0d1a2c" />
     <title>Sixfold</title>
+    <meta name="description" content="A creature card duel with the old handheld rules: collect original cards, build decks, duel the AI and explore the world. Plays offline." />
     <!-- three.js for the world test (web/world/world.js); must come before any module script. -->
     <script type="importmap">
       {
@@ -22,8 +23,54 @@
       href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"
     />
     <link data-trunk rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <!-- Installable and playable offline: the manifest, its icons and sw.js (written by sw-manifest.sh). -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link data-trunk rel="copy-file" href="manifest.webmanifest" />
+    <link data-trunk rel="copy-dir" href="icons" />
+    <link data-trunk rel="copy-file" href="a11y.js" />
+    <script src="a11y.js" defer></script>
+    <!-- wasm-opt must know the wasm features rustc emits by default. -->
+    <link data-trunk rel="rust" href="Cargo.toml" data-wasm-opt="z"
+      data-wasm-opt-params="--enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-reference-types --enable-multivalue" />
     <link data-trunk rel="css" href="style.css" />
     <link data-trunk rel="copy-dir" href="world" />
   </head>
-  <body></body>
+  <body>
+    <script>
+      // Offline play: register the service worker, and offer a reload when a
+      // new version has installed (it waits until the player says so).
+      if ("serviceWorker" in navigator) {
+        addEventListener("load", async () => {
+          // Reload only when the player asked for the new version (the first
+          // install also changes the controller, and must not reload).
+          let wanted = false;
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (wanted) { wanted = false; location.reload(); }
+          });
+          const reg = await navigator.serviceWorker.register("sw.js").catch(() => null);
+          if (!reg) return;
+          const offer = (worker) => {
+            if (document.querySelector(".update-toast")) return;
+            const toast = document.createElement("div");
+            toast.className = "update-toast";
+            toast.setAttribute("role", "status");
+            toast.innerHTML = '<span>New version available</span><button type="button" class="btn primary">Reload</button><button type="button" class="btn ghost" >Later</button>';
+            const [reload, later] = toast.querySelectorAll("button");
+            reload.onclick = () => { wanted = true; worker.postMessage("skip-waiting"); };
+            later.onclick = () => toast.remove();
+            document.body.append(toast);
+          };
+          const watch = (worker) => worker.addEventListener("statechange", () => {
+            if (worker.state === "installed" && navigator.serviceWorker.controller) offer(worker);
+          });
+          if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
+          if (reg.installing) watch(reg.installing);
+          reg.addEventListener("updatefound", () => watch(reg.installing));
+          // A long session still hears about a new deploy.
+          setInterval(() => reg.update().catch(() => {}), 30 * 60 * 1000);
+        });
+      }
+    </script>
+  </body>
 </html>

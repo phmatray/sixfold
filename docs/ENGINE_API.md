@@ -516,14 +516,16 @@ pub static CARDS: &[CardDef] = &[
 ## 9. Rules for the AI (`engine/src/ai.rs`, R-AI-*)
 
 ```rust
-pub enum Difficulty { Easy, Normal }                 // Default = Normal
+pub enum Difficulty { Easy, Normal, Hard }           // Default = Normal
 impl Ai {
     pub fn new(seed: u64, difficulty: Difficulty) -> Ai;
     pub fn choose_action(&mut self, game: &Game, me: usize) -> Action; // panics if `me` isn't asked
 }
 ```
 
-- **Inputs:** decide only from `game.view(me)` and `game.legal_actions()`, plus `game.preview_attack`, `game.retreat_cost` and `game.power_works`, which read only public state. Act only through `game.apply`, and only when `view.prompt` is `Some`. Never read `game.prompt()`, other `Game` internals, or the cards of events where `is_private(me)` is true. Never clone the game to look ahead: that would reveal the deck order and the opponent's hand.
+- **Inputs:** decide only from `game.view(me)` and `game.legal_actions()`, plus `game.preview_attack`, `game.retreat_cost` and `game.power_works`, which read only public state. Act only through `game.apply`, and only when `view.prompt` is `Some`. Never read `game.prompt()`, other `Game` internals, or the cards of events where `is_private(me)` is true. Never look ahead on a plain clone of the game: that would reveal the deck order, the opponent's hand and the coming coins. The one exception is Hard's look-ahead below, which runs only on a determinized copy.
+- **Hard** (`Difficulty::Hard`) plays Normal's heuristics everywhere except two places. Its opening Active is the sturdiest real Basic that can attack soonest (keeping one whose evolution is in hand for the Bench). In the main phase it looks ahead: the candidates are Normal's pick, the attacks and the other listed actions (one per distinct card, at most 10, without the plays the turn's loop guards rule out). Each one is applied to a copy made by `Game::determinize(me, seed)` (`pub(crate)`): the cards `me` can't see are dealt again from their pools (my deck and prizes; the opponent's hand, deck and prizes), and the coins come from a seed drawn from the AI's own RNG, so the copy shows nothing a player couldn't know. The copy then plays on with Normal on both sides through the rest of my turn and the opponent's whole turn (at most 80 applies), and the position at the start of my next turn is scored by a logistic model of the chance to win (prizes, HP, energy and creatures in play, evolutions, hand and deck sizes, empty Benches, each Active's chance to knock out the other and its average share of the defender's HP, conditions, and a knock-out that would end the game). Its weights are fitted on Normal self-play by the ignored test `fit_evaluation`. All candidates are played out on the same copies, round after round (at most 6), and no new round starts past `NODE_BUDGET` = 600 applies, so one decision costs at most 600 + 10 × 80 applies (a few milliseconds natively). A candidate must average 30 thousandths of a win more than Normal's pick to replace it. Hard is deterministic for a seed, like the others.
+- **Strength:** over seeded mirror matches of the six prebuilt decks (seats alternating), Hard wins 189 of 300 games (63%) against Normal (`hard_beats_normal_in_mirrors_big`, `#[ignore]`d); the always-on `hard_beats_normal_in_mirrors` plays 60 and asserts at least 60% and the apply budget.
 - **Prompts and the R-AI-01 entry points:**
   - `MainPhase` is "take a turn": it is called once per action until the AI answers `Attack`, or `Done` to end the turn.
   - `ChooseActive` and `ChooseBench` are setup (R-AI-14).
@@ -644,13 +646,13 @@ pub struct Reward { pub won: bool, pub first: bool, pub seal: bool, pub packs: (
 | 3 | Cinza, Kiln Runner | Fire / Fighting | Ember Rush | Normal | 4 | 0 | seal + 2 Ember |
 | 4 | Quill, Weather Watcher | Lightning / Water | Storm Front | Normal | 4 | 3 | seal + 2 Storm |
 | 5 | Orla, Quarry Foreman | Fighting | Bedrock | Normal | 5 | 3 | seal + 2 Stone |
-| 6 | Lumen, Night Gardener | Psychic / Water | Moonlit Tide | Normal | 6 | 5 | seal + 2 Dream |
-| — | Sable, the Hex Warden | Water / Fighting | Sixfold Crown | Normal | 6 | 6 | 3 Wild |
+| 6 | Lumen, Night Gardener | Psychic / Water | Moonlit Tide | Hard | 6 | 5 | seal + 2 Dream |
+| — | Sable, the Hex Warden | Water / Fighting | Sixfold Crown | Hard | 6 | 6 | 3 Wild |
 
 A rematch win grants `REMATCH_PACKS` of the same booster; a loss grants nothing. `record` sets
 `beat_<id>` on a win and always remembers the result as the last duel. Against the starter deck
 (Normal AI, 60 seeded games, `rival_strength_against_the_starter`, `#[ignore]`d) the rivals win
-about 20%, 53%, 60%, 66%, 70%, 61% and 70%.
+about 20%, 53%, 60%, 66%, 70%, 76% and 86%.
 
 **Progress.** Items, flags and the last campaign duel. Dialogue strings (all names are
 lowercase ASCII letters, digits and `_`):
@@ -664,7 +666,43 @@ lowercase ASCII letters, digits and `_`):
 
 ---
 
-## 12. Known engine gaps (current)
+## 12. Save file (`save::*`)
+
+One text envelope holds everything a player keeps, for a save slot, Export and Import. Pure: the UI decides where the string lives (`web/src/store.rs` keeps three slots in localStorage).
+
+```text
+sixfold-save;1;<checksum>
+[collection]
+v1;0:2,5:1;1a2b3c4d
+[decks]
+d1;...;My deck;...
+[name]
+Save 1
+```
+
+- The header is `sixfold-save;<version>;<checksum>`: `save::VERSION = 1`, and the checksum is FNV-1a (8 lowercase hex digits) over every line after the header, joined with `\n`.
+- A section is `[name]` (lowercase ASCII letters, digits and `_`) followed by its lines. A content line that is empty or starts with `[` or `\` is written with a `\` in front.
+- Sections this build reads: `name`, `collection` (`Collection::save`), `decks` (one `DeckList::save` per line), `wallet` (`Wallet::save`), `progress` (`Progress::encode`), `world_at` (`map,x,z,facing`) and `campaign_deck`. Any other section (from a newer build) is kept and written back unchanged.
+
+```rust
+let mut s = Save::new_player("Save 1");         // name + a new player's profile
+s.get(section) -> Option<&str>; s.set(section, value); s.remove(section); s.sections()
+s.name() / s.set_name(name)                     // control characters become spaces
+s.encode() -> String                            // sections in name order: stable
+Save::decode(&text) -> Result<Save, SaveError>  // NotASave | Newer(version) | Checksum | Malformed
+s.profile() -> (Profile, Vec<&'static str>)     // parts that didn't read are reset and named
+s.set_profile(&p); s.progress(); s.set_progress(&p)
+s.summary() -> Summary { name, cards, distinct, decks, packs, seals, champion }
+Save::from_legacy(name, |key| storage.get(key)) -> Option<Save>  // a 0.6 save, key by key
+```
+
+- `decode` accepts surrounding whitespace, a BOM and `\r\n` line ends, refuses a newer version, and checks the whole file before anything is read, so an import can be validated (and summarised for a confirm) before it replaces a save.
+- `profile` mirrors the old per-key loading: no `collection` section is a new player; a collection, deck or wallet string that doesn't load is reset (starter collection, deck dropped, no packs) and reported, while the section keeps the bad string until the next `set_profile`.
+- `save::LEGACY_KEYS` lists the 0.6 localStorage keys (`sixfold.v1.collection`, `sixfold.v1.decks`, `sixfold.v1.wallet`, `sixfold.world.progress`, `sixfold.world.at`, `sixfold.campaign.deck`) and the section each becomes. Audio settings stay a per-device preference outside the save.
+
+---
+
+## 13. Known engine gaps (current)
 
 - A search can't decline to take a matching card. `DiscardEnergy` with `Colorless` discards the newest energy, and the player doesn't choose.
 - There is no "revive onto the Bench" effect and no "return a card to the top of the deck" effect.
@@ -672,4 +710,4 @@ lowercase ASCII letters, digits and `_`):
 - When an attack inflicts a condition and also force-switches, the condition lands on the new Active.
 - Nothing in the engine stops a caller from looping. Retreat has no per-turn limit (R-RETREAT-05), an Activated Power with `once_per_turn: false` can be used again and again, and cancelling a `Choose` goes back to exactly the same state. `ai::Ai` guards against all three itself (one retreat per turn, each Power once per turn, a cancelled play isn't retried that turn, and at most 100 main-phase answers per turn).
 - A `Choose` prompt doesn't say which card or Power started it; remember the last play you started.
-- The AI doesn't use R-AI-15 (stacked openings, unfair by design). Easy differs from Normal only in R-AI-03's skipped trainer and Power plays.
+- The AI doesn't use R-AI-15 (stacked openings, unfair by design). Easy differs from Normal only in R-AI-03's skipped trainer and Power plays. Hard's look-ahead covers only main-phase actions: its replacements, prize picks and `Choose` answers are Normal's, and its imagined opponent hand is drawn at random from the unseen cards (a real hand holds the cards its owner chose not to play).

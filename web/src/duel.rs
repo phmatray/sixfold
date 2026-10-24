@@ -125,7 +125,7 @@ pub fn DuelSetup() -> impl IntoView {
     let theirs = RwSignal::new(if theirs_opts.len() > 1 { 1 } else { 0 });
     let seed = RwSignal::new(crate::new_seed());
     let prizes = RwSignal::new(6u8);
-    let normal = RwSignal::new(true);
+    let difficulty = RwSignal::new(Difficulty::Normal);
     let (m, t) = (
         StoredValue::new(mine_opts.clone()),
         StoredValue::new(theirs_opts.clone()),
@@ -142,11 +142,7 @@ pub fn DuelSetup() -> impl IntoView {
             decks: [a.cards, b.cards],
             names: [a.name, b.name],
             prizes: prizes.get(),
-            difficulty: if normal.get() {
-                Difficulty::Normal
-            } else {
-                Difficulty::Easy
-            },
+            difficulty: difficulty.get(),
             rival: None,
         };
         if ctl.start(setup, seed.get()) {
@@ -179,9 +175,14 @@ pub fn DuelSetup() -> impl IntoView {
                         </label>
                         <label class="field">
                             <span>"AI"</span>
-                            <select name="difficulty" on:change=move |e| normal.set(event_target_value(&e) == "normal")>
-                                <option value="normal" selected>"Normal"</option>
+                            <select name="difficulty" on:change=move |e| difficulty.set(match event_target_value(&e).as_str() {
+                                "easy" => Difficulty::Easy,
+                                "hard" => Difficulty::Hard,
+                                _ => Difficulty::Normal,
+                            })>
                                 <option value="easy">"Easy: sometimes skips a play"</option>
+                                <option value="normal" selected>"Normal"</option>
+                                <option value="hard">"Hard: thinks a turn ahead"</option>
                             </select>
                         </label>
                         <button type="submit" class="btn primary start">"Start the duel"</button>

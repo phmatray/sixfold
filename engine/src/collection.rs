@@ -170,7 +170,7 @@ pub(crate) fn parse_counts(
 }
 
 /// 32-bit FNV-1a: enough to catch a truncated or edited save string.
-fn fnv1a(s: &str) -> u32 {
+pub(crate) fn fnv1a(s: &str) -> u32 {
     s.bytes()
         .fold(0x811c_9dc5, |h, b| (h ^ b as u32).wrapping_mul(0x0100_0193))
 }

@@ -51,12 +51,15 @@ button, input, select { font: inherit; color: inherit; }
   outline-offset: 2px;
 }
 
+/* Headings take focus on a screen change (to start reading there); they aren't controls. */
+h1[tabindex="-1"]:focus, main[tabindex="-1"]:focus { outline: none; }
+
 h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 
 /* ---------- Buttons ---------- */
 
 .btn {
-  min-height: 40px;
+  min-height: 44px;
   padding: 8px 14px;
   border-radius: 10px;
   border: 1px solid var(--line);
@@ -257,7 +260,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .field { display: grid; gap: 4px; }
 .field span { font-size: 13px; color: var(--muted); }
 .field input, .field select {
-  min-height: 40px;
+  min-height: 44px;
   padding: 6px 10px;
   border-radius: 10px;
   border: 1px solid var(--line);
@@ -291,6 +294,8 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .me-name, .opp-name { color: var(--ink); font-weight: 700; }
 .seed { margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .topbar .btn { min-height: 34px; padding: 4px 12px; }
+/* Touch: every control is at least 44 px tall. */
+@media (pointer: coarse) { .topbar .btn { min-height: 44px; } }
 .log-toggle { display: none; }
 
 .table {
@@ -405,7 +410,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   align-items: center;
   gap: 3px;
   width: var(--w);
-  animation: drop-in 420ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+  animation: drop-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .active-spot .mon { --w: var(--aw); }
 .mon-card {
@@ -443,9 +448,10 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 }
 .hp-bar .fill {
   position: absolute;
-  inset: 0 auto 0 0;
+  inset: 0;
+  transform-origin: left center;
   background: linear-gradient(#72dd98, #2a9e5c);
-  transition: width 550ms cubic-bezier(0.3, 0.8, 0.3, 1);
+  transition: transform 550ms cubic-bezier(0.3, 0.8, 0.3, 1);
 }
 .hp-bar .fill.mid { background: linear-gradient(#ffe07a, #d29a12); }
 .hp-bar .fill.low { background: linear-gradient(#ff8a7e, #c72c20); }
@@ -460,7 +466,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   text-shadow: 0 1px 1px #000, 0 0 3px #000;
 }
 .energy-row { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; font-size: 12px; min-height: 0; }
-.energy-in { display: inline-flex; gap: 2px; animation: pop-in 360ms cubic-bezier(0.2, 1, 0.3, 1.4) both; }
+.energy-in { display: inline-flex; gap: 2px; animation: pop-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 .badges { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
 .badge {
   font-size: 10.5px;
@@ -893,7 +899,12 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
   }
+  /* Messages that come and go (turn banners, damage numbers) would vanish at
+     once without their animation: they fade in place for their time instead. */
+  .callout { transform: translate(-50%, -50%); animation: calm-show 1000ms linear both !important; }
+  .pop { animation: calm-show 1100ms linear forwards !important; }
 }
+@keyframes calm-show { 0%, 100% { opacity: 0; } 12%, 80% { opacity: 1; } }
 
 /* ---------- World ---------- */
 
@@ -1004,7 +1015,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   white-space: nowrap;
   border: 2px solid var(--felt-deep); /* stays distinct on the dirt path */
   box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.55);
-  animation: prompt-pop 300ms cubic-bezier(0.3, 1.25, 0.5, 1) both;
+  animation: prompt-pop 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes prompt-pop { from { opacity: 0; transform: translateY(10px) scale(0.92); } }
 .world-prompt kbd {
@@ -1197,13 +1208,81 @@ select option { background: var(--panel); color: var(--ink); }
 /* Sound: the Settings sliders, and the mute button in the duel and world headers. */
 .audio-settings { display: grid; gap: 10px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
 .audio-settings legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
-.vol-mute { display: flex; align-items: center; gap: 10px; min-height: 32px; }
+.vol-mute { display: flex; align-items: center; gap: 10px; min-height: 44px; }
 .vol-mute input { width: 18px; height: 18px; accent-color: var(--brass); }
-.vol { display: grid; grid-template-columns: 64px minmax(0, 1fr) 44px; align-items: center; gap: 10px; min-height: 32px; }
+.vol { display: grid; grid-template-columns: 64px minmax(0, 1fr) 44px; align-items: center; gap: 10px; min-height: 44px; }
 .vol input { width: 100%; accent-color: var(--brass); }
 .vol .vol-pct { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
 .btn.mute { padding-inline: 10px; }
 .btn.mute[aria-pressed="true"] { color: var(--muted); }
+
+/* Saves: slot picker on the title, Export / Import in Settings, the auto-save pill. */
+.foot-menus { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+.slots summary { display: inline-flex; align-items: center; gap: 8px; list-style: none; min-height: 44px; color: var(--muted); }
+.slots summary::-webkit-details-marker { display: none; }
+.slots summary b { color: var(--ink); font-weight: 700; }
+.slots summary svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; flex: none; }
+.slots[open] summary { color: var(--ink); border-color: rgba(214, 172, 74, 0.45); }
+.slot-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.slot { display: grid; gap: 8px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2); }
+.slot.current { border-color: rgba(214, 172, 74, 0.55); }
+.slot-info { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.slot-name { font: 700 16px/1.2 var(--display); }
+.slot-sub { flex-basis: 100%; color: var(--muted); font-size: 13px; }
+.slot .btn, .save-settings .btn { min-height: 44px; }
+.save-settings { display: grid; gap: 10px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.save-settings legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
+.save-settings .note, .slots .note { margin: 0; }
+.save-settings .note:empty, .slots .note:empty { display: none; }
+.save-settings textarea { width: 100%; min-height: 64px; resize: vertical; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--felt-deep); color: var(--ink); font: 13px/1.4 ui-monospace, monospace; }
+.file-pick { display: inline-flex; align-items: center; }
+.file-pick:focus-within { outline: 3px solid var(--brass-hi); outline-offset: 2px; }
+.import-diff { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; margin: 0 0 10px; }
+.import-diff dt { color: var(--muted); }
+.import-diff dd { margin: 0; }
+.autosave {
+  position: fixed;
+  z-index: 90;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+.autosave.show { opacity: 1; }
+.autosave.failed { background: #5a1f1c; border-color: rgba(255, 93, 82, 0.6); color: #ffd5d0; }
+.update-toast {
+  position: fixed;
+  z-index: 95;
+  left: 16px;
+  right: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  width: max-content;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  max-width: calc(100% - 32px);
+  padding: 10px 12px 10px 16px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid rgba(214, 172, 74, 0.55);
+  box-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.7);
+  color: var(--ink);
+  animation: fade-in 200ms ease;
+}
+.update-toast .btn { min-height: 44px; }
+.autosave svg { width: 16px; height: 16px; fill: none; stroke: var(--heal); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---------- Menu screens ---------- */
 

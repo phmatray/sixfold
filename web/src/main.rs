@@ -12,6 +12,7 @@ mod decks;
 mod duel;
 mod overlays;
 mod packs;
+mod saves;
 mod store;
 mod title;
 mod world;
@@ -107,11 +108,15 @@ fn App() -> impl IntoView {
     provide_context(Legal(legal));
     store::provide();
     // Each screen starts at the top with nothing selected in the inspector.
-    Effect::new(move |_| {
+    // Keyboard and screen-reader users land on the new screen's heading.
+    Effect::new(move |first: Option<()>| {
         screen.track();
         ui.inspect.set(None);
         ui.sheet.set(false);
         window().scroll_to_with_x_and_y(0.0, 0.0);
+        if first.is_some() {
+            request_animation_frame(focus_heading);
+        }
     });
     // The world picks its own track (meadow or indoors) as each map loads.
     Effect::new(move |_| match screen.get() {
@@ -119,7 +124,7 @@ fn App() -> impl IntoView {
         Screen::World => {}
         _ => audio::music("title"),
     });
-    move || match screen.get() {
+    let page = move || match screen.get() {
         Screen::Title => view! { <title::TitleScreen /> }.into_any(),
         Screen::Duel => view! { <duel::DuelSetup /> }.into_any(),
         Screen::Match => view! { <MatchScreen /> }.into_any(),
@@ -129,6 +134,27 @@ fn App() -> impl IntoView {
         Screen::Decks => view! { <decks::DecksScreen /> }.into_any(),
         Screen::Editor(i) => view! { <decks::Editor index=i /> }.into_any(),
         Screen::Campaign => view! { <campaign::CampaignScreen /> }.into_any(),
+    };
+    view! { {page} <saves::SaveIndicator /> }
+}
+
+/// Focus the screen's `h1` (or its `main`), so focus never sits on a button
+/// that the screen change removed.
+fn focus_heading() {
+    use wasm_bindgen::JsCast;
+    let doc = document();
+    let el = doc
+        .query_selector("h1")
+        .ok()
+        .flatten()
+        .or_else(|| doc.query_selector("main").ok().flatten());
+    if let Some(el) = el.and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok()) {
+        if !el.has_attribute("tabindex") {
+            let _ = el.set_attribute("tabindex", "-1");
+        }
+        let opts = web_sys::FocusOptions::new();
+        opts.set_prevent_scroll(true);
+        let _ = el.focus_with_options(&opts);
     }
 }
 
@@ -161,7 +187,8 @@ fn MatchScreen() -> impl IntoView {
     view! {
         <div class="match" on:keydown=on_key>
             <header class="topbar">
-                <span class="wordmark small">"Sixfold"</span>
+                <span class="wordmark small" aria-hidden="true">"Sixfold"</span>
+                <h1 class="sr-only">"Duel"</h1>
                 <span class="matchup">
                     <span class="me-name">{names[HUMAN].clone()}</span>
                     " against "
@@ -191,6 +218,9 @@ fn MatchScreen() -> impl IntoView {
                 <Inspector />
                 <LogPanel />
             </div>
+            // One polite summary per turn instead of every event (the coin and
+            // callouts are visual only; the log is there to read back).
+            <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">{move || ctl.announce.get()}</p>
             <PromptModal />
             <CalloutOverlay />
             <CoinOverlay />

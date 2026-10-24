@@ -1313,6 +1313,7 @@ dependencies = [
  "leptos",
  "sixfold-engine",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
 

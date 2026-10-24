@@ -7,7 +7,7 @@ use sixfold_engine::profile::Profile;
 use sixfold_engine::{card, set, CardId, CardKind, Collection, Color, Rarity, SortBy};
 
 use crate::art::card_color;
-use crate::cards::{rarity_label, CardFace, Pip};
+use crate::cards::{face_text, rarity_label, CardFace, Pip};
 use crate::overlays::Inspector;
 use crate::{Inspect, Screen, Ui};
 
@@ -297,7 +297,7 @@ fn BinderSlot(id: CardId) -> impl IntoView {
             usize::MAX => "unlimited".to_string(),
             n => format!("{n} owned"),
         };
-        format!("{}, {}, {own}", def.name, rarity_label(def.rarity))
+        format!("{}, {}, {own}", face_text(id), rarity_label(def.rarity))
     };
     view! {
         <li class="bind-slot" class:missing=move || count.get() == 0>

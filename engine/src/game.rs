@@ -337,6 +337,49 @@ impl Game {
         self.forced_coins.extend(coins);
     }
 
+    /// A copy of the game that player `me` can't tell from the real one:
+    /// the cards `me` can't see are dealt again from their pools (my deck and
+    /// prizes; the opponent's hand, deck and prizes) and the coins come from
+    /// `seed`. The Hard AI looks ahead only on such a copy, so it never learns
+    /// a deck order, the opponent's hand or a future coin. Call it only where
+    /// no prompt lists deck cards (the main phase).
+    pub(crate) fn determinize(&self, me: usize, seed: u64) -> Game {
+        // Field by field, to leave the log behind: it is the bulk of a late game.
+        let mut g = Game {
+            players: self.players.clone(),
+            decks: self.decks.clone(),
+            prize_count: self.prize_count,
+            sudden_death: self.sudden_death,
+            rng: Rng::new(seed),
+            forced_coins: VecDeque::new(),
+            turn: self.turn,
+            turn_player: self.turn_player,
+            energy_attached: self.energy_attached,
+            retreat_failed: self.retreat_failed,
+            accuracy: self.accuracy,
+            pending: self.pending.clone(),
+            prompt: self.prompt.clone(),
+            steps: self.steps.clone(),
+            winner: self.winner,
+            log: Vec::new(),
+            last_uid: self.last_uid,
+        };
+        let mut rng = Rng::new(seed ^ 0x9e37_79b9_7f4a_7c15);
+        for (p, pl) in g.players.iter_mut().enumerate() {
+            let hand = if p == me { 0 } else { pl.hand.len() };
+            let mut pool = std::mem::take(&mut pl.deck);
+            pool.extend(pl.hand.drain(pl.hand.len() - hand..));
+            pool.extend(pl.prizes.iter().flatten());
+            rng.shuffle(&mut pool);
+            for prize in pl.prizes.iter_mut().flatten() {
+                *prize = pool.pop().expect("pool holds the prizes");
+            }
+            pl.hand.extend(pool.drain(pool.len() - hand..));
+            pl.deck = pool;
+        }
+        g
+    }
+
     pub(crate) fn draw(&mut self, p: usize, ev: &mut Vec<Event>) -> Option<CardId> {
         let card = self.players[p].draw()?;
         ev.push(Event::CardDrawn { player: p, card });
@@ -532,5 +575,62 @@ mod tests {
             }
             assert!(matches!(g.log().last(), Some(Event::GameOver { .. })));
         }
+    }
+
+    /// The AI's imagined copy: same public state and zone sizes, but the
+    /// cards player 0 can't see (its deck and prizes, the opponent's hand,
+    /// deck and prizes) are dealt again, and the coins come from a new seed.
+    #[test]
+    fn determinize_hides_what_the_player_cannot_see() {
+        use crate::decks::{ember_rush, tide_mind};
+        let mut g = Game::new([ember_rush(), tide_mind()], 5, Config::default()).unwrap();
+        play(&mut g, 40);
+        let d = g.determinize(0, 99);
+        let sorted = |mut v: Vec<CardId>| {
+            v.sort_by_key(|c| c.0);
+            v
+        };
+        let hidden = |g: &Game, p: usize, hand: bool| {
+            let pl = &g.players[p];
+            let mut v: Vec<CardId> = pl
+                .deck
+                .iter()
+                .chain(pl.prizes.iter().flatten())
+                .copied()
+                .collect();
+            if hand {
+                v.extend(&pl.hand);
+            }
+            sorted(v)
+        };
+        for p in 0..2 {
+            let (a, b) = (&g.players[p], &d.players[p]);
+            assert_eq!(a.deck.len(), b.deck.len());
+            assert_eq!(a.hand.len(), b.hand.len());
+            assert_eq!(
+                a.prizes.iter().map(Option::is_some).collect::<Vec<_>>(),
+                b.prizes.iter().map(Option::is_some).collect::<Vec<_>>()
+            );
+            assert_eq!(
+                (&a.active, &a.bench, &a.discard),
+                (&b.active, &b.bench, &b.discard)
+            );
+            assert_eq!(hidden(&g, p, p == 1), hidden(&d, p, p == 1));
+        }
+        assert_eq!(g.players[0].hand, d.players[0].hand, "my own hand stays");
+        assert_ne!(
+            g.players[0].deck, d.players[0].deck,
+            "my deck order is hidden"
+        );
+        assert_ne!(
+            (&g.players[1].hand, &g.players[1].deck),
+            (&d.players[1].hand, &d.players[1].deck),
+            "the opponent's hand and deck are hidden"
+        );
+        assert_eq!(
+            (g.turn, g.turn_player, &g.prompt),
+            (d.turn, d.turn_player, &d.prompt)
+        );
+        assert_ne!(g.rng.clone().next_u32(), d.rng.clone().next_u32());
     }
 }

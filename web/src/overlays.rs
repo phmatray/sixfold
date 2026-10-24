@@ -20,7 +20,7 @@ pub fn CoinOverlay() -> impl IntoView {
             let who = if c.player == HUMAN { "You" } else { "Opponent" };
             let side = if c.heads { "heads" } else { "tails" };
             view! {
-                <div class="coin-overlay" role="status" aria-live="assertive" aria-label=format!("{who} flipped a coin: {side}")>
+                <div class="coin-overlay" aria-hidden="true">
                     <p class="coin-caption">{c.caption}</p>
                     <div class="coin-stage">
                         <div class=format!("coin land-{side}")>
@@ -42,7 +42,7 @@ pub fn CalloutOverlay() -> impl IntoView {
     move || {
         callout.get().map(|c| {
             view! {
-                <div class=if c.mine { "callout mine" } else { "callout theirs" } role="status" aria-live="polite">
+                <div class=if c.mine { "callout mine" } else { "callout theirs" } aria-hidden="true">
                     {c.card.map(|id| view! { <div class="callout-card"><CardFace id=id /></div> })}
                     <div class="callout-text">
                         <strong>{c.title}</strong>
@@ -133,7 +133,7 @@ pub fn LogPanel() -> impl IntoView {
     view! {
         <section class="log" class:open=move || ui.log_open.get() aria-label="Battle log">
             <h2>"Battle log"</h2>
-            <ol class="log-list" node_ref=list aria-live="polite" aria-relevant="additions">
+            <ol class="log-list" node_ref=list>
                 <For
                     each=move || ctl.log.get()
                     key=|l| l.key
@@ -170,7 +170,7 @@ pub fn DiscardViewer() -> impl IntoView {
                     <p class="dialog-sub">{if cards.is_empty() { "Empty.".to_string() } else { format!("{}, newest last.", crate::board::cards(cards.len())) }}</p>
                     <div class="discard-grid">
                         {cards.into_iter().map(|id| view! {
-                            <button class="discard-card" aria-label=card(id).name on:click=move |_| ui.open(Inspect { card: id, at: None })>
+                            <button class="discard-card" aria-label=crate::cards::face_text(id) on:click=move |_| ui.open(Inspect { card: id, at: None })>
                                 <CardFace id=id />
                             </button>
                         }).collect_view()}

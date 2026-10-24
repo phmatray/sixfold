@@ -3,8 +3,9 @@
 //! It decides only from what its player may see: [`Game::view`],
 //! [`Game::legal_actions`] and the public queries [`Game::preview_attack`],
 //! [`Game::retreat_cost`] and [`Game::power_works`]. It always answers with one
-//! of the listed actions (R-AI-01) and never looks at hidden cards or clones
-//! the game to look ahead.
+//! of the listed actions (R-AI-01) and never looks at hidden cards. Hard looks
+//! ahead only on copies made by `Game::determinize`, which deal the unseen cards
+//! and the coins anew.
 //!
 //! A main phase is answered one action per call. Every call walks the same
 //! fixed order (R-AI-02, `docs/RULES.md` §16) and takes the first step that
@@ -34,6 +35,11 @@ pub enum Difficulty {
     /// Full heuristics, no random skips.
     #[default]
     Normal,
+    /// Normal's heuristics, plus a look ahead in the main phase: each
+    /// candidate action is tried on a determinized copy of the game, the
+    /// rest of the turn is played out as Normal would, and the position the
+    /// opponent then faces is scored.
+    Hard,
 }
 
 /// A trainer card or a creature's Power (by uid), remembered for the turn.
@@ -69,6 +75,8 @@ pub struct Ai {
     idle: u32,
     idle_uid: Option<u32>,
     hit: bool,
+    /// Look-ahead applies the last decision used (Hard only).
+    pub(crate) nodes: u32,
 }
 
 /// Main-phase answers per turn before the AI just ends its turn (a safety net).
@@ -87,6 +95,7 @@ impl Ai {
             idle: 0,
             idle_uid: None,
             hit: false,
+            nodes: 0,
         }
     }
 
@@ -105,7 +114,9 @@ impl Ai {
             me,
             legal: game.legal_actions(),
         };
+        let hard = self.difficulty == Difficulty::Hard;
         let a = match &kind {
+            PromptKind::ChooseActive if hard => hard_setup(&x),
             PromptKind::ChooseActive | PromptKind::ChooseBench => setup(&x),
             PromptKind::MainPhase => self.main_phase(&x),
             PromptKind::ChooseRetreatEnergy { chosen, .. } => retreat_energy(&x, chosen),
@@ -146,6 +157,14 @@ impl Ai {
         if self.actions > MAX_ACTIONS {
             return self.attack(x);
         }
+        if self.difficulty == Difficulty::Hard {
+            return self.look_ahead(x);
+        }
+        self.heuristic(x)
+    }
+
+    /// R-AI-02's fixed order of steps: the first that applies.
+    fn heuristic(&mut self, x: &Ctx) -> Action {
         if let Some(a) = self.trainer(x, Step::Draw) {
             return a;
         }
@@ -304,6 +323,377 @@ impl Ai {
     }
 }
 
+// ----- Hard: look ahead -----
+
+/// A Hard decision starts no new round of play-outs once it has used this
+/// many applies, so one decision costs at most `NODE_BUDGET + CANDIDATES *
+/// ROLLOUT` (about 5 µs each natively: a few ms, inside the 50 ms a phone
+/// may spend in wasm).
+pub(crate) const NODE_BUDGET: u32 = 600;
+/// Most candidate actions tried per decision, Normal's pick first.
+const CANDIDATES: usize = 10;
+/// Most applies one play-out may use.
+const ROLLOUT: u32 = 80;
+/// Most rounds of play-outs (one determinized copy each) per decision.
+const SAMPLES: u64 = 6;
+/// How much better (in thousandths of a win) another action must average
+/// to replace Normal's pick.
+const MARGIN: i32 = 30;
+
+impl Ai {
+    /// Hard's main phase: Normal's pick, unless another action, played out on
+    /// determinized copies of the game, leaves a clearly better position.
+    fn look_ahead(&mut self, x: &Ctx) -> Action {
+        self.nodes = 0;
+        let seed = u64::from(self.rng.next_u32()) << 32 | u64::from(self.rng.next_u32());
+        let mut normal = self.clone();
+        normal.difficulty = Difficulty::Normal;
+        let pick = normal.heuristic(x);
+        let candidates = self.candidates(x, pick);
+        let mut chosen = pick;
+        if candidates.len() > 1 {
+            // Each candidate's memory of the turn, as Normal would carry on.
+            let ais: Vec<Ai> = candidates
+                .iter()
+                .map(|&a| {
+                    if a == pick {
+                        return normal.clone();
+                    }
+                    let mut ai = self.clone();
+                    ai.difficulty = Difficulty::Normal;
+                    ai.note(x, a);
+                    ai
+                })
+                .collect();
+            // Every candidate is played out on the same copies (common
+            // random numbers), round after round while the budget lasts.
+            let mut totals = vec![0i64; candidates.len()];
+            let mut rounds = 0;
+            while rounds < SAMPLES && self.nodes < NODE_BUDGET {
+                for (i, &a) in candidates.iter().enumerate() {
+                    let copy = x.game.determinize(x.me, seed.wrapping_add(rounds));
+                    totals[i] += i64::from(self.play_out(copy, x.me, a, ais[i].clone()));
+                }
+                rounds += 1;
+            }
+            let mut best = i64::MIN;
+            for (i, &a) in candidates.iter().enumerate() {
+                let score = totals[i]
+                    + if a == pick {
+                        i64::from(MARGIN) * rounds as i64
+                    } else {
+                        0
+                    };
+                if score > best {
+                    (best, chosen) = (score, a);
+                }
+            }
+        }
+        if chosen == pick {
+            normal.difficulty = Difficulty::Hard;
+            normal.nodes = self.nodes;
+            *self = normal;
+        } else {
+            self.note(x, chosen);
+        }
+        chosen
+    }
+
+    /// The main-phase actions worth trying: Normal's pick, attacks, then the
+    /// rest, without plays the turn's memory rules out, one per distinct card.
+    fn candidates(&self, x: &Ctx, pick: Action) -> Vec<Action> {
+        let mut seen = Vec::new();
+        let mut out = vec![pick];
+        let attacks = x.legal.iter().filter(|a| matches!(a, Action::Attack(_)));
+        let rest = x.legal.iter().filter(|a| !matches!(a, Action::Attack(_)));
+        for &a in attacks.chain(rest) {
+            let key = match a {
+                Action::Retreat if self.retreated => continue,
+                Action::UsePower(slot) => {
+                    let used = x.at(x.me, slot).map(|c| Play::Power(c.uid));
+                    if used.is_some_and(|p| self.done.contains(&p)) {
+                        continue;
+                    }
+                    None
+                }
+                Action::PlayTrainer(h) => {
+                    if self.done.contains(&Play::Trainer(x.v.hand[h])) {
+                        continue;
+                    }
+                    Some((1, x.v.hand[h], 0))
+                }
+                Action::PlayBasic(h) => Some((2, x.v.hand[h], 0)),
+                Action::Evolve { hand, slot } => Some((3, x.v.hand[hand], slot)),
+                Action::AttachEnergy { hand, slot } => Some((4, x.v.hand[hand], slot)),
+                _ => None,
+            };
+            if let Some(k) = key {
+                if seen.contains(&k) {
+                    continue;
+                }
+                seen.push(k);
+            }
+            if !out.contains(&a) && out.len() < CANDIDATES {
+                out.push(a);
+            }
+        }
+        out
+    }
+
+    /// Remember a main-phase action Hard chose itself, as Normal's steps do,
+    /// so the loop guards (one retreat, each Power once) still hold.
+    fn note(&mut self, x: &Ctx, a: Action) {
+        match a {
+            Action::Retreat => self.retreated = true,
+            Action::UsePower(slot) => {
+                if let Some(c) = x.at(x.me, slot) {
+                    self.done.push(Play::Power(c.uid));
+                    self.last = Some(Play::Power(c.uid));
+                }
+            }
+            Action::PlayTrainer(h) => {
+                let id = x.v.hand[h];
+                if let CardKind::Trainer(t) = &card(id).kind {
+                    if t.effects.contains(&Effect::SwitchSelf) {
+                        self.retreated = true;
+                    }
+                    if t.effects
+                        .iter()
+                        .any(|e| matches!(e, Effect::SwitchDefender { .. }))
+                    {
+                        self.done.push(Play::Trainer(id));
+                    }
+                }
+                self.last = Some(Play::Trainer(id));
+            }
+            Action::Attack(i) => self.hit = outcomes(x, x.me, i).iter().any(|&(_, d)| d > 0),
+            _ => {}
+        }
+    }
+
+    /// Play `first` on the copy `g`, then the rest of my turn and the
+    /// opponent's whole turn with Normal on both sides, and score the
+    /// position at the start of my next turn.
+    fn play_out(&mut self, mut g: Game, me: usize, first: Action, mut mine: Ai) -> i32 {
+        let turn = g.turn();
+        let mut theirs = Ai::new(g.turn().into(), Difficulty::Normal);
+        let mut a = first;
+        let mut used = 0;
+        while g.apply(a).is_ok() {
+            used += 1;
+            let Some(p) = g.prompt().cloned() else { break };
+            let next_turn = p.kind == PromptKind::MainPhase && p.player == me && g.turn() != turn;
+            if next_turn || used >= ROLLOUT {
+                break;
+            }
+            a = if p.player == me {
+                mine.choose_action(&g, me)
+            } else {
+                theirs.choose_action(&g, p.player)
+            };
+        }
+        self.nodes += used;
+        evaluate(&g, me)
+    }
+}
+
+/// How good a position is for `me`, from what `me` can see: a logistic
+/// model of the chance to win, in thousandths, with one set of weights for
+/// when `me` moves next and one for when the opponent does, both fitted on
+/// Normal self-play (`fit_evaluation`).
+fn evaluate(g: &Game, me: usize) -> i32 {
+    if let Some(w) = g.winner() {
+        return if w == me { 100_000 } else { -100_000 };
+    }
+    let f = features(g, me);
+    let w = if g.turn_player() == me {
+        &WEIGHTS_MOVER
+    } else {
+        &WEIGHTS
+    };
+    let z: f32 = f.iter().zip(w).map(|(a, b)| a * b).sum();
+    (1000.0 / (1.0 + (-z).exp())) as i32
+}
+
+const FEATURES: usize = 27;
+/// Fitted by `fit_evaluation`, one per entry of [`features`]: the opponent
+/// to move, then `me` to move.
+const WEIGHTS: [f32; FEATURES] = [
+    0.43280375,
+    0.7642921,
+    0.16945873,
+    -0.33493382,
+    -0.0020286527,
+    -0.018317752,
+    -0.6618075,
+    0.6116969,
+    -0.1418339,
+    -0.049939975,
+    0.19158705,
+    -0.09360187,
+    -0.6461303,
+    0.58984053,
+    0.01750406,
+    0.07593973,
+    -1.0280104,
+    0.77792114,
+    -0.057191383,
+    0.05571348,
+    -0.005253026,
+    -0.021303585,
+    0.6652478,
+    -0.78325456,
+    -1.6212165,
+    0.73250043,
+    -0.23299436,
+];
+
+const WEIGHTS_MOVER: [f32; FEATURES] = [
+    0.43287304,
+    0.7633917,
+    0.16889153,
+    -0.33309937,
+    -0.0007544721,
+    -0.018143132,
+    -0.61604387,
+    0.6602679,
+    0.060264982,
+    0.14894077,
+    0.02310579,
+    -0.2735151,
+    -0.58323646,
+    0.64922565,
+    -0.09224805,
+    -0.025578214,
+    -0.6364584,
+    1.1562434,
+    -0.082433484,
+    0.0334695,
+    0.10341987,
+    0.064220555,
+    0.7741683,
+    -0.6669799,
+    -0.692936,
+    1.7710328,
+    0.22567734,
+];
+
+/// The position seen by `me`: each entry is mine minus theirs, a chance, a
+/// flag, or one side's count.
+fn features(g: &Game, me: usize) -> [f32; FEATURES] {
+    let [m, o] = [me, 1 - me].map(|p| Ctx {
+        game: g,
+        v: g.view(p),
+        me: p,
+        legal: Vec::new(),
+    });
+    let left = |x: &Ctx| x.mine().prizes.iter().filter(|&&b| b).count() as f32;
+    let sum = |x: &Ctx, f: &dyn Fn(&InPlay) -> f32| -> f32 {
+        let s = x.mine();
+        s.active.into_iter().chain(s.bench).map(f).sum()
+    };
+    let hp = |x: &Ctx| sum(x, &|c| c.hp as f32) / 100.0;
+    let energy = |x: &Ctx| sum(x, &|c| total(&c.units()) as f32);
+    let count = |x: &Ctx| sum(x, &|_| 1.0);
+    let evolved = |x: &Ctx| sum(x, &|c| (c.stack.len() - 1) as f32);
+    let thin = |x: &Ctx| 10usize.saturating_sub(x.mine().deck_count) as f32;
+    let alone = |x: &Ctx| f32::from(x.mine().bench.is_empty() as u8);
+    let cond = |x: &Ctx| {
+        x.mine().active.map_or(0.0, |a| {
+            (bring_in_score(x, a) - active_score(x)) as f32 / 40.0
+        })
+    };
+    let ready = |x: &Ctx| {
+        x.mine().active.map_or(3.0, |a| {
+            a.creature()
+                .attacks
+                .iter()
+                .map(|t| missing(&a.units(), t.cost))
+                .min()
+                .unwrap_or(3) as f32
+        })
+    };
+    [
+        left(&o) - left(&m),
+        hp(&m) - hp(&o),
+        energy(&m) - energy(&o),
+        count(&m) - count(&o),
+        evolved(&m) - evolved(&o),
+        m.mine().hand_count as f32 - o.mine().hand_count as f32,
+        thin(&m),
+        thin(&o),
+        alone(&m),
+        alone(&o),
+        ko_chance(&o, 0.7),
+        ko_chance(&m, 0.5),
+        cond(&m),
+        cond(&o),
+        ready(&m),
+        ready(&o),
+        hit(&o, 0.7),
+        hit(&m, 0.5),
+        on_active(&m, &|c| total(&c.units()) as f32),
+        on_active(&o, &|c| total(&c.units()) as f32),
+        on_active(&m, &|c| c.hp as f32 / 100.0),
+        on_active(&o, &|c| c.hp as f32 / 100.0),
+        f32::from(left(&m) == 1.0),
+        f32::from(left(&o) == 1.0),
+        // A knock-out that ends the game: the last prize, or no Bench left.
+        ko_chance(&o, 0.7) * f32::from(alone(&m) > 0.0 || left(&o) == 1.0),
+        ko_chance(&m, 0.5) * f32::from(alone(&o) > 0.0 || left(&m) == 1.0),
+        1.0,
+    ]
+}
+
+fn on_active(x: &Ctx, f: &dyn Fn(&InPlay) -> f32) -> f32 {
+    x.mine().active.map_or(0.0, f)
+}
+
+/// The share of the opposing Active's HP that x's Active takes off on
+/// average with its best attack, one energy short counting `short` as much.
+fn hit(x: &Ctx, short: f32) -> f32 {
+    let (Some(a), Some(d)) = (x.mine().active, x.theirs().active) else {
+        return 0.0;
+    };
+    (0..a.creature().attacks.len())
+        .filter_map(|j| {
+            let w = match missing(&a.units(), a.creature().attacks[j].cost) {
+                0 => 1.0,
+                1 => short,
+                _ => return None,
+            };
+            let e: f32 = outcomes(x, x.me, j)
+                .iter()
+                .map(|&(c, dmg)| c * dmg.min(d.hp) as f32)
+                .sum();
+            Some(w * e / d.hp.max(1) as f32)
+        })
+        .fold(0.0, f32::max)
+}
+
+/// The chance that x's Active knocks out the opposing Active with one of its
+/// attacks, an attack one energy short counting `short` as much.
+fn ko_chance(x: &Ctx, short: f32) -> f32 {
+    let (Some(a), Some(d)) = (x.mine().active, x.theirs().active) else {
+        return 0.0;
+    };
+    (0..a.creature().attacks.len())
+        .filter_map(|j| {
+            let w = match missing(&a.units(), a.creature().attacks[j].cost) {
+                0 => 1.0,
+                1 => short,
+                _ => return None,
+            };
+            let p: f32 = outcomes(x, x.me, j)
+                .iter()
+                .filter(|&&(_, dmg)| dmg >= d.hp)
+                .map(|&(c, _)| c)
+                .sum();
+            Some(w * p)
+        })
+        .fold(0.0, f32::max)
+}
+
 /// Everything one decision reads.
 struct Ctx<'a> {
     game: &'a Game,
@@ -354,6 +744,31 @@ fn setup(x: &Ctx) -> Action {
             .find(|&a| matches!(a, Action::PlayBasic(h) if card(x.v.hand[h]).is_basic() == real))
     };
     basic(true).or_else(|| basic(false)).unwrap_or(Action::Done)
+}
+
+/// Hard's opening Active: a real Basic that can attack soon, sturdy and quick
+/// to retreat, keeping one whose evolution is in hand for the Bench.
+fn hard_setup(x: &Ctx) -> Action {
+    x.legal
+        .iter()
+        .copied()
+        .filter_map(|a| match a {
+            Action::PlayBasic(h) => Some((h, a)),
+            _ => None,
+        })
+        .max_by_key(|&(h, _)| {
+            let d = card(x.v.hand[h]);
+            let Some(c) = d.creature() else {
+                return i32::MIN;
+            };
+            let cheapest = c.attacks.iter().map(|a| a.cost.len()).min().unwrap_or(4) as i32;
+            let evo = x.v.hand.iter().any(|&e| evolves_from(e) == Some(d.name));
+            1000 * d.is_basic() as i32 + c.hp as i32
+                - 20 * cheapest
+                - 10 * c.retreat_cost as i32
+                - 30 * evo as i32
+        })
+        .map_or(Action::Done, |(_, a)| a)
 }
 
 /// R-AI-09: the best creature to bring in; ties go to the later slot.
@@ -1190,10 +1605,14 @@ mod tests {
     fn ai_never_emits_illegal_action() {
         for seed in 0..300 {
             let easy = (seed % 4 == 0).then_some(Difficulty::Easy);
+            let hard = (seed % 5 == 0).then_some(Difficulty::Hard);
             play(
                 decks_for(seed),
                 seed,
-                [Some(easy.unwrap_or_default()), Some(Difficulty::Normal)],
+                [
+                    Some(easy.unwrap_or_default()),
+                    Some(hard.unwrap_or_default()),
+                ],
             );
         }
     }
@@ -1214,11 +1633,12 @@ mod tests {
             if seed / decks.len() as u64 % 2 == 1 {
                 pair.swap(0, 1);
             }
-            play(
-                pair,
-                seed,
-                [Some(Difficulty::Normal), Some(Difficulty::Easy)],
-            );
+            let other = if seed % 4 == 0 {
+                Difficulty::Hard
+            } else {
+                Difficulty::Easy
+            };
+            play(pair, seed, [Some(Difficulty::Normal), Some(other)]);
         }
     }
 
@@ -1616,5 +2036,203 @@ mod tests {
             let rate = w as f32 / n as f32;
             assert!((0.3..=0.7).contains(&rate), "{} won {w}/{n}", d.name);
         }
+    }
+
+    /// Hard against Normal in mirror matches: each prebuilt deck against
+    /// itself, `games` seeded games per deck, seats alternating. Returns
+    /// Hard's (wins, games) and the most look-ahead applies one decision used.
+    fn hard_vs_normal(games: u64) -> (u32, u32, u32) {
+        use crate::decks::PREBUILT;
+        let (mut wins, mut played, mut most) = (0, 0, 0);
+        for (d, deck) in PREBUILT.iter().enumerate() {
+            let mut deck_wins = 0;
+            for n in 0..games {
+                let seed = d as u64 * 1000 + n;
+                let hard = (n % 2) as usize;
+                let mut g =
+                    Game::new([deck.cards(), deck.cards()], seed, Config::default()).unwrap();
+                let mut ais = [0, 1].map(|i| {
+                    let level = if i == hard {
+                        Difficulty::Hard
+                    } else {
+                        Difficulty::Normal
+                    };
+                    Ai::new(seed * 2 + i as u64, level)
+                });
+                while g.winner().is_none() {
+                    assert!(g.turn() < 500, "seed {seed}: no end");
+                    let p = g.prompt().unwrap().player;
+                    let a = ais[p].choose_action(&g, p);
+                    most = most.max(ais[p].nodes);
+                    g.apply(a).unwrap();
+                }
+                deck_wins += u32::from(g.winner() == Some(hard));
+            }
+            eprintln!("{:12} Hard won {deck_wins}/{games}", deck.name);
+            wins += deck_wins;
+            played += games as u32;
+        }
+        eprintln!("Hard vs Normal: {wins}/{played}, at most {most} applies per decision");
+        (wins, played, most)
+    }
+
+    /// Hard wins at least 60% of mirror matches against Normal, and keeps
+    /// to its look-ahead budget.
+    #[test]
+    fn hard_beats_normal_in_mirrors() {
+        let (wins, games, most) = hard_vs_normal(10);
+        assert!(wins * 10 >= games * 6, "Hard won only {wins}/{games}");
+        assert!(
+            most <= NODE_BUDGET + CANDIDATES as u32 * ROLLOUT,
+            "{most} applies in one decision"
+        );
+    }
+
+    /// The same over 50 games per deck, with decision times (run with
+    /// `--release -- --ignored --nocapture`).
+    #[test]
+    #[ignore]
+    fn hard_beats_normal_in_mirrors_big() {
+        let start = std::time::Instant::now();
+        let (wins, games, _) = hard_vs_normal(50);
+        eprintln!("{:?} in all", start.elapsed());
+        assert!(wins * 10 >= games * 6, "Hard won only {wins}/{games}");
+    }
+
+    /// Hard's decision time on this machine: mean and worst over a few games.
+    #[test]
+    #[ignore]
+    fn hard_decision_time() {
+        use crate::decks::PREBUILT;
+        let (mut total, mut worst, mut n) =
+            (std::time::Duration::ZERO, std::time::Duration::ZERO, 0);
+        let mut nodes = 0u64;
+        for (d, deck) in PREBUILT.iter().enumerate() {
+            for seed in 0..4u64 {
+                let mut g = Game::new(
+                    [deck.cards(), deck.cards()],
+                    d as u64 * 7 + seed,
+                    Config::default(),
+                )
+                .unwrap();
+                let mut ais = [
+                    Ai::new(seed, Difficulty::Hard),
+                    Ai::new(seed + 1, Difficulty::Normal),
+                ];
+                while g.winner().is_none() {
+                    let p = g.prompt().unwrap().player;
+                    let t = std::time::Instant::now();
+                    let a = ais[p].choose_action(&g, p);
+                    if p == 0 {
+                        nodes += ais[0].nodes as u64;
+                        let e = t.elapsed();
+                        total += e;
+                        worst = worst.max(e);
+                        n += 1;
+                    }
+                    g.apply(a).unwrap();
+                }
+            }
+        }
+        eprintln!(
+            "Hard: {n} decisions, mean {:?}, worst {worst:?}, {:?} per apply",
+            total / n,
+            total / nodes.max(1) as u32
+        );
+    }
+
+    /// Fits [`WEIGHTS`] and [`WEIGHTS_MOVER`]: Normal self-play over every
+    /// pair of prebuilt decks; at the start of each main phase the position is
+    /// seen by the player who waits and by the one who moves, against who won;
+    /// logistic regression by gradient descent. Paste the printed arrays.
+    /// `cargo test --release -p sixfold-engine fit_evaluation -- --ignored --nocapture`
+    #[test]
+    #[ignore]
+    #[allow(clippy::needless_range_loop)] // i, j index PREBUILT and the seed
+    fn fit_evaluation() {
+        use crate::decks::PREBUILT;
+        type Row = ([f32; FEATURES], f32);
+        let mut rows: [Vec<Row>; 2] = [Vec::new(), Vec::new()];
+        let n = PREBUILT.len();
+        for i in 0..n {
+            for j in 0..n {
+                for k in 0..150u64 {
+                    let seed = 77_000 + (i * n + j) as u64 * 100 + k;
+                    let decks = [PREBUILT[i].cards(), PREBUILT[j].cards()];
+                    let mut g = Game::new(decks, seed, Config::default()).unwrap();
+                    let mut ais = [0, 1].map(|p| Ai::new(seed * 2 + p, Difficulty::Normal));
+                    let mut seen = Vec::new();
+                    let mut last = None;
+                    while g.winner().is_none() {
+                        let pr = g.prompt().unwrap().clone();
+                        if pr.kind == PromptKind::MainPhase && last != Some(g.turn()) {
+                            last = Some(g.turn());
+                            for (side, who) in [(0, 1 - pr.player), (1, pr.player)] {
+                                seen.push((side, features(&g, who), who));
+                            }
+                        }
+                        let a = ais[pr.player].choose_action(&g, pr.player);
+                        g.apply(a).unwrap();
+                    }
+                    let w = g.winner();
+                    for (side, f, who) in seen {
+                        rows[side].push((f, f32::from(w == Some(who))));
+                    }
+                }
+            }
+        }
+        for (name, rows) in ["WEIGHTS", "WEIGHTS_MOVER"].iter().zip(&rows) {
+            let raw = fit(rows);
+            let dot = |f: &[f32; FEATURES]| (0..FEATURES).map(|k| raw[k] * f[k]).sum::<f32>();
+            let right = rows
+                .iter()
+                .filter(|(f, y)| (dot(f) > 0.0) == (*y > 0.5))
+                .count();
+            let pct = 100.0 * right as f32 / rows.len() as f32;
+            eprintln!("{} positions, {pct:.1}% called right", rows.len());
+            eprintln!("const {name}: [f32; FEATURES] = {raw:?};");
+        }
+    }
+
+    /// Logistic regression on standardized features (all but the bias, the
+    /// last), then the weights for the raw features.
+    #[allow(clippy::needless_range_loop)] // k indexes several arrays
+    fn fit(rows: &[([f32; FEATURES], f32)]) -> [f32; FEATURES] {
+        let len = rows.len() as f32;
+        let mut mean = [0.0f32; FEATURES];
+        let mut sd = [1.0f32; FEATURES];
+        for k in 0..FEATURES - 1 {
+            mean[k] = rows.iter().map(|r| r.0[k]).sum::<f32>() / len;
+            let var = rows.iter().map(|r| (r.0[k] - mean[k]).powi(2)).sum::<f32>() / len;
+            sd[k] = var.sqrt().max(1e-3);
+        }
+        let z = |f: &[f32; FEATURES], k: usize| {
+            if k == FEATURES - 1 {
+                1.0
+            } else {
+                (f[k] - mean[k]) / sd[k]
+            }
+        };
+        let mut w = [0.0f32; FEATURES];
+        for _ in 0..800 {
+            let mut grad = [0.0f32; FEATURES];
+            for (f, y) in rows {
+                let s: f32 = (0..FEATURES).map(|k| w[k] * z(f, k)).sum();
+                let e = 1.0 / (1.0 + (-s).exp()) - y;
+                for k in 0..FEATURES {
+                    grad[k] += e * z(f, k);
+                }
+            }
+            for k in 0..FEATURES {
+                w[k] -= 0.5 * (grad[k] / len + 0.001 * w[k]);
+            }
+        }
+        let mut raw = [0.0f32; FEATURES];
+        for k in 0..FEATURES - 1 {
+            raw[k] = w[k] / sd[k];
+            raw[FEATURES - 1] -= w[k] * mean[k] / sd[k];
+        }
+        raw[FEATURES - 1] += w[FEATURES - 1];
+        raw
     }
 }

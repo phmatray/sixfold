@@ -172,9 +172,9 @@ pub fn Creature(player: usize, uid: u32) -> impl IntoView {
         mon.with(|m| {
             m.as_ref().map_or(String::new(), |m| {
                 let mut s = format!(
-                    "{}: {}, {} of {} HP, {} energy",
+                    "{}, {}, {} of {} HP, {} energy",
+                    crate::cards::face_text(m.top),
                     slot_name(player, m.slot),
-                    card(m.top).name,
                     hp(),
                     m.max,
                     m.energy.len()
@@ -220,7 +220,7 @@ pub fn Creature(player: usize, uid: u32) -> impl IntoView {
                             let pct = hp() as u32 * 100 / max() as u32;
                             if pct <= 25 { "fill low" } else if pct <= 50 { "fill mid" } else { "fill" }
                         }
-                        style=move || format!("width:{}%", hp() as u32 * 100 / max() as u32)
+                        style=move || format!("transform:scaleX({})", f32::from(hp()) / f32::from(max().max(1)))
                     ></span>
                     <span class="hp-text">{hp} "/" {max}</span>
                 </div>
@@ -366,13 +366,13 @@ pub fn SideRow(player: usize) -> impl IntoView {
                     <span class="badge effect">"No trainers this turn"</span>
                 })}
             </div>
-            <div class="active-spot" aria-label=format!("{who} Active spot")>
+            <div class="active-spot" role="group" aria-label=format!("{who} Active spot")>
                 {move || match info.with(|i| i.active) {
                     Some(uid) => view! { <Creature player=player uid=uid /> }.into_any(),
                     None => view! { <div class="slot-empty active-empty"><span>"Active"</span></div> }.into_any(),
                 }}
             </div>
-            <div class="bench" aria-label=format!("{who} Bench")>
+            <div class="bench" role="group" aria-label=format!("{who} Bench")>
                 <For
                     each=move || info.with(|i| i.bench.clone())
                     key=|uid| *uid
@@ -411,7 +411,7 @@ pub fn Hand() -> impl IntoView {
             .unwrap_or_default()
     });
     view! {
-        <div class="hand-wrap">
+        <div class="hand-wrap" data-focus-home="">
             <ul class="hand" aria-label=move || format!("Your hand: {}", cards(hand.with(|h| h.len())))>
                 <For
                     each=move || hand.get()
@@ -445,7 +445,7 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
         )
     };
     let id = key.0;
-    let name = card(id).name;
+    let face = crate::cards::face_text(id);
     let peek = Inspect { card: id, at: None };
     let long = StoredValue::new(false);
     let timer = StoredValue::new(None::<TimeoutHandle>);
@@ -462,7 +462,7 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
                 class:playable=playable
                 class:selected=selected
                 aria-pressed=move || selected().to_string()
-                aria-label=move || format!("{name}{}", if playable() { ", playable" } else { "" })
+                aria-label=move || format!("{face}{}", if playable() { ", playable" } else { "" })
                 on:click=move |_| {
                     if long.get_value() {
                         long.set_value(false);

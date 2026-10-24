@@ -65,7 +65,6 @@ fn type_class(def: &CardDef) -> String {
 pub fn CardFace(id: CardId) -> impl IntoView {
     let def = card(id);
     let hp = def.creature().map(|c| c.hp);
-    let stage = def.creature().map(|c| c.stage);
     view! {
         <div class=format!("card {}", type_class(def))>
             <div class="card-head">
@@ -73,16 +72,28 @@ pub fn CardFace(id: CardId) -> impl IntoView {
                 {hp.map(|hp| view! { <span class="card-hp">{hp}</span> })}
             </div>
             <div class="card-art" inner_html=card_art(def)></div>
-            <div class="card-foot">
-                {match stage {
-                    Some(Stage::Stage1) => "Stage 1".to_string(),
-                    Some(Stage::Stage2) => "Stage 2".to_string(),
-                    Some(Stage::Basic) if !def.is_basic() => "Trainer".to_string(),
-                    Some(Stage::Basic) => "Basic".to_string(),
-                    None => kind_label(def),
-                }}
-            </div>
+            <div class="card-foot">{foot(def)}</div>
         </div>
+    }
+}
+
+fn foot(def: &CardDef) -> String {
+    match def.creature().map(|c| c.stage) {
+        Some(Stage::Stage1) => "Stage 1".to_string(),
+        Some(Stage::Stage2) => "Stage 2".to_string(),
+        Some(Stage::Basic) if !def.is_basic() => "Trainer".to_string(),
+        Some(Stage::Basic) => "Basic".to_string(),
+        None => kind_label(def),
+    }
+}
+
+/// The words printed on a [`CardFace`] ("Cindrel 50 Basic"): a button showing
+/// a card starts its accessible name with them (WCAG 2.5.3, label in name).
+pub fn face_text(id: CardId) -> String {
+    let def = card(id);
+    match def.creature() {
+        Some(c) => format!("{} {} {}", def.name, c.hp, foot(def)),
+        None => format!("{} {}", def.name, foot(def)),
     }
 }
 
