@@ -12,3 +12,5 @@ license = "MIT"
 opt-level = "z"
 lto = true
 codegen-units = 1
+# The wasm name section is most of the file; nothing reads it in production.
+strip = true
