@@ -497,8 +497,23 @@ mod tests {
                     g.prompt()
                 );
                 let a = legal[pick.below(legal.len() as u32) as usize];
-                g.apply(a)
+                if seed % 10 == 0 {
+                    // Every label and log line can be built, for both viewers.
+                    let v = g.view(g.prompt().unwrap().player);
+                    legal
+                        .iter()
+                        .for_each(|&a| assert!(!v.describe_action(a).contains('?')));
+                    v.prompt.unwrap().kind.to_string();
+                }
+                let ev = g
+                    .apply(a)
                     .unwrap_or_else(|e| panic!("seed {seed}: listed {a:?} refused: {e:?}"));
+                if seed % 10 == 0 {
+                    ev.iter().for_each(|e| {
+                        e.describe(0);
+                        e.describe(1);
+                    });
+                }
                 for p in 0..2 {
                     assert_eq!(
                         cards_owned(&g, p),

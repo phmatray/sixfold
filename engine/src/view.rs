@@ -39,6 +39,8 @@ pub struct Side<'a> {
     pub condition: Condition,
     pub effects: ActiveEffects,
     pub trainer_locked: bool,
+    /// The Active's retreat cost now, reducers included (R-RETREAT-02).
+    pub retreat_cost: u8,
 }
 
 impl<'a> Side<'a> {
@@ -53,6 +55,7 @@ impl<'a> Side<'a> {
             condition: pl.condition,
             effects: pl.effects,
             trainer_locked: pl.trainer_locked,
+            retreat_cost: 0,
         }
     }
 }
@@ -62,7 +65,10 @@ impl Game {
         View {
             me,
             hand: &self.players[me].hand,
-            sides: [Side::of(&self.players[0]), Side::of(&self.players[1])],
+            sides: [0, 1].map(|p| Side {
+                retreat_cost: self.retreat_cost(p),
+                ..Side::of(&self.players[p])
+            }),
             turn: self.turn,
             turn_player: self.turn_player,
             energy_attached: self.energy_attached,

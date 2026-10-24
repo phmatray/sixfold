@@ -11,6 +11,7 @@ mod card;
 mod condition;
 mod damage;
 mod deck;
+mod describe;
 mod effect;
 mod game;
 mod ko;
