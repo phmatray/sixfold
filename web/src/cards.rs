@@ -67,14 +67,16 @@ pub fn CardFace(id: CardId) -> impl IntoView {
     let hp = def.creature().map(|c| c.hp);
     view! {
         <div class=format!("card {}", type_class(def))>
+            // The " " text nodes don't show (flex and grid drop them) but keep
+            // the words apart in the text that "label in name" checks compare.
             <div class="card-head">
-                <span class="card-name">{def.name}</span>
+                <span class="card-name">{def.name}</span>" "
                 {hp.map(|hp| view! { <span class="card-hp">{hp}</span> })}
-            </div>
+            </div>" "
             <div class="card-art" inner_html=card_art(def)></div>
             <div class="card-foot">
                 {foot(def)}
-                {sixfold_engine::set::is_promo(id).then(|| view! { <span class="card-promo">"Promo"</span> })}
+                {sixfold_engine::set::is_promo(id).then(|| view! { " "<span class="card-promo">"Promo"</span> })}
             </div>
         </div>
     }
@@ -94,9 +96,14 @@ fn foot(def: &CardDef) -> String {
 /// a card starts its accessible name with them (WCAG 2.5.3, label in name).
 pub fn face_text(id: CardId) -> String {
     let def = card(id);
+    let promo = if sixfold_engine::set::is_promo(id) {
+        " Promo"
+    } else {
+        ""
+    };
     match def.creature() {
-        Some(c) => format!("{} {} {}", def.name, c.hp, foot(def)),
-        None => format!("{} {}", def.name, foot(def)),
+        Some(c) => format!("{} {} {}{promo}", def.name, c.hp, foot(def)),
+        None => format!("{} {}{promo}", def.name, foot(def)),
     }
 }
 

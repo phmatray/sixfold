@@ -83,7 +83,7 @@ pub fn Inspector() -> impl IntoView {
         <aside class="inspector" class:open=move || ui.sheet.get() aria-label="Card details">
             <button class="btn ghost close" node_ref=close on:click=move |_| ui.sheet.set(false) aria-label="Close card details">"Close"</button>
             {move || match shown_card() {
-                None => view! { <p class="empty-note">"Hover a card, or press and hold it, to read it here."</p> }.into_any(),
+                None => view! { <p class="empty-note">"Hover or focus a card, or press and hold it, to read it here."</p> }.into_any(),
                 Some(id) => view! {
                     <div class="inspect-body">
                         <div class="inspect-card" aria-hidden="true"><CardFace id=id /></div>
@@ -331,6 +331,9 @@ pub fn GameOver() -> impl IntoView {
                             <div class="reward campaign-reward" role="status">
                                 {if rw.seal {
                                     view! { <crate::campaign::Seal r=r earned=true /> }.into_any()
+                                } else if let Some(c) = rw.promo {
+                                    // The Warden's promo: show the card itself.
+                                    view! { <span class="reward-card" aria-hidden="true"><crate::cards::CardFace id=c /></span> }.into_any()
                                 } else {
                                     view! { <span class=format!("pack mini p-{}", crate::packs::pack_theme(b)) aria-hidden="true">
                                         <span class="pack-crimp"></span><span class="pack-crimp bottom"></span>

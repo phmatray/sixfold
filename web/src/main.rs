@@ -148,18 +148,19 @@ fn App() -> impl IntoView {
     view! { {page} <saves::SaveIndicator /> }
 }
 
-/// Focus the screen's `h1` (or its `main`), so focus never sits on a button
-/// that the screen change removed.
+/// Focus the screen's `[data-screen-focus]` control if it names one (the
+/// credits' Skip), else its `h1` (or its `main`), so focus never sits on a
+/// button that the screen change removed.
 fn focus_heading() {
     use wasm_bindgen::JsCast;
     let doc = document();
-    let el = doc
-        .query_selector("h1")
-        .ok()
-        .flatten()
+    // Two queries: a selector list would return whichever comes first in the page.
+    let el = ["[data-screen-focus]", "h1"]
+        .iter()
+        .find_map(|s| doc.query_selector(s).ok().flatten())
         .or_else(|| doc.query_selector("main").ok().flatten());
     if let Some(el) = el.and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok()) {
-        if !el.has_attribute("tabindex") {
+        if el.tab_index() < 0 && !el.has_attribute("tabindex") {
             let _ = el.set_attribute("tabindex", "-1");
         }
         let opts = web_sys::FocusOptions::new();
@@ -192,12 +193,31 @@ fn MatchScreen() -> impl IntoView {
             progress.update(sixfold_engine::endgame::abandon);
         }
     };
+    // Quitting a duel under way asks first (it can't be resumed, and in the
+    // Gauntlet it ends the run).
+    let asking = RwSignal::new(false);
+    let leave = move || {
+        forfeit();
+        ctl.stop();
+        screen.set(quit_to)
+    };
+    let quit = move || {
+        let over = ctl
+            .shown
+            .with_untracked(|g| g.as_ref().is_none_or(|g| g.winner().is_some()));
+        if over {
+            leave()
+        } else {
+            asking.set(true)
+        }
+    };
     let turn = Memo::new(move |_| {
         ctl.shown
             .with(|g| g.as_ref().map(|g| (g.turn(), g.turn_player())))
     });
     let on_key = move |e: leptos::ev::KeyboardEvent| {
         if e.key() == "Escape" {
+            asking.set(false);
             ui.sheet.set(false);
             ui.discard.set(None);
             ui.selected.set(None);
@@ -217,18 +237,33 @@ fn MatchScreen() -> impl IntoView {
                 <button class="btn ghost log-toggle" aria-expanded=move || ui.log_open.get().to_string()
                     on:click=move |_| ui.log_open.update(|o| *o = !*o)>"Log"</button>
                 <MuteToggle />
-                <button class="btn ghost" on:click=move |_| { forfeit(); ctl.stop(); screen.set(quit_to) }>"Quit"</button>
+                <button class="btn ghost" on:click=move |_| quit()>"Quit"</button>
             </header>
-            <main class="table">
-                <SideRow player=AI />
-                <div class="midline" aria-hidden="true">
-                    <span>{move || match turn.get() {
-                        _ if !ctl.revealed.get() => "Setup".to_string(),
-                        Some((t, p)) => format!("Turn {t}, {}", if p == HUMAN { "your move" } else { "opponent's move" }),
-                        None => String::new(),
+            {move || asking.get().then(|| view! {
+                <div class="quit-confirm confirm row" role="alertdialog" aria-labelledby="quit-q">
+                    <span id="quit-q">{if gauntlet {
+                        "Leave this duel? It can't be resumed, and it ends your Gauntlet run."
+                    } else {
+                        "Leave this duel? It can't be resumed."
                     }}</span>
+                    <button type="button" class="btn danger" on:click=move |_| leave()>"Leave"</button>
+                    <button type="button" class="btn primary" autofocus on:click=move |_| asking.set(false)>"Keep playing"</button>
                 </div>
-                <SideRow player=HUMAN />
+            })}
+            <main class="table">
+                // The board scrolls on its own when it is taller than the
+                // space left, so the hand and the action bar stay on screen.
+                <div class="board">
+                    <SideRow player=AI />
+                    <div class="midline" aria-hidden="true">
+                        <span>{move || match turn.get() {
+                            _ if !ctl.revealed.get() => "Setup".to_string(),
+                            Some((t, p)) => format!("Turn {t}, {}", if p == HUMAN { "your move" } else { "opponent's move" }),
+                            None => String::new(),
+                        }}</span>
+                    </div>
+                    <SideRow player=HUMAN />
+                </div>
                 <Hand />
                 <ActionBar />
                 {move || ctl.error.get().map(|e| view! { <p class="error" role="alert">{e}</p> })}

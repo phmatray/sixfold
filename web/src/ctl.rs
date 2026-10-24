@@ -273,6 +273,8 @@ impl Ctl {
             if !heard.is_empty() {
                 self.announce.set(summary(&heard));
             }
+            #[cfg(debug_assertions)]
+            self.autoplay(generation);
             return;
         }
         let setup = self.real.with_value(|g| {
@@ -299,6 +301,40 @@ impl Ctl {
                 }
             },
             Duration::from_millis(think),
+        );
+    }
+
+    /// Debug builds only (`trunk serve`): with `?autoplay` in the URL the Hard
+    /// AI plays the human's seat too, so a whole duel, a Warden win and the
+    /// credits after it can be checked in the browser.
+    #[cfg(debug_assertions)]
+    fn autoplay(self, generation: u32) {
+        let on = window()
+            .location()
+            .search()
+            .is_ok_and(|s| s.contains("autoplay"));
+        let mine = self.real.with_value(|g| {
+            g.as_ref()
+                .is_some_and(|g| g.winner().is_none() && g.view(HUMAN).waiting_on == Some(HUMAN))
+        });
+        if !on || !mine {
+            return;
+        }
+        set_timeout(
+            move || {
+                if self.generation.get_value() != generation {
+                    return;
+                }
+                let seed = self.seed.get_untracked() ^ u64::from(self.next_key());
+                let action = self.real.with_value(|g| {
+                    g.as_ref()
+                        .map(|g| Ai::new(seed, Difficulty::Hard).choose_action(g, HUMAN))
+                });
+                if let Some(action) = action {
+                    self.run(action);
+                }
+            },
+            Duration::from_millis(50),
         );
     }
 
@@ -600,10 +636,12 @@ fn summary(lines: &[String]) -> String {
     while i < lines.len() {
         let n = lines[i..].iter().take_while(|l| **l == lines[i]).count();
         let line = lines[i].trim_end_matches('.');
+        // "You win!" keeps its own mark rather than gaining a full stop.
+        let stop = if line.ends_with(['!', '?']) { "" } else { "." };
         out.push(if n > 1 {
-            format!("{line} ({n} times).")
+            format!("{line} ({n} times){stop}")
         } else {
-            format!("{line}.")
+            format!("{line}{stop}")
         });
         i += n;
     }

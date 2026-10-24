@@ -325,7 +325,7 @@ pub fn SaveSettings() -> impl IntoView {
                 <button type="button" class="btn" on:click=export>"Export save"</button>
                 <label class="btn file-pick">
                     "Import a file…"
-                    <input type="file" class="sr-only" accept=".txt,text/plain" on:change=on_file />
+                    <input type="file" name="save-file" class="sr-only" accept=".txt,text/plain" on:change=on_file />
                 </label>
             </div>
             <label class="paste-label" for="save-paste">"Or paste a save"</label>
