@@ -1,0 +1,134 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWWWWWVWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    { "asset": "shelf", "x": 1, "z": 1, "rot": 0 },
+    { "asset": "shelf", "x": 3, "z": 1, "rot": 0 },
+    { "asset": "counter", "x": 6, "z": 2, "rot": 0 },
+    { "asset": "plant", "x": 9, "z": 1, "rot": 0 },
+    { "asset": "display_case", "x": 9, "z": 3, "rot": 0 },
+    { "asset": "lamp", "x": 9, "z": 6, "rot": 0 },
+    { "asset": "duel_table", "x": 2, "z": 4, "rot": 0 },
+    { "asset": "chair", "x": 1, "z": 4, "rot": 90 },
+    { "asset": "chair", "x": 4, "z": 4, "rot": 270 },
+    { "asset": "rug", "x": 4, "z": 5, "rot": 0 },
+    { "asset": "plant", "x": 1, "z": 7, "rot": 0 },
+    { "asset": "exit_mat", "x": 5, "z": 7, "rot": 0 }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 2,
+      "z": 4,
+      "kind": "duel",
+      "text": "A duel table, cards already laid out. Play a six-prize duel against the AI?"
+    },
+    {
+      "x": 3,
+      "z": 4,
+      "kind": "duel",
+      "text": "A duel table, cards already laid out. Play a six-prize duel against the AI?"
+    },
+    {
+      "x": 9,
+      "z": 3,
+      "kind": "sign",
+      "text": "Behind the glass: a deck box carved from pale wood. A card says: not for sale, not even for you."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "dir": "s",
+      "to": "overworld",
+      "label": "Go outside",
+      "spawn": {
+        "x": 13,
+        "z": 11,
+        "facing": "s"
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "juniper",
+      "name": "Juniper",
+      "model": "npc_shopkeeper",
+      "tint": "#ffb27a",
+      "scale": 1.0,
+      "x": 7,
+      "z": 1,
+      "facing": "s",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "!item:running_shoes",
+          "lines": [
+            "Welcome in! Mind the rug, it's older than I am.",
+            "You walked all the way here? On those soles?",
+            "Here. Running shoes, broken in and ready. On the house."
+          ],
+          "do": [
+            "give:running_shoes"
+          ]
+        },
+        {
+          "lines": [
+            "How are the shoes? Hold Shift, or tap RUN, and off you go.",
+            "The table by the window is free if you fancy a duel."
+          ]
+        }
+      ]
+    }
+  ],
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 8,
+    "distancePortrait": 10,
+    "lookAtOffset": [0, 0.75, 0],
+    "clamp": true
+  },
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.6,
+      "fromHero": [-6, 10, 4]
+    },
+    "hemisphere": {
+      "sky": "#ffe2bd",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb257",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e",
+    "note": "Indoors the sun is the window light, placed from the room centre (not the hero); lamp lights sit on each lamp prop."
+  }
+}

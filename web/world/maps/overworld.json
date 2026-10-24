@@ -15,12 +15,12 @@
     "..................ffffff....",
     ".............p....f....f....",
     ".............p....f....f....",
-    "............pp....f....f....",
     ".............p....f....f....",
-    ".............pp...ff.fff....",
+    ".............p....f....f....",
+    ".............p....ff.fff....",
     ".............p..............",
     "....ffffffff.p.ffffffff.....",
-    ".............pp.............",
+    ".............p..............",
     ".............p..............",
     ".............p..............",
     ".............p..............",
@@ -115,16 +115,121 @@
   },
   "interactions": [
     {
-      "x": 13,
-      "z": 10,
-      "kind": "duel",
-      "text": "Someone inside is shuffling a deck. Play a six-prize duel with the first two prebuilt decks?"
-    },
-    {
       "x": 16,
       "z": 11,
       "kind": "sign",
-      "text": "Sixfold Meadow. Duels inside. Wipe your feet."
+      "text": "Sixfold Meadow. The shop by the path has duels, snacks and shoes."
+    }
+  ],
+  "warps": [
+    {
+      "x": 13,
+      "z": 10,
+      "to": "shop",
+      "label": "Go inside",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "wren",
+      "name": "Wren",
+      "model": "npc_wanderer",
+      "tint": "#7fb6ff",
+      "scale": 0.94,
+      "x": 6,
+      "z": 13,
+      "facing": "e",
+      "idle": "Idle",
+      "route": [
+        "e",
+        "e",
+        "s",
+        "s",
+        "w",
+        "w",
+        "n",
+        "n"
+      ],
+      "dialogue": [
+        {
+          "if": "!flag:talked_wren",
+          "lines": [
+            "Lovely day for a walk. I do this loop a hundred times before lunch.",
+            "Some call it a rut. I call it a route."
+          ]
+        },
+        {
+          "if": "item:running_shoes",
+          "lines": [
+            "Are those running shoes? Don't lap me, it's rude."
+          ]
+        },
+        {
+          "lines": [
+            "Round and round. Still lovely."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pip",
+      "name": "Pip",
+      "model": "npc_kid",
+      "tint": "#ffd36e",
+      "scale": 0.82,
+      "x": 9,
+      "z": 19,
+      "facing": "s",
+      "idle": "Idle",
+      "route": [
+        "e",
+        "e",
+        "w",
+        "w"
+      ],
+      "dialogue": [
+        {
+          "if": "!flag:talked_pip",
+          "lines": [
+            "I'm practising my shuffle. Watch! ...Okay, don't watch."
+          ]
+        },
+        {
+          "lines": [
+            "One day I'll beat whoever sits at that duel table. One day."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "moss",
+      "name": "Moss",
+      "model": "npc_gardener",
+      "tint": "#9be08a",
+      "scale": 1.04,
+      "x": 21,
+      "z": 12,
+      "facing": "w",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "item:running_shoes",
+          "lines": [
+            "New shoes? Lovely. Now keep them out of my beds."
+          ]
+        },
+        {
+          "lines": [
+            "These flowers took three summers to settle in.",
+            "Juniper's shop up the path sells more than seeds. Ask about shoes."
+          ]
+        }
+      ]
     }
   ],
   "camera": {
@@ -134,7 +239,13 @@
     "distance": 12,
     "distancePortrait": 15,
     "lookAtOffset": [0, 0.75, 0],
+    "clamp": false,
     "note": "Camera sits at hero + lookAtOffset + distance * (0, sin(pitch), cos(pitch)), looking at hero + lookAtOffset; fov is vertical, in degrees. Portrait values apply when the viewport is taller than wide."
+  },
+  "ground": {
+    "base": "grass",
+    "path": "dirt",
+    "margin": 9
   },
   "light": {
     "sun": {
@@ -149,8 +260,8 @@
     },
     "background": "#a8d98a",
     "fog": {
-      "near": 24,
-      "far": 48
+      "near": 18,
+      "far": 36
     },
     "note": "The sun shines from hero + fromHero toward the hero (direction = -normalize(fromHero))."
   }

@@ -1,7 +1,9 @@
-// Micro-animation for the meadow: wind sway and cloud shadows (shaders on one
-// shared clock), plus a few cheap particles: dust motes, butterflies, chimney
-// smoke and footstep puffs. With reduced motion, sway and particles are off.
+// Micro-animation: wind sway (a vertex shader on one shared clock, also used by
+// the ground's drifting cloud shadows) plus a few cheap particles: dust motes,
+// butterflies, chimney smoke and footstep puffs. With reduced motion, sway and
+// particles are off.
 import * as THREE from "three";
+import { toon } from "./props.js";
 
 export const U = { uTime: { value: 0 }, uSway: { value: 1 }, uDrift: { value: 0 } };
 
@@ -40,23 +42,6 @@ export function windify(mesh, height) {
   mat.customProgramCacheKey = () => (byColor ? "wind-c" : "wind-h");
 }
 
-// Soft cloud shadows drifting over the ground: a tiling noise multiplied into its colour.
-export function cloudify(mat) {
-  const tex = softTexture(256, 14, 40, 110, true);
-  mat.onBeforeCompile = (sh) => {
-    Object.assign(sh.uniforms, U, { uCloud: { value: tex } });
-    sh.vertexShader = sh.vertexShader
-      .replace("#include <common>", "#include <common>\nvarying vec2 vCloud;")
-      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvCloud = (modelMatrix * vec4(position, 1.0)).xz;");
-    sh.fragmentShader = sh.fragmentShader
-      .replace("#include <common>", "#include <common>\nuniform float uDrift;\nuniform sampler2D uCloud;\nvarying vec2 vCloud;")
-      .replace(
-        "#include <map_fragment>",
-        "#include <map_fragment>\ndiffuseColor.rgb *= 1.0 - 0.2 * texture2D(uCloud, vCloud * 0.03 + uDrift * vec2(0.012, 0.007)).r;",
-      );
-  };
-}
-
 // White blobs on black (or one soft dot when n = 1), tiling when `wrap`.
 function softTexture(size, n, rMin, rMax, wrap) {
   const c = document.createElement("canvas");
@@ -86,7 +71,8 @@ function softTexture(size, n, rMin, rMax, wrap) {
   return t;
 }
 
-// Particles. `spots.flowers` = flower bed centres, `spots.smoke` = chimney top or null.
+// Particles, added to `scene` (the map's root group). `spots.flowers` = flower
+// bed centres, `spots.smoke` = chimney top or null.
 export function ambience(scene, spots, reduced) {
   if (reduced) return { update() {}, puff() {} };
   const dot = softTexture(64, 1, 30, 30, false);
@@ -106,14 +92,16 @@ export function ambience(scene, spots, reduced) {
   motes.frustumCulled = false;
   scene.add(motes);
 
-  // Butterflies: two hinged wings, looping over a flower bed each.
+  // Butterflies: a dark body and two small toon wings, looping over a flower bed each.
+  const wingGeo = new THREE.CircleGeometry(0.045, 8).scale(1, 1.3, 1).translate(0.04, 0, 0).rotateX(-Math.PI / 2);
+  const bodyGeo = new THREE.CapsuleGeometry(0.008, 0.05, 2, 6).rotateX(Math.PI / 2);
+  const bodyMat = toon("#2b2230");
   const flies = spots.flowers.slice(0, 4).map((c, i) => {
-    const wingGeo = new THREE.PlaneGeometry(0.13, 0.1).translate(0.065, 0, 0).rotateX(-Math.PI / 2);
-    const mat = new THREE.MeshBasicMaterial({ color: ["#fff3a6", "#ffffff", "#ffc2e0", "#bfe3ff"][i % 4], side: THREE.DoubleSide });
+    const mat = toon(["#ff9d3c", "#ffd23f", "#6fb7ff", "#ff7aa8"][i % 4], { side: THREE.DoubleSide });
     const l = new THREE.Mesh(wingGeo, mat), r = new THREE.Mesh(wingGeo, mat);
     r.scale.x = -1;
     const g = new THREE.Group();
-    g.add(l, r);
+    g.add(l, r, new THREE.Mesh(bodyGeo, bodyMat));
     scene.add(g);
     return { g, l, r, c, k: i * 1.7, last: new THREE.Vector3() };
   });
@@ -152,7 +140,7 @@ export function ambience(scene, spots, reduced) {
         const v = f.g.position.clone().sub(f.last);
         if (v.lengthSq() > 1e-8) f.g.rotation.y = Math.atan2(v.x, v.z);
         f.last.copy(f.g.position);
-        const flap = Math.sin(t * 22 + f.k) * 0.9;
+        const flap = Math.sin(t * 11 + f.k) * 0.8;
         f.l.rotation.z = flap;
         f.r.rotation.z = -flap;
       }
