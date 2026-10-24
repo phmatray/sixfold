@@ -8,23 +8,95 @@
     "WwwwwwwwwwW",
     "VwwwwwwwwwW",
     "WwwwwwwwwwV",
-    "WwwwwwwwwwW",
+    "#wwwwwwwwwW",
     "WwwwwwwwwwW",
     "WWWWWWWWWWW"
   ],
   "props": [
-    { "asset": "shelf", "x": 1, "z": 1, "rot": 0 },
-    { "asset": "shelf", "x": 3, "z": 1, "rot": 0 },
-    { "asset": "counter", "x": 6, "z": 2, "rot": 0 },
-    { "asset": "plant", "x": 9, "z": 1, "rot": 0 },
-    { "asset": "display_case", "x": 9, "z": 3, "rot": 0 },
-    { "asset": "lamp", "x": 9, "z": 6, "rot": 0 },
-    { "asset": "duel_table", "x": 2, "z": 4, "rot": 0 },
-    { "asset": "chair", "x": 1, "z": 4, "rot": 90 },
-    { "asset": "chair", "x": 4, "z": 4, "rot": 270 },
-    { "asset": "rug", "x": 4, "z": 5, "rot": 0 },
-    { "asset": "plant", "x": 1, "z": 7, "rot": 0 },
-    { "asset": "exit_mat", "x": 5, "z": 7, "rot": 0 }
+    {
+      "asset": "shelf",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "shelf",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 6,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "display_case",
+      "x": 9,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "duel_table",
+      "x": 2,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 1,
+      "z": 4,
+      "rot": 90
+    },
+    {
+      "asset": "chair",
+      "x": 4,
+      "z": 4,
+      "rot": 270
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "duel_table",
+      "x": 7,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 5,
+      "rot": 0
+    }
   ],
   "spawn": {
     "x": 5,
@@ -63,6 +135,19 @@
         "z": 11,
         "facing": "s"
       }
+    },
+    {
+      "x": 0,
+      "z": 6,
+      "to": "warden",
+      "label": "Go through the sealed door",
+      "if": "seals:6",
+      "locked": "A heavy door carved with six empty hexagons. Six seals would fill it.",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
     }
   ],
   "npcs": [
@@ -89,9 +174,129 @@
           ]
         },
         {
+          "if": "beat:warden",
+          "lines": [
+            "The Hex Warden, beaten in my shop's back room! I'm framing the scorch marks."
+          ]
+        },
+        {
+          "if": "flag:juniper_gift",
+          "lines": [
+            "How's the seal hunt? Marlo and Lumen take the tables in here, the rest are out in the meadow."
+          ]
+        },
+        {
+          "if": "seals:1",
+          "lines": [
+            "Is that your first seal? Let me see. Oh, that's a good one.",
+            "Here, a Wild Pack for the collection. On the house, again."
+          ],
+          "do": [
+            "pack:wild",
+            "flag:juniper_gift"
+          ]
+        },
+        {
           "lines": [
             "How are the shoes? Hold Shift, or tap RUN, and off you go.",
-            "The table by the window is free if you fancy a duel."
+            "The table by the window is free if you fancy a duel.",
+            "Rivals duel for seals around here. Marlo at the window table is a gentle start."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "marlo",
+      "name": "Marlo",
+      "model": "rival_water",
+      "tint": "#73b8f2",
+      "scale": 1.0,
+      "x": 2,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "won:marlo",
+          "lines": [
+            "Washed out, fair and square.",
+            "Take my seal, it's still a little damp."
+          ]
+        },
+        {
+          "if": "lost:marlo",
+          "lines": [
+            "Low tide for you today. The water always comes back in."
+          ]
+        },
+        {
+          "if": "beat:marlo",
+          "lines": [
+            "The tide's turned. Another round?"
+          ],
+          "do": [
+            "duel:marlo"
+          ]
+        },
+        {
+          "lines": [
+            "Shh. Listen... that's the kettle, not the sea. Close, though.",
+            "I'm Marlo. I read the tide tables and the table here.",
+            "Three prizes. Sit down, the cards are already dealt."
+          ],
+          "do": [
+            "duel:marlo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lumen",
+      "name": "Lumen",
+      "model": "rival_psychic",
+      "tint": "#ba8ce9",
+      "scale": 1.0,
+      "x": 8,
+      "z": 4,
+      "facing": "s",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "won:lumen",
+          "lines": [
+            "You stayed awake the whole time. Impressive.",
+            "My seal. With six, the door by the lamp is yours."
+          ]
+        },
+        {
+          "if": "lost:lumen",
+          "lines": [
+            "Sweet dreams. Wake up and try again."
+          ]
+        },
+        {
+          "if": "!open:lumen",
+          "lines": [
+            "You look tired. Five seals first, then we'll talk.",
+            "Rest up: the others are still waiting."
+          ]
+        },
+        {
+          "if": "beat:lumen",
+          "lines": [
+            "The moon's up again. Shall we?"
+          ],
+          "do": [
+            "duel:lumen"
+          ]
+        },
+        {
+          "lines": [
+            "You came in out of the light. Good. My garden only grows at night.",
+            "I'm Lumen. Six prizes, and I don't let anyone sleep through them."
+          ],
+          "do": [
+            "duel:lumen"
           ]
         }
       ]
@@ -103,7 +308,11 @@
     "pitch": 50,
     "distance": 8,
     "distancePortrait": 10,
-    "lookAtOffset": [0, 0.75, 0],
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
     "clamp": true
   },
   "ground": {
@@ -116,7 +325,11 @@
     "sun": {
       "color": "#fff1d6",
       "intensity": 1.6,
-      "fromHero": [-6, 10, 4]
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
     },
     "hemisphere": {
       "sky": "#ffe2bd",

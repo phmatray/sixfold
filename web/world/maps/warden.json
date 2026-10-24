@@ -1,0 +1,205 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWWVWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "duel_table",
+      "x": 4,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 3,
+      "z": 3,
+      "rot": 90
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "display_case",
+      "x": 2,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "display_case",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 2,
+      "z": 1,
+      "kind": "sign",
+      "text": "Six hexagons under glass, one for every seal ever won here. One frame is still empty."
+    },
+    {
+      "x": 8,
+      "z": 1,
+      "kind": "sign",
+      "text": "A worn deck box. The label reads: the Warden's first deck. Lost more than it won."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "dir": "s",
+      "to": "shop",
+      "label": "Back to the hall",
+      "spawn": {
+        "x": 1,
+        "z": 6,
+        "facing": "e"
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "warden",
+      "name": "Sable",
+      "model": "rival_champion",
+      "tint": "#c9a2ff",
+      "scale": 1.0,
+      "x": 5,
+      "z": 2,
+      "facing": "s",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "won:warden",
+          "lines": [
+            "...So the seals chose well.",
+            "The Warden's chair is yours whenever you want it. I'll keep it warm, though."
+          ]
+        },
+        {
+          "if": "lost:warden",
+          "lines": [
+            "Six seals are a key, not a crown.",
+            "Sit with your cards a while. The door stays open for you now."
+          ]
+        },
+        {
+          "if": "!open:warden",
+          "lines": [
+            "How did you get in here? Go on, back out you go."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "Champion. You came back. Good, I've rebuilt my deck since."
+          ],
+          "do": [
+            "duel:warden"
+          ]
+        },
+        {
+          "lines": [
+            "Six seals. It has been a long time since the door opened.",
+            "I am Sable, the Hex Warden. Every rival out there learned from me, or tried to.",
+            "Six prizes. Show me what they taught you."
+          ],
+          "do": [
+            "duel:warden"
+          ]
+        }
+      ]
+    }
+  ],
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 8,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#e6dcff",
+      "intensity": 1.3,
+      "fromHero": [
+        6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#d9c9ff",
+      "ground": "#3a2a4a",
+      "intensity": 1.4
+    },
+    "lamp": {
+      "color": "#c9a2ff",
+      "intensity": 6,
+      "distance": 7
+    },
+    "background": "#130e1c"
+  }
+}
