@@ -60,10 +60,13 @@ impl Game {
         ev.push(Event::BetweenTurns);
         let t = self.turn_player;
         let n = 1 - t;
-        // 1. T's poison, sleep coin, then the paralysis ends (R-STATUS-10).
+        // 1. T's poison, sleep coin, then the paralysis ends (R-STATUS-10),
+        // unless the poison knocked it out (01:6CA6).
         self.poison_and_sleep(t, ev);
         let pl = &mut self.players[t];
-        if pl.active.is_some() && pl.condition.special == Some(Special::Paralyzed) {
+        if pl.active.as_ref().is_some_and(|a| a.hp > 0)
+            && pl.condition.special == Some(Special::Paralyzed)
+        {
             pl.condition.special = None;
             ev.push(Event::ConditionRemoved {
                 player: t,
@@ -429,6 +432,30 @@ mod tests {
                 ..
             }
         )));
+    }
+
+    /// R-STATUS-07: a poison knock-out skips the sleep coin and the paralysis
+    /// removal (01:6CA6 jumps to 6CC7).
+    #[test]
+    fn poison_ko_skips_paralysis_removal() {
+        let mut g = main_phase(0);
+        g.players[0].bench.push(creature(EMBERKIT, &[]));
+        g.players[0].condition.apply(Status::Paralyzed);
+        g.players[0].condition.apply(Status::Poisoned);
+        g.players[0].active.as_mut().unwrap().hp = 10;
+        let ev = ok(&mut g, Action::Done);
+        assert!(ev.iter().any(|e| matches!(
+            e,
+            Event::KnockedOut {
+                player: 0,
+                slot: 0,
+                ..
+            }
+        )));
+        assert!(!ev.contains(&Event::ConditionRemoved {
+            player: 0,
+            status: Status::Paralyzed
+        }));
     }
 
     /// R-STATUS-07: N's Active is processed after T's, both each between-turns step.

@@ -505,18 +505,27 @@ unit test that should cover it.
 
 ### R-STATUS-07: Between-turns order
 - **Rule.** After the turn ends (with T = the player whose turn just ended), these steps run in order:
-  1. T's Active: poison damage. If it survives, a sleep coin. Then Paralysis is removed.
+  1. T's Active: poison damage. If it survives, a sleep coin, then Paralysis is removed. A poison
+     knock-out skips both.
   2. T's +10 trainers are discarded.
   3. N's Active: poison damage, then a sleep coin if it survives. No Paralysis removal.
   4. N's −20 trainers are discarded.
   5. Knock-outs are handled for both sides together.
 
   Confusion is never processed here. If nothing needs processing, the condition steps are skipped
-  silently and the knock-out check does not run.
-- **Parameters.** `01:6C5C`. The skip test is `6D15`, plus nibble 3 for T only.
+  silently and the knock-out check does not run. The trainer discards (steps 2 and 4) run on both
+  paths; only the condition steps and the knock-out check are skipped.
+- **Parameters.** `01:6C5C`. The skip test `6D15` returns carry for poison or nibble 2 on either
+  side, and the caller tests nibble 3 for T only (`6C61`). So a Confused-only board, or one where only
+  N is Paralyzed, takes the fast path `01:6C70-6C79`, which still calls both trainer discards.
+  `01:6CA6`: a poison knock-out (carry) jumps to `6CC7`, past the sleep coin and the paralysis removal.
 - **Status.** CONFIRMED
-- **Evidence.** `01:410B`, `01:6C9D-6CF0`, `01:6D15`.
-- **Test.** `paralysis_inflicted_lasts_through_owner_next_turn`, `between_turns_poison_before_sleep`
+- **Evidence.** `01:410B`, `01:6C5C-6CF0`, `01:6D15`.
+- **Test.** `paralysis_inflicted_lasts_through_owner_next_turn`, `between_turns_poison_before_sleep`,
+  `poison_ko_skips_paralysis_removal`
+
+  The clean engine always runs the condition steps; with nothing to process they do nothing, so the
+  outcome is the same.
 
 ### R-STATUS-08: Poison damage
 - **Rule.** A Poisoned Active takes 10 damage at every between-turns step (after either player's
@@ -536,9 +545,16 @@ unit test that should cover it.
 
 ### R-STATUS-10: How long Paralysis lasts
 - **Rule.** Paralysis is removed without a coin at the between-turns step that ends its **owner's**
-  turn. So it lasts through exactly one of the owner's turns. Poison stays.
-- **Status.** CONFIRMED
-- **Evidence.** `01:6CAB-6CC4`, in T's section only.
+  turn. So when the opponent inflicts it, it lasts through exactly one of the owner's turns. Poison
+  stays. Paralysis the owner inflicts on itself during its own turn is removed at that same
+  between-turns step, so it lasts no turn at all (the source has no self-paralysis: every self-inflict
+  site in bank `0B` is confusion).
+- **Status.** CONFIRMED. Runtime: from a state with `C3F0 = 3`, a write watchpoint on `C3F0` fired
+  first at `01:6CB5` (value 0), with `ff98 = cc05 = $C3`, at the between-turns step ending `$C3`'s
+  turn, before the turn counter went up.
+- **Evidence.** `01:6CAB-6CC4`, in T's section only: the test at `6CAB-6CB0`, the clearing write
+  `01:6CB5` (`and $C0` keeps poison). `0B:4796`, `4E41`, `60A5`, `6BB0` (the self-inflicts, all
+  confusion), `0B:5308` (paralyses the opponent).
 - **Test.** `paralysis_cured_after_owner_turn`
 
 ### R-STATUS-11: Confusion persists
