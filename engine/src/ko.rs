@@ -442,4 +442,78 @@ mod tests {
             "then the turn ends"
         );
     }
+
+    use crate::condition::{Placed, Shield, Status};
+
+    /// R-KO-08: a between-turns knock-out uses the same handler, with the
+    /// player whose turn just ended as T.
+    #[test]
+    fn between_turns_double_poison_ko_turn_ender_takes_prize_first() {
+        let mut g = main_phase(0);
+        for p in 0..2 {
+            g.players[p].bench = vec![creature(EMBERKIT, &[])];
+            g.players[p].condition.apply(Status::DoublePoisoned);
+            g.players[p].active.as_mut().unwrap().hp = 20;
+        }
+        ok(&mut g, Action::Done);
+        let mut order = Vec::new();
+        while let Some((p, kind)) = g.prompt_kind() {
+            if kind == PromptKind::MainPhase {
+                break;
+            }
+            order.push((p, kind.clone()));
+            let a = g.legal_actions()[0];
+            ok(&mut g, a);
+        }
+        assert_eq!(
+            order,
+            vec![
+                (0, PromptKind::ChoosePrize { count: 1 }),
+                (1, PromptKind::ChoosePrize { count: 1 }),
+                (1, PromptKind::ChooseReplacement),
+                (0, PromptKind::ChooseReplacement),
+            ]
+        );
+        assert_eq!(g.prompt_kind(), Some((1, PromptKind::MainPhase)));
+    }
+
+    /// R-KO-09
+    #[test]
+    fn counter_ko_effect_knocks_out_attacker() {
+        let mut g = main_phase(0);
+        for p in 0..2 {
+            g.players[p].bench = vec![creature(EMBERKIT, &[])];
+        }
+        g.players[1].effects.shield = Some(Shield::CounterKo);
+        g.players[1].active.as_mut().unwrap().hp = 10;
+        let ev = attack_with(&mut g, 10, &[]);
+        assert_eq!(kos(&ev), 2);
+        // Not checked between turns.
+        let mut g = main_phase(0);
+        g.players[1].bench = vec![creature(EMBERKIT, &[])];
+        g.players[1].effects.shield = Some(Shield::CounterKo);
+        g.players[1].condition.apply(Status::Poisoned);
+        g.players[1].active.as_mut().unwrap().hp = 10;
+        let ev = ok(&mut g, Action::Done);
+        assert_eq!(kos(&ev), 1);
+        assert!(g.players[0].active.is_some());
+    }
+
+    /// R-KO-10
+    #[test]
+    fn ko_clears_effects_placed_by_defender() {
+        for (placed, cleared) in [
+            (Placed::CantAttack, true),
+            (Placed::Weaken(20), true),
+            (Placed::DisabledAttack(0), false),
+            (Placed::CantRetreat, false),
+        ] {
+            let mut g = main_phase(0);
+            g.players[1].bench = vec![creature(EMBERKIT, &[])];
+            g.players[0].effects.placed = Some(placed);
+            ko(&mut g, 1, 0);
+            resolve(&mut g);
+            assert_eq!(g.players[0].effects.placed.is_none(), cleared, "{placed:?}");
+        }
+    }
 }
