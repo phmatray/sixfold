@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [0.8.0](https://github.com/phmatray/sixfold/compare/v0.7.0...v0.8.0) (2026-10-24)
+
+
+### Added
+
+* **polish:** save slots, offline play, a Hard AI and an accessibility pass ([#14](https://github.com/phmatray/sixfold/issues/14)) ([f8285c2](https://github.com/phmatray/sixfold/commit/f8285c2c47f0961d5dfe1a8536ccc375549b2ce5))
+
 ## [0.7.0](https://github.com/phmatray/sixfold/compare/v0.6.0...v0.7.0) (2026-10-24)
 
 
