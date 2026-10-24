@@ -65,8 +65,9 @@ impl Game {
         }
     }
 
-    /// R-ZONE-01: into the empty Active spot (clearing its conditions), else the Bench.
-    pub(crate) fn place(&mut self, p: usize, h: usize, ev: &mut Vec<Event>) {
+    /// R-ZONE-01: into the empty Active spot (clearing its conditions), else the
+    /// Bench. Returns the slot.
+    pub(crate) fn place(&mut self, p: usize, h: usize, ev: &mut Vec<Event>) -> usize {
         let pl = &mut self.players[p];
         let card = pl.hand.remove(h);
         let slot = if pl.active.is_none() {
@@ -82,7 +83,7 @@ impl Game {
             slot,
             card,
         });
-        // RULES: R-POWER-06 — stage 2 fires on-play Powers here (bench placement).
+        slot
     }
 
     /// R-SETUP-05: prizes from the top of the deck, after placement, player 0

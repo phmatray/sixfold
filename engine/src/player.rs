@@ -1,7 +1,8 @@
 //! One player's zones (R-ZONE-*) and the creatures they have in play.
 
-use crate::card::{card, energy_units, CardId, CardKind, Creature, Units};
+use crate::card::{card, energy_units, CardId, CardKind, Color, Creature, Units};
 use crate::condition::{ActiveEffects, Condition};
+use crate::effect::Effect;
 use crate::rng::Rng;
 
 /// A creature in play: its evolution stack plus everything attached to it.
@@ -13,12 +14,16 @@ pub struct InPlay {
     /// Remaining HP (R-DMG-06): knocked out exactly at 0.
     pub hp: u16,
     pub energy: Vec<CardId>,
-    /// Attached trainer cards (the +10 / −20 trainers, stage 2).
+    /// Attached trainer cards: the +10 / −20 trainers (R-TRAINER-05).
     pub trainers: Vec<CardId>,
     /// In play since the start of its owner's turn, so it may evolve (R-EVO-02/03).
     pub settled: bool,
     /// Once-per-turn Power already used this turn (R-POWER-04).
     pub power_used: bool,
+    /// A once-while-in-play attack was used (R-EFFECT-05).
+    pub once_used: bool,
+    /// Colour set by its own Power (`+D4`), used only while that Power works (R-DMG-03).
+    pub color_override: Option<Color>,
 }
 
 impl InPlay {
@@ -32,7 +37,32 @@ impl InPlay {
             trainers: vec![],
             settled: false,
             power_used: false,
+            once_used: false,
+            color_override: None,
         }
+    }
+
+    /// R-EVO-08 / R-EVO-12: clear the slot flags and the colour override.
+    pub(crate) fn clear_flags(&mut self) {
+        self.settled = false;
+        self.power_used = false;
+        self.once_used = false;
+        self.color_override = None;
+    }
+
+    /// Attached trainers whose effect is `kind` (`AttachPlus10` / `AttachMinus20`).
+    pub fn attached(&self, kind: Effect) -> usize {
+        self.trainers
+            .iter()
+            .filter(|&&id| match &card(id).kind {
+                CardKind::Trainer(t) => t.effects.contains(&kind),
+                _ => false,
+            })
+            .count()
+    }
+
+    pub fn damage(&self) -> u16 {
+        self.creature().hp.saturating_sub(self.hp)
     }
 
     pub fn top(&self) -> CardId {
@@ -91,8 +121,6 @@ impl Player {
         rng.shuffle(&mut self.deck);
     }
 
-    // Deck search / return primitives for stage-2 effects (R-ZONE-04).
-    #[allow(dead_code)]
     /// R-ZONE-04: remove one specific card; the rest keep their order.
     pub fn take_from_deck(&mut self, id: CardId) -> Option<CardId> {
         let i = self.deck.iter().position(|&c| c == id)?;

@@ -1,17 +1,11 @@
-//! Main-phase actions (R-TURN-04): bench, evolve, attach, trainer, attack.
+//! Main-phase actions (R-TURN-04): bench, evolve, attach, trainer, Power, attack.
 
 use crate::action::{Action, Event, RuleError};
-use crate::card::{can_pay, card, Attack, CardKind, EnergyCard, PowerKind, Stage};
+use crate::card::{can_pay, card, CardKind, EnergyCard, PowerKind, Stage};
 use crate::condition::Placed;
 use crate::effect::Effect;
 use crate::game::{Game, Step, MAX_BENCH};
-
-/// The outcome of the damage calculation, for the event and the UI (R-DMG-11).
-pub(crate) struct Hit {
-    pub amount: u16,
-    pub weakness: bool,
-    pub resistance: bool,
-}
+use crate::resolve::{matches, Source};
 
 impl Game {
     pub(crate) fn check_main(&self, p: usize, action: Action) -> Result<(), RuleError> {
@@ -41,6 +35,7 @@ impl Game {
                 }
                 Ok(())
             }
+            // R-TRAINER-02 steps 1–3: lock, then each effect's phase-1 check.
             Action::PlayTrainer(h) => {
                 let CardKind::Trainer(t) = &self.hand_card(p, h)?.kind else {
                     return Err(RuleError::NotATrainer);
@@ -48,8 +43,11 @@ impl Game {
                 if pl.trainer_locked {
                     return Err(RuleError::TrainerLocked);
                 }
-                t.effects.iter().try_for_each(|e| self.effect_check(p, e))
+                t.effects
+                    .iter()
+                    .try_for_each(|e| self.effect_check(p, 0, e, Source::Trainer))
             }
+            Action::UsePower(slot) => self.check_power(p, slot),
             Action::Retreat => self.check_retreat(p),
             Action::Attack(i) => self.check_attack(p, i),
             Action::Done => Ok(()),
@@ -59,29 +57,43 @@ impl Game {
 
     pub(crate) fn main_action(&mut self, p: usize, action: Action, ev: &mut Vec<Event>) {
         match action {
-            Action::PlayBasic(h) => self.place(p, h, ev),
-            Action::Evolve { hand, slot } => self.evolve(p, hand, slot, ev),
+            Action::PlayBasic(h) => {
+                let slot = self.place(p, h, ev);
+                if self.on_play(p, slot) {
+                    return;
+                }
+            }
+            Action::Evolve { hand, slot } => {
+                self.evolve(p, hand, slot, ev);
+                if self.on_play(p, slot) {
+                    return;
+                }
+            }
             Action::AttachEnergy { hand, slot } => self.attach(p, hand, slot, ev),
-            Action::PlayTrainer(h) => self.play_trainer(p, h, ev),
+            Action::PlayTrainer(h) => return self.play_trainer(p, h),
+            Action::UsePower(slot) => return self.use_power(p, slot),
             Action::Retreat => return self.start_retreat(p),
             Action::Attack(i) => return self.attack(p, i, ev),
-            // RULES: R-TURN-06 — stage 2 also clears the opponent's last-attack memory here.
-            Action::Done => return self.steps.push_front(Step::EndTurn),
+            Action::Done => {
+                // R-TURN-06: Done clears the opponent's last-attack memory.
+                self.players[1 - p].effects.last_inflicted = Default::default();
+                return self.steps.push_front(Step::EndTurn);
+            }
             _ => unreachable!("validated"),
         }
         self.steps.push_front(Step::Main);
     }
 
-    /// R-ENERGY-02: a basic energy of the Power's colour onto a creature of that
-    /// colour, while a holder on the attaching side is in play.
+    /// R-ENERGY-02: a basic energy of the Power's colour onto a creature whose
+    /// effective colour is that colour, while a holder on the attaching side is in play.
     fn free_attach(&self, p: usize, hand: usize, slot: usize) -> bool {
         let pl = &self.players[p];
         let CardKind::Energy(EnergyCard::Basic(color)) = card(pl.hand[hand]).kind else {
             return false;
         };
-        // RULES: R-ENERGY-02 effective colour — stage 2 adds Power-made colour changes.
-        let target = pl.slot(slot).map(|c| c.creature().color);
-        target == Some(color) && self.count_powers(p, false, PowerKind::FreeAttach(color)) > 0
+        pl.slot(slot).is_some()
+            && self.color_of(p, slot) == color
+            && self.count_powers(p, false, PowerKind::FreeAttach(color)) > 0
     }
 
     /// R-ENERGY-01: once per turn; the free-attach exception doesn't use it up.
@@ -99,6 +111,11 @@ impl Game {
         });
     }
 
+    /// R-EVO-09: a working evolution-lock Power on either side.
+    pub(crate) fn evolution_locked(&self) -> bool {
+        (0..2).any(|q| self.count_powers(q, false, PowerKind::EvolutionLock) > 0)
+    }
+
     /// R-EVO-01/02/03/09: name match, then settled, then the lock.
     fn check_evolve(&self, p: usize, hand: usize, slot: usize) -> Result<(), RuleError> {
         let evo = match &self.hand_card(p, hand)?.kind {
@@ -112,10 +129,7 @@ impl Game {
         if !target.settled {
             return Err(RuleError::NotThisTurn);
         }
-        let locks = (0..2)
-            .map(|q| self.count_powers(q, false, PowerKind::EvolutionLock))
-            .sum::<usize>();
-        if locks > 0 {
+        if self.evolution_locked() {
             return Err(RuleError::EvolutionLocked);
         }
         Ok(())
@@ -123,7 +137,7 @@ impl Game {
 
     /// R-EVO-06/07/08/11: keep damage and attachments, clear the slot flags, and
     /// for the Active its conditions and effects.
-    fn evolve(&mut self, p: usize, hand: usize, slot: usize, ev: &mut Vec<Event>) {
+    pub(crate) fn evolve(&mut self, p: usize, hand: usize, slot: usize, ev: &mut Vec<Event>) {
         let pl = &mut self.players[p];
         let id = pl.hand.remove(hand);
         let c = pl.slot_mut(slot).expect("validated");
@@ -133,8 +147,7 @@ impl Game {
         // source's 8-bit wrap (only matters if a card set evolves into lower HP).
         c.hp = (c.hp as i32 + new_max - old_max).max(0) as u16;
         c.stack.push(id);
-        c.settled = false;
-        c.power_used = false;
+        c.clear_flags();
         if slot == 0 {
             pl.clear_active_state();
         }
@@ -143,49 +156,80 @@ impl Game {
             slot,
             card: id,
         });
-        // RULES: R-POWER-06 — stage 2 fires on-play Powers here (evolve).
     }
 
-    /// R-TRAINER-02/03 (core): checks passed; resolve, then discard.
-    fn play_trainer(&mut self, p: usize, h: usize, ev: &mut Vec<Event>) {
+    /// R-TRAINER-02: the card waits in limbo while its effects resolve.
+    fn play_trainer(&mut self, p: usize, h: usize) {
         let id = self.players[p].hand.remove(h);
-        ev.push(Event::TrainerPlayed {
-            player: p,
-            card: id,
-        });
         let CardKind::Trainer(t) = &card(id).kind else {
             unreachable!("validated")
         };
-        for e in t.effects {
-            self.effect_resolve(p, e, ev);
-        }
-        self.players[p].discard.push(id);
+        self.begin(Source::Trainer, p, 0, t.effects, 0);
+        let pd = self.pending.as_mut().expect("just begun");
+        pd.card = Some(id);
+        pd.hand_index = h;
     }
 
-    /// Phase-1 style check of one effect (R-EFFECT-01).
-    pub(crate) fn effect_check(&self, p: usize, effect: &Effect) -> Result<(), RuleError> {
-        match effect {
-            Effect::Draw(_) if self.players[p].deck.is_empty() => Err(RuleError::DeckEmpty),
-            Effect::Draw(_) => Ok(()),
-            Effect::StageSkip | Effect::Devolve => Err(RuleError::Unsupported),
-        }
-    }
-
-    pub(crate) fn effect_resolve(&mut self, p: usize, effect: &Effect, ev: &mut Vec<Event>) {
+    /// Phase-1 check of one effect (R-EFFECT-01): failing refuses the play and
+    /// changes nothing. Trainers and Powers also need something to work on;
+    /// attacks just skip what they can't do.
+    pub(crate) fn effect_check(
+        &self,
+        p: usize,
+        slot: usize,
+        effect: &Effect,
+        source: Source,
+    ) -> Result<(), RuleError> {
+        use Effect::*;
+        let pl = &self.players[p];
+        let opp = &self.players[1 - p];
+        let attack = source == Source::Attack;
+        let need = |ok: bool| if ok { Ok(()) } else { Err(RuleError::NoTarget) };
         match *effect {
-            // R-TURN-02: stop at an empty deck, no loss.
-            Effect::Draw(n) => {
-                for _ in 0..n {
-                    if self.draw(p, ev).is_none() {
-                        break;
-                    }
-                }
+            Draw(_) | Search(_) if pl.deck.is_empty() => Err(RuleError::DeckEmpty),
+            Recover(find) => need(pl.discard.iter().any(|&c| matches(find, c))),
+            Heal(_) if !attack => need(pl.active.as_ref().is_some_and(|a| a.damage() > 0)),
+            Cure { both } if !attack => {
+                need(!pl.condition.is_empty() || (both && !opp.condition.is_empty()))
             }
-            Effect::StageSkip | Effect::Devolve => unreachable!("refused by effect_check"),
+            SwitchSelf if !attack && !pl.has_live_bench() => Err(RuleError::NoLiveBench),
+            SwitchDefender { .. } if !attack => need(opp.has_live_bench()),
+            DiscardDefenderEnergy if !attack => {
+                need(opp.active.as_ref().is_some_and(|a| !a.energy.is_empty()))
+            }
+            Devolve if !attack => need(opp.active.as_ref().is_some_and(|a| a.stack.len() > 1)),
+            // R-EVO-10: the usual eligibility first, then the lock.
+            StageSkip => {
+                need(!self.stage_skip_options(p).is_empty())?;
+                if self.evolution_locked() {
+                    return Err(RuleError::EvolutionLocked);
+                }
+                Ok(())
+            }
+            DiscardEnergy { color, count } => {
+                let c = pl.slot(slot).ok_or(RuleError::NoSuchSlot)?;
+                let have = c
+                    .energy
+                    .iter()
+                    .filter(|&&e| {
+                        color == crate::Color::Colorless
+                            || matches!(card(e).kind, CardKind::Energy(EnergyCard::Basic(x)) if x == color)
+                    })
+                    .count();
+                if have < count as usize {
+                    return Err(RuleError::NotEnoughEnergy);
+                }
+                Ok(())
+            }
+            OnceWhileInPlay if pl.slot(slot).is_some_and(|c| c.once_used) => {
+                Err(RuleError::AlreadyUsed)
+            }
+            CopyAttack => need(!self.copy_options(p).is_empty()),
+            _ => Ok(()),
         }
     }
 
-    /// R-TURN-05 blocks, in order.
+    /// R-TURN-05 blocks, in order, then the attack's phase-1 checks.
     fn check_attack(&self, p: usize, i: usize) -> Result<(), RuleError> {
         let pl = &self.players[p];
         let active = pl.active.as_ref().ok_or(RuleError::NoSuchSlot)?;
@@ -206,60 +250,42 @@ impl Game {
         if pl.effects.placed == Some(Placed::DisabledAttack(i)) {
             return Err(RuleError::AttackDisabled);
         }
-        Ok(())
+        attack
+            .effects
+            .iter()
+            .try_for_each(|e| self.effect_check(p, 0, e, Source::Attack))
     }
 
-    /// A committed attack always ends the turn (R-TURN-05).
-    ///
-    /// RULES: R-EFFECT-02 — stage 2 fills in the pipeline around the damage:
-    /// phase 1 check, accuracy coin, phase 2, phase 6 costs, confusion coin,
-    /// phase 5, prevention check, phase 3 | damage | coin prevention, phase 4,
-    /// retaliation, status queue. The knock-out handler stays last.
+    /// R-EFFECT-02 step 2: the accuracy coin from the attacker's own
+    /// substatus, cached for the turn; tails ends the turn with nothing paid.
+    /// Then the rest of the pipeline (see `resolve`).
     fn attack(&mut self, p: usize, i: usize, ev: &mut Vec<Event>) {
+        if self.players[p].effects.placed == Some(Placed::Accuracy) {
+            let heads = match self.accuracy {
+                Some(heads) => heads,
+                None => {
+                    let heads = self.flip(p, ev);
+                    self.accuracy = Some(heads);
+                    heads
+                }
+            };
+            if !heads {
+                ev.push(Event::AttackUsed {
+                    player: p,
+                    attack: i,
+                });
+                ev.push(Event::AttackFailed { player: p });
+                return self.steps.push_front(Step::EndTurn);
+            }
+        }
         let attack = &self.players[p]
             .active
             .as_ref()
             .expect("validated")
             .creature()
             .attacks[i];
-        ev.push(Event::AttackUsed {
-            player: p,
-            attack: i,
-        });
-        let hit = self.attack_damage(p, attack);
-        self.deal_damage(1 - p, 0, hit, ev);
-        self.steps.push_front(Step::EndTurn);
-        self.knock_outs(ev);
-    }
-
-    /// RULES: R-DMG-01 placeholder — base damage only. Stage 2 replaces this with the
-    /// full calculation (doubling, weakness ×2, resistance −30, trainers, defender
-    /// reductions, clamp).
-    fn attack_damage(&self, _p: usize, attack: &Attack) -> Hit {
-        Hit {
-            amount: attack.damage,
-            weakness: false,
-            resistance: false,
-        }
-    }
-
-    /// R-DMG-06: HP floors at 0. Zero damage still reports (nothing to subtract).
-    pub(crate) fn deal_damage(
-        &mut self,
-        player: usize,
-        slot: usize,
-        hit: Hit,
-        ev: &mut Vec<Event>,
-    ) {
-        let c = self.players[player].slot_mut(slot).expect("target in play");
-        c.hp = c.hp.saturating_sub(hit.amount);
-        ev.push(Event::Damage {
-            player,
-            slot,
-            amount: hit.amount,
-            weakness: hit.weakness,
-            resistance: hit.resistance,
-        });
+        self.begin(Source::Attack, p, 0, attack.effects, attack.damage);
+        self.pending.as_mut().expect("just begun").attack = i;
     }
 }
 

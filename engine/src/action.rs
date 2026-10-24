@@ -4,6 +4,8 @@
 //! Slots: 0 is the Active, 1..=5 the Bench. Hand positions index the hand.
 
 use crate::card::CardId;
+use crate::condition::Status;
+use crate::effect::{Choice, Effect};
 
 /// A pending decision for one player.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -30,6 +32,14 @@ pub enum PromptKind {
     ChoosePrize { count: u8 },
     /// The Active was knocked out: `Promote` a Benched creature. Can't be cancelled.
     ChooseReplacement,
+    /// An effect needs a decision: answer `Choose(i)` with an index into
+    /// `options`, or `Cancel` when `can_cancel` (the attack, trainer or Power
+    /// is then abandoned at no cost, R-TRAINER-02).
+    Choose {
+        effect: Effect,
+        options: Vec<Choice>,
+        can_cancel: bool,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -53,6 +63,10 @@ pub enum Action {
     Promote(usize),
     Cancel,
     Attack(usize),
+    /// Use the activated Power of the creature in this slot (R-POWER-01).
+    UsePower(usize),
+    /// Answer a `Choose` prompt.
+    Choose(usize),
     TakePrize(usize),
     /// End setup placement, or end the turn (R-TURN-06).
     Done,
@@ -126,6 +140,69 @@ pub enum Event {
         player: usize,
         attack: usize,
     },
+    /// The attack did nothing more: accuracy or confusion tails (R-TURN-05).
+    AttackFailed {
+        player: usize,
+    },
+    /// R-DMG-12/13: the defender is protected from this attack's effects.
+    AttackNegated {
+        player: usize,
+    },
+    PowerUsed {
+        player: usize,
+        slot: usize,
+    },
+    ConditionApplied {
+        player: usize,
+        status: Status,
+    },
+    /// The Active's conditions changed by a cure, waking up or paralysis ending.
+    ConditionRemoved {
+        player: usize,
+        status: Status,
+    },
+    /// A lasting effect took hold on this player's Active (or on the player,
+    /// for a trainer lock).
+    EffectApplied {
+        player: usize,
+        effect: Effect,
+    },
+    Healed {
+        player: usize,
+        slot: usize,
+        amount: u16,
+    },
+    /// An effect switched this Active with the creature from `slot`.
+    Switched {
+        player: usize,
+        slot: usize,
+    },
+    /// The top card `card` left the creature in `slot` for its owner's hand.
+    Devolved {
+        player: usize,
+        slot: usize,
+        card: CardId,
+    },
+    TrainerAttached {
+        player: usize,
+        slot: usize,
+        card: CardId,
+    },
+    TrainerDiscarded {
+        player: usize,
+        slot: usize,
+        card: CardId,
+    },
+    HandDiscarded {
+        player: usize,
+        cards: Vec<CardId>,
+    },
+    /// A card moved to the hand from the deck (`from_deck`) or the discard pile.
+    CardToHand {
+        player: usize,
+        card: CardId,
+        from_deck: bool,
+    },
     Damage {
         player: usize,
         slot: usize,
@@ -184,8 +261,18 @@ pub enum RuleError {
     NotATrainer,
     TrainerLocked,
     DeckEmpty,
-    /// The card uses an effect this engine version doesn't implement yet.
-    Unsupported,
+    /// An effect has nothing to work on (no damage to heal, no card to find…).
+    NoTarget,
+    /// R-EFFECT-05: once-while-in-play attack already used.
+    AlreadyUsed,
+    NoPower,
+    /// R-POWER-01: a passive Power can't be activated.
+    PassivePower,
+    /// R-POWER-02/03: a condition on the Active or a blocker stops it.
+    PowerBlocked,
+    /// R-POWER-04
+    PowerAlreadyUsed,
+    NoSuchChoice,
     AsleepOrParalyzed,
     CantAttack,
     NoAttacks,

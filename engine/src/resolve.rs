@@ -1,0 +1,862 @@
+//! The effect pipeline (R-EFFECT-01/02, R-TRAINER-02, R-POWER-01): one
+//! attack, trainer or Power resolving, stage by stage.
+//!
+//! The resolving item lives in `Game::pending`; `Step::Resolve` runs its next
+//! stage. A stage that needs a decision raises a `Choose` prompt and stops;
+//! the answer records the choice and queues `Step::Resolve` again.
+
+use crate::action::{Event, PromptKind};
+use crate::card::{card, CardId, CardKind, EnergyCard, PowerKind, Stage as CardStage};
+use crate::condition::{Shield, Status};
+use crate::effect::{Choice, Effect, Find, Phase};
+use crate::game::{Game, Step};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Source {
+    Attack,
+    Trainer,
+    Power,
+    /// R-POWER-06: an on-play Power firing by itself.
+    OnPlay,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Stage {
+    /// Phase 2: the player's selections; cancelling abandons at no cost.
+    Select,
+    /// The announcement and phase 6 costs.
+    Commit,
+    /// R-STATUS-06
+    Confusion,
+    /// Phase 5: selections after the announcement (the defender's).
+    Phase5,
+    /// R-DMG-12
+    Prevention,
+    /// Phase 3
+    Before,
+    /// R-DMG-01, R-DMG-13
+    Damage,
+    /// Phase 4
+    After,
+    /// R-STATUS-03: the queued conditions.
+    Statuses,
+    KnockOuts,
+    End,
+}
+
+impl Source {
+    /// R-EFFECT-02 (attack), R-TRAINER-02 (trainer), R-POWER-01 (Power).
+    fn stages(self) -> &'static [Stage] {
+        use Stage::*;
+        match self {
+            Source::Attack => &[
+                Select, Commit, Confusion, Phase5, Prevention, Before, Damage, After, Statuses,
+                KnockOuts, End,
+            ],
+            Source::Trainer => &[
+                Select, Commit, Phase5, Before, After, Statuses, KnockOuts, End,
+            ],
+            Source::Power | Source::OnPlay => {
+                &[Select, Commit, Before, After, Statuses, KnockOuts, End]
+            }
+        }
+    }
+
+    fn is_power(self) -> bool {
+        matches!(self, Source::Power | Source::OnPlay)
+    }
+}
+
+/// An attack, trainer or Power being resolved.
+#[derive(Debug, Clone)]
+pub(crate) struct Pending {
+    pub source: Source,
+    pub player: usize,
+    /// The acting creature: 0 for attacks and trainers, the holder for Powers.
+    pub slot: usize,
+    pub effects: &'static [Effect],
+    /// The attack's damage word: printed damage plus phase-3 changes.
+    pub damage: i32,
+    /// The attack does direct damage (R-EFFECT-02 `ccb7` bit 7 clear).
+    pub direct: bool,
+    pub ignore_wr: bool,
+    /// R-DMG-12/13: the defender is protected from this attack's effects.
+    pub negated: bool,
+    /// Index into `source.stages()`.
+    pub stage: usize,
+    /// Next effect a selection stage looks at.
+    pub cursor: usize,
+    pub choices: Vec<Option<Choice>>,
+    /// Queued conditions `(target player, status)`, applied after damage.
+    pub queue: Vec<(usize, Status)>,
+    /// The trainer card in limbo while it resolves (R-TRAINER-03), and where
+    /// it came from in the hand.
+    pub card: Option<CardId>,
+    pub hand_index: usize,
+    /// The attack index, for the event.
+    pub attack: usize,
+}
+
+fn does_direct_damage(damage: u16, effects: &[Effect]) -> bool {
+    damage > 0
+        || effects
+            .iter()
+            .any(|e| matches!(e, Effect::AddPerHeads { .. }))
+}
+
+/// Card filters for `Search` / `Recover`.
+pub(crate) fn matches(find: Find, id: CardId) -> bool {
+    let def = card(id);
+    match find {
+        Find::Any => true,
+        Find::Basic => def.is_basic(),
+        Find::Creature => matches!(def.kind, CardKind::Creature(_)),
+        Find::BasicEnergy => matches!(def.kind, CardKind::Energy(EnergyCard::Basic(_))),
+        Find::Trainer => matches!(def.kind, CardKind::Trainer(_) | CardKind::TrainerBasic(_)),
+    }
+}
+
+/// Distinct matching cards, in first-seen order.
+fn distinct(cards: &[CardId], find: Find) -> Vec<Choice> {
+    let mut out: Vec<CardId> = Vec::new();
+    for &id in cards {
+        if matches(find, id) && !out.contains(&id) {
+            out.push(id);
+        }
+    }
+    out.into_iter().map(Choice::Card).collect()
+}
+
+impl Game {
+    /// Start resolving `effects` for player `p`; runs on the next step.
+    pub(crate) fn begin(
+        &mut self,
+        source: Source,
+        p: usize,
+        slot: usize,
+        effects: &'static [Effect],
+        damage: u16,
+    ) {
+        self.pending = Some(Pending {
+            source,
+            player: p,
+            slot,
+            effects,
+            damage: damage as i32,
+            direct: source == Source::Attack && does_direct_damage(damage, effects),
+            ignore_wr: false,
+            negated: false,
+            stage: 0,
+            cursor: 0,
+            choices: vec![None; effects.len()],
+            queue: Vec::new(),
+            card: None,
+            hand_index: 0,
+            attack: 0,
+        });
+        self.steps.push_front(Step::Resolve);
+    }
+
+    fn pd(&self) -> &Pending {
+        self.pending.as_ref().expect("resolving")
+    }
+
+    fn pd_mut(&mut self) -> &mut Pending {
+        self.pending.as_mut().expect("resolving")
+    }
+
+    /// Run the pending item's current stage.
+    pub(crate) fn resolve(&mut self, ev: &mut Vec<Event>) {
+        let pd = self.pd();
+        let stage = pd.source.stages()[pd.stage];
+        let next = match stage {
+            Stage::Select => self.select(false),
+            Stage::Phase5 => self.select(true),
+            Stage::Commit => {
+                self.commit(ev);
+                true
+            }
+            Stage::Confusion => self.confusion(ev),
+            Stage::Prevention => {
+                self.prevention(ev);
+                true
+            }
+            Stage::Before => {
+                self.run_effects(Phase::Before, ev);
+                true
+            }
+            Stage::Damage => {
+                self.attack_hit(ev);
+                true
+            }
+            Stage::After => {
+                self.run_effects(Phase::After, ev);
+                true
+            }
+            Stage::Statuses => {
+                self.statuses(ev);
+                true
+            }
+            Stage::KnockOuts => {
+                self.advance();
+                let counter_ko = self.pd().source == Source::Attack;
+                self.knock_outs(counter_ko, ev);
+                return;
+            }
+            Stage::End => return self.finish(),
+        };
+        if next {
+            self.advance();
+        }
+    }
+
+    /// Move to the next stage and queue it.
+    fn advance(&mut self) {
+        let pd = self.pd_mut();
+        pd.stage += 1;
+        pd.cursor = 0;
+        self.steps.push_front(Step::Resolve);
+    }
+
+    /// Ask for the next selection, if any is left. Returns true when done.
+    fn select(&mut self, phase5: bool) -> bool {
+        let pd = self.pd();
+        let (p, source, effects, start) = (pd.player, pd.source, pd.effects, pd.cursor);
+        for (i, &effect) in effects.iter().enumerate().skip(start) {
+            let Some((chooser, options)) = self.options(p, effect, phase5) else {
+                continue;
+            };
+            if options.is_empty() {
+                continue;
+            }
+            self.pd_mut().cursor = i;
+            let can_cancel = !phase5 && source != Source::OnPlay;
+            self.ask(
+                chooser,
+                PromptKind::Choose {
+                    effect,
+                    options,
+                    can_cancel,
+                },
+            );
+            return false;
+        }
+        true
+    }
+
+    /// Who decides for `effect` in this selection stage, and between what.
+    fn options(&self, p: usize, effect: Effect, phase5: bool) -> Option<(usize, Vec<Choice>)> {
+        use Effect::*;
+        let q = 1 - p;
+        let (me, opp) = (&self.players[p], &self.players[q]);
+        let bench = |player: usize| {
+            self.players[player]
+                .in_play()
+                .filter(|(slot, c)| *slot > 0 && c.hp > 0)
+                .map(|(slot, _)| Choice::Slot { player, slot })
+                .collect::<Vec<_>>()
+        };
+        let all = |player: usize| {
+            self.players[player]
+                .in_play()
+                .map(|(slot, _)| Choice::Slot { player, slot })
+                .collect::<Vec<_>>()
+        };
+        if phase5 {
+            return match effect {
+                SwitchDefender {
+                    chooser_is_attacker: false,
+                } => Some((q, bench(q))),
+                _ => None,
+            };
+        }
+        let defender_attacks = || {
+            opp.active
+                .as_ref()
+                .map_or(&[][..], |a| a.creature().attacks)
+        };
+        let options = match effect {
+            DisableAttack => (0..defender_attacks().len()).map(Choice::Attack).collect(),
+            CopyAttack => self.copy_options(p),
+            DiscardDefenderEnergy => {
+                let n = opp.active.as_ref().map_or(0, |a| a.energy.len());
+                (0..n).map(Choice::Energy).collect()
+            }
+            Snipe(_) => all(q),
+            SwitchDefender {
+                chooser_is_attacker: true,
+            } => bench(q),
+            SwitchSelf => bench(p),
+            Search(find) => distinct(&me.deck, find),
+            Recover(find) => distinct(&me.discard, find),
+            AttachMinus20 => all(p),
+            StageSkip => self.stage_skip_options(p),
+            _ => return None,
+        };
+        Some((p, options))
+    }
+
+    /// R-EFFECT-06: the defender's attacks, except ones that copy.
+    pub(crate) fn copy_options(&self, p: usize) -> Vec<Choice> {
+        let attacks = self.players[1 - p]
+            .active
+            .as_ref()
+            .map_or(&[][..], |a| a.creature().attacks);
+        (0..attacks.len())
+            .filter(|&i| !attacks[i].effects.contains(&Effect::CopyAttack))
+            .map(Choice::Attack)
+            .collect()
+    }
+
+    /// R-EVO-10: a Stage 2 in hand onto a settled Basic named as the
+    /// evolves-from of the Stage 1 it evolves from.
+    pub(crate) fn stage_skip_options(&self, p: usize) -> Vec<Choice> {
+        let pl = &self.players[p];
+        let mut out = Vec::new();
+        for (hand, &id) in pl.hand.iter().enumerate() {
+            let Some(stage2) = card(id).creature() else {
+                continue;
+            };
+            let basic_name = stage2
+                .evolves_from
+                .filter(|_| stage2.stage == CardStage::Stage2)
+                .and_then(crate::card::find_named)
+                .and_then(|stage1| stage1.creature())
+                .and_then(|stage1| stage1.evolves_from);
+            let Some(basic_name) = basic_name else {
+                continue;
+            };
+            for (slot, c) in pl.in_play() {
+                if card(c.top()).name == basic_name
+                    && c.creature().stage == CardStage::Basic
+                    && c.settled
+                {
+                    out.push(Choice::Evolve { hand, slot });
+                }
+            }
+        }
+        out
+    }
+
+    /// The answer to a `Choose` prompt.
+    pub(crate) fn chosen(&mut self, effect: Effect, choice: Choice) {
+        if let (Effect::CopyAttack, Choice::Attack(i)) = (effect, choice) {
+            // R-EFFECT-06: the copied attack replaces this one's effects and
+            // damage, then makes its own selections.
+            let p = self.pd().player;
+            let attacks = self.players[1 - p]
+                .active
+                .as_ref()
+                .expect("defender")
+                .creature()
+                .attacks;
+            let copied = &attacks[i];
+            let pd = self.pd_mut();
+            pd.effects = copied.effects;
+            pd.damage = copied.damage as i32;
+            pd.direct = does_direct_damage(copied.damage, copied.effects);
+            pd.choices = vec![None; copied.effects.len()];
+            pd.cursor = 0;
+        } else {
+            let pd = self.pd_mut();
+            pd.choices[pd.cursor] = Some(choice);
+            pd.cursor += 1;
+        }
+        self.steps.push_front(Step::Resolve);
+    }
+
+    /// Cancel during selection: nothing was paid (R-TRAINER-02, R-EFFECT-02).
+    pub(crate) fn cancel_pending(&mut self) {
+        let pd = self.pending.take().expect("resolving");
+        if let Some(id) = pd.card {
+            self.players[pd.player].hand.insert(pd.hand_index, id);
+        }
+        self.steps.push_front(Step::Main);
+    }
+
+    /// The announcement, then the costs (phase 6).
+    fn commit(&mut self, ev: &mut Vec<Event>) {
+        let pd = self.pd();
+        let (p, slot) = (pd.player, pd.slot);
+        match pd.source {
+            Source::Attack => ev.push(Event::AttackUsed {
+                player: p,
+                attack: pd.attack,
+            }),
+            Source::Trainer => {
+                if let Some(card) = pd.card {
+                    ev.push(Event::TrainerPlayed { player: p, card });
+                }
+            }
+            Source::Power | Source::OnPlay => {
+                // R-POWER-04: the once-per-turn flag (only read when the Power has one).
+                if let Some(c) = self.players[p].slot_mut(slot) {
+                    c.power_used = true;
+                }
+                ev.push(Event::PowerUsed { player: p, slot });
+            }
+        }
+        self.run_effects(Phase::Cost, ev);
+    }
+
+    /// R-STATUS-06: a Confused attacker flips; tails is 20 to itself and the end.
+    fn confusion(&mut self, ev: &mut Vec<Event>) -> bool {
+        let p = self.pd().player;
+        if !self.players[p].condition.is_confused() || self.flip(p, ev) {
+            return true;
+        }
+        ev.push(Event::AttackFailed { player: p });
+        let hit = self.self_damage(p, 20);
+        self.hurt(p, 0, hit, false, ev);
+        let knock_outs = Source::Attack
+            .stages()
+            .iter()
+            .position(|&s| s == Stage::KnockOuts)
+            .expect("attack stages");
+        let pd = self.pd_mut();
+        pd.stage = knock_outs;
+        self.steps.push_front(Step::Resolve);
+        false
+    }
+
+    /// R-DMG-12: whole-attack prevention, for attacks that do direct damage.
+    fn prevention(&mut self, ev: &mut Vec<Event>) {
+        let pd = self.pd();
+        if !pd.direct {
+            return;
+        }
+        let (p, q) = (pd.player, 1 - pd.player);
+        let evolved = self.players[p]
+            .active
+            .as_ref()
+            .is_some_and(|a| a.creature().stage != CardStage::Basic);
+        let shielded = self.players[q].effects.shield == Some(Shield::PreventAll)
+            || (evolved && self.passive(q, 0) == Some(PowerKind::ShieldFromEvolved));
+        if shielded {
+            self.pd_mut().negated = true;
+            ev.push(Event::AttackNegated { player: q });
+        }
+    }
+
+    /// R-DMG-01 then the coin-prevention hook (R-DMG-13), then apply.
+    fn attack_hit(&mut self, ev: &mut Vec<Event>) {
+        let pd = self.pd();
+        if !pd.direct {
+            return;
+        }
+        let (p, q) = (pd.player, 1 - pd.player);
+        let mut hit = self.attack_damage(p, pd.damage, pd.ignore_wr, pd.negated);
+        // RULES: R-DMG-13 — we flip only when there is damage to prevent.
+        if hit.amount > 0
+            && self.passive(q, 0) == Some(PowerKind::CoinPrevention)
+            && self.flip(q, ev)
+        {
+            hit = Default::default();
+            self.pd_mut().negated = true;
+            ev.push(Event::AttackNegated { player: q });
+        }
+        self.hurt(q, 0, hit, true, ev);
+    }
+
+    fn run_effects(&mut self, phase: Phase, ev: &mut Vec<Event>) {
+        for i in 0..self.pd().effects.len() {
+            if self.pd().effects[i].phase() == phase {
+                self.exec(i, ev);
+            }
+        }
+    }
+
+    /// One effect, at its phase (R-EFFECT-04..06).
+    fn exec(&mut self, i: usize, ev: &mut Vec<Event>) {
+        use Effect::*;
+        let pd = self.pd();
+        let (p, slot, effect, choice, negated) =
+            (pd.player, pd.slot, pd.effects[i], pd.choices[i], pd.negated);
+        let power = pd.source.is_power();
+        let q = 1 - p;
+        let mark =
+            |ev: &mut Vec<Event>, player: usize| ev.push(Event::EffectApplied { player, effect });
+        match effect {
+            AddPerHeads { coins, per } => {
+                let heads = self.flip_many(p, coins, ev);
+                self.pd_mut().damage += heads as i32 * per as i32;
+            }
+            IgnoreWeaknessResistance => self.pd_mut().ignore_wr = true,
+            DoubleNextAttack => {
+                self.players[p].effects.doubling = Some(self.turn);
+                mark(ev, p);
+            }
+            Recoil(n) => {
+                let hit = self.self_damage(p, n);
+                self.hurt(p, 0, hit, false, ev);
+            }
+            BenchDamage {
+                amount,
+                own,
+                opponent,
+            } => {
+                for (side, on) in [(q, opponent), (p, own)] {
+                    if !on {
+                        continue;
+                    }
+                    for s in 1..=self.players[side].bench.len() {
+                        let hit = self.effect_damage(p, side, s, amount, power);
+                        self.hurt(side, s, hit, !power, ev);
+                    }
+                }
+            }
+            Snipe(n) => {
+                let Some(Choice::Slot { player, slot: s }) = choice else {
+                    return;
+                };
+                // R-DMG-12: effect damage to the protected defending Active is cancelled.
+                if self.players[player].slot(s).is_none() || (negated && s == 0) {
+                    return;
+                }
+                let hit = self.effect_damage(p, player, s, n, power);
+                self.hurt(player, s, hit, !power, ev);
+            }
+            Inflict { status, coin } => {
+                if !coin || self.flip(p, ev) {
+                    self.pd_mut().queue.push((q, status));
+                }
+            }
+            InflictSelf(status) => self.pd_mut().queue.push((p, status)),
+            Cure { both } => {
+                self.cure(p, ev);
+                if both {
+                    self.cure(q, ev);
+                }
+            }
+            Protect { shield, coin } => {
+                if !coin || self.flip(p, ev) {
+                    self.players[p].effects.shield = Some(shield);
+                    mark(ev, p);
+                }
+            }
+            Place { placed, coin } => {
+                if (!coin || self.flip(p, ev)) && !negated {
+                    self.players[q].effects.placed = Some(placed);
+                    mark(ev, q);
+                }
+            }
+            DisableAttack => {
+                if let (Some(Choice::Attack(a)), false) = (choice, negated) {
+                    self.players[q].effects.placed = Some(crate::Placed::DisabledAttack(a));
+                    mark(ev, q);
+                }
+            }
+            // R-TRAINER-04: set even when the attack was negated.
+            TrainerLock => {
+                self.players[q].trainer_locked = true;
+                mark(ev, q);
+            }
+            DefenderWeakness(color) => {
+                if !negated {
+                    self.players[q].effects.weakness = Some(color);
+                    mark(ev, q);
+                }
+            }
+            OwnResistance(color) => {
+                self.players[p].effects.resistance = Some(color);
+                mark(ev, p);
+            }
+            DiscardEnergy { color, count } => {
+                self.discard_energy(p, slot, Some((color, count)), ev)
+            }
+            DiscardAllEnergy => self.discard_energy(p, slot, None, ev),
+            DiscardDefenderEnergy => {
+                let Some(Choice::Energy(k)) = choice else {
+                    return;
+                };
+                let opp = &mut self.players[q];
+                let Some(active) = opp.active.as_mut() else {
+                    return;
+                };
+                if negated || k >= active.energy.len() {
+                    return;
+                }
+                let card = active.energy.remove(k);
+                opp.discard.push(card);
+                ev.push(Event::EnergyDiscarded {
+                    player: q,
+                    slot: 0,
+                    card,
+                });
+            }
+            SwitchDefender { .. } => {
+                if let (Some(Choice::Slot { slot: s, .. }), false) = (choice, negated) {
+                    self.effect_switch(q, s, ev);
+                }
+            }
+            SwitchSelf => {
+                if let Some(Choice::Slot { slot: s, .. }) = choice {
+                    self.effect_switch(p, s, ev);
+                }
+            }
+            Heal(n) => {
+                let Some(active) = self.players[p].active.as_mut() else {
+                    return;
+                };
+                let amount = n.min(active.damage());
+                active.hp += amount;
+                if amount > 0 {
+                    ev.push(Event::Healed {
+                        player: p,
+                        slot: 0,
+                        amount,
+                    });
+                }
+            }
+            Devolve => {
+                if !negated {
+                    self.devolve(q, 0, ev);
+                }
+            }
+            StageSkip => {
+                if let Some(Choice::Evolve { hand, slot: s }) = choice {
+                    if self
+                        .stage_skip_options(p)
+                        .contains(&Choice::Evolve { hand, slot: s })
+                    {
+                        self.evolve(p, hand, s, ev);
+                    }
+                }
+            }
+            // R-TURN-02: stop at an empty deck, no loss.
+            Draw(n) => {
+                for _ in 0..n {
+                    if self.draw(p, ev).is_none() {
+                        break;
+                    }
+                }
+            }
+            DiscardHand => {
+                let pl = &mut self.players[p];
+                let cards = std::mem::take(&mut pl.hand);
+                pl.discard.extend(&cards);
+                ev.push(Event::HandDiscarded { player: p, cards });
+            }
+            Search(_) => {
+                if let Some(Choice::Card(id)) = choice {
+                    if let Some(card) = self.players[p].take_from_deck(id) {
+                        self.players[p].hand.push(card);
+                        ev.push(Event::CardToHand {
+                            player: p,
+                            card,
+                            from_deck: true,
+                        });
+                    }
+                }
+                // R-ZONE-03: searching shuffles afterwards.
+                self.players[p].shuffle(&mut self.rng);
+                ev.push(Event::Shuffled { player: p });
+            }
+            Recover(_) => {
+                let Some(Choice::Card(id)) = choice else {
+                    return;
+                };
+                let pl = &mut self.players[p];
+                if let Some(k) = pl.discard.iter().rposition(|&c| c == id) {
+                    let card = pl.discard.remove(k);
+                    pl.hand.push(card);
+                    ev.push(Event::CardToHand {
+                        player: p,
+                        card,
+                        from_deck: false,
+                    });
+                }
+            }
+            AttachPlus10 => self.attach_trainer(p, 0, ev),
+            AttachMinus20 => {
+                if let Some(Choice::Slot { slot: s, .. }) = choice {
+                    self.attach_trainer(p, s, ev);
+                }
+            }
+            OnceWhileInPlay => {
+                if let Some(c) = self.players[p].slot_mut(slot) {
+                    c.once_used = true;
+                }
+            }
+            // Handled when the attack is chosen.
+            CopyAttack => {}
+            SetOwnColor(color) => {
+                if let Some(c) = self.players[p].slot_mut(slot) {
+                    c.color_override = Some(color);
+                    mark(ev, p);
+                }
+            }
+        }
+    }
+
+    /// R-STATUS-12: a cure clears the Active's conditions.
+    fn cure(&mut self, p: usize, ev: &mut Vec<Event>) {
+        let c = std::mem::take(&mut self.players[p].condition);
+        let removed = [
+            (c.is_confused(), Status::Confused),
+            (c.special == Some(crate::Special::Asleep), Status::Asleep),
+            (
+                c.special == Some(crate::Special::Paralyzed),
+                Status::Paralyzed,
+            ),
+            (c.poison == crate::Poison::Poisoned, Status::Poisoned),
+            (
+                c.poison == crate::Poison::DoublePoisoned,
+                Status::DoublePoisoned,
+            ),
+        ];
+        for (was, status) in removed {
+            if was {
+                ev.push(Event::ConditionRemoved { player: p, status });
+            }
+        }
+    }
+
+    /// Phase-6 energy costs from (p, slot): `count` of a basic colour
+    /// (Colorless: any), or everything.
+    fn discard_energy(
+        &mut self,
+        p: usize,
+        slot: usize,
+        what: Option<(crate::Color, u8)>,
+        ev: &mut Vec<Event>,
+    ) {
+        let pl = &mut self.players[p];
+        let Some(c) = pl.slot_mut(slot) else {
+            return;
+        };
+        let mut picked = Vec::new();
+        for k in (0..c.energy.len()).rev() {
+            let fits = match what {
+                None => true,
+                Some((color, count)) => {
+                    picked.len() < count as usize
+                        && (color == crate::Color::Colorless
+                            || matches!(card(c.energy[k]).kind,
+                                CardKind::Energy(EnergyCard::Basic(e)) if e == color))
+                }
+            };
+            if fits {
+                picked.push(c.energy.remove(k));
+            }
+        }
+        for card in picked {
+            pl.discard.push(card);
+            ev.push(Event::EnergyDiscarded {
+                player: p,
+                slot,
+                card,
+            });
+        }
+    }
+
+    /// R-RETREAT-04: an effect switches the Active with a live Benched creature.
+    fn effect_switch(&mut self, p: usize, slot: usize, ev: &mut Vec<Event>) {
+        if self.players[p]
+            .bench
+            .get(slot - 1)
+            .is_some_and(|c| c.hp > 0)
+        {
+            self.switch(p, slot);
+            ev.push(Event::Switched { player: p, slot });
+        }
+    }
+
+    /// R-TRAINER-03/05: the resolving trainer stays on (p, slot) instead of
+    /// going to the discard pile.
+    fn attach_trainer(&mut self, p: usize, slot: usize, ev: &mut Vec<Event>) {
+        let Some(card) = self.pd_mut().card.take() else {
+            return;
+        };
+        match self.players[p].slot_mut(slot) {
+            Some(c) => {
+                c.trainers.push(card);
+                ev.push(Event::TrainerAttached {
+                    player: p,
+                    slot,
+                    card,
+                });
+            }
+            None => self.pd_mut().card = Some(card),
+        }
+    }
+
+    /// R-EVO-12: back to the lower stage, damage kept, flags cleared.
+    pub(crate) fn devolve(&mut self, p: usize, slot: usize, ev: &mut Vec<Event>) {
+        let pl = &mut self.players[p];
+        let Some(c) = pl.slot_mut(slot) else {
+            return;
+        };
+        if c.stack.len() < 2 {
+            return;
+        }
+        let damage = c.damage();
+        let card = c.stack.pop().expect("evolved");
+        c.hp = c.creature().hp.saturating_sub(damage);
+        c.clear_flags();
+        // RULES: R-EVO-12 — the removed stage goes to its owner's hand.
+        pl.hand.push(card);
+        if slot == 0 {
+            pl.clear_active_state();
+        }
+        ev.push(Event::Devolved {
+            player: p,
+            slot,
+            card,
+        });
+    }
+
+    /// R-STATUS-03: the queue, after damage. A negated attack drops the
+    /// defender's conditions; immune targets drop them too. Self-conditions
+    /// always apply (R-STATUS-14). The result is recorded (R-STATUS-13).
+    fn statuses(&mut self, ev: &mut Vec<Event>) {
+        let pd = self.pd_mut();
+        let queue = std::mem::take(&mut pd.queue);
+        let (p, negated) = (pd.player, pd.negated);
+        if queue.is_empty() {
+            return;
+        }
+        for pl in &mut self.players {
+            pl.effects.last_inflicted = Default::default();
+        }
+        for (target, status) in queue {
+            if target != p && (negated || self.status_immune(target)) {
+                continue;
+            }
+            let pl = &mut self.players[target];
+            if pl.active.is_none() {
+                continue;
+            }
+            pl.condition.apply(status);
+            pl.effects.last_inflicted.apply(status);
+            ev.push(Event::ConditionApplied {
+                player: target,
+                status,
+            });
+        }
+    }
+
+    /// R-STATUS-03: a Trainer-as-Basic, or a working immunity Power.
+    fn status_immune(&self, p: usize) -> bool {
+        self.players[p]
+            .active
+            .as_ref()
+            .is_some_and(|a| a.is_trainer_basic())
+            || self.passive(p, 0) == Some(PowerKind::StatusImmune)
+    }
+
+    /// The pipeline is done: an attack ends the turn; anything else goes back
+    /// to the main phase, a trainer to the discard pile if it is still in limbo.
+    fn finish(&mut self) {
+        let pd = self.pending.take().expect("resolving");
+        match pd.source {
+            Source::Attack => self.steps.push_front(Step::EndTurn),
+            _ => {
+                if let Some(card) = pd.card {
+                    self.players[pd.player].discard.push(card);
+                }
+                self.steps.push_front(Step::Main);
+            }
+        }
+    }
+}

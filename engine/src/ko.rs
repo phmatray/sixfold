@@ -1,12 +1,14 @@
 //! Knock-outs, prizes and the duel result (R-KO-*, R-TURN-07/08).
 
 use crate::action::Event;
+use crate::condition::Shield;
 use crate::game::{Game, Step};
 
 impl Game {
     /// The knock-out handler (R-KO-03/04), with T = the turn player. Runs after
-    /// a whole attack and at the end of between-turns; a no-op if nothing is at 0 HP.
-    pub(crate) fn knock_outs(&mut self, ev: &mut Vec<Event>) {
+    /// a whole attack (`after_attack`), after other damaging effects and at the
+    /// end of between-turns; a no-op if nothing is at 0 HP.
+    pub(crate) fn knock_outs(&mut self, after_attack: bool, ev: &mut Vec<Event>) {
         if !self
             .players
             .iter()
@@ -14,10 +16,28 @@ impl Game {
         {
             return;
         }
-        // RULES: R-KO-04 steps 1–2 (counter-KO R-KO-09, clearing linked effects
-        // R-KO-10) — stage 2, here.
         let t = self.turn_player;
         let n = 1 - t;
+        let active_out =
+            |g: &Game, q: usize| g.players[q].active.as_ref().is_some_and(|a| a.hp == 0);
+        // Step 1, R-KO-09: the knocked-out defender's counter-KO takes the attacker with it.
+        if after_attack
+            && active_out(self, n)
+            && self.players[n].effects.shield == Some(Shield::CounterKo)
+        {
+            if let Some(a) = self.players[t].active.as_mut() {
+                a.hp = 0;
+            }
+        }
+        // Step 2, R-KO-10: a knocked-out Active's effects on the other side end.
+        for q in [t, n] {
+            if active_out(self, q) {
+                let other = &mut self.players[1 - q].effects.placed;
+                if other.is_some_and(|e| e.linked_to_placer()) {
+                    *other = None;
+                }
+            }
+        }
         // R-KO-01: one prize per knocked-out creature (not Trainer-as-Basic),
         // capped at what is left. `take[p]` is what player p takes.
         let kos = |q: usize| {
@@ -127,6 +147,7 @@ impl Game {
         self.prize_count = 1;
         self.turn = 0;
         self.prompt = None;
+        self.pending = None;
         self.start_setup(ev);
     }
 }
@@ -149,7 +170,7 @@ mod tests {
         g.prompt = None;
         g.steps.push_front(Step::Main);
         let mut ev = Vec::new();
-        g.knock_outs(&mut ev);
+        g.knock_outs(false, &mut ev);
         g.run(&mut ev);
         ev
     }

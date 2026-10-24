@@ -91,8 +91,10 @@ pub struct Power {
     pub kind: PowerKind,
 }
 
-/// The generic Power hooks the engine knows (R-POWER-07). Stage 2 adds the
-/// damage-related passives.
+/// The generic Power hooks the engine knows (R-POWER-07). Every passive hook
+/// works only while the Power works: on the Bench always, as the Active only
+/// without Confused / Asleep / Paralyzed, and never while a blocker is in play
+/// (R-POWER-03, R-STATUS-05).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PowerKind {
     /// Energy of this colour attached to a creature of this colour doesn't use up
@@ -104,7 +106,23 @@ pub enum PowerKind {
     EvolutionLock,
     /// All other Powers stop working (R-POWER-03).
     Blocker,
-    /// Used from the menu (R-POWER-01). Stage 2 implements the flow.
+    /// The holder can't receive conditions (R-STATUS-03).
+    StatusImmune,
+    /// Damage of at least this much to the holder is prevented (R-DMG-09 (3), R-DMG-04).
+    PreventAtLeast(u16),
+    /// Damage to the holder is halved, rounded down to 10 (R-DMG-09 (3), R-DMG-07).
+    HalveDamage,
+    /// All effects of attacks by evolved creatures, damage included, are
+    /// prevented on the holder (R-DMG-12).
+    ShieldFromEvolved,
+    /// Flip when attack damage is done to the holder: heads prevents it (R-DMG-13).
+    CoinPrevention,
+    /// When the holder takes damage that isn't from a Power, the other Active
+    /// takes a flat 10 (R-DMG-14).
+    Retaliate,
+    /// Runs when the holder is put on the Bench or evolves (R-POWER-06).
+    OnPlay(&'static [Effect]),
+    /// Used from the menu (R-POWER-01, R-POWER-04/05).
     Activated {
         effects: &'static [Effect],
         once_per_turn: bool,
@@ -150,6 +168,15 @@ impl CardDef {
 /// [`validate_deck`](crate::validate_deck)-checked decks are always valid.
 pub fn card(id: CardId) -> &'static CardDef {
     try_card(id).unwrap_or_else(|| panic!("unknown card id {}", id.0))
+}
+
+/// A card with this name, for rules that follow "evolves from" names (R-EVO-10).
+pub(crate) fn find_named(name: &str) -> Option<&'static CardDef> {
+    #[cfg(test)]
+    if let Some(c) = crate::fixtures::CARDS.iter().find(|c| c.name == name) {
+        return Some(c);
+    }
+    crate::set::CARDS.iter().find(|c| c.name == name)
 }
 
 pub fn try_card(id: CardId) -> Option<&'static CardDef> {

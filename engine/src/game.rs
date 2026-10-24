@@ -10,6 +10,7 @@ use crate::action::{Action, Event, Prompt, PromptKind, RuleError};
 use crate::card::{card, CardDef, CardId};
 use crate::deck::{validate_deck, DeckError};
 use crate::player::Player;
+use crate::resolve::Pending;
 use crate::rng::Rng;
 
 pub const MAX_BENCH: usize = 5;
@@ -54,6 +55,8 @@ pub(crate) enum Step {
         count: u8,
     },
     Replace(usize),
+    /// The next stage of `Game::pending` (see `resolve`).
+    Resolve,
 }
 
 #[derive(Debug, Clone)]
@@ -72,6 +75,10 @@ pub struct Game {
     /// Per-turn flags (R-TURN-03 step 4).
     pub(crate) energy_attached: bool,
     pub(crate) retreat_failed: bool,
+    /// R-EFFECT-02: this turn's accuracy coin, once flipped.
+    pub(crate) accuracy: Option<bool>,
+    /// The attack, trainer or Power being resolved.
+    pub(crate) pending: Option<Pending>,
     pub(crate) prompt: Option<Prompt>,
     pub(crate) steps: VecDeque<Step>,
     pub(crate) winner: Option<usize>,
@@ -108,6 +115,8 @@ impl Game {
             turn_player: 0,
             energy_attached: false,
             retreat_failed: false,
+            accuracy: None,
+            pending: None,
             prompt: None,
             steps: VecDeque::new(),
             winner: None,
@@ -156,6 +165,10 @@ impl Game {
             all.extend((0..active.creature().attacks.len()).map(Action::Attack));
             all.extend((0..active.energy.len()).map(Action::DiscardEnergy));
         }
+        if let PromptKind::Choose { options, .. } = &prompt.kind {
+            all.extend((0..options.len()).map(Action::Choose));
+        }
+        all.extend((0..=MAX_BENCH).map(Action::UsePower));
         all.extend((1..=MAX_BENCH).map(Action::Promote));
         all.extend((0..pl.prizes.len()).map(Action::TakePrize));
         all.retain(|&a| self.validate(a).is_ok());
@@ -212,6 +225,16 @@ impl Game {
                 Some(None) => Err(RuleError::PrizeTaken),
                 Some(Some(_)) => Ok(()),
             },
+            (K::Choose { options, .. }, Action::Choose(i)) if i >= options.len() => {
+                Err(RuleError::NoSuchChoice)
+            }
+            (K::Choose { .. }, Action::Choose(_)) => Ok(()),
+            (
+                K::Choose {
+                    can_cancel: true, ..
+                },
+                Action::Cancel,
+            ) => Ok(()),
             _ => Err(RuleError::NotNow),
         }
     }
@@ -238,6 +261,13 @@ impl Game {
             }
             (K::ChoosePrize { count }, Action::TakePrize(i)) => self.take_prize(p, i, count, ev),
             (K::ChooseReplacement, Action::Promote(slot)) => self.promote(p, slot, ev),
+            (
+                K::Choose {
+                    effect, options, ..
+                },
+                Action::Choose(i),
+            ) => self.chosen(effect, options[i]),
+            (K::Choose { .. }, Action::Cancel) => self.cancel_pending(),
             _ => unreachable!("validated"),
         }
     }
@@ -267,6 +297,7 @@ impl Game {
                         self.ask(p, PromptKind::ChooseReplacement);
                     }
                 }
+                Step::Resolve => self.resolve(ev),
             }
         }
     }
@@ -292,6 +323,11 @@ impl Game {
         heads
     }
 
+    /// R-EFFECT-03: always flips all `n` coins; returns the number of heads.
+    pub(crate) fn flip_many(&mut self, player: usize, n: u8, ev: &mut Vec<Event>) -> u8 {
+        (0..n).filter(|_| self.flip(player, ev)).count() as u8
+    }
+
     /// Script the next coin results (tests and scripted scenarios).
     #[cfg(test)]
     pub(crate) fn force_coins(&mut self, coins: &[bool]) {
@@ -315,6 +351,7 @@ impl Game {
     pub(crate) fn game_over(&mut self, winner: usize, ev: &mut Vec<Event>) {
         self.winner = Some(winner);
         self.prompt = None;
+        self.pending = None;
         self.steps.clear();
         ev.push(Event::GameOver { winner });
     }

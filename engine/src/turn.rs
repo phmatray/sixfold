@@ -1,6 +1,8 @@
 //! Turn skeleton (R-TURN-03): start, end, between-turns, next turn.
 
 use crate::action::Event;
+use crate::condition::{Poison, Special, Status};
+use crate::effect::Effect;
 use crate::game::{Game, Step};
 
 impl Game {
@@ -8,7 +10,7 @@ impl Game {
     pub(crate) fn start_turn(&mut self, ev: &mut Vec<Event>) {
         let t = self.turn_player;
         // Step 1: clear t's own-turn substatus (+E7).
-        // RULES: R-TURN-03 — stage 2 adds that field to `ActiveEffects` and clears it here.
+        self.players[t].effects.shield = None;
         ev.push(Event::TurnStarted {
             player: t,
             turn: self.turn,
@@ -20,9 +22,10 @@ impl Game {
                 c.power_used = false;
             }
         }
-        // Step 4. RULES: R-EFFECT-02 — stage 2 also resets the accuracy-coin cache here.
+        // Step 4
         self.energy_attached = false;
         self.retreat_failed = false;
+        self.accuracy = None;
         // Step 5 (R-TURN-01/02): every turn draws, even turn 0; an empty deck loses.
         if self.draw(t, ev).is_none() {
             ev.push(Event::DeckOut { player: t });
@@ -35,10 +38,15 @@ impl Game {
     /// R-TURN-03 step 8: clear the turn player's end-of-turn effects.
     pub(crate) fn end_turn(&mut self, ev: &mut Vec<Event>) {
         let t = self.turn_player;
+        let turn = self.turn;
         let pl = &mut self.players[t];
         pl.trainer_locked = false;
         pl.effects.placed = None;
-        // RULES: R-TURN-03 — stage 2 also clears the doubling flag (+EB bit 0) here.
+        // RULES: R-TURN-03 step 8 "conditionally +EB bit 0" — the doubling ends
+        // with the turn it applied to, not the turn it was set.
+        if pl.effects.doubling.is_some_and(|set| turn > set) {
+            pl.effects.doubling = None;
+        }
         ev.push(Event::TurnEnded { player: t });
         self.steps.push_front(Step::BetweenTurns);
     }
@@ -46,11 +54,74 @@ impl Game {
     /// R-STATUS-07, with T = the player whose turn just ended.
     pub(crate) fn between_turns(&mut self, ev: &mut Vec<Event>) {
         ev.push(Event::BetweenTurns);
-        // RULES: R-STATUS-07 steps 1–4 (T's poison / sleep coin / paralysis cure,
-        // T's +10 trainers, N's poison / sleep coin, N's −20 trainers) — stage 2.
+        let t = self.turn_player;
+        let n = 1 - t;
+        // 1. T's poison, sleep coin, then the paralysis ends (R-STATUS-10).
+        self.poison_and_sleep(t, ev);
+        let pl = &mut self.players[t];
+        if pl.active.is_some() && pl.condition.special == Some(Special::Paralyzed) {
+            pl.condition.special = None;
+            ev.push(Event::ConditionRemoved {
+                player: t,
+                status: Status::Paralyzed,
+            });
+        }
+        // 2. T's +10 trainers. 3. N's poison and sleep coin. 4. N's −20 trainers.
+        // RULES: R-TRAINER-05 (UNCERTAIN) — discarded from every slot, as the ledger reads.
+        self.discard_trainers(t, Effect::AttachPlus10, ev);
+        self.poison_and_sleep(n, ev);
+        self.discard_trainers(n, Effect::AttachMinus20, ev);
         self.steps.push_front(Step::NextTurn);
-        // Step 5: knock-outs for both sides together (R-KO-08); a no-op if none.
-        self.knock_outs(ev);
+        // 5. Knock-outs for both sides together (R-KO-08); a no-op if none.
+        self.knock_outs(false, ev);
+    }
+
+    /// R-STATUS-08/09: poison damage (10, double 20) with no modifiers, then a
+    /// sleep coin if it survived. Confusion is never processed (R-STATUS-11).
+    fn poison_and_sleep(&mut self, p: usize, ev: &mut Vec<Event>) {
+        if self.players[p].active.is_none() {
+            return;
+        }
+        let amount = match self.players[p].condition.poison {
+            Poison::None => 0,
+            Poison::Poisoned => 10,
+            Poison::DoublePoisoned => 20,
+        };
+        if amount > 0 {
+            self.raw_damage(p, amount, ev);
+        }
+        let alive = self.players[p].active.as_ref().is_some_and(|a| a.hp > 0);
+        if alive && self.players[p].condition.special == Some(Special::Asleep) && self.flip(p, ev) {
+            self.players[p].condition.special = None;
+            ev.push(Event::ConditionRemoved {
+                player: p,
+                status: Status::Asleep,
+            });
+        }
+    }
+
+    /// R-TRAINER-05: discard every attached trainer of this kind on side `p`.
+    fn discard_trainers(&mut self, p: usize, kind: Effect, ev: &mut Vec<Event>) {
+        let pl = &mut self.players[p];
+        let mut gone = Vec::new();
+        for slot in 0..=pl.bench.len() {
+            let Some(c) = pl.slot_mut(slot) else {
+                continue;
+            };
+            let (drop, keep): (Vec<_>, Vec<_>) = c.trainers.iter().partition(|&&id| {
+                matches!(&crate::card::card(id).kind, crate::CardKind::Trainer(t) if t.effects.contains(&kind))
+            });
+            c.trainers = keep;
+            gone.extend(drop.into_iter().map(|card| (slot, card)));
+        }
+        for (slot, card) in gone {
+            pl.discard.push(card);
+            ev.push(Event::TrainerDiscarded {
+                player: p,
+                slot,
+                card,
+            });
+        }
     }
 
     /// R-TURN-03 steps 11–12.
@@ -154,11 +225,16 @@ mod tests {
             Event::Damage {
                 player: 1,
                 slot: 0,
-                amount: 10,
+                amount: 20,
+                weakness: true,
                 ..
             }
         )));
-        assert_eq!(g.players[1].active.as_ref().unwrap().hp, 50);
+        assert_eq!(
+            g.players[1].active.as_ref().unwrap().hp,
+            40,
+            "Pebblet is weak to Grass"
+        );
     }
 
     /// R-TURN-05
@@ -223,5 +299,238 @@ mod tests {
         set_hand(&mut g, 0, &[GRASS_E; 15]);
         ok(&mut g, Action::Done);
         assert_eq!(g.players[0].hand.len(), 15);
+    }
+
+    use crate::condition::{Special, Status};
+
+    fn applied(ev: &[Event], player: usize, status: Status) -> bool {
+        ev.contains(&Event::ConditionApplied { player, status })
+    }
+
+    /// R-STATUS-07, R-STATUS-10: inflicted on N, it lasts through N's turn and
+    /// ends at the between-turns step after it.
+    #[test]
+    fn paralysis_inflicted_lasts_through_owner_next_turn() {
+        let mut g = main_phase(0);
+        g.players[1].bench.push(creature(EMBERKIT, &[]));
+        let ev = attack_with(
+            &mut g,
+            10,
+            &[crate::Effect::Inflict {
+                status: Status::Paralyzed,
+                coin: false,
+            }],
+        );
+        assert!(applied(&ev, 1, Status::Paralyzed));
+        assert_eq!(
+            g.players[1].condition.special,
+            Some(Special::Paralyzed),
+            "kept after T's turn"
+        );
+        g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E, FIGHTING_E];
+        assert_eq!(err(&mut g, Action::Attack(0)), RuleError::AsleepOrParalyzed);
+        assert_eq!(err(&mut g, Action::Retreat), RuleError::AsleepOrParalyzed);
+        let ev = ok(&mut g, Action::Done);
+        assert!(ev.contains(&Event::ConditionRemoved {
+            player: 1,
+            status: Status::Paralyzed
+        }));
+        assert_eq!(g.players[1].condition, Default::default());
+    }
+
+    /// R-STATUS-10
+    #[test]
+    fn paralysis_cured_after_owner_turn() {
+        let mut g = main_phase(0);
+        g.players[0].condition.apply(Status::Paralyzed);
+        g.players[0].condition.apply(Status::Poisoned);
+        ok(&mut g, Action::Done);
+        assert_eq!(g.players[0].condition.special, None);
+        assert_eq!(
+            g.players[0].condition.poison,
+            crate::Poison::Poisoned,
+            "poison stays"
+        );
+        // On the opponent's Active it is not removed.
+        let mut g = main_phase(0);
+        g.players[1].condition.apply(Status::Paralyzed);
+        ok(&mut g, Action::Done);
+        assert_eq!(g.players[1].condition.special, Some(Special::Paralyzed));
+    }
+
+    /// R-STATUS-07, R-STATUS-09: poison first, and no sleep coin once knocked out.
+    #[test]
+    fn between_turns_poison_before_sleep() {
+        let mut g = main_phase(0);
+        g.players[0].condition.apply(Status::Asleep);
+        g.players[0].condition.apply(Status::Poisoned);
+        g.force_coins(&[false]);
+        let ev = ok(&mut g, Action::Done);
+        let poison = ev
+            .iter()
+            .position(|e| {
+                matches!(
+                    e,
+                    Event::Damage {
+                        player: 0,
+                        amount: 10,
+                        ..
+                    }
+                )
+            })
+            .unwrap();
+        let coin = ev
+            .iter()
+            .position(|e| matches!(e, Event::CoinFlip { player: 0, .. }))
+            .unwrap();
+        assert!(poison < coin);
+        let mut g = main_phase(0);
+        g.players[0].bench.push(creature(EMBERKIT, &[]));
+        g.players[0].condition.apply(Status::Asleep);
+        g.players[0].condition.apply(Status::Poisoned);
+        g.players[0].active.as_mut().unwrap().hp = 10;
+        let ev = ok(&mut g, Action::Done);
+        assert_eq!(coins(&ev), 0, "knocked out by poison: no coin");
+        assert!(ev.contains(&Event::KnockedOut {
+            player: 0,
+            slot: 0,
+            card: MOSSLING
+        }));
+    }
+
+    /// R-STATUS-07: N's Active is processed after T's, both each between-turns step.
+    #[test]
+    fn between_turns_processes_both_actives_in_order() {
+        let mut g = main_phase(0);
+        g.players[0].condition.apply(Status::Poisoned);
+        g.players[1].condition.apply(Status::DoublePoisoned);
+        let ev = ok(&mut g, Action::Done);
+        let hits: Vec<_> = ev
+            .iter()
+            .filter_map(|e| match e {
+                Event::Damage { player, amount, .. } => Some((*player, *amount)),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(hits, vec![(0, 10), (1, 20)]);
+    }
+
+    /// R-STATUS-08
+    #[test]
+    fn poison_ignores_minus_20_trainer() {
+        let mut g = main_phase(0);
+        g.players[1].condition.apply(Status::Poisoned);
+        g.players[1].active.as_mut().unwrap().trainers.push(BUCKLER);
+        g.players[1].effects.shield = Some(crate::Shield::PreventDamage);
+        ok(&mut g, Action::Done);
+        assert_eq!(hp(&g, 1, 0), 50);
+    }
+
+    /// R-STATUS-08
+    #[test]
+    fn double_poison_deals_20() {
+        let mut g = main_phase(0);
+        g.players[0].condition.apply(Status::DoublePoisoned);
+        ok(&mut g, Action::Done);
+        assert_eq!(hp(&g, 0, 0), 30);
+        ok(&mut g, Action::Done);
+        assert_eq!(
+            hp(&g, 0, 0),
+            10,
+            "every between-turns step, after either turn"
+        );
+    }
+
+    /// R-STATUS-09
+    #[test]
+    fn sleep_flip_heads_wakes_up() {
+        let mut g = main_phase(0);
+        g.players[1].condition.apply(Status::Asleep);
+        g.players[1].condition.apply(Status::Poisoned);
+        g.force_coins(&[true]);
+        let ev = ok(&mut g, Action::Done);
+        assert!(ev.contains(&Event::ConditionRemoved {
+            player: 1,
+            status: Status::Asleep
+        }));
+        assert_eq!(g.players[1].condition.special, None);
+        assert_eq!(g.players[1].condition.poison, crate::Poison::Poisoned);
+    }
+
+    /// R-STATUS-09
+    #[test]
+    fn sleep_flip_tails_stays_asleep() {
+        let mut g = main_phase(0);
+        g.players[1].condition.apply(Status::Asleep);
+        g.force_coins(&[false]);
+        ok(&mut g, Action::Done);
+        assert_eq!(g.players[1].condition.special, Some(Special::Asleep));
+    }
+
+    /// R-STATUS-11
+    #[test]
+    fn confusion_persists_across_turns() {
+        let mut g = main_phase(0);
+        g.players[0].condition.apply(Status::Confused);
+        for _ in 0..4 {
+            ok(&mut g, Action::Done);
+        }
+        assert!(g.players[0].condition.is_confused());
+    }
+
+    /// R-TURN-07: a result set between turns ends the duel before the next turn.
+    #[test]
+    fn poison_ko_between_turns_ends_before_next_draw() {
+        let mut g = main_phase(0);
+        g.players[1].condition.apply(Status::Poisoned);
+        g.players[1].active.as_mut().unwrap().hp = 10;
+        let ev = ok(&mut g, Action::Done);
+        assert_eq!(g.winner(), Some(0));
+        assert!(!ev.iter().any(|e| matches!(e, Event::TurnStarted { .. })));
+        assert_eq!(g.turn(), 0);
+    }
+
+    /// R-TRAINER-05: a +10 lasts for the turn it was played.
+    #[test]
+    fn plus10_trainer_discarded_end_of_turn() {
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[WHETSTONE]);
+        ok(&mut g, Action::PlayTrainer(0));
+        assert_eq!(
+            g.players[0].active.as_ref().unwrap().trainers,
+            vec![WHETSTONE]
+        );
+        assert!(g.players[0].discard.is_empty());
+        g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
+        let ev = ok(&mut g, Action::Attack(0));
+        assert_eq!(damage_to(&ev, 1, 0), vec![30], "10 ×2 +10");
+        assert!(ev.contains(&Event::TrainerDiscarded {
+            player: 0,
+            slot: 0,
+            card: WHETSTONE
+        }));
+        assert_eq!(g.players[0].discard, vec![WHETSTONE]);
+    }
+
+    /// R-TRAINER-05: a −20 lasts through the opponent's following turn.
+    #[test]
+    fn minus20_trainer_lasts_opponent_turn() {
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[BUCKLER]);
+        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::Choose(0)); // the Active
+        ok(&mut g, Action::Done);
+        assert_eq!(
+            g.players[0].active.as_ref().unwrap().trainers,
+            vec![BUCKLER]
+        );
+        g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
+        let ev = ok(&mut g, Action::Attack(0));
+        assert_eq!(damage_to(&ev, 0, 0), vec![0], "20 −20");
+        assert!(ev.contains(&Event::TrainerDiscarded {
+            player: 0,
+            slot: 0,
+            card: BUCKLER
+        }));
     }
 }
