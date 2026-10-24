@@ -364,7 +364,7 @@ pub enum EnergyCard { Basic(Color) /* never Colorless */, DoubleColorless /* 2 c
 pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 ```
 
-**Rarity.** Every card has one. Basic energy is `Energy` (and nothing else is); Stage 2 creatures are always `Rare` and Stage 1 at least `Uncommon` (both checked by the set's tests). In the shipped set the Basics and simple trainers are `Common`; Stage 1s, Basics with a Power or a big attack, and draw, search and attach trainers are `Uncommon`; Stage 2s, the switch, energy-removal, stage-skip and devolve trainers and the special energy are `Rare`. Rarity only drives boosters (§10).
+**Rarity.** Every card has one. Basic energy is `Energy` (and nothing else is); Stage 2 creatures are always `Rare` and Stage 1 at least `Uncommon` (both checked by the set's tests). In the shipped set the Basics and simple trainers are `Common`; Stage 1s, the stronger Basics, and the draw, search, recover and attach trainers are `Uncommon`; Stage 2s, the switch, energy-removal, stage-skip and devolve trainers and the special energy are `Rare`. Rarity only drives boosters (§10).
 
 **Deck rules.** A deck has exactly 60 cards and at least one real Basic. A deck may hold at most 4 cards with the same name, except basic energy, which is unlimited. The special energy counts toward that limit. Evolving matches `evolves_from` against the **name** of the card on top.
 
@@ -536,7 +536,63 @@ impl Ai {
 
 ---
 
-## 10. Known engine gaps (current)
+## 10. Collection, boosters and deck building
+
+Pure data and functions with no I/O: the UI decides where strings are stored and where booster seeds come from. `Collection`, `starter_collection`, `LoadError`, `DeckList`, `DeckListError`, `AddError` and `SortBy` are re-exported from the crate root; boosters live in `pkmntcg_engine::booster`.
+
+**Collection.** Owned copies per `CardId`. Basic energy is unlimited: it is never stored, `count` reports `usize::MAX`, and `add` / `remove` on it are no-ops (`remove` returns true).
+
+```rust
+let mut c = Collection::new();          // or starter_collection(): both prebuilt decks' cards
+c.add(id, n); c.add_all(&pack);         // add copies / a booster's contents
+c.remove(id, n) -> bool                 // false, and nothing removed, when fewer are owned
+c.count(id) -> usize
+c.iter() -> impl Iterator<Item = (CardId, usize)>  // id order, basic energy not listed
+c.missing(&deck) -> Vec<(CardId, usize)>           // cards short, and by how many
+c.can_build(&deck) -> bool
+```
+
+**Save string.** `c.save()` gives `v1;<id>:<count>,...;<checksum>`: decimal ids in ascending order, then the 32-bit FNV-1a hash of everything before the last `;`, as 8 lowercase hex digits. An empty collection is `v1;;<checksum>`. The same collection always gives the same string. `Collection::load(&s) -> Result<(Collection, Vec<(CardId, usize)>), LoadError>`:
+
+- `LoadError::Version`: not a collection string, or another version.
+- `LoadError::Checksum`: cut short or edited.
+- `LoadError::Malformed`: an entry that isn't `id:count`, a zero count, or a repeated id.
+- An id the card set doesn't have (e.g. saved by a newer build) is dropped and returned in the `Vec` with its count, so the UI can say so. Basic energy entries are ignored.
+
+Ids are positions in `set::CARDS`, so the set may only grow at the end: reordering or removing cards would change what old saves mean.
+
+**Boosters (`booster::*`).** `PACK_SIZE = 10`. `Booster { name, description, colors }`; `BOOSTERS = [&EMBER_PACK, &TIDE_PACK, &WILD_PACK]`.
+
+| Slot (reveal order) | Cards | Drawn |
+|---|---|---|
+| 1 | basic energy | any of the pack's colours |
+| 2–6 | 5 `Common` | may repeat |
+| 7–9 | 3 `Uncommon` | distinct |
+| 10 | 1 `Rare` | |
+
+`booster.open(seed) -> Vec<CardId>` always gives the same pack for the same seed (the engine's PCG32). A pack holds trainers, the special energy and colorless creatures always, and creatures and basic energy only of its `colors`: Ember is Fire / Fighting, Tide is Water / Psychic, Wild is everything. `booster.holds(id)` and `booster.pool(rarity)` list what it can contain, for odds in the UI. Each card of a pool is equally likely.
+
+**Deck lists.** `DeckList { pub name: String, pub cards: Vec<CardId> }`, for decks a player builds.
+
+```rust
+let mut d = DeckList::new("My deck");
+d.check_add(id, &owned) -> Result<(), AddError> // UnknownCard | DeckFull | TooManyCopies | NotOwned, in that order
+d.add(id, &owned) -> Result<(), AddError>       // check_add, then push
+d.remove(id) -> bool                            // one copy
+d.copies("Cindrel") -> usize                    // by name, as the 4-copy rule counts
+d.counts() -> Vec<(CardId, usize)>              // distinct cards, id order
+d.sorted(SortBy::Color | SortBy::Kind | SortBy::Rarity) -> Vec<(CardId, usize)>
+d.fill_energy() -> usize                        // pads to 60 with basic energy, returns how many
+d.validate(&owned) -> Result<(), DeckListError> // Illegal(DeckError), then NotOwned(first short card)
+```
+
+- `SortBy::key(id)` sorts any card list (e.g. the collection) the same way: `v.sort_by_key(|&(id, _)| by.key(id))`. Colour puts each colour's creatures then its basic energy, with trainers and the special energy last; Kind is Basics, Stage 1, Stage 2, trainers, special energy, basic energy; Rarity is rarest first. Ties go by id, which keeps evolution lines together.
+- `fill_energy` shares the free slots between the colours of the deck's creatures, in proportion to the number of creature cards of each colour (D'Hondt, counting the basic energy already in the deck). A deck with no coloured creature gets nothing.
+- `set::basic_energy(color) -> Option<CardId>` is the basic energy card of a colour.
+
+---
+
+## 11. Known engine gaps (current)
 
 - A search can't decline to take a matching card. `DiscardEnergy` with `Colorless` discards the newest energy, and the player doesn't choose.
 - There is no "revive onto the Bench" effect and no "return a card to the top of the deck" effect.
