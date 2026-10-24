@@ -1,7 +1,9 @@
 # World assets and maps (contract for the Blender side)
 
 `world.js` builds each map from `web/world/maps/<name>.json` (the game starts in
-`overworld`) and loads the models below. A missing model is fine: the scene draws a
+`overworld`, Sixfold Meadow) and loads the models below. Only the current map is built;
+once it is up, the maps, models and ground textures next door (its exits and warps) are
+fetched one at a time while the browser is idle, so the next area opens quickly. A missing model is fine: the scene draws a
 placeholder of the same footprint, so models can land one at a time. Reload the page
 to see a new file.
 
@@ -13,8 +15,13 @@ to see a new file.
 - The hero stands on tile centres and moves one tile per step: 0.25 s, or 0.125 s
   running (once it owns the running shoes).
 - Collision is per tile: a tile is blocked if a prop's footprint covers it (except
-  the walkable `rug` and `exit_mat`), an NPC stands on it, or its tile character is
-  `#`, `f`, `W` or `V`. Outside the map is blocked.
+  the walkable `rug` and `exit_mat`, and the decks below), an NPC stands on it, or its
+  tile character is `#`, `f`, `W`, `V` or `~`. Outside the map is blocked, except where an
+  edge exit leads on.
+- **Height:** every tile has a floor height: 0, a cliff digit (`1`..`9` m), a deck (`=` 0.1,
+  `H` 0.3, or a deck prop). The hero and NPCs stand at it, easing between two heights on a
+  step. A step may rise or drop at most 0.6 m, so a cliff edge (1 m) blocks and stairs
+  (0.5 m) climb it. Taps on raised ground find the right tile.
 - Press G in the game to show the grid with a legend (blocked, look or use, door, person).
 
 ## Models
@@ -25,6 +32,23 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | File | What | Footprint (X × Z) | Height guide |
 |---|---|---|---|
 | `house.glb` | The duel hall, door on the front (+Z) edge | 7 × 5 | ~5 m |
+| `cottage.glb` | Small house (Hob's bakery), door on column 2 of the front row, `smoke_origin` on the chimney | 5 × 4 | ~4.5 m |
+| `workshop.glb` | Shed (boathouse, letter office), door on column 1 of the front row | 3 × 3 | ~3.8 m |
+| `lighthouse.glb` | Striped tower, `light_origin` in the lantern room (the game adds a pulsing glow) | 2 × 2 | ~7 m |
+| `fountain.glb` | Hexagonal basin; meshes whose material name contains `water` get rippling water | 3 × 3 | ~1.6 m |
+| `pine.glb`, `birch.glb` | Woodland trees, varied like `tree` | 1 × 1 | ~3.8, ~3.6 m |
+| `reeds.glb` | Shoreline reeds and cattails | 1 × 1 | ~0.9 m |
+| `boardwalk.glb` | Deck tile for `=`, top at 0.10 m, planks along X, chains on all sides | 1 × 1 | 0.1 m |
+| `pier.glb` | Deck tile for `H` (over water), top at 0.30 m, posts into the water | 1 × 1 | 0.3 m |
+| `bridge.glb` | Footbridge spanning its Z length; floor 0.12 / 0.24 / 0.24 / 0.12 m by row | 2 × 4 | rails ~1.1 m |
+| `stairs.glb` | Stone steps climbing toward −Z from 0 to 1 m (floor 0.5 m; `y` stacks them on a cliff) | 1 × 1 | 1 m |
+| `cliff.glb` (+ `cliff_b`, mossy) | Stackable rock block for the digit tiles: sides to the tile edges, flat top at exactly 1 m, random 90° turns | 1 × 1 | 1 m |
+| `boat.glb` | Rowboat on the water (bobs in the game) | 2 × 1 | ~0.4 m |
+| `stall.glb`, `stall_b.glb` | Market stalls, counter on the front; a person can be talked to across one | 2 × 1 | ~2.3 m |
+| `lantern.glb` | Street lantern, `light_origin` at the glass | 1 × 1 | ~2.2 m |
+| `crates.glb`, `bench.glb` | Crates and a barrel; a park bench facing +Z | 1 × 1, 2 × 1 | — |
+| `signpost.glb` | Direction arrows on a post, read like `sign` | 1 × 1 | ~1.6 m |
+| `lens.glb`, `letter.glb` | Quest items, shown turning in the item popup | — | any (fitted) |
 | `tree.glb` (+ `tree_b`, `tree_c`) | Round-canopy trees, picked at random | 2 × 2 | ~3.5 m |
 | `bush.glb` | Leafy bush | 1 × 1 | ~0.7 m |
 | `bush_dark.glb` | Darker filler for the band of trees outside the map | free | ~1 m |
@@ -60,7 +84,11 @@ Rules for every model:
 - **Characters:** `Idle` (breathing, blink) and `Walk` (an in-place loop, one leg forward
   per 0.25 s tile), optional `Run` (else Walk plays twice as fast) and `Fidget` (played once
   after ~6 s idle). The first clip of each name wins. The game adds the step bounce.
-- **Wind:** trees, bushes, flowers and grass_edge sway in the vertex shader, weighted by a
+- **Draw calls:** static props (trees, bushes, rocks, decks, cliffs, stalls, lanterns …) are
+  instanced, and the flat-coloured opaque parts of each model are merged into one mesh with
+  vertex colours, so a model costs one draw (plus one shadow draw) however many there are.
+  Keep textured or see-through parts to a minimum; each one is a draw of its own.
+- **Wind:** trees, bushes, flowers, pine, birch, reeds and grass_edge sway in the vertex shader, weighted by a
   `COLOR_0` vertex colour (red: 0 at the base, 1 at the tips; never shown as a tint).
   Without it, the game uses height above the ground.
 - **Shadows:** bake a soft contact-shadow disc into prop bases; the game adds one only
@@ -75,10 +103,14 @@ Rules for every model:
 ## Ground
 
 One flat ground mesh per map at y = 0 (nothing else may be coplanar with it). Its
-shader blends two layers through a per-tile mask (path tiles in the overworld) with
-noisy, painted borders. Textures: `textures/grass.webp`, `dirt.webp`, `wood_floor.webp`
-(seamless, 1024²; convert from PNG with `cwebp -q 82`; only the .webp files are
-committed). A procedural fallback is drawn when one is missing.
+shader paints the base layer and up to four overlays through a per-tile RGBA mask with
+noisy, painted borders: `p` the map's path layer, `s` (and `=`) sand, `r` stone, and `~`
+(and `H`) water. Water is drawn by the same shader, no extra mesh: shallow to deep teal,
+drifting ripples and glints, a foam line and wet sand along the shore (still with reduced
+motion). Past the map edge the mask carries on from the edge tile, so a path or the sea
+runs on into the distance. Textures: `textures/grass.webp`, `dirt.webp`, `wood_floor.webp`,
+`sand.webp`, `stone.webp` (seamless, 1024²; convert from PNG with `cwebp -q 82`; only the
+.webp files are committed). A procedural fallback is drawn when one is missing.
 
 ## Auto-tiling (fences and walls)
 
@@ -113,10 +145,13 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
 ```jsonc
 {
   "width": 28, "height": 24,            // in tiles
+  "title": "Sixfold Meadow",            // outdoors: shown (and announced) on the way in
   "tiles": ["....p....", ...],          // `height` rows of `width` chars; row 0 is z = 0 (far side)
-      // "." grass, "p" dirt path, "w" wood floor (walkable)
-      // "f" fence, "W" wall, "V" wall with a window, "#" blocked
-  "props": [{ "asset": "house", "x": 10, "z": 6, "rot": 0 }, ...],
+      // "." base ground, "p" path, "s" sand, "r" stone, "w" wood floor (walkable)
+      // "=" boardwalk, "H" pier over water, "1".."9" a raised cliff top that many metres up (walkable)
+      // "f" fence, "W" wall, "V" wall with a window, "~" water, "#" blocked
+  "props": [{ "asset": "house", "x": 10, "z": 6, "rot": 0 }, { "asset": "pine", "x": 3, "z": 2, "rot": 0, "y": 1 }, ...],
+  "exits": [{ "side": "n", "span": [24, 25], "to": "quarry" }],
   "spawn": { "x": 13, "z": 14, "facing": "n" },
   "interactions": [{ "x": 16, "z": 11, "kind": "sign", "text": "..." }, ...],
   "warps": [{ "x": 13, "z": 10, "to": "shop", "label": "Go inside", "spawn": { "x": 5, "z": 7, "facing": "n" } }],
@@ -124,7 +159,8 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
              "x": 6, "z": 13, "facing": "e", "idle": "Idle", "route": ["e", "e", "s", ...],
              "dialogue": [{ "if": "!item:running_shoes", "lines": ["..."], "do": ["give:running_shoes"] },
                           { "lines": ["..."] }] }],
-  "ground": { "base": "grass", "path": "dirt", "margin": 9 },
+  "ground": { "base": "grass", "path": "dirt", "margin": 9, "tufts": 1800 },
+  "ring": ["pine", "birch", "bush_dark"], "ringSides": "nesw",
   "camera": { ... },
   "light": { ... }
 }
@@ -132,17 +168,28 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
 
 - **props:** `x`, `z` = the footprint's min-corner tile. `rot` ∈ 0, 90, 180, 270 degrees
   about +Y (counter-clockwise seen from above: rot 90 turns the +Z front toward +X); 90
-  and 270 swap the footprint. The model sits at the footprint's centre.
+  and 270 swap the footprint. The model sits at the footprint's centre, `y` metres up
+  (optional: a tree or a rock on a cliff top, stairs from one ledge to the next). Decks
+  (`boardwalk`, `pier`, `bridge`, `stairs`) are walkable, even over water, and set the floor
+  height of their tiles.
+- **exits:** walking off the map's `side` (`n`, `e`, `s`, `w`) on a tile whose coordinate
+  along that edge is within `span` (inclusive) fades to map `to`. The hero comes in on the
+  matching edge of `to`, at the same offset along the exit there that leads back (same
+  `to`, opposite side), facing the way it walked; without one, on `to`'s spawn. Every exit
+  needs its way back, and both spans' edge tiles must be walkable
+  (`node tools/check-maps.mjs web/world` checks this, in CI). Put a signpost by each.
 - **Directions:** `n` = −Z, `s` = +Z, `e` = +X, `w` = −X.
 - **interactions:** the tile the hero must **face** to act with E / tap. `kind` `duel` offers a
-  match; `sign` shows `text`.
+  match; `sign` shows `text`. A spot with an `id`, a `name` and a `dialogue` (as for NPCs)
+  talks instead, so a find can `give:` an item; with `glint` (a condition, e.g.
+  `"!item:field_lens"`) a sparkle marks it while the condition holds.
 - **warps:** a door warp (no `dir`) sits on a solid tile; facing it shows `label`, and stepping
   into it (or E) walks in, fades, and loads map `to` with the hero on `spawn`. A warp with
   `dir` (the exit mat) fires when the hero steps onto it, or pushes `dir` while standing on it.
   A door warp with `if` (a dialogue condition, e.g. `"seals:6"`) only opens while it holds;
   until then it reads like a sign showing `locked`. A `#` tile in a wall row leaves a gap: a
   dark doorway for such a door (the hall's sealed door to `warden`).
-- **npcs:** block their tile. `model` loads `assets/npc/<model>.glb` (`npc_*` and `rival_*`
+- **npcs:** block their tile (and stand at its floor height). `model` loads `assets/npc/<model>.glb` (`npc_*` and `rival_*`
   names); until it exists the hero model is used, lerped toward `tint` and scaled by `scale`.
   `route` (optional) is a loop of one-tile steps. Speaking (E or tap while facing them, also
   across a counter or a duel table) turns them to the hero and runs `dialogue`: the first
@@ -159,8 +206,12 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   Progress, and where the hero stands (`map,x,z,facing`), are saved in localStorage; the
   world resumes there, and after a campaign duel the hero, back on its tile, talks to the
   rival again so the post-duel line plays.
-- **ground:** the two layers (`base`, and `path` under `p` tiles) and how far the ground
-  runs past the map edge.
+- **ground:** the base layer (`grass`, `dirt`, `sand` …), `path` under `p` tiles, how far
+  the ground runs past the map edge, and `tufts` (grass blades scattered on open base
+  tiles, 1800 by default; 0 on sand or dirt).
+- **ring / ringSides:** the band of trees drawn outside an outdoor map: which models
+  (default `tree`, its variants and `bush_dark`) and on which sides (default `nesw`; leave out
+  the sea). It leaves a gap at each exit.
 - **camera:** `fov` (vertical, degrees; `fovPortrait` when the view is taller than wide),
   `pitch` (degrees below horizontal), `distance` (`distancePortrait`), `lookAtOffset`, and
   `clamp` (indoors: keep the view inside the room). The camera looks at hero + lookAtOffset

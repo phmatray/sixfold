@@ -9,8 +9,8 @@ Each phase lands as one or more pull requests and ships as a minor release cut b
 | 0.3.0 | Collection and deck builder: rarities, original booster packs, the player's collection and saved decks | Released |
 | 0.4.0 | A larger original card set (about a hundred cards), more prebuilt decks and AI deck variety | Released |
 | 0.5.0 | Sound and feel: original music and sound effects, settings | Released |
-| 0.6.0 | Campaign: six rival duelists and the Hex Warden in the world, duels started from dialogue, seals, pack rewards and a champion's room | In review |
-| 0.7.0 | A bigger world: several areas and buildings, more NPCs, small quests | Planned |
+| 0.6.0 | Campaign: six rival duelists and the Hex Warden in the world, duels started from dialogue, seals, pack rewards and a champion's room | Released |
+| 0.7.0 | A bigger world: five outdoor areas joined by their edges, cliffs and decks, more buildings and NPCs, two small quests | In review |
 | 0.8.0 | Saves, accessibility, phone performance, offline play (PWA) | Planned |
 | 0.9.0 | Content complete: endgame, balance pass, full playtest | Planned |
 | 1.0.0 | Final polish and release | Planned |
