@@ -7,6 +7,7 @@
 // Grid: 1 tile = 1 m; tile (x, z) covers [x, x+1] × [z, z+1].
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { U, windify, cloudify, ambience } from "./life.js";
 
 const ASSETS = new URL("./assets/", import.meta.url);
 const MAP = new URL("./map.json", import.meta.url);
@@ -15,6 +16,9 @@ const OPTIONAL = new Set(["path_b", "path_c"]); // extra dirt-tile variants
 // Footprint in tiles [along X, along Z] at rot 0. Everything but path blocks.
 const FOOT = { house: [7, 5], tree: [2, 2], bush: [1, 1], flowers: [1, 1], rock: [1, 1], sign: [1, 1], path: [1, 1] };
 const STEP = 0.25; // seconds per tile
+const TURN_SPEED = Math.PI / 2 / 0.12; // a quarter turn in 0.12 s
+const WIND_H = { tree: 3.5, bush: 0.8, flowers: 0.4 }; // sway reference height per prop
+const FIDGET_AFTER = 6; // seconds idle before the hero fidgets and the camera leans in
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
 const DIR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }; // n = away from the camera
 const KEYS = { w: "n", arrowup: "n", s: "s", arrowdown: "s", a: "w", arrowleft: "w", d: "e", arrowright: "e" };
@@ -90,6 +94,14 @@ const group = (...kids) => {
 };
 const blobs = (mat, list) => list.map(([r, x, y, z]) => mesh(new THREE.IcosahedronGeometry(r, 1), mat, x, y, z));
 
+// The placeholder door hangs on a hinge at its left edge, like the contract asks.
+function door() {
+  const hinge = group(mesh(new THREE.BoxGeometry(0.9, 2.0, 0.14), toon("#2f7175"), 0.45, 0, 0));
+  hinge.name = "door";
+  hinge.position.set(-0.45, 1.3, 2.32);
+  return hinge;
+}
+
 const PLACEHOLDER = {
   house() {
     const wall = toon("#efe4cc"), wood = toon("#7a5a3c"), glass = toon("#9fd3f0");
@@ -108,7 +120,7 @@ const PLACEHOLDER = {
       mesh(new THREE.BoxGeometry(6.6, 2.9, 4.6), wall, 0, 1.6, 0),
       mesh(roofGeo, toon("#d0663f"), 0, 3.05, 0),
       mesh(new THREE.BoxGeometry(0.6, 1.4, 0.6), toon("#a9533a"), 2, 4.1, -0.6),
-      mesh(new THREE.BoxGeometry(0.9, 2.0, 0.14), toon("#2f7175"), 0, 1.3, 2.32), // door, centre column
+      door(),
       mesh(new THREE.BoxGeometry(1.2, 0.14, 0.5), wood, 0, 2.4, 2.45),
       mesh(new THREE.BoxGeometry(1.3, 1.0, 0.1), glass, -2.1, 1.85, 2.32),
       mesh(new THREE.BoxGeometry(1.3, 1.0, 0.1), glass, 2.1, 1.85, 2.32),
@@ -116,6 +128,7 @@ const PLACEHOLDER = {
       mesh(new THREE.BoxGeometry(1.5, 0.16, 0.3), wood, 2.1, 1.28, 2.4),
       mesh(hex, toon("#2d5fae"), 0, 2.85, 2.34), // the Sixfold hex
       mesh(inner, toon("#f3d589"), 0, 2.85, 2.34),
+      Object.assign(new THREE.Object3D(), { name: "smoke_origin" }).translateX(2).translateY(4.85).translateZ(-0.6),
     );
   },
   tree() {
@@ -254,13 +267,25 @@ export function mount(el, cb) {
       if (!e.repeat) press(k);
     } else if ((k === "e" || k === "enter" || k === " ") && world?.near && !e.repeat) {
       e.preventDefault();
-      held.length = 0;
-      cb("use", world.near.kind, world.near.text);
+      act();
     } else if (k === "g" && world && !e.repeat) {
       world.grid.visible = !world.grid.visible;
     }
   };
   const clearHeld = () => (held.length = 0);
+  // Act on the faced tile: the door swings open first; a sign wobbles.
+  const act = () => {
+    const it = world?.near;
+    if (!it) return;
+    held.length = 0;
+    if (it.kind === "duel") {
+      world.door.want = 1;
+      setTimeout(() => alive && cb("use", it.kind, it.text), reduced ? 0 : 450);
+      return;
+    }
+    if (it.obj && !reduced) it.obj.userData.wobble = 1;
+    cb("use", it.kind, it.text);
+  };
   const padDown = (e) => {
     const f = e.target.dataset?.dir;
     if (!f) return;
@@ -301,7 +326,7 @@ export function mount(el, cb) {
       const got = Object.fromEntries(NAMES.map((n, i) => [n, gltfs[i]]));
       const missing = NAMES.filter((n) => !got[n] && !OPTIONAL.has(n));
       if (missing.length) console.info(`world: placeholders for ${missing.join(", ")}`);
-      world = build(scene, map, got);
+      world = build(scene, map, got, reduced);
       cam = map.camera;
       resize();
       clock.getDelta();
@@ -314,13 +339,17 @@ export function mount(el, cb) {
 
   // ---------- Loop ----------
   const clock = new THREE.Clock();
-  const look = new THREE.Vector3(), camPos = new THREE.Vector3();
-  let first = true;
+  const look = new THREE.Vector3(), lookVel = new THREE.Vector3(), aim = new THREE.Vector3();
+  let first = true, zoom = 1;
+  U.uSway.value = reduced ? 0 : 1;
   function frame() {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(clock.getDelta(), 0.05);
     const w = world, h = w.hero;
     w.now += dt;
+    U.uTime.value = w.now;
+    if (!reduced) U.uDrift.value = w.now;
+    const prevStep = h.step;
 
     // Finish (or carry on) the current step.
     let carry = 0, chained = false;
@@ -349,14 +378,20 @@ export function mount(el, cb) {
       }
     }
 
+    if (h.step && h.step !== prevStep) w.life.puff(h.x + 0.5, h.z + 0.5); // footstep dust
+    h.idle = h.step || held.length ? 0 : h.idle + dt;
+
     // Place the hero: tile centre, or between two while stepping.
     const t = h.step ? h.step.t : 0;
     const px = h.x + 0.5 + (h.step ? (h.step.x - h.x) * t : 0);
     const pz = h.z + 0.5 + (h.step ? (h.step.z - h.z) * t : 0);
     h.obj.position.set(px, 0, pz);
     const want = angle(h.face), cur = h.obj.rotation.y;
-    h.obj.rotation.y = cur + Math.atan2(Math.sin(want - cur), Math.cos(want - cur)) * Math.min(1, dt * 20);
-    animateHero(h, !!h.step, dt);
+    const turn = Math.atan2(Math.sin(want - cur), Math.cos(want - cur));
+    h.obj.rotation.y = cur + Math.sign(turn) * Math.min(Math.abs(turn), TURN_SPEED * dt);
+    animateHero(h, dt, reduced);
+    animateProps(w, dt, reduced);
+    w.life.update(dt, w.now, px, pz);
 
     el.dataset.hero = `${h.x},${h.z},${h.face}`; // for tests and debugging
 
@@ -364,17 +399,26 @@ export function mount(el, cb) {
     const front = h.step ? null : w.talk.get(`${h.x + DIR[h.face][0]},${h.z + DIR[h.face][1]}`) ?? null;
     if (front !== w.near) {
       w.near = front;
+      if (front?.kind !== "duel") w.door.want = 0; // walked off: the door swings shut
       cb("near", front?.kind ?? "", front?.text ?? "");
     }
 
-    // Camera: fixed pitch, follows the hero; eased unless motion is reduced.
+    // Camera: fixed pitch, on a soft spring behind a point a little ahead of a
+    // walking hero; leans in after a while idle. Rigid with reduced motion.
     const pitch = THREE.MathUtils.degToRad(cam.pitch), off = cam.lookAtOffset;
-    look.set(px + off[0], off[1], pz + off[2]);
-    camPos.set(look.x, look.y + Math.sin(pitch) * dist, look.z + Math.cos(pitch) * dist);
-    if (first || reduced) camera.position.copy(camPos);
-    else camera.position.lerp(camPos, 1 - Math.exp(-dt * 6));
+    const ahead = h.step && !reduced ? 0.7 : 0;
+    aim.set(px + off[0] + DIR[h.face][0] * ahead, off[1], pz + off[2] + DIR[h.face][1] * ahead);
+    if (first || reduced) look.copy(aim), lookVel.set(0, 0, 0);
+    else {
+      const k = 28, c = 2 * Math.sqrt(k) * 0.85; // slightly under-damped
+      lookVel.addScaledVector(aim.clone().sub(look), k * dt).addScaledVector(lookVel, -c * dt);
+      look.addScaledVector(lookVel, dt);
+    }
     first = false;
-    camera.lookAt(camera.position.x, look.y, camera.position.z - Math.cos(pitch) * dist);
+    zoom += ((h.idle > FIDGET_AFTER && !reduced ? 0.88 : 1) - zoom) * Math.min(1, dt * 1.5);
+    const dz = dist * zoom;
+    camera.position.set(look.x, look.y + Math.sin(pitch) * dz, look.z + Math.cos(pitch) * dz);
+    camera.lookAt(look);
     // The sun (and its shadow map) moves a whole tile at a time: following the
     // tweened position makes shadow edges shimmer.
     const s = w.sun, from = w.sunFrom;
@@ -384,7 +428,7 @@ export function mount(el, cb) {
     renderer.render(scene, camera);
   }
 
-  return () => {
+  const stop = () => {
     alive = false;
     cancelAnimationFrame(raf);
     ro.disconnect();
@@ -399,6 +443,7 @@ export function mount(el, cb) {
     renderer.domElement.remove();
     pad.remove();
   };
+  return { stop, act };
 }
 
 // Start a one-tile step toward `f` if that tile is free; otherwise just face it.
@@ -441,7 +486,7 @@ function route(w, tx, tz) {
 }
 
 // Build the scene from map.json: ground, lights, props, scatter, hero, debug grid.
-function build(scene, map, got) {
+function build(scene, map, got, reduced) {
   const { width: W, height: H } = map;
   const L = map.light;
   scene.background = new THREE.Color(L.background);
@@ -459,6 +504,7 @@ function build(scene, map, got) {
   const grass = grassTexture();
   grass.repeat.set(size / 6, size / 6);
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(size, size), new THREE.MeshLambertMaterial({ map: grass }));
+  cloudify(ground.material);
   ground.rotation.x = -Math.PI / 2;
   ground.position.set(W / 2, 0, H / 2);
   ground.receiveShadow = true;
@@ -470,6 +516,7 @@ function build(scene, map, got) {
   const make = (n, seed) => (got[n] ? got[n].scene.clone(true) : PLACEHOLDER[n](seed));
 
   // Each prop sits at its footprint's centre; rot 90/270 swaps the footprint.
+  const props = [];
   for (const p of map.props) {
     let [fw, fd] = FOOT[p.asset];
     if (p.rot % 180 === 90) [fw, fd] = [fd, fw];
@@ -477,7 +524,10 @@ function build(scene, map, got) {
     o.position.set(p.x + fw / 2, 0, p.z + fd / 2);
     o.rotation.y = THREE.MathUtils.degToRad(p.rot);
     prep(o, true);
+    if (WIND_H[p.asset]) o.traverse((m) => m.isMesh && windify(m, WIND_H[p.asset]));
     scene.add(o);
+    props.push({ ...p, obj: o, cx: o.position.x, cz: o.position.z });
+    for (const i of map.interactions) if (i.x >= p.x && i.x < p.x + fw && i.z >= p.z && i.z < p.z + fd) i.obj = o;
     if (p.asset !== "path") for (let x = p.x; x < p.x + fw; x++) for (let z = p.z; z < p.z + fd; z++) solid[z * W + x] = 1;
   }
   const isFence = (x, z) => map.tiles[z]?.[x] === "f";
@@ -504,7 +554,7 @@ function build(scene, map, got) {
   const obj = got.hero ? got.hero.scene : PLACEHOLDER.hero();
   prep(obj, true);
   scene.add(obj);
-  const hero = { x: s.x, z: s.z, face: s.facing, turnedAt: -1, step: null, obj, mixer: null, actions: {}, walking: false, t: 0 };
+  const hero = { x: s.x, z: s.z, face: s.facing, turnedAt: -1, step: null, obj, mixer: null, actions: {}, walking: false, t: 0, idle: 0, base: obj.scale.x };
   obj.rotation.y = angle(s.facing);
   if (got.hero?.animations.length) {
     hero.mixer = new THREE.AnimationMixer(obj);
@@ -516,7 +566,25 @@ function build(scene, map, got) {
   const grid = debugGrid(W, H, blocked, talk);
   grid.visible = false;
   scene.add(grid);
-  return { map, blocked, hero, talk, grid, sun, sunFrom: L.sun.fromHero, near: null, path: [], now: 0 };
+
+  // The house door: its "Open" clip when the model has one, else a node named "door"
+  // swung on its origin (the hinge). `open` eases toward `want`, 0 shut to 1 open.
+  const house = props.find((p) => p.asset === "house")?.obj;
+  const clip = got.house?.animations.find((a) => a.name.toLowerCase() === "open");
+  const doorState = { open: 0, want: 0, node: house?.getObjectByName("door") ?? null, mixer: null, action: null };
+  if (house && clip) {
+    doorState.mixer = new THREE.AnimationMixer(house);
+    doorState.action = doorState.mixer.clipAction(clip);
+    doorState.action.play();
+    doorState.action.paused = true;
+  }
+  if (doorState.node) doorState.rest = doorState.node.rotation.y;
+
+  scene.updateMatrixWorld(true);
+  const smoke = house?.getObjectByName("smoke_origin")?.getWorldPosition(new THREE.Vector3()) ?? null;
+  const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
+  const life = ambience(scene, { flowers, smoke }, reduced);
+  return { map, blocked, hero, talk, grid, sun, sunFrom: L.sun.fromHero, near: null, path: [], now: 0, door: doorState, life };
 }
 
 // One fence tile, its piece and rotation picked from the fence neighbours.
@@ -575,7 +643,8 @@ function prep(root, cast) {
   });
 }
 
-function animateHero(h, walking, dt) {
+function animateHero(h, dt, reduced) {
+  const walking = !!h.step;
   h.t += dt;
   if (h.mixer) {
     if (walking !== h.walking) {
@@ -583,15 +652,43 @@ function animateHero(h, walking, dt) {
       h.actions[from]?.fadeOut(0.15);
       h.actions[to]?.reset().fadeIn(0.15).play();
     }
+    // A fidget clip once the hero has stood still a while, if the model has one.
+    const fidget = h.actions.fidget ?? h.actions.look;
+    if (fidget && h.idle > FIDGET_AFTER && !h.fidgeted) {
+      h.fidgeted = true;
+      fidget.reset().setLoop(THREE.LoopOnce, 1).fadeIn(0.2).play();
+      fidget.getMixer().addEventListener("finished", () => fidget.fadeOut(0.3));
+    }
+    if (h.idle === 0) h.fidgeted = false;
     h.mixer.update(dt);
   } else if (h.obj.userData.legs) {
     const swing = walking ? Math.sin((h.t * Math.PI) / STEP) * 0.6 : 0; // one leg forward per tile
     const [l, r] = h.obj.userData.legs;
     l.rotation.x = swing;
     r.rotation.x = -swing;
-    h.obj.position.y = Math.abs(swing) * 0.08; // a little hop per step
   }
   h.walking = walking;
+  // A small bounce per tile, squashed at each footfall.
+  const up = walking && !reduced ? Math.sin(Math.PI * h.step.t) : 0;
+  const squash = walking && !reduced ? 1 - up : 0;
+  h.obj.position.y = up * 0.05;
+  h.obj.scale.set(h.base * (1 + squash * 0.04), h.base * (1 - squash * 0.06 + up * 0.02), h.base * (1 + squash * 0.04));
+}
+
+// The door easing open or shut, and the sign wobbling after it was read.
+function animateProps(w, dt, reduced) {
+  const d = w.door;
+  d.open = reduced ? d.want : d.open + (d.want - d.open) * Math.min(1, dt * 7);
+  if (d.action) {
+    d.action.time = d.open * d.action.getClip().duration;
+    d.mixer.update(0);
+  } else if (d.node) d.node.rotation.y = d.rest + d.open * 1.5;
+  for (const it of w.talk.values()) {
+    const o = it.obj;
+    if (!o?.userData.wobble) continue;
+    o.userData.wobble = Math.max(0, o.userData.wobble - dt * 1.4);
+    o.rotation.z = Math.sin(w.now * 22) * 0.07 * o.userData.wobble;
+  }
 }
 
 // Grass tufts and tiny flowers, instanced, only on open grass tiles.
@@ -626,5 +723,7 @@ function scatter(scene, W, H, open) {
     bloom.setColorAt(j, col.set(petals[Math.floor(r() * 3)]));
   }
   tufts.receiveShadow = bloom.receiveShadow = true;
+  windify(tufts, 0.32);
+  windify(bloom, 0.12);
   scene.add(tufts, bloom);
 }

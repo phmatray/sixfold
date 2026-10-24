@@ -12,18 +12,21 @@ use crate::Screen;
 // The scene module is loaded at runtime from the copied `world/` folder, so
 // three.js comes from the import map in index.html and never touches the wasm.
 #[wasm_bindgen(inline_js = r#"
-let stop = null, gen = 0;
+let api = null, gen = 0;
 export function world_mount(el, cb) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g === gen) stop = m.mount(el, cb); })
+    .then((m) => { if (g === gen) api = m.mount(el, cb); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "", String(e)); });
 }
-export function world_unmount() { gen++; if (stop) { stop(); stop = null; } }
+export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
+export function world_act() { api?.act(); }
 "#)]
 extern "C" {
     fn world_mount(el: &JsValue, cb: &JsValue);
     fn world_unmount();
+    /// Act on the faced tile, as E does (the scene animates, then reports "use").
+    fn world_act();
 }
 
 /// An interaction tile from map.json: what it does and what it says.
@@ -99,7 +102,7 @@ pub fn WorldScreen() -> impl IntoView {
             {move || near.get().filter(|_| open.with(Option::is_none)).map(|s| {
                 let label = if s.duel() { "Knock on the door" } else { "Read the sign" };
                 view! {
-                    <button class="btn primary world-prompt" on:click=move |_| open.set(Some(s.clone()))>
+                    <button class="btn primary world-prompt" on:click=move |_| world_act()>
                         {label}
                         <kbd>"E"</kbd>
                     </button>

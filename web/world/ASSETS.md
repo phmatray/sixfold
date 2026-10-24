@@ -43,8 +43,17 @@ Rules for every model:
 - **Materials:** flat colours or a baked painterly base-colour texture (≤ 1024 px). No
   PBR maps; the game re-shades with a toon material, keeping base colour, its texture and alpha.
 - **Budget:** ≤ 3k triangles per prop, ≤ 6k for the hero.
-- **Hero animations:** optional, named `Idle` and `Walk` (any case). Walk is an in-place
-  loop; one step (one leg forward) per 0.25 s tile reads best. Models load at 1:1, never rescaled.
+- **Hero animations:** optional, named `Idle` (breathing, blink) and `Walk` (any case). Walk
+  is an in-place loop; one step (one leg forward) per 0.25 s tile reads best. An optional
+  `Fidget` (or `Look`) clip plays once after ~6 s idle. The game adds the step bounce and
+  squash itself. Models load at 1:1, never rescaled.
+- **Wind:** trees, bushes and flowers sway in the vertex shader. Weight it with a `COLOR_0`
+  vertex colour, red channel 0 at the base and 1 at the tips (the colour is not shown).
+  Without it, the game uses height above the ground.
+- **House:** an empty named `smoke_origin` at the chimney top (smoke rises from it). The door
+  opens with an `Open` clip if present (played from 0 to its end, and back to close);
+  otherwise a node named `door` is swung about +Y on its own origin, so put that origin
+  on the hinge (left edge seen from the front), with the door swinging inward.
 - **Legal:** original designs only. No logos, characters, buildings or text from any
   existing game. The only emblem is the Sixfold hexagon.
 
