@@ -31,6 +31,13 @@
 
 html, body { margin: 0; min-height: 100%; }
 
+/* Play like an app on touch screens: no double-tap zoom (nor its click delay),
+   no pull-to-refresh or rubber-band, no long-press text selection, callout or
+   tap flash on the game UI. Text fields stay selectable. */
+html { touch-action: manipulation; overscroll-behavior: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+input, textarea, [contenteditable="true"] { user-select: text; -webkit-user-select: text; -webkit-touch-callout: default; }
+
 body {
   font-family: var(--body);
   font-size: 15px;
@@ -1049,6 +1056,8 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   align-items: flex-start;
   gap: 10px;
 }
+.world-controls, .world-pad { pointer-events: none; } /* the pad's empty corners let taps reach the scene */
+.world-pad button, .world-run { pointer-events: auto; }
 .world-run { order: -1; } /* above the pad */
 .world-pad {
   display: grid;
@@ -1228,7 +1237,7 @@ select option { background: var(--panel); color: var(--ink); }
 .vol { display: grid; grid-template-columns: 64px minmax(0, 1fr) 44px; align-items: center; gap: 10px; min-height: 44px; }
 .vol input { width: 100%; accent-color: var(--brass); }
 .vol .vol-pct { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
-.btn.mute { padding-inline: 10px; }
+.btn.mute { min-width: 44px; padding-inline: 10px; }
 .btn.mute[aria-pressed="true"] { color: var(--muted); }
 
 /* Saves: slot picker on the title, Export / Import in Settings, the auto-save pill. */
@@ -1297,6 +1306,13 @@ select option { background: var(--panel); color: var(--ink); }
   animation: fade-in 200ms ease;
 }
 .update-toast .btn { min-height: 44px; }
+/* Touch screens: up top, off the D-pad and the duel's action bar. */
+@media (pointer: coarse) { .update-toast { top: max(16px, env(safe-area-inset-top)); bottom: auto; } }
+
+/* Phones: no page zoom, so the text people read stays at 14 px or more. */
+@media (pointer: coarse) {
+  .bar-hint, .log-list, .note, .slot-sub, .foot, .effects, .details-kind, .detail-stats, .opt-extra, .field span, .world-legend { font-size: 14px; }
+}
 .autosave svg { width: 16px; height: 16px; fill: none; stroke: var(--heal); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---------- Menu screens ---------- */
