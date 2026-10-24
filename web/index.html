@@ -42,9 +42,11 @@
       // new version has installed (it waits until the player says so).
       if ("serviceWorker" in navigator) {
         addEventListener("load", async () => {
-          let reloading = false;
+          // Reload only when the player asked for the new version (the first
+          // install also changes the controller, and must not reload).
+          let wanted = false;
           navigator.serviceWorker.addEventListener("controllerchange", () => {
-            if (!reloading) { reloading = true; location.reload(); }
+            if (wanted) { wanted = false; location.reload(); }
           });
           const reg = await navigator.serviceWorker.register("sw.js").catch(() => null);
           if (!reg) return;
@@ -55,7 +57,7 @@
             toast.setAttribute("role", "status");
             toast.innerHTML = '<span>New version available</span><button type="button" class="btn primary">Reload</button><button type="button" class="btn ghost" >Later</button>';
             const [reload, later] = toast.querySelectorAll("button");
-            reload.onclick = () => worker.postMessage("skip-waiting");
+            reload.onclick = () => { wanted = true; worker.postMessage("skip-waiting"); };
             later.onclick = () => toast.remove();
             document.body.append(toast);
           };
