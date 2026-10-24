@@ -1205,6 +1205,52 @@ select option { background: var(--panel); color: var(--ink); }
 .btn.mute { padding-inline: 10px; }
 .btn.mute[aria-pressed="true"] { color: var(--muted); }
 
+/* Saves: slot picker on the title, Export / Import in Settings, the auto-save pill. */
+.foot-menus { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+.slots summary { display: inline-flex; align-items: center; gap: 8px; list-style: none; min-height: 44px; color: var(--muted); }
+.slots summary::-webkit-details-marker { display: none; }
+.slots summary b { color: var(--ink); font-weight: 700; }
+.slots summary svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; flex: none; }
+.slots[open] summary { color: var(--ink); border-color: rgba(214, 172, 74, 0.45); }
+.slot-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.slot { display: grid; gap: 8px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2); }
+.slot.current { border-color: rgba(214, 172, 74, 0.55); }
+.slot-info { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.slot-name { font: 700 16px/1.2 var(--display); }
+.slot-sub { flex-basis: 100%; color: var(--muted); font-size: 13px; }
+.slot .btn, .save-settings .btn { min-height: 44px; }
+.save-settings { display: grid; gap: 10px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.save-settings legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
+.save-settings .note, .slots .note { margin: 0; }
+.save-settings .note:empty, .slots .note:empty { display: none; }
+.save-settings textarea { width: 100%; min-height: 64px; resize: vertical; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--felt-deep); color: var(--ink); font: 13px/1.4 ui-monospace, monospace; }
+.file-pick { display: inline-flex; align-items: center; }
+.file-pick:focus-within { outline: 3px solid var(--brass-hi); outline-offset: 2px; }
+.import-diff { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; margin: 0 0 10px; }
+.import-diff dt { color: var(--muted); }
+.import-diff dd { margin: 0; }
+.autosave {
+  position: fixed;
+  z-index: 90;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+.autosave.show { opacity: 1; }
+.autosave.failed { background: #5a1f1c; border-color: rgba(255, 93, 82, 0.6); color: #ffd5d0; }
+.autosave svg { width: 16px; height: 16px; fill: none; stroke: var(--heal); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
 /* ---------- Menu screens ---------- */
 
 .page { min-height: 100dvh; display: grid; grid-template-rows: auto 1fr; align-content: start; }

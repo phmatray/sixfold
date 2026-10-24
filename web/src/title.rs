@@ -10,6 +10,7 @@ use sixfold_engine::{card, CardId};
 use crate::audio::AudioSettings;
 use crate::binder::progress;
 use crate::cards::{deck_star, CardFace};
+use crate::saves::{SaveSettings, SlotPicker};
 use crate::store::{self, Notice};
 use crate::Screen;
 
@@ -38,14 +39,10 @@ fn MenuItem(
 
 #[component]
 fn Settings() -> impl IntoView {
-    let profile = expect_context::<RwSignal<Profile>>();
-    let progress = expect_context::<RwSignal<Progress>>();
     let confirm = RwSignal::new(false);
     let done = RwSignal::new(false);
     let reset = move |_| {
         store::reset();
-        profile.set(Profile::new_player());
-        progress.set(Progress::default());
         confirm.set(false);
         done.set(true);
     };
@@ -57,10 +54,11 @@ fn Settings() -> impl IntoView {
             </summary>
             <div class="settings-body">
                 <AudioSettings />
+                <SaveSettings />
                 {move || if confirm.get() {
                     view! {
                         <div class="confirm" role="group" aria-labelledby="reset-q">
-                            <p id="reset-q">"Delete your cards, decks, packs and world progress, and start again as a new player?"</p>
+                            <p id="reset-q">"Delete this slot's cards, decks, packs and world progress, and start again as a new player?"</p>
                             <div class="row">
                                 <button type="button" class="btn danger" on:click=reset>"Reset progress"</button>
                                 <button type="button" class="btn ghost" on:click=move |_| confirm.set(false) autofocus>"Keep my progress"</button>
@@ -159,7 +157,10 @@ pub fn TitleScreen() -> impl IntoView {
             </section>
             <footer class="foot">
                 <span>"Original cards and art. The rules follow a classic handheld version of the game."</span>
-                <Settings />
+                <div class="foot-menus">
+                    <SlotPicker />
+                    <Settings />
+                </div>
             </footer>
         </main>
     }

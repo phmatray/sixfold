@@ -12,6 +12,7 @@ mod decks;
 mod duel;
 mod overlays;
 mod packs;
+mod saves;
 mod store;
 mod title;
 mod world;
@@ -119,7 +120,7 @@ fn App() -> impl IntoView {
         Screen::World => {}
         _ => audio::music("title"),
     });
-    move || match screen.get() {
+    let page = move || match screen.get() {
         Screen::Title => view! { <title::TitleScreen /> }.into_any(),
         Screen::Duel => view! { <duel::DuelSetup /> }.into_any(),
         Screen::Match => view! { <MatchScreen /> }.into_any(),
@@ -129,6 +130,27 @@ fn App() -> impl IntoView {
         Screen::Decks => view! { <decks::DecksScreen /> }.into_any(),
         Screen::Editor(i) => view! { <decks::Editor index=i /> }.into_any(),
         Screen::Campaign => view! { <campaign::CampaignScreen /> }.into_any(),
+    };
+    view! { {page} <saves::SaveIndicator /> }
+}
+
+/// Focus the screen's `h1` (or its `main`), so focus never sits on a button
+/// that the screen change removed.
+fn focus_heading() {
+    use wasm_bindgen::JsCast;
+    let doc = document();
+    let el = doc
+        .query_selector("h1")
+        .ok()
+        .flatten()
+        .or_else(|| doc.query_selector("main").ok().flatten());
+    if let Some(el) = el.and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok()) {
+        if !el.has_attribute("tabindex") {
+            let _ = el.set_attribute("tabindex", "-1");
+        }
+        let opts = web_sys::FocusOptions::new();
+        opts.set_prevent_scroll(true);
+        let _ = el.focus_with_options(&opts);
     }
 }
 
