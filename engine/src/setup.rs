@@ -264,9 +264,9 @@ mod tests {
             })
             .collect();
         place_both(&mut g);
-        for p in 0..2 {
+        for (p, top) in tops.iter().enumerate() {
             assert_eq!(g.players[p].prizes_left(), 6);
-            assert_eq!(g.players[p].prizes, tops[p], "player {p}");
+            assert_eq!(&g.players[p].prizes, top, "player {p}");
         }
         // Player 0 first (01:4C0C, then 01:4C12).
         let set = |player| {
