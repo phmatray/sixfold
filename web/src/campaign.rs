@@ -130,7 +130,7 @@ pub fn CampaignScreen() -> impl IntoView {
         <div class="page">
             <PageBar title="Campaign" />
             <main class="page-body campaign">
-                <p class="page-lead">"Six rivals wait in the meadow and the duel hall. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden."</p>
+                <p class="page-lead">"Six rivals wait out on the trail, the boardwalk and the quarry. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden."</p>
                 <Roster />
                 <button type="button" class="btn primary" on:click=move |_| screen.set(Screen::World)>"Explore the world"</button>
             </main>

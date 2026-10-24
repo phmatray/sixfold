@@ -1,0 +1,186 @@
+{
+  "title": "Brightwell Square",
+  "width": 26,
+  "height": 20,
+  "tiles": [
+    "............rr............",
+    "............rr............",
+    "............rr............",
+    "............rr............",
+    ".....r......rr....r.......",
+    "....rrrrrrrrrrrrrrrrrr....",
+    "....rrrrrrrrrrrrrrrrrr....",
+    "....rrrrrrrrrrrrrrrrrr....",
+    "....rrrrrrrrrrrrrrrrrr....",
+    "....rrrrrrrrrrrrrrrrrr....",
+    "....rrrrrrrrrrrrrrrrrr....",
+    "....rrrrrrrrrrrrrrrrrr....",
+    "....rrrrrrrrrrrrrrrrrr....",
+    "....rrrrrrrrrrrrrrrrrr....",
+    "....rrrrrrrrrrrrrrrrrr....",
+    "..........................",
+    "..........................",
+    "..........................",
+    "..........................",
+    ".........................."
+  ],
+  "props": [
+    {"asset": "fountain", "x": 11, "z": 8, "rot": 0},
+    {"asset": "cottage", "x": 3, "z": 0, "rot": 0},
+    {"asset": "workshop", "x": 17, "z": 1, "rot": 0},
+    {"asset": "stall", "x": 8, "z": 5, "rot": 0},
+    {"asset": "stall_b", "x": 15, "z": 5, "rot": 0},
+    {"asset": "lantern", "x": 4, "z": 5, "rot": 0},
+    {"asset": "lantern", "x": 21, "z": 5, "rot": 0},
+    {"asset": "lantern", "x": 4, "z": 14, "rot": 0},
+    {"asset": "lantern", "x": 21, "z": 14, "rot": 0},
+    {"asset": "bench", "x": 8, "z": 12, "rot": 180},
+    {"asset": "bench", "x": 15, "z": 12, "rot": 180},
+    {"asset": "signpost", "x": 14, "z": 2, "rot": 0},
+    {"asset": "tree", "x": 0, "z": 6, "rot": 0},
+    {"asset": "tree", "x": 0, "z": 10, "rot": 0},
+    {"asset": "tree", "x": 0, "z": 14, "rot": 0},
+    {"asset": "tree", "x": 24, "z": 6, "rot": 0},
+    {"asset": "tree", "x": 24, "z": 10, "rot": 0},
+    {"asset": "tree", "x": 24, "z": 14, "rot": 0},
+    {"asset": "tree", "x": 1, "z": 17, "rot": 0},
+    {"asset": "tree", "x": 6, "z": 17, "rot": 0},
+    {"asset": "tree", "x": 18, "z": 17, "rot": 0},
+    {"asset": "tree", "x": 22, "z": 17, "rot": 0},
+    {"asset": "tree", "x": 9, "z": 0, "rot": 0},
+    {"asset": "tree", "x": 21, "z": 0, "rot": 0},
+    {"asset": "bush", "x": 2, "z": 5, "rot": 0},
+    {"asset": "bush", "x": 23, "z": 9, "rot": 0},
+    {"asset": "bush", "x": 3, "z": 16, "rot": 0},
+    {"asset": "bush", "x": 11, "z": 16, "rot": 0},
+    {"asset": "bush", "x": 14, "z": 16, "rot": 0},
+    {"asset": "bush", "x": 16, "z": 0, "rot": 0},
+    {"asset": "bush", "x": 2, "z": 12, "rot": 0},
+    {"asset": "flowers", "x": 8, "z": 3, "rot": 0},
+    {"asset": "flowers", "x": 10, "z": 3, "rot": 0},
+    {"asset": "flowers", "x": 15, "z": 3, "rot": 0},
+    {"asset": "flowers", "x": 20, "z": 4, "rot": 0},
+    {"asset": "flowers", "x": 5, "z": 15, "rot": 0},
+    {"asset": "flowers", "x": 19, "z": 15, "rot": 0},
+    {"asset": "flowers", "x": 9, "z": 15, "rot": 0},
+    {"asset": "flowers", "x": 16, "z": 15, "rot": 0}
+  ],
+  "spawn": {
+    "x": 12,
+    "z": 2,
+    "facing": "s"
+  },
+  "interactions": [
+    {"x": 5, "z": 3, "kind": "sign", "text": "Hob's Bakery. Warm bread, a bell over the door, and a queue on Saturdays."},
+    {"x": 18, "z": 3, "kind": "sign", "text": "The letter office. A brass slot with a little hexagon on it. Closed till noon, as always."},
+    {"x": 14, "z": 2, "kind": "sign", "text": "Brightwell Square. North: Sixfold Meadow, and every road out of it."}
+  ],
+  "warps": [],
+  "exits": [
+    {"side": "n", "span": [12, 13], "to": "overworld"}
+  ],
+  "npcs": [
+    {
+      "id": "hob",
+      "name": "Hob",
+      "model": "npc_shopkeeper",
+      "tint": "#f5d7a1",
+      "scale": 1.06,
+      "x": 17,
+      "z": 5,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "flag:letter_delivered",
+          "lines": [
+            "Bread's up! Well, it's always up. That's bread.",
+            "Tell Ottilie I'll walk out to the lighthouse on Sunday. With buns."
+          ]
+        },
+        {
+          "if": "item:letter",
+          "lines": [
+            "A letter? That's my sister's hexagon on the wax. Ottilie!",
+            "\"Dear Hob, the gulls stole another loaf.\" Ha! Of course they did.",
+            "Thank you for carrying it. Here, a pack, still warm. Well, not warm. Packs aren't."
+          ],
+          "do": [
+            "flag:letter_delivered",
+            "pack:tide"
+          ]
+        },
+        {
+          "lines": [
+            "Morning! Rolls, loaves, a seed cake if you're quick.",
+            "My sister keeps the lighthouse out on Saltwind Boardwalk. She never visits. Too many stairs, she says."
+          ]
+        }
+      ],
+      "idle": "Idle"
+    },
+    {
+      "id": "tansy",
+      "name": "Tansy",
+      "model": "npc_gardener",
+      "tint": "#ffb3c7",
+      "scale": 0.95,
+      "x": 7,
+      "z": 5,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "seals:3",
+          "lines": [
+            "Three seals! You'll want a buttonhole for the Warden. Kidding. Mostly."
+          ]
+        },
+        {
+          "lines": [
+            "Apples from the orchard, pears from the meadow, and one very proud marrow.",
+            "There are rivals down every road out of the meadow. The quarry folk are the toughest, or so they keep telling me."
+          ]
+        }
+      ],
+      "idle": "Idle"
+    }
+  ],
+  "ground": {
+    "base": "grass",
+    "path": "dirt",
+    "margin": 9
+  },
+  "light": {
+    "sun": {
+      "color": "#fff0cf",
+      "intensity": 2.6,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#fff6dc",
+      "ground": "#4a7a32",
+      "intensity": 1.6
+    },
+    "background": "#b5d98f",
+    "fog": {
+      "near": 18,
+      "far": 36
+    }
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  }
+}
