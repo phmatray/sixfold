@@ -16,6 +16,7 @@ scene inside it and saves the file:
 | `World`   | `build_world_scene.py`   | `web/world/maps/overworld.json` assembled from the exported .glb files: fences auto-tiled, sway, smoke, hero Idle loop, game camera |
 | `NPCs`    | `build_npcs.py`          | NPC variants on the hero's rig (shopkeeper, gardener, wanderer, kid, rival) and the campaign rivals (grass, fire, water, lightning, fighting, psychic, champion) -> `assets/npc/npc_*.glb`, `assets/npc/rival_*.glb` + `npc_palettes.json` |
 | `Interior`| `build_interior_scene.py`| `web/world/maps/shop.json`: walls auto-tiled with the fence rules (cutaway `wall_low*` on the camera-side south row, `wall_window` on chosen straight tiles), wood floor, furniture, lamp light, hero |
+| `Areas`   | `build_area_props.py`    | the 0.7 outdoor-area props (woodland, seaside, quarry, square) side by side; imports `build_assets.py` for its helpers and exports only its own files |
 
 ```bash
 # First time only: create the file
@@ -28,11 +29,17 @@ blender -b art/Sixfold.blend -P tools/blender/build_assets.py -- --out web/world
 # World scene (--check lists z-fighting faces, --render writes a game-camera still)
 blender -b art/Sixfold.blend -P tools/blender/build_world_scene.py -- --check --render /tmp/world.png
 
+# Area props -> web/world/assets/{pine,birch,reeds,boardwalk,pier,bridge,lighthouse,boat,lantern,stall,stall_b,
+#   cottage,workshop,fountain,cliff,cliff_b,stairs,crates,signpost,bench,lens,letter}.glb
+# (--only a,b rebuilds some; --preview renders a contact sheet with a cliff terrace and a deck run; --cam x,y,dist moves it)
+blender -b --factory-startup -P tools/blender/build_area_props.py -- --out web/world/assets --preview /tmp/areas.png
+
 # Shop interior scene
 blender -b art/Sixfold.blend -P tools/blender/build_interior_scene.py -- --render /tmp/interior.png
 
-# Seamless painterly ground textures -> web/world/textures/{grass,dirt,wood_floor}.png (1024 px)
-blender -b --factory-startup -P tools/blender/bake_ground_textures.py -- --out web/world/textures
+# Seamless painterly ground textures -> {grass,dirt,wood_floor,sand,stone}.png (1024 px; --only sand,stone for some).
+# Bake into a scratch folder, then `cwebp -q 82 x.png -o web/world/textures/x.webp`: only the .webp files are committed.
+blender -b --factory-startup -P tools/blender/bake_ground_textures.py -- --out /tmp/tex --only sand,stone
 
 # NPC variants (+ lineup sheet of hero and NPCs, front and game camera)
 blender -b art/Sixfold.blend -P tools/blender/build_npcs.py -- --out web/world/assets
@@ -91,6 +98,14 @@ created by a script, its panel may show the server as off even though it is stil
   - furniture: `counter`, `shelf`, `duel_table`, `chair`, `rug`, `plant`, `display_case`, `exit_mat`;
   - `lamp`, which has a `light_origin` empty.
 - **Item:** `shoes.glb` is the running-shoes pickup, centred on the origin.
+- **Area props (`build_area_props.py`):**
+  - decks: `boardwalk` (top at 0.10 m), `pier` (top at 0.30 m, posts into the water), `bridge` (2 × 4, deck 0.12 / 0.24 / 0.24 / 0.12 m at the row centres, rails at x = ±0.92); planks reach the tile edges so runs chain;
+  - quarry: `cliff` / `cliff_b` (1 × 1 × 1 sandstone block, flat top at exactly 1 m, stackable, good under random 90° turns; `_b` has low moss), `stairs` (treads at 0.125 / 0.375 / 0.625 / 0.875 m, rising toward −Z, a last 12.5 cm riser onto a cliff top);
+  - woodland and shore: `pine`, `birch`, `reeds` (wind `COLOR_0`);
+  - seaside: `lighthouse` (2 × 2, `light_origin` in the lantern room), `boat` (2 × 1, hull below the water line), `crates`;
+  - square: `fountain` (3 × 3 hex basin; its water uses the `sx_water` material for the game to animate), `stall` / `stall_b` (2 × 1), `lantern` (`light_origin`), `bench` (2 × 1), `signpost`;
+  - buildings: `cottage` (5 × 4, door on column 2 of the front row, `smoke_origin`) and `workshop` (3 × 3, door on column 1 of the front row), decorative;
+  - items: `lens` and `letter`, centred on the origin for the popup.
 
 ## Generated models (text-to-3D trials, dropped for now)
 
