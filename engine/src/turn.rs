@@ -9,8 +9,13 @@ impl Game {
     /// R-TURN-03 steps 1–5, then the main phase.
     pub(crate) fn start_turn(&mut self, ev: &mut Vec<Event>) {
         let t = self.turn_player;
-        // Step 1: clear t's own-turn substatus (+E7).
-        self.players[t].effects.shield = None;
+        // Step 1: clear t's own-turn substatus (+E7); a pending doubling
+        // becomes this turn's doubling (+EB bit 0, 00:35A6, R-DMG-08).
+        let e = &mut self.players[t].effects;
+        e.shield = None;
+        if std::mem::take(&mut e.doubling_pending) {
+            e.doubled = true;
+        }
         ev.push(Event::TurnStarted {
             player: t,
             turn: self.turn,
@@ -38,14 +43,13 @@ impl Game {
     /// R-TURN-03 step 8: clear the turn player's end-of-turn effects.
     pub(crate) fn end_turn(&mut self, ev: &mut Vec<Event>) {
         let t = self.turn_player;
-        let turn = self.turn;
         let pl = &mut self.players[t];
         pl.trainer_locked = false;
         pl.effects.placed = None;
-        // RULES: R-TURN-03 step 8 "conditionally +EB bit 0" — the doubling ends
-        // with the turn it applied to, not the turn it was set.
-        if pl.effects.doubling.is_some_and(|set| turn > set) {
-            pl.effects.doubling = None;
+        // R-TURN-03 step 8 "conditionally +EB bit 0": kept only when this turn
+        // set the doubling again (00:35C6, R-DMG-08).
+        if !pl.effects.doubling_pending {
+            pl.effects.doubled = false;
         }
         ev.push(Event::TurnEnded { player: t });
         self.steps.push_front(Step::BetweenTurns);

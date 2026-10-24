@@ -89,10 +89,12 @@ pub struct ActiveEffects {
     /// printed ones while set (R-DMG-03).
     pub weakness: Option<Color>,
     pub resistance: Option<Color>,
-    /// `+EB` bit 0: the turn this player's "next attack does double damage" was
-    /// set. It applies on a later turn and is cleared at the end of that turn
-    /// (R-DMG-08).
-    pub doubling: Option<u32>,
+    /// `+E7 = $19`: this player's attack asked for double damage on its next
+    /// turn (R-DMG-08). Turned into `doubled` at the start of that turn.
+    pub doubling_pending: bool,
+    /// `+EB` bit 0: this turn's attacks do double damage (R-DMG-08). Cleared at
+    /// the end of a turn that didn't set `doubling_pending` again.
+    pub doubled: bool,
     /// `+F5`: the conditions the most recent attack inflicted on this Active
     /// (R-STATUS-13).
     pub last_inflicted: Condition,

@@ -492,7 +492,7 @@ impl Game {
             }
             IgnoreWeaknessResistance => self.pd_mut().ignore_wr = true,
             DoubleNextAttack => {
-                self.players[p].effects.doubling = Some(self.turn);
+                self.players[p].effects.doubling_pending = true;
                 mark(ev, p);
             }
             Recoil(n) => {
@@ -1130,7 +1130,8 @@ mod tests {
         g.players[0].condition.apply(Status::Asleep);
         g.players[0].effects.shield = Some(Shield::Halve);
         g.players[0].effects.weakness = Some(Water);
-        g.players[0].effects.doubling = Some(1);
+        g.players[0].effects.doubling_pending = true;
+        g.players[0].effects.doubled = true;
         g.players[0].trainer_locked = true;
         set_hand(&mut g, 0, &[MOSSBACK]);
         ok(&mut g, Action::Evolve { hand: 0, slot: 0 });
@@ -1254,6 +1255,20 @@ mod tests {
         assert_eq!(damage_to(&attack_with(&mut g, 10, plain), 1, 0)[0], 20);
         ok(&mut g, Action::Done);
         assert_eq!(damage_to(&attack_with(&mut g, 10, plain), 1, 0)[0], 10);
+    }
+
+    /// R-DMG-08: using the doubling attack again on the doubled turn is
+    /// doubled too, and sets the doubling for the next turn again.
+    #[test]
+    fn double_next_attack_reused_on_doubled_turn() {
+        let effects = &[DoubleNextAttack, IgnoreWeaknessResistance];
+        let mut g = main_phase(0);
+        let mut dealt = Vec::new();
+        for _ in 0..3 {
+            dealt.push(damage_to(&attack_with(&mut g, 10, effects), 1, 0)[0]);
+            ok(&mut g, Action::Done);
+        }
+        assert_eq!(dealt, vec![10, 20, 20]);
     }
 
     /// R-EFFECT-04

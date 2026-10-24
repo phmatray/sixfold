@@ -52,8 +52,10 @@ pub fn find_mon(g: &Game, player: usize, uid: u32) -> Option<Mon> {
         effects.extend(e.shield.map(|s| s.to_string()));
         effects.extend(e.weakness.map(|c| format!("Weakness is now {c}")));
         effects.extend(e.resistance.map(|c| format!("Resistance is now {c}")));
-        if e.doubling.is_some() {
+        if e.doubling_pending {
             effects.push("Its next attack does double damage".into());
+        } else if e.doubled {
+            effects.push("Its attacks do double damage this turn".into());
         }
     }
     let cr = c.creature();

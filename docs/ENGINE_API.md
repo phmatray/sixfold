@@ -204,7 +204,8 @@ pub struct ActiveEffects {
     pub shield: Option<Shield>,          // set by its own attack; lasts through the opponent's turn
     pub weakness: Option<Color>,         // changed weakness (replaces the printed one)
     pub resistance: Option<Color>,       // changed resistance
-    pub doubling: Option<u32>,           // "next attack does double damage" set on this turn
+    pub doubling_pending: bool,          // "next attack does double damage": applies on the owner's next turn
+    pub doubled: bool,                   // this turn's attacks do double damage
     pub last_inflicted: Condition,
 }
 pub enum Placed { CantRetreat, CantAttack, DisabledAttack(usize), Accuracy, Weaken(u16) }
@@ -407,7 +408,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 |---|---|
 | `AddPerHeads { coins, per }` | Flip `coins` coins: +`per` damage for each heads. With printed damage 0, this *is* the damage. |
 | `IgnoreWeaknessResistance` | The attack's damage skips weakness and resistance. |
-| `DoubleNextAttack` | Self's attack on its owner's next turn does double damage. |
+| `DoubleNextAttack` | Self's attacks on its owner's next turn do double damage. Using it again on that turn is doubled too and sets it again. |
 | `Recoil(n)` | n damage to self after the attack, using its own weakness, resistance and trainers. |
 | `BenchDamage { amount, own, opponent }` | `amount` to every Benched creature on the chosen sides, with no weakness or resistance. |
 | `Snipe(n)` | n to one opposing creature the player picks. From a Power it counts as Power damage. |

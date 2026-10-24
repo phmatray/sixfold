@@ -667,11 +667,20 @@ unit test that should cover it.
 
 ### R-DMG-08: The attacker's doubling comes before weakness
 - **Rule.** The attacker's "next attack does double damage" state doubles the damage before
-  weakness. With weakness the damage is ×4, then −30.
-- **Parameters.** `+EB` bit 0, inside `00:31D4`.
-- **Status.** CONFIRMED
-- **Evidence.** `00:31D4-31F9`.
-- **Test.** `double_damage_then_weakness_then_resistance`
+  weakness. With weakness the damage is ×4, then −30. The state has two parts. The attack sets a
+  pending mark on its own Active. At the start of the owner's next turn the mark becomes "this
+  turn's attacks are doubled", which then applies to every attack of that turn, including another
+  use of the doubling attack itself (which sets the mark again). At the end of a turn the doubling
+  is dropped unless the mark was set again that turn. Both parts are Active effects, so they are lost
+  if the Active leaves (switch, evolve) before they are used.
+- **Parameters.** The pending mark is `+E7 = $19`. The doubling is `+EB` bit 0, read inside `00:31D4`.
+  `00:35A6-35AE` (start of turn) sets `+EB` bit 0 when `+E7 == $19`. `00:35C6-35C9` (end of turn)
+  keeps bit 0 only while `+E7 == $19`.
+- **Status.** CORRECTED. The original claim did not say how the state carries over, so a doubling
+  attack used on the doubled turn was not doubled.
+- **Evidence.** `00:31D4-31F9`, `00:359D-35B0`, `00:35B1-35CB`.
+- **Test.** `double_damage_then_weakness_then_resistance`, `double_next_attack_applies_on_next_own_turn`,
+  `double_next_attack_reused_on_doubled_turn`
 
 ### R-DMG-09: The defender's prevention and reduction
 - **Rule.** After weakness, resistance and both trainers, these steps run in order:

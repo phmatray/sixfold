@@ -111,12 +111,11 @@ impl Game {
             .map_or(0, |c| 20 * c.attached(Effect::AttachMinus20) as i32)
     }
 
-    /// R-DMG-08: the "next attack does double damage" set on an earlier turn.
+    /// R-DMG-08: this turn's attacks are doubled. For a preview of the
+    /// opponent's attack, a pending doubling counts too (it applies on their turn).
     fn doubled(&self, p: usize) -> bool {
-        self.players[p]
-            .effects
-            .doubling
-            .is_some_and(|set| self.turn > set)
+        let e = &self.players[p].effects;
+        e.doubled || (e.doubling_pending && p != self.turn_player)
     }
 
     /// R-DMG-01: the direct damage of player `p`'s attack on the opposing Active.
@@ -559,7 +558,7 @@ mod tests {
     #[test]
     fn double_damage_then_weakness_then_resistance() {
         let mut g = main_phase(2);
-        g.players[0].effects.doubling = Some(0);
+        g.players[0].effects.doubled = true;
         g.players[1].effects.resistance = Some(Grass);
         let ev = attack_with(&mut g, 20, &[]);
         assert_eq!(damage_to(&ev, 1, 0), vec![50], "20 ×2 ×2 −30");
