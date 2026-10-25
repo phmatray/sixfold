@@ -247,8 +247,8 @@ pub fn PackOdds(b: usize) -> impl IntoView {
         )
     } else {
         tr(
-            format!("one of its {holos} {types}"),
-            format!("l'une de ses {holos} {types}"),
+            format!("one of its {holos} {types} Holos"),
+            format!("l'une de ses {holos} Holo {types}"),
         )
     };
     view! {
