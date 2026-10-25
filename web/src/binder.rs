@@ -25,13 +25,20 @@ pub fn progress(c: &Collection) -> (usize, usize) {
 pub fn PageBar(
     title: &'static str,
     #[prop(optional)] back: Option<Screen>,
+    /// Back runs this instead of changing screen.
+    #[prop(optional)]
+    on_back: Option<Callback<()>>,
     #[prop(optional)] children: Option<Children>,
 ) -> impl IntoView {
     let screen = expect_context::<RwSignal<Screen>>();
     let back = back.unwrap_or(Screen::Title);
+    let go = move || match on_back {
+        Some(f) => f.run(()),
+        None => screen.set(back),
+    };
     view! {
         <header class="topbar page-bar">
-            <button type="button" class="btn ghost back" on:click=move |_| screen.set(back)>
+            <button type="button" class="btn ghost back" on:click=move |_| go()>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                 {tr("Back", "Retour")}
             </button>
@@ -248,11 +255,7 @@ pub fn inspect_handlers(id: CardId) -> (impl Fn() + Copy, impl Fn() + Copy) {
 
 #[component]
 pub fn CollectionScreen() -> impl IntoView {
-    let profile = expect_context::<RwSignal<Profile>>();
     let ui = expect_context::<Ui>();
-    let f = Filters::new(Own::All);
-    let shown = Memo::new(move |_| profile.with(|p| f.apply(&p.collection)));
-    let prog = move || profile.with(|p| progress(&p.collection));
     let on_key = move |e: leptos::ev::KeyboardEvent| {
         if e.key() == "Escape" {
             ui.sheet.set(false);
@@ -261,40 +264,51 @@ pub fn CollectionScreen() -> impl IntoView {
     view! {
         <div class="page with-side" on:keydown=on_key>
             <PageBar title="Collection" />
-            <main class="page-body">
-                <div class="progress-row">
-                    <p class="progress-text"><b>{move || prog().0}</b>{tr(" of ", " sur ")}{move || prog().1}{move || match (prog().0, fr()) {
-                        (_, false) => " cards found",
-                        (0 | 1, true) => " carte trouvée",
-                        _ => " cartes trouvées",
-                    }}</p>
-                    <div class="progress-bar" aria-hidden="true">
-                        <span style=move || { let (h, a) = prog(); format!("width:{}%", h * 100 / a.max(1)) }></span>
-                    </div>
-                </div>
-                <FilterBar f=f show_own=true />
-                <p class="sr-only" aria-live="polite">{move || {
-                    let n = shown.with(Vec::len);
-                    match (n, fr()) {
-                        (1, false) => "1 card shown".to_string(),
-                        (_, false) => format!("{n} cards shown"),
-                        (0 | 1, true) => format!("{n} carte affichée"),
-                        _ => format!("{n} cartes affichées"),
-                    }
-                }}</p>
-                {move || shown.with(Vec::is_empty).then(|| view! {
-                    <p class="empty-note">{tr("No card matches these filters. ", "Aucune carte ne correspond à ces filtres. ")}
-                        <button type="button" class="btn ghost" on:click=move |_| f.clear()>{tr("Clear filters", "Effacer les filtres")}</button>
-                    </p>
-                })}
-                <ul class="binder">
-                    <For each=move || shown.get() key=|id| id.0 let:id>
-                        <BinderSlot id=id />
-                    </For>
-                </ul>
-            </main>
+            <main class="page-body"><CollectionPanel /></main>
             <div class="side-panel"><Inspector /></div>
         </div>
+    }
+}
+
+/// The binder: progress, filters and every card (the Collection screen and
+/// the in-game menu). The inspector is the host's.
+#[component]
+pub fn CollectionPanel() -> impl IntoView {
+    let profile = expect_context::<RwSignal<Profile>>();
+    let f = Filters::new(Own::All);
+    let shown = Memo::new(move |_| profile.with(|p| f.apply(&p.collection)));
+    let prog = move || profile.with(|p| progress(&p.collection));
+    view! {
+        <div class="progress-row">
+            <p class="progress-text"><b>{move || prog().0}</b>{tr(" of ", " sur ")}{move || prog().1}{move || match (prog().0, fr()) {
+                (_, false) => " cards found",
+                (0 | 1, true) => " carte trouvée",
+                _ => " cartes trouvées",
+            }}</p>
+            <div class="progress-bar" aria-hidden="true">
+                <span style=move || { let (h, a) = prog(); format!("width:{}%", h * 100 / a.max(1)) }></span>
+            </div>
+        </div>
+        <FilterBar f=f show_own=true />
+        <p class="sr-only" aria-live="polite">{move || {
+            let n = shown.with(Vec::len);
+            match (n, fr()) {
+                (1, false) => "1 card shown".to_string(),
+                (_, false) => format!("{n} cards shown"),
+                (0 | 1, true) => format!("{n} carte affichée"),
+                _ => format!("{n} cartes affichées"),
+            }
+        }}</p>
+        {move || shown.with(Vec::is_empty).then(|| view! {
+            <p class="empty-note">{tr("No card matches these filters. ", "Aucune carte ne correspond à ces filtres. ")}
+                <button type="button" class="btn ghost" on:click=move |_| f.clear()>{tr("Clear filters", "Effacer les filtres")}</button>
+            </p>
+        })}
+        <ul class="binder">
+            <For each=move || shown.get() key=|id| id.0 let:id>
+                <BinderSlot id=id />
+            </For>
+        </ul>
     }
 }
 
