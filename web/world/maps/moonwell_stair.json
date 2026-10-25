@@ -1,0 +1,136 @@
+{
+  "width": 7,
+  "height": 5,
+  "tiles": [
+    "3333333",
+    "3.....3",
+    "3.....3",
+    "3.....3",
+    "3333333"
+  ],
+  "props": [
+    {
+      "asset": "crystal_cluster",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "crystal_cluster",
+      "x": 5,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "moonflower",
+      "x": 1,
+      "z": 3,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 5,
+      "z": 3,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "exit_mat",
+      "x": 3,
+      "z": 3,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 3,
+    "z": 3,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "kind": "find",
+      "id": "d_stair",
+      "x": 3,
+      "z": 1,
+      "give": "give:curio_moth_brooch",
+      "text": "On a ledge at the bottom of the stair, in the lantern's glow: a silver moth brooch, two moon-eyes on its wings. They glow back at you.",
+      "text_fr": "Sur une corniche au pied de l'escalier, dans la lueur de la lanterne : une broche phalène en argent, deux yeux de lune sur les ailes. Ils te renvoient la lueur."
+    },
+    {
+      "x": 1,
+      "z": 1,
+      "kind": "sign",
+      "text": "Pale crystals grow out of the well wall, cool as moonlight. Something has scratched six marks beside them, and a seventh, fainter.",
+      "text_fr": "Des cristaux pâles poussent dans la paroi du puits, frais comme la lune. Quelque chose a gravé six traits à côté, et un septième, plus pâle."
+    }
+  ],
+  "warps": [
+    {
+      "x": 3,
+      "z": 3,
+      "to": "moonwell",
+      "label": "Climb back up",
+      "label_fr": "Remonter",
+      "spawn": {
+        "x": 13,
+        "z": 13,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [],
+  "ground": {
+    "base": "slate",
+    "path": "slate",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 8,
+    "distancePortrait": 9,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "cliff": [
+    "cliff_slate",
+    "cliff_slate_b"
+  ],
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#9fb4ff",
+      "intensity": 0.5,
+      "fromHero": [
+        -3,
+        8,
+        2
+      ]
+    },
+    "hemisphere": {
+      "sky": "#6a6aa8",
+      "ground": "#141220",
+      "intensity": 0.9
+    },
+    "lamp": {
+      "color": "#b8c4ff",
+      "intensity": 4,
+      "distance": 6
+    },
+    "background": "#07060b"
+  }
+}

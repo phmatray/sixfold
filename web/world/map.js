@@ -8,7 +8,8 @@ import { SUFFIX_ARMS } from "./props.js";
 
 const BASE = new URL("./", import.meta.url);
 const INTERIOR = new Set(["counter", "shelf", "duel_table", "chair", "rug", "plant", "display_case", "lamp", "exit_mat",
-  "oven", "printing_press", "type_case", "bookcase", "bed", "workbench", "light_box", "net_locker"]);
+  "oven", "printing_press", "type_case", "bookcase", "bed", "workbench", "light_box", "net_locker",
+  "chart_table", "dress_form", "cloth_rack", "paper_lanterns", "chowder_stove"]);
 
 const loader = new GLTFLoader();
 const assets = new Map();

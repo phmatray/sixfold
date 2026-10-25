@@ -317,8 +317,9 @@ macro_rules! duelist {
 use Kit::{Mix, One};
 
 /// The roster, by map. 1.2: meadow, woodland, boardwalk, quarry, square.
-/// 1.3 Ember: cinderwick, kilnmouth; Storm: downs, rodspire, stormwatch.
-pub static TRAINERS: [Trainer; 26] = [
+/// 1.3 Ember: cinderwick, kilnmouth; Storm: downs, rodspire, stormwatch;
+/// Tide: gullhaven, bellflats; Dream: hushlane, lanternmere, moonwell.
+pub static TRAINERS: [Trainer; 39] = [
     duelist!("t_tobin", "Tobin", "Junior Duelist" / "Duelliste en herbe", One(&SCRAP), WARRENBUCK 2, 1, Easy),
     duelist!("t_hazel", "Hazel", "Beekeeper" / "Apicultrice", Mix(&SEEDLING, &SPARK), HIVEVOLT 2, 2, Easy),
     duelist!("t_ossian", "Ossian", "Birdwatcher" / "Ornithologue", One(&SCRAP), GALEHERON 2, 1, Easy),
@@ -358,6 +359,33 @@ pub static TRAINERS: [Trainer; 26] = [
         rule: Some(Rule::LightEnergy),
         purse: Some(120),
         ..duelist!("t_greer", "Greer", "Featherweight" / "Poids plume", One(&TEMPEST), ZIPPET 1, 3, Normal)
+    },
+    duelist!("t_dorrit", "Dorrit", "Deckhand" / "Matelot", One(&PUDDLE), SHELLMOTE 2, 1, Easy),
+    duelist!("t_finch", "Finch", "Net Mender" / "Ramendeur", One(&CURRENT), KELPWARDEN 1, 2, Normal),
+    duelist!("t_liesl", "Liesl", "Clam Digger" / "Pêcheuse à pied", Mix(&PUDDLE, &PEBBLE), SHELLMOTE 2, 2, Normal),
+    duelist!("t_harrow", "Harrow", "Bell Ringer" / "Sonneur de cloche", One(&UNDERTOW), TIDEMAW 1, 3, Normal),
+    Trainer {
+        night: true,
+        ..duelist!("t_brann", "Brann", "Night Fisher" / "Pêcheur de nuit", One(&UNDERTOW), GULFWYRM 1, 3, Hard)
+    },
+    Trainer {
+        rule: Some(Rule::NoTrainers),
+        purse: Some(120),
+        ..duelist!("t_mirela", "Mirela", "Tidecaller" / "Appelle-marée", One(&CURRENT), STREAMFIN 1, 3, Normal)
+    },
+    duelist!("t_luce", "Luce", "Sleepwalker" / "Somnambule", One(&MURMUR), GLOAMOWL 1, 1, Easy),
+    duelist!("t_iver", "Iver", "Poet" / "Poète", One(&REVERIE), GLIMMOX 1, 2, Normal),
+    duelist!("t_clem", "Clem", "Lantern Carrier" / "Porteur de lanternes", One(&MURMUR), GLIMMOX 2, 2, Normal),
+    duelist!("t_maud", "Maud", "Moth Catcher" / "Chasseuse de phalènes", One(&REVERIE), GLOAMOWL 1, 3, Normal),
+    duelist!("t_noor", "Noor", "Dream Reader" / "Liseuse de rêves", Mix(&REVERIE, &SEEDLING), SOMNITAR 1, 3, Normal),
+    Trainer {
+        night: true,
+        ..duelist!("t_ambrose", "Ambrose", "Night Rower" / "Rameur de nuit", One(&TRANCE), HEXARCH 1, 3, Hard)
+    },
+    Trainer {
+        rule: Some(Rule::TwoStage2),
+        purse: Some(120),
+        ..duelist!("t_yara", "Yara", "Awakener" / "Éveilleuse", One(&TRANCE), WRAITHELLE 1, 3, Normal)
     },
 ];
 
@@ -438,18 +466,21 @@ mod tests {
         }
         // §4.4: five 1-prize, seven 2-prize and two 3-prize duelists (585);
         // §10.1-10.2: Ember 45 + 60 + 45 + 90 + 120, Storm 30 + 45 + 45 + 60
-        // + 60 + 90 + 120 (810).
+        // + 60 + 90 + 120 (810); §10.3-10.4: Tide 30 + 45 + 45 + 60 + 90 + 120,
+        // Dream 30 + 45 + 45 + 60 + 60 + 90 + 120 (840).
         assert_eq!(
             TRAINERS.iter().map(Trainer::purse).sum::<u32>(),
-            585 + 360 + 450
+            585 + 360 + 450 + 390 + 450
         );
         // A night duelist plays Hard; a rule duelist's own deck keeps its rule
         // when the rule can be kept by a kit.
         for t in TRAINERS.iter() {
             assert!(!t.night || t.difficulty == Difficulty::Hard, "{}", t.name);
         }
-        let basil = trainer("t_basil").unwrap();
-        assert!(basil.rule.unwrap().allows(&basil.deck()));
+        for id in ["t_basil", "t_yara"] {
+            let t = trainer(id).unwrap();
+            assert!(t.rule.unwrap().allows(&t.deck()), "{id}");
+        }
     }
 
     #[test]

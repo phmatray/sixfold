@@ -21,11 +21,11 @@
     "....rrrrrrrrrrrrrrrrrr....",
     "....rrrrrrrrrrrrrrrrrr....",
     "....rrrrrrrrrrrrrrrrrr....",
-    "..........................",
-    "..........................",
-    "..........................",
-    "..........................",
-    ".........................."
+    "............rr............",
+    "............rr............",
+    "............rr............",
+    "............rr............",
+    "............rr............"
   ],
   "props": [
     {
@@ -303,6 +303,12 @@
       "x": 21,
       "z": 8,
       "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 14,
+      "z": 18,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -382,6 +388,13 @@
       "kind": "sign",
       "text": "The Hearth Rooms. Beds by the night or by the hour, soup always.",
       "text_fr": "Les Chambres de l'Âtre. Des lits à la nuit ou à l'heure, de la soupe toujours."
+    },
+    {
+      "x": 14,
+      "z": 18,
+      "kind": "sign",
+      "text": "South: Hushwillow Lane, under the willows, and Lanternmere on its lake.",
+      "text_fr": "Sud : l'Allée des Saules-Murmures, sous les saules, et Lac-aux-Lanternes sur son lac."
     }
   ],
   "warps": [
@@ -442,6 +455,14 @@
         13
       ],
       "to": "overworld"
+    },
+    {
+      "side": "s",
+      "span": [
+        12,
+        13
+      ],
+      "to": "hushlane"
     }
   ],
   "npcs": [

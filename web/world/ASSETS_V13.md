@@ -303,6 +303,29 @@ Sheets: `stone_tiles.png`, `stone_day.png`, `stone_night.png`.
 The Stone set's `menhir` stands in the Downs' chime ring, and the Tide set's `tidepool`, `crab_pots`, `ferry` and
 `buoy` dress the Rodspire and the Stormwatch dock.
 
+## Added in 1.3 PR 3 (Tide and Dream)
+
+Interior furniture goes to `assets/interior/` (each module's `INTERIOR` set; the driver files them there).
+
+| Asset | Foot | What | Tris |
+|---|---|---|---|
+| `bell_clapper` | item | curio (`t_bell`): the drowned bell's verdigris clapper, its ball worn bright in a band, a rope loop through the eye, barnacles (`v13_tide.py`) | 536 |
+| `ferry_pass` | item | the Ferry Pass: a bent pasteboard ticket, teal stub, brass grommet with a red-and-white twisted cord, a round wave stamp (no letters), a punched corner | 496 |
+| `interior/chart_table` | 2×1 | the Harbour Office desk, customer side +Z, 1.05 m (quill to 1.33): sloping chart table on turned legs (sea chart, dividers, inkwell), a flat counter with the big stamp, a red pad, stamped tickets; rolled charts below | 1574 |
+| `interior/chowder_stove` | 1×1 | The Dry Dock's pot-bellied stove on a stone hearth, 1.54 m with the flue: firebox grate `stove_glow`, a copper pot of chowder with a ladle, a brass coal scuttle | 1304 |
+| `moth_brooch` | item | curio (Moonwell well stair): a silver-lilac moth brooch, moon-eye spots `dr_moon_glow`, a pearl body (`v13_dream.py`) | 576 |
+| `interior/dress_form` | 1×1 | the Lanternmere tailor's mannequin, 1.63 m: wooden tripod, a half-finished lilac jacket (one sleeve), a yellow tape measure, a pincushion on the neck | 1364 |
+| `interior/cloth_rack` | 2×1 | against the north wall (back −Z), 2.07 m: shelves of folded cloth, standing bolts and rolls end-on, shears and a spool on the lowest shelf | 1472 |
+| `interior/paper_lanterns` | 1×1 | The Quiet Lamp's stand, 2.04 m: a pole and arm, three paper lanterns (`dr_paper_glow`) at different heights; `light_origin` in the middle one | 1060 |
+
+    blender -b --factory-startup -P tools/blender/build_regions_v13.py -- --region tide --out web/world/assets \
+        --only bell_clapper,ferry_pass,chart_table,chowder_stove
+    blender -b --factory-startup -P tools/blender/build_regions_v13.py -- --region dream --out web/world/assets \
+        --only moth_brooch,dress_form,cloth_rack,paper_lanterns
+
+Suggested `props.js`: `FOOT: chart_table: [2, 1], cloth_rack: [2, 1]`, `TALL: chart_table: 1.05, chowder_stove: 1.5,
+dress_form: 1.6, cloth_rack: 2.0, paper_lanterns: 2.0`.
+
 ## Not built (left for later)
 
 - **Interior furniture** for the new 1.3 interiors (seven inns, glassworks, observatory, harbour office, tailor, cobbler,

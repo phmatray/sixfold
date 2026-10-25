@@ -570,24 +570,36 @@
       "hair": "#5a4030",
       "dialogue": [
         {
+          "if": "item:ferry_pass",
+          "lines": [
+            "Pass: stamped. Twice. Ines. Wind: fair. Gullhaven: aboard."
+          ],
+          "lines_fr": [
+            "Laissez-passer : tamponné. Deux fois. Ines. Vent : favorable. Havre-aux-Mouettes : embarque."
+          ],
+          "do": [
+            "warp:gullhaven:26:21:w"
+          ]
+        },
+        {
           "if": "flag:bo_asked",
           "lines": [
             "Sorry, too much salt in the mouth. I'll say it slow.",
-            "The ferry runs to Gullhaven, on the Saltreach coast. Not yet, though: the Harbour Office over there hasn't started stamping passes.",
-            "Lou crews the far side. When the passes are out, find me here and we'll be across by noon."
+            "The ferry runs to Gullhaven, on the Saltreach coast. The Harbour Office there stamps the passes now: two hundred and fifty Facets, and Ines Varga stamps it twice.",
+            "Walk there round the coast, by the meadow and the Saltwind Boardwalk. Come back with a pass and we'll be across by noon. Lou crews the far side."
           ],
           "lines_fr": [
             "Pardon, trop de sel dans la bouche. Je le redis lentement.",
-            "Le bac va jusqu'à Havre-aux-Mouettes, sur la Côte Salée. Pas encore, par contre : la Capitainerie de là-bas ne tamponne pas encore les laissez-passer.",
-            "Lou tient l'autre rive. Quand les laissez-passer seront prêts, viens me trouver ici et on traversera avant midi."
+            "Le bac va jusqu'à Havre-aux-Mouettes, sur la Côte Salée. La Capitainerie de là-bas tamponne les laissez-passer, maintenant : deux cent cinquante Facettes, et Ines Varga tamponne deux fois.",
+            "Vas-y par la côte, par le pré et la Promenade de Ventsalé. Reviens avec un laissez-passer et on traversera avant midi. Lou tient l'autre rive."
           ]
         },
         {
           "lines": [
-            "Ferry: laid up. Pass: none. Office: shut. Lou: far side. Wind: sou'west, freshening."
+            "Ferry: ready. Pass: none. Office: Gullhaven. Price: two-fifty. Lou: far side. Wind: sou'west, freshening."
           ],
           "lines_fr": [
-            "Bac : à quai. Laissez-passer : aucun. Bureau : fermé. Lou : en face. Vent : suroît, fraîchissant."
+            "Bac : paré. Laissez-passer : aucun. Bureau : Havre-aux-Mouettes. Prix : deux cent cinquante. Lou : en face. Vent : suroît, fraîchissant."
           ],
           "do": [
             "flag:bo_asked"

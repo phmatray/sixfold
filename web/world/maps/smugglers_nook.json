@@ -1,0 +1,149 @@
+{
+  "width": 9,
+  "height": 7,
+  "tiles": [
+    "333333333",
+    "3.......3",
+    "3.......3",
+    "3.......3",
+    "3.......3",
+    "3.......3",
+    "333333333"
+  ],
+  "props": [
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 2,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "net_locker",
+      "x": 6,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 1,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 7,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 4,
+    "z": 5,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "kind": "find",
+      "id": "t_nook",
+      "x": 2,
+      "z": 1,
+      "give": "pack:tide",
+      "text": "Behind the smugglers' crates, wrapped in tarred canvas and forgotten for fifty tides: a sealed booster. Dry as a biscuit.",
+      "text_fr": "Derrière les caisses des contrebandiers, emballé dans une toile goudronnée et oublié depuis cinquante marées : un booster scellé. Sec comme un biscuit."
+    },
+    {
+      "x": 7,
+      "z": 1,
+      "kind": "sign",
+      "text": "A crate stencilled \"NOT TEA\". It is, in fact, tea. Very old tea.",
+      "text_fr": "Une caisse marquée au pochoir « PAS DU THÉ ». C'en est, en fait. Du très vieux thé."
+    },
+    {
+      "x": 6,
+      "z": 1,
+      "kind": "sign",
+      "text": "A locker of oilskins and a ledger in a code nobody remembers. The last line is a drawing of a bell.",
+      "text_fr": "Un casier de cirés et un registre dans un code que plus personne ne connaît. La dernière ligne est le dessin d'une cloche."
+    }
+  ],
+  "warps": [
+    {
+      "x": 4,
+      "z": 5,
+      "to": "bellflats",
+      "label": "Go back out",
+      "label_fr": "Ressortir",
+      "spawn": {
+        "x": 3,
+        "z": 12,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [],
+  "ground": {
+    "base": "wet_sand",
+    "path": "wet_sand",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 9,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "cliff": [
+    "cliff_sea",
+    "cliff_sea_b"
+  ],
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#ffd9a0",
+      "intensity": 0.6,
+      "fromHero": [
+        -3,
+        8,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#8a7a6a",
+      "ground": "#1a140e",
+      "intensity": 0.9
+    },
+    "lamp": {
+      "color": "#ffb060",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#07060b"
+  }
+}

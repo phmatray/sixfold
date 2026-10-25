@@ -16,8 +16,10 @@ import { OPTIONAL, RING, cliffSet } from "./map.js";
 const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "reeds", "boardwalk", "pier", "bridge", "stairs",
   "lantern", "stall", "stall_b", "crates", "bench",
   "ash_pine", "rock_basalt", "cliff_basalt", "cliff_basalt_b", "stairs_basalt", "climb_wall_basalt", "glass_rack", // Ember
-  "heather", "cliff_heath", "cliff_heath_b", "stairs_heath", "wall_dry", "wall_dry_corner", "wall_dry_end", "wall_dry_t", "chime_post"]); // Storm (not pylon: animated)
-const TREES = new Set(["tree", "pine", "birch", "ash_pine"]); // varied in size, turn and tint; half a tile out on the map edge
+  "heather", "cliff_heath", "cliff_heath_b", "stairs_heath", "wall_dry", "wall_dry_corner", "wall_dry_end", "wall_dry_t", "chime_post", // Storm (not pylon: animated)
+  "crab_pots", "rock_sea", "bollard", "tidepool", "net_rack", "cliff_sea", "cliff_sea_b", // Tide (not ferry or buoy: they bob)
+  "willow", "wishing_tree", "ford_stones", "wisteria_arch", "hedge", "hedge_corner", "hedge_end", "hedge_t"]); // Dream (not moonflower: animated)
+const TREES = new Set(["tree", "pine", "birch", "ash_pine", "willow"]); // varied in size, turn and tint; half a tile out on the map edge
 const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // props whose smoke_origin smokes
 const SMOKE = 8;
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
@@ -55,9 +57,15 @@ export function refresh(w, holds, gate, animate = false) {
     if (open === g.open) continue;
     const was = g.open;
     g.open = open;
-    if (animate && was !== null) (g.anim = 0), w.life.puffs?.(g.tiles), (w.gateSound = open);
+    const play = animate && was !== null;
+    if (play && !g.sea) (g.anim = 0), w.life.puffs?.(g.tiles), (w.gateSound = open);
     else g.anim = null;
     showGate(g, reduced(w) ? null : g.anim);
+    if (g.sea) {
+      // The tide turns over a few seconds (at once on a fresh build or with reduced motion).
+      g.tideWant = open ? 0 : 1;
+      if (!play || reduced(w)) g.sea((g.tide = g.tideWant));
+    }
   }
   collide(w);
   w.lightDirty = true;
@@ -101,6 +109,7 @@ export function dispose(root) {
 // bobbing, the lighthouse beacon and the glint of something to find.
 export function animateProps(w, dt, reduced) {
   for (const g of w.gates) {
+    if (g.sea && g.tide !== g.tideWant) g.sea((g.tide += Math.sign(g.tideWant - g.tide) * Math.min(Math.abs(g.tideWant - g.tide), dt / 5)));
     if (g.anim === null) continue;
     g.anim = Math.min(1, g.anim + dt / 0.7);
     showGate(g, g.anim);
@@ -303,7 +312,8 @@ export async function build(map, got, reduced) {
     return ladders.get(key(ax, az)) === axis || ladders.get(key(bx, bz)) === axis;
   };
 
-  root.add(await groundMesh(map, tile));
+  const ground = await groundMesh(map, tile);
+  root.add(ground);
 
   const batch = batcher();
   const blobs = [];
@@ -465,7 +475,10 @@ export async function build(map, got, reduced) {
       return g;
     };
     props(def.prop);
-    return { def, tiles, open: null, anim: null, closed: props(def.prop_closed), opened: props(def.prop_open) };
+    // A tide gate (`tide: true`): the sea covers its tiles, and its `flood` tiles, while it is shut.
+    const flood = def.tide ? [...tiles.map((t) => t.i), ...(def.flood ?? []).map(([x, z]) => z * W + x)] : null;
+    const sea = flood && ((level) => ground.userData.water(flood, level));
+    return { def, tiles, open: null, anim: null, closed: props(def.prop_closed), opened: props(def.prop_open), sea, tide: 0, tideWant: 0 };
   });
   const gateAt = new Map(gates.flatMap((g) => g.tiles.map((t) => [key(t.x, t.z), g])));
 
@@ -646,7 +659,7 @@ export async function build(map, got, reduced) {
   }
   smoke.length = Math.min(smoke.length, SMOKE);
   const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
-  const life = ambience(root, { flowers, smoke }, reduced);
+  const life = ambience(root, { flowers, smoke, lamps, gulls: map.gulls ?? 0 }, reduced);
   return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, door, life, boats, glows, glints,
     gates, gateAt, shown, openers, waymarks, lamps, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }

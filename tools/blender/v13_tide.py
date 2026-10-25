@@ -3,13 +3,13 @@
 Vocabulary: teal clapboard and red roofs on stilts with barnacled feet, navy-and-white hulls, cork-orange floats,
 wave-worn blue-grey rock with barnacles, mussels and a green weed line, sea pinks on the cliff tops.
 Glow parts: td_window_glow (harbour house and ferry windows), lamp_glow (the bell tower's night lamp, the ferry's
-masthead light), td_buoy_glow (the buoy's lamp). td_pool_water is the tide pool's surface (rippling water shader).
+masthead light), td_buoy_glow (the buoy's lamp), stove_glow (The Dry Dock's firebox). td_pool_water is the tide pool's surface (rippling water shader).
 """
 import math
 import random
 
 import bmesh
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 from v13_kit import (A, B, T, arch_pts, beam, box, chain, contact, curve, cyl, empty, ico, jitter, lathe,  # noqa: F401
                      prism, ribbon, rock, shadow, sphere, stratum, torus, tube, FRONT)
@@ -34,10 +34,19 @@ PALETTE = {
     "td_net": "#d6c49a", "td_net_line": "#8f7752", "td_net_dk": "#3c5a6e", "td_float": "#ef7a2f", "td_buoy_red": "#d0453a",
     "td_buoy_glow": "#ffd27a", "td_pool_water": "#4fb8c4", "td_star": "#ef8a3a", "td_anemone": "#e86a8a",
     "td_anemone_g": "#6fbf8a", "td_shell": "#f2e2cf", "td_rim": "#a9a49a", "td_rim_dk": "#8e8a82",
+    # 1.3 PR 3: the clapper, the Ferry Pass, the Harbour Office desk, The Dry Dock's stove
+    "td_verdigris": "#62a88c", "td_verdigris_dk": "#3f7f6a", "td_bronze_lt": "#f2c25e",
+    "td_ticket": "#efd9a6", "td_ticket_dk": "#e2c88e", "td_ticket_line": "#c9a86a", "td_stamp_ink": "#4a5bb0",
+    "td_stamp_red": "#c8403a", "td_cord": "#d24a3a", "td_cord_dk": "#f3e7d0", "td_stamp_knob": "#c98a50",
+    "td_chart": "#f1e8cf", "td_chart_sea": "#a8d2e2", "td_chart_deep": "#7db4d0", "td_chart_coast": "#6b5a44",
+    "td_ink": "#232838", "td_quill": "#f4f1ea", "td_steel": "#aab2ba",
+    "td_castiron": "#4c515a", "td_iron_dk": "#33363d", "stove_glow": "#ff8a3a", "td_copper": "#c97c48",
+    "td_copper_dk": "#9a5a32", "td_chowder": "#f2e2b8", "td_potato": "#e9c86a", "td_carrot": "#e8813a", "td_coal": "#2b2b31",
 }
 
 WIND = {}
-FOOT = {"harbour_house": (5, 4), "ferry": (4, 2), "bell_tower": (3, 3), "net_rack": (2, 1)}
+FOOT = {"harbour_house": (5, 4), "ferry": (4, 2), "bell_tower": (3, 3), "net_rack": (2, 1), "chart_table": (2, 1)}
+INTERIOR = {"chart_table", "chowder_stove"}   # exported to <out>/interior/
 ANIM = set()
 
 LIGHT = dict(sun=("#fff4e0", 2.7), from_hero=(8, 18, 6), hemi=("#f2fbff", "#6d8a7a", 1.6), bg="#bfe3e8", fog=(16, 34))
@@ -557,10 +566,228 @@ def build_bollard(k):
     contact(k, 0.34)
 
 
+# ---------------------------------------------------------------- 1.3 PR 3: curios, the Ferry Pass, Gullhaven interiors
+
+
+def along(p, n):
+    """A matrix at p with its local +Z along n (things stuck on a curved surface)."""
+    return Matrix.Translation(p) @ Vector(n).normalized().to_track_quat("Z", "Y").to_matrix().to_4x4()
+
+
+def build_bell_clapper(k):
+    """Curio (the popup, `t_bell`): the drowned bell's clapper. A verdigris bronze shank hung from an eye, a heavy
+    ball worn bright in a band where it struck the bell, a short tail; a loop of old rope through the eye with a
+    knot and two frayed ends; barnacles on the ball. Centred on the origin."""
+    k.add(lathe([(0.0, -0.215), (0.02, -0.19), (0.026, -0.165), (0.05, -0.15), (0.068, -0.12), (0.068, -0.09),
+                 (0.05, -0.062), (0.03, -0.04), (0.022, 0.04), (0.016, 0.1), (0.0, 0.122)], 10), "td_verdigris", T(), smooth=True)
+    k.add(lathe([(0.071, -0.128), (0.074, -0.105), (0.071, -0.082)], 10), "td_bronze_lt", T(), smooth=True)
+    k.add(torus(0.034, 0.012, 10, 4), "td_verdigris_dk", T((0, 0, 0.15), (90, 0, 0)))          # the eye
+    k.add(torus(0.05, 0.011, 10, 4), "rope", T((0, 0, 0.196), (0, 90, 0)))                   # rope loop through it
+    k.add(sphere(0.019, 6, 4), "rope", T((0, 0, 0.246), scale=(1.2, 1, 1)), smooth=True)     # knot
+    for dx, L in ((0.012, 1.0), (-0.004, 0.75)):                                             # two frayed tails
+        k.add(tube([(0, 0, 0.25), (dx + 0.02, -0.01, 0.245), (dx + 0.032, -0.016, 0.25 - 0.05 * L), (dx + 0.036, -0.018, 0.25 - 0.09 * L)],
+                   0.009, 4, 0.6), "rope")
+    for p, sz in (((0.045, -0.04, -0.074), 0.014), ((-0.03, -0.05, -0.07), 0.011), ((0.012, 0.055, -0.072), 0.012)):
+        n = Vector(p) - Vector((0, 0, -0.105))
+        k.add(cyl(sz, sz * 0.4, sz * 0.9, 5), "td_barnacle", along(Vector(p) + n.normalized() * 0.003, n))
+
+
+def card(xs, top, bot, t):
+    """A ticket-like slab across columns xs (in XZ), top(x) / bot(x) its edges, t thick (Y), with end caps."""
+    bm = bmesh.new()
+    cols = [[bm.verts.new((x, s * t / 2, z)) for s, z in ((-1, bot(x)), (-1, top(x)), (1, top(x)), (1, bot(x)))] for x in xs]
+    for a, b in zip(cols, cols[1:]):
+        for j in range(4):
+            q = (j + 1) % 4
+            bm.faces.new((a[j], b[j], b[q], a[q]))
+    bm.faces.new(cols[0])
+    bm.faces.new(cols[-1][::-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return bm
+
+
+def build_ferry_pass(k):
+    """Field item (the popup): the Ferry Pass. A buff pasteboard ticket, slightly bent, a teal stub band with a
+    brass grommet and a short twisted cord loop, a big round inked stamp (a ring round a wave line, no letters), the
+    far corner bitten out by the conductor's punch. Stands upright facing the front, centred on the origin."""
+    hw, hh, t, bite = 0.13, 0.075, 0.006, 0.03
+    n0 = len(k.parts)
+    xs = [-hw + (2 * hw - bite) * i / 10 for i in range(11)] + [hw - bite * 0.62, hw - bite * 0.24, hw]
+
+    def top(x):
+        d = x - (hw - bite)
+        return hh if d <= 0 else hh - math.sqrt(max(bite * bite - (hw - x) ** 2, 0.0))
+    k.add(card(xs, top, lambda x: -hh, t), "td_ticket")
+    x0, x1 = -hw + 0.004, -hw + 0.056                                                        # teal stub band, both faces
+    k.add(card([x0 + (x1 - x0) * i / 3 for i in range(4)], lambda x: hh - 0.005, lambda x: -hh + 0.005, t + 0.003), "td_cabin_roof")
+    k.add(card([x1 + 0.006, x1 + 0.012], lambda x: hh - 0.005, lambda x: -hh + 0.005, t + 0.003), "td_ticket_line")
+    # the stamp: a ring and a wave inside it, tilted, 1.5 mm proud of the front
+    cx, cz, R, tilt = 0.042, -0.004, 0.047, math.radians(-12)
+    rot = lambda x, z: (cx + x * math.cos(tilt) - z * math.sin(tilt), cz + x * math.sin(tilt) + z * math.cos(tilt))  # noqa: E731
+    M = T((0, -t / 2 + 0.0005, 0), FRONT)                                                  # 2.5 mm proud
+    k.add(ribbon([rot(R * math.cos(a), R * math.sin(a)) for a in (i / 12 * math.tau for i in range(12))], 0.008, 0.003, closed=True), "td_stamp_ink", M)
+    k.add(ribbon([rot(-0.03 + 0.01 * i, 0.009 * math.sin(i * math.pi / 2)) for i in range(7)], 0.007, 0.003), "td_stamp_ink", M)
+    # grommet, its hole, and a two-ply cord loop out to the upper left
+    gx, gz = -hw + 0.026, 0.038
+    k.add(torus(0.011, 0.006, 8, 3), "brass", T((gx, 0, gz), (90, 0, 0)))
+    k.add(cyl(0.007, 0.007, t + 0.006, 8), "td_dark", T((gx, 0, gz), (90, 0, 0)))
+    u, Y = Vector((-1.0, 0.0, 0.75)).normalized(), Vector((0, 1, 0))
+    nrm = u.cross(Y)
+    for ph in (0.0, math.pi):
+        pts = []
+        for i in range(11):
+            th = -0.35 + (math.tau + 0.7) * i / 10
+            c = Vector((gx, 0, gz)) + u * 0.034 * (1 - math.cos(th)) + Y * 0.017 * math.sin(th)
+            tang = (u * 0.034 * math.sin(th) + Y * 0.017 * math.cos(th)).normalized()
+            b = tang.cross(nrm).normalized()
+            w = 3 * th + ph
+            pts.append(c + (nrm * math.cos(w) + b * math.sin(w)) * 0.0026)
+        k.add(tube(pts, 0.0032, 3), "td_cord" if ph else "td_cord_dk")
+    for bm, *_ in k.parts[n0:]:                                                              # the bend: ends curl back
+        for v in bm.verts:
+            v.co.y += 0.016 * (v.co.x / hw) ** 2 + 0.004 * v.co.x / hw
+
+
+def turned_leg(k, x, y, h, mat, seg=6):
+    """A turned table leg standing on the floor (bun foot, a bead, a long taper, a block under the top)."""
+    k.add(lathe([(0.04, -0.01), (0.048, 0.035), (0.03, 0.08), (0.042, 0.13), (0.026, 0.2), (0.032, h - 0.32), (0.044, h - 0.24),
+                 (0.03, h - 0.18), (0.04, h - 0.16), (0.04, h)], seg, 30), mat, T((x, y, 0)), smooth=True)
+
+
+def build_chart_table(k):
+    """2 x 1 (interior) the Gullhaven Harbour Office desk, customer side to the front: a carcass with two drawers on
+    turned legs; on the left a sloping chart table (front edge 0.9 m, back 1.04 m) with a pale sea chart (blue
+    water, a deeper channel, coast lines, an island, a compass star, a red course line; no text), its far edge rolled,
+    brass dividers on it and an inkwell with a quill on the flat back rail; on the right a flat counter with the big
+    wooden-handled stamp, a red stamp pad in an open tin, a stack of stamped tickets. Rolled charts on the stretcher shelf."""
+    rng = random.Random(580)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            turned_leg(k, sx * 0.87, sy * 0.34, 0.8, "wood_dk")
+    k.add(box(1.86, 0.78, 0.2), "wood_mid", T((0, 0, 0.76)))                                    # frieze
+    for sx in (-1, 1):                                                                       # two drawers, customer side
+        k.add(box(0.7, 0.02, 0.13), "wood_lt", T((sx * 0.46, -0.395, 0.76)))
+        k.add(sphere(0.022, 6, 4), "brass", T((sx * 0.46, -0.41, 0.76)), smooth=True)
+    k.add(box(1.72, 0.62, 0.03), "wood_mid", T((0, 0, 0.16)))                                    # stretcher shelf
+    for i, (m, y) in enumerate((("td_chart", -0.16), ("td_ticket", 0.0), ("td_chart", 0.16))):
+        k.add(cyl(0.05, 0.05, 0.9 - 0.12 * i, 8), m, T((-0.3 + 0.12 * i, y, 0.225), (0, 90, 0)))
+    k.add(torus(0.052, 0.008, 8, 3), "td_stamp_red", T((-0.2, -0.16, 0.225), (0, 90, 0)))
+    # left: the sloping chart table (a wedge on the frieze, a board, a pencil lip, a flat back rail)
+    xl0, xl1, yf, yb, zf, zb = -0.95, 0.25, -0.43, 0.24, 0.9, 1.04
+    xc, wl = (xl0 + xl1) / 2, xl1 - xl0
+    k.add(prism([(yf, 0.85), (0.43, 0.85), (0.43, zb), (yb, zb), (yf, zf)], wl), "wood_mid", T((xc, 0, 0), (0, 0, 90)))
+    th = math.degrees(math.atan2(zb - zf, yb - yf))
+    S = T((xc, (yf + yb) / 2, (zf + zb) / 2), (th, 0, 0))                                     # the slope's top plane
+    L = math.hypot(yb - yf, zb - zf)
+    k.add(box(wl + 0.04, L + 0.02, 0.03), "wood_lt", S @ T((0, 0, 0.0)))
+    k.add(box(wl + 0.03, 0.03, 0.04), "wood_dk", S @ T((0, -L / 2 - 0.005, 0.03)))            # pencil lip
+    k.add(box(wl + 0.02, 0.2, 0.03), "wood_lt", T((xc, 0.34, zb)))                             # flat back rail
+    # the chart, its far edge rolled
+    C = S @ T((-0.02, 0.0, 0.018))
+    cw, cd = 1.02, 0.5
+    k.add(box(cw, cd, 0.004), "td_chart", C)
+    k.add(cyl(0.022, 0.022, cw, 8), "td_chart", C @ T((0, cd / 2 + 0.01, 0.02), (0, 90, 0)))
+    sea = [(-0.12, -0.25), (0.51, -0.25), (0.51, 0.25), (0.2, 0.25), (0.12, 0.14), (0.16, 0.05), (0.04, -0.03), (-0.04, -0.13)]
+    k.add(slab([(x * 0.98, y * 0.98) for x, y in sea], 0.0, 0.0035), "td_chart_sea", C)
+    k.add(slab([(0.2, -0.22), (0.46, -0.22), (0.46, 0.2), (0.33, 0.12), (0.26, -0.02), (0.14, -0.1)], 0.0028, 0.0055), "td_chart_deep", C)
+    k.add(ribbon([(x * 0.98, y * 0.98) for x, y in sea[3:] + sea[:1]], 0.012, 0.006), "td_chart_coast", C @ T((0, 0, 0.0013)))
+    isle = [(0.3, 0.02), (0.36, 0.05), (0.4, 0.0), (0.38, -0.06), (0.31, -0.07), (0.27, -0.03)]
+    k.add(slab(isle, 0.004, 0.0105), "td_chart", C)
+    k.add(ribbon(isle, 0.01, 0.0065, closed=True), "td_chart_coast", C @ T((0, 0, 0.0055)))
+    star = [((0.06 if i % 2 == 0 else 0.018) * math.cos(math.radians(90 * i / 2)), (0.06 if i % 2 == 0 else 0.018) * math.sin(math.radians(90 * i / 2)))
+            for i in range(8)]
+    k.add(slab([(x - 0.33, y + 0.13) for x, y in star], 0.001, 0.005), "td_stamp_red", C)
+    k.add(ribbon([(-0.04, -0.16), (0.14, -0.1), (0.25, -0.05)], 0.008, 0.0048), "td_stamp_red", C @ T((0, 0, 0.0042)))
+    hinge = C @ T((-0.2, 0.02, 0.012), (0, 0, 0))                                             # brass dividers, open
+    k.add(cyl(0.016, 0.016, 0.012, 8), "brass", hinge)
+    for a in (-104, -76):
+        e = Vector((0.2 * math.cos(math.radians(a)), 0.2 * math.sin(math.radians(a)), 0))
+        beam(k, (hinge @ Vector((0, 0, 0))), (hinge @ e), 0.012, 0.01, "brass")
+    k.add(cyl(0.045, 0.05, 0.06, 8), "td_ink", T((-0.75, 0.34, zb + 0.045)))                     # inkwell and quill
+    k.add(cyl(0.024, 0.024, 0.02, 8), "brass", T((-0.75, 0.34, zb + 0.08)))
+    k.add(prism([(0, 0), (0.012, 0.06), (0.02, 0.2), (0.005, 0.24), (-0.012, 0.12)], 0.006), "td_quill", T((-0.75, 0.34, zb + 0.07), (0, -22, 25)))
+    # right: the flat counter with the stamp, the pad, the tickets
+    k.add(box(0.7, 0.86, 0.05), "wood_lt", T((0.62, 0, 0.885)))
+    k.add(box(0.66, 0.03, 0.07), "wood_dk", T((0.62, 0.41, 0.94)))                             # back gallery
+    zt = 0.91
+    sx, sy = 0.5, -0.12                                                                     # the big stamp
+    k.add(box(0.15, 0.1, 0.022), "td_dark", T((sx, sy, zt + 0.011), (0, 0, 8)))
+    k.add(box(0.15, 0.1, 0.04), "wood_mid", T((sx, sy, zt + 0.042), (0, 0, 8)))
+    k.add(cyl(0.02, 0.026, 0.07, 8), "wood_lt", T((sx, sy, zt + 0.095)))
+    k.add(lathe([(0.026, zt + 0.12), (0.05, zt + 0.15), (0.058, zt + 0.19), (0.045, zt + 0.225), (0.0, zt + 0.24)], 8), "td_stamp_knob", T((sx, sy, 0)), smooth=True)
+    k.add(box(0.2, 0.13, 0.024), "td_steel", T((0.78, -0.2, zt + 0.012), (0, 0, -6)))         # pad in an open tin
+    k.add(box(0.17, 0.1, 0.006), "td_stamp_red", T((0.78, -0.2, zt + 0.026), (0, 0, -6)))
+    k.add(box(0.2, 0.012, 0.13), "td_steel", T((0.785, -0.13, zt + 0.07), (-15, 0, -6)))
+    for i in range(6):                                                                       # stamped tickets
+        k.add(box(0.2, 0.11, 0.006), "td_ticket" if i % 3 else "td_ticket_dk", T((0.72, 0.18, zt + 0.004 + 0.007 * i), (0, 0, rng.uniform(-12, 12))))
+    k.add(torus(0.028, 0.005, 10, 3), "td_stamp_ink", T((0.74, 0.18, zt + 0.045), scale=(1, 1, 0.3)))
+    k.add(box(0.2, 0.11, 0.006), "td_ticket", T((0.45, 0.24, zt + 0.004), (0, 0, 30)))       # a stray one
+    A.shadow(k, 1.0, 1.0, 0.5)
+
+
+def build_chowder_stove(k):
+    """1 x 1 (interior) The Dry Dock's stove: a squat cast-iron pot-belly on four little legs and a stone hearth,
+    a firebox door with a glowing grate (stove_glow), a copper pot of chowder on top with a ladle in it, a flue pipe
+    up the back that turns into the wall, a brass coal scuttle at the front right."""
+    rng = random.Random(590)
+    cx, cy = -0.06, 0.05
+    k.add(box(0.94, 0.94, 0.05, 0.01), "td_stone", T((0, 0, 0.0)))
+    for i in range(4):                                                                       # legs
+        a = math.radians(45 + 90 * i)
+        beam(k, (cx + 0.17 * math.cos(a), cy + 0.17 * math.sin(a), 0.2), (cx + 0.24 * math.cos(a), cy + 0.24 * math.sin(a), 0.02), 0.05, 0.05, "td_iron_dk")
+    k.add(cyl(0.2, 0.22, 0.1, 12), "td_iron_dk", T((cx, cy, 0.22)))                             # ash pan
+    k.add(lathe([(0.2, 0.26), (0.27, 0.32), (0.3, 0.41), (0.29, 0.51), (0.25, 0.59), (0.21, 0.63)], 12, 15), "td_castiron", T((cx, cy, 0)), smooth=True)
+    k.add(torus(0.215, 0.022, 12, 3), "brass", T((cx, cy, 0.63)))
+    k.add(cyl(0.27, 0.25, 0.05, 12), "td_iron_dk", T((cx, cy, 0.665)))                          # top plate
+    # firebox door: a frame, the glowing grate behind three bars, a brass knob; an ash door under it
+    fy = cy - 0.3
+    k.add(box(0.26, 0.06, 0.22, 0.01), "td_iron_dk", T((cx, fy + 0.01, 0.42)))
+    k.add(box(0.2, 0.012, 0.16), "stove_glow", T((cx, fy - 0.024, 0.42)))
+    for z in (0.375, 0.42, 0.465):
+        k.add(box(0.21, 0.016, 0.014), "td_iron_dk", T((cx, fy - 0.034, z)))
+    k.add(sphere(0.02, 6, 4), "brass", T((cx + 0.15, fy - 0.03, 0.42)), smooth=True)
+    k.add(box(0.16, 0.03, 0.06), "td_iron_dk", T((cx, cy - 0.215, 0.22)))
+    k.add(box(0.12, 0.012, 0.012), "brass", T((cx, cy - 0.235, 0.215)))
+    # the copper pot, the chowder, a few bits, the ladle
+    py = cy - 0.06
+    k.add(lathe([(0.0, 0.69), (0.15, 0.69), (0.185, 0.72), (0.195, 0.85), (0.205, 0.9), (0.18, 0.9), (0.174, 0.86)], 12), "td_copper", T((cx, py, 0)), smooth=True)
+    k.add(cyl(0.174, 0.174, 0.012, 12), "td_chowder", T((cx, py, 0.877)))
+    for i, m in enumerate(("td_potato", "td_carrot", "td_potato", "td_turf", "td_carrot")):
+        a = i * 1.3 + 0.4
+        r = 0.05 + 0.025 * i
+        k.add(jitter(ico(0.017, 0), rng, 0.004), m, T((cx + r * math.cos(a), py + r * math.sin(a), 0.885), scale=(1, 1, 0.6)))
+    for s in (-1, 1):
+        k.add(torus(0.04, 0.01, 8, 3), "td_copper_dk", T((cx + s * 0.212, py, 0.84), (90, 0, 0)))
+    beam(k, (cx + 0.04, py - 0.02, 0.86), (cx + 0.18, py - 0.16, 1.12), 0.024, 0.014, "td_steel")
+    k.add(torus(0.016, 0.005, 6, 3), "td_steel", T((cx + 0.185, py - 0.165, 1.14), (90, 0, 45)))
+    # flue up the back with a damper key, a collar and a little rain hat
+    fx, fyb = cx, cy + 0.2
+    k.add(cyl(0.06, 0.06, 0.74, 8), "td_castiron", T((fx, fyb, 1.05)))
+    k.add(cyl(0.072, 0.072, 0.04, 8), "td_iron_dk", T((fx, fyb, 0.71)))
+    k.add(cyl(0.072, 0.072, 0.04, 8), "td_iron_dk", T((fx, fyb, 1.2)))
+    k.add(box(0.2, 0.02, 0.02), "brass", T((fx + 0.07, fyb, 0.98)))
+    k.add(cyl(0.07, 0.07, 0.03, 8), "td_iron_dk", T((fx, fyb, 1.42)))
+    for z in (1.445, 1.47):
+        k.add(cyl(0.012, 0.012, 0.025, 4), "td_iron_dk", T((fx + 0.045, fyb, z)))
+    k.add(cyl(0.12, 0.0, 0.07, 8), "td_castiron", T((fx, fyb, 1.5)))
+    # brass coal scuttle and coal at the front right
+    sx, sy = 0.31, -0.3
+    k.add(lathe([(0.0, 0.025), (0.09, 0.025), (0.11, 0.1), (0.125, 0.2)], 10), "brass", T((sx, sy, 0)), smooth=True)
+    k.add(jitter(ico(0.115, 1), rng, 0.012), "td_coal", T((sx, sy, 0.19), scale=(1, 1, 0.45)))
+    for i in range(3):
+        a = i * 2.1
+        k.add(jitter(ico(0.03, 0), rng, 0.008), "td_coal", T((sx + 0.07 * math.cos(a), sy + 0.07 * math.sin(a), 0.235)))
+    k.add(torus(0.1, 0.012, 10, 3), "td_iron_dk", T((sx, sy, 0.21), (90, 0, 0)))
+    for bm, *_ in k.parts[-1:]:                                                              # handle: the top half only
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z < 0.205], context="VERTS")
+
+
 PROPS = {
     "harbour_house": build_harbour_house, "ferry": build_ferry, "bell_tower": build_bell_tower,
     "crab_pots": build_crab_pots, "buoy": build_buoy, "net_rack": build_net_rack, "cliff_sea": build_cliff_sea,
     "cliff_sea_b": build_cliff_sea_b, "tidepool": build_tidepool, "rock_sea": build_rock_sea, "bollard": build_bollard,
+    "bell_clapper": build_bell_clapper, "ferry_pass": build_ferry_pass, "chart_table": build_chart_table,
+    "chowder_stove": build_chowder_stove,
 }
 
 VIGNETTE = dict(

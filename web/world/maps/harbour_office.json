@@ -1,0 +1,221 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "chart_table",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bookcase",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bookcase",
+      "x": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 1,
+      "z": 5,
+      "rot": 90
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "net_locker",
+      "x": 9,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 1,
+      "z": 1,
+      "kind": "sign",
+      "text": "The harbour chart: the coast from Stormwatch's cliffs down to the mouth of the Mere river, every rock inked, every buoy numbered. Someone has pencilled \"tea?\" by the lighthouse.",
+      "text_fr": "La carte du port : la côte des falaises de Guette-Orage jusqu'à l'embouchure de la rivière du Lac, chaque rocher à l'encre, chaque bouée numérotée. Quelqu'un a écrit « thé ? » au crayon près du phare."
+    },
+    {
+      "x": 4,
+      "z": 1,
+      "kind": "sign",
+      "text": "Ledgers, by year and by boat. The spines are stamped. So are the shelves.",
+      "text_fr": "Des registres, par année et par bateau. Les dos sont tamponnés. Les étagères aussi."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "to": "gullhaven",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 30,
+        "z": 7,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "ines",
+      "name": "Ines Varga",
+      "model": "npc_scholar",
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#2c4f7c",
+      "hair": "#3a2a20",
+      "dialogue": [
+        {
+          "if": "item:ferry_pass",
+          "lines": [
+            "Your pass is valid on both runs, at any hour. Stamped, and stamped again.",
+            "Lou will want to see it. Three times, probably. Humour her."
+          ],
+          "lines_fr": [
+            "Ton laissez-passer est valable sur les deux lignes, à toute heure. Tamponné, et retamponné.",
+            "Lou voudra le voir. Trois fois, sans doute. Fais-lui plaisir."
+          ]
+        },
+        {
+          "if": "coins:250",
+          "lines": [
+            "Two hundred and fifty Facets. Thank you. Name, here. Date, here. Stamp.",
+            "And stamp. One for the Office, one for the sea. The sea never asks to see it, but one never knows.",
+            "There. The Stormwatch ferry and the Lanternmere launch, any hour, as often as you like. No refunds."
+          ],
+          "lines_fr": [
+            "Deux cent cinquante Facettes. Merci. Le nom, ici. La date, ici. Tampon.",
+            "Et tampon. Un pour la Capitainerie, un pour la mer. La mer ne demande jamais à le voir, mais on ne sait jamais.",
+            "Voilà. Le bac de Guette-Orage et la vedette de Lac-aux-Lanternes, à toute heure, aussi souvent que tu veux. Pas de remboursement."
+          ],
+          "do": [
+            "pay:250",
+            "give:ferry_pass",
+            "sfx:jingle"
+          ]
+        },
+        {
+          "lines": [
+            "Harbour Office. A Ferry Pass is two hundred and fifty Facets: the Stormwatch ferry and the Lanternmere launch, both ways, for good.",
+            "You don't have it. Come back when you do. I'll have the stamp warmed up."
+          ],
+          "lines_fr": [
+            "Capitainerie. Un laissez-passer coûte deux cent cinquante Facettes : le bac de Guette-Orage et la vedette de Lac-aux-Lanternes, aller et retour, pour toujours.",
+            "Tu ne les as pas. Reviens quand tu les auras. Je ferai chauffer le tampon."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#eef4ff",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#e3ecf5",
+      "ground": "#3a3a48",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffc878",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

@@ -154,7 +154,8 @@ export async function groundMesh(map, tile) {
   const maskTex = new THREE.DataTexture(data, W, H, THREE.RGBAFormat, THREE.UnsignedByteType);
   maskTex.magFilter = maskTex.minFilter = THREE.LinearFilter;
   maskTex.needsUpdate = true;
-  const water = data.some((v, i) => i % 4 === 3 && v);
+  // A tide gate (build.js) floods its tiles while shut, so its map always draws water.
+  const water = (map.gates ?? []).some((g) => g.tide) || data.some((v, i) => i % 4 === 3 && v);
 
   const m = gd.margin ?? 0;
   const mat = new THREE.MeshLambertMaterial();
@@ -219,5 +220,11 @@ export async function groundMesh(map, tile) {
   ground.position.set(W / 2, 0, H / 2);
   ground.receiveShadow = true;
   ground.userData.dispose = () => maskTex.dispose();
+  // The tide: these tiles' water, 0 (the flats bare) to 1 (under the sea).
+  ground.userData.water = (tiles, level) => {
+    const v = Math.round(level * 255);
+    for (const i of tiles) data[i * 4 + 3] = v;
+    maskTex.needsUpdate = true;
+  };
   return ground;
 }

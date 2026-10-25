@@ -597,6 +597,15 @@ mod tests {
             facets: 390,
             packs: 2,
         });
+        // 1.3 Tide and Dream (§10.3-10.4): their Facet finds (t_quay 50, t_pool_2 80,
+        // t_lamp 100, t_seawall 40, d_tree 40, d_ford 60, d_raft 100) and two pack
+        // finds (t_nook, d_islet), over five outdoor maps and four houses; the Ferry
+        // Pass (⬡ 250) is a sink, left out like the other prices.
+        first.push(Source {
+            minutes: 5 * 10 + 4 * 3,
+            facets: 470,
+            packs: 2,
+        });
         let rate = packs_per_hour(&first);
         // The "exploring" row of §3.4, per hour: 5 two-prize duelists, 6 finds
         // of ⬡ 40, half a quest of ⬡ 160 and 0.8 of a rival.

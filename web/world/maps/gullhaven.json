@@ -1,0 +1,1348 @@
+{
+  "title": "Gullhaven",
+  "title_fr": "Havre-aux-Mouettes",
+  "region": "tide",
+  "music": "tide",
+  "width": 34,
+  "height": 26,
+  "tiles": [
+    "...............................111",
+    "................................11",
+    "................................11",
+    "..................................",
+    "..................................",
+    "...........rrrrrrrrrr.p...........",
+    "....p......rrrrrrrrrr.p...........",
+    "=========rrrrrrrrrrrrrrrrrrr..p...",
+    "=========rrrrrrrrrrrrrrrrrrr111111",
+    "........==rrrrrrrrrrrrrrrr==112222",
+    "........==..~~~~~~~~~~~~..==112222",
+    "........==.~~~~~~~~~~~~~~.==111111",
+    "........==~~~~~~~~~~~~~~~.==.1~111",
+    "........==~~~~~~~~~~~~~~~.==.~~111",
+    "........==~~~~~~~~~~~~~~~~==.~~~~~",
+    "........==~~~~~~~~~~~~~~~~HH~~~~~~",
+    "........==~HHHH~~~~~~~~~~~HH~~~~~~",
+    "........===HHHH~~~~~~~~~~~HH~~~~~~",
+    "........=.rr~~~~~~~~~~~~~~HH~~~~~~",
+    "........=..rr~~~~~~~~~~~~~HH~~~~~~",
+    ".......==..rrr~~~~~~~~~~~~HH~~~~~~",
+    ".......==...rrr~~~~~~~~~~~HH~~~~~~",
+    ".......==....~~~~~~~~~~~~~HH~~~~~~",
+    "......==....~~~~~~~~~~~~~~HH~~~~~~",
+    "......==...~~~~~~~~~~~~~~~HH~~~~~~",
+    "......==..~~~~~~~~~~~~~~~~~~~~~~~~"
+  ],
+  "props": [
+    {
+      "asset": "harbour_house",
+      "x": 2,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "inn_sign",
+      "x": 6,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "harbour_house",
+      "x": 10,
+      "z": 11,
+      "rot": 270,
+      "recolor": {
+        "sx_td_wall": "#d9a441",
+        "sx_td_wall_dk": "#b9862f",
+        "sx_td_roof": "#b8483a",
+        "sx_td_roof_dk": "#963a2f"
+      }
+    },
+    {
+      "asset": "harbour_house",
+      "x": 20,
+      "z": 1,
+      "rot": 0,
+      "recolor": {
+        "sx_td_wall": "#e8e2d4",
+        "sx_td_wall_dk": "#cfc7b5",
+        "sx_td_roof": "#2f7f6f",
+        "sx_td_roof_dk": "#25665a"
+      }
+    },
+    {
+      "asset": "harbour_house",
+      "x": 28,
+      "z": 3,
+      "rot": 0,
+      "recolor": {
+        "sx_td_wall": "#f0efe8",
+        "sx_td_wall_dk": "#d6d4ca",
+        "sx_td_roof": "#2c4f7c",
+        "sx_td_roof_dk": "#223d61"
+      }
+    },
+    {
+      "asset": "workshop",
+      "x": 9,
+      "z": 1,
+      "rot": 0,
+      "recolor": {
+        "sx_slate": "#7a4a36",
+        "sx_slate_dk": "#5e3929"
+      }
+    },
+    {
+      "asset": "workshop",
+      "x": 1,
+      "z": 18,
+      "rot": 90,
+      "recolor": {
+        "sx_slate": "#3d6f8f",
+        "sx_slate_dk": "#2f5770"
+      }
+    },
+    {
+      "asset": "signpost",
+      "x": 1,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 9,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "stall",
+      "x": 12,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "stall_b",
+      "x": 15,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "stall",
+      "x": 18,
+      "z": 5,
+      "rot": 0,
+      "recolor": {
+        "sx_awning_red": "#2f7fd0"
+      }
+    },
+    {
+      "asset": "crates",
+      "x": 11,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 20,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 17,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 23,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 2,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "bollard",
+      "x": 10,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "bollard",
+      "x": 13,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "bollard",
+      "x": 16,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "bollard",
+      "x": 19,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "bollard",
+      "x": 22,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "bollard",
+      "x": 25,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 27,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 9,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 27,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 14,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 7,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 24,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 9,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 26,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 27,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 21,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 12,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 31,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 10,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 13,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 6,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 18,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 21,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 2,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 4,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 1,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "ferry",
+      "x": 22,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 31,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 21,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 32,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 15,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 16,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 17,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 18,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 19,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 20,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 15,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 16,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 14,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 13,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 3,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 4,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 1,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 3,
+      "z": 20,
+      "rot": 180
+    },
+    {
+      "asset": "crab_pots",
+      "x": 5,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 4,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 5,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 1,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 5,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 5,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 1,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 9,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 10,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 9,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 10,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 11,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 10,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 4,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 5,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 4,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 6,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 7,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 6,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 2,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 3,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 2,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 2,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 5,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 8,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 9,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 6,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 12,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 13,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 15,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 17,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 25,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 26,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 27,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 29,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 7,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 1,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 24,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 19,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 26,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 8,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 7,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 25,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 16,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 11,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 29,
+      "z": 9,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_sea",
+      "x": 32,
+      "z": 12,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_sea",
+      "x": 33,
+      "z": 9,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_sea",
+      "x": 28,
+      "z": 11,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_sea",
+      "x": 33,
+      "z": 1,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "reeds",
+      "x": 31,
+      "z": 11,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "reeds",
+      "x": 30,
+      "z": 8,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "reeds",
+      "x": 32,
+      "z": 0,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "bench",
+      "x": 30,
+      "z": 9,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "flowers",
+      "x": 33,
+      "z": 10,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "flowers",
+      "x": 28,
+      "z": 9,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "waymark",
+      "x": 26,
+      "z": 4,
+      "rot": 0,
+      "glow": "#2f7fd0"
+    },
+    {
+      "asset": "ferry",
+      "x": 28,
+      "z": 19,
+      "rot": 0,
+      "recolor": {
+        "sx_td_hull": "#5b3f86",
+        "sx_td_cabin_roof": "#c89b3c",
+        "sx_td_funnel": "#efe6d2"
+      }
+    }
+  ],
+  "spawn": {
+    "x": 2,
+    "z": 7,
+    "facing": "e"
+  },
+  "interactions": [
+    {
+      "kind": "waymark",
+      "id": "gullhaven",
+      "x": 26,
+      "z": 4
+    },
+    {
+      "x": 1,
+      "z": 9,
+      "kind": "sign",
+      "text": "West: the Saltwind Boardwalk, and the meadow beyond. South, through the dunes: the Bellflats.",
+      "text_fr": "Ouest : la Promenade de Ventsalé, et le pré au-delà. Au sud, par les dunes : les Grèves de la Cloche."
+    },
+    {
+      "x": 9,
+      "z": 22,
+      "kind": "sign",
+      "text": "The Bellflats. The tide goes out at eight in the morning and comes back at six. After dark, keep to the boardwalk.",
+      "text_fr": "Les Grèves de la Cloche. La mer se retire à huit heures du matin et revient à six heures du soir. Une fois la nuit tombée, restez sur le ponton."
+    },
+    {
+      "x": 6,
+      "z": 6,
+      "kind": "sign",
+      "text": "The Dry Dock. Chowder, beds, and nobody asks about your boots.",
+      "text_fr": "Le Bassin de radoub. De la chaudrée, des lits, et personne ne pose de questions sur vos bottes."
+    },
+    {
+      "x": 25,
+      "z": 9,
+      "kind": "sign",
+      "id": "tide_board",
+      "name": "The tide board",
+      "name_fr": "Le tableau des marées",
+      "dialogue": [
+        {
+          "lines": [
+            "A painted board, chalked fresh this morning:",
+            "\"LOW WATER 8 to 6. The Bellflats walkable, the causeway to Lanternmere open.\"",
+            "\"HIGH WATER 6 to 8. Flats under the sea, causeway under the sea. Take the boardwalk, or the ferry.\""
+          ],
+          "lines_fr": [
+            "Un tableau peint, mis à jour à la craie ce matin :",
+            "« BASSE MER de 8 h à 18 h. Grèves praticables, chaussée de Lac-aux-Lanternes ouverte. »",
+            "« PLEINE MER de 18 h à 8 h. Grèves sous la mer, chaussée sous la mer. Prenez le ponton, ou le bac. »"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "t_quay",
+      "x": 27,
+      "z": 10,
+      "give": "coins:50",
+      "hidden": true,
+      "text": "Wedged between two crates on the quay, where the gulls can't get at it: a little purse of Facets.",
+      "text_fr": "Coincée entre deux caisses sur le quai, là où les mouettes ne l'atteignent pas : une petite bourse de Facettes."
+    },
+    {
+      "kind": "find",
+      "id": "t_market",
+      "x": 20,
+      "z": 6,
+      "give": "card:streamfin",
+      "hidden": true,
+      "text": "Under the fish crates, pressed flat in waxed paper: a card. It smells of mackerel and it's perfectly fine.",
+      "text_fr": "Sous les caisses de poisson, aplatie dans du papier ciré : une carte. Elle sent le maquereau et elle est en parfait état."
+    },
+    {
+      "kind": "find",
+      "id": "t_seawall",
+      "x": 14,
+      "z": 22,
+      "give": "coins:40",
+      "text": "In a crack of the old sea wall, behind the weed: Facets, green at the edges. Someone hid them here a long tide ago.",
+      "text_fr": "Dans une fente du vieux mur de mer, derrière les algues : des Facettes, vertes sur les bords. Quelqu'un les a cachées là il y a bien des marées."
+    },
+    {
+      "x": 25,
+      "z": 22,
+      "kind": "sign",
+      "id": "gangway_storm",
+      "name": "The Stormwatch ferry",
+      "name_fr": "Le bac de Guette-Orage",
+      "dialogue": [
+        {
+          "if": "item:ferry_pass",
+          "lines": [
+            "Lou checks the pass, twice, and waves you up the gangway. The ferry noses out past the buoys and turns north along the cliffs."
+          ],
+          "lines_fr": [
+            "Lou vérifie le laissez-passer, deux fois, et vous fait monter. Le bac sort entre les bouées et vire au nord, le long des falaises."
+          ],
+          "do": [
+            "warp:stormwatch:19:20:n"
+          ]
+        },
+        {
+          "lines": [
+            "The gangway's chained. A tin plate on the chain: \"STORMWATCH. Passes only. Harbour Office, up the quay.\""
+          ],
+          "lines_fr": [
+            "La passerelle est fermée par une chaîne. Une plaque de fer-blanc dessus : « GUETTE-ORAGE. Laissez-passer obligatoire. Capitainerie, en haut du quai. »"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 28,
+      "z": 19,
+      "kind": "sign",
+      "id": "gangway_lake",
+      "name": "The Lanternmere launch",
+      "name_fr": "La vedette de Lac-aux-Lanternes",
+      "dialogue": [
+        {
+          "if": "item:ferry_pass",
+          "lines": [
+            "Lou checks the pass, twice, and casts off. The launch runs down the coast and up the Mere river, and the lanterns of Lanternmere come out of the haze."
+          ],
+          "lines_fr": [
+            "Lou vérifie le laissez-passer, deux fois, et largue les amarres. La vedette longe la côte, remonte la rivière du Lac, et les lanternes de Lac-aux-Lanternes sortent de la brume."
+          ],
+          "do": [
+            "warp:lanternmere:31:21:n"
+          ]
+        },
+        {
+          "lines": [
+            "A lilac launch with a brass rail. The gangway's chained: \"LANTERNMERE. Passes only. Harbour Office, up the quay.\""
+          ],
+          "lines_fr": [
+            "Une vedette lilas à la rambarde de laiton. La passerelle est fermée par une chaîne : « LAC-AUX-LANTERNES. Laissez-passer obligatoire. Capitainerie, en haut du quai. »"
+          ]
+        }
+      ]
+    }
+  ],
+  "warps": [
+    {
+      "x": 4,
+      "z": 5,
+      "to": "inn_tide",
+      "label": "Go into the Dry Dock",
+      "label_fr": "Entrer au Bassin de radoub",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    },
+    {
+      "x": 30,
+      "z": 6,
+      "to": "harbour_office",
+      "label": "Go into the Harbour Office",
+      "label_fr": "Entrer à la Capitainerie",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    }
+  ],
+  "exits": [
+    {
+      "side": "w",
+      "span": [
+        7,
+        8
+      ],
+      "to": "seaside"
+    },
+    {
+      "side": "s",
+      "span": [
+        6,
+        7
+      ],
+      "to": "bellflats"
+    }
+  ],
+  "npcs": [
+    {
+      "id": "lou",
+      "name": "Lou",
+      "model": "npc_sailor",
+      "x": 27,
+      "z": 17,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#c0392b",
+      "hair": "#e0c080",
+      "dialogue": [
+        {
+          "if": "item:ferry_pass",
+          "lines": [
+            "Pass! Pass. Pass. Stamped twice, Ines style. Lovely, lovely, lovely.",
+            "Big ferry on the right for Stormwatch, lilac launch on the left for Lanternmere. Right for the cliffs, left for the lake."
+          ],
+          "lines_fr": [
+            "Laissez-passer ! Laissez-passer. Laissez-passer. Tamponné deux fois, façon Ines. Parfait, parfait, parfait.",
+            "Le gros bac à droite pour Guette-Orage, la vedette lilas à gauche pour Lac-aux-Lanternes. À droite les falaises, à gauche le lac."
+          ]
+        },
+        {
+          "if": "flag:bo_asked",
+          "lines": [
+            "Bo says hello? Bo says hello. Bo never says hello. Must be the pass talking.",
+            "Two boats, two runs: the ferry to Stormwatch, the launch to Lanternmere. Passes from the Harbour Office, up the quay. Ines stamps them. Twice. Twice! Twice."
+          ],
+          "lines_fr": [
+            "Bo te salue ? Bo te salue. Bo ne salue jamais personne. Ça doit être l'effet du laissez-passer.",
+            "Deux bateaux, deux lignes : le bac pour Guette-Orage, la vedette pour Lac-aux-Lanternes. Les laissez-passer, à la Capitainerie, en haut du quai. Ines les tamponne. Deux fois. Deux fois ! Deux fois."
+          ]
+        },
+        {
+          "lines": [
+            "The ferry, the ferry, the ferry. Stormwatch up north, Lanternmere down the coast, and back again.",
+            "Passes from the Harbour Office, just up the quay. Ines stamps them. Twice. Twice! Twice."
+          ],
+          "lines_fr": [
+            "Le bac, le bac, le bac. Guette-Orage au nord, Lac-aux-Lanternes en bas de la côte, et retour.",
+            "Les laissez-passer, à la Capitainerie, en haut du quai. Ines les tamponne. Deux fois. Deux fois ! Deux fois."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "abel",
+      "name": "Abel",
+      "model": "npc_worker",
+      "x": 15,
+      "z": 4,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#2f6b8a",
+      "hair": "#4a3426",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Mackerel this morning, crab this afternoon, and gossip all day for free.",
+            "Hanne at the Dry Dock takes the best of it for her chowder. She hums while she stirs. Always the same tune: the tide's tune, she says."
+          ],
+          "lines_fr": [
+            "Maquereau ce matin, crabe cet après-midi, et des ragots toute la journée, gratuitement.",
+            "Hanne, au Bassin de radoub, prend le meilleur pour sa chaudrée. Elle fredonne en tournant la louche. Toujours le même air : l'air de la marée, qu'elle dit."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "abel_night",
+      "name": "Abel",
+      "model": "npc_worker",
+      "x": 14,
+      "z": 16,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#2f6b8a",
+      "hair": "#4a3426",
+      "if": "time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Stall's shut. This is the night shift: cards, a lantern, and Brann pretending he isn't winning.",
+            "A tip, since you're here: hold one Basic back on your Bench. When your Active goes down, you're not left with nothing to send in."
+          ],
+          "lines_fr": [
+            "L'étal est fermé. Ici, c'est l'équipe de nuit : des cartes, une lanterne, et Brann qui fait semblant de ne pas gagner.",
+            "Un conseil, puisque tu es là : garde toujours un Hexon de Base sur ton Banc. Quand ton Actif tombe, tu n'es pas pris de court."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "juno",
+      "name": "Juno",
+      "model": "npc_kid",
+      "x": 12,
+      "z": 8,
+      "facing": "e",
+      "idle": "Idle",
+      "outfit": "#e2ad19",
+      "hair": "#c0582d",
+      "route": [
+        "e",
+        "e",
+        "e",
+        "e",
+        "e",
+        "e",
+        "e",
+        "e",
+        "e",
+        "e",
+        "e",
+        "w",
+        "w",
+        "w",
+        "w",
+        "w",
+        "w",
+        "w",
+        "w",
+        "w",
+        "w",
+        "w"
+      ],
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Beat you! Well, beat the gulls. They don't know we're racing, which helps.",
+            "Want a secret? Out on the Bellflats, when the sea's gone, there are pools full of things. Deep ones. You need boots to reach the bottom.",
+            "And the old bell tower has a lamp nobody lights. Except it's lit some nights. Spooky, right?"
+          ],
+          "lines_fr": [
+            "Gagné ! Enfin, contre les mouettes. Elles ne savent pas qu'on fait la course, ça aide.",
+            "Tu veux un secret ? Sur les Grèves, quand la mer est partie, il y a des flaques pleines de bestioles. Des profondes. Il faut des bottes pour toucher le fond.",
+            "Et la vieille tour de la cloche a une lampe que personne n'allume. Sauf qu'elle est allumée certaines nuits. Ça fait peur, hein ?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_dorrit",
+      "name": "Dorrit",
+      "model": "npc_sailor",
+      "x": 27,
+      "z": 22,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "You waiting on the ferry? Me too. Lou's still counting things three times.",
+          "Quick duel while we wait? One prize. Deckhands play fast."
+        ],
+        "challenge_fr": [
+          "Tu attends le bac ? Moi aussi. Lou recompte encore tout trois fois.",
+          "Un petit duel en attendant ? Une Récompense. Les matelots jouent vite."
+        ],
+        "win": [
+          "Overboard! That's me, I'm overboard. Fair win."
+        ],
+        "win_fr": [
+          "Un homme à la mer ! C'est moi, l'homme à la mer. Bien joué."
+        ],
+        "lose": [
+          "Ha! Swab the deck and try again."
+        ],
+        "lose_fr": [
+          "Ha ! Passe la serpillière et réessaie."
+        ],
+        "after": [
+          "Ferry's late. Ferry's always late. Lou says it's early for tomorrow."
+        ],
+        "after_fr": [
+          "Le bac est en retard. Le bac est toujours en retard. Lou dit qu'il est en avance pour demain."
+        ]
+      },
+      "outfit": "#3d5a7a",
+      "hair": "#2b211c"
+    },
+    {
+      "id": "t_brann",
+      "name": "Brann",
+      "model": "npc_elder",
+      "x": 13,
+      "z": 17,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "Night fishing's slow. Cards are quicker.",
+          "Sit down. Three prizes, and I play the way the sea does: patiently, then all at once."
+        ],
+        "challenge_fr": [
+          "La pêche de nuit, c'est lent. Les cartes, c'est plus rapide.",
+          "Assieds-toi. Trois Récompenses, et je joue comme la mer : patiemment, puis d'un coup."
+        ],
+        "win": [
+          "Well. The sea doesn't always win either. Take it, you earned it."
+        ],
+        "win_fr": [
+          "Eh bien. La mer ne gagne pas toujours non plus. Prends, tu l'as mérité."
+        ],
+        "lose": [
+          "Tide's out on you, friend. Come back on the flood."
+        ],
+        "lose_fr": [
+          "La mer s'est retirée pour toi, l'ami. Reviens avec le flot."
+        ],
+        "after": [
+          "Seventy years on this pier and you're the first to empty my pockets twice in one night. Once, I mean. Once."
+        ],
+        "after_fr": [
+          "Soixante-dix ans sur ce ponton, et tu es le premier à vider mes poches deux fois en une nuit. Une fois, je veux dire. Une fois."
+        ]
+      },
+      "outfit": "#2b3a4a",
+      "hair": "#e8e4dc",
+      "if": "time:night"
+    }
+  ],
+  "ground": {
+    "base": "sand",
+    "path": "wood_floor",
+    "margin": 10,
+    "tufts": 350
+  },
+  "ring": [
+    "reeds",
+    "bush_dark",
+    "reeds"
+  ],
+  "ringSides": "nw",
+  "cliff": [
+    "cliff_sea",
+    "cliff_sea_b"
+  ],
+  "gulls": 5,
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#fff4e0",
+      "intensity": 2.7,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#f2fbff",
+      "ground": "#6d8a7a",
+      "intensity": 1.6
+    },
+    "background": "#bfe3e8",
+    "fog": {
+      "near": 18,
+      "far": 38
+    }
+  }
+}

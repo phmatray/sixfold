@@ -1,0 +1,193 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "cloth_rack",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "cloth_rack",
+      "x": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "dress_form",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "dress_form",
+      "x": 9,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "duel_table",
+      "x": 2,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "display_case",
+      "x": 9,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 4,
+      "z": 1,
+      "kind": "sign",
+      "text": "A half-finished jacket in lilac silk, pinned at the seams. The lining is stitched with tiny lanterns.",
+      "text_fr": "Une veste à moitié finie en soie lilas, épinglée aux coutures. La doublure est brodée de minuscules lanternes."
+    },
+    {
+      "x": 9,
+      "z": 5,
+      "kind": "sign",
+      "text": "Swatches under glass: moth-wing grey, mere-at-midnight blue, wisteria. Each with a price that makes you step back.",
+      "text_fr": "Des échantillons sous verre : gris aile-de-phalène, bleu lac-à-minuit, glycine. Chacun avec un prix qui fait reculer."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "to": "lanternmere",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 21,
+        "z": 8,
+        "facing": "n"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "celestin",
+      "name": "Celestin",
+      "model": "npc_scholar",
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#c46a8a",
+      "hair": "#2b211c",
+      "dialogue": [
+        {
+          "if": "!flag:talked_celestin",
+          "lines": [
+            "Ah. A traveller cut on the bias: a little crooked, a lot of stretch. I approve.",
+            "I am Celestin. I dress the lantern-makers, the night rowers and, once, a moth.",
+            "Your journey is still a pattern pinned to paper. When it has a few more seams in it, come back, and I'll cut you something to wear in it."
+          ],
+          "lines_fr": [
+            "Ah. Un voyageur coupé dans le biais : un peu de travers, beaucoup d'élasticité. J'approuve.",
+            "Je suis Celestin. J'habille les lanternières, les rameurs de nuit et, une fois, une phalène.",
+            "Ton voyage n'est encore qu'un patron épinglé sur du papier. Quand il aura quelques coutures de plus, reviens, et je te taillerai de quoi le porter."
+          ]
+        },
+        {
+          "lines": [
+            "Measure twice, cut once, and never trust a hem sewn in a hurry.",
+            "Mina says I talk in fabric. I say Mina talks in whispers. We are both lined with silk."
+          ],
+          "lines_fr": [
+            "Mesurer deux fois, couper une fois, et ne jamais se fier à un ourlet cousu à la hâte.",
+            "Mina dit que je parle en tissu. Je dis que Mina parle en chuchotements. Nous sommes tous deux doublés de soie."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#f2e8ff",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ece0fa",
+      "ground": "#40344a",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffc0a0",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#14101c"
+  }
+}
