@@ -31,7 +31,7 @@ import { U } from "./life.js";
 import { PLACEHOLDER, group, prep } from "./props.js";
 import { tr, loadMap, loadAsset, assetNames, preload, PERSON, OPTIONAL } from "./map.js";
 import { build, dispose, refresh, animateProps } from "./build.js";
-import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route, emote } from "./actors.js";
+import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route, emote, LATE } from "./actors.js";
 import { updateNpc, facing as facingOf } from "./npc.js";
 import * as duelists from "./trainer.js";
 import { daylight, phaseOf, DAY } from "./daylight.js";
@@ -67,8 +67,17 @@ export function mount(el, controls, cb, start, edit = false) {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, 0.5, 80); // tight planes: depth precision
-  // Where scenery hides the hero, draw it as a flat silhouette (depth test reversed).
-  const silhouette = new THREE.MeshBasicMaterial({ color: "#f3d589", transparent: true, opacity: 0.55, depthFunc: THREE.GreaterDepth, depthWrite: false, fog: false });
+  // Where tall scenery hides the hero, draw it as a solid flat silhouette (depth test reversed).
+  const silhouette = new THREE.MeshBasicMaterial({ color: "#f3d589", depthFunc: THREE.GreaterDepth, depthWrite: false, fog: false });
+  // three's shadow pass draws only what the rendering camera's layers hold, so the
+  // shadows are drawn first through a camera that sees nothing itself and holds every
+  // layer (people, low things, the terrain's shadow caster) but the hero's (its blob is
+  // its shadow).
+  const shadowEye = new THREE.OrthographicCamera(-0.01, 0.01, 0.01, -0.01, 0.1, 0.2);
+  shadowEye.position.set(0, -1e4, 0);
+  shadowEye.updateMatrixWorld();
+  shadowEye.layers.enableAll();
+  shadowEye.layers.disable(1);
   let cam = { fov: 40, fovPortrait: 50, pitch: 50, distance: 12, distancePortrait: 15, lookAtOffset: [0, 0.75, 0] };
   let dist = 12, alive = true, raf = 0, paused = false, warping = false, world = null, hero = null;
   let canRun = false, runToggle = false, shift = false, lastHero = "";
@@ -594,10 +603,12 @@ export function mount(el, controls, cb, start, edit = false) {
       w.sun.target.position.set(h.x, 0, h.z);
     }
 
-    // Three passes: the scene without the hero; the hero's silhouette where
-    // scenery hides it; then the hero itself where it shows.
+    // Four passes: the tall scenery; the hero's silhouette where that hides it; the
+    // hero itself where it shows; then people and low things (LATE), which cover the
+    // hero by plain depth and so never show its silhouette.
     renderer.shadowMap.needsUpdate = true;
     renderer.info.reset();
+    renderer.render(scene, shadowEye);
     renderer.clear();
     camera.layers.set(0);
     renderer.render(scene, camera);
@@ -605,6 +616,8 @@ export function mount(el, controls, cb, start, edit = false) {
     scene.overrideMaterial = silhouette;
     renderer.render(scene, camera);
     scene.overrideMaterial = null;
+    renderer.render(scene, camera);
+    camera.layers.set(LATE);
     renderer.render(scene, camera);
     camera.layers.set(0);
     stats = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles };

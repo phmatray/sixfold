@@ -119,7 +119,7 @@ export function ambience(scene, spots, reduced) {
     new THREE.PointsMaterial({ size: 0.07, map: dot, color: "#fff4c2", vertexColors: true, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending }),
   );
   const seeds = Array.from({ length: MOTES }, () => [Math.random() * box, Math.random() * 3 + 0.3, Math.random() * box, Math.random() * 6.28]);
-  motes.frustumCulled = false;
+  motes.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 500); // in every real view (not world.js's shadowEye, far below)
   scene.add(motes);
 
   // Butterflies: a dark body and two small toon wings, looping over a flower bed each.
@@ -132,6 +132,7 @@ export function ambience(scene, spots, reduced) {
     r.scale.x = -1;
     const g = new THREE.Group();
     g.add(l, r, new THREE.Mesh(bodyGeo, bodyMat));
+    g.traverse((o) => o.layers.set(3)); // a butterfly can't hide the hero (actors.js LATE)
     scene.add(g);
     return { g, l, r, c, k: i * 1.7, last: new THREE.Vector3() };
   });

@@ -34,8 +34,8 @@ wired: the `cliff` and `fence` map keys, glow and glass parts kept apart, `open`
 repeats. The exact formats are in `ASSETS.md`, "1.3 additions". Region PRs only add their props' `props.js`
 entries (FOOT / DECK / TALL / WIND_H, and `BATCHED` in `build.js`) and place them.
 
-1. **Per-map cliff set.** `build.js` stacks `cliff` / `cliff_b` for digit tiles. Add a map key, for example
-   `"cliff": ["cliff_basalt", "cliff_basalt_b"]` (the `_b` keeps the existing 35 % top-layer rule). Sets:
+1. **Per-map cliff set.** Digit tiles are raised ground built by `terrain.js` (no blocks); the map key, for example
+   `"cliff": ["cliff_basalt", "cliff_basalt_b"]`, picks the rock its walls are painted with. Sets:
    `cliff_basalt` (Ember, the Rodspire causeway), `cliff_heath` (Storm), `cliff_sea` (Tide), `cliff_slate` (Stone);
    Dream and Grove keep `cliff` / `cliff_b`.
 2. **Per-map fence set** (`docs/WORLD_DESIGN.md` §14.1): `"fence": "wall_dry" | "hedge"`. Both sets use the fence arm

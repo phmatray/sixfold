@@ -28,6 +28,11 @@ function radial(inner, outer) {
 const blobTex = radial("rgba(20,30,15,0.42)", "rgba(20,30,15,0)");
 export const glowTex = radial("rgba(255,255,255,0.9)", "rgba(255,255,255,0)");
 // Soft contact shadow, 1.5 cm above the floor and depth-offset (never coplanar).
+// Drawn after the hero (camera layer 3): people and anything too low to hide the hero
+// (grass, rocks, fences, crates). They cover the hero by plain depth, so only tall
+// static scenery (roofs, canopies, cliffs, walls) draws the hero's silhouette (world.js).
+export const LATE = 3;
+export const late = (o) => (o.traverse((c) => c.layers.set(LATE)), o);
 export const blobMat = () => new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
 export const blobGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
 

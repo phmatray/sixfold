@@ -310,6 +310,14 @@ export function prep(root, cast) {
     o.material.vertexColors = false;
     // A `glow` part (a lamp's glass, the oven's mouth) shines a little on its own.
     if (/glow/i.test(o.material.name) && o.material.emissive) o.material.emissive.copy(o.material.color).multiplyScalar(0.55);
+    // The baked contact shadow (two discs a few mm over the ground): pulled toward the
+    // camera in depth and never written there or cast, so it can't flicker against the
+    // ground or itself.
+    if (/contact/i.test(o.material.name)) {
+      o.castShadow = false;
+      Object.assign(o.material, { depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: /_in/.test(o.material.name) ? -8 : -4 });
+      o.renderOrder = /_in/.test(o.material.name) ? 1 : 0;
+    }
   });
 }
 
