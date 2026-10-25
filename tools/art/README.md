@@ -23,6 +23,28 @@ procedural SVG.
 - **Output:** the PNG goes to `tools/art/out/` (git-ignored); the WebP (best quality ≤ 60 KB)
   goes straight to `web/cards/`.
 
+## Safe area: where the picture is cropped
+
+The art is 800×560 (10:7). How much of it shows depends on the card's size (measured in 1.3.x at
+1440×900 and 390×844):
+
+| Where | Card width | Window | What shows |
+|---|---|---|---|
+| Full card: binder, inspector, pack reveal, shop | ≥ 140 px | fixed 10:7 | **the whole picture** |
+| Compact card: hand, Active and Bench on desktop, shop thumbnails | 48–139 px | about 1:1 (0.84–1.03) | x 15–85 % (energy, which has no stage line, x 21–79 %), full height |
+| Picture only: Bench on a phone, discard top, piles | ≤ 47 px | 5:7 (0.70) | x 25–75 %, full height |
+
+The picture is centred (`object-position: 50% 50%`) and never cropped top or bottom. So, as
+insets from each edge of the 800×560 frame:
+
+- **Safe area — the whole subject** (body, tail, wings, the object's outline): **18 % left and
+  right, 4 % top and bottom** (x 144–656, y 22–538). Everything inside shows on every card from the
+  hand up.
+- **Core — what must read even as a thumbnail** (the face, or the object's key part): **27 % left
+  and right** (x 216–584), full height.
+- Outside the safe area: background wash and ground only; it shows on full cards and is cropped
+  away on small ones.
+
 ## Licence notes
 
 - The weights are **not** in this repository. FLUX 3 Image Klein is published by Black Forest
