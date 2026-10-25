@@ -193,6 +193,17 @@ pub struct Saved {
     pub slot: RwSignal<usize>,
 }
 
+/// The current save still has its guided first duel ahead.
+#[derive(Clone, Copy)]
+pub struct TutorialDue(pub RwSignal<bool>);
+
+/// The guided duel was played or skipped: the title offers Continue from now on.
+pub fn tutorial_done() {
+    edit(Save::set_tutorial_done);
+    write();
+    expect_context::<TutorialDue>().0.set(false);
+}
+
 /// A one-off message shown on the title screen (e.g. a save that didn't read).
 #[derive(Clone, Copy)]
 pub struct Notice(pub RwSignal<Option<String>>);
@@ -218,7 +229,9 @@ fn show_current() {
     let progress = expect_context::<RwSignal<Progress>>();
     let notice = expect_context::<Notice>().0;
     let saved = expect_context::<Saved>();
-    let ((p, lost), prog, n) = CURRENT.with_borrow(|(n, s)| (s.profile(), s.progress(), *n));
+    let ((p, lost), prog, n, due) =
+        CURRENT.with_borrow(|(n, s)| (s.profile(), s.progress(), *n, s.tutorial_due()));
+    expect_context::<TutorialDue>().0.set(due);
     profile.set(p);
     progress.set(prog);
     saved.slot.set(n);
@@ -298,6 +311,9 @@ pub fn provide() {
     provide_context(profile);
     provide_context(progress);
     provide_context(saved);
+    provide_context(TutorialDue(RwSignal::new(
+        CURRENT.with_borrow(|(_, s)| s.tutorial_due()),
+    )));
     provide_context(Notice(RwSignal::new(note.or_else(|| lost_note(&lost)))));
     // The first run only reads the signal: nothing changed yet.
     Effect::new(move |first: Option<()>| {

@@ -93,7 +93,8 @@ fn attack_buttons(g: &Game, legal: &[Action]) -> Vec<AttackBtn> {
                 ko: matches!((preview, defender_hp), (Some((amt, ..)), Some(hp)) if amt >= hp && amt > 0),
                 // Probing a clone only reads the human's own options.
                 blocked: (!legal.contains(&action))
-                    .then(|| g.clone().apply(action).err().map_or(tr("Can't use it now", "Impossible pour l'instant"), reason)),
+                    // An engine-legal attack held back is the guided duel's "later".
+                    .then(|| g.clone().apply(action).err().map_or(tr("Not yet", "Pas encore"), reason)),
                 text: attack_text(a),
             }
         })

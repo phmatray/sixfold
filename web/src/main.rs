@@ -6,6 +6,7 @@ mod binder;
 mod board;
 mod campaign;
 mod cards;
+mod coach;
 mod controls;
 mod credits;
 mod ctl;
@@ -103,10 +104,18 @@ fn App() -> impl IntoView {
         if ctl.busy.get() {
             return vec![];
         }
+        // The guided duel offers only its step's move.
+        let tutorial = ctl.tutorial();
         ctl.shown.with(|g| {
             g.as_ref()
                 .filter(|g| g.view(HUMAN).waiting_on == Some(HUMAN))
-                .map(|g| g.legal_actions())
+                .map(|g| {
+                    let mut l = g.legal_actions();
+                    if tutorial {
+                        l.retain(|&a| sixfold_engine::tutorial::allows(g, a));
+                    }
+                    l
+                })
                 .unwrap_or_default()
         })
     });
@@ -180,6 +189,7 @@ fn MatchScreen() -> impl IntoView {
     let ui = expect_context::<Ui>();
     let screen = expect_context::<RwSignal<Screen>>();
     let names = ctl.setup.get_value().map(|s| s.names).unwrap_or_default();
+    let tutorial = ctl.tutorial();
     // Quitting goes back where the duel started (the world for a campaign duel).
     let quit_to = ctl
         .setup
@@ -238,7 +248,7 @@ fn MatchScreen() -> impl IntoView {
                     {tr(" against ", " contre ")}
                     <span class="opp-name">{names[AI].clone()}</span>
                 </span>
-                <span class="seed">{tr("Seed ", "Graine ")} {move || ctl.seed.get()}</span>
+                {(!tutorial).then(|| view! { <span class="seed">{tr("Seed ", "Graine ")} {move || ctl.seed.get()}</span> })}
                 <button class="btn ghost log-toggle" aria-expanded=move || ui.log_open.get().to_string()
                     on:click=move |_| ui.log_open.update(|o| *o = !*o)>{tr("Log", "Journal")}</button>
                 <MuteToggle />
@@ -271,6 +281,7 @@ fn MatchScreen() -> impl IntoView {
                     </div>
                     <SideRow player=HUMAN />
                 </div>
+                {tutorial.then(|| view! { <coach::Coach /> })}
                 <Hand />
                 <ActionBar />
                 {move || ctl.error.get().map(|e| view! { <p class="error" role="alert">{e}</p> })}
@@ -286,7 +297,7 @@ fn MatchScreen() -> impl IntoView {
             <CalloutOverlay />
             <CoinOverlay />
             <DiscardViewer />
-            <GameOver />
+            {if tutorial { view! { <coach::Finish /> }.into_any() } else { view! { <GameOver /> }.into_any() }}
         </div>
     }
 }

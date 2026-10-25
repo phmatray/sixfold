@@ -11,7 +11,7 @@ use crate::audio::AudioSettings;
 use crate::binder::progress;
 use crate::cards::{deck_star, CardFace};
 use crate::saves::{SaveSettings, SlotPicker};
-use crate::store::{self, Notice};
+use crate::store::{self, Notice, TutorialDue};
 use crate::Screen;
 
 #[component]
@@ -31,6 +31,24 @@ fn MenuItem(
                 {badge.map(|b| view! {
                     <span class="count-badge" class:zero=move || b.get() == 0 aria-hidden="true">{move || b.get()}</span>
                 })}
+                <svg class="menu-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+            </button>
+        </li>
+    }
+}
+
+/// A menu entry that starts the guided first duel.
+#[component]
+fn LessonItem(
+    label: &'static str,
+    sub: &'static str,
+    #[prop(optional)] primary: bool,
+) -> impl IntoView {
+    view! {
+        <li>
+            <button type="button" class="menu-item" class:primary=primary on:click=move |_| crate::coach::start(Screen::Title)>
+                <span class="menu-label">{label}</span>
+                <span class="menu-sub">{sub}</span>
                 <svg class="menu-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
             </button>
         </li>
@@ -140,6 +158,7 @@ pub fn TitleScreen() -> impl IntoView {
             )
         })
     };
+    let due = expect_context::<TutorialDue>().0;
     let progress = expect_context::<RwSignal<Progress>>();
     let campaign_sub = move || {
         progress.with(|p| {
@@ -163,6 +182,17 @@ pub fn TitleScreen() -> impl IntoView {
                 ),
             }
         })
+    };
+    let continue_sub = move || {
+        progress.with(
+            |p| match RIVALS.iter().find(|r| r.open(p) && !r.beaten(p)) {
+                Some(r) => tr(
+                    format!("Back into the world · next rival: {}", r.name),
+                    format!("Retour dans le monde · prochain rival : {}", r.name),
+                ),
+                None => tr("Back into the world", "Retour dans le monde").to_string(),
+            },
+        )
     };
     let pack_sub = move || match packs.get() {
         0 => tr(
@@ -193,14 +223,25 @@ pub fn TitleScreen() -> impl IntoView {
                             <button type="button" class="btn ghost" on:click=move |_| notice.set(None)>{tr("Dismiss", "Fermer")}</button>
                         </p>
                     })}
+                    // A new save starts with the lesson; after it, Continue leads
+                    // back into the world, and the lesson stays a menu away.
                     <nav aria-label=tr("Main menu", "Menu principal")>
                         <ul class="menu">
-                            <MenuItem label=tr("Play a duel", "Jouer un duel") sub=tr("Your deck against the AI", "Votre deck contre l'IA") to=Screen::Duel primary=true />
+                            {move || if due.get() {
+                                view! { <LessonItem primary=true label=tr("Learn to play", "Apprendre à jouer") sub=tr("A guided first duel, three turns long", "Un premier duel guidé, en trois tours") /> }.into_any()
+                            } else {
+                                view! { <MenuItem label=tr("Continue", "Continuer") sub=Signal::derive(continue_sub) to=Screen::World primary=true /> }.into_any()
+                            }}
+                            <MenuItem label=tr("Play a duel", "Jouer un duel") sub=tr("Your deck against the AI", "Votre deck contre l'IA") to=Screen::Duel />
                             <MenuItem label=tr("Campaign", "Campagne") sub=Signal::derive(campaign_sub) to=Screen::Campaign />
                             <MenuItem label=tr("Open packs", "Ouvrir des boosters") sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
                             <MenuItem label=tr("My decks", "Mes decks") sub=Signal::derive(decks) to=Screen::Decks />
                             <MenuItem label="Collection" sub=Signal::derive(found) to=Screen::Collection />
-                            <MenuItem label=tr("Explore the world", "Explorer le monde") sub=tr("Explore the meadow and the four roads out of it", "Le pré et les quatre routes qui en partent") to=Screen::World />
+                            {move || if due.get() {
+                                view! { <MenuItem label=tr("Explore the world", "Explorer le monde") sub=tr("Explore the meadow and the four roads out of it", "Le pré et les quatre routes qui en partent") to=Screen::World /> }.into_any()
+                            } else {
+                                view! { <LessonItem label=tr("How to play", "Comment jouer") sub=tr("Replay the guided first duel", "Rejouer le premier duel guidé") /> }.into_any()
+                            }}
                         </ul>
                     </nav>
                 </div>

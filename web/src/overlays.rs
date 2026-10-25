@@ -301,6 +301,7 @@ pub fn GameOver() -> impl IntoView {
                     }
                     campaign_reward.set(got);
                 }
+                (None, Some(Post::Tutorial)) => {}
                 (None, None) => reward.set(profile.try_update(|p| p.record_duel(won)).flatten()),
             }
         }

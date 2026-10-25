@@ -185,6 +185,7 @@ pub fn DuelSetup() -> impl IntoView {
                             <li>{tr("Attack when the Active has the energy an attack shows. Attacking ends your turn.", "Attaquez quand votre Active porte l'énergie indiquée par l'attaque. Attaquer termine votre tour.")}</li>
                             <li>{tr("Knock out a creature to take a prize. Take all your prizes, or leave the opponent with no creature in play, to win.", "Mettez une créature K.O. pour prendre une Récompense. Pour gagner, prenez toutes vos Récompenses ou ne laissez aucune créature en jeu à l'adversaire.")}</li>
                         </ol>
+                        <p><button type="button" class="btn" on:click=move |_| crate::coach::start(Screen::Duel)>{tr("Play the guided duel", "Jouer le duel guidé")}</button></p>
                         <p class="note">{tr("Tap or hover any card to read it. Asleep and Paralyzed creatures can't attack or retreat; Confused ones may hurt themselves.", "Touchez ou survolez une carte pour la lire. Une créature Endormie ou Paralysée ne peut ni attaquer ni battre en retraite ; une créature Confuse peut se blesser elle-même.")}</p>
                     </details>
                     <div class="pickers">
