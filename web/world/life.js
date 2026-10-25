@@ -1,7 +1,8 @@
 // Micro-animation: wind sway (a vertex shader on one shared clock, also used by
 // the ground's drifting cloud shadows) plus a few cheap particles: dust motes
-// (fireflies after dark), butterflies (roosting at night), chimney smoke and
-// footstep puffs. With reduced motion, sway and particles are off.
+// (fireflies after dark), butterflies (roosting at night), moths round the lamps
+// at night, gulls over the sea by day, chimney smoke and footstep puffs. With
+// reduced motion, sway and particles are off.
 import * as THREE from "three";
 import { toon } from "./props.js";
 
@@ -135,6 +136,41 @@ export function ambience(scene, spots, reduced) {
     return { g, l, r, c, k: i * 1.7, last: new THREE.Vector3() };
   });
 
+  // Moths: pale wings fluttering round the street lamps nearest the hero, after dark.
+  const mothMat = toon("#efe6d2", { side: THREE.DoubleSide, emissive: "#3a3426" });
+  const mothWing = new THREE.CircleGeometry(0.03, 6).scale(1, 1.2, 1).translate(0.026, 0, 0).rotateX(-Math.PI / 2);
+  const moths = (spots.lamps ?? []).length
+    ? Array.from({ length: 8 }, (_, i) => {
+        const l = new THREE.Mesh(mothWing, mothMat), r = new THREE.Mesh(mothWing, mothMat);
+        r.scale.x = -1;
+        const g = new THREE.Group();
+        g.add(l, r);
+        g.visible = false;
+        scene.add(g);
+        return { g, l, r, k: i * 2.39, lamp: null };
+      })
+    : [];
+  let mothPick = 0;
+
+  // Gulls (`spots.gulls` of them, a map's `gulls`): wide glides high over the hero's
+  // part of the map, a few lazy flaps, gone to roost at night.
+  const gullMat = toon("#f7f7f2"), tipMat = toon("#3b4048");
+  const gullWing = new THREE.BoxGeometry(0.36, 0.015, 0.11).translate(0.18, 0, 0);
+  const gullTip = new THREE.BoxGeometry(0.1, 0.017, 0.09).translate(0.31, 0.002, 0);
+  const gullBody = new THREE.CapsuleGeometry(0.045, 0.2, 2, 6).rotateX(Math.PI / 2);
+  const gulls = Array.from({ length: spots.gulls ?? 0 }, (_, i) => {
+    const wing = (side) => {
+      const w = new THREE.Group();
+      w.add(new THREE.Mesh(gullWing, gullMat), new THREE.Mesh(gullTip, tipMat));
+      w.scale.x = side;
+      return w;
+    };
+    const l = wing(1), r = wing(-1), g = new THREE.Group();
+    g.add(new THREE.Mesh(gullBody, gullMat), l, r);
+    scene.add(g);
+    return { g, l, r, k: i * 2.1, rad: 3.5 + (i % 3) * 1.6, h: 5.2 + (i % 2) * 1.3, ox: ((i * 37) % 9) - 4.5, oz: ((i * 53) % 7) - 5, cx: null, cz: 0, last: new THREE.Vector3() };
+  });
+
   // Smoke: soft puffs rising and fading, from each source in `spots.smoke`
   // ({ at, kind, on }): a chimney's pale curl, a kiln's darker soot, a vent's
   // quick white steam (only while `on()` holds, for a gate's vents).
@@ -203,6 +239,45 @@ export function ambience(scene, spots, reduced) {
         const flap = Math.sin(t * 11 + f.k) * 0.8;
         f.l.rotation.z = flap;
         f.r.rotation.z = -flap;
+      }
+
+      // Each moth keeps to one of the four lamps nearest the hero (re-picked each second).
+      if (moths.length) {
+        const on = night > 0.4;
+        if (on && t > mothPick) {
+          mothPick = t + 1;
+          const near = spots.lamps.filter((l) => l.y < 4 && Math.hypot(l.x - hx, l.z - hz) < 16).sort((a, b) => Math.hypot(a.x - hx, a.z - hz) - Math.hypot(b.x - hx, b.z - hz)).slice(0, 4);
+          moths.forEach((m, i) => (m.lamp = near.length ? near[i % near.length] : null));
+        }
+        for (const m of moths) {
+          m.g.visible = on && !!m.lamp;
+          if (!m.g.visible) continue;
+          const a = t * (2.1 + (m.k % 1.3)) + m.k;
+          m.g.position.set(m.lamp.x + Math.sin(a) * 0.32 + Math.sin(a * 2.7) * 0.08, m.lamp.y - 0.05 + Math.sin(a * 1.7) * 0.18, m.lamp.z + Math.cos(a * 1.3) * 0.32);
+          m.g.rotation.y = a + Math.PI / 2;
+          const flap = Math.sin(t * 26 + m.k) * 0.9;
+          m.l.rotation.z = flap;
+          m.r.rotation.z = -flap;
+        }
+      }
+
+      for (const gl of gulls) {
+        gl.g.visible = night < 0.5;
+        if (!gl.g.visible) continue;
+        // The circle's centre trails the hero slowly, so the gulls stay in view without following.
+        if (gl.cx === null) (gl.cx = hx + gl.ox), (gl.cz = hz + gl.oz);
+        gl.cx += (hx + gl.ox - gl.cx) * Math.min(1, dt * 0.08);
+        gl.cz += (hz + gl.oz - gl.cz) * Math.min(1, dt * 0.08);
+        const a = t * (0.32 + (gl.k % 0.7) * 0.1) + gl.k;
+        gl.g.position.set(gl.cx + Math.cos(a) * gl.rad, gl.h + Math.sin(a * 2.3) * 0.35, gl.cz + Math.sin(a) * gl.rad * 0.7);
+        const v = gl.g.position.clone().sub(gl.last);
+        if (v.lengthSq() > 1e-8) gl.g.rotation.y = Math.atan2(v.x, v.z);
+        gl.last.copy(gl.g.position);
+        gl.g.rotation.z = -0.35; // banked into the turn
+        const beat = Math.max(0, Math.sin(t * 0.5 + gl.k)) ** 8; // mostly gliding, now and then a few flaps
+        const flap = 0.12 + beat * Math.sin(t * 9 + gl.k) * 0.55;
+        gl.l.rotation.z = flap;
+        gl.r.rotation.z = -flap;
       }
 
       for (const p of smoke) {

@@ -16,9 +16,12 @@ import { OPTIONAL, RING, cliffSet } from "./map.js";
 const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "reeds", "boardwalk", "pier", "bridge", "stairs",
   "lantern", "stall", "stall_b", "crates", "bench",
   "ash_pine", "rock_basalt", "cliff_basalt", "cliff_basalt_b", "stairs_basalt", "climb_wall_basalt", "glass_rack", // Ember
-  "heather", "cliff_heath", "cliff_heath_b", "stairs_heath", "wall_dry", "wall_dry_corner", "wall_dry_end", "wall_dry_t", "chime_post"]); // Storm (not pylon: animated)
-const TREES = new Set(["tree", "pine", "birch", "ash_pine"]); // varied in size, turn and tint; half a tile out on the map edge
+  "heather", "cliff_heath", "cliff_heath_b", "stairs_heath", "wall_dry", "wall_dry_corner", "wall_dry_end", "wall_dry_t", "chime_post", // Storm (not pylon: animated)
+  "crab_pots", "rock_sea", "bollard", "tidepool", "net_rack", "cliff_sea", "cliff_sea_b", // Tide (not ferry or buoy: they bob)
+  "willow", "wishing_tree", "ford_stones", "wisteria_arch", "hedge", "hedge_corner", "hedge_end", "hedge_t"]); // Dream (not moonflower: animated)
+const TREES = new Set(["tree", "pine", "birch", "ash_pine", "willow"]); // varied in size, turn and tint; half a tile out on the map edge
 const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // props whose smoke_origin smokes
+const BLOOMS = new Set(["moonflower"]); // with an `open` condition: instanced closed and open, cross-faded (build, refresh)
 const SMOKE = 8;
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
@@ -55,9 +58,24 @@ export function refresh(w, holds, gate, animate = false) {
     if (open === g.open) continue;
     const was = g.open;
     g.open = open;
-    if (animate && was !== null) (g.anim = 0), w.life.puffs?.(g.tiles), (w.gateSound = open);
+    const play = animate && was !== null;
+    if (play && !g.sea) (g.anim = 0), w.life.puffs?.(g.tiles), (w.gateSound = open);
     else g.anim = null;
     showGate(g, reduced(w) ? null : g.anim);
+    if (g.sea) {
+      // The tide turns over a few seconds (at once on a fresh build or with reduced motion).
+      g.tideWant = open ? 0 : 1;
+      if (!play || reduced(w)) g.sea((g.tide = g.tideWant));
+    }
+  }
+  for (const g of w.glimmers ?? []) g.on = g.gate ? !!g.gate.open : holds(g.cond);
+  for (const b of w.blooms ?? []) {
+    const open = holds(b.cond);
+    if (open === b.open) continue;
+    b.want = open ? 1 : 0;
+    if (b.open === null || !animate || reduced(w)) b.k = b.want;
+    b.open = open;
+    showBloom(b);
   }
   collide(w);
   w.lightDirty = true;
@@ -71,6 +89,15 @@ function collide(w) {
   for (const i of w.dynamic) (solid[i] = base.solid[i]), (floor[i] = base.floor[i]);
   for (const g of w.gates) for (const t of g.tiles) (solid[t.i] = g.open ? 0 : 1), g.open && (floor[t.i] = t.open);
   for (const c of w.shown) if (c.obj.visible) for (const t of c.tiles) (solid[t.i] = t.deck === null ? 1 : 0), t.deck !== null && (floor[t.i] = t.deck);
+}
+
+// Moonflowers opening or closing: the buds sink as the blooms rise, over a few seconds.
+function showBloom(b) {
+  const e = b.k * b.k * (3 - 2 * b.k);
+  b.opened.visible = b.k > 0.001;
+  b.closed.visible = b.k < 0.999;
+  b.opened.scale.y = Math.max(0.001, e);
+  b.closed.scale.y = Math.max(0.001, 1 - e);
 }
 
 // A gate's props: `prop` always, `prop_closed` / `prop_open` by state. `t` (0..1)
@@ -100,7 +127,9 @@ export function dispose(root) {
 // The house door easing open or shut, a sign wobbling after it was read, boats
 // bobbing, the lighthouse beacon and the glint of something to find.
 export function animateProps(w, dt, reduced) {
+  for (const b of w.blooms ?? []) if (b.k !== b.want) (b.k += Math.sign(b.want - b.k) * Math.min(Math.abs(b.want - b.k), dt / 3)), showBloom(b);
   for (const g of w.gates) {
+    if (g.sea && g.tide !== g.tideWant) g.sea((g.tide += Math.sign(g.tideWant - g.tide) * Math.min(Math.abs(g.tideWant - g.tide), dt / 5)));
     if (g.anim === null) continue;
     g.anim = Math.min(1, g.anim + dt / 0.7);
     showGate(g, g.anim);
@@ -121,7 +150,8 @@ export function animateProps(w, dt, reduced) {
   }
   if (!reduced) {
     for (const b of w.boats) {
-      b.obj.position.y = (b.y ?? 0) + Math.sin(w.now * 1.4 + b.cx) * 0.035;
+      // Paper lanterns ride on lily pads: a gentle bob that never dips them under the water (maps float them at y 0.06).
+      b.obj.position.y = (b.y ?? 0) + Math.sin(w.now * 1.4 + b.cx) * (b.asset === "floating_lantern" ? 0.012 : 0.035);
       b.obj.rotation.z = Math.sin(w.now * 1.1 + b.cz) * 0.03;
     }
     for (const g of w.glows) g.material.opacity = 0.55 + 0.3 * Math.sin(w.now * 2.2);
@@ -197,6 +227,19 @@ function topOnly(template) {
     g.setIndex(keep);
     m.geometry = g;
   });
+  return out;
+}
+
+// A copy of a model posed at the end of `clip` (the moonflower open), for instancing.
+function posed(scene, clip) {
+  const flat = scene.userData.flat; // a session cache (flatten): not to be copied into the clone
+  delete scene.userData.flat;
+  const out = scene.clone(true), mixer = new THREE.AnimationMixer(out), action = mixer.clipAction(clip);
+  if (flat) scene.userData.flat = flat;
+  action.play();
+  action.time = clip.duration;
+  mixer.update(0);
+  out.updateMatrixWorld(true);
   return out;
 }
 
@@ -303,7 +346,8 @@ export async function build(map, got, reduced) {
     return ladders.get(key(ax, az)) === axis || ladders.get(key(bx, bz)) === axis;
   };
 
-  root.add(await groundMesh(map, tile));
+  const ground = await groundMesh(map, tile);
+  root.add(ground);
 
   const batch = batcher();
   const blobs = [];
@@ -321,6 +365,7 @@ export async function build(map, got, reduced) {
 
   // Props sit at their footprint's centre; rot 90/270 swaps the footprint. A prop
   // with an `if` (WORLD_DESIGN §9.1) is only there, and only blocks, while it holds.
+  const blooms = new Map();
   const props = [];
   const propAt = new Map();
   const shown = [];
@@ -329,7 +374,14 @@ export async function build(map, got, reduced) {
     if (p.rot % 180 === 90) [fw, fd] = [fd, fw];
     const cx = p.x + fw / 2, cz = p.z + fd / 2, y = p.y ?? 0; // `y` stacks a prop (a step on a cliff)
     let obj = null;
-    if (BATCHED.has(p.asset) && !p.if && !p.recolor) {
+    const clip = BLOOMS.has(p.asset) && p.open && !p.if && got[p.asset]?.animations.find((c) => c.name.toLowerCase() === "open");
+    if (clip) {
+      // A bed of moonflowers costs two draws, not two per flower: closed and open instances, swapped by `open`.
+      if (!blooms.has(p.open)) blooms.set(p.open, { cond: p.open, closed: batcher(), opened: batcher() });
+      const set = blooms.get(p.open), m = at(cx, cz, THREE.MathUtils.degToRad(p.rot), 1, y);
+      set.closed.add(p.asset, tpl(p.asset), m);
+      set.opened.add(`${p.asset}#open`, tpl(`${p.asset}#open`, () => posed(got[p.asset].scene, clip)), m);
+    } else if (BATCHED.has(p.asset) && !p.if && !p.recolor) {
       // Trees vary in model, size, tint and turn; the ones on the map edge sit half a tile out.
       const isTree = TREES.has(p.asset);
       const kinds = variants(p.asset);
@@ -382,6 +434,13 @@ export async function build(map, got, reduced) {
         } else if (!WALKABLE.has(p.asset)) solid[z * W + x] = 1;
       }
   }
+  const bloomSets = [...blooms.values()].map((b) => {
+    const closed = new THREE.Group(), opened = new THREE.Group();
+    b.closed.build(closed, () => 0);
+    b.opened.build(opened, () => 0);
+    root.add(closed, opened);
+    return { cond: b.cond, closed, opened, open: null, k: 0, want: 0 };
+  });
   // Props with an `Open` clip (a pylon's lever, moonflowers at dusk) play it while
   // their `open` condition holds; the house door opens as the hero walks up (below).
   const openers = [];
@@ -420,6 +479,7 @@ export async function build(map, got, reduced) {
   // south (camera-facing) row use the low cutaway pieces.
   const joins = (c, x, z) => (c === "f" ? tile(x, z) === "f" : "WV".includes(tile(x, z) ?? "-"));
   const fence = map.fence ?? "fence";
+  const fenceTint = map.fence_tint ? new THREE.Color(map.fence_tint) : null; // a map's own shade of its fences (the Moonwell's dusky hedges)
   for (let z = 0; z < H; z++)
     for (let x = 0; x < W; x++) {
       const c = tile(x, z);
@@ -429,7 +489,7 @@ export async function build(map, got, reduced) {
       for (const [sfx, deg] of [AUTOTILE[mask], ...(mask === 15 ? [["_end", 270]] : [])]) {
         const n = c === "V" && sfx === "" ? "wall_window" : kind + sfx; // a window only fits a straight run
         const stand = n === "wall_window" ? n : c === "f" ? "fence" : kind; // placeholder pieces
-        batch.add(n, tpl(n, () => armsPiece(stand, SUFFIX_ARMS[sfx])), at(x + 0.5, z + 0.5, THREE.MathUtils.degToRad(deg)));
+        batch.add(n, tpl(n, () => armsPiece(stand, SUFFIX_ARMS[sfx])), at(x + 0.5, z + 0.5, THREE.MathUtils.degToRad(deg)), c === "f" ? fenceTint : null);
       }
     }
 
@@ -451,7 +511,8 @@ export async function build(map, got, reduced) {
       if (!name) return null;
       const g = new THREE.Group(), gb = batcher();
       for (const t of tiles) {
-        if (BOB.has(name)) {
+        if (name === "lantern_raft") gb.add(name, tpl(name), at(t.x + 0.5, t.z + 0.5, rot + (r() - 0.5) * 0.5, 0.9, t.y)); // separate rafts, not a plank bridge; instanced
+        else if (BOB.has(name)) {
           const obj = got[name] ? got[name].scene.clone(true) : fallback(name);
           obj.position.set(t.x + 0.5, t.y, t.z + 0.5);
           obj.rotation.y = rot;
@@ -465,7 +526,10 @@ export async function build(map, got, reduced) {
       return g;
     };
     props(def.prop);
-    return { def, tiles, open: null, anim: null, closed: props(def.prop_closed), opened: props(def.prop_open) };
+    // A tide gate (`tide: true`): the sea covers its tiles, and its `flood` tiles, while it is shut.
+    const flood = def.tide ? [...tiles.map((t) => t.i), ...(def.flood ?? []).map(([x, z]) => z * W + x)] : null;
+    const sea = flood && ((level) => ground.userData.water(flood, level));
+    return { def, tiles, open: null, anim: null, closed: props(def.prop_closed), opened: props(def.prop_open), sea, tide: 0, tideWant: 0 };
   });
   const gateAt = new Map(gates.flatMap((g) => g.tiles.map((t) => [key(t.x, t.z), g])));
 
@@ -547,6 +611,30 @@ export async function build(map, got, reduced) {
       const o = t.getObjectByName("light_origin");
       if (o) lamps.push(o.getWorldPosition(origin).clone().add(new THREE.Vector3(p.cx, p.y, p.cz)));
     }
+  }
+  // Glimmers (daylight.js): small glows that are not lamps, a halo and a soft pool of light under each,
+  // at a model's `glow` parts: lanterns afloat, the lantern rafts while their gate is open, moonflowers
+  // while open. `on` is kept by refresh(); moths visit them like lamps.
+  const glowAt = new Map();
+  const glowSpot = (name) => {
+    if (!glowAt.has(name)) {
+      const box = new THREE.Box3(), at = [];
+      got[name]?.scene.updateMatrixWorld(true);
+      got[name]?.scene.traverse((o) => o.isMesh && /glow/i.test(o.material.name) && at.push(box.setFromObject(o).getCenter(new THREE.Vector3())));
+      glowAt.set(name, at.length ? at.reduce((a, b) => a.add(b), new THREE.Vector3()).divideScalar(at.length) : null);
+    }
+    return glowAt.get(name);
+  };
+  const GLIMMER = { floating_lantern: ["#ffc98a", 1.3, 2.6], lantern_raft: ["#ffbcc0", 0.8, 1.1], moonflower: ["#cfdcff", 0.8, 2.2] };
+  const glimmers = [];
+  const spin = (v, deg) => v.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(deg));
+  for (const p of props) {
+    const look = GLIMMER[p.asset], o = look && glowSpot(p.asset);
+    if (o) glimmers.push({ at: spin(o, p.rot).add(new THREE.Vector3(p.cx, p.y, p.cz)), color: look[0], size: look[1], pool: look[2], cond: p.open ?? p.if ?? null, on: true });
+  }
+  for (const g of gates) {
+    const look = GLIMMER[g.def.prop_open], o = look && glowSpot(g.def.prop_open);
+    if (o) for (const t of g.tiles) glimmers.push({ at: o.clone().add(new THREE.Vector3(t.x + 0.5, t.y, t.z + 0.5)), color: look[0], size: look[1], pool: look[2], gate: g, on: false });
   }
   // Waymarks: the crystal is dim until touched (`flag:way_<id>`), then lit.
   const waymarks = map.interactions.filter((i) => i.kind === "waymark" && i.obj).map((it) => {
@@ -646,9 +734,9 @@ export async function build(map, got, reduced) {
   }
   smoke.length = Math.min(smoke.length, SMOKE);
   const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
-  const life = ambience(root, { flowers, smoke }, reduced);
+  const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0 }, reduced);
   return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, door, life, boats, glows, glints,
-    gates, gateAt, shown, openers, waymarks, lamps, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
+    gates, gateAt, shown, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }
 
 // G toggles this: tile lines; red = blocked, gold = look/use, blue = door, green = person.

@@ -10,7 +10,7 @@ import math
 import random
 
 import bmesh
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 from v13_kit import (B, T, arc, arch_pts, beam, box, chain, clamp01, contact, curve, cyl, empty, ico, jitter,  # noqa: F401
                      lathe, open_part, prism, ribbon, rock, shadow, sphere, torus, tube, FRONT)
@@ -35,6 +35,11 @@ PALETTE = {
     "dr_blossom": "#eaa6c6", "dr_blossom_lt": "#f6c8db", "dr_blossom_dk": "#cc84ad",
     "dr_ribbon_a": "#e85d75", "dr_ribbon_b": "#f2c14e", "dr_ribbon_c": "#5fb3c9", "dr_ribbon_d": "#9d7be0",
     "dr_tag": "#f4ecd8",
+    # 1.3 PR 3: the moth brooch, the tailor's form and cloth rack
+    "dr_wing": "#cdbfe8", "dr_wing_dk": "#b3a2dc", "dr_silver": "#e8e6f0", "dr_eye_ring": "#5b4282", "dr_pearl": "#f7f0f2",
+    "dr_linen": "#ece3d2", "dr_jacket": "#a98bd6", "dr_jacket_dk": "#8768bf", "dr_tape": "#f2c94c", "dr_cushion": "#d9506a",
+    "dr_chalk": "#f8f6f0", "dr_pin": "#e8b84a", "dr_steel": "#c3c9d2",
+    "dr_fab_lilac": "#b79be0", "dr_fab_teal": "#4fa6a2", "dr_fab_rose": "#e8a0b4", "dr_fab_cream": "#f1e7d3", "dr_fab_blue": "#3d5296",
 }
 
 WIND = {
@@ -44,7 +49,9 @@ WIND = {
     "wisteria_arch": lambda x, y, z, r: clamp01((2.3 - z) / 0.6) if (abs(x) < 0.8 and z > 1.55) else 0.0,
 }
 
-FOOT = {"willow": (2, 2), "moonwell": (3, 3), "lake_house": (4, 4), "wisteria_arch": (2, 1), "wishing_tree": (2, 2)}
+FOOT = {"willow": (2, 2), "moonwell": (3, 3), "lake_house": (4, 4), "wisteria_arch": (2, 1), "wishing_tree": (2, 2),
+        "cloth_rack": (2, 1)}
+INTERIOR = {"dress_form", "cloth_rack", "paper_lanterns"}   # exported to <out>/interior/
 FOOT_OTHER = {"seal_stone": (2, 2)}
 ANIM = {"moonflower"}
 
@@ -274,10 +281,12 @@ def build_moonflower(k):
     parts sharing an `Open` clip: at rest (day) plump closed buds; at the end (dusk) the buds shrink away as broad
     pale blooms twist open in their place. Petals are `dr_moon_glow`."""
     rng = random.Random(416)
-    k.add(jitter(ico(0.3, 1), rng, 0.03), "dr_leaf_dk", T((0, 0, 0.03), scale=(1.3, 1.25, 0.32)), smooth=True)
-    for i in range(9):
-        bm, _ = flat_leaf(0.29, 0.16)
-        k.add(bm, ("dr_leaf", "dr_leaf_lt", "dr_leaf")[i % 3], T((0, 0, 0.075 + 0.004 * (i % 3)), (90, -14 - 6 * (i % 2), i * 40 + rng.uniform(-8, 8))))
+    # No dark cushion and no contact disc (1.3 PR 3): at night the glowing heads made them read as a black tile under
+    # the flowers. A loose, open rosette of leaves lying on the grass instead, the outer ones longer and paler.
+    k.add(jitter(ico(0.12, 1), rng, 0.02), "dr_leaf", T((0, 0, 0.02), scale=(1.2, 1.1, 0.4)), smooth=True)
+    for i in range(11):
+        bm, _ = flat_leaf(0.24 + 0.08 * (i % 2), 0.13)
+        k.add(bm, ("dr_leaf_lt", "dr_leaf", "dr_leaf_lt")[i % 3], T((0, 0, 0.03 + 0.004 * (i % 3)), (90, -8 - 7 * (i % 2), i * 33 + rng.uniform(-10, 10))))
     heads = [(-0.22, -0.16, 0.36), (0.2, -0.17, 0.3), (0.02, 0.06, 0.52), (-0.24, 0.18, 0.44), (0.26, 0.15, 0.4),
              (-0.02, -0.28, 0.24), (0.08, 0.3, 0.33)]
     hooks = []
@@ -285,7 +294,6 @@ def build_moonflower(k):
         k.add(tube([(x * 0.25, y * 0.25, 0.06), (x * 0.75 + 0.02, y * 0.75, z * 0.55), (x, y, z - 0.01)], 0.011, 3), "dr_leaf", None)
         hooks.append(open_part(moon_bud, (x, y, z), [(0, (0, 0, 0), (1, 1, 1)), (16, (0, 0, 20), (0.01, 0.01, 0.01))], f"moonflower_bud{i}"))
         hooks.append(open_part(moon_bloom, (x, y, z), [(0, (0, 0, 0), (0.05, 0.05, 0.05)), (24, (0, 0, 40), (1, 1, 1))], f"moonflower_bloom{i}"))
-    contact(k, 0.42)
     return chain(*hooks)
 
 
@@ -456,10 +464,181 @@ def build_lake_house(k):
     return empty("smoke_origin", (-0.9, 0.55, 3.35))
 
 
+# ---------------------------------------------------------------- 1.3 PR 3: the moth brooch, Lanternmere and Quiet Lamp interiors
+
+
+def grow(pts, d):
+    """A polygon pushed d outward from its centroid (a setting behind a shape)."""
+    cx, cz = sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts)
+    out = []
+    for x, z in pts:
+        L = math.hypot(x - cx, z - cz) or 1.0
+        out.append((x + (x - cx) / L * d, z + (z - cz) / L * d))
+    return out
+
+
+def build_moth_brooch(k):
+    """Curio (the popup, the Moonwell's well stair): a moth brooch with its wings spread, a little cupped. Pale
+    silver-lilac wings on a silver setting, a moon-eye spot on each forewing (dr_moon_glow ringed in plum), a pearl
+    body, curled antennae; a pin bar behind. Stands upright facing the front, centred on the origin."""
+    fore = [(0.012, 0.012), (0.05, 0.062), (0.1, 0.094), (0.134, 0.09), (0.13, 0.05), (0.092, 0.012), (0.03, -0.004)]
+    hind = [(0.01, -0.006), (0.05, -0.008), (0.09, -0.036), (0.088, -0.072), (0.058, -0.092), (0.024, -0.062)]
+    for s in (-1, 1):
+        W = T((0, 0, 0), (0, 0, s * 8))                                                       # cup the wings back
+        for pts, m in ((fore, "dr_wing"), (hind, "dr_wing_dk")):
+            mp = [(s * x, z) for x, z in pts]
+            k.add(prism(grow(mp, 0.007), 0.008), "dr_silver", W @ T((0, 0.004 if m == "dr_wing" else 0.0055, 0)))
+            k.add(prism(mp, 0.008), m, W @ T((0, -0.001, 0)))
+        k.add(cyl(0.021, 0.021, 0.004, 8), "dr_eye_ring", W @ T((s * 0.088, -0.006, 0.058), (90, 0, 0)))
+        k.add(cyl(0.012, 0.012, 0.004, 8), "dr_moon_glow", W @ T((s * 0.088, -0.008, 0.058), (90, 0, 0)))
+        k.add(tube([(s * 0.006, -0.012, 0.048), (s * 0.02, -0.013, 0.075), (s * 0.04, -0.012, 0.094), (s * 0.055, -0.01, 0.092)],
+                   0.0035, 3, 0.7), "dr_silver")
+        k.add(sphere(0.006, 5, 3), "dr_pearl", T((s * 0.056, -0.01, 0.092)))
+    k.add(sphere(0.019, 8, 5), "dr_pearl", T((0, -0.01, -0.036), scale=(1, 1, 2.3)), smooth=True)   # abdomen
+    k.add(sphere(0.021, 8, 5), "dr_pearl", T((0, -0.012, 0.014)), smooth=True)                    # thorax
+    k.add(sphere(0.013, 6, 4), "dr_pearl", T((0, -0.012, 0.042)), smooth=True)                    # head
+    k.add(cyl(0.004, 0.004, 0.13, 6), "dr_silver", T((0, 0.012, 0.02), (0, 90, 0)))                # pin bar behind
+    k.add(box(0.014, 0.012, 0.014), "dr_silver", T((-0.068, 0.012, 0.02)))
+    k.add(box(0.014, 0.012, 0.018), "dr_silver", T((0.068, 0.012, 0.02)))
+
+
+def on_form(a, z, r, out=0.0, sx=1.12, sy=0.74):
+    """A matrix on the dress form's oval at angle a (degrees, -90 = front), height z, radius r: local -Y outward."""
+    ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
+    n = Vector((ca / sx, sa / sy, 0)).normalized()
+    p = Vector((sx * r * ca, sy * r * sa, z)) + n * out
+    return T(p, (0, 0, math.degrees(math.atan2(n.x, -n.y))))
+
+
+def build_dress_form(k):
+    """1 x 1 (interior) the Lanternmere tailor's mannequin: a linen form on a wooden tripod, a half-finished lilac
+    jacket pinned on it (open front with lapels, one sleeve tacked on, the right front panel not cut yet, chalk
+    basting at the hem), a yellow tape measure over the shoulders, a rose pincushion on the neck. Front +Z (glTF)."""
+    sx, sy = 1.12, 0.74
+    for i in range(3):                                                                        # tripod
+        a = math.radians(90 + 120 * i)
+        beam(k, (0.04 * math.cos(a), 0.04 * math.sin(a), 0.32), (0.34 * math.cos(a), 0.34 * math.sin(a), 0.03), 0.055, 0.055, "dr_wood")
+        k.add(sphere(0.03, 6, 4), "dr_wood_dk", T((0.35 * math.cos(a), 0.35 * math.sin(a), 0.03), scale=(1, 1, 0.8)))
+    k.add(cyl(0.055, 0.045, 0.12, 8), "dr_wood_dk", T((0, 0, 0.3)))
+    k.add(cyl(0.028, 0.028, 0.72, 8), "dr_wood", T((0, 0, 0.68)))
+    k.add(cyl(0.034, 0.034, 0.05, 8), "dr_brass", T((0, 0, 0.72)))
+    k.add(box(0.07, 0.012, 0.025), "dr_brass", T((0.05, 0, 0.72)))
+    torso = lathe([(0.15, 0.97), (0.19, 1.04), (0.172, 1.12), (0.145, 1.2), (0.172, 1.3), (0.178, 1.36), (0.15, 1.42),
+                   (0.06, 1.47), (0.048, 1.53)], 16)
+    k.add(torso, "dr_linen", T(scale=(sx, sy, 1)), smooth=True)
+    k.add(cyl(0.056, 0.056, 0.02, 10), "dr_wood_dk", T((0, 0, 1.54), scale=(sx, sy, 1)))
+    # the jacket: an open shell, the front opening, the uncut right front panel below the bust
+    jk = lathe([(0.2, 1.05), (0.183, 1.12), (0.157, 1.2), (0.184, 1.3), (0.19, 1.36), (0.162, 1.425), (0.085, 1.468)], 16)
+    cut = []
+    for f in jk.faces:
+        c = f.calc_center_median()
+        a = math.degrees(math.atan2(c.y, c.x))
+        if abs(f.normal.z) > 0.95 and len(f.verts) > 4 or -115 < a < -65 or (c.z < 1.25 and -65 <= a < -10):
+            cut.append(f)
+    bmesh.ops.delete(jk, geom=cut, context="FACES")
+    k.add(jk, "dr_jacket", T(scale=(sx, sy, 1)), smooth=True)
+    for a, sgn in ((-67.5, 1), (-112.5, -1)):                                                     # lapels folded back
+        k.add(prism([(0, -0.1), (0, 0.04), (sgn * 0.06, 0.02)], 0.008), "dr_jacket_dk", on_form(a, 1.33, 0.186, 0.006))
+    k.add(tube([(-0.19, 0.0, 1.41), (-0.222, -0.008, 1.26), (-0.226, -0.02, 1.08)], 0.052, 6, 0.78), "dr_jacket", smooth=True)
+    k.add(cyl(0.043, 0.043, 0.04, 6), "dr_jacket_dk", T((-0.226, -0.02, 1.08)))
+    for a in (-145, -165, 175):                                                               # chalk basting at the hem
+        k.add(box(0.035, 0.006, 0.008), "dr_chalk", on_form(a, 1.075, 0.192, 0.006))
+    for a, z, r in ((-52, 1.26, 0.178), (-128, 1.22, 0.17), (-62, 1.12, 0.183), (-20, 1.38, 0.19), (-158, 1.3, 0.184)):
+        k.add(sphere(0.009, 5, 3), "dr_ribbon_a", on_form(a, z, r, 0.012))
+    # tape measure over the shoulders, both ends hanging down the front
+    k.add(tube([(-0.135, -0.15, 1.13), (-0.135, -0.15, 1.3), (-0.13, -0.122, 1.4), (-0.12, -0.062, 1.465), (-0.1, 0.02, 1.49),
+                (-0.05, 0.075, 1.497), (0.03, 0.08, 1.497), (0.1, 0.03, 1.49), (0.122, -0.05, 1.465), (0.132, -0.112, 1.41),
+                (0.137, -0.15, 1.32), (0.137, -0.15, 1.2)], 0.016, 4), "dr_tape")
+    # the pincushion on the neck, pins in it
+    k.add(sphere(0.055, 10, 6), "dr_cushion", T((0, 0, 1.575), scale=(1, 1, 0.62)), smooth=True)
+    k.add(cyl(0.024, 0.0, 0.025, 5), "dr_leaf", T((0, 0, 1.615)))
+    for i, m in enumerate(("dr_pin", "dr_ribbon_c", "dr_pin", "dr_ribbon_a")):
+        a = math.radians(30 + 95 * i)
+        d = Vector((math.cos(a), math.sin(a), 0.9)).normalized()
+        p = Vector((0, 0, 1.575)) + Vector((0.04 * math.cos(a), 0.04 * math.sin(a), 0.02))
+        k.add(cyl(0.0025, 0.0025, 0.05, 4), "dr_steel", Matrix.Translation(p) @ d.to_track_quat("Z", "Y").to_matrix().to_4x4())
+        k.add(sphere(0.008, 5, 3), m, T(p + d * 0.027))
+    contact(k, 0.42)
+
+
+FABRIC = ("dr_fab_lilac", "dr_fab_teal", "dr_fab_rose", "dr_fab_cream", "dr_fab_blue")
+
+
+def build_cloth_rack(k):
+    """2 x 1 (interior) the tailor's cloth rack against the north wall: open shelves of folded cloth, standing bolts
+    and rolls end-on (lilac, teal, rose, cream, deep blue), a length of lilac hanging over the top shelf, big shears
+    and a spool on the lowest shelf by a roll of blue."""
+    rng = random.Random(630)
+    w, d, h, y = 1.9, 0.44, 2.0, 0.26
+    for s in (-1, 1):
+        k.add(box(0.06, d, h, 0.012), "dr_wood", T((s * (w / 2 - 0.03), y, h / 2 - 0.01)))
+    k.add(box(w - 0.1, 0.03, h - 0.06), "dr_wood_dk", T((0, y + d / 2 - 0.02, h / 2)))
+    k.add(box(w + 0.08, d + 0.06, 0.08, 0.015), "dr_wood_dk", T((0, y - 0.01, h + 0.03)))
+    k.add(box(w + 0.02, d + 0.02, 0.1, 0.012), "dr_wood_dk", T((0, y, 0.035)))
+    for z in (0.1, 0.6, 1.1, 1.58):
+        k.add(box(w - 0.1, d - 0.03, 0.035), "dr_wood_lt", T((0, y - 0.015, z)))
+        k.add(box(w - 0.11, 0.025, 0.06), "dr_wood", T((0, y - d / 2 + 0.01, z + 0.005)))
+    # top shelf: folded cloth in four stacks
+    for i, x in enumerate((-0.66, -0.22, 0.22, 0.66)):
+        for j in range(4):
+            k.add(box(0.36, 0.32, 0.07), FABRIC[(i * 2 + j * 3) % 5], T((x + rng.uniform(-0.02, 0.02), y - 0.02, 1.6 + 0.036 + 0.072 * j), (0, 0, rng.uniform(-4, 4))))
+    k.add(prism([(-0.15, 0), (0.15, 0), (0.15, -0.26), (0.08, -0.31), (0.0, -0.27), (-0.08, -0.33), (-0.15, -0.28)], 0.012),
+          "dr_fab_lilac", T((-0.68, y - d / 2 - 0.004, 1.61)))
+    # second shelf: bolts standing like books
+    x, i = -w / 2 + 0.08, 0
+    while x < w / 2 - 0.14:
+        bw = rng.uniform(0.07, 0.11)
+        bh = rng.uniform(0.34, 0.42)
+        k.add(box(bw - 0.008, 0.36, bh), FABRIC[i % 5], T((x + bw / 2, y - 0.02, 1.1175 + bh / 2)))
+        x += bw
+        i += rng.choice((1, 2))
+    # third shelf: rolls end-on, seven below and three on top
+    rolls = [(-0.66 + 0.22 * i, 0.7175) for i in range(7)] + [(-0.55 + 0.22 * i, 0.8907) for i in (0, 2, 4)]
+    for i, (x, z) in enumerate(rolls):
+        k.add(cyl(0.1, 0.1, 0.38, 8), FABRIC[(i * 3) % 5], T((x, y - 0.03, z), (90, 0, 22.5)))
+        k.add(cyl(0.03, 0.03, 0.01, 6), "dr_wood_lt", T((x, y - 0.223, z), (90, 0, 0)))
+    # bottom shelf: a roll of blue lying along X, the shears, a spool
+    k.add(cyl(0.09, 0.09, 0.8, 10), "dr_fab_blue", T((-0.45, y + 0.06, 0.2075), (0, 90, 0)))
+    S = T((0.22, y - 0.12, 0.124), (0, 0, -18))
+    for a in (-11, 11):
+        Ma = S @ T((0, 0, 0.008 if a > 0 else 0.0), (0, 0, a))
+        k.add(prism([(0.0, -0.012), (0.21, 0.0), (0.0, 0.016)], 0.006), "dr_steel", Ma @ T((0, 0, 0), (90, 0, 0)))
+        k.add(torus(0.035, 0.009, 8, 3), "dr_iron", Ma @ T((-0.07, 0, 0.002)))
+        beam(k, Ma @ Vector((0, 0, 0.0025)), Ma @ Vector((-0.04, 0, 0.0025)), 0.012, 0.008, "dr_iron")
+    k.add(cyl(0.01, 0.01, 0.022, 6), "dr_brass", S @ T((0, 0, 0.007)))
+    for z, r, m in ((0.13, 0.06, "dr_wood"), (0.28, 0.06, "dr_wood"), (0.205, 0.045, "dr_fab_rose")):
+        k.add(cyl(r, r, 0.13 if m == "dr_fab_rose" else 0.02, 8), m, T((0.66, y - 0.06, z)))
+
+
+def build_paper_lanterns(k):
+    """1 x 1 (interior) The Quiet Lamp's lantern stand: a slim wooden pole on a round foot, an arm with a brace, three
+    round paper lanterns (dr_paper_glow) hanging at different heights, each with a red tassel; `light_origin` in
+    the middle one."""
+    px = -0.28
+    k.add(cyl(0.2, 0.22, 0.06, 10, 0.01), "dr_wood_dk", T((px, 0, 0.02)))
+    k.add(cyl(0.09, 0.11, 0.06, 10), "dr_wood", T((px, 0, 0.08)))
+    k.add(cyl(0.026, 0.022, 1.92, 8), "dr_wood", T((px, 0, 1.02)))
+    k.add(sphere(0.036, 8, 5), "dr_brass", T((px, 0, 2.0)), smooth=True)
+    beam(k, (px, 0, 1.9), (0.43, 0, 1.94), 0.045, 0.045, "dr_wood_dk")
+    k.add(sphere(0.03, 8, 5), "dr_brass", T((0.44, 0, 1.94)), smooth=True)
+    beam(k, (px, 0, 1.6), (px + 0.3, 0, 1.91), 0.03, 0.03, "dr_wood_dk")
+    for x, zc, r in ((-0.1, 1.5, 0.13), (0.12, 1.22, 0.16), (0.34, 1.56, 0.12)):
+        hh = 1.75 * r
+        k.add(tube([(x, 0, 1.93), (x, 0, zc + hh / 2 + 0.02)], 0.006, 3), "dr_iron")
+        paper_lantern(k, T((x, 0, zc)), r, hh, seg=10)
+        k.add(cyl(0.0, 0.018, 0.09, 5), "dr_ribbon_a", T((x, 0, zc - hh / 2 - 0.06)))
+    contact(k, 0.22)
+    for bm, *_ in k.parts[-2:]:
+        bmesh.ops.translate(bm, vec=(px, 0, 0), verts=bm.verts)
+    return empty("light_origin", (0.12, 0, 1.22))
+
+
 PROPS = {
     "willow": build_willow, "wishing_tree": build_wishing_tree, "floating_lantern": build_floating_lantern,
     "lantern_raft": build_lantern_raft, "ford_stones": build_ford_stones, "moonflower": build_moonflower,
     "wisteria_arch": build_wisteria_arch, "moonwell": build_moonwell, "lake_house": build_lake_house,
+    "moth_brooch": build_moth_brooch, "dress_form": build_dress_form, "cloth_rack": build_cloth_rack,
+    "paper_lanterns": build_paper_lanterns,
 }
 
 VIGNETTE = dict(

@@ -1,0 +1,231 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "paper_lanterns",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bed",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bookcase",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 6,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "duel_table",
+      "x": 7,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 7,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 8,
+      "z": 6,
+      "rot": 180
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 9,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "moonflower",
+      "x": 1,
+      "z": 7,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 4,
+      "z": 1,
+      "kind": "sign",
+      "text": "A shelf of dream journals left by guests, one per night. The latest entry, in a careful hand: \"Dreamed of a seventh colour. Woke up before I could see it.\"",
+      "text_fr": "Une étagère de carnets de rêves laissés par les clients, un par nuit. La dernière page, d'une écriture soignée : « Rêvé d'une septième couleur. Réveillé avant de pouvoir la voir. »"
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "to": "lanternmere",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 4,
+        "z": 5,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "mina",
+      "name": "Mina",
+      "model": "npc_shopkeeper",
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#8a6fb8",
+      "hair": "#e8e0d0",
+      "dialogue": [
+        {
+          "if": "!flag:talked_mina",
+          "lines": [
+            "(whispering) Welcome to the Quiet Lamp. Our guests sleep by day and walk by night, so we keep our voices down.",
+            "Rest is free. Till dawn, day, dusk or night: say it softly.",
+            "And the counter has Dream packs, and a Hexarch I've never had the heart to sell. Yet."
+          ],
+          "lines_fr": [
+            "(à voix basse) Bienvenue à la Lampe Tranquille. Nos clients dorment le jour et se promènent la nuit, alors on parle doucement.",
+            "Le repos est gratuit. Jusqu'à l'aube, au matin, au crépuscule ou à la nuit : dis-le tout bas.",
+            "Et au comptoir, des boosters Rêve, et une Sorcarque que je n'ai jamais eu le cœur de vendre. Pour l'instant."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "if": "time:night",
+          "lines": [
+            "(whispering) Everyone's out on the water. The lanterns are up. Lovely night.",
+            "A bed, for later?"
+          ],
+          "lines_fr": [
+            "(à voix basse) Tout le monde est sur l'eau. Les lanternes sont levées. Belle nuit.",
+            "Un lit, pour plus tard ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "lines": [
+            "(whispering) Shh. Day-sleepers upstairs.",
+            "Rest?"
+          ],
+          "lines_fr": [
+            "(à voix basse) Chut. Des dormeurs de jour, en haut.",
+            "Te reposer ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#efe6ff",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#e6dcf8",
+      "ground": "#3d3550",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb889",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#14101c"
+  }
+}

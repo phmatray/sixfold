@@ -1,0 +1,1123 @@
+{
+  "title": "Hushwillow Lane",
+  "title_fr": "Allée des Saules-Murmures",
+  "region": "dream",
+  "music": "dream",
+  "width": 24,
+  "height": 32,
+  "tiles": [
+    "............pp..........",
+    "...........ppp..........",
+    "...........pp...........",
+    "..........pp......~~~...",
+    "..........pp.....~~~~~..",
+    ".........pp......~~~~~..",
+    "..11111..pp.......~~~...",
+    ".1111111.pp.............",
+    ".1111111.pp.............",
+    ".1111111.pp.............",
+    "..11111.pp..............",
+    ".........pp.............",
+    ".........pp.............",
+    ".........pp.............",
+    ".........pp.............",
+    ".........pp.............",
+    "..........pp............",
+    "........~~~~..........~~",
+    "......~~~~~~~~~~~~~~~~~~",
+    ".....~~~...p~~~~~~~~~~..",
+    "....~~......pp..........",
+    "~~~~~......pp...........",
+    "~~~~~......pp...........",
+    ".~~~~......pp...........",
+    ".~~~~.....pp............",
+    ".~~~~.....pp............",
+    "~~~~......pp............",
+    "~~~.......pp............",
+    "..........pp............",
+    "..........pp............",
+    "..........ppp...........",
+    "...........pp..........."
+  ],
+  "props": [
+    {
+      "asset": "bridge",
+      "x": 10,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "stairs",
+      "x": 8,
+      "z": 9,
+      "rot": 90
+    },
+    {
+      "asset": "wishing_tree",
+      "x": 3,
+      "z": 7,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "wisteria_arch",
+      "x": 11,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "wisteria_arch",
+      "x": 10,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 14,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 6,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 13,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 15,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 3,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 5,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 14,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 22,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 15,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 21,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 1,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 19,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 8,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 14,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 20,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 16,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 20,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 7,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 11,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 8,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 14,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 12,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 14,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 9,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 18,
+      "z": 4,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 20,
+      "z": 5,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 19,
+      "z": 3,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "reeds",
+      "x": 16,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 22,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 21,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "moonflower",
+      "x": 16,
+      "z": 24,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 17,
+      "z": 25,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 18,
+      "z": 24,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 19,
+      "z": 25,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 17,
+      "z": 23,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 15,
+      "z": 25,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 18,
+      "z": 26,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 20,
+      "z": 24,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "reeds",
+      "x": 23,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 23,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 19,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 19,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 17,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 17,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 13,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 9,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 9,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 7,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 7,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 6,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 5,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 4,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 1,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 10,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 16,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 19,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 4,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 13,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 21,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 8,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 22,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 2,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 22,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 15,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 2,
+      "z": 9,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "flowers",
+      "x": 6,
+      "z": 7,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "flowers",
+      "x": 6,
+      "z": 10,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 5,
+      "z": 6,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 2,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 0,
+      "z": 24,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 12,
+    "z": 1,
+    "facing": "s"
+  },
+  "interactions": [
+    {
+      "x": 14,
+      "z": 2,
+      "kind": "sign",
+      "text": "North: Brightwell Square. South: Lanternmere, on its lake. West, over the ford: the Deepgrove.",
+      "text_fr": "Nord : la Place de Clairpuits. Sud : Lac-aux-Lanternes, sur son lac. Ouest, après le gué : le Bois-Profond."
+    },
+    {
+      "x": 13,
+      "z": 30,
+      "kind": "sign",
+      "text": "South: Lanternmere and its lanterns. North, up the lane: Brightwell Square.",
+      "text_fr": "Sud : Lac-aux-Lanternes et ses lanternes. Nord, en remontant l'allée : la Place de Clairpuits."
+    },
+    {
+      "x": 6,
+      "z": 23,
+      "kind": "sign",
+      "text": "The Hush ford. Deepgrove folk cross here in boots. Everyone else gets wet.",
+      "text_fr": "Le gué du Murmure. Les gens du Bois-Profond le passent en bottes. Les autres se mouillent."
+    },
+    {
+      "x": 0,
+      "z": 24,
+      "kind": "sign",
+      "text": "West: Rootholm and the Deepgrove. The bank path is washed out past the bend; the Rootholm folk are rebuilding it. Mind the roots.",
+      "text_fr": "Ouest : Racinemont et le Bois-Profond. Le chemin de la rive est emporté après le coude ; les gens de Racinemont le reconstruisent. Attention aux racines."
+    },
+    {
+      "x": 3,
+      "z": 8,
+      "kind": "sign",
+      "id": "wishing_tree",
+      "name": "The wishing tree",
+      "name_fr": "L'arbre aux vœux",
+      "dialogue": [
+        {
+          "if": "coins:10 & !flag:wish_1",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"A door you thought was a wall.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« Une porte que vous preniez pour un mur. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_1",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_2",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"Count your Bench before you count your prizes.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« Comptez votre Banc avant de compter vos Récompenses. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_2",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_3",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"The tide goes out so it can come back.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« La mer se retire pour pouvoir revenir. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_3",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_4",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"Someone in a lantern-lit town is thinking of you. Probably about soup.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« Quelqu'un, dans une ville aux lanternes, pense à vous. Sans doute à propos de soupe. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_4",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_5",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"Your next pack has one card you'll keep forever.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« Votre prochain booster contient une carte que vous garderez toujours. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_5",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_6",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"Walk slowly past the willows. They're listening.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« Passez doucement sous les saules. Ils écoutent. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_6",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_7",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"An Awaken 2 is three wishes, patiently made.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« Un Éveil 2, ce sont trois vœux, faits avec patience. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_7",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_8",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"Look up at night. Then look again.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« Levez les yeux la nuit. Puis regardez encore. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_8",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_9",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"The seventh face is blank because it is waiting.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« La septième face est vide parce qu'elle attend. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_9",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_10",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"Lose once, learn twice.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« Perdre une fois, apprendre deux fois. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_10",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_11",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"The lanterns know the way. Follow them.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« Les lanternes connaissent le chemin. Suivez-les. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_11",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "coins:10 & !flag:wish_12",
+          "lines": [
+            "You tie ten Facets into a ribbon and hang it on a low branch. A paper tag flutters down into your hand:",
+            "\"You'll be a long way from here, and glad of it.\""
+          ],
+          "lines_fr": [
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "« Vous serez loin d'ici, et content de l'être. »"
+          ],
+          "do": [
+            "pay:10",
+            "flag:wish_12",
+            "sfx:chime"
+          ]
+        },
+        {
+          "if": "flag:wish_12",
+          "lines": [
+            "The branches are heavy with ribbons, every one of them yours. The tree has told you all it knows. For now."
+          ],
+          "lines_fr": [
+            "Les branches ploient sous les rubans, tous les vôtres. L'arbre vous a dit tout ce qu'il sait. Pour l'instant."
+          ]
+        },
+        {
+          "lines": [
+            "Ribbons and paper tags, hundreds of them, whispering. A little sign: \"Ten Facets a wish. The tree answers.\""
+          ],
+          "lines_fr": [
+            "Des rubans et des étiquettes de papier, des centaines, qui chuchotent. Un petit écriteau : « Dix Facettes le vœu. L'arbre répond. »"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 3,
+      "z": 30,
+      "kind": "sign",
+      "id": "slipper",
+      "name": "Something in the grass",
+      "name_fr": "Quelque chose dans l'herbe",
+      "dialogue": [
+        {
+          "lines": [
+            "One embroidered slipper, soaked with dew, beside a flat stone. The other is nowhere to be seen. The stitching says \"L\"."
+          ],
+          "lines_fr": [
+            "Une pantoufle brodée, trempée de rosée, à côté d'une pierre plate. L'autre est introuvable. La broderie dit « L »."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "d_tree",
+      "x": 4,
+      "z": 8,
+      "give": "coins:40",
+      "hidden": true,
+      "text": "Between two roots, where the coins people drop roll to: a little hoard of Facets. The tree won't miss them. Probably.",
+      "text_fr": "Entre deux racines, là où roulent les pièces que les gens laissent tomber : un petit magot de Facettes. L'arbre ne s'en apercevra pas. Sans doute."
+    },
+    {
+      "kind": "find",
+      "id": "d_willow",
+      "x": 20,
+      "z": 21,
+      "give": "card:dozel",
+      "hidden": true,
+      "text": "In a hollow of the old willow, behind the curtain of leaves: a card, curled up like something asleep.",
+      "text_fr": "Dans un creux du vieux saule, derrière le rideau de feuilles : une carte, enroulée comme une bête qui dort."
+    },
+    {
+      "kind": "find",
+      "id": "d_ford",
+      "x": 2,
+      "z": 23,
+      "give": "coins:60",
+      "text": "Mid-ford, on the biggest stone, the water has piled up a little drift of Facets in a crack. Boots planted, you scoop them out.",
+      "text_fr": "Au milieu du gué, sur la plus grosse pierre, le courant a accumulé quelques Facettes dans une fente. Les bottes bien plantées, vous les ramassez."
+    }
+  ],
+  "warps": [],
+  "exits": [
+    {
+      "side": "n",
+      "span": [
+        12,
+        13
+      ],
+      "to": "square"
+    },
+    {
+      "side": "s",
+      "span": [
+        11,
+        12
+      ],
+      "to": "lanternmere"
+    }
+  ],
+  "gates": [
+    {
+      "id": "hush_ford",
+      "tiles": [
+        [
+          4,
+          24
+        ],
+        [
+          3,
+          24
+        ],
+        [
+          2,
+          24
+        ],
+        [
+          1,
+          24
+        ]
+      ],
+      "if": "item:wading_boots",
+      "prop": "ford_stones",
+      "text": "The ford runs fast and knee-deep, and the stones are slick. Wading boots would help. On the far bank, a signpost points west.",
+      "text_fr": "Le gué est rapide, profond jusqu'aux genoux, et les pierres glissent. Des bottes de gué aideraient. Sur l'autre rive, un poteau indique l'ouest."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "ysolde",
+      "name": "Ysolde",
+      "model": "npc_gardener",
+      "x": 17,
+      "z": 16,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#8a6fb8",
+      "hair": "#e8d8b0",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Willow wands. I soak them in the brook, then weave. Baskets, fences, a cradle once.",
+            "The lane's quiet by day. Come back after dusk: the fireflies come up off the water, the moonflowers open, and Luce goes walking in her sleep.",
+            "Don't wake her. Duel her, if you like. She plays better asleep."
+          ],
+          "lines_fr": [
+            "Des baguettes de saule. Je les fais tremper dans le ruisseau, puis je tresse. Des paniers, des clôtures, un berceau, une fois.",
+            "L'allée est calme le jour. Reviens après le crépuscule : les lucioles montent de l'eau, les belles-de-lune s'ouvrent, et Luce se promène en dormant.",
+            "Ne la réveille pas. Fais-lui un duel, si tu veux. Elle joue mieux endormie."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_luce",
+      "name": "Luce",
+      "model": "npc_kid",
+      "x": 16,
+      "z": 12,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 2,
+        "challenge": [
+          "Mm... is it my turn? It's always my turn in the dream.",
+          "One prize. Don't wake me up..."
+        ],
+        "challenge_fr": [
+          "Mm… c'est à moi ? C'est toujours à moi, dans le rêve.",
+          "Une Récompense. Ne me réveille pas…"
+        ],
+        "win": [
+          "Mm. I dreamed I lost. Oh. I did."
+        ],
+        "win_fr": [
+          "Mm. J'ai rêvé que je perdais. Oh. C'est vrai."
+        ],
+        "lose": [
+          "Zzz... I win... zzz..."
+        ],
+        "lose_fr": [
+          "Zzz… j'ai gagné… zzz…"
+        ],
+        "after": [
+          "I walk the same loop every night. I wake up in my bed with grass on my feet."
+        ],
+        "after_fr": [
+          "Je fais la même boucle toutes les nuits. Je me réveille dans mon lit avec de l'herbe sous les pieds."
+        ]
+      },
+      "outfit": "#c9b6e8",
+      "hair": "#f2e6c8",
+      "route": [
+        "e",
+        "e",
+        "e",
+        "s",
+        "s",
+        "w",
+        "w",
+        "w",
+        "n",
+        "n"
+      ],
+      "if": "!time:day"
+    },
+    {
+      "id": "t_iver",
+      "name": "Iver",
+      "model": "npc_scholar",
+      "x": 18,
+      "z": 8,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 4,
+        "challenge": [
+          "Stop! Stay there. You've walked into a line. Of my poem. It's about willows.",
+          "Rhymes with... no. Duel me while I think. Two prizes."
+        ],
+        "challenge_fr": [
+          "Halte ! Ne bouge pas. Tu viens d'entrer dans un vers. De mon poème. Il parle des saules.",
+          "Rime avec… non. Fais un duel pendant que je réfléchis. Deux Récompenses."
+        ],
+        "win": [
+          "\"Defeated, I sat beneath the willow...\" Not bad. I'll keep that."
+        ],
+        "win_fr": [
+          "« Vaincu, je m'assis sous le saule… » Pas mal. Je garde ça."
+        ],
+        "lose": [
+          "Victory! It scans."
+        ],
+        "lose_fr": [
+          "Victoire ! Ça sonne juste."
+        ],
+        "after": [
+          "A willow is a tree that has decided to listen. I wrote that. Do you like it? Don't answer."
+        ],
+        "after_fr": [
+          "Un saule est un arbre qui a décidé d'écouter. C'est de moi. Ça te plaît ? Ne réponds pas."
+        ]
+      },
+      "outfit": "#5a6fb0",
+      "hair": "#2b211c"
+    }
+  ],
+  "ground": {
+    "base": "dusk_grass",
+    "path": "stone",
+    "margin": 9,
+    "tufts": 900
+  },
+  "ring": [
+    "willow",
+    "bush_dark",
+    "bush_dark"
+  ],
+  "cliff": [
+    "cliff_slate",
+    "cliff_slate_b"
+  ],
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#ffe9f2",
+      "intensity": 2.0,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#efe3ff",
+      "ground": "#3d4a6b",
+      "intensity": 1.6
+    },
+    "background": "#b9b2dc",
+    "fog": {
+      "near": 12,
+      "far": 30
+    }
+  },
+  "light_night": {
+    "hemisphere": {
+      "sky": "#8a8fd8",
+      "ground": "#2c3358",
+      "intensity": 1.5
+    },
+    "background": "#262a4a",
+    "fog": {
+      "near": 14,
+      "far": 34
+    }
+  }
+}

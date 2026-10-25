@@ -1,0 +1,1231 @@
+{
+  "title": "Lanternmere",
+  "title_fr": "Lac-aux-Lanternes",
+  "region": "dream",
+  "music": "dream",
+  "width": 34,
+  "height": 28,
+  "tiles": [
+    "..........pp.............~~~rr~~~~",
+    "..........pp.............~~~rr~~~~",
+    "..........pp..............~~rr~~~~",
+    "..........pp...............~rr~~~~",
+    "....p.....pprrrrrrrr..p.....rr~~~~",
+    "....ppppppprrrrrrrrrrrpppppppp.~~~",
+    "...p.......rrrrrrrrrrrpppppppp....",
+    "...p.........rrrrrrr........pp....",
+    "...p............pp..........pp....",
+    "...p.......~~~~~HH~~~.......pp....",
+    "...p....~~~~~~~~HH~~~~~~....pp....",
+    "...p...~~~~~~~~~~~~~~~~~~~..pp....",
+    "...p..~~~~~~~~~~~~~~~~~~~~~.pp....",
+    "...p..~~~~~~~~~~~~~~~~~~~~~.pp....",
+    "...pp.~ss~~~~~~~~~~~~~~~~~~.pp....",
+    "...pp~~sss~~~~~~~~~~~~~~~~~~pp....",
+    "....~~~sss~~~~~~~~H~~~~~~~~~pp....",
+    "....~~~~s~~~~~~~~~H~~~~~~~~~pp....",
+    ".....~~~~~~~~~~~~~~~~~~~~~~~pp....",
+    "......~~~~~~~~~~~~~~~~~~~~~.pp....",
+    ".......~~~~~~~~~~~~~~~~~~~..pp....",
+    "........~~~~~~~~~~~~~~~~~~...pHHH.",
+    ".........~~~~~~~~~~~~~~.~~~~~~~~~~",
+    "...........~~~~~~~~~....~~~~~~~~~~",
+    "................pp..........pp..~~",
+    "................pppppppppppppp....",
+    "................pppppppppppp......",
+    "................pp................"
+  ],
+  "props": [
+    {
+      "asset": "lake_house",
+      "x": 2,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "inn_sign",
+      "x": 6,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "lake_house",
+      "x": 19,
+      "z": 9,
+      "rot": 180,
+      "recolor": {
+        "sx_dr_roof": "#c46a8a",
+        "sx_dr_roof_dk": "#a35472",
+        "sx_dr_roof_lt": "#d88aa4"
+      }
+    },
+    {
+      "asset": "lake_house",
+      "x": 20,
+      "z": 0,
+      "rot": 0,
+      "recolor": {
+        "sx_dr_roof": "#5a6fb0",
+        "sx_dr_roof_dk": "#4a5c94",
+        "sx_dr_roof_lt": "#7586c4"
+      }
+    },
+    {
+      "asset": "workshop",
+      "x": 13,
+      "z": 0,
+      "rot": 0,
+      "recolor": {
+        "sx_slate": "#6a5aa0",
+        "sx_slate_dk": "#54487f"
+      }
+    },
+    {
+      "asset": "waymark",
+      "x": 18,
+      "z": 3,
+      "rot": 0,
+      "glow": "#8a4fc9"
+    },
+    {
+      "asset": "wisteria_arch",
+      "x": 10,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 9,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 18,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 30,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 27,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bridge",
+      "x": 28,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 9,
+      "z": 11,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 13,
+      "z": 12,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 21,
+      "z": 14,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 24,
+      "z": 18,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 11,
+      "z": 20,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 14,
+      "z": 22,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 22,
+      "z": 21,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 6,
+      "z": 18,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 25,
+      "z": 12,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 20,
+      "z": 19,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 12,
+      "z": 16,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "willow",
+      "x": 8,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 5,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 4,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 5,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 8,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 26,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 6,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 26,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 13,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 1,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 5,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 11,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 27,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 30,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 30,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 22,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 15,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 2,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "moonflower",
+      "x": 1,
+      "z": 6,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 2,
+      "z": 6,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 7,
+      "z": 3,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 8,
+      "z": 3,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 14,
+      "z": 26,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 13,
+      "z": 26,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "flowers",
+      "x": 7,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 30,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 21,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 11,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 5,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 33,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "ferry",
+      "x": 30,
+      "z": 22,
+      "rot": 0,
+      "recolor": {
+        "sx_td_hull": "#5b3f86",
+        "sx_td_cabin_roof": "#c89b3c",
+        "sx_td_funnel": "#efe6d2"
+      }
+    },
+    {
+      "asset": "crates",
+      "x": 32,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 19,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 3,
+      "z": 23,
+      "rot": 180
+    },
+    {
+      "asset": "lake_house",
+      "x": 24,
+      "z": 13,
+      "rot": 90,
+      "recolor": {
+        "sx_dr_roof": "#4f8a8a",
+        "sx_dr_roof_dk": "#3f7070",
+        "sx_dr_roof_lt": "#6aa3a3"
+      }
+    },
+    {
+      "asset": "willow",
+      "x": 31,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 31,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 30,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 30,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 12,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 16,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "moonflower",
+      "x": 9,
+      "z": 8,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 13,
+      "z": 8,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 20,
+      "z": 8,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 24,
+      "z": 8,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 5,
+      "z": 7,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 15,
+      "z": 19,
+      "rot": 0,
+      "y": 0.06
+    }
+  ],
+  "spawn": {
+    "x": 10,
+    "z": 1,
+    "facing": "s"
+  },
+  "interactions": [
+    {
+      "kind": "waymark",
+      "id": "lanternmere",
+      "x": 18,
+      "z": 3
+    },
+    {
+      "x": 9,
+      "z": 3,
+      "kind": "sign",
+      "text": "North: Hushwillow Lane and Brightwell Square. North-east, at low water only: the causeway to the Bellflats.",
+      "text_fr": "Nord : l'Allée des Saules-Murmures et la Place de Clairpuits. Nord-est, à marée basse seulement : la chaussée des Grèves."
+    },
+    {
+      "x": 18,
+      "z": 24,
+      "kind": "sign",
+      "text": "South: the Moonwell Garden. Across the mere by the lanterns at night; round the east shore at any hour.",
+      "text_fr": "Sud : le Jardin du Puits-de-Lune. Par les lanternes sur le lac, la nuit ; par la rive est, à toute heure."
+    },
+    {
+      "x": 27,
+      "z": 4,
+      "kind": "sign",
+      "text": "Causeway to the Bellflats. Low water only, 8 in the morning to 6 in the evening. After that the sea has it.",
+      "text_fr": "Chaussée des Grèves de la Cloche. À marée basse seulement, de 8 h à 18 h. Ensuite, la mer la reprend."
+    },
+    {
+      "x": 30,
+      "z": 7,
+      "kind": "sign",
+      "text": "The east shore path: round the mere to the Moonwell Garden, and over the river to the launch jetty.",
+      "text_fr": "Le chemin de la rive est : autour du lac jusqu'au Jardin du Puits-de-Lune, et par le pont jusqu'à l'embarcadère de la vedette."
+    },
+    {
+      "x": 6,
+      "z": 4,
+      "kind": "sign",
+      "text": "The Quiet Lamp. Rooms by the day: our guests sleep while the sun is up.",
+      "text_fr": "La Lampe Tranquille. Chambres à la journée : nos clients dorment tant que le soleil est levé."
+    },
+    {
+      "x": 31,
+      "z": 22,
+      "kind": "sign",
+      "id": "gangway_launch",
+      "name": "The Gullhaven launch",
+      "name_fr": "La vedette de Havre-aux-Mouettes",
+      "dialogue": [
+        {
+          "if": "item:ferry_pass",
+          "lines": [
+            "You ring the jetty bell. A deckhand checks your pass, twice, as Ines taught her, and the launch slips down the river to the sea and north to Gullhaven."
+          ],
+          "lines_fr": [
+            "Vous sonnez la cloche de l'embarcadère. Une matelote vérifie votre laissez-passer, deux fois, comme Ines le lui a appris, et la vedette descend la rivière jusqu'à la mer puis remonte vers Havre-aux-Mouettes."
+          ],
+          "do": [
+            "warp:gullhaven:27:20:n"
+          ]
+        },
+        {
+          "lines": [
+            "A lilac launch with a brass rail, and a bell on the jetty post. A tin plate: \"GULLHAVEN. Passes from the Harbour Office there.\""
+          ],
+          "lines_fr": [
+            "Une vedette lilas à la rambarde de laiton, et une cloche sur le poteau de l'embarcadère. Une plaque de fer-blanc : « HAVRE-AUX-MOUETTES. Laissez-passer à la Capitainerie, là-bas. »"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "d_jetty",
+      "x": 32,
+      "z": 20,
+      "give": "card:gloamowl",
+      "text": "In a crate by the jetty, under a coil of rope, in a jar to keep the river out: a card. A label says \"for the first one off the boat\".",
+      "text_fr": "Dans une caisse près de l'embarcadère, sous un rouleau de corde, dans un bocal pour la garder de l'eau : une carte. Une étiquette dit « pour le premier qui descend du bateau »."
+    },
+    {
+      "kind": "find",
+      "id": "d_raft",
+      "x": 15,
+      "z": 19,
+      "give": "coins:100",
+      "text": "A lantern drifts up against the raft, and in its paper base, folded small: Facets. Someone's wish, maybe. Or someone's change.",
+      "text_fr": "Une lanterne vient buter contre le radeau, et dans son socle de papier, pliées serré : des Facettes. Le vœu de quelqu'un, peut-être. Ou sa monnaie.",
+      "if": "time:night"
+    },
+    {
+      "x": 27,
+      "z": 15,
+      "kind": "sign",
+      "text": "A round house on piles, lanterns hung all round the porch. A note on the door: \"Out lighting the shore. Back by dawn. Clem.\"",
+      "text_fr": "Une maison ronde sur pilotis, des lanternes tout autour du porche. Un mot sur la porte : « Parti allumer la rive. De retour à l'aube. Clem. »"
+    },
+    {
+      "x": 3,
+      "z": 23,
+      "kind": "sign",
+      "id": "old_boat",
+      "name": "An upturned rowboat",
+      "name_fr": "Une barque retournée",
+      "dialogue": [
+        {
+          "lines": [
+            "An old rowboat, upturned on the shore, moss in its seams. Painted on the hull, nearly gone: \"Ambrose\". He rows a newer one now. Under it, someone keeps a jar of lantern wicks dry."
+          ],
+          "lines_fr": [
+            "Une vieille barque retournée sur la rive, de la mousse dans les joints. Peint sur la coque, presque effacé : « Ambrose ». Il rame dans une plus récente, maintenant. Dessous, quelqu'un garde au sec un bocal de mèches à lanterne."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "d_islet",
+      "x": 8,
+      "z": 14,
+      "give": "pack:dream",
+      "text": "Under the islet's willow, wrapped in oilcloth against the damp: a sealed booster. The lanterns must see it every night.",
+      "text_fr": "Sous le saule de l'îlot, enveloppé de toile cirée contre l'humidité : un booster scellé. Les lanternes doivent le voir toutes les nuits."
+    }
+  ],
+  "warps": [
+    {
+      "x": 4,
+      "z": 4,
+      "to": "inn_dream",
+      "label": "Go into the Quiet Lamp",
+      "label_fr": "Entrer à la Lampe Tranquille",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    },
+    {
+      "x": 21,
+      "z": 9,
+      "to": "tailor",
+      "label": "Go into the Lamplit Tailor",
+      "label_fr": "Entrer chez le Tailleur aux lampions",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    }
+  ],
+  "exits": [
+    {
+      "side": "n",
+      "span": [
+        10,
+        11
+      ],
+      "to": "hushlane"
+    },
+    {
+      "side": "n",
+      "span": [
+        28,
+        29
+      ],
+      "to": "bellflats"
+    },
+    {
+      "side": "s",
+      "span": [
+        16,
+        17
+      ],
+      "to": "moonwell"
+    }
+  ],
+  "gates": [
+    {
+      "id": "lantern_path",
+      "tiles": [
+        [
+          16,
+          11
+        ],
+        [
+          17,
+          11
+        ],
+        [
+          16,
+          12
+        ],
+        [
+          17,
+          12
+        ],
+        [
+          16,
+          13
+        ],
+        [
+          17,
+          13
+        ],
+        [
+          16,
+          14
+        ],
+        [
+          17,
+          14
+        ],
+        [
+          16,
+          15
+        ],
+        [
+          17,
+          15
+        ],
+        [
+          16,
+          16
+        ],
+        [
+          17,
+          16
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          17,
+          17
+        ],
+        [
+          16,
+          18
+        ],
+        [
+          17,
+          18
+        ],
+        [
+          16,
+          19
+        ],
+        [
+          17,
+          19
+        ],
+        [
+          16,
+          20
+        ],
+        [
+          17,
+          20
+        ],
+        [
+          16,
+          21
+        ],
+        [
+          17,
+          21
+        ],
+        [
+          16,
+          22
+        ],
+        [
+          17,
+          22
+        ],
+        [
+          16,
+          23
+        ],
+        [
+          17,
+          23
+        ],
+        [
+          18,
+          16
+        ],
+        [
+          18,
+          17
+        ]
+      ],
+      "if": "time:night",
+      "prop_open": "lantern_raft",
+      "floor": 0.1,
+      "text": "Just dark water, and the lanterns drifting far out. They only gather into a path after nightfall.",
+      "text_fr": "Rien que de l'eau sombre, et les lanternes qui dérivent au loin. Elles ne se rassemblent en chemin qu'à la nuit tombée."
+    },
+    {
+      "id": "causeway",
+      "tiles": [
+        [
+          28,
+          0
+        ],
+        [
+          29,
+          0
+        ],
+        [
+          28,
+          1
+        ],
+        [
+          29,
+          1
+        ],
+        [
+          28,
+          2
+        ],
+        [
+          29,
+          2
+        ],
+        [
+          28,
+          3
+        ],
+        [
+          29,
+          3
+        ]
+      ],
+      "if": "time:day",
+      "tide": true,
+      "text": "The causeway to the Bellflats is under the sea. It comes back at low water, at eight in the morning.",
+      "text_fr": "La chaussée des Grèves est sous la mer. Elle réapparaît à marée basse, à huit heures du matin."
+    },
+    {
+      "id": "islet_shallows",
+      "tiles": [
+        [
+          5,
+          15
+        ],
+        [
+          6,
+          15
+        ]
+      ],
+      "if": "item:wading_boots",
+      "text": "The water's only knee-deep out to the islet, but cold, and the bottom is soft mud. Wading boots would do it.",
+      "text_fr": "L'eau n'arrive qu'aux genoux jusqu'à l'îlot, mais elle est froide et le fond est de la vase molle. Des bottes de gué feraient l'affaire."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "lisette",
+      "name": "Lisette",
+      "model": "npc_worker",
+      "x": 14,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#e8a0b8",
+      "hair": "#2b211c",
+      "if": "!time:dusk & !time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Paper, wire, a drop of wax, and a wish folded inside. That's a lantern.",
+            "I make them all day. At dusk I carry them down to the jetty and let them go, and they find each other on the water.",
+            "By night they make a path straight across the mere. Walk it, if you like. They hold."
+          ],
+          "lines_fr": [
+            "Du papier, du fil de fer, une goutte de cire, et un vœu plié dedans. C'est ça, une lanterne.",
+            "J'en fais toute la journée. Au crépuscule, je les porte au ponton et je les lâche, et elles se retrouvent sur l'eau.",
+            "La nuit, elles font un chemin tout droit à travers le lac. Marche dessus, si tu veux. Elles tiennent."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lisette_dusk",
+      "name": "Lisette",
+      "model": "npc_worker",
+      "x": 15,
+      "z": 8,
+      "facing": "e",
+      "idle": "Idle",
+      "outfit": "#e8a0b8",
+      "hair": "#2b211c",
+      "if": "!time:day & !time:dawn",
+      "dialogue": [
+        {
+          "lines": [
+            "There they go. Watch: they drift, they turn, they line up. Every night, the same line, to the Moonwell.",
+            "The Moonwell Garden is over there: Lumen's garden. Nim keeps it while Lumen's away. The lanterns like them both."
+          ],
+          "lines_fr": [
+            "Les voilà parties. Regarde : elles dérivent, elles tournent, elles s'alignent. Chaque nuit, la même ligne, jusqu'au Puits-de-Lune.",
+            "Le Jardin du Puits-de-Lune est là-bas : le jardin de Lumen. Nim s'en occupe pendant que Lumen est partie. Les lanternes les aiment bien toutes les deux."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "esme",
+      "name": "Esme",
+      "model": "npc_kid",
+      "x": 14,
+      "z": 8,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#f2c6a0",
+      "hair": "#e8d080",
+      "if": "time:dawn",
+      "dialogue": [
+        {
+          "lines": [
+            "Shh. Everyone's asleep but me. Lanternmere goes to bed when the sun comes up.",
+            "I like dawn. The lanterns go home, and the moonflowers close, and the whole lake is pink for a bit."
+          ],
+          "lines_fr": [
+            "Chut. Tout le monde dort sauf moi. Lac-aux-Lanternes va se coucher quand le soleil se lève.",
+            "J'aime l'aube. Les lanternes rentrent, les belles-de-lune se ferment, et tout le lac est rose un moment."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ruben",
+      "name": "Ruben",
+      "model": "npc_scholar",
+      "x": 20,
+      "z": 6,
+      "facing": "w",
+      "idle": "Idle",
+      "outfit": "#3a3f6a",
+      "hair": "#c8c0b0",
+      "if": "time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Three hundred and twelve. Three hundred and thirteen. Moths. Round every lamp in Lanternmere.",
+            "I count them, I don't catch them. Well, I catch them, count them, let them go. The moth doesn't mind. Much.",
+            "Hints, for a moth-counter's friend: the lanterns on the mere carry more than wishes. The moonflower beds in the Moonwell hide something only by night. And the islet: you'd need boots."
+          ],
+          "lines_fr": [
+            "Trois cent douze. Trois cent treize. Des phalènes. Autour de chaque lampe de Lac-aux-Lanternes.",
+            "Je les compte, je ne les attrape pas. Enfin, je les attrape, je les compte, je les relâche. La phalène ne s'en formalise pas. Trop.",
+            "Des indices, pour un ami des compteurs de phalènes : les lanternes du lac portent plus que des vœux. Les massifs de belles-de-lune du Puits-de-Lune cachent quelque chose, la nuit seulement. Et l'îlot : il te faudrait des bottes."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_clem",
+      "name": "Clem",
+      "model": "npc_worker",
+      "x": 30,
+      "z": 14,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 2,
+        "challenge": [
+          "Lanterns for the east shore! Mind the wire. Oh, a duellist. Two prizes, while the wax sets?"
+        ],
+        "challenge_fr": [
+          "Des lanternes pour la rive est ! Attention au fil. Oh, un duelliste. Deux Récompenses, le temps que la cire prenne ?"
+        ],
+        "win": [
+          "Snuffed out. Fair enough."
+        ],
+        "win_fr": [
+          "Soufflé. C'est de bonne guerre."
+        ],
+        "lose": [
+          "Lit you up! Come back with a brighter deck."
+        ],
+        "lose_fr": [
+          "Je t'ai éclairé ! Reviens avec un deck plus lumineux."
+        ],
+        "after": [
+          "The long way round is the lit way round. Every post, every night. My legs know it by heart."
+        ],
+        "after_fr": [
+          "Le long chemin, c'est le chemin éclairé. Chaque poteau, chaque nuit. Mes jambes le connaissent par cœur."
+        ]
+      },
+      "outfit": "#c89b3c",
+      "hair": "#4a3426"
+    },
+    {
+      "id": "t_yara",
+      "name": "Yara",
+      "model": "npc_wanderer",
+      "x": 13,
+      "z": 6,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "A Hexon that has never Awakened is a seed that has never been planted.",
+          "My house rule: at least two Awaken 2 Hexons in your deck. Three prizes. Show me what your Hexons can become."
+        ],
+        "challenge_fr": [
+          "Un Hexon qui ne s'est jamais Éveillé est une graine qu'on n'a jamais plantée.",
+          "Ma règle maison : au moins deux Hexons d'Éveil 2 dans ton deck. Trois Récompenses. Montre-moi ce que tes Hexons peuvent devenir."
+        ],
+        "lose": [
+          "Patience. An Awakening takes three turns at least, and a lifetime at most."
+        ],
+        "lose_fr": [
+          "Patience. Un Éveil prend trois tours au moins, et une vie entière au plus."
+        ],
+        "after": [
+          "Everything here wakes at night. Hexons too, if you let them."
+        ],
+        "after_fr": [
+          "Ici, tout s'éveille la nuit. Les Hexons aussi, si tu les laisses faire."
+        ]
+      },
+      "outfit": "#8a4fc9",
+      "hair": "#f2e6c8",
+      "dialogue": [
+        {
+          "if": "won:t_yara & !flag:yara_paid",
+          "lines": [
+            "Two Awakenings, all the way. Beautiful.",
+            "Take Wraithelle. She was a wisp once."
+          ],
+          "lines_fr": [
+            "Deux Éveils, jusqu'au bout. Magnifique.",
+            "Prends Spectrelle. Elle a été un feu follet, autrefois."
+          ],
+          "do": [
+            "card:wraithelle",
+            "flag:yara_paid"
+          ]
+        },
+        {
+          "if": "won:t_yara",
+          "lines": [
+            "You let them wake. That's the whole art."
+          ],
+          "lines_fr": [
+            "Tu les as laissés s'éveiller. Tout l'art est là."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_ambrose",
+      "name": "Ambrose",
+      "model": "npc_sailor",
+      "x": 18,
+      "z": 17,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "Shipped my oars to watch the lanterns pass. You walked here on them? Brave.",
+          "Sit a moment. Three prizes, out here in the middle of the mere. Nobody rows better at night."
+        ],
+        "challenge_fr": [
+          "J'ai rentré mes rames pour regarder passer les lanternes. Tu es venu à pied sur elles ? Courageux.",
+          "Reste un moment. Trois Récompenses, ici, au milieu du lac. Personne ne rame mieux que moi la nuit."
+        ],
+        "win": [
+          "Capsized. In the middle of the mere. Well rowed."
+        ],
+        "win_fr": [
+          "Chaviré. En plein milieu du lac. Bien ramé."
+        ],
+        "lose": [
+          "Overboard! Swim for the lanterns, they'll carry you."
+        ],
+        "lose_fr": [
+          "Par-dessus bord ! Nage vers les lanternes, elles te porteront."
+        ],
+        "after": [
+          "At dawn the lanterns go home and so do I. Mind you're off the water by then. Well, they'll wait for you if you're on them."
+        ],
+        "after_fr": [
+          "À l'aube, les lanternes rentrent, et moi aussi. Sois sorti de l'eau d'ici là. Enfin, elles t'attendront si tu es dessus."
+        ]
+      },
+      "outfit": "#2c3a5a",
+      "hair": "#9a8a7a",
+      "if": "time:night"
+    }
+  ],
+  "ground": {
+    "base": "dusk_grass",
+    "path": "stone",
+    "margin": 9,
+    "tufts": 800
+  },
+  "ring": [
+    "willow",
+    "bush_dark",
+    "bush_dark"
+  ],
+  "ringSides": "ws",
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#ffe9f2",
+      "intensity": 2.0,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#efe3ff",
+      "ground": "#3d4a6b",
+      "intensity": 1.6
+    },
+    "background": "#b9b2dc",
+    "fog": {
+      "near": 12,
+      "far": 30
+    }
+  },
+  "light_night": {
+    "hemisphere": {
+      "sky": "#8a8fd8",
+      "ground": "#2c3358",
+      "intensity": 1.5
+    },
+    "background": "#262a4a",
+    "fog": {
+      "near": 14,
+      "far": 34
+    }
+  }
+}

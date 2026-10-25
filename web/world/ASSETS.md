@@ -395,6 +395,24 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   - `tidepool` is walkable (WALKABLE); `stairs_basalt` and `stairs_heath` are decks.
   - A regional inn (an `inn_<region>` interior listed in `engine::shop::INNS`) opens its counter under the rest panel
     of `show:inn`.
+- **1.3 PR 3 additions** (Tide and Dream):
+  - **gate `tide: true`**: the sea covers the gate's tiles in the ground shader while it is shut and drains while it is open,
+    over five seconds (at once on a fresh build or with reduced motion); `flood: [[x, z], …]` adds tiles that flood with it
+    but are not the gate (under its boardwalks and props). The Bellflats' `flats` and both ends of the causeway.
+  - **map `gulls: n`**: n gulls glide high over the hero's part of the map by day and roost at night.
+  - **moths**: after dark, eight moths flutter round the lamps (and glimmers) nearest the hero, on every map.
+  - **glimmers**: `floating_lantern`, `lantern_raft` (a gate's `prop_open`) and `moonflower` (while its `open` holds) get a
+    small tinted halo and a soft pool of light at their `glow` parts after dusk. Not real lights: one point cloud per size and
+    one instanced pool mesh for all of them.
+  - **moonflowers with `open`** are instanced as two sets, closed and posed open (the end of their `Open` clip), cross-faded
+    when the condition changes: a whole bed costs two draws.
+  - **lantern rafts** are instanced (a little turned and apart, so the path reads as rafts drifting together).
+  - **map `fence_tint`** (a colour): multiplies the map's `f` pieces (the Moonwell's dusky hedges).
+  - Props: `harbour_house` (5×4), `bell_tower` (3×3), `net_rack` (2×1), `willow`, `wishing_tree` (2×2, sway), `moonwell` (3×3),
+    `lake_house` (4×4), `wisteria_arch` (2×1, walked under), and the interior `chart_table`, `cloth_rack` (2×1), `dress_form`,
+    `paper_lanterns`, `chowder_stove`; `tidepool` and the hedge set are batched.
+  - **check-maps** also turns the clock: for every phase, once the `time:` gates of that phase have shut, every tile the hero
+    can stand on must still reach an exit, a door or a spot that warps (it found a dead-end pocket on the Kilnmouth).
 - **Debug hooks** on the world's host element (`.world-host`): `sixfoldClock(minute)` sets the time,
   `sixfoldWarp(map, x, z, facing)` goes anywhere, `sixfoldStats()` reads draw calls, the area and the hour, and `sixfoldCam({ distance: 40, pitch: 65 })` pulls the
   camera back (no fog) to review a whole map until the next one loads.

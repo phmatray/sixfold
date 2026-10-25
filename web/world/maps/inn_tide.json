@@ -1,0 +1,230 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "chowder_stove",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bed",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "net_locker",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "shelf",
+      "x": 5,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "duel_table",
+      "x": 7,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 7,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 8,
+      "z": 6,
+      "rot": 180
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 1,
+      "z": 1,
+      "kind": "sign",
+      "text": "A pot of chowder as big as a lifebuoy, simmering. It smells of smoke, cream and the whole sea.",
+      "text_fr": "Une marmite de chaudrée grande comme une bouée, qui mijote. Elle sent la fumée, la crème et la mer entière."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "to": "gullhaven",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 4,
+        "z": 6,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "hanne",
+      "name": "Hanne",
+      "model": "npc_shopkeeper",
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#2f7fd0",
+      "hair": "#d8c8a0",
+      "dialogue": [
+        {
+          "if": "!flag:talked_hanne",
+          "lines": [
+            "Mm-hm-hm... oh! A customer. Sit, sit. Chowder first, questions after.",
+            "Beds are through the back, and resting's free. Dawn, day, dusk or night: the tide doesn't care, so why should you?",
+            "And the counter has Tide packs and a Gulfwyrm I keep for whoever can afford her."
+          ],
+          "lines_fr": [
+            "Mm-hm-hm… oh ! Quelqu'un. Assieds-toi, assieds-toi. La chaudrée d'abord, les questions après.",
+            "Les lits sont au fond, et le repos est gratuit. Aube, jour, crépuscule ou nuit : la marée s'en moque, alors pourquoi pas toi ?",
+            "Et au comptoir, des boosters Marée et une Golfeguivre que je garde pour qui pourra se l'offrir."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "if": "time:night",
+          "lines": [
+            "The boats are in, the lamps are lit. Brann's on the pier pretending he's fishing.",
+            "A bed?"
+          ],
+          "lines_fr": [
+            "Les bateaux sont rentrés, les lampes allumées. Brann est sur le ponton à faire semblant de pêcher.",
+            "Un lit ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "lines": [
+            "Mm-hm-hm. That's the tide's tune. Goes out, comes back, never misses.",
+            "Rest a while?"
+          ],
+          "lines_fr": [
+            "Mm-hm-hm. C'est l'air de la marée. Elle part, elle revient, elle ne rate jamais.",
+            "Tu te reposes un peu ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#f2f8ff",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#e8f2f8",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffbe70",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

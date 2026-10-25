@@ -14,7 +14,8 @@
 // `cliff` name known sets. Gates: tiles in bounds; with every gate shut the spawn still reaches an exit or
 // a warp (no soft-lock), and with every gate open every person, spot, warp and waymark can be reached
 // (floor heights, the 0.6 m step and the ladder rule as build.js has them; a door warp to the same map, a
-// lift, carries the fill to where it lands). The atlas (atlas.json) lists
+// lift, carries the fill to where it lands). When the hour turns and the `time:` gates of that phase shut,
+// every tile the hero can stand on still has a way out (an exit, a door, a spot that warps). The atlas (atlas.json) lists
 // every outdoor map under its own title, its roads join listed maps, and each waymark stands on a
 // reachable tile facing its post (a `kind: "waymark"` spot of the same id); posts sit at least 1.7 grid
 // squares apart on the chart, so their 44 px targets never overlap on a phone.
@@ -153,12 +154,12 @@ function reach(name, m, solid0, height0) {
     if (!g.text) fail.push(`${name}: gate ${g.id} needs a text for when it's shut`);
     if (g.floor !== undefined && !(g.floor >= 0)) fail.push(`${name}: gate ${g.id} floor ${g.floor} is below the ground (it would hide the hero's feet)`);
   }
-  const flood = (open) => {
+  const flood = (open, starts = [[m.spawn.x, m.spawn.z]]) => {
     const solid = new Set(solid0), h = { ...height };
     for (const g of gates)
       for (const [x, z, y] of g.tiles ?? []) {
         const k = `${x},${z}`, c = m.tiles[z]?.[x];
-        if (!open) {
+        if (!(typeof open === "function" ? open(g) : open)) {
           solid.add(k);
           continue;
         }
@@ -172,7 +173,7 @@ function reach(name, m, solid0, height0) {
       const axis = ax !== bx ? "x" : "z";
       return ladders.get(`${ax},${az}`) === axis || ladders.get(`${bx},${bz}`) === axis;
     };
-    const seen = new Set([`${m.spawn.x},${m.spawn.z}`]), queue = [[m.spawn.x, m.spawn.z]];
+    const seen = new Set(starts.map(([x, z]) => `${x},${z}`)), queue = starts.map((t) => [...t]);
     // A door warp to this same map (a lift) carries the fill on to its landing.
     const lifts = (m.warps ?? []).filter((w) => w.to === name && !w.dir);
     for (;;) {
@@ -204,6 +205,27 @@ function reach(name, m, solid0, height0) {
   for (const n of m.npcs ?? []) if (!near(all, n.x, n.z, true)) fail.push(`${name}: ${n.id} can't be reached, even with every gate open`);
   for (const i of m.interactions ?? []) if (!near(all, i.x, i.z, true)) fail.push(`${name}: the spot at ${i.x},${i.z} can't be reached, even with every gate open`);
   for (const w of m.warps ?? []) if (!near(all, w.x, w.z)) fail.push(`${name}: the warp at ${w.x},${w.z} can't be reached, even with every gate open`);
+  // The hour turning: wherever the hero can stand (every gate open), once the gates on `time:` that are shut in
+  // a phase have shut (items and flags never take a gate back), the way out must still be there: an edge exit, a
+  // door, or a spot whose dialogue warps (a rope down). A gate never shuts under the hero, so its own tiles are
+  // skipped; the hero steps off them onto one of the tiles tested here.
+  const timed = gates.filter((g) => /time:/.test(g.if ?? ""));
+  if (timed.length) {
+    const outs = [...exitTiles];
+    for (const w of m.warps ?? []) if (w.to !== name || w.dir) Object.values(DIR).forEach(([dx, dz]) => outs.push([w.x + dx, w.z + dz]));
+    for (const i of m.interactions ?? []) if (JSON.stringify(i.dialogue ?? []).includes('"warp:')) Object.values(DIR).forEach(([dx, dz]) => outs.push([i.x + dx, i.z + dz]));
+    const onGate = new Set(gates.flatMap((g) => (g.tiles ?? []).map(([x, z]) => `${x},${z}`)));
+    // A gate's condition at phase `ph`, its items and flags taken as held.
+    const at = (c, ph) => c.split("&").every((t) => {
+      const neg = t.trim().startsWith("!"), term = t.trim().replace(/^!/, "");
+      return !term.startsWith("time:") || (term.slice(5) === ph) !== neg;
+    });
+    for (const ph of ["dawn", "day", "dusk", "night"]) {
+      const back = flood((g) => !/time:/.test(g.if) || at(g.if, ph), outs.filter(([x, z]) => inMap(x, z)));
+      const stuck = [...all].find((t) => !onGate.has(t) && !back.has(t));
+      if (stuck) fail.push(`${name}: at ${ph}, once the timed gates shut, ${stuck} has no way out (give it one: a rope with a warp:, a door)`);
+    }
+  }
   for (const wm of atlas?.waymarks ?? [])
     if (wm.map === name && !all.has(`${wm.x},${wm.z}`)) fail.push(`${name}: waymark ${wm.id}'s tile ${wm.x},${wm.z} can't be reached`);
   return all;

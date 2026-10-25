@@ -7,7 +7,8 @@ Headless only:
         [--out web/world/assets] [--only kiln,ash_pine] [--sheets DIR] [--check] [--assets-extra DIR]
 
   --region  ember, storm, tide, dream, grove, stone (comma separated) or all
-  --out     export each prop to <out>/<name>.glb (fails on > 3k triangles or > 2 MB, or a stray clip)
+  --out     export each prop to <out>/<name>.glb, a region's INTERIOR furniture to <out>/interior/<name>.glb
+            (fails on > 3k triangles or > 2 MB, or a stray clip)
   --sheets  DIR/<region>_tiles.png (every prop, front and back 3/4, labelled with footprint and triangles) and
             DIR/<region>_day.png, DIR/<region>_night.png: a small map of the region built from the exported
             files like build.js builds one (cliff stacks, auto-tiled walls, ring trees), at the game camera,
@@ -76,7 +77,8 @@ def main(argv):
             stats = {}
             if out:
                 for name, objs in built.items():
-                    stats[name] = K.export(name, objs, out, animated=name in getattr(mod, "ANIM", ()))
+                    dest = os.path.join(out, "interior") if name in getattr(mod, "INTERIOR", ()) else out
+                    stats[name] = K.export(name, objs, dest, animated=name in getattr(mod, "ANIM", ()))
                     report.append((region, name, *stats[name]))
             if "--check" in argv:
                 import check_coplanar

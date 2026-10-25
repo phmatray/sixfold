@@ -1,0 +1,655 @@
+{
+  "title": "The Moonwell Garden",
+  "title_fr": "Le Jardin du Puits-de-Lune",
+  "region": "dream",
+  "music": "dream",
+  "width": 28,
+  "height": 24,
+  "tiles": [
+    ".............pp.............",
+    ".............pp.............",
+    "......fffffffppffffff.......",
+    "....fff......pp.....fff.....",
+    "...ff........pp.......ff....",
+    "..ff.ppppppppppppppppppff...",
+    "..f.ppppppppppppppppppp.f...",
+    ".ff.pp....fffffff....pp.ff..",
+    ".f..pp..fff.....fff..pp..f..",
+    ".f..pp.ff.........ff.pp..f..",
+    ".f..pp.f............ppp..f..",
+    ".f..pppppppp........ppp..f..",
+    ".f..pppppppp.......f.....f..",
+    ".f.....f...ppppp...f.....f..",
+    ".f.....ff...pp....ff.....f..",
+    ".f......fff.pp..fff......f..",
+    ".f........ffppfff..~~~...f..",
+    ".f........ppppppp.~~~~~..f..",
+    ".ff...............~~~~~.ff..",
+    "..ff...............~~~.ff...",
+    "...ff.................ff....",
+    "....ff...............ff.....",
+    ".....fffffffffffffffff......",
+    "............................"
+  ],
+  "props": [
+    {
+      "asset": "moonwell",
+      "x": 12,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "seal_stone",
+      "x": 15,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "waymark",
+      "x": 20,
+      "z": 7,
+      "rot": 0,
+      "glow": "#8a4fc9"
+    },
+    {
+      "asset": "wisteria_arch",
+      "x": 13,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "wisteria_arch",
+      "x": 7,
+      "z": 11,
+      "rot": 90
+    },
+    {
+      "asset": "wisteria_arch",
+      "x": 19,
+      "z": 10,
+      "rot": 90
+    },
+    {
+      "asset": "signpost",
+      "x": 15,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 18,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 21,
+      "z": 17,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 20,
+      "z": 19,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 25,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "moonflower",
+      "x": 3,
+      "z": 9,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 3,
+      "z": 10,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 4,
+      "z": 14,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 5,
+      "z": 15,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 8,
+      "z": 18,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 9,
+      "z": 19,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 12,
+      "z": 19,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 13,
+      "z": 19,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 14,
+      "z": 19,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 23,
+      "z": 8,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 23,
+      "z": 9,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 23,
+      "z": 11,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 17,
+      "z": 3,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 18,
+      "z": 3,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 8,
+      "z": 4,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 10,
+      "z": 13,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 16,
+      "z": 9,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 10,
+      "z": 10,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 17,
+      "z": 14,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "flowers",
+      "x": 3,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 24,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 6,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 20,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 24,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 22,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 17,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 23,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 12,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 16,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 5,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 21,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 10,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 11,
+      "z": 8,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 13,
+    "z": 1,
+    "facing": "s"
+  },
+  "interactions": [
+    {
+      "kind": "waymark",
+      "id": "moonwell",
+      "x": 20,
+      "z": 7
+    },
+    {
+      "x": 15,
+      "z": 0,
+      "kind": "sign",
+      "text": "The Moonwell Garden. Please walk softly: the flowers are sleeping. (By day.)",
+      "text_fr": "Le Jardin du Puits-de-Lune. Marchez doucement, s'il vous plaît : les fleurs dorment. (Le jour.)"
+    },
+    {
+      "x": 15,
+      "z": 12,
+      "kind": "sign",
+      "id": "seal_moonwell",
+      "name": "The seal stone",
+      "name_fr": "La pierre de sceau",
+      "dialogue": [
+        {
+          "lines": [
+            "A hexagonal stone, cool and dewy. Each of its six faces is a colour: the psychic face, turned to the well, shimmers when you look away from it.",
+            "The top is smooth, pale and blank, as if something was meant to be cut there and never was."
+          ],
+          "lines_fr": [
+            "Une pierre hexagonale, fraîche et couverte de rosée. Chacune de ses six faces a une couleur : celle de l'esprit, tournée vers le puits, chatoie quand on détourne les yeux.",
+            "Le dessus est lisse, pâle et vide, comme si quelque chose devait y être gravé et ne l'avait jamais été."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 18,
+      "z": 17,
+      "kind": "sign",
+      "id": "skiff",
+      "name": "A little skiff",
+      "name_fr": "Un petit esquif",
+      "dialogue": [
+        {
+          "lines": [
+            "A skiff tied to a ring, oars shipped. A card in Nim's round hand: \"For Lumen's guests: back to the village. Push off, the current knows the way.\"",
+            "The pool drains under the hedge into a channel, and the channel into the mere. A few strokes, and you bump against the lantern jetty."
+          ],
+          "lines_fr": [
+            "Un esquif attaché à un anneau, les rames rentrées. Une carte de l'écriture ronde de Nim : « Pour les invités de Lumen : retour au village. Poussez, le courant connaît le chemin. »",
+            "Le bassin s'écoule sous la haie dans un chenal, et le chenal dans le lac. Quelques coups de rame, et vous touchez le ponton aux lanternes."
+          ],
+          "do": [
+            "warp:lanternmere:17:7:n"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 3,
+      "z": 1,
+      "kind": "sign",
+      "id": "seven_stones",
+      "name": "Stacked stones",
+      "name_fr": "Des pierres empilées",
+      "dialogue": [
+        {
+          "lines": [
+            "Seven flat stones, stacked with care outside the garden wall. Six have a dab of colour on them. The top one is blank."
+          ],
+          "lines_fr": [
+            "Sept pierres plates, empilées avec soin devant le mur du jardin. Six portent une touche de couleur. Celle du dessus est vierge."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "d_bed",
+      "x": 23,
+      "z": 9,
+      "give": "card:hexmage",
+      "text": "The moonflowers are open, and in the brightest bed, laid among the petals like a pressed leaf: a card. By day you'd never have seen it under the buds.",
+      "text_fr": "Les belles-de-lune sont ouvertes, et dans le massif le plus lumineux, posée parmi les pétales comme une feuille séchée : une carte. Le jour, sous les boutons, vous ne l'auriez jamais vue.",
+      "if": "time:night"
+    }
+  ],
+  "warps": [
+    {
+      "x": 13,
+      "z": 12,
+      "to": "moonwell_stair",
+      "label": "Go down the well stair",
+      "label_fr": "Descendre l'escalier du puits",
+      "spawn": {
+        "x": 3,
+        "z": 3,
+        "facing": "n"
+      },
+      "if": "item:kiln_lantern",
+      "locked": "Steps spiral down inside the well, into a dark so thick the moonlight gives up at the third step. You'd want a light.",
+      "locked_fr": "Des marches descendent en spirale dans le puits, dans un noir si épais que la lune renonce dès la troisième marche. Il vous faudrait une lumière."
+    }
+  ],
+  "exits": [
+    {
+      "side": "n",
+      "span": [
+        13,
+        14
+      ],
+      "to": "lanternmere"
+    }
+  ],
+  "npcs": [
+    {
+      "id": "nim",
+      "name": "Nim",
+      "model": "npc_kid",
+      "x": 17,
+      "z": 12,
+      "facing": "w",
+      "idle": "Idle",
+      "outfit": "#b9a6e0",
+      "hair": "#3a2a20",
+      "if": "!time:day",
+      "dialogue": [
+        {
+          "if": "!flag:talked_nim",
+          "lines": [
+            "The moonflowers are open! This is the busy hour. Water, prune, whisper. In that order.",
+            "I'm Nim. Lumen's apprentice. She's away in the Fernhollow shade, gathering seeds, so the garden is mine for now.",
+            "She'll come home to keep the seal when the time comes. The well always knows before we do."
+          ],
+          "lines_fr": [
+            "Les belles-de-lune sont ouvertes ! C'est l'heure de pointe. Arroser, tailler, chuchoter. Dans cet ordre.",
+            "Moi, c'est Nim. L'apprentie de Lumen. Elle est partie à l'ombre de Creuse-Fougère ramasser des graines, alors le jardin est à moi, pour l'instant.",
+            "Elle reviendra garder le sceau le moment venu. Le puits le sait toujours avant nous."
+          ]
+        },
+        {
+          "lines": [
+            "Don't step on the beds. Do look in them. Things turn up in moonflowers.",
+            "The well stair goes down to an old alcove. It's black as a closed eye in there. I never go without a light."
+          ],
+          "lines_fr": [
+            "Ne marche pas sur les massifs. Mais regarde dedans. On trouve des choses dans les belles-de-lune.",
+            "L'escalier du puits descend jusqu'à une vieille alcôve. Il fait noir comme un œil fermé, là-dedans. Je n'y vais jamais sans lumière."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nim_day",
+      "name": "Nim",
+      "model": "npc_kid",
+      "x": 3,
+      "z": 13,
+      "facing": "e",
+      "idle": "Idle",
+      "outfit": "#b9a6e0",
+      "hair": "#3a2a20",
+      "if": "time:day",
+      "dialogue": [
+        {
+          "lines": [
+            "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
+            "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it."
+          ],
+          "lines_fr": [
+            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
+            "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_maud",
+      "name": "Maud",
+      "model": "npc_wanderer",
+      "x": 22,
+      "z": 7,
+      "facing": "s",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "Hold still! There's a moth on your shoulder. A rare one. Oh, it's gone.",
+          "You owe me a moth. Three prizes will do."
+        ],
+        "challenge_fr": [
+          "Ne bouge pas ! Il y a une phalène sur ton épaule. Une rare. Oh, elle est partie.",
+          "Tu me dois une phalène. Trois Récompenses feront l'affaire."
+        ],
+        "win": [
+          "Flown off. Like the moth."
+        ],
+        "win_fr": [
+          "Envolée. Comme la phalène."
+        ],
+        "lose": [
+          "Netted! Come back when you're a little faster on the wing."
+        ],
+        "lose_fr": [
+          "Dans le filet ! Reviens quand tu auras l'aile un peu plus rapide."
+        ],
+        "after": [
+          "Ruben counts them, I catch them. We argue about which of us loves moths more. It's me."
+        ],
+        "after_fr": [
+          "Ruben les compte, moi je les attrape. On se dispute pour savoir qui aime le plus les phalènes. C'est moi."
+        ]
+      },
+      "outfit": "#5a4a8a",
+      "hair": "#c8a070"
+    },
+    {
+      "id": "t_noor",
+      "name": "Noor",
+      "model": "npc_scholar",
+      "x": 6,
+      "z": 14,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "Sit. Tell me what you dreamed last night. No? Then let the cards dream for you.",
+          "Three prizes. I read the deck before I read the hand."
+        ],
+        "challenge_fr": [
+          "Assieds-toi. Raconte-moi ton rêve de la nuit dernière. Non ? Alors laisse les cartes rêver pour toi.",
+          "Trois Récompenses. Je lis le deck avant de lire la main."
+        ],
+        "win": [
+          "I dreamed this. I just didn't dream who won."
+        ],
+        "win_fr": [
+          "J'ai rêvé ça. Je n'avais simplement pas rêvé qui gagnait."
+        ],
+        "lose": [
+          "Your deck dreams of water and wakes up dry. Rest, and try again."
+        ],
+        "lose_fr": [
+          "Ton deck rêve d'eau et se réveille au sec. Repose-toi, et réessaie."
+        ],
+        "after": [
+          "Lumen says the well dreams too. Of a seventh colour. I believe her on even nights."
+        ],
+        "after_fr": [
+          "Lumen dit que le puits rêve aussi. D'une septième couleur. Je la crois les nuits paires."
+        ]
+      },
+      "outfit": "#3a6a8a",
+      "hair": "#1f1a2a"
+    }
+  ],
+  "ground": {
+    "base": "dusk_grass",
+    "path": "stone",
+    "margin": 9,
+    "tufts": 700
+  },
+  "ring": [
+    "bush_dark",
+    "willow",
+    "bush_dark",
+    "bush_dark"
+  ],
+  "fence": "hedge",
+  "fence_tint": "#a3b8cc",
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#ffe9f2",
+      "intensity": 2.0,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#efe3ff",
+      "ground": "#3d4a6b",
+      "intensity": 1.6
+    },
+    "background": "#b9b2dc",
+    "fog": {
+      "near": 12,
+      "far": 30
+    }
+  },
+  "light_night": {
+    "hemisphere": {
+      "sky": "#8a8fd8",
+      "ground": "#2c3358",
+      "intensity": 1.5
+    },
+    "background": "#262a4a",
+    "fog": {
+      "near": 14,
+      "far": 34
+    }
+  }
+}

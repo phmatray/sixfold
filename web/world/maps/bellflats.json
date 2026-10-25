@@ -1,0 +1,2743 @@
+{
+  "title": "The Bellflats",
+  "title_fr": "Les Grèves de la Cloche",
+  "region": "tide",
+  "music": "tide",
+  "width": 36,
+  "height": 28,
+  "tiles": [
+    "ssssss==ssssssssssssssssssssssssssss",
+    "ssssss==ssssssssssssssssssssssssssss",
+    "ssssss==ssssssssssssssssssssssssssss",
+    "3322ss==sssssssss=====ssssssssssssss",
+    "3322ss==s=========...=======ssssssss",
+    "33222ss===.................===ssssss",
+    "33222s==.....................==sssss",
+    "33222==.....~.................=sssss",
+    "33211=.......~~.sssssss.......=sssss",
+    "33211=.........sssssssss......==~~~~",
+    "33221=..~~.....sssssssss......==~~~~",
+    "33..1=...~~....sssssssss......=~~~~~",
+    "32====.....~~..sssssssss......=~~~~~",
+    "3221==.......~..sssssss.~.....===~~~",
+    "2221==.............=....~~.....==~~~",
+    "22211==............=.....~~....=~~~~",
+    "22211===...........=.....~~...==~~~~",
+    "11111~==...........=....~..~..=~~~~~",
+    "111~~~~=...........=....~..~.==~~~~~",
+    "11~~~~~==..........=...~....~=~~~~~~",
+    "~~~~~~~~==.........=...~...===~~~~~~",
+    "~~~~~~~~~===================rr~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~rr~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~rr~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~rr~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~rr~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~rr~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~rr~~~~~~"
+  ],
+  "props": [
+    {
+      "asset": "bell_tower",
+      "x": 18,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "seal_stone",
+      "x": 22,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "waymark",
+      "x": 16,
+      "z": 11,
+      "rot": 0,
+      "glow": "#2f7fd0"
+    },
+    {
+      "asset": "cave_mouth",
+      "x": 2,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 8,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 14,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 15,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 22,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 25,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 15,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 21,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 14,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 16,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 25,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 23,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 23,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 16,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 11,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 25,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "tidepool",
+      "x": 10,
+      "z": 14,
+      "rot": 0,
+      "if": "time:day"
+    },
+    {
+      "asset": "tidepool",
+      "x": 11,
+      "z": 14,
+      "rot": 0,
+      "if": "time:day"
+    },
+    {
+      "asset": "tidepool",
+      "x": 27,
+      "z": 11,
+      "rot": 0,
+      "if": "time:day"
+    },
+    {
+      "asset": "tidepool",
+      "x": 28,
+      "z": 11,
+      "rot": 0,
+      "if": "time:day"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 12,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 10,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 29,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 27,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 14,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 24,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 8,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 13,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 21,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 30,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 7,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 26,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 16,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 9,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "tidepool",
+      "x": 6,
+      "z": 9,
+      "rot": 0,
+      "if": "time:day"
+    },
+    {
+      "asset": "tidepool",
+      "x": 11,
+      "z": 8,
+      "rot": 0,
+      "if": "time:day"
+    },
+    {
+      "asset": "tidepool",
+      "x": 14,
+      "z": 16,
+      "rot": 0,
+      "if": "time:day"
+    },
+    {
+      "asset": "tidepool",
+      "x": 22,
+      "z": 16,
+      "rot": 0,
+      "if": "time:day"
+    },
+    {
+      "asset": "tidepool",
+      "x": 27,
+      "z": 14,
+      "rot": 0,
+      "if": "time:day"
+    },
+    {
+      "asset": "tidepool",
+      "x": 17,
+      "z": 5,
+      "rot": 0,
+      "if": "time:day"
+    },
+    {
+      "asset": "crab_pots",
+      "x": 13,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 15,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 27,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 20,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 12,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 8,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 6,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 12,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 19,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 24,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 7,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 3,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 10,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 16,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 21,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 26,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 33,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 34,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 29,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 5,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 31,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 27,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 33,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 27,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 5,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "reeds",
+      "x": 1,
+      "z": 9,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "reeds",
+      "x": 2,
+      "z": 6,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 14,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "reeds",
+      "x": 1,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "reeds",
+      "x": 3,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "reeds",
+      "x": 3,
+      "z": 9,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "reeds",
+      "x": 4,
+      "z": 7,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_sea",
+      "x": 2,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 1,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 35,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 34,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 31,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 24,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 8,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 14,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 5,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 33,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 33,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 21,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 10,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 24,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 32,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 26,
+      "z": 20,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 6,
+    "z": 2,
+    "facing": "s"
+  },
+  "interactions": [
+    {
+      "kind": "waymark",
+      "id": "bellflats",
+      "x": 16,
+      "z": 11
+    },
+    {
+      "x": 8,
+      "z": 3,
+      "kind": "sign",
+      "text": "THE BELLFLATS. Low water 8 to 6: the flats are yours. High water 6 to 8: keep to the boardwalk. The causeway to Lanternmere goes under with the flats.",
+      "text_fr": "LES GRÈVES DE LA CLOCHE. Basse mer de 8 h à 18 h : les grèves sont à vous. Pleine mer de 18 h à 8 h : restez sur le ponton. La chaussée de Lac-aux-Lanternes est submergée avec les grèves."
+    },
+    {
+      "x": 22,
+      "z": 11,
+      "kind": "sign",
+      "id": "seal_bellflats",
+      "name": "The seal stone",
+      "name_fr": "La pierre de sceau",
+      "dialogue": [
+        {
+          "lines": [
+            "A hexagonal stone, beaded with salt. Each of its six faces is a colour: the water face, toward the open sea, is cold to the touch.",
+            "The top is smooth, pale and blank, as if something was meant to be cut there and never was."
+          ],
+          "lines_fr": [
+            "Une pierre hexagonale, perlée de sel. Chacune de ses six faces a une couleur : celle de l'eau, tournée vers le large, est froide sous la main.",
+            "Le dessus est lisse, pâle et vide, comme si quelque chose devait y être gravé et ne l'avait jamais été."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "t_bell",
+      "x": 19,
+      "z": 10,
+      "give": "give:curio_bell_clapper",
+      "text": "At low water the tower's door is out of the sea. Inside, on the wet stair, the old bell's clapper lies where it fell. It's green, and heavy, and it rings when you knock it.",
+      "text_fr": "À marée basse, la porte de la tour sort de l'eau. Dedans, sur l'escalier mouillé, le battant de la vieille cloche est resté là où il est tombé. Il est vert, lourd, et il sonne quand on le cogne.",
+      "if": "time:day"
+    },
+    {
+      "kind": "find",
+      "id": "t_lamp",
+      "x": 20,
+      "z": 10,
+      "give": "coins:100",
+      "text": "The tower's lamp is lit tonight, though no one keeps it. Under it, in a tin box tied with tarred string: Facets, and a note: \"for whoever comes to look\".",
+      "text_fr": "La lampe de la tour est allumée ce soir, alors que personne ne l'entretient. Dessous, dans une boîte en fer nouée de ficelle goudronnée : des Facettes, et un mot : « pour qui viendra voir ».",
+      "if": "time:night"
+    },
+    {
+      "kind": "find",
+      "id": "t_pool_1",
+      "x": 12,
+      "z": 14,
+      "give": "card:frosteel",
+      "text": "You wade into the pool to the knee. On the bottom, among the anemones, a card in a glass jar, sealed with wax.",
+      "text_fr": "Vous entrez dans la flaque jusqu'au genou. Au fond, parmi les anémones, une carte dans un bocal scellé à la cire.",
+      "if": "item:wading_boots"
+    },
+    {
+      "kind": "find",
+      "id": "t_pool_2",
+      "x": 29,
+      "z": 11,
+      "give": "coins:80",
+      "text": "Boots on, you wade out to the far side of the pool. Wedged under a ledge of weed: a pouch of Facets, crusted with tiny shells.",
+      "text_fr": "Bottes aux pieds, vous traversez la flaque jusqu'au bord opposé. Coincée sous un rebord d'algues : une bourse de Facettes, couverte de minuscules coquillages.",
+      "if": "item:wading_boots"
+    },
+    {
+      "x": 10,
+      "z": 15,
+      "kind": "sign",
+      "id": "pool_hint_1",
+      "name": "A deep tide pool",
+      "name_fr": "Une flaque profonde",
+      "if": "time:day",
+      "dialogue": [
+        {
+          "if": "!item:wading_boots",
+          "lines": [
+            "The pool is deeper than it looks, and the bottom glints. Your arm doesn't reach. In wading boots you could walk right in."
+          ],
+          "lines_fr": [
+            "La flaque est plus profonde qu'elle n'en a l'air, et quelque chose brille au fond. Votre bras n'y arrive pas. Avec des bottes de gué, vous pourriez y entrer."
+          ]
+        },
+        {
+          "lines": [
+            "Anemones, a crab with opinions, and your reflection."
+          ],
+          "lines_fr": [
+            "Des anémones, un crabe qui a des opinions, et votre reflet."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 27,
+      "z": 12,
+      "kind": "sign",
+      "id": "pool_hint_2",
+      "name": "A deep tide pool",
+      "name_fr": "Une flaque profonde",
+      "if": "time:day",
+      "dialogue": [
+        {
+          "if": "!item:wading_boots",
+          "lines": [
+            "The pool is deeper than it looks, and the bottom glints. Your arm doesn't reach. In wading boots you could walk right in."
+          ],
+          "lines_fr": [
+            "La flaque est plus profonde qu'elle n'en a l'air, et quelque chose brille au fond. Votre bras n'y arrive pas. Avec des bottes de gué, vous pourriez y entrer."
+          ]
+        },
+        {
+          "lines": [
+            "Anemones, a crab with opinions, and your reflection."
+          ],
+          "lines_fr": [
+            "Des anémones, un crabe qui a des opinions, et votre reflet."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 24,
+      "z": 22,
+      "kind": "sign",
+      "id": "punt",
+      "name": "A flat-bottomed punt",
+      "name_fr": "Une barque à fond plat",
+      "dialogue": [
+        {
+          "lines": [
+            "A punt tied to the boardwalk, a pole laid along it. A painted board: \"Back to Gullhaven, the short way. Leave it at Brann's slip.\"",
+            "You cast off and pole round the outside of the flats, past the breakwater, and nose up on the sand by Old Brann's cottage."
+          ],
+          "lines_fr": [
+            "Une barque attachée au ponton, une perche posée dedans. Un panneau peint : « Retour à Havre-aux-Mouettes, par le plus court. Laissez-la à la cale de Brann. »",
+            "Vous larguez l'amarre et poussez à la perche autour des grèves, le long du brise-lames, jusqu'à échouer sur le sable près de la maison du vieux Brann."
+          ],
+          "do": [
+            "warp:gullhaven:7:12:w"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 32,
+      "z": 10,
+      "kind": "sign",
+      "id": "perch",
+      "name": "A fishing perch",
+      "name_fr": "Un poste de pêche",
+      "dialogue": [
+        {
+          "lines": [
+            "Crab pots on a line, and tide marks cut into the rail, year after year. The highest is an arm's length above the boardwalk: \"the great flood\". Nobody remembers which year."
+          ],
+          "lines_fr": [
+            "Des casiers au bout d'une corde, et des marques de marée gravées dans la rambarde, année après année. La plus haute est à une longueur de bras au-dessus du ponton : « la grande crue ». Personne ne se souvient de l'année."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 26,
+      "z": 20,
+      "kind": "sign",
+      "id": "causeway_sign",
+      "name": "A tide post",
+      "name_fr": "Un poteau de marée",
+      "dialogue": [
+        {
+          "lines": [
+            "A tall post painted in bands, sunk at the foot of the causeway. The sea climbs it every evening up to the red band.",
+            "\"Causeway to Lanternmere. Low water only, 8 to 6. Do not race the tide. You will lose.\""
+          ],
+          "lines_fr": [
+            "Un grand poteau peint par bandes, planté au pied de la chaussée. Chaque soir, la mer y monte jusqu'à la bande rouge.",
+            "« Chaussée de Lac-aux-Lanternes. Basse mer uniquement, de 8 h à 18 h. Ne faites pas la course avec la marée. Vous perdriez. »"
+          ]
+        }
+      ]
+    }
+  ],
+  "warps": [
+    {
+      "x": 3,
+      "z": 11,
+      "to": "smugglers_nook",
+      "label": "Go into the cave",
+      "label_fr": "Entrer dans la grotte",
+      "spawn": {
+        "x": 4,
+        "z": 5,
+        "facing": "n"
+      },
+      "if": "item:kiln_lantern",
+      "locked": "A low cave in the cliff, black as ink. The air coming out smells of tar and old rope. Without a light you'd crack your head.",
+      "locked_fr": "Une grotte basse dans la falaise, noire comme l'encre. L'air qui en sort sent le goudron et la vieille corde. Sans lumière, vous vous fendriez le crâne."
+    }
+  ],
+  "exits": [
+    {
+      "side": "n",
+      "span": [
+        6,
+        7
+      ],
+      "to": "gullhaven"
+    },
+    {
+      "side": "s",
+      "span": [
+        28,
+        29
+      ],
+      "to": "lanternmere"
+    }
+  ],
+  "gates": [
+    {
+      "id": "flats",
+      "tiles": [
+        [
+          18,
+          4
+        ],
+        [
+          19,
+          4
+        ],
+        [
+          20,
+          4
+        ],
+        [
+          10,
+          5
+        ],
+        [
+          11,
+          5
+        ],
+        [
+          12,
+          5
+        ],
+        [
+          13,
+          5
+        ],
+        [
+          15,
+          5
+        ],
+        [
+          16,
+          5
+        ],
+        [
+          17,
+          5
+        ],
+        [
+          18,
+          5
+        ],
+        [
+          19,
+          5
+        ],
+        [
+          20,
+          5
+        ],
+        [
+          21,
+          5
+        ],
+        [
+          22,
+          5
+        ],
+        [
+          23,
+          5
+        ],
+        [
+          24,
+          5
+        ],
+        [
+          25,
+          5
+        ],
+        [
+          26,
+          5
+        ],
+        [
+          8,
+          6
+        ],
+        [
+          9,
+          6
+        ],
+        [
+          10,
+          6
+        ],
+        [
+          11,
+          6
+        ],
+        [
+          12,
+          6
+        ],
+        [
+          13,
+          6
+        ],
+        [
+          14,
+          6
+        ],
+        [
+          15,
+          6
+        ],
+        [
+          16,
+          6
+        ],
+        [
+          17,
+          6
+        ],
+        [
+          18,
+          6
+        ],
+        [
+          19,
+          6
+        ],
+        [
+          20,
+          6
+        ],
+        [
+          21,
+          6
+        ],
+        [
+          22,
+          6
+        ],
+        [
+          23,
+          6
+        ],
+        [
+          25,
+          6
+        ],
+        [
+          26,
+          6
+        ],
+        [
+          27,
+          6
+        ],
+        [
+          28,
+          6
+        ],
+        [
+          7,
+          7
+        ],
+        [
+          9,
+          7
+        ],
+        [
+          10,
+          7
+        ],
+        [
+          11,
+          7
+        ],
+        [
+          13,
+          7
+        ],
+        [
+          14,
+          7
+        ],
+        [
+          15,
+          7
+        ],
+        [
+          17,
+          7
+        ],
+        [
+          18,
+          7
+        ],
+        [
+          19,
+          7
+        ],
+        [
+          20,
+          7
+        ],
+        [
+          21,
+          7
+        ],
+        [
+          23,
+          7
+        ],
+        [
+          24,
+          7
+        ],
+        [
+          25,
+          7
+        ],
+        [
+          26,
+          7
+        ],
+        [
+          27,
+          7
+        ],
+        [
+          28,
+          7
+        ],
+        [
+          29,
+          7
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          8,
+          8
+        ],
+        [
+          9,
+          8
+        ],
+        [
+          10,
+          8
+        ],
+        [
+          11,
+          8
+        ],
+        [
+          12,
+          8
+        ],
+        [
+          23,
+          8
+        ],
+        [
+          24,
+          8
+        ],
+        [
+          27,
+          8
+        ],
+        [
+          28,
+          8
+        ],
+        [
+          29,
+          8
+        ],
+        [
+          6,
+          9
+        ],
+        [
+          7,
+          9
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          9,
+          9
+        ],
+        [
+          10,
+          9
+        ],
+        [
+          11,
+          9
+        ],
+        [
+          12,
+          9
+        ],
+        [
+          13,
+          9
+        ],
+        [
+          14,
+          9
+        ],
+        [
+          24,
+          9
+        ],
+        [
+          25,
+          9
+        ],
+        [
+          27,
+          9
+        ],
+        [
+          28,
+          9
+        ],
+        [
+          29,
+          9
+        ],
+        [
+          6,
+          10
+        ],
+        [
+          7,
+          10
+        ],
+        [
+          10,
+          10
+        ],
+        [
+          11,
+          10
+        ],
+        [
+          12,
+          10
+        ],
+        [
+          13,
+          10
+        ],
+        [
+          24,
+          10
+        ],
+        [
+          26,
+          10
+        ],
+        [
+          27,
+          10
+        ],
+        [
+          28,
+          10
+        ],
+        [
+          29,
+          10
+        ],
+        [
+          7,
+          11
+        ],
+        [
+          8,
+          11
+        ],
+        [
+          11,
+          11
+        ],
+        [
+          12,
+          11
+        ],
+        [
+          13,
+          11
+        ],
+        [
+          14,
+          11
+        ],
+        [
+          24,
+          11
+        ],
+        [
+          25,
+          11
+        ],
+        [
+          26,
+          11
+        ],
+        [
+          27,
+          11
+        ],
+        [
+          28,
+          11
+        ],
+        [
+          6,
+          12
+        ],
+        [
+          8,
+          12
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          10,
+          12
+        ],
+        [
+          13,
+          12
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          26,
+          12
+        ],
+        [
+          28,
+          12
+        ],
+        [
+          29,
+          12
+        ],
+        [
+          6,
+          13
+        ],
+        [
+          7,
+          13
+        ],
+        [
+          8,
+          13
+        ],
+        [
+          9,
+          13
+        ],
+        [
+          10,
+          13
+        ],
+        [
+          11,
+          13
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          13
+        ],
+        [
+          15,
+          13
+        ],
+        [
+          23,
+          13
+        ],
+        [
+          25,
+          13
+        ],
+        [
+          26,
+          13
+        ],
+        [
+          27,
+          13
+        ],
+        [
+          28,
+          13
+        ],
+        [
+          29,
+          13
+        ],
+        [
+          6,
+          14
+        ],
+        [
+          7,
+          14
+        ],
+        [
+          8,
+          14
+        ],
+        [
+          9,
+          14
+        ],
+        [
+          10,
+          14
+        ],
+        [
+          11,
+          14
+        ],
+        [
+          13,
+          14
+        ],
+        [
+          14,
+          14
+        ],
+        [
+          16,
+          14
+        ],
+        [
+          17,
+          14
+        ],
+        [
+          18,
+          14
+        ],
+        [
+          20,
+          14
+        ],
+        [
+          21,
+          14
+        ],
+        [
+          22,
+          14
+        ],
+        [
+          26,
+          14
+        ],
+        [
+          27,
+          14
+        ],
+        [
+          28,
+          14
+        ],
+        [
+          29,
+          14
+        ],
+        [
+          8,
+          15
+        ],
+        [
+          9,
+          15
+        ],
+        [
+          11,
+          15
+        ],
+        [
+          12,
+          15
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          15
+        ],
+        [
+          17,
+          15
+        ],
+        [
+          18,
+          15
+        ],
+        [
+          20,
+          15
+        ],
+        [
+          22,
+          15
+        ],
+        [
+          23,
+          15
+        ],
+        [
+          24,
+          15
+        ],
+        [
+          27,
+          15
+        ],
+        [
+          28,
+          15
+        ],
+        [
+          29,
+          15
+        ],
+        [
+          30,
+          15
+        ],
+        [
+          8,
+          16
+        ],
+        [
+          9,
+          16
+        ],
+        [
+          10,
+          16
+        ],
+        [
+          11,
+          16
+        ],
+        [
+          12,
+          16
+        ],
+        [
+          13,
+          16
+        ],
+        [
+          14,
+          16
+        ],
+        [
+          15,
+          16
+        ],
+        [
+          16,
+          16
+        ],
+        [
+          17,
+          16
+        ],
+        [
+          18,
+          16
+        ],
+        [
+          20,
+          16
+        ],
+        [
+          21,
+          16
+        ],
+        [
+          22,
+          16
+        ],
+        [
+          23,
+          16
+        ],
+        [
+          24,
+          16
+        ],
+        [
+          27,
+          16
+        ],
+        [
+          28,
+          16
+        ],
+        [
+          29,
+          16
+        ],
+        [
+          9,
+          17
+        ],
+        [
+          10,
+          17
+        ],
+        [
+          13,
+          17
+        ],
+        [
+          14,
+          17
+        ],
+        [
+          15,
+          17
+        ],
+        [
+          17,
+          17
+        ],
+        [
+          18,
+          17
+        ],
+        [
+          20,
+          17
+        ],
+        [
+          21,
+          17
+        ],
+        [
+          22,
+          17
+        ],
+        [
+          23,
+          17
+        ],
+        [
+          25,
+          17
+        ],
+        [
+          26,
+          17
+        ],
+        [
+          28,
+          17
+        ],
+        [
+          29,
+          17
+        ],
+        [
+          8,
+          18
+        ],
+        [
+          9,
+          18
+        ],
+        [
+          10,
+          18
+        ],
+        [
+          11,
+          18
+        ],
+        [
+          12,
+          18
+        ],
+        [
+          14,
+          18
+        ],
+        [
+          15,
+          18
+        ],
+        [
+          16,
+          18
+        ],
+        [
+          17,
+          18
+        ],
+        [
+          18,
+          18
+        ],
+        [
+          20,
+          18
+        ],
+        [
+          22,
+          18
+        ],
+        [
+          23,
+          18
+        ],
+        [
+          25,
+          18
+        ],
+        [
+          26,
+          18
+        ],
+        [
+          28,
+          18
+        ],
+        [
+          10,
+          19
+        ],
+        [
+          11,
+          19
+        ],
+        [
+          13,
+          19
+        ],
+        [
+          14,
+          19
+        ],
+        [
+          15,
+          19
+        ],
+        [
+          16,
+          19
+        ],
+        [
+          17,
+          19
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          19
+        ],
+        [
+          21,
+          19
+        ],
+        [
+          22,
+          19
+        ],
+        [
+          24,
+          19
+        ],
+        [
+          25,
+          19
+        ],
+        [
+          26,
+          19
+        ],
+        [
+          10,
+          20
+        ],
+        [
+          11,
+          20
+        ],
+        [
+          12,
+          20
+        ],
+        [
+          13,
+          20
+        ],
+        [
+          14,
+          20
+        ],
+        [
+          15,
+          20
+        ],
+        [
+          16,
+          20
+        ],
+        [
+          17,
+          20
+        ],
+        [
+          18,
+          20
+        ],
+        [
+          21,
+          20
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          24,
+          20
+        ],
+        [
+          25,
+          20
+        ],
+        [
+          26,
+          20
+        ]
+      ],
+      "if": "time:day",
+      "tide": true,
+      "flood": [
+        [
+          17,
+          3
+        ],
+        [
+          18,
+          3
+        ],
+        [
+          19,
+          3
+        ],
+        [
+          20,
+          3
+        ],
+        [
+          21,
+          3
+        ],
+        [
+          9,
+          4
+        ],
+        [
+          10,
+          4
+        ],
+        [
+          11,
+          4
+        ],
+        [
+          12,
+          4
+        ],
+        [
+          13,
+          4
+        ],
+        [
+          14,
+          4
+        ],
+        [
+          15,
+          4
+        ],
+        [
+          16,
+          4
+        ],
+        [
+          17,
+          4
+        ],
+        [
+          21,
+          4
+        ],
+        [
+          22,
+          4
+        ],
+        [
+          23,
+          4
+        ],
+        [
+          24,
+          4
+        ],
+        [
+          25,
+          4
+        ],
+        [
+          26,
+          4
+        ],
+        [
+          27,
+          4
+        ],
+        [
+          7,
+          5
+        ],
+        [
+          8,
+          5
+        ],
+        [
+          9,
+          5
+        ],
+        [
+          14,
+          5
+        ],
+        [
+          27,
+          5
+        ],
+        [
+          28,
+          5
+        ],
+        [
+          29,
+          5
+        ],
+        [
+          6,
+          6
+        ],
+        [
+          7,
+          6
+        ],
+        [
+          24,
+          6
+        ],
+        [
+          29,
+          6
+        ],
+        [
+          30,
+          6
+        ],
+        [
+          5,
+          7
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          7
+        ],
+        [
+          16,
+          7
+        ],
+        [
+          22,
+          7
+        ],
+        [
+          30,
+          7
+        ],
+        [
+          5,
+          8
+        ],
+        [
+          15,
+          8
+        ],
+        [
+          25,
+          8
+        ],
+        [
+          26,
+          8
+        ],
+        [
+          30,
+          8
+        ],
+        [
+          5,
+          9
+        ],
+        [
+          26,
+          9
+        ],
+        [
+          30,
+          9
+        ],
+        [
+          5,
+          10
+        ],
+        [
+          14,
+          10
+        ],
+        [
+          25,
+          10
+        ],
+        [
+          30,
+          10
+        ],
+        [
+          5,
+          11
+        ],
+        [
+          6,
+          11
+        ],
+        [
+          29,
+          11
+        ],
+        [
+          30,
+          11
+        ],
+        [
+          5,
+          12
+        ],
+        [
+          7,
+          12
+        ],
+        [
+          14,
+          12
+        ],
+        [
+          25,
+          12
+        ],
+        [
+          27,
+          12
+        ],
+        [
+          30,
+          12
+        ],
+        [
+          4,
+          13
+        ],
+        [
+          5,
+          13
+        ],
+        [
+          30,
+          13
+        ],
+        [
+          31,
+          13
+        ],
+        [
+          32,
+          13
+        ],
+        [
+          4,
+          14
+        ],
+        [
+          5,
+          14
+        ],
+        [
+          12,
+          14
+        ],
+        [
+          15,
+          14
+        ],
+        [
+          19,
+          14
+        ],
+        [
+          23,
+          14
+        ],
+        [
+          30,
+          14
+        ],
+        [
+          31,
+          14
+        ],
+        [
+          32,
+          14
+        ],
+        [
+          5,
+          15
+        ],
+        [
+          6,
+          15
+        ],
+        [
+          7,
+          15
+        ],
+        [
+          10,
+          15
+        ],
+        [
+          13,
+          15
+        ],
+        [
+          15,
+          15
+        ],
+        [
+          19,
+          15
+        ],
+        [
+          21,
+          15
+        ],
+        [
+          31,
+          15
+        ],
+        [
+          5,
+          16
+        ],
+        [
+          6,
+          16
+        ],
+        [
+          7,
+          16
+        ],
+        [
+          19,
+          16
+        ],
+        [
+          30,
+          16
+        ],
+        [
+          31,
+          16
+        ],
+        [
+          6,
+          17
+        ],
+        [
+          7,
+          17
+        ],
+        [
+          8,
+          17
+        ],
+        [
+          11,
+          17
+        ],
+        [
+          12,
+          17
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          19,
+          17
+        ],
+        [
+          30,
+          17
+        ],
+        [
+          7,
+          18
+        ],
+        [
+          13,
+          18
+        ],
+        [
+          19,
+          18
+        ],
+        [
+          21,
+          18
+        ],
+        [
+          29,
+          18
+        ],
+        [
+          30,
+          18
+        ],
+        [
+          7,
+          19
+        ],
+        [
+          8,
+          19
+        ],
+        [
+          9,
+          19
+        ],
+        [
+          12,
+          19
+        ],
+        [
+          19,
+          19
+        ],
+        [
+          27,
+          19
+        ],
+        [
+          29,
+          19
+        ],
+        [
+          8,
+          20
+        ],
+        [
+          9,
+          20
+        ],
+        [
+          19,
+          20
+        ],
+        [
+          20,
+          20
+        ],
+        [
+          27,
+          20
+        ],
+        [
+          28,
+          20
+        ],
+        [
+          29,
+          20
+        ],
+        [
+          9,
+          21
+        ],
+        [
+          10,
+          21
+        ],
+        [
+          11,
+          21
+        ],
+        [
+          12,
+          21
+        ],
+        [
+          13,
+          21
+        ],
+        [
+          14,
+          21
+        ],
+        [
+          15,
+          21
+        ],
+        [
+          16,
+          21
+        ],
+        [
+          17,
+          21
+        ],
+        [
+          18,
+          21
+        ],
+        [
+          19,
+          21
+        ],
+        [
+          20,
+          21
+        ],
+        [
+          21,
+          21
+        ],
+        [
+          22,
+          21
+        ],
+        [
+          23,
+          21
+        ],
+        [
+          24,
+          21
+        ],
+        [
+          25,
+          21
+        ],
+        [
+          26,
+          21
+        ],
+        [
+          27,
+          21
+        ],
+        [
+          31,
+          9
+        ],
+        [
+          31,
+          10
+        ],
+        [
+          6,
+          15
+        ],
+        [
+          6,
+          16
+        ],
+        [
+          7,
+          16
+        ]
+      ],
+      "text": "The tide's in. The flats are under a metre of cold sea. The boardwalk goes all the way round.",
+      "text_fr": "La mer est haute. Les grèves sont sous un mètre d'eau froide. Le ponton fait tout le tour."
+    },
+    {
+      "id": "causeway",
+      "tiles": [
+        [
+          28,
+          21
+        ],
+        [
+          29,
+          21
+        ],
+        [
+          28,
+          22
+        ],
+        [
+          29,
+          22
+        ],
+        [
+          28,
+          23
+        ],
+        [
+          29,
+          23
+        ],
+        [
+          28,
+          24
+        ],
+        [
+          29,
+          24
+        ],
+        [
+          28,
+          25
+        ],
+        [
+          29,
+          25
+        ],
+        [
+          28,
+          26
+        ],
+        [
+          29,
+          26
+        ],
+        [
+          28,
+          27
+        ],
+        [
+          29,
+          27
+        ]
+      ],
+      "if": "time:day",
+      "tide": true,
+      "text": "The causeway to Lanternmere is under the sea. It comes back at low water, at eight in the morning.",
+      "text_fr": "La chaussée de Lac-aux-Lanternes est sous la mer. Elle réapparaît à marée basse, à huit heures du matin."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "t_finch",
+      "name": "Finch",
+      "model": "npc_sailor",
+      "x": 7,
+      "z": 16,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 2,
+        "challenge": [
+          "Mind the nets! Oh, you're not a gull. Good.",
+          "I mend, I watch, I duel. Two prizes, and my knots never slip."
+        ],
+        "challenge_fr": [
+          "Attention aux filets ! Ah, tu n'es pas une mouette. Tant mieux.",
+          "Je ramende, je surveille, je fais des duels. Deux Récompenses, et mes nœuds ne glissent jamais."
+        ],
+        "win": [
+          "Slipped a knot. That never happens."
+        ],
+        "win_fr": [
+          "Un nœud a glissé. Ça n'arrive jamais."
+        ],
+        "lose": [
+          "Tight as a bowline. Come back when you've mended your deck."
+        ],
+        "lose_fr": [
+          "Serré comme un nœud de chaise. Reviens quand tu auras ramendé ton deck."
+        ],
+        "after": [
+          "A net's just holes tied together. So's a good deck, if you think about it. I try not to."
+        ],
+        "after_fr": [
+          "Un filet, c'est juste des trous attachés ensemble. Un bon deck aussi, quand on y pense. J'essaie de ne pas y penser."
+        ]
+      },
+      "outfit": "#3d6f8f",
+      "hair": "#8a6a4a"
+    },
+    {
+      "id": "t_liesl",
+      "name": "Liesl",
+      "model": "npc_gardener",
+      "x": 13,
+      "z": 14,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "Shh! The clams can hear you coming. Now they've gone deep. Thanks.",
+          "Make it up to me. Two prizes, quick, before the tide turns."
+        ],
+        "challenge_fr": [
+          "Chut ! Les palourdes t'entendent arriver. Voilà, elles se sont enfoncées. Merci.",
+          "Rattrape-toi. Deux Récompenses, vite, avant que la marée tourne."
+        ],
+        "win": [
+          "Dug myself a hole there. Well played."
+        ],
+        "win_fr": [
+          "Je me suis creusé un trou, là. Bien joué."
+        ],
+        "lose": [
+          "Ha! Back to the boardwalk with you, the sea's coming."
+        ],
+        "lose_fr": [
+          "Ha ! Retourne sur le ponton, la mer arrive."
+        ],
+        "after": [
+          "Low water, high water. Six hours each, near enough. I've never been late. Well. Once. I swam."
+        ],
+        "after_fr": [
+          "Basse mer, pleine mer. Six heures chacune, à peu près. Je n'ai jamais été en retard. Enfin. Une fois. J'ai nagé."
+        ]
+      },
+      "outfit": "#8fa858",
+      "hair": "#c89a5a",
+      "if": "time:day"
+    },
+    {
+      "id": "t_harrow",
+      "name": "Harrow",
+      "model": "npc_elder",
+      "x": 21,
+      "z": 9,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "Nobody's rung this bell in sixty years. The sea took the floor out from under it, and then the clapper.",
+          "I still come up every day. Habit. Three prizes, if you'd like to hear me ring something."
+        ],
+        "challenge_fr": [
+          "Personne n'a sonné cette cloche depuis soixante ans. La mer a emporté le plancher sous elle, puis le battant.",
+          "Je monte quand même tous les jours. L'habitude. Trois Récompenses, si tu veux m'entendre sonner quelque chose."
+        ],
+        "win": [
+          "Dong. That was me, losing. Good duel."
+        ],
+        "win_fr": [
+          "Dong. C'était moi, en train de perdre. Beau duel."
+        ],
+        "lose": [
+          "Ding, dong. Come back when the tide turns for you."
+        ],
+        "lose_fr": [
+          "Ding, dong. Reviens quand la marée tournera pour toi."
+        ],
+        "after": [
+          "The flats are under at high water, but the tower's always dry at the top. Like me."
+        ],
+        "after_fr": [
+          "Les grèves sont sous l'eau à marée haute, mais le haut de la tour reste toujours sec. Comme moi."
+        ]
+      },
+      "outfit": "#5a4a6a",
+      "hair": "#d8d0c0",
+      "dialogue": [
+        {
+          "if": "item:curio_bell_clapper & !flag:harrow_clapper",
+          "lines": [
+            "You found the clapper? Then you've been inside at low water. Brave.",
+            "Keep it. A bell with no tongue is still a bell. It just listens instead."
+          ],
+          "lines_fr": [
+            "Tu as trouvé le battant ? Alors tu es entré à marée basse. Courageux.",
+            "Garde-le. Une cloche sans langue reste une cloche. Elle écoute, voilà tout."
+          ],
+          "do": [
+            "flag:harrow_clapper"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_mirela",
+      "name": "Mirela",
+      "model": "npc_wanderer",
+      "x": 17,
+      "z": 13,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "The sea doesn't use tricks. It just comes, and comes, and comes.",
+          "My house rule: Hexons and energy only, no Trainers. Three prizes. Just you and the tide."
+        ],
+        "challenge_fr": [
+          "La mer n'utilise pas de ruses. Elle vient, et vient, et vient encore.",
+          "Ma règle maison : des Hexons et de l'énergie, aucun Dresseur. Trois Récompenses. Toi et la marée, c'est tout."
+        ],
+        "lose": [
+          "You leaned on your tricks. The tide doesn't care for them."
+        ],
+        "lose_fr": [
+          "Tu t'es reposé sur tes ruses. La marée s'en moque."
+        ],
+        "after": [
+          "Plain decks, plain water. There's no shame in either."
+        ],
+        "after_fr": [
+          "Des decks simples, de l'eau simple. Il n'y a pas de honte à ça."
+        ]
+      },
+      "outfit": "#2f7fd0",
+      "hair": "#1f2a3a",
+      "dialogue": [
+        {
+          "if": "won:t_mirela & !flag:mirela_paid",
+          "lines": [
+            "No tricks, and still you washed over me. That's how the sea does it.",
+            "Take Gulfwyrm. She rides the flood."
+          ],
+          "lines_fr": [
+            "Pas de ruses, et pourtant tu m'as submergée. C'est comme ça que fait la mer.",
+            "Prends Golfeguivre. Elle chevauche le flot."
+          ],
+          "do": [
+            "card:gulfwyrm",
+            "flag:mirela_paid"
+          ]
+        },
+        {
+          "if": "won:t_mirela",
+          "lines": [
+            "Pure as seawater. Well played."
+          ],
+          "lines_fr": [
+            "Pur comme l'eau de mer. Bien joué."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wet_sand",
+    "path": "dirt",
+    "margin": 10,
+    "tufts": 0
+  },
+  "ring": [
+    "reeds",
+    "bush_dark",
+    "reeds"
+  ],
+  "ringSides": "n",
+  "cliff": [
+    "cliff_sea",
+    "cliff_sea_b"
+  ],
+  "gulls": 6,
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#fff4e0",
+      "intensity": 2.7,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#f2fbff",
+      "ground": "#6d8a7a",
+      "intensity": 1.6
+    },
+    "background": "#c3e2e6",
+    "fog": {
+      "near": 18,
+      "far": 40
+    }
+  }
+}

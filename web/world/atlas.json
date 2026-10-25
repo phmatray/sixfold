@@ -19,7 +19,12 @@
     { "id": "kilnmouth", "region": "ember", "x": 5.15, "y": 0.75, "name": "The Kilnmouth", "name_fr": "La Gueule-du-Four" },
     { "id": "downs", "region": "storm", "x": 8.4, "y": 2.2, "name": "Thrumming Downs", "name_fr": "Les Landes Vibrantes" },
     { "id": "stormwatch", "region": "storm", "x": 9.2, "y": 3.6, "name": "Stormwatch", "name_fr": "Guette-Orage" },
-    { "id": "rodspire", "region": "storm", "x": 10.5, "y": 2.5, "name": "The Rodspire", "name_fr": "L'Aiguille-Foudre" }
+    { "id": "rodspire", "region": "storm", "x": 10.5, "y": 2.5, "name": "The Rodspire", "name_fr": "L'Aiguille-Foudre" },
+    { "id": "gullhaven", "region": "tide", "x": 10.3, "y": 5.3, "name": "Gullhaven", "name_fr": "Havre-aux-Mouettes" },
+    { "id": "bellflats", "region": "tide", "x": 9.7, "y": 7.3, "name": "The Bellflats", "name_fr": "Les Grèves de la Cloche" },
+    { "id": "hushlane", "region": "dream", "x": 6.2, "y": 6.5, "name": "Hushwillow Lane", "name_fr": "Allée des Saules-Murmures" },
+    { "id": "lanternmere", "region": "dream", "x": 7.0, "y": 7.4, "name": "Lanternmere", "name_fr": "Lac-aux-Lanternes" },
+    { "id": "moonwell", "region": "dream", "x": 5.9, "y": 8.75, "name": "The Moonwell Garden", "name_fr": "Le Jardin du Puits-de-Lune" }
   ],
   "links": [
     { "a": "overworld", "b": "quarry" },
@@ -30,13 +35,25 @@
     { "a": "cinderwick", "b": "kilnmouth" },
     { "a": "cinderwick", "b": "downs" },
     { "a": "downs", "b": "stormwatch" },
-    { "a": "stormwatch", "b": "rodspire" }
+    { "a": "stormwatch", "b": "rodspire" },
+    { "a": "seaside", "b": "gullhaven" },
+    { "a": "gullhaven", "b": "bellflats" },
+    { "a": "bellflats", "b": "lanternmere" },
+    { "a": "square", "b": "hushlane" },
+    { "a": "hushlane", "b": "lanternmere" },
+    { "a": "lanternmere", "b": "moonwell" },
+    { "a": "gullhaven", "b": "stormwatch", "if": "item:ferry_pass", "icon": "ferry" },
+    { "a": "gullhaven", "b": "lanternmere", "if": "item:ferry_pass", "icon": "ferry" }
   ],
   "waymarks": [
     { "id": "meadow", "map": "overworld", "x": 16, "z": 13, "facing": "n", "name": "Sixfold Meadow", "name_fr": "Pré de Sixfold" },
     { "id": "cinderwick", "map": "cinderwick", "x": 8, "z": 10, "facing": "n", "name": "Cinderwick plaza", "name_fr": "Place de Mèche-Cendre" },
     { "id": "kilnmouth", "map": "kilnmouth", "x": 8, "z": 20, "facing": "w", "name": "The Kilnmouth rim", "name_fr": "Rebord de la Gueule-du-Four" },
     { "id": "stormwatch", "map": "stormwatch", "x": 11, "z": 11, "facing": "n", "name": "Stormwatch square", "name_fr": "Place de Guette-Orage" },
-    { "id": "rodspire", "map": "rodspire", "x": 18, "z": 9, "facing": "n", "name": "The Rodspire's summit", "name_fr": "Sommet de l'Aiguille-Foudre" }
+    { "id": "rodspire", "map": "rodspire", "x": 18, "z": 9, "facing": "n", "name": "The Rodspire's summit", "name_fr": "Sommet de l'Aiguille-Foudre" },
+    { "id": "gullhaven", "map": "gullhaven", "x": 26, "z": 5, "facing": "n", "name": "Gullhaven quay", "name_fr": "Quai de Havre-aux-Mouettes" },
+    { "id": "bellflats", "map": "bellflats", "x": 17, "z": 11, "facing": "w", "name": "The bell tower islet", "name_fr": "L'îlot de la tour" },
+    { "id": "lanternmere", "map": "lanternmere", "x": 18, "z": 4, "facing": "n", "name": "Lanternmere plaza", "name_fr": "Place de Lac-aux-Lanternes" },
+    { "id": "moonwell", "map": "moonwell", "x": 20, "z": 8, "facing": "n", "name": "The Moonwell gate", "name_fr": "Portail du Puits-de-Lune" }
   ]
 }

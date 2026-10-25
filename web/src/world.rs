@@ -200,6 +200,22 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
                 "Une bouteille bouchée où rampe un fil d'éclair. Elle bourdonne quand on la secoue. Une curiosité pour Odile.",
             ),
         ),
+        "curio_bell_clapper" => (
+            tr("Bell Clapper", "Battant de cloche").into(),
+            "bell_clapper",
+            tr(
+                "The drowned bell's tongue, green with the sea, its striking ball worn bright. Still rings if you knock it. A curio for Odile.",
+                "La langue de la cloche noyée, verdie par la mer, la boule polie à force de frapper. Elle tinte encore quand on la cogne. Une curiosité pour Odile.",
+            ),
+        ),
+        "curio_moth_brooch" => (
+            tr("Moth Brooch", "Broche phalène").into(),
+            "moth_brooch",
+            tr(
+                "A silver moth with two moon-eyes on its wings, which glow faintly in the dark. Someone lost it in the well stair long ago. A curio for Odile.",
+                "Une phalène d'argent, deux yeux de lune sur les ailes, qui luisent un peu dans le noir. Quelqu'un l'a perdue dans l'escalier du puits, il y a longtemps. Une curiosité pour Odile.",
+            ),
+        ),
         "cullet_quarry" | "cullet_town" | "cullet_kiln" => (
             tr("Cullet", "Calcin").into(),
             "cullet",
@@ -219,7 +235,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
         ),
         "ferry_pass" => (
             tr("Ferry Pass", "Laissez-passer du bac").into(),
-            "letter",
+            "ferry_pass",
             tr(
                 "Stamped by the Gullhaven Harbour Office. Show it on any jetty and the ferry takes you across.",
                 "Tamponné par la Capitainerie de Havre-aux-Mouettes. Montrez-le sur n'importe quel embarcadère et le bac vous fait traverser.",

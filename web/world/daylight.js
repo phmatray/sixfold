@@ -114,6 +114,32 @@ export function daylight(w, reduced) {
     root.add(pools);
   }
 
+  // Glimmers (build.js): a smaller tinted halo and a soft pool each, shown while their `on` holds, after dusk.
+  const glim = w.glimmers ?? [];
+  // One point cloud per halo size (a few draws, not one sprite each); a glimmer that is off is black (additive: unseen).
+  // Points scale without the field of view, so a halo of `size` metres is about size / tan(fov / 2) points.
+  const glimClouds = [...new Set(glim.map((g) => g.size))].map((size) => {
+    const mine = glim.filter((g) => g.size === size), geo = new THREE.BufferGeometry();
+    // Lifted a little, so the floor doesn't cut a low halo (on the water) flat.
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(mine.flatMap((g) => [g.at.x, g.at.y + size * 0.35, g.at.z]), 3));
+    geo.setAttribute("color", new THREE.Float32BufferAttribute(new Float32Array(mine.length * 3), 3));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: glowTex, size: size * 2.5, vertexColors: true, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false }));
+    pts.frustumCulled = false;
+    root.add(pts);
+    return { pts, mine, cols: mine.map((g) => new THREE.Color(g.color)), shown: mine.map(() => null) };
+  });
+  let glimPools = null;
+  if (glim.length && !indoor) {
+    const mat = new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false,
+      polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
+    glimPools = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), mat, glim.length);
+    glim.forEach((g, i) => glimPools.setColorAt(i, new THREE.Color(g.color)));
+    glimPools.visible = false;
+    root.add(glimPools);
+  }
+  const glimShown = glim.map(() => null);
+
   // Materials that light up: `glow` parts and window `glass` (models and instances alike).
   // Coloured glassware (`glass_teal`, `glass_amber` …: racks, cullet, the kiln's
   // wares) keeps its colour and catches the light softly after dark.
@@ -181,6 +207,27 @@ export function daylight(w, reduced) {
       const on = cur.lamps > 0.01;
       for (const h of halos) (h.visible = on), (h.material.opacity = 0.85 * cur.glow);
       if (pools) (pools.visible = on), (pools.material.opacity = 0.42 * cur.lamps);
+      for (const c of glimClouds) {
+        c.pts.material.opacity = on ? 0.9 * cur.glow : 0;
+        const col = c.pts.geometry.attributes.color;
+        c.mine.forEach((g, i) => {
+          const show = on && g.on;
+          if (c.shown[i] === show) return;
+          c.shown[i] = show;
+          col.setXYZ(i, show ? c.cols[i].r : 0, show ? c.cols[i].g : 0, show ? c.cols[i].b : 0);
+          col.needsUpdate = true;
+        });
+      }
+      glim.forEach((g, i) => {
+        const show = on && g.on;
+        if (glimPools && glimShown[i] !== show) {
+          glimShown[i] = show;
+          const s = show ? g.pool : 0;
+          glimPools.setMatrixAt(i, new THREE.Matrix4().makeScale(s, 1, s).setPosition(g.at.x, w.floorAt(Math.floor(g.at.x), Math.floor(g.at.z)) + 0.035, g.at.z));
+          glimPools.instanceMatrix.needsUpdate = true;
+        }
+      });
+      if (glimPools) (glimPools.visible = on), (glimPools.material.opacity = 0.5 * cur.lamps);
       if (lantern) {
         // Held high and a little forward, so it lights the ground round the hero, not its hair.
         lantern.intensity = dark ? 9 : 2.6 * cur.lamps;
