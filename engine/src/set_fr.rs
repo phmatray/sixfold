@@ -70,8 +70,8 @@ pub static FR: &[CardFr] = &[
     ], None),
     c("Pyrequill", "Bûcheplume", &[
         ("Pluie d'étincelles", "Inflige 10 dégâts à chaque Hexon du Banc adverse."),
-        ("Panache infernal", "Défaussez 2 cartes Énergie Feu attachées à ce Hexon."),
-    ], Some(("Cœur de braise", "Une fois pendant votre tour, attacher une énergie Feu à l'un de vos Hexons Feu ne compte pas comme votre énergie attachée du tour."))),
+        ("Panache infernal", "Défaussez 2 cartes Énergie Braise attachées à ce Hexon."),
+    ], Some(("Cœur de braise", "Une fois pendant votre tour, attacher une énergie Braise à l'un de vos Hexons Braise ne compte pas comme votre énergie attachée du tour."))),
     // ----- Ember Rush: Fighting -----
     c("Knollop", "Mottelot", &[
         ("Jet de motte", ""),
@@ -104,7 +104,7 @@ pub static FR: &[CardFr] = &[
     ], Some(("Pluie apaisante", "Une fois pendant votre tour, vous pouvez soigner 10 dégâts de votre Hexon Actif."))),
     c("Shellmote", "Coquillot", &[
         ("Repli", "Lancez une pièce. Si c'est face, évitez tous les dégâts infligés à ce Hexon par des attaques pendant le prochain tour de votre adversaire."),
-        ("Détrempe", "La Faiblesse du Hexon en défense devient Eau."),
+        ("Détrempe", "La Faiblesse du Hexon en défense devient Marée."),
     ], Some(("Coque flottante", "Tant que ce Hexon est sur votre Banc, le coût de Retraite de votre Hexon Actif diminue de 1."))),
     // ----- Tide Mind: Psychic -----
     c("Wispun", "Lueurin", &[
@@ -137,18 +137,18 @@ pub static FR: &[CardFr] = &[
     t("Bloom Seed", "Graine d'éclosion", "Posez une carte Éveil 2 de votre main sur le Hexon de Base correspondant en jeu. Celui-ci doit être en jeu depuis le début de votre tour."),
     t("Unwind Spray", "Brume régressive", "Le Hexon Actif éveillé de votre adversaire régresse au stade précédent. Mettez la carte du dessus dans la main de votre adversaire."),
     // ----- Energy -----
-    e("Grass Energy", "Énergie Herbe"),
-    e("Fire Energy", "Énergie Feu"),
-    e("Water Energy", "Énergie Eau"),
-    e("Lightning Energy", "Énergie Foudre"),
-    e("Fighting Energy", "Énergie Combat"),
-    e("Psychic Energy", "Énergie Psychique"),
+    e("Grass Energy", "Énergie Bosquet"),
+    e("Fire Energy", "Énergie Braise"),
+    e("Water Energy", "Énergie Marée"),
+    e("Lightning Energy", "Énergie Orage"),
+    e("Fighting Energy", "Énergie Roc"),
+    e("Psychic Energy", "Énergie Songe"),
     e("Twofold Energy", "Énergie Double"),
     // ===== 0.4.0 expansion =====
     // ----- Grass -----
     c("Sprigget", "Brindelet", &[
         ("Entaille feuillue", ""),
-        ("Appel des racines", "Cherchez une carte Énergie Herbe dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."),
+        ("Appel des racines", "Cherchez une carte Énergie Bosquet dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."),
     ], None),
     c("Thornbuck", "Brocépine", &[
         ("Salve d'épines", "Lancez une pièce. Si c'est face, le Hexon en défense est maintenant Empoisonné."),
@@ -188,11 +188,11 @@ pub static FR: &[CardFr] = &[
     // ----- Fire -----
     c("Ashpaw", "Cendrepatte", &[
         ("Griffe chaude", ""),
-        ("Bond de flammes", "Défaussez 1 carte Énergie Feu attachée à ce Hexon."),
+        ("Bond de flammes", "Défaussez 1 carte Énergie Braise attachée à ce Hexon."),
     ], None),
     c("Blazelynx", "Brasilynx", &[
         ("Griffe de braise", ""),
-        ("Ruée flamboyante", "Défaussez 1 carte Énergie Feu attachée à ce Hexon."),
+        ("Ruée flamboyante", "Défaussez 1 carte Énergie Braise attachée à ce Hexon."),
     ], None),
     c("Solarlynx", "Héliolynx", &[
         ("Crinière ardente", ""),
@@ -203,8 +203,8 @@ pub static FR: &[CardFr] = &[
         ("Coup de four", ""),
     ], None),
     c("Furnaceback", "Fournaidos", &[
-        ("Attisement", "Cherchez une carte Énergie Feu dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."),
-        ("Vague de magma", "Défaussez 2 cartes Énergie Feu attachées à ce Hexon."),
+        ("Attisement", "Cherchez une carte Énergie Braise dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."),
+        ("Vague de magma", "Défaussez 2 cartes Énergie Braise attachées à ce Hexon."),
     ], None),
     c("Waxwick", "Cirèche", &[
         ("Mèche vive", "Lancez une pièce. Si c'est face, cette attaque inflige 20 dégâts de plus."),
@@ -231,7 +231,7 @@ pub static FR: &[CardFr] = &[
         ("Ligotage d'algues", "Le Hexon en défense ne peut pas battre en retraite pendant le prochain tour de votre adversaire."),
     ], None),
     c("Kelpwarden", "Gardevarech", &[
-        ("Don des marées", "Cherchez une carte Énergie Eau dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."),
+        ("Don des marées", "Cherchez une carte Énergie Marée dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."),
         ("Courant broyeur", ""),
     ], None),
     c("Frosteel", "Givranguille", &[
@@ -264,7 +264,7 @@ pub static FR: &[CardFr] = &[
         ("Bourdonnement", ""),
     ], None),
     c("Ohmrunner", "Ohmcoureur", &[
-        ("Courant vif", "Cherchez une carte Énergie Foudre dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."),
+        ("Courant vif", "Cherchez une carte Énergie Orage dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."),
         ("Tir sur rail", "Inflige 20 dégâts à 1 des Hexons de votre adversaire."),
     ], None),
     c("Stormox", "Taurorage", &[
@@ -302,7 +302,7 @@ pub static FR: &[CardFr] = &[
     ], None),
     c("Cragmastiff", "Rochemâtin", &[
         ("Morsure sismique", "Pendant le prochain tour de votre adversaire, les attaques du Hexon en défense infligent 20 dégâts de moins."),
-        ("Fend-la-terre", "Défaussez 1 carte Énergie Combat attachée à ce Hexon."),
+        ("Fend-la-terre", "Défaussez 1 carte Énergie Roc attachée à ce Hexon."),
     ], None),
     c("Bouldergut", "Rocpanse", &[
         ("Poids mort", ""),
@@ -396,8 +396,8 @@ pub static FR: &[CardFr] = &[
         ("Gerbe saline", ""),
     ], None),
     c("Kilnfox", "Fournard", &[
-        ("Attisement", "Cherchez une carte Énergie Feu dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."),
-        ("Flambée", "Défaussez 1 carte Énergie Feu attachée à ce Hexon."),
+        ("Attisement", "Cherchez une carte Énergie Braise dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."),
+        ("Flambée", "Défaussez 1 carte Énergie Braise attachée à ce Hexon."),
     ], None),
     c("Squallkite", "Milanorage", &[
         ("Rafale statique", "Lancez une pièce. Si c'est face, le Hexon en défense est maintenant Paralysé."),

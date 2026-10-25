@@ -1,10 +1,10 @@
-# Grass Hexons / Hexons Herbe
+# Grove Hexons / Hexons Bosquet
 
-Grain: **bark**. Grass Hexons are built of plant matter, not dressed in it: bodies of plated bark with tree-ring grain, chests of seed pod, legs of root, and leaves, moss and flowers growing out of the seams. Their **buds open** as they awaken: closed
+Grain: **bark**. Grove Hexons are built of plant matter, not dressed in it: bodies of plated bark with tree-ring grain, chests of seed pod, legs of root, and leaves, moss and flowers growing out of the seams. Their **buds open** as they awaken: closed
 buds on a Basic, leaves at Awaken 1, blossom at Awaken 2. Home: the Deepgrove (Fernhollow Trail,
 Rootholm, the Elder Ring). See [BESTIARY.md](../BESTIARY.md).
 
-*Grain : **écorce**. Les Hexons Herbe sont faits de végétal, ils n'en sont pas vêtus : corps d'écorce en plaques veinées de cernes, poitrine de cosse, pattes de racines, et feuilles, mousse et fleurs qui sortent des joints. Leurs **bourgeons s'ouvrent** à
+*Grain : **écorce**. Les Hexons Bosquet sont faits de végétal, ils n'en sont pas vêtus : corps d'écorce en plaques veinées de cernes, poitrine de cosse, pattes de racines, et feuilles, mousse et fleurs qui sortent des joints. Leurs **bourgeons s'ouvrent** à
 chaque Éveil : fermés à la Base, en feuilles à l'Éveil 1, en fleurs à l'Éveil 2. Région : le Bois-Profond.*
 
 ---
@@ -21,8 +21,8 @@ le cou et les bois.*
 
 ### 023 · Sprigget / Brindelet
 
-**1. Identity / Identité.** No. 023 · Grass · Basic · Sprigget → Thornbuck → Elderhart. 50 HP, common.
-*N° 023 · Herbe · Base · Brindelet → Brocépine → Sylvecerf. 50 PV, commun.*
+**1. Identity / Identité.** No. 023 · Grove · Basic · Sprigget → Thornbuck → Elderhart. 50 HP, common.
+*N° 023 · Bosquet · Base · Brindelet → Brocépine → Sylvecerf. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a fawn, only as a silhouette: long thin legs, a long neck and big ears. Everything else is plant: its body is a living **seed pod** of smooth husk, its legs are twisted roots, its ears are leaves growing out of its head and its tail is a fern frond. *FR : Du faon, il ne garde que la silhouette : longues pattes fines, long cou et grandes oreilles. Tout le reste est végétal : son corps est une **cosse** vivante à l'écorce lisse, ses pattes sont des racines torsadées, ses oreilles des feuilles qui lui poussent sur la tête et sa queue une crosse de fougère.*
 
@@ -71,8 +71,8 @@ FR : « Il dort les sabots-racines plantés dans le sol. Là où un Brindelet a 
 
 ### 024 · Thornbuck / Brocépine
 
-**1. Identity / Identité.** No. 024 · Grass · Awaken 1 · from Sprigget → Elderhart. 80 HP, uncommon.
-*N° 024 · Herbe · Éveil 1 · de Brindelet → Sylvecerf. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 024 · Grove · Awaken 1 · from Sprigget → Elderhart. 80 HP, uncommon.
+*N° 024 · Bosquet · Éveil 1 · de Brindelet → Sylvecerf. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a young buck, only as a silhouette: the lean four-legged frame, the neck and the branching brow. Its body is now **plated bark** grown over the old seed pod, its legs are root bundles, and two living briars grow out of its brow where a deer would carry antlers. *FR : Du jeune cerf, il ne garde que la silhouette : la charpente élancée à quatre pattes, le cou et le front ramifié. Son corps est désormais **cuirassé d'écorce** poussée sur l'ancienne cosse, ses pattes sont des faisceaux de racines, et deux ronces vivantes lui poussent du front, là où un cerf porterait ses bois.*
 
@@ -125,8 +125,8 @@ FR : « Ses bois sont de la ronce vivante, plus épineuse chaque automne. Les é
 
 ### 025 · Elderhart / Sylvecerf
 
-**1. Identity / Identité.** No. 025 · Grass · Awaken 2 · from Thornbuck. 100 HP, rare. Power: Verdant
-Pulse. *N° 025 · Herbe · Éveil 2 · de Brocépine. 100 PV, rare. Pouvoir : Souffle verdoyant.*
+**1. Identity / Identité.** No. 025 · Grove · Awaken 2 · from Thornbuck. 100 HP, rare. Power: Verdant
+Pulse. *N° 025 · Bosquet · Éveil 2 · de Brocépine. 100 PV, rare. Pouvoir : Souffle verdoyant.*
 
 **2. Animal base / Base animale.** EN: Kept from an old stag, only as a silhouette: four long legs, a long face and a crowned head. Its body is a trunk of **oak bark** in thick plates, its chest a great split seed pod that holds a glowing heartwood, its legs are root columns that spread into the ground, and a small tree in blossom grows from its head. *FR : Du vieux cerf, il ne garde que la silhouette : quatre longues pattes, un long visage et une tête couronnée. Son corps est un tronc d'**écorce de chêne** en plaques épaisses, sa poitrine une grande cosse fendue qui abrite un cœur de bois lumineux, ses pattes des colonnes de racines qui s'étalent dans le sol, et un petit arbre en fleurs pousse sur sa tête.*
 
@@ -196,8 +196,8 @@ la cosse qui respire comme un poumon.*
 
 ### 026 · Mirebud / Tourbouton
 
-**1. Identity / Identité.** No. 026 · Grass · Basic · Mirebud → Bogblossom → Bogcrown. 40 HP, common.
-*N° 026 · Herbe · Base · Tourbouton → Tourbefleur → Tourbereine. 40 PV, commun.*
+**1. Identity / Identité.** No. 026 · Grove · Basic · Mirebud → Bogblossom → Bogcrown. 40 HP, common.
+*N° 026 · Bosquet · Base · Tourbouton → Tourbefleur → Tourbereine. 40 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a small mud-dwelling shell-back: the blunt hooked beak, the
 short neck and the domed back, nothing else. Invented: the "shell" is one whole closed seed pod standing on
@@ -281,8 +281,8 @@ FR : « Sa carapace est une cosse et il respire par le bourgeon du sommet. Si le
 
 ### 027 · Bogblossom / Tourbefleur
 
-**1. Identity / Identité.** No. 027 · Grass · Awaken 1 · from Mirebud → Bogcrown. 70 HP, uncommon.
-*N° 027 · Herbe · Éveil 1 · de Tourbouton → Tourbereine. 70 PV, peu commun.*
+**1. Identity / Identité.** No. 027 · Grove · Awaken 1 · from Mirebud → Bogcrown. 70 HP, uncommon.
+*N° 027 · Bosquet · Éveil 1 · de Tourbouton → Tourbereine. 70 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: the hooked beak, now heavier, and a longer reaching neck.
 Invented: the seed pod has split along its seams into three husk plates with leaves growing out of the cracks,
@@ -370,8 +370,8 @@ FR : « Racinemont appelle sa corolle de feuilles une fleur. Penchez-vous pour l
 
 ### 028 · Bogcrown / Tourbereine
 
-**1. Identity / Identité.** No. 028 · Grass · Awaken 2 · from Bogblossom. 100 HP, rare.
-*N° 028 · Herbe · Éveil 2 · de Tourbefleur. 100 PV, rare.*
+**1. Identity / Identité.** No. 028 · Grove · Awaken 2 · from Bogblossom. 100 HP, rare.
+*N° 028 · Bosquet · Éveil 2 · de Tourbefleur. 100 PV, rare.*
 
 **2. Animal base / Base animale.** EN: Kept: the weight, the massive hooked beak and the dome of an old
 snapping shell-back. Invented: the three pod plates fused back into a deep ringed dome, a crown of seven
@@ -473,8 +473,8 @@ son enveloppe.*
 
 ### 029 · Pollenpup / Pollinou
 
-**1. Identity / Identité.** No. 029 · Grass · Basic · Pollenpup → Honeymane. 50 HP, common.
-*N° 029 · Herbe · Base · Pollinou → Mielcrin. 50 PV, commun.*
+**1. Identity / Identité.** No. 029 · Grove · Basic · Pollenpup → Honeymane. 50 HP, common.
+*N° 029 · Bosquet · Base · Pollinou → Mielcrin. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a long-legged wild pup: the tall ears, the narrow muzzle and
 the way it sits. Invented: a body of smooth young bark plates with growth-ring grain where fur would be, ears
@@ -560,8 +560,8 @@ FR : « Sa poitrine est une cosse qui s'emplit de nectar et luit à travers l'en
 
 ### 030 · Honeymane / Mielcrin
 
-**1. Identity / Identité.** No. 030 · Grass · Awaken 1 · from Pollenpup. 80 HP, uncommon.
-*N° 030 · Herbe · Éveil 1 · de Pollinou. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 030 · Grove · Awaken 1 · from Pollenpup. 80 HP, uncommon.
+*N° 030 · Bosquet · Éveil 1 · de Pollinou. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: the long legs, tall ears and narrow muzzle of a grown wild runner.
 Invented: a darker bark body with deep rings, ears unfurled into two long leaves, a mane of leaf fronds grown
@@ -657,8 +657,8 @@ pression qui tire d'elle-même.*
 
 ### 031 · Briarhog / Roncisson
 
-**1. Identity / Identité.** No. 031 · Grass · Basic. 70 HP, uncommon. Power: Prickly Hide.
-*N° 031 · Herbe · Base. 70 PV, peu commun. Pouvoir : Peau piquante.*
+**1. Identity / Identité.** No. 031 · Grove · Basic. 70 HP, uncommon. Power: Prickly Hide.
+*N° 031 · Bosquet · Base. 70 PV, peu commun. Pouvoir : Peau piquante.*
 
 **2. Animal base / Base animale.** EN: Kept from a small spiny leaf-litter forager: the round body, the pointed
 snout and the habit of curling into a ball. Invented: its back is a spiny seed-pod burr of briar thorns, each
@@ -752,8 +752,8 @@ se déroule à volonté.*
 
 ### 032 · Fernwhisk / Fougerette
 
-**1. Identity / Identité.** No. 032 · Grass · Basic. 40 HP, common.
-*N° 032 · Herbe · Base. 40 PV, commun.*
+**1. Identity / Identité.** No. 032 · Grove · Basic. 40 HP, common.
+*N° 032 · Bosquet · Base. 40 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a small tree-climber: the sitting-up pose, the forepaws that
 hold food and the big tail carried over the back. Invented: the tail is a tall coiled fern crozier, the body is
@@ -852,8 +852,8 @@ son organe inventé est la **mèche**. C'est le Hexon de Bramble, poussé dans l
 
 ### 033 · Thistlewick / Chardomèche
 
-**1. Identity / Identité.** No. 033 · Grass · Basic. 70 HP, rare, promo.
-*N° 033 · Herbe · Base. 70 PV, rare, promo.*
+**1. Identity / Identité.** No. 033 · Grove · Basic. 70 HP, rare, promo.
+*N° 033 · Bosquet · Base. 70 PV, rare, promo.*
 
 **2. Animal base / Base animale.** EN: Kept from a slow, spined crawler of dry ground: the squat body, the cone
 thorns and the blunt wedge-shaped head. Invented: a body of knotted bark plates with growth rings, the wick (one

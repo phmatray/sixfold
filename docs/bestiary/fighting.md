@@ -1,11 +1,11 @@
-# Fighting Hexons / Hexons Combat
+# Stone Hexons / Hexons Roc
 
-Grain: **rock strata**. Fighting Hexons carry layered plates of sandstone and slate like a cliff face,
+Grain: **rock strata**. Stone Hexons carry layered plates of sandstone and slate like a cliff face,
 knuckles and claws of quartz, iron-banded joints and gravel manes, with moss in the cracks. Each
 Awakening adds **strata**. Home: the Stonebacks (the Undermine, Scree Pass, Anvilstead, the Bastion).
 See [BESTIARY.md](../BESTIARY.md).
 
-*Grain : **strates de roche**. Les Hexons Combat portent des plaques superposées de grès et d'ardoise
+*Grain : **strates de roche**. Les Hexons Roc portent des plaques superposées de grès et d'ardoise
 comme une falaise, des jointures et griffes de quartz, des articulations cerclées de fer et des
 crinières de gravier, avec de la mousse dans les fissures. Chaque Éveil ajoute des **strates**. Région : les Échines de Pierre.*
 
@@ -23,8 +23,8 @@ mains-pelles, le museau pointu et l'amour des galeries.*
 
 ### 045 · Knollop / Mottelot
 
-**1. Identity / Identité.** No. 045 · Fighting · Basic · Knollop → Knollgrim → Knollossus. 60 HP,
-common. *N° 045 · Combat · Base · Mottelot → Mottegrogne → Mottecolosse. 60 PV, commun.*
+**1. Identity / Identité.** No. 045 · Stone · Basic · Knollop → Knollgrim → Knollossus. 60 HP,
+common. *N° 045 · Roc · Base · Mottelot → Mottegrogne → Mottecolosse. 60 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a mole: the round body, the pointed snout and the broad
 digging hands. Invented: a hump of sandstone strata on its back like a tiny hill with moss on top,
@@ -101,8 +101,8 @@ FR : « Il porte une petite colline de grès sur le dos. Les mineurs de Bourg-l'
 
 ### 046 · Knollgrim / Mottegrogne
 
-**1. Identity / Identité.** No. 046 · Fighting · Awaken 1 · from Knollop → Knollossus. 90 HP,
-uncommon. Power: Jagged Crust. *N° 046 · Combat · Éveil 1 · de Mottelot → Mottecolosse. 90 PV, peu
+**1. Identity / Identité.** No. 046 · Stone · Awaken 1 · from Knollop → Knollossus. 90 HP,
+uncommon. Power: Jagged Crust. *N° 046 · Roc · Éveil 1 · de Mottelot → Mottecolosse. 90 PV, peu
 commun. Pouvoir : Croûte acérée.*
 
 **2. Animal base / Base animale.** EN: Kept: the mole's spade hands and snout, now huge. Invented: a
@@ -177,8 +177,8 @@ FR : « Son dos est une croûte d'ardoise coupante. Il s'abrite d'abord derrièr
 
 ### 047 · Knollossus / Mottecolosse
 
-**1. Identity / Identité.** No. 047 · Fighting · Awaken 2 · from Knollgrim. 120 HP, rare.
-*N° 047 · Combat · Éveil 2 · de Mottegrogne. 120 PV, rare.*
+**1. Identity / Identité.** No. 047 · Stone · Awaken 2 · from Knollgrim. 120 HP, rare.
+*N° 047 · Roc · Éveil 2 · de Mottegrogne. 120 PV, rare.*
 
 **2. Animal base / Base animale.** EN: Kept: the spade hands and pointed snout, at the scale of a hill.
 Invented: a back that is a whole hillside of strata with boulders, moss and a small tree, a stone face
@@ -269,8 +269,8 @@ le sol. Du chien restent la pose assise, le museau, les grosses pattes avant et 
 
 ### 048 · Shalepup / Schistiot
 
-**1. Identity / Identité.** No. 048 · Fighting · Basic · Shalepup → Shalehound → Cragmastiff. 50 HP,
-common. *N° 048 · Combat · Base · Schistiot → Schistedogue → Rochemâtin. 50 PV, commun.*
+**1. Identity / Identité.** No. 048 · Stone · Basic · Shalepup → Shalehound → Cragmastiff. 50 HP,
+common. *N° 048 · Roc · Base · Schistiot → Schistedogue → Rochemâtin. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a pup: the sitting pose, the round muzzle, the oversized
 front paws and the eagerness. Invented: a small round geode hanging under its chin, split open to show
@@ -358,8 +358,8 @@ FR : « Une géode cliquette sous son menton. Il renverse les cairns du Col des 
 
 ### 049 · Shalehound / Schistedogue
 
-**1. Identity / Identité.** No. 049 · Fighting · Awaken 1 · from Shalepup → Cragmastiff. 80 HP,
-uncommon. *N° 049 · Combat · Éveil 1 · de Schistiot → Rochemâtin. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 049 · Stone · Awaken 1 · from Shalepup → Cragmastiff. 80 HP,
+uncommon. *N° 049 · Roc · Éveil 1 · de Schistiot → Rochemâtin. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: the hound's long muzzle, deep chest and upright sitting
 pose. Invented: the geode grown to the size of a fist and bound in an iron band, which rings like a bell
@@ -445,8 +445,8 @@ FR : « Sa géode sonne comme une cloche quand il aboie. Dans le noir des Galeri
 
 ### 050 · Cragmastiff / Rochemâtin
 
-**1. Identity / Identité.** No. 050 · Fighting · Awaken 2 · from Shalehound. 110 HP, rare.
-*N° 050 · Combat · Éveil 2 · de Schistedogue. 110 PV, rare.*
+**1. Identity / Identité.** No. 050 · Stone · Awaken 2 · from Shalehound. 110 HP, rare.
+*N° 050 · Roc · Éveil 2 · de Schistedogue. 110 PV, rare.*
 
 **2. Animal base / Base animale.** EN: Kept: the mastiff's massive head, heavy jowls, deep chest and
 seated guard pose. Invented: a great geode as big as its head hanging at its chest, bound in three iron
@@ -550,8 +550,8 @@ claire le long du dos et le refus de reculer.*
 
 ### 051 · Brawlet / Bagarrot
 
-**1. Identity / Identité.** No. 051 · Fighting · Basic · Brawlet → Ironbrawl. 60 HP, common.
-*N° 051 · Combat · Base · Bagarrot → Ferbagarre. 60 PV, commun.*
+**1. Identity / Identité.** No. 051 · Stone · Basic · Brawlet → Ironbrawl. 60 HP, common.
+*N° 051 · Roc · Base · Bagarrot → Ferbagarre. 60 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a badger: the low, broad body, the flat-topped head, the
 small low-set ears and the pale stripe down the back. Invented: the "grudge seam", a vein of milky quartz
@@ -635,8 +635,8 @@ FR : « Une veine de quartz court le long de son dos, et chaque coup reçu y fai
 
 ### 052 · Ironbrawl / Ferbagarre
 
-**1. Identity / Identité.** No. 052 · Fighting · Awaken 1 · from Brawlet. 80 HP, uncommon.
-*N° 052 · Combat · Éveil 1 · de Bagarrot. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 052 · Stone · Awaken 1 · from Brawlet. 80 HP, uncommon.
+*N° 052 · Roc · Éveil 1 · de Bagarrot. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: the badger's broad flat-topped head and low, heavy
 shoulders, now enormous. Invented: the grudge seam grown into a ridge of seven tall quartz crystals,
@@ -732,8 +732,8 @@ restent le corps rond, les pattes courtes et la queue en tire-bouchon.*
 
 ### 053 · Tusklet / Défensin
 
-**1. Identity / Identité.** No. 053 · Fighting · Basic · does not awaken. 50 HP, common.
-*N° 053 · Combat · Base · ne s'éveille pas. 50 PV, commun.*
+**1. Identity / Identité.** No. 053 · Stone · Basic · does not awaken. 50 HP, common.
+*N° 053 · Roc · Base · ne s'éveille pas. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a piglet: the round body, the short legs, the flat
 snout and the corkscrew tail. Invented: the snout ends in a flat round disc of knapped grey flint with a
@@ -829,8 +829,8 @@ broie.*
 
 ### 054 · Gritfang / Gravicroc
 
-**1. Identity / Identité.** No. 054 · Fighting · Basic · does not awaken. 70 HP, uncommon.
-*N° 054 · Combat · Base · ne s'éveille pas. 70 PV, peu commun.*
+**1. Identity / Identité.** No. 054 · Stone · Basic · does not awaken. 70 HP, uncommon.
+*N° 054 · Roc · Base · ne s'éveille pas. 70 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a hyena: the sloping back, the heavy neck and jaw, the
 rounded ears and the laughing call. Invented: two round granite millstones set into its cheeks, one on
@@ -927,8 +927,8 @@ bouger. Du wombat restent le corps en tonneau, la face ronde et la façon de s'a
 
 ### 055 · Bouldergut / Rocpanse
 
-**1. Identity / Identité.** No. 055 · Fighting · Basic · does not awaken. 80 HP, uncommon.
-*N° 055 · Combat · Base · ne s'éveille pas. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 055 · Stone · Basic · does not awaken. 80 HP, uncommon.
+*N° 055 · Roc · Base · ne s'éveille pas. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a wombat: the barrel body, the short legs, the blunt round
 face, the small ears and the habit of sitting on its rump. Invented: the "ballast cradle", an open bowl of
@@ -1027,8 +1027,8 @@ la tête massive, le fanon et l'amour d'une terrasse chaude.*
 
 ### 056 · Slatebrow / Ardoisfront
 
-**1. Identity / Identité.** No. 056 · Fighting · Basic · does not awaken. 80 HP, rare, promo.
-*N° 056 · Combat · Base · ne s'éveille pas. 80 PV, rare, promo.*
+**1. Identity / Identité.** No. 056 · Stone · Basic · does not awaken. 80 HP, rare, promo.
+*N° 056 · Roc · Base · ne s'éveille pas. 80 PV, rare, promo.*
 
 **2. Animal base / Base animale.** EN: Kept from a large lizard: the long body, the sprawling forelegs, the
 blunt heavy head, the throat dewlap and the long tail. Invented: the "brow-wall", a tall upright slab of

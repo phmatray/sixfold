@@ -18,10 +18,10 @@ download first).
 - **Card set**: 110 original cards (78 Hexons in full Awakening lines across
   all seven colours, 25 trainers, 6 basic energies and a special energy, seven
   of them promos you earn in the campaign rather than in packs), and
-  six prebuilt 60-card decks: Ember Rush (Fire / Fighting), Tide Mind
-  (Water / Psychic), Grove Bloom (Grass / Lightning), Storm Front
-  (Lightning / Water), Stone Fist (Fighting / Colorless) and Dream Veil
-  (Psychic / Grass). In an AI-against-AI sweep over every prebuilt, rival and
+  six prebuilt 60-card decks: Ember Rush (Ember / Stone), Tide Mind
+  (Tide / Dream), Grove Bloom (Grove / Storm), Storm Front
+  (Storm / Tide), Stone Fist (Stone / Neutral) and Dream Veil
+  (Dream / Grove). In an AI-against-AI sweep over every prebuilt, rival and
   Gauntlet deck, each prebuilt wins between 42% and 59% of its games and no two
   prebuilts meet beyond 73/27 ([`docs/BALANCE.md`](docs/BALANCE.md)); a test
   keeps each between 30% and 70%.
@@ -39,7 +39,7 @@ download first).
 - **Collection and deck building**: a binder of every card, booster packs
   (Ember, Tide, Grove, Storm, Stone, Dream and Wild) revealed card by card,
   saved decks you create, copy, rename and edit, and Facets for every duel you
-  win (since 1.2; it was a Wild Pack). New players start with one starter deck, Trailhead (Fire / Water),
+  win (since 1.2; it was a Wild Pack). New players start with one starter deck, Trailhead (Ember / Tide),
   and three packs; every prebuilt deck can still be played against the AI.
 - **Saves**: three save slots, picked, renamed and deleted from the title
   screen, each saved by itself as you play (a small "Saved" pill says so).

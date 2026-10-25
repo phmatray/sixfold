@@ -14,13 +14,13 @@ use crate::view::View;
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(match self {
-            Color::Grass => tr("Grass", "Herbe"),
-            Color::Fire => tr("Fire", "Feu"),
-            Color::Water => tr("Water", "Eau"),
-            Color::Lightning => tr("Lightning", "Foudre"),
-            Color::Fighting => tr("Fighting", "Combat"),
-            Color::Psychic => tr("Psychic", "Psychique"),
-            Color::Colorless => tr("Colorless", "Incolore"),
+            Color::Grass => tr("Grove", "Bosquet"),
+            Color::Fire => tr("Ember", "Braise"),
+            Color::Water => tr("Tide", "Marée"),
+            Color::Lightning => tr("Storm", "Orage"),
+            Color::Fighting => tr("Stone", "Roc"),
+            Color::Psychic => tr("Dream", "Songe"),
+            Color::Colorless => tr("Neutral", "Neutre"),
         })
     }
 }
@@ -161,7 +161,7 @@ fn plural(n: impl Into<u32>, word: &str) -> String {
 }
 
 /// "2 cartes", "1 carte", "0 carte": French plural (0 and 1 singular) on the
-/// first word ("2 cartes Énergie Feu").
+/// first word ("2 cartes Énergie Braise").
 fn pluriel(n: impl Into<u32>, word: &str) -> String {
     let n = n.into();
     if n <= 1 {
@@ -298,7 +298,8 @@ impl fmt::Display for Effect {
             ),
             AttachFromDeck(c) => write!(
                 f,
-                "Search your deck for a {c} energy card and attach it to this Hexon, then shuffle your deck."
+                "Search your deck for {} {c} energy card and attach it to this Hexon, then shuffle your deck.",
+                if c == Color::Fire { "an" } else { "a" }
             ),
             Devolve => write!(
                 f,
@@ -1429,7 +1430,7 @@ mod tests {
         let v = g.view(0);
         assert_eq!(
             v.describe_action(Action::AttachEnergy { hand: 0, slot: 0 }),
-            "Attach Grass Energy to Mossling (Active)"
+            "Attach Grove Energy to Mossling (Active)"
         );
         assert_eq!(
             v.describe_action(Action::PlayTrainer(1)),
@@ -1537,7 +1538,7 @@ mod tests {
                 "Pendant votre prochain tour, votre Actif ne peut pas battre en retraite",
                 "Pendant son prochain tour, l'Actif adverse ne peut pas battre en retraite",
                 "Pendant votre prochain tour, l'Actif adverse ne subit aucun dégât des attaques",
-                "Attacher Grass Energy à Mossling (Active)",
+                "Attacher Énergie Bosquet à Mossling (Active)",
                 "Terminer le tour",
                 "Votre tour",
             ]

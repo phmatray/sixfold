@@ -1,11 +1,11 @@
-# Fire Hexons / Hexons Feu
+# Ember Hexons / Hexons Braise
 
-Grain: **kiln clay**. Fire Hexons are bodies of soot-dark down or hide armoured in kiln-glazed ceramic,
+Grain: **kiln clay**. Ember Hexons are bodies of soot-dark down or hide armoured in kiln-glazed ceramic,
 with an **ember core** that glows through hairline glaze cracks. Each Awakening widens the cracks into
 vents. Home: the Emberlands (Emberstep Quarry, Cinderwick and its glassworks, the Kilnmouth). See
 [BESTIARY.md](../BESTIARY.md) for the type rules.
 
-*Grain : **argile de four**. Les Hexons Feu ont un duvet ou un cuir couleur de suie, cuirassé de
+*Grain : **argile de four**. Les Hexons Braise ont un duvet ou un cuir couleur de suie, cuirassé de
 céramique émaillée, et un **cœur de braise** qui luit à travers de fines craquelures d'émail. Chaque
 Éveil élargit les craquelures en évents. Région : les Braisières.*
 
@@ -23,8 +23,8 @@ tout le reste est argile cuite et braise.*
 
 ### 001 · Cindrel / Braisillon
 
-**1. Identity / Identité.** No. 001 · Fire · Basic · Cindrel → Flarrow → Pyrequill. 50 HP, common.
-*N° 001 · Feu · Base · Braisillon → Flambèche → Bûcheplume. 50 PV, commun.*
+**1. Identity / Identité.** No. 001 · Ember · Basic · Cindrel → Flarrow → Pyrequill. 50 HP, common.
+*N° 001 · Braise · Base · Braisillon → Flambèche → Bûcheplume. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a hoopoe chick: the round fledgling body, the fan crest
 and the curved beak. Invented: a body still half-cased in its glazed clay eggshell, a crest of fired-clay
@@ -96,8 +96,8 @@ FR : « Son œuf d'argile n'éclot que lorsqu'on allume un four. Les verriers li
 
 ### 002 · Flarrow / Flambèche
 
-**1. Identity / Identité.** No. 002 · Fire · Awaken 1 · from Cindrel → Pyrequill. 70 HP, uncommon.
-*N° 002 · Feu · Éveil 1 · de Braisillon → Bûcheplume. 70 PV, peu commun.*
+**1. Identity / Identité.** No. 002 · Ember · Awaken 1 · from Cindrel → Pyrequill. 70 HP, uncommon.
+*N° 002 · Braise · Éveil 1 · de Braisillon → Bûcheplume. 70 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: the lean, long-legged running bird and the hoopoe crest,
 now swept back. Invented: a fired ceramic breastplate with glowing vent-slits, a swept crest of long
@@ -172,8 +172,8 @@ FR : « Il ne marche jamais quand il peut courir. Un Flambèche qui dévale la p
 
 ### 003 · Pyrequill / Bûcheplume
 
-**1. Identity / Identité.** No. 003 · Fire · Awaken 2 · from Flarrow. 100 HP, rare. Power: Kindling
-Heart. *N° 003 · Feu · Éveil 2 · de Flambèche. 100 PV, rare. Pouvoir : Cœur de braise.*
+**1. Identity / Identité.** No. 003 · Ember · Awaken 2 · from Flarrow. 100 HP, rare. Power: Kindling
+Heart. *N° 003 · Braise · Éveil 2 · de Flambèche. 100 PV, rare. Pouvoir : Cœur de braise.*
 
 **2. Animal base / Base animale.** EN: Kept: a tall standing bird of prey's stance, long legs and hooked
 beak (a secretary bird's bearing). Invented: armour of kiln-glazed plates, an open **firebox** in its
@@ -217,10 +217,10 @@ generations, and when it dies its plates are said to fire into a perfect kiln br
 Éveil. Un Bûcheplume vit des générations ; à sa mort, ses plaques cuiraient en une brique de four
 parfaite.*
 
-**10. Abilities / Capacités.** EN: **Kindling Heart** (Power): once a turn its open firebox lends a spare flame to another Fire Hexon, so one extra Fire energy given to them costs your turn nothing. **Spark Rain**: it shakes its crown
+**10. Abilities / Capacités.** EN: **Kindling Heart** (Power): once a turn its open firebox lends a spare flame to another Ember Hexon, so one extra Ember energy given to them costs your turn nothing. **Spark Rain**: it shakes its crown
 and sparks fall on every foe waiting behind the lines. **Inferno Plume**: it pours two hearts' worth of
 fire out of its crown in one blazing column, and has to rekindle afterwards. *FR : **Cœur de braise**
-(Pouvoir) : une fois par tour, son foyer prête une flamme de plus à un autre Hexon Feu ; une énergie Feu supplémentaire qu'on lui donne ne compte pas. **Pluie d'étincelles** : il secoue sa couronne et des étincelles tombent sur tous les adversaires en
+(Pouvoir) : une fois par tour, son foyer prête une flamme de plus à un autre Hexon Braise ; une énergie Braise supplémentaire qu'on lui donne ne compte pas. **Pluie d'étincelles** : il secoue sa couronne et des étincelles tombent sur tous les adversaires en
 réserve. **Panache infernal** : il déverse le feu de deux cœurs en une colonne embrasée, puis doit se
 rallumer.*
 
@@ -258,8 +258,8 @@ FR : « Son cœur de braise brûle dans un foyer ouvert. Il rallume tout four é
 
 ### 004 · Ashpaw / Cendrepatte
 
-**1. Identity / Identité.** No. 004 · Fire · Basic · Ashpaw → Blazelynx → Solarlynx. 50 HP, common.
-*N° 004 · Feu · Base · Cendrepatte → Brasilynx → Héliolynx. 50 PV, commun.*
+**1. Identity / Identité.** No. 004 · Ember · Basic · Ashpaw → Blazelynx → Solarlynx. 50 HP, common.
+*N° 004 · Braise · Base · Cendrepatte → Brasilynx → Héliolynx. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a lynx kitten, as a silhouette hint only: the tufted ears, the bobtail and the oversized paws. Invented: four paws that are glossy fired-clay mitts holding heat, ear tufts that are ember wicks, and a heat ruff still folded shut around its neck like a bud. *FR : Du chaton de lynx, il ne garde qu'un souvenir de silhouette : les oreilles à pinceaux, la queue courte et les pattes trop grandes. Inventé : quatre pattes qui sont des moufles d'argile cuite lustrée gorgées de chaleur, des pinceaux d'oreilles qui sont des mèches de braise, et une collerette de chaleur encore refermée autour du cou comme un bourgeon.*
 
@@ -293,8 +293,8 @@ FR : « Il dort les pattes d'argile enfouies dans la cendre chaude. Les carriers
 
 ### 005 · Blazelynx / Brasilynx
 
-**1. Identity / Identité.** No. 005 · Fire · Awaken 1 · from Ashpaw → Solarlynx. 80 HP, uncommon.
-*N° 005 · Feu · Éveil 1 · de Cendrepatte → Héliolynx. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 005 · Ember · Awaken 1 · from Ashpaw → Solarlynx. 80 HP, uncommon.
+*N° 005 · Braise · Éveil 1 · de Cendrepatte → Héliolynx. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: the long-legged prowling cat, the tufted ears and the bobtail. Invented: a heat ruff half open into twelve glazed blades with glowing edges, ear wicks that burn with real flame, a row of glazed plates down the spine, and clay-mitt forepaws with ceramic claws. *FR : Gardé : le grand félin rôdeur aux longues pattes, les oreilles à pinceaux et la queue courte. Inventé : une collerette de chaleur à demi ouverte en douze lames émaillées aux bords lumineux, des mèches d'oreilles qui brûlent d'une vraie flamme, une rangée de plaques émaillées le long de l'échine, et des moufles d'argile armées de griffes de céramique.*
 
@@ -328,8 +328,8 @@ FR : « Il attend sur une corniche, collerette repliée, puis dresse ses douze l
 
 ### 006 · Solarlynx / Héliolynx
 
-**1. Identity / Identité.** No. 006 · Fire · Awaken 2 · from Blazelynx. 110 HP, rare.
-*N° 006 · Feu · Éveil 2 · de Brasilynx. 110 PV, rare.*
+**1. Identity / Identité.** No. 006 · Ember · Awaken 2 · from Blazelynx. 110 HP, rare.
+*N° 006 · Braise · Éveil 2 · de Brasilynx. 110 PV, rare.*
 
 **2. Animal base / Base animale.** EN: Kept: the sitting bearing of a great cat, the tufted ears, the bobtail and the heavy paws. Invented: a heat ruff fully open into a sunburst of sixteen burning ceramic rays, armour of gold-glazed plates, and ear wicks grown into tall flames. *FR : Gardé : le port assis d'un grand félin, les oreilles à pinceaux, la queue courte et les pattes lourdes. Inventé : une collerette de chaleur tout à fait ouverte en soleil de seize rayons de céramique ardents, une armure de plaques émaillées d'or, et des mèches d'oreilles devenues de hautes flammes.*
 
@@ -371,8 +371,8 @@ FR : « Il salue le lever du jour collerette grande ouverte. Après un Saut supe
 
 ### 007 · Kilnback / Fourdos
 
-**1. Identity / Identité.** No. 007 · Fire · Basic · Kilnback → Furnaceback. 60 HP, common.
-*N° 007 · Feu · Base · Fourdos → Fournaidos. 60 PV, commun.*
+**1. Identity / Identité.** No. 007 · Ember · Basic · Kilnback → Furnaceback. 60 HP, common.
+*N° 007 · Braise · Base · Fourdos → Fournaidos. 60 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a badger: the low, broad body on short legs, the wedge-shaped head with two dark bands and the long digging claws. Invented: a hollow kiln dome of three clay coils grown over its back, with a fire burning inside, one chimney spout and one glowing spyhole. *FR : Du blaireau, il garde le corps bas et large sur pattes courtes, la tête en coin à deux bandes sombres et les longues griffes de fouisseur. Inventé : un dôme de four creux de trois colombins d'argile poussé sur son dos, avec un feu qui brûle dedans, un bec de cheminée et un regard lumineux.*
 
@@ -406,8 +406,8 @@ FR : « Il creuse le charbon et l'avale pour nourrir le four de son dos. Les nui
 
 ### 008 · Furnaceback / Fournaidos
 
-**1. Identity / Identité.** No. 008 · Fire · Awaken 1 · from Kilnback. 90 HP, uncommon.
-*N° 008 · Feu · Éveil 1 · de Fourdos. 90 PV, peu commun.*
+**1. Identity / Identité.** No. 008 · Ember · Awaken 1 · from Kilnback. 90 HP, uncommon.
+*N° 008 · Braise · Éveil 1 · de Fourdos. 90 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: the low, massive digger's body, the banded wedge face and the heavy claws. Invented: a kiln dome grown into a furnace of five coils, with two chimneys and an open arched firedoor full of molten light. *FR : Gardé : le corps massif et bas du fouisseur, le museau en coin barré de bandes et les lourdes griffes. Inventé : un dôme devenu fournaise de cinq colombins, avec deux cheminées et une porte de foyer en arc grande ouverte, pleine d'une lumière en fusion.*
 
@@ -449,8 +449,8 @@ FR : « Il nourrit sa porte de foyer un charbon à la fois et vide une veine en 
 
 ### 009 · Waxwick / Cirèche
 
-**1. Identity / Identité.** No. 009 · Fire · Basic · does not awaken. 40 HP, common.
-*N° 009 · Feu · Base · ne s'éveille pas. 40 PV, commun.*
+**1. Identity / Identité.** No. 009 · Ember · Basic · does not awaken. 40 HP, common.
+*N° 009 · Braise · Base · ne s'éveille pas. 40 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a waxwing: the plump perching body, the dark eye mask and the waxy beads on the wingtips. Invented: a body of soft candle wax that drips like a melting candle, and a glazed clay cup in its crown full of its own wax, with a braided wick in place of a crest. *FR : Du jaseur, il garde le corps dodu de passereau, le masque sombre autour des yeux et les gouttes de cire au bout des ailes. Inventé : un corps de cire de bougie qui coule comme une bougie qui fond, et une coupe d'argile émaillée dans le crâne, pleine de sa propre cire, avec une mèche tressée en guise de huppe.*
 
@@ -492,8 +492,8 @@ FR : « Sa huppe est une mèche plantée dans sa propre cire. Un seul Cirèche a
 
 ### 010 · Cinderhorn / Braisecorne
 
-**1. Identity / Identité.** No. 010 · Fire · Basic · does not awaken. 70 HP, uncommon.
-*N° 010 · Feu · Base · ne s'éveille pas. 70 PV, peu commun.*
+**1. Identity / Identité.** No. 010 · Ember · Basic · does not awaken. 70 HP, uncommon.
+*N° 010 · Braise · Base · ne s'éveille pas. 70 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from an ibex: the compact, deep-chested climber's body, the cloven hooves gathered on a rock point and the backswept curve of its horns. Invented: horns that are hollow fired-clay flues ringed like stacked kiln pipes and open at the tips, glazed plates over a soot-black hide, and an ember core that breathes heat out through the horns. *FR : Du bouquetin, il garde le corps ramassé de grimpeur à poitrine profonde, les sabots fendus réunis sur une pointe de roche et la courbe des cornes rejetées en arrière. Inventé : des cornes qui sont des conduits d'argile cuite creux, annelés comme des tuyaux de four empilés et ouverts à la pointe, des plaques émaillées sur un cuir noir de suie, et un cœur de braise qui expire sa chaleur par les cornes.*
 
@@ -535,8 +535,8 @@ FR : « Ses cornes sont des conduits d'argile où respire son cœur de braise. L
 
 ### 011 · Kilnfox / Fournard
 
-**1. Identity / Identité.** No. 011 · Fire · Basic · does not awaken. 60 HP, rare, promo.
-*N° 011 · Feu · Base · ne s'éveille pas. 60 PV, rare, promo.*
+**1. Identity / Identité.** No. 011 · Ember · Basic · does not awaken. 60 HP, rare, promo.
+*N° 011 · Braise · Base · ne s'éveille pas. 60 PV, rare, promo.*
 
 **2. Animal base / Base animale.** EN: Kept from a fox: the large pointed ears, the long narrow muzzle, the slender legs and the tail carried high. Invented: a tail that ends in a clear blown-glass bulb holding a live coal, a face and chest of crackle-glazed ceramic, and ears lit from inside like kiln spyholes. *FR : Du renard, il garde les grandes oreilles pointues, le long museau étroit, les pattes fines et la queue portée haut. Inventé : une queue terminée par un bulbe de verre soufflé clair où brûle un charbon vivant, un visage et une poitrine de céramique craquelée, et des oreilles éclairées de l'intérieur comme des regards de four.*
 

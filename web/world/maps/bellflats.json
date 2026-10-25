@@ -1559,11 +1559,11 @@
       "dialogue": [
         {
           "lines": [
-            "A hexagonal stone, beaded with salt. Each of its six faces is a colour: the water face, toward the open sea, is cold to the touch.",
+            "A hexagonal stone, beaded with salt. Each of its six faces is a colour: the Tide face, toward the open sea, is cold to the touch.",
             "The top is smooth, pale and blank, as if something was meant to be cut there and never was."
           ],
           "lines_fr": [
-            "Une pierre hexagonale, perlée de sel. Chacune de ses six faces a une couleur : celle de l'eau, tournée vers le large, est froide sous la main.",
+            "Une pierre hexagonale, perlée de sel. Chacune de ses six faces a une couleur : la face Marée, tournée vers le large, est froide sous la main.",
             "Le dessus est lisse, pâle et vide, comme si quelque chose devait y être gravé et ne l'avait jamais été."
           ]
         }

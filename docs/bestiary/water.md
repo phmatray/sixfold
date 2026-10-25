@@ -1,9 +1,9 @@
-# Water Hexons / Hexons Eau
+# Tide Hexons / Hexons Marée
 
-Grain: **sea glass**. Water Hexons have smooth wet hides banded with pale **tide rings**, fins and frills
+Grain: **sea glass**. Tide Hexons have smooth wet hides banded with pale **tide rings**, fins and frills
 of translucent glass, nacre plates and lens-clear eyes. Each Awakening adds rings and glass. Home: the Saltreach (Saltwind Boardwalk, Gullhaven, the Bellflats). See [BESTIARY.md](../BESTIARY.md).
 
-*Grain : **verre de mer**. Les Hexons Eau ont une peau lisse et humide cerclée d'**anneaux de marée**
+*Grain : **verre de mer**. Les Hexons Marée ont une peau lisse et humide cerclée d'**anneaux de marée**
 pâles, des nageoires et collerettes de verre translucide, des plaques de nacre et des yeux clairs comme
 des lentilles. Chaque Éveil ajoute des anneaux et du verre. Région : la Côte Salée.*
 
@@ -21,8 +21,8 @@ large bouche et le sac vocal.*
 
 ### 012 · Puddock / Flaquaud
 
-**1. Identity / Identité.** No. 012 · Water · Basic · Puddock → Brookhorn → Tidemaw. 50 HP, common.
-*N° 012 · Eau · Base · Flaquaud → Ruissecorne → Marégueule. 50 PV, commun.*
+**1. Identity / Identité.** No. 012 · Tide · Basic · Puddock → Brookhorn → Tidemaw. 50 HP, common.
+*N° 012 · Marée · Base · Flaquaud → Ruissecorne → Marégueule. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a young frog: the squat body, wide mouth and big round
 eyes. Invented: a tadpole's glass tail fin it never loses, fan-shaped glass gill frills, a bubble-lens
@@ -97,8 +97,8 @@ FR : « Il ne perd jamais sa queue de têtard. Quand son sac vocal se trouble, l
 
 ### 013 · Brookhorn / Ruissecorne
 
-**1. Identity / Identité.** No. 013 · Water · Awaken 1 · from Puddock → Tidemaw. 70 HP, uncommon.
-*N° 013 · Eau · Éveil 1 · de Flaquaud → Marégueule. 70 PV, peu commun.*
+**1. Identity / Identité.** No. 013 · Tide · Awaken 1 · from Puddock → Tidemaw. 70 HP, uncommon.
+*N° 013 · Marée · Éveil 1 · de Flaquaud → Marégueule. 70 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: a broad-headed frog's stance and wide mouth. Invented: a
 spiral horn of nacre on its snout, a crest of glass fins down its spine, and a long glass tail it uses as
@@ -170,8 +170,8 @@ FR : « Il garde une seule mare en levant un tourbillon. Une corne de Ruissecorn
 
 ### 014 · Tidemaw / Marégueule
 
-**1. Identity / Identité.** No. 014 · Water · Awaken 2 · from Brookhorn. 100 HP, rare. Power: Mending
-Rain. *N° 014 · Eau · Éveil 2 · de Ruissecorne. 100 PV, rare. Pouvoir : Pluie apaisante.*
+**1. Identity / Identité.** No. 014 · Tide · Awaken 2 · from Brookhorn. 100 HP, rare. Power: Mending
+Rain. *N° 014 · Marée · Éveil 2 · de Ruissecorne. 100 PV, rare. Pouvoir : Pluie apaisante.*
 
 **2. Animal base / Base animale.** EN: Kept: a huge old toad's squat mass and vast mouth. Invented: a
 living tide pool sunk into its back, ringed by nacre plates, where small fish and anemones live; a mouth
@@ -261,8 +261,8 @@ prend sur son propre verre. Du poisson restent le long corps, les ouïes et la n
 
 ### 015 · Rillet / Ruisselin
 
-**1. Identity / Identité.** No. 015 · Water · Basic · Rillet → Streamfin → Gulfwyrm. 50 HP, common.
-*N° 015 · Eau · Base · Ruisselin → Nageflot → Golfeguivre. 50 PV, commun.*
+**1. Identity / Identité.** No. 015 · Tide · Basic · Rillet → Streamfin → Gulfwyrm. 50 HP, common.
+*N° 015 · Marée · Base · Ruisselin → Nageflot → Golfeguivre. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a ribbon fish: the long flat body, the tail fan and a
 row of gill slits. Invented: the rill, a clear inner channel that spirals through its glass body from gills
@@ -354,8 +354,8 @@ FR : « Un petit ruisseau traverse son corps de verre toute la journée. Les pê
 
 ### 016 · Streamfin / Nageflot
 
-**1. Identity / Identité.** No. 016 · Water · Awaken 1 · from Rillet → Gulfwyrm. 80 HP, uncommon.
-*N° 016 · Eau · Éveil 1 · de Ruisselin → Golfeguivre. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 016 · Tide · Awaken 1 · from Rillet → Gulfwyrm. 80 HP, uncommon.
+*N° 016 · Marée · Éveil 1 · de Ruisselin → Golfeguivre. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: a ribbon fish's long body and tail fan. Invented: the rill
 has grown into a fast white spiral current; two pairs of sickle-shaped glass fin blades along its flanks;
@@ -446,8 +446,8 @@ FR : « Immobile dans la marée qui court, lames couchées, il coupe le courant 
 
 ### 017 · Gulfwyrm / Golfeguivre
 
-**1. Identity / Identité.** No. 017 · Water · Awaken 2 · from Streamfin. 120 HP, rare.
-*N° 017 · Eau · Éveil 2 · de Nageflot. 120 PV, rare.*
+**1. Identity / Identité.** No. 017 · Tide · Awaken 2 · from Streamfin. 120 HP, rare.
+*N° 017 · Marée · Éveil 2 · de Nageflot. 120 PV, rare.*
 
 **2. Animal base / Base animale.** EN: Kept: a ribbon fish's length, gill vents and tail fan, grown to
 the size of a sea serpent from a sailor's tale. Invented: the rill has become a deep gulf current, dark
@@ -556,8 +556,8 @@ tête ronde, les quatre nageoires et sa façon de se dresser sur un rocher.*
 
 ### 018 · Kelpup / Varéchiot
 
-**1. Identity / Identité.** No. 018 · Water · Basic · Kelpup → Kelpwarden. 60 HP, common.
-*N° 018 · Eau · Base · Varéchiot → Gardevarech. 60 PV, commun.*
+**1. Identity / Identité.** No. 018 · Tide · Basic · Kelpup → Kelpwarden. 60 HP, common.
+*N° 018 · Marée · Base · Varéchiot → Gardevarech. 60 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a seal pup: the round head, the plump body and the four
 flippers. Invented: living kelp rooted in its own hide (six kelp whiskers and a tuft on its head) and the
@@ -642,8 +642,8 @@ FR : « Le varech pousse sur sa peau, porté par un flotteur de verre plein de m
 
 ### 019 · Kelpwarden / Gardevarech
 
-**1. Identity / Identité.** No. 019 · Water · Awaken 1 · from Kelpup. 90 HP, uncommon.
-*N° 019 · Eau · Éveil 1 · de Varéchiot. 90 PV, peu commun.*
+**1. Identity / Identité.** No. 019 · Tide · Awaken 1 · from Kelpup. 90 HP, uncommon.
+*N° 019 · Marée · Éveil 1 · de Varéchiot. 90 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: a grown seal's heavy body, thick neck and flippers.
 Invented: a living mantle of kelp rooted along its shoulders and back, buoyed by five glass floats full
@@ -694,9 +694,9 @@ sa lignée. Un nouveau flotteur pousse sur son manteau à chaque grande marée, 
 ancien.*
 
 **10. Abilities / Capacités.** EN: **Tide Gift**: it plucks a float from its mantle and takes up the
-bead of tide inside, a fresh Water energy for itself. **Crushing Current**: it leans its whole weight
+bead of tide inside, a fresh Tide energy for itself. **Crushing Current**: it leans its whole weight
 into the current and rolls it, kelp and all, over the foe. *FR : **Don des marées** : il cueille un flotteur
-de son manteau et absorbe la perle de marée qu'il contient, une énergie Eau toute fraîche. **Crushing
+de son manteau et absorbe la perle de marée qu'il contient, une énergie Marée toute fraîche. **Crushing
 Current** : il pèse de tout son poids dans le courant et le fait rouler, varech compris, sur
 l'adversaire.*
 
@@ -743,8 +743,8 @@ les yeux pédonculés, les pinces et l'habitude de vivre chez soi.*
 
 ### 020 · Shellmote / Coquillot
 
-**1. Identity / Identité.** No. 020 · Water · Basic. 60 HP, uncommon. Power: Float Shell.
-*N° 020 · Eau · Base. 60 PV, peu commun. Pouvoir : Coque flottante.*
+**1. Identity / Identité.** No. 020 · Tide · Basic. 60 HP, uncommon. Power: Float Shell.
+*N° 020 · Marée · Base. 60 PV, peu commun. Pouvoir : Coque flottante.*
 
 **2. Animal base / Base animale.** EN: Kept from a hermit crab: the eye stalks, the claws and a soft
 body that lives in a house. Invented: a glass-blowing mouth that blows its own round globe of sea glass
@@ -841,8 +841,8 @@ mâchoires et le long corps qui s'enroule.*
 
 ### 021 · Frosteel / Givranguille
 
-**1. Identity / Identité.** No. 021 · Water · Basic. 60 HP, uncommon.
-*N° 021 · Eau · Base. 60 PV, peu commun.*
+**1. Identity / Identité.** No. 021 · Tide · Basic. 60 HP, uncommon.
+*N° 021 · Marée · Base. 60 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a wolf eel: the heavy head with a grumpy brow, the
 strong jaws and the long body. Invented: a rime crest, a ridge of frosted glass spines along its head
@@ -936,8 +936,8 @@ restent le corps duveteux, les antennes plumeuses et les ailes repliées sur le 
 
 ### 022 · Brinemoth / Saumite
 
-**1. Identity / Identité.** No. 022 · Water · Basic. 60 HP, rare, promo.
-*N° 022 · Eau · Base. 60 PV, rare, promo.*
+**1. Identity / Identité.** No. 022 · Tide · Basic. 60 HP, rare, promo.
+*N° 022 · Marée · Base. 60 PV, rare, promo.*
 
 **2. Animal base / Base animale.** EN: Kept from a moth: the downy body, the feathery antennae, four
 wings and six legs. Invented: brine-pane wings, thin panes of sea glass that each hold a living film of
@@ -1011,7 +1011,7 @@ clear sea-glass wings, each holding a film of seawater rippling in pale rings, e
 salt; two feathery salt-crusted antennae; six thin teal legs; large round black lens eyes. Pose: perched
 on top of a barnacled mooring post, front three-quarter view, four wings raised and pressed together
 upright over its back like a closed book, low angle, moonlit backlight through the wings. Avoid: a real
-moth or butterfly; wings spread open to the sides; eye-spot patterns; a lantern glow (that is Psychic);
+moth or butterfly; wings spread open to the sides; eye-spot patterns; a lantern glow (that is Dream);
 no hexagon shapes or markings. *À montrer : corps de duvet nacré, quatre ailes de verre au film d'eau
 ridé, bords de sel, deux antennes salées, six pattes. Contre-plongée, contre-jour de lune. À éviter : un
 vrai papillon, des ailes étalées, des ocelles, une lueur de lanterne, aucun hexagone.*

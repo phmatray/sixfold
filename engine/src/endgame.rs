@@ -189,7 +189,7 @@ pub static GAUNTLET: [Rung; 6] = [
         rival: "bramble",
         deck: Prebuilt {
             name: T::new("Deep Thicket", "Fourré profond"),
-            description: T::new("The full Grass line to Awaken 2, poison and plenty of healing.", "Toute la lignée Herbe jusqu'à l'Éveil 2, du poison et des soins à foison."),
+            description: T::new("The full Grove line to Awaken 2, poison and plenty of healing.", "Toute la lignée Bosquet jusqu'à l'Éveil 2, du poison et des soins à foison."),
             list: &[
                 (SPRIGGET, 4),
                 (THORNBUCK, 3),
@@ -216,7 +216,7 @@ pub static GAUNTLET: [Rung; 6] = [
         rival: "marlo",
         deck: Prebuilt {
             name: T::new("Spring Tide", "Grande marée"),
-            description: T::new("Water up to Awaken 2, a Brinemoth to drag your Bench forward, Psychic on the side.", "L'Eau jusqu'à l'Éveil 2, une Saumite pour tirer votre Banc en avant, du Psychique en appoint."),
+            description: T::new("Tide up to Awaken 2, a Brinemoth to drag your Bench forward, Dream on the side.", "La Marée jusqu'à l'Éveil 2, une Saumite pour tirer votre Banc en avant, du Songe en appoint."),
             list: &[
                 (PUDDOCK, 4),
                 (BROOKHORN, 3),
