@@ -1,6 +1,8 @@
 {
   "title": "Saltwind Boardwalk",
   "title_fr": "Promenade de Ventsalé",
+  "region": "tide",
+  "music": "tide",
   "width": 30,
   "height": 22,
   "tiles": [

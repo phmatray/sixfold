@@ -1,6 +1,8 @@
 {
   "title": "Brightwell Square",
   "title_fr": "Place de Clairpuits",
+  "region": "hub",
+  "music": "overworld",
   "width": 26,
   "height": 20,
   "tiles": [
@@ -283,6 +285,18 @@
       "x": 23,
       "z": 13,
       "rot": 0
+    },
+    {
+      "asset": "cottage",
+      "x": 22,
+      "z": 7,
+      "rot": 270
+    },
+    {
+      "asset": "inn_sign",
+      "x": 21,
+      "z": 8,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -355,6 +369,13 @@
       "text": "In the bush at the square's edge, a twist of paper: \"Runner beans. Do NOT eat.\"",
       "text_fr": "Dans le buisson, au bord de la place, un cornet de papier : « Haricots grimpants. NE PAS MANGER. »",
       "if": "flag:seeds_asked"
+    },
+    {
+      "x": 21,
+      "z": 8,
+      "kind": "sign",
+      "text": "The Hearth Rooms. Beds by the night or by the hour, soup always.",
+      "text_fr": "Les Chambres de l'Âtre. Des lits à la nuit ou à l'heure, de la soupe toujours."
     }
   ],
   "warps": [
@@ -388,6 +409,18 @@
       "to": "clinic",
       "label": "Go into the Deck Clinic",
       "label_fr": "Entrer dans le Cabinet des decks",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    },
+    {
+      "x": 22,
+      "z": 9,
+      "to": "inn_hub",
+      "label": "Go into the Hearth Rooms",
+      "label_fr": "Entrer aux Chambres de l'Âtre",
       "spawn": {
         "x": 5,
         "z": 7,

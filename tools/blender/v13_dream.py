@@ -9,6 +9,9 @@ windows and cupola), dr_moon_glow (moonflower petals), dr_moonpool_glow (the moo
 import math
 import random
 
+import bmesh
+from mathutils import Vector
+
 from v13_kit import (B, T, arc, arch_pts, beam, box, chain, clamp01, contact, curve, cyl, empty, ico, jitter,  # noqa: F401
                      lathe, open_part, prism, ribbon, rock, shadow, sphere, torus, tube, FRONT)
 
@@ -35,8 +38,8 @@ PALETTE = {
 }
 
 WIND = {
-    # the curtain sways from its hem; the crown barely
-    "willow": lambda x, y, z, r: (clamp01((r - 0.35) / 0.75) * 0.85 + clamp01((z - 1.5) / 2.0) * 0.15) if z > 1.2 or r > 0.6 else 0.0,
+    # the hanging locks sway from their tips; the dome barely
+    "willow": lambda x, y, z, r: clamp01((z - 2.0) / 1.7) * 0.15 + clamp01((r - 0.6) / 0.3) * clamp01((2.8 - z) / 1.7) * 0.85,
     "wishing_tree": lambda x, y, z, r: clamp01((z - 1.2) / 2.2) * 0.6 + (0.35 if 1.0 < z < 2.1 and r > 0.4 else 0.0),
     "wisteria_arch": lambda x, y, z, r: clamp01((2.3 - z) / 0.6) if (abs(x) < 0.8 and z > 1.55) else 0.0,
 }
@@ -70,40 +73,84 @@ def paper_lantern(k, M, r=0.13, h=0.26, mat="dr_paper_glow", seg=8):
 # ---------------------------------------------------------------- trees
 
 
+def frond(pts, ang, w, sides=5):
+    """A willow lock along 3D points (top to tip): beaded, flattened across the tree (w wide, ~0.4 w deep), its
+    cross-sections square to the path, tapering to a blade tip at the last point."""
+    bm = bmesh.new()
+    pts = [Vector(p) for p in pts]
+    tan = Vector((-math.sin(ang), math.cos(ang), 0))
+    seg = [(b - a).length for a, b in zip(pts, pts[1:])]
+    total, run, prev = sum(seg), 0.0, None
+    for i, c in enumerate(pts):
+        if i == len(pts) - 1:
+            tip = bm.verts.new(c)
+            for j in range(sides):
+                bm.faces.new((prev[j], prev[(j + 1) % sides], tip))
+            break
+        d = (pts[i + 1] - pts[max(i - 1, 0)]).normalized()
+        nrm = d.cross(tan).normalized()
+        t = run / total
+        run += seg[i]
+        hw = w / 2 * (1 - t ** 2.2) ** 0.6 * (1.0 if i == 0 else (1.12 if i % 2 else 0.88))   # leafy beads, a blade tip
+        row = [bm.verts.new(c + tan * (hw * math.cos(q)) + nrm * (hw * 0.42 * math.sin(q)))
+               for q in (j / sides * math.tau for j in range(sides))]
+        if prev:
+            for j in range(sides):
+                k = (j + 1) % sides
+                bm.faces.new((prev[j], prev[k], row[k], row[j]))
+        prev = row
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return bm
+
+
 def build_willow(k):
-    """2 x 2 weeping willow (~3.6 m): a stout leaning trunk forking into three limbs under a soft crown, and a
-    curtain of long hanging blades all round, hem about 0.6 m off the ground. The Hushlands' ring tree."""
+    """2 x 2 weeping willow (~3.8 m): a stout leaning trunk forking into three limbs that hold up a domed umbrella of
+    foliage (lit top, darker rim), and long beaded locks hanging from the canopy edge with gaps between them, so the
+    trunk and the shade under the dome show through. The Hushlands' ring and lane tree."""
     rng = random.Random(412)
-    k.add(cyl(0.27, 0.19, 1.35, 8, 0.02), "dr_bark", T((0, 0, 0.66), (3, 2, 0)), smooth=True)
+    k.add(tube([(0, 0, -0.02), (0.04, 0.02, 0.55), (0.12, 0.0, 1.1), (0.1, -0.05, 1.65)], 0.25, 7, taper=0.62), "dr_bark", smooth=True)
     for a in range(0, 360, 90):
-        k.add(cyl(0.12, 0.03, 0.5, 5), "dr_bark_dk", T((0.2 * math.cos(math.radians(a + 20)), 0.2 * math.sin(math.radians(a + 20)), 0.1), (0, 62, a + 20)), smooth=True)
+        k.add(cyl(0.13, 0.03, 0.5, 5), "dr_bark_dk", T((0.2 * math.cos(math.radians(a + 20)), 0.2 * math.sin(math.radians(a + 20)), 0.1), (0, 62, a + 20)), smooth=True)
     for a in (30, 150, 270):
         ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
-        beam(k, (0.05 * ca, 0.05 * sa, 1.2), (0.55 * ca, 0.55 * sa, 2.35), 0.13, 0.13, "dr_bark")
-    for loc, r, m in (((0, 0, 3.0), 0.8, "dr_willow"), ((0.55, -0.3, 2.72), 0.6, "dr_willow_dk"), ((-0.55, 0.28, 2.75), 0.6, "dr_willow_dk"),
-                      ((0.1, 0.6, 2.8), 0.58, "dr_willow_dk"), ((-0.25, -0.55, 2.85), 0.55, "dr_willow"), ((0.62, 0.35, 2.85), 0.5, "dr_willow"),
-                      ((-0.15, -0.2, 3.4), 0.48, "dr_willow_lt"), ((0.3, 0.15, 3.42), 0.4, "dr_willow_lt")):
-        k.add(jitter(ico(r, 1), rng, r * 0.08), m, T(loc, scale=(1, 1, 0.82)), smooth=True)
-    # the curtain: blades hang from under the dome's rim, longer at the sides, a ragged hem 0.4-0.9 m up
-    radii = [0.95 + 0.0033 * j for j in range(70)]  # every blade on its own radius: no two share a plane
-    rng.shuffle(radii)
-    for c in range(14):
-        a0 = c / 14 * math.tau + rng.uniform(-0.1, 0.1)
-        for i in range(5):
-            a = a0 + rng.uniform(-0.18, 0.18)
-            rr = radii[c * 5 + i]
-            top = rng.uniform(2.45, 2.8)
-            hem = rng.uniform(0.4, 0.9) + (0.25 if math.sin(a) > 0.6 else 0.0)
-            m = rng.choice(["dr_willow", "dr_willow_dk", "dr_willow_lt", "dr_willow_xdk", "dr_willow_dk"])
-            k.add(blade(rng.uniform(0.14, 0.2), top - hem), m,
-                  T((rr * math.cos(a), rr * math.sin(a), top), (-rng.uniform(3, 9), 0, math.degrees(a) + 90)))
-    for c in range(18):  # a shorter, lighter layer higher on the dome hides where the curtain meets it
-        a = c / 18 * math.tau + rng.uniform(-0.12, 0.12)
-        rr = 0.78 + 0.0077 * ((c * 7) % 18)
-        top = rng.uniform(3.0, 3.25)
-        k.add(blade(rng.uniform(0.16, 0.22), rng.uniform(0.9, 1.4)), rng.choice(["dr_willow_lt", "dr_willow"]),
-              T((rr * math.cos(a), rr * math.sin(a), top), (-rng.uniform(16, 24), 0, math.degrees(a) + 90)))
-    contact(k, 0.95)
+        k.add(tube([(0.1, -0.05, 1.5), (0.1 + 0.35 * ca, -0.05 + 0.35 * sa, 2.15), (0.7 * ca, 0.7 * sa, 2.75)], 0.12, 5, taper=0.55), "dr_bark", smooth=True)
+    # the dome: a scalloped umbrella (~1.2 m); the locks spring from the crown, run over it and fall
+    DOME = [(0.45, 2.5), (0.95, 2.6), (1.15, 2.74), (1.14, 2.92), (0.98, 3.2), (0.7, 3.48), (0.36, 3.66), (0.0, 3.72)]
+    scal = lambda a, r: 1 + 0.07 * math.cos(7 * a + 0.4) * min(1.0, r / 0.9)  # noqa: E731
+    dome = lathe(DOME, 18)
+    for v in dome.verts:
+        r = math.hypot(v.co.x, v.co.y)
+        if r > 1e-4:
+            f = scal(math.atan2(v.co.y, v.co.x), r)
+            v.co.x, v.co.y = v.co.x * f, v.co.y * f
+    k.add(jitter(dome, rng, 0.02), "dr_willow", smooth=True)
+    k.add(jitter(ico(0.26, 1), rng, 0.02), "dr_willow_lt", T((0, 0, 3.72), scale=(1, 1, 0.5)), smooth=True)
+    over = [(0.3, 3.71), (0.7, 3.53), (0.99, 3.24), (1.19, 2.9)]   # just over the dome, crown to rim
+
+    def lock(a, r0, hem, w, m, drift):
+        ca, sa = math.cos(a), math.sin(a)
+        pts = [(r * scal(a, r) * ca, r * scal(a, r) * sa, z) for r, z in over if r >= r0]
+        rim = 1.19 * scal(a, 1.19)
+        n = 5
+        for i in range(1, n + 1):  # then straight down, a little out and to one side, to a blade tip
+            t = i / n
+            r = rim + 0.1 * math.sin(t * 1.6)
+            pts.append((r * ca - sa * drift * t * t, r * sa + ca * drift * t * t, 2.9 - (2.9 - hem) * t))
+        k.add(frond(pts, a, w), m, smooth=True)
+
+    for i in range(20):  # outer locks, long and short in turn, gaps between them
+        a = i / 20 * math.tau + rng.uniform(-0.05, 0.05)
+        hem = rng.uniform(0.5, 0.85) if i % 2 == 0 else rng.uniform(1.05, 1.45)
+        lock(a, 0.3 if i % 2 == 0 else 0.7, hem, rng.uniform(0.22, 0.27),
+             rng.choice(["dr_willow", "dr_willow", "dr_willow_lt", "dr_willow_dk"]), rng.uniform(-0.1, 0.1))
+    for i in range(7):  # a darker inner ring, shorter, hanging behind from under the dome
+        a = (i + 0.5) / 7 * math.tau + rng.uniform(-0.1, 0.1)
+        top = rng.uniform(2.6, 2.7)
+        hem = top - rng.uniform(1.5, 1.85)
+        pts = [((0.72 + 0.1 * math.sin(t * 1.6)) * math.cos(a), (0.72 + 0.1 * math.sin(t * 1.6)) * math.sin(a), top - (top - hem) * t)
+               for t in (i / 4 for i in range(5))]
+        k.add(frond(pts, a, 0.24), "dr_willow_xdk", smooth=True)
+    contact(k, 1.05)
 
 
 def build_wishing_tree(k):

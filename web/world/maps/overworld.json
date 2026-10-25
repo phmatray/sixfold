@@ -1,6 +1,8 @@
 {
   "title": "Sixfold Meadow",
   "title_fr": "Pré de Sixfold",
+  "region": "hub",
+  "music": "overworld",
   "width": 28,
   "height": 24,
   "tiles": [
@@ -70,12 +72,6 @@
       "asset": "flowers",
       "x": 15,
       "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 16,
-      "z": 13,
       "rot": 0
     },
     {
@@ -509,6 +505,13 @@
       "x": 5,
       "z": 21,
       "rot": 0
+    },
+    {
+      "asset": "waymark",
+      "x": 16,
+      "z": 12,
+      "rot": 0,
+      "glow": "#d6ac4a"
     }
   ],
   "spawn": {
@@ -619,6 +622,12 @@
       "text": "Caught in the roots at the meadow's edge, a twist of paper: \"Runner beans. Do NOT eat.\"",
       "text_fr": "Coincé dans les racines, en lisière du pré, un cornet de papier : « Haricots grimpants. NE PAS MANGER. »",
       "if": "flag:seeds_asked"
+    },
+    {
+      "kind": "waymark",
+      "id": "meadow",
+      "x": 16,
+      "z": 12
     }
   ],
   "warps": [

@@ -46,6 +46,8 @@ export const setMap = (name, raw) => maps.set(name, Promise.resolve(expand(local
 // `dialogue`, beat: -> `after`, else `challenge` and the duel offer.
 // A find (`kind: "find"`): `text` and its `give` once (flag found_<id>), a glint
 // until then unless `hidden`, and a shrug after.
+// A waymark (`kind: "waymark"`, §7.3): the first touch lights it (flag way_<id>),
+// and every touch opens the world map to travel.
 export function expand(map) {
   for (const n of map.npcs ?? []) {
     const t = n.trainer;
@@ -66,9 +68,27 @@ export function expand(map) {
     i.name ??= "";
     i.dialogue = [{ if: `!flag:${flag}`, lines: [i.text], do: [i.give, `flag:${flag}`] }, { lines: [tr("Nothing else here.", "Plus rien ici.")] }];
   }
+  for (const i of map.interactions ?? []) {
+    if (i.kind !== "waymark") continue;
+    const flag = `way_${i.id}`;
+    i.name ??= tr("Waymark", "Borne de voyage");
+    i.dialogue = [
+      {
+        if: `!flag:${flag}`,
+        lines: [tr("The crystal on the post wakes under your hand and hums, a note that seems to come from far away.",
+          "Le cristal de la borne s'éveille sous votre main et se met à bourdonner, une note qui semble venir de très loin."),
+        tr("Lit waymarks are linked. From any of them, or from your map whenever you're outdoors, you can travel to another.",
+          "Les bornes allumées sont reliées. Depuis l'une d'elles, ou depuis votre carte dès que vous êtes dehors, vous pouvez voyager jusqu'à une autre.")],
+        do: [`flag:${flag}`, "show:map"],
+      },
+      { lines: [tr("The waymark hums. Where to?", "La borne bourdonne. Où aller ?")], do: ["show:map"] },
+    ];
+  }
   return map;
 }
 export const OPTIONAL = /_b$|_c$|_dark$/; // variants: used when present, never missed
+// The cliff blocks for digit tiles: a map's `cliff` set ([block, top variant]), else the sandstone one.
+export const cliffSet = (map) => map.cliff ?? ["cliff", "cliff_b"];
 export const RING = ["tree", "tree_b", "tree_c", "bush_dark"]; // the default band of trees outside an outdoor map
 
 // Every model a map can use, so they load in parallel before it is built.
@@ -76,9 +96,10 @@ export function assetNames(map) {
   const names = new Set(["hero", ...map.props.map((p) => p.asset), ...(map.npcs ?? []).map((n) => n.model).filter(Boolean)]);
   const tiles = map.tiles.join("");
   const pieces = (kind) => Object.keys(SUFFIX_ARMS).forEach((s) => names.add(kind + s));
-  if (tiles.includes("f")) pieces("fence");
+  if (tiles.includes("f")) pieces(map.fence ?? "fence");
   if (/[WV]/.test(tiles)) pieces("wall"), pieces("wall_low"), names.add("wall_window");
-  if (/[1-9]/.test(tiles)) names.add("cliff"), names.add("cliff_b");
+  if (/[1-9]/.test(tiles)) cliffSet(map).forEach((n) => names.add(n));
+  for (const g of map.gates ?? []) for (const n of [g.prop, g.prop_closed, g.prop_open]) if (n) names.add(n);
   if (tiles.includes("=")) names.add("boardwalk");
   if (tiles.includes("H")) names.add("pier");
   if (!map.light.indoor) [...(map.ring ?? RING), "grass_edge"].forEach((n) => names.add(n));

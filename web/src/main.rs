@@ -20,6 +20,7 @@ mod shops;
 mod store;
 mod title;
 mod world;
+mod worldmap;
 
 use leptos::prelude::*;
 use sixfold_engine::{fr, tr, Action, CardId};

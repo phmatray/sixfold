@@ -99,8 +99,9 @@ Sheets: `ember_tiles.png`, `ember_day.png`, `ember_night.png`.
 ## Storm: the Galewold (1.3 PR 2)
 
 High heath on sea cliffs, dry-stone lanes, chime posts, copper and slate. Silhouettes: low walls in long lines, thin
-vertical masts (chime posts, pylons, the lift, the Rodspire), the white observatory dome. Ground `heath`, path `dirt`.
-Glow: `coil_glow` (pylon coils, the lift's line lamp, the spire tip), `lamp_glow` (observatory slit and windows).
+vertical masts (chime posts, pylons, the lift) and the Rodspire's lattice tower, the white observatory dome. Ground
+`heath`, path `dirt`. Glow: `coil_glow` (pylon coils, the lift's line lamp, the spire tip), `lamp_glow` (observatory
+slit and windows).
 
 | Asset | Foot | Collision | Height | Glow / empties / clip / wind | Tris | KB | Use |
 |---|---|---|---|---|---|---|---|
@@ -110,7 +111,7 @@ Glow: `coil_glow` (pylon coils, the lift's line lamp, the spire tip), `lamp_glow
 | `pylon` | 1×1 | solid | 3.2 m | `coil_glow`; `Open` (node `pylon_lever`, knife switch off → on) | 1880 | 96 | the three relay pylons; play `Open` and light the coil when `flag:pylon_n` is set |
 | `observatory` | 5×5 | solid; door tile origin + (2, 4) | 5.7 m | `lamp_glow` | 2886 | 148 | Stormwatch's observatory (warp to `observatory`); telescope through the slit, gallery ring at ~2.6 m |
 | `lift` | 2×2 | deck 0.1 | 5.4 m | `coil_glow` | 1584 | 90 | the Rodspire lift cage (its tiles hold the door warp `if` pylons 1–3) |
-| `rodspire` | 3×3 | solid | 12.1 m | `coil_glow`; `light_origin` at the tip | 2750 | 141 | the copper spire on the sea stack (arcs at night from `light_origin`) |
+| `rodspire` | 3×3 | solid | 12.1 m | `coil_glow`; `light_origin` at the tip | 2494 | 128 | the copper spire on the sea stack (arcs at night from `light_origin`): a stout four-legged lattice tower (X-braced bays, verdigris collars) round a core with two glowing coil drums, halo rings and a finned crown on a big orb |
 | `cliff_heath`, `cliff_heath_b` | 1×1 | cliff block, top 1.0 | 1 m (+ tufts) | — | 520 / 536 | 32 | the cliff set: grey weathered granite under a heath top; `_b` adds heather and a boulder |
 
 Suggested `props.js`:
@@ -167,13 +168,13 @@ Sheets: `tide_tiles.png`, `tide_day.png`, `tide_night.png`.
 ## Dream: the Hushlands (1.3 PR 3)
 
 Willow country in a soft twilight tint; a lake of floating paper lanterns; busier at night than by day. Silhouettes:
-weeping willow curtains, the pink wishing tree, round lilac-roofed houses on piles, lantern rafts in a line across the
-water, the moonwell's crescent arch. Ground `dusk_grass`, path `stone`. Glow: `dr_paper_glow`, `dr_rose_glow`,
-`dr_window_glow`, `dr_moon_glow` (moonflower petals), `dr_moonpool_glow` (the well's pool).
+domed weeping willows trailing their locks, the pink wishing tree, round lilac-roofed houses on piles, lantern rafts in
+a line across the water, the moonwell's crescent arch. Ground `dusk_grass`, path `stone`. Glow: `dr_paper_glow`,
+`dr_rose_glow`, `dr_window_glow`, `dr_moon_glow` (moonflower petals), `dr_moonpool_glow` (the well's pool).
 
 | Asset | Foot | Collision | Height | Glow / empties / clip / wind | Tris | KB | Use |
 |---|---|---|---|---|---|---|---|
-| `willow` | 2×2 | solid | 3.8 m | wind (the curtain hem most) | 2228 | 133 | the region's ring and lane tree |
+| `willow` | 2×2 | solid | 3.8 m | wind (the hanging lock tips most) | 2225 | 62 | the region's ring and lane tree: a domed, lit crown with beaded locks springing from it, arching over the rim and hanging in separate tapered strands, gaps showing the trunk and shade |
 | `wishing_tree` | 2×2 | solid | 3.8 m | wind | 1578 | 99 | Hushwillow Lane's wishing tree: blossom, ribbons and tags, a coin bowl (`d_tree` find) |
 | `floating_lantern` | 1×1 | solid (on water) | 0.6 m | `dr_paper_glow` | 344 | 18 | lanterns on Lanternmere; bobs |
 | `lantern_raft` | 1×1 | deck 0.1 | 0.75 m (pole) | `dr_rose_glow` | 504 | 29 | the lantern path gate's `prop_open` (`floor: 0.1`); bobs |
@@ -246,7 +247,7 @@ on rails, leaning menhirs, flagged cairns, timber mine sets and pale crystals in
 
 | Asset | Foot | Collision | Height | Glow / empties / clip / wind | Tris | KB | Use |
 |---|---|---|---|---|---|---|---|
-| `cliff_slate`, `cliff_slate_b` | 1×1 | cliff block, top 1.0 | 1 m | — | 534 / 606 | 33 / 38 | the cliff set: thin tilted beds, rust drips, a plated top that hides the grid; `_b` adds lichen and a grass tuft |
+| `cliff_slate`, `cliff_slate_b` | 1×1 | cliff block, top 1.0 | 1 m | — | 550 / 618 | 35 / 40 | the cliff set: thin tilted beds, rust-weathered beds (flat stains laid on the bed faces, thin runs dribbling down), a plated top that hides the grid; `_b` adds lichen and a grass tuft |
 | `stairs_slate` | 1×1 | deck 0.5 | 1 m | — | 652 | 37 | as `stairs` (Scree Pass switchbacks, Anvilstead and Bastion terraces) |
 | `headframe` | 3×3 | solid | 6.1 m | `sn_lamp_glow`; `light_origin` | 2630 | 149 | the winding tower over Anvilstead's old shaft (the `sn_headframe` gloves find) |
 | `terrace_house` | 4×3 | solid; back flush with the north edge, door on column 1 of the front row (warp tile origin + (1, 2)) | 5.0 m | `sn_window_glow`, `sn_lamp_glow`; `smoke_origin` | 2718 | 152 | Anvilstead's houses, the Tally Room inn, the climbing school, backed into a cliff on the row behind |

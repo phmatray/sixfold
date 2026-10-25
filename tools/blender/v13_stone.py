@@ -18,7 +18,8 @@ from v13_kit import (B, T, beam, box, contact, cyl, empty, facet_block, ico, jit
 PALETTE = {
     "sn_slate": "#6c7380", "sn_slate_dk": "#535a67", "sn_slate_lt": "#838a96", "sn_slate_top": "#a3a7ad", "sn_shard": "#b4b8bd",
     "sn_bed_a": "#58606f", "sn_bed_b": "#4b5262", "sn_bed_c": "#646c7b", "sn_bed_d": "#525a6b", "sn_crack": "#2f343e",
-    "sn_top_a": "#7a818d", "sn_top_b": "#6e7582", "sn_top_c": "#858b96", "sn_drip": "#b8643a", "sn_drip_lt": "#cf8550",
+    "sn_top_a": "#7a818d", "sn_top_b": "#6e7582", "sn_top_c": "#858b96", "sn_drip": "#b05f3a",
+    "sn_stain": "#9c6048",
     "sn_break": "#b9bdc3",
     "sn_seam": "#3f4550", "sn_rusty": "#7e6e6a", "sn_lichen": "#b5a862", "sn_menhir": "#8b9097", "sn_menhir_dk": "#72777f", "sn_grass": "#7f9a4c",
     "sn_rust": "#b85a32", "sn_rust_dk": "#8a4126", "sn_steel": "#8a9099", "sn_ballast": "#8d8a84",
@@ -59,17 +60,21 @@ BEDS = ((-0.02, 0.12, 0.022), (0.12, 0.15, -0.03), (0.15, 0.27, 0.018), (0.27, 0
 
 
 def slate_block(k, rng, lichen=False):
-    """1 x 1 x 1 slate: thin tilted beds in four blue-greys with dark recessed partings, rust drips running down
-    from the rim, broken plate lips overhanging at the top, and a top of three or four plates at exactly 1.0 with
+    """1 x 1 x 1 slate: thin tilted beds in four blue-greys with dark recessed partings, rust stains fanning
+    down from the rim, broken plate lips overhanging at the top, and a top of three or four plates at exactly 1.0 with
     dark cracks between, tonal patches and loose chips a few mm proud."""
     tones = ["sn_bed_a", "sn_bed_b", "sn_bed_c", "sn_bed_d"]
+    thick = []   # (half width, half height, placement) of each proud bed, top first: the stains are laid on these
     for i, (z0, z1, jut) in enumerate(BEDS):
         thin = jut < 0
         j = jut + rng.uniform(-0.006, 0.006)
         tilt = (rng.uniform(2.0, 4.0) * rng.choice([-1, 1]), 0, 0) if i % 2 else (0, rng.uniform(2.0, 4.0) * rng.choice([-1, 1]), 0)
         off = (0, 0) if thin else (rng.uniform(-0.01, 0.01), rng.uniform(-0.01, 0.01))
+        M = T((off[0], off[1], (z0 + z1) / 2), tilt if not thin else (0, 0, 0))
         k.add(facet_block(rng, 1.0 + j, 1.0 + j, z0 - (z0 + z1) / 2, z1 - (z0 + z1) / 2, bulge=0.0 if thin else 0.01, cuts=1),
-              "sn_crack" if thin else rng.choice(tones), T((off[0], off[1], (z0 + z1) / 2), tilt if not thin else (0, 0, 0)))
+              "sn_crack" if thin else rng.choice(tones), M)
+        if not thin:
+            thick.insert(0, ((1.0 + j) / 2, (z1 - z0) / 2, M))
     k.add(facet_block(rng, 1.0, 1.0, 0.86, 0.995, bulge=0.0, cuts=0, top_in=True), "sn_crack")
     # broken plate lips overhanging at the rim, on two sides
     for side in rng.sample(range(4), 2):
@@ -78,15 +83,47 @@ def slate_block(k, rng, lichen=False):
         u, L = rng.uniform(-0.2, 0.2), rng.uniform(0.3, 0.5)
         lip = jitter(box(L if ny else 0.14, 0.14 if ny else L, 0.06), rng, 0.012, squash=0.3)
         k.add(lip, rng.choice(tones), T((nx * 0.5 + (-ny) * u, ny * 0.5 + nx * u, 0.93), (rng.uniform(-6, 6), rng.uniform(-6, 6), 0)))
-    # rust drips from the rim, down across a few beds, just proud of the plates
-    for i in range(3):
-        side = rng.randrange(4)
+    # rust stains on two faces: an iron-rich bed weathered rust-brown along part of its length (ragged ends, a hotter
+    # core), a paler wash on the bed under it, and thin runs dribbling a few beds down from it, fading toward slate.
+    # Flat polygons laid on each bed's own face (tilted with it, 1-2 cm proud), so the dark partings cross them.
+    def on_bed(lv, side, pts, mat, proud):
+        if lv >= len(thick):
+            return
+        hw, hh, M = thick[lv]
         a = math.radians(90 * side)
-        nx, ny = round(math.cos(a)), round(math.sin(a))
-        u, L, w = rng.uniform(-0.38, 0.38), rng.uniform(0.25, 0.6), rng.uniform(0.035, 0.06)
-        d = 0.5 + 0.034 + 0.004 * i
-        drip = prism([(-w / 2, 0), (w / 2, 0), (w * 0.15, -L), (-w * 0.15, -L)], 0.01)
-        k.add(drip, rng.choice(["sn_drip", "sn_drip_lt"]), T((nx * d + (-ny) * u, ny * d + nx * u, 0.885 - 0.012 * i), (0, 0, side * 90 + 90)))
+        n, tv = Vector((round(math.cos(a)), round(math.sin(a)), 0)), Vector((-round(math.sin(a)), round(math.cos(a)), 0))
+        bm = bmesh.new()
+        f = bm.faces.new([bm.verts.new(n * (hw + proud) + tv * u + Vector((0, 0, (hh - 0.006) * (2 * v - 1)))) for u, v in pts])
+        f.normal_update()
+        if f.normal.dot(n) < 0:
+            f.normal_flip()
+        k.add(bm, mat, M)
+
+    def patch(lv, side, ua, ub, mat, proud, v0=0.0, v1=1.0):   # a ragged-ended strip along a bed, v = 0 bottom .. 1 top
+        r = lambda: rng.uniform(0.0, 0.07)  # noqa: E731
+        vm = (v0 + v1) / 2
+        on_bed(lv, side, [(ua + r(), v1), (ub - r(), v1), (ub + r() * 0.6, vm), (ub - r(), v0), (ua + r(), v0), (ua - r() * 0.6, vm)],
+               mat, proud)
+
+    for si, side in enumerate(rng.sample(range(4), 2)):
+        lv = rng.choice([0, 1, 1, 2, 3])
+        L = rng.uniform(0.5, 0.85) * (1.0 if si == 0 else 0.7)
+        ua = rng.uniform(-0.48, 0.48 - L)
+        patch(lv, side, ua, ua + L, "sn_stain", 0.011)
+        c = ua + L * rng.uniform(0.3, 0.6)
+        patch(lv, side, c - L * 0.22, c + L * 0.22, "sn_drip", 0.017, rng.uniform(0.0, 0.35), 1.0)
+        patch(lv + 1, side, ua + L * rng.uniform(0.1, 0.3), ua + L * rng.uniform(0.6, 0.85), "sn_rusty", 0.011, rng.uniform(0.2, 0.5), 1.0)
+        for _ in range(rng.choice([2, 3])):  # thin runs, each a little narrower and paler per bed, ending in a point
+            u, w = rng.uniform(ua + 0.05, ua + L - 0.05), rng.uniform(0.016, 0.026)
+            depth = rng.randint(2, 3)
+            for d in range(depth):
+                last = d == depth - 1
+                wb = 0.0 if last else w * 0.75
+                u2 = u + rng.uniform(-0.012, 0.012)
+                v_end = rng.uniform(0.0, 0.5) if last else 0.0
+                on_bed(lv + 1 + d, side, [(u - w, 1.0), (u + w, 1.0), (u2 + max(wb, 0.003), v_end), (u2 - max(wb, 0.003), v_end)],
+                       "sn_stain" if d == 0 else "sn_rusty", 0.017)
+                u, w = u2, wb
     # the top: a random split into plates (top exactly 1.0), inset so dark cracks show between them
     sx, sy = rng.uniform(-0.2, 0.2), rng.uniform(-0.2, 0.2)
     cells = [(-0.5, -0.5, sx, sy), (sx, -0.5, 0.5, sy + rng.uniform(-0.12, 0.12)), (-0.5, sy, sx + rng.uniform(-0.15, 0.15), 0.5)]

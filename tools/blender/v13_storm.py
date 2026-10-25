@@ -382,51 +382,58 @@ def build_lift(k):
 
 
 def build_rodspire(k):
-    """3 x 3, ~12 m: the Rodspire. A stepped granite plinth with three copper buttress fins, a tall tapering spire of
-    copper sections with verdigris collars and wound coils, three stays to the corners, a crown of six points
-    round a cyan orb (coil_glow) where the `light_origin` sits."""
-    rng = random.Random(461)
-    k.add(cyl(1.42, 1.48, 0.3, 8, 0.03), "st_granite_dk", T((0, 0, 0.13), (0, 0, 22.5)))
-    k.add(cyl(1.1, 1.18, 0.35, 8, 0.03), "st_granite", T((0, 0, 0.45), (0, 0, 22.5)))
-    k.add(cyl(0.78, 0.82, 0.3, 8, 0.02), "st_granite_lt", T((0, 0, 0.77), (0, 0, 22.5)))
-    for i in range(3):  # buttress fins
-        a = math.radians(90 + 120 * i)
-        k.add(prism([(0.25, 0.0), (1.2, 0.0), (1.05, 0.25), (0.35, 2.6), (0.25, 3.2)], 0.12, 0.01), "copper",
-              T((0, 0, 0.6), (0, 0, math.degrees(a))))
-        k.add(prism([(1.05, -0.01), (1.23, -0.01), (1.23, 0.3), (1.05, 0.3)], 0.2), "st_verdigris_dk", T((0, 0, 0.6), (0, 0, math.degrees(a))))
-    # spire sections: radius tapers from 0.42 at 0.9 m to 0.06 at 11 m
-    rad = lambda z: 0.42 - 0.36 * (z - 0.9) / 10.1  # noqa: E731
-    zs = [0.9, 2.6, 4.2, 5.7, 7.1, 8.4, 9.6, 10.6, 11.0]
-    for i, (z0, z1) in enumerate(zip(zs, zs[1:])):
-        k.add(cyl(rad(z0), rad(z1), z1 - z0, 8), "copper" if i % 2 == 0 else "copper_dk", T((0, 0, (z0 + z1) / 2), (0, 0, 22.5)), smooth=True)
-        k.add(cyl(rad(z1) + 0.06, rad(z1) + 0.06, 0.12, 8), "st_verdigris", T((0, 0, z1), (0, 0, 22.5)))
-    for z0 in (3.0, 6.0):  # wound coils
-        for j in range(4):
-            z = z0 + 0.14 * j
-            k.add(torus(rad(z) + 0.045, 0.035, 10, 4), "copper", T((0, 0, z)))
-    # two halo rings on spokes, high up: the Rodspire's signature
-    for z, rr in ((7.75, 0.75), (9.0, 0.5)):
-        k.add(torus(rr, 0.045, 16, 4), "copper", T((0, 0, z)))
-        for i in range(3):
-            a = math.radians(60 + 120 * i)
-            beam(k, (rad(z) * math.cos(a), rad(z) * math.sin(a), z - 0.25), (rr * math.cos(a), rr * math.sin(a), z), 0.035, 0.035, "st_verdigris_dk")
-            k.add(sphere(0.07, 6, 4), "st_verdigris", T((rr * math.cos(a), rr * math.sin(a), z)))
-    # stays from a collar to the plinth corners
-    for i in range(3):
-        a = math.radians(30 + 120 * i)
-        k.add(tube([(0.2 * math.cos(a), 0.2 * math.sin(a), 5.65), (1.25 * math.cos(a), 1.25 * math.sin(a), 0.62)], 0.022, 4), "st_steel_dk")
-        k.add(sphere(0.07, 6, 4), "st_porcelain", T((0.7 * math.cos(a), 0.7 * math.sin(a), 3.2)))
-    # crown and orb
-    TOP = 11.0
-    k.add(torus(0.22, 0.04, 10, 4), "copper", T((0, 0, TOP + 0.02)))
-    for i in range(6):
-        a = i / 6 * math.tau
-        k.add(tube([(0.2 * math.cos(a), 0.2 * math.sin(a), TOP), (0.3 * math.cos(a), 0.3 * math.sin(a), TOP + 0.35), (0.22 * math.cos(a), 0.22 * math.sin(a), TOP + 0.75)], 0.03, 4, taper=0.3), "copper")
-    k.add(sphere(0.2, 12, 8), "coil_glow", T((0, 0, TOP + 0.36)), smooth=True)
-    k.add(cyl(0.03, 0.0, 0.7, 6), "copper", T((0, 0, TOP + 0.75)))
-    _ = rng
+    """3 x 3, ~12 m: the Rodspire. A stepped granite plinth carrying a stout four-legged copper lattice tower that
+    tapers in an Eiffel curve (X-braced bays, chunky verdigris collars at every level), a heavy copper rod up its
+    core wound with two big coil drums (glowing bands), then a mast with two halo rings and a crown of fins round a
+    large cyan orb (coil_glow) where the `light_origin` sits."""
+    k.add(cyl(1.44, 1.48, 0.3, 8, 0.03), "st_granite_dk", T((0, 0, 0.13), (0, 0, 22.5)))
+    k.add(cyl(1.2, 1.26, 0.36, 8, 0.03), "st_granite", T((0, 0, 0.44), (0, 0, 22.5)))
+    k.add(cyl(0.55, 0.6, 0.3, 8, 0.02), "st_granite_lt", T((0, 0, 0.75), (0, 0, 22.5)))
+    Z0, ZT = 0.62, 9.0
+    R = lambda z: 0.36 + 0.68 * ((ZT - z) / (ZT - Z0)) ** 1.35  # noqa: E731  (leg distance from the axis)
+    lv = [Z0, 2.3, 3.9, 5.4, 6.8, 8.0, ZT]
+    corner = lambda z, i: (R(z) * math.cos(math.radians(45 + 90 * i)), R(z) * math.sin(math.radians(45 + 90 * i)), z)  # noqa: E731
+    for i in range(4):  # legs, thick at the foot; granite foot blocks
+        k.add(box(0.36, 0.36, 0.16, 0.02), "st_granite_lt", T((*corner(Z0, i)[:2], Z0 + 0.06), (0, 0, 45 + 90 * i)))
+        for z0, z1 in zip(lv, lv[1:]):
+            w = 0.075 + 0.07 * (ZT - z0) / (ZT - Z0)
+            k.add(tube([corner(z0 + 0.02, i), corner(z1, i)], w, 4, cap=False), "copper")
+    for z0, z1 in zip(lv[:-1], lv[1:-1]):  # X bracing in every bay but the top one
+        for i in range(4):
+            a, b = corner(z0, i), corner(z1, (i + 1) % 4)
+            c, d = corner(z0, (i + 1) % 4), corner(z1, i)
+            for p, q, f in ((a, b, 1.0), (c, d, 0.97)):   # the second diagonal a touch inside: no shared plane
+                k.add(tube([(p[0] * f, p[1] * f, p[2]), (q[0] * f, q[1] * f, q[2])], 0.045, 4, cap=False), "copper_dk")
+    for n, z in enumerate(lv[1:]):  # collars: a square frame ring with a verdigris band, one per level
+        r = R(z) + 0.2
+        k.add(cyl(r, r, 0.2, 4), "st_verdigris_dk" if n % 2 else "st_verdigris", T((0, 0, z), (0, 0, 45)))
+        k.add(cyl(r * 0.8, r * 0.8, 0.27, 4), "copper_dk", T((0, 0, z), (0, 0, 45)))
+    # the core rod and two coil drums with glowing bands
+    core = lambda z: 0.3 - 0.14 * (z - 0.9) / (ZT - 0.9)  # noqa: E731
+    k.add(cyl(core(0.9), core(ZT), ZT - 0.86, 8), "copper", T((0, 0, (0.84 + ZT - 0.02) / 2), (0, 0, 22.5)), smooth=True)
+    for zc, h, rr in ((3.1, 1.2, 0.5), (6.1, 0.9, 0.38)):
+        k.add(cyl(rr, rr, h, 10), "copper_dk", T((0, 0, zc)), smooth=True)
+        for j in range(3):
+            k.add(torus(rr + 0.03, 0.06, 8, 4), "copper", T((0, 0, zc - h / 2 + 0.12 + j * (h - 0.24) / 2)))
+        for j in range(2):
+            k.add(cyl(rr + 0.012, rr + 0.012, 0.15, 8), "coil_glow", T((0, 0, zc - h / 2 + 0.12 + (j + 0.5) * (h - 0.24) / 2)))
+    # the mast above the tower, halo rings on spokes, crown of fins round the orb
+    TOP = 11.2
+    k.add(cyl(0.2, 0.11, TOP - ZT, 8), "copper_dk", T((0, 0, (ZT + TOP) / 2), (0, 0, 22.5)), smooth=True)
+    for z, rr in ((9.55, 0.95), (10.45, 0.62)):
+        k.add(torus(rr, 0.08, 14, 4), "copper", T((0, 0, z)))
+        k.add(cyl(0.26, 0.26, 0.18, 8), "st_verdigris", T((0, 0, z), (0, 0, 22.5)))
+        for i in range(4):
+            a = math.radians(90 * i)
+            k.add(tube([(0.2 * math.cos(a), 0.2 * math.sin(a), z), (rr * math.cos(a), rr * math.sin(a), z)], 0.045, 4), "st_verdigris_dk")
+    k.add(cyl(0.34, 0.24, 0.16, 8), "st_verdigris", T((0, 0, TOP), (0, 0, 22.5)))
+    for i in range(4):
+        k.add(prism([(0.16, 0.0), (0.52, 0.1), (0.58, 0.5), (0.36, 1.0), (0.2, 0.62)], 0.07), "copper",
+              T((0, 0, TOP), (0, 0, 45 + 90 * i)))
+    k.add(sphere(0.4, 12, 8), "coil_glow", T((0, 0, TOP + 0.5)), smooth=True)
+    k.add(cyl(0.06, 0.0, 0.9, 6), "copper", T((0, 0, TOP + 1.3)))
     contact(k, 1.5)
-    return empty("light_origin", (0, 0, TOP + 0.36))
+    return empty("light_origin", (0, 0, TOP + 0.5))
 
 
 PROPS = {

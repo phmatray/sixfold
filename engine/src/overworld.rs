@@ -15,6 +15,8 @@
 //!   `open:<rival>` (enough seals to duel them)
 //! - `coins:<n>` (at least n Facets), `count:<prefix>:<n>` (at least n flags
 //!   and items start with the prefix, e.g. `count:found_:30`)
+//! - `time:<phase>` (the clock is in `dawn`, `day`, `dusk` or `night`; see
+//!   [`clock`](crate::clock))
 //!
 //! Effects ([`parse_effect`]):
 //!
@@ -25,28 +27,34 @@
 //!   spaces; promos refused), `show:<panel>` (one of [`PANELS`])
 //! - `coins:<n>` (gain n Facets), `pay:<n>` (spend n; when short, nothing is
 //!   spent and [`Progress::apply_all`] skips the rest of the list)
-//! - `emote:<actor>:<emote>`, a cue for the world ([`Cue`]): state is untouched
+//! - `clock:<phase>` (jump the clock to the start of a phase: an inn's rest)
+//! - `emote:<actor>:<emote>` and `warp:<map>:<x>:<z>:<facing>` (fade and load
+//!   a map at a tile: a ferry, a lift), cues for the world ([`Cue`]): state is
+//!   untouched
 //!
 //! Save string: comma-separated `i:<item>`, `f:<flag>`, `won:<id>` /
 //! `lost:<id>`, `g:<beaten>_<deck print>` (a Gauntlet run), `d:<day>` (the
 //! last daily duel reward), `c:<n>` (Facets; absent in a save from before
 //! them, which then starts with [`STARTING_COINS`]) and `ps:<day>_<mask>`
-//! (the shop's daily singles bought that day) tokens. Unknown tokens are
-//! skipped.
+//! (the shop's daily singles bought that day) and `t:<minute>` (the clock;
+//! absent at 08:00, and in a save from before the clock) tokens. Unknown
+//! tokens are skipped.
 
 use std::collections::BTreeSet;
 
 use crate::booster::BOOSTERS;
 use crate::campaign::{rival, seals};
 use crate::card::{card, CardId};
+use crate::clock::{self, Phase};
 use crate::trainers::trainer;
 
 /// Facets a new player starts with, and a save from before Facets.
 pub const STARTING_COINS: u32 = 100;
 
 /// The UI panels a `show:` effect may open.
-pub const PANELS: [&str; 9] = [
+pub const PANELS: [&str; 10] = [
     "ladder",
+    "inn",
     "shop_hall",
     "trader",
     "press",
@@ -56,6 +64,9 @@ pub const PANELS: [&str; 9] = [
     "map",
     "tailor",
 ];
+
+/// The ways a `warp:` cue may leave the hero facing.
+const FACINGS: [&str; 4] = ["n", "e", "s", "w"];
 
 /// The bubbles an `emote:` cue may pop over a head.
 pub const EMOTES: [&str; 5] = ["bang", "what", "dots", "heart", "note"];
@@ -81,6 +92,8 @@ pub struct Progress {
     coins: u32,
     /// The shop's daily singles bought: (day, one bit per stock slot).
     stock: Option<(u32, u8)>,
+    /// The clock: the game minute of the day (0..1440).
+    minute: u16,
 }
 
 impl Default for Progress {
@@ -94,6 +107,7 @@ impl Default for Progress {
             daily: None,
             coins: STARTING_COINS,
             stock: None,
+            minute: clock::START,
         }
     }
 }
@@ -113,6 +127,8 @@ pub enum Test {
     Coins(u32),
     /// At least this many flags and items start with the prefix.
     Count(String, usize),
+    /// The clock is in this phase.
+    Time(Phase),
 }
 
 /// A parsed condition: every `(negated, test)` must hold.
@@ -133,6 +149,8 @@ pub enum Effect {
     Coins(u32),
     Pay(u32),
     Card(CardId),
+    /// Jump the clock to the start of this phase.
+    Clock(Phase),
     Cue(Cue),
 }
 
@@ -141,6 +159,13 @@ pub enum Effect {
 pub enum Cue {
     /// A bubble over an actor's head (an NPC id, or `hero`).
     Emote { actor: String, emote: String },
+    /// Fade out and load `map` with the hero on (`x`, `z`) facing `facing`.
+    Warp {
+        map: String,
+        x: u32,
+        z: u32,
+        facing: String,
+    },
 }
 
 /// What applying an effect did.
@@ -165,6 +190,8 @@ pub enum Applied {
     Short(u32),
     /// Add one copy of this card to the collection.
     Card(CardId),
+    /// The clock jumped to the start of this phase (the world fades to it).
+    Clock(Phase),
     /// Play this cue, then go on.
     Cue(Cue),
 }
@@ -260,6 +287,7 @@ fn parse_test(c: &str) -> Option<Test> {
         ("open", [id]) if rival(id).is_some() => Test::Open(s(id)),
         ("coins", [n]) => Test::Coins(n.parse().ok()?),
         ("count", [prefix, n]) => Test::Count(s(prefix), n.parse().ok()?),
+        ("time", [p]) => Test::Time(Phase::parse(p)?),
         _ => return None,
     })
 }
@@ -287,6 +315,13 @@ pub fn parse_effect(e: &str) -> Result<Effect, String> {
         ("emote", [actor, emote]) if EMOTES.contains(emote) => Effect::Cue(Cue::Emote {
             actor: s(actor),
             emote: s(emote),
+        }),
+        ("clock", [p]) => Effect::Clock(Phase::parse(p).ok_or_else(bad)?),
+        ("warp", [map, x, z, f]) if FACINGS.contains(f) => Effect::Cue(Cue::Warp {
+            map: s(map),
+            x: num(x)?,
+            z: num(z)?,
+            facing: s(f),
         }),
         _ => return Err(bad()),
     })
@@ -400,6 +435,10 @@ impl Progress {
             Effect::Pay(n) if self.spend(n) => Applied::Paid(n),
             Effect::Pay(n) => Applied::Short(n),
             Effect::Card(id) => Applied::Card(id),
+            Effect::Clock(p) => {
+                self.minute = p.start();
+                Applied::Clock(p)
+            }
             Effect::Cue(c) => Applied::Cue(c),
         }
     }
@@ -425,7 +464,41 @@ impl Progress {
             Test::Lost(id) => self.last_duel() == Some((id, false)),
             Test::Coins(n) => self.coins >= *n,
             Test::Count(prefix, n) => self.count(prefix) >= *n,
+            Test::Time(p) => self.phase() == *p,
         }
+    }
+
+    /// The clock: the game minute of the day.
+    pub fn minute(&self) -> u16 {
+        self.minute
+    }
+
+    /// Set the clock (the world reports it as it runs); taken modulo a day.
+    pub fn set_minute(&mut self, minute: u16) {
+        self.minute = minute % clock::DAY;
+    }
+
+    pub fn phase(&self) -> Phase {
+        clock::phase(self.minute)
+    }
+
+    /// Is a gate open (`docs/WORLD_DESIGN.md` §7.1)? While its condition
+    /// holds; and a gate that was open stays open while the hero is on any of
+    /// its tiles, so it never closes under them (a ford at dusk, a vent at
+    /// dawn). A malformed condition keeps a gate shut.
+    pub fn gate_open(&self, cond: &str, was_open: bool, under_hero: bool) -> bool {
+        self.check(cond) || (was_open && under_hero)
+    }
+
+    /// The waymarks touched (flags `way_<id>`), by id: the places fast travel reaches.
+    pub fn waymarks(&self) -> impl Iterator<Item = &str> {
+        self.flags.iter().filter_map(|f| f.strip_prefix("way_"))
+    }
+
+    /// Has the hero been to this outdoor map (flag `seen_<map>`)? The meadow
+    /// is where every game starts, so it is always known.
+    pub fn seen(&self, map: &str) -> bool {
+        map == "overworld" || self.has_flag(&format!("seen_{map}"))
     }
 
     /// The last duel's (rival or duelist id, won), until [`settle`](Self::settle).
@@ -480,6 +553,9 @@ impl Progress {
         let daily = self.daily.iter().map(|d| format!("d:{d}"));
         let coins = std::iter::once(format!("c:{}", self.coins));
         let stock = self.stock.iter().map(|(d, m)| format!("ps:{d}_{m}"));
+        let minute = (self.minute != clock::START)
+            .then(|| format!("t:{}", self.minute))
+            .into_iter();
         items
             .chain(flags)
             .chain(last)
@@ -487,6 +563,7 @@ impl Progress {
             .chain(daily)
             .chain(coins)
             .chain(stock)
+            .chain(minute)
             .collect::<Vec<_>>()
             .join(",")
     }
@@ -515,6 +592,10 @@ impl Progress {
                 }
                 Some(("d", day)) => p.daily = day.parse().ok(),
                 Some(("c", n)) => p.coins = n.parse().unwrap_or(p.coins),
+                Some(("t", m)) => match m.parse::<u16>() {
+                    Ok(m) if m < clock::DAY => p.minute = m,
+                    _ => {}
+                },
                 Some(("ps", s)) => {
                     p.stock = s
                         .split_once('_')
@@ -859,6 +940,118 @@ mod tests {
         assert_eq!(parse_effect("pack:storm"), Ok(Effect::Pack(4)));
         assert_eq!(parse_effect("pay:150"), Ok(Effect::Pay(150)));
         assert!(parse_cond("flag:a&&flag:b").is_err() && parse_effect("").is_err());
+    }
+
+    /// §7.2: the clock rides in the save as `t:<minute>`, left out at 08:00
+    /// so a save from before it reads the same; junk is skipped.
+    #[test]
+    fn the_clock_rides_in_the_save_string() {
+        let mut p = Progress::default();
+        assert_eq!(p.minute(), clock::START);
+        assert_eq!(p.encode(), "c:100", "08:00 writes nothing");
+        p.set_minute(21 * 60 + 30);
+        assert_eq!(p.encode(), "c:100,t:1290");
+        assert_eq!(Progress::decode(&p.encode()), p);
+        assert_eq!(Progress::decode("f:beat_bramble").minute(), clock::START);
+        for junk in ["t:1440", "t:night", "t:-5", "t:"] {
+            assert_eq!(Progress::decode(junk).minute(), clock::START, "{junk:?}");
+        }
+        p.set_minute(clock::DAY + 5);
+        assert_eq!(p.minute(), 5, "set_minute wraps");
+    }
+
+    #[test]
+    fn time_conditions_follow_the_clock_and_clock_effects_jump_it() {
+        let mut p = Progress::default();
+        assert!(p.check("time:day") && !p.check("time:night") && p.check("!time:night"));
+        assert!(
+            !p.check("!time:day & !time:dawn"),
+            "\"dark\" is dusk or night"
+        );
+        assert_eq!(p.apply("clock:dusk"), Ok(Applied::Clock(Phase::Dusk)));
+        assert_eq!(p.minute(), 18 * 60);
+        assert!(p.check("time:dusk") && p.check("!time:day & !time:dawn"));
+        p.apply("clock:night").unwrap();
+        assert!(p.check("time:night"));
+        p.apply("clock:dawn").unwrap();
+        assert!(p.check("time:dawn") && p.minute() == 5 * 60);
+        for bad in ["clock:noon", "clock:", "clock:dusk:1"] {
+            assert!(p.apply(bad).is_err(), "{bad:?}");
+        }
+        for bad in ["time:noon", "time:", "!time:Day"] {
+            assert!(!p.check(bad), "{bad:?}");
+        }
+        assert_eq!(
+            parse_cond("time:night"),
+            Ok(Cond(vec![(false, Test::Time(Phase::Night))]))
+        );
+    }
+
+    #[test]
+    fn warp_is_a_cue_to_a_tile() {
+        let mut p = Progress::default();
+        assert_eq!(
+            p.apply("warp:gullhaven:12:9:s"),
+            Ok(Applied::Cue(Cue::Warp {
+                map: "gullhaven".into(),
+                x: 12,
+                z: 9,
+                facing: "s".into()
+            }))
+        );
+        for bad in [
+            "warp:gullhaven:12:9",
+            "warp:gullhaven:12:9:up",
+            "warp:Gull:1:2:n",
+            "warp:gullhaven:x:9:n",
+        ] {
+            assert!(p.apply(bad).is_err(), "{bad:?}");
+        }
+        assert_eq!(p, Progress::default(), "cues never change state");
+    }
+
+    /// §7.1: a gate is open while its condition holds, and never closes under the hero.
+    #[test]
+    fn a_gate_never_closes_under_the_hero() {
+        let mut p = Progress::default();
+        let ford = "item:wading_boots";
+        assert!(!p.gate_open(ford, false, false) && !p.gate_open(ford, false, true));
+        p.apply("give:wading_boots").unwrap();
+        assert!(p.gate_open(ford, false, false));
+        // The lantern rafts are out at night; at dawn they stay while the hero is on them.
+        let rafts = "time:night";
+        p.apply("clock:night").unwrap();
+        assert!(p.gate_open(rafts, false, false));
+        p.apply("clock:dawn").unwrap();
+        assert!(p.gate_open(rafts, true, true), "the hero is still on it");
+        assert!(
+            !p.gate_open(rafts, true, false),
+            "closes once they step off"
+        );
+        assert!(
+            !p.gate_open(rafts, false, true),
+            "a shut gate doesn't open for standing on it"
+        );
+        assert!(!p.gate_open("weather:fog", false, false), "malformed: shut");
+        assert!(p.gate_open("", false, false), "no condition: open");
+    }
+
+    #[test]
+    fn waymarks_and_seen_maps_are_flags() {
+        let mut p = Progress::default();
+        assert!(p.seen("overworld") && !p.seen("quarry"));
+        assert_eq!(p.waymarks().count(), 0);
+        for e in [
+            "flag:way_meadow",
+            "flag:way_cinderwick",
+            "flag:seen_quarry",
+            "flag:wayward",
+        ] {
+            p.apply(e).unwrap();
+        }
+        assert_eq!(p.waymarks().collect::<Vec<_>>(), ["cinderwick", "meadow"]);
+        assert!(p.seen("quarry") && !p.seen("seaside"));
+        assert_eq!(p.apply("show:inn"), Ok(Applied::Show("inn".into())));
     }
 
     /// Wynne and Tarn were Juniper and Flint before 1.2: their flags follow.

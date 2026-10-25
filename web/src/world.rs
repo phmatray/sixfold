@@ -9,6 +9,7 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
+use sixfold_engine::clock::{self, Phase};
 use sixfold_engine::overworld::{Applied, Cue, Progress};
 use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
@@ -22,11 +23,11 @@ use crate::{store, Screen};
 // three.js comes from the import map in index.html and never touches the wasm.
 // Calls made before the module is in (items, pause) are replayed once it is.
 #[wasm_bindgen(inline_js = r#"
-let api = null, gen = 0, items = "", paused = false;
+let api = null, gen = 0, items = "", paused = false, minute = 480;
 export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb, start, edit && new URLSearchParams(location.search).has("edit")); api.setItems(items); api.pause(paused); })
+    .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb, start, edit && new URLSearchParams(location.search).has("edit")); api.setItems(items); api.setClock(minute); api.pause(paused); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
@@ -37,6 +38,7 @@ export function world_preview(el, name) { api?.preview(el, name); }
 export function world_preview_stop() { api?.previewStop(); }
 export function world_meet(id) { api?.meet(id); }
 export function world_cue(json) { api?.cue(json); }
+export function world_clock(m) { minute = m; api?.setClock(m); }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
@@ -54,8 +56,18 @@ extern "C" {
     /// Back from a duel against `id`: that person (a route duelist walks back
     /// over) faces the hero and says its post-duel line.
     fn world_meet(id: &str);
-    /// Play a dialogue cue, as JSON (`{"emote": "heart", "actor": "moss"}`).
+    /// Play a dialogue cue, as JSON (`{"emote": "heart", "actor": "moss"}`, or
+    /// `{"warp": {"map", "x", "z", "facing"}, "travel": true}`).
     fn world_cue(json: &str);
+    /// Set the world's clock (the game minute): on mount, and after an inn's rest.
+    fn world_clock(minute: u16);
+}
+
+/// Fade the world to a map tile: a `warp:` cue, or fast travel (its own sound).
+pub(crate) fn warp_to(map: &str, x: u32, z: u32, facing: &str, travel: bool) {
+    world_cue(&format!(
+        r#"{{"warp":{{"map":"{map}","x":{x},"z":{z},"facing":"{facing}"}},"travel":{travel}}}"#
+    ));
 }
 
 /// Hand the owned items to the scene (the shoes unlock running).
@@ -171,6 +183,39 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
                 "Valable pour une carte, n'importe laquelle sauf une promo, Rares comprises. Gus, à l'Imprimerie de Clairpuits, l'imprime pendant que vous attendez.",
             ),
         ),
+        // The 1.3 field items (WORLD_DESIGN §7.1): each opens gates in other regions.
+        "kiln_lantern" => (
+            tr("Kiln Lantern", "Lanterne de four").into(),
+            "lantern",
+            tr(
+                "Glass blown at Cinderwick round a coal that never quite goes out. Dark tunnels and caves light up around you.",
+                "Un verre soufflé à Mèche-Cendre autour d'une braise qui ne s'éteint jamais tout à fait. Les tunnels et les grottes s'éclairent autour de vous.",
+            ),
+        ),
+        "ferry_pass" => (
+            tr("Ferry Pass", "Laissez-passer du bac").into(),
+            "letter",
+            tr(
+                "Stamped by the Gullhaven Harbour Office. Show it on any jetty and the ferry takes you across.",
+                "Tamponné par la Capitainerie de Havre-aux-Mouettes. Montrez-le sur n'importe quel embarcadère et le bac vous fait traverser.",
+            ),
+        ),
+        "wading_boots" => (
+            tr("Wading Boots", "Bottes de gué").into(),
+            "shoes",
+            tr(
+                "Waxed reed and leather, laced to the knee. Fords and shallows are a path now.",
+                "Du roseau ciré et du cuir, lacés jusqu'au genou. Gués et hauts-fonds deviennent des chemins.",
+            ),
+        ),
+        "grip_gloves" => (
+            tr("Grip Gloves", "Gants d'escalade").into(),
+            "curio",
+            tr(
+                "Chalked palms, stitched fingertips. Walls with handholds can be climbed.",
+                "Paumes à la craie, bouts des doigts cousus. Les parois à prises s'escaladent.",
+            ),
+        ),
         other => (other.replace('_', " "), "", ""),
     }
 }
@@ -253,6 +298,42 @@ enum Sheet {
     Packs,
     Doctor,
     Press,
+    /// An inn's rest (`show:inn`): sleep until a phase of the day.
+    Inn,
+    /// The world map (`show:map`, M or the top bar): waymarks and fast travel.
+    Atlas,
+}
+
+/// An inn's choices: rest until this phase begins.
+fn rest_label(p: Phase) -> &'static str {
+    match p {
+        Phase::Dawn => tr("Until dawn", "Jusqu'à l'aube"),
+        Phase::Day => tr("Until morning", "Jusqu'au matin"),
+        Phase::Dusk => tr("Until dusk", "Jusqu'au crépuscule"),
+        Phase::Night => tr("Until night", "Jusqu'à la nuit"),
+    }
+}
+
+/// Said when the rest is over.
+fn rested_line(p: Phase) -> &'static str {
+    match p {
+        Phase::Dawn => tr(
+            "You rest until dawn. The sky is turning pink.",
+            "Vous dormez jusqu'à l'aube. Le ciel rosit.",
+        ),
+        Phase::Day => tr(
+            "You rest until morning. Fresh as a new deck.",
+            "Vous dormez jusqu'au matin. Frais comme un paquet neuf.",
+        ),
+        Phase::Dusk => tr(
+            "You rest until dusk. The lamps are being lit.",
+            "Vous vous reposez jusqu'au crépuscule. On allume les lampes.",
+        ),
+        Phase::Night => tr(
+            "You rest until nightfall. The night folk are out.",
+            "Vous vous reposez jusqu'à la nuit. Les gens de la nuit sont de sortie.",
+        ),
+    }
 }
 
 /// The prompt's label for what the hero faces.
@@ -262,6 +343,7 @@ fn prompt_label(kind: &str, text: &str) -> String {
         "warp" => text.to_string(),
         "duel" => tr("Play a duel", "Jouer un duel").into(),
         "locked" => tr("Try the door", "Essayer la porte").into(),
+        "gate" => tr("Look at the way", "Examiner le passage").into(),
         _ => tr("Take a look", "Regarder").into(),
     }
 }
@@ -285,6 +367,10 @@ pub fn WorldScreen() -> impl IntoView {
     let failed = RwSignal::new(None::<String>);
     let announce = RwSignal::new(String::new());
     let progress = expect_context::<RwSignal<Progress>>();
+    // Where the hero is: (map, outdoors). Fast travel only leaves from outdoors.
+    let here = RwSignal::new((String::new(), false));
+    // An inn's rest: the world fades to black and back (see `rest`).
+    let resting = RwSignal::new(false);
     // A world duel just ended: once the scene is up, the hero (put back on its
     // tile) and the rival or duelist meet again so the post-duel line plays.
     let returning = progress.with_untracked(|p| p.last_duel().map(|(id, _)| id.to_string()));
@@ -321,6 +407,32 @@ pub fn WorldScreen() -> impl IntoView {
             match event.as_str() {
                 // A gated warp asks whether its condition holds.
                 "check" => return progress.with_untracked(|p| p.check(&a)),
+                // A gate: open while its condition holds, never shutting under the hero.
+                "gate" => {
+                    let flag = |i| b.as_bytes().get(i) == Some(&b'1');
+                    return progress.with_untracked(|p| p.gate_open(&a, flag(0), flag(1)));
+                }
+                // The world's clock (every game hour and at each phase): saved, and a
+                // new phase is announced.
+                "clock" => {
+                    if let Ok(m) = a.parse::<u16>() {
+                        let was = progress.with_untracked(Progress::phase);
+                        if progress.with_untracked(Progress::minute) != m {
+                            progress.update(|p| p.set_minute(m));
+                        }
+                        if clock::phase(m) != was {
+                            _ = announce.try_set(clock::phase(m).arrives().into());
+                        }
+                    }
+                }
+                // A map entered: outdoors, it goes on the world map.
+                "seen" => {
+                    let out = b == "out";
+                    _ = here.try_set((a.clone(), out));
+                    if out && !progress.with_untracked(|p| p.seen(&a)) {
+                        progress.update(|p| _ = p.apply(&format!("flag:seen_{a}")));
+                    }
+                }
                 "at" => store::set_world_at(&format!("{a},{b}")),
                 "near" => {
                     let now = (!a.is_empty()).then(|| (a.clone(), b.clone()));
@@ -335,6 +447,9 @@ pub fn WorldScreen() -> impl IntoView {
                 "use" if a == "duel" => _ = sheet.try_set(Some(Sheet::Duel(b))),
                 "use" if a == "locked" => {
                     _ = sheet.try_set(Some(Sheet::Note(tr("Locked", "Fermé à clé"), b)))
+                }
+                "use" if a == "gate" => {
+                    _ = sheet.try_set(Some(Sheet::Note(tr("No way through", "Pas de passage"), b)))
                 }
                 "use" => _ = sheet.try_set(Some(Sheet::Note(tr("It says", "On peut lire"), b))),
                 "talk" => start_talk(a, b),
@@ -355,6 +470,7 @@ pub fn WorldScreen() -> impl IntoView {
     let mount = move || {
         if let (Some(h), Some(c)) = (host.get_untracked(), controls.get_untracked()) {
             let start = store::world_at().unwrap_or_default();
+            world_clock(progress.with_untracked(Progress::minute));
             cb.with_value(|cb| world_mount(&h, &c, cb, &start, cfg!(debug_assertions)));
         }
     };
@@ -402,7 +518,7 @@ pub fn WorldScreen() -> impl IntoView {
     // close, focus goes back to the prompt (or the stage).
     Effect::new(move |_| {
         let open = sheet.with(Option::is_some);
-        world_pause(open);
+        world_pause(open || resting.get());
         let Some(d) = dlg.get() else { return };
         if open && !d.open() {
             let _ = d.show_modal();
@@ -445,6 +561,8 @@ pub fn WorldScreen() -> impl IntoView {
         let mut cards = vec![];
         let mut cues = vec![];
         let mut gained = 0;
+        let mut warp = None;
+        let mut rested = None;
         progress.update(|p| {
             if p.last_duel().is_some_and(|(id, _)| id == t.id) {
                 p.settle();
@@ -472,12 +590,18 @@ pub fn WorldScreen() -> impl IntoView {
                             Applied::Cue(Cue::Emote { actor, emote }) => {
                                 cues.push(format!(r#"{{"actor":"{actor}","emote":"{emote}"}}"#))
                             }
+                            Applied::Cue(Cue::Warp { map, x, z, facing }) => {
+                                warp = Some((map, x, z, facing))
+                            }
+                            Applied::Clock(phase) => rested = Some(phase),
                             Applied::Show(panel) => match panel.as_str() {
                                 "ladder" => next = Some(Sheet::Ladder),
                                 "trader" => next = Some(Sheet::Trader),
                                 "shop_hall" => next = Some(Sheet::Packs),
                                 "doctor" => next = Some(Sheet::Doctor),
                                 "press" => next = Some(Sheet::Press),
+                                "inn" => next = Some(Sheet::Inn),
+                                "map" => next = Some(Sheet::Atlas),
                                 // Odile works through dialogue; the rest are 1.3.
                                 "curios" => {}
                                 _ => leptos::logging::warn!("world: no panel {panel}"),
@@ -501,6 +625,14 @@ pub fn WorldScreen() -> impl IntoView {
         });
         progress.with_untracked(push_items);
         cues.iter().for_each(|c| world_cue(c));
+        if let Some(phase) = rested {
+            // A `clock:` effect in a dialogue (a story beat): the world turns at once.
+            world_clock(progress.with_untracked(Progress::minute));
+            announce.set(phase.arrives().into());
+        }
+        if let Some((map, x, z, facing)) = &warp {
+            warp_to(map, *x, *z, facing, false);
+        }
         if gained > 0 {
             crate::audio::sfx("facets", 0.0);
             let have = progress.with_untracked(Progress::coins);
@@ -595,7 +727,34 @@ pub fn WorldScreen() -> impl IntoView {
         }
     };
     let close = move |_| sheet.set(None);
-    // J opens the Journal, and closes it again.
+    // An inn's rest: the world fades to black, the clock jumps (the engine's
+    // `clock:` effect, saved), and it fades back in at the new hour.
+    let rest = move |ph: Phase| {
+        sheet.set(None);
+        resting.set(true);
+        set_timeout(
+            move || {
+                progress.update(|p| _ = p.apply(&format!("clock:{}", ph.name())));
+                world_clock(progress.with_untracked(Progress::minute));
+                crate::audio::sfx("rest", 0.0);
+                announce.set(rested_line(ph).into());
+                set_timeout(
+                    move || resting.set(false),
+                    Duration::from_millis(if reduced { 0 } else { 900 }),
+                );
+            },
+            Duration::from_millis(if reduced { 0 } else { 750 }),
+        );
+    };
+    let travel = Callback::new(move |w: crate::worldmap::Waymark| {
+        sheet.set(None);
+        warp_to(&w.map, w.x, w.z, &w.facing, true);
+        announce.set(tr(
+            format!("Travelling to {}.", w.name),
+            format!("En route pour {}.", w.name),
+        ));
+    });
+    // J opens the Journal, M the world map, and closes it again.
     let journal_key = window_event_listener(leptos::ev::keydown, move |e| {
         let typing = e
             .target()
@@ -606,7 +765,8 @@ pub fn WorldScreen() -> impl IntoView {
                     .flatten()
                     .is_some()
             });
-        if !matches!(e.key().as_str(), "j" | "J")
+        let k = e.key().to_lowercase();
+        if !matches!(k.as_str(), "j" | "m")
             || e.repeat()
             || typing
             || e.ctrl_key()
@@ -615,9 +775,14 @@ pub fn WorldScreen() -> impl IntoView {
         {
             return;
         }
+        let want = if k == "j" {
+            Sheet::Journal
+        } else {
+            Sheet::Atlas
+        };
         match sheet.get_untracked() {
-            None => sheet.set(Some(Sheet::Journal)),
-            Some(Sheet::Journal) => sheet.set(None),
+            None if !resting.get_untracked() => sheet.set(Some(want)),
+            Some(s) if s == want => sheet.set(None),
             _ => return,
         }
         e.prevent_default();
@@ -639,8 +804,8 @@ pub fn WorldScreen() -> impl IntoView {
             <header class="world-top">
                 <span class="wordmark small">"Sixfold"</span>
                 <span class="world-hint">{tr(
-                    "Arrows or WASD to walk · E to act · Shift to run · G for the grid",
-                    "Flèches ou ZQSD pour marcher · E pour agir · Maj pour courir · G pour la grille",
+                    "Arrows or WASD to walk · E to act · Shift to run · M for the map",
+                    "Flèches ou ZQSD pour marcher · E pour agir · Maj pour courir · M pour la carte",
                 )}</span>
                 <button type="button" class="btn ghost journal-btn" aria-keyshortcuts="J"
                     aria-label="Journal" title=tr("Journal (J)", "Journal (J)")
@@ -648,6 +813,14 @@ pub fn WorldScreen() -> impl IntoView {
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z" /><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" /></svg>
                     <span class="journal-label">"Journal"</span>
                 </button>
+                <button type="button" class="btn ghost journal-btn map-btn" aria-keyshortcuts="M"
+                    aria-label=tr("World map", "Carte du monde") title=tr("World map (M)", "Carte du monde (M)")
+                    on:click=move |_| sheet.set(Some(Sheet::Atlas))>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20Z" /><path d="M9 4v13.5M15 6.5V20" /></svg>
+                    <span class="journal-label">{tr("Map", "Carte")}</span>
+                    <crate::worldmap::DayDial />
+                </button>
+                <crate::worldmap::DayDial />
                 <Facets />
                 <SealBadge on_open=move || sheet.set(Some(Sheet::Roster)) />
                 <MuteToggle />
@@ -668,6 +841,7 @@ pub fn WorldScreen() -> impl IntoView {
                     <kbd>"E"</kbd>
                 </button>
             })}
+            <div class="world-rest" class:on=move || resting.get() aria-hidden="true"></div>
             {move || (loading.get() && failed.with(Option::is_none)).then(|| view! {
                 <p class="world-loading" role="status">{tr("Loading the world…", "Chargement du monde…")}</p>
             })}
@@ -771,6 +945,49 @@ pub fn WorldScreen() -> impl IntoView {
                     Sheet::Press => view! {
                         {head(tr("Brightwell Press", "L'Imprimerie de Clairpuits"), true)}
                         <crate::shops::Press />
+                    }.into_any(),
+                    Sheet::Inn => {
+                        let now = progress.with_untracked(Progress::minute);
+                        let current = clock::phase(now);
+                        view! {
+                            <div class="sheet-head">
+                                <h2 id="world-sheet-title">{tr("Rest a while", "Se reposer")}</h2>
+                                <crate::worldmap::DayDial full=true />
+                                <button class="btn ghost" on:click=close>{tr("Close", "Fermer")}</button>
+                            </div>
+                            <p class="dialog-sub">{tr(
+                                "A warm bed, a candle, the house quiet. Sleep until…",
+                                "Un lit chaud, une bougie, la maison tranquille. Dormir…",
+                            )}</p>
+                            <div class="inn-rest" role="group" aria-label=tr("Rest until", "Dormir jusqu'à")>
+                                {Phase::ALL.into_iter().map(|ph| {
+                                    let wait = clock::until(now, ph);
+                                    let hours = wait.div_ceil(60);
+                                    let is_now = ph == current;
+                                    let first = ph == current.next();
+                                    view! {
+                                        <button type="button" class="inn-choice" data-phase=ph.name() disabled=is_now
+                                            autofocus=first on:click=move |_| rest(ph)>
+                                            <span class="inn-choice-name">{rest_label(ph)}</span>
+                                            <span class="inn-choice-time">
+                                                {clock::hhmm(ph.start())}
+                                                " · "
+                                                {if is_now { tr("now".to_string(), "maintenant".to_string()) }
+                                                 else { tr(format!("in {hours} h"), format!("dans {hours} h")) }}
+                                            </span>
+                                        </button>
+                                    }
+                                }).collect_view()}
+                            </div>
+                        }.into_any()
+                    }
+                    Sheet::Atlas => view! {
+                        <div class="sheet-head">
+                            <h2 id="world-sheet-title">{tr("World map", "Carte du monde")}</h2>
+                            <crate::worldmap::DayDial full=true />
+                            <button class="btn ghost" on:click=close>{tr("Close", "Fermer")}</button>
+                        </div>
+                        <crate::worldmap::WorldMap here=here on_travel=travel />
                     }.into_any(),
                     Sheet::Roster => view! {
                         <div class="sheet-head">

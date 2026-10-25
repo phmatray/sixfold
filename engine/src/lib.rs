@@ -31,6 +31,7 @@ mod view;
 pub mod ai;
 pub mod booster;
 pub mod campaign;
+pub mod clock;
 pub mod decks;
 pub mod doctor;
 pub mod endgame;

@@ -5,6 +5,9 @@
 //! the dialogue they expand to; find ids are unique and every route duelist
 //! is placed exactly once; emote actors stand on the map. The Journal
 //! (`web/world/quests.json`) only names flags and items some map sets.
+//! 1.3: gate, prop `if` and prop `open` conditions parse; a `warp:` leads to
+//! a map that exists; a night duelist is out only at night (`time:night` in
+//! its `if`); waymark ids are unique and charted in `web/world/atlas.json`.
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
@@ -22,6 +25,10 @@ struct Seen {
     trainers: HashMap<String, String>,
     /// `item:x` and `flag:x` for every item given and flag set.
     sets: HashSet<String>,
+    /// (where, map) for every `warp:` effect.
+    warps: Vec<(String, String)>,
+    /// Waymark ids, and the map each is on.
+    waymarks: HashMap<String, String>,
 }
 
 /// Note what an effect gives or sets.
@@ -56,17 +63,20 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
             bad.push(format!("{name}: {at}: {e}"));
         }
     };
-    let effect = |at: &str, e: &str, bad: &mut Vec<String>| match parse_effect(e) {
+    let mut warps = vec![];
+    let mut effect = |at: &str, e: &str, bad: &mut Vec<String>| match parse_effect(e) {
         Err(err) => bad.push(format!("{name}: {at}: {err}")),
         Ok(Effect::Cue(Cue::Emote { actor, .. })) if !actors.contains(&actor.as_str()) => {
             bad.push(format!("{name}: {at}: no actor {actor:?} on this map"))
         }
+        Ok(Effect::Cue(Cue::Warp { map, .. })) => warps.push((format!("{name}: {at}"), map)),
         Ok(_) => {}
     };
     let dialogue = |at: &str,
                     d: &Value,
                     bad: &mut Vec<String>,
-                    cond: &mut dyn FnMut(&str, &str, &mut Vec<String>)| {
+                    cond: &mut dyn FnMut(&str, &str, &mut Vec<String>),
+                    effect: &mut dyn FnMut(&str, &str, &mut Vec<String>)| {
         for (i, b) in d.as_array().into_iter().flatten().enumerate() {
             if let Some(c) = b["if"].as_str() {
                 cond(&format!("{at}.dialogue[{i}].if"), c, bad);
@@ -99,12 +109,20 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
         if let Some(c) = n["if"].as_str() {
             cond(&format!("{at}.if"), c, &mut bad);
         }
-        dialogue(&at, &n["dialogue"], &mut bad, &mut cond);
+        dialogue(&at, &n["dialogue"], &mut bad, &mut cond, &mut effect);
         if let Some(t) = n.get("trainer") {
             // The loader expands the block to won:/lost:/beat: branches and a
             // challenge ending in duel:<id>.
-            if trainer(id).is_none() {
-                bad.push(format!("{name}: {at}: a trainer block on no route duelist"));
+            match trainer(id) {
+                None => bad.push(format!("{name}: {at}: a trainer block on no route duelist")),
+                Some(tr)
+                    if tr.night && !n["if"].as_str().is_some_and(|c| c.contains("time:night")) =>
+                {
+                    bad.push(format!(
+                        "{name}: {at}: a night duelist must be out only at night (if: time:night)"
+                    ))
+                }
+                Some(_) => {}
             }
             for c in [
                 format!("won:{id}"),
@@ -137,7 +155,7 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
                 cond(&format!("{at}.{key}"), c, &mut bad);
             }
         }
-        dialogue(&at, &it["dialogue"], &mut bad, &mut cond);
+        dialogue(&at, &it["dialogue"], &mut bad, &mut cond, &mut effect);
         if it["kind"] == "find" {
             let Some(id) = it["id"].as_str() else {
                 bad.push(format!("{name}: {at}: a find with no id"));
@@ -160,6 +178,32 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
             cond(&format!("warp {i}.if"), c, &mut bad);
         }
     }
+    for (i, g) in m["gates"].as_array().into_iter().flatten().enumerate() {
+        let at = format!(
+            "gate {}",
+            g["id"].as_str().map_or(i.to_string(), String::from)
+        );
+        match g["if"].as_str() {
+            Some(c) => cond(&format!("{at}.if"), c, &mut bad),
+            None => bad.push(format!("{name}: {at}: a gate needs an if")),
+        }
+    }
+    for (i, p) in m["props"].as_array().into_iter().flatten().enumerate() {
+        for key in ["if", "open"] {
+            if let Some(c) = p[key].as_str() {
+                cond(&format!("prop {i}.{key}"), c, &mut bad);
+            }
+        }
+    }
+    for it in m["interactions"].as_array().into_iter().flatten() {
+        if it["kind"] == "waymark" {
+            let id = it["id"].as_str().unwrap_or("");
+            if let Some(other) = seen.waymarks.insert(id.to_string(), name.to_string()) {
+                bad.push(format!("{name}: waymark {id:?} also on {other}"));
+            }
+        }
+    }
+    seen.warps.extend(warps);
     bad
 }
 
@@ -185,6 +229,28 @@ fn every_map_reads_with_the_engine_grammar() {
     for t in &TRAINERS {
         if !seen.trainers.contains_key(t.id) {
             bad.push(format!("{} ({}) is on no map", t.id, t.name));
+        }
+    }
+    let names: HashSet<String> = std::fs::read_dir(&dir)
+        .unwrap()
+        .filter_map(|e| Some(e.ok()?.path().file_stem()?.to_string_lossy().into_owned()))
+        .collect();
+    for (at, map) in &seen.warps {
+        if !names.contains(map) {
+            bad.push(format!("{at}: warp: to {map:?}, which is not a map"));
+        }
+    }
+    let atlas = std::fs::read_to_string(dir.join("../atlas.json")).expect("web/world/atlas.json");
+    let atlas: Value = serde_json::from_str(&atlas).expect("atlas.json parses");
+    let charted: HashSet<&str> = atlas["waymarks"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|w| w["id"].as_str())
+        .collect();
+    for (id, map) in &seen.waymarks {
+        if !charted.contains(id.as_str()) {
+            bad.push(format!("{map}: waymark {id:?} is not in atlas.json"));
         }
     }
     let quests =
@@ -285,8 +351,11 @@ fn the_checker_reads_trainer_and_find_blocks() {
         ],
         "interactions": [
             { "kind": "find", "id": "w_log", "give": "coins:many" },
-            { "kind": "find", "id": "w_new" }
-        ]
+            { "kind": "find", "id": "w_new" },
+            { "kind": "find", "id": "w_ferry", "give": "warp:gullhaven:1:2:north" }
+        ],
+        "gates": [{ "id": "ford", "if": "time:noon" }, { "id": "vent" }],
+        "props": [{ "asset": "pylon", "open": "flag:Pylon" }]
     }"#,
     )
     .unwrap();
@@ -303,6 +372,10 @@ fn the_checker_reads_trainer_and_find_blocks() {
         "find id also used in woodland",
         "coins:many",
         "a find gives one effect",
+        "warp:gullhaven:1:2:north",
+        "time:noon",
+        "gate vent: a gate needs an if",
+        "flag:Pylon",
     ] {
         assert!(
             errors.iter().any(|e| e.contains(want)),
