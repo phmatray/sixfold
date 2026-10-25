@@ -1,0 +1,289 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "soup_cauldron",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "shelf",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bed",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 6,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "duel_table",
+      "x": 7,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 7,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 8,
+      "z": 6,
+      "rot": 180
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 1,
+      "z": 1,
+      "kind": "sign",
+      "text": "A cauldron of something green and thick, bubbling over a slow fire. It smells of nettles, mushrooms and whatever Hester found this morning.",
+      "text_fr": "Un chaudron de quelque chose de vert et d'épais, qui bouillonne sur un feu doux. Ça sent l'ortie, le champignon et tout ce que Hester a trouvé ce matin."
+    },
+    {
+      "x": 3,
+      "z": 1,
+      "kind": "sign",
+      "text": "Jars of honey, pickled ferns, and a row of wooden cups, one carved with each regular's name. There's an empty one at the end.",
+      "text_fr": "Des pots de miel, des fougères au vinaigre, et une rangée de tasses en bois, chacune gravée au nom d'un habitué. La dernière est vierge."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "to": "rootholm",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 5,
+        "z": 8,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "hester",
+      "name": "Hester",
+      "model": "npc_shopkeeper",
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#6a8a3a",
+      "hair": "#b8865a",
+      "dialogue": [
+        {
+          "if": "!flag:talked_hester",
+          "lines": [
+            "Sit down, sit down, you look like the trail ate you. Soup first. It's green. Don't ask.",
+            "Beds are upstairs, and resting's free. Dawn, day, dusk or night, you pick.",
+            "And the counter has Grove packs, and an Elderhart I keep under the soup for whoever can pay for her."
+          ],
+          "lines_fr": [
+            "Assieds-toi, assieds-toi, on dirait que le sentier t'a mâché. La soupe d'abord. Elle est verte. Pose pas de questions.",
+            "Les lits sont en haut, et le repos est gratuit. Aube, jour, crépuscule ou nuit, c'est toi qui choisis.",
+            "Et au comptoir, des boosters Bosquet, et un Cerf-Ancien que je garde sous la soupe pour qui pourra se l'offrir."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "if": "count:beat_t_:40",
+          "lines": [
+            "Forty duelists down, they say. FORTY. Jory's telling everyone you taught him everything he knows, which is a lie, but a nice one.",
+            "Rest a while?"
+          ],
+          "lines_fr": [
+            "Quarante duellistes battus, à ce qu'on dit. QUARANTE. Jory raconte à tout le monde que tu lui as tout appris, c'est un mensonge, mais un joli.",
+            "Tu te reposes un peu ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "if": "count:beat_t_:20",
+          "lines": [
+            "Twenty duelists, Gorse says, and he's never wrong about numbers. Fenna wants to know how you play your Basics. I told her: fast.",
+            "A bed?"
+          ],
+          "lines_fr": [
+            "Vingt duellistes, dit Gorse, et il ne se trompe jamais sur les chiffres. Fenna veut savoir comment tu joues tes Hexons de Base. Je lui ai dit : vite.",
+            "Un lit ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "if": "time:night",
+          "lines": [
+            "Briony's up on the walkway with her owls, Corvin's counting them, and Agnes is talking to her bees again. Night in Rootholm.",
+            "A bed?"
+          ],
+          "lines_fr": [
+            "Briony est sur la passerelle avec ses chouettes, Corvin les compte, et Agnes parle encore à ses abeilles. La nuit à Racinemont.",
+            "Un lit ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "lines": [
+            "Tobiah's got his door open, Jory's on his walkway, and Linden's painting something green. Same as every day.",
+            "Rest, or soup, or both?"
+          ],
+          "lines_fr": [
+            "Tobiah a ouvert sa porte, Jory est sur sa passerelle, et Linden peint quelque chose en vert. Comme tous les jours.",
+            "Repos, soupe, ou les deux ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gorse_n",
+      "name": "Gorse",
+      "model": "npc_elder",
+      "x": 9,
+      "z": 5,
+      "facing": "w",
+      "idle": "Idle",
+      "outfit": "#7a5a3a",
+      "hair": "#e8e0d0",
+      "if": "time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Evening. I come in for the soup and stay for the arguing.",
+            "That cup on the end, the empty one? Hester carves a name on it when somebody stays long enough. Could be yours."
+          ],
+          "lines_fr": [
+            "Bonsoir. Je viens pour la soupe et je reste pour les disputes.",
+            "La tasse au bout, la vierge ? Hester y grave un nom quand quelqu'un reste assez longtemps. Ça pourrait être le tien."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#f6ffe0",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#f0f8d8",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffc070",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

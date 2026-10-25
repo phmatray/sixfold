@@ -1,0 +1,793 @@
+{
+  "title": "The Undermine",
+  "title_fr": "Les Galeries Basses",
+  "region": "stone",
+  "kind": "cave",
+  "music": "cave",
+  "width": 50,
+  "height": 14,
+  "tiles": [
+    "33333333333333333333333333333333333333333333333333",
+    "33333333333...33333333333...333333333...3333333333",
+    "33333333333...33333333333...333333333...3333333333",
+    "333333333333.3333333333333.33333333333.33333333333",
+    "333333333333.333....333333.33333333333.33333333333",
+    "333333333............33333.33333333333.33333333333",
+    "3................................33333.33........3",
+    "3................................................3",
+    "1..........11111111..............................1",
+    "1111111111111111111111111111...............1111111",
+    "1111111111111111111111111111....111111111111111111",
+    "11111111111111111111111111111111111111111111111111",
+    "11111111111111111111111111111111111111111111111111",
+    "11111111111111111111111111111111111111111111111111"
+  ],
+  "props": [
+    {
+      "asset": "rail",
+      "x": 3,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 4,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 6,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 7,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 8,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 11,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 13,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 14,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 15,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 16,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 17,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 18,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 21,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 22,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 23,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 24,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 25,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 27,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 28,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 29,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 30,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 33,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 34,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 35,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 36,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 37,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 39,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 40,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 43,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 44,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 45,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 46,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "support_beam",
+      "x": 4,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "oil_lantern",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "support_beam",
+      "x": 15,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "oil_lantern",
+      "x": 21,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "support_beam",
+      "x": 33,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "oil_lantern",
+      "x": 40,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "oil_lantern",
+      "x": 44,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 1,
+      "z": 7,
+      "rot": 90
+    },
+    {
+      "asset": "exit_mat",
+      "x": 48,
+      "z": 7,
+      "rot": 90
+    },
+    {
+      "asset": "rock",
+      "x": 45,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 46,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 45,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 47,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 43,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "minecart",
+      "x": 41,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 46,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "minecart",
+      "x": 17,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 11,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "minecart",
+      "x": 25,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 39,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 13,
+      "z": 1,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 27,
+      "z": 1,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 37,
+      "z": 1,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "crystal_cluster",
+      "x": 28,
+      "z": 11,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "crystal_cluster",
+      "x": 30,
+      "z": 11,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "crystal_cluster",
+      "x": 31,
+      "z": 11,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "crystal_cluster",
+      "x": 29,
+      "z": 11,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 6,
+      "z": 8,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 24,
+      "z": 5,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 34,
+      "z": 9,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 2,
+      "z": 8,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 11,
+      "z": 5,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 25,
+      "z": 8,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 39,
+      "z": 7,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 30,
+      "z": 6,
+      "rot": 0,
+      "glow": "#f0a848"
+    },
+    {
+      "asset": "glow_mushroom_tall",
+      "x": 32,
+      "z": 10,
+      "rot": 0,
+      "glow": "#8ad8f0"
+    },
+    {
+      "asset": "glow_shelf",
+      "x": 27,
+      "z": 9,
+      "rot": 0,
+      "glow": "#8ad8f0"
+    },
+    {
+      "asset": "crystal_cluster",
+      "x": 19,
+      "z": 8,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "crystal_cluster",
+      "x": 36,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "sign",
+      "x": 3,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "sign",
+      "x": 46,
+      "z": 8,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 2,
+    "z": 7,
+    "facing": "e"
+  },
+  "interactions": [
+    {
+      "x": 47,
+      "z": 6,
+      "kind": "sign",
+      "id": "the_cut",
+      "name": "A fresh cut",
+      "name_fr": "Une saignée toute fraîche",
+      "dialogue": [
+        {
+          "lines": [
+            "The rockfall you saw from the quarry side, dug through by hand. Pick marks on every stone, chalk tallies on the timbers: one stroke per cart of spoil. There are a great many strokes."
+          ],
+          "lines_fr": [
+            "L'éboulement que vous aviez vu côté carrière, creusé à la main. Des traces de pic sur chaque pierre, des tailles à la craie sur les bois : un trait par wagonnet de déblais. Il y a énormément de traits."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "sn_side_1",
+      "x": 11,
+      "z": 1,
+      "give": "card:shalehound",
+      "text": "Behind the fall, a miners' cubby: a bench, a cold lamp, and in a tin box with a hexagon scratched on the lid, a card.",
+      "text_fr": "Derrière l'éboulis, un réduit de mineurs : un banc, une lampe froide, et dans une boîte en fer avec un hexagone gravé sur le couvercle, une carte."
+    },
+    {
+      "kind": "find",
+      "id": "sn_side_2",
+      "x": 25,
+      "z": 1,
+      "give": "give:curio_miner_tally",
+      "text": "An old ore cart, abandoned when the roof came down. Hooked on its rim, a ring of brass tally tags, one punched with a hexagon: the miner who never came back for them.",
+      "text_fr": "Un vieux wagonnet, abandonné quand le toit s'est effondré. Accroché à son rebord, un anneau de jetons de laiton, l'un poinçonné d'un hexagone : le mineur qui n'est jamais revenu les chercher."
+    },
+    {
+      "kind": "find",
+      "id": "sn_side_3",
+      "x": 39,
+      "z": 1,
+      "give": "pack:stone",
+      "text": "The crew's old store: rope, wedges, a crate of candles. At the bottom, still in its wax paper, a sealed Stone pack.",
+      "text_fr": "L'ancienne réserve de l'équipe : de la corde, des coins, une caisse de bougies. Au fond, encore dans son papier ciré, un booster Pierre scellé."
+    },
+    {
+      "kind": "find",
+      "id": "sn_crystal",
+      "x": 29,
+      "z": 11,
+      "give": "coins:80",
+      "hidden": true,
+      "text": "Among the crystals, a pocket of the old miners' wages, hidden where only a lamp would find it and the glow would hide it again.",
+      "text_fr": "Parmi les cristaux, une poche des gages des anciens mineurs, cachée là où seule une lampe la trouverait et où la lueur la cacherait de nouveau."
+    },
+    {
+      "x": 3,
+      "z": 6,
+      "kind": "sign",
+      "text": "Painted on the timber: an arrow pointing west, and \"SCREE PASS. ANVILSTEAD UP TOP.\" Underneath, smaller: \"Mind your head.\"",
+      "text_fr": "Peint sur le bois : une flèche vers l'ouest, et « COL DES ÉBOULIS. BOURG-L'ENCLUME EN HAUT. » Dessous, plus petit : « Attention à la tête. »"
+    },
+    {
+      "x": 46,
+      "z": 8,
+      "kind": "sign",
+      "text": "A board nailed across a timber: \"QUARRY THIS WAY. EMBERSTEP. -O's crew.\"",
+      "text_fr": "Une planche clouée en travers d'un bois : « CARRIÈRE PAR LÀ. PAS-DE-BRAISE. -L'équipe d'O. »"
+    }
+  ],
+  "warps": [
+    {
+      "x": 1,
+      "z": 7,
+      "to": "screepass",
+      "label": "Out to Scree Pass",
+      "label_fr": "Sortir vers le Col des Éboulis",
+      "spawn": {
+        "x": 21,
+        "z": 34,
+        "facing": "s"
+      },
+      "dir": "w"
+    },
+    {
+      "x": 48,
+      "z": 7,
+      "to": "quarry",
+      "label": "Out to the quarry",
+      "label_fr": "Sortir vers la carrière",
+      "spawn": {
+        "x": 3,
+        "z": 23,
+        "facing": "s"
+      },
+      "dir": "e"
+    }
+  ],
+  "exits": [],
+  "gates": [
+    {
+      "id": "rubble_1",
+      "tiles": [
+        [
+          12,
+          4
+        ]
+      ],
+      "if": "flag:rubble_1",
+      "prop_closed": "rubble",
+      "text": "Fallen slate, floor to roof. Orla's crew could shift it; they're the ones who dig round here.",
+      "text_fr": "De l'ardoise effondrée, du sol au plafond. L'équipe d'Orla pourrait la dégager ; c'est elle qui creuse par ici."
+    },
+    {
+      "id": "rubble_2",
+      "tiles": [
+        [
+          26,
+          5
+        ]
+      ],
+      "if": "flag:rubble_2",
+      "prop_closed": "rubble",
+      "text": "Fallen slate, floor to roof. Orla's crew could shift it; they're the ones who dig round here.",
+      "text_fr": "De l'ardoise effondrée, du sol au plafond. L'équipe d'Orla pourrait la dégager ; c'est elle qui creuse par ici."
+    },
+    {
+      "id": "rubble_3",
+      "tiles": [
+        [
+          38,
+          6
+        ]
+      ],
+      "if": "flag:rubble_3",
+      "prop_closed": "rubble",
+      "text": "Fallen slate, floor to roof. Orla's crew could shift it; they're the ones who dig round here.",
+      "text_fr": "De l'ardoise effondrée, du sol au plafond. L'équipe d'Orla pourrait la dégager ; c'est elle qui creuse par ici."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "ros",
+      "name": "Ros",
+      "model": "npc_worker",
+      "x": 44,
+      "z": 6,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#a8642f",
+      "hair": "#2a2a2a",
+      "dialogue": [
+        {
+          "if": "item:lunch_pail",
+          "lines": [
+            "Lunch! Huw sent lunch! You're a hero. A small, dusty hero.",
+            "Right. For that, the fall on the first side passage comes down this afternoon. Stand back."
+          ],
+          "lines_fr": [
+            "À manger ! Huw a envoyé à manger ! T'es un héros. Un petit héros plein de poussière.",
+            "Bon. Pour la peine, l'éboulis du premier passage tombe cet après-midi. Recule-toi."
+          ],
+          "do": [
+            "take:lunch_pail",
+            "flag:rubble_1",
+            "sfx:gate"
+          ]
+        },
+        {
+          "if": "!flag:rubble_3",
+          "lines": [
+            "The three side passages fell in years ago. We clear one when Huw says, and Huw says when somebody does him a favour. That's the rule of the Stonebacks: favour for favour."
+          ],
+          "lines_fr": [
+            "Les trois passages latéraux se sont effondrés il y a des années. On en dégage un quand Huw le dit, et Huw le dit quand quelqu'un lui rend service. C'est la règle des Échines : service pour service."
+          ]
+        },
+        {
+          "lines": [
+            "All three open. The old Undermine breathes again. Listen: you can hear the air moving."
+          ],
+          "lines_fr": [
+            "Les trois ouverts. Les vieilles Galeries respirent de nouveau. Écoute : on entend l'air bouger."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pike",
+      "name": "Pike",
+      "model": "npc_worker",
+      "x": 43,
+      "z": 8,
+      "facing": "w",
+      "idle": "Idle",
+      "outfit": "#5a6070",
+      "hair": "#c8a070",
+      "dialogue": [
+        {
+          "lines": [
+            "We dug through from the far side. Took us a season. Orla wanted the quarry road open, so it's open.",
+            "Lantern's the only reason you're not walking into the walls, by the way. Down here, a light is a friend."
+          ],
+          "lines_fr": [
+            "On a creusé depuis l'autre côté. Ça nous a pris une saison. Orla voulait la route de la carrière, alors elle est ouverte.",
+            "C'est ta lanterne qui t'empêche de foncer dans les murs, au fait. Ici, une lumière, c'est une amie."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_jet",
+      "name": "Jet",
+      "model": "npc_kid",
+      "x": 18,
+      "z": 5,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "Oi! You're on my rails. Well, Uncle Huw's rails. Same thing.",
+          "One prize. Then you can push this cart. I'm on a break."
+        ],
+        "challenge_fr": [
+          "Hé ! T'es sur mes rails. Enfin, les rails de l'oncle Huw. C'est pareil.",
+          "Une Récompense. Après, c'est toi qui pousses le wagonnet. Je suis en pause."
+        ],
+        "win": [
+          "Rubble. That's what I am. Rubble."
+        ],
+        "win_fr": [
+          "Des gravats. Voilà ce que je suis. Des gravats."
+        ],
+        "lose": [
+          "Ha! Tell Uncle Huw I'm too good to push carts."
+        ],
+        "lose_fr": [
+          "Ha ! Dis à l'oncle Huw que je suis trop fort pour pousser des wagonnets."
+        ],
+        "after": [
+          "Uncle Huw says if I lose to you, I push carts for a month. So. I'm pushing carts for a month."
+        ],
+        "after_fr": [
+          "L'oncle Huw dit que si je perds contre toi, je pousse des wagonnets pendant un mois. Donc. Je pousse des wagonnets pendant un mois."
+        ]
+      },
+      "outfit": "#c87a3a",
+      "hair": "#3a2a1a"
+    }
+  ],
+  "dark": true,
+  "cliff": [
+    "cliff_slate",
+    "cliff_slate_b"
+  ],
+  "ground": {
+    "base": "cave",
+    "path": "stone",
+    "margin": 4,
+    "tufts": 0
+  },
+  "ring": [],
+  "ringSides": "",
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#ffd9a0",
+      "intensity": 0.3,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#3a3630",
+      "ground": "#0d0c0b",
+      "intensity": 0.5
+    },
+    "background": "#0d0c0b",
+    "fog": {
+      "near": 10,
+      "far": 24
+    }
+  }
+}

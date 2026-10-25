@@ -21,7 +21,9 @@ const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "re
   "heather", "cliff_heath", "cliff_heath_b", "stairs_heath", "wall_dry", "wall_dry_corner", "wall_dry_end", "wall_dry_t", "chime_post", // Storm (not pylon: animated)
   "crab_pots", "rock_sea", "bollard", "tidepool", "net_rack", "cliff_sea", "cliff_sea_b", // Tide (not ferry or buoy: they bob)
   "willow", "wishing_tree", "ford_stones", "wisteria_arch", "hedge", "hedge_corner", "hedge_end", "hedge_t", // Dream (not moonflower: animated)
-  "glow_mushroom", "glow_mushroom_tall", "glow_shelf"]); // cave light (a prop's `glow` tints a batch of its own)
+  "glow_mushroom", "glow_mushroom_tall", "glow_shelf", // cave light (a prop's `glow` tints a batch of its own)
+  "standing_tree", "fallen_trunk", "canopy_deck", "rope_bridge", "ladder", "beehive", "climb_wall_root", // Grove
+  "cliff_slate", "cliff_slate_b", "stairs_slate", "rail", "cairn", "menhir", "rubble", "support_beam", "climb_wall_slate", "minecart", "anvil"]); // Stone
 const TREES = new Set(["tree", "pine", "birch", "ash_pine", "willow"]); // varied in size, turn and tint; half a tile out on the map edge
 const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // props whose smoke_origin smokes
 const BLOOMS = new Set(["moonflower"]); // with an `open` condition: instanced closed and open, cross-faded (build, refresh)

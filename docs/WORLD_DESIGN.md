@@ -1563,6 +1563,29 @@ night; tells the Undermine's story; hints the cave finds).
 
 **Inn stock.** Stone pack, Wild; Knollop (C), Brawlet (C), Shalehound (U), **Cragmastiff (R)**.
 
+**As built (1.3 PR 4, Grove and Stone).** The maps in `web/world/maps/` have the final word; what moved and why:
+- *Sizes* (WORLD_RULES §8): Rootholm 52×36 town, the Elder Ring 44×34 site, the Undermine 50×14 cave, Scree Pass
+  30×44 route, Anvilstead 52×36 town, the Bastion 42×32 site; interiors `trunk_hollow`, `inn_grove`, `cobbler`,
+  `inn_stone`, `climb_school` on the 11×9 kit. All pass `check-maps --strict` with no warning.
+- *Ring links*: Fernhollow's old road runs out west again (rows 9–11): the fallen elder that closed it now lies
+  sawn a cart wide on either side of the road. The Hush ford lands on a dry west bank (rows 28–30) that is the way
+  into Rootholm's east side; the boots open it. The quarry's cave mouth is a lantern door into the Undermine (the
+  rockfall is gone: Orla's crew dug through), whose west mouth opens on Scree Pass. Scree Pass climbs north to
+  Anvilstead, Anvilstead's west road reaches the Bastion, and the Bastion's south cliff drops to the Elder Ring by a
+  gloves wall. The ring can be walked both ways.
+- *Keys*: the Wading Boots (Tobiah the cobbler: reed fibre from the Fernhollow stream, then dawn; ⬡ 100) open the
+  Hush ford and the Bellflats pools. The Grip Gloves (Ida at Ropes & Holds, once Ida and Garth are beaten) open the
+  Elder Ring cliff and Rootholm's root mound (Grove), the Anvilstead brake-house ledge (Stone) and the quarry nook
+  (Ember).
+- *The dark mine*: the Undermine has no lamp. Miners' oil lanterns hang on its timber sets and glow mushrooms and
+  crystals mark the side passages; three rubble gates open with the crew's favours (`crew` quest). No lift: the
+  mine runs on one level, so the headframe in Anvilstead is scenery.
+- *Duelists* (14): Jory and Linden (mono-colour rule) in Rootholm; Fenna, Heath and Rue in the Elder Ring;
+  Vesper ☾ on Fernhollow by the moonflower glade; Jet in the Undermine; Mica and Ulric on Scree Pass; Ida and
+  Garth at Ropes & Holds; Dov (no rares) in Anvilstead; Petra and Morwen ☾ at the Bastion.
+- *Quests*: `boots`, `agnes` (Hazel's honey for her mother), `gloves`, `crew` (three favours that clear the
+  rubble) and `cairns` (six cairns on Scree Pass, for Bex). Wick the charcoal burner keeps a camp on Fernhollow.
+
 ---
 
 ### 10.7 The hub in 1.3

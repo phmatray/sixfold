@@ -1,0 +1,144 @@
+{
+  "width": 9,
+  "height": 7,
+  "tiles": [
+    "333333333",
+    "3.......3",
+    "3.......3",
+    "3.......3",
+    "3.......3",
+    "3.......3",
+    "3.......3"
+  ],
+  "props": [
+    {
+      "asset": "glow_mushroom_tall",
+      "x": 1,
+      "z": 1,
+      "rot": 0,
+      "glow": "#a8f0b0",
+      "light": true
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 7,
+      "z": 2,
+      "rot": 0,
+      "glow": "#a8f0b0"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 2,
+      "z": 4,
+      "rot": 0,
+      "glow": "#a8f0b0"
+    },
+    {
+      "asset": "stump",
+      "x": 6,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "glow_shelf",
+      "x": 7,
+      "z": 4,
+      "rot": 0,
+      "glow": "#a8f0b0"
+    },
+    {
+      "asset": "log",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 6,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 6,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "kind": "find",
+      "id": "g_cave",
+      "x": 6,
+      "z": 1,
+      "give": "card:bogcrown",
+      "text": "Deep in the hollow, where the elder's heart rotted soft, a stump of heartwood still stands. On it, as if set down carefully: a card, crowned with moss.",
+      "text_fr": "Au fond du creux, là où le cœur du vieil arbre a pourri, une souche de bois de cœur tient encore debout. Dessus, comme posée avec soin : une carte, couronnée de mousse."
+    },
+    {
+      "x": 3,
+      "z": 1,
+      "kind": "sign",
+      "text": "Rings. Hundreds of them, on the inside of the trunk, each one a year. Someone has scratched a little mark on one, very near the outside: \"G. born\".",
+      "text_fr": "Des cernes. Des centaines, sur l'intérieur du tronc, un par année. Quelqu'un a gravé une petite marque sur l'un d'eux, tout près de l'écorce : « G. né »."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 6,
+      "to": "rootholm",
+      "label": "Go back out",
+      "label_fr": "Ressortir",
+      "spawn": {
+        "x": 26,
+        "z": 1,
+        "facing": "e"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [],
+  "cave": true,
+  "ground": {
+    "base": "moss",
+    "path": "dirt",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 9,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#c8ffd0",
+      "intensity": 0.5,
+      "fromHero": [
+        -3,
+        8,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#5a7a6a",
+      "ground": "#0e140e",
+      "intensity": 0.8
+    },
+    "lamp": {
+      "color": "#a8ffc0",
+      "intensity": 3,
+      "distance": 6
+    },
+    "background": "#05080a"
+  }
+}

@@ -615,6 +615,17 @@ mod tests {
             facets: 385,
             packs: 0,
         });
+        // 1.3 Grove and Stone (§10.5-10.6): their Facet finds (g_walkway 60, g_ring 50,
+        // g_glade 100, w_hollow 40, sn_crystal 80, sn_scree 60, sn_menhir 50) and two pack
+        // finds (g_cliff, sn_side_3), over six new outdoor maps, the reworked trail and five
+        // houses; the errands that pay (the six cairns 60, Agnes's honey 50) with the boots,
+        // the crew's three favours and the gloves, which pay in keys. The boots' ⬡ 100 is a
+        // sink, left out like the other prices.
+        first.push(Source {
+            minutes: 7 * 10 + 5 * 3 + 55,
+            facets: 440 + 110,
+            packs: 2,
+        });
         let rate = packs_per_hour(&first);
         // The "exploring" row of §3.4, per hour: 5 two-prize duelists, 6 finds
         // of ⬡ 40, half a quest of ⬡ 160 and 0.8 of a rival.

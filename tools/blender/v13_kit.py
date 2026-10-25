@@ -217,6 +217,29 @@ def open_part(build, pivot, keys, name):
     return after
 
 
+def along(p, n):
+    """A matrix at p with its local +Z along n (things stuck on a curved surface, logs, handles)."""
+    return Matrix.Translation(p) @ Vector(n).normalized().to_track_quat("Z", "Y").to_matrix().to_4x4()
+
+
+def quad(pts, normal):
+    """One flat face through 3D points, turned to face `normal` (chalk strokes, marks laid just off a surface)."""
+    bm = bmesh.new()
+    f = bm.faces.new([bm.verts.new(p) for p in pts])
+    f.normal_update()
+    if f.normal.dot(Vector(normal)) < 0:
+        f.normal_flip()
+    return bm
+
+
+def centre(k):
+    """Move every part so the bounding box centre sits on the origin (item popups)."""
+    vs = [v.co for bm, *_ in k.parts for v in bm.verts]
+    c = Vector([(min(v[i] for v in vs) + max(v[i] for v in vs)) / 2 for i in range(3)])
+    for bm, *_ in k.parts:
+        bmesh.ops.translate(bm, vec=-c, verts=bm.verts)
+
+
 def chain(*hooks):
     """Several after() hooks as one."""
     def after(ob, coll):
@@ -560,13 +583,19 @@ def render(scn, path):
     print("[v13] render ->", path)
 
 
-def tile_sheet(scn, L, built, info, path, tile=360, cols=6):
-    """One labelled tile per model and view (front 3/4 from the game pitch, then from behind), ortho, fitted."""
+def tile_sheet(scn, L, built, info, path, tile=360, cols=6, night=False):
+    """One labelled tile per model and view (front 3/4 from the game pitch, then from behind), ortho, fitted.
+    night: the 1.3 night preset with glow parts lit."""
     import numpy as np
+    for ob in [o for o in scn.objects if o.type == "LIGHT" or o.name.startswith("v13_cam")]:
+        bpy.data.objects.remove(ob)
+    if night:
+        L = dict(L, **NIGHT)
+        L.update(L.get("night", {}))
     L = dict(L, fog=(1e4, 2e4))  # the ortho camera stands far off: no fog on the tiles
     cam = stage(scn, L, (tile, tile))
     cam.data.type = "ORTHO"
-    toonify(L)
+    toonify(L, night=night)
     tmp = os.path.join(os.path.dirname(os.path.abspath(path)), "_v13_tile.png")
     tiles = []
     meshes = [o for o in scn.objects if o.type == "MESH"]

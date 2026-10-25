@@ -1,0 +1,2109 @@
+{
+  "title": "The Bastion",
+  "title_fr": "Le Bastion",
+  "region": "stone",
+  "kind": "site",
+  "music": "stone",
+  "width": 42,
+  "height": 32,
+  "tiles": [
+    "666666666666666666666666666666666666666666",
+    "664444444444444444444444444444444444444446",
+    "644444444444444444444444444444444444444446",
+    "664444444444444444444444444444444444444466",
+    "644444444444444444444444444444444444444466",
+    "644444444444444444444444444444444444444466",
+    "644444444444444444444444444444444444444466",
+    "664444444444444444444444444444444444444446",
+    "644444444444444444444444444444444444444446",
+    "644333333444444444444344444444444444444436",
+    "633333333333444444433333333333444444433336",
+    "663333333333333333333333333333333333333336",
+    "663333333333333333333333333333333333333336",
+    "633333333333333333333333333322222233333366",
+    "633333322222222222233333322222222222233366",
+    "622222222222222222222222222222222222222222",
+    "662222222222222222222222222222222222222222",
+    "622222222222222222222222222222222222222222",
+    "612222222222211111112222222222222211112266",
+    "611122222221111111111112222211111111111166",
+    "661111111111111111111111111111111111111116",
+    "611111111111111111111111111111111111111116",
+    "661111111111111111111111111111111111111116",
+    "6....111111111111..1111111111111111......6",
+    "6.......111111.......ppp..1111111........6",
+    "66...................ppp.................6",
+    "6....................ppp.................6",
+    "6....................ppp.................6",
+    "66...................ppp.................6",
+    "66...................ppp.................6",
+    "66...................ppp.................6",
+    "6....................ppp.................6"
+  ],
+  "paint": [
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    "........................pp................",
+    "........................pp................",
+    "........................pp................",
+    "........................pp................",
+    "........................pp................",
+    "............ppppppppppppppp...............",
+    "............ppppppppppppppp...............",
+    "............pp............................",
+    "............pp............................",
+    "............pppppppppppppppppppppppppppppp",
+    "............pppppppppppppppppppppppppppppp",
+    "..........................................",
+    "..............................pp..........",
+    "..............................pp..........",
+    ".....................pppppppppppp.........",
+    ".....................pppppppppppp.........",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    ".........................................."
+  ],
+  "props": [
+    {
+      "asset": "stairs_slate",
+      "x": 21,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 22,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 30,
+      "z": 19,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 31,
+      "z": 19,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 12,
+      "z": 14,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 13,
+      "z": 14,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 24,
+      "z": 10,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 25,
+      "z": 10,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "seal_stone",
+      "x": 19,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "menhir",
+      "x": 15,
+      "z": 2,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "menhir",
+      "x": 16,
+      "z": 6,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "menhir",
+      "x": 19,
+      "z": 7,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "menhir",
+      "x": 23,
+      "z": 6,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "menhir",
+      "x": 24,
+      "z": 2,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "menhir",
+      "x": 21,
+      "z": 1,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "menhir",
+      "x": 17,
+      "z": 1,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "waymark",
+      "x": 27,
+      "z": 5,
+      "rot": 0,
+      "glow": "#a8642f"
+    },
+    {
+      "asset": "rock",
+      "x": 33,
+      "z": 3,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "crates",
+      "x": 37,
+      "z": 6,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rail",
+      "x": 15,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 16,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 17,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 18,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 19,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 20,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 21,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 22,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 23,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 24,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 25,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 26,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 27,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 28,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 29,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 32,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 33,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 34,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 35,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 36,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 37,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rail",
+      "x": 38,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "minecart",
+      "x": 33,
+      "z": 17,
+      "rot": 0,
+      "y": 2.07
+    },
+    {
+      "asset": "rail",
+      "x": 4,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 5,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 6,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 7,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 8,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 9,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 10,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 11,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 12,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 13,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 14,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 15,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 16,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 17,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "minecart",
+      "x": 6,
+      "z": 22,
+      "rot": 0,
+      "y": 1.07
+    },
+    {
+      "asset": "workshop",
+      "x": 4,
+      "z": 14,
+      "rot": 0,
+      "y": 2,
+      "recolor": {
+        "sx_slate": "#5a606c",
+        "sx_slate_dk": "#454a55"
+      }
+    },
+    {
+      "asset": "rubble",
+      "x": 9,
+      "z": 11,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rubble",
+      "x": 10,
+      "z": 11,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rubble",
+      "x": 28,
+      "z": 15,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rubble",
+      "x": 6,
+      "z": 19,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rubble",
+      "x": 34,
+      "z": 21,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rubble",
+      "x": 14,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "rubble",
+      "x": 31,
+      "z": 12,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "campfire",
+      "x": 9,
+      "z": 16,
+      "rot": 0,
+      "y": 2,
+      "why": "the night shift's camp"
+    },
+    {
+      "asset": "oil_lantern_post",
+      "x": 7,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "oil_lantern_post",
+      "x": 17,
+      "z": 13,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "log",
+      "x": 10,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "mushroom_ring",
+      "x": 17,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "mushroom_ring",
+      "x": 26,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "mushroom_ring",
+      "x": 14,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "mushroom_ring",
+      "x": 28,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 25,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 37,
+      "z": 14,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 33,
+      "z": 9,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 16,
+      "z": 4,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 17,
+      "z": 7,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 30,
+      "z": 9,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 18,
+      "z": 7,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 1,
+      "z": 2,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 35,
+      "z": 5,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 31,
+      "z": 3,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 4,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 3,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 38,
+      "z": 2,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 36,
+      "z": 8,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 4,
+      "z": 21,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 9,
+      "z": 12,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "pine",
+      "x": 1,
+      "z": 10,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 10,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock",
+      "x": 5,
+      "z": 12,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock",
+      "x": 31,
+      "z": 13,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 35,
+      "z": 12,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "pine",
+      "x": 37,
+      "z": 20,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 39,
+      "z": 10,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock",
+      "x": 1,
+      "z": 13,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock",
+      "x": 6,
+      "z": 12,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "pine",
+      "x": 34,
+      "z": 20,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 5,
+      "z": 20,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 3,
+      "z": 21,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 11,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 33,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 10,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 31,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 38,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 4,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 36,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 16,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 27,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 13,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 13,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 12,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 28,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 25,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 1,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 2,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 3,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 4,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 5,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 6,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 7,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 8,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 9,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 10,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 11,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 12,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 13,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 14,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 15,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 16,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 17,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 18,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 19,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 20,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 21,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 22,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 23,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 24,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 25,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 26,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 27,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 28,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 29,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 30,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 31,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 1,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 1,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 2,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 4,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 5,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 5,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 6,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 6,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 7,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 7,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 8,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 8,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 9,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 9,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 10,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 10,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 11,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 11,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 12,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 13,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 14,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 14,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 15,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 15,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 16,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 16,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 17,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 17,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 18,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 18,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 19,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 19,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 20,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 20,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 21,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 22,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 23,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 24,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 24,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 25,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 26,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 26,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 27,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 27,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 28,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 28,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 29,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 30,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 31,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 31,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 32,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 32,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 33,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 33,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 34,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 35,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 35,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 36,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 36,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 37,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 37,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 38,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 38,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 39,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 39,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 40,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 40,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 1,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 41,
+      "z": 2,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 41,
+      "z": 3,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 4,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 41,
+      "z": 5,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 6,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 41,
+      "z": 7,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 8,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 41,
+      "z": 9,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 10,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 11,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 12,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 41,
+      "z": 13,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 41,
+      "z": 14,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 18,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 19,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 20,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 41,
+      "z": 21,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 22,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 23,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 41,
+      "z": 24,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 25,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 26,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 27,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 28,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 41,
+      "z": 29,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 30,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 31,
+      "rot": 0,
+      "y": 6
+    }
+  ],
+  "spawn": {
+    "x": 22,
+    "z": 30,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 19,
+      "z": 4,
+      "kind": "sign",
+      "text": "The seal stone of the Stonebacks. Six faces, the fighting face scarred as if by knuckles. The seventh, on top, is blank, and colder than the rest.",
+      "text_fr": "La pierre du sceau des Échines. Six faces, celle du combat balafrée comme par des poings. La septième, au sommet, est vierge, et plus froide que les autres."
+    },
+    {
+      "kind": "find",
+      "id": "sn_menhir",
+      "x": 19,
+      "z": 7,
+      "give": "coins:50",
+      "hidden": true,
+      "text": "At the foot of the south menhir, under a flat stone the crew uses as a step: a little cache of Facets, wrapped in an oilcloth.",
+      "text_fr": "Au pied du menhir sud, sous une pierre plate dont l'équipe se sert comme marche : une petite réserve de Facettes, enveloppée dans une toile cirée."
+    },
+    {
+      "kind": "waymark",
+      "id": "bastion",
+      "x": 27,
+      "z": 5
+    },
+    {
+      "kind": "find",
+      "id": "sn_moon",
+      "x": 33,
+      "z": 3,
+      "give": "card:cragmastiff",
+      "text": "Moonlight falls on the cut slate and every seam shines like a vein of silver. In the brightest seam, wedged in a crack: a card, cold to the touch.",
+      "text_fr": "La lune tombe sur l'ardoise taillée et chaque veine brille comme de l'argent. Dans la plus brillante, coincée dans une fente : une carte, froide au toucher.",
+      "if": "time:night"
+    },
+    {
+      "x": 37,
+      "z": 6,
+      "kind": "sign",
+      "id": "chute",
+      "name": "An old spoil chute",
+      "name_fr": "Une vieille goulotte à déblais",
+      "dialogue": [
+        {
+          "lines": [
+            "A plank chute, polished by a century of spoil, drops from the top terrace to the works below. You sit, push off, and slide all the way down to the road for Anvilstead."
+          ],
+          "lines_fr": [
+            "Une goulotte de planches, polie par un siècle de déblais, plonge de la terrasse du haut jusqu'au chantier. Vous vous asseyez, vous poussez, et vous glissez jusqu'à la route de Bourg-l'Enclume."
+          ],
+          "do": [
+            "warp:bastion:37:16:e"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 5,
+      "z": 16,
+      "kind": "sign",
+      "id": "works_office",
+      "name": "The Bastion Works",
+      "name_fr": "Le chantier du Bastion",
+      "dialogue": [
+        {
+          "lines": [
+            "A board on the door: \"BASTION WORKS. Day shift: Orla's crew. Night shift: Morwen's. Visitors: wear a hat.\" There is a hook with one hat on it."
+          ],
+          "lines_fr": [
+            "Un panneau sur la porte : « CHANTIER DU BASTION. Équipe de jour : Orla. Équipe de nuit : Morwen. Visiteurs : portez un chapeau. » Il y a un crochet avec un chapeau dessus."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 30,
+      "z": 12,
+      "kind": "sign",
+      "id": "half_block",
+      "name": "A half-cut block",
+      "name_fr": "Un bloc à moitié taillé",
+      "dialogue": [
+        {
+          "lines": [
+            "A block of slate as big as a cart, split halfway along a line of iron wedges. The wedges are rusted in. Whoever was cutting it stopped one morning and never came back."
+          ],
+          "lines_fr": [
+            "Un bloc d'ardoise gros comme un wagonnet, fendu à moitié le long d'une ligne de coins de fer. Les coins sont rouillés dedans. Celui qui le taillait s'est arrêté un matin et n'est jamais revenu."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 25,
+      "z": 29,
+      "kind": "sign",
+      "text": "South: The Elder Ring, at the foot of the cliff. There's a wall of old pegs down; you'd need gloves to use it. East: Anvilstead.",
+      "text_fr": "Sud : Le Cercle des Anciens, au pied de la falaise. Il y a une paroi de vieux pitons pour descendre ; il faudrait des gants. Est : Bourg-l'Enclume."
+    },
+    {
+      "x": 37,
+      "z": 14,
+      "kind": "sign",
+      "text": "East: Anvilstead, along the rail road. Up the terraces: the stone ring and the seal.",
+      "text_fr": "Est : Bourg-l'Enclume, par la route des rails. En haut des gradins : le cercle de pierres et le sceau."
+    }
+  ],
+  "warps": [],
+  "exits": [
+    {
+      "side": "e",
+      "span": [
+        15,
+        17
+      ],
+      "to": "anvilstead"
+    },
+    {
+      "side": "s",
+      "span": [
+        21,
+        23
+      ],
+      "to": "elder_ring"
+    }
+  ],
+  "npcs": [
+    {
+      "id": "kessa",
+      "name": "Kessa",
+      "model": "npc_worker",
+      "x": 22,
+      "z": 4,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#a8642f",
+      "hair": "#d8c8a0",
+      "dialogue": [
+        {
+          "if": "time:night",
+          "lines": [
+            "Night shift's Morwen's. I'm only up because the stone hums after dark. Listen. Hear it?",
+            "Orla says it's the mountain settling. Orla says a lot of things."
+          ],
+          "lines_fr": [
+            "L'équipe de nuit, c'est Morwen. Je ne suis debout que parce que la pierre bourdonne après la tombée de la nuit. Écoute. Tu l'entends ?",
+            "Orla dit que c'est la montagne qui se tasse. Orla dit beaucoup de choses."
+          ]
+        },
+        {
+          "lines": [
+            "Kessa. Foreman. Orla's down at the Emberstep quarry, minding the old face; she goes every season. She'll be back up to her seal when she's done, and you'll know it when she is.",
+            "Until then I keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry."
+          ],
+          "lines_fr": [
+            "Kessa. Contremaîtresse. Orla est en bas à la Carrière de Pas-de-Braise, à surveiller le vieux front de taille ; elle y va chaque saison. Elle remontera à son sceau quand elle aura fini, et tu le sauras quand ce sera le cas.",
+            "En attendant, je garde le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_petra",
+      "name": "Petra",
+      "model": "npc_worker",
+      "x": 16,
+      "z": 20,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 4,
+        "challenge": [
+          "Hard hat? No? Then you'd better be quick on your feet.",
+          "Three prizes. We cut slate here; we don't cut corners."
+        ],
+        "challenge_fr": [
+          "Un casque ? Non ? Alors tu as intérêt à être vif.",
+          "Trois Récompenses. Ici, on taille l'ardoise ; on ne taille pas les virages."
+        ],
+        "win": [
+          "Split clean down the grain. Good work."
+        ],
+        "win_fr": [
+          "Fendu net, dans le fil. Du beau travail."
+        ],
+        "lose": [
+          "Hit the wedge, not your thumb. That's the whole trade."
+        ],
+        "lose_fr": [
+          "Tape sur le coin, pas sur ton pouce. C'est tout le métier."
+        ],
+        "after": [
+          "Every terrace here is a year of work. Count them from the bottom and you've the age of the crew."
+        ],
+        "after_fr": [
+          "Chaque gradin, ici, c'est une année de travail. Compte-les depuis le bas, et tu as l'âge de l'équipe."
+        ]
+      },
+      "outfit": "#6a6070",
+      "hair": "#2a2a2a"
+    },
+    {
+      "id": "t_morwen",
+      "name": "Morwen",
+      "model": "npc_worker",
+      "x": 27,
+      "z": 11,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "Night shift. We work by lantern and moon, and we don't like surprises.",
+          "Three prizes, and no light in my eyes."
+        ],
+        "challenge_fr": [
+          "Équipe de nuit. On travaille à la lanterne et à la lune, et on n'aime pas les surprises.",
+          "Trois Récompenses, et pas de lumière dans mes yeux."
+        ],
+        "win": [
+          "Beaten in the dark. That's a first."
+        ],
+        "win_fr": [
+          "Battue dans le noir. Une première."
+        ],
+        "lose": [
+          "The dark's my shift. You're on my time."
+        ],
+        "lose_fr": [
+          "Le noir, c'est mon service. Tu es sur mon temps."
+        ],
+        "after": [
+          "When the moon's up, the slate shines along its seams. Look on the top terrace. Not everything that shines is quartz."
+        ],
+        "after_fr": [
+          "Quand la lune est levée, l'ardoise brille le long de ses veines. Regarde sur la terrasse du haut. Tout ce qui brille n'est pas du quartz."
+        ]
+      },
+      "outfit": "#2a3040",
+      "hair": "#c8c8c8",
+      "if": "time:night"
+    }
+  ],
+  "cliff": [
+    "cliff_slate",
+    "cliff_slate_b"
+  ],
+  "ground": {
+    "base": "slate",
+    "path": "stone",
+    "margin": 9,
+    "tufts": 700
+  },
+  "ring": [
+    "pine",
+    "rock",
+    "bush_dark"
+  ],
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#ffffff",
+      "intensity": 2.6,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#f4f1ea",
+      "ground": "#5d5a55",
+      "intensity": 1.5
+    },
+    "background": "#c9c3b8",
+    "fog": {
+      "near": 16,
+      "far": 34
+    }
+  }
+}

@@ -16,8 +16,8 @@
     "..............p.............~~...p..........................",
     "..............p.............~~...p..........................",
     "..............p.............~~...p..........................",
-    "....pp.ppppppppppppppppppppppppppppppppppppppp..............",
-    "......pppppppppppppppppppppppppppppppppppppppp..p...........",
+    "pppppp.ppppppppppppppppppppppppppppppppppppppp..............",
+    "pppppppppppppppppppppppppppppppppppppppppppppp..p...........",
     "..................p.....p...~~.............ppppppppppppppppp",
     "..................p.....p...~~...........p.ppppppppppppppppp",
     "..................p.....p...~~...........p.............ppppp",
@@ -53,8 +53,8 @@
     },
     {
       "asset": "signpost",
-      "x": 5,
-      "z": 7,
+      "x": 4,
+      "z": 8,
       "rot": 0
     },
     {
@@ -116,12 +116,6 @@
       "asset": "flowers",
       "x": 41,
       "z": 5,
-      "rot": 0
-    },
-    {
-      "asset": "standing_tree",
-      "x": 35,
-      "z": 12,
       "rot": 0
     },
     {
@@ -262,18 +256,6 @@
       "glow": "#6fe8c4"
     },
     {
-      "asset": "fallen_trunk",
-      "x": 1,
-      "z": 9,
-      "rot": 90
-    },
-    {
-      "asset": "fallen_trunk_end",
-      "x": 1,
-      "z": 5,
-      "rot": 90
-    },
-    {
       "asset": "log",
       "x": 19,
       "z": 17,
@@ -307,12 +289,6 @@
       "asset": "bush",
       "x": 12,
       "z": 23,
-      "rot": 0
-    },
-    {
-      "asset": "stump",
-      "x": 16,
-      "z": 20,
       "rot": 0
     },
     {
@@ -851,12 +827,6 @@
       "rot": 0
     },
     {
-      "asset": "pine",
-      "x": 0,
-      "z": 9,
-      "rot": 0
-    },
-    {
       "asset": "birch",
       "x": 59,
       "z": 9,
@@ -864,20 +834,8 @@
     },
     {
       "asset": "birch",
-      "x": 0,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
       "x": 59,
       "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 11,
       "rot": 0
     },
     {
@@ -1854,18 +1812,6 @@
     },
     {
       "asset": "pine",
-      "x": 2,
-      "z": 5,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
-      "x": 3,
-      "z": 5,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
       "x": 17,
       "z": 5,
       "rot": 0
@@ -1932,24 +1878,6 @@
     },
     {
       "asset": "pine",
-      "x": 1,
-      "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 2,
-      "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 3,
-      "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
       "x": 17,
       "z": 6,
       "rot": 0
@@ -2012,24 +1940,6 @@
       "asset": "bush",
       "x": 42,
       "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 1,
-      "z": 7,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 2,
-      "z": 7,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 3,
-      "z": 7,
       "rot": 0
     },
     {
@@ -2106,78 +2016,6 @@
     },
     {
       "asset": "birch",
-      "x": 2,
-      "z": 8,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
-      "x": 2,
-      "z": 9,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 2,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
-      "x": 1,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 2,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 3,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 1,
-      "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 2,
-      "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
-      "x": 3,
-      "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 1,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
-      "x": 2,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 3,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
       "x": 4,
       "z": 13,
       "rot": 0
@@ -2186,24 +2024,6 @@
       "asset": "pine",
       "x": 5,
       "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 1,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 2,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 3,
-      "z": 14,
       "rot": 0
     },
     {
@@ -2309,39 +2129,9 @@
       "rot": 0
     },
     {
-      "asset": "birch",
-      "x": 35,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
-      "x": 37,
-      "z": 14,
-      "rot": 0
-    },
-    {
       "asset": "bush",
       "x": 39,
       "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
-      "x": 1,
-      "z": 15,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 2,
-      "z": 15,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 3,
-      "z": 15,
       "rot": 0
     },
     {
@@ -2377,12 +2167,6 @@
     {
       "asset": "pine",
       "x": 9,
-      "z": 15,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 10,
       "z": 15,
       "rot": 0
     },
@@ -3540,18 +3324,6 @@
     },
     {
       "asset": "bush",
-      "x": 36,
-      "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 37,
-      "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
       "x": 38,
       "z": 12,
       "rot": 0
@@ -3649,18 +3421,6 @@
     {
       "asset": "bush",
       "x": 34,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 35,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 37,
       "z": 13,
       "rot": 0
     },
@@ -3792,25 +3552,7 @@
     },
     {
       "asset": "bush",
-      "x": 1,
-      "z": 8,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 1,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
       "x": 33,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 36,
       "z": 13,
       "rot": 0
     },
@@ -3823,12 +3565,6 @@
     {
       "asset": "bush",
       "x": 34,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 36,
       "z": 14,
       "rot": 0
     },
@@ -4011,6 +3747,55 @@
       "x": 39,
       "z": 22,
       "rot": 0
+    },
+    {
+      "asset": "fallen_trunk",
+      "x": 1,
+      "z": 5,
+      "rot": 90
+    },
+    {
+      "asset": "fallen_trunk",
+      "x": 1,
+      "z": 12,
+      "rot": 90
+    },
+    {
+      "asset": "standing_tree",
+      "x": 35,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "stump",
+      "x": 11,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 12,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "campfire",
+      "x": 18,
+      "z": 17,
+      "rot": 0,
+      "why": "the charcoal burner's camp"
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 14,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -4023,8 +3808,8 @@
       "x": 56,
       "z": 9,
       "kind": "sign",
-      "text": "Fernhollow Trail. East: back to Sixfold Meadow. Over the bridge and north: the moonflower glade.",
-      "text_fr": "Sentier de Creuse-Fougère. Est : retour au Pré de Sixfold. Après le pont, au nord : la clairière des fleurs de lune."
+      "text": "Fernhollow Trail. East: back to Sixfold Meadow. West, over the bridge and down the old road: Rootholm. North of the stream: the moonflower glade.",
+      "text_fr": "Sentier de Creuse-Fougère. À l'est : retour au Pré de Sixfold. À l'ouest, après le pont, par la vieille route : Racinemont. Au nord du ruisseau : la clairière des fleurs de lune."
     },
     {
       "kind": "sign",
@@ -4035,10 +3820,10 @@
     },
     {
       "kind": "sign",
-      "text": "The old road to Rootholm. Closed: the elder came down in the spring gales. The rangers are working on it.",
-      "text_fr": "La vieille route de Racinemont. Fermée : l'ancien est tombé dans les coups de vent du printemps. Les gardes s'en occupent.",
-      "x": 5,
-      "z": 7
+      "text": "West: Rootholm, under the Broken Elder. The rangers sawed the old road open again. East: the Fernhollow bridge and Sixfold Meadow.",
+      "text_fr": "À l'ouest : Racinemont, sous le Vieil-Arbre brisé. Les gardes ont rouvert la vieille route à la scie. À l'est : le pont de Creuse-Fougère et le Pré de Sixfold.",
+      "x": 4,
+      "z": 8
     },
     {
       "kind": "find",
@@ -4133,6 +3918,54 @@
       "give": "card:moss_poultice",
       "text": "At the foot of the corner pine, in a nest of needles: a card.",
       "text_fr": "Au pied du pin, dans le coin, sur un nid d'aiguilles : une carte."
+    },
+    {
+      "x": 2,
+      "z": 8,
+      "kind": "sign",
+      "id": "sawn_elder",
+      "name": "A sawn trunk",
+      "name_fr": "Un tronc scié",
+      "dialogue": [
+        {
+          "lines": [
+            "The elder came down across the road in the spring gales. The rangers sawed a gap through it, a cart wide, and left the two halves where they fell. The rings say it was older than Rootholm."
+          ],
+          "lines_fr": [
+            "L'ancien est tombé en travers de la route lors des coups de vent du printemps. Les gardes y ont scié un passage, large comme une charrette, et laissé les deux moitiés là où elles sont tombées. Les cernes disent qu'il était plus vieux que Racinemont."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "g_glade",
+      "x": 11,
+      "z": 3,
+      "give": "coins:100",
+      "text": "The moonflowers are wide open, glowing like lamps. Under the brightest, where an owl has been dropping shiny things all summer: a little heap of Facets.",
+      "text_fr": "Les belles-de-lune sont grandes ouvertes, elles brillent comme des lampes. Sous la plus lumineuse, là où une chouette laisse tomber des choses brillantes tout l'été : un petit tas de Facettes.",
+      "if": "time:night"
+    },
+    {
+      "kind": "find",
+      "id": "reed_fibre",
+      "x": 26,
+      "z": 17,
+      "give": "give:reed_fibre",
+      "text": "Long pale reeds, the kind Tobiah wants. You pick the longest, strip them and tie them in a bundle.",
+      "text_fr": "De longs roseaux pâles, ceux que veut Tobiah. Vous choisissez les plus longs, vous les effeuillez et vous en faites une botte.",
+      "if": "flag:boots_asked"
+    },
+    {
+      "kind": "find",
+      "id": "w_hollow",
+      "x": 11,
+      "z": 15,
+      "give": "coins:40",
+      "hidden": true,
+      "text": "In the hollow stump, under a lid of bark someone fitted on purpose: a forgotten purse of Facets. A ranger's emergency money, by the look of the knot.",
+      "text_fr": "Dans la souche creuse, sous un couvercle d'écorce taillé exprès : une bourse de Facettes oubliée. L'argent de secours d'un garde, à en juger par le nœud."
     }
   ],
   "warps": [
@@ -4157,6 +3990,14 @@
         13
       ],
       "to": "overworld"
+    },
+    {
+      "side": "w",
+      "span": [
+        9,
+        11
+      ],
+      "to": "rootholm"
     }
   ],
   "npcs": [
@@ -4248,7 +4089,24 @@
         "after_fr": [
           "Les Ruchevolt bourdonnent la nuit. Écoute, un de ces soirs."
         ]
-      }
+      },
+      "dialogue": [
+        {
+          "if": "flag:agnes_asked & !flag:hazel_gave & !flag:agnes_done",
+          "lines": [
+            "Mum sent you? The clover's early, is it. That means she wants honey and won't say so.",
+            "Here, the new comb, still warm. Tell her it's from the east hives. She'll pretend she can taste the difference."
+          ],
+          "lines_fr": [
+            "C'est Maman qui t'envoie ? Le trèfle est en avance, hein. Ça veut dire qu'elle veut du miel sans le dire.",
+            "Tiens, le nouveau rayon, encore tiède. Dis-lui que ça vient des ruches de l'est. Elle fera semblant de sentir la différence."
+          ],
+          "do": [
+            "give:honey_jar",
+            "flag:hazel_gave"
+          ]
+        }
+      ]
     },
     {
       "id": "fennel",
@@ -4595,6 +4453,70 @@
           ]
         }
       ]
+    },
+    {
+      "id": "wick",
+      "name": "Wick",
+      "model": "npc_worker",
+      "x": 18,
+      "z": 18,
+      "facing": "n",
+      "idle": "Idle",
+      "outfit": "#4a4a4a",
+      "hair": "#2a2a2a",
+      "dialogue": [
+        {
+          "lines": [
+            "Charcoal for the cobbler's forge in Rootholm, and for the glassworks, when Cinderwick runs short. Takes a week to burn a mound. I sit with it, so it doesn't sulk.",
+            "At night the fire's the only light between the bridge and the Broken Elder. Owls come and look at it. So does Vesper, the owl keeper. He doesn't talk much."
+          ],
+          "lines_fr": [
+            "Du charbon pour la forge du cordonnier de Racinemont, et pour la verrerie, quand Mèche-Cendre en manque. Il faut une semaine pour cuire une meule. Je reste avec, pour qu'elle ne boude pas.",
+            "La nuit, le feu, c'est la seule lumière entre le pont et le Vieil-Arbre brisé. Les chouettes viennent le regarder. Vesper aussi, le gardien des chouettes. Il ne parle pas beaucoup."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_vesper",
+      "name": "Vesper",
+      "model": "npc_scholar",
+      "x": 16,
+      "z": 6,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 4,
+        "challenge": [
+          "Hoo. You're out late. So are they.",
+          "The owls want to see a duel. Three prizes, by moonlight."
+        ],
+        "challenge_fr": [
+          "Hou. Tu sors tard. Elles aussi.",
+          "Les chouettes veulent voir un duel. Trois Récompenses, au clair de lune."
+        ],
+        "win": [
+          "The owls approve. They don't approve of much."
+        ],
+        "win_fr": [
+          "Les chouettes approuvent. Elles n'approuvent pas grand-chose."
+        ],
+        "lose": [
+          "Silent wings. You never heard me coming."
+        ],
+        "lose_fr": [
+          "Des ailes silencieuses. Tu ne m'as pas entendu venir."
+        ],
+        "after": [
+          "Every owl in this wood has a name. I won't tell you them. They're private."
+        ],
+        "after_fr": [
+          "Chaque chouette de ce bois a un nom. Je ne te les dirai pas. C'est privé."
+        ]
+      },
+      "outfit": "#3a3a5a",
+      "hair": "#d8d0c0",
+      "if": "time:night"
     }
   ],
   "ground": {

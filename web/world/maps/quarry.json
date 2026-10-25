@@ -30,8 +30,8 @@
     "22222222.......pp......1112233",
     "22222222.......pp......1112233",
     "33.............pp......1112233",
-    "33.............pp......1112233",
-    "33.............pp......1112233",
+    "33.rr..........pp......1112233",
+    "33.rrrrrrrrrrrrpp......1112233",
     "33.............pp......1112233",
     "331111.........pp......1112233",
     "331111.........pp......1111133",
@@ -2495,35 +2495,6 @@
       "z": 32
     },
     {
-      "x": 3,
-      "z": 22,
-      "kind": "sign",
-      "id": "cave_mouth",
-      "name": "A cave mouth",
-      "name_fr": "Une bouche de grotte",
-      "dialogue": [
-        {
-          "if": "item:kiln_lantern",
-          "lines": [
-            "You hold up the Kiln Lantern. The tunnel runs west under the hills, timbered, with old rails in the dust.",
-            "A few steps in, a fresh rockfall closes it to the roof. From far off, faintly, comes the knock of picks: someone is digging through from the other side."
-          ],
-          "lines_fr": [
-            "Vous levez la Lanterne de four. Le tunnel file vers l'ouest sous les collines, boisé, avec de vieux rails dans la poussière.",
-            "Quelques pas plus loin, un éboulement récent le bouche jusqu'au plafond. De très loin, à peine, montent des coups de pioche : quelqu'un creuse depuis l'autre côté."
-          ]
-        },
-        {
-          "lines": [
-            "Pitch black inside, and a cold draught that smells of wet stone. You'd need a light to go in."
-          ],
-          "lines_fr": [
-            "Noir d'encre là-dedans, et un courant d'air froid qui sent la pierre mouillée. Il faudrait une lumière pour entrer."
-          ]
-        }
-      ]
-    },
-    {
       "kind": "find",
       "id": "q_midledge",
       "x": 3,
@@ -2594,7 +2565,23 @@
       "text_fr": "Entre les racines du pin, tout en haut de la carrière : un tas de Facettes : quelqu'un a grimpé bien haut pour les cacher."
     }
   ],
-  "warps": [],
+  "warps": [
+    {
+      "x": 3,
+      "z": 22,
+      "to": "undermine",
+      "label": "Go into the Undermine",
+      "label_fr": "Entrer dans les Galeries Basses",
+      "spawn": {
+        "x": 47,
+        "z": 7,
+        "facing": "w"
+      },
+      "if": "item:kiln_lantern",
+      "locked": "Pitch black inside, and a cold draught that smells of wet stone. Far off, picks are knocking. You'd need a light to go in.",
+      "locked_fr": "Noir d'encre là-dedans, et un courant d'air froid qui sent la pierre mouillée. Au loin, des pioches cognent. Il faudrait une lumière pour entrer."
+    }
+  ],
   "exits": [
     {
       "side": "s",

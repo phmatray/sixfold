@@ -1,0 +1,2303 @@
+{
+  "title": "Scree Pass",
+  "title_fr": "Col des Éboulis",
+  "region": "stone",
+  "kind": "route",
+  "music": "stone",
+  "width": 30,
+  "height": 44,
+  "tiles": [
+    "664444444444444444444444444666",
+    "644444444444444444444444444666",
+    "644444444444444444444444444466",
+    "644444444444444444444444444466",
+    "664444445544444444444444444666",
+    "644444444544444444444444444666",
+    "644444444444444444444444444466",
+    "644444444444444444444444444466",
+    "664444444444444444444444444666",
+    "644444444444333333334444444666",
+    "634444444433333333333333333466",
+    "633333333333333333333333333666",
+    "633333333333333333333333333366",
+    "633333333333333333333333333366",
+    "633333333333333333333333333366",
+    "633333333334433333333333333366",
+    "663333333333433333333333333666",
+    "633333332222223333333333333266",
+    "632222222222222223333333322266",
+    "662222222222222222222222222666",
+    "622222222222222222222222222666",
+    "662222222222222222222222222266",
+    "622222222222222233222222222666",
+    "622222222222222222222222222666",
+    "662222222222222222222222222266",
+    "661111111122222222222222222266",
+    "661111111111222222221111111666",
+    "661111111111111111111111111666",
+    "661111111111111111111111111166",
+    "661111111111111111122111111666",
+    "611111111111111111111111111166",
+    "661111111111111111113333111166",
+    "661111111111111111..3333..1666",
+    "6..pp...11111111.....pp....666",
+    "66.pp................pp....666",
+    "6..pppppppppppppppppppp....666",
+    "6..pppppppppppppppppppp.....66",
+    "6...........................66",
+    "6..........................666",
+    "66...~~~~~.................666",
+    "66..~~~~~~~................666",
+    "6...~~~~~~~................666",
+    "66...~~~~~..................66",
+    "66..........................66"
+  ],
+  "paint": [
+    ".............ppp..............",
+    ".............ppp..............",
+    ".............ppp..............",
+    ".............ppp..............",
+    ".............ppp..............",
+    ".............ppp..............",
+    ".............pppppppppppp.....",
+    ".............pppppppppppp.....",
+    ".............ppp..............",
+    "..............................",
+    ".......................pp.....",
+    ".......................pp.....",
+    ".......................pp.....",
+    "....pppppppppppppppppppppp....",
+    "....pppppppppppppppppppppp....",
+    "..............................",
+    "..............................",
+    "..............................",
+    "....pp........................",
+    "....pp........................",
+    "....pp........................",
+    "....ppppppppppppppppppppppp...",
+    "....ppppppppppppppppppppppp...",
+    "..............................",
+    "..............................",
+    "..............................",
+    "........................pp....",
+    "........................pp....",
+    "........................pp....",
+    "...pppppppppppppppppppppppp...",
+    "...pppppppppppppppppppppppp...",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    ".............................."
+  ],
+  "props": [
+    {
+      "asset": "stairs_slate",
+      "x": 3,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 4,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 24,
+      "z": 26,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 25,
+      "z": 26,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 4,
+      "z": 18,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 5,
+      "z": 18,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 23,
+      "z": 10,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 24,
+      "z": 10,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "cave_mouth_slate",
+      "x": 21,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "rail",
+      "x": 22,
+      "z": 35,
+      "rot": 90
+    },
+    {
+      "asset": "rail",
+      "x": 22,
+      "z": 36,
+      "rot": 90
+    },
+    {
+      "asset": "rail",
+      "x": 22,
+      "z": 37,
+      "rot": 90
+    },
+    {
+      "asset": "minecart",
+      "x": 23,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 37,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 24,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "cairn",
+      "x": 18,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "cairn",
+      "x": 2,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "cairn",
+      "x": 26,
+      "z": 27,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "cairn",
+      "x": 2,
+      "z": 19,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "cairn",
+      "x": 26,
+      "z": 11,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "cairn",
+      "x": 21,
+      "z": 2,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "menhir",
+      "x": 11,
+      "z": 1,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "menhir",
+      "x": 17,
+      "z": 1,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "signpost",
+      "x": 16,
+      "z": 3,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 3,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 9,
+      "z": 23,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "campfire",
+      "x": 22,
+      "z": 23,
+      "rot": 0,
+      "y": 2,
+      "why": "the prospectors' camp"
+    },
+    {
+      "asset": "log",
+      "x": 19,
+      "z": 24,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "crates",
+      "x": 24,
+      "z": 24,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "reeds",
+      "x": 3,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 11,
+      "z": 41,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 6,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "sign",
+      "x": 9,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 4,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 17,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 13,
+      "z": 41,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 27,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 3,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 11,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 19,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 21,
+      "z": 41,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 24,
+      "z": 37,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 26,
+      "z": 41,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 22,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 10,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 15,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 15,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 2,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 16,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 27,
+      "z": 36,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 16,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 13,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 26,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 18,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 17,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 10,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 17,
+      "z": 41,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 10,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 7,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 14,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 13,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 7,
+      "z": 27,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 11,
+      "z": 32,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 4,
+      "z": 26,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 26,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 12,
+      "z": 27,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 16,
+      "z": 27,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 15,
+      "z": 27,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 17,
+      "z": 27,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 8,
+      "z": 26,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 17,
+      "z": 25,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 10,
+      "z": 19,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 16,
+      "z": 18,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 1,
+      "z": 23,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 13,
+      "z": 24,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 22,
+      "z": 19,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 12,
+      "z": 19,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 2,
+      "z": 24,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 22,
+      "z": 24,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 19,
+      "z": 25,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 12,
+      "z": 10,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 16,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "pine",
+      "x": 11,
+      "z": 11,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock",
+      "x": 1,
+      "z": 12,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock",
+      "x": 7,
+      "z": 17,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock",
+      "x": 23,
+      "z": 16,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "pine",
+      "x": 9,
+      "z": 16,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock",
+      "x": 24,
+      "z": 17,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock",
+      "x": 10,
+      "z": 11,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "pine",
+      "x": 8,
+      "z": 16,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock",
+      "x": 11,
+      "z": 2,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 2,
+      "z": 8,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 19,
+      "z": 1,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 4,
+      "z": 7,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 24,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 1,
+      "z": 3,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 2,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 6,
+      "z": 9,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 10,
+      "z": 2,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 11,
+      "z": 6,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 1,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 2,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 3,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 4,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 5,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 6,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 7,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 8,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 9,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 10,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 11,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 12,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 13,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 14,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 15,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 16,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 17,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 18,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 19,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 20,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 21,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 22,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 23,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 24,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 25,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 26,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 27,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 28,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 29,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 30,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 31,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 32,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 33,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 34,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 35,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 36,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 37,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 38,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 39,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 40,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 41,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 42,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 43,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 1,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 1,
+      "z": 43,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 2,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "bush_dark",
+      "x": 4,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 4,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 5,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "bush_dark",
+      "x": 5,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 6,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "bush_dark",
+      "x": 6,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 7,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "heather",
+      "x": 7,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 8,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 8,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 9,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 9,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 10,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 11,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 11,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 12,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 12,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 13,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 14,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 15,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 16,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "bush_dark",
+      "x": 17,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "heather",
+      "x": 17,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 18,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "heather",
+      "x": 18,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 19,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "bush_dark",
+      "x": 19,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 20,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 20,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 21,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 21,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 22,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 22,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 23,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 23,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 24,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 26,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "pine",
+      "x": 26,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 27,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 27,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 28,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 28,
+      "z": 43,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 0,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 29,
+      "z": 1,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 2,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 29,
+      "z": 3,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 4,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 5,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 6,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 7,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 8,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 9,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 10,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 11,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 12,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 13,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 14,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 15,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 16,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 17,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 18,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 19,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 20,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 21,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 22,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 23,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 24,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 25,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 26,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 27,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 28,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 29,
+      "z": 29,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 30,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 31,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "bush_dark",
+      "x": 29,
+      "z": 32,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 33,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 34,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 35,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 36,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 37,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 38,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 39,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 40,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 41,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 42,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 43,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock",
+      "x": 1,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 26,
+      "z": 40,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 21,
+    "z": 34,
+    "facing": "s"
+  },
+  "interactions": [
+    {
+      "x": 25,
+      "z": 38,
+      "kind": "sign",
+      "id": "tipped_cart",
+      "name": "A tipped cart",
+      "name_fr": "Un wagonnet renversé",
+      "dialogue": [
+        {
+          "lines": [
+            "An ore cart, tipped on its side at the end of the rails, rusted to the colour of the hills. Inside, a nest of dry grass, and a single blue eggshell."
+          ],
+          "lines_fr": [
+            "Un wagonnet à minerai, renversé au bout des rails, rouillé de la couleur des collines. Dedans, un nid d'herbe sèche, et une seule coquille bleue."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 18,
+      "z": 34,
+      "kind": "sign",
+      "id": "cairn_1",
+      "name": "A cairn",
+      "name_fr": "Un cairn",
+      "dialogue": [
+        {
+          "if": "flag:cairn_1",
+          "lines": [
+            "Your stone is still on top, a little crooked. The pennant flaps."
+          ],
+          "lines_fr": [
+            "Votre pierre est toujours au sommet, un peu de travers. Le fanion claque."
+          ]
+        },
+        {
+          "if": "count:cairn_:5",
+          "lines": [
+            "You add a flat stone to the top of the cairn. That's the sixth: every cairn on the pass has your stone on it now.",
+            "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
+          ],
+          "lines_fr": [
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+          ],
+          "do": [
+            "flag:cairn_1",
+            "coins:60",
+            "sfx:chime"
+          ]
+        },
+        {
+          "lines": [
+            "A cairn of slate, with a little red pennant. Walkers add a stone as they pass, for luck and to show the way. You find a flat one and add it."
+          ],
+          "lines_fr": [
+            "Un cairn d'ardoise, avec un petit fanion rouge. Les marcheurs ajoutent une pierre en passant, pour la chance et pour montrer le chemin. Vous en trouvez une plate et vous l'ajoutez."
+          ],
+          "do": [
+            "flag:cairn_1"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 2,
+      "z": 33,
+      "kind": "sign",
+      "id": "cairn_2",
+      "name": "A cairn",
+      "name_fr": "Un cairn",
+      "dialogue": [
+        {
+          "if": "flag:cairn_2",
+          "lines": [
+            "Your stone is still on top, a little crooked. The pennant flaps."
+          ],
+          "lines_fr": [
+            "Votre pierre est toujours au sommet, un peu de travers. Le fanion claque."
+          ]
+        },
+        {
+          "if": "count:cairn_:5",
+          "lines": [
+            "You add a flat stone to the top of the cairn. That's the sixth: every cairn on the pass has your stone on it now.",
+            "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
+          ],
+          "lines_fr": [
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+          ],
+          "do": [
+            "flag:cairn_2",
+            "coins:60",
+            "sfx:chime"
+          ]
+        },
+        {
+          "lines": [
+            "A cairn of slate, with a little red pennant. Walkers add a stone as they pass, for luck and to show the way. You find a flat one and add it."
+          ],
+          "lines_fr": [
+            "Un cairn d'ardoise, avec un petit fanion rouge. Les marcheurs ajoutent une pierre en passant, pour la chance et pour montrer le chemin. Vous en trouvez une plate et vous l'ajoutez."
+          ],
+          "do": [
+            "flag:cairn_2"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 26,
+      "z": 27,
+      "kind": "sign",
+      "id": "cairn_3",
+      "name": "A cairn",
+      "name_fr": "Un cairn",
+      "dialogue": [
+        {
+          "if": "flag:cairn_3",
+          "lines": [
+            "Your stone is still on top, a little crooked. The pennant flaps."
+          ],
+          "lines_fr": [
+            "Votre pierre est toujours au sommet, un peu de travers. Le fanion claque."
+          ]
+        },
+        {
+          "if": "count:cairn_:5",
+          "lines": [
+            "You add a flat stone to the top of the cairn. That's the sixth: every cairn on the pass has your stone on it now.",
+            "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
+          ],
+          "lines_fr": [
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+          ],
+          "do": [
+            "flag:cairn_3",
+            "coins:60",
+            "sfx:chime"
+          ]
+        },
+        {
+          "lines": [
+            "A cairn of slate, with a little red pennant. Walkers add a stone as they pass, for luck and to show the way. You find a flat one and add it."
+          ],
+          "lines_fr": [
+            "Un cairn d'ardoise, avec un petit fanion rouge. Les marcheurs ajoutent une pierre en passant, pour la chance et pour montrer le chemin. Vous en trouvez une plate et vous l'ajoutez."
+          ],
+          "do": [
+            "flag:cairn_3"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 2,
+      "z": 19,
+      "kind": "sign",
+      "id": "cairn_4",
+      "name": "A cairn",
+      "name_fr": "Un cairn",
+      "dialogue": [
+        {
+          "if": "flag:cairn_4",
+          "lines": [
+            "Your stone is still on top, a little crooked. The pennant flaps."
+          ],
+          "lines_fr": [
+            "Votre pierre est toujours au sommet, un peu de travers. Le fanion claque."
+          ]
+        },
+        {
+          "if": "count:cairn_:5",
+          "lines": [
+            "You add a flat stone to the top of the cairn. That's the sixth: every cairn on the pass has your stone on it now.",
+            "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
+          ],
+          "lines_fr": [
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+          ],
+          "do": [
+            "flag:cairn_4",
+            "coins:60",
+            "sfx:chime"
+          ]
+        },
+        {
+          "lines": [
+            "A cairn of slate, with a little red pennant. Walkers add a stone as they pass, for luck and to show the way. You find a flat one and add it."
+          ],
+          "lines_fr": [
+            "Un cairn d'ardoise, avec un petit fanion rouge. Les marcheurs ajoutent une pierre en passant, pour la chance et pour montrer le chemin. Vous en trouvez une plate et vous l'ajoutez."
+          ],
+          "do": [
+            "flag:cairn_4"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 26,
+      "z": 11,
+      "kind": "sign",
+      "id": "cairn_5",
+      "name": "A cairn",
+      "name_fr": "Un cairn",
+      "dialogue": [
+        {
+          "if": "flag:cairn_5",
+          "lines": [
+            "Your stone is still on top, a little crooked. The pennant flaps."
+          ],
+          "lines_fr": [
+            "Votre pierre est toujours au sommet, un peu de travers. Le fanion claque."
+          ]
+        },
+        {
+          "if": "count:cairn_:5",
+          "lines": [
+            "You add a flat stone to the top of the cairn. That's the sixth: every cairn on the pass has your stone on it now.",
+            "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
+          ],
+          "lines_fr": [
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+          ],
+          "do": [
+            "flag:cairn_5",
+            "coins:60",
+            "sfx:chime"
+          ]
+        },
+        {
+          "lines": [
+            "A cairn of slate, with a little red pennant. Walkers add a stone as they pass, for luck and to show the way. You find a flat one and add it."
+          ],
+          "lines_fr": [
+            "Un cairn d'ardoise, avec un petit fanion rouge. Les marcheurs ajoutent une pierre en passant, pour la chance et pour montrer le chemin. Vous en trouvez une plate et vous l'ajoutez."
+          ],
+          "do": [
+            "flag:cairn_5"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 21,
+      "z": 2,
+      "kind": "sign",
+      "id": "cairn_6",
+      "name": "A cairn",
+      "name_fr": "Un cairn",
+      "dialogue": [
+        {
+          "if": "flag:cairn_6",
+          "lines": [
+            "Your stone is still on top, a little crooked. The pennant flaps."
+          ],
+          "lines_fr": [
+            "Votre pierre est toujours au sommet, un peu de travers. Le fanion claque."
+          ]
+        },
+        {
+          "if": "count:cairn_:5",
+          "lines": [
+            "You add a flat stone to the top of the cairn. That's the sixth: every cairn on the pass has your stone on it now.",
+            "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
+          ],
+          "lines_fr": [
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+          ],
+          "do": [
+            "flag:cairn_6",
+            "coins:60",
+            "sfx:chime"
+          ]
+        },
+        {
+          "lines": [
+            "A cairn of slate, with a little red pennant. Walkers add a stone as they pass, for luck and to show the way. You find a flat one and add it."
+          ],
+          "lines_fr": [
+            "Un cairn d'ardoise, avec un petit fanion rouge. Les marcheurs ajoutent une pierre en passant, pour la chance et pour montrer le chemin. Vous en trouvez une plate et vous l'ajoutez."
+          ],
+          "do": [
+            "flag:cairn_6"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 16,
+      "z": 3,
+      "kind": "sign",
+      "text": "North: Anvilstead, the town on the terraces. South, down the switchbacks: the Undermine, and through it the Emberstep Quarry.",
+      "text_fr": "Au nord : Bourg-l'Enclume, le bourg en terrasses. Au sud, en bas des lacets : les Galeries Basses, et au-delà la Carrière de Pas-de-Braise."
+    },
+    {
+      "kind": "find",
+      "id": "sn_scree",
+      "x": 25,
+      "z": 3,
+      "give": "coins:60",
+      "text": "At the top of the scree, wedged under a slab where the wind can't get it: a climber's purse, heavy with Facets.",
+      "text_fr": "En haut des éboulis, coincée sous une dalle à l'abri du vent : la bourse d'un grimpeur, lourde de Facettes."
+    },
+    {
+      "kind": "find",
+      "id": "lucky_pick",
+      "x": 9,
+      "z": 23,
+      "give": "give:lucky_pick",
+      "text": "Half buried in the scree, its handle wrapped in faded red cord: a pick. Huw's, by the initials burned into the wood.",
+      "text_fr": "À moitié enfouie dans les éboulis, le manche entouré d'une cordelette rouge passée : une pioche. Celle de Huw, d'après les initiales brûlées dans le bois.",
+      "if": "flag:pick_asked"
+    },
+    {
+      "x": 9,
+      "z": 34,
+      "kind": "sign",
+      "text": "A slate plaque on a post: \"For the miners of the Undermine, who dug the road under the mountain. Walk it, and remember them.\" Someone has left a sprig of heather.",
+      "text_fr": "Une plaque d'ardoise sur un poteau : « Aux mineurs des Galeries Basses, qui ont creusé la route sous la montagne. Empruntez-la, et souvenez-vous d'eux. » Quelqu'un a laissé un brin de bruyère."
+    }
+  ],
+  "warps": [
+    {
+      "x": 21,
+      "z": 33,
+      "to": "undermine",
+      "label": "Go into the Undermine",
+      "label_fr": "Entrer dans les Galeries Basses",
+      "spawn": {
+        "x": 2,
+        "z": 7,
+        "facing": "e"
+      },
+      "if": "item:kiln_lantern",
+      "locked": "The old haulage tunnel, black as a well. The rails run in and vanish. You'd want a light before following them.",
+      "locked_fr": "Le vieux tunnel de roulage, noir comme un puits. Les rails y entrent et disparaissent. Il faudrait une lumière avant de les suivre."
+    }
+  ],
+  "exits": [
+    {
+      "side": "n",
+      "span": [
+        13,
+        15
+      ],
+      "to": "anvilstead"
+    }
+  ],
+  "npcs": [
+    {
+      "id": "t_mica",
+      "name": "Mica",
+      "model": "npc_scholar",
+      "x": 26,
+      "z": 14,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 4,
+        "challenge": [
+          "Hold it! I've been watching that seam of quartz all morning and you walked right across it.",
+          "Two prizes, and you can tell me if it glints."
+        ],
+        "challenge_fr": [
+          "Halte ! Je surveille ce filon de quartz depuis ce matin et tu viens de marcher dessus.",
+          "Deux Récompenses, et tu me diras si ça brille."
+        ],
+        "win": [
+          "Fool's gold. Me, I mean. Fair win."
+        ],
+        "win_fr": [
+          "De l'or des fous. Moi, je veux dire. Belle victoire."
+        ],
+        "lose": [
+          "Struck it rich! Well. Struck it."
+        ],
+        "lose_fr": [
+          "J'ai fait fortune ! Enfin. J'ai frappé."
+        ],
+        "after": [
+          "Every stone on this pass has a story. Most of them say \"I fell off the mountain.\""
+        ],
+        "after_fr": [
+          "Chaque pierre de ce col a une histoire. La plupart disent : « Je suis tombée de la montagne. »"
+        ]
+      },
+      "outfit": "#8a6a4a",
+      "hair": "#c8a060"
+    },
+    {
+      "id": "t_ulric",
+      "name": "Ulric",
+      "model": "npc_elder",
+      "x": 8,
+      "z": 27,
+      "facing": "s",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "You're climbing my pass. Did you add a stone to my cairn? No? Duel first, then stones.",
+          "Two prizes."
+        ],
+        "challenge_fr": [
+          "Tu grimpes mon col. Tu as ajouté une pierre à mon cairn ? Non ? Le duel d'abord, les pierres ensuite.",
+          "Deux Récompenses."
+        ],
+        "win": [
+          "Well stacked. You'd make a cairn builder."
+        ],
+        "win_fr": [
+          "Bien empilé. Tu ferais un bâtisseur de cairns."
+        ],
+        "lose": [
+          "Steady base, patient top. That's a cairn, and that's a deck."
+        ],
+        "lose_fr": [
+          "Une base solide, un sommet patient. C'est ça, un cairn, et c'est ça, un deck."
+        ],
+        "after": [
+          "Six cairns on this pass. I built the first one forty years ago. Add a stone to each. Something happens. I won't say what."
+        ],
+        "after_fr": [
+          "Six cairns sur ce col. J'ai bâti le premier il y a quarante ans. Ajoute une pierre à chacun. Il se passe quelque chose. Je ne dirai pas quoi."
+        ]
+      },
+      "outfit": "#6a7a5a",
+      "hair": "#e0e0d8"
+    },
+    {
+      "id": "nessa",
+      "name": "Nessa",
+      "model": "npc_gardener",
+      "x": 14,
+      "z": 31,
+      "facing": "n",
+      "idle": "Idle",
+      "outfit": "#7a5a8a",
+      "hair": "#3a2a1a",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Mind the sheep. They know the pass better than you; they'll stand where they like.",
+            "The miners who dug the Undermine came up this way every evening. My grandmother sold them soup at the top. Now there's only me and the sheep, and you."
+          ],
+          "lines_fr": [
+            "Attention aux moutons. Ils connaissent le col mieux que toi ; ils se mettent où ils veulent.",
+            "Les mineurs qui ont creusé les Galeries montaient par ici chaque soir. Ma grand-mère leur vendait de la soupe en haut. Maintenant, il n'y a plus que moi, les moutons, et toi."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flint",
+      "name": "Flint",
+      "model": "npc_sheep",
+      "x": 8,
+      "z": 30,
+      "facing": "w",
+      "idle": "Idle",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Baa. It chews, and looks at you, and chews."
+          ],
+          "lines_fr": [
+            "Bêê. Il rumine, te regarde, et rumine."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shale",
+      "name": "Shale",
+      "model": "npc_sheep",
+      "x": 18,
+      "z": 28,
+      "facing": "w",
+      "idle": "Idle",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Baa. It chews, and looks at you, and chews."
+          ],
+          "lines_fr": [
+            "Bêê. Il rumine, te regarde, et rumine."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "orrin",
+      "name": "Orrin",
+      "model": "npc_scholar",
+      "x": 20,
+      "z": 23,
+      "facing": "e",
+      "idle": "Idle",
+      "outfit": "#4a4a6a",
+      "hair": "#b8b8b0",
+      "if": "time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Pull up a stone. The fire's the only warm thing on this pass after dark.",
+            "Prospecting by night? No. Star-watching. The Stonebacks are close to the sky.",
+            "Seren, up in Anvilstead, worked the Undermine before the fall. Ask her about the side passages. She knows what's behind every one."
+          ],
+          "lines_fr": [
+            "Prends une pierre. Le feu, c'est la seule chose chaude du col après la nuit tombée.",
+            "Prospecter la nuit ? Non. Regarder les étoiles. Les Échines sont près du ciel.",
+            "Seren, en haut à Bourg-l'Enclume, travaillait aux Galeries avant l'éboulement. Demande-lui pour les passages latéraux. Elle sait ce qu'il y a derrière chacun."
+          ]
+        }
+      ]
+    }
+  ],
+  "cliff": [
+    "cliff_slate",
+    "cliff_slate_b"
+  ],
+  "ground": {
+    "base": "slate",
+    "path": "stone",
+    "margin": 9,
+    "tufts": 700
+  },
+  "ring": [
+    "pine",
+    "rock",
+    "bush_dark"
+  ],
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#ffffff",
+      "intensity": 2.6,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#f4f1ea",
+      "ground": "#5d5a55",
+      "intensity": 1.5
+    },
+    "background": "#c9c3b8",
+    "fog": {
+      "near": 16,
+      "far": 34
+    }
+  }
+}

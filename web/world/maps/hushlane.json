@@ -34,11 +34,11 @@
     "~~~~~~~.....pp..............",
     "~~~~~~~.....pp..............",
     "~~~~~~~.....pp..............",
-    "~~~~~~~.....pp..............",
-    "..~~~~~.....pp..............",
-    "..~~~~~ppppppp..............",
-    "..~~~~~.....pp..............",
-    "~~~~~~......pp..............",
+    "...~~~~.....pp..............",
+    "pp.~~~~.....pp..............",
+    "ppp~~~~ppppppp..............",
+    "pp.~~~~.....pp..............",
+    "...~~~......pp..............",
     "~~~~~.......pp..............",
     "............ppp.............",
     "............ppp.............",
@@ -69,24 +69,6 @@
       "asset": "signpost",
       "x": 9,
       "z": 28,
-      "rot": 0
-    },
-    {
-      "asset": "signpost",
-      "x": 0,
-      "z": 29,
-      "rot": 90
-    },
-    {
-      "asset": "rock",
-      "x": 0,
-      "z": 28,
-      "rot": 0
-    },
-    {
-      "asset": "rock",
-      "x": 0,
-      "z": 30,
       "rot": 0
     },
     {
@@ -1663,6 +1645,42 @@
       "x": 3,
       "z": 41,
       "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 2,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 1,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 1,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 31,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -1689,15 +1707,15 @@
       "x": 9,
       "z": 28,
       "kind": "sign",
-      "text": "The Hush ford. Deepgrove folk cross here in boots. Everyone else gets wet.",
-      "text_fr": "Le gué du Murmure. Les gens du Bois-Profond le passent en bottes. Les autres se mouillent."
+      "text": "The Hush ford. Deepgrove folk cross here in boots, on their way to Rootholm. Everyone else gets wet.",
+      "text_fr": "Le gué du Murmure. Les gens du Bois-Profond le passent en bottes, en route pour Racinemont. Les autres se mouillent."
     },
     {
-      "x": 0,
-      "z": 29,
+      "x": 2,
+      "z": 27,
       "kind": "sign",
-      "text": "West: Rootholm and the Deepgrove. The bank path is washed out past the bend; the Rootholm folk are rebuilding it. Mind the roots.",
-      "text_fr": "Ouest : Racinemont et le Bois-Profond. Le chemin de la rive est emporté après le coude ; les gens de Racinemont le reconstruisent. Attention aux racines."
+      "text": "West: Rootholm, the Deepgrove's town under the Broken Elder. East, over the Hush ford: Hushwillow Lane and Brightwell Square.",
+      "text_fr": "À l'ouest : Racinemont, la ville du Bois-Profond sous le Vieil-Arbre brisé. À l'est, après le gué du Murmure : l'Allée des Saules-Murmures et la Place de Clairpuits."
     },
     {
       "x": 3,
@@ -1992,16 +2010,20 @@
         14
       ],
       "to": "lanternmere"
+    },
+    {
+      "side": "w",
+      "span": [
+        28,
+        30
+      ],
+      "to": "rootholm"
     }
   ],
   "gates": [
     {
       "id": "hush_ford",
       "tiles": [
-        [
-          2,
-          29
-        ],
         [
           3,
           29

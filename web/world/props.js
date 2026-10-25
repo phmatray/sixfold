@@ -296,22 +296,26 @@ export const FOOT = {
   terrace_house: [4, 3], // Stone (Cinderwick's terraces use it too)
   harbour_house: [5, 4], bell_tower: [3, 3], net_rack: [2, 1], chart_table: [2, 1], // Tide
   willow: [2, 2], wishing_tree: [2, 2], moonwell: [3, 3], lake_house: [4, 4], wisteria_arch: [2, 1], cloth_rack: [2, 1], // Dream
+  standing_tree: [3, 3], great_root: [4, 2], treehouse: [4, 4], fallen_trunk: [4, 3], fallen_trunk_end: [4, 3], // Grove
+  cobbler_bench: [2, 1], boot_rack: [2, 1],
+  headframe: [3, 3], terrace_house: [4, 3], minecart: [2, 1], // Stone
+  hold_wall: [2, 1], tally_board: [2, 1],
 };
 // Props the hero walks over; every other prop blocks its footprint.
-export const WALKABLE = new Set(["rug", "exit_mat", "tidepool", "wisteria_arch"]); // the arch: walked under
+export const WALKABLE = new Set(["rug", "exit_mat", "tidepool", "wisteria_arch", "rail", "support_beam", "oil_lantern"]); // the arch and the mine frames: walked under
 // People are spoken to across these (a person behind a counter or a duel table).
 export const ACROSS = new Set(["counter", "duel_table", "stall", "stall_b", "curio_cabinet"]);
 // Decks: walkable even over water, with the floor height the hero stands at, per
 // footprint row along the prop's own Z (front row first; one value for every row).
 export const DECK = { boardwalk: [0.1], pier: [0.3], bridge: [0.12, 0.24, 0.24, 0.12], stairs: [0.5], climb_wall: [0.5], climb_wall_basalt: [0.5], stairs_basalt: [0.5], stairs_heath: [0.5],
-  lantern_raft: [0.1], ladder: [1.5] };
+  lantern_raft: [0.1], ladder: [1.5], canopy_deck: [0.1], rope_bridge: [0.1], stairs_slate: [0.5], climb_wall_slate: [0.5], climb_wall_root: [0.5] };
 // Ladders join their front and back neighbours whatever the height (floor 0 in front, a 3 m deck behind).
 export const LADDER = new Set(["ladder"]);
 // Afloat: they bob on the water (never instanced).
 export const BOB = new Set(["boat", "ferry", "buoy", "floating_lantern", "lantern_raft"]);
 // Sway reference height per prop (life.js wind).
 export const WIND_H = { tree: 3.5, bush: 0.8, flowers: 0.4, pine: 3.8, birch: 3.6, reeds: 0.9, ash_pine: 3.1, heather: 0.55, chime_post: 2.3,
-  willow: 3.8, wishing_tree: 3.8, wisteria_arch: 2.3 };
+  willow: 3.8, wishing_tree: 3.8, wisteria_arch: 2.3, standing_tree: 5.5, cairn: 1.2 };
 // Rough height of a model, for the generic placeholder box of a model not yet built.
 export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0.24, stairs: 0.5, lighthouse: 7, cottage: 4.5, workshop: 3.8, pine: 3.8, birch: 3.6,
   waymark: 1.7, inn_sign: 1.9, ember_vent: 1.7, rubble: 1.4, ford_stones: 0.1, lantern_raft: 0.1, climb_wall: 1, climb_wall_basalt: 1, ladder: 3.4,
@@ -319,7 +323,12 @@ export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0
   kiln: 4.5, glass_furnace: 2.8, glass_rack: 1.8, lava_glass: 0.3, ash_pine: 3.1, cliff_basalt: 1, cliff_basalt_b: 1, stairs_basalt: 0.5,
   glow_mushroom: 0.35, glow_mushroom_tall: 0.9, glow_shelf: 0.62, observatory: 5.7, lift_tower: 9.6, lift_cage: 2.6, rodspire: 12.1, pylon: 3.2, chime_post: 2.6, heather: 0.5, wall_dry: 0.95, cliff_heath: 1, cliff_heath_b: 1, stairs_heath: 0.5, telescope: 2.2,
   harbour_house: 4.3, bell_tower: 6.8, net_rack: 1.45, cliff_sea: 1, cliff_sea_b: 1, tidepool: 0.07, rock_sea: 0.55, bollard: 0.6, crab_pots: 0.45,
-  willow: 3.8, wishing_tree: 3.8, moonwell: 3.7, lake_house: 4.6, wisteria_arch: 2.7, moonflower: 0.5, hedge: 1.3 };
+  willow: 3.8, wishing_tree: 3.8, moonwell: 3.7, lake_house: 4.6, wisteria_arch: 2.7, moonflower: 0.5, hedge: 1.3,
+  standing_tree: 6, great_root: 3, treehouse: 7.6, fallen_trunk: 2.9, fallen_trunk_end: 4.1, canopy_deck: 0.1, rope_bridge: 0.1, beehive: 0.9, mushroom_ring: 0.45,
+  climb_wall_root: 1, campfire: 0.5,
+  cliff_slate: 1, cliff_slate_b: 1, stairs_slate: 0.5, headframe: 6.1, terrace_house: 5, minecart: 1.1, menhir: 2.7, support_beam: 2.1, cave_mouth_slate: 2.2,
+  rail: 0.07, cairn: 1.45, crystal_cluster: 1, climb_wall_slate: 1, oil_lantern: 2.1, oil_lantern_post: 1.75, anvil: 0.85,
+  cobbler_bench: 1, boot_rack: 2, hold_wall: 2.6, rope_coil: 0.9, tally_board: 2.2, soup_cauldron: 1.3 };
 
 // Auto-tiling for fences ("f") and walls ("W"): neighbour mask (N=1, E=2, S=4, W=8)
 // -> [piece suffix, rot]. At rot 0: "" = arms W+E, _corner = W+S, _end = W,
