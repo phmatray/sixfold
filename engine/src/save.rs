@@ -23,6 +23,7 @@ use std::collections::BTreeMap;
 use crate::campaign::{seals, RIVALS};
 use crate::collection::{fnv1a, starter_collection, Collection};
 use crate::deck::DeckList;
+use crate::lang::tr;
 use crate::overworld::Progress;
 use crate::profile::{Profile, Wallet};
 
@@ -67,10 +68,24 @@ pub enum SaveError {
 impl std::fmt::Display for SaveError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            SaveError::NotASave => write!(f, "This isn't a Sixfold save."),
-            SaveError::Newer(v) => write!(f, "This save is from a newer Sixfold (version {v})."),
-            SaveError::Checksum => write!(f, "This save is incomplete or was edited."),
-            SaveError::Malformed => write!(f, "This save is damaged."),
+            SaveError::NotASave => f.write_str(tr(
+                "This isn't a Sixfold save.",
+                "Ce fichier n'est pas une sauvegarde Sixfold.",
+            )),
+            SaveError::Newer(v) => f.write_str(&tr(
+                format!("This save is from a newer Sixfold (version {v})."),
+                format!(
+                    "Cette sauvegarde vient d'une version plus récente de Sixfold (version {v})."
+                ),
+            )),
+            SaveError::Checksum => f.write_str(tr(
+                "This save is incomplete or was edited.",
+                "Cette sauvegarde est incomplète ou a été modifiée.",
+            )),
+            SaveError::Malformed => f.write_str(tr(
+                "This save is damaged.",
+                "Cette sauvegarde est endommagée.",
+            )),
         }
     }
 }
@@ -211,8 +226,8 @@ impl Save {
     }
 
     /// The player's cards, decks and packs. A part that doesn't read is reset
-    /// (the starter collection, no packs, the deck left out) and named in the
-    /// second value; the section itself is left untouched until the next
+    /// (the starter collection, no packs, the deck left out) and named, in the
+    /// current language, in the second value; the section itself is left untouched until the next
     /// [`set_profile`](Self::set_profile). No collection at all is a new player.
     pub fn profile(&self) -> (Profile, Vec<&'static str>) {
         let Some(saved) = self.get(COLLECTION) else {
@@ -222,7 +237,7 @@ impl Save {
         let collection = match Collection::load(saved) {
             Ok((c, _unknown)) => c,
             Err(_) => {
-                lost.push("collection");
+                lost.push(tr("collection", "la collection"));
                 starter_collection()
             }
         };
@@ -231,13 +246,13 @@ impl Save {
             match DeckList::load(line) {
                 Ok((d, _unknown)) => decks.push(d),
                 Err(_) if line.is_empty() => {}
-                Err(_) => lost.push("a deck"),
+                Err(_) => lost.push(tr("a deck", "un deck")),
             }
         }
         let wallet = match self.get(WALLET).map(Wallet::load) {
             Some(Ok(w)) => w,
             Some(Err(_)) => {
-                lost.push("your packs");
+                lost.push(tr("your packs", "vos boosters"));
                 Wallet::default()
             }
             None => Wallet::default(),

@@ -1,5 +1,6 @@
 {
   "title": "Sixfold Meadow",
+  "title_fr": "Pré de Sixfold",
   "width": 28,
   "height": 24,
   "tiles": [
@@ -496,25 +497,29 @@
       "x": 16,
       "z": 11,
       "kind": "sign",
-      "text": "Sixfold Meadow. The duel hall up the path has duels, snacks and shoes. Six rivals wait on the roads out: the trail, the boardwalk and the quarry."
+      "text": "Sixfold Meadow. The duel hall up the path has duels, snacks and shoes. Six rivals wait on the roads out: the trail, the boardwalk and the quarry.",
+      "text_fr": "Pré de Sixfold. En haut du chemin, la salle des duels : duels, en-cas et chaussures. Six rivaux attendent sur les routes : le sentier, la promenade et la carrière."
     },
     {
       "x": 2,
       "z": 17,
       "kind": "sign",
-      "text": "West: Fernhollow Trail, the woods and the stream."
+      "text": "West: Fernhollow Trail, the woods and the stream.",
+      "text_fr": "Ouest : Sentier de Creuse-Fougère, les bois et le ruisseau."
     },
     {
       "x": 24,
       "z": 19,
       "kind": "sign",
-      "text": "North: Emberstep Quarry. East: Saltwind Boardwalk and the sea."
+      "text": "North: Emberstep Quarry. East: Saltwind Boardwalk and the sea.",
+      "text_fr": "Nord : Carrière de Pas-de-Braise. Est : Promenade de Ventsalé et la mer."
     },
     {
       "x": 14,
       "z": 21,
       "kind": "sign",
-      "text": "South: Brightwell Square, the bakery and the market."
+      "text": "South: Brightwell Square, the bakery and the market.",
+      "text_fr": "Sud : Place de Clairpuits, la boulangerie et le marché."
     }
   ],
   "warps": [
@@ -523,6 +528,7 @@
       "z": 10,
       "to": "shop",
       "label": "Go inside",
+      "label_fr": "Entrer",
       "spawn": {
         "x": 5,
         "z": 7,
@@ -557,6 +563,10 @@
           "lines": [
             "Lovely day for a walk. I do this loop a hundred times before lunch.",
             "Some call it a rut. I call it a route."
+          ],
+          "lines_fr": [
+            "Belle journée pour marcher. Je fais cette boucle cent fois avant midi.",
+            "On dit que je tourne en rond. Moi, je dis que je fais ma ronde."
           ]
         },
         {
@@ -564,17 +574,27 @@
           "lines": [
             "The champion, out on my loop! Everyone will say I overtook you.",
             "I won't correct them."
+          ],
+          "lines_fr": [
+            "Champion, sur ma boucle ! Tout le monde dira que je t'ai mis un tour.",
+            "Je ne les contredirai pas."
           ]
         },
         {
           "if": "item:running_shoes",
           "lines": [
             "Are those running shoes? Don't lap me, it's rude."
+          ],
+          "lines_fr": [
+            "Ce sont des chaussures de course ? Ne me mets pas un tour, c'est malpoli."
           ]
         },
         {
           "lines": [
             "Round and round. Still lovely."
+          ],
+          "lines_fr": [
+            "Ça tourne, ça tourne. Toujours aussi joli."
           ]
         }
       ]
@@ -600,6 +620,9 @@
           "if": "!flag:talked_pip",
           "lines": [
             "I'm practising my shuffle. Watch! ...Okay, don't watch."
+          ],
+          "lines_fr": [
+            "Je m'entraîne à mélanger. Regarde ! …Bon, regarde pas."
           ]
         },
         {
@@ -607,6 +630,10 @@
           "lines": [
             "You beat the Hex Warden? With cards? Real cards?",
             "Sable runs a Gauntlet in the back room now. I'm not ready. I'll watch."
+          ],
+          "lines_fr": [
+            "T'as battu la Gardienne des Six ? Avec des cartes ? Des vraies ?",
+            "Sable fait passer l'Épreuve dans l'arrière-salle. C'est pas pour moi, pas encore. Je regarde."
           ]
         },
         {
@@ -614,11 +641,18 @@
           "lines": [
             "Is that a seal? A real one? Bramble never gave ME one.",
             "...I never beat Bramble. Shh."
+          ],
+          "lines_fr": [
+            "C'est un sceau ? Un vrai ? Bramble m'en a jamais donné, à MOI.",
+            "…J'ai jamais battu Bramble. Chut."
           ]
         },
         {
           "lines": [
             "One day I'll beat whoever sits at that duel table. One day."
+          ],
+          "lines_fr": [
+            "Un jour, je battrai celui qui s'assoit à cette table de duel. Un jour."
           ]
         }
       ]
@@ -639,18 +673,29 @@
           "lines": [
             "The champion, in my flowerbeds. I'll allow it, just this once.",
             "Bramble says the hedges grew back thicker the day you won. Coincidence, surely."
+          ],
+          "lines_fr": [
+            "Champion ou pas, on ne marche pas sur mes plates-bandes. Bon, pour cette fois.",
+            "Bramble dit que les haies ont repoussé plus drues le jour de ta victoire. Pure coïncidence."
           ]
         },
         {
           "if": "item:running_shoes",
           "lines": [
             "New shoes? Lovely. Now keep them out of my beds."
+          ],
+          "lines_fr": [
+            "Des chaussures neuves ? Charmant. Maintenant, tiens-les loin de mes plates-bandes."
           ]
         },
         {
           "lines": [
             "These flowers took three summers to settle in.",
             "Juniper's shop up the path sells more than seeds. Ask about shoes."
+          ],
+          "lines_fr": [
+            "Ces fleurs ont mis trois étés à s'installer.",
+            "La boutique de Juniper, en haut du chemin, ne vend pas que des graines. Demande-lui des chaussures."
           ]
         }
       ]

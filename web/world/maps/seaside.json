@@ -1,5 +1,6 @@
 {
   "title": "Saltwind Boardwalk",
+  "title_fr": "Promenade de Ventsalé",
   "width": 30,
   "height": 22,
   "tiles": [
@@ -71,8 +72,8 @@
     "facing": "e"
   },
   "interactions": [
-    {"x": 5, "z": 9, "kind": "sign", "text": "The boathouse. Nets, oars, and a cat asleep on a coil of rope."},
-    {"x": 2, "z": 14, "kind": "sign", "text": "Saltwind Boardwalk. West: back to Sixfold Meadow. North: the pier. East: the lighthouse."}
+    {"x": 5, "z": 9, "kind": "sign", "text": "The boathouse. Nets, oars, and a cat asleep on a coil of rope.", "text_fr": "Le hangar à bateaux. Des filets, des rames et un chat endormi sur un rouleau de corde."},
+    {"x": 2, "z": 14, "kind": "sign", "text": "Saltwind Boardwalk. West: back to Sixfold Meadow. North: the pier. East: the lighthouse.", "text_fr": "Promenade de Ventsalé. Ouest : retour au Pré de Sixfold. Nord : la jetée. Est : le phare."}
   ],
   "warps": [],
   "exits": [
@@ -94,6 +95,9 @@
           "if": "won:marlo&flag:thanked_marlo",
           "lines": [
             "Washed out twice. The tide likes you today."
+          ],
+          "lines_fr": [
+            "Emporté deux fois. La marée t'aime bien, aujourd'hui."
           ]
         },
         {
@@ -103,6 +107,11 @@
             "Take my seal, it's still a little damp.",
             "This Brinemoth washed up with it. Yours now."
           ],
+          "lines_fr": [
+            "Balayé par la vague, à la loyale.",
+            "Prends mon sceau, il est encore un peu humide.",
+            "Ce Saumite s'est échoué avec. À toi, maintenant."
+          ],
           "do": [
             "flag:thanked_marlo"
           ]
@@ -111,6 +120,9 @@
           "if": "lost:marlo",
           "lines": [
             "Low tide for you today. The water always comes back in."
+          ],
+          "lines_fr": [
+            "Marée basse pour toi aujourd'hui. Mais la mer finit toujours par remonter."
           ]
         },
         {
@@ -118,6 +130,10 @@
           "lines": [
             "The champion, back on my pier. The tide tables never mentioned you.",
             "One more round? Three prizes, and I won't go easy."
+          ],
+          "lines_fr": [
+            "Champion, de retour sur ma jetée. Les tables des marées n'avaient rien prévu de tel.",
+            "Une autre partie ? Trois Récompenses, et je ne te ferai pas de cadeau."
           ],
           "do": [
             "duel:marlo"
@@ -128,6 +144,9 @@
           "lines": [
             "The tide's turned. Another round?"
           ],
+          "lines_fr": [
+            "La marée a tourné. Une autre partie ?"
+          ],
           "do": [
             "duel:marlo"
           ]
@@ -137,6 +156,11 @@
             "Shh. Listen... that's the sea. Or a kettle. Hard to tell out here.",
             "I'm Marlo. I read the tide tables, and whoever sits down across from me.",
             "Three prizes. Pull up a crate, the cards are already dealt."
+          ],
+          "lines_fr": [
+            "Chut. Écoute… c'est la mer. Ou une bouilloire. Difficile à dire, par ici.",
+            "Moi, c'est Marlo. Je lis les tables des marées, et quiconque s'assoit en face de moi.",
+            "Trois Récompenses. Prends une caisse, les cartes sont déjà distribuées."
           ],
           "do": [
             "duel:marlo"
@@ -159,6 +183,9 @@
           "if": "won:quill&flag:thanked_quill",
           "lines": [
             "Another one for the notebook. Your column is getting long."
+          ],
+          "lines_fr": [
+            "Encore un pour le carnet. Ta colonne s'allonge."
           ]
         },
         {
@@ -168,6 +195,11 @@
             "My seal is yours. Mark it in your own notebook.",
             "Squallkite comes with it. Fly it on a windy day."
           ],
+          "lines_fr": [
+            "Eh bien. Ce duel-là, je le consigne comme une averse.",
+            "Mon sceau est à toi. Note-le dans ton propre carnet.",
+            "Milanorage va avec. Fais-le voler un jour de grand vent."
+          ],
           "do": [
             "flag:thanked_quill"
           ]
@@ -176,6 +208,9 @@
           "if": "lost:quill",
           "lines": [
             "Clear skies for me today. Check the forecast and come back."
+          ],
+          "lines_fr": [
+            "Ciel dégagé pour moi aujourd'hui. Consulte la météo et reviens."
           ]
         },
         {
@@ -183,6 +218,10 @@
           "lines": [
             "Hold on. You carry fewer than three seals.",
             "I only write up duels worth reading. Come back with three."
+          ],
+          "lines_fr": [
+            "Une seconde. Tu as moins de trois sceaux.",
+            "Je ne raconte que les duels qui valent la lecture. Reviens avec trois sceaux."
           ]
         },
         {
@@ -190,6 +229,10 @@
           "lines": [
             "I wrote up your duel with the Warden. Three pages, and a storm on every one.",
             "Care to give me a fourth?"
+          ],
+          "lines_fr": [
+            "J'ai raconté ton duel contre la Gardienne. Trois pages, et un orage à chacune.",
+            "Tu m'en offres une quatrième ?"
           ],
           "do": [
             "duel:quill"
@@ -200,6 +243,9 @@
           "lines": [
             "New page, same storm. Ready?"
           ],
+          "lines_fr": [
+            "Nouvelle page, même orage. C'est parti ?"
+          ],
           "do": [
             "duel:quill"
           ]
@@ -209,6 +255,11 @@
             "Clouds are stacking up over the sea. Good duelling weather.",
             "I'm Quill. I note the wind, the rain and every duel I play.",
             "Four prizes, and I'll be writing it all down."
+          ],
+          "lines_fr": [
+            "Les nuages s'empilent sur la mer. Un temps idéal pour un duel.",
+            "Je suis Quill. Je note le vent, la pluie et chaque duel que je joue.",
+            "Quatre Récompenses, et je noterai tout."
           ],
           "do": [
             "duel:quill"
@@ -231,6 +282,10 @@
           "lines": [
             "I saw the hall's lamps burning all night from up here. Hob says that was you.",
             "A champion carried my letter. I'll tell the gulls."
+          ],
+          "lines_fr": [
+            "D'ici, j'ai vu les lampes de la salle brûler toute la nuit. Hob dit que c'était toi.",
+            "Ma lettre, portée par un champion ! Je vais le raconter aux mouettes."
           ]
         },
         {
@@ -238,6 +293,10 @@
           "lines": [
             "Hob wrote back already? He never writes back. You must have charmed him.",
             "Come by at dusk some time. The lamp is worth the climb."
+          ],
+          "lines_fr": [
+            "Hob a déjà répondu ? Il ne répond jamais. Tu as dû le charmer.",
+            "Passe un soir au crépuscule. La lampe vaut bien la montée."
           ]
         },
         {
@@ -245,6 +304,10 @@
           "lines": [
             "The letter goes to Hob, at the bakery in Brightwell Square.",
             "South of the meadow. Follow your nose, it smells of bread."
+          ],
+          "lines_fr": [
+            "La lettre est pour Hob, à la boulangerie de la Place de Clairpuits.",
+            "Au sud du pré. Suis ton nez, ça sent le pain."
           ]
         },
         {
@@ -252,6 +315,11 @@
             "Mind the steps, they're slippery with spray. I keep the lamp here.",
             "Are you walking inland? Would you take this to my brother Hob? He bakes in Brightwell Square.",
             "Don't let it get wet. That's the whole trick of letters."
+          ],
+          "lines_fr": [
+            "Attention aux marches, les embruns les rendent glissantes. C'est moi qui garde le phare.",
+            "Tu rentres dans les terres ? Tu porterais ça à mon frère Hob ? Il est boulanger, Place de Clairpuits.",
+            "Ne la mouille pas. C'est tout le secret des lettres."
           ],
           "do": [
             "give:letter"
@@ -275,18 +343,29 @@
           "lines": [
             "Marlo says the new champion fishes better than me.",
             "Marlo's never even seen you fish. Marlo's still right."
+          ],
+          "lines_fr": [
+            "D'après Marlo, la nouvelle star du coin pêche mieux que moi.",
+            "Marlo ne sait même pas si tu pêches. Marlo a quand même raison."
           ]
         },
         {
           "if": "beat:marlo",
           "lines": [
             "You beat Marlo? Marlo doesn't lose. Marlo told me Marlo doesn't lose."
+          ],
+          "lines_fr": [
+            "T'as battu Marlo ? Marlo ne perd pas. Marlo m'a dit que Marlo ne perdait pas."
           ]
         },
         {
           "lines": [
             "Nothing's biting. I think the fish are duelling too.",
             "Marlo sits at the end of the pier. Bring a good deck, the tide's on Marlo's side."
+          ],
+          "lines_fr": [
+            "Ça ne mord pas. Je crois que les poissons font des duels, eux aussi.",
+            "Marlo est au bout de la jetée. Prends un bon deck, la marée est du côté de Marlo."
           ]
         }
       ],

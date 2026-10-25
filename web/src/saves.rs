@@ -4,16 +4,15 @@
 
 use leptos::prelude::*;
 use sixfold_engine::save::{Save, SaveError, Summary};
+use sixfold_engine::{fr, tr};
 use wasm_bindgen::{JsCast, JsValue};
 
 use crate::store::{self, Saved, SLOTS};
 
-fn plural(n: usize, one: &str) -> String {
-    if n == 1 {
-        format!("1 {one}")
-    } else {
-        format!("{n} {one}s")
-    }
+/// "1 card", "2 cards"; in French 0 and 1 are singular ("0 carte").
+fn plural(n: usize, one: &str, many: &str) -> String {
+    let singular = if fr() { n <= 1 } else { n == 1 };
+    format!("{n} {}", if singular { one } else { many })
 }
 
 /// "54 cards · 2 decks · 3 packs · 1 seal".
@@ -21,13 +20,17 @@ pub fn describe(s: &Summary) -> String {
     let seals = if s.champion {
         "Champion".to_string()
     } else {
-        plural(s.seals, "seal")
+        plural(s.seals, tr("seal", "sceau"), tr("seals", "sceaux"))
     };
     format!(
         "{} · {} · {} · {seals}",
-        plural(s.cards, "card"),
-        plural(s.decks, "deck"),
-        plural(s.packs as usize, "pack"),
+        plural(s.cards, tr("card", "carte"), tr("cards", "cartes")),
+        plural(s.decks, "deck", "decks"),
+        plural(
+            s.packs as usize,
+            tr("pack", "booster"),
+            tr("packs", "boosters")
+        ),
     )
 }
 
@@ -73,10 +76,10 @@ pub fn SaveIndicator() -> impl IntoView {
             {move || if saved.ok.get() {
                 view! {
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-                    "Saved"
+                    {tr("Saved", "Sauvegardé")}
                 }.into_any()
             } else {
-                view! { <span role="alert">"Not saved: this browser is blocking storage"</span> }.into_any()
+                view! { <span role="alert">{tr("Not saved: this browser is blocking storage", "Non sauvegardé : ce navigateur bloque le stockage")}</span> }.into_any()
             }}
         </div>
     }
@@ -110,13 +113,13 @@ pub fn SlotPicker() -> impl IntoView {
         let info = move || slots.with(|s| s.get(n - 1).and_then(|(_, r)| r.clone()));
         let name = move || match info() {
             Some(Ok(s)) => s.name,
-            Some(Err(_)) => format!("Save {n}"),
-            None => format!("Slot {n}"),
+            Some(Err(_)) => tr(format!("Save {n}"), format!("Sauvegarde {n}")),
+            None => tr(format!("Slot {n}"), format!("Emplacement {n}")),
         };
         let sub = move || match info() {
             Some(Ok(s)) => describe(&s),
-            Some(Err(e)) => format!("Can't be read: {e}"),
-            None => "Empty: starts a new player".into(),
+            Some(Err(e)) => tr(format!("Can't be read: {e}"), format!("Illisible : {e}")),
+            None => tr("Empty: starts a new player", "Vide : nouveau joueur").into(),
         };
         let current = move || saved.slot.get() == n;
         let commit = move || {
@@ -124,7 +127,7 @@ pub fn SlotPicker() -> impl IntoView {
             renaming.set(None);
             focus_later(format!("slot-rename-{n}"));
             tick.update(|t| *t += 1);
-            status.set("Name saved.".into());
+            status.set(tr("Name saved.", "Nom enregistré.").into());
         };
         view! {
             <li class="slot" class:current=current>
@@ -132,12 +135,12 @@ pub fn SlotPicker() -> impl IntoView {
                     {move || if renaming.get() == Some(n) {
                         view! {
                             <form class="rename" on:submit=move |e| { e.prevent_default(); commit() }>
-                                <label class="sr-only" for=format!("slot-name-{n}")>{format!("Name of slot {n}")}</label>
+                                <label class="sr-only" for=format!("slot-name-{n}")>{tr(format!("Name of slot {n}"), format!("Nom de l'emplacement {n}"))}</label>
                                 <input id=format!("slot-name-{n}") autofocus maxlength="24" prop:value=move || draft.get()
                                     on:input=move |e| draft.set(event_target_value(&e))
                                     on:keydown=move |e| { if e.key() == "Escape" { e.stop_propagation(); renaming.set(None); focus_later(format!("slot-rename-{n}")) } } />
-                                <button type="submit" class="btn primary">"Save name"</button>
-                                <button type="button" class="btn ghost" on:click=move |_| { renaming.set(None); focus_later(format!("slot-rename-{n}")) }>"Cancel"</button>
+                                <button type="submit" class="btn primary">{tr("Save name", "Enregistrer")}</button>
+                                <button type="button" class="btn ghost" on:click=move |_| { renaming.set(None); focus_later(format!("slot-rename-{n}")) }>{tr("Cancel", "Annuler")}</button>
                             </form>
                         }.into_any()
                     } else {
@@ -147,16 +150,19 @@ pub fn SlotPicker() -> impl IntoView {
                 </div>
                 {move || if deleting.get() == Some(n) {
                     view! {
-                        <div class="confirm row" role="group" aria-label=format!("Delete slot {n}?")>
-                            <span>{format!("Delete “{}”? Its cards, decks and progress are gone for good.", name())}</span>
+                        <div class="confirm row" role="group" aria-label=tr(format!("Delete slot {n}?"), format!("Supprimer l'emplacement {n} ?"))>
+                            <span>{tr(
+                                format!("Delete “{}”? Its cards, decks and progress are gone for good.", name()),
+                                format!("Supprimer « {} » ? Ses cartes, decks et sa progression seront perdus pour de bon.", name()),
+                            )}</span>
                             <button type="button" class="btn danger" on:click=move |_| {
                                 store::delete(n);
                                 deleting.set(None);
                                 focus_later(format!("slot-play-{n}"));
                                 tick.update(|t| *t += 1);
-                                status.set(format!("Slot {n} deleted."));
-                            }>"Delete"</button>
-                            <button type="button" class="btn ghost" autofocus on:click=move |_| { deleting.set(None); focus_later(format!("slot-delete-{n}")) }>"Keep it"</button>
+                                status.set(tr(format!("Slot {n} deleted."), format!("Emplacement {n} supprimé.")));
+                            }>{tr("Delete", "Supprimer")}</button>
+                            <button type="button" class="btn ghost" autofocus on:click=move |_| { deleting.set(None); focus_later(format!("slot-delete-{n}")) }>{tr("Keep it", "Garder")}</button>
                         </div>
                     }.into_any()
                 } else {
@@ -168,13 +174,13 @@ pub fn SlotPicker() -> impl IntoView {
                                 on:click=move |_| {
                                     if !current() {
                                         store::switch(n);
-                                        status.set(format!("Now playing {}.", name()));
+                                        status.set(tr(format!("Now playing {}.", name()), format!("Vous jouez maintenant sur {}.", name())));
                                     }
                                 }>
                                 {move || match (current(), info().is_some()) {
-                                    (true, _) => "Playing",
-                                    (false, true) => "Play",
-                                    (false, false) => "New game",
+                                    (true, _) => tr("Playing", "En cours"),
+                                    (false, true) => tr("Play", "Jouer"),
+                                    (false, false) => tr("New game", "Nouvelle partie"),
                                 }}
                                 <span class="sr-only">{move || format!(" {}", name())}</span>
                             </button>
@@ -183,11 +189,11 @@ pub fn SlotPicker() -> impl IntoView {
                                     deleting.set(None);
                                     draft.set(name());
                                     renaming.set(Some(n));
-                                }>"Rename"<span class="sr-only">{move || format!(" {}", name())}</span></button>
+                                }>{tr("Rename", "Renommer")}<span class="sr-only">{move || format!(" {}", name())}</span></button>
                                 <button type="button" class="btn ghost" id=format!("slot-delete-{n}") on:click=move |_| {
                                     renaming.set(None);
                                     deleting.set(Some(n));
-                                }>"Delete"<span class="sr-only">{move || format!(" {}", name())}</span></button>
+                                }>{tr("Delete", "Supprimer")}<span class="sr-only">{move || format!(" {}", name())}</span></button>
                             })}
                         </div>
                     }.into_any()
@@ -199,7 +205,7 @@ pub fn SlotPicker() -> impl IntoView {
         <details class="slots">
             <summary class="btn ghost">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5z" /><path d="M8 4v5h7V4M8 20v-6h8v6" /></svg>
-                <span>"Save slot: " <b>{current_name}</b></span>
+                <span>{tr("Save slot: ", "Emplacement : ")} <b>{current_name}</b></span>
             </summary>
             <div class="settings-body">
                 <ul class="slot-list">{(1..=SLOTS).map(row).collect_view()}</ul>
@@ -272,18 +278,33 @@ pub fn SaveSettings() -> impl IntoView {
             Err(e) => {
                 pending.set(None);
                 let hint = match e {
-                    SaveError::NotASave => " Pick a file made by Export save.",
+                    SaveError::NotASave => tr(
+                        " Pick a file made by Export save.",
+                        " Choisissez un fichier créé par Exporter la sauvegarde.",
+                    ),
                     _ => "",
                 };
-                error.set(Some(format!("{e}{hint} Nothing was changed.")));
+                error.set(Some(tr(
+                    format!("{e}{hint} Nothing was changed."),
+                    format!("{e}{hint} Rien n'a été modifié."),
+                )));
             }
         }
     };
     let export = move |_| {
         let (name, text) = store::export();
         match download(&file_name(&name), &text) {
-            Ok(()) => status.set(format!("Exported “{name}”.")),
-            Err(_) => error.set(Some("This browser couldn't make the file.".into())),
+            Ok(()) => status.set(tr(
+                format!("Exported “{name}”."),
+                format!("« {name} » exportée."),
+            )),
+            Err(_) => error.set(Some(
+                tr(
+                    "This browser couldn't make the file.",
+                    "Ce navigateur n'a pas pu créer le fichier.",
+                )
+                .into(),
+            )),
         }
     };
     let on_file = move |e: leptos::ev::Event| {
@@ -295,14 +316,20 @@ pub fn SaveSettings() -> impl IntoView {
         if file.size() > 1_000_000.0 {
             pending.set(None);
             error.set(Some(
-                "That file is too big to be a Sixfold save. Nothing was changed.".into(),
+                tr(
+                    "That file is too big to be a Sixfold save. Nothing was changed.",
+                    "Ce fichier est trop gros pour être une sauvegarde Sixfold. Rien n'a été modifié.",
+                )
+                .into(),
             ));
             return;
         }
         leptos::task::spawn_local(async move {
             match wasm_bindgen_futures::JsFuture::from(file.text()).await {
                 Ok(t) => check(&t.as_string().unwrap_or_default()),
-                Err(_) => error.set(Some("That file couldn't be read.".into())),
+                Err(_) => error.set(Some(
+                    tr("That file couldn't be read.", "Ce fichier est illisible.").into(),
+                )),
             }
         });
     };
@@ -312,29 +339,30 @@ pub fn SaveSettings() -> impl IntoView {
             store::import(s);
             pending.set(None);
             pasted.set(String::new());
-            status.set(format!(
-                "Imported “{name}”. The replaced save is kept as a backup in this browser."
+            status.set(tr(
+                format!("Imported “{name}”. The replaced save is kept as a backup in this browser."),
+                format!("« {name} » importée. L'ancienne sauvegarde est gardée en secours dans ce navigateur."),
             ));
         }
     };
     view! {
         <fieldset class="save-settings">
-            <legend>"Save"</legend>
-            <p class="note">"Your progress saves by itself in this browser. Export a copy to keep a backup or to carry it to another device."</p>
+            <legend>{tr("Save", "Sauvegarde")}</legend>
+            <p class="note">{tr("Your progress saves by itself in this browser. Export a copy to keep a backup or to carry it to another device.", "Votre progression est sauvegardée automatiquement dans ce navigateur. Exportez-en une copie pour la garder en secours ou la passer sur un autre appareil.")}</p>
             <div class="row">
-                <button type="button" class="btn" on:click=export>"Export save"</button>
+                <button type="button" class="btn" on:click=export>{tr("Export save", "Exporter la sauvegarde")}</button>
                 <label class="btn file-pick">
-                    "Import a file…"
+                    {tr("Import a file…", "Importer un fichier…")}
                     <input type="file" name="save-file" class="sr-only" accept=".txt,text/plain" on:change=on_file />
                 </label>
             </div>
-            <label class="paste-label" for="save-paste">"Or paste a save"</label>
+            <label class="paste-label" for="save-paste">{tr("Or paste a save", "Ou collez une sauvegarde")}</label>
             <textarea id="save-paste" rows="3" spellcheck="false" autocomplete="off"
                 prop:value=move || pasted.get()
                 on:input=move |e| pasted.set(event_target_value(&e))></textarea>
             <div class="row">
                 <button type="button" class="btn" prop:disabled=move || pasted.get().trim().is_empty()
-                    on:click=move |_| check(&pasted.get_untracked())>"Check pasted save"</button>
+                    on:click=move |_| check(&pasted.get_untracked())>{tr("Check pasted save", "Vérifier la sauvegarde collée")}</button>
             </div>
             {move || error.get().map(|e| view! { <p class="error" role="alert">{e}</p> })}
             {move || pending.get().map(|s| {
@@ -342,16 +370,16 @@ pub fn SaveSettings() -> impl IntoView {
                 let now = store::current_summary();
                 view! {
                     <div class="confirm" role="group" aria-labelledby="import-q">
-                        <p id="import-q">"Replace the save you are playing?"</p>
+                        <p id="import-q">{tr("Replace the save you are playing?", "Remplacer la sauvegarde en cours ?")}</p>
                         <dl class="import-diff">
-                            <dt>"Now"</dt>
-                            <dd><b>{now.name.clone()}</b> ": " {describe(&now)}</dd>
-                            <dt>"Imported"</dt>
-                            <dd><b>{incoming.name.clone()}</b> ": " {describe(&incoming)}</dd>
+                            <dt>{tr("Now", "Actuelle")}</dt>
+                            <dd><b>{now.name.clone()}</b> {tr(": ", " : ")} {describe(&now)}</dd>
+                            <dt>{tr("Imported", "Importée")}</dt>
+                            <dd><b>{incoming.name.clone()}</b> {tr(": ", " : ")} {describe(&incoming)}</dd>
                         </dl>
                         <div class="row">
-                            <button type="button" class="btn danger" on:click=replace>"Replace my save"</button>
-                            <button type="button" class="btn ghost" autofocus on:click=move |_| pending.set(None)>"Cancel"</button>
+                            <button type="button" class="btn danger" on:click=replace>{tr("Replace my save", "Remplacer ma sauvegarde")}</button>
+                            <button type="button" class="btn ghost" autofocus on:click=move |_| pending.set(None)>{tr("Cancel", "Annuler")}</button>
                         </div>
                     </div>
                 }

@@ -4,7 +4,7 @@
 use leptos::prelude::*;
 use sixfold_engine::campaign;
 use sixfold_engine::endgame::{self, RungResult, CLEAR_PACKS, GAUNTLET};
-use sixfold_engine::{card, Color, Event};
+use sixfold_engine::{card, fr, tr, Color, Event};
 
 use crate::art::glyph_svg;
 use crate::board::{find_mon, slot_name, status_class};
@@ -18,7 +18,16 @@ pub fn CoinOverlay() -> impl IntoView {
     let coin = Memo::new(move |_| ctl.fx.with(|f| f.coin.clone()));
     move || {
         coin.get().map(|c| {
-            let who = if c.player == HUMAN { "You" } else { "Opponent" };
+            let result = match (c.player == HUMAN, c.heads, fr()) {
+                (true, true, false) => "You flipped Heads",
+                (true, false, false) => "You flipped Tails",
+                (false, true, false) => "Opponent flipped Heads",
+                (false, false, false) => "Opponent flipped Tails",
+                (true, true, true) => "Vous obtenez face",
+                (true, false, true) => "Vous obtenez pile",
+                (false, true, true) => "L'adversaire obtient face",
+                (false, false, true) => "L'adversaire obtient pile",
+            };
             let side = if c.heads { "heads" } else { "tails" };
             view! {
                 <div class="coin-overlay" aria-hidden="true">
@@ -29,7 +38,7 @@ pub fn CoinOverlay() -> impl IntoView {
                             <div class="coin-face tails"><span class="tails-ring"></span></div>
                         </div>
                     </div>
-                    <p class="coin-result">{format!("{who} flipped {}", if c.heads { "Heads" } else { "Tails" })}</p>
+                    <p class="coin-result">{result}</p>
                 </div>
             }
         })
@@ -80,22 +89,25 @@ pub fn Inspector() -> impl IntoView {
         }
     });
     view! {
-        <aside class="inspector" class:open=move || ui.sheet.get() aria-label="Card details">
-            <button class="btn ghost close" node_ref=close on:click=move |_| ui.sheet.set(false) aria-label="Close card details">"Close"</button>
+        <aside class="inspector" class:open=move || ui.sheet.get() aria-label=tr("Card details", "Détails de la carte")>
+            <button class="btn ghost close" node_ref=close on:click=move |_| ui.sheet.set(false) aria-label=tr("Close card details", "Fermer les détails de la carte")>{tr("Close", "Fermer")}</button>
             {move || match shown_card() {
-                None => view! { <p class="empty-note">"Hover or focus a card, or press and hold it, to read it here."</p> }.into_any(),
+                None => view! { <p class="empty-note">{tr("Hover or focus a card, or press and hold it, to read it here.", "Survolez ou sélectionnez une carte, ou maintenez-la appuyée, pour la lire ici.")}</p> }.into_any(),
                 Some(id) => view! {
                     <div class="inspect-body">
                         <div class="inspect-card" aria-hidden="true"><CardFace id=id /></div>
                         {move || in_play.get().map(|(player, m)| view! {
                             <div class="inplay">
                                 <h4>{slot_name(player, m.slot)}</h4>
-                                <p>{format!("{} of {} HP", m.hp, m.max)}
-                                    {(m.stack.len() > 1).then(|| format!(", evolved from {}", card(m.stack[m.stack.len() - 2]).name))}
+                                <p>{tr(format!("{} of {} HP", m.hp, m.max), format!("{} PV sur {}", m.hp, m.max))}
+                                    {(m.stack.len() > 1).then(|| {
+                                        let from = card(m.stack[m.stack.len() - 2]).label();
+                                        tr(format!(", evolved from {from}"), format!(", a évolué de {from}"))
+                                    })}
                                 </p>
                                 <div class="energy-row">
                                     {if m.energy.is_empty() {
-                                        view! { <span class="none">"No energy attached"</span> }.into_any()
+                                        view! { <span class="none">{tr("No energy attached", "Aucune énergie attachée")}</span> }.into_any()
                                     } else {
                                         m.energy.iter().map(|&e| energy_pips(e)).collect_view().into_any()
                                     }}
@@ -104,12 +116,12 @@ pub fn Inspector() -> impl IntoView {
                                     {m.statuses.iter().map(|&s| view! {
                                         <span class=format!("badge status {}", status_class(s))>{s.to_string()}</span>
                                     }).collect_view()}
-                                    {m.trainers.iter().map(|&t| view! { <span class="badge tool">{card(t).name}</span> }).collect_view()}
+                                    {m.trainers.iter().map(|&t| view! { <span class="badge tool">{card(t).label()}</span> }).collect_view()}
                                 </div>
                                 {(!m.effects.is_empty()).then(|| view! {
                                     <ul class="effects">{m.effects.iter().map(|e| view! { <li>{e.clone()}</li> }).collect_view()}</ul>
                                 })}
-                                {(m.power == Some(false)).then(|| view! { <p class="note">"Its Power is not working right now."</p> })}
+                                {(m.power == Some(false)).then(|| view! { <p class="note">{tr("Its Power is not working right now.", "Son Pouvoir est inactif pour le moment.")}</p> })}
                             </div>
                         })}
                         <CardDetails id=id />
@@ -132,10 +144,10 @@ pub fn LogPanel() -> impl IntoView {
         }
     });
     view! {
-        <section class="log" class:open=move || ui.log_open.get() aria-label="Battle log">
-            <h2>"Battle log"</h2>
+        <section class="log" class:open=move || ui.log_open.get() aria-label=tr("Battle log", "Journal du duel")>
+            <h2>{tr("Battle log", "Journal du duel")}</h2>
             {move || ctl.log.with(Vec::is_empty).then(|| view! {
-                <p class="empty-note">"Every draw, attack and coin flip shows up here."</p>
+                <p class="empty-note">{tr("Every draw, attack and coin flip shows up here.", "Chaque pioche, attaque et pile ou face s'affiche ici.")}</p>
             })}
             <ol class="log-list" node_ref=list>
                 <For
@@ -161,17 +173,23 @@ pub fn DiscardViewer() -> impl IntoView {
                     .map(|g| g.view(HUMAN).sides[player].discard.to_vec())
             })
             .unwrap_or_default();
-        let whose = if player == HUMAN {
-            "Your"
-        } else {
-            "Opponent's"
+        let title = match (player == HUMAN, fr()) {
+            (true, false) => "Your discard pile",
+            (false, false) => "Opponent's discard pile",
+            (true, true) => "Votre défausse",
+            (false, true) => "Défausse adverse",
         };
         let close = move |_| ui.discard.set(None);
         Some(view! {
             <div class="scrim" on:keydown=move |e| { if e.key() == "Escape" { ui.discard.set(None) } }>
                 <div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="discard-title">
-                    <h2 id="discard-title">{format!("{whose} discard pile")}</h2>
-                    <p class="dialog-sub">{if cards.is_empty() { "Empty.".to_string() } else { format!("{}, newest last.", crate::board::cards(cards.len())) }}</p>
+                    <h2 id="discard-title">{title}</h2>
+                    <p class="dialog-sub">{if cards.is_empty() {
+                        tr("Empty.", "Vide.").to_string()
+                    } else {
+                        let n = crate::board::cards(cards.len());
+                        tr(format!("{n}, newest last."), format!("{n}, la plus récente en dernier."))
+                    }}</p>
                     <div class="discard-grid">
                         {cards.into_iter().map(|id| view! {
                             <button class="discard-card" aria-label=crate::cards::face_text(id) on:click=move |_| ui.open(Inspect { card: id, at: None })>
@@ -180,7 +198,7 @@ pub fn DiscardViewer() -> impl IntoView {
                         }).collect_view()}
                     </div>
                     <div class="dialog-foot">
-                        <button class="btn" on:click=close autofocus>"Close"</button>
+                        <button class="btn" on:click=close autofocus>{tr("Close", "Fermer")}</button>
                     </div>
                 </div>
             </div>
@@ -202,17 +220,32 @@ pub fn GameOver() -> impl IntoView {
                 .clone()
                 .map(|s| s.prizes.iter().filter(|p| **p).count());
             let loser = 1 - w;
-            let you = |p: usize| if p == HUMAN { "You" } else { "Your opponent" };
             let deck_out = g
                 .log()
                 .iter()
                 .any(|e| matches!(e, Event::DeckOut { player } if *player == loser));
-            let why = if deck_out {
-                format!("{} couldn't draw a card.", you(loser))
-            } else if left[w] == 0 {
-                format!("{} took every prize.", you(w))
-            } else {
-                format!("{} had no creature left in play.", you(loser))
+            let why = match (deck_out, left[w] == 0, loser == HUMAN) {
+                (true, _, true) => tr("You couldn't draw a card.", "Vous ne pouviez plus piocher."),
+                (true, _, false) => tr(
+                    "Your opponent couldn't draw a card.",
+                    "Votre adversaire ne pouvait plus piocher.",
+                ),
+                (false, true, false) => tr(
+                    "You took every prize.",
+                    "Vous avez pris toutes vos Récompenses.",
+                ),
+                (false, true, true) => tr(
+                    "Your opponent took every prize.",
+                    "Votre adversaire a pris toutes ses Récompenses.",
+                ),
+                (false, false, true) => tr(
+                    "You had no creature left in play.",
+                    "Vous n'aviez plus de créature en jeu.",
+                ),
+                (false, false, false) => tr(
+                    "Your opponent had no creature left in play.",
+                    "Votre adversaire n'avait plus de créature en jeu.",
+                ),
             };
             Some((w, v.sudden_death, left, why))
         })
@@ -307,11 +340,19 @@ pub fn GameOver() -> impl IntoView {
         Some(view! {
             <div class="scrim end">
                 <div class=if won { "dialog result won" } else { "dialog result lost" } role="dialog" aria-modal="true" aria-labelledby="result-title">
-                    <h2 id="result-title">{if won { "You win" } else { "You lose" }}</h2>
+                    <h2 id="result-title">{match (won, fr()) {
+                        (true, false) => "You win",
+                        (false, false) => "You lose",
+                        (true, true) => "Victoire !",
+                        (false, true) => "Défaite",
+                    }}</h2>
                     <p class="dialog-sub">
                         {why} " "
-                        {format!("Prizes left: you {}, opponent {}.", left[HUMAN], left[1 - HUMAN])}
-                        {sudden.then_some(" Decided in sudden death.")}
+                        {tr(
+                            format!("Prizes left: you {}, opponent {}.", left[HUMAN], left[1 - HUMAN]),
+                            format!("Récompenses restantes : vous {}, l'adversaire {}.", left[HUMAN], left[1 - HUMAN]),
+                        )}
+                        {sudden.then_some(tr(" Decided in sudden death.", " Décidé en mort subite."))}
                     </p>
                     {move || reward.get().map(|b| {
                         let packs = profile.with(|p| p.wallet.total());
@@ -321,7 +362,12 @@ pub fn GameOver() -> impl IntoView {
                                 <span class="pack-crimp"></span><span class="pack-crimp bottom"></span>
                             </span>
                             <p><b>{format!("+1 {}", sixfold_engine::booster::BOOSTERS[b].name)}</b>
-                                <span>{format!("You have {packs} to open.", packs = if packs == 1 { "1 pack".to_string() } else { format!("{packs} packs") })}</span></p>
+                                <span>{match (packs, fr()) {
+                                (1, false) => "You have 1 pack to open.".to_string(),
+                                (n, false) => format!("You have {n} packs to open."),
+                                (n, true) if n <= 1 => format!("Vous avez {n} booster à ouvrir."),
+                                (n, true) => format!("Vous avez {n} boosters à ouvrir."),
+                            }}</span></p>
                         </div>
                     }})}
                     {move || campaign_reward.get().zip(rival).map(|(rw, r)| {
@@ -341,13 +387,28 @@ pub fn GameOver() -> impl IntoView {
                                 }}
                                 <p>
                                     {match (rw.won, rw.seal, rw.first) {
-                                        (true, true, _) => view! { <b>{format!("{}'s seal!", r.name)}</b><span>{format!("{seals} of {} seals.", campaign::SEALS)}</span> }.into_any(),
-                                        (true, false, true) => view! { <b>"You beat the Hex Warden!"</b><span>"Every seal, and the champion's title."</span> }.into_any(),
-                                        (true, ..) => view! { <b>"Rematch won"</b> }.into_any(),
-                                        _ => view! { <b>"No reward this time"</b><span>{format!("Talk to {} again for a rematch.", r.name)}</span> }.into_any(),
+                                        (true, true, _) => view! {
+                                            <b>{tr(format!("{}'s seal!", r.name), format!("Le sceau de {} !", r.name))}</b>
+                                            <span>{tr(
+                                                format!("{seals} of {} seals.", campaign::SEALS),
+                                                format!("{seals} sceau{} sur {}.", if seals > 1 { "x" } else { "" }, campaign::SEALS),
+                                            )}</span>
+                                        }.into_any(),
+                                        (true, false, true) => view! {
+                                            <b>{tr("You beat the Hex Warden!", "Vous avez battu la Gardienne des Six !")}</b>
+                                            <span>{tr("Every seal, and the champion's title.", "Tous les sceaux, et le titre de champion.")}</span>
+                                        }.into_any(),
+                                        (true, ..) => view! { <b>{tr("Rematch won", "Revanche gagnée")}</b> }.into_any(),
+                                        _ => view! {
+                                            <b>{tr("No reward this time", "Pas de récompense cette fois")}</b>
+                                            <span>{tr(format!("Talk to {} again for a rematch.", r.name), format!("Reparlez à {} pour une revanche.", r.name))}</span>
+                                        }.into_any(),
                                     }}
                                     {(n > 0).then(|| view! { <span>{format!("+{}", crate::campaign::packs_label(b, n))}</span> })}
-                                    {rw.promo.map(|c| view! { <span>{format!("+ the promo card {}, now in your collection", card(c).name)}</span> })}
+                                    {rw.promo.map(|c| view! { <span>{tr(
+                                        format!("+ the promo card {}, now in your collection", card(c).label()),
+                                        format!("+ la carte promo {}, ajoutée à votre collection", card(c).label()),
+                                    )}</span> })}
                                 </p>
                             </div>
                         }
@@ -358,9 +419,21 @@ pub fn GameOver() -> impl IntoView {
                             <div class="reward" role="status">
                                 <p>
                                     {match (rr.won, rr.cleared) {
-                                        (true, true) => view! { <b>"Gauntlet cleared!"</b><span>{format!("All {} rivals in a row. +{CLEAR_PACKS} Wild Packs.", GAUNTLET.len())}</span> }.into_any(),
-                                        (true, false) => view! { <b>{format!("Rung {} of {} cleared", rr.beaten, GAUNTLET.len())}</b> }.into_any(),
-                                        _ => view! { <b>"The run ends here"</b><span>"Start a new Gauntlet from the ladder."</span> }.into_any(),
+                                        (true, true) => view! {
+                                            <b>{tr("Gauntlet cleared!", "Épreuve réussie !")}</b>
+                                            <span>{tr(
+                                                format!("All {} rivals in a row. +{CLEAR_PACKS} Wild Packs.", GAUNTLET.len()),
+                                                format!("Les {} rivaux d'affilée. +{CLEAR_PACKS} Boosters Sauvage.", GAUNTLET.len()),
+                                            )}</span>
+                                        }.into_any(),
+                                        (true, false) => view! { <b>{tr(
+                                            format!("Rung {} of {} cleared", rr.beaten, GAUNTLET.len()),
+                                            format!("Palier {} sur {} franchi", rr.beaten, GAUNTLET.len()),
+                                        )}</b> }.into_any(),
+                                        _ => view! {
+                                            <b>{tr("The run ends here", "La série s'arrête ici")}</b>
+                                            <span>{tr("Start a new Gauntlet from the ladder.", "Relancez l'Épreuve depuis le tableau de la Gardienne.")}</span>
+                                        }.into_any(),
                                     }}
                                     {(n > 0).then(|| view! { <span>{format!("+{}", crate::campaign::packs_label(b, n))}</span> })}
                                 </p>
@@ -370,8 +443,17 @@ pub fn GameOver() -> impl IntoView {
                     {(post.is_some_and(|p| matches!(p, Post::Daily(_))) && won).then(|| view! {
                         <div class="reward" role="status">
                             <p>{move || match daily_pack.get() {
-                                Some(b) => view! { <b>"Daily duel won"</b><span>{format!("+{}. A new duel comes at midnight.", crate::campaign::packs_label(b, 1))}</span> }.into_any(),
-                                None => view! { <b>"Daily duel won"</b><span>"Today's pack was already claimed."</span> }.into_any(),
+                                Some(b) => view! {
+                                    <b>{tr("Daily duel won", "Duel du jour gagné")}</b>
+                                    <span>{tr(
+                                        format!("+{}. A new duel comes at midnight.", crate::campaign::packs_label(b, 1)),
+                                        format!("+{}. Un nouveau duel arrive à minuit.", crate::campaign::packs_label(b, 1)),
+                                    )}</span>
+                                }.into_any(),
+                                None => view! {
+                                    <b>{tr("Daily duel won", "Duel du jour gagné")}</b>
+                                    <span>{tr("Today's pack was already claimed.", "Le booster du jour a déjà été réclamé.")}</span>
+                                }.into_any(),
                             }}</p>
                         </div>
                     })}
@@ -380,11 +462,11 @@ pub fn GameOver() -> impl IntoView {
                             <div class="dialog-foot">
                                 {move || if champion_now() {
                                     view! {
-                                        <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(Screen::Credits(true)) }>"Roll the credits"</button>
+                                        <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(Screen::Credits(true)) }>{tr("Roll the credits", "Voir le générique")}</button>
                                     }.into_any()
                                 } else {
                                     view! {
-                                        <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(Screen::World) }>"Back to the world"</button>
+                                        <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(Screen::World) }>{tr("Back to the world", "Retour au monde")}</button>
                                     }.into_any()
                                 }}
                             </div>
@@ -392,21 +474,21 @@ pub fn GameOver() -> impl IntoView {
                         (None, Some(p)) => view! {
                             <div class="dialog-foot">
                                 {move || (p == Post::Gauntlet && rung_result.get().is_some_and(|r| r.won && !r.cleared)).then(|| view! {
-                                    <button class="btn" on:click=next_rung>"Next rung"</button>
+                                    <button class="btn" on:click=next_rung>{tr("Next rung", "Palier suivant")}</button>
                                 })}
                                 {matches!(p, Post::Daily(_)).then(|| view! {
-                                    <button class="btn" on:click=rematch>"Play it again"</button>
+                                    <button class="btn" on:click=rematch>{tr("Play it again", "Rejouer")}</button>
                                 })}
-                                <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(back) }>"Back"</button>
+                                <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(back) }>{tr("Back", "Retour")}</button>
                             </div>
                         }.into_any(),
                         (None, None) => view! {
                     <div class="dialog-foot">
                         {won.then(|| view! {
-                            <button class="btn" on:click=move |_| { ctl.stop(); screen.set(Screen::Packs) }>"Open packs"</button>
+                            <button class="btn" on:click=move |_| { ctl.stop(); screen.set(Screen::Packs) }>{tr("Open packs", "Ouvrir des boosters")}</button>
                         })}
-                        <button class="btn primary" on:click=rematch autofocus>"Rematch"</button>
-                        <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(Screen::Duel) }>"Change decks"</button>
+                        <button class="btn primary" on:click=rematch autofocus>{tr("Rematch", "Revanche")}</button>
+                        <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(Screen::Duel) }>{tr("Change decks", "Changer de deck")}</button>
                     </div>
                         }.into_any(),
                     }}

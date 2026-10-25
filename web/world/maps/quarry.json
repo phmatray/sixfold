@@ -1,5 +1,6 @@
 {
   "title": "Emberstep Quarry",
+  "title_fr": "Carrière de Pas-de-Braise",
   "width": 28,
   "height": 22,
   "tiles": [
@@ -89,12 +90,16 @@
       "kind": "sign",
       "id": "lens_rock",
       "name": "A glint under a rock",
+      "name_fr": "Un reflet sous un rocher",
       "glint": "!item:field_lens",
       "dialogue": [
         {
           "if": "item:field_lens",
           "lines": [
             "Just pebbles and a falcon feather now."
+          ],
+          "lines_fr": [
+            "Plus que des cailloux et une plume de faucon."
           ]
         },
         {
@@ -102,13 +107,17 @@
             "Something brass is wedged under the rock... a birdwatcher's field lens!",
             "Somebody must be squinting at blurs without it."
           ],
+          "lines_fr": [
+            "Un objet en laiton est coincé sous le rocher… la longue-vue d'un ornithologue !",
+            "Quelqu'un doit plisser les yeux sur du flou, sans elle."
+          ],
           "do": [
             "give:field_lens"
           ]
         }
       ]
     },
-    {"x": 15, "z": 19, "kind": "sign", "text": "Emberstep Quarry. South: back to Sixfold Meadow. The steps lead up to the ledges; mind the edges."}
+    {"x": 15, "z": 19, "kind": "sign", "text": "Emberstep Quarry. South: back to Sixfold Meadow. The steps lead up to the ledges; mind the edges.", "text_fr": "Carrière de Pas-de-Braise. Sud : retour au Pré de Sixfold. Les marches mènent aux corniches ; attention au bord."}
   ],
   "warps": [],
   "exits": [
@@ -130,6 +139,9 @@
           "if": "won:cinza&flag:thanked_cinza",
           "lines": [
             "Again?! Fine. The kiln needed cooling anyway."
+          ],
+          "lines_fr": [
+            "Encore ?! Bon. Le four avait besoin de refroidir, de toute façon."
           ]
         },
         {
@@ -139,6 +151,11 @@
             "Here, my seal. Don't let it cool off in a drawer.",
             "And take Kilnfox. It runs hotter than I do."
           ],
+          "lines_fr": [
+            "Grillée… Tu es plus rapide que tu en as l'air.",
+            "Tiens, mon sceau. Ne le laisse pas refroidir au fond d'un tiroir.",
+            "Et prends Fournard. Il chauffe encore plus que moi."
+          ],
           "do": [
             "flag:thanked_cinza"
           ]
@@ -147,6 +164,9 @@
           "if": "lost:cinza",
           "lines": [
             "Too slow! The road's still warm, come race me again."
+          ],
+          "lines_fr": [
+            "Pas assez vite ! La route est encore chaude, reviens faire la course."
           ]
         },
         {
@@ -154,6 +174,10 @@
           "lines": [
             "The champion, running the kiln road like the rest of us. Ha!",
             "Four prizes. Let's see if the title made you any faster."
+          ],
+          "lines_fr": [
+            "Champion, et tu cours la route du four comme nous autres. Ha !",
+            "Quatre Récompenses. Voyons si le titre t'a donné des ailes."
           ],
           "do": [
             "duel:cinza"
@@ -164,6 +188,9 @@
           "lines": [
             "Again? Good. I've been stoking the fire."
           ],
+          "lines_fr": [
+            "Encore ? Parfait. J'ai attisé le feu."
+          ],
           "do": [
             "duel:cinza"
           ]
@@ -173,6 +200,11 @@
             "You walk like someone who's never been in a hurry.",
             "I'm Cinza. I run the kiln road every morning and duel every afternoon.",
             "Four prizes. Try to keep up."
+          ],
+          "lines_fr": [
+            "Tu marches comme quelqu'un qui n'a jamais été pressé.",
+            "Moi, c'est Cinza. Je cours la route du four le matin et je fais des duels l'après-midi.",
+            "Quatre Récompenses. Essaie de suivre."
           ],
           "do": [
             "duel:cinza"
@@ -195,6 +227,9 @@
           "if": "won:orla&flag:thanked_orla",
           "lines": [
             "Cracked it again. I'll need a harder rock."
+          ],
+          "lines_fr": [
+            "Encore fendue. Il me faudra une roche plus dure."
           ]
         },
         {
@@ -204,6 +239,11 @@
             "My seal. Earned, not quarried.",
             "Slatebrow too. Built like my site hut, and twice as stubborn."
           ],
+          "lines_fr": [
+            "Tu as fendu la roche-mère. Respect.",
+            "Mon sceau. Gagné, pas extrait.",
+            "Ardoisfront aussi. Bâti comme ma cabane de chantier, et deux fois plus têtu."
+          ],
           "do": [
             "flag:thanked_orla"
           ]
@@ -212,6 +252,9 @@
           "if": "lost:orla",
           "lines": [
             "Solid stone stays solid. Come back with a sharper pick."
+          ],
+          "lines_fr": [
+            "La pierre dure reste dure. Reviens avec une pioche mieux affûtée."
           ]
         },
         {
@@ -219,6 +262,10 @@
           "lines": [
             "Not yet. The quarry only opens to those with three seals.",
             "Go on, the others won't beat themselves."
+          ],
+          "lines_fr": [
+            "Pas encore. La carrière ne s'ouvre qu'à ceux qui ont trois sceaux.",
+            "Allez, les autres ne vont pas se battre tout seuls."
           ]
         },
         {
@@ -226,6 +273,10 @@
           "lines": [
             "Champion on my quarry floor. Mind the gravel, it doesn't care about titles.",
             "Five prizes, same as ever. Shall we?"
+          ],
+          "lines_fr": [
+            "Champion, dans ma carrière. Attention au gravier, il se fiche des titres.",
+            "Cinq Récompenses, comme toujours. On y va ?"
           ],
           "do": [
             "duel:orla"
@@ -236,6 +287,9 @@
           "lines": [
             "Another shift? Five prizes, same as ever."
           ],
+          "lines_fr": [
+            "On rembauche ? Cinq Récompenses, comme toujours."
+          ],
           "do": [
             "duel:orla"
           ]
@@ -244,6 +298,10 @@
           "lines": [
             "Hard hat zone. Well, it would be, if I had a hard hat.",
             "Orla. I run this quarry. Five prizes, no shortcuts."
+          ],
+          "lines_fr": [
+            "Port du casque obligatoire. Enfin, il le serait, si j'avais un casque.",
+            "Orla. C'est moi qui dirige la carrière. Cinq Récompenses, pas de raccourcis."
           ],
           "do": [
             "duel:orla"
@@ -266,18 +324,29 @@
           "lines": [
             "They're carving a seventh hexagon for the fountain. Yours, I hear.",
             "I'll cut it myself. Stone lasts."
+          ],
+          "lines_fr": [
+            "On taille un septième hexagone pour la fontaine. Le tien, à ce qu'on dit.",
+            "Je le taillerai moi-même. La pierre, ça dure."
           ]
         },
         {
           "if": "item:field_lens",
           "lines": [
             "Found something shiny up top? The falcons drop all sorts."
+          ],
+          "lines_fr": [
+            "Trouvé un truc brillant là-haut ? Les faucons laissent tomber de tout."
           ]
         },
         {
           "lines": [
             "Every block in Brightwell's fountain came out of this pit. I cut half of them.",
             "The high ledge has the best view. Falcons, mostly. And a birdwatcher's lost things, I'd bet."
+          ],
+          "lines_fr": [
+            "Chaque bloc de la fontaine de Clairpuits sort de ce trou. J'en ai taillé la moitié.",
+            "La haute corniche a la plus belle vue. Des faucons, surtout. Et les affaires perdues d'un ornithologue, je parie."
           ]
         }
       ],

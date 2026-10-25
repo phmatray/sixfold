@@ -272,3 +272,87 @@ fn the_deck_builder_makes_legal_decks() {
     assert_eq!(validate_deck(&d), Ok(()));
     assert!(p.collection.can_build(&d));
 }
+
+/// English left in a French text: words French never has, as words.
+fn english_in(line: &str) -> Option<&'static str> {
+    const MARKERS: [&str; 15] = [
+        " the ",
+        "The ",
+        "You ",
+        " your ",
+        "Your ",
+        "Opponent",
+        " card",
+        " damage",
+        " turn",
+        "Flip ",
+        "Active creature",
+        "Bench ",
+        " heads",
+        " tails",
+        "Choose ",
+    ];
+    let padded = format!(" {line} ");
+    MARKERS.into_iter().find(|m| padded.contains(m))
+}
+
+/// A French game reads in French: AI-vs-AI games over the prebuilts, every
+/// log line from both seats, every legal action's button and every prompt,
+/// plus each set card's effects as rules text. Prints one game's log for
+/// review with `-- --nocapture`.
+#[test]
+fn a_french_game_has_no_english_left() {
+    use crate::lang::{set_lang, Lang};
+    set_lang(Lang::Fr);
+    let mut lines: Vec<String> = vec![];
+    let mut sample: Vec<String> = vec![];
+    let n = PREBUILT.len();
+    for k in 0..4 {
+        let seed = 4_200 + k as u64;
+        let decks = [PREBUILT[k % n].cards(), PREBUILT[(k + 1) % n].cards()];
+        let mut g = Game::new(decks, seed, Config { prizes: 6 }).unwrap();
+        let mut ais = [
+            Ai::new(seed ^ 0xa1, Difficulty::Normal),
+            Ai::new(seed ^ 0xb2, Difficulty::Normal),
+        ];
+        for _ in 0..50_000 {
+            if g.winner().is_some() {
+                break;
+            }
+            let me = g.view(0).waiting_on.unwrap();
+            let v = g.view(me);
+            lines.extend(v.prompt.map(|p| p.kind.to_string()));
+            lines.extend(g.legal_actions().into_iter().map(|a| v.describe_action(a)));
+            let a = ais[me].choose_action(&g, me);
+            g.apply(a).unwrap();
+        }
+        assert!(g.winner().is_some(), "seed {seed}: the game never ended");
+        for viewer in 0..2 {
+            for e in g.log() {
+                let l = e.describe(viewer);
+                if k == 0 && viewer == 0 {
+                    sample.push(l.clone());
+                }
+                lines.push(l);
+            }
+        }
+    }
+    for c in set::CARDS {
+        let effects = match &c.kind {
+            CardKind::Creature(cr) | CardKind::TrainerBasic(cr) => {
+                cr.attacks.iter().flat_map(|a| a.effects).collect()
+            }
+            CardKind::Trainer(t) => t.effects.iter().collect(),
+            CardKind::Energy(_) => vec![],
+        };
+        lines.extend(effects.into_iter().map(|e| e.to_string()));
+    }
+    set_lang(Lang::En);
+    for l in sample.iter().take(80) {
+        eprintln!("{l}");
+    }
+    for l in &lines {
+        assert!(!l.trim().is_empty(), "an empty French text");
+        assert!(english_in(l).is_none(), "English in French: {l:?}");
+    }
+}

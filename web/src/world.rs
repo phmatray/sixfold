@@ -9,8 +9,8 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::campaign;
 use sixfold_engine::overworld::{Applied, Progress};
+use sixfold_engine::{campaign, tr};
 use wasm_bindgen::prelude::*;
 
 use crate::audio::MuteToggle;
@@ -59,19 +59,28 @@ fn push_items(p: &Progress) {
 fn item_info(id: &str) -> (String, &'static str, &'static str) {
     match id {
         "running_shoes" => (
-            "Running Shoes".into(),
+            tr("Running Shoes", "Chaussures de course").into(),
             "shoes",
-            "Light soles, quick feet. Hold Shift, or switch on Run, to cover two tiles in the time of one.",
+            tr(
+                "Light soles, quick feet. Hold Shift, or switch on Run, to cover two tiles in the time of one.",
+                "Semelles légères, pas rapides. Maintenez Maj, ou activez Courir, pour franchir deux cases le temps d'une.",
+            ),
         ),
         "field_lens" => (
-            "Field Lens".into(),
+            tr("Field Lens", "Longue-vue").into(),
             "lens",
-            "A brass birdwatcher's lens with a scratched cap. Somebody on the woodland trail will want it back.",
+            tr(
+                "A brass birdwatcher's lens with a scratched cap. Somebody on the woodland trail will want it back.",
+                "Une lunette d'ornithologue en laiton, au capuchon rayé. Quelqu'un, sur le sentier des bois, voudra la récupérer.",
+            ),
         ),
         "letter" => (
-            "Letter for Hob".into(),
+            tr("Letter for Hob", "Lettre pour Hob").into(),
             "letter",
-            "Sealed with a wax hexagon and smelling faintly of the sea. Hob bakes in Brightwell Square.",
+            tr(
+                "Sealed with a wax hexagon and smelling faintly of the sea. Hob bakes in Brightwell Square.",
+                "Scellée d'un hexagone de cire, elle sent vaguement la mer. Hob fait son pain sur la Place de Clairpuits.",
+            ),
         ),
         other => (other.replace('_', " "), "", ""),
     }
@@ -152,11 +161,11 @@ enum Sheet {
 /// The prompt's label for what the hero faces.
 fn prompt_label(kind: &str, text: &str) -> String {
     match kind {
-        "npc" => format!("Talk to {text}"),
+        "npc" => tr(format!("Talk to {text}"), format!("Parler à {text}")),
         "warp" => text.to_string(),
-        "duel" => "Play a duel".into(),
-        "locked" => "Try the door".into(),
-        _ => "Take a look".into(),
+        "duel" => tr("Play a duel", "Jouer un duel").into(),
+        "locked" => tr("Try the door", "Essayer la porte").into(),
+        _ => tr("Take a look", "Regarder").into(),
     }
 }
 
@@ -223,13 +232,18 @@ pub fn WorldScreen() -> impl IntoView {
                 "near" => {
                     let now = (!a.is_empty()).then(|| (a.clone(), b.clone()));
                     if let Some((k, t)) = &now {
-                        _ = announce.try_set(format!("{}. Press E.", prompt_label(k, t)));
+                        _ = announce.try_set(tr(
+                            format!("{}. Press E.", prompt_label(k, t)),
+                            format!("{}. Appuyez sur E.", prompt_label(k, t)),
+                        ));
                     }
                     _ = near.try_set(now);
                 }
                 "use" if a == "duel" => _ = sheet.try_set(Some(Sheet::Duel(b))),
-                "use" if a == "locked" => _ = sheet.try_set(Some(Sheet::Note("Locked", b))),
-                "use" => _ = sheet.try_set(Some(Sheet::Note("It says", b))),
+                "use" if a == "locked" => {
+                    _ = sheet.try_set(Some(Sheet::Note(tr("Locked", "Fermé à clé"), b)))
+                }
+                "use" => _ = sheet.try_set(Some(Sheet::Note(tr("It says", "On peut lire"), b))),
                 "talk" => start_talk(a, b),
                 "area" => _ = announce.try_set(a),
                 "ready" => {
@@ -361,16 +375,25 @@ pub fn WorldScreen() -> impl IntoView {
         if !packs.is_empty() {
             profile.update(|p| packs.iter().for_each(|&b| _ = p.wallet.grant(b, 1)));
             let names: Vec<String> = packs.iter().map(|&b| packs_label(b, 1)).collect();
-            let text = format!(
-                "You got {}. Open packs from the title screen.",
-                names.join(" and ")
+            let text = tr(
+                format!(
+                    "You got {}. Open packs from the title screen.",
+                    names.join(" and ")
+                ),
+                format!(
+                    "Vous recevez {}. Ouvrez vos boosters depuis l'écran titre.",
+                    names.join(" et ")
+                ),
             );
-            next = next.or(Some(Sheet::Note("A gift", text.clone())));
+            next = next.or(Some(Sheet::Note(tr("A gift", "Un cadeau"), text.clone())));
             announce.set(text);
         }
         if let Some(Sheet::Item(item)) = &next {
             crate::audio::sfx("jingle", 0.0);
-            announce.set(format!("You got {}.", item_info(item).0));
+            announce.set(tr(
+                format!("You got {}.", item_info(item).0),
+                format!("Vous obtenez : {}.", item_info(item).0),
+            ));
         }
         sheet.set(next);
     };
@@ -423,13 +446,19 @@ pub fn WorldScreen() -> impl IntoView {
         <div class="world">
             <header class="world-top">
                 <span class="wordmark small">"Sixfold"</span>
-                <span class="world-hint">"Arrows or WASD to walk · E to act · Shift to run · G for the grid"</span>
+                <span class="world-hint">{tr(
+                    "Arrows or WASD to walk · E to act · Shift to run · G for the grid",
+                    "Flèches ou ZQSD pour marcher · E pour agir · Maj pour courir · G pour la grille",
+                )}</span>
                 <SealBadge on_open=move || sheet.set(Some(Sheet::Roster)) />
                 <MuteToggle />
-                <button class="btn ghost" on:click=move |_| screen.set(Screen::Title)>"Leave"</button>
+                <button class="btn ghost" on:click=move |_| screen.set(Screen::Title)>{tr("Leave", "Partir")}</button>
             </header>
             <main class="world-stage" node_ref=stage tabindex="-1"
-                aria-label="The Sixfold world: a meadow, a square, a woodland trail, a boardwalk and a quarry to walk around. Use the arrow keys or the pad, and E to act.">
+                aria-label=tr(
+                    "The Sixfold world: a meadow, a square, a woodland trail, a boardwalk and a quarry to walk around. Use the arrow keys or the pad, and E to act.",
+                    "Le monde de Sixfold : un pré, une place, un sentier des bois, une promenade et une carrière à parcourir. Utilisez les flèches ou le pavé, et E pour agir.",
+                )>
                 <div class="world-host" node_ref=host></div>
                 <p class="sr-only" aria-live="polite">{move || announce.get()}</p>
             </main>
@@ -441,12 +470,15 @@ pub fn WorldScreen() -> impl IntoView {
                 </button>
             })}
             {move || (loading.get() && failed.with(Option::is_none)).then(|| view! {
-                <p class="world-loading" role="status">"Loading the world…"</p>
+                <p class="world-loading" role="status">{tr("Loading the world…", "Chargement du monde…")}</p>
             })}
             {move || failed.get().map(|_| view! {
                 <div class="world-error" role="alert">
-                    <p>"The 3D scene could not load. Check your connection, then try again."</p>
-                    <button class="btn primary" on:click=retry>"Retry"</button>
+                    <p>{tr(
+                        "The 3D scene could not load. Check your connection, then try again.",
+                        "La scène 3D n'a pas pu se charger. Vérifiez votre connexion, puis réessayez.",
+                    )}</p>
+                    <button class="btn primary" on:click=retry>{tr("Retry", "Réessayer")}</button>
                 </div>
             })}
             <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title"
@@ -472,28 +504,28 @@ pub fn WorldScreen() -> impl IntoView {
                             <div class="item-got">
                                 <div class="item-preview" node_ref=preview></div>
                                 <div>
-                                    <h2 id="world-sheet-title">"You got " {name} "!"</h2>
+                                    <h2 id="world-sheet-title">{tr(format!("You got {name}!"), format!("Vous obtenez : {name} !"))}</h2>
                                     <p class="dialog-sub">{blurb}</p>
                                     <div class="dialog-foot">
-                                        <button class="btn primary" autofocus on:click=close>"Nice"</button>
+                                        <button class="btn primary" autofocus on:click=close>{tr("Nice", "Super")}</button>
                                     </div>
                                 </div>
                             </div>
                         }.into_any()
                     }
                     Sheet::Duel(text) => view! {
-                        <h2 id="world-sheet-title">"Duel the AI?"</h2>
+                        <h2 id="world-sheet-title">{tr("Duel the AI?", "Défier l'IA ?")}</h2>
                         <p class="dialog-sub">{text}</p>
                         <div class="dialog-foot">
-                            <button class="btn ghost" on:click=close>"Not now"</button>
-                            <button class="btn primary" autofocus on:click=duel>"Duel"</button>
+                            <button class="btn ghost" on:click=close>{tr("Not now", "Pas maintenant")}</button>
+                            <button class="btn primary" autofocus on:click=duel>{tr("Duel", "Jouer")}</button>
                         </div>
                     }.into_any(),
                     Sheet::Note(title, text) => view! {
                         <h2 id="world-sheet-title">{title}</h2>
                         <p class="dialog-sub">{text}</p>
                         <div class="dialog-foot">
-                            <button class="btn primary" autofocus on:click=close>"Close"</button>
+                            <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
                         </div>
                     }.into_any(),
                     Sheet::Challenge(id) => view! {
@@ -501,18 +533,18 @@ pub fn WorldScreen() -> impl IntoView {
                     }.into_any(),
                     Sheet::Ladder => view! {
                         <div class="sheet-head">
-                            <h2 id="world-sheet-title">"The Warden's ladder"</h2>
-                            <button class="btn ghost" autofocus on:click=close>"Close"</button>
+                            <h2 id="world-sheet-title">{tr("The Warden's ladder", "Le tableau de la Gardienne")}</h2>
+                            <button class="btn ghost" autofocus on:click=close>{tr("Close", "Fermer")}</button>
                         </div>
                         <Ladder back=Screen::World before=move || sheet.set(None) />
                         <div class="dialog-foot">
-                            <button class="btn" on:click=move |_| sheet.set(Some(Sheet::Challenge("warden".into())))>"Duel Sable again"</button>
+                            <button class="btn" on:click=move |_| sheet.set(Some(Sheet::Challenge("warden".into())))>{tr("Duel Sable again", "Rejouer contre Sable")}</button>
                         </div>
                     }.into_any(),
                     Sheet::Roster => view! {
                         <div class="sheet-head">
-                            <h2 id="world-sheet-title">"Rivals and seals"</h2>
-                            <button class="btn primary" autofocus on:click=close>"Close"</button>
+                            <h2 id="world-sheet-title">{tr("Rivals and seals", "Rivaux et sceaux")}</h2>
+                            <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
                         </div>
                         <Roster />
                     }.into_any(),

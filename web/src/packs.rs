@@ -7,7 +7,7 @@ use std::time::Duration;
 use leptos::prelude::*;
 use sixfold_engine::booster::{BOOSTERS, PACK_SIZE};
 use sixfold_engine::profile::Profile;
-use sixfold_engine::{card, CardId, Rarity};
+use sixfold_engine::{card, tr, CardId, Rarity};
 
 use crate::art::color_key;
 use crate::binder::{inspect_handlers, PageBar};
@@ -91,7 +91,7 @@ pub fn PacksScreen() -> impl IntoView {
     on_cleanup(|| crate::audio::sfx("packstop", 0.0));
     view! {
         <div class="page with-side" on:keydown=on_key>
-            <PageBar title="Open packs" />
+            <PageBar title=tr("Open packs", "Ouvrir des boosters") />
             <main class="page-body">
                 {move || match opened.get() {
                     None => view! { <Shelf open=open /> }.into_any(),
@@ -122,11 +122,17 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
     view! {
         <p class="page-lead">
             {move || match total() {
-                0 => "You have no packs left. Win a duel against the AI, beat a rival or win the daily duel to earn more.".to_string(),
-                1 => "You have 1 pack to open.".to_string(),
-                n => format!("You have {n} packs to open."),
+                0 => tr(
+                    "You have no packs left. Win a duel against the AI, beat a rival or win the daily duel to earn more.",
+                    "Vous n'avez plus de boosters. Gagnez un duel contre l'IA, battez un rival ou remportez le duel du jour pour en obtenir.",
+                ).to_string(),
+                1 => tr("You have 1 pack to open.", "Vous avez 1 booster à ouvrir.").to_string(),
+                n => tr(format!("You have {n} packs to open."), format!("Vous avez {n} boosters à ouvrir.")),
             }}
-            " Each holds " {PACK_SIZE} " cards: 1 energy, 5 Common, 3 Uncommon and 1 Rare."
+            {tr(
+                format!(" Each holds {PACK_SIZE} cards: 1 energy, 5 Common, 3 Uncommon and 1 Rare."),
+                format!(" Chacun contient {PACK_SIZE} cartes : 1 énergie, 5 Communes, 3 Peu communes et 1 Rare."),
+            )}
         </p>
         <ul class="shelf">
             {BOOSTERS.iter().enumerate().map(|(i, b)| {
@@ -145,11 +151,14 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
                             <h2>{b.name.get()}</h2>
                             <p>{b.description.get()}</p>
                             <button type="button" class="btn primary" disabled=move || n() == 0
-                                aria-label=move || format!("Open one {}, {} left", b.name, n())
+                                aria-label=move || tr(
+                                    format!("Open one {}, {} left", b.name, n()),
+                                    format!("Ouvrir un {}, il en reste {}", b.name, n()),
+                                )
                                 on:click=move |_| open(i)>
                                 {move || match n() {
-                                    0 => "None left".to_string(),
-                                    n => format!("Open one ({n} left)"),
+                                    0 => tr("None left", "Aucun").to_string(),
+                                    n => tr(format!("Open one ({n} left)"), format!("En ouvrir un ({n})")),
                                 }}
                             </button>
                         </div>
@@ -158,7 +167,7 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
             }).collect_view()}
         </ul>
         {move || (total() == 0).then(|| view! {
-            <button type="button" class="btn" on:click=move |_| screen.set(Screen::Duel)>"Play a duel"</button>
+            <button type="button" class="btn" on:click=move |_| screen.set(Screen::Duel)>{tr("Play a duel", "Jouer un duel")}</button>
         })}
     }
 }
@@ -179,9 +188,18 @@ fn Reveal(
         let names: Vec<String> = o
             .cards
             .iter()
-            .map(|&(id, new)| format!("{}{}", card(id).name, if new { " (new)" } else { "" }))
+            .map(|&(id, new)| {
+                format!(
+                    "{}{}",
+                    card(id).label(),
+                    if new { tr(" (new)", " (nouvelle)") } else { "" }
+                )
+            })
             .collect();
-        format!("You got {}.", names.join(", "))
+        tr(
+            format!("You got {}.", names.join(", ")),
+            format!("Vous obtenez : {}.", names.join(", ")),
+        )
     };
     let more = move || profile.with(|p| p.wallet.total());
     let name = BOOSTERS[o.booster].name.get();
@@ -190,26 +208,29 @@ fn Reveal(
             <h2>{name}</h2>
             <p class="page-lead">{move || if done.get() {
                 match fresh {
-                    0 => "No new cards this time, but every copy counts toward a deck.".to_string(),
-                    1 => "1 new card for your collection.".to_string(),
-                    n => format!("{n} new cards for your collection."),
+                    0 => tr(
+                        "No new cards this time, but every copy counts toward a deck.",
+                        "Aucune nouvelle carte cette fois, mais chaque exemplaire compte pour un deck.",
+                    ).to_string(),
+                    1 => tr("1 new card for your collection.", "1 nouvelle carte pour votre collection.").to_string(),
+                    n => tr(format!("{n} new cards for your collection."), format!("{n} nouvelles cartes pour votre collection.")),
                 }
             } else {
-                "Turning the cards over…".to_string()
+                tr("Turning the cards over…", "On retourne les cartes…").to_string()
             }}</p>
         </div>
-        <ol class="reveal" class:instant=move || instant.get() aria-label=format!("The {} cards in this pack", o.cards.len())>
+        <ol class="reveal" class:instant=move || instant.get() aria-label=tr(format!("The {} cards in this pack", o.cards.len()), format!("Les {} cartes de ce booster", o.cards.len()))>
             {o.cards.iter().enumerate().map(|(i, &(id, new))| {
                 let rare = card(id).rarity == Rarity::Rare;
                 let (peek, open) = inspect_handlers(id);
                 view! {
                     <li class="flip" class:rare=rare style=format!("--i:{i}")>
-                        <button type="button" class="flip-inner" aria-label=format!("{}{}", face_text(id), if new { ", new" } else { "" })
+                        <button type="button" class="flip-inner" aria-label=format!("{}{}", face_text(id), if new { tr(", new", ", nouvelle") } else { "" })
                             on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
                             <span class="face back-face"><CardBack /></span>
                             <span class="face front-face"><CardFace id=id /></span>
                         </button>
-                        {new.then(|| view! { <span class="new-badge" aria-hidden="true">"New"</span> })}
+                        {new.then(|| view! { <span class="new-badge" aria-hidden="true">{tr("New", "Nouvelle")}</span> })}
                     </li>
                 }
             }).collect_view()}
@@ -220,11 +241,11 @@ fn Reveal(
                 view! {
                     {(more() > 0).then(|| view! {
                         <button type="button" class="btn primary" on:click=move |_| again()>
-                            {format!("Open another ({} left)", more())}
+                            {tr(format!("Open another ({} left)", more()), format!("Un autre ({} restant{})", more(), if more() > 1 { "s" } else { "" }))}
                         </button>
                     })}
-                    <button type="button" class="btn" on:click=move |_| screen.set(Screen::Collection)>"See the collection"</button>
-                    <button type="button" class="btn ghost" on:click=move |_| screen.set(Screen::Decks)>"Build a deck"</button>
+                    <button type="button" class="btn" on:click=move |_| screen.set(Screen::Collection)>{tr("See the collection", "Voir la collection")}</button>
+                    <button type="button" class="btn ghost" on:click=move |_| screen.set(Screen::Decks)>{tr("Build a deck", "Construire un deck")}</button>
                 }.into_any()
             } else {
                 view! {
@@ -233,7 +254,7 @@ fn Reveal(
                         skip();
                         crate::audio::sfx("packstop", 0.0);
                         crate::audio::sfx("rare", 0.0);
-                    }>"Show all"</button>
+                    }>{tr("Show all", "Tout montrer")}</button>
                 }.into_any()
             }}
         </div>

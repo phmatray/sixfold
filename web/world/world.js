@@ -33,7 +33,7 @@ const FIDGET_AFTER = 6; // seconds idle before the hero fidgets and the camera l
 const FADE = 350; // ms, warp fade
 const DIR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }; // n = away from the camera
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
-const KEYS = { w: "n", arrowup: "n", s: "s", arrowdown: "s", a: "w", arrowleft: "w", d: "e", arrowright: "e" };
+const KEYS = { w: "n", z: "n", arrowup: "n", s: "s", arrowdown: "s", a: "w", q: "w", arrowleft: "w", d: "e", arrowright: "e" }; // WASD and AZERTY ZQSD
 const angle = (f) => Math.atan2(DIR[f][0], DIR[f][1]);
 const key = (x, z) => `${x},${z}`;
 const SUFFIX_ARMS = { "": [[-1, 0], [1, 0]], _corner: [[-1, 0], [0, 1]], _end: [[-1, 0]], _t: [[-1, 0], [1, 0], [0, 1]] }; // rot-0 arms

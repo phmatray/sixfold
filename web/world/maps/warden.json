@@ -84,13 +84,15 @@
       "x": 2,
       "z": 1,
       "kind": "sign",
-      "text": "Six hexagons under glass, one for every seal ever won here. One frame is still empty."
+      "text": "Six hexagons under glass, one for every seal ever won here. One frame is still empty.",
+      "text_fr": "Six hexagones sous verre, un pour chaque sceau gagné ici. Un cadre est encore vide."
     },
     {
       "x": 8,
       "z": 1,
       "kind": "sign",
-      "text": "A worn deck box. The label reads: the Warden's first deck. Lost more than it won."
+      "text": "A worn deck box. The label reads: the Warden's first deck. Lost more than it won.",
+      "text_fr": "Une boîte à deck usée. L'étiquette indique : premier deck de la Gardienne. A plus perdu que gagné."
     }
   ],
   "warps": [
@@ -100,6 +102,7 @@
       "dir": "s",
       "to": "shop",
       "label": "Back to the hall",
+      "label_fr": "Retour à la salle",
       "spawn": {
         "x": 1,
         "z": 6,
@@ -123,6 +126,9 @@
           "if": "won:warden&flag:thanked_warden",
           "lines": [
             "Again, then. The chair stays yours."
+          ],
+          "lines_fr": [
+            "Encore, donc. Le fauteuil reste à toi."
           ]
         },
         {
@@ -131,6 +137,11 @@
             "...So the seals chose well.",
             "The Warden's chair is yours whenever you want it. I'll keep it warm, though.",
             "Take Hexcrest. It was my first card. It never minded conditions, and neither should you."
+          ],
+          "lines_fr": [
+            "…Les sceaux ont donc bien choisi.",
+            "Le fauteuil de la Gardienne est à toi quand tu veux. Je le garde au chaud, en attendant.",
+            "Prends Sorcrête. C'était ma première carte. Elle se moquait des altérations ; fais comme elle."
           ],
           "do": [
             "flag:thanked_warden"
@@ -141,12 +152,19 @@
           "lines": [
             "Six seals are a key, not a crown.",
             "Sit with your cards a while. The door stays open for you now."
+          ],
+          "lines_fr": [
+            "Six sceaux, c'est une clé, pas une couronne.",
+            "Prends le temps de revoir tes cartes. La porte te reste ouverte, désormais."
           ]
         },
         {
           "if": "!open:warden",
           "lines": [
             "How did you get in here? Go on, back out you go."
+          ],
+          "lines_fr": [
+            "Qu'est-ce que tu fais ici ? Allez, dehors."
           ]
         },
         {
@@ -154,6 +172,10 @@
           "lines": [
             "Champion. The chair suits you.",
             "For those who want more, I keep a ladder: the Gauntlet, six rivals in a row, and a new duel every day."
+          ],
+          "lines_fr": [
+            "Champion. Le fauteuil te va bien.",
+            "Pour qui en veut plus, je tiens un tableau : l'Épreuve, six rivaux à la suite, et le duel du jour."
           ],
           "do": [
             "show:ladder"
@@ -164,6 +186,11 @@
             "Six seals. It has been a long time since the door opened.",
             "I am Sable, the Hex Warden. Every rival out there learned from me, or tried to.",
             "Six prizes. Show me what they taught you."
+          ],
+          "lines_fr": [
+            "Six sceaux. Il y a bien longtemps que cette porte ne s'était pas ouverte.",
+            "Je suis Sable, la Gardienne des Six. Tous les rivaux du dehors ont appris de moi, ou ont essayé.",
+            "Six Récompenses. Montre-moi ce qu'ils t'ont appris."
           ],
           "do": [
             "duel:warden"

@@ -50,6 +50,11 @@ download first).
   plays without a connection once it has loaded; the world is kept after your
   first visit to each area. When a new version is out, a toast offers to
   reload.
+- **English and French** (1.1): every screen, card, rule, log line and line of
+  dialogue in both languages, with original French card names. The game follows
+  the browser's language on a first visit; the EN / FR switch on the title
+  screen (and in Settings) changes it. The choice is kept in the browser, not in
+  the save.
 - **Accessible**: every screen works with the keyboard alone, with visible
   focus; a screen reader hears one summary of each turn (what the AI did),
   controls are at least 44 px on touch screens, and animations calm down with

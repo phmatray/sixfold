@@ -247,7 +247,10 @@ pub struct Hit { pub amount: u16, pub weakness: bool, pub resistance: bool }
 
 ## 6. Text for the UI
 
-Everything below is plain English, written from the viewer's side ("You" / "Opponent").
+Everything below is written from the viewer's side ("You" / "Opponent"), in the current language:
+English by default, French after `set_lang(Lang::Fr)` (a per-thread setting; the web app sets it
+once at startup). `tr(en, fr)` picks a value by language and `T { en, fr }` holds a static pair, so
+every call site carries both texts.
 
 | API | Use |
 |---|---|
@@ -259,7 +262,10 @@ Everything below is plain English, written from the viewer's side ("You" / "Oppo
 | `event.is_private(viewer) -> bool` | Whether the event's card must be hidden from `viewer`. |
 | `Display` for `Color`, `Stage`, `Status`, `Find`, `Placed`, `Shield` | "Fire", "Stage 1", "Double-poisoned", … |
 
-Card text comes from the card data itself: `Attack::text`, `Power::text` and `Trainer::text`.
+Card text comes from the card data itself. Show it through the localized accessors
+`CardDef::label()`, `Attack::label()` / `rules()`, `Power::label()` / `rules()` and `Trainer::rules()`
+(French from `engine/src/set_fr.rs`). The English `CardDef::name` stays the identity key that
+evolutions, the 4-copy rule and saves use: compare names, display labels.
 
 ---
 

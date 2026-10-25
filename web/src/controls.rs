@@ -4,8 +4,8 @@
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
 use sixfold_engine::{
-    card, energy_units, total_units, Action, CardId, Choice, Color, Effect as CardEffect, Game,
-    PromptKind, RuleError,
+    card, energy_units, fr, total_units, tr, Action, CardId, Choice, Color, Effect as CardEffect,
+    Game, PromptKind, RuleError,
 };
 
 use crate::board::{hand_index, keyed_hand};
@@ -16,15 +16,15 @@ use crate::{Legal, Ui};
 /// Why an attack button is greyed out.
 fn reason(e: RuleError) -> &'static str {
     match e {
-        RuleError::NotEnoughEnergy => "Not enough energy",
-        RuleError::AsleepOrParalyzed => "Asleep or Paralyzed",
-        RuleError::CantAttack => "Can't attack this turn",
-        RuleError::AttackDisabled => "Disabled this turn",
-        RuleError::AlreadyUsed => "Already used",
-        RuleError::DeckEmpty => "Your deck is empty",
-        RuleError::NoTarget => "Nothing to target",
-        RuleError::NotNow => "Not now",
-        _ => "Can't use it now",
+        RuleError::NotEnoughEnergy => tr("Not enough energy", "Pas assez d'énergie"),
+        RuleError::AsleepOrParalyzed => tr("Asleep or Paralyzed", "Endormie ou Paralysée"),
+        RuleError::CantAttack => tr("Can't attack this turn", "Pas d'attaque ce tour"),
+        RuleError::AttackDisabled => tr("Disabled this turn", "Bloquée ce tour"),
+        RuleError::AlreadyUsed => tr("Already used", "Déjà utilisé"),
+        RuleError::DeckEmpty => tr("Your deck is empty", "Votre deck est vide"),
+        RuleError::NoTarget => tr("Nothing to target", "Aucune cible"),
+        RuleError::NotNow => tr("Not now", "Pas maintenant"),
+        _ => tr("Can't use it now", "Impossible pour l'instant"),
     }
 }
 
@@ -85,7 +85,7 @@ fn attack_buttons(g: &Game, legal: &[Action]) -> Vec<AttackBtn> {
                 .map(|h| (h.amount, h.weakness, h.resistance));
             AttackBtn {
                 action,
-                name: a.name,
+                name: a.label(),
                 cost: a.cost,
                 damage: damage_label(a),
                 preview,
@@ -93,7 +93,7 @@ fn attack_buttons(g: &Game, legal: &[Action]) -> Vec<AttackBtn> {
                 ko: matches!((preview, defender_hp), (Some((amt, ..)), Some(hp)) if amt >= hp && amt > 0),
                 // Probing a clone only reads the human's own options.
                 blocked: (!legal.contains(&action))
-                    .then(|| g.clone().apply(action).err().map_or("Can't use it now", reason)),
+                    .then(|| g.clone().apply(action).err().map_or(tr("Can't use it now", "Impossible pour l'instant"), reason)),
                 text: attack_text(a),
             }
         })
@@ -108,13 +108,13 @@ fn bar_model(ctl: Ctl, ui: Ui, legal: &[Action]) -> Bar {
         let v = g.view(HUMAN);
         if v.winner.is_some() {
             return Bar {
-                title: "Game over".into(),
+                title: tr("Game over", "Partie terminée").into(),
                 ..Bar::default()
             };
         }
         if ctl.busy.get() {
             return Bar {
-                title: "Resolving".into(),
+                title: tr("Resolving", "Résolution…").into(),
                 ..Bar::default()
             };
         }
@@ -122,11 +122,17 @@ fn bar_model(ctl: Ctl, ui: Ui, legal: &[Action]) -> Bar {
             let setup = !ctl.revealed.get();
             return Bar {
                 title: if setup {
-                    "Opponent is setting up".into()
+                    tr("Opponent is setting up", "L'adversaire se prépare").into()
                 } else {
-                    "Opponent's turn".into()
+                    tr("Opponent's turn", "Tour adverse").into()
                 },
-                hint: Some("Their moves play out on the table and in the log.".into()),
+                hint: Some(
+                    tr(
+                        "Their moves play out on the table and in the log.",
+                        "Ses actions se jouent sur la table et dans le journal.",
+                    )
+                    .into(),
+                ),
                 ..Bar::default()
             };
         };
@@ -167,21 +173,39 @@ fn bar_model(ctl: Ctl, ui: Ui, legal: &[Action]) -> Bar {
             bar.attacks = attack_buttons(g, legal);
         }
         bar.hint = match (selected, playable.is_empty()) {
-            (Some(i), _) if bar.hand.is_empty() => Some(format!(
-                "{} can't be played right now.",
-                card(v.hand[i]).name
+            (Some(i), _) if bar.hand.is_empty() => Some(tr(
+                format!("{} can't be played right now.", card(v.hand[i]).label()),
+                format!(
+                    "{} ne peut pas être jouée maintenant.",
+                    card(v.hand[i]).label()
+                ),
             )),
             (Some(_), _) => None,
             (None, false) => Some(match prompt.kind {
-                PromptKind::ChooseActive => "Pick a Basic creature from your hand.".into(),
-                PromptKind::ChooseBench => "Pick more Basics for your Bench, or press Done.".into(),
+                PromptKind::ChooseActive => tr(
+                    "Pick a Basic creature from your hand.",
+                    "Choisissez une créature de Base dans votre main.",
+                )
+                .into(),
+                PromptKind::ChooseBench => tr(
+                    "Pick more Basics for your Bench, or press Done.",
+                    "Ajoutez des créatures de Base à votre Banc, ou touchez Terminé.",
+                )
+                .into(),
                 _ => {
                     let mut n = playable;
                     n.dedup();
-                    format!(
-                        "Select a card in your hand to play it ({} playable).",
-                        n.len()
-                    )
+                    match (n.len(), fr()) {
+                        (n, false) => {
+                            format!("Select a card in your hand to play it ({n} playable).")
+                        }
+                        (n @ (0 | 1), true) => {
+                            format!("Touchez une carte de votre main pour la jouer ({n} jouable).")
+                        }
+                        (n, true) => {
+                            format!("Touchez une carte de votre main pour la jouer ({n} jouables).")
+                        }
+                    }
                 }
             }),
             (None, true) => None,
@@ -201,7 +225,7 @@ pub fn ActionBar() -> impl IntoView {
         ctl.act(a);
     };
     view! {
-        <div class="action-bar" class:mine=move || bar.with(|b| b.mine) role="region" aria-label="Actions" tabindex="-1" data-focus-home="">
+        <div class="action-bar" class:mine=move || bar.with(|b| b.mine) role="region" aria-label=tr("Actions", "Actions") tabindex="-1" data-focus-home="">
             <div class="bar-status">
                 <h2 class="bar-title" aria-live="polite">{move || bar.with(|b| b.title.clone())}</h2>
                 {move || bar.with(|b| b.hint.clone()).map(|h| view! { <p class="bar-hint">{h}</p> })}
@@ -211,7 +235,14 @@ pub fn ActionBar() -> impl IntoView {
                     {move || bar.with(|b| b.attacks.clone()).into_iter().map(|a| {
                         let note = match (a.blocked, a.preview) {
                             (Some(r), _) => r.to_string(),
-                            (None, Some((0, ..))) if a.coins => "Damage depends on coin flips".to_string(),
+                            (None, Some((0, ..))) if a.coins => tr("Damage depends on coin flips", "Dégâts selon pile ou face").to_string(),
+                            (None, Some((amt, w, r))) if fr() => format!(
+                                "{}{amt} dégâts{}{}{}",
+                                if a.coins { "Au moins " } else { "" },
+                                if w { ", Faiblesse ×2" } else { "" },
+                                if r { ", résisté" } else { "" },
+                                if a.ko { ", met K.O." } else { "" }
+                            ),
                             (None, Some((amt, w, r))) => format!(
                                 "{}{amt} to the defender{}{}{}",
                                 if a.coins { "At least " } else { "" },
@@ -222,7 +253,7 @@ pub fn ActionBar() -> impl IntoView {
                             (None, None) => String::new(),
                         };
                         // The words on the button, in order (WCAG 2.5.3, label in name).
-                        let free = if a.cost.is_empty() { "Free" } else { "" };
+                        let free = if a.cost.is_empty() { tr("Free", "Gratuit") } else { "" };
                         let label = [free, a.name, a.damage.as_deref().unwrap_or(""), &note]
                             .into_iter()
                             .filter(|s| !s.is_empty())
@@ -298,8 +329,11 @@ fn dialog_model(g: &Game, legal: &[Action]) -> Option<Dialog> {
         }
     };
     let hp_note = |player: usize, slot: usize| {
-        creature_at(player, slot)
-            .map(|c| format!("{}/{} HP, {} energy", c.hp, c.creature().hp, c.energy.len()))
+        creature_at(player, slot).map(|c| match (c.energy.len(), fr()) {
+            (n, false) => format!("{}/{} HP, {n} energy", c.hp, c.creature().hp),
+            (n @ (0 | 1), true) => format!("{}/{} PV, {n} énergie", c.hp, c.creature().hp),
+            (n, true) => format!("{}/{} PV, {n} énergies", c.hp, c.creature().hp),
+        })
     };
     let mut options = vec![];
     for &a in legal {
@@ -362,17 +396,26 @@ fn dialog_model(g: &Game, legal: &[Action]) -> Option<Dialog> {
                         .collect()
                 })
                 .unwrap_or_default();
-            Some(format!(
-                "Paid {} of {cost}. The chosen energy is discarded when you pick who comes in.",
-                total_units(&energy_units(&picked)).min(*cost as u32)
+            let paid = total_units(&energy_units(&picked)).min(*cost as u32);
+            Some(tr(
+                format!("Paid {paid} of {cost}. The chosen energy is discarded when you pick who comes in."),
+                format!("Payé : {paid} sur {cost}. L'énergie choisie sera défaussée quand vous choisirez qui entre."),
             ))
         }
-        PromptKind::ChoosePrize { .. } => {
-            Some("Prizes are face down: any one is a surprise.".into())
-        }
-        PromptKind::ChooseReplacement => {
-            Some("Pick a Benched creature to become your Active.".into())
-        }
+        PromptKind::ChoosePrize { .. } => Some(
+            tr(
+                "Prizes are face down: any one is a surprise.",
+                "Les Récompenses sont face cachée : chacune est une surprise.",
+            )
+            .into(),
+        ),
+        PromptKind::ChooseReplacement => Some(
+            tr(
+                "Pick a Benched creature to become your Active.",
+                "Choisissez une créature de Banc qui deviendra votre Active.",
+            )
+            .into(),
+        ),
         _ => None,
     };
     let grid = options.iter().all(|o| o.visual != Visual::Text);
@@ -420,7 +463,7 @@ pub fn PromptModal() -> impl IntoView {
             return Some(
                 view! {
                     <button class="btn peek-return" on:click=move |_| peek.set(false)>
-                        "Back to the choice: " {d.title.clone()}
+                        {tr("Back to the choice: ", "Retour au choix : ")} {d.title.clone()}
                     </button>
                 }
                 .into_any(),
@@ -461,9 +504,9 @@ pub fn PromptModal() -> impl IntoView {
                         {d.sub.map(|s| view! { <p class="dialog-sub">{s}</p> })}
                         <div class=if d.grid { "opts grid" } else { "opts" }>{options}</div>
                         <div class="dialog-foot">
-                            <button class="btn ghost" on:click=move |_| peek.set(true)>"Look at the table"</button>
+                            <button class="btn ghost" on:click=move |_| peek.set(true)>{tr("Look at the table", "Voir la table")}</button>
                             {d.cancel.then(|| view! {
-                                <button class="btn ghost" on:click=move |_| ctl.act(Action::Cancel)>"Cancel"</button>
+                                <button class="btn ghost" on:click=move |_| ctl.act(Action::Cancel)>{tr("Cancel", "Annuler")}</button>
                             })}
                         </div>
                     </div>

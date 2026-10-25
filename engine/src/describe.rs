@@ -1,6 +1,6 @@
-//! Plain-English text for the UI: button labels, prompt titles, tooltips and
-//! the game log. Player-relative wording ("You" / "Opponent") is from the
-//! viewer's side. Nothing here changes the game.
+//! Text for the UI, in English or French: button labels, prompt titles,
+//! tooltips and the game log. Player-relative wording ("You" / "Opponent") is
+//! from the viewer's side. Nothing here changes the game.
 
 use std::fmt;
 
@@ -8,18 +8,19 @@ use crate::action::{Action, Event, PromptKind};
 use crate::card::{card, CardId, Color, Stage};
 use crate::condition::{Placed, Shield, Status};
 use crate::effect::{Choice, Effect, Find};
+use crate::lang::{fr, tr};
 use crate::view::View;
 
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(match self {
-            Color::Grass => "Grass",
-            Color::Fire => "Fire",
-            Color::Water => "Water",
-            Color::Lightning => "Lightning",
-            Color::Fighting => "Fighting",
-            Color::Psychic => "Psychic",
-            Color::Colorless => "Colorless",
+            Color::Grass => tr("Grass", "Herbe"),
+            Color::Fire => tr("Fire", "Feu"),
+            Color::Water => tr("Water", "Eau"),
+            Color::Lightning => tr("Lightning", "Foudre"),
+            Color::Fighting => tr("Fighting", "Combat"),
+            Color::Psychic => tr("Psychic", "Psychique"),
+            Color::Colorless => tr("Colorless", "Incolore"),
         })
     }
 }
@@ -27,9 +28,9 @@ impl fmt::Display for Color {
 impl fmt::Display for Stage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(match self {
-            Stage::Basic => "Basic",
-            Stage::Stage1 => "Stage 1",
-            Stage::Stage2 => "Stage 2",
+            Stage::Basic => tr("Basic", "Base"),
+            Stage::Stage1 => tr("Stage 1", "Stade 1"),
+            Stage::Stage2 => tr("Stage 2", "Stade 2"),
         })
     }
 }
@@ -37,11 +38,11 @@ impl fmt::Display for Stage {
 impl fmt::Display for Status {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(match self {
-            Status::Confused => "Confused",
-            Status::Asleep => "Asleep",
-            Status::Paralyzed => "Paralyzed",
-            Status::Poisoned => "Poisoned",
-            Status::DoublePoisoned => "Double-poisoned",
+            Status::Confused => tr("Confused", "Confuse"),
+            Status::Asleep => tr("Asleep", "Endormie"),
+            Status::Paralyzed => tr("Paralyzed", "Paralysée"),
+            Status::Poisoned => tr("Poisoned", "Empoisonnée"),
+            Status::DoublePoisoned => tr("Double-poisoned", "Gravement empoisonnée"),
         })
     }
 }
@@ -49,11 +50,11 @@ impl fmt::Display for Status {
 impl fmt::Display for Find {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(match self {
-            Find::Any => "a card",
-            Find::Basic => "a Basic creature",
-            Find::Creature => "a creature card",
-            Find::BasicEnergy => "a basic energy",
-            Find::Trainer => "a trainer",
+            Find::Any => tr("a card", "une carte"),
+            Find::Basic => tr("a Basic creature", "une carte créature de Base"),
+            Find::Creature => tr("a creature card", "une carte créature"),
+            Find::BasicEnergy => tr("a basic energy", "une énergie de base"),
+            Find::Trainer => tr("a trainer", "une carte Dresseur"),
         })
     }
 }
@@ -62,6 +63,30 @@ impl fmt::Display for Find {
 /// next turn, ...".
 impl fmt::Display for Placed {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if fr() {
+            // "la créature en défense" is what the log replaces with the Active.
+            return match self {
+                Placed::CantRetreat => {
+                    write!(f, "la créature en défense ne peut pas battre en retraite")
+                }
+                Placed::CantAttack => write!(f, "la créature en défense ne peut pas attaquer"),
+                Placed::DisabledAttack(i) => write!(
+                    f,
+                    "la créature en défense ne peut pas utiliser l'attaque {}",
+                    i + 1
+                ),
+                Placed::Accuracy => {
+                    write!(
+                        f,
+                        "la créature en défense doit obtenir face à pile ou face pour attaquer"
+                    )
+                }
+                Placed::Weaken(n) => write!(
+                    f,
+                    "les attaques de la créature en défense infligent {n} dégâts de moins"
+                ),
+            };
+        }
         match self {
             Placed::CantRetreat => write!(f, "the defending creature can't retreat"),
             Placed::CantAttack => write!(f, "the defending creature can't attack"),
@@ -77,6 +102,34 @@ impl fmt::Display for Placed {
 /// Completes "During your opponent's next turn, ...".
 impl fmt::Display for Shield {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if fr() {
+            // "cette créature" is what the log replaces with the Active.
+            return match self {
+                Shield::PreventAll => write!(
+                    f,
+                    "cette créature ne subit aucun effet des attaques, dégâts compris"
+                ),
+                Shield::PreventDamage => {
+                    write!(f, "cette créature ne subit aucun dégât des attaques")
+                }
+                Shield::Reduce(n) => write!(
+                    f,
+                    "les attaques infligent {n} dégâts de moins à cette créature"
+                ),
+                Shield::PreventBelow(n) => write!(
+                    f,
+                    "cette créature ne subit pas les dégâts d'attaque inférieurs à {n}"
+                ),
+                Shield::Halve => write!(
+                    f,
+                    "les attaques n'infligent que la moitié de leurs dégâts à cette créature"
+                ),
+                Shield::CounterKo => write!(
+                    f,
+                    "si une attaque met cette créature K.O., la créature attaquante est aussi mise K.O."
+                ),
+            };
+        }
         match self {
             Shield::PreventAll => write!(
                 f,
@@ -108,9 +161,34 @@ fn plural(n: impl Into<u32>, word: &str) -> String {
     }
 }
 
+/// "2 cartes", "1 carte", "0 carte": French plural (0 and 1 singular) on the
+/// first word ("2 cartes Énergie Feu").
+fn pluriel(n: impl Into<u32>, word: &str) -> String {
+    let n = n.into();
+    if n <= 1 {
+        format!("{n} {word}")
+    } else {
+        let (head, tail) = word.split_once(' ').map_or((word, ""), |(h, t)| (h, t));
+        let sep = if tail.is_empty() { "" } else { " " };
+        format!("{n} {head}s{sep}{tail}")
+    }
+}
+
+/// The French agreement ending for `n` things: "" or "s".
+fn s(n: impl Into<u32>) -> &'static str {
+    if n.into() > 1 {
+        "s"
+    } else {
+        ""
+    }
+}
+
 fn coin_prefix(coin: bool) -> &'static str {
     if coin {
-        "Flip a coin. If heads, "
+        tr(
+            "Flip a coin. If heads, ",
+            "Lancez une pièce. Si c'est face, ",
+        )
     } else {
         ""
     }
@@ -121,6 +199,9 @@ fn coin_prefix(coin: bool) -> &'static str {
 /// when a card's own `text` is empty.
 impl fmt::Display for Effect {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if fr() {
+            return effect_fr(self, f);
+        }
         use Effect::*;
         match *self {
             AddPerHeads { coins, per } => write!(
@@ -250,9 +331,235 @@ impl fmt::Display for Effect {
     }
 }
 
+/// [`Effect`]'s rules sentence in French.
+fn effect_fr(e: &Effect, f: &mut fmt::Formatter) -> fmt::Result {
+    use Effect::*;
+    match *e {
+        AddPerHeads { coins, per } => {
+            let coins = if coins == 1 {
+                "une pièce".to_string()
+            } else {
+                pluriel(coins, "pièce")
+            };
+            write!(
+                f,
+                "Lancez {coins}. Cette attaque inflige {per} dégâts de plus pour chaque face."
+            )
+        }
+        AddPerDamage { per, own } => {
+            let on = if own {
+                "cette créature"
+            } else {
+                "la créature en défense"
+            };
+            write!(
+                f,
+                "Cette attaque inflige {per} dégâts de plus pour chaque tranche de 10 dégâts sur {on}."
+            )
+        }
+        IgnoreWeaknessResistance => write!(
+            f,
+            "Les dégâts de cette attaque ne tiennent compte ni de la Faiblesse ni de la Résistance."
+        ),
+        DoubleNextAttack => write!(
+            f,
+            "Pendant votre prochain tour, l'attaque de cette créature inflige le double de dégâts."
+        ),
+        Recoil(n) => write!(f, "Cette créature s'inflige {n} dégâts."),
+        BenchDamage {
+            amount,
+            own,
+            opponent,
+        } => {
+            let whose = match (own, opponent) {
+                (true, true) => "de Banc des deux joueurs",
+                (true, false) => "de votre Banc",
+                _ => "du Banc adverse",
+            };
+            write!(f, "Inflige {amount} dégâts à chaque créature {whose}.")
+        }
+        Snipe(n) => write!(f, "Inflige {n} dégâts à 1 créature de votre adversaire."),
+        Inflict { status, coin } => {
+            let the = if coin { "la" } else { "La" };
+            write!(
+                f,
+                "{}{the} créature en défense est maintenant {status}.",
+                coin_prefix(coin)
+            )
+        }
+        InflictSelf(status) => write!(f, "Cette créature est maintenant {status}."),
+        Cure { both: false } => {
+            write!(f, "Soigne toutes les altérations de votre créature Active.")
+        }
+        Cure { both: true } => {
+            write!(f, "Soigne toutes les altérations des deux créatures Actives.")
+        }
+        Protect { shield, coin } => {
+            let during = if coin { "pendant" } else { "Pendant" };
+            write!(
+                f,
+                "{}{during} le prochain tour de votre adversaire, {shield}.",
+                coin_prefix(coin)
+            )
+        }
+        Place { placed, coin } => {
+            let during = if coin { "pendant" } else { "Pendant" };
+            write!(
+                f,
+                "{}{during} le prochain tour de votre adversaire, {placed}.",
+                coin_prefix(coin)
+            )
+        }
+        DisableAttack => write!(
+            f,
+            "Choisissez 1 des attaques de la créature en défense. Elle ne peut pas être utilisée pendant le prochain tour de votre adversaire."
+        ),
+        TrainerLock => write!(
+            f,
+            "Votre adversaire ne peut pas jouer de cartes Dresseur pendant son prochain tour."
+        ),
+        DefenderWeakness(c) => write!(f, "La Faiblesse de la créature en défense devient {c}."),
+        OwnResistance(c) => write!(f, "La Résistance de cette créature devient {c}."),
+        DiscardEnergy {
+            color: Color::Colorless,
+            count,
+        } => write!(
+            f,
+            "Défaussez {} attachée{} à cette créature.",
+            pluriel(count, "carte Énergie"),
+            s(count)
+        ),
+        DiscardEnergy { color, count } => write!(
+            f,
+            "Défaussez {} attachée{} à cette créature.",
+            pluriel(count, &format!("carte Énergie {color}")),
+            s(count)
+        ),
+        DiscardAllEnergy => write!(f, "Défaussez toutes les énergies attachées à cette créature."),
+        DiscardDefenderEnergy => write!(
+            f,
+            "Défaussez 1 carte Énergie attachée à la créature en défense."
+        ),
+        SwitchDefender {
+            chooser_is_attacker: true,
+        } => write!(
+            f,
+            "Échangez la créature en défense contre 1 des créatures du Banc adverse, de votre choix."
+        ),
+        SwitchDefender {
+            chooser_is_attacker: false,
+        } => write!(
+            f,
+            "Votre adversaire échange la créature en défense contre 1 des créatures de son Banc."
+        ),
+        SwitchSelf => write!(
+            f,
+            "Échangez votre créature Active contre 1 des créatures de votre Banc."
+        ),
+        Heal(n) => write!(f, "Soigne {n} dégâts de votre créature Active."),
+        HealAll(n) => write!(f, "Soigne {n} dégâts de chacune de vos créatures."),
+        AttachFromDeck(Color::Colorless) => write!(
+            f,
+            "Cherchez une carte Énergie de base dans votre deck et attachez-la à cette créature, puis mélangez votre deck."
+        ),
+        AttachFromDeck(c) => write!(
+            f,
+            "Cherchez une carte Énergie {c} dans votre deck et attachez-la à cette créature, puis mélangez votre deck."
+        ),
+        Devolve => write!(
+            f,
+            "La créature en défense régresse à son stade précédent ; la carte retirée retourne dans la main de son propriétaire."
+        ),
+        StageSkip => write!(
+            f,
+            "Posez une carte Stade 2 de votre main sur la créature de Base correspondante en jeu."
+        ),
+        Draw(n) => write!(f, "Piochez {}.", pluriel(n, "carte")),
+        DiscardHand => write!(f, "Défaussez votre main."),
+        Search(find) => write!(
+            f,
+            "Cherchez {find} dans votre deck, ajoutez-la à votre main, puis mélangez votre deck."
+        ),
+        Recover(find) => write!(
+            f,
+            "Prenez {find} dans votre défausse et ajoutez-la à votre main."
+        ),
+        AttachPlus10 => write!(
+            f,
+            "À attacher à votre créature Active : ses attaques infligent 10 dégâts de plus pendant ce tour."
+        ),
+        AttachMinus20 => write!(
+            f,
+            "À attacher à 1 de vos créatures : elle subit 20 dégâts de moins jusqu'à la fin du prochain tour de votre adversaire."
+        ),
+        OnceWhileInPlay => write!(
+            f,
+            "Utilisable une seule fois tant que cette créature est en jeu."
+        ),
+        CopyAttack => write!(
+            f,
+            "Cette attaque copie 1 des attaques de la créature en défense."
+        ),
+        SetOwnColor(c) => write!(f, "Cette créature devient une créature {c}."),
+    }
+}
+
+/// [`PromptKind`]'s heading in French.
+fn prompt_fr(k: &PromptKind, f: &mut fmt::Formatter) -> fmt::Result {
+    use Effect::*;
+    match k {
+        PromptKind::ChooseActive => write!(f, "Choisissez votre créature Active"),
+        PromptKind::ChooseBench => {
+            write!(
+                f,
+                "Placez des créatures de Base sur votre Banc, puis Terminé"
+            )
+        }
+        PromptKind::MainPhase => write!(f, "Votre tour"),
+        PromptKind::ChooseRetreatEnergy { cost, .. } => write!(
+            f,
+            "Choisissez l'énergie à défausser pour battre en retraite (coût {cost})"
+        ),
+        PromptKind::ChooseRetreatTarget { .. } => {
+            write!(f, "Choisissez la créature de Banc à faire entrer")
+        }
+        PromptKind::ChoosePrize { count } => {
+            write!(f, "Prenez une Récompense ({count} à prendre)")
+        }
+        PromptKind::ChooseReplacement => {
+            write!(f, "Votre Active est K.O. : choisissez sa remplaçante")
+        }
+        PromptKind::Choose { effect, .. } => match *effect {
+            DisableAttack => write!(f, "Choisissez l'attaque à bloquer"),
+            CopyAttack => write!(f, "Choisissez l'attaque à copier"),
+            DiscardDefenderEnergy => write!(f, "Choisissez l'énergie à défausser"),
+            Snipe(n) => write!(f, "Choisissez la créature qui subira {n} dégâts"),
+            SwitchDefender {
+                chooser_is_attacker: true,
+            } => write!(f, "Choisissez la créature adverse à faire entrer"),
+            SwitchDefender {
+                chooser_is_attacker: false,
+            } => write!(f, "Votre Active est échangée : choisissez sa remplaçante"),
+            SwitchSelf => write!(f, "Choisissez la créature de Banc à faire entrer"),
+            Search(find) => write!(f, "Choisissez {find} à prendre dans votre deck"),
+            Recover(find) => write!(f, "Choisissez {find} à prendre dans votre défausse"),
+            AttachMinus20 => write!(f, "Choisissez la créature qui recevra cette carte"),
+            AttachFromDeck(_) => write!(f, "Choisissez l'énergie de votre deck à attacher"),
+            StageSkip => write!(
+                f,
+                "Choisissez la carte Stade 2 et la créature de Base qui la reçoit"
+            ),
+            other => write!(f, "Choisissez : {other}"),
+        },
+    }
+}
+
 /// The instruction shown to the player being asked.
 impl fmt::Display for PromptKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if fr() {
+            return prompt_fr(self, f);
+        }
         use Effect::*;
         match self {
             PromptKind::ChooseActive => write!(f, "Choose your Active creature"),
@@ -294,14 +601,14 @@ impl fmt::Display for PromptKind {
 }
 
 fn name(id: CardId) -> &'static str {
-    card(id).name
+    card(id).label()
 }
 
 fn slot_label(slot: usize) -> String {
     if slot == 0 {
         "Active".to_string()
     } else {
-        format!("Bench {slot}")
+        tr(format!("Bench {slot}"), format!("Banc {slot}"))
     }
 }
 
@@ -327,38 +634,56 @@ impl View<'_> {
         let kind = self.prompt.map(|p| &p.kind);
         let active = self.sides[me].active;
         match action {
-            Action::PlayBasic(h) if kind == Some(&PromptKind::ChooseActive) => {
-                format!("Make {} your Active", self.hand_name(h))
-            }
-            Action::PlayBasic(h) => format!("Put {} on your Bench", self.hand_name(h)),
+            Action::PlayBasic(h) if kind == Some(&PromptKind::ChooseActive) => tr(
+                format!("Make {} your Active", self.hand_name(h)),
+                format!("Jouer {} en Active", self.hand_name(h)),
+            ),
+            Action::PlayBasic(h) => tr(
+                format!("Put {} on your Bench", self.hand_name(h)),
+                format!("Placer {} sur votre Banc", self.hand_name(h)),
+            ),
             Action::Evolve { hand, slot } => format!(
-                "Evolve {} into {}",
+                "{} {} {} {}",
+                tr("Evolve", "Faire évoluer"),
                 self.creature_name(me, slot),
+                tr("into", "en"),
                 self.hand_name(hand)
             ),
             Action::AttachEnergy { hand, slot } => format!(
-                "Attach {} to {} ({})",
+                "{} {} {} {} ({})",
+                tr("Attach", "Attacher"),
                 self.hand_name(hand),
+                tr("to", "à"),
                 self.creature_name(me, slot),
                 slot_label(slot)
             ),
-            Action::PlayTrainer(h) => format!("Play {}", self.hand_name(h)),
-            Action::Retreat => format!(
-                "Retreat {} (cost {})",
-                self.creature_name(me, 0),
-                self.sides[me].retreat_cost
-            ),
+            Action::PlayTrainer(h) => format!("{} {}", tr("Play", "Jouer"), self.hand_name(h)),
+            Action::Retreat => {
+                let cost = self.sides[me].retreat_cost;
+                tr(
+                    format!("Retreat {} (cost {cost})", self.creature_name(me, 0)),
+                    format!("Battre en retraite (coût {cost})"),
+                )
+            }
             Action::DiscardEnergy(i) => {
                 let e = active.and_then(|a| a.energy.get(i));
-                format!("Discard {}", e.map_or("?", |&id| name(id)))
+                format!(
+                    "{} {}",
+                    tr("Discard", "Défausser"),
+                    e.map_or("?", |&id| name(id))
+                )
             }
-            Action::Promote(slot) => format!("Switch in {}", self.creature_name(me, slot)),
-            Action::Cancel => "Cancel".to_string(),
+            Action::Promote(slot) => format!(
+                "{} {}",
+                tr("Switch in", "Faire entrer"),
+                self.creature_name(me, slot)
+            ),
+            Action::Cancel => tr("Cancel", "Annuler").to_string(),
             Action::Attack(i) => {
                 let a = active.and_then(|a| a.creature().attacks.get(i));
                 match a {
-                    Some(a) if a.damage > 0 => format!("{} ({})", a.name, a.damage),
-                    Some(a) => a.name.to_string(),
+                    Some(a) if a.damage > 0 => format!("{} ({})", a.label(), a.damage),
+                    Some(a) => a.label().to_string(),
                     None => "?".to_string(),
                 }
             }
@@ -371,8 +696,9 @@ impl View<'_> {
                 };
                 let power = c.and_then(|c| c.creature().power.as_ref());
                 format!(
-                    "Use {} ({})",
-                    power.map_or("?", |p| p.name),
+                    "{} {} ({})",
+                    tr("Use", "Utiliser"),
+                    power.map_or("?", |p| p.label()),
                     self.creature_name(me, slot)
                 )
             }
@@ -382,9 +708,13 @@ impl View<'_> {
                     .map_or("?".to_string(), |&c| self.describe_choice(c)),
                 _ => "?".to_string(),
             },
-            Action::TakePrize(i) => format!("Take prize {}", i + 1),
-            Action::Done if kind == Some(&PromptKind::MainPhase) => "End turn".to_string(),
-            Action::Done => "Done".to_string(),
+            Action::TakePrize(i) => {
+                format!("{} {}", tr("Take prize", "Prendre la Récompense"), i + 1)
+            }
+            Action::Done if kind == Some(&PromptKind::MainPhase) => {
+                tr("End turn", "Terminer le tour").to_string()
+            }
+            Action::Done => tr("Done", "Terminé").to_string(),
         }
     }
 
@@ -394,23 +724,26 @@ impl View<'_> {
         let defender = self.sides[1 - me].active;
         match choice {
             Choice::Slot { player, slot } => {
-                let whose = if player == me { "your" } else { "opponent's" };
-                format!(
-                    "{} ({whose} {})",
-                    self.creature_name(player, slot),
-                    slot_label(slot)
-                )
+                let at = match (player == me, fr()) {
+                    (true, false) => format!("your {}", slot_label(slot)),
+                    (false, false) => format!("opponent's {}", slot_label(slot)),
+                    (true, true) => format!("votre {}", slot_label(slot)),
+                    (false, true) if slot == 0 => "Active adverse".to_string(),
+                    (false, true) => format!("Banc adverse {slot}"),
+                };
+                format!("{} ({at})", self.creature_name(player, slot))
             }
             Choice::Energy(i) => defender
                 .and_then(|a| a.energy.get(i))
                 .map_or("?".to_string(), |&id| name(id).to_string()),
             Choice::Attack(i) => defender
                 .and_then(|a| a.creature().attacks.get(i))
-                .map_or("?".to_string(), |a| a.name.to_string()),
+                .map_or("?".to_string(), |a| a.label().to_string()),
             Choice::Card(id) => name(id).to_string(),
             Choice::Evolve { hand, slot } => format!(
-                "{} onto {}",
+                "{} {} {}",
                 self.hand_name(hand),
+                tr("onto", "sur"),
                 self.creature_name(me, slot)
             ),
         }
@@ -433,6 +766,9 @@ impl Event {
 
     /// One log line, worded for `viewer` and hiding what they can't see.
     pub fn describe(&self, viewer: usize) -> String {
+        if fr() {
+            return self.describe_fr(viewer);
+        }
         let who = |p: usize| if p == viewer { "You" } else { "Opponent" };
         let whose = |p: usize| if p == viewer { "Your" } else { "Opponent's" };
         let their = |p: usize| if p == viewer { "your" } else { "their" };
@@ -530,7 +866,7 @@ impl Event {
                 let attack = card(*creature)
                     .creature()
                     .and_then(|c| c.attacks.get(*attack))
-                    .map_or("an attack", |a| a.name);
+                    .map_or("an attack", |a| a.label());
                 format!("{} {} used {attack}", whose(*player), name(*creature))
             }
             Event::AttackFailed { player } => format!("{} attack failed", whose(*player)),
@@ -543,7 +879,7 @@ impl Event {
                 let power = card(*creature)
                     .creature()
                     .and_then(|c| c.power.as_ref())
-                    .map_or("its Power", |p| p.name);
+                    .map_or("its Power", |p| p.label());
                 format!("{} {} used {power}", whose(*player), name(*creature))
             }
             Event::ConditionApplied { player, status } => {
@@ -705,6 +1041,364 @@ impl Event {
             Event::GameOver { .. } => "Opponent wins".to_string(),
         }
     }
+
+    /// [`Event::describe`] in French: whole sentences per side, since French
+    /// conjugates ("Vous piochez" / "L'adversaire pioche").
+    fn describe_fr(&self, viewer: usize) -> String {
+        // Your thing or theirs: `pick(p, mine, theirs)`.
+        let pick = |p: usize, a: String, b: String| if p == viewer { a } else { b };
+        // "Votre Braisillon" / "Braisillon adverse", starting a sentence.
+        let crea = |p: usize, id: CardId| {
+            if p == viewer {
+                format!("Votre {}", name(id))
+            } else {
+                format!("{} adverse", name(id))
+            }
+        };
+        // The Active, mid-sentence.
+        let active = |p: usize| {
+            if p == viewer {
+                "votre Active"
+            } else {
+                "l'Active adverse"
+            }
+        };
+        let hidden = self.is_private(viewer);
+        match self {
+            Event::Shuffled { player } => pick(
+                *player,
+                "Vous mélangez votre deck".into(),
+                "L'adversaire mélange son deck".into(),
+            ),
+            Event::CardDrawn { player, .. } if hidden => pick(
+                *player,
+                "Vous piochez une carte".into(),
+                "L'adversaire pioche une carte".into(),
+            ),
+            Event::CardDrawn { player, card } => pick(
+                *player,
+                format!("Vous piochez {}", name(*card)),
+                format!("L'adversaire pioche {}", name(*card)),
+            ),
+            Event::Mulligan { player, hand } => {
+                let cards: Vec<_> = hand.iter().map(|&id| name(id)).collect();
+                let who = pick(*player, "Vous n'avez".into(), "L'adversaire n'a".into());
+                format!(
+                    "{who} aucune créature de Base : nouvelle main (révélée : {})",
+                    cards.join(", ")
+                )
+            }
+            Event::SetupRestarted => {
+                "Aucun joueur n'a de créature de Base : la mise en place recommence".to_string()
+            }
+            Event::Placed {
+                player, slot, card, ..
+            } => {
+                let c = name(*card);
+                match (*player == viewer, *slot == 0) {
+                    (true, true) => format!("Vous placez {c} en Active"),
+                    (true, false) => format!("Vous placez {c} sur votre Banc"),
+                    (false, true) => format!("L'adversaire place {c} en Active"),
+                    (false, false) => format!("L'adversaire place {c} sur son Banc"),
+                }
+            }
+            Event::PrizesSet { player, count } => {
+                let n = pluriel(*count, "Récompense");
+                pick(
+                    *player,
+                    format!("Vous mettez de côté {n}"),
+                    format!("L'adversaire met de côté {n}"),
+                )
+            }
+            Event::CoinFlip { player, heads } => {
+                let side = if *heads { "face" } else { "pile" };
+                pick(
+                    *player,
+                    format!("Vous lancez une pièce : {side}"),
+                    format!("L'adversaire lance une pièce : {side}"),
+                )
+            }
+            Event::FirstPlayer { player } => pick(
+                *player,
+                "Vous commencez".into(),
+                "L'adversaire commence".into(),
+            ),
+            Event::TurnStarted { player, turn } => pick(
+                *player,
+                format!("Tour {turn} : à vous"),
+                format!("Tour {turn} : à l'adversaire"),
+            ),
+            Event::EnergyAttached {
+                player,
+                creature,
+                card,
+                ..
+            }
+            | Event::TrainerAttached {
+                player,
+                creature,
+                card,
+                ..
+            } => {
+                let (c, to) = (name(*card), name(*creature));
+                pick(
+                    *player,
+                    format!("Vous attachez {c} à {to}"),
+                    format!("L'adversaire attache {c} à {to}"),
+                )
+            }
+            Event::Evolved {
+                player, slot, card, ..
+            } => {
+                let who = match (*player == viewer, *slot) {
+                    (true, 0) => "Votre Active".to_string(),
+                    (false, 0) => "L'Active adverse".to_string(),
+                    (true, s) => format!("Votre créature en Banc {s}"),
+                    (false, s) => format!("La créature adverse en Banc {s}"),
+                };
+                format!("{who} évolue en {}", name(*card))
+            }
+            Event::TrainerPlayed { player, card } => pick(
+                *player,
+                format!("Vous jouez {}", name(*card)),
+                format!("L'adversaire joue {}", name(*card)),
+            ),
+            Event::EnergyDiscarded {
+                player,
+                creature,
+                card,
+                ..
+            } => format!("{} défausse {}", crea(*player, *creature), name(*card)),
+            Event::Retreated {
+                player, creature, ..
+            } => {
+                let c = name(*creature);
+                pick(
+                    *player,
+                    format!("Vous battez en retraite : {c} passe en Active"),
+                    format!("L'adversaire bat en retraite : {c} passe en Active"),
+                )
+            }
+            Event::RetreatFailed { player } => pick(
+                *player,
+                "Votre retraite échoue (confusion)".into(),
+                "La retraite adverse échoue (confusion)".into(),
+            ),
+            Event::AttackUsed {
+                player,
+                attack,
+                creature,
+                ..
+            } => {
+                let attack = card(*creature)
+                    .creature()
+                    .and_then(|c| c.attacks.get(*attack))
+                    .map_or("une attaque", |a| a.label());
+                format!("{} utilise {attack}", crea(*player, *creature))
+            }
+            Event::AttackFailed { player } => pick(
+                *player,
+                "Votre attaque échoue".into(),
+                "L'attaque adverse échoue".into(),
+            ),
+            Event::AttackNegated { player } => pick(
+                *player,
+                "Votre Active est protégée de l'attaque".into(),
+                "L'Active adverse est protégée de l'attaque".into(),
+            ),
+            Event::PowerUsed {
+                player, creature, ..
+            } => {
+                let power = card(*creature)
+                    .creature()
+                    .and_then(|c| c.power.as_ref())
+                    .map_or("son Pouvoir", |p| p.label());
+                format!("{} utilise {power}", crea(*player, *creature))
+            }
+            Event::ConditionApplied { player, status } => pick(
+                *player,
+                format!("Votre Active est maintenant {status}"),
+                format!("L'Active adverse est maintenant {status}"),
+            ),
+            Event::ConditionRemoved { player, status } => pick(
+                *player,
+                format!("Votre Active n'est plus {status}"),
+                format!("L'Active adverse n'est plus {status}"),
+            ),
+            Event::EffectApplied { player, effect } => {
+                let p = *player;
+                let next = |q: usize| {
+                    pick(
+                        q,
+                        "Pendant votre prochain tour".into(),
+                        "Pendant son prochain tour".into(),
+                    )
+                };
+                match *effect {
+                    Effect::Protect { shield, .. } => format!(
+                        "{}, {}",
+                        pick(
+                            1 - p,
+                            "Pendant votre prochain tour".into(),
+                            "Pendant le prochain tour adverse".into(),
+                        ),
+                        shield.to_string().replace("cette créature", active(p))
+                    ),
+                    Effect::Place { placed, .. } => format!(
+                        "{}, {}",
+                        next(p),
+                        placed
+                            .to_string()
+                            .replace("la créature en défense", active(p))
+                    ),
+                    Effect::DisableAttack => format!(
+                        "{}, une des attaques de {} est bloquée",
+                        next(p),
+                        active(p)
+                    ),
+                    Effect::TrainerLock => pick(
+                        p,
+                        "Vous ne pouvez pas jouer de cartes Dresseur pendant votre prochain tour"
+                            .into(),
+                        "L'adversaire ne peut pas jouer de cartes Dresseur pendant son prochain tour"
+                            .into(),
+                    ),
+                    Effect::DefenderWeakness(c) => {
+                        format!("La Faiblesse de {} est maintenant {c}", active(p))
+                    }
+                    Effect::OwnResistance(c) => {
+                        format!("La Résistance de {} est maintenant {c}", active(p))
+                    }
+                    Effect::DoubleNextAttack => format!(
+                        "La prochaine attaque de {} inflige le double de dégâts",
+                        active(p)
+                    ),
+                    Effect::SetOwnColor(c) => pick(
+                        p,
+                        format!("Votre Active devient une créature {c}"),
+                        format!("L'Active adverse devient une créature {c}"),
+                    ),
+                    _ => pick(
+                        p,
+                        format!("De votre côté : {effect}"),
+                        format!("Du côté adverse : {effect}"),
+                    ),
+                }
+            }
+            Event::Healed {
+                player,
+                creature,
+                amount,
+                ..
+            } => format!("{} récupère {amount} PV", crea(*player, *creature)),
+            Event::Switched {
+                player, creature, ..
+            }
+            | Event::Promoted {
+                player, creature, ..
+            } => format!("{} passe en Active", crea(*player, *creature)),
+            Event::Devolved {
+                player,
+                creature,
+                card,
+                ..
+            } => format!("{} régresse en {}", crea(*player, *card), name(*creature)),
+            Event::TrainerDiscarded {
+                player,
+                creature,
+                card,
+                ..
+            } => {
+                let on = if *player == viewer {
+                    format!("votre {}", name(*creature))
+                } else {
+                    format!("{} adverse", name(*creature))
+                };
+                format!("{} part à la défausse ({on})", name(*card))
+            }
+            Event::HandDiscarded { player, cards } => {
+                let n = pluriel(cards.len() as u32, "carte");
+                pick(
+                    *player,
+                    format!("Vous défaussez votre main ({n})"),
+                    format!("L'adversaire défausse sa main ({n})"),
+                )
+            }
+            Event::CardToHand { player, .. } if hidden => pick(
+                *player,
+                "Vous prenez une carte dans votre deck".into(),
+                "L'adversaire prend une carte dans son deck".into(),
+            ),
+            Event::CardToHand {
+                player,
+                card,
+                from_deck,
+            } => {
+                let c = name(*card);
+                match (*player == viewer, *from_deck) {
+                    (true, true) => format!("Vous prenez {c} dans votre deck"),
+                    (true, false) => format!("Vous prenez {c} dans votre défausse"),
+                    (false, true) => format!("L'adversaire prend {c} dans son deck"),
+                    (false, false) => format!("L'adversaire prend {c} dans sa défausse"),
+                }
+            }
+            Event::Damage {
+                player,
+                creature,
+                amount,
+                weakness,
+                resistance,
+                ..
+            } => {
+                let who = crea(*player, *creature);
+                let mut s = if *amount == 0 {
+                    format!("{who} ne subit aucun dégât")
+                } else {
+                    format!("{who} subit {amount} dégâts")
+                };
+                if *weakness {
+                    s.push_str(" (Faiblesse)");
+                }
+                if *resistance {
+                    s.push_str(" (Résistance)");
+                }
+                s
+            }
+            Event::KnockedOut { player, card, .. } => {
+                format!("{} est K.O.", crea(*player, *card))
+            }
+            Event::PrizeTaken { player, .. } if hidden => pick(
+                *player,
+                "Vous prenez une Récompense".into(),
+                "L'adversaire prend une Récompense".into(),
+            ),
+            Event::PrizeTaken { player, card, .. } => {
+                let c = name(*card);
+                pick(
+                    *player,
+                    format!("Vous prenez une Récompense : {c}"),
+                    format!("L'adversaire prend une Récompense : {c}"),
+                )
+            }
+            Event::TurnEnded { player } => pick(
+                *player,
+                "Fin de votre tour".into(),
+                "Fin du tour adverse".into(),
+            ),
+            Event::BetweenTurns => "Entre deux tours".to_string(),
+            Event::DeckOut { player } => pick(
+                *player,
+                "Vous ne pouvez pas piocher".into(),
+                "L'adversaire ne peut pas piocher".into(),
+            ),
+            Event::SuddenDeath => {
+                "Mort subite : le duel reprend avec 1 Récompense chacun".to_string()
+            }
+            Event::GameOver { winner } => {
+                pick(*winner, "Vous gagnez !".into(), "L'adversaire gagne".into())
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -785,6 +1479,70 @@ mod tests {
         assert_eq!(
             lock.describe(0),
             "You can't play trainer cards during your next turn"
+        );
+    }
+
+    /// French reads as French sentences per side, with French plurals and
+    /// the log's Active put in place of the rules text's creature.
+    #[test]
+    fn french_text_reads_as_french() {
+        use crate::lang::{set_lang, Lang};
+        set_lang(Lang::Fr);
+        let mut g = main_phase(0);
+        set_hand(&mut g, 0, &[GRASS_E]);
+        let v = g.view(0);
+        let attach = v.describe_action(Action::AttachEnergy { hand: 0, slot: 0 });
+        let done = v.describe_action(Action::Done);
+        let title = v.prompt.unwrap().kind.to_string();
+        let draw = Event::CardDrawn {
+            player: 1,
+            card: MOSSLING,
+        };
+        let jaw = Event::EffectApplied {
+            player: 0,
+            effect: Effect::Place {
+                placed: Placed::CantRetreat,
+                coin: false,
+            },
+        };
+        let protect = Event::EffectApplied {
+            player: 1,
+            effect: Effect::Protect {
+                shield: Shield::PreventDamage,
+                coin: true,
+            },
+        };
+        let got = [
+            Effect::Draw(1).to_string(),
+            Effect::Draw(2).to_string(),
+            Effect::Inflict {
+                status: Status::Paralyzed,
+                coin: true,
+            }
+            .to_string(),
+            draw.describe(0),
+            jaw.describe(0),
+            jaw.describe(1),
+            protect.describe(0),
+            attach,
+            done,
+            title,
+        ];
+        set_lang(Lang::En);
+        assert_eq!(
+            got,
+            [
+                "Piochez 1 carte.",
+                "Piochez 2 cartes.",
+                "Lancez une pièce. Si c'est face, la créature en défense est maintenant Paralysée.",
+                "L'adversaire pioche une carte",
+                "Pendant votre prochain tour, votre Active ne peut pas battre en retraite",
+                "Pendant son prochain tour, l'Active adverse ne peut pas battre en retraite",
+                "Pendant votre prochain tour, l'Active adverse ne subit aucun dégât des attaques",
+                "Attacher Grass Energy à Mossling (Active)",
+                "Terminer le tour",
+                "Votre tour",
+            ]
         );
     }
 

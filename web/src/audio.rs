@@ -3,7 +3,7 @@
 //! volume controls.
 
 use leptos::prelude::*;
-use sixfold_engine::{Event, Game, Status};
+use sixfold_engine::{tr, Event, Game, Status};
 use wasm_bindgen::prelude::*;
 
 use crate::ctl::HUMAN;
@@ -73,7 +73,7 @@ pub fn duel_state(g: &Game) {
 pub fn MuteToggle() -> impl IntoView {
     let muted = RwSignal::new(get_pref("muted") > 0.0);
     view! {
-        <button type="button" class="btn ghost mute" aria-label="Mute sound"
+        <button type="button" class="btn ghost mute" aria-label=tr("Mute sound", "Couper le son")
             aria-pressed=move || muted.get().to_string()
             on:click=move |_| {
                 let m = !muted.get_untracked();
@@ -103,20 +103,20 @@ pub fn AudioSettings() -> impl IntoView {
                 <span>{label}</span>
                 <input type="range" name=key min="0" max="100" step="5"
                     prop:value=move || value.get()
-                    aria-valuetext=move || format!("{}%", value.get())
+                    aria-valuetext=move || format!("{}{}", value.get(), tr("%", " %"))
                     on:input=move |e| {
                         let v = event_target_value(&e).parse::<f64>().unwrap_or(0.0);
                         set_pref(key, v / 100.0);
                         value.set(v);
                     }
                     on:change=move |_| sfx(if key == "music" { "click" } else { "prize" }, 0.0) />
-                <span class="vol-pct" aria-hidden="true">{move || format!("{}%", value.get())}</span>
+                <span class="vol-pct" aria-hidden="true">{move || format!("{}{}", value.get(), tr("%", " %"))}</span>
             </label>
         }
     };
     view! {
         <fieldset class="audio-settings">
-            <legend>"Sound"</legend>
+            <legend>{tr("Sound", "Son")}</legend>
             <label class="vol-mute">
                 <input type="checkbox" name="muted" prop:checked=move || muted.get()
                     on:change=move |e| {
@@ -124,11 +124,11 @@ pub fn AudioSettings() -> impl IntoView {
                         set_pref("muted", f64::from(u8::from(m)));
                         muted.set(m);
                     } />
-                "Mute all sound"
+                {tr("Mute all sound", "Couper tout le son")}
             </label>
-            {slider("master", "Master")}
-            {slider("music", "Music")}
-            {slider("sfx", "Effects")}
+            {slider("master", tr("Master", "Général"))}
+            {slider("music", tr("Music", "Musique"))}
+            {slider("sfx", tr("Effects", "Effets"))}
         </fieldset>
     }
 }
