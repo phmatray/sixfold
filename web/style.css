@@ -206,7 +206,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 /* Energy is a symbol, not a scene: full colour. */
 .k-energy .card-art { background: radial-gradient(circle at 50% 40%, var(--tint), var(--c) 62%, var(--c2)); }
 .card-art img, .card-art svg { display: block; width: 100%; height: 100%; }
-.card-art img { object-fit: cover; object-position: 50% 48%; }
+.card-art img { object-fit: cover; object-position: 50% 50%; }
 .card-body, .card-foot { display: none; }
 
 /* Foil: a fixed iridescent wash on the picture, and a sheen that sweeps
@@ -240,7 +240,8 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 
 @container (min-width: 140px) {
   .face {
-    grid-template: "stage" auto "head" auto "art" minmax(0, 1fr) "body" auto "foot" auto / minmax(0, 1fr);
+    /* The picture keeps the art's own 10:7, so nothing is cropped; the text takes what is left. */
+    grid-template: "stage" auto "head" auto "art" auto "body" minmax(0, 1fr) "foot" auto / minmax(0, 1fr);
     padding: 2.6cqw 3.6cqw 2.4cqw;
     row-gap: 1.6cqw;
   }
@@ -252,14 +253,14 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   .k-creature .card-hp { position: static; padding: 0; background: none; font-size: 1em; }
   .k-creature .card-hp small { display: inline; }
   .card-type { display: block; }
-  .card-art { border-radius: 1.4cqw; box-shadow: inset 0 0 0 1px rgba(29, 34, 48, 0.3), 0 0 0 0.7cqw color-mix(in srgb, var(--c) 55%, #d8cfbd); margin: 0.7cqw; }
+  .card-art { aspect-ratio: 10 / 7; border-radius: 1.4cqw; box-shadow: inset 0 0 0 1px rgba(29, 34, 48, 0.3), 0 0 0 0.7cqw color-mix(in srgb, var(--c) 55%, #d8cfbd); margin: 0.7cqw; }
   .card-body { display: flex; flex-direction: column; justify-content: center; min-height: 0; font-size: 6.6cqw; }
   .card-attack {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 2cqw;
-    padding: 1.1cqw 0;
+    padding: 0.7cqw 0;
   }
   .card-attack + .card-attack, .card-power + .card-attack { border-top: 1px solid rgba(29, 34, 48, 0.14); }
   .card-attack .cost { gap: 0.6cqw; font-size: 5.4cqw; }
@@ -276,13 +277,13 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
     text-wrap: balance;
   }
   .card-dmg { font-family: var(--display); font-weight: 800; font-size: 1.32em; font-variant-numeric: tabular-nums; }
-  .card-power { display: flex; align-items: baseline; gap: 1.6cqw; padding: 0.8cqw 0; color: #7a2412; }
+  .card-power { display: flex; align-items: baseline; gap: 1.6cqw; padding: 0.5cqw 0; color: #7a2412; }
   .card-power .tag { flex: none; padding: 0.1em 0.45em; border-radius: 0.5em; background: #8a2512; color: #fff6ea; font-size: 0.78em; font-weight: 700; }
   .card-power .card-move { -webkit-line-clamp: 1; }
   .card-text {
     margin: 0;
     font-size: 6.2cqw;
-    line-height: 1.28;
+    line-height: 1.2;
     text-wrap: pretty;
     overflow: hidden;
     display: -webkit-box;
