@@ -458,7 +458,11 @@ export function mount(el, controls, cb, start, edit = false) {
   // Resume at a saved "map,x,z,facing"; a map that no longer loads falls back to the overworld.
   const [sm, sx, sz, sf] = (start ?? "").split(",");
   const at = sm && DIR[sf] && Number.isInteger(+sx) && Number.isInteger(+sz) ? { x: +sx, z: +sz, facing: sf } : null;
+  // The first build counts as a warp: travel or an edge warp while its materials compile would dispose them
+  // mid-compile (three's compileAsync then never settles and the world stays on "Loading").
+  warping = true;
   (at ? enter(sm, at).catch(() => enter("overworld")) : enter("overworld"))
+    .finally(() => (warping = false))
     .then(() => {
       if (!alive) return;
       clock.getDelta();

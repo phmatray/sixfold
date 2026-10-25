@@ -4,66 +4,97 @@
   "region": "dream",
   "kind": "town",
   "music": "dream",
-  "width": 34,
-  "height": 28,
+  "width": 52,
+  "height": 36,
   "tiles": [
-    "..........pp.............~~~rr~~~~",
-    "..........pp.............~~~rr~~~~",
-    "..........pp..............~~rr~~~~",
-    "..........pp...............~rr~~~~",
-    "....p.....pprrrrrrrr..p.....rr~~~~",
-    "....ppppppprrrrrrrrrrrpppppppp.~~~",
-    "...p.......rrrrrrrrrrrpppppppp....",
-    "...p.........rrrrrrr........pp....",
-    "...p............pp..........pp....",
-    "...p.......~~~~~HH~~~.......pp....",
-    "...p....~~~~~~~~HH~~~~~~....pp....",
-    "...p...~~~~~~~~~~~~~~~~~~~..pp....",
-    "...p..~~~~~~~~~~~~~~~~~~~~~.pp....",
-    "...p..~~~~~~~~~~~~~~~~~~~~~.pp....",
-    "...pp.~ss~~~~~~~~~~~~~~~~~~.pp....",
-    "...pp~~sss~~~~~~~~~~~~~~~~~~pp....",
-    "....~~~sss~~~~~~~~H~~~~~~~~~pp....",
-    "....~~~~s~~~~~~~~~H~~~~~~~~~pp....",
-    ".....~~~~~~~~~~~~~~~~~~~~~~~pp....",
-    "......~~~~~~~~~~~~~~~~~~~~~.pp....",
-    ".......~~~~~~~~~~~~~~~~~~~..pp....",
-    "........~~~~~~~~~~~~~~~~~~...pHHH.",
-    ".........~~~~~~~~~~~~~~.~~~~~~~~~~",
-    "...........~~~~~~~~~....~~~~~~~~~~",
-    "................pp..........pp..~~",
-    "................pppppppppppppp....",
-    "................pppppppppppp......",
-    "................pp................"
+    "..............ppp...................~~~~~~rrr~~~~~~~",
+    "..............ppp...................~~~~~~rrr~~~~~~~",
+    "..............ppp...................~~~~~~rrr~~~~~~~",
+    "..............ppp...................~~~~~~rrr~~~~~~~",
+    "..............ppp.........................ppp..~~~~~",
+    "..............ppp.........................ppp..~~~~~",
+    "............rrrrrrrr......................ppp..~~~~~",
+    "............rrrrrrrr......................ppp..~~~~~",
+    "............rrrrrrrr......................ppp..~~~~~",
+    "..ppppppppppppppppppppppppppppppppppppppppppppp~~~~~",
+    "..ppppppppppppppppppppppppppppppppppppppppppppp~~~~~",
+    "..p...p................===........==.....pp....~~~~~",
+    "..p...p........~~~~~~~~===~~~~~...==.....pp....~~~~~",
+    "..p...p...~~~~~~~~~~~~~===~~~~~~..==.....pp....~~~~~",
+    "..p......~~~~~~~~~~~~~~===~~~~~~~~==~....pp....~~~~~",
+    "..p.....~~~~~~~~~~~~~~~~~~~~~~~~~~==~~~..pp....~~~~~",
+    "..p....~~~~~~~~~~~~~~~~~~~~~~~~~~~==~~~~.pp....~~~~~",
+    "..p...~~~~~~~~~~~~~~~~~~~~~~~~~=====~~~~~pp....~~~~~",
+    "..p...~~~ssss~~~~~~~~~~~~~~~~~~~~~~~~~~~~pp....~~~~~",
+    "..p....~~ssss~~~~~~~~~~~~~~~~~~~~~~~~~~~.pp....~~~~~",
+    "..p....~~ssss~~~~~~~~~~~~~~~~~~~~~~~~~~~.pp....~~~~~",
+    "..p...~~~ssss~~~~~~~~~~~~~H~~~~~~~~~~~===pp....~~~~~",
+    "..p...~~~~~~~~~~~~~~~~~~~~H~~~~~~~~~~~~~~pp....~~~~~",
+    "..p...~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~pp....~~~~~",
+    ".......~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.pp....~~~~~",
+    "........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~...pp....~~~~~",
+    ".........~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "..........~~~~~~~~~~~~~~~~~~~~~~....~~~~~~~~~~~~~~~~",
+    "...............~~~~~~~~~~~~~~~~................~~~~~",
+    "........................pppppppppppppppppppppp.~~~~~",
+    "........................pppppppppppppppppppHHHH~~~~~",
+    "........................ppp................~~~~~~~~~",
+    "........................ppp................~~~~~~~~~",
+    "........................ppp................~~~~~~~~~",
+    "........................ppp................~~~~~~~~~",
+    "........................ppp................~~~~~~~~~"
   ],
   "props": [
     {
-      "asset": "lake_house",
-      "x": 2,
-      "z": 1,
+      "asset": "signpost",
+      "x": 18,
+      "z": 3,
       "rot": 0
     },
     {
-      "asset": "inn_sign",
-      "x": 6,
+      "asset": "signpost",
+      "x": 41,
       "z": 4,
       "rot": 0
     },
     {
+      "asset": "signpost",
+      "x": 22,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 39,
+      "z": 12,
+      "rot": 0
+    },
+    {
       "asset": "lake_house",
-      "x": 19,
-      "z": 9,
-      "rot": 180,
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "inn_sign",
+      "x": 8,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "workshop",
+      "x": 21,
+      "z": 4,
+      "rot": 0,
       "recolor": {
-        "sx_dr_roof": "#c46a8a",
-        "sx_dr_roof_dk": "#a35472",
-        "sx_dr_roof_lt": "#d88aa4"
+        "sx_slate": "#6a5aa0",
+        "sx_slate_dk": "#54487f"
       }
     },
     {
       "asset": "lake_house",
-      "x": 20,
-      "z": 0,
+      "x": 27,
+      "z": 3,
       "rot": 0,
       "recolor": {
         "sx_dr_roof": "#5a6fb0",
@@ -72,124 +103,230 @@
       }
     },
     {
-      "asset": "workshop",
-      "x": 13,
-      "z": 0,
-      "rot": 0,
-      "recolor": {
-        "sx_slate": "#6a5aa0",
-        "sx_slate_dk": "#54487f"
-      }
-    },
-    {
       "asset": "waymark",
       "x": 18,
-      "z": 3,
+      "z": 7,
       "rot": 0,
       "glow": "#8a4fc9"
     },
     {
-      "asset": "wisteria_arch",
-      "x": 10,
-      "z": 1,
+      "asset": "paper_lanterns",
+      "x": 13,
+      "z": 5,
       "rot": 0
     },
     {
-      "asset": "signpost",
+      "asset": "paper_lanterns",
+      "x": 20,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 25,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 31,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "moonflower",
+      "x": 3,
+      "z": 8,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
       "x": 9,
-      "z": 3,
-      "rot": 0
+      "z": 5,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
     },
     {
-      "asset": "signpost",
-      "x": 18,
-      "z": 24,
-      "rot": 0
+      "asset": "moonflower",
+      "x": 10,
+      "z": 5,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
     },
     {
-      "asset": "signpost",
-      "x": 30,
+      "asset": "moonflower",
+      "x": 24,
+      "z": 6,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 26,
+      "z": 6,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 32,
+      "z": 6,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 33,
       "z": 7,
-      "rot": 0
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
     },
     {
-      "asset": "signpost",
-      "x": 27,
+      "asset": "crates",
+      "x": 24,
       "z": 4,
       "rot": 0
     },
     {
-      "asset": "bridge",
+      "asset": "bench",
+      "x": 11,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 29,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 4,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 10,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 16,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 22,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
       "x": 28,
-      "z": 21,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 33,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 38,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 44,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 45,
+      "z": 6,
       "rot": 0
     },
     {
       "asset": "floating_lantern",
       "x": 9,
-      "z": 11,
-      "rot": 0,
-      "y": 0.06
-    },
-    {
-      "asset": "floating_lantern",
-      "x": 13,
-      "z": 12,
-      "rot": 0,
-      "y": 0.06
-    },
-    {
-      "asset": "floating_lantern",
-      "x": 21,
       "z": 14,
       "rot": 0,
       "y": 0.06
     },
     {
       "asset": "floating_lantern",
-      "x": 24,
-      "z": 18,
+      "x": 15,
+      "z": 13,
       "rot": 0,
       "y": 0.06
     },
     {
       "asset": "floating_lantern",
-      "x": 11,
-      "z": 20,
+      "x": 19,
+      "z": 16,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 29,
+      "z": 15,
       "rot": 0,
       "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 14,
-      "z": 22,
+      "z": 24,
       "rot": 0,
       "y": 0.06
     },
     {
       "asset": "floating_lantern",
-      "x": 22,
-      "z": 21,
+      "x": 18,
+      "z": 26,
       "rot": 0,
       "y": 0.06
     },
     {
       "asset": "floating_lantern",
-      "x": 6,
-      "z": 18,
+      "x": 30,
+      "z": 23,
       "rot": 0,
       "y": 0.06
     },
     {
       "asset": "floating_lantern",
-      "x": 25,
-      "z": 12,
+      "x": 35,
+      "z": 25,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 8,
+      "z": 24,
       "rot": 0,
       "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 20,
+      "z": 20,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 33,
       "z": 19,
       "rot": 0,
       "y": 0.06
@@ -202,255 +339,95 @@
       "y": 0.06
     },
     {
-      "asset": "willow",
-      "x": 8,
-      "z": 14,
-      "rot": 0
+      "asset": "floating_lantern",
+      "x": 23,
+      "z": 20,
+      "rot": 0,
+      "y": 0.06
     },
     {
-      "asset": "reeds",
-      "x": 5,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 4,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 5,
-      "z": 21,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 8,
-      "z": 23,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 26,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 6,
-      "z": 8,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 26,
-      "z": 8,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 13,
-      "z": 24,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 1,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 2,
-      "z": 21,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 5,
-      "z": 25,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 11,
-      "z": 25,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 9,
-      "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
+      "asset": "boat",
       "x": 27,
-      "z": 7,
+      "z": 13,
       "rot": 0
     },
     {
-      "asset": "lantern",
+      "asset": "lake_house",
       "x": 30,
-      "z": 12,
-      "rot": 0
+      "z": 13,
+      "rot": 0,
+      "recolor": {
+        "sx_dr_roof": "#c46a8a",
+        "sx_dr_roof_dk": "#a35472",
+        "sx_dr_roof_lt": "#d88aa4"
+      }
     },
     {
-      "asset": "lantern",
-      "x": 30,
+      "asset": "willow",
+      "x": 10,
       "z": 18,
       "rot": 0
     },
     {
-      "asset": "lantern",
-      "x": 22,
+      "asset": "boat",
+      "x": 3,
       "z": 24,
-      "rot": 0
+      "rot": 180
     },
     {
-      "asset": "lantern",
-      "x": 15,
-      "z": 24,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 2,
-      "z": 7,
-      "rot": 0
-    },
-    {
-      "asset": "moonflower",
+      "asset": "glow_mushroom",
       "x": 1,
-      "z": 6,
+      "z": 21,
       "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "glow": "#b48cff"
     },
     {
-      "asset": "moonflower",
-      "x": 2,
-      "z": 6,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 7,
-      "z": 3,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 8,
-      "z": 3,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 14,
-      "z": 26,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 13,
-      "z": 26,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "flowers",
-      "x": 7,
-      "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 30,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 21,
-      "z": 27,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 11,
-      "z": 27,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 5,
-      "z": 27,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 33,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 33,
-      "z": 7,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 32,
-      "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 33,
+      "asset": "reeds",
+      "x": 4,
       "z": 17,
       "rot": 0
     },
     {
-      "asset": "bush",
-      "x": 32,
-      "z": 19,
+      "asset": "reeds",
+      "x": 5,
+      "z": 22,
       "rot": 0
     },
     {
-      "asset": "bush",
-      "x": 0,
-      "z": 3,
+      "asset": "lake_house",
+      "x": 36,
+      "z": 17,
+      "rot": 0,
+      "recolor": {
+        "sx_dr_roof": "#4f8a8a",
+        "sx_dr_roof_dk": "#3f7070",
+        "sx_dr_roof_lt": "#6aa3a3"
+      }
+    },
+    {
+      "asset": "bridge",
+      "x": 41,
+      "z": 25,
       "rot": 0
     },
     {
-      "asset": "bush",
-      "x": 0,
-      "z": 0,
-      "rot": 0
+      "asset": "glow_mushroom",
+      "x": 43,
+      "z": 18,
+      "rot": 0,
+      "glow": "#b48cff"
     },
     {
-      "asset": "bush",
-      "x": 8,
-      "z": 0,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 17,
-      "z": 0,
-      "rot": 0
+      "asset": "glow_mushroom_tall",
+      "x": 39,
+      "z": 23,
+      "rot": 0,
+      "glow": "#b48cff"
     },
     {
       "asset": "ferry",
-      "x": 30,
-      "z": 22,
+      "x": 43,
+      "z": 31,
       "rot": 0,
       "recolor": {
         "sx_td_hull": "#5b3f86",
@@ -460,218 +437,1122 @@
     },
     {
       "asset": "crates",
-      "x": 32,
-      "z": 20,
+      "x": 45,
+      "z": 28,
       "rot": 0
     },
     {
-      "asset": "boat",
-      "x": 19,
-      "z": 16,
+      "asset": "lantern",
+      "x": 43,
+      "z": 28,
       "rot": 0
     },
     {
-      "asset": "boat",
-      "x": 3,
-      "z": 23,
-      "rot": 180
-    },
-    {
-      "asset": "lake_house",
-      "x": 24,
-      "z": 13,
-      "rot": 90,
-      "recolor": {
-        "sx_dr_roof": "#4f8a8a",
-        "sx_dr_roof_dk": "#3f7070",
-        "sx_dr_roof_lt": "#6aa3a3"
-      }
-    },
-    {
-      "asset": "willow",
-      "x": 31,
-      "z": 8,
+      "asset": "lantern",
+      "x": 27,
+      "z": 31,
       "rot": 0
     },
     {
-      "asset": "willow",
-      "x": 31,
-      "z": 15,
-      "rot": 0
-    },
-    {
-      "asset": "paper_lanterns",
-      "x": 30,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "paper_lanterns",
-      "x": 30,
-      "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "paper_lanterns",
-      "x": 12,
-      "z": 3,
-      "rot": 0
-    },
-    {
-      "asset": "paper_lanterns",
-      "x": 16,
-      "z": 3,
+      "asset": "lantern",
+      "x": 23,
+      "z": 33,
       "rot": 0
     },
     {
       "asset": "moonflower",
-      "x": 9,
-      "z": 8,
+      "x": 21,
+      "z": 34,
       "rot": 0,
       "open": "!time:day & !time:dawn"
     },
     {
       "asset": "moonflower",
-      "x": 13,
-      "z": 8,
+      "x": 28,
+      "z": 33,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 29,
+      "z": 34,
       "rot": 0,
       "open": "!time:day & !time:dawn"
     },
     {
       "asset": "moonflower",
       "x": 20,
-      "z": 8,
+      "z": 33,
       "rot": 0,
       "open": "!time:day & !time:dawn"
     },
     {
-      "asset": "moonflower",
+      "asset": "wisteria_arch",
       "x": 24,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "stump",
+      "x": 3,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 8,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 10,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 12,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 14,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 16,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 18,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 30,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 32,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 34,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 36,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 40,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 10,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 12,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 17,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 25,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 27,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 29,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 31,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 33,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
       "z": 8,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "rot": 0
     },
     {
-      "asset": "moonflower",
-      "x": 5,
-      "z": 7,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "asset": "willow",
+      "x": 0,
+      "z": 10,
+      "rot": 0
     },
     {
-      "asset": "floating_lantern",
+      "asset": "willow",
+      "x": 0,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 20,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 22,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 27,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 42,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 8,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 11,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 31,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 33,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 35,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 37,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 39,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 8,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 10,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 12,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 14,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 16,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 8,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 11,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 20,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
       "x": 15,
-      "z": 19,
-      "rot": 0,
-      "y": 0.06
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 17,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 30,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 33,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 35,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 37,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 40,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 20,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 22,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 24,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 31,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 12,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 38,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 13,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 19,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 13,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 20,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 30,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 35,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 31,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 33,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 35,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 38,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 40,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 31,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 31,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 6,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 13,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 6,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 12,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 19,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 33,
+      "rot": 0
     }
   ],
   "spawn": {
-    "x": 10,
-    "z": 1,
+    "x": 15,
+    "z": 2,
     "facing": "s"
   },
   "interactions": [
     {
-      "kind": "waymark",
-      "id": "lanternmere",
       "x": 18,
-      "z": 3
-    },
-    {
-      "x": 9,
       "z": 3,
       "kind": "sign",
       "text": "North: Hushwillow Lane and Brightwell Square. North-east, at low water only: the causeway to the Bellflats.",
       "text_fr": "Nord : l'Allée des Saules-Murmures et la Place de Clairpuits. Nord-est, à marée basse seulement : la chaussée des Grèves."
     },
     {
-      "x": 18,
-      "z": 24,
       "kind": "sign",
-      "text": "South: the Moonwell Garden. Across the mere by the lanterns at night; round the east shore at any hour.",
-      "text_fr": "Sud : le Jardin du Puits-de-Lune. Par les lanternes sur le lac, la nuit ; par la rive est, à toute heure."
+      "text": "The Bellflats, by the causeway: low water only, 8 in the morning to 6 in the evening. After that the sea has it.",
+      "text_fr": "Les Grèves de la Cloche, par la chaussée : à marée basse seulement, de 8 h à 18 h. Ensuite, la mer la reprend.",
+      "x": 41,
+      "z": 4
     },
     {
-      "x": 27,
-      "z": 4,
       "kind": "sign",
-      "text": "Causeway to the Bellflats. Low water only, 8 in the morning to 6 in the evening. After that the sea has it.",
-      "text_fr": "Chaussée des Grèves de la Cloche. À marée basse seulement, de 8 h à 18 h. Ensuite, la mer la reprend."
+      "text": "South: The Moonwell Garden. Straight across the mere by the lanterns at night; round the east shore at any hour.",
+      "text_fr": "Sud : Le Jardin du Puits-de-Lune. Tout droit sur le lac par les lanternes, la nuit ; par la rive est, à toute heure.",
+      "x": 22,
+      "z": 31
     },
     {
-      "x": 30,
-      "z": 7,
+      "x": 39,
+      "z": 12,
       "kind": "sign",
       "text": "The east shore path: round the mere to the Moonwell Garden, and over the river to the launch jetty.",
       "text_fr": "Le chemin de la rive est : autour du lac jusqu'au Jardin du Puits-de-Lune, et par le pont jusqu'à l'embarcadère de la vedette."
     },
     {
-      "x": 6,
-      "z": 4,
+      "x": 8,
+      "z": 7,
       "kind": "sign",
       "text": "The Quiet Lamp. Rooms by the day: our guests sleep while the sun is up.",
       "text_fr": "La Lampe Tranquille. Chambres à la journée : nos clients dorment tant que le soleil est levé."
     },
     {
-      "x": 31,
-      "z": 22,
-      "kind": "sign",
-      "id": "gangway_launch",
-      "name": "The Gullhaven launch",
-      "name_fr": "La vedette de Havre-aux-Mouettes",
-      "dialogue": [
-        {
-          "if": "item:ferry_pass",
-          "lines": [
-            "You ring the jetty bell. A deckhand checks your pass, twice, as Ines taught her, and the launch slips down the river to the sea and north to Gullhaven."
-          ],
-          "lines_fr": [
-            "Vous sonnez la cloche de l'embarcadère. Une matelote vérifie votre laissez-passer, deux fois, comme Ines le lui a appris, et la vedette descend la rivière jusqu'à la mer puis remonte vers Havre-aux-Mouettes."
-          ],
-          "do": [
-            "warp:gullhaven:27:20:n"
-          ]
-        },
-        {
-          "lines": [
-            "A lilac launch with a brass rail, and a bell on the jetty post. A tin plate: \"GULLHAVEN. Passes from the Harbour Office there.\""
-          ],
-          "lines_fr": [
-            "Une vedette lilas à la rambarde de laiton, et une cloche sur le poteau de l'embarcadère. Une plaque de fer-blanc : « HAVRE-AUX-MOUETTES. Laissez-passer à la Capitainerie, là-bas. »"
-          ]
-        }
-      ]
-    },
-    {
-      "kind": "find",
-      "id": "d_jetty",
-      "x": 32,
-      "z": 20,
-      "give": "card:gloamowl",
-      "text": "In a crate by the jetty, under a coil of rope, in a jar to keep the river out: a card. A label says \"for the first one off the boat\".",
-      "text_fr": "Dans une caisse près de l'embarcadère, sous un rouleau de corde, dans un bocal pour la garder de l'eau : une carte. Une étiquette dit « pour le premier qui descend du bateau »."
+      "kind": "waymark",
+      "id": "lanternmere",
+      "x": 18,
+      "z": 7
     },
     {
       "kind": "find",
       "id": "d_raft",
-      "x": 15,
-      "z": 19,
+      "x": 23,
+      "z": 20,
       "give": "coins:100",
       "text": "A lantern drifts up against the raft, and in its paper base, folded small: Facets. Someone's wish, maybe. Or someone's change.",
       "text_fr": "Une lanterne vient buter contre le radeau, et dans son socle de papier, pliées serré : des Facettes. Le vœu de quelqu'un, peut-être. Ou sa monnaie.",
       "if": "time:night"
     },
     {
-      "x": 27,
-      "z": 15,
-      "kind": "sign",
-      "text": "A round house on piles, lanterns hung all round the porch. A note on the door: \"Out lighting the shore. Back by dawn. Clem.\"",
-      "text_fr": "Une maison ronde sur pilotis, des lanternes tout autour du porche. Un mot sur la porte : « Parti allumer la rive. De retour à l'aube. Clem. »"
+      "kind": "find",
+      "id": "d_islet",
+      "x": 10,
+      "z": 18,
+      "give": "pack:dream",
+      "text": "Under the islet's willow, wrapped in oilcloth against the damp: a sealed booster. The lanterns must see it every night.",
+      "text_fr": "Sous le saule de l'îlot, enveloppé de toile cirée contre l'humidité : un booster scellé. Les lanternes doivent le voir toutes les nuits."
     },
     {
       "x": 3,
-      "z": 23,
+      "z": 24,
       "kind": "sign",
       "id": "old_boat",
       "name": "An upturned rowboat",
@@ -688,19 +1569,65 @@
       ]
     },
     {
+      "x": 38,
+      "z": 20,
+      "kind": "sign",
+      "text": "A round house on piles, lanterns hung all round the porch. A note on the door: \"Out lighting the shore. Back by dawn. Clem.\"",
+      "text_fr": "Une maison ronde sur pilotis, des lanternes tout autour du porche. Un mot sur la porte : « Parti allumer la rive. De retour à l'aube. Clem. »"
+    },
+    {
+      "x": 44,
+      "z": 31,
+      "kind": "sign",
+      "id": "gangway_launch",
+      "name": "The Gullhaven launch",
+      "name_fr": "La vedette de Havre-aux-Mouettes",
+      "dialogue": [
+        {
+          "if": "item:ferry_pass",
+          "lines": [
+            "You ring the jetty bell. A deckhand checks your pass, twice, as Ines taught her, and the launch slips down the river to the sea and north to Gullhaven."
+          ],
+          "lines_fr": [
+            "Vous sonnez la cloche de l'embarcadère. Une matelote vérifie votre laissez-passer, deux fois, comme Ines le lui a appris, et la vedette descend la rivière jusqu'à la mer puis remonte vers Havre-aux-Mouettes."
+          ],
+          "do": [
+            "warp:gullhaven:38:25:n"
+          ]
+        },
+        {
+          "lines": [
+            "A lilac launch with a brass rail, and a bell on the jetty post. A tin plate: \"GULLHAVEN. Passes from the Harbour Office there.\""
+          ],
+          "lines_fr": [
+            "Une vedette lilas à la rambarde de laiton, et une cloche sur le poteau de l'embarcadère. Une plaque de fer-blanc : « HAVRE-AUX-MOUETTES. Laissez-passer à la Capitainerie, là-bas. »"
+          ]
+        }
+      ]
+    },
+    {
       "kind": "find",
-      "id": "d_islet",
-      "x": 8,
-      "z": 14,
-      "give": "pack:dream",
-      "text": "Under the islet's willow, wrapped in oilcloth against the damp: a sealed booster. The lanterns must see it every night.",
-      "text_fr": "Sous le saule de l'îlot, enveloppé de toile cirée contre l'humidité : un booster scellé. Les lanternes doivent le voir toutes les nuits."
+      "id": "d_jetty",
+      "x": 45,
+      "z": 28,
+      "give": "card:gloamowl",
+      "text": "In a crate by the jetty, under a coil of rope, in a jar to keep the river out: a card. A label says \"for the first one off the boat\".",
+      "text_fr": "Dans une caisse près de l'embarcadère, sous un rouleau de corde, dans un bocal pour la garder de l'eau : une carte. Une étiquette dit « pour le premier qui descend du bateau »."
+    },
+    {
+      "kind": "find",
+      "id": "d_inn_stump",
+      "give": "coins:40",
+      "text": "In the old stump behind the inn, where Mina's guests hide what they mean to come back for: Facets nobody came back for.",
+      "text_fr": "Dans la vieille souche derrière l'auberge, là où les clients de Mina cachent ce qu'ils comptent reprendre : des Facettes que personne n'est revenu chercher.",
+      "x": 3,
+      "z": 13
     }
   ],
   "warps": [
     {
-      "x": 4,
-      "z": 4,
+      "x": 6,
+      "z": 7,
       "to": "inn_dream",
       "label": "Go into the Quiet Lamp",
       "label_fr": "Entrer à la Lampe Tranquille",
@@ -711,8 +1638,8 @@
       }
     },
     {
-      "x": 21,
-      "z": 9,
+      "x": 32,
+      "z": 16,
       "to": "tailor",
       "label": "Go into the Lamplit Tailor",
       "label_fr": "Entrer chez le Tailleur aux lampions",
@@ -727,184 +1654,78 @@
     {
       "side": "n",
       "span": [
-        10,
-        11
+        14,
+        16
       ],
       "to": "hushlane"
     },
     {
       "side": "n",
       "span": [
-        28,
-        29
+        42,
+        44
       ],
       "to": "bellflats"
     },
     {
       "side": "s",
       "span": [
-        16,
-        17
+        24,
+        26
       ],
       "to": "moonwell"
     }
   ],
   "gates": [
     {
-      "id": "lantern_path",
-      "tiles": [
-        [
-          16,
-          11
-        ],
-        [
-          17,
-          11
-        ],
-        [
-          16,
-          12
-        ],
-        [
-          17,
-          12
-        ],
-        [
-          16,
-          13
-        ],
-        [
-          17,
-          13
-        ],
-        [
-          16,
-          14
-        ],
-        [
-          17,
-          14
-        ],
-        [
-          16,
-          15
-        ],
-        [
-          17,
-          15
-        ],
-        [
-          16,
-          16
-        ],
-        [
-          17,
-          16
-        ],
-        [
-          16,
-          17
-        ],
-        [
-          17,
-          17
-        ],
-        [
-          16,
-          18
-        ],
-        [
-          17,
-          18
-        ],
-        [
-          16,
-          19
-        ],
-        [
-          17,
-          19
-        ],
-        [
-          16,
-          20
-        ],
-        [
-          17,
-          20
-        ],
-        [
-          16,
-          21
-        ],
-        [
-          17,
-          21
-        ],
-        [
-          16,
-          22
-        ],
-        [
-          17,
-          22
-        ],
-        [
-          16,
-          23
-        ],
-        [
-          17,
-          23
-        ],
-        [
-          18,
-          16
-        ],
-        [
-          18,
-          17
-        ]
-      ],
-      "if": "time:night",
-      "prop_open": "lantern_raft",
-      "floor": 0.1,
-      "text": "Just dark water, and the lanterns drifting far out. They only gather into a path after nightfall.",
-      "text_fr": "Rien que de l'eau sombre, et les lanternes qui dérivent au loin. Elles ne se rassemblent en chemin qu'à la nuit tombée."
-    },
-    {
       "id": "causeway",
       "tiles": [
         [
-          28,
+          42,
           0
         ],
         [
-          29,
+          43,
           0
         ],
         [
-          28,
+          44,
+          0
+        ],
+        [
+          42,
           1
         ],
         [
-          29,
+          43,
           1
         ],
         [
-          28,
+          44,
+          1
+        ],
+        [
+          42,
           2
         ],
         [
-          29,
+          43,
           2
         ],
         [
-          28,
+          44,
+          2
+        ],
+        [
+          42,
           3
         ],
         [
-          29,
+          43,
+          3
+        ],
+        [
+          44,
           3
         ]
       ],
@@ -914,15 +1735,145 @@
       "text_fr": "La chaussée des Grèves est sous la mer. Elle réapparaît à marée basse, à huit heures du matin."
     },
     {
-      "id": "islet_shallows",
+      "id": "lantern_path",
       "tiles": [
         [
-          5,
+          24,
           15
         ],
         [
-          6,
+          25,
           15
+        ],
+        [
+          24,
+          16
+        ],
+        [
+          25,
+          16
+        ],
+        [
+          24,
+          17
+        ],
+        [
+          25,
+          17
+        ],
+        [
+          24,
+          18
+        ],
+        [
+          25,
+          18
+        ],
+        [
+          24,
+          19
+        ],
+        [
+          25,
+          19
+        ],
+        [
+          24,
+          20
+        ],
+        [
+          25,
+          20
+        ],
+        [
+          24,
+          21
+        ],
+        [
+          25,
+          21
+        ],
+        [
+          24,
+          22
+        ],
+        [
+          25,
+          22
+        ],
+        [
+          24,
+          23
+        ],
+        [
+          25,
+          23
+        ],
+        [
+          24,
+          24
+        ],
+        [
+          25,
+          24
+        ],
+        [
+          24,
+          25
+        ],
+        [
+          25,
+          25
+        ],
+        [
+          24,
+          26
+        ],
+        [
+          25,
+          26
+        ],
+        [
+          24,
+          27
+        ],
+        [
+          25,
+          27
+        ],
+        [
+          24,
+          28
+        ],
+        [
+          25,
+          28
+        ],
+        [
+          26,
+          21
+        ],
+        [
+          26,
+          22
+        ]
+      ],
+      "if": "time:night",
+      "prop_open": "lantern_raft",
+      "floor": 0.1,
+      "text": "Just dark water, and the lanterns drifting far out. They only gather into a path after nightfall.",
+      "text_fr": "Rien que de l'eau sombre, et les lanternes qui dérivent au loin. Elles ne se rassemblent en chemin qu'à la nuit tombée."
+    },
+    {
+      "id": "islet_shallows",
+      "tiles": [
+        [
+          7,
+          19
+        ],
+        [
+          8,
+          19
         ]
       ],
       "if": "item:wading_boots",
@@ -935,8 +1886,8 @@
       "id": "lisette",
       "name": "Lisette",
       "model": "npc_worker",
-      "x": 14,
-      "z": 3,
+      "x": 23,
+      "z": 8,
       "facing": "s",
       "idle": "Idle",
       "outfit": "#e8a0b8",
@@ -961,9 +1912,9 @@
       "id": "lisette_dusk",
       "name": "Lisette",
       "model": "npc_worker",
-      "x": 15,
-      "z": 8,
-      "facing": "e",
+      "x": 23,
+      "z": 13,
+      "facing": "s",
       "idle": "Idle",
       "outfit": "#e8a0b8",
       "hair": "#2b211c",
@@ -985,8 +1936,8 @@
       "id": "esme",
       "name": "Esme",
       "model": "npc_kid",
-      "x": 14,
-      "z": 8,
+      "x": 15,
+      "z": 11,
       "facing": "s",
       "idle": "Idle",
       "outfit": "#f2c6a0",
@@ -1009,8 +1960,8 @@
       "id": "ruben",
       "name": "Ruben",
       "model": "npc_scholar",
-      "x": 20,
-      "z": 6,
+      "x": 30,
+      "z": 8,
       "facing": "w",
       "idle": "Idle",
       "outfit": "#3a3f6a",
@@ -1032,49 +1983,11 @@
       ]
     },
     {
-      "id": "t_clem",
-      "name": "Clem",
-      "model": "npc_worker",
-      "x": 30,
-      "z": 14,
-      "facing": "w",
-      "idle": "Idle",
-      "trainer": {
-        "sight": 2,
-        "challenge": [
-          "Lanterns for the east shore! Mind the wire. Oh, a duellist. Two prizes, while the wax sets?"
-        ],
-        "challenge_fr": [
-          "Des lanternes pour la rive est ! Attention au fil. Oh, un duelliste. Deux Récompenses, le temps que la cire prenne ?"
-        ],
-        "win": [
-          "Snuffed out. Fair enough."
-        ],
-        "win_fr": [
-          "Soufflé. C'est de bonne guerre."
-        ],
-        "lose": [
-          "Lit you up! Come back with a brighter deck."
-        ],
-        "lose_fr": [
-          "Je t'ai éclairé ! Reviens avec un deck plus lumineux."
-        ],
-        "after": [
-          "The long way round is the lit way round. Every post, every night. My legs know it by heart."
-        ],
-        "after_fr": [
-          "Le long chemin, c'est le chemin éclairé. Chaque poteau, chaque nuit. Mes jambes le connaissent par cœur."
-        ]
-      },
-      "outfit": "#c89b3c",
-      "hair": "#4a3426"
-    },
-    {
       "id": "t_yara",
       "name": "Yara",
       "model": "npc_wanderer",
-      "x": 13,
-      "z": 6,
+      "x": 12,
+      "z": 7,
       "facing": "e",
       "idle": "Idle",
       "trainer": {
@@ -1133,8 +2046,8 @@
       "id": "t_ambrose",
       "name": "Ambrose",
       "model": "npc_sailor",
-      "x": 18,
-      "z": 17,
+      "x": 26,
+      "z": 22,
       "facing": "w",
       "idle": "Idle",
       "trainer": {
@@ -1169,6 +2082,44 @@
       "outfit": "#2c3a5a",
       "hair": "#9a8a7a",
       "if": "time:night"
+    },
+    {
+      "id": "t_clem",
+      "name": "Clem",
+      "model": "npc_worker",
+      "x": 42,
+      "z": 14,
+      "facing": "s",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 2,
+        "challenge": [
+          "Lanterns for the east shore! Mind the wire. Oh, a duellist. Two prizes, while the wax sets?"
+        ],
+        "challenge_fr": [
+          "Des lanternes pour la rive est ! Attention au fil. Oh, un duelliste. Deux Récompenses, le temps que la cire prenne ?"
+        ],
+        "win": [
+          "Snuffed out. Fair enough."
+        ],
+        "win_fr": [
+          "Soufflé. C'est de bonne guerre."
+        ],
+        "lose": [
+          "Lit you up! Come back with a brighter deck."
+        ],
+        "lose_fr": [
+          "Je t'ai éclairé ! Reviens avec un deck plus lumineux."
+        ],
+        "after": [
+          "The long way round is the lit way round. Every post, every night. My legs know it by heart."
+        ],
+        "after_fr": [
+          "Le long chemin, c'est le chemin éclairé. Chaque poteau, chaque nuit. Mes jambes le connaissent par cœur."
+        ]
+      },
+      "outfit": "#c89b3c",
+      "hair": "#4a3426"
     }
   ],
   "ground": {
@@ -1199,7 +2150,7 @@
   "light": {
     "sun": {
       "color": "#ffe9f2",
-      "intensity": 2.0,
+      "intensity": 2,
       "fromHero": [
         8,
         18,

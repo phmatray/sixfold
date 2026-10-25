@@ -79,24 +79,26 @@ north: **Ember → Storm → Tide → Dream → Grove → Stone → Ember**.
 
 Ids of the five existing outdoor maps are **kept** (saves store `map,x,z,facing`). `R` = release that
 adds or reworks the map.
+Sizes are as built after the re-lay to `docs/WORLD_RULES.md` (towns 4 × 4 screens, routes 2 × 4–2 × 6);
+the Grove and Stone maps below are still the 1.3 plan.
 
 | Id | EN | FR | Region | Kind | Size | R |
 |---|---|---|---|---|---|---|
-| `overworld` | Sixfold Meadow | Pré des Six | Hub | hub | 28×24 | 1.2 / 1.3 |
-| `square` | Brightwell Square | Place de Clairpuits | Hub | town | 26×20 | 1.2 / 1.3 |
-| `quarry` | Emberstep Quarry | Carrière de Pas-de-Braise | Ember | route | 28×22 | 1.2 / 1.3 |
-| `cinderwick` | Cinderwick | Mèche-Cendre | Ember | town | 32×26 | 1.3 |
-| `kilnmouth` | The Kilnmouth | La Gueule-du-Four | Ember | seal site | 30×24 | 1.3 |
-| `downs` | Thrumming Downs | Les Landes Vibrantes | Storm | route | 36×24 | 1.3 |
-| `stormwatch` | Stormwatch | Guette-Orage | Storm | town | 32×26 | 1.3 |
-| `rodspire` | The Rodspire | L'Aiguille-Foudre | Storm | seal site | 28×28 | 1.3 |
-| `seaside` | Saltwind Boardwalk | Promenade de Ventsalé | Tide | route | 30×22 | 1.2 / 1.3 |
-| `gullhaven` | Gullhaven | Havre-aux-Mouettes | Tide | town | 34×26 | 1.3 |
-| `bellflats` | The Bellflats | Les Grèves de la Cloche | Tide | seal site | 36×28 | 1.3 |
-| `hushlane` | Hushwillow Lane | Allée des Saules-Murmures | Dream | route | 24×32 | 1.3 |
-| `lanternmere` | Lanternmere | Lac-aux-Lanternes | Dream | town | 34×28 | 1.3 |
-| `moonwell` | The Moonwell Garden | Le Jardin du Puits-de-Lune | Dream | seal site | 28×24 | 1.3 |
-| `woodland` | Fernhollow Trail | Sentier de Creuse-Fougère | Grove | route | 30×22 | 1.2 / 1.3 |
+| `overworld` | Sixfold Meadow | Pré des Six | Hub | hub | 52×36 | 1.2 / 1.3 |
+| `square` | Brightwell Square | Place de Clairpuits | Hub | town | 52×36 | 1.2 / 1.3 |
+| `quarry` | Emberstep Quarry | Carrière de Pas-de-Braise | Ember | route | 30×44 | 1.2 / 1.3 |
+| `cinderwick` | Cinderwick | Mèche-Cendre | Ember | town | 52×36 | 1.3 |
+| `kilnmouth` | The Kilnmouth | La Gueule-du-Four | Ember | seal site | 40×30 | 1.3 |
+| `downs` | Thrumming Downs | Les Landes Vibrantes | Storm | route | 60×26 | 1.3 |
+| `stormwatch` | Stormwatch | Guette-Orage | Storm | town | 52×36 | 1.3 |
+| `rodspire` | The Rodspire | L'Aiguille-Foudre | Storm | seal site | 40×32 | 1.3 |
+| `seaside` | Saltwind Boardwalk | Promenade de Ventsalé | Tide | route | 60×24 | 1.2 / 1.3 |
+| `gullhaven` | Gullhaven | Havre-aux-Mouettes | Tide | town | 52×36 | 1.3 |
+| `bellflats` | The Bellflats | Les Grèves de la Cloche | Tide | seal site | 40×30 | 1.3 |
+| `hushlane` | Hushwillow Lane | Allée des Saules-Murmures | Dream | route | 28×44 | 1.3 |
+| `lanternmere` | Lanternmere | Lac-aux-Lanternes | Dream | town | 52×36 | 1.3 |
+| `moonwell` | The Moonwell Garden | Le Jardin du Puits-de-Lune | Dream | seal site | 40×30 | 1.3 |
+| `woodland` | Fernhollow Trail | Sentier de Creuse-Fougère | Grove | route | 60×24 | 1.2 / 1.3 |
 | `rootholm` | Rootholm | Racinemont | Grove | town | 34×28 | 1.3 |
 | `elder_ring` | The Elder Ring | Le Cercle des Anciens | Grove | seal site | 30×26 | 1.3 |
 | `undermine` | The Undermine | Les Galeries Basses | Stone | cave | 32×12 | 1.3 |
@@ -129,7 +131,7 @@ Interiors (all on the 11×9 interior kit unless noted; `shop` and `warden` alrea
 |---|---|---|---|
 | Sixfold Meadow | hub, unchanged edges | — | Swap Shop (1.2), hub waymark, seal-count festival dressing, Rook's first scene (1.4) |
 | Brightwell Square | hub town | — | Clinic, Press, bakery interior, Curator (1.2); **south exit → Hushwillow Lane**, hub inn (1.3) |
-| Emberstep Quarry | Ember route | Cinza → Kilnmouth; Orla → Bastion | north exit on the top ledge → Cinderwick; cave mouth (west cliff) → Undermine |
+| Emberstep Quarry | Ember route | Cinza → Kilnmouth; Orla → Bastion | north road along the quarry floor → Cinderwick; cave mouth (west cliff) → Undermine |
 | Saltwind Boardwalk | Tide route | Marlo → Bellflats; Quill → Rodspire | east exit along the boardwalk → Gullhaven; a lighthouse keeper |
 | Fernhollow Trail | Grove route | Bramble → Elder Ring; Lumen → Moonwell | west exit → Rootholm; the moonflower glade keeps a night find |
 
@@ -833,6 +835,12 @@ It runs in `cargo test -p sixfold-engine`, so CI already runs it.
 How to read this section. Sketches are schematic, about one character per two tiles, north up. Coordinates in
 the bullets are full tiles and are what you build from; check-maps has the final word.
 
+**Re-laid to the world rules.** Every outdoor map of §10.1–10.4 and the hub was later enlarged and re-laid to
+`docs/WORLD_RULES.md` (sizes in §2.2): districts, lamps that follow use, one signpost per exit, waymarks in
+their own clearing, and every exit a 3-wide road **at ground level**. The sketches and coordinates below are the
+1.3 design and its first build; the people, duelists, finds, gates and quests are kept, but their tiles moved.
+The maps in `web/world/maps/` (and the waymark tiles in `web/world/atlas.json`) have the final word.
+
 ```
 legend   .  open ground      p  path          ~  water          #  wall / scree / blocked
          1-6 ledge height (m) =  deck/bridge/boardwalk           T  trees (map ring or clumps)
@@ -871,9 +879,9 @@ square lead over a bass ostinato, an anvil "clank" on beat 3.
 
 **Maps.**
 
-`quarry` — **Emberstep Quarry** (existing, 28×22). Cinza and Orla leave; their tiles become `t_cole`'s post and
-`t_marigold`'s ledge (1.2). New: stairs up to the top ledge (height 2) and a **north exit** at x 13–14 on row 0
-→ `cinderwick`; a `cave_mouth` prop on the west ledge face at 2,7 with a door warp (`if: item:kiln_lantern`,
+`quarry` — **Emberstep Quarry** (existing, 28×22; re-laid 30×44, north–south). Cinza and Orla leave; their tiles become `t_cole`'s post and
+`t_marigold`'s ledge (1.2). New: a **north exit** → `cinderwick` (re-laid: the road runs along the quarry floor
+through a cutting, the worked faces stepping up into galleries either side); a `cave_mouth` prop on the west ledge face at 2,7 with a door warp (`if: item:kiln_lantern`,
 `locked`: "Pitch black inside, and a cold draught. You'd need a light.") → `undermine`; a handhold wall
 (`climb_wall`, gloves gate) at 24,6 up to a 2 m nook with a find.
 
@@ -892,7 +900,7 @@ the Great Kiln.
  # 1 1 . . p . ~ ~ ~ . * . 1 1 #
  # 1 1 1 . p . . . . . . . 1 1 #
  # 1 1 1 1 p p . . n . . 1 1 1 #
- # # # # # # # @ @ # # # # # # #        @ S x14-15 → quarry N (top ledge)
+ # # # # # # # @ @ # # # # # # #        @ S x14-15 → quarry N
 ```
 
 - Waymark `way_cinderwick` at 7,9 (south face). Great Kiln at 12–15 × 6–9 (always lit; at night its glow is the
@@ -913,10 +921,11 @@ three rings of terraces to a glassy floor where Cinza waits by the seal stone.
  3 3 2 1 1 0 0 0 0 0 1 1 2 3 3
  3 3 3 2 2 1 1 1 1 1 2 2 3 3 3
  3 W p p p p p p p p p p p p 3          rim walk (3 m) and waymark
- 3 3 3 3 3 3 3 @ 3 3 3 3 3 3 3          @ S x14-15, at rim height → cinderwick N
+ 3 3 3 3 3 3 3 @ 3 3 3 3 3 3 3          @ S x14-15 → cinderwick N
 ```
 
-- Entry: S edge exit x 14–15 at rim height ↔ `cinderwick` N. Waymark `way_kilnmouth` at 2,20 on the rim. Stairs at the spiral's turns (2→1 at 6,8; 1→0 at 10,10). Seal stone 13–14 × 10–11, Cinza at 15,10.
+- Entry: S edge exit x 14–15 ↔ `cinderwick` N (re-laid: the Kiln road arrives at ground level at the foot of the
+  crater's south flank and a switchback climbs to the rim lookout, where the waymark is). Waymark `way_kilnmouth` at 2,20 on the rim. Stairs at the spiral's turns (2→1 at 6,8; 1→0 at 10,10). Seal stone 13–14 × 10–11, Cinza at 15,10.
 - Vent gates: 4–5,4 and 22–23,4, `if: "!time:day & !time:dusk"`, `prop_closed: ember_vent`. Text: "Scalding
   steam. It might ease off in the cool of the night."
 
@@ -946,7 +955,7 @@ a sfx).
 **Inn stock.** Ember pack, Wild pack; Cindrel (C), Ashpaw (C), Blazelynx (U), **Solarlynx (R)**.
 
 **As built (1.3 PR 2).** The maps read in `web/world/maps/` have the final word; what moved and why:
-- *Quarry*: stairs up to the top ledge at 13–14,2 and the north exit at 13–14; the cave mouth at 2–3,8 under a 2 m
+- *Quarry*: (first build; re-laid since, see §10) stairs up to the top ledge at 13–14,2 and the north exit at 13–14; the cave mouth at 2–3,8 under a 2 m
   bluff. Until the Undermine exists (PR 4) the cave is a spot, not a warp: without the lantern it reads "pitch black",
   with it the lantern shows a timbered tunnel closed by a fresh rockfall and picks knocking from the far side, so the
   Lantern's first payoff is the promise of Stone. The gloves wall is at 24,6 up to a 2 m nook at 24–26 × 4–5.

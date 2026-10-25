@@ -4,37 +4,41 @@
   "region": "storm",
   "kind": "site",
   "music": "storm",
-  "width": 28,
-  "height": 28,
+  "width": 40,
+  "height": 32,
   "tiles": [
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~..~~~666666~~~~",
-    "~~~~~~~~~~~~..1.~66666666~~~",
-    "~~~~~~~~~~~~....~66666666~~~",
-    "~~~~~~~~~~~~...16666666666~~",
-    "~~~~~~~~~~===...6666666666~~",
-    "~~~~~~~~...=~..~6666666666~~",
-    "~~~~~~~.....~~~~6666666666~~",
-    "~~~~~~~1...1~~~~666666666~~~",
-    "~...~~=....===~~~66666666~~~",
-    ".....==.....~==~~6666666611~",
-    "......~.....~==.........~11~",
-    "......~~..1~~==.....=....11~",
-    "......~~~~~~~==..........~~~",
-    "1....~~~~~~~~~...........~~~",
-    "....1~~~~~~~~~..........1~~~",
-    "~1..~~~~~~~~~~...........~~~",
-    "~~~=~~~~~~~~~~...........~~~",
-    "~~~=~~~~~~~~~~~1.......1~~~~",
-    "~~~==~~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~..~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~1...~~~~~~~~~~~~~~~~~~~~~",
-    "~~~....~~~~~~~~~~~~~~~~~~~~~",
-    "~~~...1~~~~~~~~~~~~~~~~~~~~~",
-    "~~~....~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~..~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~..~~~666666~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~..1.~66666666~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~....~66666666~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~...16666666666~~~~~~~~~~~~~~",
+    "~~~~~~~~~~===...6666666666~~~~~~~~~~~~~~",
+    "~~~~~~~~...=~..~6666666666~~~~~~~~~~~~~~",
+    "~~~~~~~.....~~~~6666666666~~~~~~~~~~~~~~",
+    "~...~~~1...1~~~~666666666~~~~~~~~~~~~~~~",
+    "~...~~=....===~~~66666666~~~~~~~~~~~~~~~",
+    "ppppp==.....~==~~6666666611~~~~~~~~~~~~~",
+    "ppppp.~.....~==.........~11~~~~~~~~~~~~~",
+    "ppppp.~~..1~~==.....=....11~~~~~~~~~~~~~",
+    "......~~~~~~~==..........~~~~~~~~~~~~~~~",
+    "1....~~~~~~~~~...........~~~~~~~~~~~~~~~",
+    "....1~~~~~~~~~..........1~~~~~~~~~~~~~~~",
+    "~1..~~~~~~~~~~...........~~~~~~~~~~~~~~~",
+    "~~~=~~~~~~~~~~...........~~~~~~~~~~~~~~~",
+    "~~~=~~~~~~~~~~~1.......1~~~~~~~~....~~~~",
+    "~~~==~~~~~~~~~~~~~~~~~=~~~~~~~~......~~~",
+    "~~~~..~~~~~~~~~~~~~~~~=~~~~~~~........~~",
+    "~~~1...~~~~~~~~~~~~~~~=~~~~~~~.......~~~",
+    "~~~....~~~~~~~~~~~~~~~========......1~~~",
+    "~~~...1~~~~~~~~~~~~~~~~~~~~~~~~.....~~~~",
+    "~~~....~~~~~~~~~~~~~~~~~~~~~~~~~...~~~~~",
+    "~~~~..~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   ],
   "props": [
     {
@@ -103,12 +107,6 @@
     },
     {
       "asset": "rock_basalt",
-      "x": 4,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "rock_basalt",
       "x": 7,
       "z": 12,
       "rot": 0
@@ -157,20 +155,8 @@
     },
     {
       "asset": "heather",
-      "x": 1,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "heather",
       "x": 10,
       "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "heather",
-      "x": 22,
-      "z": 18,
       "rot": 0
     },
     {
@@ -183,12 +169,6 @@
       "asset": "buoy",
       "x": 2,
       "z": 5,
-      "rot": 0
-    },
-    {
-      "asset": "buoy",
-      "x": 23,
-      "z": 23,
       "rot": 0
     },
     {
@@ -207,18 +187,6 @@
       "asset": "buoy",
       "x": 11,
       "z": 25,
-      "rot": 0
-    },
-    {
-      "asset": "signpost",
-      "x": 1,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "tidepool",
-      "x": 3,
-      "z": 13,
       "rot": 0
     },
     {
@@ -268,12 +236,6 @@
       "rot": 0
     },
     {
-      "asset": "crates",
-      "x": 3,
-      "z": 11,
-      "rot": 0
-    },
-    {
       "asset": "crab_pots",
       "x": 8,
       "z": 7,
@@ -281,33 +243,17 @@
     },
     {
       "asset": "lantern",
-      "x": 4,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
       "x": 7,
       "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 13,
-      "z": 7,
-      "rot": 0
+      "rot": 0,
+      "why": "the head of the boardwalk out to the pylons"
     },
     {
       "asset": "lantern",
       "x": 15,
       "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 19,
-      "z": 16,
-      "rot": 0
+      "rot": 0,
+      "why": "the lift landing, where the crews wait for the cage"
     },
     {
       "asset": "heather",
@@ -399,11 +345,270 @@
       "z": 5,
       "rot": 0,
       "y": 6
+    },
+    {
+      "asset": "signpost",
+      "x": 4,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 4,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "tidepool",
+      "x": 1,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 0,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 0,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 15,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "boat",
+      "x": 37,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 33,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 31,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 35,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 32,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 35,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 30,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 36,
+      "z": 23,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "buoy",
+      "x": 26,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 34,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 27,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 38,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 1,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 3,
+      "z": 22,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 6,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 6,
+      "z": 24,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 7,
+      "z": 9,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 10,
+      "z": 13,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 11,
+      "z": 9,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 13,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 14,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 14,
+      "z": 3,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 15,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 15,
+      "z": 5,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 15,
+      "z": 19,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 21,
+      "z": 2,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 22,
+      "z": 2,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 23,
+      "z": 2,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 23,
+      "z": 19,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 24,
+      "z": 3,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "heather",
+      "x": 24,
+      "z": 5,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 24,
+      "z": 16,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 24,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 25,
+      "z": 6,
+      "rot": 0,
+      "y": 6
     }
   ],
   "spawn": {
     "x": 1,
-    "z": 13,
+    "z": 12,
     "facing": "e"
   },
   "interactions": [
@@ -412,13 +617,6 @@
       "id": "rodspire",
       "x": 18,
       "z": 8
-    },
-    {
-      "x": 1,
-      "z": 11,
-      "kind": "sign",
-      "text": "The Rodspire. West: back to Stormwatch. Relay pylons power the lift to the top. Keep off the cables in a storm.",
-      "text_fr": "L'Aiguille-Foudre. Ouest : retour à Guette-Orage. Des pylônes relais alimentent l'ascenseur du sommet. Ne touchez pas aux câbles par temps d'orage."
     },
     {
       "x": 2,
@@ -575,13 +773,29 @@
       "give": "pack:storm",
       "text": "Under a stone on the lonely islet, tied up in a fishing net: a sealed booster.",
       "text_fr": "Sous une pierre de l'îlot solitaire, ficelé dans un filet de pêche : un booster scellé."
+    },
+    {
+      "kind": "sign",
+      "text": "The Rodspire. West: back to Stormwatch. Relay pylons power the lift to the top. Keep off the cables in a storm.",
+      "text_fr": "L'Aiguille-Foudre. Ouest : retour à Guette-Orage. Des pylônes relais alimentent l'ascenseur du sommet. Ne touchez pas aux câbles par temps d'orage.",
+      "x": 4,
+      "z": 14
+    },
+    {
+      "kind": "find",
+      "id": "st_wreck",
+      "give": "coins:45",
+      "text": "In a split crate washed up from the supply boat: a few Facets, crusted with salt.",
+      "text_fr": "Dans une caisse fendue, rejetée par le canot de ravitaillement : quelques Facettes, croûtées de sel.",
+      "x": 33,
+      "z": 21
     }
   ],
   "exits": [
     {
       "side": "w",
       "span": [
-        12,
+        11,
         13
       ],
       "to": "stormwatch"
@@ -615,40 +829,6 @@
     }
   ],
   "npcs": [
-    {
-      "id": "nils",
-      "name": "Nils",
-      "model": "npc_worker",
-      "x": 2,
-      "z": 12,
-      "facing": "e",
-      "idle": "Idle",
-      "outfit": "#2f6b8a",
-      "hair": "#c8b89a",
-      "dialogue": [
-        {
-          "if": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3",
-          "lines": [
-            "All three humming! Listen to that. The lift's live: up you go."
-          ],
-          "lines_fr": [
-            "Les trois bourdonnent ! Écoute-moi ça. L'ascenseur est sous tension : monte."
-          ]
-        },
-        {
-          "lines": [
-            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
-            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works."
-          ],
-          "lines_fr": [
-            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
-            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais."
-          ]
-        }
-      ]
-    },
     {
       "id": "t_corra",
       "name": "Corra",
@@ -728,6 +908,40 @@
       },
       "outfit": "#3d5a7a",
       "hair": "#d8d0c8"
+    },
+    {
+      "id": "nils",
+      "name": "Nils",
+      "model": "npc_worker",
+      "x": 2,
+      "z": 9,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#2f6b8a",
+      "hair": "#c8b89a",
+      "dialogue": [
+        {
+          "if": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3",
+          "lines": [
+            "All three humming! Listen to that. The lift's live: up you go."
+          ],
+          "lines_fr": [
+            "Les trois bourdonnent ! Écoute-moi ça. L'ascenseur est sous tension : monte."
+          ]
+        },
+        {
+          "lines": [
+            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
+            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
+            "Nicely never works."
+          ],
+          "lines_fr": [
+            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
+            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
+            "Poliment, ça ne marche jamais."
+          ]
+        }
+      ]
     }
   ],
   "ground": {

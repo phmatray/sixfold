@@ -79,8 +79,8 @@
       "label": "Climb back up",
       "label_fr": "Remonter",
       "spawn": {
-        "x": 13,
-        "z": 13,
+        "x": 19,
+        "z": 16,
         "facing": "s"
       },
       "dir": "s"

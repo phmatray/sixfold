@@ -114,8 +114,8 @@
       "label": "Go outside",
       "label_fr": "Sortir",
       "spawn": {
-        "x": 5,
-        "z": 13,
+        "x": 14,
+        "z": 15,
         "facing": "s"
       },
       "dir": "s"

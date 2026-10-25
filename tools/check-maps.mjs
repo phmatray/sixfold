@@ -46,8 +46,9 @@ const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
 const maps = Object.fromEntries(readdirSync(`${dir}/maps`).map((f) => [f.replace(".json", ""), JSON.parse(readFileSync(`${dir}/maps/${f}`, "utf8"))]));
 const fail = [], warn = [];
-// The placement rules (docs/WORLD_RULES.md) fail the build with --strict; without it they are listed as warnings
-// (until every map is re-laid to them).
+const open = {}; // per map: is a tile open ground (for warp: cues from other maps)
+// The placement rules (docs/WORLD_RULES.md) fail the build with --strict (as CI runs it); without it they are listed
+// as warnings, for a map in progress.
 const STRICT = process.argv.includes("--strict");
 const rule = [];
 // One screen at the default camera, measured: about 13 tiles across and 9 deep on a 1440 x 900 desktop (a phone
@@ -115,6 +116,7 @@ for (const [name, m] of Object.entries(maps)) {
   // crystals and glow plants, a worked mine with oil lanterns on its timbers (WORLD_RULES §2.6). Always an error.
   if (m.dark || m.kind === "cave" || m.cave)
     for (const p of m.props) if (["lantern", "lamp"].includes(p.asset)) fail.push(`${name}: a ${p.asset} at ${p.x},${p.z} in a cave; light it with glow_mushroom, glow_shelf or crystal_cluster`);
+  open[name] = (x, z) => x >= 0 && z >= 0 && x < m.width && z < m.height && !solid.has(`${x},${z}`);
   rules(name, m, solid, all);
   const ids = (m.npcs ?? []).map((n) => n.id);
   ids.filter((id, i) => ids.indexOf(id) !== i).forEach((id) => fail.push(`${name}: two NPCs are called ${id}`));
@@ -283,6 +285,11 @@ function reach(name, m, solid0, height0) {
     if (wm.map === name && !all.has(`${wm.x},${wm.z}`)) fail.push(`${name}: waymark ${wm.id}'s tile ${wm.x},${wm.z} can't be reached`);
   return all;
 }
+
+// Every `warp:<map>:<x>:<z>:<dir>` cue (a ferry, a lift) lands on open ground there.
+for (const [name, m] of Object.entries(maps))
+  for (const [, to, x, z] of JSON.stringify(m).matchAll(/"warp:([a-z_]+):(\d+):(\d+):[nesw]"/g))
+    if (!open[to]?.(+x, +z)) rule.push(`${name}: a warp: cue lands on ${to} ${x},${z}, which is not open ground`);
 
 // The atlas.
 if (!atlas) fail.push("atlas.json is missing");

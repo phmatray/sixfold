@@ -4,61 +4,112 @@
   "region": "storm",
   "kind": "town",
   "music": "storm",
-  "width": 32,
-  "height": 26,
+  "width": 52,
+  "height": 36,
   "tiles": [
-    "..............pp122222221.......",
-    "..............pp122222221.......",
-    "..............pp122222221ffffff.",
-    "..............pp122222221f....f.",
-    "..............pp122222221f....f.",
-    "..............pp122222221f....f.",
-    "....pppppppppppp122222221f....f.",
-    "..............pp111111111f....f.",
-    "..............pp111111111ff..ff.",
-    ".........rrrrrpp................",
-    ".........rrrrrpp....p...........",
-    ".........rrrrrpp....p....ppppppp",
-    "......ppprrrrrpppppppppppppppppp",
-    ".....pppprrrrrpppppppppppp......",
-    ".........rrrrrpp................",
-    "fffffffffrrrrrpp.............fff",
-    "..............ppp...............",
-    "..............ppp...............",
-    "1111111111....ppp.......11111111",
-    "2222222111....ppp.......11222222",
-    "2222222111ssssssssssssss11222222",
-    "2222222~~~~~~~~HHHHHHH~~~~222222",
-    "1111~~~~~~~~~~~HHHHHHH~~~~~~~111",
-    "~~~~~~~~~~~~~~~HHHHHHH~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    "ffffffffffffffffffffffffpppfffffffffffffffffffffffff",
+    "f.......................ppp....22222222222222......f",
+    "f.......................ppp....22222222222222......f",
+    "f.......................pp.....22222222222222......f",
+    "f.......................pp.....22222222222222......f",
+    "f.......................pp.....22222222222222......f",
+    "f.......................pp.....22222222222222......f",
+    "f.......................pp.....22222222222222......f",
+    "f...pppppppppppppppppppppp.....22222222222222......f",
+    "f...pppppppppppppppppppppp.....11111111111111......f",
+    "f.......................pp.....11111111111111......f",
+    "f.......................pp.........................f",
+    "f.......................pp...........pp............f",
+    "f.......................pp...........pp............f",
+    "f......p..........rrrrrrrrrrrrrr.....pp............f",
+    "f......p..........rrrrrrrrrrrrrr.....pp............f",
+    "f..pppppppppppppppprrrrrrrrrrrrrpppppppppppppppppppp",
+    "f..pppppppppppppppprrrrrrrrrrrrrpppppppppppppppppppp",
+    "f.ffffffff........rrrrrrrrrrrrrr............p....ppp",
+    "f.f......f........rrrrrrrrrrrrrr............p......f",
+    "f.f......f..............pp..................p......f",
+    "f.f......f..............pp........................~~",
+    "f.ffff.fff..............pp..............1111111111~~",
+    "f..ppppppppppppppppppppppp..............1111111111~~",
+    "f..ppppppppppppppppppppppp..............2222222222~~",
+    "f.......................pp..............2222222222~~",
+    "~~~~....................pp..............2222222222~~",
+    "~~~~rrrrrrrrrrrrrrrrrrrrpprrrrrrrrrrrrrr2222222222~~",
+    "~~~~rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr2222222222~~",
+    "~~~~ssssssssssssssssssssssssssssssssssss2222222222~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~HH~~~~~~~~~~~~~~~2222222222~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~HH~~~~~~~~~~~~~~~2222222222~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~HH~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~HH~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~HH~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   ],
   "props": [
     {
-      "asset": "observatory",
-      "x": 18,
-      "z": 1,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "stairs_heath",
-      "x": 20,
-      "z": 9,
+      "asset": "signpost",
+      "x": 27,
+      "z": 3,
       "rot": 0
     },
     {
-      "asset": "stairs_heath",
-      "x": 20,
-      "z": 7,
+      "asset": "signpost",
+      "x": 47,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 22,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 23,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 27,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "waymark",
+      "x": 28,
+      "z": 17,
       "rot": 0,
-      "y": 1
+      "glow": "#e2ad19"
+    },
+    {
+      "asset": "chime_post",
+      "x": 18,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 31,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 19,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 30,
+      "z": 19,
+      "rot": 0
     },
     {
       "asset": "cottage",
-      "x": 3,
-      "z": 9,
+      "x": 12,
+      "z": 11,
       "rot": 0,
       "recolor": {
         "sx_plaster": "#eef0ec",
@@ -69,14 +120,14 @@
     },
     {
       "asset": "inn_sign",
-      "x": 7,
-      "z": 13,
+      "x": 17,
+      "z": 15,
       "rot": 0
     },
     {
       "asset": "cottage",
-      "x": 2,
-      "z": 1,
+      "x": 4,
+      "z": 3,
       "rot": 0,
       "recolor": {
         "sx_plaster": "#e7e2d8",
@@ -86,8 +137,31 @@
     },
     {
       "asset": "cottage",
-      "x": 8,
-      "z": 1,
+      "x": 12,
+      "z": 3,
+      "rot": 0,
+      "recolor": {
+        "sx_plaster": "#efe9dc",
+        "sx_roof_brown": "#6a5446",
+        "sx_roof_brown_dk": "#554337",
+        "sx_awning_red": "#e1ac1f"
+      }
+    },
+    {
+      "asset": "cottage",
+      "x": 5,
+      "z": 11,
+      "rot": 0,
+      "recolor": {
+        "sx_plaster": "#e7e2d8",
+        "sx_roof_brown": "#5b6470",
+        "sx_roof_brown_dk": "#48505a"
+      }
+    },
+    {
+      "asset": "cottage",
+      "x": 12,
+      "z": 18,
       "rot": 0,
       "recolor": {
         "sx_plaster": "#efe9dc",
@@ -98,8 +172,8 @@
     },
     {
       "asset": "workshop",
-      "x": 21,
-      "z": 16,
+      "x": 19,
+      "z": 10,
       "rot": 0,
       "recolor": {
         "sx_slate": "#4f5a66",
@@ -107,389 +181,1068 @@
       }
     },
     {
-      "asset": "terrace_house",
-      "x": 25,
-      "z": 14,
-      "rot": 0,
-      "recolor": {
-        "sx_sn_masonry": "#b9b6ad",
-        "sx_sn_masonry_dk": "#9b988f",
-        "sx_sn_roof": "#4f5a66",
-        "sx_sn_roof_dk": "#3e4752",
-        "sx_sn_rust": "#2f6b8a",
-        "sx_sn_rust_dk": "#24546d",
-        "sx_sn_door": "#2f4a6b"
-      }
-    },
-    {
-      "asset": "stall_b",
-      "x": 10,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "bench",
-      "x": 9,
-      "z": 9,
-      "rot": 0
-    },
-    {
-      "asset": "crates",
-      "x": 8,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "chime_post",
-      "x": 8,
-      "z": 9,
-      "rot": 0
-    },
-    {
-      "asset": "lighthouse",
-      "x": 28,
-      "z": 19,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "chime_post",
-      "x": 22,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "crab_pots",
-      "x": 29,
-      "z": 17,
-      "rot": 0
-    },
-    {
-      "asset": "waymark",
-      "x": 11,
-      "z": 10,
-      "rot": 0,
-      "glow": "#e2ad19"
-    },
-    {
-      "asset": "lantern",
-      "x": 8,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 17,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 13,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 22,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 16,
+      "asset": "flowers",
+      "x": 3,
       "z": 19,
       "rot": 0
     },
     {
-      "asset": "lantern",
-      "x": 21,
+      "asset": "flowers",
+      "x": 5,
       "z": 19,
       "rot": 0
     },
     {
-      "asset": "lantern",
-      "x": 12,
-      "z": 4,
-      "rot": 0
-    },
-    {
-      "asset": "signpost",
-      "x": 13,
-      "z": 1,
-      "rot": 0
-    },
-    {
-      "asset": "signpost",
-      "x": 29,
-      "z": 13,
-      "rot": 0
-    },
-    {
       "asset": "flowers",
-      "x": 26,
-      "z": 3,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 28,
-      "z": 3,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 27,
-      "z": 5,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 29,
-      "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 26,
-      "z": 7,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 29,
-      "z": 3,
-      "rot": 0
-    },
-    {
-      "asset": "crab_pots",
-      "x": 21,
+      "x": 3,
       "z": 21,
       "rot": 0
     },
     {
-      "asset": "crab_pots",
-      "x": 15,
-      "z": 23,
-      "rot": 0
-    },
-    {
-      "asset": "boat",
-      "x": 12,
-      "z": 22,
-      "rot": 0
-    },
-    {
-      "asset": "ferry",
-      "x": 22,
-      "z": 22,
-      "rot": 0
-    },
-    {
-      "asset": "net_rack",
-      "x": 10,
-      "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "crates",
-      "x": 24,
-      "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "bench",
-      "x": 17,
-      "z": 17,
-      "rot": 0
-    },
-    {
-      "asset": "heather",
-      "x": 2,
-      "z": 19,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "heather",
+      "asset": "flowers",
       "x": 5,
-      "z": 18,
-      "rot": 0,
-      "y": 1
+      "z": 21,
+      "rot": 0
     },
     {
-      "asset": "heather",
+      "asset": "flowers",
+      "x": 7,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
       "x": 8,
-      "z": 18,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "heather",
-      "x": 27,
       "z": 19,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "heather",
-      "x": 30,
-      "z": 20,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "heather",
-      "x": 24,
-      "z": 18,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "rock",
-      "x": 1,
-      "z": 20,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "rock",
-      "x": 29,
-      "z": 19,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "heather",
-      "x": 1,
-      "z": 7,
       "rot": 0
     },
     {
-      "asset": "heather",
-      "x": 0,
-      "z": 13,
+      "asset": "flowers",
+      "x": 9,
+      "z": 15,
       "rot": 0
     },
     {
-      "asset": "heather",
+      "asset": "flowers",
       "x": 10,
-      "z": 7,
+      "z": 15,
       "rot": 0
     },
     {
-      "asset": "heather",
-      "x": 23,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "heather",
-      "x": 31,
-      "z": 9,
-      "rot": 0
-    },
-    {
-      "asset": "heather",
-      "x": 12,
-      "z": 17,
-      "rot": 0
-    },
-    {
-      "asset": "heather",
-      "x": 1,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "heather",
-      "x": 29,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "heather",
+      "asset": "bush",
       "x": 17,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "observatory",
+      "x": 36,
+      "z": 2,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "stairs_heath",
+      "x": 37,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "stairs_heath",
+      "x": 37,
+      "z": 9,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "chime_post",
+      "x": 32,
+      "z": 3,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "chime_post",
+      "x": 43,
+      "z": 3,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 33,
+      "z": 6,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 42,
+      "z": 7,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 34,
       "z": 2,
       "rot": 0,
       "y": 2
     },
     {
       "asset": "heather",
-      "x": 22,
-      "z": 0,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "heather",
-      "x": 23,
+      "x": 44,
       "z": 5,
       "rot": 0,
       "y": 2
     },
     {
       "asset": "heather",
-      "x": 24,
-      "z": 3,
+      "x": 31,
+      "z": 8,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "stall_b",
+      "x": 20,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 18,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 17,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "workshop",
+      "x": 6,
+      "z": 25,
+      "rot": 0,
+      "recolor": {
+        "sx_slate": "#4f5a66",
+        "sx_slate_dk": "#3e4752"
+      }
+    },
+    {
+      "asset": "net_rack",
+      "x": 10,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 13,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 27,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 29,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 21,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 18,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "ferry",
+      "x": 25,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 33,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 33,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 36,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 34,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 38,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 38,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 32,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 4,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 10,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 12,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 16,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 12,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "stairs_heath",
+      "x": 44,
+      "z": 21,
+      "rot": 180
+    },
+    {
+      "asset": "stairs_heath",
+      "x": 44,
+      "z": 23,
+      "rot": 180,
+      "y": 1
+    },
+    {
+      "asset": "lighthouse",
+      "x": 46,
+      "z": 27,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 42,
+      "z": 26,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "bench",
+      "x": 42,
+      "z": 30,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 40,
+      "z": 25,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 24,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 30,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 40,
+      "z": 31,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 45,
+      "z": 25,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 22,
       "rot": 0,
       "y": 1
     },
     {
       "asset": "heather",
-      "x": 16,
-      "z": 4,
+      "x": 48,
+      "z": 22,
       "rot": 0,
       "y": 1
     },
     {
-      "asset": "chime_post",
-      "x": 6,
+      "asset": "lantern",
+      "x": 26,
       "z": 7,
       "rot": 0
     },
     {
-      "asset": "chime_post",
-      "x": 24,
+      "asset": "lantern",
+      "x": 23,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 17,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 32,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 11,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 5,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 9,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 17,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 23,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 26,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 31,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 23,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 36,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 42,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 48,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 49,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 45,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 49,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 50,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 46,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 2,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 6,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 7,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 9,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 13,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 14,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 17,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 19,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 20,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 21,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 22,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 28,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 30,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 45,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 2,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 3,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 3,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 2,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
       "z": 9,
       "rot": 0
     },
     {
-      "asset": "chime_post",
+      "asset": "heather",
+      "x": 49,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 2,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 3,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 3,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 2,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 3,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 4,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 11,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 12,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 47,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 3,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 2,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 2,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 2,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 48,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 2,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 2,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
       "x": 2,
       "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 3,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 40,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 2,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 27,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 47,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 31,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 19,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 46,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 11,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 48,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 28,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 42,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 10,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 9,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 47,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 27,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 45,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 21,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 22,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 45,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 28,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 30,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 47,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 47,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 49,
+      "z": 21,
       "rot": 0
     }
   ],
   "spawn": {
-    "x": 14,
-    "z": 3,
+    "x": 25,
+    "z": 8,
     "facing": "s"
   },
   "interactions": [
     {
-      "kind": "waymark",
-      "id": "stormwatch",
-      "x": 11,
-      "z": 10
-    },
-    {
-      "x": 13,
-      "z": 1,
       "kind": "sign",
       "text": "North: the Thrumming Downs, and Cinderwick beyond. South: the harbour.",
-      "text_fr": "Nord : les Landes Vibrantes, et Mèche-Cendre au-delà. Sud : le port."
+      "text_fr": "Nord : Les Landes Vibrantes, et Mèche-Cendre au-delà. Sud : le port.",
+      "x": 27,
+      "z": 3
     },
     {
-      "x": 29,
-      "z": 13,
       "kind": "sign",
-      "text": "East: the Rodspire causeway. Mind the waves, and the lightning.",
-      "text_fr": "Est : la chaussée de l'Aiguille-Foudre. Attention aux vagues, et à la foudre."
+      "text": "East: The Rodspire, along the causeway. Mind the waves, and the lightning.",
+      "text_fr": "Est : L'Aiguille-Foudre, par la chaussée. Attention aux vagues, et à la foudre.",
+      "x": 47,
+      "z": 14
     },
     {
-      "x": 7,
-      "z": 13,
+      "kind": "sign",
+      "text": "Stormwatch square. North: the Downs road. East: the causeway to The Rodspire. South: the harbour and the ferry. West: the lanes and the Weathervane.",
+      "text_fr": "Place de Guette-Orage. Nord : la route des Landes. Est : la chaussée de L'Aiguille-Foudre. Sud : le port et le bac. Ouest : les ruelles et la Girouette.",
+      "x": 22,
+      "z": 12
+    },
+    {
+      "kind": "waymark",
+      "id": "stormwatch",
+      "x": 28,
+      "z": 17
+    },
+    {
+      "x": 17,
+      "z": 15,
       "kind": "sign",
       "text": "The Weathervane. Beds, a fire, and the storm log.",
       "text_fr": "La Girouette. Des lits, un feu, et le journal des tempêtes."
@@ -497,8 +1250,8 @@
     {
       "kind": "find",
       "id": "st_garden",
-      "x": 29,
-      "z": 3,
+      "x": 8,
+      "z": 19,
       "give": "card:jolt_wire",
       "hidden": true,
       "text": "Under the rosemary, in the corner the wind never reaches: a card in an oilcloth wrap.",
@@ -507,29 +1260,26 @@
     {
       "kind": "find",
       "id": "st_dock",
-      "x": 21,
-      "z": 21,
+      "x": 27,
+      "z": 28,
       "give": "coins:60",
       "text": "In the bottom of a crab pot, under the weed: Facets. Somebody's emergency fund, or a crab's.",
       "text_fr": "Au fond d'un casier à crabes, sous les algues : des Facettes. La réserve de quelqu'un, ou celle d'un crabe."
+    },
+    {
+      "kind": "find",
+      "id": "st_struck",
+      "give": "coins:40",
+      "text": "In the split of the pine the lightning opened, fused into the bark: a few Facets, still faintly warm.",
+      "text_fr": "Dans la fente du pin que la foudre a ouvert, soudées à l'écorce : quelques Facettes, encore un peu tièdes.",
+      "x": 42,
+      "z": 26
     }
   ],
   "warps": [
     {
-      "x": 20,
-      "z": 5,
-      "to": "observatory",
-      "label": "Go into the Observatory",
-      "label_fr": "Entrer dans l'Observatoire",
-      "spawn": {
-        "x": 6,
-        "z": 9,
-        "facing": "n"
-      }
-    },
-    {
-      "x": 5,
-      "z": 12,
+      "x": 14,
+      "z": 14,
       "to": "inn_storm",
       "label": "Go into the Weathervane",
       "label_fr": "Entrer à la Girouette",
@@ -538,132 +1288,45 @@
         "z": 7,
         "facing": "n"
       }
+    },
+    {
+      "x": 38,
+      "z": 6,
+      "to": "observatory",
+      "label": "Go into the Observatory",
+      "label_fr": "Entrer dans l'Observatoire",
+      "spawn": {
+        "x": 6,
+        "z": 9,
+        "facing": "n"
+      }
     }
   ],
   "exits": [
     {
       "side": "n",
       "span": [
-        14,
-        15
+        24,
+        26
       ],
       "to": "downs"
     },
     {
       "side": "e",
       "span": [
-        11,
-        12
+        16,
+        18
       ],
       "to": "rodspire"
     }
   ],
   "npcs": [
     {
-      "id": "bo",
-      "name": "Bo",
-      "model": "npc_sailor",
-      "x": 18,
-      "z": 20,
-      "facing": "s",
-      "idle": "Idle",
-      "outfit": "#3d5a7a",
-      "hair": "#5a4030",
-      "dialogue": [
-        {
-          "if": "item:ferry_pass",
-          "lines": [
-            "Pass: stamped. Twice. Ines. Wind: fair. Gullhaven: aboard."
-          ],
-          "lines_fr": [
-            "Laissez-passer : tamponné. Deux fois. Ines. Vent : favorable. Havre-aux-Mouettes : embarque."
-          ],
-          "do": [
-            "warp:gullhaven:26:21:w"
-          ]
-        },
-        {
-          "if": "flag:bo_asked",
-          "lines": [
-            "Sorry, too much salt in the mouth. I'll say it slow.",
-            "The ferry runs to Gullhaven, on the Saltreach coast. The Harbour Office there stamps the passes now: two hundred and fifty Facets, and Ines Varga stamps it twice.",
-            "Walk there round the coast, by the meadow and the Saltwind Boardwalk. Come back with a pass and we'll be across by noon. Lou crews the far side."
-          ],
-          "lines_fr": [
-            "Pardon, trop de sel dans la bouche. Je le redis lentement.",
-            "Le bac va jusqu'à Havre-aux-Mouettes, sur la Côte Salée. La Capitainerie de là-bas tamponne les laissez-passer, maintenant : deux cent cinquante Facettes, et Ines Varga tamponne deux fois.",
-            "Vas-y par la côte, par le pré et la Promenade de Ventsalé. Reviens avec un laissez-passer et on traversera avant midi. Lou tient l'autre rive."
-          ]
-        },
-        {
-          "lines": [
-            "Ferry: ready. Pass: none. Office: Gullhaven. Price: two-fifty. Lou: far side. Wind: sou'west, freshening."
-          ],
-          "lines_fr": [
-            "Bac : paré. Laissez-passer : aucun. Bureau : Havre-aux-Mouettes. Prix : deux cent cinquante. Lou : en face. Vent : suroît, fraîchissant."
-          ],
-          "do": [
-            "flag:bo_asked"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "pim",
-      "name": "Pim",
-      "model": "npc_kid",
-      "x": 12,
-      "z": 14,
-      "facing": "n",
-      "idle": "Idle",
-      "outfit": "#e2ad19",
-      "hair": "#3a2a20",
-      "if": "!time:night",
-      "dialogue": [
-        {
-          "lines": [
-            "I'm Pim! Quill's apprentice. Well, log-keeper. She's off duelling down the coast just now.",
-            "She says the Rodspire will be hers one day. And that everyone forgets to watch their Bench.",
-            "Oh. I wasn't supposed to say that. Forget I said that."
-          ],
-          "lines_fr": [
-            "Moi, c'est Pim ! L'apprenti de Quill. Enfin, le teneur de journal. Elle est partie faire des duels sur la côte, en ce moment.",
-            "Elle dit que l'Aiguille-Foudre sera à elle un jour. Et que tout le monde oublie de surveiller son Banc.",
-            "Oh. Je n'étais pas censé dire ça. Oublie que j'ai dit ça."
-          ]
-        }
-      ]
-    },
-    {
-      "id": "wenna",
-      "name": "Wenna",
-      "model": "npc_sailor",
-      "x": 10,
-      "z": 15,
-      "facing": "s",
-      "idle": "Idle",
-      "outfit": "#c0582d",
-      "hair": "#d8c8a0",
-      "if": "!time:night",
-      "dialogue": [
-        {
-          "lines": [
-            "Mackerel! Crab! Something with too many legs, ask me later!",
-            "Rhian buys half my catch for the Weathervane's stew. The other half, Bo eats while pretending to count it."
-          ],
-          "lines_fr": [
-            "Maquereau ! Crabe ! Un truc avec trop de pattes, demande-moi plus tard !",
-            "Rhian m'achète la moitié de ma pêche pour le ragoût de la Girouette. L'autre moitié, Bo la mange en faisant semblant de la compter."
-          ]
-        }
-      ]
-    },
-    {
       "id": "oswin",
       "name": "Oswin",
       "model": "npc_elder",
-      "x": 16,
-      "z": 10,
+      "x": 20,
+      "z": 15,
       "facing": "e",
       "idle": "Idle",
       "outfit": "#4f5a66",
@@ -702,8 +1365,8 @@
       "id": "t_greer",
       "name": "Greer",
       "model": "npc_wanderer",
-      "x": 13,
-      "z": 9,
+      "x": 32,
+      "z": 21,
       "facing": "w",
       "idle": "Idle",
       "trainer": {
@@ -754,6 +1417,105 @@
           ],
           "lines_fr": [
             "Léger, et encore trop pour toi. Hum. Non : c'est toi qui étais plus léger."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pim",
+      "name": "Pim",
+      "model": "npc_kid",
+      "x": 39,
+      "z": 12,
+      "facing": "w",
+      "idle": "Idle",
+      "outfit": "#e2ad19",
+      "hair": "#3a2a20",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "I'm Pim! Quill's apprentice. Well, log-keeper. She's off duelling down the coast just now.",
+            "She says the Rodspire will be hers one day. And that everyone forgets to watch their Bench.",
+            "Oh. I wasn't supposed to say that. Forget I said that."
+          ],
+          "lines_fr": [
+            "Moi, c'est Pim ! L'apprenti de Quill. Enfin, le teneur de journal. Elle est partie faire des duels sur la côte, en ce moment.",
+            "Elle dit que l'Aiguille-Foudre sera à elle un jour. Et que tout le monde oublie de surveiller son Banc.",
+            "Oh. Je n'étais pas censé dire ça. Oublie que j'ai dit ça."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wenna",
+      "name": "Wenna",
+      "model": "npc_sailor",
+      "x": 20,
+      "z": 26,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#c0582d",
+      "hair": "#d8c8a0",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Mackerel! Crab! Something with too many legs, ask me later!",
+            "Rhian buys half my catch for the Weathervane's stew. The other half, Bo eats while pretending to count it."
+          ],
+          "lines_fr": [
+            "Maquereau ! Crabe ! Un truc avec trop de pattes, demande-moi plus tard !",
+            "Rhian m'achète la moitié de ma pêche pour le ragoût de la Girouette. L'autre moitié, Bo la mange en faisant semblant de la compter."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bo",
+      "name": "Bo",
+      "model": "npc_sailor",
+      "x": 22,
+      "z": 28,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#3d5a7a",
+      "hair": "#5a4030",
+      "dialogue": [
+        {
+          "if": "item:ferry_pass",
+          "lines": [
+            "Pass: stamped. Twice. Ines. Wind: fair. Gullhaven: aboard."
+          ],
+          "lines_fr": [
+            "Laissez-passer : tamponné. Deux fois. Ines. Vent : favorable. Havre-aux-Mouettes : embarque."
+          ],
+          "do": [
+            "warp:gullhaven:31:25:n"
+          ]
+        },
+        {
+          "if": "flag:bo_asked",
+          "lines": [
+            "Sorry, too much salt in the mouth. I'll say it slow.",
+            "The ferry runs to Gullhaven, on the Saltreach coast. The Harbour Office there stamps the passes now: two hundred and fifty Facets, and Ines Varga stamps it twice.",
+            "Walk there round the coast, by the meadow and the Saltwind Boardwalk. Come back with a pass and we'll be across by noon. Lou crews the far side."
+          ],
+          "lines_fr": [
+            "Pardon, trop de sel dans la bouche. Je le redis lentement.",
+            "Le bac va jusqu'à Havre-aux-Mouettes, sur la Côte Salée. La Capitainerie de là-bas tamponne les laissez-passer, maintenant : deux cent cinquante Facettes, et Ines Varga tamponne deux fois.",
+            "Vas-y par la côte, par le pré et la Promenade de Ventsalé. Reviens avec un laissez-passer et on traversera avant midi. Lou tient l'autre rive."
+          ]
+        },
+        {
+          "lines": [
+            "Ferry: ready. Pass: none. Office: Gullhaven. Price: two-fifty. Lou: far side. Wind: sou'west, freshening."
+          ],
+          "lines_fr": [
+            "Bac : paré. Laissez-passer : aucun. Bureau : Havre-aux-Mouettes. Prix : deux cent cinquante. Lou : en face. Vent : suroît, fraîchissant."
+          ],
+          "do": [
+            "flag:bo_asked"
           ]
         }
       ]

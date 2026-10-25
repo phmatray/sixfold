@@ -4,48 +4,118 @@
   "region": "dream",
   "kind": "route",
   "music": "dream",
-  "width": 24,
-  "height": 32,
+  "width": 28,
+  "height": 44,
   "tiles": [
-    "............pp..........",
-    "...........ppp..........",
-    "...........pp...........",
-    "..........pp......~~~...",
-    "..........pp.....~~~~~..",
-    ".........pp......~~~~~..",
-    "..11111..pp.......~~~...",
-    ".1111111.pp.............",
-    ".1111111.pp.............",
-    ".1111111.pp.............",
-    "..11111.pp..............",
-    ".........pp.............",
-    ".........pp.............",
-    ".........pp.............",
-    ".........pp.............",
-    ".........pp.............",
-    "..........pp............",
-    "........~~~~..........~~",
-    "......~~~~~~~~~~~~~~~~~~",
-    ".....~~~...p~~~~~~~~~~..",
-    "....~~......pp..........",
-    "~~~~~......pp...........",
-    "~~~~~......pp...........",
-    ".~~~~......pp...........",
-    ".~~~~.....pp............",
-    ".~~~~.....pp............",
-    "~~~~......pp............",
-    "~~~.......pp............",
-    "..........pp............",
-    "..........pp............",
-    "..........ppp...........",
-    "...........pp..........."
+    "............rrr.............",
+    "...........rrrrr............",
+    "...........rrrrr............",
+    "...........rrppr............",
+    ".............pp.............",
+    ".............pp.............",
+    "..111111.....pp.............",
+    ".1111111.....pp.....~~~~....",
+    ".1111111.....pp....~~~~~~...",
+    ".1111111.pppppp....~~~~~~...",
+    "..11111..pppppp.....~~~~....",
+    ".........pp.................",
+    ".........pp.................",
+    ".........pp.................",
+    ".........ppppp..............",
+    ".........ppppp..............",
+    "............pp..............",
+    ".........~~~pp~~~~~~~~~~~~~~",
+    ".........~~~pp~~~~~~~~~~~~~~",
+    "......~~~~~.pp..............",
+    "....~~~~~~..pp..............",
+    "..~~~~~~~...pp..............",
+    "~~~~~~~~....pp..............",
+    "~~~~~~~.....pp..............",
+    "~~~~~~~.....pp..............",
+    "~~~~~~~.....pp..............",
+    "~~~~~~~.....pp..............",
+    "~~~~~~~.....pp..............",
+    "..~~~~~.....pp..............",
+    "..~~~~~ppppppp..............",
+    "..~~~~~.....pp..............",
+    "~~~~~~......pp..............",
+    "~~~~~.......pp..............",
+    "............ppp.............",
+    "............ppp.............",
+    ".............pp.............",
+    ".............pp.............",
+    ".............pp.............",
+    ".............pp.............",
+    ".............pp.............",
+    "............ppp.............",
+    "............ppp.............",
+    "............ppp.............",
+    "............ppp............."
   ],
   "props": [
     {
-      "asset": "bridge",
-      "x": 10,
-      "z": 16,
+      "asset": "signpost",
+      "x": 16,
+      "z": 4,
       "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 15,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 9,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 0,
+      "z": 29,
+      "rot": 90
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 10,
+      "z": 2,
+      "rot": 0,
+      "why": "Brightwell's last street lamp, at the lane's mouth"
+    },
+    {
+      "asset": "lantern",
+      "x": 16,
+      "z": 2,
+      "rot": 0,
+      "why": "Brightwell's last street lamp, at the lane's mouth"
+    },
+    {
+      "asset": "lantern",
+      "x": 14,
+      "z": 15,
+      "rot": 0,
+      "why": "the brook bridge"
+    },
+    {
+      "asset": "lantern",
+      "x": 11,
+      "z": 40,
+      "rot": 0,
+      "why": "Lanternmere's first lamp, where the lane comes in"
     },
     {
       "asset": "stairs",
@@ -61,500 +131,9 @@
       "y": 1
     },
     {
-      "asset": "wisteria_arch",
-      "x": 11,
-      "z": 2,
-      "rot": 0
-    },
-    {
-      "asset": "wisteria_arch",
-      "x": 10,
-      "z": 26,
-      "rot": 0
-    },
-    {
-      "asset": "signpost",
-      "x": 14,
-      "z": 2,
-      "rot": 0
-    },
-    {
-      "asset": "signpost",
-      "x": 6,
-      "z": 23,
-      "rot": 0
-    },
-    {
-      "asset": "signpost",
-      "x": 13,
-      "z": 30,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 15,
-      "z": 0,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 8,
-      "z": 0,
-      "rot": 0
-    },
-    {
-      "asset": "rock",
-      "x": 3,
-      "z": 30,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 1,
-      "z": 1,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 5,
-      "z": 2,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 14,
-      "z": 4,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 22,
-      "z": 0,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 15,
-      "z": 9,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 21,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 1,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 6,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 19,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 8,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 14,
-      "z": 22,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 20,
-      "z": 21,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
+      "asset": "flowers",
       "x": 2,
-      "z": 28,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 6,
-      "z": 29,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 16,
-      "z": 29,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 20,
-      "z": 26,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 7,
-      "z": 25,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 11,
-      "z": 5,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 8,
-      "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 14,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 12,
-      "z": 28,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 14,
-      "z": 15,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 9,
-      "z": 8,
-      "rot": 0
-    },
-    {
-      "asset": "floating_lantern",
-      "x": 18,
-      "z": 4,
-      "rot": 0,
-      "y": 0.06
-    },
-    {
-      "asset": "floating_lantern",
-      "x": 20,
-      "z": 5,
-      "rot": 0,
-      "y": 0.06
-    },
-    {
-      "asset": "floating_lantern",
-      "x": 19,
-      "z": 3,
-      "rot": 0,
-      "y": 0.06
-    },
-    {
-      "asset": "reeds",
-      "x": 16,
-      "z": 4,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 22,
-      "z": 5,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 21,
-      "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "moonflower",
-      "x": 16,
-      "z": 24,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 17,
-      "z": 25,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 18,
-      "z": 24,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 19,
-      "z": 25,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 17,
-      "z": 23,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 15,
-      "z": 25,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 18,
-      "z": 26,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 20,
-      "z": 24,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "reeds",
-      "x": 23,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 23,
-      "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 19,
-      "z": 17,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 19,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 17,
-      "z": 17,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 17,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 13,
-      "z": 17,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 9,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 9,
-      "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 7,
-      "z": 17,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 7,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 6,
-      "z": 21,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 5,
-      "z": 26,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 4,
-      "z": 27,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 0,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 1,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 0,
-      "z": 23,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 0,
-      "z": 25,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 10,
-      "z": 3,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 16,
-      "z": 5,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 19,
       "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 4,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 13,
-      "z": 27,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 21,
-      "z": 29,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 8,
-      "z": 30,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 22,
-      "z": 3,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 2,
-      "z": 18,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 0,
-      "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 23,
-      "z": 8,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 11,
-      "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 22,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 0,
-      "z": 30,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 23,
-      "z": 31,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 15,
-      "z": 31,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 10,
-      "z": 22,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 2,
-      "z": 9,
       "rot": 0,
       "y": 1
     },
@@ -580,48 +159,1542 @@
       "y": 1
     },
     {
+      "asset": "flowers",
+      "x": 9,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 17,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 8,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 18,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 19,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 21,
+      "z": 7,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 23,
+      "z": 8,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 20,
+      "z": 9,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 22,
+      "z": 10,
+      "rot": 0,
+      "y": 0.06
+    },
+    {
+      "asset": "willow",
+      "x": 25,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 15,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 18,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bridge",
+      "x": 12,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 15,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 20,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 24,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 10,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 11,
+      "z": 15,
+      "rot": 0,
+      "glow": "#b48cff"
+    },
+    {
+      "asset": "crates",
+      "x": 18,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "moonflower",
+      "x": 17,
+      "z": 25,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 18,
+      "z": 25,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 21,
+      "z": 23,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 22,
+      "z": 24,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 21,
+      "z": 26,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 15,
+      "z": 22,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 20,
+      "z": 28,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 17,
+      "z": 28,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 23,
+      "z": 26,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "willow",
+      "x": 22,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "glow_mushroom_tall",
+      "x": 15,
+      "z": 27,
+      "rot": 0,
+      "glow": "#b48cff"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 7,
+      "z": 27,
+      "rot": 0,
+      "glow": "#b48cff"
+    },
+    {
+      "asset": "reeds",
+      "x": 7,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 7,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "wisteria_arch",
+      "x": 12,
+      "z": 35,
+      "rot": 0
+    },
+    {
       "asset": "rock",
+      "x": 9,
+      "z": 36,
+      "rot": 0
+    },
+    {
+      "asset": "stump",
+      "x": 20,
+      "z": 37,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 16,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 10,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "moonflower",
+      "x": 8,
+      "z": 41,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 18,
+      "z": 41,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 36,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
       "x": 2,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 8,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 18,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 20,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 22,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 24,
+      "z": 42,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 15,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 27,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 27,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 27,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 27,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 37,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 41,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 15,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 43,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 9,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 5,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 22,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 24,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 3,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 9,
       "z": 23,
       "rot": 0
     },
     {
-      "asset": "signpost",
-      "x": 0,
+      "asset": "willow",
+      "x": 9,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 17,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 19,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 21,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 23,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 8,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 18,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 20,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 22,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 24,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 3,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 7,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 5,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 24,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 36,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 7,
+      "z": 36,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 24,
+      "z": 37,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 9,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 24,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 13,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 20,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 20,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 20,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 24,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
       "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 15,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 24,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 36,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 36,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 37,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 37,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 37,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 37,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 40,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 1,
+      "z": 41,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 41,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 41,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 8,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 2,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 22,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 24,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 25,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 26,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 3,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 26,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 25,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 6,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 36,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 2,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 38,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 39,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 3,
+      "z": 41,
       "rot": 0
     }
   ],
   "spawn": {
-    "x": 12,
-    "z": 1,
+    "x": 13,
+    "z": 2,
     "facing": "s"
   },
   "interactions": [
     {
-      "x": 14,
-      "z": 2,
+      "x": 16,
+      "z": 4,
       "kind": "sign",
       "text": "North: Brightwell Square. South: Lanternmere, on its lake. West, over the ford: the Deepgrove.",
       "text_fr": "Nord : la Place de Clairpuits. Sud : Lac-aux-Lanternes, sur son lac. Ouest, après le gué : le Bois-Profond."
     },
     {
-      "x": 13,
-      "z": 30,
+      "x": 15,
+      "z": 39,
       "kind": "sign",
       "text": "South: Lanternmere and its lanterns. North, up the lane: Brightwell Square.",
       "text_fr": "Sud : Lac-aux-Lanternes et ses lanternes. Nord, en remontant l'allée : la Place de Clairpuits."
     },
     {
-      "x": 6,
-      "z": 23,
+      "x": 9,
+      "z": 28,
       "kind": "sign",
       "text": "The Hush ford. Deepgrove folk cross here in boots. Everyone else gets wet.",
       "text_fr": "Le gué du Murmure. Les gens du Bois-Profond le passent en bottes. Les autres se mouillent."
     },
     {
       "x": 0,
-      "z": 24,
+      "z": 29,
       "kind": "sign",
       "text": "West: Rootholm and the Deepgrove. The bank path is washed out past the bend; the Rootholm folk are rebuilding it. Mind the roots.",
       "text_fr": "Ouest : Racinemont et le Bois-Profond. Le chemin de la rive est emporté après le coude ; les gens de Racinemont le reconstruisent. Attention aux racines."
@@ -846,8 +1919,37 @@
       ]
     },
     {
-      "x": 3,
-      "z": 30,
+      "kind": "find",
+      "id": "d_tree",
+      "x": 4,
+      "z": 8,
+      "give": "coins:40",
+      "hidden": true,
+      "text": "Between two roots, where the coins people drop roll to: a little hoard of Facets. The tree won't miss them. Probably.",
+      "text_fr": "Entre deux racines, là où roulent les pièces que les gens laissent tomber : un petit magot de Facettes. L'arbre ne s'en apercevra pas. Sans doute."
+    },
+    {
+      "kind": "find",
+      "id": "d_willow",
+      "x": 22,
+      "z": 21,
+      "give": "card:dozel",
+      "hidden": true,
+      "text": "In a hollow of the old willow, behind the curtain of leaves: a card, curled up like something asleep.",
+      "text_fr": "Dans un creux du vieux saule, derrière le rideau de feuilles : une carte, enroulée comme une bête qui dort."
+    },
+    {
+      "kind": "find",
+      "id": "d_ford",
+      "x": 4,
+      "z": 28,
+      "give": "coins:60",
+      "text": "Mid-ford, on the biggest stone, the water has piled up a little drift of Facets in a crack. Boots planted, you scoop them out.",
+      "text_fr": "Au milieu du gué, sur la plus grosse pierre, le courant a accumulé quelques Facettes dans une fente. Les bottes bien plantées, vous les ramassez."
+    },
+    {
+      "x": 9,
+      "z": 36,
       "kind": "sign",
       "id": "slipper",
       "name": "Something in the grass",
@@ -865,32 +1967,12 @@
     },
     {
       "kind": "find",
-      "id": "d_tree",
-      "x": 4,
-      "z": 8,
-      "give": "coins:40",
-      "hidden": true,
-      "text": "Between two roots, where the coins people drop roll to: a little hoard of Facets. The tree won't miss them. Probably.",
-      "text_fr": "Entre deux racines, là où roulent les pièces que les gens laissent tomber : un petit magot de Facettes. L'arbre ne s'en apercevra pas. Sans doute."
-    },
-    {
-      "kind": "find",
-      "id": "d_willow",
+      "id": "d_nook_lane",
+      "give": "coins:30",
+      "text": "Inside the hollow stump, under a fall of willow leaves: a little pouch of Facets, damp but whole.",
+      "text_fr": "Dans la souche creuse, sous une pluie de feuilles de saule : une petite bourse de Facettes, humide mais intacte.",
       "x": 20,
-      "z": 21,
-      "give": "card:dozel",
-      "hidden": true,
-      "text": "In a hollow of the old willow, behind the curtain of leaves: a card, curled up like something asleep.",
-      "text_fr": "Dans un creux du vieux saule, derrière le rideau de feuilles : une carte, enroulée comme une bête qui dort."
-    },
-    {
-      "kind": "find",
-      "id": "d_ford",
-      "x": 2,
-      "z": 23,
-      "give": "coins:60",
-      "text": "Mid-ford, on the biggest stone, the water has piled up a little drift of Facets in a crack. Boots planted, you scoop them out.",
-      "text_fr": "Au milieu du gué, sur la plus grosse pierre, le courant a accumulé quelques Facettes dans une fente. Les bottes bien plantées, vous les ramassez."
+      "z": 37
     }
   ],
   "warps": [],
@@ -899,15 +1981,15 @@
       "side": "n",
       "span": [
         12,
-        13
+        14
       ],
       "to": "square"
     },
     {
       "side": "s",
       "span": [
-        11,
-        12
+        12,
+        14
       ],
       "to": "lanternmere"
     }
@@ -917,20 +1999,24 @@
       "id": "hush_ford",
       "tiles": [
         [
-          4,
-          24
+          2,
+          29
         ],
         [
           3,
-          24
+          29
         ],
         [
-          2,
-          24
+          4,
+          29
         ],
         [
-          1,
-          24
+          5,
+          29
+        ],
+        [
+          6,
+          29
         ]
       ],
       "if": "item:wading_boots",
@@ -941,11 +2027,51 @@
   ],
   "npcs": [
     {
+      "id": "t_iver",
+      "name": "Iver",
+      "model": "npc_scholar",
+      "x": 18,
+      "z": 8,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 4,
+        "challenge": [
+          "Stop! Stay there. You've walked into a line. Of my poem. It's about willows.",
+          "Rhymes with... no. Duel me while I think. Two prizes."
+        ],
+        "challenge_fr": [
+          "Halte ! Ne bouge pas. Tu viens d'entrer dans un vers. De mon poème. Il parle des saules.",
+          "Rime avec… non. Fais un duel pendant que je réfléchis. Deux Récompenses."
+        ],
+        "win": [
+          "\"Defeated, I sat beneath the willow...\" Not bad. I'll keep that."
+        ],
+        "win_fr": [
+          "« Vaincu, je m'assis sous le saule… » Pas mal. Je garde ça."
+        ],
+        "lose": [
+          "Victory! It scans."
+        ],
+        "lose_fr": [
+          "Victoire ! Ça sonne juste."
+        ],
+        "after": [
+          "A willow is a tree that has decided to listen. I wrote that. Do you like it? Don't answer."
+        ],
+        "after_fr": [
+          "Un saule est un arbre qui a décidé d'écouter. C'est de moi. Ça te plaît ? Ne réponds pas."
+        ]
+      },
+      "outfit": "#5a6fb0",
+      "hair": "#2b211c"
+    },
+    {
       "id": "ysolde",
       "name": "Ysolde",
       "model": "npc_gardener",
-      "x": 17,
-      "z": 16,
+      "x": 16,
+      "z": 15,
       "facing": "s",
       "idle": "Idle",
       "outfit": "#8a6fb8",
@@ -971,7 +2097,7 @@
       "name": "Luce",
       "model": "npc_kid",
       "x": 16,
-      "z": 12,
+      "z": 24,
       "facing": "e",
       "idle": "Idle",
       "trainer": {
@@ -1018,46 +2144,6 @@
         "n"
       ],
       "if": "!time:day"
-    },
-    {
-      "id": "t_iver",
-      "name": "Iver",
-      "model": "npc_scholar",
-      "x": 18,
-      "z": 8,
-      "facing": "w",
-      "idle": "Idle",
-      "trainer": {
-        "sight": 4,
-        "challenge": [
-          "Stop! Stay there. You've walked into a line. Of my poem. It's about willows.",
-          "Rhymes with... no. Duel me while I think. Two prizes."
-        ],
-        "challenge_fr": [
-          "Halte ! Ne bouge pas. Tu viens d'entrer dans un vers. De mon poème. Il parle des saules.",
-          "Rime avec… non. Fais un duel pendant que je réfléchis. Deux Récompenses."
-        ],
-        "win": [
-          "\"Defeated, I sat beneath the willow...\" Not bad. I'll keep that."
-        ],
-        "win_fr": [
-          "« Vaincu, je m'assis sous le saule… » Pas mal. Je garde ça."
-        ],
-        "lose": [
-          "Victory! It scans."
-        ],
-        "lose_fr": [
-          "Victoire ! Ça sonne juste."
-        ],
-        "after": [
-          "A willow is a tree that has decided to listen. I wrote that. Do you like it? Don't answer."
-        ],
-        "after_fr": [
-          "Un saule est un arbre qui a décidé d'écouter. C'est de moi. Ça te plaît ? Ne réponds pas."
-        ]
-      },
-      "outfit": "#5a6fb0",
-      "hair": "#2b211c"
     }
   ],
   "ground": {
@@ -1091,7 +2177,7 @@
   "light": {
     "sun": {
       "color": "#ffe9f2",
-      "intensity": 2.0,
+      "intensity": 2,
       "fromHero": [
         8,
         18,

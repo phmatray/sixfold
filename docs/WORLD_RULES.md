@@ -4,7 +4,7 @@
 
 These are the placement rules every map follows. A map author applies them while laying a map, and
 `tools/check-maps.mjs` enforces the ones a machine can judge. **Check** says how each rule is held:
-**error** fails the build with `--strict` (`node tools/check-maps.mjs web/world --strict`; CI turns it on once every map is re-laid to these rules, and until then the errors are listed as warnings), **warn** is listed
+**error** fails the build with `--strict` (`node tools/check-maps.mjs web/world --strict`; CI runs it so since every map was re-laid to these rules; without the flag the errors are listed as warnings), **warn** is listed
 for a person to judge, and **eye** is checked by walking the map (overhead view, then ground level, by day
 and by night, on a desktop and a phone).
 

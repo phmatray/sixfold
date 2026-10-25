@@ -4,326 +4,1593 @@
   "region": "tide",
   "kind": "route",
   "music": "tide",
-  "width": 30,
-  "height": 22,
+  "width": 60,
+  "height": 24,
   "tiles": [
-    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~HHHH~~~~~~~~~~~~~",
-    "~~~~~~~~~~~~~HHHH~~~~~~sssssss",
-    "~~~~~~~~~~~~~~HH~~~~~~~sssssss",
-    "~~~~~~~~~~~~~~HH~~~~~~ssssssss",
-    "~~~~~~~~~~~~~~HH~~~~~~ssssssss",
-    "s~~~~ss~ss~~~~HH~~~~~sssssssss",
-    "ssssssssssssss==ssssssssssssss",
-    "ssssssssssssss==ssssssssssssss",
-    "ssssssssssssss==ssssssssssssss",
-    "ssssssssssssss==ssssssssssssss",
-    "..============================",
-    "..============================",
-    "ssssssssssssssssssssssssssssss",
-    "........pp....................",
-    "pppppppppp....................",
-    "pppppppppp....................",
-    "..............................",
-    "..............................",
-    "..............................",
-    "..............................",
-    ".............................."
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ssssssss~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~HHHHH~~~~~~~~~~~~~~~~ssssssssss~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~HHHHH~~~~~~~~~~~~~~~ssssssssssss~~~~~~",
+    "~~~~~~~~~~s~~~~~~~~~~~~HHH~~~~~~~~~~~~s~~~ssssssssssss~~~~~~",
+    "~~~~~~~~~~ss~~~~~~~~~~~HHH~~~~~~~~~~~~ss~sssssrrssssss~~~~~~",
+    "ssss~sssssssssssss~ssssHHHssssss~sssssssssssssrrssssssss~~~~",
+    "....ss.ssssssssssssssss===ssssssssssssssssssssrrssssssss~~~~",
+    "......sssssssssssssssss===ssssssssssssssssssssrrssssssss~~~~",
+    "........sssssssssssssss===ssssssssssssssssssssrrssssssss~~~~",
+    ".......ssssssssssssssss===ssssssssssssssssssssrrssssssss~~~~",
+    ".........===================================================",
+    ".........===================================================",
+    ".........ppssssssssssssssssssssssssssssssssssssssssssss=====",
+    ".........ppsssssssssssssssssssssssssssssssssssssssssssssssss",
+    ".........pp.........ss.s.sss.ss.sssss.ss......sssss.s.ss..ss",
+    "ppppppppppp...s...s..s.s.s....ssss.sssss.....s.sss.s.ss.ssss",
+    "ppppppppppp.s...s.s.s.sss.s.s..ss.ss....ssss.ss.sss.s.s..s..",
+    "pppp.....pp........s.ss.ss..s.s.s..ss......sss.....s..ss....",
+    "..................s.s..........s.s.......s.ss..s..s..s......",
+    "............................................................",
+    "............................................................",
+    "............................................................",
+    "............................................................",
+    "............................................................"
   ],
   "props": [
     {
-      "asset": "lighthouse",
-      "x": 25,
-      "z": 3,
+      "asset": "signpost",
+      "x": 4,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 55,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 8,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 5,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 7,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "workshop",
+      "x": 12,
+      "z": 6,
       "rot": 0
     },
     {
       "asset": "boat",
       "x": 9,
-      "z": 3,
-      "rot": 0
-    },
-    {
-      "asset": "boat",
-      "x": 19,
-      "z": 4,
-      "rot": 180
-    },
-    {
-      "asset": "workshop",
-      "x": 4,
       "z": 7,
       "rot": 0
     },
     {
+      "asset": "boat",
+      "x": 6,
+      "z": 3,
+      "rot": 0
+    },
+    {
       "asset": "crates",
-      "x": 13,
+      "x": 11,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 16,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 18,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 15,
+      "z": 9,
+      "rot": 0,
+      "why": "the boathouse door"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 19,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 20,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 22,
       "z": 1,
       "rot": 0,
       "y": 0.3
     },
     {
       "asset": "crates",
-      "x": 16,
+      "x": 26,
       "z": 2,
       "rot": 0,
       "y": 0.3
     },
     {
-      "asset": "crates",
-      "x": 7,
-      "z": 9,
-      "rot": 0
-    },
-    {
-      "asset": "bench",
-      "x": 18,
-      "z": 8,
-      "rot": 180
-    },
-    {
-      "asset": "bench",
-      "x": 9,
-      "z": 8,
-      "rot": 180
-    },
-    {
       "asset": "lantern",
-      "x": 6,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 12,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 18,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 24,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "stall_b",
-      "x": 21,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "rock",
-      "x": 1,
-      "z": 7,
-      "rot": 0
-    },
-    {
-      "asset": "rock",
-      "x": 27,
-      "z": 9,
-      "rot": 0
-    },
-    {
-      "asset": "rock",
       "x": 22,
-      "z": 3,
-      "rot": 0
-    },
-    {
-      "asset": "rock",
-      "x": 11,
-      "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "rock",
-      "x": 2,
       "z": 9,
-      "rot": 0
+      "rot": 0,
+      "why": "the foot of the pier"
     },
     {
-      "asset": "reeds",
-      "x": 3,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 12,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 17,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
+      "asset": "lantern",
       "x": 26,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 24,
-      "z": 7,
-      "rot": 0
-    },
-    {
-      "asset": "signpost",
-      "x": 2,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 13,
-      "z": 17,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 20,
-      "z": 18,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 25,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 4,
-      "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 11,
-      "z": 15,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 17,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 27,
-      "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 1,
-      "z": 18,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 9,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 15,
-      "z": 15,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 23,
-      "z": 17,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 6,
-      "z": 18,
-      "rot": 0
-    },
-    {
-      "asset": "crates",
-      "x": 1,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 28,
-      "z": 18,
-      "rot": 0
-    },
-    {
-      "asset": "log",
-      "x": 1,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "signpost",
-      "x": 28,
-      "z": 10,
-      "rot": 0
+      "z": 1,
+      "rot": 0,
+      "why": "the pier head",
+      "y": 0.3
     },
     {
       "asset": "buoy",
       "x": 5,
-      "z": 4,
+      "z": 1,
       "rot": 0
     },
     {
       "asset": "buoy",
-      "x": 20,
-      "z": 5,
+      "x": 19,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 37,
+      "z": 2,
       "rot": 0
     },
     {
       "asset": "ferry",
-      "x": 4,
+      "x": 30,
       "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 29,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 32,
+      "z": 7,
+      "rot": 180
+    },
+    {
+      "asset": "stall_b",
+      "x": 34,
+      "z": 13,
+      "rot": 180
+    },
+    {
+      "asset": "bench",
+      "x": 37,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 36,
+      "z": 13,
+      "rot": 0,
+      "why": "the kiosk"
+    },
+    {
+      "asset": "reeds",
+      "x": 39,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 33,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 43,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 25,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 16,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 41,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 38,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 30,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 27,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "lighthouse",
+      "x": 47,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 50,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 42,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 44,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 52,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 53,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 45,
+      "z": 9,
+      "rot": 0,
+      "why": "the lighthouse steps"
+    },
+    {
+      "asset": "log",
+      "x": 46,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 51,
+      "z": 7,
+      "rot": 180
+    },
+    {
+      "asset": "crates",
+      "x": 53,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 54,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bollard",
+      "x": 50,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "bollard",
+      "x": 54,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 57,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "net_rack",
+      "x": 50,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 57,
+      "z": 9,
+      "rot": 0,
+      "why": "the harbour road to Gullhaven"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 45,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 46,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 47,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 48,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 49,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 50,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 51,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 59,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 59,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 59,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 59,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 59,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 59,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 59,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 59,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 59,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 59,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 7,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 8,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 10,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 12,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 13,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 14,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 15,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 19,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 20,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 21,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 22,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 23,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 24,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 25,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 26,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 27,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 31,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 36,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 37,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 38,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 40,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 42,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 43,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 44,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 45,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 46,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 47,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 49,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 50,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 52,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 53,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 54,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 55,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 56,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 57,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 58,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 59,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 8,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 10,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 12,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 14,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 19,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 22,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 24,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 28,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 30,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 32,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 34,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 36,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 38,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 40,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 42,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 44,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 47,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 49,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 52,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 54,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 56,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 18,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 58,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 21,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 46,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 58,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 4,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 5,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 7,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 8,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 9,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 12,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 13,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 15,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 16,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 18,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 19,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 20,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 21,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 22,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 24,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 26,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 27,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 31,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 33,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 34,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 38,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 39,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 40,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 41,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 43,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 45,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 47,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 49,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 50,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 52,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 53,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 54,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 55,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 56,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 57,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 58,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 45,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 53,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 18,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 48,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 14,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 17,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 18,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 47,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 53,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 42,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 24,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 55,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 42,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 44,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 22,
       "rot": 0
     }
   ],
   "spawn": {
-    "x": 2,
-    "z": 15,
+    "x": 3,
+    "z": 16,
     "facing": "e"
   },
   "interactions": [
     {
-      "x": 2,
-      "z": 14,
+      "x": 4,
+      "z": 13,
       "kind": "sign",
-      "text": "Saltwind Boardwalk. West: back to Sixfold Meadow. North: the pier. East: the lighthouse.",
-      "text_fr": "Promenade de Ventsalé. Ouest : retour au Pré de Sixfold. Nord : la jetée. Est : le phare."
+      "text": "Saltwind Boardwalk. West: back to Sixfold Meadow. North: the boathouse and the pier. East: the lighthouse, then Gullhaven.",
+      "text_fr": "Promenade de Ventsalé. Ouest : retour au Pré de Sixfold. Nord : la remise à bateaux et la jetée. Est : le phare, puis Havre-aux-Mouettes."
     },
     {
-      "kind": "find",
-      "id": "s_pier",
-      "x": 13,
-      "z": 1,
-      "give": "give:curio_message_bottle",
-      "text": "Wedged between the crates at the end of the pier: a bottle, corked and waxed, a rolled note inside.",
-      "text_fr": "Coincée entre les caisses au bout de la jetée : une bouteille bouchée à la cire, un billet roulé à l'intérieur."
+      "x": 55,
+      "z": 13,
+      "kind": "sign",
+      "text": "East along the boardwalk: Gullhaven, the harbour town. West: Sixfold Meadow.",
+      "text_fr": "À l'est, par la promenade : Havre-aux-Mouettes, la ville du port. À l'ouest : le Pré de Sixfold."
     },
     {
       "kind": "find",
       "id": "s_under",
-      "x": 1,
+      "x": 8,
       "z": 11,
       "hidden": true,
       "give": "coins:60",
@@ -332,27 +1599,9 @@
     },
     {
       "kind": "find",
-      "id": "s_pools",
-      "x": 11,
-      "z": 6,
-      "give": "card:shellmote",
-      "text": "In the rock pool, a crab sits on a card in an oilskin sleeve. It lets go, eventually.",
-      "text_fr": "Dans la flaque entre les rochers, un crabe couve une carte dans une pochette cirée. Il finit par lâcher prise."
-    },
-    {
-      "kind": "find",
-      "id": "s_lighthouse",
-      "x": 25,
-      "z": 4,
-      "give": "coins:40",
-      "text": "On the lighthouse step, under a loose stone worn smooth by boots: a few Facets.",
-      "text_fr": "Sur la marche du phare, sous une pierre branlante polie par les bottes : quelques Facettes."
-    },
-    {
-      "kind": "find",
       "id": "s_boat",
-      "x": 7,
-      "z": 9,
+      "x": 11,
+      "z": 8,
       "hidden": true,
       "give": "card:relay_baton",
       "text": "In the crates by the rowboat, under a coil of rope: a card, bone dry.",
@@ -360,35 +1609,55 @@
     },
     {
       "kind": "find",
+      "id": "s_pools",
+      "x": 20,
+      "z": 6,
+      "give": "card:shellmote",
+      "text": "In the rock pool, a crab sits on a card in an oilskin sleeve. It lets go, eventually.",
+      "text_fr": "Dans la flaque entre les rochers, un crabe couve une carte dans une pochette cirée. Il finit par lâcher prise."
+    },
+    {
+      "kind": "find",
+      "id": "s_pier",
+      "x": 22,
+      "z": 1,
+      "give": "give:curio_message_bottle",
+      "text": "Wedged between the crates at the end of the pier: a bottle, corked and waxed, a rolled note inside.",
+      "text_fr": "Coincée entre les caisses au bout de la jetée : une bouteille bouchée à la cire, un billet roulé à l'intérieur."
+    },
+    {
+      "kind": "find",
       "id": "s_dunes",
-      "x": 28,
-      "z": 18,
+      "x": 39,
+      "z": 16,
       "give": "pack:tide",
       "text": "Half buried in the dune grass: a booster, still sealed. The sand got everywhere except inside.",
       "text_fr": "À moitié enfoui dans les oyats : un booster encore scellé. Le sable s'est glissé partout, sauf dedans."
     },
     {
       "kind": "find",
+      "id": "s_lighthouse",
+      "x": 50,
+      "z": 2,
+      "give": "coins:40",
+      "text": "On the lighthouse step, under a loose stone worn smooth by boots: a few Facets.",
+      "text_fr": "Sur la marche du phare, sous une pierre branlante polie par les bottes : quelques Facettes."
+    },
+    {
+      "kind": "find",
       "id": "s_beach",
-      "x": 2,
-      "z": 20,
+      "x": 46,
+      "z": 15,
       "hidden": true,
       "give": "coins:25",
       "text": "In the hollow of the driftwood, where the sea wore it out: a few Facets and a great deal of sand.",
       "text_fr": "Dans le creux du bois flotté, là où la mer l'a usé : quelques Facettes et beaucoup de sable."
-    },
-    {
-      "x": 28,
-      "z": 10,
-      "kind": "sign",
-      "text": "East along the boardwalk: Gullhaven, the harbour town. West: Sixfold Meadow.",
-      "text_fr": "À l'est, par la promenade : Havre-aux-Mouettes, la ville du port. À l'ouest : le Pré des Six."
     }
   ],
   "warps": [
     {
-      "x": 5,
-      "z": 9,
+      "x": 13,
+      "z": 8,
       "to": "boathouse",
       "label": "Go into the boathouse",
       "label_fr": "Entrer dans la remise à bateaux",
@@ -404,14 +1673,14 @@
       "side": "w",
       "span": [
         15,
-        16
+        17
       ],
       "to": "overworld"
     },
     {
       "side": "e",
       "span": [
-        11,
+        10,
         12
       ],
       "to": "gullhaven"
@@ -419,13 +1688,103 @@
   ],
   "npcs": [
     {
+      "idle": "Idle",
+      "id": "t_pell",
+      "name": "Pell",
+      "model": "npc_sailor",
+      "tint": "#4a78b8",
+      "outfit": "#2f5f8a",
+      "hair": "#6b4a2e",
+      "x": 16,
+      "z": 8,
+      "facing": "s",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "Shh, you'll scare the... oh. Nothing was biting anyway.",
+          "Did I tell you about the fish? This long. There's a Streamfin in my deck in its honour. Duel?"
+        ],
+        "challenge_fr": [
+          "Chut, tu vas faire fuir le… ah. De toute façon, rien ne mordait.",
+          "Je t'ai parlé du poisson ? Long comme ça. J'ai mis un Nageflot dans mon deck en son honneur. Un duel ?"
+        ],
+        "win": [
+          "Slipped off the hook. Like the fish.",
+          "Here's your purse. Don't tell the gulls."
+        ],
+        "win_fr": [
+          "Décroché. Comme le poisson.",
+          "Voilà ta bourse. Ne le dis pas aux mouettes."
+        ],
+        "lose": [
+          "Reeled in! Patience, that's the secret.",
+          "Patience and bait. Mostly bait."
+        ],
+        "lose_fr": [
+          "Ferré ! La patience, c'est tout le secret.",
+          "La patience et l'appât. Surtout l'appât."
+        ],
+        "after": [
+          "It was this long. No, this long. Ask anyone. Well, nobody saw it."
+        ],
+        "after_fr": [
+          "Il était long comme ça. Non, comme ça. Demande à n'importe qui. Enfin, personne ne l'a vu."
+        ]
+      }
+    },
+    {
+      "idle": "Idle",
+      "id": "t_nell",
+      "name": "Nell",
+      "model": "npc_worker",
+      "tint": "#e05a48",
+      "outfit": "#d6402f",
+      "hair": "#3a2a20",
+      "x": 24,
+      "z": 4,
+      "facing": "s",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "*Fweet!* No running on the pier!",
+          "Marlo's at the end, and my Kelpwardens are in the way. Rules are rules."
+        ],
+        "challenge_fr": [
+          "*Tuiiit !* On ne court pas sur la jetée !",
+          "Marlo est au bout, et mes Gardevarech sont sur le chemin. Le règlement, c'est le règlement."
+        ],
+        "win": [
+          "*Fweet.* Clean win. I'd have blown for anything less.",
+          "Here's your purse. Walk, don't run."
+        ],
+        "win_fr": [
+          "*Tuiiit.* Victoire propre. J'aurais sifflé pour moins que ça.",
+          "Voilà ta bourse. On marche, on ne court pas."
+        ],
+        "lose": [
+          "*Fweet! Fweet!* Misplay! You left your Active out to dry.",
+          "Back to the beach, and warm up properly this time."
+        ],
+        "lose_fr": [
+          "*Tuiiit ! Tuiiit !* Faute ! Tu as laissé ton Hexon Actif sécher au soleil.",
+          "Retour à la plage, et échauffe-toi correctement cette fois."
+        ],
+        "after": [
+          "Marlo's at the end of the pier. Walking pace, please. The planks are wet."
+        ],
+        "after_fr": [
+          "Marlo est au bout de la jetée. Au pas, s'il te plaît. Les planches sont mouillées."
+        ]
+      }
+    },
+    {
       "id": "marlo",
       "name": "Marlo",
       "model": "rival_water",
       "tint": "#73b8f2",
       "scale": 1,
       "idle": "Idle",
-      "x": 15,
+      "x": 24,
       "z": 1,
       "facing": "s",
       "dialogue": [
@@ -507,15 +1866,273 @@
       ]
     },
     {
+      "id": "dace",
+      "name": "Dace",
+      "model": "npc_kid",
+      "tint": "#8fd0ff",
+      "scale": 0.82,
+      "x": 26,
+      "z": 7,
+      "facing": "w",
+      "dialogue": [
+        {
+          "if": "item:kite_line",
+          "do": [
+            "take:kite_line",
+            "pack:storm",
+            "flag:kite_done",
+            "emote:dace:heart"
+          ],
+          "lines": [
+            "The line! Skye's line! Hold this end. Pull. Gently... GENTLY...",
+            "It's free! Look at it go!",
+            "Here. Mum says I have to give you something, so: a pack. It's a Storm one. Kite weather."
+          ],
+          "lines_fr": [
+            "La ligne ! La ligne de Skye ! Tiens ce bout. Tire. Doucement… DOUCEMENT…",
+            "Il est libre ! Regarde-le filer !",
+            "Tiens. Maman dit que je dois te donner quelque chose, alors : un booster. Un Orage. Un temps à cerf-volant."
+          ]
+        },
+        {
+          "if": "!flag:kite_asked",
+          "do": [
+            "flag:kite_asked"
+          ],
+          "lines": [
+            "See that red tail, up on the lighthouse rail? That's my kite. Skye made it for me.",
+            "The wind took it. Now it's stuck, and I can't reach, and Ottilie says the rail is \"not for children\".",
+            "Skye's got line, loads of it. But Skye won't hand anything over until you've duelled her. That's just Skye."
+          ],
+          "lines_fr": [
+            "Tu vois la queue rouge, là-haut, sur la rambarde du phare ? C'est mon cerf-volant. C'est Skye qui me l'a fait.",
+            "Le vent l'a emporté. Maintenant il est coincé, je n'arrive pas à l'attraper, et Ottilie dit que la rambarde, « ce n'est pas pour les enfants ».",
+            "Skye a de la ligne, des tonnes. Mais elle ne donne rien tant qu'on ne l'a pas affrontée en duel. Skye, c'est comme ça."
+          ]
+        },
+        {
+          "if": "!flag:kite_done",
+          "lines": [
+            "Still stuck. Skye's the one with the line, by the boats east of the pier."
+          ],
+          "lines_fr": [
+            "Toujours coincé. C'est Skye qui a la ligne, près des barques, à l'est de la jetée."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "Marlo says the new champion fishes better than me.",
+            "Marlo's never even seen you fish. Marlo's still right."
+          ],
+          "lines_fr": [
+            "D'après Marlo, la nouvelle star du coin pêche mieux que moi.",
+            "Marlo ne sait même pas si tu pêches. Marlo a quand même raison."
+          ]
+        },
+        {
+          "if": "beat:marlo",
+          "lines": [
+            "You beat Marlo? Marlo doesn't lose. Marlo told me Marlo doesn't lose."
+          ],
+          "lines_fr": [
+            "T'as battu Marlo ? Marlo ne perd pas. Marlo m'a dit que Marlo ne perdait pas."
+          ]
+        },
+        {
+          "if": "flag:kite_done",
+          "lines": [
+            "It flies every day now. I tie it to the pier. Twice."
+          ],
+          "lines_fr": [
+            "Il vole tous les jours, maintenant. Je l'attache à la jetée. Deux fois."
+          ]
+        },
+        {
+          "lines": [
+            "Nothing's biting. I think the fish are duelling too.",
+            "Marlo sits at the end of the pier. Bring a good deck, the tide's on Marlo's side."
+          ],
+          "lines_fr": [
+            "Ça ne mord pas. Je crois que les poissons font des duels, eux aussi.",
+            "Marlo est au bout de la jetée. Prends un bon deck, la marée est du côté de Marlo."
+          ]
+        }
+      ],
+      "idle": "Idle"
+    },
+    {
+      "idle": "Idle",
+      "id": "t_skye",
+      "name": "Skye",
+      "model": "npc_kid",
+      "tint": "#7cc4ff",
+      "outfit": "#4aa3e8",
+      "hair": "#f2d16b",
+      "scale": 0.9,
+      "x": 31,
+      "z": 9,
+      "facing": "s",
+      "trainer": {
+        "sight": 4,
+        "challenge": [
+          "Wind's from the west, gusting four. Perfect duelling weather.",
+          "I read the wind; my Stormox reads the rest. Shall we?"
+        ],
+        "challenge_fr": [
+          "Vent d'ouest, rafales force quatre. Un temps parfait pour un duel.",
+          "Moi, je lis le vent ; mon Taurorage lit le reste. On y va ?"
+        ],
+        "win": [
+          "The wind turned on me. It does that.",
+          "Here. A purse for somebody who reads the gusts better than I do."
+        ],
+        "win_fr": [
+          "Le vent a tourné. Ça lui arrive.",
+          "Tiens. Une bourse, pour quelqu'un qui lit les rafales mieux que moi."
+        ],
+        "lose": [
+          "Caught you in a crosswind. Happens to the best.",
+          "Come back when the wind's on your side."
+        ],
+        "lose_fr": [
+          "Pris dans un vent de travers. Ça arrive aux meilleurs.",
+          "Reviens quand le vent sera de ton côté."
+        ],
+        "after": [
+          "See the red tail on the lighthouse rail? I built that kite. Dace flew it. The wind kept it."
+        ],
+        "after_fr": [
+          "Tu vois la queue rouge, sur la rambarde du phare ? Ce cerf-volant, c'est moi qui l'ai fabriqué. Dace l'a fait voler. Le vent l'a gardé."
+        ]
+      },
+      "dialogue": [
+        {
+          "if": "beat:t_skye & flag:kite_asked & !flag:kite_line_given",
+          "do": [
+            "give:kite_line",
+            "flag:kite_line_given"
+          ],
+          "lines": [
+            "Dace sent you? Of course Dace sent you.",
+            "Here, my spare reel. Waxed line, long enough to reach the lamp room. Tie it to the tail and tug gently. Gently!"
+          ],
+          "lines_fr": [
+            "C'est Dace qui t'envoie ? Évidemment, c'est Dace.",
+            "Tiens, ma bobine de secours. Une ligne cirée, assez longue pour atteindre la lanterne. Noue-la à la queue et tire doucement. Doucement !"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ottilie",
+      "name": "Ottilie",
+      "model": "npc_gardener",
+      "tint": "#f2c48d",
+      "scale": 1,
+      "x": 48,
+      "z": 4,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "beat:warden&flag:letter_delivered",
+          "lines": [
+            "I saw the hall's lamps burning all night from up here. Hob says that was you.",
+            "A champion carried my letter. I'll tell the gulls."
+          ],
+          "lines_fr": [
+            "D'ici, j'ai vu les lampes de la salle brûler toute la nuit. Hob dit que c'était toi.",
+            "Ma lettre, portée par un champion ! Je vais le raconter aux mouettes."
+          ]
+        },
+        {
+          "if": "flag:letter_delivered",
+          "lines": [
+            "Hob wrote back already? He never writes back. You must have charmed him.",
+            "Come by at dusk some time. The lamp is worth the climb."
+          ],
+          "lines_fr": [
+            "Hob a déjà répondu ? Il ne répond jamais. Tu as dû le charmer.",
+            "Passe un soir au crépuscule. La lampe vaut bien la montée."
+          ]
+        },
+        {
+          "if": "item:letter",
+          "lines": [
+            "The letter goes to Hob, at the bakery in Brightwell Square.",
+            "South of the meadow. Follow your nose, it smells of bread."
+          ],
+          "lines_fr": [
+            "La lettre est pour Hob, à la boulangerie de la Place de Clairpuits.",
+            "Au sud du pré. Suis ton nez, ça sent le pain."
+          ]
+        },
+        {
+          "lines": [
+            "Mind the steps, they're slippery with spray. I keep the lamp here.",
+            "Are you walking inland? Would you take this to my brother Hob? He bakes in Brightwell Square.",
+            "Don't let it get wet. That's the whole trick of letters."
+          ],
+          "lines_fr": [
+            "Attention aux marches, les embruns les rendent glissantes. C'est moi qui garde le phare.",
+            "Tu rentres dans les terres ? Tu porterais ça à mon frère Hob ? Il est boulanger, Place de Clairpuits.",
+            "Ne la mouille pas. C'est tout le secret des lettres."
+          ],
+          "do": [
+            "give:letter"
+          ]
+        }
+      ],
+      "idle": "Idle"
+    },
+    {
+      "id": "halvard",
+      "name": "Halvard",
+      "model": "npc_elder",
+      "x": 43,
+      "z": 2,
+      "facing": "n",
+      "idle": "Idle",
+      "outfit": "#2c4f7c",
+      "hair": "#e8e4dc",
+      "dialogue": [
+        {
+          "lines": [
+            "Halvard. I keep the light. Have done since before your parents were arguing about your name.",
+            "That's the Gullhaven ferry out there, the blue one. Lou runs her. Says everything three times, does Lou. You'll see.",
+            "Come back after dark. The lamps on the water tell you which boat is which, if you know how to read them."
+          ],
+          "lines_fr": [
+            "Halvard. Je garde le phare. Depuis avant que tes parents se disputent pour ton prénom.",
+            "Là-bas, c'est le bac de Havre-aux-Mouettes, le bleu. C'est Lou qui le mène. Lou dit tout trois fois. Tu verras.",
+            "Reviens après la nuit tombée. Les lampes sur l'eau te disent quel bateau est lequel, si tu sais les lire."
+          ],
+          "if": "!time:night"
+        },
+        {
+          "lines": [
+            "Look. Red and white, low down: that's the Rodspire buoy. The two warm squares of light moving north: Lou's ferry, late as ever.",
+            "And that faint lilac one, far out by the river mouth? The Lanternmere launch. They say the lanterns on that lake can carry a person. I've never tried.",
+            "Seventy-three ships I've named from this step. Never once got a wave back. Doesn't matter. The light's for them, not for me."
+          ],
+          "lines_fr": [
+            "Regarde. Rouge et blanc, tout bas : c'est la bouée de l'Aiguille-Foudre. Les deux carrés de lumière chaude qui filent au nord : le bac de Lou, en retard comme toujours.",
+            "Et cette lueur lilas, toute pâle, loin là-bas vers l'embouchure ? La vedette de Lac-aux-Lanternes. On dit que les lanternes de ce lac peuvent porter quelqu'un. Je n'ai jamais essayé.",
+            "Soixante-treize navires nommés depuis cette marche. Jamais un salut en retour. Ça ne fait rien. La lumière est pour eux, pas pour moi."
+          ]
+        }
+      ]
+    },
+    {
       "id": "quill",
       "name": "Quill",
       "model": "rival_lightning",
       "tint": "#ffd84d",
       "scale": 1,
       "idle": "Idle",
-      "x": 24,
-      "z": 6,
-      "facing": "s",
+      "x": 51,
+      "z": 4,
+      "facing": "w",
       "dialogue": [
         {
           "if": "won:quill&flag:thanked_quill",
@@ -606,271 +2223,6 @@
       ]
     },
     {
-      "id": "ottilie",
-      "name": "Ottilie",
-      "model": "npc_gardener",
-      "tint": "#f2c48d",
-      "scale": 1,
-      "x": 27,
-      "z": 5,
-      "facing": "w",
-      "dialogue": [
-        {
-          "if": "beat:warden&flag:letter_delivered",
-          "lines": [
-            "I saw the hall's lamps burning all night from up here. Hob says that was you.",
-            "A champion carried my letter. I'll tell the gulls."
-          ],
-          "lines_fr": [
-            "D'ici, j'ai vu les lampes de la salle brûler toute la nuit. Hob dit que c'était toi.",
-            "Ma lettre, portée par un champion ! Je vais le raconter aux mouettes."
-          ]
-        },
-        {
-          "if": "flag:letter_delivered",
-          "lines": [
-            "Hob wrote back already? He never writes back. You must have charmed him.",
-            "Come by at dusk some time. The lamp is worth the climb."
-          ],
-          "lines_fr": [
-            "Hob a déjà répondu ? Il ne répond jamais. Tu as dû le charmer.",
-            "Passe un soir au crépuscule. La lampe vaut bien la montée."
-          ]
-        },
-        {
-          "if": "item:letter",
-          "lines": [
-            "The letter goes to Hob, at the bakery in Brightwell Square.",
-            "South of the meadow. Follow your nose, it smells of bread."
-          ],
-          "lines_fr": [
-            "La lettre est pour Hob, à la boulangerie de la Place de Clairpuits.",
-            "Au sud du pré. Suis ton nez, ça sent le pain."
-          ]
-        },
-        {
-          "lines": [
-            "Mind the steps, they're slippery with spray. I keep the lamp here.",
-            "Are you walking inland? Would you take this to my brother Hob? He bakes in Brightwell Square.",
-            "Don't let it get wet. That's the whole trick of letters."
-          ],
-          "lines_fr": [
-            "Attention aux marches, les embruns les rendent glissantes. C'est moi qui garde le phare.",
-            "Tu rentres dans les terres ? Tu porterais ça à mon frère Hob ? Il est boulanger, Place de Clairpuits.",
-            "Ne la mouille pas. C'est tout le secret des lettres."
-          ],
-          "do": [
-            "give:letter"
-          ]
-        }
-      ],
-      "idle": "Idle"
-    },
-    {
-      "id": "dace",
-      "name": "Dace",
-      "model": "npc_kid",
-      "tint": "#8fd0ff",
-      "scale": 0.82,
-      "x": 15,
-      "z": 4,
-      "facing": "e",
-      "dialogue": [
-        {
-          "if": "item:kite_line",
-          "do": [
-            "take:kite_line",
-            "pack:storm",
-            "flag:kite_done",
-            "emote:dace:heart"
-          ],
-          "lines": [
-            "The line! Skye's line! Hold this end. Pull. Gently... GENTLY...",
-            "It's free! Look at it go!",
-            "Here. Mum says I have to give you something, so: a pack. It's a Storm one. Kite weather."
-          ],
-          "lines_fr": [
-            "La ligne ! La ligne de Skye ! Tiens ce bout. Tire. Doucement… DOUCEMENT…",
-            "Il est libre ! Regarde-le filer !",
-            "Tiens. Maman dit que je dois te donner quelque chose, alors : un booster. Un Orage. Un temps à cerf-volant."
-          ]
-        },
-        {
-          "if": "!flag:kite_asked",
-          "do": [
-            "flag:kite_asked"
-          ],
-          "lines": [
-            "See that red tail, up on the lighthouse rail? That's my kite. Skye made it for me.",
-            "The wind took it. Now it's stuck, and I can't reach, and Ottilie says the rail is \"not for children\".",
-            "Skye's got line, loads of it. But Skye won't hand anything over until you've duelled her. That's just Skye."
-          ],
-          "lines_fr": [
-            "Tu vois la queue rouge, là-haut, sur la rambarde du phare ? C'est mon cerf-volant. C'est Skye qui me l'a fait.",
-            "Le vent l'a emporté. Maintenant il est coincé, je n'arrive pas à l'attraper, et Ottilie dit que la rambarde, « ce n'est pas pour les enfants ».",
-            "Skye a de la ligne, des tonnes. Mais elle ne donne rien tant qu'on ne l'a pas affrontée en duel. Skye, c'est comme ça."
-          ]
-        },
-        {
-          "if": "!flag:kite_done",
-          "lines": [
-            "Still stuck. Skye's the one with the line, by the boats east of the pier."
-          ],
-          "lines_fr": [
-            "Toujours coincé. C'est Skye qui a la ligne, près des barques, à l'est de la jetée."
-          ]
-        },
-        {
-          "if": "beat:warden",
-          "lines": [
-            "Marlo says the new champion fishes better than me.",
-            "Marlo's never even seen you fish. Marlo's still right."
-          ],
-          "lines_fr": [
-            "D'après Marlo, la nouvelle star du coin pêche mieux que moi.",
-            "Marlo ne sait même pas si tu pêches. Marlo a quand même raison."
-          ]
-        },
-        {
-          "if": "beat:marlo",
-          "lines": [
-            "You beat Marlo? Marlo doesn't lose. Marlo told me Marlo doesn't lose."
-          ],
-          "lines_fr": [
-            "T'as battu Marlo ? Marlo ne perd pas. Marlo m'a dit que Marlo ne perdait pas."
-          ]
-        },
-        {
-          "if": "flag:kite_done",
-          "lines": [
-            "It flies every day now. I tie it to the pier. Twice."
-          ],
-          "lines_fr": [
-            "Il vole tous les jours, maintenant. Je l'attache à la jetée. Deux fois."
-          ]
-        },
-        {
-          "lines": [
-            "Nothing's biting. I think the fish are duelling too.",
-            "Marlo sits at the end of the pier. Bring a good deck, the tide's on Marlo's side."
-          ],
-          "lines_fr": [
-            "Ça ne mord pas. Je crois que les poissons font des duels, eux aussi.",
-            "Marlo est au bout de la jetée. Prends un bon deck, la marée est du côté de Marlo."
-          ]
-        }
-      ],
-      "idle": "Idle"
-    },
-    {
-      "idle": "Idle",
-      "id": "t_pell",
-      "name": "Pell",
-      "model": "npc_sailor",
-      "tint": "#4a78b8",
-      "outfit": "#2f5f8a",
-      "hair": "#6b4a2e",
-      "x": 12,
-      "z": 7,
-      "facing": "w",
-      "trainer": {
-        "sight": 3,
-        "challenge": [
-          "Shh, you'll scare the... oh. Nothing was biting anyway.",
-          "Did I tell you about the fish? This long. There's a Streamfin in my deck in its honour. Duel?"
-        ],
-        "challenge_fr": [
-          "Chut, tu vas faire fuir le… ah. De toute façon, rien ne mordait.",
-          "Je t'ai parlé du poisson ? Long comme ça. J'ai mis un Nageflot dans mon deck en son honneur. Un duel ?"
-        ],
-        "win": [
-          "Slipped off the hook. Like the fish.",
-          "Here's your purse. Don't tell the gulls."
-        ],
-        "win_fr": [
-          "Décroché. Comme le poisson.",
-          "Voilà ta bourse. Ne le dis pas aux mouettes."
-        ],
-        "lose": [
-          "Reeled in! Patience, that's the secret.",
-          "Patience and bait. Mostly bait."
-        ],
-        "lose_fr": [
-          "Ferré ! La patience, c'est tout le secret.",
-          "La patience et l'appât. Surtout l'appât."
-        ],
-        "after": [
-          "It was this long. No, this long. Ask anyone. Well, nobody saw it."
-        ],
-        "after_fr": [
-          "Il était long comme ça. Non, comme ça. Demande à n'importe qui. Enfin, personne ne l'a vu."
-        ]
-      }
-    },
-    {
-      "idle": "Idle",
-      "id": "t_skye",
-      "name": "Skye",
-      "model": "npc_kid",
-      "tint": "#7cc4ff",
-      "outfit": "#4aa3e8",
-      "hair": "#f2d16b",
-      "scale": 0.9,
-      "x": 21,
-      "z": 8,
-      "facing": "s",
-      "trainer": {
-        "sight": 4,
-        "challenge": [
-          "Wind's from the west, gusting four. Perfect duelling weather.",
-          "I read the wind; my Stormox reads the rest. Shall we?"
-        ],
-        "challenge_fr": [
-          "Vent d'ouest, rafales force quatre. Un temps parfait pour un duel.",
-          "Moi, je lis le vent ; mon Taurorage lit le reste. On y va ?"
-        ],
-        "win": [
-          "The wind turned on me. It does that.",
-          "Here. A purse for somebody who reads the gusts better than I do."
-        ],
-        "win_fr": [
-          "Le vent a tourné. Ça lui arrive.",
-          "Tiens. Une bourse, pour quelqu'un qui lit les rafales mieux que moi."
-        ],
-        "lose": [
-          "Caught you in a crosswind. Happens to the best.",
-          "Come back when the wind's on your side."
-        ],
-        "lose_fr": [
-          "Pris dans un vent de travers. Ça arrive aux meilleurs.",
-          "Reviens quand le vent sera de ton côté."
-        ],
-        "after": [
-          "See the red tail on the lighthouse rail? I built that kite. Dace flew it. The wind kept it."
-        ],
-        "after_fr": [
-          "Tu vois la queue rouge, sur la rambarde du phare ? Ce cerf-volant, c'est moi qui l'ai fabriqué. Dace l'a fait voler. Le vent l'a gardé."
-        ]
-      },
-      "dialogue": [
-        {
-          "if": "beat:t_skye & flag:kite_asked & !flag:kite_line_given",
-          "do": [
-            "give:kite_line",
-            "flag:kite_line_given"
-          ],
-          "lines": [
-            "Dace sent you? Of course Dace sent you.",
-            "Here, my spare reel. Waxed line, long enough to reach the lamp room. Tie it to the tail and tug gently. Gently!"
-          ],
-          "lines_fr": [
-            "C'est Dace qui t'envoie ? Évidemment, c'est Dace.",
-            "Tiens, ma bobine de secours. Une ligne cirée, assez longue pour atteindre la lanterne. Noue-la à la queue et tire doucement. Doucement !"
-          ]
-        }
-      ]
-    },
-    {
       "idle": "Idle",
       "id": "t_morrow",
       "name": "Morrow",
@@ -878,7 +2230,7 @@
       "tint": "#d8c08a",
       "outfit": "#b8955a",
       "hair": "#e8e4dc",
-      "x": 27,
+      "x": 53,
       "z": 13,
       "facing": "w",
       "trainer": {
@@ -914,89 +2266,6 @@
           "Celui-ci, c'est une volute. Plus vieille que la promenade. Presque plus vieille que moi."
         ]
       }
-    },
-    {
-      "idle": "Idle",
-      "id": "t_nell",
-      "name": "Nell",
-      "model": "npc_worker",
-      "tint": "#e05a48",
-      "outfit": "#d6402f",
-      "hair": "#3a2a20",
-      "x": 14,
-      "z": 2,
-      "facing": "s",
-      "trainer": {
-        "sight": 3,
-        "challenge": [
-          "*Fweet!* No running on the pier!",
-          "Marlo's at the end, and my Kelpwardens are in the way. Rules are rules."
-        ],
-        "challenge_fr": [
-          "*Tuiiit !* On ne court pas sur la jetée !",
-          "Marlo est au bout, et mes Gardevarech sont sur le chemin. Le règlement, c'est le règlement."
-        ],
-        "win": [
-          "*Fweet.* Clean win. I'd have blown for anything less.",
-          "Here's your purse. Walk, don't run."
-        ],
-        "win_fr": [
-          "*Tuiiit.* Victoire propre. J'aurais sifflé pour moins que ça.",
-          "Voilà ta bourse. On marche, on ne court pas."
-        ],
-        "lose": [
-          "*Fweet! Fweet!* Misplay! You left your Active out to dry.",
-          "Back to the beach, and warm up properly this time."
-        ],
-        "lose_fr": [
-          "*Tuiiit ! Tuiiit !* Faute ! Tu as laissé ton Hexon Actif sécher au soleil.",
-          "Retour à la plage, et échauffe-toi correctement cette fois."
-        ],
-        "after": [
-          "Marlo's at the end of the pier. Walking pace, please. The planks are wet."
-        ],
-        "after_fr": [
-          "Marlo est au bout de la jetée. Au pas, s'il te plaît. Les planches sont mouillées."
-        ]
-      }
-    },
-    {
-      "id": "halvard",
-      "name": "Halvard",
-      "model": "npc_elder",
-      "x": 27,
-      "z": 5,
-      "facing": "w",
-      "idle": "Idle",
-      "outfit": "#2c4f7c",
-      "hair": "#e8e4dc",
-      "dialogue": [
-        {
-          "lines": [
-            "Halvard. I keep the light. Have done since before your parents were arguing about your name.",
-            "That's the Gullhaven ferry out there, the blue one. Lou runs her. Says everything three times, does Lou. You'll see.",
-            "Come back after dark. The lamps on the water tell you which boat is which, if you know how to read them."
-          ],
-          "lines_fr": [
-            "Halvard. Je garde le phare. Depuis avant que tes parents se disputent pour ton prénom.",
-            "Là-bas, c'est le bac de Havre-aux-Mouettes, le bleu. C'est Lou qui le mène. Lou dit tout trois fois. Tu verras.",
-            "Reviens après la nuit tombée. Les lampes sur l'eau te disent quel bateau est lequel, si tu sais les lire."
-          ],
-          "if": "!time:night"
-        },
-        {
-          "lines": [
-            "Look. Red and white, low down: that's the Rodspire buoy. The two warm squares of light moving north: Lou's ferry, late as ever.",
-            "And that faint lilac one, far out by the river mouth? The Lanternmere launch. They say the lanterns on that lake can carry a person. I've never tried.",
-            "Seventy-three ships I've named from this step. Never once got a wave back. Doesn't matter. The light's for them, not for me."
-          ],
-          "lines_fr": [
-            "Regarde. Rouge et blanc, tout bas : c'est la bouée de l'Aiguille-Foudre. Les deux carrés de lumière chaude qui filent au nord : le bac de Lou, en retard comme toujours.",
-            "Et cette lueur lilas, toute pâle, loin là-bas vers l'embouchure ? La vedette de Lac-aux-Lanternes. On dit que les lanternes de ce lac peuvent porter quelqu'un. Je n'ai jamais essayé.",
-            "Soixante-treize navires nommés depuis cette marche. Jamais un salut en retour. Ça ne fait rien. La lumière est pour eux, pas pour moi."
-          ]
-        }
-      ]
     }
   ],
   "ground": {
