@@ -15,11 +15,17 @@ procedural SVG.
 - **Settings:** 16 steps, float16 compute, 800×560 (the 10:7 art box), one fixed seed per card.
   About 55 s per image on an M1-class Mac.
 - **Prompts:** `prompts.json` holds a full hand-written caption per card (the long, descriptive
-  form FLUX 3 is trained on): the shared style lead (painterly gouache-and-watercolour storybook
-  art on cold-press paper, warm light from the upper left, one subject, a soft wash in the card's
-  colour behind it), then the subject. Awakening lines repeat the same palette and markings so a
-  Basic, its Awaken 1 and its Awaken 2 read as one species growing. `_groups` orders the cards for
-  the contact sheets.
+  form FLUX 3 is trained on). `_groups` orders the cards for the contact sheets.
+  - **Hexons** (the 78 creatures) are drawn from their species sheets in `docs/bestiary/`
+    (see `docs/BESTIARY.md`): each caption is written from the sheet's morphology, colours, habitat
+    and visual key. The shared lead asks for a fantasy creature-design painting in gouache and
+    watercolour with ink linework, an invented species and not a real animal; then a composition
+    sentence keeps the whole Hexon in the safe area (below); then the subject (pose, anatomy with
+    exact counts, type material, the line's invented organ) and the light. Awaken 2, rares and promos
+    get a low angle and backlight. An Awaken line repeats colours, material and signature organ so
+    it reads as one species awakening. No Hexon carries a hexagon mark.
+  - **Trainers and energy** keep the storybook still-life lead: painterly gouache and watercolour on
+    cold-press paper, warm light from the upper left, one subject, a soft wash in the card's colour.
 - **Output:** the PNG goes to `tools/art/out/` (git-ignored); the WebP (best quality ≤ 60 KB)
   goes straight to `web/cards/`.
 
@@ -59,6 +65,11 @@ The window is nearly square, so it shows the full width and about two thirds of 
 19 % is cut from the top (the calm wash) and 14 % from the bottom (`object-position: 50% 58%`). Keep
 the crystal within y 25–80 %.
 
+**Hexons aim tighter:** the whole Hexon (ears, tails, crests, veils included) sits in x 200–600,
+y 28–532, so it survives even the picture-only crop. That means seated, perched, coiled or front
+three-quarter poses, tails curled up, wings folded. Side-on quadrupeds, crouches, running poses and
+spread wings or veils always spill out; redraw them.
+
 ## Licence notes
 
 - The weights are **not** in this repository. FLUX 3 Image Klein is published by Black Forest
@@ -82,4 +93,5 @@ $PY tools/art/gen.py --contact   # rebuilds tools/art/out/contact-<group>.png on
 ```
 
 Look at the result (the contact sheets help) before committing the new `web/cards/*.webp`: no
-extra limbs, no lettering, one subject, same style as its neighbours.
+extra limbs, no lettering, one subject, same style as its neighbours, the whole Hexon inside the
+safe area, nothing that reads as a real animal, a human figure or a hexagon.

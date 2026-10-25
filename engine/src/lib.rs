@@ -35,6 +35,7 @@ pub mod clock;
 pub mod decks;
 pub mod doctor;
 pub mod endgame;
+pub mod lore;
 pub mod overworld;
 pub mod profile;
 pub mod save;
