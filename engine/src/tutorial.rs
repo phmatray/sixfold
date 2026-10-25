@@ -179,8 +179,8 @@ pub fn lesson(g: &Game) -> Lesson {
                     format!("Touchez {} dans votre main, puis mettez-la en jeu.", name(ASHPAW)),
                 ),
                 tr(
-                    "Your first Basic creature becomes your Active: the one that attacks and takes hits.",
-                    "Votre première créature de Base devient votre Active : c'est elle qui attaque et encaisse.",
+                    "Your first Basic Hexon becomes your Active: the one that attacks and takes hits.",
+                    "Votre premier Hexon de Base devient votre Actif : c'est lui qui attaque et encaisse.",
                 )
                 .into(),
             )
@@ -194,8 +194,8 @@ pub fn lesson(g: &Game) -> Lesson {
                     format!("Placez maintenant {} sur votre Banc.", name(PUDDOCK)),
                 ),
                 tr(
-                    "Benched creatures wait their turn: Retreat swaps your Active for one of them, paying its energy cost. If your Active is knocked out with an empty Bench, you lose.",
-                    "Les créatures du Banc attendent leur tour : la Retraite échange votre Active contre l'une d'elles, en payant son coût en énergie. Si votre Active est mise K.O. sans personne sur le Banc, vous perdez.",
+                    "Benched Hexons wait their turn: Retreat swaps your Active for one of them, paying its energy cost. If your Active is knocked out with an empty Bench, you lose.",
+                    "Les Hexons du Banc attendent leur tour : la Retraite échange votre Actif contre l'un d'eux, en payant son coût en énergie. Si votre Actif est mis K.O. sans personne sur le Banc, vous perdez.",
                 )
                 .into(),
             )
@@ -244,12 +244,12 @@ pub fn lesson(g: &Game) -> Lesson {
                 Goal::Evolve,
                 Some(Action::Evolve { hand: h, slot: 0 }),
                 tr(
-                    format!("Tap {} and evolve {} into it.", name(BLAZELYNX), name(ASHPAW)),
-                    format!("Touchez {} pour faire évoluer {}.", name(BLAZELYNX), name(ASHPAW)),
+                    format!("Tap {} and awaken {} into it.", name(BLAZELYNX), name(ASHPAW)),
+                    format!("Touchez {} pour éveiller {}.", name(BLAZELYNX), name(ASHPAW)),
                 ),
                 tr(
-                    "An evolution goes on top of the creature it names. It keeps its energy and damage, and gets more HP and stronger attacks.",
-                    "Une évolution se pose sur la créature qu'elle nomme. Elle garde son énergie et ses dégâts, et gagne des PV et de meilleures attaques.",
+                    "An Awakening goes on top of the Hexon it names. It keeps its energy and damage, and gets more HP and stronger attacks.",
+                    "Un Éveil se pose sur le Hexon qu'il nomme. Il garde son énergie et ses dégâts, et gagne des PV et de meilleures attaques.",
                 )
                 .into(),
             )
@@ -277,7 +277,7 @@ pub fn lesson(g: &Game) -> Lesson {
                     Some(Action::PlayTrainer(h)),
                     tr(
                         format!("Play {} to heal your Active.", name(MOSS_POULTICE)),
-                        format!("Jouez {} pour soigner votre Active.", name(MOSS_POULTICE)),
+                        format!("Jouez {} pour soigner votre Actif.", name(MOSS_POULTICE)),
                     ),
                     tr(
                         "Trainer cards are played from your hand for their effect, then discarded. Play as many as you like.",

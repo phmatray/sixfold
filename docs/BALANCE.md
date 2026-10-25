@@ -22,7 +22,7 @@ Seven stats, chosen to fix the outliers with as little as possible:
 |---|---|---|
 | Knollop, Knollgrim | Lightning resistance removed | With Fighting weakness on every Lightning line, Storm Front lost 84/16 to Ember Rush and 94/6 to Bedrock. |
 | Cragmastiff | Lightning resistance removed | Same, against Stone Fist and Bedrock. |
-| Arcfang | Fighting weakness removed | Storm Front's Stage 1 now survives a Fighting hit; Sparkit and Fulgurex keep theirs. |
+| Arcfang | Fighting weakness removed | Storm Front's Awaken 1 now survives a Fighting hit; Sparkit and Fulgurex keep theirs. |
 | Ironbrawl | 90 → 80 HP | Stone Fist won 62%, Bedrock 61%. |
 | Elderhart | 110 → 100 HP | Grove Bloom sat on the 60% line. |
 | Hexlet | Psychic weakness removed | Tide Mind beat Dream Veil 77/23. |

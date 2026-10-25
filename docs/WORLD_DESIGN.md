@@ -11,7 +11,7 @@ the world. Three releases implement it:
 
 Hard constraints, restated so nobody has to look them up:
 
-- **Clean room.** Every name, place, creature, map layout and story beat here is original. Generic genre
+- **Clean room.** Every name, place, Hexon, map layout and story beat here is original. Generic genre
   mechanics (trainers with line of sight, item-gated paths, a day clock, fast travel) are fine; named
   franchise structures are not. Vocabulary to use: *seal*, *seal site*, *rival*, *route duelist*,
   *waymark*. Vocabulary to avoid: gym, badge, league, elite, "pokécenter"-style heal houses, any
@@ -303,11 +303,11 @@ challenge sheet and the duel screen for rivals, trainers and Rook alike.
 ### 4.3 Deck kits
 
 Fifty hand-written 60-card lists is a maintenance trap. Duelists draw from **20 kits**: a short list of
-creatures and trainers, padded to 60 with basic energy of the kit's colour(s) by `Kit::deck()` (which also
+Hexons and trainers, padded to 60 with basic energy of the kit's colour(s) by `Kit::deck()` (which also
 asserts the 4-copy limit). `Kit::Mix(a, b)` takes the first half of each list. Each duelist adds one **signature card** (Hazel always has
 two Hivevolt, Pell a Streamfin, Cole a Furnaceback …) so two duelists on the same kit still feel different;
 the signature is named in their `challenge` line. Tiers: **Sprout** (Basics
-only), **Bud** (+ Stage 1), **Bloom** (+ Stage 2; night and late duelists).
+only), **Bud** (+ Awaken 1), **Bloom** (+ Awaken 2; night and late duelists).
 
 | Colour | Sprout | Bud | Bloom |
 |---|---|---|---|
@@ -365,7 +365,7 @@ Each rival gets a **portrait** (256² webp bust rendered from its `rival_*.glb` 
 with a new `--portrait` flag; shown in the challenge sheet, the duel header and the roster), their
 existing **title**, four **duel lines** shown as a speech bubble from the portrait, and an **AI style**.
 
-Duel line moments: **intro** (setup ends), **first KO** (their first knock-out of your creature),
+Duel line moments: **intro** (setup ends), **first KO** (their first knock-out of your Hexon),
 **on the ropes** (they need one prize or fewer to lose), **defeat** (the game-over screen). The world's
 `won:`/`lost:` branches still carry the after-duel talk.
 
@@ -393,7 +393,7 @@ small scores with thresholds, so a style is a handful of extra weights, not a ne
 | Balanced | today's AI | no change (Sable, quick duels, route duelists) |
 | Aggressive | damage now | energy to the Active first; attacks whenever any attack is usable; retreats only to dodge a sure KO; draw trainers before setup trainers |
 | Stall | outlasting | heals and conditions score higher; retreats a damaged Active earlier; spreads energy over the Bench; prefers attacks that leave the defender Asleep/Paralysed over raw damage |
-| Bench sniper | the weakest target | attacks and effects that hit the Bench score by how close they bring a Benched creature to a KO; Snare Hook-style "bring up the opponent's Bench" scores the lowest-HP target; a Bench KO counts like an Active KO |
+| Bench sniper | the weakest target | attacks and effects that hit the Bench score by how close they bring a Benched Hexon to a KO; Snare Hook-style "bring up the opponent's Bench" scores the lowest-HP target; a Bench KO counts like an Active KO |
 
 Each style is unit-tested on one constructed position where it must pick differently from Balanced.
 `deck_sweep` reruns with styles on; a rival deck that drifts outside 40–60% overall gets its style, not its
@@ -534,9 +534,9 @@ Facet balance. She keeps the running-shoes gift and the one-seal Wild pack.
 **The deck doctor** is engine logic (`engine/src/doctor.rs`, `diagnose(deck, collection) -> Vec<Advice>`),
 each piece of advice a `T` with a severity, and where possible a concrete swap from the player's own
 collection. Checks: fewer than 10 Basics (opening hands with no Basic); energy under 18 or over 28; a
-Stage 1 or 2 without its line underneath; attack costs in a colour the deck carries no energy for; no
+Awaken 1 or 2 without its line underneath; attack costs in a colour the deck carries no energy for; no
 draw/search trainers while owning Lucky Satchel or Trail Compass; four or more colours; a line of 4
-Stage 2s over 2 Basics. A deck with nothing to say gets "Clean bill of health" / "Rien à signaler".
+Awaken 2 Hexons over 2 Basics. A deck with nothing to say gets "Clean bill of health" / "Rien à signaler".
 
 **The Press**: choose a card in the binder, see its craft price (owned / never owned, §3.2), confirm. The
 voucher appears as a "Use voucher" button on any non-promo card.
@@ -680,7 +680,7 @@ top that is smooth and blank. Nobody remembers why.
 
 **Rook** (FR *Rook*), *The Blank* / *Le Sans-Couleur*, grew up in the meadow. At twelve he took his first deck
 to the duel hall, lost to everyone and was told kindly he'd "find his colour". He never did; he plays
-**Colorless** creatures only, on purpose now. He has walked the ring the other way round and believes the
+**Colorless** Hexons only, on purpose now. He has walked the ring the other way round and believes the
 seventh face is for a champion of no colour: him. He's sharp, funny, competitive, a little bitter, and keeps
 a tally of your wins on his sleeve. Not a villain; a mirror. The arc is about whether the path is closed or
 just unwalked.
@@ -847,12 +847,12 @@ shop stock. Duelists marked ☾ are night-only; ⚖ are challenge-rule duelists 
 
 | Rule | Deck must… | Engine check |
 |---|---|---|
-| `BasicsOnly` | hold no Stage 1 or Stage 2 creature | stage of every creature card |
-| `NoTrainers` | hold creatures and energy only | card kind |
-| `MonoColour` | hold creatures and basic energy of one colour (plus Colorless) | colours |
+| `BasicsOnly` | hold no Awaken 1 or Awaken 2 Hexon | stage of every Hexon card |
+| `NoTrainers` | hold Hexons and energy only | card kind |
+| `MonoColour` | hold Hexons and basic energy of one colour (plus Colorless) | colours |
 | `LightEnergy` | hold at most 16 energy cards | count |
 | `NoRares` | hold no Rare (energy excepted) | rarity |
-| `TwoStage2` | hold at least two Stage 2 creatures | stage count |
+| `TwoStage2` | hold at least two Awaken 2 Hexons | stage count |
 
 ---
 
@@ -1288,7 +1288,7 @@ each night find). **Esme**, a child who only appears at dawn ("Everyone's asleep
 | `t_maud` | Maud, Moth Catcher / *Chasseuse de phalènes* | moonwell 22,4 (s, 3) | Reverie | 3 | Normal | 60 |
 | `t_noor` | Noor, Dream Reader / *Liseuse de rêves* | moonwell 4,12 (e, 4) | Mix(Reverie, Seedling) | 3 | Normal | 60 |
 | `t_ambrose` ☾ | Ambrose, Night Rower / *Rameur de nuit* | the lantern path, mid-lake (talk) | Trance | 3 | Hard | 90 |
-| `t_yara` ⚖ | Yara, Evolutionist / *Évolutionniste* — `TwoStage2` | lanternmere (talk) | Trance | 3 | Normal | 120 + `wraithelle` |
+| `t_yara` ⚖ | Yara, Awakener / *Éveilleuse* — `TwoStage2` | lanternmere (talk) | Trance | 3 | Normal | 120 + `wraithelle` |
 
 **Finds (8).** `d_tree` wishing tree roots (hidden) ⬡ 40 · `d_willow` hushlane willow (hidden) card `dozel` ·
 `d_ford` mid-ford stone (boots) ⬡ 60 · `d_jetty` jetty end card `gloamowl` · `d_islet` lake islet (boots, the
@@ -1643,9 +1643,9 @@ them, hidden ones as "???" until earned (marked H).
 | `clean_sweep` | Clean Sweep / *Sans bavure* | win a 6-prize duel without giving up a prize | 100 |
 | `comeback` H | Comeback / *Retournement* | win after the opponent needed one prize and you needed four or more | 100 |
 | `deck_out` | Patience / *Patience* | win because the opponent's deck ran out | 50 |
-| `empty_bench` | Empty Bench / *Banc vide* | win by leaving the opponent no creature in play | 50 |
+| `empty_bench` | Empty Bench / *Banc vide* | win by leaving the opponent no Hexon in play | 50 |
 | `sudden_death` | Sudden Death / *Mort subite* | win a sudden-death duel | 75 |
-| `full_bloom` | Full Bloom / *Pleine floraison* | play a Stage 2 creature | 25 |
+| `full_bloom` | Full Bloom / *Pleine floraison* | play an Awaken 2 Hexon | 25 |
 | `ko_200` | Knockout Artist / *Artiste du K.O.* | 200 knock-outs | 100 |
 | `heads_5` | Lucky Streak / *La main heureuse* | five heads in a row in one duel | 50 |
 | `mono_rival` | True Colours / *Haut en couleur* | beat a rival with a one-colour deck | 75 |

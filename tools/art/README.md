@@ -17,8 +17,8 @@ procedural SVG.
 - **Prompts:** `prompts.json` holds a full hand-written caption per card (the long, descriptive
   form FLUX 3 is trained on): the shared style lead (painterly gouache-and-watercolour storybook
   art on cold-press paper, warm light from the upper left, one subject, a soft wash in the card's
-  colour behind it), then the subject. Evolution lines repeat the same palette and markings so a
-  Basic, its Stage 1 and its Stage 2 read as one species growing. `_groups` orders the cards for
+  colour behind it), then the subject. Awakening lines repeat the same palette and markings so a
+  Basic, its Awaken 1 and its Awaken 2 read as one species growing. `_groups` orders the cards for
   the contact sheets.
 - **Output:** the PNG goes to `tools/art/out/` (git-ignored); the WebP (best quality ≤ 60 KB)
   goes straight to `web/cards/`.
@@ -50,7 +50,7 @@ insets from each edge of the 800×560 frame:
 - The weights are **not** in this repository. FLUX 3 Image Klein is published by Black Forest
   Labs under its community licence, which allows using the generated images in this free,
   non-commercial project. Re-check the licence before any commercial use.
-- Every creature, object and caption is original. Captions never name or imitate an existing
+- Every Hexon, object and caption is original. Captions never name or imitate an existing
   franchise, character or artist, and images are reviewed and redrawn if one looks like a known
   creature (see `CLAUDE.md`, "Legal scope").
 

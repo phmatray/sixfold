@@ -26,8 +26,8 @@ impl Prebuilt {
 
 pub static EMBER_RUSH: Prebuilt = Prebuilt {
     name: T::new("Ember Rush", "Ruée ardente"),
-    description: T::new("Fire and Fighting aggro: fast Basics, coin-flip hits and a Stage 2 \
-                  that powers up with free Fire energy. Hit hard before the opponent sets up.", "Feu et Combat, tout en attaque : des créatures de Base rapides, des coups à pile ou face et un Stade 2 qui se charge d'énergie Feu gratuite. Frappez fort avant que l'adversaire ne s'installe."),
+    description: T::new("Fire and Fighting aggro: fast Basics, coin-flip hits and an Awaken 2 \
+                  that powers up with free Fire energy. Hit hard before the opponent sets up.", "Feu et Combat, tout en attaque : des Hexons de Base rapides, des coups à pile ou face et un Hexon d'Éveil 2 qui se charge d'énergie Feu gratuite. Frappez fort avant que l'adversaire ne s'installe."),
     list: &[
         (CINDREL, 4),
         (FLARROW, 3),
@@ -53,7 +53,7 @@ pub static EMBER_RUSH: Prebuilt = Prebuilt {
 pub static TIDE_MIND: Prebuilt = Prebuilt {
     name: T::new("Tide Mind", "Esprit des marées"),
     description: T::new("Water and Psychic control: sleep, poison and paralysis, energy removal \
-                  and healing, then a sturdy Stage 2 to finish. Outlast the opponent.", "Eau et Psychique, tout en contrôle : sommeil, poison et paralysie, retrait d'énergie et soins, puis un solide Stade 2 pour conclure. Tenez plus longtemps que l'adversaire."),
+                  and healing, then a sturdy Awaken 2 to finish. Outlast the opponent.", "Eau et Psychique, tout en contrôle : sommeil, poison et paralysie, retrait d'énergie et soins, puis un solide Hexon d'Éveil 2 pour conclure. Tenez plus longtemps que l'adversaire."),
     list: &[
         (PUDDOCK, 4),
         (BROOKHORN, 3),
@@ -79,7 +79,7 @@ pub static TIDE_MIND: Prebuilt = Prebuilt {
 pub static GROVE_BLOOM: Prebuilt = Prebuilt {
     name: T::new("Grove Bloom", "Bosquet en fleurs"),
     description: T::new("Grass and Lightning: poison and paralysis wear the opponent down while \
-                  healing keeps your creatures standing. Win the long game.", "Herbe et Foudre : le poison et la paralysie usent l'adversaire pendant que les soins gardent vos créatures debout. Gagnez sur la durée."),
+                  healing keeps your Hexons standing. Win the long game.", "Herbe et Foudre : le poison et la paralysie usent l'adversaire pendant que les soins gardent vos Hexons debout. Gagnez sur la durée."),
     list: &[
         (SPRIGGET, 4),
         (THORNBUCK, 3),
@@ -106,7 +106,7 @@ pub static GROVE_BLOOM: Prebuilt = Prebuilt {
 pub static STORM_FRONT: Prebuilt = Prebuilt {
     name: T::new("Storm Front", "Front orageux"),
     description: T::new("Lightning and Water: snipe the Bench, paralyze the Active and strip its \
-                  energy, then bring down a coin-flip storm.", "Foudre et Eau : visez le Banc, paralysez l'Active, arrachez-lui son énergie, puis déchaînez une tempête à pile ou face."),
+                  energy, then bring down a coin-flip storm.", "Foudre et Eau : visez le Banc, paralysez l'Actif, arrachez-lui son énergie, puis déchaînez une tempête à pile ou face."),
     list: &[
         (SPARKIT, 4),
         (ARCFANG, 3),
@@ -132,8 +132,8 @@ pub static STORM_FRONT: Prebuilt = Prebuilt {
 
 pub static STONE_FIST: Prebuilt = Prebuilt {
     name: T::new("Stone Fist", "Poing de pierre"),
-    description: T::new("Fighting with Colorless support: sturdy creatures that hit harder the more \
-                  they are hurt. Take the blows, then hit back.", "Combat avec un soutien Incolore : des créatures robustes qui frappent d'autant plus fort qu'elles sont blessées. Encaissez, puis rendez les coups."),
+    description: T::new("Fighting with Colorless support: sturdy Hexons that hit harder the more \
+                  they are hurt. Take the blows, then hit back.", "Combat avec un soutien Incolore : des Hexons robustes qui frappent d'autant plus fort qu'ils sont blessés. Encaissez, puis rendez les coups."),
     list: &[
         (BRAWLET, 4),
         (IRONBRAWL, 3),
@@ -187,8 +187,8 @@ pub static DREAM_VEIL: Prebuilt = Prebuilt {
 /// Rares. Not in [`PREBUILT`]: it is the player's own deck list.
 pub static STARTER: Prebuilt = Prebuilt {
     name: T::new("Trailhead", "Premiers pas"),
-    description: T::new("Your first deck: Fire and Water creatures with simple attacks, \
-                  plus trainers to draw, heal and switch.", "Votre premier deck : des créatures Feu et Eau aux attaques simples, plus des cartes Dresseur pour piocher, soigner et échanger."),
+    description: T::new("Your first deck: Fire and Water Hexons with simple attacks, \
+                  plus trainers to draw, heal and switch.", "Votre premier deck : des Hexons Feu et Eau aux attaques simples, plus des cartes Dresseur pour piocher, soigner et échanger."),
     list: &[
         (CINDREL, 3),
         (FLARROW, 2),

@@ -32,8 +32,8 @@ pub struct Booster {
 pub static EMBER_PACK: Booster = Booster {
     name: T::new("Ember Pack", "Booster Braise"),
     description: T::new(
-        "Fire and Fighting creatures, plus trainers.",
-        "Créatures Feu et Combat, plus des cartes Dresseur.",
+        "Fire and Fighting Hexons, plus trainers.",
+        "Hexons Feu et Combat, plus des cartes Dresseur.",
     ),
     colors: &[Color::Fire, Color::Fighting],
 };
@@ -41,8 +41,8 @@ pub static EMBER_PACK: Booster = Booster {
 pub static TIDE_PACK: Booster = Booster {
     name: T::new("Tide Pack", "Booster Marée"),
     description: T::new(
-        "Water and Psychic creatures, plus trainers.",
-        "Créatures Eau et Psychique, plus des cartes Dresseur.",
+        "Water and Psychic Hexons, plus trainers.",
+        "Hexons Eau et Psychique, plus des cartes Dresseur.",
     ),
     colors: &[Color::Water, Color::Psychic],
 };
@@ -59,8 +59,8 @@ pub static WILD_PACK: Booster = Booster {
 pub static GROVE_PACK: Booster = Booster {
     name: T::new("Grove Pack", "Booster Bosquet"),
     description: T::new(
-        "Grass and Lightning creatures, plus trainers.",
-        "Créatures Herbe et Foudre, plus des cartes Dresseur.",
+        "Grass and Lightning Hexons, plus trainers.",
+        "Hexons Herbe et Foudre, plus des cartes Dresseur.",
     ),
     colors: &[Color::Grass, Color::Lightning],
 };
@@ -68,8 +68,8 @@ pub static GROVE_PACK: Booster = Booster {
 pub static STORM_PACK: Booster = Booster {
     name: T::new("Storm Pack", "Booster Orage"),
     description: T::new(
-        "Lightning and Water creatures, plus trainers.",
-        "Créatures Foudre et Eau, plus des cartes Dresseur.",
+        "Lightning and Water Hexons, plus trainers.",
+        "Hexons Foudre et Eau, plus des cartes Dresseur.",
     ),
     colors: &[Color::Lightning, Color::Water],
 };
@@ -77,8 +77,8 @@ pub static STORM_PACK: Booster = Booster {
 pub static STONE_PACK: Booster = Booster {
     name: T::new("Stone Pack", "Booster Pierre"),
     description: T::new(
-        "Fighting and Colorless creatures, plus trainers.",
-        "Créatures Combat et Incolore, plus des cartes Dresseur.",
+        "Fighting and Colorless Hexons, plus trainers.",
+        "Hexons Combat et Incolore, plus des cartes Dresseur.",
     ),
     colors: &[Color::Fighting],
 };
@@ -86,8 +86,8 @@ pub static STONE_PACK: Booster = Booster {
 pub static DREAM_PACK: Booster = Booster {
     name: T::new("Dream Pack", "Booster Songe"),
     description: T::new(
-        "Psychic and Grass creatures, plus trainers.",
-        "Créatures Psychique et Herbe, plus des cartes Dresseur.",
+        "Psychic and Grass Hexons, plus trainers.",
+        "Hexons Psychique et Herbe, plus des cartes Dresseur.",
     ),
     colors: &[Color::Psychic, Color::Grass],
 };

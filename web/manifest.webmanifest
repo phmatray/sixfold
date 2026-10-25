@@ -1,7 +1,7 @@
 {
   "name": "Sixfold",
   "short_name": "Sixfold",
-  "description": "A creature card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.",
+  "description": "A Hexon card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

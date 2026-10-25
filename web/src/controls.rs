@@ -17,7 +17,7 @@ use crate::{Legal, Ui};
 fn reason(e: RuleError) -> &'static str {
     match e {
         RuleError::NotEnoughEnergy => tr("Not enough energy", "Pas assez d'énergie"),
-        RuleError::AsleepOrParalyzed => tr("Asleep or Paralyzed", "Endormie ou Paralysée"),
+        RuleError::AsleepOrParalyzed => tr("Asleep or Paralyzed", "Endormi ou Paralysé"),
         RuleError::CantAttack => tr("Can't attack this turn", "Pas d'attaque ce tour"),
         RuleError::AttackDisabled => tr("Disabled this turn", "Bloquée ce tour"),
         RuleError::AlreadyUsed => tr("Already used", "Déjà utilisé"),
@@ -184,13 +184,13 @@ fn bar_model(ctl: Ctl, ui: Ui, legal: &[Action]) -> Bar {
             (Some(_), _) => None,
             (None, false) => Some(match prompt.kind {
                 PromptKind::ChooseActive => tr(
-                    "Pick a Basic creature from your hand.",
-                    "Choisissez une créature de Base dans votre main.",
+                    "Pick a Basic Hexon from your hand.",
+                    "Choisissez un Hexon de Base dans votre main.",
                 )
                 .into(),
                 PromptKind::ChooseBench => tr(
                     "Pick more Basics for your Bench, or press Done.",
-                    "Ajoutez des créatures de Base à votre Banc, ou touchez Terminé.",
+                    "Ajoutez des Hexons de Base à votre Banc, ou touchez Terminé.",
                 )
                 .into(),
                 _ => {
@@ -420,8 +420,8 @@ fn dialog_model(g: &Game, legal: &[Action]) -> Option<Dialog> {
         ),
         PromptKind::ChooseReplacement => Some(
             tr(
-                "Pick a Benched creature to become your Active.",
-                "Choisissez une créature de Banc qui deviendra votre Active.",
+                "Pick a Benched Hexon to become your Active.",
+                "Choisissez un Hexon de Banc qui deviendra votre Actif.",
             )
             .into(),
         ),

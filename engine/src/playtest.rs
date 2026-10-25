@@ -475,7 +475,7 @@ fn english_in(line: &str) -> Option<&'static str> {
         " damage",
         " turn",
         "Flip ",
-        "Active creature",
+        "Active Hexon",
         "Bench ",
         " heads",
         " tails",
