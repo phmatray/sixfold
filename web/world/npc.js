@@ -10,11 +10,23 @@ const NPC_STEP = 0.45; // seconds per tile
 const GO_STEP = 0.3; // walking somewhere on purpose (a duelist coming over)
 const LOOK_EVERY = 2.5; // seconds between turns of a `look` list
 
+// What a person wears: the map's `wear` list, else for a route duelist one of its
+// model's accessories, picked by its id (so each looks its own on a shared model).
+function wearOf(def, src) {
+  if (def.wear) return def.wear;
+  if (!def.trainer) return [];
+  const names = [];
+  src.scene.traverse((o) => /^acc_/.test(o.name) && names.push(o.name.slice(4)));
+  let h = 0;
+  for (const ch of def.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return names.length ? [names[h % names.length]] : [];
+}
+
 // NPCs: their own model when it exists, else the hero model, tinted and scaled.
 export function spawnNpcs(map, got, floorAt, root) {
   return (map.npcs ?? []).map((def) => {
     const own = got[def.model];
-    const n = own ? actor(own, null, 1, def.idle, def.outfit, def.hair) : actor(got.hero, def.tint, def.scale ?? 1, def.idle);
+    const n = own ? actor(own, null, 1, def.idle, def.outfit, def.hair, wearOf(def, own)) : actor(got.hero, def.tint, def.scale ?? 1, def.idle);
     Object.assign(n, { def, x: def.x, z: def.z, fy: floorAt(def.x, def.z), face: def.facing ?? "s", step: null, ri: 0, wait: 1.5, busy: false });
     n.obj.rotation.y = angle(n.face);
     root.add(n.obj, n.blob);

@@ -32,25 +32,61 @@ export const blobMat = () => new THREE.MeshBasicMaterial({ map: blobTex, transpa
 export const blobGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
 
 // `tint` lerps the stand-in hero toward a colour. On an NPC's own model, `outfit`
-// recolours the clothes (not skin, eyes, hair or trims) and `hair` the hair, so
-// two people on one model still look like two people.
-const BODY = /skin|eye|white|blush|sole|gold|cream|hair/i;
-export function actor(src, tint, scale, idle, outfit = null, hair = null) {
+// recolours the clothes (not skin, eyes, hair, trims or glowing parts; accents take
+// its opposite hue) and `hair`
+// the hair, so two people on one model still look like two people; `wear` shows
+// accessories (`acc_<name>` meshes, hidden otherwise).
+// People are one mesh on one palette texture (build_characters.py): the swatch
+// table rides in the material's extras, and a recolour repaints the swatches into
+// a texture shared by everyone dressed alike. Models without one (the sheep)
+// recolour their materials by name.
+const BODY = /skin|eye|white|blush|sole|gold|cream|hair|trim|glow/i;
+const repainted = new Map();
+function palette(json, ops) {
+  const id = `${json}|${ops.map((o) => o.id).join("|")}`;
+  if (repainted.has(id)) return repainted.get(id);
+  const { grid, cell, keys } = JSON.parse(json);
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = grid * cell;
+  const g = cv.getContext("2d"), c = new THREE.Color();
+  for (const [name, [i, hex]] of Object.entries(keys)) {
+    c.set(hex);
+    for (const op of ops) if (op.test(name)) op.apply(c);
+    g.fillStyle = `#${c.getHexString()}`;
+    g.fillRect((i % grid) * cell, (grid - 1 - Math.floor(i / grid)) * cell, cell, cell); // row 0 at the bottom, as in Blender
+  }
+  const t = new THREE.CanvasTexture(cv);
+  Object.assign(t, { colorSpace: THREE.SRGBColorSpace, flipY: false, magFilter: THREE.NearestFilter, minFilter: THREE.NearestFilter, generateMipmaps: false });
+  repainted.set(id, t);
+  return t;
+}
+export function actor(src, tint, scale, idle, outfit = null, hair = null, wear = []) {
   const obj = src ? cloneSkinned(src.scene) : PLACEHOLDER.hero();
   prep(obj, true);
   // `hue`: take the colour's hue and keep each part's own lightness (garments stay distinct).
-  const recolor = (test, color, k, hue) => {
-    const c = new THREE.Color(color), want = c.getHSL({}), had = {};
-    obj.traverse((o) => {
-      if (!o.isMesh || !test(o.material.name)) return;
-      o.material = o.material.clone();
-      if (hue) o.material.color.getHSL(had), o.material.color.setHSL(want.h, (had.s + want.s) / 2, had.l);
-      else o.material.color.lerp(c, k);
-    });
+  const op = (test, color, k, hue) => {
+    const want = new THREE.Color(color), w = want.getHSL({}), had = {};
+    return { test, id: `${k}${hue}${color}`, apply: (c) => (hue ? (c.getHSL(had), c.setHSL(w.h, (had.s + w.s) / 2, had.l)) : c.lerp(want, k)) };
   };
-  if (tint) recolor(() => true, tint, 0.45);
-  if (outfit) recolor((n) => !BODY.test(n), outfit, 0, true);
-  if (hair) recolor((n) => /hair/i.test(n), hair, 0.85);
+  // An `_accent` swatch takes the outfit's opposite hue, so a recoloured person keeps two colours.
+  const accent = outfit && `#${new THREE.Color(outfit).offsetHSL(0.5, 0, 0).getHexString()}`;
+  const ops = [tint && op(() => true, tint, 0.45), outfit && op((n) => !BODY.test(n) && !/accent/i.test(n), outfit, 0, true),
+    accent && op((n) => /accent/i.test(n), accent, 0, true), hair && op((n) => /hair/i.test(n), hair, 0.85)].filter(Boolean);
+  obj.traverse((o) => {
+    if (!o.isMesh) return;
+    if (/^acc_/.test(o.name)) o.visible = wear.includes(o.name.slice(4));
+    const pal = o.material.userData?.sx_palette;
+    if (pal && o.material.map) {
+      const map = o.material.map;
+      if (ops.length) o.material.map = palette(pal, ops);
+      else if (map.minFilter !== THREE.NearestFilter) Object.assign(map, { magFilter: THREE.NearestFilter, minFilter: THREE.NearestFilter, generateMipmaps: false, needsUpdate: true });
+      return;
+    }
+    const mine = ops.filter((p) => p.test(o.material.name));
+    if (!mine.length) return;
+    o.material = o.material.clone();
+    for (const p of mine) p.apply(o.material.color);
+  });
   obj.scale.multiplyScalar(scale);
   const blob = new THREE.Mesh(blobGeo, blobMat());
   blob.userData.shared = true;
