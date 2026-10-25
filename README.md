@@ -37,8 +37,8 @@ download first).
   rematch. Works on desktop and on phones, in portrait and landscape.
 - **Collection and deck building**: a binder of every card, booster packs
   (Ember, Tide, Grove, Storm, Stone, Dream and Wild) revealed card by card,
-  saved decks you create, copy, rename and edit, and a Wild Pack for every duel
-  you win. New players start with one starter deck, Trailhead (Fire / Water),
+  saved decks you create, copy, rename and edit, and Facets for every duel you
+  win (since 1.2; it was a Wild Pack). New players start with one starter deck, Trailhead (Fire / Water),
   and three packs; every prebuilt deck can still be played against the AI.
 - **Saves**: three save slots, picked, renamed and deleted from the title
   screen, each saved by itself as you play (a small "Saved" pill says so).
@@ -61,7 +61,7 @@ download first).
   the system's reduced-motion setting.
 - **Campaign**: six original rivals out on the roads around the meadow, one per
   colour theme, each with their own deck, AI level and prize count. Beat one
-  for their seal and packs of their colours (a rematch win gives a pack);
+  for their seal and packs of their colours (a rematch win pays Facets);
   three seals open the next rivals, and all six open the sealed door to Sable,
   the Hex Warden. Each rival's first defeat also gives their promo card. A
   Campaign page on the title screen lists who is beaten, open or locked. A test
@@ -83,6 +83,25 @@ download first).
   quests (a birdwatcher's lost lens, a letter for the baker) that pay in packs,
   animated water, and only the area you stand in is built, so it stays at 60 fps
   on a phone.
+
+## What's new in 1.2: the world comes alive
+
+- **Facets** (⬡), the world's one currency: earned from duels, finds and quests,
+  spent on packs at Wynne's counter, on six daily singles at Perrin's Swap Shop
+  (who also buys your spares), and at Brightwell Press, where Gus prints the card
+  you're missing.
+- **14 route duelists** on the roads, each with a deck kit, a signature card and a
+  personality: they spot you down a line of sight, walk over, and challenge you
+  (**Not now** always works). Short duels, 1 to 3 prizes, a purse on the first win.
+- **38 finds** hidden in stumps, logs, crates, rock pools and bookcases: Facets,
+  cards, packs and six curios that Odile in the square collects for rewards.
+- **Six houses**: the Swap Shop, Mags's Deck Clinic (she reads a deck and
+  suggests swaps from your own cards), Brightwell Press, Hob's Bakery, the
+  boathouse and the Ranger's Lodge.
+- **Six quests** in a **Journal** (J, or the top bar): Moss's seeds, Dace's kite,
+  rye for Hob, a first consult, and the 1.1 letter and lens.
+- **Rivals with a face and a voice**: a portrait and four lines each in a duel,
+  and an AI style (Aggressive, Stall or Bench sniper) of their own.
 
 Not in 1.0: a second human player (see [`docs/ROADMAP.md`](docs/ROADMAP.md)).
 

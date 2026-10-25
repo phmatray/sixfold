@@ -162,7 +162,7 @@
       "name": "Wynne",
       "model": "npc_shopkeeper",
       "tint": "#ffb27a",
-      "scale": 1.0,
+      "scale": 1,
       "x": 7,
       "z": 1,
       "facing": "s",
@@ -193,6 +193,9 @@
           "lines_fr": [
             "La Gardienne des Six, battue dans mon arrière-boutique ! Je fais encadrer les traces de brûlure.",
             "Sable y tient un tableau, maintenant : l'Épreuve, et le duel du jour."
+          ],
+          "do": [
+            "show:shop_hall"
           ]
         },
         {
@@ -202,6 +205,9 @@
           ],
           "lines_fr": [
             "Et cette chasse aux sceaux ? Les rivaux sont sur les routes : le sentier à l'ouest, la promenade à l'est, la carrière au nord."
+          ],
+          "do": [
+            "show:shop_hall"
           ]
         },
         {
@@ -222,13 +228,14 @@
         {
           "lines": [
             "How are the shoes? Hold Shift, or tap RUN, and off you go.",
-            "The table by the window is free if you fancy a duel.",
-            "Rivals duel for seals out on the roads. Bramble on the woodland trail is a gentle start."
+            "Packs are on the counter, priced in Facets. The table by the window is free if you fancy a duel."
           ],
           "lines_fr": [
-            "Et ces chaussures ? Maintiens Maj, ou touche COURIR, et c'est parti.",
-            "La table près de la fenêtre est libre, si un duel te tente.",
-            "Sur les routes, les rivaux mettent leur sceau en jeu. Bramble, sur le sentier des bois, est un début en douceur."
+            "Et ces chaussures ? Maintiens Maj, ou touche COURIR, et c'est parti.",
+            "Les boosters sont sur le comptoir, au prix en facettes. La table près de la fenêtre est libre, si un duel te tente."
+          ],
+          "do": [
+            "show:shop_hall"
           ]
         }
       ]

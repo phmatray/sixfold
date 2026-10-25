@@ -12,6 +12,7 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 use sixfold_engine::ai::{Ai, Difficulty, Style};
+use sixfold_engine::campaign::{rival, RivalLines};
 use sixfold_engine::tutorial;
 use sixfold_engine::{card, fr, tr, Action, CardId, Config, Event, Game, PromptKind};
 
@@ -58,6 +59,14 @@ pub struct Fx {
     pub callout: Option<Callout>,
     /// (player, prize position) being taken.
     pub prize: Option<(usize, usize)>,
+}
+
+/// A rival's duel line in the speech bubble; `ko` for their first knock-out.
+#[derive(Clone, Copy, PartialEq)]
+pub struct Said {
+    pub key: u32,
+    pub text: &'static str,
+    pub ko: bool,
 }
 
 #[derive(Clone, PartialEq)]
@@ -108,6 +117,10 @@ pub struct Ctl {
     /// For screen readers: what happened since the human last had to act
     /// (the AI's whole turn, or the result of the human's own action).
     pub announce: RwSignal<String>,
+    /// The rival's line being said, if any (see [`Ctl::say`]).
+    pub said: RwSignal<Option<Said>>,
+    /// The rival lines already said this duel, one bit each.
+    spoken: StoredValue<u8>,
     heard: StoredValue<Vec<String>>,
     pub setup: StoredValue<Option<Setup>>,
     real: StoredValue<Option<Game>>,
@@ -142,6 +155,8 @@ impl Ctl {
             seed: RwSignal::new(0),
             error: RwSignal::new(None),
             announce: RwSignal::new(String::new()),
+            said: RwSignal::new(None),
+            spoken: StoredValue::new(0),
             heard: StoredValue::new(vec![]),
             setup: StoredValue::new(None),
             real: StoredValue::new(None),
@@ -196,6 +211,8 @@ impl Ctl {
         self.log.set(vec![]);
         self.heard.set_value(vec![]);
         self.announce.set(String::new());
+        self.said.set(None);
+        self.spoken.set_value(0);
         self.fx.set(Fx::default());
         self.revealed.set(false);
         self.busy.set(true);
@@ -222,6 +239,33 @@ impl Ctl {
         self.busy.set(false);
         self.shown.set(None);
         self.real.set_value(None);
+    }
+
+    /// The rival's duel lines, in a duel started from the world against a
+    /// rival (route duelists, quick duels and the tutorial have none).
+    pub fn lines(&self) -> Option<&'static RivalLines> {
+        self.setup
+            .with_value(|s| s.as_ref()?.opponent)
+            .and_then(rival)
+            .map(|r| &r.lines)
+    }
+
+    /// Say one of the rival's lines, at most once per duel (`bit`: 1 intro,
+    /// 2 first KO, 4 on the ropes).
+    fn say(&self, bit: u8, pick: fn(&RivalLines) -> sixfold_engine::T) {
+        let Some(lines) = self.lines() else {
+            return;
+        };
+        if self.spoken.get_value() & bit != 0 {
+            return;
+        }
+        self.spoken.update_value(|s| *s |= bit);
+        let key = self.next_key();
+        self.said.set(Some(Said {
+            key,
+            text: pick(lines).get(),
+            ko: bit == 2,
+        }));
     }
 
     pub fn tutorial(&self) -> bool {
@@ -531,6 +575,7 @@ impl Ctl {
                 1300
             }
             Event::TurnStarted { player, turn } => {
+                self.say(1, |l| l.intro);
                 self.revealed.set(true);
                 self.fx.update(|f| f.coin = None);
                 let title = if you(*player) {
@@ -635,11 +680,31 @@ impl Ctl {
                 self.pop(Some(*uid), format!("+{amount}"), "heal");
                 700
             }
-            Event::KnockedOut { uid, .. } => {
+            Event::KnockedOut { uid, player, .. } => {
+                if *player == HUMAN {
+                    self.say(2, |l| l.first_ko);
+                }
                 self.fx.update(|f| f.ko.push(*uid));
                 950
             }
             Event::PrizeTaken { player, prize, .. } => {
+                // On the ropes: the rival is one prize from losing (`real` is
+                // already past this batch, so it knows the game goes on).
+                let ropes = *player == HUMAN
+                    && self.real.with_value(|g| {
+                        g.as_ref().is_some_and(|g| {
+                            g.winner().is_none()
+                                && g.view(HUMAN).sides[HUMAN]
+                                    .prizes
+                                    .iter()
+                                    .filter(|p| **p)
+                                    .count()
+                                    == 1
+                        })
+                    });
+                if ropes {
+                    self.say(4, |l| l.ropes);
+                }
                 self.fx.update(|f| f.prize = Some((*player, *prize)));
                 600
             }

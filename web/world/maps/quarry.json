@@ -28,55 +28,327 @@
     ".............rr............."
   ],
   "props": [
-    {"asset": "stairs", "x": 13, "z": 6, "rot": 0},
-    {"asset": "stairs", "x": 14, "z": 6, "rot": 0},
-    {"asset": "stairs", "x": 20, "z": 2, "rot": 0, "y": 1},
-    {"asset": "rock", "x": 3, "z": 0, "rot": 0, "y": 2},
-    {"asset": "pine", "x": 1, "z": 3, "rot": 0, "y": 1},
-    {"asset": "pine", "x": 6, "z": 2, "rot": 0, "y": 1},
-    {"asset": "pine", "x": 25, "z": 3, "rot": 0, "y": 1},
-    {"asset": "pine", "x": 10, "z": 0, "rot": 0, "y": 2},
-    {"asset": "pine", "x": 16, "z": 1, "rot": 0, "y": 2},
-    {"asset": "pine", "x": 26, "z": 0, "rot": 0, "y": 2},
-    {"asset": "pine", "x": 9, "z": 4, "rot": 0, "y": 1},
-    {"asset": "pine", "x": 17, "z": 3, "rot": 0, "y": 1},
-    {"asset": "rock", "x": 24, "z": 6, "rot": 0, "y": 1},
-    {"asset": "rock", "x": 2, "z": 6, "rot": 0, "y": 1},
-    {"asset": "rock", "x": 11, "z": 3, "rot": 0, "y": 1},
-    {"asset": "rock", "x": 7, "z": 1, "rot": 0, "y": 2},
-    {"asset": "rock", "x": 6, "z": 9, "rot": 0},
-    {"asset": "rock", "x": 9, "z": 10, "rot": 0},
-    {"asset": "rock", "x": 20, "z": 9, "rot": 0},
-    {"asset": "rock", "x": 23, "z": 11, "rot": 0},
-    {"asset": "rock", "x": 3, "z": 15, "rot": 0},
-    {"asset": "rock", "x": 24, "z": 16, "rot": 0},
-    {"asset": "rock", "x": 7, "z": 18, "rot": 0},
-    {"asset": "rock", "x": 20, "z": 19, "rot": 0},
-    {"asset": "rock", "x": 17, "z": 10, "rot": 0},
-    {"asset": "rock", "x": 10, "z": 17, "rot": 0},
-    {"asset": "rock", "x": 25, "z": 13, "rot": 0},
-    {"asset": "crates", "x": 6, "z": 13, "rot": 0},
-    {"asset": "crates", "x": 6, "z": 14, "rot": 0},
-    {"asset": "crates", "x": 18, "z": 13, "rot": 0},
-    {"asset": "lantern", "x": 12, "z": 8, "rot": 0},
-    {"asset": "lantern", "x": 15, "z": 8, "rot": 0},
-    {"asset": "lantern", "x": 12, "z": 18, "rot": 0},
-    {"asset": "lantern", "x": 15, "z": 18, "rot": 0},
-    {"asset": "lantern", "x": 12, "z": 4, "rot": 0, "y": 1},
-    {"asset": "signpost", "x": 15, "z": 19, "rot": 0},
-    {"asset": "tree", "x": 0, "z": 9, "rot": 0},
-    {"asset": "tree", "x": 0, "z": 13, "rot": 0},
-    {"asset": "tree", "x": 0, "z": 17, "rot": 0},
-    {"asset": "tree", "x": 26, "z": 9, "rot": 0},
-    {"asset": "tree", "x": 26, "z": 14, "rot": 0},
-    {"asset": "tree", "x": 26, "z": 18, "rot": 0},
-    {"asset": "tree", "x": 3, "z": 19, "rot": 0},
-    {"asset": "tree", "x": 21, "z": 15, "rot": 0},
-    {"asset": "bush", "x": 2, "z": 11, "rot": 0},
-    {"asset": "bush", "x": 24, "z": 10, "rot": 0},
-    {"asset": "bush", "x": 6, "z": 20, "rot": 0},
-    {"asset": "bush", "x": 23, "z": 20, "rot": 0},
-    {"asset": "bush", "x": 10, "z": 20, "rot": 0}
+    {
+      "asset": "stairs",
+      "x": 13,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "stairs",
+      "x": 14,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "stairs",
+      "x": 20,
+      "z": 2,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 3,
+      "z": 0,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 1,
+      "z": 3,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 6,
+      "z": 2,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 25,
+      "z": 3,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 10,
+      "z": 0,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 16,
+      "z": 1,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 26,
+      "z": 0,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 9,
+      "z": 4,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 17,
+      "z": 3,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 24,
+      "z": 6,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 2,
+      "z": 6,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 11,
+      "z": 3,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 7,
+      "z": 1,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 6,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 9,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 20,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 23,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 3,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 24,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 7,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 20,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 17,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 10,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 6,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 6,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 18,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 12,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 15,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 12,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 15,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 12,
+      "z": 4,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "signpost",
+      "x": 15,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 3,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 21,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 24,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 20,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 19,
+      "rot": 0
+    }
   ],
   "spawn": {
     "x": 13,
@@ -117,11 +389,91 @@
         }
       ]
     },
-    {"x": 15, "z": 19, "kind": "sign", "text": "Emberstep Quarry. South: back to Sixfold Meadow. The steps lead up to the ledges; mind the edges.", "text_fr": "Carrière de Pas-de-Braise. Sud : retour au Pré de Sixfold. Les marches mènent aux corniches ; attention au bord."}
+    {
+      "x": 15,
+      "z": 19,
+      "kind": "sign",
+      "text": "Emberstep Quarry. South: back to Sixfold Meadow. The steps lead up to the ledges; mind the edges.",
+      "text_fr": "Carrière de Pas-de-Braise. Sud : retour au Pré de Sixfold. Les marches mènent aux corniches ; attention au bord."
+    },
+    {
+      "kind": "find",
+      "id": "q_topledge",
+      "x": 26,
+      "z": 0,
+      "give": "coins:80",
+      "text": "Between the pine's roots, at the very top of the quarry: a heap of Facets someone climbed a long way to hide.",
+      "text_fr": "Entre les racines du pin, tout en haut de la carrière : un tas de facettes que quelqu'un a grimpé loin pour cacher."
+    },
+    {
+      "kind": "find",
+      "id": "q_crates",
+      "x": 20,
+      "z": 15,
+      "hidden": true,
+      "give": "card:ash_sifter",
+      "text": "In the stacked crates, packed in straw like something fragile: a card.",
+      "text_fr": "Dans les caisses empilées, calée dans la paille comme un objet fragile : une carte."
+    },
+    {
+      "kind": "find",
+      "id": "q_fern",
+      "x": 2,
+      "z": 6,
+      "give": "give:curio_fossil_fern",
+      "text": "A slab split off the ledge, and inside it, pressed flat in the stone: a fern.",
+      "text_fr": "Une dalle s'est détachée de la corniche, et dedans, pressée à plat dans la pierre : une fougère."
+    },
+    {
+      "kind": "find",
+      "id": "q_rubble",
+      "x": 7,
+      "z": 18,
+      "hidden": true,
+      "give": "coins:35",
+      "text": "Under a loose stone on the quarry floor: Facets, warm from the sun.",
+      "text_fr": "Sous une pierre branlante, au fond de la carrière : des facettes, tièdes de soleil."
+    },
+    {
+      "kind": "find",
+      "id": "q_lantern",
+      "x": 15,
+      "z": 8,
+      "give": "pack:ember",
+      "text": "Hung on the lantern's hook, out of the dust: a booster, still sealed.",
+      "text_fr": "Accroché au crochet de la lanterne, à l'abri de la poussière : un booster encore scellé."
+    },
+    {
+      "kind": "find",
+      "id": "q_southeast",
+      "x": 25,
+      "z": 19,
+      "hidden": true,
+      "give": "card:scrap_ledger",
+      "text": "Behind the rock, a tally book left by some long-gone hauler, with a card for a bookmark.",
+      "text_fr": "Derrière le rocher, un carnet de comptes laissé par un porteur parti depuis longtemps, une carte en guise de marque-page."
+    },
+    {
+      "kind": "find",
+      "id": "q_midledge",
+      "x": 11,
+      "z": 3,
+      "hidden": true,
+      "give": "card:spike_charm",
+      "text": "Tucked behind the rocks on the first ledge, where the wind can't reach: a card.",
+      "text_fr": "Glissée derrière les rochers de la première corniche, là où le vent ne passe pas : une carte."
+    }
   ],
   "warps": [],
   "exits": [
-    {"side": "s", "span": [13, 14], "to": "overworld"}
+    {
+      "side": "s",
+      "span": [
+        13,
+        14
+      ],
+      "to": "overworld"
+    }
   ],
   "npcs": [
     {
@@ -129,7 +481,7 @@
       "name": "Cinza",
       "model": "rival_fire",
       "tint": "#ff9a5c",
-      "scale": 1.0,
+      "scale": 1,
       "idle": "Idle",
       "x": 8,
       "z": 13,
@@ -217,7 +569,7 @@
       "name": "Orla",
       "model": "rival_fighting",
       "tint": "#d39058",
-      "scale": 1.0,
+      "scale": 1,
       "idle": "Idle",
       "x": 22,
       "z": 4,
@@ -351,6 +703,197 @@
         }
       ],
       "idle": "Idle"
+    },
+    {
+      "idle": "Idle",
+      "id": "t_tamsin",
+      "name": "Tamsin",
+      "model": "npc_worker",
+      "tint": "#a0a4aa",
+      "outfit": "#7d838c",
+      "hair": "#c46a32",
+      "x": 10,
+      "z": 16,
+      "facing": "e",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "Hold still. I'm measuring you.",
+          "Twice. Right. My Knollgrims attack once. Whenever you're ready."
+        ],
+        "challenge_fr": [
+          "Bouge pas. Je te mesure.",
+          "Deux fois. Bon. Mes Mottegrogne, eux, attaquent une fois. Quand tu veux."
+        ],
+        "win": [
+          "Off by a hair. I measured wrong. I never measure wrong.",
+          "Your purse. Counted twice."
+        ],
+        "win_fr": [
+          "Raté d'un cheveu. J'ai mal mesuré. Je ne mesure jamais mal.",
+          "Ta bourse. Comptée deux fois."
+        ],
+        "lose": [
+          "Clean cut. Measure twice next time, then come back."
+        ],
+        "lose_fr": [
+          "Coupe nette. Mesure deux fois, la prochaine fois, et reviens."
+        ],
+        "after": [
+          "Tarn taught me the cut. I taught him to measure. He still doesn't."
+        ],
+        "after_fr": [
+          "Tarn m'a appris à tailler. Moi, je lui ai appris à mesurer. Il ne mesure toujours pas."
+        ]
+      }
+    },
+    {
+      "idle": "Idle",
+      "id": "t_cole",
+      "name": "Cole",
+      "model": "npc_worker",
+      "tint": "#5a4a44",
+      "outfit": "#4a3c38",
+      "hair": "#1e1a18",
+      "x": 19,
+      "z": 9,
+      "facing": "w",
+      "trainer": {
+        "sight": 4,
+        "challenge": [
+          "You there! Help me test the kiln? It's hot, I'm hot, and my Furnacebacks are very hot.",
+          "Duel first, questions after. Mostly about bread."
+        ],
+        "challenge_fr": [
+          "Hé, toi ! Tu m'aides à tester le four ? Il est chaud, j'ai chaud, et mes Fournaidos sont brûlants.",
+          "Le duel d'abord, les questions après. Surtout sur le pain."
+        ],
+        "win": [
+          "Ha! Burnt to a crisp. Me, I mean.",
+          "Here's your purse. It smells of smoke, sorry."
+        ],
+        "win_fr": [
+          "Ha ! Carbonisé. Moi, je veux dire.",
+          "Voilà ta bourse. Elle sent la fumée, désolé."
+        ],
+        "lose": [
+          "Out of the fire and into the ash! That's what we say up here.",
+          "Cool off and come back."
+        ],
+        "lose_fr": [
+          "Sorti du feu, direct dans la cendre ! C'est ce qu'on dit, ici.",
+          "Va te rafraîchir et reviens."
+        ],
+        "after": [
+          "I owe Hob a loaf. Long story. There's a goat in it."
+        ],
+        "after_fr": [
+          "Je dois un pain à Hob. Longue histoire. Il y a une chèvre dedans."
+        ]
+      },
+      "dialogue": [
+        {
+          "if": "beat:t_cole & flag:rye_asked & !flag:ash_given",
+          "do": [
+            "give:kiln_ash",
+            "flag:ash_given"
+          ],
+          "lines": [
+            "Ash for Hob? For an ash-crust loaf? He's finally doing it!",
+            "Here, the finest grey in the quarry. Tell him we're square about the goat."
+          ],
+          "lines_fr": [
+            "De la cendre pour Hob ? Pour un pain en croûte de cendre ? Il se lance enfin !",
+            "Tiens, la plus belle cendre grise de la carrière. Dis-lui qu'on est quittes pour la chèvre."
+          ]
+        }
+      ]
+    },
+    {
+      "idle": "Idle",
+      "id": "t_rusk",
+      "name": "Rusk",
+      "model": "npc_shopkeeper",
+      "tint": "#8a6a48",
+      "outfit": "#6e5236",
+      "hair": "#2a2420",
+      "x": 4,
+      "z": 10,
+      "facing": "e",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "Don't ask about the crate.",
+          "...You were going to ask. Duel me instead. My Haulox carries the heavy stuff."
+        ],
+        "challenge_fr": [
+          "Pose pas de questions sur la caisse.",
+          "…Tu allais demander. Affronte-moi plutôt. Mon Halebœuf porte ce qui est lourd."
+        ],
+        "win": [
+          "Losing's lighter than it looks. Like the crate.",
+          "Purse is yours."
+        ],
+        "win_fr": [
+          "Perdre, c'est plus léger qu'on croit. Comme la caisse.",
+          "La bourse est à toi."
+        ],
+        "lose": [
+          "Heavy lifting, this. You'll get there."
+        ],
+        "lose_fr": [
+          "C'est du lourd, hein. Tu y arriveras."
+        ],
+        "after": [
+          "It's empty. Fine. It's been empty for years. I just like carrying it."
+        ],
+        "after_fr": [
+          "Elle est vide. Voilà. Elle est vide depuis des années. J'aime juste la porter."
+        ]
+      }
+    },
+    {
+      "idle": "Idle",
+      "id": "t_marigold",
+      "name": "Marigold",
+      "model": "npc_gardener",
+      "tint": "#f0b040",
+      "outfit": "#d98a1f",
+      "hair": "#7a3b1a",
+      "x": 18,
+      "z": 5,
+      "facing": "w",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "See this bead? Melted glass. This whole quarry was a volcano once. Nobody believes me.",
+          "My Cinderhorns believe me. Three prizes, and you will too."
+        ],
+        "challenge_fr": [
+          "Tu vois cette perle ? Du verre fondu. Toute la carrière était un volcan, autrefois. Personne ne me croit.",
+          "Mes Braisecorne, eux, me croient. Trois Récompenses, et tu me croiras aussi."
+        ],
+        "win": [
+          "Hmph. Still a volcano.",
+          "Here's your purse. And a bead for luck. No, not the bead. Just the purse."
+        ],
+        "win_fr": [
+          "Hmpf. C'était quand même un volcan.",
+          "Voilà ta bourse. Et une perle pour la chance. Non, pas la perle. Juste la bourse."
+        ],
+        "lose": [
+          "Molten! You'll cool down. Then you'll believe me."
+        ],
+        "lose_fr": [
+          "En fusion ! Tu vas refroidir. Et là, tu me croiras."
+        ],
+        "after": [
+          "Put your hand on the rock under the top ledge. Warm. I told you. Volcano."
+        ],
+        "after_fr": [
+          "Pose la main sur la roche, sous la haute corniche. Tiède. Je te l'avais dit. Un volcan."
+        ]
+      }
     }
   ],
   "ground": {

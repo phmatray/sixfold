@@ -1,0 +1,221 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "workbench",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "shelf",
+      "x": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "net_locker",
+      "x": 9,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 5,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "display_case",
+      "x": 1,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 0,
+      "z": 3,
+      "kind": "sign",
+      "text": "A sea chart, pinned to the wall. A dotted line runs east from this jetty to a harbour drawn as a gull. Someone has pencilled in: \"Gullhaven, two hours, calm days only.\"",
+      "text_fr": "Une carte marine, punaisée au mur. Un pointillé file vers l'est, de cet embarcadère à un port dessiné comme une mouette. Quelqu'un a ajouté au crayon : « Havre-aux-Mouettes, deux heures, par temps calme seulement. »"
+    },
+    {
+      "kind": "find",
+      "id": "i_boathouse",
+      "x": 9,
+      "z": 3,
+      "hidden": true,
+      "give": "coins:40",
+      "text": "In the net locker, under an oilskin that smells of tar: a purse of Facets, tied with a fisherman's knot.",
+      "text_fr": "Dans le casier à filets, sous un ciré qui sent le goudron : une bourse de facettes, fermée d'un nœud de pêcheur."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "dir": "s",
+      "to": "seaside",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 5,
+        "z": 10,
+        "facing": "s"
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "idle": "Idle",
+      "id": "nettie",
+      "name": "Nettie",
+      "model": "npc_sailor",
+      "tint": "#d0654a",
+      "outfit": "#b8503a",
+      "hair": "#c9c3b8",
+      "x": 6,
+      "z": 3,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "!flag:talked_nettie",
+          "lines": [
+            "Mind the floats, they roll.",
+            "I mend nets for the boats that are left. There was a ferry once, east along the coast, to a harbour so full of gulls you couldn't hear yourself shout.",
+            "The jetty's still out there. Somebody'll want it again one day."
+          ],
+          "lines_fr": [
+            "Attention aux flotteurs, ils roulent.",
+            "Je ramende les filets des bateaux qui restent. Il y avait un bac, autrefois, vers l'est le long de la côte, jusqu'à un port si plein de mouettes qu'on ne s'entendait pas crier.",
+            "L'embarcadère est toujours là. Quelqu'un en voudra de nouveau, un jour."
+          ]
+        },
+        {
+          "if": "beat:marlo",
+          "lines": [
+            "Marlo reads the tide and I read the knots. Between us the sea has never once surprised us. Well. Once."
+          ],
+          "lines_fr": [
+            "Marlo lit la marée, moi je lis les nœuds. À nous deux, la mer ne nous a jamais surpris. Enfin. Une fois."
+          ]
+        },
+        {
+          "if": "!flag:kite_done",
+          "lines": [
+            "A net's only holes, tied together carefully. Same as a deck, if you ask me.",
+            "Dace's kite? I told that child: never fly it near the lamp. Never."
+          ],
+          "lines_fr": [
+            "Un filet, ce n'est que des trous noués avec soin. Comme un deck, si tu veux mon avis.",
+            "Le cerf-volant de Dace ? Je l'avais prévenue, cette petite : jamais près de la lanterne. Jamais."
+          ]
+        },
+        {
+          "lines": [
+            "A net's only holes, tied together carefully. Same as a deck, if you ask me."
+          ],
+          "lines_fr": [
+            "Un filet, ce n'est que des trous noués avec soin. Comme un deck, si tu veux mon avis."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 8,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffe2bd",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb257",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e",
+    "note": "Indoors the sun is the window light, placed from the room centre (not the hero); lamp lights sit on each lamp prop."
+  }
+}

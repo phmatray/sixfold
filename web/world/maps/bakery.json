@@ -1,0 +1,283 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "oven",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "shelf",
+      "x": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "shelf",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "display_case",
+      "x": 9,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 1,
+      "z": 4,
+      "rot": 90
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "kind": "find",
+      "id": "i_bakery",
+      "x": 9,
+      "z": 3,
+      "give": "coins:35",
+      "text": "The tip jar on the bread case has a note taped to it: \"For whoever lends a hand.\"",
+      "text_fr": "Le pot à pourboires, sur la vitrine à pain, porte un mot scotché : « Pour qui donne un coup de main. »"
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "dir": "s",
+      "to": "square",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 5,
+        "z": 4,
+        "facing": "s"
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "idle": "Idle",
+      "id": "hob",
+      "name": "Hob",
+      "model": "npc_shopkeeper",
+      "tint": "#f5d7a1",
+      "scale": 1.06,
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "item:kiln_ash",
+          "do": [
+            "take:kiln_ash",
+            "coins:120",
+            "card:hearty_broth",
+            "flag:rye_done",
+            "emote:hob:heart"
+          ],
+          "lines": [
+            "Kiln ash! From Cole? That rascal. We're square about the goat, then.",
+            "In it goes. Ash crust, rye inside, an hour in the oven.",
+            "Here: Facets, and a card. Hearty, like the loaf."
+          ],
+          "lines_fr": [
+            "De la cendre de four ! De Cole ? Ce chenapan. On est quittes pour la chèvre, alors.",
+            "Hop, dedans. Croûte de cendre, seigle à l'intérieur, une heure au four.",
+            "Tiens : des facettes, et une carte. Bien nourrissante, comme le pain."
+          ]
+        },
+        {
+          "if": "item:letter",
+          "lines": [
+            "A letter? That's my sister's hexagon on the wax. Ottilie!",
+            "\"Dear Hob, the gulls stole another loaf.\" Ha! Of course they did.",
+            "Thank you for carrying it. Here, a pack, still warm. Well, not warm. Packs aren't."
+          ],
+          "lines_fr": [
+            "Une lettre ? C'est l'hexagone de ma sœur sur le cachet. Ottilie !",
+            "« Cher Hob, les mouettes m'ont encore volé un pain. » Ha ! Évidemment.",
+            "Merci de me l'avoir apportée. Tiens, un booster tout chaud. Enfin, non. Ça ne cuit pas, un booster."
+          ],
+          "do": [
+            "flag:letter_delivered",
+            "pack:tide"
+          ]
+        },
+        {
+          "if": "!flag:rye_asked",
+          "do": [
+            "flag:rye_asked"
+          ],
+          "lines": [
+            "Ah, a visitor! Or a helper? I'm trying a new loaf: rye with an ash crust, the old quarry way.",
+            "Only I need kiln ash, the fine grey kind, and the only kiln for miles is up at Emberstep Quarry.",
+            "Cole stokes it. He owes me a loaf, so he can owe me some ash instead. He'll want a duel first. He always does."
+          ],
+          "lines_fr": [
+            "Ah, de la visite ! Ou un coup de main ? J'essaie un nouveau pain : du seigle en croûte de cendre, à la mode de la carrière.",
+            "Seulement, il me faut de la cendre de four, la grise, la fine, et le seul four à des lieues, c'est celui de la Carrière de Pas-de-Braise.",
+            "C'est Cole qui le chauffe. Il me doit un pain, il peut bien me devoir de la cendre à la place. Il voudra un duel d'abord. Il veut toujours un duel."
+          ]
+        },
+        {
+          "if": "!flag:rye_done",
+          "lines": [
+            "Any ash? Cole's up at the quarry, by the kiln. Sooty. Cheerful. You can't miss him."
+          ],
+          "lines_fr": [
+            "Alors, cette cendre ? Cole est à la carrière, près du four. Plein de suie, toujours de bonne humeur. Impossible de le rater."
+          ]
+        },
+        {
+          "if": "beat:warden&flag:letter_delivered",
+          "lines": [
+            "The champion! Have a bun. Have two. Ottilie says heroes need feeding.",
+            "I'm putting a hexagon on the seed cake. Six, actually."
+          ],
+          "lines_fr": [
+            "Champion ! Prends une brioche. Prends-en deux. Ottilie dit qu'un héros, ça se nourrit.",
+            "Je mets un hexagone sur le gâteau aux graines. Six, en fait."
+          ]
+        },
+        {
+          "if": "flag:rye_done & !flag:hob_sold_out",
+          "do": [
+            "flag:hob_sold_out"
+          ],
+          "lines": [
+            "The ash-crust loaf sold out by nine. Posy recommended it to everyone. Twice."
+          ],
+          "lines_fr": [
+            "Le pain en croûte de cendre était épuisé à neuf heures. Posy l'a conseillé à tout le monde. Deux fois."
+          ]
+        },
+        {
+          "if": "flag:letter_delivered",
+          "lines": [
+            "Bread's up! Well, it's always up. That's bread.",
+            "Tell Ottilie I'll walk out to the lighthouse on Sunday. With buns."
+          ],
+          "lines_fr": [
+            "Le pain est levé ! Comme tous les matins. C'est un lève-tôt, le pain.",
+            "Dis à Ottilie que je monterai au phare dimanche. Avec des brioches."
+          ]
+        },
+        {
+          "lines": [
+            "Morning! Rolls, loaves, a seed cake if you're quick.",
+            "My sister keeps the lighthouse out on Saltwind Boardwalk. She never visits. Too many stairs, she says."
+          ],
+          "lines_fr": [
+            "Bonjour ! Petits pains, miches, et un gâteau aux graines si tu fais vite.",
+            "Ma sœur garde le phare, sur la Promenade de Ventsalé. Elle ne vient jamais. Trop de marches, qu'elle dit."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 8,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffe2bd",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb257",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e",
+    "note": "Indoors the sun is the window light, placed from the room centre (not the hero); lamp lights sit on each lamp prop."
+  }
+}

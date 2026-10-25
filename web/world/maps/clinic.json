@@ -1,0 +1,223 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "light_box",
+      "x": 4,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bookcase",
+      "x": 1,
+      "z": 3,
+      "rot": 90
+    },
+    {
+      "asset": "shelf",
+      "x": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 8,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 9,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "kind": "find",
+      "id": "i_clinic",
+      "x": 1,
+      "z": 3,
+      "give": "card:trail_compass",
+      "text": "Between two volumes of \"Common Ailments of the Sixty-Card Deck\": a card, used as a bookmark.",
+      "text_fr": "Entre deux tomes des « Maux courants du deck de soixante cartes » : une carte, glissée en marque-page."
+    },
+    {
+      "x": 10,
+      "z": 3,
+      "kind": "sign",
+      "text": "A chart on the wall: card names in rows, each smaller than the last. The bottom line just says \"shuffle\".",
+      "text_fr": "Un tableau au mur : des noms de cartes en lignes, de plus en plus petits. La dernière ligne dit juste « mélangez »."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "dir": "s",
+      "to": "square",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 23,
+        "z": 4,
+        "facing": "s"
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "idle": "Idle",
+      "id": "mags",
+      "name": "Mags",
+      "model": "npc_scholar",
+      "tint": "#d8e2ea",
+      "outfit": "#e2eaf0",
+      "hair": "#3a2a24",
+      "x": 6,
+      "z": 3,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "flag:consult_applied & !flag:consult_paid",
+          "do": [
+            "coins:100",
+            "flag:consult_paid",
+            "emote:mags:heart"
+          ],
+          "lines": [
+            "Back already? Let me listen... Better. Much better. You can hear it breathe.",
+            "Here, for taking such good care of it. Bring any deck by, any time."
+          ],
+          "lines_fr": [
+            "Déjà de retour ? Écoutons… Mieux. Bien mieux. On l'entend respirer.",
+            "Tiens, pour en avoir pris si bien soin. Amène-moi n'importe quel deck, quand tu veux."
+          ]
+        },
+        {
+          "if": "!flag:consult_asked",
+          "do": [
+            "flag:consult_asked",
+            "show:doctor"
+          ],
+          "lines": [
+            "Come in, sit down. Mags Thale, deck doctor.",
+            "Let's hear its breathing. Pick a deck and I'll tell you what ails it.",
+            "Take one of my suggestions, then come back and tell me how it's doing. First consult's on the house. I'll even pay you for your trouble."
+          ],
+          "lines_fr": [
+            "Entre, assieds-toi. Mags Thale, docteure des decks.",
+            "Écoutons sa respiration. Choisis un deck et je te dirai ce qui ne va pas.",
+            "Suis une de mes suggestions, puis reviens me dire comment il va. La première consultation est offerte. Je te paierai même pour ta peine."
+          ]
+        },
+        {
+          "do": [
+            "show:doctor"
+          ],
+          "lines": [
+            "Next patient! Let's see that deck."
+          ],
+          "lines_fr": [
+            "Patient suivant ! Voyons ce deck."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 8,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffe2bd",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb257",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e",
+    "note": "Indoors the sun is the window light, placed from the room centre (not the hero); lamp lights sit on each lamp prop."
+  }
+}

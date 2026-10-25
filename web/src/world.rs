@@ -90,6 +90,87 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
                 "Scellée d'un hexagone de cire, elle sent vaguement la mer. Hob fait son pain sur la Place de Clairpuits.",
             ),
         ),
+        // The six 1.2 curios (WORLD_DESIGN §5.2): Odile in the square counts them.
+        "curio_brass_thimble" => (
+            tr("Brass Thimble", "Dé à coudre en laiton").into(),
+            "brass_thimble",
+            tr(
+                "Dented on one side, polished bright on the other. Somebody sewed a great deal with it. A curio: Odile in Brightwell Square collects them.",
+                "Cabossé d'un côté, poli à force de servir de l'autre. Quelqu'un a beaucoup cousu avec. Une curiosité : Odile, sur la Place de Clairpuits, les collectionne.",
+            ),
+        ),
+        "curio_heron_feather" => (
+            tr("Heron Feather", "Plume de héron").into(),
+            "heron_feather",
+            tr(
+                "Long, grey and perfect. The herons don't miss it. A curio for Odile's cabinet.",
+                "Longue, grise, parfaite. Les hérons ne s'en plaindront pas. Une curiosité pour la vitrine d'Odile.",
+            ),
+        ),
+        "curio_message_bottle" => (
+            tr("Message in a Bottle", "Bouteille à la mer").into(),
+            "message_bottle",
+            tr(
+                "The cork is waxed shut and the paper inside says, as far as you can read it, \"Wish you were here.\" A curio for Odile.",
+                "Le bouchon est scellé à la cire et le papier dit, autant qu'on puisse lire : « J'aurais aimé que tu sois là. » Une curiosité pour Odile.",
+            ),
+        ),
+        "curio_fossil_fern" => (
+            tr("Fossil Fern", "Fougère fossile").into(),
+            "fossil_fern",
+            tr(
+                "A fern pressed into stone long before the quarry had a name. A curio for Odile.",
+                "Une fougère pressée dans la pierre bien avant que la carrière ait un nom. Une curiosité pour Odile.",
+            ),
+        ),
+        "curio_tin_hex" => (
+            tr("Painted Tin Hex", "Hexagone en fer-blanc peint").into(),
+            "tin_hex",
+            tr(
+                "A toy seal, six colours flaking off a tin hexagon. Every child in Brightwell had one once. A curio for Odile.",
+                "Un sceau jouet : six couleurs qui s'écaillent sur un hexagone de fer-blanc. Tous les enfants de Clairpuits en ont eu un. Une curiosité pour Odile.",
+            ),
+        ),
+        "curio_lead_type" => (
+            tr("Lead Type \"S\"", "Caractère de plomb « S »").into(),
+            "lead_type",
+            tr(
+                "A single letter S, cast backwards in lead. Gus swears it isn't missing from anything. A curio for Odile.",
+                "Une lettre S, fondue à l'envers dans le plomb. Gus jure qu'elle ne manque nulle part. Une curiosité pour Odile.",
+            ),
+        ),
+        "seed_packet_1" | "seed_packet_2" | "seed_packet_3" => (
+            tr("Seed Packet", "Sachet de graines").into(),
+            "curio",
+            tr(
+                "A twist of paper with Moss's handwriting on it: \"Runner beans. Do NOT eat.\" Moss tends the garden in Sixfold Meadow.",
+                "Un cornet de papier, de l'écriture de Moss : « Haricots grimpants. NE PAS MANGER. » Moss soigne le potager du Pré des Six.",
+            ),
+        ),
+        "kite_line" => (
+            tr("Kite Line", "Ligne de cerf-volant").into(),
+            "curio",
+            tr(
+                "Skye's spare reel of waxed line, long enough to reach the top of a lighthouse. Dace on the boardwalk is waiting.",
+                "La bobine de secours de Skye, une ligne cirée assez longue pour atteindre le haut d'un phare. Dace attend sur la promenade.",
+            ),
+        ),
+        "kiln_ash" => (
+            tr("Kiln Ash", "Cendre de four").into(),
+            "curio",
+            tr(
+                "A pouch of fine grey ash from Cole's kiln, still faintly warm. Hob wants it for an ash-crust loaf.",
+                "Une bourse de cendre grise et fine, tirée du four de Cole, encore tiède. Hob la veut pour un pain en croûte de cendre.",
+            ),
+        ),
+        "press_voucher" => (
+            tr("Press Voucher", "Bon de l'Imprimerie").into(),
+            "letter",
+            tr(
+                "Good for one card, any card that isn't a promo, Rares included. Gus at Brightwell Press prints it while you wait.",
+                "Valable pour une carte, n'importe laquelle sauf une promo, Rares comprises. Gus, à l'Imprimerie de Clairpuits, l'imprime pendant que vous attendez.",
+            ),
+        ),
         other => (other.replace('_', " "), "", ""),
     }
 }
@@ -101,7 +182,7 @@ struct Branch {
     effects: Vec<String>,
 }
 
-fn field(v: &JsValue, k: &str) -> JsValue {
+pub(crate) fn field(v: &JsValue, k: &str) -> JsValue {
     js_sys::Reflect::get(v, &JsValue::from_str(k)).unwrap_or(JsValue::UNDEFINED)
 }
 
@@ -166,6 +247,12 @@ enum Sheet {
     Roster,
     /// The post-game ladder: the Gauntlet, the daily duel and a Warden rematch.
     Ladder,
+    Journal,
+    /// A shop panel opened by `show:<panel>` (see `shops`).
+    Trader,
+    Packs,
+    Doctor,
+    Press,
 }
 
 /// The prompt's label for what the hero faces.
@@ -385,10 +472,16 @@ pub fn WorldScreen() -> impl IntoView {
                             Applied::Cue(Cue::Emote { actor, emote }) => {
                                 cues.push(format!(r#"{{"actor":"{actor}","emote":"{emote}"}}"#))
                             }
-                            Applied::Show(panel) if panel == "ladder" => next = Some(Sheet::Ladder),
-                            Applied::Show(panel) => {
-                                leptos::logging::warn!("world: no panel {panel}")
-                            }
+                            Applied::Show(panel) => match panel.as_str() {
+                                "ladder" => next = Some(Sheet::Ladder),
+                                "trader" => next = Some(Sheet::Trader),
+                                "shop_hall" => next = Some(Sheet::Packs),
+                                "doctor" => next = Some(Sheet::Doctor),
+                                "press" => next = Some(Sheet::Press),
+                                // Odile works through dialogue; the rest are 1.3.
+                                "curios" => {}
+                                _ => leptos::logging::warn!("world: no panel {panel}"),
+                            },
                             Applied::Short(_) => {
                                 next = Some(Sheet::Note(
                                     tr("Not enough Facets", "Pas assez de facettes"),
@@ -421,7 +514,14 @@ pub fn WorldScreen() -> impl IntoView {
         }
         if !packs.is_empty() {
             profile.update(|p| packs.iter().for_each(|&b| _ = p.wallet.grant(b, 1)));
-            let names: Vec<String> = packs.iter().map(|&b| packs_label(b, 1)).collect();
+            // Two of one booster read "2 Wild Packs", not "1 Wild Pack and 1 Wild Pack".
+            let mut kinds: Vec<usize> = packs.clone();
+            kinds.sort_unstable();
+            kinds.dedup();
+            let names: Vec<String> = kinds
+                .iter()
+                .map(|&b| packs_label(b, packs.iter().filter(|&&p| p == b).count() as u32))
+                .collect();
             let text = tr(
                 format!(
                     "You got {}. Open packs from the title screen.",
@@ -495,6 +595,44 @@ pub fn WorldScreen() -> impl IntoView {
         }
     };
     let close = move |_| sheet.set(None);
+    // J opens the Journal, and closes it again.
+    let journal_key = window_event_listener(leptos::ev::keydown, move |e| {
+        let typing = e
+            .target()
+            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+            .is_some_and(|t| {
+                t.closest("input, select, textarea")
+                    .ok()
+                    .flatten()
+                    .is_some()
+            });
+        if !matches!(e.key().as_str(), "j" | "J")
+            || e.repeat()
+            || typing
+            || e.ctrl_key()
+            || e.meta_key()
+            || e.alt_key()
+        {
+            return;
+        }
+        match sheet.get_untracked() {
+            None => sheet.set(Some(Sheet::Journal)),
+            Some(Sheet::Journal) => sheet.set(None),
+            _ => return,
+        }
+        e.prevent_default();
+    });
+    on_cleanup(move || journal_key.remove());
+    // The head of a panel sheet: title, the Facets held, Close.
+    let head = move |title: &'static str, facets: bool| {
+        view! {
+            <div class="sheet-head">
+                <h2 id="world-sheet-title">{title}</h2>
+                {facets.then(|| view! { <Facets /> })}
+                <button class="btn ghost" autofocus on:click=close>{tr("Close", "Fermer")}</button>
+            </div>
+        }
+    };
 
     view! {
         <div class="world">
@@ -504,6 +642,12 @@ pub fn WorldScreen() -> impl IntoView {
                     "Arrows or WASD to walk · E to act · Shift to run · G for the grid",
                     "Flèches ou ZQSD pour marcher · E pour agir · Maj pour courir · G pour la grille",
                 )}</span>
+                <button type="button" class="btn ghost journal-btn" aria-keyshortcuts="J"
+                    aria-label="Journal" title=tr("Journal (J)", "Journal (J)")
+                    on:click=move |_| sheet.set(Some(Sheet::Journal))>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z" /><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" /></svg>
+                    <span class="journal-label">"Journal"</span>
+                </button>
                 <Facets />
                 <SealBadge on_open=move || sheet.set(Some(Sheet::Roster)) />
                 <MuteToggle />
@@ -607,6 +751,26 @@ pub fn WorldScreen() -> impl IntoView {
                         <div class="dialog-foot">
                             <button class="btn" on:click=move |_| sheet.set(Some(Sheet::Challenge("warden".into())))>{tr("Duel Sable again", "Rejouer contre Sable")}</button>
                         </div>
+                    }.into_any(),
+                    Sheet::Journal => view! {
+                        {head("Journal", false)}
+                        <crate::journal::Journal />
+                    }.into_any(),
+                    Sheet::Trader => view! {
+                        {head(tr("Perrin's Swap Shop", "La Bourse aux cartes de Perrin"), true)}
+                        <crate::shops::Trader />
+                    }.into_any(),
+                    Sheet::Packs => view! {
+                        {head(tr("Wynne's pack counter", "Le comptoir de Wynne"), true)}
+                        <crate::shops::PackCounter />
+                    }.into_any(),
+                    Sheet::Doctor => view! {
+                        {head(tr("The Deck Clinic", "Le Cabinet des decks"), false)}
+                        <crate::shops::Doctor />
+                    }.into_any(),
+                    Sheet::Press => view! {
+                        {head(tr("Brightwell Press", "L'Imprimerie de Clairpuits"), true)}
+                        <crate::shops::Press />
                     }.into_any(),
                     Sheet::Roster => view! {
                         <div class="sheet-head">

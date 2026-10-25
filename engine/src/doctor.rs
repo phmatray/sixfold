@@ -16,6 +16,9 @@ pub const MIN_BASICS: usize = 10;
 pub const ENERGY: std::ops::RangeInclusive<usize> = 18..=28;
 /// This many creature colours is too many to power.
 pub const MAX_COLOURS: usize = 3;
+/// The flag set once the player applies one of Mags's swaps (the First
+/// Consult quest, `docs/WORLD_DESIGN.md` §5.4).
+pub const APPLIED_FLAG: &str = "consult_applied";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Severity {

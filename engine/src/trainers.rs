@@ -241,7 +241,7 @@ pub static TRAINERS: [Trainer; 14] = [
     duelist!("t_bryn", "Bryn", "Trail Runner" / "Coureur des sentiers", One(&SEEDLING), BRIARHOG 1, 1, Easy),
     duelist!("t_pell", "Pell", "Angler" / "Pêcheur", One(&PUDDLE), STREAMFIN 1, 2, Easy),
     duelist!("t_skye", "Skye", "Kite Flyer" / "Cerf-voliste", One(&SPARK), STORMOX 1, 2, Normal),
-    duelist!("t_morrow", "Morrow", "Shell Collector" / "Collectionneur de coquillages", One(&CURRENT), SHELLMOTE 2, 3, Normal),
+    duelist!("t_morrow", "Morrow", "Shell Collector" / "Collectionneur de coquillages", One(&PUDDLE), BROOKHORN 3, 3, Normal),
     duelist!("t_nell", "Nell", "Lifeguard" / "Maître-nageuse", One(&PUDDLE), KELPWARDEN 2, 2, Normal),
     duelist!("t_tamsin", "Tamsin", "Stonecutter" / "Tailleuse de pierre", One(&PEBBLE), KNOLLGRIM 2, 2, Easy),
     duelist!("t_cole", "Cole", "Kiln Stoker" / "Chauffeur de four", One(&KINDLING), FURNACEBACK 2, 2, Normal),

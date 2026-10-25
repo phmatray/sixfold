@@ -374,6 +374,15 @@ pub fn GameOver() -> impl IntoView {
                         )}
                         {sudden.then_some(tr(" Decided in sudden death.", " Décidé en mort subite."))}
                     </p>
+                    {rival.filter(|_| won).map(|r| view! {
+                        <figure class="rival-quote">
+                            <crate::campaign::Portrait id=r.id name=r.name />
+                            <blockquote>
+                                <p>{r.lines.defeat.get()}</p>
+                                <footer>{r.name}</footer>
+                            </blockquote>
+                        </figure>
+                    })}
                     {move || reward.get().map(|n| {
                         let coins = progress.with(|p| p.coins());
                         view! {
@@ -540,4 +549,48 @@ pub fn GameOver() -> impl IntoView {
             </div>
         })
     }
+}
+
+/// The rival's face in the duel header, and the speech bubble their lines
+/// come in (see `Ctl::say`): it goes after a few seconds or on a tap, and a
+/// polite live region reads it out. Only for rivals and route duelists.
+#[component]
+pub fn RivalFace() -> impl IntoView {
+    let ctl = expect_context::<Ctl>();
+    let Some(id) = ctl
+        .setup
+        .with_value(|s| s.as_ref().and_then(|s| s.opponent))
+    else {
+        return ().into_any();
+    };
+    let name = campaign::opponent(id).map_or(id, |o| o.name);
+    Effect::new(move |_| {
+        if let Some(s) = ctl.said.get() {
+            // Long enough to read: 3 s plus a little per character.
+            let ms = 3000 + 45 * s.text.chars().count() as u64;
+            set_timeout(
+                move || {
+                    if ctl.said.get_untracked().is_some_and(|n| n.key == s.key) {
+                        ctl.said.set(None);
+                    }
+                },
+                std::time::Duration::from_millis(ms.min(9000)),
+            );
+        }
+    });
+    let ko = move || ctl.said.with(|s| s.is_some_and(|s| s.ko));
+    view! {
+        <span class="opp-face" class:shake=ko>
+            <crate::campaign::Portrait id=id name=name />
+            <span class="rival-say-live" aria-live="polite">
+                {move || ctl.said.get().map(|s| view! {
+                    <button type="button" class="rival-say" on:click=move |_| ctl.said.set(None)
+                        title=tr("Dismiss", "Masquer")>
+                        <b>{name}</b>" "{s.text}
+                    </button>
+                })}
+            </span>
+        </span>
+    }
+    .into_any()
 }

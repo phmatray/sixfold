@@ -26,45 +26,258 @@
     ".........................."
   ],
   "props": [
-    {"asset": "fountain", "x": 11, "z": 8, "rot": 0},
-    {"asset": "cottage", "x": 3, "z": 0, "rot": 0},
-    {"asset": "workshop", "x": 17, "z": 1, "rot": 0},
-    {"asset": "stall", "x": 8, "z": 5, "rot": 0},
-    {"asset": "stall_b", "x": 15, "z": 5, "rot": 0},
-    {"asset": "lantern", "x": 4, "z": 5, "rot": 0},
-    {"asset": "lantern", "x": 21, "z": 5, "rot": 0},
-    {"asset": "lantern", "x": 4, "z": 14, "rot": 0},
-    {"asset": "lantern", "x": 21, "z": 14, "rot": 0},
-    {"asset": "bench", "x": 8, "z": 12, "rot": 180},
-    {"asset": "bench", "x": 15, "z": 12, "rot": 180},
-    {"asset": "signpost", "x": 14, "z": 2, "rot": 0},
-    {"asset": "tree", "x": 0, "z": 6, "rot": 0},
-    {"asset": "tree", "x": 0, "z": 10, "rot": 0},
-    {"asset": "tree", "x": 0, "z": 14, "rot": 0},
-    {"asset": "tree", "x": 24, "z": 6, "rot": 0},
-    {"asset": "tree", "x": 24, "z": 10, "rot": 0},
-    {"asset": "tree", "x": 24, "z": 14, "rot": 0},
-    {"asset": "tree", "x": 1, "z": 17, "rot": 0},
-    {"asset": "tree", "x": 6, "z": 17, "rot": 0},
-    {"asset": "tree", "x": 18, "z": 17, "rot": 0},
-    {"asset": "tree", "x": 22, "z": 17, "rot": 0},
-    {"asset": "tree", "x": 9, "z": 0, "rot": 0},
-    {"asset": "tree", "x": 21, "z": 0, "rot": 0},
-    {"asset": "bush", "x": 2, "z": 5, "rot": 0},
-    {"asset": "bush", "x": 23, "z": 9, "rot": 0},
-    {"asset": "bush", "x": 3, "z": 16, "rot": 0},
-    {"asset": "bush", "x": 11, "z": 16, "rot": 0},
-    {"asset": "bush", "x": 14, "z": 16, "rot": 0},
-    {"asset": "bush", "x": 16, "z": 0, "rot": 0},
-    {"asset": "bush", "x": 2, "z": 12, "rot": 0},
-    {"asset": "flowers", "x": 8, "z": 3, "rot": 0},
-    {"asset": "flowers", "x": 10, "z": 3, "rot": 0},
-    {"asset": "flowers", "x": 15, "z": 3, "rot": 0},
-    {"asset": "flowers", "x": 20, "z": 4, "rot": 0},
-    {"asset": "flowers", "x": 5, "z": 15, "rot": 0},
-    {"asset": "flowers", "x": 19, "z": 15, "rot": 0},
-    {"asset": "flowers", "x": 9, "z": 15, "rot": 0},
-    {"asset": "flowers", "x": 16, "z": 15, "rot": 0}
+    {
+      "asset": "fountain",
+      "x": 11,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "cottage",
+      "x": 3,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "workshop",
+      "x": 17,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "stall",
+      "x": 8,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "stall_b",
+      "x": 15,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 21,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 4,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 21,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 8,
+      "z": 12,
+      "rot": 180
+    },
+    {
+      "asset": "bench",
+      "x": 15,
+      "z": 12,
+      "rot": 180
+    },
+    {
+      "asset": "signpost",
+      "x": 14,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 24,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 24,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 24,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 1,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 18,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 22,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 9,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 8,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 10,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 15,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 20,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 5,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 19,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 9,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 16,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "cottage",
+      "x": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 16,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 3,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "curio_cabinet",
+      "x": 23,
+      "z": 13,
+      "rot": 0
+    }
   ],
   "spawn": {
     "x": 12,
@@ -72,77 +285,121 @@
     "facing": "s"
   },
   "interactions": [
-    {"x": 5, "z": 3, "kind": "sign", "text": "Hob's Bakery. Warm bread, a bell over the door, and a queue on Saturdays.", "text_fr": "La boulangerie de Hob. Pain chaud, une clochette à la porte et la queue le samedi."},
-    {"x": 18, "z": 3, "kind": "sign", "text": "The letter office. A brass slot with a little hexagon on it. Closed till noon, as always.", "text_fr": "La poste. Une fente en laiton ornée d'un petit hexagone. Fermée jusqu'à midi, comme toujours."},
-    {"x": 14, "z": 2, "kind": "sign", "text": "Brightwell Square. North: Sixfold Meadow, and every road out of it.", "text_fr": "Place de Clairpuits. Nord : le Pré de Sixfold, et toutes les routes qui en partent."}
+    {
+      "x": 14,
+      "z": 2,
+      "kind": "sign",
+      "text": "Brightwell Square. North: Sixfold Meadow, and every road out of it.",
+      "text_fr": "Place de Clairpuits. Nord : le Pré de Sixfold, et toutes les routes qui en partent."
+    },
+    {
+      "kind": "find",
+      "id": "sq_fountain",
+      "x": 13,
+      "z": 9,
+      "give": "coins:15",
+      "text": "At the bottom of the fountain basin, among the wishes: a few Facets nobody wished hard enough for.",
+      "text_fr": "Au fond du bassin de la fontaine, parmi les vœux : quelques facettes que personne n'a souhaitées assez fort."
+    },
+    {
+      "kind": "find",
+      "id": "sq_stall",
+      "x": 16,
+      "z": 4,
+      "hidden": true,
+      "give": "card:field_guide",
+      "text": "In a crate behind the stall, under a sack of flour: a card, lightly dusted.",
+      "text_fr": "Dans une caisse derrière l'étal, sous un sac de farine : une carte, à peine enfarinée."
+    },
+    {
+      "kind": "find",
+      "id": "sq_bench",
+      "x": 8,
+      "z": 12,
+      "give": "coins:30",
+      "text": "Under the bench, stuck to the slats with a bit of jam: Facets.",
+      "text_fr": "Sous le banc, collées aux lattes par un peu de confiture : des facettes."
+    },
+    {
+      "kind": "find",
+      "id": "sq_bed",
+      "x": 3,
+      "z": 18,
+      "hidden": true,
+      "give": "give:curio_tin_hex",
+      "text": "In the flowerbed, pressed into the soil: a little tin hexagon, its six colours flaking.",
+      "text_fr": "Dans le massif, enfoncé dans la terre : un petit hexagone de fer-blanc, ses six couleurs écaillées."
+    },
+    {
+      "kind": "find",
+      "id": "sq_lantern",
+      "x": 21,
+      "z": 5,
+      "give": "coins:20",
+      "text": "In the little door at the lantern's base, beside the spare wick: a few Facets.",
+      "text_fr": "Dans la petite trappe au pied du réverbère, à côté de la mèche de rechange : quelques facettes."
+    },
+    {
+      "kind": "find",
+      "id": "seed_2",
+      "x": 2,
+      "z": 12,
+      "hidden": true,
+      "give": "give:seed_packet_2",
+      "text": "In the bush at the square's edge, a twist of paper: \"Runner beans. Do NOT eat.\"",
+      "text_fr": "Dans le buisson, au bord de la place, un cornet de papier : « Haricots grimpants. NE PAS MANGER. »",
+      "if": "flag:seeds_asked"
+    }
   ],
-  "warps": [],
+  "warps": [
+    {
+      "x": 5,
+      "z": 3,
+      "to": "bakery",
+      "label": "Go into Hob's Bakery",
+      "label_fr": "Entrer dans la boulangerie de Hob",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    },
+    {
+      "x": 18,
+      "z": 3,
+      "to": "press",
+      "label": "Go into Brightwell Press",
+      "label_fr": "Entrer dans l'Imprimerie de Clairpuits",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    },
+    {
+      "x": 23,
+      "z": 3,
+      "to": "clinic",
+      "label": "Go into the Deck Clinic",
+      "label_fr": "Entrer dans le Cabinet des decks",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    }
+  ],
   "exits": [
-    {"side": "n", "span": [12, 13], "to": "overworld"}
+    {
+      "side": "n",
+      "span": [
+        12,
+        13
+      ],
+      "to": "overworld"
+    }
   ],
   "npcs": [
-    {
-      "id": "hob",
-      "name": "Hob",
-      "model": "npc_shopkeeper",
-      "tint": "#f5d7a1",
-      "scale": 1.06,
-      "x": 17,
-      "z": 5,
-      "facing": "s",
-      "dialogue": [
-        {
-          "if": "beat:warden&flag:letter_delivered",
-          "lines": [
-            "The champion! Have a bun. Have two. Ottilie says heroes need feeding.",
-            "I'm putting a hexagon on the seed cake. Six, actually."
-          ],
-          "lines_fr": [
-            "Champion ! Prends une brioche. Prends-en deux. Ottilie dit qu'un héros, ça se nourrit.",
-            "Je mets un hexagone sur le gâteau aux graines. Six, en fait."
-          ]
-        },
-        {
-          "if": "flag:letter_delivered",
-          "lines": [
-            "Bread's up! Well, it's always up. That's bread.",
-            "Tell Ottilie I'll walk out to the lighthouse on Sunday. With buns."
-          ],
-          "lines_fr": [
-            "Le pain est levé ! Comme tous les matins. C'est un lève-tôt, le pain.",
-            "Dis à Ottilie que je monterai au phare dimanche. Avec des brioches."
-          ]
-        },
-        {
-          "if": "item:letter",
-          "lines": [
-            "A letter? That's my sister's hexagon on the wax. Ottilie!",
-            "\"Dear Hob, the gulls stole another loaf.\" Ha! Of course they did.",
-            "Thank you for carrying it. Here, a pack, still warm. Well, not warm. Packs aren't."
-          ],
-          "lines_fr": [
-            "Une lettre ? C'est l'hexagone de ma sœur sur le cachet. Ottilie !",
-            "« Cher Hob, les mouettes m'ont encore volé un pain. » Ha ! Évidemment.",
-            "Merci de me l'avoir apportée. Tiens, un booster tout chaud. Enfin, non. Ça ne cuit pas, un booster."
-          ],
-          "do": [
-            "flag:letter_delivered",
-            "pack:tide"
-          ]
-        },
-        {
-          "lines": [
-            "Morning! Rolls, loaves, a seed cake if you're quick.",
-            "My sister keeps the lighthouse out on Saltwind Boardwalk. She never visits. Too many stairs, she says."
-          ],
-          "lines_fr": [
-            "Bonjour ! Petits pains, miches, et un gâteau aux graines si tu fais vite.",
-            "Ma sœur garde le phare, sur la Promenade de Ventsalé. Elle ne vient jamais. Trop de marches, qu'elle dit."
-          ]
-        }
-      ],
-      "idle": "Idle"
-    },
     {
       "id": "tansy",
       "name": "Tansy",
@@ -185,6 +442,173 @@
         }
       ],
       "idle": "Idle"
+    },
+    {
+      "id": "posy",
+      "name": "Posy",
+      "model": "npc_kid",
+      "tint": "#f7a8c4",
+      "outfit": "#e8789e",
+      "hair": "#8a4a2a",
+      "scale": 0.8,
+      "x": 17,
+      "z": 5,
+      "facing": "s",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "!flag:talked_posy",
+          "lines": [
+            "Uncle Hob's inside, baking. I'm minding the stall.",
+            "I'm not allowed to sell anything. I'm allowed to recommend. I recommend everything."
+          ],
+          "lines_fr": [
+            "Oncle Hob est dedans, il fait le pain. Moi, je garde l'étal.",
+            "J'ai pas le droit de vendre. J'ai le droit de conseiller. Je conseille tout."
+          ]
+        },
+        {
+          "if": "flag:rye_done",
+          "lines": [
+            "Uncle Hob's ash-crust loaf is the best thing he's ever made. I recommend it. I recommend it most."
+          ],
+          "lines_fr": [
+            "Le pain en croûte de cendre d'oncle Hob, c'est ce qu'il a fait de mieux. Je le conseille. Je le conseille le plus."
+          ]
+        },
+        {
+          "lines": [
+            "Today I recommend the seed cake, the rolls, and the bench by the fountain to eat them on."
+          ],
+          "lines_fr": [
+            "Aujourd'hui, je conseille le gâteau aux graines, les petits pains, et le banc près de la fontaine pour les manger."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "odile",
+      "name": "Odile",
+      "model": "npc_elder",
+      "tint": "#9a6aae",
+      "outfit": "#7a4a8c",
+      "hair": "#ece6f0",
+      "x": 23,
+      "z": 12,
+      "facing": "s",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "count:curio_:3 & !flag:odile_3",
+          "do": [
+            "pack:wild",
+            "pack:wild",
+            "flag:odile_3",
+            "emote:odile:heart"
+          ],
+          "lines": [
+            "Three! Let me look. The wear on that... and the colour of this...",
+            "A cabinet needs a beginning, and you've given me one. Two Wild packs, for the trouble.",
+            "Bring me six and I'll have something better. Something the Press can't refuse."
+          ],
+          "lines_fr": [
+            "Trois ! Fais voir. L'usure sur celle-ci… et la couleur de celle-là…",
+            "Une vitrine a besoin d'un début, et tu me l'as donné. Deux boosters Sauvages, pour ta peine.",
+            "Apporte-m'en six et j'aurai mieux. Quelque chose que l'Imprimerie ne peut pas refuser."
+          ]
+        },
+        {
+          "if": "count:curio_:6 & !flag:odile_6",
+          "do": [
+            "give:press_voucher",
+            "flag:odile_6",
+            "emote:odile:heart"
+          ],
+          "lines": [
+            "Six. Six! The whole set of what this corner of the world forgets.",
+            "Here: a Press voucher. Gus will print you any card you like on it. Any card. Even a Rare."
+          ],
+          "lines_fr": [
+            "Six. Six ! Toute la collection de ce que ce coin du monde oublie.",
+            "Tiens : un bon de l'Imprimerie. Gus t'imprimera dessus la carte de ton choix. N'importe laquelle. Même une Rare."
+          ]
+        },
+        {
+          "if": "!flag:talked_odile",
+          "lines": [
+            "Curios! Bring me curios! Small, old, odd. A thimble. A feather. A bottle with a note in it.",
+            "I don't keep them, mind; you do. I only need to see them.",
+            "Show me three and I'll pay you in packs. Six, and in something rarer."
+          ],
+          "lines_fr": [
+            "Des curiosités ! Apporte-moi des curiosités ! Petites, vieilles, bizarres. Un dé à coudre. Une plume. Une bouteille avec un billet dedans.",
+            "Je ne les garde pas, note bien ; c'est toi qui les gardes. J'ai juste besoin de les voir.",
+            "Montre-m'en trois et je te paie en boosters. Six, et en quelque chose de plus rare."
+          ]
+        },
+        {
+          "if": "flag:odile_6",
+          "lines": [
+            "All six seen and catalogued. There are more out past the meadow, I'm sure of it. There always are."
+          ],
+          "lines_fr": [
+            "Les six vues et cataloguées. Il y en a d'autres au-delà du pré, j'en suis sûre. Il y en a toujours."
+          ]
+        },
+        {
+          "lines": [
+            "Curios turn up where things wash ashore, fall off, or get forgotten.",
+            "A pier. A lookout. A quarry ledge. A flowerbed. A print shop. A field, if you're lucky."
+          ],
+          "lines_fr": [
+            "Les curiosités se trouvent là où les choses s'échouent, tombent ou s'oublient.",
+            "Une jetée. Un belvédère. Une corniche de carrière. Un massif de fleurs. Une imprimerie. Un champ, avec de la chance."
+          ]
+        }
+      ]
+    },
+    {
+      "idle": "Idle",
+      "id": "t_lark",
+      "name": "Lark",
+      "model": "npc_wanderer",
+      "tint": "#9a6ad8",
+      "outfit": "#8a5cc7",
+      "hair": "#2a1e3a",
+      "x": 9,
+      "z": 10,
+      "facing": "s",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "*squeeeee-onk*",
+          "Sorry. Sorry! The squeezebox hates mornings. My deck doesn't, Echopups and all. A duel, for a tune?"
+        ],
+        "challenge_fr": [
+          "*Couiiiic-onk*",
+          "Pardon. Pardon ! L'accordéon déteste le matin. Mon deck, non, Échouaf compris. Un duel, contre un air ?"
+        ],
+        "win": [
+          "You win! Shall I play you something? No? Probably wise.",
+          "Here's the purse. Don't tell anyone it's mostly small change."
+        ],
+        "win_fr": [
+          "Tu as gagné ! Je te joue quelque chose ? Non ? C'est sans doute plus sage.",
+          "Voilà la bourse. Ne dis à personne que c'est surtout de la petite monnaie."
+        ],
+        "lose": [
+          "*triumphant squeeeee-onk*"
+        ],
+        "lose_fr": [
+          "*couiiiic-onk triomphal*"
+        ],
+        "after": [
+          "Odile says my playing would curdle milk. Hob says it helps the dough rise. I choose to believe Hob."
+        ],
+        "after_fr": [
+          "Odile dit que ma musique ferait tourner le lait. Hob dit que ça aide la pâte à lever. J'ai choisi de croire Hob."
+        ]
+      }
     }
   ],
   "ground": {

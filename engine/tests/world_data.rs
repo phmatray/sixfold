@@ -2,21 +2,35 @@
 //! §9.4): every map's conditions and effects parse, every duel names a rival
 //! or a route duelist, every `card:` a non-promo card, every `pack:` a
 //! booster, every `show:` a panel; `trainer` and `find` blocks are checked as
-//! the dialogue they expand to; find ids are unique and a route duelist is
-//! placed at most once; emote actors stand on the map.
+//! the dialogue they expand to; find ids are unique and every route duelist
+//! is placed exactly once; emote actors stand on the map. The Journal
+//! (`web/world/quests.json`) only names flags and items some map sets.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 use serde_json::Value;
-use sixfold_engine::overworld::{parse_cond, parse_effect, Cue, Effect};
-use sixfold_engine::trainers::trainer;
+use sixfold_engine::campaign::rival;
+use sixfold_engine::doctor::APPLIED_FLAG;
+use sixfold_engine::overworld::{parse_cond, parse_effect, Cue, Effect, Test};
+use sixfold_engine::trainers::{trainer, TRAINERS};
 
 /// What every map seen so far placed.
 #[derive(Default)]
 struct Seen {
     finds: HashMap<String, String>,
     trainers: HashMap<String, String>,
+    /// `item:x` and `flag:x` for every item given and flag set.
+    sets: HashSet<String>,
+}
+
+/// Note what an effect gives or sets.
+fn sets(e: &str, seen: &mut Seen) {
+    match parse_effect(e) {
+        Ok(Effect::Give(x)) => _ = seen.sets.insert(format!("item:{x}")),
+        Ok(Effect::Flag(x)) => _ = seen.sets.insert(format!("flag:{x}")),
+        _ => {}
+    }
 }
 
 fn strs(v: &Value) -> Vec<&str> {
@@ -63,6 +77,22 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
         }
     };
 
+    for d in m["npcs"]
+        .as_array()
+        .into_iter()
+        .chain(m["interactions"].as_array())
+        .flatten()
+    {
+        for b in d["dialogue"].as_array().into_iter().flatten() {
+            strs(&b["do"]).into_iter().for_each(|e| sets(e, seen));
+        }
+        if d["kind"] == "find" {
+            if let (Some(id), Some(g)) = (d["id"].as_str(), d["give"].as_str()) {
+                sets(g, seen);
+                sets(&format!("flag:found_{id}"), seen);
+            }
+        }
+    }
     for n in m["npcs"].as_array().into_iter().flatten() {
         let id = n["id"].as_str().unwrap_or("?");
         let at = format!("npc {id}");
@@ -152,7 +182,74 @@ fn every_map_reads_with_the_engine_grammar() {
         maps += 1;
     }
     assert!(maps >= 7, "only {maps} maps found in {}", dir.display());
+    for t in &TRAINERS {
+        if !seen.trainers.contains_key(t.id) {
+            bad.push(format!("{} ({}) is on no map", t.id, t.name));
+        }
+    }
+    let quests =
+        std::fs::read_to_string(dir.join("../quests.json")).expect("web/world/quests.json");
+    let quests: Value = serde_json::from_str(&quests).expect("quests.json parses");
+    bad.extend(check_quests(&quests, &seen));
     assert!(bad.is_empty(), "{}", bad.join("\n"));
+}
+
+/// The Journal: every condition parses, and every flag or item it waits for is
+/// set by some map (or, for the deck doctor, by its panel).
+fn check_quests(q: &Value, seen: &Seen) -> Vec<String> {
+    let mut bad = vec![];
+    let mut ids = HashSet::new();
+    for quest in q["quests"].as_array().expect("a quests array") {
+        let id = quest["id"].as_str().unwrap_or("?");
+        if !ids.insert(id) {
+            bad.push(format!("quest {id}: listed twice"));
+        }
+        for k in ["title", "title_fr", "giver"] {
+            if quest[k].as_str().is_none_or(str::is_empty) {
+                bad.push(format!("quest {id}: no {k}"));
+            }
+        }
+        let steps = quest["steps"].as_array().map_or(&[][..], Vec::as_slice);
+        if steps.is_empty() {
+            bad.push(format!("quest {id}: no steps"));
+        }
+        let conds = ["start", "done"]
+            .iter()
+            .map(|k| (k.to_string(), &quest[*k]))
+            .chain(steps.iter().enumerate().flat_map(|(i, s)| {
+                for k in ["text", "text_fr"] {
+                    if s[k].as_str().is_none_or(str::is_empty) {
+                        bad.push(format!("quest {id}: step {i} has no {k}"));
+                    }
+                }
+                [(format!("step {i}"), &s["done"])]
+            }));
+        for (at, c) in conds.collect::<Vec<_>>() {
+            let Some(c) = c.as_str() else {
+                bad.push(format!("quest {id}: {at} has no condition"));
+                continue;
+            };
+            let parsed = match parse_cond(c) {
+                Ok(p) => p,
+                Err(e) => {
+                    bad.push(format!("quest {id}: {at}: {e}"));
+                    continue;
+                }
+            };
+            for (_, t) in parsed.0 {
+                let ok = match &t {
+                    Test::Item(x) => seen.sets.contains(&format!("item:{x}")),
+                    Test::Flag(x) => x == APPLIED_FLAG || seen.sets.contains(&format!("flag:{x}")),
+                    Test::Beat(x) => trainer(x).is_some() || rival(x).is_some(),
+                    _ => true,
+                };
+                if !ok {
+                    bad.push(format!("quest {id}: {at}: no map sets {t:?}"));
+                }
+            }
+        }
+    }
+    bad
 }
 
 /// The checker itself, on a small map using every 1.2 addition.
@@ -212,4 +309,28 @@ fn the_checker_reads_trainer_and_find_blocks() {
             "missing {want:?} in {errors:#?}"
         );
     }
+    // The Journal waits only for what the maps (or the doctor's panel) set.
+    let quests: Value = serde_json::from_str(
+        r#"{ "quests": [
+        { "id": "a", "title": "A", "title_fr": "A", "giver": "Perrin", "start": "flag:found_w_log", "done": "flag:consult_applied",
+          "steps": [{ "text": "x", "text_fr": "x", "done": "beat:t_hazel & item:nothing" }] },
+        { "id": "a", "title": "B", "giver": "Odile", "start": "weather:sunny", "steps": [] }
+    ] }"#,
+    )
+    .unwrap();
+    let errors = check_quests(&quests, &seen);
+    for want in [
+        "step 0: no map sets Item(\"nothing\")",
+        "listed twice",
+        "no title_fr",
+        "weather:sunny",
+        "no steps",
+        "done has no condition",
+    ] {
+        assert!(
+            errors.iter().any(|e| e.contains(want)),
+            "missing {want:?} in {errors:#?}"
+        );
+    }
+    assert_eq!(errors.len(), 6, "{errors:#?}");
 }

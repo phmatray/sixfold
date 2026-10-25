@@ -149,15 +149,19 @@
             "Je ne marchande pas, note bien. Une carte vaut ce qu'elle vaut."
           ],
           "do": [
-            "emote:perrin:note"
+            "emote:perrin:note",
+            "show:trader"
           ]
         },
         {
           "lines": [
-            "Duplicates weigh a binder down. Bring me your spares one day."
+            "Today's six are under the glass. Spares, I'll take off your hands."
           ],
           "lines_fr": [
-            "Les doubles alourdissent un classeur. Apporte-moi tes cartes en trop, un jour."
+            "Les six du jour sont sous la vitre. Tes doubles, je te les reprends."
+          ],
+          "do": [
+            "show:trader"
           ]
         }
       ]

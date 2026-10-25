@@ -1,6 +1,6 @@
 # Sixfold — World Design (1.2 → 1.4)
 
-Status: living spec; 1.2 PRs 1–3 (engine, world.js split, line of sight, finds and houses) are built. Owner: game/world design. Supersedes the "After 1.0" line of `docs/ROADMAP.md` for
+Status: living spec; 1.2 is built (PRs 1–4: engine, world.js split, line of sight, finds and houses, then the content). Owner: game/world design. Supersedes the "After 1.0" line of `docs/ROADMAP.md` for
 the world. Three releases implement it:
 
 | Release | Name | One-line goal |
@@ -223,6 +223,11 @@ so the set is completed by play, packs and crafting together — never by one al
 `(minutes, source)` events built from the real tables) that asserts the packs-per-hour of the
 "exploring" row stays between 3.5 and 6. Change a price and the test tells you what it did.
 
+As built in 1.2 the sim counts every source the maps hold: 14 purses, the 38 finds, the six quests with their
+errand time (the letter and the lens included, 59 minutes in all) and Odile's two Wild packs. A first
+playthrough earns **5.7 packs an hour** (about 31 packs over 5.5 hours, rival packs and promos on top); the
+exploring row is 5.2. No price changed.
+
 ---
 
 ## 4. Route duelists (1.2)
@@ -328,20 +333,30 @@ Sight direction in brackets.
 |---|---|---|---|---|---|---|---|---|
 | `t_tobin` | Tobin | Junior Duelist / Duelliste en herbe | overworld 8,20 (n, 2) — watches the cross path | Scrap | 1 | Easy | 30 | Ten years old, has read every rule twice, still forgets to attach energy. The tutorial duel. |
 | `t_hazel` | Hazel | Beekeeper / Apicultrice | woodland 22,8 (w, 4) | Mix(Seedling, Spark) | 2 | Easy | 45 | Talks to her bees more than to people; they seem to answer. |
-| `t_ossian` | Ossian | Birdwatcher / Ornithologue | woodland 17,15 (n, 3) | Scrap | 1 | Easy | 30 | Whispers everything. Thinks you're scaring the herons. |
-| `t_sorrel` | Sorrel | Forager / Cueilleuse | woodland 6,8 (s, 3) | Seedling | 2 | Normal | 45 | Knows which mushrooms are safe; won't tell you. |
+| `t_ossian` | Ossian | Birdwatcher / Ornithologue | woodland 11,16 (n, 2), by the reeds, guarding the south woods | Scrap | 1 | Easy | 30 | Whispers everything. Thinks you're scaring the herons. |
+| `t_sorrel` | Sorrel | Forager / Cueilleuse | woodland 5,8 (e, 3), across the north path | Seedling | 2 | Normal | 45 | Knows which mushrooms are safe; won't tell you. |
 | `t_bryn` | Bryn | Trail Runner / Coureur des sentiers | woodland 26,14 (w, 5) | Seedling | 1 | Easy | 30 | Stretching, always. Challenges you mid-lunge. |
-| `t_pell` | Pell | Angler / Pêcheur | seaside 13,9 (e, 3) | Puddle | 2 | Easy | 45 | Has caught one fish this year and describes it nightly. |
+| `t_pell` | Pell | Angler / Pêcheur | seaside 12,7 (w, 3), by the rowboat | Puddle | 2 | Easy | 45 | Has caught one fish this year and describes it nightly. |
 | `t_skye` | Skye | Kite Flyer / Cerf-voliste | seaside 21,8 (s, 4) | Spark | 2 | Normal | 45 | Reads the wind like a rival reads a deck; Dace's kite is hers. |
-| `t_morrow` | Morrow | Shell Collector / Collectionneur de coquillages | seaside 4,13 (e, 3) | Current | 3 | Normal | 60 | Slow, kind, unbeatable patience; plays the long game. |
-| `t_nell` | Nell | Lifeguard / Maître-nageuse | seaside 15,1 (s, 3) — pier end, Marlo's old spot in 1.3 | Puddle | 2 | Normal | 45 | Whistle on a cord; blows it when you misplay. |
+| `t_morrow` | Morrow | Shell Collector / Collectionneur de coquillages | seaside 27,13 (w, 3), the east end, off the main boardwalk | Puddle + Brookhorn 3 | 3 | Normal | 60 | Slow, kind, unbeatable patience; plays the long game. |
+| `t_nell` | Nell | Lifeguard / Maître-nageuse | seaside 14,2 (s, 3), on the pier below Marlo (Marlo's own spot, 15,1, in 1.3) | Puddle | 2 | Normal | 45 | Whistle on a cord; blows it when you misplay. |
 | `t_tamsin` | Tamsin | Stonecutter / Tailleuse de pierre | quarry 10,16 (e, 3) | Pebble | 2 | Easy | 45 | Measures twice, attacks once. |
 | `t_cole` | Cole | Kiln Stoker / Chauffeur de four | quarry 19,9 (w, 4) | Kindling | 2 | Normal | 45 | Sooty, cheerful, owes Hob a loaf; part of the Rye quest. |
 | `t_rusk` | Rusk | Hauler / Porteur | quarry 4,10 (e, 3) | Mix(Pebble, Scrap) | 1 | Easy | 30 | Carries a crate everywhere. It's empty. Don't ask. |
-| `t_marigold` | Marigold | Glass Gatherer / Cueilleuse de verre | quarry 22,4 (w, 3) on the ledge — Orla's old spot in 1.3 | Bellows | 3 | Normal | 60 | Collects melted glass beads; thinks the quarry was a volcano once (it was). |
+| `t_marigold` | Marigold | Glass Gatherer / Cueilleuse de verre | quarry 18,5 (w, 3) on the first ledge (Orla's spot, 22,4, in 1.3) | Bellows | 3 | Normal | 60 | Collects melted glass beads; thinks the quarry was a volcano once (it was). |
 | `t_lark` | Lark | Busker / Musicienne de rue | square 9,10 (talk-to-duel) | Mix(Scrap, Murmur) | 1 | Easy | 30 | Plays a squeezebox badly and a deck well. |
 
 14 duelists, ⬡ 585 in purses (five 1-prize, seven 2-prize, two 3-prize).
+
+**Balance (1.2 content PR).** `kit_sweep` plays each duelist as placed against the bare starter deck (a new
+player's): most sit at 3–47%. **Morrow** was at 80% on the Current kit (Water against the Fire starter, three
+prizes) and 78% even on Easy, so the difficulty wasn't the lever: he now plays the Sprout **Puddle** kit with
+three Brookhorn as his signature, **47%**, still the boardwalk's long, patient duel; and he stands at the east
+end off the main boardwalk, so he's a choice rather than the first thing you meet. **Tamsin** (Pebble, Easy)
+sits at 60%: Fighting against Fire. She's left as is, since the quarry is the third area most players reach,
+but she's the next one to soften if playtests say so. One duelist per corridor: Nell owns the pier, Pell the
+boathouse front, Skye the east boardwalk; Hazel the trail's middle, Ossian the south woods, Bryn the lodge
+path, Sorrel the north path.
 
 ### 4.5 Rival identity (1.2)
 
@@ -364,7 +379,10 @@ Duel line moments: **intro** (setup ends), **first KO** (their first knock-out o
 | **Sable**, The Hex Warden / La Gardienne des Six | Balanced | Six seals. Let's see the hand that carried them. / *Six sceaux. Voyons la main qui les a portés.* | Every champion falls once in this room. Usually more. / *Tout champion tombe au moins une fois dans cette salle. Souvent plus.* | There it is: the look they all get, just before. / *Le voilà : ce regard qu'ils ont tous, juste avant.* | The door was always going to open for you. I just had to be sure. / *La porte allait s'ouvrir pour toi, de toute façon. Je devais juste en être sûre.* |
 
 Lines are engine data (`RivalLines { intro, first_ko, ropes, defeat: T }` on `Rival`); the duel UI
-reads them through `opponent(id)`. Route duelists get an `intro` line only (their `challenge` text).
+reads them through `opponent(id)`. As built (1.2): the portrait shows in the challenge sheet, the roster and the duel's top bar (a
+monogram disc for route duelists); intro, first KO and on the ropes are a bubble under the top bar that closes
+by itself or on a tap, and the defeat line sits in the game-over dialog. Gauntlet and daily duels don't show
+them yet (they carry no opponent id, which drives the reward). Route duelists get an `intro` line only (their `challenge` text).
 
 **AI styles** (`engine/src/ai.rs`, a `Style` on `Ai` next to `Difficulty`). The AI is already a sum of
 small scores with thresholds, so a style is a handful of extra weights, not a new AI:
@@ -423,58 +441,66 @@ mineur* (Stone).
 
 ### 5.3 1.2 finds (38)
 
+As built: each sits on a prop worth looking in (check-maps refuses an open tile), and none on an interior's back
+row (it sits under the top bar). A curio is the item `curio_<name>`, so `count:curio_:n` counts them.
+
 | Id | Map | Tile | Hidden | On / in | Gives |
 |---|---|---|---|---|---|
 | `m_stump` | overworld | 2,2 | no | hollow stump in the NW trees | ⬡ 40 |
 | `m_hallback` | overworld | 13,5 | yes | crates behind the duel hall | card `recall_horn` |
-| `m_garden` | overworld | 20,14 | yes | Moss's bean row (enter by the gap at 20,15) | ⬡ 30 |
-| `m_post` | overworld | 24,20 | no | foot of the east signpost | ⬡ 25 |
-| `m_flowers` | overworld | 5,21 | no | flower meadow, south-west | curio `brass_thimble` |
-| `m_eastend` | overworld | 26,8 | yes | bush at the path's elbow | ⬡ 30 |
+| `m_garden` | overworld | 19,14 | yes | Moss's bean rows (in by the gap at 20,15) | ⬡ 30 |
+| `m_post` | overworld | 24,20 | no | a stone at the foot of the east sign | ⬡ 25 |
+| `m_flowers` | overworld | 5,21 | no | flowers, south-west | curio `brass_thimble` |
+| `m_eastend` | overworld | 26,8 | yes | the tree at the path's elbow | ⬡ 30 |
 | `w_log` | woodland | 2,20 | no | mossy log | ⬡ 50 |
 | `w_reeds` | woodland | 12,4 | yes | reeds on the stream bank | card `clearwater_vial` |
-| `w_lookout` | woodland | 21,5 | no | lookout rail at the path's top | curio `heron_feather` |
-| `w_bridge` | woodland | 15,15 | yes | under the bridge's south end | ⬡ 40 |
-| `w_glade` | woodland | 5,3 | no | moonflower glade (Lumen's spot) | pack `wild` |
-| `w_corner` | woodland | 28,2 | yes | pines, north-east corner | card `moss_poultice` |
-| `w_birch` | woodland | 8,16 | no | fallen birch | ⬡ 30 |
-| `s_pier` | seaside | 14,1 | no | the pier's last post | curio `message_bottle` |
-| `s_under` | seaside | 1,11 | yes | under the boardwalk's west end | ⬡ 60 |
-| `s_pools` | seaside | 6,6 | no | rock pools | card `shellmote` |
-| `s_lighthouse` | seaside | 24,3 | no | the lighthouse step | ⬡ 40 |
-| `s_boat` | seaside | 9,9 | yes | crates by the rowboat | card `relay_baton` |
-| `s_dunes` | seaside | 28,18 | no | dune grass, south-east | pack `tide` |
-| `s_beach` | seaside | 2,20 | yes | driftwood, south-west | ⬡ 25 |
-| `q_topledge` | quarry | 26,0 | no | top ledge (two flights up) | ⬡ 80 |
+| `w_lookout` | woodland | 21,5 | no | the lookout rail at the path's top | curio `heron_feather` |
+| `w_bridge` | woodland | 15,16 | yes | reeds below the bridge | ⬡ 40 |
+| `w_glade` | woodland | 2,2 | no | moonflowers in Lumen's glade | pack `wild` |
+| `w_corner` | woodland | 28,2 | yes | the pine in the north-east corner | card `moss_poultice` |
+| `w_birch` | woodland | 8,16 | no | fallen birch (a `log`) | ⬡ 30 |
+| `s_pier` | seaside | 13,1 | no | crates at the pier's end | curio `message_bottle` |
+| `s_under` | seaside | 1,11 | yes | crates under the boardwalk's west end | ⬡ 60 |
+| `s_pools` | seaside | 11,6 | no | the rock pool | card `shellmote` |
+| `s_lighthouse` | seaside | 25,4 | no | the lighthouse step | ⬡ 40 |
+| `s_boat` | seaside | 7,9 | yes | crates by the rowboat | card `relay_baton` |
+| `s_dunes` | seaside | 28,18 | no | dune grass (reeds), south-east | pack `tide` |
+| `s_beach` | seaside | 2,20 | yes | driftwood (a `log`), south-west | ⬡ 25 |
+| `q_topledge` | quarry | 26,0 | no | the pine on the top ledge (two flights up) | ⬡ 80 |
 | `q_crates` | quarry | 20,15 | yes | stacked crates | card `ash_sifter` |
-| `q_fern` | quarry | 2,4 | no | west ledge face | curio `fossil_fern` |
-| `q_rubble` | quarry | 8,18 | yes | rubble on the floor | ⬡ 35 |
-| `q_lantern` | quarry | 16,7 | no | foot of a lantern | pack `ember` |
+| `q_fern` | quarry | 2,6 | no | a slab on the west ledge | curio `fossil_fern` |
+| `q_rubble` | quarry | 7,18 | yes | a stone on the floor | ⬡ 35 |
+| `q_lantern` | quarry | 15,8 | no | a lantern's hook | pack `ember` |
 | `q_southeast` | quarry | 25,19 | yes | rock, south-east | card `scrap_ledger` |
-| `q_midledge` | quarry | 13,3 | yes | behind rocks on the first ledge | card `spike_charm` |
+| `q_midledge` | quarry | 11,3 | yes | rocks on the first ledge | card `spike_charm` |
 | `sq_fountain` | square | 13,9 | no | the fountain basin | ⬡ 15 |
-| `sq_stall` | square | 19,8 | yes | behind the market stall | card `field_guide` |
-| `sq_bench` | square | 8,16 | no | under a bench | ⬡ 30 |
-| `sq_bed` | square | 1,18 | yes | flowerbed, south-west | curio `tin_hex` |
-| `sq_lantern` | square | 22,4 | no | lantern base | ⬡ 20 |
-| `i_swap` | swap_shop | 8,2 | yes | a drawer behind the counter | ⬡ 50 |
-| `i_clinic` | clinic | 2,1 | no | the bookcase | card `trail_compass` |
-| `i_bakery` | bakery | 8,1 | no | the tip jar on the oven shelf | ⬡ 35 |
-| `i_press` | press | 2,2 | yes | the type case | curio `lead_type` |
-| `i_boathouse` | boathouse | 7,1 | yes | net locker | ⬡ 40 |
-| `i_lodge` | lodge | 2,6 | no | the ranger's map table | card `dowsing_rod` |
+| `sq_stall` | square | 16,4 | yes | a crate behind Posy's stall | card `field_guide` |
+| `sq_bench` | square | 8,12 | no | under a bench | ⬡ 30 |
+| `sq_bed` | square | 3,18 | yes | flowerbed, south-west | curio `tin_hex` |
+| `sq_lantern` | square | 21,5 | no | the lantern's base | ⬡ 20 |
+| `i_swap` | swap_shop | 9,1 | yes | a drawer in the bookcase | ⬡ 50 |
+| `i_clinic` | clinic | 1,3 | no | the bookcase | card `trail_compass` |
+| `i_bakery` | bakery | 9,3 | no | the tip jar on the bread case | ⬡ 35 |
+| `i_press` | press | 1,3 | yes | the type case | curio `lead_type` |
+| `i_boathouse` | boathouse | 9,3 | yes | net locker | ⬡ 40 |
+| `i_lodge` | lodge | 2,5 | no | the ranger's map table | card `dowsing_rod` |
 
-Totals: ⬡ 675 (18 finds), 11 cards, 6 curios, 3 packs. The existing `lens_rock` (field lens) stays a quest item, not a
-find.
+Totals: ⬡ 675 (18 finds), 11 cards, 6 curios, 3 packs; plus the three seed packets of Moss's quest (§5.4).
+Hidden: 18 of the 38 (and the packets), more than the third first planned: the houses and the quarry hide
+well, and a glint on every tile would turn the maps into a checklist. The existing `lens_rock` (field lens)
+stays a quest item, not a find.
 
 ### 5.4 1.2 quests (four new, the two old ones kept)
 
 | Quest | Giver | Steps | Reward |
 |---|---|---|---|
-| **Moss's Seeds** / *Les graines de Moss* | Moss (overworld) | three seed packets (`seed_1..3`, hidden finds that only exist while `flag:seeds_asked`): woodland 9,19, square 3,12, overworld 1,15 | ⬡ 150 + card `bloom_seed` |
-| **Dace's Kite** / *Le cerf-volant de Dace* | Dace (seaside) | the kite is snagged on the lighthouse; beat Skye (`beat:t_skye`), she gives `kite_line`; give it to Dace | pack `storm` |
-| **Rye for Hob** / *Du seigle pour Hob* | Hob (bakery) | Hob wants kiln ash for an ash-crust loaf; Cole has it after you beat him (`beat:t_cole` → `give:kiln_ash`) | ⬡ 120 + card `hearty_broth` |
-| **First Consult** / *Première consultation* | Mags (clinic) | let Mags look at any saved deck (`show:doctor`) and apply one of her suggestions | ⬡ 100 |
+| **Moss's Seeds** / *Les graines de Moss* | Moss (overworld), once you have the shoes (`flag:seeds_asked`) | three seed packets (finds `seed_1..3`, hidden, only there while `flag:seeds_asked`, giving `seed_packet_1..3`): woodland 9,19 (a stump), square 2,12 (a bush), overworld 1,15 (the west trees); Moss takes them on `count:seed_packet_:3` | ⬡ 150 + card `bloom_seed` |
+| **Dace's Kite** / *Le cerf-volant de Dace* | Dace (seaside, `flag:kite_asked`) | the kite is snagged on the lighthouse rail; beat Skye, then talk to her (`beat:t_skye & flag:kite_asked` → `give:kite_line`, `flag:kite_line_given`); Dace takes the line | pack `storm` |
+| **Rye for Hob** / *Du seigle pour Hob* | Hob (bakery, `flag:rye_asked`) | Hob wants kiln ash for an ash-crust loaf; Cole has it once you've beaten him (`beat:t_cole & flag:rye_asked` → `give:kiln_ash`, `flag:ash_given`) | ⬡ 120 + card `hearty_broth` |
+| **First Consult** / *Première consultation* | Mags (clinic, `flag:consult_asked`) | let Mags read a saved deck (`show:doctor`) and apply one of her swaps; the panel sets `consult_applied` (`doctor::APPLIED_FLAG`), also when a reading has no swap to apply, so a clean deck can't strand the quest; then tell her | ⬡ 100 |
+
+The two 1.1 errands are kept and listed too: **A Letter for Hob** (Ottilie's letter, a Tide pack) and **The Lost Lens** (Fennel's
+field lens from the quarry's high ledge, a Grove pack). Odile's curio rewards (§5.2) are dialogue, not a panel.
 
 **Journal.** Quests are listed in a **Journal** panel (J, or the top bar): `web/world/quests.json` holds each
 quest's id, title and steps (EN/FR), each step tied to the flag or item that completes it, plus the flag that
@@ -492,11 +518,14 @@ one find.
 | House | Building prop, where | People (one-line personality) | Service |
 |---|---|---|---|
 | **Swap Shop** | new `cottage` in the meadow's west trees (door ≈ 5,10; clear trees 3–7 × 7–10) | **Perrin**, Card Trader / *marchand de cartes*: talks prices like weather, never haggles, always fair. | `show:trader`: today's 6 singles, sell one card, sell extras |
-| **Deck Clinic** | a second `cottage` on the square's west side | **Mags Thale**, Deck Doctor / *docteure des decks*: brisk, warm, treats decks like patients ("Let's hear its breathing"). | `show:doctor`: pick a deck, get a diagnosis |
-| **Brightwell Press** | the square's letter office (`workshop`) | **Gus Ferrand**, Printer / *imprimeur*: ink to the elbows, mutters about kerning. | `show:press`: craft a chosen card |
-| **Hob's Bakery** | the square's cottage (Hob's) | **Hob** moves inside (his stall is left to **Posy**, his niece, who sells nothing and recommends everything); from 1.3 he's back at the stall at dawn | Rye quest |
-| **Boathouse** | seaside `workshop` | **Nettie**, Net-Mender / *ramendeuse*: knew the ferry's old route; foreshadows Gullhaven in 1.3. | — |
-| **Ranger's Lodge** | new `cottage` in the woodland's south-east | **Fennel** (existing) lives here (from 1.3, only at night; by day she's on the trail); **Alder**, Ranger / *garde forestier*, keeps a trail map on the table (1.3: the woodland waymark is outside). | — |
+| **Deck Clinic** | a second `cottage` in the square's north-east corner (door 23,3; the square's west side is too narrow) | **Mags Thale**, Deck Doctor / *docteure des decks*: brisk, warm, treats decks like patients ("Let's hear its breathing"). | `show:doctor`: pick a deck, get a diagnosis |
+| **Brightwell Press** | the square's letter office (`workshop`, door 18,3) | **Gus Ferrand**, Printer / *imprimeur*: ink to the elbows, mutters about kerning. | `show:press`: craft a chosen card |
+| **Hob's Bakery** | the square's cottage (Hob's, door 5,3) | **Hob** moves inside (his stall is left to **Posy**, his niece, who sells nothing and recommends everything); from 1.3 he's back at the stall at dawn | Rye quest |
+| **Boathouse** | seaside `workshop` (door 5,9); a sea chart on the wall marks Gullhaven | **Nettie**, Net-Mender / *ramendeuse*: knew the ferry's old route; foreshadows Gullhaven in 1.3. | — |
+| **Ranger's Lodge** | new `cottage` in the woodland's south-east (door 26,18, a path down from the trail at x 23) | **Fennel** (existing) lives here (her shelf is inside; in 1.2 she's always on the trail, from 1.3 home at night); **Alder**, Ranger / *garde forestier*, keeps a trail map on the table (1.3: the woodland waymark is outside). | — |
+
+**Odile**'s curio cabinet stands on the square's east side (23,13; she's behind it at 23,12). She pays by
+`count:curio_:3` and `:6` in dialogue (two Wild packs, then the Press voucher); the curios stay with the player.
 
 **Wynne's counter** (duel hall) becomes the pack shop (`show:shop_hall`): buy packs (§3.2), see the
 Facet balance. She keeps the running-shoes gift and the one-seal Wild pack.
@@ -790,6 +819,8 @@ that and say so in the changelog).
   slug resolves to a non-promo card; every `pack:` names a booster; every `show:` names a known panel;
 - every `found_` id and `way_` id is unique; every find `give` is one effect;
 - `walk:`/`face:`/`emote:` actors exist on that map (or `hero`).
+- `web/world/quests.json` (the Journal): every `start`, `done` and step condition parses, and every flag or item
+  it waits for is set by some map effect (or, for `consult_applied`, by the doctor's panel).
 
 It runs in `cargo test -p sixfold-engine`, so CI already runs it.
 
@@ -1590,7 +1621,7 @@ so each gets a one-line unit test.
 
 ### 13.2 Web (`web/`)
 
-Rust (`web/src/`): `shop.rs` (hall shop, trader, press, inn counters), `doctor.rs`, `worldmap.rs` (map +
+Rust (`web/src/`): `shops.rs` (as built in 1.2: Perrin's trader, Wynne's pack counter, Mags's doctor and Gus's press, all sheets in the world dialog; the inn counters join it in 1.3), `journal.rs` (built in 1.2), `worldmap.rs` (map +
 travel), `journal.rs`, `achievements.rs` (page + toast), `stats.rs`; `world.rs` gains the script runner (steps,
 cue forwarding to `world_cue`, waiting on `cue_done`) and the generalized challenge sheet.
 
