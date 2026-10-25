@@ -7,6 +7,9 @@
 //!   stays craftable.
 //! - Gus at the Press makes one more copy of a card ([`craft`]), or any
 //!   non-promo card for a Press voucher ([`craft_with_voucher`]).
+//! - Each region's inn has a counter (1.3, §7.4): its themed pack, the Wild
+//!   pack, and four fixed singles of its colours, one of them a Rare
+//!   ([`inn_stock`], [`buy_inn_single`]).
 //!
 //! Promos and basic energy are never stocked, sold or crafted. Every function
 //! changes nothing when it fails.
@@ -113,6 +116,89 @@ pub fn buy_pack(p: &mut Progress, profile: &mut Profile, b: usize) -> Result<(),
     pay(p, pack_price(b, p).ok_or(ShopError::NotForSale)?)?;
     profile.wallet.grant(b, 1);
     Ok(())
+}
+
+/// A region's inn counter (§7.4): the inn's interior map, its region's
+/// booster (the first word of the booster's name) and four singles, Commons
+/// first, one Rare last.
+#[derive(Debug)]
+pub struct InnStock {
+    pub map: &'static str,
+    pub booster: &'static str,
+    pub singles: [CardId; 4],
+}
+
+impl InnStock {
+    /// The region's booster, by index in [`BOOSTERS`].
+    pub fn booster(&self) -> usize {
+        BOOSTERS
+            .iter()
+            .position(|b| b.name.en.split(' ').next() == Some(self.booster))
+            .expect("an inn names a booster")
+    }
+}
+
+/// The six regional inns' counters (§10, "Inn stock").
+pub static INNS: [InnStock; 6] = [
+    InnStock {
+        map: "inn_ember",
+        booster: "Ember",
+        singles: [set::CINDREL, set::ASHPAW, set::BLAZELYNX, set::SOLARLYNX],
+    },
+    InnStock {
+        map: "inn_storm",
+        booster: "Storm",
+        singles: [set::SPARKIT, set::ZIPPET, set::ARCFANG, set::FULGUREX],
+    },
+    InnStock {
+        map: "inn_tide",
+        booster: "Tide",
+        singles: [set::PUDDOCK, set::KELPUP, set::KELPWARDEN, set::GULFWYRM],
+    },
+    InnStock {
+        map: "inn_dream",
+        booster: "Dream",
+        singles: [set::WISPUN, set::HEXLET, set::SOMNITAR, set::HEXARCH],
+    },
+    InnStock {
+        map: "inn_grove",
+        booster: "Grove",
+        singles: [
+            set::SPRIGGET,
+            set::POLLENPUP,
+            set::THORNBUCK,
+            set::ELDERHART,
+        ],
+    },
+    InnStock {
+        map: "inn_stone",
+        booster: "Stone",
+        singles: [
+            set::KNOLLOP,
+            set::BRAWLET,
+            set::SHALEHOUND,
+            set::CRAGMASTIFF,
+        ],
+    },
+];
+
+/// The counter of the inn whose interior is `map`, if it has one (the hub's
+/// Hearth Rooms only rest).
+pub fn inn_stock(map: &str) -> Option<&'static InnStock> {
+    INNS.iter().find(|i| i.map == map)
+}
+
+/// Buy single `slot` of an inn's counter, at the single price; no daily limit.
+pub fn buy_inn_single(
+    p: &mut Progress,
+    profile: &mut Profile,
+    inn: &InnStock,
+    slot: usize,
+) -> Result<CardId, ShopError> {
+    let &id = inn.singles.get(slot).ok_or(ShopError::NotForSale)?;
+    pay(p, SINGLE_PRICE[tier(id).ok_or(ShopError::NotForSale)?])?;
+    profile.collection.add(id, 1);
+    Ok(id)
 }
 
 /// Perrin's six singles for day `day` (days since 1970-01-01): two
@@ -389,6 +475,46 @@ mod tests {
     }
 
     #[test]
+    fn inn_counters_sell_their_region() {
+        use crate::card::Color;
+        for inn in &INNS {
+            let b = &BOOSTERS[inn.booster()];
+            let tiers: Vec<_> = inn.singles.iter().map(|&id| tier(id)).collect();
+            assert_eq!(tiers, [Some(0), Some(0), Some(1), Some(2)], "{}", inn.map);
+            for &id in &inn.singles {
+                let c = card(id)
+                    .creature()
+                    .expect("inn singles are creatures")
+                    .color;
+                assert!(
+                    b.colors.contains(&c) || c == Color::Colorless,
+                    "{}: {}",
+                    inn.map,
+                    card(id).name
+                );
+            }
+        }
+        assert!(inn_stock("inn_hub").is_none() && inn_stock("inn_storm").is_some());
+        let (mut p, mut pr) = (Progress::default(), Profile::new_player());
+        let ember = inn_stock("inn_ember").unwrap();
+        assert_eq!(
+            buy_inn_single(&mut p, &mut pr, ember, 3),
+            Err(ShopError::Short(140))
+        );
+        p.earn(400);
+        assert_eq!(
+            buy_inn_single(&mut p, &mut pr, ember, 3),
+            Ok(set::SOLARLYNX)
+        );
+        assert_eq!(buy_inn_single(&mut p, &mut pr, ember, 0), Ok(set::CINDREL));
+        assert_eq!((p.coins(), pr.collection.count(set::SOLARLYNX)), (240, 1));
+        assert_eq!(
+            buy_inn_single(&mut p, &mut pr, ember, 4),
+            Err(ShopError::NotForSale)
+        );
+    }
+
+    #[test]
     fn shop_errors_read_in_both_languages() {
         use crate::lang::{set_lang, Lang};
         assert_eq!(
@@ -461,6 +587,16 @@ mod tests {
                 packs,
             });
         }
+        // 1.3 Ember and Storm (§10.1-10.2): their duelists come with TRAINERS above;
+        // their Facet finds (e_pond 60, e_vent_w 100, e_quarry_nook 80, st_wall 50,
+        // st_cliff 40, st_dock 60) and two pack finds (e_rim, st_islet), over five
+        // outdoor maps and four houses; the Lantern quest's errand (three shards on
+        // three maps, a lantern rather than Facets).
+        first.push(Source {
+            minutes: 5 * 10 + 4 * 3 + 15,
+            facets: 390,
+            packs: 2,
+        });
         let rate = packs_per_hour(&first);
         // The "exploring" row of §3.4, per hour: 5 two-prize duelists, 6 finds
         // of ⬡ 40, half a quest of ⬡ 160 and 0.8 of a rival.

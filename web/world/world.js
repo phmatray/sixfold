@@ -429,8 +429,8 @@ export function mount(el, controls, cb, start, edit = false) {
 
   // The sky behind the scene and the fog: one colour (fog fades into the sky).
   function sky(look, now = false) {
-    renderer.setClearColor(look.bg);
-    if (scene.fog) scene.fog.color.copy(look.bg), (scene.fog.near = look.near), (scene.fog.far = look.far);
+    renderer.setClearColor(look.color ?? look.bg); // `color`: the sky, lit by a lightning flash
+    if (scene.fog) scene.fog.color.copy(look.color ?? look.bg), (scene.fog.near = look.near), (scene.fog.far = look.far);
     if (now || world.now - bgAt > 1) (bgAt = world.now), el.closest(".world")?.style.setProperty("--world-bg", `#${look.bg.getHexString()}`);
   }
 
@@ -625,6 +625,9 @@ export function mount(el, controls, cb, start, edit = false) {
   el.sixfoldClock = (m) => (cb("clock", String(Math.floor(m)), ""), setClock(m));
   el.sixfoldWarp = (to, x, z, facing = "s") => warp({ to, spawn: { x, z, facing }, travel: true }); // and anywhere: `el.sixfoldWarp("square", 12, 8)`
   // For measuring: draw calls and triangles of the last frame (shadows included), and the area.
+  // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back
+  // (no fog, a far plane to match) until the next map loads.
+  el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
   el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute) });
 
   // Item popup preview: the model turning in its own small canvas.
@@ -712,6 +715,7 @@ export function mount(el, controls, cb, start, edit = false) {
     },
     // A dialogue cue (engine `Cue`), e.g. {"emote": "heart", "actor": "moss"}; actor "hero" is the hero.
     // {"warp": {"map", "x", "z", "facing"}, "travel": true}: fade and load (a ferry, fast travel).
+    // {"sfx": "spark"}: a sound.
     cue(json) {
       const c = JSON.parse(json);
       if (c.warp) {
@@ -719,6 +723,7 @@ export function mount(el, controls, cb, start, edit = false) {
         if (world && !warping) warp({ to: map, spawn: { x, z, facing }, travel: !!c.travel });
         return;
       }
+      if (c.sfx) return sound(c.sfx);
       const a = c.actor === "hero" ? hero : world?.npcs.find((n) => n.def.id === c.actor);
       if (c.emote && a) emote(a, c.emote);
     },

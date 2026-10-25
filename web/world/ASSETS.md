@@ -288,7 +288,7 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
 - **prop `glow`**: a colour for the prop's `*glow*` materials (a waymark's crystal in its region's colour).
 - **prop `recolor`**: `{ "<material name>": "#rrggbb" | null }`, a cheap variant of a shared model: each named
   material gets that colour, and `null` hides its parts. The Deck Clinic is the bakery's `cottage` with a slate
-  roof, a teal awning and no bread sign. Unbatched props only.
+  roof, a teal awning and no bread sign. A recoloured prop is never instanced.
 - **ground:** the base layer (`grass`, `dirt`, `sand` …), `path` under `p` tiles, how far
   the ground runs past the map edge, and `tufts` (grass blades scattered on open base
   tiles, 1800 by default; 0 on sand or dirt).
@@ -378,5 +378,23 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   1.7 squares apart on the chart (44 px targets on a phone).
 - **inns:** an innkeeper's branch with `"do": ["show:inn"]` opens the rest panel (rest until dawn, morning,
   dusk or night; free). The hub inn is `inn_hub` in Brightwell Square (Hollis).
+- **1.3 PR 2 additions** (Ember and Storm):
+  - `lightning: true` (map): far lightning at night, a short double flash of the sky every 20–40 s (off with reduced
+    motion). **prop `pulse`** (a condition): an arc of light at the prop's `light_origin` every few seconds while it
+    holds (the Rodspire with its pylons on).
+  - **Smoke** rises from the first chimney and from every `kiln`, `glass_furnace` and `ember_vent` (`SMOKY` in
+    `build.js`, eight sources at most); a gate's vents steam only while it is shut.
+  - **prop `recolor`** works on any prop now: a recoloured prop is drawn on its own instead of instanced.
+  - Static models that are not instanced (houses, kilns, the observatory…) are **merged** like the instanced ones:
+    one draw for their flat-coloured parts; their named empties survive. Cliff blocks hidden on all four sides are
+    skipped, and a plateau's inner tiles draw only the top of their block.
+  - A **door warp to the same map** is a lift (the Rodspire's): check-maps carries its flood fill on to where it lands.
+  - The effect **`sfx:<name>`** plays one of `engine::overworld::SOUNDS` (`spark`, `chime`, `jingle`, `gate`, `seal`).
+  - Coloured glassware (`glass_teal`, `glass_amber` … materials) keeps its colour at night and catches the light
+    softly; only plain `*glass*` (windows) turns warm.
+  - `tidepool` is walkable (WALKABLE); `stairs_basalt` and `stairs_heath` are decks.
+  - A regional inn (an `inn_<region>` interior listed in `engine::shop::INNS`) opens its counter under the rest panel
+    of `show:inn`.
 - **Debug hooks** on the world's host element (`.world-host`): `sixfoldClock(minute)` sets the time,
-  `sixfoldWarp(map, x, z, facing)` goes anywhere, `sixfoldStats()` reads draw calls, the area and the hour.
+  `sixfoldWarp(map, x, z, facing)` goes anywhere, `sixfoldStats()` reads draw calls, the area and the hour, and `sixfoldCam({ distance: 40, pitch: 65 })` pulls the
+  camera back (no fog) to review a whole map until the next one loads.

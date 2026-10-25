@@ -12,7 +12,7 @@ use sixfold_engine::campaign::{champion, opponent, rival, seals, Rival, RIVALS, 
 use sixfold_engine::endgame::{self, Rung, CLEAR_FLAG, CLEAR_PACKS, GAUNTLET};
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
-use sixfold_engine::trainers::trainer;
+use sixfold_engine::trainers::{trainer, Rule};
 use sixfold_engine::{fr, tr, CardId};
 
 use crate::art::color_key;
@@ -296,7 +296,7 @@ pub fn Ladder(back: Screen, before: impl Fn() + Copy + Send + Sync + 'static) ->
     let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<Profile>>();
     let progress = expect_context::<RwSignal<Progress>>();
-    let (opts, pick) = profile.with_untracked(deck_opts);
+    let (opts, pick) = profile.with_untracked(|p| deck_opts(p, None));
     let playable = opts.iter().any(|o| o.problem.is_none());
     let choice = RwSignal::new(pick);
     let opts = StoredValue::new(opts);
@@ -432,7 +432,9 @@ pub fn Ladder(back: Screen, before: impl Fn() + Copy + Send + Sync + 'static) ->
 
 /// The player's own decks, the last one taken into a campaign duel first
 /// choice when it still plays.
-fn deck_opts(p: &Profile) -> (Vec<Opt>, usize) {
+/// The player's decks for a duel; with a challenge `rule`, the decks that
+/// break it can't be picked.
+fn deck_opts(p: &Profile, rule: Option<Rule>) -> (Vec<Opt>, usize) {
     let opts: Vec<Opt> = p
         .decks
         .iter()
@@ -440,7 +442,10 @@ fn deck_opts(p: &Profile) -> (Vec<Opt>, usize) {
             name: d.name.clone(),
             desc: tr("Your deck", "Votre deck").into(),
             cards: d.cards.clone(),
-            problem: deck_problem(d, &p.collection),
+            problem: deck_problem(d, &p.collection).or_else(|| {
+                rule.filter(|r| !r.allows(&d.cards))
+                    .map(|r| r.text().to_string())
+            }),
         })
         .collect();
     let last = store::campaign_deck();
@@ -470,7 +475,8 @@ pub fn Challenge(
     };
     let r = rival(&id);
     let open = move || progress.with_untracked(|p| r.is_none_or(|r| r.open(p)));
-    let (opts, pick) = profile.with_untracked(deck_opts);
+    let rule = trainer(&id).and_then(|t| t.rule);
+    let (opts, pick) = profile.with_untracked(|p| deck_opts(p, rule));
     let playable = opts.iter().any(|o| o.problem.is_none());
     let choice = RwSignal::new(pick);
     let opts = StoredValue::new(opts);
@@ -535,7 +541,15 @@ pub fn Challenge(
                     format!("{} exige {} avant d'accepter un duel.", r.name, seals_n(r.needs)),
                 )}</p> }.into_any()
             } else if playable {
-                view! { <DeckPicker legend=tr("Your deck", "Votre deck") name="campaign-deck" opts=opts.get_value() choice=choice /> }.into_any()
+                view! {
+                    {rule.map(|r| view! { <p class="challenge-rule"><b>{tr("House rule: ", "Règle maison : ")}</b>{r.text().to_string()}</p> })}
+                    <DeckPicker legend=tr("Your deck", "Votre deck") name="campaign-deck" opts=opts.get_value() choice=choice />
+                }.into_any()
+            } else if let Some(r) = rule {
+                view! { <p class="legal no">{tr(
+                    format!("None of your decks keeps this house rule: {} Build one in My decks.", r.text()),
+                    format!("Aucun de vos decks ne respecte cette règle maison : {} Construisez-en un dans Mes decks.", r.text()),
+                )}</p> }.into_any()
             } else {
                 view! { <p class="legal no">{tr("None of your decks can play yet. Fix one in My decks.", "Aucun de vos decks n'est encore jouable. Corrigez-en un dans Mes decks.")}</p> }.into_any()
             }}

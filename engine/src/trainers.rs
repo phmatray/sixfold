@@ -7,7 +7,7 @@
 //! duelists on one kit still play differently.
 
 use crate::ai::Difficulty;
-use crate::card::{card, CardId, Color};
+use crate::card::{card, CardId, CardKind, Color, EnergyCard, Rarity, Stage};
 use crate::deck::{DECK_SIZE, MAX_COPIES};
 use crate::lang::T;
 use crate::overworld::Progress;
@@ -113,6 +113,89 @@ pub struct Trainer {
     pub night: bool,
     /// Overrides the default purse.
     pub purse: Option<u32>,
+    /// A challenge rule the player's deck must keep (1.3).
+    pub rule: Option<Rule>,
+}
+
+/// A challenge-rule duelist's deck rule (`docs/WORLD_DESIGN.md` §10): decks
+/// that break it are greyed out in the challenge sheet's picker.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Rule {
+    /// No Stage 1 or Stage 2 creature.
+    BasicsOnly,
+    /// Creatures and energy only.
+    NoTrainers,
+    /// Creatures and basic energy of one colour (plus Colorless creatures).
+    MonoColour,
+    /// At most 16 energy cards.
+    LightEnergy,
+    /// No Rare.
+    NoRares,
+    /// At least two Stage 2 creatures.
+    TwoStage2,
+}
+
+impl Rule {
+    /// Whether `deck` keeps the rule.
+    pub fn allows(self, deck: &[CardId]) -> bool {
+        let defs = || deck.iter().map(|&id| card(id));
+        let stage = |s| {
+            defs()
+                .filter(|c| c.creature().is_some_and(|cr| cr.stage == s))
+                .count()
+        };
+        match self {
+            Rule::BasicsOnly => {
+                stage(Stage::Basic) == defs().filter(|c| c.creature().is_some()).count()
+            }
+            Rule::NoTrainers => {
+                defs().all(|c| matches!(c.kind, CardKind::Creature(_) | CardKind::Energy(_)))
+            }
+            Rule::MonoColour => {
+                let mut colours = defs().filter_map(|c| match &c.kind {
+                    CardKind::Energy(EnergyCard::Basic(col)) => Some(*col),
+                    _ => c
+                        .creature()
+                        .map(|cr| cr.color)
+                        .filter(|&col| col != Color::Colorless),
+                });
+                let first = colours.next();
+                colours.all(|c| Some(c) == first)
+            }
+            Rule::LightEnergy => {
+                defs()
+                    .filter(|c| matches!(c.kind, CardKind::Energy(_)))
+                    .count()
+                    <= 16
+            }
+            Rule::NoRares => defs().all(|c| c.rarity != Rarity::Rare),
+            Rule::TwoStage2 => stage(Stage::Stage2) >= 2,
+        }
+    }
+
+    /// What the rule asks, as the challenge sheet says it.
+    pub fn text(self) -> T {
+        match self {
+            Rule::BasicsOnly => T::new(
+                "Basic creatures only: no Stage 1 or Stage 2.",
+                "Créatures de Base uniquement : ni Stade 1 ni Stade 2.",
+            ),
+            Rule::NoTrainers => T::new(
+                "Creatures and energy only: no Trainers.",
+                "Créatures et énergies uniquement : aucun Dresseur.",
+            ),
+            Rule::MonoColour => T::new(
+                "One colour only, plus Colorless creatures.",
+                "Une seule couleur, plus les créatures Incolores.",
+            ),
+            Rule::LightEnergy => T::new("At most 16 energy cards.", "16 cartes Énergie au plus."),
+            Rule::NoRares => T::new("No Rares.", "Aucune carte Rare."),
+            Rule::TwoStage2 => T::new(
+                "At least two Stage 2 creatures.",
+                "Au moins deux créatures de Stade 2.",
+            ),
+        }
+    }
 }
 
 /// The default purse: this base plus this much per prize.
@@ -226,14 +309,16 @@ macro_rules! duelist {
             difficulty: Difficulty::$level,
             night: false,
             purse: None,
+            rule: None,
         }
     };
 }
 
 use Kit::{Mix, One};
 
-/// The 1.2 roster, by map: meadow, woodland, boardwalk, quarry, square.
-pub static TRAINERS: [Trainer; 14] = [
+/// The roster, by map. 1.2: meadow, woodland, boardwalk, quarry, square.
+/// 1.3 Ember: cinderwick, kilnmouth; Storm: downs, rodspire, stormwatch.
+pub static TRAINERS: [Trainer; 26] = [
     duelist!("t_tobin", "Tobin", "Junior Duelist" / "Duelliste en herbe", One(&SCRAP), WARRENBUCK 2, 1, Easy),
     duelist!("t_hazel", "Hazel", "Beekeeper" / "Apicultrice", Mix(&SEEDLING, &SPARK), HIVEVOLT 2, 2, Easy),
     duelist!("t_ossian", "Ossian", "Birdwatcher" / "Ornithologue", One(&SCRAP), GALEHERON 2, 1, Easy),
@@ -248,6 +333,32 @@ pub static TRAINERS: [Trainer; 14] = [
     duelist!("t_rusk", "Rusk", "Hauler" / "Porteur", Mix(&PEBBLE, &SCRAP), HAULOX 1, 1, Easy),
     duelist!("t_marigold", "Marigold", "Glass Gatherer" / "Cueilleuse de verre", One(&BELLOWS), CINDERHORN 2, 3, Normal),
     duelist!("t_lark", "Lark", "Busker" / "Musicienne de rue", Mix(&SCRAP, &MURMUR), ECHOPUP 2, 1, Easy),
+    duelist!("t_tavish", "Tavish", "Glassblower" / "Souffleur de verre", One(&BELLOWS), WAXWICK 1, 2, Normal),
+    Trainer {
+        rule: Some(Rule::BasicsOnly),
+        purse: Some(120),
+        ..duelist!("t_basil", "Basil", "Purist" / "Puriste", One(&KINDLING), CINDERHORN 2, 3, Normal)
+    },
+    duelist!("t_carys", "Carys", "Firewalker" / "Marcheuse de braise", One(&BELLOWS), BLAZELYNX 2, 3, Normal),
+    duelist!("t_dunstan", "Dunstan", "Ash Sifter" / "Tamiseur de cendres", Mix(&KINDLING, &PEBBLE), ASH_SIFTER 2, 2, Normal),
+    Trainer {
+        night: true,
+        ..duelist!("t_vela", "Vela", "Kilnwatcher" / "Veilleuse de four", One(&FORGE), KILNBACK 1, 3, Hard)
+    },
+    duelist!("t_hew", "Hew", "Shepherd" / "Berger", Mix(&SPARK, &SCRAP), ECHOPUP 2, 1, Easy),
+    duelist!("t_maren", "Maren", "Wind Surveyor" / "Arpenteuse des vents", One(&SPARK), FLASHFIN 1, 2, Normal),
+    duelist!("t_tull", "Tull", "Chime Tuner" / "Accordeur de carillons", One(&STATIC), OHMRUNNER 1, 2, Normal),
+    Trainer {
+        night: true,
+        ..duelist!("t_odo", "Odo", "Storm Chaser" / "Chasseur d'orages", One(&TEMPEST), STORMOX 2, 3, Hard)
+    },
+    duelist!("t_corra", "Corra", "Lineworker" / "Monteuse de lignes", One(&STATIC), ARCFANG 1, 3, Normal),
+    duelist!("t_ves", "Ves", "Signal Keeper" / "Gardienne des signaux", Mix(&STATIC, &CURRENT), STREAMFIN 1, 3, Normal),
+    Trainer {
+        rule: Some(Rule::LightEnergy),
+        purse: Some(120),
+        ..duelist!("t_greer", "Greer", "Featherweight" / "Poids plume", One(&TEMPEST), ZIPPET 1, 3, Normal)
+    },
 ];
 
 #[cfg(test)]
@@ -325,8 +436,20 @@ mod tests {
             assert!((1..=3).contains(&t.prizes), "{}", t.name);
             assert!(!t.class.en.is_empty() && !t.class.fr.is_empty());
         }
-        // §4.4: five 1-prize, seven 2-prize and two 3-prize duelists.
-        assert_eq!(TRAINERS.iter().map(Trainer::purse).sum::<u32>(), 585);
+        // §4.4: five 1-prize, seven 2-prize and two 3-prize duelists (585);
+        // §10.1-10.2: Ember 45 + 60 + 45 + 90 + 120, Storm 30 + 45 + 45 + 60
+        // + 60 + 90 + 120 (810).
+        assert_eq!(
+            TRAINERS.iter().map(Trainer::purse).sum::<u32>(),
+            585 + 360 + 450
+        );
+        // A night duelist plays Hard; a rule duelist's own deck keeps its rule
+        // when the rule can be kept by a kit.
+        for t in TRAINERS.iter() {
+            assert!(!t.night || t.difficulty == Difficulty::Hard, "{}", t.name);
+        }
+        let basil = trainer("t_basil").unwrap();
+        assert!(basil.rule.unwrap().allows(&basil.deck()));
     }
 
     #[test]
@@ -342,6 +465,33 @@ mod tests {
         assert!(p.has_flag("beat_t_hazel") && p.check("count:beat_t_:1"));
         assert_eq!(record(hazel, true, &mut p), 0, "once per duelist");
         assert_eq!((p.coins(), seals(&p)), (start + 45, 0));
+    }
+
+    #[test]
+    fn challenge_rules_read_decks() {
+        let kindling = Kit::One(&KINDLING).deck(None);
+        let bellows = Kit::One(&BELLOWS).deck(None);
+        let forge = Kit::One(&FORGE).deck(None);
+        let scrap = Kit::One(&SCRAP).deck(None);
+        let mono_fire: Vec<CardId> = [CINDREL; 4].into_iter().chain([FIRE_ENERGY; 56]).collect();
+        let fire_and_scampit: Vec<CardId> = mono_fire.iter().copied().chain([SCAMPIT]).collect();
+        assert!(Rule::BasicsOnly.allows(&kindling) && !Rule::BasicsOnly.allows(&bellows));
+        assert!(Rule::NoTrainers.allows(&mono_fire) && !Rule::NoTrainers.allows(&kindling));
+        assert!(Rule::MonoColour.allows(&mono_fire) && Rule::MonoColour.allows(&fire_and_scampit));
+        assert!(
+            !Rule::MonoColour.allows(&scrap),
+            "Scrap pads with Fire and Water"
+        );
+        assert!(
+            !Rule::LightEnergy.allows(&kindling),
+            "a kit pads to 60 with energy"
+        );
+        let light: Vec<CardId> = [CINDREL; 4].into_iter().chain([FIRE_ENERGY; 16]).collect();
+        assert!(Rule::LightEnergy.allows(&light));
+        assert!(Rule::NoRares.allows(&bellows) && !Rule::NoRares.allows(&forge));
+        assert!(!Rule::TwoStage2.allows(&bellows) && Rule::TwoStage2.allows(&forge));
+        assert_eq!(trainer("t_greer").unwrap().rule, Some(Rule::LightEnergy));
+        assert!(!Rule::NoRares.text().fr.is_empty());
     }
 
     #[test]

@@ -183,10 +183,35 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
                 "Valable pour une carte, n'importe laquelle sauf une promo, Rares comprises. Gus, à l'Imprimerie de Clairpuits, l'imprime pendant que vous attendez.",
             ),
         ),
+        // 1.3 curios (Odile still counts them) and the Lantern quest's cullet.
+        "curio_glass_marble" => (
+            tr("Glass Marble", "Bille de verre").into(),
+            "glass_marble",
+            tr(
+                "As big as a plum, with a twist of ember caught inside. Cinderwick glass. A curio for Odile's cabinet.",
+                "Grosse comme une prune, avec une volute de braise prise dedans. Du verre de Mèche-Cendre. Une curiosité pour la vitrine d'Odile.",
+            ),
+        ),
+        "curio_bottled_spark" => (
+            tr("Bottled Spark", "Étincelle en bouteille").into(),
+            "bottled_spark",
+            tr(
+                "A stoppered bottle with a thread of lightning crawling about inside. It hums if you shake it. A curio for Odile.",
+                "Une bouteille bouchée où rampe un fil d'éclair. Elle bourdonne quand on la secoue. Une curiosité pour Odile.",
+            ),
+        ),
+        "cullet_quarry" | "cullet_town" | "cullet_kiln" => (
+            tr("Cullet", "Calcin").into(),
+            "cullet",
+            tr(
+                "A shard of the old green glass, as thick as a thumb. Clio at the Cinderwick Glassworks wants three.",
+                "Un éclat de vieux verre vert, épais comme un pouce. Clio, à la Verrerie de Mèche-Cendre, en veut trois.",
+            ),
+        ),
         // The 1.3 field items (WORLD_DESIGN §7.1): each opens gates in other regions.
         "kiln_lantern" => (
             tr("Kiln Lantern", "Lanterne de four").into(),
-            "lantern",
+            "kiln_lantern",
             tr(
                 "Glass blown at Cinderwick round a coal that never quite goes out. Dark tunnels and caves light up around you.",
                 "Un verre soufflé à Mèche-Cendre autour d'une braise qui ne s'éteint jamais tout à fait. Les tunnels et les grottes s'éclairent autour de vous.",
@@ -590,6 +615,9 @@ pub fn WorldScreen() -> impl IntoView {
                             Applied::Cue(Cue::Emote { actor, emote }) => {
                                 cues.push(format!(r#"{{"actor":"{actor}","emote":"{emote}"}}"#))
                             }
+                            Applied::Cue(Cue::Sfx(name)) => {
+                                cues.push(format!(r#"{{"sfx":"{name}"}}"#))
+                            }
                             Applied::Cue(Cue::Warp { map, x, z, facing }) => {
                                 warp = Some((map, x, z, facing))
                             }
@@ -979,6 +1007,9 @@ pub fn WorldScreen() -> impl IntoView {
                                     }
                                 }).collect_view()}
                             </div>
+                            // A regional inn also keeps a counter (§7.4); the hub's only rests.
+                            {here.with_untracked(|(map, _)| sixfold_engine::shop::inn_stock(map))
+                                .map(|stock| view! { <crate::shops::InnCounter stock=stock /> })}
                         }.into_any()
                     }
                     Sheet::Atlas => view! {

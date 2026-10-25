@@ -1,6 +1,6 @@
 # Sixfold — World Design (1.2 → 1.4)
 
-Status: living spec; 1.2 is built (PRs 1–4: engine, world.js split, line of sight, finds and houses, then the content); 1.3 PR 1 (the clock, day and night, gates, the world map, waymarks and the hub inn) is built. Owner: game/world design. Supersedes the "After 1.0" line of `docs/ROADMAP.md` for
+Status: living spec; 1.2 is built (PRs 1–4: engine, world.js split, line of sight, finds and houses, then the content); 1.3 PR 1 (the clock, day and night, gates, the world map, waymarks and the hub inn) and PR 2 (Ember and Storm: five maps, four interiors, 12 duelists, 15 finds, the Lantern quest, the inn counters) are built. Owner: game/world design. Supersedes the "After 1.0" line of `docs/ROADMAP.md` for
 the world. Three releases implement it:
 
 | Release | Name | One-line goal |
@@ -552,7 +552,7 @@ one sends you back somewhere you've been. Running Shoes stay the hub's starter i
 
 | Item id | EN / FR | Where, how | Opens |
 |---|---|---|---|
-| `kiln_lantern` | Kiln Lantern / *Lanterne de four* | Cinderwick Glassworks: bring Ottoline three **cullet** shards (finds in quarry, cinderwick, kilnmouth). No seal needed. | the **Undermine** (quarry ↔ Scree Pass, the only way into Stone on foot); dark side-caves in Rootholm and the Bellflats (finds); the Moonwell's well stair (a curio) |
+| `kiln_lantern` | Kiln Lantern / *Lanterne de four* | Cinderwick Glassworks: bring Clio three **cullet** shards (finds in quarry, cinderwick, kilnmouth). No seal needed. | the **Undermine** (quarry ↔ Scree Pass, the only way into Stone on foot); dark side-caves in Rootholm and the Bellflats (finds); the Moonwell's well stair (a curio) |
 | `ferry_pass` | Ferry Pass / *Laissez-passer du bac* | Gullhaven Harbour Office, **⬡ 250** | the ferry: Gullhaven ↔ Stormwatch dock, Gullhaven ↔ Lanternmere jetty |
 | `wading_boots` | Wading Boots / *Bottes de gué* | Rootholm Cobbler: bring **reed fibre** (find in woodland) and ⬡ 100; Tobiah makes them overnight: ordering sets `flag:boots_ordered`, and his branch `if: "flag:boots_ordered & time:dawn"` hands them over ("Done by first light, as promised") | the **Hushwillow ford** (Dream ↔ Grove); tide-pool finds in the Bellflats; the shallows round Lanternmere's islets |
 | `grip_gloves` | Grip Gloves / *Gants d'escalade* | Anvilstead climbing school: beat its two instructors (`beat:t_ida & beat:t_garth`) | the **Bastion ↔ Elder Ring cliff**; handhold walls to ledge finds in the quarry, Kilnmouth, Rootholm canopy and Rodspire |
@@ -920,8 +920,8 @@ three rings of terraces to a glassy floor where Cinza waits by the seal stone.
 - Vent gates: 4–5,4 and 22–23,4, `if: "!time:day & !time:dusk"`, `prop_closed: ember_vent`. Text: "Scalding
   steam. It might ease off in the cool of the night."
 
-**People (Cinderwick).** **Ottoline**, glassblower (Lantern quest; never looks up from the blowpipe, talks to you
-in measurements). **Fen**, innkeeper of the Bellows (tall, laconic, gives you soup unasked). **Tito**, Cinza's
+**People (Cinderwick).** **Clio**, glassblower (Lantern quest; never looks up from the blowpipe, talks to you
+in measurements). **Keld**, innkeeper of the Bellows (tall, laconic, gives you soup unasked). **Tito**, Cinza's
 little brother (talks as fast as she runs; tells you her deck's weak spot after you've beaten her once).
 **Marthe**, kiln warden (has kept the Great Kiln lit for forty years; at night she tells its history).
 ☾ **Wendell**, glass-listener (sits by the cooling racks at night; cooling glass "sings", he says, and it does —
@@ -931,7 +931,7 @@ a sfx).
 
 | Id | Name, class | Where | Kit | P | AI | ⬡ |
 |---|---|---|---|---|---|---|
-| `t_hollis` | Hollis, Glassblower / *Souffleur de verre* | cinderwick (talk) | Bellows | 2 | Normal | 45 |
+| `t_tavish` | Tavish, Glassblower / *Souffleur de verre* | cinderwick (talk) | Bellows | 2 | Normal | 45 |
 | `t_carys` | Carys, Firewalker / *Marcheuse de braise* | kilnmouth 9,8 (e, 4) | Bellows | 3 | Normal | 60 |
 | `t_dunstan` | Dunstan, Ash Sifter / *Tamiseur de cendres* | kilnmouth 20,12 (w, 3) | Mix(Kindling, Pebble) | 2 | Normal | 45 |
 | `t_vela` ☾ | Vela, Kilnwatcher / *Veilleuse de four* | kilnmouth rim 24,1 (w, 5) | Forge | 3 | Hard | 90 |
@@ -944,6 +944,34 @@ a sfx).
 `solarlynx`. Quest items (not finds): three `cullet` at quarry 6,12, cinderwick 27,17, kilnmouth 4,12.
 
 **Inn stock.** Ember pack, Wild pack; Cindrel (C), Ashpaw (C), Blazelynx (U), **Solarlynx (R)**.
+
+**As built (1.3 PR 2).** The maps read in `web/world/maps/` have the final word; what moved and why:
+- *Quarry*: stairs up to the top ledge at 13–14,2 and the north exit at 13–14; the cave mouth at 2–3,8 under a 2 m
+  bluff. Until the Undermine exists (PR 4) the cave is a spot, not a warp: without the lantern it reads "pitch black",
+  with it the lantern shows a timbered tunnel closed by a fresh rockfall and picks knocking from the far side, so the
+  Lantern's first payoff is the promise of Stone. The gloves wall is at 24,6 up to a 2 m nook at 24–26 × 4–5.
+- *Cinderwick*: a 4 m wall of basalt columns along the north with a 2 m walk on top (the kiln-catwalk perch, gloves,
+  is at 19–21 × 0–1 off that walk, its climb at 18,1), the cut up to the Kilnmouth road at 15–16; the Great Kiln
+  stands on a 6 × 6 dais (13–18 × 8–13) with stairs north and south, its mouth lighting the plaza at night (a
+  `light_origin`). Glassworks door 4,6 (NW), the Bellows Inn door 22,14 facing the plaza, a glass market (two
+  recoloured stalls) by the waymark (8,9), terraces SW (Tavish's studio) and SE (the cullet) at 1 m, a cooling pond
+  with a steaming vent. People: Clio (inside), Keld (inside), Marthe (on the dais by day, on the north walk at night:
+  the seventh-face line), Tito (by the family house), Ama the glass seller (day), Wendell (night, by the cooling
+  racks; his line plays the `chime` sound and points at the hidden `e_rack`), Basil and Tavish (talk to duel).
+- *Kilnmouth*: an irregular caldera: rim 3 m (south walk, waymark 2,20), the high terrace 2 m under a north rim walk,
+  two 2-wide legs down the sides, terrace 1, the floor (8–21 × 8–14) with the seal stone at 13–14 × 10–11 and three
+  lava-glass pools. The vents close the two legs at row 6 (3–4 and 25–26) by day and dusk; past them the high
+  terrace holds `e_vent_w`/`e_vent_e` and stairs up to the north rim (Vela, `e_rim` on the gloves ledge at 25–26 ×
+  1–2). So that dawn never strands anyone up there, a rope at 6,4 lowers the hero to terrace 1 (a one-way `warp:`).
+  Edda, a vent-reader on the rim, explains the vents. `e_glowash` (night) is in the crust of the pool at 19,12.
+- Clio's three cullet are spots that glint once she has asked (`flag:lantern_asked`) and give `cullet_quarry`,
+  `cullet_town`, `cullet_kiln`; she takes all three when `count:cullet_:3` holds and gives the lantern
+  (`flag:lantern_done`). The Journal lists the quest as "The Kiln Lantern".
+- Names: the glassblower is **Clio** (Ottilie already gives the letter quest), the innkeeper **Keld** (Fennel is the
+  ranger), the glassblower duelist **Tavish** (`t_tavish`; Hollis keeps the hub inn).
+- Every regional inn's rest panel also opens its counter (`engine::shop::INNS`, `inn_stock`, `buy_inn_single`): the
+  region's pack and the Wild pack (on sale by the same rule as Wynne's) and the four singles above, at single prices,
+  no daily limit. The hub's Hearth Rooms only rest.
 
 ---
 
@@ -1048,6 +1076,29 @@ crab pots on the dock ⬡ 60 · `st_ledge` rodspire gloves ledge curio `bottled_
 pack `storm` · `st_scope` ☾ observatory telescope (after the Lens quest) ⬡ 100.
 
 **Inn stock.** Storm pack, Wild; Sparkit (C), Zippet (C), Arcfang (U), **Fulgurex (R)**.
+
+**As built (1.3 PR 2).**
+- *Downs*: three lanes between dry-stone walls (`fence: "wall_dry"`), a raised down along the north, a rocky lip and
+  the sea on the east. The chime ring (six posts round a standing stone, the `menhir` prop) is at 3–8 × 15–19;
+  Ansel's sheepfold at 14–21 × 15–21. The sheep are NPCs on their own rig (`npc_sheep.glb`, built by
+  `tools/blender/build_sheep.py`): Biscuit, Fog and Tuft graze the south pasture by day and sleep in the fold at night.
+  Hew is Ansel's grandson.
+- *Stormwatch*: raised plateau tiles can't carry paths or dry-stone walls, so the village stands on the ground with
+  painted lanes and walls, and the bluff is the observatory's: a 2 m knoll (17–23 × 0–6) with granite stairs
+  (`stairs_heath`), the observatory on top (door 20,5). Headlands of heath cliff frame the harbour cove; the dock is a
+  pier over the water with the (laid-up) ferry moored. The east exit is at rows 11–12. The inn is the Weathervane
+  (`inn_storm`, Rhian). Bo explains, the second time he's asked, that the ferry waits for Gullhaven's Harbour Office
+  (PR 3): a closed link with a reason, not a dead end. Wenna sells fish by day, Pim keeps Quill's log, Oswin lights
+  the lamps at dusk (a route), Greer duels in the square.
+- *Rodspire*: low basalt islets (ground tiles on `slate`, outcrops at 1 m) joined by boardwalks, pylons at 2,15 /
+  9,8 / 13,3 (each a spot that sets `flag:pylon_n` and plays `sfx:spark`; the prop's `open` plays its lever), the
+  lift at 20–21 × 12–13: a door warp from 20,13 (if all three) to the stack top (6 m) at 20,11, and back down from
+  20,12. check-maps follows such same-map warps in its flood fill. The spire's tip `pulse`s once the three are on.
+  Corra guards pylon 2, Ves the stack's foot, Nils explains the pylons on the landing islet. The gloves ledge (1 m)
+  is at 25–26 × 11–13 (`st_ledge`); `st_islet` is on the lonely islet to the south-west.
+- `st_scope` waits for the Observatory Lens (PR 6); the telescope already shows every star doubled through a crack,
+  and Ilse Marr asks for a Cinderwick glassblower.
+- Night: far lightning (`lightning: true` on the three Storm maps), Odo in the chime ring, `st_chimes` in the stone.
 
 ---
 

@@ -289,6 +289,16 @@ const SFX = {
     tone(d, t + 0.02, hz(98), 1.1, { peak: 0.04, rel: 0.6 });
     noise(d, t, 0.5, { type: "highpass", f: 8000, a: 0.05, peak: 0.05 });
   },
+  // A relay pylon thrown: a knife switch clunks home, the coil crackles up and hums.
+  spark: (d, t) => {
+    noise(d, t, 0.05, { type: "lowpass", f: 900, peak: 0.25 });
+    for (let i = 0; i < 7; i++) noise(d, t + 0.08 + i * 0.045 + Math.random() * 0.02, 0.03, { type: "highpass", f: 4000 + Math.random() * 3000, peak: 0.07 });
+    tone(d, t + 0.1, 55, 0.9, { type: "sawtooth", f2: 110, glide: 0.4, peak: 0.03, lin: true, rel: 0.4 });
+  },
+  // Cooling glass singing: high, slightly detuned partials ringing out.
+  chime: (d, t) => {
+    [96, 103, 100, 108].forEach((m, i) => tone(d, t + i * 0.22, hz(m), 1.6, { peak: 0.035, detune: (i % 2 ? 9 : -7), rel: 0.8 }));
+  },
   win: (d, t) => {
     notes(d, t, [72, 76, 79], 0.12, { type: "triangle", peak: 0.15, dur: 0.3 });
     [72, 76, 79, 84].forEach((m) => tone(d, t + 0.38, hz(m), 1.4, { type: "triangle", peak: 0.09, lin: true, rel: 0.6 }));

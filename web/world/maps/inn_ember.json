@@ -1,0 +1,224 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "oven",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bed",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bookcase",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 6,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "duel_table",
+      "x": 1,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 1,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 2,
+      "z": 6,
+      "rot": 180
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 4,
+      "z": 1,
+      "kind": "sign",
+      "text": "A slate of chalked race times, the quarry road, top to bottom. Every line at the top says \"Cinza\".",
+      "text_fr": "Une ardoise de temps de course à la craie, la route de la carrière, de haut en bas. Toutes les lignes du haut disent « Cinza »."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "to": "cinderwick",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 21,
+        "z": 14,
+        "facing": "w"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "keld",
+      "name": "Keld",
+      "model": "npc_shopkeeper",
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#6b4a3a",
+      "hair": "#3a2a20",
+      "dialogue": [
+        {
+          "if": "!flag:talked_keld",
+          "lines": [
+            "Soup.",
+            "Beds are upstairs. Resting's free. Dawn, day, dusk or night: say which.",
+            "Counter's got packs and cards. Solarlynx, if you've the Facets. Most don't."
+          ],
+          "lines_fr": [
+            "De la soupe.",
+            "Les lits sont en haut. Le repos est gratuit. Aube, jour, crépuscule ou nuit : dis-moi.",
+            "Au comptoir, des boosters et des cartes. Héliolynx, si tu as les Facettes. Peu les ont."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "if": "time:night",
+          "lines": [
+            "Late. Soup's still warm.",
+            "Bed?"
+          ],
+          "lines_fr": [
+            "Tard. La soupe est encore chaude.",
+            "Un lit ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "lines": [
+            "Soup.",
+            "Rest?"
+          ],
+          "lines_fr": [
+            "De la soupe.",
+            "Te reposer ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffe2bd",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffa860",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

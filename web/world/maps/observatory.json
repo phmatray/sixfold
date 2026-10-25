@@ -1,0 +1,229 @@
+{
+  "width": 13,
+  "height": 11,
+  "tiles": [
+    "WWWWWVWVWWWWW",
+    "WwwwwwwwwwwwW",
+    "WwwwwwwwwwwwW",
+    "WwwwwwwwwwwwW",
+    "VwwwwwwwwwwwV",
+    "WwwwwwwwwwwwW",
+    "WwwwwwwwwwwwW",
+    "VwwwwwwwwwwwV",
+    "WwwwwwwwwwwwW",
+    "WwwwwwwwwwwwW",
+    "WWWWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "telescope",
+      "x": 5,
+      "z": 2,
+      "rot": 270
+    },
+    {
+      "asset": "bookcase",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bookcase",
+      "x": 10,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "light_box",
+      "x": 9,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "workbench",
+      "x": 1,
+      "z": 5,
+      "rot": 90
+    },
+    {
+      "asset": "chair",
+      "x": 8,
+      "z": 6,
+      "rot": 90
+    },
+    {
+      "asset": "rug",
+      "x": 5,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 11,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 11,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 6,
+      "z": 9,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 6,
+    "z": 9,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 6,
+      "z": 3,
+      "kind": "sign",
+      "id": "telescope",
+      "name": "The great telescope",
+      "name_fr": "La grande lunette",
+      "dialogue": [
+        {
+          "if": "time:night",
+          "lines": [
+            "You put your eye to the brass. Stars, hundreds of them, and every one of them doubled, as if seen through a crack.",
+            "Something's wrong with the lens."
+          ],
+          "lines_fr": [
+            "Vous collez l'œil au laiton. Des étoiles, des centaines, et chacune en double, comme vue à travers une fêlure.",
+            "Quelque chose ne va pas avec la lentille."
+          ]
+        },
+        {
+          "lines": [
+            "By day the telescope shows a bright blur of sky. Through it, every gull is two gulls."
+          ],
+          "lines_fr": [
+            "De jour, la lunette montre un flou de ciel lumineux. À travers elle, chaque mouette en vaut deux."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 9,
+      "z": 5,
+      "kind": "sign",
+      "text": "A star chart glows on the light table, pinned with brass weights. Six bright stars are ringed in red ink, and a seventh, faint, has a question mark.",
+      "text_fr": "Une carte du ciel luit sur la table lumineuse, tenue par des poids de laiton. Six étoiles brillantes sont cerclées d'encre rouge, et une septième, pâle, porte un point d'interrogation."
+    }
+  ],
+  "warps": [
+    {
+      "x": 6,
+      "z": 9,
+      "to": "stormwatch",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 20,
+        "z": 6,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "ilse",
+      "name": "Ilse Marr",
+      "model": "npc_scholar",
+      "x": 8,
+      "z": 3,
+      "facing": "w",
+      "idle": "Idle",
+      "outfit": "#2f4a6b",
+      "hair": "#cfc8be",
+      "dialogue": [
+        {
+          "if": "!flag:talked_ilse",
+          "lines": [
+            "Is it night already? Or still? I lose track.",
+            "Mind the telescope, the objective's cracked. The cold snap did it. Everything doubles: stars, moons, my headaches.",
+            "Only a Cinderwick glassblower could grind me a new one. And I can't leave. There's a comet due."
+          ],
+          "lines_fr": [
+            "Il fait déjà nuit ? Ou encore ? Je perds le fil.",
+            "Attention à la lunette, l'objectif est fêlé. C'est la vague de froid. Tout se dédouble : les étoiles, les lunes, mes migraines.",
+            "Seul un souffleur de verre de Mèche-Cendre pourrait m'en tailler un neuf. Et je ne peux pas partir. Une comète arrive."
+          ]
+        },
+        {
+          "lines": [
+            "Six bright stars over the Galewold, one for each colour. People say there's a seventh. I've never seen it.",
+            "I've also never slept a full night, so I'm not the best judge."
+          ],
+          "lines_fr": [
+            "Six étoiles brillantes au-dessus des Hautes-Rafales, une par couleur. On dit qu'il y en a une septième. Je ne l'ai jamais vue.",
+            "Je n'ai jamais dormi une nuit entière non plus, alors je ne suis pas la mieux placée pour en juger."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#e6eeff",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#dfe8f6",
+      "ground": "#3a3a48",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffc878",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

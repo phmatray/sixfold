@@ -1,0 +1,232 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "glass_furnace",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "glass_furnace",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "workbench",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "glass_rack",
+      "x": 1,
+      "z": 5,
+      "rot": 90
+    },
+    {
+      "asset": "glass_rack",
+      "x": 9,
+      "z": 5,
+      "rot": 90
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "cullet",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 6,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 3,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 7,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 4,
+      "z": 1,
+      "kind": "sign",
+      "text": "The batch book, open on the bench: columns of temperatures, weights and times, and in the margin, \"three greens short\" underlined twice.",
+      "text_fr": "Le livre des fournées, ouvert sur l'établi : des colonnes de températures, de poids et de durées, et dans la marge, « manque trois verts » souligné deux fois."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "to": "cinderwick",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 4,
+        "z": 7,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "clio",
+      "name": "Clio",
+      "model": "npc_worker",
+      "x": 5,
+      "z": 3,
+      "facing": "n",
+      "idle": "Idle",
+      "outfit": "#b5462f",
+      "hair": "#2b211c",
+      "dialogue": [
+        {
+          "if": "flag:lantern_done",
+          "lines": [
+            "Hold it level. One coal, a hundred nights, give or take two.",
+            "Caves, tunnels, cellars: wherever the dark's thicker than a finger, it'll thin it. The quarry's west face has one nobody's walked in years.",
+            "They say the Saltreach and the Deepgrove have their caves too. Take it everywhere."
+          ],
+          "lines_fr": [
+            "Tiens-la droite. Une braise, cent nuits, à deux près.",
+            "Grottes, tunnels, caves : partout où le noir est plus épais qu'un doigt, elle l'amincit. La paroi ouest de la carrière en a une où personne n'a marché depuis des années.",
+            "On dit que la Côte Salée et le Bois-Profond ont leurs grottes aussi. Emporte-la partout."
+          ]
+        },
+        {
+          "if": "flag:lantern_asked & count:cullet_:3",
+          "lines": [
+            "One, two, three. Good old green, eleven millimetres. Stand back, half a metre.",
+            "She dips the pipe in the glory hole, turns it, blows. Amber glass swells like a soap bubble round a red coal from the Great Kiln.",
+            "There. Sealed in amber, it won't go out. Hold it level.",
+            "The quarry's west face has a cave nobody's walked in years. Now you can."
+          ],
+          "lines_fr": [
+            "Un, deux, trois. Du bon vieux vert, onze millimètres. Recule, un demi-mètre.",
+            "Elle plonge la canne dans le four, la tourne, souffle. Le verre ambré gonfle comme une bulle de savon autour d'une braise rouge du Grand Four.",
+            "Voilà. Scellée dans l'ambre, elle ne s'éteindra pas. Tiens-la droite.",
+            "La paroi ouest de la carrière a une grotte où personne n'a marché depuis des années. Maintenant, tu peux."
+          ],
+          "do": [
+            "take:cullet_quarry",
+            "take:cullet_town",
+            "take:cullet_kiln",
+            "give:kiln_lantern",
+            "flag:lantern_done"
+          ]
+        },
+        {
+          "if": "flag:lantern_asked",
+          "lines": [
+            "Three shards of the old green, each as thick as a thumb. No fewer.",
+            "One by the crates in the quarry, one under the rack on the south-east terrace here, one on the Kilnmouth's west terrace."
+          ],
+          "lines_fr": [
+            "Trois éclats de vieux vert, chacun épais comme un pouce. Pas moins.",
+            "Un près des caisses de la carrière, un sous le séchoir de la terrasse sud-est, ici, un sur la terrasse ouest de la Gueule-du-Four."
+          ]
+        },
+        {
+          "lines": [
+            "Four hundred and ten... four hundred and twelve. Sorry. Hello. I'm Clio.",
+            "You've the look of someone who walks into caves. You'll want a Kiln Lantern: a coal sealed in glass. It burns a season and has never set a beard alight.",
+            "I'll blow you one, but my batch is short of the old green. Bring me three shards of cullet, each as thick as a thumb.",
+            "Carts drop them. One by the crates in the quarry, one under the rack on the south-east terrace here, one on the Kilnmouth's west terrace."
+          ],
+          "lines_fr": [
+            "Quatre cent dix… quatre cent douze. Pardon. Bonjour. Moi, c'est Clio.",
+            "Tu as l'air de quelqu'un qui entre dans les grottes. Il te faudra une lanterne de four : une braise scellée dans du verre. Elle brûle une saison et n'a jamais roussi une barbe.",
+            "Je t'en souffle une, mais il manque du vieux vert à ma fournée. Rapporte-moi trois éclats de calcin, chacun épais comme un pouce.",
+            "Les charrettes en sèment. Un près des caisses de la carrière, un sous le séchoir de la terrasse sud-est, ici, un sur la terrasse ouest de la Gueule-du-Four."
+          ],
+          "do": [
+            "flag:lantern_asked"
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "stone",
+    "path": "stone",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#ffe1c0",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffd9b0",
+      "ground": "#4a2a1c",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ff9a4a",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

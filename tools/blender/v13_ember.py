@@ -178,7 +178,8 @@ def build_kiln(k):
         k.add(cyl(0.29, 0.29, 0.04, 10), "iron", T((-1.55, 1.55, z)))
     k.add(cyl(0.24, 0.24, 0.02, 10), "glass_blue", T((-1.55, 1.55, 0.688)))
     shadow(k, 2.05)
-    return empty("smoke_origin", (0, 0.05, 4.62))
+    # smoke from the neck; light from the great mouth (it lights the plaza at night)
+    return chain(empty("smoke_origin", (0, 0.05, 4.62)), empty("light_origin", (0, -1.95, 0.95)))
 
 
 def build_glass_furnace(k):
@@ -207,7 +208,7 @@ def build_glass_furnace(k):
         k.add(jitter(ico(0.05, 0), rng, 0.012), ("glass_teal", "glass_amber", "glass_green")[i], T((-0.62 + 0.06 * i, -0.72, 0.3)))
     k.add(cyl(0.16, 0.13, 0.25, 10), "timber_ember", T((-0.62, -0.72, 0.115)))
     shadow(k, 1.0)
-    return empty("smoke_origin", (0, 0.25, 2.75))
+    return chain(empty("smoke_origin", (0, 0.25, 2.75)), empty("light_origin", (0, -0.95, 0.75)))
 
 
 def bottle(k, x, y, z, h, r, mat, neck=0.4):
@@ -372,7 +373,36 @@ def build_cullet(k):
         k.add(jitter(ico(s * 0.5, 0), rng, s * 0.1), "white", T((x - s * 0.3, y - s * 0.4, z + s * 0.35), rot, (0.5, 0.3, 0.3)))
 
 
+def build_kiln_lantern(k):
+    """Item (the popup): the Kiln Lantern. A hand lantern blown at Cinderwick: a copper cap and ring, a bulb of
+    amber glass round a glowing coal, a wire bail to carry it by. Centred on the origin."""
+    rng = random.Random(330)
+    k.add(cyl(0.075, 0.085, 0.03, 10), "copper_dk", T((0, 0, -0.1)))                       # foot
+    k.add(lathe([(0.06, -0.085), (0.1, -0.04), (0.11, 0.02), (0.095, 0.07), (0.055, 0.1)], 12), "glass_amber", T((0, 0, 0)), smooth=True)
+    k.add(sphere(0.045, 10, 7), "kiln_glow", T((0, 0, -0.01)), smooth=True)                  # the coal
+    for i in range(4):                                                                       # sparks
+        a = i * 1.6
+        k.add(jitter(ico(0.008, 0), rng, 0.002), "kiln_glow", T((0.03 * math.cos(a), 0.03 * math.sin(a), 0.03 + 0.012 * i)))
+    for a in range(0, 360, 90):                                                              # copper ribs
+        ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
+        beam(k, (0.105 * ca, 0.105 * sa, -0.06), (0.06 * ca, 0.06 * sa, 0.1), 0.012, 0.012, "copper")
+    k.add(cyl(0.065, 0.04, 0.05, 10), "copper", T((0, 0, 0.12)))                             # cap
+    k.add(torus(0.035, 0.008, 10, 4), "copper_dk", T((0, 0, 0.15)))
+    k.add(torus(0.075, 0.006, 14, 4), "iron", T((0, 0, 0.16), (90, 0, 0), (1, 1, 0.9)))       # bail
+
+
+def build_glass_marble(k):
+    """Curio (the popup): a glass marble as big as a plum, a twist of ember-orange and teal inside clear amber,
+    on a little brass stand. Centred on the origin."""
+    k.add(sphere(0.09, 14, 10), "glass_amber", T((0, 0, 0.03)), smooth=True)
+    k.add(tube([(-0.05, -0.02, 0.0), (-0.02, 0.03, 0.03), (0.02, -0.03, 0.05), (0.05, 0.02, 0.07)], 0.014, 6), "ember_glow", T((0, 0, 0.0)))
+    k.add(tube([(0.05, -0.03, -0.01), (0.01, 0.03, 0.02), (-0.03, -0.02, 0.05), (-0.05, 0.03, 0.07)], 0.012, 6), "glass_teal", T((0, 0, 0.0)))
+    k.add(cyl(0.05, 0.06, 0.02, 10), "copper", T((0, 0, -0.07)))
+    k.add(torus(0.045, 0.008, 12, 4), "copper_dk", T((0, 0, -0.055)))
+
+
 PROPS = {
+    "kiln_lantern": build_kiln_lantern, "glass_marble": build_glass_marble,
     "kiln": build_kiln, "glass_furnace": build_glass_furnace, "glass_rack": build_glass_rack, "ember_vent": build_ember_vent,
     "lava_glass": build_lava_glass, "ash_pine": build_ash_pine, "rock_basalt": build_rock_basalt,
     "cliff_basalt": build_cliff_basalt, "cliff_basalt_b": build_cliff_basalt_b, "stairs_basalt": build_stairs_basalt,

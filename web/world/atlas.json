@@ -14,15 +14,29 @@
     { "id": "square", "region": "hub", "x": 6, "y": 5.65, "name": "Brightwell Square", "name_fr": "Place de Clairpuits" },
     { "id": "quarry", "region": "ember", "x": 6, "y": 2.3, "name": "Emberstep Quarry", "name_fr": "Carrière de Pas-de-Braise" },
     { "id": "seaside", "region": "tide", "x": 8.35, "y": 5.4, "name": "Saltwind Boardwalk", "name_fr": "Promenade de Ventsalé" },
-    { "id": "woodland", "region": "grove", "x": 3.65, "y": 5.4, "name": "Fernhollow Trail", "name_fr": "Sentier de Creuse-Fougère" }
+    { "id": "woodland", "region": "grove", "x": 3.65, "y": 5.4, "name": "Fernhollow Trail", "name_fr": "Sentier de Creuse-Fougère" },
+    { "id": "cinderwick", "region": "ember", "x": 6.75, "y": 1.7, "name": "Cinderwick", "name_fr": "Mèche-Cendre" },
+    { "id": "kilnmouth", "region": "ember", "x": 5.15, "y": 0.75, "name": "The Kilnmouth", "name_fr": "La Gueule-du-Four" },
+    { "id": "downs", "region": "storm", "x": 8.4, "y": 2.2, "name": "Thrumming Downs", "name_fr": "Les Landes Vibrantes" },
+    { "id": "stormwatch", "region": "storm", "x": 9.2, "y": 3.6, "name": "Stormwatch", "name_fr": "Guette-Orage" },
+    { "id": "rodspire", "region": "storm", "x": 10.5, "y": 2.5, "name": "The Rodspire", "name_fr": "L'Aiguille-Foudre" }
   ],
   "links": [
     { "a": "overworld", "b": "quarry" },
     { "a": "overworld", "b": "seaside" },
     { "a": "overworld", "b": "woodland" },
-    { "a": "overworld", "b": "square" }
+    { "a": "overworld", "b": "square" },
+    { "a": "quarry", "b": "cinderwick" },
+    { "a": "cinderwick", "b": "kilnmouth" },
+    { "a": "cinderwick", "b": "downs" },
+    { "a": "downs", "b": "stormwatch" },
+    { "a": "stormwatch", "b": "rodspire" }
   ],
   "waymarks": [
-    { "id": "meadow", "map": "overworld", "x": 16, "z": 13, "facing": "n", "name": "Sixfold Meadow", "name_fr": "Pré de Sixfold" }
+    { "id": "meadow", "map": "overworld", "x": 16, "z": 13, "facing": "n", "name": "Sixfold Meadow", "name_fr": "Pré de Sixfold" },
+    { "id": "cinderwick", "map": "cinderwick", "x": 8, "z": 10, "facing": "n", "name": "Cinderwick plaza", "name_fr": "Place de Mèche-Cendre" },
+    { "id": "kilnmouth", "map": "kilnmouth", "x": 8, "z": 20, "facing": "w", "name": "The Kilnmouth rim", "name_fr": "Rebord de la Gueule-du-Four" },
+    { "id": "stormwatch", "map": "stormwatch", "x": 11, "z": 11, "facing": "n", "name": "Stormwatch square", "name_fr": "Place de Guette-Orage" },
+    { "id": "rodspire", "map": "rodspire", "x": 18, "z": 9, "facing": "n", "name": "The Rodspire's summit", "name_fr": "Sommet de l'Aiguille-Foudre" }
   ]
 }

@@ -9,7 +9,7 @@ import math
 import random
 
 from v13_kit import (B, T, beam, box, contact, cyl, empty, ico, jitter, prism, ribbon, shadow, sphere,  # noqa: F401
-                     torus, tube, curve, half_sphere, arch_pts, arc, stratum, FRONT, clamp01, chain, open_part)
+                     torus, tube, curve, half_sphere, arch_pts, arc, stratum, FRONT, clamp01, chain, open_part, lathe)
 
 PALETTE = {
     "st_granite": "#9c9c96", "st_granite_dk": "#6f716e", "st_granite_lt": "#b8b6ad", "st_granite_warm": "#a99f90",
@@ -20,7 +20,7 @@ PALETTE = {
     "st_whitewash": "#ece5d6", "st_whitewash_dk": "#d3cab8", "st_door": "#2f4a6b",
     "st_porcelain": "#f2efe6", "st_pennant": "#d9573f", "st_pennant_lt": "#f2c14a",
     "st_steel": "#59626c", "st_steel_dk": "#3f464f",
-    "coil_glow": "#9feaff",
+    "coil_glow": "#9feaff", "st_bottle": "#cfe4ec",
     "copper": "#c27a43", "copper_dk": "#9a5a2e",   # same values as v13_ember (shared keys)
 }
 
@@ -29,7 +29,7 @@ WIND = {
     "heather": lambda x, y, z, r: clamp01(z / 0.5) * 0.8,
 }
 
-FOOT = {"observatory": (5, 5), "lift": (2, 2), "rodspire": (3, 3)}
+FOOT = {"observatory": (5, 5), "lift": (2, 2), "rodspire": (3, 3), "telescope": (2, 2)}
 ANIM = {"pylon"}
 
 LIGHT = dict(sun=("#f2f5ff", 2.3), from_hero=(8, 18, 6), hemi=("#dfe8f2", "#4f5b3c", 1.5), bg="#b9c6cf", fog=(14, 32))
@@ -436,7 +436,63 @@ def build_rodspire(k):
     return empty("light_origin", (0, 0, TOP + 0.5))
 
 
+def build_stairs_heath(k):
+    """1 x 1 granite steps, same contract as stairs: up from the front (-Y) toward the back, tread tops
+    0.125 / 0.375 / 0.625 / 0.875, floor 0.5; rough granite cheeks with a lip of turf. Stormwatch's bluff stairs."""
+    rng = random.Random(481)
+    for i in range(4):
+        y0 = -0.5 + 0.25 * i
+        topz = 0.125 + 0.25 * i
+        k.add(box(0.72 - 0.006 * i, 0.5 - y0, topz + 0.02, 0.014), "st_granite_dk", T((0, (y0 + 0.5) / 2, (topz - 0.02) / 2)))
+        k.add(stone(rng, 0.74, 0.25, 0.04, 0.004), ("st_granite_lt", "st_granite")[i % 2], T((0, y0 + 0.115, topz - 0.015)))
+    for sx in (-1, 1):
+        pts = [(-0.5, -0.02), (0.5, -0.02), (0.5, 1.0), (0.22, 0.9), (-0.25, 0.32), (-0.5, 0.14)]
+        k.add(jitter(prism(pts, 0.13, 0.015), rng, 0.01), "st_granite", T((sx * 0.44, 0, 0), (0, 0, 90)))
+        k.add(jitter(prism([(0.18, 0.88), (0.5, 0.98), (0.5, 1.03), (0.16, 0.93)], 0.15, 0.01), rng, 0.008), "st_turf", T((sx * 0.44, 0, 0), (0, 0, 90)))
+    contact(k, 0.5)
+
+
+def build_telescope(k):
+    """2 x 2 (interior) the observatory's great telescope: a brass tube on a tilted equatorial mount, a cast-iron
+    pier on a round granite plinth, a finder scope, a little eyepiece chair. Front +Z (glTF), aimed up and back."""
+    k.add(cyl(0.7, 0.75, 0.12, 14, 0.02), "st_granite", T((0, 0.1, 0.05)))
+    k.add(cyl(0.16, 0.22, 0.9, 10), "st_steel_dk", T((0, 0.1, 0.55)), smooth=True)              # pier
+    k.add(box(0.36, 0.36, 0.12, 0.02), "st_steel", T((0, 0.1, 1.05)))
+    M = T((0, 0.1, 1.15), (-38, 0, 0))                                                          # polar axis tilt
+    k.add(cyl(0.07, 0.07, 0.36, 8), "st_steel", M @ T((0, 0, 0.12)))
+    k.add(box(0.22, 0.14, 0.14, 0.01), "brass", M @ T((0, 0, 0.32)))
+    tube_m = M @ T((0, 0, 0.42), (70, 0, 0))                                                    # the tube, pointing up and back
+    k.add(cyl(0.13, 0.15, 1.7, 14), "brass", tube_m @ T((0, 0, 0.3)), smooth=True)
+    k.add(torus(0.155, 0.02, 14, 4), "copper_dk", tube_m @ T((0, 0, 1.15)))
+    k.add(torus(0.15, 0.02, 14, 4), "copper_dk", tube_m @ T((0, 0, -0.35)))
+    k.add(cyl(0.16, 0.16, 0.04, 14), "st_steel_dk", tube_m @ T((0, 0, 1.16)))
+    k.add(cyl(0.035, 0.035, 0.42, 8), "brass", tube_m @ T((0.16, 0, 0.75)))                     # finder
+    k.add(cyl(0.03, 0.04, 0.1, 8), "st_steel_dk", tube_m @ T((0, 0.14, -0.4), (90, 0, 0)))       # eyepiece
+    k.add(cyl(0.18, 0.18, 0.05, 10), "wood", T((0.45, -0.55, 0.45)))                            # stool
+    for a in (0, 120, 240):
+        ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
+        beam(k, (0.45 + 0.13 * ca, -0.55 + 0.13 * sa, 0.0), (0.45 + 0.08 * ca, -0.55 + 0.08 * sa, 0.44), 0.03, 0.03, "wood")
+    shadow(k, 0.8)
+
+
+def build_bottled_spark(k):
+    """Curio (the popup): a stoppered glass bottle with a crackle of blue lightning caught inside, a copper wire
+    twisted round its neck. Centred on the origin."""
+    rng = random.Random(482)
+    k.add(lathe([(0.0, -0.11), (0.07, -0.105), (0.08, -0.06), (0.075, 0.03), (0.035, 0.07), (0.028, 0.1), (0.032, 0.11)], 12),
+          "st_bottle", T((0, 0, 0)), smooth=True)
+    k.add(cyl(0.024, 0.02, 0.04, 8), "wood", T((0, 0, 0.125)))
+    k.add(torus(0.03, 0.006, 10, 4), "copper", T((0, 0, 0.085)))
+    pts, z = [], -0.08
+    for i in range(7):
+        pts.append((rng.uniform(-0.04, 0.04), rng.uniform(-0.04, 0.04), z))
+        z += 0.022
+    k.add(tube(pts, 0.008, 4), "coil_glow")
+    k.add(sphere(0.022, 8, 6), "coil_glow", T((0, 0, -0.02)), smooth=True)
+
+
 PROPS = {
+    "stairs_heath": build_stairs_heath, "telescope": build_telescope, "bottled_spark": build_bottled_spark,
     "cliff_heath": build_cliff_heath, "cliff_heath_b": lambda k: build_cliff_heath(k, 402, tufted=True),
     "wall_dry": lambda k: build_wall_dry(k, "WE", 471), "wall_dry_corner": lambda k: build_wall_dry(k, "WS", 472),
     "wall_dry_end": lambda k: build_wall_dry(k, "W", 473), "wall_dry_t": lambda k: build_wall_dry(k, "WES", 474),

@@ -1,0 +1,906 @@
+{
+  "title": "The Kilnmouth",
+  "title_fr": "La Gueule-du-Four",
+  "region": "ember",
+  "music": "ember",
+  "width": 30,
+  "height": 24,
+  "tiles": [
+    ".........33333333344..........",
+    ".......33333333333333.........",
+    "......33333333333333333.......",
+    ".....33222222222222233333.....",
+    "....33322222222222222223333...",
+    "..33322222221111222222223333..",
+    ".333222222111111111122223333..",
+    ".332221111111111111111222333..",
+    ".332221111.........111122233..",
+    "332221111...........111122233.",
+    "33222111.............11122223.",
+    "33221111.............11122233.",
+    ".3222111.............11122233.",
+    ".33221111...........11112233..",
+    "33322221111.......1111112233..",
+    ".332222211111111111112222233..",
+    ".33322222111111111122222333...",
+    "..333322222222222222222233....",
+    "....333222222222222222233.....",
+    "......3333222222233333333.....",
+    "......33333333333333333.......",
+    "......333333333333333.........",
+    "............3333..33..........",
+    "..............33.............."
+  ],
+  "props": [
+    {
+      "asset": "stairs_basalt",
+      "x": 12,
+      "z": 19,
+      "rot": 180,
+      "y": 2
+    },
+    {
+      "asset": "stairs_basalt",
+      "x": 11,
+      "z": 16,
+      "rot": 180,
+      "y": 1
+    },
+    {
+      "asset": "stairs_basalt",
+      "x": 14,
+      "z": 14,
+      "rot": 180
+    },
+    {
+      "asset": "stairs_basalt",
+      "x": 15,
+      "z": 14,
+      "rot": 180
+    },
+    {
+      "asset": "seal_stone",
+      "x": 13,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "lava_glass",
+      "x": 9,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "lava_glass",
+      "x": 18,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "lava_glass",
+      "x": 16,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "ember_vent",
+      "x": 11,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "ember_vent",
+      "x": 19,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "ember_vent",
+      "x": 10,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 7,
+      "z": 8,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 21,
+      "z": 14,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 6,
+      "z": 12,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 22,
+      "z": 7,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 17,
+      "z": 6,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "ember_vent",
+      "x": 9,
+      "z": 15,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "cullet",
+      "x": 12,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "cullet",
+      "x": 15,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "cullet",
+      "x": 20,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "cullet",
+      "x": 8,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 8,
+      "z": 7,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "ash_pine",
+      "x": 20,
+      "z": 7,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "ash_pine",
+      "x": 6,
+      "z": 14,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "ash_pine",
+      "x": 22,
+      "z": 12,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "ash_pine",
+      "x": 13,
+      "z": 6,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "ash_pine",
+      "x": 18,
+      "z": 15,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "ash_pine",
+      "x": 9,
+      "z": 4,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 20,
+      "z": 4,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 3,
+      "z": 12,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 26,
+      "z": 13,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 16,
+      "z": 18,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 6,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 24,
+      "z": 16,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 8,
+      "z": 2,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "ash_pine",
+      "x": 12,
+      "z": 1,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "ash_pine",
+      "x": 22,
+      "z": 3,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "ash_pine",
+      "x": 19,
+      "z": 21,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "ash_pine",
+      "x": 10,
+      "z": 21,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "ash_pine",
+      "x": 21,
+      "z": 20,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 10,
+      "z": 3,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 17,
+      "z": 4,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 4,
+      "z": 11,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 25,
+      "z": 14,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 20,
+      "z": 18,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 8,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 19,
+      "z": 0,
+      "rot": 0,
+      "y": 4
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 7,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 22,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 12,
+      "z": 4,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "cullet",
+      "x": 4,
+      "z": 15,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "waymark",
+      "x": 7,
+      "z": 20,
+      "rot": 0,
+      "y": 3,
+      "glow": "#e1572f"
+    },
+    {
+      "asset": "signpost",
+      "x": 16,
+      "z": 21,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "ash_pine",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 3,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 25,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 28,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 0,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 2,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 27,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 24,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 5,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 29,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 0,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 28,
+      "z": 8,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 14,
+    "z": 21,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "kind": "waymark",
+      "id": "kilnmouth",
+      "x": 7,
+      "z": 20
+    },
+    {
+      "x": 16,
+      "z": 21,
+      "kind": "sign",
+      "text": "South: back up to Cinderwick. Below: the Kilnmouth floor and its seal stone. Keep to the stairs.",
+      "text_fr": "Sud : retour vers Mèche-Cendre. En bas : le fond de la Gueule-du-Four et sa pierre de sceau. Restez sur les marches."
+    },
+    {
+      "x": 13,
+      "z": 11,
+      "kind": "sign",
+      "id": "seal_kilnmouth",
+      "name": "The seal stone",
+      "name_fr": "La pierre de sceau",
+      "dialogue": [
+        {
+          "lines": [
+            "A hexagonal stone, warm to the touch. Each of its six faces is a colour: the fire face, toward the kiln road, glows faintly.",
+            "The top is smooth, pale and blank, as if something was meant to be cut there and never was."
+          ],
+          "lines_fr": [
+            "Une pierre hexagonale, tiède sous la main. Chacune de ses six faces a une couleur : celle du feu, tournée vers la route du four, luit faiblement.",
+            "Le dessus est lisse, pâle et vide, comme si quelque chose devait y être gravé et ne l'avait jamais été."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 4,
+      "z": 15,
+      "kind": "sign",
+      "id": "cullet_kiln",
+      "name": "Glass on the terrace",
+      "name_fr": "Du verre sur la terrasse",
+      "glint": "flag:lantern_asked & !item:cullet_kiln & !flag:lantern_done",
+      "dialogue": [
+        {
+          "if": "flag:lantern_done",
+          "lines": [
+            "Just ash and grit now."
+          ],
+          "lines_fr": [
+            "Plus que de la cendre et du gravier."
+          ]
+        },
+        {
+          "if": "item:cullet_kiln",
+          "lines": [
+            "Just ash and grit now."
+          ],
+          "lines_fr": [
+            "Plus que de la cendre et du gravier."
+          ]
+        },
+        {
+          "if": "flag:lantern_asked",
+          "lines": [
+            "Half buried in the ash: a fat shard of the old green glass, thick as a thumb, warm from the rock.",
+            "Clio's third piece."
+          ],
+          "lines_fr": [
+            "À moitié enterré dans la cendre : un gros éclat de vieux verre vert, épais comme un pouce, tiède de la roche.",
+            "Le troisième morceau pour Clio."
+          ],
+          "do": [
+            "give:cullet_kiln"
+          ]
+        },
+        {
+          "lines": [
+            "Shards of glass glint in the ash. The crater is full of them."
+          ],
+          "lines_fr": [
+            "Des éclats de verre brillent dans la cendre. Le cratère en est plein."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "e_vent_w",
+      "x": 7,
+      "z": 5,
+      "give": "coins:100",
+      "text": "Behind the boulder, where the steam keeps everyone away all day: a pouch of Facets, dry as a bone.",
+      "text_fr": "Derrière le rocher, là où la vapeur éloigne tout le monde la journée : une bourse de Facettes, sèche comme un os."
+    },
+    {
+      "kind": "find",
+      "id": "e_vent_e",
+      "x": 22,
+      "z": 5,
+      "give": "card:cinderhorn",
+      "text": "In a crack of the boulder, out of the steam's reach: a card in a tin, its corners warm.",
+      "text_fr": "Dans une fente du rocher, hors de portée de la vapeur : une carte dans une boîte en fer, aux coins tièdes."
+    },
+    {
+      "kind": "find",
+      "id": "e_rim",
+      "x": 19,
+      "z": 0,
+      "give": "pack:ember",
+      "text": "On the crater's lip, tucked under a stone where only a climber would look: a sealed booster.",
+      "text_fr": "Sur la lèvre du cratère, glissé sous une pierre où seul un grimpeur regarderait : un booster scellé."
+    },
+    {
+      "kind": "find",
+      "id": "e_glowash",
+      "x": 16,
+      "z": 12,
+      "give": "card:solarlynx",
+      "text": "At the pool's edge the ash glows by night, and in the glow, half melted into the glass crust: a card, perfectly unburnt.",
+      "text_fr": "Au bord du bassin, la cendre luit la nuit, et dans la lueur, à moitié prise dans la croûte de verre : une carte, intacte.",
+      "if": "time:night"
+    },
+    {
+      "x": 12,
+      "z": 4,
+      "kind": "sign",
+      "id": "rope_w",
+      "name": "An old rope",
+      "name_fr": "Une vieille corde",
+      "dialogue": [
+        {
+          "lines": [
+            "An old rope, knotted to an iron stake, hangs down to the terrace below. You climb down, hand over hand."
+          ],
+          "lines_fr": [
+            "Une vieille corde, nouée à un piquet de fer, pend jusqu'à la terrasse du dessous. Vous descendez, une main après l'autre."
+          ],
+          "do": [
+            "warp:kilnmouth:12:6:s"
+          ]
+        }
+      ]
+    }
+  ],
+  "warps": [],
+  "exits": [
+    {
+      "side": "s",
+      "span": [
+        14,
+        15
+      ],
+      "to": "cinderwick"
+    }
+  ],
+  "gates": [
+    {
+      "id": "vent_w",
+      "tiles": [
+        [
+          2,
+          9
+        ],
+        [
+          3,
+          9
+        ],
+        [
+          4,
+          9
+        ]
+      ],
+      "if": "!time:day & !time:dusk",
+      "prop_closed": "ember_vent",
+      "text": "Scalding steam roars out of the rock. It might ease off in the cool of the night.",
+      "text_fr": "De la vapeur brûlante jaillit de la roche. Elle se calmera peut-être à la fraîche, la nuit."
+    },
+    {
+      "id": "vent_e",
+      "tiles": [
+        [
+          24,
+          9
+        ],
+        [
+          25,
+          9
+        ],
+        [
+          26,
+          9
+        ]
+      ],
+      "if": "!time:day & !time:dusk",
+      "prop_closed": "ember_vent",
+      "text": "Scalding steam roars out of the rock. It might ease off in the cool of the night.",
+      "text_fr": "De la vapeur brûlante jaillit de la roche. Elle se calmera peut-être à la fraîche, la nuit."
+    },
+    {
+      "id": "rim_ledge",
+      "tiles": [
+        [
+          17,
+          0,
+          3
+        ]
+      ],
+      "if": "item:grip_gloves",
+      "prop": "climb_wall_basalt",
+      "rot": 270,
+      "text": "Copper staples lead up to a ledge on the crater's lip. Bare hands won't hold them.",
+      "text_fr": "Des agrafes de cuivre mènent à une corniche sur la lèvre du cratère. À mains nues, impossible de s'y tenir."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "edda",
+      "name": "Edda",
+      "model": "npc_elder",
+      "x": 12,
+      "z": 21,
+      "facing": "n",
+      "idle": "Idle",
+      "outfit": "#5a3e36",
+      "hair": "#e8e0d6",
+      "dialogue": [
+        {
+          "if": "!time:day & !time:dawn",
+          "lines": [
+            "Hear that? Nothing. The vents are asleep. Go on: the high terrace is yours till dawn.",
+            "Vela's up on the north rim, if you're looking for trouble. She usually is."
+          ],
+          "lines_fr": [
+            "Tu entends ? Rien. Les évents dorment. Vas-y : la haute terrasse est à toi jusqu'à l'aube.",
+            "Vela est sur le rebord nord, si tu cherches les ennuis. Elle, elle les cherche toujours."
+          ]
+        },
+        {
+          "lines": [
+            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
+            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
+            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
+          ],
+          "lines_fr": [
+            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
+            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
+            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_carys",
+      "name": "Carys",
+      "model": "npc_wanderer",
+      "x": 11,
+      "z": 15,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "You came down the spiral? Then you can take some heat.",
+          "Three prizes. My Blazelynx don't blink."
+        ],
+        "challenge_fr": [
+          "Tu es descendu par la spirale ? Alors tu supportes la chaleur.",
+          "Trois Récompenses. Mes Brasilynx ne clignent pas des yeux."
+        ],
+        "win": [
+          "Burnt my soles. Well walked."
+        ],
+        "win_fr": [
+          "Je me suis brûlé la plante des pieds. Bien marché."
+        ],
+        "lose": [
+          "Keep your feet moving next time."
+        ],
+        "lose_fr": [
+          "La prochaine fois, garde les pieds en mouvement."
+        ],
+        "after": [
+          "I walk the hot floor barefoot every morning. Builds character. And blisters."
+        ],
+        "after_fr": [
+          "Je marche pieds nus sur le fond brûlant tous les matins. Ça forge le caractère. Et les ampoules."
+        ]
+      },
+      "outfit": "#e1572f",
+      "hair": "#2b211c"
+    },
+    {
+      "id": "t_dunstan",
+      "name": "Dunstan",
+      "model": "npc_worker",
+      "x": 18,
+      "z": 11,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "Every speck of this ash was a kiln once. I sift it for what's left.",
+          "Two prizes. My Ash Sifters bring back what burns away."
+        ],
+        "challenge_fr": [
+          "Chaque grain de cette cendre a été un four, autrefois. Je la tamise pour ce qui reste.",
+          "Deux Récompenses. Mes Tamis à cendres rapportent ce qui a brûlé."
+        ],
+        "win": [
+          "Swept clean."
+        ],
+        "win_fr": [
+          "Balayé."
+        ],
+        "lose": [
+          "Nothing's wasted. Not even you."
+        ],
+        "lose_fr": [
+          "Rien ne se perd. Pas même toi."
+        ],
+        "after": [
+          "Found a glass bead this morning. Third this year. Good year."
+        ],
+        "after_fr": [
+          "J'ai trouvé une perle de verre ce matin. La troisième de l'année. Bonne année."
+        ]
+      },
+      "outfit": "#7a6a5a",
+      "hair": "#5a4a3a"
+    },
+    {
+      "id": "t_vela",
+      "name": "Vela",
+      "model": "npc_rival",
+      "x": 20,
+      "z": 1,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 5,
+        "challenge": [
+          "You're on my rim at night. Nobody's on my rim at night.",
+          "Three prizes, and I don't go easy. The kiln never does."
+        ],
+        "challenge_fr": [
+          "Tu es sur mon rebord, la nuit. Personne ne vient sur mon rebord la nuit.",
+          "Trois Récompenses, et je ne fais pas de cadeau. Le four non plus."
+        ],
+        "win": [
+          "...Fine. You can stand here. Quietly."
+        ],
+        "win_fr": [
+          "… Bon. Tu peux rester. En silence."
+        ],
+        "lose": [
+          "Back down the spiral. Mind the vents: they wake at dawn."
+        ],
+        "lose_fr": [
+          "Redescends la spirale. Attention aux évents : ils se réveillent à l'aube."
+        ],
+        "after": [
+          "From up here you can see Cinderwick glow. Forty years of Marthe. I'm next, she says."
+        ],
+        "after_fr": [
+          "D'ici, on voit luire Mèche-Cendre. Quarante ans de Marthe. La suivante, ce sera moi, dit-elle."
+        ]
+      },
+      "outfit": "#3a2f3a",
+      "hair": "#b5462f",
+      "if": "time:night"
+    }
+  ],
+  "ground": {
+    "base": "ash",
+    "path": "stone",
+    "margin": 9,
+    "tufts": 0
+  },
+  "ring": [
+    "ash_pine",
+    "rock_basalt",
+    "rock_basalt"
+  ],
+  "cliff": [
+    "cliff_basalt",
+    "cliff_basalt_b"
+  ],
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light_night": {
+    "hemisphere": {
+      "sky": "#5a4262",
+      "ground": "#3a1a12",
+      "intensity": 0.7
+    },
+    "background": "#2a1b22",
+    "fog": {
+      "near": 13,
+      "far": 32
+    }
+  },
+  "light": {
+    "sun": {
+      "color": "#ffcf98",
+      "intensity": 2.6,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffd8b4",
+      "ground": "#4a2418",
+      "intensity": 1.4
+    },
+    "background": "#d9a77a",
+    "fog": {
+      "near": 16,
+      "far": 34
+    }
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "bookcase",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bed",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "net_locker",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 6,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "duel_table",
+      "x": 7,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 7,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 8,
+      "z": 6,
+      "rot": 180
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 0,
+      "z": 3,
+      "kind": "sign",
+      "text": "The storm log, chalked on the wall in Rhian's big hand: \"Third gale this week. Lightning on the Rodspire, twice. Bo says the ferry's still laid up. Bo says a lot.\"",
+      "text_fr": "Le journal des tempêtes, à la craie sur le mur, de la grosse écriture de Rhian : « Troisième coup de vent de la semaine. Foudre sur l'Aiguille, deux fois. Bo dit que le bac est toujours à quai. Bo dit beaucoup de choses. »"
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "to": "stormwatch",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 5,
+        "z": 13,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "rhian",
+      "name": "Rhian",
+      "model": "npc_sailor",
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#2f6b8a",
+      "hair": "#c0582d",
+      "dialogue": [
+        {
+          "if": "!flag:talked_rhian",
+          "lines": [
+            "Welcome to the Weathervane! Shut the door, the wind's got opinions tonight.",
+            "Beds, a fire, and a storm log so you know what you slept through. Rest's free for duellists. Till when?",
+            "And if you're buying, the counter has Storm packs and a Fulgurex I keep polished."
+          ],
+          "lines_fr": [
+            "Bienvenue à la Girouette ! Ferme la porte, le vent a des avis, ce soir.",
+            "Des lits, un feu, et un journal des tempêtes pour savoir ce que tu as manqué en dormant. Le repos est gratuit pour les duellistes. Jusqu'à quand ?",
+            "Et si tu achètes, le comptoir a des boosters Orage et un Fulgurion que je garde bien astiqué."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "if": "time:night",
+          "lines": [
+            "Hear that? Lightning out past the Rodspire. Lovely night for staying in.",
+            "Bed?"
+          ],
+          "lines_fr": [
+            "Tu entends ? De la foudre au-delà de l'Aiguille. Belle nuit pour rester au chaud.",
+            "Un lit ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        },
+        {
+          "lines": [
+            "Back again! Your bed's where you left it, and so's the wind.",
+            "A rest?"
+          ],
+          "lines_fr": [
+            "Te revoilà ! Ton lit est là où tu l'as laissé, le vent aussi.",
+            "Tu te reposes ?"
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#eaf0ff",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#e3ecf5",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffc070",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

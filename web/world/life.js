@@ -99,7 +99,7 @@ function softTexture(size, n, rMin, rMax, wrap) {
 }
 
 // Particles, added to `scene` (the map's root group). `spots.flowers` = flower
-// bed centres, `spots.smoke` = chimney top or null.
+// bed centres, `spots.smoke` = smoke sources (chimneys, kilns, vents).
 export function ambience(scene, spots, reduced) {
   if (reduced) return { update() {}, puff() {}, puffs() {} };
   const dot = softTexture(64, 1, 30, 30, false);
@@ -135,9 +135,18 @@ export function ambience(scene, spots, reduced) {
     return { g, l, r, c, k: i * 1.7, last: new THREE.Vector3() };
   });
 
-  // Chimney smoke: a few soft puffs rising and fading.
-  const smoke = spots.smoke ? Array.from({ length: 7 }, () => sprite("#f6f2ea", 0)) : [];
-  smoke.forEach((s) => (s.material.blending = THREE.NormalBlending));
+  // Smoke: soft puffs rising and fading, from each source in `spots.smoke`
+  // ({ at, kind, on }): a chimney's pale curl, a kiln's darker soot, a vent's
+  // quick white steam (only while `on()` holds, for a gate's vents).
+  const LOOK = { chimney: ["#f6f2ea", 7, 4.2, 0.5, 0.55], soot: ["#8a7f78", 8, 5.2, 0.62, 0.6], steam: ["#ffffff", 5, 1.8, 1.1, 0.7] };
+  const smoke = (spots.smoke ?? []).flatMap((src, j) => {
+    const [color, n, life, rise, alpha] = LOOK[src.kind] ?? LOOK.chimney;
+    return Array.from({ length: n }, (_, i) => {
+      const s = sprite(color, 0);
+      s.material.blending = THREE.NormalBlending;
+      return { s, src, i, n, life, rise, alpha, ph: j * 1.3 };
+    });
+  });
 
   // Footstep dust: a small pool reused round-robin.
   const dust = Array.from({ length: 10 }, () => {
@@ -196,13 +205,20 @@ export function ambience(scene, spots, reduced) {
         f.r.rotation.z = -flap;
       }
 
-      const L = 4.2;
-      smoke.forEach((s, i) => {
-        const age = (t + (i * L) / smoke.length) % L, k = age / L;
-        s.position.set(spots.smoke.x + age * 0.18 + Math.sin(t + i) * 0.05, spots.smoke.y + age * 0.5, spots.smoke.z - age * 0.06);
-        s.scale.setScalar(0.35 + age * 0.3);
-        s.material.opacity = 0.55 * Math.min(1, k * 6) * (1 - k);
-      });
+      for (const p of smoke) {
+        const { s, src, i, n, life: L } = p;
+        const on = !src.on || src.on();
+        if (!on && s.material.opacity < 0.01) {
+          s.visible = false;
+          continue;
+        }
+        s.visible = true;
+        const age = (t + p.ph + (i * L) / n) % L, k = age / L;
+        s.position.set(src.at.x + age * 0.18 + Math.sin(t + i) * 0.05, src.at.y + age * p.rise, src.at.z - age * 0.06);
+        s.scale.setScalar(0.35 + age * 0.3 * (p.rise > 1 ? 0.6 : 1));
+        const want = on ? p.alpha * Math.min(1, k * 6) * (1 - k) : 0;
+        s.material.opacity += (want - s.material.opacity) * Math.min(1, dt * (on ? 30 : 3));
+      }
 
       for (const d of dust) {
         if (d.age >= 1) continue;

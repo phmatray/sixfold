@@ -81,9 +81,11 @@ function lerp(out, a, b, t) {
 
 // The light of a built map `w` (build.js), added to its root. `update(minute, hero)`
 // each frame; it returns the current look for world.js (background, fog, sun direction).
+const BOLT = new THREE.Color("#c9d6ff");
 export function daylight(w, reduced) {
   const P = presets(w.map);
-  const indoor = !!w.map.light.indoor, dark = !!w.map.dark;
+  const indoor = !!w.map.light.indoor, dark = !!w.map.dark, storm = !!w.map.lightning && !indoor;
+  let bolt = 6 + Math.random() * 10, strike = null;
   const cur = { ...P.day, sun: C(0), sky: C(0), ground: C(0), bg: C(0), from: new THREE.Vector3() };
   const root = w.root;
 
@@ -113,12 +115,16 @@ export function daylight(w, reduced) {
   }
 
   // Materials that light up: `glow` parts and window `glass` (models and instances alike).
-  const glows = new Set(), glass = new Set(), crystals = new Set(w.waymarks.flatMap((m) => m.mats));
+  // Coloured glassware (`glass_teal`, `glass_amber` …: racks, cullet, the kiln's
+  // wares) keeps its colour and catches the light softly after dark.
+  const glows = new Set(), glass = new Set(), ware = new Set(), crystals = new Set(w.waymarks.flatMap((m) => m.mats));
   root.traverse((o) => {
     if (!o.isMesh || !o.material?.name) return;
     const m = o.material;
     if (crystals.has(m)) return;
     if (/glow|lantern_glass/i.test(m.name)) glows.add(m);
+    else if (/glass_(teal|green|rose|amber|blue)/i.test(m.name)) ware.add(m);
+    else if (/glass_crust/i.test(m.name)) return;
     else if (/glass/i.test(m.name)) glass.add(m);
     m.userData.base ??= m.color.clone();
   });
@@ -139,6 +145,18 @@ export function daylight(w, reduced) {
       w.hemi.color.copy(cur.sky);
       w.hemi.groundColor.copy(cur.ground);
       w.hemi.intensity = cur.hemiI;
+      // Storm country at night: far lightning, a short double flash every 20-40 s
+      // (`w.flash` 0..1 also lets the Rodspire's tip arc). Off with reduced motion.
+      w.flash = 0;
+      if (storm && !reduced && cur.night > 0.5) {
+        if ((bolt -= dt) <= 0) (bolt = 20 + Math.random() * 20), (strike = 0);
+        if (strike !== null) {
+          strike += dt;
+          w.flash = strike < 0.12 ? 1 : strike >= 0.2 && strike < 0.28 ? 0.6 : 0;
+          if (strike > 0.3) strike = null;
+        }
+        w.hemi.intensity += w.flash * 2.4 * cur.night;
+      }
 
       // Materials only when the look moved (a fade, a waymark lit) or something asked.
       const key = `${cur.glow.toFixed(3)}|${cur.glass.toFixed(3)}|${w.waymarks.map((m) => `${m.lit}${m.flash.toFixed(2)}`).join()}`;
@@ -150,6 +168,7 @@ export function daylight(w, reduced) {
           if (indoor) m.color.lerpColors(m.userData.base, DARK_PANE, cur.glass * 0.85), m.emissive?.setScalar(0);
           else m.color.lerpColors(m.userData.base, WARM, cur.glass * 0.9), m.emissive?.copy(WARM).multiplyScalar(0.95 * cur.glass);
         }
+        for (const m of ware) m.emissive?.copy(m.userData.base).multiplyScalar(0.12 + 0.4 * cur.glow);
         for (const wm of w.waymarks)
           for (const m of wm.mats) {
             const on = wm.lit ? 1 : 0;
@@ -182,7 +201,7 @@ export function daylight(w, reduced) {
           l.intensity = on ? 7 * cur.lamps * fade : 0;
         });
       }
-      return { bg: cur.bg, near: cur.near, far: cur.far, from: cur.from, night: cur.night, phase: p, color: tmp.copy(cur.bg) };
+      return { bg: cur.bg, near: cur.near, far: cur.far, from: cur.from, night: cur.night, phase: p, color: tmp.copy(cur.bg).lerp(BOLT, (w.flash ?? 0) * 0.3) };
     },
   };
 }
