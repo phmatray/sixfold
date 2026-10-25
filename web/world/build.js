@@ -6,6 +6,7 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { windify, waterify, ambience } from "./life.js";
+import { grass } from "./grass.js";
 import { groundMesh } from "./ground.js";
 import { rng, mesh, group, toon, fadeable, PLACEHOLDER, FOOT, WALKABLE, DECK, LADDER, BOB, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox } from "./props.js";
 import { key, glowTex, blobGeo, blobMat } from "./actors.js";
@@ -538,22 +539,9 @@ export async function build(map, got, reduced) {
   const wet = (x, z) => SIDES.some(([dx, dz]) => "~H".includes(tile(x + dx, z + dz) ?? "-"));
   const open = (x, z) => !blocked(x, z) && tile(x, z) === "." && floor[z * W + x] === 0 && !wet(x, z);
   const exits = map.exits ?? [];
-  const tufts = Math.round((map.ground.tufts ?? 1800) * Math.max(1, (W * H) / 900)); // per ~30 x 30 tiles, so big maps keep the density; 0 on sand
+  const tufts = (map.ground.tufts ?? 1800) / 1800; // grass density, 0 on sand
   if (!L.indoor) {
-    if (tufts) scatter(root, W, H, open, tufts);
-    // Grass tufts along the path edges.
-    for (let z = 0; z < H; z++)
-      for (let x = 0; x < W; x++) {
-        if (!tufts || !open(x, z)) continue;
-        for (const [dx, dz] of SIDES) {
-          if (!"pr".includes(tile(x + dx, z + dz) ?? "-")) continue;
-          for (let k = 0; k < 2; k++) {
-            const along = (r() - 0.5) * 0.8;
-            const ex = x + 0.5 + dx * 0.4 + (dz ? along : 0), ez = z + 0.5 + dz * 0.4 + (dx ? along : 0);
-            batch.add("grass_edge", tpl("grass_edge", PLACEHOLDER.grass_edge), at(ex, ez, r() * Math.PI * 2, 0.8 + r() * 0.4), tint("#ffffff", 0.08));
-          }
-        }
-      }
+    if (tufts) await grass(root, map, tile, open, tufts);
     // A denser, darker band of trees beyond the map edge hides the empty plain,
     // on the sides the map asks for (not over the sea), with a gap at each exit.
     const outer = (map.ring ?? RING).filter((n) => got[n] || !OPTIONAL.test(n));
@@ -567,7 +555,7 @@ export async function build(map, got, reduced) {
     for (let x = -5; x <= W + 5; x += 1.6 + r() * 0.6) ring("n", x, -1.6 - r() * 2.2), ring("s", x, H + 1.4 + r() * 2.2);
     for (let z = -2; z <= H + 2; z += 1.6 + r() * 0.6) ring("w", -1.6 - r() * 2.2, z), ring("e", W + 1.6 + r() * 2.2, z);
   }
-  batch.build(root, (n) => (n === "grass_edge" ? 0.35 : WIND_H[n.replace(OPTIONAL, "")] ?? 0));
+  batch.build(root, (n) => WIND_H[n.replace(OPTIONAL, "")] ?? 0);
 
   // Contact shadows under the scenery.
   if (blobs.length) {
@@ -762,42 +750,4 @@ function debugGrid(W, H, blocked, talk, warps, npcs) {
       if (m) g.add(mesh(quad, m, x + 0.5, 0.05, z + 0.5));
     }
   return g;
-}
-
-// Grass tufts and tiny flowers, instanced, only on open grass tiles.
-function scatter(root, W, H, open, count) {
-  const r = rng(99);
-  const blade = new THREE.ConeGeometry(0.05, 0.32, 3);
-  blade.translate(0, 0.16, 0);
-  const tufts = new THREE.InstancedMesh(blade, new THREE.MeshLambertMaterial(), count);
-  const bloom = new THREE.InstancedMesh(new THREE.SphereGeometry(0.06, 6, 4), new THREE.MeshLambertMaterial(), Math.ceil(count / 9));
-  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s = new THREE.Vector3(), v = new THREE.Vector3(), col = new THREE.Color();
-  const free = [];
-  for (let z = 0; z < H; z++) for (let x = 0; x < W; x++) if (open(x, z)) free.push([x, z]);
-  if (!free.length) return;
-  const spot = () => {
-    const [x, z] = free[Math.floor(r() * free.length)];
-    return [x + r(), z + r()];
-  };
-  for (let i = 0; i < tufts.count; ) {
-    const [cx, cz] = spot();
-    for (let k = 0; k < 8 && i < tufts.count; k++, i++) {
-      e.set((r() - 0.5) * 0.6, r() * 6, (r() - 0.5) * 0.6);
-      s.setScalar(0.7 + r() * 0.8);
-      m.compose(v.set(cx + (r() - 0.5) * 0.35, 0, cz + (r() - 0.5) * 0.35), q.setFromEuler(e), s);
-      tufts.setMatrixAt(i, m);
-      tufts.setColorAt(i, col.set(r() < 0.5 ? "#3c9a2f" : "#6cc44a"));
-    }
-  }
-  const petals = ["#ffffff", "#ffd2b8", "#fff1a0"];
-  for (let j = 0; j < bloom.count; j++) {
-    const [x, z] = spot();
-    m.compose(v.set(x, 0.07, z), q.identity(), s.set(1, 0.6, 1));
-    bloom.setMatrixAt(j, m);
-    bloom.setColorAt(j, col.set(petals[Math.floor(r() * 3)]));
-  }
-  tufts.receiveShadow = bloom.receiveShadow = true;
-  windify(tufts, 0.32);
-  windify(bloom, 0.12);
-  root.add(tufts, bloom);
 }

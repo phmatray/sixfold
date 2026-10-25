@@ -101,7 +101,7 @@ export function assetNames(map) {
   for (const g of map.gates ?? []) for (const n of [g.prop, g.prop_closed, g.prop_open]) if (n) names.add(n);
   if (tiles.includes("=")) names.add("boardwalk");
   if (tiles.includes("H")) names.add("pier");
-  if (!map.light.indoor) [...(map.ring ?? RING), "grass_edge"].forEach((n) => names.add(n));
+  if (!map.light.indoor) (map.ring ?? RING).forEach((n) => names.add(n));
   if (names.has("tree")) names.add("tree_b"), names.add("tree_c");
   return [...names];
 }
