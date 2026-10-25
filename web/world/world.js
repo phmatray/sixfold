@@ -12,6 +12,7 @@
 //   ("seen", map, "in"|"out") a map was entered (indoors or out)
 //   ("talk", npcId, json)  spoke to an NPC (or a duelist walked up): {"name", "dialogue"} for Leptos to run
 //   ("area", title, "")    entered an outdoor area that has a `title`
+//   ("progress", "done/total", "") models loaded for the first map (the loading screen)
 //   ("ready", "", "")      first frame drawn;  ("error", "", message)
 // Game rules (progression, dialogue effects) live in the engine crate; the world
 // only moves and draws. Grid: 1 tile = 1 m; tile (x, z) covers [x, x+1] × [z, z+1].
@@ -401,7 +402,11 @@ export function mount(el, controls, cb, start, edit = false) {
     const map = await loadMap(name);
     if (typeof spawn === "function") spawn = spawn(map);
     const names = assetNames(map);
-    const loaded = await Promise.all(names.map(loadAsset));
+    // The loading screen counts the first map's models in.
+    let count = 0;
+    const counted = (n) => (readySent ? loadAsset(n) : loadAsset(n).finally(() => cb("progress", `${++count}/${names.length}`, "")));
+    if (!readySent) cb("progress", `0/${names.length}`, "");
+    const loaded = await Promise.all(names.map(counted));
     if (!alive) return;
     const got = Object.fromEntries(names.map((n, i) => [n, loaded[i]]));
     const missing = names.filter((n) => !got[n] && !OPTIONAL.test(n) && !PERSON.test(n)); // NPCs fall back to a tinted hero

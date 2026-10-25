@@ -38,7 +38,8 @@
     <!-- Booster key art (packs/<theme>.webp): precached with the app shell. -->
     <link data-trunk rel="copy-dir" href="packs" />
     <!-- wasm-opt must know the wasm features rustc emits by default. -->
-    <link data-trunk rel="rust" href="Cargo.toml" data-wasm-opt="z" data-integrity="none"
+    <!-- data-initializer: loader.js drives the loading screen (#loader) while the wasm downloads. -->
+    <link data-trunk rel="rust" href="Cargo.toml" data-wasm-opt="z" data-integrity="none" data-initializer="loader.js"
       data-wasm-opt-params="--enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-reference-types --enable-multivalue" />
     <link data-trunk rel="css" href="style.css" />
     <link data-trunk rel="copy-dir" href="world" />
@@ -46,6 +47,13 @@
     <link data-trunk rel="copy-dir" href="cards" />
   </head>
   <body>
+    <!-- The loading screen, before the game runs (loader.js fills it in and removes it). -->
+    <div id="loader" class="loader" role="status">
+      <p class="wordmark">Sixfold</p>
+      <div class="progress-bar" role="progressbar" aria-label="Sixfold" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+      <p class="loader-msg"></p>
+      <button type="button" class="btn primary" hidden></button>
+    </div>
     <script>
       // A game, not a page: iOS Safari ignores user-scalable=no, so stop its pinch zoom here.
       for (const t of ["gesturestart", "gesturechange"]) addEventListener(t, (e) => e.preventDefault(), { passive: false });
