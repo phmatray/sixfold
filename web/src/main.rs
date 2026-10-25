@@ -12,9 +12,11 @@ mod credits;
 mod ctl;
 mod decks;
 mod duel;
+mod journal;
 mod overlays;
 mod packs;
 mod saves;
+mod shops;
 mod store;
 mod title;
 mod world;
@@ -26,7 +28,9 @@ use audio::MuteToggle;
 use board::{Hand, SideRow};
 use controls::{ActionBar, PromptModal};
 use ctl::{Ctl, AI, HUMAN};
-use overlays::{CalloutOverlay, CoinOverlay, DiscardViewer, GameOver, Inspector, LogPanel};
+use overlays::{
+    CalloutOverlay, CoinOverlay, DiscardViewer, GameOver, Inspector, LogPanel, RivalFace,
+};
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -243,6 +247,7 @@ fn MatchScreen() -> impl IntoView {
             <header class="topbar">
                 <span class="wordmark small" aria-hidden="true">"Sixfold"</span>
                 <h1 class="sr-only">{tr("Duel", "Duel")}</h1>
+                <RivalFace />
                 <span class="matchup">
                     <span class="me-name">{names[HUMAN].clone()}</span>
                     {tr(" against ", " contre ")}

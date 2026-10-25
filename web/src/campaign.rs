@@ -90,6 +90,23 @@ pub fn reward_line(r: &Rival, p: &Progress) -> String {
     }
 }
 
+/// A duelist's face: a rival's portrait (`world/assets/portraits/<id>.webp`,
+/// relative to the page so it works under the deployed sub-path), or a
+/// monogram disc for a route duelist, who has none.
+#[component]
+pub fn Portrait(id: &'static str, name: &'static str) -> impl IntoView {
+    if rival(id).is_some() {
+        view! {
+            <img class="portrait" src=format!("world/assets/portraits/{id}.webp") width="256" height="256"
+                loading="lazy" decoding="async" alt=tr(format!("{name}'s portrait"), format!("Portrait de {name}")) />
+        }
+        .into_any()
+    } else {
+        let initial: String = name.chars().take(1).collect();
+        view! { <span class="portrait mono" aria-hidden="true">{initial}</span> }.into_any()
+    }
+}
+
 /// One hexagon seal, filled once earned.
 #[component]
 pub fn Seal(r: &'static Rival, #[prop(into)] earned: Signal<bool>) -> impl IntoView {
@@ -166,6 +183,7 @@ pub fn Roster() -> impl IntoView {
                     };
                     view! {
                         <li class=move || format!("rival {}", state()) class:champion=!r.seal>
+                            <Portrait id=r.id name=r.name />
                             <div class="rival-head">
                                 <span class="rival-name">{r.name}</span>
                                 <span class="rival-title">{r.title.get()}</span>
@@ -499,7 +517,10 @@ pub fn Challenge(
     let open = open();
     view! {
         <form class="challenge" on:submit=move |e| { e.prevent_default(); start() }>
-            <h2 id="world-sheet-title">{tr(format!("Duel {name}?"), format!("Défier {name} ?"))}</h2>
+            <div class="challenge-head">
+                <Portrait id=o.id name=name />
+                <h2 id="world-sheet-title">{tr(format!("Duel {name}?"), format!("Défier {name} ?"))}</h2>
+            </div>
             <p class="dialog-sub">
                 {format!("{what}{}, {}. ", prizes(prize_n), difficulty(level))}
                 <b>{reward}"."</b>

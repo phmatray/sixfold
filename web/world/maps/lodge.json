@@ -1,0 +1,220 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "bed",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "workbench",
+      "x": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bookcase",
+      "x": 9,
+      "z": 3,
+      "rot": 90
+    },
+    {
+      "asset": "duel_table",
+      "x": 1,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 3,
+      "z": 5,
+      "rot": 270
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 9,
+      "z": 3,
+      "kind": "sign",
+      "text": "Fennel's shelf: bird books, a heron on every spine, and a gap where a field guide used to be.",
+      "text_fr": "L'étagère de Fennel : des livres d'oiseaux, un héron sur chaque tranche, et un vide là où se trouvait un guide de terrain."
+    },
+    {
+      "kind": "find",
+      "id": "i_lodge",
+      "x": 2,
+      "z": 5,
+      "give": "card:dowsing_rod",
+      "text": "On the map table, under the stone that holds down the blank west corner: a card, left for whoever walks out that way.",
+      "text_fr": "Sur la table des cartes, sous la pierre qui retient le coin ouest, resté en blanc : une carte, laissée pour qui ira par là."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "dir": "s",
+      "to": "woodland",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 26,
+        "z": 19,
+        "facing": "s"
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "idle": "Idle",
+      "id": "alder",
+      "name": "Alder",
+      "model": "npc_wanderer",
+      "tint": "#4d7a44",
+      "outfit": "#3d6b3d",
+      "hair": "#5a3a22",
+      "x": 6,
+      "z": 3,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "!flag:talked_alder",
+          "lines": [
+            "Wipe your boots. The trail comes in on everyone.",
+            "I'm Alder. I keep the trail: the bridge, the signs, and the herons' peace and quiet.",
+            "Fennel boards here when she isn't out with her lens. If she isn't on the trail, she's asleep."
+          ],
+          "lines_fr": [
+            "Essuie tes bottes. Le sentier rentre avec tout le monde.",
+            "Moi, c'est Alder. J'entretiens le sentier : le pont, les panneaux, et la tranquillité des hérons.",
+            "Fennel loge ici quand elle n'est pas dehors avec sa longue-vue. Si elle n'est pas sur le sentier, c'est qu'elle dort."
+          ]
+        },
+        {
+          "if": "flag:lens_returned & !flag:alder_lens",
+          "do": [
+            "flag:alder_lens"
+          ],
+          "lines": [
+            "Fennel's been up before dawn every day since you brought her lens back. I've never seen her so happy. Or so tired."
+          ],
+          "lines_fr": [
+            "Fennel se lève avant l'aube tous les jours depuis que tu lui as rapporté sa longue-vue. Je ne l'ai jamais vue aussi heureuse. Ni aussi fatiguée."
+          ]
+        },
+        {
+          "if": "beat:bramble & !flag:alder_bramble",
+          "do": [
+            "flag:alder_bramble"
+          ],
+          "lines": [
+            "Bramble trims the hedges by the bridge. Since you beat him he trims them very, very neatly."
+          ],
+          "lines_fr": [
+            "Bramble taille les haies près du pont. Depuis que tu l'as battu, il les taille très, très soigneusement."
+          ]
+        },
+        {
+          "lines": [
+            "The map on the table is mine. The whole west of it is blank.",
+            "Somebody ought to walk out past the trees and fill it in. Not me. My knees."
+          ],
+          "lines_fr": [
+            "La carte sur la table, c'est la mienne. Tout l'ouest est en blanc.",
+            "Il faudrait que quelqu'un marche au-delà des arbres pour la compléter. Pas moi. Mes genoux."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 8,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffe2bd",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb257",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e",
+    "note": "Indoors the sun is the window light, placed from the room centre (not the hero); lamp lights sit on each lamp prop."
+  }
+}

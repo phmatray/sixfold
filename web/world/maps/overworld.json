@@ -497,6 +497,18 @@
       "x": 13,
       "z": 5,
       "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 24,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 5,
+      "z": 21,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -558,6 +570,55 @@
       "give": "card:recall_horn",
       "text": "Behind the crates, wedged against the hall's back wall: a card someone dropped long ago.",
       "text_fr": "Derrière les caisses, coincée contre le mur du fond de la salle : une carte perdue il y a longtemps."
+    },
+    {
+      "kind": "find",
+      "id": "m_garden",
+      "x": 19,
+      "z": 14,
+      "hidden": true,
+      "give": "coins:30",
+      "text": "Down among Moss's bean rows, in a flowerpot turned upside down: a few Facets.",
+      "text_fr": "Entre les rangs de haricots de Moss, sous un pot de fleurs retourné : quelques facettes."
+    },
+    {
+      "kind": "find",
+      "id": "m_post",
+      "x": 24,
+      "z": 20,
+      "give": "coins:25",
+      "text": "Under the stone at the foot of the signpost, where travellers leave a coin for luck: Facets.",
+      "text_fr": "Sous la pierre au pied du panneau, là où les voyageurs laissent une pièce pour la chance : des facettes."
+    },
+    {
+      "kind": "find",
+      "id": "m_flowers",
+      "x": 5,
+      "z": 21,
+      "give": "give:curio_brass_thimble",
+      "text": "Something glints among the flowers: a brass thimble, dented and polished bright.",
+      "text_fr": "Quelque chose brille entre les fleurs : un dé à coudre en laiton, cabossé et poli à force de servir."
+    },
+    {
+      "kind": "find",
+      "id": "m_eastend",
+      "x": 26,
+      "z": 8,
+      "hidden": true,
+      "give": "coins:30",
+      "text": "Where the path bends, at the foot of the tree: Facets, half under the roots.",
+      "text_fr": "Là où le chemin tourne, au pied de l'arbre : des facettes, à moitié sous les racines."
+    },
+    {
+      "kind": "find",
+      "id": "seed_3",
+      "x": 1,
+      "z": 15,
+      "hidden": true,
+      "give": "give:seed_packet_3",
+      "text": "Caught in the roots at the meadow's edge, a twist of paper: \"Runner beans. Do NOT eat.\"",
+      "text_fr": "Coincé dans les racines, en lisière du pré, un cornet de papier : « Haricots grimpants. NE PAS MANGER. »",
+      "if": "flag:seeds_asked"
     }
   ],
   "warps": [
@@ -719,6 +780,53 @@
       "idle": "Idle",
       "dialogue": [
         {
+          "if": "count:seed_packet_:3 & !flag:seeds_done",
+          "do": [
+            "take:seed_packet_1",
+            "take:seed_packet_2",
+            "take:seed_packet_3",
+            "coins:150",
+            "card:bloom_seed",
+            "flag:seeds_done",
+            "emote:moss:heart"
+          ],
+          "lines": [
+            "All three! And not one eaten. You've restored my faith in people.",
+            "Here: Facets for your trouble, and a card I've been saving. It's a seed too, in its way."
+          ],
+          "lines_fr": [
+            "Les trois ! Et pas un seul mangé. Tu me rends foi en l'humanité.",
+            "Tiens : des facettes pour ta peine, et une carte que je gardais de côté. C'est une graine, elle aussi, à sa façon."
+          ]
+        },
+        {
+          "if": "flag:seeds_asked & !flag:seeds_done",
+          "lines": [
+            "Any luck? One on Fernhollow Trail, one in Brightwell Square, one by the meadow's west trees.",
+            "They'll be tucked wherever a bean would hide. Stumps. Bushes. Bean-ish places."
+          ],
+          "lines_fr": [
+            "Alors ? Un sur le Sentier de Creuse-Fougère, un sur la Place de Clairpuits, un près des arbres à l'ouest du pré.",
+            "Ils seront cachés là où un haricot se cacherait. Des souches. Des buissons. Des coins à haricots."
+          ]
+        },
+        {
+          "if": "item:running_shoes & !flag:seeds_asked",
+          "do": [
+            "flag:seeds_asked"
+          ],
+          "lines": [
+            "Oh, it's you. Have you seen three paper twists? About so big. They say \"Do NOT eat\" on them.",
+            "My runner bean seeds. They were in my apron pocket all the way to the woods and back, and through the square, and now: gone.",
+            "One on the trail, one in the square, one by the west trees, I'd guess. Bring them back and I'll make it worth your while."
+          ],
+          "lines_fr": [
+            "Ah, c'est toi. Tu n'aurais pas vu trois cornets de papier ? Grands comme ça. Il y a écrit « NE PAS MANGER » dessus.",
+            "Mes graines de haricots grimpants. Elles étaient dans la poche de mon tablier jusqu'au bois et retour, puis sur la place, et maintenant : envolées.",
+            "Un sur le sentier, un sur la place, un près des arbres de l'ouest, à mon avis. Rapporte-les-moi et tu ne le regretteras pas."
+          ]
+        },
+        {
           "if": "beat:warden",
           "lines": [
             "The champion, in my flowerbeds. I'll allow it, just this once.",
@@ -727,6 +835,15 @@
           "lines_fr": [
             "Champion ou pas, on ne marche pas sur mes plates-bandes. Bon, pour cette fois.",
             "Bramble dit que les haies ont repoussé plus drues le jour de ta victoire. Pure coïncidence."
+          ]
+        },
+        {
+          "if": "flag:seeds_done",
+          "lines": [
+            "The beans are in. Come back in a month and you won't see the fence for them."
+          ],
+          "lines_fr": [
+            "Les haricots sont en terre. Reviens dans un mois, tu ne verras plus la clôture."
           ]
         },
         {
@@ -770,7 +887,7 @@
         ],
         "challenge_fr": [
           "Hé ! T'as un deck, ça se voit à ta façon de marcher.",
-          "J'ai lu les règles deux fois, et mes Warrenbuck attendent depuis ce matin. Un duel !"
+          "J'ai lu les règles deux fois, et mes Garenbouquin attendent depuis ce matin. Un duel !"
         ],
         "win": [
           "Wait. I forgot to attach energy again, didn't I?",

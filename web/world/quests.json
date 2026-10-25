@@ -1,0 +1,135 @@
+{
+  "note": "The Journal (WORLD_DESIGN §5.4). A quest is listed once `start` holds and ticked off once `done` holds; a step is ticked once its `done` holds, or the quest is done. Conditions are the engine's (engine/tests/world_data.rs checks them, and that a map sets every flag and item they name).",
+  "quests": [
+    {
+      "id": "letter",
+      "title": "A Letter for Hob",
+      "title_fr": "Une lettre pour Hob",
+      "giver": "Ottilie",
+      "start": "item:letter",
+      "done": "flag:letter_delivered",
+      "steps": [
+        {
+          "text": "Take Ottilie's letter to Hob's Bakery in Brightwell Square.",
+          "text_fr": "Portez la lettre d'Ottilie à la boulangerie de Hob, sur la Place de Clairpuits.",
+          "done": "flag:letter_delivered"
+        }
+      ]
+    },
+    {
+      "id": "lens",
+      "title": "The Lost Lens",
+      "title_fr": "La longue-vue perdue",
+      "giver": "Tarn",
+      "start": "item:field_lens",
+      "done": "flag:lens_returned",
+      "steps": [
+        {
+          "text": "Return the Field Lens to its owner on Fernhollow Trail.",
+          "text_fr": "Rendez la longue-vue à sa propriétaire, sur le Sentier de Creuse-Fougère.",
+          "done": "flag:lens_returned"
+        }
+      ]
+    },
+    {
+      "id": "seeds",
+      "title": "Moss's Seeds",
+      "title_fr": "Les graines de Moss",
+      "giver": "Moss",
+      "start": "flag:seeds_asked",
+      "done": "flag:seeds_done",
+      "steps": [
+        {
+          "text": "Find the packet Moss dropped on Fernhollow Trail, south of the path.",
+          "text_fr": "Trouvez le sachet que Moss a perdu sur le Sentier de Creuse-Fougère, au sud du chemin.",
+          "done": "item:seed_packet_1"
+        },
+        {
+          "text": "Find the packet Moss dropped in Brightwell Square, by the west flowerbeds.",
+          "text_fr": "Trouvez le sachet que Moss a perdu sur la Place de Clairpuits, près des massifs de l'ouest.",
+          "done": "item:seed_packet_2"
+        },
+        {
+          "text": "Find the packet Moss dropped at the meadow's west edge, by the woods.",
+          "text_fr": "Trouvez le sachet que Moss a perdu à l'ouest du pré, en lisière du bois.",
+          "done": "item:seed_packet_3"
+        },
+        {
+          "text": "Bring all three back to Moss's garden.",
+          "text_fr": "Rapportez les trois sachets au potager de Moss.",
+          "done": "flag:seeds_done"
+        }
+      ]
+    },
+    {
+      "id": "kite",
+      "title": "Dace's Kite",
+      "title_fr": "Le cerf-volant de Dace",
+      "giver": "Dace",
+      "start": "flag:kite_asked",
+      "done": "flag:kite_done",
+      "steps": [
+        {
+          "text": "Beat Skye, the kite flyer on Saltwind Boardwalk.",
+          "text_fr": "Battez Skye, la cerf-voliste de la Promenade de Ventsalé.",
+          "done": "beat:t_skye"
+        },
+        {
+          "text": "Ask Skye for a line long enough to reach the lighthouse.",
+          "text_fr": "Demandez à Skye une ligne assez longue pour atteindre le phare.",
+          "done": "flag:kite_line_given"
+        },
+        {
+          "text": "Give the Kite Line to Dace.",
+          "text_fr": "Donnez la ligne à Dace.",
+          "done": "flag:kite_done"
+        }
+      ]
+    },
+    {
+      "id": "rye",
+      "title": "Rye for Hob",
+      "title_fr": "Du seigle pour Hob",
+      "giver": "Hob",
+      "start": "flag:rye_asked",
+      "done": "flag:rye_done",
+      "steps": [
+        {
+          "text": "Beat Cole, the kiln stoker in Emberstep Quarry.",
+          "text_fr": "Battez Cole, le chauffeur de four de la Carrière de Pas-de-Braise.",
+          "done": "beat:t_cole"
+        },
+        {
+          "text": "Ask Cole for a pouch of kiln ash.",
+          "text_fr": "Demandez à Cole une bourse de cendre de four.",
+          "done": "flag:ash_given"
+        },
+        {
+          "text": "Bring the Kiln Ash to Hob.",
+          "text_fr": "Apportez la cendre à Hob.",
+          "done": "flag:rye_done"
+        }
+      ]
+    },
+    {
+      "id": "consult",
+      "title": "First Consult",
+      "title_fr": "Première consultation",
+      "giver": "Mags",
+      "start": "flag:consult_asked",
+      "done": "flag:consult_paid",
+      "steps": [
+        {
+          "text": "Let Mags read one of your decks, and apply one of her swaps.",
+          "text_fr": "Faites lire un de vos decks à Mags, et appliquez une de ses suggestions.",
+          "done": "flag:consult_applied"
+        },
+        {
+          "text": "Tell Mags how the patient is doing.",
+          "text_fr": "Donnez des nouvelles du patient à Mags.",
+          "done": "flag:consult_paid"
+        }
+      ]
+    }
+  ]
+}

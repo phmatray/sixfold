@@ -420,7 +420,7 @@ mod tests {
     /// tables: every route duelist once (5 min each), every rival and the
     /// Warden (two 12-min duels each: a first playthrough loses about half),
     /// the finds of §5.3 met while exploring (10 min per outdoor map, 3 per
-    /// new house) and the four quests of §5.4 (5 min each). Rival packs and
+    /// house) and the quests of §5.4 with their errands. Rival packs and
     /// promos come on top. Change a price or a purse and this says what it did.
     #[test]
     fn economy_sim() {
@@ -435,18 +435,32 @@ mod tests {
             facets: if r.seal { RIVAL_PURSE } else { WARDEN_PURSE },
             packs: 0,
         }));
-        // §5.3: 18 Facet finds (⬡ 675), 3 pack finds; the rest are cards and curios.
+        // §5.3: 18 Facet finds (⬡ 675), 3 pack finds; the rest are cards and
+        // curios. Five outdoor maps and seven houses.
         first.push(Source {
-            minutes: 5 * 10 + 6 * 3,
+            minutes: 5 * 10 + 7 * 3,
             facets: 675,
             packs: 3,
         });
-        // §5.4: Moss 150, Hob 120, Mags 100; Dace gives a Storm pack.
-        first.push(Source {
-            minutes: 4 * 5,
-            facets: 150 + 120 + 100,
-            packs: 1,
-        });
+        // §5.4, (minutes, Facets, packs) per quest: the letter (a Tide pack),
+        // the lens (Grove), Moss's seeds over three maps, Dace's kite (Storm),
+        // Hob's rye from the quarry, Mags's consult; Odile's two Wild packs
+        // for three curios come with the finds.
+        for (minutes, facets, packs) in [
+            (8, 0, 1),
+            (10, 0, 1),
+            (15, 150, 0),
+            (8, 0, 1),
+            (12, 120, 0),
+            (6, 100, 0),
+            (0, 0, 2),
+        ] {
+            first.push(Source {
+                minutes,
+                facets,
+                packs,
+            });
+        }
         let rate = packs_per_hour(&first);
         // The "exploring" row of §3.4, per hour: 5 two-prize duelists, 6 finds
         // of ⬡ 40, half a quest of ⬡ 160 and 0.8 of a rival.
