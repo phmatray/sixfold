@@ -2,6 +2,7 @@
   "title": "Sixfold Meadow",
   "title_fr": "Pré de Sixfold",
   "region": "hub",
+  "kind": "hub",
   "music": "overworld",
   "width": 28,
   "height": 24,

@@ -2,6 +2,7 @@
   "title": "The Rodspire",
   "title_fr": "L'Aiguille-Foudre",
   "region": "storm",
+  "kind": "site",
   "music": "storm",
   "width": 28,
   "height": 28,

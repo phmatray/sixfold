@@ -2,6 +2,7 @@
   "title": "Gullhaven",
   "title_fr": "Havre-aux-Mouettes",
   "region": "tide",
+  "kind": "town",
   "music": "tide",
   "width": 34,
   "height": 26,

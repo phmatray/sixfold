@@ -2,6 +2,7 @@
   "title": "Thrumming Downs",
   "title_fr": "Les Landes Vibrantes",
   "region": "storm",
+  "kind": "route",
   "music": "storm",
   "width": 36,
   "height": 24,

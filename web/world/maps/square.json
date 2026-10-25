@@ -2,6 +2,7 @@
   "title": "Brightwell Square",
   "title_fr": "Place de Clairpuits",
   "region": "hub",
+  "kind": "town",
   "music": "overworld",
   "width": 26,
   "height": 20,

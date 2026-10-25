@@ -23,7 +23,7 @@ Hard constraints, restated so nobody has to look them up:
   `*_fr` sibling (`text_fr`, `lines_fr`, `label_fr`, `locked_fr`, `title_fr`, `name_fr`), engine text uses
   `tr(en, fr)` / `T::new(en, fr)`. Tooling fails the build when a sibling is missing (§13.3). Proper names
   (people) stay the same in both languages; place names are translated.
-- **Budgets.** Maps ≤ 40 × 32 tiles (more maps, not bigger). Props ≤ 3k triangles, characters ≤ 6k, one
+- **Budgets.** Maps ≤ 80 × 72 tiles and ≤ 80 × 64 in all, sized in screens per kind (`docs/WORLD_RULES.md` §8; it was 40 × 32 until the world rules). Props ≤ 3k triangles, characters ≤ 6k, one
   `.glb` ≤ 2 MB, nothing tracked over 2 MB (`scripts/check-no-game-data.sh`).
 
 ---
@@ -1756,7 +1756,7 @@ builds (`trunk serve`, URL `?edit`), ~300 lines in `editor.js`:
 
 **`tools/check-maps.mjs`** (in CI) grows from today's exit/warp/NPC checks to:
 
-- maps ≤ 40 × 32; outdoor maps have `title_fr`, `region`, `music`;
+- maps ≤ 80 × 72 (80 × 64 tiles in all), at least the size of their `kind` in screens, and the placement rules of `docs/WORLD_RULES.md` (`--strict`); outdoor maps have `title_fr`, `region`, `music`;
 - every text field has its `_fr` sibling, and `lines` / `lines_fr` arrays have the same length;
 - duelist sight lines: in bounds, first tile walkable, and covering no exit edge tile, warp spawn or waymark
   front tile;
