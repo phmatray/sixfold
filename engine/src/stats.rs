@@ -178,7 +178,8 @@ impl Stats {
             );
             self.add("sudden_death_wins", u64::from(s.sudden_death));
             self.add("comebacks", u64::from(s.brink));
-            self.add("clean_sweeps", u64::from(s.prizes == 6 && s.taken[1] == 0));
+            let clean = s.prizes == 6 && s.taken[1] == 0 && !s.sudden_death;
+            self.add("clean_sweeps", u64::from(clean));
         }
     }
 
@@ -312,7 +313,7 @@ pub static ACHIEVEMENTS: [Achievement; 38] = [
     ach!("ring_day", "Around the Ring" / "Le tour de l'anneau", "Visit all six seal sites within one game day." / "Visiter les six sites de sceau en une journée de jeu.", 150, true, |s, _, _| ring(s)),
     ach!("items_all", "Well Equipped" / "Bien équipé", "Own all four field items." / "Posséder les quatre objets de terrain.", 75, false, |_, p, _| FIELD_ITEMS.iter().all(|i| p.has_item(i))),
     ach!("nights_10", "Insomniac" / "Insomniaque", "See ten nights fall in the world." / "Voir tomber dix nuits sur le monde.", 50, false, |s, _, _| s.get("nights") >= 10),
-    ach!("cards_50", "Half a Binder" / "Un demi-classeur", "Own 50 different cards." / "Posséder 50 cartes différentes.", 75, false, |_, _, pf| pf.collection.iter().count() >= 50),
+    ach!("cards_50", "Half a Binder" / "Un demi-classeur", "Own 50 different cards." / "Posséder 50 cartes différentes.", 75, false, |_, _, pf| collectable().filter(|&id| pf.collection.count(id) > 0).count() >= 50),
     ach!("cards_all", "Complete Set" / "Collection complète", "Own every card but the promos." / "Posséder toutes les cartes hors promos.", 250, false, |_, _, pf| collectable().all(|id| pf.collection.count(id) > 0)),
     ach!("promos_all", "Signed Copies" / "Exemplaires dédicacés", "Own all seven promos." / "Posséder les sept cartes promo.", 150, false, |_, _, pf| PROMOS.iter().all(|&id| pf.collection.count(id) > 0)),
     ach!("packs_25", "Pack Rat" / "Collectionneur compulsif", "Open 25 packs." / "Ouvrir 25 boosters.", 50, false, |s, _, _| s.get("packs") >= 25),
@@ -458,17 +459,23 @@ mod tests {
         let clean = GameSummary {
             taken: [6, 0],
             brink: true,
-            sudden_death: true,
             ..won(End::Prizes)
         };
         s.record_duel(&clean, Duel::World("bramble"), &mono);
         assert_eq!((s.get("rival_wins"), s.get("mono_rival_wins")), (1, 1));
         assert_eq!((s.get("clean_sweeps"), s.get("comebacks")), (1, 1));
-        assert_eq!(s.get("sudden_death_wins"), 1);
-        // Four prizes is no clean sweep, even untouched.
-        let short = GameSummary { prizes: 4, ..clean };
+        // Four prizes is no clean sweep, even untouched; nor is a sudden death.
+        let short = GameSummary {
+            prizes: 4,
+            ..clean.clone()
+        };
         s.record_duel(&short, Duel::Gauntlet, &mono);
-        assert_eq!(s.get("clean_sweeps"), 1);
+        let sudden = GameSummary {
+            sudden_death: true,
+            ..clean
+        };
+        s.record_duel(&sudden, Duel::Gauntlet, &mono);
+        assert_eq!((s.get("clean_sweeps"), s.get("sudden_death_wins")), (1, 1));
     }
 
     #[test]
@@ -574,7 +581,9 @@ mod tests {
                 .iter()
                 .for_each(|i| _ = p.apply(&format!("give:{i}")).unwrap()),
             "nights_10" => s.add("nights", 10),
-            "cards_50" => set::ids().take(60).for_each(|id| pf.collection.add(id, 1)),
+            "cards_50" => collectable()
+                .take(50)
+                .for_each(|id| pf.collection.add(id, 1)),
             "cards_all" => collectable().for_each(|id| pf.collection.add(id, 1)),
             "promos_all" => PROMOS.iter().for_each(|&id| pf.collection.add(id, 1)),
             "packs_25" => s.add("packs", 25),

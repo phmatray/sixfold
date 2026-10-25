@@ -14,7 +14,30 @@ use crate::Screen;
 
 /// Achievements earned and not yet announced, oldest first.
 #[derive(Clone, Copy)]
-pub struct Toasts(pub RwSignal<VecDeque<&'static Achievement>>);
+pub struct Toasts(pub RwSignal<VecDeque<Toast>>);
+
+#[derive(Clone, Copy)]
+pub enum Toast {
+    One(&'static Achievement),
+    /// Several at once (an older save's first load): how many, and the Facets.
+    Many(usize, u32),
+}
+
+/// More than this many at once are announced as one toast.
+const ONE_BY_ONE: usize = 3;
+
+impl Toasts {
+    /// Queue what was just earned.
+    pub fn earned(&self, got: Vec<&'static Achievement>) {
+        self.0.update(|q| {
+            if got.len() > ONE_BY_ONE {
+                q.push_back(Toast::Many(got.len(), got.iter().map(|a| a.facets).sum()));
+            } else {
+                q.extend(got.into_iter().map(Toast::One));
+            }
+        });
+    }
+}
 
 /// How long a toast stays up.
 const TOAST_MS: u64 = 3_000;
@@ -51,7 +74,8 @@ pub enum Tab {
     Stats,
 }
 
-fn earned(p: &Progress) -> Vec<&'static Achievement> {
+/// The achievements already granted (their flag is set).
+fn granted(p: &Progress) -> Vec<&'static Achievement> {
     ACHIEVEMENTS
         .iter()
         .filter(|a| p.has_flag(&a.flag()))
@@ -74,7 +98,7 @@ fn thousands(n: u32) -> String {
 
 /// "12 of 38 achievements", for menus.
 pub fn count_line(p: &Progress) -> String {
-    let n = earned(p).len();
+    let n = granted(p).len();
     tr(
         format!("{n} of {} achievements", ACHIEVEMENTS.len()),
         format!("{n} succès sur {}", ACHIEVEMENTS.len()),
@@ -86,7 +110,7 @@ pub fn count_line(p: &Progress) -> String {
 #[component]
 pub fn Toaster() -> impl IntoView {
     let toasts = expect_context::<Toasts>().0;
-    let current = RwSignal::new(None::<&'static Achievement>);
+    let current = RwSignal::new(None::<Toast>);
     Effect::new(move |_| {
         if current.get().is_some() || toasts.with(VecDeque::is_empty) {
             return;
@@ -102,15 +126,25 @@ pub fn Toaster() -> impl IntoView {
     });
     view! {
         <div class="ach-toast-region" role="status" aria-live="polite" aria-atomic="true">
-            {move || current.get().map(|a| view! {
-                <div class="ach-toast">
-                    <span class="ach-medal" aria-hidden="true"></span>
-                    <p>
-                        <span class="ach-kicker">{tr("Achievement", "Succès")}</span>
-                        <b>{a.name.get()}</b>
-                        <span class="ach-pay">{format!("+⬡ {}", a.facets)}</span>
-                    </p>
-                </div>
+            {move || current.get().map(|t| {
+                let (kicker, name, facets) = match t {
+                    Toast::One(a) => (tr("Achievement", "Succès"), a.name.get().to_string(), a.facets),
+                    Toast::Many(n, f) => (
+                        tr("Achievements", "Succès"),
+                        tr(format!("{n} earned — see Records"), format!("{n} obtenus — voir le Palmarès")),
+                        f,
+                    ),
+                };
+                view! {
+                    <div class="ach-toast">
+                        <span class="ach-medal" aria-hidden="true"></span>
+                        <p>
+                            <span class="ach-kicker">{kicker}</span>
+                            <b>{name}</b>
+                            <span class="ach-pay">{format!("+⬡ {facets}")}</span>
+                        </p>
+                    </div>
+                }
             })}
         </div>
     }
@@ -121,7 +155,7 @@ pub fn Toaster() -> impl IntoView {
 pub fn AchievementsPanel() -> impl IntoView {
     let progress = expect_context::<RwSignal<Progress>>();
     let total: u32 = ACHIEVEMENTS.iter().map(|a| a.facets).sum();
-    let got = move || progress.with(earned);
+    let got = move || progress.with(granted);
     let paid = move || got().iter().map(|a| a.facets).sum::<u32>();
     view! {
         <div class="achievements">
@@ -176,10 +210,12 @@ pub fn Records(from: Origin, tab: Tab) -> impl IntoView {
     ];
     let on_key = move |e: leptos::ev::KeyboardEvent| {
         let to = match e.key().as_str() {
-            "ArrowRight" | "ArrowLeft" | "Home" | "End" => match tab.get_untracked() {
+            "ArrowRight" | "ArrowLeft" | "ArrowUp" | "ArrowDown" => match tab.get_untracked() {
                 Tab::Achievements => Tab::Stats,
                 Tab::Stats => Tab::Achievements,
             },
+            "Home" => Tab::Achievements,
+            "End" => Tab::Stats,
             _ => return,
         };
         e.prevent_default();

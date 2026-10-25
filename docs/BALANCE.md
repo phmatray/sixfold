@@ -489,5 +489,6 @@ the six seals and the champion, ten duelists and finds, 50 cards, 25 packs, the 
 empty-bench win): the first playthrough goes from 4.85 to 5.28 packs an hour, still inside the
 3.5–6.0 band; exploring stays at 5.23. The other ⬡ 3,050 are the long tail (the Gauntlet, the daily
 duel, every find, card and duelist, streaks and records) and pay after the campaign, when there is
-less else to buy. The campaign playthrough now pays achievements as they are earned; over the three
-pack seeds it finished in 84, 83 and 71 duels (78, 92 and 80 before), inside its 98-duel budget.
+less else to buy. The campaign playthrough now pays the achievements it can see as they are earned
+(wins, seals, the champion, duelists, cards, packs; it doesn't track the board): over the three pack
+seeds it finished in 92, 83 and 71 duels (78, 92 and 80 before), inside its 98-duel budget.

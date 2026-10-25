@@ -438,12 +438,14 @@ pub struct GameSummary {
     pub bench_kos: [u32; 2],
     /// Stage 2 creatures each side evolved into.
     pub stage2: [u32; 2],
-    /// Each side's longest run of heads on its own coins.
+    /// Each side's longest run of heads on its own coins (in turns: the
+    /// first-player coin doesn't count).
     pub heads_run: [u32; 2],
     /// The biggest prize deficit the winner came back from (prizes still to
     /// take minus the opponent's).
     pub deficit: u32,
-    /// The winner once needed four prizes or more while the loser needed one.
+    /// The winner once needed four prizes or more while the loser needed one
+    /// (in the game that decided it: a sudden death starts the race again).
     pub brink: bool,
     pub sudden_death: bool,
 }
@@ -460,6 +462,8 @@ impl Game {
         let mut left: [Option<u32>; 2] = [None; 2];
         let mut set = false;
         let mut run = [0; 2];
+        // Coins of turns only: the first-player coin is nobody's luck.
+        let mut playing = false;
         // Prizes still to take, (needed by the winner, by the loser), over time.
         let mut gaps = vec![];
         let mut decked = None;
@@ -489,7 +493,14 @@ impl Game {
                         .is_some_and(|cr| cr.stage == crate::card::Stage::Stage2);
                     s.stage2[player] += u32::from(two);
                 }
-                Event::CoinFlip { player, heads } => {
+                Event::TurnStarted { .. } => playing = true,
+                // A restart: a new setup coin, and the old prize race is over.
+                Event::SuddenDeath => {
+                    playing = false;
+                    gaps.clear();
+                    left = [None; 2];
+                }
+                Event::CoinFlip { player, heads } if playing => {
                     run[player] = if heads { run[player] + 1 } else { 0 };
                     s.heads_run[player] = s.heads_run[player].max(run[player]);
                 }
@@ -805,6 +816,20 @@ mod summary_tests {
     }
 
     #[test]
+    fn a_sudden_death_starts_the_prize_race_again() {
+        let mut g = dealt([4, 1]);
+        g.log.push(Event::SuddenDeath);
+        g.sudden_death = true;
+        for player in [0, 1] {
+            g.log.push(Event::PrizesSet { player, count: 1 });
+        }
+        g.players[1].deck.clear();
+        ok(&mut g, Action::Done);
+        let s = g.summary();
+        assert_eq!((s.winner, s.brink, s.sudden_death), (Some(0), false, true));
+    }
+
+    #[test]
     fn summary_of_a_comeback() {
         // Four prizes to take while the opponent needs one; then they deck out.
         let mut g = dealt([4, 1]);
@@ -822,6 +847,10 @@ mod summary_tests {
         let mut g = dealt([6, 6]);
         let coin = |player, heads| Event::CoinFlip { player, heads };
         g.log.extend([
+            // The first-player coin, before any turn, is no one's run.
+            coin(0, true),
+            coin(0, true),
+            Event::TurnStarted { player: 0, turn: 0 },
             coin(0, true),
             coin(0, true),
             coin(1, false),

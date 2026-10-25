@@ -83,7 +83,7 @@ pub fn provide() {
         progress.update(|p| {
             got = stats.with_untracked(|s| profile.with_untracked(|pf| award(s, p, pf)))
         });
-        toasts.0.update(|q| q.extend(got));
+        toasts.earned(got);
     });
 }
 
