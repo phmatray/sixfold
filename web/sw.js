@@ -3,8 +3,9 @@
 // shell, relative to this worker, so it works at / and under a sub-path.
 //
 // - The app shell is cached on install and served cache-first (its file
-//   names carry a content hash); a page load goes to the network first and
-//   falls back to the cached index.html when offline.
+//   names carry a content hash, and the world's modules, which don't, are
+//   part of it so they change together); a page load goes to the network
+//   first and falls back to the cached index.html when offline.
 // - World assets (every area's models and textures), three.js from the CDN
 //   and the web fonts are cached the first time they are used, then served
 //   stale-while-revalidate. The world's cache is per build, so a deploy never
@@ -27,7 +28,9 @@ const SHELL_URLS = new Set(PRECACHE.map((p) => new URL(p, SCOPE).href));
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(SHELL).then((c) => c.addAll([INDEX, ...SHELL_URLS])),
+    // no-cache: an unhashed file (index.html, world/*.js) must not come from
+    // an HTTP cache that still holds the previous deploy.
+    caches.open(SHELL).then((c) => c.addAll([INDEX, ...SHELL_URLS].map((u) => new Request(u, { cache: "no-cache" })))),
   );
 });
 

@@ -194,8 +194,8 @@ pub fn lesson(g: &Game) -> Lesson {
                     format!("Placez maintenant {} sur votre Banc.", name(PUDDOCK)),
                 ),
                 tr(
-                    "Benched creatures wait their turn. If your Active is knocked out with an empty Bench, you lose.",
-                    "Les créatures du Banc attendent leur tour. Si votre Active est mise K.O. sans personne sur le Banc, vous perdez.",
+                    "Benched creatures wait their turn: Retreat swaps your Active for one of them, paying its energy cost. If your Active is knocked out with an empty Bench, you lose.",
+                    "Les créatures du Banc attendent leur tour : la Retraite échange votre Active contre l'une d'elles, en payant son coût en énergie. Si votre Active est mise K.O. sans personne sur le Banc, vous perdez.",
                 )
                 .into(),
             )
@@ -236,7 +236,7 @@ pub fn lesson(g: &Game) -> Lesson {
             ),
             tr(
                 format!("It does 10, but {} is weak to Fire: weakness doubles it to 20. Attacking ends your turn.", name(POLLENPUP)),
-                format!("Elle inflige 10, mais {} a une Faiblesse au Feu : ce qui double les dégâts : 20. Attaquer termine votre tour.", name(POLLENPUP)),
+                format!("Elle inflige 10, mais {} a une Faiblesse au Feu, ce qui double les dégâts : 20. Attaquer termine votre tour.", name(POLLENPUP)),
             ),
         )),
         (PromptKind::MainPhase, Some(ASHPAW)) => find(g, BLAZELYNX).map(|h| {
@@ -420,6 +420,17 @@ mod tests {
                 ..
             }
         )));
+    }
+
+    /// Retreat can't be played in the three-turn script (one retreat a turn,
+    /// and its energy is needed for the knock-out), so the Bench step names it.
+    #[test]
+    fn tutorial_explains_retreat() {
+        let mut g = game();
+        g.apply(Action::PlayBasic(0)).unwrap();
+        let l = lesson(&g);
+        assert_eq!(l.goal, Goal::Bench);
+        assert!(l.why.contains("Retreat"), "{}", l.why);
     }
 
     #[test]

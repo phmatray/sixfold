@@ -535,7 +535,8 @@ impl Ctl {
                 } else {
                     tr("Opponent's turn", "Tour adverse")
                 };
-                let sub = tr(format!("Turn {turn}"), format!("Tour {turn}"));
+                // Counted from 1 for people (the engine counts from 0).
+                let sub = tr(format!("Turn {}", turn + 1), format!("Tour {}", turn + 1));
                 self.callout(title.into(), sub, None, you(*player));
                 1000
             }
