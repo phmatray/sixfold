@@ -7,10 +7,10 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { windify, waterify, ambience } from "./life.js";
 import { groundMesh } from "./ground.js";
-import { rng, mesh, group, toon, PLACEHOLDER, FOOT, WALKABLE, DECK, LADDER, BOB, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox } from "./props.js";
+import { rng, mesh, group, toon, fadeable, PLACEHOLDER, FOOT, WALKABLE, DECK, LADDER, BOB, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox } from "./props.js";
 import { key, glowTex, blobGeo, blobMat } from "./actors.js";
 import { spawnNpcs } from "./npc.js";
-import { OPTIONAL, RING, cliffSet } from "./map.js";
+import { OPTIONAL, RING } from "./map.js";
 
 // Instanced: static, never animated, never read like a sign (one draw per mesh of the model, not per prop).
 const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "reeds", "boardwalk", "pier", "bridge", "stairs",
@@ -27,6 +27,11 @@ const SMOKE = 8;
 const CHUNK = 16; // tiles per side of an instanced scenery chunk (culled as one)
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
+// A model at least this tall can hide the hero: its opaque parts fade where they stand
+// between the camera and the hero (props.js `fadeable`). Measured once per model.
+const TALL_FADE = 1.3;
+const tall = (o) => (o.userData.tall ??= new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()).y >= TALL_FADE);
+const fadeAll = (o) => o.traverse((m) => m.isMesh && !m.material.transparent && fadeable(m.material));
 
 // Re-check what a condition shows or hides (`holds(cond)`), after a map is built
 // and whenever the game state may have changed (a dialogue closed, the time of day
@@ -213,25 +218,6 @@ function flatten(template) {
   return (template.userData.flat = out);
 }
 
-// A copy of a model keeping only its upward faces (a cliff block's top, for tiles
-// inside a plateau whose sides nobody sees).
-function topOnly(template) {
-  const out = template.clone(true), a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
-  delete out.userData.flat;
-  out.traverse((m) => {
-    if (!m.isMesh) return;
-    const g = m.geometry.clone(), pos = g.attributes.position, idx = g.index ? g.index.array : [...Array(pos.count).keys()], keep = [];
-    for (let i = 0; i < idx.length; i += 3) {
-      a.fromBufferAttribute(pos, idx[i]), b.fromBufferAttribute(pos, idx[i + 1]), c.fromBufferAttribute(pos, idx[i + 2]);
-      const ny = c.clone().sub(b).cross(a.clone().sub(b)).normalize().y; // winding is CCW: (b-a)x(c-a) == (c-b)x(a-b)
-      if (Math.abs(ny) > 0.3 && Math.max(a.y, b.y, c.y) > 0.75) keep.push(idx[i], idx[i + 1], idx[i + 2]);
-    }
-    g.setIndex(keep);
-    m.geometry = g;
-  });
-  return out;
-}
-
 // A copy of a model posed at the end of `clip` (the moonflower open), for instancing.
 function posed(scene, clip) {
   const flat = scene.userData.flat; // a session cache (flatten): not to be copied into the clone
@@ -315,6 +301,7 @@ function batcher() {
             inst.receiveShadow = true;
             inst.userData.shared = true; // geometry and material belong to the cached model
             if (windH(name)) windify(inst, windH(name));
+            if (tall(flat) && !m.material.transparent) fadeable(m.material);
             parent.add(inst);
           }
         });
@@ -437,6 +424,7 @@ export async function build(map, got, reduced) {
       // A static model (no clip, not afloat) is merged like the instanced ones: one
       // draw for its flat-coloured parts instead of one per material.
       if (got[p.asset] && !got[p.asset].animations.length && !BOB.has(p.asset)) obj = merged(obj);
+      if (tall(obj)) fadeAll(obj);
       root.add(obj);
       if (BLOB[p.asset] && !got[p.asset]) blobs.push([cx, cz, BLOB[p.asset]]);
     }
@@ -480,25 +468,11 @@ export async function build(map, got, reduced) {
     openers.push({ mixer, action, length: clip.duration || 1, open: 0, want: p.open ? 0 : undefined, cond: p.open ?? null });
   }
 
-  // Raised ground ("1".."9": stacked cliff blocks, a mossy top now and then; the map's
-  // own `cliff` set when it has one) and deck tiles.
-  const cliffs = cliffSet(map);
-  const rise = (x, z) => (inMap(x, z) && tile(x, z) >= "1" && tile(x, z) <= "9" ? +tile(x, z) : 0); // off the map counts as open ground
+  // Deck tiles. (Raised ground, "1".."9", is part of the ground mesh: terrain.js.)
   for (let z = 0; z < H; z++)
     for (let x = 0; x < W; x++) {
-      const c = tile(x, z), turn = () => (Math.floor(r() * 4) * Math.PI) / 2;
-      if (c >= "1" && c <= "9")
-        for (let k = 0; k < +c; k++) {
-          // A block whose four neighbours all stand higher is hidden: only the top
-          // layer of a plateau and the faces of its edges are drawn (a 4 m crater
-          // rim would otherwise be four blocks per tile, most of them never seen).
-          if (k < +c - 1 && SIDES.every(([dx, dz]) => rise(x + dx, z + dz) > k)) continue;
-          const n = k === +c - 1 && got[cliffs[1]] && r() < 0.35 ? cliffs[1] : cliffs[0];
-          // Inside a plateau only the top shows: the block without its sides.
-          const inner = k === +c - 1 && got[n] && SIDES.every(([dx, dz]) => rise(x + dx, z + dz) >= +c);
-          batch.add(inner ? `${n}#top` : n, inner ? tpl(`${n}#top`, () => topOnly(tpl(n))) : tpl(n), at(x + 0.5, z + 0.5, turn(), 1, k));
-        }
-      else if (c === "=" || c === "H") batch.add(c === "=" ? "boardwalk" : "pier", tpl(c === "=" ? "boardwalk" : "pier"), at(x + 0.5, z + 0.5, 0));
+      const c = tile(x, z);
+      if (c === "=" || c === "H") batch.add(c === "=" ? "boardwalk" : "pier", tpl(c === "=" ? "boardwalk" : "pier"), at(x + 0.5, z + 0.5, 0));
     }
 
   // Fences ("f": the map's `fence` set, "fence", "wall_dry" or "hedge") and walls ("W",

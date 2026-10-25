@@ -89,8 +89,6 @@ export function expand(map) {
   return map;
 }
 export const OPTIONAL = /_b$|_c$|_dark$/; // variants: used when present, never missed
-// The cliff blocks for digit tiles: a map's `cliff` set ([block, top variant]), else the sandstone one.
-export const cliffSet = (map) => map.cliff ?? ["cliff", "cliff_b"];
 export const RING = ["tree", "tree_b", "tree_c", "bush_dark"]; // the default band of trees outside an outdoor map
 
 // Every model a map can use, so they load in parallel before it is built.
@@ -100,7 +98,6 @@ export function assetNames(map) {
   const pieces = (kind) => Object.keys(SUFFIX_ARMS).forEach((s) => names.add(kind + s));
   if (tiles.includes("f")) pieces(map.fence ?? "fence");
   if (/[WV]/.test(tiles)) pieces("wall"), pieces("wall_low"), names.add("wall_window");
-  if (/[1-9]/.test(tiles)) cliffSet(map).forEach((n) => names.add(n));
   for (const g of map.gates ?? []) for (const n of [g.prop, g.prop_closed, g.prop_open]) if (n) names.add(n);
   if (tiles.includes("=")) names.add("boardwalk");
   if (tiles.includes("H")) names.add("pier");

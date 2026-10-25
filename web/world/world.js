@@ -28,7 +28,7 @@
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
 import * as THREE from "three";
 import { U } from "./life.js";
-import { PLACEHOLDER, group, prep } from "./props.js";
+import { PLACEHOLDER, group, prep, CUTAWAY } from "./props.js";
 import { tr, loadMap, loadAsset, assetNames, preload, PERSON, OPTIONAL } from "./map.js";
 import { build, dispose, refresh, animateProps } from "./build.js";
 import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route, emote } from "./actors.js";
@@ -67,8 +67,15 @@ export function mount(el, controls, cb, start, edit = false) {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, 0.5, 80); // tight planes: depth precision
-  // Where scenery hides the hero, draw it as a flat silhouette (depth test reversed).
-  const silhouette = new THREE.MeshBasicMaterial({ color: "#f3d589", transparent: true, opacity: 0.55, depthFunc: THREE.GreaterDepth, depthWrite: false, fog: false });
+  camera.layers.enable(1); // the hero (layer 1: left out of the sun's shadow pass)
+  // three's shadow pass draws only what the rendering camera's layers hold, so the
+  // shadows are drawn first through a camera that sees nothing itself and holds every
+  // layer (the terrain's shadow-only caster, layer 2) but the hero's.
+  const shadowEye = new THREE.OrthographicCamera(-0.01, 0.01, 0.01, -0.01, 0.1, 0.2);
+  shadowEye.position.set(0, -1e4, 0);
+  shadowEye.updateMatrixWorld();
+  shadowEye.layers.enableAll();
+  shadowEye.layers.disable(1);
   let cam = { fov: 40, fovPortrait: 50, pitch: 50, distance: 12, distancePortrait: 15, lookAtOffset: [0, 0.75, 0] };
   let dist = 12, alive = true, raf = 0, paused = false, warping = false, world = null, hero = null;
   let canRun = false, runToggle = false, shift = false, lastHero = "";
@@ -393,7 +400,7 @@ export function mount(el, controls, cb, start, edit = false) {
     if (missing.length) console.info(`world (${name}): placeholders for ${missing.join(", ")}`);
     if (!hero) {
       hero = actor(got.hero, null, 1, "idle");
-      hero.obj.traverse((o) => o.layers.set(1)); // drawn in its own passes (see frame)
+      hero.obj.traverse((o) => o.layers.set(1)); // casts no sun shadow (its blob is its shadow; see shadowEye)
       scene.add(hero.obj, hero.blob);
     }
     const next = await build(map, got, reduced);
@@ -594,19 +601,15 @@ export function mount(el, controls, cb, start, edit = false) {
       w.sun.target.position.set(h.x, 0, h.z);
     }
 
-    // Three passes: the scene without the hero; the hero's silhouette where
-    // scenery hides it; then the hero itself where it shows.
+    // The shadows (shadowEye), then the scene. Tall scenery between the camera and the
+    // hero thins out round the hero (props.js `fadeable`); the hero is never drawn through it.
+    if (hero && !warping) CUTAWAY.hero.value.set(hero.obj.position.x, hero.obj.position.y + 0.8, hero.obj.position.z);
+    else CUTAWAY.hero.value.set(0, -1e4, 0);
     renderer.shadowMap.needsUpdate = true;
     renderer.info.reset();
+    renderer.render(scene, shadowEye);
     renderer.clear();
-    camera.layers.set(0);
     renderer.render(scene, camera);
-    camera.layers.set(1);
-    scene.overrideMaterial = silhouette;
-    renderer.render(scene, camera);
-    scene.overrideMaterial = null;
-    renderer.render(scene, camera);
-    camera.layers.set(0);
     stats = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles };
     if (!readySent) (readySent = true), cb("ready", "", "");
   }

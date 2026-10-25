@@ -11,7 +11,7 @@
 // fades in). Finds (`kind: "find"`): an id, a `give` and a `text`, on a solid tile
 // (something to look in, never a featureless one).
 // 1.3 (WORLD_DESIGN §7, §13.3): outdoor maps have `title_fr`, a `region` and a `music` track; `fence` and
-// `cliff` name known sets. Gates: tiles in bounds; with every gate shut the spawn still reaches an exit or
+// `cliff` name known sets; optional `paint` rows (a ground layer on any tile, raised ones too) match `tiles`. Gates: tiles in bounds; with every gate shut the spawn still reaches an exit or
 // a warp (no soft-lock), and with every gate open every person, spot, warp and waymark can be reached
 // (floor heights, the 0.6 m step and the ladder rule as build.js has them; a door warp to the same map, a
 // lift, carries the fill to where it lands). When the hour turns and the `time:` gates of that phase shut,
@@ -82,6 +82,8 @@ for (const [name, m] of Object.entries(maps)) {
   }
   if (m.fence !== undefined && !FENCES.has(m.fence)) fail.push(`${name}: fence ${m.fence} is not ${[...FENCES].join(" / ")}`);
   if (m.cliff !== undefined && !(Array.isArray(m.cliff) && m.cliff.length === 2 && m.cliff.every((c) => typeof c === "string"))) fail.push(`${name}: cliff is [block, top variant]`);
+  if (m.paint !== undefined && !(Array.isArray(m.paint) && m.paint.length === m.tiles.length && m.paint.every((r, z) => r.length === m.tiles[z].length && /^[.psr]*$/.test(r))))
+    fail.push(`${name}: paint is one row per tile row, the same length, of . p s r`);
   const solid = new Set(), height = {};
   m.tiles.forEach((row, z) => [...row].forEach((c, x) => c >= "1" && c <= "9" && (height[`${x},${z}`] = +c)));
   m.tiles.forEach((row, z) => [...row].forEach((c, x) => "#fWV~".includes(c) && solid.add(`${x},${z}`)));

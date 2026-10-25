@@ -8,7 +8,8 @@
 // with a procedural canvas fallback until those exist.
 import * as THREE from "three";
 import { U } from "./life.js";
-import { grassTexture, rng } from "./props.js";
+import { grassTexture, rng, fadeInto } from "./props.js";
+import { raised, rise, rockOf, terrainGeometry } from "./terrain.js";
 
 const TEX = new URL("./textures/", import.meta.url);
 const REPEAT = { grass: 6, dirt: 3, wood_floor: 2.4, sand: 5, stone: 2.5, // metres per texture tile
@@ -131,7 +132,8 @@ const clouds = (() => {
 
 // Ground layers per tile character: the overlay channel each one paints.
 // "p" path (the map's `ground.path` layer), "s" and "=" sand, "r" stone,
-// "~" and "H" (a pier) water. Anything else shows the base layer.
+// "~" and "H" (a pier) water. Anything else shows the base layer. A map's optional
+// `paint` rows (same size as `tiles`) paint a layer on any tile, a raised one too.
 const CHANNEL = { p: 0, s: 1, "=": 1, r: 2, "~": 3, H: 3 };
 
 // Overlay textures a map uses (the base stands in for the unused ones).
@@ -148,14 +150,20 @@ export async function groundMesh(map, tile) {
   const [a, b, c, d] = await Promise.all(names.map(layer));
   const data = new Uint8Array(W * H * 4);
   for (let z = 0; z < H; z++) for (let x = 0; x < W; x++) {
-    const ch = CHANNEL[tile(x, z)];
-    if (ch !== undefined) data[(z * W + x) * 4 + ch] = 255;
+    for (const ch of [CHANNEL[tile(x, z)], CHANNEL[map.paint?.[z]?.[x]]]) if (ch !== undefined) data[(z * W + x) * 4 + ch] = 255;
   }
   const maskTex = new THREE.DataTexture(data, W, H, THREE.RGBAFormat, THREE.UnsignedByteType);
   maskTex.magFilter = maskTex.minFilter = THREE.LinearFilter;
   maskTex.needsUpdate = true;
   // A tide gate (build.js) floods its tiles while shut, so its map always draws water.
   const water = (map.gates ?? []).some((g) => g.tide) || data.some((v, i) => i % 4 === 3 && v);
+  // Raised ground (terrain.js): each tile's level, so a layer only paints at its own
+  // tile's height (no path or water creeping over a lip), and the rock of the walls.
+  const high = raised(map);
+  const levels = new Uint8Array(W * H * 4);
+  for (let z = 0; z < H; z++) for (let x = 0; x < W; x++) levels[(z * W + x) * 4] = rise(map, x, z) * 25;
+  const levelTex = new THREE.DataTexture(levels, W, H, THREE.RGBAFormat, THREE.UnsignedByteType);
+  levelTex.needsUpdate = true;
 
   const m = gd.margin ?? 0;
   const mat = new THREE.MeshLambertMaterial();
@@ -165,16 +173,20 @@ export async function groundMesh(map, tile) {
       uSize: { value: new THREE.Vector2(W, H) },
       uRep: { value: new THREE.Vector4(...names.map((n) => REPEAT[n] ?? 4)) },
       uClouds: { value: map.light.indoor ? 0 : 1 },
+      uLevel: { value: levelTex }, uRock: { value: rockOf(map).map((c) => new THREE.Color(c)) },
     });
     sh.vertexShader = sh.vertexShader
-      .replace("#include <common>", "#include <common>\nvarying vec2 vXZ;")
-      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvXZ = (modelMatrix * vec4(position, 1.0)).xz;");
+      .replace("#include <common>", `#include <common>\nvarying vec2 vXZ;\nvarying float vY;${high ? "\nattribute vec2 aRim;\nvarying vec2 vRim;" : ""}`)
+      .replace("#include <begin_vertex>", `#include <begin_vertex>\nvec4 wp4 = modelMatrix * vec4(position, 1.0);\nvXZ = wp4.xz;\nvY = wp4.y;${high ? "\nvRim = aRim;" : ""}`);
     sh.fragmentShader = sh.fragmentShader
       .replace(
         "#include <common>",
         `#include <common>
         varying vec2 vXZ;
-        uniform sampler2D uA, uB, uC, uD, uMask, uCloud;
+        varying float vY;
+        ${high ? "varying vec2 vRim;" : ""}
+        uniform sampler2D uA, uB, uC, uD, uMask, uCloud, uLevel;
+        uniform vec3 uRock[6];
         uniform vec2 uSize;
         uniform vec4 uRep;
         uniform float uDrift, uClouds;
@@ -190,6 +202,9 @@ export async function groundMesh(map, tile) {
           float n = vnoise(vXZ * 1.7) * 0.65 + vnoise(vXZ * 4.3) * 0.35;
           vec2 warp = vec2(vnoise(vXZ * 0.9 + 7.1), vnoise(vXZ * 0.9 - 3.7)) - 0.5;
           vec4 m = texture2D(uMask, (vXZ + warp * 0.55) / uSize);
+          ${high ? `
+          float lvl = texture2D(uLevel, (floor(vXZ) + 0.5) / uSize).r * 10.2; // 255 / 25
+          m *= 1.0 - smoothstep(0.15, 0.4, abs(vY - lvl));` : ""}
           vec4 k = smoothstep(0.4, 0.6, m + (n - 0.5) * 0.35);
           vec3 col = texture2D(uA, vXZ / uRep.x).rgb;
           col = mix(col, texture2D(uC, vXZ / uRep.z).rgb, k.g);
@@ -209,17 +224,47 @@ export async function groundMesh(map, tile) {
           col = mix(col, wat, edge);
           float foam = smoothstep(0.1, 0.0, abs(w - 0.5 - 0.035 * sin(uDrift * 1.3 + n * 6.0)));
           col = mix(col, vec3(0.96, 0.98, 0.95), foam * 0.8);` : ""}
+          ${high ? `
+          // Rock where the field is steep: wavy strata by height, a darker foot.
+          vec3 wp = vec3(vXZ.x, vY, vXZ.y);
+          float steep = 1.0 - smoothstep(0.5, 0.78, abs(normalize(cross(dFdx(wp), dFdy(wp))).y));
+          float band = mod(floor(vY * 2.3 + n * 0.7 + vnoise(vXZ * 0.31) * 1.6), 4.0);
+          vec3 rock = band < 0.5 ? uRock[0] : band < 1.5 ? uRock[1] : band < 2.5 ? uRock[2] : uRock[3];
+          rock *= 0.86 + 0.28 * vnoise(vec2(vXZ.x + vXZ.y, vY) * vec2(2.7, 7.0));
+          // A worn lip round a plateau's top, a contact shadow along a wall's foot and
+          // darker rock at the bottom of the wall (terrain.js marks those nodes: aRim).
+          float level = 1.0 - steep;
+          col = mix(col, uRock[5], level * smoothstep(0.42, 0.5, vRim.x + (n - 0.5) * 0.45) * 0.75);
+          col *= 1.0 - level * smoothstep(0.0, 0.8, vRim.y) * 0.35;
+          col *= 1.0 + level * min(vY, 3.0) * 0.045; // higher ground a touch lighter, so levels read from above
+          rock = mix(rock, uRock[4], vRim.y * 0.7);
+          col = mix(col, rock, steep);` : ""}
           col *= 1.0 - 0.2 * uClouds * texture2D(uCloud, vXZ * 0.03 + uDrift * vec2(0.012, 0.007)).r;
           diffuseColor.rgb *= col;
         }`,
       );
+    if (high) fadeInto(sh); // a cliff lip between the camera and the hero thins out
   };
-  mat.customProgramCacheKey = () => (water ? "ground-w" : "ground");
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(W + 2 * m, H + 2 * m), mat);
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.set(W / 2, 0, H / 2);
+  mat.customProgramCacheKey = () => (water ? "ground-w" : "ground") + (high ? "-h" : "");
+  let ground;
+  if (high) {
+    // One mesh for the ground and every plateau (flat-shaded, so the walls facet like
+    // the props). Only its raised part casts a shadow, through a copy on layer 2 that
+    // the shadow pass draws and the camera (layers 0 and 1) never does.
+    const { geo, shadow } = terrainGeometry(map);
+    mat.flatShading = true;
+    ground = new THREE.Mesh(geo, mat);
+    const caster = new THREE.Mesh(shadow, new THREE.MeshBasicMaterial());
+    caster.castShadow = true;
+    caster.layers.set(2);
+    ground.add(caster);
+  } else {
+    ground = new THREE.Mesh(new THREE.PlaneGeometry(W + 2 * m, H + 2 * m), mat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.set(W / 2, 0, H / 2);
+  }
   ground.receiveShadow = true;
-  ground.userData.dispose = () => maskTex.dispose();
+  ground.userData.dispose = () => (maskTex.dispose(), levelTex.dispose());
   // The tide: these tiles' water, 0 (the flats bare) to 1 (under the sea).
   ground.userData.water = (tiles, level) => {
     const v = Math.round(level * 255);

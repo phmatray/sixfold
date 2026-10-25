@@ -24,6 +24,43 @@ const ramp = (() => {
 })();
 export const toon = (color, extra = {}) => new THREE.MeshToonMaterial({ color, gradientMap: ramp, ...extra });
 
+// Scenery that stands between the camera and the hero thins out round the hero (an
+// ordered dither, down to ~30 % at the centre), above the hero's waist only; the hero
+// is never drawn through anything. `CUTAWAY.hero` (the hero's centre) is set every frame
+// by world.js; one shared uniform, so nothing recompiles as the hero moves.
+export const CUTAWAY = { hero: { value: new THREE.Vector3(0, -1e4, 0) } };
+export function fadeInto(sh) {
+  sh.uniforms.uFadeHero = CUTAWAY.hero;
+  sh.vertexShader = sh.vertexShader
+    .replace("#include <common>", "#include <common>\nvarying vec3 vFadeW;")
+    .replace("#include <project_vertex>", `#include <project_vertex>
+      vec4 fadeW = vec4(transformed, 1.0);
+      #ifdef USE_INSTANCING
+        fadeW = instanceMatrix * fadeW;
+      #endif
+      vFadeW = (modelMatrix * fadeW).xyz;`);
+  sh.fragmentShader = sh.fragmentShader
+    .replace("#include <common>", "#include <common>\nvarying vec3 vFadeW;\nuniform vec3 uFadeHero;")
+    .replace("#include <clipping_planes_fragment>", `#include <clipping_planes_fragment>
+      {
+        vec3 ray = uFadeHero - cameraPosition, p = vFadeW - cameraPosition;
+        float len = length(ray), t = dot(p, ray) / len;
+        float k = (1.0 - smoothstep(0.7, 1.15, length(p - ray * (t / len)))) * step(t, len - 0.45) * step(uFadeHero.y - 0.5, vFadeW.y);
+        ivec2 q = ivec2(mod(gl_FragCoord.xy, 4.0));
+        const float B[16] = float[16](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
+        if ((B[q.y * 4 + q.x] + 0.5) / 16.0 < k * 0.7) discard;
+      }`);
+}
+// Opt a material into the fade, once (a wind or water hook it already has runs first).
+export function fadeable(mat) {
+  if (mat.onBeforeCompile.fade) return;
+  const prev = mat.onBeforeCompile;
+  const key = Object.hasOwn(mat, "customProgramCacheKey") && !mat.customProgramCacheKey.fade ? mat.customProgramCacheKey.bind(mat) : () => prev.toString();
+  mat.onBeforeCompile = Object.assign((sh, r) => (prev.call(mat, sh, r), fadeInto(sh)), { fade: true });
+  mat.customProgramCacheKey = Object.assign(() => `${key()}|fade`, { fade: true });
+  mat.needsUpdate = true;
+}
+
 
 export function grassTexture() {
   const c = document.createElement("canvas");
@@ -310,6 +347,14 @@ export function prep(root, cast) {
     o.material.vertexColors = false;
     // A `glow` part (a lamp's glass, the oven's mouth) shines a little on its own.
     if (/glow/i.test(o.material.name) && o.material.emissive) o.material.emissive.copy(o.material.color).multiplyScalar(0.55);
+    // The baked contact shadow (two discs a few mm over the ground): pulled toward the
+    // camera in depth and never written there or cast, so it can't flicker against the
+    // ground or itself.
+    if (/contact/i.test(o.material.name)) {
+      o.castShadow = false;
+      Object.assign(o.material, { depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: /_in/.test(o.material.name) ? -8 : -4 });
+      o.renderOrder = /_in/.test(o.material.name) ? 1 : 0;
+    }
   });
 }
 

@@ -22,6 +22,10 @@ to see a new file.
   `H` 0.3, or a deck prop). The hero and NPCs stand at it, easing between two heights on a
   step. A step may rise or drop at most 0.6 m, so a cliff edge (1 m) blocks and stairs
   (0.5 m) climb it. Taps on raised ground find the right tile.
+- **Raised ground** (`terrain.js`): digit tiles are part of the ground mesh, one height field per
+  map: plateau tops carry the ground texture (and `paint`), walls stand in the lower tile's outer
+  quarter, convex corners are rounded and concave ones filled. Next to a built prop (stairs, a climb
+  wall, a cave mouth, a house; not trees, rocks or flowers) the wall stays straight on the tile edge.
 - Press G in the game to show the grid with a legend (blocked, look or use, door, person).
 
 ## Models
@@ -42,7 +46,7 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `pier.glb` | Deck tile for `H` (over water), top at 0.30 m, posts into the water | 1 × 1 | 0.3 m |
 | `bridge.glb` | Footbridge spanning its Z length; floor 0.12 / 0.24 / 0.24 / 0.12 m by row | 2 × 4 | rails ~1.1 m |
 | `stairs.glb` | Stone steps climbing toward −Z from 0 to 1 m (floor 0.5 m; `y` stacks them on a cliff) | 1 × 1 | 1 m |
-| `cliff.glb` (+ `cliff_b`, mossy) | Stackable rock block for the digit tiles: sides to the tile edges, flat top at exactly 1 m, random 90° turns | 1 × 1 | 1 m |
+| `cliff.glb` (+ `cliff_b`, mossy) | A rock block (no longer stacked on digit tiles: `terrain.js` builds raised ground; its colours are the sandstone wall's) | 1 × 1 | 1 m |
 | `boat.glb` | Rowboat on the water (bobs in the game) | 2 × 1 | ~0.4 m |
 | `stall.glb`, `stall_b.glb` | Market stalls, counter on the front; a person can be talked to across one | 2 × 1 | ~2.3 m |
 | `lantern.glb` | Street lantern, `light_origin` at the glass | 1 × 1 | ~2.2 m |
@@ -184,6 +188,8 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
       // "." base ground, "p" path, "s" sand, "r" stone, "w" wood floor (walkable)
       // "=" boardwalk, "H" pier over water, "1".."9" a raised cliff top that many metres up (walkable)
       // "f" fence, "W" wall, "V" wall with a window, "~" water, "#" blocked
+  "paint": ["....ppp..", ...],          // optional, same size as `tiles`: "p" / "s" / "r" paint that layer on
+      // any tile, a raised one too (a path across a plateau); "." leaves the tile as it is
   "props": [{ "asset": "house", "x": 10, "z": 6, "rot": 0 }, { "asset": "pine", "x": 3, "z": 2, "rot": 0, "y": 1 }, ...],
   "exits": [{ "side": "n", "span": [24, 25], "to": "quarry" }],
   "spawn": { "x": 13, "z": 14, "facing": "n" },
@@ -318,8 +324,8 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   `atlas.json`: `hub`, `ember`, `storm`, `tide`, `dream`, `grove`, `stone`), `music` (a track:
   `overworld`, `ember`, `storm`, `tide`, `dream`, `grove`, `stone`, `cave`; after dark the world plays
   `<track>_night`), and optionally:
-  - `cliff: ["cliff_basalt", "cliff_basalt_b"]`: the blocks digit tiles stack (block, top variant;
-    default `cliff` / `cliff_b`);
+  - `cliff: ["cliff_basalt", "cliff_basalt_b"]`: the rock of the raised ground's walls (strata, foot and
+    worn lip, `ROCK` in `terrain.js`; default `cliff`, sandstone);
   - `fence: "wall_dry" | "hedge"`: the auto-tile set for `f` tiles (default `fence`; same mask table);
   - `dark: true`: a cave. No sun at any hour, a dim sky, and the hero's lantern lights the way; music `cave`;
   - `light_dawn` / `light_dusk` / `light_night`: any part of a `light` block, overriding that phase's
@@ -394,8 +400,8 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
     `build.js`, eight sources at most); a gate's vents steam only while it is shut.
   - **prop `recolor`** works on any prop now: a recoloured prop is drawn on its own instead of instanced.
   - Static models that are not instanced (houses, kilns, the observatory…) are **merged** like the instanced ones:
-    one draw for their flat-coloured parts; their named empties survive. Cliff blocks hidden on all four sides are
-    skipped, and a plateau's inner tiles draw only the top of their block.
+    one draw for their flat-coloured parts; their named empties survive. Raised ground is one mesh with the ground
+    (`terrain.js`), plus one shadow-only copy of its raised part.
   - A **door warp to the same map** is a lift (the Rodspire's): check-maps carries its flood fill on to where it lands.
   - The effect **`sfx:<name>`** plays one of `engine::overworld::SOUNDS` (`spark`, `chime`, `jingle`, `gate`, `seal`).
   - Coloured glassware (`glass_teal`, `glass_amber` … materials) keeps its colour at night and catches the light
