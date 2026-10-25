@@ -1,6 +1,8 @@
 //! A player's progress outside a duel: the packs they hold ([`Wallet`]), and
 //! the rules that move cards and packs around ([`Profile`]): what a new player
-//! starts with, opening a pack, and the reward for a duel against the AI.
+//! starts with and opening a pack. (Duel rewards are Facets, kept in the
+//! world's [`Progress`](crate::overworld::Progress): see
+//! [`crate::campaign::record_quick_duel`].)
 //!
 //! Pure data: the UI stores [`Collection::save`], [`DeckList::save`] and
 //! [`Wallet::save`] strings wherever it likes.
@@ -16,9 +18,6 @@ const VERSION: &str = "p1";
 
 /// Packs a new player starts with, per booster: one Ember, Tide and Wild.
 pub const STARTING_PACKS: [u32; BOOSTERS.len()] = [1, 1, 1, 0, 0, 0, 0];
-
-/// The booster (index into [`BOOSTERS`]) a won duel against the AI grants.
-pub const WIN_REWARD: usize = 2;
 
 /// Unopened packs, counted per booster in [`BOOSTERS`] order.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -124,12 +123,6 @@ impl Profile {
                 .collect(),
         )
     }
-
-    /// The reward for a finished duel against the AI: a won duel grants a
-    /// [`WIN_REWARD`] pack and returns its booster index; a loss grants nothing.
-    pub fn record_duel(&mut self, won: bool) -> Option<usize> {
-        (won && self.wallet.grant(WIN_REWARD, 1)).then_some(WIN_REWARD)
-    }
 }
 
 #[cfg(test)]
@@ -172,16 +165,6 @@ mod tests {
             assert!(p.collection.count(id) >= 1);
         }
         assert_eq!(p.open_pack(9, 1), None);
-    }
-
-    #[test]
-    fn a_win_grants_one_pack_a_loss_none() {
-        let mut p = Profile::new_player();
-        assert_eq!(p.record_duel(false), None);
-        assert_eq!(p.wallet.total(), 3);
-        assert_eq!(p.record_duel(true), Some(WIN_REWARD));
-        assert_eq!(p.wallet.total(), 4);
-        assert_eq!(p.wallet.packs(WIN_REWARD), 2);
     }
 
     #[test]

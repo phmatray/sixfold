@@ -7,12 +7,11 @@
 
 use leptos::prelude::*;
 use sixfold_engine::ai::Difficulty;
-use sixfold_engine::booster::BOOSTERS;
+use sixfold_engine::booster::{BOOSTERS, WILD};
 use sixfold_engine::campaign::{champion, rival, seals, Rival, RIVALS, SEALS};
 use sixfold_engine::endgame::{self, Rung, CLEAR_FLAG, CLEAR_PACKS, GAUNTLET};
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
-use sixfold_engine::profile::WIN_REWARD;
 use sixfold_engine::{fr, tr, CardId};
 
 use crate::art::color_key;
@@ -67,24 +66,25 @@ pub fn reward_line(r: &Rival, p: &Progress) -> String {
     let (b, n) = r.prize_packs(p);
     let packs = packs_label(b, n);
     let promo = sixfold_engine::card(r.promo()).label();
+    let facets = r.purse(p);
     match (r.beaten(p), r.seal) {
         (false, true) => tr(
             format!(
-                "First win: {}'s seal, {packs} and the {promo} promo card",
+                "First win: {}'s seal, {packs}, ⬡ {facets} and the {promo} promo card",
                 r.name
             ),
             format!(
-                "Première victoire : le sceau {}, {packs} et la carte promo {promo}",
+                "Première victoire : le sceau {}, {packs}, ⬡ {facets} et la carte promo {promo}",
                 de(r.name)
             ),
         ),
         (false, false) => tr(
-            format!("First win: the champion's title, {packs} and the {promo} promo card"),
-            format!("Première victoire : le titre de champion, {packs} et la carte promo {promo}"),
+            format!("First win: the champion's title, {packs}, ⬡ {facets} and the {promo} promo card"),
+            format!("Première victoire : le titre de champion, {packs}, ⬡ {facets} et la carte promo {promo}"),
         ),
         (true, _) => tr(
-            format!("Rematch win: {packs}"),
-            format!("Revanche gagnée : {packs}"),
+            format!("Rematch win: ⬡ {facets}"),
+            format!("Revanche gagnée : ⬡ {facets}"),
         ),
     }
 }
@@ -238,6 +238,7 @@ fn daily_setup(day: u32, name: String, cards: Vec<CardId>, back: Screen) -> Setu
         ],
         prizes: r.prizes,
         difficulty: r.difficulty,
+        style: r.style,
         rival: None,
         post: Some(Post::Daily(day)),
         back,
@@ -258,6 +259,7 @@ pub fn gauntlet_setup(rung: &Rung, name: String, cards: Vec<CardId>, back: Scree
         ],
         prizes: rung.prizes,
         difficulty: rung.difficulty,
+        style: r.style,
         rival: None,
         post: Some(Post::Gauntlet),
         back,
@@ -362,8 +364,8 @@ pub fn Ladder(back: Screen, before: impl Fn() + Copy + Send + Sync + 'static) ->
                         }.into_any(),
                         _ => view! {
                             <p class="rival-meta">{tr(
-                                format!("The six rivals in a row with sharper decks and more prizes. Your deck plays every duel and can't change; one loss ends the run. A pack for each win, and {} for clearing it.", packs_label(WIN_REWARD, CLEAR_PACKS)),
-                                format!("Les six rivaux à la suite, avec des decks plus affûtés et plus de Récompenses. Votre deck joue chaque duel sans changer ; une défaite met fin au parcours. Un booster par victoire, et {} pour l'Épreuve terminée.", packs_label(WIN_REWARD, CLEAR_PACKS)),
+                                format!("The six rivals in a row with sharper decks and more prizes. Your deck plays every duel and can't change; one loss ends the run. A pack for each win, and {} for clearing it.", packs_label(WILD, CLEAR_PACKS)),
+                                format!("Les six rivaux à la suite, avec des decks plus affûtés et plus de Récompenses. Votre deck joue chaque duel sans changer ; une défaite met fin au parcours. Un booster par victoire, et {} pour l'Épreuve terminée.", packs_label(WILD, CLEAR_PACKS)),
                             )}</p>
                             <ol class="rungs">
                                 {GAUNTLET.iter().map(|g| view! {
@@ -464,6 +466,7 @@ pub fn Challenge(
             names: [o.name, format!("{}, {}", r.name, r.title)],
             prizes: r.prizes,
             difficulty: r.difficulty,
+            style: r.style,
             rival: Some(r.id),
             post: None,
             back: Screen::World,

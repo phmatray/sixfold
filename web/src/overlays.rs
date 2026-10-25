@@ -250,8 +250,9 @@ pub fn GameOver() -> impl IntoView {
             Some((w, v.sudden_death, left, why))
         })
     });
-    // The reward is granted once per match, when its result first shows. A
-    // campaign duel gives the rival's reward instead of the Wild pack.
+    // The reward is granted once per match, when its result first shows: a
+    // quick duel pays Facets by the AI's level, a campaign duel the rival's
+    // reward.
     let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
     let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
     let rival = ctl
@@ -262,7 +263,8 @@ pub fn GameOver() -> impl IntoView {
     let back = ctl
         .setup
         .with_value(|s| s.as_ref().map_or(Screen::Title, |s| s.back));
-    let reward = RwSignal::new(None::<usize>);
+    let level = ctl.setup.with_value(|s| s.as_ref().map(|s| s.difficulty));
+    let reward = RwSignal::new(None::<u32>);
     let campaign_reward = RwSignal::new(None::<campaign::Reward>);
     let rung_result = RwSignal::new(None::<RungResult>);
     // The daily duel's pack, if this win claimed it.
@@ -302,7 +304,13 @@ pub fn GameOver() -> impl IntoView {
                     campaign_reward.set(got);
                 }
                 (None, Some(Post::Tutorial)) => {}
-                (None, None) => reward.set(profile.try_update(|p| p.record_duel(won)).flatten()),
+                (None, None) => {
+                    let mut got = 0;
+                    progress.update(|pr| {
+                        got = campaign::record_quick_duel(pr, won, level.unwrap_or_default())
+                    });
+                    reward.set((got > 0).then_some(got));
+                }
             }
         }
     });
@@ -355,20 +363,15 @@ pub fn GameOver() -> impl IntoView {
                         )}
                         {sudden.then_some(tr(" Decided in sudden death.", " Décidé en mort subite."))}
                     </p>
-                    {move || reward.get().map(|b| {
-                        let packs = profile.with(|p| p.wallet.total());
+                    {move || reward.get().map(|n| {
+                        let coins = progress.with(|p| p.coins());
                         view! {
                         <div class="reward" role="status">
-                            <span class="pack mini p-wild" aria-hidden="true">
-                                <span class="pack-crimp"></span><span class="pack-crimp bottom"></span>
-                            </span>
-                            <p><b>{format!("+1 {}", sixfold_engine::booster::BOOSTERS[b].name)}</b>
-                                <span>{match (packs, fr()) {
-                                (1, false) => "You have 1 pack to open.".to_string(),
-                                (n, false) => format!("You have {n} packs to open."),
-                                (n, true) if n <= 1 => format!("Vous avez {n} booster à ouvrir."),
-                                (n, true) => format!("Vous avez {n} boosters à ouvrir."),
-                            }}</span></p>
+                            <p><b>{format!("+⬡ {n}")}</b>
+                                <span>{tr(
+                                    format!("You have ⬡ {coins}. Spend Facets on packs at the duel hall."),
+                                    format!("Vous avez ⬡ {coins}. Dépensez vos facettes en boosters à la salle des duels."),
+                                )}</span></p>
                         </div>
                     }})}
                     {move || campaign_reward.get().zip(rival).map(|(rw, r)| {
@@ -406,6 +409,7 @@ pub fn GameOver() -> impl IntoView {
                                         }.into_any(),
                                     }}
                                     {(n > 0).then(|| view! { <span>{format!("+{}", crate::campaign::packs_label(b, n))}</span> })}
+                                    {(rw.facets > 0).then(|| view! { <span>{format!("+⬡ {}", rw.facets)}</span> })}
                                     {rw.promo.map(|c| view! { <span>{tr(
                                         format!("+ the promo card {}, now in your collection", card(c).label()),
                                         format!("+ la carte promo {}, ajoutée à votre collection", card(c).label()),

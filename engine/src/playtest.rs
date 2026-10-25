@@ -1,23 +1,37 @@
 //! Whole-game playtests run by the AI: the deck sweep over every deck the
-//! game ships (prebuilts, rival and Gauntlet decks) and a full campaign
-//! playthrough from a new player's collection.
+//! game ships (prebuilts, rival and Gauntlet decks), the route duelists' kits
+//! and the rivals' AI styles, and a full campaign playthrough from a new
+//! player's collection.
 
-use crate::ai::{Ai, Difficulty};
-use crate::campaign::{champion, record, seals, RIVALS, SEALS};
+use crate::ai::{Ai, Difficulty, Style};
+use crate::booster::BOOSTERS;
+use crate::campaign::{champion, record, rival, seals, RIVALS, SEALS};
 use crate::card::{card, CardId, CardKind, Color, Stage};
-use crate::decks::{Prebuilt, PREBUILT};
+use crate::decks::{Prebuilt, PREBUILT, STARTER};
 use crate::endgame::GAUNTLET;
 use crate::overworld::Progress;
 use crate::profile::Profile;
 use crate::set::{self, basic_energy};
+use crate::shop::{buy_pack, pack_price};
+use crate::trainers::{self, Kit, KITS, SPROUTS, TRAINERS};
 use crate::{card_id, validate_deck, Collection, Config, Game, DECK_SIZE, MAX_COPIES};
 
 /// Play one game to the end; returns the winner's seat.
 fn play(decks: [Vec<CardId>; 2], seed: u64, prizes: u8, levels: [Difficulty; 2]) -> usize {
+    play_styled(decks, seed, prizes, levels.map(|l| (l, Style::Balanced)))
+}
+
+/// [`play`] with an AI style per seat.
+fn play_styled(
+    decks: [Vec<CardId>; 2],
+    seed: u64,
+    prizes: u8,
+    seats: [(Difficulty, Style); 2],
+) -> usize {
     let mut g = Game::new(decks, seed, Config { prizes }).unwrap();
     let mut ais = [
-        Ai::new(seed ^ 0xa1, levels[0]),
-        Ai::new(seed ^ 0xb2, levels[1]),
+        Ai::new(seed ^ 0xa1, seats[0].0).with_style(seats[0].1),
+        Ai::new(seed ^ 0xb2, seats[1].0).with_style(seats[1].1),
     ];
     for _ in 0..50_000 {
         if let Some(w) = g.winner() {
@@ -43,24 +57,45 @@ fn field() -> Vec<&'static Prebuilt> {
     decks
 }
 
+/// The style a rival plays this deck with (its campaign or Gauntlet deck);
+/// Balanced for a deck no rival uses.
+fn style_of(d: &Prebuilt) -> Style {
+    RIVALS
+        .iter()
+        .find(|r| r.deck.name == d.name)
+        .or_else(|| {
+            GAUNTLET
+                .iter()
+                .find(|g| g.deck.name == d.name)
+                .map(|g| g.rival())
+        })
+        .map_or(Style::Balanced, |r| r.style)
+}
+
 /// Normal-vs-Normal round robin over [`field`], `games` per pair with seats
-/// alternating and 6 prizes. Returns `beat[i][j]`: games deck i won against j.
+/// alternating and 6 prizes, each deck played with its rival's style when
+/// `styled`. Returns `beat[i][j]`: games deck i won against j.
 #[allow(clippy::needless_range_loop)] // i, j index both the decks and the table
-fn sweep(games: u64) -> (Vec<&'static Prebuilt>, Vec<Vec<u32>>) {
+fn sweep(games: u64, styled: bool) -> (Vec<&'static Prebuilt>, Vec<Vec<u32>>) {
     let decks = field();
     let n = decks.len();
     let mut beat = vec![vec![0u32; n]; n];
-    let normal = [Difficulty::Normal; 2];
+    let seat = |d: &Prebuilt| {
+        let style = if styled { style_of(d) } else { Style::Balanced };
+        (Difficulty::Normal, style)
+    };
     for i in 0..n {
         for j in i + 1..n {
             for g in 0..games {
                 let seed = (i * n + j) as u64 * 1000 + g;
                 let swap = g % 2 == 1;
                 let mut pair = [decks[i].cards(), decks[j].cards()];
+                let mut seats = [seat(decks[i]), seat(decks[j])];
                 if swap {
                     pair.swap(0, 1);
+                    seats.swap(0, 1);
                 }
-                let first_won = play(pair, seed, 6, normal) == 0;
+                let first_won = play_styled(pair, seed, 6, seats) == 0;
                 let (w, l) = if first_won != swap { (i, j) } else { (j, i) };
                 beat[w][l] += 1;
             }
@@ -80,7 +115,7 @@ fn sweep(games: u64) -> (Vec<&'static Prebuilt>, Vec<Vec<u32>>) {
 #[allow(clippy::needless_range_loop)] // i, j index both the decks and the table
 fn deck_sweep() {
     let games = 100;
-    let (decks, beat) = sweep(games);
+    let (decks, beat) = sweep(games, false);
     let n = decks.len();
     let head: Vec<String> = (0..n).map(|j| format!("{:>3}", j + 1)).collect();
     println!("{:>2} {:18} {} | all", "#", "deck", head.join(" "));
@@ -129,6 +164,106 @@ fn deck_sweep() {
                 beat[i][j]
             );
         }
+    }
+}
+
+/// Each deck's overall win rate in a sweep.
+fn rates(beat: &[Vec<u32>], games: u64) -> Vec<f32> {
+    let n = beat.len() as f32;
+    beat.iter()
+        .map(|row| row.iter().sum::<u32>() as f32 / (games as f32 * (n - 1.0)))
+        .collect()
+}
+
+/// Risk G4: the deck sweep with and without the rivals' AI styles, 60 games
+/// per pair. A styled rival deck must stay inside 40–60% overall, or no
+/// further outside it than the same deck played Balanced. Tuning aid:
+/// `cargo test --release -p sixfold-engine style_sweep -- --ignored --nocapture`.
+#[test]
+#[ignore]
+fn style_sweep() {
+    let games = 60;
+    let (decks, plain) = sweep(games, false);
+    let (_, styled) = sweep(games, true);
+    let (plain, styled) = (rates(&plain, games), rates(&styled, games));
+    let off = |r: f32| (0.4 - r).max(r - 0.6).max(0.0);
+    for (i, d) in decks.iter().enumerate() {
+        let style = style_of(d);
+        println!(
+            "{:20} {:12} balanced {:>3.0}%  styled {:>3.0}%",
+            d.name.en,
+            format!("{style:?}"),
+            plain[i] * 100.0,
+            styled[i] * 100.0
+        );
+        if style != Style::Balanced {
+            assert!(
+                off(styled[i]) <= off(plain[i]) + 0.02,
+                "{} drifts with its style: {:.2} -> {:.2}",
+                d.name.en,
+                plain[i],
+                styled[i]
+            );
+        }
+    }
+}
+
+/// §4.3: each kit against the prebuilt-level field (the six prebuilts and
+/// the starter) at 2 prizes, Normal against Normal, 40 games per opponent;
+/// no kit may win more than 60% overall. Then each route duelist as it plays
+/// (its deck, prizes and AI) against the starter a new player holds, for the
+/// record. Tuning aid:
+/// `cargo test --release -p sixfold-engine kit_sweep -- --ignored --nocapture`.
+#[test]
+#[ignore]
+fn kit_sweep() {
+    let rate =
+        |deck: &[CardId], against: &[Vec<CardId>], prizes: u8, level: Difficulty, games: u64| {
+            let mut wins = 0;
+            for (k, other) in against.iter().enumerate() {
+                for seed in 0..games {
+                    let mut pair = [other.clone(), deck.to_vec()];
+                    let mut levels = [Difficulty::Normal, level];
+                    let swap = seed % 2 == 1;
+                    if swap {
+                        pair.swap(0, 1);
+                        levels.swap(0, 1);
+                    }
+                    let w = play(pair, 9_000 + 100 * k as u64 + seed, prizes, levels);
+                    wins += usize::from((w == 1) != swap);
+                }
+            }
+            wins as f32 / (games * against.len() as u64) as f32
+        };
+    let field: Vec<Vec<CardId>> = PREBUILT
+        .iter()
+        .chain([&&STARTER])
+        .map(|d| d.cards())
+        .collect();
+    for r in KITS {
+        let w = rate(&Kit::One(r).deck(None), &field, 2, Difficulty::Normal, 40);
+        let tier = if SPROUTS.iter().any(|s| s.name == r.name) {
+            "sprout"
+        } else {
+            ""
+        };
+        println!(
+            "kit {:10} {:>3.0}% vs the field at 2 prizes {tier}",
+            r.name,
+            w * 100.0
+        );
+        assert!(w <= 0.6, "{} wins {w:.2}", r.name);
+    }
+    let starter = [STARTER.cards()];
+    for t in &TRAINERS {
+        let w = rate(&t.deck(), &starter, t.prizes, t.difficulty, 60);
+        println!(
+            "{:9} {:>3.0}% vs the starter ({} prizes, {:?})",
+            t.name,
+            w * 100.0,
+            t.prizes,
+            t.difficulty
+        );
     }
 }
 
@@ -227,42 +362,96 @@ fn open_all(p: &mut Profile, seed: &mut u64) {
     }
 }
 
-/// A full playthrough: a new player, played by the Normal AI, takes on the
+/// Spend the Facets on packs: the themed pack on sale this player has
+/// bought fewest of, while the Facets last. Returns the packs bought.
+fn shop_packs(progress: &mut Progress, profile: &mut Profile, bought: &mut [u32]) -> u32 {
+    let mut n = 0;
+    loop {
+        let pick = (0..BOOSTERS.len())
+            .filter(|&b| b != crate::booster::WILD && pack_price(b, progress).is_some())
+            .min_by_key(|&b| bought[b]);
+        let Some(b) = pick else { return n };
+        if buy_pack(progress, profile, b).is_err() {
+            return n;
+        }
+        bought[b] += 1;
+        n += 1;
+    }
+}
+
+/// Duels the campaign playthrough may take, route duelists included. Pinned
+/// for 1.2 (risk E1): the 14 route duels plus the 40 rival duels the
+/// pack-reward campaign had.
+const CAMPAIGN_DUELS: u64 = 54;
+
+/// A full playthrough: a new player, played by the Normal AI, first meets
+/// every route duelist once (win or lose, they walk on), then takes on the
 /// first open rival they haven't beaten, rebuilding their deck from the
-/// collection before every duel and opening every pack they win, until the
-/// Warden falls. The campaign must be finished in at most 40 duels.
+/// collection before every duel. Every Facet earned buys themed packs at
+/// the shop and every pack is opened. Rivals play with their AI style. The
+/// campaign must be finished within [`CAMPAIGN_DUELS`] duels, with packs
+/// bought along the way.
 #[test]
 fn the_campaign_can_be_finished_from_a_new_profile() {
     let (mut progress, mut profile) = (Progress::default(), Profile::new_player());
     let mut pack_seed = 1;
+    let mut bought = vec![0; BOOSTERS.len()];
+    let mut packs = shop_packs(&mut progress, &mut profile, &mut bought);
     open_all(&mut profile, &mut pack_seed);
     let mut duels = 0;
     let mut log = vec![];
+    for t in &TRAINERS {
+        let deck = build_deck(&profile.collection);
+        let won = play(
+            [deck, t.deck()],
+            6_000 + duels,
+            t.prizes,
+            [Difficulty::Normal, t.difficulty],
+        ) == 0;
+        trainers::record(t, won, &mut progress);
+        progress.settle();
+        packs += shop_packs(&mut progress, &mut profile, &mut bought);
+        open_all(&mut profile, &mut pack_seed);
+        duels += 1;
+        log.push((t.id, won));
+    }
     while !champion(&progress) {
-        assert!(duels < 40, "not finished after {duels} duels: {log:?}");
+        assert!(
+            duels < CAMPAIGN_DUELS,
+            "not finished after {duels} duels: {log:?}"
+        );
         let r = RIVALS
             .iter()
             .find(|r| r.open(&progress) && !r.beaten(&progress))
             .expect("an open rival while the Warden stands");
         let deck = build_deck(&profile.collection);
-        let won = play(
+        let won = play_styled(
             [deck, r.deck.cards()],
             7_000 + duels,
             r.prizes,
-            [Difficulty::Normal, r.difficulty],
+            [
+                (Difficulty::Normal, Style::Balanced),
+                (r.difficulty, r.style),
+            ],
         ) == 0;
         record(r, won, &mut progress, &mut profile);
         progress.settle();
+        packs += shop_packs(&mut progress, &mut profile, &mut bought);
         open_all(&mut profile, &mut pack_seed);
         duels += 1;
         log.push((r.id, won));
     }
-    eprintln!("campaign finished in {duels} duels: {log:?}");
+    eprintln!(
+        "campaign finished in {duels} duels, {packs} packs bought, ⬡ {} left: {log:?}",
+        progress.coins()
+    );
     assert_eq!(seals(&progress), SEALS);
+    assert!(packs >= 10, "Facets bought only {packs} packs");
     // Every promo was earned along the way.
     assert!(set::PROMOS
         .iter()
         .all(|&id| profile.collection.count(id) == 1));
+    assert!(rival("warden").unwrap().beaten(&progress));
 }
 
 #[test]

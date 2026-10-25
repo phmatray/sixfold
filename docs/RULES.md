@@ -1539,6 +1539,7 @@ notes give the decision order and the weightings to copy where helpful.
 | R-AI-16 | Prizes: picked at random among those remaining (`05:41E5-421D`). | CONFIRMED | `ai_prize_pick_is_remaining_slot` |
 | R-AI-17 | Powers: each Power has its own heuristic. All Powers are skipped while a blocker is in play or the random gate fires. A condition on the Active skips only the Active's own Power (`08:637F-6401`). | CORRECTED | `ai_skips_active_power_when_confused` |
 | R-AI-18 | *(verifier-found)* A no-damage counter raises the retreat score. An anti-stall mode against one particular defender exists (card-specific, skip it) (`05:6A62-6A84`, `05:5649`). | CONFIRMED | `ai_no_damage_counter_increments` |
+| R-AI-19 | *(clean-room addition, not from the reference)* AI styles: on top of its difficulty, an AI may lean Aggressive (energy to the Active, any usable attack, retreat only from a knock-out), Stall (early heals, Sleep and Paralysis valued, earlier retreats, energy spread over the Bench) or Bench sniper (Bench damage scored by how close it brings a creature to a knock-out, a forced switch for the lowest HP). Balanced is the plain policy above. See section 16. | ORIGINAL | `aggressive_retreats_only_from_a_knock_out`, `stall_heals_early`, `bench_sniper_goes_for_the_weakest`, `bench_sniper_switches_in_the_lowest_hp` |
 
 ---
 
@@ -1723,6 +1724,15 @@ threshold.
 - The stacked-opening cheat must **not** be copied.
 
 Prizes are picked at random. Setup places every real Basic in hand order (Trainer-as-Basics are never placed by setup or the bench step).
+
+**Styles** (R-AI-19, our own): a style changes a few weights of the steps above and nothing else.
+Aggressive adds 25 to an energy target on the Active, attacks unless the best attack would give a
+prize away, and counts only a knock-out threat as a reason to retreat. Stall plays heals from 10
+damage, doubles the value of heals and of Sleep and Paralysis in an attack (1.5× for the other
+conditions), also retreats an Active that has lost half its HP and wants a smaller edge from the
+Bench to do it, and adds 15 to Bench energy targets. Bench sniper scores damage off the Active as
+`n × (1 + 6n / hp)` and a knock-out there like an Active one, plays a force-switch when a Benched
+target has less HP left than the defender, and then brings up the lowest HP.
 
 ---
 

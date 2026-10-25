@@ -158,8 +158,8 @@
   ],
   "npcs": [
     {
-      "id": "juniper",
-      "name": "Juniper",
+      "id": "wynne",
+      "name": "Wynne",
       "model": "npc_shopkeeper",
       "tint": "#ffb27a",
       "scale": 1.0,
@@ -196,7 +196,7 @@
           ]
         },
         {
-          "if": "flag:juniper_gift",
+          "if": "flag:wynne_gift",
           "lines": [
             "How's the seal hunt? The rivals are out on the roads now: the trail west, the boardwalk east, the quarry north."
           ],
@@ -216,7 +216,7 @@
           ],
           "do": [
             "pack:wild",
-            "flag:juniper_gift"
+            "flag:wynne_gift"
           ]
         },
         {
