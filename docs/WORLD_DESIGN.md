@@ -7,7 +7,7 @@ the world. Three releases implement it:
 |---|---|---|
 | **1.2** | The world comes alive | The five existing areas fill with route duelists, a currency, shops, hidden finds and six houses; rivals get a face and a voice. |
 | **1.3** | Six regions | The world is re-laid as a hub and a ring of six colour regions (21 outdoor maps), with field items that gate paths, day and night, and fast travel. |
-| **1.4** | Story | An original recurring rival, six short cutscenes, duel juice, stats and 38 achievements. |
+| **1.4** | Story | An original recurring rival, six short cutscenes, duel juice, stats and 38 achievements. **Moved:** the story, cutscenes, stats and achievements ship in 1.7 and duel juice in 1.6 (`docs/ROADMAP.md`). |
 
 Hard constraints, restated so nobody has to look them up:
 
@@ -1854,6 +1854,9 @@ half drums). Map JSON names its track with `music`.
 
 Each line is one PR, titled as a Conventional Commit (release-please cuts the minor version).
 
+Since 1.3.0 a minor version ships after every three merged feat/fix PRs, and the versions from 1.4 to 2.0 are planned
+in `docs/ROADMAP.md`; the 1.4 plan below is kept as the design's grouping, not as a release.
+
 **1.2 "The world comes alive"** (target: 4 PRs)
 1. `feat(engine): facets, shops, route duelists and rival styles` — grammar additions, `trainers.rs` + kits,
    `shop.rs`, `doctor.rs`, `RivalLines`, AI `Style`, reward changes, `economy_sim`, `world_data.rs`.
@@ -1879,7 +1882,7 @@ pass; check-maps and the data test pass; a phone holds 60 fps in every 1.2 map.
 Done when: the ring can be walked both ways; each region passes the "reason to stop" check (§1) on every map;
 every key opens something in at least two regions; night content exists in every region.
 
-**1.4 "Story"** (target: 4 PRs)
+**"Story"**, planned as 1.4 and now shipping as 1.7 (PRs 1–3) and 1.6 (PR 4, duel juice); see `docs/ROADMAP.md`
 1. `feat(world): cutscene scripts` — `script.js`, cues, skip.
 2. `feat(story): Rook and the seventh face` — Rook's decks and scenes, the hall scene, epilogue.
 3. `feat: stats and achievements`.
