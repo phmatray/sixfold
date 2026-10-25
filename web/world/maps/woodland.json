@@ -842,7 +842,7 @@
       "z": 20,
       "give": "coins:50",
       "text": "Inside the mossy log: a twist of Facets, dry as a bone.",
-      "text_fr": "Dans la bûche moussue : quelques facettes, bien au sec."
+      "text_fr": "Dans le tronc moussu : quelques Facettes, bien au sec."
     },
     {
       "kind": "find",
@@ -871,7 +871,7 @@
       "hidden": true,
       "give": "coins:40",
       "text": "In the reeds below the bridge, out of sight of the path: a little pile of Facets.",
-      "text_fr": "Dans les roseaux sous le pont, hors de vue du chemin : un petit tas de facettes."
+      "text_fr": "Dans les roseaux sous le pont, hors de vue du chemin : un petit tas de Facettes."
     },
     {
       "kind": "find",
@@ -890,7 +890,7 @@
       "hidden": true,
       "give": "card:moss_poultice",
       "text": "At the foot of the corner pine, in a nest of needles: a card.",
-      "text_fr": "Au pied du pin du coin, dans un nid d'aiguilles : une carte."
+      "text_fr": "Au pied du pin, dans le coin, sur un nid d'aiguilles : une carte."
     },
     {
       "kind": "find",
@@ -899,7 +899,7 @@
       "z": 16,
       "give": "coins:30",
       "text": "Under the curl of the fallen birch's bark, like a letter in its envelope: a few Facets.",
-      "text_fr": "Sous l'écorce enroulée du bouleau tombé, comme une lettre dans son enveloppe : quelques facettes."
+      "text_fr": "Sous l'écorce enroulée du bouleau tombé, comme une lettre dans son enveloppe : quelques Facettes."
     },
     {
       "kind": "find",
@@ -1307,7 +1307,7 @@
         ],
         "challenge_fr": [
           "Tu cherches des champignons ? Ceux-là sont sans danger. Sans doute. Je ne dirai pas lesquels.",
-          "Bats-moi, moi et mes Tourbefleur, et je ne le dirai toujours pas."
+          "Bats-nous, mes Tourbefleur et moi, et je ne le dirai toujours pas."
         ],
         "win": [
           "You've an eye for foraging. Shame about the mushrooms.",
@@ -1321,7 +1321,7 @@
           "Picked clean! Come back when you can tell a cep from a death cap."
         ],
         "lose_fr": [
-          "Cueilli ! Reviens quand tu sauras reconnaître un cèpe d'une amanite."
+          "Cueilli ! Reviens quand tu sauras distinguer un cèpe d'une amanite."
         ],
         "after": [
           "The ones with the white gills? No. Never. Not even to look at."

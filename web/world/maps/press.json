@@ -137,7 +137,7 @@
           ],
           "lines_fr": [
             "Attention à l'encre. Il y en a partout. Il y en a sur moi.",
-            "Gus Ferrand, imprimeur. Choisis une carte, je la compose et je t'en tire un exemplaire. Les facettes d'abord ; le crénage est offert.",
+            "Gus Ferrand, imprimeur. Choisis une carte, je la compose et je t'en tire un exemplaire. Les Facettes d'abord ; le crénage est offert.",
             "Tu ne l'as jamais eue ? Je peux quand même faire les Communes et les Peu communes, un peu plus cher. Les Rares, il faudra les tirer des boosters. Sauf si tu m'apportes un bon."
           ]
         },
@@ -176,7 +176,7 @@
     "fov": 40,
     "fovPortrait": 50,
     "pitch": 50,
-    "distance": 8,
+    "distance": 10,
     "distancePortrait": 10,
     "lookAtOffset": [
       0,

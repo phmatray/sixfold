@@ -258,7 +258,13 @@
       "asset": "cottage",
       "x": 21,
       "z": 0,
-      "rot": 0
+      "rot": 0,
+      "recolor": {
+        "sx_roof_brown": "#3f5a6b",
+        "sx_roof_brown_dk": "#2c3f4c",
+        "sx_awning_red": "#2f8a84",
+        "sx_bread": null
+      }
     },
     {
       "asset": "crates",
@@ -299,7 +305,7 @@
       "z": 9,
       "give": "coins:15",
       "text": "At the bottom of the fountain basin, among the wishes: a few Facets nobody wished hard enough for.",
-      "text_fr": "Au fond du bassin de la fontaine, parmi les vœux : quelques facettes que personne n'a souhaitées assez fort."
+      "text_fr": "Au fond du bassin de la fontaine, parmi les vœux : quelques Facettes que personne n'a souhaitées assez fort."
     },
     {
       "kind": "find",
@@ -318,7 +324,7 @@
       "z": 12,
       "give": "coins:30",
       "text": "Under the bench, stuck to the slats with a bit of jam: Facets.",
-      "text_fr": "Sous le banc, collées aux lattes par un peu de confiture : des facettes."
+      "text_fr": "Sous le banc, collées aux lattes par un peu de confiture : des Facettes."
     },
     {
       "kind": "find",
@@ -337,7 +343,7 @@
       "z": 5,
       "give": "coins:20",
       "text": "In the little door at the lantern's base, beside the spare wick: a few Facets.",
-      "text_fr": "Dans la petite trappe au pied du réverbère, à côté de la mèche de rechange : quelques facettes."
+      "text_fr": "Dans la petite trappe au pied du réverbère, à côté de la mèche de rechange : quelques Facettes."
     },
     {
       "kind": "find",
@@ -552,7 +558,7 @@
             "All six seen and catalogued. There are more out past the meadow, I'm sure of it. There always are."
           ],
           "lines_fr": [
-            "Les six vues et cataloguées. Il y en a d'autres au-delà du pré, j'en suis sûre. Il y en a toujours."
+            "Les six, vues et cataloguées. Il y en a d'autres au-delà du pré, j'en suis sûre. Il y en a toujours."
           ]
         },
         {

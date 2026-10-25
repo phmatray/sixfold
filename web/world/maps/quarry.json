@@ -403,7 +403,7 @@
       "z": 0,
       "give": "coins:80",
       "text": "Between the pine's roots, at the very top of the quarry: a heap of Facets someone climbed a long way to hide.",
-      "text_fr": "Entre les racines du pin, tout en haut de la carrière : un tas de facettes que quelqu'un a grimpé loin pour cacher."
+      "text_fr": "Entre les racines du pin, tout en haut de la carrière : un tas de Facettes : quelqu'un a grimpé bien haut pour les cacher."
     },
     {
       "kind": "find",
@@ -432,7 +432,7 @@
       "hidden": true,
       "give": "coins:35",
       "text": "Under a loose stone on the quarry floor: Facets, warm from the sun.",
-      "text_fr": "Sous une pierre branlante, au fond de la carrière : des facettes, tièdes de soleil."
+      "text_fr": "Sous une pierre branlante, au fond de la carrière : des Facettes, tièdes de soleil."
     },
     {
       "kind": "find",
@@ -451,7 +451,7 @@
       "hidden": true,
       "give": "card:scrap_ledger",
       "text": "Behind the rock, a tally book left by some long-gone hauler, with a card for a bookmark.",
-      "text_fr": "Derrière le rocher, un carnet de comptes laissé par un porteur parti depuis longtemps, une carte en guise de marque-page."
+      "text_fr": "Derrière le rocher, un carnet de comptes laissé par un porteur parti depuis longtemps, avec une carte en guise de marque-page."
     },
     {
       "kind": "find",
@@ -737,7 +737,7 @@
           "Clean cut. Measure twice next time, then come back."
         ],
         "lose_fr": [
-          "Coupe nette. Mesure deux fois, la prochaine fois, et reviens."
+          "Coupe nette. La prochaine fois, mesure deux fois avant de revenir."
         ],
         "after": [
           "Tarn taught me the cut. I taught him to measure. He still doesn't."
@@ -842,7 +842,7 @@
           "Heavy lifting, this. You'll get there."
         ],
         "lose_fr": [
-          "C'est du lourd, hein. Tu y arriveras."
+          "Ça demande des bras, hein. Tu y arriveras."
         ],
         "after": [
           "It's empty. Fine. It's been empty for years. I just like carrying it."

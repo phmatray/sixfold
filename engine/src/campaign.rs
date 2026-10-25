@@ -399,7 +399,7 @@ pub static RIVALS: [Rival; 7] = [
         packs: 2,
         style: Style::BenchSniper,
         lines: RivalLines {
-            intro: T::new("Barometer's falling. Expect scattered strikes, mostly on your bench.", "Le baromètre chute. Prévois des éclairs épars, surtout sur ton banc."),
+            intro: T::new("Barometer's falling. Expect scattered strikes, mostly on your bench.", "Le baromètre chute. Prévois des éclairs épars, surtout sur ton Banc."),
             first_ko: T::new("Called it. I always log a direct hit.", "Je l'avais prévu. Je note toujours un coup au but."),
             ropes: T::new("Unexpected front moving in. I'll have to revise the forecast.", "Front inattendu. Je vais devoir revoir mes prévisions."),
             defeat: T::new("Clear skies for you. Mark it in the logbook: today, I was wrong.", "Ciel dégagé pour toi. Note-le au carnet : aujourd'hui, je me suis trompé."),

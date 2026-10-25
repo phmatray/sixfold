@@ -148,7 +148,7 @@ hero on that map's `spawn` instead. That's the only migration.
 
 ### 3.1 Facets
 
-The currency is **Facets** (FR *facettes*): small six-sided tokens cut from seal stone, shown as `⬡ 120`.
+The currency is **Facets** (FR *Facettes*, capitalised like the other game terms): small six-sided tokens cut from seal stone, shown as `⬡ 120`.
 Internally the grammar word is `coins` (`coins:n`, `pay:n`) so the language stays plain.
 
 Facets live in the world's `Progress` (save token `c:<n>`), not in `Wallet`: dialogue spends and
@@ -340,7 +340,7 @@ Sight direction in brackets.
 | `t_skye` | Skye | Kite Flyer / Cerf-voliste | seaside 21,8 (s, 4) | Spark | 2 | Normal | 45 | Reads the wind like a rival reads a deck; Dace's kite is hers. |
 | `t_morrow` | Morrow | Shell Collector / Collectionneur de coquillages | seaside 27,13 (w, 3), the east end, off the main boardwalk | Puddle + Brookhorn 3 | 3 | Normal | 60 | Slow, kind, unbeatable patience; plays the long game. |
 | `t_nell` | Nell | Lifeguard / Maître-nageuse | seaside 14,2 (s, 3), on the pier below Marlo (Marlo's own spot, 15,1, in 1.3) | Puddle | 2 | Normal | 45 | Whistle on a cord; blows it when you misplay. |
-| `t_tamsin` | Tamsin | Stonecutter / Tailleuse de pierre | quarry 10,16 (e, 3) | Pebble | 2 | Easy | 45 | Measures twice, attacks once. |
+| `t_tamsin` | Tamsin | Stonecutter / Tailleuse de pierre | quarry 10,16 (e, 3) | Mix(Rubble, Scrap) + Knollgrim 1 | 2 | Easy | 45 | Measures twice, attacks once. |
 | `t_cole` | Cole | Kiln Stoker / Chauffeur de four | quarry 19,9 (w, 4) | Kindling | 2 | Normal | 45 | Sooty, cheerful, owes Hob a loaf; part of the Rye quest. |
 | `t_rusk` | Rusk | Hauler / Porteur | quarry 4,10 (e, 3) | Mix(Pebble, Scrap) | 1 | Easy | 30 | Carries a crate everywhere. It's empty. Don't ask. |
 | `t_marigold` | Marigold | Glass Gatherer / Cueilleuse de verre | quarry 18,5 (w, 3) on the first ledge (Orla's spot, 22,4, in 1.3) | Bellows | 3 | Normal | 60 | Collects melted glass beads; thinks the quarry was a volcano once (it was). |
@@ -353,8 +353,9 @@ player's): most sit at 3–47%. **Morrow** was at 80% on the Current kit (Water 
 prizes) and 78% even on Easy, so the difficulty wasn't the lever: he now plays the Sprout **Puddle** kit with
 three Brookhorn as his signature, **47%**, still the boardwalk's long, patient duel; and he stands at the east
 end off the main boardwalk, so he's a choice rather than the first thing you meet. **Tamsin** (Pebble, Easy)
-sits at 60%: Fighting against Fire. She's left as is, since the quarry is the third area most players reach,
-but she's the next one to soften if playtests say so. One duelist per corridor: Nell owns the pier, Pell the
+sat at 60% on the Pebble kit (58% over 1,200 games): Fighting against Fire. The 1.2 design audit gave her the
+first half of Rubble and of Scrap, with one more Knollgrim (four in all): still a Fighting deck, now **47%** in
+`kit_sweep` and 48% over 1,200 games, an Easy quarry duel again. One duelist per corridor: Nell owns the pier, Pell the
 boathouse front, Skye the east boardwalk; Hazel the trail's middle, Ossian the south woods, Bryn the lodge
 path, Sorrel the north path.
 
@@ -409,7 +410,7 @@ A find is an interaction with `"kind": "find"`:
 ```jsonc
 { "kind": "find", "id": "w_log", "x": 2, "z": 20, "give": "coins:50",
   "hidden": false,                 // false: glints while unfound; true: no glint, a "Look" prompt only
-  "text": "Inside the mossy log: a twist of Facets.", "text_fr": "Dans la bûche moussue : quelques facettes." ,
+  "text": "Inside the mossy log: a twist of Facets.", "text_fr": "Dans le tronc moussu : quelques Facettes." ,
   "if": "time:night" }             // optional: only there while the condition holds (1.3)
 ```
 
@@ -497,7 +498,7 @@ stays a quest item, not a find.
 | **Moss's Seeds** / *Les graines de Moss* | Moss (overworld), once you have the shoes (`flag:seeds_asked`) | three seed packets (finds `seed_1..3`, hidden, only there while `flag:seeds_asked`, giving `seed_packet_1..3`): woodland 9,19 (a stump), square 2,12 (a bush), overworld 1,15 (the west trees); Moss takes them on `count:seed_packet_:3` | ⬡ 150 + card `bloom_seed` |
 | **Dace's Kite** / *Le cerf-volant de Dace* | Dace (seaside, `flag:kite_asked`) | the kite is snagged on the lighthouse rail; beat Skye, then talk to her (`beat:t_skye & flag:kite_asked` → `give:kite_line`, `flag:kite_line_given`); Dace takes the line | pack `storm` |
 | **Rye for Hob** / *Du seigle pour Hob* | Hob (bakery, `flag:rye_asked`) | Hob wants kiln ash for an ash-crust loaf; Cole has it once you've beaten him (`beat:t_cole & flag:rye_asked` → `give:kiln_ash`, `flag:ash_given`) | ⬡ 120 + card `hearty_broth` |
-| **First Consult** / *Première consultation* | Mags (clinic, `flag:consult_asked`) | let Mags read a saved deck (`show:doctor`) and apply one of her swaps; the panel sets `consult_applied` (`doctor::APPLIED_FLAG`), also when a reading has no swap to apply, so a clean deck can't strand the quest; then tell her | ⬡ 100 |
+| **First Consult** / *Première consultation* | Mags (clinic, `flag:consult_asked`) | let Mags read a saved deck (`show:doctor`) and apply one of her swaps; the panel sets `consult_applied` (`doctor::APPLIED_FLAG`), also when a reading has no swap to apply, so a clean deck can't strand the quest; then tell her. Her "much better" thank-you waits for `consult_swapped` (`doctor::SWAPPED_FLAG`, a swap really applied); after a clean reading she says there was nothing to fix and pays all the same | ⬡ 100 |
 
 The two 1.1 errands are kept and listed too: **A Letter for Hob** (Ottilie's letter, a Tide pack) and **The Lost Lens** (Fennel's
 field lens from the quarry's high ledge, a Grove pack). Odile's curio rewards (§5.2) are dialogue, not a panel.
@@ -518,7 +519,7 @@ one find.
 | House | Building prop, where | People (one-line personality) | Service |
 |---|---|---|---|
 | **Swap Shop** | new `cottage` in the meadow's west trees (door ≈ 5,10; clear trees 3–7 × 7–10) | **Perrin**, Card Trader / *marchand de cartes*: talks prices like weather, never haggles, always fair. | `show:trader`: today's 6 singles, sell one card, sell extras |
-| **Deck Clinic** | a second `cottage` in the square's north-east corner (door 23,3; the square's west side is too narrow) | **Mags Thale**, Deck Doctor / *docteure des decks*: brisk, warm, treats decks like patients ("Let's hear its breathing"). | `show:doctor`: pick a deck, get a diagnosis |
+| **Deck Clinic** | a second `cottage` in the square's north-east corner (door 23,3; the square's west side is too narrow), re-dressed with prop `recolor` so it doesn't read as a second bakery: slate roof, teal awning, no bread sign | **Mags Thale**, Deck Doctor / *docteure des decks*: brisk, warm, treats decks like patients ("Let's hear its breathing"). | `show:doctor`: pick a deck, get a diagnosis |
 | **Brightwell Press** | the square's letter office (`workshop`, door 18,3) | **Gus Ferrand**, Printer / *imprimeur*: ink to the elbows, mutters about kerning. | `show:press`: craft a chosen card |
 | **Hob's Bakery** | the square's cottage (Hob's, door 5,3) | **Hob** moves inside (his stall is left to **Posy**, his niece, who sells nothing and recommends everything); from 1.3 he's back at the stall at dawn | Rye quest |
 | **Boathouse** | seaside `workshop` (door 5,9); a sea chart on the wall marks Gullhaven | **Nettie**, Net-Mender / *ramendeuse*: knew the ferry's old route; foreshadows Gullhaven in 1.3. | — |
@@ -1585,7 +1586,7 @@ them, hidden ones as "???" until earned (marked H).
 | `packs_25` | Pack Rat / *Collectionneur compulsif* | open 25 packs | 50 |
 | `craft_first` | Hot off the Press / *Tout juste imprimé* | craft a card | 25 |
 | `sold_100` | Clearance / *Liquidation* | sell 100 cards | 50 |
-| `hoard` | Facet Hoard / *Trésor de facettes* | hold ⬡ 2,000 at once | 50 |
+| `hoard` | Facet Hoard / *Trésor de Facettes* | hold ⬡ 2,000 at once | 50 |
 | `spender` | Big Spender / *Panier percé* | spend ⬡ 5,000 in total | 75 |
 | `clean_sweep` | Clean Sweep / *Sans bavure* | win a 6-prize duel without giving up a prize | 100 |
 | `comeback` H | Comeback / *Retournement* | win after the opponent needed one prize and you needed four or more | 100 |

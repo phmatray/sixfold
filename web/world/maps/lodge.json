@@ -133,7 +133,7 @@
             "Fennel boards here when she isn't out with her lens. If she isn't on the trail, she's asleep."
           ],
           "lines_fr": [
-            "Essuie tes bottes. Le sentier rentre avec tout le monde.",
+            "Essuie tes bottes. Tout le monde rapporte un bout du sentier.",
             "Moi, c'est Alder. J'entretiens le sentier : le pont, les panneaux, et la tranquillité des hérons.",
             "Fennel loge ici quand elle n'est pas dehors avec sa longue-vue. Si elle n'est pas sur le sentier, c'est qu'elle dort."
           ]
@@ -184,7 +184,7 @@
     "fov": 40,
     "fovPortrait": 50,
     "pitch": 50,
-    "distance": 8,
+    "distance": 10,
     "distancePortrait": 10,
     "lookAtOffset": [
       0,

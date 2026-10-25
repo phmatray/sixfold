@@ -69,7 +69,7 @@ pub fn Journal() -> impl IntoView {
         return view! {
             <p class="dialog-sub">{tr(
                 "No errands yet. People around the world will ask.",
-                "Aucune course pour l'instant. Les gens que vous croiserez vous en demanderont.",
+                "Aucune quête pour l'instant. Les gens que vous croiserez vous en confieront.",
             )}</p>
         }
         .into_any();

@@ -559,7 +559,7 @@
       "z": 2,
       "give": "coins:40",
       "text": "Tucked in the hollow stump: a little heap of Facets.",
-      "text_fr": "Cachée dans la souche creuse : une petite poignée de facettes."
+      "text_fr": "Cachée dans la souche creuse : une petite poignée de Facettes."
     },
     {
       "kind": "find",
@@ -579,7 +579,7 @@
       "hidden": true,
       "give": "coins:30",
       "text": "Down among Moss's bean rows, in a flowerpot turned upside down: a few Facets.",
-      "text_fr": "Entre les rangs de haricots de Moss, sous un pot de fleurs retourné : quelques facettes."
+      "text_fr": "Entre les rangs de haricots de Moss, sous un pot de fleurs retourné : quelques Facettes."
     },
     {
       "kind": "find",
@@ -588,7 +588,7 @@
       "z": 20,
       "give": "coins:25",
       "text": "Under the stone at the foot of the signpost, where travellers leave a coin for luck: Facets.",
-      "text_fr": "Sous la pierre au pied du panneau, là où les voyageurs laissent une pièce pour la chance : des facettes."
+      "text_fr": "Sous la pierre au pied du panneau, là où les voyageurs laissent une pièce pour la chance : des Facettes."
     },
     {
       "kind": "find",
@@ -607,7 +607,7 @@
       "hidden": true,
       "give": "coins:30",
       "text": "Where the path bends, at the foot of the tree: Facets, half under the roots.",
-      "text_fr": "Là où le chemin tourne, au pied de l'arbre : des facettes, à moitié sous les racines."
+      "text_fr": "Là où le chemin tourne, au pied de l'arbre : des Facettes, à moitié sous les racines."
     },
     {
       "kind": "find",
@@ -795,8 +795,8 @@
             "Here: Facets for your trouble, and a card I've been saving. It's a seed too, in its way."
           ],
           "lines_fr": [
-            "Les trois ! Et pas un seul mangé. Tu me rends foi en l'humanité.",
-            "Tiens : des facettes pour ta peine, et une carte que je gardais de côté. C'est une graine, elle aussi, à sa façon."
+            "Les trois ! Et pas un seul mangé. Tu me redonnes foi en l'humanité.",
+            "Tiens : des Facettes pour ta peine, et une carte que je gardais de côté. C'est une graine, elle aussi, à sa façon."
           ]
         },
         {
@@ -822,7 +822,7 @@
           ],
           "lines_fr": [
             "Ah, c'est toi. Tu n'aurais pas vu trois cornets de papier ? Grands comme ça. Il y a écrit « NE PAS MANGER » dessus.",
-            "Mes graines de haricots grimpants. Elles étaient dans la poche de mon tablier jusqu'au bois et retour, puis sur la place, et maintenant : envolées.",
+            "Mes graines de haricots grimpants. Elles ont fait l'aller-retour jusqu'au bois dans la poche de mon tablier, puis la place, et maintenant : envolées.",
             "Un sur le sentier, un sur la place, un près des arbres de l'ouest, à mon avis. Rapporte-les-moi et tu ne le regretteras pas."
           ]
         },

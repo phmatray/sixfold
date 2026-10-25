@@ -226,6 +226,14 @@ export async function build(map, got, reduced) {
       obj.rotation.y = THREE.MathUtils.degToRad(p.rot);
       prep(obj, true);
       obj.traverse((o) => o.isMesh && /water/i.test(o.material.name) && waterify(o.material)); // the fountain's pool
+      // A variant of a shared model: `recolor` maps a material name to a colour,
+      // or to null to hide that part (the clinic is the bakery's cottage, re-dressed).
+      if (p.recolor) obj.traverse((o) => {
+        if (!o.isMesh || !(o.material.name in p.recolor)) return;
+        const c = p.recolor[o.material.name];
+        if (c === null) o.visible = false;
+        else (o.material = o.material.clone()), o.material.color.set(c);
+      });
       if (p.glow) obj.traverse((o) => o.isMesh && /glow/i.test(o.material.name) && ((o.material = o.material.clone()), o.material.color.set(p.glow), o.material.emissive.set(p.glow).multiplyScalar(0.55))); // a waymark's region colour
       root.add(obj);
       if (BLOB[p.asset] && !got[p.asset]) blobs.push([cx, cz, BLOB[p.asset]]);

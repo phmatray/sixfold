@@ -121,7 +121,7 @@ pub fn Trader() -> impl IntoView {
         said.set(
             tr(
                 format!("Sold your extras for ⬡ {n}."),
-                format!("Vous vendez vos doubles pour ⬡ {n}."),
+                format!("Vous vendez votre surplus pour ⬡ {n}."),
             ) + &balance(progress),
         );
     };
@@ -151,7 +151,7 @@ pub fn Trader() -> impl IntoView {
         <div class="shop">
             <p class="dialog-sub">{tr(
                 "Six singles a day, one copy each, new stock at midnight. Perrin buys back what you can spare: never your last copy, nor what your decks use.",
-                "Six cartes par jour, un exemplaire chacune, du neuf à minuit. Perrin rachète ce dont vous pouvez vous passer : jamais votre dernier exemplaire, ni ce qu'utilisent vos decks.",
+                "Six cartes par jour, un exemplaire de chaque, renouvelées à minuit. Perrin rachète ce dont vous pouvez vous passer : jamais votre dernier exemplaire, ni ce qu'utilisent vos decks.",
             )}</p>
             <section aria-labelledby="stock-title">
                 <h3 id="stock-title">{tr("Today's stock", "En rayon aujourd'hui")}</h3>
@@ -170,7 +170,7 @@ pub fn Trader() -> impl IntoView {
                                         tr(format!("{}: sold out for today, {}", def.label(), owned(have())), format!("{} : épuisée pour aujourd'hui, {}", def.label(), owned(have())))
                                     } else {
                                         tr(format!("Buy {}, {}, {}, for {price} Facets", def.label(), rarity_label(def.rarity), owned(have())),
-                                           format!("Acheter {}, {}, {}, pour {price} facettes", def.label(), rarity_label(def.rarity), owned(have())))
+                                           format!("Acheter {}, {}, {}, pour {price} Facettes", def.label(), rarity_label(def.rarity), owned(have())))
                                     }
                                     on:click=move |_| buy(slot)>
                                     {move || if sold() {
@@ -190,14 +190,14 @@ pub fn Trader() -> impl IntoView {
                     <h3 id="sell-title">{tr("Sell to Perrin", "Vendre à Perrin")}</h3>
                     <button type="button" class="btn" aria-disabled=move || (extras.get() == 0).to_string() on:click=sell_extras>
                         {move || match extras.get() {
-                            0 => tr("No extras to sell", "Aucun double à vendre").to_string(),
-                            n => tr(format!("Sell extras: ⬡ {n}"), format!("Vendre les doubles : ⬡ {n}")),
+                            0 => tr("No extras to sell", "Aucun surplus à vendre").to_string(),
+                            n => tr(format!("Sell extras: ⬡ {n}"), format!("Vendre le surplus : ⬡ {n}")),
                         }}
                     </button>
                 </div>
                 <p class="rival-meta">{tr(
                     "Sell extras sells every copy beyond four of a card: a deck never uses more.",
-                    "« Vendre les doubles » vend chaque exemplaire au-delà de quatre : un deck n'en utilise jamais plus.",
+                    "« Vendre le surplus » vend chaque exemplaire au-delà de quatre : un deck n'en utilise jamais plus.",
                 )}</p>
                 {move || sellable.with(Vec::is_empty).then(|| view! {
                     <p class="empty-note">{tr("Nothing to spare yet: open packs or win duels, then come back.", "Rien à céder pour l'instant : ouvrez des boosters ou gagnez des duels, puis revenez.")}</p>
@@ -214,7 +214,7 @@ pub fn Trader() -> impl IntoView {
                                     <span class="sell-spare">{move || tr(format!("{} spare", spare(id)), format!("{} en trop", spare(id)))}</span>
                                     <button type="button" class="btn" aria-disabled=move || (spare(id) == 0).to_string()
                                         aria-label=move || tr(format!("Sell 1 {} for {price} Facets, {} spare", def.label(), spare(id)),
-                                                             format!("Vendre 1 {} pour {price} facettes, {} en trop", def.label(), spare(id)))
+                                                             format!("Vendre 1 {} pour {price} Facettes, {} en trop", def.label(), spare(id)))
                                         on:click=move |_| sell(id)>
                                         {tr(format!("Sell ⬡ {price}"), format!("Vendre ⬡ {price}"))}
                                     </button>
@@ -279,7 +279,7 @@ pub fn PackCounter() -> impl IntoView {
                                 {move || match price.get() {
                                     Some(n) => view! {
                                         <button type="button" class="btn primary"
-                                            aria-label=tr(format!("Buy one {} for {n} Facets", b.name), format!("Acheter un {} pour {n} facettes", b.name))
+                                            aria-label=tr(format!("Buy one {} for {n} Facets", b.name), format!("Acheter un {} pour {n} Facettes", b.name))
                                             on:click=move |_| buy(i)>
                                             {tr(format!("Buy ⬡ {n}"), format!("Acheter ⬡ {n}"))}
                                         </button>
@@ -357,6 +357,9 @@ pub fn Doctor() -> impl IntoView {
             }
         });
         consulted(progress);
+        if !progress.with_untracked(|p| p.has_flag(doctor::SWAPPED_FLAG)) {
+            progress.update(|p| _ = p.apply(&format!("flag:{}", doctor::SWAPPED_FLAG)));
+        }
         crate::audio::sfx("place", 0.0);
         said.set(tr(
             format!(
@@ -437,7 +440,7 @@ pub fn Press() -> impl IntoView {
                     count(id)
                 ),
                 format!(
-                    "Imprimée : un {} de plus. Vous en avez {}.",
+                    "C'est imprimé : un {} de plus. Vous en avez {}.",
                     card(id).label(),
                     count(id)
                 ),
@@ -516,7 +519,7 @@ pub fn Press() -> impl IntoView {
                                 })}
                                 {move || can.get().then(|| view! {
                                     <button type="button" class="btn primary"
-                                        aria-label=move || tr(format!("Craft one {} for {} Facets", def.label(), n()), format!("Imprimer un {} pour {} facettes", def.label(), n()))
+                                        aria-label=move || tr(format!("Craft one {} for {} Facets", def.label(), n()), format!("Imprimer un {} pour {} Facettes", def.label(), n()))
                                         on:click=move |_| craft(id)>
                                         {move || tr(format!("Craft ⬡ {}", n()), format!("Imprimer ⬡ {}", n()))}
                                     </button>

@@ -259,6 +259,7 @@ fn daily_setup(day: u32, name: String, cards: Vec<CardId>, back: Screen) -> Setu
         difficulty: r.difficulty,
         style: r.style,
         opponent: None,
+        rival: Some(r.id),
         post: Some(Post::Daily(day)),
         back,
     }
@@ -280,6 +281,7 @@ pub fn gauntlet_setup(rung: &Rung, name: String, cards: Vec<CardId>, back: Scree
         difficulty: rung.difficulty,
         style: r.style,
         opponent: None,
+        rival: Some(r.id),
         post: Some(Post::Gauntlet),
         back,
     }
@@ -491,6 +493,7 @@ pub fn Challenge(
             difficulty: level,
             style: o.style,
             opponent: Some(o.id),
+            rival: None,
             post: None,
             back: Screen::World,
         };
@@ -523,7 +526,8 @@ pub fn Challenge(
             </div>
             <p class="dialog-sub">
                 {format!("{what}{}, {}. ", prizes(prize_n), difficulty(level))}
-                <b>{reward}"."</b>
+                // The amount never wraps away from its sign.
+                <b>{reward.replace(" ⬡ ", "\u{a0}⬡\u{a0}")}"."</b>
             </p>
             {if let Some(r) = r.filter(|_| !open) {
                 view! { <p class="legal no">{tr(

@@ -101,7 +101,7 @@
         },
         {
           "text": "Ask Cole for a pouch of kiln ash.",
-          "text_fr": "Demandez à Cole une bourse de cendre de four.",
+          "text_fr": "Demandez à Cole un sachet de cendre de four.",
           "done": "flag:ash_given"
         },
         {

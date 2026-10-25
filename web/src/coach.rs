@@ -25,6 +25,7 @@ pub fn start(back: Screen) {
         difficulty: sixfold_engine::ai::Difficulty::Easy,
         style: Default::default(),
         opponent: None,
+        rival: None,
         post: Some(Post::Tutorial),
         back,
     };
@@ -135,6 +136,11 @@ pub fn Finish() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<Profile>>();
+    let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
+    // A replay (from the title or the duel page) gives nothing: say so.
+    let first = expect_context::<crate::store::TutorialDue>()
+        .0
+        .get_untracked();
     let done = Memo::new(move |_| {
         ctl.shown.with(|g| {
             g.as_ref()
@@ -160,6 +166,7 @@ pub fn Finish() -> impl IntoView {
             )
         });
         let gift = match (packs, fr()) {
+            _ if !first => tr("That's the whole lesson.", "La leçon est terminée.").to_string(),
             (0, false) => format!("Your starter deck, {deck}, is yours."),
             (1, false) => format!("Your starter deck, {deck}, and 1 pack are yours."),
             (n, false) => format!("Your starter deck, {deck}, and {n} packs are yours."),
@@ -168,17 +175,26 @@ pub fn Finish() -> impl IntoView {
             (n, true) => format!("Votre deck de départ, {deck}, et {n} boosters sont à vous."),
         };
         let open = packs > 0;
-        let r = &sixfold_engine::campaign::RIVALS[0];
-        let next = tr(
-            format!(
-                "Open your packs, then head into the world. First rival: {}, {}.",
-                r.name, r.place
+        let rivals = &sixfold_engine::campaign::RIVALS;
+        let r = progress
+            .with_untracked(|p| rivals.iter().find(|r| !r.beaten(p)))
+            .unwrap_or(&rivals[0]);
+        let next = match (open, first) {
+            (true, true) => tr(
+                format!(
+                    "Open your packs, then head into the world. First rival: {}, {}.",
+                    r.name, r.place
+                ),
+                format!(
+                    "Ouvrez vos boosters, puis partez dans le monde. Premier rival : {}, {}.",
+                    r.name, r.place
+                ),
             ),
-            format!(
-                "Ouvrez vos boosters, puis partez dans le monde. Premier rival : {}, {}.",
-                r.name, r.place
+            _ => tr(
+                format!("Next rival: {}, {}.", r.name, r.place),
+                format!("Prochain rival : {}, {}.", r.name, r.place),
             ),
-        );
+        };
         Some(view! {
             <div class="scrim end">
                 <div class="dialog result won coach-finish" role="dialog" aria-modal="true" aria-labelledby="result-title" aria-describedby="finish-sub">

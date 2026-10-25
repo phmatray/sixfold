@@ -90,6 +90,7 @@ pub fn default_setup() -> Option<Setup> {
         difficulty: Difficulty::Normal,
         style: Default::default(),
         opponent: None,
+        rival: None,
         post: None,
         back: Screen::Title,
     })
@@ -167,6 +168,7 @@ pub fn DuelSetup() -> impl IntoView {
             difficulty: difficulty.get(),
             style: Default::default(),
             opponent: None,
+            rival: None,
             post: None,
             back: Screen::Title,
         };
@@ -194,7 +196,10 @@ pub fn DuelSetup() -> impl IntoView {
                         <DeckPicker legend=tr("Your deck", "Votre deck") name="mine" opts=mine_opts choice=mine />
                         <DeckPicker legend=tr("The AI plays", "Deck de l'IA") name="theirs" opts=theirs_opts choice=theirs />
                     </div>
-                    <p class="note">{tr("Win to earn a Wild Pack.", "Gagnez pour obtenir un Booster Sauvage.")}</p>
+                    <p class="note">{move || {
+                        let n = sixfold_engine::campaign::quick_duel_purse(difficulty.get());
+                        tr(format!("Win to earn ⬡ {n} (more against a harder AI)."), format!("Gagnez pour obtenir ⬡ {n} (davantage contre une IA plus forte)."))
+                    }}</p>
                     <div class="options">
                         <details class="more-options">
                             <summary>{tr("Seed and prizes", "Graine et Récompenses")}</summary>

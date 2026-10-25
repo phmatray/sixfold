@@ -286,6 +286,9 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   bookcase…): check-maps refuses a find on an open tile. Ids are unique across all maps
   (`engine/tests/world_data.rs`).
 - **prop `glow`**: a colour for the prop's `*glow*` materials (a waymark's crystal in its region's colour).
+- **prop `recolor`**: `{ "<material name>": "#rrggbb" | null }`, a cheap variant of a shared model: each named
+  material gets that colour, and `null` hides its parts. The Deck Clinic is the bakery's `cottage` with a slate
+  roof, a teal awning and no bread sign. Unbatched props only.
 - **ground:** the base layer (`grass`, `dirt`, `sand` …), `path` under `p` tiles, how far
   the ground runs past the map edge, and `tufts` (grass blades scattered on open base
   tiles, 1800 by default; 0 on sand or dirt).

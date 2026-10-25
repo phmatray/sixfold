@@ -101,7 +101,7 @@
       "hidden": true,
       "give": "coins:40",
       "text": "In the net locker, under an oilskin that smells of tar: a purse of Facets, tied with a fisherman's knot.",
-      "text_fr": "Dans le casier à filets, sous un ciré qui sent le goudron : une bourse de facettes, fermée d'un nœud de pêcheur."
+      "text_fr": "Dans le casier à filets, sous un ciré qui sent le goudron : une bourse de Facettes, fermée d'un nœud de pêcheur."
     }
   ],
   "warps": [
@@ -185,7 +185,7 @@
     "fov": 40,
     "fovPortrait": 50,
     "pitch": 50,
-    "distance": 8,
+    "distance": 10,
     "distancePortrait": 10,
     "lookAtOffset": [
       0,
