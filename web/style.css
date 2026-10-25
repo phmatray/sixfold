@@ -209,34 +209,92 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .card-art img { object-fit: cover; object-position: 50% 50%; }
 .card-body, .card-foot { display: none; }
 
-/* Foil: a fixed iridescent wash on the picture, and a sheen that sweeps
-   across when the card is pointed at or focused. */
-.card.foil .card-art::after {
+/* Foil, by rarity.
+   - Holo Rare: rainbow foil on the picture, under fine etched lines.
+   - Promo: the same on its picture, and prismatic starlight on its stock.
+   - Inside a [data-tilt] frame (tilt.js: the inspector, the pack reveal's
+     Rare), a glare where the light falls, gold on a Rare, and the foil
+     slides under it. --px/--py (-0.5..0.5) say where the pointer is and
+     --o (0..1) how strongly it is held. Light and foil move by transform
+     and fade by opacity only, so a held card is never repainted.
+   - Elsewhere the foil rests, and slides once when the card is pointed at
+     or focused. */
+.card::after { z-index: 2; }
+.card.holo .card-art::after, .card.promo .card-art::after, .card.promo::before, [data-tilt] .card > .face::after {
   content: "";
   position: absolute;
-  inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.75) 48%, rgba(255, 255, 255, 0.2) 54%, transparent 62%) 130% 0 / 300% 100% no-repeat,
-    linear-gradient(125deg, #ff7a7a, #ffe07a 20%, #7affb0 40%, #7ac4ff 60%, #c88aff 80%, #ff7a7a) 0 0 / 200% 200%;
-  mix-blend-mode: soft-light;
-  opacity: 0.6;
 }
-:hover > .card.foil .card-art::after, :focus-visible > .card.foil .card-art::after, .card.foil:hover .card-art::after {
+.card.holo .card-art::after, .card.promo .card-art::after {
+  /* Darkened, the rainbow only dodges the light parts of the painting:
+     the wash behind the subject shines, the subject stays readable. */
+  inset: -100%;
+  z-index: 1;
+  background:
+    repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.07) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(115deg, #ff6f8e 0%, #ffd36b 6%, #7dffb2 12%, #6bc7ff 18%, #c58bff 24%, #ff6f8e 30%);
+  mix-blend-mode: color-dodge;
+  filter: brightness(0.42) contrast(1.6) saturate(1.3);
+  opacity: calc(0.4 + var(--o, 0) * 0.35);
+  transform: translate(calc(var(--px, 0) * -20%), calc(var(--py, 0) * -20%));
+}
+/* The promo's foil lies on the stock, under the print. */
+.card.promo::before {
+  inset: -50%;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 22%, #fff 0 0.6px, transparent 1.4px) 0 0 / 23px 29px,
+    radial-gradient(circle at 70% 64%, #fff 0 0.5px, transparent 1.2px) 0 0 / 31px 19px,
+    repeating-linear-gradient(60deg, #ff9fb4 0%, #ffe98a 4%, #9fffc8 8%, #9fd2ff 12%, #d6b0ff 16%, #ff9fb4 20%);
+  mix-blend-mode: color-dodge;
+  filter: brightness(0.6) contrast(1.4);
+  opacity: calc(0.55 + var(--o, 0) * 0.45);
+  transform: translate(calc(var(--px, 0) * -24%), calc(var(--py, 0) * -24%));
+}
+.card.promo .face { position: relative; z-index: 1; }
+:hover > .card:is(.holo, .promo) .card-art::after, :focus-visible > .card:is(.holo, .promo) .card-art::after, .card:is(.holo, .promo):hover .card-art::after {
   animation: foil-sweep 1400ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-@keyframes foil-sweep {
-  from { background-position: 130% 0, 0 0; }
-  to { background-position: -40% 0, 100% 100%; }
+@keyframes foil-sweep { from { translate: 12% 8%; } to { translate: 0 0; } }
+[data-tilt] .card > .face::after {
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 3;
+  background: radial-gradient(circle, rgb(255 255 255 / 0.6), rgb(255 255 255 / 0.12) 14%, transparent 26%);
+  opacity: var(--o, 0);
+  transform: translate(calc(var(--px, 0) * 50%), calc(var(--py, 0) * 50%));
 }
+[data-tilt] .r-rare > .face::after { background: radial-gradient(circle, rgb(255 232 170 / 0.75), rgb(255 220 140 / 0.15) 15%, transparent 27%); }
+
+/* Tilt (tilt.js): the frame takes the pointer and the finger (no scrolling
+   from a drag on it), the card turns toward the light. */
+[data-tilt] { touch-action: none; perspective: 800px; }
+[data-tilt] .card { transform: rotateX(calc(var(--rx, 0) * 1deg)) rotateY(calc(var(--ry, 0) * 1deg)); }
+/* A fixed, deeper shadow while held: one that followed the tilt would
+   repaint its blur every frame. */
+[data-tilt].tilting .card {
+  will-change: transform;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 14px 30px -8px rgba(0, 0, 0, 0.8);
+}
+[data-tilt].tilting .card-art::after, [data-tilt].tilting .card > .face::after, [data-tilt].tilting .card::before { will-change: transform, opacity; }
 @media (prefers-reduced-motion: reduce) {
-  .card.foil .card-art::after { animation: none !important; }
+  .card .card-art::after { animation: none !important; }
+  [data-tilt] { touch-action: auto; }
 }
 
-/* Pile-sized (the discard's top card): the picture alone. */
+/* Pile-sized (a phone's Bench): the picture alone,
+   in a square window across the middle of the stock, so it shows the
+   middle 70 % of the art's width (a 5:7 window would show only half). */
 @container (max-width: 47px) {
   .card-head, .card-stage, .k-creature .card-hp { display: none; }
+  .card-art { align-self: center; aspect-ratio: 1; }
 }
+/* The discard's top card is a thumbnail at every size (56 px on a desktop
+   would print a stage line it has no room for). */
+.pile-card :is(.card-head, .card-stage, .card-hp) { display: none; }
+.pile-card .card-art { align-self: center; aspect-ratio: 1; }
 
 @container (min-width: 140px) {
   .face {
@@ -307,7 +365,8 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   .stat .none { color: #6b707c; }
   .card-promo { margin-left: auto; padding: 0.15em 0.5em; border-radius: 0.6em; background: var(--brass); color: var(--stock-ink); font-weight: 800; }
   .rarity { margin-left: auto; width: 6cqw; height: 6cqw; color: #4a4f5d; }
-  .card-promo + .rarity { margin-left: 0; }
+  .card-promo + .rarity { display: none; }
+  .card-promo { padding: 0.15em 0.4em; }
   .r-uncommon .rarity { color: #3b6f86; }
   .r-rare .rarity, .foil .rarity { color: #a67a1a; }
   .rarity svg { display: block; width: 100%; height: 100%; fill: currentColor; }
@@ -1605,49 +1664,196 @@ select option { background: var(--panel); color: var(--ink); }
 .rarity.r-rare { fill: var(--brass-hi); }
 
 /* Packs */
-.shelf { list-style: none; margin: 0 0 24px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; }
+.shelf { list-style: none; margin: 0 0 24px; padding: 0; display: grid; align-items: start; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px; }
 .shelf-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; padding: 16px; border-radius: 16px; background: rgba(19, 33, 58, 0.75); border: 1px solid var(--line); }
 .shelf-info { display: grid; gap: 8px; justify-items: start; }
 .shelf-info h2 { font-size: 21px; }
 .shelf-info p { margin: 0; color: var(--muted); font-size: 14px; }
+
+/* The booster wrapper (PackArt): a foil pillow crimped top and bottom, in
+   its set's colours, with the key art in a window, the type emblem and the
+   name. Sized by --pw on any ancestor; text in cqw of the pack. */
 .pack {
-  --pw2: 96px;
   position: relative;
-  width: var(--pw2);
+  flex: none;
+  width: var(--pack-w, 104px);
   aspect-ratio: 5 / 8;
-  display: grid;
-  grid-template-rows: 12px 1fr auto 12px;
-  justify-items: center;
-  border-radius: 6px;
+  container-type: inline-size;
+  filter: drop-shadow(0 calc(var(--pack-w, 104px) * 0.07) calc(var(--pack-w, 104px) * 0.06) rgba(0, 0, 0, 0.55));
+}
+.p-fire { --pk-hi: #ffc27a; --pk: #d9472a; --pk-lo: #4a140a; }
+.p-water { --pk-hi: #a8e1ff; --pk: #2a6fc9; --pk-lo: #0d2152; }
+.p-grass { --pk-hi: #cff5a0; --pk: #3a9150; --pk-lo: #0f3a1f; }
+.p-lightning { --pk-hi: #fff3a6; --pk: #d29a0e; --pk-lo: #533200; }
+.p-fighting { --pk-hi: #f5cd9f; --pk: #a35f2c; --pk-lo: #38190a; }
+.p-psychic { --pk-hi: #ecd2ff; --pk: #8448c4; --pk-lo: #260f46; }
+.p-wild { --pk-hi: #fff7dc; --pk: #3a4a6a; --pk-lo: #121a2e; }
+.pack-body {
+  --tooth: 4.4cqw;
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  /* The crimp: saw teeth along the top and bottom edges. */
+  -webkit-mask:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 50% 0 / var(--tooth) 51% repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% 100% / var(--tooth) 51% repeat-x;
+  mask:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 50% 0 / var(--tooth) 51% repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% 100% / var(--tooth) 51% repeat-x;
   background:
-    linear-gradient(115deg, rgba(255, 255, 255, 0.45), transparent 30%, transparent 60%, rgba(255, 255, 255, 0.2) 75%, transparent 85%),
-    var(--pack-bg);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 14px 22px -10px rgba(0, 0, 0, 0.85);
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.26) 0 0.6cqw, rgb(255 255 255 / 0.22) 0.6cqw 2.2cqw) 0 0 / 100% 7.5% no-repeat,
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.26) 0 0.6cqw, rgb(255 255 255 / 0.22) 0.6cqw 2.2cqw) 0 100% / 100% 7.5% no-repeat,
+    linear-gradient(90deg, rgb(0 0 0 / 0.45), transparent 8%, rgb(255 255 255 / 0.12) 30%, transparent 55%, transparent 92%, rgb(0 0 0 / 0.45)),
+    linear-gradient(112deg, transparent 18%, rgb(255 255 255 / 0.4) 30%, transparent 40%, transparent 60%, rgb(255 255 255 / 0.22) 70%, transparent 80%),
+    var(--pk-base, linear-gradient(165deg, var(--pk-hi), var(--pk) 42%, var(--pk-lo)));
   color: #fff;
 }
-.pack-crimp { width: 100%; height: 12px; background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0 2px, rgba(255, 255, 255, 0.22) 2px 4px); border-radius: 6px 6px 0 0; }
-.pack-crimp.bottom { grid-row: 4; border-radius: 0 0 6px 6px; }
-.pack-name { align-self: center; font: 800 21px/1 var(--display); letter-spacing: -0.03em; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35); writing-mode: vertical-rl; transform: rotate(180deg); }
-.pack-pips { display: flex; gap: 3px; padding-bottom: 8px; font-size: 15px; }
+.p-wild .pack-body { --pk-base: conic-gradient(from 210deg at 50% 45%, #3f9a52, #e2ad19, #e1572f, #8a4fc9, #2f7fd0, #3f9a52); }
+.p-wild .pack-body::before { inset: 0; background: linear-gradient(180deg, rgb(10 16 30 / 0.35), rgb(10 16 30 / 0.1) 40%, rgb(10 16 30 / 0.55)); }
+/* Light on the foil: a fixed glint, the pointer's glare (tilt.js, moved by
+   transform), and a sheen across it on hover. */
+.pack-body::before, .pack-body::after { content: ""; position: absolute; pointer-events: none; }
+.pack-body::after {
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 2;
+  background: radial-gradient(circle at 40% 35%, rgb(255 255 255 / 0.35), transparent 22%);
+  mix-blend-mode: overlay;
+  opacity: calc(0.5 + var(--o, 0) * 0.5);
+  transform: translate(calc(var(--px, 0) * 50%), calc(var(--py, 0) * 50%));
+}
+.shelf-item:hover .pack-body::after { animation: pack-sheen 1400ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+@keyframes pack-sheen { from { translate: -30% -20%; } to { translate: 0 0; } }
+.pack-window {
+  position: absolute;
+  top: 16%;
+  left: 9%;
+  right: 9%;
+  height: 55%;
+  border-radius: 3cqw;
+  overflow: hidden;
+  background: var(--pk-lo);
+  box-shadow: 0 0 0 1.4cqw rgb(255 255 255 / 0.5), 0 0 0 2cqw rgb(0 0 0 / 0.25), inset 0 0 6cqw rgb(0 0 0 / 0.35);
+}
+.pack-window img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 58%; }
+.pack-brand {
+  position: absolute;
+  top: 9%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font: 800 6.4cqw/1 var(--display);
+  letter-spacing: 0.32em;
+  text-indent: 0.32em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.9);
+  text-shadow: 0 0.4cqw 0 rgb(0 0 0 / 0.35);
+}
+.pack-emblem {
+  position: absolute;
+  top: 64%;
+  left: 50%;
+  width: 21cqw;
+  height: 21cqw;
+  translate: -50% 0;
+  padding: 3.6cqw;
+  border-radius: 50%;
+  color: var(--c2);
+  background: radial-gradient(circle at 35% 30%, #fff 0, var(--tint) 35%, var(--c) 90%);
+  box-shadow: 0 0 0 1.2cqw rgb(255 255 255 / 0.85), 0 1.4cqw 2.4cqw rgb(0 0 0 / 0.45);
+}
+.pack-emblem.minor { top: 68%; left: 72%; width: 13cqw; height: 13cqw; padding: 2.3cqw; box-shadow: 0 0 0 0.9cqw rgb(255 255 255 / 0.85), 0 1cqw 2cqw rgb(0 0 0 / 0.45); }
+.pack-emblem .glyph { display: block; width: 100%; height: 100%; fill: currentColor; }
+.t-wild { --c: #fff; --c2: #222; --tint: #fff; }
+.pack-emblem.t-wild { padding: 1.6cqw; }
+.w-grass { fill: #3f9a52; } .w-fire { fill: #e1572f; } .w-water { fill: #2f7fd0; }
+.w-lightning { fill: #e2ad19; } .w-fighting { fill: #a8642f; } .w-psychic { fill: #8a4fc9; }
+.pack-name {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: 12.5%;
+  text-align: center;
+  font: 800 15cqw/1 var(--display);
+  font-stretch: 85%;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-shadow: 0 0.6cqw 0 rgb(0 0 0 / 0.4), 0 0 3cqw rgb(0 0 0 / 0.35);
+}
+.pack-count { position: absolute; left: 0; right: 0; bottom: 8%; text-align: center; font: 700 5.6cqw/1 var(--body, inherit); letter-spacing: 0.08em; text-transform: uppercase; color: rgb(255 255 255 / 0.8); }
+@container (max-width: 70px) {
+  .pack-brand, .pack-count, .pack-emblem.minor { display: none; }
+  .pack-name { font-size: 17cqw; bottom: 10%; }
+}
+@container (max-width: 48px) {
+  .pack-name { display: none; }
+  .pack-emblem { top: 74%; }
+}
 .pack .count-badge { position: absolute; top: -9px; right: -9px; }
-.p-fire { --pack-bg: linear-gradient(160deg, #ff8a4c, #c43d1f 50%, #6e3415); }
-.p-water { --pack-bg: linear-gradient(160deg, #5ab0f0, #2a5fb5 50%, #4b2580); }
-.p-wild { --pack-bg: conic-gradient(from 200deg at 50% 45%, #3f9a52, #e2ad19, #e1572f, #8a4fc9, #2f7fd0, #3f9a52); }
 
+/* What a pack holds and how often. */
+.odds { font-size: 13px; line-height: 1.45; color: var(--muted); }
+.odds summary { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--ink); cursor: pointer; }
+.odds summary:hover { color: var(--brass-hi); }
+.odds summary::-webkit-details-marker { display: none; }
+.odds summary::before { content: ""; width: 6px; height: 6px; margin: 0 10px 0 2px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; rotate: -45deg; transition: rotate 160ms ease; }
+.odds[open] > summary::before { rotate: 45deg; }
+.odds ul { margin: 0 0 6px; padding-left: 18px; display: grid; gap: 4px; }
+
+/* Opening one: the sealed pack, torn along its top, then the cards. */
 .reveal-head h2 { font-size: 26px; }
 .reveal-head .page-lead { margin: 4px 0 18px; }
+.opening { container-type: inline-size; overflow-x: clip; overflow-clip-margin: 0; display: grid; justify-items: center; margin-bottom: 24px; }
+.sealed { grid-area: 1 / 1; padding: 8px 0 12px; }
+.tear {
+  --pack-w: clamp(180px, 40cqw, 250px);
+  position: relative;
+  display: block;
+  width: var(--pack-w);
+  aspect-ratio: 5 / 8;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  animation: pack-float 3.4s ease-in-out infinite;
+}
+.tear > span { position: absolute; inset: 0; }
+.tear-top { z-index: 1; }
+[data-tilt] .pack { transform: rotateX(calc(var(--rx, 0) * 1deg)) rotateY(calc(var(--ry, 0) * 1deg)); }
+/* One jagged line, the same on both halves. */
+.tear-top { clip-path: polygon(0 0, 100% 0, 100% 15%, 94% 13.4%, 87% 15.6%, 80% 13.2%, 73% 15.4%, 66% 13%, 59% 15.5%, 52% 13.4%, 45% 15.2%, 38% 13%, 31% 15.6%, 24% 13.3%, 17% 15.4%, 10% 13.1%, 4% 15.3%, 0 14%); }
+.tear-body { clip-path: polygon(0 13.3%, 4% 14.6%, 10% 12.4%, 17% 14.7%, 24% 12.6%, 31% 14.9%, 38% 12.3%, 45% 14.5%, 52% 12.7%, 59% 14.8%, 66% 12.3%, 73% 14.7%, 80% 12.5%, 87% 14.9%, 94% 12.7%, 100% 14.3%, 100% 100%, 0 100%); }
+.opening.open .sealed { pointer-events: none; }
+.opening.open .tear { animation: none; }
+.opening.open .tear-top { animation: tear-off 560ms cubic-bezier(0.4, 0, 0.8, 0.6) forwards; }
+.opening.open .tear-body { animation: pack-drop 620ms 300ms cubic-bezier(0.5, 0, 0.9, 0.5) forwards; }
+@keyframes pack-float { 50% { translate: 0 -6px; } }
+@keyframes tear-off {
+  30% { transform: translate(4%, -6%) rotate(4deg); }
+  to { transform: translate(30%, -80%) rotate(24deg); opacity: 0; }
+}
+@keyframes pack-drop { to { transform: translateY(45%) scale(0.9); opacity: 0; } }
+
+.reveal-stage { grid-area: 1 / 1; width: 100%; }
+.opening:not(.open) .reveal-stage { display: none; }
 .reveal {
-  --w: clamp(100px, calc((100vw - 340px - 120px) / 5), 152px);
+  --w: clamp(76px, calc((100cqw - 96px) / 6.8), 132px);
+  --rw: calc(var(--w) * 1.8);
   list-style: none;
-  margin: 0 0 24px;
+  margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(5, var(--w));
-  gap: 26px 16px;
+  grid-template-columns: repeat(5, var(--w)) var(--rw);
+  gap: 30px 12px;
   justify-content: center;
+  align-items: start;
 }
-.flip { --d: calc(400ms + var(--i) * 260ms); position: relative; perspective: 900px; }
-.flip.rare { --d: calc(400ms + var(--i) * 260ms + 700ms); }
+.flip { position: relative; perspective: 900px; animation: card-rise 520ms calc(420ms + var(--i) * 40ms) cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.flip.rare { --w: var(--rw); grid-column: 6; grid-row: 1 / span 2; align-self: center; margin-left: 12px; }
 .flip-inner {
   position: relative;
   display: block;
@@ -1662,28 +1868,52 @@ select option { background: var(--panel); color: var(--ink); }
   animation: flip-over 560ms var(--d) cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 .flip.rare .flip-inner { animation-duration: 900ms; }
-.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.front-face { transform: rotateY(180deg); }
+.flip-inner > .side { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip-inner > .front-face { transform: rotateY(180deg); }
 .flip.rare .front-face .card { animation: rare-shine 1100ms calc(var(--d) + 700ms) ease-out both; }
-.flip.rare::after {
-  content: "Rare";
+/* The Rare slot waits in a halo; a Holo Rare's turns to rainbow rays. */
+.flip.rare::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(243 213 137 / 0.55), rgb(243 213 137 / 0.12) 60%, transparent);
+  animation: halo 1600ms ease-in-out infinite alternate, halo-burst 900ms calc(var(--d) + 600ms) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.flip.rare.holo::before {
+  inset: -30%;
+  background:
+    radial-gradient(closest-side, rgb(255 255 255 / 0.5), transparent 70%),
+    repeating-conic-gradient(from 0deg, rgb(255 111 142 / 0.5) 0 6deg, transparent 6deg 15deg, rgb(107 199 255 / 0.5) 15deg 21deg, transparent 21deg 30deg, rgb(125 255 178 / 0.45) 30deg 36deg, transparent 36deg 45deg);
+  -webkit-mask: radial-gradient(closest-side, #000 40%, transparent);
+  mask: radial-gradient(closest-side, #000 40%, transparent);
+  animation: halo-burst 900ms calc(var(--d) + 600ms) cubic-bezier(0.16, 1, 0.3, 1) both, rays 24s linear infinite;
+}
+@keyframes halo { from { opacity: 0.5; scale: 0.92; } to { opacity: 1; scale: 1.04; } }
+@keyframes halo-burst { from { opacity: 0.4; scale: 0.6; } 40% { opacity: 1; scale: 1.15; } to { opacity: 0.8; scale: 1; } }
+@keyframes rays { to { rotate: 1turn; } }
+@keyframes card-rise { from { transform: translateY(70px) scale(0.8); opacity: 0; } }
+.rare-badge {
   position: absolute;
   left: 50%;
   bottom: 0;
-  translate: -50% calc(100% - 4px);
-  padding: 2px 10px;
+  translate: -50% calc(100% + 6px);
+  padding: 3px 12px;
   border-radius: 999px;
   background: var(--brass);
   color: #1e1606;
-  font: 800 12px/1.4 var(--display);
+  font: 800 13px/1.4 var(--display);
   letter-spacing: 0.04em;
+  white-space: nowrap;
   animation: pop-in 360ms calc(var(--d) + 800ms) cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+.flip.holo .rare-badge { background: linear-gradient(100deg, #ffb3c4, #fff0a8 30%, #b8ffd8 55%, #b3dcff 80%, #e2c4ff); }
 .new-badge {
   position: absolute;
   top: 0;
   left: 50%;
-  translate: -50% calc(-100% + 4px);
+  translate: -50% -55%;
   padding: 2px 9px;
   border-radius: 999px;
   background: var(--heal);
@@ -1692,7 +1922,8 @@ select option { background: var(--panel); color: var(--ink); }
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
   animation: pop-in 320ms calc(var(--d) + 380ms) cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.reveal.instant *, .reveal.instant *::after, .reveal.instant .flip::after { animation-delay: 0ms !important; animation-duration: 1ms !important; }
+.opening.instant *, .opening.instant *::before, .opening.instant *::after { animation-delay: 0ms !important; animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
+.opening.instant.open .sealed { display: none; }
 .reveal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 @keyframes flip-over { from { transform: rotateY(0) translateY(0); } 50% { transform: rotateY(90deg) translateY(-10px) scale(1.06); } to { transform: rotateY(180deg); } }
 @keyframes rare-shine {
@@ -1700,15 +1931,27 @@ select option { background: var(--panel); color: var(--ink); }
   35% { box-shadow: 0 0 0 4px var(--brass-hi), 0 10px 40px 6px rgba(243, 213, 137, 0.7); filter: brightness(1.2); }
   to { box-shadow: 0 0 0 3px var(--brass), 0 12px 28px -6px rgba(243, 213, 137, 0.5); filter: none; }
 }
+/* A phone: the Rare slot on top, alone, the nine others three by three. */
+@container (max-width: 620px) {
+  .reveal {
+    --w: clamp(80px, calc((100cqw - 40px) / 3), 132px);
+    --rw: min(58cqw, 230px);
+    grid-template-columns: repeat(3, var(--w));
+    gap: 24px 12px;
+  }
+  .flip.rare { grid-column: 1 / -1; grid-row: 1; justify-self: center; margin: 4px 0 30px; }
+  .tear { --pack-w: min(56cqw, 230px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tear, .flip.rare::before { animation: none !important; }
+}
 
 /* Game-over reward */
 .reward { display: flex; gap: 14px; align-items: center; justify-content: center; margin: 18px auto 0; padding: 12px 16px; border-radius: 14px; background: rgba(214, 172, 74, 0.1); border: 1px solid rgba(214, 172, 74, 0.35); text-align: left; animation: rise 420ms 300ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both; }
 .reward p { margin: 0; display: grid; }
 .reward b { font: 800 19px/1.2 var(--display); color: var(--brass-hi); }
 .reward p span { color: var(--muted); font-size: 14px; }
-.pack.mini { --pw2: 34px; grid-template-rows: 5px 1fr 5px; }
-.pack.mini .pack-crimp { height: 5px; }
-.pack.mini .pack-crimp.bottom { grid-row: 3; }
+.pack-mini .pack { --pack-w: 40px; }
 
 /* My decks */
 .deck-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
@@ -1782,7 +2025,6 @@ select option { background: var(--panel); color: var(--ink); }
 @media (max-width: 1000px) {
   .page.with-side { grid-template-columns: minmax(0, 1fr); }
   .side-panel { position: static; min-height: 0; max-height: none; padding: 0; border: 0; background: none; }
-  .reveal { --w: clamp(96px, calc((100vw - 32px - 64px) / 5), 152px); }
 }
 
 @media (max-width: 760px) {
@@ -1803,9 +2045,8 @@ select option { background: var(--panel); color: var(--ink); }
   .pick-grid { --w: calc((100vw - 32px - 24px) / 3); gap: 14px 12px; }
   /* Two across, so the cards are full ones (attacks and all). */
   .binder { --w: calc((100vw - 32px - 12px) / 2); gap: 14px 12px; }
-  .reveal { --w: calc((100vw - 32px - 12px) / 2); display: flex; flex-wrap: wrap; justify-content: center; gap: 26px 12px; }
   .shelf-item { grid-template-columns: auto minmax(0, 1fr); padding: 12px; gap: 14px; }
-  .pack { --pw2: 78px; }
+  .shelf .pack { --pack-w: 84px; }
   .deck-row { grid-template-columns: auto minmax(0, 1fr); }
   .deck-row .deck-actions, .deck-row .confirm { grid-column: 1 / -1; justify-content: flex-start; max-width: none; }
   .deck-actions .btn { flex: 1 1 auto; text-align: center; }
@@ -2092,8 +2333,7 @@ select option { background: var(--panel); color: var(--ink); }
 .inn-pack .pack { --pw2: 44px; }
 .pack-counter { margin: 0; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
 .pack-counter .shelf-item { padding: 10px 12px; gap: 14px; }
-.pack-counter .pack { --pw2: 64px; }
-.pack-counter .pack-name { font-size: 16px; }
+.pack-counter .pack { --pack-w: 72px; }
 .pack-counter .shelf-info { gap: 6px; }
 .pack-counter .shelf-item.locked .pack { filter: grayscale(0.9) brightness(0.55); }
 .shop-lock { color: var(--muted); font-size: 14px; font-style: italic; }

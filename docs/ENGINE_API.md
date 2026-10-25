@@ -582,14 +582,15 @@ Ids are positions in `set::CARDS`, so the set may only grow at the end: reorderi
 
 **Boosters (`booster::*`).** `PACK_SIZE = 10`. `Booster { name, description, colors }`; `BOOSTERS = [&EMBER_PACK, &TIDE_PACK, &WILD_PACK, &GROVE_PACK, &STORM_PACK, &STONE_PACK, &DREAM_PACK]`. Wallets count packs by index into `BOOSTERS`, so a new booster goes at the end.
 
+The design and its odds are in `docs/BOOSTERS.md`.
+
 | Slot (reveal order) | Cards | Drawn |
 |---|---|---|
-| 1 | basic energy | any of the pack's colours |
-| 2–6 | 5 `Common` | may repeat |
-| 7–9 | 3 `Uncommon` | distinct |
-| 10 | 1 `Rare` | |
+| 1–6 | `COMMONS` = 6 `Common` | by `SHARES` (themed) or evenly (Wild) |
+| 7–9 | `UNCOMMONS` = 3 `Uncommon` | the same |
+| 10 | 1 `Rare` | a Holo Rare (`set::is_holo`: the Awaken 2 Hexons) one pack in `HOLO_IN` = 3, else a Rare trainer or the special energy |
 
-`booster.open(seed) -> Vec<CardId>` always gives the same pack for the same seed (the engine's PCG32). A pack holds trainers, the special energy and colorless Hexons always, and Hexons and basic energy only of its `colors`: Ember is Fire / Fighting, Tide is Water / Psychic, Grove is Grass / Lightning, Storm is Lightning / Water, Stone is Fighting (plus the colorless Hexons every pack has), Dream is Psychic / Grass, Wild is everything. `booster.holds(id)` and `booster.pool(rarity)` list what it can contain, for odds in the UI. Each card of a pool is equally likely.
+`booster.open(seed, &collection) -> Vec<CardId>` always gives the same pack for the same seed and collection (the engine's PCG32); no card twice in a pack. `booster.group(id)` is the card's `SHARES` group in that pack (0 its own `colors`, 1 trainers, the special energy and Colorless Hexons, 2 the other types; always 0 in the Wild pack), and a themed pack's Common and Uncommon slots pick a group 60 / 35 / 5, then a card of it evenly. Ember is Fire / Fighting, Tide is Water / Psychic, Grove is Grass / Lightning, Storm is Lightning / Water, Stone is Fighting / Colorless, Dream is Psychic / Grass, Wild (`is_wild()`) is everything. A themed pack's Holo Rares are its own types only. The Rare slot leaves out cards the collection holds `MAX_COPIES` of while another is left. No pack holds basic energy (unlimited) or promos. `booster.holds(id)` and `booster.pool(rarity, holo) -> [Vec<CardId>; 3]` (by group) list what it can contain, for the odds the UI shows.
 
 **Deck lists.** `DeckList { pub name: String, pub cards: Vec<CardId> }`, for decks a player builds.
 

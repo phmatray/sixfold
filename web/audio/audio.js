@@ -206,7 +206,7 @@ const SFX = {
   },
   heal: (d, t) => notes(d, t, [79, 84], 0.1, { peak: 0.1, dur: 0.35 }),
   // A pack: the tear, ten cards turning (the Rare last and slower), its shine.
-  // Matches the delays in style.css (.flip). n = 1: shown all at once.
+  // Matches the reveal's timeline in packs.rs. n = 1: shown all at once.
   pack: (d, t, n) => {
     if (packBus) packBus.disconnect();
     packBus = ctx.createGain();
@@ -215,9 +215,10 @@ const SFX = {
     noise(p, t, 0.35, { f: 1200, f2: 4500, q: 0.8, a: 0.05, peak: 0.3 });
     noise(p, t + 0.12, 0.2, { type: "highpass", f: 3000, peak: 0.12 });
     if (n) return SFX.rare(p, t + 0.4);
-    for (let i = 0; i < 9; i++) SFX.flip(p, t + 0.45 + i * 0.26);
-    SFX.flip(p, t + 0.45 + 9 * 0.26 + 0.7);
-    SFX.rare(p, t + 0.4 + 9 * 0.26 + 0.7 + 0.7);
+    // FLIP_AT, FLIP_STEP and RARE_AT in packs.rs.
+    for (let i = 0; i < 9; i++) SFX.flip(p, t + 0.9 + i * 0.18 + 0.28);
+    SFX.flip(p, t + 3.12 + 0.45);
+    SFX.rare(p, t + 3.12 + 0.75);
   },
   packstop: () => {
     if (packBus) packBus.disconnect();

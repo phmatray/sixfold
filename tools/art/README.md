@@ -25,25 +25,39 @@ procedural SVG.
 
 ## Safe area: where the picture is cropped
 
-The art is 800×560 (10:7). How much of it shows depends on the card's size (measured in 1.3.x at
-1440×900 and 390×844):
+The art is 800×560 (10:7). How much of it shows depends on the card's size (measured at 1440×900
+and 390×844 with the stylesheet of the boosters release):
 
-| Where | Card width | Window | What shows |
+| Where | Card width | Window (wide:tall) | What shows |
 |---|---|---|---|
-| Full card: binder, inspector, pack reveal, shop | ≥ 140 px | fixed 10:7 | **the whole picture** |
-| Compact card: hand, Active and Bench on desktop, shop thumbnails | 48–139 px | about 1:1 (0.84–1.03) | x 15–85 % (energy, which has no stage line, x 21–79 %), full height |
-| Picture only: Bench on a phone, discard top, piles | ≤ 47 px | 5:7 (0.70) | x 25–75 %, full height |
+| Full card: binder, inspector, pack reveal | ≥ 140 px | fixed 10:7 (1.43) | **the whole picture** |
+| Compact card: hand, Active and Bench on desktop, the Active on a phone | 48–139 px | 0.84–1.03 | x 15–85 % (energy, which has no stage line, x 21–79 %), full height |
+| Picture only: Bench on a phone, the discard's top card | ≤ 47 px (the discard: any size) | fixed 1:1 | x 15–85 %, full height |
 
-The picture is centred (`object-position: 50% 50%`) and never cropped top or bottom. So, as
-insets from each edge of the 800×560 frame:
+Every window is centred (`object-position: 50% 50%`), and none crops the top or bottom.
 
-- **Safe area — the whole subject** (body, tail, wings, the object's outline): **18 % left and
-  right, 4 % top and bottom** (x 144–656, y 22–538). Everything inside shows on every card from the
-  hand up.
-- **Core — what must read even as a thumbnail** (the face, or the object's key part): **27 % left
-  and right** (x 216–584), full height.
-- Outside the safe area: background wash and ground only; it shows on full cards and is cropped
-  away on small ones.
+**Safe area: the whole subject** (body, tail, wings, antlers, the object's outline) stays inside
+**the central 50 % of the width and 90 % of the height**, that is x 200–600 and y 28–532 on the 800×560
+image (insets of 25 % left and right, 5 % top and bottom). That is the area the Hexon art is composed
+in. It shows on every card, with at least 10 % to spare on each side, even in the narrowest window
+(compact energy). Outside it go the background wash and the ground only: they show on full cards and
+are cropped away on small ones.
+
+## Booster key art
+
+`web/packs/<theme>.webp` (fire, water, grass, lightning, fighting, psychic, wild) is the painting in
+each booster wrapper's window: same model, settings and style lead, 512×816 (about the wrapper's 5:8),
+text-free, a six-sided crystal in each region's landscape. Captions and seeds are in `packs.json`;
+`gen_packs.py` draws them (WebP ≤ 80 KB, precached with the app shell):
+
+```bash
+$PY tools/art/gen_packs.py             # every pack without a PNG in tools/art/out/
+$PY tools/art/gen_packs.py fire wild   # redraw these
+```
+
+The window is nearly square, so it shows the full width and about two thirds of the height: roughly
+19 % is cut from the top (the calm wash) and 14 % from the bottom (`object-position: 50% 58%`). Keep
+the crystal within y 25–80 %.
 
 ## Licence notes
 

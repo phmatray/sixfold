@@ -379,22 +379,21 @@ fn shop_packs(progress: &mut Progress, profile: &mut Profile, bought: &mut [u32]
     }
 }
 
-/// Duels the campaign playthrough may take, route duelists included. Pinned
-/// for 1.2 (risk E1): the 14 route duels plus the 40 rival duels the
-/// pack-reward campaign had.
-const CAMPAIGN_DUELS: u64 = 54;
+/// Rival duels the campaign playthrough may take on top of one duel per
+/// route duelist. Pinned for 1.2 (risk E1): the 40 rival duels the
+/// pack-reward campaign had (54 duels with 1.2's 14 route duelists).
+const RIVAL_DUELS: u64 = 40;
 
 /// A full playthrough: a new player, played by the Normal AI, first meets
 /// every route duelist once (win or lose, they walk on), then takes on the
 /// first open rival they haven't beaten, rebuilding their deck from the
 /// collection before every duel. Every Facet earned buys themed packs at
-/// the shop and every pack is opened. Rivals play with their AI style. The
-/// campaign must be finished within [`CAMPAIGN_DUELS`] duels, with packs
-/// bought along the way.
-#[test]
-fn the_campaign_can_be_finished_from_a_new_profile() {
+/// the shop and every pack is opened, from `pack_seed` on. Rivals play with
+/// their AI style. Stops when the Warden falls or after one duel per route
+/// duelist plus [`RIVAL_DUELS`]; returns the duels played, the packs
+/// bought, the log and the final state.
+fn playthrough(mut pack_seed: u64) -> (u64, u32, Vec<(&'static str, bool)>, Progress, Profile) {
     let (mut progress, mut profile) = (Progress::default(), Profile::new_player());
-    let mut pack_seed = 1;
     let mut bought = vec![0; BOOSTERS.len()];
     let mut packs = shop_packs(&mut progress, &mut profile, &mut bought);
     open_all(&mut profile, &mut pack_seed);
@@ -415,11 +414,7 @@ fn the_campaign_can_be_finished_from_a_new_profile() {
         duels += 1;
         log.push((t.id, won));
     }
-    while !champion(&progress) {
-        assert!(
-            duels < CAMPAIGN_DUELS,
-            "not finished after {duels} duels: {log:?}"
-        );
+    while !champion(&progress) && duels < TRAINERS.len() as u64 + RIVAL_DUELS {
         let r = RIVALS
             .iter()
             .find(|r| r.open(&progress) && !r.beaten(&progress))
@@ -441,17 +436,36 @@ fn the_campaign_can_be_finished_from_a_new_profile() {
         duels += 1;
         log.push((r.id, won));
     }
-    eprintln!(
-        "campaign finished in {duels} duels, {packs} packs bought, ⬡ {} left: {log:?}",
-        progress.coins()
-    );
-    assert_eq!(seals(&progress), SEALS);
-    assert!(packs >= 10, "Facets bought only {packs} packs");
-    // Every promo was earned along the way.
-    assert!(set::PROMOS
-        .iter()
-        .all(|&id| profile.collection.count(id) == 1));
-    assert!(rival("warden").unwrap().beaten(&progress));
+    (duels, packs, log, progress, profile)
+}
+
+/// The campaign must be finished within one duel per route duelist plus
+/// [`RIVAL_DUELS`], with packs bought along the way, in at least two of
+/// three playthroughs: one seeded run swings by 30 duels on the packs it
+/// opens alone (`docs/BALANCE.md`), so a single one tests the seed.
+#[test]
+fn the_campaign_can_be_finished_from_a_new_profile() {
+    let mut finished = 0;
+    for seed in [1, 2, 3] {
+        let (duels, packs, log, progress, profile) = playthrough(seed);
+        if !champion(&progress) {
+            eprintln!("pack seed {seed}: not finished after {duels} duels: {log:?}");
+            continue;
+        }
+        eprintln!(
+            "pack seed {seed}: campaign finished in {duels} duels, {packs} packs bought, ⬡ {} left: {log:?}",
+            progress.coins()
+        );
+        assert_eq!(seals(&progress), SEALS);
+        assert!(packs >= 10, "Facets bought only {packs} packs");
+        // Every promo was earned along the way.
+        assert!(set::PROMOS
+            .iter()
+            .all(|&id| profile.collection.count(id) == 1));
+        assert!(rival("warden").unwrap().beaten(&progress));
+        finished += 1;
+    }
+    assert!(finished >= 2, "only {finished} of 3 playthroughs finished");
 }
 
 #[test]
