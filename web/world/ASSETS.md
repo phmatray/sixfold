@@ -402,7 +402,17 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   - Static models that are not instanced (houses, kilns, the observatory…) are **merged** like the instanced ones:
     one draw for their flat-coloured parts; their named empties survive. Raised ground is one mesh with the ground
     (`terrain.js`), plus one shadow-only copy of its raised part.
-  - A **door warp to the same map** is a lift (the Rodspire's): check-maps carries its flood fill on to where it lands.
+  - A **door warp to the same map** carries check-maps' flood fill on to where it lands.
+  - **`lifts`** (map, lift.js): a cage the hero rides between two heights of one map, the camera following.
+    `[{ "id", "x", "z", "top", "bottom"?, "head"?, "cage"?, "rot"?, "if"?, "locked"? }]`: `x, z` the shaft tile
+    (walkable even under a tower prop's footprint), `top` / `bottom` the landing heights (bottom: the tile's own),
+    `if` the power (`locked` is said while it fails), `head` where the cables end (default top + 3.1), `cage` the
+    model (`lift_cage`). The landings are the shaft's neighbours at either height that a gate of the cage faces.
+    Inside: "Ride the lift" (E, the prompt, a tap on the cage); on a landing it isn't at: "Call the lift". Input
+    is locked during a ride (gate shuts, an eased climb, a little bob, gate opens, the hero steps off); with
+    reduced motion it's a fade. Nothing is saved mid-ride (the tile doesn't change); a reload on the shaft starts
+    at the bottom. A cage model: `gate*` nodes hinged on their +X edge (they swing out), `cable*` nodes 1 m tall
+    from their origin (stretched up to `head`). check-maps joins the shaft and the landings at both heights.
   - The effect **`sfx:<name>`** plays one of `engine::overworld::SOUNDS` (`spark`, `chime`, `jingle`, `gate`, `seal`).
   - Coloured glassware (`glass_teal`, `glass_amber` … materials) keeps its colour at night and catches the light
     softly; only plain `*glass*` (windows) turns warm.

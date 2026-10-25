@@ -13,8 +13,9 @@
 // 1.3 (WORLD_DESIGN §7, §13.3): outdoor maps have `title_fr`, a `region` and a `music` track; `fence` and
 // `cliff` name known sets; optional `paint` rows (a ground layer on any tile, raised ones too) match `tiles`. Gates: tiles in bounds; with every gate shut the spawn still reaches an exit or
 // a warp (no soft-lock), and with every gate open every person, spot, warp and waymark can be reached
-// (floor heights, the 0.6 m step and the ladder rule as build.js has them; a door warp to the same map, a
-// lift, carries the fill to where it lands). When the hour turns and the `time:` gates of that phase shut,
+// (floor heights, the 0.6 m step and the ladder rule as build.js has them; a door warp to the same map
+// carries the fill to where it lands, and a lift (`lifts`, lift.js) joins its shaft and the landings at its
+// two heights). A lift: an id, its shaft tile in bounds, a `top` above its bottom, a landing at each height. When the hour turns and the `time:` gates of that phase shut,
 // every tile the hero can stand on still has a way out (an exit, a door, a spot that warps). The atlas (atlas.json) lists
 // every outdoor map under its own title, its roads join listed maps, and each waymark stands on a
 // reachable tile facing its post (a `kind: "waymark"` spot of the same id); posts sit at least 1.7 grid
@@ -98,6 +99,16 @@ for (const [name, m] of Object.entries(maps)) {
         if (DECK[p.asset]) height[k] = (p.y ?? 0) + DECK[p.asset][0];
       }
   }
+  // A lift's shaft stays walkable under its tower's footprint (lift.js); it needs a landing at both ends.
+  for (const l of m.lifts ?? []) {
+    const k = `${l.x},${l.z}`;
+    solid.delete(k);
+    if (!l.id || (m.lifts.filter((o) => o.id === l.id).length > 1)) fail.push(`${name}: lift ids must be set and unique (${l.id})`);
+    if (!(l.x >= 0 && l.z >= 0 && l.x < m.width && l.z < m.height)) fail.push(`${name}: lift ${l.id} is off the map`);
+    if (!(l.top > (l.bottom ?? height[k] ?? 0))) fail.push(`${name}: lift ${l.id} needs a top above its bottom`);
+    for (const y of [l.bottom ?? height[k] ?? 0, l.top])
+      if (!liftLandings(l, y, solid, height).length) fail.push(`${name}: lift ${l.id} has no landing at ${y} m`);
+  }
   for (const n of m.npcs ?? []) if (solid.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} stands on a solid tile`);
   const all = reach(name, m, solid, height);
   // Underground nothing could power a street lamp: caves (`dark`, kind `cave`, a `cave` room) light with mushrooms,
@@ -154,6 +165,10 @@ for (const [name, m] of Object.entries(maps)) {
 
 // Gates and reachability: flood fill from the spawn over walkable tiles, a step at most 0.6 m up or
 // down (a ladder joins its front and back whatever the height), first with every gate shut, then open.
+// A lift's landings at height `y`: its open neighbours whose floor is within a step of the cage floor (y + 0.1).
+function liftLandings(l, y, solid, height) {
+  return Object.values(DIR).map(([dx, dz]) => `${l.x + dx},${l.z + dz}`).filter((k) => !solid.has(k) && Math.abs((height[k] ?? 0) - (y + 0.1)) <= 0.6);
+}
 function reach(name, m, solid0, height0) {
   const W = m.width, H = m.height, inMap = (x, z) => x >= 0 && z >= 0 && x < W && z < H;
   const ladders = new Map();
@@ -203,6 +218,11 @@ function reach(name, m, solid0, height0) {
     const seen = new Set(starts.map(([x, z]) => `${x},${z}`)), queue = starts.map((t) => [...t]);
     // A door warp to this same map (a lift) carries the fill on to its landing.
     const lifts = (m.warps ?? []).filter((w) => w.to === name && !w.dir);
+    // A lift: its shaft and the landings at both its heights, joined once any of them is reached.
+    const cages = (m.lifts ?? []).map((l) => {
+      const k = `${l.x},${l.z}`, low = l.bottom ?? h[k] ?? 0;
+      return [k, ...liftLandings(l, low, solid, h), ...liftLandings(l, l.top, solid, h)];
+    });
     for (;;) {
       while (queue.length) {
         const [x, z] = queue.shift();
@@ -212,6 +232,12 @@ function reach(name, m, solid0, height0) {
           seen.add(k);
           queue.push([nx, nz]);
         }
+      }
+      const cage = cages.find((c) => !c.done && c.some((k) => seen.has(k)));
+      if (cage) {
+        cage.done = true;
+        for (const k of cage) if (!seen.has(k)) seen.add(k), queue.push(k.split(",").map(Number));
+        continue;
       }
       const next = lifts.find((w) => !seen.has(`${w.spawn.x},${w.spawn.z}`) && Object.values(DIR).some(([dx, dz]) => seen.has(`${w.x + dx},${w.z + dz}`)));
       if (!next) return seen;

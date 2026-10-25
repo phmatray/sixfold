@@ -24,6 +24,7 @@
 //   actors.js  hero and NPC rigs (`actor`, `place`, `animateActor`), grid helpers, `route`
 //   npc.js     placing NPCs, their routes, `facing` (what the hero can talk to or use)
 //   trainer.js route duelists: line of sight, the walk over, going quiet
+//   lift.js    cages that carry the hero between two heights (the Rodspire)
 //   daylight.js the light at each minute of the day: sun, moon, sky, fog, lamps, glow
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
 import * as THREE from "three";
@@ -34,6 +35,7 @@ import { build, dispose, refresh, animateProps } from "./build.js";
 import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route, emote } from "./actors.js";
 import { updateNpc, facing as facingOf } from "./npc.js";
 import * as duelists from "./trainer.js";
+import * as lifts from "./lift.js";
 import { daylight, phaseOf, DAY } from "./daylight.js";
 
 const STEP = 0.25, RUN_STEP = 0.17; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
@@ -162,7 +164,7 @@ export function mount(el, controls, cb, start, edit = false) {
     const i = held.indexOf(k);
     if (i >= 0) held.splice(i, 1);
   };
-  const busy = () => paused || warping || !world || !!world.engage; // a duelist coming over locks input
+  const busy = () => paused || warping || !world || !!world.engage || !!world.ride; // a duelist coming over, a lift ride lock input
   const onKey = (e) => {
     const k = e.key.toLowerCase();
     if (e.type === "keyup") {
@@ -233,6 +235,7 @@ export function mount(el, controls, cb, start, edit = false) {
     for (const n of w.npcs) test(n.x, n.z, n.obj.position.x, n.obj.position.z, 1.7);
     for (const i of w.talk.values()) test(i.x, i.z, i.x + 0.5, i.z + 0.5, 1.1);
     for (const wp of w.warps.values()) if (!wp.dir) test(wp.x, wp.z, wp.x + 0.5, wp.z + 0.5, 2.2); // a door: walking into it enters
+    for (const l of w.lifts) test(l.x, l.z, l.x + 0.5, l.z + 0.5, 2.4); // a lift's cage: walk in and ride
     if (best) return best;
     // Raised ground first: the highest level whose tile under the ray stands at that height.
     for (const y of w.levels) {
@@ -270,8 +273,9 @@ export function mount(el, controls, cb, start, edit = false) {
   // Ends facing it (route's last move turns into the solid tile); "act" then uses it.
   // `path.npc`: a person who may walk off, so the path is re-planned at every step.
   const walkTo = (tx, tz, npc) => {
-    const path = route(world, hero, tx, tz);
-    if (path.length && (npc || world.talk.has(key(tx, tz)) || world.gateAt.get(key(tx, tz))?.open === false)) path.push("act");
+    const path = route(world, hero, tx, tz), lift = lifts.at(world, tx, tz);
+    if (lift && tx === hero.x && tz === hero.z) path.push("act"); // already in the cage: ride
+    else if (path.length && (npc || lift || world.talk.has(key(tx, tz)) || world.gateAt.get(key(tx, tz))?.open === false)) path.push("act");
     path.npc = npc;
     return path;
   };
@@ -304,7 +308,7 @@ export function mount(el, controls, cb, start, edit = false) {
     lastPhase = phase;
   };
   const opens = (wp) => holds(wp.if);
-  const facing = () => facingOf(world, hero, opens);
+  const facing = () => lifts.facing(world, hero) ?? facingOf(world, hero, opens);
 
   // Start a step toward `f`. A door warp is entered even though its tile is solid;
   // pushing against the wall from a warp tile with that `dir` leaves the room.
@@ -339,6 +343,10 @@ export function mount(el, controls, cb, start, edit = false) {
     held.length = 0;
     if (it.kind === "npc") talkTo(it.npc);
     else if (it.kind === "warp") tryStep(hero.face, 0);
+    else if (it.kind === "lift") {
+      world.path = [];
+      lifts.use(world, hero, it, { holds, reduced, sound, say: (t) => cb("use", "locked", t), fade: (on) => fade.classList.toggle("on", on), step: (f) => tryStep(f, 0) });
+    }
     else {
       if (it.obj && !reduced) it.obj.userData.wobble = 1;
       // A spot with its own `dialogue` (a lost item, a letter box) talks like a person.
@@ -405,6 +413,7 @@ export function mount(el, controls, cb, start, edit = false) {
     }
     const next = await build(map, got, reduced);
     if (!alive) return;
+    lifts.attach(next, got, spawn);
     next.name = name;
     duelists.enterMap(name);
     // Gates first see the hero where it arrives (a gate it stands on lets it stay).
@@ -501,7 +510,7 @@ export function mount(el, controls, cb, start, edit = false) {
     }
     // Standing on a tile (a step just ended, or still): does a duelist see the hero?
     // After one was dealt with, the next waits for the hero's next step.
-    if (!h.step && !warping && !paused && !w.engage && !w.calm && !editing() && (spotted = duelists.watch(w, h, holds))) {
+    if (!h.step && !warping && !paused && !w.engage && !w.ride && !w.calm && !editing() && (spotted = duelists.watch(w, h, holds))) {
       held.length = 0;
       w.path = [];
       duelists.spot(w, spotted, h, sound);
@@ -536,6 +545,7 @@ export function mount(el, controls, cb, start, edit = false) {
     h.idle = h.step || held.length ? 0 : h.idle + dt;
     h.running = !!h.step && h.step.dur < STEP;
 
+    lifts.update(w, dt);
     const [px, pz] = place(h, dt, w.floorAt);
     animateActor(h, dt, reduced);
     for (const n of w.npcs) updateNpc(w, n, dt, paused);

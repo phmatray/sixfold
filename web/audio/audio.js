@@ -296,6 +296,19 @@ const SFX = {
     for (let i = 0; i < 7; i++) noise(d, t + 0.08 + i * 0.045 + Math.random() * 0.02, 0.03, { type: "highpass", f: 4000 + Math.random() * 3000, peak: 0.07 });
     tone(d, t + 0.1, 55, 0.9, { type: "sawtooth", f2: 110, glide: 0.4, peak: 0.03, lin: true, rel: 0.4 });
   },
+  // A lift: the gate clanks shut, then (n: seconds of travel) the winch hums and its pawl
+  // ratchets, and a clank at the stop.
+  winch: (d, t, n) => {
+    const clank = (at) => {
+      noise(d, at, 0.06, { type: "lowpass", f: 1400, peak: 0.22 });
+      tone(d, at, 190, 0.1, { type: "square", f2: 120, peak: 0.035 });
+    };
+    clank(t);
+    if (!n) return;
+    tone(d, t + 0.35, 52, n, { type: "sawtooth", f2: 68, glide: n * 0.4, peak: 0.035, a: 0.3, lin: true, rel: 0.3 });
+    for (let k = 0.4; k < n + 0.3; k += 0.16) noise(d, t + k, 0.02, { type: "highpass", f: 2600, peak: 0.03 });
+    clank(t + 0.4 + n);
+  },
   // Cooling glass singing: high, slightly detuned partials ringing out.
   chime: (d, t) => {
     [96, 103, 100, 108].forEach((m, i) => tone(d, t + i * 0.22, hz(m), 1.6, { peak: 0.035, detune: (i % 2 ? 9 : -7), rel: 0.8 }));

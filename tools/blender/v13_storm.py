@@ -3,10 +3,13 @@ copper and verdigris, weather always moving.
 
 Vocabulary: grey granite with a turf lip (cliffs, walls), copper gone green (the observatory dome, the Rodspire,
 pylon coils), tall thin masts with stays and cables, purple heather, pennants that all point downwind (+X).
-Glow parts: coil_glow (pylon coil, lift lamp, Rodspire orb: electric cyan), lamp_glow (observatory slit, windows).
+Glow parts: coil_glow (pylon coil, lift cage lamp, Rodspire orb: electric cyan), lamp_glow (observatory slit,
+windows, the lift landings).
 """
 import math
 import random
+
+import bmesh
 
 from v13_kit import (B, T, beam, box, contact, cyl, empty, ico, jitter, prism, ribbon, shadow, sphere,  # noqa: F401
                      torus, tube, curve, half_sphere, arch_pts, arc, stratum, FRONT, clamp01, chain, open_part, lathe)
@@ -29,7 +32,7 @@ WIND = {
     "heather": lambda x, y, z, r: clamp01(z / 0.5) * 0.8,
 }
 
-FOOT = {"observatory": (5, 5), "lift": (2, 2), "rodspire": (3, 3), "telescope": (2, 2)}
+FOOT = {"observatory": (5, 5), "lift_tower": (2, 1), "rodspire": (3, 3), "telescope": (2, 2)}
 ANIM = {"pylon"}
 
 LIGHT = dict(sun=("#f2f5ff", 2.3), from_hero=(8, 18, 6), hemi=("#dfe8f2", "#4f5b3c", 1.5), bg="#b9c6cf", fog=(14, 32))
@@ -326,59 +329,176 @@ def build_observatory(k):
     contact(k, 2.45)
 
 
-def build_lift(k):
-    """2 x 2 cliff lift: an iron cage (floor top 0.1 m, open at the front) on rails up a steel lattice mast at the
-    back, a winding wheel and cables at the head, a counterweight, a lamp that says the line is live."""
-    rng = random.Random(451)
-    k.add(stone(rng, 1.9, 1.9, 0.08, 0.008), "st_granite", T((0, 0, -0.005)))
-    # cage floor and frame (front edge at y = -0.85)
-    k.add(box(1.6, 1.5, 0.1, 0.012), "st_steel_dk", T((0, -0.1, 0.025)))
+LIFT_TOP = 6.0     # the summit the lift serves (the Rodspire stack)
+LIFT_HEAD = 9.1    # the head sheave's axle: where the cables end (lift.js: `head` = top + 3.1)
+
+
+def build_lift_tower(k):
+    """2 x 1 lift tower against a 6 m cliff (the cliff face on the tile edge behind it, +Y). East tile (x 0..1):
+    the shaft the cage rides in, on two iron guide rails; west tile: a bay whose top carries the winch house.
+    Weathered timber posts and X braces, anchored into the rock by beams with iron plates; a head frame over
+    the shaft with a copper-rimmed sheave whose east rim drops the cage cable and whose west rim takes the winch
+    cable; a plank landing with rails on the summit behind the shaft; lamps (lamp_glow) at both landings."""
+    rng = random.Random(452)
+    S, Wb, P = 0.5, -0.5, 0.11                       # shaft and bay centres (x), post section
+    XS = (-0.94, 0.0, 1.0)                           # post lines
+    YF, YB = -0.44, 0.42                             # front and back post rows
+    wood = lambda: rng.choice(["plank_grey_dk", "plank_grey", "plank_grey_dk"])  # noqa: E731
+    # footings and ground sills
+    for x in XS:
+        for y in (YF, YB):
+            k.add(stone(rng, 0.24, 0.24, 0.14, 0.01), "st_granite", T((x, y, 0.05)))
+    for y in (YF, YB):
+        k.add(box(2.06, 0.12, 0.1), "plank_grey_dk", T((0.03, y, 0.13)))
+    # posts: the shaft's four up to the head frame, the bay's two up to the winch floor
+    for x in XS:
+        for y in (YF, YB):
+            top = LIFT_TOP + 0.02 if x < -0.5 else 8.52
+            k.add(box(P, P, top - 0.08), wood(), T((x, y, 0.08 + (top - 0.08) / 2)))
+    # girts: shaft sides at every level; front only clear of the doorway and the rider; back only below the summit
+    for z in (1.4, 2.7, 4.0, 5.3, 6.6, 7.9):
+        for x in (0.0, 1.0):
+            k.add(box(0.09, YB - YF + 0.1, 0.1), wood(), T((x + (0.012 if x else -0.012), (YF + YB) / 2, z)))
+    for z in (2.7, 4.3):
+        k.add(box(1.1, 0.09, 0.1), wood(), T((S, YF - 0.03, z)))
+    for z in (1.4, 2.7, 4.0, 5.3):
+        k.add(box(1.1, 0.09, 0.1), wood(), T((S, YB + 0.05, z)))
+    for z in (1.4, 2.7, 4.0, 5.3):                   # the bay's own girts, front, back and west side
+        for y in (YF, YB):
+            k.add(box(1.04, 0.09, 0.1), wood(), T((Wb - 0.02, y + (-0.012 if y < 0 else 0.012), z)))
+        k.add(box(0.09, YB - YF + 0.1, 0.1), wood(), T((-0.952, (YF + YB) / 2, z)))
+    # X braces (iron straps on the east side and over the bay's front and west side)
+    def cross(a, b, c, d, off):
+        beam(k, a, b, 0.035, 0.025, "iron")
+        beam(k, tuple(v + o for v, o in zip(c, off)), tuple(v + o for v, o in zip(d, off)), 0.035, 0.025, "iron")
+    lv = (0.2, 1.4, 2.7, 4.0, 5.3, 6.6, 7.9)
+    for z0, z1 in zip(lv, lv[1:]):
+        cross((1.07, YF, z0), (1.07, YB, z1), (1.07, YB, z0), (1.07, YF, z1), (0.02, 0, 0))
+    for z0, z1 in zip(lv[:5], lv[1:6]):
+        cross((-0.94, YF - 0.07, z0), (0.0, YF - 0.07, z1), (0.0, YF - 0.07, z0), (-0.94, YF - 0.07, z1), (0, -0.02, 0))
+        cross((-1.01, YF, z0), (-1.01, YB, z1), (-1.01, YB, z0), (-1.01, YF, z1), (-0.02, 0, 0))
+    # guide rails either side of the cage (tile centre line), on brackets to the girts
+    for x in (0.07, 0.93):
+        k.add(box(0.04, 0.07, 8.36), "st_steel", T((x, 0.0, 0.1 + 4.18)))
+        for z in (1.4, 4.0, 6.6):
+            k.add(box(0.07, 0.05, 0.06), "st_steel_dk", T((x + (-0.035 if x < 0.5 else 0.035), 0.0, z)))
+    # anchored to the rock: beams from the back posts into the face, an iron plate and bolts where they enter
+    for z in (1.4, 3.3, 5.3):
+        for x in XS:
+            k.add(box(0.1, 0.62, 0.1), "plank_grey_dk", T((x, 0.7, z - 0.13)))
+            k.add(box(0.26, 0.03, 0.26), "st_steel_dk", T((x, 0.48, z - 0.13)))
+            for dx in (-0.08, 0.08):
+                k.add(cyl(0.022, 0.022, 0.03, 6), "brass", T((x + dx, 0.46, z - 0.13 + dx), (90, 0, 0)))
+    # winch house on the bay at the summit's height: a plank floor, board walls, a copper roof
+    k.add(box(1.04, 0.98, 0.07), "plank_grey", T((Wb - 0.02, 0.0, LIFT_TOP + 0.035)))
+    k.add(box(0.8, 0.74, 1.12), "plank_grey_lt", T((Wb, 0.0, LIFT_TOP + 0.07 + 0.56)))
+    for x in (Wb - 0.4, Wb + 0.4):
+        k.add(box(0.06, 0.78, 1.14), "plank_grey_dk", T((x, 0.0, LIFT_TOP + 0.07 + 0.57)))
+    k.add(box(0.3, 0.02, 0.24), "lamp_glow", T((Wb, -0.375, LIFT_TOP + 0.85)))       # a lit window on the sea side
+    k.add(box(0.36, 0.03, 0.04), "plank_grey_dk", T((Wb, -0.385, LIFT_TOP + 0.99)))
+    roof = prism([(-0.5, 0.0), (0.5, 0.0), (0.0, 0.38)], 0.92)
+    k.add(roof, "copper", T((Wb, 0.0, LIFT_TOP + 1.17)))
+    k.add(box(0.06, 0.96, 0.05), "st_verdigris_dk", T((Wb, 0.0, LIFT_TOP + 1.56)))   # ridge
+    k.add(cyl(0.05, 0.05, 0.12, 8), "st_steel_dk", T((Wb, 0.0, LIFT_TOP + 1.6)))     # cable gland on the ridge
+    k.add(box(0.03, 0.03, LIFT_HEAD - LIFT_TOP - 1.6), "st_steel_dk", T((Wb, 0.0, (LIFT_TOP + 1.6 + LIFT_HEAD) / 2)))
+    # head frame: cap beams, two bearing pedestals, the axle along Y, the sheave in the XZ plane (faces the camera)
+    for y in (YF, YB):
+        k.add(box(1.14, 0.12, 0.12), "plank_grey_dk", T((S, y, 8.46)))
+    for x in (0.0, 1.0):
+        k.add(box(0.12, YB - YF + 0.12, 0.12), "plank_grey_dk", T((x, (YF + YB) / 2, 8.46)))
+    for y in (YF, YB):
+        beam(k, (-0.2, y, 8.52), (0.0, y, LIFT_HEAD), 0.07, 0.06, "st_steel")
+        beam(k, (0.2, y, 8.52), (0.0, y, LIFT_HEAD), 0.07, 0.06, "st_steel")
+        k.add(box(0.12, 0.08, 0.1), "st_steel_dk", T((0.0, y, LIFT_HEAD)))
+    k.add(cyl(0.035, 0.035, YB - YF + 0.12, 8), "brass", T((0.0, (YF + YB) / 2, LIFT_HEAD), (90, 0, 0)))
+    R = 0.5
+    M = T((0.0, 0.0, LIFT_HEAD), (90, 0, 0))
+    k.add(torus(R, 0.045, 16, 4), "copper", M)
+    k.add(torus(R - 0.06, 0.02, 16, 4), "copper_dk", M @ T((0, 0, 0.03)))
+    k.add(cyl(0.09, 0.09, 0.14, 10), "st_steel_dk", M)
     for i in range(6):
-        k.add(box(1.52, 0.2, 0.025), "plank_grey" if i % 2 else "plank_grey_lt", T((0, -0.73 + 0.25 * i, 0.0875)))
-    H = 2.1
+        a = i / 6 * math.tau + 0.2
+        beam(k, (0.08 * math.cos(a), 0.0, LIFT_HEAD + 0.08 * math.sin(a)), ((R - 0.03) * math.cos(a), 0.0, LIFT_HEAD + (R - 0.03) * math.sin(a)),
+             0.035, 0.03, "iron")
+    k.add(tube([((R + 0.03) * math.cos(math.radians(a)), 0.0, LIFT_HEAD + (R + 0.03) * math.sin(math.radians(a)))
+                for a in range(180, -1, -20)], 0.016, 4, cap=False), "st_steel_dk")  # the cable over the top
+    # summit landing behind the shaft: planks over the lip, rails each side, a lamp on the east post
+    for i in range(5):
+        k.add(box(0.19, 1.06, 0.05), rng.choice(["plank_grey", "plank_grey_lt", "plank_grey_dk"]),
+              T((0.1 + 0.2 * i, 0.98, LIFT_TOP - 0.01)))
+    for x in (0.06, 0.94):  # short guard rails at the lip (the summit stays open east and west)
+        for y in (0.56, 0.94):
+            k.add(box(0.08, 0.08, 1.08), "plank_grey_dk", T((x, y, LIFT_TOP + 0.5)))
+        for z in (0.55, 1.0):
+            k.add(box(0.06, 0.46, 0.06), "plank_grey", T((x, 0.75, LIFT_TOP + z)))
+
+    def lamp(x, y, z, arm=0.0):  # a little lantern on a post top, or hung from an arm off a post's face
+        if arm:
+            k.add(box(0.04, abs(arm), 0.04), "st_steel_dk", T((x, y + arm / 2, z + 0.22)))
+            y += arm
+        k.add(box(0.13, 0.13, 0.03), "st_steel_dk", T((x, y, z + 0.015)))
+        k.add(box(0.1, 0.1, 0.16), "lamp_glow", T((x, y, z + 0.1)))
+        k.add(box(0.13, 0.13, 0.03), "st_steel_dk", T((x, y, z + 0.195)))
+        k.add(cyl(0.09, 0.02, 0.07, 4), "copper", T((x, y, z + 0.245), (0, 0, 45)))
+        return (x, y, z + 0.1)
+    top_lamp = lamp(0.94, 0.56, LIFT_TOP + 1.04)
+    low_lamp = lamp(1.0, YF - 0.055, 2.0, -0.18)
+    contact(k, 1.05)
+    for bm, *_ in k.parts[-2:]:
+        bmesh.ops.scale(bm, vec=(1.15, 0.6, 1), verts=bm.verts)
+        bmesh.ops.translate(bm, vec=(0.03, 0, 0), verts=bm.verts)
+    return chain(empty("light_origin", low_lamp), empty("light_origin", top_lamp))
+
+
+def build_lift_cage(k):
+    """The moving cage (lift.js carries it): 0.8 m square, floor top 0.1 m, copper frame, iron bar sides, open
+    above two waist-high gates (four materials, so few draws). Nodes: gate_front (-Y) and gate_back (+Y), hinged on their +X edge, swing out;
+    cable_cage (1 m tall from its origin, stretched up to the sheave), a coil_glow lamp under the roof."""
+    H, h = 2.25, 0.375
+    k.add(box(0.8, 0.8, 0.06), "iron", T((0, 0, 0.03)))
+    for i in range(4):
+        k.add(box(0.19, 0.76, 0.04), "plank_grey", T((-0.3 + 0.2 * i, 0, 0.08)))
     for sx in (-1, 1):
         for sy in (-1, 1):
-            k.add(box(0.07, 0.07, H, 0.01), "lh_red", T((sx * 0.77, -0.1 + sy * 0.72, 0.1 + H / 2)))
-    k.add(box(1.62, 1.52, 0.08, 0.012), "lh_red", T((0, -0.1, 0.1 + H)))
-    k.add(cyl(0.95, 0.4, 0.3, 4), "st_steel_dk", T((0, -0.1, 0.1 + H + 0.19), (0, 0, 45)))
-    for side in ("l", "r", "b"):  # bars on three sides
-        for i in range(7):
-            u = -0.65 + 0.217 * i
-            x, y = {"l": (-0.77, -0.1 + u), "r": (0.77, -0.1 + u), "b": (u, 0.62)}[side]
-            k.add(box(0.022, 0.022, H - 0.1), "iron", T((x, y, 0.15 + (H - 0.1) / 2)))
-        for z in (1.0, 1.55):
-            if side == "b":
-                k.add(box(1.5, 0.03, 0.04), "lh_red", T((0, 0.62, z)))
-            else:
-                k.add(box(0.03, 1.4, 0.04), "lh_red", T(((-0.77 if side == "l" else 0.77), -0.1, z)))
-    # folded-open gate on the front left
-    for i in range(4):
-        k.add(box(0.022, 0.022, 1.6), "iron", T((-0.74 + 0.07 * i, -0.86 - 0.03 * i, 0.95)))
-    k.add(box(0.26, 0.12, 0.04), "lh_red", T((-0.64, -0.9, 1.75), (0, 0, -25)))
-    # mast at the back edge, rails, head wheel, cables
-    MH = 4.6
-    for sx in (-1, 1):
-        k.add(box(0.1, 0.1, MH + 0.02, 0.012), "st_steel", T((sx * 0.45, 0.88, MH / 2 - 0.01)))
-    for i in range(7):
-        z0 = 0.3 + i * 0.6
-        o = 0.012 * (i % 2)
-        beam(k, (-0.45, 0.825 + o, z0), (0.45, 0.825 + o, z0 + 0.6), 0.03, 0.025, "st_steel_dk")
-        beam(k, (0.45, 0.94 + o, z0), (-0.45, 0.94 + o, z0 + 0.6), 0.03, 0.025, "st_steel_dk")
-    k.add(box(1.1, 0.4, 0.1, 0.012), "st_steel", T((0, 0.82, MH)))
-    k.add(cyl(0.38, 0.38, 0.07, 14), "lh_red", T((0, 0.72, MH + 0.38), (0, 90, 0)))
-    k.add(torus(0.38, 0.035, 14, 4), "st_steel_dk", T((0, 0.72, MH + 0.38), (0, 90, 0)))
-    for i in range(6):
-        a = i / 6 * math.tau
-        x = 0.005 * (i - 2.5)
-        beam(k, (x, 0.72, MH + 0.38), (x, 0.72 + 0.34 * math.cos(a), MH + 0.38 + 0.34 * math.sin(a)), 0.03, 0.03, "st_steel_dk")
-    k.add(cyl(0.06, 0.06, 0.2, 8), "brass", T((0, 0.72, MH + 0.38), (0, 90, 0)))
-    k.add(tube([(0, 0.35, MH + 0.38), (0, -0.05, 2.5)], 0.014, 4), "st_steel_dk")
-    k.add(tube([(0, 1.08, MH + 0.38), (0, 1.12, 1.6)], 0.014, 4), "st_steel_dk")
-    k.add(box(0.32, 0.18, 0.5, 0.015), "st_granite_dk", T((0, 1.1, 1.35)))   # counterweight
-    # live lamp on the mast
-    k.add(box(0.12, 0.08, 0.12), "st_steel_dk", T((0.52, 0.8, 2.6)))
-    k.add(sphere(0.07, 8, 6), "coil_glow", T((0.52, 0.74, 2.6)), smooth=True)
-    shadow(k, 1.0, 1.0, 1.0)
+            k.add(box(0.05, 0.05, H - 0.06), "copper", T((sx * h, sy * h, 0.06 + (H - 0.06) / 2)))
+    k.add(box(0.82, 0.82, 0.05), "copper", T((0, 0, H + 0.025)))
+    k.add(cyl(0.56, 0.12, 0.18, 4), "iron", T((0, 0, H + 0.14), (0, 0, 45)))
+    k.add(box(0.05, 0.05, 0.12), "iron", T((0, 0, H + 0.27)))
+    for sx in (-1, 1):  # bar sides (east, west), rails, guide shoes on the rails
+        for i in range(4):
+            k.add(box(0.02, 0.02, H - 0.12), "iron", T((sx * h, -0.225 + 0.15 * i, 0.06 + (H - 0.12) / 2)))
+        for z in (0.12, 1.05, 2.0):
+            k.add(box(0.03, 0.72, 0.04), "copper", T((sx * h, 0, z)))
+        for z in (0.3, 2.05):
+            k.add(box(0.04, 0.1, 0.12), "iron", T((sx * 0.405, 0, z)))
+    for sy in (-1, 1):  # a lintel over each doorway
+        k.add(box(0.72, 0.03, 0.05), "copper", T((0, sy * h, 2.0)))
+    k.add(sphere(0.06, 8, 6), "coil_glow", T((0, -0.3, H - 0.08)), smooth=True)
+    k.add(box(0.1, 0.06, 0.04), "iron", T((0, -0.33, H - 0.01)))
+
+    def gate(gk):  # local: hinge at the origin, the leaf toward -X, 1 m tall
+        for z in (0.04, 0.98):
+            gk.add(box(0.7, 0.03, 0.04), "copper", T((-0.36, 0, z)))
+        gk.add(box(0.03, 0.03, 0.98), "copper", T((-0.02, 0, 0.5)))
+        gk.add(box(0.03, 0.03, 0.98), "copper", T((-0.7, 0, 0.5)))
+        for i in range(5):
+            gk.add(box(0.016, 0.016, 0.92), "iron", T((-0.13 - 0.11 * i, 0, 0.5)))
+        gk.add(box(0.05, 0.05, 0.1), "copper", T((-0.69, -0.03, 0.62)))
+
+    def cable(ck):
+        ck.add(box(0.025, 0.025, 1.0), "iron", T((0, 0, 0.5)))
+
+    def part(build, loc, name):
+        def after(ob, coll):
+            pk = B.Kit(name)
+            build(pk)
+            o = pk.build(coll)
+            o.parent = ob
+            o.location = loc
+            return [o]
+        return after
+    return chain(part(gate, (0.35, -0.4, 0.1), "gate_front"), part(gate, (0.35, 0.4, 0.1), "gate_back"),
+                 part(cable, (0.0, 0.0, H + 0.33), "cable_cage"))
 
 
 def build_rodspire(k):
@@ -497,7 +617,8 @@ PROPS = {
     "wall_dry": lambda k: build_wall_dry(k, "WE", 471), "wall_dry_corner": lambda k: build_wall_dry(k, "WS", 472),
     "wall_dry_end": lambda k: build_wall_dry(k, "W", 473), "wall_dry_t": lambda k: build_wall_dry(k, "WES", 474),
     "heather": build_heather, "chime_post": build_chime_post, "pylon": build_pylon,
-    "observatory": build_observatory, "lift": build_lift, "rodspire": build_rodspire,
+    "observatory": build_observatory, "lift_tower": build_lift_tower, "lift_cage": build_lift_cage,
+    "rodspire": build_rodspire,
 }
 
 _STACK = [("cliff_basalt", x, z, 0, h) for x in (15, 16, 17) for z in (1, 2, 3) for h in range(3)]
@@ -522,7 +643,7 @@ VIGNETTE = dict(
         "..f.....p.....~~~~~~",
         "..fff...p.....~~~~~~",
     ],
-    props=[("observatory", 7, 0), ("lift", 12, 2), ("rodspire", 15, 1, 0, 3)] + _STACK + [
+    props=[("observatory", 7, 0), ("lift_tower", 11, 2), ("lift_cage", 12, 2), ("rodspire", 15, 1, 0, 3)] + _STACK + [
         ("chime_post", 1, 8), ("chime_post", 3, 8), ("chime_post", 0, 10), ("chime_post", 4, 10), ("chime_post", 1, 11),
         ("pylon", 10, 7), ("pylon", 12, 10, 90),
         ("heather", 6, 9), ("heather", 7, 11), ("heather", 11, 5), ("heather", 13, 12), ("heather", 6, 4), ("heather", 3, 5),

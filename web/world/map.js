@@ -103,6 +103,7 @@ export function assetNames(map) {
   if (tiles.includes("H")) names.add("pier");
   if (!map.light.indoor) (map.ring ?? RING).forEach((n) => names.add(n));
   if (names.has("tree")) names.add("tree_b"), names.add("tree_c");
+  for (const l of map.lifts ?? []) names.add(l.cage ?? "lift_cage");
   return [...names];
 }
 
