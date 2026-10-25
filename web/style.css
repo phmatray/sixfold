@@ -2215,12 +2215,12 @@ select option { background: var(--panel); color: var(--ink); }
   position: absolute; transform: translate(-50%, 0); white-space: nowrap; color: var(--ink-map);
   text-shadow: 0 0 2px var(--paper), 0 0 3px var(--paper), 0 0 5px var(--paper);
 }
-.atlas-label.region { transform: translate(-50%, -50%); font: italic 700 clamp(12px, 1.9vw, 16px) var(--display); letter-spacing: 0.02em; color: color-mix(in srgb, var(--rc) 55%, var(--ink-map)); }
+.atlas-label.region { transform: translate(-50%, -50%); font: italic 700 clamp(12px, 1.5vw, 19px) var(--display); letter-spacing: 0.02em; color: color-mix(in srgb, var(--rc) 55%, var(--ink-map)); }
 .atlas-label.region:not(.known) { color: color-mix(in srgb, var(--rc) 25%, #7a6a50); font-weight: 600; }
-.atlas-label.place { margin-top: 7px; font: 700 clamp(11px, 1.45vw, 13px) var(--body); }
-.atlas-label.place.post { margin-top: 15px; }
-.atlas-you { position: absolute; width: 34px; height: 34px; transform: translate(-50%, -88%); pointer-events: none; z-index: 1; }
-.atlas-you.post { transform: translate(-50%, calc(-88% - 13px)); }
+.atlas-label.place { margin-top: 7px; font: 700 clamp(11px, 1.1vw, 15px) / 1.1 var(--body); white-space: normal; width: max-content; max-width: 9em; text-align: center; text-wrap: balance; }
+.atlas-label.place.post { margin-top: clamp(19px, 1.9vw, 24px); } /* below the crystal and its selection ring */
+.atlas-you { position: absolute; width: clamp(28px, 2.6vw, 36px); height: clamp(28px, 2.6vw, 36px); transform: translate(-50%, -88%); pointer-events: none; z-index: 1; }
+.atlas-you.post { transform: translate(calc(-50% - clamp(20px, 1.9vw, 26px)), calc(-88% - 3px)); } /* beside the crystal, clear of the labels above */
 .atlas-you svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 1.5px rgba(58, 40, 18, 0.45)); }
 .atlas-you .pin { fill: #b3261e; stroke: #4a0f0b; stroke-width: 0.35; }
 .atlas-you .dot { fill: var(--paper); }
@@ -2232,11 +2232,11 @@ select option { background: var(--panel); color: var(--ink); }
 .atlas .compass .north { fill: #b3261e; opacity: 1; }
 .atlas .compass text { font: 700 2.6px var(--display); fill: var(--ink-map); }
 /* A waymark: a hexagonal crystal in its region's colour, a 44 px target. */
-.atlas-post { position: absolute; width: 44px; height: 44px; transform: translate(-50%, -50%); padding: 0; border: 0; border-radius: 50%; background: none; display: grid; place-items: center; cursor: pointer; }
+.atlas-post { position: absolute; width: clamp(44px, 3.6vw, 52px); height: clamp(44px, 3.6vw, 52px); transform: translate(-50%, -50%); padding: 0; border: 0; border-radius: 50%; background: none; display: grid; place-items: center; cursor: pointer; }
 .atlas-post::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--rc) 55%, transparent), transparent 70%); opacity: 0; transition: opacity 0.2s ease; }
 .atlas-post.lit::before { opacity: 1; }
 .atlas-post .crystal {
-  position: relative; width: 19px; aspect-ratio: 1 / 1.15; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  position: relative; width: clamp(19px, 1.8vw, 24px); aspect-ratio: 1 / 1.15; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
   background: linear-gradient(150deg, #f6f0e2 8%, #c9bb9c 55%, #8f7f62 95%);
 }
 .atlas-post.lit .crystal { background: linear-gradient(150deg, #fffaf0 6%, color-mix(in srgb, var(--rc) 75%, #fff) 30%, var(--rc) 60%, color-mix(in srgb, var(--rc) 55%, #000) 96%); }

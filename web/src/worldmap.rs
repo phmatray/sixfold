@@ -317,8 +317,12 @@ pub fn WorldMap(
         .filter(|r| r.id != "hub") // the hub's own maps are named on it
         .map(|r| {
             let known = found(r);
+            // Along the land's outer edge (the top of a northern land, the foot of a
+            // southern one), clear of the roads and places nearer the hub.
+            let hy = a.regions.iter().find(|h| h.id == "hub").map_or(4.5, |h| h.y);
+            let (lx, ly) = (r.x, r.y + (r.y - hy).signum() * r.r * 0.72);
             view! {
-                <span class="atlas-label region" class:known=known style=format!("{}; --rc: {}", at(r.x, r.y + r.r * 0.5), r.color)>
+                <span class="atlas-label region" class:known=known style=format!("{}; --rc: {}", at(lx, ly), r.color)>
                     {if known { r.name.clone() } else { tr("Uncharted", "Inexploré").to_string() }}
                 </span>
             }

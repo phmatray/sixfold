@@ -290,7 +290,13 @@
       "asset": "cottage",
       "x": 22,
       "z": 7,
-      "rot": 270
+      "rot": 270,
+      "recolor": {
+        "sx_roof_brown": "#55703f",
+        "sx_roof_brown_dk": "#3b4f2c",
+        "sx_awning_red": "#c98a2e",
+        "sx_bread": null
+      }
     },
     {
       "asset": "inn_sign",

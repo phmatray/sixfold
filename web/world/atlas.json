@@ -1,156 +1,28 @@
 {
   "note": "The world map (WORLD_DESIGN §7.3), drawn by web/src/worldmap.rs on a 12 x 9 grid (x east, y south). regions: the ring round the hub, each a land drawn round (x, y). maps: every outdoor map, its node on the chart; name / name_fr match the map's title. links: roads between maps, drawn once both ends are seen; `if` (a condition) and `icon` (lantern, ferry, boots, gloves) mark a gated one. waymarks: fast-travel posts; the hero lands on (x, z) facing `facing`, the post being the tile in front, with a `kind: waymark` interaction of the same id.",
   "regions": [
-    {
-      "id": "hub",
-      "name": "Sixfold",
-      "name_fr": "Sixfold",
-      "color": "#d6ac4a",
-      "x": 6,
-      "y": 4.6,
-      "r": 1.25
-    },
-    {
-      "id": "ember",
-      "name": "The Emberlands",
-      "name_fr": "Les Braisières",
-      "color": "#e1572f",
-      "x": 6,
-      "y": 1.55,
-      "r": 1.35
-    },
-    {
-      "id": "storm",
-      "name": "The Galewold",
-      "name_fr": "Les Hautes-Rafales",
-      "color": "#e2ad19",
-      "x": 9.4,
-      "y": 2.9,
-      "r": 1.35
-    },
-    {
-      "id": "tide",
-      "name": "The Saltreach",
-      "name_fr": "La Côte Salée",
-      "color": "#2f7fd0",
-      "x": 9.4,
-      "y": 6.2,
-      "r": 1.35
-    },
-    {
-      "id": "dream",
-      "name": "The Hushlands",
-      "name_fr": "Les Terres du Murmure",
-      "color": "#8a4fc9",
-      "x": 6,
-      "y": 7.55,
-      "r": 1.3
-    },
-    {
-      "id": "grove",
-      "name": "The Deepgrove",
-      "name_fr": "Le Bois-Profond",
-      "color": "#3f9a52",
-      "x": 2.6,
-      "y": 6.2,
-      "r": 1.35
-    },
-    {
-      "id": "stone",
-      "name": "The Stonebacks",
-      "name_fr": "Les Échines de Pierre",
-      "color": "#a8642f",
-      "x": 2.6,
-      "y": 2.9,
-      "r": 1.35
-    }
+    { "id": "hub", "name": "Sixfold", "name_fr": "Sixfold", "color": "#d6ac4a", "x": 6, "y": 4.6, "r": 1.25 },
+    { "id": "ember", "name": "The Emberlands", "name_fr": "Les Braisières", "color": "#e1572f", "x": 6, "y": 1.55, "r": 1.35 },
+    { "id": "storm", "name": "The Galewold", "name_fr": "Les Hautes-Rafales", "color": "#e2ad19", "x": 9.4, "y": 2.9, "r": 1.35 },
+    { "id": "tide", "name": "The Saltreach", "name_fr": "La Côte Salée", "color": "#2f7fd0", "x": 9.4, "y": 6.2, "r": 1.35 },
+    { "id": "dream", "name": "The Hushlands", "name_fr": "Les Terres du Murmure", "color": "#8a4fc9", "x": 6, "y": 7.55, "r": 1.3 },
+    { "id": "grove", "name": "The Deepgrove", "name_fr": "Le Bois-Profond", "color": "#3f9a52", "x": 2.6, "y": 6.2, "r": 1.35 },
+    { "id": "stone", "name": "The Stonebacks", "name_fr": "Les Échines de Pierre", "color": "#a8642f", "x": 2.6, "y": 2.9, "r": 1.35 }
   ],
   "maps": [
-    {
-      "id": "overworld",
-      "region": "hub",
-      "x": 6,
-      "y": 4.15,
-      "name": "Sixfold Meadow",
-      "name_fr": "Pré de Sixfold"
-    },
-    {
-      "id": "square",
-      "region": "hub",
-      "x": 6,
-      "y": 5.45,
-      "name": "Brightwell Square",
-      "name_fr": "Place de Clairpuits"
-    },
-    {
-      "id": "quarry",
-      "region": "ember",
-      "x": 6,
-      "y": 2.55,
-      "name": "Emberstep Quarry",
-      "name_fr": "Carrière de Pas-de-Braise"
-    },
-    {
-      "id": "seaside",
-      "region": "tide",
-      "x": 8.35,
-      "y": 5.4,
-      "name": "Saltwind Boardwalk",
-      "name_fr": "Promenade de Ventsalé"
-    },
-    {
-      "id": "woodland",
-      "region": "grove",
-      "x": 3.65,
-      "y": 5.4,
-      "name": "Fernhollow Trail",
-      "name_fr": "Sentier de Creuse-Fougère"
-    },
-    {
-      "id": "lab",
-      "region": "hub",
-      "x": 10.6,
-      "y": 8.3,
-      "name": "Gate Lab",
-      "name_fr": "Labo des passages"
-    }
+    { "id": "overworld", "region": "hub", "x": 6, "y": 4.35, "name": "Sixfold Meadow", "name_fr": "Pré de Sixfold" },
+    { "id": "square", "region": "hub", "x": 6, "y": 5.65, "name": "Brightwell Square", "name_fr": "Place de Clairpuits" },
+    { "id": "quarry", "region": "ember", "x": 6, "y": 2.3, "name": "Emberstep Quarry", "name_fr": "Carrière de Pas-de-Braise" },
+    { "id": "seaside", "region": "tide", "x": 8.35, "y": 5.4, "name": "Saltwind Boardwalk", "name_fr": "Promenade de Ventsalé" },
+    { "id": "woodland", "region": "grove", "x": 3.65, "y": 5.4, "name": "Fernhollow Trail", "name_fr": "Sentier de Creuse-Fougère" }
   ],
   "links": [
-    {
-      "a": "overworld",
-      "b": "quarry"
-    },
-    {
-      "a": "overworld",
-      "b": "seaside"
-    },
-    {
-      "a": "overworld",
-      "b": "woodland"
-    },
-    {
-      "a": "overworld",
-      "b": "square"
-    }
+    { "a": "overworld", "b": "quarry" },
+    { "a": "overworld", "b": "seaside" },
+    { "a": "overworld", "b": "woodland" },
+    { "a": "overworld", "b": "square" }
   ],
   "waymarks": [
-    {
-      "id": "meadow",
-      "map": "overworld",
-      "x": 16,
-      "z": 13,
-      "facing": "n",
-      "name": "Sixfold Meadow",
-      "name_fr": "Pré de Sixfold"
-    },
-    {
-      "id": "lab",
-      "map": "lab",
-      "x": 12,
-      "z": 7,
-      "facing": "n",
-      "name": "Gate Lab",
-      "name_fr": "Labo des passages"
-    }
+    { "id": "meadow", "map": "overworld", "x": 16, "z": 13, "facing": "n", "name": "Sixfold Meadow", "name_fr": "Pré de Sixfold" }
   ]
 }

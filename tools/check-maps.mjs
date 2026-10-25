@@ -15,7 +15,7 @@
 // a warp (no soft-lock), and with every gate open every person, spot, warp and waymark can be reached
 // (floor heights, the 0.6 m step and the ladder rule as build.js has them). The atlas (atlas.json) lists
 // every outdoor map under its own title, its roads join listed maps, and each waymark stands on a
-// reachable tile facing its post (a `kind: "waymark"` spot of the same id); posts sit at least 1.5 grid
+// reachable tile facing its post (a `kind: "waymark"` spot of the same id); posts sit at least 1.7 grid
 // squares apart on the chart, so their 44 px targets never overlap on a phone.
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 const dir = process.argv[2] ?? "web/world";
@@ -239,7 +239,7 @@ else {
   for (let i = 0; i < atlas.waymarks.length; i++)
     for (let j = i + 1; j < atlas.waymarks.length; j++) {
       const a = at(atlas.waymarks[i]), b = at(atlas.waymarks[j]);
-      if (Math.hypot(a.x - b.x, a.y - b.y) < 1.5) fail.push(`atlas: waymarks ${atlas.waymarks[i].id} and ${atlas.waymarks[j].id} are under 1.5 squares apart on the chart`);
+      if (Math.hypot(a.x - b.x, a.y - b.y) < 1.7) fail.push(`atlas: waymarks ${atlas.waymarks[i].id} and ${atlas.waymarks[j].id} are under 1.7 squares apart on the chart`);
     }
 }
 if (fail.length) throw new Error(fail.join("\n"));

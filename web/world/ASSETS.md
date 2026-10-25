@@ -375,7 +375,7 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   centre `x`/`y` and radius `r` on a 12 × 9 chart), `maps` (every outdoor map: id, region, `x`/`y`, name and
   name_fr equal to the map's title), `links` (roads `a`–`b`, drawn once one end is seen; a gated one has
   `if` and `icon`: `lantern`, `ferry`, `boots` or `gloves`), `waymarks` (above). Posts must sit at least
-  1.5 squares apart on the chart (44 px targets on a phone).
+  1.7 squares apart on the chart (44 px targets on a phone).
 - **inns:** an innkeeper's branch with `"do": ["show:inn"]` opens the rest panel (rest until dawn, morning,
   dusk or night; free). The hub inn is `inn_hub` in Brightwell Square (Hollis).
 - **Debug hooks** on the world's host element (`.world-host`): `sixfoldClock(minute)` sets the time,
