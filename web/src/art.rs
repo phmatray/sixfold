@@ -1,9 +1,43 @@
-//! Original procedural card art: SVG strings built from a hash of the card
-//! name, so each card always gets the same picture. No external images.
+//! Card art: an illustration from `cards/<slug>.webp` when the card has one,
+//! else original procedural SVG built from a hash of the card name, so each
+//! card always gets the same picture.
 
 use std::fmt::Write;
 
-use sixfold_engine::{CardDef, CardKind, Color, Creature, EnergyCard, Stage};
+use sixfold_engine::{CardDef, CardKind, Color, Creature, Effect, EnergyCard, Stage, Trainer};
+
+include!(concat!(env!("OUT_DIR"), "/art_files.rs"));
+
+/// The file name stem of a card's illustration: its English identity name
+/// (never the translated one), lowercased, with anything but letters and
+/// digits turned into `-` ("Trail Compass" -> `trail-compass`).
+pub fn slug(name: &str) -> String {
+    let s: String = name
+        .chars()
+        .map(|c| {
+            if c.is_ascii_alphanumeric() {
+                c.to_ascii_lowercase()
+            } else {
+                '-'
+            }
+        })
+        .collect();
+    s.split('-')
+        .filter(|w| !w.is_empty())
+        .collect::<Vec<_>>()
+        .join("-")
+}
+
+/// The URL of a card's illustration, when `cards/` has one (listed at build
+/// time by build.rs). The query carries the file's hash, so a redrawn picture
+/// gets a new URL past every cache.
+pub fn art_src(def: &CardDef) -> Option<String> {
+    let slug = slug(def.name);
+    ART_FILES
+        .binary_search_by(|(s, _)| (*s).cmp(slug.as_str()))
+        .ok()
+        .map(|i| format!("cards/{slug}.webp?v={}", ART_FILES[i].1))
+}
 
 /// CSS class suffix for a colour (`t-fire` etc. in style.css).
 pub fn color_key(c: Color) -> &'static str {
@@ -81,7 +115,7 @@ pub fn card_art(def: &CardDef) -> String {
     match &def.kind {
         CardKind::Creature(c) | CardKind::TrainerBasic(c) => creature_art(def.name, c),
         CardKind::Energy(e) => energy_art(*e),
-        CardKind::Trainer(_) => trainer_art(def.name),
+        CardKind::Trainer(t) => trainer_art(def.name, t),
     }
 }
 
@@ -100,7 +134,9 @@ fn motifs(s: &mut String, r: &mut Seq, c: Color, count: usize) {
 /// A seeded blob creature: smooth body, a crest in its colour's glyph, eyes.
 fn creature_art(name: &str, c: &Creature) -> String {
     let mut r = Seq::of(name);
-    let mut s = String::from(r#"<svg viewBox="0 0 100 70" aria-hidden="true">"#);
+    let mut s = String::from(
+        r#"<svg viewBox="0 0 100 70" preserveAspectRatio="xMidYMid slice" aria-hidden="true">"#,
+    );
     motifs(&mut s, &mut r, c.color, 7);
     let stage = match c.stage {
         Stage::Basic => 0.0,
@@ -186,7 +222,9 @@ fn energy_art(e: EnergyCard) -> String {
         EnergyCard::Basic(c) => c,
         EnergyCard::DoubleColorless => Color::Colorless,
     };
-    let mut s = String::from(r#"<svg viewBox="0 0 100 70" aria-hidden="true">"#);
+    let mut s = String::from(
+        r#"<svg viewBox="0 0 100 70" preserveAspectRatio="xMidYMid slice" aria-hidden="true">"#,
+    );
     s.push_str(r#"<circle class="ring" cx="50" cy="35" r="27"/><circle class="ring" cx="50" cy="35" r="19"/>"#);
     let marks: &[f32] = if e == EnergyCard::DoubleColorless {
         &[38.0, 62.0]
@@ -204,25 +242,60 @@ fn energy_art(e: EnergyCard) -> String {
     s
 }
 
-/// Trainers: a seeded arrangement of arcs and bars in slate and brass.
-fn trainer_art(name: &str) -> String {
+/// A trainer's emblem, from what its first effect does (24×24 strokes).
+fn trainer_icon(t: &Trainer) -> &'static str {
+    match t.effects.first() {
+        // Search: a magnifier.
+        Some(Effect::Search(_)) => "M10 4a6 6 0 1 0 0 12a6 6 0 1 0 0-12ZM14.5 14.5L20 20",
+        // Draw: two cards.
+        Some(Effect::Draw(_) | Effect::DiscardHand) => "M5 7h9v13H5ZM10 4h9v13",
+        // Heal: a cross.
+        Some(Effect::Heal(_) | Effect::HealAll(_)) => "M12 5v14M5 12h14",
+        // Cure: a vial.
+        Some(Effect::Cure { .. }) => {
+            "M9 3h6M10 3v6l-4.5 9.5A2 2 0 0 0 7.3 21h9.4a2 2 0 0 0 1.8-2.5L14 9V3M7.5 15h9"
+        }
+        // Switch: two arrows.
+        Some(Effect::SwitchSelf | Effect::SwitchDefender { .. }) => "M4 8h15l-4-4M20 16H5l4 4",
+        // Recover from the discard pile: a return arrow.
+        Some(Effect::Recover(_)) => "M9 14L5 10l4-4M5 10h9a5 5 0 0 1 0 10h-3",
+        // Take away (energy, an evolution): an arrow down to a line.
+        Some(Effect::DiscardDefenderEnergy | Effect::Devolve) => "M12 4v11M7 10l5 5l5-5M5 20h14",
+        // Skip a stage: a sprout.
+        Some(Effect::StageSkip) => {
+            "M12 21v-9M12 12c0-4 3-7 7-7c0 4-3 7-7 7ZM12 15c0-3-2.5-5-6-5c0 3 2.5 5 6 5Z"
+        }
+        // Energy from the deck: a bolt.
+        Some(Effect::AttachFromDeck(_)) => "M13 3L6 13h5l-1 8l7-10h-5Z",
+        // Attached tools: a shield.
+        Some(Effect::AttachPlus10 | Effect::AttachMinus20) => {
+            "M12 3l7 3v5c0 5-3 8-7 10c-4-2-7-5-7-10V6Z"
+        }
+        // Strikes at the opponent: a target.
+        _ => "M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16ZM12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6Z",
+    }
+}
+
+/// Trainers: seeded arcs behind a brass medallion with the trainer's emblem.
+fn trainer_art(name: &str, t: &Trainer) -> String {
     let mut r = Seq::of(name);
-    let mut s = String::from(r#"<svg viewBox="0 0 100 70" aria-hidden="true">"#);
+    let mut s = String::from(
+        r#"<svg viewBox="0 0 100 70" preserveAspectRatio="xMidYMid slice" aria-hidden="true">"#,
+    );
     for i in 0..4 {
-        let rad = 10.0 + i as f32 * 8.0 + r.range(-2.0, 2.0);
+        let rad = 14.0 + i as f32 * 8.0 + r.range(-2.0, 2.0);
         let _ = write!(
             s,
-            r#"<circle class="arc" cx="{:.1}" cy="{:.1}" r="{rad:.1}" stroke-dasharray="{:.0} {:.0}"/>"#,
-            r.range(40.0, 60.0),
-            r.range(30.0, 40.0),
+            r#"<circle class="arc" cx="50" cy="35" r="{rad:.1}" stroke-dasharray="{:.0} {:.0}" transform="rotate({:.0} 50 35)"/>"#,
             r.range(10.0, 40.0),
-            r.range(6.0, 18.0)
+            r.range(6.0, 18.0),
+            r.range(0.0, 360.0)
         );
     }
-    let rot = r.range(-40.0, 40.0);
     let _ = write!(
         s,
-        r#"<g transform="rotate({rot:.0} 50 35)"><rect class="bar" x="20" y="32" width="60" height="6" rx="3"/><rect class="bar2" x="44" y="14" width="12" height="42" rx="6"/></g>"#
+        r#"<circle class="medal" cx="50" cy="35" r="17"/><path class="emblem" transform="translate(38 23)" d="{}"/>"#,
+        trainer_icon(t)
     );
     s.push_str("</svg>");
     s

@@ -77,26 +77,155 @@ fn type_class(def: &CardDef) -> String {
     format!("{kind} {color}")
 }
 
-/// The face of a card. Size comes from the parent's `--w` CSS variable.
+/// The face of a card. Size comes from the parent's `--w` CSS variable; the
+/// layout follows the width (a container query in style.css): from 140px
+/// the full card (stage line, attacks, weakness and retreat), below it the
+/// compact one (name, picture, HP, stage) for the hand and the table.
 #[component]
 pub fn CardFace(id: CardId) -> impl IntoView {
     let def = card(id);
-    let hp = def.creature().map(|c| c.hp);
-    let long_name = def.label().chars().count() > 10;
+    let promo = sixfold_engine::set::is_promo(id);
+    let foil = promo || (def.rarity == Rarity::Rare && !matches!(def.kind, CardKind::Energy(_)));
+    let class = format!(
+        "card {} r-{}{}",
+        type_class(def),
+        rarity_key(def.rarity),
+        if foil { " foil" } else { "" }
+    );
+    let long_name = def.label().chars().count() > 11;
+    let hp = def.creature().map(|c| {
+        view! { <span class="card-hp">{c.hp}<small aria-hidden="true">{tr(" HP", " PV")}</small></span> }
+    });
+    let mark =
+        card_color(def).map(|c| view! { <span class="card-type" inner_html=glyph_svg(c)></span> });
     view! {
-        <div class=format!("card {}", type_class(def))>
-            // The " " text nodes don't show (flex and grid drop them) but keep
-            // the words apart in the text that "label in name" checks compare.
-            <div class="card-head">
-                <span class="card-name" class:long=long_name>{def.label()}</span>" "
-                {hp.map(|hp| view! { <span class="card-hp">{hp}</span> })}
-            </div>" "
-            <div class="card-art" inner_html=card_art(def)></div>
-            <div class="card-foot">
-                {foot(def)}
-                {sixfold_engine::set::is_promo(id).then(|| view! { " "<span class="card-promo">"Promo"</span> })}
+        <div class=class>
+            <div class="face">
+                // The " " text nodes don't show (flex and grid drop them) but keep
+                // the words apart in the text that "label in name" checks compare.
+                <div class="card-head">
+                    <span class="card-name" class:long=long_name>{def.label()}</span>" "
+                    {hp}{mark}
+                </div>" "
+                <div class="card-stage">{stage_line(def)}</div>" "
+                <CardArt def=def />
+                // What only the full card prints: a control showing a card is
+                // named by its first words (face_text), the inspector reads out the rest.
+                <div class="card-body" aria-hidden="true">{body(def)}</div>
+                <div class="card-foot" aria-hidden="true">{footer(def, promo)}</div>
             </div>
         </div>
+    }
+}
+
+/// The picture window: the card's illustration, or its procedural art when
+/// it has none yet (or the file can't load, e.g. offline before it was cached).
+#[component]
+fn CardArt(def: &'static CardDef) -> impl IntoView {
+    let src = crate::art::art_src(def);
+    let broken = RwSignal::new(false);
+    move || {
+        match src.clone().filter(|_| !broken.get()) {
+        Some(src) => view! {
+            <div class="card-art">
+                <img src=src alt="" width="800" height="560" loading="lazy" decoding="async" on:error=move |_| broken.set(true) />
+            </div>
+        }
+        .into_any(),
+        None => view! { <div class="card-art drawn" inner_html=card_art(def)></div> }.into_any(),
+    }
+    }
+}
+
+/// "Stage 1 · from Kilnback", "Basic", "Trainer"... (the compact card shows
+/// only the stage).
+fn stage_line(def: &CardDef) -> impl IntoView {
+    let from = def.creature().and_then(|c| c.evolves_from).map(|f| {
+        let from = card_id(f).map_or(f, |id| card(id).label());
+        view! { " "<span class="from" aria-hidden="true">{tr("· from ", "· évolue de ")}{from}</span> }
+    });
+    view! { {foot(def)}{from} }
+}
+
+/// What the full card prints under the picture.
+fn body(def: &'static CardDef) -> AnyView {
+    match &def.kind {
+        CardKind::Creature(c) | CardKind::TrainerBasic(c) => {
+            let power = c.power.as_ref().map(|p| {
+                view! {
+                    <div class="card-power">
+                        <span class="tag">{tr("Power", "Pouvoir")}</span>" "
+                        <span class="card-move">{p.label()}</span>
+                    </div>
+                }
+            });
+            let attacks = c
+                .attacks
+                .iter()
+                .map(|a| {
+                    view! {
+                        <div class="card-attack">
+                            {cost_pips(a.cost)}" "
+                            <span class="card-move">{a.label()}</span>" "
+                            <span class="card-dmg">{damage_label(a)}</span>
+                        </div>
+                    }
+                })
+                .collect_view();
+            view! { {power}{attacks} }.into_any()
+        }
+        CardKind::Trainer(t) => {
+            let text = if t.rules().is_empty() {
+                t.effects.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(" ")
+            } else {
+                t.rules().to_string()
+            };
+            view! { <p class="card-text">{text}</p> }.into_any()
+        }
+        CardKind::Energy(EnergyCard::Basic(c)) => view! {
+            <p class="card-text">{tr(format!("Provides 1 {c} energy."), format!("Fournit 1 énergie {c}."))}</p>
+        }
+        .into_any(),
+        CardKind::Energy(EnergyCard::DoubleColorless) => view! {
+            <p class="card-text">{tr("Provides 2 Colorless energy.", "Fournit 2 énergies Incolore.")}</p>
+        }
+        .into_any(),
+    }
+}
+
+/// Weakness, resistance and retreat (creatures), then the rarity mark.
+fn footer(def: &CardDef, promo: bool) -> impl IntoView {
+    let stats = def.creature().map(|c| {
+        let pip = |c: Option<Color>, add: &'static str| match c {
+            Some(c) => view! { <Pip color=c />{add} }.into_any(),
+            None => view! { <span class="none">"–"</span> }.into_any(),
+        };
+        let retreat = if c.retreat_cost == 0 {
+            view! { <span class="none">"0"</span> }.into_any()
+        } else {
+            (0..c.retreat_cost).map(|_| view! { <Pip color=Color::Colorless /> }).collect_view().into_any()
+        };
+        view! {
+            <span class="stat"><small>{tr("Weakness", "Faiblesse")}</small>" "<b>{pip(c.weakness, "×2")}</b></span>" "
+            <span class="stat"><small>{tr("Resistance", "Résistance")}</small>" "<b>{pip(c.resistance, "−30")}</b></span>" "
+            <span class="stat"><small>{tr("Retreat", "Retraite")}</small>" "<b>{retreat}</b></span>" "
+        }
+    });
+    let rarity = (def.rarity != Rarity::Energy).then(|| {
+        let shape = match def.rarity {
+            Rarity::Uncommon => r#"<path d="M6 1 11 6 6 11 1 6Z"/>"#,
+            Rarity::Rare => r#"<path d="M6 .8 7.6 4.4 11.4 4.7 8.5 7.2 9.4 11 6 9 2.6 11 3.5 7.2.6 4.7 4.4 4.4Z"/>"#,
+            _ => r#"<circle cx="6" cy="6" r="4"/>"#,
+        };
+        view! {
+            <span class="rarity" title=rarity_label(def.rarity)
+                inner_html=format!(r#"<svg viewBox="0 0 12 12" aria-hidden="true">{shape}</svg>"#)></span>
+        }
+    });
+    view! {
+        {stats}
+        {promo.then(|| view! { <span class="card-promo">"Promo"</span> })}
+        {rarity}
     }
 }
 
@@ -108,8 +237,9 @@ fn foot(def: &CardDef) -> String {
     }
 }
 
-/// The words printed on a [`CardFace`] ("Cindrel 50 Basic"): a button showing
-/// a card starts its accessible name with them (WCAG 2.5.3, label in name).
+/// The words printed first on a [`CardFace`] ("Cindrel 50 Basic"): a
+/// button showing a card starts its accessible name with them (WCAG 2.5.3,
+/// label in name).
 pub fn face_text(id: CardId) -> String {
     let def = card(id);
     let promo = if sixfold_engine::set::is_promo(id) {
