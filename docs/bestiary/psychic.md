@@ -726,14 +726,14 @@ de lanterne éclairées de l'intérieur ; une queue de gaze ; une lueur en orbit
 legs, chest up and head held high, its body compact. Its short coat is moon-silver with lilac shading and a
 cream throat. Set in the middle of its forehead is one round mirror of polished mother-of-pearl, as large
 as its eye, catching the light and reflecting a faint shimmer. Two short, smooth, slightly curved pearl
-horns rise just above the mirror. Its two large ears are thin violet lantern paper with fine ribs, glowing
-amber from inside. Its tail is a short tuft of pale gauze. Large dark eyes with a pearly sheen, a soft grey
+horns rise just above the mirror. Its two small ears are thin violet lantern paper with fine ribs, glowing
+amber from inside, held close beside its horns. Its tail is a tiny tuft of pale gauze tucked against its haunch. Large dark eyes with a pearly sheen, a soft grey
 muzzle. One amber mote circles its head. *FR : Une jeune créature fine à quatre pattes assise repliée sur
 ses pattes, poitrine levée et tête haute, le corps compact. Son pelage ras est argent lunaire ombré de
 lilas, la gorge crème. Au milieu de son front est serti un miroir rond de nacre polie, grand comme son
 œil, qui accroche la lumière et renvoie un faible scintillement. Deux courtes cornes de nacre, lisses et
-légèrement courbes, s'élèvent juste au-dessus du miroir. Ses deux grandes oreilles sont de fin papier de
-lanterne violet nervuré, lumineuses d'ambre. Sa queue est une courte touffe de gaze pâle. Grands yeux
+légèrement courbes, s'élèvent juste au-dessus du miroir. Ses deux petites oreilles sont de fin papier de
+lanterne violet nervuré, lumineuses d'ambre, tenues près de ses cornes. Sa queue est une minuscule touffe de gaze pâle serrée contre sa hanche. Grands yeux
 sombres à reflet nacré, museau gris et doux. Une lueur ambre tourne autour de sa tête.*
 
 **4. Size and weight / Taille et poids.** 70 cm, 18 kg. *70 cm, 18 kg.*
@@ -783,13 +783,13 @@ de lumière vive dans les hauts-fonds qui cligne quand vous bougez.*
 that way till morning. *FR : Ne faites jamais de grimace à un Miroitox : il vous la rendra, et la vôtre
 restera ainsi jusqu'au matin.*
 
-**14. Visual key / Clé visuelle.** Must show: ears folded back flat along the neck (spread ears break the card crop); young slender four-legged body sitting folded on tucked
+**14. Visual key / Clé visuelle.** Must show: two small ears held close beside the horns, inside the head's outline (spread ears break the card crop); young slender four-legged body sitting folded on tucked
 legs, chest up, head high; moon-silver coat shaded lilac with a cream throat; exactly one round
 mother-of-pearl mirror in the middle of the forehead; exactly two short smooth pearl horns above it; two
-large violet lantern-paper ears glowing amber; short gauze tail tuft; large pearly dark eyes; exactly one
+small violet lantern-paper ears glowing amber; a tiny gauze tail tuft tucked in; large pearly dark eyes; exactly one
 amber mote. Pose: sitting folded in shallow water, front three-quarter view, compact. Avoid: a real deer,
 fawn or antelope; a single unicorn horn; standing side-on; long legs stretched out; no hexagon shapes or
-markings. *À montrer : oreilles repliées à plat le long du cou, un miroir de nacre au front, deux courtes cornes, oreilles de papier lumineuses,
+markings. *À montrer : deux petites oreilles serrées près des cornes, un miroir de nacre au front, deux courtes cornes, oreilles de papier lumineuses,
 pattes repliées, une lueur. À éviter : un vrai faon ou une vraie antilope, une licorne, une pose de profil,
 aucun hexagone.*
 

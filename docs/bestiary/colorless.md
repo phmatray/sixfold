@@ -1,30 +1,29 @@
 # Colorless Hexons / Hexons Incolores
 
-Grain: **none**. Colorless Hexons belong to the blank seventh face. Their hides are dense felt with visible fibres, their horns chalk, their claws and beaks unglazed porcelain, and **chalk markings** are drawn on their bodies: lines, dots and tally strokes like a map nobody can read, around one plain unmarked oval where other Hexons carry grain. Home: Sixfold Meadow,
-Brightwell Square and every road between the regions. See [BESTIARY.md](../BESTIARY.md).
+Grain: **none**. Neutral Hexons belong to the blank seventh face. They have no fur, feathers or skin: each body is **sewn** from patchwork panels of thick matted felt (oatmeal, cream, warm grey, slate) joined by bold, visible stitched seams. Having no face of their own, every line grew the shape of a tool travellers carry, as **one or two impossible organs** that change the silhouette: bellows flanks, hearing-horn ears, spool knees, a pincushion back, a stocking tail, a body wound from yarn, raised moth wings. Horn is chalk, claws and beaks unglazed porcelain. Their **chalk markings are alive** and differ per line: a map of tunnels, wind arrows, sound rings, tallies of stores or loads, a route, stitch marks. No mark is shared: there is no common chest disc or emblem, and the animal base is only a silhouette hint. Home: Sixfold Meadow, Brightwell Square and every road between the regions. See [BESTIARY.md](../BESTIARY.md).
 
-*Grain : **aucun**. Les Hexons Incolores appartiennent à la septième face, la face vierge. Leur peau est un feutre dense aux fibres visibles, leurs cornes de craie, leurs griffes et becs de porcelaine brute, et des **marques à la craie** sont tracées sur leur corps : lignes, points et bâtons comme une carte que personne ne sait lire, autour d'un ovale vierge là où les autres Hexons portent leur grain. Région : le Pré de Sixfold, la Place de Clairpuits et toutes les routes.*
+*Grain : **aucun**. Les Hexons Neutres appartiennent à la septième face, la face lisse. Ils n'ont ni fourrure, ni plumes, ni peau : chaque corps est **cousu** de pièces de feutre épais en patchwork (avoine, crème, gris chaud, ardoise), aux coutures larges et bien visibles. Faute d'une face à eux, chaque lignée a pris la forme d'un outil de voyageur, en **un ou deux organes impossibles** qui changent la silhouette : flancs-soufflets, oreilles-cornets, genoux-bobines, dos-pelote à épingles, queue-bas, corps de laine enroulée, ailes de phalène dressées. La corne est de craie, les griffes et les becs de porcelaine brute. Leurs **marques de craie sont vivantes** et propres à chaque lignée : plan de galeries, flèches de vent, ondes sonores, comptes de provisions ou de chargements, itinéraire, points de couture. Aucune marque n'est commune : pas de disque ni d'emblème partagé sur la poitrine, et l'animal d'origine n'est qu'un souvenir de silhouette. Région : le Pré de Sixfold, la Place de Clairpuits et toutes les routes.*
 
 ---
 
 ## Burrowbit line / Lignée de Terrinot (068–070)
 
-**The line in one breath.** A felted digger with spade-bladed ears becomes a four-eared sprinter and then a warren-lord whose spade-ears have grown into a crown and whose felt is drawn all over with the map of its tunnels. The rabbit base survives only in the silhouette.
+**The line in one breath.** A sewn sack of a digger, whose front is a drawstring pouch and whose ears are two chalk spades, becomes a four-bladed sprinter on coiled-spring legs and then a warren-lord crowned with five blades, on porcelain spade feet, its whole body chalked with the map of every tunnel. The rabbit base survives only as a hint in the silhouette.
 
-*En un souffle : un fouisseur feutré aux oreilles-pelles devient un coureur à quatre oreilles, puis un seigneur de garenne dont les oreilles-pelles sont devenues couronne et dont le feutre porte, tracé à la craie, le plan de ses galeries. Du lapin ne reste que la silhouette.*
+*En un souffle : un fouisseur en forme de sac cousu, dont le devant est une bourse à cordon et les oreilles deux pelles de craie, devient un coureur à quatre lames sur des pattes en ressorts, puis un seigneur de garenne couronné de cinq lames, sur des pattes-pelles de porcelaine, dont tout le corps porte à la craie le plan de chaque galerie. Du lapin ne reste qu'un souvenir de silhouette.*
 
 ### 068 · Burrowbit / Terrinot
 
 **1. Identity / Identité.** No. 068 · Colorless · Basic · Burrowbit → Warrenbuck → Warrenking. 50 HP,
 common. *N° 068 · Incolore · Base · Terrinot → Garenbouquin → Garenroi. 50 PV, commun.*
 
-**2. Animal base / Base animale.** EN: Kept from a young rabbit, only as a silhouette: a round body, long ears and strong hind feet. Invented: a hide of dense felt instead of fur, ears that end in flat chalk **spade blades** it digs with, chalk tally marks drawn on its flanks, a pouch of loose felt on its chest full of found trinkets and porcelain claws. *FR : Du jeune lapin, il ne garde que la silhouette : corps rond, longues oreilles et fortes pattes arrière. Inventé : une peau de feutre dense au lieu de fourrure, des oreilles terminées par des **lames-pelles** de craie plates avec lesquelles il creuse, des bâtons de comptage tracés à la craie sur ses flancs, une poche de feutre souple sur la poitrine pleine de trouvailles et des griffes de porcelaine.*
+**2. Animal base / Base animale.** EN: Kept from a young rabbit, as a silhouette hint only: a low round body and two tall shapes on its head. Invented: no fur, a sack-shaped body sewn from patchwork felt; ears that are two felt stalks ending in flat chalk **spade blades** it digs with; a whole front that is a **drawstring pouch** full of found trinkets; a chalk map of its own tunnels drawn across its panels. *FR : Du jeune lapin, il ne garde qu'un souvenir de silhouette : un corps rond et bas, et deux formes dressées sur la tête. Inventé : pas de fourrure, un corps en forme de sac cousu de feutre en patchwork ; des oreilles qui sont deux tiges de feutre terminées par des **lames-pelles** de craie plates avec lesquelles il creuse ; tout un devant qui est une **bourse à cordon** pleine de trouvailles ; le plan de ses propres galeries tracé à la craie sur ses pièces.*
 
-**3. Morphology / Morphologie.** EN: A small, ball-shaped creature whose four very short legs are almost hidden under its round felt body. Its hide is dense oatmeal felt with visible fibres and soft pilling, like needle-felted wool. Its two long ears stand up and end in flat, chalk-white spade blades, scuffed with earth. Bold chalk spirals, dots and tally marks are drawn all over its felt, one tally for every tunnel it has dug, and one plain unmarked oval sits on its brow. On its chest, a pouch of loose felt bulges with things it has found: a button, a key, a twig. Its forepaws end in small unglazed porcelain claws. A tuft of felt for a tail, large bright dark eyes. *FR : Une petite créature en forme de boule dont les quatre pattes très courtes disparaissent presque sous son corps de feutre. Sa peau est un feutre avoine dense, aux fibres visibles et légèrement bouloché, comme de la laine feutrée à l'aiguille. Ses deux longues oreilles se dressent et finissent en lames-pelles de craie blanche plates, éraflées de terre. Des spirales, des points et des bâtons de comptage sont tracés à la craie sur tout son feutre, un bâton par galerie creusée, et un ovale vierge orne son front. Sur sa poitrine, une poche de feutre souple déborde de trouvailles : un bouton, une clé, une brindille. Ses pattes avant finissent en petites griffes de porcelaine brute. Une touffe de feutre pour queue, grands yeux sombres et brillants.*
+**3. Morphology / Morphologie.** EN: A small, round, sack-shaped creature with no neck, its four stubby stitched legs almost hidden under it. It has no fur: its body is sewn from patchwork panels of thick matted oatmeal and cream felt, joined by bold seams of cream thread. Its whole front is a drawstring pouch, a puckered felt mouth gathered by a cord, bulging with things it has found: a brass button, a small key, a twig. From the top of its head rise two tall stalks of stitched felt, each ending in a flat chalk-white spade blade with straight edges, scuffed with earth. Its face is a small flat panel above the pouch, with two big glossy dark eyes. White chalk lines run across its panels like a map of branching tunnels with little round chambers; the map grows a line every time it digs. Small porcelain claws. *FR : Une petite créature ronde en forme de sac, sans cou, dont les quatre pattes courtes et cousues disparaissent presque sous le corps. Elle n'a pas de fourrure : son corps est cousu de pièces de feutre épais et mat, avoine et crème, jointes par de larges coutures de fil crème. Tout son devant est une bourse à cordon, une bouche de feutre froncée par un lacet, qui déborde de trouvailles : un bouton de laiton, une petite clé, une brindille. Du haut de sa tête montent deux hautes tiges de feutre cousu, chacune terminée par une lame-pelle de craie blanche, plate et à bords droits, éraflée de terre. Sa face est une petite pièce plate au-dessus de la bourse, avec deux grands yeux sombres et brillants. Des lignes de craie blanche courent sur ses pièces comme le plan de galeries ramifiées aux petites chambres rondes ; le plan gagne un trait chaque fois qu'il creuse. Petites griffes de porcelaine.*
 
 **4. Size and weight / Taille et poids.** 30 cm, 2 kg (plus its pouch). *30 cm, 2 kg (plus sa poche).*
 
-**5. Colours and materials / Couleurs et matières.** Oatmeal felt with visible fibres, chalk-white spade blades and tally marks, one plain cream oval, unglazed porcelain claws, a few brass and wood trinkets. *Feutre avoine aux fibres visibles, lames-pelles et bâtons de craie blanche, un ovale crème vierge, griffes de porcelaine brute, quelques babioles de laiton et de bois.*
+**5. Colours and materials / Couleurs et matières.** Oatmeal and cream patchwork felt with cream-thread seams, chalk-white spade blades and tunnel-map lines, a cord drawstring, unglazed porcelain claws, a few brass and wood trinkets. *Feutre en patchwork avoine et crème aux coutures de fil crème, lames-pelles et plan de galeries de craie blanche, un lacet, griffes de porcelaine brute, quelques babioles de laiton et de bois.*
 
 **6. Habitat.** EN: The banks and hedges of Sixfold Meadow; it digs under the duel hall's garden wall.
 *FR : Les talus et les haies du Pré de Sixfold ; il creuse sous le mur du jardin de la salle de duel.*
@@ -59,7 +58,7 @@ vérifiez vos poches ensuite.*
 **13. Folklore.** EN: Meadow folk say a lost key is never lost, only borrowed by a Burrowbit. *FR : Au
 pré, on dit qu'une clé perdue n'est jamais perdue, seulement empruntée par un Terrinot.*
 
-**14. Visual key / Clé visuelle.** Must show: small ball-shaped felt body, legs almost hidden; dense oatmeal felt hide with visible fibres and pilling; two long ears ending in flat chalk-white spade blades; bold chalk spirals, dots and tally marks drawn all over; one plain oval on the brow; felt chest pouch with a button, a key and a twig; porcelain claws. Pose: sitting low on all fours, front three-quarter view, compact. Avoid: a real rabbit or bunny; fur; a toy or plush look; standing on hind legs; no hexagon shapes or markings. *À montrer : feutre aux fibres visibles, oreilles à lames-pelles de craie, bâtons de comptage à la craie, ovale vierge, poche à trouvailles. À éviter : un vrai lapin, une peluche, une posture debout, aucun hexagone.*
+**14. Visual key / Clé visuelle.** Must show: a small round sack-shaped body with no neck, sewn from oatmeal and cream felt panels with bold stitched seams; two felt stalks ending in flat chalk-white spade blades; the whole front a drawstring pouch spilling a button, a key and a twig; a small flat face panel with two big dark eyes; chalk tunnel-map lines across the panels; porcelain claws. Pose: sitting low, front three-quarter view, compact, the blades inside the safe area. Avoid: a real rabbit or bunny; fur; soft rabbit ears, a nose or whiskers; a plush or toy look; standing on hind legs; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : corps-sac rond cousu de pièces de feutre, deux tiges à lames-pelles de craie, bourse à cordon pleine de trouvailles, plan de galeries à la craie. À éviter : un vrai lapin, de la fourrure, des oreilles de lapin, un air de peluche, une posture debout, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
 EN: "It keeps whatever shines in the pouch on its chest. Meadow folk say a lost key is never lost, only borrowed."
@@ -70,14 +69,14 @@ FR : « Il garde tout ce qui brille dans la poche de sa poitrine. Au pré, on di
 **1. Identity / Identité.** No. 069 · Colorless · Awaken 1 · from Burrowbit → Warrenking. 70 HP,
 uncommon. *N° 069 · Incolore · Éveil 1 · de Terrinot → Garenroi. 70 PV, peu commun.*
 
-**2. Animal base / Base animale.** EN: Kept from a hare, only as a silhouette: long hind legs and tall ears. Invented: a second, smaller pair of spade-ears below the first, long chalk spade blades on the tall ears, chalk arrows drawn along its flanks like running tracks, porcelain plates on its hocks and a fringe of thick felt around its neck. *FR : Du lièvre, il ne garde que la silhouette : longues pattes arrière et hautes oreilles. Inventé : une seconde paire d'oreilles-pelles plus petite sous la première, de longues lames-pelles de craie sur les grandes oreilles, des flèches tracées à la craie sur ses flancs comme des pistes de course, des plaques de porcelaine aux jarrets et une frange de feutre épais autour du cou.*
+**2. Animal base / Base animale.** EN: Kept from a hare, as a silhouette hint only: a lean seated body and tall things on its head. Invented: no fur, a body sewn from patchwork felt; **four** spade-blade ears on stiff felt stalks; hind legs that are **coiled springs** of wound felt cord, which is how it outruns carts; a ruff of loose felt fibre; chalk arrows on its flanks that point the way it means to run. *FR : Du lièvre, il ne garde qu'un souvenir de silhouette : un corps sec assis et de hautes formes sur la tête. Inventé : pas de fourrure, un corps cousu de feutre en patchwork ; **quatre** oreilles à lames-pelles sur des tiges de feutre raides ; des pattes arrière qui sont des **ressorts** de cordon de feutre enroulé, et c'est ainsi qu'il distance les charrettes ; une collerette de fibres de feutre ; des flèches de craie sur les flancs qui montrent par où il compte courir.*
 
-**3. Morphology / Morphologie.** EN: A lean, strong creature sitting alert on its haunches with its front paws planted on the ground, ready to spring. Its hide is sandy-grey felt with visible fibres. It has four ears: two tall upright ears ending in long chalk-white spade blades, and a second, shorter pair of spade-ears sweeping back below them. Pale chalk arrows and dashes run along its flanks like running tracks. A thick fringe of cream felt circles its neck. Its long folded hind legs carry smooth porcelain plates on the hocks, and one plain oval sits on its chest. Sharp dark eyes. *FR : Une créature sèche et forte, assise aux aguets sur son arrière-train, pattes avant plantées au sol, prête à bondir. Sa peau est un feutre gris sable aux fibres visibles. Il a quatre oreilles : deux hautes oreilles dressées terminées par de longues lames-pelles de craie blanche, et une seconde paire plus courte rabattue dessous. Des flèches et des tirets pâles tracés à la craie courent sur ses flancs comme des pistes de course. Une épaisse frange de feutre crème entoure son cou. Ses longues pattes arrière repliées portent des plaques de porcelaine lisse aux jarrets, et un ovale vierge orne sa poitrine. Yeux sombres et vifs.*
+**3. Morphology / Morphologie.** EN: A lean, strong creature sitting alert on its haunches with its front legs planted, ready to spring. It has no fur: its body is sewn from patchwork panels of thick matted sandy-grey and slate felt, joined by bold seams of cream thread. Its two long hind legs, folded under it, are tightly wound coils of thick felt cord, like compressed springs. From its head rise four short stiff felt stalks, close together, each ending in a flat chalk-white spade blade: a tall pair in the middle and a shorter pair beside them. A thick ruff of loose cream felt fibres circles its neck. Bold white chalk arrows race along its flanks; they always point the way it is about to run. Its face is a long blunt panel with a stitched seam down the middle and two sharp dark eyes. Porcelain claws. *FR : Une créature sèche et forte, assise aux aguets sur son arrière-train, pattes avant plantées, prête à bondir. Elle n'a pas de fourrure : son corps est cousu de pièces de feutre épais et mat, gris sable et ardoise, jointes par de larges coutures de fil crème. Ses deux longues pattes arrière, repliées sous elle, sont des spirales serrées de gros cordon de feutre, comme des ressorts comprimés. De sa tête montent quatre courtes tiges de feutre raides, serrées, chacune terminée par une lame-pelle de craie blanche plate : une grande paire au milieu et une paire plus courte de chaque côté. Une épaisse collerette de fibres de feutre crème entoure son cou. De grandes flèches de craie blanche filent sur ses flancs ; elles pointent toujours dans la direction où il va courir. Sa face est une longue pièce arrondie marquée d'une couture au milieu, avec deux yeux sombres et vifs. Griffes de porcelaine.*
 
 **4. Size and weight / Taille et poids.** 85 cm standing, ears included; 7 kg. *85 cm debout,
 oreilles comprises ; 7 kg.*
 
-**5. Colours and materials / Couleurs et matières.** Sandy-grey felt with visible fibres, chalk-white spade blades and arrows, cream felt fringe, porcelain hock plates, one plain oval. *Feutre gris sable aux fibres visibles, lames-pelles et flèches de craie blanche, frange de feutre crème, plaques de porcelaine, un ovale vierge.*
+**5. Colours and materials / Couleurs et matières.** Sandy-grey and slate patchwork felt with cream-thread seams, coiled felt-cord hind legs, chalk-white spade blades and arrows, a cream felt-fibre ruff, porcelain claws. *Feutre en patchwork gris sable et ardoise aux coutures de fil crème, pattes arrière en cordon de feutre enroulé, lames-pelles et flèches de craie blanche, collerette de fibres de feutre crème, griffes de porcelaine.*
 
 **6. Habitat.** EN: The roads leading out of Sixfold Meadow, where it races carts for fun. *FR : Les
 routes qui partent du Pré de Sixfold, où il fait la course avec les charrettes pour s'amuser.*
@@ -96,9 +95,9 @@ warren chooses to follow it, a choice made in a single night of thumping. *FR : 
 Garenroi quand toute sa garenne choisit de le suivre, un choix fait en une seule nuit de
 tambourinements.*
 
-**10. Abilities / Capacités.** EN: **Thump**: a kick from its porcelain-plated hind legs. **Burrow
-Dash**: it dives into a burrow and a benched ally pops out in its place. *FR : **Coup de patte** : un coup de ses
-pattes arrière cuirassées de porcelaine. **Fuite au terrier** : il plonge dans un terrier et un allié en
+**10. Abilities / Capacités.** EN: **Thump**: its coiled hind legs let go like springs. **Burrow
+Dash**: it dives into a burrow and a benched ally pops out in its place. *FR : **Coup de patte** : ses pattes arrière
+enroulées se détendent comme des ressorts. **Fuite au terrier** : il plonge dans un terrier et un allié en
 réserve surgit à sa place.*
 
 **11. People and duelists / Relations avec les humains.** EN: Couriers on the six roads race them at
@@ -113,7 +112,7 @@ tambourinement.*
 watching which ears it turns. *FR : Quatre oreilles entendent quatre vents : les voyageurs demandent au
 Garenbouquin quelle route est sûre en regardant de quel côté il tourne ses oreilles.*
 
-**14. Visual key / Clé visuelle.** Must show: lean body sitting alert on its haunches, front paws on the ground; sandy-grey felt hide with visible fibres; four ears, the tall pair ending in long chalk spade blades, the short pair swept back; chalk arrows drawn along the flanks; thick cream felt fringe at the neck; porcelain hock plates. Pose: sitting on its haunches like an animal, front three-quarter view, compact. Avoid: a real hare; standing upright on two legs or any human stance; fur; no hexagon shapes or markings. *À montrer : assis sur l'arrière-train, feutre aux fibres visibles, quatre oreilles dont deux à lames-pelles, flèches de craie, frange de feutre, plaques de porcelaine. À éviter : un vrai lièvre, une posture debout humaine, aucun hexagone.*
+**14. Visual key / Clé visuelle.** Must show: a lean body sitting on its haunches, front legs planted, sewn from sandy-grey and slate felt panels with bold seams; hind legs as tightly coiled springs of felt cord; four short felt stalks close together on the head, each ending in a flat chalk-white spade blade; a ruff of loose cream felt fibres; bold chalk arrows on the flanks; a long blunt face panel with a seam. Pose: sitting on its haunches like an animal, front three-quarter view, compact, the blades no wider than its head. Avoid: a real hare; fur or long soft ears; standing upright on two legs or any human stance; blades spread wide; a plush or toy look; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : corps cousu assis sur l'arrière-train, pattes arrière en ressorts de cordon, quatre tiges à lames-pelles serrées, collerette de fibres, flèches de craie. À éviter : un vrai lièvre, de la fourrure, une posture debout humaine, des lames écartées, un air de peluche, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
 EN: "Four ears hear four winds. Couriers race it at dawn on the six roads; nobody has won yet."
@@ -124,14 +123,14 @@ FR : « Quatre oreilles entendent quatre vents. Les coursiers des six routes fon
 **1. Identity / Identité.** No. 070 · Colorless · Awaken 2 · from Warrenbuck. 100 HP, rare. Power:
 Warren Welcome. *N° 070 · Incolore · Éveil 2 · de Garenbouquin. 100 PV, rare. Pouvoir : Bienvenue au terrier.*
 
-**2. Animal base / Base animale.** EN: Kept from a great hare, only as a silhouette: a big body sitting on its haunches and a long muzzle. Invented: its spade-ears have split into a ring of five flat chalk blades rising round the back of its head like a crown, its felt hide is covered in chalk lines that map the whole warren, and a heavy fringe of felt hangs from its shoulders like a mantle. *FR : Du grand lièvre, il ne garde que la silhouette : un grand corps assis sur l'arrière-train et un long museau. Inventé : ses oreilles-pelles se sont divisées en un cercle de cinq lames de craie plates dressées derrière sa tête comme une couronne, sa peau de feutre est couverte de lignes de craie qui dessinent toute la garenne, et une lourde frange de feutre pend de ses épaules comme un manteau.*
+**2. Animal base / Base animale.** EN: Kept from a great hare, as a silhouette hint only: a big body sitting on its haunches. Invented: no fur, a body sewn from patchwork felt; its spade-ears have split into a **crown of five chalk blades**; front feet that are wide **porcelain digging spades**; the chalk map of the whole warren drawn over every panel of its body. *FR : Du grand lièvre, il ne garde qu'un souvenir de silhouette : un grand corps assis sur l'arrière-train. Inventé : pas de fourrure, un corps cousu de feutre en patchwork ; ses oreilles-pelles se sont divisées en une **couronne de cinq lames de craie** ; des pattes avant qui sont de larges **pelles de porcelaine** ; le plan de toute la garenne tracé à la craie sur chaque pièce de son corps.*
 
-**3. Morphology / Morphologie.** EN: A large, regal creature sitting on its haunches on a grassy burrow mound, front paws planted, chest out. Its hide is warm grey felt with visible fibres. Behind its head rises a ring of five flat chalk-white blades, its spade-ears grown into a crown. Its whole body is covered in pale chalk lines and dots drawn like a map of tunnels and chambers. A heavy fringe of cream felt hangs from its shoulders like a mantle, and one plain oval sits on its chest. Its hind feet carry polished porcelain plates. A long soft muzzle, wise dark eyes. *FR : Une grande créature majestueuse, assise sur l'arrière-train sur un tertre herbu, pattes avant plantées, poitrail en avant. Sa peau est un feutre gris chaud aux fibres visibles. Derrière sa tête se dresse un cercle de cinq lames de craie blanche plates : ses oreilles-pelles devenues couronne. Tout son corps est couvert de lignes et de points tracés à la craie comme le plan de galeries et de chambres. Une lourde frange de feutre crème pend de ses épaules comme un manteau, et un ovale vierge orne sa poitrine. Ses pattes arrière portent des plaques de porcelaine polie. Long museau doux, yeux sombres et sages.*
+**3. Morphology / Morphologie.** EN: A large, heavy, regal creature sitting on its haunches on a grassy burrow mound, chest out, its two broad front feet planted. It has no fur: its body is sewn from patchwork panels of thick warm-grey and slate felt, joined by bold seams of cream thread. White chalk lines run over every panel, from its shoulders to its feet, mapping branching tunnels and round chambers: the whole warren, redrawn each night. Behind its head rises a ring of exactly five flat chalk-white spade blades on felt stalks, its ears grown into a crown. Its front feet are wide, flat digging spades of porcelain. Its face is a long blunt panel with a stitched seam down the middle and wise dark eyes with a touch of gold. *FR : Une grande créature lourde et majestueuse, assise sur l'arrière-train sur un tertre herbu, poitrail en avant, ses deux larges pattes avant plantées. Elle n'a pas de fourrure : son corps est cousu de pièces de feutre épais gris chaud et ardoise, jointes par de larges coutures de fil crème. Des lignes de craie blanche courent sur chaque pièce, des épaules aux pieds, et dessinent galeries ramifiées et chambres rondes : toute la garenne, redessinée chaque nuit. Derrière sa tête se dresse un cercle d'exactement cinq lames-pelles de craie blanche sur des tiges de feutre, ses oreilles devenues couronne. Ses pattes avant sont de larges pelles plates de porcelaine. Sa face est une longue pièce arrondie marquée d'une couture au milieu, aux yeux sombres et sages touchés d'or.*
 
 **4. Size and weight / Taille et poids.** 1.3 m sitting, crown included; 22 kg. *1,3 m assis, couronne
 comprise ; 22 kg.*
 
-**5. Colours and materials / Couleurs et matières.** Warm grey felt with visible fibres, chalk-white crown blades and map lines, cream felt mantle-fringe, polished porcelain, one plain oval, a touch of gold in the eyes. *Feutre gris chaud aux fibres visibles, couronne et lignes de craie blanche, frange-manteau de feutre crème, porcelaine polie, un ovale vierge, une touche d'or dans les yeux.*
+**5. Colours and materials / Couleurs et matières.** Warm grey and slate patchwork felt with cream-thread seams, chalk warren-map lines over every panel, five chalk-white crown blades, porcelain spade feet, a touch of gold in the eyes. *Feutre en patchwork gris chaud et ardoise aux coutures de fil crème, plan de la garenne à la craie sur chaque pièce, cinq lames de couronne en craie blanche, pattes-pelles de porcelaine, une touche d'or dans les yeux.*
 
 **6. Habitat.** EN: The great warren under the hill behind the duel hall on Sixfold Meadow, said to run
 under all six roads. *FR : La grande garenne sous la colline derrière la salle de duel du Pré de Sixfold,
@@ -171,7 +170,7 @@ au coucher du soleil, quand la garenne sort s'asseoir autour de lui.*
 crowned one gets the last slice of pie. *FR : Les enfants du pré se couronnent de trèfle « comme le
 Garenroi », et le couronné a la dernière part de tourte.*
 
-**14. Visual key / Clé visuelle.** Must show: large body sitting on its haunches on a burrow mound, front paws planted; warm grey felt hide with visible fibres; a ring of five flat chalk blades rising behind the head like a crown; chalk lines and dots drawn all over the body like a map of tunnels; heavy cream felt fringe hanging from the shoulders like a mantle; long soft muzzle. Pose: low angle, sunset backlight, chest out, compact. Avoid: a real hare or a horned rabbit; horns; standing on two legs; fur; a metal crown or clothing; no hexagon shapes or markings. *À montrer : assis sur un tertre, feutre aux fibres visibles, cercle de cinq lames de craie en couronne, plan de galeries tracé à la craie, frange-manteau. Contre-plongée, couchant. À éviter : un vrai lièvre, un lapin cornu, des cornes, une posture debout, aucun hexagone.*
+**14. Visual key / Clé visuelle.** Must show: a large body sitting on its haunches on a burrow mound, seen from the front, sewn from warm-grey and slate felt panels with bold seams; a ring of exactly five flat chalk-white spade blades behind the head like a crown; chalk lines mapping tunnels and chambers over every panel; wide porcelain spade front feet; a long blunt face panel with a seam. Pose: low angle, sunset backlight, chest out, compact. Avoid: a real hare or a horned rabbit; fur; a cape, shell or clothing; a metal crown; standing on two legs; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : assis sur un tertre, corps cousu, couronne de cinq lames-pelles, plan de la garenne à la craie sur tout le corps, pattes-pelles de porcelaine. Contre-plongée, couchant. À éviter : un vrai lièvre, de la fourrure, une cape, une carapace ou un vêtement, une couronne de métal, une posture debout, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
 EN: "Its ears have grown into a crown of chalk. When it arrives, the whole warren pours out to meet it with gifts."
@@ -181,50 +180,22 @@ FR : « Ses oreilles sont devenues une couronne de craie. Quand il arrive, toute
 
 ## Pecklet line / Lignée de Picorin (071–072)
 
-**The line in one breath.** A small felted wader whose short neck is a pleated bellows of three folds
-awakens into a tall heron-shape whose whole neck has unfolded into a nine-fold accordion and whose wing
-edges have hardened into porcelain blades. It never fights by force: it breathes gusts that move the foe
-out of the way. The heron base survives in the long vertical legs, the dagger beak and the patience.
+**The line in one breath.** A small stilt-legged bellows of felt, two wing-boards and a pleated belly that puff air through a porcelain nozzle, awakens into a tall bellows whose neck has unfolded into a nine-fold accordion and whose boards are edged with porcelain blades. It never fights by force: it breathes gusts that move the foe out of the way. The heron base survives only in the stilt legs and the patience.
 
-*En un souffle : un petit échassier feutré dont le cou court est un soufflet plissé à trois plis s'éveille
-en une grande silhouette de héron dont tout le cou s'est déplié en un accordéon à neuf plis, et dont le
-bord des ailes a durci en lames de porcelaine. Il ne se bat jamais en force : il souffle des rafales qui
-écartent l'adversaire. Du héron restent les longues pattes droites, le bec en poignard et la patience.*
+*En un souffle : un petit soufflet de feutre monté sur échasses, deux planchettes-ailes et un ventre plissé qui soufflent par une tuyère de porcelaine, s'éveille en un grand soufflet dont le cou s'est déplié en un accordéon à neuf plis et dont les planchettes sont bordées de lames de porcelaine. Il ne se bat jamais en force : il souffle des rafales qui écartent l'adversaire. Du héron ne restent que les échasses et la patience.*
 
 ### 071 · Pecklet / Picorin
 
 **1. Identity / Identité.** No. 071 · Colorless · Basic · Pecklet → Galeheron. 40 HP, common.
 *N° 071 · Incolore · Base · Picorin → Rafaléron. 40 PV, commun.*
 
-**2. Animal base / Base animale.** EN: Kept from a young heron: two long thin legs, a dagger beak and
-the habit of standing still in shallow water. Invented: a short neck that is a pleated felt bellows of
-three folds, a hide of dense felt, a beak of unglazed porcelain, rows of chalk dots on its wings and the
-blank patch on its breast. *FR : Du jeune héron, il garde les deux longues pattes fines, le bec en
-poignard et l'habitude de rester immobile dans l'eau peu profonde. Inventé : un cou court qui est un
-soufflet de feutre plissé à trois plis, une peau de feutre dense, un bec de porcelaine brute, des rangées
-de points de craie sur les ailes et la tache vierge sur la poitrine.*
+**2. Animal base / Base animale.** EN: Kept from a young heron, as a silhouette hint only: two long stilt legs and the habit of standing still in shallow water. Invented: no feathers, a body that is a living **fireplace bellows**, two stiff felt wing-boards joined by pleated felt that it squeezes to puff air; a short neck of three pleats; a **nozzle beak** of porcelain; chalk wind arrows on its boards. *FR : Du jeune héron, il ne garde qu'un souvenir de silhouette : deux longues pattes-échasses et l'habitude de rester immobile dans l'eau peu profonde. Inventé : pas de plumes, un corps qui est un **soufflet de cheminée** vivant, deux planchettes-ailes de feutre raide reliées par du feutre plissé qu'il écrase pour souffler ; un cou court à trois plis ; un **bec-tuyère** de porcelaine ; des flèches de vent à la craie sur ses planchettes.*
 
-**3. Morphology / Morphologie.** EN: A small round wading creature standing on two long, thin, warm grey
-legs held perfectly vertical. Its body is a ball of dense felted wool, oatmeal and warm grey, matted, with
-loose fibres and soft pilling all over. Its neck is short, thick and made of exactly three soft pleated
-folds of felt, like a bellows: when it squeezes them flat, air puffs out of its beak. The beak is short,
-dagger-shaped and of matte unglazed porcelain. Two loose plumes of combed wool hang from the back of its
-head. Its wings fold tight against its sides, marked with rows of pale chalk dots. A plain, smooth, pale
-oval patch with no markings sits on its breast. Porcelain toes, round dark eyes. *FR : Une petite
-créature d'échassier ronde, dressée sur deux longues pattes fines gris chaud, parfaitement verticales.
-Son corps est une boule de laine feutrée dense, avoine et gris chaud, mate, avec des fibres libres et de
-petites bouloches partout. Son cou est court, épais, fait d'exactement trois plis de feutre souples comme
-un soufflet : quand il les écrase, l'air jaillit de son bec. Le bec est court, en poignard, de porcelaine
-brute mate. Deux plumets de laine peignée pendent derrière sa tête. Ses ailes se replient serrées contre
-ses flancs, marquées de rangées de points de craie pâle. Un ovale lisse et pâle, sans aucune marque, orne
-sa poitrine. Doigts de porcelaine, yeux ronds et sombres.*
+**3. Morphology / Morphologie.** EN: A small creature standing on two long, thin, vertical stilt legs of white porcelain. It has no feathers: its round body is a living bellows, two flat, stiff, rounded boards of slate felt pressed against its sides like folded wings, joined by deep pleated folds of oatmeal felt that open and close, every edge bound with bold stitching. When it claps its boards together, air puffs out of its beak. Its short neck is exactly three pleated felt folds, and its head ends in a short tapered nozzle beak of matte unglazed porcelain. Two loose plumes of combed wool hang from the back of its head. White chalk arrows and swirling wind lines are drawn on its boards; they turn to show where the next puff will go. Round dark eyes. *FR : Une petite créature dressée sur deux longues pattes-échasses fines et verticales de porcelaine blanche. Elle n'a pas de plumes : son corps rond est un soufflet vivant, deux planchettes plates, raides et arrondies de feutre ardoise serrées contre ses flancs comme des ailes repliées, reliées par de profonds plis de feutre avoine qui s'ouvrent et se ferment, chaque bord cousu à grands points. Quand il claque ses planchettes l'une contre l'autre, l'air jaillit de son bec. Son cou court est fait d'exactement trois plis de feutre, et sa tête finit en un bec-tuyère court et effilé de porcelaine brute mate. Deux plumets de laine peignée pendent derrière sa tête. Des flèches et des volutes de vent à la craie blanche couvrent ses planchettes ; elles tournent pour montrer où ira la prochaine bouffée. Yeux ronds et sombres.*
 
 **4. Size and weight / Taille et poids.** 45 cm standing, 1.5 kg. *45 cm debout, 1,5 kg.*
 
-**5. Colours and materials / Couleurs et matières.** Oatmeal and warm grey felted hide with pilling,
-cream breast, matte white porcelain beak and toes, pale chalk dots, a plain pale oval patch. *Peau
-feutrée avoine et gris chaud, bouloches, poitrine crème, bec et doigts de porcelaine blanche mate, points
-de craie pâle, un ovale pâle sans marque.*
+**5. Colours and materials / Couleurs et matières.** Slate felt wing-boards and pleated oatmeal felt with bold stitched edges, white porcelain stilt legs and nozzle beak, combed wool plumes, chalk wind arrows. *Planchettes de feutre ardoise et feutre avoine plissé aux bords cousus à grands points, pattes-échasses et bec-tuyère de porcelaine blanche, plumets de laine peignée, flèches de vent à la craie.*
 
 **6. Habitat.** EN: The fountain basin of Brightwell Square and the ditches along the six roads out of
 Sixfold Meadow. *FR : Le bassin de la fontaine de la Place de Clairpuits et les fossés des six routes qui
@@ -248,9 +219,9 @@ dans les roseaux des fossés du pré. Il s'éveille en Rafaléron par une nuit d
 avalé assez d'air du pré : au matin, son cou s'est déplié en neuf plis.*
 
 **10. Abilities / Capacités.** EN: **Beak Jab**: a quick stab of its porcelain beak. **Gust Flap**: it
-squeezes its bellows flat and the puff shoves the foe back to the bench (your opponent switches the
+claps its wing-boards together and the puff shoves the foe back to the bench (your opponent switches the
 defending creature with one of their Benched creatures). *FR : **Coup de bec** : un coup sec de son bec de
-porcelaine. **Battement d'ailes** : il écrase son soufflet et la bouffée repousse l'adversaire vers le banc
+porcelaine. **Battement d'ailes** : il claque ses planchettes et la bouffée repousse l'adversaire vers le banc
 (votre adversaire échange la créature en défense contre une de son Banc).*
 
 **11. People and duelists / Relations avec les humains.** EN: Odile, whose curio cabinet stands by the
@@ -267,53 +238,24 @@ place ne se remplisse.*
 **13. Folklore.** EN: A Pecklet's puff in your face means you're about to change roads. *FR : Une
 bouffée de Picorin en plein visage annonce qu'on va changer de route.*
 
-**14. Visual key / Clé visuelle.** Must show: small round body of dense felted wool with visible fibres
-and pilling; two long thin vertical legs; a short neck of exactly three pleated felt folds like a bellows;
-a short dagger beak of matte unglazed porcelain; two loose wool plumes at the back of the head; wings
-folded tight with rows of chalk dots; one plain unmarked pale oval patch on the breast; porcelain toes.
-Pose: standing in a shallow stone fountain basin, neck and legs vertical, wings folded, front
-three-quarter view, compact. Avoid: a real heron or egret; spread wings; a knitted, plush or toy look;
-smooth feathers; no hexagon shapes or markings. *À montrer : laine feutrée à fibres et bouloches, cou-
-soufflet à trois plis, bec de porcelaine, plumets de laine, points de craie, ovale vierge. À éviter : un
-vrai héron ou une aigrette, des ailes déployées, un aspect tricoté ou peluche, aucun hexagone.*
+**14. Visual key / Clé visuelle.** Must show: two long thin vertical porcelain stilt legs; a round body that is a bellows, two stiff slate felt boards pressed flat against its sides with pleated oatmeal felt between them and bold stitching on every edge; a short neck of exactly three pleated felt folds; a short tapered porcelain nozzle beak with a little puff of air; two loose wool plumes at the back of the head; chalk wind arrows on the boards. Pose: standing in a shallow stone fountain basin, legs vertical, boards folded flat, front three-quarter view, compact. Avoid: a real heron, egret or pigeon; feathers; boards or wings spread out; a plush or toy look; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : pattes-échasses de porcelaine, corps-soufflet à planchettes de feutre et plis, cou à trois plis, bec-tuyère, plumets de laine, flèches de vent. À éviter : un vrai héron, une aigrette ou un pigeon, des plumes, des planchettes écartées, un air de peluche, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
-EN: "Its neck is a felt bellows. It stands in the fountain for an hour, then puffs, and whoever was in its way is one step aside."
-FR : « Son cou est un soufflet de feutre. Il reste une heure dans la fontaine, puis souffle, et l'importun se retrouve un pas plus loin. »
+EN: "Its body is a felt bellows. It stands in the fountain for an hour, then puffs, and whoever was in its way is one step aside."
+FR : « Son corps est un soufflet de feutre. Il reste une heure dans la fontaine, puis souffle, et l'importun se retrouve un pas plus loin. »
 
 ### 072 · Galeheron / Rafaléron
 
 **1. Identity / Identité.** No. 072 · Colorless · Awaken 1 · from Pecklet. 70 HP, uncommon.
 *N° 072 · Incolore · Éveil 1 · de Picorin. 70 PV, peu commun.*
 
-**2. Animal base / Base animale.** EN: Kept: a grown heron's height, long vertical legs, dagger beak and
-long head plumes. Invented: a long neck that is an accordion of nine pleated felt folds, wing edges of
-thin porcelain blades, chalk spirals on the wings and a larger blank patch on the breast. *FR : Gardé :
-la taille d'un héron adulte, les longues pattes droites, le bec en poignard et les longs plumets. Inventé :
-un long cou qui est un accordéon de neuf plis de feutre, un bord d'ailes en fines lames de porcelaine, des
-spirales de craie sur les ailes et une tache vierge plus grande sur la poitrine.*
+**2. Animal base / Base animale.** EN: Kept from a grown heron, as a silhouette hint only: its height, long stilt legs and patience. Invented: no feathers, a body that is a great **bellows** of felt wing-boards and pleats; a long neck that is an **accordion of nine pleats** it can wring into a twist; porcelain blades along the wing-boards; a long nozzle beak; chalk spirals of wind. *FR : Du héron adulte, il ne garde qu'un souvenir de silhouette : la taille, les longues pattes-échasses et la patience. Inventé : pas de plumes, un corps qui est un grand **soufflet** de planchettes de feutre et de plis ; un long cou qui est un **accordéon de neuf plis** qu'il peut tordre comme un linge ; des lames de porcelaine le long des planchettes ; un long bec-tuyère ; des spirales de vent à la craie.*
 
-**3. Morphology / Morphologie.** EN: A tall, lean wading creature standing still on two long, thin,
-vertical legs. Its long neck rises straight up and is an accordion of exactly nine pleated felt folds; it
-can stretch them, squeeze them or wring them into a twist. Its body is dense felted wool, warm grey and
-slate with a cream breast, matted and softly pilled. Its wings fold tight along its sides, and their
-trailing edges are thin blades of matte unglazed porcelain. Pale chalk spirals and dotted lines are drawn
-across the wings. A long dagger beak of white porcelain, two long wool plumes hanging straight down its
-back, a plain, smooth, pale oval patch with no markings on its breast, amber eyes. *FR : Une grande
-créature d'échassier, élancée, immobile sur deux longues pattes fines et verticales. Son long cou monte
-tout droit et c'est un accordéon d'exactement neuf plis de feutre : il peut les étirer, les écraser ou les
-tordre comme un linge. Son corps est de laine feutrée dense, gris chaud et ardoise, poitrine crème, mate
-et un peu boulochée. Ses ailes se replient serrées le long des flancs, et leur bord de fuite est fait de
-fines lames de porcelaine brute mate. Des spirales et des pointillés de craie pâle couvrent les ailes. Un
-long bec en poignard de porcelaine blanche, deux longs plumets de laine qui tombent droit dans le dos, un
-ovale lisse et pâle sans aucune marque sur la poitrine, des yeux ambre.*
+**3. Morphology / Morphologie.** EN: A tall, lean creature standing still on two long, thin, vertical stilt legs of white porcelain. It has no feathers: its body is a large living bellows, two stiff wing-boards of slate felt folded flat against its sides and pointing down, with deep pleated folds of warm grey felt between them, every edge bound with bold stitching; the trailing edge of each board is a thin blade of matte white porcelain. Its long neck rises straight up and is an accordion of exactly nine pleated felt folds; it can stretch them, squeeze them or wring them into a twist. Its head ends in a long tapered nozzle beak of white porcelain. Two long plumes of combed wool hang down its back. White chalk spirals and wind lines are drawn on its boards, wound tighter the stronger the wind. Amber eyes. *FR : Une grande créature élancée, immobile sur deux longues pattes-échasses fines et verticales de porcelaine blanche. Elle n'a pas de plumes : son corps est un grand soufflet vivant, deux planchettes-ailes de feutre ardoise rabattues à plat contre ses flancs, pointe en bas, avec de profonds plis de feutre gris chaud entre elles, chaque bord cousu à grands points ; le bord de fuite de chaque planchette est une fine lame de porcelaine blanche mate. Son long cou monte tout droit et c'est un accordéon d'exactement neuf plis de feutre : il peut les étirer, les écraser ou les tordre comme un linge. Sa tête finit en un long bec-tuyère effilé de porcelaine blanche. Deux longs plumets de laine peignée pendent dans son dos. Des spirales et des lignes de vent à la craie blanche couvrent ses planchettes, d'autant plus serrées que le vent est fort. Yeux ambre.*
 
 **4. Size and weight / Taille et poids.** 1.4 m standing, 6 kg. *1,4 m debout, 6 kg.*
 
-**5. Colours and materials / Couleurs et matières.** Warm grey and slate felted hide with pilling, cream
-breast, white porcelain beak and wing blades, pale chalk spirals and dots, a plain pale oval patch, amber
-eyes. *Peau feutrée gris chaud et ardoise, bouloches, poitrine crème, bec et lames d'ailes de porcelaine
-blanche, spirales et points de craie pâle, un ovale pâle sans marque, yeux ambre.*
+**5. Colours and materials / Couleurs et matières.** Slate felt wing-boards and pleated warm grey felt with bold stitched edges, white porcelain stilt legs, blade edges and nozzle beak, combed wool plumes, chalk wind spirals, amber eyes. *Planchettes de feutre ardoise et feutre gris chaud plissé aux bords cousus à grands points, pattes-échasses, lames et bec-tuyère de porcelaine blanche, plumets de laine peignée, spirales de vent à la craie, yeux ambre.*
 
 **6. Habitat.** EN: The high ground of Sixfold Meadow where the six roads part, and the wind along every
 road. *FR : Les hauteurs du Pré de Sixfold, là où les six routes se séparent, et le vent de chaque route.*
@@ -355,16 +297,7 @@ face au vent.*
 Galeheron" and pointing. *FR : Sur la Place de Clairpuits, les enfants décident qui commence en tournant
 sur eux-mêmes « comme un Rafaléron » et en pointant du doigt.*
 
-**14. Visual key / Clé visuelle.** Must show: tall lean body of dense felted wool with visible fibres and
-pilling; two long thin vertical legs; a long vertical neck of exactly nine pleated felt folds like an
-accordion; wings folded tight with trailing edges of thin matte porcelain blades; chalk spirals and dotted
-lines on the wings; a long porcelain dagger beak; two long wool plumes hanging down the back; one plain
-unmarked pale oval patch on the breast. Pose: standing still in meadow grass, neck and legs vertical,
-wings folded, front three-quarter view, silhouette tall and narrow. Avoid: a real heron or crane; spread
-or raised wings; a curved S-neck that reaches sideways; a knitted, plush or toy look; no hexagon shapes or
-markings. *À montrer : cou-accordéon à neuf plis, lames de porcelaine au bord des ailes, spirales de
-craie, ovale vierge, laine feutrée à bouloches. Pose verticale, ailes repliées. À éviter : un vrai héron ou
-une grue, des ailes ouvertes, un aspect tricoté ou peluche, aucun hexagone.*
+**14. Visual key / Clé visuelle.** Must show: two long thin vertical porcelain stilt legs; a body that is a large bellows, two stiff slate felt wing-boards folded flat against its sides with pleated felt between them and bold stitching on every edge; thin porcelain blades along the boards' trailing edges; a long vertical neck of exactly nine pleated felt folds; a long porcelain nozzle beak; two long wool plumes down the back; chalk wind spirals on the boards. Pose: standing still in meadow grass, neck and legs vertical, boards folded, front three-quarter view, tall and narrow. Avoid: a real heron or crane; feathers; boards or blades spread out; a curved S-neck reaching sideways; a plush or toy look; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : pattes-échasses de porcelaine, corps-soufflet à planchettes et plis, lames de porcelaine, cou-accordéon à neuf plis, bec-tuyère, spirales de vent. Pose verticale, planchettes repliées. À éviter : un vrai héron ou une grue, des plumes, des planchettes écartées, un air de peluche, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
 EN: "It wrings its nine-fold neck like a cloth, then lets go. The spiral gale it breathes out decides who steps up next."
@@ -374,50 +307,23 @@ FR : « Il tord son cou à neuf plis comme un linge, puis le relâche. La rafale
 
 ## Scampit (073)
 
-**In one breath.** A plump felted hoarder whose tail is a hollow felt larder, open at the tip like a sock
-and curled over its back. Whatever it tucks in at dusk it finds again at dawn. The chipmunk base survives
-in the sitting-up pose, the full cheeks and the three stripes, which here are lines of chalk.
+**In one breath.** A plump sewn hoarder whose tail is a felt stocking as big as itself, whose back is three buttoned pockets and whose cheeks are drawstring pouches. Whatever it tucks in at dusk it finds again at dawn. The chipmunk base survives only in the sitting-up pose and the full cheeks.
 
-*En un souffle : un petit amasseur feutré dont la queue est un garde-manger de feutre creux, ouvert au
-bout comme une chaussette et enroulé sur son dos. Ce qu'il y range au crépuscule, il le retrouve à l'aube.
-Du tamia restent la posture assise, les joues pleines et les trois rayures, qui sont ici des traits de
-craie.*
+*En un souffle : un petit amasseur cousu dont la queue est un bas de feutre aussi grand que lui, le dos trois poches boutonnées et les joues des bourses à cordon. Ce qu'il y range au crépuscule, il le retrouve à l'aube. Du tamia ne restent que la posture assise et les joues pleines.*
 
 ### 073 · Scampit / Galopiot
 
 **1. Identity / Identité.** No. 073 · Colorless · Basic · does not awaken. 40 HP, common. Power: Forage.
 *N° 073 · Incolore · Base · ne s'éveille pas. 40 PV, commun. Pouvoir : Fouinage.*
 
-**2. Animal base / Base animale.** EN: Kept from a chipmunk: a plump body sitting up, full cheeks, small
-round ears and three stripes down the back. Invented: a tail that is a hollow tube of felt open at the
-tip, used as a larder; stripes drawn in chalk; porcelain front teeth and claws; the blank patch on its
-chest. *FR : Du tamia, il garde le corps dodu assis, les joues pleines, les petites oreilles rondes et
-trois rayures sur le dos. Inventé : une queue qui est un tube de feutre creux ouvert au bout, qui lui sert
-de garde-manger ; des rayures tracées à la craie ; des incisives et des griffes de porcelaine ; la tache
-vierge sur la poitrine.*
+**2. Animal base / Base animale.** EN: Kept from a chipmunk, as a silhouette hint only: a plump body sitting up and full cheeks. Invented: no fur, a body sewn from patchwork felt; a tail that is a **hollow felt stocking** as big as itself, used as a larder; **three pocket flaps** with wooden toggles down its back; cheeks that are two **drawstring pouches**; chalk tallies of its stores on its belly. *FR : Du tamia, il ne garde qu'un souvenir de silhouette : un corps dodu assis et des joues pleines. Inventé : pas de fourrure, un corps cousu de feutre en patchwork ; une queue qui est un **bas de feutre creux** aussi grand que lui, son garde-manger ; **trois rabats de poche** à boutons de bois le long du dos ; des joues qui sont deux **bourses à cordon** ; le compte de ses provisions à la craie sur le ventre.*
 
-**3. Morphology / Morphologie.** EN: A small plump creature sitting up on its haunches, holding a nut in
-its forepaws. Its hide is dense felted wool, oatmeal and warm grey, matted and softly pilled. Its tail is
-a thick hollow tube of felt, open at the tip like a sock, curled up over its back; seeds, a hazelnut and a
-bread crust poke out of the open end. Three long pale chalk lines run down its back, and rows of chalk
-dots mark its flanks. A plain, smooth, pale oval patch with no markings sits on its chest. Two small
-porcelain front teeth, porcelain claws, small round ears, plump cheeks, bright dark eyes. *FR : Une petite
-créature dodue assise sur son arrière-train, une noisette entre les pattes avant. Sa peau est de laine
-feutrée dense, avoine et gris chaud, mate et un peu boulochée. Sa queue est un épais tube de feutre creux,
-ouvert au bout comme une chaussette, enroulé sur son dos ; des graines, une noisette et une croûte de pain
-dépassent de l'ouverture. Trois longs traits de craie pâle descendent le long de son dos, et des rangées
-de points de craie marquent ses flancs. Un ovale lisse et pâle, sans aucune marque, orne sa poitrine. Deux
-petites incisives de porcelaine, des griffes de porcelaine, de petites oreilles rondes, des joues dodues,
-des yeux sombres et vifs.*
+**3. Morphology / Morphologie.** EN: A small plump creature sitting up on its haunches, a hazelnut in its forepaws. It has no fur: its body is sewn from patchwork panels of thick matted oatmeal and warm grey felt, joined by bold seams of cream thread. Its tail is a long hollow felt stocking as big as its body, standing up behind its back and bending forward over its head, the open top stuffed with seeds, hazelnuts and a bread crust. Down its back run three stitched pocket flaps, each closed with a wooden toggle. Its cheeks are two round drawstring pouches, puffed full. White chalk tally marks on its belly count what it has stored; it rubs one out for every nut it eats. Two small porcelain front teeth, porcelain claws, small round felt ears, bright dark eyes. *FR : Une petite créature dodue assise sur son arrière-train, une noisette entre les pattes avant. Elle n'a pas de fourrure : son corps est cousu de pièces de feutre épais et mat, avoine et gris chaud, jointes par de larges coutures de fil crème. Sa queue est un long bas de feutre creux aussi grand que son corps, dressé derrière son dos et recourbé au-dessus de sa tête, dont l'ouverture déborde de graines, de noisettes et d'une croûte de pain. Le long de son dos courent trois rabats de poche cousus, chacun fermé par un bouton de bois. Ses joues sont deux bourses rondes à cordon, bien pleines. Des bâtons de craie blanche sur son ventre comptent ce qu'il a rangé ; il en efface un pour chaque noisette mangée. Deux petites incisives de porcelaine, des griffes de porcelaine, de petites oreilles rondes de feutre, des yeux sombres et vifs.*
 
 **4. Size and weight / Taille et poids.** 18 cm sitting, 300 g, twice that with a full tail. *18 cm
 assis, 300 g, le double queue pleine.*
 
-**5. Colours and materials / Couleurs et matières.** Oatmeal and warm grey felted hide with pilling,
-cream cheeks, three pale chalk lines and chalk dots, porcelain teeth and claws, a plain pale oval patch,
-whatever crumbs it is carrying. *Peau feutrée avoine et gris chaud, bouloches, joues crème, trois traits et
-des points de craie pâle, incisives et griffes de porcelaine, un ovale pâle sans marque, et les miettes
-qu'il transporte.*
+**5. Colours and materials / Couleurs et matières.** Oatmeal and warm grey patchwork felt with cream-thread seams, a felt stocking tail, wooden toggles, drawstring cheek pouches, chalk tallies, porcelain teeth and claws, whatever crumbs it is carrying. *Feutre en patchwork avoine et gris chaud aux coutures de fil crème, queue-bas de feutre, boutons de bois, joues-bourses à cordon, bâtons de craie, incisives et griffes de porcelaine, et les miettes qu'il transporte.*
 
 **6. Habitat.** EN: Under Hob's stall in Brightwell Square and in the hedges of Sixfold Meadow. *FR :
 Sous l'étal de Hob sur la Place de Clairpuits et dans les haies du Pré de Sixfold.*
@@ -454,15 +360,7 @@ hedges at dusk. *FR : Commun. Sous l'étal de la boulangerie à l'aube, dans les
 **13. Folklore.** EN: If you find a hazelnut in your shoe, a Scampit has paid its rent. *FR : Si vous
 trouvez une noisette dans votre chaussure, un Galopiot a payé son loyer.*
 
-**14. Visual key / Clé visuelle.** Must show: small plump body of dense felted wool with visible fibres
-and pilling; a thick hollow felt tail open at the tip like a sock, curled up over the back, with seeds, a
-hazelnut and a bread crust poking out; exactly three long chalk lines down the back; chalk dots on the
-flanks; one plain unmarked pale oval patch on the chest; porcelain front teeth and claws; a hazelnut in its
-forepaws. Pose: sitting up on a mossy stone, front three-quarter view, tail curled up over the back,
-compact. Avoid: a real chipmunk or squirrel; a bushy fur tail; dark painted stripes; a knitted, plush or
-toy look; no hexagon shapes or markings. *À montrer : queue-garde-manger en tube de feutre ouvert,
-pleine de provisions, trois traits de craie, ovale vierge, laine feutrée à bouloches. À éviter : un vrai
-tamia ou un écureuil, une queue touffue, un aspect peluche, aucun hexagone.*
+**14. Visual key / Clé visuelle.** Must show: a small plump body sitting up, sewn from oatmeal and warm grey felt panels with bold seams; a hollow felt stocking tail as big as the body, standing up behind the back and bending over the head, stuffed with seeds, hazelnuts and a crust; three pocket flaps with wooden toggles down the back; two drawstring cheek pouches; chalk tally marks on the belly; a hazelnut in its forepaws; porcelain teeth and claws. Pose: sitting up on a mossy stone, front three-quarter view, tail held up close behind it, compact. Avoid: a real chipmunk, hamster or squirrel; fur; a bushy tail; painted stripes; a plush or toy look; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : corps cousu assis, queue-bas de feutre pleine de provisions, trois rabats de poche à boutons de bois, joues-bourses, bâtons de craie. À éviter : un vrai tamia, hamster ou écureuil, de la fourrure, une queue touffue, un air de peluche, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
 EN: "Its tail is a felt larder, open at the tip. Whatever it tucks in at dusk, it finds again at dawn, plus a crust it forgot."
@@ -472,50 +370,23 @@ FR : « Sa queue est un garde-manger de feutre ouvert au bout. Ce qu'il y range 
 
 ## Echopup (074)
 
-**In one breath.** A small felted fox-shape that has two trumpets of chalk horn instead of ears. It
-catches every sound that comes at it, keeps it inside the spiral, and plays it back, the foe's own attack
-included. The fox base survives in the pointed muzzle, the slim legs and the tail wrapped round its paws.
+**In one breath.** A small sewn creature with two hearing horns of chalk instead of ears and a third horn coiled at the end of its tail. What the trumpets catch, the tail plays back, the foe's own attack included. The fox base survives only in the slim seated shape and the mask.
 
-*En un souffle : une petite silhouette de renard feutrée qui porte deux trompes de corne de craie à la
-place des oreilles. Elle attrape chaque son qui lui arrive, le garde dans la spirale et le renvoie, attaque
-de l'adversaire comprise. Du renard restent le museau pointu, les pattes fines et la queue enroulée autour
-des pattes.*
+*En un souffle : une petite créature cousue qui porte deux cornets acoustiques de craie à la place des oreilles et un troisième cornet enroulé au bout de la queue. Ce que les trompes attrapent, la queue le rejoue, attaque de l'adversaire comprise. Du renard ne restent que la silhouette fine assise et le masque.*
 
 ### 074 · Echopup / Échouaf
 
 **1. Identity / Identité.** No. 074 · Colorless · Basic · does not awaken. 50 HP, uncommon.
 *N° 074 · Incolore · Base · ne s'éveille pas. 50 PV, peu commun.*
 
-**2. Animal base / Base animale.** EN: Kept from a small big-eared fox: a pointed muzzle, slim legs, a
-dark mask and the tail wrapped round its paws. Invented: two flared trumpets of chalk horn with a spiral
-groove inside, in place of ears; a felted hide; chalk dots and a chalk muzzle line; porcelain claws; the
-blank patch on its chest. *FR : Du petit renard à grandes oreilles, il garde le museau pointu, les pattes
-fines, le masque sombre et la queue enroulée autour des pattes. Inventé : deux trompes évasées de corne de
-craie, à spirale intérieure, à la place des oreilles ; une peau feutrée ; des points et un trait de craie
-sur le museau ; des griffes de porcelaine ; la tache vierge sur la poitrine.*
+**2. Animal base / Base animale.** EN: Kept from a small big-eared fox, as a silhouette hint only: a slim seated body and a short muzzle. Invented: no fur, a body sewn from patchwork felt with a slate mask; two flared **hearing horns** of chalk in place of ears; a tail that coils into a **third horn** whose bell faces forward and plays sounds back; chalk sound rings on its chest. *FR : Du petit renard à grandes oreilles, il ne garde qu'un souvenir de silhouette : un corps fin assis et un museau court. Inventé : pas de fourrure, un corps cousu de feutre en patchwork au masque ardoise ; deux **cornets acoustiques** évasés de craie à la place des oreilles ; une queue enroulée en **troisième cornet** dont le pavillon, tourné vers l'avant, rejoue les sons ; des ondes sonores de craie sur la poitrine.*
 
-**3. Morphology / Morphologie.** EN: A small slender creature sitting upright on its haunches, its tail
-curled round its front paws. In place of ears, two large flared trumpets of chalk-white horn stand
-straight up from its head, close together, each with a spiral groove running down inside like an old
-hearing horn. Its hide is dense felted wool, pale oatmeal with a slate-grey mask and legs, matted and
-softly pilled. Rows of pale chalk dots run across its back and one chalk line runs down its muzzle. A
-plain, smooth, pale oval patch with no markings sits on its chest. A short pointed muzzle with a slate
-nose, porcelain claws, large dark eyes. *FR : Une petite créature fine assise bien droite sur son
-arrière-train, la queue enroulée autour des pattes avant. À la place des oreilles, deux grandes trompes
-évasées de corne blanc craie se dressent tout droit, serrées l'une contre l'autre, chacune creusée d'une
-rainure en spirale comme un vieux cornet acoustique. Sa peau est de laine feutrée dense, avoine pâle, avec
-un masque et des pattes gris ardoise, mate et un peu boulochée. Des rangées de points de craie pâle
-courent sur son dos et un trait de craie descend le long de son museau. Un ovale lisse et pâle, sans
-aucune marque, orne sa poitrine. Un museau court et pointu à truffe ardoise, des griffes de porcelaine, de
-grands yeux sombres.*
+**3. Morphology / Morphologie.** EN: A small slender creature sitting upright on its haunches, facing whoever speaks. It has no fur: its body is sewn from patchwork panels of thick pale oatmeal felt, with slate-grey panels for its face mask and legs, joined by bold stitched seams. In place of ears, two large flared trumpets of chalk-white horn stand straight up from its head, close together, each with a spiral groove running down inside like an old hearing horn. Its tail curls round in front of its paws into a third coiled horn whose open bell faces forward: what the trumpets catch, the tail plays back. White chalk rings ripple outward across its chest like sound waves, more rings the louder the last sound was. A short blunt muzzle with a stitched seam, porcelain claws, large dark eyes. *FR : Une petite créature fine assise bien droite sur son arrière-train, tournée vers celui qui parle. Elle n'a pas de fourrure : son corps est cousu de pièces de feutre épais avoine pâle, avec des pièces gris ardoise pour le masque et les pattes, jointes par de larges coutures. À la place des oreilles, deux grandes trompes évasées de corne blanc craie se dressent tout droit, serrées l'une contre l'autre, chacune creusée d'une rainure en spirale comme un vieux cornet acoustique. Sa queue s'enroule devant ses pattes en un troisième cornet dont le pavillon s'ouvre vers l'avant : ce que les trompes attrapent, la queue le rejoue. Des cercles de craie blanche s'élargissent sur sa poitrine comme des ondes sonores, d'autant plus nombreux que le dernier son était fort. Un museau court et arrondi marqué d'une couture, des griffes de porcelaine, de grands yeux sombres.*
 
 **4. Size and weight / Taille et poids.** 40 cm sitting, trumpets included; 3 kg. *40 cm assis, trompes
 comprises ; 3 kg.*
 
-**5. Colours and materials / Couleurs et matières.** Pale oatmeal felted hide with pilling, slate-grey
-mask and legs, chalk-white horn trumpets, pale chalk dots, porcelain claws, a plain pale oval patch. *Peau
-feutrée avoine pâle, bouloches, masque et pattes gris ardoise, trompes de corne blanc craie, points de
-craie pâle, griffes de porcelaine, un ovale pâle sans marque.*
+**5. Colours and materials / Couleurs et matières.** Pale oatmeal patchwork felt with slate-grey mask and leg panels and bold seams, chalk-white horn trumpets and tail horn, chalk sound rings, porcelain claws. *Feutre en patchwork avoine pâle, pièces gris ardoise au masque et aux pattes, larges coutures, trompes et queue-cornet de corne blanc craie, ondes sonores de craie, griffes de porcelaine.*
 
 **6. Habitat.** EN: Under the floorboards of Brightwell Press, and in any hedge where people talk.
 *FR : Sous le plancher de l'Imprimerie de Clairpuits, et dans toutes les haies où l'on bavarde.*
@@ -555,15 +426,7 @@ qu'on ne le voit ; quand une haie vous répond, cherchez deux trompes blanches.*
 noon. *FR : Ne chuchotez jamais un secret près d'une haie : un Échouaf le répétera à la boulangerie avant
 midi.*
 
-**14. Visual key / Clé visuelle.** Must show: small slender body of dense felted wool with visible fibres
-and pilling; exactly two large flared trumpets of chalk-white horn in place of ears, standing straight up
-and close together, spiral groove inside; slate-grey mask and legs; chalk dots on the back and one chalk
-line down the muzzle; one plain unmarked pale oval patch on the chest; porcelain claws. Pose: sitting
-upright on a cobbled step, facing the viewer, tail curled round the front paws, compact. Avoid: a real fox
-or fennec; soft furry ears; trumpets splayed wide or metal horns; a knitted, plush or toy look; no hexagon
-shapes or markings. *À montrer : deux trompes de corne de craie à spirale, dressées et serrées, masque
-ardoise, points de craie, ovale vierge, laine feutrée à bouloches. À éviter : un vrai renard ou fennec, des
-oreilles de fourrure, des trompes écartées, un aspect peluche, aucun hexagone.*
+**14. Visual key / Clé visuelle.** Must show: a small slender body sewn from pale oatmeal felt panels with bold seams, slate-grey mask and legs; exactly two large flared chalk-horn trumpets in place of ears, standing straight up and close together, spiral groove inside; the tail coiled in front of the paws into a third horn with its bell facing forward; chalk rings rippling across the chest; porcelain claws. Pose: sitting upright on a cobbled step, facing the viewer, compact. Avoid: a real fox or fennec; fur or soft furry ears; trumpets splayed wide or metal horns; a plush or toy look; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : corps cousu de pièces de feutre, masque ardoise, deux trompes de craie dressées et serrées, queue enroulée en troisième cornet, ondes de craie sur la poitrine. À éviter : un vrai renard ou fennec, de la fourrure, des trompes écartées, un air de peluche, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
 EN: "Its ears are two horn trumpets. It catches the sound of your attack, keeps it a moment, then plays it back at you."
@@ -573,51 +436,22 @@ FR : « Ses oreilles sont deux trompes de corne. Il capte le bruit de votre atta
 
 ## Haulox (075)
 
-**In one breath.** A great shaggy draft bull with a yoke of chalk horn grown across its shoulders, so
-carters hitch it with no harness at all. Its felted coat hangs to its hooves, and its flank is a column of
-chalk tally strokes, one per load. The musk-ox base survives in the bulk, the low head and the horns that
-sweep down past its cheeks.
+**In one breath.** A great quilted draft beast with a straight yoke of chalk horn grown across its shoulders, so carters hitch it with no harness at all. Its knees are wooden spools, its face hides under a fringe of felt, and its panels are columns of chalk tallies, one per load. The musk-ox base survives only in the bulk and the low head.
 
-*En un souffle : un grand taureau de trait hirsute, avec un joug de corne de craie poussé en travers des
-épaules : les charretiers l'attellent sans aucun harnais. Son pelage feutré tombe jusqu'aux sabots, et son
-flanc est une colonne de bâtons de craie, un par chargement. Du bœuf musqué restent la masse, la tête basse
-et les cornes qui descendent le long des joues.*
+*En un souffle : une grande bête de trait matelassée, avec un joug droit de corne de craie poussé en travers des épaules : les charretiers l'attellent sans aucun harnais. Ses genoux sont des bobines de bois, sa face se cache sous une frange de feutre, et ses pièces sont des colonnes de bâtons de craie, un par chargement. Du bœuf musqué ne restent que la masse et la tête basse.*
 
 ### 075 · Haulox / Halebœuf
 
 **1. Identity / Identité.** No. 075 · Colorless · Basic · does not awaken. 80 HP, uncommon.
 *N° 075 · Incolore · Base · ne s'éveille pas. 80 PV, peu commun.*
 
-**2. Animal base / Base animale.** EN: Kept from a musk-ox bull: a massive body on short legs, a low
-head, two horns sweeping down beside the cheeks and a long coat. Invented: a yoke of chalk horn grown
-across the shoulders with two worn hollows; a coat of dense felt hanging to the hooves; porcelain hooves;
-chalk tally strokes on the flank; the blank patch on its forehead. *FR : Du taureau musqué, il garde le
-corps massif sur pattes courtes, la tête basse, deux cornes qui descendent le long des joues et le long
-pelage. Inventé : un joug de corne de craie poussé en travers des épaules, creusé de deux creux usés ; un
-pelage de feutre dense qui tombe jusqu'aux sabots ; des sabots de porcelaine ; des bâtons de craie sur le
-flanc ; la tache vierge sur le front.*
+**2. Animal base / Base animale.** EN: Kept from a musk-ox bull, as a silhouette hint only: the bulk and the low head. Invented: no hide, a body that is a great mound of **quilted felt panels** hanging almost to the ground; a straight **yoke of chalk horn** grown across the top of its shoulders, so carters hitch it with no harness; a face hidden under a fringe of felt strips, only a porcelain muzzle plate showing; no horns on its head; knees that are **wooden spools** wound with yarn; chalk tallies of every load on its panels. *FR : Du bœuf musqué, il ne garde qu'un souvenir de silhouette : la masse et la tête basse. Inventé : pas de cuir, un corps qui est un grand tas de **pièces de feutre matelassé** tombant presque jusqu'au sol ; un **joug de corne de craie** droit poussé en travers du haut des épaules, si bien qu'on l'attelle sans harnais ; une face cachée sous une frange de bandes de feutre, d'où ne dépasse qu'une plaque de mufle en porcelaine ; aucune corne sur la tête ; des genoux qui sont des **bobines de bois** enroulées de fil ; le compte de chaque chargement à la craie sur ses pièces.*
 
-**3. Morphology / Morphologie.** EN: A big, shaggy draft beast, a bull, standing four-square with its
-head low. Across its shoulders grows a broad arch of chalk-white horn like a yoke, no wider than its body,
-with two smooth hollows worn into the top where cart shafts rest. Two chalk-white horns sweep down beside
-its cheeks and hook up at the tips. Its coat is dense felted wool in warm grey and slate, matted and
-softly pilled, hanging in a heavy curtain almost to its hooves and hiding its belly; he is male and has no
-udder. Rows of pale chalk tally strokes mark its flank. A plain, smooth, pale oval patch with no markings
-sits on its broad forehead. Porcelain hooves, calm dark eyes. *FR : Une grande bête de trait hirsute, un
-taureau, campée sur ses quatre pattes, la tête basse. En travers de ses épaules pousse une large arche de
-corne blanc craie, comme un joug, pas plus large que son corps, creusée sur le dessus de deux creux lisses
-où reposent les brancards. Deux cornes blanc craie descendent le long de ses joues et remontent en crochet.
-Son pelage est de laine feutrée dense gris chaud et ardoise, mate et un peu boulochée, qui tombe en lourd
-rideau presque jusqu'aux sabots et cache son ventre ; c'est un mâle, sans pis. Des rangées de bâtons de
-craie pâle marquent son flanc. Un ovale lisse et pâle, sans aucune marque, orne son large front. Sabots de
-porcelaine, yeux sombres et calmes.*
+**3. Morphology / Morphologie.** EN: A huge, heavy draft creature standing four-square with its head low. It has no hide: its body is a tall mound of quilted patchwork panels of thick warm-grey and slate felt, joined by bold seams of cream thread and hanging like a heavy blanket almost to the ground. Lying across the top of its shoulders, behind its head, grows one straight bar of chalk-white horn like a carter's yoke, no wider than its body, with two smooth hollows worn into the top where cart shafts rest. Its small head is hidden under a long fringe of felt strips, showing only a wide flat muzzle plate of matte porcelain and two calm dark eyes; it has no horns on its head. Its four short, thick legs bend at knees that are big wooden spools wound with cream yarn, and end in porcelain hooves. Rows of white chalk tally strokes, in fives, mark its panels, one stroke per load. *FR : Une énorme et lourde créature de trait, campée sur ses quatre pattes, la tête basse. Elle n'a pas de cuir : son corps est un haut tas de pièces de feutre matelassé épais, gris chaud et ardoise, jointes par de larges coutures de fil crème et tombant comme une lourde couverture presque jusqu'au sol. En travers du haut de ses épaules, derrière la tête, pousse une barre droite de corne blanc craie comme un joug de charretier, pas plus large que son corps, creusée sur le dessus de deux creux lisses où reposent les brancards. Sa petite tête est cachée sous une longue frange de bandes de feutre, d'où ne dépassent qu'une large plaque de mufle en porcelaine mate et deux yeux sombres et calmes ; il n'a aucune corne sur la tête. Ses quatre pattes courtes et épaisses plient à des genoux qui sont de grosses bobines de bois enroulées de fil crème, et finissent en sabots de porcelaine. Des rangées de bâtons de craie blanche, par cinq, marquent ses pièces, un bâton par chargement.*
 
 **4. Size and weight / Taille et poids.** 1.6 m at the yoke, 600 kg. *1,6 m au joug, 600 kg.*
 
-**5. Colours and materials / Couleurs et matières.** Warm grey and slate felted coat with pilling,
-chalk-white horn yoke and horns, unglazed porcelain hooves, pale chalk tally strokes, a plain pale oval
-patch. *Pelage feutré gris chaud et ardoise, bouloches, joug et cornes de corne blanc craie, sabots de
-porcelaine brute, bâtons de craie pâle, un ovale pâle sans marque.*
+**5. Colours and materials / Couleurs et matières.** Warm grey and slate quilted patchwork felt with cream-thread seams, a chalk-white horn yoke, a fringe of felt strips, a porcelain muzzle plate and hooves, wooden spool knees wound with cream yarn, chalk tally strokes. *Feutre matelassé en patchwork gris chaud et ardoise aux coutures de fil crème, joug de corne blanc craie, frange de bandes de feutre, plaque de mufle et sabots de porcelaine, genoux-bobines de bois enroulés de fil crème, bâtons de craie.*
 
 **6. Habitat.** EN: Every road. Haulox pull the carts between Sixfold Meadow and the towns of the ring,
 and graze the far side of the meadow between trips. *FR : Toutes les routes. Les Halebœuf tirent les
@@ -634,14 +468,14 @@ roads. Likes: a full cart and a long road. Dislikes: being rushed. *FR : Foin, c
 au bord des routes. Aime une charrette pleine et une longue route. Déteste qu'on le presse.*
 
 **9. Life cycle and Awakening / Cycle de vie et Éveil.** EN: Haulox do not awaken. A calf is born with
-two bumps on its shoulders; the yoke grows in over its first three years, and widens a finger every year
-after. *FR : Les Halebœuf ne s'éveillent pas. Le veau naît avec deux bosses sur les épaules ; le joug pousse
+two bumps on its shoulders and bare wooden knees; the yoke grows in over its first three years, and widens a finger every year
+after. *FR : Les Halebœuf ne s'éveillent pas. Le veau naît avec deux bosses sur les épaules et des genoux de bois nus ; le joug pousse
 pendant ses trois premières années, puis s'élargit d'un doigt chaque année.*
 
-**10. Abilities / Capacités.** EN: **Shoulder Shove**: it lowers its yoke and leans in, and the horn arch
-takes the next blows.
+**10. Abilities / Capacités.** EN: **Shoulder Shove**: it lowers its yoke and leans in, and the horn bar
+and its quilted panels take the next blows.
 **Heavy Trample**: it walks straight through the foe on its porcelain hooves. *FR : **Coup d'épaule** :
-il baisse son joug et pousse, et l'arche de corne encaisse les coups suivants. **Piétinement lourd** : il passe droit sur
+il baisse son joug et pousse, et la barre de corne et ses pièces matelassées encaissent les coups suivants. **Piétinement lourd** : il passe droit sur
 l'adversaire de ses sabots de porcelaine.*
 
 **11. People and duelists / Relations avec les humains.** EN: Clover's fruit comes in to the cross path
@@ -658,17 +492,7 @@ les jours de marché.*
 room, it is owed a summer off in the meadow. *FR : Les charretiers tracent un bâton de craie sur le flanc
 d'un Halebœuf pour chaque chargement. Quand il n'y a plus de place, il a droit à un été de repos au pré.*
 
-**14. Visual key / Clé visuelle.** Must show: seen exactly head-on from the front, as tall as wide (a side view spreads past the card crop); a big shaggy bull, clearly male, no udder; dense felted coat
-with visible fibres and pilling hanging almost to the hooves and hiding the belly; a broad yoke-arch of
-chalk-white horn across the shoulders, no wider than the body, with two worn hollows; exactly two
-chalk-white horns sweeping down beside the cheeks and hooking up; rows of chalk tally strokes on the
-flank; one plain unmarked pale oval patch on the forehead; porcelain hooves. Pose: standing four-square on
-a dirt road, head low, seen nearly head-on in a front three-quarter view so the body is foreshortened,
-compact. Avoid: a real musk ox, yak or cow; an udder or teats; a side-on view; a leather harness or cart;
-a knitted, plush or toy look; no hexagon shapes or markings. *À montrer : vu exactement de face, aussi haut que large, un taureau, sans pis, pelage
-feutré jusqu'aux sabots, joug de corne de craie aux deux creux, deux cornes tombantes, bâtons de craie,
-ovale vierge. Vue de trois quarts face, presque de face. À éviter : un vrai bœuf musqué, un yak ou une
-vache, un pis, une vue de profil, un harnais, aucun hexagone.*
+**14. Visual key / Clé visuelle.** Must show: seen from the front and foreshortened, the body stretching back away from the viewer (a side view spreads past the card crop); a huge four-legged body that is a mound of quilted warm-grey and slate felt panels with bold seams, hanging almost to the ground; one straight beam of chalk-white horn across the top of the shoulders, above and behind the head, no wider than the body, with two worn hollows; a small low head hidden under a fringe of felt strips, only a porcelain muzzle plate and two dark eyes showing, no horns on the head; four short legs with wooden spool knees wound with cream yarn; porcelain hooves; chalk tally strokes in fives. Pose: standing on all four legs on a dirt road, head low, compact. Avoid: a real musk ox, bison, yak, bull or cow; horns on the head; fur or hide; an udder; a side-on view; a leather harness or cart; arms or an upright stance; a plush or toy look; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : vu de face en raccourci, sur quatre pattes, corps-tas de feutre matelassé, joug de corne de craie droit sur les épaules, face cachée sous une frange, plaque de mufle en porcelaine, genoux-bobines, bâtons de craie. À éviter : un vrai bœuf musqué, bison, yack ou taureau, des cornes sur la tête, une vue de profil, un harnais, une posture debout, un air de peluche, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
 EN: "A yoke of chalk horn grows across its shoulders. Carters hitch it with no harness and chalk one stroke on its flank per load."
@@ -678,50 +502,23 @@ FR : « Un joug de corne de craie lui pousse sur les épaules. On l'attelle sans
 
 ## Pocketmouse (076)
 
-**In one breath.** A tiny felted mouse-shape whose tail is one long strand of spun wool, kept wound into a
-ball it hugs to its chest. It rides in travellers' pockets and never gets lost: unwound, the thread always
-leads back out. The mouse base survives in the round ears, the whiskers and the size.
+**In one breath.** A tiny creature whose whole body is a ball of its own wound yarn, with a felt face stitched on and two round felt ears. It rides in travellers' pockets and never gets lost: unwound, the thread always leads back out. The mouse base survives only in the ears and the size.
 
-*En un souffle : une minuscule silhouette de souris feutrée dont la queue est un seul long brin de laine
-filée, enroulé en pelote qu'elle serre contre sa poitrine. Elle voyage dans les poches et ne se perd
-jamais : déroulé, le fil ramène toujours vers la sortie. De la souris restent les oreilles rondes, les
-moustaches et la taille.*
+*En un souffle : une minuscule créature dont tout le corps est une pelote de son propre fil, avec une face de feutre cousue dessus et deux oreilles rondes de feutre. Elle voyage dans les poches et ne se perd jamais : déroulé, le fil ramène toujours vers la sortie. De la souris ne restent que les oreilles et la taille.*
 
 ### 076 · Pocketmouse / Souripoche
 
 **1. Identity / Identité.** No. 076 · Colorless · Basic · does not awaken. 40 HP, common. Power: Scurry.
 *N° 076 · Incolore · Base · ne s'éveille pas. 40 PV, commun. Pouvoir : Détalage.*
 
-**2. Animal base / Base animale.** EN: Kept from a field mouse: a tiny round body, two large round ears,
-whiskers and bead eyes. Invented: a tail that is a single long strand of spun wool yarn, kept wound in a
-ball; ears of thin felt dotted with chalk; a dotted chalk line down its back like a route on a map;
-porcelain claws; the blank patch on its brow. *FR : Du mulot, elle garde le minuscule corps rond, deux
-grandes oreilles rondes, les moustaches et les yeux en perle. Inventé : une queue qui est un seul long
-brin de laine filée, gardé en pelote ; des oreilles de feutre fin pointillées de craie ; une ligne de
-pointillés de craie sur le dos comme un itinéraire sur une carte ; des griffes de porcelaine ; la tache
-vierge sur le front.*
+**2. Animal base / Base animale.** EN: Kept from a field mouse, as a silhouette hint only: the tiny size and two big round ears. Invented: its whole body is a **ball of its own wound yarn**, its loose end the tail it pays out; a small flat felt face stitched onto the ball; ears of thin felt dotted with chalk; a dotted chalk route that winds round the ball. *FR : Du mulot, elle ne garde qu'un souvenir de silhouette : la taille minuscule et deux grandes oreilles rondes. Inventé : tout son corps est une **pelote de son propre fil**, dont le bout libre est la queue qu'elle dévide ; une petite face plate de feutre cousue sur la pelote ; des oreilles de feutre fin pointillées de craie ; un itinéraire en pointillés de craie qui fait le tour de la pelote.*
 
-**3. Morphology / Morphologie.** EN: A tiny round creature sitting up, hugging a ball against its chest
-with both forepaws. The ball is its own tail: a single long strand of spun cream wool, many times its body
-length, wound tight, its loose end trailing down. Its hide is dense felted wool, pale warm grey, matted
-and softly pilled. Two large round ears of thin felt are dotted with pale chalk, and a dotted chalk line
-runs down its back like a path on a map. A plain, smooth, pale oval patch with no markings sits on its
-brow. Fine white whisker fibres, tiny porcelain claws, bright black bead eyes. *FR : Une minuscule
-créature ronde assise, qui serre une pelote contre sa poitrine des deux pattes avant. La pelote est sa
-propre queue : un seul long brin de laine filée crème, bien des fois plus long que son corps, serré, dont
-le bout libre pend. Sa peau est de laine feutrée dense gris chaud pâle, mate et un peu boulochée. Deux
-grandes oreilles rondes de feutre fin sont pointillées de craie pâle, et une ligne de pointillés de craie
-descend le long de son dos comme un chemin sur une carte. Un ovale lisse et pâle, sans aucune marque, orne
-son front. De fines moustaches de fibre blanche, de minuscules griffes de porcelaine, des yeux noirs en
-perle.*
+**3. Morphology / Morphologie.** EN: A tiny round creature whose whole body is a tightly wound ball of cream spun wool, the strands clearly visible. A small flat face of pale grey felt is stitched onto the front of the ball with bold stitches, with two bright black bead eyes and fine white whisker fibres. Two large round ears of thin grey felt, dotted with chalk, stand on top. Two tiny front paws with porcelain claws peep out from under the ball and hold the loose end of the yarn, which trails away like a tail. A dotted white chalk line winds round the ball like a route on a map, and it changes to show the way it came. *FR : Une minuscule créature ronde dont tout le corps est une pelote serrée de laine filée crème, aux brins bien visibles. Une petite face plate de feutre gris pâle est cousue sur le devant de la pelote à grands points, avec deux yeux noirs en perle et de fines moustaches de fibre blanche. Deux grandes oreilles rondes de feutre gris fin, pointillées de craie, se dressent dessus. Deux minuscules pattes avant aux griffes de porcelaine dépassent sous la pelote et tiennent le bout libre du fil, qui s'en va comme une queue. Une ligne de pointillés de craie blanche fait le tour de la pelote comme un itinéraire sur une carte, et change pour montrer le chemin parcouru.*
 
 **4. Size and weight / Taille et poids.** 9 cm sitting, 60 g, ball of tail included. *9 cm assise,
 60 g, pelote de queue comprise.*
 
-**5. Colours and materials / Couleurs et matières.** Pale warm grey felted hide with pilling, cream spun
-wool tail, chalk dots and a dotted chalk line, porcelain claws, white whisker fibres, a plain pale oval
-patch. *Peau feutrée gris chaud pâle, bouloches, queue de laine filée crème, points et pointillés de
-craie, griffes de porcelaine, moustaches de fibre blanche, un ovale pâle sans marque.*
+**5. Colours and materials / Couleurs et matières.** Cream spun wool wound into a ball, a pale grey felt face panel and ears with bold stitches, chalk dots and a dotted chalk route, porcelain claws, white whisker fibres, black bead eyes. *Laine filée crème enroulée en pelote, face et oreilles de feutre gris pâle à grands points, points et itinéraire en pointillés de craie, griffes de porcelaine, moustaches de fibre blanche, yeux en perle noire.*
 
 **6. Habitat.** EN: Travellers' coat pockets on every road, and the coat hooks of the inns round the
 ring. *FR : Les poches de manteau des voyageurs sur toutes les routes, et les patères des auberges de
@@ -763,67 +560,32 @@ qui a fait le tour de l'anneau ; un fil crème qui dépasse de la manche la trah
 don't. *FR : Un fil crème sur votre manteau veut dire qu'une Souripoche connaît le chemin du retour,
 même si vous l'ignorez.*
 
-**14. Visual key / Clé visuelle.** Must show: a needle-felted body with stray fibres and bold chalk spirals and dots; tiny round body of dense felted wool with visible fibres and
-pilling; the tail as a single strand of spun cream wool wound into a round ball hugged to the chest, loose
-end trailing down; two large round thin felt ears dotted with chalk; a dotted chalk line down the back;
-one plain unmarked pale oval patch on the brow; white whisker fibres; porcelain claws. Pose: sitting up on
-a flat road stone, front three-quarter view, ball held to the chest, compact. Avoid: a real mouse; a
-cat's ball of yarn lying separately; a pink bare tail; a knitted, plush or toy look; no hexagon shapes or
-markings. *À montrer : corps feutré à l'aiguille, fibres folles, spirales et points de craie bien visibles, queue de laine filée enroulée en pelote serrée contre la poitrine, bout libre qui
-pend, oreilles de feutre pointillées de craie, pointillés sur le dos, ovale vierge. À éviter : une vraie
-souris, une queue rose nue, un aspect peluche, aucun hexagone.*
+**14. Visual key / Clé visuelle.** Must show: a tiny body that is a tightly wound ball of cream yarn with visible strands; a small flat grey felt face stitched onto the ball with two black bead eyes and white whisker fibres; two large round thin felt ears dotted with chalk; two tiny porcelain-clawed paws holding the loose end, which trails away like a tail; a dotted chalk route winding round the ball. Pose: sitting on a flat road stone, front three-quarter view, compact. Avoid: a real mouse; fur; a pink bare tail; a cat's ball of yarn lying separately; a plush or toy look; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : corps-pelote de laine crème, face de feutre cousue, oreilles pointillées de craie, bout de fil en guise de queue, itinéraire de craie. À éviter : une vraie souris, de la fourrure, une queue rose nue, un air de peluche, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
-EN: "Its tail is a thread of spun wool it keeps wound in a ball. Lost travellers follow the loose end out; so do tired duelists."
-FR : « Sa queue est un fil de laine qu'elle garde en pelote. Les voyageurs perdus suivent le bout libre pour sortir, les duellistes las aussi. »
+EN: "Its body is a ball of its own wound thread. Lost travellers follow the loose end out; so do tired duelists."
+FR : « Son corps est une pelote de son propre fil. Les voyageurs perdus suivent le bout libre pour sortir, les duellistes las aussi. »
 
 ---
 
 ## Mendlark (077)
 
-**In one breath.** A small felted songbird whose beak is a porcelain darning needle with an eye near the
-tip. It mends its own frayed felt by tamping the loose fibres back in while it sings, and its song makes
-everything around it unknot. The lark base survives in the crest, the streaked back and the dawn song.
+**In one breath.** A small living pincushion bristling with porcelain pins, whose beak is a darning needle trailing a thread. It stitches its own frayed felt back together while it sings, and its song makes everything around it unknot. The lark base survives only in the perch and the dawn song.
 
-*En un souffle : un petit passereau feutré dont le bec est une aiguille à repriser de porcelaine, percée
-d'un chas près de la pointe. Il répare son propre feutre effiloché en repiquant les fibres libres tout en
-chantant, et son chant dénoue tout autour de lui. De l'alouette restent la huppe, le dos rayé et le chant
-de l'aube.*
+*En un souffle : une petite pelote à épingles vivante, hérissée d'épingles de porcelaine, dont le bec est une aiguille à repriser d'où pend un fil. Il recoud son propre feutre effiloché tout en chantant, et son chant dénoue tout autour de lui. De l'alouette ne restent que le perchoir et le chant de l'aube.*
 
 ### 077 · Mendlark / Pansalouette
 
 **1. Identity / Identité.** No. 077 · Colorless · Basic · does not awaken. 50 HP, uncommon.
 *N° 077 · Incolore · Base · ne s'éveille pas. 50 PV, peu commun.*
 
-**2. Animal base / Base animale.** EN: Kept from a lark: a small streaked body, a short crest, thin legs
-and a famous dawn song. Invented: a long, straight, needle-thin beak of unglazed porcelain with an eye
-pierced near the tip; a crest of combed wool fibre; a felted body; chalk cross-stitch marks for streaks;
-porcelain claws; the blank patch on its breast. *FR : De l'alouette, il garde le petit corps rayé, la
-huppe courte, les pattes fines et le célèbre chant de l'aube. Inventé : un bec long, droit, fin comme une
-aiguille, de porcelaine brute, percé d'un chas près de la pointe ; une huppe de fibre de laine peignée ; un
-corps feutré ; des points de croix de craie en guise de rayures ; des griffes de porcelaine ; la tache
-vierge sur la poitrine.*
+**2. Animal base / Base animale.** EN: Kept from a lark, as a silhouette hint only: a small perching body and a famous dawn song. Invented: no feathers, a round body that is a living **pincushion**, its back and crown bristling with porcelain-headed pins; a **darning-needle beak** with an eye near the tip, trailing a thread; wings that are felt patches sewn on in blanket stitch; chalk cross-stitches that mark what it has mended. *FR : De l'alouette, il ne garde qu'un souvenir de silhouette : un petit corps perché et un célèbre chant de l'aube. Inventé : pas de plumes, un corps rond qui est une **pelote à épingles** vivante, le dos et le crâne hérissés d'épingles à tête de porcelaine ; un **bec-aiguille à repriser** percé d'un chas près de la pointe, d'où pend un fil ; des ailes qui sont des pièces de feutre cousues au point de feston ; des points de croix de craie qui marquent ce qu'il a réparé.*
 
-**3. Morphology / Morphologie.** EN: A small songbird-creature perched upright, wings folded, beak
-slightly open in song. Its beak is long, straight and very thin, of matte unglazed porcelain like a
-darning needle, with a small round hole through it near the tip. A short upright crest of combed wool
-fibre stands on its head. Its body is dense felted wool, oatmeal and warm grey with a cream breast, matted
-and softly pilled. Pale chalk cross-stitch marks and dashed lines run across its wings and back like
-stitching. A plain, smooth, pale oval patch with no markings sits on its breast. Thin legs with porcelain
-claws, dark eyes. *FR : Un petit passereau perché bien droit, ailes repliées, bec entrouvert pour
-chanter. Son bec est long, droit et très fin, de porcelaine brute mate comme une aiguille à repriser,
-percé d'un petit trou rond près de la pointe. Une huppe courte et droite de fibre de laine peignée se
-dresse sur sa tête. Son corps est de laine feutrée dense, avoine et gris chaud, poitrine crème, mate et un
-peu boulochée. Des points de croix et des tirets de craie pâle courent sur ses ailes et son dos comme une
-couture. Un ovale lisse et pâle, sans aucune marque, orne sa poitrine. Pattes fines aux griffes de
-porcelaine, yeux sombres.*
+**3. Morphology / Morphologie.** EN: A small round creature perched upright, its beak raised in song and its short tail tucked down. It has no feathers: its round body is a plump stitched pincushion of oatmeal and cream felt, its back and crown bristling with dozens of pins with round porcelain heads. Its beak is a long, straight, very thin darning needle of matte porcelain with a small eye near the tip, a cream thread trailing from the eye. Its two wings are flat felt patches sewn onto its sides with bold blanket stitch. White chalk cross-stitches and dashed seam lines are drawn over its breast, one for every tear it has mended. Thin legs with porcelain claws, dark eyes. *FR : Une petite créature ronde perchée bien droite, le bec levé pour chanter, la queue courte rentrée. Elle n'a pas de plumes : son corps rond est une pelote à épingles dodue, cousue de feutre avoine et crème, le dos et le crâne hérissés de dizaines d'épingles à tête ronde de porcelaine. Son bec est une longue aiguille à repriser droite et très fine, de porcelaine mate, percée d'un petit chas près de la pointe d'où pend un fil crème. Ses deux ailes sont des pièces plates de feutre cousues sur ses flancs à grands points de feston. Des points de croix et des pointillés de couture à la craie blanche couvrent sa poitrine, un pour chaque accroc réparé. Pattes fines aux griffes de porcelaine, yeux sombres.*
 
 **4. Size and weight / Taille et poids.** 20 cm, 50 g. *20 cm, 50 g.*
 
-**5. Colours and materials / Couleurs et matières.** Oatmeal and warm grey felted body with pilling,
-cream breast, combed wool crest, matte porcelain needle beak and claws, pale chalk cross-stitches, a plain
-pale oval patch. *Corps feutré avoine et gris chaud, bouloches, poitrine crème, huppe de laine peignée, bec-
-aiguille et griffes de porcelaine mate, points de croix de craie pâle, un ovale pâle sans marque.*
+**5. Colours and materials / Couleurs et matières.** Oatmeal and cream felt pincushion body, porcelain-headed pins, a matte porcelain needle beak with a cream thread, felt patch wings in blanket stitch, chalk cross-stitches, porcelain claws. *Corps-pelote de feutre avoine et crème, épingles à tête de porcelaine, bec-aiguille de porcelaine mate et son fil crème, ailes de feutre cousues au point de feston, points de croix à la craie, griffes de porcelaine.*
 
 **6. Habitat.** EN: The fence posts and hedges of Sixfold Meadow, and the teal awning of the Deck Clinic
 in Brightwell Square, where it nests. *FR : Les piquets et les haies du Pré de Sixfold, et l'auvent
@@ -845,10 +607,10 @@ porcelain on the morning of its first song. *FR : Les Mendlarks ne s'éveillent 
 sont trop occupés à réparer les autres. Le bec d'un oisillon reste de feutre souple pendant un mois et
 durcit en porcelaine le matin de son premier chant.*
 
-**10. Abilities / Capacités.** EN: **Mending Chirp**: between two notes, it tamps its own frayed felt
-back in with its beak. **Restful Tune**: its song unknots everything
+**10. Abilities / Capacités.** EN: **Mending Chirp**: between two notes, it stitches its own frayed felt
+back together with its needle beak. **Restful Tune**: its song unknots everything
 that has gone wrong in the fight, on both sides (removes all conditions from both Active creatures).
-*FR : **Gazouillis soignant** : entre deux notes, il repique son propre feutre effiloché d'un coup de bec.
+*FR : **Gazouillis soignant** : entre deux notes, il recoud son propre feutre effiloché de son bec-aiguille.
 **Air apaisant** : son chant dénoue tout ce qui a mal tourné dans
 le combat, des deux côtés (les deux créatures Actives guérissent de toutes leurs altérations).*
 
@@ -865,33 +627,19 @@ attendent dessous.*
 **13. Folklore.** EN: Darn your socks while a Mendlark sings and they'll never wear through. *FR :
 Reprisez vos chaussettes pendant qu'un Pansalouette chante, et elles ne s'useront jamais.*
 
-**14. Visual key / Clé visuelle.** Must show: a round needle-felted body with bold chalk cross-stitches; beak pointing upward in song; small songbird body of dense felted wool with visible fibres
-and pilling; a long, straight, very thin beak of matte porcelain like a darning needle, with one small
-hole through it near the tip; a short upright crest of combed wool; chalk cross-stitch marks and dashed
-lines on the wings and back; one plain unmarked pale oval patch on the breast; porcelain claws. Pose:
-perched upright on a weathered fence post, wings folded, beak slightly open, front three-quarter view,
-compact. Avoid: a real lark or sparrow; smooth feathers; a hummingbird; spread wings; a knitted, plush or
-toy look; no hexagon shapes or markings. *À montrer : corps rond feutré à l'aiguille, points de croix à la craie bien visibles ; bec levé pour chanter, bec-aiguille de porcelaine percé d'un chas, huppe de
-laine peignée, points de croix de craie, ovale vierge, laine feutrée à bouloches. À éviter : une vraie
-alouette, des plumes lisses, un colibri, des ailes ouvertes, un aspect peluche, aucun hexagone.*
+**14. Visual key / Clé visuelle.** Must show: a small round body that is a stitched felt pincushion, its back and crown bristling with porcelain-headed pins; a long straight porcelain needle beak with one small eye near the tip and a cream thread trailing from it, raised in song; two flat felt patch wings sewn on with bold blanket stitch; chalk cross-stitches on the breast; thin legs with porcelain claws. Pose: perched upright on a weathered fence post, short tail tucked down, front three-quarter view, compact. Avoid: a real lark, sparrow or wren; feathers; a long tail; spread wings; a hummingbird; a plush or toy look; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : corps-pelote hérissé d'épingles, bec-aiguille levé avec son chas et son fil, ailes de feutre au point de feston, points de croix à la craie. À éviter : une vraie alouette, des plumes, une longue queue, des ailes ouvertes, un air de peluche, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
-EN: "Its beak is a porcelain needle. It tamps its frayed felt back into place as it sings, and the whole hedge settles down."
-FR : « Son bec est une aiguille de porcelaine. Il repique son feutre effiloché tout en chantant, et toute la haie s'apaise. »
+EN: "Its beak is a porcelain needle. It stitches its frayed felt back together as it sings, and the whole hedge settles down."
+FR : « Son bec est une aiguille de porcelaine. Il recoud son feutre effiloché tout en chantant, et toute la haie s'apaise. »
 
 ---
 
 ## Hexcrest (078)
 
-**In one breath.** A noble felted ram crowned by six chalk horns, three per side, one for each face of the
-seal stone, with a broad blank plate on its brow for the seventh. Nothing that sours a duel can write on
-that blank brow, so nothing sticks to it. The ram base survives in the fleece, the calm stance and the
-horns; no ram carries six stacked upward like a crown.
+**In one breath.** A noble sewn beast crowned by six straight chalk horns, three per side, one for each face of the seal stone, with a pair of raised moth wings and a long blank face for the seventh: the only panel on its body with no seam and no chalk. Nothing that sours a duel can write on that blank face, so nothing sticks to it. The ram base survives only in the deep chest and the calm.
 
-*En un souffle : un noble bélier feutré couronné de six cornes de craie, trois de chaque côté, une pour
-chaque face de la pierre de sceau, avec une large plaque vierge sur le front pour la septième. Rien de ce
-qui gâte un duel ne peut s'écrire sur ce front vierge, alors rien n'y prend. Du bélier restent la toison,
-l'aplomb calme et les cornes ; aucun bélier n'en porte six dressées en couronne.*
+*En un souffle : une noble bête cousue couronnée de six cornes droites de craie, trois de chaque côté, une pour chaque face de la pierre de sceau, avec une paire d'ailes de phalène dressées et une longue face nue pour la septième : la seule pièce de son corps sans couture ni craie. Rien de ce qui gâte un duel ne peut s'écrire sur cette face nue, alors rien n'y prend. Du bélier ne restent que le poitrail profond et le calme.*
 
 ### 078 · Hexcrest / Sorcrête
 
@@ -900,33 +648,14 @@ first win over Sable, the Hex Warden). Power: Champion's Calm. *N° 078 · Incol
 pas. 80 PV, rare, promo (la première victoire sur Sable, la Gardienne des Six). Pouvoir : Champion's
 Calm.*
 
-**2. Animal base / Base animale.** EN: Kept from a ram: a thick fleece, a deep chest, a calm four-square stance and ridged horns. Invented: six horns of chalk, three per side stacked one above the other and all
-curving up into a crown; a broad smooth blank plate on the brow; a felted fleece; chalk spirals and tally
-strokes; porcelain hooves. *FR : Du bélier, il garde l'épaisse toison, le poitrail profond, l'aplomb calme sur ses quatre pattes et les cornes annelées. Inventé : six cornes de craie, trois de chaque côté, étagées l'une
-au-dessus de l'autre et toutes recourbées vers le haut en couronne ; une large plaque lisse et vierge sur
-le front ; une toison feutrée ; des spirales et des bâtons de craie ; des sabots de porcelaine.*
+**2. Animal base / Base animale.** EN: Kept from a ram, as a silhouette hint only: a deep chest and a calm, upright way of sitting. Invented: no fleece, a body sewn from cream patchwork felt; **six straight chalk horns**, three per side, stacked into a crown; a pair of great felt **moth wings** raised from its shoulders, with chalk eye-spots; a long **blank face**, the only panel on its body with no seam and no chalk. *FR : Du bélier, il ne garde qu'un souvenir de silhouette : un poitrail profond et une façon calme et droite de s'asseoir. Inventé : pas de toison, un corps cousu de feutre crème en patchwork ; **six cornes droites de craie**, trois de chaque côté, étagées en couronne ; une paire de grandes **ailes de phalène** en feutre dressées de ses épaules, aux ocelles de craie ; une longue **face nue**, la seule pièce de son corps sans couture ni craie.*
 
-**3. Morphology / Morphologie.** EN: A noble ram-shaped creature standing four-square, chest out and head high. Six chalk-white horns crown its head, three on each side stacked one
-above the other, all curving upward and slightly inward like the points of a crown; the whole crown is no
-wider than its shoulders. Its brow is a broad, smooth oval plate, pale and completely unmarked. Its
-fleece is dense felted wool, cream and chalk-white, matted and softly pilled, falling in a heavy ruff over
-its chest. Pale chalk spirals are drawn on its shoulders and short chalk tally strokes on its forelegs.
-Porcelain hooves, calm pale gold eyes. *FR : Une noble créature en forme de bélier, campée sur ses quatre pattes, poitrail en avant et tête droite. Six cornes blanc craie couronnent sa tête, trois
-de chaque côté étagées l'une au-dessus de l'autre, toutes recourbées vers le haut et un peu vers
-l'intérieur comme les pointes d'une couronne ; la couronne entière n'est pas plus large que ses épaules.
-Son front est une large plaque ovale et lisse, pâle et sans aucune marque. Sa toison est de laine feutrée
-dense, crème et blanc craie, mate et un peu boulochée, qui retombe en lourde collerette sur son poitrail.
-Des spirales de craie pâle ornent ses épaules et de courts bâtons de craie ses pattes avant. Sabots de
-porcelaine, yeux or pâle et calmes.*
+**3. Morphology / Morphologie.** EN: A large, noble four-legged creature sitting on its haunches like a great hound, front legs straight and together, chest up and head high. It has no fleece: its body is sewn from patchwork panels of thick cream and chalk-white felt, joined by bold stitched seams. From its shoulders rises a pair of great soft felt moth wings, raised behind it like a moth at rest, dusty cream with pale chalk eye-spots, no wider than its body. Exactly six straight chalk-white horns rise from its head, three on each side stacked one above the other, all pointing upward like the points of a crown, no wider than its shoulders. Its long face is the only panel with no seam and no chalk, smooth and completely blank, with calm pale gold eyes. Porcelain hooves. *FR : Une grande et noble créature à quatre pattes, assise sur son arrière-train comme un grand lévrier, pattes avant droites et jointes, poitrail levé et tête haute. Elle n'a pas de toison : son corps est cousu de pièces de feutre épais crème et blanc craie, jointes par de larges coutures. De ses épaules s'élève une paire de grandes ailes de phalène en feutre doux, dressées derrière elle comme chez une phalène au repos, crème poudreux aux ocelles de craie pâle, pas plus larges que son corps. Exactement six cornes droites blanc craie s'élèvent de sa tête, trois de chaque côté étagées l'une au-dessus de l'autre, toutes pointées vers le haut comme les pointes d'une couronne, pas plus large que ses épaules. Sa longue face est la seule pièce sans couture ni craie, lisse et entièrement nue, aux yeux or pâle et calmes. Sabots de porcelaine.*
 
 **4. Size and weight / Taille et poids.** 1.2 m at the shoulder standing, 1.6 m to the top horn; 140 kg.
 *1,2 m au garrot debout, 1,6 m jusqu'à la corne la plus haute ; 140 kg.*
 
-**5. Colours and materials / Couleurs et matières.** Cream and chalk-white felted fleece with pilling,
-six chalk-white horns, a pale unmarked brow plate, pale chalk spirals and tally strokes, unglazed
-porcelain hooves, pale gold eyes. *Toison feutrée crème et blanc craie, bouloches, six cornes blanc craie,
-une plaque frontale pâle sans marque, spirales et bâtons de craie pâle, sabots de porcelaine brute, yeux or
-pâle.*
+**5. Colours and materials / Couleurs et matières.** Cream and chalk-white patchwork felt with bold seams, a pair of dusty cream felt moth wings with pale chalk eye-spots, six chalk-white horns, a seamless blank face panel, porcelain hooves, pale gold eyes. *Feutre en patchwork crème et blanc craie aux larges coutures, paire d'ailes de phalène en feutre crème poudreux aux ocelles de craie pâle, six cornes blanc craie, une face sans couture et nue, sabots de porcelaine, yeux or pâle.*
 
 **6. Habitat.** EN: The duel hall on Sixfold Meadow, behind the sealed door, beside the Hex Warden. Only
 one has ever been seen grazing outside, on the hill behind the hall. *FR : La salle de duel du Pré de
@@ -945,17 +674,17 @@ jardin de la salle de duel, que lui apporte Wynne. Aime un challenger qui ne se 
 crie dans la salle.*
 
 **9. Life cycle and Awakening / Cycle de vie et Éveil.** EN: Hexcrests do not awaken. A lamb is born
-with a bare brow and no horns; one horn grows in for each face it meets, so a Hexcrest with six has walked
-the whole ring. Its brow stays blank all its life. *FR : Les Hexcrests ne s'éveillent pas. L'agneau naît
-le front nu et sans cornes ; une corne pousse pour chaque face qu'il rencontre, si bien qu'un Sorcrête à six
-cornes a fait le tour de l'anneau. Son front reste vierge toute sa vie.*
+with a bare face and no horns; one horn grows in for each face it meets, so a Hexcrest with six has walked
+the whole ring. Its face stays blank all its life, however many seams the rest of it gains. *FR : Les Hexcrests ne s'éveillent pas. L'agneau naît
+la face nue et sans cornes ; une corne pousse pour chaque face qu'il rencontre, si bien qu'un Sorcrête à six
+cornes a fait le tour de l'anneau. Sa face reste nue toute sa vie, quel que soit le nombre de coutures que gagne le reste de son corps.*
 
-**10. Abilities / Capacités.** EN: **Champion's Calm** (Power): nothing can mark its blank brow, so
+**10. Abilities / Capacités.** EN: **Champion's Calm** (Power): nothing can mark its blank face, so
 sleep, poison, confusion and paralysis find nowhere to take hold (this creature can't be affected by
 conditions). **Sixfold Guard**: it lowers its head so the six horns meet in front of it like a shield.
 **Crown Strike**: it
 rises and drives its whole crown into the foe. *FR : **Calme du champion** (Pouvoir) : rien ne peut marquer
-son front vierge, alors le sommeil, le poison, la confusion et la paralysie n'ont aucune prise (cette
+sa face nue, alors le sommeil, le poison, la confusion et la paralysie n'ont aucune prise (cette
 créature est immunisée contre les altérations). **Garde des Six** : il baisse la tête et ses six cornes se
 rejoignent devant lui comme un bouclier. **Frappe couronnée** : il se lève et projette toute sa couronne sur l'adversaire.*
 
@@ -969,24 +698,14 @@ qu'il n'a jamais demandée.*
 shop; seen only when the sealed door of the duel hall stands open. *FR : Rare, promo. Jamais en booster,
 jamais en boutique ; on ne le voit que lorsque la porte scellée de la salle de duel est ouverte.*
 
-**13. Folklore.** EN: Six horns for six faces and a blank brow for the seventh: meadow folk say a
-Hexcrest is a seal stone that grew a fleece. The seventh face Sable carved on the hall's stone is just as
-blank. *FR : Six cornes pour six faces et un front vierge pour la septième : au pré, on dit qu'un Sorcrête
-est une pierre de sceau à qui il a poussé une toison. La septième face que Sable a gravée sur la pierre de
-la salle est tout aussi vierge.*
+**13. Folklore.** EN: Six horns for six faces and a blank face for the seventh: meadow folk say a
+Hexcrest is a seal stone that grew a coat of felt. The seventh face Sable carved on the hall's stone is just as
+blank. *FR : Six cornes pour six faces et une face nue pour la septième : au pré, on dit qu'un Sorcrête
+est une pierre de sceau à qui il a poussé un manteau de feutre. La septième face que Sable a gravée sur la pierre de
+la salle est tout aussi nue.*
 
-**14. Visual key / Clé visuelle.** Must show: standing, seen exactly head-on; all six horns point upward like a crown, none curling round the ears; a noble ram-shaped body with a dense felted fleece, visible
-fibres and pilling, falling in a heavy ruff over the chest; exactly six chalk-white horns, three per side
-stacked one above the other, all curving upward and slightly inward into a crown no wider than the
-shoulders; a broad smooth pale brow plate, completely unmarked; chalk spirals on the shoulders and tally
-strokes on the forelegs; porcelain hooves; calm pale gold eyes. Pose: standing four-square on a low stone dais, head high, seen exactly head-on; low angle, warm backlight. Avoid: a real
-ram or mountain goat; horns curling outward past the shoulders; horns arranged in a ring; a metal crown,
-jewels or clothing; a knitted, plush or toy look; no hexagon shapes or markings. *À montrer : debout, vu exactement de face ; les six cornes pointent vers le haut comme une couronne, six cornes de
-craie, trois par côté, étagées et dressées en couronne, plaque frontale vierge, toison feutrée à
-bouloches, spirales et bâtons de craie. Contre-plongée, contre-jour. À éviter : un vrai bélier ou bouquetin,
-des cornes qui débordent des épaules, des cornes disposées en anneau, une couronne de métal, aucun
-hexagone.*
+**14. Visual key / Clé visuelle.** Must show: a large four-legged body sitting on its haunches, front legs straight, chest up, head high, sewn from cream and chalk-white felt panels with bold seams; a pair of great felt moth wings raised behind it from the shoulders, with pale chalk eye-spots, no wider than the body; exactly six straight chalk-white horns, three per side, stacked and pointing upward into a crown no wider than the shoulders; a long smooth blank face with no seam and no chalk; calm pale gold eyes; porcelain hooves. Pose: sitting on a low round stone dais, seen from the front, low angle, warm backlight, compact. Avoid: a real ram or mountain goat; a fleece or curled horns; horns spreading past the shoulders; standing upright or any human stance; wings spread wider than the body; a metal crown, jewels or clothing; a polygonal plinth; a plush or toy look; no shared chest disc or emblem; must not read as a real animal; no hexagon shapes or markings. *À montrer : assis, corps cousu crème, ailes de phalène dressées aux ocelles de craie, six cornes droites en couronne, face nue sans couture. Contre-plongée, contre-jour. À éviter : un vrai bélier ou bouquetin, une toison, des cornes enroulées ou trop larges, une posture debout humaine, des ailes plus larges que le corps, une couronne de métal, un air de peluche, aucun disque ni emblème commun, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
-EN: "Six chalk horns crown it, one for each face, and its brow stays blank for the seventh. Nothing that sours a duel will stick to it."
-FR : « Six cornes de craie le couronnent, une par face, et son front reste vierge pour la septième. Rien de ce qui gâte un duel n'a prise sur lui. »
+EN: "Six chalk horns crown it, one for each face, and its face stays blank for the seventh. Nothing that sours a duel will stick to it."
+FR : « Six cornes de craie le couronnent, une par face, et sa face reste nue pour la septième. Rien de ce qui gâte un duel n'a prise sur lui. »
