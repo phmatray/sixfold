@@ -23,7 +23,8 @@ cargo test --release -p sixfold-engine booster_report -- --ignored --nocapture
   only 44 % of its Commons were Fire or Fighting, and 70 % of its Rares were trainers. Now the share of
   each slot is chosen on purpose.
 - **A chase card.** Holo Rares (the Awaken 2 Hexons) are the cards a deck is built around. They turn up
-  one pack in three, with their own foil.
+  in three packs of five, with their own foil, so the Rare slot is a Hexon more often than not (it was
+  one pack in three until 1.3, when the slot was a creature only a third of the time).
 - **Transparent odds.** The shop and the pack screen show the numbers below, taken from the same
   constants the engine uses.
 - **Stay in the economy band.** Pack prices and income don't change (`economy_sim`: 5.7 packs an hour
@@ -38,7 +39,7 @@ cargo test --release -p sixfold-engine booster_report -- --ignored --nocapture
 |---|---|---|
 | 1–6 | Common | a group by **share** (below), then a card of it, evenly |
 | 7–9 | Uncommon | the same |
-| 10 | Rare slot | **Holo Rare 1 pack in 3** (33.3 %), otherwise a Rare (66.7 %) |
+| 10 | Rare slot | **Holo Rare in 3 packs of 5** (60 %), otherwise a Rare (40 %) |
 
 - **Holo Rare**: the 12 Awaken 2 Hexons. A themed pack only holds its own types' Holos; Wild holds
   all 12.
@@ -46,8 +47,8 @@ cargo test --release -p sixfold-engine booster_report -- --ignored --nocapture
 - **Duplicate protection**: the Rare slot skips any card you already hold 4 of (a full playset) while
   another card of that slot is left. Rares can't be crafted until you've pulled one, so this slot must
   keep paying. Commons and Uncommons sell back and can be crafted, so they have no protection.
-- **No pity timer.** With a Holo one pack in 3, the chance of none in 6 packs in a row is 8.8 %, and in
-  10 packs 1.7 %. That is short enough not to need a counter in the save.
+- **No pity timer.** With a Holo in 3 packs of 5, the chance of none in 3 packs in a row is 6.4 %, and in
+  6 packs 0.4 %. That is short enough not to need a counter in the save.
 
 ### 3. Shares in a themed pack
 
@@ -89,39 +90,42 @@ The chance that a given card is in one pack, with a fresh collection:
 | neutral Uncommon | 6.6 % (16) | 6.6 % (16) | 6.6 % (16) | 6.6 % (16) | 9.5 % (11) | 6.6 % (16) | — |
 | other-type Uncommon | 0.8 % | 0.9 % | 0.8 % | 0.8 % | 0.7 % | 0.8 % | — |
 | any Uncommon (43) | | | | | | | 7.0 % |
-| each Rare (9) | 7.4 % | 7.4 % | 7.4 % | 7.4 % | 7.4 % | 7.4 % | 7.4 % |
-| each Holo Rare | 8.3 % (4) | 8.3 % (4) | 11.1 % (3) | 11.1 % (3) | 11.1 % (3) | 8.3 % (4) | 2.8 % (12) |
+| each Rare (9) | 4.4 % | 4.4 % | 4.4 % | 4.4 % | 4.4 % | 4.4 % | 4.4 % |
+| each Holo Rare | 15 % (4) | 15 % (4) | 20 % (3) | 20 % (3) | 20 % (3) | 15 % (4) | 5.0 % (12) |
 
-(n) is how many cards share that line. A Holo's odds are exactly ⅓ ÷ n and a Rare's ⅔ ÷ 9; the rest are
+(n) is how many cards share that line. A Holo's odds are exactly ⅗ ÷ n and a Rare's ⅖ ÷ 9; the rest are
 measured.
 
 ### 5. Packs to complete a set
 
 These are the packs needed for one copy of every card a booster is meant for: its own types and its
-neutral group (for Wild, the whole set of 97 pack cards). The Holos and the 7.4 % Rares are what make
-the tail long.
+neutral group (for Wild, the whole set of 97 pack cards). The 4.4 % Rares are what make the tail long:
+since 1.3 a themed set takes about 12 packs more (the Rares are rarer), and the whole set through Wild
+about 24 fewer (the Holos are commoner).
 
 | Booster | Cards | Mean | Median | 9 runs in 10 by |
 |---|---|---|---|---|
-| Ember, Tide, Grove, Storm, Dream | 55–56 | 52 | 47–48 | 78 |
-| Stone | 47 | 38 | 38 | 50 |
-| Wild (whole set) | 97 | 96 | 96 | 123 |
+| Ember, Tide, Grove, Storm, Dream | 55–56 | 64 | 62 | 87 |
+| Stone | 47 | 57 | 56 | 79 |
+| Wild (whole set) | 97 | 72 | 69 | 91 |
 
-At about 5 packs an hour, one theme takes roughly 10 hours from packs alone. Crafting the last Commons
+At about 5 packs an hour, one theme takes roughly 12 hours from packs alone. Crafting the last Commons
 and Uncommons (⬡ 80 / 240 for one you've never owned) cuts that well short, and singles and selling help
 too. That is the "play, packs and crafting together" of `docs/WORLD_DESIGN.md` §3.4.
 
 ### 6. Effect on the campaign
 
-The campaign gets easier, not harder. Over 16 pack seeds with no duel budget, the automatic
-playthrough of `engine/src/playtest.rs` takes a median of 52 duels (40–91) with these packs, against 65
-(44–100) with the 1.x packs. Its greedy deck builder gets more cards of the types it buys. Because one
-seeded run swings this much, the test now plays three seeds and requires two to finish within budget
-(`docs/BALANCE.md`). `economy_sim` doesn't change, since prices and income are untouched.
+The boosters made the campaign easier. Over 16 pack seeds with no duel budget, the automatic
+playthrough of `engine/src/playtest.rs` (`campaign_length`) took a median of 52 duels (40–105) with
+these packs, against 65 (44–100) with the 1.x packs: its greedy deck builder gets more cards of the
+types it buys. The 1.3 rules (`docs/BALANCE.md`) lengthen duels and bring the median back to 62
+(38–83). The 1.3 holo rate helps: with the old one pack in three, the same rules take a median of 66.
+Because one seeded run swings this much, the test plays three seeds and requires two to finish within
+budget. `economy_sim` doesn't change, since prices and income are untouched.
 
 ### 7. Changing it
 
-`COMMONS`, `UNCOMMONS`, `HOLO_IN` and `SHARES` are public constants. The shop's odds panel and the pack
+`COMMONS`, `UNCOMMONS`, `HOLO_ODDS` and `SHARES` are public constants. The shop's odds panel and the pack
 screen read them, so the UI follows. After a change, run `booster_report` and update §4–5, then run the
 campaign playthrough and `economy_sim`.
 
@@ -137,7 +141,9 @@ campaign playthrough and `economy_sim`.
   tout ce qu'il contenait : 44 % seulement de ses Communes étaient Feu ou Combat, et 70 % de ses Rares
   des Dresseurs. La part de chaque emplacement est désormais choisie.
 - **Une carte à chasser.** Les Rares Holo (les Hexons d'Éveil 2) sont les cartes autour desquelles on
-  construit un deck. Elles sortent un booster sur trois, avec leur propre effet holographique.
+  construit un deck. Elles sortent dans trois boosters sur cinq, avec leur propre effet holographique :
+  l'emplacement Rare est donc le plus souvent un Hexon (jusqu'à la 1.3, une Holo sortait un booster
+  sur trois et l'emplacement n'était un Hexon qu'une fois sur trois).
 - **Des probabilités affichées.** La boutique et l'écran des boosters montrent les chiffres ci-dessous,
   tirés des constantes du moteur.
 - **Rester dans la fourchette économique.** Prix et revenus inchangés (`economy_sim` : 5,7 boosters par
@@ -152,7 +158,7 @@ campaign playthrough and `economy_sim`.
 |---|---|---|
 | 1–6 | Commune | un groupe selon la **part** (ci-dessous), puis une carte de ce groupe, à parts égales |
 | 7–9 | Peu commune | idem |
-| 10 | emplacement Rare | **Rare Holo 1 booster sur 3** (33,3 %), sinon une Rare (66,7 %) |
+| 10 | emplacement Rare | **Rare Holo dans 3 boosters sur 5** (60 %), sinon une Rare (40 %) |
 
 - **Rare Holo** : les 12 Hexons d'Éveil 2. Un booster à thème ne contient que les Holo de ses types ;
   Sauvage contient les 12.
@@ -161,8 +167,8 @@ campaign playthrough and `economy_sim`.
   exemplaires (un jeu complet), tant qu'il reste une autre carte possible. Une Rare ne se fabrique
   qu'après en avoir tiré une : cet emplacement doit donc toujours rapporter. Les Communes et Peu
   communes se revendent et se fabriquent, elles n'ont pas de protection.
-- **Pas de compteur de malchance.** Avec une Holo un booster sur 3, la probabilité de n'en voir aucune
-  sur 6 boosters d'affilée est de 8,8 %, et sur 10 boosters de 1,7 %. C'est assez court pour se passer
+- **Pas de compteur de malchance.** Avec une Holo dans 3 boosters sur 5, la probabilité de n'en voir
+  aucune sur 3 boosters d'affilée est de 6,4 %, et sur 6 boosters de 0,4 %. C'est assez court pour se passer
   d'un compteur dans la sauvegarde.
 
 ### 3. Les parts d'un booster à thème
@@ -205,41 +211,44 @@ La probabilité qu'une carte donnée soit dans un booster, avec une collection v
 | Peu commune neutre | 6,6 % (16) | 6,6 % (16) | 6,6 % (16) | 6,6 % (16) | 9,5 % (11) | 6,6 % (16) | — |
 | Peu commune d'un autre type | 0,8 % | 0,9 % | 0,8 % | 0,8 % | 0,7 % | 0,8 % | — |
 | toute Peu commune (43) | | | | | | | 7,0 % |
-| chaque Rare (9) | 7,4 % | 7,4 % | 7,4 % | 7,4 % | 7,4 % | 7,4 % | 7,4 % |
-| chaque Rare Holo | 8,3 % (4) | 8,3 % (4) | 11,1 % (3) | 11,1 % (3) | 11,1 % (3) | 8,3 % (4) | 2,8 % (12) |
+| chaque Rare (9) | 4,4 % | 4,4 % | 4,4 % | 4,4 % | 4,4 % | 4,4 % | 4,4 % |
+| chaque Rare Holo | 15 % (4) | 15 % (4) | 20 % (3) | 20 % (3) | 20 % (3) | 15 % (4) | 5,0 % (12) |
 
-(n) est le nombre de cartes de la ligne. Une Holo vaut exactement ⅓ ÷ n et une Rare ⅔ ÷ 9 ; le reste
+(n) est le nombre de cartes de la ligne. Une Holo vaut exactement ⅗ ÷ n et une Rare ⅖ ÷ 9 ; le reste
 est mesuré.
 
 ### 5. Boosters pour compléter une série
 
 Voici le nombre de boosters pour un exemplaire de chaque carte qu'un booster vise : ses types et son
-groupe neutre (pour Sauvage, toute la série de 97 cartes de booster). Les Holo et les Rares à 7,4 %
-font la longue traîne.
+groupe neutre (pour Sauvage, toute la série de 97 cartes de booster). Les Rares à 4,4 % font la longue
+traîne : depuis la 1.3, une série à thème demande environ 12 boosters de plus (les Rares sont plus
+rares), et toute la série par Sauvage environ 24 de moins (les Holo sont plus fréquentes).
 
 | Booster | Cartes | Moyenne | Médiane | 9 fois sur 10 en |
 |---|---|---|---|---|
-| Braise, Marée, Bosquet, Orage, Songe | 55–56 | 52 | 47–48 | 78 |
-| Pierre | 47 | 38 | 38 | 50 |
-| Sauvage (toute la série) | 97 | 96 | 96 | 123 |
+| Braise, Marée, Bosquet, Orage, Songe | 55–56 | 64 | 62 | 87 |
+| Pierre | 47 | 57 | 56 | 79 |
+| Sauvage (toute la série) | 97 | 72 | 69 | 91 |
 
-À environ 5 boosters par heure, un thème prend une dizaine d'heures avec les seuls boosters. Fabriquer
+À environ 5 boosters par heure, un thème prend une douzaine d'heures avec les seuls boosters. Fabriquer
 les dernières Communes et Peu communes (⬡ 80 / 240 pour une carte jamais possédée) raccourcit nettement
 ce temps, et les cartes à l'unité et la revente aident aussi. C'est le « jeu, boosters et fabrication
 ensemble » de `docs/WORLD_DESIGN.md` §3.4.
 
 ### 6. Effet sur la campagne
 
-La campagne devient plus facile, pas plus dure. Sur 16 graines de boosters et sans plafond de duels,
-la partie automatique de `engine/src/playtest.rs` demande une médiane de 52 duels (40–91) avec ces
-boosters, contre 65 (44–100) avec ceux de la 1.x. Son constructeur de deck glouton reçoit plus de
-cartes des types qu'il achète. Comme une seule partie tirée au sort varie autant, le test joue
-désormais trois graines et exige que deux finissent dans le budget (`docs/BALANCE.md`). `economy_sim`
-ne change pas, car prix et revenus sont intacts.
+Les boosters ont rendu la campagne plus facile. Sur 16 graines de boosters et sans plafond de duels,
+la partie automatique de `engine/src/playtest.rs` (`campaign_length`) demandait une médiane de 52
+duels (40–105) avec ces boosters, contre 65 (44–100) avec ceux de la 1.x : son constructeur de deck
+glouton reçoit plus de cartes des types qu'il achète. Les règles de la 1.3 (`docs/BALANCE.md`)
+allongent les duels et ramènent la médiane à 62 (38–83). Le taux de Holo de la 1.3 aide : avec
+l'ancien, un booster sur trois, les mêmes règles demandent une médiane de 66. Comme une seule partie
+tirée au sort varie autant, le test joue trois graines et exige que deux finissent dans le budget.
+`economy_sim` ne change pas, car prix et revenus sont intacts.
 
 ### 7. Modifier
 
-`COMMONS`, `UNCOMMONS`, `HOLO_IN` et `SHARES` sont des constantes publiques. Le panneau des
+`COMMONS`, `UNCOMMONS`, `HOLO_ODDS` et `SHARES` sont des constantes publiques. Le panneau des
 probabilités de la boutique et l'écran des boosters les lisent, l'interface suit donc. Après un
 changement, lancez `booster_report` et mettez à jour les §4–5, puis lancez la partie de campagne
 automatique et `economy_sim`.

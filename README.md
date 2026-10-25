@@ -109,7 +109,7 @@ Not in 1.0: a second human player (see [`docs/ROADMAP.md`](docs/ROADMAP.md)).
 ## How to play
 
 **Your first duel.** A new save opens on **Learn to play**: a guided duel of
-three turns against a practice partner. A card-stock note above your hand says
+four turns against a practice partner, who goes first (and so can't attack yet). A card-stock note above your hand says
 what to do next and why, and a brass ring marks the card or button to press
 (**Show me** moves keyboard focus there). You place an Active and a Benched
 Hexon, attach energy, attack into a weakness, awaken, play a trainer and

@@ -380,9 +380,11 @@ fn shop_packs(progress: &mut Progress, profile: &mut Profile, bought: &mut [u32]
 }
 
 /// Rival duels the campaign playthrough may take on top of one duel per
-/// route duelist. Pinned for 1.2 (risk E1): the 40 rival duels the
-/// pack-reward campaign had (54 duels with 1.2's 14 route duelists).
-const RIVAL_DUELS: u64 = 40;
+/// route duelist. Pinned for 1.2 (risk E1) at the 40 rival duels the
+/// pack-reward campaign had (54 duels with 1.2's 14 route duelists); 45
+/// since 1.3, whose rules make duels a little longer to win (a median of
+/// 62 duels over 16 pack seeds, and pack seed 2 took exactly the old 66).
+const RIVAL_DUELS: u64 = 45;
 
 /// A full playthrough: a new player, played by the Normal AI, first meets
 /// every route duelist once (win or lose, they walk on), then takes on the

@@ -228,7 +228,7 @@ pub fn TitleScreen() -> impl IntoView {
                     <nav aria-label=tr("Main menu", "Menu principal")>
                         <ul class="menu">
                             {move || if due.get() {
-                                view! { <LessonItem primary=true label=tr("Learn to play", "Apprendre à jouer") sub=tr("A guided first duel, three turns long", "Un premier duel guidé, en trois tours") /> }.into_any()
+                                view! { <LessonItem primary=true label=tr("Learn to play", "Apprendre à jouer") sub=tr("A guided first duel, four turns long", "Un premier duel guidé, en quatre tours") /> }.into_any()
                             } else {
                                 view! { <MenuItem label=tr("Continue", "Continuer") sub=Signal::derive(continue_sub) to=Screen::World primary=true /> }.into_any()
                             }}

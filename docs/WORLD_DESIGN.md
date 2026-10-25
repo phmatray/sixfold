@@ -315,7 +315,7 @@ only), **Bud** (+ Awaken 1), **Bloom** (+ Awaken 2; night and late duelists).
 | Water | **Puddle**: Puddock 4, Rillet 4, Kelpup 4, Clearwater Vial 2 | **Current**: + Brookhorn 3, Streamfin 2, Kelpwarden 2, Shellmote 1 | **Undertow**: + Tidemaw 1, Gulfwyrm 1, Frosteel 1 |
 | Grass | **Seedling**: Sprigget 4, Mirebud 4, Pollenpup 3, Fernwhisk 3, Moss Poultice 2 | **Hedgerow**: + Thornbuck 3, Bogblossom 2, Honeymane 2, Briarhog 1 | **Canopy**: + Elderhart 1, Bogcrown 1, Grove Balm 2 |
 | Lightning | **Spark**: Sparkit 4, Buzzlet 4, Ohmlet 3, Zippet 3, Flashfin 2 | **Static**: + Arcfang 3, Hivevolt 2, Ohmrunner 2, Stormox 1 | **Tempest**: + Fulgurex 1, Charge Coil 1, Jolt Wire 1 |
-| Fighting | **Pebble**: Knollop 4, Tusklet 4, Brawlet 3, Shalepup 3 | **Rubble**: + Knollgrim 3, Ironbrawl 2, Shalehound 2, Gritfang 1, Bouldergut 1 | **Landslide**: + Knollossus 1, Cragmastiff 1, Spike Charm 2 |
+| Fighting | **Pebble**: Knollop 4, Tusklet 4, Brawlet 3, Shalepup 3 | **Rubble**: + Knollgrim 3, Ironbrawl 2, Shalehound 2, Gritfang 1, Bouldergut 1 | **Landslide**: + Knollossus 1, Cragmastiff 1, Spike Charm 1 |
 | Psychic | **Murmur**: Wispun 4, Dozel 4, Hexlet 4, Smoke Pellet 2 | **Reverie**: + Wispelle 3, Somnitar 2, Hexmage 2, Glimmox 1, Gloamowl 1 | **Trance**: + Wraithelle 1, Hexarch 1, Unwind Spray 1 |
 | Colorless | **Scrap**: Burrowbit 4, Pecklet 4, Pocketmouse 3, Scampit 3, Relay Baton 2 | **Flock**: + Warrenbuck 3, Galeheron 2, Echopup 2, Haulox 1, Mendlark 1 | — |
 
