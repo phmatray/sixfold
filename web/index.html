@@ -60,7 +60,10 @@
             const toast = document.createElement("div");
             toast.className = "update-toast";
             toast.setAttribute("role", "status");
-            const [msg, ok, no] = document.documentElement.lang === "fr" ? ["Nouvelle version disponible", "Recharger", "Plus tard"] : ["New version available", "Reload", "Later"];
+            // The app may not have set <html lang> yet: read the same choice it does.
+            let fr = false;
+            try { fr = (localStorage.getItem("sixfold.lang") ?? navigator.language).toLowerCase().startsWith("fr"); } catch {}
+            const [msg, ok, no] = fr ? ["Nouvelle version disponible", "Recharger", "Plus tard"] : ["New version available", "Reload", "Later"];
             toast.innerHTML = `<span>${msg}</span><button type="button" class="btn primary">${ok}</button><button type="button" class="btn ghost" >${no}</button>`;
             const [reload, later] = toast.querySelectorAll("button");
             reload.onclick = () => { wanted = true; worker.postMessage("skip-waiting"); };

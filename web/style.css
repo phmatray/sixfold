@@ -130,8 +130,11 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: -0.01em;
+  min-width: 0;
 }
-.card-hp { font-family: var(--display); font-weight: 800; color: #9b2a1c; font-variant-numeric: tabular-nums; }
+/* Long names (French runs longer) shrink a step before they ellipsize. */
+.card-name.long { font-size: 0.86em; letter-spacing: -0.02em; }
+.card-hp { flex: none; font-family: var(--display); font-weight: 800; color: #9b2a1c; font-variant-numeric: tabular-nums; }
 .card-art {
   border-radius: 0.35em;
   background: radial-gradient(circle at 50% 38%, var(--tint), var(--c) 62%, var(--c2));
@@ -705,9 +708,9 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   font-size: clamp(28px, 5vw, 54px);
   letter-spacing: -0.03em;
   line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Long (French) names wrap to a second line rather than being cut. */
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 .callout.mine strong { color: var(--brass-hi); }
 .callout.theirs strong { color: #bcd2f5; }

@@ -187,7 +187,7 @@ pub fn TitleScreen() -> impl IntoView {
                 </div>
                 <div class="hero-text">
                     <h1 class="wordmark">"Sixfold"</h1>
-                    <p class="tagline">{tr("A creature card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.", "Un duel de cartes de créatures aux règles d'antan : six Récompenses, des pile ou face, et pas de seconde chance sur une mauvaise main.")}</p>
+                    <p class="tagline">{tr("A creature card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.", "Un duel de cartes de créatures aux règles d'antan : six Récompenses, du pile ou face, et pas de seconde chance sur une mauvaise main.")}</p>
                     {move || notice.get().map(|n| view! {
                         <p class="error" role="alert">{n} " "
                             <button type="button" class="btn ghost" on:click=move |_| notice.set(None)>{tr("Dismiss", "Fermer")}</button>

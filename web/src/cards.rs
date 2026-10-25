@@ -82,12 +82,13 @@ fn type_class(def: &CardDef) -> String {
 pub fn CardFace(id: CardId) -> impl IntoView {
     let def = card(id);
     let hp = def.creature().map(|c| c.hp);
+    let long_name = def.label().chars().count() > 10;
     view! {
         <div class=format!("card {}", type_class(def))>
             // The " " text nodes don't show (flex and grid drop them) but keep
             // the words apart in the text that "label in name" checks compare.
             <div class="card-head">
-                <span class="card-name">{def.label()}</span>" "
+                <span class="card-name" class:long=long_name>{def.label()}</span>" "
                 {hp.map(|hp| view! { <span class="card-hp">{hp}</span> })}
             </div>" "
             <div class="card-art" inner_html=card_art(def)></div>
@@ -203,7 +204,7 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
         CardKind::Creature(c) | CardKind::TrainerBasic(c) => {
             let evolves = c.evolves_from.map(|f| {
                 let from = card_id(f).map_or(f, |id| card(id).label());
-                view! { <p class="evolves">{tr("Evolves from ", "Évolue de ")} <b>{from}</b></p> }
+                view! { <p class="evolves">{tr("Evolves from ", "Évolution de ")} <b>{from}</b></p> }
             });
             let power = c.power.as_ref().map(|p| {
                 view! {

@@ -350,7 +350,7 @@ pub fn GameOver() -> impl IntoView {
                         {why} " "
                         {tr(
                             format!("Prizes left: you {}, opponent {}.", left[HUMAN], left[1 - HUMAN]),
-                            format!("Récompenses restantes : vous {}, l'adversaire {}.", left[HUMAN], left[1 - HUMAN]),
+                            format!("Récompenses restantes : vous {}, l'adversaire {}.", left[HUMAN], left[1 - HUMAN]),
                         )}
                         {sudden.then_some(tr(" Decided in sudden death.", " Décidé en mort subite."))}
                     </p>
