@@ -20,8 +20,9 @@ the shape of an ordinary beast the way frost grows over a twig, until the animal
 memory in the silhouette. That is why a Hexon reminds you of a bird, a frog or a hare without being one.
 
 The seventh face, smooth and blank on every seal stone, belongs to the **Colourless** Hexons. They carry
-no grain at all, only the plain stuff of the meadow (felted coats, woven fibre, chalk horn), and they
-live wherever the six roads meet. Seal stone is grain without a body: the Facets in every purse are
+no grain at all, only the plain stuff of the meadow and the road (felt sewn in patchwork, thread and
+yarn, chalk, unglazed porcelain), and they live wherever the six roads meet. Having no face of their own,
+each line grew the shape of a tool travellers carry: a bellows, a hearing horn, a pincushion, a spool. Seal stone is grain without a body: the Facets in every purse are
 chips of it.
 
 **FR.** Les anciens gardiens disent que le monde a été taillé comme une pierre de sceau, à six faces : **Feu, Eau, Herbe, Foudre, Combat et Psychique**. Tout ce qui vit porte un peu d'une face ; chez un
@@ -31,8 +32,10 @@ brindille, jusqu'à ce que l'animal d'origine ne survive plus que dans la silhou
 Hexon rappelle un oiseau, une grenouille ou un lièvre sans en être un.
 
 La septième face, lisse et vierge sur chaque pierre de sceau, appartient aux Hexons **Incolores**. Ils
-ne portent aucun grain, seulement la matière simple du pré (pelage feutré, fibre tissée, corne de
-craie), et vivent là où les six routes se croisent. La pierre de sceau, c'est du grain sans corps : les
+ne portent aucun grain, seulement la matière simple du pré et de la route (feutre cousu en patchwork,
+fil et laine, craie, porcelaine brute), et vivent là où les six routes se croisent. Faute d'une face à
+eux, chaque lignée a pris la forme d'un outil de voyageur : un soufflet, un cornet acoustique, une
+pelote à épingles, une bobine. La pierre de sceau, c'est du grain sans corps : les
 Facettes de chaque bourse en sont des éclats.
 
 ### Awakening / L'Éveil
@@ -79,12 +82,12 @@ on distingue les espèces par l'anatomie, les matières et la silhouette.*
 | Lightning / Foudre | The Galewold / Les Hautes-Rafales: Thrumming Downs, Stormwatch, the Rodspire | copper and mica / cuivre et mica | copper-coil horns and prongs, glassy mica insulator beads, filament whiskers, slate storm-felt fur | **paired prongs**: every Storm Hexon carries copper prongs in pairs with a spark jumping between them | storm slate, electric yellow, copper, white-blue |
 | Fighting / Combat | The Stonebacks / Les Échines de Pierre: the Undermine, Scree Pass, Anvilstead, the Bastion | rock strata / strates de roche | sandstone and slate strata plates, quartz knuckles and claws, iron-banded joints, gravel manes, moss in the cracks | **strata**: layered bands of rock like a cliff face, more layers with each Awakening | ochre sandstone, slate grey, rust, quartz white, umber |
 | Psychic / Psychique | The Hushlands / Les Terres du Murmure: Hushwillow Lane, Lanternmere, the Moonwell Garden | lantern gauze / gaze de lanterne | translucent paper-lantern membranes lit from inside, veils and gauze trails, mother-of-pearl masks, moth dust | **orbiting motes**: small glowing motes that circle the body, one more with each Awakening | violet, dusk indigo, moon silver, lantern amber, lilac |
-| Colorless / Incolore | the blank face / la face vierge: Sixfold Meadow, Brightwell Square, every road | none / aucun | a dense **felted** hide with visible felt fibres and pilling, chalk-white horn, unglazed porcelain claws and beaks | **chalk markings**: simple pale chalk lines, dots and tally strokes drawn on the felt, like a map nobody can read, plus one plain unmarked oval where other Hexons carry grain | oatmeal, cream, warm grey, slate, chalk white |
+| Colorless / Incolore | the blank face / la face vierge: Sixfold Meadow, Brightwell Square, every road | none / aucun | **structural** felt: no fur, feathers or skin, the body itself is sewn from patchwork panels of thick matted felt joined by bold stitched seams; its working parts are travellers' tools grown as organs (bellows flanks, hearing-horn ears, spool joints, a pincushion back, a stocking tail, a yarn-ball body, raised moth wings); hard parts are chalk horn and unglazed porcelain / *feutre **structurel** : ni fourrure, ni plumes, ni peau, le corps est cousu de pièces de feutre épais en patchwork aux coutures bien visibles ; ses organes sont des outils de voyageur (flancs-soufflets, oreilles-cornets, articulations-bobines, dos-pelote à épingles, queue-bas, corps-pelote, ailes de phalène dressées) ; les parties dures sont de corne de craie et de porcelaine brute* | **living chalk**: chalk markings that differ per line and mean something (a tunnel map, wind arrows, sound rings, store tallies, load tallies, a route, stitch marks), plus **one or two impossible organs** per line that change the silhouette; no mark is shared across species / *des marques de craie vivantes, propres à chaque lignée et qui disent quelque chose, et un ou deux organes impossibles par lignée qui changent la silhouette ; aucune marque commune* | oatmeal, cream, warm grey, slate, chalk white |
 
 **What each type avoids / Ce que chaque type évite.** Fire: crimson or dripping red (reads as blood),
 a body made only of flames, realistic fur with a flame added. Water: a real frog, fish or seal with a
 splash added. Grass: a real deer, turtle or dog wearing leaves; the animal is only a silhouette hint under structural bark, root and pod anatomy. Lightning: a real weasel or bee with a
-glow. Fighting: a real mole or dog painted grey. Psychic: a real glider or owl tinted violet. Colorless: a plain real rabbit or bird, a toy look, or an upright humanoid stance; the felt and chalk must be unmistakable. *Pour tous : aucun animal réel avec un effet ajouté par-dessus.*
+glow. Fighting: a real mole or dog painted grey. Psychic: a real glider or owl tinted violet. Colorless: a real rabbit, hare, mouse, hamster, bird, bison or ram with felt texture or chalk lines added; fur, feathers or skin; a plush or toy look; an upright humanoid stance; a shared chest disc, oval or any emblem repeated across species. The animal is only a silhouette hint under sewn patchwork and the line's tool-organ: a Colorless Hexon must not read as a real animal. *Incolore : un vrai lapin, lièvre, souris, hamster, oiseau, bison ou bélier avec du feutre ou de la craie par-dessus ; fourrure, plumes ou peau ; un air de peluche ; une posture humaine ; un disque, un ovale ou un emblème commun à plusieurs espèces. L'animal n'est qu'un souvenir de silhouette sous le patchwork cousu et l'organe-outil de la lignée.* *Pour tous : aucun animal réel avec un effet ajouté par-dessus.*
 
 ---
 
@@ -116,9 +119,9 @@ centraux. Le **Hexon entier**, oreilles, queues, crêtes et voiles compris, tien
 **50 % centraux de la largeur et 90 % de la hauteur**. Poses compactes : assis, perché, enroulé ou
 de trois quarts face ; seul le lavis touche les bords.*
 
-**Never / Jamais.** No hexagon shapes or markings on any Hexon. No upright human stance or human silhouette (a Hexon sits, crouches, floats or stands like an animal). No real animal with an effect painted
+**Never / Jamais.** No hexagon shapes or markings on any Hexon, and no mark shared across species (no chest disc, oval or emblem). No upright human stance or human silhouette (a Hexon sits, crouches, floats or stands like an animal). No real animal with an effect painted
 on top. No franchise likeness. No red liquids. Exact counts for legs, wings and horns in every caption.
-*Aucun hexagone, aucune silhouette ou posture humaine, aucun animal réel retouché, aucune ressemblance avec une franchise, aucun liquide
+*Aucun hexagone ni marque commune à plusieurs espèces (disque, ovale, emblème), aucune silhouette ou posture humaine, aucun animal réel retouché, aucune ressemblance avec une franchise, aucun liquide
 rouge.*
 
 ---

@@ -575,8 +575,8 @@ pub static LORE: &[(&str, Lore)] = &[
     (
         "Pecklet",
         Lore {
-            en: "Its neck is a felt bellows. It stands in the fountain for an hour, then puffs, and whoever was in its way is one step aside.",
-            fr: "Son cou est un soufflet de feutre. Il reste une heure dans la fontaine, puis souffle, et l'importun se retrouve un pas plus loin.",
+            en: "Its body is a felt bellows. It stands in the fountain for an hour, then puffs, and whoever was in its way is one step aside.",
+            fr: "Son corps est un soufflet de feutre. Il reste une heure dans la fontaine, puis souffle, et l'importun se retrouve un pas plus loin.",
         },
     ),
     // 072
@@ -615,24 +615,24 @@ pub static LORE: &[(&str, Lore)] = &[
     (
         "Pocketmouse",
         Lore {
-            en: "Its tail is a thread of spun wool it keeps wound in a ball. Lost travellers follow the loose end out; so do tired duelists.",
-            fr: "Sa queue est un fil de laine qu'elle garde en pelote. Les voyageurs perdus suivent le bout libre pour sortir, les duellistes las aussi.",
+            en: "Its body is a ball of its own wound thread. Lost travellers follow the loose end out; so do tired duelists.",
+            fr: "Son corps est une pelote de son propre fil. Les voyageurs perdus suivent le bout libre pour sortir, les duellistes las aussi.",
         },
     ),
     // 077
     (
         "Mendlark",
         Lore {
-            en: "Its beak is a porcelain needle. It tamps its frayed felt back into place as it sings, and the whole hedge settles down.",
-            fr: "Son bec est une aiguille de porcelaine. Il repique son feutre effiloché tout en chantant, et toute la haie s'apaise.",
+            en: "Its beak is a porcelain needle. It stitches its frayed felt back together as it sings, and the whole hedge settles down.",
+            fr: "Son bec est une aiguille de porcelaine. Il recoud son feutre effiloché tout en chantant, et toute la haie s'apaise.",
         },
     ),
     // 078
     (
         "Hexcrest",
         Lore {
-            en: "Six chalk horns crown it, one for each face, and its brow stays blank for the seventh. Nothing that sours a duel will stick to it.",
-            fr: "Six cornes de craie le couronnent, une par face, et son front reste vierge pour la septième. Rien de ce qui gâte un duel n'a prise sur lui.",
+            en: "Six chalk horns crown it, one for each face, and its face stays blank for the seventh. Nothing that sours a duel will stick to it.",
+            fr: "Six cornes de craie le couronnent, une par face, et sa face reste nue pour la septième. Rien de ce qui gâte un duel n'a prise sur lui.",
         },
     ),
 ];

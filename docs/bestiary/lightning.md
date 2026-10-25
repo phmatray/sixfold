@@ -630,18 +630,19 @@ il garde la tête large, les quatre pattes solides et le long pelage. Inventé :
 mica clair empilées entre les épaules, qui se remplit de lumière d'orage, et deux cornes en bobine de
 cuivre entre les pointes desquelles saute une étincelle.*
 
-**3. Morphology / Morphologie.** EN: A stocky, broad-chested calf-like creature on four sturdy legs. Its
-long, shaggy slate-blue storm-felt hangs in heavy locks to its knees, with a butter-yellow forelock over
-its eyes. Between its shoulders rises a rounded hump of about a dozen thin, clear mica sheets stacked
+**3. Morphology / Morphologie.** EN: A stocky, broad-chested creature on four sturdy legs. It has no hide
+and no fur: its whole body is long, shaggy ropes of slate-blue storm-felt hanging to its knees, with a
+butter-yellow forelock over its face. Between its shoulders rises a tall rounded hump, taller than its
+head, of about a dozen thin, clear mica sheets stacked
 on edge like glass leaves, glowing pale yellow from inside. Two short horns of wound copper coil curve
 forward and up from its brow, a white-blue spark leaping between their tips. A round mica bead hangs at
-each ear. Dark slate hooves, a broad soft muzzle, calm dark eyes. *FR : Une créature trapue au large
-poitrail, comme un veau, sur quatre pattes solides. Son long feutre d'orage bleu ardoise pend en lourdes
-mèches jusqu'aux genoux, un toupet jaune beurre sur les yeux. Entre ses épaules se dresse une bosse ronde
-d'une douzaine de fines feuilles de mica clair, posées sur la tranche comme des feuilles de verre, qui
+each ear. Dark slate hooves; only a small slate muzzle and calm dark eyes show under the forelock. *FR : Une créature trapue au large
+poitrail, sur quatre pattes solides. Elle n'a ni cuir ni fourrure : tout son corps est fait de longues
+cordes hirsutes de feutre d'orage bleu ardoise qui pendent jusqu'aux genoux, un toupet jaune beurre sur la
+face. Entre ses épaules se dresse une haute bosse ronde, plus haute que sa tête, d'une douzaine de fines feuilles de mica clair, posées sur la tranche comme des feuilles de verre, qui
 luisent d'un jaune pâle. Deux courtes cornes en bobine de cuivre s'incurvent vers l'avant et le haut,
 une étincelle bleu-blanc sautant entre leurs pointes. Une perle de mica ronde pend à chaque oreille.
-Sabots ardoise sombre, mufle large et doux, yeux sombres et calmes.*
+Sabots ardoise sombre ; sous le toupet ne dépassent qu'un petit mufle ardoise et des yeux sombres et calmes.*
 
 **4. Size and weight / Taille et poids.** 1.1 m at the hump, 180 kg. *1,1 m à la bosse, 180 kg.*
 
@@ -687,14 +688,14 @@ un endormi près de la pierre.*
 own, though no wind blows. *FR : Quand un Taurorage dort contre la pierre dressée, les six poteaux de carillon
 sonnent tout seuls, même sans vent.*
 
-**14. Visual key / Clé visuelle.** Must show: stocky calf body on four sturdy legs; long shaggy slate-blue
-felt locks to the knees with butter-yellow forelock; rounded hump of about a dozen clear mica sheets
+**14. Visual key / Clé visuelle.** Must show: stocky body on four sturdy legs, made of long shaggy slate-blue
+felt ropes to the knees, no hide or fur, with butter-yellow forelock; a rounded hump taller than the head, of about a dozen clear mica sheets
 stacked on edge, glowing yellow; two short copper-coil horns with a spark between; a mica bead at each
 ear. Pose: standing four-square facing the viewer, head slightly lowered, front view so the body stays
-narrow; never side-on. Avoid: a real yak, bull or cow; a side-on stance; no hexagon shapes or markings.
+narrow; never side-on. Avoid: a real yak, bull or cow; a broad bovine muzzle; a side-on stance; must not read as a real animal; no hexagon shapes or markings.
 *À montrer : corps trapu, long feutre ardoise, toupet jaune, bosse de feuilles de mica lumineuses, deux
 cornes en bobine de cuivre et leur étincelle. De face, jamais de profil. À éviter : un vrai yack ou
-taureau, aucun hexagone.*
+taureau, un mufle de bovin, ne doit pas ressembler à un vrai animal, aucun hexagone.*
 
 **15. Dex line / Ligne de registre.**
 EN: "The mica sheets on its hump fill with storm light. When they are full, it must empty them all at once, and it feels every bit."

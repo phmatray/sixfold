@@ -23,7 +23,9 @@ procedural SVG.
     sentence keeps the whole Hexon in the safe area (below); then the subject (pose, anatomy with
     exact counts, type material, the line's invented organ) and the light. Awaken 2, rares and promos
     get a low angle and backlight. An Awaken line repeats colours, material and signature organ so
-    it reads as one species awakening. No Hexon carries a hexagon mark.
+    it reads as one species awakening. No Hexon carries a hexagon mark or a mark shared across species
+    (no common chest disc or emblem). Colorless Hexons say "no fur, no feathers and no skin" and describe a
+    body sewn from patchwork felt with bold stitched seams, so the felt is structural, not a texture on a real animal.
   - **Trainers and energy** keep the storybook still-life lead: painterly gouache and watercolour on
     cold-press paper, warm light from the upper left, one subject, a soft wash in the card's colour.
 - **Output:** the PNG goes to `tools/art/out/` (git-ignored); the WebP (best quality ≤ 60 KB)
@@ -94,4 +96,4 @@ $PY tools/art/gen.py --contact   # rebuilds tools/art/out/contact-<group>.png on
 
 Look at the result (the contact sheets help) before committing the new `web/cards/*.webp`: no
 extra limbs, no lettering, one subject, same style as its neighbours, the whole Hexon inside the
-safe area, nothing that reads as a real animal, a human figure or a hexagon.
+safe area, nothing that reads as a real animal, a human figure, a hexagon or a shared emblem.
