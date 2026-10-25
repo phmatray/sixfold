@@ -488,14 +488,14 @@ impl Ctl {
             Event::BetweenTurns => Some(
                 tr(
                     "Asleep: heads wakes it up",
-                    "Endormie : face, elle se réveille",
+                    "Endormi : face, il se réveille",
                 )
                 .into(),
             ),
             Event::EnergyDiscarded { .. } if self.turn_flip.get_value() => Some(
                 tr(
                     "Confused: heads lets it retreat",
-                    "Confuse : face, elle bat en retraite",
+                    "Confus : face, il bat en retraite",
                 )
                 .into(),
             ),
@@ -528,10 +528,10 @@ impl Ctl {
                 self.callout(
                     "Mulligan".into(),
                     match (you(*player), fr()) {
-                        (true, false) => "You had no Basic creature and reshuffled",
-                        (false, false) => "Opponent had no Basic creature and reshuffled",
-                        (true, true) => "Aucune créature de Base : vous remélangez",
-                        (false, true) => "Aucune créature de Base : l'adversaire remélange",
+                        (true, false) => "You had no Basic Hexon and reshuffled",
+                        (false, false) => "Opponent had no Basic Hexon and reshuffled",
+                        (true, true) => "Aucun Hexon de Base : vous remélangez",
+                        (false, true) => "Aucun Hexon de Base : l'adversaire remélange",
                     }
                     .into(),
                     None,
@@ -543,8 +543,8 @@ impl Ctl {
                 self.callout(
                     tr("Redeal", "Nouvelle donne").into(),
                     tr(
-                        "Neither player had a Basic creature",
-                        "Aucun joueur n'avait de créature de Base",
+                        "Neither player had a Basic Hexon",
+                        "Aucun joueur n'avait de Hexon de Base",
                     )
                     .into(),
                     None,

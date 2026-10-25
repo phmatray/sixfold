@@ -111,8 +111,8 @@ pub fn slot_name(player: usize, slot: usize) -> String {
         (false, 0, false) => "Opponent's Active".into(),
         (true, _, false) => format!("Your Bench {slot}"),
         (false, _, false) => format!("Opponent's Bench {slot}"),
-        (true, 0, true) => "Votre Active".into(),
-        (false, 0, true) => "Active adverse".into(),
+        (true, 0, true) => "Votre Actif".into(),
+        (false, 0, true) => "Actif adverse".into(),
         (true, _, true) => format!("Votre Banc {slot}"),
         (false, _, true) => format!("Banc adverse {slot}"),
     }
@@ -189,7 +189,7 @@ pub fn Creature(player: usize, uid: u32) -> impl IntoView {
     };
     let label = move || {
         if hidden() {
-            return tr("Face-down creature", "Créature face cachée").to_string();
+            return tr("Face-down Hexon", "Hexon face cachée").to_string();
         }
         mon.with(|m| {
             m.as_ref().map_or(String::new(), |m| {
@@ -272,7 +272,7 @@ pub fn Creature(player: usize, uid: u32) -> impl IntoView {
                             <span class="badge tool" title=card(t).label()>{card(t).label()}</span>
                         }).collect_view();
                         let power = (m.power == Some(false)).then(|| view! {
-                            <span class="badge off" title=tr("This creature's Power is not working", "Le Pouvoir de cette créature est bloqué")>{tr("Power off", "Pouvoir bloqué")}</span>
+                            <span class="badge off" title=tr("This Hexon's Power is not working", "Le Pouvoir de ce Hexon est bloqué")>{tr("Power off", "Pouvoir bloqué")}</span>
                         });
                         (statuses, effects, trainers, power)
                     }))}

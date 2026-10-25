@@ -112,7 +112,7 @@ pub fn Credits(won: bool) -> impl IntoView {
                     </ul>
                 </section>
                 <section>
-                    <p>{tr("Every creature, card, place, picture and sound here is original. Only the rules come from a classic handheld card game.", "Chaque créature, carte, lieu, image et son de ce jeu est original. Seules les règles viennent d'un grand classique du jeu de cartes sur console portable.")}</p>
+                    <p>{tr("Every Hexon, card, place, picture and sound here is original. Only the rules come from a classic handheld card game.", "Chaque Hexon, carte, lieu, image et son de ce jeu est original. Seules les règles viennent d'un grand classique du jeu de cartes sur console portable.")}</p>
                 </section>
                 <p class="credits-end">{tr("Thank you for playing.", "Merci d'avoir joué.")}</p>
             </div>

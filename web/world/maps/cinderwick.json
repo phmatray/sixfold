@@ -1025,12 +1025,12 @@
       "trainer": {
         "sight": 0,
         "challenge": [
-          "Evolutions? Crutches. A true duelist wins with Basics.",
-          "Prove me wrong: Basic creatures only, three prizes. My Cinderhorns are waiting."
+          "Awakenings? Crutches. A true duelist wins with Basics.",
+          "Prove me wrong: Basic Hexons only, three prizes. My Cinderhorns are waiting."
         ],
         "challenge_fr": [
-          "Des évolutions ? Des béquilles. Un vrai duelliste gagne avec des créatures de Base.",
-          "Prouve-moi le contraire : créatures de Base uniquement, trois Récompenses. Mes Braisecorne t'attendent."
+          "Des Éveils ? Des béquilles. Un vrai duelliste gagne avec des Hexons de Base.",
+          "Prouve-moi le contraire : Hexons de Base uniquement, trois Récompenses. Mes Braisecorne t'attendent."
         ],
         "lose": [
           "Simplicity wins again. Come back when your deck's purer."
@@ -1039,10 +1039,10 @@
           "La simplicité gagne encore. Reviens quand ton deck sera plus pur."
         ],
         "after": [
-          "I've started allowing myself one Stage 1. On weekends."
+          "I've started allowing myself one Awaken 1. On weekends."
         ],
         "after_fr": [
-          "Je m'autorise un Stade 1, maintenant. Le week-end."
+          "Je m'autorise un Éveil 1, maintenant. Le week-end."
         ]
       },
       "outfit": "#c4622d",
@@ -1052,11 +1052,11 @@
           "if": "won:t_basil & !flag:basil_paid",
           "lines": [
             "Basics, and you beat me with them. That's... correct. Infuriatingly correct.",
-            "Take this Pyrequill. A Stage 2. Clearly you'll know how to keep it humble."
+            "Take this Pyrequill. An Awaken 2. Clearly you'll know how to keep it humble."
           ],
           "lines_fr": [
             "Des Bases, et tu m'as battu avec. C'est... juste. Rageusement juste.",
-            "Prends ce Bûcheplume. Un Stade 2. Toi, au moins, tu sauras le garder humble."
+            "Prends ce Bûcheplume. Un Éveil 2. Toi, au moins, tu sauras le garder humble."
           ],
           "do": [
             "card:pyrequill",

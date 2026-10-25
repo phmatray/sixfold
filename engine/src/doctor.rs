@@ -84,20 +84,20 @@ impl Advice {
         match self.issue {
             Issue::Healthy => tr("Clean bill of health.", "Rien à signaler.").into(),
             Issue::FewBasics(n) => tr(
-                format!("Only {n} Basic creatures: some opening hands will have none. Aim for {MIN_BASICS} or more."),
-                format!("Seulement {n} créatures de Base : certaines mains de départ n'en auront aucune. Visez-en {MIN_BASICS} ou plus."),
+                format!("Only {n} Basic Hexons: some opening hands will have none. Aim for {MIN_BASICS} or more."),
+                format!("Seulement {n} Hexons de Base : certaines mains de départ n'en auront aucun. Visez-en {MIN_BASICS} ou plus."),
             ),
             Issue::Energy(n) if n < *ENERGY.start() => tr(
                 format!("Only {n} energy: your attacks will stall. Aim for 18 to 28."),
                 format!("Seulement {n} énergies : vos attaques vont piétiner. Visez entre 18 et 28."),
             ),
             Issue::Energy(n) => tr(
-                format!("{n} energy is a lot: you'll draw it instead of creatures. Aim for 18 to 28."),
-                format!("{n} énergies, c'est beaucoup : vous les piocherez à la place de vos créatures. Visez entre 18 et 28."),
+                format!("{n} energy is a lot: you'll draw it instead of Hexons. Aim for 18 to 28."),
+                format!("{n} énergies, c'est beaucoup : vous les piocherez à la place de vos Hexons. Visez entre 18 et 28."),
             ),
             Issue::BrokenLine(id) => tr(
-                format!("{} has nothing to evolve from: add {}.", label(id), below(id)),
-                format!("{} n'a rien sur quoi évoluer : ajoutez {}.", label(id), below(id)),
+                format!("{} has nothing to awaken from: add {}.", label(id), below(id)),
+                format!("{} n'a rien d'où s'éveiller : ajoutez {}.", label(id), below(id)),
             ),
             Issue::NoEnergyFor(c) => tr(
                 format!("Some attacks need {c} energy, and the deck has none."),
@@ -427,7 +427,7 @@ mod tests {
                 into: CINDREL
             })
         );
-        assert_eq!(b.text(), "Flarrow has nothing to evolve from: add Cindrel.");
+        assert_eq!(b.text(), "Flarrow has nothing to awaken from: add Cindrel.");
         // With one Cindrel back, two Flarrow sit on one: top-heavy.
         with(&mut d, FIRE_ENERGY, CINDREL, 1);
         assert!(issues(&d, &all()).contains(&Issue::TopHeavy(FLARROW)));
@@ -492,6 +492,6 @@ mod tests {
         set_lang(Lang::En);
         assert_eq!(t, "Rien à signaler.");
         assert!(st.starts_with("Remplacez 1 "), "{st}");
-        assert!(few.starts_with("Seulement 7 créatures de Base"));
+        assert!(few.starts_with("Seulement 7 Hexons de Base"));
     }
 }

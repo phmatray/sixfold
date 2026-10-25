@@ -177,22 +177,22 @@ impl Rule {
     pub fn text(self) -> T {
         match self {
             Rule::BasicsOnly => T::new(
-                "Basic creatures only: no Stage 1 or Stage 2.",
-                "Créatures de Base uniquement : ni Stade 1 ni Stade 2.",
+                "Basic Hexons only: no Awaken 1 or Awaken 2.",
+                "Hexons de Base uniquement : ni Éveil 1 ni Éveil 2.",
             ),
             Rule::NoTrainers => T::new(
-                "Creatures and energy only: no Trainers.",
-                "Créatures et énergies uniquement : aucun Dresseur.",
+                "Hexons and energy only: no Trainers.",
+                "Hexons et énergies uniquement : aucun Dresseur.",
             ),
             Rule::MonoColour => T::new(
-                "One colour only, plus Colorless creatures.",
-                "Une seule couleur, plus les créatures Incolores.",
+                "One colour only, plus Colorless Hexons.",
+                "Une seule couleur, plus les Hexons Incolores.",
             ),
             Rule::LightEnergy => T::new("At most 16 energy cards.", "16 cartes Énergie au plus."),
             Rule::NoRares => T::new("No Rares.", "Aucune carte Rare."),
             Rule::TwoStage2 => T::new(
-                "At least two Stage 2 creatures.",
-                "Au moins deux créatures de Stade 2.",
+                "At least two Awaken 2 Hexons.",
+                "Au moins deux Hexons d'Éveil 2.",
             ),
         }
     }

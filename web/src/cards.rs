@@ -13,7 +13,7 @@ pub fn kind_label(def: &CardDef) -> String {
         CardKind::Creature(c) => c.stage.to_string(),
         CardKind::TrainerBasic(_) => tr(
             "Trainer played as a Basic",
-            "Dresseur joué comme créature de Base",
+            "Dresseur joué comme Hexon de Base",
         )
         .into(),
         CardKind::Energy(EnergyCard::Basic(_)) => tr("Basic energy", "Énergie de base").into(),
@@ -142,7 +142,7 @@ fn CardArt(def: &'static CardDef) -> impl IntoView {
 fn stage_line(def: &CardDef) -> impl IntoView {
     let from = def.creature().and_then(|c| c.evolves_from).map(|f| {
         let from = card_id(f).map_or(f, |id| card(id).label());
-        view! { " "<span class="from" aria-hidden="true">{tr("· from ", "· évolue de ")}{from}</span> }
+        view! { " "<span class="from" aria-hidden="true">{tr("· from ", "· s'éveille de ")}{from}</span> }
     });
     view! { {foot(def)}{from} }
 }
@@ -334,7 +334,7 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
         CardKind::Creature(c) | CardKind::TrainerBasic(c) => {
             let evolves = c.evolves_from.map(|f| {
                 let from = card_id(f).map_or(f, |id| card(id).label());
-                view! { <p class="evolves">{tr("Evolves from ", "Évolution de ")} <b>{from}</b></p> }
+                view! { <p class="evolves">{tr("Awakens from ", "S'éveille de ")} <b>{from}</b></p> }
             });
             let power = c.power.as_ref().map(|p| {
                 view! {
@@ -381,8 +381,8 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
                 </dl>
                 {matches!(def.kind, CardKind::TrainerBasic(_)).then(|| view! {
                     <p class="note">{tr(
-                        "Played as a Basic creature. It can't retreat and gives no prize when knocked out.",
-                        "Se joue comme une créature de Base. Elle ne peut pas battre en retraite et ne rapporte aucune Récompense quand elle est K.O.",
+                        "Played as a Basic Hexon. It can't retreat and gives no prize when knocked out.",
+                        "Se joue comme un Hexon de Base. Il ne peut pas battre en retraite et ne rapporte aucune Récompense quand il est K.O.",
                     )}</p>
                 })}
             }
@@ -425,9 +425,9 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
                     <h3>{def.label()}</h3>
                     <p class="details-kind">{match def.creature() {
                         Some(c) if def.is_basic() || c.stage != Stage::Basic => match (fr(), c.stage) {
-                            (false, stage) => format!("{stage} {} creature", c.color),
-                            (true, Stage::Basic) => format!("Créature {} de Base", c.color),
-                            (true, stage) => format!("Créature {}, {stage}", c.color),
+                            (false, stage) => format!("{stage} {} Hexon", c.color),
+                            (true, Stage::Basic) => format!("Hexon {} de Base", c.color),
+                            (true, stage) => format!("Hexon {}, {stage}", c.color),
                         },
                         _ => kind_label(def),
                     }}</p>

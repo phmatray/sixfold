@@ -283,7 +283,7 @@ pub static RIVALS: [Rival; 7] = [
         colors: &[Grass],
         deck: Prebuilt {
             name: T::new("Thicket", "Fourré"),
-            description: T::new("Grass Basics and their first evolutions, healing on the side.", "Des créatures Herbe de Base et leurs premières évolutions, avec des soins en appoint."),
+            description: T::new("Grass Basics and their first Awakenings, healing on the side.", "Des Hexons Herbe de Base et leurs premiers Éveils, avec des soins en appoint."),
             list: &[
                 (SPRIGGET, 4),
                 (THORNBUCK, 3),
@@ -322,7 +322,7 @@ pub static RIVALS: [Rival; 7] = [
         colors: &[Water, Psychic],
         deck: Prebuilt {
             name: T::new("Low Tide", "Marée basse"),
-            description: T::new("Water creatures that grow sturdy, with a Psychic sting.", "Des créatures Eau qui deviennent coriaces, avec une piqûre Psychique."),
+            description: T::new("Water Hexons that grow sturdy, with a Psychic sting.", "Des Hexons Eau qui deviennent coriaces, avec une piqûre Psychique."),
             list: &[
                 (PUDDOCK, 4),
                 (BROOKHORN, 3),
@@ -413,7 +413,7 @@ pub static RIVALS: [Rival; 7] = [
         colors: &[Fighting],
         deck: Prebuilt {
             name: T::new("Bedrock", "Roche-mère"),
-            description: T::new("Two Fighting lines up to Stage 2 and a wall of trainers.", "Deux lignées Combat jusqu'au Stade 2 et un mur de cartes Dresseur."),
+            description: T::new("Two Fighting lines up to Awaken 2 and a wall of trainers.", "Deux lignées Combat jusqu'à l'Éveil 2 et un mur de cartes Dresseur."),
             list: &[
                 (BRAWLET, 4),
                 (IRONBRAWL, 3),
@@ -457,7 +457,7 @@ pub static RIVALS: [Rival; 7] = [
         colors: &[Psychic, Water],
         deck: Prebuilt {
             name: T::new("Moonlit Tide", "Marée de lune"),
-            description: T::new("Psychic Stage 2s that put the opponent to sleep, backed by Water.", "Des Stade 2 Psychique qui endorment l'adversaire, épaulés par l'Eau."),
+            description: T::new("Psychic Awaken 2 Hexons that put the opponent to sleep, backed by Water.", "Des Hexons d'Éveil 2 Psychique qui endorment l'adversaire, épaulés par l'Eau."),
             list: &[
                 (WISPUN, 4),
                 (WISPELLE, 3),
@@ -502,7 +502,7 @@ pub static RIVALS: [Rival; 7] = [
         colors: &[Water, Fighting],
         deck: Prebuilt {
             name: T::new("Sixfold Crown", "Couronne des Six"),
-            description: T::new("Water and Fighting Stage 2s, energy removal, healing and stage skips.", "Des Stade 2 Eau et Combat, du retrait d'énergie, des soins et des évolutions express."),
+            description: T::new("Water and Fighting Awaken 2 Hexons, energy removal, healing and stage skips.", "Des Hexons d'Éveil 2 Eau et Combat, du retrait d'énergie, des soins et des Éveils express."),
             list: &[
                 (PUDDOCK, 4),
                 (BROOKHORN, 3),

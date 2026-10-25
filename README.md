@@ -1,7 +1,8 @@
 # Sixfold
 
-A clean-room creature card duel with the old handheld rules, written in **Rust**,
-compiled to **WebAssembly** and played in the browser (Leptos, client-side only).
+A clean-room card duel between Hexons, the creatures of Sixfold, with the old
+handheld rules, written in **Rust**, compiled to **WebAssembly** and played in
+the browser (Leptos, client-side only).
 Walk a small world, collect cards from booster packs, build your own decks, beat
 six rivals and the Hex Warden, then take on the Gauntlet. It installs as an app
 and plays offline.
@@ -14,7 +15,7 @@ download first).
 - **Rules engine** (`engine/`): the whole duel, from setup and mulligans through
   attacks, conditions, Powers, trainers, knock-outs, prizes and sudden death.
   Pure Rust, no browser needed; 315 unit tests.
-- **Card set**: 110 original cards (78 creatures in full evolution lines across
+- **Card set**: 110 original cards (78 Hexons in full Awakening lines across
   all seven colours, 25 trainers, 6 basic energies and a special energy, seven
   of them promos you earn in the campaign rather than in packs), and
   six prebuilt 60-card decks: Ember Rush (Fire / Fighting), Tide Mind
@@ -111,7 +112,7 @@ Not in 1.0: a second human player (see [`docs/ROADMAP.md`](docs/ROADMAP.md)).
 three turns against a practice partner. A card-stock note above your hand says
 what to do next and why, and a brass ring marks the card or button to press
 (**Show me** moves keyboard focus there). You place an Active and a Benched
-creature, attach energy, attack into a weakness, evolve, play a trainer and
+Hexon, attach energy, attack into a weakness, awaken, play a trainer and
 knock the opponent out for the win. Only the move the lesson asks for is
 offered, so nothing can go wrong; **Skip the lesson** leaves at any time. It
 ends by handing you your starter deck and three packs. After that the title's
@@ -148,13 +149,13 @@ the browser).
 **A quick duel.** Choose **Play a duel**, pick your deck and the AI's, then
 press **Start the duel**.
 
-1. **Setup.** Choose a Basic creature as your Active, put more Basics on your
+1. **Setup.** Choose a Basic Hexon as your Active, put more Basics on your
    Bench, then press **Done**.
 2. **Your turn.** Click a card in your hand to see what it can do: place it,
-   attach energy (once per turn), evolve, or play a trainer.
+   attach energy (once per turn), awaken, or play a trainer.
 3. **Act.** The action bar has your attacks (with the damage they would do
    now), Retreat, Powers and End turn. An attack ends your turn.
-4. **Win.** Take all your prizes, leave the opponent with no creature in play,
+4. **Win.** Take all your prizes, leave the opponent with no Hexon in play,
    or outlast a deck that runs out of cards.
 
 The seed on the title screen fixes the shuffles and coin flips, so a seed
@@ -205,6 +206,8 @@ the engine.
   shipped: no card art, names, attack names, flavor text, card stats, sprites
   or data tables. Every card name, number and rules text here is original, and
   the art is drawn by code.
-- The code and the app say "creature", not the trademarked name.
+- The game's beings are called **Hexons**, a name coined for Sixfold, never the
+  trademarked name, and evolution is called **Awakening**. (The code keeps the
+  neutral identifiers `Creature` and `evolve`.)
 - A reference ROM may sit in the repository root for local study only. It is
   git-ignored (`*.gbc`) and must never be committed or shipped.

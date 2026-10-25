@@ -65,12 +65,12 @@ fn deck_count(cards: usize, creatures: usize) -> String {
     if sixfold_engine::fr() {
         let s = |n: usize| if n > 1 { "s" } else { "" };
         format!(
-            "{cards} carte{}, {creatures} créature{}",
+            "{cards} carte{}, {creatures} Hexon{}",
             s(cards),
             s(creatures)
         )
     } else {
-        format!("{cards} cards, {creatures} creatures")
+        format!("{cards} cards, {creatures} Hexons")
     }
 }
 
@@ -184,13 +184,13 @@ pub fn DuelSetup() -> impl IntoView {
                     <details class="how-to">
                         <summary>{tr("How a duel works", "Comment se joue un duel")}</summary>
                         <ol>
-                            <li>{tr("Put a Basic creature in your Active spot, and more Basics on your Bench (up to 5).", "Placez une créature de Base en position Active, et d'autres créatures de Base sur votre Banc (5 au plus).")}</li>
-                            <li>{tr("Each turn you draw a card, may attach one energy, play Basics and trainers, evolve, and retreat.", "À chaque tour, vous piochez une carte ; vous pouvez attacher une énergie, jouer des créatures de Base et des Dresseurs, faire évoluer et battre en retraite.")}</li>
-                            <li>{tr("Attack when the Active has the energy an attack shows. Attacking ends your turn.", "Attaquez quand votre Active porte l'énergie indiquée par l'attaque. Attaquer termine votre tour.")}</li>
-                            <li>{tr("Knock out a creature to take a prize. Take all your prizes, or leave the opponent with no creature in play, to win.", "Mettez une créature K.O. pour prendre une Récompense. Pour gagner, prenez toutes vos Récompenses ou ne laissez aucune créature en jeu à l'adversaire.")}</li>
+                            <li>{tr("Put a Basic Hexon in your Active spot, and more Basics on your Bench (up to 5).", "Placez un Hexon de Base en position Active, et d'autres Hexons de Base sur votre Banc (5 au plus).")}</li>
+                            <li>{tr("Each turn you draw a card, may attach one energy, play Basics and trainers, awaken, and retreat.", "À chaque tour, vous piochez une carte ; vous pouvez attacher une énergie, jouer des Hexons de Base et des Dresseurs, éveiller vos Hexons et battre en retraite.")}</li>
+                            <li>{tr("Attack when the Active has the energy an attack shows. Attacking ends your turn.", "Attaquez quand votre Actif porte l'énergie indiquée par l'attaque. Attaquer termine votre tour.")}</li>
+                            <li>{tr("Knock out a Hexon to take a prize. Take all your prizes, or leave the opponent with no Hexon in play, to win.", "Mettez un Hexon K.O. pour prendre une Récompense. Pour gagner, prenez toutes vos Récompenses ou ne laissez aucun Hexon en jeu à l'adversaire.")}</li>
                         </ol>
                         <p><button type="button" class="btn" on:click=move |_| crate::coach::start(Screen::Duel)>{tr("Play the guided duel", "Jouer le duel guidé")}</button></p>
-                        <p class="note">{tr("Tap or hover any card to read it. Asleep and Paralyzed creatures can't attack or retreat; Confused ones may hurt themselves.", "Touchez ou survolez une carte pour la lire. Une créature Endormie ou Paralysée ne peut ni attaquer ni battre en retraite ; une créature Confuse peut se blesser elle-même.")}</p>
+                        <p class="note">{tr("Tap or hover any card to read it. Asleep and Paralyzed Hexons can't attack or retreat; Confused ones may hurt themselves.", "Touchez ou survolez une carte pour la lire. Un Hexon Endormi ou Paralysé ne peut ni attaquer ni battre en retraite ; un Hexon Confus peut se blesser lui-même.")}</p>
                     </details>
                     <div class="pickers">
                         <DeckPicker legend=tr("Your deck", "Votre deck") name="mine" opts=mine_opts choice=mine />

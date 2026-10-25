@@ -29,8 +29,8 @@ impl fmt::Display for Stage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(match self {
             Stage::Basic => tr("Basic", "Base"),
-            Stage::Stage1 => tr("Stage 1", "Stade 1"),
-            Stage::Stage2 => tr("Stage 2", "Stade 2"),
+            Stage::Stage1 => tr("Awaken 1", "Éveil 1"),
+            Stage::Stage2 => tr("Awaken 2", "Éveil 2"),
         })
     }
 }
@@ -38,11 +38,11 @@ impl fmt::Display for Stage {
 impl fmt::Display for Status {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(match self {
-            Status::Confused => tr("Confused", "Confuse"),
-            Status::Asleep => tr("Asleep", "Endormie"),
-            Status::Paralyzed => tr("Paralyzed", "Paralysée"),
-            Status::Poisoned => tr("Poisoned", "Empoisonnée"),
-            Status::DoublePoisoned => tr("Double-poisoned", "Gravement empoisonnée"),
+            Status::Confused => tr("Confused", "Confus"),
+            Status::Asleep => tr("Asleep", "Endormi"),
+            Status::Paralyzed => tr("Paralyzed", "Paralysé"),
+            Status::Poisoned => tr("Poisoned", "Empoisonné"),
+            Status::DoublePoisoned => tr("Double-poisoned", "Gravement empoisonné"),
         })
     }
 }
@@ -51,50 +51,50 @@ impl fmt::Display for Find {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(match self {
             Find::Any => tr("a card", "une carte"),
-            Find::Basic => tr("a Basic creature", "une carte créature de Base"),
-            Find::Creature => tr("a creature card", "une carte créature"),
+            Find::Basic => tr("a Basic Hexon", "une carte Hexon de Base"),
+            Find::Creature => tr("a Hexon card", "une carte Hexon"),
             Find::BasicEnergy => tr("a basic energy", "une énergie de base"),
             Find::Trainer => tr("a trainer", "une carte Dresseur"),
         })
     }
 }
 
-/// "the defending creature can't attack", completing "During your opponent's
+/// "the defending Hexon can't attack", completing "During your opponent's
 /// next turn, ...".
 impl fmt::Display for Placed {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if fr() {
-            // "la créature en défense" is what the log replaces with the Active.
+            // "le Hexon en défense" (or "du ...") is what the log replaces with the Active.
             return match self {
                 Placed::CantRetreat => {
-                    write!(f, "la créature en défense ne peut pas battre en retraite")
+                    write!(f, "le Hexon en défense ne peut pas battre en retraite")
                 }
-                Placed::CantAttack => write!(f, "la créature en défense ne peut pas attaquer"),
+                Placed::CantAttack => write!(f, "le Hexon en défense ne peut pas attaquer"),
                 Placed::DisabledAttack(i) => write!(
                     f,
-                    "la créature en défense ne peut pas utiliser l'attaque {}",
+                    "le Hexon en défense ne peut pas utiliser l'attaque {}",
                     i + 1
                 ),
                 Placed::Accuracy => {
                     write!(
                         f,
-                        "la créature en défense doit obtenir face à pile ou face pour attaquer"
+                        "le Hexon en défense doit obtenir face à pile ou face pour attaquer"
                     )
                 }
                 Placed::Weaken(n) => write!(
                     f,
-                    "les attaques de la créature en défense infligent {n} dégâts de moins"
+                    "les attaques du Hexon en défense infligent {n} dégâts de moins"
                 ),
             };
         }
         match self {
-            Placed::CantRetreat => write!(f, "the defending creature can't retreat"),
-            Placed::CantAttack => write!(f, "the defending creature can't attack"),
+            Placed::CantRetreat => write!(f, "the defending Hexon can't retreat"),
+            Placed::CantAttack => write!(f, "the defending Hexon can't attack"),
             Placed::DisabledAttack(i) => {
-                write!(f, "the defending creature can't use attack {}", i + 1)
+                write!(f, "the defending Hexon can't use attack {}", i + 1)
             }
-            Placed::Accuracy => write!(f, "the defending creature must flip heads to attack"),
-            Placed::Weaken(n) => write!(f, "the defending creature's attacks do {n} less damage"),
+            Placed::Accuracy => write!(f, "the defending Hexon must flip heads to attack"),
+            Placed::Weaken(n) => write!(f, "the defending Hexon's attacks do {n} less damage"),
         }
     }
 }
@@ -103,50 +103,49 @@ impl fmt::Display for Placed {
 impl fmt::Display for Shield {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if fr() {
-            // "cette créature" is what the log replaces with the Active.
+            // "ce Hexon" is what the log replaces with the Active.
             return match self {
                 Shield::PreventAll => write!(
                     f,
-                    "cette créature ne subit aucun effet des attaques, dégâts compris"
+                    "ce Hexon ne subit aucun effet des attaques, dégâts compris"
                 ),
                 Shield::PreventDamage => {
-                    write!(f, "cette créature ne subit aucun dégât des attaques")
+                    write!(f, "ce Hexon ne subit aucun dégât des attaques")
                 }
-                Shield::Reduce(n) => write!(
-                    f,
-                    "les attaques infligent {n} dégâts de moins à cette créature"
-                ),
+                Shield::Reduce(n) => {
+                    write!(f, "les attaques infligent {n} dégâts de moins à ce Hexon")
+                }
                 Shield::PreventBelow(n) => write!(
                     f,
-                    "cette créature ne subit pas les dégâts d'attaque inférieurs à {n}"
+                    "ce Hexon ne subit pas les dégâts d'attaque inférieurs à {n}"
                 ),
                 Shield::Halve => write!(
                     f,
-                    "les attaques n'infligent que la moitié de leurs dégâts à cette créature"
+                    "les attaques n'infligent que la moitié de leurs dégâts à ce Hexon"
                 ),
                 Shield::CounterKo => write!(
                     f,
-                    "si une attaque met cette créature K.O., la créature attaquante est aussi mise K.O."
+                    "si une attaque met ce Hexon K.O., le Hexon attaquant est aussi mis K.O."
                 ),
             };
         }
         match self {
             Shield::PreventAll => write!(
                 f,
-                "prevent all effects of attacks, damage included, done to this creature"
+                "prevent all effects of attacks, damage included, done to this Hexon"
             ),
             Shield::PreventDamage => {
-                write!(f, "prevent all damage done to this creature by attacks")
+                write!(f, "prevent all damage done to this Hexon by attacks")
             }
-            Shield::Reduce(n) => write!(f, "this creature takes {n} less damage from attacks"),
+            Shield::Reduce(n) => write!(f, "this Hexon takes {n} less damage from attacks"),
             Shield::PreventBelow(n) => write!(
                 f,
-                "prevent attack damage of less than {n} done to this creature"
+                "prevent attack damage of less than {n} done to this Hexon"
             ),
-            Shield::Halve => write!(f, "this creature takes half damage from attacks"),
+            Shield::Halve => write!(f, "this Hexon takes half damage from attacks"),
             Shield::CounterKo => write!(
                 f,
-                "if an attack knocks this creature out, the attacker is knocked out too"
+                "if an attack knocks this Hexon out, the attacker is knocked out too"
             ),
         }
     }
@@ -194,7 +193,7 @@ fn coin_prefix(coin: bool) -> &'static str {
     }
 }
 
-/// One rules sentence per effect, from the user's side ("this creature" is
+/// One rules sentence per effect, from the user's side ("this Hexon" is
 /// the one attacking or using the Power). Good for tooltips, and as a fallback
 /// when a card's own `text` is empty.
 impl fmt::Display for Effect {
@@ -210,7 +209,7 @@ impl fmt::Display for Effect {
                 plural(coins, "coin")
             ),
             AddPerDamage { per, own } => {
-                let on = if own { "this creature" } else { "the defending creature" };
+                let on = if own { "this Hexon" } else { "the defending Hexon" };
                 write!(f, "This attack does {per} more damage for each 10 damage on {on}.")
             }
             IgnoreWeaknessResistance => {
@@ -218,9 +217,9 @@ impl fmt::Display for Effect {
             }
             DoubleNextAttack => write!(
                 f,
-                "During your next turn, this creature's attack does double damage."
+                "During your next turn, this Hexon's attack does double damage."
             ),
-            Recoil(n) => write!(f, "This creature does {n} damage to itself."),
+            Recoil(n) => write!(f, "This Hexon does {n} damage to itself."),
             BenchDamage {
                 amount,
                 own,
@@ -231,17 +230,17 @@ impl fmt::Display for Effect {
                     (true, false) => "your",
                     _ => "your opponent's",
                 };
-                write!(f, "Does {amount} damage to each of {whose} Benched creatures.")
+                write!(f, "Does {amount} damage to each of {whose} Benched Hexons.")
             }
-            Snipe(n) => write!(f, "Does {n} damage to 1 of your opponent's creatures."),
+            Snipe(n) => write!(f, "Does {n} damage to 1 of your opponent's Hexons."),
             Inflict { status, coin } => {
                 let lead = coin_prefix(coin);
                 let the = if coin { "the" } else { "The" };
-                write!(f, "{lead}{the} defending creature is now {status}.")
+                write!(f, "{lead}{the} defending Hexon is now {status}.")
             }
-            InflictSelf(status) => write!(f, "This creature is now {status}."),
-            Cure { both: false } => write!(f, "Removes all conditions from your Active creature."),
-            Cure { both: true } => write!(f, "Removes all conditions from both Active creatures."),
+            InflictSelf(status) => write!(f, "This Hexon is now {status}."),
+            Cure { both: false } => write!(f, "Removes all conditions from your Active Hexon."),
+            Cure { both: true } => write!(f, "Removes all conditions from both Active Hexons."),
             Protect { shield, coin } => {
                 let during = if coin { "during" } else { "During" };
                 write!(
@@ -260,54 +259,54 @@ impl fmt::Display for Effect {
             }
             DisableAttack => write!(
                 f,
-                "Choose 1 of the defending creature's attacks. It can't be used during your opponent's next turn."
+                "Choose 1 of the defending Hexon's attacks. It can't be used during your opponent's next turn."
             ),
             TrainerLock => write!(f, "Your opponent can't play trainers during their next turn."),
-            DefenderWeakness(c) => write!(f, "The defending creature's weakness becomes {c}."),
-            OwnResistance(c) => write!(f, "This creature's resistance becomes {c}."),
+            DefenderWeakness(c) => write!(f, "The defending Hexon's weakness becomes {c}."),
+            OwnResistance(c) => write!(f, "This Hexon's resistance becomes {c}."),
             DiscardEnergy {
                 color: Color::Colorless,
                 count,
-            } => write!(f, "Discard {} attached to this creature.", plural(count, "energy card")),
+            } => write!(f, "Discard {} attached to this Hexon.", plural(count, "energy card")),
             DiscardEnergy { color, count } => write!(
                 f,
-                "Discard {} attached to this creature.",
+                "Discard {} attached to this Hexon.",
                 plural(count, &format!("{color} energy card"))
             ),
-            DiscardAllEnergy => write!(f, "Discard all energy attached to this creature."),
+            DiscardAllEnergy => write!(f, "Discard all energy attached to this Hexon."),
             DiscardDefenderEnergy => {
-                write!(f, "Discard 1 energy card attached to the defending creature.")
+                write!(f, "Discard 1 energy card attached to the defending Hexon.")
             }
             SwitchDefender {
                 chooser_is_attacker: true,
             } => write!(
                 f,
-                "Switch the defending creature with 1 of your opponent's Benched creatures, chosen by you."
+                "Switch the defending Hexon with 1 of your opponent's Benched Hexons, chosen by you."
             ),
             SwitchDefender {
                 chooser_is_attacker: false,
             } => write!(
                 f,
-                "Your opponent switches the defending creature with 1 of their Benched creatures."
+                "Your opponent switches the defending Hexon with 1 of their Benched Hexons."
             ),
-            SwitchSelf => write!(f, "Switch your Active creature with 1 of your Benched creatures."),
-            Heal(n) => write!(f, "Removes {n} damage from your Active creature."),
-            HealAll(n) => write!(f, "Removes {n} damage from each of your creatures."),
+            SwitchSelf => write!(f, "Switch your Active Hexon with 1 of your Benched Hexons."),
+            Heal(n) => write!(f, "Removes {n} damage from your Active Hexon."),
+            HealAll(n) => write!(f, "Removes {n} damage from each of your Hexons."),
             AttachFromDeck(Color::Colorless) => write!(
                 f,
-                "Search your deck for a basic energy card and attach it to this creature, then shuffle your deck."
+                "Search your deck for a basic energy card and attach it to this Hexon, then shuffle your deck."
             ),
             AttachFromDeck(c) => write!(
                 f,
-                "Search your deck for a {c} energy card and attach it to this creature, then shuffle your deck."
+                "Search your deck for a {c} energy card and attach it to this Hexon, then shuffle your deck."
             ),
             Devolve => write!(
                 f,
-                "The defending creature returns to its previous stage; the removed card goes to its owner's hand."
+                "The defending Hexon returns to its previous stage; the removed card goes to its owner's hand."
             ),
             StageSkip => write!(
                 f,
-                "Put a Stage 2 card from your hand onto the matching Basic creature in play."
+                "Put an Awaken 2 card from your hand onto the matching Basic Hexon in play."
             ),
             Draw(n) => write!(f, "Draw {}.", plural(n, "card")),
             DiscardHand => write!(f, "Discard your hand."),
@@ -318,15 +317,15 @@ impl fmt::Display for Effect {
             Recover(find) => write!(f, "Put {find} from your discard pile into your hand."),
             AttachPlus10 => write!(
                 f,
-                "Attach to your Active creature: its attacks do 10 more damage this turn."
+                "Attach to your Active Hexon: its attacks do 10 more damage this turn."
             ),
             AttachMinus20 => write!(
                 f,
-                "Attach to 1 of your creatures: it takes 20 less damage until the end of your opponent's next turn."
+                "Attach to 1 of your Hexons: it takes 20 less damage until the end of your opponent's next turn."
             ),
-            OnceWhileInPlay => write!(f, "Usable only once while this creature is in play."),
-            CopyAttack => write!(f, "Use 1 of the defending creature's attacks as this attack."),
-            SetOwnColor(c) => write!(f, "This creature's colour becomes {c}."),
+            OnceWhileInPlay => write!(f, "Usable only once while this Hexon is in play."),
+            CopyAttack => write!(f, "Use 1 of the defending Hexon's attacks as this attack."),
+            SetOwnColor(c) => write!(f, "This Hexon's colour becomes {c}."),
         }
     }
 }
@@ -348,9 +347,9 @@ fn effect_fr(e: &Effect, f: &mut fmt::Formatter) -> fmt::Result {
         }
         AddPerDamage { per, own } => {
             let on = if own {
-                "cette créature"
+                "ce Hexon"
             } else {
-                "la créature en défense"
+                "le Hexon en défense"
             };
             write!(
                 f,
@@ -363,9 +362,9 @@ fn effect_fr(e: &Effect, f: &mut fmt::Formatter) -> fmt::Result {
         ),
         DoubleNextAttack => write!(
             f,
-            "Pendant votre prochain tour, l'attaque de cette créature inflige le double de dégâts."
+            "Pendant votre prochain tour, l'attaque de ce Hexon inflige le double de dégâts."
         ),
-        Recoil(n) => write!(f, "Cette créature s'inflige {n} dégâts."),
+        Recoil(n) => write!(f, "Ce Hexon s'inflige {n} dégâts."),
         BenchDamage {
             amount,
             own,
@@ -376,23 +375,23 @@ fn effect_fr(e: &Effect, f: &mut fmt::Formatter) -> fmt::Result {
                 (true, false) => "de votre Banc",
                 _ => "du Banc adverse",
             };
-            write!(f, "Inflige {amount} dégâts à chaque créature {whose}.")
+            write!(f, "Inflige {amount} dégâts à chaque Hexon {whose}.")
         }
-        Snipe(n) => write!(f, "Inflige {n} dégâts à 1 créature de votre adversaire."),
+        Snipe(n) => write!(f, "Inflige {n} dégâts à 1 Hexon de votre adversaire."),
         Inflict { status, coin } => {
-            let the = if coin { "la" } else { "La" };
+            let the = if coin { "le" } else { "Le" };
             write!(
                 f,
-                "{}{the} créature en défense est maintenant {status}.",
+                "{}{the} Hexon en défense est maintenant {status}.",
                 coin_prefix(coin)
             )
         }
-        InflictSelf(status) => write!(f, "Cette créature est maintenant {status}."),
+        InflictSelf(status) => write!(f, "Ce Hexon est maintenant {status}."),
         Cure { both: false } => {
-            write!(f, "Soigne toutes les altérations de votre créature Active.")
+            write!(f, "Soigne toutes les altérations de votre Hexon Actif.")
         }
         Cure { both: true } => {
-            write!(f, "Soigne toutes les altérations des deux créatures Actives.")
+            write!(f, "Soigne toutes les altérations des deux Hexons Actifs.")
         }
         Protect { shield, coin } => {
             let during = if coin { "pendant" } else { "Pendant" };
@@ -412,67 +411,67 @@ fn effect_fr(e: &Effect, f: &mut fmt::Formatter) -> fmt::Result {
         }
         DisableAttack => write!(
             f,
-            "Choisissez 1 des attaques de la créature en défense. Elle ne peut pas être utilisée pendant le prochain tour de votre adversaire."
+            "Choisissez 1 des attaques du Hexon en défense. Elle ne peut pas être utilisée pendant le prochain tour de votre adversaire."
         ),
         TrainerLock => write!(
             f,
             "Votre adversaire ne peut pas jouer de cartes Dresseur pendant son prochain tour."
         ),
-        DefenderWeakness(c) => write!(f, "La Faiblesse de la créature en défense devient {c}."),
-        OwnResistance(c) => write!(f, "La Résistance de cette créature devient {c}."),
+        DefenderWeakness(c) => write!(f, "La Faiblesse du Hexon en défense devient {c}."),
+        OwnResistance(c) => write!(f, "La Résistance de ce Hexon devient {c}."),
         DiscardEnergy {
             color: Color::Colorless,
             count,
         } => write!(
             f,
-            "Défaussez {} attachée{} à cette créature.",
+            "Défaussez {} attachée{} à ce Hexon.",
             pluriel(count, "carte Énergie"),
             s(count)
         ),
         DiscardEnergy { color, count } => write!(
             f,
-            "Défaussez {} attachée{} à cette créature.",
+            "Défaussez {} attachée{} à ce Hexon.",
             pluriel(count, &format!("carte Énergie {color}")),
             s(count)
         ),
-        DiscardAllEnergy => write!(f, "Défaussez toutes les énergies attachées à cette créature."),
+        DiscardAllEnergy => write!(f, "Défaussez toutes les énergies attachées à ce Hexon."),
         DiscardDefenderEnergy => write!(
             f,
-            "Défaussez 1 carte Énergie attachée à la créature en défense."
+            "Défaussez 1 carte Énergie attachée au Hexon en défense."
         ),
         SwitchDefender {
             chooser_is_attacker: true,
         } => write!(
             f,
-            "Échangez la créature en défense contre 1 des créatures du Banc adverse, de votre choix."
+            "Échangez le Hexon en défense contre 1 des Hexons du Banc adverse, de votre choix."
         ),
         SwitchDefender {
             chooser_is_attacker: false,
         } => write!(
             f,
-            "Votre adversaire échange la créature en défense contre 1 des créatures de son Banc."
+            "Votre adversaire échange le Hexon en défense contre 1 des Hexons de son Banc."
         ),
         SwitchSelf => write!(
             f,
-            "Échangez votre créature Active contre 1 des créatures de votre Banc."
+            "Échangez votre Hexon Actif contre 1 des Hexons de votre Banc."
         ),
-        Heal(n) => write!(f, "Soigne {n} dégâts de votre créature Active."),
-        HealAll(n) => write!(f, "Soigne {n} dégâts de chacune de vos créatures."),
+        Heal(n) => write!(f, "Soigne {n} dégâts de votre Hexon Actif."),
+        HealAll(n) => write!(f, "Soigne {n} dégâts de chacun de vos Hexons."),
         AttachFromDeck(Color::Colorless) => write!(
             f,
-            "Cherchez une carte Énergie de base dans votre deck et attachez-la à cette créature, puis mélangez votre deck."
+            "Cherchez une carte Énergie de base dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."
         ),
         AttachFromDeck(c) => write!(
             f,
-            "Cherchez une carte Énergie {c} dans votre deck et attachez-la à cette créature, puis mélangez votre deck."
+            "Cherchez une carte Énergie {c} dans votre deck et attachez-la à ce Hexon, puis mélangez votre deck."
         ),
         Devolve => write!(
             f,
-            "La créature en défense régresse à son stade précédent ; la carte retirée retourne dans la main de son propriétaire."
+            "Le Hexon en défense régresse à son stade précédent ; la carte retirée retourne dans la main de son propriétaire."
         ),
         StageSkip => write!(
             f,
-            "Posez une carte Stade 2 de votre main sur la créature de Base correspondante en jeu."
+            "Posez une carte Éveil 2 de votre main sur le Hexon de Base correspondant en jeu."
         ),
         Draw(n) => write!(f, "Piochez {}.", pluriel(n, "carte")),
         DiscardHand => write!(f, "Défaussez votre main."),
@@ -486,21 +485,21 @@ fn effect_fr(e: &Effect, f: &mut fmt::Formatter) -> fmt::Result {
         ),
         AttachPlus10 => write!(
             f,
-            "À attacher à votre créature Active : ses attaques infligent 10 dégâts de plus pendant ce tour."
+            "À attacher à votre Hexon Actif : ses attaques infligent 10 dégâts de plus pendant ce tour."
         ),
         AttachMinus20 => write!(
             f,
-            "À attacher à 1 de vos créatures : elle subit 20 dégâts de moins jusqu'à la fin du prochain tour de votre adversaire."
+            "À attacher à 1 de vos Hexons : il subit 20 dégâts de moins jusqu'à la fin du prochain tour de votre adversaire."
         ),
         OnceWhileInPlay => write!(
             f,
-            "Utilisable une seule fois tant que cette créature est en jeu."
+            "Utilisable une seule fois tant que ce Hexon est en jeu."
         ),
         CopyAttack => write!(
             f,
-            "Cette attaque copie 1 des attaques de la créature en défense."
+            "Cette attaque copie 1 des attaques du Hexon en défense."
         ),
-        SetOwnColor(c) => write!(f, "Cette créature devient une créature {c}."),
+        SetOwnColor(c) => write!(f, "Ce Hexon devient un Hexon {c}."),
     }
 }
 
@@ -508,12 +507,9 @@ fn effect_fr(e: &Effect, f: &mut fmt::Formatter) -> fmt::Result {
 fn prompt_fr(k: &PromptKind, f: &mut fmt::Formatter) -> fmt::Result {
     use Effect::*;
     match k {
-        PromptKind::ChooseActive => write!(f, "Choisissez votre créature Active"),
+        PromptKind::ChooseActive => write!(f, "Choisissez votre Hexon Actif"),
         PromptKind::ChooseBench => {
-            write!(
-                f,
-                "Placez des créatures de Base sur votre Banc, puis Terminé"
-            )
+            write!(f, "Placez des Hexons de Base sur votre Banc, puis Terminé")
         }
         PromptKind::MainPhase => write!(f, "Votre tour"),
         PromptKind::ChooseRetreatEnergy { cost, .. } => write!(
@@ -521,33 +517,33 @@ fn prompt_fr(k: &PromptKind, f: &mut fmt::Formatter) -> fmt::Result {
             "Choisissez l'énergie à défausser pour battre en retraite (coût {cost})"
         ),
         PromptKind::ChooseRetreatTarget { .. } => {
-            write!(f, "Choisissez la créature de Banc à faire entrer")
+            write!(f, "Choisissez le Hexon de Banc à faire entrer")
         }
         PromptKind::ChoosePrize { count } => {
             write!(f, "Prenez une Récompense ({count} à prendre)")
         }
         PromptKind::ChooseReplacement => {
-            write!(f, "Votre Active est K.O. : choisissez sa remplaçante")
+            write!(f, "Votre Actif est K.O. : choisissez son remplaçant")
         }
         PromptKind::Choose { effect, .. } => match *effect {
             DisableAttack => write!(f, "Choisissez l'attaque à bloquer"),
             CopyAttack => write!(f, "Choisissez l'attaque à copier"),
             DiscardDefenderEnergy => write!(f, "Choisissez l'énergie à défausser"),
-            Snipe(n) => write!(f, "Choisissez la créature qui subira {n} dégâts"),
+            Snipe(n) => write!(f, "Choisissez le Hexon qui subira {n} dégâts"),
             SwitchDefender {
                 chooser_is_attacker: true,
-            } => write!(f, "Choisissez la créature adverse à faire entrer"),
+            } => write!(f, "Choisissez le Hexon adverse à faire entrer"),
             SwitchDefender {
                 chooser_is_attacker: false,
-            } => write!(f, "Votre Active est échangée : choisissez sa remplaçante"),
-            SwitchSelf => write!(f, "Choisissez la créature de Banc à faire entrer"),
+            } => write!(f, "Votre Actif est échangé : choisissez son remplaçant"),
+            SwitchSelf => write!(f, "Choisissez le Hexon de Banc à faire entrer"),
             Search(find) => write!(f, "Choisissez {find} à prendre dans votre deck"),
             Recover(find) => write!(f, "Choisissez {find} à prendre dans votre défausse"),
-            AttachMinus20 => write!(f, "Choisissez la créature qui recevra cette carte"),
+            AttachMinus20 => write!(f, "Choisissez le Hexon qui recevra cette carte"),
             AttachFromDeck(_) => write!(f, "Choisissez l'énergie de votre deck à attacher"),
             StageSkip => write!(
                 f,
-                "Choisissez la carte Stade 2 et la créature de Base qui la reçoit"
+                "Choisissez la carte Éveil 2 et le Hexon de Base qui la reçoit"
             ),
             other => write!(f, "Choisissez : {other}"),
         },
@@ -562,14 +558,14 @@ impl fmt::Display for PromptKind {
         }
         use Effect::*;
         match self {
-            PromptKind::ChooseActive => write!(f, "Choose your Active creature"),
-            PromptKind::ChooseBench => write!(f, "Put Basic creatures on your Bench, then Done"),
+            PromptKind::ChooseActive => write!(f, "Choose your Active Hexon"),
+            PromptKind::ChooseBench => write!(f, "Put Basic Hexons on your Bench, then Done"),
             PromptKind::MainPhase => write!(f, "Your turn"),
             PromptKind::ChooseRetreatEnergy { cost, .. } => {
                 write!(f, "Choose energy to discard to retreat (cost {cost})")
             }
             PromptKind::ChooseRetreatTarget { .. } => {
-                write!(f, "Choose the Benched creature to switch in")
+                write!(f, "Choose the Benched Hexon to switch in")
             }
             PromptKind::ChoosePrize { count } => {
                 write!(f, "Take a prize card ({count} to take)")
@@ -581,19 +577,19 @@ impl fmt::Display for PromptKind {
                 DisableAttack => write!(f, "Choose the attack to disable"),
                 CopyAttack => write!(f, "Choose the attack to copy"),
                 DiscardDefenderEnergy => write!(f, "Choose the energy to discard"),
-                Snipe(n) => write!(f, "Choose the creature to take {n} damage"),
+                Snipe(n) => write!(f, "Choose the Hexon to take {n} damage"),
                 SwitchDefender {
                     chooser_is_attacker: true,
-                } => write!(f, "Choose the opposing creature to switch in"),
+                } => write!(f, "Choose the opposing Hexon to switch in"),
                 SwitchDefender {
                     chooser_is_attacker: false,
                 } => write!(f, "Your Active is being switched: choose its replacement"),
-                SwitchSelf => write!(f, "Choose the Benched creature to switch in"),
+                SwitchSelf => write!(f, "Choose the Benched Hexon to switch in"),
                 Search(find) => write!(f, "Choose {find} to take from your deck"),
                 Recover(find) => write!(f, "Choose {find} to take from your discard pile"),
-                AttachMinus20 => write!(f, "Choose the creature to attach this card to"),
+                AttachMinus20 => write!(f, "Choose the Hexon to attach this card to"),
                 AttachFromDeck(_) => write!(f, "Choose the energy to attach from your deck"),
-                StageSkip => write!(f, "Choose the Stage 2 card and the Basic it goes on"),
+                StageSkip => write!(f, "Choose the Awaken 2 card and the Basic it goes on"),
                 other => write!(f, "Choose: {other}"),
             },
         }
@@ -636,7 +632,7 @@ impl View<'_> {
         match action {
             Action::PlayBasic(h) if kind == Some(&PromptKind::ChooseActive) => tr(
                 format!("Make {} your Active", self.hand_name(h)),
-                format!("Jouer {} en Active", self.hand_name(h)),
+                format!("Jouer {} en Actif", self.hand_name(h)),
             ),
             Action::PlayBasic(h) => tr(
                 format!("Put {} on your Bench", self.hand_name(h)),
@@ -644,7 +640,7 @@ impl View<'_> {
             ),
             Action::Evolve { hand, slot } => format!(
                 "{} {} {} {}",
-                tr("Evolve", "Faire évoluer"),
+                tr("Awaken", "Éveiller"),
                 self.creature_name(me, slot),
                 tr("into", "en"),
                 self.hand_name(hand)
@@ -727,8 +723,9 @@ impl View<'_> {
                 let at = match (player == me, fr()) {
                     (true, false) => format!("your {}", slot_label(slot)),
                     (false, false) => format!("opponent's {}", slot_label(slot)),
+                    (true, true) if slot == 0 => "votre Actif".to_string(),
                     (true, true) => format!("votre {}", slot_label(slot)),
-                    (false, true) if slot == 0 => "Active adverse".to_string(),
+                    (false, true) if slot == 0 => "Actif adverse".to_string(),
                     (false, true) => format!("Banc adverse {slot}"),
                 };
                 format!("{} ({at})", self.creature_name(player, slot))
@@ -782,13 +779,13 @@ impl Event {
             Event::Mulligan { player, hand } => {
                 let cards: Vec<_> = hand.iter().map(|&id| name(id)).collect();
                 format!(
-                    "{} had no Basic creature and redrew (revealed: {})",
+                    "{} had no Basic Hexon and redrew (revealed: {})",
                     who(*player),
                     cards.join(", ")
                 )
             }
             Event::SetupRestarted => {
-                "Neither player had a Basic creature: setup starts over".to_string()
+                "Neither player had a Basic Hexon: setup starts over".to_string()
             }
             Event::Placed {
                 player, slot, card, ..
@@ -828,7 +825,7 @@ impl Event {
             Event::Evolved {
                 player, slot, card, ..
             } => format!(
-                "{} {} evolved into {}",
+                "{} {} awakened into {}",
                 whose(*player),
                 slot_label(*slot),
                 name(*card)
@@ -900,12 +897,12 @@ impl Event {
                     Effect::Protect { shield, .. } => format!(
                         "{}, {}",
                         next(1 - p),
-                        shield.to_string().replace("this creature", active)
+                        shield.to_string().replace("this Hexon", active)
                     ),
                     Effect::Place { placed, .. } => format!(
                         "{}, {}",
                         next(p),
-                        placed.to_string().replace("the defending creature", active)
+                        placed.to_string().replace("the defending Hexon", active)
                     ),
                     Effect::DisableAttack => {
                         format!("{}, one of {active}'s attacks can't be used", next(p))
@@ -924,7 +921,7 @@ impl Event {
                     Effect::DoubleNextAttack => {
                         format!("{} Active's next attack does double damage", whose(p))
                     }
-                    Effect::SetOwnColor(c) => format!("{} creature is now {c}", whose(p)),
+                    Effect::SetOwnColor(c) => format!("{} Hexon is now {c}", whose(p)),
                     _ => format!("On {} side: {effect}", their(p)),
                 }
             }
@@ -951,7 +948,7 @@ impl Event {
                 card,
                 ..
             } => format!(
-                "{} {} devolved into {}",
+                "{} {} fell back to {}",
                 whose(*player),
                 name(*card),
                 name(*creature)
@@ -1058,9 +1055,9 @@ impl Event {
         // The Active, mid-sentence.
         let active = |p: usize| {
             if p == viewer {
-                "votre Active"
+                "votre Actif"
             } else {
-                "l'Active adverse"
+                "l'Actif adverse"
             }
         };
         let hidden = self.is_private(viewer);
@@ -1084,21 +1081,21 @@ impl Event {
                 let cards: Vec<_> = hand.iter().map(|&id| name(id)).collect();
                 let who = pick(*player, "Vous n'avez".into(), "L'adversaire n'a".into());
                 format!(
-                    "{who} aucune créature de Base : nouvelle main (révélée : {})",
+                    "{who} aucun Hexon de Base : nouvelle main (révélée : {})",
                     cards.join(", ")
                 )
             }
             Event::SetupRestarted => {
-                "Aucun joueur n'a de créature de Base : la mise en place recommence".to_string()
+                "Aucun joueur n'a de Hexon de Base : la mise en place recommence".to_string()
             }
             Event::Placed {
                 player, slot, card, ..
             } => {
                 let c = name(*card);
                 match (*player == viewer, *slot == 0) {
-                    (true, true) => format!("Vous placez {c} en Active"),
+                    (true, true) => format!("Vous placez {c} en Actif"),
                     (true, false) => format!("Vous placez {c} sur votre Banc"),
-                    (false, true) => format!("L'adversaire place {c} en Active"),
+                    (false, true) => format!("L'adversaire place {c} en Actif"),
                     (false, false) => format!("L'adversaire place {c} sur son Banc"),
                 }
             }
@@ -1151,12 +1148,12 @@ impl Event {
                 player, slot, card, ..
             } => {
                 let who = match (*player == viewer, *slot) {
-                    (true, 0) => "Votre Active".to_string(),
-                    (false, 0) => "L'Active adverse".to_string(),
-                    (true, s) => format!("Votre créature en Banc {s}"),
-                    (false, s) => format!("La créature adverse en Banc {s}"),
+                    (true, 0) => "Votre Actif".to_string(),
+                    (false, 0) => "L'Actif adverse".to_string(),
+                    (true, s) => format!("Votre Hexon en Banc {s}"),
+                    (false, s) => format!("Le Hexon adverse en Banc {s}"),
                 };
-                format!("{who} évolue en {}", name(*card))
+                format!("{who} s'éveille en {}", name(*card))
             }
             Event::TrainerPlayed { player, card } => pick(
                 *player,
@@ -1175,8 +1172,8 @@ impl Event {
                 let c = name(*creature);
                 pick(
                     *player,
-                    format!("Vous battez en retraite : {c} passe en Active"),
-                    format!("L'adversaire bat en retraite : {c} passe en Active"),
+                    format!("Vous battez en retraite : {c} passe en Actif"),
+                    format!("L'adversaire bat en retraite : {c} passe en Actif"),
                 )
             }
             Event::RetreatFailed { player } => pick(
@@ -1203,8 +1200,8 @@ impl Event {
             ),
             Event::AttackNegated { player } => pick(
                 *player,
-                "Votre Active est protégée de l'attaque".into(),
-                "L'Active adverse est protégée de l'attaque".into(),
+                "Votre Actif est protégé de l'attaque".into(),
+                "L'Actif adverse est protégé de l'attaque".into(),
             ),
             Event::PowerUsed {
                 player, creature, ..
@@ -1217,13 +1214,13 @@ impl Event {
             }
             Event::ConditionApplied { player, status } => pick(
                 *player,
-                format!("Votre Active est maintenant {status}"),
-                format!("L'Active adverse est maintenant {status}"),
+                format!("Votre Actif est maintenant {status}"),
+                format!("L'Actif adverse est maintenant {status}"),
             ),
             Event::ConditionRemoved { player, status } => pick(
                 *player,
-                format!("Votre Active n'est plus {status}"),
-                format!("L'Active adverse n'est plus {status}"),
+                format!("Votre Actif n'est plus {status}"),
+                format!("L'Actif adverse n'est plus {status}"),
             ),
             Event::EffectApplied { player, effect } => {
                 let p = *player;
@@ -1242,14 +1239,15 @@ impl Event {
                             "Pendant votre prochain tour".into(),
                             "Pendant le prochain tour adverse".into(),
                         ),
-                        shield.to_string().replace("cette créature", active(p))
+                        shield.to_string().replace("ce Hexon", active(p))
                     ),
                     Effect::Place { placed, .. } => format!(
                         "{}, {}",
                         next(p),
                         placed
                             .to_string()
-                            .replace("la créature en défense", active(p))
+                            .replace("du Hexon en défense", &format!("de {}", active(p)))
+                            .replace("le Hexon en défense", active(p))
                     ),
                     Effect::DisableAttack => format!(
                         "{}, une des attaques de {} est bloquée",
@@ -1275,8 +1273,8 @@ impl Event {
                     ),
                     Effect::SetOwnColor(c) => pick(
                         p,
-                        format!("Votre Active devient une créature {c}"),
-                        format!("L'Active adverse devient une créature {c}"),
+                        format!("Votre Actif devient un Hexon {c}"),
+                        format!("L'Actif adverse devient un Hexon {c}"),
                     ),
                     _ => pick(
                         p,
@@ -1296,7 +1294,7 @@ impl Event {
             }
             | Event::Promoted {
                 player, creature, ..
-            } => format!("{} passe en Active", crea(*player, *creature)),
+            } => format!("{} passe en Actif", crea(*player, *creature)),
             Event::Devolved {
                 player,
                 creature,
@@ -1419,7 +1417,7 @@ mod tests {
                 coin: true
             }
             .to_string(),
-            "Flip a coin. If heads, the defending creature is now Paralyzed."
+            "Flip a coin. If heads, the defending Hexon is now Paralyzed."
         );
         assert_eq!(Effect::Draw(1).to_string(), "Draw 1 card.");
     }
@@ -1483,7 +1481,7 @@ mod tests {
     }
 
     /// French reads as French sentences per side, with French plurals and
-    /// the log's Active put in place of the rules text's creature.
+    /// the log's Active put in place of the rules text's Hexon.
     #[test]
     fn french_text_reads_as_french() {
         use crate::lang::{set_lang, Lang};
@@ -1534,11 +1532,11 @@ mod tests {
             [
                 "Piochez 1 carte.",
                 "Piochez 2 cartes.",
-                "Lancez une pièce. Si c'est face, la créature en défense est maintenant Paralysée.",
+                "Lancez une pièce. Si c'est face, le Hexon en défense est maintenant Paralysé.",
                 "L'adversaire pioche une carte",
-                "Pendant votre prochain tour, votre Active ne peut pas battre en retraite",
-                "Pendant son prochain tour, l'Active adverse ne peut pas battre en retraite",
-                "Pendant votre prochain tour, l'Active adverse ne subit aucun dégât des attaques",
+                "Pendant votre prochain tour, votre Actif ne peut pas battre en retraite",
+                "Pendant son prochain tour, l'Actif adverse ne peut pas battre en retraite",
+                "Pendant votre prochain tour, l'Actif adverse ne subit aucun dégât des attaques",
                 "Attacher Grass Energy à Mossling (Active)",
                 "Terminer le tour",
                 "Votre tour",

@@ -18,6 +18,9 @@ unit test that should cover it.
   contains no card names, attack names, flavor or UI text, art, or card data tables. Internal IDs
   (`$CB`, text `$3E`, and so on) appear only as evidence pointers. The engine must model every
   card-specific hook as a generic, original effect.
+- **Names.** The game's beings are called *Hexons*, and evolution is called *Awakening* (Basic,
+  Awaken 1, Awaken 2). The rule IDs keep the old `R-EVO` prefix, and the engine keeps its original
+  identifiers (`Creature`, `Stage1`/`Stage2`, `evolve`, `Devolve`); test names below use them too.
 
 ## Conventions
 
@@ -29,17 +32,17 @@ unit test that should cover it.
   `+XX`, an offset into that player's duel page.
 - **Glossary**
   - *T* is the turn player and *N* is the non-turn player (the opponent).
-  - *Creature* is a character card (type index < 8). Its *stage* is 0 for Basic, 1 for Stage 1 and
-    2 for Stage 2.
+  - *Hexon* is a character card (type index < 8). Its *stage* is 0 for Basic, 1 for Awaken 1 and
+    2 for Awaken 2.
   - *Energy* covers basic energy (one per colour) and one *special 2-unit colorless energy*.
   - *Trainer* is a one-shot card (type `$10`). Trainers have no subtypes.
   - *Active* is slot 0. *Bench* is slots 1 to 5.
   - *Condition* means a special condition: Confused, Asleep, Paralyzed, Poisoned or Double-Poisoned.
-  - *Power* is a creature ability stored in attack slot 1 with category 4. A Power is either
+  - *Power* is a Hexon ability stored in attack slot 1 with category 4. A Power is either
     *activated* (used from a menu) or *passive* (always on).
   - *Power blocker* is a passive Power that shuts down all other Powers.
-  - *+10 trainer* and *−20 trainer* are trainers that stay attached to a creature and change damage.
-  - *Trainer-as-Basic* is a trainer card that may be placed in play as a Basic creature.
+  - *+10 trainer* and *−20 trainer* are trainers that stay attached to a Hexon and change damage.
+  - *Trainer-as-Basic* is a trainer card that may be placed in play as a Basic Hexon.
 
 ---
 
@@ -50,7 +53,7 @@ unit test that should cover it.
   shuffled and the player draws 7 cards.
 - **Parameters.** 7 draws. 2 shuffle passes. The shuffle is skipped only in a scripted practice
   duel (`cc09 == $80`), which also seeds the RNG with `57 57 57`. A card counts as Basic when it is
-  a creature (type < 8) with stage 0.
+  a Hexon (type < 8) with stage 0.
 - **Status.** CONFIRMED
 - **Evidence.**
   - `01:4D96-4DB0`: reset (`01:71B4`), `call 00:1021` twice (skipped at `01:4D9C` when
@@ -87,11 +90,11 @@ unit test that should cover it.
 - **Parameters.** The mulligan check enters at `01:4DDB` (type and stage only). The placement filter
   enters at `01:4DD0`, which also accepts the two trainer IDs.
 - **Status.** CONFIRMED. The verifier raised it to high confidence: in hand these cards stay type
-  `$10`, and `01:6E31` turns them into creature data only while they are in play.
+  `$10`, and `01:6E31` turns them into Hexon data only while they are in play.
 - **Evidence.**
   - `01:4DC0`: `call 4DDB` from the hand scan.
   - `01:552A`: `call 4DD0`. This is the only caller of the ID-accepting entry.
-  - `00:12E9 → 01:6E31`: creature data is substituted only while the card's location is in play.
+  - `00:12E9 → 01:6E31`: Hexon data is substituted only while the card's location is in play.
 - **Test.** `mulligan_ignores_trainer_as_basic`
 
 ### R-SETUP-04: Placing Active and Bench
@@ -109,7 +112,7 @@ unit test that should cover it.
 - **Test.** `setup_requires_exactly_one_basic_active`, `setup_rejects_evolution_card`, `setup_bench_limit_five`
 
 ### R-SETUP-05: Prizes are set after placement; count is 1 to 6
-- **Rule.** After both players have placed their creatures, each player sets aside N prize cards from
+- **Rule.** After both players have placed their Hexons, each player sets aside N prize cards from
   the top of the deck, player first. N is a per-duel setting from 1 to 6. A sudden-death duel uses 1.
   **Clean-room default: 6**, kept configurable.
 - **Parameters.** `cc08 ← cc18`. The remaining-prize bitmask is `+EC = (1<<N)-1`, from table
@@ -144,7 +147,7 @@ unit test that should cover it.
 - **Parameters.** 1 card. The turn counter is not tested around the draw.
 - **Status.** CONFIRMED
 - **Evidence.** `01:423E-424E`: an unconditional draw. `01:4231` is the only test of `cc06`, and it
-  guards evolution, not the draw.
+  guards Awakening, not the draw.
 - **Test.** `first_player_draws_on_turn_zero`
 
 ### R-TURN-02: Deck-out happens only at the turn draw
@@ -175,8 +178,8 @@ unit test that should cover it.
 - **Rule.** Each turn runs in this order:
   1. Clear the turn player's own-turn substatus (`+E7`).
   2. Show the turn banner.
-  3. If the turn counter is ≥ 2, mark every creature the turn player has in play as *settled*
-     (bit 7, which allows evolution) and clear its once-per-turn Power flag (bit 5).
+  3. If the turn counter is ≥ 2, mark every Hexon the turn player has in play as *settled*
+     (bit 7, which allows Awakening) and clear its once-per-turn Power flag (bit 5).
   4. Reset the per-turn flags (energy attached, retreat failed, accuracy coin) and record whose turn
      it is.
   5. Draw 1 card (deck-out ends the duel).
@@ -192,7 +195,7 @@ unit test that should cover it.
 - **Status.** CONFIRMED
 - **Evidence.**
   - `01:40F2-4128`: the main loop, checked call by call.
-  - `01:4231-423B`: the evolution gate and `7193`.
+  - `01:4231-423B`: the Awakening gate and `7193`.
   - `00:359D`: clears `+E7`.
   - `00:35B1`: clears the trainer lock and `+E8`.
   - `01:7157`: `cc06 = 0` at duel start.
@@ -201,8 +204,8 @@ unit test that should cover it.
 ### R-TURN-04: Main phase actions in any order
 - **Rule.** The main phase is a loop. The turn player may repeat any of these, in any order and as
   often as allowed:
-  - Play a card from hand. A Basic goes to the Bench if fewer than 6 creatures are in play. An
-    evolution card evolves a creature. Energy is attached, once per turn. A Trainer is played.
+  - Play a card from hand. A Basic goes to the Bench if fewer than 6 Hexons are in play. An
+    Awakening card awakens a Hexon. Energy is attached, once per turn. A Trainer is played.
   - Use a Power.
   - Retreat.
   - Look at cards.
@@ -214,7 +217,7 @@ unit test that should cover it.
 - **Status.** CONFIRMED
 - **Evidence.**
   - `01:445F-4478`: dispatch by card type. Every branch returns to `4271`.
-  - `01:44DF-4527`: Basic → Bench, otherwise evolve.
+  - `01:44DF-4527`: Basic → Bench, otherwise awaken.
   - `01:4392-439B`: Power → menu.
 - **Test.** `main_phase_multiple_actions_same_turn`
 
@@ -297,7 +300,7 @@ unit test that should cover it.
 
 ### R-ENERGY-01: One energy attachment per turn
 - **Rule.** A player may attach at most one energy card from hand per turn, to the Active or to any
-  Benched creature. The limit is checked before the target is chosen, except when the free-attach
+  Benched Hexon. The limit is checked before the target is chosen, except when the free-attach
   exception may apply (R-ENERGY-02): then the target is picked first and the play is refused
   afterwards if the exception does not cover it. The flag is set only when the attachment is committed, so cancelling the target choice keeps the attachment available. This
   applies on any turn, including both players' first turns. The flag resets every turn.
@@ -315,9 +318,9 @@ unit test that should cover it.
 - **Test.** `second_energy_attach_same_turn_rejected`, `cancel_attach_keeps_allowance`, `energy_attach_allowed_turn_zero`
 
 ### R-ENERGY-02: Free-attach Power exception
-- **Rule.** A generic Power can lift the one-per-turn limit for one energy colour going onto creatures
+- **Rule.** A generic Power can lift the one-per-turn limit for one energy colour going onto Hexons
   of that same colour. While a holder of this Power is in play **on the attaching side**, a matching
-  energy attached to a creature whose *effective* colour matches does not use up the attachment.
+  energy attached to a Hexon whose *effective* colour matches does not use up the attachment.
   The exception does not apply while a power blocker is in play.
 
   Counting rule (R-POWER-03): a Benched holder always counts. An Active holder counts only if it is
@@ -377,7 +380,7 @@ unit test that should cover it.
   this order):
   1. The opponent's effect has set "can't retreat" on the Active.
   2. The Active is Asleep or Paralyzed.
-  3. There is no Benched creature with HP above 0.
+  3. There is no Benched Hexon with HP above 0.
   4. The Active is a Trainer-as-Basic card.
   5. The attached units are fewer than the retreat cost.
 
@@ -407,7 +410,7 @@ unit test that should cover it.
 - **Rule.** A Confused Active may try to retreat. The chosen energies are discarded first, then a
   coin is flipped, even when the cost is 0.
   - Heads: the switch happens.
-  - Tails: the energy stays discarded, the creature stays Active, and a *retreat failed* flag is set.
+  - Tails: the energy stays discarded, the Hexon stays Active, and a *retreat failed* flag is set.
     While that flag is set and the Active is Confused, further retreat attempts that turn are refused.
 
   The flag is cleared on a successful retreat and at the start of every turn. The flag is read only
@@ -423,8 +426,8 @@ unit test that should cover it.
 - **Rule.** Any switch between Active and Bench (retreat or an effect) clears every condition and
   every attack-applied effect on the outgoing Active. That covers conditions, substatuses, changed
   weakness and resistance, the doubling flag, and last-attack data. Conditions are stored only for the
-  Active, so a Benched creature never has one. These move with the creature: damage, attached cards,
-  stage, evolve and Power flags, the per-slot colour override and the attached-trainer counters. The
+  Active, so a Benched Hexon never has one. These move with the Hexon: damage, attached cards,
+  stage, awaken and Power flags, the per-slot colour override and the attached-trainer counters. The
   player-wide trainer lock is not cleared.
 - **Parameters.** `00:13C6` zeroes `+F0`, `+E7`, `+E8`, `+E9`, `+EA`, `+EB` bit 0 and `+F2..F9`.
   `00:14A8` then swaps `+BB`, `+C8`, `+C2`, `+CE`, `+D4`, `+E0` and `+DA`, and rewrites the
@@ -434,7 +437,7 @@ unit test that should cover it.
 - **Test.** `retreat_clears_status_keeps_damage`
 
 ### R-RETREAT-05: No per-turn retreat limit
-- **Rule.** A creature that is not Confused may retreat any number of times per turn, paying each
+- **Rule.** A Hexon that is not Confused may retreat any number of times per turn, paying each
   time. Retreating does not end the turn, and the new Active may attack. Retreat is available on every
   turn, including first turns.
 - **Parameters.** The only per-turn retreat state for players is `cc0c` (R-RETREAT-03). The AI has
@@ -473,7 +476,7 @@ unit test that should cover it.
 ### R-STATUS-02: Applying a condition
 - **Rule.** Applying Confused, Asleep or Paralyzed replaces whichever of those three is present and
   keeps Poison. Applying Poison or Double-Poison overwrites the poison level and keeps the other
-  condition. So Poison on a Double-Poisoned creature makes it single-Poisoned. The coin variants flip
+  condition. So Poison on a Double-Poisoned Hexon makes it single-Poisoned. The coin variants flip
   first and apply only on heads.
 - **Parameters.** `new = (old & mask) | value`:
 
@@ -493,7 +496,7 @@ unit test that should cover it.
 - **Rule.** An attack's condition is decided, including its coin, before damage. It is queued and
   written only after damage and the after-damage effects. If the defender was protected from the
   attack's effects, conditions aimed at the defender are dropped, and conditions the attacker puts on
-  itself still apply. A Trainer-as-Basic creature can never receive a condition. A generic
+  itself still apply. A Trainer-as-Basic Hexon can never receive a condition. A generic
   "condition immunity" Power protects its holder while that Power is usable. Immunity is decided
   when the condition is queued, against the defender at that moment. The queue entry names a side,
   not a card, so if a later effect of the same attack switches the defender, the condition lands on
@@ -521,7 +524,7 @@ unit test that should cover it.
 ### R-STATUS-05: Conditions disable the Active's Powers
 - **Rule.** While the Active is Confused, Asleep or Paralyzed, its activated Power cannot be used and
   its passive Power stops working. That includes no longer counting for "is this Power in play".
-  Poison does not disable Powers. Benched creatures are never affected.
+  Poison does not disable Powers. Benched Hexons are never affected.
 - **Parameters.** `00:34A7(slot)`. Only slot 0 tests the nibble. Slot ≠ 0 skips straight to the
   blocker check.
 - **Status.** CONFIRMED
@@ -529,7 +532,7 @@ unit test that should cover it.
 - **Test.** `confused_active_power_blocked`, `poisoned_active_power_usable`
 
 ### R-STATUS-06: Confusion coin when attacking
-- **Rule.** When a Confused creature attacks, its energy-discard cost is paid first, after any
+- **Rule.** When a Confused Hexon attacks, its energy-discard cost is paid first, after any
   accuracy coin from its own substatus. Then a coin is flipped.
   - Heads: the attack resolves normally.
   - Tails: the attack does nothing else. The attacker takes 20 self-damage, modified as in
@@ -577,7 +580,7 @@ unit test that should cover it.
 
 ### R-STATUS-09: Sleep coin
 - **Rule.** At every between-turns step, each Asleep Active flips a coin, after its poison damage.
-  Heads wakes it (Poison stays). Tails keeps it Asleep. A creature knocked out by poison gets no coin.
+  Heads wakes it (Poison stays). Tails keeps it Asleep. A Hexon knocked out by poison gets no coin.
 - **Status.** CONFIRMED
 - **Evidence.** `01:6DA7-6DD7`, called from `6CA8` and `6CE4`.
 - **Test.** `sleep_flip_heads_wakes_up`, `sleep_flip_tails_stays_asleep`
@@ -597,8 +600,8 @@ unit test that should cover it.
 - **Test.** `paralysis_cured_after_owner_turn`
 
 ### R-STATUS-11: Confusion persists
-- **Rule.** Confusion never wears off by itself. It ends only when the creature leaves the Active
-  spot, evolves, is knocked out, or is cured by an effect.
+- **Rule.** Confusion never wears off by itself. It ends only when the Hexon leaves the Active
+  spot, awakens, is knocked out, or is cured by an effect.
 - **Status.** CONFIRMED
 - **Evidence.** `01:6C5C-6D2A` never tests nibble 1.
 - **Test.** `confusion_persists_across_turns`
@@ -606,8 +609,8 @@ unit test that should cover it.
 ### R-STATUS-12: Cures
 - **Rule.** All conditions and attack effects on the Active are cleared when:
   - it is switched out;
-  - it evolves (Active only);
-  - a creature is put into an empty Active spot, including replacement after a knock-out;
+  - it awakens (Active only);
+  - a Hexon is put into an empty Active spot, including replacement after a knock-out;
   - a card effect removes or replaces it.
 
   Generic cure effects also exist: a trainer that requires the Active to have a condition and then
@@ -625,13 +628,13 @@ unit test that should cover it.
   re-apply those recorded conditions to the other side through the normal helpers. Every completed
   attack clears both sides' records, even when it queued nothing. An attack that fails its accuracy
   coin or its confusion coin never applies the queue, but the defender's record is still cleared
-  (the attacker's is kept). Switching, evolving and a new Active also clear the record.
+  (the attacker's is kept). Switching, awakening and a new Active also clear the record.
 - **Parameters.** Both `+F5` are zeroed at the start of `01:6E9E` (`6E9F-6EA2`), before the
   empty-queue test at `6EA8`. `01:6E9E` runs at the end of every completed attack (`00:1770`) and after
   the paralysing Power (`0B:531D`); trainers never reach it. The defender's `+F2..F9`, which includes
   `+F5`, is also zeroed by `01:7227`: at the start of every attack attempt (`00:1691 → 01:7236`), on
   confusion tails (`00:17A6`), on an accuracy miss (`00:1783`) and on Done. `00:13C6` clears `+F2..F9`
-  on switch, evolve and new Active. The reader `0B:69F4-6A23` reads the turn duelist's own record
+  on switch, awaken and new Active. The reader `0B:69F4-6A23` reads the turn duelist's own record
   (`+F5`, and `+F3/+F4` for the last damage) and writes the opponent's `+F0`.
 - **Status.** CORRECTED (verifier-found). The original text had the clear only "at each queue apply".
   Runtime: `01:6E9E` with `C2F5 = $80`, `C3F5 = 2` and an empty queue left both 0; `00:1788` and
@@ -704,7 +707,7 @@ unit test that should cover it.
     Otherwise the printed value is used.
   - The attacker's changed colour (from a Power) is used only while that Power is working. If the
     attacking Active has a condition, or a power blocker is in play, its printed colour is used.
-  - A Trainer-as-Basic creature counts as colour index 6.
+  - A Trainer-as-Basic Hexon counts as colour index 6.
 
   Weakness ×2 is applied before resistance −30.
 - **Parameters.** Type mask table `80 40 20 10 08 04 02 01`. Changed colour is `+D4` bit 7, gated by
@@ -717,14 +720,14 @@ unit test that should cover it.
 - **Rule.** Effect damage (to the Bench, or to either Active through an effect) never uses weakness
   or resistance.
   - Effect damage to an **Active** adds the attacker's +10 trainers, even when it comes from a Power.
-  - Effect damage to **any** slot subtracts the −20 trainers on the damaged creature, except Power
+  - Effect damage to **any** slot subtracts the −20 trainers on the damaged Hexon, except Power
     damage.
   - Effect damage to the Active also goes through the defender's reductions. It is cancelled
     entirely while the attack-prevention flag is set.
   - After the clamp, unless the damage came from a Power or a power blocker is in play:
-    - a damaged Benched creature's own reduction Power still applies (prevent at ≥30, or halve);
-    - then, for **any** slot, a holder of the "protected from evolved attackers" Power takes 0 when
-      the attacker is evolved and the damage is not to the attacker's own side;
+    - a damaged Benched Hexon's own reduction Power still applies (prevent at ≥30, or halve);
+    - then, for **any** slot, a holder of the "protected from awakened attackers" Power takes 0 when
+      the attacker is awakened and the damage is not to the attacker's own side;
     - then, for any slot, a holder of the coin-prevention Power (R-DMG-13) flips a coin, even when
       the damage is already 0; heads makes it 0.
 - **Parameters.** `00:1A53`. The target slot goes to `ccf1`. `ccb7 == 4` means Power damage. The
@@ -735,7 +738,7 @@ unit test that should cover it.
   defender, unless another `1A53` call clears it again (R-DMG-12).
 - **Status.** CORRECTED. The original claim missed the +10 on Power damage, the post-clamp Bench
   Power, and the two Power checks for every slot. Runtime: `00:1A53` with `b = 1`, `de = 10`: a Bench
-  `$96` with a heads coin gave `de = 0`, `cccd = 4`; a Bench `$A0` against a Stage 1 attacker gave
+  `$96` with a heads coin gave `de = 0`, `cccd = 4`; a Bench `$A0` against an Awaken 1 attacker gave
   `de = 0`, `cccd = 5`, and against a Basic `de = 10`.
 - **Evidence.** `00:1A53-1AEC`, `00:32AE-32CD`, `00:3418-346D`, `0B:4117-412D` (the Bench helper).
 - **Test.** `bench_effect_damage_ignores_weakness`, `bench_minus20_trainer_reduces_effect_damage`,
@@ -745,7 +748,7 @@ unit test that should cover it.
   itself is protected, and keeps it for the whole attack (see R-DMG-12).
 
 ### R-DMG-05: Self-damage uses the attacker's own modifiers
-- **Rule.** Damage a creature deals to itself (the confusion hit, or recoil) uses its **own**
+- **Rule.** Damage a Hexon deals to itself (the confusion hit, or recoil) uses its **own**
   weakness and resistance against its **own** colour, then its own +10 and −20 trainers, then the
   clamp. Its substatus modifiers are skipped. The prevention flag is saved and forced to 0 during
   the self-hit, so self-damage cannot be prevented.
@@ -759,10 +762,10 @@ unit test that should cover it.
 - **Test.** `confusion_self_hit_weak_to_own_type_takes_40`, `confusion_self_hit_resists_own_type_takes_0`
 
 ### R-DMG-06: HP storage and the knock-out test
-- **Rule.** Each creature in play stores its remaining HP as raw points (one byte). There are no
-  damage counters. Damage is subtracted, and HP is set to 0 instead of going negative. A creature is
+- **Rule.** Each Hexon in play stores its remaining HP as raw points (one byte). There are no
+  damage counters. Damage is subtracted, and HP is set to 0 instead of going negative. A Hexon is
   knocked out **exactly** when its HP is 0.
-- **Parameters.** `+C8+slot`. `00:19F6` sets carry when the creature is still alive.
+- **Parameters.** `+C8+slot`. `00:19F6` sets carry when the Hexon is still alive.
 - **Status.** CONFIRMED
 - **Evidence.** `00:19F6-1A0B`. `01:7074`, `01:70A4`, `01:6FB5` and `01:6FD0` all test only the HP byte.
 - **Test.** `damage_equal_to_hp_knocks_out`, `overkill_clamps_hp_to_zero`
@@ -787,7 +790,7 @@ unit test that should cover it.
   turn's attacks are doubled", which then applies to every attack of that turn, including another
   use of the doubling attack itself (which sets the mark again). At the end of a turn the doubling
   is dropped unless the mark was set again that turn. Both parts are Active effects, so they are lost
-  if the Active leaves (switch, evolve) before they are used.
+  if the Active leaves (switch, awaken) before they are used.
 - **Parameters.** The pending mark is `+E7 = $19`. The doubling is `+EB` bit 0, read inside `00:31D4`.
   `00:35A6-35AE` (start of turn) sets `+EB` bit 0 when `+E7 == $19`. `00:35C6-35C9` (end of turn)
   keeps bit 0 only while `+E7 == $19`.
@@ -880,7 +883,7 @@ unit test that should cover it.
   2. **Direct damage**, once per attack, after phase 4: for an attack with direct damage, if the
      total damage dealt to the defending Active (the direct damage plus effect damage to the Active)
      is nonzero and the defending Active's Power works, the turn player's **current** Active takes
-     10. If a phase-4 effect switched the attacker, the creature switched in takes it.
+     10. If a phase-4 effect switched the attacker, the Hexon switched in takes it.
 
   So an attack with 0 direct damage whose phase-4 effect hits the holder's Active triggers both,
   for 20 in total.
@@ -904,41 +907,43 @@ unit test that should cover it.
 
 ---
 
-## 7. Evolution (R-EVO)
+## 7. Awakening (R-EVO)
 
-### R-EVO-01: Evolution follows the "evolves from" name
-- **Rule.** A creature card with stage ≠ 0 played from hand evolves an in-play creature whose
-  **name** matches the card's "evolves from" name. There is no stage arithmetic. A stage-0 card always
+Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` prefix.
+
+### R-EVO-01: Awakening follows the "awakens from" name
+- **Rule.** A Hexon card with stage ≠ 0 played from hand awakens an in-play Hexon whose
+  **name** matches the card's "awakens from" name. There is no stage arithmetic. A stage-0 card always
   goes to the Bench.
 - **Parameters.** Hand card `+0A/+0B` is compared with the in-play card's name `+03/+04`.
 - **Status.** CONFIRMED
 - **Evidence.** `01:44DF`, `00:135C-138F`.
 - **Test.** `evolve_requires_matching_evolves_from_name`
 
-### R-EVO-02: No evolution on either player's first turn
+### R-EVO-02: No Awakening on either player's first turn
 - **Rule.** The settled flag is set at turn start only when the turn counter is ≥ 2, so neither
-  player can evolve on their own first turn.
+  player can awaken on their own first turn.
 - **Status.** CONFIRMED
 - **Evidence.** `01:4231` (`cp 2`), `01:71A3`, `01:7157/411A`.
 - **Test.** `no_evolution_on_turns_zero_and_one`
 
-### R-EVO-03: No evolution on the turn a creature came into play
-- **Rule.** A creature placed in play has its flags cleared. It can evolve only after the start of its
-  owner's next turn. The two errors differ: "no matching creature" versus "matching creature, but not
-  this turn". The flag moves with the creature when it switches slots.
+### R-EVO-03: No Awakening on the turn a Hexon came into play
+- **Rule.** A Hexon placed in play has its flags cleared. It can awaken only after the start of its
+  owner's next turn. The two errors differ: "no matching Hexon" versus "matching Hexon, but not
+  this turn". The flag moves with the Hexon when it switches slots.
 - **Status.** CONFIRMED
 - **Evidence.** `00:140C`, `00:137B`, `01:4540-4552`, `00:14A8`.
 - **Test.** `cannot_evolve_creature_benched_this_turn`, `no_evolvable_vs_not_this_turn_errors_differ`
 
-### R-EVO-04: Only one evolution per creature per turn
-- **Rule.** Evolving clears the slot's flags, so the same creature cannot evolve again that turn.
-  Going from Basic to Stage 2 normally takes two turns.
+### R-EVO-04: Only one Awakening per Hexon per turn
+- **Rule.** Awakening clears the slot's flags, so the same Hexon cannot awaken again that turn.
+  Going from Basic to Awaken 2 normally takes two turns.
 - **Status.** CONFIRMED
 - **Evidence.** `00:133C`.
 - **Test.** `cannot_double_evolve_same_turn`
 
-### R-EVO-05: No limit on evolutions per turn
-- **Rule.** Different eligible creatures may each evolve once in the same turn. There is no counter
+### R-EVO-05: No limit on Awakenings per turn
+- **Rule.** Different eligible Hexons may each awaken once in the same turn. There is no counter
   across the turn.
 - **Status.** CONFIRMED
 - **Evidence.** `01:7193`, `01:4528-4583`, `00:1307-1359`.
@@ -951,19 +956,19 @@ unit test that should cover it.
 - **Evidence.** `00:132C-133B`.
 - **Test.** `evolve_keeps_damage`
 
-### R-EVO-07: Attached cards and the evolution stack stay
-- **Rule.** Attached energy and trainers stay with the creature. The earlier stage cards stay
-  underneath in the same slot and go to the discard pile with it. Evolution does not reset the
+### R-EVO-07: Attached cards and the Awakening stack stay
+- **Rule.** Attached energy and trainers stay with the Hexon. The earlier stage cards stay
+  underneath in the same slot and go to the discard pile with it. Awakening does not reset the
   attached-trainer counters.
 - **Status.** CONFIRMED
-- **Evidence.** `00:1311-1327`, `00:1437`. The Bench path zeroes `E0/DA` at `00:1418`, and evolve
+- **Evidence.** `00:1311-1327`, `00:1437`. The Bench path zeroes `E0/DA` at `00:1418`, and the awaken path
   does not.
 - **Test.** `evolve_keeps_attached_energy` (also checks the attached trainers and their count)
 
-### R-EVO-08: Evolving clears the slot's flags, and clears the Active's conditions
-- **Rule.** For any slot, evolving clears all the slot flags (settled, Power-used, once-while-in-play)
+### R-EVO-08: Awakening clears the slot's flags, and clears the Active's conditions
+- **Rule.** For any slot, awakening clears all the slot flags (settled, Power-used, once-while-in-play)
   and the changed colour, and writes the new stage. So a once-while-in-play attack (R-EFFECT-05) is
-  usable again after evolving. For the Active only, all conditions and effects are cleared as well
+  usable again after awakening. For the Active only, all conditions and effects are cleared as well
   (R-STATUS-12). The player-wide trainer lock is not cleared.
 - **Parameters.** EvolveCreatureNoCheck zeroes the whole `+C2` byte (`00:133C`: bit 7 settled, bit 5
   Power used, bit 6 once-while-in-play) and `+D4` (`00:1342`).
@@ -971,45 +976,45 @@ unit test that should cover it.
 - **Evidence.** `00:133C`, `00:1342`, `00:13C6`, `00:134D`.
 - **Test.** `evolve_active_clears_conditions`, `evolve_bench_keeps_slot_state`
 
-### R-EVO-09: Evolution-lock Power
-- **Rule.** While a creature with a generic evolution-lock Power is in play on either side, nobody
-  can evolve, whether from hand or through the stage-skip trainer. The holder counts as in play when
+### R-EVO-09: Awakening-lock Power
+- **Rule.** While a Hexon with a generic Awakening-lock Power is in play on either side, nobody
+  can awaken, whether from hand or through the stage-skip trainer. The holder counts as in play when
   it is on the Bench, or when it is the Active without Confused, Asleep or Paralyzed. The lock is
-  lifted while a power blocker is in play, using the same counting rule. The "nothing to evolve" and
+  lifted while a power blocker is in play, using the same counting rule. The "nothing to awaken" and
   "not this turn" errors take priority over the lock. That priority is judged over the whole play
   area: EvolveFromHand `01:4528` scans every slot first, shows "none" or "not this turn" only if no
   slot works, then checks the lock (`01:455A`), and only then opens the target picker. The clean
   engine judges the one slot the player named, so with a lock up and another slot eligible it
-  reports "no matching creature" where the source reports the lock. Both refuse the play.
+  reports "no matching Hexon" where the source reports the lock. Both refuse the play.
 - **Parameters.** `00:356E` is blocked when `count($8D) > 0` and `count($27) == 0`.
 - **Status.** CORRECTED. The verifier refined how the blocker is counted.
 - **Evidence.** `00:356E`, `00:34C0`, `00:34DC`, `01:455A`, `0B:76B8`.
 - **Test.** `evolution_lock_power_blocks_evolution`, `evolution_lock_inactive_when_holder_asleep`
 
 ### R-EVO-10: Stage-skip trainer (optional effect)
-- **Rule.** A trainer effect may put a Stage 2 from hand directly onto a settled Basic. The Basic's
-  name must match the evolves-from name of the Stage 1 that the Stage 2 evolves from. The usual
-  eligibility rules and the evolution lock still apply. The normal evolve body runs, and the stage is
-  then recorded as 3. Stage 3 means "a skipped Stage 1": devolving such a creature returns it to the
-  Basic.
+- **Rule.** A trainer effect may put an Awaken 2 from hand directly onto a settled Basic. The Basic's
+  name must match the awakens-from name of the Awaken 1 that the Awaken 2 awakens from. The usual
+  eligibility rules and the Awakening lock still apply. The normal awaken body runs, and the stage is
+  then recorded as 3. Stage value 3 means "a skipped Awaken 1": such a Hexon, when it falls back,
+  returns to the Basic.
 - **Status.** CONFIRMED
-- **Evidence.** `0B:76B3-7716`, `00:1390`, `00:2E84`, `01:70F2` / `01:713B` (devolve reads 1 and 3
+- **Evidence.** `0B:76B3-7716`, `00:1390`, `00:2E84`, `01:70F2` / `01:713B` (the fall-back reads 1 and 3
   alike, see §15).
 - **Test.** `stage_skip_trainer_requires_settled_basic`
 
-### R-EVO-11: Evolving refreshes a once-per-turn Power *(verifier-found)*
-- **Rule.** Evolving zeroes the Power-used bit, so the newly evolved creature may use its own
+### R-EVO-11: Awakening refreshes a once-per-turn Power *(verifier-found)*
+- **Rule.** Awakening zeroes the Power-used bit, so the newly awakened Hexon may use its own
   once-per-turn Power in the same turn.
 - **Status.** CONFIRMED (verifier-found)
 - **Evidence.** `00:133C` (C2 = 0), `0B:4D0D`, `0B:4D69`.
 - **Test.** `evolved_creature_may_use_power_same_turn`
 
-### R-EVO-12: Devolve effect *(verifier-found)*
-- **Rule.** A devolve effect sets HP to (the lower stage's max − damage), clamped at 0, restores the
-  lower stage, clears the Active's conditions, and clears the slot flags. A devolved creature cannot
-  evolve again that turn. Where the removed stage goes depends on the effect:
-  - the devolve **attack** (`0B:5D17-5D2E`) puts it into its owner's hand;
-  - the devolve **trainer** (`0B:7C99-7CCC`) devolves a creature on the player's own side, puts the
+### R-EVO-12: Fall-back effect *(verifier-found)*
+- **Rule.** A fall-back effect sets HP to (the lower stage's max − damage), clamped at 0, restores the
+  lower stage, clears the Active's conditions, and clears the slot flags. A Hexon that fell back cannot
+  awaken again that turn. Where the removed stage goes depends on the effect:
+  - the fall-back **attack** (`0B:5D17-5D2E`) puts it into its owner's hand;
+  - the fall-back **trainer** (`0B:7C99-7CCC`) makes a Hexon fall back on the player's own side, puts the
     removed stages into the discard pile, then runs the knock-out handler (`01:6EF6`).
 
   The clean engine always returns the removed stage to its owner's hand, for attacks and trainers
@@ -1019,8 +1024,8 @@ unit test that should cover it.
   `0B:5D17-5D2E`, `0B:7C99-7CCC`.
 - **Test.** `devolve_keeps_damage_and_clears_flags`
 
-### R-EVO-13: The evolve target picker *(verifier-found)*
-- **Rule.** Choosing an invalid evolve target sends the player back to the picker. A creature
+### R-EVO-13: The awaken target picker *(verifier-found)*
+- **Rule.** Choosing an invalid awaken target sends the player back to the picker. A Hexon
   placed from hand starts at stage 0.
 - **Status.** CONFIRMED (verifier-found)
 - **Evidence.** `01:4572`, `01:44F7`.
@@ -1030,10 +1035,10 @@ unit test that should cover it.
 
 ## 8. Knock-outs, prizes and winning (R-KO)
 
-### R-KO-01: One prize per knocked-out creature
-- **Rule.** For each of the opponent's in-play creatures at 0 HP (Active or Bench), the player takes
+### R-KO-01: One prize per knocked-out Hexon
+- **Rule.** For each of the opponent's in-play Hexons at 0 HP (Active or Bench), the player takes
   one prize. A knocked-out Trainer-as-Basic gives no prize. A player cannot take more prizes than
-  remain. Prizes go to the hand one at a time. There are no multi-prize creatures.
+  remain. Prizes go to the hand one at a time. There are no multi-prize Hexons.
 - **Parameters.** The count goes to `ccce` (`01:7074`). The picking loop stops at count 0 or at
   `+EC == 0`.
 - **Status.** CONFIRMED
@@ -1060,15 +1065,15 @@ unit test that should cover it.
 ### R-KO-04: Order inside the knock-out handler
 - **Rule.** With T as the turn player:
   1. Counter-KO (R-KO-09).
-  2. Clear effects tied to a creature that was knocked out (R-KO-10).
-  3. T takes prizes for N's knocked-out creatures.
+  2. Clear effects tied to a Hexon that was knocked out (R-KO-10).
+  3. T takes prizes for N's knocked-out Hexons.
   4. T may win early (R-KO-07).
-  5. Otherwise N takes prizes for T's knocked-out creatures.
+  5. Otherwise N takes prizes for T's knocked-out Hexons.
   6. T may lose early.
   7. N replaces its Active if it was knocked out, then T does.
   8. If any win bit is set, the result is looked up in the table.
 
-  **In every case**, including the early exits, all 0-HP creatures with their attached cards go to the
+  **In every case**, including the early exits, all 0-HP Hexons with their attached cards go to the
   discard pile (T's first, then N's), and both play areas are compacted.
 - **Parameters.** The discard path `6F5F-6F70` runs on every path.
 - **Status.** CORRECTED. Discarding always happens. It is not an alternative to deciding the result.
@@ -1077,9 +1082,9 @@ unit test that should cover it.
 
 ### R-KO-05: Replacing a knocked-out Active
 - **Rule.** A player whose Active is at 0 HP must immediately choose a new Active from Benched
-  creatures with HP above 0. The choice cannot be cancelled. If none exists, that player has no
-  creatures (a win condition for the opponent).
-- **Status.** CONFIRMED. The default AI never picks a 0-HP creature (AIDefaultReplaceHandler
+  Hexons with HP above 0. The choice cannot be cancelled. If none exists, that player has no
+  Hexons (a win condition for the opponent).
+- **Status.** CONFIRMED. The default AI never picks a 0-HP Hexon (AIDefaultReplaceHandler
   `05:4683 → AIScoreSwitchIn` scores it 0). The scripted practice AI (opponent index 0, replacement
   entry `05:47E7`) looks for two fixed card IDs on the Bench (`05:55EF`) or falls back to slot 1 with
   no HP check while the turn counter / 2 < 7, so it can pick a 0-HP slot (runtime: `00:2B52` with
@@ -1103,11 +1108,11 @@ unit test that should cover it.
   `result_table_matches_all_sixteen_entries`
 
 ### R-KO-07: Early win and early loss
-- **Rule.** If T takes its last prize, still has a creature with HP above 0, and N cannot also finish
+- **Rule.** If T takes its last prize, still has a Hexon with HP above 0, and N cannot also finish
   its prizes in this step, T wins at once. T still picks its deciding prizes the normal way (a human
   with the prize cursor, the AI at random). N's prizes are only removed from the count: no card goes to
   N's hand, and the mask keeps the lowest slots, so the highest go first. No replacements happen. If
-  only N finishes its prizes and N still has a live creature, T loses at once. On the full table path
+  only N finishes its prizes and N still has a live Hexon, T loses at once. On the full table path
   both replacements are still asked for before the result. The result always matches the table, so
   an engine may use the table path every time. The knock-out discard still happens.
 - **Status.** CONFIRMED. Runtime (T one prize left, both Actives knocked out): the human prize cursor
@@ -1148,7 +1153,7 @@ unit test that should cover it.
 - **Rule.** When one side's Active is knocked out, these values in the other side's `+E8` are
   cleared: 3, 5, 6, 7 and `$12` (effects that depended on it). The third attack-lock code `$0B`
   (R-TURN-05; set by `0B:6312-6318` on a coin) is not in that set, so that lock outlives the
-  knock-out of the creature that placed it.
+  knock-out of the Hexon that placed it.
 - **Status.** CONFIRMED. The clean engine's single attack lock is always linked (it models codes 5
   and 6); an unlinked lock would need its own effect.
 - **Evidence.** `01:6F8F-6FA2`, `00:357E-359C`.
@@ -1165,14 +1170,14 @@ unit test that should cover it.
 - **Test.** `deck_must_have_exactly_sixty`
 
 ### R-DECK-02: At least one Basic
-- **Rule.** A deck needs at least one Basic creature. Trainer-as-Basic cards do not count.
+- **Rule.** A deck needs at least one Basic Hexon. Trainer-as-Basic cards do not count.
 - **Status.** CONFIRMED
 - **Evidence.** `02:5674`, `02:556F-557D`.
 - **Test.** `deck_without_basic_rejected`
 
 ### R-DECK-03: At most 4 cards with the same name
 - **Rule.** A deck may hold at most 4 cards that share a **name**. Different versions with the same
-  name count together. Basic energy is exempt. The special 2-unit energy, trainers and creatures are
+  name count together. Basic energy is exempt. The special 2-unit energy, trainers and Hexons are
   limited.
 - **Parameters.** Limit `cfd9 = 4`. The exemption test is exactly: type `$0E` (the special energy)
   is counted; otherwise any type with bit 3 set is exempt, which is `$08-$0D` (basic energy) in
@@ -1192,10 +1197,10 @@ unit test that should cover it.
   duplicate name), so counting by name and by id agree; "different versions with the same name"
   cannot occur in a valid card set.
 
-### R-ZONE-01: Bench limit and placing a creature
-- **Rule.** A player can have at most 6 creatures in play: 1 Active and 5 Benched. This is enforced
-  for playing from hand, for setup placement and for effects. A newly placed creature has full HP, its
-  flags cleared (so it cannot evolve this turn), and its stage recorded. If it goes to slot 0, its
+### R-ZONE-01: Bench limit and placing a Hexon
+- **Rule.** A player can have at most 6 Hexons in play: 1 Active and 5 Benched. This is enforced
+  for playing from hand, for setup placement and for effects. A newly placed Hexon has full HP, its
+  flags cleared (so it cannot awaken this turn), and its stage recorded. If it goes to slot 0, its
   conditions and Active effects are cleared (`00:13C6`: `+F0`, `+E7..+EA`, `+EB` bit 0, `+F2..+F9`;
   the player-wide trainer lock stays). The new slot is the old in-play count (`+EF`), so slot 0 is
   used only when nothing is in play.
@@ -1236,7 +1241,7 @@ unit test that should cover it.
 
 ### R-ZONE-05: Discard pile
 - **Rule.** The discard pile is an ordered public list, and new cards go on top. Only cards in hand
-  can be discarded from hand. A knocked-out creature goes there with every card in its slot (all
+  can be discarded from hand. A knocked-out Hexon goes there with every card in its slot (all
   stages, energy and trainers). In the source these are added in deck-index order (`00:1442-145C`
   loops locations 0..`$3B`). The order within a single knock-out is not a rule; the clean engine
   discards the stack, then energy, then trainers. The play area is then compacted, starting from
@@ -1291,7 +1296,7 @@ unit test that should cover it.
 
 ### R-TRAINER-05: Attached damage-modifier trainers
 - **Rule.** The +10 and −20 trainers stay attached. They are counted per slot and move with the
-  creature. At every between-turns step, all of T's +10 trainers in play (Active and Bench) are
+  Hexon. At every between-turns step, all of T's +10 trainers in play (Active and Bench) are
   discarded, so they last for the turn they were played. Then all of N's −20 trainers in play are
   discarded, so a −20 its owner attached survives the owner's own turn end and lasts through the
   opponent's following turn. Both discards run on the full path and on the no-conditions fast path.
@@ -1372,7 +1377,7 @@ unit test that should cover it.
 ### R-EFFECT-04: Reusable effect kinds
 - **Rule.** The source builds effects from shared helpers. An original card set may reuse these:
   - apply a condition, always or on heads;
-  - damage every Benched creature on a side, with no weakness or resistance;
+  - damage every Benched Hexon on a side, with no weakness or resistance;
   - heal the Active, capped at max HP, requiring some damage;
   - set or add to the damage;
   - protect itself next turn;
@@ -1382,11 +1387,11 @@ unit test that should cover it.
     switch is skipped);
   - search the deck, draw, or recover cards;
   - change weakness or resistance;
-  - devolve;
+  - fall back to the previous stage;
   - lock the opponent's trainers.
 - **Engine extensions.** Built from the same helpers, for the original set: add damage per 10
-  damage on the attacker or the defender; heal every own creature; attach a basic energy found in
-  the deck to the acting creature, then shuffle (R-ZONE-03). Tests:
+  damage on the attacker or the defender; heal every own Hexon; attach a basic energy found in
+  the deck to the acting Hexon, then shuffle (R-ZONE-03). Tests:
   `add_per_damage_counts_damage_on_self_or_defender`, `heal_all_heals_every_own_creature`,
   `attach_from_deck_puts_chosen_energy_on_self_and_shuffles`.
 - **Status.** CORRECTED. The force-switch is a phase-5 selection, not a precondition, and healing
@@ -1395,16 +1400,16 @@ unit test that should cover it.
 - **Test.** `bench_damage_ignores_weakness`, `heal_capped_at_max_hp`, `force_switch_with_empty_bench_still_attacks`
 
 ### R-EFFECT-05: Attack usable once while in play *(verifier-found)*
-- **Rule.** An attack may be flagged "only once while this creature stays in play". The flag is set
+- **Rule.** An attack may be flagged "only once while this Hexon stays in play". The flag is set
   during the cost phase, so it counts even if the confusion coin fails. It survives turn changes and
-  switching. Evolving or a new placement resets it.
+  switching. Awakening or a new placement resets it.
 - **Parameters.** `+C2` bit 6.
 - **Status.** CONFIRMED (verifier-found)
 - **Evidence.** `0B:6B1F`, `0B:6B2C`, `06:4DBA`.
 - **Test.** `once_per_stay_attack_rejected_second_time`
 
 ### R-EFFECT-06: Copy one of the defender's attacks *(verifier-found)*
-- **Rule.** An effect can run one of the defending creature's attacks through the same pipeline. It
+- **Rule.** An effect can run one of the defending Hexon's attacks through the same pipeline. It
   cannot copy the copying attack itself. The copied attack's phase-1 check and then its phase-2
   selection run for the copier. If the check fails, the copy is refused with that attack's error:
   nothing is paid and the player is back at the attack menu with the turn still going. The copied
@@ -1428,7 +1433,7 @@ unit test that should cover it.
 ## 11. Powers (R-POWER)
 
 ### R-POWER-01: Activating a Power
-- **Rule.** The player chooses an in-play creature whose first ability is a Power.
+- **Rule.** The player chooses an in-play Hexon whose first ability is a Power.
   - A passive Power (one with a phase-1 entry) cannot be activated.
   - An activated Power runs, in order: the usability check, selection, then the effect. The source's
     usability checks test the once-per-turn bit first, then conditions and the blocker
@@ -1459,9 +1464,9 @@ unit test that should cover it.
 - **Test.** `bench_power_blocker_stops_other_powers`, `asleep_active_blocker_does_not_block`
 
 ### R-POWER-04: Once per turn
-- **Rule.** Most activated Powers can be used once per turn per creature. The flag moves with the
-  creature when it switches slots. It is cleared at the start of the owner's turn, and also by
-  evolving or by a new placement.
+- **Rule.** Most activated Powers can be used once per turn per Hexon. The flag moves with the
+  Hexon when it switches slots. It is cleared at the start of the owner's turn, and also by
+  awakening or by a new placement.
 - **Parameters.** `+C2` bit 5. It is reset by `01:71A3`, which runs only from turn counter 2. That is
   harmless, because the bit starts at 0.
 - **Status.** CONFIRMED
@@ -1470,21 +1475,21 @@ unit test that should cover it.
 - **Test.** `once_per_turn_power_second_use_rejected`
 
 ### R-POWER-05: "Not on the turn it was played" (optional per Power)
-- **Rule.** Some Powers also require the creature to be settled (in play since the start of its
+- **Rule.** Some Powers also require the Hexon to be settled (in play since the start of its
   owner's turn). Such a Power is never usable on either player's first turn, because the settled
   marking is skipped while the turn counter is below 2.
 - **Status.** CORRECTED. The verifier added the first-turn consequence.
 - **Evidence.** `0B:5293-52AD`, `01:4231-4236`, `00:1410`, `00:1340`.
-- **Test.** `settled_power_unusable_on_turn_played` (a creature in play before the turn starts:
+- **Test.** `settled_power_unusable_on_turn_played` (a Hexon in play before the turn starts:
   refused on turn 1, usable on turn 2)
 
 ### R-POWER-06: Powers that trigger on placement
-- **Rule.** When a creature with a phase-7 Power is placed on the Bench **or evolves**, the effect
+- **Rule.** When a Hexon with a phase-7 Power is placed on the Bench **or awakens**, the effect
   fires automatically, unless a power blocker is in play. A blocker is not blocked by itself. When a
   blocker enters play, both sides' per-slot colour changes made by Powers are removed.
 - **Parameters.** `00:3690` checks for the blocker ID `$27`, then `SwapTurn`, `call 36A0` (zeroes the
   opponent's `+D4..D9`), `SwapTurn`, and falls through into `36A0` again for the own side.
-- **Status.** CORRECTED. The original claim missed the evolve trigger and the colour reset, and the
+- **Status.** CORRECTED. The original claim missed the awaken trigger and the colour reset, and the
   reset covers both sides. Runtime: `00:3690` with a `$27` card and `C2D4.. = $81`, `C3D4.. = $82`
   zeroed both; with another card both stayed.
 - **Evidence.** `00:1583-1611`, called from `01:451B` and `01:457F`. `00:3690/36A0`.
@@ -1494,7 +1499,7 @@ unit test that should cover it.
 - **Rule.** The engine core references these generic passive Powers:
   - free-attach (R-ENERGY-02);
   - retreat reducer (R-RETREAT-02);
-  - evolution lock (R-EVO-09);
+  - Awakening lock (R-EVO-09);
   - condition immunity (R-STATUS-03);
   - damage reduction: prevent ≥30, or halve (R-DMG-09 / R-DMG-04);
   - whole-attack prevention (R-DMG-12);
@@ -1521,25 +1526,25 @@ notes give the decision order and the weightings to copy where helpful.
 
 | ID | Rule (summary) | Status | Test |
 |---|---|---|---|
-| R-AI-01 | There are five entry points: take a turn, place at setup, choose a creature when forced to switch, choose a replacement after a knock-out, pick prizes. The AI acts only through the same action primitives as a human (`00:2B42-2B8A`, `05:4668`, `01:687E`). Some legality checks are done by the AI caller, not by the primitive, so the engine must validate every AI action. | CONFIRMED | `ai_never_emits_illegal_action` |
+| R-AI-01 | There are five entry points: take a turn, place at setup, choose a Hexon when forced to switch, choose a replacement after a knock-out, pick prizes. The AI acts only through the same action primitives as a human (`00:2B42-2B8A`, `05:4668`, `01:687E`). Some legality checks are done by the AI caller, not by the primitive, so the engine must validate every AI action. | CONFIRMED | `ai_never_emits_illegal_action` |
 | R-AI-02 | Turn order is fixed (see AI policy notes). The phase-14 trainers run inside attack selection, after the attack is chosen. The second pass stops at phase 13 (`05:468B-4785`, `05:6A48`). | CORRECTED | `ai_turn_benches_before_attach_before_attack` |
-| R-AI-03 | Random mistakes: weaker AIs skip a valid trainer or Power play with probability 1/4, and some with 1/2. Strong AIs never skip. Benching, evolving, energy, retreat and attacking are deterministic (`05:743B-7473`). The Powers step (`08:6386`) calls AIRandomSkipGate once and then skips **all** Powers for that pass; trainers are gated per card (`08:414A`); nothing is remembered across passes. Eligibility (`05:7426`, AIIsSkipEligible): SRAM `$A00A ≠ 0` turns the gate off for everyone, opponent indexes `$0C-$1B` never skip, and the 1/2 rate applies to indexes `$1C`, `$20`, `$22`, `$26`, `$2A`, `$33`. The clean AI gates each play and remembers a skip for the rest of the turn. | CONFIRMED | `ai_easy_skips_quarter_of_valid_trainer_plays` |
-| R-AI-04 | Benching a Basic: score = 130; +50 if fewer than 4 in play, otherwise −20; +20 if the Active could be knocked out next turn; +20 if usable energy is in hand; +20 if the evolution is in hand; +10 if the evolution is in the deck. Bench at ≥180 and fewer than 6 in play (`05:5EAE-5F4B`). So with 4 or 5 in play it still benches when all four bonuses apply (110 + 70 = 180; runtime: the score went `$82 → $6E → … → $B4` and AIExecuteAction ran). The clean AI benches only below 4 in play. | CONFIRMED | `ai_benches_basic_under_four_in_play` |
-| R-AI-05 | Evolving: score = 128, evolve at ≥133. It weighs: can attack after evolving, a knock-out gained or lost, leaving knock-out range, a cure for the Active's condition, the next stage being available, damage taken, and a small per-card AI byte (`05:5F4C-611F`). | CONFIRMED | `ai_evolves_statused_active` |
-| R-AI-06 | Energy target: score = 128 for each creature, attach at ≥133, ties go to the lowest slot. A creature that can't use any energy in hand is never chosen. Only the Active gets the knock-out bonus for one missing energy (`05:64E8-67DF`, `05:653A`, `05:674E`). | CORRECTED | `ai_attaches_to_active_for_ko` |
-| R-AI-07 | Retreat: at most once per turn through wAIRetreatedThisTurn `$CE0A` (AIRetreatStep `05:4786`, cleared by `05:565A`), never after a failed confused retreat. Exception: the alternate turn routine `05:4078`, used only by opponent index `$35` (`05:406A`), has no `$CE0A` gate and may retreat twice. Score = 128, retreat at ≥131, built from poison, confusion, knock-out threat, weakness and resistance matchups, a better creature on the Bench, retreat cost, the prize race, and turns without dealing damage (`05:58B2-5B32`). | CORRECTED | `ai_retreats_threatened_poisoned_active` |
+| R-AI-03 | Random mistakes: weaker AIs skip a valid trainer or Power play with probability 1/4, and some with 1/2. Strong AIs never skip. Benching, awakening, energy, retreat and attacking are deterministic (`05:743B-7473`). The Powers step (`08:6386`) calls AIRandomSkipGate once and then skips **all** Powers for that pass; trainers are gated per card (`08:414A`); nothing is remembered across passes. Eligibility (`05:7426`, AIIsSkipEligible): SRAM `$A00A ≠ 0` turns the gate off for everyone, opponent indexes `$0C-$1B` never skip, and the 1/2 rate applies to indexes `$1C`, `$20`, `$22`, `$26`, `$2A`, `$33`. The clean AI gates each play and remembers a skip for the rest of the turn. | CONFIRMED | `ai_easy_skips_quarter_of_valid_trainer_plays` |
+| R-AI-04 | Benching a Basic: score = 130; +50 if fewer than 4 in play, otherwise −20; +20 if the Active could be knocked out next turn; +20 if usable energy is in hand; +20 if the Awakening is in hand; +10 if the Awakening is in the deck. Bench at ≥180 and fewer than 6 in play (`05:5EAE-5F4B`). So with 4 or 5 in play it still benches when all four bonuses apply (110 + 70 = 180; runtime: the score went `$82 → $6E → … → $B4` and AIExecuteAction ran). The clean AI benches only below 4 in play. | CONFIRMED | `ai_benches_basic_under_four_in_play` |
+| R-AI-05 | Awakening: score = 128, awaken at ≥133. It weighs: can attack after awakening, a knock-out gained or lost, leaving knock-out range, a cure for the Active's condition, the next stage being available, damage taken, and a small per-card AI byte (`05:5F4C-611F`). | CONFIRMED | `ai_evolves_statused_active` |
+| R-AI-06 | Energy target: score = 128 for each Hexon, attach at ≥133, ties go to the lowest slot. A Hexon that can't use any energy in hand is never chosen. Only the Active gets the knock-out bonus for one missing energy (`05:64E8-67DF`, `05:653A`, `05:674E`). | CORRECTED | `ai_attaches_to_active_for_ko` |
+| R-AI-07 | Retreat: at most once per turn through wAIRetreatedThisTurn `$CE0A` (AIRetreatStep `05:4786`, cleared by `05:565A`), never after a failed confused retreat. Exception: the alternate turn routine `05:4078`, used only by opponent index `$35` (`05:406A`), has no `$CE0A` gate and may retreat twice. Score = 128, retreat at ≥131, built from poison, confusion, knock-out threat, weakness and resistance matchups, a better Hexon on the Bench, retreat cost, the prize race, and turns without dealing damage (`05:58B2-5B32`). | CORRECTED | `ai_retreats_threatened_poisoned_active` |
 | R-AI-08 | The AI plays a self-switch trainer instead of paying when the retreat cost is ≥3 or there isn't enough energy. In an urgent retreat only, and only if no energy was attached yet, it attaches one first when exactly 1 unit short (`08:462E`, `05:5D4F`). | CORRECTED | `ai_uses_switch_trainer_for_cost_three` |
-| R-AI-09 | Choosing a creature to bring in (retreat, forced switch, replacement after a knock-out): score = 50 plus knock-out potential, damage, weakness and resistance, retreat cost, threat and HP. A creature at 0 HP scores 0. The highest score wins, and ties go to the later slot (`05:5B72-5D4C`). | CORRECTED | `ai_promotes_creature_that_can_ko` |
+| R-AI-09 | Choosing a Hexon to bring in (retreat, forced switch, replacement after a knock-out): score = 50 plus knock-out potential, damage, weakness and resistance, retreat cost, threat and HP. A Hexon at 0 HP scores 0. The highest score wins, and ties go to the later slot (`05:5B72-5D4C`). | CORRECTED | `ai_promotes_creature_that_can_ko` |
 | R-AI-10 | Attack choice: score = 80 for each attack. An unusable attack scores 0. Adjustments include +20 for a knock-out, +damage/10, recoil, discard cost, condition value, and a prize-race check for Bench or self-knock-out effects. A tie goes to the 2nd attack. It attacks only if the best score is ≥80; otherwise it ends the turn (`05:69F8-6DCC`). | CORRECTED | `ai_picks_attack_that_kos`, `ai_ends_turn_with_useless_attack` |
 | R-AI-11 | The +10 trainer is played when it turns a non-knock-out into a knock-out, or 30% of the time afterwards. The −20 trainer is played when it prevents the Active being knocked out. The heal-20 trainer is played on the Active when it lets it survive and the AI isn't retreating (`08:4501`, `08:45A5`, `08:4406`, `08:41D1`, `08:4204`). | CORRECTED | `ai_plays_plus10_only_for_ko` |
 | R-AI-12 | Draw trainers: draw-2 needs ≥10 cards in the deck. Discard-hand-draw-7 needs ≥15 and a score ≥60. If it is played, the turn sequence runs again (`08:4878`, `08:4CC1-4D9B`). | CORRECTED | `ai_skips_draw_trainer_on_small_deck` |
-| R-AI-13 | Force-switch trainer: once per turn, only if the opponent has a Bench and the Active can't already knock out the defender. It prefers a creature it can knock out (`47A9`), then one weak to its colour (`46C3-46D9`), then one with no energy (`46E2-4704`), then the lowest HP (`4705-473E` via `4821`), so it is played even with no knock-out-able target (`08:467E-4821`). The clean AI plays it only when a Benched target can be knocked out. | CORRECTED | `ai_force_switches_ko_able_bench` |
+| R-AI-13 | Force-switch trainer: once per turn, only if the opponent has a Bench and the Active can't already knock out the defender. It prefers a Hexon it can knock out (`47A9`), then one weak to its colour (`46C3-46D9`), then one with no energy (`46E2-4704`), then the lowest HP (`4705-473E` via `4821`), so it is played even with no knock-out-able target (`08:467E-4821`). The clean AI plays it only when a Benched target can be knocked out. | CORRECTED | `ai_force_switches_ko_able_bench` |
 | R-AI-14 | Setup: the AI places every real Basic in hand order. The first becomes the Active, up to 6 in play. Trainer-as-Basic cards are never placed by setup or by the bench step: AIDefaultSetup (`05:4232-4240`) and the bench scorer (`05:5ECD-5ED8`) skip any hand card with type ≥ 8 or stage ≠ 0, and these cards are type `$10` in hand (runtime: `05:4226` placed the real Basic and left the `$CB` card in hand). The AI makes no mulligan choice (`05:4226-4249`). The clean AI places real Basics first and then Trainer-as-Basics; that is legal. | CONFIRMED | `ai_setup_first_basic_active` |
 | R-AI-15 | Strong AIs stack their opening by reshuffling until the hand and next draws are good. **Do not implement.** This is unfair. A disabled prize filter (`cp a`) is also present (`05:72AF-7377`). | CONFIRMED | n/a (not implemented) |
 | R-AI-16 | Prizes: picked at random among those remaining (`05:41E5-421D`). | CONFIRMED | `ai_prize_pick_is_remaining_slot` |
 | R-AI-17 | Powers: each Power has its own heuristic. All Powers are skipped while a blocker is in play or the random gate fires. A condition on the Active skips only the Active's own Power (`08:637F-6401`). | CORRECTED | `ai_skips_active_power_when_confused` |
 | R-AI-18 | *(verifier-found)* A no-damage counter raises the retreat score. An anti-stall mode against one particular defender exists (card-specific, skip it) (`05:6A62-6A84`, `05:5649`). | CONFIRMED | `ai_no_damage_counter_increments` |
-| R-AI-19 | *(clean-room addition, not from the reference)* AI styles: on top of its difficulty, an AI may lean Aggressive (energy to the Active, any usable attack, retreat only from a knock-out), Stall (early heals, Sleep and Paralysis valued, earlier retreats, energy spread over the Bench) or Bench sniper (Bench damage scored by how close it brings a creature to a knock-out, a forced switch for the lowest HP). Balanced is the plain policy above. See section 16. | ORIGINAL | `aggressive_retreats_only_from_a_knock_out`, `stall_heals_early`, `bench_sniper_goes_for_the_weakest`, `bench_sniper_switches_in_the_lowest_hp` |
+| R-AI-19 | *(clean-room addition, not from the reference)* AI styles: on top of its difficulty, an AI may lean Aggressive (energy to the Active, any usable attack, retreat only from a knock-out), Stall (early heals, Sleep and Paralysis valued, earlier retreats, energy spread over the Bench) or Bench sniper (Bench damage scored by how close it brings a Hexon to a knock-out, a forced switch for the lowest HP). Balanced is the plain policy above. See section 16. | ORIGINAL | `aggressive_retreats_only_from_a_knock_out`, `stall_heals_early`, `bench_sniper_goes_for_the_weakest`, `bench_sniper_switches_in_the_lowest_hp` |
 
 ---
 
@@ -1548,24 +1553,24 @@ notes give the decision order and the weightings to copy where helpful.
 | Mechanic | Evidence of absence | Recommendation |
 |---|---|---|
 | **Burned** condition | `+F0` encodes only nibble 1/2/3 and poison bits. No writer stores another nibble. Between-turns `01:6C5C` handles only poison, sleep and paralysis. No condition text exists. | Omit. Could be added later as an optional extension behind a ruleset flag. |
-| Conditions on Benched creatures | One condition byte per player for the Active only, wiped on every switch (`00:13C6`). | Omit; this is by design. |
+| Conditions on Benched Hexons | One condition byte per player for the Active only, wiped on every switch (`00:13C6`). | Omit; this is by design. |
 | Confusion wearing off on its own | No nibble-1 handler between turns. | Omit. |
 | Coin flip to recover from Paralysis | Removed without a coin at `01:6CAB`. | Omit. |
 | First player skips the first draw | The draw at `01:4241` is unconditional. | Omit. A modern-rules variant could be optional. |
-| First player can't attack or play trainers on turn 0 | `cc06` is read only for the evolution gate (`01:4231`) and practice scripts. | Omit. A modern-rules variant could be optional. |
+| First player can't attack or play trainers on turn 0 | `cc06` is read only for the Awakening gate (`01:4231`) and practice scripts. | Omit. A modern-rules variant could be optional. |
 | Choosing to go first or second | Heads or tails sets the turn directly (`01:4C41-4C46`). | Omit. |
 | Optional mulligan, or the opponent drawing extra cards on a mulligan | `01:4B8B-4BAF` jumps straight to placement with no prompt. | Omit. |
 | Retreat limited to once per turn, or retreat ending the turn | The non-confused path reads no flag and returns to the menu (`01:43F5-4420`). | Omit. |
 | Hand-size limit or discard at end of turn | `00:1088` has no bound. | Omit. |
 | Trainer subtypes (support, stadium, tool) or per-turn trainer limits | A single trainer type `$10` and no counter (`00:1859`, `01:7193`). | Omit. The attached ±damage trainers are the only trainers that stay in play. |
-| Creatures worth more than one prize | Exactly one `inc b` per knock-out (`01:7074`). | Omit. |
+| Hexons worth more than one prize | Exactly one `inc b` per knock-out (`01:7074`). | Omit. |
 | Turn or time limit in normal duels | The 15-turn exit `01:411E` needs `cc09 == $80` (a practice duel) and `cc13 ≠ 0` (the scripted tutorial, AI index 0 only). Normal AI duels have `cc09` = `$80` plus the opponent index, so `$81` or more. | Omit. |
 | Losing by deck-out through an effect | `cc07` is set only at `01:4248` and `01:6F79`. | Omit. |
 | A plain draw ending the duel | `cc07 = 3` always leads to sudden death (`01:41B4`). | Omit. Sudden death is implemented as written. |
 | Other win conditions (concession, alternate wins) | `cc07` has no other writers. | Omit. A UI "concede" button could be offered as an extension. |
 | A variable weakness multiplier, resistance other than −30, or weakness and resistance on Bench damage | Fixed shift at `00:1933`. Only `$FFE2`. `00:1A53` never calls the weakness or resistance helpers. | Omit. |
-| Checking that the stage goes up by one when evolving | Only the name is matched (`00:135C`). | Omit, but keep data consistent in the card set. |
-| A per-turn evolution limit | No counter (`01:7193`). | Omit. |
+| Checking that the stage goes up by one when awakening | Only the name is matched (`00:135C`). | Omit, but keep data consistent in the card set. |
+| A per-turn Awakening limit | No counter (`01:7193`). | Omit. |
 | A confirmation prompt on Done | `01:51ED` is a practice-duel hook. | Omit. The UI may add its own optional confirmation. |
 | The AI choosing whether to mulligan, or AI search and lookahead | There is no mulligan handler (`05:4668`). Scores are additive with a one-move threat check (`05:73B1`). | Omit. A smarter AI is optional. |
 
@@ -1573,7 +1578,7 @@ notes give the decision order and the weightings to copy where helpful.
 
 ## 14. Engine spec summary (test-first checklist)
 
-1. Each deck must have exactly 60 cards, at least 1 Basic creature (Trainer-as-Basic does not count), and at most 4 cards per name (basic energy exempt; the special 2-unit energy is limited).
+1. Each deck must have exactly 60 cards, at least 1 Basic Hexon (Trainer-as-Basic does not count), and at most 4 cards per name (basic energy exempt; the special 2-unit energy is limited).
 2. Setup: reset, shuffle, and draw 7 for each player.
 3. Mulligan: a hand without a Basic is revealed, reshuffled and redrawn until it has one. It is forced, with 0 bonus cards for the opponent. If neither player has a Basic, setup restarts for both. Trainer-as-Basic does not count.
 4. Placement: human first, then the opponent. Exactly 1 Basic as Active (it can't be cancelled), then 0 to 5 on the Bench. Only Basics or Trainer-as-Basic cards are allowed.
@@ -1581,15 +1586,15 @@ notes give the decision order and the weightings to copy where helpful.
 6. First player: one coin after prizes. Heads means the flipper goes first. No choice is offered.
 7. Every turn starts with a draw of 1, including turn 0. An empty deck at that draw means the turn player loses immediately.
 8. Effect draws are capped at the cards left in the deck. Search effects (`0B:42E0` callers) are refused on an empty deck. Plain draw effects can still be played and draw nothing (`01:4939` clamps, `01:4973` message). Neither case is ever a loss.
-9. Turn start: clear own-turn substatus. If the turn counter ≥ 2, mark all of the turn player's in-play creatures as settled and clear their Power-used flags. Reset energy-attached, retreat-failed and accuracy-cache. Then draw.
-10. Main phase: any number of actions in any order (bench, evolve, attach, trainer, Power, retreat). Only an attack or Done ends the turn.
+9. Turn start: clear own-turn substatus. If the turn counter ≥ 2, mark all of the turn player's in-play Hexons as settled and clear their Power-used flags. Reset energy-attached, retreat-failed and accuracy-cache. Then draw.
+10. Main phase: any number of actions in any order (bench, awaken, attach, trainer, Power, retreat). Only an attack or Done ends the turn.
 11. Done ends the turn without a prompt and clears the opponent's last-attack and disabled-attack memory.
 12. Turn end: check the result, clear the trainer lock and `+E8`, run between-turns, check the result, increment the turn counter, swap.
 13. There is no first-turn restriction on attacking, trainers, energy, retreat or Powers (except settled-only Powers).
-14. Bench: at most 6 creatures in play. A placed creature has full HP and cleared flags. Conditions are cleared when it lands in slot 0.
+14. Bench: at most 6 Hexons in play. A placed Hexon has full HP and cleared flags. Conditions are cleared when it lands in slot 0.
 15. There is no hand-size limit.
 16. Energy: one attachment per turn, to the Active or the Bench. Cancelling doesn't use it up.
-17. Free-attach Power: a matching energy onto a matching-colour creature doesn't count toward the limit, while the holder (own side) is in play and no blocker is in play.
+17. Free-attach Power: a matching energy onto a matching-colour Hexon doesn't count toward the limit, while the holder (own side) is in play and no blocker is in play.
 18. Energy counting: a basic energy is 1 unit of its colour. The special energy is 2 colorless units.
 19. Attack cost: each typed requirement must be met by that colour, and the total minus the typed sum must cover colorless. Empty slots and Powers are never attacks.
 20. An attack is blocked by, in this order: an attack-lock substatus, Asleep or Paralyzed, no attacks, not enough energy, or the specific disabled attack.
@@ -1598,7 +1603,7 @@ notes give the decision order and the weightings to copy where helpful.
 23. Damage order: base → attacker double → weakness ×2 → resistance −30 → +10 per +10 trainer → −20 per −20 trainer on the defender → defender prevention/reduction → attacker-placed reduction → clamp to 0. Clamp only at the end.
 24. Base damage 0 skips all modifiers.
 25. Weakness and resistance: use the defender's changed weakness or resistance if set. The attacker's changed colour applies only while its Power works (no condition, no blocker). Trainer-as-Basic is colour index 6.
-26. Effect damage never uses weakness or resistance. +10 applies only when the target is the Active (including Power damage). −20 applies on any slot (except Power damage). The defender's reductions apply on the Active, and the whole-attack check runs again for it. After the clamp (not for Power damage, not under a blocker): the Bench reduction Power, then on any slot the evolved-attacker shield and the coin prevention.
+26. Effect damage never uses weakness or resistance. +10 applies only when the target is the Active (including Power damage). −20 applies on any slot (except Power damage). The defender's reductions apply on the Active, and the whole-attack check runs again for it. After the clamp (not for Power damage, not under a blocker): the Bench reduction Power, then on any slot the awakened-attacker shield and the coin prevention.
 27. An ignore-weakness-and-resistance flag skips only those two steps.
 28. Defender reduction: the prevention flag, else one "until next turn" effect (0 / −10 / −20 / <40 → 0 / halve), else the defender's reduction Power (≥30 → 0, or halve). Then the attacker-placed −20/−10.
 29. Halving rounds down to a multiple of 10.
@@ -1616,24 +1621,24 @@ notes give the decision order and the weightings to copy where helpful.
 41. Sleep: a coin at every between-turns step after poison. Heads wakes it.
 42. Paralysis: removed at the end of the owner's turn, with no coin.
 43. Confusion never expires on its own.
-44. All conditions and effects are cleared by switching, by the Active evolving, by placement into an empty Active spot, and by cure effects.
+44. All conditions and effects are cleared by switching, by the Active awakening, by placement into an empty Active spot, and by cure effects.
 45. Retreat preconditions in order: can't-retreat substatus, Asleep or Paralyzed, no live Bench, Active is Trainer-as-Basic, energy < cost. Poison and Confusion are OK.
 46. Retreat cost: printed cost minus own-Bench reducers (ignored with a blocker), floored at 0. The player chooses the energy. Stop once paid ≥ cost. Special energy counts 2 with no refund.
 47. Confused retreat: discard first, then a coin. Tails means it stays and the retreat-failed flag blocks confused retries this turn. The flip happens even at cost 0.
-48. A switch clears the outgoing Active's conditions and effects. Damage, cards, stage, flags, colour override and trainer counters move with the creature.
+48. A switch clears the outgoing Active's conditions and effects. Damage, cards, stage, flags, colour override and trainer counters move with the Hexon.
 49. No per-turn retreat limit. Retreating doesn't end the turn.
 50. Cancelling a retreat costs nothing.
-51. Evolve: the hand card's evolves-from name must match the in-play creature's name. There is no stage arithmetic.
-52. Evolve requires settled status: not on turns 0 or 1, not on the turn the creature was placed, and not twice in one turn. There is no per-turn evolution limit.
-53. Evolve keeps damage (HP += newMax − oldMax), attached cards and the lower stages underneath.
-54. Evolve clears the slot flags (including the Power-used flag) and the colour override. Evolving the Active also clears its conditions and effects.
-55. Evolution-lock Power (either side, counted by the in-play rule) blocks all evolution unless a blocker is in play. "No target" and "not this turn" errors take priority.
-56. Optional stage-skip trainer and devolve effects follow R-EVO-10 and R-EVO-12.
+51. Awaken: the hand card's awakens-from name must match the in-play Hexon's name. There is no stage arithmetic.
+52. Awaken requires settled status: not on turns 0 or 1, not on the turn the Hexon was placed, and not twice in one turn. There is no per-turn Awakening limit.
+53. Awaken keeps damage (HP += newMax − oldMax), attached cards and the lower stages underneath.
+54. Awaken clears the slot flags (including the Power-used flag) and the colour override. Awakening the Active also clears its conditions and effects.
+55. Awakening-lock Power (either side, counted by the in-play rule) blocks all Awakening unless a blocker is in play. "No target" and "not this turn" errors take priority.
+56. Optional stage-skip trainer and fall-back effects follow R-EVO-10 and R-EVO-12.
 57. Knock-out check: runs once after the full attack, after the confusion self-hit, after damaging effects, and after between-turns.
-58. Knock-out handler order: counter-KO → clear linked effects → T takes prizes → (early win) → N takes prizes → (early loss) → N replaces, then T replaces → result table → always discard all 0-HP creatures with their stacks, then compact.
-59. One prize per knocked-out non-Trainer-as-Basic creature, capped at the prizes left. A human picks the prize slot, the AI picks at random. Prizes go to the hand.
-60. Replacement: choose from the live Bench and it can't be cancelled. No live Bench means "no creatures".
-61. Result = sign((T took last prize + N has no creatures) − (N took last prize + T has no creatures)). Positive means T wins, negative means T loses, equal and nonzero means a draw.
+58. Knock-out handler order: counter-KO → clear linked effects → T takes prizes → (early win) → N takes prizes → (early loss) → N replaces, then T replaces → result table → always discard all 0-HP Hexons with their stacks, then compact.
+59. One prize per knocked-out non-Trainer-as-Basic Hexon, capped at the prizes left. A human picks the prize slot, the AI picks at random. Prizes go to the hand.
+60. Replacement: choose from the live Bench and it can't be cancelled. No live Bench means "no Hexons".
+61. Result = sign((T took last prize + N has no Hexons) − (N took last prize + T has no Hexons)). Positive means T wins, negative means T loses, equal and nonzero means a draw.
 62. A draw restarts as sudden death: 1 prize each, turn counter 0, full setup and a new coin flip. It can repeat.
 63. A result set mid-turn ends the turn at once and skips between-turns. A result set between turns ends the duel before the next turn.
 64. Counter-KO effect: if the defender with the effect is knocked out during the turn (attack, confusion self-hit, damaging Power or trainer), the turn player's Active is knocked out too (not between turns).
@@ -1647,9 +1652,9 @@ notes give the decision order and the weightings to copy where helpful.
 72. Coins are 50/50. A multi-flip flips all N and returns the heads count. Use a seedable RNG.
 73. Powers: activated only (not passive). The flow is usability → select → effect. A Power doesn't end the turn and can be used on any turn before attacking.
 74. Power blocker: while it is in play (Bench, or an Active without a nibble condition), all other Powers are off. It doesn't block itself.
-75. Once-per-turn Powers: a per-slot flag that moves with the creature and is cleared at turn start, by evolving and by placement.
-76. Optional settled-only Powers can't be used on the turn the creature was played or evolved, nor on either first turn.
-77. Phase-7 on-play Powers fire on bench placement and on evolve unless a blocker is in play. A blocker entering play removes both sides' per-slot colour changes made by Powers (`00:3690 → 36A0` for each side).
+75. Once-per-turn Powers: a per-slot flag that moves with the Hexon and is cleared at turn start, by awakening and by placement.
+76. Optional settled-only Powers can't be used on the turn the Hexon was played or awakened, nor on either first turn.
+77. Phase-7 on-play Powers fire on bench placement and on awaken unless a blocker is in play. A blocker entering play removes both sides' per-slot colour changes made by Powers (`00:3690 → 36A0` for each side).
 78. Optional attack flag "once while in play", set at the cost phase.
 79. Prevention hooks: a whole-attack prevention substatus or Power (negates damage, effect damage to the Active, and conditions), a coin-prevention Power (flips for damage, a queued condition or a placed effect; heads drops all three), and a retaliation Power (flat 10).
 80. The AI must act only through engine actions, and every AI action must pass the same validation as a human action.
@@ -1659,7 +1664,7 @@ notes give the decision order and the weightings to copy where helpful.
 ## 15. Open questions
 
 - The linked-duel first-player and setup paths (`01:41F7`, `01:4CEB`). Not needed for single player.
-- The 8-bit HP formula on evolution when the new max is lower than the old one (it could wrap). The
+- The 8-bit HP formula on Awakening when the new max is lower than the old one (it could wrap). The
   clean engine should use signed or saturating arithmetic.
 - The full set of sources for the `cccd` prevention codes, and which effects set `+E7 = $16`,
   `+E8 = 9` and `+E8 ∈ {3,5,6,7,$12}`. For an original card set, the engine defines its own effects
@@ -1675,12 +1680,12 @@ notes give the decision order and the weightings to copy where helpful.
 
 - When the attached ±damage trainers are discarded: R-TRAINER-05, now CONFIRMED at runtime.
 - Bit 6 of a card's location byte is the limbo state (`00:1045`, `00:1071`, `00:1090`): R-ZONE-04.
-- Stage value 3, written by the stage-skip trainer (`0B:7716`), is read by the devolve helper
-  `01:70F2`: at `01:713B` it treats 1 and 3 alike and takes `ccd0`, the Basic underneath, so devolving
-  a stage-skipped Stage 2 goes straight back to its Basic (runtime: `C2CE = 3` gave the Basic,
-  `C2CE = 2` the Stage 1). Other `+CE` readers only test for zero (`00:334C`, `0B:7005`, `0B:5D59`);
-  `01:6344` indexes a 4-entry table at `01:63D5`. The clean engine keeps the evolution stack, so
-  devolving pops back to whatever is underneath: the Basic.
+- Stage value 3, written by the stage-skip trainer (`0B:7716`), is read by the fall-back helper
+  `01:70F2`: at `01:713B` it treats 1 and 3 alike and takes `ccd0`, the Basic underneath, so a
+  stage-skipped Awaken 2 that falls back goes straight to its Basic (runtime: `C2CE = 3` gave the
+  Basic, `C2CE = 2` the Awaken 1). Other `+CE` readers only test for zero (`00:334C`, `0B:7005`, `0B:5D59`);
+  `01:6344` indexes a 4-entry table at `01:63D5`. The clean engine keeps the Awakening stack, so
+  a fall-back pops back to whatever is underneath: the Basic.
 - The damage high byte ≥ `$81` and halving above 255: R-DMG-07 (static answers).
 - The AI's setup and replacement filters: R-AI-14 (setup places only real Basics) and R-KO-05
   (the default AI never picks 0 HP; the scripted practice AI can).
@@ -1705,14 +1710,14 @@ threshold.
 2. Play "hand reset or gamble draw" trainers.
 3. Use Powers. Each Power has its own heuristic. All are skipped if a blocker is in play.
 4. Play search and draw trainers.
-5. Bench Basics: always while fewer than 4 are in play, and at 4-5 in play only when every bonus applies (knock-out threat, usable energy, evolution in hand and in deck).
-6. Evolve, where it helps (a knock-out, survival, a cure, attack readiness).
+5. Bench Basics: always while fewer than 4 are in play, and at 4-5 in play only when every bonus applies (knock-out threat, usable energy, Awakening in hand and in deck).
+6. Awaken, where it helps (a knock-out, survival, a cure, attack readiness).
 7. Play disruption and support trainers: energy removal, revive, heal, force-switch, stage-skip.
 8. Decide whether to retreat, at most once per turn (one opponent's alternate routine may retreat twice). If so, use a self-switch trainer when paying is
-   expensive. The replacement is the best-scored Bench creature.
+   expensive. The replacement is the best-scored Bench Hexon.
 9. Play more heal and force-switch trainers, then energy recovery or energy search trainers.
 10. Attach one energy, to the best target: the Active first when one more energy enables a knock-out.
-11. Bench and evolve again, then use Powers again.
+11. Bench and awaken again, then use Powers again.
 12. Play damage-buff and shield trainers, then (last) the discard-hand-draw-7 trainer. If that was
     played, re-run steps 2-11 once.
 13. Score each attack. If the best is good enough (≥ base), play attack-dependent trainers, then
@@ -1764,8 +1769,8 @@ replaced:
   pointer `$4D09` (R-EFFECT-01).
 - **Force-switching the defender requires an opposing Bench.** False. With an empty Bench the
   attack still resolves (R-EFFECT-04).
-- **On-play Powers fire only on bench placement.** False. They also fire on evolve (R-POWER-06).
-- **Evolution lock lifted by the blocker under any condition.** The blocker counting rule applies
+- **On-play Powers fire only on bench placement.** False. They also fire on awaken (R-POWER-06).
+- **Awakening lock lifted by the blocker under any condition.** The blocker counting rule applies
   (R-EVO-09).
 - **`cc09 == $80` means "a duel against the AI".** False; this earlier verifier note was itself
   wrong. `$80` = AI opponent index 0 or 2 (a scripted practice duel, fixed RNG seed); other AI duels

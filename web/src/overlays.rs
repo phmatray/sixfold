@@ -102,7 +102,7 @@ pub fn Inspector() -> impl IntoView {
                                 <p>{tr(format!("{} of {} HP", m.hp, m.max), format!("{} PV sur {}", m.hp, m.max))}
                                     {(m.stack.len() > 1).then(|| {
                                         let from = card(m.stack[m.stack.len() - 2]).label();
-                                        tr(format!(", evolved from {from}"), format!(", a évolué de {from}"))
+                                        tr(format!(", awakened from {from}"), format!(", s'est éveillé de {from}"))
                                     })}
                                 </p>
                                 <div class="energy-row">
@@ -239,12 +239,12 @@ pub fn GameOver() -> impl IntoView {
                     "Votre adversaire a pris toutes ses Récompenses.",
                 ),
                 (false, false, true) => tr(
-                    "You had no creature left in play.",
-                    "Vous n'aviez plus de créature en jeu.",
+                    "You had no Hexon left in play.",
+                    "Vous n'aviez plus de Hexon en jeu.",
                 ),
                 (false, false, false) => tr(
-                    "Your opponent had no creature left in play.",
-                    "Votre adversaire n'avait plus de créature en jeu.",
+                    "Your opponent had no Hexon left in play.",
+                    "Votre adversaire n'avait plus de Hexon en jeu.",
                 ),
             };
             Some((w, v.sudden_death, left, why))

@@ -192,7 +192,7 @@ pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView 
                         "creature" => Kind::Creature, "trainer" => Kind::Trainer, "energy" => Kind::Energy, _ => Kind::All,
                     })>
                         <option value="all">{tr("All kinds", "Tous les types")}</option>
-                        <option value="creature">{tr("Creatures", "Créatures")}</option>
+                        <option value="creature">{tr("Hexons", "Hexons")}</option>
                         <option value="trainer">{tr("Trainers", "Dresseurs")}</option>
                         <option value="energy">{tr("Energy", "Énergies")}</option>
                     </select>

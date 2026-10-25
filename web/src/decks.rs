@@ -27,7 +27,7 @@ pub fn deck_problem(d: &DeckList, owned: &Collection) -> Option<String> {
             format!("{}, {} de trop", cards(n), n - DECK_SIZE),
         ),
         DeckListError::Illegal(DeckError::NoBasic) => {
-            tr("needs a Basic creature", "il faut une créature de Base").into()
+            tr("needs a Basic Hexon", "il faut un Hexon de Base").into()
         }
         DeckListError::Illegal(DeckError::TooManyCopies(name)) => {
             let name = card_id(name).map_or(name, |id| card(id).label());
@@ -265,7 +265,7 @@ fn group_of(id: CardId) -> &'static str {
 /// A group's heading ([`group_of`] keys stay English).
 fn group_label(g: &str) -> &'static str {
     match g {
-        "Creatures" => tr("Creatures", "Créatures"),
+        "Creatures" => tr("Hexons", "Hexons"),
         "Trainers" => tr("Trainers", "Dresseurs"),
         _ => tr("Energy", "Énergies"),
     }
@@ -334,14 +334,14 @@ pub fn Editor(index: usize) -> impl IntoView {
                 tr("The deck is already full.", "Le deck est déjà plein.").into()
             }
             0 => tr(
-                "Add a coloured creature first: the energy follows the creatures' colours.",
-                "Ajoutez d'abord une créature colorée : les énergies suivent la couleur des créatures.",
+                "Add a coloured Hexon first: the energy follows the Hexons' colours.",
+                "Ajoutez d'abord un Hexon coloré : les énergies suivent la couleur des Hexons.",
             )
             .into(),
-            1 if fr() => "1 énergie de base ajoutée, assortie à vos créatures.".into(),
+            1 if fr() => "1 énergie de base ajoutée, assortie à vos Hexons.".into(),
             n => tr(
-                format!("Added {n} basic energy to match your creatures."),
-                format!("{n} énergies de base ajoutées, assorties à vos créatures."),
+                format!("Added {n} basic energy to match your Hexons."),
+                format!("{n} énergies de base ajoutées, assorties à vos Hexons."),
             ),
         }));
     };
@@ -398,8 +398,8 @@ pub fn Editor(index: usize) -> impl IntoView {
                     <div class="curve-bars" role="img" aria-label=move || {
                         let c = curve();
                         tr(
-                            format!("Energy curve: {} creatures need 0 energy, {} need 1, {} need 2, {} need 3, {} need 4 or more.", c[0], c[1], c[2], c[3], c[4]),
-                            format!("Courbe d'énergie, créatures par coût : {} à 0 énergie, {} à 1, {} à 2, {} à 3, {} à 4 ou plus.", c[0], c[1], c[2], c[3], c[4]),
+                            format!("Energy curve: {} Hexons need 0 energy, {} need 1, {} need 2, {} need 3, {} need 4 or more.", c[0], c[1], c[2], c[3], c[4]),
+                            format!("Courbe d'énergie, Hexons par coût : {} à 0 énergie, {} à 1, {} à 2, {} à 3, {} à 4 ou plus.", c[0], c[1], c[2], c[3], c[4]),
                         )
                     }>
                         {move || {
@@ -414,7 +414,7 @@ pub fn Editor(index: usize) -> impl IntoView {
                             }).collect_view()
                         }}
                     </div>
-                    <figcaption>{tr("Energy for each creature's biggest attack", "Énergie de l'attaque la plus chère de chaque créature")}</figcaption>
+                    <figcaption>{tr("Energy for each Hexon's biggest attack", "Énergie de l'attaque la plus chère de chaque Hexon")}</figcaption>
                 </figure>
                 <p class="editor-msg" role="status" aria-live="polite">{move || msg.get()}</p>
             </section>
@@ -440,7 +440,7 @@ pub fn Editor(index: usize) -> impl IntoView {
                         <button type="button" class="btn" on:click=fill>{tr("Fill with energy", "Compléter en énergies")}</button>
                     </div>
                     {move || (total() == 0).then(|| view! {
-                        <p class="empty-note">{tr("Empty. Add cards from your collection; a deck needs at least one Basic creature and exactly 60 cards.", "Vide. Ajoutez des cartes de votre collection ; un deck doit compter au moins une créature de Base et exactement 60 cartes.")}</p>
+                        <p class="empty-note">{tr("Empty. Add cards from your collection; a deck needs at least one Basic Hexon and exactly 60 cards.", "Vide. Ajoutez des cartes de votre collection ; un deck doit compter au moins un Hexon de Base et exactement 60 cartes.")}</p>
                     })}
                     {move || {
                         let rows = draft.with(|d| d.sorted(SortBy::Kind));
