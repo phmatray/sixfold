@@ -63,9 +63,20 @@ export function terrainGeometry(map) {
   }
   for (const g of map.gates ?? []) if (g.prop || g.prop_closed || g.prop_open) for (const [x, z] of g.tiles) mark(x, z);
 
-  // Node positions along one axis: the margin, a foot row just outside the map, then S per tile.
-  const axis = (n) => [...(m ? [-m, -1 / S] : []), ...Array.from({ length: n * S + 1 }, (_, i) => i / S), ...(m ? [n + 1 / S, n + m] : [])];
-  const xs = axis(W), zs = axis(H), NX = xs.length, NZ = zs.length;
+  // Node positions along one axis: the margin, a foot row just outside the map, then S
+  // per tile across the raised tiles' span (a tile either side), one per tile elsewhere.
+  const span = (n, at) => {
+    const on = [...Array(n).keys()].filter((t) => at(t));
+    return [Math.max(0, Math.min(...on) - 1), Math.min(n, Math.max(...on) + 2)];
+  };
+  const axis = (n, [lo, hi]) => [
+    ...(m ? [-m, -1 / S] : []),
+    ...[...Array(n).keys()].flatMap((t) => (t >= lo && t < hi ? Array.from({ length: S }, (_, i) => t + i / S) : [t])),
+    n,
+    ...(m ? [n + 1 / S, n + m] : []),
+  ];
+  const xs = axis(W, span(W, (x) => map.tiles.some((row) => row[x] >= "1" && row[x] <= "9")));
+  const zs = axis(H, span(H, (z) => /[1-9]/.test(map.tiles[z]))), NX = xs.length, NZ = zs.length;
   // The tiles a coordinate touches (two on a tile edge, else one).
   const touch = (c, n) => (c < 0 || c > n ? [] : Number.isInteger(c) ? [c - 1, c].filter((t) => t >= 0 && t < n) : [Math.floor(c)]);
   // Pinned nodes (touching a pinned tile, or off the map) take the tallest tile they touch.

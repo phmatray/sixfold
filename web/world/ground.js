@@ -8,7 +8,7 @@
 // with a procedural canvas fallback until those exist.
 import * as THREE from "three";
 import { U } from "./life.js";
-import { grassTexture, rng } from "./props.js";
+import { grassTexture, rng, fadeInto } from "./props.js";
 import { raised, rise, rockOf, terrainGeometry } from "./terrain.js";
 
 const TEX = new URL("./textures/", import.meta.url);
@@ -243,6 +243,7 @@ export async function groundMesh(map, tile) {
           diffuseColor.rgb *= col;
         }`,
       );
+    if (high) fadeInto(sh); // a cliff lip between the camera and the hero thins out
   };
   mat.customProgramCacheKey = () => (water ? "ground-w" : "ground") + (high ? "-h" : "");
   let ground;

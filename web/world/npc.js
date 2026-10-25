@@ -2,7 +2,7 @@
 // they were sent on (`go`), turning between `look` directions (`updateNpc`), and
 // what the hero faces and can talk to or use (`facing`). An NPC with an `if` is
 // only there while it holds (`hidden` otherwise, set by build.js `refresh`).
-import { actor, place, animateActor, angle, key, DIR, late } from "./actors.js";
+import { actor, place, animateActor, angle, key, DIR } from "./actors.js";
 import { ACROSS } from "./props.js";
 import { tr } from "./map.js";
 
@@ -17,7 +17,7 @@ export function spawnNpcs(map, got, floorAt, root) {
     const n = own ? actor(own, null, 1, def.idle, def.outfit, def.hair) : actor(got.hero, def.tint, def.scale ?? 1, def.idle);
     Object.assign(n, { def, x: def.x, z: def.z, fy: floorAt(def.x, def.z), face: def.facing ?? "s", step: null, ri: 0, wait: 1.5, busy: false });
     n.obj.rotation.y = angle(n.face);
-    root.add(late(n.obj), n.blob);
+    root.add(n.obj, n.blob);
     return n;
   });
 }

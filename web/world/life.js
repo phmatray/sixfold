@@ -132,7 +132,6 @@ export function ambience(scene, spots, reduced) {
     r.scale.x = -1;
     const g = new THREE.Group();
     g.add(l, r, new THREE.Mesh(bodyGeo, bodyMat));
-    g.traverse((o) => o.layers.set(3)); // a butterfly can't hide the hero (actors.js LATE)
     scene.add(g);
     return { g, l, r, c, k: i * 1.7, last: new THREE.Vector3() };
   });

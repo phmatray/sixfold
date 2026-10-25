@@ -7,8 +7,8 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { windify, waterify, ambience } from "./life.js";
 import { groundMesh } from "./ground.js";
-import { rng, mesh, group, toon, PLACEHOLDER, FOOT, WALKABLE, DECK, LADDER, BOB, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox } from "./props.js";
-import { key, glowTex, blobGeo, blobMat, late, LATE } from "./actors.js";
+import { rng, mesh, group, toon, fadeable, PLACEHOLDER, FOOT, WALKABLE, DECK, LADDER, BOB, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox } from "./props.js";
+import { key, glowTex, blobGeo, blobMat } from "./actors.js";
 import { spawnNpcs } from "./npc.js";
 import { OPTIONAL, RING } from "./map.js";
 
@@ -27,10 +27,11 @@ const SMOKE = 8;
 const CHUNK = 16; // tiles per side of an instanced scenery chunk (culled as one)
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
-// A model lower than this can't hide the hero: it's drawn after the hero (LATE), never
-// through its silhouette. Measured once per model.
-const LOW = 1.3;
-const low = (o) => (o.userData.low ??= new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()).y < LOW);
+// A model at least this tall can hide the hero: its opaque parts fade where they stand
+// between the camera and the hero (props.js `fadeable`). Measured once per model.
+const TALL_FADE = 1.3;
+const tall = (o) => (o.userData.tall ??= new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()).y >= TALL_FADE);
+const fadeAll = (o) => o.traverse((m) => m.isMesh && !m.material.transparent && fadeable(m.material));
 
 // Re-check what a condition shows or hides (`holds(cond)`), after a map is built
 // and whenever the game state may have changed (a dialogue closed, the time of day
@@ -300,7 +301,7 @@ function batcher() {
             inst.receiveShadow = true;
             inst.userData.shared = true; // geometry and material belong to the cached model
             if (windH(name)) windify(inst, windH(name));
-            if (low(flat)) inst.layers.set(LATE);
+            if (tall(flat) && !m.material.transparent) fadeable(m.material);
             parent.add(inst);
           }
         });
@@ -423,7 +424,8 @@ export async function build(map, got, reduced) {
       // A static model (no clip, not afloat) is merged like the instanced ones: one
       // draw for its flat-coloured parts instead of one per material.
       if (got[p.asset] && !got[p.asset].animations.length && !BOB.has(p.asset)) obj = merged(obj);
-      root.add(low(obj) ? late(obj) : obj);
+      if (tall(obj)) fadeAll(obj);
+      root.add(obj);
       if (BLOB[p.asset] && !got[p.asset]) blobs.push([cx, cz, BLOB[p.asset]]);
     }
     const rec = { ...p, obj, cx, cz, y };
@@ -797,5 +799,5 @@ function scatter(root, W, H, open, count) {
   tufts.receiveShadow = bloom.receiveShadow = true;
   windify(tufts, 0.32);
   windify(bloom, 0.12);
-  root.add(late(tufts), late(bloom));
+  root.add(tufts, bloom);
 }
