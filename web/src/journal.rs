@@ -71,7 +71,7 @@ pub fn Journal() -> impl IntoView {
     let next = progress.with_untracked(|p| objective(p).text(p));
     let goal = view! {
         <p class="objective">
-            <span class="objective-label">{tr("Next", "Ensuite")}</span>
+            <span class="objective-label">{tr("Next", "À faire")}</span>
             {next}
         </p>
     };

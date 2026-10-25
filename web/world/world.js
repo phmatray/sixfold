@@ -1,7 +1,7 @@
 // The overworld test: tile-grid maps (./maps/<name>.json) drawn with three.js.
 // `mount(host, controls, cb, start, edit)` builds it (at `start` = "map,x,z,facing"
 // when given; `edit`: a debug build with ?edit loads the map editor) and returns an
-// api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, meet, cue).
+// api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, portrait, meet, cue).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
 //   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate; a gated
@@ -30,6 +30,7 @@
 //   daylight.js the light at each minute of the day: sun, moon, sky, fog, lamps, glow
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
 import * as THREE from "three";
+import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
 import { U } from "./life.js";
 import { PLACEHOLDER, group, prep, CUTAWAY } from "./props.js";
 import { tr, loadMap, loadAsset, assetNames, preload, PERSON, OPTIONAL } from "./map.js";
@@ -702,8 +703,47 @@ export function mount(el, controls, cb, start, edit = false) {
     pv = null;
   }
 
+  // A speaker's bust for the dialogue box: their own rig in their own outfit and hair, in the pose
+  // they hold now, drawn once per map visit by a small offscreen renderer kept for the mount.
+  // ponytail: each rig's meshes stay uploaded in that renderer until unmount; fine for a few dozen people.
+  let bustR = null, busts = new Map(), bustsOf = null;
+  function portrait(id) {
+    const n = world?.npcs.find((p) => p.def.id === id);
+    if (!n?.obj) return "";
+    if (bustsOf !== world) (busts = new Map()), (bustsOf = world);
+    if (busts.has(id)) return busts.get(id);
+    const S = 256;
+    bustR ??= new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    bustR.setPixelRatio(1);
+    bustR.setSize(S, S, false);
+    const s = new THREE.Scene();
+    const key = new THREE.DirectionalLight("#fff4dc", 2.6), rim = new THREE.DirectionalLight("#cfe0ff", 1.8);
+    key.position.set(-1.5, 2.5, 3);
+    rim.position.set(2, 1.5, -2.5);
+    const o = cloneSkinned(n.obj);
+    o.position.set(0, 0, 0);
+    o.rotation.set(0, 0, 0); // facing +z, toward the camera
+    s.add(new THREE.HemisphereLight("#ffffff", "#6a5a4a", 1.8), key, rim, o);
+    o.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(o), size = box.getSize(new THREE.Vector3());
+    // People: head and shoulders (the upper half: they're big-headed); a beast wider than it is tall: all of it.
+    const beast = Math.max(size.x, size.z) > size.y;
+    const h = beast ? Math.max(size.y, size.z) * 1.15 : size.y * 0.5;
+    const cy = beast ? box.getCenter(new THREE.Vector3()).y : box.max.y - h * 0.5;
+    const cam = new THREE.PerspectiveCamera(22, 1, 0.05, 50);
+    const dir = new THREE.Vector3(0.42, 0.14, 1).normalize();
+    cam.position.set(0, cy, 0).addScaledVector(dir, h / 2 / Math.tan(THREE.MathUtils.degToRad(11)));
+    cam.lookAt(0, cy, 0);
+    bustR.render(s, cam);
+    const url = bustR.domElement.toDataURL("image/webp", 0.85);
+    busts.set(id, url);
+    return url;
+  }
+
   const stop = () => {
     alive = false;
+    bustR?.dispose();
+    bustR?.forceContextLoss();
     stopEditor();
     previewStop();
     cancelAnimationFrame(raf);
@@ -761,6 +801,7 @@ export function mount(el, controls, cb, start, edit = false) {
     },
     preview,
     previewStop,
+    portrait,
   };
 }
 

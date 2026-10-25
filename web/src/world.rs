@@ -9,6 +9,7 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
+use sixfold_engine::campaign::rival;
 use sixfold_engine::clock::{self, Phase};
 use sixfold_engine::objective;
 use sixfold_engine::overworld::{Applied, Cue, Progress};
@@ -46,6 +47,7 @@ export function world_meet(id) { api?.meet(id); }
 export function world_cue(json) { api?.cue(json); }
 export function world_clock(m) { minute = m; api?.setClock(m); }
 export function world_busy() { return !api || api.busy(); }
+export function world_portrait(id) { return api?.portrait(id) ?? ""; }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
@@ -70,6 +72,9 @@ extern "C" {
     fn world_clock(minute: u16);
     /// The scene is loading, warping (a fade), or a duelist is walking over.
     fn world_busy() -> bool;
+    /// A person's bust, drawn from their own rig and colours (a data URL), or
+    /// empty for anyone who isn't a person on this map (a sign, a gangway).
+    fn world_portrait(id: &str) -> String;
 }
 
 /// Fade the world to a map tile: a `warp:` cue, or fast travel (its own sound).
@@ -357,6 +362,9 @@ fn parse_talk(json: &str) -> Option<(String, Vec<Branch>)> {
 struct Talk {
     id: String,
     name: String,
+    /// The speaker's face: a rival's portrait, a person's bust, none for the
+    /// hero's own lines (a sign, a thought).
+    face: Option<String>,
     lines: Vec<String>,
     effects: Vec<String>,
     at: usize,
@@ -553,7 +561,13 @@ pub fn WorldScreen() -> impl IntoView {
             return;
         };
         typed.set(0);
+        let face = if rival(&id).is_some() {
+            Some(format!("world/assets/portraits/{id}.webp"))
+        } else {
+            Some(world_portrait(&id)).filter(|u| !u.is_empty())
+        };
         sheet.set(Some(Sheet::Talk(Talk {
+            face,
             id,
             name,
             lines: b.lines,
@@ -1091,15 +1105,29 @@ pub fn WorldScreen() -> impl IntoView {
                 {move || sheet.get().map(|s| match s {
                     Sheet::Talk(t) => {
                         let line = t.line().to_string();
+                        let len = line.chars().count();
                         let more = t.at + 1 < t.lines.len();
+                        // The hero's own lines (a sign, a thought) carry no name plate.
+                        let named = !t.name.is_empty();
                         view! {
-                            <button class="talk-box" on:click=move |_| advance()>
-                                <span class="talk-name" id="world-sheet-title">{t.name.clone()}</span>
+                            <button class="talk-box" class:has-face=t.face.is_some() on:click=move |_| advance()>
+                                // The face slides in with the first line only.
+                                {t.face.clone().map(|src| view! {
+                                    <img class="talk-face" class:enter=t.at == 0 src=src alt="" width="96" height="96" />
+                                })}
+                                {if named {
+                                    view! { <span class="talk-name" id="world-sheet-title">{t.name.clone()}</span> }.into_any()
+                                } else {
+                                    view! { <span class="sr-only" id="world-sheet-title">{tr("A note", "Une note")}</span> }.into_any()
+                                }}
                                 <span class="talk-line" aria-hidden="true">
                                     {move || line.chars().take(typed.get()).collect::<String>()}
                                 </span>
                                 <span class="sr-only">{t.line().to_string()}</span>
-                                <span class="talk-next" aria-hidden="true">{if more { "▾" } else { "■" }}</span>
+                                // Shown once the line is out: more to come, or the end.
+                                <span class="talk-next" class:ready={move || typed.get() >= len} aria-hidden="true">
+                                    {if more { "▾" } else { "■" }}
+                                </span>
                             </button>
                         }.into_any()
                     }
