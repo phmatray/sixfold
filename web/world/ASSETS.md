@@ -61,7 +61,7 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `sign.glb` | Signboard on one post, face toward +Z | 1 × 1 | ~1.3 m |
 | `grass_edge.glb` | A few blades, scattered along path borders | free | ~0.35 m |
 | `fence*.glb` | Fence pieces, see Auto-tiling | 1 × 1 | ~0.9 m |
-| `hero.glb` | Chibi player character | — | ~1.45 m |
+| `hero.glb` | The player character (built by `build_characters.py`) | — | ~1.47 m |
 | `shoes.glb` | The running shoes, shown turning in the item popup | — | any (fitted) |
 | `interior/wall*.glb` | Wall pieces, see Auto-tiling; `wall_window` is a straight wall with a window | 1 × 1 | ~2.6 m |
 | `interior/wall_low*.glb` | Low cutaway walls for the south (camera-facing) row | 1 × 1 | ~0.45 m |
@@ -71,7 +71,7 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `interior/chair.glb`, `plant.glb`, `display_case.glb`, `lamp.glb` | Furniture | 1 × 1 | — |
 | `interior/rug.glb` | Rug, ≥ 1 cm thick (walkable) | 3 × 2 | — |
 | `interior/exit_mat.glb` | Door mat on the exit tile, ≥ 1 cm thick (walkable) | 1 × 1 | — |
-| `npc/<model>.glb` | NPC on the hero rig (`Idle`, `Walk`, `Fidget`); campaign rivals are `rival_<colour>.glb` and `rival_champion.glb` | — | ~1.45 m |
+| `npc/<model>.glb` | A person (`Idle`, `Walk`, `Fidget`), one draw on a palette texture: the townsfolk archetypes `npc_kid`, `npc_gardener`, `npc_elder`, `npc_sailor`, `npc_shopkeeper`, `npc_scholar`, `npc_worker`, `npc_wanderer`, `npc_rival`, and the campaign rivals `rival_<colour>.glb` and `rival_champion.glb` | — | ~1.1–1.8 m |
 | `interior/oven.glb` | Brick bread oven against the north wall, glowing mouth (`oven_glow`), flue, a ledge with loaves and the tip jar on its right | 2 × 1 | ~2.45 m |
 | `interior/printing_press.glb` | Hand press: frame, screw and bar, bed on rails along X, raised tympan on the left, ink table on the right | 2 × 1 | ~1.8 m |
 | `interior/type_case.glb` | Compositor's cabinet: drawers (one pulled out), a sloping case of compartments | 1 × 1 | ~1.35 m |
@@ -89,7 +89,6 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `cave_mouth.glb` | A rough arch of boulders round a black throat in a sandstone face, timber bracing, a lantern on the lintel (`lamp_glow`), roots and vines over the top, crystals glinting inside (`crystal_glow`); back flush with the north edge: put it against a cliff on the row behind (≥ 2 m); the door warp is its tile | 2 × 1 | ~2.1 m |
 | `climb_wall.glb` | Two rough steps (tops 0.5 m front, 1.0 m back) with painted holds, chalk, a knotted rope from an iron stake and vines; climbs toward −Z, floor 0.5 m, stacks with `y` like `stairs` | 1 × 1 | 1 m |
 | `inn_sign.glb` | Two posts, a board with a crescent moon and stars (both faces), a lantern (`lamp_glow`) | 1 × 1 | ~2.35 m |
-| `npc/npc_elder.glb`, `npc_worker`, `npc_sailor`, `npc_scholar` | 1.2 / 1.3 townsfolk on the hero rig (stooped elder with a cane; worker in cap and apron; sailor in a striped jumper and rain hat; scholar in a long coat with a map roll) | — | ~1.4–1.6 m |
 | `stump.glb` | Hollow stump: flared roots, a cut rim round a dark hollow, moss, two mushrooms (a find's host) | 1 × 1 | ~0.55 m |
 | `log.glb` | Fallen mossy log along X, a hollow end on +X, bracket fungus and mushrooms (a find's host) | 2 × 1 | ~0.55 m |
 | `portraits/<rival id>.webp` | 512² bust portraits of the campaign rivals for the duel screen (`bramble`, `marlo`, `cinza`, `quill`, `orla`, `lumen`, `warden`), 3/4 view to each rival's own side and tilt, a rim light and a background motif in the rival's colour, ≤ 60 KB | — | — |
@@ -113,6 +112,8 @@ Rules for every model:
   instanced, and the flat-coloured opaque parts of each model are merged into one mesh with
   vertex colours, so a model costs one draw (plus one shadow draw) however many there are.
   Keep textured or see-through parts to a minimum; each one is a draw of its own.
+  People are skinned, so they are not merged: each is one mesh on one palette texture (one draw, plus
+  one shadow draw), with its swatch table in the material's extras (`sx_palette`) for recolours.
 - **Wind:** trees, bushes, flowers, pine, birch, reeds and grass_edge sway in the vertex shader, weighted by a
   `COLOR_0` vertex colour (red: 0 at the base, 1 at the tips; never shown as a tint).
   Without it, the game uses height above the ground.
@@ -231,8 +232,10 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   dark doorway for such a door (the hall's sealed door to `warden`).
 - **npcs:** block their tile (and stand at its floor height). `model` loads `assets/npc/<model>.glb` (`npc_*` and `rival_*`
   names); until it exists the hero model is used, lerped toward `tint` and scaled by `scale`. On the NPC's
-  own model, `outfit` (a colour) moves the clothes to that hue, keeping each garment's lightness, and `hair`
-  recolours the hair: two people on one model then look like two people. `look` (directions) turns them
+  own model, `outfit` (a colour) moves the clothes to that hue, keeping each garment's lightness (accent
+  garments take the opposite hue), and `hair` recolours the hair: two people on one model then look like two
+  people. `wear` (a list of `cap`, `glasses`, `headband`, `scarf`, `bag`, whichever the model carries) shows
+  accessories; a route duelist without `wear` puts on one of them, picked by its id. `look` (directions) turns them
   between those ways every 2.5 s. `if` (a condition): they are only there while it holds.
   `route` (optional) is a loop of one-tile steps. Speaking (E or tap while facing them, also
   across a counter or a duel table) turns them to the hero and runs `dialogue`: the first

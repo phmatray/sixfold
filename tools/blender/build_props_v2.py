@@ -1,4 +1,4 @@
-"""Props and people for 1.2 (houses, curios) and the 1.3 shared kit, exported as .glb.
+"""Props for 1.2 (houses, curios) and the 1.3 shared kit, exported as .glb (people: build_characters.py).
 
 Headless:
     blender -b --factory-startup -P tools/blender/build_props_v2.py -- \
@@ -13,7 +13,6 @@ writes the files listed below. Materials whose name contains `glow` are the nigh
   --sheet    per-model tiles (front 3/4 and back 3/4) to check facing and shapes
   --check    z-fighting check (check_coplanar.py) over all new models on a y = 0 ground plane
 """
-import json
 import math
 import os
 import random
@@ -25,12 +24,10 @@ from mathutils import Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import build_npcs as N  # noqa: E402  (imports and reloads build_assets: keep it first)
 import build_area_props as A  # noqa: E402
 import build_assets as B  # noqa: E402
 from build_assets import T, box, contact, cyl, ico, jitter, prism, sphere  # noqa: E402
 
-B.PALETTE.update(N.PALETTE)
 B.PALETTE.update({
     # interior kit
     "oven_clay": "#d9a77a", "oven_glow": "#ffa04a", "soot": "#2a211c", "log_end": "#e0b27a",
@@ -51,16 +48,23 @@ B.PALETTE.update({
     "seal_fighting": "#a8642f", "seal_psychic": "#8a4fc9", "cave_dark": "#18120f", "cave_floor": "#5a4632",
     "vine": "#4f8a3a", "vine_lt": "#78b04e", "rope": "#c8a46a",
     "hold_r": "#e2553a", "hold_y": "#f0b830", "hold_b": "#2f7fd0", "hold_g": "#3f9a52", "chalk": "#f4f1ea",
-    # new people
-    "el_hair": "#eeeae6", "el_cardigan": "#8f6fa0", "el_dress": "#3f6b5a", "el_shawl": "#e8d9b0", "el_shoe": "#4a3326",
-    "el_frame": "#c9a24a", "el_cane": "#6e4b33",
-    "wk_hair": "#4a3326", "wk_cap": "#5a5f6a", "wk_shirt": "#c86a3a", "wk_pants": "#4c5566", "wk_boot": "#5a3f2a",
-    "wk_glove": "#d9b35a", "wk_apron": "#8a6040", "wk_scarf": "#2f7f86",
-    "sa_hair": "#b9b4ae", "sa_beard": "#d6d1ca", "sa_jumper": "#f1e7d2", "sa_stripe": "#2f4a7a", "sa_pants": "#3a4a5e",
-    "sa_boot": "#2a2d33", "sa_hat": "#f0b830",
-    "sc_hair": "#2f2420", "sc_coat": "#7a2f3a", "sc_vest": "#e9dcc0", "sc_pants": "#3a3340", "sc_shoe": "#3a2c25",
-    "sc_scarf": "#e0a13a", "sc_frame": "#3a2c25", "sc_bag": "#8a5a3a",
 })
+
+
+def ring(r_out, r_in, seg=14):
+    """Flat annulus facing -Y (rims, chain links)."""
+    bm = bmesh.new()
+    pts = [(math.cos(a), math.sin(a)) for a in (i / seg * math.tau for i in range(seg))]
+    o = [bm.verts.new((r_out * x, 0, r_out * z)) for x, z in pts]
+    n = [bm.verts.new((r_in * x, 0, r_in * z)) for x, z in pts]
+    for k in range(seg):
+        m = (k + 1) % seg
+        bm.faces.new((o[k], o[m], n[m], n[k]))
+    for f in bm.faces:
+        f.normal_update()
+        if f.normal.y > 0:
+            f.normal_flip()
+    return bm
 
 # ---------------------------------------------------------------- shape helpers
 
@@ -366,7 +370,7 @@ def build_light_box(k):
     k.add(box(0.08, 0.08, 0.06, 0.01), "iron", T((0.68, 0.3, 0.82)))
     beam(k, (0.68, 0.3, 0.84), (0.6, 0.18, 1.25), 0.03, 0.03, "iron")
     beam(k, (0.6, 0.18, 1.25), (0.38, -0.02, 1.12), 0.03, 0.03, "iron")
-    k.add(N.ring(0.11, 0.09, 16), "brass", T((0.3, -0.06, 1.06), (-62, 0, 0)))
+    k.add(ring(0.11, 0.09, 16), "brass", T((0.3, -0.06, 1.06), (-62, 0, 0)))
     k.add(cyl(0.092, 0.092, 0.008, 16), "glass_in", T((0.3, -0.06, 1.06), (28, 0, 0)))
     # notebook, pencil, deck box
     k.add(box(0.24, 0.3, 0.02, 0.005), "book_b", T((0.68, -0.18, 0.8), (0, 0, -8)))
@@ -445,7 +449,7 @@ def build_hanging_sign(k):
     bx, bz = 0.15, 1.72
     for cx in (-0.2, 0.2):  # chains: three links each
         for i in range(3):
-            k.add(N.ring(0.025, 0.014, 6), "iron", T((bx + cx, 0.1, 2.12 - 0.05 * i), (0, 0, 90 * (i % 2))))
+            k.add(ring(0.025, 0.014, 6), "iron", T((bx + cx, 0.1, 2.12 - 0.05 * i), (0, 0, 90 * (i % 2))))
     k.add(box(0.6, 0.05, 0.44, 0.015), "board", T((bx, 0.1, bz)))
     k.add(ribbon([(-0.29, -0.21), (0.29, -0.21), (0.29, 0.21), (-0.29, 0.21)], 0.03, 0.012, closed=True), "wood_dk", T((bx, 0.075, bz), FRONT))
     k.add(ribbon([(-0.29, -0.21), (0.29, -0.21), (0.29, 0.21), (-0.29, 0.21)], 0.03, 0.012, closed=True), "wood_dk", T((bx, 0.125, bz), BACK))
@@ -740,7 +744,7 @@ def build_inn_sign(k):
     for sx in (-1, 1):
         beam(k, (sx * 0.38, 0, 1.93), (sx * 0.25, 0, 2.06), 0.05, 0.04, "wood_dk")
         for i in range(3):
-            k.add(N.ring(0.022, 0.012, 6), "iron", T((sx * 0.22, 0, 2.02 - 0.042 * i), (0, 0, 90 * (i % 2))))
+            k.add(ring(0.022, 0.012, 6), "iron", T((sx * 0.22, 0, 2.02 - 0.042 * i), (0, 0, 90 * (i % 2))))
     bz = 1.7
     k.add(box(0.6, 0.05, 0.42, 0.015), "inn_board", T((0, 0, bz)))
     frame = [(-0.29, -0.2), (0.29, -0.2), (0.29, 0.2), (-0.29, 0.2)]
@@ -831,100 +835,6 @@ B.INTERIOR.update(INTERIOR_V2)   # export() files these under assets/interior/
 B.ALPHA.update({"jar_glass": 0.4, "bottle_glass": 0.45})
 
 
-# ---------------------------------------------------------------- people (assets/npc/, the hero's rig)
-
-
-def elder(k):
-    """Stooped older adult: white bun, gold glasses, knitted shawl, long dress, a cane in the right hand."""
-    N.body(k, {"shoe": "el_shoe", "pants": "el_dress", "top": "el_cardigan", "sleeve": "el_cardigan"})
-    N.hair_cap(k, "el_hair", tilt=-30, cut=0.0)
-    k.add(sphere(0.11, 10, 6), "el_hair", T((0, 0.17, 1.0)), smooth=True, bone="Head")                  # bun
-    k.add(cyl(0.05, 0.05, 0.03, 8), "el_shawl", T((0, 0.15, 0.95), (60, 0, 0)), smooth=True, bone="Head")
-    for s in (1, -1):
-        k.add(N.ring(0.06, 0.048), "el_frame", T((s * 0.085, -0.228, 0.82)), bone="Head")
-        k.add(box(0.012, 0.16, 0.012), "el_frame", T((s * 0.15, -0.15, 0.83)), bone="Head")
-    k.add(box(0.05, 0.012, 0.012), "el_frame", T((0, -0.229, 0.83)), bone="Head")
-    N.skirt(k, "el_dress", 0.17, 0.235, 0.03, 0.4, 14)
-    k.add(cyl(0.18, 0.2, 0.1, 14, 0.02), "el_shawl", T((0, 0.0, 0.6), scale=(1.05, 0.85, 1)), smooth=True, bone="Torso")
-    k.add(prism([(-0.14, 0), (0.14, 0), (0, -0.18)], 0.03, 0.008), "el_shawl", T((0, 0.135, 0.58), (0, 0, 0)), bone="Torso")
-    for z in (0.44, 0.5):
-        k.add(sphere(0.013, 6, 4), "el_shawl", T((0, -0.13, z)), smooth=True, bone="Torso")
-    hx = -0.235
-    k.add(cyl(0.016, 0.016, 0.36, 6), "el_cane", T((hx, -0.07, 0.17)), bone="Arm.R")
-    k.add(cyl(0.016, 0.016, 0.1, 6), "el_cane", T((hx + 0.03, -0.07, 0.36), (0, 90, 0)), bone="Arm.R")
-    k.add(sphere(0.022, 6, 4), "el_frame", T((hx + 0.08, -0.07, 0.36)), smooth=True, bone="Arm.R")
-
-
-def worker(k):
-    """Broad quarry/kiln hand: flat cap, kerchief, leather apron with a hammer, rolled sleeves, work gloves."""
-    N.body(k, {"shoe": "wk_boot", "pants": "wk_pants", "top": "wk_shirt", "sleeve": "wk_shirt"}, sleeves="rolled", hands="wk_glove")
-    N.hair_cap(k, "wk_hair", tilt=-15)
-    k.add(sphere(0.255, 14, 8), "wk_cap", T((0, 0.02, 0.95), (-8, 0, 0), (1.02, 1.04, 0.55)), smooth=True, bone="Head")
-    k.add(cyl(0.16, 0.16, 0.02, 12), "wk_cap", T((0, -0.17, 0.97), (-10, 0, 0), (1.0, 0.55, 1)), smooth=True, bone="Head")   # peak
-    k.add(cyl(0.135, 0.125, 0.05, 12, 0.012), "wk_scarf", T((0, 0.0, 0.625)), smooth=True, bone="Torso")
-    k.add(prism([(-0.07, 0), (0.07, 0), (0, -0.09)], 0.02, 0.005), "wk_scarf", T((0, -0.152, 0.62)), bone="Torso")
-    k.add(box(0.23, 0.03, 0.2, 0.01), "wk_apron", T((0, -0.125, 0.5)), bone="Torso")
-    k.add(box(0.31, 0.03, 0.2, 0.01), "wk_apron", T((0, -0.118, 0.3)), bone="Hips")
-    for s in (1, -1):
-        k.add(box(0.03, 0.2, 0.03), "wk_apron", T((s * 0.085, -0.03, 0.62)), bone="Torso")
-    k.add(box(0.33, 0.23, 0.04, 0.012), "leather", T((0, 0, 0.39)), bone="Hips")
-    k.add(box(0.025, 0.025, 0.16), "wood_mid", T((-0.16, -0.05, 0.3)), bone="Hips")                     # hammer
-    k.add(box(0.03, 0.09, 0.04, 0.008), "iron", T((-0.16, -0.05, 0.39)), bone="Hips")
-
-
-def sailor(k):
-    """Weathered sailor: striped knit jumper, yellow brimmed rain hat, grey beard, a coil of rope over the shoulder."""
-    N.body(k, {"shoe": "sa_boot", "pants": "sa_pants", "top": "sa_jumper", "sleeve": "sa_jumper"})
-    N.hair_cap(k, "sa_hair", tilt=-15)
-    k.add(sphere(0.15, 12, 6), "sa_beard", T((0, -0.12, 0.72), scale=(1.25, 0.75, 0.75)), smooth=True, bone="Head")
-    k.add(sphere(0.045, 8, 4), "sa_beard", T((0, -0.215, 0.77), scale=(1.6, 0.5, 0.55)), smooth=True, bone="Head")
-    k.add(cyl(0.34, 0.31, 0.03, 18, 0.008), "sa_hat", T((0, 0.03, 1.0), (8, 0, 0)), smooth=True, bone="Head")
-    k.add(cyl(0.21, 0.19, 0.14, 16, 0.02), "sa_hat", T((0, 0.02, 1.07), (-4, 0, 0)), smooth=True, bone="Head")
-    for z in (0.44, 0.52, 0.6):  # jumper stripes (the torso widens from 0.135 at z 0.38 to 0.16 at 0.62)
-        r = 0.135 + (0.16 - 0.135) * (z - 0.38) / 0.24 + 0.006
-        k.add(cyl(r, r, 0.03, 12), "sa_stripe", T((0, 0, z), scale=(1.05, 0.8, 1)), smooth=True, bone="Torso")
-    for s, b in ((1, "Arm.L"), (-1, "Arm.R")):
-        for dz in (-0.04, 0.03):
-            k.add(cyl(0.053, 0.053, 0.025, 8), "sa_stripe", T((s * 0.2, 0, 0.47), (0, s * 8, 0)) @ T((0, 0, dz)), smooth=True, bone=b)
-    k.add(torus(0.17, 0.028, 12, 5), "rope", T((0.02, 0.0, 0.52), (0, 62, 0), (1, 0.75, 1)), bone="Torso")
-
-
-def scholar(k):
-    """Scholar: long open burgundy coat, round glasses, a long mustard scarf, a map roll under the arm, a satchel."""
-    N.body(k, {"shoe": "sc_shoe", "pants": "sc_pants", "top": "sc_vest", "sleeve": "sc_coat"})
-    N.hair_cap(k, "sc_hair", tilt=-22)
-    for s in (1, -1):
-        k.add(sphere(0.12, 10, 6), "sc_hair", T((s * 0.17, 0.03, 0.78), scale=(0.55, 1.2, 1.15)), smooth=True, bone="Head")
-        k.add(N.ring(0.064, 0.05), "sc_frame", T((s * 0.085, -0.228, 0.82)), bone="Head")
-        k.add(box(0.012, 0.16, 0.012), "sc_frame", T((s * 0.15, -0.15, 0.83)), bone="Head")
-    k.add(box(0.05, 0.012, 0.012), "sc_frame", T((0, -0.229, 0.83)), bone="Head")
-    N.skirt(k, "sc_coat", 0.17, 0.21, 0.08, 0.4, 14, open_front=True)
-    for s in (1, -1):  # open coat fronts over the vest
-        k.add(box(0.07, 0.03, 0.25, 0.01), "sc_coat", T((s * 0.1, -0.115, 0.5), (0, 0, s * -6)), bone="Torso")
-    k.add(cyl(0.15, 0.14, 0.07, 14, 0.02), "sc_scarf", T((0, 0.0, 0.62)), smooth=True, bone="Torso")
-    for x, L in ((0.05, 0.24), (-0.04, 0.3)):
-        k.add(box(0.06, 0.03, L, 0.012), "sc_scarf", T((x, -0.135, 0.6 - L / 2), (0, 4, 0)), bone="Torso")
-    k.add(cyl(0.035, 0.035, 0.34, 10), "paper", T((0.27, -0.02, 0.43), (60, 0, 0)), smooth=True, bone="Arm.L")
-    k.add(cyl(0.037, 0.037, 0.02, 10), "wax", T((0.27, -0.02, 0.43), (60, 0, 0)), bone="Arm.L")
-    k.add(box(0.06, 0.16, 0.13, 0.015), "sc_bag", T((-0.17, 0.0, 0.33)), bone="Hips")
-    k.add(box(0.02, 0.03, 0.34), "sc_bag", T((0.0, -0.13, 0.48), (0, -38, 0)), bone="Torso")
-
-
-STOOP = {"Torso": ((0, 0, 0), (10, 0, 0)), "Head": ((0, 0, 0), (-6, 0, 0)), "Arm.R": ((0, 0, 0), (-10, 0, -4))}
-NPCS_V2 = {  # as build_npcs.NPCS: (builder, scale, head_scale, leg, idle pose offsets, walk arm swing)
-    "npc_elder": (elder, 1.2, 0.93, 1.12, STOOP, 0.35),
-    "npc_worker": (worker, 1.32, 0.94, 1.22, {"Arm.L": ((0, 0, 0), (0, 0, 6)), "Arm.R": ((0, 0, 0), (0, 0, -6))}, 1.0),
-    "npc_sailor": (sailor, 1.28, 0.95, 1.14, None, 0.8),
-    "npc_scholar": (scholar, 1.24, 1.0, 1.12, {"Head": ((0, 0, 0), (5, 0, 0))}, 0.6),
-}
-TAGS_V2 = {
-    "npc_elder": {"primary": "#8f6fa0", "secondary": "#e8d9b0", "hair": "#eeeae6", "accent": "#3f6b5a"},
-    "npc_worker": {"primary": "#c86a3a", "secondary": "#8a6040", "hair": "#4a3326", "accent": "#2f7f86"},
-    "npc_sailor": {"primary": "#2f4a7a", "secondary": "#f1e7d2", "hair": "#b9b4ae", "accent": "#f0b830"},
-    "npc_scholar": {"primary": "#7a2f3a", "secondary": "#e0a13a", "hair": "#2f2420", "accent": "#e9dcc0"},
-}
-
-
 # ---------------------------------------------------------------- build, export, checks, sheets
 
 
@@ -936,7 +846,6 @@ SLOTS = {  # Blender (x, y) in the PropsV2 scene; footprints never overlap
     "stump": (8, 3), "log": (10.5, 3),
     "curio": (-9, 0), "brass_thimble": (-8, 0), "heron_feather": (-7, 0), "message_bottle": (-6, 0),
     "fossil_fern": (-5, 0), "tin_hex": (-4, 0), "lead_type": (-3, 0),
-    "npc_elder": (0, 0), "npc_worker": (1.2, 0), "npc_sailor": (2.4, 0), "npc_scholar": (3.6, 0),
 }
 CURIO_Z = 0.4  # curios are centred on the origin; lift them in the scene so they don't sit in the ground
 
@@ -952,14 +861,6 @@ def build_all(scn, only):
         after = fn(kit)
         ob = kit.build(coll)
         built[name] = [ob] + (after(ob, coll) if after else [])
-    for name, (fn, S, head, leg, pose, swing) in NPCS_V2.items():
-        if only and name not in only:
-            continue
-        coll = bpy.data.collections.new(B.PREFIX + name)
-        scn.collection.children.link(coll)
-        kit = B.Kit(name)
-        fn(kit)
-        built[name] = B.rig_character(kit, coll, name, S, head_scale=head, leg=leg, clips=B.NPC_CLIPS, pose=pose, arm_swing=swing)
     for name, objs in built.items():
         x, y = SLOTS[name]
         z = CURIO_Z if name in CURIOS else 0
@@ -1104,14 +1005,6 @@ def main(argv):
                         other.name = base + "_parked"
                     e.name = base
                 B.export({name: objs}, out)
-            people = [n for n in built if n in NPCS_V2]
-            if people:
-                pal = os.path.join(out, "npc", "npc_palettes.json")
-                tags = json.load(open(pal)) if os.path.exists(pal) else {}
-                tags.update({n: TAGS_V2[n] for n in people})
-                with open(pal, "w") as f:
-                    json.dump(tags, f, indent=2)
-                    f.write("\n")
         if "--check" in argv:
             check(scn)
         if sh:

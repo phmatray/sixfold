@@ -798,210 +798,6 @@ def build_path(k, seed):
               T((rng.uniform(-0.36, 0.36), rng.uniform(-0.36, 0.36), 0.016), scale=(1, 0.8, 0.22)))
 
 
-# ---------------------------------------------------------------- hero
-
-HEAD_SCALE, NECK = 1.1, Vector((0, 0, 0.62))  # bigger chibi head (about 1:1.6), grown from the neck
-HERO_SCALE = 1.45 / 1.2  # modelled at ~1.2 m, shipped at ~1.45 m
-
-BONES = {  # name: (head, tail, parent) in metres, all pointing up so local axes = world axes
-    "Root": ((0, 0, 0), (0, 0, 0.15), None),
-    "Hips": ((0, 0, 0.32), (0, 0, 0.42), "Root"),
-    "Torso": ((0, 0, 0.38), (0, 0, 0.6), "Hips"),
-    "Head": ((0, 0, 0.62), (0, 0, 0.9), "Torso"),
-    "Leg.L": ((0.085, 0, 0.3), (0.085, 0, 0.4), "Hips"),
-    "Leg.R": ((-0.085, 0, 0.3), (-0.085, 0, 0.4), "Hips"),
-    "Arm.L": ((0.2, 0, 0.56), (0.2, 0, 0.66), "Torso"),
-    "Arm.R": ((-0.2, 0, 0.56), (-0.2, 0, 0.66), "Torso"),
-    "Eye.L": ((0.085, -0.2, 0.82), (0.085, -0.2, 0.87), "Head"),   # scaled on Y (world Z) to blink
-    "Eye.R": ((-0.085, -0.2, 0.82), (-0.085, -0.2, 0.87), "Head"),
-}
-
-
-def build_hero_mesh(k):
-    """Original chibi: violet bob with a curl and a short tied tuft at the back, orange open
-    jacket over a cream shirt with a small hex badge, navy shorts, teal sneakers."""
-    for s, b in ((1, "Leg.L"), (-1, "Leg.R")):
-        x = s * 0.085
-        k.add(box(0.13, 0.2, 0.09, 0.035, 2), "shoe", T((x, -0.025, 0.055)), bone=b)
-        k.add(box(0.14, 0.21, 0.035, 0.01), "sole", T((x, -0.025, 0.0075)), bone=b)
-        k.add(cyl(0.05, 0.055, 0.2, 8), "skin", T((x, 0, 0.18)), smooth=True, bone=b)
-        k.add(cyl(0.075, 0.08, 0.1, 8), "shorts", T((x, 0, 0.29)), smooth=True, bone=b)
-    k.add(box(0.31, 0.2, 0.13, 0.05, 2), "shorts", T((0, 0, 0.36)), bone="Hips")
-    k.add(cyl(0.135, 0.16, 0.24, 10, 0.03), "jacket", T((0, 0, 0.5), scale=(1.05, 0.8, 1)), smooth=True, bone="Torso")
-    k.add(box(0.11, 0.03, 0.22, 0.012), "shirt", T((0, -0.124, 0.5)), bone="Torso")        # shirt in the open jacket
-    k.add(cyl(0.028, 0.028, 0.012, 6), "hex_in", T((0, -0.142, 0.54), (90, 30, 0)), bone="Torso")  # hex badge
-    # bright backpack: the accent that reads from behind and far away at phone size
-    k.add(box(0.24, 0.12, 0.23, 0.045, 2), "pack", T((0, 0.15, 0.5)), bone="Torso")
-    k.add(box(0.18, 0.04, 0.09, 0.02), "pack_dk", T((0, 0.215, 0.45)), bone="Torso")       # front pocket
-    k.add(cyl(0.035, 0.035, 0.012, 6), "shoe", T((0, 0.24, 0.53), (90, 30, 0)), bone="Torso")  # hex badge
-    for sx in (-1, 1):  # straps over the shoulders
-        k.add(box(0.035, 0.03, 0.2, 0.01), "shoe", T((sx * 0.085, -0.13, 0.5)), bone="Torso")
-        k.add(box(0.035, 0.26, 0.03, 0.01), "shoe", T((sx * 0.085, 0.0, 0.615)), bone="Torso")
-    k.add(sphere(0.13, 10, 5), "jacket", T((0, 0.08, 0.6), scale=(1.2, 0.7, 0.5)), smooth=True, bone="Torso")  # hood
-    for s, b in ((1, "Arm.L"), (-1, "Arm.R")):
-        x = s * 0.2
-        k.add(cyl(0.05, 0.045, 0.2, 8), "jacket", T((x, 0, 0.47), (0, s * 8, 0)), smooth=True, bone=b)
-        k.add(sphere(0.05, 8, 5), "skin", T((x + s * 0.015, 0, 0.35)), smooth=True, bone=b)
-    # head
-    k.add(sphere(0.23, 14, 9), "skin", T((0, 0, 0.84), scale=(1, 0.95, 0.95)), smooth=True, bone="Head")
-    for s, eb in ((1, "Eye.L"), (-1, "Eye.R")):
-        k.add(sphere(0.048, 8, 6), "eye", T((s * 0.085, -0.203, 0.82), scale=(0.8, 0.5, 1.2)), smooth=True, bone=eb)
-        k.add(sphere(0.016, 6, 4), "white", T((s * 0.085 + 0.013, -0.226, 0.85)), smooth=True, bone=eb)
-        k.add(sphere(0.03, 8, 4), "blush", T((s * 0.14, -0.18, 0.76), scale=(1.2, 0.4, 0.6)), smooth=True, bone="Head")
-    k.add(sphere(0.022, 8, 4), "eye", T((0, -0.221, 0.735), scale=(1.5, 0.4, 0.55)), smooth=True, bone="Head")  # mouth
-    # hair: cap tilted back (forehead visible from the game camera) + side bob + short fringe
-    # + a curl on top + a short tied tuft at the back (silhouette from behind and the side)
-    cap = sphere(0.25, 14, 9)
-    bmesh.ops.bisect_plane(cap, geom=list(cap.verts) + list(cap.edges) + list(cap.faces),
-                           plane_co=(0, 0, -0.02), plane_no=(0, 0, -1), clear_outer=True)
-    k.add(cap, "hair", T((0, 0.03, 0.87), (-22, 0, 0)), smooth=True, bone="Head")
-    for s in (1, -1):
-        k.add(sphere(0.12, 10, 6), "hair", T((s * 0.17, 0.03, 0.78), scale=(0.55, 1.25, 1.25)), smooth=True, bone="Head")
-    for i, x in enumerate((-0.12, -0.04, 0.05, 0.13)):
-        k.add(sphere(0.068, 8, 5), "hair_lt" if i == 2 else "hair", T((x, -0.165, 1.0 - abs(x) * 0.3), (30, 0, x * 120), (1, 0.55, 0.8)),
-              smooth=True, bone="Head")
-    k.add(sphere(0.085, 8, 6), "hair", T((0, 0.25, 0.8), (-35, 0, 0), (0.85, 1.35, 0.8)), smooth=True, bone="Head")  # tuft
-    k.add(cyl(0.045, 0.045, 0.04, 8), "shoe", T((0, 0.2, 0.82), (55, 0, 0)), smooth=True, bone="Head")          # hair tie
-    k.add(sphere(0.21, 12, 7), "hair", T((0, 0.07, 0.79), scale=(1.12, 0.95, 1.05)), smooth=True, bone="Head")
-    k.add(cyl(0.03, 0.0, 0.11, 6), "hair_lt", T((0.02, 0.0, 1.12), (-35, 15, 0)), smooth=True, bone="Head")
-
-
-def build_hero(coll):
-    kit = Kit("hero")
-    build_hero_mesh(kit)
-    return rig_character(kit, coll, "hero", HERO_SCALE)
-
-
-HIP = 0.32  # model-space hip line: legs below it stretch with `leg`, everything above moves up
-
-
-def rig_character(kit, coll, name, S, head_scale=HEAD_SCALE, leg=1.0,
-                  clips=("Idle", "Fidget", "Walk", "Run"), pose=None, arm_swing=1.0):
-    """Shared by the hero and the NPC variants: same 10-bone rig, same clips.
-    head_scale grows the head from the neck, leg stretches the legs (1.0 = hero proportions),
-    pose = {bone: (loc, rot)} static offsets added to Idle and Fidget (pockets, confident stance),
-    arm_swing scales the Walk/Run arm swing."""
-    head_bones = ("Head", "Eye.L", "Eye.R")
-
-    def zmap(v):
-        return Vector((v.x, v.y, v.z * leg if v.z <= HIP else v.z + HIP * (leg - 1)))
-    for bm, _, _, bone, _ in kit.parts:
-        if bone in head_bones:
-            bmesh.ops.transform(bm, matrix=Matrix.Translation(NECK) @ Matrix.Scale(head_scale, 4)
-                                @ Matrix.Translation(-NECK), verts=bm.verts)
-        if leg != 1.0:
-            for v in bm.verts:
-                v.co = zmap(v.co)
-        bmesh.ops.scale(bm, vec=(S, S, S), verts=bm.verts)
-    body = kit.build(coll)
-
-    arm_data = bpy.data.armatures.new(PREFIX + name + "_rig")
-    rig = bpy.data.objects.new(name + "_rig", arm_data)
-    coll.objects.link(rig)
-    vl = bpy.context.view_layer
-    vl.objects.active = rig
-    bpy.ops.object.mode_set(mode="EDIT")
-    for name, (h, t, p) in BONES.items():
-        eb = arm_data.edit_bones.new(name)
-        hh, tt = Vector(h), Vector(t)
-        if name in head_bones:
-            hh, tt = NECK + (hh - NECK) * head_scale, NECK + (tt - NECK) * head_scale
-        eb.head, eb.tail, eb.roll = zmap(hh) * S, zmap(tt) * S, 0
-        if p:
-            eb.parent = arm_data.edit_bones[p]
-    bpy.ops.object.mode_set(mode="OBJECT")
-    for b in arm_data.bones:
-        b.use_deform = b.name != "Root"
-    body.parent = rig
-    mod = body.modifiers.new("Armature", "ARMATURE")
-    mod.object = rig
-
-    rig.animation_data_create()
-    pb = rig.pose.bones
-    for b in pb:
-        b.rotation_mode = "XYZ"
-
-    def key(frame, poses, offset=None):
-        for bname, bpose in poses.items():
-            b = pb[bname]
-            dl, dr = (offset or {}).get(bname, ((0, 0, 0), (0, 0, 0)))
-            b.location = (Vector(bpose[0]) + Vector(dl)) * S
-            b.rotation_euler = [math.radians(a + d) for a, d in zip(bpose[1], dr)]
-            b.keyframe_insert("location", frame=frame)
-            b.keyframe_insert("rotation_euler", frame=frame)
-            if len(bpose) > 2:
-                b.scale = bpose[2]
-                b.keyframe_insert("scale", frame=frame)
-
-    def make_action(clip, keys, offset=None):
-        if clip not in clips:
-            return None
-        act = bpy.data.actions.new(clip)
-        act.use_fake_user = True
-        rig.animation_data.action = act
-        for frame, poses in keys:
-            key(frame, poses, offset)
-        track = rig.animation_data.nla_tracks.new()
-        track.name = clip
-        track.strips.new(clip, int(keys[0][0]), act)
-        track.mute = clip != "Idle"
-        rig.animation_data.action = None
-        for b in pb:
-            b.location = (0, 0, 0)
-            b.rotation_euler = (0, 0, 0)
-            b.scale = (1, 1, 1)
-        return act
-
-    z = ((0, 0, 0), (0, 0, 0))
-    # Bone axes: x = world X, y = world up, z = world back. Rot x > 0 tips forward.
-    # Idle: 4 s loop. Two breaths (chest and shoulders rise, head bobs), one slow weight shift
-    # (hips roll, legs counter-roll so the feet stay planted) and one blink at 2.5 s.
-    idle = []
-    for f in sorted(set(range(0, 97, 6)) | {58, 60, 62}):
-        br = (1 - math.cos(math.tau * f / 48)) / 2
-        ws = math.sin(math.tau * f / 96)
-        blink = 0.1 if f == 60 else 1.0
-        idle.append((f, {"Hips": ((0, 0, 0), (0, 0, 2.5 * ws)),
-                         "Leg.L": ((0, 0, 0), (0, 0, -2.5 * ws)), "Leg.R": ((0, 0, 0), (0, 0, -2.5 * ws)),
-                         "Torso": ((0, 0.008 * br, 0), (-1.5 * br, 0, -1.5 * ws)),
-                         "Head": ((0, 0.005 * br, 0), (2.5 * br - 1, 4 * ws, ws)),
-                         "Arm.L": ((0, 0.01 * br, 0), (0, 0, 2 + 2 * br)),
-                         "Arm.R": ((0, 0.01 * br, 0), (0, 0, -2 - 2 * br)),
-                         "Eye.L": ((0, 0, 0), (0, 0, 0), (1, blink, 1)),
-                         "Eye.R": ((0, 0, 0), (0, 0, 0), (1, blink, 1))}))
-    make_action("Idle", idle, pose)
-    # Fidget: 2.5 s look around (head turns left, then right, torso follows a little)
-    fidget = []
-    for f, turn in ((0, 0), (12, 32), (26, 32), (38, -32), (50, -32), (60, 0)):
-        fidget.append((f, {"Head": ((0, 0, 0), (-3 if turn else 0, turn, 0)),
-                           "Torso": ((0, 0, 0), (0, turn * 0.25, 0)),
-                           "Hips": z, "Leg.L": z, "Leg.R": z, "Arm.L": ((0, 0, 0), (0, 0, 3)),
-                           "Arm.R": ((0, 0, 0), (0, 0, -3))}))
-    make_action("Fidget", fidget, pose)
-    # Walk: 0.5 s loop = two steps; each step is one tile (game moves 1 tile / 0.25 s)
-    walk = []
-    for f, sw, bob in ((0, 1, -1), (3, 0, 0), (6, -1, -1), (9, 0, 0), (12, 1, -1)):
-        # dip at contact (legs spread), level at passing: keeps the feet on the ground
-        walk.append((f, {"Hips": ((0, 0.035 * bob, 0), (0, 0, 6 * sw)),
-                         "Torso": ((0, 0, 0), (6, 0, -10 * sw)),
-                         "Head": ((0, 0, 0), (-4, 0, 6 * sw)),
-                         "Leg.L": ((0, 0, 0), (-32 * sw, 0, 0)), "Leg.R": ((0, 0, 0), (32 * sw, 0, 0)),
-                         "Arm.L": ((0, 0, 0), (36 * sw * arm_swing, 0, 4)),
-                         "Arm.R": ((0, 0, 0), (-36 * sw * arm_swing, 0, -4))}))
-    make_action("Walk", walk)
-    # Run: 0.25 s loop = two steps of 0.125 s (one tile each at run speed); lean in, bigger swing, flight bob
-    run = []
-    for f, sw, bob in ((0, 1, -1), (1.5, 0, 1), (3, -1, -1), (4.5, 0, 1), (6, 1, -1)):
-        run.append((f, {"Hips": ((0, 0.03 * bob, 0), (0, 0, 8 * sw)),
-                        "Torso": ((0, 0, 0), (14, 0, -14 * sw)),
-                        "Head": ((0, 0, 0), (-10, 0, 8 * sw)),
-                        "Leg.L": ((0, 0, 0), (-48 * sw, 0, 0)), "Leg.R": ((0, 0, 0), (48 * sw, 0, 0)),
-                        "Arm.L": ((0, 0, 0), (60 * sw * arm_swing, 0, 8)),
-                        "Arm.R": ((0, 0, 0), (-60 * sw * arm_swing, 0, -8))}))
-    make_action("Run", run)
-    return [body, rig]
-
-
 # ---------------------------------------------------------------- scene, export, preview
 
 PROPS = {
@@ -1087,7 +883,7 @@ def save_if_file():
 SLOTS = {  # where each asset sits in the Assets scene (tile centres on integers, 2x2 tree on a corner)
     "house": (0, 5), "tree": (-6.5, 5.5), "bush": (-4, 1), "flowers": (-3, 1), "rock": (-2, 1),
     "sign": (2, 1), "fence": (4, 1), "fence_corner": (5, 1), "fence_end": (6, 1), "fence_t": (7, 1),
-    "path": (-1, -1), "path_b": (0, -1), "path_c": (1, -1), "hero": (0, 1),
+    "path": (-1, -1), "path_b": (0, -1), "path_c": (1, -1),
     "tree_b": (-9.5, 5.5), "tree_c": (9.5, 5.5), "bush_dark": (-5, 1), "grass_edge": (3, -1), "shoes": (9, 1),
     # interior kit, two rows further south
     "wall": (-9, -4), "wall_corner": (-7, -4), "wall_end": (-5, -4), "wall_t": (-3, -4), "wall_window": (-1, -4),
@@ -1108,9 +904,6 @@ def build_all(scn):
         if name in WIND:
             add_wind(ob, WIND[name])
         built[name] = [ob] + (after(ob, coll) if after else [])
-    coll = bpy.data.collections.new(PREFIX + "hero")
-    scn.collection.children.link(coll)
-    built["hero"] = build_hero(coll)
     for name, objs in built.items():  # lay out side by side; exports put roots back at the origin
         x, y = SLOTS[name]
         bpy.data.collections[PREFIX + name].instance_offset = (x, y, 0)
@@ -1207,7 +1000,7 @@ LAYOUT = [  # preview placement on the 1 m grid (x, y), Blender coords (front = 
     ("flowers", -2, -1), ("flowers", -3, -1), ("flowers", 2, -1), ("rock", 5, -2),
     ("sign", 3, 0),
     ("path", 0, 0), ("path_b", 0, -1), ("path_c", 0, -2), ("path", 0, -3), ("path_b", 1, -3),
-    ("hero", 0, -1), ("tree_b", -9.5, 4.5), ("tree_c", 9.5, 4.5), ("bush_dark", -5, 1), ("bush_dark", 5, 1),
+    ("tree_b", -9.5, 4.5), ("tree_c", 9.5, 4.5), ("bush_dark", -5, 1), ("bush_dark", 5, 1),
     ("grass_edge", -0.56, -1, 90), ("grass_edge", 0.56, -1, 90), ("grass_edge", -0.56, -2, 90), ("grass_edge", 0.56, -2, 270),
 ]
 # fence tiles (tx, tz) in map terms (z grows toward the camera): a closed 4 x 3 ring plus a stub (T + end)

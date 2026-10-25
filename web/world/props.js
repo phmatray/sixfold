@@ -342,6 +342,7 @@ export function prep(root, cast) {
     if (!(o.material instanceof THREE.MeshToonMaterial) && !(o.material instanceof THREE.MeshLambertMaterial) && !(o.material instanceof THREE.MeshBasicMaterial)) {
       const m = o.material;
       o.material = toon(m.color ?? "#ffffff", { name: m.name, map: m.map ?? null, transparent: m.transparent, alphaTest: m.alphaTest, opacity: m.opacity });
+      o.material.userData = m.userData; // a person's palette table (actors.js)
     }
     // COLOR_0 is a wind weight (read by the wind shader), never a tint.
     o.material.vertexColors = false;

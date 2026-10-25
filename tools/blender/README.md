@@ -14,10 +14,10 @@ scene inside it and saves the file:
 | `Assets`  | `build_assets.py`        | every model side by side on a 1 m grid, one `sx_<name>` collection each; the .glb exports come from here |
 | `Preview` | `build_assets.py`        | contact-sheet layout (instances, grass, grid, camera) |
 | `World`   | `build_world_scene.py`   | `web/world/maps/overworld.json` assembled from the exported .glb files: fences auto-tiled, sway, smoke, hero Idle loop, game camera |
-| `NPCs`    | `build_npcs.py`          | NPC variants on the hero's rig (shopkeeper, gardener, wanderer, kid, rival) and the campaign rivals (grass, fire, water, lightning, fighting, psychic, champion) -> `assets/npc/npc_*.glb`, `assets/npc/rival_*.glb` + `npc_palettes.json` |
+| `Characters` | `build_characters.py` | every person: the hero, the townsfolk archetypes (kid, gardener, elder, sailor, shopkeeper, scholar, worker, wanderer, rival) and the seven campaign rivals -> `assets/hero.glb`, `assets/npc/npc_*.glb`, `assets/npc/rival_*.glb`; headless only |
 | `Interior`| `build_interior_scene.py`| `web/world/maps/shop.json`: walls auto-tiled with the fence rules (cutaway `wall_low*` on the camera-side south row, `wall_window` on chosen straight tiles), wood floor, furniture, lamp light, hero |
 | `Areas`   | `build_area_props.py`    | the 0.7 outdoor-area props (woodland, seaside, quarry, square) side by side; imports `build_assets.py` for its helpers and exports only its own files |
-| `PropsV2` | `build_props_v2.py`      | 1.2 house furniture, signs, the curio cabinet and curios, the 1.3 shared kit (waymark, seal stone, cave mouth, climb wall, inn sign), the find hosts (stump, log) and four more NPCs; imports `build_npcs.py` and `build_area_props.py` for their helpers and exports only its own files |
+| `PropsV2` | `build_props_v2.py`      | 1.2 house furniture, signs, the curio cabinet and curios, the 1.3 shared kit (waymark, seal stone, cave mouth, climb wall, inn sign), the find hosts (stump, log); imports `build_area_props.py` for its helpers and exports only its own files |
 | `V13_<region>` | `build_regions_v13.py` | the 1.3 region props, one module per region (`v13_ember.py` … `v13_stone.py`) on the shared `v13_kit.py`; headless only (see `web/world/ASSETS_V13.md`) |
 
 ```bash
@@ -51,14 +51,14 @@ blender -b --factory-startup -P tools/blender/build_regions_v13.py -- --region e
 # Bake into a scratch folder, then `cwebp -q 82 x.png -o web/world/textures/x.webp`: only the .webp files are committed.
 blender -b --factory-startup -P tools/blender/bake_ground_textures.py -- --out /tmp/tex --only sand,stone
 
-# NPC variants (+ lineup sheet of hero and NPCs, front and game camera)
-blender -b art/Sixfold.blend -P tools/blender/build_npcs.py -- --out web/world/assets
+# Every person (hero, townsfolk, rivals; --only hero,npc_kid for some), then a lineup sheet, front and game camera
+blender -b --factory-startup -P tools/blender/build_characters.py -- --out web/world/assets
 blender -b --factory-startup -P tools/blender/npc_lineup.py -- --assets web/world/assets --out /tmp/lineup \
     [--names hero,rival_grass,rival_fire,rival_water,rival_lightning,rival_fighting,rival_psychic,rival_champion]
 
-# 1.2 / 1.3 props and NPCs -> assets/{interior/,npc/,}*.glb, merges their tags into npc_palettes.json
+# 1.2 / 1.3 props -> assets/{interior/,}*.glb
 # (--only a,b; --check lists z-fighting faces on a y = 0 ground; --sheet front/back 3/4 tiles per model;
-#  --preview game camera beside the house, cottage, stall and NPCs, cliffs behind the cave mouth and climb wall)
+#  --preview game camera beside the house, cottage, stall and a person, cliffs behind the cave mouth and climb wall)
 blender -b --factory-startup -P tools/blender/build_props_v2.py -- --out web/world/assets --check \
     --sheet /tmp/pv2_sheet.png --preview /tmp/pv2.png
 
@@ -91,16 +91,13 @@ created by a script, its panel may show the server as off even though it is stil
   - Each export is a single scene restricted to that asset (`use_active_scene`).
   - Clips are taken from NLA tracks.
   - `validate_glb()` rejects extra scenes, hero data inside props, and duplicate or suffixed clip names.
-- **Hero:** `hero.glb` is about 1.47 m tall and 0.64 m wide. It is one skinned mesh with rigid weights, including the `Eye.L` / `Eye.R` blink bones. Clips:
-  - `Idle`: 4 s, with breathing, a weight shift and one blink.
-  - `Fidget`: 2.5 s look-around.
-  - `Walk`: 0.5 s, two steps of 0.25 s, one tile each.
-  - `Run`: 0.25 s, two steps of 0.125 s.
-- **Hero frozen:** the hero is frozen. `build_hero()` and `build_hero_mesh()` must not change its output; the export was checked against the frozen copy (identical glTF JSON).
-- **NPCs:**
-  - They share `rig_character()`: the same 10 bones and the Idle/Walk/Fidget clips.
-  - Each one has its own parameters: scale, `head_scale`, `leg` length, static `pose` offsets (the wanderer's hands in pockets, the rival's confident stance) and arm swing.
-  - Hats, tools and binders are weighted to the head or hand bones.
+- **People (`build_characters.py`):**
+  - Each is authored in the hero's canonical body and mapped to its own build (`bz` height, `bw` width, `hs` head, `leg`). The hero is about 1.47 m tall; children about 1.1 m, adults 1.5 to 1.65 m, Sable about 1.8 m.
+  - One mesh on one palette texture (4 px swatches on an 8 x 8 grid, nearest filtering), so a person is one draw (two with a glowing lantern). The swatch table rides in the material's extras (`sx_palette`): `actors.js` repaints it for map `outfit` and `hair` colours. Swatch names decide what a recolour touches: `skin`, `eye`, `white`, `blush`, `sole`, `gold`, `cream`, `hair`, `trim` and `glow` keep their colour, `*_accent` takes the outfit's opposite hue, everything else takes its hue.
+  - Garments are fused surfaces (a voxel remesh of primitives, smoothed and decimated); hair and hats are flat-shaded facets. Budget: the hero 5k triangles, the others about 4k to 5.5k.
+  - Route-duelist accessories (`acc_cap`, `acc_glasses`, `acc_headband`, `acc_scarf`, `acc_bag`) are extra meshes on the same skeleton and palette, hidden unless worn.
+  - Rig: 14 bones with rigid weights (`Root`, `Hips`, `Torso`, `Head`, `Eye.L` / `Eye.R` for the blink, `Leg` + `Shin` for knees, `Arm` + `Fore` for elbows). A prop in a posed hand is modelled where it shows and un-posed onto the forearm (`held()`).
+  - Clips: `Idle` (4 s: breathing, a weight shift, one blink), `Fidget` (2.5 s look-around), `Walk` (0.5 s, two 0.25 s steps), and for the hero `Run` (two 0.17 s steps, the game's run speed).
 - **House:** `house.glb` is a duel hall with a hipped roof, a hex turret, an awning and a hanging hex sign. It contains:
   - a `door` node hinged on −X, with the `Open` clip (0.42 s);
   - an empty `smoke_origin` on top of the chimney;

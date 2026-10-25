@@ -4,13 +4,14 @@
         --assets web/world/assets --out web/world/assets/portraits [--size 512] [--only bramble,warden]
 
 Each rival_*.glb on its Idle pose (frame 30, eyes open), three-quarter view, ortho, scaled on the
-head sphere (skin faces weighted to the Head bone) so every bust has the same scale whatever the
+head sphere (skin faces weighted to the Head bone; skin is the palette's `*skin` swatches) so every bust has the same scale whatever the
 hat or hair, and framed low enough that the tallest hat or antenna still fits. Each rival faces its
 own way and tilts to its temper (`POSE`); a key light, a rim light in the rival's colour, then a
 background in that colour carrying a motif of its own (`MOTIF`: leaves, waves, flame rays, a
 lightning zigzag, strata, stars, the six-sided seal pattern for the Warden).
 Writes <out>/<rival id>.webp (cwebp, must be on PATH); ids as in engine/src/campaign.rs.
 """
+import json
 import math
 import os
 import subprocess
@@ -33,7 +34,7 @@ RIVALS = {  # id: (model, centre tint, edge colour) — the card colours of web/
 
 # id: (camera side, -1 left / 1 right; roll in degrees; motif)
 POSE = {
-    "bramble": (1, 0, "leaves"), "marlo": (-1, -3, "waves"), "cinza": (1, 6, "rays"), "quill": (-1, 4, "zigzag"),
+    "bramble": (1, 0, "leaves"), "marlo": (-1, -3, "waves"), "cinza": (1, 6, "rays"), "quill": (1, 4, "zigzag"),
     "orla": (1, -2, "strata"), "lumen": (-1, -5, "stars"), "warden": (1, 0, "hexes"),
 }
 
@@ -119,11 +120,24 @@ def head_sphere(objs):
             continue
         gi = o.vertex_groups["Head"].index
         skin = {i for i, m in enumerate(o.data.materials) if m and m.name.split(".")[0].endswith("skin")}
+        cells = {}  # palette models (build_characters.py): skin is a swatch, found by the face's UV
+        for i, m in enumerate(o.data.materials):
+            if m and "sx_palette" in m:
+                pal = json.loads(m["sx_palette"])
+                cells[i] = (pal["grid"], {c for k, (c, _) in pal["keys"].items() if k.endswith("skin")})
+        uv = o.data.uv_layers.active.data if o.data.uv_layers.active else None
+
+        def is_skin(p):
+            if p.material_index in cells and uv is not None:
+                g, want = cells[p.material_index]
+                u, v = uv[p.loop_start].uv
+                return int(u * g) + int(v * g) * g in want
+            return p.material_index in skin
         head = {v.index for v in o.data.vertices if any(g.group == gi and g.weight > 0.5 for g in v.groups)}
         ev = o.evaluated_get(dg)
         me = ev.to_mesh()
         for p in me.polygons:
-            if p.material_index in skin and all(i in head for i in p.vertices):
+            if is_skin(o.data.polygons[p.index]) and all(i in head for i in p.vertices):
                 pts += [ev.matrix_world @ me.vertices[i].co for i in p.vertices]
         ev.to_mesh_clear()
     lo = Vector([min(p[i] for p in pts) for i in range(3)])
