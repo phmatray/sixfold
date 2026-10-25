@@ -121,67 +121,78 @@
       "asset": "floating_lantern",
       "x": 9,
       "z": 11,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 13,
       "z": 12,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 21,
       "z": 14,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 24,
       "z": 18,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 11,
       "z": 20,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 14,
       "z": 22,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 22,
       "z": 21,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 6,
       "z": 18,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 25,
       "z": 12,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 20,
       "z": 19,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 12,
       "z": 16,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "willow",
@@ -269,12 +280,6 @@
     },
     {
       "asset": "lantern",
-      "x": 23,
-      "z": 3,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
       "x": 27,
       "z": 7,
       "rot": 0
@@ -353,26 +358,8 @@
     },
     {
       "asset": "flowers",
-      "x": 20,
-      "z": 3,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
       "x": 7,
       "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 31,
-      "z": 9,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 32,
-      "z": 15,
       "rot": 0
     },
     {
@@ -454,12 +441,6 @@
       "rot": 0
     },
     {
-      "asset": "crates",
-      "x": 15,
-      "z": 1,
-      "rot": 0
-    },
-    {
       "asset": "ferry",
       "x": 30,
       "z": 22,
@@ -481,6 +462,12 @@
       "x": 19,
       "z": 16,
       "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 3,
+      "z": 23,
+      "rot": 180
     },
     {
       "asset": "lake_house",
@@ -568,7 +555,8 @@
       "asset": "floating_lantern",
       "x": 15,
       "z": 19,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     }
   ],
   "spawn": {
@@ -666,6 +654,24 @@
       "kind": "sign",
       "text": "A round house on piles, lanterns hung all round the porch. A note on the door: \"Out lighting the shore. Back by dawn. Clem.\"",
       "text_fr": "Une maison ronde sur pilotis, des lanternes tout autour du porche. Un mot sur la porte : « Parti allumer la rive. De retour à l'aube. Clem. »"
+    },
+    {
+      "x": 3,
+      "z": 23,
+      "kind": "sign",
+      "id": "old_boat",
+      "name": "An upturned rowboat",
+      "name_fr": "Une barque retournée",
+      "dialogue": [
+        {
+          "lines": [
+            "An old rowboat, upturned on the shore, moss in its seams. Painted on the hull, nearly gone: \"Ambrose\". He rows a newer one now. Under it, someone keeps a jar of lantern wicks dry."
+          ],
+          "lines_fr": [
+            "Une vieille barque retournée sur la rive, de la mousse dans les joints. Peint sur la coque, presque effacé : « Ambrose ». Il rame dans une plus récente, maintenant. Dessous, quelqu'un garde au sec un bocal de mèches à lanterne."
+          ]
+        }
+      ]
     },
     {
       "kind": "find",

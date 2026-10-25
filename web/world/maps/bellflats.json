@@ -433,12 +433,6 @@
     },
     {
       "asset": "reeds",
-      "x": 13,
-      "z": 2,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
       "x": 5,
       "z": 0,
       "rot": 0
@@ -632,6 +626,18 @@
       "rot": 0
     },
     {
+      "asset": "boat",
+      "x": 24,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 32,
+      "z": 10,
+      "rot": 0
+    },
+    {
       "asset": "signpost",
       "x": 26,
       "z": 20,
@@ -769,6 +775,47 @@
           ],
           "lines_fr": [
             "Des anémones, un crabe qui a des opinions, et votre reflet."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 24,
+      "z": 22,
+      "kind": "sign",
+      "id": "punt",
+      "name": "A flat-bottomed punt",
+      "name_fr": "Une barque à fond plat",
+      "dialogue": [
+        {
+          "lines": [
+            "A punt tied to the boardwalk, a pole laid along it. A painted board: \"Back to Gullhaven, the short way. Leave it at Brann's slip.\"",
+            "You cast off and pole round the outside of the flats, past the breakwater, and nose up on the sand by Old Brann's cottage."
+          ],
+          "lines_fr": [
+            "Une barque attachée au ponton, une perche posée dedans. Un panneau peint : « Retour à Havre-aux-Mouettes, par le plus court. Laissez-la à la cale de Brann. »",
+            "Vous larguez l'amarre et poussez à la perche autour des grèves, le long du brise-lames, jusqu'à échouer sur le sable près de la maison du vieux Brann."
+          ],
+          "do": [
+            "warp:gullhaven:7:12:w"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 32,
+      "z": 10,
+      "kind": "sign",
+      "id": "perch",
+      "name": "A fishing perch",
+      "name_fr": "Un poste de pêche",
+      "dialogue": [
+        {
+          "lines": [
+            "Crab pots on a line, and tide marks cut into the rail, year after year. The highest is an arm's length above the boardwalk: \"the great flood\". Nobody remembers which year."
+          ],
+          "lines_fr": [
+            "Des casiers au bout d'une corde, et des marques de marée gravées dans la rambarde, année après année. La plus haute est à une longueur de bras au-dessus du ponton : « la grande crue ». Personne ne se souvient de l'année."
           ]
         }
       ]

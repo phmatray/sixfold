@@ -1,6 +1,6 @@
 # Sixfold — World Design (1.2 → 1.4)
 
-Status: living spec; 1.2 is built (PRs 1–4: engine, world.js split, line of sight, finds and houses, then the content); 1.3 PR 1 (the clock, day and night, gates, the world map, waymarks and the hub inn) and PR 2 (Ember and Storm: five maps, four interiors, 12 duelists, 15 finds, the Lantern quest, the inn counters) are built. Owner: game/world design. Supersedes the "After 1.0" line of `docs/ROADMAP.md` for
+Status: living spec; 1.2 is built (PRs 1–4: engine, world.js split, line of sight, finds and houses, then the content); 1.3 PR 1 (the clock, day and night, gates, the world map, waymarks and the hub inn) and PR 2 (Ember and Storm: five maps, four interiors, 12 duelists, 15 finds, the Lantern quest, the inn counters) and PR 3 (Tide and Dream: five maps and the reworked boardwalk, six interiors, 13 duelists, 16 finds, the tide, the lantern path, the ferry and the Ferry Pass) are built. Owner: game/world design. Supersedes the "After 1.0" line of `docs/ROADMAP.md` for
 the world. Three releases implement it:
 
 | Release | Name | One-line goal |
@@ -1188,6 +1188,30 @@ quay; route NPC; knows where the tide pools are). **Abel**, fishmonger (day at t
 
 **Inn stock.** Tide pack, Wild; Puddock (C), Kelpup (C), Kelpwarden (U), **Gulfwyrm (R)**.
 
+**As built (1.3 PR 3).** The maps in `web/world/maps/` have the final word; what moved and why:
+- *Saltwind*: the boardwalk runs on to an east exit (rows 11–12) into Gullhaven. **Halvard** keeps the lighthouse; at
+  night he reads the lights at sea (a passing ferry and buoys glow). Marlo and Quill stay where they are until PR 5.
+- *Gullhaven* (34×26, ground `sand`, path `wood_floor`): a U of quays round a basin that opens south-east past a rubble
+  breakwater. North quay: a cobbled fish market (three stalls recoloured to fish), Abel behind the middle one by day and
+  at the card table on the little pier at night (with **Brann** ☾, `t_brann`). The Dry Dock inn (`inn_tide`, keeper
+  **Hanne**: "Mo" read as Moss's nickname) by the boardwalk from Saltwind; a stilt house over the basin; Juno's house;
+  the Harbour Office on the east quay (`harbour_office`, **Ines Varga**: `pay:250` then `give:ferry_pass`); Old Brann's
+  cottage on the slip and a net loft in the south-west dunes; the boardwalk down to the Bellflats (south exit x 6–7).
+  Dialogue has no choice menu, so **the ferry is two boats** at the pier: the Stormwatch ferry and a lilac Lanternmere
+  launch, each a gangway spot (`item:ferry_pass` → `warp:`); Lou stands between them and explains, three times. Bo in
+  Stormwatch now sails with the pass (`warp:gullhaven:26:21:w`). A tide board on the quay states the hours.
+- *Bellflats* (36×28, ground `wet_sand`): a rounded bay of mud inside a ring of boardwalk on stilts; the drowned bell
+  tower on a sandbank islet (never covered) reached by a pier; creeks that never drain; low sea cliffs on the west with
+  the smugglers' cave (`smugglers_nook`, a lantern door warp; `t_nook`). **The tide is drawn**: a gate with `tide: true`
+  floods its tiles (and its `flood` list) in the ground shader while shut and drains them while open, over five seconds.
+  `flats` (every bare wet-sand tile, `time:day`) and the `causeway` (x 28–29 from the boardwalk to the south edge,
+  `time:day`) are tide gates; Lanternmere's end of the causeway is one too, so neither end can be entered at high water.
+  The tide pools are props shown by day (`if: time:day`); their finds want boots, with a hint spot when you have none.
+  `t_bell` (day) and `t_lamp` (night) are the tower's door and lamp. Finch watches the west boardwalk from a side
+  platform, so he never blocks the night way round.
+- *Dream* chart: the Lanternmere causeway leaves from its north-east corner, so on the chart Lanternmere sits south-east of
+  Hushwillow and the Moonwell south-west of Lanternmere.
+
 ---
 
 ### 10.4 Dream: The Hushlands / *Les Terres du Murmure* (Psychic) — Lumen
@@ -1296,6 +1320,27 @@ shallows) pack `dream` · `d_raft` ☾ a lantern raft mid-path ⬡ 100 · `d_bed
 `d_stair` moonwell stair (lantern) curio `moth_brooch`.
 
 **Inn stock.** Dream pack, Wild; Wispun (C), Hexlet (C), Somnitar (U), **Hexarch (R)**.
+
+**As built (1.3 PR 3).**
+- *Brightwell Square*: the south exit (x 12–13, `rr` extended to row 19) leads into the lane now, rather than in PR 5.
+- *Hushwillow* (24×32): the lane swings west round the wishing tree's slate knoll and back, crosses the Hush brook on a
+  bridge, and passes a moonflower glade and a willow pond where the first paper lanterns float. The ford (boots,
+  `ford_stones`) crosses to a signpost on the Deepgrove bank; the bank path beyond is "washed out", so the Rootholm link
+  waits for PR 4. The wishing tree's fortunes are twelve `flag:wish_n` branches (`pay:10`, `sfx:chime`). **Luce** sleepwalks
+  dusk to dawn (`!time:day`); **Ysolde**, a willow weaver, keeps the lane by day.
+- *Lanternmere* (34×28): the village on the north shore, the mere below it. The lantern path runs **south** from the jetty
+  (x 16–17, rows 11–23) to the Moonwell exit on the south edge; the long way round is the east shore path, over a bridge
+  across the river. Rafts are instanced, a little turned and apart, so they read as rafts; Ambrose ☾ sits on a mooring stage
+  beside the path (part of the gate, so dawn never strands anyone there). The launch from Gullhaven moors at the river
+  mouth. The tailor's lake house is on piles (`tailor`, **Celestin**; outfits come later). The islet is reached through
+  knee-deep shallows (boots). Lisette launches the lanterns from the jetty at dusk. Lumen stays in Fernhollow until PR 5;
+  **Nim** keeps her garden and says so.
+- *Moonwell* (28×24): a rounded hedge wall (`fence: hedge`, cooled with the new `fence_tint`) round an inner hedge ring
+  whose three gaps are staggered so the alleys wind; the moonwell and seal stone inside, a moon pool, beds everywhere.
+  The well stair is a lantern door warp to `moonwell_stair` (`d_stair`). Nim is there day (dozing) and night.
+- **Night.** Moonflower beds bloom at dusk (instanced closed and open sets, cross-faded: two draws a bed). Floating
+  lanterns, raft lanterns and open moonflowers are *glimmers*: a halo and a soft pool of light each, not real lights.
+  Moths flutter round lamps and glimmers after dark. Each Dream map has a `light_night` about 30 % brighter.
 
 ---
 

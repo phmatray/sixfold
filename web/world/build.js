@@ -150,7 +150,8 @@ export function animateProps(w, dt, reduced) {
   }
   if (!reduced) {
     for (const b of w.boats) {
-      b.obj.position.y = (b.y ?? 0) + Math.sin(w.now * 1.4 + b.cx) * 0.035;
+      // Paper lanterns ride on lily pads: a gentle bob that never dips them under the water (maps float them at y 0.06).
+      b.obj.position.y = (b.y ?? 0) + Math.sin(w.now * 1.4 + b.cx) * (b.asset === "floating_lantern" ? 0.012 : 0.035);
       b.obj.rotation.z = Math.sin(w.now * 1.1 + b.cz) * 0.03;
     }
     for (const g of w.glows) g.material.opacity = 0.55 + 0.3 * Math.sin(w.now * 2.2);

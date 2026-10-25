@@ -29,9 +29,9 @@
     "....~~......pp..........",
     "~~~~~......pp...........",
     "~~~~~......pp...........",
-    "~~~~~......pp...........",
-    "~~~~~.....pp............",
-    "~~~~~.....pp............",
+    ".~~~~......pp...........",
+    ".~~~~.....pp............",
+    ".~~~~.....pp............",
     "~~~~......pp............",
     "~~~.......pp............",
     "..........pp............",
@@ -81,6 +81,24 @@
       "asset": "signpost",
       "x": 6,
       "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 15,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 8,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 3,
+      "z": 30,
       "rot": 0
     },
     {
@@ -181,7 +199,7 @@
     },
     {
       "asset": "willow",
-      "x": 9,
+      "x": 7,
       "z": 25,
       "rot": 0
     },
@@ -225,19 +243,22 @@
       "asset": "floating_lantern",
       "x": 18,
       "z": 4,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 20,
       "z": 5,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "floating_lantern",
       "x": 19,
       "z": 3,
-      "rot": 0
+      "rot": 0,
+      "y": 0.06
     },
     {
       "asset": "reeds",
@@ -399,12 +420,6 @@
     },
     {
       "asset": "reeds",
-      "x": 3,
-      "z": 28,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
       "x": 0,
       "z": 20,
       "rot": 0
@@ -413,6 +428,18 @@
       "asset": "reeds",
       "x": 1,
       "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 0,
+      "z": 25,
       "rot": 0
     },
     {
@@ -800,6 +827,24 @@
           ],
           "lines_fr": [
             "Des rubans et des étiquettes de papier, des centaines, qui chuchotent. Un petit écriteau : « Dix Facettes le vœu. L'arbre répond. »"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 3,
+      "z": 30,
+      "kind": "sign",
+      "id": "slipper",
+      "name": "Something in the grass",
+      "name_fr": "Quelque chose dans l'herbe",
+      "dialogue": [
+        {
+          "lines": [
+            "One embroidered slipper, soaked with dew, beside a flat stone. The other is nowhere to be seen. The stitching says \"L\"."
+          ],
+          "lines_fr": [
+            "Une pantoufle brodée, trempée de rosée, à côté d'une pierre plate. L'autre est introuvable. La broderie dit « L »."
           ]
         }
       ]

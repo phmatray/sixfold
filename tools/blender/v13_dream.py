@@ -281,10 +281,12 @@ def build_moonflower(k):
     parts sharing an `Open` clip: at rest (day) plump closed buds; at the end (dusk) the buds shrink away as broad
     pale blooms twist open in their place. Petals are `dr_moon_glow`."""
     rng = random.Random(416)
-    k.add(jitter(ico(0.3, 1), rng, 0.03), "dr_leaf_dk", T((0, 0, 0.03), scale=(1.3, 1.25, 0.32)), smooth=True)
-    for i in range(9):
-        bm, _ = flat_leaf(0.29, 0.16)
-        k.add(bm, ("dr_leaf", "dr_leaf_lt", "dr_leaf")[i % 3], T((0, 0, 0.075 + 0.004 * (i % 3)), (90, -14 - 6 * (i % 2), i * 40 + rng.uniform(-8, 8))))
+    # No dark cushion and no contact disc (1.3 PR 3): at night the glowing heads made them read as a black tile under
+    # the flowers. A loose, open rosette of leaves lying on the grass instead, the outer ones longer and paler.
+    k.add(jitter(ico(0.12, 1), rng, 0.02), "dr_leaf", T((0, 0, 0.02), scale=(1.2, 1.1, 0.4)), smooth=True)
+    for i in range(11):
+        bm, _ = flat_leaf(0.24 + 0.08 * (i % 2), 0.13)
+        k.add(bm, ("dr_leaf_lt", "dr_leaf", "dr_leaf_lt")[i % 3], T((0, 0, 0.03 + 0.004 * (i % 3)), (90, -8 - 7 * (i % 2), i * 33 + rng.uniform(-10, 10))))
     heads = [(-0.22, -0.16, 0.36), (0.2, -0.17, 0.3), (0.02, 0.06, 0.52), (-0.24, 0.18, 0.44), (0.26, 0.15, 0.4),
              (-0.02, -0.28, 0.24), (0.08, 0.3, 0.33)]
     hooks = []
@@ -292,7 +294,6 @@ def build_moonflower(k):
         k.add(tube([(x * 0.25, y * 0.25, 0.06), (x * 0.75 + 0.02, y * 0.75, z * 0.55), (x, y, z - 0.01)], 0.011, 3), "dr_leaf", None)
         hooks.append(open_part(moon_bud, (x, y, z), [(0, (0, 0, 0), (1, 1, 1)), (16, (0, 0, 20), (0.01, 0.01, 0.01))], f"moonflower_bud{i}"))
         hooks.append(open_part(moon_bloom, (x, y, z), [(0, (0, 0, 0), (0.05, 0.05, 0.05)), (24, (0, 0, 40), (1, 1, 1))], f"moonflower_bloom{i}"))
-    contact(k, 0.42)
     return chain(*hooks)
 
 
