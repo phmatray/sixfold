@@ -254,6 +254,8 @@ export const FOOT = {
 };
 // Props the hero walks over; every other prop blocks its footprint.
 export const WALKABLE = new Set(["rug", "exit_mat"]);
+// People are spoken to across these (a person behind a counter or a duel table).
+export const ACROSS = new Set(["counter", "duel_table", "stall", "stall_b"]);
 // Decks: walkable even over water, with the floor height the hero stands at, per
 // footprint row along the prop's own Z (front row first; one value for every row).
 export const DECK = { boardwalk: [0.1], pier: [0.3], bridge: [0.12, 0.24, 0.24, 0.12], stairs: [0.5] };
@@ -266,13 +268,15 @@ export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0
 // -> [piece suffix, rot]. At rot 0: "" = arms W+E, _corner = W+S, _end = W,
 // _t = W+E+S. Mask 15 adds an _end toward N. Same table in ASSETS.md, in the
 // Blender scene script, and checked by tools/check-fence-table.mjs.
-// (world.js places the pieces.)
+// (build.js places the pieces.)
 export const AUTOTILE = [
   ["", 0], ["_end", 270], ["_end", 180], ["_corner", 180],
   ["_end", 90], ["", 90], ["_corner", 90], ["_t", 90],
   ["_end", 0], ["_corner", 270], ["", 0], ["_t", 180],
   ["_corner", 0], ["_t", 270], ["_t", 0], ["_t", 0],
 ];
+// Each piece's arms at rot 0, as [dx, dz] (the placeholder pieces, and the model names a map needs).
+export const SUFFIX_ARMS = { "": [[-1, 0], [1, 0]], _corner: [[-1, 0], [0, 1]], _end: [[-1, 0]], _t: [[-1, 0], [1, 0], [0, 1]] };
 // Shadows on, and loaded glTF materials swapped to toon so they match the placeholders.
 export function prep(root, cast) {
   root.traverse((o) => {
