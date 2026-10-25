@@ -508,13 +508,13 @@ impl Game {
             s.deficit = s.deficit.max(g[w].saturating_sub(g[l]));
             s.brink |= g[w] >= 4 && g[l] == 1;
         }
-        let loser = &self.players[l];
+        // The last prize wins even when it also empties the loser's board.
         s.end = Some(if decked == Some(l) {
             End::DeckOut
-        } else if loser.active.is_none() && loser.bench.is_empty() {
-            End::NoCreatures
-        } else {
+        } else if self.players[w].prizes_left() == 0 {
             End::Prizes
+        } else {
+            End::NoCreatures
         });
         s
     }
@@ -791,6 +791,17 @@ mod summary_tests {
         let s = g.summary();
         assert_eq!((s.winner, s.end), (Some(0), Some(End::NoCreatures)));
         assert_eq!((s.kos, s.bench_kos, s.taken), ([1, 0], [0, 0], [1, 0]));
+    }
+
+    #[test]
+    fn the_last_prize_is_a_prize_win_even_on_an_empty_board() {
+        let mut g = dealt([1, 6]);
+        attack_with(&mut g, 200, &[]);
+        let s = g.summary();
+        assert_eq!(
+            (s.winner, s.end, s.taken),
+            (Some(0), Some(End::Prizes), [1, 0])
+        );
     }
 
     #[test]
