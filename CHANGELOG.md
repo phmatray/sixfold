@@ -5,6 +5,25 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.2.0](https://github.com/phmatray/sixfold/compare/v1.1.0...v1.2.0) (2026-10-25)
+
+
+### Added
+
+* **content:** duelists, finds, quests and six houses ([#32](https://github.com/phmatray/sixfold/issues/32)) ([1dd51f9](https://github.com/phmatray/sixfold/commit/1dd51f9bef72c0c0b0ef71450d7df3ac34b62a9a))
+* **engine:** facets, shops, route duelists and rival styles ([#28](https://github.com/phmatray/sixfold/issues/28)) ([be82f18](https://github.com/phmatray/sixfold/commit/be82f18e0d6e0a0bb1791973e84f5d1dc7f73985))
+* **world:** line of sight, finds and houses ([#31](https://github.com/phmatray/sixfold/issues/31)) ([78c8b70](https://github.com/phmatray/sixfold/commit/78c8b70cf5428ef586f3f11d0fc747895d3e90d1))
+
+
+### Fixed
+
+* **ui:** 1.2 design audit — phone board fit, full inspector, interior camera, clinic look, French pass ([#33](https://github.com/phmatray/sixfold/issues/33)) ([8739fdc](https://github.com/phmatray/sixfold/commit/8739fdc9dff280872c79f158690a71df8ddf1b56))
+
+
+### Changed
+
+* **world:** split world.js into modules ([#29](https://github.com/phmatray/sixfold/issues/29)) ([3867cd3](https://github.com/phmatray/sixfold/commit/3867cd34cef50c4c3f075e47f18af6ac46a56c20))
+
 ## [1.1.0](https://github.com/phmatray/sixfold/compare/v1.0.0...v1.1.0) (2026-10-25)
 
 
