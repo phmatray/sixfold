@@ -105,9 +105,9 @@ Sheets: `ember_tiles.png`, `ember_day.png`, `ember_night.png`.
 ## Storm: the Galewold (1.3 PR 2)
 
 High heath on sea cliffs, dry-stone lanes, chime posts, copper and slate. Silhouettes: low walls in long lines, thin
-vertical masts (chime posts, pylons, the lift) and the Rodspire's lattice tower, the white observatory dome. Ground
-`heath`, path `dirt`. Glow: `coil_glow` (pylon coils, the lift's line lamp, the spire tip), `lamp_glow` (observatory
-slit and windows).
+vertical masts (chime posts, pylons, the lift tower) and the Rodspire's lattice tower, the white observatory dome. Ground
+`heath`, path `dirt`. Glow: `coil_glow` (pylon coils, the lift cage's lamp, the spire tip), `lamp_glow` (observatory
+slit and windows, the lift's landings and winch house).
 
 | Asset | Foot | Collision | Height | Glow / empties / clip / wind | Tris | KB | Use |
 |---|---|---|---|---|---|---|---|
@@ -116,18 +116,18 @@ slit and windows).
 | `chime_post` | 1×1 | solid | 2.6 m | wind | 734 | 56 | the chime ring on the Downs (the `st_chimes` night find) |
 | `pylon` | 1×1 | solid | 3.2 m | `coil_glow`; `Open` (node `pylon_lever`, knife switch off → on) | 1880 | 96 | the three relay pylons; play `Open` and light the coil when `flag:pylon_n` is set |
 | `observatory` | 5×5 | solid; door tile origin + (2, 4) | 5.7 m | `lamp_glow` | 2886 | 148 | Stormwatch's observatory (warp to `observatory`); telescope through the slit, gallery ring at ~2.6 m |
-| `lift` | 2×2 | deck 0.1 | 5.4 m | `coil_glow` | 1584 | 90 | the Rodspire lift cage (its tiles hold the door warp `if` pylons 1–3) |
+| `lift_tower` | 2×1 | solid; the east tile is the lift's shaft (map `lifts`) | 9.6 m | `lamp_glow`; two `light_origin` (both landings) | 2680 | 149 | the Rodspire lift against the 6 m stack (cliff face on the tile edge behind): weathered timber posts and X braces anchored into the rock, two iron guide rails, a head frame with a copper sheave (axle at 9.1 m), a winch house on the west bay at the summit's height, a plank landing with guard rails on the summit behind the shaft |
+| `lift_cage` | 1×1 | — (lift.js moves it) | 2.6 m | `coil_glow`; nodes `gate_front`, `gate_back`, `cable_cage` | 728 | 41 | the cage that rides the shaft: floor top 0.1 m, open above two waist-high gates |
 | `rodspire` | 3×3 | solid | 12.1 m | `coil_glow`; `light_origin` at the tip | 2494 | 128 | the copper spire on the sea stack (arcs at night from `light_origin`): a stout four-legged lattice tower (X-braced bays, verdigris collars) round a core with two glowing coil drums, halo rings and a finned crown on a big orb |
 | `cliff_heath`, `cliff_heath_b` | 1×1 | cliff block, top 1.0 | 1 m (+ tufts) | — | 520 / 536 | 32 | the cliff set: grey weathered granite under a heath top; `_b` adds heather and a boulder |
 
 Suggested `props.js`:
 
 ```js
-FOOT:    observatory: [5, 5], lift: [2, 2], rodspire: [3, 3],
-DECK:    lift: [0.1],
+FOOT:    observatory: [5, 5], lift_tower: [2, 1], rodspire: [3, 3],
 WIND_H:  heather: 0.55, chime_post: 2.3,
 BATCHED: heather, cliff_heath, cliff_heath_b, wall_dry, wall_dry_corner, wall_dry_end, wall_dry_t, chime_post  // not pylon (animated)
-TALL:    observatory: 5.7, lift: 5.4, rodspire: 12.1, pylon: 3.2, chime_post: 2.6, heather: 0.5, wall_dry: 0.95, cliff_heath: 1, cliff_heath_b: 1,
+TALL:    observatory: 5.7, lift_tower: 9.6, lift_cage: 2.6, rodspire: 12.1, pylon: 3.2, chime_post: 2.6, heather: 0.5, wall_dry: 0.95, cliff_heath: 1, cliff_heath_b: 1,
 ```
 
 Maps: `downs` and `stormwatch` use `"cliff": ["cliff_heath", "cliff_heath_b"]` and `"fence": "wall_dry"`; `rodspire`

@@ -292,7 +292,7 @@ export const FOOT = {
   curio_cabinet: [2, 1], seal_stone: [2, 2], cave_mouth: [2, 1], log: [2, 1],
   ferry: [4, 2], cave_mouth_slate: [2, 1],
   kiln: [4, 4], glass_furnace: [2, 2], glass_rack: [2, 1], lava_glass: [2, 2], // Ember
-  observatory: [5, 5], lift: [2, 2], rodspire: [3, 3], telescope: [2, 2], // Storm
+  observatory: [5, 5], lift_tower: [2, 1], rodspire: [3, 3], telescope: [2, 2], // Storm
   harbour_house: [5, 4], bell_tower: [3, 3], net_rack: [2, 1], chart_table: [2, 1], // Tide
   willow: [2, 2], wishing_tree: [2, 2], moonwell: [3, 3], lake_house: [4, 4], wisteria_arch: [2, 1], cloth_rack: [2, 1], // Dream
 };
@@ -316,7 +316,7 @@ export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0
   waymark: 1.7, inn_sign: 1.9, ember_vent: 1.7, rubble: 1.4, ford_stones: 0.1, lantern_raft: 0.1, climb_wall: 1, climb_wall_basalt: 1, ladder: 3.4,
   ferry: 2.1, buoy: 1.4, floating_lantern: 0.6,
   kiln: 4.5, glass_furnace: 2.8, glass_rack: 1.8, lava_glass: 0.3, ash_pine: 3.1, cliff_basalt: 1, cliff_basalt_b: 1, stairs_basalt: 0.5,
-  glow_mushroom: 0.35, glow_mushroom_tall: 0.9, glow_shelf: 0.62, observatory: 5.7, lift: 5.4, rodspire: 12.1, pylon: 3.2, chime_post: 2.6, heather: 0.5, wall_dry: 0.95, cliff_heath: 1, cliff_heath_b: 1, stairs_heath: 0.5, telescope: 2.2,
+  glow_mushroom: 0.35, glow_mushroom_tall: 0.9, glow_shelf: 0.62, observatory: 5.7, lift_tower: 9.6, lift_cage: 2.6, rodspire: 12.1, pylon: 3.2, chime_post: 2.6, heather: 0.5, wall_dry: 0.95, cliff_heath: 1, cliff_heath_b: 1, stairs_heath: 0.5, telescope: 2.2,
   harbour_house: 4.3, bell_tower: 6.8, net_rack: 1.45, cliff_sea: 1, cliff_sea_b: 1, tidepool: 0.07, rock_sea: 0.55, bollard: 0.6, crab_pots: 0.45,
   willow: 3.8, wishing_tree: 3.8, moonwell: 3.7, lake_house: 4.6, wisteria_arch: 2.7, moonflower: 0.5, hedge: 1.3 };
 

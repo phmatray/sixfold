@@ -986,8 +986,8 @@ eighth bar.
 
 **New props.** `chime_post` (1×1, 2.2 m, sways, 800), `pylon` (1×1, 3 m, `Open` clip = the lever, `glow` coil,
 2k), `wall_dry` auto-tile set (`wall_dry`, `_corner`, `_end`, `_t`, as fences, 400 each), `heather` (1×1 bush,
-400), `observatory` (5×5 dome, door front centre, `glow` slit, 3k), `lift` (2×2 cage on a mast, a deck at
-0.1 m, 2.5k), `rodspire` (3×3, ~12 m copper spire, `light_origin` at the tip, 3k).
+400), `observatory` (5×5 dome, door front centre, `glow` slit, 3k), `lift_tower` (2×1 timber tower and head
+frame against the stack, 3k) and `lift_cage` (the cage lift.js rides up its shaft), `rodspire` (3×3, ~12 m copper spire, `light_origin` at the tip, 3k).
 
 **Maps.**
 
@@ -1047,8 +1047,8 @@ to a sea stack; three relay pylons along it power the lift.
 ```
 
 - Pylons at 2,16 / 6,12 / 12,8: facing one sets `flag:pylon_<n>` (the `Open` clip plays, the coil glows, a
-  spark sfx). The lift at 20–21,8–9 is a door warp `if: "flag:pylon_1 & flag:pylon_2 & flag:pylon_3"` to
-  `rodspire` 20,4 at height 6 (and back down). `t_corra` guards pylon 2 at 8,13 (w, 3), `t_ves` pylon 3 at 18,13
+  spark sfx). The lift (map `lifts`, ridden in place: web/world/lift.js) climbs
+  the stack's face to the summit at height 6 (and back down), powered `if: "flag:pylon_1 & flag:pylon_2 & flag:pylon_3"`. `t_corra` guards pylon 2 at 8,13 (w, 3), `t_ves` pylon 3 at 18,13
   (n, 3).
 - At night, with the pylons on, the spire's tip arcs every few seconds (light pulse at `light_origin`).
 
@@ -1092,8 +1092,9 @@ pack `storm` · `st_scope` ☾ observatory telescope (after the Lens quest) ⬡ 
   the lamps at dusk (a route), Greer duels in the square.
 - *Rodspire*: low basalt islets (ground tiles on `slate`, outcrops at 1 m) joined by boardwalks, pylons at 2,15 /
   9,8 / 13,3 (each a spot that sets `flag:pylon_n` and plays `sfx:spark`; the prop's `open` plays its lever), the
-  lift at 20–21 × 12–13: a door warp from 20,13 (if all three) to the stack top (6 m) at 20,11, and back down from
-  20,12. check-maps follows such same-map warps in its flood fill. The spire's tip `pulse`s once the three are on.
+  lift's tower at 19–20 × 12 with its shaft at 20,12 (map `lifts`, if all three): the cage carries the hero from the
+  boardwalk landing at 20,13 to the stack top (6 m) at 20,11, and back down. check-maps joins a lift's landings in
+  its flood fill. The spire's tip `pulse`s once the three are on.
   Corra guards pylon 2, Ves the stack's foot, Nils explains the pylons on the landing islet. The gloves ledge (1 m)
   is at 25–26 × 11–13 (`st_ledge`); `st_islet` is on the lonely islet to the south-west.
 - `st_scope` waits for the Observatory Lens (PR 6); the telescope already shows every star doubled through a crack,
@@ -1794,7 +1795,7 @@ contract in `web/world/ASSETS.md`. Missing models draw placeholders, so content 
 | 1.2 | interior: `oven` (2×1), `printing_press` (2×1), `type_case` (1×1), `bookcase` (2×1), `bed` (2×1), `workbench` (2×1), `light_box` (deck doctor's table, 2×1), `net_locker` (1×1); outdoor: `hanging_sign` (1×1, swap shop), `curio_cabinet` (2×1 stall variant), `curio.glb` + 6 curio models (≤ 600 each); NPC rigs `npc_elder`, `npc_worker` (≤ 6k); 7 rival portraits |
 | 1.3 shared | `waymark` (1×1, crystal tinted per region, `glow`), `seal_stone` (2×2, six coloured faces + a blank top), `cave_mouth` (2×1), `climb_wall` (1×1 stackable), `inn_sign` (1×1); NPC rigs `npc_sailor`, `npc_scholar`; 6 curio models |
 | 1.3 Ember | `kiln`, `glass_furnace`, `glass_rack`, `ash_pine`, `ember_vent`, `cliff_basalt` (+`_b`), `cullet` |
-| 1.3 Storm | `chime_post`, `pylon`, `wall_dry` set ×4, `heather`, `observatory`, `lift`, `rodspire` |
+| 1.3 Storm | `chime_post`, `pylon`, `wall_dry` set ×4, `heather`, `observatory`, `lift_tower`, `lift_cage`, `rodspire` |
 | 1.3 Tide | `harbour_house`, `ferry`, `bell_tower`, `crab_pots`, `buoy`, `net_rack`, `cliff_sea`, `tidepool` |
 | 1.3 Dream | `willow`, `floating_lantern`, `lantern_raft`, `moonflower`, `moonwell`, `lake_house`, `wisteria_arch` |
 | 1.3 Grove | `great_root`, `treehouse`, `ladder`, `rope_bridge`, `hedge` set ×4, `standing_tree`, `beehive`, `mushroom_ring` |

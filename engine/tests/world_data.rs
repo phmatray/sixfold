@@ -178,6 +178,11 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
             cond(&format!("warp {i}.if"), c, &mut bad);
         }
     }
+    for (i, l) in m["lifts"].as_array().into_iter().flatten().enumerate() {
+        if let Some(c) = l["if"].as_str() {
+            cond(&format!("lift {i}.if"), c, &mut bad);
+        }
+    }
     for (i, g) in m["gates"].as_array().into_iter().flatten().enumerate() {
         let at = format!(
             "gate {}",

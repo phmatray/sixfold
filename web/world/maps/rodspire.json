@@ -20,7 +20,7 @@
     "~...~~=....===~~~66666666~~~",
     ".....==.....~==~~6666666611~",
     "......~.....~==.........~11~",
-    "......~~..1~~==..........11~",
+    "......~~..1~~==.....=....11~",
     "......~~~~~~~==..........~~~",
     "1....~~~~~~~~~...........~~~",
     "....1~~~~~~~~~..........1~~~",
@@ -59,10 +59,17 @@
       "open": "flag:pylon_3"
     },
     {
-      "asset": "lift",
-      "x": 20,
+      "asset": "lift_tower",
+      "x": 19,
       "z": 12,
       "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 19,
+      "z": 11,
+      "rot": 0,
+      "y": 6
     },
     {
       "asset": "rock_basalt",
@@ -570,35 +577,6 @@
       "text_fr": "Sous une pierre de l'îlot solitaire, ficelé dans un filet de pêche : un booster scellé."
     }
   ],
-  "warps": [
-    {
-      "x": 20,
-      "z": 13,
-      "to": "rodspire",
-      "label": "Ride the lift up",
-      "label_fr": "Monter par l'ascenseur",
-      "spawn": {
-        "x": 20,
-        "z": 11,
-        "facing": "n"
-      },
-      "if": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3",
-      "locked": "The cage hangs dead on its mast. Somewhere out on the causeway, three relay pylons are switched off.",
-      "locked_fr": "La cage pend, inerte, à son mât. Quelque part sur la chaussée, trois pylônes relais sont coupés."
-    },
-    {
-      "x": 20,
-      "z": 12,
-      "to": "rodspire",
-      "label": "Ride the lift down",
-      "label_fr": "Redescendre par l'ascenseur",
-      "spawn": {
-        "x": 20,
-        "z": 14,
-        "facing": "s"
-      }
-    }
-  ],
   "exits": [
     {
       "side": "w",
@@ -607,6 +585,17 @@
         13
       ],
       "to": "stormwatch"
+    }
+  ],
+  "lifts": [
+    {
+      "id": "rodspire",
+      "x": 20,
+      "z": 12,
+      "top": 6,
+      "if": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3",
+      "locked": "The cage hangs dead in its tower. Somewhere out on the causeway, three relay pylons are switched off.",
+      "locked_fr": "La cage pend, inerte, dans sa tour. Quelque part sur la chaussée, trois pylônes relais sont coupés."
     }
   ],
   "gates": [
