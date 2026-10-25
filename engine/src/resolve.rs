@@ -1144,7 +1144,7 @@ mod tests {
     /// R-EFFECT-02: the accuracy coin is flipped once per turn, before costs.
     #[test]
     fn accuracy_coin_cached_for_turn() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(ROCKLET, &[FIGHTING_E, FIGHTING_E]));
         g.players[0].effects.placed = Some(Placed::Accuracy);
         g.force_coins(&[true]);
@@ -1157,7 +1157,7 @@ mod tests {
         ok(&mut g, Action::Choose(0));
         assert_eq!(g.players[1].effects.placed, Some(Placed::DisabledAttack(0)));
         // Tails: the turn ends, nothing paid.
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(SPARKLET, &[LIGHTNING_E, LIGHTNING_E]));
         g.players[0].effects.placed = Some(Placed::Accuracy);
         g.force_coins(&[false]);
@@ -1397,7 +1397,7 @@ mod tests {
     #[test]
     fn failed_attack_clears_defender_record() {
         for confused in [false, true] {
-            let mut g = main_phase(0);
+            let mut g = main_phase(2);
             g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
             if confused {
                 g.players[0].condition.apply(Status::Confused);
@@ -2076,7 +2076,7 @@ mod tests {
     /// R-EFFECT-05
     #[test]
     fn once_per_stay_attack_rejected_second_time() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(MOTHWING, &[PSYCHIC_E]));
         g.players[0].bench.push(creature(EMBERKIT, &[]));
         ok(&mut g, Action::Attack(0));
@@ -2087,7 +2087,7 @@ mod tests {
         g.switch(0, 1);
         assert_eq!(err(&mut g, Action::Attack(0)), RuleError::AlreadyUsed);
         // Set at the cost phase: a confusion tails still uses it up.
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(MOTHWING, &[PSYCHIC_E]));
         g.players[0].condition.apply(Status::Confused);
         g.force_coins(&[false]);
@@ -2098,7 +2098,7 @@ mod tests {
     /// R-EFFECT-06
     #[test]
     fn copy_attack_runs_defender_effect_list() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(FOGLET, &[PSYCHIC_E, PSYCHIC_E]));
         g.players[1].active = Some(creature(BRAMBLET, &[]));
         ok(&mut g, Action::Attack(1));
@@ -2110,7 +2110,7 @@ mod tests {
         assert_eq!(damage_to(&ev, 1, 0)[0], 10);
         assert_eq!(applied(&ev, 1), vec![Status::Poisoned]);
         // A copying attack can't be copied.
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(FOGLET, &[PSYCHIC_E, PSYCHIC_E]));
         g.players[1].active = Some(creature(FOGLET, &[]));
         ok(&mut g, Action::Attack(1));
@@ -2121,7 +2121,7 @@ mod tests {
     /// (0B:6D50); one that fails can't be copied, at no cost.
     #[test]
     fn copy_attack_runs_copied_phase_one_checks() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(FOGLET, &[PSYCHIC_E, PSYCHIC_E]));
         g.players[1].active = Some(creature(SPARKLET, &[]));
         ok(&mut g, Action::Attack(1));
@@ -2130,7 +2130,7 @@ mod tests {
             vec![Choice::Attack(1)],
             "no Lightning energy to discard"
         );
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(FOGLET, &[PSYCHIC_E, LIGHTNING_E]));
         g.players[1].active = Some(creature(SPARKLET, &[]));
         ok(&mut g, Action::Attack(1));

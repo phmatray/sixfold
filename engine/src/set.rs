@@ -251,7 +251,7 @@ pub static CARDS: &[CardDef] = &[
         ],
         power: Some(Power {
             name: "Kindling Heart",
-            text: "Fire energy you attach to your Fire Hexons doesn't use up your energy attachment for the turn.",
+            text: "Once during your turn, a Fire energy you attach to one of your Fire Hexons doesn't use up your energy attachment for the turn.",
             kind: PowerKind::FreeAttach(Fire),
         }),
     }),
@@ -469,7 +469,7 @@ pub static CARDS: &[CardDef] = &[
     }),
     creature("Thornbuck", Uncommon, Creature {
         stage: Stage::Stage1, evolves_from: Some("Sprigget"), hp: 80, color: Grass,
-        weakness: Some(Fire), resistance: Some(Water), retreat_cost: 2,
+        weakness: Some(Fire), resistance: None, retreat_cost: 2,
         attacks: &[
             atk("Barb Volley", "Flip a coin. If heads, the defending Hexon is now Poisoned.",
                 &[Grass, Colorless], 20, &[Inflict { status: Status::Poisoned, coin: true }]),
@@ -479,7 +479,7 @@ pub static CARDS: &[CardDef] = &[
     }),
     creature("Elderhart", Rare, Creature {
         stage: Stage::Stage2, evolves_from: Some("Thornbuck"), hp: 100, color: Grass,
-        weakness: Some(Fire), resistance: Some(Water), retreat_cost: 3,
+        weakness: Some(Fire), resistance: None, retreat_cost: 3,
         attacks: &[
             atk("Grove Crush", "Remove 20 damage from this Hexon.",
                 &[Grass, Grass, Grass, Colorless], 60, &[Heal(20)]),
@@ -724,7 +724,7 @@ pub static CARDS: &[CardDef] = &[
         weakness: Some(Fighting), resistance: None, retreat_cost: 2,
         attacks: &[
             atk("Forked Bolt", "Does 20 damage to 1 of your opponent's Hexons.",
-                &[Lightning, Lightning], 30, &[Snipe(20)]),
+                &[Lightning, Lightning], 40, &[Snipe(20)]),
             atk("Storm Barrage", "Flip 4 coins. This attack does 30 damage for each heads.",
                 &[Lightning, Lightning, Lightning, Colorless], 0, &[AddPerHeads { coins: 4, per: 30 }]),
         ],
@@ -767,7 +767,7 @@ pub static CARDS: &[CardDef] = &[
             atk("Live Current", "Search your deck for a Lightning energy card and attach it to this Hexon, then shuffle your deck.",
                 &[Lightning], 10, &[AttachFromDeck(Lightning)]),
             atk("Rail Shot", "Does 20 damage to 1 of your opponent's Hexons.",
-                &[Lightning, Lightning, Colorless], 30, &[Snipe(20)]),
+                &[Lightning, Lightning, Colorless], 40, &[Snipe(20)]),
         ],
         power: None,
     }),
@@ -923,7 +923,7 @@ pub static CARDS: &[CardDef] = &[
             atk("Mind Twist", "The defending Hexon is now Confused.",
                 &[Psychic, Colorless], 20, &[Inflict { status: Status::Confused, coin: false }]),
             atk("Spite Bolt", "This attack does 10 more damage for each 10 damage on the defending Hexon.",
-                &[Psychic, Psychic, Colorless], 30, &[AddPerDamage { per: 10, own: false }]),
+                &[Psychic, Psychic, Colorless], 40, &[AddPerDamage { per: 10, own: false }]),
         ],
         power: None,
     }),
@@ -932,7 +932,7 @@ pub static CARDS: &[CardDef] = &[
         weakness: Some(Psychic), resistance: None, retreat_cost: 2,
         attacks: &[
             atk("Grand Hex", "This attack does 10 more damage for each 10 damage on the defending Hexon.",
-                &[Psychic, Psychic, Psychic, Colorless], 50, &[AddPerDamage { per: 10, own: false }]),
+                &[Psychic, Psychic, Psychic, Colorless], 60, &[AddPerDamage { per: 10, own: false }]),
         ],
         power: Some(Power {
             name: "Bewilder",
@@ -1020,7 +1020,7 @@ pub static CARDS: &[CardDef] = &[
         attacks: &[
             atk("Shoulder Shove", "During your opponent's next turn, this Hexon takes 20 less damage from attacks.",
                 &[Colorless, Colorless], 20, &[Protect { shield: Shield::Reduce(20), coin: false }]),
-            atk("Heavy Trample", "", &[Colorless, Colorless, Colorless, Colorless], 60, &[]),
+            atk("Heavy Trample", "", &[Colorless, Colorless, Colorless, Colorless], 50, &[]),
         ],
         power: None,
     }),
@@ -1119,7 +1119,7 @@ pub static CARDS: &[CardDef] = &[
         attacks: &[
             atk("Rock Brace", "During your opponent's next turn, this Hexon takes 20 less damage from attacks.",
                 &[Fighting, Colorless], 20, &[Protect { shield: Shield::Reduce(20), coin: false }]),
-            atk("Landslide", "", &[Fighting, Fighting, Colorless], 50, &[]),
+            atk("Landslide", "", &[Fighting, Fighting, Colorless], 40, &[]),
         ],
         power: None,
     }),
@@ -1358,5 +1358,278 @@ mod tests {
                 assert!(below.hp < cr.hp, "{} loses HP when evolving", c.name);
             }
         }
+    }
+}
+
+/// The value budget (`docs/BALANCE.md`, "Value budget"): every creature is
+/// scored in damage-equivalents (10 = 10 damage = 10 HP) against the curve
+/// for its stage, so a new or changed card can't drift off the curve.
+#[cfg(test)]
+mod budget {
+    use super::*;
+    use crate::condition::{Placed, Shield, Status};
+    use crate::effect::Effect;
+
+    /// Expected damage of a vanilla attack, by stage (Basic, Stage 1,
+    /// Stage 2) and energy cost (1, 2, 3, 4+).
+    const CURVE: [[i32; 4]; 3] = [[10, 20, 40, 50], [10, 20, 50, 60], [10, 30, 50, 80]];
+    /// Median HP and retreat cost by stage.
+    const HP: [i32; 3] = [50, 80, 100];
+    const RETREAT: [i32; 3] = [1, 1, 2];
+    /// How far above the curve a card may sit, by role (about the classic
+    /// sets' 90th percentile on the same scale), and the floor for all.
+    const CEILING: i32 = 40;
+    const SUPPORT_CEILING: i32 = 30;
+    const FLOOR: i32 = -20;
+    /// Off-budget on purpose, each with its reason. Keep this list short.
+    const ACCEPTED: &[(&str, &str)] =
+        &[("Hexcrest", "the champion's promo: one copy, earned last")];
+    /// A main attacker this far above the attack curve needs a drawback.
+    const DRAWBACK_AT: i32 = 20;
+
+    fn stage(s: Stage) -> usize {
+        match s {
+            Stage::Basic => 0,
+            Stage::Stage1 => 1,
+            Stage::Stage2 => 2,
+        }
+    }
+
+    /// Damage-equivalent of one effect; drawbacks are negative.
+    pub(super) fn effect_value(e: &Effect) -> i32 {
+        use Effect::*;
+        let status = |s: &Status| match s {
+            Status::Paralyzed | Status::DoublePoisoned => 20,
+            _ => 10,
+        };
+        let coin = |v: i32, c: bool| if c { v / 2 } else { v };
+        match e {
+            AddPerHeads { coins, per } => i32::from(*coins) * i32::from(*per) / 2,
+            AddPerDamage { .. } | DoubleNextAttack | OwnResistance(_) => 10,
+            IgnoreWeaknessResistance => 5,
+            Recoil(x) => -i32::from(*x) / 2,
+            BenchDamage {
+                amount,
+                own,
+                opponent,
+            } => {
+                let a = i32::from(*amount);
+                (if *opponent { a * 3 / 2 } else { 0 }) - (if *own { a / 2 } else { 0 })
+            }
+            Snipe(x) => i32::from(*x),
+            Inflict { status: s, coin: c } => coin(status(s), *c),
+            InflictSelf(_) => -10,
+            Cure { .. } | SwitchSelf => 5,
+            Protect { shield, coin: c } => coin(
+                match shield {
+                    Shield::PreventDamage | Shield::PreventAll => 30,
+                    Shield::Reduce(x) => i32::from(*x) / 2,
+                    _ => 15,
+                },
+                *c,
+            ),
+            Place { placed, coin: c } => coin(
+                match placed {
+                    Placed::CantAttack => 20,
+                    Placed::Weaken(x) => i32::from(*x) / 2,
+                    Placed::CantRetreat => 5,
+                    _ => 10,
+                },
+                *c,
+            ),
+            DisableAttack | TrainerLock | DefenderWeakness(_) => 10,
+            DiscardEnergy { count, .. } => -10 * i32::from(*count),
+            DiscardAllEnergy | OnceWhileInPlay => -30,
+            DiscardDefenderEnergy | AttachFromDeck(_) => 20,
+            SwitchDefender {
+                chooser_is_attacker,
+            } => {
+                if *chooser_is_attacker {
+                    20
+                } else {
+                    5
+                }
+            }
+            Heal(x) => i32::from(*x) / 2,
+            HealAll(x) => i32::from(*x),
+            Draw(n) => 10 * i32::from(*n),
+            Search(_) | Recover(_) => 15,
+            CopyAttack => 30,
+            _ => 0,
+        }
+    }
+
+    fn power_value(p: &PowerKind) -> i32 {
+        match p {
+            // One extra attachment a turn (R-ENERGY-02), from the hand.
+            PowerKind::FreeAttach(_) => 30,
+            PowerKind::RetreatReducer | PowerKind::StatusImmune => 10,
+            PowerKind::Retaliate => 15,
+            PowerKind::OnPlay(effects) => effects.iter().map(effect_value).sum(),
+            // Used every turn: worth about two uses, less if it must wait a turn.
+            PowerKind::Activated {
+                effects,
+                settled_only,
+                ..
+            } => {
+                let v = 2 * effects.iter().map(effect_value).sum::<i32>();
+                if *settled_only {
+                    v * 3 / 4
+                } else {
+                    v
+                }
+            }
+            _ => 20,
+        }
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub(super) enum Role {
+        Attacker,
+        Wall,
+        Support,
+        Engine,
+        Tech,
+    }
+
+    pub(super) struct Score {
+        pub hp: i32,
+        pub attack: i32,
+        pub power: i32,
+        pub rest: i32,
+        pub drawback: bool,
+        pub role: Role,
+    }
+
+    impl Score {
+        pub fn total(&self) -> i32 {
+            self.hp + self.attack + self.power + self.rest
+        }
+    }
+
+    /// The score of one creature: HP, its best attack against the curve,
+    /// its Power, retreat, weakness and resistance.
+    pub(super) fn score(cr: &Creature) -> Score {
+        let s = stage(cr.stage);
+        let value = |a: &Attack| {
+            i32::from(a.damage) + a.effects.iter().map(effect_value).sum::<i32>()
+                - CURVE[s][a.cost.len().clamp(1, 4) - 1]
+        };
+        // The main attack is the dearest one; a second attack adds half its surplus.
+        let best = cr
+            .attacks
+            .iter()
+            .max_by_key(|a| (a.cost.len(), value(a)))
+            .unwrap();
+        let other = cr
+            .attacks
+            .iter()
+            .filter(|a| !std::ptr::eq(*a, best))
+            .map(|a| value(a).max(0) / 2)
+            .max()
+            .unwrap_or(0);
+        let effects_lead = best
+            .effects
+            .iter()
+            .map(effect_value)
+            .filter(|&v| v > 0)
+            .sum::<i32>()
+            > i32::from(best.damage);
+        let power = cr.power.as_ref().map_or(0, |p| power_value(&p.kind));
+        let hp = i32::from(cr.hp) - HP[s];
+        let attack = value(best) + other;
+        let role = match cr.power.as_ref().map(|p| p.kind) {
+            Some(PowerKind::FreeAttach(_) | PowerKind::OnPlay(_)) => Role::Engine,
+            Some(PowerKind::Activated { effects, .. })
+                if effects
+                    .iter()
+                    .any(|e| matches!(e, Effect::Draw(_) | Effect::AttachFromDeck(_))) =>
+            {
+                Role::Engine
+            }
+            Some(PowerKind::Retaliate | PowerKind::RetreatReducer | PowerKind::StatusImmune) => {
+                Role::Tech
+            }
+            _ if best.effects.iter().any(|e| matches!(e, Effect::CopyAttack)) => Role::Tech,
+            _ if hp >= 20
+                && (value(best) <= 0
+                    || cr.attacks.iter().flat_map(|a| a.effects).any(|e| {
+                        matches!(
+                            e,
+                            Effect::Protect { .. } | Effect::Heal(_) | Effect::HealAll(_)
+                        )
+                    })) =>
+            {
+                Role::Wall
+            }
+            _ if effects_lead => Role::Support,
+            _ => Role::Attacker,
+        };
+        Score {
+            hp,
+            attack,
+            power,
+            rest: 5 * (RETREAT[s] - i32::from(cr.retreat_cost))
+                + if cr.weakness.is_none() { 10 } else { 0 }
+                + if cr.resistance.is_some() { 10 } else { 0 },
+            drawback: cr
+                .attacks
+                .iter()
+                .flat_map(|a| a.effects)
+                .any(|e| effect_value(e) < 0 || matches!(e, Effect::BenchDamage { own: true, .. })),
+            role,
+        }
+    }
+
+    /// Prints the table (`-- --nocapture`) and fails on a card off its budget.
+    #[test]
+    fn every_creature_is_within_its_budget() {
+        let mut off = vec![];
+        for c in CARDS {
+            let Some(cr) = c.creature() else { continue };
+            let sc = score(cr);
+            let t = sc.total();
+            println!(
+                "{:12} {:?} {:9} hp {:+4} atk {:+4} pow {:+4} rest {:+4} = {:+4}{}",
+                c.name,
+                cr.stage,
+                format!("{:?}", sc.role),
+                sc.hp,
+                sc.attack,
+                sc.power,
+                sc.rest,
+                t,
+                if sc.drawback { "  (drawback)" } else { "" }
+            );
+            let ceiling = match sc.role {
+                Role::Attacker | Role::Wall => CEILING,
+                _ => SUPPORT_CEILING,
+            };
+            if ACCEPTED.iter().any(|(n, _)| *n == c.name) {
+                continue;
+            }
+            if t > ceiling || t < FLOOR {
+                off.push(format!(
+                    "{} {t:+} (role {:?}, limit {FLOOR}..{ceiling})",
+                    c.name, sc.role
+                ));
+            }
+            if sc.role == Role::Attacker && sc.attack > DRAWBACK_AT && !sc.drawback {
+                off.push(format!(
+                    "{}: attack {:+} with no drawback",
+                    c.name, sc.attack
+                ));
+            }
+            if matches!(sc.role, Role::Wall | Role::Support) && sc.attack > 10 {
+                off.push(format!(
+                    "{}: a {:?} more than 10 above the attack curve",
+                    c.name, sc.role
+                ));
+            }
+            if sc.role == Role::Engine && sc.hp > 0 {
+                off.push(format!("{}: an engine above its stage's HP", c.name));
+            }
+        }
+        assert!(off.is_empty(), "off budget:\n{}", off.join("\n"));
     }
 }

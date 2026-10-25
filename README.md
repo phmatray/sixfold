@@ -185,8 +185,10 @@ Releases are cut by release-please from Conventional Commits.
 
 ## Rules
 
-The rules follow the original Game Boy game, not the modern card game. The
-first player draws and may attack on turn 0, there is no Burned condition,
+The rules follow the original Game Boy game, not the modern card game, with
+two deliberate changes. The player who goes first draws but can't attack on
+their first turn (the modern game's fix for the first player's edge), and a
+free-attach Power gives one extra energy a turn, not unlimited ones. There is no Burned condition,
 confusion hurts the attacker for 20, weakness doubles damage, resistance takes
 off 30, a mulligan gives the opponent no extra cards, the Bench holds 5, and a
 tie goes to sudden death with one prize each.

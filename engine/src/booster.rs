@@ -2,9 +2,9 @@
 //! seed. The design and its odds are in `docs/BOOSTERS.md`.
 //!
 //! A pack is 6 Commons, 3 Uncommons and a Rare slot, in that (reveal)
-//! order, all distinct. One Rare slot in [`HOLO_IN`] holds a Holo Rare (an
-//! Awaken 2 Hexon, [`is_holo`]); the others a Rare trainer or the special
-//! energy. A themed pack fills each Common and Uncommon slot from its own
+//! order, all distinct. The Rare slot holds a Holo Rare (an Awaken 2
+//! Hexon, [`is_holo`]) at the odds of [`HOLO_ODDS`]; otherwise a Rare trainer
+//! or the special energy. A themed pack fills each Common and Uncommon slot from its own
 //! types, trainers and Colorless Hexons, or the other types, by
 //! [`SHARES`], and its Holo Rares are its own types; the Wild pack draws
 //! evenly from the whole set. The Rare slot skips cards the player already
@@ -22,8 +22,8 @@ use crate::set::{is_holo, is_promo};
 pub const PACK_SIZE: usize = COMMONS + UNCOMMONS + 1;
 pub const COMMONS: usize = 6;
 pub const UNCOMMONS: usize = 3;
-/// The Rare slot holds a Holo Rare one pack in `HOLO_IN`.
-pub const HOLO_IN: u32 = 3;
+/// The Rare slot holds a Holo Rare in `HOLO_ODDS.0` packs of `HOLO_ODDS.1`.
+pub const HOLO_ODDS: (u32, u32) = (3, 5);
 /// A themed pack's Common and Uncommon slots, in percent: its own types,
 /// then trainers and Colorless Hexons, then the other types.
 pub const SHARES: [u32; 3] = [60, 35, 5];
@@ -170,7 +170,7 @@ impl Booster {
                 pack.push(id);
             }
         }
-        let holo = rng.below(HOLO_IN) == 0;
+        let holo = rng.below(HOLO_ODDS.1) < HOLO_ODDS.0;
         let mut pool = self.pool(Rarity::Rare, holo);
         let spare = |id: &CardId| owned.count(*id) < MAX_COPIES;
         if pool.iter().flatten().any(spare) {
@@ -315,7 +315,7 @@ mod tests {
     }
 
     /// Over many seeded packs the slot rates and type shares match
-    /// `docs/BOOSTERS.md`: a Holo one Rare slot in three, 60/35/5 in a
+    /// `docs/BOOSTERS.md`: a Holo in three Rare slots of five, 60/35/5 in a
     /// themed pack's Common and Uncommon slots, and in the Wild pack every
     /// card close to its even share.
     #[test]
@@ -335,7 +335,7 @@ mod tests {
             }
             let rate = holo as f64 / packs as f64;
             assert!(
-                (rate - 1.0 / f64::from(HOLO_IN)).abs() < 0.015,
+                (rate - f64::from(HOLO_ODDS.0) / f64::from(HOLO_ODDS.1)).abs() < 0.015,
                 "{}: holo {rate:.3}",
                 b.name
             );

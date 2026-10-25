@@ -74,7 +74,11 @@ pub struct Game {
     pub(crate) turn_player: usize,
     /// Per-turn flags (R-TURN-03 step 4).
     pub(crate) energy_attached: bool,
+    /// R-ENERGY-02: the one extra free-attach Power attachment is used.
+    pub(crate) free_attached: bool,
     pub(crate) retreat_failed: bool,
+    /// R-RETREAT-05: the turn player has retreated this turn.
+    pub(crate) retreated: bool,
     /// R-EFFECT-02: this turn's accuracy coin, once flipped.
     pub(crate) accuracy: Option<bool>,
     /// The attack, trainer or Power being resolved.
@@ -116,7 +120,9 @@ impl Game {
             turn: 0,
             turn_player: 0,
             energy_attached: false,
+            free_attached: false,
             retreat_failed: false,
+            retreated: false,
             accuracy: None,
             pending: None,
             prompt: None,
@@ -355,7 +361,9 @@ impl Game {
             turn: self.turn,
             turn_player: self.turn_player,
             energy_attached: self.energy_attached,
+            free_attached: self.free_attached,
             retreat_failed: self.retreat_failed,
+            retreated: self.retreated,
             accuracy: self.accuracy,
             pending: self.pending.clone(),
             prompt: self.prompt.clone(),

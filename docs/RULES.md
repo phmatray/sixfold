@@ -221,12 +221,23 @@ unit test that should cover it.
   - `01:4392-439B`: Power → menu.
 - **Test.** `main_phase_multiple_actions_same_turn`
 
-### R-TURN-05: Attacking ends the turn; no first-turn restriction
+### R-TURN-05: Attacking ends the turn; the first player can't attack on turn 0
 - **Rule.** Once an attack is committed, the turn ends, even if the attack then fails a coin (a
   confusion self-hit, or a miss caused by an accuracy effect). Only cancelling, or the attack's own
-  precondition failing, returns to the menu. The first player **may** attack on turn 0.
+  precondition failing, returns to the menu.
+
+  **Sixfold departs from the handheld game here, on purpose.** The handheld lets the first player
+  attack on turn 0. Sixfold doesn't: the player who goes first can't attack on their first turn
+  (turn 0). They can still place Basics, attach energy, play trainers and use Powers (Awakening is
+  already barred on that turn, R-EVO-02). The second player may attack on their first turn (turn 1)
+  as usual. The physical card game made the same change in 2013 to offset the first player's
+  advantage. Measured with the AI on both sides, that first attack was worth about 9 points of win
+  rate: the first player won 58.8% of games, and 53.4% without it (`docs/BALANCE.md`, "Indicators").
+  The AI and the tutorial follow the rule through `legal_actions`; the duel screen greys the attacks
+  out with the reason.
 
   Attacking is blocked when any of these is true (checked in this order):
+  - it is turn 0 (Sixfold only, `RuleError::FirstTurn`);
   - the Active has an attack-lock substatus;
   - the Active is Asleep or Paralyzed;
   - the Active has no attacks;
@@ -244,10 +255,11 @@ unit test that should cover it.
   still end the turn.
 - **Evidence.**
   - `01:4700-470D`: the pre-checks, attack lock (`01:4700 → 00:3378`) before Asleep/Paralyzed
-    (`01:4705 → 01:491E`). The turn counter is never read on this path.
+    (`01:4705 → 01:491E`). The handheld never reads the turn counter on this path; the turn-0 block
+    is Sixfold's own.
   - `01:4772-4780`: `call 1695; jp c,4271; ret`, so no carry means the turn ends.
   - `00:1695`: carry returns to the menu only at `177E/1781`.
-- **Test.** `first_player_may_attack_turn_zero`, `attack_ends_turn`, `disabled_attack_only_blocks_that_attack`,
+- **Test.** `first_player_cannot_attack_turn_zero`, `attack_ends_turn`, `disabled_attack_only_blocks_that_attack`,
   `attack_blocked_without_energy_or_attacks`
 
 ### R-TURN-06: Done ends the turn without confirmation
@@ -323,6 +335,12 @@ unit test that should cover it.
   energy attached to a Hexon whose *effective* colour matches does not use up the attachment.
   The exception does not apply while a power blocker is in play.
 
+  **Sixfold's limit:** the exception covers **one** extra attachment a turn, however many holders
+  are in play. The handheld has no limit, so a holder in play made every matching energy in hand
+  free; in Sixfold the second matching energy uses the normal attachment and a third is refused.
+  The only holder, Pyrequill's Kindling Heart, was the one card the value budget priced as
+  off-curve for it (`docs/BALANCE.md`, "The value budget").
+
   Counting rule (R-POWER-03): a Benched holder always counts. An Active holder counts only if it is
   not Confused, Asleep or Paralyzed (Poison does not matter). The blocker is counted the same way:
   a Confused, Asleep or Paralyzed Active blocker does not block. If the exception does not apply and
@@ -342,7 +360,7 @@ unit test that should cover it.
   nothing. Other AI indexes return at `08:6795`.
 - **Evidence.** `01:447B-4483`, `00:35CC-35D8`, `00:34DC-34FF`, `00:35D9-35EE` (the target colour via
   `00:36AE`, after the slot pick), `01:44B3-44C7`, `01:6A65`, `08:6790-6795`.
-- **Test.** `free_attach_power_allows_extra_matching_energy`, `free_attach_power_off_when_holder_active_asleep`,
+- **Test.** `free_attach_power_allows_one_extra_matching_energy`, `free_attach_power_off_when_holder_active_asleep`,
   `free_attach_needs_matching_target_colour`
 
 ### R-ENERGY-03: Energy counting
@@ -436,16 +454,21 @@ unit test that should cover it.
 - **Evidence.** `00:14A8-14EC`, `00:13C6-13E9`.
 - **Test.** `retreat_clears_status_keeps_damage`
 
-### R-RETREAT-05: No per-turn retreat limit
-- **Rule.** A Hexon that is not Confused may retreat any number of times per turn, paying each
-  time. Retreating does not end the turn, and the new Active may attack. Retreat is available on every
-  turn, including first turns.
+### R-RETREAT-05: One retreat a turn
+- **Rule.** **Sixfold departs from the handheld game here, on purpose.** The handheld lets a Hexon
+  that is not Confused retreat any number of times per turn, paying each time. Sixfold allows **one**
+  retreat a turn, as the physical card game always has: once a retreat goes through, Retreat is
+  refused for the rest of the turn (`RuleError::AlreadyRetreated`). A Confused retreat that fails its
+  coin doesn't use it up (R-RETREAT-03 still bars a retry while Confused), and a switch trainer is not
+  a retreat. Retreating does not end the turn, and the new Active may attack. Retreat is available on
+  every turn, including first turns.
 - **Parameters.** The only per-turn retreat state for players is `cc0c` (R-RETREAT-03). The AI has
   its own once-per-turn flag (R-AI-07).
 - **Status.** CONFIRMED
 - **Evidence.** `01:43F5-4420` (no flag read, `jp 4271`). `05:4078-408E`: the one AI handler without
-  the AI's retreat flag (opponent index `$35`) retreats twice in one turn.
-- **Test.** `retreat_twice_same_turn_then_attack`
+  the AI's retreat flag (opponent index `$35`) retreats twice in one turn. The once-a-turn flag is
+  Sixfold's own; the engine AI already kept to one retreat a turn (R-AI-07).
+- **Test.** `retreat_once_per_turn_then_attack`, `confused_retreat_failure_blocks_retry_same_turn`
 
 ### R-RETREAT-06: Cancelling a retreat costs nothing
 - **Rule.** Cancelling during energy or Bench selection abandons the retreat at no cost. Energy that
@@ -1557,7 +1580,7 @@ notes give the decision order and the weightings to copy where helpful.
 | Confusion wearing off on its own | No nibble-1 handler between turns. | Omit. |
 | Coin flip to recover from Paralysis | Removed without a coin at `01:6CAB`. | Omit. |
 | First player skips the first draw | The draw at `01:4241` is unconditional. | Omit. A modern-rules variant could be optional. |
-| First player can't attack or play trainers on turn 0 | `cc06` is read only for the Awakening gate (`01:4231`) and practice scripts. | Omit. A modern-rules variant could be optional. |
+| First player can't attack or play trainers on turn 0 | `cc06` is read only for the Awakening gate (`01:4231`) and practice scripts. | **Partly adopted:** Sixfold bars the first player's turn-0 attack (R-TURN-05) but not their trainers. |
 | Choosing to go first or second | Heads or tails sets the turn directly (`01:4C41-4C46`). | Omit. |
 | Optional mulligan, or the opponent drawing extra cards on a mulligan | `01:4B8B-4BAF` jumps straight to placement with no prompt. | Omit. |
 | Retreat limited to once per turn, or retreat ending the turn | The non-confused path reads no flag and returns to the menu (`01:43F5-4420`). | Omit. |

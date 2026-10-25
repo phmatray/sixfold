@@ -71,7 +71,7 @@ pub static FR: &[CardFr] = &[
     c("Pyrequill", "Bûcheplume", &[
         ("Pluie d'étincelles", "Inflige 10 dégâts à chaque Hexon du Banc adverse."),
         ("Panache infernal", "Défaussez 2 cartes Énergie Feu attachées à ce Hexon."),
-    ], Some(("Cœur de braise", "Attacher une énergie Feu à l'un de vos Hexons Feu ne compte pas comme votre énergie attachée du tour."))),
+    ], Some(("Cœur de braise", "Une fois pendant votre tour, attacher une énergie Feu à l'un de vos Hexons Feu ne compte pas comme votre énergie attachée du tour."))),
     // ----- Ember Rush: Fighting -----
     c("Knollop", "Mottelot", &[
         ("Jet de motte", ""),

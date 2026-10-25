@@ -30,7 +30,10 @@ use crate::view::{Side, View};
 /// How well the AI plays.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Difficulty {
-    /// R-AI-03: skips a valid trainer or Power play one time in four.
+    /// R-AI-03: skips a valid trainer or Power play one time in four. On
+    /// top of the handheld's mistakes, Sixfold's Easy picks any attack that
+    /// does something rather than the best one, and retreats only to dodge
+    /// a knock-out.
     Easy,
     /// Full heuristics, no random skips.
     #[default]
@@ -218,7 +221,13 @@ impl Ai {
 
     /// The best attack, or the end of the turn; remembers whether it hits.
     fn attack(&mut self, x: &Ctx) -> Action {
-        let Some(i) = best_attack(x) else {
+        let pick = if self.difficulty == Difficulty::Easy {
+            let useful: Vec<usize> = attacks(x).filter(|&i| attack_score(x, i) > 0.0).collect();
+            (!useful.is_empty()).then(|| useful[self.rng.below(useful.len() as u32) as usize])
+        } else {
+            best_attack(x)
+        };
+        let Some(i) = pick else {
             return Action::Done;
         };
         self.hit = outcomes(x, x.me, i).iter().any(|&(_, d)| d > 0);
@@ -307,7 +316,9 @@ impl Ai {
         // knock-out; Stall also from half its HP gone, and for less.
         let hurt = x.style == Style::Stall && active.damage() >= active.hp;
         let trouble = match x.style {
-            Style::Aggressive => in_danger(x),
+            _ if self.difficulty == Difficulty::Easy || x.style == Style::Aggressive => {
+                in_danger(x)
+            }
             _ => in_danger(x) || !cond.is_empty() || stuck || self.idle >= 2 || hurt,
         };
         let margin = if x.style == Style::Stall { 5 } else { 20 };
@@ -1784,9 +1795,9 @@ mod tests {
     /// R-AI-04, R-AI-02: bench a Basic first, then attach, then attack.
     #[test]
     fn ai_turn_benches_before_attach_before_attack() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         set_hand(&mut g, 0, &[GRASS_E, EMBERKIT]);
-        let chosen = run_until(&mut g, end_of_turn_0);
+        let chosen = run_until(&mut g, |g| g.turn() > 2 || g.winner().is_some());
         assert_eq!(
             chosen,
             [
@@ -1834,16 +1845,33 @@ mod tests {
     /// R-AI-10: a sure knock-out beats a coin attack with a similar average.
     #[test]
     fn ai_picks_attack_that_kos() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(TIDEPUP, &[WATER_E, WATER_E]));
         g.players[1].active.as_mut().unwrap().hp = 20;
         assert_eq!(pick(&g), Action::Attack(1));
     }
 
+    /// R-AI-03 (Sixfold): Easy picks any useful attack, not the best one,
+    /// and still never one that can do nothing.
+    #[test]
+    fn ai_easy_attacks_at_random() {
+        let mut g = main_phase(2);
+        g.players[0].active = Some(creature(TIDEPUP, &[WATER_E, WATER_E]));
+        g.players[1].active.as_mut().unwrap().hp = 20;
+        let picks: Vec<Action> = (0..40)
+            .map(|s| Ai::new(s, Difficulty::Easy).choose_action(&g, 0))
+            .collect();
+        assert!(picks.contains(&Action::Attack(0)) && picks.contains(&Action::Attack(1)));
+        let mut g = main_phase(2);
+        g.players[0].active = Some(creature(SPARKLET, &[LIGHTNING_E]));
+        g.players[1].active = Some(creature(WARDEN, &[]));
+        assert!((0..40).all(|s| Ai::new(s, Difficulty::Easy).choose_action(&g, 0) == Action::Done));
+    }
+
     /// R-AI-10: an attack that can do nothing is not used; the turn ends.
     #[test]
     fn ai_ends_turn_with_useless_attack() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(SPARKLET, &[LIGHTNING_E]));
         g.players[1].active = Some(creature(WARDEN, &[]));
         assert!(g.legal_actions().contains(&Action::Attack(1)));
@@ -1933,7 +1961,7 @@ mod tests {
     #[test]
     fn bench_sniper_goes_for_the_weakest() {
         use crate::set::{LIGHTNING_ENERGY, OHMLET, RILLET, SPRIGGET};
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(OHMLET, &[LIGHTNING_ENERGY, LIGHTNING_ENERGY]));
         g.players[1].active = Some(creature(SPRIGGET, &[]));
         let mut hurt = creature(RILLET, &[]);
@@ -2012,7 +2040,7 @@ mod tests {
     /// R-AI-11: the +10 trainer is played only when it makes the knock-out.
     #[test]
     fn ai_plays_plus10_only_for_ko() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active = Some(creature(MOSSLING, &[GRASS_E]));
         set_hand(&mut g, 0, &[WHETSTONE]);
         for (hp, plays) in [(30, true), (60, false), (20, false)] {
@@ -2176,12 +2204,13 @@ mod tests {
     }
 
     /// Balance check: in a seeded round robin every prebuilt deck wins
-    /// between 30% and 70% of its games against the others.
+    /// between 35% and 65% of its games against the others (seeded, so not
+    /// flaky; at 80 games a deck one standard error is about 5.5 points).
     #[test]
     fn prebuilt_decks_round_robin_is_balanced() {
         for (d, (w, n)) in crate::decks::PREBUILT.iter().zip(round_robin(16)) {
             let rate = w as f32 / n as f32;
-            assert!((0.3..=0.7).contains(&rate), "{} won {w}/{n}", d.name);
+            assert!((0.35..=0.65).contains(&rate), "{} won {w}/{n}", d.name);
         }
     }
 

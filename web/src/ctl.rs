@@ -576,8 +576,8 @@ impl Ctl {
                 self.callout(
                     title.into(),
                     tr(
-                        "The first player draws and may attack",
-                        "Le premier joueur pioche et peut attaquer",
+                        "The first player draws but can't attack this turn",
+                        "Le premier joueur pioche mais ne peut pas attaquer ce tour",
                     )
                     .into(),
                     None,

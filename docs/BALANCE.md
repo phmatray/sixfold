@@ -202,3 +202,179 @@ with the 1.x packs and 40–91 (median 52) with the slot design of `docs/BOOSTER
 at 54 failed for a third of the seeds either way. With the boosters release, seeds 2 and 3 finish in
 45 and 44 duels (22 and 23 packs bought); seed 1 stalls on the Warden. Before 1.2 (packs for wins,
 no route duelists) it took 31 rival duels.
+
+## Curves and the value budget
+
+Every Hexon is held to the curves below. They come from two sources: our own pack set (71
+Hexons, promos left out) and, as an outside check, aggregate statistics of the three classic
+sets the handheld game was built on (159 distinct creatures, 32 trainers). Only rules and numbers
+were taken from those sets, never a card. Our evolutions are deliberately stronger per energy than
+theirs. In the classic sets a Stage 2 dealt no more damage per energy than a Basic, so evolving
+rarely paid; our curve rewards the setup.
+
+### How we compare
+
+| Measure | Classic sets | Ours | Target |
+|---|---|---|---|
+| HP median, Basic / Stage 1 / Stage 2 | 50 / 70 / 80 | 50 / 80 / 100 | 50 / 80 / 100 |
+| HP range, Basic / Stage 1 / Stage 2 | 30–120 / 30–100 / 60–120 | 40–80 / 70–90 / 100–120 | 40–80 / 70–90 / 100–120 |
+| Expected damage per energy, main attack, Basic / S1 / S2 (median) | 10 / 10 / 12 | 10 / 17 / 19 | 10–13 / 15–17 / 18–20 |
+| Vanilla expected damage at 1 / 2 / 3 / 4 energy | 10 / 20 / 30 / 55 | 10 / 20 / 50 / 60 | see the curve below |
+| Mean retreat, Basic / S1 / S2 | 1.2 / 1.3 / 1.9 | 1.2 / 1.5 / 2.4 | ≤ 1.2 / ≤ 1.5 / ≤ 2.2 |
+| Retreat 0 / 1 / 2 / 3+ | 15 / 53 / 17 / 14% | 8 / 51 / 28 / 13% | 10 / 50 / 25 / 15% |
+| Hexons with a weakness | 92% | 96% | ≥ 90% |
+| Hexons with a resistance | 33% | 14% | 15–25%, never to the colour already weak to them |
+| Hexons weak to each colour (min–max) | 12–31 | 5–17 | 8–14 a colour |
+| Powers, Basic / S1 / S2 | 6 / 15 / 44% | 13 / 5 / 42% | ≤ 10 / 10–15 / 35–45% |
+| Attacks that flip coins | 38% | 16% | 15–25% |
+| Colourless share of attack costs | 29% | 31% | 25–35%; at most 2 in 3 attacks of 3+ energy carry one |
+| Lines of 1 / 2 / 3 stages | 31 / 48 / 21% | 49 / 21 / 31% | more 2-stage lines in set 2 |
+| Basics that are Common / Uncommon / Rare | 63 / 15 / 22% | 69 / 31 / 0% | allow a few Rare Basics |
+| Trainers: disruption, heal, draw, search, recovery, energy, switch | 28, 16, 12, 9, 9, 3, 6% | 28, 16, 12, 12, 8, 8, 4% (+12% boosts) | keep |
+
+The attack curve, as expected damage of an attack with no effect:
+
+| Energy | 1 | 2 | 3 | 4+ |
+|---|---|---|---|---|
+| Basic | 10 | 20 | 40 | 50 |
+| Stage 1 | 10 | 20 | 50 | 60 |
+| Stage 2 | 10 | 30 | 50 | 80 |
+
+### The value budget
+
+`every_creature_is_within_its_budget` (`engine/src/set.rs`, always on) scores each Hexon in
+damage-equivalents, where 10 is worth 10 damage or 10 HP:
+
+    score = (HP − stage median HP)
+          + (main attack's expected damage + its effects − curve[stage][energy])
+          + ½ × the other attack's surplus, if positive
+          + Power value
+          + 5 × (stage retreat − retreat cost) + 10 if no weakness + 10 if a resistance
+
+The main attack is the one that costs most. Effects are valued by what they cost in damage, in both
+the classic sets and ours:
+
+| Effect | Value |
+|---|---|
+| Paralysis or Double-poison | +20 |
+| Sleep, Confusion or Poison; a coin flip halves the value | +10 |
+| The opponent can't attack (coin) | +10 |
+| Weaken 20, Reduce 20, accuracy flip, trainer lock, disable an attack | +10 |
+| Prevent all damage (coin) | +15 |
+| The attacker picks the switch (a gust) | +20 |
+| The opponent picks the switch | +5 |
+| Bench damage to each opponent | +1.5× the amount |
+| Snipe | +the amount |
+| Heal X; heal X on each Hexon | +X/2; +X |
+| Draw 1 | +10 |
+| Search or recover a card | +15 |
+| Energy from the deck, or discard the defender's energy | +20 |
+| Recoil X | −X/2 |
+| Discard own energy | −10 each |
+| Discard all energy, or once while in play | −30 |
+| Confuse self | −10 |
+
+Powers are valued at twice their effect, or 1.5 times if the Hexon must wait a turn. On-play
+Powers count their effect once. A free attach (one extra energy a turn, R-ENERGY-02) is +30, retaliation +15, and a retreat reducer or
+status immunity +10.
+
+Each Hexon also gets a role from its stats:
+
+- **Engine**: a Power that draws, searches or attaches energy.
+- **Tech**: retaliation, a retreat reducer, status immunity, or a copied attack.
+- **Wall**: at least 20 HP over the median, with a defensive attack or one at or below the curve.
+- **Support**: an attack whose effects are worth more than its damage.
+- **Attacker**: everything else.
+
+The limits:
+
+| Role | Total score | Also |
+|---|---|---|
+| Attacker | ≤ +40 | more than +20 over the attack curve needs a drawback |
+| Wall | ≤ +40 | at most +10 over the attack curve |
+| Support | ≤ +30 | at most +10 over the attack curve |
+| Engine | ≤ +30 | no more HP than its stage median |
+| Tech | ≤ +30 | |
+| Every Hexon | ≥ −20 | |
+
++40 is about the 90th percentile of the classic sets on the same scale. The two spreads match: theirs
+runs from −10 to +40 (10th to 90th percentile), ours from −8 to +35. One card is off budget on
+purpose and listed in the test with its reason: Hexcrest (the champion's promo). Pyrequill was the
+second until 1.3: its Kindling Heart made every Fire energy free, priced at +40 (+37 in all). Limited
+to one extra attachment a turn, it is priced at +30 and scores +27, inside the Engine limit.
+
+### Built-in drawbacks
+
+A card well above the curve should carry a cost. Ours carry one of these:
+
+- **Setup.** A Stage 2 takes two turns and three cards.
+- **Coins.** 16% of attacks flip.
+- **Recoil.** 10–20 damage to the attacker.
+- **Discards.** One or two of its own energy, or all of them.
+- **Once while in play.**
+- **Own-bench damage.**
+- **Heavy retreat.** 3–4 for the biggest bodies.
+
+The budget test asks a main attacker more than +20 over the curve to carry an attack drawback.
+
+### Indicators
+
+`balance_indicators` (`engine/src/playtest.rs`, ignored) plays the deck sweep's field and reports the
+numbers below. "1.3 cards" is the curve pass that follows; "first-turn rule" adds the rule-level
+proposal in the next paragraph.
+
+| Indicator | Target | 1.2 | 1.3 cards | + first-turn rule |
+|---|---|---|---|---|
+| First player's win rate | 50 ± 3% | 58.8% | 59.1% | 53.4% |
+| Game length in turns (both players): mean, median, 10th–90th percentile | — | 22.6, 20, 5–42 | 22.4, 20, 5–42 | 23.3, 21, 6–43 |
+| Prebuilts within 45–55% | ≥ 4 of 6 | 2 | 3 | 3 |
+| Decks above 55% | only the Gauntlet's | 5 | 5 | 4 |
+| Spread of overall rates (standard deviation) | ≤ 6 | 7.2 | 6.1 | 5.4 |
+
+It also prints each card's play rate and win rate when played or not. Read that table with care.
+Evolutions and late cards are played in games that go well, and reactive trainers in games that go
+badly, so the gap measures timing as much as strength.
+
+The rules give the first player an attack on their first turn, as the handheld game did, and that
+turn is worth about 9 points. Barring that attack brings the edge to about 3 points. It is a
+deliberate departure from the original rules, and 24 unit tests that attack on turn 0 would need a
+turn advanced.
+
+Bands to tighten once the cards land:
+
+- `deck_sweep`: from 40–60% to 42–58% for each prebuilt.
+- The always-on round robin: from 30–70% to 35–65%. At 16 games a pair this is about 2.5 standard
+  errors; check it before tightening.
+- The long-term aim is no deck above 55% and every prebuilt within 45–55%.
+
+### Set 2: rotation and errata
+
+We have one set, so rotation doesn't apply. Set 2 should carry a set mark from its first card, so a
+format can drop set 1 later. Ids stay append-only because they are save positions. Because the game
+is digital, direct changes to card stats are the main lever (this page records each one), and a set
+of cards held back from formats is the second.
+
+## 1.3: curve pass
+
+Eight numbers, chosen by the value budget and the indicators. Each keeps its card's name, attacks
+and Power.
+
+| Card | Change | Why |
+|---|---|---|
+| Thornbuck, Elderhart | Water resistance removed | The Grass lines led the field (Grove Bloom 59%, Deep Thicket 66%). Thornbuck had the widest played-or-not gap of any card (+38). No classic Grass card resists Water. |
+| Ohmrunner | Rail Shot 30 → 40 | 10 below the Stage 1 curve; Storm Front was the weakest prebuilt after Dream Veil. |
+| Fulgurex | Forked Bolt 30 → 40 | The same, for the Lightning Stage 2. |
+| Slatebrow | Landslide 50 → 40 | An 80 HP Basic wall 15 over the attack curve, played in 83% of Bedrock Deep's games. |
+| Haulox | Heavy Trample 60 → 50 | The same wall rule. |
+| Hexmage, Hexarch | Spite Bolt 30 → 40, Grand Hex 50 → 60 | Below the curve. The sweep doesn't move (±1), so these are for players, not the AI. |
+
+Measured with the deck sweep:
+
+- Spread of overall rates 7.2 → 6.1.
+- Prebuilts 42–59% → 42–57%; widest pairing 83 → 79.
+- Storm Front 44 → 48%, Bedrock Deep 60 → 56%, Deep Thicket 66 → 64%, Grove Bloom 59 → 57%.
+- Kits: Lightning +3, Grass −2, Fighting −1 or −2; none above 60%.
+- Rivals against the starter: within 2 points.
+- The campaign playthrough: still 32 duels and 19 packs.
+- Dream Veil stays at 42%. Its losses come from Psychic weakness against the Water-and-Psychic decks
+  and from the Normal AI's weak use of Sleep, not from a card below the curve.

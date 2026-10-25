@@ -382,7 +382,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 
 | `PowerKind` | What it does |
 |---|---|
-| `FreeAttach(Color)` | Energy of that colour attached to a Hexon of that colour doesn't use up the turn's attachment. |
+| `FreeAttach(Color)` | Once a turn (however many holders), an energy of that colour attached to a Hexon of that colour doesn't use up the turn's attachment. |
 | `RetreatReducer` | The owner's Active retreats for 1 less while this is on the Bench. |
 | `EvolutionLock` | Nobody can awaken. |
 | `Blocker` | Every other Power stops. |

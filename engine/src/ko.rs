@@ -557,7 +557,7 @@ mod tests {
     /// R-ZONE-05
     #[test]
     fn ko_stage1_with_two_energy_discards_four_cards() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         let mut target = creature(MOSSLING, &[GRASS_E, GRASS_E]);
         target.stack.push(MOSSBACK);
         target.hp = 10;

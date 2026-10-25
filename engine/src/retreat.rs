@@ -21,6 +21,11 @@ impl Game {
     pub(crate) fn check_retreat(&self, p: usize) -> Result<(), RuleError> {
         let pl = &self.players[p];
         let active = pl.active.as_ref().ok_or(RuleError::NoSuchSlot)?;
+        // RULES: R-RETREAT-05 — one retreat a turn, as in the physical game;
+        // the handheld allowed any number (see docs/RULES.md).
+        if self.retreated {
+            return Err(RuleError::AlreadyRetreated);
+        }
         // R-RETREAT-03: on the confused path the failed flag comes first.
         if pl.condition.is_confused() && self.retreat_failed {
             return Err(RuleError::RetreatFailedThisTurn);
@@ -76,7 +81,8 @@ impl Game {
     }
 
     /// Pay, then (if Confused) flip: tails keeps the Active and sets the
-    /// retreat-failed flag (R-RETREAT-03). Retreating never ends the turn (R-RETREAT-05).
+    /// retreat-failed flag (R-RETREAT-03). Retreating never ends the turn; a
+    /// retreat that goes through uses up the turn's one retreat (R-RETREAT-05).
     pub(crate) fn finish_retreat(
         &mut self,
         p: usize,
@@ -107,6 +113,7 @@ impl Game {
         }
         self.switch(p, slot);
         self.retreat_failed = false;
+        self.retreated = true;
         let a = self.players[p].active.as_ref().expect("switched in");
         ev.push(Event::Retreated {
             player: p,
@@ -136,7 +143,7 @@ mod tests {
     use crate::testkit::*;
 
     fn with_bench() -> crate::Game {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
         g.players[0].bench.push(creature(PEBBLET, &[]));
         g
@@ -291,14 +298,14 @@ mod tests {
         // Cured later that turn: a normal retreat is allowed again.
         g.players[0].condition = Default::default();
         ok(&mut g, Action::Retreat);
-        // A successful retreat clears the flag (01:65F1), so the new Active may
-        // try a confused retreat later that turn.
+        // A successful retreat clears the flag (01:65F1), and in Sixfold uses
+        // up the turn's one retreat (R-RETREAT-05).
         ok(&mut g, Action::DiscardEnergy(0));
         ok(&mut g, Action::Promote(1));
         assert!(!g.retreat_failed);
         g.players[0].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
         g.players[0].condition.apply_special(Special::Confused);
-        ok(&mut g, Action::Retreat);
+        assert_eq!(err(&mut g, Action::Retreat), RuleError::AlreadyRetreated);
     }
 
     /// R-RETREAT-01: when several refusals apply, the first in the ledger's
@@ -375,18 +382,20 @@ mod tests {
 
     /// R-RETREAT-05
     #[test]
-    fn retreat_twice_same_turn_then_attack() {
-        let mut g = main_phase(0);
+    fn retreat_once_per_turn_then_attack() {
+        let mut g = main_phase(2);
         g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E, GRASS_E];
         g.players[0].bench.push(creature(EMBERKIT, &[FIRE_E]));
         ok(&mut g, Action::Retreat);
         ok(&mut g, Action::DiscardEnergy(0));
         ok(&mut g, Action::Promote(1)); // Emberkit in
-        ok(&mut g, Action::Retreat);
-        ok(&mut g, Action::Promote(1)); // Mossling back, cost 0 for Emberkit
-        assert_eq!(g.players[0].active.as_ref().unwrap().energy, vec![GRASS_E]);
+        assert_eq!(err(&mut g, Action::Retreat), RuleError::AlreadyRetreated);
+        assert!(!g.legal_actions().contains(&Action::Retreat));
+        // The new Active may still attack, and the next turn retreats again.
         ok(&mut g, Action::Attack(0));
-        assert_eq!(g.turn(), 1);
+        assert_eq!(g.turn(), 3);
+        ok(&mut g, Action::Done);
+        assert!(g.legal_actions().contains(&Action::Retreat));
     }
 
     /// R-RETREAT-06

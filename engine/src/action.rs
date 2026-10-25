@@ -313,6 +313,8 @@ pub enum RuleError {
     PowerAlreadyUsed,
     NoSuchChoice,
     AsleepOrParalyzed,
+    /// R-TURN-05: the player who goes first can't attack on turn 0.
+    FirstTurn,
     CantAttack,
     NoAttacks,
     NoSuchAttack,
@@ -322,6 +324,8 @@ pub enum RuleError {
     NoLiveBench,
     TrainerBasicCantRetreat,
     RetreatFailedThisTurn,
+    /// R-RETREAT-05: one retreat a turn (Sixfold).
+    AlreadyRetreated,
     NoSuchEnergy,
     EnergyAlreadyChosen,
     NoSuchPrize,
