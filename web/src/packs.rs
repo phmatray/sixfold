@@ -14,7 +14,7 @@ use sixfold_engine::{card, tr, CardId, Color, Rarity};
 
 use crate::art::{color_key, glyph_svg};
 use crate::binder::{inspect_handlers, PageBar};
-use crate::cards::{CardBack, CardFace};
+use crate::cards::{reduced_motion, CardBack, CardFace};
 use crate::overlays::Inspector;
 use crate::Screen;
 use crate::Ui;
@@ -32,14 +32,6 @@ struct Opened {
     key: u32,
     booster: usize,
     cards: Vec<(CardId, bool)>,
-}
-
-fn reduced_motion() -> bool {
-    window()
-        .match_media("(prefers-reduced-motion: reduce)")
-        .ok()
-        .flatten()
-        .is_some_and(|m| m.matches())
 }
 
 #[component]

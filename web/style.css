@@ -1651,14 +1651,168 @@ select option { background: var(--panel); color: var(--ink); }
 }
 .bind-card:hover { transform: translateY(-4px); }
 /* A card not found yet: a dark silhouette, its name still readable. */
-.bind-slot.missing .card { background: linear-gradient(170deg, #1b2335, #121a29) padding-box, linear-gradient(160deg, #3a4458, #222a3a) border-box; color: #b8c1d1; box-shadow: none; }
-.bind-slot.missing .card::after { display: none; }
-.bind-slot.missing .card-hp { color: #d89a90; }
-.bind-slot.missing .card-art { filter: grayscale(1) brightness(0.3) contrast(1.3); }
+.bind-slot.missing .card, .viewer-card.missing .card { background: linear-gradient(170deg, #1b2335, #121a29) padding-box, linear-gradient(160deg, #3a4458, #222a3a) border-box; color: #b8c1d1; box-shadow: none; }
+:is(.bind-slot, .viewer-card).missing .card::after { display: none; }
+:is(.bind-slot, .viewer-card).missing .card-hp { color: #d89a90; }
+:is(.bind-slot, .viewer-card).missing .card-art { filter: grayscale(1) brightness(0.3) contrast(1.3); }
 .bind-slot.missing .bind-card { outline: 1.5px dashed rgba(255, 255, 255, 0.16); outline-offset: 3px; }
 .bind-slot.missing .bind-card:focus-visible { outline: 3px solid var(--brass-hi); }
 .bind-meta { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .bind-slot:not(.missing) .bind-count { color: var(--ink); font-weight: 700; }
+/* The binder: one sheet of nine clear pockets at a time, ring holes down
+   its spine, turned like a page (a cut under reduced motion). */
+.binder-view { container: binder / inline-size; }
+.shelf-switch { margin-left: auto; display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
+.shelf-switch button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
+.shelf-switch button:hover { color: var(--ink); }
+.shelf-switch button[aria-pressed="true"] { background: var(--panel-2); border-color: var(--brass); color: var(--brass-hi); }
+.shelf-count { min-width: 22px; padding: 1px 6px; border-radius: 999px; background: rgba(214, 172, 74, 0.18); color: var(--brass-hi); font-size: 12px; font-variant-numeric: tabular-nums; }
+.binder-layout { display: grid; grid-template-areas: "filters" "book" "tally"; gap: 18px 28px; align-items: start; }
+.binder-filters { grid-area: filters; min-width: 0; }
+.binder-filters .filters { margin: 0; }
+.binder-filters summary { display: flex; align-items: center; min-height: 44px; font-weight: 700; cursor: pointer; list-style: none; }
+.binder-filters summary::-webkit-details-marker { display: none; }
+.binder-filters summary::before { content: ""; width: 6px; height: 6px; margin: 0 12px 0 2px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; rotate: -45deg; transition: rotate 160ms ease; }
+.binder-filters[open] > summary::before { rotate: 45deg; }
+.binder-filters[open] > summary { margin-bottom: 8px; }
+.binder-book { grid-area: book; }
+.tally { grid-area: tally; }
+.tally .rarity { margin: 0; width: 14px; height: 14px; }
+/* Wide: the filters and the tally beside the page, so a whole sheet fits. */
+@container binder (min-width: 820px) {
+  .binder-layout { grid-template-columns: minmax(0, 1fr) minmax(250px, 300px); grid-template-areas: "book filters" "book tally"; grid-template-rows: auto 1fr; }
+  .binder-filters .filters { gap: 10px; }
+  .binder-filters .chips { display: grid; grid-template-columns: repeat(4, 1fr); width: 100%; }
+  .binder-filters .selects { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .binder-filters .field select { width: 100%; }
+}
+.binder-book { min-width: 0; display: grid; gap: 14px; }
+.sheets { container-type: inline-size; display: grid; justify-items: center; perspective: 2200px; touch-action: pan-y; }
+.binder.sheet {
+  /* A whole sheet in sight: as wide as the column allows, as tall as the screen does. */
+  --w: clamp(92px, min(calc((100cqw - 130px) / 3), calc((100dvh - 345px) / 4.25)), 180px);
+  grid-area: 1 / 1;
+  grid-template-columns: repeat(3, max-content);
+  gap: 12px;
+  justify-content: center;
+  padding: 18px 18px 18px 46px;
+  border-radius: 6px 16px 16px 6px;
+  background:
+    radial-gradient(circle at 20px 18%, #070d18 0 6px, rgba(255, 255, 255, 0.12) 6.5px, transparent 8px),
+    radial-gradient(circle at 20px 50%, #070d18 0 6px, rgba(255, 255, 255, 0.12) 6.5px, transparent 8px),
+    radial-gradient(circle at 20px 82%, #070d18 0 6px, rgba(255, 255, 255, 0.12) 6.5px, transparent 8px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.35), transparent 40px),
+    linear-gradient(160deg, #1d2c47, #15223a 55%, #111c31);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 22px 40px -22px rgba(0, 0, 0, 0.9), 0 2px 0 #0b1426, 0 4px 0 #0e1a2f;
+}
+/* A clear pocket: a sleeve with a lip along its top. */
+@container (max-width: 480px) {
+  .binder.sheet { --w: clamp(80px, calc((100cqw - 86px) / 3), 160px); gap: 8px; padding: 10px 8px 10px 30px; background-position: -6px 0, -6px 0, -6px 0, 0 0, 0 0; }
+  .sheet .bind-slot { padding: 5px 5px 3px; }
+}
+.sheet .bind-slot { padding: 7px 7px 5px; border-radius: 8px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03) 18%, rgba(255, 255, 255, 0.045)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.35); }
+.sheet .pocket-empty::before { content: ""; display: block; width: var(--w); aspect-ratio: 5 / 7; border-radius: calc(var(--w) * 0.075); }
+.sheet .pocket-empty::after { content: ""; display: block; height: 19px; }
+.sheet .bind-card:hover { transform: translateY(-3px); }
+.leaf { grid-area: 1 / 1; transform-origin: 0 50%; backface-visibility: hidden; pointer-events: none; }
+.leaf::after { content: ""; position: absolute; inset: 0; border-radius: 6px 16px 16px 6px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.06) 60%, rgba(0, 0, 0, 0.25)); opacity: 0; }
+.leaf { position: relative; }
+.leaf.fwd { animation: leaf-fwd 560ms cubic-bezier(0.45, 0.05, 0.3, 1) forwards; }
+.leaf.back { animation: leaf-back 560ms cubic-bezier(0.45, 0.05, 0.3, 1) forwards; }
+.leaf.fwd::after { animation: leaf-shade 560ms ease-in forwards; }
+.leaf.back::after { animation: leaf-shade 560ms ease-out reverse forwards; }
+@keyframes leaf-fwd { from { transform: rotateY(0); } to { transform: rotateY(-115deg); } }
+@keyframes leaf-back { from { transform: rotateY(-115deg); } to { transform: rotateY(0); } }
+@keyframes leaf-shade { to { opacity: 1; } }
+.pager { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.pager .btn.icon { width: 44px; min-height: 44px; padding: 0; display: grid; place-items: center; }
+.pager .btn.icon svg, .viewer-nav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.page-range { flex: 0 1 240px; min-width: 80px; accent-color: var(--brass); }
+.page-of { min-width: 9ch; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; }
+
+/* The tally: owned of total, by kind, rarity and type; a row filters the binder. */
+.tally { padding: 6px 14px 14px; border-radius: 14px; background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
+.tally summary { display: flex; align-items: center; min-height: 44px; font-weight: 700; cursor: pointer; list-style: none; }
+.tally summary::-webkit-details-marker { display: none; }
+.tally summary::before { content: ""; width: 6px; height: 6px; margin: 0 12px 0 2px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; rotate: -45deg; transition: rotate 160ms ease; }
+.tally[open] > summary::before { rotate: 45deg; }
+.tally h3 { margin: 12px 0 4px; font: 700 12px/1.3 var(--body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.tally ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.tally-row { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 10px; min-height: 44px; padding: 6px 8px; border: 1px solid transparent; border-radius: 9px; background: none; text-align: left; font-size: 14px; }
+button.tally-row { cursor: pointer; }
+button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
+.tally-row[aria-pressed="true"] { border-color: var(--brass); background: rgba(214, 172, 74, 0.1); }
+.tally-label { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.tally-label .pip { font-size: 15px; }
+.tally-n { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tally-n b { color: var(--ink); font-size: 14px; }
+.tally-bar { grid-column: 1 / -1; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
+.tally-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--brass), var(--brass-hi)); }
+.tally-row.done .tally-bar span { background: var(--heal); }
+.tally-row.done .tally-n b { color: var(--heal); }
+
+/* The showcase: owned Rares and promos on a dark velvet wall, each under its
+   own light with a brass plaque. Tilts with the pointer (tilt.js). */
+.showcase {
+  --w: clamp(132px, 22cqw, 200px);
+  list-style: none;
+  margin: 0;
+  padding: clamp(20px, 4cqw, 40px) clamp(14px, 3cqw, 36px);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--w) + 16px), 1fr));
+  gap: 34px 18px;
+  justify-items: center;
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0, rgba(243, 213, 137, 0.08), transparent 70%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 5px),
+    linear-gradient(180deg, #161028, #0e0b1b 70%, #0a0814);
+  box-shadow: inset 0 0 0 1px rgba(214, 172, 74, 0.22), inset 0 30px 60px -30px rgba(0, 0, 0, 0.8);
+}
+.showcase-lead { margin-bottom: 14px; }
+.showpiece { position: relative; display: grid; justify-items: center; gap: 12px; }
+.showpiece::before { content: ""; position: absolute; left: 50%; top: -28px; width: calc(var(--w) * 1.5); height: calc(var(--w) * 1.7); translate: -50% 0; background: radial-gradient(ellipse 50% 55% at 50% 30%, rgba(255, 236, 190, 0.16), transparent 70%); pointer-events: none; }
+.showpiece.holo::before { background: radial-gradient(ellipse 50% 55% at 50% 30%, rgba(190, 220, 255, 0.16), rgba(255, 190, 220, 0.06) 45%, transparent 70%); }
+.show-frame { position: relative; padding: 0; border: 0; background: none; border-radius: calc(var(--w) * 0.075); cursor: zoom-in; box-shadow: 0 26px 30px -18px rgba(0, 0, 0, 0.95); }
+.plaque { display: grid; justify-items: center; gap: 1px; min-width: 70%; padding: 5px 14px 6px; border-radius: 4px; background: linear-gradient(180deg, #ecca72, #c39a3d 60%, #a47e2c); color: #2a1e06; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 4px 8px -2px rgba(0, 0, 0, 0.6); text-align: center; }
+.plaque b { font: 800 14px/1.2 var(--display); }
+.plaque span { font-size: 12px; font-weight: 700; color: #4a3810; }
+
+/* The card viewer: one card up close, its full text beside it. */
+.viewer-scrim { position: fixed; inset: 0; z-index: 85; display: grid; place-items: center; padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); background: rgba(4, 8, 16, 0.84); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade-in 180ms ease-out; }
+@keyframes fade-in { from { opacity: 0; } }
+.viewer { width: min(1040px, 100%); max-height: 100%; overflow: auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); grid-template-rows: auto 1fr; gap: 8px 24px; padding: 12px 18px 20px; border-radius: 18px; background: linear-gradient(170deg, #17253f, #0f192c); border: 1px solid var(--line); box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.9); }
+.viewer-bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
+.viewer-bar .btn { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; }
+.viewer-bar svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.viewer-pos { margin-right: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+.viewer-stage { display: flex; align-items: center; justify-content: center; gap: 12px; min-width: 0; touch-action: pan-y; }
+.viewer-card { --w: min(340px, calc(100vw - 150px), calc((100dvh - 150px) * 5 / 7)); flex: none; border-radius: calc(var(--w) * 0.075); }
+.viewer-card .card { cursor: zoom-in; }
+.viewer-stage.zoomed .viewer-card { --w: min(calc(100vw - 150px), calc((100dvh - 110px) * 5 / 7), 720px); }
+.viewer-stage.zoomed .viewer-card .card { cursor: zoom-out; }
+.viewer:has(.viewer-stage.zoomed) { grid-template-columns: minmax(0, 1fr); width: auto; }
+.viewer:has(.viewer-stage.zoomed) .viewer-info { display: none; }
+.viewer-nav { flex: none; width: 48px; min-height: 48px; padding: 0; display: grid; place-items: center; border-radius: 50%; }
+.viewer-card.from-right { animation: card-in-r 280ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.viewer-card.from-left { animation: card-in-l 280ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes card-in-r { from { transform: translateX(44px); opacity: 0.2; } }
+@keyframes card-in-l { from { transform: translateX(-44px); opacity: 0.2; } }
+.viewer-info { min-width: 0; align-self: start; padding-top: 4px; }
+.viewer-own { margin: 0 0 10px; color: var(--brass-hi); font-weight: 700; font-size: 14px; }
+.viewer-own.missing { color: var(--muted); }
+@media (max-width: 760px) {
+  .viewer-scrim { padding: 0; }
+  .viewer { grid-template-columns: minmax(0, 1fr); border-radius: 0; height: 100%; align-content: start; padding: max(8px, env(safe-area-inset-top)) 14px 24px; }
+  .viewer-card { --w: min(calc(100vw - 132px), 320px); }
+  .viewer-stage.zoomed .viewer-card { --w: calc(100vw - 132px); }
+  .viewer-stage { gap: 8px; }
+  .viewer-nav { width: 44px; min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .leaf { display: none; }
+  .viewer-scrim, .viewer-card.from-right, .viewer-card.from-left { animation: none; }
+}
 .rarity { width: 14px; height: 14px; fill: #c9cfda; stroke: rgba(0, 0, 0, 0.4); stroke-width: 1; flex: none; }
 .rarity.r-uncommon { fill: #9fc4e8; }
 .rarity.r-rare { fill: var(--brass-hi); }
@@ -2065,8 +2219,6 @@ select option { background: var(--panel); color: var(--ink); }
   .menu-item.primary .menu-label { font-size: 23px; }
   .page-title { font-size: 19px; }
   .pick-grid { --w: calc((100vw - 32px - 24px) / 3); gap: 14px 12px; }
-  /* Two across, so the cards are full ones (attacks and all). */
-  .binder { --w: calc((100vw - 32px - 12px) / 2); gap: 14px 12px; }
   .shelf-item { grid-template-columns: auto minmax(0, 1fr); padding: 12px; gap: 14px; }
   .shelf .pack { --pack-w: 84px; }
   .deck-row { grid-template-columns: auto minmax(0, 1fr); }
