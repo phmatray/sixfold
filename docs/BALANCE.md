@@ -210,24 +210,28 @@ their style. Duel wins pay Facets, not packs, so after every duel it spends its 
 pack on sale it has bought fewest of, and opens every pack. It must take all six seals and the Warden
 within one duel per route duelist plus 45 rival duels and buy at least 10 packs, in at least two of
 three playthroughs (pack seeds 1, 2 and 3). The rival budget was 40 from 1.2 (risk E1: 54 duels with
-14 route duelists, 66 with the 26 of the Ember and Storm regions); 1.3 raises it to 45 (71 duels),
-because pack seed 2 now takes exactly 66.
+14 route duelists); 1.3 raises it to 45, because pack seed 1 now needs 42 rival duels and seed 2
+(before Tide and Dream) took exactly the old limit. With the 39 route duelists of Tide and Dream that
+is 84 duels.
 
 One seeded run swings widely on the packs alone. `campaign_length` (ignored) plays 16 pack seeds with
 no budget:
 
-| Build | Duels (16 seeds) | Median | Mean |
-|---|---|---|---|
-| 1.x packs | 44–100 | 65 | |
-| Boosters (#39) | 40–105 | 52 | 59 |
-| 1.3 | 38–83 | 62 | 62 |
+| Build | Route duelists | Duels (16 seeds) | Median | Mean |
+|---|---|---|---|---|
+| 1.x packs | 26 | 44–100 | 65 | |
+| Boosters (#39) | 26 | 40–105 | 52 | 59 |
+| Boosters + 1.3 rules | 26 | 38–83 | 62 | 62 |
+| Tide and Dream (#40) | 39 | 50–78 | 55 | 61 |
+| Tide and Dream + 1.3 | 39 | 55–83 | 66 | 67 |
 
-The boosters release made the campaign easier; 1.3 gives most of that back, so no reward needs to
-move. The rules, not the packs, do it: with 1.3's rules and cards but the old holo rate (1 pack in 3)
-the median is 66, and the weaker Easy AI with Bramble on Normal accounts for about 4 duels. Orla
-(Bedrock, 5 prizes) is where the extra duels go: 7 to 18 of them in the seeds that finish late. In
-the always-on test, seeds 2 and 3 finish in 66 and 59 duels (22 and 23 packs bought); seed 1 takes 83.
-Before 1.2 (packs for wins, no route duelists) the campaign took 31 rival duels.
+The boosters release made the campaign easier, and 1.3 gives that back, so no reward moves. Take away
+the 39 route duels and the rivals take a median of 27 duels instead of 16. The 1.3 rules cause it, not
+the packs: with the 26 duelists, 1.3's rules and cards with the old holo rate (1 pack in 3) give a
+median of 66, and the new rate brings it to 62. The weaker Easy AI with Bramble on Normal accounts for
+about 4 duels. The extra losses are spread over Cinza, Orla and the Warden. In the always-on test,
+seeds 1, 2 and 3 finish in 81, 66 and 59 duels (22, 24 and 25 packs bought). Before 1.2 (packs for
+wins, no route duelists) the campaign took 31 rival duels.
 
 ## Curves and the value budget
 
@@ -421,7 +425,8 @@ One kit list changed: Landslide carries one Spike Charm, not two (60.4% → 59%,
 - Storm Front 44 → 48%, Low Tide 43 → 48%, Grove Bloom 59 → 55%, Deep Thicket 66 → 62%, Bedrock Deep
   60 → 54%. Thicket 48 → 43%: the Grass lines lost their Water resistance.
 - The first player's edge in the post-game: 57.1% → 50.5%.
-- The campaign: a median of 62 duels over 16 pack seeds (52 after the boosters release).
+- The campaign: a median of 66 duels over 16 pack seeds with 39 route duelists (55 before 1.3), or
+  27 rival duels instead of 16.
 
 ### The Easy AI and the difficulty slope
 

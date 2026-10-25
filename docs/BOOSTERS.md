@@ -118,8 +118,10 @@ too. That is the "play, packs and crafting together" of `docs/WORLD_DESIGN.md` �
 The boosters made the campaign easier. Over 16 pack seeds with no duel budget, the automatic
 playthrough of `engine/src/playtest.rs` (`campaign_length`) took a median of 52 duels (40–105) with
 these packs, against 65 (44–100) with the 1.x packs: its greedy deck builder gets more cards of the
-types it buys. The 1.3 rules (`docs/BALANCE.md`) lengthen duels and bring the median back to 62
-(38–83). The 1.3 holo rate helps: with the old one pack in three, the same rules take a median of 66.
+types it buys. The 1.3 rules (`docs/BALANCE.md`) make rivals harder to beat and bring the median back
+to 62 (38–83). The 1.3 holo rate helps: with the old one pack in three, the same rules take a median of
+66. With Tide and Dream's 39 route duelists the campaign takes a median of 66 duels (55–83), against
+55 without the 1.3 rules.
 Because one seeded run swings this much, the test plays three seeds and requires two to finish within
 budget. `economy_sim` doesn't change, since prices and income are untouched.
 
@@ -241,8 +243,10 @@ Les boosters ont rendu la campagne plus facile. Sur 16 graines de boosters et sa
 la partie automatique de `engine/src/playtest.rs` (`campaign_length`) demandait une médiane de 52
 duels (40–105) avec ces boosters, contre 65 (44–100) avec ceux de la 1.x : son constructeur de deck
 glouton reçoit plus de cartes des types qu'il achète. Les règles de la 1.3 (`docs/BALANCE.md`)
-allongent les duels et ramènent la médiane à 62 (38–83). Le taux de Holo de la 1.3 aide : avec
-l'ancien, un booster sur trois, les mêmes règles demandent une médiane de 66. Comme une seule partie
+rendent les rivaux plus durs à battre et ramènent la médiane à 62 (38–83). Le taux de Holo de la 1.3
+aide : avec l'ancien, un booster sur trois, les mêmes règles demandent une médiane de 66. Avec les 39
+duellistes de route de Marée et Songe, la campagne demande une médiane de 66 duels (55–83), contre 55
+sans les règles de la 1.3. Comme une seule partie
 tirée au sort varie autant, le test joue trois graines et exige que deux finissent dans le budget.
 `economy_sim` ne change pas, car prix et revenus sont intacts.
 
