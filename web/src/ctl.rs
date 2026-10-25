@@ -87,10 +87,21 @@ pub struct Setup {
     pub style: Style,
     /// The rival's or route duelist's id, for a duel started from the world.
     pub opponent: Option<&'static str>,
+    /// A post-game duel's rival (Gauntlet, daily duel): their face and lines,
+    /// with none of a world duel's rewards.
+    pub rival: Option<&'static str>,
     /// A post-game duel: what its result counts for.
     pub post: Option<Post>,
     /// Where Quit and the result's way out lead.
     pub back: crate::Screen,
+}
+
+impl Setup {
+    /// Whose face and lines the duel shows: the world opponent, else the
+    /// post-game rival.
+    pub fn face(&self) -> Option<&'static str> {
+        self.opponent.or(self.rival)
+    }
 }
 
 /// A duel of the post-game ladder.
@@ -241,11 +252,11 @@ impl Ctl {
         self.real.set_value(None);
     }
 
-    /// The rival's duel lines, in a duel started from the world against a
-    /// rival (route duelists, quick duels and the tutorial have none).
+    /// The rival's duel lines, in a world or post-game duel against a rival
+    /// (route duelists, quick duels and the tutorial have none).
     pub fn lines(&self) -> Option<&'static RivalLines> {
         self.setup
-            .with_value(|s| s.as_ref()?.opponent)
+            .with_value(|s| s.as_ref()?.face())
             .and_then(rival)
             .map(|r| &r.lines)
     }

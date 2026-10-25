@@ -232,7 +232,7 @@
           ],
           "lines_fr": [
             "Et ces chaussures ? Maintiens Maj, ou touche COURIR, et c'est parti.",
-            "Les boosters sont sur le comptoir, au prix en facettes. La table près de la fenêtre est libre, si un duel te tente."
+            "Les boosters sont sur le comptoir, avec leur prix en Facettes. La table près de la fenêtre est libre, si un duel te tente."
           ],
           "do": [
             "show:shop_hall"
@@ -245,7 +245,7 @@
     "fov": 40,
     "fovPortrait": 50,
     "pitch": 50,
-    "distance": 8,
+    "distance": 10,
     "distancePortrait": 10,
     "lookAtOffset": [
       0,

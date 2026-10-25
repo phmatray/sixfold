@@ -132,7 +132,7 @@
       "facing": "s",
       "dialogue": [
         {
-          "if": "flag:consult_applied & !flag:consult_paid",
+          "if": "flag:consult_swapped & !flag:consult_paid",
           "do": [
             "coins:100",
             "flag:consult_paid",
@@ -145,6 +145,22 @@
           "lines_fr": [
             "Déjà de retour ? Écoutons… Mieux. Bien mieux. On l'entend respirer.",
             "Tiens, pour en avoir pris si bien soin. Amène-moi n'importe quel deck, quand tu veux."
+          ]
+        },
+        {
+          "if": "flag:consult_applied & !flag:consult_paid",
+          "do": [
+            "coins:100",
+            "flag:consult_paid",
+            "emote:mags:note"
+          ],
+          "lines": [
+            "Back already? That deck of yours was in fine health. Nothing for me to fix, and I don't operate for fun.",
+            "Here, for your trouble all the same. Bring any deck by, any time."
+          ],
+          "lines_fr": [
+            "Déjà de retour ? Ton deck se portait très bien. Rien à soigner, et je n'opère pas pour le plaisir.",
+            "Tiens, pour ta peine quand même. Amène-moi n'importe quel deck, quand tu veux."
           ]
         },
         {
@@ -187,7 +203,7 @@
     "fov": 40,
     "fovPortrait": 50,
     "pitch": 50,
-    "distance": 8,
+    "distance": 10,
     "distancePortrait": 10,
     "lookAtOffset": [
       0,

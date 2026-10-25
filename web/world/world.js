@@ -67,9 +67,12 @@ export function mount(el, controls, cb, start, edit = false) {
   let canRun = false, runToggle = false, shift = false, lastHero = "";
   const clock = new THREE.Clock();
   const look = new THREE.Vector3(), lookVel = new THREE.Vector3(), aim = new THREE.Vector3();
-  let first = true, zoom = 1, readySent = false, drawnPaused = false;
+  let first = true, zoom = 1, readySent = false, drawnPaused = false, cover = 0;
   const resize = () => {
     const w = el.clientWidth || 1, h = el.clientHeight || 1;
+    // The share of the view under the top bar: a room's back row must clear it.
+    const bar = document.querySelector(".world-top");
+    cover = bar ? THREE.MathUtils.clamp((bar.getBoundingClientRect().bottom - el.getBoundingClientRect().top) / h, 0, 0.4) : 0;
     renderer.setSize(w, h);
     camera.aspect = w / h;
     camera.fov = w < h ? cam.fovPortrait : cam.fov; // portrait phones: pull back and widen
@@ -507,15 +510,22 @@ export function mount(el, controls, cb, start, edit = false) {
     if (cam.clamp) {
       // Keep the view inside the room: the ground it shows spans [aim + top, aim + bottom]
       // along z (perspective makes the far side longer) and ±halfW along x.
+      // The top edge is the top bar's lower edge, not the canvas's.
       const half = THREE.MathUtils.degToRad(camera.fov / 2), hc = dist * Math.sin(pitch) + off[1], d0 = dist * Math.cos(pitch);
-      const top = pitch > half ? d0 - hc / Math.tan(pitch - half) : -Infinity, bottom = d0 - hc / Math.tan(pitch + half);
+      const halfTop = Math.atan((1 - 2 * cover) * Math.tan(half));
+      const top = pitch > halfTop ? d0 - hc / Math.tan(pitch - halfTop) : -Infinity, bottom = d0 - hc / Math.tan(pitch + half);
       const halfW = dist * Math.tan(half) * camera.aspect;
       // A room bigger than the view: the view stays inside it. Smaller: the
       // camera still follows the hero, but only as far as keeps the whole room
       // (and its back wall, about 1 m) in view.
       const fit = (v, lo, hi) => THREE.MathUtils.clamp(v, Math.min(lo, hi), Math.max(lo, hi));
       aim.x = fit(aim.x, halfW, w.map.width - halfW);
-      if (Number.isFinite(top)) aim.z = fit(aim.z, -top - 1, w.map.height - bottom);
+      if (Number.isFinite(top)) {
+        // A room deeper than the view leans to its back row (counters, shelves) as
+        // long as the hero stays a little over the bottom edge.
+        const lo = -top - 1, hi = w.map.height - bottom;
+        aim.z = fit(aim.z, lo, lo < hi ? Math.max(lo, Math.min(hi, pz + 1.2 - bottom)) : hi);
+      }
     }
     if (first || reduced) look.copy(aim), lookVel.set(0, 0, 0);
     else {

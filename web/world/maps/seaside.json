@@ -301,7 +301,7 @@
       "hidden": true,
       "give": "coins:60",
       "text": "Under the boardwalk's first plank, out of the spray: a tin of Facets somebody never came back for.",
-      "text_fr": "Sous la première planche de la promenade, à l'abri des embruns : une boîte de facettes que quelqu'un n'est jamais revenu chercher."
+      "text_fr": "Sous la première planche de la promenade, à l'abri des embruns : une boîte de Facettes que quelqu'un n'est jamais revenu chercher."
     },
     {
       "kind": "find",
@@ -319,7 +319,7 @@
       "z": 4,
       "give": "coins:40",
       "text": "On the lighthouse step, under a loose stone worn smooth by boots: a few Facets.",
-      "text_fr": "Sur la marche du phare, sous une pierre branlante polie par les bottes : quelques facettes."
+      "text_fr": "Sur la marche du phare, sous une pierre branlante polie par les bottes : quelques Facettes."
     },
     {
       "kind": "find",
@@ -348,7 +348,7 @@
       "hidden": true,
       "give": "coins:25",
       "text": "In the hollow of the driftwood, where the sea wore it out: a few Facets and a great deal of sand.",
-      "text_fr": "Dans le creux du bois flotté, là où la mer l'a usé : quelques facettes et beaucoup de sable."
+      "text_fr": "Dans le creux du bois flotté, là où la mer l'a usé : quelques Facettes et beaucoup de sable."
     }
   ],
   "warps": [
@@ -891,7 +891,7 @@
           "Marlo's at the end, and my Kelpwardens are in the way. Rules are rules."
         ],
         "challenge_fr": [
-          "*Tuuut !* On ne court pas sur la jetée !",
+          "*Tuiiit !* On ne court pas sur la jetée !",
           "Marlo est au bout, et mes Gardevarech sont sur le chemin. Le règlement, c'est le règlement."
         ],
         "win": [
@@ -899,7 +899,7 @@
           "Here's your purse. Walk, don't run."
         ],
         "win_fr": [
-          "*Tuuut.* Victoire propre. J'aurais sifflé pour moins que ça.",
+          "*Tuiiit.* Victoire propre. J'aurais sifflé pour moins que ça.",
           "Voilà ta bourse. On marche, on ne court pas."
         ],
         "lose": [
@@ -907,7 +907,7 @@
           "Back to the beach, and warm up properly this time."
         ],
         "lose_fr": [
-          "*Tuuut ! Tuuut !* Faute ! Tu as laissé ta créature Active sécher au soleil.",
+          "*Tuiiit ! Tuiiit !* Faute ! Tu as laissé ta créature Active sécher au soleil.",
           "Retour à la plage, et échauffe-toi correctement cette fois."
         ],
         "after": [

@@ -160,7 +160,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "curio",
             tr(
                 "A pouch of fine grey ash from Cole's kiln, still faintly warm. Hob wants it for an ash-crust loaf.",
-                "Une bourse de cendre grise et fine, tirée du four de Cole, encore tiède. Hob la veut pour un pain en croûte de cendre.",
+                "Un sachet de cendre grise et fine, tiré du four de Cole, encore tiède. Hob la veut pour un pain en croûte de cendre.",
             ),
         ),
         "press_voucher" => (
@@ -484,7 +484,7 @@ pub fn WorldScreen() -> impl IntoView {
                             },
                             Applied::Short(_) => {
                                 next = Some(Sheet::Note(
-                                    tr("Not enough Facets", "Pas assez de facettes"),
+                                    tr("Not enough Facets", "Pas assez de Facettes"),
                                     tr(
                                         format!("You have ⬡ {}.", p.coins()),
                                         format!("Vous avez ⬡ {}.", p.coins()),
@@ -506,7 +506,7 @@ pub fn WorldScreen() -> impl IntoView {
             let have = progress.with_untracked(Progress::coins);
             announce.set(tr(
                 format!("+{gained} Facets. You have {have}."),
-                format!("+{gained} facettes. Vous en avez {have}."),
+                format!("+{gained} Facettes. Vous en avez {have}."),
             ));
         }
         if !cards.is_empty() {
@@ -800,7 +800,7 @@ fn Facets() -> impl IntoView {
         last.set_value(now);
     });
     view! {
-        <span class="facets" aria-label=move || tr(format!("{} Facets", coins.get()), format!("{} facettes", coins.get()))>
+        <span class="facets" aria-label=move || tr(format!("{} Facets", coins.get()), format!("{} Facettes", coins.get()))>
             // Keyed on `pop`, so the animation restarts on every gain.
             {move || {
                 let gains = pop.get();

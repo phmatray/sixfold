@@ -259,6 +259,11 @@ pub fn GameOver() -> impl IntoView {
         .setup
         .with_value(|s| s.as_ref().and_then(|s| s.opponent));
     let rival = opponent.and_then(campaign::rival);
+    // Whose last word the result shows: a world rival or a post-game one.
+    let quoted = ctl
+        .setup
+        .with_value(|s| s.as_ref().and_then(|s| s.face()))
+        .and_then(campaign::rival);
     let duelist = opponent.and_then(sixfold_engine::trainers::trainer);
     let post = ctl.setup.with_value(|s| s.as_ref().and_then(|s| s.post));
     let back = ctl
@@ -374,7 +379,7 @@ pub fn GameOver() -> impl IntoView {
                         )}
                         {sudden.then_some(tr(" Decided in sudden death.", " Décidé en mort subite."))}
                     </p>
-                    {rival.filter(|_| won).map(|r| view! {
+                    {quoted.filter(|_| won).map(|r| view! {
                         <figure class="rival-quote">
                             <crate::campaign::Portrait id=r.id name=r.name />
                             <blockquote>
@@ -391,7 +396,7 @@ pub fn GameOver() -> impl IntoView {
                             <p><b>{format!("+⬡ {n}")}</b>
                                 <span>{tr(
                                     format!("You have ⬡ {coins}. Spend Facets on packs at the duel hall."),
-                                    format!("Vous avez ⬡ {coins}. Dépensez vos facettes en boosters à la salle des duels."),
+                                    format!("Vous avez ⬡ {coins}. Dépensez vos Facettes en boosters à la salle des duels."),
                                 )}</span></p>
                         </div>
                     }})}
@@ -553,14 +558,12 @@ pub fn GameOver() -> impl IntoView {
 
 /// The rival's face in the duel header, and the speech bubble their lines
 /// come in (see `Ctl::say`): it goes after a few seconds or on a tap, and a
-/// polite live region reads it out. Only for rivals and route duelists.
+/// polite live region reads it out. For rivals (world and post-game) and
+/// route duelists.
 #[component]
 pub fn RivalFace() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let Some(id) = ctl
-        .setup
-        .with_value(|s| s.as_ref().and_then(|s| s.opponent))
-    else {
+    let Some(id) = ctl.setup.with_value(|s| s.as_ref().and_then(|s| s.face())) else {
         return ().into_any();
     };
     let name = campaign::opponent(id).map_or(id, |o| o.name);

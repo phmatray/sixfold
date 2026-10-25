@@ -166,7 +166,7 @@ AI) against the starter a new player holds, 60 games:
 | Skye | Spark | 2, Normal | 40% |
 | Morrow | Current | 3, Normal | 80% |
 | Nell | Puddle | 2, Normal | 38% |
-| Tamsin | Pebble | 2, Easy | 60% |
+| Tamsin | Rubble + Scrap | 2, Easy | 47% (60% on Pebble before the 1.2 audit) |
 | Cole | Kindling | 2, Normal | 22% |
 | Rusk | Pebble + Scrap | 1, Easy | 30% |
 | Marigold | Bellows | 3, Normal | 47% |
