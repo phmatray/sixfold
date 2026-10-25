@@ -494,6 +494,30 @@
       }
     },
     {
+      "asset": "willow",
+      "x": 31,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 31,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 30,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "paper_lanterns",
+      "x": 30,
+      "z": 19,
+      "rot": 0
+    },
+    {
       "asset": "paper_lanterns",
       "x": 12,
       "z": 3,
@@ -601,7 +625,7 @@
             "You ring the jetty bell. A deckhand checks your pass, twice, as Ines taught her, and the launch slips down the river to the sea and north to Gullhaven."
           ],
           "lines_fr": [
-            "Tu sonnes la cloche de l'embarcadère. Une matelote vérifie ton laissez-passer, deux fois, comme Ines le lui a appris, et la vedette descend la rivière jusqu'à la mer puis remonte vers Havre-aux-Mouettes."
+            "Vous sonnez la cloche de l'embarcadère. Une matelote vérifie votre laissez-passer, deux fois, comme Ines le lui a appris, et la vedette descend la rivière jusqu'à la mer puis remonte vers Havre-aux-Mouettes."
           ],
           "do": [
             "warp:gullhaven:27:20:n"
@@ -931,7 +955,7 @@
             "The Moonwell Garden is over there: Lumen's garden. Nim keeps it while Lumen's away. The lanterns like them both."
           ],
           "lines_fr": [
-            "Les voilà partis. Regarde : elles dérivent, elles tournent, elles s'alignent. Chaque nuit, la même ligne, jusqu'au Puits-de-Lune.",
+            "Les voilà parties. Regarde : elles dérivent, elles tournent, elles s'alignent. Chaque nuit, la même ligne, jusqu'au Puits-de-Lune.",
             "Le Jardin du Puits-de-Lune est là-bas : le jardin de Lumen. Nim s'en occupe pendant que Lumen est partie. Les lanternes les aiment bien toutes les deux."
           ]
         }
@@ -1138,7 +1162,7 @@
     "bush_dark",
     "bush_dark"
   ],
-  "ringSides": "nws",
+  "ringSides": "ws",
   "camera": {
     "fov": 40,
     "fovPortrait": 50,

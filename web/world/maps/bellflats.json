@@ -704,7 +704,7 @@
       "z": 14,
       "give": "card:frosteel",
       "text": "You wade into the pool to the knee. On the bottom, among the anemones, a card in a glass jar, sealed with wax.",
-      "text_fr": "Tu entres dans la flaque jusqu'au genou. Au fond, parmi les anémones, une carte dans un bocal scellé à la cire.",
+      "text_fr": "Vous entrez dans la flaque jusqu'au genou. Au fond, parmi les anémones, une carte dans un bocal scellé à la cire.",
       "if": "item:wading_boots"
     },
     {
@@ -714,7 +714,7 @@
       "z": 11,
       "give": "coins:80",
       "text": "Boots on, you wade out to the far side of the pool. Wedged under a ledge of weed: a pouch of Facets, crusted with tiny shells.",
-      "text_fr": "Bottes aux pieds, tu traverses la flaque jusqu'au bord opposé. Coincée sous un rebord d'algues : une bourse de Facettes, couverte de minuscules coquillages.",
+      "text_fr": "Bottes aux pieds, vous traversez la flaque jusqu'au bord opposé. Coincée sous un rebord d'algues : une bourse de Facettes, couverte de minuscules coquillages.",
       "if": "item:wading_boots"
     },
     {
@@ -732,7 +732,7 @@
             "The pool is deeper than it looks, and the bottom glints. Your arm doesn't reach. In wading boots you could walk right in."
           ],
           "lines_fr": [
-            "La flaque est plus profonde qu'elle n'en a l'air, et quelque chose brille au fond. Ton bras n'y arrive pas. Avec des bottes de gué, tu pourrais y entrer."
+            "La flaque est plus profonde qu'elle n'en a l'air, et quelque chose brille au fond. Votre bras n'y arrive pas. Avec des bottes de gué, vous pourriez y entrer."
           ]
         },
         {
@@ -740,7 +740,7 @@
             "Anemones, a crab with opinions, and your reflection."
           ],
           "lines_fr": [
-            "Des anémones, un crabe qui a des opinions, et ton reflet."
+            "Des anémones, un crabe qui a des opinions, et votre reflet."
           ]
         }
       ]
@@ -760,7 +760,7 @@
             "The pool is deeper than it looks, and the bottom glints. Your arm doesn't reach. In wading boots you could walk right in."
           ],
           "lines_fr": [
-            "La flaque est plus profonde qu'elle n'en a l'air, et quelque chose brille au fond. Ton bras n'y arrive pas. Avec des bottes de gué, tu pourrais y entrer."
+            "La flaque est plus profonde qu'elle n'en a l'air, et quelque chose brille au fond. Votre bras n'y arrive pas. Avec des bottes de gué, vous pourriez y entrer."
           ]
         },
         {
@@ -768,7 +768,7 @@
             "Anemones, a crab with opinions, and your reflection."
           ],
           "lines_fr": [
-            "Des anémones, un crabe qui a des opinions, et ton reflet."
+            "Des anémones, un crabe qui a des opinions, et votre reflet."
           ]
         }
       ]
@@ -808,7 +808,7 @@
       },
       "if": "item:kiln_lantern",
       "locked": "A low cave in the cliff, black as ink. The air coming out smells of tar and old rope. Without a light you'd crack your head.",
-      "locked_fr": "Une grotte basse dans la falaise, noire comme l'encre. L'air qui en sort sent le goudron et la vieille corde. Sans lumière, tu te fendrais le crâne."
+      "locked_fr": "Une grotte basse dans la falaise, noire comme l'encre. L'air qui en sort sent le goudron et la vieille corde. Sans lumière, vous vous fendriez le crâne."
     }
   ],
   "exits": [

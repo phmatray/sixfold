@@ -363,7 +363,7 @@
       "z": 9,
       "give": "card:hexmage",
       "text": "The moonflowers are open, and in the brightest bed, laid among the petals like a pressed leaf: a card. By day you'd never have seen it under the buds.",
-      "text_fr": "Les belles-de-lune sont ouvertes, et dans le massif le plus lumineux, posée parmi les pétales comme une feuille séchée : une carte. Le jour, sous les boutons, tu ne l'aurais jamais vue.",
+      "text_fr": "Les belles-de-lune sont ouvertes, et dans le massif le plus lumineux, posée parmi les pétales comme une feuille séchée : une carte. Le jour, sous les boutons, vous ne l'auriez jamais vue.",
       "if": "time:night"
     }
   ],
@@ -381,7 +381,7 @@
       },
       "if": "item:kiln_lantern",
       "locked": "Steps spiral down inside the well, into a dark so thick the moonlight gives up at the third step. You'd want a light.",
-      "locked_fr": "Des marches descendent en spirale dans le puits, dans un noir si épais que la lune renonce dès la troisième marche. Il te faudrait une lumière."
+      "locked_fr": "Des marches descendent en spirale dans le puits, dans un noir si épais que la lune renonce dès la troisième marche. Il vous faudrait une lumière."
     }
   ],
   "exits": [

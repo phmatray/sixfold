@@ -116,14 +116,18 @@ export function daylight(w, reduced) {
 
   // Glimmers (build.js): a smaller tinted halo and a soft pool each, shown while their `on` holds, after dusk.
   const glim = w.glimmers ?? [];
-  const glimHalos = glim.map((g) => {
-    // Low on the water or the ground, a depth-tested halo would be cut flat by the floor: these draw over it.
-    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: g.color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false }));
-    s.position.copy(g.at);
-    s.scale.setScalar(g.size);
-    s.visible = false;
-    root.add(s);
-    return s;
+  // One point cloud per halo size (a few draws, not one sprite each); a glimmer that is off is black (additive: unseen).
+  // Points scale without the field of view, so a halo of `size` metres is about size / tan(fov / 2) points.
+  const glimClouds = [...new Set(glim.map((g) => g.size))].map((size) => {
+    const mine = glim.filter((g) => g.size === size), geo = new THREE.BufferGeometry();
+    // Lifted a little, so the floor doesn't cut a low halo (on the water) flat.
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(mine.flatMap((g) => [g.at.x, g.at.y + size * 0.35, g.at.z]), 3));
+    geo.setAttribute("color", new THREE.Float32BufferAttribute(new Float32Array(mine.length * 3), 3));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: glowTex, size: size * 2.5, vertexColors: true, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false }));
+    pts.frustumCulled = false;
+    root.add(pts);
+    return { pts, mine, cols: mine.map((g) => new THREE.Color(g.color)), shown: mine.map(() => null) };
   });
   let glimPools = null;
   if (glim.length && !indoor) {
@@ -203,10 +207,19 @@ export function daylight(w, reduced) {
       const on = cur.lamps > 0.01;
       for (const h of halos) (h.visible = on), (h.material.opacity = 0.85 * cur.glow);
       if (pools) (pools.visible = on), (pools.material.opacity = 0.42 * cur.lamps);
+      for (const c of glimClouds) {
+        c.pts.material.opacity = on ? 0.9 * cur.glow : 0;
+        const col = c.pts.geometry.attributes.color;
+        c.mine.forEach((g, i) => {
+          const show = on && g.on;
+          if (c.shown[i] === show) return;
+          c.shown[i] = show;
+          col.setXYZ(i, show ? c.cols[i].r : 0, show ? c.cols[i].g : 0, show ? c.cols[i].b : 0);
+          col.needsUpdate = true;
+        });
+      }
       glim.forEach((g, i) => {
         const show = on && g.on;
-        glimHalos[i].visible = show;
-        glimHalos[i].material.opacity = 0.9 * cur.glow;
         if (glimPools && glimShown[i] !== show) {
           glimShown[i] = show;
           const s = show ? g.pool : 0;

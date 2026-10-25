@@ -21,6 +21,7 @@ const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "re
   "willow", "wishing_tree", "ford_stones", "wisteria_arch", "hedge", "hedge_corner", "hedge_end", "hedge_t"]); // Dream (not moonflower: animated)
 const TREES = new Set(["tree", "pine", "birch", "ash_pine", "willow"]); // varied in size, turn and tint; half a tile out on the map edge
 const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // props whose smoke_origin smokes
+const BLOOMS = new Set(["moonflower"]); // with an `open` condition: instanced closed and open, cross-faded (build, refresh)
 const SMOKE = 8;
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
@@ -68,6 +69,14 @@ export function refresh(w, holds, gate, animate = false) {
     }
   }
   for (const g of w.glimmers ?? []) g.on = g.gate ? !!g.gate.open : holds(g.cond);
+  for (const b of w.blooms ?? []) {
+    const open = holds(b.cond);
+    if (open === b.open) continue;
+    b.want = open ? 1 : 0;
+    if (b.open === null || !animate || reduced(w)) b.k = b.want;
+    b.open = open;
+    showBloom(b);
+  }
   collide(w);
   w.lightDirty = true;
 }
@@ -80,6 +89,15 @@ function collide(w) {
   for (const i of w.dynamic) (solid[i] = base.solid[i]), (floor[i] = base.floor[i]);
   for (const g of w.gates) for (const t of g.tiles) (solid[t.i] = g.open ? 0 : 1), g.open && (floor[t.i] = t.open);
   for (const c of w.shown) if (c.obj.visible) for (const t of c.tiles) (solid[t.i] = t.deck === null ? 1 : 0), t.deck !== null && (floor[t.i] = t.deck);
+}
+
+// Moonflowers opening or closing: the buds sink as the blooms rise, over a few seconds.
+function showBloom(b) {
+  const e = b.k * b.k * (3 - 2 * b.k);
+  b.opened.visible = b.k > 0.001;
+  b.closed.visible = b.k < 0.999;
+  b.opened.scale.y = Math.max(0.001, e);
+  b.closed.scale.y = Math.max(0.001, 1 - e);
 }
 
 // A gate's props: `prop` always, `prop_closed` / `prop_open` by state. `t` (0..1)
@@ -109,6 +127,7 @@ export function dispose(root) {
 // The house door easing open or shut, a sign wobbling after it was read, boats
 // bobbing, the lighthouse beacon and the glint of something to find.
 export function animateProps(w, dt, reduced) {
+  for (const b of w.blooms ?? []) if (b.k !== b.want) (b.k += Math.sign(b.want - b.k) * Math.min(Math.abs(b.want - b.k), dt / 3)), showBloom(b);
   for (const g of w.gates) {
     if (g.sea && g.tide !== g.tideWant) g.sea((g.tide += Math.sign(g.tideWant - g.tide) * Math.min(Math.abs(g.tideWant - g.tide), dt / 5)));
     if (g.anim === null) continue;
@@ -207,6 +226,19 @@ function topOnly(template) {
     g.setIndex(keep);
     m.geometry = g;
   });
+  return out;
+}
+
+// A copy of a model posed at the end of `clip` (the moonflower open), for instancing.
+function posed(scene, clip) {
+  const flat = scene.userData.flat; // a session cache (flatten): not to be copied into the clone
+  delete scene.userData.flat;
+  const out = scene.clone(true), mixer = new THREE.AnimationMixer(out), action = mixer.clipAction(clip);
+  if (flat) scene.userData.flat = flat;
+  action.play();
+  action.time = clip.duration;
+  mixer.update(0);
+  out.updateMatrixWorld(true);
   return out;
 }
 
@@ -332,6 +364,7 @@ export async function build(map, got, reduced) {
 
   // Props sit at their footprint's centre; rot 90/270 swaps the footprint. A prop
   // with an `if` (WORLD_DESIGN §9.1) is only there, and only blocks, while it holds.
+  const blooms = new Map();
   const props = [];
   const propAt = new Map();
   const shown = [];
@@ -340,7 +373,14 @@ export async function build(map, got, reduced) {
     if (p.rot % 180 === 90) [fw, fd] = [fd, fw];
     const cx = p.x + fw / 2, cz = p.z + fd / 2, y = p.y ?? 0; // `y` stacks a prop (a step on a cliff)
     let obj = null;
-    if (BATCHED.has(p.asset) && !p.if && !p.recolor) {
+    const clip = BLOOMS.has(p.asset) && p.open && !p.if && got[p.asset]?.animations.find((c) => c.name.toLowerCase() === "open");
+    if (clip) {
+      // A bed of moonflowers costs two draws, not two per flower: closed and open instances, swapped by `open`.
+      if (!blooms.has(p.open)) blooms.set(p.open, { cond: p.open, closed: batcher(), opened: batcher() });
+      const set = blooms.get(p.open), m = at(cx, cz, THREE.MathUtils.degToRad(p.rot), 1, y);
+      set.closed.add(p.asset, tpl(p.asset), m);
+      set.opened.add(`${p.asset}#open`, tpl(`${p.asset}#open`, () => posed(got[p.asset].scene, clip)), m);
+    } else if (BATCHED.has(p.asset) && !p.if && !p.recolor) {
       // Trees vary in model, size, tint and turn; the ones on the map edge sit half a tile out.
       const isTree = TREES.has(p.asset);
       const kinds = variants(p.asset);
@@ -393,6 +433,13 @@ export async function build(map, got, reduced) {
         } else if (!WALKABLE.has(p.asset)) solid[z * W + x] = 1;
       }
   }
+  const bloomSets = [...blooms.values()].map((b) => {
+    const closed = new THREE.Group(), opened = new THREE.Group();
+    b.closed.build(closed, () => 0);
+    b.opened.build(opened, () => 0);
+    root.add(closed, opened);
+    return { cond: b.cond, closed, opened, open: null, k: 0, want: 0 };
+  });
   // Props with an `Open` clip (a pylon's lever, moonflowers at dusk) play it while
   // their `open` condition holds; the house door opens as the hero walks up (below).
   const openers = [];
@@ -463,11 +510,11 @@ export async function build(map, got, reduced) {
       if (!name) return null;
       const g = new THREE.Group(), gb = batcher();
       for (const t of tiles) {
-        if (BOB.has(name)) {
+        if (name === "lantern_raft") gb.add(name, tpl(name), at(t.x + 0.5, t.z + 0.5, rot + (r() - 0.5) * 0.5, 0.9, t.y)); // separate rafts, not a plank bridge; instanced
+        else if (BOB.has(name)) {
           const obj = got[name] ? got[name].scene.clone(true) : fallback(name);
           obj.position.set(t.x + 0.5, t.y, t.z + 0.5);
           obj.rotation.y = rot;
-          if (name === "lantern_raft") obj.rotation.y += (r() - 0.5) * 0.5, obj.scale.setScalar(0.9); // separate rafts, not a plank bridge
           prep(obj, true);
           g.add(obj);
           boats.push({ obj, cx: t.x + 0.5, cz: t.z + 0.5, y: t.y });
@@ -688,7 +735,7 @@ export async function build(map, got, reduced) {
   const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
   const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0 }, reduced);
   return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, door, life, boats, glows, glints,
-    gates, gateAt, shown, openers, waymarks, lamps, glimmers, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
+    gates, gateAt, shown, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }
 
 // G toggles this: tile lines; red = blocked, gold = look/use, blue = door, green = person.

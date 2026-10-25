@@ -313,21 +313,33 @@
       "rot": 0
     },
     {
+      "asset": "harbour_house",
+      "x": 0,
+      "z": 10,
+      "rot": 90,
+      "recolor": {
+        "sx_td_wall": "#8fa3a0",
+        "sx_td_wall_dk": "#768987",
+        "sx_td_roof": "#5a4636",
+        "sx_td_roof_dk": "#46362a"
+      }
+    },
+    {
       "asset": "boat",
-      "x": 2,
-      "z": 13,
+      "x": 5,
+      "z": 11,
       "rot": 0
     },
     {
       "asset": "crates",
-      "x": 4,
+      "x": 5,
       "z": 13,
       "rot": 0
     },
     {
       "asset": "crab_pots",
-      "x": 1,
-      "z": 12,
+      "x": 6,
+      "z": 13,
       "rot": 0
     },
     {
@@ -423,7 +435,7 @@
     {
       "asset": "net_rack",
       "x": 4,
-      "z": 15,
+      "z": 16,
       "rot": 0
     },
     {
@@ -433,15 +445,9 @@
       "rot": 0
     },
     {
-      "asset": "boat",
-      "x": 3,
-      "z": 20,
-      "rot": 180
-    },
-    {
       "asset": "crab_pots",
       "x": 5,
-      "z": 18,
+      "z": 19,
       "rot": 0
     },
     {
@@ -458,12 +464,6 @@
     },
     {
       "asset": "reeds",
-      "x": 0,
-      "z": 15,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
       "x": 1,
       "z": 15,
       "rot": 0
@@ -476,14 +476,14 @@
     },
     {
       "asset": "reeds",
-      "x": 5,
-      "z": 23,
+      "x": 1,
+      "z": 16,
       "rot": 0
     },
     {
       "asset": "reeds",
       "x": 5,
-      "z": 24,
+      "z": 23,
       "rot": 0
     },
     {
@@ -496,18 +496,6 @@
       "asset": "reeds",
       "x": 1,
       "z": 21,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 0,
-      "z": 22,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 9,
-      "z": 24,
       "rot": 0
     },
     {
@@ -530,38 +518,8 @@
     },
     {
       "asset": "reeds",
-      "x": 11,
-      "z": 21,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
       "x": 10,
       "z": 22,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 4,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 5,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 4,
-      "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 6,
-      "z": 16,
       "rot": 0
     },
     {
@@ -578,50 +536,20 @@
     },
     {
       "asset": "reeds",
-      "x": 2,
-      "z": 24,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 3,
-      "z": 24,
+      "x": 7,
+      "z": 17,
       "rot": 0
     },
     {
       "asset": "reeds",
       "x": 2,
       "z": 25,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 2,
-      "z": 25,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 5,
-      "z": 25,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 0,
-      "z": 22,
       "rot": 0
     },
     {
       "asset": "reeds",
       "x": 8,
-      "z": 25,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 9,
-      "z": 25,
+      "z": 24,
       "rot": 0
     },
     {
@@ -1031,6 +959,13 @@
           ]
         }
       ]
+    },
+    {
+      "x": 3,
+      "z": 12,
+      "kind": "sign",
+      "text": "Old Brann's. Nets mended, fish smoked, no questions answered before noon. He's out on the pier most nights.",
+      "text_fr": "Chez le vieux Brann. Filets ramendés, poisson fumé, aucune réponse aux questions avant midi. Il est sur le ponton presque toutes les nuits."
     }
   ],
   "warps": [
@@ -1162,11 +1097,11 @@
         {
           "lines": [
             "Stall's shut. This is the night shift: cards, a lantern, and Brann pretending he isn't winning.",
-            "A tip, since you're here: hold one Basic back on your Bench. When your Active goes down, you're not left with nothing to send in."
+            "A tip, since you're here: hold one Basic back on your Bench. When your Active Hexon goes down, you're not left with nothing to send in."
           ],
           "lines_fr": [
             "L'étal est fermé. Ici, c'est l'équipe de nuit : des cartes, une lanterne, et Brann qui fait semblant de ne pas gagner.",
-            "Un conseil, puisque tu es là : garde toujours un Hexon de Base sur ton Banc. Quand ton Actif tombe, tu n'es pas pris de court."
+            "Un conseil, puisque tu es là : garde toujours un Hexon de Base sur ton Banc. Quand ton Hexon Actif tombe, tu n'es pas pris de court."
           ]
         }
       ]
