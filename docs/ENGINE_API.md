@@ -523,11 +523,15 @@ pub static CARDS: &[CardDef] = &[
 
 ```rust
 pub enum Difficulty { Easy, Normal, Hard }           // Default = Normal
+pub enum Style { Balanced, Aggressive, Stall, BenchSniper }  // Default = Balanced
 impl Ai {
-    pub fn new(seed: u64, difficulty: Difficulty) -> Ai;
+    pub fn new(seed: u64, difficulty: Difficulty) -> Ai;   // Balanced
+    pub fn with_style(self, style: Style) -> Ai;
     pub fn choose_action(&mut self, game: &Game, me: usize) -> Action; // panics if `me` isn't asked
 }
 ```
+
+- **Styles** (1.2, `docs/WORLD_DESIGN.md` §4.5) are a few extra weights in the same scores, on top of any difficulty (Hard's look-ahead starts from its style's pick). **Aggressive**: +25 for energy on the Active, takes any usable attack that doesn't give a prize away (score above −100 instead of 0), and retreats only from a knock-out threat. **Stall**: heals from 10 damage (not 20), heals and Sleep/Paralysis are worth twice as much in an attack (other conditions 1.5×), retreats an Active that has lost half its HP and for a smaller margin, +15 for energy on the Bench. **Bench sniper**: damage off the Active scores `n × (1 + 6n / hp)` (closer to a knock-out scores more) and a knock-out there `100 + hp`, like an Active one; a forced switch picks the lowest HP left and is also played when a Benched target is softer than the defender. Each has a unit test on a position where it picks differently from Balanced (`aggressive_retreats_only_from_a_knock_out`, `stall_heals_early`, `bench_sniper_goes_for_the_weakest`, `bench_sniper_switches_in_the_lowest_hp`). The rivals' styles are in `campaign::RIVALS`; `style_sweep` (ignored) checks they keep the decks' balance.
 
 - **Inputs:** decide only from `game.view(me)` and `game.legal_actions()`, plus `game.preview_attack`, `game.retreat_cost` and `game.power_works`, which read only public state. Act only through `game.apply`, and only when `view.prompt` is `Some`. Never read `game.prompt()`, other `Game` internals, or the cards of events where `is_private(me)` is true. Never look ahead on a plain clone of the game: that would reveal the deck order, the opponent's hand and the coming coins. The one exception is Hard's look-ahead below, which runs only on a determinized copy.
 - **Hard** (`Difficulty::Hard`) plays Normal's heuristics everywhere except two places. Its opening Active is the sturdiest real Basic that can attack soonest (keeping one whose evolution is in hand for the Bench). In the main phase it looks ahead: the candidates are Normal's pick, the attacks and the other listed actions (one per distinct card, at most 10, without the plays the turn's loop guards rule out). Each one is applied to a copy made by `Game::determinize(me, seed)` (`pub(crate)`): the cards `me` can't see are dealt again from their pools (my deck and prizes; the opponent's hand, deck and prizes), and the coins come from a seed drawn from the AI's own RNG, so the copy shows nothing a player couldn't know. The copy then plays on with Normal on both sides through the rest of my turn and the opponent's whole turn (at most 80 applies), and the position at the start of my next turn is scored by a logistic model of the chance to win (prizes, HP, energy and creatures in play, evolutions, hand and deck sizes, empty Benches, each Active's chance to knock out the other and its average share of the defender's HP, conditions, and a knock-out that would end the game). Its weights are fitted on Normal self-play by the ignored test `fit_evaluation`. All candidates are played out on the same copies, round after round (at most 6), and no new round starts past `NODE_BUDGET` = 600 applies, so one decision costs at most 600 + 10 × 80 applies (a few milliseconds natively). A candidate must average 30 thousandths of a win more than Normal's pick to replace it. Hard is deterministic for a seed, like the others.
@@ -609,7 +613,6 @@ d.validate(&owned) -> Result<(), DeckListError> // Illegal(DeckError), then NotO
 ```rust
 let mut p = Profile::new_player();   // starter_collection(), the STARTER deck as its one deck list, STARTING_PACKS = one Ember, Tide and Wild pack
 p.open_pack(b, seed) -> Option<Vec<(CardId, bool)>> // spends a pack of BOOSTERS[b], adds its cards; true = first copy
-p.record_duel(won) -> Option<usize>  // a win grants one WIN_REWARD (Wild) pack and returns its booster index; a loss nothing
 p.wallet.packs(b) / .total() / .grant(b, n) -> bool / .take(b) -> bool
 p.wallet.save()                      // p1;<count>,... one per booster in BOOSTERS order;<checksum>
 Wallet::load(&s) -> Result<Wallet, LoadError>    // missing trailing counts are 0 (a 0.3 save has three)
@@ -636,49 +639,128 @@ pub struct Rival {
     pub seal: bool,                // the first win earns a seal (all but the Warden)
     pub booster: usize,            // index into BOOSTERS of the packs they give
     pub packs: u32,                // packs the first win grants
+    pub style: Style,              // ai::Style
+    pub lines: RivalLines,         // duel bubbles: intro, first_ko, ropes, defeat (each a T)
 }
 pub static RIVALS: [Rival; 7];     // campaign order, the Warden (`warden`) last
 pub const SEALS: usize = 6;
-pub const REMATCH_PACKS: u32 = 1;
+pub const RIVAL_PURSE: u32 = 300;  // Facets, first win; WARDEN_PURSE = 600
+pub const REMATCH_PER_PRIZE: u32 = 10;
 campaign::rival(id) -> Option<&'static Rival>
 campaign::seals(&progress) -> usize
 r.beaten(&progress) / r.open(&progress) -> bool
-r.prize_packs(&progress) -> (booster, count)  // what a win would give now
-campaign::record(r, won, &mut progress, &mut profile) -> Reward  // packs to the wallet, promo to the collection
-pub struct Reward { pub won: bool, pub first: bool, pub seal: bool, pub packs: (usize, u32), pub promo: Option<CardId> }
+r.prize_packs(&progress) -> (booster, count)  // what a win would give now: (b, 0) for a rematch
+r.purse(&progress) -> u32                     // Facets a win would pay now
+campaign::record(r, won, &mut progress, &mut profile) -> Reward  // packs to the wallet, promo to the collection, Facets to progress
+pub struct Reward { pub won: bool, pub first: bool, pub seal: bool, pub packs: (usize, u32), pub promo: Option<CardId>, pub facets: u32 }
+
+// One view of anyone duelled in the world, a rival or a route duelist:
+pub struct Opponent { pub id, pub name: &'static str, pub title: T, pub deck: Vec<CardId>, pub prizes: u8,
+                      pub difficulty: Difficulty, pub style: Style, pub lines: Option<&'static RivalLines>, pub rival: bool }
+campaign::opponent(id) -> Option<Opponent>
+campaign::record_opponent(id, won, &mut progress, &mut profile) -> Option<Reward>  // a duelist: its purse once, no packs
+campaign::quick_duel_purse(level) -> u32       // 10 / 20 / 40 for Easy / Normal / Hard
+campaign::record_quick_duel(&mut progress, won, level) -> u32  // "Play a duel": Facets, no pack
 campaign::champion(&progress) -> bool            // the Warden is beaten
 r.promo() -> CardId                              // set::PROMOS[i] for RIVALS[i]
 campaign::backfill_promos(&progress, &mut profile) -> Vec<CardId>  // older saves: promos of rivals already beaten
 ```
 
-| # | Rival | Colours | Deck | AI | Prizes | Needs | First win |
-|---|---|---|---|---|---|---|---|
-| 1 | Bramble, Hedge Tender | Grass | Thicket | Easy | 2 | 0 | seal + 2 Grove |
-| 2 | Marlo, Tide Reader | Water / Psychic | Low Tide | Easy | 3 | 0 | seal + 2 Tide |
-| 3 | Cinza, Kiln Runner | Fire / Fighting | Ember Rush | Normal | 4 | 0 | seal + 2 Ember |
-| 4 | Quill, Weather Watcher | Lightning / Water | Storm Front | Normal | 4 | 3 | seal + 2 Storm |
-| 5 | Orla, Quarry Foreman | Fighting | Bedrock | Normal | 5 | 3 | seal + 2 Stone |
-| 6 | Lumen, Night Gardener | Psychic / Water | Moonlit Tide | Hard | 6 | 5 | seal + 2 Dream |
-| — | Sable, the Hex Warden | Water / Fighting | Sixfold Crown | Hard | 6 | 6 | 3 Wild |
+| # | Rival | Colours | Deck | AI | Style | Prizes | Needs | First win | Rematch |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | Bramble, Hedge Tender | Grass | Thicket | Easy | Stall | 2 | 0 | seal + 2 Grove + ⬡ 300 | ⬡ 20 |
+| 2 | Marlo, Tide Reader | Water / Psychic | Low Tide | Easy | Stall | 3 | 0 | seal + 2 Tide + ⬡ 300 | ⬡ 30 |
+| 3 | Cinza, Kiln Runner | Fire / Fighting | Ember Rush | Normal | Aggressive | 4 | 0 | seal + 2 Ember + ⬡ 300 | ⬡ 40 |
+| 4 | Quill, Weather Watcher | Lightning / Water | Storm Front | Normal | Bench sniper | 4 | 3 | seal + 2 Storm + ⬡ 300 | ⬡ 40 |
+| 5 | Orla, Quarry Foreman | Fighting | Bedrock | Normal | Aggressive | 5 | 3 | seal + 2 Stone + ⬡ 300 | ⬡ 50 |
+| 6 | Lumen, Night Gardener | Psychic / Water | Moonlit Tide | Hard | Bench sniper | 6 | 5 | seal + 2 Dream + ⬡ 300 | ⬡ 60 |
+| — | Sable, the Hex Warden | Water / Fighting | Sixfold Crown | Hard | Balanced | 6 | 6 | 3 Wild + ⬡ 600 | ⬡ 60 |
 
 Every first win also adds that rival's promo card (Thistlewick, Brinemoth, Kilnfox, Squallkite,
 Slatebrow, Moonmoth; Hexcrest for the Warden) to the collection.
 
-A rematch win grants `REMATCH_PACKS` of the same booster; a loss grants nothing. `record` sets
-`beat_<id>` on a win and always remembers the result as the last duel. Against the starter deck
-(Normal AI, 60 seeded games, `rival_strength_against_the_starter`, `#[ignore]`d) the rivals win
-about 20%, 53%, 60%, 66%, 70%, 76% and 86%.
+A rematch win pays `REMATCH_PER_PRIZE` Facets per prize and no pack; a loss pays nothing. `record`
+sets `beat_<id>` on a win and always remembers the result as the last duel. Against the starter deck
+(Normal AI, 60 seeded games, `rival_strength_against_the_starter`, `#[ignore]`d) the rivals, with
+their styles, win about 15%, 66%, 63%, 66%, 68%, 76% and 85% (`docs/BALANCE.md`).
 
-**Progress.** Items, flags and the last campaign duel. Dialogue strings (all names are
-lowercase ASCII letters, digits and `_`):
+The duel UI reads a rival's `lines` through `opponent(id)`: `intro` when setup ends, `first_ko` at
+their first knock-out of the player's creature, `ropes` when they need one prize or fewer to lose
+(the player has at most one prize left to take), `defeat` on the game-over screen when the player
+won. A route duelist has `lines: None`: its only line is the map's `challenge`.
+
+**Progress.** Items, flags, Facets and the last duel. `overworld.rs` is the only parser of the
+dialogue language (`docs/WORLD_DESIGN.md` §9.2); names are lowercase ASCII letters, digits and `_`,
+arguments are split on `:`.
 
 | | Accepted | Notes |
 |---|---|---|
-| `p.apply(effect)` | `give:x` → `Applied::GotItem(x)` (first time), `flag:x`, `duel:<rival>` → `Applied::Duel(id)`, `pack:<booster>` → `Applied::Pack(index)`, `show:<panel>` → `Applied::Show(panel)` (the UI knows `ladder`) | Anything else is `Err`. `pack:` takes the booster's first name word (`ember`, `tide`, `wild`, `grove`, `storm`, `stone`, `dream`). The UI grants the pack and opens the duel offer. |
-| `p.check(cond)` | `item:x`, `flag:x`, `seals:n`, `beat:<rival>`, `open:<rival>`, `won:<rival>`, `lost:<rival>`, each negatable with `!`; several joined with `&` must all hold; empty holds | Malformed conditions and unknown rivals never hold, negated or not. |
-| `p.last_duel() -> Option<(&str, bool)>` / `p.settle()` | | The last campaign duel (rival id, won), until `settle` (the UI settles when the player next talks to that rival). |
-| `p.encode()` / `Progress::decode(s)` | `i:<item>`, `f:<flag>`, `won:<id>` / `lost:<id>`, `g:<beaten>_<print>`, `d:<day>` | Sorted and stable; junk tokens are skipped, and a string without `g:` / `d:` reads as no Gauntlet run and no daily claim. |
-| `p.gauntlet() -> Option<(usize, u32)>` / `p.daily() -> Option<u32>` | | The Gauntlet run (rungs beaten, deck fingerprint) and the last day whose daily pack was claimed. Set only through `endgame::*`. |
+| `parse_effect(s) -> Result<Effect, String>` / `p.apply(effect)` / `p.run(effect)` | `give:x` → `Applied::GotItem(x)` (first time), `take:x`, `flag:x`, `duel:<rival or duelist>` → `Applied::Duel(id)`, `pack:<booster>` → `Applied::Pack(index)`, `card:<slug>` → `Applied::Card(id)`, `show:<panel>` → `Applied::Show(panel)`, `coins:n` → `Applied::Coins(n)`, `pay:n` → `Applied::Paid(n)` or `Applied::Short(n)` (nothing spent), `emote:<actor>:<bang\|what\|dots\|heart\|note>` → `Applied::Cue(Cue::Emote { actor, emote })` | Anything else is `Err`. `pack:` takes the booster's first name word (`ember`, `tide`, `wild`, `grove`, `storm`, `stone`, `dream`); `card:` the English name in lowercase with `_` (`overworld::card_slug(id)`), never a promo; `show:` one of `overworld::PANELS` (`ladder`, `shop_hall`, `trader`, `press`, `doctor`, `curios`, `inn_shop`, `map`, `tailor`). The UI grants packs and cards to the profile, opens the duel offer or the panel, and plays cues (they change no state). |
+| `p.apply_all(&effects) -> Result<Vec<Applied>, String>` | a branch's `do` list | Parses all first: a malformed effect changes nothing. Applies in order and stops after an `Applied::Short`: the effects before stand, the rest are skipped, and the UI says "Not enough Facets". |
+| `parse_cond(s) -> Result<Cond, String>` / `p.check(cond)` / `p.holds(&cond)` | `item:x`, `flag:x`, `seals:n`, `beat:<id>`, `won:<id>`, `lost:<id>` (rivals and duelists), `open:<rival>`, `coins:n`, `count:<prefix>:n` (flags and items starting with the prefix), each negatable with `!`; several joined with `&` must all hold; empty holds | Malformed conditions and unknown ids never hold, negated or not. |
+| `p.coins()` / `p.earn(n)` / `p.spend(n) -> bool` / `p.take(item) -> bool` / `p.count(prefix)` | | Facets start at `STARTING_COINS` = 100 (a new `Progress::default()`, and an old save without the token). |
+| `p.last_duel() -> Option<(&str, bool)>` / `p.settle()` | | The last world duel (rival or duelist id, won), until `settle` (the UI settles when the player next talks to them). |
+| `p.encode()` / `Progress::decode(s)` | `i:<item>`, `f:<flag>`, `won:<id>` / `lost:<id>`, `g:<beaten>_<print>`, `d:<day>`, `c:<facets>`, `ps:<day>_<mask>` | Sorted and stable; junk tokens are skipped. A string without `g:` / `d:` / `ps:` reads as no Gauntlet run, no daily claim and nothing bought today; without `c:` as 100 Facets. Flags of renamed NPCs (`juniper_gift`, `talked_juniper`, `talked_flint`) read as their new names. |
+| `p.gauntlet() -> Option<(usize, u32)>` / `p.daily() -> Option<u32>` / `p.stock_bought(day) -> u8` | | The Gauntlet run (rungs beaten, deck fingerprint), the last day whose daily pack was claimed, the shop slots bought that day. Set only through `endgame::*` and `shop::*`. |
+
+### Route duelists (`trainers::*`)
+
+```rust
+pub struct Trainer { pub id: &'static str /* t_<name> */, pub name: &'static str, pub class: T, pub kit: Kit,
+                     pub signature: Option<(CardId, u8)>, pub prizes: u8 /* 1..=3 */, pub difficulty: Difficulty,
+                     pub night: bool, pub purse: Option<u32> }
+pub static TRAINERS: [Trainer; 14];       // the 1.2 roster, WORLD_DESIGN §4.4
+trainers::trainer(id) -> Option<&'static Trainer>
+t.deck() -> Vec<CardId>                   // its kit padded to 60, plus the signature card
+t.purse() -> u32                          // purse, else 15 + 15 × prizes; × 1.5 at night
+t.beaten(&progress) -> bool               // flag beat_<id>; never a seal
+trainers::record(t, won, &mut progress) -> u32   // the first win pays the purse, once
+pub enum Kit { One(&'static Recipe), Mix(&'static Recipe, &'static Recipe) }   // Mix: the first half of each
+kit.deck(signature) -> Vec<CardId>        // pads with basic energy by the creatures' colours; panics past 4 copies
+pub static KITS: [&Recipe; 20];           // 7 colours × Sprout / Bud / Bloom (Colorless has no Bloom)
+pub static SPROUTS: [&Recipe; 7];
+```
+
+Duels with them go through `campaign::opponent` and `campaign::record_opponent`; the map's
+`trainer` block (`WORLD_DESIGN` §4.1) expands to `won:`/`lost:`/`beat:` branches and `duel:<id>`.
+
+### Shops (`shop::*`)
+
+All take `(&mut Progress, &mut Profile)` and change nothing when they fail with a `ShopError`
+(`Short(n)`: n Facets short, `NotForSale`, `SoldOut`, `Keep`, `NoVoucher`; `Display` is bilingual).
+
+```rust
+shop::pack_price(b, &p) -> Option<u32>          // ⬡ 150 themed, ⬡ 200 Wild; None while not on sale
+shop::buy_pack(&mut p, &mut profile, b)         // Ember, Tide, Wild always; Grove/Storm/Stone/Dream once their rival is beaten
+shop::daily_stock(day) -> [CardId; 6]           // 2 Commons, 3 Uncommons, 1 Rare, distinct, fixed per day; no promos, no basic energy
+shop::buy_single(&mut p, &mut profile, day, slot) -> Result<CardId, _>   // ⬡ 20 / 60 / 240, each slot once a day
+shop::sell_price(id) -> Option<u32>             // ⬡ 3 / 10 / 40
+shop::spare(&profile, id) -> usize              // sellable: never the last copy, nor those a saved deck uses
+shop::sell(&mut p, &mut profile, id) -> Result<u32, _>
+shop::sell_extras(&mut p, &mut profile) -> u32  // every copy beyond 4
+shop::craft_price(id, &profile) -> Option<u32>  // owned ⬡ 40 / 120 / 400; never owned ⬡ 80 / 240, a Rare not at all
+shop::craft(&mut p, &mut profile, id)
+shop::craft_with_voucher(&mut p, &mut profile, id)  // spends the item `press_voucher`; any non-promo card
+shop::tier(id) -> Option<usize>                 // 0 Common, 1 Uncommon, 2 Rare; None for promos and basic energy
+```
+
+The `economy_sim` test plays a scripted first playthrough from these tables and keeps it between
+3.5 and 6 packs an hour (`docs/BALANCE.md`).
+
+### Deck doctor (`doctor::*`)
+
+```rust
+doctor::diagnose(&deck, &collection) -> Vec<Advice>   // problems first; [Issue::Healthy] when nothing to say
+pub struct Advice { pub severity: Severity /* Problem | Tip */, pub issue: Issue, pub swap: Option<Swap> }
+pub enum Issue { Healthy, FewBasics(n), Energy(n), BrokenLine(id), NoEnergyFor(Color), NoDrawTrainers, TooManyColours(n), TopHeavy(id) }
+pub struct Swap { pub out: CardId, pub into: CardId }  // one copy each way, only with copies the collection can spare
+advice.text() / swap.text() -> String                  // in the current language
+```
+
+Checks: fewer than 10 Basics; energy outside 18–28; an evolution with nothing to evolve from, or
+more copies than its line underneath; attack costs in a colour without energy; no draw or search
+trainer while the collection has a Lucky Satchel or Trail Compass to spare; more than 3 creature
+colours.
 
 ### Post-game (`endgame::*`)
 
@@ -695,17 +777,18 @@ endgame::next_rung(&p) -> Option<&'static Rung>
 endgame::run_deck(&p, &deck) -> bool      // the deck the run started with?
 endgame::record_rung(&mut p, &mut profile, won) -> Option<RungResult>  // a loss ends the run
 endgame::abandon(&mut p)
-pub struct RungResult { pub won: bool, pub packs: (usize, u32), pub beaten: usize, pub cleared: bool }
+pub struct RungResult { pub won: bool, pub packs: (usize, u32), pub beaten: usize, pub cleared: bool, pub facets: u32 }
 
 // The daily duel: open to everyone; the UI turns the local date into a day number.
 pub struct Daily { pub rival: &'static Rival, pub seed: u64 }
 endgame::daily(day) -> Daily              // pure: the same day, the same rival deck and game seed
 endgame::daily_unclaimed(&p, day) -> bool
-endgame::record_daily(&mut p, &mut profile, day, won) -> Option<usize>  // the first win of the day: one pack of the rival's booster
+endgame::record_daily(&mut p, &mut profile, day, won) -> Option<usize>  // the first win of the day: one pack of the rival's booster and DAILY_PURSE
 ```
 
-A Gauntlet rung pays one pack of its rival's booster; clearing it sets `gauntlet_clear` and pays
-`CLEAR_PACKS` Wild Packs. The UI ends the run when a Gauntlet duel is quit before it ends.
+A Gauntlet rung pays one pack of its rival's booster and `RUNG_PURSE` = ⬡ 40; clearing it sets
+`gauntlet_clear` and pays `CLEAR_PACKS` Wild Packs and `CLEAR_PURSE` = ⬡ 300. The first daily win
+pays `DAILY_PURSE` = ⬡ 100 with its pack. The UI ends the run when a Gauntlet duel is quit before it ends.
 
 ---
 
@@ -725,7 +808,7 @@ Save 1
 
 - The header is `sixfold-save;<version>;<checksum>`: `save::VERSION = 1`, and the checksum is FNV-1a (8 lowercase hex digits) over every line after the header, joined with `\n`.
 - A section is `[name]` (lowercase ASCII letters, digits and `_`) followed by its lines. A content line that is empty or starts with `[` or `\` is written with a `\` in front.
-- Sections this build reads: `name`, `collection` (`Collection::save`), `decks` (one `DeckList::save` per line), `wallet` (`Wallet::save`), `progress` (`Progress::encode`), `world_at` (`map,x,z,facing`) and `campaign_deck`. The 0.9 endgame state needs no new section: the champion, the Gauntlet run and the daily claim are in `progress`, and promos are collection entries (ids 103–109, which an older build drops and reports as unknown). Any other section (from a newer build) is kept and written back unchanged.
+- Sections this build reads: `name`, `collection` (`Collection::save`), `decks` (one `DeckList::save` per line), `wallet` (`Wallet::save`), `progress` (`Progress::encode`), `world_at` (`map,x,z,facing`), `campaign_deck` and `tutorial`. 1.2's Facets (`c:`) and the shop's daily purchases (`ps:`) are `progress` tokens, so the envelope stays version 1; the compatibility rules are in `engine/src/save.rs`, and `a_1_1_save_loads` decodes a save written by 1.1. The 0.9 endgame state needs no new section: the champion, the Gauntlet run and the daily claim are in `progress`, and promos are collection entries (ids 103–109, which an older build drops and reports as unknown). Any other section (from a newer build) is kept and written back unchanged.
 
 ```rust
 let mut s = Save::new_player("Save 1");         // name + a new player's profile
@@ -735,7 +818,7 @@ s.encode() -> String                            // sections in name order: stabl
 Save::decode(&text) -> Result<Save, SaveError>  // NotASave | Newer(version) | Checksum | Malformed
 s.profile() -> (Profile, Vec<&'static str>)     // parts that didn't read are reset and named
 s.set_profile(&p); s.progress(); s.set_progress(&p)
-s.summary() -> Summary { name, cards, distinct, decks, packs, seals, champion }
+s.summary() -> Summary { name, cards, distinct, decks, packs, seals, champion, facets }
 Save::from_legacy(name, |key| storage.get(key)) -> Option<Save>  // a 0.6 save, key by key
 ```
 

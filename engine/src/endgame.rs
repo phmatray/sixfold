@@ -4,11 +4,13 @@
 //! - **Gauntlet**: the six rivals again, in campaign order, with harder decks
 //!   ([`GAUNTLET`]) and one deck for the whole run. The deck is fixed by its
 //!   [`fingerprint`] when the run starts, so changing it ends the run; so does
-//!   a loss. Each rung won gives a pack of that rival's booster, and clearing
-//!   all six gives [`CLEAR_PACKS`] Wild packs and the `gauntlet_clear` flag.
+//!   a loss. Each rung won gives a pack of that rival's booster and
+//!   [`RUNG_PURSE`] Facets, and clearing all six gives [`CLEAR_PACKS`] Wild
+//!   packs, [`CLEAR_PURSE`] Facets and the `gauntlet_clear` flag.
 //! - **Daily duel**: open to everyone. A day number picks a rival deck and a
-//!   game seed ([`daily`]); the first win of the day gives one pack. Turning
-//!   the date into a day number is the UI's job.
+//!   game seed ([`daily`]); the first win of the day gives one pack and
+//!   [`DAILY_PURSE`] Facets. Turning the date into a day number is the UI's
+//!   job.
 //!
 //! Both keep their state in the world's [`Progress`].
 
@@ -24,6 +26,13 @@ use crate::set::*;
 
 /// Wild packs for clearing the whole Gauntlet.
 pub const CLEAR_PACKS: u32 = 3;
+
+/// Facets per Gauntlet rung won, and for clearing it.
+pub const RUNG_PURSE: u32 = 40;
+pub const CLEAR_PURSE: u32 = 300;
+
+/// Facets for the first daily duel win of the day (with its pack).
+pub const DAILY_PURSE: u32 = 100;
 
 /// The flag set by the first Gauntlet clear.
 pub const CLEAR_FLAG: &str = "gauntlet_clear";
@@ -96,6 +105,8 @@ pub struct RungResult {
     pub beaten: usize,
     /// The sixth rung fell: the run is over and won.
     pub cleared: bool,
+    /// Facets earned.
+    pub facets: u32,
 }
 
 /// Record the result of the duel against [`next_rung`]. A loss ends the run.
@@ -110,19 +121,20 @@ pub fn record_rung(p: &mut Progress, profile: &mut Profile, won: bool) -> Option
             packs: (rung.rival().booster, 0),
             beaten: 0,
             cleared: false,
+            facets: 0,
         });
     }
     let booster = rung.rival().booster;
     profile.wallet.grant(booster, 1);
     let beaten = beaten + 1;
     let cleared = beaten == GAUNTLET.len();
+    let facets = RUNG_PURSE + if cleared { CLEAR_PURSE } else { 0 };
+    p.earn(facets);
     if cleared {
         p.set_gauntlet(None);
         p.apply(&format!("flag:{CLEAR_FLAG}"))
             .expect("a valid flag name");
-        profile
-            .wallet
-            .grant(crate::profile::WIN_REWARD, CLEAR_PACKS);
+        profile.wallet.grant(crate::booster::WILD, CLEAR_PACKS);
     } else {
         p.set_gauntlet(Some((beaten, print)));
     }
@@ -131,6 +143,7 @@ pub fn record_rung(p: &mut Progress, profile: &mut Profile, won: bool) -> Option
         packs: (booster, 1),
         beaten,
         cleared,
+        facets,
     })
 }
 
@@ -156,12 +169,13 @@ pub fn daily_unclaimed(p: &Progress, day: u32) -> bool {
 }
 
 /// Record the daily duel of `day`: the first win that day grants one pack
-/// of the rival's booster, returned as its index.
+/// of the rival's booster, returned as its index, and [`DAILY_PURSE`].
 pub fn record_daily(p: &mut Progress, profile: &mut Profile, day: u32, won: bool) -> Option<usize> {
     if !won || !daily_unclaimed(p, day) {
         return None;
     }
     p.set_daily(day);
+    p.earn(DAILY_PURSE);
     let b = daily(day).rival.booster;
     profile.wallet.grant(b, 1);
     Some(b)
@@ -406,12 +420,14 @@ mod tests {
         assert!(run_deck(&p, &deck) && !run_deck(&p, &STORM_FRONT.cards()));
         assert_eq!(next_rung(&p).unwrap().rival, "bramble");
         let packs = pr.wallet.total();
+        let coins = p.coins();
         let r = record_rung(&mut p, &mut pr, true).unwrap();
         assert_eq!((r.beaten, r.packs, r.cleared), (1, (3, 1), false));
         assert_eq!(pr.wallet.total(), packs + 1);
+        assert_eq!((r.facets, p.coins()), (RUNG_PURSE, coins + RUNG_PURSE));
         assert_eq!(next_rung(&p).unwrap().rival, "marlo");
         let r = record_rung(&mut p, &mut pr, false).unwrap();
-        assert_eq!((r.won, r.beaten, r.packs.1), (false, 0, 0));
+        assert_eq!((r.won, r.beaten, r.packs.1, r.facets), (false, 0, 0, 0));
         assert!(next_rung(&p).is_none() && record_rung(&mut p, &mut pr, true).is_none());
     }
 
@@ -419,16 +435,15 @@ mod tests {
     fn clearing_all_six_rungs_pays_and_sets_the_flag() {
         let (mut p, mut pr) = champion_progress();
         start_run(&mut p, &EMBER_RUSH.cards());
-        let wild = pr.wallet.packs(crate::profile::WIN_REWARD);
+        let wild = pr.wallet.packs(crate::booster::WILD);
+        let coins = p.coins();
         for i in 0..GAUNTLET.len() {
             let r = record_rung(&mut p, &mut pr, true).unwrap();
             assert_eq!(r.cleared, i + 1 == GAUNTLET.len());
         }
         assert!(p.has_flag(CLEAR_FLAG) && p.gauntlet().is_none());
-        assert_eq!(
-            pr.wallet.packs(crate::profile::WIN_REWARD),
-            wild + CLEAR_PACKS
-        );
+        assert_eq!(pr.wallet.packs(crate::booster::WILD), wild + CLEAR_PACKS);
+        assert_eq!(p.coins(), coins + 6 * RUNG_PURSE + CLEAR_PURSE);
         abandon(&mut p);
     }
 
@@ -446,6 +461,7 @@ mod tests {
 
         let (mut p, mut pr) = (Progress::default(), Profile::new_player());
         let packs = pr.wallet.total();
+        let coins = p.coins();
         assert_eq!(record_daily(&mut p, &mut pr, 7, false), None);
         assert!(daily_unclaimed(&p, 7));
         assert_eq!(
@@ -459,5 +475,6 @@ mod tests {
             Some(daily(8).rival.booster)
         );
         assert_eq!(pr.wallet.total(), packs + 2);
+        assert_eq!(p.coins(), coins + 2 * DAILY_PURSE);
     }
 }

@@ -17,6 +17,21 @@
 //! `[` or `\` is written with a `\` in front. Sections this build doesn't know (from a newer
 //! build) are kept as they are and written back. Pure: the UI decides where
 //! the string lives.
+//!
+//! Compatibility rules, so every save ever written keeps loading:
+//!
+//! - The envelope stays [`VERSION`] 1 for as long as possible. New data is a
+//!   new `[progress]` token or a new section, which an older build skips
+//!   (its next write drops progress tokens it doesn't know: downgrading loses
+//!   the newer progress, and the changelog says so).
+//! - A missing token or section reads as the state before it existed: no
+//!   `c:` token is [`STARTING_COINS`](crate::overworld::STARTING_COINS)
+//!   Facets (1.2), no `[tutorial]` section a player past the lesson (1.1).
+//! - A renamed flag is mapped on read ([`Progress::decode`]), never left
+//!   behind; ids of maps, rivals and items are never renamed.
+//! - Bump [`VERSION`] only for a change an older build would misread, and
+//!   keep reading every older version. Each release adds a decode test of a
+//!   save written by the one before.
 
 use std::collections::BTreeMap;
 
@@ -105,6 +120,7 @@ pub struct Summary {
     pub seals: usize,
     /// Every rival, the Warden included, beaten.
     pub champion: bool,
+    pub facets: u32,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -312,6 +328,7 @@ impl Save {
             packs: p.wallet.total(),
             seals: seals(&progress),
             champion: RIVALS.iter().all(|r| r.beaten(&progress)),
+            facets: progress.coins(),
         }
     }
 
@@ -541,5 +558,55 @@ mod tests {
         s.set_name("  two\nlines ");
         assert_eq!(s.name(), "two lines");
         assert_eq!(Save::decode(&s.encode()).unwrap().name(), "two lines");
+    }
+
+    /// A save written by 1.1, byte for byte: it loads in 1.2 with ⬡ 100,
+    /// Wynne's gift flag carried over from Juniper's, and nothing lost; the
+    /// next write adds the Facets token and keeps every section.
+    #[test]
+    fn a_1_1_save_loads() {
+        const SAVE_1_1: &str = "sixfold-save;1;550e6df3
+[campaign_deck]
+Trailhead
+[collection]
+v1;0:3,1:2,7:3,8:2,14:2,15:2,16:2,17:2,18:2,19:2,44:3,45:2,50:1,54:2,55:1,81:1,90:2;fe5d5a91
+[decks]
+d1;0:3,1:2,7:3,8:2,14:2,15:2,16:2,17:2,18:2,19:2,28:13,29:13,44:3,45:2,50:1,54:2,55:1,81:1,90:2;Trailhead;781a9efd
+[name]
+Ada
+[progress]
+i:running_shoes,f:beat_bramble,f:juniper_gift,f:talked_flint,f:talked_juniper,won:bramble
+[tutorial]
+done
+[wallet]
+p1;1,1,1,2,0,0,0;2e0dc008
+[world_at]
+woodland,12,8,e";
+        let s = Save::decode(SAVE_1_1).unwrap();
+        let (profile, lost) = s.profile();
+        assert!(lost.is_empty(), "{lost:?}");
+        assert_eq!(profile.decks[0].name, "Trailhead");
+        assert_eq!(profile.wallet.packs(3), 2);
+        let p = s.progress();
+        assert_eq!(p.coins(), crate::overworld::STARTING_COINS);
+        assert!(p.has_item("running_shoes") && p.check("beat:bramble"));
+        assert_eq!(p.last_duel(), Some(("bramble", true)));
+        assert!(p.has_flag("wynne_gift") && !p.has_flag("juniper_gift"));
+        assert!(!s.tutorial_due());
+        let sum = s.summary();
+        assert_eq!(
+            (sum.name.as_str(), sum.seals, sum.facets, sum.packs),
+            ("Ada", 1, 100, 5)
+        );
+        // Written again by 1.2: same sections, the progress now with its Facets.
+        let mut again = s.clone();
+        again.set_progress(&p);
+        let back = Save::decode(&again.encode()).unwrap();
+        assert_eq!(
+            back.sections().collect::<Vec<_>>(),
+            s.sections().collect::<Vec<_>>()
+        );
+        assert!(back.get(PROGRESS).unwrap().ends_with(",c:100"));
+        assert_eq!(back.progress(), p);
     }
 }

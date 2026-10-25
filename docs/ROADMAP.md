@@ -16,7 +16,7 @@ Each phase lands as one or more pull requests and ships as a minor release cut b
 | 1.0.0 | Final polish and release: a last audit of every screen, accessibility and console fixes, a Low Tide balance nudge | Released |
 | 1.1.0 | French: the whole game in French or English, original French card names, an EN / FR switch | Released |
 
-After 1.0: a second human player (two people on one device, or over the network).
+After 1.0: the world (1.2 to 1.4), built from `docs/WORLD_DESIGN.md`; then a second human player (two people on one device, or over the network).
 
 Constraints that hold for every phase: only the rules and mechanics of the classic handheld game are
 reproduced; every name, card, character, place and asset is original (see `CLAUDE.md`).

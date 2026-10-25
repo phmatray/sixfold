@@ -6,3 +6,7 @@ license.workspace = true
 description = "Pure-Rust rules engine for the trading card game (no WASM/UI deps)."
 
 [dependencies]
+
+# Host-only: the map data test reads the world's JSON. Never in the wasm build.
+[dev-dependencies]
+serde_json = "1"

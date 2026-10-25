@@ -350,28 +350,53 @@ pub fn WorldScreen() -> impl IntoView {
     let finish = move |t: Talk| {
         let mut next = None;
         let mut packs = vec![];
+        let mut cards = vec![];
         progress.update(|p| {
             if p.last_duel().is_some_and(|(id, _)| id == t.id) {
                 p.settle();
             }
-            for e in t
+            let effects: Vec<String> = t
                 .effects
                 .iter()
                 .cloned()
                 .chain([format!("flag:talked_{}", t.id)])
-            {
-                match p.apply(&e) {
-                    Ok(Applied::GotItem(item)) => next = Some(Sheet::Item(item)),
-                    Ok(Applied::Duel(id)) => next = Some(Sheet::Challenge(id)),
-                    Ok(Applied::Pack(b)) => packs.push(b),
-                    Ok(Applied::Show(panel)) if panel == "ladder" => next = Some(Sheet::Ladder),
-                    Ok(Applied::Show(panel)) => leptos::logging::warn!("world: no panel {panel}"),
-                    Ok(Applied::Nothing) => {}
-                    Err(err) => leptos::logging::warn!("world: {err}"),
+                .collect();
+            match p.apply_all(&effects) {
+                Ok(done) => {
+                    for a in done {
+                        match a {
+                            Applied::GotItem(item) => next = Some(Sheet::Item(item)),
+                            Applied::Duel(id) => next = Some(Sheet::Challenge(id)),
+                            Applied::Pack(b) => packs.push(b),
+                            Applied::Card(id) => cards.push(id),
+                            Applied::Show(panel) if panel == "ladder" => next = Some(Sheet::Ladder),
+                            Applied::Show(panel) => {
+                                leptos::logging::warn!("world: no panel {panel}")
+                            }
+                            Applied::Short(_) => {
+                                next = Some(Sheet::Note(
+                                    tr("Not enough Facets", "Pas assez de facettes"),
+                                    tr(
+                                        format!("You have ⬡ {}.", p.coins()),
+                                        format!("Vous avez ⬡ {}.", p.coins()),
+                                    ),
+                                ))
+                            }
+                            // ponytail: Facets and cues have no HUD yet; the world PR draws them.
+                            Applied::Coins(_)
+                            | Applied::Paid(_)
+                            | Applied::Cue(_)
+                            | Applied::Nothing => {}
+                        }
+                    }
                 }
+                Err(err) => leptos::logging::warn!("world: {err}"),
             }
         });
         progress.with_untracked(push_items);
+        if !cards.is_empty() {
+            profile.update(|p| cards.iter().for_each(|&id| p.collection.add(id, 1)));
+        }
         if !packs.is_empty() {
             profile.update(|p| packs.iter().for_each(|&b| _ = p.wallet.grant(b, 1)));
             let names: Vec<String> = packs.iter().map(|&b| packs_label(b, 1)).collect();

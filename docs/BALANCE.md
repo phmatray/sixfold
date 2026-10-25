@@ -95,11 +95,106 @@ Games won out of 100 by the row deck against the column deck.
 | 16 Bedrock Deep | 67 | 81 | 47 | 83 | 64 | 38 | 35 | 68 | 53 | 72 | 61 | 26 | 66 | 71 | 81 | - | 57 | 60% |
 | 17 New Moon | 41 | 38 | 38 | 42 | 37 | 58 | 55 | 46 | 40 | 45 | 53 | 35 | 43 | 45 | 50 | 43 | - | 44% |
 
+## 1.2: AI styles
+
+Each rival now plays with an AI style (`docs/WORLD_DESIGN.md` §4.5, `docs/ENGINE_API.md` §9). Risk G4
+says to check that styles don't push the rival decks out of balance and, if one drifts, to adjust
+the style weights before the cards. `style_sweep` reruns the deck sweep (60 games a pair) with every
+deck Balanced, then with each rival's deck (campaign and Gauntlet) played in its rival's style, and
+requires a styled deck to stay inside 40–60% or no further outside than it was:
+
+```bash
+cargo test --release -p sixfold-engine style_sweep -- --ignored --nocapture
+```
+
+| Deck | Style | Balanced | Styled |
+|---|---|---|---|
+| Ember Rush (Cinza) | Aggressive | 51% | 50% |
+| Storm Front (Quill) | Bench sniper | 45% | 48% |
+| Thicket (Bramble) | Stall | 48% | 44% |
+| Low Tide (Marlo) | Stall | 44% | 42% |
+| Bedrock (Orla) | Aggressive | 57% | 56% |
+| Moonlit Tide (Lumen) | Bench sniper | 44% | 47% |
+| Deep Thicket | Stall | 66% | 60% |
+| Spring Tide | Stall | 45% | 41% |
+| White Heat | Aggressive | 51% | 52% |
+| Eye of the Storm | Bench sniper | 45% | 45% |
+| Bedrock Deep | Aggressive | 60% | 60% |
+| New Moon | Bench sniper | 44% | 46% |
+
+No deck drifts out, so no weight was changed. Stall costs its decks a few points (healing and Sleep
+are worth less to the Normal AI than tempo) and the bench sniper gains a few. Against the starter
+deck (`rival_strength_against_the_starter`, 60 games, the campaign's prizes and AI levels):
+
+| Rival | Balanced | With style |
+|---|---|---|
+| Bramble (Stall) | 20% | 15% |
+| Marlo (Stall) | 75% | 66% |
+| Cinza (Aggressive) | 60% | 63% |
+| Quill (Bench sniper) | 66% | 66% |
+| Orla (Aggressive) | 68% | 68% |
+| Lumen (Bench sniper) | 76% | 76% |
+| Sable (Balanced) | 85% | 85% |
+
+## 1.2: route duelists' kits
+
+`kit_sweep` plays each of the 20 kits (`engine/src/trainers.rs`) at 2 prizes, Normal against Normal,
+40 games against each of the six prebuilts and the starter; no kit may win more than 60%:
+
+| Colour | Sprout | Bud | Bloom |
+|---|---|---|---|
+| Fire | Kindling 27% | Bellows 46% | Forge 48% |
+| Water | Puddle 16% | Current 44% | Undertow 43% |
+| Grass | Seedling 13% | Hedgerow 46% | Canopy 47% |
+| Lightning | Spark 18% | Static 37% | Tempest 42% |
+| Fighting | Pebble 50% | Rubble 58% | Landslide 59% |
+| Psychic | Murmur 5% | Reverie 41% | Trance 42% |
+| Colorless | Scrap 2% | Flock 30% | — |
+
+The Basics-only Sprout kits are meant to be soft; Fighting is the strongest colour at this size, and
+Landslide sits just under the line. Then each of the 14 duelists as it plays (its deck, prizes and
+AI) against the starter a new player holds, 60 games:
+
+| Duelist | Kit | Prizes, AI | Wins vs starter |
+|---|---|---|---|
+| Tobin | Scrap | 1, Easy | 22% |
+| Hazel | Seedling + Spark | 2, Easy | 20% |
+| Ossian | Scrap | 1, Easy | 20% |
+| Sorrel | Seedling | 2, Normal | 3% |
+| Bryn | Seedling | 1, Easy | 8% |
+| Pell | Puddle | 2, Easy | 30% |
+| Skye | Spark | 2, Normal | 40% |
+| Morrow | Current | 3, Normal | 80% |
+| Nell | Puddle | 2, Normal | 38% |
+| Tamsin | Pebble | 2, Easy | 60% |
+| Cole | Kindling | 2, Normal | 22% |
+| Rusk | Pebble + Scrap | 1, Easy | 30% |
+| Marigold | Bellows | 3, Normal | 47% |
+| Lark | Scrap + Murmur | 1, Easy | 12% |
+
+Morrow (Water, 3 prizes, against a starter whose Fire line is weak to Water) is the boardwalk's wall,
+as the roster intends ("unbeatable patience"); a player can say **Not now** and come back with a
+better deck.
+
+## 1.2: Facets
+
+`economy_sim` (`engine/src/shop.rs`, always on) scripts a first playthrough of the 1.2 world from
+the real tables: the 14 route duelists (5 min each, ⬡ 585), the six rivals and the Warden (two
+12-minute duels each, ⬡ 2,400), the finds met while exploring (⬡ 675 and 3 packs over 68 min) and the
+four quests (⬡ 370 and a pack, 20 min). Every Facet turned into ⬡ 150 themed packs, that is **5.7
+packs an hour** (rival packs and promos on top); the §3.4 "exploring" row (5 duelists, 6 finds, half
+a quest and 0.8 of a rival an hour) is **5.2**. The test keeps both between 3.5 and 6. Selling pays a
+tenth of crafting at most (risk E2), also asserted.
+
 ## Campaign playthrough
 
 `the_campaign_can_be_finished_from_a_new_profile` (always on) plays the whole campaign from a new
 player: the Normal AI takes the player's seat with a deck rebuilt from the collection before every
-duel (a greedy one- or two-colour builder), opens every pack it wins, and faces the first open
-rival it hasn't beaten. It must take all six seals and the Warden within 40 duels. With Lumen and
-Sable on the Hard AI it takes **31 duels**: Bramble 1, Marlo 4, Cinza 3, Quill 8, Orla 1, Lumen 2
-and Sable 12.
+duel (a greedy one- or two-colour builder). Since 1.2 it first meets each of the 14 route duelists
+once (win or lose, it walks on), then faces the first open rival it hasn't beaten; rivals play in
+their style. Duel wins pay Facets, not packs, so after every duel it spends its Facets on the themed
+pack on sale it has bought fewest of, and opens every pack. It must take all six seals and the Warden
+within 54 duels (the 14 route duels and the 40 rival duels the budget allowed before; pinned for
+risk E1) and buy at least 10 packs. It takes **32 duels**: 10 of 14 route duels won (⬡ 405), then
+Bramble 1, Marlo 1, Cinza 1, Quill 1, Orla 3, Lumen 6 and Sable 5, with **19 packs bought** and ⬡ 55
+left. Before 1.2 (packs for wins, no route duelists) it took 31 rival duels.

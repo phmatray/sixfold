@@ -1,16 +1,21 @@
 //! The campaign: six rival duelists, one per colour theme, and the Hex Warden
-//! behind them. Beating a rival the first time earns its seal and packs of its
-//! colours; a rematch win earns one pack. Seals open the later rivals and,
-//! all six, the Warden.
+//! behind them. Beating a rival the first time earns its seal, packs of its
+//! colours and a purse of Facets; a rematch win earns Facets only. Seals open
+//! the later rivals and, all six, the Warden.
 //!
 //! State lives in the world's [`Progress`]: a beaten rival is the flag
 //! `beat_<id>`, and the result of the last campaign duel is kept until its
 //! post-duel line has played (see [`Progress::last_duel`]). Packs go to the
 //! profile's wallet, and the first win against each rival also adds its promo
-//! card ([`promo`]) to the collection.
+//! card ([`Rival::promo`]) to the collection.
+//!
+//! [`opponent`] is the one view of anyone the player can duel in the world
+//! (a rival or a route duelist, [`crate::trainers`]), and [`record_opponent`]
+//! the one way to record such a duel.
 
-use crate::ai::Difficulty;
+use crate::ai::{Difficulty, Style};
 use crate::lang::T;
+use crate::trainers::{self, trainer};
 
 use crate::card::{CardId, Color};
 use crate::decks::{Prebuilt, EMBER_RUSH, STORM_FRONT};
@@ -21,8 +26,24 @@ use crate::set::*;
 /// Seals there are to earn: one per rival, the Warden excluded.
 pub const SEALS: usize = 6;
 
-/// Packs a rematch win grants (of the rival's booster).
-pub const REMATCH_PACKS: u32 = 1;
+/// Facets a rival's first win pays; the Warden's.
+pub const RIVAL_PURSE: u32 = 300;
+pub const WARDEN_PURSE: u32 = 600;
+/// Facets a rematch win pays per prize (no pack).
+pub const REMATCH_PER_PRIZE: u32 = 10;
+
+/// What a rival says in a duel, shown as a bubble from their portrait.
+#[derive(Debug)]
+pub struct RivalLines {
+    /// When setup ends.
+    pub intro: T,
+    /// Their first knock-out of one of the player's creatures.
+    pub first_ko: T,
+    /// They need one prize or fewer to lose.
+    pub ropes: T,
+    /// The game-over screen, when the player won.
+    pub defeat: T,
+}
 
 #[derive(Debug)]
 pub struct Rival {
@@ -44,6 +65,8 @@ pub struct Rival {
     pub booster: usize,
     /// Packs the first win grants.
     pub packs: u32,
+    pub style: Style,
+    pub lines: RivalLines,
 }
 
 impl Rival {
@@ -68,14 +91,19 @@ impl Rival {
         PROMOS[i]
     }
 
-    /// Packs a win would grant now: (booster, count).
+    /// Packs a win would grant now: (booster, count); none for a rematch.
     pub fn prize_packs(&self, p: &Progress) -> (usize, u32) {
-        let n = if self.beaten(p) {
-            REMATCH_PACKS
-        } else {
-            self.packs
-        };
+        let n = if self.beaten(p) { 0 } else { self.packs };
         (self.booster, n)
+    }
+
+    /// Facets a win would pay now.
+    pub fn purse(&self, p: &Progress) -> u32 {
+        match (self.beaten(p), self.seal) {
+            (true, _) => REMATCH_PER_PRIZE * u32::from(self.prizes),
+            (false, true) => RIVAL_PURSE,
+            (false, false) => WARDEN_PURSE,
+        }
     }
 }
 
@@ -91,6 +119,8 @@ pub struct Reward {
     pub packs: (usize, u32),
     /// The promo card added to the collection (first win only).
     pub promo: Option<CardId>,
+    /// Facets earned.
+    pub facets: u32,
 }
 
 /// Rival by id.
@@ -130,10 +160,12 @@ pub fn record(r: &Rival, won: bool, p: &mut Progress, profile: &mut Profile) -> 
     } else {
         (r.booster, 0)
     };
+    let facets = if won { r.purse(p) } else { 0 };
     if won {
         p.apply(&format!("flag:{}", r.flag()))
             .expect("rival ids are valid flag names");
         profile.wallet.grant(packs.0, packs.1);
+        p.earn(facets);
     }
     let promo = first.then(|| r.promo());
     if let Some(id) = promo {
@@ -146,7 +178,97 @@ pub fn record(r: &Rival, won: bool, p: &mut Progress, profile: &mut Profile) -> 
         seal: first && r.seal,
         packs,
         promo,
+        facets,
     }
+}
+
+/// Anyone the player can duel in the world, as the challenge sheet and the
+/// duel screen show them.
+#[derive(Debug, Clone)]
+pub struct Opponent {
+    pub id: &'static str,
+    pub name: &'static str,
+    /// A rival's title, a route duelist's class.
+    pub title: T,
+    pub deck: Vec<CardId>,
+    pub prizes: u8,
+    pub difficulty: Difficulty,
+    pub style: Style,
+    /// A rival's duel lines; a route duelist's only line is its map
+    /// `challenge`.
+    pub lines: Option<&'static RivalLines>,
+    /// A campaign rival (seals, packs, promo), not a route duelist.
+    pub rival: bool,
+}
+
+/// The rival or route duelist with this id.
+pub fn opponent(id: &str) -> Option<Opponent> {
+    if let Some(r) = rival(id) {
+        return Some(Opponent {
+            id: r.id,
+            name: r.name,
+            title: r.title,
+            deck: r.deck.cards(),
+            prizes: r.prizes,
+            difficulty: r.difficulty,
+            style: r.style,
+            lines: Some(&r.lines),
+            rival: true,
+        });
+    }
+    trainer(id).map(|t| Opponent {
+        id: t.id,
+        name: t.name,
+        title: t.class,
+        deck: t.deck(),
+        prizes: t.prizes,
+        difficulty: t.difficulty,
+        style: Style::Balanced,
+        lines: None,
+        rival: false,
+    })
+}
+
+/// Record a finished duel against a rival or a route duelist (by id). A
+/// duelist's reward is its purse on the first win, no packs. None for an
+/// unknown id.
+pub fn record_opponent(
+    id: &str,
+    won: bool,
+    p: &mut Progress,
+    profile: &mut Profile,
+) -> Option<Reward> {
+    if let Some(r) = rival(id) {
+        return Some(record(r, won, p, profile));
+    }
+    let t = trainer(id)?;
+    let first = won && !t.beaten(p);
+    let facets = trainers::record(t, won, p);
+    Some(Reward {
+        won,
+        first,
+        seal: false,
+        packs: (crate::booster::WILD, 0),
+        promo: None,
+        facets,
+    })
+}
+
+/// Facets a quick duel win against the AI pays, by its level.
+pub fn quick_duel_purse(level: Difficulty) -> u32 {
+    match level {
+        Difficulty::Easy => 10,
+        Difficulty::Normal => 20,
+        Difficulty::Hard => 40,
+    }
+}
+
+/// Record a quick duel ("Play a duel") against the AI at `level`: a win pays
+/// [`quick_duel_purse`], returned; a loss nothing.
+pub fn record_quick_duel(p: &mut Progress, won: bool, level: Difficulty) -> u32 {
+    let n = if won { quick_duel_purse(level) } else { 0 };
+    p.earn(n);
+    n
 }
 
 use Color::*;
@@ -184,6 +306,13 @@ pub static RIVALS: [Rival; 7] = [
         seal: true,
         booster: 3, // Grove
         packs: 2,
+        style: Style::Stall,
+        lines: RivalLines {
+            intro: T::new("Easy now. A hedge grows one leaf at a time, and so will this duel.", "Doucement. Une haie pousse une feuille à la fois, et ce duel aussi."),
+            first_ko: T::new("Pruned. It'll grow back stronger. Yours might not.", "Taillé. Ça repoussera plus fort. Le tien, je n'en suis pas sûr."),
+            ropes: T::new("You've found the gap in my hedge. Mind the thorns on the way through.", "Tu as trouvé le trou dans ma haie. Attention aux épines en passant."),
+            defeat: T::new("Well grown. Go on, I've some pride to mulch.", "Bien poussé. Va, j'ai de la fierté à pailler."),
+        },
     },
     Rival {
         id: "marlo",
@@ -218,6 +347,13 @@ pub static RIVALS: [Rival; 7] = [
         seal: true,
         booster: 1, // Tide
         packs: 2,
+        style: Style::Stall,
+        lines: RivalLines {
+            intro: T::new("The tide's turning. Question is which of us it carries out.", "La marée tourne. Reste à savoir lequel de nous deux elle emporte."),
+            first_ko: T::new("Out with the ebb. It always comes back in, you know. Mine does.", "Parti avec le reflux. Ça revient toujours, tu sais. Chez moi, en tout cas."),
+            ropes: T::new("Slack water. Nothing moves, except you, apparently.", "L'étale. Plus rien ne bouge, sauf toi, visiblement."),
+            defeat: T::new("High-water mark. I'll chalk it on the piling.", "Laisse de haute mer. Je la marque à la craie sur le pilotis."),
+        },
     },
     Rival {
         id: "cinza",
@@ -236,6 +372,13 @@ pub static RIVALS: [Rival; 7] = [
         seal: true,
         booster: 0, // Ember
         packs: 2,
+        style: Style::Aggressive,
+        lines: RivalLines {
+            intro: T::new("No warm-up, no waiting. The kiln's already hot!", "Pas d'échauffement, pas d'attente. Le four est déjà chaud !"),
+            first_ko: T::new("Ha! Out of the fire and straight into the ash!", "Ha ! Sorti du feu, direct dans la cendre !"),
+            ropes: T::new("Okay, okay, I'm stoking, I'm stoking!", "D'accord, d'accord, je rallume, je rallume !"),
+            defeat: T::new("Burnt out. Rematch the second I've cooled down. So, now?", "Grillée. Revanche dès que j'ai refroidi. Donc, maintenant ?"),
+        },
     },
     Rival {
         id: "quill",
@@ -254,6 +397,13 @@ pub static RIVALS: [Rival; 7] = [
         seal: true,
         booster: 4, // Storm
         packs: 2,
+        style: Style::BenchSniper,
+        lines: RivalLines {
+            intro: T::new("Barometer's falling. Expect scattered strikes, mostly on your bench.", "Le baromètre chute. Prévois des éclairs épars, surtout sur ton banc."),
+            first_ko: T::new("Called it. I always log a direct hit.", "Je l'avais prévu. Je note toujours un coup au but."),
+            ropes: T::new("Unexpected front moving in. I'll have to revise the forecast.", "Front inattendu. Je vais devoir revoir mes prévisions."),
+            defeat: T::new("Clear skies for you. Mark it in the logbook: today, I was wrong.", "Ciel dégagé pour toi. Note-le au carnet : aujourd'hui, je me suis trompé."),
+        },
     },
     Rival {
         id: "orla",
@@ -291,6 +441,13 @@ pub static RIVALS: [Rival; 7] = [
         seal: true,
         booster: 5, // Stone
         packs: 2,
+        style: Style::Aggressive,
+        lines: RivalLines {
+            intro: T::new("Hard hat on. We're breaking ground.", "Casque sur la tête. On attaque la roche."),
+            first_ko: T::new("That's one block shifted. Plenty more in the pile.", "Un bloc de déplacé. Il en reste plein le tas."),
+            ropes: T::new("Hm. You've found the fault line. Most don't.", "Hm. Tu as trouvé la faille. La plupart ne la voient pas."),
+            defeat: T::new("Solid work. I'd hire you, if you could lift a crate.", "Du travail solide. Je t'embaucherais, si tu savais porter une caisse."),
+        },
     },
     Rival {
         id: "lumen",
@@ -329,6 +486,13 @@ pub static RIVALS: [Rival; 7] = [
         seal: true,
         booster: 6, // Dream
         packs: 2,
+        style: Style::BenchSniper,
+        lines: RivalLines {
+            intro: T::new("Shh. The moonflowers are opening. Let's not wake them.", "Chut. Les fleurs de lune s'ouvrent. Ne les réveillons pas."),
+            first_ko: T::new("Sleep now. The moths will keep watch.", "Dors, maintenant. Les phalènes veilleront."),
+            ropes: T::new("You walk through dreams like someone who knows the way.", "Tu traverses les rêves comme quelqu'un qui connaît le chemin."),
+            defeat: T::new("Morning, already? Then go. You've woken the garden.", "Déjà le matin ? Alors va. Tu as réveillé le jardin."),
+        },
     },
     Rival {
         id: "warden",
@@ -366,6 +530,13 @@ pub static RIVALS: [Rival; 7] = [
         seal: false,
         booster: 2, // Wild
         packs: 3,
+        style: Style::Balanced,
+        lines: RivalLines {
+            intro: T::new("Six seals. Let's see the hand that carried them.", "Six sceaux. Voyons la main qui les a portés."),
+            first_ko: T::new("Every champion falls once in this room. Usually more.", "Tout champion tombe au moins une fois dans cette salle. Souvent plus."),
+            ropes: T::new("There it is: the look they all get, just before.", "Le voilà : ce regard qu'ils ont tous, juste avant."),
+            defeat: T::new("The door was always going to open for you. I just had to be sure.", "La porte allait s'ouvrir pour toi, de toute façon. Je devais juste en être sûre."),
+        },
     },
 ];
 
@@ -402,14 +573,17 @@ mod tests {
     }
 
     #[test]
-    fn first_win_earns_a_seal_and_packs_rematch_one_pack_loss_nothing() {
+    fn first_win_earns_a_seal_packs_and_facets_rematch_facets_loss_nothing() {
         let mut p = Progress::default();
         let mut pr = Profile::new_player();
         pr.wallet = Default::default();
+        let coins = p.coins();
         let r = rival("bramble").unwrap();
+        assert_eq!(r.purse(&p), RIVAL_PURSE);
         let lost = record(r, false, &mut p, &mut pr);
         assert_eq!((lost.seal, lost.packs.1, pr.wallet.total()), (false, 0, 0));
         assert_eq!((lost.promo, pr.collection.count(THISTLEWICK)), (None, 0));
+        assert_eq!((lost.facets, p.coins()), (0, coins));
         assert_eq!(p.last_duel(), Some(("bramble", false)));
         assert_eq!(seals(&p), 0);
 
@@ -421,15 +595,103 @@ mod tests {
             (won.promo, pr.collection.count(THISTLEWICK)),
             (Some(THISTLEWICK), 1)
         );
+        assert_eq!((won.facets, p.coins()), (300, coins + 300));
         assert!(p.has_flag("beat_bramble"));
         assert_eq!(p.last_duel(), Some(("bramble", true)));
         assert_eq!(seals(&p), 1);
 
+        // A rematch: ⬡ 10 a prize, no pack, no second promo.
+        assert_eq!(r.purse(&p), 20);
         let again = record(r, true, &mut p, &mut pr);
         assert!(!again.first && !again.seal && again.promo.is_none());
-        assert_eq!(again.packs, (3, REMATCH_PACKS));
-        assert_eq!((pr.wallet.packs(3), seals(&p)), (3, 1));
+        assert_eq!((again.packs, again.facets), ((3, 0), 20));
+        assert_eq!((pr.wallet.packs(3), seals(&p)), (2, 1));
         assert_eq!(pr.collection.count(THISTLEWICK), 1, "one promo per rival");
+        assert_eq!(p.coins(), coins + 320);
+    }
+
+    #[test]
+    fn the_warden_pays_most_and_rematches_pay_by_prizes() {
+        let p = Progress::default();
+        assert_eq!(rival("warden").unwrap().purse(&p), WARDEN_PURSE);
+        let mut champ = p.clone();
+        beat(&mut champ, &["bramble", "lumen", "warden"]);
+        let rematch: Vec<u32> = ["bramble", "lumen", "warden"]
+            .map(|id| rival(id).unwrap().purse(&champ))
+            .to_vec();
+        assert_eq!(rematch, [20, 60, 60]);
+    }
+
+    #[test]
+    fn opponents_cover_rivals_and_route_duelists() {
+        let r = opponent("quill").unwrap();
+        assert!(r.rival && r.style == Style::BenchSniper && r.prizes == 4);
+        assert_eq!(
+            r.lines.unwrap().intro.en,
+            rival("quill").unwrap().lines.intro.en
+        );
+        let t = opponent("t_hazel").unwrap();
+        assert!(!t.rival && t.lines.is_none() && t.style == Style::Balanced);
+        assert_eq!((t.name, t.title.en, t.prizes), ("Hazel", "Beekeeper", 2));
+        assert_eq!(validate_deck(&t.deck), Ok(()));
+        assert!(opponent("nobody").is_none());
+
+        let (mut p, mut pr) = (Progress::default(), Profile::new_player());
+        let packs = pr.wallet.total();
+        let rw = record_opponent("t_hazel", true, &mut p, &mut pr).unwrap();
+        assert!(rw.first && !rw.seal && rw.packs.1 == 0 && rw.promo.is_none());
+        assert_eq!(rw.facets, 45);
+        assert_eq!(pr.wallet.total(), packs);
+        let again = record_opponent("t_hazel", true, &mut p, &mut pr).unwrap();
+        assert!(!again.first && again.facets == 0);
+        assert!(
+            record_opponent("bramble", true, &mut p, &mut pr)
+                .unwrap()
+                .seal
+        );
+        assert!(record_opponent("nobody", true, &mut p, &mut pr).is_none());
+        assert_eq!(seals(&p), 1, "a route duelist is never a seal");
+    }
+
+    #[test]
+    fn quick_duels_pay_facets_by_level() {
+        let mut p = Progress::default();
+        let coins = p.coins();
+        let paid: Vec<u32> = [Difficulty::Easy, Difficulty::Normal, Difficulty::Hard]
+            .map(|d| record_quick_duel(&mut p, true, d))
+            .to_vec();
+        assert_eq!(paid, [10, 20, 40]);
+        assert_eq!(record_quick_duel(&mut p, false, Difficulty::Hard), 0);
+        assert_eq!(p.coins(), coins + 70);
+    }
+
+    /// Every rival has four duel lines in both languages, and a style.
+    #[test]
+    fn rivals_have_their_lines_and_styles() {
+        for r in &RIVALS {
+            let l = &r.lines;
+            for t in [l.intro, l.first_ko, l.ropes, l.defeat] {
+                assert!(
+                    !t.en.is_empty() && !t.fr.is_empty() && t.en != t.fr,
+                    "{}",
+                    r.name
+                );
+            }
+        }
+        let styles: Vec<Style> = RIVALS.iter().map(|r| r.style).collect();
+        use Style::*;
+        assert_eq!(
+            styles,
+            [
+                Stall,
+                Stall,
+                Aggressive,
+                BenchSniper,
+                Aggressive,
+                BenchSniper,
+                Balanced
+            ]
+        );
     }
 
     #[test]
@@ -494,28 +756,38 @@ mod tests {
     }
 
     /// Tuning aid: each rival's win rate against the starter deck (the
-    /// starter played by a Normal AI). `cargo test --release -p sixfold-engine
-    /// rival_strength -- --ignored --nocapture`
+    /// starter played by a Normal AI), played Balanced and with its style.
+    /// `cargo test --release -p sixfold-engine rival_strength -- --ignored --nocapture`
     #[test]
     #[ignore]
     fn rival_strength_against_the_starter() {
         for r in &RIVALS {
-            let mut wins = 0;
-            for seed in 0..60u64 {
-                let config = Config { prizes: r.prizes };
-                let mut g = Game::new([STARTER.cards(), r.deck.cards()], seed, config).unwrap();
-                let mut ais = [
-                    Ai::new(seed, Difficulty::Normal),
-                    Ai::new(seed ^ 1, r.difficulty),
-                ];
-                while g.winner().is_none() {
-                    let me = g.view(0).waiting_on.unwrap();
-                    let a = ais[me].choose_action(&g, me);
-                    g.apply(a).unwrap();
+            let rate = |style| {
+                let mut wins = 0;
+                for seed in 0..60u64 {
+                    let config = Config { prizes: r.prizes };
+                    let mut g = Game::new([STARTER.cards(), r.deck.cards()], seed, config).unwrap();
+                    let mut ais = [
+                        Ai::new(seed, Difficulty::Normal),
+                        Ai::new(seed ^ 1, r.difficulty).with_style(style),
+                    ];
+                    while g.winner().is_none() {
+                        let me = g.view(0).waiting_on.unwrap();
+                        let a = ais[me].choose_action(&g, me);
+                        g.apply(a).unwrap();
+                    }
+                    wins += usize::from(g.winner() == Some(1));
                 }
-                wins += usize::from(g.winner() == Some(1));
-            }
-            println!("{:8} {:>3}% ({} prizes)", r.name, wins * 100 / 60, r.prizes);
+                wins * 100 / 60
+            };
+            println!(
+                "{:8} balanced {:>3}%  {:?} {:>3}% ({} prizes)",
+                r.name,
+                rate(Style::Balanced),
+                r.style,
+                rate(r.style),
+                r.prizes
+            );
         }
     }
 }

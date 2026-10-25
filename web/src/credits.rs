@@ -11,7 +11,7 @@ use crate::Screen;
 /// The people of the world, as the credits list them.
 const TOWNSFOLK: &[(&str, T)] = &[
     (
-        "Juniper",
+        "Wynne",
         T::new("keeps the duel hall", "veille sur la salle des duels"),
     ),
     (
@@ -44,7 +44,7 @@ const TOWNSFOLK: &[(&str, T)] = &[
     ("Ottilie", T::new("keeps the lighthouse", "garde le phare")),
     ("Dace", T::new("waits for a bite", "attend que ça morde")),
     (
-        "Flint",
+        "Tarn",
         T::new("cuts stone in the quarry", "taille la pierre à la carrière"),
     ),
 ];

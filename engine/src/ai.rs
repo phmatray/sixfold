@@ -42,6 +42,24 @@ pub enum Difficulty {
     Hard,
 }
 
+/// How the AI leans, on top of its [`Difficulty`]: a few extra weights in
+/// the same scores, not another AI (`docs/WORLD_DESIGN.md` §4.5).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Style {
+    /// The plain heuristics.
+    #[default]
+    Balanced,
+    /// Damage now: energy to the Active first, any usable attack, a retreat
+    /// only to dodge a knock-out.
+    Aggressive,
+    /// Outlasting: heals early, prizes Sleep and Paralysis, retreats a hurt
+    /// Active sooner and spreads energy over the Bench.
+    Stall,
+    /// The weakest target: Bench damage scores by how close it brings a
+    /// creature to a knock-out, and a forced switch drags up the lowest HP.
+    BenchSniper,
+}
+
 /// A trainer card or a creature's Power (by uid), remembered for the turn.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Play {
@@ -61,6 +79,7 @@ enum Step {
 #[derive(Debug, Clone)]
 pub struct Ai {
     pub difficulty: Difficulty,
+    pub style: Style,
     rng: Rng,
     /// The turn the memory below is about.
     turn: Option<u32>,
@@ -86,6 +105,7 @@ impl Ai {
     pub fn new(seed: u64, difficulty: Difficulty) -> Ai {
         Ai {
             difficulty,
+            style: Style::Balanced,
             rng: Rng::new(seed),
             turn: None,
             actions: 0,
@@ -97,6 +117,12 @@ impl Ai {
             hit: false,
             nodes: 0,
         }
+    }
+
+    /// The same AI with another [`Style`].
+    pub fn with_style(mut self, style: Style) -> Ai {
+        self.style = style;
+        self
     }
 
     /// Answer the prompt player `me` is being asked. The answer is always one
@@ -113,6 +139,7 @@ impl Ai {
             v,
             me,
             legal: game.legal_actions(),
+            style: self.style,
         };
         let hard = self.difficulty == Difficulty::Hard;
         let a = match &kind {
@@ -276,10 +303,16 @@ impl Ai {
             .iter()
             .all(|a| missing(&active.units(), a.cost) > 1);
         // R-AI-18: two idle turns in a row count as trouble, and each one
-        // makes the Bench look 10 points better.
-        let trouble = in_danger(x) || !cond.is_empty() || stuck || self.idle >= 2;
+        // makes the Bench look 10 points better. Aggressive only runs from a
+        // knock-out; Stall also from half its HP gone, and for less.
+        let hurt = x.style == Style::Stall && active.damage() >= active.hp;
+        let trouble = match x.style {
+            Style::Aggressive => in_danger(x),
+            _ => in_danger(x) || !cond.is_empty() || stuck || self.idle >= 2 || hurt,
+        };
+        let margin = if x.style == Style::Stall { 5 } else { 20 };
         let best = x.legal_bench().map(|c| bring_in_score(x, c)).max()?;
-        if !trouble || best <= active_score(x) + 20 - 10 * self.idle as i32 {
+        if !trouble || best <= active_score(x) + margin - 10 * self.idle as i32 {
             return None;
         }
         let switch = x.legal.iter().copied().find(|&a| {
@@ -586,6 +619,7 @@ fn features(g: &Game, me: usize) -> [f32; FEATURES] {
         v: g.view(p),
         me: p,
         legal: Vec::new(),
+        style: Style::Balanced,
     });
     let left = |x: &Ctx| x.mine().prizes.iter().filter(|&&b| b).count() as f32;
     let sum = |x: &Ctx, f: &dyn Fn(&InPlay) -> f32| -> f32 {
@@ -700,6 +734,7 @@ struct Ctx<'a> {
     v: View<'a>,
     me: usize,
     legal: Vec<Action>,
+    style: Style,
 }
 
 impl<'a> Ctx<'a> {
@@ -950,6 +985,11 @@ fn attach_score(x: &Ctx, energy: CardId, slot: usize) -> Option<i32> {
     if slot == 0 && s < 100 && in_danger(x) {
         s -= 30;
     }
+    match x.style {
+        Style::Aggressive if slot == 0 => s += 25,
+        Style::Stall if slot > 0 => s += 15,
+        _ => {}
+    }
     Some(s)
 }
 
@@ -969,8 +1009,8 @@ fn trainer_step(x: &Ctx, effects: &[Effect]) -> Option<Step> {
         Draw(_) => yes(Step::Draw, deck >= 10),
         Search(find) => yes(Step::Draw, deck >= 5 && search_wanted(x, find)),
         Recover(_) => Some(Step::Draw),
-        Heal(n) => yes(Step::Support, active.damage() >= n.min(20)),
-        HealAll(n) => yes(Step::Support, side_damage(x.mine(), n) >= 20),
+        Heal(n) => yes(Step::Support, active.damage() >= n.min(heal_at(x))),
+        HealAll(n) => yes(Step::Support, side_damage(x.mine(), n) >= heal_at(x)),
         AttachFromDeck(_) => {
             let short = active
                 .creature()
@@ -980,7 +1020,10 @@ fn trainer_step(x: &Ctx, effects: &[Effect]) -> Option<Step> {
             yes(Step::Support, short)
         }
         // R-AI-13
-        SwitchDefender { .. } => yes(Step::Support, !sure_ko(x) && ko_able_bench(x)),
+        SwitchDefender { .. } => yes(
+            Step::Support,
+            !sure_ko(x) && (ko_able_bench(x) || softer_bench(x)),
+        ),
         // R-AI-11
         AttachPlus10 => yes(Step::PreAttack, plus10_makes_ko(x)),
         AttachMinus20 => {
@@ -993,6 +1036,24 @@ fn trainer_step(x: &Ctx, effects: &[Effect]) -> Option<Step> {
         // lists them only when they can do something.
         _ => Some(Step::Support),
     }
+}
+
+/// The damage a heal waits for: Stall heals sooner.
+fn heal_at(x: &Ctx) -> u16 {
+    if x.style == Style::Stall {
+        10
+    } else {
+        20
+    }
+}
+
+/// Bench sniper: an opposing Benched creature with less HP left than the
+/// defender, worth dragging up.
+fn softer_bench(x: &Ctx) -> bool {
+    let Some(def) = x.theirs().active else {
+        return false;
+    };
+    x.style == Style::BenchSniper && x.theirs().bench.iter().any(|c| c.hp > 0 && c.hp < def.hp)
 }
 
 fn search_wanted(x: &Ctx, find: Find) -> bool {
@@ -1106,7 +1167,13 @@ fn best_attack(x: &Ctx) -> Option<usize> {
             best = Some((s, i));
         }
     }
-    best.filter(|&(s, _)| s > 0.0).map(|(_, i)| i)
+    // Aggressive takes any attack that doesn't give a prize away.
+    let floor = if x.style == Style::Aggressive {
+        -100.0
+    } else {
+        0.0
+    };
+    best.filter(|&(s, _)| s > floor).map(|(_, i)| i)
 }
 
 /// Expected damage (capped at the defender's HP), +100 times the chance of a
@@ -1135,15 +1202,26 @@ fn effect_value(x: &Ctx, me: &InPlay, def: &InPlay, e: &Effect) -> f32 {
     use Effect::*;
     let negated = x.theirs().effects.shield == Some(Shield::PreventAll);
     let coin = |c: bool| if c { 0.5 } else { 1.0 };
-    let hits = |c: &InPlay, n: u16| if c.hp <= n { 60.0 } else { n as f32 };
+    let stall = x.style == Style::Stall;
+    // Damage to a creature off the Active spot. The sniper scores it by how
+    // close it brings that creature to a knock-out, and a knock-out like an
+    // Active one.
+    let hits = |c: &InPlay, n: u16| match (x.style, c.hp <= n) {
+        (Style::BenchSniper, true) => 100.0 + c.hp as f32,
+        (Style::BenchSniper, false) => n as f32 * (1.0 + 6.0 * n as f32 / c.hp.max(1) as f32),
+        (_, true) => 60.0,
+        (_, false) => n as f32,
+    };
     let v = match *e {
         Inflict { status, coin: c } if !negated && !status_immune(x) => {
+            let (lock, other) = if stall { (2.0, 1.5) } else { (1.0, 1.0) };
             coin(c)
                 * match status {
-                    Status::Paralyzed => 40.0,
-                    Status::Asleep | Status::Confused => 25.0,
-                    Status::Poisoned => 20.0,
-                    Status::DoublePoisoned => 30.0,
+                    Status::Paralyzed => 40.0 * lock,
+                    Status::Asleep => 25.0 * lock,
+                    Status::Confused => 25.0 * other,
+                    Status::Poisoned => 20.0 * other,
+                    Status::DoublePoisoned => 30.0 * other,
                 }
         }
         Place { placed, coin: c } if !negated => {
@@ -1207,8 +1285,8 @@ fn effect_value(x: &Ctx, me: &InPlay, def: &InPlay, e: &Effect) -> f32 {
         }
         DiscardEnergy { count, .. } => -10.0 * count as f32,
         DiscardAllEnergy => -10.0 * me.energy.len() as f32,
-        Heal(n) => n.min(me.damage()) as f32,
-        HealAll(n) => side_damage(x.mine(), n) as f32,
+        Heal(n) => n.min(me.damage()) as f32 * if stall { 2.0 } else { 1.0 },
+        HealAll(n) => side_damage(x.mine(), n) as f32 * if stall { 2.0 } else { 1.0 },
         AttachFromDeck(_) if x.mine().deck_count > 0 => 15.0,
         // Worth half the best attack I could pay for next turn.
         DoubleNextAttack => {
@@ -1341,6 +1419,10 @@ fn choice_score(x: &Ctx, effect: Effect, choice: Choice) -> i32 {
                 // with little energy and HP.
                 let me = x.mine().active;
                 let ko = me.is_some_and(|m| best_rough(m, c, 0) >= c.hp);
+                if x.style == Style::BenchSniper {
+                    // The lowest HP left.
+                    return 1000 * ko as i32 - c.hp as i32;
+                }
                 let weak = me.is_some_and(|m| c.creature().weakness == Some(color(m)));
                 1000 * ko as i32 + 100 * weak as i32 - 20 * c.energy.len() as i32 - c.hp as i32
             } else {
@@ -1812,6 +1894,82 @@ mod tests {
         g.players[0].bench = vec![creature(PEBBLET, &[FIGHTING_E, GRASS_E])];
         g.players[1].active = Some(creature(PEBBLET, &[FIGHTING_E, GRASS_E]));
         g
+    }
+
+    /// The pick of a Normal AI of this style for player 0.
+    fn pick_styled(g: &Game, style: Style) -> Action {
+        normal().with_style(style).choose_action(g, 0)
+    }
+
+    /// Aggressive: a Poisoned Active that isn't about to be knocked out
+    /// stays in and fights; Balanced retreats it.
+    #[test]
+    fn aggressive_retreats_only_from_a_knock_out() {
+        use crate::set::{BOULDERGUT, FIGHTING_ENERGY, PSYCHIC_ENERGY, PUDDOCK, WISPUN};
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(WISPUN, &[PSYCHIC_ENERGY, PSYCHIC_ENERGY]));
+        g.players[0].condition.poison = Poison::Poisoned;
+        g.players[0].bench = vec![creature(BOULDERGUT, &[FIGHTING_ENERGY, FIGHTING_ENERGY])];
+        g.players[1].active = Some(creature(PUDDOCK, &[]));
+        assert_eq!(pick_styled(&g, Style::Balanced), Action::Retreat);
+        assert_ne!(pick_styled(&g, Style::Aggressive), Action::Retreat);
+    }
+
+    /// Stall: heals a 10-damage scratch that Balanced leaves alone.
+    #[test]
+    fn stall_heals_early() {
+        use crate::set::{GRASS_ENERGY, MOSS_POULTICE, SPRIGGET};
+        let mut g = main_phase(0);
+        let mut a = creature(SPRIGGET, &[GRASS_ENERGY]);
+        a.hp -= 10;
+        g.players[0].active = Some(a);
+        set_hand(&mut g, 0, &[MOSS_POULTICE]);
+        assert_ne!(pick_styled(&g, Style::Balanced), Action::PlayTrainer(0));
+        assert_eq!(pick_styled(&g, Style::Stall), Action::PlayTrainer(0));
+    }
+
+    /// Bench sniper: a 10-damage snipe that brings a hurt Benched creature
+    /// halfway to a knock-out beats 20 on the Active; Balanced takes the 20.
+    #[test]
+    fn bench_sniper_goes_for_the_weakest() {
+        use crate::set::{LIGHTNING_ENERGY, OHMLET, RILLET, SPRIGGET};
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(OHMLET, &[LIGHTNING_ENERGY, LIGHTNING_ENERGY]));
+        g.players[1].active = Some(creature(SPRIGGET, &[]));
+        let mut hurt = creature(RILLET, &[]);
+        hurt.hp = 20;
+        g.players[1].bench = vec![hurt];
+        assert_eq!(pick_styled(&g, Style::Balanced), Action::Attack(1));
+        assert_eq!(pick_styled(&g, Style::BenchSniper), Action::Attack(0));
+    }
+
+    /// Bench sniper: the forced switch drags up the lowest HP; Balanced the
+    /// one weak to the attacker.
+    #[test]
+    fn bench_sniper_switches_in_the_lowest_hp() {
+        use crate::set::{GRASS_ENERGY, KNOLLOP, PUDDOCK, SPRIGGET};
+        let mut g = main_phase(0);
+        g.players[0].active = Some(creature(SPRIGGET, &[GRASS_ENERGY]));
+        let mut low = creature(PUDDOCK, &[]);
+        low.hp = 30;
+        g.players[1].bench = vec![creature(KNOLLOP, &[]), low];
+        let switch = Effect::SwitchDefender {
+            chooser_is_attacker: true,
+        };
+        let pick = |style| {
+            let x = Ctx {
+                game: &g,
+                v: g.view(0),
+                me: 0,
+                legal: vec![],
+                style,
+            };
+            (1..=2)
+                .max_by_key(|&slot| choice_score(&x, switch, Choice::Slot { player: 1, slot }))
+                .unwrap()
+        };
+        assert_eq!(pick(Style::Balanced), 1, "Knollop is weak to Grass");
+        assert_eq!(pick(Style::BenchSniper), 2, "Puddock has 30 HP left");
     }
 
     /// R-AI-07: a poisoned Active the defender can knock out retreats, once,

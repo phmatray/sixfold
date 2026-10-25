@@ -11,7 +11,7 @@ use std::collections::{HashMap, VecDeque};
 use std::time::Duration;
 
 use leptos::prelude::*;
-use sixfold_engine::ai::{Ai, Difficulty};
+use sixfold_engine::ai::{Ai, Difficulty, Style};
 use sixfold_engine::tutorial;
 use sixfold_engine::{card, fr, tr, Action, CardId, Config, Event, Game, PromptKind};
 
@@ -74,6 +74,8 @@ pub struct Setup {
     pub names: [String; 2],
     pub prizes: u8,
     pub difficulty: Difficulty,
+    /// How the AI leans: a rival's own style, else Balanced.
+    pub style: Style,
     /// The campaign rival's id, for a duel started from the world.
     pub rival: Option<&'static str>,
     /// A post-game duel: what its result counts for.
@@ -187,8 +189,9 @@ impl Ctl {
         self.error.set(None);
         self.seed.set(seed);
         // Its own seed, so the AI's random choices don't mirror the game's coins.
-        self.ai
-            .set_value(Some(Ai::new(seed ^ 0x5eed_0a11, setup.difficulty)));
+        self.ai.set_value(Some(
+            Ai::new(seed ^ 0x5eed_0a11, setup.difficulty).with_style(setup.style),
+        ));
         self.setup.set_value(Some(setup));
         self.log.set(vec![]);
         self.heard.set_value(vec![]);

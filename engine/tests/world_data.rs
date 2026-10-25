@@ -1,0 +1,215 @@
+//! The world's data, read with the engine's own parser (`docs/WORLD_DESIGN.md`
+//! §9.4): every map's conditions and effects parse, every duel names a rival
+//! or a route duelist, every `card:` a non-promo card, every `pack:` a
+//! booster, every `show:` a panel; `trainer` and `find` blocks are checked as
+//! the dialogue they expand to; find ids are unique and a route duelist is
+//! placed at most once; emote actors stand on the map.
+
+use std::collections::HashMap;
+use std::path::Path;
+
+use serde_json::Value;
+use sixfold_engine::overworld::{parse_cond, parse_effect, Cue, Effect};
+use sixfold_engine::trainers::trainer;
+
+/// What every map seen so far placed.
+#[derive(Default)]
+struct Seen {
+    finds: HashMap<String, String>,
+    trainers: HashMap<String, String>,
+}
+
+fn strs(v: &Value) -> Vec<&str> {
+    match v {
+        Value::String(s) => vec![s],
+        Value::Array(a) => a.iter().filter_map(Value::as_str).collect(),
+        _ => vec![],
+    }
+}
+
+/// Check one map; returns what is wrong, one line each.
+fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
+    let mut bad = vec![];
+    let actors: Vec<&str> = m["npcs"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|n| n["id"].as_str())
+        .chain(["hero"])
+        .collect();
+    let mut cond = |at: &str, c: &str, bad: &mut Vec<String>| {
+        if let Err(e) = parse_cond(c) {
+            bad.push(format!("{name}: {at}: {e}"));
+        }
+    };
+    let effect = |at: &str, e: &str, bad: &mut Vec<String>| match parse_effect(e) {
+        Err(err) => bad.push(format!("{name}: {at}: {err}")),
+        Ok(Effect::Cue(Cue::Emote { actor, .. })) if !actors.contains(&actor.as_str()) => {
+            bad.push(format!("{name}: {at}: no actor {actor:?} on this map"))
+        }
+        Ok(_) => {}
+    };
+    let dialogue = |at: &str,
+                    d: &Value,
+                    bad: &mut Vec<String>,
+                    cond: &mut dyn FnMut(&str, &str, &mut Vec<String>)| {
+        for (i, b) in d.as_array().into_iter().flatten().enumerate() {
+            if let Some(c) = b["if"].as_str() {
+                cond(&format!("{at}.dialogue[{i}].if"), c, bad);
+            }
+            for e in strs(&b["do"]) {
+                effect(&format!("{at}.dialogue[{i}].do"), e, bad);
+            }
+        }
+    };
+
+    for n in m["npcs"].as_array().into_iter().flatten() {
+        let id = n["id"].as_str().unwrap_or("?");
+        let at = format!("npc {id}");
+        if let Some(c) = n["if"].as_str() {
+            cond(&format!("{at}.if"), c, &mut bad);
+        }
+        dialogue(&at, &n["dialogue"], &mut bad, &mut cond);
+        if let Some(t) = n.get("trainer") {
+            // The loader expands the block to won:/lost:/beat: branches and a
+            // challenge ending in duel:<id>.
+            if trainer(id).is_none() {
+                bad.push(format!("{name}: {at}: a trainer block on no route duelist"));
+            }
+            for c in [
+                format!("won:{id}"),
+                format!("lost:{id}"),
+                format!("beat:{id}"),
+            ] {
+                cond(&format!("{at}.trainer"), &c, &mut bad);
+            }
+            effect(&format!("{at}.trainer"), &format!("duel:{id}"), &mut bad);
+            if strs(&t["challenge"]).is_empty() {
+                bad.push(format!("{name}: {at}: a trainer with no challenge line"));
+            }
+            if let Some(other) = seen.trainers.insert(id.to_string(), name.to_string()) {
+                bad.push(format!("{name}: {at}: also placed in {other}"));
+            }
+        }
+    }
+    for (i, it) in m["interactions"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .enumerate()
+    {
+        let at = format!(
+            "interaction {}",
+            it["id"].as_str().map_or(i.to_string(), String::from)
+        );
+        for key in ["if", "glint"] {
+            if let Some(c) = it[key].as_str() {
+                cond(&format!("{at}.{key}"), c, &mut bad);
+            }
+        }
+        dialogue(&at, &it["dialogue"], &mut bad, &mut cond);
+        if it["kind"] == "find" {
+            let Some(id) = it["id"].as_str() else {
+                bad.push(format!("{name}: {at}: a find with no id"));
+                continue;
+            };
+            // Expands to glint !flag:found_<id> and do [give, flag:found_<id>].
+            cond(&at, &format!("!flag:found_{id}"), &mut bad);
+            effect(&at, &format!("flag:found_{id}"), &mut bad);
+            match it["give"].as_str() {
+                Some(g) => effect(&format!("{at}.give"), g, &mut bad),
+                None => bad.push(format!("{name}: {at}: a find gives one effect")),
+            }
+            if let Some(other) = seen.finds.insert(id.to_string(), name.to_string()) {
+                bad.push(format!("{name}: {at}: find id also used in {other}"));
+            }
+        }
+    }
+    for (i, w) in m["warps"].as_array().into_iter().flatten().enumerate() {
+        if let Some(c) = w["if"].as_str() {
+            cond(&format!("warp {i}.if"), c, &mut bad);
+        }
+    }
+    bad
+}
+
+#[test]
+fn every_map_reads_with_the_engine_grammar() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let mut seen = Seen::default();
+    let mut bad = vec![];
+    let mut maps = 0;
+    for entry in std::fs::read_dir(&dir).expect("the world's maps") {
+        let path = entry.unwrap().path();
+        if path.extension().is_none_or(|e| e != "json") {
+            continue;
+        }
+        let text = std::fs::read_to_string(&path).unwrap();
+        let m: Value =
+            serde_json::from_str(&text).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+        let name = path.file_stem().unwrap().to_string_lossy();
+        bad.extend(check_map(&name, &m, &mut seen));
+        maps += 1;
+    }
+    assert!(maps >= 7, "only {maps} maps found in {}", dir.display());
+    assert!(bad.is_empty(), "{}", bad.join("\n"));
+}
+
+/// The checker itself, on a small map using every 1.2 addition.
+#[test]
+fn the_checker_reads_trainer_and_find_blocks() {
+    let good: Value = serde_json::from_str(
+        r#"{
+        "npcs": [
+            { "id": "t_hazel", "trainer": { "sight": 4, "challenge": ["Buzz."] },
+              "dialogue": [{ "if": "beat:t_hazel & count:found_:2", "do": ["emote:t_hazel:heart", "coins:20"] }] },
+            { "id": "perrin", "if": "seals:1", "dialogue": [{ "if": "coins:150", "do": ["pay:150", "pack:ember", "show:trader"] }] }
+        ],
+        "interactions": [
+            { "kind": "find", "id": "w_log", "give": "coins:50", "glint": "!flag:found_w_log" },
+            { "kind": "find", "id": "w_reeds", "give": "card:clearwater_vial", "hidden": true }
+        ],
+        "warps": [{ "if": "item:ferry_pass" }]
+    }"#,
+    )
+    .unwrap();
+    let mut seen = Seen::default();
+    assert_eq!(
+        check_map("woodland", &good, &mut seen),
+        Vec::<String>::new()
+    );
+    // The same duelist and find ids again elsewhere, and assorted bad data.
+    let bad: Value = serde_json::from_str(
+        r#"{
+        "npcs": [
+            { "id": "t_hazel", "trainer": { "challenge": [] } },
+            { "id": "t_nobody", "trainer": { "challenge": ["Hi."] } },
+            { "id": "odd", "dialogue": [{ "if": "weather:sunny", "do": ["duel:nobody", "card:thistlewick", "emote:ghost:bang", "show:nowhere"] }] }
+        ],
+        "interactions": [
+            { "kind": "find", "id": "w_log", "give": "coins:many" },
+            { "kind": "find", "id": "w_new" }
+        ]
+    }"#,
+    )
+    .unwrap();
+    let errors = check_map("seaside", &bad, &mut seen);
+    for want in [
+        "no challenge line",
+        "also placed in woodland",
+        "a trainer block on no route duelist",
+        "weather:sunny",
+        "duel:nobody",
+        "card:thistlewick",
+        "no actor \"ghost\"",
+        "show:nowhere",
+        "find id also used in woodland",
+        "coins:many",
+        "a find gives one effect",
+    ] {
+        assert!(
+            errors.iter().any(|e| e.contains(want)),
+            "missing {want:?} in {errors:#?}"
+        );
+    }
+}

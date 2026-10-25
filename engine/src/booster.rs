@@ -92,6 +92,9 @@ pub static DREAM_PACK: Booster = Booster {
     colors: &[Color::Psychic, Color::Grass],
 };
 
+/// The Wild pack's index in [`BOOSTERS`]: any card can turn up.
+pub const WILD: usize = 2;
+
 /// Every booster, for the shop. Wallets count packs by index here, so new
 /// boosters go at the end.
 pub static BOOSTERS: [&Booster; 7] = [
