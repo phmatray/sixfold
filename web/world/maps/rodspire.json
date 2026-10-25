@@ -1,0 +1,605 @@
+{
+  "title": "The Rodspire",
+  "title_fr": "L'Aiguille-Foudre",
+  "region": "storm",
+  "music": "storm",
+  "width": 28,
+  "height": 28,
+  "tiles": [
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~..~~~666666~~~~",
+    "~~~~~~~~~~~~....~66666666~~~",
+    "~~~~~~~~~~~~....~66666666~~~",
+    "~~~~~~~~~~~~....6666666666~~",
+    "~~~~~~~~~~===...6666666666~~",
+    "~~~~~~~~...=~..~6666666666~~",
+    "~~~~~~~.....~~~~6666666666~~",
+    "~~~~~~~.....~~~~666666666~~~",
+    "~...~~=....===~~~66666666~~~",
+    ".....==.....~==~~6666666611~",
+    "......~.....~==.........~11~",
+    "......~~...~~==..........11~",
+    "......~~~~~~~==..........~~~",
+    ".....~~~~~~~~~...........~~~",
+    ".....~~~~~~~~~...........~~~",
+    "~...~~~~~~~~~~...........~~~",
+    "~~~=~~~~~~~~~~...........~~~",
+    "~~~=~~~~~~~~~~~.........~~~~",
+    "~~~==~~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~..~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~....~~~~~~~~~~~~~~~~~~~~~",
+    "~~~....~~~~~~~~~~~~~~~~~~~~~",
+    "~~~....~~~~~~~~~~~~~~~~~~~~~",
+    "~~~....~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~..~~~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  ],
+  "props": [
+    {
+      "asset": "pylon",
+      "x": 2,
+      "z": 15,
+      "rot": 0,
+      "open": "flag:pylon_1"
+    },
+    {
+      "asset": "pylon",
+      "x": 9,
+      "z": 8,
+      "rot": 0,
+      "open": "flag:pylon_2"
+    },
+    {
+      "asset": "pylon",
+      "x": 13,
+      "z": 3,
+      "rot": 0,
+      "open": "flag:pylon_3"
+    },
+    {
+      "asset": "lift",
+      "x": 20,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 26,
+      "z": 11,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rodspire",
+      "x": 21,
+      "z": 3,
+      "rot": 0,
+      "y": 6,
+      "pulse": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3"
+    },
+    {
+      "asset": "seal_stone",
+      "x": 18,
+      "z": 4,
+      "rot": 0,
+      "y": 6
+    },
+    {
+      "asset": "waymark",
+      "x": 18,
+      "z": 8,
+      "rot": 0,
+      "y": 6,
+      "glow": "#e2ad19"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 4,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 7,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 11,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 15,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 24,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 14,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 3,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 6,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 16,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 1,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 10,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 22,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 5,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 2,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 23,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 8,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 26,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "buoy",
+      "x": 11,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 1,
+      "z": 11,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 1,
+    "z": 13,
+    "facing": "e"
+  },
+  "interactions": [
+    {
+      "kind": "waymark",
+      "id": "rodspire",
+      "x": 18,
+      "z": 8
+    },
+    {
+      "x": 1,
+      "z": 11,
+      "kind": "sign",
+      "text": "The Rodspire. West: back to Stormwatch. Relay pylons power the lift to the top. Keep off the cables in a storm.",
+      "text_fr": "L'Aiguille-Foudre. Ouest : retour à Guette-Orage. Des pylônes relais alimentent l'ascenseur du sommet. Ne touchez pas aux câbles par temps d'orage."
+    },
+    {
+      "x": 2,
+      "z": 15,
+      "kind": "sign",
+      "id": "pylon_1",
+      "name": "Relay pylon 1",
+      "name_fr": "Pylône relais 1",
+      "dialogue": [
+        {
+          "if": "flag:pylon_1",
+          "lines": [
+            "The coil hums, blue and steady. The switch is home."
+          ],
+          "lines_fr": [
+            "La bobine bourdonne, bleue et régulière. Le levier est enclenché."
+          ]
+        },
+        {
+          "lines": [
+            "A knife switch as long as your arm. You heave it down: a crack, a smell of hot copper, and the coil wakes up blue."
+          ],
+          "lines_fr": [
+            "Un levier à couteau long comme le bras. Vous le baissez de toutes vos forces : un claquement, une odeur de cuivre chaud, et la bobine s'éveille en bleu."
+          ],
+          "do": [
+            "flag:pylon_1",
+            "sfx:spark"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 9,
+      "z": 8,
+      "kind": "sign",
+      "id": "pylon_2",
+      "name": "Relay pylon 2",
+      "name_fr": "Pylône relais 2",
+      "dialogue": [
+        {
+          "if": "flag:pylon_2",
+          "lines": [
+            "The coil hums, blue and steady. The switch is home."
+          ],
+          "lines_fr": [
+            "La bobine bourdonne, bleue et régulière. Le levier est enclenché."
+          ]
+        },
+        {
+          "lines": [
+            "A knife switch as long as your arm. You heave it down: a crack, a smell of hot copper, and the coil wakes up blue."
+          ],
+          "lines_fr": [
+            "Un levier à couteau long comme le bras. Vous le baissez de toutes vos forces : un claquement, une odeur de cuivre chaud, et la bobine s'éveille en bleu."
+          ],
+          "do": [
+            "flag:pylon_2",
+            "sfx:spark"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 13,
+      "z": 3,
+      "kind": "sign",
+      "id": "pylon_3",
+      "name": "Relay pylon 3",
+      "name_fr": "Pylône relais 3",
+      "dialogue": [
+        {
+          "if": "flag:pylon_3",
+          "lines": [
+            "The coil hums, blue and steady. The switch is home."
+          ],
+          "lines_fr": [
+            "La bobine bourdonne, bleue et régulière. Le levier est enclenché."
+          ]
+        },
+        {
+          "lines": [
+            "A knife switch as long as your arm. You heave it down: a crack, a smell of hot copper, and the coil wakes up blue."
+          ],
+          "lines_fr": [
+            "Un levier à couteau long comme le bras. Vous le baissez de toutes vos forces : un claquement, une odeur de cuivre chaud, et la bobine s'éveille en bleu."
+          ],
+          "do": [
+            "flag:pylon_3",
+            "sfx:spark"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 22,
+      "z": 5,
+      "kind": "sign",
+      "id": "rodspire_top",
+      "name": "The Rodspire",
+      "name_fr": "L'Aiguille-Foudre",
+      "dialogue": [
+        {
+          "if": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3",
+          "lines": [
+            "Up close the spire never stops humming. Every few seconds a thread of blue light crawls up to the orb at the top."
+          ],
+          "lines_fr": [
+            "De près, l'aiguille ne cesse jamais de bourdonner. Toutes les quelques secondes, un fil de lumière bleue grimpe jusqu'à la sphère du sommet."
+          ]
+        },
+        {
+          "lines": [
+            "A copper lattice tower, green with weather, twelve metres up from the rock. It's silent."
+          ],
+          "lines_fr": [
+            "Une tour en treillis de cuivre, verdie par les intempéries, haute de douze mètres. Elle est silencieuse."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 18,
+      "z": 5,
+      "kind": "sign",
+      "id": "seal_rodspire",
+      "name": "The seal stone",
+      "name_fr": "La pierre de sceau",
+      "dialogue": [
+        {
+          "lines": [
+            "The seal stone's lightning face faces the sea and buzzes faintly under your palm. The top is smooth and blank."
+          ],
+          "lines_fr": [
+            "La face de la foudre de la pierre de sceau regarde la mer et vibre légèrement sous votre paume. Le dessus est lisse et vide."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "st_ledge",
+      "x": 26,
+      "z": 11,
+      "give": "give:curio_bottled_spark",
+      "text": "On the ledge, jammed in a crack where the spray can't reach: a stoppered bottle with a little lightning caught inside.",
+      "text_fr": "Sur la corniche, coincée dans une fente que les embruns n'atteignent pas : une bouteille bouchée avec un petit éclair enfermé dedans."
+    },
+    {
+      "kind": "find",
+      "id": "st_islet",
+      "x": 3,
+      "z": 25,
+      "give": "pack:storm",
+      "text": "Under a stone on the lonely islet, tied up in a fishing net: a sealed booster.",
+      "text_fr": "Sous une pierre de l'îlot solitaire, ficelé dans un filet de pêche : un booster scellé."
+    }
+  ],
+  "warps": [
+    {
+      "x": 20,
+      "z": 13,
+      "to": "rodspire",
+      "label": "Ride the lift up",
+      "label_fr": "Monter par l'ascenseur",
+      "spawn": {
+        "x": 20,
+        "z": 11,
+        "facing": "n"
+      },
+      "if": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3",
+      "locked": "The cage hangs dead on its mast. Somewhere out on the causeway, three relay pylons are switched off.",
+      "locked_fr": "La cage pend, inerte, à son mât. Quelque part sur la chaussée, trois pylônes relais sont coupés."
+    },
+    {
+      "x": 20,
+      "z": 12,
+      "to": "rodspire",
+      "label": "Ride the lift down",
+      "label_fr": "Redescendre par l'ascenseur",
+      "spawn": {
+        "x": 20,
+        "z": 14,
+        "facing": "s"
+      }
+    }
+  ],
+  "exits": [
+    {
+      "side": "w",
+      "span": [
+        12,
+        13
+      ],
+      "to": "stormwatch"
+    }
+  ],
+  "gates": [
+    {
+      "id": "spire_ledge",
+      "tiles": [
+        [
+          24,
+          12
+        ]
+      ],
+      "if": "item:grip_gloves",
+      "prop": "climb_wall_basalt",
+      "rot": 270,
+      "text": "Copper staples climb the stack to a ledge just out of reach. Bare hands won't hold them.",
+      "text_fr": "Des agrafes de cuivre montent le long du rocher jusqu'à une corniche hors de portée. À mains nues, impossible de s'y tenir."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "nils",
+      "name": "Nils",
+      "model": "npc_worker",
+      "x": 2,
+      "z": 12,
+      "facing": "e",
+      "idle": "Idle",
+      "outfit": "#2f6b8a",
+      "hair": "#c8b89a",
+      "dialogue": [
+        {
+          "if": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3",
+          "lines": [
+            "All three humming! Listen to that. The lift's live: up you go."
+          ],
+          "lines_fr": [
+            "Les trois bourdonnent ! Écoute-moi ça. L'ascenseur est sous tension : monte."
+          ]
+        },
+        {
+          "lines": [
+            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
+            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
+            "Nicely never works."
+          ],
+          "lines_fr": [
+            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
+            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
+            "Poliment, ça ne marche jamais."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_corra",
+      "name": "Corra",
+      "model": "npc_worker",
+      "x": 8,
+      "z": 12,
+      "facing": "n",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "That pylon's mine to mind. Want the switch? Win it.",
+          "Three prizes. My Arcfang bites through insulation."
+        ],
+        "challenge_fr": [
+          "Ce pylône, c'est moi qui le garde. Tu veux le levier ? Gagne-le.",
+          "Trois Récompenses. Mon Arcroc mord à travers l'isolant."
+        ],
+        "win": [
+          "Short-circuited. Go on, throw it."
+        ],
+        "win_fr": [
+          "Court-circuitée. Vas-y, baisse-le."
+        ],
+        "lose": [
+          "No current in you yet. Come back charged."
+        ],
+        "lose_fr": [
+          "Pas encore de courant en toi. Reviens chargé."
+        ],
+        "after": [
+          "When the lift's live you can feel it in your teeth. Lovely feeling."
+        ],
+        "after_fr": [
+          "Quand l'ascenseur est sous tension, on le sent dans les dents. Délicieux."
+        ]
+      },
+      "outfit": "#e2ad19",
+      "hair": "#2b211c"
+    },
+    {
+      "id": "t_ves",
+      "name": "Ves",
+      "model": "npc_scholar",
+      "x": 17,
+      "z": 15,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "I keep the signals. Lamps for the ships, lightning for the spire. And duels for visitors.",
+          "Three prizes. Streamfin carries the message."
+        ],
+        "challenge_fr": [
+          "Je garde les signaux. Des lampes pour les bateaux, la foudre pour l'aiguille. Et des duels pour les visiteurs.",
+          "Trois Récompenses. Nageflot porte le message."
+        ],
+        "win": [
+          "Message received."
+        ],
+        "win_fr": [
+          "Message reçu."
+        ],
+        "lose": [
+          "Signal lost. Try again."
+        ],
+        "lose_fr": [
+          "Signal perdu. Réessaie."
+        ],
+        "after": [
+          "On stormy nights the spire draws the lightning down. Quill says it's the best seat in the Galewold."
+        ],
+        "after_fr": [
+          "Les nuits d'orage, l'aiguille attire la foudre. Quill dit que c'est la meilleure place des Hautes-Rafales."
+        ]
+      },
+      "outfit": "#3d5a7a",
+      "hair": "#d8d0c8"
+    }
+  ],
+  "ground": {
+    "base": "ash",
+    "path": "stone",
+    "margin": 9,
+    "tufts": 0
+  },
+  "ring": [],
+  "ringSides": "",
+  "cliff": [
+    "cliff_basalt",
+    "cliff_basalt_b"
+  ],
+  "lightning": true,
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#eef2ff",
+      "intensity": 2.2,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#d8e2ee",
+      "ground": "#3f4a46",
+      "intensity": 1.6
+    },
+    "background": "#a9b8c4",
+    "fog": {
+      "near": 14,
+      "far": 34
+    }
+  }
+}

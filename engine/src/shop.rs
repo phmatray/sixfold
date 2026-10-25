@@ -461,6 +461,16 @@ mod tests {
                 packs,
             });
         }
+        // 1.3 Ember and Storm (§10.1-10.2): their duelists come with TRAINERS above;
+        // their Facet finds (e_pond 60, e_vent_w 100, e_quarry_nook 80, st_wall 50,
+        // st_cliff 40, st_dock 60) and two pack finds (e_rim, st_islet), over five
+        // outdoor maps and four houses; the Lantern quest's errand (three shards on
+        // three maps, a lantern rather than Facets).
+        first.push(Source {
+            minutes: 5 * 10 + 4 * 3 + 15,
+            facets: 390,
+            packs: 2,
+        });
         let rate = packs_per_hour(&first);
         // The "exploring" row of §3.4, per hour: 5 two-prize duelists, 6 finds
         // of ⬡ 40, half a quest of ⬡ 160 and 0.8 of a rival.

@@ -1995,6 +1995,9 @@ select option { background: var(--panel); color: var(--ink); }
 .challenge-head { display: flex; align-items: center; gap: 14px; }
 .challenge-head .portrait { width: 72px; }
 .challenge-head .portrait.mono { font-size: 28px; }
+/* A challenge-rule duelist's house rule, set off like a brass plaque. */
+.challenge-rule { margin: 0 0 12px; padding: 8px 12px; border-left: 3px solid rgba(214, 172, 74, 0.8); background: rgba(214, 172, 74, 0.08); border-radius: 0 6px 6px 0; text-wrap: pretty; }
+.challenge-rule b { color: var(--ink); }
 .rival { grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; }
 .rival > .portrait { grid-row: 1 / span 4; align-self: start; }
 .rival > :not(.portrait) { grid-column: 2; }

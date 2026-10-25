@@ -14,8 +14,12 @@ import { OPTIONAL, RING, cliffSet } from "./map.js";
 
 // Instanced: static, never animated, never read like a sign (one draw per mesh of the model, not per prop).
 const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "reeds", "boardwalk", "pier", "bridge", "stairs",
-  "lantern", "stall", "stall_b", "crates", "bench"]);
-const TREES = new Set(["tree", "pine", "birch"]); // varied in size, turn and tint; half a tile out on the map edge
+  "lantern", "stall", "stall_b", "crates", "bench",
+  "ash_pine", "rock_basalt", "cliff_basalt", "cliff_basalt_b", "stairs_basalt", "climb_wall_basalt", "glass_rack", // Ember
+  "heather", "cliff_heath", "cliff_heath_b", "wall_dry", "wall_dry_corner", "wall_dry_end", "wall_dry_t", "chime_post"]); // Storm (not pylon: animated)
+const TREES = new Set(["tree", "pine", "birch", "ash_pine"]); // varied in size, turn and tint; half a tile out on the map edge
+const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // props whose smoke_origin smokes
+const SMOKE = 8;
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
 
@@ -37,6 +41,7 @@ export function refresh(w, holds, gate, animate = false) {
   w.glints.forEach((g) => (g.sprite.visible = holds(g.it.if) && holds(g.cond)));
   for (const c of w.shown) c.obj.visible = holds(c.p.if);
   for (const o of w.openers) if (o.cond) o.want = holds(o.cond) ? 1 : 0;
+  for (const p of w.pulses) p.on = holds(p.cond);
   for (const m of w.waymarks) {
     const lit = holds(`flag:way_${m.it.id}`);
     if (m.lit === false && lit && animate) m.flash = 1; // just touched: a burst of light
@@ -108,6 +113,12 @@ export function animateProps(w, dt, reduced) {
     o.mixer.update(0);
   }
   for (const m of w.waymarks) if (m.flash) m.flash = Math.max(0, m.flash - dt * 0.8);
+  for (const p of w.pulses) {
+    // A crackle every ~3.5 s (steady with reduced motion), brighter in a lightning flash.
+    const k = reduced ? 0.6 : Math.max(0, Math.sin(w.now * 1.8)) ** 12 + Math.max(0, Math.sin(w.now * 23)) * 0.15;
+    p.sprite.material.opacity = p.on ? Math.min(1, k + (w.flash ?? 0)) : 0;
+    p.sprite.scale.setScalar(2.4 + k * 2);
+  }
   if (!reduced) {
     for (const b of w.boats) {
       b.obj.position.y = (b.y ?? 0) + Math.sin(w.now * 1.4 + b.cx) * 0.035;
@@ -142,7 +153,7 @@ function flatten(template) {
   template.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(template.matrixWorld).invert(), keep = [], parts = [];
   template.traverse((m) => {
-    if (!m.isMesh) return;
+    if (!m.isMesh || !m.visible) return; // a part `recolor` hid
     const rel = new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld);
     // Textured, see-through, `glow` and `glass` parts (lit at night, by name) stay apart.
     if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass/i.test(m.material.name)) return keep.push([m, rel]);
@@ -168,6 +179,39 @@ function flatten(template) {
     out.add(k);
   }
   return (template.userData.flat = out);
+}
+
+// A copy of a model keeping only its upward faces (a cliff block's top, for tiles
+// inside a plateau whose sides nobody sees).
+function topOnly(template) {
+  const out = template.clone(true), a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  delete out.userData.flat;
+  out.traverse((m) => {
+    if (!m.isMesh) return;
+    const g = m.geometry.clone(), pos = g.attributes.position, idx = g.index ? g.index.array : [...Array(pos.count).keys()], keep = [];
+    for (let i = 0; i < idx.length; i += 3) {
+      a.fromBufferAttribute(pos, idx[i]), b.fromBufferAttribute(pos, idx[i + 1]), c.fromBufferAttribute(pos, idx[i + 2]);
+      const ny = c.clone().sub(b).cross(a.clone().sub(b)).normalize().y; // winding is CCW: (b-a)x(c-a) == (c-b)x(a-b)
+      if (Math.abs(ny) > 0.3 && Math.max(a.y, b.y, c.y) > 0.75) keep.push(idx[i], idx[i + 1], idx[i + 2]);
+    }
+    g.setIndex(keep);
+    m.geometry = g;
+  });
+  return out;
+}
+
+// One placed model, merged (`flatten`), keeping its named empties (light_origin,
+// smoke_origin) for the lamps and the smoke.
+function merged(obj) {
+  obj.updateMatrixWorld(true);
+  const out = new THREE.Group();
+  delete obj.userData.flat; // a clone carries a (JSON-copied) cache from its template
+  out.add(flatten(obj));
+  out.traverse((o) => o.isMesh && ((o.castShadow = !o.material.transparent), (o.receiveShadow = true)));
+  obj.traverse((o) => !o.isMesh && o !== obj && o.name && out.add(Object.assign(new THREE.Object3D(), { name: o.name }).applyMatrix4(new THREE.Matrix4().copy(obj.matrixWorld).invert().multiply(o.matrixWorld))));
+  out.position.copy(obj.position);
+  out.rotation.copy(obj.rotation);
+  return out;
 }
 
 // Static props of one kind become InstancedMeshes: one draw per mesh of the
@@ -278,7 +322,7 @@ export async function build(map, got, reduced) {
     if (p.rot % 180 === 90) [fw, fd] = [fd, fw];
     const cx = p.x + fw / 2, cz = p.z + fd / 2, y = p.y ?? 0; // `y` stacks a prop (a step on a cliff)
     let obj = null;
-    if (BATCHED.has(p.asset) && !p.if) {
+    if (BATCHED.has(p.asset) && !p.if && !p.recolor) {
       // Trees vary in model, size, tint and turn; the ones on the map edge sit half a tile out.
       const isTree = TREES.has(p.asset);
       const kinds = variants(p.asset);
@@ -304,6 +348,9 @@ export async function build(map, got, reduced) {
         else (o.material = o.material.clone()), o.material.color.set(c);
       });
       if (p.glow) obj.traverse((o) => o.isMesh && /glow/i.test(o.material.name) && ((o.material = o.material.clone()), o.material.color.set(p.glow), o.material.emissive.set(p.glow).multiplyScalar(0.55))); // a waymark's region colour
+      // A static model (no clip, not afloat) is merged like the instanced ones: one
+      // draw for its flat-coloured parts instead of one per material.
+      if (got[p.asset] && !got[p.asset].animations.length && !BOB.has(p.asset)) obj = merged(obj);
       root.add(obj);
       if (BLOB[p.asset] && !got[p.asset]) blobs.push([cx, cz, BLOB[p.asset]]);
     }
@@ -343,13 +390,20 @@ export async function build(map, got, reduced) {
   // Raised ground ("1".."9": stacked cliff blocks, a mossy top now and then; the map's
   // own `cliff` set when it has one) and deck tiles.
   const cliffs = cliffSet(map);
+  const rise = (x, z) => (inMap(x, z) && tile(x, z) >= "1" && tile(x, z) <= "9" ? +tile(x, z) : 0); // off the map counts as open ground
   for (let z = 0; z < H; z++)
     for (let x = 0; x < W; x++) {
       const c = tile(x, z), turn = () => (Math.floor(r() * 4) * Math.PI) / 2;
       if (c >= "1" && c <= "9")
         for (let k = 0; k < +c; k++) {
+          // A block whose four neighbours all stand higher is hidden: only the top
+          // layer of a plateau and the faces of its edges are drawn (a 4 m crater
+          // rim would otherwise be four blocks per tile, most of them never seen).
+          if (k < +c - 1 && SIDES.every(([dx, dz]) => rise(x + dx, z + dz) > k)) continue;
           const n = k === +c - 1 && got[cliffs[1]] && r() < 0.35 ? cliffs[1] : cliffs[0];
-          batch.add(n, tpl(n), at(x + 0.5, z + 0.5, turn(), 1, k));
+          // Inside a plateau only the top shows: the block without its sides.
+          const inner = k === +c - 1 && got[n] && SIDES.every(([dx, dz]) => rise(x + dx, z + dz) >= +c);
+          batch.add(inner ? `${n}#top` : n, inner ? tpl(`${n}#top`, () => topOnly(tpl(n))) : tpl(n), at(x + 0.5, z + 0.5, turn(), 1, k));
         }
       else if (c === "=" || c === "H") batch.add(c === "=" ? "boardwalk" : "pier", tpl(c === "=" ? "boardwalk" : "pier"), at(x + 0.5, z + 0.5, 0));
     }
@@ -511,6 +565,18 @@ export async function build(map, got, reduced) {
     root.add(sprite);
     return { sprite, cond: i.glint, it: i };
   });
+  // Prop `pulse` (a condition): an arc of light at its `light_origin` every few seconds
+  // while it holds (the Rodspire's tip once its pylons are on).
+  const pulses = props.filter((p) => p.pulse && p.obj).map((p) => {
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: "#9feaff", transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+    p.obj.updateMatrixWorld(true);
+    const o = p.obj.getObjectByName("light_origin");
+    if (o) o.getWorldPosition(s.position);
+    else s.position.set(p.cx, p.y + 3, p.cz);
+    s.scale.setScalar(3.2);
+    root.add(s);
+    return { sprite: s, cond: p.pulse, on: false };
+  });
   // Boats, buoys and lanterns afloat bob; a lighthouse beacon glows at its `light_origin`.
   boats.push(...props.filter((p) => BOB.has(p.asset) && p.obj));
   root.updateMatrixWorld(true);
@@ -550,12 +616,32 @@ export async function build(map, got, reduced) {
   }
 
   root.updateMatrixWorld(true);
+  // Smoke: the first chimney; every kiln and furnace (soot); vents (steam), a gate's
+  // only while it is shut. At most SMOKE sources, so the sprites stay cheap.
+  const smoke = [];
   const chimney = house ?? props.find((p) => p.asset === "cottage")?.obj;
-  const smoke = chimney?.getObjectByName("smoke_origin")?.getWorldPosition(new THREE.Vector3()) ?? null;
+  const top = chimney?.getObjectByName("smoke_origin");
+  if (top) smoke.push({ at: top.getWorldPosition(new THREE.Vector3()), kind: "chimney" });
+  const originOf = (name) => {
+    const o = got[name]?.scene;
+    if (!o) return null;
+    o.updateMatrixWorld(true);
+    return o.getObjectByName("smoke_origin")?.getWorldPosition(new THREE.Vector3()) ?? null;
+  };
+  for (const p of props) {
+    if (!SMOKY[p.asset]) continue;
+    const o = originOf(p.asset);
+    if (o) smoke.push({ at: o.applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(p.rot)).add(new THREE.Vector3(p.cx, p.y, p.cz)), kind: SMOKY[p.asset] });
+  }
+  for (const g of gates) {
+    const o = SMOKY[g.def.prop_closed] && originOf(g.def.prop_closed);
+    if (o) for (const t of g.tiles) smoke.push({ at: o.clone().add(new THREE.Vector3(t.x + 0.5, t.y, t.z + 0.5)), kind: SMOKY[g.def.prop_closed], on: () => !g.open });
+  }
+  smoke.length = Math.min(smoke.length, SMOKE);
   const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
   const life = ambience(root, { flowers, smoke }, reduced);
   return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, door, life, boats, glows, glints,
-    gates, gateAt, shown, openers, waymarks, lamps, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
+    gates, gateAt, shown, openers, waymarks, lamps, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }
 
 // G toggles this: tile lines; red = blocked, gold = look/use, blue = door, green = person.

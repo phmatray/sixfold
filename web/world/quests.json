@@ -130,6 +130,36 @@
           "done": "flag:consult_paid"
         }
       ]
+    },
+    {
+      "id": "lantern",
+      "title": "The Kiln Lantern",
+      "title_fr": "La lanterne de four",
+      "giver": "Clio",
+      "start": "flag:lantern_asked",
+      "done": "flag:lantern_done",
+      "steps": [
+        {
+          "text": "Find a shard of old green cullet by the crates in Emberstep Quarry.",
+          "text_fr": "Trouvez un éclat de vieux calcin vert près des caisses de la Carrière de Pas-de-Braise.",
+          "done": "item:cullet_quarry"
+        },
+        {
+          "text": "Find a shard under the glass rack on Cinderwick's south-east terrace.",
+          "text_fr": "Trouvez un éclat sous le séchoir de la terrasse sud-est de Mèche-Cendre.",
+          "done": "item:cullet_town"
+        },
+        {
+          "text": "Find a shard on the Kilnmouth's west terrace.",
+          "text_fr": "Trouvez un éclat sur la terrasse ouest de la Gueule-du-Four.",
+          "done": "item:cullet_kiln"
+        },
+        {
+          "text": "Bring the three shards to Clio at the Cinderwick Glassworks.",
+          "text_fr": "Apportez les trois éclats à Clio, à la Verrerie de Mèche-Cendre.",
+          "done": "flag:lantern_done"
+        }
+      ]
     }
   ]
 }

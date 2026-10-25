@@ -13,7 +13,8 @@
 // 1.3 (WORLD_DESIGN §7, §13.3): outdoor maps have `title_fr`, a `region` and a `music` track; `fence` and
 // `cliff` name known sets. Gates: tiles in bounds; with every gate shut the spawn still reaches an exit or
 // a warp (no soft-lock), and with every gate open every person, spot, warp and waymark can be reached
-// (floor heights, the 0.6 m step and the ladder rule as build.js has them). The atlas (atlas.json) lists
+// (floor heights, the 0.6 m step and the ladder rule as build.js has them; a door warp to the same map, a
+// lift, carries the fill to where it lands). The atlas (atlas.json) lists
 // every outdoor map under its own title, its roads join listed maps, and each waymark stands on a
 // reachable tile facing its post (a `kind: "waymark"` spot of the same id); posts sit at least 1.7 grid
 // squares apart on the chart, so their 44 px targets never overlap on a phone.
@@ -172,16 +173,23 @@ function reach(name, m, solid0, height0) {
       return ladders.get(`${ax},${az}`) === axis || ladders.get(`${bx},${bz}`) === axis;
     };
     const seen = new Set([`${m.spawn.x},${m.spawn.z}`]), queue = [[m.spawn.x, m.spawn.z]];
-    while (queue.length) {
-      const [x, z] = queue.shift();
-      for (const [dx, dz] of Object.values(DIR)) {
-        const nx = x + dx, nz = z + dz, k = `${nx},${nz}`;
-        if (!inMap(nx, nz) || seen.has(k) || solid.has(k) || !step(x, z, nx, nz)) continue;
-        seen.add(k);
-        queue.push([nx, nz]);
+    // A door warp to this same map (a lift) carries the fill on to its landing.
+    const lifts = (m.warps ?? []).filter((w) => w.to === name && !w.dir);
+    for (;;) {
+      while (queue.length) {
+        const [x, z] = queue.shift();
+        for (const [dx, dz] of Object.values(DIR)) {
+          const nx = x + dx, nz = z + dz, k = `${nx},${nz}`;
+          if (!inMap(nx, nz) || seen.has(k) || solid.has(k) || !step(x, z, nx, nz)) continue;
+          seen.add(k);
+          queue.push([nx, nz]);
+        }
       }
+      const next = lifts.find((w) => !seen.has(`${w.spawn.x},${w.spawn.z}`) && Object.values(DIR).some(([dx, dz]) => seen.has(`${w.x + dx},${w.z + dz}`)));
+      if (!next) return seen;
+      seen.add(`${next.spawn.x},${next.spawn.z}`);
+      queue.push([next.spawn.x, next.spawn.z]);
     }
-    return seen;
   };
   const near = (seen, x, z, across = false) =>
     seen.has(`${x},${z}`) || Object.values(DIR).some(([dx, dz]) => seen.has(`${x + dx},${z + dz}`) || (across && seen.has(`${x + 2 * dx},${z + 2 * dz}`)));

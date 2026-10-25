@@ -13,7 +13,8 @@ const INTERIOR = new Set(["counter", "shelf", "duel_table", "chair", "rug", "pla
 const loader = new GLTFLoader();
 const assets = new Map();
 export const PERSON = /^(npc|rival)_/; // models in assets/npc/
-const folder = (n) => (INTERIOR.has(n) || n.startsWith("wall") ? "interior/" : PERSON.test(n) ? "npc/" : "");
+const WALL = /^wall(_low)?(|_corner|_end|_t|_window)$/; // the interior wall kit (not the outdoor `wall_dry` set)
+const folder = (n) => (INTERIOR.has(n) || WALL.test(n) ? "interior/" : PERSON.test(n) ? "npc/" : "");
 export const loadAsset = (n) => {
   if (!assets.has(n)) assets.set(n, loader.loadAsync(new URL(`assets/${folder(n)}${n}.glb`, BASE).href).catch(() => null));
   return assets.get(n);

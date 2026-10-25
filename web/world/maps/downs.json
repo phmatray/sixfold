@@ -1,0 +1,874 @@
+{
+  "title": "Thrumming Downs",
+  "title_fr": "Les Landes Vibrantes",
+  "region": "storm",
+  "music": "storm",
+  "width": 36,
+  "height": 24,
+  "tiles": [
+    "......111122222222222222222111111~~~",
+    "......111111111111111111111111111~~~",
+    "......111111111111111111111111111~~~",
+    "......11...........111......11111~~~",
+    "...............................11~~~",
+    ".....ffffffffffffffffffff.......1~~~",
+    "...ppppppppppppppppppppppppp....1~~~",
+    "...ppppppppppppppppppppppppp....1~~~",
+    "...ppffffffff...ffffffffffpp....1~~~",
+    "...pp.....................pp...11~~~",
+    "...ppfffff.....ffffffffff.pp....1~~~",
+    "ppppppppppppppppppppppppppppppp.1~~~",
+    "ppppppppppppppppppppppppppppppp.1~~~",
+    ".fffffffffff.p.fffffffffffff.pp.~~~~",
+    ".............p...............pp.~~~~",
+    ".............pfff..fff.......pp.1~~~",
+    ".............pf......f.......pp.1~~~",
+    "......ppppppppf......f.......pp11~~~",
+    "..............f......f.......pp11~~~",
+    "..............f......f111111.pp.1~~~",
+    "..............f......f122221.pp.1~~~",
+    "..............ffffffff111111.pp.1~~~",
+    ".............................pp.1~~~",
+    ".............................pp.1~~~"
+  ],
+  "props": [
+    {
+      "asset": "chime_post",
+      "x": 4,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 7,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 3,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 8,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 4,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 7,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 5,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 6,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 9,
+      "z": 1,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 14,
+      "z": 1,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 22,
+      "z": 1,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 27,
+      "z": 2,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 31,
+      "z": 1,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 17,
+      "z": 2,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 12,
+      "z": 2,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 0,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 30,
+      "z": 2,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 32,
+      "z": 2,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 32,
+      "z": 7,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 32,
+      "z": 16,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 32,
+      "z": 21,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 32,
+      "z": 10,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 31,
+      "z": 18,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 1,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 3,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 2,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 8,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 10,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 16,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 22,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 24,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 28,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 1,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 10,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 11,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 2,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 24,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 27,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 25,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 19,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 6,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 9,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 12,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 5,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 17,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 26,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 9,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 2,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 28,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 15,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 25,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 28,
+      "z": 14,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 2,
+    "z": 12,
+    "facing": "e"
+  },
+  "interactions": [
+    {
+      "x": 2,
+      "z": 9,
+      "kind": "sign",
+      "text": "East along the coast road: Stormwatch. West: Cinderwick and the Emberlands.",
+      "text_fr": "À l'est, par la route de la côte : Guette-Orage. À l'ouest : Mèche-Cendre et les Braisières."
+    },
+    {
+      "x": 28,
+      "z": 21,
+      "kind": "sign",
+      "text": "South: Stormwatch, on its bluff. North: the Downs.",
+      "text_fr": "Sud : Guette-Orage, sur sa falaise. Nord : les Landes."
+    },
+    {
+      "x": 6,
+      "z": 17,
+      "kind": "sign",
+      "id": "chime_ring",
+      "name": "The chime ring",
+      "name_fr": "Le cercle des carillons",
+      "dialogue": [
+        {
+          "if": "time:night",
+          "lines": [
+            "Six old posts round a standing stone. In the dark their chimes ring together, a low chord that hangs in the air."
+          ],
+          "lines_fr": [
+            "Six vieux poteaux autour d'une pierre levée. Dans le noir, leurs carillons sonnent ensemble, un accord grave qui reste suspendu dans l'air."
+          ],
+          "do": [
+            "sfx:chime"
+          ]
+        },
+        {
+          "lines": [
+            "Six old posts round a standing stone. The chimes knock about in the wind, tuneless by day."
+          ],
+          "lines_fr": [
+            "Six vieux poteaux autour d'une pierre levée. Les carillons s'entrechoquent dans le vent, sans mélodie le jour."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "st_wall",
+      "x": 12,
+      "z": 8,
+      "give": "coins:50",
+      "hidden": true,
+      "text": "A loose stone at the end of the wall comes away in your hand. Behind it: Facets, wrapped in a shepherd's rag.",
+      "text_fr": "Une pierre branlante au bout du mur vient toute seule. Derrière : des Facettes, roulées dans un chiffon de berger."
+    },
+    {
+      "kind": "find",
+      "id": "st_chimes",
+      "x": 5,
+      "z": 17,
+      "give": "card:stormox",
+      "text": "At night a hollow in the standing stone glows faintly blue. Inside, dry and humming: a card.",
+      "text_fr": "La nuit, un creux de la pierre levée luit d'un bleu pâle. Dedans, sèche et bourdonnante : une carte.",
+      "if": "time:night"
+    },
+    {
+      "kind": "find",
+      "id": "st_cliff",
+      "x": 32,
+      "z": 10,
+      "give": "coins:40",
+      "text": "Wedged in a crack on the cliff's lip, where the sea wind howls: a little purse of Facets.",
+      "text_fr": "Coincée dans une fente au bord de la falaise, là où hurle le vent du large : une petite bourse de Facettes."
+    }
+  ],
+  "warps": [],
+  "exits": [
+    {
+      "side": "w",
+      "span": [
+        11,
+        12
+      ],
+      "to": "cinderwick"
+    },
+    {
+      "side": "s",
+      "span": [
+        29,
+        30
+      ],
+      "to": "stormwatch"
+    }
+  ],
+  "npcs": [
+    {
+      "id": "ansel",
+      "name": "Ansel",
+      "model": "npc_elder",
+      "x": 19,
+      "z": 14,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#6b6a4a",
+      "hair": "#e6e2d8",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "if": "beat:t_hew",
+          "lines": [
+            "Beat our Hew? Good. He'd have been insufferable for a week.",
+            "The flock likes you. Well, Biscuit does. Biscuit likes everyone."
+          ],
+          "lines_fr": [
+            "Tu as battu notre Hew ? Tant mieux. Il aurait été insupportable pendant une semaine.",
+            "Le troupeau t'aime bien. Enfin, Biscuit. Biscuit aime tout le monde."
+          ]
+        },
+        {
+          "lines": [
+            "Morning! Mind the flock, they've opinions about strangers.",
+            "Hew's my grandson. Duels everyone on the north lane. Gets that from his grandmother.",
+            "When the wind comes off the sea, every chime post on the Downs hums at once. That's why they call them the Thrumming Downs."
+          ],
+          "lines_fr": [
+            "Bonjour ! Attention au troupeau, ils ont un avis sur les étrangers.",
+            "Hew, c'est mon petit-fils. Il défie tout le monde sur le chemin du nord. Ça lui vient de sa grand-mère.",
+            "Quand le vent vient du large, tous les poteaux à carillons des Landes bourdonnent en même temps. C'est pour ça qu'on les appelle les Landes Vibrantes."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "biscuit",
+      "name": "Biscuit",
+      "model": "npc_sheep",
+      "x": 4,
+      "z": 21,
+      "facing": "s",
+      "idle": "Idle",
+      "route": [
+        "e",
+        "e",
+        "n",
+        "w",
+        "w",
+        "s"
+      ],
+      "scale": 1,
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Baa."
+          ],
+          "lines_fr": [
+            "Bêê."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "biscuit_night",
+      "name": "Biscuit",
+      "model": "npc_sheep",
+      "x": 16,
+      "z": 17,
+      "facing": "w",
+      "idle": "Idle",
+      "scale": 1,
+      "if": "time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "...baa. Zzz."
+          ],
+          "lines_fr": [
+            "… bêê. Zzz."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fog",
+      "name": "Fog",
+      "model": "npc_sheep",
+      "x": 9,
+      "z": 20,
+      "facing": "s",
+      "idle": "Idle",
+      "route": [
+        "w",
+        "s",
+        "s",
+        "e",
+        "n",
+        "n"
+      ],
+      "scale": 1,
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Baa."
+          ],
+          "lines_fr": [
+            "Bêê."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fog_night",
+      "name": "Fog",
+      "model": "npc_sheep",
+      "x": 19,
+      "z": 18,
+      "facing": "w",
+      "idle": "Idle",
+      "scale": 1,
+      "if": "time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "...baa. Zzz."
+          ],
+          "lines_fr": [
+            "… bêê. Zzz."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tuft",
+      "name": "Tuft",
+      "model": "npc_sheep",
+      "x": 10,
+      "z": 22,
+      "facing": "s",
+      "idle": "Idle",
+      "route": [
+        "e",
+        "n",
+        "w",
+        "s"
+      ],
+      "scale": 1,
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Baa."
+          ],
+          "lines_fr": [
+            "Bêê."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tuft_night",
+      "name": "Tuft",
+      "model": "npc_sheep",
+      "x": 17,
+      "z": 20,
+      "facing": "w",
+      "idle": "Idle",
+      "scale": 1,
+      "if": "time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "...baa. Zzz."
+          ],
+          "lines_fr": [
+            "… bêê. Zzz."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_hew",
+      "name": "Hew",
+      "model": "npc_kid",
+      "x": 4,
+      "z": 7,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "Grandad says I'm not to duel strangers. You don't look strange. One prize!",
+          "Meet Echopup: best sheepdog on the Downs. Well, card dog."
+        ],
+        "challenge_fr": [
+          "Grand-père dit que je ne dois pas défier les étrangers. Tu n'as pas l'air étrange. Une Récompense !",
+          "Je te présente Échouaf : le meilleur chien de berger des Landes. Enfin, chien de cartes."
+        ],
+        "win": [
+          "Aw. Echopup says good game."
+        ],
+        "win_fr": [
+          "Oh. Échouaf dit bien joué."
+        ],
+        "lose": [
+          "Ha! Herded!"
+        ],
+        "lose_fr": [
+          "Ha ! Rassemblé !"
+        ],
+        "after": [
+          "Grandad's down by the fold with the flock. Don't tell him I lost."
+        ],
+        "after_fr": [
+          "Grand-père est près de l'enclos avec le troupeau. Lui dis pas que j'ai perdu."
+        ]
+      },
+      "outfit": "#4f7a4a",
+      "hair": "#c8a46a"
+    },
+    {
+      "id": "t_maren",
+      "name": "Maren",
+      "model": "npc_scholar",
+      "x": 13,
+      "z": 11,
+      "facing": "n",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 4,
+        "challenge": [
+          "Gust from the north-west, force five. And a duellist, force... let's measure.",
+          "Two prizes. Flashfin rides the wind."
+        ],
+        "challenge_fr": [
+          "Rafale de nord-ouest, force cinq. Et un duelliste, force… mesurons.",
+          "Deux Récompenses. Nagéclair surfe sur le vent."
+        ],
+        "win": [
+          "Force six, then. Noted."
+        ],
+        "win_fr": [
+          "Force six, alors. C'est noté."
+        ],
+        "lose": [
+          "Calm conditions. Try again when you've got some wind in you."
+        ],
+        "lose_fr": [
+          "Temps calme. Réessaie quand tu auras du vent dans les voiles."
+        ],
+        "after": [
+          "The chime posts are my instruments. When they all hum, a storm's eight hours out."
+        ],
+        "after_fr": [
+          "Les poteaux à carillons sont mes instruments. Quand ils bourdonnent tous, une tempête arrive dans huit heures."
+        ]
+      },
+      "outfit": "#e2ad19",
+      "hair": "#3a2a20"
+    },
+    {
+      "id": "t_tull",
+      "name": "Tull",
+      "model": "npc_worker",
+      "x": 28,
+      "z": 7,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 4,
+        "challenge": [
+          "Hear that post? Flat. Everything's flat today, including my mood. Duel?",
+          "Two prizes. Ohmrunner keeps perfect time."
+        ],
+        "challenge_fr": [
+          "Tu entends ce poteau ? Faux. Tout sonne faux aujourd'hui, même mon humeur. Un duel ?",
+          "Deux Récompenses. Ohmcoureur garde le tempo parfait."
+        ],
+        "win": [
+          "Ah. That rang true."
+        ],
+        "win_fr": [
+          "Ah. Ça, ça sonnait juste."
+        ],
+        "lose": [
+          "Off-key! Come back in tune."
+        ],
+        "lose_fr": [
+          "Faux ! Reviens accordé."
+        ],
+        "after": [
+          "There's a ring of old posts by the west wall. At night they play a chord nobody tuned. Not me, anyway."
+        ],
+        "after_fr": [
+          "Il y a un cercle de vieux poteaux près du mur ouest. La nuit, ils jouent un accord que personne n'a accordé. Pas moi, en tout cas."
+        ]
+      },
+      "outfit": "#8a6a3a",
+      "hair": "#6a5a4a"
+    },
+    {
+      "id": "t_odo",
+      "name": "Odo",
+      "model": "npc_wanderer",
+      "x": 5,
+      "z": 18,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 3,
+        "challenge": [
+          "Out in the dark? Me too. I chase storms. Tonight I caught you.",
+          "Three prizes, and Stormox charges like the sky."
+        ],
+        "challenge_fr": [
+          "Dehors dans le noir ? Moi aussi. Je chasse les orages. Ce soir, c'est toi que j'ai attrapé.",
+          "Trois Récompenses, et Taurorage charge comme le ciel."
+        ],
+        "win": [
+          "Grounded. Spectacular."
+        ],
+        "win_fr": [
+          "Mis à la terre. Spectaculaire."
+        ],
+        "lose": [
+          "Struck! Ha!"
+        ],
+        "lose_fr": [
+          "Foudroyé ! Ha !"
+        ],
+        "after": [
+          "The stone in this ring glows at night. Something's hidden in it. I never looked: I'm always looking up."
+        ],
+        "after_fr": [
+          "La pierre de ce cercle luit la nuit. Quelque chose y est caché. Je n'ai jamais regardé : je regarde toujours en l'air."
+        ]
+      },
+      "outfit": "#2f3a5a",
+      "hair": "#e2ad19",
+      "if": "time:night"
+    }
+  ],
+  "ground": {
+    "base": "heath",
+    "path": "dirt",
+    "margin": 9,
+    "tufts": 900
+  },
+  "ring": [
+    "heather",
+    "rock",
+    "bush_dark"
+  ],
+  "ringSides": "nsw",
+  "cliff": [
+    "cliff_heath",
+    "cliff_heath_b"
+  ],
+  "fence": "wall_dry",
+  "lightning": true,
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#f2f5ff",
+      "intensity": 2.3,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#dfe8f2",
+      "ground": "#4f5b3c",
+      "intensity": 1.6
+    },
+    "background": "#b9c6cf",
+    "fog": {
+      "near": 14,
+      "far": 32
+    }
+  }
+}

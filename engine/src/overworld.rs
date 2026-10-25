@@ -70,6 +70,8 @@ const FACINGS: [&str; 4] = ["n", "e", "s", "w"];
 
 /// The bubbles an `emote:` cue may pop over a head.
 pub const EMOTES: [&str; 5] = ["bang", "what", "dots", "heart", "note"];
+/// Sounds a `sfx:` cue may play (the world's sound names in `web/audio/audio.js`).
+pub const SOUNDS: [&str; 5] = ["spark", "chime", "jingle", "gate", "seal"];
 
 /// Flags named after an NPC who has since been renamed, and their new names.
 const RENAMED: [(&str, &str); 3] = [
@@ -166,6 +168,8 @@ pub enum Cue {
         z: u32,
         facing: String,
     },
+    /// Play one of [`SOUNDS`].
+    Sfx(String),
 }
 
 /// What applying an effect did.
@@ -316,6 +320,7 @@ pub fn parse_effect(e: &str) -> Result<Effect, String> {
             actor: s(actor),
             emote: s(emote),
         }),
+        ("sfx", [name]) if SOUNDS.contains(name) => Effect::Cue(Cue::Sfx(s(name))),
         ("clock", [p]) => Effect::Clock(Phase::parse(p).ok_or_else(bad)?),
         ("warp", [map, x, z, f]) if FACINGS.contains(f) => Effect::Cue(Cue::Warp {
             map: s(map),
@@ -908,6 +913,8 @@ mod tests {
             }))
         );
         assert!(p.apply("emote:hero:wave").is_err() && p.apply("emote:hero").is_err());
+        assert_eq!(p.apply("sfx:spark"), Ok(Applied::Cue(Cue::Sfx("spark".into()))));
+        assert!(p.apply("sfx:boom").is_err() && p.apply("sfx").is_err());
         assert_eq!(p, Progress::default(), "cues never change state");
     }
 

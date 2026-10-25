@@ -5,7 +5,7 @@
 //! the dialogue they expand to; find ids are unique and every route duelist
 //! is placed exactly once; emote actors stand on the map. The Journal
 //! (`web/world/quests.json`) only names flags and items some map sets.
-//! 1.3: gate, prop `if` and prop `open` conditions parse; a `warp:` leads to
+//! 1.3: gate, prop `if`, `open` and `pulse` conditions parse; a `warp:` leads to
 //! a map that exists; a night duelist is out only at night (`time:night` in
 //! its `if`); waymark ids are unique and charted in `web/world/atlas.json`.
 
@@ -189,7 +189,7 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
         }
     }
     for (i, p) in m["props"].as_array().into_iter().flatten().enumerate() {
-        for key in ["if", "open"] {
+        for key in ["if", "open", "pulse"] {
             if let Some(c) = p[key].as_str() {
                 cond(&format!("prop {i}.{key}"), c, &mut bad);
             }
