@@ -117,7 +117,8 @@ export function fly_card(from, to) {
   ghost.setAttribute("aria-hidden", "true");
   Object.assign(ghost.style, { position: "fixed", left: a.left + "px", top: a.top + "px", width: a.width + "px", height: a.height + "px", margin: 0, zIndex: 90, pointerEvents: "none", "--w": a.width + "px" });
   ghost.classList.add("flying");
-  document.body.append(ghost);
+  // Inside a modal dialog (the in-game menu), the top layer would hide it from the body.
+  (from.closest("dialog") ?? document.body).append(ghost);
   const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2);
   const s = Math.max(0.18, Math.min(1, (b.height * 1.6) / a.height));
   ghost.animate(
