@@ -24,7 +24,7 @@ pub fn start(back: Screen) {
         prizes: tutorial::PRIZES,
         difficulty: sixfold_engine::ai::Difficulty::Easy,
         style: Default::default(),
-        rival: None,
+        opponent: None,
         post: Some(Post::Tutorial),
         back,
     };

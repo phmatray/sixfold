@@ -15,12 +15,12 @@
     ".........................p..",
     ".........................p..",
     "..................ffffff.p..",
-    ".............p....f....f.p..",
-    ".............p....f....f.p..",
-    ".............p....f....f.p..",
-    ".............p....f....f.p..",
-    ".............p....ff.fff.p..",
-    ".............p...........p..",
+    ".....p.......p....f....f.p..",
+    ".....p.......p....f....f.p..",
+    ".....p.......p....f....f.p..",
+    ".....p.......p....f....f.p..",
+    ".....p.......p....ff.fff.p..",
+    ".....ppppppppp...........p..",
     "....ffffffff.p.ffffffff..p..",
     "pppppppppppppppppppppppppppp",
     ".............p..............",
@@ -106,12 +106,6 @@
       "asset": "flowers",
       "x": 19,
       "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 5,
-      "z": 10,
       "rot": 0
     },
     {
@@ -434,12 +428,6 @@
     },
     {
       "asset": "tree",
-      "x": 3,
-      "z": 7,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
       "x": 23,
       "z": 7,
       "rot": 180
@@ -485,6 +473,30 @@
       "x": 14,
       "z": 21,
       "rot": 0
+    },
+    {
+      "asset": "cottage",
+      "x": 3,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "hanging_sign",
+      "x": 8,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "stump",
+      "x": 2,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 13,
+      "z": 5,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -520,6 +532,32 @@
       "kind": "sign",
       "text": "South: Brightwell Square, the bakery and the market.",
       "text_fr": "Sud : Place de Clairpuits, la boulangerie et le marché."
+    },
+    {
+      "x": 8,
+      "z": 10,
+      "kind": "sign",
+      "text": "The Swap Shop. Cards bought, sold and swapped. Perrin never haggles.",
+      "text_fr": "La Bourse aux cartes. Cartes achetées, vendues, échangées. Perrin ne marchande jamais."
+    },
+    {
+      "kind": "find",
+      "id": "m_stump",
+      "x": 2,
+      "z": 2,
+      "give": "coins:40",
+      "text": "Tucked in the hollow stump: a little heap of Facets.",
+      "text_fr": "Cachée dans la souche creuse : une petite poignée de facettes."
+    },
+    {
+      "kind": "find",
+      "id": "m_hallback",
+      "x": 13,
+      "z": 5,
+      "hidden": true,
+      "give": "card:recall_horn",
+      "text": "Behind the crates, wedged against the hall's back wall: a card someone dropped long ago.",
+      "text_fr": "Derrière les caisses, coincée contre le mur du fond de la salle : une carte perdue il y a longtemps."
     }
   ],
   "warps": [
@@ -529,6 +567,18 @@
       "to": "shop",
       "label": "Go inside",
       "label_fr": "Entrer",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    },
+    {
+      "x": 5,
+      "z": 10,
+      "to": "swap_shop",
+      "label": "Go into the Swap Shop",
+      "label_fr": "Entrer dans la Bourse aux cartes",
       "spawn": {
         "x": 5,
         "z": 7,
@@ -699,6 +749,52 @@
           ]
         }
       ]
+    },
+    {
+      "id": "t_tobin",
+      "name": "Tobin",
+      "model": "npc_kid",
+      "tint": "#ff9b6a",
+      "outfit": "#e2553a",
+      "hair": "#e8b04a",
+      "scale": 0.8,
+      "x": 8,
+      "z": 20,
+      "facing": "n",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 2,
+        "challenge": [
+          "Hey! You've got a deck. I can tell by the way you walk.",
+          "I've read the rules twice, and my Warrenbucks have waited all morning. Duel me!"
+        ],
+        "challenge_fr": [
+          "Hé ! T'as un deck, ça se voit à ta façon de marcher.",
+          "J'ai lu les règles deux fois, et mes Warrenbuck attendent depuis ce matin. Un duel !"
+        ],
+        "win": [
+          "Wait. I forgot to attach energy again, didn't I?",
+          "Here, my purse. Fair's fair."
+        ],
+        "win_fr": [
+          "Attends. J'ai encore oublié d'attacher une énergie, c'est ça ?",
+          "Tiens, ma bourse. C'est la règle."
+        ],
+        "lose": [
+          "Ha! Twice-read rules win again!",
+          "Read them twice too, then come back."
+        ],
+        "lose_fr": [
+          "Ha ! Les règles lues deux fois gagnent encore !",
+          "Lis-les deux fois toi aussi, et reviens."
+        ],
+        "after": [
+          "Next time I'm reading the rules three times. Maybe four."
+        ],
+        "after_fr": [
+          "La prochaine fois, je lis les règles trois fois. Peut-être quatre."
+        ]
+      }
     }
   ],
   "camera": {

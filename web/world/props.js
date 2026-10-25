@@ -251,14 +251,16 @@ export const FOOT = {
   house: [7, 5], tree: [2, 2], counter: [3, 1], shelf: [2, 1], duel_table: [2, 1], rug: [3, 2],
   bridge: [2, 4], lighthouse: [2, 2], boat: [2, 1], stall: [2, 1], stall_b: [2, 1], cottage: [5, 4],
   workshop: [3, 3], fountain: [3, 3], bench: [2, 1],
+  oven: [2, 1], printing_press: [2, 1], bookcase: [2, 1], bed: [2, 1], workbench: [2, 1], light_box: [2, 1],
+  curio_cabinet: [2, 1], seal_stone: [2, 2], cave_mouth: [2, 1], log: [2, 1],
 };
 // Props the hero walks over; every other prop blocks its footprint.
 export const WALKABLE = new Set(["rug", "exit_mat"]);
 // People are spoken to across these (a person behind a counter or a duel table).
-export const ACROSS = new Set(["counter", "duel_table", "stall", "stall_b"]);
+export const ACROSS = new Set(["counter", "duel_table", "stall", "stall_b", "curio_cabinet"]);
 // Decks: walkable even over water, with the floor height the hero stands at, per
 // footprint row along the prop's own Z (front row first; one value for every row).
-export const DECK = { boardwalk: [0.1], pier: [0.3], bridge: [0.12, 0.24, 0.24, 0.12], stairs: [0.5] };
+export const DECK = { boardwalk: [0.1], pier: [0.3], bridge: [0.12, 0.24, 0.24, 0.12], stairs: [0.5], climb_wall: [0.5] };
 // Sway reference height per prop (life.js wind).
 export const WIND_H = { tree: 3.5, bush: 0.8, flowers: 0.4, pine: 3.8, birch: 3.6, reeds: 0.9 };
 // Rough height of a model, for the generic placeholder box of a model not yet built.
@@ -289,6 +291,8 @@ export function prep(root, cast) {
     }
     // COLOR_0 is a wind weight (read by the wind shader), never a tint.
     o.material.vertexColors = false;
+    // A `glow` part (a lamp's glass, the oven's mouth) shines a little on its own.
+    if (/glow/i.test(o.material.name) && o.material.emissive) o.material.emissive.copy(o.material.color).multiplyScalar(0.55);
   });
 }
 

@@ -7,7 +7,8 @@ import { groundLayers, layer } from "./ground.js";
 import { SUFFIX_ARMS } from "./props.js";
 
 const BASE = new URL("./", import.meta.url);
-const INTERIOR = new Set(["counter", "shelf", "duel_table", "chair", "rug", "plant", "display_case", "lamp", "exit_mat"]);
+const INTERIOR = new Set(["counter", "shelf", "duel_table", "chair", "rug", "plant", "display_case", "lamp", "exit_mat",
+  "oven", "printing_press", "type_case", "bookcase", "bed", "workbench", "light_box", "net_locker"]);
 
 const loader = new GLTFLoader();
 const assets = new Map();
@@ -32,9 +33,41 @@ const localize = (o) => {
 const maps = new Map();
 export const loadMap = (name) => {
   if (!maps.has(name))
-    maps.set(name, fetch(new URL(`maps/${name}.json`, BASE)).then((r) => (r.ok ? r.json().then(localize) : Promise.reject(new Error(`map ${name}: HTTP ${r.status}`)))));
+    maps.set(name, fetch(new URL(`maps/${name}.json`, BASE)).then((r) => (r.ok ? r.json().then((m) => expand(localize(m))) : Promise.reject(new Error(`map ${name}: HTTP ${r.status}`)))));
   return maps.get(name);
 };
+
+// The editor (editor.js) previews a map it changed: `raw` is the map as written in its file.
+export const setMap = (name, raw) => maps.set(name, Promise.resolve(expand(localize(structuredClone(raw)))));
+
+// Shorthand blocks become plain dialogue, so one grammar drives everything
+// (WORLD_DESIGN §4.1, §5.1; engine/tests/world_data.rs checks the same expansion).
+// A route duelist (`trainer`): won: -> `win`, lost: -> `lose`, then any hand-written
+// `dialogue`, beat: -> `after`, else `challenge` and the duel offer.
+// A find (`kind: "find"`): `text` and its `give` once (flag found_<id>), a glint
+// until then unless `hidden`, and a shrug after.
+export function expand(map) {
+  for (const n of map.npcs ?? []) {
+    const t = n.trainer;
+    if (!t) continue;
+    const id = n.id, say = (lines, extra) => (lines?.length ? [{ ...extra, lines }] : []);
+    n.dialogue = [
+      ...say(t.win, { if: `won:${id}` }),
+      ...say(t.lose, { if: `lost:${id}` }),
+      ...(n.dialogue ?? []),
+      ...say(t.after, { if: `beat:${id}` }),
+      { lines: t.challenge, do: [`duel:${id}`] },
+    ];
+  }
+  for (const i of map.interactions ?? []) {
+    if (i.kind !== "find") continue;
+    const flag = `found_${i.id}`;
+    if (!i.hidden) i.glint = i.glint ? `${i.glint} & !flag:${flag}` : `!flag:${flag}`;
+    i.name ??= "";
+    i.dialogue = [{ if: `!flag:${flag}`, lines: [i.text], do: [i.give, `flag:${flag}`] }, { lines: [tr("Nothing else here.", "Plus rien ici.")] }];
+  }
+  return map;
+}
 export const OPTIONAL = /_b$|_c$|_dark$/; // variants: used when present, never missed
 export const RING = ["tree", "tree_b", "tree_c", "bush_dark"]; // the default band of trees outside an outdoor map
 

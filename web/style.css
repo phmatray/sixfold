@@ -1821,7 +1821,19 @@ select option { background: var(--panel); color: var(--ink); }
 .seal.earned { background: radial-gradient(circle at 40% 35%, var(--tint), var(--c) 60%, var(--c2)); box-shadow: none; }
 .seal-badge { display: inline-flex; align-items: center; gap: 8px; min-width: 44px; min-height: 44px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .seal-badge .seal { width: 20px; background: radial-gradient(circle at 40% 35%, var(--brass-hi), var(--brass) 60%, #7b5a17); }
-.world-top .seal-badge { margin-left: auto; }
+.world-top .facets { margin-left: auto; }
+.world-top .facets + .seal-badge { margin-left: 0; }
+/* Facets: the world's currency, small hexes cut from seal stone. */
+.facets { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 4px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.facets-n { display: inline-flex; align-items: center; gap: 7px; }
+.facets .hex, .gem { width: 17px; flex: none; aspect-ratio: 1 / 1.1; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: linear-gradient(150deg, #e9fbff 10%, #7fd3e6 45%, #2f8fae 80%); }
+.reward .gem { width: 34px; }
+.facets-n.pop { animation: facets-pop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.facets-n.pop .hex { animation: facets-spin 0.6s ease-out; }
+@keyframes facets-pop { 30% { transform: scale(1.28); color: #bff1ff; } }
+@keyframes facets-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .facets-n.pop, .facets-n.pop .hex { animation: none; } }
+.found-card { --w: 120px; flex: none; transform: rotate(-3deg); }
 .world-top .seal-badge + .btn { margin-left: 0; }
 
 .campaign { display: grid; gap: 20px; max-width: 960px; align-content: start; justify-items: start; }
@@ -1868,6 +1880,13 @@ select option { background: var(--panel); color: var(--ink); }
 .seal-count .champion-chip { margin-left: 10px; vertical-align: 3px; }
 .seal-badge.champion { border-color: rgba(214, 172, 74, 0.55); }
 @media (max-width: 520px) { .world-top .champion-chip { display: none; } }
+/* Narrow phones: the counter, seals, sound and Leave must fit beside the wordmark. */
+@media (max-width: 430px) {
+  .world-top { gap: 4px; padding-left: 12px; }
+  .world-top .facets { padding-inline: 2px; }
+  .world-top .seal-badge { padding-inline: 6px; gap: 6px; }
+  .world-top .btn.ghost:last-child { padding-inline: 10px; }
+}
 
 .ladder-page { display: grid; gap: 10px; width: 100%; }
 .ladder { display: grid; gap: 12px; width: 100%; }

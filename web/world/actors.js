@@ -31,18 +31,32 @@ export const glowTex = radial("rgba(255,255,255,0.9)", "rgba(255,255,255,0)");
 export const blobMat = () => new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
 export const blobGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
 
-export function actor(src, tint, scale, idle) {
+// `tint` lerps the stand-in hero toward a colour. On an NPC's own model, `outfit`
+// recolours the clothes (not skin, eyes, hair or trims) and `hair` the hair, so
+// two people on one model still look like two people.
+const BODY = /skin|eye|white|blush|sole|gold|cream|hair/i;
+export function actor(src, tint, scale, idle, outfit = null, hair = null) {
   const obj = src ? cloneSkinned(src.scene) : PLACEHOLDER.hero();
   prep(obj, true);
-  if (tint) {
-    const c = new THREE.Color(tint);
-    obj.traverse((o) => o.isMesh && ((o.material = o.material.clone()), o.material.color.lerp(c, 0.45)));
-  }
+  // `hue`: take the colour's hue and keep each part's own lightness (garments stay distinct).
+  const recolor = (test, color, k, hue) => {
+    const c = new THREE.Color(color), want = c.getHSL({}), had = {};
+    obj.traverse((o) => {
+      if (!o.isMesh || !test(o.material.name)) return;
+      o.material = o.material.clone();
+      if (hue) o.material.color.getHSL(had), o.material.color.setHSL(want.h, (had.s + want.s) / 2, had.l);
+      else o.material.color.lerp(c, k);
+    });
+  };
+  if (tint) recolor(() => true, tint, 0.45);
+  if (outfit) recolor((n) => !BODY.test(n), outfit, 0, true);
+  if (hair) recolor((n) => /hair/i.test(n), hair, 0.85);
   obj.scale.multiplyScalar(scale);
   const blob = new THREE.Mesh(blobGeo, blobMat());
   blob.userData.shared = true;
   blob.scale.setScalar(0.8 * scale);
-  const a = { obj, blob, base: obj.scale.x, mixer: null, actions: {}, clip: null, idle: 0, t: 0, turnedAt: -1, idleName: (idle ?? "idle").toLowerCase() };
+  const head = new THREE.Box3().setFromObject(obj).max.y;
+  const a = { obj, blob, head: Number.isFinite(head) ? head : 1.45, base: obj.scale.x, mixer: null, actions: {}, clip: null, idle: 0, t: 0, turnedAt: -1, idleName: (idle ?? "idle").toLowerCase() };
   if (src?.animations.length) {
     a.mixer = new THREE.AnimationMixer(obj);
     // The first clip of each name wins: exports can carry duplicates.
@@ -99,6 +113,7 @@ export function animateActor(a, dt, reduced) {
   const up = walking && !reduced ? Math.sin(Math.PI * a.step.t) : 0;
   const squash = walking && !reduced ? 1 - up : 0;
   a.obj.position.y = a.fy + up * 0.05;
+  if (a.bubble?.visible) bubble(a, dt, reduced);
   a.obj.scale.set(a.base * (1 + squash * 0.04), a.base * (1 - squash * 0.06 + up * 0.02), a.base * (1 + squash * 0.04));
 }
 
@@ -135,4 +150,76 @@ export function route(w, hero, tx, tz) {
     }
   }
   return [];
+}
+
+// ---------- Emotes: a bubble over a head ----------
+// "!" when a route duelist spots the hero, and the dialogue cue `emote:<actor>:<kind>`
+// (kinds as `EMOTES` in engine/src/overworld.rs). Drawn over everything, so scenery never hides it.
+const INK = "#0d1a2c", GLYPH = { bang: "#e2553a", what: "#2d5fae", dots: INK, heart: "#e0457b", note: "#2f7175" };
+const bubbles = new Map();
+function bubbleTex(kind) {
+  if (bubbles.has(kind)) return bubbles.get(kind);
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const g = c.getContext("2d");
+  g.lineJoin = "round";
+  g.lineWidth = 7;
+  g.strokeStyle = INK;
+  g.fillStyle = "#fffaf0";
+  g.beginPath(); // a round bubble with a tail toward the head below
+  g.roundRect(14, 10, 100, 86, 34);
+  g.moveTo(54, 94);
+  g.lineTo(64, 118);
+  g.lineTo(76, 94);
+  g.stroke();
+  g.fill();
+  g.fillRect(52, 86, 26, 10);
+  g.fillStyle = g.strokeStyle = GLYPH[kind] ?? INK;
+  g.beginPath();
+  if (kind === "bang") g.roundRect(55, 22, 18, 46, 8), g.arc(64, 81, 9, 0, Math.PI * 2);
+  else if (kind === "dots") for (const x of [38, 64, 90]) g.moveTo(x + 8, 54), g.arc(x, 54, 8, 0, Math.PI * 2);
+  else if (kind === "heart") g.moveTo(64, 82), g.bezierCurveTo(20, 54, 32, 18, 64, 38), g.bezierCurveTo(96, 18, 108, 54, 64, 82);
+  else if (kind === "note") {
+    g.ellipse(52, 72, 13, 10, -0.4, 0, Math.PI * 2);
+    g.rect(58, 26, 8, 46);
+    g.moveTo(62, 26), g.quadraticCurveTo(84, 30, 86, 50), g.quadraticCurveTo(76, 40, 64, 40);
+  } else {
+    // "what": a question mark
+    g.lineWidth = 12;
+    g.lineCap = "round";
+    g.arc(64, 40, 16, Math.PI * 1.1, Math.PI * 0.45);
+    g.lineTo(64, 62);
+    g.stroke();
+    g.beginPath();
+    g.arc(64, 81, 8, 0, Math.PI * 2);
+  }
+  g.fill();
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  bubbles.set(kind, t);
+  return t;
+}
+const POP = 0.2, FADE_OUT = 0.25;
+// Pop a bubble over `a` for `hold` seconds (then it fades).
+export function emote(a, kind, hold = 1.2) {
+  if (!a.bubble) {
+    a.bubble = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthTest: false, depthWrite: false, fog: false }));
+    a.bubble.renderOrder = 20;
+    a.bubble.userData.shared = true; // module-wide textures; the sprite geometry is three's own
+  }
+  if (a.bubble.parent !== a.obj.parent) a.obj.parent?.add(a.bubble);
+  a.bubble.material.map = bubbleTex(kind);
+  a.bubble.material.needsUpdate = true;
+  Object.assign(a.bubble.userData, { t: 0, hold });
+  a.bubble.visible = true;
+  bubble(a, 0, false);
+}
+function bubble(a, dt, reduced) {
+  const b = a.bubble, u = b.userData;
+  u.t += dt;
+  const t = u.t, pop = reduced || t > POP ? 1 : t < POP * 0.6 ? (t / (POP * 0.6)) * 1.25 : 1.25 - ((t - POP * 0.6) / (POP * 0.4)) * 0.25;
+  b.material.opacity = THREE.MathUtils.clamp(1 - (t - u.hold) / FADE_OUT, 0, 1);
+  if (b.material.opacity === 0) b.visible = false;
+  b.scale.setScalar(0.74 * pop);
+  b.position.set(a.obj.position.x, a.obj.position.y + a.head + 0.42, a.obj.position.z);
 }

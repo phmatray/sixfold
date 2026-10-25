@@ -255,10 +255,11 @@ pub fn GameOver() -> impl IntoView {
     // reward.
     let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
     let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
-    let rival = ctl
+    let opponent = ctl
         .setup
-        .with_value(|s| s.as_ref().and_then(|s| s.rival))
-        .and_then(campaign::rival);
+        .with_value(|s| s.as_ref().and_then(|s| s.opponent));
+    let rival = opponent.and_then(campaign::rival);
+    let duelist = opponent.and_then(sixfold_engine::trainers::trainer);
     let post = ctl.setup.with_value(|s| s.as_ref().and_then(|s| s.post));
     let back = ctl
         .setup
@@ -266,6 +267,7 @@ pub fn GameOver() -> impl IntoView {
     let level = ctl.setup.with_value(|s| s.as_ref().map(|s| s.difficulty));
     let reward = RwSignal::new(None::<u32>);
     let campaign_reward = RwSignal::new(None::<campaign::Reward>);
+    let duelist_reward = RwSignal::new(None::<campaign::Reward>);
     let rung_result = RwSignal::new(None::<RungResult>);
     // The daily duel's pack, if this win claimed it.
     let daily_pack = RwSignal::new(None::<usize>);
@@ -302,6 +304,15 @@ pub fn GameOver() -> impl IntoView {
                         );
                     }
                     campaign_reward.set(got);
+                }
+                (None, _) if duelist.is_some() => {
+                    let mut got = None;
+                    progress.update(|pr| {
+                        profile.update(|p| {
+                            got = opponent.and_then(|id| campaign::record_opponent(id, won, pr, p))
+                        })
+                    });
+                    duelist_reward.set(got);
                 }
                 (None, Some(Post::Tutorial)) => {}
                 (None, None) => {
@@ -367,6 +378,7 @@ pub fn GameOver() -> impl IntoView {
                         let coins = progress.with(|p| p.coins());
                         view! {
                         <div class="reward" role="status">
+                            <span class="gem" aria-hidden="true"></span>
                             <p><b>{format!("+⬡ {n}")}</b>
                                 <span>{tr(
                                     format!("You have ⬡ {coins}. Spend Facets on packs at the duel hall."),
@@ -418,6 +430,33 @@ pub fn GameOver() -> impl IntoView {
                             </div>
                         }
                     })}
+                    {move || duelist_reward.get().zip(duelist).map(|(rw, t)| {
+                        let coins = progress.with(|p| p.coins());
+                        view! {
+                            <div class="reward" role="status">
+                                {(rw.facets > 0).then(|| view! { <span class="gem" aria-hidden="true"></span> })}
+                                <p>{if rw.facets > 0 {
+                                    view! {
+                                        <b>{format!("+⬡ {}", rw.facets)}</b>
+                                        <span>{tr(
+                                            format!("{}'s purse. You have ⬡ {coins}.", t.name),
+                                            format!("La bourse de {}. Vous avez ⬡ {coins}.", t.name),
+                                        )}</span>
+                                    }.into_any()
+                                } else if rw.won {
+                                    view! {
+                                        <b>{tr("Won again", "Encore gagné")}</b>
+                                        <span>{tr(format!("{} pays a purse only once.", t.name), format!("{} ne paie sa bourse qu'une fois.", t.name))}</span>
+                                    }.into_any()
+                                } else {
+                                    view! {
+                                        <b>{tr("No purse this time", "Pas de bourse cette fois")}</b>
+                                        <span>{tr(format!("Talk to {} for another go.", t.name), format!("Reparlez à {} pour retenter votre chance.", t.name))}</span>
+                                    }.into_any()
+                                }}</p>
+                            </div>
+                        }
+                    })}
                     {move || rung_result.get().map(|rr| {
                         let (b, n) = rr.packs;
                         view! {
@@ -462,7 +501,7 @@ pub fn GameOver() -> impl IntoView {
                             }}</p>
                         </div>
                     })}
-                    {match (rival, post) {
+                    {match (opponent, post) {
                         (Some(_), _) => view! {
                             <div class="dialog-foot">
                                 {move || if champion_now() {

@@ -9,8 +9,8 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::overworld::{Applied, Progress};
-use sixfold_engine::{campaign, tr};
+use sixfold_engine::overworld::{Applied, Cue, Progress};
+use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
 
 use crate::audio::MuteToggle;
@@ -23,10 +23,10 @@ use crate::{store, Screen};
 // Calls made before the module is in (items, pause) are replayed once it is.
 #[wasm_bindgen(inline_js = r#"
 let api = null, gen = 0, items = "", paused = false;
-export function world_mount(el, controls, cb, start) {
+export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb, start); api.setItems(items); api.pause(paused); })
+    .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb, start, edit && new URLSearchParams(location.search).has("edit")); api.setItems(items); api.pause(paused); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
@@ -35,10 +35,13 @@ export function world_pause(p) { paused = p; api?.pause(p); }
 export function world_items(csv) { items = csv; api?.setItems(csv); }
 export function world_preview(el, name) { api?.preview(el, name); }
 export function world_preview_stop() { api?.previewStop(); }
+export function world_meet(id) { api?.meet(id); }
+export function world_cue(json) { api?.cue(json); }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
-    fn world_mount(el: &JsValue, controls: &JsValue, cb: &JsValue, start: &str);
+    /// `edit`: a debug build, where `?edit` in the URL loads the map editor.
+    fn world_mount(el: &JsValue, controls: &JsValue, cb: &JsValue, start: &str, edit: bool);
     fn world_unmount();
     /// Act on the faced tile, as E does.
     fn world_act();
@@ -48,6 +51,11 @@ extern "C" {
     fn world_items(csv: &str);
     fn world_preview(el: &JsValue, model: &str);
     fn world_preview_stop();
+    /// Back from a duel against `id`: that person (a route duelist walks back
+    /// over) faces the hero and says its post-duel line.
+    fn world_meet(id: &str);
+    /// Play a dialogue cue, as JSON (`{"emote": "heart", "actor": "moss"}`).
+    fn world_cue(json: &str);
 }
 
 /// Hand the owned items to the scene (the shoes unlock running).
@@ -151,7 +159,9 @@ enum Sheet {
     Note(&'static str, String),
     Talk(Talk),
     Item(String),
-    /// A campaign rival's duel offer, by id.
+    /// A card found in the world, now in the collection.
+    Card(CardId),
+    /// A rival's or route duelist's duel offer, by id.
     Challenge(String),
     Roster,
     /// The post-game ladder: the Gauntlet, the daily duel and a Warden rematch.
@@ -188,13 +198,9 @@ pub fn WorldScreen() -> impl IntoView {
     let failed = RwSignal::new(None::<String>);
     let announce = RwSignal::new(String::new());
     let progress = expect_context::<RwSignal<Progress>>();
-    // A campaign duel just ended: once the scene is up, the hero (put back on
-    // its tile, facing the rival) talks to them so the post-duel line plays.
-    let returning = progress.with_untracked(|p| {
-        p.last_duel()
-            .and_then(|(id, _)| campaign::rival(id))
-            .map(|r| r.name)
-    });
+    // A world duel just ended: once the scene is up, the hero (put back on its
+    // tile) and the rival or duelist meet again so the post-duel line plays.
+    let returning = progress.with_untracked(|p| p.last_duel().map(|(id, _)| id.to_string()));
     let reduced = web_sys::window()
         .and_then(|w| {
             w.match_media("(prefers-reduced-motion: reduce)")
@@ -248,9 +254,8 @@ pub fn WorldScreen() -> impl IntoView {
                 "area" => _ = announce.try_set(a),
                 "ready" => {
                     _ = loading.try_set(false);
-                    let facing = near.try_get_untracked().flatten();
-                    if returning.is_some_and(|n| facing == Some(("npc".into(), n.into()))) {
-                        world_act();
+                    if let Some(id) = &returning {
+                        world_meet(id);
                     }
                 }
                 _ => _ = failed.try_set(Some(b)),
@@ -263,7 +268,7 @@ pub fn WorldScreen() -> impl IntoView {
     let mount = move || {
         if let (Some(h), Some(c)) = (host.get_untracked(), controls.get_untracked()) {
             let start = store::world_at().unwrap_or_default();
-            cb.with_value(|cb| world_mount(&h, &c, cb, &start));
+            cb.with_value(|cb| world_mount(&h, &c, cb, &start, cfg!(debug_assertions)));
         }
     };
     Effect::new(move |_| {
@@ -351,6 +356,8 @@ pub fn WorldScreen() -> impl IntoView {
         let mut next = None;
         let mut packs = vec![];
         let mut cards = vec![];
+        let mut cues = vec![];
+        let mut gained = 0;
         progress.update(|p| {
             if p.last_duel().is_some_and(|(id, _)| id == t.id) {
                 p.settle();
@@ -368,7 +375,16 @@ pub fn WorldScreen() -> impl IntoView {
                             Applied::GotItem(item) => next = Some(Sheet::Item(item)),
                             Applied::Duel(id) => next = Some(Sheet::Challenge(id)),
                             Applied::Pack(b) => packs.push(b),
-                            Applied::Card(id) => cards.push(id),
+                            Applied::Card(id) => {
+                                cards.push(id);
+                                if next.is_none() {
+                                    next = Some(Sheet::Card(id));
+                                }
+                            }
+                            Applied::Coins(n) => gained += n,
+                            Applied::Cue(Cue::Emote { actor, emote }) => {
+                                cues.push(format!(r#"{{"actor":"{actor}","emote":"{emote}"}}"#))
+                            }
                             Applied::Show(panel) if panel == "ladder" => next = Some(Sheet::Ladder),
                             Applied::Show(panel) => {
                                 leptos::logging::warn!("world: no panel {panel}")
@@ -382,11 +398,8 @@ pub fn WorldScreen() -> impl IntoView {
                                     ),
                                 ))
                             }
-                            // ponytail: Facets and cues have no HUD yet; the world PR draws them.
-                            Applied::Coins(_)
-                            | Applied::Paid(_)
-                            | Applied::Cue(_)
-                            | Applied::Nothing => {}
+                            // Facets show in the counter (it reads Progress).
+                            Applied::Paid(_) | Applied::Nothing => {}
                         }
                     }
                 }
@@ -394,6 +407,15 @@ pub fn WorldScreen() -> impl IntoView {
             }
         });
         progress.with_untracked(push_items);
+        cues.iter().for_each(|c| world_cue(c));
+        if gained > 0 {
+            crate::audio::sfx("facets", 0.0);
+            let have = progress.with_untracked(Progress::coins);
+            announce.set(tr(
+                format!("+{gained} Facets. You have {have}."),
+                format!("+{gained} facettes. Vous en avez {have}."),
+            ));
+        }
         if !cards.is_empty() {
             profile.update(|p| cards.iter().for_each(|&id| p.collection.add(id, 1)));
         }
@@ -412,6 +434,13 @@ pub fn WorldScreen() -> impl IntoView {
             );
             next = next.or(Some(Sheet::Note(tr("A gift", "Un cadeau"), text.clone())));
             announce.set(text);
+        }
+        if let Some(Sheet::Card(id)) = &next {
+            crate::audio::sfx("jingle", 0.0);
+            announce.set(tr(
+                format!("You found {}.", card(*id).label()),
+                format!("Vous trouvez : {}.", card(*id).label()),
+            ));
         }
         if let Some(Sheet::Item(item)) = &next {
             crate::audio::sfx("jingle", 0.0);
@@ -475,6 +504,7 @@ pub fn WorldScreen() -> impl IntoView {
                     "Arrows or WASD to walk · E to act · Shift to run · G for the grid",
                     "Flèches ou ZQSD pour marcher · E pour agir · Maj pour courir · G pour la grille",
                 )}</span>
+                <Facets />
                 <SealBadge on_open=move || sheet.set(Some(Sheet::Roster)) />
                 <MuteToggle />
                 <button class="btn ghost" on:click=move |_| screen.set(Screen::Title)>{tr("Leave", "Partir")}</button>
@@ -538,6 +568,18 @@ pub fn WorldScreen() -> impl IntoView {
                             </div>
                         }.into_any()
                     }
+                    Sheet::Card(id) => view! {
+                        <div class="item-got">
+                            <span class="found-card" aria-hidden="true"><crate::cards::CardFace id=id /></span>
+                            <div>
+                                <h2 id="world-sheet-title">{tr(format!("You found {}!", card(id).label()), format!("Vous trouvez : {} !", card(id).label()))}</h2>
+                                <p class="dialog-sub">{tr("It's in your collection now.", "La carte rejoint votre collection.")}</p>
+                                <div class="dialog-foot">
+                                    <button class="btn primary" autofocus on:click=close>{tr("Nice", "Super")}</button>
+                                </div>
+                            </div>
+                        </div>
+                    }.into_any(),
                     Sheet::Duel(text) => view! {
                         <h2 id="world-sheet-title">{tr("Duel the AI?", "Défier l'IA ?")}</h2>
                         <p class="dialog-sub">{text}</p>
@@ -576,5 +618,32 @@ pub fn WorldScreen() -> impl IntoView {
                 })}
             </dialog>
         </div>
+    }
+}
+
+/// The Facets held, in the world's top bar; it pops when the count goes up.
+#[component]
+fn Facets() -> impl IntoView {
+    let progress = expect_context::<RwSignal<Progress>>();
+    let coins = Memo::new(move |_| progress.with(Progress::coins));
+    let last = StoredValue::new(coins.get_untracked());
+    let pop = RwSignal::new(0u32);
+    Effect::new(move |_| {
+        let now = coins.get();
+        if now > last.get_value() {
+            pop.update(|n| *n += 1);
+        }
+        last.set_value(now);
+    });
+    view! {
+        <span class="facets" aria-label=move || tr(format!("{} Facets", coins.get()), format!("{} facettes", coins.get()))>
+            // Keyed on `pop`, so the animation restarts on every gain.
+            {move || {
+                let gains = pop.get();
+                view! { <span class="facets-n" class:pop={gains > 0}>
+                    <span class="hex" aria-hidden="true"></span>{move || coins.get()}
+                </span> }
+            }}
+        </span>
     }
 }

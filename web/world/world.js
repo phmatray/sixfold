@@ -1,12 +1,13 @@
 // The overworld test: tile-grid maps (./maps/<name>.json) drawn with three.js.
-// `mount(host, controls, cb, start)` builds it (at `start` = "map,x,z,facing"
-// when given) and returns an api for Leptos (stop, act, pause, setItems,
-// preview, previewStop). `cb(event, a, b)` reports:
+// `mount(host, controls, cb, start, edit)` builds it (at `start` = "map,x,z,facing"
+// when given; `edit`: a debug build with ?edit loads the map editor) and returns an
+// api for Leptos (stop, act, pause, setItems, preview, previewStop, meet, cue).
+// `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
 //   ("use", kind, text)    acted on a sign, the duel table or a locked door
 //   ("at", map, "x,z,f")   the hero stands on a new tile or faces a new way
 //   ("check", cond, "")    asks whether a gated warp's `if` holds (returns a bool)
-//   ("talk", npcId, json)  spoke to an NPC: {"name", "dialogue"} for Leptos to run
+//   ("talk", npcId, json)  spoke to an NPC (or a duelist walked up): {"name", "dialogue"} for Leptos to run
 //   ("area", title, "")    entered an outdoor area that has a `title`
 //   ("ready", "", "")      first frame drawn;  ("error", "", message)
 // Game rules (progression, dialogue effects) live in the engine crate; the world
@@ -19,14 +20,16 @@
 //   build.js   a map's scene (`build`), prop animation, `refresh`, `dispose`
 //   actors.js  hero and NPC rigs (`actor`, `place`, `animateActor`), grid helpers, `route`
 //   npc.js     placing NPCs, their routes, `facing` (what the hero can talk to or use)
+//   trainer.js route duelists: line of sight, the walk over, going quiet
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
 import * as THREE from "three";
 import { U } from "./life.js";
 import { PLACEHOLDER, group, prep } from "./props.js";
 import { tr, loadMap, loadAsset, assetNames, preload, PERSON, OPTIONAL } from "./map.js";
 import { build, dispose, refresh, animateProps } from "./build.js";
-import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route } from "./actors.js";
+import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route, emote } from "./actors.js";
 import { updateNpc, facing as facingOf } from "./npc.js";
+import * as duelists from "./trainer.js";
 
 const STEP = 0.25, RUN_STEP = 0.17; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
@@ -38,7 +41,7 @@ const KEYS = { w: "n", z: "n", arrowup: "n", s: "s", arrowdown: "s", a: "w", q: 
 // Sounds come from web/audio/audio.js (loaded with the wasm), when it is there.
 const sound = (name, n = 0) => globalThis.sixfoldAudio?.sfx(name, n);
 
-export function mount(el, controls, cb, start) {
+export function mount(el, controls, cb, start, edit = false) {
   const mq = matchMedia("(prefers-reduced-motion: reduce)");
   let reduced = mq.matches;
   const onMotion = (e) => ((reduced = e.matches), (U.uSway.value = reduced ? 0 : 1));
@@ -140,7 +143,7 @@ export function mount(el, controls, cb, start) {
     const i = held.indexOf(k);
     if (i >= 0) held.splice(i, 1);
   };
-  const busy = () => paused || warping || !world;
+  const busy = () => paused || warping || !world || !!world.engage; // a duelist coming over locks input
   const onKey = (e) => {
     const k = e.key.toLowerCase();
     if (e.type === "keyup") {
@@ -222,6 +225,20 @@ export function mount(el, controls, cb, start) {
     }
     return null;
   };
+  // The floor tile under a screen point (the editor's pointer).
+  const tileAt = (clientX, clientY) => {
+    const b = renderer.domElement.getBoundingClientRect();
+    ndc.set(((clientX - b.left) / b.width) * 2 - 1, -((clientY - b.top) / b.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    for (const y of world.levels) {
+      floor.constant = -y;
+      if (!ray.ray.intersectPlane(floor, hit)) continue;
+      const tx = Math.floor(hit.x), tz = Math.floor(hit.z);
+      if (!y || Math.abs(world.floorAt(tx, tz) - y) <= 0.3) return [tx, tz];
+    }
+    return null;
+  };
+  let stopEditor = () => {}, editing = () => false; // the map editor (?edit), when loaded
   const onTap = (e) => {
     if (busy() || e.button) return;
     const b = renderer.domElement.getBoundingClientRect();
@@ -280,18 +297,22 @@ export function mount(el, controls, cb, start) {
     const it = facing();
     if (!it) return;
     held.length = 0;
-    if (it.kind === "npc") {
-      const n = it.npc;
-      n.busy = true;
-      n.face = BACK[hero.face]; // turn to the hero, then speak
-      setTimeout(() => alive && cb("talk", n.def.id, JSON.stringify({ name: n.def.name, dialogue: n.def.dialogue })), reduced ? 0 : 160);
-    } else if (it.kind === "warp") tryStep(hero.face, 0);
+    if (it.kind === "npc") talkTo(it.npc);
+    else if (it.kind === "warp") tryStep(hero.face, 0);
     else {
       if (it.obj && !reduced) it.obj.userData.wobble = 1;
       // A spot with its own `dialogue` (a lost item, a letter box) talks like a person.
       if (it.dialogue) cb("talk", it.id, JSON.stringify({ name: it.name ?? "", dialogue: it.dialogue }));
       else cb("use", it.kind, it.text);
     }
+  }
+
+  // Turn a person to the hero, then speak (Leptos runs the dialogue).
+  function talkTo(n) {
+    duelists.engaged(world, n, n.face);
+    n.busy = true;
+    n.face = BACK[hero.face];
+    setTimeout(() => alive && cb("talk", n.def.id, JSON.stringify({ name: n.def.name, dialogue: n.def.dialogue })), reduced ? 0 : 160);
   }
 
   // Where the hero comes in after walking off `w` through `exit` (heading `f`): on the
@@ -345,6 +366,7 @@ export function mount(el, controls, cb, start) {
     const next = await build(map, got, reduced);
     if (!alive) return;
     next.name = name;
+    duelists.enterMap(name);
     refresh(next, holds);
     if (world) dispose(world.root);
     world = next;
@@ -379,6 +401,13 @@ export function mount(el, controls, cb, start) {
       if (!alive) return;
       clock.getDelta();
       raf = requestAnimationFrame(frame);
+      if (edit)
+        import("./editor.js").then((m) => {
+          if (!alive) return;
+          const tool = m.attach({ el, canvas: renderer.domElement, world: () => world, tileAt, rebuild: () => enter(world.name, { x: hero.x, z: hero.z, facing: hero.face }) });
+          stopEditor = tool.stop;
+          editing = tool.editing;
+        });
     })
     .catch(fail);
 
@@ -399,7 +428,7 @@ export function mount(el, controls, cb, start) {
     const prevStep = h.step;
 
     // Finish (or carry on) the current step.
-    let carry = 0, chained = false;
+    let carry = 0, chained = false, spotted = null;
     if (h.step) {
       h.step.t += dt / h.step.dur;
       if (h.step.t >= 1) {
@@ -409,11 +438,20 @@ export function mount(el, controls, cb, start) {
         h.z = done.z;
         h.step = null;
         chained = true;
+        w.calm = false; // a step taken: duelists may look again
         const wp = done.warp ?? w.warps.get(key(h.x, h.z));
         if (wp) warp(wp);
       }
     }
-    if (!h.step && !warping && !paused) {
+    // Standing on a tile (a step just ended, or still): does a duelist see the hero?
+    // After one was dealt with, the next waits for the hero's next step.
+    if (!h.step && !warping && !paused && !w.engage && !w.calm && !editing() && (spotted = duelists.watch(w, h, holds))) {
+      held.length = 0;
+      w.path = [];
+      duelists.spot(w, spotted, h, sound);
+    }
+    if (!paused) duelists.update(w, dt, talkTo);
+    if (!h.step && !warping && !paused && !w.engage) {
       const k = held[held.length - 1];
       if (k) {
         const f = dirOf(k);
@@ -564,6 +602,7 @@ export function mount(el, controls, cb, start) {
 
   const stop = () => {
     alive = false;
+    stopEditor();
     previewStop();
     cancelAnimationFrame(raf);
     ro.disconnect();
@@ -584,11 +623,24 @@ export function mount(el, controls, cb, start) {
       paused = !!p;
       clearHeld();
       if (world) world.path = [];
-      if (!paused) {
+      if (!paused && world) {
         clock.getDelta();
-        world?.npcs.forEach((n) => (n.busy = false));
-        if (world) refresh(world, holds); // a find may be gone now
+        world.npcs.forEach((n) => (n.busy = false));
+        if (world.engage?.talked) (duelists.release(world), (world.calm = true)); // the talk with a duelist is over
+        refresh(world, holds); // a find may be gone now
       }
+    },
+    // Back from a duel against `id`: that person (a duelist walks back over) says its post-duel line.
+    meet(id) {
+      if (!world || warping) return;
+      const n = duelists.meet(world, hero, id);
+      if (n && facing()?.npc === n) talkTo(n);
+    },
+    // A dialogue cue (engine `Cue`), e.g. {"emote": "heart", "actor": "moss"}; actor "hero" is the hero.
+    cue(json) {
+      const c = JSON.parse(json);
+      const a = c.actor === "hero" ? hero : world?.npcs.find((n) => n.def.id === c.actor);
+      if (c.emote && a) emote(a, c.emote);
     },
     setItems(list) {
       canRun = list.split(",").includes("running_shoes");

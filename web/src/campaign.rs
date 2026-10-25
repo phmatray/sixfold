@@ -8,10 +8,11 @@
 use leptos::prelude::*;
 use sixfold_engine::ai::Difficulty;
 use sixfold_engine::booster::{BOOSTERS, WILD};
-use sixfold_engine::campaign::{champion, rival, seals, Rival, RIVALS, SEALS};
+use sixfold_engine::campaign::{champion, opponent, rival, seals, Rival, RIVALS, SEALS};
 use sixfold_engine::endgame::{self, Rung, CLEAR_FLAG, CLEAR_PACKS, GAUNTLET};
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
+use sixfold_engine::trainers::trainer;
 use sixfold_engine::{fr, tr, CardId};
 
 use crate::art::color_key;
@@ -239,7 +240,7 @@ fn daily_setup(day: u32, name: String, cards: Vec<CardId>, back: Screen) -> Setu
         prizes: r.prizes,
         difficulty: r.difficulty,
         style: r.style,
-        rival: None,
+        opponent: None,
         post: Some(Post::Daily(day)),
         back,
     }
@@ -260,7 +261,7 @@ pub fn gauntlet_setup(rung: &Rung, name: String, cards: Vec<CardId>, back: Scree
         prizes: rung.prizes,
         difficulty: rung.difficulty,
         style: r.style,
-        rival: None,
+        opponent: None,
         post: Some(Post::Gauntlet),
         back,
     }
@@ -431,8 +432,9 @@ fn deck_opts(p: &Profile) -> (Vec<Opt>, usize) {
     (opts, pick)
 }
 
-/// The pre-duel sheet: who, for what, with which deck. `before` runs just
-/// before the match starts (the world saves where the hero stands).
+/// The pre-duel sheet: who (a rival or a route duelist), for what, with which
+/// deck. `before` runs just before the match starts (the world saves where the
+/// hero stands).
 #[component]
 pub fn Challenge(
     id: String,
@@ -443,31 +445,34 @@ pub fn Challenge(
     let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<Profile>>();
     let progress = expect_context::<RwSignal<Progress>>();
-    let Some(r) = rival(&id) else {
-        return view! { <p>{tr("Unknown rival.", "Rival inconnu.")}</p> }.into_any();
+    let Some(o) = opponent(&id) else {
+        return view! { <p>{tr("Unknown opponent.", "Adversaire inconnu.")}</p> }.into_any();
     };
-    let open = progress.with_untracked(|p| r.open(p));
+    let r = rival(&id);
+    let open = move || progress.with_untracked(|p| r.is_none_or(|r| r.open(p)));
     let (opts, pick) = profile.with_untracked(deck_opts);
     let playable = opts.iter().any(|o| o.problem.is_none());
     let choice = RwSignal::new(pick);
     let opts = StoredValue::new(opts);
+    let (name, title, prize_n, level) = (o.name, o.title, o.prizes, o.difficulty);
+    let theirs = StoredValue::new(o.deck.clone());
     let start = move || {
-        let Some(o) = opts.with_value(|o| o.get(choice.get_untracked()).cloned()) else {
+        let Some(mine) = opts.with_value(|o| o.get(choice.get_untracked()).cloned()) else {
             return;
         };
-        if o.problem.is_some() || !progress.with_untracked(|p| r.open(p)) {
+        if mine.problem.is_some() || !open() {
             return;
         }
-        store::set_campaign_deck(&o.name);
+        store::set_campaign_deck(&mine.name);
         crate::audio::sfx("challenge", 0.0);
         before();
         let setup = Setup {
-            decks: [o.cards, r.deck.cards()],
-            names: [o.name, format!("{}, {}", r.name, r.title)],
-            prizes: r.prizes,
-            difficulty: r.difficulty,
-            style: r.style,
-            rival: Some(r.id),
+            decks: [mine.cards, theirs.get_value()],
+            names: [mine.name, format!("{name}, {title}")],
+            prizes: prize_n,
+            difficulty: level,
+            style: o.style,
+            opponent: Some(o.id),
             post: None,
             back: Screen::World,
         };
@@ -475,15 +480,31 @@ pub fn Challenge(
             screen.set(Screen::Match);
         }
     };
-    let reward = progress.with_untracked(|p| reward_line(r, p));
+    let what = match r {
+        Some(r) => format!("{title}, {}. ", r.deck.name),
+        None => format!("{title}. "),
+    };
+    let reward = progress.with_untracked(|p| match (r, trainer(&id)) {
+        (Some(r), _) => reward_line(r, p),
+        (None, Some(t)) if !t.beaten(p) => tr(
+            format!("First win: ⬡ {}", t.purse()),
+            format!("Première victoire : ⬡ {}", t.purse()),
+        ),
+        _ => tr(
+            "A friendly rematch, no purse",
+            "Une revanche amicale, sans bourse",
+        )
+        .into(),
+    });
+    let open = open();
     view! {
         <form class="challenge" on:submit=move |e| { e.prevent_default(); start() }>
-            <h2 id="world-sheet-title">{tr(format!("Duel {}?", r.name), format!("Défier {} ?", r.name))}</h2>
+            <h2 id="world-sheet-title">{tr(format!("Duel {name}?"), format!("Défier {name} ?"))}</h2>
             <p class="dialog-sub">
-                {format!("{}, {}. {}, {}. ", r.title, r.deck.name, prizes(r.prizes), difficulty(r.difficulty))}
+                {format!("{what}{}, {}. ", prizes(prize_n), difficulty(level))}
                 <b>{reward}"."</b>
             </p>
-            {if !open {
+            {if let Some(r) = r.filter(|_| !open) {
                 view! { <p class="legal no">{tr(
                     format!("{} needs {} before accepting a duel.", r.name, seals_n(r.needs)),
                     format!("{} exige {} avant d'accepter un duel.", r.name, seals_n(r.needs)),
