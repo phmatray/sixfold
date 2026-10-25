@@ -14,7 +14,7 @@ Each phase lands as one or more pull requests and ships as a minor release cut b
 | 0.8.0 | Saves and slots with export / import, offline play (PWA), a Hard AI that looks ahead, an accessibility pass, a smaller wasm | Released |
 | 0.9.0 | Content complete: credits and the champion's title, the Gauntlet and a daily duel, seven promo cards, a balance pass over every deck, a full campaign playthrough test | Released |
 | 1.0.0 | Final polish and release: a last audit of every screen, accessibility and console fixes, a Low Tide balance nudge | Released |
-| 1.1.0 | French: the whole game in French or English, original French card names, an EN / FR switch | In progress |
+| 1.1.0 | French: the whole game in French or English, original French card names, an EN / FR switch | Released |
 
 After 1.0: a second human player (two people on one device, or over the network).
 
