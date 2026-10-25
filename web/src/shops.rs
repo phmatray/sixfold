@@ -1,5 +1,6 @@
 //! The world's shop panels (`docs/WORLD_DESIGN.md` §3 and §6): Perrin's Swap
-//! Shop, Wynne's pack counter, Mags's Deck Clinic and Gus's Press. They open
+//! Shop, Wynne's pack counter, Mags's Deck Clinic and Gus's Press, and a
+//! regional inn's counter (§7.4) under its rest panel. They open
 //! as sheets in the world's dialog; the rules are the engine's (`shop`,
 //! `doctor`), these only show them and call them. Progress and the profile
 //! are context signals, saved by `store` whenever they change.
@@ -11,7 +12,7 @@ use sixfold_engine::campaign::RIVALS;
 use sixfold_engine::doctor::{self, Issue, Severity, Swap};
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
-use sixfold_engine::shop::{self, ShopError};
+use sixfold_engine::shop::{self, InnStock, ShopError};
 use sixfold_engine::{card, tr, CardId};
 
 use crate::binder::{FilterBar, Filters, Own, RarityMark};
@@ -226,6 +227,102 @@ pub fn Trader() -> impl IntoView {
             </section>
             <Said said=said node=NodeRef::new() />
         </div>
+    }
+}
+
+/// A regional inn's counter, under its rest panel: the region's pack, the
+/// Wild pack, and four singles at single prices (one a Rare to save for).
+#[component]
+pub fn InnCounter(stock: &'static InnStock) -> impl IntoView {
+    let (progress, profile) = signals();
+    let said = RwSignal::new(String::new());
+    let buy_pack = move |b: usize| match deal((progress, profile), |p, pr| shop::buy_pack(p, pr, b))
+    {
+        Ok(()) => {
+            crate::audio::sfx("jingle", 0.0);
+            said.set(
+                tr(
+                    format!(
+                        "You bought {}. Open packs from the title screen.",
+                        packs_label(b, 1)
+                    ),
+                    format!(
+                        "Vous achetez {}. Ouvrez vos boosters depuis l'écran titre.",
+                        packs_label(b, 1)
+                    ),
+                ) + &balance(progress),
+            );
+        }
+        Err(e) => said.set(e.to_string()),
+    };
+    let buy = move |slot: usize| match deal((progress, profile), |p, pr| {
+        shop::buy_inn_single(p, pr, stock, slot)
+    }) {
+        Ok(id) => {
+            crate::audio::sfx("jingle", 0.0);
+            said.set(
+                tr(
+                    format!("Bought {}. It's in your collection.", card(id).label()),
+                    format!(
+                        "Vous achetez {}. La carte rejoint votre collection.",
+                        card(id).label()
+                    ),
+                ) + &balance(progress),
+            );
+        }
+        Err(e) => said.set(e.to_string()),
+    };
+    let packs = [stock.booster(), sixfold_engine::booster::WILD];
+    view! {
+        <section class="shop inn-counter" aria-labelledby="inn-counter-title">
+            <h3 id="inn-counter-title">{tr("At the counter", "Au comptoir")}</h3>
+            <ul class="inn-packs">
+                {packs.into_iter().map(|i| {
+                    let b = &BOOSTERS[i];
+                    let price = Memo::new(move |_| progress.with(|p| shop::pack_price(i, p)));
+                    let rival = RIVALS.iter().find(|r| r.booster == i).map_or("?", |r| r.name);
+                    view! {
+                        <li class="inn-pack">
+                            <span class=format!("pack p-{}", crate::packs::pack_theme(i)) aria-hidden="true">
+                                <span class="pack-crimp"></span>
+                                <span class="pack-name">{b.name.get().trim_end_matches(" Pack").trim_start_matches("Booster ")}</span>
+                                <span class="pack-crimp bottom"></span>
+                            </span>
+                            {move || match price.get() {
+                                Some(n) => view! {
+                                    <button type="button" class="btn"
+                                        aria-label=tr(format!("Buy one {} for {n} Facets", b.name), format!("Acheter un {} pour {n} Facettes", b.name))
+                                        on:click=move |_| buy_pack(i)>
+                                        {format!("⬡ {n}")}
+                                    </button>
+                                }.into_any(),
+                                None => view! { <span class="shop-lock">{tr(format!("After {rival}"), format!("Après {rival}"))}</span> }.into_any(),
+                            }}
+                        </li>
+                    }
+                }).collect_view()}
+            </ul>
+            <ul class="stock">
+                {stock.singles.into_iter().enumerate().map(|(slot, id)| {
+                    let def = card(id);
+                    let price = shop::SINGLE_PRICE[shop::tier(id).unwrap_or(0)];
+                    let have = move || profile.with(|p| p.collection.count(id));
+                    view! {
+                        <li class="stock-slot">
+                            <span class="stock-card" aria-hidden="true"><CardFace id=id /></span>
+                            <span class="stock-meta" aria-hidden="true"><RarityMark rarity=def.rarity /><span>{move || match have() { 0 => tr("New", "Nouvelle").to_string(), n => format!("×{n}") }}</span></span>
+                            <button type="button" class="btn primary"
+                                aria-label=move || tr(format!("Buy {}, {}, {}, for {price} Facets", def.label(), rarity_label(def.rarity), owned(have())),
+                                                      format!("Acheter {}, {}, {}, pour {price} Facettes", def.label(), rarity_label(def.rarity), owned(have())))
+                                on:click=move |_| buy(slot)>
+                                {format!("⬡ {price}")}
+                            </button>
+                        </li>
+                    }
+                }).collect_view()}
+            </ul>
+            <Said said=said node=NodeRef::new() />
+        </section>
     }
 }
 

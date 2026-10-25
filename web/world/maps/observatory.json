@@ -19,7 +19,7 @@
       "asset": "telescope",
       "x": 5,
       "z": 2,
-      "rot": 0
+      "rot": 270
     },
     {
       "asset": "bookcase",

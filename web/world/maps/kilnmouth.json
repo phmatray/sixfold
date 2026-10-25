@@ -853,6 +853,18 @@
     ],
     "clamp": false
   },
+  "light_night": {
+    "hemisphere": {
+      "sky": "#5a4262",
+      "ground": "#3a1a12",
+      "intensity": 0.7
+    },
+    "background": "#2a1b22",
+    "fog": {
+      "near": 13,
+      "far": 32
+    }
+  },
   "light": {
     "sun": {
       "color": "#ffcf98",

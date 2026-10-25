@@ -16,7 +16,7 @@ import { OPTIONAL, RING, cliffSet } from "./map.js";
 const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "reeds", "boardwalk", "pier", "bridge", "stairs",
   "lantern", "stall", "stall_b", "crates", "bench",
   "ash_pine", "rock_basalt", "cliff_basalt", "cliff_basalt_b", "stairs_basalt", "climb_wall_basalt", "glass_rack", // Ember
-  "heather", "cliff_heath", "cliff_heath_b", "wall_dry", "wall_dry_corner", "wall_dry_end", "wall_dry_t", "chime_post"]); // Storm (not pylon: animated)
+  "heather", "cliff_heath", "cliff_heath_b", "stairs_heath", "wall_dry", "wall_dry_corner", "wall_dry_end", "wall_dry_t", "chime_post"]); // Storm (not pylon: animated)
 const TREES = new Set(["tree", "pine", "birch", "ash_pine"]); // varied in size, turn and tint; half a tile out on the map edge
 const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // props whose smoke_origin smokes
 const SMOKE = 8;

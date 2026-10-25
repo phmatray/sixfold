@@ -913,7 +913,10 @@ mod tests {
             }))
         );
         assert!(p.apply("emote:hero:wave").is_err() && p.apply("emote:hero").is_err());
-        assert_eq!(p.apply("sfx:spark"), Ok(Applied::Cue(Cue::Sfx("spark".into()))));
+        assert_eq!(
+            p.apply("sfx:spark"),
+            Ok(Applied::Cue(Cue::Sfx("spark".into())))
+        );
         assert!(p.apply("sfx:boom").is_err() && p.apply("sfx").is_err());
         assert_eq!(p, Progress::default(), "cues never change state");
     }

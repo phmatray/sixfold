@@ -23,7 +23,7 @@ const dir = process.argv[2] ?? "web/world";
 const src = readFileSync(`${dir}/props.js`, "utf8");
 const FOOT = eval(`(${src.match(/export const FOOT = (\{[\s\S]*?\});/)[1]})`);
 const DECK = eval(`(${src.match(/export const DECK = (\{[\s\S]*?\});/)[1]})`);
-const WALKABLE = new Set(["rug", "exit_mat", ...Object.keys(DECK)]);
+const WALKABLE = new Set([...eval(`(${src.match(/export const WALKABLE = new Set\((\[[\s\S]*?\])\);/)[1]})`), ...Object.keys(DECK)]);
 const ACROSS = eval(`(${src.match(/export const ACROSS = new Set\((\[[\s\S]*?\])\);/)[1]})`);
 const LADDER = new Set(eval(`(${src.match(/export const LADDER = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove", "stone", "cave"]);

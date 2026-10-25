@@ -139,14 +139,14 @@
           "if": "flag:lantern_asked & count:cullet_:3",
           "lines": [
             "One, two, three. Good old green, eleven millimetres. Stand back, half a metre.",
-            "...",
-            "There. A coal of the Great Kiln, sealed in amber glass. Hold it level.",
+            "She dips the pipe in the glory hole, turns it, blows. Amber glass swells like a soap bubble round a red coal from the Great Kiln.",
+            "There. Sealed in amber, it won't go out. Hold it level.",
             "The quarry's west face has a cave nobody's walked in years. Now you can."
           ],
           "lines_fr": [
             "Un, deux, trois. Du bon vieux vert, onze millimètres. Recule, un demi-mètre.",
-            "...",
-            "Voilà. Une braise du Grand Four, scellée dans du verre ambré. Tiens-la droite.",
+            "Elle plonge la canne dans le four, la tourne, souffle. Le verre ambré gonfle comme une bulle de savon autour d'une braise rouge du Grand Four.",
+            "Voilà. Scellée dans l'ambre, elle ne s'éteindra pas. Tiens-la droite.",
             "La paroi ouest de la carrière a une grotte où personne n'a marché depuis des années. Maintenant, tu peux."
           ],
           "do": [

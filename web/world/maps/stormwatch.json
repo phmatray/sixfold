@@ -21,7 +21,7 @@
     "......ppprrrrrpppppppppppppppppp",
     ".....pppprrrrrpppppppppppp......",
     ".........rrrrrpp................",
-    "fffffffffrrrrrpp....fffffffff...",
+    "fffffffffrrrrrpp.............fff",
     "..............ppp...............",
     "..............ppp...............",
     "1111111111....ppp.......11111111",
@@ -42,13 +42,13 @@
       "y": 2
     },
     {
-      "asset": "stairs",
+      "asset": "stairs_heath",
       "x": 20,
       "z": 9,
       "rot": 0
     },
     {
-      "asset": "stairs",
+      "asset": "stairs_heath",
       "x": 20,
       "z": 7,
       "rot": 0,
@@ -104,6 +104,57 @@
         "sx_slate": "#4f5a66",
         "sx_slate_dk": "#3e4752"
       }
+    },
+    {
+      "asset": "terrace_house",
+      "x": 25,
+      "z": 14,
+      "rot": 0,
+      "recolor": {
+        "sx_sn_masonry": "#b9b6ad",
+        "sx_sn_masonry_dk": "#9b988f",
+        "sx_sn_roof": "#4f5a66",
+        "sx_sn_roof_dk": "#3e4752",
+        "sx_sn_rust": "#2f6b8a",
+        "sx_sn_rust_dk": "#24546d",
+        "sx_sn_door": "#2f4a6b"
+      }
+    },
+    {
+      "asset": "stall_b",
+      "x": 10,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 9,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 8,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 8,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "chime_post",
+      "x": 22,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "crab_pots",
+      "x": 29,
+      "z": 17,
+      "rot": 0
     },
     {
       "asset": "waymark",
@@ -564,6 +615,30 @@
       ]
     },
     {
+      "id": "wenna",
+      "name": "Wenna",
+      "model": "npc_sailor",
+      "x": 10,
+      "z": 15,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#c0582d",
+      "hair": "#d8c8a0",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Mackerel! Crab! Something with too many legs, ask me later!",
+            "Rhian buys half my catch for the Weathervane's stew. The other half, Bo eats while pretending to count it."
+          ],
+          "lines_fr": [
+            "Maquereau ! Crabe ! Un truc avec trop de pattes, demande-moi plus tard !",
+            "Rhian m'achète la moitié de ma pêche pour le ragoût de la Girouette. L'autre moitié, Bo la mange en faisant semblant de la compter."
+          ]
+        }
+      ]
+    },
+    {
       "id": "oswin",
       "name": "Oswin",
       "model": "npc_elder",
@@ -607,9 +682,9 @@
       "id": "t_greer",
       "name": "Greer",
       "model": "npc_wanderer",
-      "x": 10,
-      "z": 14,
-      "facing": "n",
+      "x": 13,
+      "z": 9,
+      "facing": "w",
       "idle": "Idle",
       "trainer": {
         "sight": 0,

@@ -138,11 +138,13 @@
           "if": "!flag:talked_rhian",
           "lines": [
             "Welcome to the Weathervane! Shut the door, the wind's got opinions tonight.",
-            "Beds, a fire, and a storm log so you know what you slept through. Rest's free for duellists. Till when?"
+            "Beds, a fire, and a storm log so you know what you slept through. Rest's free for duellists. Till when?",
+            "And if you're buying, the counter has Storm packs and a Fulgurex I keep polished."
           ],
           "lines_fr": [
             "Bienvenue à la Girouette ! Ferme la porte, le vent a des avis, ce soir.",
-            "Des lits, un feu, et un journal des tempêtes pour savoir ce que tu as manqué en dormant. Le repos est gratuit pour les duellistes. Jusqu'à quand ?"
+            "Des lits, un feu, et un journal des tempêtes pour savoir ce que tu as manqué en dormant. Le repos est gratuit pour les duellistes. Jusqu'à quand ?",
+            "Et si tu achètes, le comptoir a des boosters Orage et un Fulgurion que je garde bien astiqué."
           ],
           "do": [
             "show:inn"

@@ -1007,6 +1007,9 @@ pub fn WorldScreen() -> impl IntoView {
                                     }
                                 }).collect_view()}
                             </div>
+                            // A regional inn also keeps a counter (§7.4); the hub's only rests.
+                            {here.with_untracked(|(map, _)| sixfold_engine::shop::inn_stock(map))
+                                .map(|stock| view! { <crate::shops::InnCounter stock=stock /> })}
                         }.into_any()
                     }
                     Sheet::Atlas => view! {

@@ -2084,6 +2084,12 @@ select option { background: var(--panel); color: var(--ink); }
 }
 
 /* Wynne: the pack shelf, smaller. */
+/* A regional inn's counter, under the rest choices. */
+.inn-counter { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.inn-counter h3 { margin: 0 0 10px; }
+.inn-packs { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 18px; }
+.inn-pack { display: flex; align-items: center; gap: 10px; }
+.inn-pack .pack { --pw2: 44px; }
 .pack-counter { margin: 0; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
 .pack-counter .shelf-item { padding: 10px 12px; gap: 14px; }
 .pack-counter .pack { --pw2: 64px; }

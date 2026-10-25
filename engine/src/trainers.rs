@@ -139,19 +139,35 @@ impl Rule {
     /// Whether `deck` keeps the rule.
     pub fn allows(self, deck: &[CardId]) -> bool {
         let defs = || deck.iter().map(|&id| card(id));
-        let stage = |s| defs().filter(|c| c.creature().is_some_and(|cr| cr.stage == s)).count();
+        let stage = |s| {
+            defs()
+                .filter(|c| c.creature().is_some_and(|cr| cr.stage == s))
+                .count()
+        };
         match self {
-            Rule::BasicsOnly => stage(Stage::Basic) == defs().filter(|c| c.creature().is_some()).count(),
-            Rule::NoTrainers => defs().all(|c| matches!(c.kind, CardKind::Creature(_) | CardKind::Energy(_))),
+            Rule::BasicsOnly => {
+                stage(Stage::Basic) == defs().filter(|c| c.creature().is_some()).count()
+            }
+            Rule::NoTrainers => {
+                defs().all(|c| matches!(c.kind, CardKind::Creature(_) | CardKind::Energy(_)))
+            }
             Rule::MonoColour => {
                 let mut colours = defs().filter_map(|c| match &c.kind {
                     CardKind::Energy(EnergyCard::Basic(col)) => Some(*col),
-                    _ => c.creature().map(|cr| cr.color).filter(|&col| col != Color::Colorless),
+                    _ => c
+                        .creature()
+                        .map(|cr| cr.color)
+                        .filter(|&col| col != Color::Colorless),
                 });
                 let first = colours.next();
                 colours.all(|c| Some(c) == first)
             }
-            Rule::LightEnergy => defs().filter(|c| matches!(c.kind, CardKind::Energy(_))).count() <= 16,
+            Rule::LightEnergy => {
+                defs()
+                    .filter(|c| matches!(c.kind, CardKind::Energy(_)))
+                    .count()
+                    <= 16
+            }
             Rule::NoRares => defs().all(|c| c.rarity != Rarity::Rare),
             Rule::TwoStage2 => stage(Stage::Stage2) >= 2,
         }
@@ -160,12 +176,24 @@ impl Rule {
     /// What the rule asks, as the challenge sheet says it.
     pub fn text(self) -> T {
         match self {
-            Rule::BasicsOnly => T::new("Basic creatures only: no Stage 1 or Stage 2.", "Créatures de Base uniquement : ni Stade 1 ni Stade 2."),
-            Rule::NoTrainers => T::new("Creatures and energy only: no Trainers.", "Créatures et énergies uniquement : aucun Dresseur."),
-            Rule::MonoColour => T::new("One colour only, plus Colorless creatures.", "Une seule couleur, plus les créatures Incolores."),
+            Rule::BasicsOnly => T::new(
+                "Basic creatures only: no Stage 1 or Stage 2.",
+                "Créatures de Base uniquement : ni Stade 1 ni Stade 2.",
+            ),
+            Rule::NoTrainers => T::new(
+                "Creatures and energy only: no Trainers.",
+                "Créatures et énergies uniquement : aucun Dresseur.",
+            ),
+            Rule::MonoColour => T::new(
+                "One colour only, plus Colorless creatures.",
+                "Une seule couleur, plus les créatures Incolores.",
+            ),
             Rule::LightEnergy => T::new("At most 16 energy cards.", "16 cartes Énergie au plus."),
             Rule::NoRares => T::new("No Rares.", "Aucune carte Rare."),
-            Rule::TwoStage2 => T::new("At least two Stage 2 creatures.", "Au moins deux créatures de Stade 2."),
+            Rule::TwoStage2 => T::new(
+                "At least two Stage 2 creatures.",
+                "Au moins deux créatures de Stade 2.",
+            ),
         }
     }
 }
@@ -411,7 +439,10 @@ mod tests {
         // §4.4: five 1-prize, seven 2-prize and two 3-prize duelists (585);
         // §10.1-10.2: Ember 45 + 60 + 45 + 90 + 120, Storm 30 + 45 + 45 + 60
         // + 60 + 90 + 120 (810).
-        assert_eq!(TRAINERS.iter().map(Trainer::purse).sum::<u32>(), 585 + 360 + 450);
+        assert_eq!(
+            TRAINERS.iter().map(Trainer::purse).sum::<u32>(),
+            585 + 360 + 450
+        );
         // A night duelist plays Hard; a rule duelist's own deck keeps its rule
         // when the rule can be kept by a kit.
         for t in TRAINERS.iter() {
@@ -447,8 +478,14 @@ mod tests {
         assert!(Rule::BasicsOnly.allows(&kindling) && !Rule::BasicsOnly.allows(&bellows));
         assert!(Rule::NoTrainers.allows(&mono_fire) && !Rule::NoTrainers.allows(&kindling));
         assert!(Rule::MonoColour.allows(&mono_fire) && Rule::MonoColour.allows(&fire_and_scampit));
-        assert!(!Rule::MonoColour.allows(&scrap), "Scrap pads with Fire and Water");
-        assert!(!Rule::LightEnergy.allows(&kindling), "a kit pads to 60 with energy");
+        assert!(
+            !Rule::MonoColour.allows(&scrap),
+            "Scrap pads with Fire and Water"
+        );
+        assert!(
+            !Rule::LightEnergy.allows(&kindling),
+            "a kit pads to 60 with energy"
+        );
         let light: Vec<CardId> = [CINDREL; 4].into_iter().chain([FIRE_ENERGY; 16]).collect();
         assert!(Rule::LightEnergy.allows(&light));
         assert!(Rule::NoRares.allows(&bellows) && !Rule::NoRares.allows(&forge));

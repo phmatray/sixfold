@@ -255,15 +255,15 @@ export const FOOT = {
   curio_cabinet: [2, 1], seal_stone: [2, 2], cave_mouth: [2, 1], log: [2, 1],
   ferry: [4, 2], cave_mouth_slate: [2, 1],
   kiln: [4, 4], glass_furnace: [2, 2], glass_rack: [2, 1], lava_glass: [2, 2], // Ember
-  observatory: [5, 5], lift: [2, 2], rodspire: [3, 3], // Storm
+  observatory: [5, 5], lift: [2, 2], rodspire: [3, 3], telescope: [2, 2], // Storm
 };
 // Props the hero walks over; every other prop blocks its footprint.
-export const WALKABLE = new Set(["rug", "exit_mat"]);
+export const WALKABLE = new Set(["rug", "exit_mat", "tidepool"]);
 // People are spoken to across these (a person behind a counter or a duel table).
 export const ACROSS = new Set(["counter", "duel_table", "stall", "stall_b", "curio_cabinet"]);
 // Decks: walkable even over water, with the floor height the hero stands at, per
 // footprint row along the prop's own Z (front row first; one value for every row).
-export const DECK = { boardwalk: [0.1], pier: [0.3], bridge: [0.12, 0.24, 0.24, 0.12], stairs: [0.5], climb_wall: [0.5], climb_wall_basalt: [0.5], stairs_basalt: [0.5],
+export const DECK = { boardwalk: [0.1], pier: [0.3], bridge: [0.12, 0.24, 0.24, 0.12], stairs: [0.5], climb_wall: [0.5], climb_wall_basalt: [0.5], stairs_basalt: [0.5], stairs_heath: [0.5],
   lantern_raft: [0.1], ladder: [1.5] };
 // Ladders join their front and back neighbours whatever the height (floor 0 in front, a 3 m deck behind).
 export const LADDER = new Set(["ladder"]);
@@ -276,7 +276,7 @@ export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0
   waymark: 1.7, inn_sign: 1.9, ember_vent: 1.7, rubble: 1.4, ford_stones: 0.1, lantern_raft: 0.1, climb_wall: 1, climb_wall_basalt: 1, ladder: 3.4,
   ferry: 2.1, buoy: 1.4, floating_lantern: 0.6,
   kiln: 4.5, glass_furnace: 2.8, glass_rack: 1.8, lava_glass: 0.3, ash_pine: 3.1, cliff_basalt: 1, cliff_basalt_b: 1, stairs_basalt: 0.5,
-  observatory: 5.7, lift: 5.4, rodspire: 12.1, pylon: 3.2, chime_post: 2.6, heather: 0.5, wall_dry: 0.95, cliff_heath: 1, cliff_heath_b: 1 };
+  observatory: 5.7, lift: 5.4, rodspire: 12.1, pylon: 3.2, chime_post: 2.6, heather: 0.5, wall_dry: 0.95, cliff_heath: 1, cliff_heath_b: 1, stairs_heath: 0.5, telescope: 2.2 };
 
 // Auto-tiling for fences ("f") and walls ("W"): neighbour mask (N=1, E=2, S=4, W=8)
 // -> [piece suffix, rot]. At rot 0: "" = arms W+E, _corner = W+S, _end = W,

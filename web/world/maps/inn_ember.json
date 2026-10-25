@@ -138,11 +138,13 @@
           "if": "!flag:talked_keld",
           "lines": [
             "Soup.",
-            "Beds are upstairs. Resting's free. Dawn, day, dusk or night: say which."
+            "Beds are upstairs. Resting's free. Dawn, day, dusk or night: say which.",
+            "Counter's got packs and cards. Solarlynx, if you've the Facets. Most don't."
           ],
           "lines_fr": [
             "De la soupe.",
-            "Les lits sont en haut. Le repos est gratuit. Aube, jour, crépuscule ou nuit : dis-moi."
+            "Les lits sont en haut. Le repos est gratuit. Aube, jour, crépuscule ou nuit : dis-moi.",
+            "Au comptoir, des boosters et des cartes. Héliolynx, si tu as les Facettes. Peu les ont."
           ],
           "do": [
             "show:inn"

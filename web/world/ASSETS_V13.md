@@ -284,11 +284,28 @@ Sheets: `stone_tiles.png`, `stone_day.png`, `stone_night.png`.
 
 ---
 
+## Added in 1.3 PR 2 (Ember and Storm)
+
+| Asset | Foot | What | Tris |
+|---|---|---|---|
+| `kiln`, `glass_furnace` | — | now carry a `light_origin` at the mouth / front glory hole (the plaza's light at night) | as before |
+| `kiln_lantern` | item | the Kiln Lantern: amber bulb round a glowing coal, copper ribs and cap, a wire bail (`v13_ember.py`) | 628 |
+| `glass_marble` | item | curio (`e_rack`): a plum-sized marble with an ember twist, on a brass stand | 472 |
+| `stairs_heath` | 1×1 | granite steps with turf cheeks, the `stairs` contract (deck 0.5): the Stormwatch bluff | 564 |
+| `telescope` | 2×2 | the observatory's brass telescope on an equatorial mount and a granite plinth, a stool (`v13_storm.py`) | 888 |
+| `bottled_spark` | item | curio (`st_ledge`): a stoppered bottle with blue lightning inside | 382 |
+| `npc/npc_sheep` | NPC | Ansel's sheep: woolly body, dark face, floppy ears, four legs on object animation, clips `Idle` (grazing), `Walk` (diagonal pairs, 0.5 s), `Fidget` (head shake). `tools/blender/build_sheep.py` | 972 |
+
+    blender -b --factory-startup -P tools/blender/build_regions_v13.py -- --region ember,storm --out web/world/assets \
+        --only kiln,glass_furnace,kiln_lantern,glass_marble,stairs_heath,telescope,bottled_spark
+    blender -b --factory-startup -P tools/blender/build_sheep.py -- --out web/world/assets/npc
+
+The Stone set's `menhir` stands in the Downs' chime ring, and the Tide set's `tidepool`, `crab_pots`, `ferry` and
+`buoy` dress the Rodspire and the Stormwatch dock.
+
 ## Not built (left for later)
 
-- **Sheep** for Thrumming Downs (Ansel's flock): an NPC needs its own quadruped rig with `Idle`/`Walk`/`Fidget`.
 - **Interior furniture** for the new 1.3 interiors (seven inns, glassworks, observatory, harbour office, tailor, cobbler,
-  climbing school): they reuse the 1.2 interior kit; bespoke pieces (a glory-hole bench, a telescope) are a later pass.
+  climbing school): they reuse the 1.2 interior kit; bespoke pieces (a glory-hole bench) are a later pass; the telescope landed in 1.3 PR 2.
 - **Climb-wall variants** for slate and the Grove trunk: the shared sandstone `climb_wall` and `climb_wall_basalt` cover
   the gloves walls for now (the Rootholm trunk and the headframe would each suit a bespoke one).
-- **Stairs for Storm**: `stairs_basalt` stands in on the Stormwatch bluff.
