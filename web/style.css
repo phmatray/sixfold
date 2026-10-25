@@ -2374,6 +2374,10 @@ select option { background: var(--panel); color: var(--ink); }
 .journal-btn { display: inline-flex; align-items: center; gap: 6px; }
 .world-top .journal-btn { margin-left: auto; }
 .world-top .journal-btn + .facets { margin-left: 0; }
+/* The current objective: one quiet line above the errands. */
+.objective { display: flex; gap: 10px; align-items: baseline; margin: 10px 0 0; max-width: 70ch; color: var(--ink); text-wrap: pretty; }
+.objective-label { flex: none; font: 700 12px var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass-hi); }
+.menu-panel .objective { margin-top: 0; }
 .quests { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
 .quest { padding: 12px 14px; border-radius: 14px; border: 1.5px solid rgba(214, 172, 74, 0.45); background: rgba(19, 33, 58, 0.75); display: grid; gap: 4px; }
 .quest p { margin: 0; }
@@ -2549,6 +2553,7 @@ p.atlas-pick { color: var(--muted); }
 .menu-split .side-panel { top: 120px; min-height: 0; max-height: calc(100dvh - 180px); border: 1px solid var(--line); border-radius: 14px; }
 .menu-panel .settings-body { max-width: 480px; margin: 0; box-shadow: none; }
 .menu-panel .atlas, .menu-panel .quests { margin-top: 0; }
+.menu-panel .objective + .quests, .menu-panel .objective + .dialog-sub { margin-top: 12px; }
 /* The deck editor in the menu: its own bar replaces the menu's head. */
 .menu-panel:has(.editor) { padding: 0; }
 .menu-panel .page { min-height: 0; }
