@@ -112,6 +112,12 @@
       "rot": 0
     },
     {
+      "asset": "signpost",
+      "x": 27,
+      "z": 4,
+      "rot": 0
+    },
+    {
       "asset": "bridge",
       "x": 28,
       "z": 21,
@@ -452,9 +458,9 @@
       }
     },
     {
-      "asset": "bollard",
+      "asset": "crates",
       "x": 32,
-      "z": 21,
+      "z": 20,
       "rot": 0
     },
     {
@@ -586,6 +592,13 @@
       "text_fr": "Sud : le Jardin du Puits-de-Lune. Par les lanternes sur le lac, la nuit ; par la rive est, à toute heure."
     },
     {
+      "x": 27,
+      "z": 4,
+      "kind": "sign",
+      "text": "Causeway to the Bellflats. Low water only, 8 in the morning to 6 in the evening. After that the sea has it.",
+      "text_fr": "Chaussée des Grèves de la Cloche. À marée basse seulement, de 8 h à 18 h. Ensuite, la mer la reprend."
+    },
+    {
       "x": 30,
       "z": 7,
       "kind": "sign",
@@ -633,10 +646,10 @@
       "kind": "find",
       "id": "d_jetty",
       "x": 32,
-      "z": 21,
+      "z": 20,
       "give": "card:gloamowl",
-      "text": "Tied to the last bollard with a ribbon, in a jar to keep the river out: a card. A label says \"for the first one off the boat\".",
-      "text_fr": "Attachée au dernier bollard avec un ruban, dans un bocal pour la garder de l'eau : une carte. Une étiquette dit « pour le premier qui descend du bateau »."
+      "text": "In a crate by the jetty, under a coil of rope, in a jar to keep the river out: a card. A label says \"for the first one off the boat\".",
+      "text_fr": "Dans une caisse près de l'embarcadère, sous un rouleau de corde, dans un bocal pour la garder de l'eau : une carte. Une étiquette dit « pour le premier qui descend du bateau »."
     },
     {
       "kind": "find",

@@ -105,13 +105,13 @@
     {
       "asset": "signpost",
       "x": 1,
-      "z": 9,
+      "z": 6,
       "rot": 0
     },
     {
       "asset": "signpost",
-      "x": 9,
-      "z": 22,
+      "x": 8,
+      "z": 24,
       "rot": 0
     },
     {
@@ -548,12 +548,6 @@
     },
     {
       "asset": "reeds",
-      "x": 8,
-      "z": 24,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
       "x": 0,
       "z": 0,
       "rot": 0
@@ -704,12 +698,6 @@
     },
     {
       "asset": "flowers",
-      "x": 25,
-      "z": 5,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
       "x": 16,
       "z": 2,
       "rot": 0
@@ -817,14 +805,14 @@
     },
     {
       "x": 1,
-      "z": 9,
+      "z": 6,
       "kind": "sign",
       "text": "West: the Saltwind Boardwalk, and the meadow beyond. South, through the dunes: the Bellflats.",
       "text_fr": "Ouest : la Promenade de Ventsalé, et le pré au-delà. Au sud, par les dunes : les Grèves de la Cloche."
     },
     {
-      "x": 9,
-      "z": 22,
+      "x": 8,
+      "z": 24,
       "kind": "sign",
       "text": "The Bellflats. The tide goes out at eight in the morning and comes back at six. After dark, keep to the boardwalk.",
       "text_fr": "Les Grèves de la Cloche. La mer se retire à huit heures du matin et revient à six heures du soir. Une fois la nuit tombée, restez sur le ponton."

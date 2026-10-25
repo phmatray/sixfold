@@ -84,6 +84,12 @@
       "rot": 0
     },
     {
+      "asset": "signpost",
+      "x": 13,
+      "z": 30,
+      "rot": 0
+    },
+    {
       "asset": "tree",
       "x": 15,
       "z": 0,
@@ -597,6 +603,13 @@
       "kind": "sign",
       "text": "North: Brightwell Square. South: Lanternmere, on its lake. West, over the ford: the Deepgrove.",
       "text_fr": "Nord : la Place de Clairpuits. Sud : Lac-aux-Lanternes, sur son lac. Ouest, après le gué : le Bois-Profond."
+    },
+    {
+      "x": 13,
+      "z": 30,
+      "kind": "sign",
+      "text": "South: Lanternmere and its lanterns. North, up the lane: Brightwell Square.",
+      "text_fr": "Sud : Lac-aux-Lanternes et ses lanternes. Nord, en remontant l'allée : la Place de Clairpuits."
     },
     {
       "x": 6,
