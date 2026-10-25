@@ -91,18 +91,31 @@ pub fn duel_state(g: &Game) {
     intensity(f64::from(u8::from(last)));
 }
 
+thread_local! {
+    /// One mute flag for every speaker button and the settings checkbox, so
+    /// muting from one shows on the others (the world's top bar stays mounted
+    /// under the in-game menu's Options).
+    static MUTED: ArcRwSignal<bool> = ArcRwSignal::new(get_pref("muted") > 0.0);
+}
+
+/// The shared mute flag, as a signal owned by the calling component.
+fn muted() -> RwSignal<bool> {
+    MUTED.with(|m| m.clone().into())
+}
+
+fn set_muted(m: bool) {
+    set_pref("muted", f64::from(u8::from(m)));
+    MUTED.with(|s| s.set(m));
+}
+
 /// A speaker button that mutes everything (the duel and world headers).
 #[component]
 pub fn MuteToggle() -> impl IntoView {
-    let muted = RwSignal::new(get_pref("muted") > 0.0);
+    let muted = muted();
     view! {
         <button type="button" class="btn ghost mute" aria-label=tr("Mute sound", "Couper le son")
             aria-pressed=move || muted.get().to_string()
-            on:click=move |_| {
-                let m = !muted.get_untracked();
-                set_pref("muted", f64::from(u8::from(m)));
-                muted.set(m);
-            }>
+            on:click=move |_| set_muted(!muted.get_untracked())>
             <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 9h4l5-4v14l-5-4H4z" />
                 {move || if muted.get() {
@@ -115,10 +128,12 @@ pub fn MuteToggle() -> impl IntoView {
     }
 }
 
-/// Mute and the three volume sliders, for the Settings menu.
+/// Mute and the four volume sliders, for the Settings menu. Master scales
+/// everything; Music the tracks; Ambience the regional beds; Effects the
+/// sound effects and the interface's clicks.
 #[component]
 pub fn AudioSettings() -> impl IntoView {
-    let muted = RwSignal::new(get_pref("muted") > 0.0);
+    let muted = muted();
     let slider = |key: &'static str, label: &'static str| {
         let value = RwSignal::new((get_pref(key) * 100.0).round());
         view! {
@@ -132,7 +147,7 @@ pub fn AudioSettings() -> impl IntoView {
                         set_pref(key, v / 100.0);
                         value.set(v);
                     }
-                    on:change=move |_| sfx(if key == "music" { "click" } else { "prize" }, 0.0) />
+                    on:change=move |_| sfx(if key == "music" || key == "ambience" { "click" } else { "prize" }, 0.0) />
                 <span class="vol-pct" aria-hidden="true">{move || format!("{}{}", value.get(), tr("%", " %"))}</span>
             </label>
         }
@@ -142,15 +157,12 @@ pub fn AudioSettings() -> impl IntoView {
             <legend>{tr("Sound", "Son")}</legend>
             <label class="vol-mute">
                 <input type="checkbox" name="muted" prop:checked=move || muted.get()
-                    on:change=move |e| {
-                        let m = event_target_checked(&e);
-                        set_pref("muted", f64::from(u8::from(m)));
-                        muted.set(m);
-                    } />
+                    on:change=move |e| set_muted(event_target_checked(&e)) />
                 {tr("Mute all sound", "Couper tout le son")}
             </label>
             {slider("master", tr("Master", "Général"))}
             {slider("music", tr("Music", "Musique"))}
+            {slider("ambience", tr("Ambience", "Ambiance"))}
             {slider("sfx", tr("Effects", "Effets"))}
         </fieldset>
     }
