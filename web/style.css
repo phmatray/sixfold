@@ -1388,6 +1388,11 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .talk-line { min-height: 3em; }
 .talk-next { justify-self: end; color: var(--brass-hi); font-size: 14px; }
 .item-got { display: flex; gap: 16px; align-items: center; }
+.note-text { white-space: pre-line; }
+/* A field item's sheet: the places it opens (engine/src/objective.rs). */
+.item-opens { margin: 10px 0 4px; }
+.item-opens h3 { margin: 0 0 4px; font: 700 12px var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass-hi); }
+.item-opens ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: 15px; }
 .item-preview { flex: none; width: 140px; height: 140px; border-radius: 14px; background: radial-gradient(circle, #24406a, #111d33 70%); }
 @media (max-width: 520px) { .item-got { flex-direction: column; text-align: center; } .item-got .dialog-foot { justify-content: center; } }
 

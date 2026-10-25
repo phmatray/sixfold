@@ -10,6 +10,7 @@ use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
 use sixfold_engine::clock::{self, Phase};
+use sixfold_engine::objective;
 use sixfold_engine::overworld::{Applied, Cue, Progress};
 use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
@@ -605,13 +606,23 @@ pub fn WorldScreen() -> impl IntoView {
                     _ = near.try_set(now);
                 }
                 "use" if a == "duel" => _ = sheet.try_set(Some(Sheet::Duel(b))),
-                "use" if a == "locked" => {
-                    _ = sheet.try_set(Some(Sheet::Note(tr("Locked", "Fermé à clé"), b)))
+                "use" => {
+                    // A gated door or gate sends "kind cond": once the hero has been
+                    // where its field item comes from, its text says what would open it.
+                    let (kind, cond) = a.split_once(' ').unwrap_or((&a, ""));
+                    let text = match progress.with_untracked(|p| objective::hint(p, cond)) {
+                        Some(k) => format!("{b}\n\n{}", k.get.get()),
+                        None => b,
+                    };
+                    let title = match kind {
+                        "locked" => tr("Locked", "Fermé à clé"),
+                        "gate" => tr("No way through", "Pas de passage"),
+                        _ => tr("It says", "On peut lire"),
+                    };
+                    _ = sheet.try_set(Some(Sheet::Note(title, text)));
                 }
-                "use" if a == "gate" => {
-                    _ = sheet.try_set(Some(Sheet::Note(tr("No way through", "Pas de passage"), b)))
-                }
-                "use" => _ = sheet.try_set(Some(Sheet::Note(tr("It says", "On peut lire"), b))),
+                // A gate on this map just opened: "A way opens: <name>", said once.
+                "opened" => _ = announce.try_set(a),
                 "talk" => start_talk(a, b),
                 "area" => _ = announce.try_set(a),
                 "ready" => {
@@ -842,9 +853,15 @@ pub fn WorldScreen() -> impl IntoView {
         }
         if let Some(Sheet::Item(item)) = &next {
             crate::audio::sfx("jingle", 0.0);
+            let opens = objective::opens_names(item).join(", ");
+            let (en, fr) = if opens.is_empty() {
+                (String::new(), String::new())
+            } else {
+                (format!(" It opens {opens}."), format!(" Ouvre : {opens}."))
+            };
             announce.set(tr(
-                format!("You got {}.", item_info(item).0),
-                format!("Vous obtenez : {}.", item_info(item).0),
+                format!("You got {}.{en}", item_info(item).0),
+                format!("Vous obtenez\u{a0}: {}.{fr}", item_info(item).0),
             ));
         }
         sheet.set(next);
@@ -1088,12 +1105,19 @@ pub fn WorldScreen() -> impl IntoView {
                     }
                     Sheet::Item(id) => {
                         let (name, _, blurb) = item_info(&id);
+                        let opens = objective::opens_names(&id);
                         view! {
                             <div class="item-got">
                                 <div class="item-preview" node_ref=preview></div>
                                 <div>
                                     <h2 id="world-sheet-title">{tr(format!("You got {name}!"), format!("Vous obtenez : {name} !"))}</h2>
                                     <p class="dialog-sub">{blurb}</p>
+                                    {(!opens.is_empty()).then(|| view! {
+                                        <div class="item-opens">
+                                            <h3>{tr("Opens", "Ouvre")}</h3>
+                                            <ul>{opens.into_iter().map(|n| view! { <li>{n}</li> }).collect_view()}</ul>
+                                        </div>
+                                    })}
                                     <div class="dialog-foot">
                                         <button class="btn primary" autofocus on:click=close>{tr("Nice", "Super")}</button>
                                     </div>
@@ -1123,7 +1147,7 @@ pub fn WorldScreen() -> impl IntoView {
                     }.into_any(),
                     Sheet::Note(title, text) => view! {
                         <h2 id="world-sheet-title">{title}</h2>
-                        <p class="dialog-sub">{text}</p>
+                        <p class="dialog-sub note-text">{text}</p>
                         <div class="dialog-foot">
                             <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
                         </div>

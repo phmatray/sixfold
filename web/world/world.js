@@ -4,7 +4,9 @@
 // api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, meet, cue).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
-//   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate
+//   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate; a gated
+//                          door or gate sends "kind cond" (e.g. "gate item:wading_boots")
+//   ("opened", text, "")   a gate on this map just opened ("A way opens: <its name>"), for the live region
 //   ("at", map, "x,z,f")   the hero stands on a new tile or faces a new way
 //   ("check", cond, "")    asks whether a condition (a gated warp's `if`) holds (returns a bool)
 //   ("gate", cond, "wo")   asks whether a gate is open: w = was open, o = the hero is on it ("0"/"1")
@@ -133,21 +135,21 @@ export function mount(el, controls, cb, start, edit = false) {
   legend.hidden = true;
   legend.innerHTML = tr('<span class="k-block">Blocked</span><span class="k-act">Look or use</span><span class="k-warp">Door</span><span class="k-npc">Person</span>',
     '<span class="k-block">Bloqué</span><span class="k-act">Regarder ou utiliser</span><span class="k-warp">Porte</span><span class="k-npc">Personne</span>');
-  // The area's name, shown for a moment on the way in.
+  // The area's name, shown for a moment on the way in; also a gate that just opened.
   const banner = document.createElement("div");
   banner.setAttribute("aria-hidden", "true");
   Object.assign(banner.style, {
     position: "absolute", zIndex: 2, left: "50%", top: "22%", transform: "translateX(-50%)", pointerEvents: "none",
     padding: "8px 18px", borderRadius: "999px", background: "rgba(13, 26, 44, 0.72)", color: "#f6ecd2",
     font: "700 clamp(16px, 2.4vw, 22px) 'Bricolage Grotesque', system-ui, sans-serif", letterSpacing: "0.02em",
-    whiteSpace: "nowrap", opacity: 0, transition: "opacity 0.5s ease",
+    width: "max-content", maxWidth: "calc(100% - 32px)", textAlign: "center", opacity: 0, transition: "opacity 0.5s ease",
   });
   let bannerTimer = 0;
-  const showBanner = (text) => {
+  const showBanner = (text, ms = 2200) => {
     banner.textContent = text;
     banner.style.opacity = 1;
     clearTimeout(bannerTimer);
-    bannerTimer = setTimeout(() => (banner.style.opacity = 0), 2200);
+    bannerTimer = setTimeout(() => (banner.style.opacity = 0), ms);
   };
   el.append(fade, legend, banner);
 
@@ -291,6 +293,11 @@ export function mount(el, controls, cb, start, edit = false) {
   const recheck = (animate) => {
     refresh(world, holds, gate, animate);
     if (world.gateSound !== undefined) sound(world.gateSound ? "gate" : "door"), (world.gateSound = undefined);
+    // A gate that just opened, named on screen and in the live region (once: it opened now).
+    for (const name of world.opened?.splice(0) ?? []) {
+      const text = tr(`A way opens: ${name}`, `Un passage s'ouvre : ${name}`);
+      showBanner(text, 4000), cb("opened", text, "");
+    }
   };
   // The music for the map and the hour: a region's track, its night variant after dark.
   const tune = () => {
@@ -351,7 +358,7 @@ export function mount(el, controls, cb, start, edit = false) {
       if (it.obj && !reduced) it.obj.userData.wobble = 1;
       // A spot with its own `dialogue` (a lost item, a letter box) talks like a person.
       if (it.dialogue) cb("talk", it.id, JSON.stringify({ name: it.name ?? "", dialogue: it.dialogue }));
-      else cb("use", it.kind, it.text);
+      else cb("use", it.cond ? `${it.kind} ${it.cond}` : it.kind, it.text);
     }
   }
 

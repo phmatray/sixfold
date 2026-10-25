@@ -2991,6 +2991,8 @@
   "gates": [
     {
       "id": "kiln_catwalk",
+      "name": "the flue-watchers' perch in Cinderwick",
+      "name_fr": "le perchoir des guetteurs de cheminée à Mèche-Cendre",
       "tiles": [
         [
           18,
