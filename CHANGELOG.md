@@ -5,6 +5,35 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.3.0](https://github.com/phmatray/sixfold/compare/v1.2.0...v1.3.0) (2026-10-25)
+
+
+### Added
+
+* **balance:** first-turn rule, one retreat a turn, value budget and card pass ([#45](https://github.com/phmatray/sixfold/issues/45)) ([5762327](https://github.com/phmatray/sixfold/commit/5762327f263aa223f2a96fd7dd39743c3e790e8d))
+* call creatures Hexons and evolution Awakening ([#38](https://github.com/phmatray/sixfold/issues/38)) ([12c5249](https://github.com/phmatray/sixfold/commit/12c5249be7f6bbe429a398ade8d6c33071697e31))
+* **cards:** Hexon lore and redesigned illustrations ([#43](https://github.com/phmatray/sixfold/issues/43)) ([2e1fd50](https://github.com/phmatray/sixfold/commit/2e1fd501f3ba6d877dc11df8beee1bef08ee10c9))
+* **content:** Ember and Storm ([#37](https://github.com/phmatray/sixfold/issues/37)) ([e51a373](https://github.com/phmatray/sixfold/commit/e51a373ad1feb9e792e60932184b60318e1aaaaa))
+* **content:** Grove and Stone ([#53](https://github.com/phmatray/sixfold/issues/53)) ([08c51e4](https://github.com/phmatray/sixfold/commit/08c51e40d41c489b5b192ef091b58fdedb35d681))
+* **content:** Tide and Dream ([#40](https://github.com/phmatray/sixfold/issues/40)) ([1b5d2e5](https://github.com/phmatray/sixfold/commit/1b5d2e55872f38d4ecf35c7e9ba7d3b52b7c634a))
+* name the seven types after the faces of the world ([#52](https://github.com/phmatray/sixfold/issues/52)) ([ee092c2](https://github.com/phmatray/sixfold/commit/ee092c2e102d4f6e2b81c54f0e59e36259b2aad4))
+* **packs:** designed boosters, slot odds, holo foil and pack opening ([#39](https://github.com/phmatray/sixfold/issues/39)) ([458c816](https://github.com/phmatray/sixfold/commit/458c81632ef723df6de5f604018554521b38c5ff))
+* **world:** a lift you can ride, on a proper scaffold ([#51](https://github.com/phmatray/sixfold/issues/51)) ([a7d539d](https://github.com/phmatray/sixfold/commit/a7d539d177e4b31ccaba005351eab054bb35cc42))
+* **world:** day and night, gates, world map and fast travel ([#34](https://github.com/phmatray/sixfold/issues/34)) ([fbdeb61](https://github.com/phmatray/sixfold/commit/fbdeb61abb438536786b3cf7f3edb183fcba783c))
+* **world:** fireflies mark finds instead of a blinking light ([#49](https://github.com/phmatray/sixfold/issues/49)) ([1dd6bc9](https://github.com/phmatray/sixfold/commit/1dd6bc961a5b7dd368a62d00221c262a83b38584))
+* **world:** glowing mushrooms light caves, never street lamps ([#42](https://github.com/phmatray/sixfold/issues/42)) ([c01c8c1](https://github.com/phmatray/sixfold/commit/c01c8c1594931b89f758fbb9b8c71f90c3de372a))
+* **world:** grass clumps instead of crossed planes ([#50](https://github.com/phmatray/sixfold/issues/50)) ([290d9e8](https://github.com/phmatray/sixfold/commit/290d9e8f478a277c18401c1acaa49fc7c52a45bc))
+* **world:** organic terrain instead of block cliffs ([#44](https://github.com/phmatray/sixfold/issues/44)) ([f7e64c3](https://github.com/phmatray/sixfold/commit/f7e64c387ea2d20b29fcf71052d1f795bfd3642d))
+* **world:** painted-figurine hero, NPCs and rivals ([#46](https://github.com/phmatray/sixfold/issues/46)) ([759e3e4](https://github.com/phmatray/sixfold/commit/759e3e43e0268fddc06e62b8c1f6622f7ab54bf8))
+* **world:** placement rules and checks ([#41](https://github.com/phmatray/sixfold/issues/41)) ([fa73a59](https://github.com/phmatray/sixfold/commit/fa73a59d124b0a63d94f8f886c6805e017fc1b54))
+
+
+### Fixed
+
+* **cards:** reinvent the Colorless Hexons ([#47](https://github.com/phmatray/sixfold/issues/47)) ([72d0f9b](https://github.com/phmatray/sixfold/commit/72d0f9b60306d9dcc88d4a4b36a789bdfc52e011))
+* **cards:** show the whole illustration on full cards ([#36](https://github.com/phmatray/sixfold/issues/36)) ([353eb9e](https://github.com/phmatray/sixfold/commit/353eb9e63e6d9af5aa17c2956344cfb23af18a43))
+* **world:** re-lay every map to the world rules ([#54](https://github.com/phmatray/sixfold/issues/54)) ([9a81e22](https://github.com/phmatray/sixfold/commit/9a81e22ed50019b2795af587e6e653bcd3cb6c0c))
+
 ## [1.2.0](https://github.com/phmatray/sixfold/compare/v1.1.0...v1.2.0) (2026-10-25)
 
 
