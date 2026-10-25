@@ -205,20 +205,11 @@ const SFX = {
     tone(d, t + 0.45, hz(96), 0.9, { peak: 0.05 });
   },
   heal: (d, t) => notes(d, t, [79, 84], 0.1, { peak: 0.1, dur: 0.35 }),
-  // A pack: the tear, ten cards turning (the Rare last and slower), its shine.
-  // Matches the reveal's timeline in packs.rs. n = 1: shown all at once.
-  pack: (d, t, n) => {
-    if (packBus) packBus.disconnect();
-    packBus = ctx.createGain();
-    packBus.connect(sfxBus);
-    const p = packBus;
-    noise(p, t, 0.35, { f: 1200, f2: 4500, q: 0.8, a: 0.05, peak: 0.3 });
-    noise(p, t + 0.12, 0.2, { type: "highpass", f: 3000, peak: 0.12 });
-    if (n) return SFX.rare(p, t + 0.4);
-    // FLIP_AT, FLIP_STEP and RARE_AT in packs.rs.
-    for (let i = 0; i < 9; i++) SFX.flip(p, t + 0.9 + i * 0.18 + 0.28);
-    SFX.flip(p, t + 3.12 + 0.45);
-    SFX.rare(p, t + 3.12 + 0.75);
+  // The held beat before a pack's Rare: a low swell and a hiss rising into it.
+  swell: (d, t, dur) => {
+    tone(d, t, hz(43), dur, { type: "sawtooth", f2: hz(55), a: dur * 0.9, peak: 0.035, lin: true, rel: 0.08 });
+    tone(d, t, hz(67), dur, { type: "triangle", f2: hz(79), a: dur * 0.9, peak: 0.04, lin: true, rel: 0.08 });
+    noise(d, t, 0.12, { f: 3000, q: 2.5, a: dur, peak: 0.07 });
   },
   packstop: () => {
     if (packBus) packBus.disconnect();
@@ -338,6 +329,30 @@ export function sfx(name, n = 0) {
   stats.sfx++;
   stats.last = name;
   f(sfxBus, t + 0.005, n);
+}
+
+// A pack's reveal, from `from` ms on its timeline, played `rate` times as
+// fast: the tear, the nine cards turning, the held beat, the Rare. The
+// timeline is packs.rs's (FLIP_AT, FLIP_STEP, BEAT_AT, RARE_AT), passed in.
+// Called again when the speed changes; "packstop" silences it.
+export function packReveal(from, rate, flipAt, flipStep, beatAt, rareAt) {
+  if (!ctx || ctx.state !== "running") return;
+  if (packBus) packBus.disconnect();
+  packBus = ctx.createGain();
+  packBus.connect(sfxBus);
+  const p = packBus, t0 = ctx.currentTime + 0.005;
+  const at = (ms) => t0 + Math.max(0, ms - from) / 1000 / rate;
+  if (from <= 0) {
+    noise(p, t0, 0.35, { f: 1200, f2: 4500, q: 0.8, a: 0.05, peak: 0.3 });
+    noise(p, t0 + 0.12, 0.2, { type: "highpass", f: 3000, peak: 0.12 });
+  }
+  // Each card is heard halfway through its turn.
+  for (let i = 0; i < 9; i++) if (flipAt + i * flipStep + 280 >= from) SFX.flip(p, at(flipAt + i * flipStep + 280));
+  if (from < rareAt) SFX.swell(p, at(Math.max(from, beatAt)), (rareAt - Math.max(from, beatAt)) / 1000 / rate);
+  if (rareAt + 450 >= from) SFX.flip(p, at(rareAt + 450));
+  if (rareAt + 750 >= from) SFX.rare(p, at(rareAt + 750));
+  stats.sfx++;
+  stats.last = "pack";
 }
 
 // ---------- Music: a tiny step sequencer ----------

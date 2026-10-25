@@ -12,6 +12,17 @@ use crate::ctl::HUMAN;
 extern "C" {
     /// Play one effect; `n` is its variant (damage dealt, heads, surface, voice…).
     pub fn sfx(name: &str, n: f64);
+    /// A pack's reveal from `from` ms on its timeline, `rate` times as fast
+    /// (the timeline's marks in ms: see packs.rs).
+    #[wasm_bindgen(js_name = packReveal)]
+    pub fn pack_reveal(
+        from: f64,
+        rate: f64,
+        flip_at: f64,
+        flip_step: f64,
+        beat_at: f64,
+        rare_at: f64,
+    );
     /// Crossfade to a track: "title", "duel", "overworld", "interior", or "" for none.
     pub fn music(track: &str);
     /// 1 while the duel is down to someone's last prize.
