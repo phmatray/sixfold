@@ -38,6 +38,7 @@ pub fn duel_theme(setup: &Setup) {
         Color::Fighting => "stone",
         Color::Psychic | Color::Colorless => "dream",
     };
+    intensity(0.0); // a rematch on the same theme starts calm
     duel_theme_js(&match stakes(setup.face()) {
         Stakes::Ordinary => "duel".to_string(),
         Stakes::Rival(c) => format!("duel_rival_{}", region(c)),

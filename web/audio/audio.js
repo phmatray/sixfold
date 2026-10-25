@@ -2,7 +2,7 @@
 // sampled. Rust calls the exports through wasm-bindgen (web/src/audio.rs);
 // world.js reaches the same functions through `globalThis.sixfoldAudio`.
 //
-// Four groups, each under the master: music (the tracks), ambience (the
+// Three groups, each under the master: music (the tracks), ambience (the
 // regional beds), effects (sfx and the UI's clicks), all through one
 // compressor. `sixfoldAudio.debug().levels` reads each group's loudness.
 //
@@ -20,7 +20,7 @@ try {
 
 let ctx = null, master, musicBus, sfxBus, ambBus, packBus = null, noiseBuf, timer = 0;
 let want = "", wantBed = [""], intense = false;
-const meters = {};
+let taps = {}, meters = null;
 const players = [];
 const stats = { sfx: 0, last: "", notes: 0 };
 
@@ -65,11 +65,7 @@ function unlock() {
     sfxBus = ctx.createGain();
     ambBus = ctx.createGain();
     for (const b of [musicBus, sfxBus, ambBus]) b.connect(master);
-    // Taps for the debug readout: each group after its slider, and what leaves the speakers.
-    Object.entries({ music: musicBus, ambience: ambBus, sfx: sfxBus, out: comp }).forEach(([k, n]) => {
-      meters[k] = ctx.createAnalyser();
-      n.connect(meters[k]);
-    });
+    taps = { music: musicBus, ambience: ambBus, sfx: sfxBus, out: comp };
     // Four seconds, so a looping bed never repeats audibly.
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
@@ -844,9 +840,11 @@ function debug() {
 
 // RMS of the last ~40 ms per group, in dBFS (-inf is silence): each group after its slider, `out` after the master.
 function levels() {
+  // Tapped on first use only: each group after its slider, and what leaves the speakers.
+  if (!meters && ctx) meters = Object.fromEntries(Object.entries(taps).map(([k, n]) => [k, n.connect(ctx.createAnalyser())]));
   const buf = new Float32Array(2048);
   return Object.fromEntries(
-    Object.entries(meters).map(([k, a]) => {
+    Object.entries(meters ?? {}).map(([k, a]) => {
       a.getFloatTimeDomainData(buf);
       const rms = Math.sqrt(buf.reduce((s, x) => s + x * x, 0) / buf.length);
       return [k, Math.round(20 * Math.log10(rms) * 10) / 10];

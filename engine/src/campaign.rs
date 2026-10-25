@@ -143,7 +143,10 @@ pub enum Stakes {
 pub fn stakes(id: Option<&str>) -> Stakes {
     match id.and_then(rival) {
         Some(r) if !r.seal => Stakes::Boss,
-        Some(r) => Stakes::Rival(r.colors[0]),
+        Some(r) => r
+            .colors
+            .first()
+            .map_or(Stakes::Ordinary, |&c| Stakes::Rival(c)),
         None => Stakes::Ordinary,
     }
 }
