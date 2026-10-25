@@ -117,7 +117,7 @@ pub fn OptionsPanel() -> impl IntoView {
 fn Settings() -> impl IntoView {
     let open = RwSignal::new(false);
     view! {
-        <details class="settings" on:toggle=move |_| open.update(|o| *o = !*o)>
+        <details class="settings" on:toggle=move |e| open.set(event_target::<web_sys::Element>(&e).has_attribute("open"))>
             <summary class="btn ghost">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg>
                 {tr("Settings", "Réglages")}

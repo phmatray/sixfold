@@ -25,13 +25,20 @@ pub fn progress(c: &Collection) -> (usize, usize) {
 pub fn PageBar(
     title: &'static str,
     #[prop(optional)] back: Option<Screen>,
+    /// Back runs this instead of changing screen.
+    #[prop(optional)]
+    on_back: Option<Callback<()>>,
     #[prop(optional)] children: Option<Children>,
 ) -> impl IntoView {
     let screen = expect_context::<RwSignal<Screen>>();
     let back = back.unwrap_or(Screen::Title);
+    let go = move || match on_back {
+        Some(f) => f.run(()),
+        None => screen.set(back),
+    };
     view! {
         <header class="topbar page-bar">
-            <button type="button" class="btn ghost back" on:click=move |_| screen.set(back)>
+            <button type="button" class="btn ghost back" on:click=move |_| go()>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                 {tr("Back", "Retour")}
             </button>

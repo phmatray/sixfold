@@ -6,6 +6,7 @@ use sixfold_engine::{
     card, card_id, fr, tr, AddError, CardId, CardKind, Collection, DeckError, DeckList,
     DeckListError, SortBy, DECK_SIZE,
 };
+use wasm_bindgen::JsCast;
 
 use crate::art::card_color;
 use crate::binder::{inspect_handlers, FilterBar, Filters, Own, PageBar};
@@ -306,13 +307,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
     let Some(saved) = profile.with_untracked(|p| p.decks.get(index).cloned()) else {
         return view! {
             <div class="page">
-                <header class="topbar page-bar">
-                    <button type="button" class="btn ghost back" on:click=move |_| done()>
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-                        "Decks"
-                    </button>
-                    <h1 class="page-title">{tr("Deck editor", "Éditeur de deck")}</h1>
-                </header>
+                <PageBar title=tr("Deck editor", "Éditeur de deck") on_back=on_done />
                 <main class="page-body"><p class="empty-note">{tr("This deck no longer exists.", "Ce deck n'existe plus.")}</p></main>
             </div>
         }
@@ -377,9 +372,13 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
     let curve = move || draft.with(energy_curve);
     // Escape steps back one layer: the card sheet, the leave question, then
     // out of the editor (through the guard). Handled here, so a host dialog
-    // doesn't close on the same key.
+    // doesn't close on the same key. In a text field, Escape stays the field's.
     let on_key = move |e: leptos::ev::KeyboardEvent| {
-        if e.key() == "Escape" {
+        let in_field = e
+            .target()
+            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+            .is_some_and(|t| matches!(t.tag_name().as_str(), "INPUT" | "SELECT" | "TEXTAREA"));
+        if e.key() == "Escape" && !in_field {
             e.prevent_default();
             if ui.sheet.get_untracked() {
                 ui.sheet.set(false);

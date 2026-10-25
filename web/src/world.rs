@@ -525,6 +525,15 @@ pub fn WorldScreen() -> impl IntoView {
     let ui = expect_context::<Ui>();
     // The in-game menu's deck editor, open on this deck (Decks tab).
     let editing = RwSignal::new(None::<usize>);
+    // A reset or an imported save (Options) replaces the player under the
+    // scene: leave for the title rather than carry the old world into it.
+    let slot = expect_context::<store::Saved>().slot;
+    Effect::new(move |seen: Option<()>| {
+        slot.track();
+        if seen.is_some() {
+            screen.set(Screen::Title);
+        }
+    });
     let reduced = web_sys::window()
         .and_then(|w| {
             w.match_media("(prefers-reduced-motion: reduce)")
@@ -676,6 +685,9 @@ pub fn WorldScreen() -> impl IntoView {
         } else if !open && d.open() {
             d.close();
             world_preview_stop();
+            // A card left open in the menu's collection mustn't pop up later.
+            ui.sheet.set(false);
+            ui.inspect.set(None);
             if let Some(p) = prompt.get_untracked() {
                 let _ = p.focus();
             } else if let Some(s) = stage.get_untracked() {
@@ -863,7 +875,18 @@ pub fn WorldScreen() -> impl IntoView {
             // In the menu, Escape closes the card sheet first; the deck
             // editor handles its own Escape (back, through its guard).
             Some(Sheet::Menu) if ui.sheet.get_untracked() => ui.sheet.set(false),
-            Some(Sheet::Menu) if editing.get_untracked().is_some() => {}
+            // Escape the editor didn't take itself (focus in a field or on
+            // the dialog): the same as its Back, so the unsaved guard still asks.
+            Some(Sheet::Menu) if editing.get_untracked().is_some() => {
+                if let Some(Ok(Some(b))) = dlg
+                    .get_untracked()
+                    .map(|d| d.query_selector(".editor .back"))
+                {
+                    if let Ok(b) = b.dyn_into::<web_sys::HtmlElement>() {
+                        b.click();
+                    }
+                }
+            }
             _ => sheet.set(None),
         }
     };
@@ -1038,11 +1061,16 @@ pub fn WorldScreen() -> impl IntoView {
                         "The 3D scene could not load. Check your connection, then try again.",
                         "La scène 3D n'a pas pu se charger. Vérifiez votre connexion, puis réessayez.",
                     )}</p>
-                    <button class="btn primary" on:click=retry>{tr("Retry", "Réessayer")}</button>
+                    <div class="row">
+                        <button class="btn primary" on:click=retry>{tr("Retry", "Réessayer")}</button>
+                        <button class="btn" on:click=move |_| screen.set(Screen::Title)>{tr("Back to title", "Retour au titre")}</button>
+                    </div>
                 </div>
             })}
             <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title"
-                on:cancel=on_cancel on:keydown=on_key>
+                on:cancel=on_cancel on:keydown=on_key
+                // Should the browser close the dialog itself, the world must not stay paused.
+                on:close=move |_| if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
                 {move || sheet.get().map(|s| match s {
                     Sheet::Talk(t) => {
                         let line = t.line().to_string();
@@ -1311,8 +1339,10 @@ fn GameMenu(
                     </div>
                 }.into_any()
             }}
-            <div class="menu-panel" id="menu-panel" role="tabpanel"
-                aria-labelledby=move || tab.get().id()>
+            // The editor replaces the tabs, so it isn't a tab's panel.
+            <div class="menu-panel" id="menu-panel"
+                role=move || editing.get().is_none().then_some("tabpanel")
+                aria-labelledby=move || editing.get().is_none().then(|| tab.get().id())>
                 {move || match (tab.get(), editing.get()) {
                     (MenuTab::Decks, Some(i)) => view! { <EditorPanel index=i on_done=done_editing /> }.into_any(),
                     (MenuTab::Decks, None) => view! {
