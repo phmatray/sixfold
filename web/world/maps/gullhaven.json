@@ -118,13 +118,20 @@
       "asset": "stall",
       "x": 12,
       "z": 5,
-      "rot": 0
+      "rot": 0,
+      "recolor": {
+        "sx_apple": "#a9bccb",
+        "sx_fruit": "#d6dfe4"
+      }
     },
     {
       "asset": "stall_b",
       "x": 15,
       "z": 5,
-      "rot": 0
+      "rot": 0,
+      "recolor": {
+        "sx_bread": "#c9d4da"
+      }
     },
     {
       "asset": "stall",
@@ -132,7 +139,9 @@
       "z": 5,
       "rot": 0,
       "recolor": {
-        "sx_awning_red": "#2f7fd0"
+        "sx_awning_red": "#2f7fd0",
+        "sx_apple": "#a9bccb",
+        "sx_fruit": "#d6dfe4"
       }
     },
     {
@@ -251,8 +260,8 @@
     },
     {
       "asset": "lantern",
-      "x": 27,
-      "z": 19,
+      "x": 28,
+      "z": 14,
       "rot": 0
     },
     {
@@ -281,7 +290,7 @@
     },
     {
       "asset": "lantern",
-      "x": 13,
+      "x": 11,
       "z": 21,
       "rot": 0
     },

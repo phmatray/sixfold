@@ -6,11 +6,11 @@
   "width": 36,
   "height": 28,
   "tiles": [
-    "ssssssppssssssssssssssssssssssssssss",
-    "ssssssppssssssssssssssssssssssssssss",
-    "ssssssppssssssssssssssssssssssssssss",
-    "3322ssppsssssssss=====ssssssssssssss",
-    "3322sspps=========...=======ssssssss",
+    "ssssss==ssssssssssssssssssssssssssss",
+    "ssssss==ssssssssssssssssssssssssssss",
+    "ssssss==ssssssssssssssssssssssssssss",
+    "3322ss==sssssssss=====ssssssssssssss",
+    "3322ss==s=========...=======ssssssss",
     "33222ss===.................===ssssss",
     "33222s==.....................==sssss",
     "33222==.....~.................=sssss",
@@ -487,14 +487,8 @@
     },
     {
       "asset": "bush",
-      "x": 15,
-      "z": 5,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
       "x": 9,
-      "z": 3,
+      "z": 2,
       "rot": 0
     },
     {
@@ -865,6 +859,10 @@
         ],
         [
           13,
+          5
+        ],
+        [
+          15,
           5
         ],
         [
@@ -1905,10 +1903,6 @@
         ],
         [
           14,
-          5
-        ],
-        [
-          15,
           5
         ],
         [

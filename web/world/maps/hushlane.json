@@ -1009,8 +1009,12 @@
   },
   "ring": [
     "willow",
-    "willow",
+    "bush_dark",
     "bush_dark"
+  ],
+  "cliff": [
+    "cliff_slate",
+    "cliff_slate_b"
   ],
   "camera": {
     "fov": 40,

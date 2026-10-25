@@ -95,26 +95,8 @@
     },
     {
       "asset": "willow",
-      "x": 24,
-      "z": 0,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 0,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
       "x": 25,
       "z": 21,
-      "rot": 0
-    },
-    {
-      "asset": "willow",
-      "x": 26,
-      "z": 10,
       "rot": 0
     },
     {
@@ -562,11 +544,13 @@
     "tufts": 700
   },
   "ring": [
+    "bush_dark",
     "willow",
     "bush_dark",
     "bush_dark"
   ],
   "fence": "hedge",
+  "fence_tint": "#a3b8cc",
   "camera": {
     "fov": 40,
     "fovPortrait": 50,

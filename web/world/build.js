@@ -67,6 +67,7 @@ export function refresh(w, holds, gate, animate = false) {
       if (!play || reduced(w)) g.sea((g.tide = g.tideWant));
     }
   }
+  for (const g of w.glimmers ?? []) g.on = g.gate ? !!g.gate.open : holds(g.cond);
   collide(w);
   w.lightDirty = true;
 }
@@ -430,6 +431,7 @@ export async function build(map, got, reduced) {
   // south (camera-facing) row use the low cutaway pieces.
   const joins = (c, x, z) => (c === "f" ? tile(x, z) === "f" : "WV".includes(tile(x, z) ?? "-"));
   const fence = map.fence ?? "fence";
+  const fenceTint = map.fence_tint ? new THREE.Color(map.fence_tint) : null; // a map's own shade of its fences (the Moonwell's dusky hedges)
   for (let z = 0; z < H; z++)
     for (let x = 0; x < W; x++) {
       const c = tile(x, z);
@@ -439,7 +441,7 @@ export async function build(map, got, reduced) {
       for (const [sfx, deg] of [AUTOTILE[mask], ...(mask === 15 ? [["_end", 270]] : [])]) {
         const n = c === "V" && sfx === "" ? "wall_window" : kind + sfx; // a window only fits a straight run
         const stand = n === "wall_window" ? n : c === "f" ? "fence" : kind; // placeholder pieces
-        batch.add(n, tpl(n, () => armsPiece(stand, SUFFIX_ARMS[sfx])), at(x + 0.5, z + 0.5, THREE.MathUtils.degToRad(deg)));
+        batch.add(n, tpl(n, () => armsPiece(stand, SUFFIX_ARMS[sfx])), at(x + 0.5, z + 0.5, THREE.MathUtils.degToRad(deg)), c === "f" ? fenceTint : null);
       }
     }
 
@@ -465,6 +467,7 @@ export async function build(map, got, reduced) {
           const obj = got[name] ? got[name].scene.clone(true) : fallback(name);
           obj.position.set(t.x + 0.5, t.y, t.z + 0.5);
           obj.rotation.y = rot;
+          if (name === "lantern_raft") obj.rotation.y += (r() - 0.5) * 0.5, obj.scale.setScalar(0.9); // separate rafts, not a plank bridge
           prep(obj, true);
           g.add(obj);
           boats.push({ obj, cx: t.x + 0.5, cz: t.z + 0.5, y: t.y });
@@ -560,6 +563,30 @@ export async function build(map, got, reduced) {
       const o = t.getObjectByName("light_origin");
       if (o) lamps.push(o.getWorldPosition(origin).clone().add(new THREE.Vector3(p.cx, p.y, p.cz)));
     }
+  }
+  // Glimmers (daylight.js): small glows that are not lamps, a halo and a soft pool of light under each,
+  // at a model's `glow` parts: lanterns afloat, the lantern rafts while their gate is open, moonflowers
+  // while open. `on` is kept by refresh(); moths visit them like lamps.
+  const glowAt = new Map();
+  const glowSpot = (name) => {
+    if (!glowAt.has(name)) {
+      const box = new THREE.Box3(), at = [];
+      got[name]?.scene.updateMatrixWorld(true);
+      got[name]?.scene.traverse((o) => o.isMesh && /glow/i.test(o.material.name) && at.push(box.setFromObject(o).getCenter(new THREE.Vector3())));
+      glowAt.set(name, at.length ? at.reduce((a, b) => a.add(b), new THREE.Vector3()).divideScalar(at.length) : null);
+    }
+    return glowAt.get(name);
+  };
+  const GLIMMER = { floating_lantern: ["#ffc98a", 1.3, 2.6], lantern_raft: ["#ffbcc0", 0.8, 1.1], moonflower: ["#cfdcff", 0.8, 2.2] };
+  const glimmers = [];
+  const spin = (v, deg) => v.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(deg));
+  for (const p of props) {
+    const look = GLIMMER[p.asset], o = look && glowSpot(p.asset);
+    if (o) glimmers.push({ at: spin(o, p.rot).add(new THREE.Vector3(p.cx, p.y, p.cz)), color: look[0], size: look[1], pool: look[2], cond: p.open ?? p.if ?? null, on: true });
+  }
+  for (const g of gates) {
+    const look = GLIMMER[g.def.prop_open], o = look && glowSpot(g.def.prop_open);
+    if (o) for (const t of g.tiles) glimmers.push({ at: o.clone().add(new THREE.Vector3(t.x + 0.5, t.y, t.z + 0.5)), color: look[0], size: look[1], pool: look[2], gate: g, on: false });
   }
   // Waymarks: the crystal is dim until touched (`flag:way_<id>`), then lit.
   const waymarks = map.interactions.filter((i) => i.kind === "waymark" && i.obj).map((it) => {
@@ -659,9 +686,9 @@ export async function build(map, got, reduced) {
   }
   smoke.length = Math.min(smoke.length, SMOKE);
   const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
-  const life = ambience(root, { flowers, smoke, lamps, gulls: map.gulls ?? 0 }, reduced);
+  const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0 }, reduced);
   return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, door, life, boats, glows, glints,
-    gates, gateAt, shown, openers, waymarks, lamps, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
+    gates, gateAt, shown, openers, waymarks, lamps, glimmers, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }
 
 // G toggles this: tile lines; red = blocked, gold = look/use, blue = door, green = person.
