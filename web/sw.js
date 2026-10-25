@@ -147,13 +147,14 @@ async function staleWhileRevalidate(event, req, name) {
 }
 
 // A world file: this build's copy from the world cache, else the network (kept
-// for next time); offline, an older copy beats none.
+// for next time); offline or on a server error, an older copy beats none.
 async function worldFile(key) {
   const cache = await caches.open(WORLD_CACHE);
   const cached = await cache.match(key);
   if (cached && cached.headers.get(SUM) === WORLD_SUMS.get(key)) return cached;
   try {
-    return await keep(cache, key);
+    const res = await keep(cache, key);
+    return res.ok || !cached ? res : cached;
   } catch (err) {
     return cached || Response.error();
   }
