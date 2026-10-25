@@ -245,13 +245,13 @@ pub static CARDS: &[CardDef] = &[
             Attack { name: "Spark Rain", text: "Does 10 damage to each of your opponent's Benched Hexons.",
                      cost: &[Fire, Fire], damage: 30,
                      effects: &[BenchDamage { amount: 10, own: false, opponent: true }] },
-            Attack { name: "Inferno Plume", text: "Discard 2 Fire energy cards attached to this Hexon.",
+            Attack { name: "Inferno Plume", text: "Discard 2 Ember energy cards attached to this Hexon.",
                      cost: &[Fire, Fire, Fire, Colorless], damage: 90,
                      effects: &[DiscardEnergy { color: Fire, count: 2 }] },
         ],
         power: Some(Power {
             name: "Kindling Heart",
-            text: "Once during your turn, a Fire energy you attach to one of your Fire Hexons doesn't use up your energy attachment for the turn.",
+            text: "Once during your turn, an Ember energy you attach to one of your Ember Hexons doesn't use up your energy attachment for the turn.",
             kind: PowerKind::FreeAttach(Fire),
         }),
     }),
@@ -358,7 +358,7 @@ pub static CARDS: &[CardDef] = &[
                      text: "Flip a coin. If heads, prevent all damage done to this Hexon by attacks during your opponent's next turn.",
                      cost: &[Water], damage: 0,
                      effects: &[Protect { shield: Shield::PreventDamage, coin: true }] },
-            Attack { name: "Soak Through", text: "The defending Hexon's weakness is now Water.",
+            Attack { name: "Soak Through", text: "The defending Hexon's weakness is now Tide.",
                      cost: &[Water, Water], damage: 20, effects: &[DefenderWeakness(Water)] },
         ],
         power: Some(Power {
@@ -462,7 +462,7 @@ pub static CARDS: &[CardDef] = &[
         weakness: Some(Fire), resistance: None, retreat_cost: 1,
         attacks: &[
             atk("Leaf Nick", "", &[Grass], 10, &[]),
-            atk("Root Call", "Search your deck for a Grass energy card and attach it to this Hexon, then shuffle your deck.",
+            atk("Root Call", "Search your deck for a Grove energy card and attach it to this Hexon, then shuffle your deck.",
                 &[Grass], 0, &[AttachFromDeck(Grass)]),
         ],
         power: None,
@@ -570,7 +570,7 @@ pub static CARDS: &[CardDef] = &[
         weakness: Some(Water), resistance: None, retreat_cost: 1,
         attacks: &[
             atk("Hot Swipe", "", &[Fire], 10, &[]),
-            atk("Flame Pounce", "Discard 1 Fire energy card attached to this Hexon.",
+            atk("Flame Pounce", "Discard 1 Ember energy card attached to this Hexon.",
                 &[Fire, Colorless], 30, &[DiscardEnergy { color: Fire, count: 1 }]),
         ],
         power: None,
@@ -580,7 +580,7 @@ pub static CARDS: &[CardDef] = &[
         weakness: Some(Water), resistance: None, retreat_cost: 1,
         attacks: &[
             atk("Ember Claw", "", &[Fire, Colorless], 30, &[]),
-            atk("Blaze Rush", "Discard 1 Fire energy card attached to this Hexon.",
+            atk("Blaze Rush", "Discard 1 Ember energy card attached to this Hexon.",
                 &[Fire, Fire, Colorless], 60, &[DiscardEnergy { color: Fire, count: 1 }]),
         ],
         power: None,
@@ -608,9 +608,9 @@ pub static CARDS: &[CardDef] = &[
         stage: Stage::Stage1, evolves_from: Some("Kilnback"), hp: 90, color: Fire,
         weakness: Some(Water), resistance: None, retreat_cost: 3,
         attacks: &[
-            atk("Stoke", "Search your deck for a Fire energy card and attach it to this Hexon, then shuffle your deck.",
+            atk("Stoke", "Search your deck for an Ember energy card and attach it to this Hexon, then shuffle your deck.",
                 &[Fire], 10, &[AttachFromDeck(Fire)]),
-            atk("Magma Wave", "Discard 2 Fire energy cards attached to this Hexon.",
+            atk("Magma Wave", "Discard 2 Ember energy cards attached to this Hexon.",
                 &[Fire, Fire, Fire, Colorless], 80, &[DiscardEnergy { color: Fire, count: 2 }]),
         ],
         power: None,
@@ -680,7 +680,7 @@ pub static CARDS: &[CardDef] = &[
         stage: Stage::Stage1, evolves_from: Some("Kelpup"), hp: 90, color: Water,
         weakness: Some(Lightning), resistance: None, retreat_cost: 2,
         attacks: &[
-            atk("Tide Gift", "Search your deck for a Water energy card and attach it to this Hexon, then shuffle your deck.",
+            atk("Tide Gift", "Search your deck for a Tide energy card and attach it to this Hexon, then shuffle your deck.",
                 &[Water], 10, &[AttachFromDeck(Water)]),
             atk("Crushing Current", "", &[Water, Water, Colorless], 50, &[]),
         ],
@@ -764,7 +764,7 @@ pub static CARDS: &[CardDef] = &[
         stage: Stage::Stage1, evolves_from: Some("Ohmlet"), hp: 80, color: Lightning,
         weakness: Some(Water), resistance: None, retreat_cost: 1,
         attacks: &[
-            atk("Live Current", "Search your deck for a Lightning energy card and attach it to this Hexon, then shuffle your deck.",
+            atk("Live Current", "Search your deck for a Storm energy card and attach it to this Hexon, then shuffle your deck.",
                 &[Lightning], 10, &[AttachFromDeck(Lightning)]),
             atk("Rail Shot", "Does 20 damage to 1 of your opponent's Hexons.",
                 &[Lightning, Lightning, Colorless], 40, &[Snipe(20)]),
@@ -859,7 +859,7 @@ pub static CARDS: &[CardDef] = &[
         attacks: &[
             atk("Tremor Bite", "During your opponent's next turn, the defending Hexon's attacks do 20 less damage.",
                 &[Fighting, Colorless], 30, &[Place { placed: Placed::Weaken(20), coin: false }]),
-            atk("Earthsplitter", "Discard 1 Fighting energy card attached to this Hexon.",
+            atk("Earthsplitter", "Discard 1 Stone energy card attached to this Hexon.",
                 &[Fighting, Fighting, Fighting, Colorless], 80, &[DiscardEnergy { color: Fighting, count: 1 }]),
         ],
         power: None,
@@ -1095,9 +1095,9 @@ pub static CARDS: &[CardDef] = &[
         stage: Stage::Basic, evolves_from: None, hp: 60, color: Fire,
         weakness: Some(Water), resistance: None, retreat_cost: 1,
         attacks: &[
-            atk("Stoke", "Search your deck for a Fire energy card and attach it to this Hexon, then shuffle your deck.",
+            atk("Stoke", "Search your deck for an Ember energy card and attach it to this Hexon, then shuffle your deck.",
                 &[Fire], 10, &[AttachFromDeck(Fire)]),
-            atk("Flash Fire", "Discard 1 Fire energy card attached to this Hexon.",
+            atk("Flash Fire", "Discard 1 Ember energy card attached to this Hexon.",
                 &[Fire, Fire, Colorless], 60, &[DiscardEnergy { color: Fire, count: 1 }]),
         ],
         power: None,

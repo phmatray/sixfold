@@ -34,7 +34,7 @@ unit test that should cover it.
   - *T* is the turn player and *N* is the non-turn player (the opponent).
   - *Hexon* is a character card (type index < 8). Its *stage* is 0 for Basic, 1 for Awaken 1 and
     2 for Awaken 2.
-  - *Energy* covers basic energy (one per colour) and one *special 2-unit colorless energy*.
+  - *Energy* covers basic energy (one per colour) and one *special 2-unit Neutral energy*.
   - *Trainer* is a one-shot card (type `$10`). Trainers have no subtypes.
   - *Active* is slot 0. *Bench* is slots 1 to 5.
   - *Condition* means a special condition: Confused, Asleep, Paralyzed, Poisoned or Double-Poisoned.
@@ -365,8 +365,8 @@ unit test that should cover it.
 
 ### R-ENERGY-03: Energy counting
 - **Rule.** Attached energy is counted per colour. A basic energy gives 1 unit of its colour. The
-  special 2-unit colorless energy gives 2 units, both in the colorless bucket. The total over all
-  buckets is used to pay retreat costs and the colorless part of attack costs.
+  special 2-unit Neutral energy gives 2 units, both in the Neutral bucket. The total over all
+  buckets is used to pay retreat costs and the Neutral part of attack costs.
 - **Parameters.** Buckets `cc1b..cc22` are indexed by `type & 7`. Index 6 (special) is incremented
   twice. The total is stored in `cc23`.
 - **Status.** CONFIRMED
@@ -377,15 +377,15 @@ unit test that should cover it.
 - **Rule.** An attack is usable when two checks pass:
   1. For each of the 6 typed colours, the attached units of that colour are at least the
      requirement for that colour.
-  2. The total units minus the sum of the typed requirements are at least the colorless requirement.
+  2. The total units minus the sum of the typed requirements are at least the Neutral requirement.
 
-  So surplus typed energy pays colorless. The 2-unit special energy pays only colorless. The check
+  So surplus typed energy pays Neutral. The 2-unit special energy pays only Neutral. The check
   only tests sufficiency and does not assign cards to costs. An empty attack slot, or a Power entry
   (category 4), can never be used as an attack.
-- **Parameters.** The cost is 4 bytes of nibbles: 6 typed requirements, then the colorless
+- **Parameters.** The cost is 4 bytes of nibbles: 6 typed requirements, then the Neutral
   requirement in the high nibble of the 4th byte. The typed sum is kept in `cbcd`.
 - **Status.** CONFIRMED
-- **Evidence.** `01:48B2-491D`: per-colour compare at `4906`, colorless check at `48EF-4902`,
+- **Evidence.** `01:48B2-491D`: per-colour compare at `4906`, Neutral check at `48EF-4902`,
   empty/Power rejection at `48C3-48D2`.
 - **Test.** `attack_cost_colorless_paid_by_surplus`, `special_energy_cannot_pay_typed_cost`
 
@@ -1618,8 +1618,8 @@ notes give the decision order and the weightings to copy where helpful.
 15. There is no hand-size limit.
 16. Energy: one attachment per turn, to the Active or the Bench. Cancelling doesn't use it up.
 17. Free-attach Power: a matching energy onto a matching-colour Hexon doesn't count toward the limit, while the holder (own side) is in play and no blocker is in play.
-18. Energy counting: a basic energy is 1 unit of its colour. The special energy is 2 colorless units.
-19. Attack cost: each typed requirement must be met by that colour, and the total minus the typed sum must cover colorless. Empty slots and Powers are never attacks.
+18. Energy counting: a basic energy is 1 unit of its colour. The special energy is 2 Neutral units.
+19. Attack cost: each typed requirement must be met by that colour, and the total minus the typed sum must cover Neutral. Empty slots and Powers are never attacks.
 20. An attack is blocked by, in this order: an attack-lock substatus, Asleep or Paralyzed, no attacks, not enough energy, or the specific disabled attack.
 21. A committed attack always ends the turn, including a confusion tails or an accuracy miss. Only cancelling or a failed precondition returns to the menu.
 22. Attack pipeline: check → accuracy coin (cached per turn) → select → costs → confusion coin → phase 5 → prevention check → before-damage → damage calc → coin prevention → apply → after-damage → retaliation → status queue → knock-out handler.

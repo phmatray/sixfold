@@ -28,6 +28,21 @@ impl Color {
         Color::Psychic,
         Color::Colorless,
     ];
+
+    /// The shown name of this colour's basic energy card. The card's English
+    /// `name` ("Fire Energy") stays its identity key.
+    pub fn energy_name(self) -> &'static str {
+        use crate::lang::tr;
+        match self {
+            Color::Grass => tr("Grove Energy", "Énergie Bosquet"),
+            Color::Fire => tr("Ember Energy", "Énergie Braise"),
+            Color::Water => tr("Tide Energy", "Énergie Marée"),
+            Color::Lightning => tr("Storm Energy", "Énergie Orage"),
+            Color::Fighting => tr("Stone Energy", "Énergie Roc"),
+            Color::Psychic => tr("Dream Energy", "Énergie Songe"),
+            Color::Colorless => tr("Neutral Energy", "Énergie Neutre"),
+        }
+    }
 }
 
 /// Index into the card registry.
@@ -185,7 +200,11 @@ impl CardDef {
     /// The name to show, in the current language. [`CardDef::name`] stays
     /// the English identity key (evolutions, the 4-copy rule, saves).
     pub fn label(&self) -> &'static str {
-        fr_card(self).map_or(self.name, |r| r.name)
+        match (fr_card(self), &self.kind) {
+            (Some(r), _) => r.name,
+            (None, CardKind::Energy(EnergyCard::Basic(c))) => c.energy_name(),
+            _ => self.name,
+        }
     }
 }
 

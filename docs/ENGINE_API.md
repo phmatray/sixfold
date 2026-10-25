@@ -2,7 +2,7 @@
 
 This is the contract between the rules engine (`engine/`) and its three consumers: the card set (`engine/src/set.rs`, `engine/src/decks.rs`), the AI (`engine/src/ai.rs`) and the Leptos UI (`web/`). The rules themselves are in `docs/RULES.md`. Everything listed here is re-exported from the crate root (`use sixfold_engine::*;`).
 
-**Legal scope:** only mechanics. Every card name, attack, Power and line of text must be original. Use the game's own words: "Hexon" (a name coined for Sixfold), "Awakening", "Power", "Basic / Awaken 1 / Awaken 2", and the colours Grass, Fire, Water, Lightning, Fighting, Psychic and Colorless.
+**Legal scope:** only mechanics. Every card name, attack, Power and line of text must be original. Use the game's own words: "Hexon" (a name coined for Sixfold), "Awakening", "Power", "Basic / Awaken 1 / Awaken 2", and the colours Grove, Ember, Tide, Storm, Stone, Dream and Neutral.
 
 **Naming.** The code keeps its original identifiers: `Creature` is a Hexon, `Stage1`/`Stage2` are Awaken 1/Awaken 2, `evolve` (and `Evolved`, `evolves_from`, `EvolutionLock`) is an Awakening, and `Devolve` is a fall-back to the previous stage.
 
@@ -240,7 +240,7 @@ pub struct Hit { pub amount: u16, pub weakness: bool, pub resistance: bool }
   - `card_id(name) -> Option<CardId>`.
   - `set::CARDS` is the whole set. `CardId(i)` is `set::CARDS[i]`.
 - **Energy maths:**
-  - `energy_units(&[CardId]) -> Units` gives `[u8; 7]` indexed by `Color as usize`. Colorless is index 6, and a `DoubleColorless` energy counts 2 there.
+  - `energy_units(&[CardId]) -> Units` gives `[u8; 7]` indexed by `Color as usize`. `Colorless` (Neutral) is index 6, and a `DoubleColorless` energy counts 2 there.
   - `total_units(&Units)`.
   - `can_pay(&Units, cost: &[Color]) -> bool` (R-ENERGY-04).
 - **Decks:** `validate_deck(&[CardId]) -> Result<(), DeckError>`. `DeckError` is `WrongSize(n)`, `UnknownCard(id)`, `NoBasic` or `TooManyCopies(name)`.
@@ -256,13 +256,13 @@ every call site carries both texts.
 
 | API | Use |
 |---|---|
-| `view.describe_action(a: Action) -> String` | Button labels, e.g. "Attach Fire Energy to Cinder Pup (Active)", "Ember Nip (10)", "End turn", "Use Warm Paws (Blaze Hound)", "Retreat Cinder Pup (cost 1)". Call it on the asked player's view. |
+| `view.describe_action(a: Action) -> String` | Button labels, e.g. "Attach Ember Energy to Cinder Pup (Active)", "Ember Nip (10)", "End turn", "Use Warm Paws (Blaze Hound)", "Retreat Cinder Pup (cost 1)". Call it on the asked player's view. |
 | `view.describe_choice(c: Choice) -> String` | Labels for `Choose` options, e.g. "Cinder Pup (opponent's Bench 2)". `describe_action(Choose(i))` uses it. |
 | `prompt.kind.to_string()` (`Display for PromptKind`) | The prompt title, e.g. "Choose the opposing Hexon to switch in". |
 | `effect.to_string()` (`Display for Effect`) | One rules sentence per effect, for tooltips. Use it as a fallback when a card's `text` is empty. |
 | `event.describe(viewer) -> String` | One log line, with private cards hidden. |
 | `event.is_private(viewer) -> bool` | Whether the event's card must be hidden from `viewer`. |
-| `Display` for `Color`, `Stage`, `Status`, `Find`, `Placed`, `Shield` | "Fire", "Awaken 1", "Double-poisoned", … |
+| `Display` for `Color`, `Stage`, `Status`, `Find`, `Placed`, `Shield` | "Ember", "Awaken 1", "Double-poisoned", … |
 
 Card text comes from the card data itself. Show it through the localized accessors
 `CardDef::label()`, `Attack::label()` / `rules()`, `Power::label()` / `rules()` and `Trainer::rules()`
@@ -485,7 +485,7 @@ pub static CARDS: &[CardDef] = &[
             stage: Stage::Stage1, evolves_from: Some("Cinder Pup"), hp: 80, color: Fire,
             weakness: Some(Water), resistance: None, retreat_cost: 2,
             attacks: &[
-                Attack { name: "Scorch Line", text: "Discard 1 Fire energy card attached to this Hexon.",
+                Attack { name: "Scorch Line", text: "Discard 1 Ember energy card attached to this Hexon.",
                          cost: &[Fire, Fire, Colorless], damage: 50,
                          effects: &[DiscardEnergy { color: Fire, count: 1 }] },
                 Attack { name: "Ash Guard",
@@ -513,7 +513,7 @@ pub static CARDS: &[CardDef] = &[
 
 **Checks.**
 
-- `set.rs` already has `#[test] fn set_is_valid()`, which calls `validate_cards(CARDS)`. That checks for unique names, `evolves_from` naming a Hexon one stage below in the set, HP and damage in tens, no Colorless basic energy, weakness or resistance, trainers that have effects, and `AttachPlus10`, `AttachMinus20` and `StageSkip` used only on trainers.
+- `set.rs` already has `#[test] fn set_is_valid()`, which calls `validate_cards(CARDS)`. That checks for unique names, `evolves_from` naming a Hexon one stage below in the set, HP and damage in tens, no Neutral basic energy, weakness or resistance, trainers that have effects, and `AttachPlus10`, `AttachMinus20` and `StageSkip` used only on trainers.
 - Also add `assert_eq!(card_id("Blaze Hound"), Some(BLAZE_HOUND))` for every constant.
 - Don't reuse names from the test fixtures in `engine/src/fixtures.rs` ("Mossling", "Field Notes", …). The engine resolves Awakening chains by name, and in tests the fixture cards are looked up first.
 - Ids are positions: the set only grows at the end (old saves store ids). `every_colour_has_a_full_line` and `set_size_by_kind` check that each colour has a Basic → Awaken 1 → Awaken 2 line and the set's size.
@@ -590,7 +590,7 @@ The design and its odds are in `docs/BOOSTERS.md`.
 | 7–9 | `UNCOMMONS` = 3 `Uncommon` | the same |
 | 10 | 1 `Rare` | a Holo Rare (`set::is_holo`: the Awaken 2 Hexons) in `HOLO_ODDS` = (3, 5), that is 3 packs in 5, else a Rare trainer or the special energy |
 
-`booster.open(seed, &collection) -> Vec<CardId>` always gives the same pack for the same seed and collection (the engine's PCG32); no card twice in a pack. `booster.group(id)` is the card's `SHARES` group in that pack (0 its own `colors`, 1 trainers, the special energy and Colorless Hexons, 2 the other types; always 0 in the Wild pack), and a themed pack's Common and Uncommon slots pick a group 60 / 35 / 5, then a card of it evenly. Ember is Fire / Fighting, Tide is Water / Psychic, Grove is Grass / Lightning, Storm is Lightning / Water, Stone is Fighting / Colorless, Dream is Psychic / Grass, Wild (`is_wild()`) is everything. A themed pack's Holo Rares are its own types only. The Rare slot leaves out cards the collection holds `MAX_COPIES` of while another is left. No pack holds basic energy (unlimited) or promos. `booster.holds(id)` and `booster.pool(rarity, holo) -> [Vec<CardId>; 3]` (by group) list what it can contain, for the odds the UI shows.
+`booster.open(seed, &collection) -> Vec<CardId>` always gives the same pack for the same seed and collection (the engine's PCG32); no card twice in a pack. `booster.group(id)` is the card's `SHARES` group in that pack (0 its own `colors`, 1 trainers, the special energy and Neutral Hexons, 2 the other types; always 0 in the Wild pack), and a themed pack's Common and Uncommon slots pick a group 60 / 35 / 5, then a card of it evenly. Ember is Ember / Stone, Tide is Tide / Dream, Grove is Grove / Storm, Storm is Storm / Tide, Stone is Stone / Neutral, Dream is Dream / Grove, Wild (`is_wild()`) is everything. A themed pack's Holo Rares are its own types only. The Rare slot leaves out cards the collection holds `MAX_COPIES` of while another is left. No pack holds basic energy (unlimited) or promos. `booster.holds(id)` and `booster.pool(rarity, holo) -> [Vec<CardId>; 3]` (by group) list what it can contain, for the odds the UI shows.
 
 **Deck lists.** `DeckList { pub name: String, pub cards: Vec<CardId> }`, for decks a player builds.
 
@@ -671,13 +671,13 @@ campaign::backfill_promos(&progress, &mut profile) -> Vec<CardId>  // older save
 
 | # | Rival | Colours | Deck | AI | Style | Prizes | Needs | First win | Rematch |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Bramble, Hedge Tender | Grass | Thicket | Easy | Stall | 2 | 0 | seal + 2 Grove + ⬡ 300 | ⬡ 20 |
-| 2 | Marlo, Tide Reader | Water / Psychic | Low Tide | Easy | Stall | 3 | 0 | seal + 2 Tide + ⬡ 300 | ⬡ 30 |
-| 3 | Cinza, Kiln Runner | Fire / Fighting | Ember Rush | Normal | Aggressive | 4 | 0 | seal + 2 Ember + ⬡ 300 | ⬡ 40 |
-| 4 | Quill, Weather Watcher | Lightning / Water | Storm Front | Normal | Bench sniper | 4 | 3 | seal + 2 Storm + ⬡ 300 | ⬡ 40 |
-| 5 | Orla, Quarry Foreman | Fighting | Bedrock | Normal | Aggressive | 5 | 3 | seal + 2 Stone + ⬡ 300 | ⬡ 50 |
-| 6 | Lumen, Night Gardener | Psychic / Water | Moonlit Tide | Hard | Bench sniper | 6 | 5 | seal + 2 Dream + ⬡ 300 | ⬡ 60 |
-| — | Sable, the Hex Warden | Water / Fighting | Sixfold Crown | Hard | Balanced | 6 | 6 | 3 Wild + ⬡ 600 | ⬡ 60 |
+| 1 | Bramble, Hedge Tender | Grove | Thicket | Easy | Stall | 2 | 0 | seal + 2 Grove + ⬡ 300 | ⬡ 20 |
+| 2 | Marlo, Tide Reader | Tide / Dream | Low Tide | Easy | Stall | 3 | 0 | seal + 2 Tide + ⬡ 300 | ⬡ 30 |
+| 3 | Cinza, Kiln Runner | Ember / Stone | Ember Rush | Normal | Aggressive | 4 | 0 | seal + 2 Ember + ⬡ 300 | ⬡ 40 |
+| 4 | Quill, Weather Watcher | Storm / Tide | Storm Front | Normal | Bench sniper | 4 | 3 | seal + 2 Storm + ⬡ 300 | ⬡ 40 |
+| 5 | Orla, Quarry Foreman | Stone | Bedrock | Normal | Aggressive | 5 | 3 | seal + 2 Stone + ⬡ 300 | ⬡ 50 |
+| 6 | Lumen, Night Gardener | Dream / Tide | Moonlit Tide | Hard | Bench sniper | 6 | 5 | seal + 2 Dream + ⬡ 300 | ⬡ 60 |
+| — | Sable, the Hex Warden | Tide / Stone | Sixfold Crown | Hard | Balanced | 6 | 6 | 3 Wild + ⬡ 600 | ⬡ 60 |
 
 Every first win also adds that rival's promo card (Thistlewick, Brinemoth, Kilnfox, Squallkite,
 Slatebrow, Moonmoth; Hexcrest for the Warden) to the collection.

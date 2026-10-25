@@ -196,7 +196,7 @@ fn body(def: &'static CardDef) -> AnyView {
         }
         .into_any(),
         CardKind::Energy(EnergyCard::DoubleColorless) => view! {
-            <p class="card-text">{tr("Provides 2 Colorless energy.", "Fournit 2 énergies Incolore.")}</p>
+            <p class="card-text">{tr("Provides 2 Neutral energy.", "Fournit 2 énergies Neutres.")}</p>
         }
         .into_any(),
     }
@@ -418,8 +418,8 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
         }
         CardKind::Energy(EnergyCard::DoubleColorless) => view! {
             <p class="detail-text">{tr(
-                "Provides 2 Colorless energy. Counts toward the 4-copy limit.",
-                "Fournit 2 énergies Incolore. Compte dans la limite de 4 exemplaires.",
+                "Provides 2 Neutral energy. Counts toward the 4-copy limit.",
+                "Fournit 2 énergies Neutres. Compte dans la limite de 4 exemplaires.",
             )}</p>
         }
         .into_any(),

@@ -24,7 +24,7 @@ procedural SVG.
     exact counts, type material, the line's invented organ) and the light. Awaken 2, rares and promos
     get a low angle and backlight. An Awaken line repeats colours, material and signature organ so
     it reads as one species awakening. No Hexon carries a hexagon mark or a mark shared across species
-    (no common chest disc or emblem). Colorless Hexons say "no fur, no feathers and no skin" and describe a
+    (no common chest disc or emblem). Neutral Hexons say "no fur, no feathers and no skin" and describe a
     body sewn from patchwork felt with bold stitched seams, so the felt is structural, not a texture on a real animal.
   - **Trainers and energy** keep the storybook still-life lead: painterly gouache and watercolour on
     cold-press paper, warm light from the upper left, one subject, a soft wash in the card's colour.

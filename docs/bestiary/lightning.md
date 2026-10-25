@@ -1,11 +1,11 @@
-# Lightning Hexons / Hexons Foudre
+# Storm Hexons / Hexons Orage
 
-Grain: **copper and mica**. Lightning Hexons wear slate-blue storm-felt over copper-coil horns, prongs
+Grain: **copper and mica**. Storm Hexons wear slate-blue storm-felt over copper-coil horns, prongs
 and filament whiskers, with glassy mica insulator beads along their joints. Every one carries **paired
 prongs** with a spark jumping between them. Home: the Galewold (Thrumming Downs, Stormwatch, the
 Rodspire). See [BESTIARY.md](../BESTIARY.md).
 
-*Grain : **cuivre et mica**. Les Hexons Foudre portent un feutre d'orage bleu ardoise sur des cornes
+*Grain : **cuivre et mica**. Les Hexons Orage portent un feutre d'orage bleu ardoise sur des cornes
 en bobine de cuivre, des pointes et des moustaches-filaments, avec des perles isolantes de mica aux
 articulations. Tous portent des **pointes par paires** entre lesquelles saute une étincelle. Région : les Hautes-Rafales.*
 
@@ -23,8 +23,8 @@ corps long et bas, les pattes courtes et l'énergie inépuisable.*
 
 ### 034 · Sparkit / Étincelot
 
-**1. Identity / Identité.** No. 034 · Lightning · Basic · Sparkit → Arcfang → Fulgurex. 50 HP, common.
-*N° 034 · Foudre · Base · Étincelot → Arcroc → Fulgurion. 50 PV, commun.*
+**1. Identity / Identité.** No. 034 · Storm · Basic · Sparkit → Arcfang → Fulgurex. 50 HP, common.
+*N° 034 · Orage · Base · Étincelot → Arcroc → Fulgurion. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a stoat kit: the long body, short legs and bright eyes.
 Invented: two copper whisker-prongs on its brow with a spark between them, a tail ending in a copper
@@ -100,8 +100,8 @@ FR : « Une étincelle saute toujours entre ses deux pointes de cuivre. Quand el
 
 ### 035 · Arcfang / Arcroc
 
-**1. Identity / Identité.** No. 035 · Lightning · Awaken 1 · from Sparkit → Fulgurex. 80 HP, uncommon.
-*N° 035 · Foudre · Éveil 1 · d'Étincelot → Fulgurion. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 035 · Storm · Awaken 1 · from Sparkit → Fulgurex. 80 HP, uncommon.
+*N° 035 · Orage · Éveil 1 · d'Étincelot → Fulgurion. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: a marten's lean, long body. Invented: two long copper
 sabre fangs outside its jaw with an arc crackling between them, copper coils wound round its forelegs,
@@ -173,8 +173,8 @@ FR : « Un arc crépite entre ses deux crocs de cuivre. Une morsure, et l'étinc
 
 ### 036 · Fulgurex / Fulgurion
 
-**1. Identity / Identité.** No. 036 · Lightning · Awaken 2 · from Arcfang. 100 HP, rare.
-*N° 036 · Foudre · Éveil 2 · d'Arcroc. 100 PV, rare.*
+**1. Identity / Identité.** No. 036 · Storm · Awaken 2 · from Arcfang. 100 HP, rare.
+*N° 036 · Orage · Éveil 2 · d'Arcroc. 100 PV, rare.*
 
 **2. Animal base / Base animale.** EN: Kept: a wolverine's heavy shoulders, broad head and stubborn
 stance. Invented: a ridge of copper lightning rods along its spine, a storm-cloud mane that crackles,
@@ -265,8 +265,8 @@ bulbe de mica clair cerclé de fil de cuivre.*
 
 ### 037 · Buzzlet / Bourdonnet
 
-**1. Identity / Identité.** No. 037 · Lightning · Basic · Buzzlet → Hivevolt. 50 HP, common.
-*N° 037 · Foudre · Base · Bourdonnet → Ruchevolt. 50 PV, commun.*
+**1. Identity / Identité.** No. 037 · Storm · Basic · Buzzlet → Hivevolt. 50 HP, common.
+*N° 037 · Orage · Base · Bourdonnet → Ruchevolt. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a bumble-flier: the round fuzzy body, six thin legs and
 four small wings. Invented: an abdomen that is a clear mica bulb wound with two copper wire bands, holding
@@ -345,8 +345,8 @@ FR : « Une seule étincelle flotte dans le bulbe de mica de son abdomen. Sur le
 
 ### 038 · Hivevolt / Ruchevolt
 
-**1. Identity / Identité.** No. 038 · Lightning · Awaken 1 · from Buzzlet. 80 HP, uncommon.
-*N° 038 · Foudre · Éveil 1 · de Bourdonnet. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 038 · Storm · Awaken 1 · from Buzzlet. 80 HP, uncommon.
+*N° 038 · Orage · Éveil 1 · de Bourdonnet. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: the round fuzzy body, six legs and four wings, all much
 larger. Invented: the mica bulb has swollen into a great clear globe wound with three copper coil bands,
@@ -443,8 +443,8 @@ les ailes repliées ; la queue de plumes est remplacée par du cuivre.*
 
 ### 039 · Ohmlet / Ohmelette
 
-**1. Identity / Identité.** No. 039 · Lightning · Basic · Ohmlet → Ohmrunner. 60 HP, common.
-*N° 039 · Foudre · Base · Ohmelette → Ohmcoureur. 60 PV, commun.*
+**1. Identity / Identité.** No. 039 · Storm · Basic · Ohmlet → Ohmrunner. 60 HP, common.
+*N° 039 · Orage · Base · Ohmelette → Ohmcoureur. 60 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a ground-bird chick: the round body, big head and stout
 legs. Invented: a tail made of two short parallel copper rails standing straight up, with a bead of
@@ -523,8 +523,8 @@ FR : « Une perle de lumière remonte les rails de cuivre de sa queue et jaillit
 
 ### 040 · Ohmrunner / Ohmcoureur
 
-**1. Identity / Identité.** No. 040 · Lightning · Awaken 1 · from Ohmlet. 80 HP, uncommon.
-*N° 040 · Foudre · Éveil 1 · d'Ohmelette. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 040 · Storm · Awaken 1 · from Ohmlet. 80 HP, uncommon.
+*N° 040 · Orage · Éveil 1 · d'Ohmelette. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: a ground-runner's long legs, lean body and swept-back crest.
 Invented: two long copper rails rising straight up as its tail, taller than its back, along which a bead
@@ -620,8 +620,8 @@ la bosse qui s'illumine en se remplissant n'appartient qu'à lui.*
 
 ### 041 · Stormox / Taurorage
 
-**1. Identity / Identité.** No. 041 · Lightning · Basic. 70 HP, uncommon.
-*N° 041 · Foudre · Base. 70 PV, peu commun.*
+**1. Identity / Identité.** No. 041 · Storm · Basic. 70 HP, uncommon.
+*N° 041 · Orage · Base. 70 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a shaggy highland calf: the broad head, four sturdy legs
 and long coat. Invented: a hump of stacked clear mica sheets between its shoulders that fills with storm
@@ -716,8 +716,8 @@ touffue ; les ressorts n'appartiennent qu'à lui.*
 
 ### 042 · Zippet / Filéclair
 
-**1. Identity / Identité.** No. 042 · Lightning · Basic. 40 HP, common.
-*N° 042 · Foudre · Base. 40 PV, commun.*
+**1. Identity / Identité.** No. 042 · Storm · Basic. 40 HP, common.
+*N° 042 · Orage · Base. 40 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a desert hopper: the tiny round body, big ears, short
 forepaws and long tail. Invented: long hind shins that are tightly coiled copper springs, and two tall
@@ -813,8 +813,8 @@ le corps fuselé et les longues nageoires en ailes ; le bulbe-flash n'appartient
 
 ### 043 · Flashfin / Nagéclair
 
-**1. Identity / Identité.** No. 043 · Lightning · Basic. 60 HP, common.
-*N° 043 · Foudre · Base. 60 PV, commun.*
+**1. Identity / Identité.** No. 043 · Storm · Basic. 60 HP, common.
+*N° 043 · Orage · Base. 60 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a flying fish: the torpedo body, forked tail and long
 winglike side fins. Invented: a clear mica bulb on its brow with a coiled copper filament inside that
@@ -910,8 +910,8 @@ descendre la foudre avec lui n'appartient qu'à lui.*
 
 ### 044 · Squallkite / Milanorage
 
-**1. Identity / Identité.** No. 044 · Lightning · Basic. 60 HP, rare, promo.
-*N° 044 · Foudre · Base. 60 PV, rare, promo.*
+**1. Identity / Identité.** No. 044 · Storm · Basic. 60 HP, rare, promo.
+*N° 044 · Orage · Base. 60 PV, rare, promo.*
 
 **2. Animal base / Base animale.** EN: Kept from a kite-hawk: the hooked beak, gripping talons and narrow
 hunting wings. Invented: wings of taut storm-felt stretched on copper spars like a kite's frame, two

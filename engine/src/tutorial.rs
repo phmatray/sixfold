@@ -225,8 +225,8 @@ pub fn lesson(g: &Game) -> Lesson {
                     Goal::Attach,
                     Some(Action::AttachEnergy { hand: h, slot: 0 }),
                     tr(
-                        format!("Tap a Fire energy, then attach it to {}.", name(ASHPAW)),
-                        format!("Touchez une énergie Feu, puis attachez-la à {}.", name(ASHPAW)),
+                        format!("Tap an Ember energy, then attach it to {}.", name(ASHPAW)),
+                        format!("Touchez une énergie Braise, puis attachez-la à {}.", name(ASHPAW)),
                     ),
                     tr(
                         "Attacks cost energy, shown as coloured pips. You can attach one energy per turn.",
@@ -244,8 +244,8 @@ pub fn lesson(g: &Game) -> Lesson {
                 format!("Attaquez avec {}.", attack_name(ASHPAW, 0)),
             ),
             tr(
-                format!("It does 10, but {} is weak to Fire: weakness doubles it to 20. Attacking ends your turn.", name(POLLENPUP)),
-                format!("Elle inflige 10, mais {} a une Faiblesse au Feu, ce qui double les dégâts : 20. Attaquer termine votre tour.", name(POLLENPUP)),
+                format!("It does 10, but {} is weak to Ember: weakness doubles it to 20. Attacking ends your turn.", name(POLLENPUP)),
+                format!("Elle inflige 10, mais {} a une Faiblesse Braise, ce qui double les dégâts : 20. Attaquer termine votre tour.", name(POLLENPUP)),
             ),
         )),
         (PromptKind::MainPhase, Some(ASHPAW)) => find(g, BLAZELYNX).map(|h| {
@@ -269,8 +269,8 @@ pub fn lesson(g: &Game) -> Lesson {
                     Goal::Attach,
                     Some(Action::AttachEnergy { hand: h, slot: 0 }),
                     tr(
-                        format!("Attach a Fire energy to {}.", name(BLAZELYNX)),
-                        format!("Attachez une énergie Feu à {}.", name(BLAZELYNX)),
+                        format!("Attach an Ember energy to {}.", name(BLAZELYNX)),
+                        format!("Attachez une énergie Braise à {}.", name(BLAZELYNX)),
                     ),
                     tr(
                         format!("{} needs two energy for {}.", name(BLAZELYNX), attack_name(BLAZELYNX, 0)),

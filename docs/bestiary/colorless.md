@@ -1,4 +1,4 @@
-# Colorless Hexons / Hexons Incolores
+# Neutral Hexons / Hexons Neutres
 
 Grain: **none**. Neutral Hexons belong to the blank seventh face. They have no fur, feathers or skin: each body is **sewn** from patchwork panels of thick matted felt (oatmeal, cream, warm grey, slate) joined by bold, visible stitched seams. Having no face of their own, every line grew the shape of a tool travellers carry, as **one or two impossible organs** that change the silhouette: bellows flanks, hearing-horn ears, spool knees, a pincushion back, a stocking tail, a body wound from yarn, raised moth wings. Horn is chalk, claws and beaks unglazed porcelain. Their **chalk markings are alive** and differ per line: a map of tunnels, wind arrows, sound rings, tallies of stores or loads, a route, stitch marks. No mark is shared: there is no common chest disc or emblem, and the animal base is only a silhouette hint. Home: Sixfold Meadow, Brightwell Square and every road between the regions. See [BESTIARY.md](../BESTIARY.md).
 
@@ -14,8 +14,8 @@ Grain: **none**. Neutral Hexons belong to the blank seventh face. They have no f
 
 ### 068 · Burrowbit / Terrinot
 
-**1. Identity / Identité.** No. 068 · Colorless · Basic · Burrowbit → Warrenbuck → Warrenking. 50 HP,
-common. *N° 068 · Incolore · Base · Terrinot → Garenbouquin → Garenroi. 50 PV, commun.*
+**1. Identity / Identité.** No. 068 · Neutral · Basic · Burrowbit → Warrenbuck → Warrenking. 50 HP,
+common. *N° 068 · Neutre · Base · Terrinot → Garenbouquin → Garenroi. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a young rabbit, as a silhouette hint only: a low round body and two tall shapes on its head. Invented: no fur, a sack-shaped body sewn from patchwork felt; ears that are two felt stalks ending in flat chalk **spade blades** it digs with; a whole front that is a **drawstring pouch** full of found trinkets; a chalk map of its own tunnels drawn across its panels. *FR : Du jeune lapin, il ne garde qu'un souvenir de silhouette : un corps rond et bas, et deux formes dressées sur la tête. Inventé : pas de fourrure, un corps en forme de sac cousu de feutre en patchwork ; des oreilles qui sont deux tiges de feutre terminées par des **lames-pelles** de craie plates avec lesquelles il creuse ; tout un devant qui est une **bourse à cordon** pleine de trouvailles ; le plan de ses propres galeries tracé à la craie sur ses pièces.*
 
@@ -66,8 +66,8 @@ FR : « Il garde tout ce qui brille dans la poche de sa poitrine. Au pré, on di
 
 ### 069 · Warrenbuck / Garenbouquin
 
-**1. Identity / Identité.** No. 069 · Colorless · Awaken 1 · from Burrowbit → Warrenking. 70 HP,
-uncommon. *N° 069 · Incolore · Éveil 1 · de Terrinot → Garenroi. 70 PV, peu commun.*
+**1. Identity / Identité.** No. 069 · Neutral · Awaken 1 · from Burrowbit → Warrenking. 70 HP,
+uncommon. *N° 069 · Neutre · Éveil 1 · de Terrinot → Garenroi. 70 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a hare, as a silhouette hint only: a lean seated body and tall things on its head. Invented: no fur, a body sewn from patchwork felt; **four** spade-blade ears on stiff felt stalks; hind legs that are **coiled springs** of wound felt cord, which is how it outruns carts; a ruff of loose felt fibre; chalk arrows on its flanks that point the way it means to run. *FR : Du lièvre, il ne garde qu'un souvenir de silhouette : un corps sec assis et de hautes formes sur la tête. Inventé : pas de fourrure, un corps cousu de feutre en patchwork ; **quatre** oreilles à lames-pelles sur des tiges de feutre raides ; des pattes arrière qui sont des **ressorts** de cordon de feutre enroulé, et c'est ainsi qu'il distance les charrettes ; une collerette de fibres de feutre ; des flèches de craie sur les flancs qui montrent par où il compte courir.*
 
@@ -120,8 +120,8 @@ FR : « Quatre oreilles entendent quatre vents. Les coursiers des six routes fon
 
 ### 070 · Warrenking / Garenroi
 
-**1. Identity / Identité.** No. 070 · Colorless · Awaken 2 · from Warrenbuck. 100 HP, rare. Power:
-Warren Welcome. *N° 070 · Incolore · Éveil 2 · de Garenbouquin. 100 PV, rare. Pouvoir : Bienvenue au terrier.*
+**1. Identity / Identité.** No. 070 · Neutral · Awaken 2 · from Warrenbuck. 100 HP, rare. Power:
+Warren Welcome. *N° 070 · Neutre · Éveil 2 · de Garenbouquin. 100 PV, rare. Pouvoir : Bienvenue au terrier.*
 
 **2. Animal base / Base animale.** EN: Kept from a great hare, as a silhouette hint only: a big body sitting on its haunches. Invented: no fur, a body sewn from patchwork felt; its spade-ears have split into a **crown of five chalk blades**; front feet that are wide **porcelain digging spades**; the chalk map of the whole warren drawn over every panel of its body. *FR : Du grand lièvre, il ne garde qu'un souvenir de silhouette : un grand corps assis sur l'arrière-train. Inventé : pas de fourrure, un corps cousu de feutre en patchwork ; ses oreilles-pelles se sont divisées en une **couronne de cinq lames de craie** ; des pattes avant qui sont de larges **pelles de porcelaine** ; le plan de toute la garenne tracé à la craie sur chaque pièce de son corps.*
 
@@ -186,8 +186,8 @@ FR : « Ses oreilles sont devenues une couronne de craie. Quand il arrive, toute
 
 ### 071 · Pecklet / Picorin
 
-**1. Identity / Identité.** No. 071 · Colorless · Basic · Pecklet → Galeheron. 40 HP, common.
-*N° 071 · Incolore · Base · Picorin → Rafaléron. 40 PV, commun.*
+**1. Identity / Identité.** No. 071 · Neutral · Basic · Pecklet → Galeheron. 40 HP, common.
+*N° 071 · Neutre · Base · Picorin → Rafaléron. 40 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a young heron, as a silhouette hint only: two long stilt legs and the habit of standing still in shallow water. Invented: no feathers, a body that is a living **fireplace bellows**, two stiff felt wing-boards joined by pleated felt that it squeezes to puff air; a short neck of three pleats; a **nozzle beak** of porcelain; chalk wind arrows on its boards. *FR : Du jeune héron, il ne garde qu'un souvenir de silhouette : deux longues pattes-échasses et l'habitude de rester immobile dans l'eau peu profonde. Inventé : pas de plumes, un corps qui est un **soufflet de cheminée** vivant, deux planchettes-ailes de feutre raide reliées par du feutre plissé qu'il écrase pour souffler ; un cou court à trois plis ; un **bec-tuyère** de porcelaine ; des flèches de vent à la craie sur ses planchettes.*
 
@@ -246,8 +246,8 @@ FR : « Son corps est un soufflet de feutre. Il reste une heure dans la fontaine
 
 ### 072 · Galeheron / Rafaléron
 
-**1. Identity / Identité.** No. 072 · Colorless · Awaken 1 · from Pecklet. 70 HP, uncommon.
-*N° 072 · Incolore · Éveil 1 · de Picorin. 70 PV, peu commun.*
+**1. Identity / Identité.** No. 072 · Neutral · Awaken 1 · from Pecklet. 70 HP, uncommon.
+*N° 072 · Neutre · Éveil 1 · de Picorin. 70 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a grown heron, as a silhouette hint only: its height, long stilt legs and patience. Invented: no feathers, a body that is a great **bellows** of felt wing-boards and pleats; a long neck that is an **accordion of nine pleats** it can wring into a twist; porcelain blades along the wing-boards; a long nozzle beak; chalk spirals of wind. *FR : Du héron adulte, il ne garde qu'un souvenir de silhouette : la taille, les longues pattes-échasses et la patience. Inventé : pas de plumes, un corps qui est un grand **soufflet** de planchettes de feutre et de plis ; un long cou qui est un **accordéon de neuf plis** qu'il peut tordre comme un linge ; des lames de porcelaine le long des planchettes ; un long bec-tuyère ; des spirales de vent à la craie.*
 
@@ -313,8 +313,8 @@ FR : « Il tord son cou à neuf plis comme un linge, puis le relâche. La rafale
 
 ### 073 · Scampit / Galopiot
 
-**1. Identity / Identité.** No. 073 · Colorless · Basic · does not awaken. 40 HP, common. Power: Forage.
-*N° 073 · Incolore · Base · ne s'éveille pas. 40 PV, commun. Pouvoir : Fouinage.*
+**1. Identity / Identité.** No. 073 · Neutral · Basic · does not awaken. 40 HP, common. Power: Forage.
+*N° 073 · Neutre · Base · ne s'éveille pas. 40 PV, commun. Pouvoir : Fouinage.*
 
 **2. Animal base / Base animale.** EN: Kept from a chipmunk, as a silhouette hint only: a plump body sitting up and full cheeks. Invented: no fur, a body sewn from patchwork felt; a tail that is a **hollow felt stocking** as big as itself, used as a larder; **three pocket flaps** with wooden toggles down its back; cheeks that are two **drawstring pouches**; chalk tallies of its stores on its belly. *FR : Du tamia, il ne garde qu'un souvenir de silhouette : un corps dodu assis et des joues pleines. Inventé : pas de fourrure, un corps cousu de feutre en patchwork ; une queue qui est un **bas de feutre creux** aussi grand que lui, son garde-manger ; **trois rabats de poche** à boutons de bois le long du dos ; des joues qui sont deux **bourses à cordon** ; le compte de ses provisions à la craie sur le ventre.*
 
@@ -376,8 +376,8 @@ FR : « Sa queue est un garde-manger de feutre ouvert au bout. Ce qu'il y range 
 
 ### 074 · Echopup / Échouaf
 
-**1. Identity / Identité.** No. 074 · Colorless · Basic · does not awaken. 50 HP, uncommon.
-*N° 074 · Incolore · Base · ne s'éveille pas. 50 PV, peu commun.*
+**1. Identity / Identité.** No. 074 · Neutral · Basic · does not awaken. 50 HP, uncommon.
+*N° 074 · Neutre · Base · ne s'éveille pas. 50 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a small big-eared fox, as a silhouette hint only: a slim seated body and a short muzzle. Invented: no fur, a body sewn from patchwork felt with a slate mask; two flared **hearing horns** of chalk in place of ears; a tail that coils into a **third horn** whose bell faces forward and plays sounds back; chalk sound rings on its chest. *FR : Du petit renard à grandes oreilles, il ne garde qu'un souvenir de silhouette : un corps fin assis et un museau court. Inventé : pas de fourrure, un corps cousu de feutre en patchwork au masque ardoise ; deux **cornets acoustiques** évasés de craie à la place des oreilles ; une queue enroulée en **troisième cornet** dont le pavillon, tourné vers l'avant, rejoue les sons ; des ondes sonores de craie sur la poitrine.*
 
@@ -442,8 +442,8 @@ FR : « Ses oreilles sont deux trompes de corne. Il capte le bruit de votre atta
 
 ### 075 · Haulox / Halebœuf
 
-**1. Identity / Identité.** No. 075 · Colorless · Basic · does not awaken. 80 HP, uncommon.
-*N° 075 · Incolore · Base · ne s'éveille pas. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 075 · Neutral · Basic · does not awaken. 80 HP, uncommon.
+*N° 075 · Neutre · Base · ne s'éveille pas. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a musk-ox bull, as a silhouette hint only: the bulk and the low head. Invented: no hide, a body that is a great mound of **quilted felt panels** hanging almost to the ground; a straight **yoke of chalk horn** grown across the top of its shoulders, so carters hitch it with no harness; a face hidden under a fringe of felt strips, only a porcelain muzzle plate showing; no horns on its head; knees that are **wooden spools** wound with yarn; chalk tallies of every load on its panels. *FR : Du bœuf musqué, il ne garde qu'un souvenir de silhouette : la masse et la tête basse. Inventé : pas de cuir, un corps qui est un grand tas de **pièces de feutre matelassé** tombant presque jusqu'au sol ; un **joug de corne de craie** droit poussé en travers du haut des épaules, si bien qu'on l'attelle sans harnais ; une face cachée sous une frange de bandes de feutre, d'où ne dépasse qu'une plaque de mufle en porcelaine ; aucune corne sur la tête ; des genoux qui sont des **bobines de bois** enroulées de fil ; le compte de chaque chargement à la craie sur ses pièces.*
 
@@ -508,8 +508,8 @@ FR : « Un joug de corne de craie lui pousse sur les épaules. On l'attelle sans
 
 ### 076 · Pocketmouse / Souripoche
 
-**1. Identity / Identité.** No. 076 · Colorless · Basic · does not awaken. 40 HP, common. Power: Scurry.
-*N° 076 · Incolore · Base · ne s'éveille pas. 40 PV, commun. Pouvoir : Détalage.*
+**1. Identity / Identité.** No. 076 · Neutral · Basic · does not awaken. 40 HP, common. Power: Scurry.
+*N° 076 · Neutre · Base · ne s'éveille pas. 40 PV, commun. Pouvoir : Détalage.*
 
 **2. Animal base / Base animale.** EN: Kept from a field mouse, as a silhouette hint only: the tiny size and two big round ears. Invented: its whole body is a **ball of its own wound yarn**, its loose end the tail it pays out; a small flat felt face stitched onto the ball; ears of thin felt dotted with chalk; a dotted chalk route that winds round the ball. *FR : Du mulot, elle ne garde qu'un souvenir de silhouette : la taille minuscule et deux grandes oreilles rondes. Inventé : tout son corps est une **pelote de son propre fil**, dont le bout libre est la queue qu'elle dévide ; une petite face plate de feutre cousue sur la pelote ; des oreilles de feutre fin pointillées de craie ; un itinéraire en pointillés de craie qui fait le tour de la pelote.*
 
@@ -576,8 +576,8 @@ FR : « Son corps est une pelote de son propre fil. Les voyageurs perdus suivent
 
 ### 077 · Mendlark / Pansalouette
 
-**1. Identity / Identité.** No. 077 · Colorless · Basic · does not awaken. 50 HP, uncommon.
-*N° 077 · Incolore · Base · ne s'éveille pas. 50 PV, peu commun.*
+**1. Identity / Identité.** No. 077 · Neutral · Basic · does not awaken. 50 HP, uncommon.
+*N° 077 · Neutre · Base · ne s'éveille pas. 50 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a lark, as a silhouette hint only: a small perching body and a famous dawn song. Invented: no feathers, a round body that is a living **pincushion**, its back and crown bristling with porcelain-headed pins; a **darning-needle beak** with an eye near the tip, trailing a thread; wings that are felt patches sewn on in blanket stitch; chalk cross-stitches that mark what it has mended. *FR : De l'alouette, il ne garde qu'un souvenir de silhouette : un petit corps perché et un célèbre chant de l'aube. Inventé : pas de plumes, un corps rond qui est une **pelote à épingles** vivante, le dos et le crâne hérissés d'épingles à tête de porcelaine ; un **bec-aiguille à repriser** percé d'un chas près de la pointe, d'où pend un fil ; des ailes qui sont des pièces de feutre cousues au point de feston ; des points de croix de craie qui marquent ce qu'il a réparé.*
 
@@ -643,8 +643,8 @@ FR : « Son bec est une aiguille de porcelaine. Il recoud son feutre effiloché 
 
 ### 078 · Hexcrest / Sorcrête
 
-**1. Identity / Identité.** No. 078 · Colorless · Basic · does not awaken. 80 HP, rare, promo (the
-first win over Sable, the Hex Warden). Power: Champion's Calm. *N° 078 · Incolore · Base · ne s'éveille
+**1. Identity / Identité.** No. 078 · Neutral · Basic · does not awaken. 80 HP, rare, promo (the
+first win over Sable, the Hex Warden). Power: Champion's Calm. *N° 078 · Neutre · Base · ne s'éveille
 pas. 80 PV, rare, promo (la première victoire sur Sable, la Gardienne des Six). Pouvoir : Champion's
 Calm.*
 

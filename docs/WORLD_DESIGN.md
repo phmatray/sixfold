@@ -53,20 +53,20 @@ Stone are only reached through their ring neighbours (or fast travel), so the hu
 turnstile.
 
 ```
-                         STORM (lightning) ── NE
+                         STORM ── NE
                   Rodspire ─ Stormwatch ─ Thrumming Downs
                         ║ ferry                │ (open road)
-   STONE (fighting) ─ NW        EMBER (fire) ─ N
+   STONE ─ NW                   EMBER ─ N
  Bastion ─ Anvilstead ─ Scree Pass ═══ Undermine ═══ Emberstep Quarry ─ Cinderwick ─ Kilnmouth
     ║ climb (gloves)                   (lantern)            │
     ║                                                       │
  Elder Ring                                          SIXFOLD MEADOW (hub)
     │                                              ╱        │        ╲
  Rootholm ───── Fernhollow Trail ─────────────────╯         │         ╰──── Saltwind Boardwalk
-    ║ ford (boots)       GROVE (grass) ─ W           Brightwell Square        │   TIDE (water) ─ E
+    ║ ford (boots)       GROVE ─ W                   Brightwell Square        │   TIDE ─ E
     ║                                                       │            Gullhaven ═ ferry ═ Stormwatch
  Hushwillow Lane ───────────────────────────────────────────╯                 │
-    │                 DREAM (psychic) ─ S                                Bellflats
+    │                 DREAM ─ S                                          Bellflats
  Lanternmere ═════════════ causeway (low tide, day) ═════════════════════════╯
     │                    ═ ferry ═ Gullhaven
  Moonwell Garden
@@ -135,8 +135,8 @@ Interiors (all on the 11×9 interior kit unless noted; `shop` and `warden` alrea
 | Saltwind Boardwalk | Tide route | Marlo → Bellflats; Quill → Rodspire | east exit along the boardwalk → Gullhaven; a lighthouse keeper |
 | Fernhollow Trail | Grove route | Bramble → Elder Ring; Lumen → Moonwell | west exit → Rootholm; the moonflower glade keeps a night find |
 
-Rivals land at their region's seal site: Cinza (Ember, Fire/Fighting), Quill (Storm, Lightning/Water),
-Marlo (Tide, Water/Psychic), Lumen (Dream, Psychic/Water), Bramble (Grove, Grass), Orla (Stone, Fighting).
+Rivals land at their region's seal site: Cinza (Ember, Ember/Stone), Quill (Storm, Storm/Tide),
+Marlo (Tide, Tide/Dream), Lumen (Dream, Dream/Tide), Bramble (Grove, Grove), Orla (Stone, Stone).
 Sable, the Hex Warden, stays behind the sealed door of the duel hall. Seal thresholds stay as in
 `campaign.rs` (`needs` 0/0/0/3/3/5/6), which the ring respects: the three hub-adjacent regions are the
 first three seals.
@@ -313,16 +313,16 @@ only), **Bud** (+ Awaken 1), **Bloom** (+ Awaken 2; night and late duelists).
 
 | Colour | Sprout | Bud | Bloom |
 |---|---|---|---|
-| Fire | **Kindling**: Cindrel 4, Ashpaw 4, Kilnback 3, Waxwick 3, Moss Poultice 2, Dowsing Rod 2 | **Bellows**: + Flarrow 3, Blazelynx 2, Furnaceback 2, Cinderhorn 1 | **Forge**: + Pyrequill 1, Solarlynx 1, Ash Sifter 2 |
-| Water | **Puddle**: Puddock 4, Rillet 4, Kelpup 4, Clearwater Vial 2 | **Current**: + Brookhorn 3, Streamfin 2, Kelpwarden 2, Shellmote 1 | **Undertow**: + Tidemaw 1, Gulfwyrm 1, Frosteel 1 |
-| Grass | **Seedling**: Sprigget 4, Mirebud 4, Pollenpup 3, Fernwhisk 3, Moss Poultice 2 | **Hedgerow**: + Thornbuck 3, Bogblossom 2, Honeymane 2, Briarhog 1 | **Canopy**: + Elderhart 1, Bogcrown 1, Grove Balm 2 |
-| Lightning | **Spark**: Sparkit 4, Buzzlet 4, Ohmlet 3, Zippet 3, Flashfin 2 | **Static**: + Arcfang 3, Hivevolt 2, Ohmrunner 2, Stormox 1 | **Tempest**: + Fulgurex 1, Charge Coil 1, Jolt Wire 1 |
-| Fighting | **Pebble**: Knollop 4, Tusklet 4, Brawlet 3, Shalepup 3 | **Rubble**: + Knollgrim 3, Ironbrawl 2, Shalehound 2, Gritfang 1, Bouldergut 1 | **Landslide**: + Knollossus 1, Cragmastiff 1, Spike Charm 1 |
-| Psychic | **Murmur**: Wispun 4, Dozel 4, Hexlet 4, Smoke Pellet 2 | **Reverie**: + Wispelle 3, Somnitar 2, Hexmage 2, Glimmox 1, Gloamowl 1 | **Trance**: + Wraithelle 1, Hexarch 1, Unwind Spray 1 |
-| Colorless | **Scrap**: Burrowbit 4, Pecklet 4, Pocketmouse 3, Scampit 3, Relay Baton 2 | **Flock**: + Warrenbuck 3, Galeheron 2, Echopup 2, Haulox 1, Mendlark 1 | — |
+| Ember | **Kindling**: Cindrel 4, Ashpaw 4, Kilnback 3, Waxwick 3, Moss Poultice 2, Dowsing Rod 2 | **Bellows**: + Flarrow 3, Blazelynx 2, Furnaceback 2, Cinderhorn 1 | **Forge**: + Pyrequill 1, Solarlynx 1, Ash Sifter 2 |
+| Tide | **Puddle**: Puddock 4, Rillet 4, Kelpup 4, Clearwater Vial 2 | **Current**: + Brookhorn 3, Streamfin 2, Kelpwarden 2, Shellmote 1 | **Undertow**: + Tidemaw 1, Gulfwyrm 1, Frosteel 1 |
+| Grove | **Seedling**: Sprigget 4, Mirebud 4, Pollenpup 3, Fernwhisk 3, Moss Poultice 2 | **Hedgerow**: + Thornbuck 3, Bogblossom 2, Honeymane 2, Briarhog 1 | **Canopy**: + Elderhart 1, Bogcrown 1, Grove Balm 2 |
+| Storm | **Spark**: Sparkit 4, Buzzlet 4, Ohmlet 3, Zippet 3, Flashfin 2 | **Static**: + Arcfang 3, Hivevolt 2, Ohmrunner 2, Stormox 1 | **Tempest**: + Fulgurex 1, Charge Coil 1, Jolt Wire 1 |
+| Stone | **Pebble**: Knollop 4, Tusklet 4, Brawlet 3, Shalepup 3 | **Rubble**: + Knollgrim 3, Ironbrawl 2, Shalehound 2, Gritfang 1, Bouldergut 1 | **Landslide**: + Knollossus 1, Cragmastiff 1, Spike Charm 1 |
+| Dream | **Murmur**: Wispun 4, Dozel 4, Hexlet 4, Smoke Pellet 2 | **Reverie**: + Wispelle 3, Somnitar 2, Hexmage 2, Glimmox 1, Gloamowl 1 | **Trance**: + Wraithelle 1, Hexarch 1, Unwind Spray 1 |
+| Neutral | **Scrap**: Burrowbit 4, Pecklet 4, Pocketmouse 3, Scampit 3, Relay Baton 2 | **Flock**: + Warrenbuck 3, Galeheron 2, Echopup 2, Haulox 1, Mendlark 1 | — |
 
-Every Bud and Bloom kit also carries Lucky Satchel 2 and Trail Compass 1. Colorless kits run Twofold
-Energy 2 and split their energy between Fire and Water (they need none of either; it keeps the
+Every Bud and Bloom kit also carries Lucky Satchel 2 and Trail Compass 1. Neutral kits run Twofold
+Energy 2 and split their energy between Ember and Tide (they need none of either; it keeps the
 deck-out count normal). `deck_sweep` gains a "kits" row so no kit wins more than 60% against the
 Sprout prebuilt-equivalents at 2 prizes.
 
@@ -351,12 +351,12 @@ Sight direction in brackets.
 14 duelists, ⬡ 585 in purses (five 1-prize, seven 2-prize, two 3-prize).
 
 **Balance (1.2 content PR).** `kit_sweep` plays each duelist as placed against the bare starter deck (a new
-player's): most sit at 3–47%. **Morrow** was at 80% on the Current kit (Water against the Fire starter, three
+player's): most sit at 3–47%. **Morrow** was at 80% on the Current kit (Tide against the Ember starter, three
 prizes) and 78% even on Easy, so the difficulty wasn't the lever: he now plays the Sprout **Puddle** kit with
 three Brookhorn as his signature, **47%**, still the boardwalk's long, patient duel; and he stands at the east
 end off the main boardwalk, so he's a choice rather than the first thing you meet. **Tamsin** (Pebble, Easy)
-sat at 60% on the Pebble kit (58% over 1,200 games): Fighting against Fire. The 1.2 design audit gave her the
-first half of Rubble and of Scrap, with one more Knollgrim (four in all): still a Fighting deck, now **47%** in
+sat at 60% on the Pebble kit (58% over 1,200 games): Stone against Ember. The 1.2 design audit gave her the
+first half of Rubble and of Scrap, with one more Knollgrim (four in all): still a Stone deck, now **47%** in
 `kit_sweep` and 48% over 1,200 games, an Easy quarry duel again. One duelist per corridor: Nell owns the pier, Pell the
 boathouse front, Skye the east boardwalk; Hazel the trail's middle, Ossian the south woods, Bryn the lodge
 path, Sorrel the north path.
@@ -682,7 +682,7 @@ top that is smooth and blank. Nobody remembers why.
 
 **Rook** (FR *Rook*), *The Blank* / *Le Sans-Couleur*, grew up in the meadow. At twelve he took his first deck
 to the duel hall, lost to everyone and was told kindly he'd "find his colour". He never did; he plays
-**Colorless** Hexons only, on purpose now. He has walked the ring the other way round and believes the
+**Neutral** Hexons only, on purpose now. He has walked the ring the other way round and believes the
 seventh face is for a champion of no colour: him. He's sharp, funny, competitive, a little bitter, and keeps
 a tally of your wins on his sleeve. Not a villain; a mirror. The arc is about whether the path is closed or
 just unwalked.
@@ -698,10 +698,10 @@ keep 60; the last is given in full:
 
 | # | Id | Where, trigger | Deck (prizes, AI) | Beat |
 |---|---|---|---|---|
-| 1 | `rook_1` | Meadow, on entering with `seals:1 & !flag:rook_1` | **Blank Slate**: Burrowbit 4, Pecklet 4, Pocketmouse 4, Scampit 3, Relay Baton 2, Lucky Satchel 2, Fire 21, Water 20 (2, Normal) | He walks down from the north path, blocks the hall door, looks at your seal. "One. They gave me none, the year I tried." |
+| 1 | `rook_1` | Meadow, on entering with `seals:1 & !flag:rook_1` | **Blank Slate**: Burrowbit 4, Pecklet 4, Pocketmouse 4, Scampit 3, Relay Baton 2, Lucky Satchel 2, Ember 21, Tide 20 (2, Normal) | He walks down from the north path, blocks the hall door, looks at your seal. "One. They gave me none, the year I tried." |
 | 2 | `rook_2` | Stormwatch, the observatory roof, on entering with `seals:3 & !flag:rook_2` | **Open Sky**: + Warrenbuck 3, Galeheron 3, Echopup 2, Haulox 2, Twofold Energy 2 (4, Normal) | Cam pans to the Rodspire; he's mapping the seal sites. "Six stones. Six faces each. And one nobody carves." |
 | 3 | `rook_3` | Lanternmere's lantern path at night, `seals:5 & time:night & !flag:rook_3` | **Hollow Crown**: + Warrenking 2, Mendlark 3, Wide Satchel 1, Snare Hook 1 (5, Hard) | Halfway across the lake, lanterns bobbing; he's tired, almost friendly. "You're the only one who's ever caught up." |
-| 4 | `rook_4` | Duel hall, stepping toward the sealed door with `seals:6 & !flag:rook_4` | **Seventh Face**: Burrowbit 4, Warrenbuck 3, Warrenking 2, Pecklet 4, Galeheron 3, Mendlark 3, Echopup 2, Haulox 2, Pocketmouse 2, Lucky Satchel 3, Trail Compass 2, Snare Hook 2, Hearty Broth 2, Wide Satchel 1, Relay Baton 1, Twofold Energy 4, Fire 10, Water 10 (6, Hard) | He's already at the door. The duel; then the door opens on its own, Sable walks out. |
+| 4 | `rook_4` | Duel hall, stepping toward the sealed door with `seals:6 & !flag:rook_4` | **Seventh Face**: Burrowbit 4, Warrenbuck 3, Warrenking 2, Pecklet 4, Galeheron 3, Mendlark 3, Echopup 2, Haulox 2, Pocketmouse 2, Lucky Satchel 3, Trail Compass 2, Snare Hook 2, Hearty Broth 2, Wide Satchel 1, Relay Baton 1, Twofold Energy 4, Ember 10, Tide 10 (6, Hard) | He's already at the door. The duel; then the door opens on its own, Sable walks out. |
 | — | epilogue | after `beat:warden` | Rook stands in the hall; rematch `rook_4` for ⬡ 60 | Sable has carved a seventh face on the hall's stone: blank still, "for whoever brings someone else along". Rook takes Wynne's apprentice job. Champion title becomes "Champion of the Seventh Face" once `flag:rook_4`. |
 
 ### 8.3 Cutscenes
@@ -857,14 +857,14 @@ shop stock. Duelists marked ☾ are night-only; ⚖ are challenge-rule duelists 
 |---|---|---|
 | `BasicsOnly` | hold no Awaken 1 or Awaken 2 Hexon | stage of every Hexon card |
 | `NoTrainers` | hold Hexons and energy only | card kind |
-| `MonoColour` | hold Hexons and basic energy of one colour (plus Colorless) | colours |
+| `MonoColour` | hold Hexons and basic energy of one colour (plus Neutral) | colours |
 | `LightEnergy` | hold at most 16 energy cards | count |
 | `NoRares` | hold no Rare (energy excepted) | rarity |
 | `TwoStage2` | hold at least two Awaken 2 Hexons | stage count |
 
 ---
 
-### 10.1 Ember: The Emberlands / *Les Braisières* (Fire) — Cinza
+### 10.1 Ember: The Emberlands / *Les Braisières* — Cinza
 
 **Identity.** Black basalt terraces and ash-grey ground; orange-lit kiln mouths and glass glinting
 everywhere; heat shimmer over vents. Ground `ash` / path `stone`; ring `ash_pine`, `rock`, `bush_dark`; cliffs
@@ -984,7 +984,7 @@ a sfx).
 
 ---
 
-### 10.2 Storm: The Galewold / *Les Hautes-Rafales* (Lightning) — Quill
+### 10.2 Storm: The Galewold / *Les Hautes-Rafales* — Quill
 
 **Identity.** High heath on sea cliffs, dry-stone walls, chime posts that thrum in the wind, copper and slate,
 weather always moving. Ground `heath` / path `dirt`; ring `heather`, `rock`, `bush_dark`, no ring on the sea
@@ -1112,7 +1112,7 @@ pack `storm` · `st_scope` ☾ observatory telescope (after the Lens quest) ⬡ 
 
 ---
 
-### 10.3 Tide: The Saltreach / *La Côte Salée* (Water) — Marlo
+### 10.3 Tide: The Saltreach / *La Côte Salée* — Marlo
 
 **Identity.** Harbour life on stilts, nets drying, painted boats, gulls; then the wide tidal flats where the
 sea goes out by day and comes back at dusk. Ground `sand` / path `wood_floor` (boardwalk) with `wet_sand` on the
@@ -1224,7 +1224,7 @@ quay; route NPC; knows where the tide pools are). **Abel**, fishmonger (day at t
 
 ---
 
-### 10.4 Dream: The Hushlands / *Les Terres du Murmure* (Psychic) — Lumen
+### 10.4 Dream: The Hushlands / *Les Terres du Murmure* — Lumen
 
 **Identity.** Willow country in a permanent soft twilight tint; a lake full of floating paper lanterns; moths,
 fog, hush. The one region that's busier at night than by day. Ground `dusk_grass` (a blue-tinted grass) / path
@@ -1354,7 +1354,7 @@ shallows) pack `dream` · `d_raft` ☾ a lantern raft mid-path ⬡ 100 · `d_bed
 
 ---
 
-### 10.5 Grove: The Deepgrove / *Le Bois-Profond* (Grass) — Bramble
+### 10.5 Grove: The Deepgrove / *Le Bois-Profond* — Bramble
 
 **Identity.** Old forest grown huge: a fallen elder whose roots make a village, walkways in the canopy, moss
 everywhere, a hedge maze at the heart, bees. Dappled light (a slow-moving leaf-shadow cookie on the sun, off with
@@ -1444,7 +1444,7 @@ woodland 12,18 (stream bank).
 
 ---
 
-### 10.6 Stone: The Stonebacks / *Les Échines de Pierre* (Fighting) — Orla
+### 10.6 Stone: The Stonebacks / *Les Échines de Pierre* — Orla
 
 **Identity.** Slate mountains and mining terraces; rails and carts, a headframe, cairns; cool greys with
 rust-orange accents; and the dark Undermine under it all. Ground `slate` / path `stone`; ring `cliff_slate`,

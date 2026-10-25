@@ -185,8 +185,8 @@ impl Rule {
                 "Hexons et énergies uniquement : aucun Dresseur.",
             ),
             Rule::MonoColour => T::new(
-                "One colour only, plus Colorless Hexons.",
-                "Une seule couleur, plus les Hexons Incolores.",
+                "One colour only, plus Neutral Hexons.",
+                "Une seule couleur, plus les Hexons Neutres.",
             ),
             Rule::LightEnergy => T::new("At most 16 energy cards.", "16 cartes Énergie au plus."),
             Rule::NoRares => T::new("No Rares.", "Aucune carte Rare."),

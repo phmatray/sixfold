@@ -20,7 +20,7 @@ cargo test --release -p sixfold-engine booster_report -- --ignored --nocapture
 - **No dead slot.** Basic energy is unlimited and never stored, so the old energy slot paid nothing. It
   is now a sixth Common.
 - **A themed pack is about its themes.** In the 1.x packs, Ember drew evenly from everything it held:
-  only 44 % of its Commons were Fire or Fighting, and 70 % of its Rares were trainers. Now the share of
+  only 44 % of its Commons were Ember or Stone, and 70 % of its Rares were trainers. Now the share of
   each slot is chosen on purpose.
 - **A chase card.** Holo Rares (the Awaken 2 Hexons) are the cards a deck is built around. They turn up
   in three packs of five, with their own foil, so the Rare slot is a Hexon more often than not (it was
@@ -57,20 +57,20 @@ Every Common and Uncommon slot first picks a group:
 | Group | Share | What it holds |
 |---|---|---|
 | Own types | **60 %** | Hexons of the pack's two types |
-| Neutral | **35 %** | trainers, the special energy and Colorless Hexons |
+| Neutral | **35 %** | trainers, the special energy and Neutral Hexons |
 | Other types | **5 %** | Hexons of the four other types: a stray card, so a themed pack never fully locks you out |
 
-60 / 35 matches a deck: about 20 Hexons for 12–14 trainers. Stone's own types are Fighting **and
-Colorless**, so its neutral group is trainers only.
+60 / 35 matches a deck: about 20 Hexons for 12–14 trainers. Stone's own types are Stone **and
+Neutral**, so its neutral group is trainers only.
 
 | Booster | Own types | Holo Rares |
 |---|---|---|
-| Ember | Fire, Fighting | Pyrequill, Solarlynx, Knollossus, Cragmastiff |
-| Tide | Water, Psychic | Tidemaw, Gulfwyrm, Wraithelle, Hexarch |
-| Grove | Grass, Lightning | Elderhart, Bogcrown, Fulgurex |
-| Storm | Lightning, Water | Tidemaw, Gulfwyrm, Fulgurex |
-| Stone | Fighting, Colorless | Knollossus, Cragmastiff, Warrenking |
-| Dream | Psychic, Grass | Wraithelle, Hexarch, Elderhart, Bogcrown |
+| Ember | Ember, Stone | Pyrequill, Solarlynx, Knollossus, Cragmastiff |
+| Tide | Tide, Dream | Tidemaw, Gulfwyrm, Wraithelle, Hexarch |
+| Grove | Grove, Storm | Elderhart, Bogcrown, Fulgurex |
+| Storm | Storm, Tide | Tidemaw, Gulfwyrm, Fulgurex |
+| Stone | Stone, Neutral | Knollossus, Cragmastiff, Warrenking |
+| Dream | Dream, Grove | Wraithelle, Hexarch, Elderhart, Bogcrown |
 | **Wild** | every type, **evenly** | all 12 |
 
 **Wild** has no shares: each slot draws evenly from every card of its rarity. It is the pack for filling
@@ -140,7 +140,7 @@ campaign playthrough and `economy_sim`.
 - **Aucun emplacement inutile.** L'énergie de base est illimitée et jamais stockée : l'ancien
   emplacement énergie ne rapportait rien. Il devient une sixième Commune.
 - **Un booster à thème parle de ses thèmes.** Dans les boosters 1.x, Braise tirait uniformément dans
-  tout ce qu'il contenait : 44 % seulement de ses Communes étaient Feu ou Combat, et 70 % de ses Rares
+  tout ce qu'il contenait : 44 % seulement de ses Communes étaient Braise ou Roc, et 70 % de ses Rares
   des Dresseurs. La part de chaque emplacement est désormais choisie.
 - **Une carte à chasser.** Les Rares Holo (les Hexons d'Éveil 2) sont les cartes autour desquelles on
   construit un deck. Elles sortent dans trois boosters sur cinq, avec leur propre effet holographique :
@@ -180,20 +180,20 @@ Chaque emplacement Commune et Peu commune choisit d'abord un groupe :
 | Groupe | Part | Contenu |
 |---|---|---|
 | Types du booster | **60 %** | Hexons des deux types du booster |
-| Neutre | **35 %** | Dresseurs, énergie spéciale et Hexons Incolore |
+| Neutre | **35 %** | Dresseurs, énergie spéciale et Hexons Neutres |
 | Autres types | **5 %** | Hexons des quatre autres types : une carte égarée, pour qu'un booster à thème ne ferme jamais tout à fait la porte |
 
-60 / 35 correspond à un deck : environ 20 Hexons pour 12 à 14 Dresseurs. Les types de Pierre sont
-Combat **et Incolore**, son groupe neutre ne contient donc que des Dresseurs.
+60 / 35 correspond à un deck : environ 20 Hexons pour 12 à 14 Dresseurs. Les types du booster Roc sont
+Roc **et Neutre**, son groupe neutre ne contient donc que des Dresseurs.
 
 | Booster | Types | Rares Holo |
 |---|---|---|
-| Braise | Feu, Combat | Pyrequill, Solarlynx, Knollossus, Cragmastiff |
-| Marée | Eau, Psychique | Tidemaw, Gulfwyrm, Wraithelle, Hexarch |
-| Bosquet | Herbe, Foudre | Elderhart, Bogcrown, Fulgurex |
-| Orage | Foudre, Eau | Tidemaw, Gulfwyrm, Fulgurex |
-| Pierre | Combat, Incolore | Knollossus, Cragmastiff, Warrenking |
-| Songe | Psychique, Herbe | Wraithelle, Hexarch, Elderhart, Bogcrown |
+| Braise | Braise, Roc | Pyrequill, Solarlynx, Knollossus, Cragmastiff |
+| Marée | Marée, Songe | Tidemaw, Gulfwyrm, Wraithelle, Hexarch |
+| Bosquet | Bosquet, Orage | Elderhart, Bogcrown, Fulgurex |
+| Orage | Orage, Marée | Tidemaw, Gulfwyrm, Fulgurex |
+| Roc | Roc, Neutre | Knollossus, Cragmastiff, Warrenking |
+| Songe | Songe, Bosquet | Wraithelle, Hexarch, Elderhart, Bogcrown |
 | **Sauvage** | tous les types, **à parts égales** | les 12 |
 
 **Sauvage** n'a pas de parts : chaque emplacement tire à parts égales parmi toutes les cartes de sa
@@ -203,7 +203,7 @@ rareté. C'est le booster pour combler les trous de toute la série.
 
 La probabilité qu'une carte donnée soit dans un booster, avec une collection vide :
 
-| Carte | Braise | Marée | Bosquet | Orage | Pierre | Songe | Sauvage |
+| Carte | Braise | Marée | Bosquet | Orage | Roc | Songe | Sauvage |
 |---|---|---|---|---|---|---|---|
 | Commune de ses types | 45 % (8) | 60 % (6) | 40 % (9) | 45 % (8) | 45 % (8) | 51 % (7) | — |
 | Commune neutre | 21 % (10) | 21 % (10) | 21 % (10) | 21 % (10) | 35 % (6) | 21 % (10) | — |
@@ -229,7 +229,7 @@ rares), et toute la série par Sauvage environ 24 de moins (les Holo sont plus f
 | Booster | Cartes | Moyenne | Médiane | 9 fois sur 10 en |
 |---|---|---|---|---|
 | Braise, Marée, Bosquet, Orage, Songe | 55–56 | 64 | 62 | 87 |
-| Pierre | 47 | 57 | 56 | 79 |
+| Roc | 47 | 57 | 56 | 79 |
 | Sauvage (toute la série) | 97 | 72 | 69 | 91 |
 
 À environ 5 boosters par heure, un thème prend une douzaine d'heures avec les seuls boosters. Fabriquer

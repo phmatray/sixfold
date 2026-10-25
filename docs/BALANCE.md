@@ -23,16 +23,16 @@ Seven stats, chosen to fix the outliers with as little as possible:
 
 | Card | Change | Why |
 |---|---|---|
-| Knollop, Knollgrim | Lightning resistance removed | With Fighting weakness on every Lightning line, Storm Front lost 84/16 to Ember Rush and 94/6 to Bedrock. |
-| Cragmastiff | Lightning resistance removed | Same, against Stone Fist and Bedrock. |
-| Arcfang | Fighting weakness removed | Storm Front's Awaken 1 now survives a Fighting hit; Sparkit and Fulgurex keep theirs. |
+| Knollop, Knollgrim | Storm resistance removed | With Stone weakness on every Storm line, Storm Front lost 84/16 to Ember Rush and 94/6 to Bedrock. |
+| Cragmastiff | Storm resistance removed | Same, against Stone Fist and Bedrock. |
+| Arcfang | Stone weakness removed | Storm Front's Awaken 1 now survives a Stone hit; Sparkit and Fulgurex keep theirs. |
 | Ironbrawl | 90 → 80 HP | Stone Fist won 62%, Bedrock 61%. |
 | Elderhart | 110 → 100 HP | Grove Bloom sat on the 60% line. |
-| Hexlet | Psychic weakness removed | Tide Mind beat Dream Veil 77/23. |
+| Hexlet | Dream weakness removed | Tide Mind beat Dream Veil 77/23. |
 
 1.0.0 tunes one more list, Marlo's Low Tide (35%, the weakest deck in the field). The cards stay the
 same; the deck leans on its Kelpwarden line: Kelpup 3 → 4, Kelpwarden 2 → 3, Wispun 3 → 2, Wispelle
-2 → 1, two Drain Brushes in, Water Energy 18 → 21 and Psychic 12 → 7. It now wins 43%. Marlo still
+2 → 1, two Drain Brushes in, Tide Energy 18 → 21 and Dream 12 → 7. It now wins 43%. Marlo still
 plays it on Easy with 3 prizes, and the campaign playthrough still takes 31 duels (Marlo 4). Spring
 Tide, its Gauntlet version, now meets it about even at 6 prizes (49–51); in the Gauntlet it plays with
 more prizes and the Normal AI.
@@ -153,15 +153,15 @@ deck (`rival_strength_against_the_starter`, 60 games, the campaign's prizes and 
 
 | Colour | Sprout | Bud | Bloom |
 |---|---|---|---|
-| Fire | Kindling 27% → 28% | Bellows 46% | Forge 48% |
-| Water | Puddle 16% → 18% | Current 44% → 47% | Undertow 43% → 46% |
-| Grass | Seedling 13% → 9% | Hedgerow 46% → 41% | Canopy 47% → 41% |
-| Lightning | Spark 18% | Static 37% → 40% | Tempest 42% → 44% |
-| Fighting | Pebble 50% → 45% | Rubble 58% | Landslide 59% |
-| Psychic | Murmur 5% → 6% | Reverie 41% → 40% | Trance 42% → 40% |
-| Colorless | Scrap 2% → 3% | Flock 30% → 27% | — |
+| Ember | Kindling 27% → 28% | Bellows 46% | Forge 48% |
+| Tide | Puddle 16% → 18% | Current 44% → 47% | Undertow 43% → 46% |
+| Grove | Seedling 13% → 9% | Hedgerow 46% → 41% | Canopy 47% → 41% |
+| Storm | Spark 18% | Static 37% → 40% | Tempest 42% → 44% |
+| Stone | Pebble 50% → 45% | Rubble 58% | Landslide 59% |
+| Dream | Murmur 5% → 6% | Reverie 41% → 40% | Trance 42% → 40% |
+| Neutral | Scrap 2% → 3% | Flock 30% → 27% | — |
 
-1.2, then 1.3 where it moved. The Basics-only Sprout kits are meant to be soft; Fighting is the
+1.2, then 1.3 where it moved. The Basics-only Sprout kits are meant to be soft; Stone is the
 strongest colour at this size. Landslide sat just under the line and crossed it (60.4%) with the 1.3
 rules, so it carries one Spike Charm instead of two (59%). Then each of the 14 duelists as it plays (its deck, prizes and
 AI) against the starter a new player holds, 60 games. "1.2" is the 1.2 release; "1.3" adds this
@@ -184,7 +184,7 @@ release's rules and its weaker Easy AI:
 | Marigold | Bellows | 3, Normal | 47% | 47% |
 | Lark | Scrap + Murmur | 1, Easy | 12% | 5% |
 
-Morrow (Water, 3 prizes, against a starter whose Fire line is weak to Water) is the boardwalk's wall,
+Morrow (Tide, 3 prizes, against a starter whose Ember line is weak to Tide) is the boardwalk's wall,
 as the roster intends ("unbeatable patience"); a player can say **Not now** and come back with a
 better deck. An earlier version of this table gave him 80%; on 1.2.x's final cards he measured 47%,
 and 53% with the 1.3 rules. The Ember and Storm duelists (12 more) run from 5% to 65% in 1.3, Odo
@@ -270,7 +270,7 @@ rarely paid; our curve rewards the setup.
 | Hexons weak to each colour (min–max) | 12–31 | 5–17 | 8–14 a colour |
 | Powers, Basic / S1 / S2 | 6 / 15 / 44% | 13 / 5 / 42% | ≤ 10 / 10–15 / 35–45% |
 | Attacks that flip coins | 38% | 16% | 15–25% |
-| Colourless share of attack costs | 29% | 31% | 25–35%; at most 2 in 3 attacks of 3+ energy carry one |
+| Neutral share of attack costs | 29% | 31% | 25–35%; at most 2 in 3 attacks of 3+ energy carry one |
 | Lines of 1 / 2 / 3 stages | 31 / 48 / 21% | 49 / 21 / 31% | more 2-stage lines in set 2 |
 | Basics that are Common / Uncommon / Rare | 63 / 15 / 22% | 69 / 31 / 0% | allow a few Rare Basics |
 | Trainers: disruption, heal, draw, search, recovery, energy, switch | 28, 16, 12, 9, 9, 3, 6% | 28, 16, 12, 12, 8, 8, 4% (+12% boosts) | keep |
@@ -343,7 +343,7 @@ The limits:
 +40 is about the 90th percentile of the classic sets on the same scale. The two spreads match: theirs
 runs from −10 to +40 (10th to 90th percentile), ours from −8 to +35. One card is off budget on
 purpose and listed in the test with its reason: Hexcrest (the champion's promo). Pyrequill was the
-second until 1.3: its Kindling Heart made every Fire energy free, priced at +40 (+37 in all). Limited
+second until 1.3: its Kindling Heart made every Ember energy free, priced at +40 (+37 in all). Limited
 to one extra attachment a turn, it is priced at +30 and scores +27, inside the Engine limit.
 
 ### Built-in drawbacks
@@ -412,7 +412,7 @@ Three rules part from the handheld game on purpose (`docs/RULES.md`):
 - **One retreat a turn** (R-RETREAT-05), as in the physical game. The AI already retreated at most
   once a turn, so the sweeps barely move: a switch trainer such as Relay Baton is now the only second
   switch.
-- **Kindling Heart gives one extra Fire attachment a turn**, not unlimited ones (R-ENERGY-02). It was
+- **Kindling Heart gives one extra Ember attachment a turn**, not unlimited ones (R-ENERGY-02). It was
   the one free-attach Power and the one off-budget card besides the champion's promo.
 
 ### Cards
@@ -422,9 +422,9 @@ and Power.
 
 | Card | Change | Why |
 |---|---|---|
-| Thornbuck, Elderhart | Water resistance removed | The Grass lines led the field (Grove Bloom 59%, Deep Thicket 66%). Thornbuck had the widest played-or-not gap of any card (+38). No classic Grass card resists Water. |
+| Thornbuck, Elderhart | Tide resistance removed | The Grove lines led the field (Grove Bloom 59%, Deep Thicket 66%). Thornbuck had the widest played-or-not gap of any card (+38). No classic card of those types has that resistance. |
 | Ohmrunner | Rail Shot 30 → 40 | 10 below the Stage 1 curve; Storm Front was the weakest prebuilt after Dream Veil. |
-| Fulgurex | Forked Bolt 30 → 40 | The same, for the Lightning Stage 2. |
+| Fulgurex | Forked Bolt 30 → 40 | The same, for the Storm Stage 2. |
 | Slatebrow | Landslide 50 → 40 | An 80 HP Basic wall 15 over the attack curve, played in 83% of Bedrock Deep's games. |
 | Haulox | Heavy Trample 60 → 50 | The same wall rule. |
 | Hexmage, Hexarch | Spite Bolt 30 → 40, Grand Hex 50 → 60 | Below the curve. The sweep doesn't move (±1), so these are for players, not the AI. |
@@ -436,7 +436,7 @@ One kit list changed: Landslide carries one Spike Charm, not two (60.4% → 59%,
 
 - Spread of overall rates 7.2 → 5.4; prebuilts 42–59% → 42–56%; widest pairing 83 → 80.
 - Storm Front 44 → 48%, Low Tide 43 → 48%, Grove Bloom 59 → 55%, Deep Thicket 66 → 62%, Bedrock Deep
-  60 → 54%. Thicket 48 → 43%: the Grass lines lost their Water resistance.
+  60 → 54%. Thicket 48 → 43%: the Grove lines lost their Tide resistance.
 - The first player's edge in the post-game: 57.1% → 50.5%.
 - The campaign: a median of 66 duels over 16 pack seeds with 39 route duelists (55 before 1.3), or
   27 rival duels instead of 16.
@@ -465,8 +465,8 @@ rival sits more than 10 points below the one before or more than 30 above it. In
 | Sable | 85% | 87% |
 
 The two steepest steps are Bramble to Marlo (+30) and Quill to Orla (+25). Both come from type, not
-AI: the starter is Fire and Water, Thicket is Grass (weak to Fire) and Low Tide is Water (strong
-against the Fire half). Bramble, Marlo and Cinza all open with no seal, so a player meets them in any
+AI: the starter is Ember and Tide, Thicket is Grove (weak to Ember) and Low Tide is Tide (strong
+against the Ember half). Bramble, Marlo and Cinza all open with no seal, so a player meets them in any
 order.
 
 ### Underperformers
@@ -474,9 +474,9 @@ order.
 - **Relay Baton** wins 39% of the games where it is played and 53% of those where it isn't. That
   gap is timing: the AI plays it to rescue a losing Active. Its play rate (22%) didn't change with the
   one-retreat rule.
-- **The Psychic decks** (Dream Veil 42%, Moonlit Tide 44%, New Moon 47%) don't come from the AI's
+- **The Dream decks** (Dream Veil 42%, Moonlit Tide 44%, New Moon 47%) don't come from the AI's
   value for Sleep and Confusion. Raising both from 25 to 35 points moved Dream Veil from 42% to 41%
-  and Moonlit Tide from 44% to 42%, so the weights stay. The losses come from Psychic weakness
-  against the Water-and-Psychic decks.
+  and Moonlit Tide from 44% to 42%, so the weights stay. The losses come from Dream weakness
+  against the Tide-and-Dream decks.
 - **Sixfold Crown** (the Warden's deck) is 44% at Normal and 6 prizes in the sweep. In the campaign
   it plays on Hard, where it beats the starter 86%.

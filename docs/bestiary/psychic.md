@@ -1,11 +1,11 @@
-# Psychic Hexons / Hexons Psychique
+# Dream Hexons / Hexons Songe
 
-Grain: **lantern gauze**. Psychic Hexons have thin membranes like paper lanterns, lit from inside,
+Grain: **lantern gauze**. Dream Hexons have thin membranes like paper lanterns, lit from inside,
 veils and gauze trails, pearly masks and a dusting of moth powder. Small glowing **motes orbit** them,
 one more with each Awakening. Home: the Hushlands (Hushwillow Lane, Lanternmere, the Moonwell
 Garden). See [BESTIARY.md](../BESTIARY.md).
 
-*Grain : **gaze de lanterne**. Les Hexons Psychique ont de fines membranes comme des lanternes de papier,
+*Grain : **gaze de lanterne**. Les Hexons Songe ont de fines membranes comme des lanternes de papier,
 éclairées de l'intérieur, des voiles et des traînes de gaze, des masques nacrés et une poudre de
 papillon de nuit. De petites **lueurs gravitent** autour d'eux, une de plus à chaque Éveil. Région : les Terres du Murmure.*
 
@@ -23,8 +23,8 @@ petit planeur restent les grands yeux, les petites pattes et les membranes entre
 
 ### 057 · Wispun / Lueurin
 
-**1. Identity / Identité.** No. 057 · Psychic · Basic · Wispun → Wispelle → Wraithelle. 40 HP, common.
-*N° 057 · Psychique · Base · Lueurin → Lueurelle → Spectrelle. 40 PV, commun.*
+**1. Identity / Identité.** No. 057 · Dream · Basic · Wispun → Wispelle → Wraithelle. 40 HP, common.
+*N° 057 · Songe · Base · Lueurin → Lueurelle → Spectrelle. 40 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a sugar glider: the tiny body, the huge dark eyes and
 the gliding membranes. Invented: membranes of translucent lantern paper glowing violet from inside, a
@@ -99,8 +99,8 @@ FR : « Il pend dans les saules comme une petite lanterne de papier et endort de
 
 ### 058 · Wispelle / Lueurelle
 
-**1. Identity / Identité.** No. 058 · Psychic · Awaken 1 · from Wispun → Wraithelle. 70 HP, uncommon.
-*N° 058 · Psychique · Éveil 1 · de Lueurin → Spectrelle. 70 PV, peu commun.*
+**1. Identity / Identité.** No. 058 · Dream · Awaken 1 · from Wispun → Wraithelle. 70 HP, uncommon.
+*N° 058 · Songe · Éveil 1 · de Lueurin → Spectrelle. 70 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: a flying squirrel's graceful limbs and membranes. Invented:
 membranes grown into long hanging veils with glowing veins, extremities that fade into violet fog, and
@@ -171,8 +171,8 @@ FR : « Ne suivez jamais deux lumières dans la brume. Celle qui traîne des voi
 
 ### 059 · Wraithelle / Spectrelle
 
-**1. Identity / Identité.** No. 059 · Psychic · Awaken 2 · from Wispelle. 100 HP, rare.
-*N° 059 · Psychique · Éveil 2 · de Lueurelle. 100 PV, rare.*
+**1. Identity / Identité.** No. 059 · Dream · Awaken 2 · from Wispelle. 100 HP, rare.
+*N° 059 · Songe · Éveil 2 · de Lueurelle. 100 PV, rare.*
 
 **2. Animal base / Base animale.** EN: Kept from a colugo, only as a silhouette: a large gliding body with a membrane between its limbs and a calm face. Invented: it floats curled in the air like a sleeping animal, its membrane grown into long glowing veils that trail below it like the tendrils of a paper lantern, a mask-like face of mother-of-pearl, a lantern heart that shines through its body, and three orbiting motes. *FR : Du galéopithèque, elle ne garde que la silhouette : un grand corps planeur à membrane entre les membres et une face calme. Inventé : elle flotte enroulée dans les airs comme une bête endormie, sa membrane devenue de longs voiles lumineux qui traînent sous elle comme les filaments d'une lanterne de papier, une face de nacre comme un masque, un cœur-lanterne qui luit à travers son corps et trois lueurs en orbite.*
 
@@ -244,8 +244,8 @@ qu'à eux.*
 
 ### 060 · Hexlet / Sorcelet
 
-**1. Identity / Identité.** No. 060 · Psychic · Basic · Hexlet → Hexmage → Hexarch. 50 HP, common.
-*N° 060 · Psychique · Base · Sorcelet → Sorcemage → Sorcarque. 50 PV, commun.*
+**1. Identity / Identité.** No. 060 · Dream · Basic · Hexlet → Hexmage → Hexarch. 50 HP, common.
+*N° 060 · Songe · Base · Sorcelet → Sorcemage → Sorcarque. 50 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a chameleon: the compact body on a branch, the two
 turret eyes that swivel apart, the pincer feet and the tail rolled into a spiral. Invented: the **jinx
@@ -333,8 +333,8 @@ FR : « Il perche sur l'arbre à vœux parmi les rubans. Un vacillement de sa pe
 
 ### 061 · Hexmage / Sorcemage
 
-**1. Identity / Identité.** No. 061 · Psychic · Awaken 1 · from Hexlet → Hexarch. 80 HP, uncommon.
-*N° 061 · Psychique · Éveil 1 · de Sorcelet → Sorcarque. 80 PV, peu commun.*
+**1. Identity / Identité.** No. 061 · Dream · Awaken 1 · from Hexlet → Hexarch. 80 HP, uncommon.
+*N° 061 · Songe · Éveil 1 · de Sorcelet → Sorcarque. 80 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: the chameleon's perch, turret eyes, pincer feet and spiral
 tail. Invented: the jinx lamp grown into a tall domed lantern on its head with a larger pearl lens; a long
@@ -422,8 +422,8 @@ FR : « Il n'oublie jamais qui l'a chassé d'un revers de main. Ses sorts frappe
 
 ### 062 · Hexarch / Sorcarque
 
-**1. Identity / Identité.** No. 062 · Psychic · Awaken 2 · from Hexmage. 100 HP, rare. Power: Bewilder.
-*N° 062 · Psychique · Éveil 2 · de Sorcemage. 100 PV, rare. Pouvoir : Égarement.*
+**1. Identity / Identité.** No. 062 · Dream · Awaken 2 · from Hexmage. 100 HP, rare. Power: Bewilder.
+*N° 062 · Songe · Éveil 2 · de Sorcemage. 100 PV, rare. Pouvoir : Égarement.*
 
 **2. Animal base / Base animale.** EN: Kept: the perch, the turret eyes, the pincer feet and the spiral
 tail. Invented: the jinx lamp grown into a crown of three round lanterns stacked one above the other, the
@@ -528,8 +528,8 @@ enroulée sur le dos.*
 
 ### 063 · Dozel / Roupillot
 
-**1. Identity / Identité.** No. 063 · Psychic · Basic · Dozel → Somnitar. 60 HP, common.
-*N° 063 · Psychique · Base · Roupillot → Songeastre. 60 PV, commun.*
+**1. Identity / Identité.** No. 063 · Dream · Basic · Dozel → Somnitar. 60 HP, common.
+*N° 063 · Songe · Base · Roupillot → Songeastre. 60 PV, commun.*
 
 **2. Animal base / Base animale.** EN: Kept from a dormouse: the round body, the small hands, the big
 sleepy eyes and the bushy tail. Invented: the **dream sac**, a translucent pouch of lantern gauze growing
@@ -613,8 +613,8 @@ FR : « Ses rêves dérivent dans le sac lumineux de sa tête. Quand il bâille,
 
 ### 064 · Somnitar / Songeastre
 
-**1. Identity / Identité.** No. 064 · Psychic · Awaken 1 · from Dozel. 90 HP, uncommon.
-*N° 064 · Psychique · Éveil 1 · de Roupillot. 90 PV, peu commun.*
+**1. Identity / Identité.** No. 064 · Dream · Awaken 1 · from Dozel. 90 HP, uncommon.
+*N° 064 · Songe · Éveil 1 · de Roupillot. 90 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept: the dormouse's round body, small hands, sleepy eyes and bushy
 tail. Invented: the dream sac swollen into a round lantern-cloud of gauze that floats above its head on a
@@ -711,8 +711,8 @@ le front-miroir et les oreilles de papier de lanterne n'appartiennent qu'à lui.
 
 ### 065 · Glimmox / Miroitox
 
-**1. Identity / Identité.** No. 065 · Psychic · Basic. 50 HP, uncommon. Power: Mind Needle.
-*N° 065 · Psychique · Base. 50 PV, peu commun. Pouvoir : Aiguille mentale.*
+**1. Identity / Identité.** No. 065 · Dream · Basic. 50 HP, uncommon. Power: Mind Needle.
+*N° 065 · Songe · Base. 50 PV, peu commun. Pouvoir : Aiguille mentale.*
 
 **2. Animal base / Base animale.** EN: Kept from an antelope calf: the slim folded legs, the soft muzzle,
 the big ears and the two short horns. Invented: the **mirror brow**, a round mirror of mother-of-pearl
@@ -813,8 +813,8 @@ qu'il abrite n'appartiennent qu'à lui.*
 
 ### 066 · Gloamowl / Crépuhibou
 
-**1. Identity / Identité.** No. 066 · Psychic · Basic. 50 HP, uncommon.
-*N° 066 · Psychique · Base. 50 PV, peu commun.*
+**1. Identity / Identité.** No. 066 · Dream · Basic. 50 HP, uncommon.
+*N° 066 · Songe · Base. 50 PV, peu commun.*
 
 **2. Animal base / Base animale.** EN: Kept from an owl: the upright round body, the two folded wings and
 the gripping talons. Invented: the **lantern shade**, a deep round shade of ribbed lantern paper around
@@ -918,8 +918,8 @@ nuit.*
 
 ### 067 · Moonmoth / Phalune
 
-**1. Identity / Identité.** No. 067 · Psychic · Basic. 60 HP, rare, promo.
-*N° 067 · Psychique · Base. 60 PV, rare, promo.*
+**1. Identity / Identité.** No. 067 · Dream · Basic. 60 HP, rare, promo.
+*N° 067 · Songe · Base. 60 PV, rare, promo.*
 
 **2. Animal base / Base animale.** EN: Kept from a moth: the plump furry body, the six thin legs and the
 four wings. Invented: the **moon bead**, a round pearl of soft white light held between the tips of its
