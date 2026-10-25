@@ -2,6 +2,7 @@
   "title": "Hushwillow Lane",
   "title_fr": "Allée des Saules-Murmures",
   "region": "dream",
+  "kind": "route",
   "music": "dream",
   "width": 24,
   "height": 32,

@@ -304,6 +304,14 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   sky/ground colours, `background` (also the fog colour), optional `fog` range, and indoors
   `lamp` (a point light on every lamp). Intensities are three.js (physically based) units.
 
+## World rules: `kind`, `wild`, `why` (docs/WORLD_RULES.md)
+
+- **map `kind`** (outdoor maps): `village`, `town`, `hub`, `route`, `site` or `cave`; sets the minimum size in screens.
+- **map `wild`**: `[[x0, z0, x1, z1], …]`, wilderness rects on a town or hub map (lanterns there need a `why`).
+- **prop `why`** (a `lantern`): why a lamp stands out of town (`"the boathouse door"`); routes, sites and caves need one per lamp.
+- Placement (one free tile before a post, nothing tall in front of what you use, exits 3 wide with a signpost, a closed
+  border…) is in WORLD_RULES; `node tools/check-maps.mjs web/world --strict` checks it.
+
 ## 1.3 additions: time of day, gates, waymarks, regions (WORLD_DESIGN §7)
 
 - **Outdoor map keys** (check-maps requires the first three outdoors): `title_fr`, `region` (an id in

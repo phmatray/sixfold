@@ -2,6 +2,7 @@
   "title": "Stormwatch",
   "title_fr": "Guette-Orage",
   "region": "storm",
+  "kind": "town",
   "music": "storm",
   "width": 32,
   "height": 26,

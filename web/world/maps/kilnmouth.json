@@ -2,6 +2,7 @@
   "title": "The Kilnmouth",
   "title_fr": "La Gueule-du-Four",
   "region": "ember",
+  "kind": "site",
   "music": "ember",
   "width": 30,
   "height": 24,

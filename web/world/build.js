@@ -23,6 +23,7 @@ const TREES = new Set(["tree", "pine", "birch", "ash_pine", "willow"]); // varie
 const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // props whose smoke_origin smokes
 const BLOOMS = new Set(["moonflower"]); // with an `open` condition: instanced closed and open, cross-faded (build, refresh)
 const SMOKE = 8;
+const CHUNK = 16; // tiles per side of an instanced scenery chunk (culled as one)
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
 
@@ -280,18 +281,28 @@ function batcher() {
         const flat = flatten(template);
         flat.updateMatrixWorld(true);
         const tinted = list.some((p) => p.color);
+        // One instanced mesh per CHUNK x CHUNK tiles, so a big map's scenery out of view (or out
+        // of the sun's shadow box) is culled instead of drawn: a few more calls, far fewer triangles.
+        const chunks = new Map();
+        for (const p of list) {
+          const k = `${Math.floor(p.matrix.elements[12] / CHUNK)},${Math.floor(p.matrix.elements[14] / CHUNK)}`;
+          (chunks.get(k) ?? chunks.set(k, []).get(k)).push(p);
+        }
         flat.traverse((m) => {
           if (!m.isMesh) return;
-          const inst = new THREE.InstancedMesh(m.geometry, m.material, list.length);
-          list.forEach(({ matrix, color }, i) => {
-            inst.setMatrixAt(i, tmp.multiplyMatrices(matrix, m.matrixWorld));
-            if (tinted) inst.setColorAt(i, color ?? white);
-          });
-          inst.castShadow = !m.material.transparent && !SHADOWLESS.has(name);
-          inst.receiveShadow = true;
-          inst.userData.shared = true; // geometry and material belong to the cached model
-          if (windH(name)) windify(inst, windH(name));
-          parent.add(inst);
+          for (const part of chunks.values()) {
+            const inst = new THREE.InstancedMesh(m.geometry, m.material, part.length);
+            part.forEach(({ matrix, color }, i) => {
+              inst.setMatrixAt(i, tmp.multiplyMatrices(matrix, m.matrixWorld));
+              if (tinted) inst.setColorAt(i, color ?? white);
+            });
+            inst.computeBoundingSphere();
+            inst.castShadow = !m.material.transparent && !SHADOWLESS.has(name);
+            inst.receiveShadow = true;
+            inst.userData.shared = true; // geometry and material belong to the cached model
+            if (windH(name)) windify(inst, windH(name));
+            parent.add(inst);
+          }
         });
       }
     },
@@ -537,7 +548,7 @@ export async function build(map, got, reduced) {
   const wet = (x, z) => SIDES.some(([dx, dz]) => "~H".includes(tile(x + dx, z + dz) ?? "-"));
   const open = (x, z) => !blocked(x, z) && tile(x, z) === "." && floor[z * W + x] === 0 && !wet(x, z);
   const exits = map.exits ?? [];
-  const tufts = map.ground.tufts ?? 1800; // 0 on sand
+  const tufts = Math.round((map.ground.tufts ?? 1800) * Math.max(1, (W * H) / 900)); // per ~30 x 30 tiles, so big maps keep the density; 0 on sand
   if (!L.indoor) {
     if (tufts) scatter(root, W, H, open, tufts);
     // Grass tufts along the path edges.

@@ -2,6 +2,7 @@
   "title": "Fernhollow Trail",
   "title_fr": "Sentier de Creuse-Fougère",
   "region": "grove",
+  "kind": "route",
   "music": "grove",
   "width": 30,
   "height": 22,

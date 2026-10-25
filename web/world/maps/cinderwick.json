@@ -2,6 +2,7 @@
   "title": "Cinderwick",
   "title_fr": "Mèche-Cendre",
   "region": "ember",
+  "kind": "town",
   "music": "ember",
   "width": 32,
   "height": 26,

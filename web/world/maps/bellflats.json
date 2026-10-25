@@ -2,6 +2,7 @@
   "title": "The Bellflats",
   "title_fr": "Les Grèves de la Cloche",
   "region": "tide",
+  "kind": "site",
   "music": "tide",
   "width": 36,
   "height": 28,

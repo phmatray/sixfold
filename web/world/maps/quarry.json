@@ -2,6 +2,7 @@
   "title": "Emberstep Quarry",
   "title_fr": "Carrière de Pas-de-Braise",
   "region": "ember",
+  "kind": "route",
   "music": "ember",
   "width": 28,
   "height": 22,
