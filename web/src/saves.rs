@@ -333,6 +333,31 @@ pub fn SaveSettings() -> impl IntoView {
             }
         });
     };
+    // Bumped after a restore (only localStorage changed).
+    let restored = RwSignal::new(0u32);
+    let saved = expect_context::<Saved>();
+    let has_bad = move || {
+        restored.track();
+        saved.slot.track();
+        store::has_bad()
+    };
+    let restore = move |_| {
+        status.set(String::new());
+        match store::restore_bad() {
+            Ok(name) => {
+                error.set(None);
+                status.set(tr(
+                    format!("Restored “{name}”. The save it replaced is kept as a backup in this browser."),
+                    format!("« {name} » restaurée. La sauvegarde remplacée est gardée en secours dans ce navigateur."),
+                ));
+            }
+            Err(e) => error.set(Some(tr(
+                format!("The kept copy still can't be read: {e} Nothing was changed."),
+                format!("La copie gardée reste illisible : {e} Rien n'a été modifié."),
+            ))),
+        }
+        restored.update(|r| *r += 1);
+    };
     let replace = move |_| {
         if let Some(s) = pending.get_untracked() {
             let name = s.name().to_string();
@@ -356,6 +381,12 @@ pub fn SaveSettings() -> impl IntoView {
                     <input type="file" name="save-file" class="sr-only" accept=".txt,text/plain" on:change=on_file />
                 </label>
             </div>
+            {move || has_bad().then(|| view! {
+                <p class="note">{tr("A copy of a save that couldn't be read is kept in this browser.", "Une copie d'une sauvegarde illisible est gardée dans ce navigateur.")}</p>
+                <div class="row">
+                    <button type="button" class="btn" on:click=restore>{tr("Restore from the kept copy", "Restaurer depuis la copie gardée")}</button>
+                </div>
+            })}
             <label class="paste-label" for="save-paste">{tr("Or paste a save", "Ou collez une sauvegarde")}</label>
             <textarea id="save-paste" rows="3" spellcheck="false" autocomplete="off"
                 prop:value=move || pasted.get()

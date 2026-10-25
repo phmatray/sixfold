@@ -208,6 +208,14 @@ impl Save {
         format!("{MAGIC};{VERSION};{:08x}\n{body}", fnv1a(&body))
     }
 
+    /// [`encode`](Self::encode), but only when the text decodes back to
+    /// this very save: what a slot is overwritten with. None when it doesn't
+    /// (a `\r` at the end of a line, say), and the slot keeps what it had.
+    pub fn encode_checked(&self) -> Option<String> {
+        let text = self.encode();
+        (Save::decode(&text).as_ref() == Ok(self)).then_some(text)
+    }
+
     /// Reads an [`encode`](Self::encode)d save. Surrounding whitespace and
     /// `\r\n` line ends (a file edited on another system) are fine.
     pub fn decode(s: &str) -> Result<Save, SaveError> {
@@ -586,6 +594,14 @@ mod tests {
         assert_eq!(back.summary().name, "Ada");
         // Reset is a new player again.
         assert!(Save::new_player("Ada").tutorial_due());
+    }
+
+    #[test]
+    fn a_save_is_written_only_when_it_reads_back_the_same() {
+        assert_eq!(sample().encode_checked(), Some(sample().encode()));
+        let mut s = sample();
+        s.set(CAMPAIGN_DECK, "line end\r");
+        assert_eq!(s.encode_checked(), None);
     }
 
     #[test]
