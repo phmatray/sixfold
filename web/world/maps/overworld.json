@@ -4,153 +4,526 @@
   "region": "hub",
   "kind": "hub",
   "music": "overworld",
-  "width": 28,
-  "height": 24,
+  "width": 52,
+  "height": 36,
   "tiles": [
-    ".........................p..",
-    ".........................p..",
-    ".........................p..",
-    ".........................p..",
-    ".........................p..",
-    ".........................p..",
-    ".........................p..",
-    ".........................p..",
-    ".........................p..",
-    ".........................p..",
-    "..................ffffff.p..",
-    ".....p.......p....f....f.p..",
-    ".....p.......p....f....f.p..",
-    ".....p.......p....f....f.p..",
-    ".....p.......p....f....f.p..",
-    ".....p.......p....ff.fff.p..",
-    ".....ppppppppp...........p..",
-    "....ffffffff.p.ffffffff..p..",
-    "pppppppppppppppppppppppppppp",
-    ".............p..............",
-    ".............p..............",
-    ".............p..............",
-    ".............p..............",
-    ".............p.............."
+    "....................................rrr.............",
+    "...................................rrrr.............",
+    "...................................rrrrr............",
+    "...................................rrrrr............",
+    "....................................rrr.............",
+    "....................................pp..............",
+    "....................................pp....~~~~......",
+    "....................................pp...~~~~~~.....",
+    "....................................pp...~~~~~~~....",
+    "....................................pp....~~~~~~....",
+    "....................................pp.....~~~......",
+    "....................................pp..............",
+    "....................rrrrrrrrrrrr....pp..............",
+    "....................rrrrrrrrrrrppppppp..............",
+    "....................rrrrrrrrrrrppppppp..............",
+    "....................rrrrrrrrrrrr....................",
+    "....................rrrrrpprrrrr.............s......",
+    ".....................p...pp..................ss.....",
+    "...........p.........p...pp.....................s.s.",
+    "...........p.........p...pp....................ssss.",
+    "pppppppppppppppppppppppppppppppppppppppppppppppppppp",
+    "pppppppppppppppppppppppppppppppppppppppppppppppppppp",
+    "pppp.....................pp................s....pppp",
+    ".........................pp.................s...ss.s",
+    ".........................pp...ffffffffff............",
+    ".........................pp...f........f.......s.s..",
+    ".........................pp...f........f.....sss..s.",
+    ".........................ppppp.........f............",
+    ".........................pp...f........f............",
+    ".........................rrr..f........f............",
+    ".........................rrr..ffffffffff............",
+    ".........................rrr........................",
+    ".........................rrr........................",
+    ".........................rrr........................",
+    ".........................rrr........................",
+    ".........................rrr........................"
   ],
   "props": [
     {
+      "asset": "signpost",
+      "x": 40,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 48,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 23,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 3,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 28,
+      "z": 18,
+      "rot": 0
+    },
+    {
       "asset": "house",
+      "x": 22,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "sign",
+      "x": 21,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "waymark",
+      "x": 30,
+      "z": 14,
+      "rot": 0,
+      "glow": "#d6ac4a"
+    },
+    {
+      "asset": "flowers",
+      "x": 22,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 28,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 22,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 27,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 29,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 23,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 28,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 9,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 24,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 17,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 33,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 39,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 24,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 28,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 24,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "cottage",
+      "x": 9,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "hanging_sign",
+      "x": 13,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 10,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 8,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 8,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 12,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 12,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 12,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "stump",
       "x": 10,
       "z": 6,
       "rot": 0
     },
     {
-      "asset": "sign",
-      "x": 16,
+      "asset": "log",
+      "x": 8,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 40,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 47,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 40,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 44,
       "z": 11,
       "rot": 0
     },
     {
+      "asset": "reeds",
+      "x": 48,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 46,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 43,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 38,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 34,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 40,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 34,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 41,
+      "z": 1,
+      "rot": 0
+    },
+    {
       "asset": "flowers",
-      "x": 9,
-      "z": 11,
+      "x": 6,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 8,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 7,
+      "z": 28,
       "rot": 0
     },
     {
       "asset": "flowers",
       "x": 10,
-      "z": 11,
+      "z": 27,
       "rot": 0
     },
     {
       "asset": "flowers",
-      "x": 11,
-      "z": 12,
+      "x": 12,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 5,
+      "z": 29,
       "rot": 0
     },
     {
       "asset": "flowers",
       "x": 9,
-      "z": 12,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 13,
+      "z": 29,
       "rot": 0
     },
     {
       "asset": "flowers",
       "x": 15,
-      "z": 12,
+      "z": 27,
       "rot": 0
     },
     {
       "asset": "flowers",
+      "x": 11,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 15,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
       "x": 19,
-      "z": 11,
+      "z": 29,
       "rot": 0
     },
     {
       "asset": "flowers",
-      "x": 20,
-      "z": 11,
+      "x": 32,
+      "z": 25,
       "rot": 0
     },
     {
       "asset": "flowers",
-      "x": 22,
-      "z": 12,
+      "x": 34,
+      "z": 25,
       "rot": 0
     },
     {
       "asset": "flowers",
-      "x": 21,
-      "z": 13,
+      "x": 36,
+      "z": 25,
       "rot": 0
     },
     {
       "asset": "flowers",
-      "x": 19,
-      "z": 14,
+      "x": 32,
+      "z": 29,
       "rot": 0
     },
     {
-      "asset": "bush",
-      "x": 21,
-      "z": 8,
+      "asset": "flowers",
+      "x": 34,
+      "z": 29,
       "rot": 0
     },
     {
-      "asset": "bush",
-      "x": 7,
-      "z": 20,
+      "asset": "flowers",
+      "x": 36,
+      "z": 29,
       "rot": 0
     },
     {
-      "asset": "bush",
-      "x": 19,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 3,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 24,
-      "z": 13,
+      "asset": "flowers",
+      "x": 38,
+      "z": 27,
       "rot": 0
     },
     {
       "asset": "rock",
-      "x": 22,
-      "z": 11,
+      "x": 30,
+      "z": 18,
       "rot": 0
     },
     {
-      "asset": "rock",
-      "x": 6,
-      "z": 5,
+      "asset": "log",
+      "x": 46,
+      "z": 24,
       "rot": 0
     },
     {
-      "asset": "rock",
-      "x": 22,
-      "z": 4,
+      "asset": "reeds",
+      "x": 50,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 1,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 1,
+      "z": 29,
       "rot": 0
     },
     {
@@ -161,21 +534,9 @@
     },
     {
       "asset": "tree",
-      "x": 0,
-      "z": 22,
-      "rot": 90
-    },
-    {
-      "asset": "tree",
       "x": 2,
       "z": 0,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 2,
-      "z": 22,
-      "rot": 270
+      "rot": 0
     },
     {
       "asset": "tree",
@@ -185,21 +546,9 @@
     },
     {
       "asset": "tree",
-      "x": 4,
-      "z": 22,
-      "rot": 90
-    },
-    {
-      "asset": "tree",
       "x": 6,
       "z": 0,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 6,
-      "z": 22,
-      "rot": 270
+      "rot": 0
     },
     {
       "asset": "tree",
@@ -209,21 +558,9 @@
     },
     {
       "asset": "tree",
-      "x": 8,
-      "z": 22,
-      "rot": 90
-    },
-    {
-      "asset": "tree",
       "x": 10,
       "z": 0,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 10,
-      "z": 22,
-      "rot": 270
+      "rot": 0
     },
     {
       "asset": "tree",
@@ -235,7 +572,7 @@
       "asset": "tree",
       "x": 14,
       "z": 0,
-      "rot": 180
+      "rot": 0
     },
     {
       "asset": "tree",
@@ -245,21 +582,9 @@
     },
     {
       "asset": "tree",
-      "x": 16,
-      "z": 22,
-      "rot": 90
-    },
-    {
-      "asset": "tree",
       "x": 18,
       "z": 0,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 18,
-      "z": 22,
-      "rot": 270
+      "rot": 0
     },
     {
       "asset": "tree",
@@ -269,289 +594,2028 @@
     },
     {
       "asset": "tree",
-      "x": 20,
-      "z": 22,
-      "rot": 90
-    },
-    {
-      "asset": "tree",
       "x": 22,
       "z": 0,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 22,
-      "z": 22,
-      "rot": 270
+      "rot": 0
     },
     {
       "asset": "tree",
       "x": 24,
-      "z": 22,
-      "rot": 90
+      "z": 0,
+      "rot": 0
     },
     {
       "asset": "tree",
       "x": 26,
       "z": 0,
-      "rot": 180
+      "rot": 0
     },
     {
       "asset": "tree",
-      "x": 26,
-      "z": 22,
-      "rot": 270
+      "x": 28,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 30,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 32,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 39,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 41,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 42,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 44,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 46,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 48,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 50,
+      "z": 0,
+      "rot": 0
     },
     {
       "asset": "tree",
       "x": 0,
       "z": 2,
-      "rot": 180
+      "rot": 0
     },
     {
-      "asset": "tree",
-      "x": 26,
+      "asset": "bush",
+      "x": 51,
       "z": 2,
       "rot": 0
     },
     {
-      "asset": "tree",
-      "x": 0,
-      "z": 4,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 26,
-      "z": 4,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 0,
-      "z": 6,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 26,
-      "z": 6,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 0,
-      "z": 8,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 26,
-      "z": 8,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 0,
-      "z": 10,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 26,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 0,
-      "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 26,
-      "z": 12,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 0,
-      "z": 14,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 26,
-      "z": 14,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 0,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 26,
-      "z": 16,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 0,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 26,
-      "z": 20,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 4,
+      "asset": "bush",
+      "x": 51,
       "z": 3,
-      "rot": 270
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 0,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 0,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 51,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 5,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 6,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 7,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 9,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 10,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 11,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 12,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 13,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 15,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 16,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 17,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 18,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 19,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 20,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 21,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 22,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 24,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 28,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 29,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 30,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 31,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 32,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 35,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 38,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 40,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 42,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 43,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 44,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 45,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 47,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 48,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 49,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 50,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 18,
+      "z": 2,
+      "rot": 0
     },
     {
       "asset": "tree",
       "x": 20,
       "z": 2,
-      "rot": 180
+      "rot": 0
     },
     {
       "asset": "tree",
-      "x": 23,
+      "x": 24,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 28,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 31,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 46,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 48,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 22,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 19,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 24,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 26,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 29,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 31,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 49,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 49,
       "z": 7,
-      "rot": 180
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 49,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 17,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 49,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 42,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 47,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 49,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 42,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 41,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 43,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 45,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 48,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 41,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 43,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 45,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 47,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 49,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 31,
+      "rot": 0
     },
     {
       "asset": "tree",
       "x": 8,
-      "z": 3,
-      "rot": 270
+      "z": 31,
+      "rot": 0
     },
     {
       "asset": "tree",
-      "x": 5,
-      "z": 19,
+      "x": 12,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 14,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 18,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 20,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 2,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 30,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 32,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 34,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 36,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 38,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 41,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 43,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 46,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 48,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 4,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 8,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 10,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 12,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 15,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 17,
+      "z": 33,
       "rot": 0
     },
     {
       "asset": "tree",
       "x": 21,
-      "z": 20,
-      "rot": 90
-    },
-    {
-      "asset": "tree",
-      "x": 2,
-      "z": 11,
-      "rot": 90
-    },
-    {
-      "asset": "signpost",
-      "x": 2,
-      "z": 17,
+      "z": 33,
       "rot": 0
     },
     {
-      "asset": "signpost",
-      "x": 24,
-      "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "signpost",
-      "x": 14,
-      "z": 21,
-      "rot": 0
-    },
-    {
-      "asset": "cottage",
-      "x": 3,
-      "z": 7,
-      "rot": 0
-    },
-    {
-      "asset": "hanging_sign",
-      "x": 8,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "stump",
+      "asset": "bush",
       "x": 2,
       "z": 2,
       "rot": 0
     },
     {
-      "asset": "crates",
-      "x": 13,
+      "asset": "pine",
+      "x": 3,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 22,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 23,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 33,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 50,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 30,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 50,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 47,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 48,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 18,
       "z": 5,
       "rot": 0
     },
     {
-      "asset": "rock",
-      "x": 24,
-      "z": 20,
+      "asset": "bush",
+      "x": 21,
+      "z": 5,
       "rot": 0
     },
     {
-      "asset": "flowers",
-      "x": 5,
-      "z": 21,
+      "asset": "birch",
+      "x": 22,
+      "z": 5,
       "rot": 0
     },
     {
-      "asset": "waymark",
+      "asset": "bush",
+      "x": 23,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 49,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 50,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 2,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 49,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 50,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 16,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
       "x": 16,
       "z": 12,
-      "rot": 0,
-      "glow": "#d6ac4a"
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 6,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 18,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 44,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 45,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 46,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 6,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 18,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 42,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 43,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 49,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 50,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 2,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 3,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 18,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 7,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 18,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 19,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 1,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 41,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 41,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 43,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 50,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 47,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 10,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 41,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 42,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 45,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 50,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 20,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 40,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 45,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 19,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 20,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 32,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 33,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 39,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 40,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 42,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 43,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 44,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 45,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 46,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 47,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 48,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 49,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "birch",
+      "x": 50,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 6,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 33,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 44,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 15,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 15,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 34,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 44,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 11,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 10,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 8,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 16,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 17,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 47,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 47,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 47,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 47,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 45,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 47,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 44,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 45,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 47,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 45,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 47,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 50,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 19,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 50,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 31,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 38,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 41,
+      "z": 34,
+      "rot": 0
     }
   ],
   "spawn": {
-    "x": 13,
-    "z": 14,
+    "x": 25,
+    "z": 15,
     "facing": "n"
   },
   "interactions": [
     {
-      "x": 16,
-      "z": 11,
+      "kind": "sign",
+      "text": "North: Emberstep Quarry, its stairs and the kilns beyond.",
+      "text_fr": "Nord : Carrière de Pas-de-Braise, ses escaliers et les fours au-delà.",
+      "x": 40,
+      "z": 3
+    },
+    {
+      "kind": "sign",
+      "text": "East: Saltwind Boardwalk and the sea.",
+      "text_fr": "Est : Promenade de Ventsalé et la mer.",
+      "x": 48,
+      "z": 17
+    },
+    {
+      "kind": "sign",
+      "text": "South: Brightwell Square, the bakery and the market.",
+      "text_fr": "Sud : Place de Clairpuits, la boulangerie et le marché.",
+      "x": 23,
+      "z": 31
+    },
+    {
+      "kind": "sign",
+      "text": "West: Fernhollow Trail, the woods and the stream.",
+      "text_fr": "Ouest : Sentier de Creuse-Fougère, les bois et le ruisseau.",
+      "x": 3,
+      "z": 18
+    },
+    {
+      "kind": "sign",
+      "text": "Crossroads. North: the duel hall and the quarry road. West: Fernhollow Trail. East: Saltwind Boardwalk. South: Brightwell Square.",
+      "text_fr": "Carrefour. Nord : la salle des duels et la route de la carrière. Ouest : Sentier de Creuse-Fougère. Est : Promenade de Ventsalé. Sud : Place de Clairpuits.",
+      "x": 28,
+      "z": 18
+    },
+    {
+      "x": 21,
+      "z": 12,
       "kind": "sign",
       "text": "Sixfold Meadow. The duel hall up the path has duels, snacks and shoes. Six rivals wait on the roads out: the trail, the boardwalk and the quarry.",
       "text_fr": "Pré de Sixfold. En haut du chemin, la salle des duels : duels, en-cas et chaussures. Six rivaux attendent sur les routes : le sentier, la promenade et la carrière."
     },
     {
-      "x": 2,
-      "z": 17,
-      "kind": "sign",
-      "text": "West: Fernhollow Trail, the woods and the stream.",
-      "text_fr": "Ouest : Sentier de Creuse-Fougère, les bois et le ruisseau."
+      "kind": "waymark",
+      "id": "meadow",
+      "x": 30,
+      "z": 14
     },
     {
-      "x": 24,
-      "z": 19,
-      "kind": "sign",
-      "text": "North: Emberstep Quarry. East: Saltwind Boardwalk and the sea.",
-      "text_fr": "Nord : Carrière de Pas-de-Braise. Est : Promenade de Ventsalé et la mer."
-    },
-    {
-      "x": 14,
-      "z": 21,
-      "kind": "sign",
-      "text": "South: Brightwell Square, the bakery and the market.",
-      "text_fr": "Sud : Place de Clairpuits, la boulangerie et le marché."
-    },
-    {
-      "x": 8,
+      "kind": "find",
+      "id": "m_hallback",
+      "x": 29,
       "z": 10,
+      "hidden": true,
+      "give": "card:recall_horn",
+      "text": "Behind the crates stacked against the hall's east wall: a card someone dropped long ago.",
+      "text_fr": "Derrière les caisses empilées contre le mur est de la salle : une carte perdue il y a longtemps."
+    },
+    {
+      "x": 13,
+      "z": 18,
       "kind": "sign",
       "text": "The Swap Shop. Cards bought, sold and swapped. Perrin never haggles.",
       "text_fr": "La Bourse aux cartes. Cartes achetées, vendues, échangées. Perrin ne marchande jamais."
@@ -559,27 +2623,36 @@
     {
       "kind": "find",
       "id": "m_stump",
-      "x": 2,
-      "z": 2,
+      "x": 10,
+      "z": 6,
       "give": "coins:40",
       "text": "Tucked in the hollow stump: a little heap of Facets.",
       "text_fr": "Cachée dans la souche creuse : une petite poignée de Facettes."
     },
     {
       "kind": "find",
-      "id": "m_hallback",
-      "x": 13,
-      "z": 5,
+      "id": "m_eastend",
+      "x": 38,
+      "z": 15,
       "hidden": true,
-      "give": "card:recall_horn",
-      "text": "Behind the crates, wedged against the hall's back wall: a card someone dropped long ago.",
-      "text_fr": "Derrière les caisses, coincée contre le mur du fond de la salle : une carte perdue il y a longtemps."
+      "give": "coins:30",
+      "text": "Where the path bends, at the foot of the tree: Facets, half under the roots.",
+      "text_fr": "Là où le chemin tourne, au pied de l'arbre : des Facettes, à moitié sous les racines."
+    },
+    {
+      "kind": "find",
+      "id": "m_flowers",
+      "x": 10,
+      "z": 27,
+      "give": "give:curio_brass_thimble",
+      "text": "Something glints among the flowers: a brass thimble, dented and polished bright.",
+      "text_fr": "Quelque chose brille entre les fleurs : un dé à coudre en laiton, cabossé et poli à force de servir."
     },
     {
       "kind": "find",
       "id": "m_garden",
-      "x": 19,
-      "z": 14,
+      "x": 36,
+      "z": 25,
       "hidden": true,
       "give": "coins:30",
       "text": "Down among Moss's bean rows, in a flowerpot turned upside down: a few Facets.",
@@ -588,53 +2661,28 @@
     {
       "kind": "find",
       "id": "m_post",
-      "x": 24,
-      "z": 20,
+      "x": 30,
+      "z": 18,
       "give": "coins:25",
-      "text": "Under the stone at the foot of the signpost, where travellers leave a coin for luck: Facets.",
-      "text_fr": "Sous la pierre au pied du panneau, là où les voyageurs laissent une pièce pour la chance : des Facettes."
-    },
-    {
-      "kind": "find",
-      "id": "m_flowers",
-      "x": 5,
-      "z": 21,
-      "give": "give:curio_brass_thimble",
-      "text": "Something glints among the flowers: a brass thimble, dented and polished bright.",
-      "text_fr": "Quelque chose brille entre les fleurs : un dé à coudre en laiton, cabossé et poli à force de servir."
-    },
-    {
-      "kind": "find",
-      "id": "m_eastend",
-      "x": 26,
-      "z": 8,
-      "hidden": true,
-      "give": "coins:30",
-      "text": "Where the path bends, at the foot of the tree: Facets, half under the roots.",
-      "text_fr": "Là où le chemin tourne, au pied de l'arbre : des Facettes, à moitié sous les racines."
+      "text": "Under the flat stone by the crossroads signpost, where travellers leave a coin for luck: Facets.",
+      "text_fr": "Sous la pierre plate près du panneau du carrefour, là où les voyageurs laissent une pièce pour la chance : des Facettes."
     },
     {
       "kind": "find",
       "id": "seed_3",
       "x": 1,
-      "z": 15,
+      "z": 26,
       "hidden": true,
       "give": "give:seed_packet_3",
       "text": "Caught in the roots at the meadow's edge, a twist of paper: \"Runner beans. Do NOT eat.\"",
       "text_fr": "Coincé dans les racines, en lisière du pré, un cornet de papier : « Haricots grimpants. NE PAS MANGER. »",
       "if": "flag:seeds_asked"
-    },
-    {
-      "kind": "waymark",
-      "id": "meadow",
-      "x": 16,
-      "z": 12
     }
   ],
   "warps": [
     {
-      "x": 13,
-      "z": 10,
+      "x": 25,
+      "z": 11,
       "to": "shop",
       "label": "Go inside",
       "label_fr": "Entrer",
@@ -645,8 +2693,8 @@
       }
     },
     {
-      "x": 5,
-      "z": 10,
+      "x": 11,
+      "z": 17,
       "to": "swap_shop",
       "label": "Go into the Swap Shop",
       "label_fr": "Entrer dans la Bourse aux cartes",
@@ -659,13 +2707,117 @@
   ],
   "npcs": [
     {
+      "id": "t_tobin",
+      "name": "Tobin",
+      "model": "npc_kid",
+      "tint": "#ff9b6a",
+      "outfit": "#e2553a",
+      "hair": "#e8b04a",
+      "scale": 0.8,
+      "x": 23,
+      "z": 27,
+      "facing": "e",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 2,
+        "challenge": [
+          "Hey! You've got a deck. I can tell by the way you walk.",
+          "I've read the rules twice, and my Warrenbucks have waited all morning. Duel me!"
+        ],
+        "challenge_fr": [
+          "Hé ! T'as un deck, ça se voit à ta façon de marcher.",
+          "J'ai lu les règles deux fois, et mes Garenbouquin attendent depuis ce matin. Un duel !"
+        ],
+        "win": [
+          "Wait. I forgot to attach energy again, didn't I?",
+          "Here, my purse. Fair's fair."
+        ],
+        "win_fr": [
+          "Attends. J'ai encore oublié d'attacher une énergie, c'est ça ?",
+          "Tiens, ma bourse. C'est la règle."
+        ],
+        "lose": [
+          "Ha! Twice-read rules win again!",
+          "Read them twice too, then come back."
+        ],
+        "lose_fr": [
+          "Ha ! Les règles lues deux fois gagnent encore !",
+          "Lis-les deux fois toi aussi, et reviens."
+        ],
+        "after": [
+          "Next time I'm reading the rules three times. Maybe four."
+        ],
+        "after_fr": [
+          "La prochaine fois, je lis les règles trois fois. Peut-être quatre."
+        ]
+      }
+    },
+    {
+      "id": "pip",
+      "name": "Pip",
+      "model": "npc_kid",
+      "tint": "#ffd36e",
+      "scale": 0.82,
+      "x": 14,
+      "z": 23,
+      "facing": "s",
+      "idle": "Idle",
+      "route": [
+        "e",
+        "e",
+        "w",
+        "w"
+      ],
+      "dialogue": [
+        {
+          "if": "!flag:talked_pip",
+          "lines": [
+            "I'm practising my shuffle. Watch! ...Okay, don't watch."
+          ],
+          "lines_fr": [
+            "Je m'entraîne à mélanger. Regarde ! …Bon, regarde pas."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "You beat the Hex Warden? With cards? Real cards?",
+            "Sable runs a Gauntlet in the back room now. I'm not ready. I'll watch."
+          ],
+          "lines_fr": [
+            "T'as battu la Gardienne des Six ? Avec des cartes ? Des vraies ?",
+            "Sable fait passer l'Épreuve dans l'arrière-salle. C'est pas pour moi, pas encore. Je regarde."
+          ]
+        },
+        {
+          "if": "seals:1",
+          "lines": [
+            "Is that a seal? A real one? Bramble never gave ME one.",
+            "...I never beat Bramble. Shh."
+          ],
+          "lines_fr": [
+            "C'est un sceau ? Un vrai ? Bramble m'en a jamais donné, à MOI.",
+            "…J'ai jamais battu Bramble. Chut."
+          ]
+        },
+        {
+          "lines": [
+            "One day I'll beat whoever sits at that duel table. One day."
+          ],
+          "lines_fr": [
+            "Un jour, je battrai celui qui s'assoit à cette table de duel. Un jour."
+          ]
+        }
+      ]
+    },
+    {
       "id": "wren",
       "name": "Wren",
       "model": "npc_wanderer",
       "tint": "#7fb6ff",
       "scale": 0.94,
-      "x": 6,
-      "z": 13,
+      "x": 17,
+      "z": 24,
       "facing": "e",
       "idle": "Idle",
       "route": [
@@ -721,71 +2873,13 @@
       ]
     },
     {
-      "id": "pip",
-      "name": "Pip",
-      "model": "npc_kid",
-      "tint": "#ffd36e",
-      "scale": 0.82,
-      "x": 9,
-      "z": 19,
-      "facing": "s",
-      "idle": "Idle",
-      "route": [
-        "e",
-        "e",
-        "w",
-        "w"
-      ],
-      "dialogue": [
-        {
-          "if": "!flag:talked_pip",
-          "lines": [
-            "I'm practising my shuffle. Watch! ...Okay, don't watch."
-          ],
-          "lines_fr": [
-            "Je m'entraîne à mélanger. Regarde ! …Bon, regarde pas."
-          ]
-        },
-        {
-          "if": "beat:warden",
-          "lines": [
-            "You beat the Hex Warden? With cards? Real cards?",
-            "Sable runs a Gauntlet in the back room now. I'm not ready. I'll watch."
-          ],
-          "lines_fr": [
-            "T'as battu la Gardienne des Six ? Avec des cartes ? Des vraies ?",
-            "Sable fait passer l'Épreuve dans l'arrière-salle. C'est pas pour moi, pas encore. Je regarde."
-          ]
-        },
-        {
-          "if": "seals:1",
-          "lines": [
-            "Is that a seal? A real one? Bramble never gave ME one.",
-            "...I never beat Bramble. Shh."
-          ],
-          "lines_fr": [
-            "C'est un sceau ? Un vrai ? Bramble m'en a jamais donné, à MOI.",
-            "…J'ai jamais battu Bramble. Chut."
-          ]
-        },
-        {
-          "lines": [
-            "One day I'll beat whoever sits at that duel table. One day."
-          ],
-          "lines_fr": [
-            "Un jour, je battrai celui qui s'assoit à cette table de duel. Un jour."
-          ]
-        }
-      ]
-    },
-    {
       "id": "moss",
       "name": "Moss",
       "model": "npc_gardener",
       "tint": "#9be08a",
       "scale": 1.04,
-      "x": 21,
-      "z": 12,
+      "x": 33,
+      "z": 27,
       "facing": "w",
       "idle": "Idle",
       "dialogue": [
@@ -876,52 +2970,6 @@
           ]
         }
       ]
-    },
-    {
-      "id": "t_tobin",
-      "name": "Tobin",
-      "model": "npc_kid",
-      "tint": "#ff9b6a",
-      "outfit": "#e2553a",
-      "hair": "#e8b04a",
-      "scale": 0.8,
-      "x": 8,
-      "z": 20,
-      "facing": "n",
-      "idle": "Idle",
-      "trainer": {
-        "sight": 2,
-        "challenge": [
-          "Hey! You've got a deck. I can tell by the way you walk.",
-          "I've read the rules twice, and my Warrenbucks have waited all morning. Duel me!"
-        ],
-        "challenge_fr": [
-          "Hé ! T'as un deck, ça se voit à ta façon de marcher.",
-          "J'ai lu les règles deux fois, et mes Garenbouquin attendent depuis ce matin. Un duel !"
-        ],
-        "win": [
-          "Wait. I forgot to attach energy again, didn't I?",
-          "Here, my purse. Fair's fair."
-        ],
-        "win_fr": [
-          "Attends. J'ai encore oublié d'attacher une énergie, c'est ça ?",
-          "Tiens, ma bourse. C'est la règle."
-        ],
-        "lose": [
-          "Ha! Twice-read rules win again!",
-          "Read them twice too, then come back."
-        ],
-        "lose_fr": [
-          "Ha ! Les règles lues deux fois gagnent encore !",
-          "Lis-les deux fois toi aussi, et reviens."
-        ],
-        "after": [
-          "Next time I'm reading the rules three times. Maybe four."
-        ],
-        "after_fr": [
-          "La prochaine fois, je lis les règles trois fois. Peut-être quatre."
-        ]
-      }
     }
   ],
   "camera": {
@@ -969,32 +3017,32 @@
     {
       "side": "n",
       "span": [
-        24,
-        25
+        36,
+        38
       ],
       "to": "quarry"
     },
     {
       "side": "e",
       "span": [
-        18,
-        19
+        20,
+        22
       ],
       "to": "seaside"
     },
     {
       "side": "s",
       "span": [
-        12,
-        14
+        25,
+        27
       ],
       "to": "square"
     },
     {
       "side": "w",
       "span": [
-        18,
-        19
+        20,
+        22
       ],
       "to": "woodland"
     }

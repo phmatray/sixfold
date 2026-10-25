@@ -200,6 +200,10 @@ packs an hour** (rival packs and promos on top); the §3.4 "exploring" row (5 du
 a quest and 0.8 of a rival an hour) is **5.2**. The test keeps both between 3.5 and 6. Selling pays a
 tenth of crafting at most (risk E2), also asserted.
 
+The re-lay of every map to `docs/WORLD_RULES.md` added ten small Facet finds in the enlarged maps' corners
+(⬡ 30–45 each, ⬡ 385 in all, modelled as two minutes' detour each): the first playthrough moves from 5.28 to
+**5.35 packs an hour**, still inside the band.
+
 ## Campaign playthrough
 
 `the_campaign_can_be_finished_from_a_new_profile` (always on) plays the whole campaign from a new

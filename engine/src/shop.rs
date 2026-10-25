@@ -606,6 +606,15 @@ mod tests {
             facets: 470,
             packs: 2,
         });
+        // The re-lay to the world rules (docs/WORLD_RULES.md): ten small Facet finds
+        // that reward the enlarged maps' corners (sq_moving 30, w_camp 40, q_cart 40,
+        // e_coalcart 40, st_struck 40, st_wreck 45, t_lookout 40, d_nook_lane 30,
+        // d_inn_stump 40, d_hedge_nook 40), two minutes' detour each.
+        first.push(Source {
+            minutes: 10 * 2,
+            facets: 385,
+            packs: 0,
+        });
         let rate = packs_per_hour(&first);
         // The "exploring" row of §3.4, per hour: 5 two-prize duelists, 6 finds
         // of ⬡ 40, half a quest of ⬡ 160 and 0.8 of a rival.

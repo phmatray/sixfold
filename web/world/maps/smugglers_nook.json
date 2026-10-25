@@ -109,8 +109,8 @@
       "label": "Go back out",
       "label_fr": "Ressortir",
       "spawn": {
-        "x": 3,
-        "z": 12,
+        "x": 4,
+        "z": 13,
         "facing": "s"
       },
       "dir": "s"

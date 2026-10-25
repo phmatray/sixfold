@@ -4,103 +4,545 @@
   "region": "dream",
   "kind": "site",
   "music": "dream",
-  "width": 28,
-  "height": 24,
+  "width": 40,
+  "height": 30,
   "tiles": [
-    ".............pp.............",
-    ".............pp.............",
-    "......fffffffppffffff.......",
-    "....fff......pp.....fff.....",
-    "...ff........pp.......ff....",
-    "..ff.ppppppppppppppppppff...",
-    "..f.ppppppppppppppppppp.f...",
-    ".ff.pp....fffffff....pp.ff..",
-    ".f..pp..fff.....fff..pp..f..",
-    ".f..pp.ff.........ff.pp..f..",
-    ".f..pp.f............ppp..f..",
-    ".f..pppppppp........ppp..f..",
-    ".f..pppppppp.......f.....f..",
-    ".f.....f...ppppp...f.....f..",
-    ".f.....ff...pp....ff.....f..",
-    ".f......fff.pp..fff......f..",
-    ".f........ffppfff..~~~...f..",
-    ".f........ppppppp.~~~~~..f..",
-    ".ff...............~~~~~.ff..",
-    "..ff...............~~~.ff...",
-    "...ff.................ff....",
-    "....ff...............ff.....",
-    ".....fffffffffffffffff......",
-    "............................"
+    "..................ppp...................",
+    "..................ppp...................",
+    "..................ppp...................",
+    "..................ppp...................",
+    "..................ppp...................",
+    ".....fffffffffffffppp.ffffffffffffff....",
+    "....ff............ppp...............ff..",
+    "...ff.............ppp................f..",
+    "...f..pppppppppppppppppppppppppppp...f..",
+    "...f..pppppppppppppppppppppppppppp...f..",
+    "...f..pp....ffffffffffffffff....pf...f..",
+    "...f..pp....f..............f....pf...f..",
+    "...f..pp....f..............ppppppp...f..",
+    "...f..pp....f...................pp...f..",
+    "...f..pp....f..............f....pp...f..",
+    "...f..pp....f..............f....pp...f..",
+    "...f..pp....fppppppp.......f....pp...f..",
+    "...f..ppppppp..............f....pp...f..",
+    "...f..pp...................f....pp...f..",
+    "...f..pp....f..............f....pp...f..",
+    "...f..pp....fffp.fffffffffff....pp...f..",
+    "...f..pp.......p................pp...f..",
+    "...f..pppppppppppppppppppppppppppp...f..",
+    "...f..pp.......~~~~~~~~~........pp...f..",
+    "...ff.........~~~~~~~~~~~...........ff..",
+    "....ff.......~~~~~~~~~~~~~.........ff...",
+    ".....fffffffff~~~~~~~~~~~ffffffffffff...",
+    "..................~~....................",
+    "..................~~....................",
+    "..................~~...................."
   ],
   "props": [
     {
-      "asset": "moonwell",
-      "x": 12,
-      "z": 10,
+      "asset": "signpost",
+      "x": 22,
+      "z": 2,
       "rot": 0
-    },
-    {
-      "asset": "seal_stone",
-      "x": 15,
-      "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "waymark",
-      "x": 20,
-      "z": 7,
-      "rot": 0,
-      "glow": "#8a4fc9"
-    },
-    {
-      "asset": "wisteria_arch",
-      "x": 13,
-      "z": 1,
-      "rot": 0
-    },
-    {
-      "asset": "wisteria_arch",
-      "x": 7,
-      "z": 11,
-      "rot": 90
-    },
-    {
-      "asset": "wisteria_arch",
-      "x": 19,
-      "z": 10,
-      "rot": 90
     },
     {
       "asset": "signpost",
-      "x": 15,
-      "z": 0,
-      "rot": 0
-    },
-    {
-      "asset": "boat",
-      "x": 18,
-      "z": 17,
+      "x": 16,
+      "z": 3,
       "rot": 0
     },
     {
       "asset": "rock",
-      "x": 3,
-      "z": 1,
+      "x": 12,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 17,
+      "z": 5,
+      "rot": 0,
+      "why": "the garden gate"
+    },
+    {
+      "asset": "lantern",
+      "x": 21,
+      "z": 5,
+      "rot": 0,
+      "why": "the garden gate"
+    },
+    {
+      "asset": "wisteria_arch",
+      "x": 18,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "moonwell",
+      "x": 18,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "seal_stone",
+      "x": 22,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "moonflower",
+      "x": 14,
+      "z": 11,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 25,
+      "z": 11,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 14,
+      "z": 18,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 25,
+      "z": 18,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 16,
+      "z": 13,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 23,
+      "z": 12,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "wisteria_arch",
+      "x": 26,
+      "z": 12,
+      "rot": 90
+    },
+    {
+      "asset": "wisteria_arch",
+      "x": 12,
+      "z": 17,
+      "rot": 90
+    },
+    {
+      "asset": "glow_mushroom_tall",
+      "x": 21,
+      "z": 18,
+      "rot": 0,
+      "glow": "#b48cff"
+    },
+    {
+      "asset": "waymark",
+      "x": 25,
+      "z": 3,
+      "rot": 0,
+      "glow": "#8a4fc9"
+    },
+    {
+      "asset": "moonflower",
+      "x": 8,
+      "z": 11,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 9,
+      "z": 11,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 8,
+      "z": 12,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 10,
+      "z": 13,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 29,
+      "z": 15,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 30,
+      "z": 16,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 29,
+      "z": 17,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 8,
+      "z": 19,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 9,
+      "z": 20,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 11,
+      "z": 20,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 28,
+      "z": 20,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 29,
+      "z": 20,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 10,
+      "z": 7,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 27,
+      "z": 7,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 13,
+      "z": 7,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 24,
+      "z": 7,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "moonflower",
+      "x": 29,
+      "z": 18,
+      "rot": 0,
+      "open": "!time:day & !time:dawn"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 9,
+      "z": 9,
+      "rot": 0,
+      "glow": "#b48cff"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 30,
+      "z": 21,
+      "rot": 0,
+      "glow": "#b48cff"
+    },
+    {
+      "asset": "bench",
+      "x": 8,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 10,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 5,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "boat",
+      "x": 15,
+      "z": 24,
       "rot": 0
     },
     {
       "asset": "floating_lantern",
       "x": 21,
-      "z": 17,
+      "z": 25,
       "rot": 0,
       "y": 0.06
     },
     {
       "asset": "floating_lantern",
-      "x": 20,
-      "z": 19,
+      "x": 23,
+      "z": 24,
       "rot": 0,
       "y": 0.06
+    },
+    {
+      "asset": "reeds",
+      "x": 13,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 25,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "stump",
+      "x": 34,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 38,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 2,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 4,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 6,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 8,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 10,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 12,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 14,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 16,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 20,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 22,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 24,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 26,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 28,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 30,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 32,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 34,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 36,
+      "z": 28,
+      "rot": 0
     },
     {
       "asset": "willow",
@@ -110,250 +552,820 @@
     },
     {
       "asset": "willow",
-      "x": 25,
-      "z": 21,
+      "x": 2,
+      "z": 0,
       "rot": 0
     },
     {
-      "asset": "moonflower",
-      "x": 3,
-      "z": 9,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 3,
-      "z": 10,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
+      "asset": "willow",
       "x": 4,
-      "z": 14,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "z": 0,
+      "rot": 0
     },
     {
-      "asset": "moonflower",
-      "x": 5,
-      "z": 15,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "asset": "willow",
+      "x": 6,
+      "z": 0,
+      "rot": 0
     },
     {
-      "asset": "moonflower",
+      "asset": "willow",
       "x": 8,
-      "z": 18,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "z": 0,
+      "rot": 0
     },
     {
-      "asset": "moonflower",
-      "x": 9,
-      "z": 19,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "asset": "willow",
+      "x": 10,
+      "z": 0,
+      "rot": 0
     },
     {
-      "asset": "moonflower",
+      "asset": "willow",
       "x": 12,
-      "z": 19,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "z": 0,
+      "rot": 0
     },
     {
-      "asset": "moonflower",
-      "x": 13,
-      "z": 19,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
+      "asset": "willow",
       "x": 14,
-      "z": 19,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "z": 0,
+      "rot": 0
     },
     {
-      "asset": "moonflower",
-      "x": 23,
-      "z": 8,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 23,
-      "z": 9,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 23,
-      "z": 11,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 17,
-      "z": 3,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 18,
-      "z": 3,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 8,
-      "z": 4,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
-      "x": 10,
-      "z": 13,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
-    },
-    {
-      "asset": "moonflower",
+      "asset": "willow",
       "x": 16,
-      "z": 9,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "z": 0,
+      "rot": 0
     },
     {
-      "asset": "moonflower",
-      "x": 10,
+      "asset": "willow",
+      "x": 21,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 23,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 25,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 27,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 29,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 31,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 33,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 35,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 0,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
       "z": 10,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "rot": 0
     },
     {
-      "asset": "moonflower",
-      "x": 17,
+      "asset": "willow",
+      "x": 0,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
       "z": 14,
-      "rot": 0,
-      "open": "!time:day & !time:dawn"
+      "rot": 0
     },
     {
-      "asset": "flowers",
+      "asset": "willow",
+      "x": 0,
+      "z": 16,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 0,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
       "x": 3,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 7,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 28,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 31,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 33,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 36,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "willow",
+      "x": 5,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 31,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
       "z": 7,
       "rot": 0
     },
     {
-      "asset": "flowers",
-      "x": 24,
+      "asset": "bush",
+      "x": 2,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
       "z": 13,
       "rot": 0
     },
     {
-      "asset": "flowers",
-      "x": 6,
-      "z": 18,
+      "asset": "bush",
+      "x": 2,
+      "z": 15,
       "rot": 0
     },
     {
-      "asset": "flowers",
-      "x": 20,
-      "z": 21,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 24,
+      "asset": "bush",
+      "x": 2,
       "z": 16,
       "rot": 0
     },
     {
-      "asset": "reeds",
-      "x": 22,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 17,
-      "z": 18,
-      "rot": 0
-    },
-    {
-      "asset": "reeds",
-      "x": 23,
-      "z": 18,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 12,
-      "z": 4,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 16,
-      "z": 4,
-      "rot": 0
-    },
-    {
-      "asset": "lantern",
-      "x": 5,
+      "asset": "bush",
+      "x": 2,
       "z": 17,
       "rot": 0
     },
     {
-      "asset": "lantern",
-      "x": 21,
-      "z": 14,
+      "asset": "bush",
+      "x": 2,
+      "z": 18,
       "rot": 0
     },
     {
-      "asset": "lantern",
-      "x": 10,
-      "z": 14,
+      "asset": "bush",
+      "x": 2,
+      "z": 19,
       "rot": 0
     },
     {
-      "asset": "lantern",
-      "x": 11,
+      "asset": "bush",
+      "x": 2,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 35,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 36,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 3,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
       "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 2,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 2,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 37,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 2,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 4,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 7,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 8,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 9,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 10,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 11,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 12,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 13,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 14,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 15,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 16,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 20,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 21,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 22,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 24,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 26,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 27,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 29,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 30,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 31,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 33,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 36,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 27,
       "rot": 0
     }
   ],
   "spawn": {
-    "x": 13,
-    "z": 1,
+    "x": 19,
+    "z": 2,
     "facing": "s"
   },
   "interactions": [
     {
-      "kind": "waymark",
-      "id": "moonwell",
-      "x": 20,
-      "z": 7
+      "kind": "sign",
+      "text": "North: Lanternmere, by the shore path round the mere.",
+      "text_fr": "Nord : Lac-aux-Lanternes, par le chemin de la rive autour du lac.",
+      "x": 22,
+      "z": 2
     },
     {
-      "x": 15,
-      "z": 0,
+      "x": 16,
+      "z": 3,
       "kind": "sign",
       "text": "The Moonwell Garden. Please walk softly: the flowers are sleeping. (By day.)",
       "text_fr": "Le Jardin du Puits-de-Lune. Marchez doucement, s'il vous plaît : les fleurs dorment. (Le jour.)"
     },
     {
-      "x": 15,
-      "z": 12,
+      "x": 12,
+      "z": 3,
+      "kind": "sign",
+      "id": "seven_stones",
+      "name": "Stacked stones",
+      "name_fr": "Des pierres empilées",
+      "dialogue": [
+        {
+          "lines": [
+            "Seven flat stones, stacked with care outside the garden wall. Six have a dab of colour on them. The top one is blank."
+          ],
+          "lines_fr": [
+            "Sept pierres plates, empilées avec soin devant le mur du jardin. Six portent une touche de couleur. Celle du dessus est vierge."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 22,
+      "z": 15,
       "kind": "sign",
       "id": "seal_moonwell",
       "name": "The seal stone",
@@ -372,8 +1384,24 @@
       ]
     },
     {
-      "x": 18,
-      "z": 17,
+      "kind": "waymark",
+      "id": "moonwell",
+      "x": 25,
+      "z": 3
+    },
+    {
+      "kind": "find",
+      "id": "d_bed",
+      "x": 29,
+      "z": 18,
+      "give": "card:hexmage",
+      "text": "The moonflowers are open, and in the brightest bed, laid among the petals like a pressed leaf: a card. By day you'd never have seen it under the buds.",
+      "text_fr": "Les belles-de-lune sont ouvertes, et dans le massif le plus lumineux, posée parmi les pétales comme une feuille séchée : une carte. Le jour, sous les boutons, vous ne l'auriez jamais vue.",
+      "if": "time:night"
+    },
+    {
+      "x": 15,
+      "z": 24,
       "kind": "sign",
       "id": "skiff",
       "name": "A little skiff",
@@ -389,44 +1417,25 @@
             "Le bassin s'écoule sous la haie dans un chenal, et le chenal dans le lac. Quelques coups de rame, et vous touchez le ponton aux lanternes."
           ],
           "do": [
-            "warp:lanternmere:17:7:n"
-          ]
-        }
-      ]
-    },
-    {
-      "x": 3,
-      "z": 1,
-      "kind": "sign",
-      "id": "seven_stones",
-      "name": "Stacked stones",
-      "name_fr": "Des pierres empilées",
-      "dialogue": [
-        {
-          "lines": [
-            "Seven flat stones, stacked with care outside the garden wall. Six have a dab of colour on them. The top one is blank."
-          ],
-          "lines_fr": [
-            "Sept pierres plates, empilées avec soin devant le mur du jardin. Six portent une touche de couleur. Celle du dessus est vierge."
+            "warp:lanternmere:24:12:n"
           ]
         }
       ]
     },
     {
       "kind": "find",
-      "id": "d_bed",
-      "x": 23,
-      "z": 9,
-      "give": "card:hexmage",
-      "text": "The moonflowers are open, and in the brightest bed, laid among the petals like a pressed leaf: a card. By day you'd never have seen it under the buds.",
-      "text_fr": "Les belles-de-lune sont ouvertes, et dans le massif le plus lumineux, posée parmi les pétales comme une feuille séchée : une carte. Le jour, sous les boutons, vous ne l'auriez jamais vue.",
-      "if": "time:night"
+      "id": "d_hedge_nook",
+      "give": "coins:40",
+      "text": "Tucked in the stump behind the hedge, where Nim keeps her pruning knife: the knife, and a twist of Facets for seeds.",
+      "text_fr": "Dans la souche, derrière la haie, là où Nim range son sécateur : le sécateur, et un cornet de Facettes pour les graines.",
+      "x": 34,
+      "z": 7
     }
   ],
   "warps": [
     {
-      "x": 13,
-      "z": 12,
+      "x": 19,
+      "z": 15,
       "to": "moonwell_stair",
       "label": "Go down the well stair",
       "label_fr": "Descendre l'escalier du puits",
@@ -444,8 +1453,8 @@
     {
       "side": "n",
       "span": [
-        13,
-        14
+        18,
+        20
       ],
       "to": "lanternmere"
     }
@@ -455,8 +1464,8 @@
       "id": "nim",
       "name": "Nim",
       "model": "npc_kid",
-      "x": 17,
-      "z": 12,
+      "x": 25,
+      "z": 15,
       "facing": "w",
       "idle": "Idle",
       "outfit": "#b9a6e0",
@@ -489,35 +1498,11 @@
       ]
     },
     {
-      "id": "nim_day",
-      "name": "Nim",
-      "model": "npc_kid",
-      "x": 3,
-      "z": 13,
-      "facing": "e",
-      "idle": "Idle",
-      "outfit": "#b9a6e0",
-      "hair": "#3a2a20",
-      "if": "time:day",
-      "dialogue": [
-        {
-          "lines": [
-            "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
-            "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it."
-          ],
-          "lines_fr": [
-            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
-            "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup."
-          ]
-        }
-      ]
-    },
-    {
       "id": "t_maud",
       "name": "Maud",
       "model": "npc_wanderer",
-      "x": 22,
-      "z": 7,
+      "x": 30,
+      "z": 9,
       "facing": "s",
       "idle": "Idle",
       "trainer": {
@@ -556,7 +1541,7 @@
       "id": "t_noor",
       "name": "Noor",
       "model": "npc_scholar",
-      "x": 6,
+      "x": 8,
       "z": 14,
       "facing": "e",
       "idle": "Idle",
@@ -591,6 +1576,30 @@
       },
       "outfit": "#3a6a8a",
       "hair": "#1f1a2a"
+    },
+    {
+      "id": "nim_day",
+      "name": "Nim",
+      "model": "npc_kid",
+      "x": 9,
+      "z": 23,
+      "facing": "e",
+      "idle": "Idle",
+      "outfit": "#b9a6e0",
+      "hair": "#3a2a20",
+      "if": "time:day",
+      "dialogue": [
+        {
+          "lines": [
+            "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
+            "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it."
+          ],
+          "lines_fr": [
+            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
+            "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup."
+          ]
+        }
+      ]
     }
   ],
   "ground": {
@@ -623,7 +1632,7 @@
   "light": {
     "sun": {
       "color": "#ffe9f2",
-      "intensity": 2.0,
+      "intensity": 2,
       "fromHero": [
         8,
         18,

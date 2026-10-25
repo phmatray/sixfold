@@ -46,14 +46,14 @@
     { "a": "gullhaven", "b": "lanternmere", "if": "item:ferry_pass", "icon": "ferry" }
   ],
   "waymarks": [
-    { "id": "meadow", "map": "overworld", "x": 16, "z": 13, "facing": "n", "name": "Sixfold Meadow", "name_fr": "Pré de Sixfold" },
-    { "id": "cinderwick", "map": "cinderwick", "x": 8, "z": 10, "facing": "n", "name": "Cinderwick plaza", "name_fr": "Place de Mèche-Cendre" },
-    { "id": "kilnmouth", "map": "kilnmouth", "x": 8, "z": 20, "facing": "w", "name": "The Kilnmouth rim", "name_fr": "Rebord de la Gueule-du-Four" },
-    { "id": "stormwatch", "map": "stormwatch", "x": 11, "z": 11, "facing": "n", "name": "Stormwatch square", "name_fr": "Place de Guette-Orage" },
+    { "id": "meadow", "map": "overworld", "x": 30, "z": 15, "facing": "n", "name": "Sixfold Meadow", "name_fr": "Pré de Sixfold" },
+    { "id": "cinderwick", "map": "cinderwick", "x": 31, "z": 16, "facing": "n", "name": "Cinderwick plaza", "name_fr": "Place de Mèche-Cendre" },
+    { "id": "kilnmouth", "map": "kilnmouth", "x": 25, "z": 22, "facing": "n", "name": "The Kilnmouth rim", "name_fr": "Rebord de la Gueule-du-Four" },
+    { "id": "stormwatch", "map": "stormwatch", "x": 28, "z": 18, "facing": "n", "name": "Stormwatch square", "name_fr": "Place de Guette-Orage" },
     { "id": "rodspire", "map": "rodspire", "x": 18, "z": 9, "facing": "n", "name": "The Rodspire's summit", "name_fr": "Sommet de l'Aiguille-Foudre" },
-    { "id": "gullhaven", "map": "gullhaven", "x": 26, "z": 5, "facing": "n", "name": "Gullhaven quay", "name_fr": "Quai de Havre-aux-Mouettes" },
-    { "id": "bellflats", "map": "bellflats", "x": 17, "z": 11, "facing": "w", "name": "The bell tower islet", "name_fr": "L'îlot de la tour" },
-    { "id": "lanternmere", "map": "lanternmere", "x": 18, "z": 4, "facing": "n", "name": "Lanternmere plaza", "name_fr": "Place de Lac-aux-Lanternes" },
-    { "id": "moonwell", "map": "moonwell", "x": 20, "z": 8, "facing": "n", "name": "The Moonwell gate", "name_fr": "Portail du Puits-de-Lune" }
+    { "id": "gullhaven", "map": "gullhaven", "x": 33, "z": 8, "facing": "n", "name": "Gullhaven quay", "name_fr": "Quai de Havre-aux-Mouettes" },
+    { "id": "bellflats", "map": "bellflats", "x": 17, "z": 15, "facing": "n", "name": "The bell tower islet", "name_fr": "L'îlot de la tour" },
+    { "id": "lanternmere", "map": "lanternmere", "x": 18, "z": 8, "facing": "n", "name": "Lanternmere plaza", "name_fr": "Place de Lac-aux-Lanternes" },
+    { "id": "moonwell", "map": "moonwell", "x": 25, "z": 4, "facing": "n", "name": "The Moonwell gate", "name_fr": "Portail du Puits-de-Lune" }
   ]
 }

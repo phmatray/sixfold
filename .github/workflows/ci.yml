@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: ./scripts/check-no-game-data.sh
-      - run: node tools/check-maps.mjs web/world && node tools/check-fence-table.mjs web/world/props.js
+      - run: node tools/check-maps.mjs web/world --strict && node tools/check-fence-table.mjs web/world/props.js
 
   rust:
     name: Engine tests, lint and web build

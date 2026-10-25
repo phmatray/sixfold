@@ -293,6 +293,7 @@ export const FOOT = {
   ferry: [4, 2], cave_mouth_slate: [2, 1],
   kiln: [4, 4], glass_furnace: [2, 2], glass_rack: [2, 1], lava_glass: [2, 2], // Ember
   observatory: [5, 5], lift_tower: [2, 1], rodspire: [3, 3], telescope: [2, 2], // Storm
+  terrace_house: [4, 3], // Stone (Cinderwick's terraces use it too)
   harbour_house: [5, 4], bell_tower: [3, 3], net_rack: [2, 1], chart_table: [2, 1], // Tide
   willow: [2, 2], wishing_tree: [2, 2], moonwell: [3, 3], lake_house: [4, 4], wisteria_arch: [2, 1], cloth_rack: [2, 1], // Dream
 };
