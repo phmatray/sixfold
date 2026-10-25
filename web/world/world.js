@@ -642,11 +642,13 @@ export function mount(el, controls, cb, start, edit = false) {
   // For trying the hours out from the console: `el.sixfoldClock(21 * 60)` (Rust hears it at once).
   el.sixfoldClock = (m) => (cb("clock", String(Math.floor(m)), ""), setClock(m));
   el.sixfoldWarp = (to, x, z, facing = "s") => warp({ to, spawn: { x, z, facing }, travel: true }); // and anywhere: `el.sixfoldWarp("square", 12, 8)`
+  // Walks there as a tap would (the same route, collisions, heights, gates and ladders); `[]` when there's no way.
+  el.sixfoldWalk = (x, z) => (busy() ? [] : [...(world.path = walkTo(x, z, world.npcAt(x, z)))]);
   // For measuring: draw calls and triangles of the last frame (shadows included), and the area.
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
-  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute) });
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face] });
 
   // Item popup preview: the model turning in its own small canvas.
   let pv = null;

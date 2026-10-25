@@ -243,7 +243,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
         ),
         "wading_boots" => (
             tr("Wading Boots", "Bottes de gué").into(),
-            "shoes",
+            "wading_boots",
             tr(
                 "Waxed reed and leather, laced to the knee. Fords and shallows are a path now.",
                 "Du roseau ciré et du cuir, lacés jusqu'au genou. Gués et hauts-fonds deviennent des chemins.",
@@ -251,10 +251,59 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
         ),
         "grip_gloves" => (
             tr("Grip Gloves", "Gants d'escalade").into(),
-            "curio",
+            "grip_gloves",
             tr(
                 "Chalked palms, stitched fingertips. Walls with handholds can be climbed.",
                 "Paumes à la craie, bouts des doigts cousus. Les parois à prises s'escaladent.",
+            ),
+        ),
+        // 1.3 Grove and Stone: errands and curios.
+        "reed_fibre" => (
+            tr("Reed Fibre", "Fibres de roseau").into(),
+            "reed_fibre",
+            tr(
+                "Long pale reeds from the Fernhollow stream, stripped and tied. Tobiah the cobbler wants them for wading boots.",
+                "De longs roseaux pâles du ruisseau de Creuse-Fougère, effeuillés et liés. Tobiah le cordonnier les veut pour des bottes de gué.",
+            ),
+        ),
+        "honey_jar" => (
+            tr("Jar of Honey", "Pot de miel").into(),
+            "curio",
+            tr(
+                "Hazel's new honey, still warm from the comb. For her mother Agnes in Rootholm.",
+                "Le miel nouveau de Hazel, encore tiède du rayon. Pour sa mère Agnes, à Racinemont.",
+            ),
+        ),
+        "lunch_pail" => (
+            tr("Lunch Pail", "Gamelle").into(),
+            "lunch_pail",
+            tr(
+                "The crew's lunch from the Tally Room: four pasties, two apples, a flask of tea. Counted. For Ros at the Undermine's east cut.",
+                "Le déjeuner de l'équipe, de la Salle des Comptes : quatre chaussons, deux pommes, une gourde de thé. Compté. Pour Ros, à la saignée est des Galeries Basses.",
+            ),
+        ),
+        "lucky_pick" => (
+            tr("Lucky Pick", "Pioche porte-bonheur").into(),
+            "lucky_pick",
+            tr(
+                "Huw's pick, its handle wrapped in faded red cord, his initials burned into the wood. Forty years lucky.",
+                "La pioche de Huw, le manche entouré d'une cordelette rouge passée, ses initiales brûlées dans le bois. Quarante ans de chance.",
+            ),
+        ),
+        "curio_acorn_whistle" => (
+            tr("Acorn Whistle", "Sifflet-gland").into(),
+            "acorn_whistle",
+            tr(
+                "An acorn as big as a fist, hollowed and pierced. Blow into it and it hoots like an owl. A curio for Odile.",
+                "Un gland gros comme un poing, creusé et percé. On souffle dedans, il hulule comme une chouette. Une curiosité pour Odile.",
+            ),
+        ),
+        "curio_miner_tally" => (
+            tr("Miner's Tally", "Jetons de mineur").into(),
+            "miner_tally",
+            tr(
+                "A ring of brass tally tags from the old Undermine, one punched with a hexagon. A curio for Odile.",
+                "Un anneau de jetons de laiton des anciennes Galeries, l'un poinçonné d'un hexagone. Une curiosité pour Odile.",
             ),
         ),
         other => (other.replace('_', " "), "", ""),

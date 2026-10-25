@@ -1,0 +1,276 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "boot_rack",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "boot_rack",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bookcase",
+      "x": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "cobbler_bench",
+      "x": 7,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 8,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "rug",
+      "x": 6,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 1,
+      "z": 1,
+      "kind": "sign",
+      "text": "Boots for every foot in Rootholm, each pair with a name chalked on the sole. One pair says \"Bramble, AGAIN\".",
+      "text_fr": "Des bottes pour chaque pied de Racinemont, chaque paire avec un nom écrit à la craie sous la semelle. Une paire dit « Bramble, ENCORE »."
+    },
+    {
+      "x": 7,
+      "z": 1,
+      "kind": "sign",
+      "text": "Pattern books, lasts in every size, and a ledger in which every boot Tobiah ever made has a page. Some pages have little drawings of the feet.",
+      "text_fr": "Des livres de patrons, des formes de toutes les tailles, et un registre où chaque botte que Tobiah a faite a sa page. Certaines pages ont de petits dessins des pieds."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "to": "rootholm",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 22,
+        "z": 30,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "tobiah",
+      "name": "Tobiah",
+      "model": "npc_worker",
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#7a4a2a",
+      "hair": "#3a2a1a",
+      "dialogue": [
+        {
+          "if": "item:wading_boots",
+          "lines": [
+            "There you are. And there you are.",
+            "Talking to the boots. They like to know where they're going. Fords, mostly. Shallows. Wet places.",
+            "Wear them in, not out."
+          ],
+          "lines_fr": [
+            "Vous voilà. Et te voilà.",
+            "Je parle aux bottes. Elles aiment savoir où elles vont. Des gués, surtout. Des hauts-fonds. Des endroits mouillés.",
+            "Fais-les à ton pied, pas à ta perte."
+          ]
+        },
+        {
+          "if": "flag:boots_ordered & time:dawn",
+          "lines": [
+            "First light. As promised. Hush now, they're shy.",
+            "Waxed reed and leather, laced to the knee. The Hush ford, the shallows round the islets, the pools on the flats when the tide's out: all paths now.",
+            "Go on. Get them wet. That's what they're for."
+          ],
+          "lines_fr": [
+            "Première lumière. Comme promis. Chut, elles sont timides.",
+            "Du roseau ciré et du cuir, lacés jusqu'au genou. Le gué du Murmure, les hauts-fonds autour des îlots, les flaques des grèves à marée basse : des chemins, maintenant.",
+            "Vas-y. Mouille-les. C'est fait pour ça."
+          ],
+          "do": [
+            "give:wading_boots",
+            "sfx:jingle"
+          ]
+        },
+        {
+          "if": "flag:boots_ordered",
+          "lines": [
+            "Not yet. The wax has to set overnight, and the boots have to get used to the idea.",
+            "Come back at first light. Hester will put you up; ask her to wake you at dawn."
+          ],
+          "lines_fr": [
+            "Pas encore. La cire doit prendre pendant la nuit, et les bottes doivent se faire à l'idée.",
+            "Reviens à la première lumière. Hester te logera ; demande-lui de te réveiller à l'aube."
+          ]
+        },
+        {
+          "if": "item:reed_fibre & time:dawn",
+          "lines": [
+            "Not at first light. At first light I finish things, I don't start them.",
+            "Come back later in the day with your reeds."
+          ],
+          "lines_fr": [
+            "Pas à la première lumière. À la première lumière, je finis les choses, je ne les commence pas.",
+            "Reviens plus tard dans la journée avec tes roseaux."
+          ]
+        },
+        {
+          "if": "item:reed_fibre",
+          "lines": [
+            "Reed fibre from the Fernhollow bank. Good and long. Hello, reeds.",
+            "And a hundred for the leather. Thank you.",
+            "I'll wax them tonight. Done by first light, as promised. Come back at dawn."
+          ],
+          "lines_fr": [
+            "Des fibres de roseau de la rive de Creuse-Fougère. Bien longues. Bonjour, les roseaux.",
+            "Et cent pour le cuir. Merci.",
+            "Je les cire cette nuit. Prêtes à la première lumière, promis. Reviens à l'aube."
+          ],
+          "do": [
+            "pay:100",
+            "take:reed_fibre",
+            "flag:boots_ordered"
+          ]
+        },
+        {
+          "if": "flag:boots_asked",
+          "lines": [
+            "Still no reeds? The long pale ones, on the Fernhollow stream bank, past the bridge. The boots are waiting. Well. The idea of the boots."
+          ],
+          "lines_fr": [
+            "Toujours pas de roseaux ? Les longs et pâles, sur la rive du ruisseau de Creuse-Fougère, après le pont. Les bottes attendent. Enfin. L'idée des bottes."
+          ]
+        },
+        {
+          "lines": [
+            "Shh. I'm telling this last how wide you are.",
+            "Wading boots? For the Hush ford? Yes. I make them. They don't make themselves, though they'd like to.",
+            "Bring me reed fibre, the long pale reeds from the Fernhollow stream bank, and a hundred Facets for the leather. I'll do the rest overnight."
+          ],
+          "lines_fr": [
+            "Chut. Je dis à cette forme quelle largeur tu fais.",
+            "Des bottes de gué ? Pour le gué du Murmure ? Oui. J'en fais. Elles ne se font pas toutes seules, même si elles aimeraient bien.",
+            "Apporte-moi des fibres de roseau, les longs roseaux pâles de la rive du ruisseau de Creuse-Fougère, et cent Facettes pour le cuir. Je fais le reste pendant la nuit."
+          ],
+          "do": [
+            "flag:boots_asked"
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffe8c8",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb860",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

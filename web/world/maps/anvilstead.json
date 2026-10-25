@@ -1,0 +1,3086 @@
+{
+  "title": "Anvilstead",
+  "title_fr": "Bourg-l'Enclume",
+  "region": "stone",
+  "kind": "town",
+  "music": "stone",
+  "width": 52,
+  "height": 36,
+  "tiles": [
+    "5555555555555555555555555555555555555555555555555555",
+    "5555555555555555555555555555555555555555555555555555",
+    "5555555555555555555555555555533355555555555555555555",
+    "5555555555555555555555555555533355555555555555555555",
+    "2222222222222222222222222222222222222222222222222222",
+    "2222222222222222222222222222222222222222222222222222",
+    "2222222222222222222222222222222222222222222222222222",
+    "2222222222222222222222222222222222222222222222222222",
+    "2222222222222222222222222222222222222222222222222222",
+    "2222222222222222222222222222222222222222222222222222",
+    "2222222222222222222222222222222222222222222222222222",
+    "2222222222222222222222222222122222222222222222122222",
+    "2111111111111111111111111111111111111111111111111122",
+    "1111111111111111111111111111111111111111111111111111",
+    "1111111111111111111111111111111111111111111111111111",
+    "1111111111111111111111111111111111111111111111111111",
+    "1111111111111111111111111111111111111111111111111111",
+    "1111111111111111111111111111111111111111111111111111",
+    "1111111111111111111111111111111111111111111111111111",
+    "111111.......111111111111111.......11111111111111...",
+    "111..............1111...ppp...........11111111.~~...",
+    "....................rrrrrrrrrrr.................~~..",
+    "..................rrrrrrrrrrrrrrr...............~~..",
+    ".................rrrrrrrrrrrrrrrrr..............~~..",
+    "........ppppppppppprrrrrrrrrrrrrrppppppppppp....~~..",
+    "........ppppppppppprrrrrrrrrrrrrrppppppppppp....~~..",
+    ".................rrrrrrrrrrrrrrrrr..............~~..",
+    "..................rrrrrrrrrrrrrrr....fff.fff...~~...",
+    "....................rrrrrrrrrrr......f.....f...~~...",
+    "........................ppp..........f.....f...~~...",
+    "........................ppp..........f.....f..~~....",
+    "..ppppppppppppppppppppppppp..........fffffff~~~~~~~.",
+    "..ppppppppppppppppppppppppp...............~~~~~~~~~~",
+    "..............fffffff...ppp...............~~~~~~~~~~",
+    "..............f.....f...ppp................~~~~~~~~~",
+    "..............f.....f...ppp.................~~~~~~~~"
+  ],
+  "paint": [
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    ".ppppppppppppppppppppppppppppppppppppppppppppp......",
+    ".ppppppppppppppppppppppppppppppppppppppppppppp......",
+    "....................................................",
+    "....................................................",
+    "..........pp..................pp....................",
+    "..........pp..................pp....................",
+    "..........pp..................pp....................",
+    "ppppppppppppppppppppppppppppppppppppppppppppppppp...",
+    "ppppppppppppppppppppppppppppppppppppppppppppppppp...",
+    "ppppppppppppppppppppppppppppppppppppppppppppppppp...",
+    "........................ppp.........................",
+    "........................ppp.........................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "....................................................",
+    "...................................................."
+  ],
+  "props": [
+    {
+      "asset": "stairs_slate",
+      "x": 23,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 24,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 25,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 30,
+      "z": 12,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 31,
+      "z": 12,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 10,
+      "z": 12,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 11,
+      "z": 12,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "terrace_house",
+      "x": 2,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "terrace_house",
+      "x": 8,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "terrace_house",
+      "x": 14,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "terrace_house",
+      "x": 38,
+      "z": 4,
+      "rot": 0,
+      "recolor": {
+        "sx_sn_door": "#4a7a4a"
+      }
+    },
+    {
+      "asset": "terrace_house",
+      "x": 44,
+      "z": 4,
+      "rot": 0,
+      "recolor": {
+        "sx_sn_door": "#8a4a6a"
+      }
+    },
+    {
+      "asset": "workshop",
+      "x": 33,
+      "z": 4,
+      "rot": 0,
+      "recolor": {
+        "sx_slate": "#a8642f",
+        "sx_slate_dk": "#7a4a22"
+      }
+    },
+    {
+      "asset": "headframe",
+      "x": 24,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 29,
+      "z": 2,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "crates",
+      "x": 20,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "minecart",
+      "x": 18,
+      "z": 9,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "bench",
+      "x": 46,
+      "z": 9,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "terrace_house",
+      "x": 5,
+      "z": 12,
+      "rot": 0,
+      "recolor": {
+        "sx_sn_door": "#d84a3a",
+        "sx_sn_rust": "#d8a03a"
+      }
+    },
+    {
+      "asset": "hanging_sign",
+      "x": 4,
+      "z": 14,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "terrace_house",
+      "x": 34,
+      "z": 12,
+      "rot": 0,
+      "recolor": {
+        "sx_sn_door": "#3a6a8a"
+      }
+    },
+    {
+      "asset": "inn_sign",
+      "x": 33,
+      "z": 14,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 1,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 2,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 3,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 4,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 5,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 6,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 7,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 8,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 9,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 12,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 13,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 14,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 15,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 16,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 17,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 18,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 19,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 20,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 21,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 22,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 23,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 24,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 25,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 26,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 27,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 28,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 29,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 32,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 33,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 34,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 35,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 36,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 37,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 38,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 39,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 40,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 41,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 42,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 43,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rail",
+      "x": 44,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "minecart",
+      "x": 13,
+      "z": 17,
+      "rot": 0,
+      "y": 1.07
+    },
+    {
+      "asset": "minecart",
+      "x": 40,
+      "z": 17,
+      "rot": 0,
+      "y": 1.07
+    },
+    {
+      "asset": "terrace_house",
+      "x": 15,
+      "z": 12,
+      "rot": 0,
+      "recolor": {
+        "sx_sn_door": "#6a5a3a"
+      }
+    },
+    {
+      "asset": "terrace_house",
+      "x": 40,
+      "z": 12,
+      "rot": 0,
+      "recolor": {
+        "sx_sn_door": "#3a3a3a"
+      }
+    },
+    {
+      "asset": "crates",
+      "x": 26,
+      "z": 13,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "crates",
+      "x": 27,
+      "z": 13,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 13,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "signpost",
+      "x": 2,
+      "z": 13,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "waymark",
+      "x": 30,
+      "z": 24,
+      "rot": 0,
+      "glow": "#a8642f"
+    },
+    {
+      "asset": "fountain",
+      "x": 20,
+      "z": 24,
+      "rot": 0,
+      "recolor": {
+        "sx_fstone": "#8a909c",
+        "sx_fstone_dk": "#5a606c",
+        "sx_fcap": "#a8642f"
+      }
+    },
+    {
+      "asset": "workshop",
+      "x": 8,
+      "z": 21,
+      "rot": 0,
+      "recolor": {
+        "sx_slate": "#5a606c",
+        "sx_slate_dk": "#454a55"
+      }
+    },
+    {
+      "asset": "anvil",
+      "x": 12,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 7,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "cottage",
+      "x": 40,
+      "z": 20,
+      "rot": 0,
+      "recolor": {
+        "sx_roof_brown": "#5a606c",
+        "sx_roof_brown_dk": "#454a55",
+        "sx_awning_red": "#a8642f",
+        "sx_bread": null
+      }
+    },
+    {
+      "asset": "stall",
+      "x": 27,
+      "z": 28,
+      "rot": 0,
+      "recolor": {
+        "sx_awning_red": "#a8642f"
+      }
+    },
+    {
+      "asset": "stall_b",
+      "x": 30,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 19,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 32,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 29,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "cottage",
+      "x": 1,
+      "z": 26,
+      "rot": 0,
+      "recolor": {
+        "sx_roof_brown": "#5a606c",
+        "sx_roof_brown_dk": "#454a55",
+        "sx_awning_red": "#7a5a3a",
+        "sx_bread": null
+      }
+    },
+    {
+      "asset": "cottage",
+      "x": 13,
+      "z": 26,
+      "rot": 0,
+      "recolor": {
+        "sx_roof_brown": "#5a606c",
+        "sx_roof_brown_dk": "#454a55",
+        "sx_awning_red": "#7a5a3a",
+        "sx_bread": null
+      }
+    },
+    {
+      "asset": "bush",
+      "x": 15,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 16,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 18,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 19,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 14,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 37,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 18,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 31,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "signpost",
+      "x": 27,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 46,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 45,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 50,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 6,
+      "z": 10,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "lantern",
+      "x": 19,
+      "z": 10,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "lantern",
+      "x": 31,
+      "z": 10,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "lantern",
+      "x": 42,
+      "z": 10,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "lantern",
+      "x": 8,
+      "z": 18,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "lantern",
+      "x": 16,
+      "z": 18,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "lantern",
+      "x": 28,
+      "z": 14,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "lantern",
+      "x": 38,
+      "z": 18,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "lantern",
+      "x": 47,
+      "z": 14,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "lantern",
+      "x": 22,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 14,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 35,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 22,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 9,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "lantern",
+      "x": 28,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 2,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 6,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 45,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 46,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 50,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 46,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 45,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 28,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 32,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 18,
+      "z": 6,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 23,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 38,
+      "z": 11,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 6,
+      "z": 6,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 36,
+      "z": 6,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 6,
+      "z": 11,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 21,
+      "z": 11,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 11,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 37,
+      "z": 4,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 40,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 6,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 6,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 30,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 51,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 47,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 10,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 26,
+      "z": 3,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 5,
+      "z": 2,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 1,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 51,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 47,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 8,
+      "z": 2,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 13,
+      "z": 3,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 39,
+      "z": 3,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 44,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 11,
+      "z": 2,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 22,
+      "z": 2,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 26,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 48,
+      "z": 2,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 8,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 13,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 44,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 18,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 30,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 7,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 44,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 36,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 32,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 34,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 12,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 38,
+      "z": 13,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 25,
+      "z": 4,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 44,
+      "z": 19,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 19,
+      "z": 6,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 19,
+      "z": 19,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "heather",
+      "x": 43,
+      "z": 6,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 46,
+      "z": 11,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 4,
+      "z": 19,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 1,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 2,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 3,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 4,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 6,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 7,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 8,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 9,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 10,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 11,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 12,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 13,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 14,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 18,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 19,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 20,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 0,
+      "z": 33,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 1,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 2,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 2,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 3,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 3,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 4,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 4,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 5,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 5,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 6,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 6,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 7,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 7,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 8,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 8,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 9,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 9,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 10,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 10,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 11,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 11,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 12,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 12,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 13,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 13,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 14,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 15,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 15,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 16,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 16,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 17,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 17,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 18,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 18,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 19,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 19,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 20,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 21,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 21,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 22,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 22,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 23,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 23,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 24,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 25,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 27,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 27,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 28,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 28,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 29,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 30,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 31,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 31,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 32,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 33,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 33,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 34,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 34,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 35,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 35,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 36,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 36,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 37,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 37,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 38,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 38,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 39,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 39,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 40,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 40,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 41,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 41,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 42,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 42,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 43,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 43,
+      "z": 35,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 45,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 46,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 48,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "rock",
+      "x": 49,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 50,
+      "z": 0,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "heather",
+      "x": 51,
+      "z": 1,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 2,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 3,
+      "rot": 0,
+      "y": 5
+    },
+    {
+      "asset": "bush_dark",
+      "x": 51,
+      "z": 4,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "bush_dark",
+      "x": 51,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 6,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 7,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 51,
+      "z": 8,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock",
+      "x": 51,
+      "z": 9,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 10,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 51,
+      "z": 11,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "heather",
+      "x": 51,
+      "z": 12,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 13,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 14,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "bush_dark",
+      "x": 51,
+      "z": 15,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 16,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "rock",
+      "x": 51,
+      "z": 17,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 18,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "bush_dark",
+      "x": 51,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 51,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 51,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 51,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 51,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 51,
+      "z": 31,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 50,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 50,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 50,
+      "z": 21,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 50,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 50,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 50,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 50,
+      "z": 26,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 50,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 44,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 46,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 50,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 44,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 45,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 29,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 45,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 48,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 50,
+      "z": 30,
+      "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 41,
+      "z": 32,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 25,
+    "z": 33,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 3,
+      "z": 6,
+      "kind": "sign",
+      "id": "miner_row_0",
+      "name": "A miner's house",
+      "name_fr": "Une maison de mineur",
+      "dialogue": [
+        {
+          "lines": [
+            "A brass tally tag nailed over the door, worn smooth by thumbs. Through the window: a kettle, a cat, a pick on two hooks."
+          ],
+          "lines_fr": [
+            "Un jeton de laiton cloué au-dessus de la porte, poli par les pouces. Par la fenêtre : une bouilloire, un chat, une pioche sur deux crochets."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 9,
+      "z": 6,
+      "kind": "sign",
+      "id": "miner_row_1",
+      "name": "A miner's house",
+      "name_fr": "Une maison de mineur",
+      "dialogue": [
+        {
+          "lines": [
+            "Chalked on the door: \"Gone to the Bastion. Back for supper. Don't let the dog in.\" There is no dog in sight."
+          ],
+          "lines_fr": [
+            "Écrit à la craie sur la porte : « Partie au Bastion. Retour pour le souper. Ne laissez pas entrer le chien. » Aucun chien en vue."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 15,
+      "z": 6,
+      "kind": "sign",
+      "id": "miner_row_2",
+      "name": "A miner's house",
+      "name_fr": "Une maison de mineur",
+      "dialogue": [
+        {
+          "lines": [
+            "The shutters are closed and a sprig of heather hangs on the latch. Somebody here worked the Undermine before the fall."
+          ],
+          "lines_fr": [
+            "Les volets sont fermés et un brin de bruyère pend au loquet. Quelqu'un ici travaillait aux Galeries avant l'éboulement."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 39,
+      "z": 6,
+      "kind": "sign",
+      "id": "upper_row_0",
+      "name": "A house on the top row",
+      "name_fr": "Une maison du rang du haut",
+      "dialogue": [
+        {
+          "lines": [
+            "Window boxes of heather, and a brass plate: \"Shift captain. Knock loud.\""
+          ],
+          "lines_fr": [
+            "Des jardinières de bruyère, et une plaque de laiton : « Chef de poste. Frappez fort. »"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 45,
+      "z": 6,
+      "kind": "sign",
+      "id": "upper_row_1",
+      "name": "A house on the top row",
+      "name_fr": "Une maison du rang du haut",
+      "dialogue": [
+        {
+          "lines": [
+            "Children's chalk drawings all over the doorstep: carts, cairns, a tall stick-person with a pick, labelled \"MUM\"."
+          ],
+          "lines_fr": [
+            "Des dessins à la craie d'enfants partout sur le seuil : des wagonnets, des cairns, un grand bonhomme en bâtons avec une pioche, marqué « MAMAN »."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 34,
+      "z": 6,
+      "kind": "sign",
+      "id": "crew_hall",
+      "name": "The Crew Hall",
+      "name_fr": "La Maison de l'équipe",
+      "dialogue": [
+        {
+          "lines": [
+            "Orla's crew keeps its picks, ropes and rota here. The rota is chalked on the door, and every name on it has been crossed out once and written back in."
+          ],
+          "lines_fr": [
+            "L'équipe d'Orla range ici ses pioches, ses cordes et ses tours de garde. Le tableau de service est écrit à la craie sur la porte, et chaque nom a été barré une fois puis réécrit."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 25,
+      "z": 7,
+      "kind": "sign",
+      "id": "old_shaft",
+      "name": "The old shaft",
+      "name_fr": "Le vieux puits",
+      "dialogue": [
+        {
+          "lines": [
+            "Under the headframe, a square of iron grating over the dark. Cold air breathes up through it, and very far down, water drips. The cage hasn't run since the fall."
+          ],
+          "lines_fr": [
+            "Sous le chevalement, un carré de grille de fer au-dessus du noir. De l'air froid monte au travers, et très loin en dessous, de l'eau goutte. La cage ne descend plus depuis l'éboulement."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "find",
+      "id": "sn_headframe",
+      "x": 29,
+      "z": 2,
+      "give": "card:bouldergut",
+      "text": "In the brake-man's box on the ledge, under a coil of greased cable: a card, left by whoever last worked the winding gear.",
+      "text_fr": "Dans la caisse du freineur, sur la corniche, sous une bobine de câble graissé : une carte, laissée par le dernier qui a fait tourner le treuil."
+    },
+    {
+      "x": 47,
+      "z": 10,
+      "kind": "sign",
+      "id": "lookout",
+      "name": "A bench with a view",
+      "name_fr": "Un banc avec vue",
+      "dialogue": [
+        {
+          "lines": [
+            "From here you see the whole valley: the rail street, the plaza, the stream, and the switchbacks of Scree Pass going down and down. West, the cut terraces of the Bastion catch the light."
+          ],
+          "lines_fr": [
+            "D'ici, on voit toute la vallée : la rue des rails, la place, le torrent, et les lacets du Col des Éboulis qui descendent, descendent. À l'ouest, les gradins taillés du Bastion prennent la lumière."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 16,
+      "z": 14,
+      "kind": "sign",
+      "id": "mid_house",
+      "name": "A house on the rail street",
+      "name_fr": "Une maison de la rue des rails",
+      "dialogue": [
+        {
+          "lines": [
+            "The carts rattle past the door all day. Someone has nailed a horseshoe-shaped piece of rail over it, upside down, for luck."
+          ],
+          "lines_fr": [
+            "Les wagonnets passent devant la porte toute la journée. Quelqu'un a cloué au-dessus un bout de rail tordu en fer à cheval, à l'envers, pour la chance."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 41,
+      "z": 14,
+      "kind": "sign",
+      "id": "assay_office",
+      "name": "The assay office",
+      "name_fr": "Le bureau d'essai",
+      "dialogue": [
+        {
+          "lines": [
+            "Scales in the window, and jars of ore with labels in a tidy hand. A note: \"Closed for lunch. Lunch is long.\""
+          ],
+          "lines_fr": [
+            "Des balances à la fenêtre, et des bocaux de minerai avec des étiquettes d'une écriture soignée. Un mot : « Fermé pour le déjeuner. Le déjeuner est long. »"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 2,
+      "z": 13,
+      "kind": "sign",
+      "text": "West: The Bastion, Orla's quarry and the seal of the Stonebacks. Down the steps: the plaza and the road to Scree Pass.",
+      "text_fr": "Ouest : Le Bastion, la carrière d'Orla et le sceau des Échines. En bas des marches : la place et la route du Col des Éboulis."
+    },
+    {
+      "kind": "waymark",
+      "id": "anvilstead",
+      "x": 30,
+      "z": 24
+    },
+    {
+      "x": 9,
+      "z": 23,
+      "kind": "sign",
+      "id": "smithy_door",
+      "name": "The smithy",
+      "name_fr": "La forge",
+      "dialogue": [
+        {
+          "lines": [
+            "The forge glows behind the half-door. Picks, wedges and rail spikes hang in rows, each one numbered with a punch."
+          ],
+          "lines_fr": [
+            "La forge rougeoie derrière la porte basse. Des pioches, des coins et des crampons de rail pendent en rangées, chacun numéroté au poinçon."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 42,
+      "z": 23,
+      "kind": "sign",
+      "id": "bex_door",
+      "name": "Bex's house",
+      "name_fr": "La maison de Bex",
+      "dialogue": [
+        {
+          "lines": [
+            "On the windowsill, rows and rows of pebbles, sorted by colour. A label: \"DO NOT TOUCH. COUNTED.\""
+          ],
+          "lines_fr": [
+            "Sur le rebord de la fenêtre, des rangées et des rangées de cailloux, triés par couleur. Une étiquette : « NE PAS TOUCHER. COMPTÉS. »"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 3,
+      "z": 29,
+      "kind": "sign",
+      "id": "cottage_w1",
+      "name": "A cottage",
+      "name_fr": "Une maison",
+      "dialogue": [
+        {
+          "lines": [
+            "A tin bath hangs on the wall, and a row of boots stands by the door, smallest to biggest: five of them."
+          ],
+          "lines_fr": [
+            "Un baquet de fer pend au mur, et une rangée de bottes attend près de la porte, de la plus petite à la plus grande : cinq."
+          ]
+        }
+      ]
+    },
+    {
+      "x": 15,
+      "z": 29,
+      "kind": "sign",
+      "id": "cottage_w2",
+      "name": "A cottage",
+      "name_fr": "Une maison",
+      "dialogue": [
+        {
+          "lines": [
+            "A slate on the door: \"Night shift. SLEEPING. This means you, Bex.\""
+          ],
+          "lines_fr": [
+            "Une ardoise sur la porte : « Équipe de nuit. JE DORS. Ça veut dire toi, Bex. »"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 27,
+      "z": 32,
+      "kind": "sign",
+      "text": "South: Scree Pass, down to the Undermine and the Emberstep Quarry. North, up the steps: the rail street, the Tally Room and Ropes & Holds.",
+      "text_fr": "Sud : le Col des Éboulis, jusqu'aux Galeries Basses et la Carrière de Pas-de-Braise. Au nord, en haut des marches : la rue des rails, la Salle des Comptes et Cordes et Prises."
+    }
+  ],
+  "warps": [
+    {
+      "x": 6,
+      "z": 14,
+      "to": "climb_school",
+      "label": "Go into Ropes & Holds",
+      "label_fr": "Entrer à Cordes et Prises",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    },
+    {
+      "x": 35,
+      "z": 14,
+      "to": "inn_stone",
+      "label": "Go into the Tally Room",
+      "label_fr": "Entrer à la Salle des Comptes",
+      "spawn": {
+        "x": 5,
+        "z": 7,
+        "facing": "n"
+      }
+    }
+  ],
+  "exits": [
+    {
+      "side": "w",
+      "span": [
+        15,
+        17
+      ],
+      "to": "bastion"
+    },
+    {
+      "side": "s",
+      "span": [
+        24,
+        26
+      ],
+      "to": "screepass"
+    }
+  ],
+  "gates": [
+    {
+      "id": "brake_house",
+      "tiles": [
+        [
+          30,
+          4,
+          2
+        ]
+      ],
+      "if": "item:grip_gloves",
+      "prop": "climb_wall_slate",
+      "text": "Iron rungs, half of them gone, up to the old brake-house ledge beside the headframe. Not with bare hands.",
+      "text_fr": "Des barreaux de fer, la moitié disparus, jusqu'à la vieille corniche du frein, à côté du chevalement. Pas à mains nues."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "huw",
+      "name": "Huw",
+      "model": "npc_worker",
+      "x": 17,
+      "z": 16,
+      "facing": "s",
+      "idle": "Idle",
+      "outfit": "#a8642f",
+      "hair": "#6a6a6a",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "if": "flag:rubble_1 & flag:rubble_2 & flag:rubble_3",
+          "lines": [
+            "All three passages open, and the Undermine breathing like it did when I was a lad. You've done the crew proud.",
+            "Orla's up at the Bastion. Tell her Huw says you're one of us."
+          ],
+          "lines_fr": [
+            "Les trois passages ouverts, et les Galeries qui respirent comme quand j'étais gamin. Tu as fait honneur à l'équipe.",
+            "Orla est en haut, au Bastion. Dis-lui que Huw dit que tu es des nôtres."
+          ]
+        },
+        {
+          "if": "item:lucky_pick",
+          "lines": [
+            "My pick! Forty years that pick's been lucky, and the one day I put it down on the pass...",
+            "Right. Favour for favour. The crew clears the second passage tonight."
+          ],
+          "lines_fr": [
+            "Ma pioche ! Quarante ans qu'elle porte bonheur, et le seul jour où je la pose sur le col…",
+            "Bon. Service pour service. L'équipe dégage le deuxième passage ce soir."
+          ],
+          "do": [
+            "take:lucky_pick",
+            "flag:rubble_2",
+            "sfx:gate"
+          ]
+        },
+        {
+          "if": "beat:t_jet & !flag:rubble_3",
+          "lines": [
+            "You beat our Jet? Ha! He'll push carts for a month, as promised. Best thing for him.",
+            "Favour for favour: the third passage, cleared. Go and see what's behind it."
+          ],
+          "lines_fr": [
+            "Tu as battu notre Jet ? Ha ! Il poussera des wagonnets pendant un mois, comme promis. C'est ce qu'il lui faut.",
+            "Service pour service : le troisième passage, dégagé. Va voir ce qu'il y a derrière."
+          ],
+          "do": [
+            "flag:rubble_3",
+            "sfx:gate"
+          ]
+        },
+        {
+          "if": "flag:lunch_asked",
+          "lines": [
+            "Still at it? Lunch to Ros at the east cut (Dagny has the pail), my pick somewhere on the Scree Pass switchbacks, and a lesson for my nephew Jet, on the rails in the Undermine. Each one's a passage cleared."
+          ],
+          "lines_fr": [
+            "Toujours dessus ? Le déjeuner pour Ros, à la saignée est (Dagny a la gamelle), ma pioche quelque part dans les lacets du Col, et une leçon pour mon neveu Jet, sur les rails des Galeries. Chacun, c'est un passage dégagé."
+          ]
+        },
+        {
+          "lines": [
+            "Huw. Orla's crew chief. You came up through the Undermine? Then you've seen what's left of it.",
+            "Three side passages fell in, years back. The crew can clear them, but the crew doesn't lift a pick for nothing. That's the rule up here: favour for favour.",
+            "Three favours, then. Dagny at the Tally Room has the crew's lunch pail; take it to Ros at the east cut. I lost my lucky pick on the pass; find it. And my nephew Jet thinks he's too good to push carts. Beat him at cards.",
+            "Each one, a passage cleared. Off you go."
+          ],
+          "lines_fr": [
+            "Huw. Chef d'équipe d'Orla. Tu es monté par les Galeries ? Alors tu as vu ce qu'il en reste.",
+            "Trois passages latéraux se sont effondrés, il y a des années. L'équipe peut les dégager, mais l'équipe ne soulève pas une pioche pour rien. C'est la règle, ici : service pour service.",
+            "Trois services, alors. Dagny, à la Salle des Comptes, a la gamelle de l'équipe ; porte-la à Ros, à la saignée est. J'ai perdu ma pioche porte-bonheur sur le col ; retrouve-la. Et mon neveu Jet se croit trop bon pour pousser des wagonnets. Bats-le aux cartes.",
+            "Chacun, un passage dégagé. Allez, file."
+          ],
+          "do": [
+            "flag:lunch_asked",
+            "flag:pick_asked"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bex",
+      "name": "Bex",
+      "model": "npc_kid",
+      "x": 34,
+      "z": 25,
+      "facing": "w",
+      "idle": "Idle",
+      "outfit": "#d8a03a",
+      "hair": "#8a4a2a",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "if": "count:cairn_:6 & !flag:bex_swap",
+          "lines": [
+            "You built ALL SIX? You've got stone dust on your hands, I can tell.",
+            "Here, a swap: my best card for your best cairn. I can't take the cairn, so just the card."
+          ],
+          "lines_fr": [
+            "Tu les as TOUS construits ? Tu as de la poussière d'ardoise sur les mains, ça se voit.",
+            "Tiens, un échange : ma meilleure carte contre ton meilleur cairn. Je peux pas prendre le cairn, alors juste la carte."
+          ],
+          "do": [
+            "card:shalepup",
+            "flag:bex_swap",
+            "emote:bex:heart"
+          ]
+        },
+        {
+          "if": "flag:bex_swap",
+          "lines": [
+            "Pebble count today: four hundred and twelve. One is a fossil. One might be an egg."
+          ],
+          "lines_fr": [
+            "Le compte de cailloux aujourd'hui : quatre cent douze. Un, c'est un fossile. Un, c'est peut-être un œuf."
+          ]
+        },
+        {
+          "lines": [
+            "Six cairns on Scree Pass. Put a stone on every one, and something happens. And then come and tell me, because I'll swap you something.",
+            "I'd do it myself but I'm not allowed past the second bend."
+          ],
+          "lines_fr": [
+            "Six cairns sur le Col des Éboulis. Mets une pierre sur chacun, et il se passe un truc. Et après viens me le dire, parce que je te ferai un échange.",
+            "Je le ferais bien moi-même mais j'ai pas le droit d'aller plus loin que le deuxième virage."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seren",
+      "name": "Seren",
+      "model": "npc_elder",
+      "x": 27,
+      "z": 9,
+      "facing": "w",
+      "idle": "Idle",
+      "outfit": "#4a5060",
+      "hair": "#e8e8e0",
+      "if": "time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Can't sleep. Forty years I worked under there, and the dark still calls me back.",
+            "The Undermine ran from the quarry under the whole mountain. The side passages were where we kept the good things: the stores, the old carts, our wages. When the roof came down, it all stayed in.",
+            "And the crystals. If you've a lantern, look among them. We used to hide our pay where the glow hides everything.",
+            "Orla's seal stone up at the Bastion has a seventh face, blank as the dark. My father used to say the mountain was saving it for someone."
+          ],
+          "lines_fr": [
+            "Je ne dors pas. Quarante ans que j'ai travaillé là-dessous, et le noir m'appelle encore.",
+            "Les Galeries allaient de la carrière jusque sous toute la montagne. Les passages latéraux, c'est là qu'on gardait les bonnes choses : les réserves, les vieux wagonnets, nos gages. Quand le toit est tombé, tout est resté dedans.",
+            "Et les cristaux. Si tu as une lanterne, regarde parmi eux. On cachait notre paie là où la lueur cache tout.",
+            "La pierre du sceau d'Orla, en haut au Bastion, a une septième face, vide comme le noir. Mon père disait que la montagne la gardait pour quelqu'un."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "crag",
+      "name": "Crag",
+      "model": "npc_sheep",
+      "x": 39,
+      "z": 29,
+      "facing": "w",
+      "idle": "Idle",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "A mountain sheep, shaggy as a slate roof. It looks at you as if you owe it something."
+          ],
+          "lines_fr": [
+            "Un mouton de montagne, hirsute comme un toit d'ardoise. Il te regarde comme si tu lui devais quelque chose."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pebble",
+      "name": "Pebble",
+      "model": "npc_sheep",
+      "x": 41,
+      "z": 30,
+      "facing": "w",
+      "idle": "Idle",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "A mountain sheep, shaggy as a slate roof. It looks at you as if you owe it something."
+          ],
+          "lines_fr": [
+            "Un mouton de montagne, hirsute comme un toit d'ardoise. Il te regarde comme si tu lui devais quelque chose."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tova",
+      "name": "Tova",
+      "model": "npc_worker",
+      "x": 11,
+      "z": 24,
+      "facing": "e",
+      "idle": "Idle",
+      "outfit": "#5a3a2a",
+      "hair": "#2a2a2a",
+      "if": "!time:night",
+      "dialogue": [
+        {
+          "lines": [
+            "Clang. Sorry, habit. Clang.",
+            "Every pick in the Stonebacks comes through this anvil sooner or later. That's why the town's called what it's called. Well. That and the mountain looks like one, if you squint from the Bastion."
+          ],
+          "lines_fr": [
+            "Klang. Pardon, l'habitude. Klang.",
+            "Chaque pioche des Échines passe par cette enclume tôt ou tard. C'est pour ça que le bourg s'appelle comme ça. Enfin. Ça, et la montagne lui ressemble, si on plisse les yeux depuis le Bastion."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_dov",
+      "name": "Dov",
+      "model": "npc_worker",
+      "x": 18,
+      "z": 28,
+      "facing": "s",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "No fancy cards. No Rares. Just you, me and the basics, bare-knuckle.",
+          "Three prizes. Bring a deck with nothing shiny in it."
+        ],
+        "challenge_fr": [
+          "Pas de cartes de luxe. Pas de Rares. Juste toi, moi et l'essentiel, à poings nus.",
+          "Trois Récompenses. Viens avec un deck sans rien de brillant dedans."
+        ],
+        "win": [
+          "Good, honest win. Here, take Knollossus. He's no Rare, but he hits like one."
+        ],
+        "win_fr": [
+          "Une bonne victoire, honnête. Tiens, prends Colossyllon. Ce n'est pas une Rare, mais il frappe comme une."
+        ],
+        "lose": [
+          "That's the Stonebacks for you. Nothing shiny, nothing wasted."
+        ],
+        "lose_fr": [
+          "Voilà les Échines. Rien de brillant, rien de gaspillé."
+        ],
+        "after": [
+          "Rares are for people who've never broken a nail. Ask Tova."
+        ],
+        "after_fr": [
+          "Les Rares, c'est pour les gens qui ne se sont jamais cassé un ongle. Demande à Tova."
+        ]
+      },
+      "outfit": "#7a3a2a",
+      "hair": "#3a2a1a",
+      "dialogue": [
+        {
+          "if": "won:t_dov & !flag:dov_paid",
+          "lines": [
+            "A deck with nothing shiny, and it still won. Take Knollossus. He's earned a home."
+          ],
+          "lines_fr": [
+            "Un deck sans rien de brillant, et il a gagné. Prends Colossyllon. Il a mérité un foyer."
+          ],
+          "do": [
+            "card:knollossus",
+            "flag:dov_paid"
+          ]
+        }
+      ]
+    }
+  ],
+  "cliff": [
+    "cliff_slate",
+    "cliff_slate_b"
+  ],
+  "ground": {
+    "base": "slate",
+    "path": "stone",
+    "margin": 9,
+    "tufts": 900
+  },
+  "ring": [
+    "pine",
+    "rock",
+    "bush_dark"
+  ],
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": false
+  },
+  "light": {
+    "sun": {
+      "color": "#ffffff",
+      "intensity": 2.6,
+      "fromHero": [
+        8,
+        18,
+        6
+      ]
+    },
+    "hemisphere": {
+      "sky": "#f4f1ea",
+      "ground": "#5d5a55",
+      "intensity": 1.5
+    },
+    "background": "#c9c3b8",
+    "fog": {
+      "near": 16,
+      "far": 34
+    }
+  }
+}

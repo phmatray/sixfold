@@ -160,6 +160,121 @@
           "done": "flag:lantern_done"
         }
       ]
+    },
+    {
+      "id": "boots",
+      "title": "The Wading Boots",
+      "title_fr": "Les bottes de gué",
+      "giver": "Tobiah",
+      "start": "flag:boots_asked",
+      "done": "item:wading_boots",
+      "steps": [
+        {
+          "text": "Pick long reed fibre on the Fernhollow stream bank, below the bridge.",
+          "text_fr": "Cueillez de longues fibres de roseau sur la rive du ruisseau de Creuse-Fougère, sous le pont.",
+          "done": "flag:found_reed_fibre"
+        },
+        {
+          "text": "Bring the reeds and ⬡ 100 to Tobiah at the Root Cobbler in Rootholm.",
+          "text_fr": "Apportez les roseaux et ⬡ 100 à Tobiah, au Cordonnier des racines, à Racinemont.",
+          "done": "flag:boots_ordered"
+        },
+        {
+          "text": "Come back at first light: the boots are done by dawn.",
+          "text_fr": "Revenez à la première lumière : les bottes sont prêtes à l'aube.",
+          "done": "item:wading_boots"
+        }
+      ]
+    },
+    {
+      "id": "agnes",
+      "title": "Honey for Agnes",
+      "title_fr": "Du miel pour Agnes",
+      "giver": "Agnes",
+      "start": "flag:agnes_asked",
+      "done": "flag:agnes_done",
+      "steps": [
+        {
+          "text": "Find Hazel, Agnes's daughter, by her hives on Fernhollow Trail.",
+          "text_fr": "Trouvez Hazel, la fille d'Agnes, près de ses ruches sur le Sentier de Creuse-Fougère.",
+          "done": "flag:hazel_gave"
+        },
+        {
+          "text": "Bring the jar of new honey back to Agnes in Rootholm.",
+          "text_fr": "Rapportez le pot de miel nouveau à Agnes, à Racinemont.",
+          "done": "flag:agnes_done"
+        }
+      ]
+    },
+    {
+      "id": "gloves",
+      "title": "Ropes & Holds",
+      "title_fr": "Cordes et Prises",
+      "giver": "Ida",
+      "start": "beat:t_ida",
+      "done": "item:grip_gloves",
+      "steps": [
+        {
+          "text": "Beat Ida, the climbing instructor.",
+          "text_fr": "Battez Ida, la monitrice d'escalade.",
+          "done": "beat:t_ida"
+        },
+        {
+          "text": "Beat Garth, the rope instructor.",
+          "text_fr": "Battez Garth, le moniteur de corde.",
+          "done": "beat:t_garth"
+        },
+        {
+          "text": "Talk to Ida for the Grip Gloves.",
+          "text_fr": "Parlez à Ida pour recevoir les Gants d'escalade.",
+          "done": "item:grip_gloves"
+        }
+      ]
+    },
+    {
+      "id": "crew",
+      "title": "Favour for Favour",
+      "title_fr": "Service pour service",
+      "giver": "Huw",
+      "start": "flag:lunch_asked",
+      "done": "flag:rubble_1 & flag:rubble_2 & flag:rubble_3",
+      "steps": [
+        {
+          "text": "Take the crew's lunch pail from Dagny at the Tally Room to Ros at the Undermine's east cut.",
+          "text_fr": "Portez la gamelle de l'équipe, chez Dagny à la Salle des Comptes, jusqu'à Ros, à la saignée est des Galeries Basses.",
+          "done": "flag:rubble_1"
+        },
+        {
+          "text": "Find Huw's lucky pick on the Scree Pass switchbacks and bring it back to him.",
+          "text_fr": "Retrouvez la pioche porte-bonheur de Huw dans les lacets du Col des Éboulis et rapportez-la-lui.",
+          "done": "flag:rubble_2"
+        },
+        {
+          "text": "Beat Huw's nephew Jet in the Undermine, then tell Huw.",
+          "text_fr": "Battez Jet, le neveu de Huw, dans les Galeries Basses, puis dites-le à Huw.",
+          "done": "flag:rubble_3"
+        }
+      ]
+    },
+    {
+      "id": "cairns",
+      "title": "Six Cairns",
+      "title_fr": "Six cairns",
+      "giver": "Bex",
+      "start": "count:cairn_:1",
+      "done": "flag:bex_swap",
+      "steps": [
+        {
+          "text": "Add a stone to each of the six cairns on Scree Pass.",
+          "text_fr": "Ajoutez une pierre à chacun des six cairns du Col des Éboulis.",
+          "done": "count:cairn_:6"
+        },
+        {
+          "text": "Tell Bex in Anvilstead.",
+          "text_fr": "Dites-le à Bex, à Bourg-l'Enclume.",
+          "done": "flag:bex_swap"
+        }
+      ]
     }
   ]
 }

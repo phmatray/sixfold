@@ -318,8 +318,10 @@ use Kit::{Mix, One};
 
 /// The roster, by map. 1.2: meadow, woodland, boardwalk, quarry, square.
 /// 1.3 Ember: cinderwick, kilnmouth; Storm: downs, rodspire, stormwatch;
-/// Tide: gullhaven, bellflats; Dream: hushlane, lanternmere, moonwell.
-pub static TRAINERS: [Trainer; 39] = [
+/// Tide: gullhaven, bellflats; Dream: hushlane, lanternmere, moonwell;
+/// Grove: rootholm, elder_ring, woodland (Vesper); Stone: undermine,
+/// screepass, climb_school, bastion, anvilstead.
+pub static TRAINERS: [Trainer; 53] = [
     duelist!("t_tobin", "Tobin", "Junior Duelist" / "Duelliste en herbe", One(&SCRAP), WARRENBUCK 2, 1, Easy),
     duelist!("t_hazel", "Hazel", "Beekeeper" / "Apicultrice", Mix(&SEEDLING, &SPARK), HIVEVOLT 2, 2, Easy),
     duelist!("t_ossian", "Ossian", "Birdwatcher" / "Ornithologue", One(&SCRAP), GALEHERON 2, 1, Easy),
@@ -386,6 +388,34 @@ pub static TRAINERS: [Trainer; 39] = [
         rule: Some(Rule::TwoStage2),
         purse: Some(120),
         ..duelist!("t_yara", "Yara", "Awakener" / "Éveilleuse", One(&TRANCE), WRAITHELLE 1, 3, Normal)
+    },
+    duelist!("t_jory", "Jory", "Treehouse Kid" / "Gamin des cabanes", One(&SEEDLING), FERNWHISK 1, 1, Easy),
+    duelist!("t_fenna", "Fenna", "Vine Trimmer" / "Élagueuse", One(&HEDGEROW), THORNBUCK 1, 2, Normal),
+    duelist!("t_heath", "Heath", "Maze Runner" / "Coureur du labyrinthe", Mix(&HEDGEROW, &STATIC), HONEYMANE 1, 2, Normal),
+    duelist!("t_rue", "Rue", "Herbalist" / "Herboriste", One(&HEDGEROW), BOGBLOSSOM 1, 3, Normal),
+    Trainer {
+        night: true,
+        ..duelist!("t_vesper", "Vesper", "Owl Keeper" / "Gardien des chouettes", One(&CANOPY), BOGCROWN 1, 3, Hard)
+    },
+    Trainer {
+        rule: Some(Rule::MonoColour),
+        purse: Some(120),
+        ..duelist!("t_linden", "Linden", "Monochrome" / "Monochrome", One(&CANOPY), ELDERHART 1, 3, Normal)
+    },
+    duelist!("t_jet", "Jet", "Cart Pusher" / "Pousseur de wagonnet", One(&PEBBLE), BRAWLET 1, 1, Easy),
+    duelist!("t_mica", "Mica", "Prospector" / "Prospectrice", One(&RUBBLE), GRITFANG 1, 2, Normal),
+    duelist!("t_ulric", "Ulric", "Cairn Builder" / "Bâtisseur de cairns", One(&PEBBLE), SHALEPUP 1, 2, Normal),
+    duelist!("t_ida", "Ida", "Climbing Instructor" / "Monitrice d'escalade", One(&RUBBLE), IRONBRAWL 1, 2, Normal),
+    duelist!("t_garth", "Garth", "Rope Instructor" / "Moniteur de corde", Mix(&RUBBLE, &FLOCK), HAULOX 1, 2, Normal),
+    duelist!("t_petra", "Petra", "Quarrywoman" / "Ouvrière de carrière", One(&LANDSLIDE), KNOLLGRIM 1, 3, Normal),
+    Trainer {
+        night: true,
+        ..duelist!("t_morwen", "Morwen", "Night Shift" / "Équipe de nuit", One(&LANDSLIDE), CRAGMASTIFF 1, 3, Hard)
+    },
+    Trainer {
+        rule: Some(Rule::NoRares),
+        purse: Some(120),
+        ..duelist!("t_dov", "Dov", "Bare-Knuckle" / "Poings nus", One(&RUBBLE), KNOLLGRIM 1, 3, Normal)
     },
 ];
 
@@ -467,17 +497,18 @@ mod tests {
         // §4.4: five 1-prize, seven 2-prize and two 3-prize duelists (585);
         // §10.1-10.2: Ember 45 + 60 + 45 + 90 + 120, Storm 30 + 45 + 45 + 60
         // + 60 + 90 + 120 (810); §10.3-10.4: Tide 30 + 45 + 45 + 60 + 90 + 120,
-        // Dream 30 + 45 + 45 + 60 + 60 + 90 + 120 (840).
+        // Dream 30 + 45 + 45 + 60 + 60 + 90 + 120 (840); §10.5-10.6: Grove 30 + 45 + 45
+        // + 60 + 90 + 120, Stone 30 + 45 + 45 + 45 + 45 + 60 + 90 + 120 (870).
         assert_eq!(
             TRAINERS.iter().map(Trainer::purse).sum::<u32>(),
-            585 + 360 + 450 + 390 + 450
+            585 + 360 + 450 + 390 + 450 + 390 + 480
         );
         // A night duelist plays Hard; a rule duelist's own deck keeps its rule
         // when the rule can be kept by a kit.
         for t in TRAINERS.iter() {
             assert!(!t.night || t.difficulty == Difficulty::Hard, "{}", t.name);
         }
-        for id in ["t_basil", "t_yara"] {
+        for id in ["t_basil", "t_yara", "t_linden", "t_dov"] {
             let t = trainer(id).unwrap();
             assert!(t.rule.unwrap().allows(&t.deck()), "{id}");
         }

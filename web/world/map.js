@@ -9,7 +9,8 @@ import { SUFFIX_ARMS } from "./props.js";
 const BASE = new URL("./", import.meta.url);
 const INTERIOR = new Set(["counter", "shelf", "duel_table", "chair", "rug", "plant", "display_case", "lamp", "exit_mat",
   "oven", "printing_press", "type_case", "bookcase", "bed", "workbench", "light_box", "net_locker",
-  "chart_table", "dress_form", "cloth_rack", "paper_lanterns", "chowder_stove"]);
+  "chart_table", "dress_form", "cloth_rack", "paper_lanterns", "chowder_stove",
+  "cobbler_bench", "boot_rack", "hold_wall", "rope_coil", "tally_board", "soup_cauldron"]);
 
 const loader = new GLTFLoader();
 const assets = new Map();

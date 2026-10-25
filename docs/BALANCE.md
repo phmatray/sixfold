@@ -204,6 +204,12 @@ The re-lay of every map to `docs/WORLD_RULES.md` added ten small Facet finds in 
 (⬡ 30–45 each, ⬡ 385 in all, modelled as two minutes' detour each): the first playthrough moves from 5.28 to
 **5.35 packs an hour**, still inside the band.
 
+Grove and Stone (1.3, PR 4) add seven Facet finds and two pack finds over six outdoor maps, the reworked trail
+and five houses, plus the errands that pay (the six cairns, Agnes's honey); the boots' ⬡ 100 is a sink, left
+out like the other prices. They are modelled as 140 minutes for ⬡ 550 and 2 packs, so the first playthrough
+moves to **4.85 packs an hour** (exploring stays 5.23), lower but inside the band: the ring's last two
+regions are longer walks with more to read.
+
 ## Campaign playthrough
 
 `the_campaign_can_be_finished_from_a_new_profile` (always on) plays the whole campaign from a new
@@ -216,7 +222,9 @@ within one duel per route duelist plus 45 rival duels and buy at least 10 packs,
 three playthroughs (pack seeds 1, 2 and 3). The rival budget was 40 from 1.2 (risk E1: 54 duels with
 14 route duelists); 1.3 raises it to 45, because pack seed 1 now needs 42 rival duels and seed 2
 (before Tide and Dream) took exactly the old limit. With the 39 route duelists of Tide and Dream that
-is 84 duels.
+is 84 duels; with the 53 of Grove and Stone it is 98, and seeds 1, 2 and 3 finish in 78, 92 and 80 duels
+(25, 39 and 27 rival duels; 23, 25 and 28 packs bought). The budget stays at 45: the rivals still take a
+median of 27 duels, but 2 of the 16 seeds below (10 and 15) need 45 and 55 rival duels.
 
 One seeded run swings widely on the packs alone. `campaign_length` (ignored) plays 16 pack seeds with
 no budget:
@@ -228,6 +236,7 @@ no budget:
 | Boosters + 1.3 rules | 26 | 38–83 | 62 | 62 |
 | Tide and Dream (#40) | 39 | 50–78 | 55 | 61 |
 | Tide and Dream + 1.3 | 39 | 55–83 | 66 | 67 |
+| Grove and Stone | 53 | 69–108 | 80 | 82 |
 
 The boosters release made the campaign easier, and 1.3 gives that back, so no reward moves. Take away
 the 39 route duels and the rivals take a median of 27 duels instead of 16. The 1.3 rules cause it, not

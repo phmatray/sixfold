@@ -1,0 +1,269 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "hold_wall",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "hold_wall",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "hold_wall",
+      "x": 7,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "rope_coil",
+      "x": 1,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "rope_coil",
+      "x": 9,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 4,
+      "z": 1,
+      "kind": "sign",
+      "text": "A training wall, bolted with holds painted every colour. The chalked arrows show routes, each with a name: \"The Slab\", \"Garth's Patience\", \"Three Points\".",
+      "text_fr": "Un mur d'entraînement, garni de prises peintes de toutes les couleurs. Les flèches à la craie montrent des voies, chacune avec un nom : « La Dalle », « La Patience de Garth », « Trois Appuis »."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "to": "anvilstead",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 6,
+        "z": 15,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [
+    {
+      "id": "t_ida",
+      "name": "Ida",
+      "model": "npc_gardener",
+      "x": 3,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "Three points of contact! Always three points of contact. Two hands, one foot. Or one hand, two feet.",
+          "Gloves? You earn gloves. Beat me, beat Garth, and they're yours. Two prizes. Chalk up!"
+        ],
+        "challenge_fr": [
+          "Trois appuis ! Toujours trois appuis. Deux mains, un pied. Ou une main, deux pieds.",
+          "Des gants ? Les gants, ça se mérite. Bats-moi, bats Garth, et ils sont à toi. Deux Récompenses. Mets de la magnésie !"
+        ],
+        "win": [
+          "Ooh, a clean send! Three points of contact the whole way."
+        ],
+        "win_fr": [
+          "Oh, une voie propre ! Trois appuis tout du long."
+        ],
+        "lose": [
+          "You came off the wall! It happens. Chalk up and go again!"
+        ],
+        "lose_fr": [
+          "Tu es tombé du mur ! Ça arrive. Remets de la magnésie et recommence !"
+        ],
+        "after": [
+          "Three points of contact. I say it in my sleep. My husband says I say it in my sleep."
+        ],
+        "after_fr": [
+          "Trois appuis. Je le dis en dormant. Mon mari dit que je le dis en dormant."
+        ]
+      },
+      "outfit": "#d84a3a",
+      "hair": "#e8c060",
+      "dialogue": [
+        {
+          "if": "beat:t_ida & beat:t_garth & !item:grip_gloves",
+          "lines": [
+            "You beat us both! Then these are yours: Grip Gloves, chalked palms, stitched tips.",
+            "Walls with handholds, ledges, old iron rungs: up you go. The Elder Ring's cliff, under the Bastion. The brake-house by the headframe. Even the Rodspire, out east, and the quarry nooks round Cinderwick.",
+            "Three points of contact!"
+          ],
+          "lines_fr": [
+            "Tu nous as battus tous les deux ! Alors ils sont à toi : les Gants d'escalade, paumes à la magnésie, bouts cousus.",
+            "Les parois à prises, les corniches, les vieux barreaux de fer : à toi de monter. La falaise du Cercle des Anciens, sous le Bastion. La cabane du frein, près du chevalement. Même l'Aiguille-Foudre, à l'est, et les niches de la carrière autour de Mèche-Cendre.",
+            "Trois appuis !"
+          ],
+          "do": [
+            "give:grip_gloves",
+            "sfx:jingle"
+          ]
+        },
+        {
+          "if": "beat:t_ida & !beat:t_garth",
+          "lines": [
+            "Now Garth! He's slow, but he never lets go."
+          ],
+          "lines_fr": [
+            "Maintenant, Garth ! Il est lent, mais il ne lâche jamais."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t_garth",
+      "name": "Garth",
+      "model": "npc_worker",
+      "x": 7,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 0,
+        "challenge": [
+          "...",
+          "Bowline. Clove hitch. Figure of eight. Two prizes. Sit down."
+        ],
+        "challenge_fr": [
+          "…",
+          "Nœud de chaise. Cabestan. Huit. Deux Récompenses. Assieds-toi."
+        ],
+        "win": [
+          "Good knot."
+        ],
+        "win_fr": [
+          "Bon nœud."
+        ],
+        "lose": [
+          "Slipped."
+        ],
+        "lose_fr": [
+          "Ça a glissé."
+        ],
+        "after": [
+          "Rope holds you when your hands can't. Remember that."
+        ],
+        "after_fr": [
+          "La corde te tient quand tes mains ne peuvent plus. Retiens ça."
+        ]
+      },
+      "outfit": "#3a5a6a",
+      "hair": "#6a5a4a",
+      "dialogue": [
+        {
+          "if": "beat:t_garth & !beat:t_ida",
+          "lines": [
+            "Ida next. She talks. A lot. Then she gives you the gloves."
+          ],
+          "lines_fr": [
+            "Ida, maintenant. Elle parle. Beaucoup. Ensuite elle te donne les gants."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff4e0",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#f4ecdc",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffc070",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

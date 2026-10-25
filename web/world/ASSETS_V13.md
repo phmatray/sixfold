@@ -348,3 +348,53 @@ and always in a cave. Indoors, `"light": true` gives one the room's point light 
   climbing school): they reuse the 1.2 interior kit; bespoke pieces (a glory-hole bench) are a later pass; the telescope landed in 1.3 PR 2.
 - **Climb-wall variants** for slate and the Grove trunk: the shared sandstone `climb_wall` and `climb_wall_basalt` cover
   the gloves walls for now (the Rootholm trunk and the headframe would each suit a bespoke one).
+
+## Added in 1.3 PR 4 (Grove and Stone)
+
+Outdoor props go to `assets/`, items to `assets/` (popup models, centred on the origin), interior furniture to
+`assets/interior/` (each module's `INTERIOR` set). The climb walls are the bespoke variants the "Not built" list
+asked for. Glow: `sn_lamp_glow` (the oil lanterns' globes), `fire_glow` and `fire_core_glow` (campfire, the
+cauldron's fire and embers).
+
+| Asset | Foot | What | Tris |
+|---|---|---|---|
+| `climb_wall_slate` | 1×1 | the `climb_wall` contract (tops 0.5 / 1.0, deck 0.5, climbs toward −Z, stacks with `y`): tilted slate beds with dark partings, a plated top, rusty iron staples and pegs on the risers, a knotted rope from a ring peg. Anvilstead headframe ledge, the Bastion (`v13_stone.py`) | 1058 |
+| `climb_wall_root` | 1×1 | the same contract in the Grove: a dark bark wall of gnarled roots, a twisting cross root and root loops as handholds, roots drooping over the lip, moss on the tops, ferns. Rootholm's root plate, the Elder Ring cliff (`v13_grove.py`) | 1016 |
+| `oil_lantern` | 1×1 | a `support_beam` timber set (posts at x ±0.4, cap at 2.0 m, lagging to 2.14) with a miner's oil lantern hung from a hook under the cap: brass fount, `sn_lamp_glow` globe in iron guards, vented cap, bail. `light_origin` at the flame (0.2, 1.6, 0.04); the lantern's foot is at ~1.46 m, off the walk line | 748 |
+| `oil_lantern_post` | 1×1, solid | a 1.7 m squared post on a slate pad with wedges, a braced arm, the same lantern hanging at the front right; `light_origin` at (0.24, 1.28, 0.06). Miners' camps, cave mouths | 632 |
+| `campfire` | 1×1, solid | 0.5 m: nine field stones on an ash bed, two charred logs under a teepee of four, crossed flame cards (`fire_glow`, `fire_core_glow`), glowing embers; `light_origin` 0.4 m, `smoke_origin` 0.6 m. Scree Pass, Fernhollow (`v13_grove.py`) | 844 |
+| `anvil` | 1×1, solid | 0.85 m: a dark anvil (bright worn face, horn on +X, heel with a hardy hole) strapped to a banded stump, a hammer leaning front right, tongs on the left. Anvilstead's smithy yard | 736 |
+| `grip_gloves` | item | the Grip Gloves: fingerless rust-leather gloves, chalk-white palms, stitched finger stalls, wrist straps, a blue chalk bag | 692 |
+| `lunch_pail` | item | a dented tin pail with rolled bands, a domed lid askew, a wire bail, a red cloth corner | 376 |
+| `lucky_pick` | item | a curved pick head (point and chisel) on a worn handle wound with red cord, a loop and two tails | 554 |
+| `miner_tally` | item | curio: a brass hex tag with a punched hex hole and notches on an iron ring, with a small hex, a round tag with three punched dots and a notched copper bar (no letters or digits) | 568 |
+| `wading_boots` | item | the Wading Boots: knee-high, woven reed shafts with darker bands, leather feet and cuffs, dark soles, cream laces (`v13_grove.py`) | 576 |
+| `reed_fibre` | item | a bundle of long pale reeds tied twice with twine, a few seed tips | 434 |
+| `acorn_whistle` | item | curio: an acorn whistle, a window cut in the nut, a scaly cap, a stalk mouthpiece, a leather loop | 484 |
+| `interior/cobbler_bench` | 2×1 | 1.02 m at the back rack: a low bench on splayed legs, red seat pad on the right, a tray of nails and tacks, a boot upside down on an iron last, three wooden lasts and five awls on the rack, a hammer, a wax pot, leather offcuts (`v13_grove.py`) | 984 |
+| `interior/boot_rack` | 2×1 | against the north wall (back −Z), 2.07 m with the boots: three shelves of shoes and ankle boots in six colours and several sizes, a pair of reed wading boots on top | 1552 |
+| `interior/hold_wall` | 2×1 | against the north wall, 2.6 m: a plank training wall in a timber frame, 18 chunky bolted holds in five colours, chalk smudges, a blue chalk-dusted crash mat (top 0.19 m) in front with a chalk pot, inside the 2×1 (`v13_stone.py`) | 1382 |
+| `interior/rope_coil` | 1×1 | 0.91 m: a post on a cross foot, a natural and a red rope coiled on two pegs, three iron rings clipped to the post, a tin chalk bucket | 1534 |
+| `interior/tally_board` | 2×1 | against the north wall, 2.2 m: a slate chalkboard on two posts ruled into rows of chalk tally gates and hex doodles (geometric strokes only), a chalk ledge with sticks and a duster, a shelf with a wooden abacus and a box of chalk | 1414 |
+| `interior/soup_cauldron` | 1×1 | 1.34 m: an iron cauldron of orange soup on a chain from a tripod over a log fire (`fire_glow`, `fire_core_glow`) on a slate hearth ringed with stones, a ladle; `light_origin` at the fire (0, 0.22, 0) | 1236 |
+
+All under 150 KB (23–93 KB). Rebuild (the `--night-tiles` flag also renders `<region>_tiles_night.png`):
+
+    blender -b --factory-startup -P tools/blender/build_regions_v13.py -- --region grove --out web/world/assets \
+        --only climb_wall_root,campfire,wading_boots,reed_fibre,acorn_whistle,cobbler_bench,boot_rack --check
+    blender -b --factory-startup -P tools/blender/build_regions_v13.py -- --region stone --out web/world/assets \
+        --only climb_wall_slate,oil_lantern,oil_lantern_post,anvil,grip_gloves,lunch_pail,lucky_pick,miner_tally,hold_wall,rope_coil,tally_board,soup_cauldron --check
+
+The Grove and Stone vignettes now place `climb_wall_root`, `campfire`, `climb_wall_slate`, `anvil`, `oil_lantern` and
+`oil_lantern_post` (a full `--region grove,stone --sheets DIR` run shows them in the day and night maps).
+
+Suggested `props.js`:
+
+```js
+FOOT:     cobbler_bench: [2, 1], boot_rack: [2, 1], hold_wall: [2, 1], tally_board: [2, 1],
+DECK:     climb_wall_slate: [0.5], climb_wall_root: [0.5],      // gloves gates, like climb_wall
+WALKABLE: oil_lantern,                                          // a frame you walk under along Z, like support_beam
+BATCHED:  climb_wall_slate, climb_wall_root, anvil              // not the lanterns, campfire or cauldron (light_origin, glow)
+TALL:     climb_wall_slate: 1, climb_wall_root: 1, oil_lantern: 2.1, oil_lantern_post: 1.75, campfire: 0.5, anvil: 0.85,
+          cobbler_bench: 1.0, boot_rack: 2.0, hold_wall: 2.6, rope_coil: 0.9, tally_board: 2.2, soup_cauldron: 1.3,
+```

@@ -358,7 +358,7 @@ function rules(name, m, solid, all) {
   for (const p of m.props) if (!ground(p)) for (const [x, z] of foot(p)) (at.get(`${x},${z}`) ?? at.set(`${x},${z}`, []).get(`${x},${z}`)).push(p);
   const who = (p) => `${p.asset} ${p.x},${p.z}`;
   const free = (x, z) => inMap(x, z) && !solid.has(`${x},${z}`) && !(m.npcs ?? []).some((n) => n.x === x && n.z === z);
-  const pathy = (x, z) => "pr=H".includes(tile(x, z) ?? "-") || m.props.some((p) => DECK[p.asset] && foot(p).some(([a, b]) => a === x && b === z));
+  const pathy = (x, z) => "pr=H".includes(tile(x, z) ?? "-") || "pr".includes(m.paint?.[z]?.[x] ?? "-") || m.props.some((p) => DECK[p.asset] && foot(p).some(([a, b]) => a === x && b === z));
 
   // 1. Clearance: no prop stands in another's footprint (props on decks and rugs, and `if` props
   // that take turns with another, excepted).
@@ -478,8 +478,10 @@ function rules(name, m, solid, all) {
         rule.push(`${name}: edge tile ${x},${z} is open but no exit; close the border (trees, a fence, rock, water)`);
 
   // 5. No pocket of open ground the hero can't reach (a save landing there would strand the hero).
+  // Raised ground no stair reaches (a cliff face, a rock mass, a backdrop ridge) is scenery, not a pocket.
+  const rock = (x, z) => tile(x, z) >= "1" && tile(x, z) <= "9";
   let lost = 0;
-  for (let x = 0; x < W; x++) for (let z = 0; z < H; z++) if (!solid.has(`${x},${z}`) && !all.has(`${x},${z}`) && tile(x, z) !== "~") lost++;
+  for (let x = 0; x < W; x++) for (let z = 0; z < H; z++) if (!solid.has(`${x},${z}`) && !all.has(`${x},${z}`) && tile(x, z) !== "~" && !rock(x, z)) lost++;
   if (lost) warn.push(`${name}: ${lost} open tile${lost > 1 ? "s" : ""} the spawn can't reach (fill them, or let a save there fall back to the spawn)`);
 
   // 6. Houses face paths: the tile in front of a door is within 3 tiles of a path.

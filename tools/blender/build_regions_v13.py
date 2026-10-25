@@ -13,6 +13,7 @@ Headless only:
             DIR/<region>_day.png, DIR/<region>_night.png: a small map of the region built from the exported
             files like build.js builds one (cliff stacks, auto-tiled walls, ring trees), at the game camera,
             with toon lighting from the region's light block (night: the 1.3 night preset, glow parts lit)
+  --night-tiles  also DIR/<region>_tiles_night.png (the tiles under the night preset, glow parts lit)
   --check   z-fighting check (check_coplanar.py) over the new props on a y = 0 ground plane
   --assets-extra  more .glb folders the sheets may borrow from (the 1.3 shared kit before it is merged)
   --textures      folder of not-yet-converted ground PNGs for the sheets (bake_ground_textures.py output)
@@ -97,6 +98,8 @@ def main(argv):
                     info[name] = f"{name}  {w}x{d}  {t} tris"
                 if built:
                     K.tile_sheet(scn, mod.LIGHT, built, info, os.path.join(sheets, f"{region}_tiles.png"))
+                    if "--night-tiles" in argv:
+                        K.tile_sheet(scn, mod.LIGHT, built, info, os.path.join(sheets, f"{region}_tiles_night.png"), night=True)
         if sheets and getattr(mod, "VIGNETTE", None) and not only:
             vs = B.fresh_scene("V13_" + region + "_map")
             with B.use_scene(vs):
