@@ -6,8 +6,8 @@
 //   names carry a content hash, and the world's modules, which don't, are
 //   part of it so they change together); a page load goes to the network
 //   first and falls back to the cached index.html when offline.
-// - World assets (every area's models and textures), three.js from the CDN
-//   and the web fonts are cached the first time they are used, then served
+// - three.js is shipped with the game (web/vendor/three) and precached with it.
+// - World assets (every area's models and textures) and the web fonts are cached the first time they are used, then served
 //   stale-while-revalidate. The world's cache is per build, so a deploy never
 //   mixes old models with new maps; data files (maps/*.json) go to the
 //   network first and fall back to the cache offline.
@@ -19,7 +19,7 @@
 
 const SCOPE = self.registration.scope;
 const SHELL = `sixfold-shell-${VERSION}-${SCOPE}`;
-// Same-origin files cached on use belong to one build; CDN files are versioned by URL.
+// Same-origin files cached on use belong to one build; font files are versioned by URL.
 const RUNTIME = `sixfold-runtime-${VERSION}-${SCOPE}`;
 const CDN = `sixfold-cdn-${SCOPE}`;
 const ART = `sixfold-art-${SCOPE}`;
@@ -59,7 +59,7 @@ self.addEventListener("message", (event) => {
   if (event.data === "skip-waiting") self.skipWaiting();
 });
 
-const RUNTIME_HOSTS = ["cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com"];
+const RUNTIME_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;

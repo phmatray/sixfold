@@ -7,7 +7,8 @@
 # The world's modules (world/*.js) import each other by plain, unhashed names,
 # so they are precached with the shell and their contents go into the version:
 # a deploy swaps them all at once, and a page never runs a new world.js
-# against an old props.js.
+# against an old props.js. The same goes for three.js (vendor/three, shipped
+# by tools/vendor-three.sh under unhashed names).
 #
 # A debug build (`trunk serve`) gets a worker that only clears the caches and
 # serves nothing, so it never hands out a stale build (and it replaces a
@@ -28,7 +29,7 @@ EOF_SW
   exit 0
 fi
 files=$(find . -type f \( ! -path './world/*' -o -name '*.js' \) ! -path './cards/*' ! -name '.trunk-lock' ! -name 'sw.js' ! -name 'index.html' | sed 's|^\./||' | LC_ALL=C sort)
-version=$( (echo "$files"; cat index.html; find ./world -name '*.js' | LC_ALL=C sort | xargs cat) | cksum | cut -d' ' -f1)
+version=$( (echo "$files"; cat index.html; find ./world ./vendor -name '*.js' | LC_ALL=C sort | xargs cat) | cksum | cut -d' ' -f1)
 {
   echo "const VERSION = \"$version\";"
   printf 'const PRECACHE = ['
