@@ -19,7 +19,7 @@ mod title;
 mod world;
 
 use leptos::prelude::*;
-use sixfold_engine::{Action, CardId};
+use sixfold_engine::{fr, tr, Action, CardId};
 
 use audio::MuteToggle;
 use board::{Hand, SideRow};
@@ -29,6 +29,11 @@ use overlays::{CalloutOverlay, CoinOverlay, DiscardViewer, GameOver, Inspector, 
 
 fn main() {
     console_error_panic_hook::set_once();
+    let lang = store::lang();
+    sixfold_engine::set_lang(lang);
+    if let Some(html) = document().document_element() {
+        let _ = html.set_attribute("lang", lang.code());
+    }
     mount_to_body(App);
 }
 
@@ -227,27 +232,28 @@ fn MatchScreen() -> impl IntoView {
         <div class="match" on:keydown=on_key>
             <header class="topbar">
                 <span class="wordmark small" aria-hidden="true">"Sixfold"</span>
-                <h1 class="sr-only">"Duel"</h1>
+                <h1 class="sr-only">{tr("Duel", "Duel")}</h1>
                 <span class="matchup">
                     <span class="me-name">{names[HUMAN].clone()}</span>
-                    " against "
+                    {tr(" against ", " contre ")}
                     <span class="opp-name">{names[AI].clone()}</span>
                 </span>
-                <span class="seed">"Seed " {move || ctl.seed.get()}</span>
+                <span class="seed">{tr("Seed ", "Graine ")} {move || ctl.seed.get()}</span>
                 <button class="btn ghost log-toggle" aria-expanded=move || ui.log_open.get().to_string()
-                    on:click=move |_| ui.log_open.update(|o| *o = !*o)>"Log"</button>
+                    on:click=move |_| ui.log_open.update(|o| *o = !*o)>{tr("Log", "Journal")}</button>
                 <MuteToggle />
-                <button class="btn ghost" on:click=move |_| quit()>"Quit"</button>
+                <button class="btn ghost" on:click=move |_| quit()>{tr("Quit", "Quitter")}</button>
             </header>
             {move || asking.get().then(|| view! {
                 <div class="quit-confirm confirm row" role="alertdialog" aria-labelledby="quit-q">
                     <span id="quit-q">{if gauntlet {
-                        "Leave this duel? It can't be resumed, and it ends your Gauntlet run."
+                        tr("Leave this duel? It can't be resumed, and it ends your Gauntlet run.",
+                            "Quitter ce duel ? Il ne pourra pas être repris, et votre Épreuve s'arrêtera.")
                     } else {
-                        "Leave this duel? It can't be resumed."
+                        tr("Leave this duel? It can't be resumed.", "Quitter ce duel ? Il ne pourra pas être repris.")
                     }}</span>
-                    <button type="button" class="btn danger" on:click=move |_| leave()>"Leave"</button>
-                    <button type="button" class="btn primary" autofocus on:click=move |_| asking.set(false)>"Keep playing"</button>
+                    <button type="button" class="btn danger" on:click=move |_| leave()>{tr("Leave", "Partir")}</button>
+                    <button type="button" class="btn primary" autofocus on:click=move |_| asking.set(false)>{tr("Keep playing", "Continuer")}</button>
                 </div>
             })}
             <main class="table">
@@ -257,7 +263,8 @@ fn MatchScreen() -> impl IntoView {
                     <SideRow player=AI />
                     <div class="midline" aria-hidden="true">
                         <span>{move || match turn.get() {
-                            _ if !ctl.revealed.get() => "Setup".to_string(),
+                            _ if !ctl.revealed.get() => tr("Setup", "Mise en place").to_string(),
+                            Some((t, p)) if fr() => format!("Tour {t}, {}", if p == HUMAN { "à vous" } else { "à l'adversaire" }),
                             Some((t, p)) => format!("Turn {t}, {}", if p == HUMAN { "your move" } else { "opponent's move" }),
                             None => String::new(),
                         }}</span>

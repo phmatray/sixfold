@@ -108,19 +108,22 @@
       "x": 2,
       "z": 4,
       "kind": "duel",
-      "text": "A duel table, cards already laid out. Play a six-prize duel against the AI?"
+      "text": "A duel table, cards already laid out. Play a six-prize duel against the AI?",
+      "text_fr": "Une table de duel, les cartes déjà en place. Jouer un duel à six Récompenses contre l'IA ?"
     },
     {
       "x": 3,
       "z": 4,
       "kind": "duel",
-      "text": "A duel table, cards already laid out. Play a six-prize duel against the AI?"
+      "text": "A duel table, cards already laid out. Play a six-prize duel against the AI?",
+      "text_fr": "Une table de duel, les cartes déjà en place. Jouer un duel à six Récompenses contre l'IA ?"
     },
     {
       "x": 9,
       "z": 3,
       "kind": "sign",
-      "text": "Behind the glass: a deck box carved from pale wood. A card says: not for sale, not even for you."
+      "text": "Behind the glass: a deck box carved from pale wood. A card says: not for sale, not even for you.",
+      "text_fr": "Derrière la vitre : une boîte à deck en bois clair sculpté. Un carton indique : pas à vendre, même pas pour vous."
     }
   ],
   "warps": [
@@ -130,6 +133,7 @@
       "dir": "s",
       "to": "overworld",
       "label": "Go outside",
+      "label_fr": "Sortir",
       "spawn": {
         "x": 13,
         "z": 11,
@@ -141,8 +145,10 @@
       "z": 6,
       "to": "warden",
       "label": "Go through the sealed door",
+      "label_fr": "Franchir la porte scellée",
       "if": "seals:6",
       "locked": "A heavy door carved with six empty hexagons. Six seals would fill it.",
+      "locked_fr": "Une lourde porte gravée de six hexagones vides. Six sceaux les rempliraient.",
       "spawn": {
         "x": 5,
         "z": 7,
@@ -169,6 +175,11 @@
             "You walked all the way here? On those soles?",
             "Here. Running shoes, broken in and ready. On the house."
           ],
+          "lines_fr": [
+            "Entre donc ! Attention au tapis, il est plus vieux que moi.",
+            "Tout ce chemin à pied ? Avec ces semelles ?",
+            "Tiens. Des chaussures de course, déjà faites au pied. Cadeau de la maison."
+          ],
           "do": [
             "give:running_shoes"
           ]
@@ -178,12 +189,19 @@
           "lines": [
             "The Hex Warden, beaten in my shop's back room! I'm framing the scorch marks.",
             "Sable keeps a ladder back there now: the Gauntlet, and a new duel every day."
+          ],
+          "lines_fr": [
+            "La Gardienne des Six, battue dans mon arrière-boutique ! Je fais encadrer les traces de brûlure.",
+            "Sable y tient un tableau, maintenant : l'Épreuve, et le duel du jour."
           ]
         },
         {
           "if": "flag:juniper_gift",
           "lines": [
             "How's the seal hunt? The rivals are out on the roads now: the trail west, the boardwalk east, the quarry north."
+          ],
+          "lines_fr": [
+            "Et cette chasse aux sceaux ? Les rivaux sont sur les routes : le sentier à l'ouest, la promenade à l'est, la carrière au nord."
           ]
         },
         {
@@ -191,6 +209,10 @@
           "lines": [
             "Is that your first seal? Let me see. Oh, that's a good one.",
             "Here, a Wild Pack for the collection. On the house, again."
+          ],
+          "lines_fr": [
+            "C'est ton premier sceau ? Fais voir. Oh, il est beau, celui-là.",
+            "Tiens, un booster Sauvage pour ta collection. Encore cadeau de la maison."
           ],
           "do": [
             "pack:wild",
@@ -202,6 +224,11 @@
             "How are the shoes? Hold Shift, or tap RUN, and off you go.",
             "The table by the window is free if you fancy a duel.",
             "Rivals duel for seals out on the roads. Bramble on the woodland trail is a gentle start."
+          ],
+          "lines_fr": [
+            "Et ces chaussures ? Maintiens Maj, ou touche COURIR, et c'est parti.",
+            "La table près de la fenêtre est libre, si un duel te tente.",
+            "Sur les routes, les rivaux mettent leur sceau en jeu. Bramble, sur le sentier des bois, est un début en douceur."
           ]
         }
       ]

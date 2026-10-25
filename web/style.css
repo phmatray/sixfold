@@ -130,8 +130,11 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: -0.01em;
+  min-width: 0;
 }
-.card-hp { font-family: var(--display); font-weight: 800; color: #9b2a1c; font-variant-numeric: tabular-nums; }
+/* Long names (French runs longer) shrink a step before they ellipsize. */
+.card-name.long { font-size: 0.86em; letter-spacing: -0.02em; }
+.card-hp { flex: none; font-family: var(--display); font-weight: 800; color: #9b2a1c; font-variant-numeric: tabular-nums; }
 .card-art {
   border-radius: 0.35em;
   background: radial-gradient(circle at 50% 38%, var(--tint), var(--c) 62%, var(--c2));
@@ -206,7 +209,13 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 
 /* ---------- Title ---------- */
 
-.title { max-width: 1120px; margin: 0 auto; padding: clamp(24px, 5vw, 56px) 16px 40px; }
+.title { position: relative; max-width: 1120px; margin: 0 auto; padding: clamp(24px, 5vw, 56px) 16px 40px; }
+.lang-switch { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 999px; }
+.lang-switch button { min-width: 44px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer; }
+.lang-switch button:hover { color: var(--ink); }
+.lang-switch button[aria-pressed="true"] { background: var(--brass); color: #1e1606; }
+.title > .lang-switch { position: absolute; top: 12px; right: 16px; z-index: 2; }
+.settings-body .lang-switch { align-self: flex-start; }
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
@@ -699,9 +708,9 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   font-size: clamp(28px, 5vw, 54px);
   letter-spacing: -0.03em;
   line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Long (French) names wrap to a second line rather than being cut. */
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 .callout.mine strong { color: var(--brass-hi); }
 .callout.theirs strong { color: #bcd2f5; }

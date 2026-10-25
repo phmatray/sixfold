@@ -181,6 +181,93 @@ impl CardDef {
     }
 }
 
+impl CardDef {
+    /// The name to show, in the current language. [`CardDef::name`] stays
+    /// the English identity key (evolutions, the 4-copy rule, saves).
+    pub fn label(&self) -> &'static str {
+        fr_card(self).map_or(self.name, |r| r.name)
+    }
+}
+
+impl Attack {
+    /// The attack's name in the current language.
+    pub fn label(&self) -> &'static str {
+        fr_attack(self).map_or(self.name, |a| a.0)
+    }
+
+    /// The attack's rules text in the current language (empty when it has none).
+    pub fn rules(&self) -> &'static str {
+        fr_attack(self).map_or(self.text, |a| a.1)
+    }
+}
+
+impl Power {
+    pub fn label(&self) -> &'static str {
+        fr_power(self).map_or(self.name, |p| p.0)
+    }
+
+    pub fn rules(&self) -> &'static str {
+        fr_power(self).map_or(self.text, |p| p.1)
+    }
+}
+
+impl Trainer {
+    /// The trainer's rules text in the current language.
+    pub fn rules(&self) -> &'static str {
+        if !crate::lang::fr() {
+            return self.text;
+        }
+        crate::set::CARDS
+            .iter()
+            .zip(crate::set_fr::FR)
+            .find(|(c, _)| matches!(&c.kind, CardKind::Trainer(t) if std::ptr::eq(t, self)))
+            .map_or(self.text, |(_, r)| r.text)
+    }
+}
+
+/// The French row of a card of the set (not a test fixture), when French is on.
+fn fr_card(def: &CardDef) -> Option<&'static crate::set_fr::CardFr> {
+    if !crate::lang::fr() {
+        return None;
+    }
+    let i = crate::set::CARDS
+        .iter()
+        .position(|c| std::ptr::eq(c, def))?;
+    crate::set_fr::FR.get(i)
+}
+
+fn fr_attack(a: &Attack) -> Option<(&'static str, &'static str)> {
+    if !crate::lang::fr() {
+        return None;
+    }
+    crate::set::CARDS
+        .iter()
+        .zip(crate::set_fr::FR)
+        .find_map(|(c, r)| {
+            let i = c
+                .creature()?
+                .attacks
+                .iter()
+                .position(|x| std::ptr::eq(x, a))?;
+            r.attacks.get(i).copied()
+        })
+}
+
+fn fr_power(p: &Power) -> Option<(&'static str, &'static str)> {
+    if !crate::lang::fr() {
+        return None;
+    }
+    crate::set::CARDS
+        .iter()
+        .zip(crate::set_fr::FR)
+        .find(|(c, _)| {
+            c.creature()
+                .and_then(|cr| cr.power.as_ref())
+                .is_some_and(|x| std::ptr::eq(x, p))
+        })
+        .and_then(|(_, r)| r.power)
+}
+
 /// Look up a card. Panics on an id outside the registry; ids from
 /// [`validate_deck`](crate::validate_deck)-checked decks are always valid.
 pub fn card(id: CardId) -> &'static CardDef {

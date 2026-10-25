@@ -2,7 +2,8 @@
 
 use leptos::prelude::*;
 use sixfold_engine::{
-    card, Attack, CardDef, CardId, CardKind, Color, Effect, EnergyCard, Rarity, Stage,
+    card, card_id, fr, tr, Attack, CardDef, CardId, CardKind, Color, Effect, EnergyCard, Rarity,
+    Stage,
 };
 
 use crate::art::{card_art, card_color, color_key, glyph_svg};
@@ -10,10 +11,16 @@ use crate::art::{card_art, card_color, color_key, glyph_svg};
 pub fn kind_label(def: &CardDef) -> String {
     match &def.kind {
         CardKind::Creature(c) => c.stage.to_string(),
-        CardKind::TrainerBasic(_) => "Trainer played as a Basic".into(),
-        CardKind::Energy(EnergyCard::Basic(_)) => "Basic energy".into(),
-        CardKind::Energy(EnergyCard::DoubleColorless) => "Special energy".into(),
-        CardKind::Trainer(_) => "Trainer".into(),
+        CardKind::TrainerBasic(_) => tr(
+            "Trainer played as a Basic",
+            "Dresseur joué comme créature de Base",
+        )
+        .into(),
+        CardKind::Energy(EnergyCard::Basic(_)) => tr("Basic energy", "Énergie de base").into(),
+        CardKind::Energy(EnergyCard::DoubleColorless) => {
+            tr("Special energy", "Énergie spéciale").into()
+        }
+        CardKind::Trainer(_) => tr("Trainer", "Dresseur").into(),
     }
 }
 
@@ -43,10 +50,20 @@ pub fn deck_star(cards: &[CardId]) -> Option<CardId> {
 
 pub fn rarity_label(r: Rarity) -> &'static str {
     match r {
-        Rarity::Energy => "Basic energy",
-        Rarity::Common => "Common",
-        Rarity::Uncommon => "Uncommon",
+        Rarity::Energy => tr("Basic energy", "Énergie de base"),
+        Rarity::Common => tr("Common", "Commune"),
+        Rarity::Uncommon => tr("Uncommon", "Peu commune"),
         Rarity::Rare => "Rare",
+    }
+}
+
+/// A stable, untranslated key for a rarity (CSS classes, filters).
+pub fn rarity_key(r: Rarity) -> &'static str {
+    match r {
+        Rarity::Energy => "energy",
+        Rarity::Common => "common",
+        Rarity::Uncommon => "uncommon",
+        Rarity::Rare => "rare",
     }
 }
 
@@ -65,12 +82,13 @@ fn type_class(def: &CardDef) -> String {
 pub fn CardFace(id: CardId) -> impl IntoView {
     let def = card(id);
     let hp = def.creature().map(|c| c.hp);
+    let long_name = def.label().chars().count() > 10;
     view! {
         <div class=format!("card {}", type_class(def))>
             // The " " text nodes don't show (flex and grid drop them) but keep
             // the words apart in the text that "label in name" checks compare.
             <div class="card-head">
-                <span class="card-name">{def.name}</span>" "
+                <span class="card-name" class:long=long_name>{def.label()}</span>" "
                 {hp.map(|hp| view! { <span class="card-hp">{hp}</span> })}
             </div>" "
             <div class="card-art" inner_html=card_art(def)></div>
@@ -84,10 +102,8 @@ pub fn CardFace(id: CardId) -> impl IntoView {
 
 fn foot(def: &CardDef) -> String {
     match def.creature().map(|c| c.stage) {
-        Some(Stage::Stage1) => "Stage 1".to_string(),
-        Some(Stage::Stage2) => "Stage 2".to_string(),
-        Some(Stage::Basic) if !def.is_basic() => "Trainer".to_string(),
-        Some(Stage::Basic) => "Basic".to_string(),
+        Some(Stage::Basic) if !def.is_basic() => tr("Trainer", "Dresseur").to_string(),
+        Some(stage) => stage.to_string(),
         None => kind_label(def),
     }
 }
@@ -102,8 +118,8 @@ pub fn face_text(id: CardId) -> String {
         ""
     };
     match def.creature() {
-        Some(c) => format!("{} {} {}{promo}", def.name, c.hp, foot(def)),
-        None => format!("{} {}{promo}", def.name, foot(def)),
+        Some(c) => format!("{} {} {}{promo}", def.label(), c.hp, foot(def)),
+        None => format!("{} {}{promo}", def.label(), foot(def)),
     }
 }
 
@@ -136,7 +152,7 @@ pub fn energy_pips(id: CardId) -> impl IntoView {
         _ => (Color::Colorless, 2),
     };
     (0..n)
-        .map(|_| view! { <Pip color=color label=def.name.to_string() /> })
+        .map(|_| view! { <Pip color=color label=def.label().to_string() /> })
         .collect_view()
 }
 
@@ -144,7 +160,7 @@ pub fn cost_pips(cost: &'static [Color]) -> impl IntoView {
     view! {
         <span class="cost">
             {if cost.is_empty() {
-                view! { <span class="free">"Free"</span> }.into_any()
+                view! { <span class="free">{tr("Free", "Gratuit")}</span> }.into_any()
             } else {
                 cost.iter().map(|&c| view! { <Pip color=c /> }).collect_view().into_any()
             }}
@@ -154,8 +170,8 @@ pub fn cost_pips(cost: &'static [Color]) -> impl IntoView {
 
 /// Rules text of an attack, with the effect sentences as a fallback.
 pub fn attack_text(a: &Attack) -> String {
-    if !a.text.is_empty() {
-        return a.text.to_string();
+    if !a.rules().is_empty() {
+        return a.rules().to_string();
     }
     a.effects
         .iter()
@@ -186,12 +202,15 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
     let def = card(id);
     let body = match &def.kind {
         CardKind::Creature(c) | CardKind::TrainerBasic(c) => {
-            let evolves = c.evolves_from.map(|f| view! { <p class="evolves">"Evolves from " <b>{f}</b></p> });
+            let evolves = c.evolves_from.map(|f| {
+                let from = card_id(f).map_or(f, |id| card(id).label());
+                view! { <p class="evolves">{tr("Evolves from ", "Évolution de ")} <b>{from}</b></p> }
+            });
             let power = c.power.as_ref().map(|p| {
                 view! {
                     <div class="detail-power">
-                        <h4><span class="tag">"Power"</span>{p.name}</h4>
-                        <p>{p.text}</p>
+                        <h4><span class="tag">{tr("Power", "Pouvoir")}</span>{p.label()}</h4>
+                        <p>{p.rules()}</p>
                     </div>
                 }
             });
@@ -203,7 +222,7 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
                         <div class="detail-attack">
                             <div class="detail-attack-head">
                                 {cost_pips(a.cost)}
-                                <h4>{a.name}</h4>
+                                <h4>{a.label()}</h4>
                                 <span class="detail-dmg">{damage_label(a)}</span>
                             </div>
                             <p>{attack_text(a)}</p>
@@ -213,55 +232,73 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
                 .collect_view();
             let opt = |c: Option<Color>| match c {
                 Some(c) => view! { <Pip color=c /> }.into_any(),
-                None => view! { <span class="none">"None"</span> }.into_any(),
+                None => view! { <span class="none">{tr("None", "Aucune")}</span> }.into_any(),
             };
             view! {
                 {evolves}
                 {power}
                 {attacks}
                 <dl class="detail-stats">
-                    <div><dt>"Weakness"</dt><dd>{opt(c.weakness)}{c.weakness.map(|_| " ×2")}</dd></div>
-                    <div><dt>"Resistance"</dt><dd>{opt(c.resistance)}{c.resistance.map(|_| " −30")}</dd></div>
-                    <div><dt>"Retreat"</dt><dd>
+                    <div><dt>{tr("Weakness", "Faiblesse")}</dt><dd>{opt(c.weakness)}{c.weakness.map(|_| " ×2")}</dd></div>
+                    <div><dt>{tr("Resistance", "Résistance")}</dt><dd>{opt(c.resistance)}{c.resistance.map(|_| " −30")}</dd></div>
+                    <div><dt>{tr("Retreat", "Retraite")}</dt><dd>
                         {if c.retreat_cost == 0 {
-                            view! { <span class="none">"Free"</span> }.into_any()
+                            view! { <span class="none">{tr("Free", "Gratuite")}</span> }.into_any()
                         } else {
                             (0..c.retreat_cost).map(|_| view! { <Pip color=Color::Colorless /> }).collect_view().into_any()
                         }}
                     </dd></div>
                 </dl>
                 {matches!(def.kind, CardKind::TrainerBasic(_)).then(|| view! {
-                    <p class="note">"Played as a Basic creature. It can't retreat and gives no prize when knocked out."</p>
+                    <p class="note">{tr(
+                        "Played as a Basic creature. It can't retreat and gives no prize when knocked out.",
+                        "Se joue comme une créature de Base. Elle ne peut pas battre en retraite et ne rapporte aucune Récompense quand elle est K.O.",
+                    )}</p>
                 })}
             }
             .into_any()
         }
         CardKind::Trainer(t) => {
-            let text = if t.text.is_empty() {
-                t.effects.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(" ")
+            let text = if t.rules().is_empty() {
+                t.effects
+                    .iter()
+                    .map(|e| e.to_string())
+                    .collect::<Vec<_>>()
+                    .join(" ")
             } else {
-                t.text.to_string()
+                t.rules().to_string()
             };
             view! { <p class="detail-text">{text}</p> }.into_any()
         }
         CardKind::Energy(EnergyCard::Basic(c)) => {
-            view! { <p class="detail-text">"Provides 1 " {c.to_string()} " energy."</p> }.into_any()
+            let text = tr(
+                format!("Provides 1 {c} energy."),
+                format!("Fournit 1 énergie {c}."),
+            );
+            view! { <p class="detail-text">{text}</p> }.into_any()
         }
         CardKind::Energy(EnergyCard::DoubleColorless) => view! {
-            <p class="detail-text">"Provides 2 Colorless energy. Counts toward the 4-copy limit."</p>
+            <p class="detail-text">{tr(
+                "Provides 2 Colorless energy. Counts toward the 4-copy limit.",
+                "Fournit 2 énergies Incolore. Compte dans la limite de 4 exemplaires.",
+            )}</p>
         }
         .into_any(),
     };
     let hp = def
         .creature()
-        .map(|c| view! { <span class="detail-hp">{c.hp} " HP"</span> });
+        .map(|c| view! { <span class="detail-hp">{c.hp} {tr(" HP", " PV")}</span> });
     view! {
         <div class="details">
             <header class="details-head">
                 <div>
-                    <h3>{def.name}</h3>
+                    <h3>{def.label()}</h3>
                     <p class="details-kind">{match def.creature() {
-                        Some(c) if def.is_basic() || c.stage != Stage::Basic => format!("{} {} creature", c.stage, c.color),
+                        Some(c) if def.is_basic() || c.stage != Stage::Basic => match (fr(), c.stage) {
+                            (false, stage) => format!("{stage} {} creature", c.color),
+                            (true, Stage::Basic) => format!("Créature {} de Base", c.color),
+                            (true, stage) => format!("Créature {}, {stage}", c.color),
+                        },
                         _ => kind_label(def),
                     }}</p>
                 </div>

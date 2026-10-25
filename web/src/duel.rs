@@ -4,7 +4,7 @@ use leptos::prelude::*;
 use sixfold_engine::ai::Difficulty;
 use sixfold_engine::decks::PREBUILT;
 use sixfold_engine::profile::Profile;
-use sixfold_engine::{card, CardId};
+use sixfold_engine::{card, tr, CardId};
 
 use crate::binder::PageBar;
 use crate::cards::{deck_colors, deck_star, CardFace, Pip};
@@ -41,7 +41,7 @@ pub fn my_opts(p: &Profile) -> Vec<Opt> {
         .iter()
         .map(|d| Opt {
             name: d.name.clone(),
-            desc: "Your deck".into(),
+            desc: tr("Your deck", "Votre deck").into(),
             cards: d.cards.clone(),
             problem: deck_problem(d, &p.collection),
         })
@@ -50,11 +50,28 @@ pub fn my_opts(p: &Profile) -> Vec<Opt> {
                 .into_iter()
                 .filter(|o| held.binary_search(&sorted(&o.cards)).is_err())
                 .map(|o| Opt {
-                    desc: format!("Prebuilt. {}", o.desc),
+                    desc: tr(
+                        format!("Prebuilt. {}", o.desc),
+                        format!("Préconstruit. {}", o.desc),
+                    ),
                     ..o
                 }),
         )
         .collect()
+}
+
+/// "60 cards, 14 creatures", with French plurals (0 and 1 singular).
+fn deck_count(cards: usize, creatures: usize) -> String {
+    if sixfold_engine::fr() {
+        let s = |n: usize| if n > 1 { "s" } else { "" };
+        format!(
+            "{cards} carte{}, {creatures} créature{}",
+            s(cards),
+            s(creatures)
+        )
+    } else {
+        format!("{cards} cards, {creatures} creatures")
+    }
 }
 
 fn sorted(cards: &[CardId]) -> Vec<CardId> {
@@ -103,8 +120,8 @@ pub fn DeckPicker(
                             <span class="deck-colors">{colors.into_iter().map(|c| view! { <Pip color=c /> }).collect_view()}</span>
                             <span class="deck-desc">{d.desc}</span>
                             {match d.problem {
-                                Some(p) => view! { <span class="legal no">"Can't play: " {p}</span> }.into_any(),
-                                None => view! { <span class="deck-count">{format!("{} cards, {creatures} creatures", d.cards.len())}</span> }.into_any(),
+                                Some(p) => view! { <span class="legal no">{tr("Can't play: ", "Injouable : ")} {p}</span> }.into_any(),
+                                None => view! { <span class="deck-count">{deck_count(d.cards.len(), creatures)}</span> }.into_any(),
                             }}
                         </span>
                     </label>
@@ -157,37 +174,37 @@ pub fn DuelSetup() -> impl IntoView {
     };
     view! {
         <div class="page">
-            <PageBar title="Play a duel" />
+            <PageBar title=tr("Play a duel", "Jouer un duel") />
             <main class="page-body">
                 <form class="setup" on:submit=move |e| { e.prevent_default(); start() }>
                     <details class="how-to">
-                        <summary>"How a duel works"</summary>
+                        <summary>{tr("How a duel works", "Comment se joue un duel")}</summary>
                         <ol>
-                            <li>"Put a Basic creature in your Active spot, and more Basics on your Bench (up to 5)."</li>
-                            <li>"Each turn you draw a card, may attach one energy, play Basics and trainers, evolve, and retreat."</li>
-                            <li>"Attack when the Active has the energy an attack shows. Attacking ends your turn."</li>
-                            <li>"Knock out a creature to take a prize. Take all your prizes, or leave the opponent with no creature in play, to win."</li>
+                            <li>{tr("Put a Basic creature in your Active spot, and more Basics on your Bench (up to 5).", "Placez une créature de Base en position Active, et d'autres créatures de Base sur votre Banc (5 au plus).")}</li>
+                            <li>{tr("Each turn you draw a card, may attach one energy, play Basics and trainers, evolve, and retreat.", "À chaque tour, vous piochez une carte ; vous pouvez attacher une énergie, jouer des créatures de Base et des Dresseurs, faire évoluer et battre en retraite.")}</li>
+                            <li>{tr("Attack when the Active has the energy an attack shows. Attacking ends your turn.", "Attaquez quand votre Active porte l'énergie indiquée par l'attaque. Attaquer termine votre tour.")}</li>
+                            <li>{tr("Knock out a creature to take a prize. Take all your prizes, or leave the opponent with no creature in play, to win.", "Mettez une créature K.O. pour prendre une Récompense. Pour gagner, prenez toutes vos Récompenses ou ne laissez aucune créature en jeu à l'adversaire.")}</li>
                         </ol>
-                        <p class="note">"Tap or hover any card to read it. Asleep and Paralyzed creatures can't attack or retreat; Confused ones may hurt themselves."</p>
+                        <p class="note">{tr("Tap or hover any card to read it. Asleep and Paralyzed creatures can't attack or retreat; Confused ones may hurt themselves.", "Touchez ou survolez une carte pour la lire. Une créature Endormie ou Paralysée ne peut ni attaquer ni battre en retraite ; une créature Confuse peut se blesser elle-même.")}</p>
                     </details>
                     <div class="pickers">
-                        <DeckPicker legend="Your deck" name="mine" opts=mine_opts choice=mine />
-                        <DeckPicker legend="The AI plays" name="theirs" opts=theirs_opts choice=theirs />
+                        <DeckPicker legend=tr("Your deck", "Votre deck") name="mine" opts=mine_opts choice=mine />
+                        <DeckPicker legend=tr("The AI plays", "Deck de l'IA") name="theirs" opts=theirs_opts choice=theirs />
                     </div>
-                    <p class="note">"Win to earn a Wild Pack."</p>
+                    <p class="note">{tr("Win to earn a Wild Pack.", "Gagnez pour obtenir un Booster Sauvage.")}</p>
                     <div class="options">
                         <details class="more-options">
-                            <summary>"Seed and prizes"</summary>
+                            <summary>{tr("Seed and prizes", "Graine et Récompenses")}</summary>
                             <div class="more-body">
                                 <label class="field">
-                                    <span>"Seed"</span>
+                                    <span>{tr("Seed", "Graine")}</span>
                                     <input type="number" name="seed" min="0" inputmode="numeric"
                                         prop:value=move || seed.get().to_string()
                                         on:input=move |e| { if let Ok(n) = event_target_value(&e).parse() { seed.set(n) } } />
                                 </label>
-                                <button type="button" class="btn ghost" on:click=move |_| seed.set(crate::new_seed())>"New seed"</button>
+                                <button type="button" class="btn ghost" on:click=move |_| seed.set(crate::new_seed())>{tr("New seed", "Nouvelle graine")}</button>
                                 <label class="field">
-                                    <span>"Prizes"</span>
+                                    <span>{tr("Prizes", "Récompenses")}</span>
                                     <select name="prizes" on:change=move |e| { if let Ok(n) = event_target_value(&e).parse() { prizes.set(n) } }>
                                         {(1..=6u8).rev().map(|n| view! { <option value=n.to_string() selected=n == 6>{n}</option> }).collect_view()}
                                     </select>
@@ -195,18 +212,18 @@ pub fn DuelSetup() -> impl IntoView {
                             </div>
                         </details>
                         <label class="field">
-                            <span>"AI"</span>
+                            <span>{tr("AI", "IA")}</span>
                             <select name="difficulty" on:change=move |e| difficulty.set(match event_target_value(&e).as_str() {
                                 "easy" => Difficulty::Easy,
                                 "hard" => Difficulty::Hard,
                                 _ => Difficulty::Normal,
                             })>
-                                <option value="easy">"Easy: sometimes skips a play"</option>
+                                <option value="easy">{tr("Easy: sometimes skips a play", "Facile : laisse parfois passer un coup")}</option>
                                 <option value="normal" selected>"Normal"</option>
-                                <option value="hard">"Hard: thinks a turn ahead"</option>
+                                <option value="hard">{tr("Hard: thinks a turn ahead", "Difficile : anticipe d'un tour")}</option>
                             </select>
                         </label>
-                        <button type="submit" class="btn primary start">"Start the duel"</button>
+                        <button type="submit" class="btn primary start">{tr("Start the duel", "Lancer le duel")}</button>
                     </div>
                     {move || ctl.error.get().map(|e| view! { <p class="error" role="alert">{e}</p> })}
                 </form>

@@ -10,6 +10,7 @@
 //! card ([`promo`]) to the collection.
 
 use crate::ai::Difficulty;
+use crate::lang::T;
 
 use crate::card::{CardId, Color};
 use crate::decks::{Prebuilt, EMBER_RUSH, STORM_FRONT};
@@ -28,9 +29,9 @@ pub struct Rival {
     /// Lowercase id used by dialogue (`duel:<id>`) and flags (`beat_<id>`).
     pub id: &'static str,
     pub name: &'static str,
-    pub title: &'static str,
+    pub title: T,
     /// Where to find them, for the roster.
-    pub place: &'static str,
+    pub place: T,
     pub colors: &'static [Color],
     pub deck: Prebuilt,
     pub difficulty: Difficulty,
@@ -155,12 +156,12 @@ pub static RIVALS: [Rival; 7] = [
     Rival {
         id: "bramble",
         name: "Bramble",
-        title: "Hedge Tender",
-        place: "Fernhollow Trail, by the bridge",
+        title: T::new("Hedge Tender", "Soigne-haies"),
+        place: T::new("Fernhollow Trail, by the bridge", "Sentier de Creuse-Fougère, près du pont"),
         colors: &[Grass],
         deck: Prebuilt {
-            name: "Thicket",
-            description: "Grass Basics and their first evolutions, healing on the side.",
+            name: T::new("Thicket", "Fourré"),
+            description: T::new("Grass Basics and their first evolutions, healing on the side.", "Des créatures Herbe de Base et leurs premières évolutions, avec des soins en appoint."),
             list: &[
                 (SPRIGGET, 4),
                 (THORNBUCK, 3),
@@ -187,12 +188,12 @@ pub static RIVALS: [Rival; 7] = [
     Rival {
         id: "marlo",
         name: "Marlo",
-        title: "Tide Reader",
-        place: "Saltwind Boardwalk, at the end of the pier",
+        title: T::new("Tide Reader", "Liseur de marées"),
+        place: T::new("Saltwind Boardwalk, at the end of the pier", "Promenade de Ventsalé, au bout de la jetée"),
         colors: &[Water, Psychic],
         deck: Prebuilt {
-            name: "Low Tide",
-            description: "Water creatures that grow sturdy, with a Psychic sting.",
+            name: T::new("Low Tide", "Marée basse"),
+            description: T::new("Water creatures that grow sturdy, with a Psychic sting.", "Des créatures Eau qui deviennent coriaces, avec une piqûre Psychique."),
             list: &[
                 (PUDDOCK, 4),
                 (BROOKHORN, 3),
@@ -221,8 +222,8 @@ pub static RIVALS: [Rival; 7] = [
     Rival {
         id: "cinza",
         name: "Cinza",
-        title: "Kiln Runner",
-        place: "Emberstep Quarry, down on the quarry floor",
+        title: T::new("Kiln Runner", "Coureuse du four"),
+        place: T::new("Emberstep Quarry, down on the quarry floor", "Carrière de Pas-de-Braise, tout au fond"),
         colors: &[Fire, Fighting],
         deck: Prebuilt {
             name: EMBER_RUSH.name,
@@ -239,8 +240,8 @@ pub static RIVALS: [Rival; 7] = [
     Rival {
         id: "quill",
         name: "Quill",
-        title: "Weather Watcher",
-        place: "Saltwind Boardwalk, under the lighthouse",
+        title: T::new("Weather Watcher", "Vigie du ciel"),
+        place: T::new("Saltwind Boardwalk, under the lighthouse", "Promenade de Ventsalé, sous le phare"),
         colors: &[Lightning, Water],
         deck: Prebuilt {
             name: STORM_FRONT.name,
@@ -257,12 +258,12 @@ pub static RIVALS: [Rival; 7] = [
     Rival {
         id: "orla",
         name: "Orla",
-        title: "Quarry Foreman",
-        place: "Emberstep Quarry, up on the ledge",
+        title: T::new("Quarry Foreman", "Contremaîtresse"),
+        place: T::new("Emberstep Quarry, up on the ledge", "Carrière de Pas-de-Braise, en haut de la corniche"),
         colors: &[Fighting],
         deck: Prebuilt {
-            name: "Bedrock",
-            description: "Two Fighting lines up to Stage 2 and a wall of trainers.",
+            name: T::new("Bedrock", "Roche-mère"),
+            description: T::new("Two Fighting lines up to Stage 2 and a wall of trainers.", "Deux lignées Combat jusqu'au Stade 2 et un mur de cartes Dresseur."),
             list: &[
                 (BRAWLET, 4),
                 (IRONBRAWL, 3),
@@ -294,12 +295,12 @@ pub static RIVALS: [Rival; 7] = [
     Rival {
         id: "lumen",
         name: "Lumen",
-        title: "Night Gardener",
-        place: "Fernhollow Trail, in the moonflower glade",
+        title: T::new("Night Gardener", "Jardinière de nuit"),
+        place: T::new("Fernhollow Trail, in the moonflower glade", "Sentier de Creuse-Fougère, dans la clairière des fleurs de lune"),
         colors: &[Psychic, Water],
         deck: Prebuilt {
-            name: "Moonlit Tide",
-            description: "Psychic Stage 2s that put the opponent to sleep, backed by Water.",
+            name: T::new("Moonlit Tide", "Marée de lune"),
+            description: T::new("Psychic Stage 2s that put the opponent to sleep, backed by Water.", "Des Stade 2 Psychique qui endorment l'adversaire, épaulés par l'Eau."),
             list: &[
                 (WISPUN, 4),
                 (WISPELLE, 3),
@@ -332,12 +333,12 @@ pub static RIVALS: [Rival; 7] = [
     Rival {
         id: "warden",
         name: "Sable",
-        title: "The Hex Warden",
-        place: "Behind the sealed door in the duel hall",
+        title: T::new("The Hex Warden", "La Gardienne des Six"),
+        place: T::new("Behind the sealed door in the duel hall", "Derrière la porte scellée de la salle des duels"),
         colors: &[Water, Fighting],
         deck: Prebuilt {
-            name: "Sixfold Crown",
-            description: "Water and Fighting Stage 2s, energy removal, healing and stage skips.",
+            name: T::new("Sixfold Crown", "Couronne des Six"),
+            description: T::new("Water and Fighting Stage 2s, energy removal, healing and stage skips.", "Des Stade 2 Eau et Combat, du retrait d'énergie, des soins et des évolutions express."),
             list: &[
                 (PUDDOCK, 4),
                 (BROOKHORN, 3),

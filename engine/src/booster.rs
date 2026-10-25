@@ -8,6 +8,7 @@
 //! ([`crate::set::PROMOS`]) are campaign rewards and turn up in none.
 
 use crate::card::{card, CardId, CardKind, Color, EnergyCard, Rarity};
+use crate::lang::T;
 use crate::rng::Rng;
 
 pub const PACK_SIZE: usize = 10;
@@ -22,51 +23,72 @@ const SLOTS: [(Rarity, usize, bool); 4] = [
 
 #[derive(Debug)]
 pub struct Booster {
-    pub name: &'static str,
-    pub description: &'static str,
+    pub name: T,
+    pub description: T,
     /// Creature and basic energy colours this pack holds.
     pub colors: &'static [Color],
 }
 
 pub static EMBER_PACK: Booster = Booster {
-    name: "Ember Pack",
-    description: "Fire and Fighting creatures, plus trainers.",
+    name: T::new("Ember Pack", "Booster Braise"),
+    description: T::new(
+        "Fire and Fighting creatures, plus trainers.",
+        "Créatures Feu et Combat, plus des cartes Dresseur.",
+    ),
     colors: &[Color::Fire, Color::Fighting],
 };
 
 pub static TIDE_PACK: Booster = Booster {
-    name: "Tide Pack",
-    description: "Water and Psychic creatures, plus trainers.",
+    name: T::new("Tide Pack", "Booster Marée"),
+    description: T::new(
+        "Water and Psychic creatures, plus trainers.",
+        "Créatures Eau et Psychique, plus des cartes Dresseur.",
+    ),
     colors: &[Color::Water, Color::Psychic],
 };
 
 pub static WILD_PACK: Booster = Booster {
-    name: "Wild Pack",
-    description: "Any card in the set.",
+    name: T::new("Wild Pack", "Booster Sauvage"),
+    description: T::new(
+        "Any card in the set.",
+        "N'importe quelle carte de la série.",
+    ),
     colors: &Color::ALL,
 };
 
 pub static GROVE_PACK: Booster = Booster {
-    name: "Grove Pack",
-    description: "Grass and Lightning creatures, plus trainers.",
+    name: T::new("Grove Pack", "Booster Bosquet"),
+    description: T::new(
+        "Grass and Lightning creatures, plus trainers.",
+        "Créatures Herbe et Foudre, plus des cartes Dresseur.",
+    ),
     colors: &[Color::Grass, Color::Lightning],
 };
 
 pub static STORM_PACK: Booster = Booster {
-    name: "Storm Pack",
-    description: "Lightning and Water creatures, plus trainers.",
+    name: T::new("Storm Pack", "Booster Orage"),
+    description: T::new(
+        "Lightning and Water creatures, plus trainers.",
+        "Créatures Foudre et Eau, plus des cartes Dresseur.",
+    ),
     colors: &[Color::Lightning, Color::Water],
 };
 
 pub static STONE_PACK: Booster = Booster {
-    name: "Stone Pack",
-    description: "Fighting and Colorless creatures, plus trainers.",
+    name: T::new("Stone Pack", "Booster Pierre"),
+    description: T::new(
+        "Fighting and Colorless creatures, plus trainers.",
+        "Créatures Combat et Incolore, plus des cartes Dresseur.",
+    ),
     colors: &[Color::Fighting],
 };
 
 pub static DREAM_PACK: Booster = Booster {
-    name: "Dream Pack",
-    description: "Psychic and Grass creatures, plus trainers.",
+    name: T::new("Dream Pack", "Booster Songe"),
+    description: T::new(
+        "Psychic and Grass creatures, plus trainers.",
+        "Créatures Psychique et Herbe, plus des cartes Dresseur.",
+    ),
     colors: &[Color::Psychic, Color::Grass],
 };
 

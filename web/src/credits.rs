@@ -4,21 +4,49 @@
 
 use leptos::prelude::*;
 use sixfold_engine::campaign::RIVALS;
+use sixfold_engine::{tr, T};
 
 use crate::Screen;
 
 /// The people of the world, as the credits list them.
-const TOWNSFOLK: &[(&str, &str)] = &[
-    ("Juniper", "keeps the duel hall"),
-    ("Wren", "walks the meadow loop"),
-    ("Moss", "tends the flowerbeds"),
-    ("Pip", "practises the shuffle"),
-    ("Hob", "bakes in Brightwell Square"),
-    ("Tansy", "sells apples and one proud marrow"),
-    ("Fennel", "watches the herons"),
-    ("Ottilie", "keeps the lighthouse"),
-    ("Dace", "waits for a bite"),
-    ("Flint", "cuts stone in the quarry"),
+const TOWNSFOLK: &[(&str, T)] = &[
+    (
+        "Juniper",
+        T::new("keeps the duel hall", "veille sur la salle des duels"),
+    ),
+    (
+        "Wren",
+        T::new("walks the meadow loop", "fait le tour du pré"),
+    ),
+    (
+        "Moss",
+        T::new("tends the flowerbeds", "soigne les massifs de fleurs"),
+    ),
+    (
+        "Pip",
+        T::new("practises the shuffle", "s'entraîne à mélanger"),
+    ),
+    (
+        "Hob",
+        T::new(
+            "bakes in Brightwell Square",
+            "fait le pain sur la Place de Clairpuits",
+        ),
+    ),
+    (
+        "Tansy",
+        T::new(
+            "sells apples and one proud marrow",
+            "vend des pommes et une courge, sa grande fierté",
+        ),
+    ),
+    ("Fennel", T::new("watches the herons", "observe les hérons")),
+    ("Ottilie", T::new("keeps the lighthouse", "garde le phare")),
+    ("Dace", T::new("waits for a bite", "attend que ça morde")),
+    (
+        "Flint",
+        T::new("cuts stone in the quarry", "taille la pierre à la carrière"),
+    ),
 ];
 
 #[component]
@@ -47,7 +75,7 @@ pub fn Credits(won: bool) -> impl IntoView {
                 on:animationend=move |_| ended.set(true)>
                 <h1 id="credits-title" class="wordmark">"Sixfold"</h1>
                 {won.then(|| view! {
-                    <p class="credits-lead">"Six seals, one Warden, and a new champion."</p>
+                    <p class="credits-lead">{tr("Six seals, one Warden, and a new champion.", "Six sceaux, une Gardienne… et une nouvelle légende.")}</p>
                     <ul class="seals credits-seals" aria-hidden="true">
                         {RIVALS.iter().filter(|r| r.seal).map(|r| view! {
                             <li><crate::campaign::Seal r=r earned=true /></li>
@@ -55,43 +83,43 @@ pub fn Credits(won: bool) -> impl IntoView {
                     </ul>
                 })}
                 <section>
-                    <h2>"The rivals"</h2>
+                    <h2>{tr("The rivals", "Les rivaux")}</h2>
                     <ul>
                         {RIVALS.iter().map(|r| view! {
-                            <li><b>{r.name}</b>" "<span>{r.title}</span></li>
+                            <li><b>{r.name}</b>" "<span>{r.title.get()}</span></li>
                         }).collect_view()}
                     </ul>
                 </section>
                 <section>
-                    <h2>"The townsfolk"</h2>
+                    <h2>{tr("The townsfolk", "Les gens du coin")}</h2>
                     <ul>
                         {TOWNSFOLK.iter().map(|(name, what)| view! {
-                            <li><b>{*name}</b>" "<span>{*what}</span></li>
+                            <li><b>{*name}</b>" "<span>{what.get()}</span></li>
                         }).collect_view()}
                     </ul>
                 </section>
                 <section>
-                    <h2>"Made by"</h2>
-                    <ul><li><b>"Philippe Matray"</b>" "<span>"design, code and cards"</span></li></ul>
+                    <h2>{tr("Made by", "Créé par")}</h2>
+                    <ul><li><b>"Philippe Matray"</b>" "<span>{tr("design, code and cards", "conception, code et cartes")}</span></li></ul>
                 </section>
                 <section>
-                    <h2>"Built with"</h2>
+                    <h2>{tr("Built with", "Fait avec")}</h2>
                     <ul>
-                        <li><b>"Rust"</b>" "<span>"and WebAssembly"</span></li>
-                        <li><b>"Leptos"</b>" "<span>"for the screens"</span></li>
-                        <li><b>"three.js"</b>" "<span>"for the world"</span></li>
-                        <li><b>"Blender"</b>" "<span>"for every prop, made by script"</span></li>
+                        <li><b>"Rust"</b>" "<span>{tr("and WebAssembly", "et WebAssembly")}</span></li>
+                        <li><b>"Leptos"</b>" "<span>{tr("for the screens", "pour les écrans")}</span></li>
+                        <li><b>"three.js"</b>" "<span>{tr("for the world", "pour le monde")}</span></li>
+                        <li><b>"Blender"</b>" "<span>{tr("for every prop, made by script", "pour chaque objet du décor, modelé par script")}</span></li>
                     </ul>
                 </section>
                 <section>
-                    <p>"Every creature, card, place, picture and sound here is original. Only the rules come from a classic handheld card game."</p>
+                    <p>{tr("Every creature, card, place, picture and sound here is original. Only the rules come from a classic handheld card game.", "Chaque créature, carte, lieu, image et son de ce jeu est original. Seules les règles viennent d'un grand classique du jeu de cartes sur console portable.")}</p>
                 </section>
-                <p class="credits-end">"Thank you for playing."</p>
+                <p class="credits-end">{tr("Thank you for playing.", "Merci d'avoir joué.")}</p>
             </div>
             <div class="credits-foot">
                 // Focus starts on Skip (see `focus_heading`), so Enter works straight away.
                 <button type="button" class="btn primary" data-screen-focus on:click=move |_| done()>
-                    {move || if ended.get() { "Continue" } else { "Skip the credits" }}
+                    {move || if ended.get() { tr("Continue", "Continuer") } else { tr("Skip the credits", "Passer le générique") }}
                 </button>
             </div>
         </main>

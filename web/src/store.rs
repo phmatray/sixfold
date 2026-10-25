@@ -18,6 +18,7 @@ use leptos::prelude::*;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::save::{self, Save, SaveError, Summary, LEGACY_KEYS};
+use sixfold_engine::tr;
 
 pub const SLOTS: usize = 3;
 const SLOT: &str = "sixfold.slot";
@@ -49,13 +50,35 @@ fn remove(key: &str) {
     }
 }
 
+const LANG: &str = "sixfold.lang";
+
+/// The display language: the player's choice, else the browser's (French for
+/// any `fr` locale). Kept beside the save, not in it: it belongs to the browser.
+pub fn lang() -> sixfold_engine::Lang {
+    let code = get(LANG).or_else(|| web_sys::window()?.navigator().language());
+    if code.is_some_and(|c| c.to_ascii_lowercase().starts_with("fr")) {
+        sixfold_engine::Lang::Fr
+    } else {
+        sixfold_engine::Lang::En
+    }
+}
+
+/// Keep the choice and reload in it: every text is built in one language.
+pub fn set_lang(l: sixfold_engine::Lang) {
+    set(LANG, l.code());
+    if let Some(w) = web_sys::window() {
+        let _ = w.location().reload();
+    }
+}
+
 /// The save in slot `n`: None when empty.
 fn read(n: usize) -> Option<Result<Save, SaveError>> {
     get(&slot_key(n)).map(|s| Save::decode(&s))
 }
 
+/// Stored in the save when a slot starts: an older English default stays as it was.
 fn default_name(n: usize) -> String {
-    format!("Save {n}")
+    tr(format!("Save {n}"), format!("Sauvegarde {n}"))
 }
 
 /// Write the current save to its slot; false when storage refused.
@@ -89,9 +112,15 @@ fn open(n: usize) -> Option<String> {
             keep_bad(n);
             (
                 Save::new_player(&default_name(n)),
-                Some(format!(
-                    "{} couldn't be read ({e}), so it starts again. A copy was kept in this browser.",
-                    default_name(n)
+                Some(tr(
+                    format!(
+                        "{} couldn't be read ({e}), so it starts again. A copy was kept in this browser.",
+                        default_name(n)
+                    ),
+                    format!(
+                        "{} est illisible ({e}) : elle repart de zéro. Une copie est gardée dans ce navigateur.",
+                        default_name(n)
+                    ),
                 )),
             )
         }
@@ -170,9 +199,15 @@ pub struct Notice(pub RwSignal<Option<String>>);
 
 fn lost_note(lost: &[&str]) -> Option<String> {
     (!lost.is_empty()).then(|| {
-        format!(
-            "Part of your save couldn't be read ({}), so it was reset. A copy was kept in this browser.",
-            lost.join(", ")
+        tr(
+            format!(
+                "Part of your save couldn't be read ({}), so it was reset. A copy was kept in this browser.",
+                lost.join(", ")
+            ),
+            format!(
+                "Une partie de votre sauvegarde était illisible ({}) : elle a été réinitialisée. Une copie est gardée dans ce navigateur.",
+                lost.join(", ")
+            ),
         )
     })
 }

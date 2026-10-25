@@ -12,7 +12,7 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 use sixfold_engine::ai::{Ai, Difficulty};
-use sixfold_engine::{card, Action, CardId, Config, Event, Game, PromptKind, Status};
+use sixfold_engine::{card, fr, tr, Action, CardId, Config, Event, Game, PromptKind};
 
 pub const HUMAN: usize = 0;
 pub const AI: usize = 1;
@@ -110,6 +110,9 @@ pub struct Ctl {
     queue: StoredValue<VecDeque<Event>>,
     /// Why the next coin is flipped, from the events before it.
     coin_reason: StoredValue<String>,
+    /// The last reason set was the turn-start flip (a following energy
+    /// discard means a Confused retreat), kept apart from the localized text.
+    turn_flip: StoredValue<bool>,
     /// Bumped on every new match so stale timers from the last one stop.
     generation: StoredValue<u32>,
     counter: StoredValue<u32>,
@@ -140,6 +143,7 @@ impl Ctl {
             ai: StoredValue::new(None),
             queue: StoredValue::new(VecDeque::new()),
             coin_reason: StoredValue::new(String::new()),
+            turn_flip: StoredValue::new(false),
             generation: StoredValue::new(0),
             counter: StoredValue::new(0),
             unrewarded: StoredValue::new(false),
@@ -163,8 +167,10 @@ impl Ctl {
         ) {
             Ok(g) => g,
             Err(e) => {
-                self.error
-                    .set(Some(format!("Can't start this match: {e:?}")));
+                self.error.set(Some(tr(
+                    format!("Can't start this match: {e:?}"),
+                    format!("Impossible de lancer ce duel : {e:?}"),
+                )));
                 return false;
             }
         };
@@ -229,9 +235,10 @@ impl Ctl {
                 self.queue.update_value(|q| q.extend(events));
                 self.step(self.generation.get_value());
             }
-            Some(Err(e)) => self
-                .error
-                .set(Some(format!("The engine refused {action:?}: {e:?}"))),
+            Some(Err(e)) => self.error.set(Some(tr(
+                format!("The engine refused {action:?}: {e:?}"),
+                format!("Le moteur a refusé {action:?} : {e:?}"),
+            ))),
             None => {}
         }
     }
@@ -397,26 +404,38 @@ impl Ctl {
             self.heard.update_value(|h| h.push(text.clone()));
         }
         let reason = match event {
-            Event::PrizesSet { .. } => Some("Who goes first?".to_string()),
-            Event::TurnStarted { .. } => Some("Coin flip".into()),
-            Event::BetweenTurns => Some("Asleep: heads wakes it up".into()),
-            Event::EnergyDiscarded { .. } if self.coin_reason.get_value() == "Coin flip" => {
-                Some("Confused: heads lets it retreat".into())
-            }
+            Event::PrizesSet { .. } => Some(tr("Who goes first?", "Qui commence ?").to_string()),
+            Event::TurnStarted { .. } => Some(tr("Coin flip", "Pile ou face").into()),
+            Event::BetweenTurns => Some(
+                tr(
+                    "Asleep: heads wakes it up",
+                    "Endormie : face, elle se réveille",
+                )
+                .into(),
+            ),
+            Event::EnergyDiscarded { .. } if self.turn_flip.get_value() => Some(
+                tr(
+                    "Confused: heads lets it retreat",
+                    "Confuse : face, elle bat en retraite",
+                )
+                .into(),
+            ),
             Event::AttackUsed {
                 creature, attack, ..
             } => card(*creature)
                 .creature()
                 .and_then(|c| c.attacks.get(*attack))
-                .map(|a| a.name.to_string()),
+                .map(|a| a.label().to_string()),
             Event::PowerUsed { creature, .. } => card(*creature)
                 .creature()
                 .and_then(|c| c.power.as_ref())
-                .map(|p| p.name.to_string()),
+                .map(|p| p.label().to_string()),
             _ => None,
         };
         if let Some(r) = reason {
             self.coin_reason.set_value(r);
+            self.turn_flip
+                .set_value(matches!(event, Event::TurnStarted { .. }));
         }
         self.log.update(|l| {
             l.push(LogLine { key, text, kind });
@@ -425,12 +444,17 @@ impl Ctl {
             }
         });
         let you = |p: usize| p == HUMAN;
-        let who = |p: usize| if p == HUMAN { "You" } else { "Opponent" };
         match event {
             Event::Mulligan { player, .. } => {
                 self.callout(
                     "Mulligan".into(),
-                    format!("{} had no Basic creature and reshuffled", who(*player)),
+                    match (you(*player), fr()) {
+                        (true, false) => "You had no Basic creature and reshuffled",
+                        (false, false) => "Opponent had no Basic creature and reshuffled",
+                        (true, true) => "Aucune créature de Base : vous remélangez",
+                        (false, true) => "Aucune créature de Base : l'adversaire remélange",
+                    }
+                    .into(),
                     None,
                     you(*player),
                 );
@@ -438,8 +462,12 @@ impl Ctl {
             }
             Event::SetupRestarted => {
                 self.callout(
-                    "Redeal".into(),
-                    "Neither player had a Basic creature".into(),
+                    tr("Redeal", "Nouvelle donne").into(),
+                    tr(
+                        "Neither player had a Basic creature",
+                        "Aucun joueur n'avait de créature de Base",
+                    )
+                    .into(),
                     None,
                     true,
                 );
@@ -462,13 +490,17 @@ impl Ctl {
             Event::FirstPlayer { player } => {
                 self.fx.update(|f| f.coin = None);
                 let title = if you(*player) {
-                    "You go first"
+                    tr("You go first", "Vous commencez")
                 } else {
-                    "Opponent goes first"
+                    tr("Opponent goes first", "L'adversaire commence")
                 };
                 self.callout(
                     title.into(),
-                    "The first player draws and may attack".into(),
+                    tr(
+                        "The first player draws and may attack",
+                        "Le premier joueur pioche et peut attaquer",
+                    )
+                    .into(),
                     None,
                     you(*player),
                 );
@@ -478,11 +510,12 @@ impl Ctl {
                 self.revealed.set(true);
                 self.fx.update(|f| f.coin = None);
                 let title = if you(*player) {
-                    "Your turn"
+                    tr("Your turn", "Votre tour")
                 } else {
-                    "Opponent's turn"
+                    tr("Opponent's turn", "Tour adverse")
                 };
-                self.callout(title.into(), format!("Turn {turn}"), None, you(*player));
+                let sub = tr(format!("Turn {turn}"), format!("Tour {turn}"));
+                self.callout(title.into(), sub, None, you(*player));
                 1000
             }
             Event::AttackUsed {
@@ -494,9 +527,14 @@ impl Ctl {
                 let name = card(*creature)
                     .creature()
                     .and_then(|c| c.attacks.get(*attack))
-                    .map_or("Attack", |a| a.name);
+                    .map_or(tr("Attack", "Attaque"), |a| a.label());
                 self.fx.update(|f| f.lunge = Some(*uid));
-                self.callout(name.into(), card(*creature).name.into(), None, you(*player));
+                self.callout(
+                    name.into(),
+                    card(*creature).label().into(),
+                    None,
+                    you(*player),
+                );
                 900
             }
             Event::PowerUsed {
@@ -508,19 +546,25 @@ impl Ctl {
                 let name = card(*creature)
                     .creature()
                     .and_then(|c| c.power.as_ref())
-                    .map_or("Power", |p| p.name);
+                    .map_or(tr("Power", "Pouvoir"), |p| p.label());
                 self.fx.update(|f| f.glow = Some(*uid));
+                let owner = card(*creature).label();
                 self.callout(
                     name.into(),
-                    format!("{}'s Power", card(*creature).name),
+                    tr(format!("{owner}'s Power"), format!("Pouvoir de {owner}")),
                     None,
                     you(*player),
                 );
                 1000
             }
             Event::TrainerPlayed { player, card: c } => {
-                let sub = format!("{} played a trainer", who(*player));
-                self.callout(card(*c).name.into(), sub, Some(*c), you(*player));
+                let sub = match (you(*player), fr()) {
+                    (true, false) => "You played a trainer",
+                    (false, false) => "Opponent played a trainer",
+                    (true, true) => "Vous jouez une carte Dresseur",
+                    (false, true) => "L'adversaire joue une carte Dresseur",
+                };
+                self.callout(card(*c).label().into(), sub.into(), Some(*c), you(*player));
                 if you(*player) {
                     700
                 } else {
@@ -544,7 +588,7 @@ impl Ctl {
                     text.push_str(" ×2");
                 }
                 if *resistance {
-                    text.push_str(" resisted");
+                    text.push_str(tr(" resisted", " résisté"));
                 }
                 let kind = if *amount == 0 { "none" } else { "dmg" };
                 self.fx.update(|f| {
@@ -575,29 +619,37 @@ impl Ctl {
                 600
             }
             Event::ConditionApplied { player, status } => {
-                self.pop(
-                    self.active_uid(*player),
-                    status_word(*status).into(),
-                    "status",
-                );
+                self.pop(self.active_uid(*player), status.to_string(), "status");
                 700
             }
             Event::ConditionRemoved { player, status } => {
-                let text = format!("{} wore off", status_word(*status));
+                let text = tr(format!("{status} wore off"), format!("N'est plus {status}"));
                 self.pop(self.active_uid(*player), text, "cure");
                 500
             }
             Event::AttackFailed { player } => {
                 self.fx.update(|f| f.lunge = None);
-                self.pop(self.active_uid(*player), "Failed".into(), "none");
+                self.pop(
+                    self.active_uid(*player),
+                    tr("Failed", "Raté").into(),
+                    "none",
+                );
                 700
             }
             Event::AttackNegated { player } => {
-                self.pop(self.active_uid(*player), "Protected".into(), "none");
+                self.pop(
+                    self.active_uid(*player),
+                    tr("Protected", "Protégée").into(),
+                    "none",
+                );
                 700
             }
             Event::RetreatFailed { player } => {
-                self.pop(self.active_uid(*player), "Can't retreat".into(), "none");
+                self.pop(
+                    self.active_uid(*player),
+                    tr("Can't retreat", "Retraite impossible").into(),
+                    "none",
+                );
                 800
             }
             Event::EnergyDiscarded { .. }
@@ -606,8 +658,14 @@ impl Ctl {
             Event::EffectApplied { .. } => 250,
             Event::DeckOut { player } => {
                 self.callout(
-                    "Out of cards".into(),
-                    format!("{} couldn't draw", who(*player)),
+                    tr("Out of cards", "Plus de cartes").into(),
+                    match (you(*player), fr()) {
+                        (true, false) => "You couldn't draw",
+                        (false, false) => "Opponent couldn't draw",
+                        (true, true) => "Vous ne pouvez plus piocher",
+                        (false, true) => "L'adversaire ne peut plus piocher",
+                    }
+                    .into(),
                     None,
                     you(*player),
                 );
@@ -616,8 +674,12 @@ impl Ctl {
             Event::SuddenDeath => {
                 self.revealed.set(false);
                 self.callout(
-                    "Sudden death".into(),
-                    "A tie. New setup, 1 prize each".into(),
+                    tr("Sudden death", "Mort subite").into(),
+                    tr(
+                        "A tie. New setup, 1 prize each",
+                        "Égalité. Nouvelle mise en place, 1 Récompense chacun",
+                    )
+                    .into(),
                     None,
                     true,
                 );
@@ -639,23 +701,16 @@ fn summary(lines: &[String]) -> String {
         // "You win!" keeps its own mark rather than gaining a full stop.
         let stop = if line.ends_with(['!', '?']) { "" } else { "." };
         out.push(if n > 1 {
-            format!("{line} ({n} times){stop}")
+            tr(
+                format!("{line} ({n} times){stop}"),
+                format!("{line} ({n} fois){stop}"),
+            )
         } else {
             format!("{line}{stop}")
         });
         i += n;
     }
     out.join(" ")
-}
-
-fn status_word(s: Status) -> &'static str {
-    match s {
-        Status::Confused => "Confused",
-        Status::Asleep => "Asleep",
-        Status::Paralyzed => "Paralyzed",
-        Status::Poisoned => "Poisoned",
-        Status::DoublePoisoned => "Double-poisoned",
-    }
 }
 
 fn log_kind(e: &Event) -> &'static str {

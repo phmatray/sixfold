@@ -4,10 +4,10 @@
 
 use leptos::prelude::*;
 use sixfold_engine::profile::Profile;
-use sixfold_engine::{card, set, CardId, CardKind, Collection, Color, Rarity, SortBy};
+use sixfold_engine::{card, fr, set, tr, CardId, CardKind, Collection, Color, Rarity, SortBy};
 
 use crate::art::card_color;
-use crate::cards::{face_text, rarity_label, CardFace, Pip};
+use crate::cards::{face_text, rarity_key, rarity_label, CardFace, Pip};
 use crate::overlays::Inspector;
 use crate::{Inspect, Screen, Ui};
 
@@ -33,7 +33,7 @@ pub fn PageBar(
         <header class="topbar page-bar">
             <button type="button" class="btn ghost back" on:click=move |_| screen.set(back)>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-                "Back"
+                {tr("Back", "Retour")}
             </button>
             <h1 class="page-title">{title}</h1>
             <div class="bar-actions">{children.map(|c| c())}</div>
@@ -53,7 +53,7 @@ pub fn RarityMark(rarity: Rarity) -> impl IntoView {
         }
     };
     Some(view! {
-        <svg class=format!("rarity r-{}", rarity_label(rarity).to_lowercase()) viewBox="0 0 24 24" role="img" aria-label=rarity_label(rarity)>
+        <svg class=format!("rarity r-{}", rarity_key(rarity)) viewBox="0 0 24 24" role="img" aria-label=rarity_label(rarity)>
             <path d=path />
         </svg>
     })
@@ -140,14 +140,16 @@ impl Filters {
 #[component]
 pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView {
     let chip = move |c: Option<Color>| {
-        let label = c.map_or("All colours".to_string(), |c| c.to_string());
+        let label = c.map_or(tr("All colours", "Toutes les couleurs").to_string(), |c| {
+            c.to_string()
+        });
         view! {
             <button type="button" class="chip" aria-pressed=move || (f.color.get() == c).to_string()
                 aria-label=label.clone() title=label.clone()
                 on:click=move |_| f.color.set(c)>
                 {match c {
                     Some(c) => view! { <Pip color=c /> }.into_any(),
-                    None => view! { <span class="chip-all">"All"</span> }.into_any(),
+                    None => view! { <span class="chip-all">{tr("All", "Toutes")}</span> }.into_any(),
                 }}
             </button>
         }
@@ -179,56 +181,56 @@ pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView 
     };
     view! {
         <div class="filters">
-            <div class="chips" role="group" aria-label="Colour">
+            <div class="chips" role="group" aria-label=tr("Colour", "Couleur")>
                 {chip(None)}
                 {Color::ALL.into_iter().map(|c| chip(Some(c))).collect_view()}
             </div>
             <div class="selects">
                 <label class="field">
-                    <span>"Kind"</span>
+                    <span>{tr("Kind", "Type")}</span>
                     <select name="kind" prop:value=kind_value on:change=move |e| f.kind.set(match event_target_value(&e).as_str() {
                         "creature" => Kind::Creature, "trainer" => Kind::Trainer, "energy" => Kind::Energy, _ => Kind::All,
                     })>
-                        <option value="all">"All kinds"</option>
-                        <option value="creature">"Creatures"</option>
-                        <option value="trainer">"Trainers"</option>
-                        <option value="energy">"Energy"</option>
+                        <option value="all">{tr("All kinds", "Tous les types")}</option>
+                        <option value="creature">{tr("Creatures", "Créatures")}</option>
+                        <option value="trainer">{tr("Trainers", "Dresseurs")}</option>
+                        <option value="energy">{tr("Energy", "Énergies")}</option>
                     </select>
                 </label>
                 <label class="field">
-                    <span>"Rarity"</span>
+                    <span>{tr("Rarity", "Rareté")}</span>
                     <select name="rarity" prop:value=rarity_value on:change=move |e| f.rarity.set(match event_target_value(&e).as_str() {
                         "energy" => Some(Rarity::Energy), "common" => Some(Rarity::Common),
                         "uncommon" => Some(Rarity::Uncommon), "rare" => Some(Rarity::Rare), _ => None,
                     })>
-                        <option value="all">"Any rarity"</option>
-                        <option value="rare">"Rare"</option>
-                        <option value="uncommon">"Uncommon"</option>
-                        <option value="common">"Common"</option>
-                        <option value="energy">"Basic energy"</option>
+                        <option value="all">{tr("Any rarity", "Toutes raretés")}</option>
+                        <option value="rare">{rarity_label(Rarity::Rare)}</option>
+                        <option value="uncommon">{rarity_label(Rarity::Uncommon)}</option>
+                        <option value="common">{rarity_label(Rarity::Common)}</option>
+                        <option value="energy">{rarity_label(Rarity::Energy)}</option>
                     </select>
                 </label>
                 {show_own.then(|| view! {
                     <label class="field">
-                        <span>"Show"</span>
+                        <span>{tr("Show", "Afficher")}</span>
                         <select name="show" prop:value=own_value on:change=move |e| f.own.set(match event_target_value(&e).as_str() {
                             "owned" => Own::Owned, "missing" => Own::Missing, _ => Own::All,
                         })>
-                            <option value="all">"Every card"</option>
-                            <option value="owned">"Owned"</option>
-                            <option value="missing">"Not found yet"</option>
+                            <option value="all">{tr("Every card", "Toutes les cartes")}</option>
+                            <option value="owned">{tr("Owned", "Possédées")}</option>
+                            <option value="missing">{tr("Not found yet", "Pas encore trouvées")}</option>
                         </select>
                     </label>
                 })}
                 <label class="field">
-                    <span>"Sort"</span>
+                    <span>{tr("Sort", "Trier")}</span>
                     <select name="sort" prop:value=sort_value on:change=move |e| f.sort.set(match event_target_value(&e).as_str() {
                         "color" => Some(SortBy::Color), "kind" => Some(SortBy::Kind), "rarity" => Some(SortBy::Rarity), _ => None,
                     })>
-                        <option value="number">"Set number"</option>
-                        <option value="color">"Colour"</option>
-                        <option value="kind">"Kind"</option>
-                        <option value="rarity">"Rarity"</option>
+                        <option value="number">{tr("Set number", "Numéro")}</option>
+                        <option value="color">{tr("Colour", "Couleur")}</option>
+                        <option value="kind">{tr("Kind", "Type")}</option>
+                        <option value="rarity">{tr("Rarity", "Rareté")}</option>
                     </select>
                 </label>
             </div>
@@ -261,16 +263,28 @@ pub fn CollectionScreen() -> impl IntoView {
             <PageBar title="Collection" />
             <main class="page-body">
                 <div class="progress-row">
-                    <p class="progress-text"><b>{move || prog().0}</b>" of "{move || prog().1}" cards found"</p>
+                    <p class="progress-text"><b>{move || prog().0}</b>{tr(" of ", " sur ")}{move || prog().1}{move || match (prog().0, fr()) {
+                        (_, false) => " cards found",
+                        (0 | 1, true) => " carte trouvée",
+                        _ => " cartes trouvées",
+                    }}</p>
                     <div class="progress-bar" aria-hidden="true">
                         <span style=move || { let (h, a) = prog(); format!("width:{}%", h * 100 / a.max(1)) }></span>
                     </div>
                 </div>
                 <FilterBar f=f show_own=true />
-                <p class="sr-only" aria-live="polite">{move || format!("{} cards shown", shown.with(Vec::len))}</p>
+                <p class="sr-only" aria-live="polite">{move || {
+                    let n = shown.with(Vec::len);
+                    match (n, fr()) {
+                        (1, false) => "1 card shown".to_string(),
+                        (_, false) => format!("{n} cards shown"),
+                        (0 | 1, true) => format!("{n} carte affichée"),
+                        _ => format!("{n} cartes affichées"),
+                    }
+                }}</p>
                 {move || shown.with(Vec::is_empty).then(|| view! {
-                    <p class="empty-note">"No card matches these filters. "
-                        <button type="button" class="btn ghost" on:click=move |_| f.clear()>"Clear filters"</button>
+                    <p class="empty-note">{tr("No card matches these filters. ", "Aucune carte ne correspond à ces filtres. ")}
+                        <button type="button" class="btn ghost" on:click=move |_| f.clear()>{tr("Clear filters", "Effacer les filtres")}</button>
                     </p>
                 })}
                 <ul class="binder">
@@ -298,13 +312,23 @@ fn BinderSlot(id: CardId) -> impl IntoView {
     let label = move || {
         let n = count.get();
         let own = match n {
-            0 if promo => format!(
-                "not earned yet: beat {}",
-                from.map_or("a rival", |r| r.name)
+            0 if promo => match from {
+                Some(r) => tr(
+                    format!("not earned yet: beat {}", r.name),
+                    format!("pas encore gagnée : battez {}", r.name),
+                ),
+                None => tr(
+                    "not earned yet: beat a rival",
+                    "pas encore gagnée : battez un rival",
+                )
+                .into(),
+            },
+            0 => tr("not found yet", "pas encore trouvée").to_string(),
+            usize::MAX => tr("unlimited", "illimitée").to_string(),
+            n => tr(
+                format!("{n} owned"),
+                format!("{n} possédée{}", if n > 1 { "s" } else { "" }),
             ),
-            0 => "not found yet".to_string(),
-            usize::MAX => "unlimited".to_string(),
-            n => format!("{n} owned"),
         };
         format!("{}, {}, {own}", face_text(id), rarity_label(def.rarity))
     };
@@ -321,9 +345,12 @@ fn BinderSlot(id: CardId) -> impl IntoView {
                     view! { <RarityMark rarity=def.rarity /> }.into_any()
                 }}
                 <span class="bind-count">{move || match count.get() {
-                    0 if promo => format!("Beat {}", from.map_or("a rival", |r| r.name)),
-                    0 => "Not found".to_string(),
-                    usize::MAX => "Unlimited".to_string(),
+                    0 if promo => match from {
+                        Some(r) => tr(format!("Beat {}", r.name), format!("Battez {}", r.name)),
+                        None => tr("Beat a rival", "Battez un rival").into(),
+                    },
+                    0 => tr("Not found", "Manquante").to_string(),
+                    usize::MAX => tr("Unlimited", "Illimitée").to_string(),
                     n => format!("×{n}"),
                 }}</span>
             </span>

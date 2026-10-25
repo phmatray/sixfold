@@ -1,9 +1,10 @@
 // Run: node tools/check-maps.mjs web/world
 // Check every map: each edge exit has a matching exit back, the edge tiles of both
 // spans are walkable, every warp and exit leads to a map that exists, and no NPC
-// stands on a solid tile or a blocking prop.
+// stands on a solid tile or a blocking prop. Every player-facing string (lines, text, label,
+// locked, title, and an interaction's speaker name) has a French `x_fr` twin of the same shape.
 import { readFileSync, readdirSync } from "node:fs";
-const dir = process.argv[2];
+const dir = process.argv[2] ?? "web/world";
 const src = readFileSync(`${dir}/props.js`, "utf8");
 const FOOT = eval(`(${src.match(/export const FOOT = (\{[\s\S]*?\});/)[1]})`);
 const DECK = eval(`(${src.match(/export const DECK = (\{[\s\S]*?\});/)[1]})`);
@@ -11,7 +12,23 @@ const WALKABLE = new Set(["rug", "exit_mat", ...Object.keys(DECK)]);
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
 const maps = Object.fromEntries(readdirSync(`${dir}/maps`).map((f) => [f.replace(".json", ""), JSON.parse(readFileSync(`${dir}/maps/${f}`, "utf8"))]));
 const fail = [];
+const SAID = ["lines", "text", "label", "locked", "title"];
+const said = (v) => typeof v === "string" || (Array.isArray(v) && v.every((s) => typeof s === "string"));
+const french = (o, at, also = []) => {
+  if (Array.isArray(o)) return o.forEach((v, i) => french(v, `${at}[${i}]`, also));
+  if (!o || typeof o !== "object") return;
+  for (const [k, v] of Object.entries(o)) {
+    if (k.endsWith("_fr")) {
+      const en = o[k.slice(0, -3)], ok = (s) => typeof s === "string" && s.trim() !== "";
+      if (en === undefined) fail.push(`${at}.${k} has no English ${k.slice(0, -3)}`);
+      else if (Array.isArray(en) ? !Array.isArray(v) || v.length !== en.length || !v.every(ok) : !ok(v)) fail.push(`${at}.${k} does not match the shape of ${k.slice(0, -3)}`);
+    } else if ([...SAID, ...also].includes(k) && said(v)) {
+      if (!(`${k}_fr` in o)) fail.push(`${at}.${k} has no ${k}_fr`);
+    } else french(v, `${at}.${k}`, k === "interactions" ? ["name"] : []);
+  }
+};
 for (const [name, m] of Object.entries(maps)) {
+  french(m, name);
   const solid = new Set();
   m.tiles.forEach((row, z) => [...row].forEach((c, x) => "#fWV~".includes(c) && solid.add(`${x},${z}`)));
   for (const p of m.props) {

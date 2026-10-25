@@ -33,7 +33,7 @@ const FIDGET_AFTER = 6; // seconds idle before the hero fidgets and the camera l
 const FADE = 350; // ms, warp fade
 const DIR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }; // n = away from the camera
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
-const KEYS = { w: "n", arrowup: "n", s: "s", arrowdown: "s", a: "w", arrowleft: "w", d: "e", arrowright: "e" };
+const KEYS = { w: "n", z: "n", arrowup: "n", s: "s", arrowdown: "s", a: "w", q: "w", arrowleft: "w", d: "e", arrowright: "e" }; // WASD and AZERTY ZQSD
 const angle = (f) => Math.atan2(DIR[f][0], DIR[f][1]);
 const key = (x, z) => `${x},${z}`;
 const SUFFIX_ARMS = { "": [[-1, 0], [1, 0]], _corner: [[-1, 0], [0, 1]], _end: [[-1, 0]], _t: [[-1, 0], [1, 0], [0, 1]] }; // rot-0 arms
@@ -50,10 +50,22 @@ const loadAsset = (n) => {
   if (!assets.has(n)) assets.set(n, loader.loadAsync(new URL(`assets/${folder(n)}${n}.glb`, BASE).href).catch(() => null));
   return assets.get(n);
 };
+// French when the page is (the app sets <html lang>): a map's `x_fr` replaces its `x`.
+const FR = document.documentElement.lang === "fr";
+const tr = (en, fr) => (FR ? fr : en);
+const localize = (o) => {
+  if (Array.isArray(o)) o.forEach(localize);
+  else if (o && typeof o === "object")
+    for (const k of Object.keys(o)) {
+      if (FR && k.endsWith("_fr")) o[k.slice(0, -3)] = o[k];
+      else localize(o[k]);
+    }
+  return o;
+};
 const maps = new Map();
 const loadMap = (name) => {
   if (!maps.has(name))
-    maps.set(name, fetch(new URL(`maps/${name}.json`, BASE)).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`map ${name}: HTTP ${r.status}`)))));
+    maps.set(name, fetch(new URL(`maps/${name}.json`, BASE)).then((r) => (r.ok ? r.json().then(localize) : Promise.reject(new Error(`map ${name}: HTTP ${r.status}`)))));
   return maps.get(name);
 };
 const OPTIONAL = /_b$|_c$|_dark$/; // variants: used when present, never missed
@@ -122,8 +134,8 @@ export function mount(el, controls, cb, start) {
   const pad = document.createElement("div");
   pad.className = "world-pad";
   pad.setAttribute("role", "group");
-  pad.setAttribute("aria-label", "Walk");
-  for (const [f, label] of [["n", "Up"], ["w", "Left"], ["e", "Right"], ["s", "Down"]]) {
+  pad.setAttribute("aria-label", tr("Walk", "Marcher"));
+  for (const [f, label] of [["n", tr("Up", "Haut")], ["w", tr("Left", "Gauche")], ["e", tr("Right", "Droite")], ["s", tr("Down", "Bas")]]) {
     const b = document.createElement("button");
     b.type = "button";
     b.innerHTML = arrow;
@@ -135,7 +147,7 @@ export function mount(el, controls, cb, start) {
   const run = document.createElement("button");
   run.type = "button";
   run.className = "world-run";
-  run.textContent = "Run";
+  run.textContent = tr("Run", "Courir");
   run.hidden = true;
   run.setAttribute("aria-pressed", "false");
   run.addEventListener("click", () => {
@@ -148,7 +160,8 @@ export function mount(el, controls, cb, start) {
   const legend = document.createElement("div");
   legend.className = "world-legend";
   legend.hidden = true;
-  legend.innerHTML = '<span class="k-block">Blocked</span><span class="k-act">Look or use</span><span class="k-warp">Door</span><span class="k-npc">Person</span>';
+  legend.innerHTML = tr('<span class="k-block">Blocked</span><span class="k-act">Look or use</span><span class="k-warp">Door</span><span class="k-npc">Person</span>',
+    '<span class="k-block">Bloqué</span><span class="k-act">Regarder ou utiliser</span><span class="k-warp">Porte</span><span class="k-npc">Personne</span>');
   // The area's name, shown for a moment on the way in.
   const banner = document.createElement("div");
   banner.setAttribute("aria-hidden", "true");
@@ -297,7 +310,7 @@ export function mount(el, controls, cb, start) {
     const it = w.talk.get(key(fx, fz));
     if (it) return it;
     const wp = w.warps.get(key(fx, fz));
-    if (wp && !wp.dir) return opens(wp) ? { kind: "warp", text: wp.label ?? "Go in", warp: wp } : { kind: "locked", text: wp.locked ?? "It won't open." };
+    if (wp && !wp.dir) return opens(wp) ? { kind: "warp", text: wp.label ?? tr("Go in", "Entrer"), warp: wp } : { kind: "locked", text: wp.locked ?? tr("It won't open.", "Ça ne s'ouvre pas.") };
     return null;
   }
 

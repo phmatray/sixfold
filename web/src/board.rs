@@ -1,7 +1,7 @@
 //! The playmat: both sides (Active, Bench, prizes, deck, discard) and the hand.
 
 use leptos::prelude::*;
-use sixfold_engine::{card, Action, CardId, Game, Poison, Special, Status, MAX_BENCH};
+use sixfold_engine::{card, fr, tr, Action, CardId, Game, Poison, Special, Status, MAX_BENCH};
 
 use crate::cards::{energy_pips, CardBack, CardFace};
 use crate::ctl::{Ctl, HUMAN};
@@ -50,12 +50,34 @@ pub fn find_mon(g: &Game, player: usize, uid: u32) -> Option<Mon> {
         let e = side.effects;
         effects.extend(e.placed.map(|p| p.to_string()));
         effects.extend(e.shield.map(|s| s.to_string()));
-        effects.extend(e.weakness.map(|c| format!("Weakness is now {c}")));
-        effects.extend(e.resistance.map(|c| format!("Resistance is now {c}")));
+        effects.extend(e.weakness.map(|c| {
+            tr(
+                format!("Weakness is now {c}"),
+                format!("Sa Faiblesse devient {c}"),
+            )
+        }));
+        effects.extend(e.resistance.map(|c| {
+            tr(
+                format!("Resistance is now {c}"),
+                format!("Sa Résistance devient {c}"),
+            )
+        }));
         if e.doubling_pending {
-            effects.push("Its next attack does double damage".into());
+            effects.push(
+                tr(
+                    "Its next attack does double damage",
+                    "Sa prochaine attaque inflige le double de dégâts",
+                )
+                .into(),
+            );
         } else if e.doubled {
-            effects.push("Its attack does double damage this turn".into());
+            effects.push(
+                tr(
+                    "Its attack does double damage this turn",
+                    "Son attaque inflige le double de dégâts ce tour-ci",
+                )
+                .into(),
+            );
         }
     }
     let cr = c.creature();
@@ -84,15 +106,15 @@ pub fn status_class(s: Status) -> &'static str {
 }
 
 pub fn slot_name(player: usize, slot: usize) -> String {
-    let whose = if player == HUMAN {
-        "Your"
-    } else {
-        "Opponent's"
-    };
-    if slot == 0 {
-        format!("{whose} Active")
-    } else {
-        format!("{whose} Bench {slot}")
+    match (player == HUMAN, slot, fr()) {
+        (true, 0, false) => "Your Active".into(),
+        (false, 0, false) => "Opponent's Active".into(),
+        (true, _, false) => format!("Your Bench {slot}"),
+        (false, _, false) => format!("Opponent's Bench {slot}"),
+        (true, 0, true) => "Votre Active".into(),
+        (false, 0, true) => "Active adverse".into(),
+        (true, _, true) => format!("Votre Banc {slot}"),
+        (false, _, true) => format!("Banc adverse {slot}"),
     }
 }
 
@@ -167,18 +189,23 @@ pub fn Creature(player: usize, uid: u32) -> impl IntoView {
     };
     let label = move || {
         if hidden() {
-            return "Face-down creature".to_string();
+            return tr("Face-down creature", "Créature face cachée").to_string();
         }
         mon.with(|m| {
             m.as_ref().map_or(String::new(), |m| {
-                let mut s = format!(
-                    "{}, {}, {} of {} HP, {} energy",
+                let (face, slot, hp, max, n) = (
                     crate::cards::face_text(m.top),
                     slot_name(player, m.slot),
                     hp(),
                     m.max,
-                    m.energy.len()
+                    m.energy.len(),
                 );
+                let mut s = if fr() {
+                    let e = if n <= 1 { "énergie" } else { "énergies" };
+                    format!("{face}, {slot}, {hp} PV sur {max}, {n} {e}")
+                } else {
+                    format!("{face}, {slot}, {hp} of {max} HP, {n} energy")
+                };
                 for st in &m.statuses {
                     s.push_str(&format!(", {st}"));
                 }
@@ -239,13 +266,13 @@ pub fn Creature(player: usize, uid: u32) -> impl IntoView {
                         let effects = (!m.effects.is_empty()).then(|| {
                             let all = m.effects.join(". ");
                             let n = m.effects.len();
-                            view! { <span class="badge effect" title=all>{if n == 1 { "1 effect".to_string() } else { format!("{n} effects") }}</span> }
+                            view! { <span class="badge effect" title=all>{match (n, fr()) { (1, false) => "1 effect".to_string(), (_, false) => format!("{n} effects"), (1, true) => "1 effet".to_string(), _ => format!("{n} effets") }}</span> }
                         });
                         let trainers = m.trainers.iter().map(|&t| view! {
-                            <span class="badge tool" title=card(t).name>{card(t).name}</span>
+                            <span class="badge tool" title=card(t).label()>{card(t).label()}</span>
                         }).collect_view();
                         let power = (m.power == Some(false)).then(|| view! {
-                            <span class="badge off" title="This creature's Power is not working">"Power off"</span>
+                            <span class="badge off" title=tr("This creature's Power is not working", "Le Pouvoir de cette créature est bloqué")>{tr("Power off", "Pouvoir bloqué")}</span>
                         });
                         (statuses, effects, trainers, power)
                     }))}
@@ -302,7 +329,24 @@ pub fn SideRow(player: usize) -> impl IntoView {
             .unwrap_or_default()
     });
     let me = player == HUMAN;
-    let who = if me { "Your" } else { "Opponent's" };
+    // (English possessive, French with the noun) for each pile's label.
+    let side = |en: &str, mine: &str, theirs: &str| {
+        if fr() {
+            if me {
+                mine.to_string()
+            } else {
+                theirs.to_string()
+            }
+        } else {
+            format!("{} {en}", if me { "Your" } else { "Opponent's" })
+        }
+    };
+    let side_label = side("side", "Votre côté", "Côté adverse");
+    let prizes_label = side("prizes", "Vos Récompenses", "Récompenses adverses");
+    let deck_label = side("deck", "Votre deck", "Deck adverse");
+    let discard_label = side("discard pile", "Votre défausse", "Défausse adverse");
+    let active_label = side("Active spot", "Votre zone Active", "Zone Active adverse");
+    let bench_label = side("Bench", "Votre Banc", "Banc adverse");
     let prize_list = move || {
         info.with(|i| {
             i.prizes
@@ -320,10 +364,13 @@ pub fn SideRow(player: usize) -> impl IntoView {
     view! {
         <section
             class=move || format!("side {} {}", if me { "me" } else { "opp" }, if info.with(|i| i.turn) { "on-turn" } else { "" })
-            aria-label=format!("{who} side")
+            aria-label=side_label
         >
             <div class="rail">
-                <div class="prizes" role="img" aria-label=move || format!("{who} prizes: {} left", info.with(|i| i.prizes.iter().filter(|p| **p).count()))>
+                <div class="prizes" role="img" aria-label=move || {
+                    let n = info.with(|i| i.prizes.iter().filter(|p| **p).count());
+                    tr(format!("{prizes_label}: {n} left"), format!("{prizes_label} restantes : {n}"))
+                }>
                     <For
                         each=prize_list
                         key=|p| *p
@@ -333,7 +380,7 @@ pub fn SideRow(player: usize) -> impl IntoView {
                     />
                 </div>
                 <div class="piles">
-                    <div class="pile deck" role="img" aria-label=move || format!("{who} deck: {}", cards(info.with(|i| i.deck)))>
+                    <div class="pile deck" role="img" aria-label=move || format!("{deck_label}{}{}", tr(": ", " : "), cards(info.with(|i| i.deck)))>
                         <div class="pile-card" style=move || format!("--depth:{}", info.with(|i| i.deck.div_ceil(8)))>
                             {move || (info.with(|i| i.deck) > 0).then(|| view! { <CardBack /> })}
                         </div>
@@ -341,7 +388,10 @@ pub fn SideRow(player: usize) -> impl IntoView {
                     </div>
                     <button
                         class="pile discard"
-                        aria-label=move || format!("{who} discard pile: {}. Open", cards(info.with(|i| i.discard)))
+                        aria-label=move || {
+                            let n = cards(info.with(|i| i.discard));
+                            tr(format!("{discard_label}: {n}. Open"), format!("{discard_label} : {n}. Ouvrir"))
+                        }
                         on:click=move |_| ui.discard.set(Some(player))
                     >
                         <div class="pile-card">
@@ -350,7 +400,10 @@ pub fn SideRow(player: usize) -> impl IntoView {
                         <span class="pile-count">{move || info.with(|i| i.discard)}</span>
                     </button>
                     {(!me).then(|| view! {
-                        <div class="pile hand-count" role="img" aria-label=move || format!("Opponent's hand: {}", cards(info.with(|i| i.hand)))>
+                        <div class="pile hand-count" role="img" aria-label=move || {
+                            let n = cards(info.with(|i| i.hand));
+                            tr(format!("Opponent's hand: {n}"), format!("Main adverse : {n}"))
+                        }>
                             <div class="mini-fan">
                                 <For
                                     each=opp_backs
@@ -363,16 +416,16 @@ pub fn SideRow(player: usize) -> impl IntoView {
                     })}
                 </div>
                 {move || info.with(|i| i.trainer_locked).then(|| view! {
-                    <span class="badge effect">"No trainers this turn"</span>
+                    <span class="badge effect">{tr("No trainers this turn", "Pas de Dresseur ce tour")}</span>
                 })}
             </div>
-            <div class="active-spot" role="group" aria-label=format!("{who} Active spot")>
+            <div class="active-spot" role="group" aria-label=active_label>
                 {move || match info.with(|i| i.active) {
                     Some(uid) => view! { <Creature player=player uid=uid /> }.into_any(),
-                    None => view! { <div class="slot-empty active-empty"><span>"Active"</span></div> }.into_any(),
+                    None => view! { <div class="slot-empty active-empty"><span>{tr("Active", "Active")}</span></div> }.into_any(),
                 }}
             </div>
-            <div class="bench" role="group" aria-label=format!("{who} Bench")>
+            <div class="bench" role="group" aria-label=bench_label>
                 <For
                     each=move || info.with(|i| i.bench.clone())
                     key=|uid| *uid
@@ -412,7 +465,10 @@ pub fn Hand() -> impl IntoView {
     });
     view! {
         <div class="hand-wrap" data-focus-home="">
-            <ul class="hand" aria-label=move || format!("Your hand: {}", cards(hand.with(|h| h.len())))>
+            <ul class="hand" aria-label=move || {
+                let n = cards(hand.with(|h| h.len()));
+                tr(format!("Your hand: {n}"), format!("Votre main : {n}"))
+            }>
                 <For
                     each=move || hand.get()
                     key=|k| *k
@@ -462,7 +518,7 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
                 class:playable=playable
                 class:selected=selected
                 aria-pressed=move || selected().to_string()
-                aria-label=move || format!("{face}{}", if playable() { ", playable" } else { "" })
+                aria-label=move || format!("{face}{}", if playable() { tr(", playable", ", jouable") } else { "" })
                 on:click=move |_| {
                     if long.get_value() {
                         long.set_value(false);
@@ -490,11 +546,12 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
     }
 }
 
-/// "1 card", "3 cards".
+/// "1 card", "3 cards" ("0 carte", "1 carte", "3 cartes" in French).
 pub fn cards(n: usize) -> String {
-    if n == 1 {
-        "1 card".to_string()
-    } else {
-        format!("{n} cards")
+    match (n, fr()) {
+        (1, false) => "1 card".to_string(),
+        (_, false) => format!("{n} cards"),
+        (0 | 1, true) => format!("{n} carte"),
+        _ => format!("{n} cartes"),
     }
 }
