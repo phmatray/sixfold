@@ -2,7 +2,7 @@
 
 use std::collections::{BTreeMap, HashMap};
 
-use crate::card::{card, try_card, CardId, CardKind, Color, EnergyCard};
+use crate::card::{card, try_card, CardId, CardKind, Color, EnergyCard, Stage};
 use crate::collection::{counts_body, parse_counts, sign, unsign, Collection, LoadError};
 
 /// The deck-list save string version this build writes and reads.
@@ -22,16 +22,30 @@ pub enum DeckError {
     TooManyCopies(&'static str),
 }
 
+/// The first rule the deck breaks (see [`deck_errors`]).
 pub fn validate_deck(deck: &[CardId]) -> Result<(), DeckError> {
+    deck_errors(deck).into_iter().next().map_or(Ok(()), Err)
+}
+
+/// Every rule the deck breaks, in this order: its size, unknown cards, no
+/// Basic, then each name over the 4-copy limit (in the order they go over).
+pub fn deck_errors(deck: &[CardId]) -> Vec<DeckError> {
+    let mut errors = vec![];
     if deck.len() != DECK_SIZE {
-        return Err(DeckError::WrongSize(deck.len()));
+        errors.push(DeckError::WrongSize(deck.len()));
     }
-    let defs = deck
-        .iter()
-        .map(|&id| try_card(id).ok_or(DeckError::UnknownCard(id)))
-        .collect::<Result<Vec<_>, _>>()?;
+    let mut defs = vec![];
+    for &id in deck {
+        match try_card(id) {
+            Some(d) => defs.push(d),
+            None if !errors.contains(&DeckError::UnknownCard(id)) => {
+                errors.push(DeckError::UnknownCard(id))
+            }
+            None => {}
+        }
+    }
     if !defs.iter().any(|d| d.is_basic()) {
-        return Err(DeckError::NoBasic);
+        errors.push(DeckError::NoBasic);
     }
     let mut copies: HashMap<&str, usize> = HashMap::new();
     for d in defs {
@@ -40,11 +54,98 @@ pub fn validate_deck(deck: &[CardId]) -> Result<(), DeckError> {
         }
         let n = copies.entry(d.name).or_default();
         *n += 1;
-        if *n > MAX_COPIES {
-            return Err(DeckError::TooManyCopies(d.name));
+        if *n == MAX_COPIES + 1 {
+            errors.push(DeckError::TooManyCopies(d.name));
         }
     }
-    Ok(())
+    errors
+}
+
+/// Below this many Basics, opening hands without one (and mulligans) get common.
+pub const FEW_BASICS: usize = 8;
+/// A 60-card deck with fewer energy cards than this stalls its attacks…
+pub const FEW_ENERGY: usize = 18;
+/// …and with more, draws too few Hexons and trainers.
+pub const MUCH_ENERGY: usize = 32;
+
+/// What a deck is made of, for the editor's composition hints.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Hints {
+    pub total: usize,
+    /// Real Basic Hexons (they count for R-DECK-02 and opening hands).
+    pub basics: usize,
+    pub stage1: usize,
+    pub stage2: usize,
+    /// Trainers, Trainers-as-Basic included.
+    pub trainers: usize,
+    /// Energy cards, basic and special.
+    pub energy: usize,
+    /// Evolutions whose pre-evolution isn't in the deck, so they can never
+    /// be played (R-EVO-01); each once, in deck order.
+    pub stranded: Vec<CardId>,
+}
+
+/// Advice on a deck's balance, from its [`Hints`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Advice {
+    /// Fewer than [`FEW_BASICS`] Basics (how many it has).
+    FewBasics(usize),
+    /// Fewer than [`FEW_ENERGY`] energy cards.
+    FewEnergy(usize),
+    /// More than [`MUCH_ENERGY`] energy cards.
+    MuchEnergy(usize),
+    /// This evolution's pre-evolution isn't in the deck.
+    Stranded(CardId),
+}
+
+/// The composition of a deck list (unknown ids are skipped).
+pub fn hints(deck: &[CardId]) -> Hints {
+    let mut h = Hints {
+        total: deck.len(),
+        ..Hints::default()
+    };
+    let has = |name: &str| {
+        deck.iter()
+            .any(|&id| try_card(id).is_some_and(|d| d.name == name))
+    };
+    for &id in deck {
+        let Some(d) = try_card(id) else { continue };
+        match &d.kind {
+            CardKind::Creature(c) => {
+                match c.stage {
+                    Stage::Basic => h.basics += 1,
+                    Stage::Stage1 => h.stage1 += 1,
+                    Stage::Stage2 => h.stage2 += 1,
+                }
+                if c.evolves_from.is_some_and(|f| !has(f)) && !h.stranded.contains(&id) {
+                    h.stranded.push(id);
+                }
+            }
+            CardKind::Trainer(_) | CardKind::TrainerBasic(_) => h.trainers += 1,
+            CardKind::Energy(_) => h.energy += 1,
+        }
+    }
+    h
+}
+
+impl Hints {
+    /// What to look at. The balance (Basics, energy) is judged once the deck
+    /// has its 60 cards; a stranded evolution is worth saying at any size.
+    pub fn advice(&self) -> Vec<Advice> {
+        let mut a = vec![];
+        if self.total >= DECK_SIZE {
+            if self.basics < FEW_BASICS {
+                a.push(Advice::FewBasics(self.basics));
+            }
+            if self.energy < FEW_ENERGY {
+                a.push(Advice::FewEnergy(self.energy));
+            } else if self.energy > MUCH_ENERGY {
+                a.push(Advice::MuchEnergy(self.energy));
+            }
+        }
+        a.extend(self.stranded.iter().map(|&id| Advice::Stranded(id)));
+        a
+    }
 }
 
 /// A deck a player builds from their [`Collection`].
@@ -121,6 +222,69 @@ impl DeckList {
             Some(&(id, _)) => Err(DeckListError::NotOwned(id)),
             None => Ok(()),
         }
+    }
+
+    /// Every reason the deck can't be played: the rules it breaks
+    /// ([`deck_errors`]), then each card it uses more copies of than owned.
+    pub fn problems(&self, owned: &Collection) -> Vec<DeckListError> {
+        let mut p: Vec<_> = deck_errors(&self.cards)
+            .into_iter()
+            .map(DeckListError::Illegal)
+            .collect();
+        p.extend(
+            owned
+                .missing(&self.cards)
+                .into_iter()
+                .filter(|&(id, _)| try_card(id).is_some())
+                .map(|(id, _)| DeckListError::NotOwned(id)),
+        );
+        p
+    }
+
+    /// Fixes one problem where there is an obvious fix: too few cards fills
+    /// with basic energy ([`fill_energy`](Self::fill_energy)), too many takes
+    /// basic energy out (the most-used colour first), the extras over the
+    /// 4-copy limit or over what is owned go, unknown cards go. No Basic has
+    /// no fix here (the player picks one). True when the deck changed.
+    pub fn repair(&mut self, e: DeckListError, owned: &Collection) -> bool {
+        let before = self.cards.clone();
+        match e {
+            DeckListError::Illegal(DeckError::WrongSize(n)) if n < DECK_SIZE => {
+                self.fill_energy();
+            }
+            DeckListError::Illegal(DeckError::WrongSize(_)) => {
+                while self.cards.len() > DECK_SIZE {
+                    let most = self
+                        .counts()
+                        .into_iter()
+                        .filter(|&(id, _)| card(id).is_basic_energy())
+                        .max_by_key(|&(_, n)| n);
+                    match most {
+                        Some((id, _)) => self.remove(id),
+                        None => break,
+                    };
+                }
+            }
+            DeckListError::Illegal(DeckError::UnknownCard(id)) => self.cards.retain(|&c| c != id),
+            DeckListError::Illegal(DeckError::NoBasic) => {}
+            DeckListError::Illegal(DeckError::TooManyCopies(name)) => {
+                let mut keep = MAX_COPIES;
+                self.cards.retain(|&c| {
+                    if try_card(c).is_none_or(|d| d.name != name) {
+                        return true;
+                    }
+                    let kept = keep > 0;
+                    keep = keep.saturating_sub(1);
+                    kept
+                });
+            }
+            DeckListError::NotOwned(id) => {
+                while self.cards.iter().filter(|&&c| c == id).count() > owned.count(id) {
+                    self.remove(id);
+                }
+            }
+        }
+        self.cards != before
     }
 
     /// Cards with this name in the deck (the 4-copy rule counts names).
@@ -495,5 +659,151 @@ mod deck_list_tests {
             (d.cards, dropped),
             (vec![CINDREL; 2], vec![(CardId(9999), 1)])
         );
+    }
+}
+
+#[cfg(test)]
+mod hint_tests {
+    use super::*;
+    use crate::collection::starter_collection;
+    use crate::decks::PREBUILT;
+    use crate::fixtures::*;
+
+    fn list(cards: &[CardId]) -> DeckList {
+        DeckList {
+            name: "Test".into(),
+            cards: cards.to_vec(),
+        }
+    }
+
+    #[test]
+    fn hints_count_the_deck_and_find_stranded_evolutions() {
+        let h = hints(&[
+            MOSSLING,
+            MOSSLING,
+            MOSSGIANT,
+            GREETER_ELDER,
+            STRAW_DECOY,
+            FIELD_NOTES,
+            GRASS_E,
+            GRASS_E,
+            TWIN_E,
+        ]);
+        assert_eq!(
+            (h.basics, h.stage1, h.stage2, h.trainers, h.energy),
+            (2, 1, 1, 2, 3)
+        );
+        // Mossgiant needs Mossback (absent); Greeter Elder needs Greeter.
+        assert_eq!(h.stranded, vec![MOSSGIANT, GREETER_ELDER]);
+        let h = hints(&[MOSSLING, MOSSBACK, MOSSGIANT, GREETER, GREETER_ELDER]);
+        assert!(h.stranded.is_empty());
+        assert_eq!(hints(&[]), Hints::default());
+    }
+
+    #[test]
+    fn hints_advise_on_basics_energy_and_lines() {
+        // Every prebuilt deck is sound: no advice at all.
+        for p in PREBUILT {
+            assert_eq!(hints(&p.cards()).advice(), vec![], "{}", p.name.get());
+        }
+        let mut d = vec![MOSSLING, MOSSGIANT];
+        d.resize(DECK_SIZE, FIELD_NOTES);
+        let a = hints(&d).advice();
+        assert_eq!(
+            a,
+            vec![
+                Advice::FewBasics(1),
+                Advice::FewEnergy(0),
+                Advice::Stranded(MOSSGIANT)
+            ]
+        );
+        let mut d = vec![MOSSLING; 8];
+        d.resize(DECK_SIZE, GRASS_E);
+        assert_eq!(hints(&d).advice(), vec![Advice::MuchEnergy(52)]);
+        // Too early to judge a deck that has barely started.
+        assert_eq!(hints(&[MOSSLING]).advice(), vec![]);
+    }
+
+    #[test]
+    fn deck_errors_lists_every_broken_rule() {
+        let mut d = vec![MOSSBACK; 5];
+        d.extend([FIELD_NOTES; 6]);
+        assert_eq!(
+            deck_errors(&d),
+            vec![
+                DeckError::WrongSize(11),
+                DeckError::NoBasic,
+                DeckError::TooManyCopies("Mossback"),
+                DeckError::TooManyCopies("Field Notes"),
+            ]
+        );
+        assert_eq!(validate_deck(&d), Err(DeckError::WrongSize(11)));
+        assert_eq!(deck_errors(&deck()), vec![]);
+    }
+
+    #[test]
+    fn problems_add_what_the_collection_lacks() {
+        let mut owned = Collection::new();
+        owned.add(MOSSLING, 2);
+        let mut d = vec![MOSSLING; 3];
+        d.resize(DECK_SIZE, GRASS_E);
+        assert_eq!(
+            list(&d).problems(&owned),
+            vec![DeckListError::NotOwned(MOSSLING)]
+        );
+        d.push(FIELD_NOTES);
+        assert_eq!(
+            list(&d).problems(&owned),
+            vec![
+                DeckListError::Illegal(DeckError::WrongSize(61)),
+                DeckListError::NotOwned(MOSSLING),
+                DeckListError::NotOwned(FIELD_NOTES),
+            ]
+        );
+        assert_eq!(list(&d).validate(&owned), Err(d_err(61)));
+        let starter = list(&crate::decks::STARTER.cards());
+        assert_eq!(starter.problems(&starter_collection()), vec![]);
+    }
+
+    fn d_err(n: usize) -> DeckListError {
+        DeckListError::Illegal(DeckError::WrongSize(n))
+    }
+
+    #[test]
+    fn repair_fixes_what_it_can() {
+        let mut owned = Collection::new();
+        owned.add(MOSSLING, 9);
+        owned.add(FIELD_NOTES, 9);
+        // Too few: energy fills it to 60.
+        let mut d = list(&[MOSSLING; 4]);
+        assert!(d.repair(d_err(4), &owned));
+        assert_eq!(d.cards.len(), DECK_SIZE);
+        // Too many: basic energy comes out, nothing else.
+        d.cards.extend([MOSSLING, GRASS_E, GRASS_E]);
+        assert!(d.repair(d_err(63), &owned));
+        assert_eq!((d.cards.len(), d.copies("Mossling")), (DECK_SIZE, 5));
+        // Over the 4-copy limit: the extras go.
+        assert!(d.repair(
+            DeckListError::Illegal(DeckError::TooManyCopies("Mossling")),
+            &owned
+        ));
+        assert_eq!(d.copies("Mossling"), 4);
+        // More than owned: down to what the collection holds.
+        let mut few = Collection::new();
+        few.add(MOSSLING, 1);
+        assert!(d.repair(DeckListError::NotOwned(MOSSLING), &few));
+        assert_eq!(d.copies("Mossling"), 1);
+        // No Basic: nothing to do here (the editor shows the Basics instead),
+        // and too many with no basic energy to take out.
+        let mut none = list(&[FIELD_NOTES; 61]);
+        assert!(!none.repair(DeckListError::Illegal(DeckError::NoBasic), &owned));
+        assert!(!none.repair(d_err(61), &owned));
+        assert_eq!(none.cards.len(), 61);
+        let mut unknown = list(&[MOSSLING, CardId(9999)]);
+        assert!(unknown.repair(
+            DeckListError::Illegal(DeckError::UnknownCard(CardId(9999))),
+            &owned
+        ));
+        assert_eq!(unknown.cards, vec![MOSSLING]);
     }
 }

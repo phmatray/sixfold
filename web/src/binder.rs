@@ -70,6 +70,9 @@ pub fn RarityMark(rarity: Rarity) -> impl IntoView {
 pub enum Kind {
     All,
     Creature,
+    /// Basic Hexons only (Trainers-as-Basic aside): the deck editor's fix for
+    /// a deck with none.
+    Basic,
     Trainer,
     Energy,
 }
@@ -121,7 +124,11 @@ impl Filters {
                 };
                 let has = owned.count(id) > 0;
                 color.is_none_or(|c| card_color(def) == Some(c))
-                    && (kind == Kind::All || kind == k)
+                    && match kind {
+                        Kind::All => true,
+                        Kind::Basic => def.is_basic(),
+                        k2 => k2 == k,
+                    }
                     && rarity.is_none_or(|r| def.rarity == r)
                     && match own {
                         Own::All => true,
@@ -164,6 +171,7 @@ pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView 
     let kind_value = move || match f.kind.get() {
         Kind::All => "all",
         Kind::Creature => "creature",
+        Kind::Basic => "basic",
         Kind::Trainer => "trainer",
         Kind::Energy => "energy",
     };
@@ -196,10 +204,11 @@ pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView 
                 <label class="field">
                     <span>{tr("Kind", "Type")}</span>
                     <select name="kind" prop:value=kind_value on:change=move |e| f.kind.set(match event_target_value(&e).as_str() {
-                        "creature" => Kind::Creature, "trainer" => Kind::Trainer, "energy" => Kind::Energy, _ => Kind::All,
+                        "creature" => Kind::Creature, "basic" => Kind::Basic, "trainer" => Kind::Trainer, "energy" => Kind::Energy, _ => Kind::All,
                     })>
                         <option value="all">{tr("All kinds", "Tous les types")}</option>
                         <option value="creature">{tr("Hexons", "Hexons")}</option>
+                        <option value="basic">{tr("Basic Hexons", "Hexons de Base")}</option>
                         <option value="trainer">{tr("Trainers", "Dresseurs")}</option>
                         <option value="energy">{tr("Energy", "Énergies")}</option>
                     </select>
