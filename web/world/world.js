@@ -292,11 +292,13 @@ export function mount(el, controls, cb, start, edit = false) {
     refresh(world, holds, gate, animate);
     if (world.gateSound !== undefined) sound(world.gateSound ? "gate" : "door"), (world.gateSound = undefined);
   };
-  // The music for the map and the hour: a region's track, its night variant after dark.
+  // The music for the map and the hour: a region's track, its night variant after dark;
+  // under it the region's ambience bed (a map may name another with `ambience`).
   const tune = () => {
-    const m = world.map;
+    const m = world.map, phase = phaseOf(minute);
     const track = m.light.indoor ? "interior" : m.dark ? "cave" : m.music ?? "overworld";
-    globalThis.sixfoldAudio?.music(!m.light.indoor && !m.dark && phaseOf(minute) === "night" ? `${track}_night` : track);
+    globalThis.sixfoldAudio?.music(!m.light.indoor && !m.dark && phase === "night" ? `${track}_night` : track);
+    globalThis.sixfoldAudio?.ambience(m.ambience ?? track, phase);
   };
   // Tell Rust the time (it saves it); at a new phase, what is out at this hour changes.
   const tick = (dt) => {
@@ -697,6 +699,7 @@ export function mount(el, controls, cb, start, edit = false) {
 
   const stop = () => {
     alive = false;
+    globalThis.sixfoldAudio?.ambience("");
     stopEditor();
     previewStop();
     cancelAnimationFrame(raf);
