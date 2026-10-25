@@ -247,6 +247,7 @@ pub fn CampaignPanel(
             <h2 id="ladder-title">{tr("After the campaign", "Après la campagne")}</h2>
             <Ladder back=back before=before />
         </section>
+        <crate::achievements::RecordsLink back=back before=before />
     }
 }
 

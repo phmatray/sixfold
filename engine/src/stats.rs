@@ -183,7 +183,8 @@ impl Stats {
     }
 
     /// Count what changed between two moments of the world: Facets in and
-    /// out, packs opened, game minutes and nightfalls, daily duels won, finds.
+    /// out, packs opened, cards sold, game minutes and nightfalls, daily duels
+    /// won, finds.
     pub fn observe(&mut self, before: (&Progress, &Profile), after: (&Progress, &Profile)) {
         let ((p0, f0), (p1, f1)) = (before, after);
         let (c0, c1) = (u64::from(p0.coins()), u64::from(p1.coins()));
@@ -191,6 +192,9 @@ impl Stats {
         self.add("coins_out", c0.saturating_sub(c1));
         let (w0, w1) = (f0.wallet.total(), f1.wallet.total());
         self.add("packs", w0.saturating_sub(w1).into());
+        // Only the shop takes cards out of the collection.
+        let cards = |f: &Profile| f.collection.iter().map(|(_, n)| n as u64).sum::<u64>();
+        self.add("sold", cards(f0).saturating_sub(cards(f1)));
         let mins = (p1.minute() + clock::DAY - p0.minute()) % clock::DAY;
         self.add("minutes", mins.into());
         self.add(
@@ -492,6 +496,12 @@ mod tests {
         p2.set_minute(60);
         s.observe((&p1, &f1), (&p2, &f1));
         assert_eq!((s.get("coins_out"), s.get("nights")), (100, 1));
+        // Cards sold to the trader.
+        let mut f2 = f1.clone();
+        let spare = f2.collection.iter().next().unwrap().0;
+        f2.collection.remove(spare, 1);
+        s.observe((&p2, &f1), (&p2, &f2));
+        assert_eq!(s.get("sold"), 1);
         // A daily duel won on a new day.
         let mut pr = f1.clone();
         crate::endgame::record_daily(&mut p2.clone(), &mut pr, 3, false);

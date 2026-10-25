@@ -1,8 +1,9 @@
 //! Keeps the player's save in localStorage: three slots, each one
 //! [`Save`] envelope (`sixfold.save.<n>`), and the chosen slot
 //! (`sixfold.slot`). The profile and the world's progress are signals in
-//! context, written back into the current slot on every change; where the hero
-//! stands and the last campaign deck are sections of the same save.
+//! context, written back into the current slot on every change, and so are the
+//! play stats; where the hero stands and the last campaign deck are sections
+//! of the same save.
 //!
 //! The first visit after 0.6 moves the old one-key-per-part save into slot 1
 //! (and removes those keys). A slot that no longer reads is copied to
@@ -12,12 +13,13 @@
 //! localStorage can be missing or throw (private mode, blocked storage): then
 //! the save simply lives in memory for this visit, and the indicator says so.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 
 use leptos::prelude::*;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::save::{self, Save, SaveError, Summary, LEGACY_KEYS};
+use sixfold_engine::stats::Stats;
 use sixfold_engine::tr;
 
 pub const SLOTS: usize = 3;
@@ -30,7 +32,14 @@ fn slot_key(n: usize) -> String {
 thread_local! {
     /// The current slot and its save (single-threaded wasm).
     static CURRENT: RefCell<(usize, Save)> = RefCell::new((1, Save::default()));
+    /// Steps walked since the last batch reached the stats.
+    static STEPS: Cell<u64> = const { Cell::new(0) };
+    /// The stats signal, for the world's callbacks (which run outside any owner).
+    static STATS: Cell<Option<RwSignal<Stats>>> = const { Cell::new(None) };
 }
+
+/// Steps reach the stats (and so the save) this many at a time.
+const STEP_BATCH: u64 = 50;
 
 fn storage() -> Option<web_sys::Storage> {
     web_sys::window()?.local_storage().ok().flatten()
@@ -147,8 +156,30 @@ pub fn world_at() -> Option<String> {
 }
 
 pub fn set_world_at(at: &str) {
+    let was = world_at();
     edit(|s| s.set(save::WORLD_AT, at));
     write();
+    walked(was.as_deref().unwrap_or(""), at);
+}
+
+/// Count a step (a new tile on the same map; turning on the spot is none) and
+/// note the map walked into, for the stats.
+fn walked(was: &str, at: &str) {
+    let map = |s: &str| s.split(',').next().unwrap_or("").to_string();
+    let tile = |s: &str| s.rsplit_once(',').map(|(t, _)| t.to_string());
+    let entered = map(was) != map(at);
+    let step = !entered && tile(was) != tile(at);
+    let steps = STEPS.get() + u64::from(step);
+    STEPS.set(steps);
+    if entered || steps >= STEP_BATCH {
+        STEPS.set(0);
+        if let Some(stats) = STATS.get() {
+            stats.update(|s| {
+                s.add("steps", steps);
+                s.visit(&map(at));
+            });
+        }
+    }
 }
 
 pub fn campaign_deck() -> Option<String> {
@@ -204,6 +235,11 @@ pub fn tutorial_done() {
     expect_context::<TutorialDue>().0.set(false);
 }
 
+/// Bumped each time a save is loaded into the signals, so a watcher of the
+/// progress can tell a load from play.
+#[derive(Clone, Copy)]
+pub struct Loaded(pub RwSignal<u32>);
+
 /// A one-off message shown on the title screen (e.g. a save that didn't read).
 #[derive(Clone, Copy)]
 pub struct Notice(pub RwSignal<Option<String>>);
@@ -229,11 +265,14 @@ fn show_current() {
     let progress = expect_context::<RwSignal<Progress>>();
     let notice = expect_context::<Notice>().0;
     let saved = expect_context::<Saved>();
-    let ((p, lost), prog, n, due) =
-        CURRENT.with_borrow(|(n, s)| (s.profile(), s.progress(), *n, s.tutorial_due()));
+    let ((p, lost), prog, n, due, st) =
+        CURRENT.with_borrow(|(n, s)| (s.profile(), s.progress(), *n, s.tutorial_due(), s.stats()));
     expect_context::<TutorialDue>().0.set(due);
+    expect_context::<Loaded>().0.update(|n| *n += 1);
+    STEPS.set(0);
     profile.set(p);
     progress.set(prog);
+    expect_context::<RwSignal<Stats>>().set(st);
     saved.slot.set(n);
     if let Some(note) = lost_note(&lost) {
         notice.set(Some(note));
@@ -300,9 +339,12 @@ pub fn provide() {
         .filter(|n| (1..=SLOTS).contains(n))
         .unwrap_or(1);
     let note = open(slot);
-    let ((p, lost), prog) = CURRENT.with_borrow(|(_, s)| (s.profile(), s.progress()));
+    let ((p, lost), prog, st) =
+        CURRENT.with_borrow(|(_, s)| (s.profile(), s.progress(), s.stats()));
     let profile = RwSignal::new(p);
     let progress = RwSignal::new(prog);
+    let stats = RwSignal::new(st);
+    STATS.set(Some(stats));
     let saved = Saved {
         count: RwSignal::new(0),
         ok: RwSignal::new(true),
@@ -311,6 +353,8 @@ pub fn provide() {
     provide_context(profile);
     provide_context(progress);
     provide_context(saved);
+    provide_context(stats);
+    provide_context(Loaded(RwSignal::new(0)));
     provide_context(TutorialDue(RwSignal::new(
         CURRENT.with_borrow(|(_, s)| s.tutorial_due()),
     )));
@@ -328,6 +372,12 @@ pub fn provide() {
         if first.is_some() {
             saved.ok.set(write());
             saved.count.update(|c| *c += 1);
+        }
+    });
+    Effect::new(move |first: Option<()>| {
+        stats.with(|st| edit(|s| s.set_stats(st)));
+        if first.is_some() {
+            saved.ok.set(write());
         }
     });
 }
