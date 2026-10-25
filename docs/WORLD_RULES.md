@@ -41,6 +41,7 @@ A lamp marks where people go after dark. It never decorates empty ground.
 | 2.3 | Out of town (a `route`, `site` or `cave` map, or a `wild` rect on any map), there are **no street lamps** unless a lamp gives a reason: `"why": "the boathouse door"`. Good reasons are a door, a bridge, a pier, a camp, a shrine, or a town gate at a map edge. | error |
 | 2.4 | The wilderness glows its own way: a campfire, a lantern hung by a door or a boat, glowing mushrooms (`mushroom_ring`), crystals (`crystal_cluster`), moonflowers, floating lanterns. | eye |
 | 2.5 | Budget: only the hero's lantern and the 3 nearest lamps are real lights (`daylight.js` `LIVE`), and every other lamp only glows. Any number of lamps is cheap, but each one still needs a reason. | — |
+| 2.6 | **Light by setting.** Nothing underground could power a street lamp, so a cave (`dark: true`, kind `cave`, or a room with `"cave": true`) has **no `lantern` and no `lamp`**. Natural caves and wild places glow with mushrooms (`glow_mushroom`, `glow_mushroom_tall`, `glow_shelf`), crystals (`crystal_cluster`) and glow plants. A worked mine has miners' oil lanterns hung on its timbers, plus mushrooms. Towns and paths have street lamps. A few mushrooms by the path and at junctions show the way, and a tall cluster or a crystal marks a landmark. | error |
 
 ## 3. Signs — *panneaux*
 
@@ -164,6 +165,8 @@ reward rules (6.3–6.5) apply to every screen. A screen with nothing to stop fo
 - `kind` (outdoor maps): `village`, `town`, `hub`, `route`, `site` or `cave`.
 - `wild` (optional): `[[x0, z0, x1, z1], …]`, rects of wilderness on a town or hub map, where lamps need a `why`.
 - `why` (lantern props): the reason a lamp stands where no street does.
+- `cave` (an interior): a cave room; no lamps (2.6).
+- `glow` (a glow prop): its hue, such as teal `#5fe0c8` on the coast, violet in the Hushlands or amber in the Stonebacks. `light: true` (indoors) gives the prop the room's point light, in that hue.
 
 ## 10. Method — *méthode*
 

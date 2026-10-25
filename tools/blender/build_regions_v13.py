@@ -6,7 +6,7 @@ Headless only:
     blender -b --factory-startup -P tools/blender/build_regions_v13.py -- --region ember,storm \
         [--out web/world/assets] [--only kiln,ash_pine] [--sheets DIR] [--check] [--assets-extra DIR]
 
-  --region  ember, storm, tide, dream, grove, stone (comma separated) or all
+  --region  ember, storm, tide, dream, grove, stone, cave (the shared cave light) (comma separated) or all
   --out     export each prop to <out>/<name>.glb, a region's INTERIOR furniture to <out>/interior/<name>.glb
             (fails on > 3k triangles or > 2 MB, or a stray clip)
   --sheets  DIR/<region>_tiles.png (every prop, front and back 3/4, labelled with footprint and triangles) and
@@ -30,8 +30,8 @@ sys.path.insert(0, HERE)
 import v13_kit as K  # noqa: E402
 from v13_kit import B  # noqa: E402
 
-REGIONS = ("ember", "storm", "tide", "dream", "grove", "stone")
-SEAL = {"ember": "#e1572f", "storm": "#e2ad19", "tide": "#2f7fd0", "dream": "#8a4fc9", "grove": "#3f9a52", "stone": "#a8642f"}
+REGIONS = ("ember", "storm", "tide", "dream", "grove", "stone", "cave")
+SEAL = {"ember": "#e1572f", "storm": "#e2ad19", "tide": "#2f7fd0", "dream": "#8a4fc9", "grove": "#3f9a52", "stone": "#a8642f", "cave": "#5fe0c8"}
 
 
 def build_region(mod, region, only):
