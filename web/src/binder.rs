@@ -7,7 +7,7 @@ use sixfold_engine::profile::Profile;
 use sixfold_engine::{card, fr, set, tr, CardId, CardKind, Collection, Color, Rarity, SortBy};
 
 use crate::art::card_color;
-use crate::cards::{face_text, rarity_key, rarity_label, CardFace, Pip};
+use crate::cards::{rarity_key, rarity_label, CardFace, Pip};
 use crate::overlays::Inspector;
 use crate::{Inspect, Screen, Ui};
 
@@ -330,13 +330,17 @@ fn BinderSlot(id: CardId) -> impl IntoView {
                 format!("{n} possédée{}", if n > 1 { "s" } else { "" }),
             ),
         };
-        format!("{}, {}, {own}", face_text(id), rarity_label(def.rarity))
+        format!(", {}, {own}", rarity_label(def.rarity))
     };
     view! {
         <li class="bind-slot" class:missing=move || count.get() == 0>
-            <button type="button" class="bind-card" aria-label=label
+            // Named by the card's own first words (the rest of a full card
+            // is aria-hidden), then rarity and copies: no aria-label, which
+            // would have to repeat every word a full card prints.
+            <button type="button" class="bind-card"
                 on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
                 <CardFace id=id />
+                <span class="sr-only">{label}</span>
             </button>
             <span class="bind-meta" aria-hidden="true">
                 {if promo {

@@ -98,7 +98,7 @@ pub fn Inspector() -> impl IntoView {
                         <div class="inspect-card" aria-hidden="true"><CardFace id=id /></div>
                         {move || in_play.get().map(|(player, m)| view! {
                             <div class="inplay">
-                                <h4>{slot_name(player, m.slot)}</h4>
+                                <h3>{slot_name(player, m.slot)}</h3>
                                 <p>{tr(format!("{} of {} HP", m.hp, m.max), format!("{} PV sur {}", m.hp, m.max))}
                                     {(m.stack.len() > 1).then(|| {
                                         let from = card(m.stack[m.stack.len() - 2]).label();

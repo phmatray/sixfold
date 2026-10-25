@@ -10,6 +10,9 @@
 //   stale-while-revalidate. The world's cache is per build, so a deploy never
 //   mixes old models with new maps; data files (maps/*.json) go to the
 //   network first and fall back to the cache offline.
+// - Card art (cards/<slug>.webp?v=<hash>) is cached the first time a card
+//   shows it and served cache-first from a cache that outlives deploys: the
+//   URL changes when a picture does, and the older copy is dropped then.
 // - A new version waits until the page asks it to take over (the "New
 //   version available" toast in pwa.js), so a duel is never cut mid-turn.
 
@@ -18,6 +21,7 @@ const SHELL = `sixfold-shell-${VERSION}-${SCOPE}`;
 // Same-origin files cached on use belong to one build; CDN files are versioned by URL.
 const RUNTIME = `sixfold-runtime-${VERSION}-${SCOPE}`;
 const CDN = `sixfold-cdn-${SCOPE}`;
+const ART = `sixfold-art-${SCOPE}`;
 const INDEX = new URL("./", SCOPE).href;
 const SHELL_URLS = new Set(PRECACHE.map((p) => new URL(p, SCOPE).href));
 
@@ -62,6 +66,8 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(pageFirstNetwork(req));
   } else if (SHELL_URLS.has(url.origin + url.pathname)) {
     event.respondWith(caches.match(url.origin + url.pathname).then((r) => r || fetch(req)));
+  } else if (req.url.startsWith(SCOPE) && url.pathname.startsWith(new URL("cards/", SCOPE).pathname)) {
+    event.respondWith(artFirstCache(req, url));
   } else if (req.url.startsWith(SCOPE) && url.pathname.endsWith(".json")) {
     event.respondWith(networkFirst(req));
   } else if (req.url.startsWith(SCOPE)) {
@@ -82,6 +88,20 @@ async function pageFirstNetwork(req) {
   } catch (err) {
     return (await caches.match(INDEX)) || Response.error();
   }
+}
+
+async function artFirstCache(req, url) {
+  const cache = await caches.open(ART);
+  const cached = await cache.match(req);
+  if (cached) return cached;
+  const res = await fetch(req);
+  if (res.ok) {
+    // Keep one copy per picture: drop the ones with an older ?v=.
+    const old = (await cache.keys()).filter((k) => new URL(k.url).pathname === url.pathname);
+    await Promise.all(old.map((k) => cache.delete(k)));
+    await cache.put(req, res.clone());
+  }
+  return res;
 }
 
 async function networkFirst(req) {

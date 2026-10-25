@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap"
     />
     <!-- data-integrity="none": Chrome ignores (and warns about) integrity on icons and wasm preloads. -->
     <link data-trunk rel="icon" type="image/svg+xml" href="favicon.svg" data-integrity="none" />
@@ -36,6 +36,8 @@
       data-wasm-opt-params="--enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-reference-types --enable-multivalue" />
     <link data-trunk rel="css" href="style.css" />
     <link data-trunk rel="copy-dir" href="world" />
+    <!-- Card illustrations, cards/<slug>.webp (see build.rs); cached on first use, never precached. -->
+    <link data-trunk rel="copy-dir" href="cards" />
   </head>
   <body>
     <script>

@@ -1,11 +1,28 @@
 #!/bin/sh
 # Trunk post_build hook: writes dist/sw.js, the service worker, with the list
 # of app-shell files it precaches (everything Trunk staged except the world's
-# assets, which are cached on first use) and a version that changes whenever
-# any of those files does (their names carry content hashes).
+# assets and the card art, which are cached on first use) and a version that
+# changes whenever any of those files does (their names carry content hashes).
+#
+# A debug build (`trunk serve`) gets a worker that only clears the caches and
+# serves nothing, so it never hands out a stale build (and it replaces a
+# release worker left over on the same origin).
 set -eu
 cd "$TRUNK_STAGING_DIR"
-files=$(find . -type f ! -path './world/*' ! -name '.trunk-lock' ! -name 'sw.js' ! -name 'index.html' | sed 's|^\./||' | LC_ALL=C sort)
+if [ "${TRUNK_PROFILE:-release}" = debug ]; then
+  cat > sw.js <<'EOF_SW'
+// Debug build: no offline cache (see sw-manifest.sh).
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith("sixfold-")).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim()),
+  );
+});
+EOF_SW
+  exit 0
+fi
+files=$(find . -type f ! -path './world/*' ! -path './cards/*' ! -name '.trunk-lock' ! -name 'sw.js' ! -name 'index.html' | sed 's|^\./||' | LC_ALL=C sort)
 version=$( (echo "$files"; cat index.html) | cksum | cut -d' ' -f1)
 {
   echo "const VERSION = \"$version\";"
