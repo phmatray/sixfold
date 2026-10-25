@@ -6,58 +6,44 @@
   "width": 30,
   "height": 24,
   "tiles": [
-    "555555555555555555555555555555",
-    "555555533333333333333333344555",
-    "555553333333333333333333344555",
-    "555522222222222232222222225555",
-    "555222223222222222222232222555",
-    "555222222222222222222222222555",
-    "555221111111111111111111122555",
-    "555221111111111111111121122555",
-    "55522111111........11111222255",
-    "555221111............111222255",
-    "55222111..............11122555",
-    "55222111..............11122555",
-    "55522112..............11222555",
-    "555222111............111122555",
-    "55522111111........11111122255",
-    "552221111111111111111211222555",
-    "555222111111111111111111222555",
-    "555222211111111111111112222555",
-    "555222222111111111111222222555",
-    "533334333433333333433333433335",
-    "533333333333333333333333333335",
-    "533333333333333333333333333335",
-    "553333333333333333333333333355",
-    "555555555555553355555555555555"
+    ".........33333333344..........",
+    ".......33333333333333.........",
+    "......33333333333333333.......",
+    ".....33222222222222233333.....",
+    "....33322222222222222223333...",
+    "..33322222221111222222223333..",
+    ".333222222111111111122223333..",
+    ".332221111111111111111222333..",
+    ".332221111.........111122233..",
+    "332221111...........111122233.",
+    "33222111.............11122223.",
+    "33221111.............11122233.",
+    ".3222111.............11122233.",
+    ".33221111...........11112233..",
+    "33322221111.......1111112233..",
+    ".332222211111111111112222233..",
+    ".33322222111111111122222333...",
+    "..333322222222222222222233....",
+    "....333222222222222222233.....",
+    "......3333222222233333333.....",
+    "......33333333333333333.......",
+    "......333333333333333.........",
+    "............3333..33..........",
+    "..............33.............."
   ],
   "props": [
     {
       "asset": "stairs_basalt",
-      "x": 3,
-      "z": 18,
+      "x": 12,
+      "z": 19,
       "rot": 180,
       "y": 2
     },
     {
       "asset": "stairs_basalt",
-      "x": 26,
-      "z": 18,
+      "x": 11,
+      "z": 16,
       "rot": 180,
-      "y": 2
-    },
-    {
-      "asset": "stairs_basalt",
-      "x": 5,
-      "z": 9,
-      "rot": 90,
-      "y": 1
-    },
-    {
-      "asset": "stairs_basalt",
-      "x": 24,
-      "z": 13,
-      "rot": 270,
       "y": 1
     },
     {
@@ -73,13 +59,6 @@
       "rot": 180
     },
     {
-      "asset": "stairs_basalt",
-      "x": 19,
-      "z": 3,
-      "rot": 0,
-      "y": 2
-    },
-    {
       "asset": "seal_stone",
       "x": 13,
       "z": 10,
@@ -88,129 +67,80 @@
     {
       "asset": "lava_glass",
       "x": 9,
-      "z": 11,
+      "z": 10,
       "rot": 0
     },
     {
       "asset": "lava_glass",
-      "x": 17,
+      "x": 18,
       "z": 9,
       "rot": 0
     },
     {
       "asset": "lava_glass",
+      "x": 16,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "ember_vent",
+      "x": 11,
+      "z": 9,
+      "rot": 0
+    },
+    {
+      "asset": "ember_vent",
       "x": 19,
       "z": 12,
       "rot": 0
     },
     {
       "asset": "ember_vent",
-      "x": 20,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "ember_vent",
-      "x": 8,
-      "z": 10,
-      "rot": 0
-    },
-    {
-      "asset": "ember_vent",
-      "x": 11,
+      "x": 10,
       "z": 13,
       "rot": 0
     },
     {
       "asset": "rock_basalt",
-      "x": 6,
-      "z": 7,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "ember_vent",
-      "x": 8,
-      "z": 16,
+      "x": 7,
+      "z": 8,
       "rot": 0,
       "y": 1
     },
     {
       "asset": "rock_basalt",
-      "x": 22,
-      "z": 9,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "rock_basalt",
-      "x": 20,
-      "z": 17,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "rock_basalt",
-      "x": 11,
-      "z": 6,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "ember_vent",
-      "x": 17,
-      "z": 7,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "rock_basalt",
-      "x": 6,
+      "x": 21,
       "z": 14,
       "rot": 0,
       "y": 1
     },
     {
       "asset": "rock_basalt",
-      "x": 11,
-      "z": 4,
+      "x": 6,
+      "z": 12,
       "rot": 0,
-      "y": 2
+      "y": 1
     },
     {
       "asset": "rock_basalt",
-      "x": 24,
-      "z": 5,
+      "x": 22,
+      "z": 7,
       "rot": 0,
-      "y": 2
+      "y": 1
     },
     {
       "asset": "rock_basalt",
-      "x": 5,
-      "z": 4,
+      "x": 17,
+      "z": 6,
       "rot": 0,
-      "y": 2
+      "y": 1
     },
     {
-      "asset": "rock_basalt",
-      "x": 3,
-      "z": 13,
+      "asset": "ember_vent",
+      "x": 9,
+      "z": 15,
       "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "rock_basalt",
-      "x": 26,
-      "z": 11,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "rock_basalt",
-      "x": 13,
-      "z": 18,
-      "rot": 0,
-      "y": 2
+      "y": 1
     },
     {
       "asset": "cullet",
@@ -220,88 +150,67 @@
     },
     {
       "asset": "cullet",
-      "x": 16,
-      "z": 12,
-      "rot": 0
-    },
-    {
-      "asset": "cullet",
-      "x": 10,
+      "x": 15,
       "z": 13,
       "rot": 0
     },
     {
       "asset": "cullet",
       "x": 20,
-      "z": 9,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "cullet",
+      "x": 8,
+      "z": 12,
       "rot": 0
     },
     {
       "asset": "ash_pine",
-      "x": 7,
-      "z": 9,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "ash_pine",
-      "x": 23,
-      "z": 12,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "ash_pine",
-      "x": 12,
-      "z": 16,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "ash_pine",
-      "x": 19,
-      "z": 6,
-      "rot": 0,
-      "y": 1
-    },
-    {
-      "asset": "ash_pine",
       "x": 8,
-      "z": 6,
+      "z": 7,
       "rot": 0,
       "y": 1
     },
     {
       "asset": "ash_pine",
-      "x": 17,
-      "z": 17,
+      "x": 20,
+      "z": 7,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "ash_pine",
+      "x": 6,
+      "z": 14,
       "rot": 0,
       "y": 1
     },
     {
       "asset": "ash_pine",
       "x": 22,
+      "z": 12,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "ash_pine",
+      "x": 13,
+      "z": 6,
+      "rot": 0,
+      "y": 1
+    },
+    {
+      "asset": "ash_pine",
+      "x": 18,
       "z": 15,
       "rot": 0,
       "y": 1
     },
     {
       "asset": "ash_pine",
-      "x": 4,
-      "z": 8,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "ash_pine",
-      "x": 25,
-      "z": 16,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "ash_pine",
-      "x": 14,
+      "x": 9,
       "z": 4,
       "rot": 0,
       "y": 2
@@ -315,36 +224,70 @@
     },
     {
       "asset": "ash_pine",
-      "x": 4,
+      "x": 3,
+      "z": 12,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 26,
+      "z": 13,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 16,
+      "z": 18,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 6,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "ash_pine",
+      "x": 24,
       "z": 16,
       "rot": 0,
       "y": 2
     },
     {
-      "asset": "waymark",
-      "x": 2,
-      "z": 20,
+      "asset": "ash_pine",
+      "x": 8,
+      "z": 2,
       "rot": 0,
-      "y": 3,
-      "glow": "#e1572f"
+      "y": 3
     },
     {
       "asset": "ash_pine",
-      "x": 1,
+      "x": 12,
+      "z": 1,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "ash_pine",
+      "x": 22,
+      "z": 3,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "ash_pine",
+      "x": 19,
       "z": 21,
       "rot": 0,
       "y": 3
     },
     {
       "asset": "ash_pine",
-      "x": 7,
-      "z": 22,
-      "rot": 0,
-      "y": 3
-    },
-    {
-      "asset": "ash_pine",
-      "x": 11,
+      "x": 10,
       "z": 21,
       "rot": 0,
       "y": 3
@@ -352,83 +295,20 @@
     {
       "asset": "ash_pine",
       "x": 21,
-      "z": 22,
-      "rot": 0,
-      "y": 3
-    },
-    {
-      "asset": "ash_pine",
-      "x": 26,
-      "z": 21,
-      "rot": 0,
-      "y": 3
-    },
-    {
-      "asset": "ash_pine",
-      "x": 16,
       "z": 20,
       "rot": 0,
       "y": 3
     },
     {
-      "asset": "ash_pine",
-      "x": 8,
-      "z": 1,
-      "rot": 0,
-      "y": 3
-    },
-    {
-      "asset": "ash_pine",
-      "x": 13,
-      "z": 2,
-      "rot": 0,
-      "y": 3
-    },
-    {
-      "asset": "ash_pine",
-      "x": 23,
-      "z": 2,
-      "rot": 0,
-      "y": 3
-    },
-    {
-      "asset": "ash_pine",
+      "asset": "rock_basalt",
       "x": 10,
       "z": 3,
       "rot": 0,
       "y": 2
     },
     {
-      "asset": "ash_pine",
-      "x": 23,
-      "z": 3,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "ash_pine",
-      "x": 7,
-      "z": 5,
-      "rot": 0,
-      "y": 2
-    },
-    {
-      "asset": "signpost",
-      "x": 13,
-      "z": 21,
-      "rot": 0,
-      "y": 3
-    },
-    {
-      "asset": "cullet",
-      "x": 3,
-      "z": 12,
-      "rot": 0,
-      "y": 2
-    },
-    {
       "asset": "rock_basalt",
-      "x": 6,
+      "x": 17,
       "z": 4,
       "rot": 0,
       "y": 2
@@ -436,23 +316,152 @@
     {
       "asset": "rock_basalt",
       "x": 4,
-      "z": 3,
+      "z": 11,
       "rot": 0,
       "y": 2
     },
     {
       "asset": "rock_basalt",
       "x": 25,
-      "z": 3,
+      "z": 14,
       "rot": 0,
       "y": 2
     },
     {
       "asset": "rock_basalt",
-      "x": 26,
-      "z": 1,
+      "x": 20,
+      "z": 18,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 8,
+      "z": 17,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 19,
+      "z": 0,
       "rot": 0,
       "y": 4
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 7,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 22,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 12,
+      "z": 4,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "cullet",
+      "x": 4,
+      "z": 15,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "waymark",
+      "x": 7,
+      "z": 20,
+      "rot": 0,
+      "y": 3,
+      "glow": "#e1572f"
+    },
+    {
+      "asset": "signpost",
+      "x": 16,
+      "z": 21,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "ash_pine",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 3,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 25,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 28,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 0,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 2,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 27,
+      "z": 20,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 24,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 5,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "ash_pine",
+      "x": 29,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 0,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 28,
+      "z": 8,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -464,11 +473,11 @@
     {
       "kind": "waymark",
       "id": "kilnmouth",
-      "x": 2,
+      "x": 7,
       "z": 20
     },
     {
-      "x": 13,
+      "x": 16,
       "z": 21,
       "kind": "sign",
       "text": "South: back up to Cinderwick. Below: the Kilnmouth floor and its seal stone. Keep to the stairs.",
@@ -495,8 +504,8 @@
       ]
     },
     {
-      "x": 3,
-      "z": 12,
+      "x": 4,
+      "z": 15,
       "kind": "sign",
       "id": "cullet_kiln",
       "name": "Glass on the terrace",
@@ -548,8 +557,8 @@
     {
       "kind": "find",
       "id": "e_vent_w",
-      "x": 4,
-      "z": 3,
+      "x": 7,
+      "z": 5,
       "give": "coins:100",
       "text": "Behind the boulder, where the steam keeps everyone away all day: a pouch of Facets, dry as a bone.",
       "text_fr": "Derrière le rocher, là où la vapeur éloigne tout le monde la journée : une bourse de Facettes, sèche comme un os."
@@ -557,8 +566,8 @@
     {
       "kind": "find",
       "id": "e_vent_e",
-      "x": 25,
-      "z": 3,
+      "x": 22,
+      "z": 5,
       "give": "card:cinderhorn",
       "text": "In a crack of the boulder, out of the steam's reach: a card in a tin, its corners warm.",
       "text_fr": "Dans une fente du rocher, hors de portée de la vapeur : une carte dans une boîte en fer, aux coins tièdes."
@@ -566,8 +575,8 @@
     {
       "kind": "find",
       "id": "e_rim",
-      "x": 26,
-      "z": 1,
+      "x": 19,
+      "z": 0,
       "give": "pack:ember",
       "text": "On the crater's lip, tucked under a stone where only a climber would look: a sealed booster.",
       "text_fr": "Sur la lèvre du cratère, glissé sous une pierre où seul un grimpeur regarderait : un booster scellé."
@@ -575,7 +584,7 @@
     {
       "kind": "find",
       "id": "e_glowash",
-      "x": 19,
+      "x": 16,
       "z": 12,
       "give": "card:solarlynx",
       "text": "At the pool's edge the ash glows by night, and in the glow, half melted into the glass crust: a card, perfectly unburnt.",
@@ -583,7 +592,7 @@
       "if": "time:night"
     },
     {
-      "x": 6,
+      "x": 12,
       "z": 4,
       "kind": "sign",
       "id": "rope_w",
@@ -598,7 +607,7 @@
             "Une vieille corde, nouée à un piquet de fer, pend jusqu'à la terrasse du dessous. Vous descendez, une main après l'autre."
           ],
           "do": [
-            "warp:kilnmouth:6:6:s"
+            "warp:kilnmouth:12:6:s"
           ]
         }
       ]
@@ -620,12 +629,16 @@
       "id": "vent_w",
       "tiles": [
         [
+          2,
+          9
+        ],
+        [
           3,
-          6
+          9
         ],
         [
           4,
-          6
+          9
         ]
       ],
       "if": "!time:day & !time:dusk",
@@ -637,12 +650,16 @@
       "id": "vent_e",
       "tiles": [
         [
+          24,
+          9
+        ],
+        [
           25,
-          6
+          9
         ],
         [
           26,
-          6
+          9
         ]
       ],
       "if": "!time:day & !time:dusk",
@@ -654,8 +671,8 @@
       "id": "rim_ledge",
       "tiles": [
         [
-          24,
-          2,
+          17,
+          0,
           3
         ]
       ],
@@ -672,7 +689,7 @@
       "name": "Edda",
       "model": "npc_elder",
       "x": 12,
-      "z": 20,
+      "z": 21,
       "facing": "n",
       "idle": "Idle",
       "outfit": "#5a3e36",
@@ -692,7 +709,7 @@
         {
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
-            "After dark the rock cools and they drop to a whisper. Then you can walk all the way round, under the north rim.",
+            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
             "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
           ],
           "lines_fr": [
@@ -712,7 +729,7 @@
       "facing": "e",
       "idle": "Idle",
       "trainer": {
-        "sight": 4,
+        "sight": 3,
         "challenge": [
           "You came down the spiral? Then you can take some heat.",
           "Three prizes. My Blazelynx don't blink."
@@ -747,7 +764,7 @@
       "id": "t_dunstan",
       "name": "Dunstan",
       "model": "npc_worker",
-      "x": 21,
+      "x": 18,
       "z": 11,
       "facing": "w",
       "idle": "Idle",
@@ -787,7 +804,7 @@
       "id": "t_vela",
       "name": "Vela",
       "model": "npc_rival",
-      "x": 22,
+      "x": 20,
       "z": 1,
       "facing": "w",
       "idle": "Idle",

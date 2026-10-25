@@ -145,6 +145,13 @@
       "rot": 0
     },
     {
+      "asset": "lighthouse",
+      "x": 28,
+      "z": 19,
+      "rot": 0,
+      "y": 2
+    },
+    {
       "asset": "chime_post",
       "x": 22,
       "z": 10,
