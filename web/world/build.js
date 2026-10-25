@@ -72,8 +72,8 @@ export function refresh(w, holds, gate, animate = false) {
     g.open = open;
     const play = animate && was !== null;
     if (play && !g.sea) (g.anim = 0), w.life.puffs?.(g.tiles), (w.gateSound = open);
-    if (play && open) (w.opened ??= []).push(g.def.name);
     else g.anim = null;
+    if (play && open) (w.opened ??= []).push(g.def.name);
     showGate(g, reduced(w) ? null : g.anim);
     if (g.sea) {
       // The tide turns over a few seconds (at once on a fresh build or with reduced motion).

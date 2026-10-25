@@ -462,17 +462,20 @@ fn ways(m: &Value, item: &str) -> Vec<(String, Option<(String, String)>)> {
 fn every_way_a_field_item_opens_is_in_its_table() {
     use sixfold_engine::objective::KEYS;
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let maps: Vec<(String, Value)> = std::fs::read_dir(&dir)
+        .expect("the world's maps")
+        .map(|e| e.unwrap().path())
+        .filter(|p| p.extension().is_some_and(|e| e == "json"))
+        .map(|p| {
+            let m = serde_json::from_str(&std::fs::read_to_string(&p).unwrap()).unwrap();
+            (p.file_stem().unwrap().to_string_lossy().into_owned(), m)
+        })
+        .collect();
     let mut bad = vec![];
     for k in &KEYS {
         let mut found = HashSet::new();
-        for entry in std::fs::read_dir(&dir).expect("the world's maps") {
-            let path = entry.unwrap().path();
-            if path.extension().is_none_or(|e| e != "json") {
-                continue;
-            }
-            let map = path.file_stem().unwrap().to_string_lossy().into_owned();
-            let m: Value = serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
-            for (id, name) in ways(&m, k.item) {
+        for (map, m) in &maps {
+            for (id, name) in ways(m, k.item) {
                 match k.opens.iter().find(|p| p.map == map && p.id == id) {
                     None => bad.push(format!(
                         "{map}: {id} shuts on {} but isn't in its opens table",

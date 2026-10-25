@@ -523,6 +523,8 @@ pub fn WorldScreen() -> impl IntoView {
     let loading = RwSignal::new(true);
     let failed = RwSignal::new(None::<String>);
     let announce = RwSignal::new(String::new());
+    // When the live region last took a phase or a way opening (they can come together).
+    let said_at = StoredValue::new(0.0f64);
     let progress = expect_context::<RwSignal<Progress>>();
     // Where the hero is: (map, outdoors). Fast travel only leaves from outdoors.
     let here = RwSignal::new((String::new(), false));
@@ -597,6 +599,7 @@ pub fn WorldScreen() -> impl IntoView {
                         }
                         if clock::phase(m) != was {
                             _ = announce.try_set(clock::phase(m).arrives().into());
+                            said_at.set_value(js_sys::Date::now());
                         }
                     }
                 }
@@ -636,7 +639,20 @@ pub fn WorldScreen() -> impl IntoView {
                     _ = sheet.try_set(Some(Sheet::Note(title, text)));
                 }
                 // A gate on this map just opened: "A way opens: <name>", said once.
-                "opened" => _ = announce.try_set(a),
+                // A phase that just arrived (a time gate's reason) is kept in front.
+                "opened" => {
+                    let now = js_sys::Date::now();
+                    let fresh = now - said_at.get_value() < 1000.0;
+                    _ = announce.try_update(|s| {
+                        if fresh && !s.is_empty() {
+                            s.push(' ');
+                            s.push_str(&a);
+                        } else {
+                            *s = a;
+                        }
+                    });
+                    said_at.set_value(now);
+                }
                 "talk" => start_talk(a, b),
                 "area" => _ = announce.try_set(a),
                 "ready" => {

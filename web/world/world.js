@@ -295,7 +295,7 @@ export function mount(el, controls, cb, start, edit = false) {
     refresh(world, holds, gate, animate);
     if (world.gateSound !== undefined) sound(world.gateSound ? "gate" : "door"), (world.gateSound = undefined);
     // A gate that just opened, named on screen and in the live region (once: it opened now).
-    for (const name of world.opened?.splice(0) ?? []) {
+    for (const name of new Set(world.opened?.splice(0))) {
       const text = tr(`A way opens: ${name}`, `Un passage s'ouvre : ${name}`);
       showBanner(text, 4000), cb("opened", text, "");
     }
@@ -704,13 +704,17 @@ export function mount(el, controls, cb, start, edit = false) {
   }
 
   // A speaker's bust for the dialogue box: their own rig in their own outfit and hair, in the pose
-  // they hold now, drawn once per map visit by a small offscreen renderer kept for the mount.
-  // ponytail: each rig's meshes stay uploaded in that renderer until unmount; fine for a few dozen people.
+  // they hold now, drawn once per map visit by a small offscreen renderer.
+  // The renderer is dropped on each new map, so the people it uploaded never pile up.
   let bustR = null, busts = new Map(), bustsOf = null;
   function portrait(id) {
     const n = world?.npcs.find((p) => p.def.id === id);
     if (!n?.obj) return "";
-    if (bustsOf !== world) (busts = new Map()), (bustsOf = world);
+    if (bustsOf !== world) {
+      // A new map: drop the last one's busts and the people uploaded to draw them.
+      bustR?.dispose(), bustR?.forceContextLoss();
+      (bustR = null), (busts = new Map()), (bustsOf = world);
+    }
     if (busts.has(id)) return busts.get(id);
     const S = 256;
     bustR ??= new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
