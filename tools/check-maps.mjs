@@ -23,7 +23,7 @@
 // post, nothing tall just in front of what you use, a tile between posts and other things you use, waymarks clear all
 // round), lamps by paths and with a `why` out of town, routes on open tiles, doors out landing in front of the door back
 // in, size per `kind` in screens, exits 3 wide with a path to the edge, an open throat and a signpost naming where they
-// go, and a closed border everywhere else.
+// go, and a closed border everywhere else. No street lamp or house lamp in a cave (an error even without --strict).
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 const dir = process.argv.slice(2).find((a) => !a.startsWith("--")) ?? "web/world";
 const src = readFileSync(`${dir}/props.js`, "utf8");
@@ -34,7 +34,7 @@ const ACROSS = new Set(eval(`(${src.match(/export const ACROSS = new Set\((\[[\s
 const TALL = eval(`(${src.match(/export const TALL = (\{[\s\S]*?\});/)[1]})`);
 // Heights (m) for depth stacking, from ASSETS.md / ASSETS_V13.md; TALL (props.js) fills the rest.
 const HEIGHT = { tree: 3.5, pine: 3.8, birch: 3.6, willow: 3.8, house: 5, sign: 1.3, signpost: 1.6, lantern: 2.2, bush: 0.7, flowers: 0.3,
-  rock: 0.6, crates: 0.9, bench: 0.9, stall: 2.3, stall_b: 2.3, fountain: 1.6, stump: 0.55, log: 0.55, hanging_sign: 2.5, boat: 0.4, reeds: 0.9,
+  rock: 0.6, crates: 0.9, glow_mushroom: 0.35, glow_mushroom_tall: 0.9, glow_shelf: 0.62, bench: 0.9, stall: 2.3, stall_b: 2.3, fountain: 1.6, stump: 0.55, log: 0.55, hanging_sign: 2.5, boat: 0.4, reeds: 0.9,
   shelf: 2, bookcase: 2.3, oven: 2.45, printing_press: 1.8, workbench: 1.8, net_locker: 1.95, plant: 1, chair: 0.9, display_case: 1.1, lamp: 1.6,
   bed: 1.1, light_box: 1.25, type_case: 1.35, curio_cabinet: 2.3, seal_stone: 1.9, cave_mouth: 2.2, crab_pots: 0.45, net_rack: 1.45, bollard: 0.6, rock_sea: 0.55 };
 const TALL_OF = (a) => TALL[a] ?? 1;
@@ -98,6 +98,10 @@ for (const [name, m] of Object.entries(maps)) {
   }
   for (const n of m.npcs ?? []) if (solid.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} stands on a solid tile`);
   const all = reach(name, m, solid, height);
+  // Underground nothing could power a street lamp: caves (`dark`, kind `cave`, a `cave` room) light with mushrooms,
+  // crystals and glow plants, a worked mine with oil lanterns on its timbers (WORLD_RULES §2.6). Always an error.
+  if (m.dark || m.kind === "cave" || m.cave)
+    for (const p of m.props) if (["lantern", "lamp"].includes(p.asset)) fail.push(`${name}: a ${p.asset} at ${p.x},${p.z} in a cave; light it with glow_mushroom, glow_shelf or crystal_cluster`);
   rules(name, m, solid, all);
   const ids = (m.npcs ?? []).map((n) => n.id);
   ids.filter((id, i) => ids.indexOf(id) !== i).forEach((id) => fail.push(`${name}: two NPCs are called ${id}`));

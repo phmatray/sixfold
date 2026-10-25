@@ -1,6 +1,7 @@
 {
   "width": 9,
   "height": 7,
+  "cave": true,
   "tiles": [
     "333333333",
     "3.......3",
@@ -42,16 +43,32 @@
       "rot": 0
     },
     {
-      "asset": "lamp",
-      "x": 7,
-      "z": 4,
-      "rot": 0
-    },
-    {
       "asset": "exit_mat",
       "x": 4,
       "z": 5,
       "rot": 0
+    },
+    {
+      "asset": "glow_mushroom_tall",
+      "x": 7,
+      "z": 4,
+      "rot": 0,
+      "glow": "#5fe0c8",
+      "light": true
+    },
+    {
+      "asset": "glow_shelf",
+      "x": 5,
+      "z": 1,
+      "rot": 0,
+      "glow": "#5fe0c8"
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 1,
+      "z": 2,
+      "rot": 0,
+      "glow": "#5fe0c8"
     }
   ],
   "spawn": {

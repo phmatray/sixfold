@@ -18,7 +18,8 @@ const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "re
   "ash_pine", "rock_basalt", "cliff_basalt", "cliff_basalt_b", "stairs_basalt", "climb_wall_basalt", "glass_rack", // Ember
   "heather", "cliff_heath", "cliff_heath_b", "stairs_heath", "wall_dry", "wall_dry_corner", "wall_dry_end", "wall_dry_t", "chime_post", // Storm (not pylon: animated)
   "crab_pots", "rock_sea", "bollard", "tidepool", "net_rack", "cliff_sea", "cliff_sea_b", // Tide (not ferry or buoy: they bob)
-  "willow", "wishing_tree", "ford_stones", "wisteria_arch", "hedge", "hedge_corner", "hedge_end", "hedge_t"]); // Dream (not moonflower: animated)
+  "willow", "wishing_tree", "ford_stones", "wisteria_arch", "hedge", "hedge_corner", "hedge_end", "hedge_t", // Dream (not moonflower: animated)
+  "glow_mushroom", "glow_mushroom_tall", "glow_shelf"]); // cave light (a prop's `glow` tints a batch of its own)
 const TREES = new Set(["tree", "pine", "birch", "ash_pine", "willow"]); // varied in size, turn and tint; half a tile out on the map edge
 const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // props whose smoke_origin smokes
 const BLOOMS = new Set(["moonflower"]); // with an `open` condition: instanced closed and open, cross-faded (build, refresh)
@@ -244,6 +245,19 @@ function posed(scene, clip) {
   return out;
 }
 
+// A copy of a model whose `glow` parts take `color` (their own material copies; the emissive follows, as prep sets it).
+function glowing(template, color) {
+  const out = template.clone(true);
+  delete out.userData.flat;
+  out.traverse((o) => {
+    if (!o.isMesh || !/glow/i.test(o.material.name)) return;
+    o.material = o.material.clone();
+    o.material.color.set(color);
+    o.material.emissive?.set(color).multiplyScalar(0.55);
+  });
+  return out;
+}
+
 // One placed model, merged (`flatten`), keeping its named empties (light_origin,
 // smoke_origin) for the lamps and the smoke.
 function merged(obj) {
@@ -401,7 +415,9 @@ export async function build(map, got, reduced) {
       const oz = isTree ? (p.z === 0 ? -0.5 : p.z + fd === H ? 0.5 : 0) : 0;
       const s = isTree ? 0.88 + r() * 0.3 : 1;
       const rot = isTree ? r() * Math.PI * 2 : THREE.MathUtils.degToRad(p.rot);
-      batch.add(name, tpl(name), at(cx + ox, cz + oz, rot, s, y), isTree ? tint("#ffffff", 0.06) : null);
+      // A `glow` colour (a mushroom's hue) makes a batch of its own, from a copy of the model with its glow parts tinted.
+      const kind = p.glow ? `${name}|${p.glow}` : name;
+      batch.add(kind, p.glow ? tpl(kind, () => glowing(tpl(name), p.glow)) : tpl(name), at(cx + ox, cz + oz, rot, s, y), isTree ? tint("#ffffff", 0.06) : null);
       if (!got[name] && BLOB[p.asset]) blobs.push([cx + ox, cz + oz, BLOB[p.asset] * s]); // models bake their own shadow disc
     } else {
       obj = got[p.asset] ? got[p.asset].scene.clone(true) : fallback(p.asset);
@@ -587,15 +603,17 @@ export async function build(map, got, reduced) {
     root.add(inst);
   }
 
-  // Indoors: a warm light, and a glow, on every lamp.
+  // Indoors: a light, and a glow, on every lamp and on any prop marked `light` (the mushrooms of a cave room),
+  // in the prop's `glow` colour if it has one.
   if (L.indoor && L.lamp) {
-    for (const p of props.filter((q) => q.asset === "lamp")) {
-      const light = new THREE.PointLight(L.lamp.color, L.lamp.intensity, L.lamp.distance, 1.6);
-      p.obj.updateMatrixWorld(true);
-      const origin = p.obj.getObjectByName("light_origin");
+    for (const p of props.filter((q) => q.asset === "lamp" || q.light)) {
+      const color = p.glow ?? L.lamp.color;
+      const light = new THREE.PointLight(color, L.lamp.intensity, L.lamp.distance, 1.6);
+      p.obj?.updateMatrixWorld(true);
+      const origin = p.obj?.getObjectByName("light_origin");
       if (origin) origin.getWorldPosition(light.position);
-      else light.position.set(p.cx, 1.55, p.cz);
-      const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: L.lamp.color, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
+      else light.position.set(p.cx, p.obj ? 1.55 : p.y + 0.9, p.cz);
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
       glow.position.copy(light.position);
       glow.scale.setScalar(1.3);
       root.add(light, glow);
@@ -636,12 +654,13 @@ export async function build(map, got, reduced) {
     }
     return glowAt.get(name);
   };
-  const GLIMMER = { floating_lantern: ["#ffc98a", 1.3, 2.6], lantern_raft: ["#ffbcc0", 0.8, 1.1], moonflower: ["#cfdcff", 0.8, 2.2] };
+  const GLIMMER = { floating_lantern: ["#ffc98a", 1.3, 2.6], lantern_raft: ["#ffbcc0", 0.8, 1.1], moonflower: ["#cfdcff", 0.8, 2.2],
+    glow_mushroom: ["#8ff0d8", 0.7, 1.8], glow_mushroom_tall: ["#8ff0d8", 1.1, 2.8], glow_shelf: ["#8ff0d8", 0.8, 2.0] }; // a prop's `glow` overrides the colour
   const glimmers = [];
   const spin = (v, deg) => v.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(deg));
   for (const p of props) {
     const look = GLIMMER[p.asset], o = look && glowSpot(p.asset);
-    if (o) glimmers.push({ at: spin(o, p.rot).add(new THREE.Vector3(p.cx, p.y, p.cz)), color: look[0], size: look[1], pool: look[2], cond: p.open ?? p.if ?? null, on: true });
+    if (o) glimmers.push({ at: spin(o, p.rot).add(new THREE.Vector3(p.cx, p.y, p.cz)), color: p.glow ?? look[0], size: look[1], pool: look[2], cond: p.open ?? p.if ?? null, on: true });
   }
   for (const g of gates) {
     const look = GLIMMER[g.def.prop_open], o = look && glowSpot(g.def.prop_open);

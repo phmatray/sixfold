@@ -326,6 +326,22 @@ Interior furniture goes to `assets/interior/` (each module's `INTERIOR` set; the
 Suggested `props.js`: `FOOT: chart_table: [2, 1], cloth_rack: [2, 1]`, `TALL: chart_table: 1.05, chowder_stove: 1.5,
 dress_form: 1.6, cloth_rack: 2.0, paper_lanterns: 2.0`.
 
+## Cave light (shared, `v13_cave.py`)
+
+Nothing underground could power a street lamp (`docs/WORLD_RULES.md` §2.6), so caves, mines and wild places light
+themselves. The caps and gills are one near-white `mushroom_glow` material. A map tints each prop with `glow`, so every
+region can have its own hue (teal `#5fe0c8` on the coast, violet in the Hushlands, amber in the Stonebacks). The props are
+instanced, with one batch per hue. Each also gets a glimmer, a small halo and a pool of light in its own colour, after dusk
+and always in a cave. Indoors, `"light": true` gives one the room's point light in its hue (the smugglers' nook).
+
+| Name | Foot | Collision | Height | Glow | Tris | KB | What |
+|---|---|---|---|---|---|---|---|
+| `glow_mushroom` | 1×1 | solid | 0.35 m | `mushroom_glow` | 642 | 28 | a low clump of five caps on a mossy stone: paths and junctions |
+| `glow_mushroom_tall` | 1×1 | solid | 0.9 m | `mushroom_glow` | 642 | 29 | three tall stems over two small ones: a landmark, a turn you shouldn't miss |
+| `glow_shelf` | 1×1 | solid | 0.62 m | `mushroom_glow` | 530 | 26 | bracket fungus stepping up a broken stump: walls, timbers, dead wood |
+
+    blender -b --factory-startup -P tools/blender/build_regions_v13.py -- --region cave --out web/world/assets --sheets /tmp/v13
+
 ## Not built (left for later)
 
 - **Interior furniture** for the new 1.3 interiors (seven inns, glassworks, observatory, harbour office, tailor, cobbler,
