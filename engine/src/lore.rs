@@ -649,9 +649,16 @@ mod tests {
 
     #[test]
     fn every_hexon_has_a_dex_line_in_both_languages() {
-        for def in CARDS.iter().filter(|d| matches!(d.kind, CardKind::Creature(_))) {
+        for def in CARDS
+            .iter()
+            .filter(|d| matches!(d.kind, CardKind::Creature(_)))
+        {
             let l = lore(def.name).unwrap_or_else(|| panic!("{} has no dex line", def.name));
-            assert!(!l.en.trim().is_empty() && !l.fr.trim().is_empty(), "{}", def.name);
+            assert!(
+                !l.en.trim().is_empty() && !l.fr.trim().is_empty(),
+                "{}",
+                def.name
+            );
         }
     }
 
@@ -659,7 +666,9 @@ mod tests {
     fn every_dex_line_names_a_hexon_once() {
         for (i, (name, _)) in LORE.iter().enumerate() {
             assert!(
-                CARDS.iter().any(|d| d.name == *name && matches!(d.kind, CardKind::Creature(_))),
+                CARDS
+                    .iter()
+                    .any(|d| d.name == *name && matches!(d.kind, CardKind::Creature(_))),
                 "{name} is not a creature card"
             );
             assert!(LORE[..i].iter().all(|(n, _)| n != name), "{name} twice");
