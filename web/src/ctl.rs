@@ -12,6 +12,7 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 use sixfold_engine::ai::{Ai, Difficulty};
+use sixfold_engine::tutorial;
 use sixfold_engine::{card, fr, tr, Action, CardId, Config, Event, Game, PromptKind};
 
 pub const HUMAN: usize = 0;
@@ -88,6 +89,8 @@ pub enum Post {
     Gauntlet,
     /// The daily duel of this day number.
     Daily(u32),
+    /// The guided first duel: stacked decks, a scripted opponent, no reward.
+    Tutorial,
 }
 
 #[derive(Clone, Copy)]
@@ -158,13 +161,18 @@ impl Ctl {
 
     /// Start a match; returns false (and sets `error`) if the engine refuses it.
     pub fn start(&self, setup: Setup, seed: u64) -> bool {
-        let game = match Game::new(
-            setup.decks.clone(),
-            seed,
-            Config {
-                prizes: setup.prizes,
-            },
-        ) {
+        let game = if setup.post == Some(Post::Tutorial) {
+            Ok(tutorial::game())
+        } else {
+            Game::new(
+                setup.decks.clone(),
+                seed,
+                Config {
+                    prizes: setup.prizes,
+                },
+            )
+        };
+        let game = match game {
             Ok(g) => g,
             Err(e) => {
                 self.error.set(Some(tr(
@@ -213,11 +221,20 @@ impl Ctl {
         self.real.set_value(None);
     }
 
-    /// The human clicked one of their legal actions.
+    pub fn tutorial(&self) -> bool {
+        self.setup
+            .with_value(|s| s.as_ref().is_some_and(|s| s.post == Some(Post::Tutorial)))
+    }
+
+    /// The human clicked one of their legal actions (in the tutorial, one
+    /// the lesson's step allows).
     pub fn act(&self, action: Action) {
+        let tutorial = self.tutorial();
         let mine = self.real.with_value(|g| {
-            g.as_ref()
-                .is_some_and(|g| g.view(HUMAN).waiting_on == Some(HUMAN))
+            g.as_ref().is_some_and(|g| {
+                g.view(HUMAN).waiting_on == Some(HUMAN)
+                    && (!tutorial || tutorial::allows(g, action))
+            })
         });
         if mine && !self.busy.get_untracked() {
             self.run(action);
@@ -290,19 +307,23 @@ impl Ctl {
             })
         });
         let think = if setup { 350 } else { 750 };
+        let tutorial = self.tutorial();
         set_timeout(
             move || {
                 if self.generation.get_value() != generation {
                     return;
                 }
-                let action = self
-                    .ai
-                    .try_update_value(|ai| {
-                        let ai = ai.as_mut()?;
-                        self.real
-                            .with_value(|g| g.as_ref().map(|g| ai.choose_action(g, AI)))
-                    })
-                    .flatten();
+                let action = if tutorial {
+                    self.real.with_value(|g| g.as_ref().map(tutorial::opponent))
+                } else {
+                    self.ai
+                        .try_update_value(|ai| {
+                            let ai = ai.as_mut()?;
+                            self.real
+                                .with_value(|g| g.as_ref().map(|g| ai.choose_action(g, AI)))
+                        })
+                        .flatten()
+                };
                 if let Some(action) = action {
                     self.run(action);
                 }

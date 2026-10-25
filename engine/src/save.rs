@@ -41,6 +41,9 @@ pub const PROGRESS: &str = "progress";
 pub const WORLD_AT: &str = "world_at";
 /// Name of the deck last taken into a campaign duel.
 pub const CAMPAIGN_DECK: &str = "campaign_deck";
+/// `due` while the guided first duel hasn't been played or skipped. A save
+/// from before 1.1 has no such section: its player is past the lesson.
+pub const TUTORIAL: &str = "tutorial";
 
 /// The localStorage keys of a 0.6 save (one per part), with the section each
 /// one becomes, for [`Save::from_legacy`].
@@ -122,7 +125,18 @@ impl Save {
         let mut s = Save::default();
         s.set(NAME, name);
         s.set_profile(&Profile::new_player());
+        s.set(TUTORIAL, "due");
         s
+    }
+
+    /// A new player who hasn't played or skipped the guided first duel.
+    pub fn tutorial_due(&self) -> bool {
+        self.get(TUTORIAL) == Some("due")
+    }
+
+    /// The guided duel was played or skipped.
+    pub fn set_tutorial_done(&mut self) {
+        self.set(TUTORIAL, "done");
     }
 
     pub fn get(&self, section: &str) -> Option<&str> {
@@ -500,6 +514,25 @@ mod tests {
         assert_eq!(s.sections().count(), 7);
         // Nothing saved: nothing to migrate.
         assert_eq!(Save::from_legacy("x", |_| None), None);
+    }
+
+    /// 1.1: a new save starts with the guided duel; a save written before
+    /// it (no `tutorial` section) still loads, as a player past the lesson.
+    #[test]
+    fn tutorial_is_due_only_for_new_saves() {
+        let mut s = Save::new_player("New");
+        assert!(s.tutorial_due());
+        s.set_tutorial_done();
+        assert!(!Save::decode(&s.encode()).unwrap().tutorial_due());
+        let mut old = sample();
+        old.remove(TUTORIAL);
+        let text = old.encode();
+        assert!(text.starts_with("sixfold-save;1;") && !text.contains("[tutorial]"));
+        let back = Save::decode(&text).unwrap();
+        assert!(!back.tutorial_due());
+        assert_eq!(back.summary().name, "Ada");
+        // Reset is a new player again.
+        assert!(Save::new_player("Ada").tutorial_due());
     }
 
     #[test]

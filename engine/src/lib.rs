@@ -37,6 +37,7 @@ pub mod overworld;
 pub mod profile;
 pub mod save;
 pub mod set;
+pub mod tutorial;
 
 #[cfg(test)]
 mod fixtures;

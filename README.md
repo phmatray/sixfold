@@ -88,9 +88,20 @@ Not in 1.0: a second human player (see [`docs/ROADMAP.md`](docs/ROADMAP.md)).
 
 ## How to play
 
-**The campaign.** Choose **Explore the world** (or **Campaign** to see the
-rivals first). Walk with the arrow keys, WASD or the on-screen pad, and press
-**E** (or tap the prompt) to talk. Rivals offer a duel: pick one of your decks
+**Your first duel.** A new save opens on **Learn to play**: a guided duel of
+three turns against a practice partner. A card-stock note above your hand says
+what to do next and why, and a brass ring marks the card or button to press
+(**Show me** moves keyboard focus there). You place an Active and a Benched
+creature, attach energy, attack into a weakness, evolve, play a trainer and
+knock the opponent out for the win. Only the move the lesson asks for is
+offered, so nothing can go wrong; **Skip the lesson** leaves at any time. It
+ends by handing you your starter deck and three packs. After that the title's
+main button is **Continue**, back into the world, and **How to play** replays
+the lesson whenever you like.
+
+**The campaign.** Choose **Continue** or **Explore the world** (or
+**Campaign** to see the rivals first). Walk with the arrow keys, WASD or the
+on-screen pad, and press **E** (or tap the prompt) to talk. Rivals offer a duel: pick one of your decks
 and press **Duel**. Win for their seal and packs; lose and they will be waiting
 for a rematch. After the duel, **Back to the world** puts you where you stood,
 and the rival has a word for you. The seal count sits in the world's top bar;
