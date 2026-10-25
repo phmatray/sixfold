@@ -41,6 +41,7 @@ When adding game logic, the model lives in `engine` with a unit test; the UI in 
 
 Public repo `phmatray/sixfold`, deployed to https://phmatray.github.io/sixfold/ after CI passes on `main`.
 Releases are cut by **release-please** from **Conventional Commits** (`feat:`, `fix:`, `docs:`, `ci:`, `chore:` …),
-so commit messages and squash-merged PR titles must follow that form. Each phase of work lands as a PR and ships as
-a new minor version (0.x.0) until 1.0.0. Renovate keeps dependencies current (`renovate.json`).
+so commit messages and squash-merged PR titles must follow that form. A new minor version is cut after every **3 merged
+`feat:`/`fix:` PRs** (`docs:`, `chore:`, `ci:` don't count); open every PR as a **draft** as soon as the branch has
+work. The plan per version is in `docs/ROADMAP.md`. Renovate keeps dependencies current (`renovate.json`).
 `scripts/check-no-game-data.sh` runs in CI and fails if a ROM, save, state, archive, `.blend` or any file over 2 MB is tracked.
