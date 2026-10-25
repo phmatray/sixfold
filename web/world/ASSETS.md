@@ -68,6 +68,25 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `interior/rug.glb` | Rug, ≥ 1 cm thick (walkable) | 3 × 2 | — |
 | `interior/exit_mat.glb` | Door mat on the exit tile, ≥ 1 cm thick (walkable) | 1 × 1 | — |
 | `npc/<model>.glb` | NPC on the hero rig (`Idle`, `Walk`, `Fidget`); campaign rivals are `rival_<colour>.glb` and `rival_champion.glb` | — | ~1.45 m |
+| `interior/oven.glb` | Brick bread oven against the north wall, glowing mouth (`oven_glow`), flue, a ledge with loaves and the tip jar on its right | 2 × 1 | ~2.45 m |
+| `interior/printing_press.glb` | Hand press: frame, screw and bar, bed on rails along X, raised tympan on the left, ink table on the right | 2 × 1 | ~1.8 m |
+| `interior/type_case.glb` | Compositor's cabinet: drawers (one pulled out), a sloping case of compartments | 1 × 1 | ~1.35 m |
+| `interior/bookcase.glb` | Tall bookcase against the north wall, cupboard below | 2 × 1 | ~2.3 m |
+| `interior/bed.glb` | Bed along X, head on +X, patchwork quilt | 2 × 1 | ~1.1 m |
+| `interior/workbench.glb` | Workbench with a vise and a pegboard of tools against the north wall | 2 × 1 | ~1.8 m |
+| `interior/light_box.glb` | The deck doctor's table: a glowing panel (`lightbox_glow`) with cards on it, a magnifier on an arm | 2 × 1 | ~1.25 m |
+| `interior/net_locker.glb` | Slatted locker with a net, floats, rope and an oilskin | 1 × 1 | ~1.95 m |
+| `hanging_sign.glb` | The swap shop's sign: a board with two chasing arrows on a braced arm (both faces) | 1 × 1 | ~2.5 m |
+| `curio_cabinet.glb` | Stall variant for the curio collector: counter, glass vitrine, drawer towers, canopy, a lamp (`lamp_glow`); spoken to across like a stall | 2 × 1 | ~2.3 m |
+| `curio.glb` | Fallback curio (a drawstring pouch), item popup | — | any (fitted) |
+| `brass_thimble.glb`, `heron_feather.glb`, `message_bottle.glb`, `fossil_fern.glb`, `tin_hex.glb`, `lead_type.glb` | The six 1.2 curios, named by curio id, centred on the origin (≤ 600 tris) | — | any (fitted) |
+| `waymark.glb` | Hex stone post holding a crystal (`crystal_glow`, near white: tint it with the region colour) | 1 × 1 | ~1.9 m |
+| `seal_stone.glb` | Hex seal stone on a stepped base, one coloured face per colour (`seal_<colour>`: front fire, then counter-clockwise seen from above water, lightning, psychic, fighting, grass), a blank pale top (`seal_top`) | 2 × 2 | ~1.9 m |
+| `cave_mouth.glb` | Sandstone opening with a timber frame and a dark recess, back flush with the north edge: put it against a cliff on the row behind (≥ 2 m); the door warp is its tile | 2 × 1 | ~2.1 m |
+| `climb_wall.glb` | Two rough steps (tops 0.5 m front, 1.0 m back) with handholds, pegs and vines; climbs toward −Z, floor 0.5 m, stacks with `y` like `stairs` | 1 × 1 | 1 m |
+| `inn_sign.glb` | Two posts, a board with a crescent moon and stars (both faces), a lantern (`lamp_glow`) | 1 × 1 | ~2.35 m |
+| `npc/npc_elder.glb`, `npc_worker`, `npc_sailor`, `npc_scholar` | 1.2 / 1.3 townsfolk on the hero rig (stooped elder with a cane; worker in cap and apron; sailor in a striped jumper and rain hat; scholar in a long coat with a map roll) | — | ~1.4–1.6 m |
+| `portraits/<rival id>.webp` | 512² bust portraits of the campaign rivals for the duel screen (`bramble`, `marlo`, `cinza`, `quill`, `orla`, `lumen`, `warden`), 3/4 view on a gradient in the rival's colour, ≤ 60 KB | — | — |
 
 The house is 7 wide so the door sits on the centre column: door tile = footprint
 origin + (3, 4), the house's warp tile.
@@ -97,6 +116,8 @@ Rules for every model:
   (played forward to open, back to close); without one, a node named `door` swings about
   +Y on its own origin (put it on the hinge).
 - **Lamp:** an empty `light_origin` where the warm point light sits.
+- **Glow:** a material whose name contains `glow` (`oven_glow`, `lamp_glow`, `crystal_glow`, `lightbox_glow`) is
+  the part that turns emissive at dusk and night; keep it out of the merged vertex-colour mesh so its name survives.
 - **Legal:** original designs only. No logos, characters, buildings or text from any
   existing game. The only emblem is the Sixfold hexagon.
 
