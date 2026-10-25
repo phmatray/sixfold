@@ -111,7 +111,7 @@ impl Profile {
         if !self.wallet.take(b) {
             return None;
         }
-        let cards = BOOSTERS[b].open(seed);
+        let cards = BOOSTERS[b].open(seed, &self.collection);
         Some(
             cards
                 .into_iter()
@@ -154,7 +154,7 @@ mod tests {
         assert_eq!(p.open_pack(2, 42), None, "no Wild pack left");
         // Same seed, same cards; the first copy of each non-energy card is new.
         let ids: Vec<CardId> = opened.iter().map(|&(id, _)| id).collect();
-        assert_eq!(ids, BOOSTERS[2].open(42));
+        assert_eq!(ids, BOOSTERS[2].open(42, &Collection::new()));
         let mut seen = vec![];
         for &(id, new) in &opened {
             let basic_energy = crate::card::card(id).is_basic_energy();

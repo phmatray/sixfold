@@ -150,6 +150,13 @@ pub fn is_promo(id: CardId) -> bool {
     PROMOS.contains(&id)
 }
 
+/// A Holo Rare: a Rare Hexon (all 12 are Awaken 2s) found in a pack's
+/// upgraded Rare slot (see [`crate::booster`]). Promos are not.
+pub fn is_holo(id: CardId) -> bool {
+    let c = &CARDS[id.0 as usize];
+    c.rarity == Rare && matches!(c.kind, CardKind::Creature(_)) && !is_promo(id)
+}
+
 /// Every card id in the set, in registry order (for card lists in the UI).
 pub fn ids() -> impl Iterator<Item = CardId> {
     (0..CARDS.len() as u16).map(CardId)

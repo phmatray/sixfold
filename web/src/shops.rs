@@ -17,7 +17,7 @@ use sixfold_engine::{card, tr, CardId};
 
 use crate::binder::{FilterBar, Filters, Own, RarityMark};
 use crate::campaign::packs_label;
-use crate::cards::{rarity_label, CardFace, Pip};
+use crate::cards::{rarity_label, CardFace};
 use crate::duel::{DeckPicker, Opt};
 
 fn signals() -> (RwSignal<Progress>, RwSignal<Profile>) {
@@ -363,16 +363,11 @@ pub fn PackCounter() -> impl IntoView {
                     let rival = RIVALS.iter().find(|r| r.booster == i).map_or("?", |r| r.name);
                     view! {
                         <li class="shelf-item" class:locked=move || price.get().is_none()>
-                            <div class=format!("pack p-{}", crate::packs::pack_theme(i)) aria-hidden="true">
-                                <span class="pack-crimp"></span>
-                                <span class="pack-name">{b.name.get().trim_end_matches(" Pack").trim_start_matches("Booster ")}</span>
-                                <span class="pack-pips">{b.colors.iter().filter(|_| b.colors.len() <= 2).map(|&c| view! { <Pip color=c /> }).collect_view()}</span>
-                                <span class="pack-crimp bottom"></span>
-                                {move || (held() > 0).then(|| view! { <span class="count-badge">{held()}</span> })}
-                            </div>
+                            <crate::packs::PackArt b=i held=Signal::derive(held) />
                             <div class="shelf-info">
                                 <h3>{b.name.get()}</h3>
                                 <p>{b.description.get()}</p>
+                                <crate::packs::PackOdds b=i />
                                 {move || match price.get() {
                                     Some(n) => view! {
                                         <button type="button" class="btn primary"

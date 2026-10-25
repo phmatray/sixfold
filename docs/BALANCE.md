@@ -194,7 +194,11 @@ duel (a greedy one- or two-colour builder). Since 1.2 it first meets each of the
 once (win or lose, it walks on), then faces the first open rival it hasn't beaten; rivals play in
 their style. Duel wins pay Facets, not packs, so after every duel it spends its Facets on the themed
 pack on sale it has bought fewest of, and opens every pack. It must take all six seals and the Warden
-within 54 duels (the 14 route duels and the 40 rival duels the budget allowed before; pinned for
-risk E1) and buy at least 10 packs. It takes **32 duels**: 10 of 14 route duels won (⬡ 405), then
-Bramble 1, Marlo 1, Cinza 1, Quill 1, Orla 3, Lumen 6 and Sable 5, with **19 packs bought** and ⬡ 55
-left. Before 1.2 (packs for wins, no route duelists) it took 31 rival duels.
+within one duel per route duelist plus 40 rival duels (the rival budget of 1.2, pinned for risk E1:
+54 duels with 14 route duelists, 66 with the 26 of the Ember and Storm regions) and buy at least 10
+packs, in at least two of three playthroughs (pack seeds 1, 2 and 3). One seeded run swings widely on
+the packs alone: over 16 pack seeds with no budget, the 1.3 campaign took 44–100 duels (median 65)
+with the 1.x packs and 40–91 (median 52) with the slot design of `docs/BOOSTERS.md`, and a single run
+at 54 failed for a third of the seeds either way. With the boosters release, seeds 2 and 3 finish in
+45 and 44 duels (22 and 23 packs bought); seed 1 stalls on the Warden. Before 1.2 (packs for wins,
+no route duelists) it took 31 rival duels.

@@ -85,9 +85,18 @@ fn type_class(def: &CardDef) -> String {
 pub fn CardFace(id: CardId) -> impl IntoView {
     let def = card(id);
     let promo = sixfold_engine::set::is_promo(id);
+    // A gilt frame on Rares and promos; the foil itself (style.css): rainbow on
+    // a Holo Rare's picture, over the whole of a promo.
     let foil = promo || (def.rarity == Rarity::Rare && !matches!(def.kind, CardKind::Energy(_)));
+    let finish = if promo {
+        " promo"
+    } else if sixfold_engine::set::is_holo(id) {
+        " holo"
+    } else {
+        ""
+    };
     let class = format!(
-        "card {} r-{}{}",
+        "card {} r-{}{}{finish}",
         type_class(def),
         rarity_key(def.rarity),
         if foil { " foil" } else { "" }
