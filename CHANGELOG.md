@@ -5,6 +5,22 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.1.0](https://github.com/phmatray/sixfold/compare/v1.0.0...v1.1.0) (2026-10-25)
+
+
+### Added
+
+* **cards:** a real card face with illustrations, attacks and foil ([#25](https://github.com/phmatray/sixfold/issues/25)) ([2ee8b9b](https://github.com/phmatray/sixfold/commit/2ee8b9b55e5c1bb7fcfc6abebd255c0f80805383))
+* **cards:** painted illustrations for all 110 cards ([#26](https://github.com/phmatray/sixfold/issues/26)) ([7b2912a](https://github.com/phmatray/sixfold/commit/7b2912a5e5c8bd861e82a71d9be18c37947fe320))
+* **i18n:** play in French or English ([#23](https://github.com/phmatray/sixfold/issues/23)) ([f96e214](https://github.com/phmatray/sixfold/commit/f96e2145620946653e2f5f30969f13d9a68a873a))
+* **tutorial:** a guided first duel and a Continue button ([#24](https://github.com/phmatray/sixfold/issues/24)) ([b37986b](https://github.com/phmatray/sixfold/commit/b37986be690845f61511aed28ecc6b7c43d2cc98))
+
+
+### Fixed
+
+* **mobile:** no page zoom or text selection, tap to interact, calmer running ([#21](https://github.com/phmatray/sixfold/issues/21)) ([cccd47f](https://github.com/phmatray/sixfold/commit/cccd47f24091a3bfad6b1f950f0861ee76a37e8f))
+* **ui:** 1.1 design audit — phone board fit, full hand, retreat lesson, atomic world cache ([#27](https://github.com/phmatray/sixfold/issues/27)) ([e3f52e1](https://github.com/phmatray/sixfold/commit/e3f52e1ff7f51df56a6887d0856e18e12096476c))
+
 ## [1.0.0](https://github.com/phmatray/sixfold/compare/v0.9.0...v1.0.0) (2026-10-24)
 
 

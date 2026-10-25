@@ -1302,11 +1302,11 @@ dependencies = [
 
 [[package]]
 name = "sixfold-engine"
-version = "1.0.0"
+version = "1.1.0"
 
 [[package]]
 name = "sixfold-web"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",
