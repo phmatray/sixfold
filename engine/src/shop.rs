@@ -626,6 +626,34 @@ mod tests {
             facets: 440 + 110,
             packs: 2,
         });
+        // 1.7 achievements (§12.3) a first playthrough earns on the way: the
+        // first win and Awaken 2, the seals and the champion, ten duelists and
+        // finds, 50 cards, 25 packs, the field items and an empty-bench win.
+        // The rest (⬡ 3,050 of the 3,975) are the long tail: the Gauntlet, the
+        // daily duel, every find, card and duelist, streaks and records.
+        let on_the_way = [
+            "first_win",
+            "full_bloom",
+            "first_seal",
+            "three_seals",
+            "all_seals",
+            "champion",
+            "trainers_10",
+            "finds_10",
+            "cards_50",
+            "packs_25",
+            "items_all",
+            "empty_bench",
+        ];
+        first.push(Source {
+            minutes: 0,
+            facets: crate::stats::ACHIEVEMENTS
+                .iter()
+                .filter(|a| on_the_way.contains(&a.id))
+                .map(|a| a.facets)
+                .sum(),
+            packs: 0,
+        });
         let rate = packs_per_hour(&first);
         // The "exploring" row of §3.4, per hour: 5 two-prize duelists, 6 finds
         // of ⬡ 40, half a quest of ⬡ 160 and 0.8 of a rival.

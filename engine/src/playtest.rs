@@ -13,6 +13,7 @@ use crate::overworld::Progress;
 use crate::profile::Profile;
 use crate::set::{self, basic_energy};
 use crate::shop::{buy_pack, pack_price};
+use crate::stats::{award, Stats};
 use crate::trainers::{self, Kit, KITS, SPROUTS, TRAINERS};
 use crate::{card_id, validate_deck, Collection, Config, Game, DECK_SIZE, MAX_COPIES};
 
@@ -386,11 +387,25 @@ fn shop_packs(progress: &mut Progress, profile: &mut Profile, bought: &mut [u32]
 /// rival duels over 16 pack seeds, against 16 before; pack seed 1 took 42).
 const RIVAL_DUELS: u64 = 45;
 
+/// Count a duel and what it changed, and pay the achievements it earned
+/// (their Facets buy packs at the next shop visit, like any others).
+fn achieve(
+    stats: &mut Stats,
+    before: (Progress, Profile),
+    won: bool,
+    progress: &mut Progress,
+    profile: &Profile,
+) {
+    stats.add("wins", u64::from(won));
+    stats.observe((&before.0, &before.1), (progress, profile));
+    award(stats, progress, profile);
+}
+
 /// A full playthrough: a new player, played by the Normal AI, first meets
 /// every route duelist once (win or lose, they walk on), then takes on the
 /// first open rival they haven't beaten, rebuilding their deck from the
 /// collection before every duel. Every Facet earned buys themed packs at
-/// the shop and every pack is opened, from `pack_seed` on. Rivals play with
+/// the shop and every pack is opened, from `pack_seed` on, and achievements pay out as earned. Rivals play with
 /// their AI style. Stops when the Warden falls or after one duel per route
 /// duelist plus `rival_duels`; returns the duels played, the packs
 /// bought, the log and the final state.
@@ -404,6 +419,7 @@ fn playthrough(
     open_all(&mut profile, &mut pack_seed);
     let mut duels = 0;
     let mut log = vec![];
+    let mut stats = Stats::default();
     for t in &TRAINERS {
         let deck = build_deck(&profile.collection);
         let won = play(
@@ -412,10 +428,12 @@ fn playthrough(
             t.prizes,
             [Difficulty::Normal, t.difficulty],
         ) == 0;
+        let before = (progress.clone(), profile.clone());
         trainers::record(t, won, &mut progress);
         progress.settle();
         packs += shop_packs(&mut progress, &mut profile, &mut bought);
         open_all(&mut profile, &mut pack_seed);
+        achieve(&mut stats, before, won, &mut progress, &profile);
         duels += 1;
         log.push((t.id, won));
     }
@@ -434,10 +452,12 @@ fn playthrough(
                 (r.difficulty, r.style),
             ],
         ) == 0;
+        let before = (progress.clone(), profile.clone());
         record(r, won, &mut progress, &mut profile);
         progress.settle();
         packs += shop_packs(&mut progress, &mut profile, &mut bought);
         open_all(&mut profile, &mut pack_seed);
+        achieve(&mut stats, before, won, &mut progress, &profile);
         duels += 1;
         log.push((r.id, won));
     }

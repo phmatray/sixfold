@@ -480,3 +480,14 @@ order.
   against the Tide-and-Dream decks.
 - **Sixfold Crown** (the Warden's deck) is 44% at Normal and 6 prizes in the sweep. In the campaign
   it plays on Hard, where it beats the starter 86%.
+
+## 1.7: achievement Facets
+
+The 38 achievements (`engine/src/stats.rs`, `docs/WORLD_DESIGN.md` §12.3) pay ⬡ 3,975 in all, each
+once. `economy_sim` counts the ⬡ 925 a first playthrough earns on the way (the first win and Awaken 2,
+the six seals and the champion, ten duelists and finds, 50 cards, 25 packs, the field items, an
+empty-bench win): the first playthrough goes from 4.85 to 5.28 packs an hour, still inside the
+3.5–6.0 band; exploring stays at 5.23. The other ⬡ 3,050 are the long tail (the Gauntlet, the daily
+duel, every find, card and duelist, streaks and records) and pay after the campaign, when there is
+less else to buy. The campaign playthrough now pays achievements as they are earned; over the three
+pack seeds it finished in 84, 83 and 71 duels (78, 92 and 80 before), inside its 98-duel budget.
