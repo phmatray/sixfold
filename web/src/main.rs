@@ -13,6 +13,7 @@ mod ctl;
 mod decks;
 mod duel;
 mod journal;
+mod offline;
 mod overlays;
 mod packs;
 mod saves;

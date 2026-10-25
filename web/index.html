@@ -81,6 +81,16 @@
           const watch = (worker) => worker.addEventListener("statechange", () => {
             if (worker.state === "installed" && navigator.serviceWorker.controller) offer(worker);
           });
+          // Every region playable offline: once the app is up, the worker downloads
+          // the rest of the world and reports {done, total} (shown in Settings).
+          navigator.serviceWorker.addEventListener("message", (e) => {
+            if (e.data?.type !== "fill") return;
+            window.sixfoldOffline = e.data;
+            dispatchEvent(new CustomEvent("sixfold-offline", { detail: e.data }));
+          });
+          navigator.serviceWorker.ready.then((r) =>
+            (window.requestIdleCallback ?? setTimeout)(() => r.active?.postMessage({ type: "fill" })),
+          );
           if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
           if (reg.installing) watch(reg.installing);
           reg.addEventListener("updatefound", () => watch(reg.installing));

@@ -4,6 +4,11 @@
 # assets and the card art, which are cached on first use) and a version that
 # changes whenever any of those files does (their names carry content hashes).
 #
+# It also lists the world's data (`WORLD`: maps, then textures, then models,
+# each with a checksum), which the worker downloads in the background after
+# the first launch so every region plays offline. The checksums let that cache
+# outlive deploys: a new build only re-downloads the files that changed.
+#
 # The world's modules (world/*.js) import each other by plain, unhashed names,
 # so they are precached with the shell and their contents go into the version:
 # a deploy swaps them all at once, and a page never runs a new world.js
@@ -36,5 +41,10 @@ version=$( (echo "$files"; cat index.html; find ./world ./vendor -name '*.js' | 
   sep=''
   for f in $files; do printf '%s"./%s"' "$sep" "$f"; sep=', '; done
   echo '];'
+  printf 'const WORLD = {'
+  sep=''
+  for d in maps textures assets; do find "./world/$d" -type f ! -name '.*' | LC_ALL=C sort; done | xargs cksum |
+    while read -r sum size f; do printf '%s"%s":"%s-%s"' "$sep" "$f" "$sum" "$size"; sep=', '; done
+  echo '};'
   cat "$TRUNK_SOURCE_DIR/sw.js"
 } > sw.js
