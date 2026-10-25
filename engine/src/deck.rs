@@ -252,17 +252,21 @@ impl DeckList {
             DeckListError::Illegal(DeckError::WrongSize(n)) if n < DECK_SIZE => {
                 self.fill_energy();
             }
-            DeckListError::Illegal(DeckError::WrongSize(_)) => {
-                while self.cards.len() > DECK_SIZE {
-                    let most = self
-                        .counts()
-                        .into_iter()
-                        .filter(|&(id, _)| card(id).is_basic_energy())
-                        .max_by_key(|&(_, n)| n);
-                    match most {
-                        Some((id, _)) => self.remove(id),
-                        None => break,
-                    };
+            DeckListError::Illegal(DeckError::WrongSize(n)) => {
+                let is_energy = |id: CardId| try_card(id).is_some_and(|d| d.is_basic_energy());
+                // All the way down to 60, or not at all: half a fix isn't one.
+                if self.cards.iter().filter(|&&id| is_energy(id)).count() >= n - DECK_SIZE {
+                    while self.cards.len() > DECK_SIZE {
+                        let most = self
+                            .counts()
+                            .into_iter()
+                            .filter(|&(id, _)| is_energy(id))
+                            .max_by_key(|&(_, n)| n);
+                        match most {
+                            Some((id, _)) => self.remove(id),
+                            None => break,
+                        };
+                    }
                 }
             }
             DeckListError::Illegal(DeckError::UnknownCard(id)) => self.cards.retain(|&c| c != id),
@@ -384,8 +388,8 @@ impl DeckList {
 
     pub fn fill_energy(&mut self) -> usize {
         let (mut weight, mut have) = ([0usize; 6], [0usize; 6]);
-        for &id in &self.cards {
-            match &card(id).kind {
+        for d in self.cards.iter().filter_map(|&id| try_card(id)) {
+            match &d.kind {
                 CardKind::Creature(cr) | CardKind::TrainerBasic(cr)
                     if cr.color != Color::Colorless =>
                 {
@@ -799,11 +803,47 @@ mod hint_tests {
         assert!(!none.repair(DeckListError::Illegal(DeckError::NoBasic), &owned));
         assert!(!none.repair(d_err(61), &owned));
         assert_eq!(none.cards.len(), 61);
+        // Not enough basic energy to reach 60: nothing comes out.
+        let mut short = list(&[FIELD_NOTES; 61]);
+        short.cards[0] = GRASS_E;
+        short.cards.push(FIELD_NOTES);
+        assert!(!short.repair(d_err(62), &owned));
+        assert_eq!(short.cards.len(), 62);
         let mut unknown = list(&[MOSSLING, CardId(9999)]);
         assert!(unknown.repair(
             DeckListError::Illegal(DeckError::UnknownCard(CardId(9999))),
             &owned
         ));
         assert_eq!(unknown.cards, vec![MOSSLING]);
+        // A wrong size next to an unknown card: no panic, the known cards count.
+        let mut odd = list(&[MOSSLING, CardId(9999)]);
+        assert!(odd.repair(d_err(2), &owned));
+        assert_eq!(odd.cards.len(), DECK_SIZE);
+    }
+
+    #[test]
+    fn repair_trims_the_most_used_energy_first() {
+        let mut d = vec![MOSSLING; 4];
+        d.extend([FIRE_E; 2]);
+        d.resize(DECK_SIZE + 1, GRASS_E);
+        let mut d = list(&d);
+        assert!(d.repair(d_err(DECK_SIZE + 1), &Collection::new()));
+        assert_eq!(d.cards.iter().filter(|&&c| c == FIRE_E).count(), 2);
+    }
+
+    #[test]
+    fn unknown_cards_are_reported_once_and_never_as_not_owned() {
+        let unknown = DeckError::UnknownCard(CardId(9999));
+        assert_eq!(
+            deck_errors(&[MOSSLING, CardId(9999), CardId(9999)])
+                .into_iter()
+                .filter(|&e| e == unknown)
+                .count(),
+            1
+        );
+        let p = list(&[MOSSLING, CardId(9999)]).problems(&Collection::new());
+        assert!(p.contains(&DeckListError::Illegal(unknown)));
+        assert!(!p.contains(&DeckListError::NotOwned(CardId(9999))));
+        assert_eq!(hints(&[MOSSGIANT, MOSSGIANT]).stranded, vec![MOSSGIANT]);
     }
 }

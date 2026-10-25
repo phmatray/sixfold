@@ -333,7 +333,9 @@ export function sfx(name, n = 0) {
 
 // A pack's reveal, from `from` ms on its timeline, played `rate` times as
 // fast: the tear, the nine cards turning, the held beat, the Rare. The
-// timeline is packs.rs's (FLIP_AT, FLIP_STEP, BEAT_AT, RARE_AT), passed in.
+// timeline is packs.rs's (FLIP_AT, FLIP_STEP, BEAT_AT, RARE_AT), passed in;
+// the offsets below are halfway through a turn (style.css: .flip-inner 560ms,
+// .flip.rare 900ms) and the Rare's shine.
 // Called again when the speed changes; "packstop" silences it.
 export function packReveal(from, rate, flipAt, flipStep, beatAt, rareAt) {
   if (!ctx || ctx.state !== "running") return;

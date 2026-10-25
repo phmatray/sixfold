@@ -20,10 +20,11 @@ use crate::Screen;
 use crate::Ui;
 use wasm_bindgen::prelude::*;
 
-/// The reveal's timeline in ms from the tear, at normal speed. The only
-/// copy: each card's delay (`--d`), the held beat (`--beat`, `--rare`) in
-/// style.css and the "pack" sound (audio.js `packReveal`) all take it from
-/// here. The nine cards turn from `FLIP_AT`, one every `FLIP_STEP`; then a
+/// The reveal's timeline in ms from the tear, at normal speed. Each card's
+/// delay (`--d`), the held beat (`--beat`, `--rare`) in style.css and the
+/// "pack" sound (audio.js `packReveal`) take their marks from here; how long
+/// one card takes to turn stays the CSS's (560 ms, 900 ms for the Rare),
+/// and the sound lands halfway through it. The nine cards turn from `FLIP_AT`, one every `FLIP_STEP`; then a
 /// held beat from `BEAT_AT` builds to the Rare slot, which turns at
 /// `RARE_AT`; all is shown by `REVEAL_MS`.
 const FLIP_AT: u64 = 900;
@@ -526,7 +527,7 @@ fn Reveal(
                 tr("Tear it open: tap the pack, or press Enter.", "Ouvrez-le : touchez le booster, ou appuyez sur Entrée.").to_string()
             }}</p>
         </div>
-        <div class="opening" node_ref=stage class:open=move || open.get() class:instant=move || instant.get() class:fast=move || fast.get()
+        <div class="opening" node_ref=stage class:open=move || open.get() class:instant=move || instant.get()
             style=format!("--beat:{BEAT_AT}ms;--rare:{RARE_AT}ms")
             on:pointerdown=on_down on:pointerup=on_up on:pointercancel=on_up on:pointerleave=on_up>
             <div class="sealed" data-tilt=move || (!open.get()).then_some("")>

@@ -146,6 +146,8 @@ enum Fix {
     Repair(DeckListError),
     /// Filter "Your cards" to the Basic Hexons.
     ShowBasics,
+    /// Show the deck pane, to choose what comes out.
+    ShowDeck,
 }
 
 /// A deck problem as a sentence naming the rule, and the fix the editor
@@ -178,11 +180,16 @@ fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Optio
                     format!("A deck holds exactly {DECK_SIZE} cards: {over} too many."),
                     format!("Un deck compte exactement {DECK_SIZE} cartes : {over} de trop."),
                 ),
-                repairable().then(|| {
+                Some(if repairable() {
                     (
-                        tr("Take out basic energy", "Retirer des énergies de base").to_string(),
+                        tr(
+                            format!("Take out {over} basic energy"),
+                            format!("Retirer {over} énergies de base"),
+                        ),
                         Fix::Repair(e),
                     )
+                } else {
+                    (tr("Show the deck", "Voir le deck").into(), Fix::ShowDeck)
                 }),
             )
         }
@@ -540,7 +547,8 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
         }));
     };
     let total = move || draft.with(|d| d.cards.len());
-    // Bumped on every change to the deck: replays the counts' bump.
+    // Bumped on every change to the deck's size: renders the counts (read
+    // untracked there, so they render once) and replays their bump.
     let pulse = RwSignal::new(0u32);
     Effect::new(move |prev: Option<usize>| {
         let n = total();
@@ -570,6 +578,12 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             if changed {
                 crate::audio::sfx("place", 0.0);
                 msg.set(Some(tr("Fixed.", "Corrigé.").into()));
+            }
+        }
+        Fix::ShowDeck => {
+            tab.set(Tab::Deck);
+            if let Some(el) = document().get_element_by_id("pane-deck") {
+                el.scroll_into_view();
             }
         }
         Fix::ShowBasics => {
@@ -635,7 +649,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 </div>
             })}
             <section class="deck-stats" aria-label=tr("Deck summary", "Résumé du deck")>
-                <p class="deck-total">{move || { let k = pulse.get(); view! { <b class:bump={k > 0}>{total()}</b> } }}" / " {DECK_SIZE}{tr(" cards", " cartes")}</p>
+                <p class="deck-total">{move || { let k = pulse.get(); view! { <b class:bump={k > 0}>{draft.with_untracked(|d| d.cards.len())}</b> } }}" / " {DECK_SIZE}{tr(" cards", " cartes")}</p>
                 <ul class="kind-counts" aria-label=tr("Composition", "Composition")>
                     {move || {
                         let h = comp();
@@ -721,7 +735,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 <button type="button" role="tab" id="tab-cards" aria-controls="pane-cards" aria-selected=move || (tab.get() == Tab::Cards).to_string()
                     on:click=move |_| tab.set(Tab::Cards)>{tr("Your cards", "Vos cartes")}</button>
                 <button type="button" role="tab" id="tab-deck" aria-controls="pane-deck" aria-selected=move || (tab.get() == Tab::Deck).to_string()
-                    on:click=move |_| tab.set(Tab::Deck)>"Deck " {move || { let k = pulse.get(); view! { <span class="tab-count" class:bump={k > 0}>{format!("({})", total())}</span> } }}</button>
+                    on:click=move |_| tab.set(Tab::Deck)>"Deck " {move || { let k = pulse.get(); view! { <span class="tab-count" class:bump={k > 0}>{format!("({})", draft.with_untracked(|d| d.cards.len()))}</span> } }}</button>
             </div>
             <main class="editor-panes">
                 <section class="pane pane-cards" id="pane-cards" role="tabpanel" aria-labelledby="tab-cards" class:inactive=move || tab.get() != Tab::Cards>

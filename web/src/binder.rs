@@ -290,12 +290,17 @@ fn showpiece(id: CardId) -> bool {
     set::is_promo(id) || (def.rarity == Rarity::Rare && !matches!(def.kind, CardKind::Energy(_)))
 }
 
+/// The rival whose first defeat earns this promo (None for any other card).
+fn promo_rival(id: CardId) -> Option<&'static sixfold_engine::campaign::Rival> {
+    sixfold_engine::campaign::RIVALS
+        .iter()
+        .find(|r| set::is_promo(id) && r.promo() == id)
+}
+
 /// What the collection holds of a card, in words: "2 owned", "not found yet",
 /// "not earned yet: beat Bramble" (a promo comes from one rival's first defeat).
 fn own_words(id: CardId, n: usize) -> String {
-    let from = sixfold_engine::campaign::RIVALS
-        .iter()
-        .find(|r| set::is_promo(id) && r.promo() == id);
+    let from = promo_rival(id);
     match n {
         0 if set::is_promo(id) => match from {
             Some(r) => tr(
@@ -432,7 +437,14 @@ pub fn CollectionPanel() -> impl IntoView {
         start.set_value(None);
         let (dx, dy) = (e.client_x() - x, e.client_y() - y);
         if dx.abs() > 48 && dx.abs() * 2 > dy.abs() * 3 {
+            // Only the click this pointerup is about to fire is swallowed.
             swiped.set_value(true);
+            set_timeout(
+                move || {
+                    swiped.try_set_value(false);
+                },
+                Duration::ZERO,
+            );
             let p = page.get_untracked();
             turn(if dx < 0 { p + 1 } else { p.saturating_sub(1) }, true);
         }
@@ -624,14 +636,20 @@ fn Tally(f: Filters) -> impl IntoView {
         (Kind::Energy, tr("Special energy", "Énergie spéciale")),
     ]
     .map(|(k, l)| {
-        let on = (
-            Signal::derive(move || f.kind.get() == k),
-            Callback::new(move |()| f.kind.update(|v| *v = if *v == k { Kind::All } else { k })),
-        );
+        // Special energy is a row, not a filter: the Energy filter also
+        // shows basic energy, which the tally leaves out.
+        let on = (k != Kind::Energy).then(|| {
+            (
+                Signal::derive(move || f.kind.get() == k),
+                Callback::new(move |()| {
+                    f.kind.update(|v| *v = if *v == k { Kind::All } else { k })
+                }),
+            )
+        });
         row(
             view! { {l} }.into_any(),
             Box::new(move |id| kind_of(id) == k),
-            Some(on),
+            on,
         )
     });
     let rarities = [Rarity::Common, Rarity::Uncommon, Rarity::Rare].map(|r| {
@@ -836,9 +854,7 @@ fn BinderSlot(id: CardId, on_open: Callback<()>) -> impl IntoView {
     let count = Memo::new(move |_| profile.with(|p| p.collection.count(id)));
     let (peek, _) = inspect_handlers(id);
     let promo = set::is_promo(id);
-    let from = sixfold_engine::campaign::RIVALS
-        .iter()
-        .find(|r| promo && r.promo() == id);
+    let from = promo_rival(id);
     let label = move || {
         format!(
             ", {}, {}",
