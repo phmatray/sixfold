@@ -139,15 +139,15 @@ fn open(n: usize) -> Option<String> {
             ),
         ),
         _ => tr(
-                    format!(
-                        "{} couldn't be read ({e}), so it starts again. A copy was kept in this browser.",
-                        default_name(n)
-                    ),
-                    format!(
-                        "{} est illisible ({e}) : elle repart de zéro. Une copie est gardée dans ce navigateur.",
-                        default_name(n)
-                    ),
-                ),
+            format!(
+                "{} couldn't be read ({e}), so it starts again. A copy was kept in this browser.",
+                default_name(n)
+            ),
+            format!(
+                "{} est illisible ({e}) : elle repart de zéro. Une copie est gardée dans ce navigateur.",
+                default_name(n)
+            ),
+        ),
     });
     CURRENT.set((n, save));
     set(SLOT, &n.to_string());
@@ -292,6 +292,7 @@ pub fn rename(n: usize, name: &str) {
 pub fn delete(n: usize) {
     remove(&slot_key(n));
     remove(&format!("{}.prev", slot_key(n)));
+    remove(&format!("{}.bad", slot_key(n)));
     if CURRENT.with_borrow(|(c, _)| *c == n) {
         open(n);
         write();
@@ -309,12 +310,15 @@ pub fn reset() {
 }
 
 /// Replace the current slot with `incoming` (already decoded, so a bad file
-/// never gets here). The replaced save is kept at `<key>.bak`.
-pub fn import(incoming: Save) {
+/// never gets here). The replaced save is kept at `<key>.bak`. False when
+/// it couldn't be written (it lives in memory, and the indicator says so).
+pub fn import(incoming: Save) -> bool {
     CURRENT.with_borrow(|(n, s)| set(&format!("{}.bak", slot_key(*n)), &s.encode()));
     edit(|s| *s = incoming);
-    write();
+    let ok = write();
+    expect_context::<Saved>().ok.set(ok);
     show_current();
+    ok
 }
 
 fn bad_key() -> String {
@@ -333,11 +337,12 @@ pub fn restore_bad() -> Result<String, SaveError> {
     let key = bad_key();
     let s = Save::decode(&get(&key).unwrap_or_default())?;
     let name = s.name().to_string();
-    // A copy kept for one unreadable part stays: the restore resets that part again.
-    if s.profile().1.is_empty() {
+    // Kept until the restored save is stored, and when one part of it still
+    // doesn't read (the restore resets that part again).
+    let whole = s.profile().1.is_empty();
+    if import(s) && whole {
         remove(&key);
     }
-    import(s);
     Ok(name)
 }
 

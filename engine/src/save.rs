@@ -163,10 +163,13 @@ impl Save {
     }
 
     /// Sets a section. Panics on a name that isn't lowercase ASCII letters,
-    /// digits and `_` (a programming error).
+    /// digits and `_` (a programming error). Carriage returns are dropped:
+    /// [`decode`](Self::decode) reads `\r\n` as a line end, so a value
+    /// holding one wouldn't read back the same.
     pub fn set(&mut self, section: &str, value: &str) {
         assert!(valid_name(section), "bad section name {section:?}");
-        self.sections.insert(section.to_string(), value.to_string());
+        self.sections
+            .insert(section.to_string(), value.replace('\r', ""));
     }
 
     pub fn remove(&mut self, section: &str) {
@@ -210,7 +213,7 @@ impl Save {
 
     /// [`encode`](Self::encode), but only when the text decodes back to
     /// this very save: what a slot is overwritten with. None when it doesn't
-    /// (a `\r` at the end of a line, say), and the slot keeps what it had.
+    /// (a bug in the format), and the slot keeps what it had.
     pub fn encode_checked(&self) -> Option<String> {
         let text = self.encode();
         (Save::decode(&text).as_ref() == Ok(self)).then_some(text)
@@ -599,8 +602,13 @@ mod tests {
     #[test]
     fn a_save_is_written_only_when_it_reads_back_the_same() {
         assert_eq!(sample().encode_checked(), Some(sample().encode()));
+        // A carriage return would be read as part of a line end: never stored.
         let mut s = sample();
-        s.set(CAMPAIGN_DECK, "line end\r");
+        s.set(CAMPAIGN_DECK, "line end\r\nnext\r");
+        assert_eq!(s.get(CAMPAIGN_DECK), Some("line end\nnext"));
+        assert!(s.encode_checked().is_some());
+        // A save that doesn't read back the same is refused.
+        s.sections.insert(CAMPAIGN_DECK.into(), "line end\r".into());
         assert_eq!(s.encode_checked(), None);
     }
 
