@@ -89,6 +89,7 @@ pub fn OptionsPanel() -> impl IntoView {
             <LangSwitch />
             <AudioSettings />
             <SaveSettings />
+            <crate::offline::OfflineStatus />
             {move || if confirm.get() {
                 view! {
                     <div class="confirm" role="group" aria-labelledby="reset-q">

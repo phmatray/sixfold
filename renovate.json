@@ -2,5 +2,15 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>phmatray/.github:renovate-base"
+  ],
+  "customManagers": [
+    {
+      "description": "three.js shipped in web/vendor/three: bump the version, then re-run tools/vendor-three.sh",
+      "customType": "regex",
+      "managerFilePatterns": ["/^tools/vendor-three\\.sh$/"],
+      "matchStrings": ["THREE_VERSION=\\$\\{1:-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\}"],
+      "depNameTemplate": "three",
+      "datasourceTemplate": "npm"
+    }
   ]
 }

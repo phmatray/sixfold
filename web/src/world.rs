@@ -33,7 +33,7 @@ export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
     .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb, start, edit && new URLSearchParams(location.search).has("edit")); api.setItems(items); api.setClock(minute); api.pause(paused); })
-    .catch((e) => { console.error("world: could not load the scene", e); cb("error", "", String(e)); });
+    .catch((e) => { console.error("world: could not load the scene", e); cb("error", "import", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
 export function world_act() { api?.act(); }
@@ -69,6 +69,28 @@ extern "C" {
     fn world_clock(minute: u16);
     /// The scene is loading, warping (a fade), or a duelist is walking over.
     fn world_busy() -> bool;
+}
+
+const REOPEN: &str = "sixfold.reopen-world";
+
+/// Retry after the scene's modules failed to load: the browser keeps a failed
+/// module import for the page's whole life, so reload and come back here.
+fn reload_into_world() {
+    let w = window();
+    if let Ok(Some(s)) = w.session_storage() {
+        _ = s.set_item(REOPEN, "1");
+    }
+    _ = w.location().reload();
+}
+
+/// Whether the page was reloaded to retry the world (see `reload_into_world`); once.
+pub(crate) fn reopen() -> bool {
+    let Ok(Some(s)) = window().session_storage() else {
+        return false;
+    };
+    let yes = s.get_item(REOPEN).ok().flatten().is_some();
+    _ = s.remove_item(REOPEN);
+    yes
 }
 
 /// Fade the world to a map tile: a `warp:` cue, or fast travel (its own sound).
@@ -512,6 +534,9 @@ pub fn WorldScreen() -> impl IntoView {
     let sheet = RwSignal::new(None::<Sheet>);
     let typed = RwSignal::new(0usize);
     let loading = RwSignal::new(true);
+    // The first map's models loaded, (done, total), for the loading line.
+    let loaded = RwSignal::new((0u32, 0u32));
+    // Some("import") when the scene's modules could not load, Some("") when the scene failed.
     let failed = RwSignal::new(None::<String>);
     let announce = RwSignal::new(String::new());
     let progress = expect_context::<RwSignal<Progress>>();
@@ -614,13 +639,18 @@ pub fn WorldScreen() -> impl IntoView {
                 "use" => _ = sheet.try_set(Some(Sheet::Note(tr("It says", "On peut lire"), b))),
                 "talk" => start_talk(a, b),
                 "area" => _ = announce.try_set(a),
+                "progress" => {
+                    if let Some((d, t)) = a.split_once('/') {
+                        _ = loaded.try_set((d.parse().unwrap_or(0), t.parse().unwrap_or(0)));
+                    }
+                }
                 "ready" => {
                     _ = loading.try_set(false);
                     if let Some(id) = &returning {
                         world_meet(id);
                     }
                 }
-                _ => _ = failed.try_set(Some(b)),
+                _ => _ = failed.try_set(Some(a)),
             }
             false
         },
@@ -645,8 +675,12 @@ pub fn WorldScreen() -> impl IntoView {
         world_unmount();
     });
     let retry = move |_| {
+        if failed.get_untracked().as_deref() == Some("import") {
+            return reload_into_world();
+        }
         failed.set(None);
         loading.set(true);
+        loaded.set((0, 0));
         world_unmount();
         mount();
     };
@@ -1052,8 +1086,14 @@ pub fn WorldScreen() -> impl IntoView {
                 </button>
             })}
             <div class="world-rest" class:on=move || resting.get() aria-hidden="true"></div>
-            {move || (loading.get() && failed.with(Option::is_none)).then(|| view! {
-                <p class="world-loading" role="status">{tr("Loading the world…", "Chargement du monde…")}</p>
+            {move || (loading.get() && failed.with(Option::is_none)).then(|| {
+                let pct = move || loaded.with(|&(d, t)| (d * 100).checked_div(t).unwrap_or(0).min(100));
+                view! {
+                    <div class="world-loading" role="status">
+                        <p>{tr("Loading the world…", "Chargement du monde…")}</p>
+                        <span class="progress-bar" aria-hidden="true"><span style:width=move || format!("{}%", pct())></span></span>
+                    </div>
+                }
             })}
             {move || failed.get().map(|_| view! {
                 <div class="world-error" role="alert">
