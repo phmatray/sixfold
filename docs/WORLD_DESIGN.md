@@ -1,6 +1,6 @@
 # Sixfold — World Design (1.2 → 1.4)
 
-Status: living spec; 1.2 PR 1 (the engine half) is built. Owner: game/world design. Supersedes the "After 1.0" line of `docs/ROADMAP.md` for
+Status: living spec; 1.2 PRs 1–3 (engine, world.js split, line of sight, finds and houses) are built. Owner: game/world design. Supersedes the "After 1.0" line of `docs/ROADMAP.md` for
 the world. Three releases implement it:
 
 | Release | Name | One-line goal |
@@ -247,8 +247,10 @@ watches a straight line of tiles.
 
 The loader expands `trainer` into ordinary dialogue branches, so one grammar still drives everything:
 `won:t_hazel` → `win`, `lost:t_hazel` → `lose`, `beat:t_hazel` → `after`, else `challenge` + `do:
-["duel:t_hazel"]`. Hand-written `dialogue` on the same NPC is placed after these branches (for night lines,
-quests, etc.).
+["duel:t_hazel"]`. Hand-written `dialogue` on the same NPC goes between the `won:`/`lost:` branches and
+`beat:` (for night lines, quests, Cole's ash), so it can be reached: after `beat:` and the catch-all challenge
+nothing would ever play. Mind the conditions: a hand-written branch that holds before the duelist is beaten
+replaces the challenge. (Built in `web/world/map.js` `expand`.)
 
 Line of sight:
 

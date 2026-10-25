@@ -20,10 +20,17 @@ const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff e
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
 
 // Re-check what a condition shows or hides (`holds(cond)`), after a map is built
-// and whenever the game state may have changed (a dialogue closed). Today: the
-// glint over each find.
+// and whenever the game state may have changed (a dialogue closed): people and
+// spots with an `if` come and go, and the glint over each find.
 export function refresh(w, holds) {
-  w.glints.forEach((g) => (g.sprite.visible = holds(g.cond)));
+  for (const n of w.npcs) n.hidden = !holds(n.def.if);
+  for (const i of w.map.interactions) {
+    if (!i.if) continue;
+    const k = key(i.x, i.z);
+    if (holds(i.if)) w.talk.set(k, i);
+    else if (w.talk.get(k) === i) w.talk.delete(k);
+  }
+  w.glints.forEach((g) => (g.sprite.visible = holds(g.it.if) && holds(g.cond)));
 }
 
 // Free GPU memory under `root`; cached model geometry (instanced) is kept.
@@ -76,7 +83,8 @@ function flatten(template) {
   template.traverse((m) => {
     if (!m.isMesh) return;
     const rel = new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld);
-    if (m.material.map || m.material.transparent || m.isSkinnedMesh) return keep.push([m, rel]);
+    // Textured, see-through and `glow` parts (lit at night, by name) stay apart.
+    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow/i.test(m.material.name)) return keep.push([m, rel]);
     const src = m.geometry, n = src.attributes.position.count, c = m.material.color;
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", src.attributes.position.clone());
@@ -218,6 +226,7 @@ export async function build(map, got, reduced) {
       obj.rotation.y = THREE.MathUtils.degToRad(p.rot);
       prep(obj, true);
       obj.traverse((o) => o.isMesh && /water/i.test(o.material.name) && waterify(o.material)); // the fountain's pool
+      if (p.glow) obj.traverse((o) => o.isMesh && /glow/i.test(o.material.name) && ((o.material = o.material.clone()), o.material.color.set(p.glow), o.material.emissive.set(p.glow).multiplyScalar(0.55))); // a waymark's region colour
       root.add(obj);
       if (BLOB[p.asset] && !got[p.asset]) blobs.push([cx, cz, BLOB[p.asset]]);
     }
@@ -338,7 +347,7 @@ export async function build(map, got, reduced) {
     sprite.position.set(i.x + 0.5, floorAt(i.x, i.z) + 0.8, i.z + 0.5);
     sprite.scale.setScalar(0.55);
     root.add(sprite);
-    return { sprite, cond: i.glint };
+    return { sprite, cond: i.glint, it: i };
   });
   // Boats bob; a lighthouse beacon glows at its `light_origin`.
   const boats = props.filter((p) => p.asset === "boat" && p.obj);
@@ -356,7 +365,7 @@ export async function build(map, got, reduced) {
     });
 
   const npcs = spawnNpcs(map, got, floorAt, root);
-  const npcAt = (x, z, except) => npcs.find((n) => n !== except && ((n.x === x && n.z === z) || (n.step && n.step.x === x && n.step.z === z))) ?? null;
+  const npcAt = (x, z, except) => npcs.find((n) => n !== except && !n.hidden && ((n.x === x && n.z === z) || (n.step && n.step.x === x && n.step.z === z))) ?? null;
 
   const grid = debugGrid(W, H, blocked, talk, warps, npcs);
   grid.visible = false;

@@ -17,7 +17,7 @@ scene inside it and saves the file:
 | `NPCs`    | `build_npcs.py`          | NPC variants on the hero's rig (shopkeeper, gardener, wanderer, kid, rival) and the campaign rivals (grass, fire, water, lightning, fighting, psychic, champion) -> `assets/npc/npc_*.glb`, `assets/npc/rival_*.glb` + `npc_palettes.json` |
 | `Interior`| `build_interior_scene.py`| `web/world/maps/shop.json`: walls auto-tiled with the fence rules (cutaway `wall_low*` on the camera-side south row, `wall_window` on chosen straight tiles), wood floor, furniture, lamp light, hero |
 | `Areas`   | `build_area_props.py`    | the 0.7 outdoor-area props (woodland, seaside, quarry, square) side by side; imports `build_assets.py` for its helpers and exports only its own files |
-| `PropsV2` | `build_props_v2.py`      | 1.2 house furniture, signs, the curio cabinet and curios, the 1.3 shared kit (waymark, seal stone, cave mouth, climb wall, inn sign) and four more NPCs; imports `build_npcs.py` and `build_area_props.py` for their helpers and exports only its own files |
+| `PropsV2` | `build_props_v2.py`      | 1.2 house furniture, signs, the curio cabinet and curios, the 1.3 shared kit (waymark, seal stone, cave mouth, climb wall, inn sign), the find hosts (stump, log) and four more NPCs; imports `build_npcs.py` and `build_area_props.py` for their helpers and exports only its own files |
 
 ```bash
 # First time only: create the file

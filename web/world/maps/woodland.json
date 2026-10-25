@@ -167,7 +167,8 @@
     {"asset": "pine", "x": 20, "z": 21, "rot": 0},
     {"asset": "birch", "x": 22, "z": 21, "rot": 0},
     {"asset": "pine", "x": 25, "z": 21, "rot": 0},
-    {"asset": "pine", "x": 27, "z": 21, "rot": 0}
+    {"asset": "pine", "x": 27, "z": 21, "rot": 0},
+    {"asset": "log", "x": 2, "z": 20, "rot": 0}
   ],
   "spawn": {
     "x": 27,
@@ -176,7 +177,8 @@
   },
   "interactions": [
     {"x": 24, "z": 11, "kind": "sign", "text": "Fernhollow Trail. East: back to Sixfold Meadow. Over the bridge and north: the moonflower glade.", "text_fr": "Sentier de Creuse-Fougère. Est : retour au Pré de Sixfold. Après le pont, au nord : la clairière des fleurs de lune."},
-    {"x": 21, "z": 6, "kind": "sign", "text": "Lookout. Herons nest by the stream in spring. Quiet feet, please.", "text_fr": "Belvédère. Les hérons nichent près du ruisseau au printemps. Marchez sans bruit, s'il vous plaît."}
+    {"x": 21, "z": 6, "kind": "sign", "text": "Lookout. Herons nest by the stream in spring. Quiet feet, please.", "text_fr": "Belvédère. Les hérons nichent près du ruisseau au printemps. Marchez sans bruit, s'il vous plaît."},
+    {"kind": "find", "id": "w_log", "x": 2, "z": 20, "give": "coins:50", "text": "Inside the mossy log: a twist of Facets, dry as a bone.", "text_fr": "Dans la bûche moussue : quelques facettes, bien au sec."}
   ],
   "warps": [],
   "exits": [
@@ -442,6 +444,53 @@
         }
       ],
       "idle": "Idle"
+    },
+    {
+      "id": "t_hazel",
+      "name": "Hazel",
+      "model": "npc_gardener",
+      "tint": "#e8c33a",
+      "x": 22,
+      "z": 8,
+      "facing": "w",
+      "idle": "Idle",
+      "trainer": {
+        "sight": 4,
+        "look": [
+          "w",
+          "s"
+        ],
+        "challenge": [
+          "The bees say you walk like a duelist.",
+          "Hear that hum? My Hivevolts want a match."
+        ],
+        "challenge_fr": [
+          "Les abeilles disent que tu as une démarche de duelliste.",
+          "Tu entends ce bourdonnement ? Mes Hivevolt veulent un duel."
+        ],
+        "win": [
+          "Buzz off, then. Kindly.",
+          "The hive will want to hear about you."
+        ],
+        "win_fr": [
+          "File, alors. Gentiment.",
+          "La ruche voudra entendre parler de toi."
+        ],
+        "lose": [
+          "Back to the hive with you.",
+          "The bees forgive you. I'll think about it."
+        ],
+        "lose_fr": [
+          "Retourne à la ruche, va.",
+          "Les abeilles te pardonnent. Moi, je vais y réfléchir."
+        ],
+        "after": [
+          "Hivevolts hum at night. Listen, some time."
+        ],
+        "after_fr": [
+          "Les Hivevolt bourdonnent la nuit. Écoute, un de ces soirs."
+        ]
+      }
     }
   ],
   "ground": {

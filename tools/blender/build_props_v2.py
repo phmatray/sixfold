@@ -50,6 +50,7 @@ B.PALETTE.update({
     "seal_grass": "#3f9a52", "seal_fire": "#e1572f", "seal_water": "#2f7fd0", "seal_lightning": "#e2ad19",
     "seal_fighting": "#a8642f", "seal_psychic": "#8a4fc9", "cave_dark": "#18120f", "cave_floor": "#5a4632",
     "vine": "#4f8a3a", "vine_lt": "#78b04e", "rope": "#c8a46a",
+    "hold_r": "#e2553a", "hold_y": "#f0b830", "hold_b": "#2f7fd0", "hold_g": "#3f9a52", "chalk": "#f4f1ea",
     # new people
     "el_hair": "#eeeae6", "el_cardigan": "#8f6fa0", "el_dress": "#3f6b5a", "el_shawl": "#e8d9b0", "el_shoe": "#4a3326",
     "el_frame": "#c9a24a", "el_cane": "#6e4b33",
@@ -646,30 +647,47 @@ def build_seal_stone(k):
 
 
 def build_cave_mouth(k):
-    """2 x 1 cave opening at the foot of a cliff (the cliff stands on the row behind): sandstone jambs and
-    lintel, a timber frame inside, a dark recess; the opening is the door tile's way in."""
+    """2 x 1 cave opening at the foot of a cliff (the cliff stands on the row behind): a rough arch of
+    boulders round a deep black throat, timber bracing just inside, a lantern on the lintel (`lamp_glow`),
+    roots and vines hanging over the top, rubble at its feet and two crystals glinting in the dark."""
     rng = random.Random(220)
-    layers = ((-0.02, 0.5, "sand_d"), (0.5, 1.05, "sand_b"), (1.05, 1.6, "sand_a"), (1.6, 2.05, "sand_c"))
-    for sx in (-1, 1):  # jambs
-        for z0, z1, m in layers:
-            k.add(jitter(box(0.48, 0.9, z1 - z0, 0.04), rng, 0.03), m, T((sx * 0.74, 0.05, (z0 + z1) / 2)))
-    for z0, z1, m in layers[2:]:  # lintel across the top
-        k.add(jitter(box(1.1, 0.9, z1 - z0, 0.04), rng, 0.03), m, T((0, 0.05, (z0 + z1) / 2)))
-    k.add(jitter(box(2.0, 0.92, 0.06, 0.02), rng, 0.01), "cliff_top", T((0, 0.05, 2.05)))
-    for x, z, r in ((-0.85, 0.2, 0.16), (0.9, 0.15, 0.12), (0.62, 0.08, 0.08)):
-        k.add(jitter(ico(r, 1), rng, r * 0.2), "sand_b", T((x, -0.42, z), scale=(1, 0.8, 0.7)))
-    # dark recess: back wall, sides, ceiling, floor
-    k.add(box(1.04, 0.04, 1.2), "cave_dark", T((0, 0.44, 0.58)))
+    layers = ((-0.02, 0.55, "sand_d"), (0.55, 1.15, "sand_b"), (1.15, 1.7, "sand_a"), (1.7, 2.05, "sand_c"))
+    for z0, z1, m in layers:  # the rock face the arch is set in, back flush with the north edge
+        k.add(jitter(box(2.0, 0.62, z1 - z0, 0.05), rng, 0.035), m, T((0, 0.19, (z0 + z1) / 2)))
+    k.add(jitter(box(2.02, 0.66, 0.07, 0.02), rng, 0.012), "cliff_top", T((0, 0.19, 2.06)))
+    # the throat: an arch-shaped block of near-black just in front of the face, a brown lip inside the stones
+    k.add(prism(arch_pts(1.12, 1.5, 10), 0.03), "cave_dark", T((0, -0.16, -0.03)))
+    k.add(prism(arch_pts(1.26, 1.6, 10), 0.03), "cave_floor", T((0, -0.13, -0.04)))
+    k.add(prism([(-0.56, -0.02), (0.56, -0.02), (0.5, 0.05), (-0.5, 0.05)], 0.36), "cave_floor", T((0, -0.34, 0)))
+    # the arch: boulders along its outline, a big keystone at the crown
+    ring = arch_pts(1.42, 1.7, 9)
+    for n, (x, z) in enumerate(ring):
+        r = 0.27 if n == len(ring) // 2 else rng.uniform(0.17, 0.23)
+        k.add(jitter(ico(r, 1), rng, r * 0.18), "sand_c" if n % 2 else "sand_a", T((x * 1.04, -0.24, max(z, r * 0.6)), scale=(1, 0.75, 0.9)))
+    # timber bracing inside the mouth, and a lantern on the lintel
     for sx in (-1, 1):
-        k.add(box(0.04, 0.84, 1.2), "cave_dark", T((sx * 0.52, 0.02, 0.58)))
-    k.add(box(1.04, 0.84, 0.04), "cave_dark", T((0, 0.02, 1.16)))
-    k.add(box(1.02, 0.86, 0.02), "cave_floor", T((0, 0.02, 0.0)))
-    # timber frame: posts and a cap beam just inside the mouth
-    for sx in (-1, 1):
-        k.add(box(0.1, 0.1, 1.12, 0.015), "wood_dk", T((sx * 0.43, -0.3, 0.55)))
-    k.add(box(1.0, 0.12, 0.12, 0.02), "wood_dk", T((0, -0.3, 1.1)))
-    for i in range(3):
-        k.add(jitter(ico(0.03, 1), rng, 0.006), "pebble", T((-0.3 + 0.25 * i, -0.36 + 0.1 * i, 0.012), scale=(1, 0.8, 0.5)))
+        k.add(box(0.09, 0.09, 1.16, 0.015), "wood_dk", T((sx * 0.42, -0.21, 0.55)))
+        k.add(box(0.06, 0.06, 0.34, 0.01), "wood_dk", T((sx * 0.32, -0.21, 1.0), (0, sx * 45, 0)))
+    k.add(box(0.98, 0.1, 0.1, 0.015), "wood_dk", T((0, -0.21, 1.15)))
+    k.add(cyl(0.008, 0.008, 0.14, 4), "iron", T((0, -0.27, 1.04)))
+    k.add(box(0.11, 0.11, 0.03, 0.005), "iron", T((0, -0.27, 0.96)))
+    k.add(cyl(0.045, 0.045, 0.12, 6), "lamp_glow", T((0, -0.27, 0.89)))
+    k.add(cyl(0.07, 0.02, 0.05, 6), "iron", T((0, -0.27, 0.985)))
+    k.add(box(0.1, 0.1, 0.02, 0.004), "iron", T((0, -0.27, 0.82)))
+    # crystals in the dark, low on each side
+    for x, s in ((-0.36, 1.0), (0.4, 0.75), (0.3, 0.55)):
+        k.add(cyl(0.035 * s, 0.0, 0.2 * s, 5), "crystal_glow", T((x, -0.19, 0.08 * s), (rng.uniform(-18, 18), 0, 0)))
+    # roots and vines over the top, rubble below
+    for x, L in ((-0.62, 0.7), (-0.2, 0.38), (0.15, 0.5), (0.55, 0.85), (0.8, 0.45)):
+        pts = [(x + 0.03 * math.sin(i * 1.4), 2.06 - L * i / 6) for i in range(7)]
+        k.add(ribbon(pts, 0.025, 0.015), "vine", T((0, -0.19, 0), FRONT))
+        for i in range(1, 7, 2):
+            px, pz = pts[i]
+            k.add(sphere(0.04, 6, 4), "vine_lt" if i % 4 == 1 else "leaf", T((px + 0.02, -0.21, pz), (0, rng.uniform(-40, 40), 0), (1, 0.4, 0.6)), smooth=True)
+    for x, y, r in ((-0.9, -0.36, 0.17), (0.92, -0.32, 0.14), (0.7, -0.42, 0.09), (-0.72, -0.44, 0.08)):
+        k.add(jitter(ico(r, 1), rng, r * 0.2), "sand_b", T((x, y, r * 0.45), scale=(1, 0.8, 0.7)))
+    for i in range(5):
+        k.add(jitter(ico(0.03, 1), rng, 0.006), "pebble", T((-0.3 + 0.16 * i, -0.4 + 0.04 * (i % 2), 0.012), scale=(1, 0.8, 0.5)))
 
 
 def build_climb_wall(k):
@@ -685,14 +703,23 @@ def build_climb_wall(k):
         top = A.stratum(rng, z1 - 0.06 if z1 == 1.0 else 0.44, z1, 0.0, inward_top=True)
         bmesh.ops.scale(top, vec=(1, 0.5, 1), verts=top.verts)
         k.add(top, "cliff_top", T((0, (y0 + y1) / 2, 0)))
-    for y, z0, z1 in ((-0.5, 0.05, 0.45), (0.0, 0.55, 0.95)):  # handholds and pegs on each riser
-        for i in range(4):
-            x = -0.3 + 0.2 * i + rng.uniform(-0.05, 0.05)
-            z = z0 + (z1 - z0) * ((i * 0.37) % 1)
-            if i % 2:
-                k.add(cyl(0.022, 0.018, 0.12, 6), "wood_dk", T((x, y - 0.04, z), (90, 0, 0)))
-            else:
-                k.add(jitter(ico(0.045, 1), rng, 0.01), "sand_c", T((x, y - 0.02, z), scale=(1.2, 0.7, 0.6)))
+    holds = ("hold_r", "hold_y", "hold_b", "hold_g")
+    for y, z0, z1 in ((-0.5, 0.06, 0.44), (0.0, 0.56, 0.94)):  # painted holds and chalk on each riser
+        for i in range(5):
+            x = -0.36 + 0.18 * i + rng.uniform(-0.04, 0.04)
+            z = z0 + (z1 - z0) * ((i * 0.41 + 0.15) % 1)
+            k.add(jitter(ico(0.04, 1), rng, 0.008), holds[(i + int(y * 4)) % 4], T((x, y - 0.03, z), scale=(1.25, 0.6, 0.8)), smooth=True)
+            if i % 2 == 0:
+                k.add(cyl(0.03, 0.03, 0.008, 6), "chalk", T((x + 0.035, y - 0.006, z + 0.05), (90, 0, 0), (1, 0.7, 1)))
+    # a knotted rope from an iron stake on the top step, over both risers
+    k.add(cyl(0.02, 0.014, 0.16, 6), "iron", T((0.16, 0.12, 1.04)))
+    k.add(torus(0.035, 0.009, 8, 4), "iron", T((0.16, 0.06, 1.06), (90, 0, 0)))
+    rope = [(0.16, 1.03), (0.17, 0.8), (0.15, 0.62), (0.18, 0.5)]
+    k.add(ribbon(rope, 0.024, 0.02), "rope", T((0, -0.015, 0), FRONT))
+    rope2 = [(0.18, 0.5), (0.17, 0.3), (0.19, 0.12), (0.16, -0.01)]
+    k.add(ribbon(rope2, 0.024, 0.02), "rope", T((0, -0.515, 0), FRONT))
+    for x, y, z in ((0.17, -0.03, 0.82), (0.155, -0.03, 0.66), (0.17, -0.53, 0.33), (0.185, -0.53, 0.15)):
+        k.add(sphere(0.026, 6, 4), "rope", T((x, y, z)), smooth=True)
     for x, y, zt, L in ((-0.36, 0.0, 1.0, 0.55), (0.22, 0.0, 1.0, 0.45), (0.38, -0.5, 0.5, 0.42), (-0.12, -0.5, 0.5, 0.3)):
         pts = [(x + 0.03 * math.sin(i * 1.3), zt + 0.005 - L * i / 6) for i in range(7)]
         k.add(ribbon(pts, 0.02, 0.012), "vine", T((0, y - 0.012, 0), FRONT))
@@ -742,12 +769,62 @@ def build_inn_sign(k):
     shadow(k, 0.55, 1.0, 0.45)
 
 
+# ---------------------------------------------------------------- find hosts (1.2): things worth looking in
+
+
+def mushrooms(k, rng, spots):
+    for x, y, z, s in spots:
+        k.add(cyl(0.018 * s, 0.022 * s, 0.065 * s + 0.02, 6), "fcap", T((x, y, z + 0.0325 * s - 0.01)))  # base 2 cm down
+        k.add(half_sphere(0.05 * s, 10, 5), "buoy_red", T((x, y, z + 0.065 * s), scale=(1, 1, 0.7)), smooth=True)
+        k.add(sphere(0.008 * s, 4, 3), "fcap", T((x + 0.02 * s, y - 0.02 * s, z + 0.1 * s)))
+
+
+def build_stump(k):
+    """1 x 1 hollow stump: flared bark, roots, a pale cut rim round a dark hollow, moss and two mushrooms."""
+    rng = random.Random(230)
+    k.add(jitter(cyl(0.36, 0.3, 0.5, 12), rng, 0.02), "bark", T((0, 0, 0.23)))
+    k.add(torus(0.27, 0.05, 14, 5), "log_end", T((0, 0, 0.48)))
+    k.add(cyl(0.24, 0.24, 0.02, 12), "soot", T((0, 0, 0.43)))
+    for i in range(5):  # roots
+        a = i / 5 * 360 + rng.uniform(-15, 15)
+        k.add(jitter(cyl(0.12, 0.05, 0.26, 6), rng, 0.012), "bark",
+              T((0, 0, 0.05)) @ T(rot=(0, 0, a)) @ T((0.32, 0, 0), (0, 70, 0), (1, 1.2, 1)))
+    for x, y, z, r in ((-0.22, -0.2, 0.32, 0.12), (-0.28, -0.05, 0.16, 0.1), (0.1, 0.27, 0.4, 0.09)):
+        k.add(jitter(sphere(r, 8, 5), rng, r * 0.15), "moss" if r > 0.095 else "moss_lt", T((x, y, z), scale=(1, 1, 0.45)), smooth=True)
+    mushrooms(k, rng, ((0.36, -0.22, 0.0, 1.7), (0.44, -0.04, 0.0, 1.2)))
+    contact(k, 0.48)
+
+
+def build_log(k):
+    """2 x 1 fallen mossy log along X: bark, a cut end on -X, a hollow end on +X, moss along the top,
+    a branch stub, bracket fungus and mushrooms at its foot."""
+    rng = random.Random(231)
+    k.add(jitter(cyl(0.27, 0.25, 1.72, 12), rng, 0.015), "bark", T((0, 0, 0.25), (0, 90, 0)))
+    k.add(cyl(0.255, 0.255, 0.02, 12), "log_end", T((-0.865, 0, 0.25), (0, 90, 0)))
+    for r in (0.17, 0.09):
+        k.add(torus(r, 0.008, 14, 3), "wood_mid", T((-0.877, 0, 0.25), (0, 90, 0)))
+    k.add(torus(0.2, 0.05, 14, 5), "log_end", T((0.85, 0, 0.25), (0, 90, 0)))
+    k.add(cyl(0.18, 0.18, 0.02, 12), "soot", T((0.78, 0, 0.25), (0, 90, 0)))
+    k.add(jitter(cyl(0.07, 0.05, 0.3, 6), rng, 0.01), "bark", T((0.2, -0.12, 0.47), (35, 20, 0)))
+    for i in range(6):
+        x = -0.7 + 0.28 * i + rng.uniform(-0.05, 0.05)
+        r = rng.uniform(0.1, 0.15)
+        k.add(jitter(sphere(r, 8, 5), rng, r * 0.15), "moss" if i % 2 else "moss_lt", T((x, rng.uniform(-0.06, 0.06), 0.48), scale=(1.3, 1, 0.38)), smooth=True)
+    for x, y, z in ((-0.38, -0.255, 0.31), (-0.2, -0.262, 0.2), (0.45, -0.25, 0.28)):
+        k.add(cyl(0.09, 0.07, 0.025, 10), "fcap", T((x, y, z), (90, 0, 0), (1, 1, 0.6)))
+    mushrooms(k, rng, ((-0.6, -0.36, 0.0, 1.6), (0.62, -0.34, 0.0, 1.3), (0.48, -0.4, 0.0, 1.0)))
+    contact(k, 0.62)
+
+
+FINDS = {"stump": build_stump, "log": build_log}
+
 SHARED = {"waymark": build_waymark, "seal_stone": build_seal_stone, "cave_mouth": build_cave_mouth,
           "climb_wall": build_climb_wall, "inn_sign": build_inn_sign}
 
 OUTDOOR = {"hanging_sign": build_hanging_sign, "curio_cabinet": build_curio_cabinet}
 OUTDOOR.update(CURIOS)
 OUTDOOR.update(SHARED)
+OUTDOOR.update(FINDS)
 PROPS = dict(INTERIOR_V2)
 PROPS.update(OUTDOOR)
 B.INTERIOR.update(INTERIOR_V2)   # export() files these under assets/interior/
@@ -856,6 +933,7 @@ SLOTS = {  # Blender (x, y) in the PropsV2 scene; footprints never overlap
     "workbench": (5, 6), "light_box": (8, 6), "net_locker": (10.5, 6),
     "hanging_sign": (-9.5, 3), "curio_cabinet": (-7, 3), "waymark": (-4.5, 3), "seal_stone": (-2, 2.5),
     "cave_mouth": (1, 3), "climb_wall": (3.5, 3), "inn_sign": (5.5, 3),
+    "stump": (8, 3), "log": (10.5, 3),
     "curio": (-9, 0), "brass_thimble": (-8, 0), "heron_feather": (-7, 0), "message_bottle": (-6, 0),
     "fossil_fern": (-5, 0), "tin_hex": (-4, 0), "lead_type": (-3, 0),
     "npc_elder": (0, 0), "npc_worker": (1.2, 0), "npc_sailor": (2.4, 0), "npc_scholar": (3.6, 0),

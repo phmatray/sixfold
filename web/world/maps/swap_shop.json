@@ -1,0 +1,208 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "shelf",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "shelf",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bookcase",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 5,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "display_case",
+      "x": 9,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 1,
+      "z": 3,
+      "rot": 90
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 9,
+      "z": 4,
+      "kind": "sign",
+      "text": "Under the glass, six cards on green velvet, each with a price tag in tidy copperplate.",
+      "text_fr": "Sous la vitre, six cartes sur du velours vert, chacune avec son étiquette calligraphiée."
+    },
+    {
+      "x": 3,
+      "z": 1,
+      "kind": "sign",
+      "text": "Binders, floor to ceiling, sorted by colour. One just says \"Strays\".",
+      "text_fr": "Des classeurs du sol au plafond, rangés par couleur. Sur l'un, juste : « Égarées »."
+    },
+    {
+      "kind": "find",
+      "id": "i_swap",
+      "x": 9,
+      "z": 1,
+      "hidden": true,
+      "give": "coins:50",
+      "text": "A drawer in the bookcase, left ajar: Facets, under a note that says \"float\".",
+      "text_fr": "Un tiroir de la bibliothèque, entrouvert : des facettes, sous un billet qui dit « fonds de caisse »."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "dir": "s",
+      "to": "overworld",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 5,
+        "z": 11,
+        "facing": "s"
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "perrin",
+      "name": "Perrin",
+      "model": "npc_elder",
+      "x": 6,
+      "z": 3,
+      "facing": "s",
+      "idle": "Idle",
+      "dialogue": [
+        {
+          "if": "!flag:talked_perrin",
+          "lines": [
+            "Come in, come in. Mind the binders.",
+            "Prices today: fair, with a chance of fairer.",
+            "I don't haggle, mind. A card's worth what it's worth."
+          ],
+          "lines_fr": [
+            "Entre, entre. Attention aux classeurs.",
+            "Les prix du jour : justes, avec une chance de plus justes encore.",
+            "Je ne marchande pas, note bien. Une carte vaut ce qu'elle vaut."
+          ],
+          "do": [
+            "emote:perrin:note"
+          ]
+        },
+        {
+          "lines": [
+            "Duplicates weigh a binder down. Bring me your spares one day."
+          ],
+          "lines_fr": [
+            "Les doubles alourdissent un classeur. Apporte-moi tes cartes en trop, un jour."
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 8,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffe2bd",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb257",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e",
+    "note": "Indoors the sun is the window light, placed from the room centre (not the hero); lamp lights sit on each lamp prop."
+  }
+}

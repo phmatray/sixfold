@@ -76,8 +76,8 @@ pub struct Setup {
     pub difficulty: Difficulty,
     /// How the AI leans: a rival's own style, else Balanced.
     pub style: Style,
-    /// The campaign rival's id, for a duel started from the world.
-    pub rival: Option<&'static str>,
+    /// The rival's or route duelist's id, for a duel started from the world.
+    pub opponent: Option<&'static str>,
     /// A post-game duel: what its result counts for.
     pub post: Option<Post>,
     /// Where Quit and the result's way out lead.

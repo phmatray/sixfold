@@ -249,6 +249,16 @@ const SFX = {
     notes(d, t, [84, 88, 91, 96], 0.08, { type: "triangle", peak: 0.12, dur: 0.4 });
     [0.05, 0.13, 0.21, 0.29].forEach((p) => noise(d, t + p, 0.05, { type: "highpass", f: 7000, peak: 0.06 }));
   },
+  // A route duelist spots the hero: a quick rising "!" sting.
+  spot: (d, t) => {
+    notes(d, t, [76, 83], 0.07, { type: "square", peak: 0.06, dur: 0.12 });
+    noise(d, t, 0.12, { type: "highpass", f: 5000, peak: 0.05 });
+  },
+  // Facets gained: small glassy chimes.
+  facets: (d, t) => {
+    notes(d, t, [88, 93, 100], 0.05, { type: "triangle", peak: 0.08, dur: 0.35 });
+    noise(d, t + 0.1, 0.12, { type: "highpass", f: 9000, peak: 0.04 });
+  },
   // Campaign: a rival's duel accepted, a seal earned, the sealed door opening.
   challenge: (d, t) => {
     noise(d, t, 0.25, { f: 400, f2: 2400, q: 2, a: 0.1, peak: 0.25 });

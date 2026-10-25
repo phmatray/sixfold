@@ -82,11 +82,13 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `brass_thimble.glb`, `heron_feather.glb`, `message_bottle.glb`, `fossil_fern.glb`, `tin_hex.glb`, `lead_type.glb` | The six 1.2 curios, named by curio id, centred on the origin (≤ 600 tris) | — | any (fitted) |
 | `waymark.glb` | Hex stone post holding a crystal (`crystal_glow`, near white: tint it with the region colour) | 1 × 1 | ~1.9 m |
 | `seal_stone.glb` | Hex seal stone on a stepped base, one coloured face per colour (`seal_<colour>`: front fire, then counter-clockwise seen from above water, lightning, psychic, fighting, grass), a blank pale top (`seal_top`) | 2 × 2 | ~1.9 m |
-| `cave_mouth.glb` | Sandstone opening with a timber frame and a dark recess, back flush with the north edge: put it against a cliff on the row behind (≥ 2 m); the door warp is its tile | 2 × 1 | ~2.1 m |
-| `climb_wall.glb` | Two rough steps (tops 0.5 m front, 1.0 m back) with handholds, pegs and vines; climbs toward −Z, floor 0.5 m, stacks with `y` like `stairs` | 1 × 1 | 1 m |
+| `cave_mouth.glb` | A rough arch of boulders round a black throat in a sandstone face, timber bracing, a lantern on the lintel (`lamp_glow`), roots and vines over the top, crystals glinting inside (`crystal_glow`); back flush with the north edge: put it against a cliff on the row behind (≥ 2 m); the door warp is its tile | 2 × 1 | ~2.1 m |
+| `climb_wall.glb` | Two rough steps (tops 0.5 m front, 1.0 m back) with painted holds, chalk, a knotted rope from an iron stake and vines; climbs toward −Z, floor 0.5 m, stacks with `y` like `stairs` | 1 × 1 | 1 m |
 | `inn_sign.glb` | Two posts, a board with a crescent moon and stars (both faces), a lantern (`lamp_glow`) | 1 × 1 | ~2.35 m |
 | `npc/npc_elder.glb`, `npc_worker`, `npc_sailor`, `npc_scholar` | 1.2 / 1.3 townsfolk on the hero rig (stooped elder with a cane; worker in cap and apron; sailor in a striped jumper and rain hat; scholar in a long coat with a map roll) | — | ~1.4–1.6 m |
-| `portraits/<rival id>.webp` | 512² bust portraits of the campaign rivals for the duel screen (`bramble`, `marlo`, `cinza`, `quill`, `orla`, `lumen`, `warden`), 3/4 view on a gradient in the rival's colour, ≤ 60 KB | — | — |
+| `stump.glb` | Hollow stump: flared roots, a cut rim round a dark hollow, moss, two mushrooms (a find's host) | 1 × 1 | ~0.55 m |
+| `log.glb` | Fallen mossy log along X, a hollow end on +X, bracket fungus and mushrooms (a find's host) | 2 × 1 | ~0.55 m |
+| `portraits/<rival id>.webp` | 512² bust portraits of the campaign rivals for the duel screen (`bramble`, `marlo`, `cinza`, `quill`, `orla`, `lumen`, `warden`), 3/4 view to each rival's own side and tilt, a rim light and a background motif in the rival's colour, ≤ 60 KB | — | — |
 
 The house is 7 wide so the door sits on the centre column: door tile = footprint
 origin + (3, 4), the house's warp tile.
@@ -120,6 +122,17 @@ Rules for every model:
   the part that turns emissive at dusk and night; keep it out of the merged vertex-colour mesh so its name survives.
 - **Legal:** original designs only. No logos, characters, buildings or text from any
   existing game. The only emblem is the Sixfold hexagon.
+
+## The map editor (debug builds)
+
+`cd web && trunk serve`, then open the world with `?edit` in the URL (`http://localhost:8080/?edit`). A
+panel top left picks a tool: **Walk** (play), **Paint** (the chosen tile character), **Prop** (place the
+chosen model at `y`; R turns the next one, or the last one placed), **Scatter** (click two corners: the
+prop fills that rectangle at the density, on free tiles), **Person** (an id starting `t_` makes a route
+duelist), **Find** and **Erase**. Every change rebuilds the scene at once; route duelists' sight lines are
+drawn on the floor. **Ctrl+S** downloads the edited map JSON (keys in their file order); copy it over
+`web/world/maps/<map>.json`. Text and dialogue (the "…" placeholders) are still written by hand, with their
+`_fr` twins. Walking through a door or an edge edits the next map.
 
 ## Ground
 
@@ -211,22 +224,68 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   until then it reads like a sign showing `locked`. A `#` tile in a wall row leaves a gap: a
   dark doorway for such a door (the hall's sealed door to `warden`).
 - **npcs:** block their tile (and stand at its floor height). `model` loads `assets/npc/<model>.glb` (`npc_*` and `rival_*`
-  names); until it exists the hero model is used, lerped toward `tint` and scaled by `scale`.
+  names); until it exists the hero model is used, lerped toward `tint` and scaled by `scale`. On the NPC's
+  own model, `outfit` (a colour) moves the clothes to that hue, keeping each garment's lightness, and `hair`
+  recolours the hair: two people on one model then look like two people. `look` (directions) turns them
+  between those ways every 2.5 s. `if` (a condition): they are only there while it holds.
   `route` (optional) is a loop of one-tile steps. Speaking (E or tap while facing them, also
   across a counter or a duel table) turns them to the hero and runs `dialogue`: the first
   branch whose `if` holds plays its `lines`, then applies its `do` effects. Conditions and
   effects are the engine's progression language (`engine/src/overworld.rs`):
-  - conditions (negate with `!`): `item:x`, `flag:x`, `seals:n` (at least n seals),
-    `beat:<rival>`, `open:<rival>` (enough seals to duel them), `won:<rival>` /
-    `lost:<rival>` (the last campaign duel's result, until its rival is next talked to);
-  - effects: `give:x`, `flag:x`, `duel:<rival>` (after the lines, offer a duel with a deck
-    picker), `pack:<booster>` (`ember`, `tide`, `wild`, `grove`, `storm`, `stone`, `dream`).
+  - conditions (negate with `!`, join with `&`): `item:x`, `flag:x`, `seals:n` (at least n seals),
+    `beat:<id>`, `open:<rival>` (enough seals to duel them), `won:<id>` / `lost:<id>` (the last
+    duel's result, until that rival or duelist is next talked to), `coins:n` (at least n Facets),
+    `count:<prefix>:n` (at least n flags and items start with the prefix);
+  - effects: `give:x`, `take:x`, `flag:x`, `duel:<id>` (after the lines, offer a duel with a deck
+    picker), `pack:<booster>` (`ember`, `tide`, `wild`, `grove`, `storm`, `stone`, `dream`),
+    `card:<slug>` (one card, shown as found), `coins:n`, `pay:n` (short: the rest is skipped and
+    "Not enough Facets" shows), `show:<panel>`, `emote:<actor>:<bang|what|dots|heart|note>` (a
+    bubble over that NPC's head, or `hero`'s, once the dialog closes).
   A campaign rival is an NPC whose `id` is the rival's id in `engine/src/campaign.rs`; its
   branches go `won:` / `lost:` (post-duel lines), `!open:` (locked), `beat:` (rematch, with
   `duel:`), then the first meeting (with `duel:`). Talking also sets `flag:talked_<id>`.
   Progress, and where the hero stands (`map,x,z,facing`), are saved in localStorage; the
-  world resumes there, and after a campaign duel the hero, back on its tile, talks to the
-  rival again so the post-duel line plays.
+  world resumes there, and after a world duel the hero, back on its tile, meets the rival or
+  duelist again so the post-duel line plays.
+- **route duelists:** an NPC whose `id` is a duelist in `engine/src/trainers.rs` (`t_<name>`) with a
+  `trainer` block (WORLD_DESIGN §4.1). `web/world/trainer.js` runs it; `map.js` expands it to dialogue.
+
+  ```jsonc
+  { "id": "t_hazel", "name": "Hazel", "model": "npc_gardener", "outfit": "#e8c33a", "x": 22, "z": 8, "facing": "w",
+    "trainer": {
+      "sight": 4,                 // tiles watched, 1..5 (default 3); 0: talk to duel, never watches
+      "look": ["w", "s"],         // optional: turns between these every 2.5 s, watching each way
+      "challenge": ["…"], "challenge_fr": ["…"],   // when it walks up: ends with the duel offer
+      "win": ["…"], "win_fr": ["…"],               // the hero won (won:t_hazel)
+      "lose": ["…"], "lose_fr": ["…"],             // the hero lost (lost:t_hazel)
+      "after": ["…"], "after_fr": ["…"]            // beaten, any later talk (beat:t_hazel)
+    },
+    "dialogue": [ … ] }           // optional, played between won/lost and after (night lines, quests)
+  ```
+
+  While unbeaten it watches a straight line from its tile along its facing, up to `sight` tiles, for as
+  long as each tile is one the hero could step on (no prop, no person, at most a 0.6 m climb: a duelist on
+  a ledge can't see the floor). The hero standing on that line, after a step or as the map comes up: input
+  locks, "!" pops over the duelist, it walks over until it stands by the hero, they face each other and its
+  challenge plays, then the duel sheet (deck picker, Duel / Not now). Not now, or after the post-duel line,
+  it walks back to its post and stops watching until the hero leaves the map. Beaten, it only chats.
+  `tools/check-maps.mjs` refuses a sight line that covers an exit's edge tile, the map's spawn or a tile a
+  warp lands on. `"sight": 0` makes a talk-to-duel duelist that never watches (towns and interiors, as
+  WORLD_DESIGN §4.1 asks).
+- **finds** (`kind: "find"` interactions): something to look in, once.
+
+  ```jsonc
+  { "kind": "find", "id": "m_stump", "x": 2, "z": 2, "give": "coins:40", "hidden": false,
+    "text": "Tucked in the hollow stump: …", "text_fr": "Cachée dans la souche creuse : …",
+    "if": "flag:seeds_asked" }   // optional: only there while it holds
+  ```
+
+  `give` is one effect (`coins:n`, `card:<slug>`, `give:<item>`, `pack:<booster>`). The first look plays
+  `text` and applies it (flag `found_<id>`, saved); later looks say "Nothing else here". Unless `hidden`, a
+  glint marks it until found. Put it on a solid tile, a prop worth looking in (`stump`, `log`, `crates`, a
+  bookcase…): check-maps refuses a find on an open tile. Ids are unique across all maps
+  (`engine/tests/world_data.rs`).
+- **prop `glow`**: a colour for the prop's `*glow*` materials (a waymark's crystal in its region's colour).
 - **ground:** the base layer (`grass`, `dirt`, `sand` …), `path` under `p` tiles, how far
   the ground runs past the map edge, and `tufts` (grass blades scattered on open base
   tiles, 1800 by default; 0 on sand or dirt).

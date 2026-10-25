@@ -89,7 +89,7 @@ pub fn default_setup() -> Option<Setup> {
         prizes: 6,
         difficulty: Difficulty::Normal,
         style: Default::default(),
-        rival: None,
+        opponent: None,
         post: None,
         back: Screen::Title,
     })
@@ -166,7 +166,7 @@ pub fn DuelSetup() -> impl IntoView {
             prizes: prizes.get(),
             difficulty: difficulty.get(),
             style: Default::default(),
-            rival: None,
+            opponent: None,
             post: None,
             back: Screen::Title,
         };
