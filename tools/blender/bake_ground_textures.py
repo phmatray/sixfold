@@ -4,7 +4,8 @@
 
     blender -b --factory-startup -P tools/blender/bake_ground_textures.py -- --out /tmp/tex --only sand,stone
 
-grass.png, dirt.png, wood_floor.png, sand.png, stone.png (cobbles): 1024 x 1024, tileable (all noise is periodic, every stroke
+grass.png, dirt.png, wood_floor.png, sand.png, stone.png (cobbles), and for 1.3 ash, heath, wet_sand,
+dusk_grass, moss, slate (flags), cave: 1024 x 1024, tileable (all noise is periodic, every stroke
 wraps around the edges), low contrast, hand-painted look (soft tonal patches + brush strokes).
 """
 import math
@@ -160,6 +161,131 @@ def stone(rng, cells=16, gap=0.07):
     return np.clip(img, 0, 1)
 
 
+# ---------------------------------------------------------------- 1.3 regions
+
+
+def specks(img, rng, count, rmin, rmax, colours, alpha=1.0, light=None):
+    """Small round bits (cinders, shells, petals): soft discs, wrapped; optional top-left highlight."""
+    R = int(rmax) + 2
+    yy, xx = np.mgrid[-R:R + 1, -R:R + 1].astype(np.float32)
+    for _ in range(count):
+        cy, cx = rng.integers(0, N, 2)
+        r = rng.uniform(rmin, rmax)
+        body = np.clip(1 - (xx ** 2 + yy ** 2) / r ** 2, 0, 1) ** 0.6 * alpha
+        rows, cols = (np.arange(-R, R + 1) + cy) % N, (np.arange(-R, R + 1) + cx) % N
+        p = img[np.ix_(rows, cols)]
+        p = p * (1 - body[..., None]) + hexrgb(colours[rng.integers(len(colours))]) * body[..., None]
+        if light:
+            hl = np.clip(1 - ((xx + r * 0.3) ** 2 + (yy - r * 0.3) ** 2) / (r * 0.45) ** 2, 0, 1) * 0.45
+            p = p * (1 - hl[..., None]) + hexrgb(light) * hl[..., None]
+        img[np.ix_(rows, cols)] = p
+
+
+def cells(rng, n_x, n_y):
+    """Periodic jittered Voronoi: (nearest index, edge distance normalised by the cell size), cells n_x by n_y."""
+    pts = [((j + rng.uniform(0.15, 0.85)) * N / n_y, (i + rng.uniform(0.15, 0.85)) * N / n_x) for i in range(n_x) for j in range(n_y)]
+    yy, xx = np.mgrid[0:N, 0:N].astype(np.float32)
+    sx, sy = n_x / N, n_y / N                     # measure distances in cell units (anisotropic cells)
+    d1 = np.full((N, N), 1e9, np.float32)
+    d2 = np.full((N, N), 1e9, np.float32)
+    idx = np.zeros((N, N), np.int32)
+    for k, (py, px) in enumerate(pts):
+        dy = np.abs(yy - py)
+        dx = np.abs(xx - px)
+        d = np.sqrt((np.minimum(dx, N - dx) * sx) ** 2 + (np.minimum(dy, N - dy) * sy) ** 2)
+        closer = d < d1
+        d2 = np.where(closer, d1, np.minimum(d2, d))
+        idx = np.where(closer, k, idx)
+        d1 = np.where(closer, d, d1)
+    return idx, d2 - d1, len(pts)
+
+
+def ash(rng):
+    """Ember ground: warm grey ash in soft drifts, dark cinders, a few glass glints."""
+    img = ramp(spread(pnoise(rng, 230) * 0.55 + pnoise(rng, 70) * 0.3 + pnoise(rng, 20) * 0.15, 0.2),
+               ["#7f7a75", "#918b85", "#a39d96", "#b4aea6"])
+    stamp(img, rng, 1400, 44, 9, 0.35, 0.4, ["#9a948d", "#b9b3ab", "#857f79"], 0.25)      # drifts, one wind
+    stamp(img, rng, 700, 15, 11, 0.0, 3.0, ["#77716c", "#c2bcb3"], 0.2)                   # soft blotches
+    specks(img, rng, 900, 2.0, 5.5, ["#4a4549", "#3d383c", "#5a5458"], 0.85, light="#8a8488")  # cinders
+    specks(img, rng, 70, 1.2, 2.2, ["#e88a3a", "#7fd3c8", "#f0b24a"], 0.9)                 # ember and glass glints
+    return img
+
+
+def heath(rng):
+    """Storm ground: olive heath and straw-gold grass, broken by soft clumps of purple heather."""
+    img = ramp(spread(pnoise(rng, 220) * 0.55 + pnoise(rng, 60) * 0.3 + pnoise(rng, 18) * 0.15),
+               ["#56653a", "#657444", "#74834c", "#879358"])
+    stamp(img, rng, 7000, 12, 2.0, -math.pi / 2, 0.5, ["#5d6c3c", "#8c9858", "#b2a560", "#77864a"], 0.45)  # blades
+    patch = spread(pnoise(rng, 110) * 0.7 + pnoise(rng, 20) * 0.3, 0.2)
+    purple = np.clip((patch - 0.6) * 6, 0, 1)[..., None] * 0.85
+    img = img * (1 - purple) + ramp(pnoise(rng, 10), ["#6a476e", "#875a86", "#a5739f"]) * purple
+    specks(img, rng, 2600, 1.4, 2.8, ["#b383b3", "#9a6aa0", "#c99ac4", "#6f7d45"], 0.8)     # heather bells
+    return img
+
+
+def wet_sand(rng):
+    """Tide flats: cool, darker sand, ripple marks, shining films of water, shells."""
+    img = ramp(spread(pnoise(rng, 240) * 0.55 + pnoise(rng, 80) * 0.3 + pnoise(rng, 24) * 0.15, 0.18),
+               ["#9c8a6a", "#ab9877", "#b9a684", "#c6b391"])
+    yy, xx = np.mgrid[0:N, 0:N].astype(np.float32)
+    warp = pnoise(rng, 120) * 40
+    rip = (np.sin((yy + warp) * math.tau / (N / 32)) * 0.5 + 0.5)[..., None]   # 32 ripples per repeat: tiles
+    img = img * (0.92 + 0.1 * rip)
+    film = np.clip((pnoise(rng, 70) - 0.62) * 5, 0, 1)[..., None] * 0.45
+    img = img * (1 - film) + hexrgb("#c9d6cf") * film                         # puddle shine
+    specks(img, rng, 500, 1.5, 3.5, ["#f2e8d8", "#e9d2c0", "#8a7a66"], 0.85, light="#ffffff")  # shells, grit
+    return img
+
+
+def dusk_grass(rng):
+    """Dream ground: blue-tinted twilight grass with pale lavender flecks."""
+    img = ramp(spread(pnoise(rng, 220) * 0.55 + pnoise(rng, 70) * 0.3 + pnoise(rng, 20) * 0.15),
+               ["#335c55", "#3f6e64", "#4d7f71", "#5f9182"])
+    stamp(img, rng, 2400, 30, 9, 0.3, 3.0, ["#3a655d", "#62958a", "#4a776e", "#55688a"], 0.26)   # broad dabs, a few blue
+    stamp(img, rng, 11000, 13, 2.2, -math.pi / 2, 0.45, ["#2e544f", "#6c9f92", "#507f74", "#86b3a5"], 0.55)
+    for _ in range(2):  # clover-like clusters of pale lavender flowers
+        specks(img, rng, 420, 1.6, 3.2, ["#c3b2e6", "#a996d6", "#e5dcf5"], 0.85)
+    return img
+
+
+def moss(rng):
+    """Grove ground: deep cushiony moss, lighter cushions, leaf litter."""
+    img = ramp(spread(pnoise(rng, 200) * 0.5 + pnoise(rng, 50) * 0.3 + pnoise(rng, 14) * 0.2, 0.24),
+               ["#335f24", "#3e6f2a", "#4b7f31", "#5b8f3a"])
+    specks(img, rng, 1300, 5, 13, ["#5f973a", "#6ea544", "#4f8732"], 0.5)                   # cushions
+    stamp(img, rng, 6000, 6, 1.6, 0.0, 3.0, ["#78ad4a", "#2f5a22", "#8cbf58"], 0.45)        # fronds
+    specks(img, rng, 260, 2.0, 4.0, ["#8a6a3a", "#a5803f", "#6e5230"], 0.8)                 # leaf litter
+    return img
+
+
+def slate(rng):
+    """Stone ground: blue-grey slate flags, angular and elongated, dark seams, faint rust."""
+    idx, edge, n = cells(rng, 5, 8)
+    tones = np.stack([hexrgb(["#6d7178", "#7a7e85", "#858990", "#686c72", "#7f8188"][rng.integers(5)])
+                      * rng.uniform(0.93, 1.06) for _ in range(n)])
+    grain = (pnoise(rng, 40, aniso=(0.25, 1.0)) * 0.6 + pnoise(rng, 8) * 0.4)[..., None]   # cleavage streaks
+    img = tones[idx] * (0.86 + 0.24 * grain)
+    seam = np.clip((0.05 - edge) / 0.03, 0, 1)[..., None] * 0.8
+    img = img * (1 - seam) + hexrgb("#53565c") * seam
+    img = img * 0.55 + ramp(spread(pnoise(rng, 160) * 0.6 + pnoise(rng, 30) * 0.4), ["#666a71", "#767a81", "#858990"]) * 0.45
+    rust = np.clip((pnoise(rng, 60) - 0.7) * 4, 0, 1)[..., None] * 0.25
+    img = img * (1 - rust) + hexrgb("#a8642f") * rust
+    stamp(img, rng, 900, 18, 2.5, 0.0, 0.2, ["#9a9ea4", "#5c6066"], 0.18)                   # chisel scuffs
+    specks(img, rng, 600, 1.5, 4, ["#5a5e64", "#9a9ea4", "#6f6a66"], 0.8, light="#b5b9be")  # chips and grit
+    return np.clip(img, 0, 1)
+
+
+def cave(rng):
+    """Undermine floor: dark damp rock, grit and pebbles, wetter hollows."""
+    img = ramp(spread(pnoise(rng, 180) * 0.55 + pnoise(rng, 50) * 0.3 + pnoise(rng, 14) * 0.15, 0.22),
+               ["#38322c", "#433c35", "#4f473f", "#5c5349"])
+    damp = np.clip((pnoise(rng, 90) - 0.55) * 4, 0, 1)[..., None] * 0.35
+    img = img * (1 - damp) + hexrgb("#2a2622") * damp
+    specks(img, rng, 700, 2.5, 7, ["#5e564d", "#6b6258", "#4a433c"], 0.9, light="#8a8074")
+    specks(img, rng, 2500, 0.8, 1.6, ["#756c61", "#2c2722"], 0.7)
+    return img
+
+
 def save(img, path):
     rgba = np.concatenate([np.clip(img, 0, 1), np.ones((N, N, 1), np.float32)], axis=2)
     im = bpy.data.images.new(os.path.basename(path), N, N)
@@ -175,7 +301,9 @@ def main(argv):
     only = argv[argv.index("--only") + 1].split(",") if "--only" in argv else None
     os.makedirs(out, exist_ok=True)
     for name, fn, seed in (("grass", grass, 1), ("dirt", dirt, 2), ("wood_floor", wood_floor, 3),
-                           ("sand", sand, 4), ("stone", stone, 5)):
+                           ("sand", sand, 4), ("stone", stone, 5),
+                           ("ash", ash, 6), ("heath", heath, 7), ("wet_sand", wet_sand, 8), ("dusk_grass", dusk_grass, 9),
+                           ("moss", moss, 10), ("slate", slate, 11), ("cave", cave, 12)):
         if not only or name in only:
             save(fn(np.random.default_rng(seed)), os.path.join(out, name + ".png"))
 
