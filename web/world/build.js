@@ -208,7 +208,14 @@ function merged(obj) {
   delete obj.userData.flat; // a clone carries a (JSON-copied) cache from its template
   out.add(flatten(obj));
   out.traverse((o) => o.isMesh && ((o.castShadow = !o.material.transparent), (o.receiveShadow = true)));
-  obj.traverse((o) => !o.isMesh && o !== obj && o.name && out.add(Object.assign(new THREE.Object3D(), { name: o.name }).applyMatrix4(new THREE.Matrix4().copy(obj.matrixWorld).invert().multiply(o.matrixWorld))));
+  const inv = new THREE.Matrix4().copy(obj.matrixWorld).invert();
+  obj.traverse((o) => {
+    if (o.isMesh || o === obj || !o.name) return;
+    const e = new THREE.Object3D();
+    e.name = o.name;
+    e.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld)); // returns nothing: add `e` itself
+    out.add(e);
+  });
   out.position.copy(obj.position);
   out.rotation.copy(obj.rotation);
   return out;
