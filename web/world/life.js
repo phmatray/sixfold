@@ -12,7 +12,7 @@ export const U = { uTime: { value: 0 }, uSway: { value: 1 }, uDrift: { value: 0 
 // ponytail: shadows use the default depth material, so they don't sway; add a
 // customDepthMaterial with the same chunk if anyone notices.
 export function windify(mesh, height) {
-  // A flattened model (world.js) already carries `windw` (-1 where a part had none: use the height).
+  // A flattened model (build.js) already carries `windw` (-1 where a part had none: use the height).
   const flat = !!mesh.geometry.attributes.windw;
   const byColor = flat || !!mesh.geometry.attributes.color;
   if (byColor && !flat) mesh.geometry.setAttribute("windw", mesh.geometry.attributes.color);

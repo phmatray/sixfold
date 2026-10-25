@@ -1,6 +1,6 @@
 # World assets and maps (contract for the Blender side)
 
-`world.js` builds each map from `web/world/maps/<name>.json` (the game starts in
+`world.js` (with `map.js` and `build.js`) builds each map from `web/world/maps/<name>.json` (the game starts in
 `overworld`, Sixfold Meadow) and loads the models below. Only the current map is built;
 once it is up, the maps, models and ground textures next door (its exits and warps) are
 fetched one at a time while the browser is idle, so the next area opens quickly. A missing model is fine: the scene draws a
