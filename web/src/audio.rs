@@ -3,23 +3,46 @@
 //! volume controls.
 
 use leptos::prelude::*;
-use sixfold_engine::{tr, Event, Game, Status};
+use sixfold_engine::campaign::{stakes, Stakes};
+use sixfold_engine::{tr, Color, Event, Game, Status};
 use wasm_bindgen::prelude::*;
 
-use crate::ctl::HUMAN;
+use crate::ctl::{Setup, HUMAN};
 
 #[wasm_bindgen(module = "/audio/audio.js")]
 extern "C" {
     /// Play one effect; `n` is its variant (damage dealt, heads, surface, voice…).
     pub fn sfx(name: &str, n: f64);
-    /// Crossfade to a track: "title", "duel", "overworld", "interior", or "" for none.
+    /// Crossfade to a track: "title", "duel" (the theme [`duel_theme`] chose),
+    /// "overworld", "interior", or "" for none.
     pub fn music(track: &str);
     /// 1 while the duel is down to someone's last prize.
     pub fn intensity(level: f64);
+    /// The theme `music("duel")` plays: "duel", "duel_rival_<region>" or "duel_boss".
+    #[wasm_bindgen(js_name = duelTheme)]
+    fn duel_theme_js(track: &str);
     #[wasm_bindgen(js_name = getPref)]
     fn get_pref(key: &str) -> f64;
     #[wasm_bindgen(js_name = setPref)]
     fn set_pref(key: &str, value: f64);
+}
+
+/// A duel's music follows its stakes: the Warden's theme, a rival's in their
+/// colour, else the ordinary duel's. Call as the duel starts.
+pub fn duel_theme(setup: &Setup) {
+    let region = |c: Color| match c {
+        Color::Grass => "grove",
+        Color::Fire => "ember",
+        Color::Water => "tide",
+        Color::Lightning => "storm",
+        Color::Fighting => "stone",
+        Color::Psychic | Color::Colorless => "dream",
+    };
+    duel_theme_js(&match stakes(setup.face()) {
+        Stakes::Ordinary => "duel".to_string(),
+        Stakes::Rival(c) => format!("duel_rival_{}", region(c)),
+        Stakes::Boss => "duel_boss".to_string(),
+    });
 }
 
 /// The sound of one duel event, as it plays back.

@@ -549,7 +549,7 @@ function tickBeds(now) {
 // keys: "x" a soft chord stab. Drums: "x" a hit.
 
 // A scale degree past the last note climbs an octave (pentatonic has five, the others seven).
-const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10], pentatonic: [0, 2, 4, 7, 9] };
+const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], harmonic: [0, 2, 3, 5, 7, 8, 11], dorian: [0, 2, 3, 5, 7, 9, 10], pentatonic: [0, 2, 4, 7, 9] };
 const DIGITS = "0123456789abcdef";
 
 const TRACKS = {
@@ -561,7 +561,8 @@ const TRACKS = {
       "7---5-6-7---a---" + "9---8-7-8-------" + "6-5-4-5-6---8---" + "7-------4---2---",
     bass: "x-------5---x---",
     drums: { kick: "x.......x.......", shaker: "....x.......x..." },
-    mix: { lead: 0.09, pad: 0.035, bass: 0.13, keys: 0.03 },
+    // A touch under the others: it was 3 dB louder than the world and the duels.
+    mix: { lead: 0.075, pad: 0.03, bass: 0.105, keys: 0.025 },
   },
   // The duel: a little more urgent, still friendly. Intensifies on the last prize.
   duel: {
@@ -669,6 +670,33 @@ TRACKS.interior = {
   drums: { shaker: "....x.......x..." },
   mix: { lead: 0.06, pad: 0.03, bass: 0.1, keys: 0.03 },
 };
+// Duels by stakes. "duel" (above) is the ordinary one: route duelists, quick duels.
+// A rival's theme is one tune played in their colour's region: its key, scale (a
+// pentatonic colour sings it differently), pace and keys. The Warden's is its own.
+const HOT = { shaker: "xxxxxxxxxxxxxxxx", arp: "x.x.x.x.x.x.x.x." };
+const RIVAL = {
+  chords: [0, 5, 3, 4, 0, 5, 6, 4],
+  lead:
+    "3-5-7-.7-8-7-5-." + "6---5-3-5-------" + "3-5-7-.7-a-9-7-." + "8-------7---5---" +
+    "a-.a-9-7-8-.8-7-" + "6---7-8-7-------" + "5-6-7-8-9-8-7-6-" + "7-------3---.3..",
+  bass: "x.x.xx.x.x.x5.o.",
+  drums: { kick: "x...x...x...x...", snare: "....x.......x.x.", hat: "..x...x...x...x." },
+  hot: HOT,
+  mix: { lead: 0.08, pad: 0.028, bass: 0.14, keys: 0.022 },
+};
+for (const [k, root, bpm] of [["ember", 62, 120], ["storm", 64, 124], ["tide", 67, 108], ["dream", 69, 104], ["grove", 65, 114], ["stone", 59, 110]])
+  TRACKS[`duel_rival_${k}`] = { ...RIVAL, root, bpm, scale: TRACKS[k].scale, keys: TRACKS[k].keys };
+TRACKS.duel_boss = {
+  bpm: 126, root: 62, scale: "harmonic", chords: [0, 0, 5, 4, 0, 3, 5, 4],
+  lead:
+    "3---4-5-6-5-4-3-" + "2-------3-------" + "3---4-5-7-6-5-4-" + "5-------6---7---" +
+    "a---9-8-7---8-9-" + "a-------9-------" + "8-7-6-5-6-5-4-2-" + "3-------.3.3.3..",
+  bass: "x.x.x.x.x.x.x5o.",
+  keys: "x..x..x...x..x..",
+  drums: { kick: "x...x...x...x...", snare: "....x.......x...", hat: "x.x.x.x.x.x.x.x." },
+  hot: HOT,
+  mix: { lead: 0.08, pad: 0.03, bass: 0.15, keys: 0.025 },
+};
 // After dark, every outdoor track has a night variant made the same way: slower,
 // filtered, half the drums (only the kick and a soft shaker), the lead held back.
 for (const k of ["overworld", "ember", "storm", "tide", "dream", "grove", "stone"]) {
@@ -750,10 +778,16 @@ function startPlayer(name, t) {
   return p;
 }
 
-let current = null;
+let current = null, duelTrack = "duel";
+
+/// The theme "duel" plays from now on ("duel", "duel_rival_<region>", "duel_boss"); set as each duel starts.
+export function duelTheme(name) {
+  duelTrack = TRACKS[name] ? name : "duel";
+}
 
 /// Crossfade to a track ("title", "duel", "overworld", "interior", a region's, "<track>_night"), or to silence ("").
 export function music(name) {
+  if (name === "duel") name = duelTrack;
   if (!ctx) return void (want = name);
   if ((current?.name ?? "") === name) return;
   const t = ctx.currentTime;
@@ -762,7 +796,7 @@ export function music(name) {
     current.endAt = t + 2.5;
   }
   current = TRACKS[name] ? startPlayer(name, t) : null;
-  if (name === "duel") intense = false;
+  if (name.startsWith("duel")) intense = false;
 }
 
 /// 1: the duel is down to someone's last prize (busier drums, an arpeggio, a touch faster).

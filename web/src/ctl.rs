@@ -218,6 +218,7 @@ impl Ctl {
         self.ai.set_value(Some(
             Ai::new(seed ^ 0x5eed_0a11, setup.difficulty).with_style(setup.style),
         ));
+        crate::audio::duel_theme(&setup);
         self.setup.set_value(Some(setup));
         self.log.set(vec![]);
         self.heard.set_value(vec![]);

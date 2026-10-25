@@ -128,6 +128,26 @@ pub fn rival(id: &str) -> Option<&'static Rival> {
     RIVALS.iter().find(|r| r.id == id)
 }
 
+/// What a duel is for; its music follows it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Stakes {
+    /// A route duelist, a quick duel, the coach.
+    Ordinary,
+    /// A rival, in their first colour.
+    Rival(Color),
+    /// The Warden: the one rival with no seal to give.
+    Boss,
+}
+
+/// The stakes of a duel against `id`, a rival's or route duelist's id.
+pub fn stakes(id: Option<&str>) -> Stakes {
+    match id.and_then(rival) {
+        Some(r) if !r.seal => Stakes::Boss,
+        Some(r) => Stakes::Rival(r.colors[0]),
+        None => Stakes::Ordinary,
+    }
+}
+
 /// Seals earned so far.
 pub fn seals(p: &Progress) -> usize {
     RIVALS.iter().filter(|r| r.seal && r.beaten(p)).count()
@@ -830,5 +850,17 @@ mod tests {
                 w[1]
             );
         }
+    }
+
+    #[test]
+    fn the_warden_is_the_boss_and_rivals_bring_their_colour() {
+        assert_eq!(stakes(Some("warden")), Stakes::Boss);
+        assert_eq!(stakes(Some("quill")), Stakes::Rival(Color::Lightning));
+        assert_eq!(stakes(Some("orla")), Stakes::Rival(Color::Fighting));
+        assert_eq!(stakes(Some(trainers::TRAINERS[0].id)), Stakes::Ordinary);
+        assert_eq!(stakes(None), Stakes::Ordinary);
+        // Every rival but the Warden plays a rival's theme.
+        let bosses = RIVALS.iter().filter(|r| stakes(Some(r.id)) == Stakes::Boss);
+        assert_eq!(bosses.count(), 1);
     }
 }
