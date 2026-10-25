@@ -87,6 +87,11 @@ impl Game {
     /// R-ENERGY-02: a basic energy of the Power's colour onto a creature whose
     /// effective colour is that colour, while a holder on the attaching side is in play.
     fn free_attach(&self, p: usize, hand: usize, slot: usize) -> bool {
+        // RULES: R-ENERGY-02 — Sixfold allows one extra attachment a turn, not
+        // the handheld's unlimited ones (however many holders are in play).
+        if self.free_attached {
+            return false;
+        }
         let pl = &self.players[p];
         let CardKind::Energy(EnergyCard::Basic(color)) = card(pl.hand[hand]).kind else {
             return false;
@@ -98,7 +103,9 @@ impl Game {
 
     /// R-ENERGY-01: once per turn; the free-attach exception doesn't use it up.
     fn attach(&mut self, p: usize, hand: usize, slot: usize, ev: &mut Vec<Event>) {
-        if !self.free_attach(p, hand, slot) {
+        if self.free_attach(p, hand, slot) {
+            self.free_attached = true;
+        } else {
             self.energy_attached = true;
         }
         let pl = &mut self.players[p];
@@ -249,6 +256,11 @@ impl Game {
     fn check_attack(&self, p: usize, i: usize) -> Result<(), RuleError> {
         let pl = &self.players[p];
         let active = pl.active.as_ref().ok_or(RuleError::NoSuchSlot)?;
+        // RULES: R-TURN-05 — the player who goes first can't attack on turn 0,
+        // a deliberate departure from the handheld game (see docs/RULES.md).
+        if self.turn == 0 {
+            return Err(RuleError::FirstTurn);
+        }
         if pl.effects.placed == Some(Placed::CantAttack) {
             return Err(RuleError::CantAttack);
         }
@@ -368,14 +380,21 @@ mod tests {
 
     /// R-ENERGY-02
     #[test]
-    fn free_attach_power_allows_extra_matching_energy() {
+    fn free_attach_power_allows_one_extra_matching_energy() {
         let mut g = main_phase(0);
         g.players[0].bench.push(creature(SPROUTWING, &[]));
-        set_hand(&mut g, 0, &[GRASS_E, GRASS_E, FIRE_E, FIRE_E]);
+        g.players[0].bench.push(creature(SPROUTWING, &[]));
+        set_hand(&mut g, 0, &[GRASS_E, FIRE_E, GRASS_E]);
         ok(&mut g, attach(0));
-        ok(&mut g, attach(1));
         assert!(!g.energy_attached, "matching energy is free");
         ok(&mut g, attach(0)); // Fire onto Grass: the normal attachment
+                               // Sixfold's limit: one extra a turn, however many holders.
+        assert_eq!(err(&mut g, attach(1)), RuleError::EnergyAlreadyAttached);
+        let mut g = main_phase(0);
+        g.players[0].bench.push(creature(SPROUTWING, &[]));
+        set_hand(&mut g, 0, &[GRASS_E, GRASS_E, GRASS_E]);
+        ok(&mut g, attach(0)); // free
+        ok(&mut g, attach(1)); // the normal attachment
         assert_eq!(err(&mut g, attach(0)), RuleError::EnergyAlreadyAttached);
         // The holder on the opponent's side doesn't help.
         let mut g = main_phase(0);
@@ -389,19 +408,19 @@ mod tests {
     /// Power-made colour counts while that Power works (00:35D9-35EE → 36AE).
     #[test]
     fn free_attach_needs_matching_target_colour() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].bench.push(creature(SPROUTWING, &[]));
         g.players[0].bench.push(creature(EMBERKIT, &[]));
-        set_hand(&mut g, 0, &[GRASS_E, FIRE_E, GRASS_E]);
-        ok(&mut g, attach(0)); // free
+        set_hand(&mut g, 0, &[FIRE_E, GRASS_E, GRASS_E]);
         ok(&mut g, attach(0)); // Fire: the normal attachment
         assert_eq!(err(&mut g, attach(2)), RuleError::EnergyAlreadyAttached);
         // A creature made Grass by its own working Power.
         let mut shifter = creature(SHIFTER, &[]);
         shifter.color_override = Some(crate::Color::Grass);
         g.players[0].bench.push(shifter.clone());
-        ok(&mut g, attach(3));
-        // Its Power off (an Asleep Active): back to Colorless.
+        ok(&mut g, attach(3)); // free
+        g.free_attached = false; // as on a new turn
+                                 // Its Power off (an Asleep Active): back to Colorless.
         g.players[0].active = Some(shifter);
         g.players[0].condition.apply_special(Special::Asleep);
         set_hand(&mut g, 0, &[GRASS_E]);

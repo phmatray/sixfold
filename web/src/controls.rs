@@ -18,12 +18,20 @@ fn reason(e: RuleError) -> &'static str {
     match e {
         RuleError::NotEnoughEnergy => tr("Not enough energy", "Pas assez d'énergie"),
         RuleError::AsleepOrParalyzed => tr("Asleep or Paralyzed", "Endormi ou Paralysé"),
+        RuleError::FirstTurn => tr(
+            "No attacks on the first turn",
+            "Pas d'attaque au premier tour",
+        ),
         RuleError::CantAttack => tr("Can't attack this turn", "Pas d'attaque ce tour"),
         RuleError::AttackDisabled => tr("Disabled this turn", "Bloquée ce tour"),
         RuleError::AlreadyUsed => tr("Already used", "Déjà utilisé"),
         RuleError::DeckEmpty => tr("Your deck is empty", "Votre deck est vide"),
         RuleError::NoTarget => tr("Nothing to target", "Aucune cible"),
         RuleError::NotNow => tr("Not now", "Pas maintenant"),
+        RuleError::AlreadyRetreated => tr(
+            "Already retreated this turn",
+            "Retraite déjà utilisée ce tour",
+        ),
         _ => tr("Can't use it now", "Impossible pour l'instant"),
     }
 }
@@ -47,6 +55,8 @@ struct AttackBtn {
 struct Btn {
     action: Action,
     label: String,
+    /// Shown greyed out, with this reason after the label.
+    blocked: Option<&'static str>,
 }
 
 #[derive(Clone, PartialEq, Default)]
@@ -158,6 +168,7 @@ fn bar_model(ctl: Ctl, ui: Ui, legal: &[Action]) -> Bar {
             let btn = Btn {
                 action: a,
                 label: v.describe_action(a),
+                blocked: None,
             };
             match a {
                 Action::Done => bar.end = Some(btn),
@@ -172,6 +183,14 @@ fn bar_model(ctl: Ctl, ui: Ui, legal: &[Action]) -> Bar {
         }
         if prompt.kind == PromptKind::MainPhase {
             bar.attacks = attack_buttons(g, legal);
+            // R-RETREAT-05: say why Retreat is gone after the turn's one retreat.
+            if g.clone().apply(Action::Retreat).err() == Some(RuleError::AlreadyRetreated) {
+                bar.other.push(Btn {
+                    action: Action::Retreat,
+                    label: tr("Retreat", "Battre en retraite").into(),
+                    blocked: Some(reason(RuleError::AlreadyRetreated)),
+                });
+            }
         }
         bar.hint = match (selected, playable.is_empty()) {
             (Some(i), _) if bar.hand.is_empty() => Some(tr(
@@ -289,7 +308,11 @@ pub fn ActionBar() -> impl IntoView {
                 <div class="bar-group plays">
                     {move || bar.with(|b| b.hand.iter().chain(b.other.iter()).cloned().collect::<Vec<_>>()).into_iter().map(|b| {
                         let action = b.action;
-                        view! { <button class="btn" on:click=move |_| act(action)>{b.label}</button> }
+                        let label = match b.blocked {
+                            Some(r) => format!("{} · {r}", b.label),
+                            None => b.label,
+                        };
+                        view! { <button class="btn" disabled=b.blocked.is_some() on:click=move |_| act(action)>{label}</button> }
                     }).collect_view()}
                     {move || bar.with(|b| b.end.clone()).map(|b| {
                         let action = b.action;

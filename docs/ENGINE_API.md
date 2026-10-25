@@ -382,7 +382,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 
 | `PowerKind` | What it does |
 |---|---|
-| `FreeAttach(Color)` | Energy of that colour attached to a Hexon of that colour doesn't use up the turn's attachment. |
+| `FreeAttach(Color)` | Once a turn (however many holders), an energy of that colour attached to a Hexon of that colour doesn't use up the turn's attachment. |
 | `RetreatReducer` | The owner's Active retreats for 1 less while this is on the Bench. |
 | `EvolutionLock` | Nobody can awaken. |
 | `Blocker` | Every other Power stops. |
@@ -588,7 +588,7 @@ The design and its odds are in `docs/BOOSTERS.md`.
 |---|---|---|
 | 1–6 | `COMMONS` = 6 `Common` | by `SHARES` (themed) or evenly (Wild) |
 | 7–9 | `UNCOMMONS` = 3 `Uncommon` | the same |
-| 10 | 1 `Rare` | a Holo Rare (`set::is_holo`: the Awaken 2 Hexons) one pack in `HOLO_IN` = 3, else a Rare trainer or the special energy |
+| 10 | 1 `Rare` | a Holo Rare (`set::is_holo`: the Awaken 2 Hexons) in `HOLO_ODDS` = (3, 5), that is 3 packs in 5, else a Rare trainer or the special energy |
 
 `booster.open(seed, &collection) -> Vec<CardId>` always gives the same pack for the same seed and collection (the engine's PCG32); no card twice in a pack. `booster.group(id)` is the card's `SHARES` group in that pack (0 its own `colors`, 1 trainers, the special energy and Colorless Hexons, 2 the other types; always 0 in the Wild pack), and a themed pack's Common and Uncommon slots pick a group 60 / 35 / 5, then a card of it evenly. Ember is Fire / Fighting, Tide is Water / Psychic, Grove is Grass / Lightning, Storm is Lightning / Water, Stone is Fighting / Colorless, Dream is Psychic / Grass, Wild (`is_wild()`) is everything. A themed pack's Holo Rares are its own types only. The Rare slot leaves out cards the collection holds `MAX_COPIES` of while another is left. No pack holds basic energy (unlimited) or promos. `booster.holds(id)` and `booster.pool(rarity, holo) -> [Vec<CardId>; 3]` (by group) list what it can contain, for the odds the UI shows.
 
@@ -839,4 +839,4 @@ Save::from_legacy(name, |key| storage.get(key)) -> Option<Save>  // a 0.6 save, 
 - When an attack inflicts a condition and also force-switches, the condition lands on the new Active.
 - Nothing in the engine stops a caller from looping. Retreat has no per-turn limit (R-RETREAT-05), an Activated Power with `once_per_turn: false` can be used again and again, and cancelling a `Choose` goes back to exactly the same state. `ai::Ai` guards against all three itself (one retreat per turn, each Power once per turn, a cancelled play isn't retried that turn, and at most 100 main-phase answers per turn).
 - A `Choose` prompt doesn't say which card or Power started it; remember the last play you started.
-- The AI doesn't use R-AI-15 (stacked openings, unfair by design). Easy differs from Normal only in R-AI-03's skipped trainer and Power plays. Hard's look-ahead covers only main-phase actions: its replacements, prize picks and `Choose` answers are Normal's, and its imagined opponent hand is drawn at random from the unseen cards (a real hand holds the cards its owner chose not to play).
+- The AI doesn't use R-AI-15 (stacked openings, unfair by design). Easy differs from Normal in R-AI-03's skipped trainer and Power plays and, since 1.3, picks any attack that does something rather than the best one and retreats only to dodge a knock-out. Hard's look-ahead covers only main-phase actions: its replacements, prize picks and `Choose` answers are Normal's, and its imagined opponent hand is drawn at random from the unseen cards (a real hand holds the cards its owner chose not to play).

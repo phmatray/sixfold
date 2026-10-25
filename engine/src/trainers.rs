@@ -277,7 +277,7 @@ pub static TEMPEST: Recipe =
 pub static PEBBLE: Recipe = recipe!("Pebble", None, [KNOLLOP 4, TUSKLET 4, BRAWLET 3, SHALEPUP 3]);
 pub static RUBBLE: Recipe = recipe!("Rubble", Some(&PEBBLE), [KNOLLGRIM 3, IRONBRAWL 2, SHALEHOUND 2, GRITFANG 1, BOULDERGUT 1, LUCKY_SATCHEL 2, TRAIL_COMPASS 1]);
 pub static LANDSLIDE: Recipe =
-    recipe!("Landslide", Some(&RUBBLE), [KNOLLOSSUS 1, CRAGMASTIFF 1, SPIKE_CHARM 2]);
+    recipe!("Landslide", Some(&RUBBLE), [KNOLLOSSUS 1, CRAGMASTIFF 1, SPIKE_CHARM 1]);
 pub static MURMUR: Recipe = recipe!("Murmur", None, [WISPUN 4, DOZEL 4, HEXLET 4, SMOKE_PELLET 2]);
 pub static REVERIE: Recipe = recipe!("Reverie", Some(&MURMUR), [WISPELLE 3, SOMNITAR 2, HEXMAGE 2, GLIMMOX 1, GLOAMOWL 1, LUCKY_SATCHEL 2, TRAIL_COMPASS 1]);
 pub static TRANCE: Recipe =

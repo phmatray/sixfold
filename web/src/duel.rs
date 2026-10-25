@@ -185,8 +185,8 @@ pub fn DuelSetup() -> impl IntoView {
                         <summary>{tr("How a duel works", "Comment se joue un duel")}</summary>
                         <ol>
                             <li>{tr("Put a Basic Hexon in your Active spot, and more Basics on your Bench (up to 5).", "Placez un Hexon de Base en position Active, et d'autres Hexons de Base sur votre Banc (5 au plus).")}</li>
-                            <li>{tr("Each turn you draw a card, may attach one energy, play Basics and trainers, awaken, and retreat.", "À chaque tour, vous piochez une carte ; vous pouvez attacher une énergie, jouer des Hexons de Base et des Dresseurs, éveiller vos Hexons et battre en retraite.")}</li>
-                            <li>{tr("Attack when the Active has the energy an attack shows. Attacking ends your turn.", "Attaquez quand votre Actif porte l'énergie indiquée par l'attaque. Attaquer termine votre tour.")}</li>
+                            <li>{tr("Each turn you draw a card, may attach one energy, play Basics and trainers, awaken, and retreat once.", "À chaque tour, vous piochez une carte ; vous pouvez attacher une énergie, jouer des Hexons de Base et des Dresseurs, éveiller vos Hexons et battre en retraite une fois.")}</li>
+                            <li>{tr("Attack when the Active has the energy an attack shows. Attacking ends your turn. Whoever goes first can't attack on their first turn.", "Attaquez quand votre Actif porte l'énergie indiquée par l'attaque. Attaquer termine votre tour. Celui qui commence ne peut pas attaquer à son premier tour.")}</li>
                             <li>{tr("Knock out a Hexon to take a prize. Take all your prizes, or leave the opponent with no Hexon in play, to win.", "Mettez un Hexon K.O. pour prendre une Récompense. Pour gagner, prenez toutes vos Récompenses ou ne laissez aucun Hexon en jeu à l'adversaire.")}</li>
                         </ol>
                         <p><button type="button" class="btn" on:click=move |_| crate::coach::start(Screen::Duel)>{tr("Play the guided duel", "Jouer le duel guidé")}</button></p>
@@ -226,7 +226,7 @@ pub fn DuelSetup() -> impl IntoView {
                                 "hard" => Difficulty::Hard,
                                 _ => Difficulty::Normal,
                             })>
-                                <option value="easy">{tr("Easy: sometimes skips a play", "Facile : laisse parfois passer un coup")}</option>
+                                <option value="easy">{tr("Easy: plays loosely, sometimes skips a play", "Facile : joue sans finesse, laisse parfois passer un coup")}</option>
                                 <option value="normal" selected>"Normal"</option>
                                 <option value="hard">{tr("Hard: thinks a turn ahead", "Difficile : anticipe d'un tour")}</option>
                             </select>

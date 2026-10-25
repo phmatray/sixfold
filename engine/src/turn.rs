@@ -29,7 +29,9 @@ impl Game {
         }
         // Step 4
         self.energy_attached = false;
+        self.free_attached = false;
         self.retreat_failed = false;
+        self.retreated = false;
         self.accuracy = None;
         // Step 5 (R-TURN-01/02): every turn draws, even turn 0; an empty deck loses.
         if self.draw(t, ev).is_none() {
@@ -245,32 +247,32 @@ mod tests {
 
     /// R-TURN-05
     #[test]
-    fn first_player_may_attack_turn_zero() {
+    fn first_player_cannot_attack_turn_zero() {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[GRASS_E]);
         ok(&mut g, Action::AttachEnergy { hand: 0, slot: 0 });
+        assert_eq!(err(&mut g, Action::Attack(0)), RuleError::FirstTurn);
+        assert!(!g.legal_actions().contains(&Action::Attack(0)));
+        // The second player may attack on their first turn.
+        ok(&mut g, Action::Done);
+        assert_eq!(prompt_of(&g), (1, PromptKind::MainPhase));
+        assert_eq!(g.turn(), 1);
+        g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
         let ev = ok(&mut g, Action::Attack(0));
         assert!(ev.iter().any(|e| matches!(
             e,
             Event::Damage {
-                player: 1,
+                player: 0,
                 slot: 0,
-                amount: 20,
-                weakness: true,
                 ..
             }
         )));
-        assert_eq!(
-            g.players[1].active.as_ref().unwrap().hp,
-            40,
-            "Pebblet is weak to Grass"
-        );
     }
 
     /// R-TURN-05
     #[test]
     fn attack_ends_turn() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
         let ev = ok(&mut g, Action::Attack(0));
         assert!(ev.contains(&Event::TurnEnded { player: 0 }));
@@ -280,7 +282,7 @@ mod tests {
     /// R-TURN-05
     #[test]
     fn disabled_attack_only_blocks_that_attack() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E; 3];
         g.players[0].effects.placed = Some(crate::Placed::DisabledAttack(0));
         assert_eq!(err(&mut g, Action::Attack(0)), RuleError::AttackDisabled);
@@ -292,7 +294,7 @@ mod tests {
     /// checked before Asleep/Paralyzed (01:4700, then 01:4705).
     #[test]
     fn attack_blocked_without_energy_or_attacks() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         assert_eq!(err(&mut g, Action::Attack(0)), RuleError::NotEnoughEnergy);
         assert_eq!(err(&mut g, Action::Attack(2)), RuleError::NoSuchAttack);
         g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
@@ -317,7 +319,7 @@ mod tests {
     /// R-TURN-07
     #[test]
     fn ko_mid_turn_ends_duel_immediately() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
         g.players[1].active.as_mut().unwrap().hp = 10;
         let ev = ok(&mut g, Action::Attack(0));
@@ -555,7 +557,7 @@ mod tests {
     /// R-TRAINER-05: a +10 lasts for the turn it was played.
     #[test]
     fn plus10_trainer_discarded_end_of_turn() {
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         set_hand(&mut g, 0, &[WHETSTONE]);
         ok(&mut g, Action::PlayTrainer(0));
         assert_eq!(
@@ -577,7 +579,7 @@ mod tests {
         )));
         assert_eq!(g.players[0].discard, vec![WHETSTONE]);
         // Benched slots too (any in-play location, 00:1B73).
-        let mut g = main_phase(0);
+        let mut g = main_phase(2);
         let mut ember = creature(EMBERKIT, &[]);
         ember.trainers = vec![WHETSTONE];
         g.players[0].bench.push(ember);

@@ -300,7 +300,9 @@ pub static RIVALS: [Rival; 7] = [
                 (GRASS_ENERGY, 32),
             ],
         },
-        difficulty: Difficulty::Easy,
+        // Normal since 1.3: the Easy AI got weaker, and Bramble (Grass
+        // against the starter's Fire) is the softest rival either way.
+        difficulty: Difficulty::Normal,
         prizes: 2,
         needs: 0,
         seal: true,
@@ -548,6 +550,12 @@ mod tests {
     use crate::decks::STARTER;
     use crate::{validate_deck, Config, Game};
 
+    /// The slope test's games per rival, the most a rival may sit below the
+    /// one before (seeded noise at this sample), and the largest rise.
+    const SLOPE_GAMES: u64 = 40;
+    const SLOPE_DIP: u64 = 10;
+    const SLOPE_STEP: u64 = 30;
+
     fn beat(p: &mut Progress, ids: &[&str]) {
         let mut pr = Profile::new_player();
         for id in ids {
@@ -755,6 +763,31 @@ mod tests {
         }
     }
 
+    /// A rival's win rate (percent) against the starter deck played by a
+    /// Normal AI, over `games` seeded games at the rival's prizes and level.
+    fn rate_vs_starter(r: &Rival, style: Style, games: u64) -> u64 {
+        rate_with(r, r.prizes, r.difficulty, style, games)
+    }
+
+    fn rate_with(r: &Rival, prizes: u8, level: Difficulty, style: Style, games: u64) -> u64 {
+        let mut wins = 0;
+        for seed in 0..games {
+            let config = Config { prizes };
+            let mut g = Game::new([STARTER.cards(), r.deck.cards()], seed, config).unwrap();
+            let mut ais = [
+                Ai::new(seed, Difficulty::Normal),
+                Ai::new(seed ^ 1, level).with_style(style),
+            ];
+            while g.winner().is_none() {
+                let me = g.view(0).waiting_on.unwrap();
+                let a = ais[me].choose_action(&g, me);
+                g.apply(a).unwrap();
+            }
+            wins += u64::from(g.winner() == Some(1));
+        }
+        wins * 100 / games
+    }
+
     /// Tuning aid: each rival's win rate against the starter deck (the
     /// starter played by a Normal AI), played Balanced and with its style.
     /// `cargo test --release -p sixfold-engine rival_strength -- --ignored --nocapture`
@@ -762,31 +795,39 @@ mod tests {
     #[ignore]
     fn rival_strength_against_the_starter() {
         for r in &RIVALS {
-            let rate = |style| {
-                let mut wins = 0;
-                for seed in 0..60u64 {
-                    let config = Config { prizes: r.prizes };
-                    let mut g = Game::new([STARTER.cards(), r.deck.cards()], seed, config).unwrap();
-                    let mut ais = [
-                        Ai::new(seed, Difficulty::Normal),
-                        Ai::new(seed ^ 1, r.difficulty).with_style(style),
-                    ];
-                    while g.winner().is_none() {
-                        let me = g.view(0).waiting_on.unwrap();
-                        let a = ais[me].choose_action(&g, me);
-                        g.apply(a).unwrap();
-                    }
-                    wins += usize::from(g.winner() == Some(1));
-                }
-                wins * 100 / 60
-            };
             println!(
                 "{:8} balanced {:>3}%  {:?} {:>3}% ({} prizes)",
                 r.name,
-                rate(Style::Balanced),
+                rate_vs_starter(r, Style::Balanced, 60),
                 r.style,
-                rate(r.style),
+                rate_vs_starter(r, r.style, 60),
                 r.prizes
+            );
+        }
+    }
+
+    /// The difficulty slope: against the starter deck, each rival as it
+    /// plays wins a little more often than the one before, in campaign
+    /// order (`docs/BALANCE.md`, "Difficulty slope"). 40 seeded games each.
+    #[test]
+    fn rivals_rise_gently_against_the_starter() {
+        let rates: Vec<u64> = RIVALS
+            .iter()
+            .map(|r| rate_vs_starter(r, r.style, SLOPE_GAMES))
+            .collect();
+        eprintln!("rivals against the starter, in campaign order: {rates:?}");
+        assert!(rates[0] <= 30, "the first rival wins {}%", rates[0]);
+        assert!(
+            rates[RIVALS.len() - 1] >= 75,
+            "the Warden wins {}%",
+            rates[RIVALS.len() - 1]
+        );
+        for w in rates.windows(2) {
+            assert!(
+                w[1] + SLOPE_DIP >= w[0] && w[1] <= w[0] + SLOPE_STEP,
+                "a step from {}% to {}%: {rates:?}",
+                w[0],
+                w[1]
             );
         }
     }

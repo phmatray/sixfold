@@ -2,10 +2,11 @@
 //! lesson plays out every time, and [`lesson`] reads the step it is at from
 //! the game state (never a counter, so it can't drift from the board).
 //!
-//! The script, in three turns: place Ashpaw as your Active and Puddock on the
-//! Bench; attach a Fire energy and attack (Pollenpup is weak to Fire: double
-//! damage); the opponent hits back; evolve into Blazelynx, attach, heal with
-//! Moss Poultice and knock Pollenpup out, which takes the one prize and wins.
+//! The script, in four turns: place Ashpaw as your Active and Puddock on the
+//! Bench; the opponent goes first, so it can't attack (R-TURN-05); attach a
+//! Fire energy and attack (Pollenpup is weak to Fire: double damage); the
+//! opponent hits back; evolve into Blazelynx, attach, heal with Moss Poultice
+//! and knock Pollenpup out, which takes the one prize and wins.
 //!
 //! [`allows`] narrows the human's legal actions to the step's one move, and
 //! [`opponent`] plays the AI's fixed line (attach, attack, end).
@@ -37,7 +38,7 @@ const YOURS: [CardId; 10] = [
     WATER_ENERGY,
     // prize
     CINDREL,
-    // turn 0, turn 2
+    // turn 1, turn 3
     WATER_ENERGY,
     FIRE_ENERGY,
 ];
@@ -50,7 +51,8 @@ fn stack(top: &[CardId], fill: [CardId; 2]) -> Vec<CardId> {
     deck
 }
 
-/// The tutorial duel, stopped at the human's first placement. You go first.
+/// The tutorial duel, stopped at the human's first placement. The opponent
+/// goes first, so you make the first attack.
 pub fn game() -> Game {
     let decks = [
         stack(&YOURS, [FIRE_ENERGY, WATER_ENERGY]),
@@ -64,8 +66,8 @@ pub fn game() -> Game {
             g.draw(p, &mut ev);
         }
     }
-    // Heads: player 0 (you) starts.
-    g.forced_coins.push_back(true);
+    // Tails: player 1 (the opponent) starts.
+    g.forced_coins.push_back(false);
     g.steps = [Step::Place(0), Step::Place(1), Step::PrizesAndCoin].into();
     g.run(&mut ev);
     g.log = ev;
@@ -118,7 +120,7 @@ pub fn lesson(g: &Game) -> Lesson {
             Goal::PlaceActive => 1,
             Goal::Bench => 2,
             Goal::EndSetup => 3,
-            Goal::Attach if g.turn() == 0 => 4,
+            Goal::Attach if g.turn() == 1 => 4,
             Goal::Attack => 5,
             Goal::Evolve => 6,
             Goal::Attach => 7,
@@ -152,10 +154,17 @@ pub fn lesson(g: &Game) -> Lesson {
             Goal::Watch,
             None,
             tr("The opponent's turn.", "Au tour de l'adversaire.").into(),
-            tr(
-                "Watch what it does: it attaches an energy and attacks, just like you.",
-                "Observez : il attache une énergie et attaque, comme vous.",
-            )
+            if g.turn() == 0 {
+                tr(
+                    "It goes first, so it can't attack this turn: it attaches an energy and ends its turn.",
+                    "Il commence, donc il ne peut pas attaquer ce tour : il attache une énergie et termine son tour.",
+                )
+            } else {
+                tr(
+                    "Watch what it does: it attaches an energy and attacks, just like you.",
+                    "Observez : il attache une énergie et attaque, comme vous.",
+                )
+            }
             .into(),
         );
     };
@@ -205,12 +214,12 @@ pub fn lesson(g: &Game) -> Lesson {
             Some(Action::Done),
             tr("Press Done to start the duel.", "Touchez Terminé pour lancer le duel.").into(),
             tr(
-                "A coin decides who goes first. Today it's you.",
-                "Une pièce décide qui commence. Aujourd'hui, c'est vous.",
+                "A coin decides who goes first: today, the opponent. Whoever goes first can't attack on their first turn.",
+                "Une pièce décide qui commence : aujourd'hui, l'adversaire. Celui qui commence ne peut pas attaquer à son premier tour.",
             )
             .into(),
         )),
-        (PromptKind::MainPhase, Some(ASHPAW)) if g.turn() == 0 && !g.energy_attached => {
+        (PromptKind::MainPhase, Some(ASHPAW)) if g.turn() == 1 && !g.energy_attached => {
             find(g, FIRE_ENERGY).map(|h| {
                 l(
                     Goal::Attach,
@@ -227,7 +236,7 @@ pub fn lesson(g: &Game) -> Lesson {
                 )
             })
         }
-        (PromptKind::MainPhase, Some(ASHPAW)) if g.turn() == 0 => Some(l(
+        (PromptKind::MainPhase, Some(ASHPAW)) if g.turn() == 1 => Some(l(
             Goal::Attack,
             Some(Action::Attack(0)),
             tr(
@@ -391,7 +400,7 @@ mod tests {
     }
 
     #[test]
-    fn tutorial_script_wins_in_three_turns() {
+    fn tutorial_script_wins_in_four_turns() {
         let (g, goals) = play();
         assert_eq!(g.winner(), Some(HUMAN));
         assert_eq!(
@@ -408,7 +417,7 @@ mod tests {
                 Goal::Finish,
             ]
         );
-        assert_eq!(g.turn(), 2);
+        assert_eq!(g.turn(), 3);
         assert_eq!(lesson(&g).goal, Goal::Won);
         // The first attack was doubled by weakness.
         assert!(g.log().iter().any(|e| matches!(
@@ -422,7 +431,7 @@ mod tests {
         )));
     }
 
-    /// Retreat can't be played in the three-turn script (one retreat a turn,
+    /// Retreat can't be played in the four-turn script (one retreat a turn,
     /// and its energy is needed for the knock-out), so the Bench step names it.
     #[test]
     fn tutorial_explains_retreat() {

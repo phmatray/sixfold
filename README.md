@@ -109,7 +109,7 @@ Not in 1.0: a second human player (see [`docs/ROADMAP.md`](docs/ROADMAP.md)).
 ## How to play
 
 **Your first duel.** A new save opens on **Learn to play**: a guided duel of
-three turns against a practice partner. A card-stock note above your hand says
+four turns against a practice partner, who goes first (and so can't attack yet). A card-stock note above your hand says
 what to do next and why, and a brass ring marks the card or button to press
 (**Show me** moves keyboard focus there). You place an Active and a Benched
 Hexon, attach energy, attack into a weakness, awaken, play a trainer and
@@ -185,8 +185,10 @@ Releases are cut by release-please from Conventional Commits.
 
 ## Rules
 
-The rules follow the original Game Boy game, not the modern card game. The
-first player draws and may attack on turn 0, there is no Burned condition,
+The rules follow the original Game Boy game, not the modern card game, with
+two deliberate changes. The player who goes first draws but can't attack on
+their first turn (the modern game's fix for the first player's edge), and a
+free-attach Power gives one extra energy a turn, not unlimited ones. There is no Burned condition,
 confusion hurts the attacker for 20, weakness doubles damage, resistance takes
 off 30, a mulligan gives the opponent no extra cards, the Bench holds 5, and a
 tie goes to sudden death with one prize each.

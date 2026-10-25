@@ -312,7 +312,7 @@ mod tests {
 
     /// Player 0's Mossling (Grass) attacks player 1's Pebblet (weak to Grass, 60 HP).
     fn duel() -> Game {
-        main_phase(0)
+        main_phase(2)
     }
 
     fn attach_trainer(g: &mut Game, p: usize, slot: usize, card: crate::CardId) {

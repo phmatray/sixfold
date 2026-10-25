@@ -1,6 +1,7 @@
 # Balance
 
-The 0.9.0 balance pass, measured with the AI playing both sides. Rerun it with:
+The 0.9.0 balance pass and the 1.3 rules and curve pass (at the end), measured with the AI playing
+both sides. Rerun it with:
 
 ```bash
 cargo test --release -p sixfold-engine deck_sweep -- --ignored --nocapture
@@ -10,9 +11,11 @@ cargo test --release -p sixfold-engine deck_sweep -- --ignored --nocapture
 game puts in front of the player: the six prebuilts, the five rival decks that aren't prebuilts
 (Cinza plays Ember Rush, Quill Storm Front) and the six Gauntlet decks. Each pairing is 100 seeded
 games with seats alternating, all at 6 prizes, so it compares decks, not campaign settings. It
-checks that every prebuilt wins 40–60% overall and that no pairing of two prebuilts is beyond
-75/25. The always-on `prebuilt_decks_round_robin_is_balanced` (16 games a pair, prebuilts only)
-keeps each prebuilt between 30% and 70%.
+checks that every prebuilt wins 42–58% overall (40–60% before 1.3) and that no pairing of two
+prebuilts is beyond 75/25. The always-on `prebuilt_decks_round_robin_is_balanced` (16 games a pair,
+prebuilts only) keeps each prebuilt between 35% and 65% (30–70% before 1.3). Its games are seeded, so
+the band can't flake; at 80 games a deck one standard error is about 5.5 points, and the weakest
+prebuilt, Dream Veil, sits at 39% (31 of 80).
 
 ## Changes
 
@@ -40,27 +43,27 @@ its campaign version head to head in 0.9.0 (Spring Tide is level with Low Tide s
 
 ## Overall win rate
 
-"Before" is 0.7.0's cards with the first draft of the Gauntlet lists; "0.9.0" is that release; "1.0.0" adds the Low Tide nudge below. The other rows move by a point or two because each plays Low Tide.
+"Before" is 0.7.0's cards with the first draft of the Gauntlet lists; "0.9.0" is that release; "1.0.0" adds the Low Tide nudge below. The other rows move by a point or two because each plays Low Tide. "1.3" is the rules and curve pass at the end of this page.
 
-| # | Deck | Kind | Before | 0.9.0 | 1.0.0 |
-|---|---|---|---|---|---|
-| 1 | Ember Rush | Prebuilt | 52% | 52% | 51% |
-| 2 | Tide Mind | Prebuilt | 50% | 49% | 48% |
-| 3 | Grove Bloom | Prebuilt | 59% | 59% | 59% |
-| 4 | Storm Front | Prebuilt | 41% | 44% | 44% |
-| 5 | Stone Fist | Prebuilt | 62% | 57% | 56% |
-| 6 | Dream Veil | Prebuilt | 42% | 42% | 42% |
-| 7 | Thicket | Rival | 47% | 47% | 48% |
-| 8 | Low Tide | Rival | 36% | 35% | 43% |
-| 9 | Bedrock | Rival | 61% | 57% | 56% |
-| 10 | Moonlit Tide | Rival | 44% | 43% | 43% |
-| 11 | Sixfold Crown | Rival | 45% | 43% | 42% |
-| 12 | Deep Thicket | Gauntlet | 65% | 66% | 66% |
-| 13 | Spring Tide | Gauntlet | 46% | 46% | 45% |
-| 14 | White Heat | Gauntlet | 46% | 51% | 51% |
-| 15 | Eye of the Storm | Gauntlet | 42% | 45% | 44% |
-| 16 | Bedrock Deep | Gauntlet | 64% | 61% | 60% |
-| 17 | New Moon | Gauntlet | 41% | 45% | 44% |
+| # | Deck | Kind | Before | 0.9.0 | 1.0.0 | 1.3 |
+|---|---|---|---|---|---|---|
+| 1 | Ember Rush | Prebuilt | 52% | 52% | 51% | 50% |
+| 2 | Tide Mind | Prebuilt | 50% | 49% | 48% | 51% |
+| 3 | Grove Bloom | Prebuilt | 59% | 59% | 59% | 55% |
+| 4 | Storm Front | Prebuilt | 41% | 44% | 44% | 48% |
+| 5 | Stone Fist | Prebuilt | 62% | 57% | 56% | 56% |
+| 6 | Dream Veil | Prebuilt | 42% | 42% | 42% | 42% |
+| 7 | Thicket | Rival | 47% | 47% | 48% | 43% |
+| 8 | Low Tide | Rival | 36% | 35% | 43% | 48% |
+| 9 | Bedrock | Rival | 61% | 57% | 56% | 57% |
+| 10 | Moonlit Tide | Rival | 44% | 43% | 43% | 44% |
+| 11 | Sixfold Crown | Rival | 45% | 43% | 42% | 44% |
+| 12 | Deep Thicket | Gauntlet | 65% | 66% | 66% | 62% |
+| 13 | Spring Tide | Gauntlet | 46% | 46% | 45% | 47% |
+| 14 | White Heat | Gauntlet | 46% | 51% | 51% | 46% |
+| 15 | Eye of the Storm | Gauntlet | 42% | 45% | 44% | 49% |
+| 16 | Bedrock Deep | Gauntlet | 64% | 61% | 60% | 54% |
+| 17 | New Moon | Gauntlet | 41% | 45% | 44% | 47% |
 
 Prebuilt pairings beyond 75/25 before: Ember Rush 84–16 Storm Front, Stone Fist 81–19 Storm Front,
 Tide Mind 77–23 Dream Veil. After: none; the widest are Ember Rush 73–27 Storm Front and Tide Mind
@@ -71,29 +74,32 @@ weakness: Eye of the Storm beats Low Tide 85–15 and Bedrock Deep beats Storm F
 campaign decks are tuned by prizes and AI level instead (see `docs/ENGINE_API.md` §11), and the
 Gauntlet decks are meant to be strong: Deep Thicket and Bedrock Deep lead the field.
 
-## Full table (1.0.0)
+## Full table (1.3)
 
 Games won out of 100 by the row deck against the column deck.
 
 | Row beat column | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | All |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 Ember Rush | - | 51 | 54 | 73 | 41 | 48 | 66 | 48 | 37 | 62 | 36 | 51 | 47 | 48 | 71 | 33 | 59 | 51% |
-| 2 Tide Mind | 49 | - | 36 | 45 | 28 | 73 | 63 | 55 | 31 | 53 | 48 | 43 | 61 | 55 | 49 | 19 | 62 | 48% |
-| 3 Grove Bloom | 46 | 64 | - | 56 | 61 | 61 | 64 | 81 | 63 | 62 | 76 | 39 | 62 | 40 | 67 | 53 | 62 | 59% |
-| 4 Storm Front | 27 | 55 | 44 | - | 29 | 59 | 49 | 70 | 19 | 45 | 60 | 32 | 73 | 24 | 44 | 17 | 58 | 44% |
-| 5 Stone Fist | 59 | 72 | 39 | 71 | - | 55 | 47 | 64 | 46 | 70 | 62 | 29 | 66 | 48 | 79 | 36 | 63 | 56% |
-| 6 Dream Veil | 52 | 27 | 39 | 41 | 45 | - | 42 | 33 | 53 | 28 | 61 | 32 | 29 | 54 | 39 | 62 | 42 | 42% |
-| 7 Thicket | 34 | 37 | 36 | 51 | 53 | 58 | - | 54 | 66 | 50 | 64 | 27 | 52 | 34 | 42 | 65 | 45 | 48% |
-| 8 Low Tide | 52 | 45 | 19 | 30 | 36 | 67 | 46 | - | 36 | 55 | 60 | 23 | 51 | 61 | 25 | 32 | 54 | 43% |
-| 9 Bedrock | 63 | 69 | 37 | 81 | 54 | 47 | 34 | 64 | - | 70 | 58 | 21 | 60 | 66 | 79 | 47 | 60 | 56% |
-| 10 Moonlit Tide | 38 | 47 | 38 | 55 | 30 | 72 | 50 | 45 | 30 | - | 46 | 32 | 44 | 37 | 48 | 28 | 55 | 43% |
-| 11 Sixfold Crown | 64 | 52 | 24 | 40 | 38 | 39 | 36 | 40 | 42 | 54 | - | 21 | 32 | 69 | 48 | 39 | 47 | 42% |
-| 12 Deep Thicket | 49 | 57 | 61 | 68 | 71 | 68 | 73 | 77 | 79 | 68 | 79 | - | 72 | 44 | 63 | 74 | 65 | 66% |
-| 13 Spring Tide | 53 | 39 | 38 | 27 | 34 | 71 | 48 | 49 | 40 | 56 | 68 | 28 | - | 62 | 27 | 34 | 57 | 45% |
-| 14 White Heat | 52 | 45 | 60 | 76 | 52 | 46 | 66 | 39 | 34 | 63 | 31 | 56 | 38 | - | 74 | 29 | 55 | 51% |
-| 15 Eye of the Storm | 29 | 51 | 33 | 56 | 21 | 61 | 58 | 75 | 21 | 52 | 52 | 37 | 73 | 26 | - | 19 | 50 | 44% |
-| 16 Bedrock Deep | 67 | 81 | 47 | 83 | 64 | 38 | 35 | 68 | 53 | 72 | 61 | 26 | 66 | 71 | 81 | - | 57 | 60% |
-| 17 New Moon | 41 | 38 | 38 | 42 | 37 | 58 | 55 | 46 | 40 | 45 | 53 | 35 | 43 | 45 | 50 | 43 | - | 44% |
+| 1 Ember Rush | - | 42 | 59 | 71 | 43 | 50 | 70 | 43 | 39 | 62 | 33 | 45 | 42 | 49 | 68 | 37 | 55 | 50% |
+| 2 Tide Mind | 58 | - | 52 | 38 | 32 | 70 | 73 | 54 | 30 | 55 | 54 | 45 | 65 | 58 | 44 | 32 | 60 | 51% |
+| 3 Grove Bloom | 41 | 48 | - | 44 | 59 | 57 | 60 | 66 | 63 | 61 | 67 | 47 | 59 | 33 | 60 | 59 | 57 | 55% |
+| 4 Storm Front | 29 | 62 | 56 | - | 37 | 64 | 56 | 72 | 24 | 51 | 57 | 40 | 78 | 31 | 41 | 25 | 59 | 48% |
+| 5 Stone Fist | 57 | 68 | 41 | 63 | - | 52 | 47 | 64 | 45 | 71 | 59 | 35 | 63 | 55 | 68 | 40 | 68 | 56% |
+| 6 Dream Veil | 50 | 30 | 43 | 36 | 48 | - | 48 | 27 | 54 | 32 | 55 | 33 | 27 | 56 | 33 | 64 | 40 | 42% |
+| 7 Thicket | 30 | 27 | 40 | 44 | 53 | 52 | - | 30 | 69 | 45 | 56 | 36 | 34 | 37 | 40 | 64 | 42 | 43% |
+| 8 Low Tide | 57 | 46 | 34 | 28 | 36 | 73 | 70 | - | 45 | 52 | 62 | 38 | 54 | 72 | 24 | 42 | 45 | 48% |
+| 9 Bedrock | 61 | 70 | 37 | 76 | 55 | 46 | 31 | 55 | - | 69 | 58 | 25 | 61 | 74 | 75 | 57 | 63 | 57% |
+| 10 Moonlit Tide | 38 | 45 | 39 | 49 | 29 | 68 | 55 | 48 | 31 | - | 42 | 39 | 50 | 47 | 43 | 36 | 56 | 44% |
+| 11 Sixfold Crown | 67 | 46 | 33 | 43 | 41 | 45 | 44 | 38 | 42 | 58 | - | 26 | 35 | 71 | 35 | 45 | 40 | 44% |
+| 12 Deep Thicket | 55 | 55 | 53 | 60 | 65 | 67 | 64 | 62 | 75 | 61 | 74 | - | 64 | 48 | 56 | 76 | 58 | 62% |
+| 13 Spring Tide | 58 | 35 | 41 | 22 | 37 | 73 | 66 | 46 | 39 | 50 | 65 | 36 | - | 69 | 23 | 39 | 62 | 47% |
+| 14 White Heat | 51 | 42 | 67 | 69 | 45 | 44 | 63 | 28 | 26 | 53 | 29 | 52 | 31 | - | 67 | 30 | 48 | 46% |
+| 15 Eye of the Storm | 32 | 56 | 40 | 59 | 32 | 67 | 60 | 76 | 25 | 57 | 65 | 44 | 77 | 33 | - | 20 | 47 | 49% |
+| 16 Bedrock Deep | 63 | 68 | 41 | 75 | 60 | 36 | 36 | 58 | 43 | 64 | 55 | 24 | 61 | 70 | 80 | - | 41 | 54% |
+| 17 New Moon | 45 | 40 | 43 | 41 | 32 | 60 | 58 | 55 | 37 | 44 | 60 | 42 | 38 | 52 | 53 | 59 | - | 47% |
+
+The widest pairing is Bedrock Deep 80–20 Eye of the Storm; between prebuilts, Ember Rush 71–29 Storm
+Front and Tide Mind 70–30 Dream Veil. The 1.0.0 table is in this page's history.
 
 ## 1.2: AI styles
 
@@ -107,34 +113,38 @@ requires a styled deck to stay inside 40–60% or no further outside than it was
 cargo test --release -p sixfold-engine style_sweep -- --ignored --nocapture
 ```
 
-| Deck | Style | Balanced | Styled |
-|---|---|---|---|
-| Ember Rush (Cinza) | Aggressive | 51% | 50% |
-| Storm Front (Quill) | Bench sniper | 45% | 48% |
-| Thicket (Bramble) | Stall | 48% | 44% |
-| Low Tide (Marlo) | Stall | 44% | 42% |
-| Bedrock (Orla) | Aggressive | 57% | 56% |
-| Moonlit Tide (Lumen) | Bench sniper | 44% | 47% |
-| Deep Thicket | Stall | 66% | 60% |
-| Spring Tide | Stall | 45% | 41% |
-| White Heat | Aggressive | 51% | 52% |
-| Eye of the Storm | Bench sniper | 45% | 45% |
-| Bedrock Deep | Aggressive | 60% | 60% |
-| New Moon | Bench sniper | 44% | 46% |
+| Deck | Style | Balanced | Styled | 1.3 balanced | 1.3 styled |
+|---|---|---|---|---|---|
+| Ember Rush (Cinza) | Aggressive | 51% | 50% | 51% | 52% |
+| Storm Front (Quill) | Bench sniper | 45% | 48% | 49% | 50% |
+| Thicket (Bramble) | Stall | 48% | 44% | 45% | 39% |
+| Low Tide (Marlo) | Stall | 44% | 42% | 48% | 45% |
+| Bedrock (Orla) | Aggressive | 57% | 56% | 56% | 56% |
+| Moonlit Tide (Lumen) | Bench sniper | 44% | 47% | 46% | 47% |
+| Deep Thicket | Stall | 66% | 60% | 60% | 56% |
+| Spring Tide | Stall | 45% | 41% | 48% | 43% |
+| White Heat | Aggressive | 51% | 52% | 47% | 48% |
+| Eye of the Storm | Bench sniper | 45% | 45% | 50% | 50% |
+| Bedrock Deep | Aggressive | 60% | 60% | 54% | 58% |
+| New Moon | Bench sniper | 44% | 46% | 47% | 49% |
 
-No deck drifts out, so no weight was changed. Stall costs its decks a few points (healing and Sleep
+No deck drifts out, so no weight was changed. In 1.3 Stall costs Thicket 6 points (39%, the one styled
+deck under 40%); the sweep's 2-point tolerance lets it pass, and Bramble is the campaign's first rival,
+meant to be soft. Watch it if Thicket loses more. Stall costs its decks a few points (healing and Sleep
 are worth less to the Normal AI than tempo) and the bench sniper gains a few. Against the starter
 deck (`rival_strength_against_the_starter`, 60 games, the campaign's prizes and AI levels):
 
-| Rival | Balanced | With style |
-|---|---|---|
-| Bramble (Stall) | 20% | 15% |
-| Marlo (Stall) | 75% | 66% |
-| Cinza (Aggressive) | 60% | 63% |
-| Quill (Bench sniper) | 66% | 66% |
-| Orla (Aggressive) | 68% | 68% |
-| Lumen (Bench sniper) | 76% | 76% |
-| Sable (Balanced) | 85% | 85% |
+| Rival | Balanced | With style | 1.3 balanced | 1.3 with style |
+|---|---|---|---|---|
+| Bramble (Stall) | 20% | 15% | 23% | 18% |
+| Marlo (Stall) | 75% | 66% | 53% | 50% |
+| Cinza (Aggressive) | 60% | 63% | 55% | 58% |
+| Quill (Bench sniper) | 66% | 66% | 61% | 61% |
+| Orla (Aggressive) | 68% | 68% | 76% | 73% |
+| Lumen (Bench sniper) | 76% | 76% | 78% | 78% |
+| Sable (Balanced) | 85% | 85% | 86% | 86% |
+
+1.3's slope is in "Difficulty slope" at the end of this page.
 
 ## 1.2: route duelists' kits
 
@@ -143,38 +153,42 @@ deck (`rival_strength_against_the_starter`, 60 games, the campaign's prizes and 
 
 | Colour | Sprout | Bud | Bloom |
 |---|---|---|---|
-| Fire | Kindling 27% | Bellows 46% | Forge 48% |
-| Water | Puddle 16% | Current 44% | Undertow 43% |
-| Grass | Seedling 13% | Hedgerow 46% | Canopy 47% |
-| Lightning | Spark 18% | Static 37% | Tempest 42% |
-| Fighting | Pebble 50% | Rubble 58% | Landslide 59% |
-| Psychic | Murmur 5% | Reverie 41% | Trance 42% |
-| Colorless | Scrap 2% | Flock 30% | — |
+| Fire | Kindling 27% → 28% | Bellows 46% | Forge 48% |
+| Water | Puddle 16% → 18% | Current 44% → 47% | Undertow 43% → 46% |
+| Grass | Seedling 13% → 9% | Hedgerow 46% → 41% | Canopy 47% → 41% |
+| Lightning | Spark 18% | Static 37% → 40% | Tempest 42% → 44% |
+| Fighting | Pebble 50% → 45% | Rubble 58% | Landslide 59% |
+| Psychic | Murmur 5% → 6% | Reverie 41% → 40% | Trance 42% → 40% |
+| Colorless | Scrap 2% → 3% | Flock 30% → 27% | — |
 
-The Basics-only Sprout kits are meant to be soft; Fighting is the strongest colour at this size, and
-Landslide sits just under the line. Then each of the 14 duelists as it plays (its deck, prizes and
-AI) against the starter a new player holds, 60 games:
+1.2, then 1.3 where it moved. The Basics-only Sprout kits are meant to be soft; Fighting is the
+strongest colour at this size. Landslide sat just under the line and crossed it (60.4%) with the 1.3
+rules, so it carries one Spike Charm instead of two (59%). Then each of the 14 duelists as it plays (its deck, prizes and
+AI) against the starter a new player holds, 60 games. "1.2" is the 1.2 release; "1.3" adds this
+release's rules and its weaker Easy AI:
 
-| Duelist | Kit | Prizes, AI | Wins vs starter |
-|---|---|---|---|
-| Tobin | Scrap | 1, Easy | 22% |
-| Hazel | Seedling + Spark | 2, Easy | 20% |
-| Ossian | Scrap | 1, Easy | 20% |
-| Sorrel | Seedling | 2, Normal | 3% |
-| Bryn | Seedling | 1, Easy | 8% |
-| Pell | Puddle | 2, Easy | 30% |
-| Skye | Spark | 2, Normal | 40% |
-| Morrow | Current | 3, Normal | 80% |
-| Nell | Puddle | 2, Normal | 38% |
-| Tamsin | Rubble + Scrap | 2, Easy | 47% (60% on Pebble before the 1.2 audit) |
-| Cole | Kindling | 2, Normal | 22% |
-| Rusk | Pebble + Scrap | 1, Easy | 30% |
-| Marigold | Bellows | 3, Normal | 47% |
-| Lark | Scrap + Murmur | 1, Easy | 12% |
+| Duelist | Kit | Prizes, AI | 1.2 | 1.3 |
+|---|---|---|---|---|
+| Tobin | Scrap | 1, Easy | 22% | 17% |
+| Hazel | Seedling + Spark | 2, Easy | 20% | 17% |
+| Ossian | Scrap | 1, Easy | 20% | 17% |
+| Sorrel | Seedling | 2, Normal | 3% | 3% |
+| Bryn | Seedling | 1, Easy | 8% | 7% |
+| Pell | Puddle | 2, Easy | 30% | 20% |
+| Skye | Spark | 2, Normal | 40% | 30% |
+| Morrow | Current | 3, Normal | 47% | 53% |
+| Nell | Puddle | 2, Normal | 38% | 37% |
+| Tamsin | Rubble + Scrap | 2, Easy | 47% (60% on Pebble before the 1.2 audit) | 27% |
+| Cole | Kindling | 2, Normal | 22% | 17% |
+| Rusk | Pebble + Scrap | 1, Easy | 30% | 15% |
+| Marigold | Bellows | 3, Normal | 47% | 47% |
+| Lark | Scrap + Murmur | 1, Easy | 12% | 5% |
 
 Morrow (Water, 3 prizes, against a starter whose Fire line is weak to Water) is the boardwalk's wall,
 as the roster intends ("unbeatable patience"); a player can say **Not now** and come back with a
-better deck.
+better deck. An earlier version of this table gave him 80%; on 1.2.x's final cards he measured 47%,
+and 53% with the 1.3 rules. The Ember and Storm duelists (12 more) run from 5% to 65% in 1.3, Odo
+(Hard, 3 prizes) the strongest; `kit_sweep` prints them all.
 
 ## 1.2: Facets
 
@@ -194,11 +208,262 @@ duel (a greedy one- or two-colour builder). Since 1.2 it first meets each of the
 once (win or lose, it walks on), then faces the first open rival it hasn't beaten; rivals play in
 their style. Duel wins pay Facets, not packs, so after every duel it spends its Facets on the themed
 pack on sale it has bought fewest of, and opens every pack. It must take all six seals and the Warden
-within one duel per route duelist plus 40 rival duels (the rival budget of 1.2, pinned for risk E1:
-54 duels with 14 route duelists, 66 with the 26 of the Ember and Storm regions) and buy at least 10
-packs, in at least two of three playthroughs (pack seeds 1, 2 and 3). One seeded run swings widely on
-the packs alone: over 16 pack seeds with no budget, the 1.3 campaign took 44–100 duels (median 65)
-with the 1.x packs and 40–91 (median 52) with the slot design of `docs/BOOSTERS.md`, and a single run
-at 54 failed for a third of the seeds either way. With the boosters release, seeds 2 and 3 finish in
-45 and 44 duels (22 and 23 packs bought); seed 1 stalls on the Warden. Before 1.2 (packs for wins,
-no route duelists) it took 31 rival duels.
+within one duel per route duelist plus 45 rival duels and buy at least 10 packs, in at least two of
+three playthroughs (pack seeds 1, 2 and 3). The rival budget was 40 from 1.2 (risk E1: 54 duels with
+14 route duelists); 1.3 raises it to 45, because pack seed 1 now needs 42 rival duels and seed 2
+(before Tide and Dream) took exactly the old limit. With the 39 route duelists of Tide and Dream that
+is 84 duels.
+
+One seeded run swings widely on the packs alone. `campaign_length` (ignored) plays 16 pack seeds with
+no budget:
+
+| Build | Route duelists | Duels (16 seeds) | Median | Mean |
+|---|---|---|---|---|
+| 1.x packs | 26 | 44–100 | 65 | |
+| Boosters (#39) | 26 | 40–105 | 52 | 59 |
+| Boosters + 1.3 rules | 26 | 38–83 | 62 | 62 |
+| Tide and Dream (#40) | 39 | 50–78 | 55 | 61 |
+| Tide and Dream + 1.3 | 39 | 55–83 | 66 | 67 |
+
+The boosters release made the campaign easier, and 1.3 gives that back, so no reward moves. Take away
+the 39 route duels and the rivals take a median of 27 duels instead of 16. The 1.3 rules cause it, not
+the packs: with the 26 duelists, 1.3's rules and cards with the old holo rate (1 pack in 3) give a
+median of 66, and the new rate brings it to 62. The weaker Easy AI with Bramble on Normal accounts for
+about 4 duels. The extra losses are spread over Cinza, Orla and the Warden. In the always-on test,
+seeds 1, 2 and 3 finish in 81, 66 and 59 duels (22, 24 and 25 packs bought). Before 1.2 (packs for
+wins, no route duelists) the campaign took 31 rival duels.
+
+## Curves and the value budget
+
+Every Hexon is held to the curves below. They come from two sources: our own pack set (71
+Hexons, promos left out) and, as an outside check, aggregate statistics of the three classic
+sets the handheld game was built on (159 distinct creatures, 32 trainers). Only rules and numbers
+were taken from those sets, never a card. Our evolutions are deliberately stronger per energy than
+theirs. In the classic sets a Stage 2 dealt no more damage per energy than a Basic, so evolving
+rarely paid; our curve rewards the setup.
+
+### How we compare
+
+| Measure | Classic sets | Ours | Target |
+|---|---|---|---|
+| HP median, Basic / Stage 1 / Stage 2 | 50 / 70 / 80 | 50 / 80 / 100 | 50 / 80 / 100 |
+| HP range, Basic / Stage 1 / Stage 2 | 30–120 / 30–100 / 60–120 | 40–80 / 70–90 / 100–120 | 40–80 / 70–90 / 100–120 |
+| Expected damage per energy, main attack, Basic / S1 / S2 (median) | 10 / 10 / 12 | 10 / 17 / 19 | 10–13 / 15–17 / 18–20 |
+| Vanilla expected damage at 1 / 2 / 3 / 4 energy | 10 / 20 / 30 / 55 | 10 / 20 / 50 / 60 | see the curve below |
+| Mean retreat, Basic / S1 / S2 | 1.2 / 1.3 / 1.9 | 1.2 / 1.5 / 2.4 | ≤ 1.2 / ≤ 1.5 / ≤ 2.2 |
+| Retreat 0 / 1 / 2 / 3+ | 15 / 53 / 17 / 14% | 8 / 51 / 28 / 13% | 10 / 50 / 25 / 15% |
+| Hexons with a weakness | 92% | 96% | ≥ 90% |
+| Hexons with a resistance | 33% | 14% | 15–25%, never to the colour already weak to them |
+| Hexons weak to each colour (min–max) | 12–31 | 5–17 | 8–14 a colour |
+| Powers, Basic / S1 / S2 | 6 / 15 / 44% | 13 / 5 / 42% | ≤ 10 / 10–15 / 35–45% |
+| Attacks that flip coins | 38% | 16% | 15–25% |
+| Colourless share of attack costs | 29% | 31% | 25–35%; at most 2 in 3 attacks of 3+ energy carry one |
+| Lines of 1 / 2 / 3 stages | 31 / 48 / 21% | 49 / 21 / 31% | more 2-stage lines in set 2 |
+| Basics that are Common / Uncommon / Rare | 63 / 15 / 22% | 69 / 31 / 0% | allow a few Rare Basics |
+| Trainers: disruption, heal, draw, search, recovery, energy, switch | 28, 16, 12, 9, 9, 3, 6% | 28, 16, 12, 12, 8, 8, 4% (+12% boosts) | keep |
+
+The attack curve, as expected damage of an attack with no effect:
+
+| Energy | 1 | 2 | 3 | 4+ |
+|---|---|---|---|---|
+| Basic | 10 | 20 | 40 | 50 |
+| Stage 1 | 10 | 20 | 50 | 60 |
+| Stage 2 | 10 | 30 | 50 | 80 |
+
+### The value budget
+
+`every_creature_is_within_its_budget` (`engine/src/set.rs`, always on) scores each Hexon in
+damage-equivalents, where 10 is worth 10 damage or 10 HP:
+
+    score = (HP − stage median HP)
+          + (main attack's expected damage + its effects − curve[stage][energy])
+          + ½ × the other attack's surplus, if positive
+          + Power value
+          + 5 × (stage retreat − retreat cost) + 10 if no weakness + 10 if a resistance
+
+The main attack is the one that costs most. Effects are valued by what they cost in damage, in both
+the classic sets and ours:
+
+| Effect | Value |
+|---|---|
+| Paralysis or Double-poison | +20 |
+| Sleep, Confusion or Poison; a coin flip halves the value | +10 |
+| The opponent can't attack (coin) | +10 |
+| Weaken 20, Reduce 20, accuracy flip, trainer lock, disable an attack | +10 |
+| Prevent all damage (coin) | +15 |
+| The attacker picks the switch (a gust) | +20 |
+| The opponent picks the switch | +5 |
+| Bench damage to each opponent | +1.5× the amount |
+| Snipe | +the amount |
+| Heal X; heal X on each Hexon | +X/2; +X |
+| Draw 1 | +10 |
+| Search or recover a card | +15 |
+| Energy from the deck, or discard the defender's energy | +20 |
+| Recoil X | −X/2 |
+| Discard own energy | −10 each |
+| Discard all energy, or once while in play | −30 |
+| Confuse self | −10 |
+
+Powers are valued at twice their effect, or 1.5 times if the Hexon must wait a turn. On-play
+Powers count their effect once. A free attach (one extra energy a turn, R-ENERGY-02) is +30, retaliation +15, and a retreat reducer or
+status immunity +10.
+
+Each Hexon also gets a role from its stats:
+
+- **Engine**: a Power that draws, searches or attaches energy.
+- **Tech**: retaliation, a retreat reducer, status immunity, or a copied attack.
+- **Wall**: at least 20 HP over the median, with a defensive attack or one at or below the curve.
+- **Support**: an attack whose effects are worth more than its damage.
+- **Attacker**: everything else.
+
+The limits:
+
+| Role | Total score | Also |
+|---|---|---|
+| Attacker | ≤ +40 | more than +20 over the attack curve needs a drawback |
+| Wall | ≤ +40 | at most +10 over the attack curve |
+| Support | ≤ +30 | at most +10 over the attack curve |
+| Engine | ≤ +30 | no more HP than its stage median |
+| Tech | ≤ +30 | |
+| Every Hexon | ≥ −20 | |
+
++40 is about the 90th percentile of the classic sets on the same scale. The two spreads match: theirs
+runs from −10 to +40 (10th to 90th percentile), ours from −8 to +35. One card is off budget on
+purpose and listed in the test with its reason: Hexcrest (the champion's promo). Pyrequill was the
+second until 1.3: its Kindling Heart made every Fire energy free, priced at +40 (+37 in all). Limited
+to one extra attachment a turn, it is priced at +30 and scores +27, inside the Engine limit.
+
+### Built-in drawbacks
+
+A card well above the curve should carry a cost. Ours carry one of these:
+
+- **Setup.** A Stage 2 takes two turns and three cards.
+- **Coins.** 16% of attacks flip.
+- **Recoil.** 10–20 damage to the attacker.
+- **Discards.** One or two of its own energy, or all of them.
+- **Once while in play.**
+- **Own-bench damage.**
+- **Heavy retreat.** 3–4 for the biggest bodies.
+
+The budget test asks a main attacker more than +20 over the curve to carry an attack drawback.
+
+### Indicators
+
+`balance_indicators` (`engine/src/playtest.rs`, ignored) plays the deck sweep's field and reports the
+numbers below. "1.2" is main before this pass; "1.3 cards" is the curve pass alone (measured on
+the analysis branch); "1.3" is what shipped: the cards, the first-turn rule, one retreat a turn and
+Kindling Heart's limit (see "1.3: rules and curve pass").
+
+| Indicator | Target | 1.2 | 1.3 cards | 1.3 |
+|---|---|---|---|---|
+| First player's win rate | 50 ± 3% | 58.8% | 59.1% | 53.4% |
+| Game length in turns (both players): mean, median, 10th–90th percentile | — | 22.6, 20, 5–42 | 22.4, 20, 5–42 | 23.3, 21, 6–43 |
+| Prebuilts within 45–55% | ≥ 4 of 6 | 2 | 3 | 3 |
+| Decks above 55% | only the Gauntlet's | 5 | 5 | 4 |
+| Spread of overall rates (standard deviation) | ≤ 6 | 7.2 | 6.1 | 5.4 |
+| Prebuilt range | 42–58% | 42–59% | 42–57% | 42–56% |
+
+It also prints each card's play rate and win rate when played or not. Read that table with care.
+Evolutions and late cards are played in games that go well, and reactive trainers in games that go
+badly, so the gap measures timing as much as strength.
+
+The handheld gave the first player an attack on their first turn, and that turn was worth about 9
+points. 1.3 bars it (R-TURN-05), which brings the edge to about 3 points, the same change the
+physical game made in 2013. In the post-game, measured by `postgame_first_player_edge` (each Gauntlet
+rung and each daily-duel rival as it plays, against every prebuilt, 40 games each):
+
+| Where | 1.2 | 1.3 |
+|---|---|---|
+| Gauntlet (6 rungs; 1,440 games) | 55.2% | 48.8% |
+| Daily duel (7 rivals; 1,680 games) | 58.6% | 52.0% |
+| Both | 57.1% | 50.5% |
+
+The bands tightened with 1.3: `deck_sweep` to 42–58% for each prebuilt, and the always-on round robin
+to 35–65%. The long-term aim is no deck above 55% and every prebuilt within 45–55%.
+
+### Set 2: rotation and errata
+
+We have one set, so rotation doesn't apply. Set 2 should carry a set mark from its first card, so a
+format can drop set 1 later. Ids stay append-only because they are save positions. Because the game
+is digital, direct changes to card stats are the main lever (this page records each one), and a set
+of cards held back from formats is the second.
+
+## 1.3: rules and curve pass
+
+### Rules
+
+Three rules part from the handheld game on purpose (`docs/RULES.md`):
+
+- **No attack on the first player's first turn** (R-TURN-05). The first player can still bench, attach,
+  play trainers and use Powers. First player's win rate 58.8% → 53.4%.
+- **One retreat a turn** (R-RETREAT-05), as in the physical game. The AI already retreated at most
+  once a turn, so the sweeps barely move: a switch trainer such as Relay Baton is now the only second
+  switch.
+- **Kindling Heart gives one extra Fire attachment a turn**, not unlimited ones (R-ENERGY-02). It was
+  the one free-attach Power and the one off-budget card besides the champion's promo.
+
+### Cards
+
+Eight numbers, chosen by the value budget and the indicators. Each keeps its card's name, attacks
+and Power.
+
+| Card | Change | Why |
+|---|---|---|
+| Thornbuck, Elderhart | Water resistance removed | The Grass lines led the field (Grove Bloom 59%, Deep Thicket 66%). Thornbuck had the widest played-or-not gap of any card (+38). No classic Grass card resists Water. |
+| Ohmrunner | Rail Shot 30 → 40 | 10 below the Stage 1 curve; Storm Front was the weakest prebuilt after Dream Veil. |
+| Fulgurex | Forked Bolt 30 → 40 | The same, for the Lightning Stage 2. |
+| Slatebrow | Landslide 50 → 40 | An 80 HP Basic wall 15 over the attack curve, played in 83% of Bedrock Deep's games. |
+| Haulox | Heavy Trample 60 → 50 | The same wall rule. |
+| Hexmage, Hexarch | Spite Bolt 30 → 40, Grand Hex 50 → 60 | Below the curve. The sweep doesn't move (±1), so these are for players, not the AI. |
+| Pyrequill | Kindling Heart: once a turn | See "Rules". |
+
+One kit list changed: Landslide carries one Spike Charm, not two (60.4% → 59%, under the 60% line).
+
+### Measured
+
+- Spread of overall rates 7.2 → 5.4; prebuilts 42–59% → 42–56%; widest pairing 83 → 80.
+- Storm Front 44 → 48%, Low Tide 43 → 48%, Grove Bloom 59 → 55%, Deep Thicket 66 → 62%, Bedrock Deep
+  60 → 54%. Thicket 48 → 43%: the Grass lines lost their Water resistance.
+- The first player's edge in the post-game: 57.1% → 50.5%.
+- The campaign: a median of 66 duels over 16 pack seeds with 39 route duelists (55 before 1.3), or
+  27 rival duels instead of 16.
+
+### The Easy AI and the difficulty slope
+
+Easy used to differ from Normal only by skipping a quarter of its trainer and Power plays, so the
+campaign's Easy rivals played almost as well as the Normal ones: against the starter Bramble won 15%
+and then Marlo 66%, on Easy. 1.3's Easy also picks any attack that does something, not the best one,
+and retreats only to dodge a knock-out. Bramble moves to Normal (he would fall to 10% on the new
+Easy), and Marlo stays Easy at 3 prizes. Two prizes, as proposed, makes Marlo stronger, not weaker
+(58% against 50%), so it was left alone.
+
+`rivals_rise_gently_against_the_starter` (always on, 40 seeded games a rival) pins the slope: in
+campaign order the first rival wins at most 30% against the starter, the Warden at least 75%, and no
+rival sits more than 10 points below the one before or more than 30 above it. In 1.3 the rates are:
+
+| Rival | 1.2 (60 games) | 1.3 (40 games) |
+|---|---|---|
+| Bramble | 15% | 15% |
+| Marlo | 66% | 45% |
+| Cinza | 63% | 60% |
+| Quill | 66% | 55% |
+| Orla | 68% | 80% |
+| Lumen | 76% | 80% |
+| Sable | 85% | 87% |
+
+The two steepest steps are Bramble to Marlo (+30) and Quill to Orla (+25). Both come from type, not
+AI: the starter is Fire and Water, Thicket is Grass (weak to Fire) and Low Tide is Water (strong
+against the Fire half). Bramble, Marlo and Cinza all open with no seal, so a player meets them in any
+order.
+
+### Underperformers
+
+- **Relay Baton** wins 39% of the games where it is played and 53% of those where it isn't. That
+  gap is timing: the AI plays it to rescue a losing Active. Its play rate (22%) didn't change with the
+  one-retreat rule.
+- **The Psychic decks** (Dream Veil 42%, Moonlit Tide 44%, New Moon 47%) don't come from the AI's
+  value for Sleep and Confusion. Raising both from 25 to 35 points moved Dream Veil from 42% to 41%
+  and Moonlit Tide from 44% to 42%, so the weights stay. The losses come from Psychic weakness
+  against the Water-and-Psychic decks.
+- **Sixfold Crown** (the Warden's deck) is 44% at Normal and 6 prizes in the sweep. In the campaign
+  it plays on Hard, where it beats the starter 86%.

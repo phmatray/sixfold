@@ -7,7 +7,7 @@
 use std::time::Duration;
 
 use leptos::prelude::*;
-use sixfold_engine::booster::{Booster, BOOSTERS, COMMONS, HOLO_IN, SHARES, UNCOMMONS};
+use sixfold_engine::booster::{Booster, BOOSTERS, COMMONS, HOLO_ODDS, SHARES, UNCOMMONS};
 use sixfold_engine::profile::Profile;
 use sixfold_engine::set::is_holo;
 use sixfold_engine::{card, tr, CardId, Color, Rarity};
@@ -204,7 +204,8 @@ pub fn PackOdds(b: usize) -> impl IntoView {
             s
         }
     };
-    let holo_odds = 1.0 / f64::from(HOLO_IN);
+    let (holo_n, holo_of) = HOLO_ODDS;
+    let holo_odds = f64::from(holo_n) / f64::from(holo_of);
     let holos = booster
         .pool(Rarity::Rare, true)
         .iter()
@@ -261,8 +262,8 @@ pub fn PackOdds(b: usize) -> impl IntoView {
                 )}</li>
                 <li>{mix}</li>
                 <li>{tr(
-                    format!("Rare slot: a Holo Rare 1 pack in {HOLO_IN} ({}%), {holo_line}, {each_holo}% each; otherwise one of the {rares} Rares, {each_rare}% each.", pct(holo_odds)),
-                    format!("Emplacement Rare : une Rare Holo 1 booster sur {HOLO_IN} ({} %), {holo_line}, {} % chacune ; sinon l'une des {rares} Rares, {} % chacune.", pct(holo_odds), each_holo, each_rare),
+                    format!("Rare slot: a Holo Rare in {holo_n} packs of {holo_of} ({}%), {holo_line}, {each_holo}% each; otherwise one of the {rares} Rares, {each_rare}% each.", pct(holo_odds)),
+                    format!("Emplacement Rare : une Rare Holo dans {holo_n} boosters sur {holo_of} ({} %), {holo_line}, {} % chacune ; sinon l'une des {rares} Rares, {} % chacune.", pct(holo_odds), each_holo, each_rare),
                 )}</li>
                 <li>{tr(
                     "The Rare slot skips cards you already have 4 of.",
@@ -289,9 +290,9 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
                 1 => tr("You have 1 pack to open.", "Vous avez 1 booster à ouvrir.").to_string(),
                 n => tr(format!("You have {n} packs to open."), format!("Vous avez {n} boosters à ouvrir.")),
             }}
-            {tr(
-                format!(" Each holds {COMMONS} Commons, {UNCOMMONS} Uncommons and a Rare, a Holo Rare one pack in {HOLO_IN}."),
-                format!(" Chacun contient {COMMONS} Communes, {UNCOMMONS} Peu communes et une Rare, Holo un booster sur {HOLO_IN}."),
+            {let (n, of) = HOLO_ODDS; tr(
+                format!(" Each holds {COMMONS} Commons, {UNCOMMONS} Uncommons and a Rare, a Holo Rare in {n} packs of {of}."),
+                format!(" Chacun contient {COMMONS} Communes, {UNCOMMONS} Peu communes et une Rare, Holo dans {n} boosters sur {of}."),
             )}
         </p>
         <ul class="shelf">

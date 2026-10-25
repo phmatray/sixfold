@@ -107,7 +107,7 @@ fn sweep(games: u64, styled: bool) -> (Vec<&'static Prebuilt>, Vec<Vec<u32>>) {
 /// The deck sweep, 100 games per pair: prints the win table (percent of
 /// each pairing, row deck's wins) and each deck's overall rate. Tuning aid:
 /// `cargo test --release -p sixfold-engine deck_sweep -- --ignored --nocapture`.
-/// Checks that each prebuilt wins 40–60% overall and that no pairing of two
+/// Checks that each prebuilt wins 42–58% overall and that no pairing of two
 /// prebuilts is beyond 75/25. (Rival and Gauntlet decks may stray further:
 /// weakness ties some of them to one colour.)
 #[test]
@@ -151,7 +151,7 @@ fn deck_sweep() {
     for (i, d) in PREBUILT.iter().enumerate() {
         let wins: u32 = beat[i].iter().sum();
         let rate = wins as f32 / (games as f32 * (n as f32 - 1.0));
-        assert!((0.4..=0.6).contains(&rate), "{} won {rate:.2}", d.name);
+        assert!((0.42..=0.58).contains(&rate), "{} won {rate:.2}", d.name);
     }
     let k = PREBUILT.len();
     for i in 0..k {
@@ -380,9 +380,11 @@ fn shop_packs(progress: &mut Progress, profile: &mut Profile, bought: &mut [u32]
 }
 
 /// Rival duels the campaign playthrough may take on top of one duel per
-/// route duelist. Pinned for 1.2 (risk E1): the 40 rival duels the
-/// pack-reward campaign had (54 duels with 1.2's 14 route duelists).
-const RIVAL_DUELS: u64 = 40;
+/// route duelist. Pinned for 1.2 (risk E1) at the 40 rival duels the
+/// pack-reward campaign had (54 duels with 1.2's 14 route duelists); 45
+/// since 1.3, whose rules make rivals take longer to beat (a median of 27
+/// rival duels over 16 pack seeds, against 16 before; pack seed 1 took 42).
+const RIVAL_DUELS: u64 = 45;
 
 /// A full playthrough: a new player, played by the Normal AI, first meets
 /// every route duelist once (win or lose, they walk on), then takes on the
@@ -390,9 +392,12 @@ const RIVAL_DUELS: u64 = 40;
 /// collection before every duel. Every Facet earned buys themed packs at
 /// the shop and every pack is opened, from `pack_seed` on. Rivals play with
 /// their AI style. Stops when the Warden falls or after one duel per route
-/// duelist plus [`RIVAL_DUELS`]; returns the duels played, the packs
+/// duelist plus `rival_duels`; returns the duels played, the packs
 /// bought, the log and the final state.
-fn playthrough(mut pack_seed: u64) -> (u64, u32, Vec<(&'static str, bool)>, Progress, Profile) {
+fn playthrough(
+    mut pack_seed: u64,
+    rival_duels: u64,
+) -> (u64, u32, Vec<(&'static str, bool)>, Progress, Profile) {
     let (mut progress, mut profile) = (Progress::default(), Profile::new_player());
     let mut bought = vec![0; BOOSTERS.len()];
     let mut packs = shop_packs(&mut progress, &mut profile, &mut bought);
@@ -414,7 +419,7 @@ fn playthrough(mut pack_seed: u64) -> (u64, u32, Vec<(&'static str, bool)>, Prog
         duels += 1;
         log.push((t.id, won));
     }
-    while !champion(&progress) && duels < TRAINERS.len() as u64 + RIVAL_DUELS {
+    while !champion(&progress) && duels < TRAINERS.len() as u64 + rival_duels {
         let r = RIVALS
             .iter()
             .find(|r| r.open(&progress) && !r.beaten(&progress))
@@ -447,7 +452,7 @@ fn playthrough(mut pack_seed: u64) -> (u64, u32, Vec<(&'static str, bool)>, Prog
 fn the_campaign_can_be_finished_from_a_new_profile() {
     let mut finished = 0;
     for seed in [1, 2, 3] {
-        let (duels, packs, log, progress, profile) = playthrough(seed);
+        let (duels, packs, log, progress, profile) = playthrough(seed, RIVAL_DUELS);
         if !champion(&progress) {
             eprintln!("pack seed {seed}: not finished after {duels} duels: {log:?}");
             continue;
@@ -558,4 +563,217 @@ fn a_french_game_has_no_english_left() {
         assert!(!l.trim().is_empty(), "an empty French text");
         assert!(english_in(l).is_none(), "English in French: {l:?}");
     }
+}
+
+/// Balance indicators over the deck sweep's field (Normal vs Normal, 6
+/// prizes, seats alternating): first-player win rate, game length, each
+/// card's play rate and win rate when played, and deck diversity.
+/// `cargo test --release -p sixfold-engine balance_indicators -- --ignored --nocapture`
+#[test]
+#[ignore]
+#[allow(clippy::needless_range_loop)]
+fn balance_indicators() {
+    use crate::Event;
+    use std::collections::{BTreeMap, BTreeSet};
+    let games = 100u64;
+    let decks = field();
+    let n = decks.len();
+    let (mut first_wins, mut played_games) = (0u32, 0u32);
+    let mut turns: Vec<u32> = vec![];
+    let mut wins = vec![0u32; n];
+    // card -> (games in a deck that holds it, games it was played, wins when played)
+    let mut cards: BTreeMap<CardId, (u32, u32, u32, u32)> = BTreeMap::new();
+    for i in 0..n {
+        for j in i + 1..n {
+            for k in 0..games {
+                let seed = (i * n + j) as u64 * 1000 + k;
+                let seats = if k % 2 == 1 { [j, i] } else { [i, j] };
+                let mut g =
+                    Game::new(seats.map(|d| decks[d].cards()), seed, Config { prizes: 6 }).unwrap();
+                let mut ais = [
+                    Ai::new(seed ^ 0xa1, Difficulty::Normal),
+                    Ai::new(seed ^ 0xb2, Difficulty::Normal),
+                ];
+                while g.winner().is_none() {
+                    let me = g.view(0).waiting_on.unwrap();
+                    let a = ais[me].choose_action(&g, me);
+                    g.apply(a).unwrap();
+                }
+                let w = g.winner().unwrap();
+                let mut first = 0;
+                let mut seen = [BTreeSet::new(), BTreeSet::new()];
+                for e in g.log() {
+                    match e {
+                        Event::FirstPlayer { player, .. } => first = *player,
+                        Event::Placed { player, card, .. }
+                        | Event::Evolved { player, card, .. }
+                        | Event::TrainerPlayed { player, card, .. }
+                        | Event::EnergyAttached { player, card, .. } => {
+                            seen[*player].insert(*card);
+                        }
+                        _ => {}
+                    }
+                }
+                played_games += 1;
+                first_wins += u32::from(w == first);
+                turns.push(g.turn());
+                wins[seats[w]] += 1;
+                for p in 0..2 {
+                    let deck: BTreeSet<CardId> = decks[seats[p]].cards().into_iter().collect();
+                    for id in deck {
+                        let e = cards.entry(id).or_default();
+                        e.0 += 1;
+                        e.3 += u32::from(w == p);
+                        if seen[p].contains(&id) {
+                            e.1 += 1;
+                            e.2 += u32::from(w == p);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    turns.sort_unstable();
+    let mean = turns.iter().sum::<u32>() as f32 / turns.len() as f32;
+    println!(
+        "first player wins {:.1}% of {played_games}; turns mean {mean:.1}, median {}, p10 {}, p90 {}",
+        100.0 * first_wins as f32 / played_games as f32,
+        turns[turns.len() / 2],
+        turns[turns.len() / 10],
+        turns[turns.len() * 9 / 10]
+    );
+    let per = games as f32 * (n as f32 - 1.0);
+    let rates: Vec<f32> = wins.iter().map(|&w| w as f32 / per).collect();
+    let k = PREBUILT.len();
+    println!(
+        "prebuilts within 45-55%: {}/{k}; decks above 55%: {:?}",
+        rates[..k]
+            .iter()
+            .filter(|r| (0.45..=0.55).contains(*r))
+            .count(),
+        (0..n)
+            .filter(|&i| rates[i] > 0.55)
+            .map(|i| format!("{} {:.0}%", decks[i].name, rates[i] * 100.0))
+            .collect::<Vec<_>>()
+    );
+    println!("card\tin_deck_games\tplay_rate\twin_when_played\twin_when_not_played");
+    for (id, (inn, pl, w, wd)) in cards {
+        if !card(id).is_basic_energy() {
+            let pct = |a: u32, b: u32| {
+                if b > 0 {
+                    100.0 * a as f32 / b as f32
+                } else {
+                    0.0
+                }
+            };
+            println!(
+                "{}\t{inn}\t{:.0}\t{:.0}\t{:.0}",
+                card(id).name,
+                pct(pl, inn),
+                pct(w, pl),
+                pct(wd - w, inn - pl)
+            );
+        }
+    }
+}
+
+/// The first player's edge in the post-game: every Gauntlet rung and every
+/// daily duel (a rival's campaign deck) as it plays (prizes, AI level and
+/// style) against each prebuilt played by the Normal AI, 40 games each with
+/// seats alternating. Prints the first player's win rate for each.
+/// `cargo test --release -p sixfold-engine postgame_first_player -- --ignored --nocapture`
+#[test]
+#[ignore]
+fn postgame_first_player_edge() {
+    use crate::Event;
+    let edge = |deck: &Prebuilt, prizes: u8, seat: (Difficulty, Style)| {
+        let (mut first, mut all) = (0u32, 0u32);
+        for (i, mine) in PREBUILT.iter().enumerate() {
+            for k in 0..40u64 {
+                let seed = 50_000 + i as u64 * 100 + k;
+                let mut pair = [mine.cards(), deck.cards()];
+                let mut seats = [(Difficulty::Normal, Style::Balanced), seat];
+                if k % 2 == 1 {
+                    pair.swap(0, 1);
+                    seats.swap(0, 1);
+                }
+                let mut g = Game::new(pair, seed, Config { prizes }).unwrap();
+                let mut ais = seats.map(|(l, s)| Ai::new(seed ^ 0xa1, l).with_style(s));
+                while g.winner().is_none() {
+                    let me = g.view(0).waiting_on.unwrap();
+                    let a = ais[me].choose_action(&g, me);
+                    g.apply(a).unwrap();
+                }
+                let starter = g.log().iter().find_map(|e| match e {
+                    Event::FirstPlayer { player, .. } => Some(*player),
+                    _ => None,
+                });
+                first += u32::from(g.winner() == starter);
+                all += 1;
+            }
+        }
+        (first, all)
+    };
+    let mut total = (0, 0);
+    for (label, list) in [
+        (
+            "Gauntlet",
+            GAUNTLET
+                .iter()
+                .map(|r| (&r.deck, r.prizes, (r.difficulty, r.rival().style)))
+                .collect::<Vec<_>>(),
+        ),
+        (
+            "daily",
+            RIVALS
+                .iter()
+                .map(|r| (&r.deck, r.prizes, (r.difficulty, r.style)))
+                .collect(),
+        ),
+    ] {
+        let mut sum = (0, 0);
+        for (deck, prizes, seat) in list {
+            let (f, a) = edge(deck, prizes, seat);
+            println!(
+                "{label:8} {:18} first player wins {:.1}%",
+                deck.name,
+                100.0 * f as f32 / a as f32
+            );
+            sum = (sum.0 + f, sum.1 + a);
+        }
+        println!(
+            "{label:8} overall: first player wins {:.1}% of {}",
+            100.0 * sum.0 as f32 / sum.1 as f32,
+            sum.1
+        );
+        total = (total.0 + sum.0, total.1 + sum.1);
+    }
+    println!(
+        "post-game overall: first player wins {:.1}% of {}",
+        100.0 * total.0 as f32 / total.1 as f32,
+        total.1
+    );
+}
+
+/// How long the campaign takes with no duel budget, over 16 pack seeds (one
+/// seeded run swings widely on its packs alone): prints each and the median.
+/// `cargo test --release -p sixfold-engine campaign_length -- --ignored --nocapture`
+#[test]
+#[ignore]
+fn campaign_length() {
+    let mut all: Vec<u64> = (1..=16)
+        .map(|seed| {
+            let (duels, packs, _, progress, _) = playthrough(seed, 1_000);
+            assert!(champion(&progress), "pack seed {seed} never finished");
+            println!("pack seed {seed}: {duels} duels, {packs} packs");
+            duels
+        })
+        .collect();
+    all.sort_unstable();
+    println!(
+        "campaign: {}-{} duels, median {}",
+        all[0],
+        all[15],
+        (all[7] + all[8]) / 2
+    );
 }
