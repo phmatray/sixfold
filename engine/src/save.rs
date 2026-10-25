@@ -354,6 +354,39 @@ impl Save {
     }
 }
 
+/// Where [`pick`] found the save it returned.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Source {
+    /// The slot itself.
+    Slot,
+    /// The kept copy of the last good save: what changed since is lost.
+    Prev,
+    /// Nothing usable: a new player.
+    New,
+}
+
+/// The save to play from a slot's text and its kept copy (`<slot>.prev`):
+/// the slot when it reads, else the copy when it reads, else a new player
+/// named `name`. The error is the slot's, whenever it was passed over. An
+/// empty slot is a new player: a copy left beside it is never brought back.
+pub fn pick(
+    slot: Option<&str>,
+    prev: Option<&str>,
+    name: &str,
+) -> (Save, Source, Option<SaveError>) {
+    let Some(slot) = slot else {
+        return (Save::new_player(name), Source::New, None);
+    };
+    let err = match Save::decode(slot) {
+        Ok(s) => return (s, Source::Slot, None),
+        Err(e) => e,
+    };
+    match prev.map(Save::decode) {
+        Some(Ok(s)) => (s, Source::Prev, Some(err)),
+        _ => (Save::new_player(name), Source::New, Some(err)),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -561,6 +594,49 @@ mod tests {
         s.set_name("  two\nlines ");
         assert_eq!(s.name(), "two lines");
         assert_eq!(Save::decode(&s.encode()).unwrap().name(), "two lines");
+    }
+
+    /// The slot first, then its kept copy, then a new player; the slot's
+    /// error rides along whenever it was passed over.
+    #[test]
+    fn pick_falls_back_from_the_slot_to_its_kept_copy() {
+        let good = sample().encode();
+        let older = {
+            let mut s = sample();
+            s.set(CAMPAIGN_DECK, "Older");
+            s.encode()
+        };
+        let cut = &good[..good.len() - 5];
+        assert_eq!(
+            pick(Some(&good), Some(&older), "Save 1"),
+            (sample(), Source::Slot, None)
+        );
+        let (s, from, err) = pick(Some(cut), Some(&older), "Save 1");
+        assert_eq!(
+            (s.get(CAMPAIGN_DECK), from, err),
+            (Some("Older"), Source::Prev, Some(SaveError::Checksum))
+        );
+        assert_eq!(
+            pick(Some(cut), Some("garbage"), "Save 1"),
+            (
+                Save::new_player("Save 1"),
+                Source::New,
+                Some(SaveError::Checksum)
+            )
+        );
+        assert_eq!(
+            pick(Some(cut), None, "Save 1"),
+            (
+                Save::new_player("Save 1"),
+                Source::New,
+                Some(SaveError::Checksum)
+            )
+        );
+        // An empty slot is a new player, whatever copy lies around.
+        assert_eq!(
+            pick(None, Some(&older), "Save 2"),
+            (Save::new_player("Save 2"), Source::New, None)
+        );
     }
 
     /// A save written by 1.1, byte for byte: it loads in 1.2 with ⬡ 100,
