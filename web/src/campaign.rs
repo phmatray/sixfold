@@ -213,18 +213,7 @@ pub fn CampaignScreen() -> impl IntoView {
         <div class="page">
             <PageBar title=tr("Campaign", "Campagne") />
             <main class="page-body campaign">
-                <p class="page-lead">{move || if champ() {
-                    tr("You hold all six seals and the Warden's title. The rivals still take rematches, and the Gauntlet and the daily duel are below.",
-                        "Vous détenez les six sceaux et le titre de la Gardienne. Les rivaux acceptent toujours une revanche ; l'Épreuve et le duel du jour vous attendent plus bas.")
-                } else {
-                    tr("Six rivals wait out on the trail, the boardwalk and the quarry. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden.",
-                        "Six rivaux vous attendent sur le sentier, sur la promenade et à la carrière. Battez-les un à un pour gagner leur sceau ; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.")
-                }}</p>
-                <Roster />
-                <section class="ladder-page" aria-labelledby="ladder-title">
-                    <h2 id="ladder-title">{tr("After the campaign", "Après la campagne")}</h2>
-                    <Ladder back=Screen::Campaign before=|| () />
-                </section>
+                <CampaignPanel back=Screen::Campaign before=|| () />
                 <div class="row">
                     <button type="button" class="btn primary" on:click=move |_| screen.set(Screen::World)>{tr("Explore the world", "Explorer le monde")}</button>
                     {move || champ().then(|| view! {
@@ -233,6 +222,31 @@ pub fn CampaignScreen() -> impl IntoView {
                 </div>
             </main>
         </div>
+    }
+}
+
+/// Seals, the rival roster and the post-game ladder (the Campaign screen and
+/// the in-game menu). `back` and `before` go to the [`Ladder`].
+#[component]
+pub fn CampaignPanel(
+    back: Screen,
+    before: impl Fn() + Copy + Send + Sync + 'static,
+) -> impl IntoView {
+    let progress = expect_context::<RwSignal<Progress>>();
+    let champ = move || progress.with(champion);
+    view! {
+        <p class="page-lead">{move || if champ() {
+            tr("You hold all six seals and the Warden's title. The rivals still take rematches, and the Gauntlet and the daily duel are below.",
+                "Vous détenez les six sceaux et le titre de la Gardienne. Les rivaux acceptent toujours une revanche ; l'Épreuve et le duel du jour vous attendent plus bas.")
+        } else {
+            tr("Six rivals wait out on the trail, the boardwalk and the quarry. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden.",
+                "Six rivaux vous attendent sur le sentier, sur la promenade et à la carrière. Battez-les un à un pour gagner leur sceau ; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.")
+        }}</p>
+        <Roster />
+        <section class="ladder-page" aria-labelledby="ladder-title">
+            <h2 id="ladder-title">{tr("After the campaign", "Après la campagne")}</h2>
+            <Ladder back=back before=before />
+        </section>
     }
 }
 

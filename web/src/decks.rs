@@ -6,6 +6,7 @@ use sixfold_engine::{
     card, card_id, fr, tr, AddError, CardId, CardKind, Collection, DeckError, DeckList,
     DeckListError, SortBy, DECK_SIZE,
 };
+use wasm_bindgen::JsCast;
 
 use crate::art::card_color;
 use crate::binder::{inspect_handlers, FilterBar, Filters, Own, PageBar};
@@ -110,37 +111,44 @@ fn unique_name(p: &Profile, base: &str) -> String {
         .expect("some number is free")
 }
 
+/// Start a new, empty deck; its index, for the editor.
+pub fn new_deck() -> Option<usize> {
+    expect_context::<RwSignal<Profile>>().try_update(|p| {
+        let name = unique_name(p, tr("New deck", "Nouveau deck"));
+        p.decks.push(DeckList::new(name));
+        p.decks.len() - 1
+    })
+}
+
 #[component]
 pub fn DecksScreen() -> impl IntoView {
-    let profile = expect_context::<RwSignal<Profile>>();
     let screen = expect_context::<RwSignal<Screen>>();
-    let renaming = RwSignal::new(None::<usize>);
-    let deleting = RwSignal::new(None::<usize>);
-    let create = move |_| {
-        let i = profile.try_update(|p| {
-            let name = unique_name(p, tr("New deck", "Nouveau deck"));
-            p.decks.push(DeckList::new(name));
-            p.decks.len() - 1
-        });
-        if let Some(i) = i {
-            screen.set(Screen::Editor(i));
-        }
-    };
-    let rows = move || profile.with(|p| p.decks.len());
+    let edit = Callback::new(move |i| screen.set(Screen::Editor(i)));
     view! {
         <div class="page">
             <PageBar title=tr("My decks", "Mes decks")>
-                <button type="button" class="btn primary" on:click=create>{tr("New deck", "Nouveau deck")}</button>
+                <button type="button" class="btn primary" on:click=move |_| { if let Some(i) = new_deck() { edit.run(i) } }>{tr("New deck", "Nouveau deck")}</button>
             </PageBar>
-            <main class="page-body narrow">
-                {move || (rows() == 0).then(|| view! {
-                    <p class="empty-note">{tr("No decks yet. Start one and fill it from your collection.", "Aucun deck pour l'instant. Créez-en un et remplissez-le avec votre collection.")}</p>
-                })}
-                <ul class="deck-list" data-focus-home="">
-                    {move || (0..rows()).map(|i| view! { <DeckRow i=i renaming=renaming deleting=deleting /> }).collect_view()}
-                </ul>
-            </main>
+            <main class="page-body narrow"><DecksPanel on_edit=edit /></main>
         </div>
+    }
+}
+
+/// The deck list (the Decks screen and the in-game menu); Edit hands the
+/// deck's index to `on_edit`.
+#[component]
+pub fn DecksPanel(on_edit: Callback<usize>) -> impl IntoView {
+    let profile = expect_context::<RwSignal<Profile>>();
+    let renaming = RwSignal::new(None::<usize>);
+    let deleting = RwSignal::new(None::<usize>);
+    let rows = move || profile.with(|p| p.decks.len());
+    view! {
+        {move || (rows() == 0).then(|| view! {
+            <p class="empty-note">{tr("No decks yet. Start one and fill it from your collection.", "Aucun deck pour l'instant. Créez-en un et remplissez-le avec votre collection.")}</p>
+        })}
+        <ul class="deck-list" data-focus-home="">
+            {move || (0..rows()).map(|i| view! { <DeckRow i=i renaming=renaming deleting=deleting on_edit=on_edit /> }).collect_view()}
+        </ul>
     }
 }
 
@@ -149,9 +157,9 @@ fn DeckRow(
     i: usize,
     renaming: RwSignal<Option<usize>>,
     deleting: RwSignal<Option<usize>>,
+    on_edit: Callback<usize>,
 ) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let Some(d) = profile.with_untracked(|p| p.decks.get(i).cloned()) else {
         return ().into_any();
     };
@@ -235,7 +243,7 @@ fn DeckRow(
             } else {
                 view! {
                     <div class="deck-actions">
-                        <button type="button" class="btn primary" on:click=move |_| screen.set(Screen::Editor(i))>{tr("Edit", "Modifier")}</button>
+                        <button type="button" class="btn primary" on:click=move |_| on_edit.run(i)>{tr("Edit", "Modifier")}</button>
                         <button type="button" class="btn" on:click=duplicate>{tr("Duplicate", "Dupliquer")}</button>
                         <button type="button" class="btn" on:click=move |_| { deleting.set(None); renaming.set(Some(i)) }>{tr("Rename", "Renommer")}</button>
                         <button type="button" class="btn ghost" on:click=move |_| { renaming.set(None); deleting.set(Some(i)) }>{tr("Delete", "Supprimer")}</button>
@@ -285,13 +293,21 @@ fn energy_curve(d: &DeckList) -> [usize; 5] {
 
 #[component]
 pub fn Editor(index: usize) -> impl IntoView {
-    let profile = expect_context::<RwSignal<Profile>>();
     let screen = expect_context::<RwSignal<Screen>>();
+    view! { <EditorPanel index=index on_done=Callback::new(move |()| screen.set(Screen::Decks)) /> }
+}
+
+/// The deck editor (its own screen, or inside the in-game menu's Decks tab).
+/// Back, Escape and the unsaved-changes guard all end in `on_done`.
+#[component]
+pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
+    let profile = expect_context::<RwSignal<Profile>>();
     let ui = expect_context::<Ui>();
+    let done = move || on_done.run(());
     let Some(saved) = profile.with_untracked(|p| p.decks.get(index).cloned()) else {
         return view! {
             <div class="page">
-                <PageBar title=tr("Deck editor", "Éditeur de deck") back=Screen::Decks />
+                <PageBar title=tr("Deck editor", "Éditeur de deck") on_back=on_done />
                 <main class="page-body"><p class="empty-note">{tr("This deck no longer exists.", "Ce deck n'existe plus.")}</p></main>
             </div>
         }
@@ -324,7 +340,7 @@ pub fn Editor(index: usize) -> impl IntoView {
         if dirty.get_untracked() {
             leaving.set(true);
         } else {
-            screen.set(Screen::Decks);
+            done();
         }
     };
     let fill = move |_| {
@@ -354,9 +370,23 @@ pub fn Editor(index: usize) -> impl IntoView {
         })
     };
     let curve = move || draft.with(energy_curve);
+    // Escape steps back one layer: the card sheet, the leave question, then
+    // out of the editor (through the guard). Handled here, so a host dialog
+    // doesn't close on the same key. In a text field, Escape stays the field's.
     let on_key = move |e: leptos::ev::KeyboardEvent| {
-        if e.key() == "Escape" {
-            ui.sheet.set(false);
+        let in_field = e
+            .target()
+            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+            .is_some_and(|t| matches!(t.tag_name().as_str(), "INPUT" | "SELECT" | "TEXTAREA"));
+        if e.key() == "Escape" && !in_field {
+            e.prevent_default();
+            if ui.sheet.get_untracked() {
+                ui.sheet.set(false);
+            } else if leaving.get_untracked() {
+                leaving.set(false);
+            } else {
+                back();
+            }
         }
     };
     view! {
@@ -380,8 +410,8 @@ pub fn Editor(index: usize) -> impl IntoView {
             {move || leaving.get().then(|| view! {
                 <div class="leave-bar confirm row" role="alertdialog" aria-labelledby="leave-q">
                     <span id="leave-q">{tr("You have unsaved changes to this deck.", "Ce deck a des modifications non enregistrées.")}</span>
-                    <button type="button" class="btn primary" on:click=move |_| { save(); screen.set(Screen::Decks) } autofocus>{tr("Save and leave", "Enregistrer et partir")}</button>
-                    <button type="button" class="btn danger" on:click=move |_| screen.set(Screen::Decks)>{tr("Leave without saving", "Partir sans enregistrer")}</button>
+                    <button type="button" class="btn primary" on:click=move |_| { save(); done() } autofocus>{tr("Save and leave", "Enregistrer et partir")}</button>
+                    <button type="button" class="btn danger" on:click=move |_| done()>{tr("Leave without saving", "Partir sans enregistrer")}</button>
                     <button type="button" class="btn ghost" on:click=move |_| leaving.set(false)>{tr("Stay", "Rester")}</button>
                 </div>
             })}

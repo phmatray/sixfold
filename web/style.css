@@ -2520,3 +2520,46 @@ p.atlas-pick { color: var(--muted); }
   .map-btn .day-dial { display: inline-flex; position: absolute; right: 1px; top: 1px; min-height: 0; padding: 0; pointer-events: none; }
   .map-btn .day-dial svg { width: 15px; height: 15px; }
 }
+
+/* ---------- 1.4: the in-game menu (Escape or the top bar's Menu) ---------- */
+.world-top .menu-btn { margin-left: 0; display: inline-flex; align-items: center; gap: 6px; }
+@media (max-width: 520px) { .world-top .menu-btn { min-width: 44px; justify-content: center; padding-inline: 10px; } }
+/* Taller and wider than a talk box: the menu holds whole screens. Only the
+   fade-in is kept from `rise`, so the card sheet inside stays fixed to the viewport. */
+.world-sheet:has(.game-menu) {
+  inset: max(16px, env(safe-area-inset-top)) 0 max(16px, env(safe-area-inset-bottom));
+  width: min(1180px, calc(100% - 32px));
+  height: auto;
+  max-height: none;
+  max-width: none;
+  padding: 0;
+  animation-fill-mode: backwards;
+}
+.game-menu { display: flex; flex-direction: column; min-height: 100%; }
+.menu-top { position: sticky; top: 0; z-index: 30; background: #172845; border-bottom: 1px solid var(--line); }
+.menu-head { padding: 14px 20px 8px; }
+.menu-head h2 { margin-right: auto; }
+.menu-tabs { display: flex; gap: 4px; padding: 0 20px 10px; overflow-x: auto; scrollbar-width: none; }
+.menu-tabs button { flex: none; min-height: 44px; padding: 0 14px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
+.menu-tabs button:hover { color: var(--ink); }
+.menu-tabs button[aria-selected="true"] { background: var(--panel-2); border-color: var(--brass); color: var(--brass-hi); }
+.menu-panel { flex: 1; min-width: 0; padding: 16px 20px 24px; }
+.menu-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.menu-split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.menu-split .side-panel { top: 120px; min-height: 0; max-height: calc(100dvh - 180px); border: 1px solid var(--line); border-radius: 14px; }
+.menu-panel .settings-body { max-width: 480px; margin: 0; box-shadow: none; }
+.menu-panel .atlas, .menu-panel .quests { margin-top: 0; }
+/* The deck editor in the menu: its own bar replaces the menu's head. */
+.menu-panel:has(.editor) { padding: 0; }
+.menu-panel .page { min-height: 0; }
+.menu-panel .page-bar { top: 0; }
+.menu-panel .side-panel { min-height: 0; max-height: calc(100dvh - 120px); }
+@media (max-width: 1000px) { .menu-split { grid-template-columns: minmax(0, 1fr); } .menu-split .side-panel { position: static; padding: 0; border: 0; } }
+@media (max-width: 520px) {
+  .world-sheet:has(.game-menu) { inset: 0; width: 100%; border-radius: 0; border: 0; }
+  .menu-head { padding: max(10px, env(safe-area-inset-top)) 16px 6px; }
+  .menu-tabs, .menu-panel { padding-inline: 16px; }
+  /* Every tab in sight: two rows of three instead of a strip that scrolls. */
+  .menu-tabs { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .menu-tabs button { padding: 0 6px; }
+}
