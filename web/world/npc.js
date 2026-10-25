@@ -69,7 +69,7 @@ export function updateNpc(w, n, dt, paused) {
 }
 
 // What the hero faces: a person (also across a counter or a duel table), a
-// sign or table, or a door (a locked one reads like a sign). `opens(warp)`:
+// sign or table, a shut gate (its `text`), or a door (a locked one reads like a sign). `opens(warp)`:
 // whether a gated door's `if` holds.
 export function facing(w, hero, opens) {
   const [dx, dz] = DIR[hero.face], fx = hero.x + dx, fz = hero.z + dz;
@@ -78,6 +78,8 @@ export function facing(w, hero, opens) {
   if (npc) return { kind: "npc", text: npc.def.name, npc };
   const it = w.talk.get(key(fx, fz));
   if (it) return it;
+  const gate = w.gateAt.get(key(fx, fz));
+  if (gate && !gate.open) return { kind: "gate", text: gate.def.text ?? tr("There's no way through here yet.", "Pas de passage ici, pour l'instant.") };
   const wp = w.warps.get(key(fx, fz));
   if (wp && !wp.dir) return opens(wp) ? { kind: "warp", text: wp.label ?? tr("Go in", "Entrer"), warp: wp } : { kind: "locked", text: wp.locked ?? tr("It won't open.", "Ça ne s'ouvre pas.") };
   return null;

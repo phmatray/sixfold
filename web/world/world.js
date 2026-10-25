@@ -1,12 +1,15 @@
 // The overworld test: tile-grid maps (./maps/<name>.json) drawn with three.js.
 // `mount(host, controls, cb, start, edit)` builds it (at `start` = "map,x,z,facing"
 // when given; `edit`: a debug build with ?edit loads the map editor) and returns an
-// api for Leptos (stop, act, pause, setItems, preview, previewStop, meet, cue).
+// api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, meet, cue).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
-//   ("use", kind, text)    acted on a sign, the duel table or a locked door
+//   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate
 //   ("at", map, "x,z,f")   the hero stands on a new tile or faces a new way
-//   ("check", cond, "")    asks whether a gated warp's `if` holds (returns a bool)
+//   ("check", cond, "")    asks whether a condition (a gated warp's `if`) holds (returns a bool)
+//   ("gate", cond, "wo")   asks whether a gate is open: w = was open, o = the hero is on it ("0"/"1")
+//   ("clock", minute, "")  the game clock, every game hour and at each phase change
+//   ("seen", map, "in"|"out") a map was entered (indoors or out)
 //   ("talk", npcId, json)  spoke to an NPC (or a duelist walked up): {"name", "dialogue"} for Leptos to run
 //   ("area", title, "")    entered an outdoor area that has a `title`
 //   ("ready", "", "")      first frame drawn;  ("error", "", message)
@@ -21,6 +24,7 @@
 //   actors.js  hero and NPC rigs (`actor`, `place`, `animateActor`), grid helpers, `route`
 //   npc.js     placing NPCs, their routes, `facing` (what the hero can talk to or use)
 //   trainer.js route duelists: line of sight, the walk over, going quiet
+//   daylight.js the light at each minute of the day: sun, moon, sky, fog, lamps, glow
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
 import * as THREE from "three";
 import { U } from "./life.js";
@@ -30,11 +34,14 @@ import { build, dispose, refresh, animateProps } from "./build.js";
 import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route, emote } from "./actors.js";
 import { updateNpc, facing as facingOf } from "./npc.js";
 import * as duelists from "./trainer.js";
+import { daylight, phaseOf, DAY } from "./daylight.js";
 
 const STEP = 0.25, RUN_STEP = 0.17; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
 const FADE = 350; // ms, warp fade
 const KEYS = { w: "n", z: "n", arrowup: "n", s: "s", arrowdown: "s", a: "w", q: "w", arrowleft: "w", d: "e", arrowright: "e" }; // WASD and AZERTY ZQSD
+const CLOCK_RATE = 1; // game minutes per real second: a day is 24 minutes (WORLD_DESIGN §7.2)
+const PHASE_FADE = 20; // daylight.js cross-fades this many game minutes into a phase
 
 // ---------- Mount ----------
 
@@ -65,6 +72,8 @@ export function mount(el, controls, cb, start, edit = false) {
   let cam = { fov: 40, fovPortrait: 50, pitch: 50, distance: 12, distancePortrait: 15, lookAtOffset: [0, 0.75, 0] };
   let dist = 12, alive = true, raf = 0, paused = false, warping = false, world = null, hero = null;
   let canRun = false, runToggle = false, shift = false, lastHero = "";
+  // The clock (the engine owns the saved minute; Rust hands it over with setClock).
+  let minute = 480, lastHour = -1, lastPhase = "", bgAt = 0;
   const clock = new THREE.Clock();
   const look = new THREE.Vector3(), lookVel = new THREE.Vector3(), aim = new THREE.Vector3();
   let first = true, zoom = 1, readySent = false, drawnPaused = false, cover = 0;
@@ -255,7 +264,7 @@ export function mount(el, controls, cb, start, edit = false) {
   // `path.npc`: a person who may walk off, so the path is re-planned at every step.
   const walkTo = (tx, tz, npc) => {
     const path = route(world, hero, tx, tz);
-    if (path.length && (npc || world.talk.has(key(tx, tz)))) path.push("act");
+    if (path.length && (npc || world.talk.has(key(tx, tz)) || world.gateAt.get(key(tx, tz))?.open === false)) path.push("act");
     path.npc = npc;
     return path;
   };
@@ -266,6 +275,27 @@ export function mount(el, controls, cb, start, edit = false) {
 
   // A condition (a gated warp's `if`, e.g. "seals:6"; a glint) holds when Rust says so.
   const holds = (cond) => !cond || cb("check", cond, "") === true;
+  // A gate's state is the engine's rule too (it never shuts under the hero).
+  const gate = (cond, was, on) => cb("gate", cond, `${was ? 1 : 0}${on ? 1 : 0}`) === true;
+  const recheck = (animate) => {
+    refresh(world, holds, gate, animate);
+    if (world.gateSound !== undefined) sound(world.gateSound ? "gate" : "door"), (world.gateSound = undefined);
+  };
+  // The music for the map and the hour: a region's track, its night variant after dark.
+  const tune = () => {
+    const m = world.map;
+    const track = m.light.indoor ? "interior" : m.dark ? "cave" : m.music ?? "overworld";
+    globalThis.sixfoldAudio?.music(!m.light.indoor && !m.dark && phaseOf(minute) === "night" ? `${track}_night` : track);
+  };
+  // Tell Rust the time (it saves it); at a new phase, what is out at this hour changes.
+  const tick = (dt) => {
+    minute = (minute + dt * CLOCK_RATE) % DAY;
+    const hour = Math.floor(minute / 60), phase = phaseOf(minute);
+    if (phase !== lastPhase || hour !== lastHour) cb("clock", String(Math.floor(minute)), "");
+    if (phase !== lastPhase && lastPhase) recheck(true), tune();
+    lastHour = hour;
+    lastPhase = phase;
+  };
   const opens = (wp) => holds(wp.if);
   const facing = () => facingOf(world, hero, opens);
 
@@ -335,7 +365,7 @@ export function mount(el, controls, cb, start, edit = false) {
   async function warp(wp) {
     if (warping) return;
     warping = true;
-    if (!wp.edge) sound(wp.if ? "gate" : "door"); // a gated door opening sounds grander
+    if (!wp.edge) sound(wp.travel ? "travel" : wp.if ? "gate" : "door"); // a gated door opening sounds grander
     held.length = 0;
     world.path = [];
     fade.classList.add("on");
@@ -370,25 +400,38 @@ export function mount(el, controls, cb, start, edit = false) {
     if (!alive) return;
     next.name = name;
     duelists.enterMap(name);
-    refresh(next, holds);
+    // Gates first see the hero where it arrives (a gate it stands on lets it stay).
+    if (spawn && Number.isInteger(spawn.x)) next.spawnAt = spawn;
+    refresh(next, holds, gate);
     if (world) dispose(world.root);
     world = next;
-    world.hero = hero;
+    world.hero = null;
+    world.day = daylight(world, reduced);
     scene.add(world.root);
     const L = map.light;
-    renderer.setClearColor(L.background);
-    scene.fog = L.fog ? new THREE.Fog(L.background, L.fog.near, L.fog.far) : null;
-    el.closest(".world")?.style.setProperty("--world-bg", L.background);
-    globalThis.sixfoldAudio?.music(L.indoor ? "interior" : "overworld");
+    scene.fog = L.indoor ? null : new THREE.Fog(L.background, L.fog?.near ?? 60, L.fog?.far ?? 90);
+    lastPhase = phaseOf(minute);
+    cb("clock", String(Math.floor(minute)), "");
+    cb("seen", name, L.indoor ? "in" : "out");
+    tune();
     const s = spawn && !next.blocked(spawn.x, spawn.z) && !next.npcAt(spawn.x, spawn.z) ? spawn : map.spawn; // a stale saved tile falls back
     Object.assign(hero, { x: s.x, z: s.z, face: s.facing, step: null, idle: 0, turnedAt: -Infinity }); // a fresh map clock
     hero.obj.rotation.y = angle(s.facing);
+    world.hero = hero;
+    sky(world.day.update(minute, s.x + 0.5, s.z + 0.5, 0), true);
     cam = map.camera;
     resize();
     first = true;
     await renderer.compileAsync(scene, camera).catch(() => {});
     if (map.title && !L.indoor) showBanner(map.title), cb("area", map.title, "");
     preload(map, () => alive);
+  }
+
+  // The sky behind the scene and the fog: one colour (fog fades into the sky).
+  function sky(look, now = false) {
+    renderer.setClearColor(look.bg);
+    if (scene.fog) scene.fog.color.copy(look.bg), (scene.fog.near = look.near), (scene.fog.far = look.far);
+    if (now || world.now - bgAt > 1) (bgAt = world.now), el.closest(".world")?.style.setProperty("--world-bg", `#${look.bg.getHexString()}`);
   }
 
   function fail(e) {
@@ -426,6 +469,7 @@ export function mount(el, controls, cb, start, edit = false) {
     } else drawnPaused = false;
     const w = world, h = hero;
     w.now += dt;
+    if (!paused) tick(dt);
     U.uTime.value = w.now;
     if (!reduced) U.uDrift.value = w.now;
     const prevStep = h.step;
@@ -435,13 +479,15 @@ export function mount(el, controls, cb, start, edit = false) {
     if (h.step) {
       h.step.t += dt / h.step.dur;
       if (h.step.t >= 1) {
-        const done = h.step;
+        const done = h.step, left = w.gateAt.get(key(h.x, h.z));
         carry = (done.t - 1) * done.dur;
         h.x = done.x;
         h.z = done.z;
         h.step = null;
         chained = true;
         w.calm = false; // a step taken: duelists may look again
+        // Off a gate that only stayed open for the hero (rafts at dawn): it may shut now.
+        if (left?.open && w.gateAt.get(key(h.x, h.z)) !== left) recheck(true);
         const wp = done.warp ?? w.warps.get(key(h.x, h.z));
         if (wp) warp(wp);
       }
@@ -487,7 +533,9 @@ export function mount(el, controls, cb, start, edit = false) {
     animateActor(h, dt, reduced);
     for (const n of w.npcs) updateNpc(w, n, dt, paused);
     animateProps(w, dt, reduced);
-    w.life.update(dt, w.now, px, pz);
+    const lit = w.day.update(minute, px, pz, dt);
+    sky(lit);
+    w.life.update(dt, w.now, px, pz, lit.night);
 
     const pos = `${h.x},${h.z},${h.face}`;
     const inside = h.x >= 0 && h.z >= 0 && h.x < w.map.width && h.z < w.map.height; // not mid-way off an edge
@@ -541,8 +589,8 @@ export function mount(el, controls, cb, start, edit = false) {
     // Outdoors the sun (and its shadow map) follows the hero a whole tile at a
     // time: following the tweened position makes shadow edges shimmer.
     if (!w.map.light.indoor) {
-      const from = w.map.light.sun.fromHero;
-      w.sun.position.set(h.x + from[0], from[1], h.z + from[2]);
+      const from = lit.from;
+      w.sun.position.set(h.x + from.x, from.y, h.z + from.z);
       w.sun.target.position.set(h.x, 0, h.z);
     }
 
@@ -562,8 +610,22 @@ export function mount(el, controls, cb, start, edit = false) {
     stats = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles };
     if (!readySent) (readySent = true), cb("ready", "", "");
   }
+  // The clock, from the save or an inn's rest (`minute` at a phase's start: shown
+  // already turned, as if the fade happened while the hero slept).
+  function setClock(m) {
+    const at = ((+m % DAY) + DAY) % DAY;
+    minute = Object.values({ dawn: 300, day: 480, dusk: 1080, night: 1260 }).includes(at) ? at + PHASE_FADE : at;
+    if (!world) return;
+    lastPhase = phaseOf(minute);
+    lastHour = Math.floor(minute / 60);
+    recheck(false);
+    tune();
+  }
+  // For trying the hours out from the console: `el.sixfoldClock(21 * 60)` (Rust hears it at once).
+  el.sixfoldClock = (m) => (cb("clock", String(Math.floor(m)), ""), setClock(m));
+  el.sixfoldWarp = (to, x, z, facing = "s") => warp({ to, spawn: { x, z, facing }, travel: true }); // and anywhere: `el.sixfoldWarp("square", 12, 8)`
   // For measuring: draw calls and triangles of the last frame (shadows included), and the area.
-  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "" });
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute) });
 
   // Item popup preview: the model turning in its own small canvas.
   let pv = null;
@@ -633,13 +695,15 @@ export function mount(el, controls, cb, start, edit = false) {
       paused = !!p;
       clearHeld();
       if (world) world.path = [];
+      if (paused && world) cb("clock", String(Math.floor(minute)), ""); // a duel may follow: keep the time
       if (!paused && world) {
         clock.getDelta();
         world.npcs.forEach((n) => (n.busy = false));
         if (world.engage?.talked) (duelists.release(world), (world.calm = true)); // the talk with a duelist is over
-        refresh(world, holds); // a find may be gone now
+        recheck(true); // a find may be gone now, a gate open
       }
     },
+    setClock,
     // Back from a duel against `id`: that person (a duelist walks back over) says its post-duel line.
     meet(id) {
       if (!world || warping) return;
@@ -647,8 +711,14 @@ export function mount(el, controls, cb, start, edit = false) {
       if (n && facing()?.npc === n) talkTo(n);
     },
     // A dialogue cue (engine `Cue`), e.g. {"emote": "heart", "actor": "moss"}; actor "hero" is the hero.
+    // {"warp": {"map", "x", "z", "facing"}, "travel": true}: fade and load (a ferry, fast travel).
     cue(json) {
       const c = JSON.parse(json);
+      if (c.warp) {
+        const { map, x, z, facing } = c.warp;
+        if (world && !warping) warp({ to: map, spawn: { x, z, facing }, travel: !!c.travel });
+        return;
+      }
       const a = c.actor === "hero" ? hero : world?.npcs.find((n) => n.def.id === c.actor);
       if (c.emote && a) emote(a, c.emote);
     },

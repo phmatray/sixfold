@@ -303,3 +303,80 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   indoors, with `indoor: true`, at the room centre + fromHero, as window light), `hemisphere`
   sky/ground colours, `background` (also the fog colour), optional `fog` range, and indoors
   `lamp` (a point light on every lamp). Intensities are three.js (physically based) units.
+
+## 1.3 additions: time of day, gates, waymarks, regions (WORLD_DESIGN §7)
+
+- **Outdoor map keys** (check-maps requires the first three outdoors): `title_fr`, `region` (an id in
+  `atlas.json`: `hub`, `ember`, `storm`, `tide`, `dream`, `grove`, `stone`), `music` (a track:
+  `overworld`, `ember`, `storm`, `tide`, `dream`, `grove`, `stone`, `cave`; after dark the world plays
+  `<track>_night`), and optionally:
+  - `cliff: ["cliff_basalt", "cliff_basalt_b"]`: the blocks digit tiles stack (block, top variant;
+    default `cliff` / `cliff_b`);
+  - `fence: "wall_dry" | "hedge"`: the auto-tile set for `f` tiles (default `fence`; same mask table);
+  - `dark: true`: a cave. No sun at any hour, a dim sky, and the hero's lantern lights the way; music `cave`;
+  - `light_dawn` / `light_dusk` / `light_night`: any part of a `light` block, overriding that phase's
+    derived look (`web/world/daylight.js`).
+- **The clock** (`engine/src/clock.rs`): a game minute a real second, saved as `t:<minute>`. Dawn 05:00,
+  day 08:00, dusk 18:00, night 21:00. Conditions `time:dawn|day|dusk|night` ("dark" is
+  `!time:day & !time:dawn`); the effect `clock:<phase>` jumps to the start of a phase (the inn's panel
+  uses it). Everything with an `if` (people, spots, finds, props, gates) is re-checked at each phase
+  change, so **schedules are data**: duplicate a townsperson with `"if": "!time:night"` and
+  `"if": "time:night"` on two tiles. A night duelist (`night: true` in `trainers.rs`) must carry
+  `time:night` in its `if` (the data test checks). A night-only find is a find with `"if": "time:night"`.
+- **Light at night:** materials named `*glow*` shine brighter after dusk, and `*glass*` (windows) turns
+  warm and lit outdoors, dark from inside. Every `light_origin` empty gets a halo and, below 3.2 m, a pool
+  of light on the ground; the nearest three get a real light, plus the hero's lantern (never more than six
+  live lights, WORLD_DESIGN P1). New lamps need nothing but a `light_origin`.
+- **prop `if`** (a condition): the prop is only there, and only blocks its footprint, while it holds (a
+  "closed" sign at night, the hub's seal dressing). **prop `open`** (a condition): a prop whose model has an
+  `Open` clip plays it while the condition holds, backwards when it stops (`pylon` with
+  `"open": "flag:pylon_1"`, `moonflower` with `"open": "!time:day & !time:dawn"`). Afloat props (`boat`,
+  `ferry`, `buoy`, `floating_lantern`, `lantern_raft`) bob. A `ladder` joins its front and back tiles
+  whatever the height (its rows run along its own Z).
+- **gates** (WORLD_DESIGN §7.1): tiles walkable only while a condition holds, whatever the tile.
+
+  ```jsonc
+  "gates": [{
+    "id": "hush_ford",
+    "tiles": [[0, 24], [1, 24], [2, 24, 0]],  // [x, z] or [x, z, y]: y stacks the props (default: the tile's own height)
+    "if": "item:wading_boots",                 // any condition: item, time, flag, seals
+    "floor": 0.1,                              // optional floor while open (>= 0; default: the open prop's deck top, else the ground)
+    "prop": "ford_stones",                     // optional: shown always, one per tile
+    "prop_closed": "rubble", "prop_open": "lantern_raft", "rot": 0,  // optional: shown per state
+    "text": "The ford runs fast and knee-deep. Boots would help.", "text_fr": "…"   // faced while shut
+  }]
+  ```
+
+  Shut, the tiles block and facing one shows `text` (titled "No way through"). A gate that changes while
+  the hero is on the map plays it: the going props sink, the coming ones rise, with dust and a sound. **A
+  gate never closes under the hero**: it stays open while the hero is on any of its tiles and re-checks
+  as they step off (`Progress::gate_open`). Recipes: ember vent `"if": "!time:day & !time:dawn"`,
+  `prop_closed: "ember_vent"`; rubble `"if": "flag:rubble_1"`, `prop_closed: "rubble"`; ford
+  `"if": "item:wading_boots"`, `prop: "ford_stones"`; climb `"if": "item:grip_gloves"`,
+  `prop: "climb_wall"` (or `climb_wall_basalt`) on the tile below the ledge; lantern path
+  `"if": "time:night"`, `prop_open: "lantern_raft"` on water. A **ferry** is a person, not a gate: a branch
+  `"if": "item:ferry_pass"` with `"do": ["warp:<map>:<x>:<z>:<facing>"]` (the `warp:` cue fades and loads
+  that tile), and a branch without the pass. A dark cave is a door warp with `"if": "item:kiln_lantern"`
+  and a `locked` text, into a `dark: true` map. check-maps flood-fills every map with all gates shut (the
+  spawn must still reach an exit or a warp) and all open (every person, spot, warp and waymark must be
+  reachable).
+- **waymarks** (WORLD_DESIGN §7.3): the post is a prop plus a spot; the chart lists it.
+
+  ```jsonc
+  { "asset": "waymark", "x": 16, "z": 12, "rot": 0, "glow": "#d6ac4a" }   // props: crystal in the region's colour
+  { "kind": "waymark", "id": "meadow", "x": 16, "z": 12 }                // interactions: same tile
+  ```
+
+  and in `atlas.json` `waymarks`: `{ "id": "meadow", "map": "overworld", "x": 16, "z": 13, "facing": "n",
+  "name": "…", "name_fr": "…" }`, the tile the hero stands on, facing the post. The first touch lights it
+  (flag `way_<id>`) and opens the world map; later touches open it to travel. The crystal is dim until lit.
+  Entering an outdoor map sets `seen_<map>`: the chart inks its region and node.
+- **atlas.json** (`web/world/atlas.json`, read by `web/src/worldmap.rs`): `regions` (id, name/name_fr, colour,
+  centre `x`/`y` and radius `r` on a 12 × 9 chart), `maps` (every outdoor map: id, region, `x`/`y`, name and
+  name_fr equal to the map's title), `links` (roads `a`–`b`, drawn once one end is seen; a gated one has
+  `if` and `icon`: `lantern`, `ferry`, `boots` or `gloves`), `waymarks` (above). Posts must sit at least
+  1.7 squares apart on the chart (44 px targets on a phone).
+- **inns:** an innkeeper's branch with `"do": ["show:inn"]` opens the rest panel (rest until dawn, morning,
+  dusk or night; free). The hub inn is `inn_hub` in Brightwell Square (Hollis).
+- **Debug hooks** on the world's host element (`.world-host`): `sixfoldClock(minute)` sets the time,
+  `sixfoldWarp(map, x, z, facing)` goes anywhere, `sixfoldStats()` reads draw calls, the area and the hour.

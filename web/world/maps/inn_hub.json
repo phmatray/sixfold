@@ -1,0 +1,215 @@
+{
+  "width": 11,
+  "height": 9,
+  "tiles": [
+    "WWWWVWWWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwV",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "bed",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bed",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bookcase",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 6,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "counter",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "chair",
+      "x": 1,
+      "z": 4,
+      "rot": 90
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 1,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 9,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "exit_mat",
+      "x": 5,
+      "z": 7,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 7,
+    "facing": "n"
+  },
+  "interactions": [
+    {
+      "x": 4,
+      "z": 1,
+      "kind": "sign",
+      "text": "The guest book. The last line reads: \"Slept like a stone. Dreamt of a seventh colour. — R.\"",
+      "text_fr": "Le livre d'or. La dernière ligne dit : « Dormi comme une pierre. Rêvé d'une septième couleur. — R. »"
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 7,
+      "dir": "s",
+      "to": "square",
+      "label": "Go outside",
+      "label_fr": "Sortir",
+      "spawn": {
+        "x": 21,
+        "z": 9,
+        "facing": "w"
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "idle": "Idle",
+      "id": "hollis",
+      "name": "Hollis",
+      "model": "npc_elder",
+      "outfit": "#9a4a32",
+      "x": 5,
+      "z": 3,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "!flag:talked_hollis",
+          "do": [
+            "show:inn"
+          ],
+          "lines": [
+            "Welcome to the Hearth Rooms! Beds upstairs, soup on the stove, and the quietest clock in Brightwell.",
+            "Rest as long as you like: it's free for anyone who duels. Sleep till morning, or till the night folk come out."
+          ],
+          "lines_fr": [
+            "Bienvenue aux Chambres de l'Âtre ! Des lits à l'étage, de la soupe sur le feu, et l'horloge la plus discrète de Clairpuits.",
+            "Repose-toi autant que tu veux : c'est gratuit pour qui joue aux cartes. Dors jusqu'au matin, ou jusqu'à ce que les gens de la nuit sortent."
+          ]
+        },
+        {
+          "if": "time:night",
+          "do": [
+            "show:inn"
+          ],
+          "lines": [
+            "Still up? The lamps are lit, and so's the kettle.",
+            "There's a bed free if you want one."
+          ],
+          "lines_fr": [
+            "Encore debout ? Les lampes sont allumées, la bouilloire aussi.",
+            "Il y a un lit de libre, si tu veux."
+          ]
+        },
+        {
+          "do": [
+            "show:inn"
+          ],
+          "lines": [
+            "Back again! Your room's just as you left it.",
+            "A rest, then?"
+          ],
+          "lines_fr": [
+            "Te revoilà ! Ta chambre est comme tu l'as laissée.",
+            "Tu te reposes un peu ?"
+          ]
+        }
+      ]
+    }
+  ],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffe2bd",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb257",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e",
+    "note": "Indoors the sun is the window light, placed from the room centre (not the hero); lamp lights sit on each lamp prop."
+  }
+}

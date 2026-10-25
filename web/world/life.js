@@ -1,7 +1,7 @@
 // Micro-animation: wind sway (a vertex shader on one shared clock, also used by
-// the ground's drifting cloud shadows) plus a few cheap particles: dust motes,
-// butterflies, chimney smoke and footstep puffs. With reduced motion, sway and
-// particles are off.
+// the ground's drifting cloud shadows) plus a few cheap particles: dust motes
+// (fireflies after dark), butterflies (roosting at night), chimney smoke and
+// footstep puffs. With reduced motion, sway and particles are off.
 import * as THREE from "three";
 import { toon } from "./props.js";
 
@@ -101,7 +101,7 @@ function softTexture(size, n, rMin, rMax, wrap) {
 // Particles, added to `scene` (the map's root group). `spots.flowers` = flower
 // bed centres, `spots.smoke` = chimney top or null.
 export function ambience(scene, spots, reduced) {
-  if (reduced) return { update() {}, puff() {} };
+  if (reduced) return { update() {}, puff() {}, puffs() {} };
   const dot = softTexture(64, 1, 30, 30, false);
   const sprite = (color, opacity) => {
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending }));
@@ -112,8 +112,10 @@ export function ambience(scene, spots, reduced) {
   // Dust motes catching the light, kept in a box around the hero.
   const MOTES = 60, box = 14;
   const motes = new THREE.Points(
-    new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(MOTES * 3), 3)),
-    new THREE.PointsMaterial({ size: 0.07, map: dot, color: "#fff4c2", transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending }),
+    new THREE.BufferGeometry()
+      .setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(MOTES * 3), 3))
+      .setAttribute("color", new THREE.Float32BufferAttribute(new Float32Array(MOTES * 3).fill(1), 3)),
+    new THREE.PointsMaterial({ size: 0.07, map: dot, color: "#fff4c2", vertexColors: true, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending }),
   );
   const seeds = Array.from({ length: MOTES }, () => [Math.random() * box, Math.random() * 3 + 0.3, Math.random() * box, Math.random() * 6.28]);
   motes.frustumCulled = false;
@@ -145,7 +147,13 @@ export function ambience(scene, spots, reduced) {
   });
   let next = 0;
 
+  const day = new THREE.Color("#fff4c2"), fly = new THREE.Color("#d9ff8a");
+  const mm = motes.material;
   return {
+    // Dust where a gate changed: a rubble pile falling, rafts drifting in.
+    puffs(tiles) {
+      for (const t of tiles.slice(0, 5)) this.puff(t.x + 0.5, t.z + 0.5);
+    },
     puff(x, z) {
       for (let i = 0; i < 2; i++) {
         const d = dust[next++ % dust.length];
@@ -153,15 +161,31 @@ export function ambience(scene, spots, reduced) {
         d.s.position.set(x + (Math.random() - 0.5) * 0.25, 0.08, z + (Math.random() - 0.5) * 0.25);
       }
     },
-    update(dt, t, hx, hz) {
+    // `night` 0..1: motes turn into slow, low fireflies that pulse; butterflies go to roost.
+    update(dt, t, hx, hz, night = 0) {
       const p = motes.geometry.attributes.position;
+      const drift = 0.15 * (1 - night * 0.7), low = 1 - night * 0.5;
       seeds.forEach(([sx, sy, sz, ph], i) => {
         const wrap = (v, c) => c - box / 2 + ((((v - c + box / 2) % box) + box) % box);
-        p.setXYZ(i, wrap(sx + Math.sin(t * 0.3 + ph) * 0.6 + t * 0.15, hx), sy + Math.sin(t * 0.7 + ph) * 0.25, wrap(sz + Math.cos(t * 0.25 + ph) * 0.6, hz));
+        p.setXYZ(i, wrap(sx + Math.sin(t * 0.3 + ph) * 0.6 + t * drift, hx), sy * low + Math.sin(t * 0.7 + ph) * 0.25, wrap(sz + Math.cos(t * 0.25 + ph) * 0.6, hz));
       });
       p.needsUpdate = true;
+      mm.color.lerpColors(day, fly, night);
+      mm.size = 0.07 + 0.07 * night;
+      // Each firefly glows and fades on its own beat (additive: dark is unseen).
+      const c = motes.geometry.attributes.color;
+      if (night > 0 || c.getX(0) !== 1) {
+        seeds.forEach(([, , , ph], i) => {
+          const pulse = Math.max(0, Math.sin(t * (0.9 + (ph % 1) * 0.8) + ph * 5));
+          const k = 1 - night + night * pulse * pulse;
+          c.setXYZ(i, k, k, k);
+        });
+        c.needsUpdate = true;
+      }
 
       for (const f of flies) {
+        f.g.visible = night < 0.5;
+        if (!f.g.visible) continue;
         const a = t * 0.6 + f.k;
         f.g.position.set(f.c.x + Math.sin(a) * 1.3, 0.55 + Math.sin(t * 2.3 + f.k) * 0.2, f.c.z + Math.sin(a * 1.6) * 0.9);
         const v = f.g.position.clone().sub(f.last);

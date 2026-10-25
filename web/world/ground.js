@@ -11,7 +11,8 @@ import { U } from "./life.js";
 import { grassTexture, rng } from "./props.js";
 
 const TEX = new URL("./textures/", import.meta.url);
-const REPEAT = { grass: 6, dirt: 3, wood_floor: 2.4, sand: 5, stone: 2.5 }; // metres per texture tile
+const REPEAT = { grass: 6, dirt: 3, wood_floor: 2.4, sand: 5, stone: 2.5, // metres per texture tile
+  ash: 5, heath: 6, wet_sand: 5, dusk_grass: 6, moss: 5, slate: 3, cave: 4 };
 const cache = new Map();
 
 function finish(t) {
@@ -29,7 +30,7 @@ export function layer(name) {
       new THREE.TextureLoader()
         .loadAsync(new URL(`${name}.webp`, TEX).href)
         .then(finish)
-        .catch(() => finish(FALLBACK[name]())),
+        .catch(() => finish((FALLBACK[name] ?? FALLBACK.dirt)())),
     );
   return cache.get(name);
 }

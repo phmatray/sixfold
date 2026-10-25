@@ -2146,3 +2146,127 @@ select option { background: var(--panel); color: var(--ink); }
 }
 /* With the Journal in the bar, a narrow phone has no room left for the wordmark. */
 @media (max-width: 430px) { .world-top .wordmark { display: none; } }
+
+/* ---------- 1.3: the time of day, inns, the world map ---------- */
+.world-top .journal-btn + .map-btn { margin-left: 0; }
+.world-top .day-dial + .facets { margin-left: 0; }
+/* A little sun or moon: gold by day, low and orange at dusk, pink at dawn, a pale moon at night. */
+.day-dial { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding-inline: 4px; font-weight: 700; color: var(--ink); --sun: #f3d589; --sun-edge: #d6ac4a; }
+.day-dial svg { width: 22px; height: 22px; flex: none; overflow: visible; }
+.day-dial .sun circle { fill: var(--sun); stroke: var(--sun-edge); stroke-width: 1.2; }
+.day-dial .sun path { fill: none; stroke: var(--sun); stroke-width: 1.8; stroke-linecap: round; }
+.day-dial .moon { fill: #d7defa; stroke: #8f9fd6; stroke-width: 1; display: none; }
+.day-dial[data-phase="dawn"] { --sun: #ffc0a8; --sun-edge: #e8846a; }
+.day-dial[data-phase="dusk"] { --sun: #ff9e6b; --sun-edge: #d0603a; }
+.day-dial[data-phase="dawn"] .sun, .day-dial[data-phase="dusk"] .sun { transform: translateY(3px); }
+.day-dial[data-phase="night"] .sun { display: none; }
+.day-dial[data-phase="night"] .moon { display: inline; }
+.day-dial-time { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 400; }
+.sheet-head .day-dial { margin-left: auto; }
+.sheet-head .day-dial + .btn { margin-left: 0; }
+
+/* An inn's rest: the world fades to black and back. */
+.world-rest { position: absolute; inset: 0; z-index: 3; background: #04060c; opacity: 0; pointer-events: none; transition: opacity 0.7s ease; }
+.world-rest.on { opacity: 1; pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) { .world-rest { transition: none; } }
+.inn-rest { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.inn-choice {
+  display: grid; gap: 2px; justify-items: start; min-height: 64px; padding: 10px 14px 10px 50px; text-align: left; cursor: pointer;
+  border-radius: 14px; border: 1.5px solid rgba(214, 172, 74, 0.45); color: var(--ink);
+  background: no-repeat 12px 50% / 26px 26px, linear-gradient(180deg, #1d3152, #152541);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.inn-choice:hover:not(:disabled) { border-color: var(--brass-hi); transform: translateY(-1px); }
+.inn-choice:disabled { opacity: 0.5; cursor: default; }
+.inn-choice-name { font: 700 17px var(--display); }
+.inn-choice-time { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.inn-choice[data-phase="dawn"] { background-image: radial-gradient(circle at 50% 72%, #ffc0a8 44%, transparent 47%), linear-gradient(180deg, #2a3150, #1e2742); }
+.inn-choice[data-phase="day"] { background-image: radial-gradient(circle, #f3d589 46%, transparent 49%), linear-gradient(180deg, #1d3152, #152541); }
+.inn-choice[data-phase="dusk"] { background-image: radial-gradient(circle at 50% 72%, #ff9e6b 44%, transparent 47%), linear-gradient(180deg, #2c2442, #1b1d36); }
+.inn-choice[data-phase="night"] { background-image: radial-gradient(circle at 66% 36%, transparent 33%, #d7defa 35% 47%, transparent 49%), linear-gradient(180deg, #141d36, #0f1629); }
+@media (prefers-reduced-motion: reduce) { .inn-choice { transition: none; } .inn-choice:hover:not(:disabled) { transform: none; } }
+
+/* The world map: a cartographer's chart on card stock, laid on the felt. */
+.world-sheet:has(.atlas) { width: min(820px, calc(100% - 32px)); }
+.atlas { display: grid; gap: 10px; margin-top: 12px; --ink-map: #3a2812; --paper: #ece3cc; }
+.atlas-chart {
+  position: relative; aspect-ratio: 4 / 3; border-radius: 6px; overflow: hidden; background: var(--paper);
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.85), 0 2px 0 rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(58, 40, 18, 0.35);
+  transform: rotate(-0.4deg);
+}
+.atlas-chart svg { display: block; width: 100%; height: 100%; }
+.atlas .paper { fill: var(--paper); }
+.atlas.night .paper { fill: #e6d7b4; } /* read by lamplight */
+.atlas .swells path { fill: none; stroke: #7f9cae; stroke-width: 0.45; stroke-linecap: round; opacity: 0.7; }
+.atlas-region .land { fill: color-mix(in srgb, var(--rc) 34%, var(--paper)); stroke: color-mix(in srgb, var(--rc) 55%, var(--ink-map)); stroke-width: 0.7; stroke-linejoin: round; }
+.atlas-region:not(.known) .land { fill: color-mix(in srgb, var(--rc) 12%, #ddd1b4); stroke: color-mix(in srgb, var(--rc) 30%, #a8967a); stroke-dasharray: 1.4 1.1; }
+.atlas-region .fog { fill: url(#atlas-hatch); pointer-events: none; }
+.atlas #atlas-hatch line { stroke: #ab9a7c; stroke-width: 0.35; }
+.atlas-road line { stroke: var(--ink-map); stroke-width: 0.75; stroke-dasharray: 1.9 1.2; stroke-linecap: round; }
+.atlas-road.partial line { opacity: 0.45; }
+.gate-mark circle { fill: var(--paper); stroke: var(--ink-map); stroke-width: 0.5; }
+.gate-mark path { fill: none; stroke: #8a7a5e; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
+.gate-mark.open path { stroke: var(--ink-map); }
+.atlas-node { fill: var(--ink-map); }
+.atlas-words, .atlas-posts { position: absolute; inset: 0; pointer-events: none; }
+.atlas-posts > * { pointer-events: auto; }
+/* Inked lettering, haloed in paper so it reads over lands and roads. */
+.atlas-label {
+  position: absolute; transform: translate(-50%, 0); white-space: nowrap; color: var(--ink-map);
+  text-shadow: 0 0 2px var(--paper), 0 0 3px var(--paper), 0 0 5px var(--paper);
+}
+.atlas-label.region { transform: translate(-50%, -50%); font: italic 700 clamp(12px, 1.5vw, 19px) var(--display); letter-spacing: 0.02em; color: color-mix(in srgb, var(--rc) 55%, var(--ink-map)); }
+.atlas-label.region:not(.known) { color: color-mix(in srgb, var(--rc) 25%, #7a6a50); font-weight: 600; }
+.atlas-label.place { margin-top: 7px; font: 700 clamp(11px, 1.1vw, 15px) / 1.1 var(--body); white-space: normal; width: max-content; max-width: 9em; text-align: center; text-wrap: balance; }
+.atlas-label.place.post { margin-top: clamp(19px, 1.9vw, 24px); } /* below the crystal and its selection ring */
+.atlas-you { position: absolute; width: clamp(28px, 2.6vw, 36px); height: clamp(28px, 2.6vw, 36px); transform: translate(-50%, -88%); pointer-events: none; z-index: 1; }
+.atlas-you.post { transform: translate(calc(-50% - clamp(20px, 1.9vw, 26px)), calc(-88% - 3px)); } /* beside the crystal, clear of the labels above */
+.atlas-you svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 1.5px rgba(58, 40, 18, 0.45)); }
+.atlas-you .pin { fill: #b3261e; stroke: #4a0f0b; stroke-width: 0.35; }
+.atlas-you .dot { fill: var(--paper); }
+.atlas-you .ring { fill: none; stroke: #b3261e; stroke-width: 0.5; transform-box: fill-box; transform-origin: center; animation: atlas-here 2.4s cubic-bezier(0.2, 0.7, 0.3, 1) infinite; }
+.atlas-you.post .ring { display: none; }
+@keyframes atlas-here { from { transform: scale(0.4); opacity: 0.9; } to { transform: scale(1.6); opacity: 0; } }
+.atlas .compass circle { fill: none; stroke: var(--ink-map); stroke-width: 0.35; }
+.atlas .compass path { fill: var(--ink-map); opacity: 0.5; }
+.atlas .compass .north { fill: #b3261e; opacity: 1; }
+.atlas .compass text { font: 700 2.6px var(--display); fill: var(--ink-map); }
+/* A waymark: a hexagonal crystal in its region's colour, a 44 px target. */
+.atlas-post { position: absolute; width: clamp(44px, 3.6vw, 52px); height: clamp(44px, 3.6vw, 52px); transform: translate(-50%, -50%); padding: 0; border: 0; border-radius: 50%; background: none; display: grid; place-items: center; cursor: pointer; }
+.atlas-post::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--rc) 55%, transparent), transparent 70%); opacity: 0; transition: opacity 0.2s ease; }
+.atlas-post.lit::before { opacity: 1; }
+.atlas-post .crystal {
+  position: relative; width: clamp(19px, 1.8vw, 24px); aspect-ratio: 1 / 1.15; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: linear-gradient(150deg, #f6f0e2 8%, #c9bb9c 55%, #8f7f62 95%);
+}
+.atlas-post.lit .crystal { background: linear-gradient(150deg, #fffaf0 6%, color-mix(in srgb, var(--rc) 75%, #fff) 30%, var(--rc) 60%, color-mix(in srgb, var(--rc) 55%, #000) 96%); }
+.atlas-post::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 2px solid var(--ink-map); opacity: 0; transform: scale(0.8); transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1); }
+.atlas-post[aria-pressed="true"]::after { opacity: 1; transform: scale(1); }
+.atlas-post:focus-visible { outline: 3px solid var(--ink-map); outline-offset: -3px; }
+.atlas-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; }
+.atlas-pick { margin: 0; display: grid; gap: 2px; min-width: 0; }
+p.atlas-pick { color: var(--muted); }
+.atlas-pick-name { font: 700 18px var(--display); }
+.atlas-pick-why { color: var(--muted); font-size: 14px; }
+.atlas-foot .btn { flex: none; min-height: 44px; }
+.atlas-keys { margin: 0; font-size: 13px; color: var(--muted); }
+@media (hover: none) { .atlas-keys { display: none; } }
+@media (max-width: 520px) {
+  .atlas-chart { transform: none; }
+  .world-sheet:has(.atlas) .sheet-head { flex-wrap: wrap; }
+  .inn-choice { padding-left: 42px; min-height: 60px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-you .ring { animation: none; opacity: 0.6; }
+  .atlas-post::before, .atlas-post::after { transition: none; }
+}
+/* Narrow phones: every control keeps its size (the hint and wordmark are already gone). */
+.world-top > :not(.world-hint) { flex-shrink: 0; }
+/* Narrow phones: the sun or moon rides on the map button's corner instead of standing alone. */
+.map-btn { position: relative; }
+.map-btn .day-dial { display: none; }
+@media (max-width: 430px) {
+  .world-top > .day-dial { display: none; }
+  .map-btn .day-dial { display: inline-flex; position: absolute; right: 1px; top: 1px; min-height: 0; padding: 0; pointer-events: none; }
+  .map-btn .day-dial svg { width: 15px; height: 15px; }
+}

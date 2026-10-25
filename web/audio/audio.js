@@ -272,6 +272,23 @@ const SFX = {
     SFX.door(d, t);
     notes(d, t + 0.5, [72, 79, 84, 91], 0.1, { type: "triangle", peak: 0.09, dur: 0.7 });
   },
+  // Fast travel: a rising shimmer, then a soft landing chord.
+  travel: (d, t) => {
+    noise(d, t, 0.6, { f: 600, f2: 5200, q: 3, a: 0.25, peak: 0.12 });
+    notes(d, t + 0.1, [79, 83, 86, 91, 95, 98], 0.06, { type: "triangle", peak: 0.06, dur: 0.5 });
+    [67, 74, 79].forEach((m) => tone(d, t + 0.55, hz(m), 0.9, { peak: 0.05, lin: true, rel: 0.5 }));
+  },
+  // A rest at an inn: a slow falling lullaby, then a bright morning (or evening) chime.
+  rest: (d, t) => {
+    notes(d, t, [79, 76, 72, 67], 0.32, { type: "triangle", peak: 0.08, dur: 0.6, lin: true });
+    notes(d, t + 1.5, [84, 88, 91], 0.09, { type: "triangle", peak: 0.08, dur: 0.6 });
+  },
+  // A waymark woken: a struck crystal.
+  waymark: (d, t) => {
+    tone(d, t, hz(91), 1.4, { type: "triangle", peak: 0.09, rel: 0.6 });
+    tone(d, t + 0.02, hz(98), 1.1, { peak: 0.04, rel: 0.6 });
+    noise(d, t, 0.5, { type: "highpass", f: 8000, a: 0.05, peak: 0.05 });
+  },
   win: (d, t) => {
     notes(d, t, [72, 76, 79], 0.12, { type: "triangle", peak: 0.15, dur: 0.3 });
     [72, 76, 79, 84].forEach((m) => tone(d, t + 0.38, hz(m), 1.4, { type: "triangle", peak: 0.09, lin: true, rel: 0.6 }));
@@ -308,7 +325,8 @@ export function sfx(name, n = 0) {
 // bass: "x" chord root, "5" its fifth, "o" its octave (two octaves down).
 // keys: "x" a soft chord stab. Drums: "x" a hit.
 
-const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10] };
+// A scale degree past the last note climbs an octave (pentatonic has five, the others seven).
+const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10], pentatonic: [0, 2, 4, 7, 9] };
 const DIGITS = "0123456789abcdef";
 
 const TRACKS = {
@@ -345,17 +363,105 @@ const TRACKS = {
     mix: { lead: 0.08, pad: 0.025, bass: 0.13, keys: 0.025 },
   },
 };
+// The six regions (WORLD_DESIGN §14.3), each in its own scale and pace; a map names its track with `music`.
+Object.assign(TRACKS, {
+  // Ember: dorian, a stoker's swing.
+  ember: {
+    bpm: 100, root: 62, scale: "dorian", chords: [0, 3, 0, 4, 0, 3, 6, 4],
+    lead:
+      "3-.3-5-6-7---6-5" + "4---3-1-3-------" + "3-.3-5-6-7-9-a--" + "9---7-6-7-------" +
+      "a-.a-9-7-8---7-6" + "7---6-5-6-------" + "5-6-7-5-6-4-5-3-" + "3-------1---3---",
+    bass: "x..x....5..x..o.",
+    drums: { kick: "x.....x...x.....", snare: "....x.......x...", shaker: "..x...x...x...x." },
+    mix: { lead: 0.075, pad: 0.025, bass: 0.14, keys: 0.025 },
+  },
+  // Storm: minor and quick, hats like rain on slate.
+  storm: {
+    bpm: 112, root: 64, scale: "minor", chords: [0, 5, 6, 4, 0, 5, 3, 4],
+    lead:
+      "7-7-a-7-9-7-6-5-" + "6---5-3-5-------" + "7-7-a-7-c-a-9-7-" + "8-------9---a---" +
+      "a-a-c-a-9-7-6-7-" + "8---7-6-5-------" + "6-7-8-6-7-5-6-4-" + "3---------------",
+    bass: "x.x...x.x.x...5.",
+    keys: "x...x...x...x...",
+    drums: { kick: "x.......x.......", snare: "....x.......x...", hat: "x.xxx.xxx.xxx.xx" },
+    mix: { lead: 0.07, pad: 0.03, bass: 0.13, keys: 0.02 },
+  },
+  // Tide: pentatonic, slow and rocking, the shaker for surf.
+  tide: {
+    bpm: 88, root: 67, scale: "pentatonic", chords: [0, 3, 1, 4, 0, 3, 2, 4],
+    lead:
+      "5---6-7---8-7---" + "5-----3-4-------" + "5---6-7---a-8---" + "7---------------" +
+      "8---7-5---6-5---" + "3-----4-5-------" + "6---5-3---4-3---" + "3---------------",
+    bass: "x.....5.....x...",
+    keys: "...x.....x....x.",
+    drums: { kick: "x...........x...", shaker: "x..x..x..x..x..." },
+    mix: { lead: 0.08, pad: 0.03, bass: 0.12, keys: 0.025 },
+  },
+  // Dream: pentatonic, slow, high and soft, no drums but a brush.
+  dream: {
+    bpm: 72, root: 69, scale: "pentatonic", chords: [0, 2, 3, 1, 0, 2, 4, 1], cutoff: 4200,
+    lead:
+      "a-------8---7---" + "8-------5-------" + "7---8---a---c---" + "a---------------" +
+      "8-------7---5---" + "6-------4-------" + "5---6---7---5---" + "3---------------",
+    bass: "x...............",
+    keys: "x.x.x.x.x.x.x.x.",
+    drums: { shaker: "........x......." },
+    mix: { lead: 0.07, pad: 0.04, bass: 0.1, keys: 0.018 },
+  },
+  // Grove: dorian, a walking tune among roots.
+  grove: {
+    bpm: 92, root: 65, scale: "dorian", chords: [0, 6, 3, 4, 0, 6, 1, 4],
+    lead:
+      "3-5-7-5-6---5-3-" + "4-6-8-6-7-------" + "5-7-8-a-9-8-7-5-" + "6-------4---2---" +
+      "3-5-7-5-6---8-7-" + "6-5-4-3-4-------" + "5-4-3-2-3-4-5-6-" + "3---------------",
+    bass: "x...5...x...5...",
+    keys: "..x...x...x...x.",
+    drums: { kick: "x.......x.......", shaker: "x.xxx.xxx.xxx.xx" },
+    mix: { lead: 0.075, pad: 0.025, bass: 0.13, keys: 0.022 },
+  },
+  // Stone: low minor, heavy steps.
+  stone: {
+    bpm: 84, root: 57, scale: "minor", chords: [0, 0, 5, 4, 0, 3, 5, 4],
+    lead:
+      "3---3-5-6---5-3-" + "2---------------" + "3---3-5-7---6-5-" + "6-------5-------" +
+      "7---7-6-5---6-7-" + "8-------7-------" + "6---5-3-2---3-2-" + "0-------3-------",
+    bass: "x.......x...5...",
+    drums: { kick: "x.......x..x....", snare: "........x......." },
+    mix: { lead: 0.085, pad: 0.03, bass: 0.15, keys: 0.02 },
+  },
+  // Caves (a `dark` map): a slow minor drone, filtered, a drip for a beat.
+  cave: {
+    bpm: 66, root: 60, scale: "minor", chords: [0, 5, 3, 4, 0, 5, 6, 4], cutoff: 1100,
+    lead:
+      "7-------6-------" + "5-------3-------" + "4-------5-------" + "3---------------" +
+      "a-------9-------" + "7-------6-------" + "5-------4-------" + "3---------------",
+    bass: "x...............",
+    drums: { shaker: "......x........." },
+    mix: { lead: 0.06, pad: 0.04, bass: 0.1, keys: 0.02 },
+  },
+});
 // Indoors: the meadow tune, slower, softer and filtered, with no drums.
 TRACKS.interior = {
   ...TRACKS.overworld, bpm: 80, cutoff: 1500,
   drums: { shaker: "....x.......x..." },
   mix: { lead: 0.06, pad: 0.03, bass: 0.1, keys: 0.03 },
 };
+// After dark, every outdoor track has a night variant made the same way: slower,
+// filtered, half the drums (only the kick and a soft shaker), the lead held back.
+for (const k of ["overworld", "ember", "storm", "tide", "dream", "grove", "stone"]) {
+  const t = TRACKS[k], d = t.drums;
+  TRACKS[`${k}_night`] = {
+    ...t, bpm: Math.round(t.bpm * 0.88), cutoff: Math.min(t.cutoff ?? 9000, 1700),
+    drums: { ...(d.kick && { kick: d.kick.replace(/(?<=x.*)x/g, ".") }), shaker: "....x.......x..." },
+    keys: undefined,
+    mix: { ...t.mix, lead: t.mix.lead * 0.75, pad: t.mix.pad * 1.3 },
+  };
+}
 
 // Precompute every step's notes once, so the scheduler only reads arrays.
 function compile(def) {
-  const sc = SCALES[def.scale];
-  const deg = (d) => def.root + sc[((d % 7) + 7) % 7] + 12 * Math.floor(d / 7);
+  const sc = SCALES[def.scale], n7 = sc.length;
+  const deg = (d) => def.root + sc[((d % n7) + n7) % n7] + 12 * Math.floor(d / n7);
   const n = def.chords.length * 16;
   const ev = Array.from({ length: n }, () => []), hot = Array.from({ length: n }, () => []);
   const held = (s, i) => {
@@ -423,7 +529,7 @@ function startPlayer(name, t) {
 
 let current = null;
 
-/// Crossfade to a track ("title", "duel", "overworld", "interior"), or to silence ("").
+/// Crossfade to a track ("title", "duel", "overworld", "interior", a region's, "<track>_night"), or to silence ("").
 export function music(name) {
   if (!ctx) return void (want = name);
   if ((current?.name ?? "") === name) return;

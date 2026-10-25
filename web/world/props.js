@@ -253,6 +253,7 @@ export const FOOT = {
   workshop: [3, 3], fountain: [3, 3], bench: [2, 1],
   oven: [2, 1], printing_press: [2, 1], bookcase: [2, 1], bed: [2, 1], workbench: [2, 1], light_box: [2, 1],
   curio_cabinet: [2, 1], seal_stone: [2, 2], cave_mouth: [2, 1], log: [2, 1],
+  ferry: [4, 2], cave_mouth_slate: [2, 1],
 };
 // Props the hero walks over; every other prop blocks its footprint.
 export const WALKABLE = new Set(["rug", "exit_mat"]);
@@ -260,11 +261,18 @@ export const WALKABLE = new Set(["rug", "exit_mat"]);
 export const ACROSS = new Set(["counter", "duel_table", "stall", "stall_b", "curio_cabinet"]);
 // Decks: walkable even over water, with the floor height the hero stands at, per
 // footprint row along the prop's own Z (front row first; one value for every row).
-export const DECK = { boardwalk: [0.1], pier: [0.3], bridge: [0.12, 0.24, 0.24, 0.12], stairs: [0.5], climb_wall: [0.5] };
+export const DECK = { boardwalk: [0.1], pier: [0.3], bridge: [0.12, 0.24, 0.24, 0.12], stairs: [0.5], climb_wall: [0.5], climb_wall_basalt: [0.5],
+  lantern_raft: [0.1], ladder: [1.5] };
+// Ladders join their front and back neighbours whatever the height (floor 0 in front, a 3 m deck behind).
+export const LADDER = new Set(["ladder"]);
+// Afloat: they bob on the water (never instanced).
+export const BOB = new Set(["boat", "ferry", "buoy", "floating_lantern", "lantern_raft"]);
 // Sway reference height per prop (life.js wind).
 export const WIND_H = { tree: 3.5, bush: 0.8, flowers: 0.4, pine: 3.8, birch: 3.6, reeds: 0.9 };
 // Rough height of a model, for the generic placeholder box of a model not yet built.
-export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0.24, stairs: 0.5, lighthouse: 7, cottage: 4.5, workshop: 3.8, pine: 3.8, birch: 3.6 };
+export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0.24, stairs: 0.5, lighthouse: 7, cottage: 4.5, workshop: 3.8, pine: 3.8, birch: 3.6,
+  waymark: 1.7, inn_sign: 1.9, ember_vent: 1.7, rubble: 1.4, ford_stones: 0.1, lantern_raft: 0.1, climb_wall: 1, climb_wall_basalt: 1, ladder: 3.4,
+  ferry: 2.1, buoy: 1.4, floating_lantern: 0.6 };
 
 // Auto-tiling for fences ("f") and walls ("W"): neighbour mask (N=1, E=2, S=4, W=8)
 // -> [piece suffix, rot]. At rot 0: "" = arms W+E, _corner = W+S, _end = W,

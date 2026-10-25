@@ -18,6 +18,7 @@ scene inside it and saves the file:
 | `Interior`| `build_interior_scene.py`| `web/world/maps/shop.json`: walls auto-tiled with the fence rules (cutaway `wall_low*` on the camera-side south row, `wall_window` on chosen straight tiles), wood floor, furniture, lamp light, hero |
 | `Areas`   | `build_area_props.py`    | the 0.7 outdoor-area props (woodland, seaside, quarry, square) side by side; imports `build_assets.py` for its helpers and exports only its own files |
 | `PropsV2` | `build_props_v2.py`      | 1.2 house furniture, signs, the curio cabinet and curios, the 1.3 shared kit (waymark, seal stone, cave mouth, climb wall, inn sign), the find hosts (stump, log) and four more NPCs; imports `build_npcs.py` and `build_area_props.py` for their helpers and exports only its own files |
+| `V13_<region>` | `build_regions_v13.py` | the 1.3 region props, one module per region (`v13_ember.py` … `v13_stone.py`) on the shared `v13_kit.py`; headless only (see `web/world/ASSETS_V13.md`) |
 
 ```bash
 # First time only: create the file
@@ -38,7 +39,15 @@ blender -b --factory-startup -P tools/blender/build_area_props.py -- --out web/w
 # Shop interior scene
 blender -b art/Sixfold.blend -P tools/blender/build_interior_scene.py -- --render /tmp/interior.png
 
-# Seamless painterly ground textures -> {grass,dirt,wood_floor,sand,stone}.png (1024 px; --only sand,stone for some).
+# 1.3 region props -> web/world/assets/*.glb, per region (ember, storm, tide, dream, grove, stone or all).
+# --sheets DIR writes <region>_tiles.png (every prop, front/back 3/4, labelled) and <region>_day.png / _night.png: a small
+# map built from the exported files at the game camera, toon-shaded like the game (gradient ramp, hemisphere, fog) in the
+# region's light. --check lists coplanar faces; --textures points at baked ground PNGs; --assets-extra borrows .glb folders.
+blender -b --factory-startup -P tools/blender/build_regions_v13.py -- --region ember,storm --out web/world/assets \
+    --sheets /tmp/v13 --textures /tmp/tex --check
+
+# Seamless painterly ground textures -> {grass,dirt,wood_floor,sand,stone}.png and the 1.3 set
+# {ash,heath,wet_sand,dusk_grass,moss,slate,cave}.png (1024 px; --only sand,stone for some).
 # Bake into a scratch folder, then `cwebp -q 82 x.png -o web/world/textures/x.webp`: only the .webp files are committed.
 blender -b --factory-startup -P tools/blender/bake_ground_textures.py -- --out /tmp/tex --only sand,stone
 

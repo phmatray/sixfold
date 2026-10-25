@@ -1,6 +1,8 @@
 {
   "title": "Fernhollow Trail",
   "title_fr": "Sentier de Creuse-Fougère",
+  "region": "grove",
+  "music": "grove",
   "width": 30,
   "height": 22,
   "tiles": [
@@ -242,12 +244,6 @@
       "asset": "pine",
       "x": 29,
       "z": 1,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
-      "x": 25,
-      "z": 2,
       "rot": 0
     },
     {
@@ -601,12 +597,6 @@
     {
       "asset": "pine",
       "x": 1,
-      "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 3,
       "z": 19,
       "rot": 0
     },

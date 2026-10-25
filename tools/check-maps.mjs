@@ -10,12 +10,24 @@
 // the map's spawn or a tile a warp from elsewhere lands on (nobody is ambushed as a map
 // fades in). Finds (`kind: "find"`): an id, a `give` and a `text`, on a solid tile
 // (something to look in, never a featureless one).
-import { readFileSync, readdirSync } from "node:fs";
+// 1.3 (WORLD_DESIGN §7, §13.3): outdoor maps have `title_fr`, a `region` and a `music` track; `fence` and
+// `cliff` name known sets. Gates: tiles in bounds; with every gate shut the spawn still reaches an exit or
+// a warp (no soft-lock), and with every gate open every person, spot, warp and waymark can be reached
+// (floor heights, the 0.6 m step and the ladder rule as build.js has them). The atlas (atlas.json) lists
+// every outdoor map under its own title, its roads join listed maps, and each waymark stands on a
+// reachable tile facing its post (a `kind: "waymark"` spot of the same id); posts sit at least 1.7 grid
+// squares apart on the chart, so their 44 px targets never overlap on a phone.
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 const dir = process.argv[2] ?? "web/world";
 const src = readFileSync(`${dir}/props.js`, "utf8");
 const FOOT = eval(`(${src.match(/export const FOOT = (\{[\s\S]*?\});/)[1]})`);
 const DECK = eval(`(${src.match(/export const DECK = (\{[\s\S]*?\});/)[1]})`);
 const WALKABLE = new Set(["rug", "exit_mat", ...Object.keys(DECK)]);
+const ACROSS = eval(`(${src.match(/export const ACROSS = new Set\((\[[\s\S]*?\])\);/)[1]})`);
+const LADDER = new Set(eval(`(${src.match(/export const LADDER = new Set\((\[[\s\S]*?\])\);/)[1]})`));
+const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove", "stone", "cave"]);
+const FENCES = new Set(["fence", "wall_dry", "hedge"]);
+const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/atlas.json`, "utf8")) : null;
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
 const maps = Object.fromEntries(readdirSync(`${dir}/maps`).map((f) => [f.replace(".json", ""), JSON.parse(readFileSync(`${dir}/maps/${f}`, "utf8"))]));
 const fail = [];
@@ -41,6 +53,13 @@ const french = (o, at, also = []) => {
 for (const [name, m] of Object.entries(maps)) {
   french(m, name);
   if (m.width > 40 || m.height > 32) fail.push(`${name}: ${m.width} x ${m.height} is over 40 x 32`);
+  if (!m.light.indoor) {
+    if (!m.title || !m.title_fr) fail.push(`${name}: an outdoor map needs a title and title_fr`);
+    if (!atlas?.regions.some((r) => r.id === m.region)) fail.push(`${name}: region ${m.region} is not in atlas.json`);
+    if (!TRACKS.has(m.music)) fail.push(`${name}: music ${m.music} is not a track (${[...TRACKS].join(", ")})`);
+  }
+  if (m.fence !== undefined && !FENCES.has(m.fence)) fail.push(`${name}: fence ${m.fence} is not ${[...FENCES].join(" / ")}`);
+  if (m.cliff !== undefined && !(Array.isArray(m.cliff) && m.cliff.length === 2 && m.cliff.every((c) => typeof c === "string"))) fail.push(`${name}: cliff is [block, top variant]`);
   const solid = new Set(), height = {};
   m.tiles.forEach((row, z) => [...row].forEach((c, x) => c >= "1" && c <= "9" && (height[`${x},${z}`] = +c)));
   m.tiles.forEach((row, z) => [...row].forEach((c, x) => "#fWV~".includes(c) && solid.add(`${x},${z}`)));
@@ -56,6 +75,7 @@ for (const [name, m] of Object.entries(maps)) {
       }
   }
   for (const n of m.npcs ?? []) if (solid.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} stands on a solid tile`);
+  reach(name, m, solid, height);
   const ids = (m.npcs ?? []).map((n) => n.id);
   ids.filter((id, i) => ids.indexOf(id) !== i).forEach((id) => fail.push(`${name}: two NPCs are called ${id}`));
   const spots = (m.interactions ?? []).map((i) => `${i.x},${i.z}`);
@@ -101,6 +121,126 @@ for (const [name, m] of Object.entries(maps)) {
       if (solid.has(`${x},${z}`)) fail.push(`${name}: exit ${e.side} tile ${x},${z} is blocked`);
     }
   }
+}
+
+// Gates and reachability: flood fill from the spawn over walkable tiles, a step at most 0.6 m up or
+// down (a ladder joins its front and back whatever the height), first with every gate shut, then open.
+function reach(name, m, solid0, height0) {
+  const W = m.width, H = m.height, inMap = (x, z) => x >= 0 && z >= 0 && x < W && z < H;
+  const ladders = new Map();
+  for (const p of m.props) if (LADDER.has(p.asset)) ladders.set(`${p.x},${p.z}`, p.rot % 180 === 90 ? "x" : "z");
+  // Deck rows, front first, as build.js lays them (check above only reads the first row).
+  const height = { ...height0 };
+  for (const p of m.props) {
+    const deck = DECK[p.asset];
+    if (!deck) continue;
+    let [w, d] = FOOT[p.asset] ?? [1, 1];
+    if (p.rot % 180 === 90) [w, d] = [d, w];
+    for (let x = p.x; x < p.x + w; x++)
+      for (let z = p.z; z < p.z + d; z++) {
+        const row = { 0: p.z + d - 1 - z, 90: p.x + w - 1 - x, 180: z - p.z, 270: x - p.x }[p.rot % 360] ?? 0;
+        height[`${x},${z}`] = (p.y ?? 0) + deck[Math.min(row, deck.length - 1)];
+      }
+  }
+  const gates = m.gates ?? [];
+  const ids = gates.map((g) => g.id);
+  ids.filter((id, i) => !id || ids.indexOf(id) !== i).forEach((id) => fail.push(`${name}: gate ids must be set and unique (${id})`));
+  for (const g of gates) {
+    if (!Array.isArray(g.tiles) || !g.tiles.length) fail.push(`${name}: gate ${g.id} has no tiles`);
+    for (const t of g.tiles ?? []) if (!inMap(t[0], t[1])) fail.push(`${name}: gate ${g.id} tile ${t} is off the map`);
+    if (typeof g.if !== "string") fail.push(`${name}: gate ${g.id} has no if`);
+    if (!g.text) fail.push(`${name}: gate ${g.id} needs a text for when it's shut`);
+    if (g.floor !== undefined && !(g.floor >= 0)) fail.push(`${name}: gate ${g.id} floor ${g.floor} is below the ground (it would hide the hero's feet)`);
+  }
+  const flood = (open) => {
+    const solid = new Set(solid0), h = { ...height };
+    for (const g of gates)
+      for (const [x, z, y] of g.tiles ?? []) {
+        const k = `${x},${z}`, c = m.tiles[z]?.[x];
+        if (!open) {
+          solid.add(k);
+          continue;
+        }
+        solid.delete(k);
+        const deck = DECK[g.prop_open] ?? DECK[g.prop];
+        const base = y ?? (c >= "1" && c <= "9" ? +c : 0);
+        h[k] = g.floor ?? (deck ? base + deck[0] : h[k] ?? 0);
+      }
+    const step = (ax, az, bx, bz) => {
+      if (Math.abs((h[`${bx},${bz}`] ?? 0) - (h[`${ax},${az}`] ?? 0)) <= 0.6) return true;
+      const axis = ax !== bx ? "x" : "z";
+      return ladders.get(`${ax},${az}`) === axis || ladders.get(`${bx},${bz}`) === axis;
+    };
+    const seen = new Set([`${m.spawn.x},${m.spawn.z}`]), queue = [[m.spawn.x, m.spawn.z]];
+    while (queue.length) {
+      const [x, z] = queue.shift();
+      for (const [dx, dz] of Object.values(DIR)) {
+        const nx = x + dx, nz = z + dz, k = `${nx},${nz}`;
+        if (!inMap(nx, nz) || seen.has(k) || solid.has(k) || !step(x, z, nx, nz)) continue;
+        seen.add(k);
+        queue.push([nx, nz]);
+      }
+    }
+    return seen;
+  };
+  const near = (seen, x, z, across = false) =>
+    seen.has(`${x},${z}`) || Object.values(DIR).some(([dx, dz]) => seen.has(`${x + dx},${z + dz}`) || (across && seen.has(`${x + 2 * dx},${z + 2 * dz}`)));
+  const exitTiles = (m.exits ?? []).flatMap((e) => Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, i) => {
+    const c = e.span[0] + i;
+    return { n: [c, 0], s: [c, H - 1], w: [0, c], e: [W - 1, c] }[e.side];
+  }));
+  const shut = flood(false);
+  const out = exitTiles.some(([x, z]) => shut.has(`${x},${z}`)) || (m.warps ?? []).some((w) => near(shut, w.x, w.z));
+  if (!out) fail.push(`${name}: with every gate shut, the spawn reaches no exit or warp (a soft-lock)`);
+  const all = flood(true);
+  for (const n of m.npcs ?? []) if (!near(all, n.x, n.z, true)) fail.push(`${name}: ${n.id} can't be reached, even with every gate open`);
+  for (const i of m.interactions ?? []) if (!near(all, i.x, i.z, true)) fail.push(`${name}: the spot at ${i.x},${i.z} can't be reached, even with every gate open`);
+  for (const w of m.warps ?? []) if (!near(all, w.x, w.z)) fail.push(`${name}: the warp at ${w.x},${w.z} can't be reached, even with every gate open`);
+  for (const wm of atlas?.waymarks ?? [])
+    if (wm.map === name && !all.has(`${wm.x},${wm.z}`)) fail.push(`${name}: waymark ${wm.id}'s tile ${wm.x},${wm.z} can't be reached`);
+  return all;
+}
+
+// The atlas.
+if (!atlas) fail.push("atlas.json is missing");
+else {
+  const listed = new Map(atlas.maps.map((n) => [n.id, n]));
+  for (const [name, m] of Object.entries(maps)) {
+    if (m.light.indoor) continue;
+    const n = listed.get(name);
+    if (!n) fail.push(`atlas: outdoor map ${name} is not on the chart`);
+    else if (n.name !== m.title || n.name_fr !== m.title_fr) fail.push(`atlas: ${name} is "${n.name}" / "${n.name_fr}" on the chart but titled "${m.title}" / "${m.title_fr}"`);
+    else if (n.region !== m.region) fail.push(`atlas: ${name} is in ${n.region} on the chart but ${m.region} on the map`);
+  }
+  for (const n of atlas.maps) {
+    if (!maps[n.id]) fail.push(`atlas: ${n.id} is not a map`);
+    if (!(n.x >= 0 && n.x <= 12 && n.y >= 0 && n.y <= 9)) fail.push(`atlas: ${n.id} is off the 12 x 9 chart`);
+  }
+  for (const r of atlas.regions) if (!r.id || !r.name || !r.name_fr || !/^#[0-9a-f]{6}$/i.test(r.color)) fail.push(`atlas: region ${r.id} needs an id, name, name_fr and a #colour`);
+  for (const l of atlas.links) {
+    if (!listed.has(l.a) || !listed.has(l.b)) fail.push(`atlas: road ${l.a} - ${l.b} joins a map not on the chart`);
+    if (l.if && !["lantern", "ferry", "boots", "gloves"].includes(l.icon)) fail.push(`atlas: gated road ${l.a} - ${l.b} needs an icon`);
+  }
+  const ids = atlas.waymarks.map((w) => w.id);
+  ids.filter((id, i) => ids.indexOf(id) !== i).forEach((id) => fail.push(`atlas: two waymarks are called ${id}`));
+  for (const w of atlas.waymarks) {
+    const m = maps[w.map];
+    if (!m || !listed.has(w.map)) {
+      fail.push(`atlas: waymark ${w.id} is on ${w.map}, not a charted map`);
+      continue;
+    }
+    if (!w.name || !w.name_fr || !DIR[w.facing]) fail.push(`atlas: waymark ${w.id} needs a name, name_fr and a facing`);
+    const [px, pz] = [w.x + (DIR[w.facing]?.[0] ?? 0), w.z + (DIR[w.facing]?.[1] ?? 0)];
+    if (!(m.interactions ?? []).some((i) => i.kind === "waymark" && i.id === w.id && i.x === px && i.z === pz)) fail.push(`atlas: waymark ${w.id} faces ${px},${pz} on ${w.map}, where there is no waymark spot of that id`);
+  }
+  for (const [name, m] of Object.entries(maps))
+    for (const i of m.interactions ?? []) if (i.kind === "waymark" && !ids.includes(i.id)) fail.push(`${name}: waymark ${i.id} is not in atlas.json`);
+  const at = (w) => listed.get(w.map) ?? { x: 0, y: 0 };
+  for (let i = 0; i < atlas.waymarks.length; i++)
+    for (let j = i + 1; j < atlas.waymarks.length; j++) {
+      const a = at(atlas.waymarks[i]), b = at(atlas.waymarks[j]);
+      if (Math.hypot(a.x - b.x, a.y - b.y) < 1.7) fail.push(`atlas: waymarks ${atlas.waymarks[i].id} and ${atlas.waymarks[j].id} are under 1.7 squares apart on the chart`);
+    }
 }
 if (fail.length) throw new Error(fail.join("\n"));
 console.log(`maps ok (${Object.keys(maps).join(", ")})`);

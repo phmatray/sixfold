@@ -1,16 +1,16 @@
 // Building a map's scene (`build`): lights, collision and floor heights, ground,
 // props (static ones instanced, flat-coloured parts merged), raised ground, fences
-// and walls, grass, the tree ring, lamps, glints, the house door and NPCs. Also
+// and walls, grass, the tree ring, lamps, glints, gates, `Open` clips and NPCs. Also
 // the props' own animation (`animateProps`), `refresh` (re-check what conditions
-// show or hide) and `dispose`.
+// show, hide, open or shut) and `dispose`. The light itself, by time of day, is daylight.js.
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { windify, waterify, ambience } from "./life.js";
 import { groundMesh } from "./ground.js";
-import { rng, mesh, group, toon, PLACEHOLDER, FOOT, WALKABLE, DECK, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox } from "./props.js";
+import { rng, mesh, group, toon, PLACEHOLDER, FOOT, WALKABLE, DECK, LADDER, BOB, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox } from "./props.js";
 import { key, glowTex, blobGeo, blobMat } from "./actors.js";
 import { spawnNpcs } from "./npc.js";
-import { OPTIONAL, RING } from "./map.js";
+import { OPTIONAL, RING, cliffSet } from "./map.js";
 
 // Instanced: static, never animated, never read like a sign (one draw per mesh of the model, not per prop).
 const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "reeds", "boardwalk", "pier", "bridge", "stairs",
@@ -20,9 +20,13 @@ const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff e
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
 
 // Re-check what a condition shows or hides (`holds(cond)`), after a map is built
-// and whenever the game state may have changed (a dialogue closed): people and
-// spots with an `if` come and go, and the glint over each find.
-export function refresh(w, holds) {
+// and whenever the game state may have changed (a dialogue closed, the time of day
+// turned): people, spots and props with an `if` come and go, the glint over each
+// find, the waymarks' crystals, props' `open` clips, and gates. `gate(cond, wasOpen,
+// underHero)` is the engine's rule (a gate never shuts under the hero); the first
+// refresh after a build counts a hero spawning on a gate as having come through it.
+// `animate`: a gate that changes now plays its opening (not on a fresh build).
+export function refresh(w, holds, gate, animate = false) {
   for (const n of w.npcs) n.hidden = !holds(n.def.if);
   for (const i of w.map.interactions) {
     if (!i.if) continue;
@@ -31,6 +35,50 @@ export function refresh(w, holds) {
     else if (w.talk.get(k) === i) w.talk.delete(k);
   }
   w.glints.forEach((g) => (g.sprite.visible = holds(g.it.if) && holds(g.cond)));
+  for (const c of w.shown) c.obj.visible = holds(c.p.if);
+  for (const o of w.openers) if (o.cond) o.want = holds(o.cond) ? 1 : 0;
+  for (const m of w.waymarks) {
+    const lit = holds(`flag:way_${m.it.id}`);
+    if (m.lit === false && lit && animate) m.flash = 1; // just touched: a burst of light
+    m.lit = lit;
+  }
+  const on = new Set([key(w.hero?.x ?? w.spawnAt.x, w.hero?.z ?? w.spawnAt.z)]);
+  if (w.hero?.step) on.add(key(w.hero.step.x, w.hero.step.z));
+  for (const g of w.gates) {
+    const under = g.tiles.some((t) => on.has(key(t.x, t.z)));
+    const open = gate(g.def.if ?? "", g.open ?? under, under);
+    if (open === g.open) continue;
+    const was = g.open;
+    g.open = open;
+    if (animate && was !== null) (g.anim = 0), w.life.puffs?.(g.tiles), (w.gateSound = open);
+    else g.anim = null;
+    showGate(g, reduced(w) ? null : g.anim);
+  }
+  collide(w);
+  w.lightDirty = true;
+}
+const reduced = (w) => w.reduced;
+
+// Collision over the static map: shut gates block their tiles (open ones take
+// their own floor), and a prop with an `if` blocks its footprint while it is there.
+function collide(w) {
+  const { solid, floor, base } = w.grid0;
+  for (const i of w.dynamic) (solid[i] = base.solid[i]), (floor[i] = base.floor[i]);
+  for (const g of w.gates) for (const t of g.tiles) (solid[t.i] = g.open ? 0 : 1), g.open && (floor[t.i] = t.open);
+  for (const c of w.shown) if (c.obj.visible) for (const t of c.tiles) (solid[t.i] = t.deck === null ? 1 : 0), t.deck !== null && (floor[t.i] = t.deck);
+}
+
+// A gate's props: `prop` always, `prop_closed` / `prop_open` by state. `t` (0..1)
+// plays the change: the going group sinks, the coming one rises.
+function showGate(g, t) {
+  const k = t === null ? 1 : t;
+  const ease = k * k * (3 - 2 * k);
+  if (g.closed) (g.closed.visible = !g.open || k < 1), (g.closed.scale.y = g.open ? Math.max(0.001, 1 - ease) : t === null ? 1 : ease);
+  if (g.opened) (g.opened.visible = g.open || k < 1), (g.opened.scale.y = g.open ? Math.max(0.001, ease) : t === null ? 1 : 1 - ease);
+  if (t === null) {
+    if (g.closed) g.closed.scale.y = 1;
+    if (g.opened) g.opened.scale.y = 1;
+  }
 }
 
 // Free GPU memory under `root`; cached model geometry (instanced) is kept.
@@ -47,9 +95,22 @@ export function dispose(root) {
 // The house door easing open or shut, a sign wobbling after it was read, boats
 // bobbing, the lighthouse beacon and the glint of something to find.
 export function animateProps(w, dt, reduced) {
+  for (const g of w.gates) {
+    if (g.anim === null) continue;
+    g.anim = Math.min(1, g.anim + dt / 0.7);
+    showGate(g, g.anim);
+    if (g.anim >= 1) (g.anim = null), showGate(g, null);
+  }
+  for (const o of w.openers) {
+    if (o.want === undefined) continue;
+    o.open = reduced ? o.want : o.open + Math.sign(o.want - o.open) * Math.min(Math.abs(o.want - o.open), dt / o.length);
+    o.action.time = o.open * o.length;
+    o.mixer.update(0);
+  }
+  for (const m of w.waymarks) if (m.flash) m.flash = Math.max(0, m.flash - dt * 0.8);
   if (!reduced) {
     for (const b of w.boats) {
-      b.obj.position.y = Math.sin(w.now * 1.4 + b.cx) * 0.035;
+      b.obj.position.y = (b.y ?? 0) + Math.sin(w.now * 1.4 + b.cx) * 0.035;
       b.obj.rotation.z = Math.sin(w.now * 1.1 + b.cz) * 0.03;
     }
     for (const g of w.glows) g.material.opacity = 0.55 + 0.3 * Math.sin(w.now * 2.2);
@@ -83,8 +144,8 @@ function flatten(template) {
   template.traverse((m) => {
     if (!m.isMesh) return;
     const rel = new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld);
-    // Textured, see-through and `glow` parts (lit at night, by name) stay apart.
-    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow/i.test(m.material.name)) return keep.push([m, rel]);
+    // Textured, see-through, `glow` and `glass` parts (lit at night, by name) stay apart.
+    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass/i.test(m.material.name)) return keep.push([m, rel]);
     const src = m.geometry, n = src.attributes.position.count, c = m.material.color;
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", src.attributes.position.clone());
@@ -183,7 +244,13 @@ export async function build(map, got, reduced) {
   const inMap = (x, z) => x >= 0 && z >= 0 && x < W && z < H;
   const blocked = (x, z) => !inMap(x, z) || solid[z * W + x] === 1;
   const floorAt = (x, z) => (inMap(x, z) ? floor[z * W + x] : 0);
-  const climb = (ax, az, bx, bz) => Math.abs(floorAt(bx, bz) - floorAt(ax, az)) <= CLIMB;
+  // A ladder joins its front and back neighbours at any height (along its own axis).
+  const ladders = new Map();
+  const climb = (ax, az, bx, bz) => {
+    if (Math.abs(floorAt(bx, bz) - floorAt(ax, az)) <= CLIMB) return true;
+    const axis = ax !== bx ? "x" : "z";
+    return ladders.get(key(ax, az)) === axis || ladders.get(key(bx, bz)) === axis;
+  };
 
   root.add(await groundMesh(map, tile));
 
@@ -201,15 +268,17 @@ export async function build(map, got, reduced) {
   const variants = (n) => [n, `${n}_b`, `${n}_c`].filter((v) => v === n || got[v]);
   const tint = (base, spread) => new THREE.Color(base).offsetHSL((r() - 0.5) * spread, 0, (r() - 0.5) * spread);
 
-  // Props sit at their footprint's centre; rot 90/270 swaps the footprint.
+  // Props sit at their footprint's centre; rot 90/270 swaps the footprint. A prop
+  // with an `if` (WORLD_DESIGN §9.1) is only there, and only blocks, while it holds.
   const props = [];
   const propAt = new Map();
+  const shown = [];
   for (const p of map.props) {
     let [fw, fd] = FOOT[p.asset] ?? [1, 1];
     if (p.rot % 180 === 90) [fw, fd] = [fd, fw];
     const cx = p.x + fw / 2, cz = p.z + fd / 2, y = p.y ?? 0; // `y` stacks a prop (a step on a cliff)
     let obj = null;
-    if (BATCHED.has(p.asset)) {
+    if (BATCHED.has(p.asset) && !p.if) {
       // Trees vary in model, size, tint and turn; the ones on the map edge sit half a tile out.
       const isTree = TREES.has(p.asset);
       const kinds = variants(p.asset);
@@ -238,48 +307,106 @@ export async function build(map, got, reduced) {
       root.add(obj);
       if (BLOB[p.asset] && !got[p.asset]) blobs.push([cx, cz, BLOB[p.asset]]);
     }
-    const rec = { ...p, obj, cx, cz };
+    const rec = { ...p, obj, cx, cz, y };
     props.push(rec);
     for (const i of map.interactions) if (i.x >= p.x && i.x < p.x + fw && i.z >= p.z && i.z < p.z + fd) i.obj = obj;
     const deck = DECK[p.asset];
+    const cond = p.if ? { p, obj, tiles: [] } : null;
+    if (cond) shown.push(cond);
     for (let x = p.x; x < p.x + fw; x++)
       for (let z = p.z; z < p.z + fd; z++) {
-        propAt.set(key(x, z), rec);
-        if (deck) {
-          // The deck's rows run from its front (+Z at rot 0) to its back.
-          const row = { 0: p.z + fd - 1 - z, 90: p.x + fw - 1 - x, 180: z - p.z, 270: x - p.x }[p.rot % 360] ?? 0;
+        if (!cond) propAt.set(key(x, z), rec);
+        if (LADDER.has(p.asset)) ladders.set(key(x, z), p.rot % 180 === 90 ? "x" : "z");
+        // The deck's rows run from its front (+Z at rot 0) to its back.
+        const row = { 0: p.z + fd - 1 - z, 90: p.x + fw - 1 - x, 180: z - p.z, 270: x - p.x }[p.rot % 360] ?? 0;
+        const top = deck ? y + deck[Math.min(row, deck.length - 1)] : null;
+        if (cond) {
+          if (deck || !WALKABLE.has(p.asset)) cond.tiles.push({ i: z * W + x, deck: top });
+        } else if (deck) {
           solid[z * W + x] = 0;
-          floor[z * W + x] = y + deck[Math.min(row, deck.length - 1)];
+          floor[z * W + x] = top;
         } else if (!WALKABLE.has(p.asset)) solid[z * W + x] = 1;
       }
   }
+  // Props with an `Open` clip (a pylon's lever, moonflowers at dusk) play it while
+  // their `open` condition holds; the house door opens as the hero walks up (below).
+  const openers = [];
+  for (const p of props) {
+    const clip = p.obj && p.asset !== "house" && got[p.asset]?.animations.find((a) => a.name.toLowerCase() === "open");
+    if (!clip) continue;
+    const mixer = new THREE.AnimationMixer(p.obj), action = mixer.clipAction(clip);
+    action.play();
+    action.paused = true;
+    openers.push({ mixer, action, length: clip.duration || 1, open: 0, want: p.open ? 0 : undefined, cond: p.open ?? null });
+  }
 
-  // Raised ground ("1".."9": stacked cliff blocks, a mossy top now and then) and deck tiles.
+  // Raised ground ("1".."9": stacked cliff blocks, a mossy top now and then; the map's
+  // own `cliff` set when it has one) and deck tiles.
+  const cliffs = cliffSet(map);
   for (let z = 0; z < H; z++)
     for (let x = 0; x < W; x++) {
       const c = tile(x, z), turn = () => (Math.floor(r() * 4) * Math.PI) / 2;
       if (c >= "1" && c <= "9")
         for (let k = 0; k < +c; k++) {
-          const n = k === +c - 1 && got.cliff_b && r() < 0.35 ? "cliff_b" : "cliff";
+          const n = k === +c - 1 && got[cliffs[1]] && r() < 0.35 ? cliffs[1] : cliffs[0];
           batch.add(n, tpl(n), at(x + 0.5, z + 0.5, turn(), 1, k));
         }
       else if (c === "=" || c === "H") batch.add(c === "=" ? "boardwalk" : "pier", tpl(c === "=" ? "boardwalk" : "pier"), at(x + 0.5, z + 0.5, 0));
     }
 
-  // Fences ("f") and walls ("W", or "V" for a wall with a window) auto-tile from
-  // their neighbours; walls on the south (camera-facing) row use the low cutaway pieces.
+  // Fences ("f": the map's `fence` set, "fence", "wall_dry" or "hedge") and walls ("W",
+  // or "V" for a wall with a window) auto-tile from their neighbours; walls on the
+  // south (camera-facing) row use the low cutaway pieces.
   const joins = (c, x, z) => (c === "f" ? tile(x, z) === "f" : "WV".includes(tile(x, z) ?? "-"));
+  const fence = map.fence ?? "fence";
   for (let z = 0; z < H; z++)
     for (let x = 0; x < W; x++) {
       const c = tile(x, z);
       if (!"fWV".includes(c ?? "-")) continue;
-      const kind = c === "f" ? "fence" : z === H - 1 ? "wall_low" : "wall";
+      const kind = c === "f" ? fence : z === H - 1 ? "wall_low" : "wall";
       const mask = SIDES.reduce((m, [dx, dz], i) => m | (joins(c, x + dx, z + dz) ? 1 << i : 0), 0);
       for (const [sfx, deg] of [AUTOTILE[mask], ...(mask === 15 ? [["_end", 270]] : [])]) {
         const n = c === "V" && sfx === "" ? "wall_window" : kind + sfx; // a window only fits a straight run
-        batch.add(n, tpl(n, () => armsPiece(n === "wall_window" ? n : kind, SUFFIX_ARMS[sfx])), at(x + 0.5, z + 0.5, THREE.MathUtils.degToRad(deg)));
+        const stand = n === "wall_window" ? n : c === "f" ? "fence" : kind; // placeholder pieces
+        batch.add(n, tpl(n, () => armsPiece(stand, SUFFIX_ARMS[sfx])), at(x + 0.5, z + 0.5, THREE.MathUtils.degToRad(deg)));
       }
     }
+
+  // Gates (WORLD_DESIGN §7.1): tiles walkable only while a condition holds, whatever
+  // they are (water, a cliff, a ledge). Each tile is [x, z] or [x, z, y]; `y` stacks
+  // its props (a climb wall on a 1 m ledge: by default the tile's own height). Open,
+  // a tile's floor is the gate's `floor`, else its deck prop's top, else the ground's.
+  // Props: `prop` always, `prop_closed` / `prop_open` by state (afloat ones bob).
+  const boats = [];
+  const gates = (map.gates ?? []).map((def) => {
+    const deck = DECK[def.prop_open] ?? DECK[def.prop];
+    const tiles = def.tiles.map(([x, z, y]) => {
+      const c = tile(x, z);
+      y ??= c >= "1" && c <= "9" ? +c : 0;
+      return { x, z, y, i: z * W + x, open: def.floor ?? (deck ? y + deck[0] : floor[z * W + x]) };
+    });
+    const rot = THREE.MathUtils.degToRad(def.rot ?? 0);
+    const props = (name) => {
+      if (!name) return null;
+      const g = new THREE.Group(), gb = batcher();
+      for (const t of tiles) {
+        if (BOB.has(name)) {
+          const obj = got[name] ? got[name].scene.clone(true) : fallback(name);
+          obj.position.set(t.x + 0.5, t.y, t.z + 0.5);
+          obj.rotation.y = rot;
+          prep(obj, true);
+          g.add(obj);
+          boats.push({ obj, cx: t.x + 0.5, cz: t.z + 0.5, y: t.y });
+        } else gb.add(name, tpl(name), at(t.x + 0.5, t.z + 0.5, rot, 1, t.y));
+      }
+      gb.build(g, (n) => WIND_H[n] ?? 0);
+      root.add(g);
+      return g;
+    };
+    props(def.prop);
+    return { def, tiles, open: null, anim: null, closed: props(def.prop_closed), opened: props(def.prop_open) };
+  });
+  const gateAt = new Map(gates.flatMap((g) => g.tiles.map((t) => [key(t.x, t.z), g])));
 
   // Open grass: plain base tiles, not under a prop, a deck or a cliff.
   const wet = (x, z) => SIDES.some(([dx, dz]) => "~H".includes(tile(x + dx, z + dz) ?? "-"));
@@ -340,6 +467,33 @@ export async function build(map, got, reduced) {
   }
   root.traverse((o) => o.isLight && o.layers.enableAll());
 
+  // The static collision, kept so gates and conditional props can be laid over it.
+  const dynamic = [...new Set([...gates.flatMap((g) => g.tiles.map((t) => t.i)), ...shown.flatMap((c) => c.tiles.map((t) => t.i))])];
+  const grid0 = { solid, floor, base: { solid: solid.slice(), floor: floor.slice() } };
+
+  // Where light comes from at night (daylight.js): every `light_origin` in the scene,
+  // the instanced lanterns' too. Low ones may get a real light; high ones only glow.
+  const lamps = [];
+  const origin = new THREE.Vector3();
+  for (const p of props) {
+    if (p.asset === "lighthouse") continue; // its beacon has its own glow
+    if (p.obj) {
+      p.obj.updateMatrixWorld(true);
+      p.obj.traverse((o) => o.name === "light_origin" && lamps.push(o.getWorldPosition(new THREE.Vector3())));
+    } else if (got[p.asset]) {
+      const t = got[p.asset].scene;
+      t.updateMatrixWorld(true);
+      const o = t.getObjectByName("light_origin");
+      if (o) lamps.push(o.getWorldPosition(origin).clone().add(new THREE.Vector3(p.cx, p.y, p.cz)));
+    }
+  }
+  // Waymarks: the crystal is dim until touched (`flag:way_<id>`), then lit.
+  const waymarks = map.interactions.filter((i) => i.kind === "waymark" && i.obj).map((it) => {
+    const mats = [];
+    it.obj.traverse((o) => o.isMesh && /glow/i.test(o.material.name) && mats.push(o.material));
+    return { it, mats, lit: null, flash: 0 };
+  });
+
   const talk = new Map(map.interactions.map((i) => [key(i.x, i.z), i]));
   const warps = new Map((map.warps ?? []).map((wp) => [key(wp.x, wp.z), wp]));
   // Edge exits: walking off side `side` at a tile within `span` leads to map `to`.
@@ -357,8 +511,8 @@ export async function build(map, got, reduced) {
     root.add(sprite);
     return { sprite, cond: i.glint, it: i };
   });
-  // Boats bob; a lighthouse beacon glows at its `light_origin`.
-  const boats = props.filter((p) => p.asset === "boat" && p.obj);
+  // Boats, buoys and lanterns afloat bob; a lighthouse beacon glows at its `light_origin`.
+  boats.push(...props.filter((p) => BOB.has(p.asset) && p.obj));
   root.updateMatrixWorld(true);
   const glows = props
     .filter((p) => p.asset === "lighthouse" && p.obj)
@@ -400,7 +554,8 @@ export async function build(map, got, reduced) {
   const smoke = chimney?.getObjectByName("smoke_origin")?.getWorldPosition(new THREE.Vector3()) ?? null;
   const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
   const life = ambience(root, { flowers, smoke }, reduced);
-  return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, door, life, boats, glows, glints, path: [], now: 0, nearKey: null };
+  return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, door, life, boats, glows, glints,
+    gates, gateAt, shown, openers, waymarks, lamps, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }
 
 // G toggles this: tile lines; red = blocked, gold = look/use, blue = door, green = person.

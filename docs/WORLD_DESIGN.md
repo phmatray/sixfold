@@ -1,6 +1,6 @@
 # Sixfold — World Design (1.2 → 1.4)
 
-Status: living spec; 1.2 is built (PRs 1–4: engine, world.js split, line of sight, finds and houses, then the content). Owner: game/world design. Supersedes the "After 1.0" line of `docs/ROADMAP.md` for
+Status: living spec; 1.2 is built (PRs 1–4: engine, world.js split, line of sight, finds and houses, then the content); 1.3 PR 1 (the clock, day and night, gates, the world map, waymarks and the hub inn) is built. Owner: game/world design. Supersedes the "After 1.0" line of `docs/ROADMAP.md` for
 the world. Three releases implement it:
 
 | Release | Name | One-line goal |
@@ -564,7 +564,7 @@ one sends you back somewhere you've been. Running Shoes stay the hub's starter i
   "id": "hush_ford",
   "tiles": [[0,24],[1,24],[2,24],[0,25],[1,25],[2,25]],
   "if": "item:wading_boots",            // any condition: item, time, flags, seals
-  "floor": -0.15,                       // optional floor height while open (wading)
+  "floor": 0.1,                         // optional floor height while open (>= 0: a lower floor hides the hero's feet)
   "prop": "ford_stones",                // optional, shown always
   "prop_closed": null, "prop_open": null, // optional, shown per state (rubble / lantern_raft / steam)
   "text": "The ford runs fast and knee-deep. Boots would help.",
@@ -629,12 +629,13 @@ The top bar gains a small sun/moon dial with the phase name (also announced to s
 map's node position and the **waymarks**:
 
 ```jsonc
-{ "waymarks": [{ "id": "way_cinderwick", "map": "cinderwick", "x": 7, "z": 9, "facing": "s",
+{ "waymarks": [{ "id": "cinderwick", "map": "cinderwick", "x": 7, "z": 9, "facing": "s",
                  "name": "Cinderwick plaza", "name_fr": "Place de Mèche-Cendre" }, ...] }
 ```
 
 - A **waymark** is a hexagonal stone post with a crystal in its region's colour (`waymark.glb`, tinted).
-  Facing it sets `flag:way_<id>` and offers **Travel**.
+  Facing it sets `flag:way_<id>` and offers **Travel** (as built in 1.3 PR 1: the map holds the post as a
+  `waymark` prop with `glow` and a `kind: "waymark"` spot; `atlas.json` holds the tile the hero lands on).
 - Entering a map sets `flag:seen_<map>`; the world map shows seen maps, fogs the rest, and draws the ring
   links you've crossed (gated links show the item icon until opened).
 - **Travel** (from any waymark, or from the map panel while standing outdoors): pick a visited waymark;
