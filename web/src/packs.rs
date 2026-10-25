@@ -479,6 +479,15 @@ fn Reveal(
         } else {
             pack_sound(0.0, 1.0);
             aim_end(0.0, 1.0);
+            // The Tear button just went away: keyboards land on Faster.
+            request_animation_frame(move || {
+                if let Some(b) = actions
+                    .get_untracked()
+                    .and_then(|el| el.query_selector(".btn.speed").ok().flatten())
+                {
+                    let _ = wasm_bindgen::JsCast::unchecked_into::<web_sys::HtmlElement>(b).focus();
+                }
+            });
         }
     };
     // Holding the pack plays it fast while held; a tap leaves it fast.
@@ -548,7 +557,7 @@ fn Reveal(
             </div>
         </div>
         <p class="sr-only" aria-live="polite">{move || done.get().then(|| summary.clone())}</p>
-        <div class="reveal-actions" node_ref=actions>
+        <div class="reveal-actions" class:live=move || open.get() && !done.get() node_ref=actions>
             {move || if done.get() {
                 view! {
                     {(more() > 0).then(|| view! {

@@ -148,6 +148,8 @@ enum Fix {
     ShowBasics,
     /// Show the deck pane, to choose what comes out.
     ShowDeck,
+    /// Show every card of "Your cards", to choose what goes in.
+    ShowCards,
 }
 
 /// A deck problem as a sentence naming the rule, and the fix the editor
@@ -157,21 +159,32 @@ fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Optio
     match e {
         DeckListError::Illegal(DeckError::WrongSize(n)) if n < DECK_SIZE => {
             let short = DECK_SIZE - n;
-            (
-                tr(
-                    format!("A deck holds exactly {DECK_SIZE} cards: {short} to go."),
-                    format!("Un deck compte exactement {DECK_SIZE} cartes : encore {short}."),
-                ),
-                repairable().then(|| {
-                    (
-                        tr(
-                            format!("Fill with {short} energy"),
-                            format!("Compléter avec {short} énergies"),
-                        ),
-                        Fix::Repair(e),
-                    )
-                }),
-            )
+            let rule = tr(
+                format!("A deck holds exactly {DECK_SIZE} cards: {short} to go."),
+                format!("Un deck compte exactement {DECK_SIZE} cartes : encore {short}."),
+            );
+            // Energy fills the gap only while that leaves a playable mix.
+            let mut filled = d.clone();
+            let fills = filled.repair(e, owned);
+            let heavy = hints(&filled.cards)
+                .advice()
+                .iter()
+                .any(|a| matches!(a, Advice::MuchEnergy(_)));
+            if fills && !heavy {
+                let label = tr(
+                    format!("Fill with {short} energy"),
+                    format!("Compléter avec {short} énergies"),
+                );
+                (rule, Some((label, Fix::Repair(e))))
+            } else {
+                (
+                    tr(
+                        format!("{rule} Energy alone would leave too few Hexons and trainers: add some first."),
+                        format!("{rule} Avec seulement des énergies, il resterait trop peu d'Hexons et de Dresseurs : ajoutez-en d'abord."),
+                    ),
+                    Some((tr("Show your cards", "Voir vos cartes").into(), Fix::ShowCards)),
+                )
+            }
         }
         DeckListError::Illegal(DeckError::WrongSize(n)) => {
             let over = n - DECK_SIZE;
@@ -560,8 +573,10 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
     let problems = move || {
         profile.with(|p| {
             draft.with(|d| {
-                d.problems(&p.collection)
-                    .into_iter()
+                let mut list = d.problems(&p.collection);
+                // The size last: its fix depends on what the others take out.
+                list.sort_by_key(|e| matches!(e, DeckListError::Illegal(DeckError::WrongSize(_))));
+                list.into_iter()
                     .map(|e| explain(e, d, &p.collection))
                     .collect::<Vec<_>>()
             })
@@ -578,6 +593,25 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             if changed {
                 crate::audio::sfx("place", 0.0);
                 msg.set(Some(tr("Fixed.", "Corrigé.").into()));
+                // The button just went away: on to the next fix, or the status line.
+                request_animation_frame(|| {
+                    let doc = document();
+                    let next = doc
+                        .query_selector(".deck-checks .btn.fix")
+                        .ok()
+                        .flatten()
+                        .or_else(|| doc.query_selector(".editor-msg").ok().flatten());
+                    if let Some(el) = next.and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok()) {
+                        let _ = el.focus();
+                    }
+                });
+            }
+        }
+        Fix::ShowCards => {
+            f.clear();
+            tab.set(Tab::Cards);
+            if let Some(el) = document().get_element_by_id("pane-cards") {
+                el.scroll_into_view();
             }
         }
         Fix::ShowDeck => {
@@ -718,6 +752,9 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                             view! {
                                 <li class="check hint">
                                     <span>{advise(a)}</span>
+                                    {matches!(a, Advice::FewBasics(_)).then(|| view! {
+                                        <button type="button" class="btn fix" on:click=move |_| apply(Fix::ShowBasics)>{tr("Show Basic Hexons", "Voir les Hexons de Base")}</button>
+                                    })}
                                     {add.map(|pre| view! {
                                         <button type="button" class="btn fix" on:click=move |_| { try_add(pre, profile, draft, msg, None); }>
                                             {tr(format!("Add {}", card(pre).label()), format!("Ajouter {}", card(pre).label()))}
@@ -728,7 +765,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                         }).collect_view()}
                     </ul>
                 </div>
-                <p class="editor-msg" role="status" aria-live="polite">{move || msg.get()}</p>
+                <p class="editor-msg" role="status" aria-live="polite" tabindex="-1">{move || msg.get()}</p>
             </section>
 
             <div class="editor-tabs" role="tablist" aria-label=tr("Editor panes", "Volets de l'éditeur")>

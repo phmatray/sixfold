@@ -1680,7 +1680,7 @@ select option { background: var(--panel); color: var(--ink); }
 .tally .rarity { margin: 0; width: 14px; height: 14px; }
 /* Wide: the filters and the tally beside the page, so a whole sheet fits. */
 @container binder (min-width: 740px) {
-  .binder-layout { grid-template-columns: minmax(0, 1fr) minmax(250px, 300px); grid-template-areas: "book filters" "book tally"; grid-template-rows: auto 1fr; }
+  .binder-layout { grid-template-columns: minmax(0, 1fr) minmax(250px, 330px); grid-template-areas: "book filters" "book tally"; grid-template-rows: auto 1fr; }
   .binder-filters .filters { gap: 10px; }
   .binder-filters .chips { display: grid; grid-template-columns: repeat(4, 1fr); width: 100%; }
   .binder-filters .selects { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
@@ -1690,7 +1690,7 @@ select option { background: var(--panel); color: var(--ink); }
 .sheets { container-type: inline-size; display: grid; justify-items: center; perspective: 2200px; touch-action: pan-y; }
 .binder.sheet {
   /* A whole sheet in sight: as wide as the column allows, as tall as the screen does. */
-  --w: clamp(92px, min(calc((100cqw - 130px) / 3), calc((100dvh - 345px) / 4.25)), 180px);
+  --w: clamp(92px, min(calc((100cqw - 130px) / 3), calc((100dvh - 400px) / 4.25)), 180px);
   grid-area: 1 / 1;
   grid-template-columns: repeat(3, max-content);
   gap: 12px;
@@ -1728,7 +1728,7 @@ select option { background: var(--panel); color: var(--ink); }
 .pager .btn.icon { width: 44px; min-height: 44px; padding: 0; display: grid; place-items: center; }
 .pager .btn.icon svg, .viewer-nav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .page-range { flex: 0 1 240px; min-width: 80px; accent-color: var(--brass); }
-.page-of { min-width: 9ch; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; }
+.page-of { min-width: 12ch; white-space: nowrap; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; }
 
 /* The tally: owned of total, by kind, rarity and type; a row filters the binder. */
 .tally { padding: 6px 14px 14px; border-radius: 14px; background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
@@ -1777,6 +1777,8 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .plaque { display: grid; justify-items: center; gap: 1px; min-width: 70%; padding: 5px 14px 6px; border-radius: 4px; background: linear-gradient(180deg, #ecca72, #c39a3d 60%, #a47e2c); color: #2a1e06; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 4px 8px -2px rgba(0, 0, 0, 0.6); text-align: center; }
 .plaque b { font: 800 14px/1.2 var(--display); }
 .plaque span { font-size: 12px; font-weight: 700; color: #4a3810; }
+/* A Holo's plaque is foil too. */
+.showpiece.holo .plaque { background: linear-gradient(100deg, #f2d7a0, #ffe9b8 25%, #d9f2e4 45%, #d6e6ff 65%, #efd9ff 85%, #f2d7a0); }
 
 /* The card viewer: one card up close, its full text beside it. */
 .viewer-scrim { position: fixed; inset: 0; z-index: 85; display: grid; place-items: center; padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); background: rgba(4, 8, 16, 0.84); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade-in 180ms ease-out; }
@@ -2123,7 +2125,8 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .opening.instant *, .opening.instant *::before, .opening.instant *::after { animation-delay: 0ms !important; animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
 .opening.instant.open .sealed { display: none; }
 /* Faster and Skip stay in reach while the cards turn (a phone's reveal is taller than the screen). */
-.reveal-actions { position: sticky; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 5; width: fit-content; max-width: 100%; margin: 0 auto; padding: 8px; border-radius: 16px; background: rgb(10 18 32 / 0.86); box-shadow: 0 12px 30px -12px rgb(0 0 0 / 0.8); display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.reveal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.reveal-actions.live { position: sticky; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 5; width: fit-content; max-width: 100%; margin: 0 auto; padding: 8px; border-radius: 16px; background: rgb(10 18 32 / 0.92); box-shadow: 0 12px 30px -12px rgb(0 0 0 / 0.8); }
 @keyframes flip-over { from { transform: rotateY(0) translateY(0); } 50% { transform: rotateY(90deg) translateY(-10px) scale(1.06); } to { transform: rotateY(180deg); } }
 @keyframes rare-shine {
   from { box-shadow: 0 0 0 0 rgba(243, 213, 137, 0); filter: brightness(1.6); }
@@ -2768,6 +2771,11 @@ p.atlas-pick { color: var(--muted); }
 .menu-split .side-panel { top: 120px; min-height: 0; max-height: calc(100dvh - 180px); border: 1px solid var(--line); border-radius: 14px; }
 .menu-panel .settings-body { max-width: 480px; margin: 0; box-shadow: none; }
 .menu-panel .atlas, .menu-panel .quests { margin-top: 0; }
+/* The binder in the menu: its viewer does the inspector's job, and the
+   menu's own head takes room the sheet must leave for its pager. */
+.menu-split:has(.binder-view) { grid-template-columns: minmax(0, 1fr); }
+.menu-split:has(.binder-view) > .side-panel { display: none; }
+.menu-panel .binder.sheet { --w: clamp(84px, min(calc((100cqw - 130px) / 3), calc((100dvh - 470px) / 4.25)), 180px); }
 /* The deck editor in the menu: its own bar replaces the menu's head. */
 .menu-panel:has(.editor) { padding: 0; }
 .menu-panel .page { min-height: 0; }

@@ -11,7 +11,6 @@ use wasm_bindgen::JsCast;
 
 use crate::art::card_color;
 use crate::cards::{rarity_key, rarity_label, reduced_motion, CardDetails, CardFace, Pip};
-use crate::overlays::Inspector;
 use crate::{Inspect, Screen, Ui};
 
 /// Distinct cards owned and in the set, basic energy left out (always owned).
@@ -270,10 +269,10 @@ pub fn CollectionScreen() -> impl IntoView {
         }
     };
     view! {
-        <div class="page with-side" on:keydown=on_key>
+        // No inspector beside it: the binder's own viewer reads a card.
+        <div class="page" on:keydown=on_key>
             <PageBar title="Collection" />
             <main class="page-body"><CollectionPanel /></main>
-            <div class="side-panel"><Inspector /></div>
         </div>
     }
 }
@@ -852,7 +851,6 @@ fn BinderSlot(id: CardId, on_open: Callback<()>) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
     let def = card(id);
     let count = Memo::new(move |_| profile.with(|p| p.collection.count(id)));
-    let (peek, _) = inspect_handlers(id);
     let promo = set::is_promo(id);
     let from = promo_rival(id);
     let label = move || {
@@ -868,7 +866,7 @@ fn BinderSlot(id: CardId, on_open: Callback<()>) -> impl IntoView {
             // is aria-hidden), then rarity and copies: no aria-label, which
             // would have to repeat every word a full card prints.
             <button type="button" class="bind-card"
-                on:click=move |_| on_open.run(()) on:mouseenter=move |_| peek() on:focus=move |_| peek()>
+                on:click=move |_| on_open.run(())>
                 <CardFace id=id />
                 <span class="sr-only">{label}</span>
             </button>
