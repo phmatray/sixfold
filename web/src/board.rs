@@ -455,6 +455,16 @@ pub fn keyed_hand(hand: &[CardId]) -> Vec<(CardId, usize)> {
         .collect()
 }
 
+/// Scrolls the board to your side. On a short phone the board is taller than
+/// the room it gets and scrolls; your Active and Bench are what you act on.
+pub fn show_my_side() {
+    request_animation_frame(|| {
+        if let Some(b) = document().query_selector(".board").ok().flatten() {
+            b.set_scroll_top(b.scroll_height());
+        }
+    });
+}
+
 #[component]
 pub fn Hand() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
@@ -497,7 +507,8 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
         format!(
             "--rot:{:.1}deg;--lift:{:.1}px",
             o * spread,
-            o.abs() * o.abs() * 0.9
+            // Capped so a big hand's outer cards stay inside the hand's bottom padding.
+            (o * o * 0.9).min(12.0)
         )
     };
     let id = key.0;

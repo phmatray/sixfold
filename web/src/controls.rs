@@ -221,6 +221,14 @@ pub fn ActionBar() -> impl IntoView {
     let ui = expect_context::<Ui>();
     let Legal(legal) = expect_context::<Legal>();
     let bar = Memo::new(move |_| legal.with(|l| bar_model(ctl, ui, l)));
+    // Your move begins: your side into view (it is the part of the board a
+    // short phone scrolls away, and the one you act on).
+    let mine = Memo::new(move |_| bar.with(|b| b.mine));
+    Effect::new(move |_| {
+        if mine.get() {
+            crate::board::show_my_side();
+        }
+    });
     let act = move |a: Action| {
         ui.selected.set(None);
         ctl.act(a);

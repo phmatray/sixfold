@@ -382,7 +382,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .lang-switch button:hover { color: var(--ink); }
 .lang-switch button[aria-pressed="true"] { background: var(--brass); color: #1e1606; }
 .title > .lang-switch { position: absolute; top: 12px; right: 16px; z-index: 2; }
-.settings-body .lang-switch { align-self: flex-start; }
+.settings-body .lang-switch { margin-bottom: 12px; }
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
@@ -712,7 +712,8 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .pop.cure, .pop.none { color: var(--stock); -webkit-text-stroke-color: #111; font-size: max(13px, calc(var(--w) * 0.14)); }
 
 /* Hand */
-.hand-wrap { flex: none; overflow-x: auto; overflow-y: hidden; padding: 30px 0 6px; margin: 0 -16px; scrollbar-width: thin; scroll-snap-type: x proximity; }
+/* The bottom padding is the fan's drop: an outer card tilts and sinks below the middle one. */
+.hand-wrap { flex: none; overflow-x: auto; overflow-y: hidden; padding: 30px 0 calc(var(--hw) * 0.1 + 12px); margin: 0 -16px; scrollbar-width: thin; scroll-snap-type: x proximity; }
 .hand-slot { scroll-snap-align: center; }
 .hand { display: flex; justify-content: center; list-style: none; margin: 0; padding: 0 28px; min-width: min-content; }
 .hand-slot {
@@ -807,7 +808,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 }
 .dialog.wide { max-width: 900px; }
 .dialog h2 { font-size: 23px; }
-.dialog-sub { color: var(--muted); margin: 6px 0 16px; max-width: 60ch; }
+.dialog-sub { color: var(--muted); margin: 6px 0 16px; max-width: 60ch; text-wrap: pretty; }
 .opts { display: grid; gap: 8px; }
 .opts.grid { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
 .opt {
@@ -1029,20 +1030,24 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 }
 
 @media (max-width: 640px) {
+  /* Cards in play are sized by the height too, so both sides fit above the
+     hand and the bar; the hand keeps its size, to stay legible. */
   :root {
-    --aw: clamp(72px, 23vw, 104px);
-    --bw: clamp(48px, 14.5vw, 70px);
+    --aw: clamp(60px, min(23vw, 9dvh), 104px);
+    --bw: clamp(42px, min(14.5vw, 6.2dvh), 70px);
     --hw: clamp(62px, 19vw, 88px);
     --pw: 34px;
   }
+  /* The opponent's side is a size smaller: yours is the one you act on. */
+  .side:not(.me) { --aw: clamp(56px, min(19.5vw, 8dvh), 88px); --bw: clamp(40px, min(12.5vw, 5.6dvh), 60px); }
   /* The discard pile opens its list: a full-size tap target around the small card. */
   .discard { display: grid; justify-items: center; min-width: 44px; }
   .hero { grid-template-columns: 1fr; }
   .hero-fan { order: 2; }
   .seed { display: none; }
-  .topbar { gap: 8px; }
+  .topbar { gap: 8px; padding-block: 4px; }
   .topbar .wordmark.small { display: none; }
-  .side { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: "bench bench bench" "rail active ."; row-gap: 8px; }
+  .side { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-areas: "bench bench bench" "rail active ."; row-gap: 4px; }
   .side.me { grid-template-areas: "rail active ." "bench bench bench"; }
   .rail, .side.me .rail { align-self: center; flex-direction: column; }
   .bench, .side.me .bench { justify-content: center; flex-wrap: nowrap; gap: 6px; }
@@ -1050,13 +1055,18 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   .action-bar { padding-top: 8px; gap: 6px; }
   .bar-status { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
   .bar-title { font-size: 16px; }
-  .bar-hint { margin: 0; font-size: 12px; }
+  /* The title says what to do; playable cards and moves are lit. */
+  .bar-hint { display: none; }
   .bar-groups, .bar-group { flex: 1 1 100%; gap: 6px; justify-content: flex-start; }
   .bar-group.attacks { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
   .bar-group.plays .btn { flex: 1 1 auto; padding: 6px 10px; font-size: 14px; text-align: center; }
-  .btn.attack { min-width: 0; padding: 6px 10px; }
+  .btn.attack { min-width: 0; padding: 6px 10px; grid-template-columns: minmax(0, 1fr) auto; }
   .btn.attack .attack-dmg { font-size: 22px; }
+  .attack-cost { display: flex; align-items: center; gap: 2px; line-height: 1; }
+  .attack-name { font-size: 14px; line-height: 1.15; }
   .attack-note { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .active-spot { padding: 4px; }
+  .midline { padding: 0; }
   .table { padding-top: 6px; gap: 2px; }
   /* Room for a selected card's lift, so its name isn't cut off. */
   .hand-wrap { padding-top: 28px; }

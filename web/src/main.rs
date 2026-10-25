@@ -274,8 +274,8 @@ fn MatchScreen() -> impl IntoView {
                     <div class="midline" aria-hidden="true">
                         <span>{move || match turn.get() {
                             _ if !ctl.revealed.get() => tr("Setup", "Mise en place").to_string(),
-                            Some((t, p)) if fr() => format!("Tour {t}, {}", if p == HUMAN { "à vous" } else { "à l'adversaire" }),
-                            Some((t, p)) => format!("Turn {t}, {}", if p == HUMAN { "your move" } else { "opponent's move" }),
+                            Some((t, p)) if fr() => format!("Tour {}, {}", t + 1, if p == HUMAN { "à vous" } else { "à l'adversaire" }),
+                            Some((t, p)) => format!("Turn {}, {}", t + 1, if p == HUMAN { "your move" } else { "opponent's move" }),
                             None => String::new(),
                         }}</span>
                     </div>

@@ -812,7 +812,7 @@ impl Event {
             ),
             Event::FirstPlayer { player } => format!("{} will go first", who(*player)),
             Event::TurnStarted { player, turn } => {
-                format!("Turn {turn}: {} turn", whose(*player))
+                format!("Turn {}: {} turn", turn + 1, whose(*player))
             }
             Event::EnergyAttached {
                 player,
@@ -1125,8 +1125,8 @@ impl Event {
             ),
             Event::TurnStarted { player, turn } => pick(
                 *player,
-                format!("Tour {turn} : à vous"),
-                format!("Tour {turn} : à l'adversaire"),
+                format!("Tour {} : à vous", turn + 1),
+                format!("Tour {} : à l'adversaire", turn + 1),
             ),
             Event::EnergyAttached {
                 player,

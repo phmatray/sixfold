@@ -92,6 +92,12 @@ pub fn Coach() -> impl IntoView {
         ctl.stop();
         screen.set(Screen::Title);
     };
+    // On a phone the coach leaves the board even shorter: each step acts on
+    // your side, so keep it in view.
+    Effect::new(move |_| {
+        lesson.track();
+        crate::board::show_my_side();
+    });
     let ring = move || {
         sel.get().map(|s| {
             format!("{s}{{outline:3px solid var(--brass-hi);outline-offset:4px;border-radius:12px;animation:coach-ring 1.8s cubic-bezier(.16,1,.3,1) infinite}}")
