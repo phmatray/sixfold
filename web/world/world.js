@@ -553,6 +553,7 @@ export function mount(el, controls, cb, start, edit = false) {
     const lit = w.day.update(minute, px, pz, dt);
     sky(lit);
     w.life.update(dt, w.now, px, pz, lit.night);
+    w.fireflies.update(dt, w.now, lit.night, reduced);
 
     const pos = `${h.x},${h.z},${h.face}`;
     const inside = h.x >= 0 && h.z >= 0 && h.x < w.map.width && h.z < w.map.height; // not mid-way off an edge

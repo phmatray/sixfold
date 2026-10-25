@@ -1,6 +1,6 @@
 // Building a map's scene (`build`): lights, collision and floor heights, ground,
 // props (static ones instanced, flat-coloured parts merged), raised ground, fences
-// and walls, grass, the tree ring, lamps, glints, gates, `Open` clips and NPCs. Also
+// and walls, grass, the tree ring, lamps, fireflies at finds, gates, `Open` clips and NPCs. Also
 // the props' own animation (`animateProps`), `refresh` (re-check what conditions
 // show, hide, open or shut) and `dispose`. The light itself, by time of day, is daylight.js.
 import * as THREE from "three";
@@ -11,6 +11,7 @@ import { groundMesh } from "./ground.js";
 import { rng, mesh, group, toon, fadeable, PLACEHOLDER, FOOT, WALKABLE, DECK, LADDER, BOB, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox } from "./props.js";
 import { key, glowTex, blobGeo, blobMat } from "./actors.js";
 import { spawnNpcs } from "./npc.js";
+import { fireflies } from "./fireflies.js";
 import { OPTIONAL, RING } from "./map.js";
 
 // Instanced: static, never animated, never read like a sign (one draw per mesh of the model, not per prop).
@@ -36,7 +37,7 @@ const fadeAll = (o) => o.traverse((m) => m.isMesh && !m.material.transparent && 
 
 // Re-check what a condition shows or hides (`holds(cond)`), after a map is built
 // and whenever the game state may have changed (a dialogue closed, the time of day
-// turned): people, spots and props with an `if` come and go, the glint over each
+// turned): people, spots and props with an `if` come and go, the fireflies round each
 // find, the waymarks' crystals, props' `open` clips, and gates. `gate(cond, wasOpen,
 // underHero)` is the engine's rule (a gate never shuts under the hero); the first
 // refresh after a build counts a hero spawning on a gate as having come through it.
@@ -49,7 +50,7 @@ export function refresh(w, holds, gate, animate = false) {
     if (holds(i.if)) w.talk.set(k, i);
     else if (w.talk.get(k) === i) w.talk.delete(k);
   }
-  w.glints.forEach((g) => (g.sprite.visible = holds(g.it.if) && holds(g.cond)));
+  w.fireflies.show(holds);
   for (const c of w.shown) c.obj.visible = holds(c.p.if);
   for (const o of w.openers) if (o.cond) o.want = holds(o.cond) ? 1 : 0;
   for (const p of w.pulses) p.on = holds(p.cond);
@@ -133,7 +134,7 @@ export function dispose(root) {
 }
 
 // The house door easing open or shut, a sign wobbling after it was read, boats
-// bobbing, the lighthouse beacon and the glint of something to find.
+// bobbing and the lighthouse beacon.
 export function animateProps(w, dt, reduced) {
   for (const b of w.blooms ?? []) if (b.k !== b.want) (b.k += Math.sign(b.want - b.k) * Math.min(Math.abs(b.want - b.k), dt / 3)), showBloom(b);
   for (const g of w.gates) {
@@ -163,7 +164,6 @@ export function animateProps(w, dt, reduced) {
       b.obj.rotation.z = Math.sin(w.now * 1.1 + b.cz) * 0.03;
     }
     for (const g of w.glows) g.material.opacity = 0.55 + 0.3 * Math.sin(w.now * 2.2);
-    for (const g of w.glints) g.sprite.material.opacity = 0.5 + 0.5 * Math.sin(w.now * 4 + g.sprite.position.x);
   }
   const d = w.door;
   if (d) {
@@ -643,15 +643,9 @@ export async function build(map, got, reduced) {
     const side = z < 0 ? "n" : z >= H ? "s" : x < 0 ? "w" : "e", c = "ns".includes(side) ? x : z;
     return exits.find((e) => e.side === side && c >= e.span[0] && c <= e.span[1]) ?? null;
   };
-  // Floor levels, highest first (taps on raised ground), and a glint over each find (`glint`: shown while it holds).
+  // Floor levels, highest first (taps on raised ground), and fireflies round each find (`glint`: there while it holds).
   const levels = [...new Set([...floor].map(Math.round))].sort((a, b) => b - a);
-  const glints = map.interactions.filter((i) => i.glint).map((i) => {
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: "#fff6c8", transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
-    sprite.position.set(i.x + 0.5, floorAt(i.x, i.z) + 0.8, i.z + 0.5);
-    sprite.scale.setScalar(0.55);
-    root.add(sprite);
-    return { sprite, cond: i.glint, it: i };
-  });
+  const flies = fireflies(map.interactions, floorAt, root);
   // Prop `pulse` (a condition): an arc of light at its `light_origin` every few seconds
   // while it holds (the Rodspire's tip once its pylons are on).
   const pulses = props.filter((p) => p.pulse && p.obj).map((p) => {
@@ -727,7 +721,7 @@ export async function build(map, got, reduced) {
   smoke.length = Math.min(smoke.length, SMOKE);
   const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
   const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0 }, reduced);
-  return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, door, life, boats, glows, glints,
+  return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, door, life, boats, glows, fireflies: flies,
     gates, gateAt, shown, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }
 
