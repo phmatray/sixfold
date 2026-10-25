@@ -15,9 +15,14 @@ use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
 
 use crate::audio::MuteToggle;
-use crate::campaign::{packs_label, Challenge, Ladder, Roster, SealBadge};
+use crate::binder::CollectionPanel;
+use crate::campaign::{packs_label, CampaignPanel, Challenge, Ladder, Roster, SealBadge};
 use crate::ctl::Ctl;
-use crate::{store, Screen};
+use crate::decks::{new_deck, DecksPanel, EditorPanel};
+use crate::overlays::Inspector;
+use crate::title::OptionsPanel;
+use crate::worldmap::Waymark;
+use crate::{store, Screen, Ui};
 
 // The scene module is loaded at runtime from the copied `world/` folder, so
 // three.js comes from the import map in index.html and never touches the wasm.
@@ -39,6 +44,7 @@ export function world_preview_stop() { api?.previewStop(); }
 export function world_meet(id) { api?.meet(id); }
 export function world_cue(json) { api?.cue(json); }
 export function world_clock(m) { minute = m; api?.setClock(m); }
+export function world_busy() { return !api || api.busy(); }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
@@ -61,6 +67,8 @@ extern "C" {
     fn world_cue(json: &str);
     /// Set the world's clock (the game minute): on mount, and after an inn's rest.
     fn world_clock(minute: u16);
+    /// The scene is loading, warping (a fade), or a duelist is walking over.
+    fn world_busy() -> bool;
 }
 
 const REOPEN: &str = "sixfold.reopen-world";
@@ -414,7 +422,57 @@ enum Sheet {
     Inn,
     /// The world map (`show:map`, M or the top bar): waymarks and fast travel.
     Atlas,
+    /// The in-game menu (Escape or the top bar), on its [`LastTab`].
+    Menu,
 }
+
+/// The in-game menu's tabs.
+#[derive(Clone, Copy, PartialEq)]
+pub enum MenuTab {
+    Decks,
+    Collection,
+    Journal,
+    Map,
+    Campaign,
+    Options,
+}
+
+impl MenuTab {
+    const ALL: [MenuTab; 6] = [
+        MenuTab::Decks,
+        MenuTab::Collection,
+        MenuTab::Journal,
+        MenuTab::Map,
+        MenuTab::Campaign,
+        MenuTab::Options,
+    ];
+
+    fn label(self) -> &'static str {
+        match self {
+            MenuTab::Decks => "Decks",
+            MenuTab::Collection => "Collection",
+            MenuTab::Journal => "Journal",
+            MenuTab::Map => tr("Map", "Carte"),
+            MenuTab::Campaign => tr("Campaign", "Campagne"),
+            MenuTab::Options => "Options",
+        }
+    }
+
+    fn id(self) -> &'static str {
+        match self {
+            MenuTab::Decks => "menu-tab-decks",
+            MenuTab::Collection => "menu-tab-collection",
+            MenuTab::Journal => "menu-tab-journal",
+            MenuTab::Map => "menu-tab-map",
+            MenuTab::Campaign => "menu-tab-campaign",
+            MenuTab::Options => "menu-tab-options",
+        }
+    }
+}
+
+/// The menu's last tab, kept by the app so it outlives a duel (not a reload).
+#[derive(Clone, Copy)]
+pub struct LastTab(pub RwSignal<MenuTab>);
 
 /// An inn's choices: rest until this phase begins.
 fn rest_label(p: Phase) -> &'static str {
@@ -489,6 +547,18 @@ pub fn WorldScreen() -> impl IntoView {
     // A world duel just ended: once the scene is up, the hero (put back on its
     // tile) and the rival or duelist meet again so the post-duel line plays.
     let returning = progress.with_untracked(|p| p.last_duel().map(|(id, _)| id.to_string()));
+    let ui = expect_context::<Ui>();
+    // The in-game menu's deck editor, open on this deck (Decks tab).
+    let editing = RwSignal::new(None::<usize>);
+    // A reset or an imported save (Options) replaces the player under the
+    // scene: leave for the title rather than carry the old world into it.
+    let slot = expect_context::<store::Saved>().slot;
+    Effect::new(move |seen: Option<()>| {
+        slot.track();
+        if seen.is_some() {
+            screen.set(Screen::Title);
+        }
+    });
     let reduced = web_sys::window()
         .and_then(|w| {
             w.match_media("(prefers-reduced-motion: reduce)")
@@ -649,6 +719,9 @@ pub fn WorldScreen() -> impl IntoView {
         } else if !open && d.open() {
             d.close();
             world_preview_stop();
+            // A card left open in the menu's collection mustn't pop up later.
+            ui.sheet.set(false);
+            ui.inspect.set(None);
             if let Some(p) = prompt.get_untracked() {
                 let _ = p.focus();
             } else if let Some(s) = stage.get_untracked() {
@@ -833,6 +906,21 @@ pub fn WorldScreen() -> impl IntoView {
                 typed.set(usize::MAX)
             }
             Some(Sheet::Talk(t)) => finish(t),
+            // In the menu, Escape closes the card sheet first; the deck
+            // editor handles its own Escape (back, through its guard).
+            Some(Sheet::Menu) if ui.sheet.get_untracked() => ui.sheet.set(false),
+            // Escape the editor didn't take itself (focus in a field or on
+            // the dialog): the same as its Back, so the unsaved guard still asks.
+            Some(Sheet::Menu) if editing.get_untracked().is_some() => {
+                if let Some(Ok(Some(b))) = dlg
+                    .get_untracked()
+                    .map(|d| d.query_selector(".editor .back"))
+                {
+                    if let Ok(b) = b.dyn_into::<web_sys::HtmlElement>() {
+                        b.click();
+                    }
+                }
+            }
             _ => sheet.set(None),
         }
     };
@@ -881,7 +969,26 @@ pub fn WorldScreen() -> impl IntoView {
             format!("En route pour {}.", w.name),
         ));
     });
-    // J opens the Journal, M the world map, and closes it again.
+    // The menu opens only over a still world: no sheet (a talk, a duel offer),
+    // no inn rest, and nothing under way in the scene (loading, a warp's fade,
+    // a duelist walking over, a lift). A cutscene (#63) adds its own term here.
+    let menu_blocked =
+        move || sheet.with_untracked(Option::is_some) || resting.get_untracked() || world_busy();
+    // Opens the menu on its last tab; the gamepad's Start (#69) calls this too.
+    let open_menu = move || {
+        if !menu_blocked() {
+            editing.set(None);
+            sheet.set(Some(Sheet::Menu));
+        }
+    };
+    let toggle_menu = move || {
+        if sheet.with_untracked(|s| s == &Some(Sheet::Menu)) {
+            sheet.set(None);
+        } else {
+            open_menu();
+        }
+    };
+    // J opens the Journal, M the world map, and closes it again; Escape opens the menu.
     let journal_key = window_event_listener(leptos::ev::keydown, move |e| {
         let typing = e
             .target()
@@ -893,6 +1000,12 @@ pub fn WorldScreen() -> impl IntoView {
                     .is_some()
             });
         let k = e.key().to_lowercase();
+        if k == "escape" && !e.repeat() && sheet.with_untracked(Option::is_none) {
+            // Cancelled, so the same key can't also close the menu it opens.
+            e.prevent_default();
+            open_menu();
+            return;
+        }
         if !matches!(k.as_str(), "j" | "m")
             || e.repeat()
             || typing
@@ -931,8 +1044,8 @@ pub fn WorldScreen() -> impl IntoView {
             <header class="world-top">
                 <span class="wordmark small">"Sixfold"</span>
                 <span class="world-hint">{tr(
-                    "Arrows or WASD to walk · E to act · Shift to run · M for the map",
-                    "Flèches ou ZQSD pour marcher · E pour agir · Maj pour courir · M pour la carte",
+                    "Arrows or WASD to walk · E to act · Shift to run · M for the map · Esc for the menu",
+                    "Flèches ou ZQSD pour marcher · E pour agir · Maj pour courir · M pour la carte · Échap pour le menu",
                 )}</span>
                 <button type="button" class="btn ghost journal-btn" aria-keyshortcuts="J"
                     aria-label="Journal" title=tr("Journal (J)", "Journal (J)")
@@ -951,7 +1064,11 @@ pub fn WorldScreen() -> impl IntoView {
                 <Facets />
                 <SealBadge on_open=move || sheet.set(Some(Sheet::Roster)) />
                 <MuteToggle />
-                <button class="btn ghost" on:click=move |_| screen.set(Screen::Title)>{tr("Leave", "Partir")}</button>
+                <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
+                    aria-keyshortcuts="Escape" title=tr("Menu (Esc)", "Menu (Échap)") on:click=move |_| toggle_menu()>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                    <span class="journal-label">"Menu"</span>
+                </button>
             </header>
             <main class="world-stage" node_ref=stage tabindex="-1"
                 aria-label=tr(
@@ -984,11 +1101,16 @@ pub fn WorldScreen() -> impl IntoView {
                         "The 3D scene could not load. Check your connection, then try again.",
                         "La scène 3D n'a pas pu se charger. Vérifiez votre connexion, puis réessayez.",
                     )}</p>
-                    <button class="btn primary" on:click=retry>{tr("Retry", "Réessayer")}</button>
+                    <div class="row">
+                        <button class="btn primary" on:click=retry>{tr("Retry", "Réessayer")}</button>
+                        <button class="btn" on:click=move |_| screen.set(Screen::Title)>{tr("Back to title", "Retour au titre")}</button>
+                    </div>
                 </div>
             })}
             <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title"
-                on:cancel=on_cancel on:keydown=on_key>
+                on:cancel=on_cancel on:keydown=on_key
+                // Should the browser close the dialog itself, the world must not stay paused.
+                on:close=move |_| if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
                 {move || sheet.get().map(|s| match s {
                     Sheet::Talk(t) => {
                         let line = t.line().to_string();
@@ -1132,6 +1254,10 @@ pub fn WorldScreen() -> impl IntoView {
                         </div>
                         <Roster />
                     }.into_any(),
+                    Sheet::Menu => view! {
+                        <GameMenu editing=editing here=here on_travel=travel
+                            on_close=Callback::new(move |()| sheet.set(None)) />
+                    }.into_any(),
                 })}
             </dialog>
         </div>
@@ -1162,5 +1288,123 @@ fn Facets() -> impl IntoView {
                 </span> }
             }}
         </span>
+    }
+}
+
+/// The in-game menu: decks (and the editor), the collection, the journal, the
+/// map, the campaign and the options, over the paused world. Quit to title
+/// asks nothing: progress is already saved.
+#[component]
+fn GameMenu(
+    editing: RwSignal<Option<usize>>,
+    here: RwSignal<(String, bool)>,
+    on_travel: Callback<Waymark>,
+    on_close: Callback<()>,
+) -> impl IntoView {
+    let tab = expect_context::<LastTab>().0;
+    let screen = expect_context::<RwSignal<Screen>>();
+    let ui = expect_context::<Ui>();
+    let focus = |sel: &'static str| {
+        request_animation_frame(move || {
+            if let Some(el) = document()
+                .query_selector(sel)
+                .ok()
+                .flatten()
+                .and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok())
+            {
+                let _ = el.focus();
+            }
+        })
+    };
+    let edit = move |i: usize| {
+        editing.set(Some(i));
+        focus(".world-sheet .editor .back");
+    };
+    let done_editing = Callback::new(move |()| {
+        editing.set(None);
+        focus("#menu-tab-decks");
+    });
+    let select = move |t: MenuTab| {
+        ui.inspect.set(None);
+        ui.sheet.set(false);
+        tab.set(t);
+    };
+    // Arrow keys (and Home, End) move between the tabs; Enter or Space picks one.
+    let on_tabs_key = move |e: leptos::ev::KeyboardEvent| {
+        let tabs = MenuTab::ALL;
+        let Some(at) = document()
+            .active_element()
+            .and_then(|a| tabs.iter().position(|t| t.id() == a.id()))
+        else {
+            return;
+        };
+        let to = match e.key().as_str() {
+            "ArrowRight" | "ArrowDown" => (at + 1) % tabs.len(),
+            "ArrowLeft" | "ArrowUp" => (at + tabs.len() - 1) % tabs.len(),
+            "Home" => 0,
+            "End" => tabs.len() - 1,
+            _ => return,
+        };
+        e.prevent_default();
+        if let Some(el) = document()
+            .get_element_by_id(tabs[to].id())
+            .and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok())
+        {
+            let _ = el.focus();
+        }
+    };
+    view! {
+        <div class="game-menu">
+            {move || if editing.get().is_some() {
+                view! { <h2 class="sr-only" id="world-sheet-title">{tr("Deck editor", "Éditeur de deck")}</h2> }.into_any()
+            } else {
+                // The selected tab takes focus as the menu opens (and when the editor closes).
+                let first = tab.get_untracked();
+                view! {
+                    <div class="menu-top">
+                    <div class="sheet-head menu-head">
+                        <h2 id="world-sheet-title">"Menu"</h2>
+                        <button type="button" class="btn" on:click=move |_| screen.set(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
+                        <button type="button" class="btn ghost" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
+                    </div>
+                    <div class="menu-tabs" role="tablist" aria-label="Menu" on:keydown=on_tabs_key>
+                        {MenuTab::ALL.into_iter().map(|t| view! {
+                            <button type="button" role="tab" id=t.id() aria-controls="menu-panel"
+                                aria-selected=move || (tab.get() == t).to_string()
+                                tabindex=move || if tab.get() == t { "0" } else { "-1" }
+                                autofocus=t == first
+                                on:click=move |_| select(t)>{t.label()}</button>
+                        }).collect_view()}
+                    </div>
+                    </div>
+                }.into_any()
+            }}
+            // The editor replaces the tabs, so it isn't a tab's panel.
+            <div class="menu-panel" id="menu-panel"
+                role=move || editing.get().is_none().then_some("tabpanel")
+                aria-labelledby=move || editing.get().is_none().then(|| tab.get().id())>
+                {move || match (tab.get(), editing.get()) {
+                    (MenuTab::Decks, Some(i)) => view! { <EditorPanel index=i on_done=done_editing /> }.into_any(),
+                    (MenuTab::Decks, None) => view! {
+                        <div class="menu-actions">
+                            <button type="button" class="btn primary" on:click=move |_| { if let Some(i) = new_deck() { edit(i) } }>{tr("New deck", "Nouveau deck")}</button>
+                        </div>
+                        <DecksPanel on_edit=Callback::new(edit) />
+                    }.into_any(),
+                    (MenuTab::Collection, _) => view! {
+                        <div class="menu-split">
+                            <div><CollectionPanel /></div>
+                            <div class="side-panel"><Inspector /></div>
+                        </div>
+                    }.into_any(),
+                    (MenuTab::Journal, _) => view! { <crate::journal::Journal /> }.into_any(),
+                    (MenuTab::Map, _) => view! { <crate::worldmap::WorldMap here=here on_travel=on_travel /> }.into_any(),
+                    (MenuTab::Campaign, _) => view! {
+                        <div class="campaign"><CampaignPanel back=Screen::World before=move || on_close.run(()) /></div>
+                    }.into_any(),
+                    (MenuTab::Options, _) => view! { <OptionsPanel /> }.into_any(),
+                }}
+            </div>
+        </div>
     }
 }

@@ -719,6 +719,7 @@ export function mount(el, controls, cb, start, edit = false) {
   return {
     stop,
     act,
+    busy: () => warping || !world || !!world.engage || !!world.ride, // the in-game menu waits for these
     pause(p) {
       paused = !!p;
       clearHeld();
