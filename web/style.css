@@ -2676,3 +2676,45 @@ p.atlas-pick { color: var(--muted); }
   .splash .splash-layer { transform: none !important; filter: none !important; transition: opacity 600ms ease !important; }
   .splash .press-start { transition: opacity 400ms ease !important; animation: none !important; }
 }
+
+/* ---------- Title backdrop: the hex island at dusk (world/title.js) ---------- */
+
+.title-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: #16233d; /* the scene's sea, while it loads */
+}
+.title-backdrop canvas { display: block; opacity: 0; transition: opacity 900ms ease; }
+.title-backdrop.live canvas { opacity: 1; }
+/* A scrim where the text sits: the menu side on a wide screen, the lower part on a tall one. */
+.title-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(11, 23, 41, 0) 22%, rgba(11, 23, 41, 0.8) 46%, rgba(11, 23, 41, 0.88) 100%),
+    linear-gradient(0deg, rgba(11, 23, 41, 0.9), rgba(11, 23, 41, 0) 30%);
+}
+@media (max-width: 900px), (orientation: portrait) {
+  .title-backdrop::after { background: linear-gradient(180deg, rgba(11, 23, 41, 0.5) 0%, rgba(11, 23, 41, 0.8) 18%, rgba(11, 23, 41, 0.9) 45%); }
+}
+/* No WebGL, or too slow for it: hex facets drifting over the felt (a
+   transform on its own layer, so the drift costs no repaint). */
+.title-backdrop.flat {
+  background-color: var(--felt-deep);
+  background-image:
+    radial-gradient(ellipse 60% 50% at 28% 40%, rgba(214, 172, 74, 0.14), transparent 70%),
+    radial-gradient(ellipse 80% 70% at 45% 45%, #1d3657, var(--felt) 45%, var(--felt-deep) 100%);
+  overflow: hidden;
+}
+.title-backdrop.flat::before {
+  content: "";
+  position: absolute;
+  inset: -97px 0 0 -56px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'><path d='M28 1l27 15.5v31L28 63 1 47.5v-31zM28 63v34' fill='none' stroke='%23d6ac4a' stroke-opacity='.12' stroke-width='1.5'/></svg>");
+  animation: facets-drift 30s linear infinite;
+}
+.title-backdrop.flat canvas { display: none; }
+@keyframes facets-drift { to { transform: translate(56px, 97px); } }

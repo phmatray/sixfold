@@ -66,6 +66,7 @@ fn StudioMark() -> impl IntoView {
 pub fn Splash() -> impl IntoView {
     let screen = expect_context::<RwSignal<Screen>>();
     mark_shown();
+    crate::title::backdrop_preload();
     let step = RwSignal::new(0u8);
     let timer = StoredValue::new(None::<TimeoutHandle>);
     let coarse = window()
