@@ -193,11 +193,11 @@ pub fn DuelSetup() -> impl IntoView {
                     </details>
                     <div class="pickers">
                         <DeckPicker legend=tr("Your deck", "Votre deck") name="mine" opts=mine_opts choice=mine />
-                        <DeckPicker legend=tr("The AI plays", "Deck de l'IA") name="theirs" opts=theirs_opts choice=theirs />
+                        <DeckPicker legend=tr("Your opponent plays", "Deck de l'adversaire") name="theirs" opts=theirs_opts choice=theirs />
                     </div>
                     <p class="note">{move || {
                         let n = sixfold_engine::campaign::quick_duel_purse(difficulty.get());
-                        tr(format!("Win to earn ⬡ {n} (more against a harder AI)."), format!("Gagnez pour obtenir ⬡ {n} (davantage contre une IA plus forte)."))
+                        tr(format!("Win to earn ⬡ {n} (more against a tougher opponent)."), format!("Gagnez pour obtenir ⬡ {n} (davantage contre un adversaire plus coriace)."))
                     }}</p>
                     <div class="options">
                         <details class="more-options">
@@ -219,15 +219,15 @@ pub fn DuelSetup() -> impl IntoView {
                             </div>
                         </details>
                         <label class="field">
-                            <span>{tr("AI", "IA")}</span>
+                            <span>{tr("Opponent", "Adversaire")}</span>
                             <select name="difficulty" on:change=move |e| difficulty.set(match event_target_value(&e).as_str() {
                                 "easy" => Difficulty::Easy,
                                 "hard" => Difficulty::Hard,
                                 _ => Difficulty::Normal,
                             })>
-                                <option value="easy">{tr("Easy: plays loosely, sometimes skips a play", "Facile : joue sans finesse, laisse parfois passer un coup")}</option>
-                                <option value="normal" selected>"Normal"</option>
-                                <option value="hard">{tr("Hard: thinks a turn ahead", "Difficile : anticipe d'un tour")}</option>
+                                <option value="easy">{tr("Laid-back: plays loosely, sometimes skips a play", "Tranquille : joue sans finesse, laisse parfois passer un coup")}</option>
+                                <option value="normal" selected>{tr("Steady", "Solide")}</option>
+                                <option value="hard">{tr("Formidable: thinks a turn ahead", "Redoutable : anticipe d'un tour")}</option>
                             </select>
                         </label>
                         <button type="submit" class="btn primary start">{tr("Start the duel", "Lancer le duel")}</button>

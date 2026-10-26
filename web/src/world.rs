@@ -1513,7 +1513,7 @@ pub fn WorldScreen() -> impl IntoView {
                         </div>
                     }.into_any(),
                     Sheet::Duel(text) => view! {
-                        <h2 id="world-sheet-title">{tr("Duel the AI?", "Défier l'IA ?")}</h2>
+                        <h2 id="world-sheet-title">{tr("A practice duel?", "Un duel d'entraînement ?")}</h2>
                         <p class="dialog-sub">{text}</p>
                         <div class="dialog-foot">
                             <button class="btn ghost" on:click=close>{tr("Not now", "Pas maintenant")}</button>

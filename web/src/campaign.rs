@@ -34,12 +34,21 @@ pub fn packs_label(b: usize, n: u32) -> String {
     }
 }
 
-fn difficulty(d: Difficulty) -> &'static str {
+/// A duelist's temper: how hard they play, said the way the world says it.
+pub fn temper(d: Difficulty) -> &'static str {
     match d {
-        Difficulty::Easy => tr("Easy AI", "IA facile"),
-        Difficulty::Normal => tr("Normal AI", "IA normale"),
-        Difficulty::Hard => tr("Hard AI", "IA difficile"),
+        Difficulty::Easy => tr("Laid-back", "Tranquille"),
+        Difficulty::Normal => tr("Steady", "Solide"),
+        Difficulty::Hard => tr("Formidable", "Redoutable"),
     }
+}
+
+/// "steady play" / "jeu solide", for a line that lists a duel's terms.
+fn play(d: Difficulty) -> String {
+    tr(
+        format!("{} play", temper(d).to_lowercase()),
+        format!("jeu {}", temper(d).to_lowercase()),
+    )
 }
 
 /// "4 prizes" / "1 Récompense", "4 Récompenses".
@@ -203,7 +212,7 @@ pub fn Roster() -> impl IntoView {
                             </div>
                             <p class="rival-status">{status}</p>
                             <p class="rival-meta">
-                                {format!("{}, {}, {}. ", r.deck.name, prizes(r.prizes), difficulty(r.difficulty))}
+                                {format!("{}, {}, {}. ", r.deck.name, prizes(r.prizes), play(r.difficulty))}
                                 {r.place.get()}
                             </p>
                             <p class="rival-reward">{move || progress.with(|p| reward_line(r, p))}</p>
@@ -380,9 +389,9 @@ pub fn Ladder(back: Screen, before: impl Fn() + Copy + Send + Sync + 'static) ->
                 <h3 id="daily-title">{tr("Daily duel", "Duel du jour")}</h3>
                 <p class="rival-meta">{tr(
                     format!("Today: {}'s {}, {}, {}. The same duel all day, a new one at midnight.",
-                        daily.rival.name, daily.rival.deck.name, prizes(daily.rival.prizes), difficulty(daily.rival.difficulty)),
+                        daily.rival.name, daily.rival.deck.name, prizes(daily.rival.prizes), play(daily.rival.difficulty)),
                     format!("Aujourd'hui : {} {}, {}, {}. Le même duel toute la journée, un nouveau à minuit.",
-                        daily.rival.deck.name, de(daily.rival.name), prizes(daily.rival.prizes), difficulty(daily.rival.difficulty)),
+                        daily.rival.deck.name, de(daily.rival.name), prizes(daily.rival.prizes), play(daily.rival.difficulty)),
                 )}</p>
                 <p class="rival-reward">{move || if unclaimed() {
                     tr(format!("First win today: {}", packs_label(daily.rival.booster, 1)), format!("Première victoire du jour : {}", packs_label(daily.rival.booster, 1)))
@@ -560,7 +569,7 @@ pub fn Challenge(
                 <h2 id="world-sheet-title">{tr(format!("Duel {name}?"), format!("Défier {name} ?"))}</h2>
             </div>
             <p class="dialog-sub">
-                {format!("{what}{}, {}. ", prizes(prize_n), difficulty(level))}
+                {format!("{what}{}, {}. ", prizes(prize_n), temper(level))}
                 // The amount never wraps away from its sign.
                 <b>{reward.replace(" ⬡ ", "\u{a0}⬡\u{a0}")}"."</b>
             </p>
