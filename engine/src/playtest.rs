@@ -385,6 +385,8 @@ fn shop_packs(progress: &mut Progress, profile: &mut Profile, bought: &mut [u32]
 /// pack-reward campaign had (54 duels with 1.2's 14 route duelists); 45
 /// since 1.3, whose rules make rivals take longer to beat (a median of 27
 /// rival duels over 16 pack seeds, against 16 before; pack seed 1 took 42).
+/// Re-measured for 1.6 (`campaign_sweep`): every one of the 16 seeds fits,
+/// the slowest taking exactly 45, so it stays.
 const RIVAL_DUELS: u64 = 45;
 
 /// Open every pack, counting them for the stats.
@@ -797,24 +799,47 @@ fn postgame_first_player_edge() {
 }
 
 /// How long the campaign takes with no duel budget, over 16 pack seeds (one
-/// seeded run swings widely on its packs alone): prints each and the median.
-/// `cargo test --release -p sixfold-engine campaign_length -- --ignored --nocapture`
+/// seeded run swings widely on its packs alone): prints each seed's duels,
+/// its rival duels (which must fit [`RIVAL_DUELS`]) and the rival it lost to most (the one that held it back),
+/// then the spread and the median.
+/// `cargo test --release -p sixfold-engine campaign_sweep -- --ignored --nocapture`
 #[test]
 #[ignore]
-fn campaign_length() {
-    let mut all: Vec<u64> = (1..=16)
+fn campaign_sweep() {
+    let route = TRAINERS.len() as u64;
+    let mut all: Vec<(u64, u64)> = (1..=16)
         .map(|seed| {
-            let (duels, packs, _, progress, _) = playthrough(seed, 1_000);
+            let (duels, packs, log, progress, _) = playthrough(seed, 1_000);
             assert!(champion(&progress), "pack seed {seed} never finished");
-            println!("pack seed {seed}: {duels} duels, {packs} packs");
-            duels
+            assert!(
+                duels - route <= RIVAL_DUELS,
+                "pack seed {seed} needs {} rival duels, over the budget of {RIVAL_DUELS}",
+                duels - route
+            );
+            let mut losses: Vec<(&str, usize)> = RIVALS
+                .iter()
+                .map(|r| (r.id, log.iter().filter(|&&(id, won)| id == r.id && !won).count()))
+                .collect();
+            losses.sort_by_key(|&(_, n)| std::cmp::Reverse(n));
+            println!(
+                "pack seed {seed}: {duels} duels ({} rival), {packs} packs, held back by {} ({} losses)",
+                duels - route,
+                losses[0].0,
+                losses[0].1
+            );
+            (duels, duels - route)
         })
         .collect();
     all.sort_unstable();
+    let mut rivals: Vec<u64> = all.iter().map(|&(_, r)| r).collect();
+    rivals.sort_unstable();
     println!(
-        "campaign: {}-{} duels, median {}",
-        all[0],
-        all[15],
-        (all[7] + all[8]) / 2
+        "campaign: {}-{} duels, median {}; rival duels {}-{}, median {}",
+        all[0].0,
+        all[15].0,
+        (all[7].0 + all[8].0) / 2,
+        rivals[0],
+        rivals[15],
+        (rivals[7] + rivals[8]) / 2
     );
 }
