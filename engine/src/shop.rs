@@ -313,7 +313,7 @@ pub fn craft_with_voucher(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::campaign::{record, rival, RIVAL_PURSE, WARDEN_PURSE};
+    use crate::campaign::{record, rival, CONSOLATION_PER_PRIZE, RIVAL_PURSE, WARDEN_PURSE};
     use crate::set::*;
     use crate::trainers::{PURSE_BASE, PURSE_PER_PRIZE, TRAINERS};
 
@@ -652,6 +652,14 @@ mod tests {
                 .filter(|a| on_the_way.contains(&a.id))
                 .map(|a| a.facets)
                 .sum(),
+            packs: 0,
+        });
+        // A lost duel pays CONSOLATION_PER_PRIZE, plus as much per prize
+        // taken: about one loss per rival on a first playthrough (its time is
+        // counted above), taking 3 prizes on average.
+        first.push(Source {
+            minutes: 0,
+            facets: RIVALS.len() as u32 * 4 * CONSOLATION_PER_PRIZE,
             packs: 0,
         });
         let rate = packs_per_hour(&first);

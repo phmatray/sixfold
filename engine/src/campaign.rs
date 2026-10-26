@@ -277,6 +277,19 @@ pub fn record_opponent(
     })
 }
 
+/// Facets a lost duel pays for showing up, and again for each prize the
+/// player took: every loss still moves the player on (`docs/BALANCE.md`,
+/// consolation).
+pub const CONSOLATION_PER_PRIZE: u32 = 5;
+
+/// Pay the consolation for a lost duel in which the player took `prizes`
+/// prizes; returns the Facets earned (never 0).
+pub fn record_consolation(p: &mut Progress, prizes: usize) -> u32 {
+    let n = CONSOLATION_PER_PRIZE.saturating_mul(prizes as u32 + 1);
+    p.earn(n);
+    n
+}
+
 /// Facets a quick duel win against the AI pays, by its level.
 pub fn quick_duel_purse(level: Difficulty) -> u32 {
     match level {
@@ -578,6 +591,15 @@ mod tests {
     const SLOPE_GAMES: u64 = 40;
     const SLOPE_DIP: u64 = 10;
     const SLOPE_STEP: u64 = 30;
+
+    #[test]
+    fn a_loss_pays_a_little_and_more_per_prize_taken() {
+        let mut p = Progress::default();
+        let start = p.coins();
+        assert_eq!(record_consolation(&mut p, 0), CONSOLATION_PER_PRIZE);
+        assert_eq!(record_consolation(&mut p, 3), 4 * CONSOLATION_PER_PRIZE);
+        assert_eq!(p.coins(), start + 5 * CONSOLATION_PER_PRIZE);
+    }
 
     fn beat(p: &mut Progress, ids: &[&str]) {
         let mut pr = Profile::new_player();
