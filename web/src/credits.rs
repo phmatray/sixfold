@@ -579,9 +579,9 @@ pub fn Credits(won: bool) -> impl IntoView {
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
                     </button>
                     // Focus starts on Skip (see `focus_heading`), so Enter works straight away.
-                    <button type="button" class="btn ghost" data-screen-focus on:click=move |_| done()>
+                    <button type="button" class="btn ghost" data-screen-focus aria-keyshortcuts="Escape" on:click=move |_| done()>
                         {tr("Skip the credits", "Passer le générique")}
-                        <kbd>{move || crate::input::prompt(crate::input::Ctrl::Cancel)}</kbd>
+                        <kbd aria-hidden="true">{move || crate::input::prompt(crate::input::Ctrl::Cancel)}</kbd>
                     </button>
                 })}
             </div>

@@ -3464,7 +3464,8 @@ button.pile { cursor: pointer; }
   padding: 8px 14px;
   background: var(--world-panel);
 }
-.world-skip kbd, .talk-skip kbd { font: 700 12px var(--body); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
+.world-skip kbd, .talk-skip kbd, .credits-foot kbd { font: 700 12px var(--body); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
+.credits-foot kbd { margin-left: 8px; }
 @media (hover: none) { .world-skip kbd { display: none; } }
 .talk-skip { display: block; margin: 6px 0 0 auto; min-height: 44px; font-size: 14px; }
 .talk-skip kbd { margin-left: 8px; }
