@@ -45,6 +45,14 @@ function fetchShot(s) {
   });
 }
 
+// A device that can't carry a whole map at a good frame rate, known before trying:
+// a software renderer, little memory or few cores, or data saving asked for.
+function weak(renderer) {
+  const gl = renderer.getContext(), info = gl.getExtension("WEBGL_debug_renderer_info");
+  const name = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
+  return /swiftshader|llvmpipe|software|basic render/i.test(name) || navigator.deviceMemory < 4 || navigator.hardwareConcurrency < 4 || !!navigator.connection?.saveData;
+}
+
 export function mount(el) {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const flat = () => el.classList.add("flat");
@@ -52,6 +60,12 @@ export function mount(el) {
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
   } catch {
+    flat();
+    return { stop() {} };
+  }
+  if (weak(renderer)) {
+    renderer.forceContextLoss();
+    renderer.dispose();
     flat();
     return { stop() {} };
   }
