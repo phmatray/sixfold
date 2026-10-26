@@ -13,11 +13,14 @@
 //! the `if` and every `do` effect parse, and every actor a step names (`say`,
 //! `walk`, `face`, `cam`, `emote`) stands on the map; each of Rook's story
 //! duels is started by some cutscene.
+//! 1.9: every `book` names one of the engine's books, and each book stands on
+//! exactly one shelf, across at least five houses.
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 use serde_json::Value;
+use sixfold_engine::books::{book, BOOKS};
 use sixfold_engine::campaign::{rival, RIVALS};
 use sixfold_engine::doctor::APPLIED_FLAG;
 use sixfold_engine::overworld::{parse_cond, parse_effect, CamTarget, Cue, Effect, Progress, Test};
@@ -37,6 +40,8 @@ struct Seen {
     waymarks: HashMap<String, String>,
     /// Story duels some cutscene starts.
     story: HashSet<String>,
+    /// Book id, and every map that shelves it.
+    books: HashMap<String, Vec<String>>,
 }
 
 /// Note what an effect gives or sets.
@@ -251,6 +256,16 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
                 bad.push(format!("{name}: waymark {id:?} also on {other}"));
             }
         }
+        if it["kind"] == "book" {
+            let id = it["id"].as_str().unwrap_or("");
+            if book(id).is_none() {
+                bad.push(format!("{name}: book {id:?} is not in books.rs"));
+            }
+            seen.books
+                .entry(id.to_string())
+                .or_default()
+                .push(name.to_string());
+        }
     }
     seen.warps.extend(warps);
     bad
@@ -410,6 +425,16 @@ fn every_map_reads_with_the_engine_grammar() {
         if !text.contains("\"seal_stone\"") {
             bad.push(format!("seal site {site:?} is no map with a seal stone"));
         }
+    }
+    for b in BOOKS {
+        match seen.books.get(b.id).map(Vec::len) {
+            Some(1) => {}
+            n => bad.push(format!("book {:?} is on {} shelves", b.id, n.unwrap_or(0))),
+        }
+    }
+    let houses: HashSet<&String> = seen.books.values().flatten().collect();
+    if houses.len() < 5 {
+        bad.push(format!("books stand in {} houses, not 5", houses.len()));
     }
     let quests =
         std::fs::read_to_string(dir.join("../quests.json")).expect("web/world/quests.json");

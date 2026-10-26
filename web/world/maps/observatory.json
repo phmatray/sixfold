@@ -129,6 +129,18 @@
       "kind": "sign",
       "text": "A star chart glows on the light table, pinned with brass weights. Six bright stars are ringed in red ink, and a seventh, faint, has a question mark.",
       "text_fr": "Une carte du ciel luit sur la table lumineuse, tenue par des poids de laiton. Six étoiles brillantes sont cerclées d'encre rouge, et une septième, pâle, porte un point d'interrogation."
+    },
+    {
+      "x": 1,
+      "z": 1,
+      "kind": "book",
+      "id": "six_faces"
+    },
+    {
+      "x": 10,
+      "z": 1,
+      "kind": "book",
+      "id": "night_sky"
     }
   ],
   "warps": [
