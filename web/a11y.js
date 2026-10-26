@@ -40,12 +40,14 @@ new MutationObserver((records) => {
       });
     }
   }
-  open = open.filter((d) => {
-    if (d.isConnected) return true;
+  const closed = open.filter((d) => !d.isConnected);
+  open = open.filter((d) => d.isConnected);
+  // Focus goes back to what opened a closed modal, unless another one is open
+  // (a menu that gave way to its confirmation): that one takes it.
+  for (const d of closed) {
     const back = opener.get(d);
-    if (lost() && back?.isConnected) back.focus();
-    return false;
-  });
+    if (lost() && back?.isConnected && !open.length) back.focus();
+  }
   if (lost() && home?.isConnected && !open.length) {
     const region = home;
     requestAnimationFrame(() => {
@@ -128,7 +130,7 @@ addEventListener("keydown", (e) => {
 });
 // Escape that nothing else took, on a menu screen: its Back (as a pad's B does).
 addEventListener("keydown", (e) => {
-  if (e.key !== "Escape" || e.defaultPrevented || e.target.closest?.("input, select, textarea")) return;
+  if (e.key !== "Escape" || e.defaultPrevented || e.target.closest?.('input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea')) return;
   if (document.querySelector('dialog[open], [aria-modal="true"]')) return;
   const back = document.querySelector(".page-bar .back");
   if (back?.getClientRects().length) e.preventDefault(), back.click();
@@ -142,11 +144,15 @@ addEventListener("keydown", (e) => {
   const dir = DIRS[e.key];
   if (!dir || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
   const t = e.target;
-  if (t.closest?.('input:not([type="checkbox"]), select, textarea, [role="tab"], [role="listbox"], [role="grid"], [contenteditable="true"]')) return;
+  if (t.closest?.('input:not([type="checkbox"], [type="radio"]), select, textarea, [role="tab"], [role="listbox"], [role="grid"], [contenteditable="true"]')) return;
   const layered = window.sixfoldLayer() !== document.body;
   if (!layered && document.querySelector(".world-stage, .duel")) return;
   e.preventDefault();
   window.sixfoldMoveFocus(t === document.body ? null : dir);
+  // Within a set of choices (the decks on offer), the choice follows the cursor,
+  // as a radio group's arrows do; the arrows also lead out of it.
+  const to = document.activeElement;
+  if (t.type === "radio" && to !== t && to?.type === "radio" && to.name === t.name && !to.disabled) to.click();
 });
 
 // The cursor (#100): a painted hand beside whatever the keys or a pad focus, the
@@ -174,10 +180,10 @@ addEventListener("keydown", (e) => {
     raf = 0;
     if (!at?.isConnected || document.activeElement !== at) return hide();
     const r = box(at);
-    // Left of the control, pointing at it; from the right when the left has no room;
-    // inside its left edge when neither has (a full-width row on a phone).
-    const left = r.left >= 44, right = !left && r.right <= innerWidth - 44;
-    const x = left ? r.left - 42 : right ? r.right + 2 : r.left + 2, y = r.top + Math.min(r.height, 60) / 2 - 16;
+    // Left of the control, pointing at it; from the right when it starts at the
+    // screen's edge; else as far left as the screen allows.
+    const right = r.left < 24 && r.right <= innerWidth - 44;
+    const x = right ? r.right + 2 : Math.max(2, r.left - 42), y = r.top + Math.min(r.height, 60) / 2 - 16;
     hand.classList.toggle("flip", right);
     hand.style.translate = `${Math.round(x)}px ${Math.round(y)}px`;
     raf = requestAnimationFrame(place);

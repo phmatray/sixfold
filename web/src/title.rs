@@ -151,7 +151,11 @@ fn LangSwitch() -> impl IntoView {
 /// The settings: language, sound, saves and the reset. The title screen's
 /// Settings menu and the world's in-game menu both show it.
 #[component]
-pub fn OptionsPanel() -> impl IntoView {
+pub fn OptionsPanel(
+    /// Shown as a sheet of its own (the title's Settings): a modal dialog.
+    #[prop(optional)]
+    sheet: bool,
+) -> impl IntoView {
     let confirm = RwSignal::new(false);
     let done = RwSignal::new(false);
     let reset = move |_| {
@@ -160,7 +164,8 @@ pub fn OptionsPanel() -> impl IntoView {
         done.set(true);
     };
     view! {
-        <div class="settings-body">
+        <div class="settings-body" role=sheet.then_some("dialog") aria-modal=sheet.then_some("true")
+            aria-label=sheet.then(|| tr("Settings", "Réglages"))>
             <LangSwitch />
             <AudioSettings />
             <crate::input::ControlsSettings />
@@ -199,9 +204,7 @@ fn Settings() -> impl IntoView {
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg>
                 {tr("Settings", "Réglages")}
             </summary>
-            {move || open.get().then(|| view! {
-                <div class="options-sheet" role="dialog" aria-modal="true" aria-label=tr("Settings", "Réglages")><OptionsPanel /></div>
-            })}
+            {move || open.get().then(|| view! { <OptionsPanel sheet=true /> })}
         </details>
     }
 }
