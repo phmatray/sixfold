@@ -5,7 +5,7 @@
 # default below; re-run the script to fetch the matching files (CI checks
 # web/vendor/three/VERSION against it).
 set -eu
-THREE_VERSION=${1:-0.170.0}
+THREE_VERSION=${1:-0.186.1}
 cd "$(dirname "$0")/../web"
 out=vendor/three
 rm -rf "$out"
