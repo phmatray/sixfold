@@ -41,3 +41,8 @@ jobs:
       - name: Build web app
         working-directory: web
         run: trunk build --release
+      - name: three.js ships with the game (no CDN) and is precached
+        run: |
+          if grep -q cdn.jsdelivr.net web/dist/index.html; then echo 'index.html still loads from a CDN'; exit 1; fi
+          grep -q '"./vendor/three/build/three.module.min.js"' web/dist/sw.js
+          grep -qx "$(sed -n 's/^THREE_VERSION=\${1:-\(.*\)}$/\1/p' tools/vendor-three.sh)" web/vendor/three/VERSION

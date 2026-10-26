@@ -4677,6 +4677,8 @@
   "gates": [
     {
       "id": "vent_w",
+      "name": "the west steam vent",
+      "name_fr": "l'évent de vapeur côté ouest",
       "tiles": [
         [
           8,
@@ -4702,6 +4704,8 @@
     },
     {
       "id": "vent_e",
+      "name": "the east steam vent",
+      "name_fr": "l'évent de vapeur côté est",
       "tiles": [
         [
           28,
@@ -4727,6 +4731,8 @@
     },
     {
       "id": "rim_ledge",
+      "name": "the ledge on the Kilnmouth's rim",
+      "name_fr": "la corniche sur la lèvre de la Gueule-du-Four",
       "tiles": [
         [
           14,

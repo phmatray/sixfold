@@ -9,7 +9,9 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
+use sixfold_engine::campaign::rival;
 use sixfold_engine::clock::{self, Phase};
+use sixfold_engine::objective;
 use sixfold_engine::overworld::{Applied, Cue, Progress};
 use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
@@ -33,7 +35,7 @@ export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
     .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb, start, edit && new URLSearchParams(location.search).has("edit")); api.setItems(items); api.setClock(minute); api.pause(paused); })
-    .catch((e) => { console.error("world: could not load the scene", e); cb("error", "", String(e)); });
+    .catch((e) => { console.error("world: could not load the scene", e); cb("error", "import", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
 export function world_act() { api?.act(); }
@@ -45,6 +47,7 @@ export function world_meet(id) { api?.meet(id); }
 export function world_cue(json) { api?.cue(json); }
 export function world_clock(m) { minute = m; api?.setClock(m); }
 export function world_busy() { return !api || api.busy(); }
+export function world_portrait(id) { return api?.portrait(id) ?? ""; }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
@@ -69,6 +72,31 @@ extern "C" {
     fn world_clock(minute: u16);
     /// The scene is loading, warping (a fade), or a duelist is walking over.
     fn world_busy() -> bool;
+    /// A person's bust, drawn from their own rig and colours (a data URL), or
+    /// empty for anyone who isn't a person on this map (a sign, a gangway).
+    fn world_portrait(id: &str) -> String;
+}
+
+const REOPEN: &str = "sixfold.reopen-world";
+
+/// Retry after the scene's modules failed to load: the browser keeps a failed
+/// module import for the page's whole life, so reload and come back here.
+fn reload_into_world() {
+    let w = window();
+    if let Ok(Some(s)) = w.session_storage() {
+        _ = s.set_item(REOPEN, "1");
+    }
+    _ = w.location().reload();
+}
+
+/// Whether the page was reloaded to retry the world (see `reload_into_world`); once.
+pub(crate) fn reopen() -> bool {
+    let Ok(Some(s)) = window().session_storage() else {
+        return false;
+    };
+    let yes = s.get_item(REOPEN).ok().flatten().is_some();
+    _ = s.remove_item(REOPEN);
+    yes
 }
 
 /// Fade the world to a map tile: a `warp:` cue, or fast travel (its own sound).
@@ -356,6 +384,9 @@ fn parse_talk(json: &str) -> Option<(String, Vec<Branch>)> {
 struct Talk {
     id: String,
     name: String,
+    /// The speaker's face: a rival's portrait, a person's bust, none for the
+    /// hero's own lines (a sign, a thought).
+    face: Option<String>,
     lines: Vec<String>,
     effects: Vec<String>,
     at: usize,
@@ -379,8 +410,9 @@ fn voice(id: &str) -> f64 {
 #[derive(Clone, PartialEq)]
 enum Sheet {
     Duel(String),
-    /// A sign, a locked door, a gift: a title and a line.
-    Note(&'static str, String),
+    /// A sign, a locked door, a gift: a title, a line, and for a shut way
+    /// the hint saying what would open it.
+    Note(&'static str, String, Option<String>),
     Talk(Talk),
     Item(String),
     /// A card found in the world, now in the collection.
@@ -512,8 +544,13 @@ pub fn WorldScreen() -> impl IntoView {
     let sheet = RwSignal::new(None::<Sheet>);
     let typed = RwSignal::new(0usize);
     let loading = RwSignal::new(true);
+    // The first map's models loaded, (done, total), for the loading line.
+    let loaded = RwSignal::new((0u32, 0u32));
+    // Some("import") when the scene's modules could not load, Some("") when the scene failed.
     let failed = RwSignal::new(None::<String>);
     let announce = RwSignal::new(String::new());
+    // When the live region last took a phase or a way opening (they can come together).
+    let said_at = StoredValue::new(0.0f64);
     let progress = expect_context::<RwSignal<Progress>>();
     // Where the hero is: (map, outdoors). Fast travel only leaves from outdoors.
     let here = RwSignal::new((String::new(), false));
@@ -552,7 +589,13 @@ pub fn WorldScreen() -> impl IntoView {
             return;
         };
         typed.set(0);
+        let face = if rival(&id).is_some() {
+            Some(format!("world/assets/portraits/{id}.webp"))
+        } else {
+            Some(world_portrait(&id)).filter(|u| !u.is_empty())
+        };
         sheet.set(Some(Sheet::Talk(Talk {
+            face,
             id,
             name,
             lines: b.lines,
@@ -582,6 +625,7 @@ pub fn WorldScreen() -> impl IntoView {
                         }
                         if clock::phase(m) != was {
                             _ = announce.try_set(clock::phase(m).arrives().into());
+                            said_at.set_value(js_sys::Date::now());
                         }
                     }
                 }
@@ -605,22 +649,49 @@ pub fn WorldScreen() -> impl IntoView {
                     _ = near.try_set(now);
                 }
                 "use" if a == "duel" => _ = sheet.try_set(Some(Sheet::Duel(b))),
-                "use" if a == "locked" => {
-                    _ = sheet.try_set(Some(Sheet::Note(tr("Locked", "Fermé à clé"), b)))
+                "use" => {
+                    // A gated door or gate sends "kind cond": once the hero has been
+                    // where its field item comes from, its text says what would open it.
+                    let (kind, cond) = a.split_once(' ').unwrap_or((&a, ""));
+                    let hint = progress
+                        .with_untracked(|p| objective::hint(p, cond))
+                        .map(|k| k.get.get().to_string());
+                    let title = match kind {
+                        "locked" => tr("Locked", "Fermé à clé"),
+                        "gate" => tr("No way through", "Pas de passage"),
+                        _ => tr("It says", "On peut lire"),
+                    };
+                    _ = sheet.try_set(Some(Sheet::Note(title, b, hint)));
                 }
-                "use" if a == "gate" => {
-                    _ = sheet.try_set(Some(Sheet::Note(tr("No way through", "Pas de passage"), b)))
+                // A gate on this map just opened: "A way opens: <name>", said once.
+                // A phase that just arrived (a time gate's reason) is kept in front.
+                "opened" => {
+                    let now = js_sys::Date::now();
+                    let fresh = now - said_at.get_value() < 1000.0;
+                    _ = announce.try_update(|s| {
+                        if fresh && !s.is_empty() {
+                            s.push(' ');
+                            s.push_str(&a);
+                        } else {
+                            *s = a;
+                        }
+                    });
+                    said_at.set_value(now);
                 }
-                "use" => _ = sheet.try_set(Some(Sheet::Note(tr("It says", "On peut lire"), b))),
                 "talk" => start_talk(a, b),
                 "area" => _ = announce.try_set(a),
+                "progress" => {
+                    if let Some((d, t)) = a.split_once('/') {
+                        _ = loaded.try_set((d.parse().unwrap_or(0), t.parse().unwrap_or(0)));
+                    }
+                }
                 "ready" => {
                     _ = loading.try_set(false);
                     if let Some(id) = &returning {
                         world_meet(id);
                     }
                 }
-                _ => _ = failed.try_set(Some(b)),
+                _ => _ = failed.try_set(Some(a)),
             }
             false
         },
@@ -645,8 +716,12 @@ pub fn WorldScreen() -> impl IntoView {
         world_unmount();
     });
     let retry = move |_| {
+        if failed.get_untracked().as_deref() == Some("import") {
+            return reload_into_world();
+        }
         failed.set(None);
         loading.set(true);
+        loaded.set((0, 0));
         world_unmount();
         mount();
     };
@@ -779,6 +854,7 @@ pub fn WorldScreen() -> impl IntoView {
                                         format!("You have ⬡ {}.", p.coins()),
                                         format!("Vous avez ⬡ {}.", p.coins()),
                                     ),
+                                    None,
                                 ))
                             }
                             // Facets show in the counter (it reads Progress).
@@ -830,7 +906,11 @@ pub fn WorldScreen() -> impl IntoView {
                     names.join(" et ")
                 ),
             );
-            next = next.or(Some(Sheet::Note(tr("A gift", "Un cadeau"), text.clone())));
+            next = next.or(Some(Sheet::Note(
+                tr("A gift", "Un cadeau"),
+                text.clone(),
+                None,
+            )));
             announce.set(text);
         }
         if let Some(Sheet::Card(id)) = &next {
@@ -842,9 +922,15 @@ pub fn WorldScreen() -> impl IntoView {
         }
         if let Some(Sheet::Item(item)) = &next {
             crate::audio::sfx("jingle", 0.0);
+            let opens = objective::opens_names(item).join(", ");
+            let (en, fr) = if opens.is_empty() {
+                (String::new(), String::new())
+            } else {
+                (format!(" It opens {opens}."), format!(" Ouvre : {opens}."))
+            };
             announce.set(tr(
-                format!("You got {}.", item_info(item).0),
-                format!("Vous obtenez : {}.", item_info(item).0),
+                format!("You got {}.{en}", item_info(item).0),
+                format!("Vous obtenez\u{a0}: {}.{fr}", item_info(item).0),
             ));
         }
         sheet.set(next);
@@ -1030,8 +1116,16 @@ pub fn WorldScreen() -> impl IntoView {
                 <Facets />
                 <SealBadge on_open=move || sheet.set(Some(Sheet::Roster)) />
                 <MuteToggle />
+                // Until the scene is up the menu can't open: say so rather than ignore the press.
                 <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
-                    aria-keyshortcuts="Escape" title=tr("Menu (Esc)", "Menu (Échap)") on:click=move |_| toggle_menu()>
+                    aria-keyshortcuts="Escape"
+                    aria-disabled=move || (loading.get() || failed.with(Option::is_some)).then_some("true")
+                    title=move || if loading.get() || failed.with(Option::is_some) {
+                        tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé")
+                    } else {
+                        tr("Menu (Esc)", "Menu (Échap)")
+                    }
+                    on:click=move |_| toggle_menu()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
                     <span class="journal-label">"Menu"</span>
                 </button>
@@ -1052,8 +1146,14 @@ pub fn WorldScreen() -> impl IntoView {
                 </button>
             })}
             <div class="world-rest" class:on=move || resting.get() aria-hidden="true"></div>
-            {move || (loading.get() && failed.with(Option::is_none)).then(|| view! {
-                <p class="world-loading" role="status">{tr("Loading the world…", "Chargement du monde…")}</p>
+            {move || (loading.get() && failed.with(Option::is_none)).then(|| {
+                let pct = move || loaded.with(|&(d, t)| (d * 100).checked_div(t).unwrap_or(0).min(100));
+                view! {
+                    <div class="world-loading" role="status">
+                        <p>{tr("Loading the world…", "Chargement du monde…")}</p>
+                        <span class="progress-bar" aria-hidden="true"><span style:width=move || format!("{}%", pct())></span></span>
+                    </div>
+                }
             })}
             {move || failed.get().map(|_| view! {
                 <div class="world-error" role="alert">
@@ -1074,26 +1174,51 @@ pub fn WorldScreen() -> impl IntoView {
                 {move || sheet.get().map(|s| match s {
                     Sheet::Talk(t) => {
                         let line = t.line().to_string();
+                        let len = line.chars().count();
                         let more = t.at + 1 < t.lines.len();
+                        // The hero's own lines (a sign, a thought) carry no name plate.
+                        let named = !t.name.is_empty();
                         view! {
-                            <button class="talk-box" on:click=move |_| advance()>
-                                <span class="talk-name" id="world-sheet-title">{t.name.clone()}</span>
+                            <button class="talk-box" class:has-face=t.face.is_some() on:click=move |_| advance()>
+                                // The face slides in with the first line only.
+                                {t.face.clone().map(|src| view! {
+                                    <img class="talk-face" class:enter=t.at == 0 src=src alt="" width="96" height="96" />
+                                })}
+                                {if named {
+                                    view! { <span class="talk-name" id="world-sheet-title">{t.name.clone()}</span> }.into_any()
+                                } else {
+                                    view! { <span class="sr-only" id="world-sheet-title">{tr("A note", "Une note")}</span> }.into_any()
+                                }}
                                 <span class="talk-line" aria-hidden="true">
                                     {move || line.chars().take(typed.get()).collect::<String>()}
                                 </span>
                                 <span class="sr-only">{t.line().to_string()}</span>
-                                <span class="talk-next" aria-hidden="true">{if more { "▾" } else { "■" }}</span>
+                                // Shown once the line is out: more to come, or the end.
+                                <svg class="talk-next" class:ready={move || typed.get() >= len} class:end=!more viewBox="0 0 12 12" aria-hidden="true">
+                                    {if more {
+                                        view! { <path d="M1 3h10l-5 6.5z" /> }.into_any()
+                                    } else {
+                                        view! { <rect x="2" y="2" width="8" height="8" rx="1.5" /> }.into_any()
+                                    }}
+                                </svg>
                             </button>
                         }.into_any()
                     }
                     Sheet::Item(id) => {
                         let (name, _, blurb) = item_info(&id);
+                        let opens = objective::opens_names(&id);
                         view! {
                             <div class="item-got">
                                 <div class="item-preview" node_ref=preview></div>
                                 <div>
                                     <h2 id="world-sheet-title">{tr(format!("You got {name}!"), format!("Vous obtenez : {name} !"))}</h2>
                                     <p class="dialog-sub">{blurb}</p>
+                                    {(!opens.is_empty()).then(|| view! {
+                                        <div class="item-opens">
+                                            <h3>{tr("Opens", "Ouvre")}</h3>
+                                            <ul>{opens.into_iter().map(|n| view! { <li>{n}</li> }).collect_view()}</ul>
+                                        </div>
+                                    })}
                                     <div class="dialog-foot">
                                         <button class="btn primary" autofocus on:click=close>{tr("Nice", "Super")}</button>
                                     </div>
@@ -1121,9 +1246,12 @@ pub fn WorldScreen() -> impl IntoView {
                             <button class="btn primary" autofocus on:click=duel>{tr("Duel", "Jouer")}</button>
                         </div>
                     }.into_any(),
-                    Sheet::Note(title, text) => view! {
+                    Sheet::Note(title, text, hint) => view! {
                         <h2 id="world-sheet-title">{title}</h2>
-                        <p class="dialog-sub">{text}</p>
+                        <p class="dialog-sub note-text">{text}</p>
+                        {hint.map(|h| view! {
+                            <p class="note-hint"><b>{tr("To open it", "Pour l'ouvrir")}</b>{h}</p>
+                        })}
                         <div class="dialog-foot">
                             <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
                         </div>
@@ -1243,7 +1371,7 @@ fn Facets() -> impl IntoView {
             // Keyed on `pop`, so the animation restarts on every gain.
             {move || {
                 let gains = pop.get();
-                view! { <span class="facets-n" class:pop={gains > 0}>
+                view! { <span class="facets-n" class:gain={gains > 0}>
                     <span class="hex" aria-hidden="true"></span>{move || coins.get()}
                 </span> }
             }}
@@ -1324,8 +1452,9 @@ fn GameMenu(
                     <div class="menu-top">
                     <div class="sheet-head menu-head">
                         <h2 id="world-sheet-title">"Menu"</h2>
-                        <button type="button" class="btn" on:click=move |_| screen.set(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
-                        <button type="button" class="btn ghost" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
+                        // Close, back to the world, is the usual way out; quitting is the quieter one.
+                        <button type="button" class="btn ghost" on:click=move |_| screen.set(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
+                        <button type="button" class="btn" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
                     </div>
                     <div class="menu-tabs" role="tablist" aria-label="Menu" on:keydown=on_tabs_key>
                         {MenuTab::ALL.into_iter().map(|t| view! {

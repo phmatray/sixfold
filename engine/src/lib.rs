@@ -36,11 +36,13 @@ pub mod decks;
 pub mod doctor;
 pub mod endgame;
 pub mod lore;
+pub mod objective;
 pub mod overworld;
 pub mod profile;
 pub mod save;
 pub mod set;
 pub mod shop;
+pub mod stats;
 pub mod trainers;
 pub mod tutorial;
 
@@ -64,7 +66,7 @@ pub use deck::{
     SortBy, DECK_SIZE, MAX_COPIES,
 };
 pub use effect::{Choice, Effect, Find};
-pub use game::{Config, Game, SetupError, MAX_BENCH};
+pub use game::{Config, End, Game, GameSummary, SetupError, MAX_BENCH};
 pub use lang::{fr, lang, set_lang, tr, Lang, T};
 pub use player::InPlay;
 pub use setup::OPENING_HAND;

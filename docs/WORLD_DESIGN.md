@@ -564,6 +564,8 @@ one sends you back somewhere you've been. Running Shoes stay the hub's starter i
 ```jsonc
 "gates": [{
   "id": "hush_ford",
+  "name": "the ford on Hushwillow Lane",  // announced when it opens (#62); an item's gate matches engine/src/objective.rs
+  "name_fr": "le gué de l'Allée des Saules-Murmures",
   "tiles": [[0,24],[1,24],[2,24],[0,25],[1,25],[2,25]],
   "if": "item:wading_boots",            // any condition: item, time, flags, seals
   "floor": 0.1,                         // optional floor height while open (>= 0: a lower floor hides the hero's feet)
@@ -577,7 +579,9 @@ one sends you back somewhere you've been. Running Shoes stay the hub's starter i
 - While `if` holds the tiles are walkable, whatever their tile character (so a gate can sit on `~` or a
   cliff digit); otherwise they are solid and facing one shows `text`, like a locked door.
 - `world.js` re-evaluates gates (and NPC/find `if`s, and glints) on every time-phase change and after every
-  dialogue effect, via one `refresh()`.
+  dialogue effect, via one `refresh()`. A gate that opens there is announced by its `name` (screen readers
+  hear it once). A field item's table in `engine/src/objective.rs` (§11.2) lists every gate, gated door and
+  gangway it opens; `engine/tests/world_data.rs` fails when the table and the maps disagree.
 - **A gate never closes under the hero**: a closing gate the hero stands on stays open until the hero is
   off all its tiles. check-maps flood-fills each map with every gate closed and fails if the spawn can't
   reach at least one exit (no soft-lock), and with every gate open and fails if any NPC, find or warp is
@@ -734,6 +738,7 @@ Scripts are map data (§9.1), triggered `on: "enter"` or by stepping on `at` til
 | `dark` | map | 1.3 | cave lighting: no sun, the hero's lantern is the light |
 | `light_dawn` / `_dusk` / `_night` | map | 1.3 | phase overrides |
 | `music` | map | 1.3 | track id (`ember`, `storm`, `tide`, `dream`, `grove`, `stone`, `cave`, default `overworld`) |
+| `ambience` | map | 1.9 | ambience bed (a track id or `interior`), default the map's track (`interior` indoors, `cave` in the dark) |
 | `region` | map | 1.3 | region id, for the world map and achievements |
 | `scripts` | map | 1.4 | cutscenes (below) |
 
@@ -1847,6 +1852,13 @@ New tracker entries in `web/audio/audio.js` (original, procedural, like today's)
 `dream`, `grove`, `stone`, `cave`, `rook` (1.4, minor, 100 bpm, Rook's theme for his scenes). Two new scales:
 `dorian` and `pentatonic`. A night variant of every outdoor track is derived the way `interior` is (filtered,
 half drums). Map JSON names its track with `music`.
+
+1.9: under the music, an **ambience bed** per region, the caves and indoors (`BEDS` in `audio.js`): looping
+filtered noise that swells (wind, surf, a forge) and sparse voices (birds, gulls, chimes, drips, crickets), with
+its own night bed, cross-fading in about a second. Duels play by stakes: `duel` for route duelists and quick
+duels, `duel_rival_<region>` (one rival theme in the rival's first colour's key and scale), `duel_boss` for the
+Hex Warden; each keeps the last-prize `hot` layer. Four volumes: Master over Music, Ambience and Effects
+(sfx and the interface's clicks); `sixfoldAudio.debug().levels` reads each group in dBFS.
 
 ---
 

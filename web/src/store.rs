@@ -1,8 +1,9 @@
 //! Keeps the player's save in localStorage: three slots, each one
 //! [`Save`] envelope (`sixfold.save.<n>`), and the chosen slot
 //! (`sixfold.slot`). The profile and the world's progress are signals in
-//! context, written back into the current slot on every change; where the hero
-//! stands and the last campaign deck are sections of the same save.
+//! context, written back into the current slot on every change, and so are the
+//! play stats; where the hero stands and the last campaign deck are sections
+//! of the same save.
 //!
 //! The first visit after 0.6 moves the old one-key-per-part save into slot 1
 //! (and removes those keys). A slot is only overwritten by text that reads
@@ -14,12 +15,13 @@
 //! localStorage can be missing or throw (private mode, blocked storage): then
 //! the save simply lives in memory for this visit, and the indicator says so.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 
 use leptos::prelude::*;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::save::{self, Save, SaveError, Source, Summary, LEGACY_KEYS};
+use sixfold_engine::stats::Stats;
 use sixfold_engine::tr;
 
 pub const SLOTS: usize = 3;
@@ -32,7 +34,14 @@ fn slot_key(n: usize) -> String {
 thread_local! {
     /// The current slot and its save (single-threaded wasm).
     static CURRENT: RefCell<(usize, Save)> = RefCell::new((1, Save::default()));
+    /// Steps walked since the last batch reached the stats.
+    static STEPS: Cell<u64> = const { Cell::new(0) };
+    /// The stats signal, for the world's callbacks (which run outside any owner).
+    static STATS: Cell<Option<RwSignal<Stats>>> = const { Cell::new(None) };
 }
+
+/// Steps reach the stats (and so the save) this many at a time.
+const STEP_BATCH: u64 = 50;
 
 fn storage() -> Option<web_sys::Storage> {
     web_sys::window()?.local_storage().ok().flatten()
@@ -127,27 +136,34 @@ fn open(n: usize) -> Option<String> {
     if err.is_some() || (from == Source::Slot && !save.profile().1.is_empty()) {
         keep_bad(n);
     }
-    let note = err.map(|e| match from {
-        Source::Prev => tr(
-            format!(
-                "{} couldn't be read ({e}), so the copy kept before your last change was loaded. What changed since is lost.",
-                save.name()
+    // The error is a sentence of its own; a save from a newer Sixfold can
+    // come back once this one updates (Settings → Save).
+    let note = err.map(|e| {
+        let name = match from {
+            Source::Prev => save.name().to_string(),
+            _ => default_name(n),
+        };
+        let what = match from {
+            Source::Prev => tr(
+                "The copy kept before your last change was loaded instead; what changed since is lost.",
+                "La copie gardée avant votre dernière modification a été chargée à la place ; ce qui a changé depuis est perdu.",
             ),
-            format!(
-                "{} est illisible ({e}) : la copie gardée avant votre dernière modification a été chargée. Ce qui a changé depuis est perdu.",
-                save.name()
+            _ => tr(
+                "It starts again as a new game, and the unreadable copy is kept in this browser.",
+                "Elle repart de zéro, et la copie illisible est gardée dans ce navigateur.",
             ),
-        ),
-        _ => tr(
-            format!(
-                "{} couldn't be read ({e}), so it starts again. A copy was kept in this browser.",
-                default_name(n)
+        };
+        let then = match e {
+            SaveError::Newer(_) => tr(
+                " Update Sixfold, then restore it from Settings → Save.",
+                " Mettez Sixfold à jour, puis restaurez-la depuis Réglages → Sauvegarde.",
             ),
-            format!(
-                "{} est illisible ({e}) : elle repart de zéro. Une copie est gardée dans ce navigateur.",
-                default_name(n)
-            ),
-        ),
+            _ => "",
+        };
+        tr(
+            format!("“{name}” couldn't be read. {e} {what}{then}"),
+            format!("« {name} » est illisible. {e} {what}{then}"),
+        )
     });
     CURRENT.set((n, save));
     set(SLOT, &n.to_string());
@@ -171,8 +187,30 @@ pub fn world_at() -> Option<String> {
 }
 
 pub fn set_world_at(at: &str) {
+    let was = world_at();
     edit(|s| s.set(save::WORLD_AT, at));
     write();
+    walked(was.as_deref().unwrap_or(""), at);
+}
+
+/// Count a step (a new tile on the same map; turning on the spot is none) and
+/// note the map walked into, for the stats.
+fn walked(was: &str, at: &str) {
+    let map = |s: &str| s.split(',').next().unwrap_or("").to_string();
+    let tile = |s: &str| s.rsplit_once(',').map(|(t, _)| t.to_string());
+    let entered = map(was) != map(at);
+    let step = !entered && tile(was) != tile(at);
+    let steps = STEPS.get() + u64::from(step);
+    STEPS.set(steps);
+    if entered || steps >= STEP_BATCH {
+        STEPS.set(0);
+        if let Some(stats) = STATS.get() {
+            stats.update(|s| {
+                s.add("steps", steps);
+                s.visit(&map(at));
+            });
+        }
+    }
 }
 
 pub fn campaign_deck() -> Option<String> {
@@ -228,6 +266,11 @@ pub fn tutorial_done() {
     expect_context::<TutorialDue>().0.set(false);
 }
 
+/// Bumped each time a save is loaded into the signals, so a watcher of the
+/// progress can tell a load from play.
+#[derive(Clone, Copy)]
+pub struct Loaded(pub RwSignal<u32>);
+
 /// A one-off message shown on the title screen (e.g. a save that didn't read).
 #[derive(Clone, Copy)]
 pub struct Notice(pub RwSignal<Option<String>>);
@@ -253,11 +296,14 @@ fn show_current() {
     let progress = expect_context::<RwSignal<Progress>>();
     let notice = expect_context::<Notice>().0;
     let saved = expect_context::<Saved>();
-    let ((p, lost), prog, n, due) =
-        CURRENT.with_borrow(|(n, s)| (s.profile(), s.progress(), *n, s.tutorial_due()));
+    let ((p, lost), prog, n, due, st) =
+        CURRENT.with_borrow(|(n, s)| (s.profile(), s.progress(), *n, s.tutorial_due(), s.stats()));
     expect_context::<TutorialDue>().0.set(due);
+    expect_context::<Loaded>().0.update(|n| *n += 1);
+    STEPS.set(0);
     profile.set(p);
     progress.set(prog);
+    expect_context::<RwSignal<Stats>>().set(st);
     saved.slot.set(n);
     if let Some(note) = lost_note(&lost) {
         notice.set(Some(note));
@@ -325,9 +371,11 @@ fn bad_key() -> String {
     CURRENT.with_borrow(|(n, _)| format!("{}.bad", slot_key(*n)))
 }
 
-/// A copy of an unreadable save is kept for the current slot.
-pub fn has_bad() -> bool {
-    get(&bad_key()).is_some()
+/// The copy of an unreadable save kept for the current slot, if any: its
+/// name when it reads now (a save from a newer build, once this one is
+/// updated), else why it still doesn't.
+pub fn kept_copy() -> Option<Result<String, SaveError>> {
+    get(&bad_key()).map(|t| Save::decode(&t).map(|s| s.name().to_string()))
 }
 
 /// Play that kept copy again when it reads now (a save from a newer build,
@@ -354,9 +402,12 @@ pub fn provide() {
         .filter(|n| (1..=SLOTS).contains(n))
         .unwrap_or(1);
     let note = open(slot);
-    let ((p, lost), prog) = CURRENT.with_borrow(|(_, s)| (s.profile(), s.progress()));
+    let ((p, lost), prog, st) =
+        CURRENT.with_borrow(|(_, s)| (s.profile(), s.progress(), s.stats()));
     let profile = RwSignal::new(p);
     let progress = RwSignal::new(prog);
+    let stats = RwSignal::new(st);
+    STATS.set(Some(stats));
     let saved = Saved {
         count: RwSignal::new(0),
         ok: RwSignal::new(true),
@@ -365,6 +416,8 @@ pub fn provide() {
     provide_context(profile);
     provide_context(progress);
     provide_context(saved);
+    provide_context(stats);
+    provide_context(Loaded(RwSignal::new(0)));
     provide_context(TutorialDue(RwSignal::new(
         CURRENT.with_borrow(|(_, s)| s.tutorial_due()),
     )));
@@ -382,6 +435,12 @@ pub fn provide() {
         if first.is_some() {
             saved.ok.set(write());
             saved.count.update(|c| *c += 1);
+        }
+    });
+    Effect::new(move |first: Option<()>| {
+        stats.with(|st| edit(|s| s.set_stats(st)));
+        if first.is_some() {
+            saved.ok.set(write());
         }
     });
 }

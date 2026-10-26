@@ -1,18 +1,50 @@
 //! Title screen: the hero and the main menu, plus a small settings menu.
 
+use leptos::html;
 use leptos::prelude::*;
 use sixfold_engine::campaign::{seals, RIVALS, SEALS};
 use sixfold_engine::decks::PREBUILT;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{card, tr, CardId, Lang};
+use wasm_bindgen::prelude::*;
 
+use crate::achievements::{count_line, Origin, Tab};
 use crate::audio::AudioSettings;
 use crate::binder::progress;
 use crate::cards::{deck_star, CardFace};
 use crate::saves::{SaveSettings, SlotPicker};
 use crate::store::{self, Notice, TutorialDue};
 use crate::Screen;
+
+// The living backdrop (`world/title.js`), loaded at runtime like the world so
+// three.js stays out of the wasm. A mount superseded before its module is in
+// is dropped.
+#[wasm_bindgen(inline_js = r#"
+let api = null, gen = 0;
+const load = () => import(new URL("world/title.js", document.baseURI).href);
+export function backdrop_preload() { load().then((m) => m.preload()).catch(() => {}); }
+export function backdrop_mount(el) {
+  const g = ++gen;
+  load().then((m) => { if (g === gen) api = m.mount(el); }).catch(() => el.classList.add("flat"));
+}
+export function backdrop_unmount() { gen++; api?.stop(); api = null; }
+"#)]
+extern "C" {
+    /// Fetch the backdrop's module and models ahead (from the splash).
+    pub fn backdrop_preload();
+    fn backdrop_mount(el: &JsValue);
+    fn backdrop_unmount();
+}
+
+/// The hex island behind the title menu, or its flat CSS stand-in.
+#[component]
+fn Backdrop() -> impl IntoView {
+    let host = NodeRef::<html::Div>::new();
+    host.on_load(move |el| backdrop_mount(&el));
+    on_cleanup(backdrop_unmount);
+    view! { <div class="title-backdrop" node_ref=host aria-hidden="true"></div> }
+}
 
 #[component]
 fn MenuItem(
@@ -89,6 +121,7 @@ pub fn OptionsPanel() -> impl IntoView {
             <LangSwitch />
             <AudioSettings />
             <SaveSettings />
+            <crate::offline::OfflineStatus />
             {move || if confirm.get() {
                 view! {
                     <div class="confirm" role="group" aria-labelledby="reset-q">
@@ -172,6 +205,7 @@ pub fn TitleScreen() -> impl IntoView {
     };
     let due = expect_context::<TutorialDue>().0;
     let progress = expect_context::<RwSignal<Progress>>();
+    let records = move || progress.with(count_line);
     let campaign_sub = move || {
         progress.with(|p| {
             let next = RIVALS.iter().find(|r| r.open(p) && !r.beaten(p));
@@ -220,6 +254,7 @@ pub fn TitleScreen() -> impl IntoView {
     };
     view! {
         <main class="title">
+            <Backdrop />
             <LangSwitch />
             <section class="hero">
                 <div class="hero-fan" aria-hidden="true">
@@ -231,7 +266,7 @@ pub fn TitleScreen() -> impl IntoView {
                     <h1 class="wordmark">"Sixfold"</h1>
                     <p class="tagline">{tr("A Hexon card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.", "Un duel de cartes Hexon aux règles d'antan : six Récompenses, du pile ou face, et pas de seconde chance sur une mauvaise main.")}</p>
                     {move || notice.get().map(|n| view! {
-                        <p class="error" role="alert">{n} " "
+                        <p class="error"><span role="alert">{n}</span> " "
                             <button type="button" class="btn ghost" on:click=move |_| notice.set(None)>{tr("Dismiss", "Fermer")}</button>
                         </p>
                     })}
@@ -249,6 +284,7 @@ pub fn TitleScreen() -> impl IntoView {
                             <MenuItem label=tr("Open packs", "Ouvrir des boosters") sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
                             <MenuItem label=tr("My decks", "Mes decks") sub=Signal::derive(decks) to=Screen::Decks />
                             <MenuItem label="Collection" sub=Signal::derive(found) to=Screen::Collection />
+                            <MenuItem label=tr("Records", "Palmarès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
                             {move || if due.get() {
                                 view! { <MenuItem label=tr("Explore the world", "Explorer le monde") sub=tr("Explore the meadow and the four roads out of it", "Le pré et les quatre routes qui en partent") to=Screen::World /> }.into_any()
                             } else {

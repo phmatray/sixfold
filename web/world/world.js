@@ -1,10 +1,12 @@
 // The overworld test: tile-grid maps (./maps/<name>.json) drawn with three.js.
 // `mount(host, controls, cb, start, edit)` builds it (at `start` = "map,x,z,facing"
 // when given; `edit`: a debug build with ?edit loads the map editor) and returns an
-// api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, meet, cue).
+// api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, portrait, meet, cue).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
-//   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate
+//   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate; a gated
+//                          door or gate sends "kind cond" (e.g. "gate item:wading_boots")
+//   ("opened", text, "")   a gate on this map just opened ("A way opens: <its name>"), for the live region
 //   ("at", map, "x,z,f")   the hero stands on a new tile or faces a new way
 //   ("check", cond, "")    asks whether a condition (a gated warp's `if`) holds (returns a bool)
 //   ("gate", cond, "wo")   asks whether a gate is open: w = was open, o = the hero is on it ("0"/"1")
@@ -12,6 +14,7 @@
 //   ("seen", map, "in"|"out") a map was entered (indoors or out)
 //   ("talk", npcId, json)  spoke to an NPC (or a duelist walked up): {"name", "dialogue"} for Leptos to run
 //   ("area", title, "")    entered an outdoor area that has a `title`
+//   ("progress", "done/total", "") models loaded for the first map (the loading screen)
 //   ("ready", "", "")      first frame drawn;  ("error", "", message)
 // Game rules (progression, dialogue effects) live in the engine crate; the world
 // only moves and draws. Grid: 1 tile = 1 m; tile (x, z) covers [x, x+1] × [z, z+1].
@@ -28,6 +31,7 @@
 //   daylight.js the light at each minute of the day: sun, moon, sky, fog, lamps, glow
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
 import * as THREE from "three";
+import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
 import { U } from "./life.js";
 import { PLACEHOLDER, group, prep, CUTAWAY } from "./props.js";
 import { tr, loadMap, loadAsset, assetNames, preload, PERSON, OPTIONAL } from "./map.js";
@@ -133,21 +137,21 @@ export function mount(el, controls, cb, start, edit = false) {
   legend.hidden = true;
   legend.innerHTML = tr('<span class="k-block">Blocked</span><span class="k-act">Look or use</span><span class="k-warp">Door</span><span class="k-npc">Person</span>',
     '<span class="k-block">Bloqué</span><span class="k-act">Regarder ou utiliser</span><span class="k-warp">Porte</span><span class="k-npc">Personne</span>');
-  // The area's name, shown for a moment on the way in.
+  // The area's name, shown for a moment on the way in; also a gate that just opened.
   const banner = document.createElement("div");
   banner.setAttribute("aria-hidden", "true");
   Object.assign(banner.style, {
     position: "absolute", zIndex: 2, left: "50%", top: "22%", transform: "translateX(-50%)", pointerEvents: "none",
     padding: "8px 18px", borderRadius: "999px", background: "rgba(13, 26, 44, 0.72)", color: "#f6ecd2",
     font: "700 clamp(16px, 2.4vw, 22px) 'Bricolage Grotesque', system-ui, sans-serif", letterSpacing: "0.02em",
-    whiteSpace: "nowrap", opacity: 0, transition: "opacity 0.5s ease",
+    width: "max-content", maxWidth: "calc(100% - 32px)", textAlign: "center", opacity: 0, transition: "opacity 0.5s ease",
   });
   let bannerTimer = 0;
-  const showBanner = (text) => {
+  const showBanner = (text, ms = 2200) => {
     banner.textContent = text;
     banner.style.opacity = 1;
     clearTimeout(bannerTimer);
-    bannerTimer = setTimeout(() => (banner.style.opacity = 0), 2200);
+    bannerTimer = setTimeout(() => (banner.style.opacity = 0), ms);
   };
   el.append(fade, legend, banner);
 
@@ -291,12 +295,22 @@ export function mount(el, controls, cb, start, edit = false) {
   const recheck = (animate) => {
     refresh(world, holds, gate, animate);
     if (world.gateSound !== undefined) sound(world.gateSound ? "gate" : "door"), (world.gateSound = undefined);
+    // The gates that just opened, named on screen and in the live region (once: they opened now);
+    // two at once (both vents at nightfall) share one banner rather than the second hiding the first.
+    const names = [...new Set(world.opened?.splice(0))];
+    if (names.length) {
+      const list = names.join(tr(" and ", " et "));
+      const text = names.length > 1 ? tr(`Ways open: ${list}`, `Des passages s'ouvrent : ${list}`) : tr(`A way opens: ${list}`, `Un passage s'ouvre : ${list}`);
+      showBanner(text, 4000), cb("opened", text, "");
+    }
   };
-  // The music for the map and the hour: a region's track, its night variant after dark.
+  // The music for the map and the hour: a region's track, its night variant after dark;
+  // under it the region's ambience bed (a map may name another with `ambience`).
   const tune = () => {
-    const m = world.map;
+    const m = world.map, phase = phaseOf(minute);
     const track = m.light.indoor ? "interior" : m.dark ? "cave" : m.music ?? "overworld";
-    globalThis.sixfoldAudio?.music(!m.light.indoor && !m.dark && phaseOf(minute) === "night" ? `${track}_night` : track);
+    globalThis.sixfoldAudio?.music(!m.light.indoor && !m.dark && phase === "night" ? `${track}_night` : track);
+    globalThis.sixfoldAudio?.ambience(m.ambience ?? track, phase);
   };
   // Tell Rust the time (it saves it); at a new phase, what is out at this hour changes.
   const tick = (dt) => {
@@ -351,7 +365,7 @@ export function mount(el, controls, cb, start, edit = false) {
       if (it.obj && !reduced) it.obj.userData.wobble = 1;
       // A spot with its own `dialogue` (a lost item, a letter box) talks like a person.
       if (it.dialogue) cb("talk", it.id, JSON.stringify({ name: it.name ?? "", dialogue: it.dialogue }));
-      else cb("use", it.kind, it.text);
+      else cb("use", it.cond ? `${it.kind} ${it.cond}` : it.kind, it.text);
     }
   }
 
@@ -401,7 +415,11 @@ export function mount(el, controls, cb, start, edit = false) {
     const map = await loadMap(name);
     if (typeof spawn === "function") spawn = spawn(map);
     const names = assetNames(map);
-    const loaded = await Promise.all(names.map(loadAsset));
+    // The loading screen counts the first map's models in.
+    let count = 0;
+    const counted = (n) => (readySent ? loadAsset(n) : loadAsset(n).finally(() => cb("progress", `${++count}/${names.length}`, "")));
+    if (!readySent) cb("progress", `0/${names.length}`, "");
+    const loaded = await Promise.all(names.map(counted));
     if (!alive) return;
     const got = Object.fromEntries(names.map((n, i) => [n, loaded[i]]));
     const missing = names.filter((n) => !got[n] && !OPTIONAL.test(n) && !PERSON.test(n)); // NPCs fall back to a tinted hero
@@ -695,8 +713,52 @@ export function mount(el, controls, cb, start, edit = false) {
     pv = null;
   }
 
+  // A speaker's bust for the dialogue box: their own rig in their own outfit and hair, in the pose
+  // they hold now, drawn once per map visit by a small offscreen renderer.
+  // The renderer is dropped on each new map, so the people it uploaded never pile up.
+  let bustR = null, busts = new Map(), bustsOf = null;
+  function portrait(id) {
+    const n = world?.npcs.find((p) => p.def.id === id);
+    if (!n?.obj) return "";
+    if (bustsOf !== world) {
+      // A new map: drop the last one's busts and the people uploaded to draw them.
+      bustR?.dispose(), bustR?.forceContextLoss();
+      (bustR = null), (busts = new Map()), (bustsOf = world);
+    }
+    if (busts.has(id)) return busts.get(id);
+    const S = 256;
+    bustR ??= new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    bustR.setPixelRatio(1);
+    bustR.setSize(S, S, false);
+    const s = new THREE.Scene();
+    const key = new THREE.DirectionalLight("#fff4dc", 2.6), rim = new THREE.DirectionalLight("#cfe0ff", 1.8);
+    key.position.set(-1.5, 2.5, 3);
+    rim.position.set(2, 1.5, -2.5);
+    const o = cloneSkinned(n.obj);
+    o.position.set(0, 0, 0);
+    o.rotation.set(0, 0, 0); // facing +z, toward the camera
+    s.add(new THREE.HemisphereLight("#ffffff", "#6a5a4a", 1.8), key, rim, o);
+    o.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(o), size = box.getSize(new THREE.Vector3());
+    // People: head and shoulders (the upper half: they're big-headed); a beast wider than it is tall: all of it.
+    const beast = Math.max(size.x, size.z) > size.y;
+    const h = beast ? Math.max(size.y, size.z) * 1.15 : size.y * 0.5;
+    const cy = beast ? box.getCenter(new THREE.Vector3()).y : box.max.y - h * 0.5;
+    const cam = new THREE.PerspectiveCamera(22, 1, 0.05, 50);
+    const dir = new THREE.Vector3(0.42, 0.14, 1).normalize();
+    cam.position.set(0, cy, 0).addScaledVector(dir, h / 2 / Math.tan(THREE.MathUtils.degToRad(11)));
+    cam.lookAt(0, cy, 0);
+    bustR.render(s, cam);
+    const url = bustR.domElement.toDataURL("image/webp", 0.85);
+    busts.set(id, url);
+    return url;
+  }
+
   const stop = () => {
     alive = false;
+    globalThis.sixfoldAudio?.ambience("");
+    bustR?.dispose();
+    bustR?.forceContextLoss();
     stopEditor();
     previewStop();
     cancelAnimationFrame(raf);
@@ -754,6 +816,7 @@ export function mount(el, controls, cb, start, edit = false) {
     },
     preview,
     previewStop,
+    portrait,
   };
 }
 

@@ -91,8 +91,8 @@ export function facing(w, hero, opens) {
   const it = w.talk.get(key(fx, fz));
   if (it) return it;
   const gate = w.gateAt.get(key(fx, fz));
-  if (gate && !gate.open) return { kind: "gate", text: gate.def.text ?? tr("There's no way through here yet.", "Pas de passage ici, pour l'instant.") };
+  if (gate && !gate.open) return { kind: "gate", cond: gate.def.if, text: gate.def.text ?? tr("There's no way through here yet.", "Pas de passage ici, pour l'instant.") };
   const wp = w.warps.get(key(fx, fz));
-  if (wp && !wp.dir) return opens(wp) ? { kind: "warp", text: wp.label ?? tr("Go in", "Entrer"), warp: wp } : { kind: "locked", text: wp.locked ?? tr("It won't open.", "Ça ne s'ouvre pas.") };
+  if (wp && !wp.dir) return opens(wp) ? { kind: "warp", text: wp.label ?? tr("Go in", "Entrer"), warp: wp } : { kind: "locked", cond: wp.if, text: wp.locked ?? tr("It won't open.", "Ça ne s'ouvre pas.") };
   return null;
 }

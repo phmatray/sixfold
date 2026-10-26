@@ -5,6 +5,39 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.5.0](https://github.com/phmatray/sixfold/compare/v1.4.0...v1.5.0) (2026-10-26)
+
+
+### Added
+
+* **audio:** a soundscape per region and music for rivals and bosses ([#71](https://github.com/phmatray/sixfold/issues/71)) ([#81](https://github.com/phmatray/sixfold/issues/81)) ([316f1ec](https://github.com/phmatray/sixfold/commit/316f1ec2253308db42c4348daee7ed9e92e911d7))
+* stats and achievements ([#65](https://github.com/phmatray/sixfold/issues/65)) ([#79](https://github.com/phmatray/sixfold/issues/79)) ([6086ad9](https://github.com/phmatray/sixfold/commit/6086ad935508ae2284a00737c614e8645ae49e69))
+* **world:** dialogue polish, current objective and clear unlocks ([#62](https://github.com/phmatray/sixfold/issues/62)) ([#78](https://github.com/phmatray/sixfold/issues/78)) ([d37b494](https://github.com/phmatray/sixfold/commit/d37b4940849447a22660d58fda623f98fad3acf6))
+
+
+### Fixed
+
+* **ui:** 1.5 design audit — dialogue, objective, records, audio settings ([#87](https://github.com/phmatray/sixfold/issues/87)) ([0577c48](https://github.com/phmatray/sixfold/commit/0577c486bcc95db1c19385d56b8a879b2f60c78c))
+
+## [1.4.0](https://github.com/phmatray/sixfold/compare/v1.3.0...v1.4.0) (2026-10-26)
+
+
+### Added
+
+* play fully offline from a fresh install, with a loading screen ([#57](https://github.com/phmatray/sixfold/issues/57)) ([#77](https://github.com/phmatray/sixfold/issues/77)) ([7c6acdc](https://github.com/phmatray/sixfold/commit/7c6acdc02808efe0eb8d4eef2339e585a2643fe0))
+* **saves:** survive corruption and test every migration ([#58](https://github.com/phmatray/sixfold/issues/58)) ([#76](https://github.com/phmatray/sixfold/issues/76)) ([7fb140b](https://github.com/phmatray/sixfold/commit/7fb140bd7c06f7f87329df32b9c7f5e9765a6c79))
+* **ui:** an in-game menu ([#56](https://github.com/phmatray/sixfold/issues/56)) ([#75](https://github.com/phmatray/sixfold/issues/75)) ([35190eb](https://github.com/phmatray/sixfold/commit/35190eb79f740ee0a2fe56870f8be003e6ca48ec))
+
+
+### Fixed
+
+* **ui:** 1.4 design audit — in-game menu, save recovery, loading ([#83](https://github.com/phmatray/sixfold/issues/83)) ([3ebda7c](https://github.com/phmatray/sixfold/commit/3ebda7ca20fa7535a527402748354c32d92750f4))
+
+
+### Documentation
+
+* roadmap 1.4 to 2.0 and a release every 3 PRs ([#73](https://github.com/phmatray/sixfold/issues/73)) ([a04270d](https://github.com/phmatray/sixfold/commit/a04270d5a8e87d94be29d5d88b410b846cbb5aa4))
+
 ## [1.3.0](https://github.com/phmatray/sixfold/compare/v1.2.0...v1.3.0) (2026-10-25)
 
 

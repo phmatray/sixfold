@@ -1,5 +1,6 @@
 //! Sixfold: a single-player duel against the AI, rendering `sixfold_engine`.
 
+mod achievements;
 mod art;
 mod audio;
 mod binder;
@@ -13,10 +14,13 @@ mod ctl;
 mod decks;
 mod duel;
 mod journal;
+mod offline;
 mod overlays;
 mod packs;
 mod saves;
 mod shops;
+mod splash;
+mod stats;
 mod store;
 mod title;
 mod world;
@@ -45,6 +49,8 @@ fn main() {
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Screen {
+    /// The opening (studio, logo, press to start): once per launch.
+    Splash,
     Title,
     /// Duel setup: pick your deck and the AI's.
     Duel,
@@ -59,6 +65,8 @@ pub enum Screen {
     Campaign,
     /// The credits; `true` right after the Warden falls (they end in the world).
     Credits(bool),
+    /// Achievements and stats, opened from there on this tab.
+    Records(achievements::Origin, achievements::Tab),
 }
 
 /// A card to show in the inspector; `at` = (player, uid) when it is in play.
@@ -97,7 +105,14 @@ pub fn new_seed() -> u64 {
 #[component]
 fn App() -> impl IntoView {
     let ctl = Ctl::new();
-    let screen = RwSignal::new(Screen::Title);
+    let screen = RwSignal::new(if world::reopen() {
+        splash::mark_shown();
+        Screen::World
+    } else if splash::due() {
+        Screen::Splash
+    } else {
+        Screen::Title
+    });
     let ui = Ui {
         inspect: RwSignal::new(None),
         sheet: RwSignal::new(false),
@@ -130,6 +145,7 @@ fn App() -> impl IntoView {
     provide_context(Legal(legal));
     provide_context(world::LastTab(RwSignal::new(world::MenuTab::Decks)));
     store::provide();
+    stats::provide();
     // A save from before promos: hand over those of rivals already beaten.
     let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
     let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
@@ -151,9 +167,12 @@ fn App() -> impl IntoView {
     Effect::new(move |_| match screen.get() {
         Screen::Match => audio::music("duel"),
         Screen::World => {}
+        // Silence until "Press to start" (the gesture the title music waits for).
+        Screen::Splash => audio::music(""),
         _ => audio::music("title"),
     });
     let page = move || match screen.get() {
+        Screen::Splash => view! { <splash::Splash /> }.into_any(),
         Screen::Title => view! { <title::TitleScreen /> }.into_any(),
         Screen::Duel => view! { <duel::DuelSetup /> }.into_any(),
         Screen::Match => view! { <MatchScreen /> }.into_any(),
@@ -164,18 +183,36 @@ fn App() -> impl IntoView {
         Screen::Editor(i) => view! { <decks::Editor index=i /> }.into_any(),
         Screen::Campaign => view! { <campaign::CampaignScreen /> }.into_any(),
         Screen::Credits(won) => view! { <credits::Credits won=won /> }.into_any(),
+        Screen::Records(from, tab) => {
+            view! { <achievements::Records from=from tab=tab /> }.into_any()
+        }
     };
-    view! { {page} <saves::SaveIndicator /> }
+    view! { {page} <saves::SaveIndicator /> <achievements::Toaster /> }
+}
+
+thread_local! {
+    static TO_MENU: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// The next screen change lands focus on the first menu item (after "Press to
+/// start", where the player is about to choose, not read).
+pub fn focus_menu_next() {
+    TO_MENU.set(true);
 }
 
 /// Focus the screen's `[data-screen-focus]` control if it names one (the
 /// credits' Skip), else its `h1` (or its `main`), so focus never sits on a
 /// button that the screen change removed.
-fn focus_heading() {
+pub(crate) fn focus_heading() {
     use wasm_bindgen::JsCast;
     let doc = document();
     // Two queries: a selector list would return whichever comes first in the page.
-    let el = ["[data-screen-focus]", "h1"]
+    let menu = if TO_MENU.take() {
+        ".menu .menu-item"
+    } else {
+        "[data-screen-focus]"
+    };
+    let el = [menu, "[data-screen-focus]", "h1"]
         .iter()
         .find_map(|s| doc.query_selector(s).ok().flatten())
         .or_else(|| doc.query_selector("main").ok().flatten());

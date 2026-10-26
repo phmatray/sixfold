@@ -43,7 +43,8 @@ const fadeAll = (o) => o.traverse((m) => m.isMesh && !m.material.transparent && 
 // find, the waymarks' crystals, props' `open` clips, and gates. `gate(cond, wasOpen,
 // underHero)` is the engine's rule (a gate never shuts under the hero); the first
 // refresh after a build counts a hero spawning on a gate as having come through it.
-// `animate`: a gate that changes now plays its opening (not on a fresh build).
+// `animate`: a gate that changes now plays its opening (not on a fresh build), and its
+// name goes on `w.opened` for the world to announce.
 export function refresh(w, holds, gate, animate = false) {
   for (const n of w.npcs) n.hidden = !holds(n.def.if);
   for (const i of w.map.interactions) {
@@ -72,6 +73,7 @@ export function refresh(w, holds, gate, animate = false) {
     const play = animate && was !== null;
     if (play && !g.sea) (g.anim = 0), w.life.puffs?.(g.tiles), (w.gateSound = open);
     else g.anim = null;
+    if (play && open) (w.opened ??= []).push(g.def.name);
     showGate(g, reduced(w) ? null : g.anim);
     if (g.sea) {
       // The tide turns over a few seconds (at once on a fresh build or with reduced motion).

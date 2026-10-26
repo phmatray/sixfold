@@ -10,7 +10,7 @@
 // the map's spawn or a tile a warp from elsewhere lands on (nobody is ambushed as a map
 // fades in). Finds (`kind: "find"`): an id, a `give` and a `text`, on a solid tile
 // (something to look in, never a featureless one).
-// 1.3 (WORLD_DESIGN §7, §13.3): outdoor maps have `title_fr`, a `region` and a `music` track; `fence` and
+// 1.3 (WORLD_DESIGN §7, §13.3): outdoor maps have `title_fr`, a `region` and a `music` track (an optional `ambience` names a bed); `fence` and
 // `cliff` name known sets; optional `paint` rows (a ground layer on any tile, raised ones too) match `tiles`. Gates: tiles in bounds; with every gate shut the spawn still reaches an exit or
 // a warp (no soft-lock), and with every gate open every person, spot, warp and waymark can be reached
 // (floor heights, the 0.6 m step and the ladder rule as build.js has them; a door warp to the same map
@@ -41,6 +41,7 @@ const HEIGHT = { tree: 3.5, pine: 3.8, birch: 3.6, willow: 3.8, house: 5, sign: 
 const TALL_OF = (a) => TALL[a] ?? 1;
 const LADDER = new Set(eval(`(${src.match(/export const LADDER = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove", "stone", "cave"]);
+const BEDS = new Set([...TRACKS, "interior"]); // audio.js BEDS
 const FENCES = new Set(["fence", "wall_dry", "hedge"]);
 const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/atlas.json`, "utf8")) : null;
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
@@ -82,6 +83,7 @@ for (const [name, m] of Object.entries(maps)) {
     if (!atlas?.regions.some((r) => r.id === m.region)) fail.push(`${name}: region ${m.region} is not in atlas.json`);
     if (!TRACKS.has(m.music)) fail.push(`${name}: music ${m.music} is not a track (${[...TRACKS].join(", ")})`);
   }
+  if (m.ambience !== undefined && !BEDS.has(m.ambience)) fail.push(`${name}: ambience ${m.ambience} is not a bed (${[...BEDS].join(", ")})`);
   if (m.fence !== undefined && !FENCES.has(m.fence)) fail.push(`${name}: fence ${m.fence} is not ${[...FENCES].join(" / ")}`);
   if (m.cliff !== undefined && !(Array.isArray(m.cliff) && m.cliff.length === 2 && m.cliff.every((c) => typeof c === "string"))) fail.push(`${name}: cliff is [block, top variant]`);
   if (m.paint !== undefined && !(Array.isArray(m.paint) && m.paint.length === m.tiles.length && m.paint.every((r, z) => r.length === m.tiles[z].length && /^[.psr]*$/.test(r))))
@@ -196,6 +198,7 @@ function reach(name, m, solid0, height0) {
     for (const t of g.tiles ?? []) if (!inMap(t[0], t[1])) fail.push(`${name}: gate ${g.id} tile ${t} is off the map`);
     if (typeof g.if !== "string") fail.push(`${name}: gate ${g.id} has no if`);
     if (!g.text) fail.push(`${name}: gate ${g.id} needs a text for when it's shut`);
+    if (!g.name) fail.push(`${name}: gate ${g.id} needs a name (announced when it opens)`);
     if (g.floor !== undefined && !(g.floor >= 0)) fail.push(`${name}: gate ${g.id} floor ${g.floor} is below the ground (it would hide the hero's feet)`);
   }
   const flood = (open, starts = [[m.spawn.x, m.spawn.z]]) => {

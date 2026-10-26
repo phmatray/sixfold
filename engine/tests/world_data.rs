@@ -8,6 +8,8 @@
 //! 1.3: gate, prop `if`, `open` and `pulse` conditions parse; a `warp:` leads to
 //! a map that exists; a night duelist is out only at night (`time:night` in
 //! its `if`); waymark ids are unique and charted in `web/world/atlas.json`.
+//! 1.7: the achievements' "every" totals (finds, curios, waymarks, field
+//! items, seal sites) match what the maps hold.
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
@@ -16,6 +18,7 @@ use serde_json::Value;
 use sixfold_engine::campaign::rival;
 use sixfold_engine::doctor::APPLIED_FLAG;
 use sixfold_engine::overworld::{parse_cond, parse_effect, Cue, Effect, Test};
+use sixfold_engine::stats::{CURIOS, FIELD_ITEMS, FINDS, SEAL_SITES, WAYMARKS};
 use sixfold_engine::trainers::{trainer, TRAINERS};
 
 /// What every map seen so far placed.
@@ -258,6 +261,34 @@ fn every_map_reads_with_the_engine_grammar() {
             bad.push(format!("{map}: waymark {id:?} is not in atlas.json"));
         }
     }
+    let curios = seen
+        .sets
+        .iter()
+        .filter(|s| s.starts_with("item:curio_"))
+        .count();
+    let totals = [
+        ("finds", seen.finds.len(), FINDS),
+        ("curios", curios, CURIOS),
+        ("waymarks", charted.len(), WAYMARKS),
+    ];
+    for (what, maps, engine) in totals {
+        if maps != engine {
+            bad.push(format!(
+                "the maps hold {maps} {what}, stats.rs says {engine}"
+            ));
+        }
+    }
+    for item in FIELD_ITEMS {
+        if !seen.sets.contains(&format!("item:{item}")) {
+            bad.push(format!("field item {item:?} is given by no map"));
+        }
+    }
+    for site in SEAL_SITES {
+        let text = std::fs::read_to_string(dir.join(format!("{site}.json"))).unwrap_or_default();
+        if !text.contains("\"seal_stone\"") {
+            bad.push(format!("seal site {site:?} is no map with a seal stone"));
+        }
+    }
     let quests =
         std::fs::read_to_string(dir.join("../quests.json")).expect("web/world/quests.json");
     let quests: Value = serde_json::from_str(&quests).expect("quests.json parses");
@@ -411,4 +442,98 @@ fn the_checker_reads_trainer_and_find_blocks() {
         );
     }
     assert_eq!(errors.len(), 6, "{errors:#?}");
+}
+
+/// Does this condition need the item (not negated)?
+fn needs(cond: &str, item: &str) -> bool {
+    parse_cond(cond).is_ok_and(|c| {
+        c.0.iter()
+            .any(|(neg, t)| !neg && *t == Test::Item(item.to_string()))
+    })
+}
+
+/// The places on one map that a field item opens, by the rule of
+/// [`sixfold_engine::objective::Place`]: a gate (its id), a gated door (the map
+/// it leads to), a spot (its id), or a person or spot whose dialogue warps
+/// once the item is held (its id, a gangway). Gates also give their names.
+fn ways(m: &Value, item: &str) -> Vec<(String, Option<(String, String)>)> {
+    let list = |k: &str| m[k].as_array().cloned().unwrap_or_default();
+    let mut out = vec![];
+    for g in list("gates") {
+        if g["if"].as_str().is_some_and(|c| needs(c, item)) {
+            let name = |k: &str| g[k].as_str().unwrap_or_default().to_string();
+            out.push((name("id"), Some((name("name"), name("name_fr")))));
+        }
+    }
+    for w in list("warps") {
+        if w["if"].as_str().is_some_and(|c| needs(c, item)) {
+            out.push((w["to"].as_str().unwrap_or_default().into(), None));
+        }
+    }
+    for i in list("interactions") {
+        if i["if"].as_str().is_some_and(|c| needs(c, item)) {
+            out.push((i["id"].as_str().unwrap_or_default().into(), None));
+        }
+    }
+    for o in list("npcs").into_iter().chain(list("interactions")) {
+        let rides = o["dialogue"].as_array().into_iter().flatten().any(|b| {
+            b["if"].as_str().is_some_and(|c| needs(c, item))
+                && strs(&b["do"]).iter().any(|e| e.starts_with("warp:"))
+        });
+        if rides {
+            out.push((o["id"].as_str().unwrap_or_default().into(), None));
+        }
+    }
+    out
+}
+
+/// §11.2: the engine's table of what each field item opens names exactly the
+/// ways the maps shut on that item, and a gate's name there is the map's own.
+#[test]
+fn every_way_a_field_item_opens_is_in_its_table() {
+    use sixfold_engine::objective::KEYS;
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let maps: Vec<(String, Value)> = std::fs::read_dir(&dir)
+        .expect("the world's maps")
+        .map(|e| e.unwrap().path())
+        .filter(|p| p.extension().is_some_and(|e| e == "json"))
+        .map(|p| {
+            let m = serde_json::from_str(&std::fs::read_to_string(&p).unwrap()).unwrap();
+            (p.file_stem().unwrap().to_string_lossy().into_owned(), m)
+        })
+        .collect();
+    let mut bad = vec![];
+    for k in &KEYS {
+        let mut found = HashSet::new();
+        for (map, m) in &maps {
+            for (id, name) in ways(m, k.item) {
+                match k.opens.iter().find(|p| p.map == map && p.id == id) {
+                    None => bad.push(format!(
+                        "{map}: {id} shuts on {} but isn't in its opens table",
+                        k.item
+                    )),
+                    Some(p) => {
+                        if let Some((en, fr)) = name {
+                            if (p.name.en, p.name.fr) != (en.as_str(), fr.as_str()) {
+                                bad.push(format!(
+                                    "{map}: gate {id} is named {en:?} / {fr:?} on the map, {:?} / {:?} in the table",
+                                    p.name.en, p.name.fr
+                                ));
+                            }
+                        }
+                    }
+                }
+                found.insert((map.clone(), id));
+            }
+        }
+        for p in k.opens {
+            if !found.contains(&(p.map.to_string(), p.id.to_string())) {
+                bad.push(format!(
+                    "{}: opens {}: {} on no map that shuts on it",
+                    k.item, p.map, p.id
+                ));
+            }
+        }
+    }
+    assert!(bad.is_empty(), "{}", bad.join("\n"));
 }
