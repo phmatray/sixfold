@@ -31,7 +31,7 @@ export async function skipSplash(page: Page) {
 export async function title(page: Page) {
   await skipSplash(page);
   await page.goto("/");
-  await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible({ timeout: 30_000 }); // the first load compiles the wasm: slower on a busy machine
 }
 
 /** A title menu entry, by its label (each entry also carries a subtitle). */

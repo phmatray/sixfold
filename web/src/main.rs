@@ -232,6 +232,8 @@ thread_local! {
     static SCREEN: std::cell::Cell<Option<RwSignal<Screen>>> = const { std::cell::Cell::new(None) };
     /// The screen a transition is on its way to (a repeated press doesn't go twice).
     static GOING: std::cell::Cell<Option<Screen>> = const { std::cell::Cell::new(None) };
+    /// What had focus when the screen began to change (the control that changed it).
+    static FOCUS_FROM: std::cell::RefCell<Option<web_sys::Element>> = const { std::cell::RefCell::new(None) };
 }
 
 // A screen change runs as a view transition (style.css, "Screen transitions"),
@@ -278,6 +280,7 @@ pub fn go_with(to: Screen, then: impl FnOnce() + 'static) {
     let Some(screen) = SCREEN.get() else {
         return;
     };
+    FOCUS_FROM.set(document().active_element());
     if !can_swap() {
         then();
         return screen.set(to);
@@ -323,6 +326,15 @@ pub(crate) fn focus_heading() {
     } else {
         "[data-screen-focus]"
     };
+    // A key or a pad already took focus into the new screen while it came in: leave it there.
+    let moved = doc.active_element().filter(|a| {
+        a.is_connected()
+            && FOCUS_FROM.with_borrow(|from| from.as_ref() != Some(a))
+            && doc.body().is_none_or(|b| !b.is_same_node(Some(a)))
+    });
+    if moved.is_some() {
+        return;
+    }
     let el = [menu, "[data-screen-focus]", "h1"]
         .iter()
         .find_map(|s| doc.query_selector(s).ok().flatten())

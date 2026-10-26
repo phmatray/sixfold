@@ -4,7 +4,7 @@ import { menuItem, title, moveTo } from "./helpers";
 test("keyboard only: title, duel setup, a duel started, then left", async ({ page }) => {
   await page.goto("/");
   const press = page.getByRole("button", { name: "Press to start" });
-  await expect(press).toBeFocused();
+  await expect(press).toBeFocused({ timeout: 30_000 });
   await page.keyboard.press("Enter");
 
   // The title lands focus on its first menu entry.
@@ -164,7 +164,7 @@ test.describe("with motion", () => {
     });
     const swaps = () => page.evaluate(() => (window as unknown as { swaps?: string[] }).swaps ?? []);
     await page.goto("/");
-    await expect(page.getByRole("button", { name: "Press to start" })).toBeFocused();
+    await expect(page.getByRole("button", { name: "Press to start" })).toBeFocused({ timeout: 30_000 });
     await page.keyboard.press("Enter");
     await expect.poll(swaps).toContain("splash");
     await expect(menuItem(page, "Learn to play")).toBeFocused();
