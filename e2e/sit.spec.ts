@@ -59,3 +59,31 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
   await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", "22,17,s");
   expect(await sitting(page)).toBe(false);
 });
+
+test("a find taken from under a bench gives the place back to sitting", async ({ page }) => {
+  page.on("dialog", (d) => d.accept());
+  await title(page);
+  await menuItem(page, "Learn to play").click();
+  await page.getByRole("button", { name: "Skip the lesson" }).click();
+  await menuItem(page, "Continue").click();
+  await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
+  const skip = page.getByRole("button", { name: /^Skip/ });
+  await expect(skip).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(skip).toBeHidden();
+
+  // Brightwell Square: Facets stuck under the bench by the fountain (21, 20), faced from the north.
+  await page.evaluate(() => (document.querySelector(".world-host") as any).sixfoldWarp("square", 21, 19, "s"));
+  await expect.poll(() => at(page)).toBe("square,21,19,s");
+  const look = page.getByRole("button", { name: /^Take a look/ });
+  await expect(look).toBeVisible();
+  await page.keyboard.press("e");
+  await expect(page.locator("#talk-live")).toHaveText(/stuck to the slats/);
+  const note = page.getByRole("button", { name: /^A note/ });
+  await note.click(); // one line: it closes
+  await expect(note).toBeHidden();
+  // Taken: the place is a seat again.
+  await expect(page.getByRole("button", { name: /^Sit/ })).toBeVisible();
+  await page.keyboard.press("e");
+  await expect.poll(() => sitting(page)).toBe(true);
+});

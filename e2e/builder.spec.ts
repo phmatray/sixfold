@@ -219,6 +219,12 @@ test("on a phone: the tools stay at hand, the advice and the deck have their tab
   await editStarter(page);
   await page.getByRole("tab", { name: "Advice" }).click();
   await expect(page.getByRole("tabpanel", { name: "Advice" }).getByText("Ready to play")).toBeVisible();
+  // A tab list: the arrows choose and focus the next tab, Home the first.
+  await page.getByRole("tab", { name: "Advice" }).press("ArrowRight");
+  await expect(page.getByRole("tab", { name: "Your cards" })).toBeFocused();
+  await expect(page.getByRole("tab", { name: "Your cards" })).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("Home");
+  await expect(page.getByRole("tab", { name: "Advice" })).toHaveAttribute("aria-selected", "true");
   await page.getByRole("button", { name: "Build for me" }).click();
   const sheet = page.getByRole("dialog", { name: "Build for me" });
   await sheet.getByRole("radio", { name: "Aggro" }).check();
