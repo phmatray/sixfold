@@ -1070,6 +1070,7 @@ body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
 /* Prompts follow the device in use (input.rs): a pad's buttons are round, touch has none to name. */
 html[data-input="pad"] kbd { border-radius: 999px; min-width: 1.6em; text-align: center; }
 html[data-input="pad"] .world-prompt kbd { display: inline-block; }
+html[data-input="pad"] .seam-btn kbd { padding: 1px 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
 kbd:empty { display: none; }
 /* The duel's key badges (1-4, P, R, E) mean nothing on a pad or a touch screen: a pad plays by focus. */
 html[data-input="pad"] .duel .key, html[data-input="touch"] .duel .key { display: none; }
@@ -1408,6 +1409,7 @@ select option { background: var(--panel); color: var(--ink); }
 .binder-book { grid-area: book; }
 .tally { grid-area: tally; }
 .tally .rarity { margin: 0; width: 14px; height: 14px; }
+.tally-mark { display: inline-flex; }
 /* Wide: the filters and the tally beside the page, so a whole sheet fits. */
 @container binder (min-width: 740px) {
   .binder-layout { grid-template-columns: minmax(0, 1fr) minmax(250px, 330px); grid-template-areas: "book filters" "book tally"; grid-template-rows: auto 1fr; }
@@ -1437,7 +1439,7 @@ select option { background: var(--panel); color: var(--ink); }
 }
 /* A clear pocket: a sleeve with a lip along its top. */
 @container (max-width: 480px) {
-  .binder.sheet { --w: clamp(80px, calc((100cqw - 86px) / 3), 160px); gap: 8px; padding: 10px 8px 10px 30px; background-position: -6px 0, -6px 0, -6px 0, 0 0, 0 0; }
+  .binder.sheet { --w: clamp(80px, calc((100cqw - 96px) / 3), 160px); gap: 8px; padding: 10px 8px 10px 30px; background-position: -6px 0, -6px 0, -6px 0, 0 0, 0 0; }
   .sheet .bind-slot { padding: 5px 5px 3px; }
 }
 .sheet .bind-slot { padding: 7px 7px 5px; border-radius: 8px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03) 18%, rgba(255, 255, 255, 0.045)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.35); }
@@ -1479,6 +1481,9 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .tally-bar { grid-column: 1 / -1; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
 .tally-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--brass), var(--brass-hi)); }
 .tally-row.done .tally-bar span { background: var(--heal); }
+/* Promos, a part of the Rare row above them. */
+.tally li:has(.tally-of) { padding-left: 22px; }
+.tally-of { font-size: 13px; color: var(--muted); }
 .tally-row.done .tally-n b { color: var(--heal); }
 
 /* The showcase: owned Rares and promos on a dark velvet wall, each under its
@@ -3380,6 +3385,7 @@ button.pile { cursor: pointer; }
 .world-skip kbd, .talk-skip kbd { font: 700 12px var(--body); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
 @media (hover: none) { .world-skip kbd { display: none; } }
 .talk-skip { display: block; margin: 6px 0 0 auto; min-height: 44px; font-size: 14px; }
+.talk-skip kbd { margin-left: 8px; }
 .world.in-scene .world-controls { visibility: hidden; } /* the pad does nothing while a scene plays */
 /* ---------- Opening: studio mark, logo, press to start (splash.rs) ---------- */
 
