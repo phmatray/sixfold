@@ -75,9 +75,8 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   // Face Tobin from the next tile and talk to him: he challenges.
   await page.locator(".world-host").evaluate((el) => (el as unknown as { sixfoldWarp: (...a: unknown[]) => void }).sixfoldWarp("overworld", 24, 27, "w"));
   await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^24,27/, { timeout: 15_000 });
-  await expect(page.getByRole("button", { name: /^Talk to Tobin/ })).toBeVisible();
-  await page.locator(".world-stage").focus();
-  await page.keyboard.press("e");
+  // The act prompt (a key tap can fall between two frames of a slow headless scene).
+  await page.getByRole("button", { name: /^Talk to Tobin/ }).click();
   const talk = page.locator(".talk-box");
   await expect(talk).toBeVisible({ timeout: 15_000 });
   while (await talk.isVisible()) {
