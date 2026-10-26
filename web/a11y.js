@@ -111,7 +111,8 @@ window.sixfoldMoveFocus = (dir) => {
     const cx = (b.left + b.right) / 2, cy = (b.top + b.bottom) / 2;
     const top = cx >= 0 && cy >= 0 && cx < innerWidth && cy < innerHeight && document.elementFromPoint(cx, cy);
     if (top && !el.contains(top) && !(el.labels?.[0] ?? el.closest("label"))?.contains(top)) continue;
-    const along = Math.max(0, gap);
+    // In 6 px steps: a plank's tilt (a pixel or two) doesn't beat reading order, the first in the page.
+    const along = Math.round(Math.max(0, gap) / 6) * 6;
     const overlap = dx ? Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) : Math.min(a.right, b.right) - Math.max(a.left, b.left);
     const across = Math.max(0, -overlap);
     // In line (overlapping across the way by a real share, not a sliver) before the rest, unless
