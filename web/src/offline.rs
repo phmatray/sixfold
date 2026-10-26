@@ -27,10 +27,15 @@ pub fn OfflineStatus() -> impl IntoView {
         state.get().map(|(done, total)| {
             let pct = u64::from(done.min(total)) * 100 / u64::from(total);
             view! {
-                <p class="note offline-status">
-                    {tr(format!("Available offline: {pct}%"), format!("Disponible hors ligne : {pct} %"))}
+                <fieldset class="offline-status">
+                    <legend>{tr("Offline play", "Jeu hors ligne")}</legend>
+                    <p class="note">{if pct == 100 {
+                        tr("The whole world is downloaded: Sixfold plays offline.".to_string(), "Le monde entier est téléchargé : Sixfold se joue hors ligne.".to_string())
+                    } else {
+                        tr(format!("Available offline: {pct}% of the world, downloading while you play."), format!("Disponible hors ligne : {pct} % du monde, téléchargé pendant que vous jouez."))
+                    }}</p>
                     <span class="progress-bar" aria-hidden="true"><span style:width=format!("{pct}%")></span></span>
-                </p>
+                </fieldset>
             }
         })
     }

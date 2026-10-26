@@ -1544,7 +1544,9 @@ select option { background: var(--panel); color: var(--ink); }
 .save-settings legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
 .save-settings .note, .slots .note { margin: 0; }
 .save-settings .note:empty, .slots .note:empty { display: none; }
-.offline-status { display: grid; gap: 6px; margin: 0 0 14px; }
+.offline-status { display: grid; gap: 8px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.offline-status legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
+.offline-status .note { margin: 0; }
 .save-settings textarea { width: 100%; min-height: 64px; resize: vertical; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--felt-deep); color: var(--ink); font: 13px/1.4 ui-monospace, monospace; }
 .file-pick { display: inline-flex; align-items: center; }
 .file-pick:focus-within { outline: 3px solid var(--brass-hi); outline-offset: 2px; }
@@ -2566,9 +2568,10 @@ p.atlas-pick { color: var(--muted); }
 }
 .game-menu { display: flex; flex-direction: column; min-height: 100%; }
 .menu-top { position: sticky; top: 0; z-index: 30; background: #172845; border-bottom: 1px solid var(--line); }
-.menu-head { padding: 14px 20px 8px; }
+.menu-head { padding: 14px 20px 4px; }
 .menu-head h2 { margin-right: auto; }
-.menu-tabs { display: flex; gap: 4px; padding: 0 20px 10px; overflow-x: auto; scrollbar-width: none; }
+/* Top padding: room for the focus ring, which the scrolling strip would clip. */
+.menu-tabs { display: flex; gap: 4px; padding: 6px 20px 10px; overflow-x: auto; scrollbar-width: none; }
 .menu-tabs button { flex: none; min-height: 44px; padding: 0 14px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
 .menu-tabs button:hover { color: var(--ink); }
 .menu-tabs button[aria-selected="true"] { background: var(--panel-2); border-color: var(--brass); color: var(--brass-hi); }
