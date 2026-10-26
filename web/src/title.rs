@@ -1,11 +1,13 @@
 //! Title screen: the hero and the main menu, plus a small settings menu.
 
+use leptos::html;
 use leptos::prelude::*;
 use sixfold_engine::campaign::{seals, RIVALS, SEALS};
 use sixfold_engine::decks::PREBUILT;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{card, tr, CardId, Lang};
+use wasm_bindgen::prelude::*;
 
 use crate::achievements::{count_line, Origin, Tab};
 use crate::audio::AudioSettings;
@@ -14,6 +16,35 @@ use crate::cards::{deck_star, CardFace};
 use crate::saves::{SaveSettings, SlotPicker};
 use crate::store::{self, Notice, TutorialDue};
 use crate::Screen;
+
+// The living backdrop (`world/title.js`), loaded at runtime like the world so
+// three.js stays out of the wasm. A mount superseded before its module is in
+// is dropped.
+#[wasm_bindgen(inline_js = r#"
+let api = null, gen = 0;
+const load = () => import(new URL("world/title.js", document.baseURI).href);
+export function backdrop_preload() { load().then((m) => m.preload()).catch(() => {}); }
+export function backdrop_mount(el) {
+  const g = ++gen;
+  load().then((m) => { if (g === gen) api = m.mount(el); }).catch(() => el.classList.add("flat"));
+}
+export function backdrop_unmount() { gen++; api?.stop(); api = null; }
+"#)]
+extern "C" {
+    /// Fetch the backdrop's module and models ahead (from the splash).
+    pub fn backdrop_preload();
+    fn backdrop_mount(el: &JsValue);
+    fn backdrop_unmount();
+}
+
+/// The hex island behind the title menu, or its flat CSS stand-in.
+#[component]
+fn Backdrop() -> impl IntoView {
+    let host = NodeRef::<html::Div>::new();
+    host.on_load(move |el| backdrop_mount(&el));
+    on_cleanup(backdrop_unmount);
+    view! { <div class="title-backdrop" node_ref=host aria-hidden="true"></div> }
+}
 
 #[component]
 fn MenuItem(
@@ -224,6 +255,7 @@ pub fn TitleScreen() -> impl IntoView {
     };
     view! {
         <main class="title">
+            <Backdrop />
             <LangSwitch />
             <section class="hero">
                 <div class="hero-fan" aria-hidden="true">

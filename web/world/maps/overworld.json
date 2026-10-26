@@ -2972,6 +2972,48 @@
       ]
     }
   ],
+  "scripts": [
+    {
+      "id": "intro",
+      "if": "!flag:intro & !item:running_shoes",
+      "on": "enter",
+      "at": [
+        [
+          25,
+          15
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "wait:500",
+            "cam:26:21",
+            "wait:1400",
+            "cam:25:11",
+            "wait:700"
+          ]
+        },
+        {
+          "say": "hero",
+          "lines": [
+            "Sixfold Meadow. Every road out of here ends at a seal.",
+            "Wynne's shop is just up the path. She said to come by before anything else."
+          ],
+          "lines_fr": [
+            "Le Pré de Sixfold. Toutes les routes qui partent d'ici mènent à un sceau.",
+            "La boutique de Wynne est juste en haut du chemin. Elle a dit de passer avant toute chose."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "walk:hero:nn",
+            "flag:intro"
+          ]
+        }
+      ]
+    }
+  ],
   "camera": {
     "fov": 40,
     "fovPortrait": 50,

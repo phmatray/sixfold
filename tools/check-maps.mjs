@@ -156,6 +156,7 @@ for (const [name, m] of Object.entries(maps)) {
     if (!i.id || !i.give || !i.text) fail.push(`${name}: a find at ${i.x},${i.z} needs an id, a give and a text`);
     if (!solid.has(`${i.x},${i.z}`)) fail.push(`${name}: find ${i.id} sits on an open tile; put it on something`);
   }
+  scripts(name, m, solid, inMap);
   for (const t of [...(m.warps ?? []), ...(m.exits ?? [])]) if (!maps[t.to]) fail.push(`${name}: leads to missing map ${t.to}`);
   for (const e of m.exits ?? []) {
     const back = maps[e.to]?.exits?.find((b) => b.side === BACK[e.side] && b.to === name);
@@ -164,6 +165,64 @@ for (const [name, m] of Object.entries(maps)) {
       const [x, z] = { n: [c, 0], s: [c, m.height - 1], w: [0, c], e: [m.width - 1, c] }[e.side];
       if (solid.has(`${x},${z}`)) fail.push(`${name}: exit ${e.side} tile ${x},${z} is blocked`);
     }
+  }
+}
+
+// Cutscenes (WORLD_DESIGN §9.1): a unique id, an `if`, `on: "enter"` and/or in-bounds `at` tiles, and steps that are each
+// a `say` (an actor on the map or the hero, with lines; lines_fr is checked with the other text) or a `do` list. The
+// cues' arguments as the engine reads them (engine/tests/world_data.rs parses every effect): walk paths of n/e/s/w
+// that keep an NPC on open tiles, face directions, cam on an actor or an in-bounds tile, waits of 0..5000 ms, music
+// tracks; a `duel:` only in the last step (it ends the scene).
+function scripts(name, m, solid, inMap) {
+  const list = m.scripts ?? [];
+  if (!Array.isArray(list)) return void fail.push(`${name}: scripts is a list`);
+  const npcs = Object.fromEntries((m.npcs ?? []).map((n) => [n.id, n]));
+  const actor = (id) => id === "hero" || id in npcs;
+  const ids = list.map((s) => s.id);
+  for (const s of list) {
+    const at = `${name}: script ${s.id}`;
+    if (!/^[a-z0-9_]+$/.test(s.id ?? "") || ids.filter((i) => i === s.id).length > 1) fail.push(`${at}: needs a unique id of a-z, 0-9 and _`);
+    if (typeof s.if !== "string") fail.push(`${at}: needs an if (or it plays every time)`);
+    if (!(s.on === "enter" || (s.on === undefined && s.at !== undefined))) fail.push(`${at}: starts on: "enter" (optionally only arriving on at tiles) or at: [[x, z], ...]`);
+    if (s.at !== undefined && !(Array.isArray(s.at) && s.at.length && s.at.every((t) => Array.isArray(t) && inMap(t[0], t[1]) && !solid.has(`${t[0]},${t[1]}`))))
+      fail.push(`${at}: at tiles must be open tiles on the map`);
+    const steps = Array.isArray(s.steps) ? s.steps : [];
+    if (!steps.length) fail.push(`${at}: has no steps`);
+    const pos = {}; // where each NPC stands as the scene goes on
+    steps.forEach((st, i) => {
+      const where = `${at}.steps[${i}]`;
+      if ((st.say !== undefined) === (st.do !== undefined)) return void fail.push(`${where}: is either a say or a do`);
+      if (st.say !== undefined) {
+        if (!actor(st.say)) fail.push(`${where}: no actor ${st.say} on this map`);
+        if (!Array.isArray(st.lines) || !st.lines.length) fail.push(`${where}: a say needs lines`);
+        return;
+      }
+      if (!Array.isArray(st.do) || !st.do.every((e) => typeof e === "string")) return void fail.push(`${where}: do is a list of effects`);
+      for (const e of st.do) {
+        const [kind, ...a] = e.split(":");
+        const bad = (why) => fail.push(`${where}: ${e}: ${why}`);
+        if (kind === "duel" && i !== steps.length - 1) bad("a duel ends the scene, so it goes in the last step");
+        if (["walk", "face", "emote"].includes(kind) && !actor(a[0])) bad(`no actor ${a[0]} on this map`);
+        if (kind === "face" && !DIR[a[1]]) bad("faces n, e, s or w");
+        if (kind === "wait" && !(/^\d+$/.test(a[0]) && +a[0] <= 5000)) bad("waits 0 to 5000 ms");
+        if (kind === "music" && !BEDS.has(a[0])) bad(`not a track (${[...BEDS].join(", ")})`);
+        if (kind === "cam" && !(a.length === 1 ? actor(a[0]) : a.length === 2 && inMap(+a[0], +a[1]))) bad("looks at hero, an actor on this map or a tile on it");
+        if (kind === "walk") {
+          if (!/^[nesw]+$/.test(a[1] ?? "")) bad("walks a path of n, e, s and w");
+          else if (a[0] !== "hero" && npcs[a[0]]) {
+            let [x, z] = pos[a[0]] ?? [npcs[a[0]].x, npcs[a[0]].z];
+            for (const f of a[1]) {
+              [x, z] = [x + DIR[f][0], z + DIR[f][1]];
+              if (!inMap(x, z) || solid.has(`${x},${z}`)) {
+                bad(`walks ${a[0]} into ${x},${z}, which is not open`);
+                break;
+              }
+            }
+            pos[a[0]] = [x, z];
+          }
+        }
+      }
+    });
   }
 }
 

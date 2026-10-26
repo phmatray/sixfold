@@ -82,6 +82,27 @@ pub fn set_lang(l: sixfold_engine::Lang) {
     }
 }
 
+const FAST: &str = "sixfold.fast";
+const TIPS: &str = "sixfold.tips";
+
+/// The opponent's moves play faster (a browser preference, like the language).
+pub fn fast_opponent() -> bool {
+    get(FAST).is_some_and(|v| v == "1")
+}
+
+pub fn set_fast_opponent(on: bool) {
+    set(FAST, if on { "1" } else { "0" });
+}
+
+/// The rule tips already shown, one bit each (see `tips::Tip`).
+pub fn tips_seen() -> u32 {
+    get(TIPS).and_then(|v| v.parse().ok()).unwrap_or(0)
+}
+
+pub fn set_tips_seen(bits: u32) {
+    set(TIPS, &bits.to_string());
+}
+
 /// The save in slot `n`: None when empty.
 fn read(n: usize) -> Option<Result<Save, SaveError>> {
     get(&slot_key(n)).map(|s| Save::decode(&s))

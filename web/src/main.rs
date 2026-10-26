@@ -13,6 +13,7 @@ mod credits;
 mod ctl;
 mod decks;
 mod duel;
+mod history;
 mod input;
 mod journal;
 mod offline;
@@ -20,22 +21,25 @@ mod overlays;
 mod packs;
 mod saves;
 mod shops;
+mod splash;
 mod stats;
 mod store;
+mod table;
+mod tips;
 mod title;
 mod world;
 mod worldmap;
 
 use leptos::prelude::*;
-use sixfold_engine::{fr, tr, Action, CardId};
+use sixfold_engine::{tr, Action, CardId};
 
-use audio::MuteToggle;
-use board::{Hand, SideRow};
-use controls::{ActionBar, PromptModal};
+use controls::PromptModal;
 use ctl::{Ctl, AI, HUMAN};
+use history::{HistoryRail, PlayPopup};
 use overlays::{
-    CalloutOverlay, CoinOverlay, DiscardViewer, GameOver, Inspector, LogPanel, RivalFace,
+    CoinOverlay, DiscardViewer, DuelMenu, GameOver, Inspector, LogDrawer, RivalFace, RuleTip,
 };
+use table::{ActiveSpot, Bench, HandFan, OppHand, Piles, Plates, Seam, Station};
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -49,6 +53,8 @@ fn main() {
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Screen {
+    /// The opening (studio, logo, press to start): once per launch.
+    Splash,
     Title,
     /// Duel setup: pick your deck and the AI's.
     Duel,
@@ -83,6 +89,8 @@ pub struct Ui {
     pub selected: RwSignal<Option<(CardId, usize)>>,
     pub discard: RwSignal<Option<usize>>,
     pub log_open: RwSignal<bool>,
+    /// E was pressed once while an attack is still possible: press again to end.
+    pub end_armed: RwSignal<bool>,
 }
 
 impl Ui {
@@ -104,7 +112,10 @@ pub fn new_seed() -> u64 {
 fn App() -> impl IntoView {
     let ctl = Ctl::new();
     let screen = RwSignal::new(if world::reopen() {
+        splash::mark_shown();
         Screen::World
+    } else if splash::due() {
+        Screen::Splash
     } else {
         Screen::Title
     });
@@ -114,6 +125,7 @@ fn App() -> impl IntoView {
         selected: RwSignal::new(None),
         discard: RwSignal::new(None),
         log_open: RwSignal::new(false),
+        end_armed: RwSignal::new(false),
     };
     let legal = Memo::new(move |_| {
         if ctl.busy.get() {
@@ -163,9 +175,12 @@ fn App() -> impl IntoView {
     Effect::new(move |_| match screen.get() {
         Screen::Match => audio::music("duel"),
         Screen::World => {}
+        // Silence until "Press to start" (the gesture the title music waits for).
+        Screen::Splash => audio::music(""),
         _ => audio::music("title"),
     });
     let page = move || match screen.get() {
+        Screen::Splash => view! { <splash::Splash /> }.into_any(),
         Screen::Title => view! { <title::TitleScreen /> }.into_any(),
         Screen::Duel => view! { <duel::DuelSetup /> }.into_any(),
         Screen::Match => view! { <MatchScreen /> }.into_any(),
@@ -183,14 +198,41 @@ fn App() -> impl IntoView {
     view! { {page} <saves::SaveIndicator /> <achievements::Toaster /> }
 }
 
+/// Focus the first element matching one of `sels`, in order.
+pub fn focus_first(sels: &[&str]) {
+    use wasm_bindgen::JsCast;
+    let el = sels
+        .iter()
+        .find_map(|s| document().query_selector(s).ok().flatten())
+        .and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok());
+    if let Some(el) = el {
+        let _ = el.focus();
+    }
+}
+
+thread_local! {
+    static TO_MENU: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// The next screen change lands focus on the first menu item (after "Press to
+/// start", where the player is about to choose, not read).
+pub fn focus_menu_next() {
+    TO_MENU.set(true);
+}
+
 /// Focus the screen's `[data-screen-focus]` control if it names one (the
 /// credits' Skip), else its `h1` (or its `main`), so focus never sits on a
 /// button that the screen change removed.
-fn focus_heading() {
+pub(crate) fn focus_heading() {
     use wasm_bindgen::JsCast;
     let doc = document();
     // Two queries: a selector list would return whichever comes first in the page.
-    let el = ["[data-screen-focus]", "h1"]
+    let menu = if TO_MENU.take() {
+        ".menu .menu-item"
+    } else {
+        "[data-screen-focus]"
+    };
+    let el = [menu, "[data-screen-focus]", "h1"]
         .iter()
         .find_map(|s| doc.query_selector(s).ok().flatten())
         .or_else(|| doc.query_selector("main").ok().flatten());
@@ -209,6 +251,7 @@ fn MatchScreen() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let ui = expect_context::<Ui>();
     let screen = expect_context::<RwSignal<Screen>>();
+    let Legal(legal) = expect_context::<Legal>();
     let names = ctl.setup.get_value().map(|s| s.names).unwrap_or_default();
     let tutorial = ctl.tutorial();
     // Quitting goes back where the duel started (the world for a campaign duel).
@@ -221,15 +264,16 @@ fn MatchScreen() -> impl IntoView {
         s.as_ref()
             .is_some_and(|s| s.post == Some(ctl::Post::Gauntlet))
     });
+    let over = move || {
+        ctl.shown
+            .with_untracked(|g| g.as_ref().is_none_or(|g| g.winner().is_some()))
+    };
     let forfeit = move || {
-        let over = ctl
-            .shown
-            .with_untracked(|g| g.as_ref().is_some_and(|g| g.winner().is_some()));
-        if gauntlet && !over {
+        if gauntlet && !over() {
             progress.update(sixfold_engine::endgame::abandon);
         }
     };
-    // Quitting a duel under way asks first (it can't be resumed, and in the
+    // Leaving a duel under way asks first (it can't be resumed, and in the
     // Gauntlet it ends the run).
     let asking = RwSignal::new(false);
     let leave = move || {
@@ -238,85 +282,337 @@ fn MatchScreen() -> impl IntoView {
         screen.set(quit_to)
     };
     let quit = move || {
-        let over = ctl
-            .shown
-            .with_untracked(|g| g.as_ref().is_none_or(|g| g.winner().is_some()));
-        if over {
+        if over() {
             leave()
         } else {
             asking.set(true)
         }
     };
-    let turn = Memo::new(move |_| {
-        ctl.shown
-            .with(|g| g.as_ref().map(|g| (g.turn(), g.turn_player())))
-    });
+    let menu = RwSignal::new(false);
+    let popup = RwSignal::new(None::<u32>);
+    provide_context(popup);
+    provide_context(table::BenchPlaces::new());
+    // Shortcuts: 1-4 attack, R retreat, E end turn (twice while an attack is
+    // still possible), Escape puts the card back and closes panels.
     let on_key = move |e: leptos::ev::KeyboardEvent| {
-        if e.key() == "Escape" {
-            asking.set(false);
-            ui.sheet.set(false);
-            ui.discard.set(None);
-            ui.selected.set(None);
+        use wasm_bindgen::JsCast;
+        if e.ctrl_key() || e.meta_key() || e.alt_key() {
+            return;
+        }
+        let typing = e
+            .target()
+            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+            .is_some_and(|el| matches!(el.tag_name().as_str(), "INPUT" | "TEXTAREA" | "SELECT"));
+        if typing {
+            return;
+        }
+        let has = |a: Action| legal.with_untracked(|l| l.contains(&a));
+        match e.key().as_str() {
+            "Escape" => {
+                asking.set(false);
+                ui.sheet.set(false);
+                ui.discard.set(None);
+                ui.selected.set(None);
+                ui.log_open.set(false);
+                ui.end_armed.set(false);
+                menu.set(false);
+                popup.set(None);
+                ctl.tip.set(None);
+            }
+            // With a card held, digits pick where it goes: 0 the Active,
+            // 1-5 the Bench places from the left.
+            k @ ("0" | "1" | "2" | "3" | "4" | "5")
+                if ui.selected.with_untracked(Option::is_some) =>
+            {
+                e.prevent_default();
+                let sel = if k == "0" {
+                    ".half.me .zone .target .hexon-card, .half.me .zone .spot.target".to_string()
+                } else {
+                    format!(".half.me .bench > :nth-child({k}).target .hexon-card, .half.me .bench > :nth-child({k}).spot.target")
+                };
+                match document()
+                    .query_selector(&sel)
+                    .ok()
+                    .flatten()
+                    .map(|e| e.dyn_into::<web_sys::HtmlElement>())
+                {
+                    Some(Ok(el)) => el.click(),
+                    // Not a place it can go: say where it can.
+                    _ => {
+                        let doc = document();
+                        let mut at: Vec<String> = vec![];
+                        if doc
+                            .query_selector(".half.me .zone .target")
+                            .ok()
+                            .flatten()
+                            .is_some()
+                        {
+                            at.push("0".into());
+                        }
+                        for p in 1..=5 {
+                            if doc
+                                .query_selector(&format!(
+                                    ".half.me .bench > :nth-child({p}).target"
+                                ))
+                                .ok()
+                                .flatten()
+                                .is_some()
+                            {
+                                at.push(p.to_string());
+                            }
+                        }
+                        let keys = at.join(", ");
+                        let active_ok = at.first().is_some_and(|k| k == "0");
+                        // Sighted players see the keys that work pulse once.
+                        if let Some(d) = doc.query_selector(".duel").ok().flatten() {
+                            let _ = d.class_list().add_1("nudge");
+                            set_timeout(
+                                move || {
+                                    let _ = d.class_list().remove_1("nudge");
+                                },
+                                std::time::Duration::from_millis(700),
+                            );
+                        }
+                        ctl.announce.set(if at.is_empty() {
+                            tr("This card doesn't go on the table: press Enter to play it, or Escape.", "Cette carte ne se pose pas : Entrée pour la jouer, ou Échap.").to_string()
+                        } else {
+                            if active_ok {
+                                tr(format!("Not there. It can go to: {keys} (0 is the Active)."), format!("Pas là. Elle peut aller en : {keys} (0 est l'Actif)."))
+                            } else {
+                                tr(format!("Not there. It can go to Bench place {keys}."), format!("Pas là. Elle peut aller en place {keys} du Banc."))
+                            }
+                        });
+                    }
+                }
+            }
+            "l" | "L" => ui.log_open.set(true),
+            k @ ("1" | "2" | "3" | "4") => {
+                let a = Action::Attack(k.parse::<usize>().unwrap_or(1) - 1);
+                if has(a) {
+                    e.prevent_default();
+                    ui.selected.set(None);
+                    ctl.act(a);
+                }
+            }
+            "p" | "P" if has(Action::UsePower(0)) => {
+                e.prevent_default();
+                ui.selected.set(None);
+                ctl.act(Action::UsePower(0));
+            }
+            "r" | "R" if has(Action::Retreat) => {
+                e.prevent_default();
+                ui.selected.set(None);
+                ctl.act(Action::Retreat);
+            }
+            "h" | "H" => {
+                if let Some(Ok(el)) = document()
+                    .query_selector(".hand .hand-card")
+                    .ok()
+                    .flatten()
+                    .map(|e| e.dyn_into::<web_sys::HtmlElement>())
+                {
+                    let _ = el.focus();
+                }
+            }
+            "m" | "M" => menu.set(true),
+            "i" | "I" => {
+                if let Some(k) = ui.selected.get_untracked() {
+                    ui.open(Inspect {
+                        card: k.0,
+                        at: None,
+                    });
+                } else if let Some(i) = ui.inspect.get_untracked() {
+                    ui.open(i);
+                }
+            }
+            "e" | "E" if has(Action::Done) => {
+                e.prevent_default();
+                let can_attack =
+                    legal.with_untracked(|l| l.iter().any(|a| matches!(a, Action::Attack(_))));
+                if can_attack && !ui.end_armed.get_untracked() {
+                    ui.end_armed.set(true);
+                    set_timeout(
+                        move || ui.end_armed.set(false),
+                        std::time::Duration::from_millis(3000),
+                    );
+                } else {
+                    ui.end_armed.set(false);
+                    ui.selected.set(None);
+                    ctl.act(Action::Done);
+                }
+            }
+            _ => {}
         }
     };
+    // On the window, so they work wherever focus is (or isn't).
+    let keys = window_event_listener(leptos::ev::keydown, on_key);
+    on_cleanup(move || keys.remove());
+    // Focus never falls to the page: when the focused control goes (a card
+    // played, a panel closed), it lands back on your hand or End turn.
+    // Only for keyboard players: a touch or mouse player never sees a card
+    // jump up on its own.
+    let by_key = StoredValue::new(false);
+    let k = window_event_listener(leptos::ev::keydown, move |_| by_key.set_value(true));
+    let p = window_event_listener(leptos::ev::pointerdown, move |_| by_key.set_value(false));
+    on_cleanup(move || {
+        k.remove();
+        p.remove();
+    });
+    Effect::new(move |_| {
+        ctl.shown.track();
+        ui.selected.track();
+        if !by_key.get_value() {
+            return;
+        }
+        request_animation_frame(|| {
+            let doc = document();
+            let lost = doc.active_element().is_none_or(|e| e.tag_name() == "BODY");
+            if lost
+                && doc
+                    .query_selector("[aria-modal='true']")
+                    .ok()
+                    .flatten()
+                    .is_none()
+            {
+                focus_first(&[
+                    ".hand .hand-card.playable",
+                    ".hand .hand-card",
+                    ".seam .end-turn",
+                ]);
+            }
+        });
+    });
+    // Paying a retreat with no real choice (just enough energy) pays itself.
+    Effect::new(move |_| {
+        let l = legal.get();
+        let auto = ctl.shown.with_untracked(|g| {
+            g.as_ref().and_then(|g| match &g.view(HUMAN).prompt?.kind {
+                sixfold_engine::PromptKind::ChooseRetreatEnergy { cost, chosen } => {
+                    let left = usize::from(*cost).saturating_sub(chosen.len());
+                    let picks: Vec<Action> = l
+                        .iter()
+                        .copied()
+                        .filter(|a| matches!(a, Action::DiscardEnergy(_)))
+                        .collect();
+                    (!picks.is_empty() && picks.len() == l.len() && picks.len() <= left)
+                        .then(|| picks[0])
+                }
+                // A choice with a single answer answers itself.
+                k if crate::controls::is_modal(k)
+                    && l.len() == 1
+                    && matches!(l[0], Action::Choose(_)) =>
+                {
+                    Some(l[0])
+                }
+                _ => None,
+            })
+        });
+        if let Some(a) = auto {
+            ctl.act(a);
+        }
+    });
+    // Their turn starts with a clean dock: it shows what they play, not the
+    // card you last pointed at.
+    let turn_player = Memo::new(move |_| {
+        ctl.shown
+            .with(|g| g.as_ref().map(|g| g.view(HUMAN).turn_player))
+    });
+    Effect::new(move |_| {
+        if turn_player.get() == Some(AI) && !ui.sheet.get_untracked() {
+            ui.inspect.set(None);
+            ui.selected.set(None);
+        }
+    });
+    // A closed panel hands focus back to what opened it.
+    let back_to = |open: Signal<bool>, sel: &'static str| {
+        Effect::new(move |was: Option<bool>| {
+            let now = open.get();
+            if was == Some(true) && !now {
+                request_animation_frame(move || focus_first(&[sel]));
+            }
+            now
+        });
+    };
+    back_to(ui.log_open.into(), ".rail-log");
+    back_to(menu.into(), ".duel-menu-btn");
+    let last_popup = StoredValue::new(None::<u32>);
+    Effect::new(move |_| match popup.get() {
+        Some(k) => last_popup.set_value(Some(k)),
+        None => {
+            if let Some(k) = last_popup.get_value() {
+                last_popup.set_value(None);
+                request_animation_frame(move || {
+                    focus_first(&[&format!(".rail-play[data-key='{k}']"), ".rail-log"])
+                });
+            }
+        }
+    });
+    let title = tr(
+        format!("Duel against {}", names[AI]),
+        format!("Duel contre {}", names[AI]),
+    );
+    let leave_label = if gauntlet {
+        tr(
+            "Leave (ends your Gauntlet run)…",
+            "Partir (arrête votre Épreuve)…",
+        )
+    } else {
+        tr("Leave the duel…", "Quitter le duel…")
+    };
     view! {
-        <div class="match" on:keydown=on_key>
-            <header class="topbar">
-                <span class="wordmark small" aria-hidden="true">"Sixfold"</span>
-                <h1 class="sr-only">{tr("Duel", "Duel")}</h1>
-                <RivalFace />
-                <span class="matchup">
-                    <span class="me-name">{names[HUMAN].clone()}</span>
-                    {tr(" against ", " contre ")}
-                    <span class="opp-name">{names[AI].clone()}</span>
-                </span>
-                {(!tutorial).then(|| view! { <span class="seed">{tr("Seed ", "Graine ")} {move || ctl.seed.get()}</span> })}
-                <button class="btn ghost log-toggle" aria-expanded=move || ui.log_open.get().to_string()
-                    on:click=move |_| ui.log_open.update(|o| *o = !*o)>{tr("Log", "Journal")}</button>
-                <MuteToggle />
-                <button class="btn ghost" on:click=move |_| quit()>{tr("Quit", "Quitter")}</button>
-            </header>
-            {move || asking.get().then(|| view! {
-                <div class="quit-confirm confirm row" role="alertdialog" aria-labelledby="quit-q">
-                    <span id="quit-q">{if gauntlet {
-                        tr("Leave this duel? It can't be resumed, and it ends your Gauntlet run.",
-                            "Quitter ce duel ? Il ne pourra pas être repris, et votre Épreuve s'arrêtera.")
-                    } else {
-                        tr("Leave this duel? It can't be resumed.", "Quitter ce duel ? Il ne pourra pas être repris.")
-                    }}</span>
-                    <button type="button" class="btn danger" on:click=move |_| leave()>{tr("Leave", "Partir")}</button>
-                    <button type="button" class="btn primary" autofocus on:click=move |_| asking.set(false)>{tr("Keep playing", "Continuer")}</button>
+        <div class="duel" class:tutorial=tutorial>
+            <main class="mat">
+                <h1 class="sr-only">{title}</h1>
+                <section class="half me" aria-label=tr("Your side", "Votre côté")>
+                    <HandFan />
+                    <div class="cell active"><ActiveSpot player=HUMAN /></div>
+                    <div class="cell right"><Plates /></div>
+                    <div class="cell left"><Station player=HUMAN /></div>
+                    <div class="cell outer"><Piles player=HUMAN /></div>
+                    <div class="row bench-row"><Bench player=HUMAN /></div>
+                </section>
+                <Seam />
+                <section class="half opp" aria-label=tr("Opponent's side", "Côté adverse")>
+                    <div class="cell left"><Station player=AI /><RivalFace bubble_only=true /></div>
+                    <div class="cell active"><ActiveSpot player=AI /></div>
+                    <div class="cell right"><OppHand /></div>
+                    <div class="cell outer"><Piles player=AI /></div>
+                    <div class="row bench-row"><Bench player=AI /></div>
+                </section>
+                <div class="dock">
+                    {tutorial.then(|| view! { <coach::Coach /> })}
+                    <RuleTip />
+                    <PlayPopup />
+                    <Inspector />
                 </div>
-            })}
-            <main class="table">
-                // The board scrolls on its own when it is taller than the
-                // space left, so the hand and the action bar stay on screen.
-                <div class="board">
-                    <SideRow player=AI />
-                    <div class="midline" aria-hidden="true">
-                        <span>{move || match turn.get() {
-                            _ if !ctl.revealed.get() => tr("Setup", "Mise en place").to_string(),
-                            Some((t, p)) if fr() => format!("Tour {}, {}", t + 1, if p == HUMAN { "à vous" } else { "à l'adversaire" }),
-                            Some((t, p)) => format!("Turn {}, {}", t + 1, if p == HUMAN { "your move" } else { "opponent's move" }),
-                            None => String::new(),
-                        }}</span>
-                    </div>
-                    <SideRow player=HUMAN />
-                </div>
-                {tutorial.then(|| view! { <coach::Coach /> })}
-                <Hand />
-                <ActionBar />
+                // One polite summary per turn instead of every event (the coin and
+                // callouts are visual only; the log is there to read back).
+                <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">{move || ctl.announce.get()}</p>
                 {move || ctl.error.get().map(|e| view! { <p class="error" role="alert">{e}</p> })}
             </main>
-            <div class="sidebar">
-                <Inspector />
-                <LogPanel />
-            </div>
-            // One polite summary per turn instead of every event (the coin and
-            // callouts are visual only; the log is there to read back).
-            <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">{move || ctl.announce.get()}</p>
+            <HistoryRail />
+            <button class="duel-menu-btn" aria-haspopup="dialog" aria-label=tr("Duel menu", "Menu du duel") on:click=move |_| menu.set(true)>
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+            {move || asking.get().then(|| view! {
+                <div class="scrim">
+                    <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="quit-q">
+                        <h2 id="quit-q">{if gauntlet {
+                            tr("Leave this duel? It can't be resumed, and it ends your Gauntlet run.",
+                                "Quitter ce duel ? Il ne pourra pas être repris, et votre Épreuve s'arrêtera.")
+                        } else {
+                            tr("Leave this duel? It can't be resumed.", "Quitter ce duel ? Il ne pourra pas être repris.")
+                        }}</h2>
+                        <div class="dialog-foot">
+                            <button type="button" class="btn danger" on:click=move |_| leave()>{tr("Leave", "Partir")}</button>
+                            <button type="button" class="btn primary" autofocus on:click=move |_| asking.set(false)>{tr("Keep playing", "Continuer")}</button>
+                        </div>
+                    </div>
+                </div>
+            })}
+            <DuelMenu open=menu on_leave=move |_| quit() leave_label=leave_label />
+            <LogDrawer />
             <PromptModal />
-            <CalloutOverlay />
             <CoinOverlay />
             <DiscardViewer />
             {if tutorial { view! { <coach::Finish /> }.into_any() } else { view! { <GameOver /> }.into_any() }}

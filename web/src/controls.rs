@@ -4,24 +4,20 @@
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
 use sixfold_engine::{
-    card, energy_units, fr, total_units, tr, Action, CardId, Choice, Color, Effect as CardEffect,
-    Game, PromptKind, RuleError,
+    energy_units, fr, total_units, tr, Action, CardId, Choice, Color, Effect as CardEffect, Game,
+    PromptKind, RuleError,
 };
 
-use crate::board::{hand_index, keyed_hand};
-use crate::cards::{attack_text, cost_pips, damage_label, energy_pips, CardBack, CardFace};
+use crate::cards::{attack_text, damage_label, energy_pips, CardBack, CardFace};
 use crate::ctl::{Ctl, AI, HUMAN};
-use crate::{Legal, Ui};
+use crate::Legal;
 
 /// Why an attack button is greyed out.
-fn reason(e: RuleError) -> &'static str {
+pub(crate) fn reason(e: RuleError) -> &'static str {
     match e {
         RuleError::NotEnoughEnergy => tr("Not enough energy", "Pas assez d'énergie"),
         RuleError::AsleepOrParalyzed => tr("Asleep or Paralyzed", "Endormi ou Paralysé"),
-        RuleError::FirstTurn => tr(
-            "No attacks on the first turn",
-            "Pas d'attaque au premier tour",
-        ),
+        RuleError::FirstTurn => tr("Not on your first turn", "Pas au premier tour"),
         RuleError::CantAttack => tr("Can't attack this turn", "Pas d'attaque ce tour"),
         RuleError::AttackDisabled => tr("Disabled this turn", "Bloquée ce tour"),
         RuleError::AlreadyUsed => tr("Already used", "Déjà utilisé"),
@@ -32,52 +28,98 @@ fn reason(e: RuleError) -> &'static str {
             "Already retreated this turn",
             "Retraite déjà utilisée ce tour",
         ),
+        RuleError::NoLiveBench => tr("No Benched Hexon to swap in", "Aucun Hexon sur le Banc"),
+        RuleError::CantRetreat | RuleError::TrainerBasicCantRetreat => {
+            tr("It can't retreat", "Il ne peut pas battre en retraite")
+        }
+        RuleError::RetreatFailedThisTurn => {
+            tr("Retreat failed this turn", "Retraite ratée ce tour")
+        }
+        RuleError::EnergyAlreadyAttached => tr(
+            "Energy already attached this turn",
+            "Énergie déjà attachée ce tour",
+        ),
+        RuleError::BenchFull => tr("Your Bench is full", "Votre Banc est plein"),
+        RuleError::NotThisTurn => tr(
+            "Played this turn: awaken it next turn",
+            "Posé ce tour : éveil au prochain tour",
+        ),
+        RuleError::NoMatchingCreature => tr("No Hexon it awakens from", "Aucun Hexon à éveiller"),
+        RuleError::EvolutionLocked => tr("Awakening is blocked", "L'Éveil est bloqué"),
+        RuleError::TrainerLocked => tr("Trainers are blocked", "Les Dresseurs sont bloqués"),
+        RuleError::PowerBlocked => tr("Its Power is blocked", "Son Pouvoir est bloqué"),
+        RuleError::PowerAlreadyUsed => tr(
+            "Power already used this turn",
+            "Pouvoir déjà utilisé ce tour",
+        ),
         _ => tr("Can't use it now", "Impossible pour l'instant"),
     }
 }
 
 #[derive(Clone, PartialEq)]
-struct AttackBtn {
-    action: Action,
-    name: &'static str,
-    cost: &'static [Color],
-    damage: Option<String>,
+pub(crate) struct AttackBtn {
+    pub action: Action,
+    pub name: &'static str,
+    pub cost: &'static [Color],
+    pub damage: Option<String>,
     /// (amount, weakness, resistance) against the opposing Active now.
-    preview: Option<(u16, bool, bool)>,
+    pub preview: Option<(u16, bool, bool)>,
     /// Coins can add damage on top of the preview (which assumes tails).
-    coins: bool,
-    ko: bool,
-    blocked: Option<&'static str>,
-    text: String,
+    pub coins: bool,
+    pub ko: bool,
+    pub blocked: Option<&'static str>,
+    pub text: String,
+    /// An effect on your Active: heads first, or the attack does nothing.
+    pub needs_heads: bool,
 }
 
-#[derive(Clone, PartialEq)]
-struct Btn {
-    action: Action,
-    label: String,
-    /// Shown greyed out, with this reason after the label.
-    blocked: Option<&'static str>,
+/// The line under an attack's name: why it's blocked, or what it will do.
+pub(crate) fn attack_note(a: &AttackBtn) -> String {
+    let note = attack_note_core(a);
+    if a.needs_heads && a.blocked.is_none() {
+        let first = tr("Flip heads first", "Face d'abord");
+        if note.is_empty() {
+            first.to_string()
+        } else {
+            format!("{first} · {note}")
+        }
+    } else {
+        note
+    }
 }
 
-#[derive(Clone, PartialEq, Default)]
-struct Bar {
-    title: String,
-    hint: Option<String>,
-    mine: bool,
-    attacks: Vec<AttackBtn>,
-    hand: Vec<Btn>,
-    other: Vec<Btn>,
-    end: Option<Btn>,
+fn attack_note_core(a: &AttackBtn) -> String {
+    match (a.blocked, a.preview) {
+        (Some(r), _) => r.to_string(),
+        (None, Some((0, ..))) if a.coins => {
+            tr("Damage depends on coin flips", "Dégâts selon pile ou face").to_string()
+        }
+        (None, Some((amt, w, r))) if fr() => format!(
+            "{}{amt} dégâts{}{}{}",
+            if a.coins { "Au moins " } else { "" },
+            if w { ", Faiblesse ×2" } else { "" },
+            if r { ", résisté" } else { "" },
+            if a.ko { ", met K.O." } else { "" }
+        ),
+        (None, Some((amt, w, r))) => format!(
+            "{}{amt} damage{}{}{}",
+            if a.coins { "At least " } else { "" },
+            if w { ", weak ×2" } else { "" },
+            if r { ", resisted" } else { "" },
+            if a.ko { ", knocks it out" } else { "" }
+        ),
+        (None, None) => String::new(),
+    }
 }
 
-fn is_modal(kind: &PromptKind) -> bool {
+pub(crate) fn is_modal(kind: &PromptKind) -> bool {
     !matches!(
         kind,
         PromptKind::ChooseActive | PromptKind::ChooseBench | PromptKind::MainPhase
     )
 }
 
-fn attack_buttons(g: &Game, legal: &[Action]) -> Vec<AttackBtn> {
+pub(crate) fn attack_buttons(g: &Game, legal: &[Action]) -> Vec<AttackBtn> {
     let v = g.view(HUMAN);
     let Some(active) = v.sides[HUMAN].active else {
         return vec![];
@@ -104,224 +146,12 @@ fn attack_buttons(g: &Game, legal: &[Action]) -> Vec<AttackBtn> {
                 // Probing a clone only reads the human's own options.
                 blocked: (!legal.contains(&action))
                     // An engine-legal attack held back is the guided duel's "later".
-                    .then(|| g.clone().apply(action).err().map_or(tr("Not yet", "Pas encore"), reason)),
+                    .then(|| g.clone().apply(action).err().map_or(tr("Follow the lesson first", "Suivez d'abord la leçon"), reason)),
                 text: attack_text(a),
+                needs_heads: v.sides[HUMAN].effects.placed == Some(sixfold_engine::Placed::Accuracy),
             }
         })
         .collect()
-}
-
-fn bar_model(ctl: Ctl, ui: Ui, legal: &[Action]) -> Bar {
-    ctl.shown.with(|g| {
-        let Some(g) = g.as_ref() else {
-            return Bar::default();
-        };
-        let v = g.view(HUMAN);
-        if v.winner.is_some() {
-            return Bar {
-                title: tr("Game over", "Partie terminée").into(),
-                ..Bar::default()
-            };
-        }
-        if ctl.busy.get() {
-            return Bar {
-                title: tr("Resolving", "Résolution…").into(),
-                ..Bar::default()
-            };
-        }
-        let Some(prompt) = v.prompt else {
-            let setup = !ctl.revealed.get();
-            return Bar {
-                title: if setup {
-                    tr("Opponent is setting up", "L'adversaire se prépare").into()
-                } else {
-                    tr("Opponent's turn", "Tour adverse").into()
-                },
-                hint: Some(
-                    tr(
-                        "Their moves play out on the table and in the log.",
-                        "Ses actions se jouent sur la table et dans le journal.",
-                    )
-                    .into(),
-                ),
-                ..Bar::default()
-            };
-        };
-        let mut bar = Bar {
-            title: prompt.kind.to_string(),
-            mine: true,
-            ..Bar::default()
-        };
-        if is_modal(&prompt.kind) {
-            return bar;
-        }
-        let keys = keyed_hand(v.hand);
-        let selected = ui
-            .selected
-            .get()
-            .and_then(|k| keys.iter().position(|x| *x == k));
-        let playable = legal
-            .iter()
-            .filter_map(|&a| hand_index(a))
-            .collect::<Vec<_>>();
-        for &a in legal {
-            let btn = Btn {
-                action: a,
-                label: v.describe_action(a),
-                blocked: None,
-            };
-            match a {
-                Action::Done => bar.end = Some(btn),
-                Action::Attack(_) => {}
-                _ if hand_index(a).is_some() => {
-                    if hand_index(a) == selected {
-                        bar.hand.push(btn)
-                    }
-                }
-                _ => bar.other.push(btn),
-            }
-        }
-        if prompt.kind == PromptKind::MainPhase {
-            bar.attacks = attack_buttons(g, legal);
-            // R-RETREAT-05: say why Retreat is gone after the turn's one retreat.
-            if g.clone().apply(Action::Retreat).err() == Some(RuleError::AlreadyRetreated) {
-                bar.other.push(Btn {
-                    action: Action::Retreat,
-                    label: tr("Retreat", "Battre en retraite").into(),
-                    blocked: Some(reason(RuleError::AlreadyRetreated)),
-                });
-            }
-        }
-        bar.hint = match (selected, playable.is_empty()) {
-            (Some(i), _) if bar.hand.is_empty() => Some(tr(
-                format!("{} can't be played right now.", card(v.hand[i]).label()),
-                format!(
-                    "{} ne peut pas être jouée maintenant.",
-                    card(v.hand[i]).label()
-                ),
-            )),
-            (Some(_), _) => None,
-            (None, false) => Some(match prompt.kind {
-                PromptKind::ChooseActive => tr(
-                    "Pick a Basic Hexon from your hand.",
-                    "Choisissez un Hexon de Base dans votre main.",
-                )
-                .into(),
-                PromptKind::ChooseBench => tr(
-                    "Pick more Basics for your Bench, or press Done.",
-                    "Ajoutez des Hexons de Base à votre Banc, ou touchez Terminé.",
-                )
-                .into(),
-                _ => {
-                    let mut n = playable;
-                    n.dedup();
-                    match (n.len(), fr()) {
-                        (n, false) => {
-                            format!("Select a card in your hand to play it ({n} playable).")
-                        }
-                        (n @ (0 | 1), true) => {
-                            format!("Touchez une carte de votre main pour la jouer ({n} jouable).")
-                        }
-                        (n, true) => {
-                            format!("Touchez une carte de votre main pour la jouer ({n} jouables).")
-                        }
-                    }
-                }
-            }),
-            (None, true) => None,
-        };
-        bar
-    })
-}
-
-#[component]
-pub fn ActionBar() -> impl IntoView {
-    let ctl = expect_context::<Ctl>();
-    let ui = expect_context::<Ui>();
-    let Legal(legal) = expect_context::<Legal>();
-    let bar = Memo::new(move |_| legal.with(|l| bar_model(ctl, ui, l)));
-    // Your move begins: your side into view (it is the part of the board a
-    // short phone scrolls away, and the one you act on).
-    let mine = Memo::new(move |_| bar.with(|b| b.mine));
-    Effect::new(move |_| {
-        if mine.get() {
-            crate::board::show_my_side();
-        }
-    });
-    let act = move |a: Action| {
-        ui.selected.set(None);
-        ctl.act(a);
-    };
-    view! {
-        <div class="action-bar" class:mine=move || bar.with(|b| b.mine) role="region" aria-label=tr("Actions", "Actions") tabindex="-1" data-focus-home="">
-            <div class="bar-status">
-                <h2 class="bar-title" aria-live="polite">{move || bar.with(|b| b.title.clone())}</h2>
-                {move || bar.with(|b| b.hint.clone()).map(|h| view! { <p class="bar-hint">{h}</p> })}
-            </div>
-            <div class="bar-groups">
-                <div class="bar-group attacks">
-                    {move || bar.with(|b| b.attacks.clone()).into_iter().map(|a| {
-                        let note = match (a.blocked, a.preview) {
-                            (Some(r), _) => r.to_string(),
-                            (None, Some((0, ..))) if a.coins => tr("Damage depends on coin flips", "Dégâts selon pile ou face").to_string(),
-                            (None, Some((amt, w, r))) if fr() => format!(
-                                "{}{amt} dégâts{}{}{}",
-                                if a.coins { "Au moins " } else { "" },
-                                if w { ", Faiblesse ×2" } else { "" },
-                                if r { ", résisté" } else { "" },
-                                if a.ko { ", met K.O." } else { "" }
-                            ),
-                            (None, Some((amt, w, r))) => format!(
-                                "{}{amt} to the defender{}{}{}",
-                                if a.coins { "At least " } else { "" },
-                                if w { ", weak ×2" } else { "" },
-                                if r { ", resisted" } else { "" },
-                                if a.ko { ", knocks it out" } else { "" }
-                            ),
-                            (None, None) => String::new(),
-                        };
-                        // The words on the button, in order (WCAG 2.5.3, label in name).
-                        let free = if a.cost.is_empty() { tr("Free", "Gratuit") } else { "" };
-                        let label = [free, a.name, a.damage.as_deref().unwrap_or(""), &note]
-                            .into_iter()
-                            .filter(|s| !s.is_empty())
-                            .collect::<Vec<_>>()
-                            .join(" ");
-                        let action = a.action;
-                        view! {
-                            <button
-                                class="btn attack"
-                                class:ko=a.ko
-                                disabled=a.blocked.is_some()
-                                aria-label=label
-                                title=a.text.clone()
-                                on:click=move |_| act(action)
-                            >
-                                <span class="attack-cost">{cost_pips(a.cost)}</span>" "
-                                <span class="attack-name">{a.name}</span>" "
-                                <span class="attack-dmg">{a.damage.clone()}</span>" "
-                                <span class="attack-note">{note}</span>
-                            </button>
-                        }
-                    }).collect_view()}
-                </div>
-                <div class="bar-group plays">
-                    {move || bar.with(|b| b.hand.iter().chain(b.other.iter()).cloned().collect::<Vec<_>>()).into_iter().map(|b| {
-                        let action = b.action;
-                        let label = match b.blocked {
-                            Some(r) => format!("{} · {r}", b.label),
-                            None => b.label,
-                        };
-                        view! { <button class="btn" disabled=b.blocked.is_some() on:click=move |_| act(action)>{label}</button> }
-                    }).collect_view()}
-                    {move || bar.with(|b| b.end.clone()).map(|b| {
-                        let action = b.action;
-                        view! { <button class="btn end" on:click=move |_| act(action)>{b.label}</button> }
-                    })}
-                </div>
-            </div>
-        </div>
-    }
 }
 
 #[derive(Clone, PartialEq)]
@@ -416,6 +246,25 @@ fn dialog_model(g: &Game, legal: &[Action]) -> Option<Dialog> {
             extra,
         });
     }
+    // Benched Hexons are offered in the order they sit on the table, left to right.
+    if let Some(places) = use_context::<crate::table::BenchPlaces>() {
+        let place = |a: Action| {
+            let (player, slot) = match a {
+                Action::Promote(slot) => (HUMAN, slot),
+                Action::Choose(i) => match &prompt.kind {
+                    PromptKind::Choose { options: o, .. } => match o.get(i) {
+                        Some(&Choice::Slot { player, slot }) => (player, slot),
+                        _ => return None,
+                    },
+                    _ => return None,
+                },
+                _ => return None,
+            };
+            let uid = creature_at(player, slot).filter(|_| slot > 0)?.uid;
+            places.place(player, uid)
+        };
+        options.sort_by_key(|o: &Opt| place(o.action).unwrap_or(0));
+    }
     let sub = match &prompt.kind {
         PromptKind::Choose { effect, .. } => Some(effect.to_string()),
         PromptKind::ChooseRetreatEnergy { cost, chosen } => {
@@ -509,7 +358,7 @@ pub fn PromptModal() -> impl IntoView {
                 let action = o.action;
                 let art = match o.visual {
                     Visual::Card(id) => {
-                        view! { <span class="opt-card"><CardFace id=id /></span> }.into_any()
+                        view! { <span class="opt-card" aria-hidden="true"><CardFace id=id /></span> }.into_any()
                     }
                     Visual::Energy(id) => {
                         view! { <span class="opt-energy">{energy_pips(id)}</span> }.into_any()

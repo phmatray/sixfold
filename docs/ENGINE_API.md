@@ -161,6 +161,7 @@ pub struct View<'a> {
     pub turn: u32,
     pub turn_player: usize,
     pub energy_attached: bool,           // the turn player already used this turn's attachment
+    pub retreated: bool,                 // the turn player already retreated this turn (R-RETREAT-05)
     pub prompt: Option<&'a Prompt>,      // Some only when *I* am being asked
     pub waiting_on: Option<usize>,       // who is being asked (None = game over)
     pub winner: Option<usize>,

@@ -601,11 +601,13 @@ fn name(id: CardId) -> &'static str {
     card(id).label()
 }
 
+/// "Active" or "Bench": the Bench is a group on screen, so its slots go
+/// unnumbered (the Hexon's name says which one).
 fn slot_label(slot: usize) -> String {
     if slot == 0 {
         "Active".to_string()
     } else {
-        tr(format!("Bench {slot}"), format!("Banc {slot}"))
+        tr("Bench", "Banc").to_string()
     }
 }
 
@@ -727,7 +729,7 @@ impl View<'_> {
                     (true, true) if slot == 0 => "votre Actif".to_string(),
                     (true, true) => format!("votre {}", slot_label(slot)),
                     (false, true) if slot == 0 => "Actif adverse".to_string(),
-                    (false, true) => format!("Banc adverse {slot}"),
+                    (false, true) => "Banc adverse".to_string(),
                 };
                 format!("{} ({at})", self.creature_name(player, slot))
             }
@@ -825,12 +827,14 @@ impl Event {
             ),
             Event::Evolved {
                 player, slot, card, ..
-            } => format!(
-                "{} {} awakened into {}",
-                whose(*player),
-                slot_label(*slot),
-                name(*card)
-            ),
+            } => {
+                let at = if *slot == 0 {
+                    "Active"
+                } else {
+                    "Benched Hexon"
+                };
+                format!("{} {at} awakened into {}", whose(*player), name(*card))
+            }
             Event::TrainerPlayed { player, card } => {
                 format!("{} played {}", who(*player), name(*card))
             }
@@ -1151,8 +1155,8 @@ impl Event {
                 let who = match (*player == viewer, *slot) {
                     (true, 0) => "Votre Actif".to_string(),
                     (false, 0) => "L'Actif adverse".to_string(),
-                    (true, s) => format!("Votre Hexon en Banc {s}"),
-                    (false, s) => format!("Le Hexon adverse en Banc {s}"),
+                    (true, _) => "Votre Hexon de Banc".to_string(),
+                    (false, _) => "Le Hexon de Banc adverse".to_string(),
                 };
                 format!("{who} s'éveille en {}", name(*card))
             }
