@@ -325,6 +325,12 @@ const SFX = {
   chime: (d, t) => {
     [96, 103, 100, 108].forEach((m, i) => tone(d, t + i * 0.22, hz(m), 1.6, { peak: 0.035, detune: (i % 2 ? 9 : -7), rel: 0.8 }));
   },
+  // "Press to start": the title's hook (a rising sixth) blooming into its chord.
+  sting: (d, t) => {
+    notes(d, t, [74, 83], 0.13, { type: "triangle", peak: 0.13, dur: 0.5 });
+    [62, 69, 74, 78, 83].forEach((m, i) => tone(d, t + 0.26 + i * 0.03, hz(m), 1.5, { type: i ? "triangle" : "sine", peak: i ? 0.05 : 0.14, a: 0.06, lin: true, rel: 0.9 }));
+    noise(d, t + 0.24, 1.1, { type: "highpass", f: 7000, a: 0.3, peak: 0.05 });
+  },
   win: (d, t) => {
     notes(d, t, [72, 76, 79], 0.12, { type: "triangle", peak: 0.15, dur: 0.3 });
     [72, 76, 79, 84].forEach((m) => tone(d, t + 0.38, hz(m), 1.4, { type: "triangle", peak: 0.09, lin: true, rel: 0.6 }));
@@ -337,6 +343,10 @@ const SFX = {
 };
 
 export function sfx(name, n = 0) {
+  // The start sting rides the gesture that creates the context, which may
+  // still be starting up: play it as soon as it runs.
+  if (name === "sting" && ctx?.state === "suspended" && !prefs.muted)
+    return void ctx.resume().then(() => ctx.state === "running" && sfx(name, n), () => {});
   const f = SFX[name];
   if (!ctx || ctx.state !== "running" || !f) return;
   const now = ctx.currentTime;
@@ -552,16 +562,19 @@ const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], h
 const DIGITS = "0123456789abcdef";
 
 const TRACKS = {
-  // Title and menus: an unhurried evening by the fire.
+  // Title and menus: an evening by the fire, around one hook, a rising sixth
+  // (tonic to sixth: the game's six) that falls back home; the start sting is
+  // the same hook. Keys and shaker on a 3-3-2 pulse.
   title: {
-    bpm: 76, root: 65, scale: "major", chords: [0, 5, 3, 4, 0, 5, 1, 4],
+    bpm: 84, root: 62, scale: "major", chords: [0, 2, 5, 3, 0, 2, 3, 4],
     lead:
-      "7---5-6-7-----.." + "8---7-5-3-------" + "6---5-6-8---7---" + "4-----2-4-5-7---" +
-      "7---5-6-7---a---" + "9---8-7-8-------" + "6-5-4-5-6---8---" + "7-------4---2---",
-    bass: "x-------5---x---",
-    drums: { kick: "x.......x.......", shaker: "....x.......x..." },
-    // A touch under the others: it was 3 dB louder than the world and the duels.
-    mix: { lead: 0.075, pad: 0.03, bass: 0.105, keys: 0.025 },
+      "3---8-------7-5-" + "7-------5---3---" + "8---a---c-----a-" + "b-------a---8---" +
+      "3---8-------7-5-" + "7-------8---a---" + "c---b---a---8---" + "9-------7-------",
+    bass: "x-----x---5---o-",
+    keys: "x..x..x.........",
+    drums: { kick: "x.........x.....", shaker: "x..x..x.x..x..x." },
+    // A touch under the others, level with the world and the duels.
+    mix: { lead: 0.07, pad: 0.025, bass: 0.105, keys: 0.018 },
   },
   // The duel: a little more urgent, still friendly. Intensifies on the last prize.
   duel: {
