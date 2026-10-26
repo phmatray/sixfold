@@ -25,6 +25,8 @@ pub struct Coin {
     pub player: usize,
     pub heads: bool,
     pub caption: String,
+    /// The flip that settles an attack: it arcs higher.
+    pub decide: bool,
 }
 
 /// A big centred message: turn banner, attack name, trainer played.
@@ -44,6 +46,44 @@ pub struct Pop {
     pub uid: u32,
     pub text: String,
     pub kind: &'static str,
+    /// Damage done (its number grows with it), else 0.
+    pub amount: u16,
+    /// Beside the number: weakness "×2", resistance "−30" (class, text).
+    pub stamps: Vec<(&'static str, &'static str)>,
+}
+
+/// A big moment's extra weight (WORLD_DESIGN §12.1), on top of the event's
+/// own effect and sound: what the duel wears while it plays (`data-beat`),
+/// a sound (name, variant) and a hold before the event (the KO's hit-stop).
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Beat {
+    pub class: &'static str,
+    pub sfx: Option<(&'static str, f64)>,
+    pub hold_ms: u32,
+}
+
+/// The beat of `event`, if it is a big moment. `next` is the event after it,
+/// `attack` says an attack is resolving, `left` is what its taker has left
+/// once a prize lands.
+pub fn beat(event: &Event, next: Option<&Event>, attack: bool, left: usize) -> Option<Beat> {
+    let b = |class, sfx, hold_ms| {
+        Some(Beat {
+            class,
+            sfx,
+            hold_ms,
+        })
+    };
+    match event {
+        Event::KnockedOut { .. } => b("ko", Some(("crack", 0.0)), 80),
+        // The winning prize flies at half speed.
+        Event::PrizeTaken { .. } if left == 0 => b("last-prize", Some(("fly", 1.0)), 0),
+        Event::PrizeTaken { .. } => b("prize", Some(("fly", 0.0)), 0),
+        // The last flip of an attack's run of flips settles it.
+        Event::CoinFlip { .. } if attack && !matches!(next, Some(Event::CoinFlip { .. })) => {
+            b("decide", None, 0)
+        }
+        _ => None,
+    }
 }
 
 #[derive(Clone, PartialEq, Default)]
@@ -59,6 +99,10 @@ pub struct Fx {
     pub callout: Option<Callout>,
     /// (player, prize position) being taken.
     pub prize: Option<(usize, usize)>,
+    /// The beat playing, for `data-beat` on the duel.
+    pub beat: Option<&'static str>,
+    /// A hit-stop: every animation on the table holds still.
+    pub frozen: bool,
 }
 
 /// A rival's duel line in the speech bubble; `ko` for their first knock-out.
@@ -168,6 +212,13 @@ pub struct Ctl {
     pub announce: RwSignal<String>,
     /// The rival's line being said, if any (see [`Ctl::say`]).
     pub said: RwSignal<Option<Said>>,
+    /// An energy just attached: (key, uid, colour key). Its own signal, so the
+    /// spark outlives the playback without holding it up.
+    pub spark: RwSignal<Option<(u32, u32, &'static str)>>,
+    /// An attack is resolving (its coins can settle it).
+    attacking: StoredValue<bool>,
+    /// Prizes each side took in the batch playing (`shown` doesn't know yet).
+    taken: StoredValue<[usize; 2]>,
     /// The rival lines already said this duel, one bit each.
     spoken: StoredValue<u8>,
     heard: StoredValue<Vec<String>>,
@@ -213,6 +264,9 @@ impl Ctl {
             error: RwSignal::new(None),
             announce: RwSignal::new(String::new()),
             said: RwSignal::new(None),
+            spark: RwSignal::new(None),
+            attacking: StoredValue::new(false),
+            taken: StoredValue::new([0; 2]),
             spoken: StoredValue::new(0),
             heard: StoredValue::new(vec![]),
             setup: StoredValue::new(None),
@@ -379,14 +433,71 @@ impl Ctl {
                 self.commit(generation);
                 return;
             };
-            let ms = self.play(&event);
-            if ms > 0 {
-                let ms = if self.reduced_motion { ms * 6 / 10 } else { ms };
-                let ms = self.pace(ms);
-                set_timeout(move || self.step(generation), Duration::from_millis(ms));
+            let beat = self.beat_of(&event);
+            if let Some(hold) = beat.map(|b| u64::from(b.hold_ms)).filter(|h| *h > 0) {
+                // Hit-stop: the table freezes on the blow, then the event lands.
+                self.fx.update(|f| {
+                    f.frozen = true;
+                    f.beat = None;
+                });
+                set_timeout(
+                    move || {
+                        if self.generation.get_value() != generation {
+                            return;
+                        }
+                        self.fx.update(|f| f.frozen = false);
+                        if !self.show(&event, beat, generation) {
+                            self.step(generation);
+                        }
+                    },
+                    Duration::from_millis(self.pace(hold)),
+                );
+                return;
+            }
+            if self.show(&event, beat, generation) {
                 return;
             }
         }
+    }
+
+    /// The beat of the next event to play, from the replay's own state.
+    fn beat_of(&self, event: &Event) -> Option<Beat> {
+        let left = match event {
+            Event::PrizeTaken { player, .. } => self.prizes_left(*player).saturating_sub(1),
+            _ => usize::MAX,
+        };
+        let next = self.queue.with_value(|q| q.front().cloned());
+        beat(event, next.as_ref(), self.attacking.get_value(), left)
+    }
+
+    /// The prizes `player` has left at this point of the playback.
+    fn prizes_left(&self, player: usize) -> usize {
+        let shown = self.shown.with_untracked(|g| {
+            g.as_ref().map_or(0, |g| {
+                g.view(HUMAN).sides[player]
+                    .prizes
+                    .iter()
+                    .filter(|p| **p)
+                    .count()
+            })
+        });
+        shown.saturating_sub(self.taken.get_value()[player])
+    }
+
+    /// Play one event and its beat; true if a pause was scheduled.
+    fn show(self, event: &Event, beat: Option<Beat>, generation: u32) -> bool {
+        let ms = self.play(event, beat);
+        if let Some((name, n)) = beat.and_then(|b| b.sfx) {
+            crate::audio::sfx(name, n);
+        }
+        if ms == 0 {
+            return false;
+        }
+        self.fx.update(|f| f.beat = beat.map(|b| b.class));
+        let ms = if self.reduced_motion { ms * 6 / 10 } else { ms };
+        let ms = self.pace(ms);
+        set_timeout(move || self.step(generation), Duration::from_millis(ms));
+        true
     }
 
     fn commit(self, generation: u32) {
@@ -394,6 +505,7 @@ impl Ctl {
         self.shown
             .with_untracked(|g| g.as_ref().map(crate::audio::duel_state));
         self.fx.set(Fx::default());
+        self.taken.set_value([0; 2]);
         self.busy.set(false);
         let ai_turn = self.real.with_value(|g| {
             g.as_ref()
@@ -500,6 +612,17 @@ impl Ctl {
     }
 
     fn pop(&self, uid: Option<u32>, text: String, kind: &'static str) {
+        self.pop_with(uid, text, kind, 0, vec![]);
+    }
+
+    fn pop_with(
+        &self,
+        uid: Option<u32>,
+        text: String,
+        kind: &'static str,
+        amount: u16,
+        stamps: Vec<(&'static str, &'static str)>,
+    ) {
         if let Some(uid) = uid {
             let key = self.next_key();
             self.fx.update(|f| {
@@ -508,6 +631,8 @@ impl Ctl {
                     uid,
                     text,
                     kind,
+                    amount,
+                    stamps,
                 })
             });
         }
@@ -708,8 +833,14 @@ impl Ctl {
     }
 
     /// Log one event, start its effect, and return how long to pause (ms).
-    fn play(&self, event: &Event) -> u64 {
+    fn play(&self, event: &Event, beat: Option<Beat>) -> u64 {
         crate::audio::duel_event(event);
+        match event {
+            Event::AttackUsed { .. } => self.attacking.set_value(true),
+            Event::CoinFlip { .. } => {}
+            // Anything after the flips means the attack's coins are done.
+            _ => self.attacking.set_value(false),
+        }
         let key = self.next_key();
         let text = event.describe(HUMAN);
         let kind = log_kind(event);
@@ -801,6 +932,7 @@ impl Ctl {
                         player: *player,
                         heads: *heads,
                         caption,
+                        decide: beat.is_some_and(|b| b.class == "decide"),
                     })
                 });
                 1700
@@ -903,21 +1035,28 @@ impl Ctl {
                 resistance,
                 ..
             } => {
-                let mut text = format!("−{amount}");
-                if *weakness {
-                    text.push_str(" ×2");
-                }
-                if *resistance {
-                    text.push_str(tr(" resisted", " résisté"));
-                }
+                // R-DMG-01: weakness doubles, resistance takes 30 off.
+                let stamps = [
+                    (*weakness, ("weak", "×2")),
+                    (*resistance, ("resist", "−30")),
+                ]
+                .into_iter()
+                .filter_map(|(on, s)| on.then_some(s))
+                .collect();
                 let kind = if *amount == 0 { "none" } else { "dmg" };
                 self.fx.update(|f| {
                     f.lunge = None;
                     f.hit = Some(*uid);
                     f.hp.insert(*uid, *hp);
                 });
-                self.pop(Some(*uid), text, kind);
-                850
+                self.pop_with(Some(*uid), format!("−{amount}"), kind, *amount, stamps);
+                // A knock-out blow hands over to the KO while it still shakes
+                // (the KO's hit-stop freezes it).
+                if *hp == 0 {
+                    450
+                } else {
+                    850
+                }
             }
             Event::Healed { uid, amount, .. } => {
                 let now = self.fx.with_untracked(|f| f.hp.get(uid).copied());
@@ -955,8 +1094,34 @@ impl Ctl {
                 if ropes {
                     self.say(4, |l| l.ropes);
                 }
+                self.taken.update_value(|t| t[*player] += 1);
+                // Down to the last prize: the music's hot layer comes in now.
+                if self.prizes_left(*player) == 1 {
+                    crate::audio::intensity(1.0);
+                }
                 self.fx.update(|f| f.prize = Some((*player, *prize)));
-                600
+                // The winning prize flies at half speed.
+                if beat.is_some_and(|b| b.class == "last-prize") {
+                    1200
+                } else {
+                    600
+                }
+            }
+            Event::EnergyAttached { uid, card: c, .. } => {
+                let tone =
+                    crate::art::card_color(card(*c)).map_or("colorless", crate::art::color_key);
+                let key = self.next_key();
+                self.spark.set(Some((key, *uid, tone)));
+                let spark = self.spark;
+                set_timeout(
+                    move || {
+                        if spark.get_untracked().is_some_and(|s| s.0 == key) {
+                            spark.set(None);
+                        }
+                    },
+                    Duration::from_millis(700),
+                );
+                0
             }
             Event::ConditionApplied { player, status } => {
                 self.pop(self.active_uid(*player), status.to_string(), "status");
@@ -1065,5 +1230,40 @@ fn log_kind(e: &Event) -> &'static str {
         | Event::BetweenTurns
         | Event::TurnEnded { .. } => "quiet",
         _ => "",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn beats_follow_the_events() {
+        let flip = Event::CoinFlip {
+            player: 0,
+            heads: true,
+        };
+        let prize = Event::PrizeTaken {
+            player: 0,
+            prize: 0,
+            card: CardId(0),
+        };
+        // Only the last flip of an attack settles it; a turn's flip never does.
+        assert_eq!(beat(&flip, Some(&flip), true, 9), None);
+        assert_eq!(beat(&flip, None, true, 9).map(|b| b.class), Some("decide"));
+        assert_eq!(beat(&flip, None, false, 9), None);
+        // The winning prize is the slow one.
+        assert_eq!(beat(&prize, None, false, 1).map(|b| b.class), Some("prize"));
+        assert_eq!(
+            beat(&prize, None, false, 0).map(|b| b.class),
+            Some("last-prize")
+        );
+        let ko = Event::KnockedOut {
+            player: 1,
+            slot: 0,
+            uid: 3,
+            card: CardId(0),
+        };
+        assert_eq!(beat(&ko, None, false, 9).map(|b| b.hold_ms), Some(80));
     }
 }
