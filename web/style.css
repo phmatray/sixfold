@@ -1063,7 +1063,12 @@ body:has(.reading-sheet[open]) :is(.world-top, .world-prompt) { visibility: hidd
   gap: 10px;
   padding: 0 16px max(16px, env(safe-area-inset-bottom));
 }
-.reading-controls .btn { min-height: 48px; min-width: 48px; gap: 8px; }
+.reading-controls .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; min-width: 48px; gap: 8px; }
+.reading-controls kbd { font: 700 calc(12px * var(--ts)) var(--body); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
+/* The title and the controls come in once the book is in the hands, not over its flight. */
+.reading-head, .reading-controls { animation: reading-in 260ms ease-out 900ms both; }
+@keyframes reading-in { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .reading-head, .reading-controls { animation: none; } }
 .reading-controls .btn:not(.primary) { background: color-mix(in srgb, var(--felt-deep) 78%, transparent); }
 .reading-controls .btn[aria-pressed="true"] { border-color: var(--brass-hi); color: var(--brass-hi); }
 .reading-controls .btn:disabled { opacity: 0.45; }

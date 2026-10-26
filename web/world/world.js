@@ -825,8 +825,6 @@ export function mount(el, controls, cb, start, edit = false) {
     },
     // Turn to page `n` (a spread), from the open book's current one.
     page: (n) => book.page(n),
-    // The text size changed: the book's pages are painted again.
-    repaint: () => book.repaint(),
     pause(p) {
       paused = !!p;
       clearHeld();

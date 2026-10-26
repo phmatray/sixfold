@@ -680,8 +680,6 @@ export function createBook({ reduced, sound }) {
       if (tall !== single) (single = tall), repaint();
       if (data && !state) place(reading());
     },
-    // The text size changed (Options): paint the pages again.
-    repaint,
     render(renderer, dt) {
       update(dt);
       if (!root.visible) return;
