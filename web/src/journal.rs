@@ -64,7 +64,8 @@ pub struct ReadBook(pub Callback<&'static str>);
 #[component]
 fn Library() -> impl IntoView {
     let progress = expect_context::<RwSignal<Progress>>();
-    let open = use_context::<ReadBook>();
+    // The Journal opens inside the world, which provides it.
+    let ReadBook(open) = expect_context::<ReadBook>();
     let read: Vec<_> =
         progress.with_untracked(|p| BOOKS.iter().filter(|b| books::is_read(p, b.id)).collect());
     let (n, total) = (read.len(), BOOKS.len());
@@ -87,9 +88,7 @@ fn Library() -> impl IntoView {
                         {read.into_iter().map(|b| view! {
                             <li>
                                 <button type="button" class=format!("library-book family-{}", b.family.name())
-                                    disabled=open.is_none()
-                                    title=open.is_none().then(|| tr("Books open in the world", "Les livres s'ouvrent dans le monde"))
-                                    on:click=move |_| if let Some(ReadBook(f)) = open { f.run(b.id) }>
+                                    on:click=move |_| open.run(b.id)>
                                     <span class="library-spine" aria-hidden="true"></span>
                                     <span class="library-title">{b.title.get()}</span>
                                     <span class="library-family">{b.family.label().get()}</span>

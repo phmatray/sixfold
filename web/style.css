@@ -2850,7 +2850,6 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .library-book { grid-template-columns: 10px 1fr auto; }
 .library-open { grid-column: 3; grid-row: 1 / 3; align-self: center; font-weight: 700; font-size: var(--fs-sm); color: var(--muted); }
 .library-book:is(:hover, :focus-visible) .library-open { color: var(--brass-hi); }
-.library-book:disabled .library-open { display: none; }
 @media (max-width: 520px) {
   /* Three cards a row in the 390px sheet (two gutters, the sheet's padding). */
   .stock { --w: calc((100vw - 120px) / 3); grid-template-columns: repeat(3, 1fr); }
