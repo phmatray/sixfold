@@ -1226,12 +1226,39 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .world-hint { flex: 1; min-width: 0; color: var(--ink); font-size: 13px; }
 .world-top .btn { margin-left: auto; }
 
+/* The loading screen (index.html #loader, driven by loader.js): shown before the game runs. */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 16px;
+  text-align: center;
+  background: inherit; /* the body's felt, over the app as it mounts underneath */
+}
+.loader .wordmark { margin: 0; }
+.loader .progress-bar, .world-loading .progress-bar { flex: none; width: min(320px, 80vw); }
+.loader .progress-bar span, .world-loading .progress-bar span { width: 0; }
+.loader-msg { margin: 0; min-height: 1.45em; color: var(--muted); }
+.loader.failed .progress-bar { display: none; }
+.loader.failed .loader-msg { color: var(--ink); max-width: 30em; }
+.loader .btn { min-height: 44px; padding-inline: 22px; }
+@media (prefers-reduced-motion: no-preference) {
+  .loader .progress-bar span, .world-loading .progress-bar span { transition: width 0.2s ease-out; }
+}
+
 .world-loading {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  display: grid;
+  gap: 10px;
+  justify-items: center;
   margin: 0;
-  padding: 10px 16px;
+  padding: 12px 16px 14px;
   border-radius: 12px;
   background: var(--world-panel);
 }
@@ -1249,6 +1276,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   border: 1px solid rgba(255, 93, 82, 0.5);
 }
 .world-error p { margin: 0; flex: 1 1 220px; }
+.world-loading p { margin: 0; }
 
 .world-fade {
   position: absolute;
@@ -1386,8 +1414,34 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .talk-box:focus-visible { outline-width: 2px; outline-offset: 6px; border-radius: 6px; }
 .talk-name { font: 700 14px var(--display); color: var(--brass-hi); letter-spacing: 0.02em; }
 .talk-line { min-height: 3em; }
-.talk-next { justify-self: end; color: var(--brass-hi); font-size: 14px; }
+.talk-next { justify-self: end; color: var(--brass-hi); font-size: 18px; line-height: 1; opacity: 0; transition: opacity 120ms ease; }
+/* The cue shows once the line is out, and bobs: tap, click, E, Enter or Space goes on. */
+.talk-next.ready { opacity: 1; animation: talk-bob 1.1s ease-in-out infinite; }
+@keyframes talk-bob { 50% { transform: translateY(3px); } }
+/* The speaker's face: a rival's portrait or a person's bust, left of the text. */
+.talk-box.has-face { grid-template-columns: 96px minmax(0, 1fr); column-gap: 16px; align-items: start; }
+.talk-box.has-face > :not(.talk-face) { grid-column: 2; }
+.talk-face {
+  grid-row: 1 / span 3;
+  width: 96px;
+  height: 96px;
+  border-radius: 16px;
+  object-fit: cover;
+  background: radial-gradient(circle at 50% 38%, #2f5182, #13213a 78%);
+  border: 1px solid rgba(214, 172, 74, 0.45);
+}
+.talk-face.enter { animation: talk-face-in 260ms cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+@keyframes talk-face-in { from { opacity: 0; transform: translateX(-12px) scale(0.92); } }
+@media (max-width: 520px) {
+  .talk-box.has-face { grid-template-columns: 64px minmax(0, 1fr); column-gap: 12px; }
+  .talk-face { width: 64px; height: 64px; border-radius: 12px; }
+}
 .item-got { display: flex; gap: 16px; align-items: center; }
+.note-text { white-space: pre-line; }
+/* A field item's sheet: the places it opens (engine/src/objective.rs). */
+.item-opens { margin: 10px 0 4px; }
+.item-opens h3 { margin: 0 0 4px; font: 700 12px var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass-hi); }
+.item-opens ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: 15px; }
 .item-preview { flex: none; width: 140px; height: 140px; border-radius: 14px; background: radial-gradient(circle, #24406a, #111d33 70%); }
 @media (max-width: 520px) { .item-got { flex-direction: column; text-align: center; } .item-got .dialog-foot { justify-content: center; } }
 
@@ -1516,6 +1570,9 @@ select option { background: var(--panel); color: var(--ink); }
 .save-settings legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
 .save-settings .note, .slots .note { margin: 0; }
 .save-settings .note:empty, .slots .note:empty { display: none; }
+.offline-status { display: grid; gap: 8px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.offline-status legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
+.offline-status .note { margin: 0; }
 .save-settings textarea { width: 100%; min-height: 64px; resize: vertical; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--felt-deep); color: var(--ink); font: 13px/1.4 ui-monospace, monospace; }
 .file-pick { display: inline-flex; align-items: center; }
 .file-pick:focus-within { outline: 3px solid var(--brass-hi); outline-offset: 2px; }
@@ -2374,6 +2431,10 @@ select option { background: var(--panel); color: var(--ink); }
 .journal-btn { display: inline-flex; align-items: center; gap: 6px; }
 .world-top .journal-btn { margin-left: auto; }
 .world-top .journal-btn + .facets { margin-left: 0; }
+/* The current objective: one quiet line above the errands. */
+.objective { display: flex; gap: 10px; align-items: baseline; margin: 10px 0 0; max-width: 70ch; color: var(--ink); text-wrap: pretty; }
+.objective-label { flex: none; font: 700 12px var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass-hi); }
+.menu-panel .objective { margin-top: 0; }
 .quests { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
 .quest { padding: 12px 14px; border-radius: 14px; border: 1.5px solid rgba(214, 172, 74, 0.45); background: rgba(19, 33, 58, 0.75); display: grid; gap: 4px; }
 .quest p { margin: 0; }
@@ -2537,9 +2598,11 @@ p.atlas-pick { color: var(--muted); }
 }
 .game-menu { display: flex; flex-direction: column; min-height: 100%; }
 .menu-top { position: sticky; top: 0; z-index: 30; background: #172845; border-bottom: 1px solid var(--line); }
-.menu-head { padding: 14px 20px 8px; }
+.menu-head { padding: 14px 20px 4px; }
 .menu-head h2 { margin-right: auto; }
-.menu-tabs { display: flex; gap: 4px; padding: 0 20px 10px; overflow-x: auto; scrollbar-width: none; }
+.menu-head .btn.ghost { color: var(--muted); }
+/* Top padding: room for the focus ring, which the scrolling strip would clip. */
+.menu-tabs { display: flex; gap: 4px; padding: 6px 20px 10px; overflow-x: auto; scrollbar-width: none; }
 .menu-tabs button { flex: none; min-height: 44px; padding: 0 14px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
 .menu-tabs button:hover { color: var(--ink); }
 .menu-tabs button[aria-selected="true"] { background: var(--panel-2); border-color: var(--brass); color: var(--brass-hi); }
@@ -2549,6 +2612,7 @@ p.atlas-pick { color: var(--muted); }
 .menu-split .side-panel { top: 120px; min-height: 0; max-height: calc(100dvh - 180px); border: 1px solid var(--line); border-radius: 14px; }
 .menu-panel .settings-body { max-width: 480px; margin: 0; box-shadow: none; }
 .menu-panel .atlas, .menu-panel .quests { margin-top: 0; }
+.menu-panel .objective + .quests, .menu-panel .objective + .dialog-sub { margin-top: 12px; }
 /* The deck editor in the menu: its own bar replaces the menu's head. */
 .menu-panel:has(.editor) { padding: 0; }
 .menu-panel .page { min-height: 0; }
