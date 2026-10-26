@@ -51,13 +51,13 @@ fn play(d: Difficulty) -> String {
     )
 }
 
-/// "4 prizes" / "1 Récompense", "4 Récompenses".
+/// "4 prizes" / "1 carte Récompense", "4 cartes Récompense".
 fn prizes(n: u8) -> String {
     match (n, fr()) {
         (1, false) => "1 prize".into(),
         (_, false) => format!("{n} prizes"),
-        (0 | 1, true) => format!("{n} Récompense"),
-        _ => format!("{n} Récompenses"),
+        (0 | 1, true) => format!("{n} carte Récompense"),
+        _ => format!("{n} cartes Récompense"),
     }
 }
 
@@ -555,22 +555,13 @@ fn win_view(w: Win) -> impl IntoView {
     }
 }
 
-/// Move focus the way of an arrow, as the gamepad's D-pad does (a11y.js).
-fn move_focus(dir: &str) {
-    use leptos::wasm_bindgen::JsCast;
-    let f = js_sys::Reflect::get(&window(), &"sixfoldMoveFocus".into())
-        .ok()
-        .and_then(|f| f.dyn_into::<js_sys::Function>().ok());
-    if let Some(f) = f {
-        _ = f.call1(&leptos::wasm_bindgen::JsValue::NULL, &dir.into());
-    }
-}
-
 /// The duel offer (a rival, Rook or a route duelist): who, in their own words
 /// (`quote`, the line they just said, else a rival's opening line), the
 /// terms, the deck the player takes, and Challenge / Not now. `face` is their
 /// portrait or bust. `before` runs just before the match starts (the world
-/// saves where the hero stands).
+/// saves where the hero stands); `on_decks` opens My decks, when no deck plays.
+/// The arrows and the D-pad move between the choices (a11y.js); on the deck,
+/// left and right change it.
 #[component]
 pub fn Challenge(
     id: String,
@@ -578,6 +569,7 @@ pub fn Challenge(
     quote: Option<String>,
     on_cancel: impl Fn() + Copy + 'static,
     before: impl Fn() + Copy + 'static,
+    on_decks: impl Fn() + Copy + 'static,
 ) -> impl IntoView {
     use crate::input::{prompt, Ctrl};
     let ctl = expect_context::<Ctl>();
@@ -591,14 +583,15 @@ pub fn Challenge(
     let rule = trainer(&id).and_then(|t| t.rule);
     let (opts, pick) = profile.with_untracked(|p| deck_opts(p, rule));
     let playable = opts.iter().filter(|o| o.problem.is_none()).count();
+    let left_out = opts.len() - playable;
     let choice = RwSignal::new(pick);
     let opts = StoredValue::new(opts);
     let (name, title, prize_n, level) = (o.name, o.title, o.prizes, o.difficulty);
     let theirs = StoredValue::new(o.deck.clone());
-    // The press that ended the duelist's last line must not also accept the duel.
+    // The presses that ended the duelist's lines must not also accept the duel.
     let shown_at = js_sys::Date::now();
     let start = move || {
-        if js_sys::Date::now() - shown_at < 350.0 {
+        if js_sys::Date::now() - shown_at < 500.0 {
             return;
         }
         let Some(mine) = opts.with_value(|o| o.get(choice.get_untracked()).cloned()) else {
@@ -639,29 +632,44 @@ pub fn Challenge(
             choice.set(i as usize);
         })
     };
-    // Arrows (and the D-pad, which plays them) move between the choices; on
-    // the deck, left and right change it.
     let on_key = move |e: leptos::ev::KeyboardEvent| {
-        let dir = match e.key().as_str() {
-            "ArrowLeft" => "left",
-            "ArrowRight" => "right",
-            "ArrowUp" => "up",
-            "ArrowDown" => "down",
+        let by = match e.key().as_str() {
+            "ArrowLeft" => -1,
+            "ArrowRight" => 1,
             _ => return,
         };
-        e.prevent_default();
-        let on_deck = event_target::<leptos::web_sys::Element>(&e)
+        if event_target::<leptos::web_sys::Element>(&e)
             .class_list()
-            .contains("ch-deck-now");
-        match dir {
-            "left" | "right" if on_deck => step(if dir == "left" { -1 } else { 1 }),
-            _ => move_focus(dir),
+            .contains("ch-deck-now")
+        {
+            e.prevent_default();
+            step(by);
         }
     };
+    // A click on the plaque's left third goes back; anywhere else, on.
+    let on_deck_click = move |e: leptos::ev::MouseEvent| {
+        let el = event_target::<leptos::web_sys::Element>(&e);
+        let back = el.closest(".ch-prev").ok().flatten().is_some()
+            || el
+                .closest(".ch-deck-now")
+                .ok()
+                .flatten()
+                .map(|b| b.get_bounding_client_rect())
+                .is_some_and(|r| {
+                    e.detail() > 0 && f64::from(e.client_x()) < r.left() + r.width() / 3.0
+                });
+        step(if back { -1 } else { 1 });
+    };
     let colors = crate::cards::deck_colors(&o.deck);
-    let what = match r {
-        Some(r) => format!("{title} · {}", r.deck.name),
-        None => title.to_string(),
+    // Who they are and what they play: a rival's deck by name, a route
+    // duelist's by the creature it leads with.
+    let what = match (r, crate::cards::deck_star(&o.deck)) {
+        (Some(r), _) => format!("{title} · {}", r.deck.name),
+        (None, Some(s)) => tr(
+            format!("{title} · plays {}", sixfold_engine::card(s).label()),
+            format!("{title} · joue {}", sixfold_engine::card(s).label()),
+        ),
+        (None, None) => title.to_string(),
     };
     let quote = quote.or_else(|| o.lines.map(|l| l.intro.get().to_string()));
     let (win_label, wins) = progress.with_untracked(|p| winnings(&id, p));
@@ -669,6 +677,13 @@ pub fn Challenge(
     let can = open && playable > 0;
     let initial: String = name.chars().take(1).collect();
     let deck = move || opts.with_value(|o| o[choice.get()].clone());
+    let to_decks = move || {
+        view! {
+            <button type="button" class="btn ch-decks" autofocus on:click=move |_| on_decks()>
+                {tr("Open My decks", "Ouvrir Mes decks")}
+            </button>
+        }
+    };
     view! {
         <form class="challenge" on:submit=move |e| { e.prevent_default(); start() } on:keydown=on_key>
             <header class="ch-head">
@@ -689,9 +704,13 @@ pub fn Challenge(
                 </div>
                 {quote.map(|q| view! { <blockquote class="ch-say"><p>{q}</p></blockquote> })}
             </header>
-            <dl class="ch-terms">
+            // The dialog's description: what is at stake, read out as it opens.
+            <dl class="ch-terms" id="world-sheet-desc">
                 <div class="ch-term">
-                    <dt>{tr("Prize cards", "Cartes Récompense")}</dt>
+                    <dt>
+                        {tr("Prize cards", "Cartes Récompense")}
+                        <small>{tr("take them all to win", "toutes prises, c'est gagné")}</small>
+                    </dt>
                     <dd>
                         <span class="ch-prizes" aria-hidden="true">{(0..prize_n).map(|_| view! { <i></i> }).collect_view()}</span>
                         <b>{prize_n}</b>
@@ -725,8 +744,16 @@ pub fn Challenge(
                 )}</p> }.into_any()
             } else if playable > 0 {
                 view! {
-                    {rule.map(|r| view! { <p class="ch-note"><b>{tr("House rule: ", "Règle maison : ")}</b>{r.text().to_string()}</p> })}
-                    <div class="ch-deck" role="group" aria-label=tr("Your deck", "Votre deck")>
+                    {rule.map(|r| view! {
+                        <p class="ch-note">
+                            <b>{tr("House rule: ", "Règle maison : ")}</b>{r.text().to_string()}
+                            {(left_out > 0).then(|| tr(
+                                format!(" {left_out} of your decks break it and sit this one out."),
+                                format!(" {left_out} de vos decks l'enfreignent et ne jouent pas ce duel."),
+                            ))}
+                        </p>
+                    })}
+                    <div class="ch-deck">
                         <span class="ch-deck-label" aria-hidden="true">
                             {tr("Your deck", "Votre deck")}
                             {(playable > 1).then_some(move || {
@@ -734,63 +761,63 @@ pub fn Challenge(
                                 view! { <small>{tr(format!("{at} of {playable}"), format!("{at} sur {playable}"))}</small> }
                             })}
                         </span>
-                        <div class="ch-deck-row">
-                            {(playable > 1).then(|| view! {
-                                <button type="button" class="ch-step" tabindex="-1" aria-hidden="true" on:click=move |_| step(-1)>
-                                    <svg viewBox="0 0 12 12"><path d="M8 2L3.5 6 8 10" /></svg>
-                                </button>
-                            })}
-                            {move || {
-                                let d = deck();
-                                let creatures = d.cards.iter().filter(|&&id| sixfold_engine::card(id).creature().is_some()).count();
-                                let count = crate::duel::deck_count(d.cards.len(), creatures);
-                                let inner = view! {
-                                    {crate::cards::deck_star(&d.cards).map(|s| view! { <span class="ch-star" aria-hidden="true"><crate::cards::CardFace id=s /></span> })}
-                                    <span class="ch-deck-info">
-                                        <span class="ch-deck-name">{d.name.clone()}</span>
-                                        <span class="ch-deck-meta">
-                                            <span class="ch-colors">{crate::cards::deck_colors(&d.cards).into_iter().map(|c| view! { <Pip color=c /> }).collect_view()}</span>
-                                            {count.clone()}
-                                        </span>
+                        {move || {
+                            let d = deck();
+                            let creatures = d.cards.iter().filter(|&&id| sixfold_engine::card(id).creature().is_some()).count();
+                            let count = crate::duel::deck_count(d.cards.len(), creatures);
+                            let inner = view! {
+                                {crate::cards::deck_star(&d.cards).map(|s| view! { <span class="ch-star" aria-hidden="true"><crate::cards::CardFace id=s /></span> })}
+                                <span class="ch-deck-info">
+                                    <span class="ch-deck-name">{d.name.clone()}</span>
+                                    <span class="ch-deck-meta">
+                                        <span class="ch-colors">{crate::cards::deck_colors(&d.cards).into_iter().map(|c| view! { <Pip color=c /> }).collect_view()}</span>
+                                        {count.clone()}
                                     </span>
-                                };
-                                if playable > 1 {
-                                    let label = tr(
-                                        format!("Your deck: {}, {count}. Left or right to change it.", d.name),
-                                        format!("Votre deck : {}, {count}. Gauche ou droite pour en changer.", d.name),
-                                    );
-                                    view! {
-                                        <button type="button" class="ch-deck-now" aria-label=label on:click=move |_| step(1)>{inner}</button>
-                                    }.into_any()
-                                } else {
-                                    view! { <span class="ch-deck-now solo">{inner}</span> }.into_any()
-                                }
-                            }}
-                            {(playable > 1).then(|| view! {
-                                <button type="button" class="ch-step" tabindex="-1" aria-hidden="true" on:click=move |_| step(1)>
-                                    <svg viewBox="0 0 12 12"><path d="M4 2l4.5 4L4 10" /></svg>
-                                </button>
-                            })}
-                        </div>
+                                </span>
+                            };
+                            if playable > 1 {
+                                let label = tr(
+                                    format!("Your deck: {}, {count}. Left or right to change it.", d.name),
+                                    format!("Votre deck : {}, {count}. Gauche ou droite pour en changer.", d.name),
+                                );
+                                view! {
+                                    <button type="button" class="ch-deck-now" aria-label=label on:click=on_deck_click>
+                                        <span class="ch-prev" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M8 2L3.5 6 8 10" /></svg></span>
+                                        {inner}
+                                        <span class="ch-next" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M4 2l4.5 4L4 10" /></svg></span>
+                                    </button>
+                                }.into_any()
+                            } else {
+                                view! { <span class="ch-deck-now solo" role="group" aria-label=tr(format!("Your deck: {}, {count}.", d.name), format!("Votre deck : {}, {count}.", d.name))>{inner}</span> }.into_any()
+                            }
+                        }}
+                        // A change of deck, said once.
+                        <span class="sr-only" aria-live="polite">{move || (playable > 1).then(|| deck().name)}</span>
                     </div>
                 }.into_any()
             } else if let Some(r) = rule {
-                view! { <p class="ch-note no">{tr(
-                    format!("None of your decks keeps this house rule: {} Build one in My decks (Menu).", r.text()),
-                    format!("Aucun de vos decks ne respecte cette règle maison : {} Construisez-en un dans Mes decks (Menu).", r.text()),
-                )}</p> }.into_any()
+                view! {
+                    <p class="ch-note no">{tr(
+                        format!("None of your decks keeps this house rule: {} Build one in My decks.", r.text()),
+                        format!("Aucun de vos decks ne respecte cette règle maison : {} Construisez-en un dans Mes decks.", r.text()),
+                    )}</p>
+                    {to_decks()}
+                }.into_any()
             } else {
-                view! { <p class="ch-note no">{tr("None of your decks can play yet. Fix one in My decks (Menu).", "Aucun de vos decks n'est encore jouable. Corrigez-en un dans Mes decks (Menu).")}</p> }.into_any()
+                view! {
+                    <p class="ch-note no">{tr("None of your decks can play yet. Fix one in My decks.", "Aucun de vos decks n'est encore jouable. Corrigez-en un dans Mes decks.")}</p>
+                    {to_decks()}
+                }.into_any()
             }}
             <div class="ch-actions">
-                <button type="button" class="btn ch-no" aria-keyshortcuts="Escape" autofocus=!can on:click=move |_| on_cancel()>
+                <button type="button" class="btn ch-no" aria-keyshortcuts="Escape" autofocus=!open on:click=move |_| on_cancel()>
                     {tr("Not now", "Pas maintenant")}
-                    <kbd>{move || prompt(Ctrl::Cancel)}</kbd>
+                    <kbd aria-hidden="true">{move || prompt(Ctrl::Cancel)}</kbd>
                 </button>
                 {can.then(|| view! {
                     <button type="submit" class="btn primary ch-go" aria-keyshortcuts="Enter" autofocus>
                         {tr("Challenge", "Défier")}
-                        <kbd>{move || prompt(Ctrl::Confirm)}</kbd>
+                        <kbd aria-hidden="true">{move || prompt(Ctrl::Confirm)}</kbd>
                     </button>
                 })}
             </div>

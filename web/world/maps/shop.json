@@ -116,14 +116,14 @@
       "z": 4,
       "kind": "duel",
       "text": "A duel table, cards already laid out. Sit down for a six-prize practice duel?",
-      "text_fr": "Une table de duel, les cartes déjà en place. S'asseoir pour un duel d'entraînement à six Récompenses ?"
+      "text_fr": "Une table de duel, les cartes déjà en place. S'asseoir pour un duel d'entraînement à six cartes Récompense ?"
     },
     {
       "x": 3,
       "z": 4,
       "kind": "duel",
       "text": "A duel table, cards already laid out. Sit down for a six-prize practice duel?",
-      "text_fr": "Une table de duel, les cartes déjà en place. S'asseoir pour un duel d'entraînement à six Récompenses ?"
+      "text_fr": "Une table de duel, les cartes déjà en place. S'asseoir pour un duel d'entraînement à six cartes Récompense ?"
     },
     {
       "x": 9,
@@ -341,7 +341,7 @@
           "lines_fr": [
             "Wynne m'a pris comme apprenti. Tu y crois ? Je balaie, je trie les boosters, je donne les cartes à la table.",
             "Sable a gravé la pierre près de l'entrée, tu as vu ? Une septième face. Encore blanche.",
-            "Une partie ? Mon meilleur deck, six Récompenses. Le perdant balaie."
+            "Une partie ? Mon meilleur deck, six cartes Récompense. Le perdant balaie."
           ],
           "do": [
             "flag:rook_apprentice",
@@ -354,7 +354,7 @@
             "Rook's table is open. Six prizes, best deck, no excuses."
           ],
           "lines_fr": [
-            "La table de Rook est ouverte. Six Récompenses, meilleur deck, pas d'excuses."
+            "La table de Rook est ouverte. Six cartes Récompense, meilleur deck, pas d'excuses."
           ],
           "do": [
             "duel:rook_4"

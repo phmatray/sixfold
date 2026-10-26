@@ -194,7 +194,7 @@
           "lines_fr": [
             "Six sceaux. Il y a bien longtemps que cette porte ne s'était pas ouverte.",
             "Je suis Sable, la Gardienne des Six. Tous les rivaux du dehors ont appris de moi, ou ont essayé.",
-            "Six Récompenses. Montre-moi ce qu'ils t'ont appris."
+            "Six cartes Récompense. Montre-moi ce qu'ils t'ont appris."
           ],
           "do": [
             "duel:warden"

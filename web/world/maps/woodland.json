@@ -4288,7 +4288,7 @@
           ],
           "lines_fr": [
             "Tu as battu Sable et tu ne bâilles toujours pas. Remarquable.",
-            "La lune est levée. Encore un ? Six Récompenses."
+            "La lune est levée. Encore un ? Six cartes Récompense."
           ],
           "do": [
             "duel:lumen"
@@ -4313,7 +4313,7 @@
           ],
           "lines_fr": [
             "Tu as trouvé l'ombre. Bien. Mon jardin ne pousse que la nuit.",
-            "Je suis Lumen. Six Récompenses, et personne ne s'endort pendant mes duels."
+            "Je suis Lumen. Six cartes Récompense, et personne ne s'endort pendant mes duels."
           ],
           "do": [
             "duel:lumen"
@@ -4419,7 +4419,7 @@
           ],
           "lines_fr": [
             "Champion ! Les haies se sont redressées en apprenant la nouvelle.",
-            "Une petite taille ? Deux Récompenses, comme toujours."
+            "Un petit coup de sécateur ? Deux cartes Récompense, comme toujours."
           ],
           "do": [
             "duel:bramble"
@@ -4431,7 +4431,7 @@
             "Back for more thorns? Two prizes, same as before."
           ],
           "lines_fr": [
-            "Tu reviens chercher des épines ? Deux Récompenses, comme la dernière fois."
+            "Tu reviens chercher des épines ? Deux cartes Récompense, comme la dernière fois."
           ],
           "do": [
             "duel:bramble"
@@ -4446,7 +4446,7 @@
           "lines_fr": [
             "Attention à la haie, elle mord. Juste un peu.",
             "Moi, c'est Bramble. J'entretiens les haies du sentier, et je garde un deck pour les visiteurs.",
-            "Un duel court, deux Récompenses. On y va ?"
+            "Un duel court, deux cartes Récompense. On y va ?"
           ],
           "do": [
             "duel:bramble"
@@ -4493,7 +4493,7 @@
         ],
         "challenge_fr": [
           "Hou. Tu sors tard. Elles aussi.",
-          "Les chouettes veulent voir un duel. Trois Récompenses, au clair de lune."
+          "Les chouettes veulent voir un duel. Trois cartes Récompense, au clair de lune."
         ],
         "win": [
           "The owls approve. They don't approve of much."

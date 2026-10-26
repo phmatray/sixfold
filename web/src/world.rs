@@ -633,6 +633,7 @@ pub fn WorldScreen() -> impl IntoView {
     let sheet = RwSignal::new(None::<Sheet>);
     // The last line someone said before their duel offer: the offer quotes it.
     let said = StoredValue::new(None::<(String, String)>);
+    let last_tab = expect_context::<LastTab>().0;
     let typed = RwSignal::new(0usize);
     let loading = RwSignal::new(true);
     // The first map's models loaded, (done, total), for the loading line.
@@ -1424,7 +1425,7 @@ pub fn WorldScreen() -> impl IntoView {
                     </div>
                 </div>
             })}
-            <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title"
+            <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title" aria-describedby="world-sheet-desc"
                 on:cancel=on_cancel on:keydown=on_key
                 // Should the browser close the dialog itself, the world must not stay paused
                 // (and a cutscene goes on rather than wait for a line nobody can see).
@@ -1537,7 +1538,8 @@ pub fn WorldScreen() -> impl IntoView {
                         let face = face_of(&id);
                         let quote = said.with_value(|s| s.clone().filter(|(who, _)| *who == id).map(|(_, l)| l));
                         view! {
-                            <Challenge id=id face=face quote=quote on_cancel=move || sheet.set(None) before=move || sheet.set(None) />
+                            <Challenge id=id face=face quote=quote on_cancel=move || sheet.set(None) before=move || sheet.set(None)
+                                on_decks=move || { last_tab.set(MenuTab::Decks); open_menu() } />
                         }.into_any()
                     }
                     Sheet::Ladder => view! {
