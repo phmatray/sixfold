@@ -9,9 +9,10 @@
 use std::time::Duration;
 
 use leptos::prelude::*;
-use sixfold_engine::campaign::{Rival, RIVALS};
+use sixfold_engine::campaign::{self, Rival, RIVALS};
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::stats::{Stats, FINDS};
+use sixfold_engine::trainers::trainer;
 use sixfold_engine::{card, tr, T};
 
 use crate::achievements::thousands;
@@ -64,20 +65,6 @@ const TOWNSFOLK: &[(&str, T)] = &[
         T::new("cuts stone in the quarry", "taille la pierre à la carrière"),
     ),
 ];
-
-/// The champion's title: "Champion", or once Rook's story is done
-/// (`flag:rook_4`, WORLD_DESIGN §8.2) "Champion of the Seventh Face".
-// ponytail: mirrors `campaign::title` from #64; use it once that lands.
-fn champion_title(p: &Progress) -> T {
-    if p.has_flag("rook_4") {
-        T::new(
-            "Champion of the Seventh Face",
-            "Champion de la septième face",
-        )
-    } else {
-        T::new("Champion", "Champion")
-    }
-}
 
 /// What the credits list under "Made with": (name, what it did).
 const TOOLS: &[(&str, T)] = &[
@@ -304,7 +291,10 @@ pub fn Credits(won: bool) -> impl IntoView {
         })
         .is_some_and(|m| m.matches());
 
-    let title = progress.with_untracked(champion_title);
+    // "Champion", or "Champion of the Seventh Face" once Rook's story is done.
+    let title = progress
+        .with_untracked(campaign::title)
+        .unwrap_or(T::new("Champion", "Champion"));
     let seal_rivals = || RIVALS.iter().filter(|r| r.seal);
     let primary = NodeRef::<leptos::html::Button>::new();
     // The plates, in order: (how long each shows in ms, its name for the
@@ -359,22 +349,28 @@ pub fn Credits(won: bool) -> impl IntoView {
         }
         .into_any(),
     ));
-    let face = |r: &'static Rival| {
+    // A portrait in its colour's ring: (portrait of, name, title, colour class).
+    let face = |id: &str, name: &'static str, title: T, tone: &str| {
         view! {
-            <li class=format!("cast-one t-{}", tone(r))>
-                <img src=format!("world/assets/portraits/{}.webp", r.id) alt="" width="256" height="256" decoding="async" />
-                <b>{r.name}</b>
-                <span>{r.title.get()}</span>
+            <li class=format!("cast-one t-{tone}")>
+                {crate::campaign::portrait_url(id).map(|src| view! { <img src=src alt="" width="256" height="256" decoding="async" /> })}
+                <b>{name}</b>
+                <span>{title.get()}</span>
             </li>
         }
     };
+    let rival = move |r: &'static Rival| face(r.id, r.name, r.title, tone(r));
     plates.push((
         9000,
         heading("The rivals", "Les rivaux"),
         view! {
             <h2>{tr("The rivals", "Les rivaux")}</h2>
-            <ul class="cast">{seal_rivals().map(face).collect_view()}</ul>
-            <ul class="cast warden">{RIVALS.iter().filter(|r| !r.seal).map(face).collect_view()}</ul>
+            <ul class="cast">{seal_rivals().map(rival).collect_view()}</ul>
+            // Rook (no colour, no seal) beside the Warden.
+            <ul class="cast last">
+                {trainer("rook_4").map(|t| face(t.id, t.name, t.class, "colorless"))}
+                {RIVALS.iter().filter(|r| !r.seal).map(rival).collect_view()}
+            </ul>
         }
         .into_any(),
     ));
