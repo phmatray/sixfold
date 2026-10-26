@@ -644,7 +644,9 @@ export function mount(el, controls, cb, start, edit = false) {
     if (pos !== lastHero && inside && !cut.playing) (el.dataset.hero = lastHero = pos), cb("at", w.name, pos);
 
     // What the hero faces, while standing still.
-    const front = h.step || warping ? null : facing();
+    // Only what pressing it would do: none while the world can't act (a cutscene, a duelist
+    // coming over, a sheet open), so the prompt never offers a press that does nothing.
+    const front = h.step || busy() ? null : facing();
     const said = front?.kind === "book" ? front.id : front?.text; // a book is named by Rust, from its id
     const nk = front ? `${front.kind}:${said}` : "";
     if (nk !== w.nearKey) {

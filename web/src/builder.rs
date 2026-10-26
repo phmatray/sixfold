@@ -116,10 +116,28 @@ impl Undo {
     }
 }
 
-/// Focus the first element `selector` finds, once the view has settled.
+/// Focus the first element `selector` finds, once the view has settled, unless the player has
+/// moved focus elsewhere meanwhile (a frame can come late on a busy page: it mustn't pull the
+/// cursor back from where a key or the pad just took it).
 pub fn focus_later(selector: &'static str) {
+    let was = document().active_element();
     request_animation_frame(move || {
-        if let Some(el) = document()
+        let doc = document();
+        let now = doc.active_element();
+        let moved = now.as_ref().is_some_and(|a| {
+            a.is_connected()
+                && was.as_ref() != Some(a)
+                && doc.body().is_none_or(|b| !b.is_same_node(Some(a)))
+        });
+        // The opener already has it back (a modal's close gives focus back at once): nothing to do.
+        if moved
+            && !now
+                .as_ref()
+                .is_some_and(|a| a.matches(selector).unwrap_or(false))
+        {
+            return;
+        }
+        if let Some(el) = doc
             .query_selector(selector)
             .ok()
             .flatten()

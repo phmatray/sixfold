@@ -1163,7 +1163,7 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
 .world-hud .menu-btn { display: inline-flex; align-items: center; gap: 6px; }
 @media (max-width: 520px) { .world-hud .menu-btn { min-width: 44px; justify-content: center; padding-inline: 10px; } .journal-label { display: none; } }
 /* A menu sheet open over the scene: the HUD behind it steps away rather than peek round its edges. */
-.world:has(.world-sheet[open]:not(.reading-sheet)):not(:has(.challenge)) .world-top { opacity: 0; visibility: hidden; }
+.world:has(.world-sheet[open] .menu-top) .world-top { opacity: 0; visibility: hidden; }
 .world:has(.world-sheet[open]) .world-prompt { visibility: hidden; }
 .options-hint { margin: 0 0 var(--space-4); color: var(--text-dim); max-width: 62ch; }
 
