@@ -811,9 +811,10 @@ export function mount(el, controls, cb, start, edit = false) {
       }
     },
     setClock,
-    // Back from a duel against `id`: that person (a duelist walks back over) says its post-duel line.
+    // Back from a duel against `id`: that person (a duelist walks back over) says its post-duel line,
+    // unless a scene is due on this map (the finale after the Warden): the scene speaks instead.
     meet(id) {
-      if (!world || warping) return;
+      if (!world || warping || cut.playing || (world.scriptsDue && world.hero && cut.due(world))) return;
       const n = duelists.meet(world, hero, id);
       if (n && facing()?.npc === n) talkTo(n);
     },

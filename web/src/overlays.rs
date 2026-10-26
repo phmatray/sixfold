@@ -465,13 +465,6 @@ pub fn GameOver() -> impl IntoView {
             ctl.start(setup, crate::new_seed());
         }
     };
-    // The champion's first win rolls the credits on the way back to the world.
-    let champion_now = move || {
-        campaign_reward
-            .get()
-            .zip(rival)
-            .is_some_and(|(rw, r)| rw.won && rw.first && !r.seal)
-    };
     move || {
         let (winner, sudden, left, why, cause) = result.get()?;
         let won = winner == HUMAN;
@@ -672,15 +665,8 @@ pub fn GameOver() -> impl IntoView {
                     {match (opponent, post) {
                         (Some(_), _) => view! {
                             <div class="dialog-foot">
-                                {move || if champion_now() {
-                                    view! {
-                                        <button class="btn primary" autofocus on:click=move |_| { crate::go_with(Screen::Credits(true), move || ctl.stop()) }>{tr("Roll the credits", "Voir le générique")}</button>
-                                    }.into_any()
-                                } else {
-                                    view! {
-                                        <button class="btn primary" autofocus on:click=move |_| { crate::go_with(Screen::World, move || ctl.stop()) }>{tr("Back to the world", "Retour au monde")}</button>
-                                    }.into_any()
-                                }}
+                                // The Warden's first win goes on in the world: the finale (#67).
+                                <button class="btn primary" autofocus on:click=move |_| { crate::go_with(Screen::World, move || ctl.stop()) }>{tr("Back to the world", "Retour au monde")}</button>
                             </div>
                         }.into_any(),
                         (None, Some(p)) => view! {

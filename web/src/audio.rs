@@ -121,6 +121,26 @@ fn set_muted(m: bool) {
     MUTED.with(|s| s.set(m));
 }
 
+/// A speaker button that mutes everything (the credits).
+#[component]
+pub fn MuteToggle() -> impl IntoView {
+    let muted = muted();
+    view! {
+        <button type="button" class="btn ghost mute" aria-label=tr("Mute sound", "Couper le son")
+            aria-pressed=move || muted.get().to_string()
+            on:click=move |_| set_muted(!muted.get_untracked())>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 9h4l5-4v14l-5-4H4z" />
+                {move || if muted.get() {
+                    view! { <path d="M17 9l5 6M22 9l-5 6" /> }.into_any()
+                } else {
+                    view! { <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" /> }.into_any()
+                }}
+            </svg>
+        </button>
+    }
+}
+
 /// Mute and the four volume sliders, for the Settings menu. Master scales
 /// everything; Music the tracks; Ambience the regional beds; Effects the
 /// sound effects and the interface's clicks.

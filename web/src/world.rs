@@ -901,6 +901,7 @@ pub fn WorldScreen() -> impl IntoView {
         let mut gained = 0;
         let mut warp = None;
         let mut rested = None;
+        let mut credits = false;
         progress.update(|p| {
             match p.apply_all(&effects) {
                 Ok(done) => {
@@ -929,6 +930,8 @@ pub fn WorldScreen() -> impl IntoView {
                                 "press" => next = Some(Sheet::Press),
                                 "inn" => next = Some(Sheet::Inn),
                                 "map" => next = Some(Sheet::Atlas),
+                                // The finale's last beat (#67): the seal stone, the title, the credits.
+                                "credits" => credits = true,
                                 // Odile works through dialogue; the rest are 1.3.
                                 "curios" => {}
                                 _ => leptos::logging::warn!("world: no panel {panel}"),
@@ -1020,6 +1023,10 @@ pub fn WorldScreen() -> impl IntoView {
             ));
         }
         sheet.set(next);
+        if credits {
+            // Last, once everything above is granted: the world is torn down from here.
+            crate::go(Screen::Credits(true));
+        }
     };
 
     // The cutscene runner: play the current step's cues one at a time (each
@@ -1033,6 +1040,9 @@ pub fn WorldScreen() -> impl IntoView {
             sheet.set(None);
         }
         playing.set(false);
+        // A scene plays instead of a post-duel line still pending (world.js `meet` stays
+        // quiet while one is due, e.g. the finale after the Warden): it settles that duel.
+        progress.update(Progress::settle);
         world_cue(&format!(r#"{{"end":[{}]}}"#, rest.join(",")));
         apply_effects(s.effects);
     };
