@@ -2151,6 +2151,8 @@
   "gates": [
     {
       "id": "root_mound",
+      "name": "the root mound in Rootholm",
+      "name_fr": "la butte des racines à Racinemont",
       "tiles": [
         [
           47,

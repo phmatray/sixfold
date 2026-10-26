@@ -1,7 +1,9 @@
 //! The Journal (`docs/WORLD_DESIGN.md` §5.4): the errands people gave, read
-//! from `world/quests.json` and ticked off by the engine's conditions.
+//! from `world/quests.json` and ticked off by the engine's conditions, under
+//! the current objective (the engine's [`objective`]).
 
 use leptos::prelude::*;
+use sixfold_engine::objective::objective;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::{fr, tr};
 use wasm_bindgen::{JsCast, JsValue};
@@ -65,8 +67,17 @@ pub fn Journal() -> impl IntoView {
             .collect()
     });
     shown.sort_by_key(|(done, _)| *done);
+    // The main thread, computed by the engine: always the first line.
+    let next = progress.with_untracked(|p| objective(p).text(p));
+    let goal = view! {
+        <p class="objective">
+            <span class="objective-label">{tr("Next", "À faire")}</span>
+            {next}
+        </p>
+    };
     if shown.is_empty() {
         return view! {
+            {goal}
             <p class="dialog-sub">{tr(
                 "No errands yet. People around the world will ask.",
                 "Aucune quête pour l'instant. Les gens que vous croiserez vous en confieront.",
@@ -76,6 +87,7 @@ pub fn Journal() -> impl IntoView {
     }
     let check = move |c: &str| progress.with_untracked(|p| p.check(c));
     view! {
+        {goal}
         <ul class="quests">
             {shown.into_iter().map(|(done, q)| view! {
                 <li class="quest" class:done=done>

@@ -443,3 +443,97 @@ fn the_checker_reads_trainer_and_find_blocks() {
     }
     assert_eq!(errors.len(), 6, "{errors:#?}");
 }
+
+/// Does this condition need the item (not negated)?
+fn needs(cond: &str, item: &str) -> bool {
+    parse_cond(cond).is_ok_and(|c| {
+        c.0.iter()
+            .any(|(neg, t)| !neg && *t == Test::Item(item.to_string()))
+    })
+}
+
+/// The places on one map that a field item opens, by the rule of
+/// [`sixfold_engine::objective::Place`]: a gate (its id), a gated door (the map
+/// it leads to), a spot (its id), or a person or spot whose dialogue warps
+/// once the item is held (its id, a gangway). Gates also give their names.
+fn ways(m: &Value, item: &str) -> Vec<(String, Option<(String, String)>)> {
+    let list = |k: &str| m[k].as_array().cloned().unwrap_or_default();
+    let mut out = vec![];
+    for g in list("gates") {
+        if g["if"].as_str().is_some_and(|c| needs(c, item)) {
+            let name = |k: &str| g[k].as_str().unwrap_or_default().to_string();
+            out.push((name("id"), Some((name("name"), name("name_fr")))));
+        }
+    }
+    for w in list("warps") {
+        if w["if"].as_str().is_some_and(|c| needs(c, item)) {
+            out.push((w["to"].as_str().unwrap_or_default().into(), None));
+        }
+    }
+    for i in list("interactions") {
+        if i["if"].as_str().is_some_and(|c| needs(c, item)) {
+            out.push((i["id"].as_str().unwrap_or_default().into(), None));
+        }
+    }
+    for o in list("npcs").into_iter().chain(list("interactions")) {
+        let rides = o["dialogue"].as_array().into_iter().flatten().any(|b| {
+            b["if"].as_str().is_some_and(|c| needs(c, item))
+                && strs(&b["do"]).iter().any(|e| e.starts_with("warp:"))
+        });
+        if rides {
+            out.push((o["id"].as_str().unwrap_or_default().into(), None));
+        }
+    }
+    out
+}
+
+/// §11.2: the engine's table of what each field item opens names exactly the
+/// ways the maps shut on that item, and a gate's name there is the map's own.
+#[test]
+fn every_way_a_field_item_opens_is_in_its_table() {
+    use sixfold_engine::objective::KEYS;
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let maps: Vec<(String, Value)> = std::fs::read_dir(&dir)
+        .expect("the world's maps")
+        .map(|e| e.unwrap().path())
+        .filter(|p| p.extension().is_some_and(|e| e == "json"))
+        .map(|p| {
+            let m = serde_json::from_str(&std::fs::read_to_string(&p).unwrap()).unwrap();
+            (p.file_stem().unwrap().to_string_lossy().into_owned(), m)
+        })
+        .collect();
+    let mut bad = vec![];
+    for k in &KEYS {
+        let mut found = HashSet::new();
+        for (map, m) in &maps {
+            for (id, name) in ways(m, k.item) {
+                match k.opens.iter().find(|p| p.map == map && p.id == id) {
+                    None => bad.push(format!(
+                        "{map}: {id} shuts on {} but isn't in its opens table",
+                        k.item
+                    )),
+                    Some(p) => {
+                        if let Some((en, fr)) = name {
+                            if (p.name.en, p.name.fr) != (en.as_str(), fr.as_str()) {
+                                bad.push(format!(
+                                    "{map}: gate {id} is named {en:?} / {fr:?} on the map, {:?} / {:?} in the table",
+                                    p.name.en, p.name.fr
+                                ));
+                            }
+                        }
+                    }
+                }
+                found.insert((map.clone(), id));
+            }
+        }
+        for p in k.opens {
+            if !found.contains(&(p.map.to_string(), p.id.to_string())) {
+                bad.push(format!(
+                    "{}: opens {}: {} on no map that shuts on it",
+                    k.item, p.map, p.id
+                ));
+            }
+        }
+    }
+    assert!(bad.is_empty(), "{}", bad.join("\n"));
+}

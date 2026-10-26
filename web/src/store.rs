@@ -6,9 +6,11 @@
 //! of the same save.
 //!
 //! The first visit after 0.6 moves the old one-key-per-part save into slot 1
-//! (and removes those keys). A slot that no longer reads is copied to
-//! `<key>.bad` before anything overwrites it, and an import keeps the save it
-//! replaces at `<key>.bak`.
+//! (and removes those keys). A slot is only overwritten by text that reads
+//! back the same, and the save it held moves to `<key>.prev` first: a slot
+//! that no longer reads opens from that copy (`save::pick`), and is itself
+//! copied to `<key>.bad` before anything overwrites it. An import keeps the
+//! save it replaces at `<key>.bak`.
 //!
 //! localStorage can be missing or throw (private mode, blocked storage): then
 //! the save simply lives in memory for this visit, and the indicator says so.
@@ -18,7 +20,7 @@ use std::cell::{Cell, RefCell};
 use leptos::prelude::*;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
-use sixfold_engine::save::{self, Save, SaveError, Summary, LEGACY_KEYS};
+use sixfold_engine::save::{self, Save, SaveError, Source, Summary, LEGACY_KEYS};
 use sixfold_engine::stats::Stats;
 use sixfold_engine::tr;
 
@@ -90,9 +92,27 @@ fn default_name(n: usize) -> String {
     tr(format!("Save {n}"), format!("Sauvegarde {n}"))
 }
 
-/// Write the current save to its slot; false when storage refused.
+/// Write the current save to its slot; false when it didn't read back the
+/// same or storage refused (the slot keeps what it had).
 fn write() -> bool {
-    CURRENT.with_borrow(|(n, s)| set(&slot_key(*n), &s.encode()))
+    CURRENT.with_borrow(|(n, s)| put(*n, s))
+}
+
+/// Write `s` to slot `n` once it reads back the same, after moving the
+/// slot's last good save to `.prev`.
+fn put(n: usize, s: &Save) -> bool {
+    let Some(text) = s.encode_checked() else {
+        return false;
+    };
+    let key = slot_key(n);
+    match get(&key) {
+        Some(old) if old == text => return true,
+        Some(old) if Save::decode(&old).is_ok() => {
+            set(&format!("{key}.prev"), &old);
+        }
+        _ => {}
+    }
+    set(&key, &text)
 }
 
 fn edit(f: impl FnOnce(&mut Save)) {
@@ -106,34 +126,45 @@ fn keep_bad(n: usize) {
 }
 
 /// Load slot `n` as the current save. A slot that doesn't read is kept at
-/// `.bad` and replaced by a new player; the message says so.
+/// `.bad` and replaced by its `.prev` copy, else by a new player; the
+/// message says so.
 fn open(n: usize) -> Option<String> {
-    let (save, note) = match read(n) {
-        None => (Save::new_player(&default_name(n)), None),
-        Some(Ok(s)) => {
-            // A part that doesn't read is reset on the next write: keep a copy.
-            if !s.profile().1.is_empty() {
-                keep_bad(n);
-            }
-            (s, None)
-        }
-        Some(Err(e)) => {
-            keep_bad(n);
-            (
-                Save::new_player(&default_name(n)),
-                Some(tr(
-                    format!(
-                        "{} couldn't be read ({e}), so it starts again. A copy was kept in this browser.",
-                        default_name(n)
-                    ),
-                    format!(
-                        "{} est illisible ({e}) : elle repart de zéro. Une copie est gardée dans ce navigateur.",
-                        default_name(n)
-                    ),
-                )),
-            )
-        }
-    };
+    let key = slot_key(n);
+    let prev = get(&format!("{key}.prev"));
+    let (save, from, err) = save::pick(get(&key).as_deref(), prev.as_deref(), &default_name(n));
+    // A part that doesn't read is reset on the next write: keep a copy too.
+    if err.is_some() || (from == Source::Slot && !save.profile().1.is_empty()) {
+        keep_bad(n);
+    }
+    // The error is a sentence of its own; a save from a newer Sixfold can
+    // come back once this one updates (Settings → Save).
+    let note = err.map(|e| {
+        let name = match from {
+            Source::Prev => save.name().to_string(),
+            _ => default_name(n),
+        };
+        let what = match from {
+            Source::Prev => tr(
+                "The copy kept before your last change was loaded instead; what changed since is lost.",
+                "La copie gardée avant votre dernière modification a été chargée à la place ; ce qui a changé depuis est perdu.",
+            ),
+            _ => tr(
+                "It starts again as a new game, and the unreadable copy is kept in this browser.",
+                "Elle repart de zéro, et la copie illisible est gardée dans ce navigateur.",
+            ),
+        };
+        let then = match e {
+            SaveError::Newer(_) => tr(
+                " Update Sixfold, then restore it from Settings → Save.",
+                " Mettez Sixfold à jour, puis restaurez-la depuis Réglages → Sauvegarde.",
+            ),
+            _ => "",
+        };
+        tr(
+            format!("“{name}” couldn't be read. {e} {what}{then}"),
+            format!("« {name} » est illisible. {e} {what}{then}"),
+        )
+    });
     CURRENT.set((n, save));
     set(SLOT, &n.to_string());
     note
@@ -145,7 +176,7 @@ fn migrate() {
         return;
     }
     if let Some(s) = Save::from_legacy(&default_name(1), get) {
-        if set(&slot_key(1), &s.encode()) {
+        if put(1, &s) {
             LEGACY_KEYS.iter().for_each(|(k, _)| remove(k));
         }
     }
@@ -299,13 +330,15 @@ pub fn rename(n: usize, name: &str) {
         write();
     } else if let Some(Ok(mut s)) = read(n) {
         s.set_name(&name);
-        set(&slot_key(n), &s.encode());
+        put(n, &s);
     }
 }
 
 /// Empty slot `n`; the current slot starts again as a new player.
 pub fn delete(n: usize) {
     remove(&slot_key(n));
+    remove(&format!("{}.prev", slot_key(n)));
+    remove(&format!("{}.bad", slot_key(n)));
     if CURRENT.with_borrow(|(c, _)| *c == n) {
         open(n);
         write();
@@ -323,12 +356,42 @@ pub fn reset() {
 }
 
 /// Replace the current slot with `incoming` (already decoded, so a bad file
-/// never gets here). The replaced save is kept at `<key>.bak`.
-pub fn import(incoming: Save) {
+/// never gets here). The replaced save is kept at `<key>.bak`. False when
+/// it couldn't be written (it lives in memory, and the indicator says so).
+pub fn import(incoming: Save) -> bool {
     CURRENT.with_borrow(|(n, s)| set(&format!("{}.bak", slot_key(*n)), &s.encode()));
     edit(|s| *s = incoming);
-    write();
+    let ok = write();
+    expect_context::<Saved>().ok.set(ok);
     show_current();
+    ok
+}
+
+fn bad_key() -> String {
+    CURRENT.with_borrow(|(n, _)| format!("{}.bad", slot_key(*n)))
+}
+
+/// The copy of an unreadable save kept for the current slot, if any: its
+/// name when it reads now (a save from a newer build, once this one is
+/// updated), else why it still doesn't.
+pub fn kept_copy() -> Option<Result<String, SaveError>> {
+    get(&bad_key()).map(|t| Save::decode(&t).map(|s| s.name().to_string()))
+}
+
+/// Play that kept copy again when it reads now (a save from a newer build,
+/// once this one is updated), like an import: the save it replaces goes to
+/// `.bak`. Its name, or why it still can't be read (nothing changes then).
+pub fn restore_bad() -> Result<String, SaveError> {
+    let key = bad_key();
+    let s = Save::decode(&get(&key).unwrap_or_default())?;
+    let name = s.name().to_string();
+    // Kept until the restored save is stored, and when one part of it still
+    // doesn't read (the restore resets that part again).
+    let whole = s.profile().1.is_empty();
+    if import(s) && whole {
+        remove(&key);
+    }
+    Ok(name)
 }
 
 /// The profile and the world's progress in context, each saved on every change.

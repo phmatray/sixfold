@@ -3069,6 +3069,8 @@
   "gates": [
     {
       "id": "quarry_nook",
+      "name": "the nook above Emberstep Quarry",
+      "name_fr": "la niche au-dessus de la Carrière de Pas-de-Braise",
       "tiles": [
         [
           25,

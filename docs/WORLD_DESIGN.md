@@ -564,6 +564,8 @@ one sends you back somewhere you've been. Running Shoes stay the hub's starter i
 ```jsonc
 "gates": [{
   "id": "hush_ford",
+  "name": "the ford on Hushwillow Lane",  // announced when it opens (#62); an item's gate matches engine/src/objective.rs
+  "name_fr": "le gué de l'Allée des Saules-Murmures",
   "tiles": [[0,24],[1,24],[2,24],[0,25],[1,25],[2,25]],
   "if": "item:wading_boots",            // any condition: item, time, flags, seals
   "floor": 0.1,                         // optional floor height while open (>= 0: a lower floor hides the hero's feet)
@@ -577,7 +579,9 @@ one sends you back somewhere you've been. Running Shoes stay the hub's starter i
 - While `if` holds the tiles are walkable, whatever their tile character (so a gate can sit on `~` or a
   cliff digit); otherwise they are solid and facing one shows `text`, like a locked door.
 - `world.js` re-evaluates gates (and NPC/find `if`s, and glints) on every time-phase change and after every
-  dialogue effect, via one `refresh()`.
+  dialogue effect, via one `refresh()`. A gate that opens there is announced by its `name` (screen readers
+  hear it once). A field item's table in `engine/src/objective.rs` (§11.2) lists every gate, gated door and
+  gangway it opens; `engine/tests/world_data.rs` fails when the table and the maps disagree.
 - **A gate never closes under the hero**: a closing gate the hero stands on stays open until the hero is
   off all its tiles. check-maps flood-fills each map with every gate closed and fails if the spawn can't
   reach at least one exit (no soft-lock), and with every gate open and fails if any NPC, find or warp is
