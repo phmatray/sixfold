@@ -623,7 +623,7 @@ export function mount(el, controls, cb, start, edit = false) {
     lifts.update(w, dt);
     const [px, pz] = place(h, dt, w.floorAt);
     animateActor(h, dt, reduced);
-    book.pose(h, dt);
+    book.pose(h);
     for (const n of w.npcs) updateNpc(w, n, dt, paused);
     animateProps(w, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);

@@ -24,7 +24,7 @@ const COVER = {
 const PAPER = "#f3e9d0", INK = "#2a2018", FAINT = "rgba(42, 32, 24, 0.55)";
 // The six faces and the blank seventh (the atlas's region colours).
 const TYPE = { ember: "#e1572f", tide: "#2f7fd0", grove: "#3f9a52", storm: "#d9a315", stone: "#a8642f", dream: "#8a4fc9", neutral: "#8d8473" };
-const DUR = { take: 0.32, fly: 0.62, open: 0.55, turn: 0.6, close: 0.36, back: 0.5 }; // seconds
+const DUR = { take: 0.45, fly: 0.62, open: 0.55, turn: 0.6, close: 0.36, back: 0.5 }; // seconds
 const DISPLAY = "'Bricolage Grotesque', 'Avenir Next', system-ui, sans-serif";
 const BODY = "'Atkinson Hyperlegible', system-ui, sans-serif";
 const BODY_PX = 19; // the page text's size on screen at 100 %, in CSS pixels
@@ -527,44 +527,11 @@ export function createBook({ reduced, sound }) {
     leafBack.material.color.setScalar(shade);
   }
 
-  // ---- The hero's arms (no clip: offsets over whatever the rig's clip poses) ----
-  // Two poses, blended by weight: `reach` (the right arm up to the shelf, elbow soft) and
-  // `hold` (both arms forward, elbows bent: the book at the chest). Each bone is set from a
-  // base every frame, never stacked: three's mixer only writes a bone when its clip's value
-  // changes, so a bone still holding last frame's result keeps last frame's base. Angles are
-  // about the bone's own X (negative: forward and up) and Z (toward the body's middle for the
-  // right arm when positive, the left when negative).
-  const POSE = {
-    reach: { ArmR: [-2.05, -0.12], ForeR: [-0.45, 0], ArmL: [0, 0], ForeL: [0, 0] },
-    hold: { ArmR: [-0.85, 0.32], ForeR: [-1.15, 0], ArmL: [-0.85, -0.32], ForeL: [-1.15, 0] },
-  };
-  const want = { reach: 0, hold: 0 }, have = { reach: 0, hold: 0 };
-  const qx = new THREE.Quaternion(), qz = new THREE.Quaternion(), X = new THREE.Vector3(1, 0, 0), Z = new THREE.Vector3(0, 0, 1);
-  let bones = [];
-  const aim = (reach, hold) => ((want.reach = reduced() ? 0 : reach), (want.hold = reduced() ? 0 : hold));
-  function pose(h, dt) {
-    if (h !== hero) {
-      hero = h;
-      const find = (n) => h?.obj.getObjectByName(n) ?? h?.obj.getObjectByName(`${n.slice(0, -1)}.${n.slice(-1)}`);
-      bones = Object.keys(POSE.reach).map((name) => ({ name, bone: find(name), base: new THREE.Quaternion(), set: null })).filter((b) => b.bone);
-    }
-    const k = 1 - Math.exp(-dt * 8); // eased toward the wanted weights, never snapped
-    for (const w of ["reach", "hold"]) have[w] += (want[w] - have[w]) * k;
-    const rest = !want.reach && !want.hold && have.reach < 0.002 && have.hold < 0.002;
-    for (const b of bones) {
-      const q = b.bone.quaternion;
-      if (!b.set || !q.equals(b.set)) b.base.copy(q);
-      if (rest) {
-        if (b.set) q.copy(b.base), (b.set = null); // released: the clip has the bone again
-        continue;
-      }
-      const r = POSE.reach[b.name], o = POSE.hold[b.name];
-      const x = r[0] * have.reach + o[0] * have.hold, z = r[1] * have.reach + o[1] * have.hold;
-      q.copy(b.base).multiply(qx.setFromAxisAngle(X, x)).multiply(qz.setFromAxisAngle(Z, z));
-      (b.set ??= new THREE.Quaternion()).copy(q);
-    }
-    if (rest) have.reach = have.hold = 0;
-  }
+  // ---- The hero's arms: the rig's own clips (actors.js `pose`), none under reduced motion ----
+  // `reach` up to the shelf (its last frame is `holdbook`'s first), `holdbook` while the book is
+  // out, `putback` as it goes back up; then the rig is left to its own clips again.
+  const act = (clip) => hero && (hero.pose = reduced() ? null : clip);
+  const pose = (h) => (hero = h);
 
   // ---- Animation ----
   const run = (kind, dur, extra = {}) => (state = { kind, t: 0, dur, ...extra });
@@ -575,7 +542,7 @@ export function createBook({ reduced, sound }) {
     switch (state.kind) {
       case "take": // the arm goes up, the book slides out toward the hero
         place(mix(state.a, { ...state.a, pos: state.a.pos.clone().add(new THREE.Vector3(0, 0.15, 1.2)) }, e));
-        if (k >= 1) aim(0, 1), run("fly", DUR.fly, { a: current() }); // brought to the chest as it flies
+        if (k >= 1) act("holdbook"), run("fly", DUR.fly, { a: current() }); // held at the chest as it flies
         break;
       case "fly": {
         const b = { ...reading(), shut: Math.PI }, p = mix(state.a, b, e);
@@ -597,7 +564,7 @@ export function createBook({ reduced, sound }) {
       }
       case "close":
         place(mix(state.a, { ...state.a, shut: Math.PI }, e));
-        if (k >= 1) aim(from ? 1 : 0, 0), run("back", DUR.back, { a: current() }); // up to the shelf again
+        if (k >= 1) from && act("putback"), run("back", DUR.back, { a: current() }); // up onto the shelf again
         break;
       case "back":
         place(mix(state.a, origin(), e));
@@ -607,7 +574,7 @@ export function createBook({ reduced, sound }) {
   }
   function finish() {
     state = null;
-    aim(0, 0); // and the arms come down
+    act(null);
     root.visible = false;
     dim.material.opacity = 0;
     data = null;
@@ -632,7 +599,7 @@ export function createBook({ reduced, sound }) {
       settle();
       if (reduced()) return place(reading());
       sound("draw");
-      aim(from ? 1 : 0, from ? 0 : 1);
+      act(from ? "reach" : "holdbook");
       place(origin());
       run("take", from ? DUR.take : 0.001, { a: origin() });
     },
