@@ -165,7 +165,7 @@ fn App() -> impl IntoView {
     provide_context(screen);
     SCREEN.set(Some(screen));
     provide_context(Legal(legal));
-    provide_context(world::LastTab(RwSignal::new(world::MenuTab::Decks)));
+    provide_context(world::LastTab(RwSignal::new(world::MenuTab::Journal)));
     store::provide();
     stats::provide();
     input::provide();

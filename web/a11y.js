@@ -201,8 +201,9 @@ addEventListener("keydown", (e) => {
     // Free: nothing to press and nothing to read under the hand (its middle and its tip).
     const BUSY = `${CONTROLS}, p, h1, h2, h3, h4, legend, dt, dd, figcaption, img, svg, .card, .pack, .deck-name, .deck-desc`;
     const free = ([s, x, y], busy = BUSY) => {
-      const tip = { left: [x + 18, y], right: [x - 18, y], above: [x, y + 18], below: [x, y - 18] }[s];
-      return [[x, y], tip].every(([px, py]) => !document.elementFromPoint(px, py)?.closest(busy));
+      // Its middle, its tip and its wrist: a neighbour close by (two buttons side by side) is under the wrist.
+      const [dx, dy] = { left: [18, 0], right: [-18, 0], above: [0, 14], below: [0, -14] }[s];
+      return [[x, y], [x + dx, y + dy], [x - dx, y - dy]].every(([px, py]) => !document.elementFromPoint(px, py)?.closest(busy));
     };
     // The side is picked once per control (no flicker while it moves), the place every frame.
     // Hemmed in on every side, it may cover words but never another control (a phone's tab

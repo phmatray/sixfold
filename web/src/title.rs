@@ -109,15 +109,11 @@ fn note_entry(e: &web_sys::MouseEvent) {
 
 /// A menu entry that starts the guided first duel.
 #[component]
-fn LessonItem(
-    label: &'static str,
-    sub: &'static str,
-    #[prop(optional)] primary: bool,
-) -> impl IntoView {
+fn LessonItem(label: &'static str, sub: &'static str, icon: &'static str) -> impl IntoView {
     view! {
         <li>
-            <button type="button" class="menu-item" class:primary=primary on:click=move |e| { note_entry(&e); crate::coach::start(Screen::Title) }>
-                <MenuIcon name=if primary { "learn" } else { "howto" } />
+            <button type="button" class="menu-item" on:click=move |e| { note_entry(&e); crate::coach::start(Screen::Title) }>
+                <MenuIcon name=icon />
                 <span class="menu-label">{label}</span>
                 <span class="menu-sub">{sub}</span>
             </button>
@@ -315,6 +311,7 @@ pub fn TitleScreen() -> impl IntoView {
         })
     };
     let due = expect_context::<TutorialDue>().0;
+    let loaded = expect_context::<store::Loaded>().0;
     let progress = expect_context::<RwSignal<Progress>>();
     let records = move || progress.with(count_line);
     let campaign_sub = move || {
@@ -408,22 +405,24 @@ pub fn TitleScreen() -> impl IntoView {
                 on:mouseover=move |e| show(e.target()) on:focusin=move |e| show(e.target())
                 on:mouseleave=move |_| help.set(None) on:focusout=move |_| help.set(None)>
                 <ul class="menu">
-                    {move || if due.get() {
-                        view! { <LessonItem primary=true label=tr("Learn to play", "Apprendre à jouer") sub=tr("A guided first duel, four turns long", "Un premier duel guidé, en quatre tours") /> }.into_any()
-                    } else {
-                        view! { <MenuItem icon="continue" label=tr("Continue", "Continuer") sub=Signal::derive(continue_sub) to=Screen::World primary=true /> }.into_any()
+                    // The world is the game (its campaign, duelists, seals and books): its entry
+                    // leads, on the brass plank. A new save begins there; the guided duel comes next.
+                    {move || {
+                        loaded.track();
+                        if due.get() && store::world_at().is_none() {
+                            view! { <MenuItem icon="explore" label=tr("Explore the world", "Explorer le monde") sub=tr("Begin your journey in Sixfold Meadow", "Commencez votre voyage au Pré de Sixfold") to=Screen::World primary=true /> }.into_any()
+                        } else {
+                            view! { <MenuItem icon="continue" label=tr("Continue", "Continuer") sub=Signal::derive(continue_sub) to=Screen::World primary=true /> }.into_any()
+                        }
                     }}
+                    {move || due.get().then(|| view! { <LessonItem icon="learn" label=tr("Learn to play", "Apprendre à jouer") sub=tr("A guided first duel, four turns long", "Un premier duel guidé, en quatre tours") /> })}
                     <MenuItem icon="duel" label=tr("Play a duel", "Jouer un duel") sub=tr("Your deck against a practice opponent", "Votre deck contre un adversaire d'entraînement") to=Screen::Duel />
                     <MenuItem icon="campaign" label=tr("Campaign", "Campagne") sub=Signal::derive(campaign_sub) to=Screen::Campaign />
                     <MenuItem icon="packs" label=tr("Open packs", "Ouvrir des boosters") sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
                     <MenuItem icon="decks" label=tr("My decks", "Mes decks") sub=Signal::derive(decks) to=Screen::Decks />
                     <MenuItem icon="collection" label="Collection" sub=Signal::derive(found) to=Screen::Collection />
                     <MenuItem icon="records" label=tr("Records", "Palmarès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
-                    {move || if due.get() {
-                        view! { <MenuItem icon="explore" label=tr("Explore the world", "Explorer le monde") sub=tr("Six regions to walk", "Six régions à parcourir") to=Screen::World /> }.into_any()
-                    } else {
-                        view! { <LessonItem label=tr("How to play", "Comment jouer") sub=tr("Replay the guided first duel", "Rejouer le premier duel guidé") /> }.into_any()
-                    }}
+                    {move || (!due.get()).then(|| view! { <LessonItem icon="howto" label=tr("How to play", "Comment jouer") sub=tr("Replay the guided first duel", "Rejouer le premier duel guidé") /> })}
                 </ul>
                 // Read out already: each entry's name carries its note.
                 {move || help.get().map(|(text, y)| view! {

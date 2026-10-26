@@ -107,6 +107,12 @@ pub fn Reading(
     let prev = move || go(at.get_untracked().saturating_sub(1));
     let next = move || go(at.get_untracked() + 1);
     let on_key = move |e: web_sys::KeyboardEvent| {
+        // Escape folds the plain text first, then (next press) puts the book back.
+        if e.key() == "Escape" && plain.get_untracked() {
+            e.prevent_default();
+            e.stop_propagation();
+            return plain.set(false);
+        }
         let n = at.get_untracked();
         let to = match e.key().as_str() {
             "ArrowRight" | "PageDown" => n + 1,

@@ -672,13 +672,19 @@ pub fn GameOver() -> impl IntoView {
                         }.into_any(),
                         (None, Some(p)) => view! {
                             <div class="dialog-foot">
+                                // A rung won with more to climb: the next one is what the player wants, so it leads.
                                 {move || (p == Post::Gauntlet && rung_result.get().is_some_and(|r| r.won && !r.cleared)).then(|| view! {
-                                    <button class="btn" on:click=next_rung>{tr("Next rung", "Palier suivant")}</button>
+                                    <button class="btn primary" autofocus on:click=next_rung>{tr("Next rung", "Palier suivant")}</button>
                                 })}
                                 {matches!(p, Post::Daily(_)).then(|| view! {
                                     <button class="btn" on:click=rematch>{tr("Play it again", "Rejouer")}</button>
                                 })}
-                                <button class="btn primary" autofocus on:click=move |_| { crate::go_with(back, move || ctl.stop()) }>{tr("Back", "Retour")}</button>
+                                {move || {
+                                    let climbing = p == Post::Gauntlet && rung_result.get().is_some_and(|r| r.won && !r.cleared);
+                                    view! {
+                                        <button class="btn" class:primary=!climbing autofocus=!climbing on:click=move |_| { crate::go_with(back, move || ctl.stop()) }>{tr("Back", "Retour")}</button>
+                                    }
+                                }}
                             </div>
                         }.into_any(),
                         (None, None) => view! {

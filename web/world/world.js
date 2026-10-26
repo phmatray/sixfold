@@ -358,7 +358,9 @@ export function mount(el, controls, cb, start, edit = false) {
   const spent = (it) => it?.kind === "find" && holds(`flag:found_${it.id}`);
   const facing = () => {
     const it = hero.sit ? null : lifts.facing(world, hero) ?? facingOf(world, hero, opens);
-    return (spent(it) && seats.facing(world, hero)) || (it ?? seats.facing(world, hero));
+    // Taken, on a seat: the seat (or, from behind it, nothing) rather than "Nothing else here".
+    if (spent(it) && world.seats.has(key(hero.x + DIR[hero.face][0], hero.z + DIR[hero.face][1]))) return seats.facing(world, hero);
+    return it ?? seats.facing(world, hero);
   };
 
   // Start a step toward `f`. A door warp is entered even though its tile is solid;

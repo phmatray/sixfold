@@ -148,7 +148,7 @@ test("keyboard only: build a deck for me, undo it, walk the cards, leave", async
   await first.focus();
   await page.keyboard.press("ArrowRight");
   await expect(first).not.toBeFocused();
-  expect(await page.evaluate(() => !!document.activeElement?.closest(".pick-grid"))).toBe(true);
+  expect(await page.evaluate(() => document.activeElement?.closest(".pick-grid") ? "ok" : (document.activeElement?.outerHTML.slice(0, 200) + " | was " + JSON.stringify(document.querySelector(".pick-grid .bind-card")?.getBoundingClientRect()) + " vp " + innerHeight))).toBe("ok");
 
   // Escape leaves (nothing unsaved).
   await page.keyboard.press("Escape");

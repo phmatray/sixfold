@@ -550,11 +550,13 @@ pub enum MenuTab {
 }
 
 impl MenuTab {
+    // What a player in the world most often opens the menu for comes first: what to do
+    // next (the Journal), where to go (the Map), then the decks for the next duel.
     const ALL: [MenuTab; 6] = [
-        MenuTab::Decks,
-        MenuTab::Collection,
         MenuTab::Journal,
         MenuTab::Map,
+        MenuTab::Decks,
+        MenuTab::Collection,
         MenuTab::Campaign,
         MenuTab::Options,
     ];

@@ -1616,7 +1616,7 @@ input, select { caret-color: var(--brass-hi); }
 /* Sound: the Settings sliders, and the mute button in the duel and world headers. */
 .audio-settings { display: grid; gap: 10px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
 .audio-settings legend { padding: 0; margin-bottom: 4px; font: 700 var(--fs-base)/1.2 var(--display); }
-.vol-mute { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.vol-mute { display: flex; align-items: center; gap: 10px; min-height: 44px; width: 100%; } /* a full row, as the sliders are, for the arrows */
 .vol { display: grid; grid-template-columns: calc(64px * var(--ts)) minmax(0, 1fr) calc(44px * var(--ts)); align-items: center; gap: 10px; min-height: 44px; }
 .vol input { width: 100%; height: 44px; margin: 0; }
 .vol .vol-pct { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
