@@ -192,7 +192,12 @@ addEventListener("keydown", (e) => {
       ["above", near, r.top - 22, r.top >= 44],
       ["below", near, r.bottom + 22, r.bottom <= innerHeight - 44],
     ];
-    const free = ([, x, y]) => !document.elementFromPoint(x, y)?.closest(CONTROLS);
+    // Free: nothing to press and nothing to read under the hand (its middle and its tip).
+    const BUSY = `${CONTROLS}, p, h1, h2, h3, h4, legend, dt, dd, figcaption, img, svg, .card, .pack, .deck-name, .deck-desc`;
+    const free = ([s, x, y]) => {
+      const tip = { left: [x + 18, y], right: [x - 18, y], above: [x, y + 18], below: [x, y - 18] }[s];
+      return [[x, y], tip].every(([px, py]) => !document.elementFromPoint(px, py)?.closest(BUSY));
+    };
     // The side is picked once per control (no flicker while it moves), the place every frame.
     side ??= (sides.find((s) => s[3] && free(s)) ?? sides.find((s) => s[3]) ?? sides[0])[0];
     const [, cx, cy] = sides.find((s) => s[0] === side);

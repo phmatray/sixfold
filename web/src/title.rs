@@ -65,20 +65,6 @@ fn MenuIcon(name: &'static str) -> impl IntoView {
     view! { <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true"><path d=icon(name) /></svg> }
 }
 
-/// The help line under the menu: what the item under the cursor leads to.
-#[derive(Clone, Copy)]
-struct Help(RwSignal<String>);
-
-/// Show `sub` on the help line while this item is pointed at or focused.
-fn helps<E>(sub: Signal<String>) -> impl Fn(E) + Copy + 'static {
-    let help = use_context::<Help>().map(|h| h.0);
-    move |_| {
-        if let Some(h) = help {
-            h.set(sub.get_untracked())
-        }
-    }
-}
-
 #[component]
 fn MenuItem(
     label: &'static str,
@@ -90,8 +76,7 @@ fn MenuItem(
 ) -> impl IntoView {
     view! {
         <li>
-            <button type="button" class="menu-item" class:primary=primary on:click=move |_| crate::go(to)
-                on:focus=helps(sub) on:pointerenter=helps(sub)>
+            <button type="button" class="menu-item" class:primary=primary on:click=move |_| crate::go(to)>
                 <MenuIcon name=icon />
                 <span class="menu-label">{label}</span>
                 <span class="menu-sub">{move || sub.get()}</span>
@@ -112,8 +97,7 @@ fn LessonItem(
 ) -> impl IntoView {
     view! {
         <li>
-            <button type="button" class="menu-item" class:primary=primary on:click=move |_| crate::coach::start(Screen::Title)
-                on:focus=helps(Signal::stored(sub.to_string())) on:pointerenter=helps(Signal::stored(sub.to_string()))>
+            <button type="button" class="menu-item" class:primary=primary on:click=move |_| crate::coach::start(Screen::Title)>
                 <MenuIcon name=if primary { "learn" } else { "howto" } />
                 <span class="menu-label">{label}</span>
                 <span class="menu-sub">{sub}</span>
@@ -173,6 +157,35 @@ fn TextSize() -> impl IntoView {
     }
 }
 
+/// A title sheet's heading and Close: folding its <details> puts focus back on
+/// the button that opened it.
+#[component]
+pub fn SheetHead(title: &'static str, id: &'static str) -> impl IntoView {
+    let close = move |e: web_sys::MouseEvent| {
+        let details = event_target::<web_sys::Element>(&e)
+            .closest("details")
+            .ok()
+            .flatten();
+        if let Some(d) = details {
+            let _ = d.remove_attribute("open");
+            if let Some(s) = d
+                .query_selector(":scope > summary")
+                .ok()
+                .flatten()
+                .and_then(|s| s.dyn_into::<web_sys::HtmlElement>().ok())
+            {
+                let _ = s.focus();
+            }
+        }
+    };
+    view! {
+        <header class="sheet-head">
+            <h2 id=id>{title}</h2>
+            <button type="button" class="btn ghost" on:click=close>{tr("Close", "Fermer")}</button>
+        </header>
+    }
+}
+
 /// The settings: language, text size, sound, saves and the reset. The title screen's
 /// Settings menu and the world's in-game menu both show it.
 #[component]
@@ -190,7 +203,8 @@ pub fn OptionsPanel(
     };
     view! {
         <div class="settings-body" role=sheet.then_some("dialog") aria-modal=sheet.then_some("true")
-            aria-label=sheet.then(|| tr("Settings", "Réglages"))>
+            aria-labelledby=sheet.then_some("settings-title")>
+            {sheet.then(|| view! { <SheetHead title=tr("Settings", "Réglages") id="settings-title" /> })}
             <LangSwitch />
             <TextSize />
             <AudioSettings />
@@ -239,8 +253,6 @@ fn Settings() -> impl IntoView {
 pub fn TitleScreen() -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
     let notice = expect_context::<Notice>().0;
-    let help = RwSignal::new(String::new());
-    provide_context(Help(help));
     let packs = Signal::derive(move || profile.with(|p| p.wallet.total()));
     let decks = move || {
         profile.with(|p| match p.decks.len() {
@@ -347,7 +359,6 @@ pub fn TitleScreen() -> impl IntoView {
                         view! { <LessonItem label=tr("How to play", "Comment jouer") sub=tr("Replay the guided first duel", "Rejouer le premier duel guidé") /> }.into_any()
                     }}
                 </ul>
-                <p class="menu-help" aria-hidden="true">{move || help.get()}</p>
             </nav>
             <footer class="title-foot foot">
                 <div class="foot-menus">

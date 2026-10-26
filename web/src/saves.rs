@@ -209,7 +209,8 @@ pub fn SlotPicker() -> impl IntoView {
                 <span>{tr("Save slot: ", "Emplacement : ")} <b>{current_name}</b></span>
             </summary>
             {move || open.get().then(|| view! {
-                <div class="settings-body" role="dialog" aria-modal="true" aria-label=tr("Save slots", "Emplacements")>
+                <div class="settings-body" role="dialog" aria-modal="true" aria-labelledby="slots-title">
+                    <crate::title::SheetHead title=tr("Save slots", "Emplacements") id="slots-title" />
                     <ul class="slot-list">{(1..=SLOTS).map(row).collect_view()}</ul>
                     <p class="note" role="status">{move || status.get()}</p>
                 </div>

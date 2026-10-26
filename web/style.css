@@ -161,6 +161,9 @@
   --grain-wood: repeating-linear-gradient(176deg, transparent 0 7px, rgba(60, 30, 10, 0.18) 7px 8px, transparent 8px 15px, rgba(255, 220, 170, 0.08) 15px 17px);
   --plank: var(--grain-wood), linear-gradient(180deg, var(--wood-hi), var(--wood) 55%, var(--wood-lo));
   --plank-lit: var(--grain-wood), linear-gradient(180deg, color-mix(in srgb, var(--wood-hi) 80%, var(--paint)), var(--wood-hi) 55%, var(--wood));
+  /* For painted text on wood (AA): the plank's darker half only. */
+  --plank-deep: var(--grain-wood), linear-gradient(180deg, var(--wood), var(--wood-lo));
+  --plank-deep-lit: var(--grain-wood), linear-gradient(180deg, color-mix(in srgb, var(--wood) 80%, var(--wood-hi)), color-mix(in srgb, var(--wood-lo) 85%, var(--wood)));
   --plank-brass: var(--grain-wood), linear-gradient(180deg, var(--brass-light), var(--brass) 60%, var(--brass-deep));
   --painted-text: 2px 0 0 var(--toon), -2px 0 0 var(--toon), 0 2px 0 var(--toon), 0 -2px 0 var(--toon), 0 4px 0 var(--toon);
 
@@ -4189,28 +4192,33 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 /* A plank. */
 .menu-item {
   position: relative; min-height: 48px; padding: 4px 18px; border-radius: 10px;
-  grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "icon label badge"; column-gap: 14px;
-  background: var(--plank); border: var(--toon-w) solid var(--toon); color: var(--paint);
+  grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "icon label sub badge"; column-gap: 12px;
+  background: var(--plank-deep); border: var(--toon-w) solid var(--toon); color: var(--paint);
   box-shadow: var(--edge), 0 12px 18px -8px rgba(0, 0, 0, 0.6), inset 0 2px 0 color-mix(in srgb, var(--paint) 30%, transparent);
   transform: rotate(var(--tilt, 0deg));
-  transition: transform var(--dur-panel) cubic-bezier(0.3, 1.6, 0.5, 1), box-shadow var(--dur-quick) ease;
+  transition: transform var(--dur-panel) var(--ease-out), box-shadow var(--dur-quick) ease;
 }
 .menu li:nth-child(odd) .menu-item { --tilt: -0.7deg; }
 .menu li:nth-child(even) .menu-item { --tilt: 0.6deg; }
 .menu-label { font-size: var(--fs-xl); font-weight: 800; text-shadow: 0 2px 0 var(--toon); }
 .menu-item .menu-icon { filter: drop-shadow(0 2px 0 var(--toon)); }
-.menu-item:is(:hover, .is-hover, :focus-visible, .is-focus), html[data-input="pad"] .menu-item:focus { --tilt: 0deg; transform: translateX(10px) scale(1.03); background: var(--plank-lit); }
-.menu-item:is(:active, .is-active) { transform: translate(10px, 4px) scale(1.03); box-shadow: 0 0 0 var(--toon); }
-.menu-item.primary { min-height: 64px; margin-bottom: 4px; grid-template-areas: "icon label badge" "icon sub badge"; background: var(--plank-brass); color: var(--toon); }
+.menu-item:is(:hover, .is-hover, :focus-visible, .is-focus), html[data-input="pad"] .menu-item:focus { --tilt: 0deg; transform: translateY(-2px) scale(1.03); background: var(--plank-deep-lit); }
+.menu-item:is(:active, .is-active) { transform: translateY(3px) scale(1.03); box-shadow: 0 0 0 var(--toon); }
+.menu-item.primary { min-height: 64px; margin-bottom: 4px; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "icon label badge" "icon sub badge"; background: var(--plank-brass); color: var(--toon); }
 .menu-item.primary .menu-label { font-size: var(--fs-4xl); text-shadow: 0 2px 0 color-mix(in srgb, var(--paint) 60%, transparent); }
 .menu-item.primary .menu-sub { color: var(--toon); font-weight: 700; }
 .menu-item.primary .menu-icon { width: 34px; height: 34px; filter: none; }
-/* Only the item under the cursor tells more, on a strip of paper under the menu. */
-.title .menu-item:not(.primary) .menu-sub { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.menu-help { margin: 16px 0 0; min-height: 1.5em; padding: 8px 16px; color: var(--toon); font-weight: 700; font-size: var(--fs-md);
-  background: var(--paper); border: var(--toon-w) solid var(--toon); border-radius: 8px; box-shadow: var(--edge); transform: rotate(-0.6deg); }
-.menu-help:empty { visibility: hidden; }
-.title-foot summary.btn.ghost { background: var(--paper-hi); color: var(--toon); border: 2px solid var(--toon); box-shadow: 0 3px 0 var(--toon); }
+/* Each entry's status on a paper tag nailed to its plank (dark ink: AA at a small size). */
+.title .menu-item:not(.primary) .menu-sub {
+  justify-self: end; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  padding: 2px 8px; border-radius: 6px; background: var(--paper); color: var(--toon); font-size: var(--fs-xs); font-weight: 700;
+  box-shadow: 0 0 0 1.5px var(--toon); text-shadow: none;
+}
+.title .menu-item .count-badge { margin-left: 4px; }
+/* The footer's controls: small planks, as the menu's. */
+.title-foot summary.btn.ghost { background: var(--plank-deep); color: var(--paint); border: 2px solid var(--toon); box-shadow: 0 3px 0 var(--toon); text-shadow: 0 1px 0 var(--toon); }
+.title-foot summary.btn.ghost:hover { background: var(--plank-deep-lit); }
+.title-legal { padding: 4px 10px; border-radius: 8px; background: color-mix(in srgb, var(--toon) 60%, transparent); text-shadow: none; }
 /* The place's card, like a film's. */
 .title-place { position: absolute; z-index: 1; right: clamp(16px, 4.5vw, 72px); bottom: clamp(96px, 13vh, 128px); margin: 0; display: grid; gap: 2px; padding: 8px 16px;
   background: var(--paper); border: var(--toon-w) solid var(--toon); border-radius: 8px; box-shadow: var(--edge); transform: rotate(1.5deg); opacity: 0; transition: opacity 900ms ease; }
@@ -4223,7 +4231,10 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
   .title-brand { justify-self: center; }
   .title-brand .wordmark { font-size: clamp(48px, 15vw, 72px); }
   .title-menu { align-self: end; }
-  .title-legal, .menu-help { display: none; }
+  .title-legal { display: none; }
+  .title .menu-item:not(.primary) .menu-sub { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); padding: 0; }
+  .title .menu-item:not(.primary) { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "icon label badge"; }
+  .menu-item:is(:hover, .is-hover, :focus-visible, .is-focus), html[data-input="pad"] .menu-item:focus { transform: scale(1.03); }
   .title-foot { justify-content: center; }
   .title-foot .foot-menus { justify-content: center; gap: 6px; }
   .title-foot .btn { padding-inline: 10px; font-size: var(--fs-sm); white-space: nowrap; }
@@ -4286,3 +4297,48 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html
 @media (max-width: 760px), (orientation: portrait) {
   .title-foot details[open] .settings-body { bottom: calc(128px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 160px); }
 }
+
+/* ---------- The kit, second pass (#100 critique) ---------- */
+/* One control, one tray: a single paper frame; the chosen slot is the plank in it. */
+.lang-switch, .segs, .shelf-switch {
+  display: inline-flex; gap: 2px; padding: 3px; border: 2px solid var(--toon); border-radius: 12px;
+  background: var(--paper-lo); box-shadow: 0 3px 0 var(--toon);
+}
+:is(.lang-switch, .shelf-switch) button, .segs .seg span { border: 0; box-shadow: none; background: transparent; border-radius: 8px; min-height: 40px; }
+:is(.lang-switch, .shelf-switch) button:hover, .segs .seg:hover span { background: var(--paper-hi); }
+:is(.lang-switch button[aria-pressed="true"], .shelf-switch button[aria-pressed="true"], .segs .seg input:checked + span) { background: var(--plank-deep); color: var(--paint); box-shadow: none; }
+/* Can't be used now: flat and hatched, the ink faded (still readable). */
+.btn:disabled, .btn.primary:disabled, .btn[aria-disabled="true"] {
+  background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--toon) 7%, transparent) 6px 8px), color-mix(in srgb, var(--paper-lo) 70%, transparent);
+  border-color: color-mix(in srgb, var(--toon) 30%, transparent);
+}
+/* Where the hand points, the control also stands up a little: focus stays plain if the hand is cut off. */
+html.hand-cursor :is(.btn, .chip, [role="tab"], summary)[data-hand] { translate: 0 -2px; filter: brightness(1.05); }
+html.hand-cursor .deck-tile:has([data-hand]) { translate: 0 -2px; }
+/* Menu screens over a dimmed still of the place the title last showed (felt when there is none). */
+body:has(> .page)::before {
+  content: ""; position: fixed; inset: -24px; z-index: -1; pointer-events: none;
+  background: var(--world-still, none) center / cover; filter: blur(10px) brightness(0.32) saturate(0.85);
+}
+body:has(> .page) .page-body { background: none; }
+/* The duel setup's bar: a plank with rounded ends, sitting on the page rather than half-spanning it. */
+.options { margin-inline: 0; border: var(--toon-w) solid var(--toon); border-bottom: 0; border-radius: 14px 14px 0 0; }
+.options .field { display: flex; align-items: center; gap: 10px; }
+/* Bindings read as keycaps. */
+.controls-list .bind { min-width: 4.5em; border-radius: 8px; box-shadow: 0 4px 0 var(--toon); font-family: var(--display); font-weight: 800; }
+/* The duel's menu: a toned paper (no glare over the dark table) under a wooden header. */
+.drawer { --sheet-bg: color-mix(in srgb, var(--paper) 86%, var(--wood-lo)); background: var(--sheet-bg); }
+.drawer > header { margin: -18px -20px 12px; padding: 12px 20px; background: var(--plank-deep); border-bottom: var(--toon-w) solid var(--toon); }
+.drawer > header h2 { color: var(--paint); text-shadow: var(--painted-text); }
+.drawer .icon-btn, .duel-menu-btn { background: var(--plank-deep); color: var(--paint); border: 2px solid var(--toon); box-shadow: 0 3px 0 var(--toon); border-radius: 10px; }
+.drawer .icon-btn:hover, .duel-menu-btn:hover { background: var(--plank-deep-lit); }
+.drawer .icon-btn .ic, .duel-menu-btn .ic { stroke: currentColor; }
+/* Painted disclosure triangles, not the browser's. */
+.drawer summary, .settings-body details > summary { display: flex; align-items: center; gap: 10px; list-style: none; }
+.drawer summary::-webkit-details-marker, .settings-body details > summary::-webkit-details-marker { display: none; }
+.drawer summary::before, .settings-body details > summary:not(.btn)::before {
+  content: ""; flex: none; width: 12px; height: 14px; background: var(--toon);
+  clip-path: polygon(0 0, 100% 50%, 0 100%); transition: rotate var(--dur-quick) var(--ease-out);
+}
+.drawer details[open] > summary::before, .settings-body details[open] > summary:not(.btn)::before { rotate: 90deg; }
+.sheet-head { margin-bottom: 14px; }
