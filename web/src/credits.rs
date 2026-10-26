@@ -314,7 +314,8 @@ pub fn Credits(won: bool) -> impl IntoView {
         lit.into(),
         view! {
             {seal_stone()}
-            <p class="credits-line">{lit}</p>
+            // It waits for the ring (its own copy of the timing: `--ring-at` is set on the stone).
+            <p class="credits-line" style=format!("--ring-at: {RING_AT}ms")>{lit}</p>
         }
         .into_any(),
     ));
