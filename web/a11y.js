@@ -177,10 +177,11 @@ addEventListener("keydown", (e) => {
   const CONTROLS = "button, a[href], input, select, textarea, summary, label, [role='tab'], [tabindex]:not([tabindex='-1'])";
   let at = null, raf = 0, side = null;
   const shown = (el) => el.matches(":focus-visible") || (document.documentElement.dataset.input === "pad" && el.matches(":focus"));
-  // A visually hidden input (a deck's radio, a segment) stands for its label.
+  // A visually hidden input (a deck's radio, a segment) stands for its label; an input inside
+  // its label (a slider, a toggle) for the whole row, so the hand never sits on the row's name.
   const box = (el) => {
     const r = el.getBoundingClientRect(), label = el.labels?.[0] ?? el.closest("label");
-    return r.width < 4 && label ? label.getBoundingClientRect() : r;
+    return (r.width < 4 || (el.matches("input") && el.closest("label"))) && label ? label.getBoundingClientRect() : r;
   };
   const place = () => {
     raf = 0;
