@@ -2161,7 +2161,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .credits-plate .wordmark { font-size: clamp(64px, 14vw, 140px); }
 .credits-plate .champion-title { font-size: clamp(56px, 13vw, 132px); line-height: 1.02; text-wrap: balance; }
 .credits-plate .champion-title.long { font-size: clamp(38px, 7vw, 92px); max-width: 11em; }
-.credits-continue { margin-top: 18px; min-width: 12em; justify-content: center; }
+.credits-continue { margin-top: 18px; min-width: 12em; justify-content: center; text-align: center; }
 .credits-line.small { font-size: 14px; }
 .credits-seals { justify-content: center; gap: 12px; }
 .credits-seals .seal { width: clamp(34px, 6vw, 48px); }
@@ -3629,6 +3629,8 @@ button.pile { cursor: pointer; }
 /* Prizes: the card lifts off and flies to its taker's hand (--dx/--dy, aimed
    by table.rs); the winning prize flies at half speed. */
 .prize.taking { position: relative; z-index: 30; animation: prize-fly calc(600ms * var(--pace, 1)) cubic-bezier(0.45, 0, 0.25, 1) forwards; }
+/* Its cell is boxed in under the bench, the hand and the Active: lift the whole cell while it flies. */
+.cell:has(.prize.taking) { z-index: 6; }
 .duel[data-beat="last-prize"] .prize.taking { animation-duration: calc(1200ms * var(--pace, 1)); }
 @keyframes prize-fly {
   0% { transform: none; }
