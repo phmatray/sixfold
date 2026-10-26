@@ -43,8 +43,6 @@ B.PALETTE.update({
     "roof_brown": "#a4553a", "roof_brown_dk": "#7c3d29", "apple": "#d9473d", "pear": "#b9c94a",
     "bread": "#d79a52", "fish": "#9fb8c4", "crate": "#b07a46", "crate_dk": "#8a5c34",
     "fstone": "#d8cdb8", "fstone_dk": "#b9ad97", "fcap": "#ece2cf", "water": "#6cc3d1",
-    # doors: the dark doorway behind a leaf that swings open
-    "doorway": "#1d1714",
     # items
     "brass": "#d4a43c", "paper": "#f3ead6", "paper_dk": "#e0d2b4", "wax": "#b8333a", "wax_dk": "#8e2229",
 })

@@ -157,7 +157,7 @@ def build_willow(k):
         a = i / 20 * math.tau + rng.uniform(-0.05, 0.05)
         hem = rng.uniform(0.5, 0.85) if i % 2 == 0 else rng.uniform(1.05, 1.45)
         lock(a, 0.95, hem, rng.uniform(0.22, 0.27),  # from the rim, under the clumps
-             rng.choice(["dr_willow", "dr_willow", "dr_willow_lt", "dr_willow_dk"]), rng.uniform(-0.1, 0.1))
+             rng.choice(["dr_willow", "dr_willow_dk", "dr_willow_dk", "dr_willow_xdk"]), rng.uniform(-0.1, 0.1))  # shade under the crown
     for i in range(7):  # a darker inner ring, shorter, hanging behind from under the dome
         a = (i + 0.5) / 7 * math.tau + rng.uniform(-0.1, 0.1)
         top = rng.uniform(2.6, 2.7)
@@ -307,7 +307,8 @@ def build_moonflower(k):
 
 def build_wisteria_arch(k):
     """2 x 1 walk-under arch over a path (walkable; posts on the footprint's outer edges): two posts wound with
-    vines, a slatted canopy at 2.3 m under a leafy top, and purple racemes hanging to ~1.7 m."""
+    vines, an arched, slatted top (2.15 m at the posts, 2.6 m at the crown) under leaves and blossom, and purple
+    racemes hanging to ~1.7 m."""
     rng = random.Random(407)
     for sx in (-1, 1):
         x = sx * 0.9
@@ -317,23 +318,30 @@ def build_wisteria_arch(k):
         for t in range(1, 12, 2):
             a = t * 1.9
             k.add(sphere(0.06, 6, 3), "dr_leaf_lt" if t % 4 == 1 else "dr_leaf", T((x + 0.12 * math.cos(a), 0.12 * math.sin(a), 0.1 + t * 0.19), scale=(1, 0.6, 0.6)), smooth=True)
+    # a true arch over the path (a flat slatted top read as a tilted slab from the 50 deg camera): two arched
+    # beams from the post tops (2.15 m) to a 2.6 m crown, slats across, leaves and blossom riding the curve
+    r, cz = 1.125, 1.475                                   # circle through (+-0.9, 2.15) and (0, 2.6)
+    a0 = math.degrees(math.atan2(2.15 - cz, 0.9))
+    top_at = lambda x: cz + math.sqrt(max(r * r - x * x, 0.0))  # noqa: E731
     for y in (-0.28, 0.28):
-        k.add(box(2.14, 0.1, 0.12, 0.015), "dr_wood_dk", T((0, y, 2.28)))
-    for i in range(6):
-        k.add(box(0.07, 0.86, 0.05, 0.01), "dr_wood_lt", T((-0.88 + i * 0.352, 0, 2.375)))
-    # a leafy crown, level and mirrored about the arch's centre, humped in the middle: it read as a tilted slab
-    for x, z, r, m in ((-0.72, 2.47, 0.34, "dr_leaf_dk"), (-0.26, 2.56, 0.36, "dr_leaf"), (0.26, 2.56, 0.36, "dr_leaf"),
-                       (0.72, 2.47, 0.34, "dr_leaf_dk")):
-        k.add(jitter(ico(r, 1), rng, r * 0.06), m, T((x, 0, z), scale=(1.35, 1.3, 0.55)), smooth=True)
-    for x, y in ((-0.75, -0.2), (-0.45, 0.22), (-0.15, -0.24), (0.15, 0.24), (0.45, -0.22), (0.75, 0.2), (0.0, 0.0)):
-        k.add(jitter(ico(0.12, 1), rng, 0.015), "dr_wisteria_lt" if abs(x) < 0.3 else "dr_wisteria",
-              T((x, y, 2.66 + 0.1 * (1 - abs(x))), scale=(1.3, 1.1, 0.6)), smooth=True)
+        k.add(ribbon(arc(0, cz, r, 180 - a0, a0, 10), 0.11, 0.1), "dr_wood_dk", T((0, y + 0.05, 0), FRONT))
+    for i in range(7):
+        a = 180 - a0 - (180 - 2 * a0) * (i + 0.5) / 7
+        x, z = r * math.cos(math.radians(a)), cz + r * math.sin(math.radians(a)) + 0.07
+        k.add(box(0.07, 0.72, 0.05, 0.01), "dr_wood_lt", T((x, 0, z), (0, 90 - a, 0)))
+    for i in range(5):  # leaves over the curve, mirrored about the centre
+        a = 180 - a0 - (180 - 2 * a0) * (i + 0.5) / 5
+        x, z = (r + 0.12) * math.cos(math.radians(a)), cz + (r + 0.12) * math.sin(math.radians(a))
+        k.add(jitter(ico(0.3, 1), rng, 0.02), "dr_leaf" if i % 2 == 0 else "dr_leaf_dk", T((x, 0, z), (0, 90 - a, 0), (1.15, 1.45, 0.55)), smooth=True)
+        for y in (-0.2, 0.2):
+            k.add(jitter(ico(0.11, 1), rng, 0.015), "dr_wisteria_lt" if i == 2 else "dr_wisteria",
+                  T((x + 0.04 * (y > 0), y, z + 0.13), scale=(1.3, 1.1, 0.6)), smooth=True)
     cols = ["dr_wisteria", "dr_wisteria_lt", "dr_wisteria_dk"]
-    for i in range(34):
-        x = rng.uniform(-1.0, 1.0)
-        y = rng.uniform(-0.45, 0.45)
-        L = rng.uniform(0.3, 0.55) if abs(x) < 0.7 else rng.uniform(0.55, 0.95)
-        top = 2.3 - 0.0016 * i  # distinct caps
+    for i in range(34):  # racemes hang from under the arch, longer toward the posts
+        x = rng.uniform(-0.95, 0.95)
+        y = rng.uniform(-0.4, 0.4)
+        L = rng.uniform(0.3, 0.55) if abs(x) < 0.6 else rng.uniform(0.55, 0.9)
+        top = top_at(min(abs(x), 0.9)) - 0.06 - 0.003 * i  # distinct caps
         k.add(cyl(0.006, rng.uniform(0.07, 0.1), L, 5), rng.choice(cols), T((x, y, top - L / 2)), smooth=True)
     shadow(k, 1.0, 1.0, 0.42)
 
