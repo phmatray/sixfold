@@ -23,16 +23,16 @@ use crate::Screen;
 let api = null, gen = 0;
 const load = () => import(new URL("world/title.js", document.baseURI).href);
 export function backdrop_preload() { load().then((m) => m.preload()).catch(() => {}); }
-export function backdrop_mount(el, reduced) {
+export function backdrop_mount(el) {
   const g = ++gen;
-  load().then((m) => { if (g === gen) api = m.mount(el, reduced); }).catch(() => el.classList.add("flat"));
+  load().then((m) => { if (g === gen) api = m.mount(el); }).catch(() => el.classList.add("flat"));
 }
 export function backdrop_unmount() { gen++; api?.stop(); api = null; }
 "#)]
 extern "C" {
     /// Fetch the backdrop's module and models ahead (from the splash).
     pub fn backdrop_preload();
-    fn backdrop_mount(el: &JsValue, reduced: bool);
+    fn backdrop_mount(el: &JsValue);
     fn backdrop_unmount();
 }
 
@@ -40,12 +40,7 @@ extern "C" {
 #[component]
 fn Backdrop() -> impl IntoView {
     let host = NodeRef::<html::Div>::new();
-    let reduced = window()
-        .match_media("(prefers-reduced-motion: reduce)")
-        .ok()
-        .flatten()
-        .is_some_and(|m| m.matches());
-    host.on_load(move |el| backdrop_mount(&el, reduced));
+    host.on_load(move |el| backdrop_mount(&el));
     on_cleanup(backdrop_unmount);
     view! { <div class="title-backdrop" node_ref=host aria-hidden="true"></div> }
 }

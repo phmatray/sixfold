@@ -1,16 +1,18 @@
 // The title's living backdrop: a hex island at dusk, its cottage lit and a
-// campfire going, embers rising, the camera on a slow orbit. Built from hex
+// campfire going, embers rising, the camera swaying gently in front of it. Built from hex
 // prisms and the world's own models (title.rs mounts it behind the menu).
 //
 // It gives way to the flat CSS backdrop (`.title-backdrop.flat`) when WebGL is
-// missing or the first frames come in under 50 fps. With reduced motion it is
-// one still frame.
+// missing or the first frames come in under 50 fps (the canvas stays hidden
+// until they pass). With reduced motion it is one still frame.
 import * as THREE from "three";
 import { loadAsset } from "./map.js";
 import { prep, rng, toon } from "./props.js";
 
 const MODELS = ["cottage", "tree", "tree_b", "pine", "bush", "rock", "campfire", "lantern", "flowers", "waymark"];
 const R = 4; // island radius, in hexes
+const FACING = 0.6; // the camera's bearing: the fire in front, the cottage behind it
+const FIRE = [0, 2]; // the hex toward the camera, in clear space under the card fan
 const S = 1.05; // hex circumradius (a tile is about 1 m)
 
 /// Start the models downloading (the splash calls this, so the title opens on them).
@@ -27,7 +29,8 @@ function hexes(r) {
 }
 const at = (q, s) => [S * Math.sqrt(3) * (q + s / 2), S * 1.5 * s];
 
-export function mount(el, reduced) {
+export function mount(el) {
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const flat = () => el.classList.add("flat");
   let renderer;
   try {
@@ -100,7 +103,7 @@ export function mount(el, reduced) {
   const loaded = Promise.all(MODELS.map(loadAsset)).then((g) => {
     const m = Object.fromEntries(MODELS.map((n, i) => [n, g[i]]));
     put(m.cottage, -1, -1, 0.5);
-    put(m.campfire, 1, 0);
+    put(m.campfire, FIRE[0], FIRE[1]);
     put(m.lantern, -2, 1, 0.3);
     put(m.waymark, 2, -3, -0.4);
     put(m.flowers, 0, 1);
@@ -109,7 +112,7 @@ export function mount(el, reduced) {
     for (const [q, s, k] of trees) put(m[k], q, s, r() * 6.28, 0.85 + r() * 0.3);
     for (const [q, s] of [[3, 0], [-1, 3], [1, 2]]) put(m.bush, q, s, r() * 6.28);
     for (const [q, s] of [[4, -2], [-4, 3], [2, 2], [-2, 4]]) put(m.rock, q, s, r() * 6.28, 0.8);
-    const t = tops.get("1,0");
+    const t = tops.get(FIRE.join(","));
     fireAt = [t[0], t[1], t[2]];
     fire.position.set(t[0], t[1] + 0.6, t[2]);
   });
@@ -121,13 +124,13 @@ export function mount(el, reduced) {
     renderer.setSize(w, h);
     camera.aspect = w / h;
     const wide = w > 900 && w > h;
-    camera.fov = wide ? 26 : 50;
-    camera.setViewOffset(w, h, wide ? w * 0.15 : 0, wide ? -h * 0.16 : h * 0.22, w, h);
+    camera.fov = wide ? 26 : 52;
+    camera.setViewOffset(w, h, wide ? w * 0.15 : 0, wide ? -h * 0.16 : h * 0.3, w, h);
     camera.updateProjectionMatrix();
     if (reduced) draw(0);
   };
 
-  let angle = 0.6, raf = 0, last = 0, alive = true;
+  let angle = FACING, raf = 0, last = 0, alive = true;
   const times = [];
   const look = new THREE.Vector3(0, 1.2, 0);
   function draw(t) {
@@ -145,18 +148,28 @@ export function mount(el, reduced) {
     embers.visible = !reduced && fireAt[1] > 0;
     renderer.render(scene, camera);
   }
+  let since = 0;
   const loop = (ms) => {
     if (!alive) return;
+    raf = requestAnimationFrame(loop);
     const t = ms / 1000, dt = last ? Math.min(t - last, 0.1) : 0;
     last = t;
-    angle += dt * ((Math.PI * 2) / 160); // one turn in under three minutes
-    draw(t);
-    // The frame-time probe: frames 30 to 120. Under 50 fps, the flat backdrop instead.
-    if (dt && times.push(dt) === 120) {
-      const slow = times.slice(30).sort((a, b) => a - b)[45] > 1 / 50;
-      if (slow) return api.stop(), flat();
+    angle = FACING + Math.sin((t * Math.PI * 2) / 48) * 0.38; // a slow sway, never round the back
+    // The frame-time probe, drawing every frame: frames 30 to 120. Under 50 fps
+    // (a weak GPU, or a battery saver capping the page), the flat backdrop instead.
+    if (times.length < 120) {
+      draw(t);
+      if (dt && times.push(dt) === 120) {
+        if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 50) api.stop(), flat();
+        else el.classList.add("live");
+      }
+      return;
     }
-    raf = requestAnimationFrame(loop);
+    // Then 30 fps is plenty for a slow sway and a fire, and spares the battery.
+    since += dt;
+    if (since < 1 / 31) return;
+    since = 0;
+    draw(t);
   };
   const ro = new ResizeObserver(resize);
   ro.observe(el);
@@ -164,8 +177,8 @@ export function mount(el, reduced) {
   loaded.finally(() => {
     if (!alive) return;
     resize();
-    el.classList.add("live");
-    if (!reduced) raf = requestAnimationFrame(loop);
+    if (reduced) el.classList.add("live");
+    else raf = requestAnimationFrame(loop);
   });
 
   const api = {
@@ -174,10 +187,9 @@ export function mount(el, reduced) {
       alive = false;
       cancelAnimationFrame(raf);
       ro.disconnect();
-      scene.traverse((o) => {
-        o.geometry?.dispose();
-        for (const m of [o.material].flat()) m?.dispose();
-      });
+      // Only what this file made: the models' geometry is shared with the world's cache.
+      for (const g of [geo, water.geometry, embers.geometry]) g.dispose();
+      for (const m of [side, sand, stone, ...grass, water.material, embers.material]) m.dispose();
       renderer.forceContextLoss(); // the world screen makes its own context next
       renderer.dispose();
       renderer.domElement.remove();

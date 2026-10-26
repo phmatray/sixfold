@@ -313,16 +313,7 @@ const SFX = {
   chime: (d, t) => {
     [96, 103, 100, 108].forEach((m, i) => tone(d, t + i * 0.22, hz(m), 1.6, { peak: 0.035, detune: (i % 2 ? 9 : -7), rel: 0.8 }));
   },
-  // The opening. The studio's die lands on the felt (a knock and its bounce),
-  // then its seventh pip rings; the start is the title's hook (a rising sixth)
-  // blooming into its chord.
-  studio: (d, t) => {
-    tone(d, t, 190, 0.09, { f2: 105, peak: 0.3 });
-    noise(d, t, 0.05, { type: "lowpass", f: 1600, peak: 0.22 });
-    tone(d, t + 0.13, 210, 0.06, { f2: 120, peak: 0.12 });
-    tone(d, t + 0.63, hz(91), 1.2, { type: "triangle", peak: 0.08, rel: 0.6 });
-    tone(d, t + 0.64, hz(98), 0.9, { peak: 0.035, rel: 0.5 });
-  },
+  // "Press to start": the title's hook (a rising sixth) blooming into its chord.
   sting: (d, t) => {
     notes(d, t, [74, 83], 0.13, { type: "triangle", peak: 0.13, dur: 0.5 });
     [62, 69, 74, 78, 83].forEach((m, i) => tone(d, t + 0.26 + i * 0.03, hz(m), 1.5, { type: i ? "triangle" : "sine", peak: i ? 0.05 : 0.14, a: 0.06, lin: true, rel: 0.9 }));
@@ -340,6 +331,10 @@ const SFX = {
 };
 
 export function sfx(name, n = 0) {
+  // The start sting rides the gesture that creates the context, which may
+  // still be starting up: play it as soon as it runs.
+  if (name === "sting" && ctx?.state === "suspended" && !prefs.muted)
+    return void ctx.resume().then(() => ctx.state === "running" && sfx(name, n), () => {});
   const f = SFX[name];
   if (!ctx || ctx.state !== "running" || !f) return;
   const now = ctx.currentTime;

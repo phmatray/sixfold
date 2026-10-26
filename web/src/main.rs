@@ -102,6 +102,7 @@ pub fn new_seed() -> u64 {
 fn App() -> impl IntoView {
     let ctl = Ctl::new();
     let screen = RwSignal::new(if world::reopen() {
+        splash::mark_shown();
         Screen::World
     } else if splash::due() {
         Screen::Splash

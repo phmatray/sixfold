@@ -15,10 +15,14 @@ const SHOWN: &str = "sixfold.splashed";
 // The swap to the title runs as a view transition (the wordmark glides into
 // the hero) where the browser has them and motion is welcome. Focus can't
 // move while the transition holds the page, so `done` runs once it lets go.
+// Without a transition the App's own focus pass (`focus_menu_next`) lands it,
+// and `done` is dropped (ponytail: its closure leaks, a few bytes once a launch).
 #[wasm_bindgen(inline_js = r#"
 export function view_swap(cb, done) {
   if (!document.startViewTransition || matchMedia("(prefers-reduced-motion: reduce)").matches) return cb();
-  const t = document.startViewTransition(() => { cb(); return new Promise((r) => requestAnimationFrame(() => r())); });
+  // No rAF in here: the page doesn't render while the callback is pending. A
+  // macrotask lets Leptos apply the change first.
+  const t = document.startViewTransition(() => { cb(); return new Promise((r) => setTimeout(r, 0)); });
   t.updateCallbackDone.then(() => requestAnimationFrame(done), () => {});
   t.ready.catch(() => {}); // skipped (a hidden tab): the swap still happened
 }
@@ -36,7 +40,8 @@ pub fn due() -> bool {
     s.get_item(SHOWN).ok().flatten().is_none()
 }
 
-fn mark_shown() {
+/// This launch's opening is spent (shown, or skipped for the world).
+pub fn mark_shown() {
     if let Ok(Some(s)) = window().session_storage() {
         _ = s.set_item(SHOWN, "1");
     }
@@ -114,14 +119,15 @@ pub fn Splash() -> impl IntoView {
         view_swap(&swap, &done);
     };
     // The die lands: its knock, if sound is already allowed (it rarely is yet).
-    set_timeout(
-        move || audio::sfx("studio", 0.0),
-        Duration::from_millis(520),
-    );
 
     let keys = window_event_listener(leptos::ev::keydown, move |e| {
+        // Letters, Space, Enter, Escape and the arrows; the browser keeps the
+        // rest (F5, F11, shortcuts) and Tab.
         let k = e.key();
-        if e.repeat() || e.ctrl_key() || e.meta_key() || e.alt_key() || k == "Shift" || k == "Tab" {
+        let ours = k.chars().count() == 1
+            || matches!(k.as_str(), "Enter" | "Escape")
+            || k.starts_with("Arrow");
+        if e.repeat() || e.ctrl_key() || e.meta_key() || e.alt_key() || !ours {
             return;
         }
         e.prevent_default();
@@ -141,6 +147,9 @@ pub fn Splash() -> impl IntoView {
                 if let Ok(b) = b.dyn_into::<web_sys::HtmlElement>() {
                     let o = web_sys::FocusOptions::new();
                     o.set_prevent_scroll(true);
+                    // No ring on a touch screen, where the next tap is all that matters
+                    // (it carries over to the menu after the swap).
+                    _ = js_sys::Reflect::set(&o, &"focusVisible".into(), &(!coarse).into());
                     _ = b.focus_with_options(&o);
                 }
             }
