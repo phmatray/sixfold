@@ -43,8 +43,11 @@ impl Toasts {
 
     /// Queue the decks just unlocked.
     pub fn decks(&self, got: Vec<&'static Unlockable>) {
-        self.0
-            .update(|q| q.extend(got.into_iter().map(Toast::Deck)));
+        // Most changes unlock nothing: leave the queue (and its watchers) alone.
+        if !got.is_empty() {
+            self.0
+                .update(|q| q.extend(got.into_iter().map(Toast::Deck)));
+        }
     }
 }
 
