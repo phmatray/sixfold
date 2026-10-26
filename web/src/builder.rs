@@ -401,7 +401,7 @@ pub fn TestSheet(open: RwSignal<bool>, draft: RwSignal<DeckList>) -> impl IntoVi
                 <h2 id="test-title">{tr("Test a hand", "Tester une main")}</h2>
                 <p class="dialog-sub">{tr("Seven cards off the top of the shuffled deck, as a duel starts.", "Sept cartes du dessus du deck mélangé, comme au début d'un duel.")}</p>
                 <ul class="test-hand" aria-label=tr("Your opening hand", "Votre main de départ")>
-                    {move || hand().into_iter().map(|id| view! { <li><CardFace id=id /></li> }).collect_view()}
+                    {move || hand().into_iter().map(|id| view! { <li class:basic=card(id).is_basic()><CardFace id=id /></li> }).collect_view()}
                 </ul>
                 <p class="test-verdict" role="status">{move || {
                     let n = hand().iter().filter(|&&id| card(id).is_basic()).count();
