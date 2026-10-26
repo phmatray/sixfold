@@ -81,13 +81,17 @@ pub fn PacksScreen() -> impl IntoView {
             return;
         }
         // After the actions have rendered: the Skip button just went away.
+        // Without scrolling, so a phone keeps the Rare in view.
         set_timeout(
             move || {
                 if let Some(b) = actions
                     .get_untracked()
                     .and_then(|el| el.query_selector("button").ok().flatten())
                 {
-                    let _ = wasm_bindgen::JsCast::unchecked_into::<web_sys::HtmlElement>(b).focus();
+                    let opts = web_sys::FocusOptions::new();
+                    opts.set_prevent_scroll(true);
+                    let _ = wasm_bindgen::JsCast::unchecked_into::<web_sys::HtmlElement>(b)
+                        .focus_with_options(&opts);
                 }
             },
             Duration::from_millis(0),
@@ -303,8 +307,8 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
                 n => tr(format!("You have {n} packs to open."), format!("Vous avez {n} boosters à ouvrir.")),
             }}
             {let (n, of) = HOLO_ODDS; tr(
-                format!(" Each holds {COMMONS} Commons, {UNCOMMONS} Uncommons and a Rare, a Holo Rare in {n} packs of {of}."),
-                format!(" Chacun contient {COMMONS} Communes, {UNCOMMONS} Peu communes et une Rare, Holo dans {n} boosters sur {of}."),
+                format!(" Each holds {COMMONS} Commons, {UNCOMMONS} Uncommons and a Rare, which is a Holo in {n} packs out of {of}."),
+                format!(" Chacun contient {COMMONS} Communes, {UNCOMMONS} Peu communes et une Rare, qui est Holo dans {n} boosters sur {of}."),
             )}
         </p>
         <ul class="shelf">
@@ -525,14 +529,24 @@ fn Reveal(
                     1 => tr("1 new card for your collection.", "1 nouvelle carte pour votre collection.").to_string(),
                     n => tr(format!("{n} new cards for your collection."), format!("{n} nouvelles cartes pour votre collection.")),
                 }
-            } else if open.get() {
-                tr(
-                    "Turning the cards over… Hold or tap to go faster.",
-                    "On retourne les cartes… Maintenez ou touchez pour accélérer.",
-                ).to_string()
             } else {
-                let k = crate::input::named(crate::input::Ctrl::Confirm);
-                tr(format!("Tear it open: tap the pack, or press {k}."), format!("Ouvrez-le : touchez le booster, ou appuyez sur {k}."))
+                // The key that presses the focused Tear / Faster button; none on a touch screen.
+                let k = crate::input::prompt(crate::input::Ctrl::Confirm);
+                match (open.get(), k.is_empty()) {
+                    (true, true) => tr(
+                        "Turning the cards over… Hold or tap the pack to go faster.",
+                        "On retourne les cartes… Maintenez ou touchez le booster pour accélérer.",
+                    ).to_string(),
+                    (true, false) => tr(
+                        format!("Turning the cards over… Press {k} to go faster."),
+                        format!("On retourne les cartes… Appuyez sur {k} pour accélérer."),
+                    ),
+                    (false, true) => tr("Tear it open: tap the pack.", "Ouvrez-le : touchez le booster.").to_string(),
+                    (false, false) => tr(
+                        format!("Tear it open: tap the pack, or press {k}."),
+                        format!("Ouvrez-le : touchez le booster, ou appuyez sur {k}."),
+                    ),
+                }
             }}</p>
         </div>
         <div class="opening" node_ref=stage class:open=move || open.get() class:instant=move || instant.get()
@@ -561,7 +575,7 @@ fn Reveal(
                 view! {
                     {(more() > 0).then(|| view! {
                         <button type="button" class="btn primary" on:click=move |_| again()>
-                            {tr(format!("Open another ({} left)", more()), format!("Un autre ({} restant{})", more(), if more() > 1 { "s" } else { "" }))}
+                            {tr(format!("Choose another ({} left)", more()), format!("En choisir un autre ({} restant{})", more(), if more() > 1 { "s" } else { "" }))}
                         </button>
                     })}
                     <button type="button" class="btn" on:click=move |_| crate::go(Screen::Collection)>{tr("See the collection", "Voir la collection")}</button>

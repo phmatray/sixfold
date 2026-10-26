@@ -689,8 +689,8 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                         let share = (h.energy * 100).checked_div(h.total).unwrap_or(0);
                         [
                             (h.basics, tr("Basic", "de Base")),
-                            (h.stage1, tr("Stage 1", "Niveau 1")),
-                            (h.stage2, tr("Stage 2", "Niveau 2")),
+                            (h.stage1, tr("Awaken 1", "Éveil 1")),
+                            (h.stage2, tr("Awaken 2", "Éveil 2")),
                             (h.trainers, tr("Trainers", "Dresseurs")),
                         ]
                         .into_iter()

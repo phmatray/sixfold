@@ -352,6 +352,13 @@ fn MatchScreen() -> impl IntoView {
     };
     // Leaving a duel under way asks first (it can't be resumed, and in the
     // Gauntlet it ends the run).
+    // Rook's story duel: he stays nearby, so leaving loses nothing (say so).
+    let story = ctl
+        .setup
+        .with_value(|s| s.as_ref().and_then(|s| s.face()))
+        .and_then(sixfold_engine::trainers::trainer)
+        .filter(|t| t.story())
+        .map(|t| t.name);
     let asking = RwSignal::new(false);
     let leave = move || {
         forfeit();
@@ -720,9 +727,12 @@ fn MatchScreen() -> impl IntoView {
                     <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="quit-q">
                         <h2 id="quit-q">{if gauntlet {
                             tr("Leave this duel? It can't be resumed, and it ends your Gauntlet run.",
-                                "Quitter ce duel ? Il ne pourra pas être repris, et votre Épreuve s'arrêtera.")
+                                "Quitter ce duel ? Il ne pourra pas être repris, et votre Épreuve s'arrêtera.").to_string()
+                        } else if let Some(name) = story {
+                            tr(format!("Leave this duel? It can't be resumed, but you can challenge {name} again nearby."),
+                                format!("Quitter ce duel ? Il ne pourra pas être repris, mais vous pourrez redéfier {name} tout près."))
                         } else {
-                            tr("Leave this duel? It can't be resumed.", "Quitter ce duel ? Il ne pourra pas être repris.")
+                            tr("Leave this duel? It can't be resumed.", "Quitter ce duel ? Il ne pourra pas être repris.").to_string()
                         }}</h2>
                         <div class="dialog-foot">
                             <button type="button" class="btn danger" on:click=move |_| leave()>{tr("Leave", "Partir")}</button>

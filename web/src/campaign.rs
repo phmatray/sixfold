@@ -85,7 +85,7 @@ pub fn reward_line(r: &Rival, p: &Progress) -> String {
         ),
         (true, _) => tr(
             format!("Rematch win: ⬡ {facets}"),
-            format!("Revanche gagnée : ⬡ {facets}"),
+            format!("Victoire en revanche : ⬡ {facets}"),
         ),
     }
 }
@@ -221,14 +221,15 @@ pub fn CampaignPanel(
     before: impl Fn() + Copy + Send + Sync + 'static,
 ) -> impl IntoView {
     let progress = expect_context::<RwSignal<Progress>>();
-    let champ = move || progress.with(champion);
     view! {
-        <p class="page-lead">{move || if champ() {
-            tr("You hold all six seals and the Warden's title. The rivals still take rematches, and the Gauntlet and the daily duel are below.",
-                "Vous détenez les six sceaux et le titre de la Gardienne. Les rivaux acceptent toujours une revanche ; l'Épreuve et le duel du jour vous attendent plus bas.")
-        } else {
-            tr("Six rivals wait out on the trail, the boardwalk and the quarry. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden.",
-                "Six rivaux vous attendent sur le sentier, sur la promenade et à la carrière. Battez-les un à un pour gagner leur sceau ; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.")
+        <p class="page-lead">{move || match progress.with(title) {
+            // "Champion", or "Champion of the Seventh Face" once Rook's story is done.
+            Some(t) => tr(
+                format!("You hold all six seals and the title {}. The rivals still take rematches, and the Gauntlet and the daily duel are below.", t.get()),
+                format!("Vous détenez les six sceaux et le titre de {}. Les rivaux acceptent toujours une revanche ; l'Épreuve et le duel du jour vous attendent plus bas.", t.get()),
+            ),
+            None => tr("Six rivals wait out on the trail, the boardwalk and the quarry. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden.",
+                "Six rivaux vous attendent sur le sentier, sur la promenade et à la carrière. Battez-les un à un pour gagner leur sceau ; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.").to_string(),
         }}</p>
         <Roster />
         <section class="ladder-page" aria-labelledby="ladder-title">
@@ -520,7 +521,7 @@ pub fn Challenge(
         ),
         (None, Some(t)) if t.win_pays(p) > 0 => tr(
             format!("Rematch win: ⬡ {}", t.win_pays(p)),
-            format!("Revanche gagnée : ⬡ {}", t.win_pays(p)),
+            format!("Victoire en revanche : ⬡ {}", t.win_pays(p)),
         ),
         _ => tr(
             "A friendly rematch, no purse",

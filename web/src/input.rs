@@ -192,12 +192,15 @@ pub fn ControlsSettings() -> impl IntoView {
     let dev = RwSignal::new(if pad() { "pad" } else { "keys" });
     let waiting = RwSignal::new(None::<Ctrl>);
     let note = RwSignal::new(String::new());
+    // The control the note is about: it shows on that row.
+    let noted = RwSignal::new(None::<Ctrl>);
     // Each change of bindings ends the wait and says why one was refused.
     Effect::new(move |first: Option<()>| {
         let (_, result) = i.bound.get();
         if first.is_none() {
             return;
         }
+        noted.set(waiting.get_untracked());
         waiting.set(None);
         // French: "une touche", "un bouton".
         let pad = dev.get_untracked() == "pad";
@@ -263,6 +266,7 @@ pub fn ControlsSettings() -> impl IntoView {
                     view! {
                         <li>
                             <span>{c.name()}</span>
+                            <span class="note" role="status">{move || if noted.get() == Some(c) { note.get() } else { String::new() }}</span>
                             <button type="button" class="btn bind" aria-pressed=move || (waiting.get() == Some(c)).to_string()
                                 aria-label=move || format!("{}: {}", c.name(), now())
                                 on:click=move |_| change(c)>
@@ -280,7 +284,6 @@ pub fn ControlsSettings() -> impl IntoView {
                 <button type="button" class="btn ghost" on:click=move |_| { stop_capture(); reset_bindings(dev.get_untracked()) }>
                     {tr("Reset to defaults", "Valeurs par défaut")}
                 </button>
-                <span class="note" role="status">{move || note.get()}</span>
             </div>
         </fieldset>
     }
