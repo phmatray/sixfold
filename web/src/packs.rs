@@ -34,7 +34,7 @@ struct Opened {
     cards: Vec<(CardId, bool)>,
 }
 
-fn reduced_motion() -> bool {
+pub fn reduced_motion() -> bool {
     window()
         .match_media("(prefers-reduced-motion: reduce)")
         .ok()

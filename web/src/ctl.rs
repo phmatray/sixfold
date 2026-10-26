@@ -401,7 +401,15 @@ impl Ctl {
         });
         if mine && !self.busy.get_untracked() {
             self.run(action);
+        } else {
+            crate::audio::sfx("refuse", 0.0);
         }
+    }
+
+    /// The engine said no: the refuse sound and the reason.
+    fn refused(&self, why: String) {
+        crate::audio::sfx("refuse", 0.0);
+        self.error.set(Some(why));
     }
 
     fn run(&self, action: Action) {
@@ -415,10 +423,10 @@ impl Ctl {
                 self.queue.update_value(|q| q.extend(events));
                 self.step(self.generation.get_value());
             }
-            Some(Err(e)) => self.error.set(Some(tr(
+            Some(Err(e)) => self.refused(tr(
                 format!("The engine refused {action:?}: {e:?}"),
                 format!("Le moteur a refusé {action:?} : {e:?}"),
-            ))),
+            )),
             None => {}
         }
     }
@@ -661,6 +669,17 @@ impl Ctl {
             ms / 3
         } else {
             ms
+        }
+    }
+
+    /// `pace` as a factor, for the table's juice (`--pace` in the CSS):
+    /// under Fast or a held fast-forward its beats play quicker too.
+    pub fn pace_factor(&self) -> f32 {
+        let theirs = self.turn_side.get() == Some(AI) && self.revealed.get();
+        match (theirs, self.rush.get(), self.fast.get()) {
+            (true, true, _) => 0.1,
+            (true, false, true) => 0.34,
+            _ => 1.0,
         }
     }
 
@@ -1100,12 +1119,18 @@ impl Ctl {
                     crate::audio::intensity(1.0);
                 }
                 self.fx.update(|f| f.prize = Some((*player, *prize)));
-                // The winning prize flies at half speed.
-                if beat.is_some_and(|b| b.class == "last-prize") {
+                // The winning prize flies at half speed; it chimes as it lands
+                // in the hand (86% into prize-fly).
+                let ms = if beat.is_some_and(|b| b.class == "last-prize") {
                     1200
                 } else {
                     600
-                }
+                };
+                set_timeout(
+                    || crate::audio::sfx("reward", 0.0),
+                    Duration::from_millis(self.pace(ms * 86 / 100)),
+                );
+                ms
             }
             Event::EnergyAttached { uid, card: c, .. } => {
                 let tone =
