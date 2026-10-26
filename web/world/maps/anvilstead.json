@@ -2740,6 +2740,8 @@
   "gates": [
     {
       "id": "brake_house",
+      "name": "the brake-house ledge in Anvilstead",
+      "name_fr": "la corniche du frein à Bourg-l'Enclume",
       "tiles": [
         [
           30,

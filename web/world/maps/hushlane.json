@@ -2023,6 +2023,8 @@
   "gates": [
     {
       "id": "hush_ford",
+      "name": "the ford on Hushwillow Lane",
+      "name_fr": "le gué de l'Allée des Saules-Murmures",
       "tiles": [
         [
           3,

@@ -1774,6 +1774,8 @@
   "gates": [
     {
       "id": "elder_cliff",
+      "name": "the cliff from the Elder Ring up to the Bastion",
+      "name_fr": "la falaise du Cercle des Anciens jusqu'au Bastion",
       "tiles": [
         [
           19,

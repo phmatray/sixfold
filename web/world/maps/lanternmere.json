@@ -1679,6 +1679,8 @@
   "gates": [
     {
       "id": "causeway",
+      "name": "the causeway to the Bellflats",
+      "name_fr": "la chaussée des Grèves de la Cloche",
       "tiles": [
         [
           42,
@@ -1736,6 +1738,8 @@
     },
     {
       "id": "lantern_path",
+      "name": "the lantern path across the lake",
+      "name_fr": "le chemin de lanternes sur le lac",
       "tiles": [
         [
           24,
@@ -1866,6 +1870,8 @@
     },
     {
       "id": "islet_shallows",
+      "name": "the shallows out to Lanternmere's islet",
+      "name_fr": "les hauts-fonds jusqu'à l'îlot du Lac-aux-Lanternes",
       "tiles": [
         [
           7,
