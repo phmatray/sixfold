@@ -70,8 +70,8 @@ pub fn KitSheet() -> impl IntoView {
                             <label class="vol"><span>"Effects"</span><input type="range" min="0" max="100" value="80" style="--fill: 80%" /><span class="vol-pct">"80%"</span></label>
                         </fieldset>
                         <div class="options-row">
-                            <label class="field"><span>"AI"</span>
-                                <select><option>"Easy"</option><option selected>"Normal"</option><option>"Hard"</option></select>
+                            <label class="field"><span>"Opponent"</span>
+                                <select><option>"Laid-back"</option><option selected>"Steady"</option><option>"Formidable"</option></select>
                             </label>
                             <fieldset class="seg"><legend>"Prizes"</legend>
                                 <label><input type="radio" name="kp" />"4"</label>
@@ -82,7 +82,7 @@ pub fn KitSheet() -> impl IntoView {
                     <section class="kit-block">
                         <h2>"List"</h2>
                         <ul class="menu kit-list">
-                            {row("M3.5 8.2l6.3-1.9 3.4 11.3-6.3 1.9zM13.2 4.5l6.6.9-1.6 11.6-3.4-.5", "Play a duel", "Your deck against the AI", "")}
+                            {row("M3.5 8.2l6.3-1.9 3.4 11.3-6.3 1.9zM13.2 4.5l6.6.9-1.6 11.6-3.4-.5", "Play a duel", "Your deck against a practice opponent", "")}
                             {row("M6 21V3.5M6 4h12l-2.5 4.5L18 13H6", "Campaign", "2 of 6 seals · next: Bramble", "is-focus")}
                             {row("M8 3.5h11v15H8zM5 6.5v14h11", "My decks", "3 decks", "is-hover")}
                             {row("M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z", "Collection", "17 of 104 cards found", "")}

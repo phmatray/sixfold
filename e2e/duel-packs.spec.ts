@@ -9,7 +9,7 @@ test("a duel against the AI is played to the end", async ({ page }) => {
   await page.getByText("Seed and prizes").click();
   await page.getByLabel("Seed").fill("59");
   await page.getByLabel("Prizes").selectOption("1");
-  await page.getByLabel(/^AI/).selectOption("hard");
+  await page.getByLabel(/^Opponent/).selectOption("hard");
   await page.getByRole("button", { name: "Start the duel" }).click();
   await expect(page.getByRole("heading", { level: 1, name: /^Duel against/ })).toBeAttached();
 

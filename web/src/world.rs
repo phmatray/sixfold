@@ -652,6 +652,9 @@ pub fn WorldScreen() -> impl IntoView {
 
     let near = RwSignal::new(None::<(String, String)>);
     let sheet = RwSignal::new(None::<Sheet>);
+    // The last line someone said before their duel offer: the offer quotes it.
+    let said = StoredValue::new(None::<(String, String)>);
+    let last_tab = expect_context::<LastTab>().0;
     let typed = RwSignal::new(0usize);
     let loading = RwSignal::new(true);
     // The first map's models loaded, (done, total), for the loading line.
@@ -1184,6 +1187,7 @@ pub fn WorldScreen() -> impl IntoView {
                 p.settle();
             }
         });
+        said.set_value(t.lines.last().map(|l| (t.id.clone(), l.clone())));
         apply_effects(
             t.effects
                 .into_iter()
@@ -1480,6 +1484,7 @@ pub fn WorldScreen() -> impl IntoView {
                 </div>
             })}
             <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title"
+                aria-describedby=move || sheet.with(|s| matches!(s, Some(Sheet::Challenge(_)))).then_some("world-sheet-desc")
                 class:reading-sheet=move || sheet.with(|s| matches!(s, Some(Sheet::Book(_))))
                 on:cancel=on_cancel on:keydown=on_key
                 // Should the browser close the dialog itself, the world must not stay paused
@@ -1574,7 +1579,7 @@ pub fn WorldScreen() -> impl IntoView {
                         </div>
                     }.into_any(),
                     Sheet::Duel(text) => view! {
-                        <h2 id="world-sheet-title">{tr("Duel the AI?", "Défier l'IA ?")}</h2>
+                        <h2 id="world-sheet-title">{tr("A practice duel?", "Un duel d'entraînement ?")}</h2>
                         <p class="dialog-sub">{text}</p>
                         <div class="dialog-foot">
                             <button class="btn ghost" on:click=close>{tr("Not now", "Pas maintenant")}</button>
@@ -1591,9 +1596,14 @@ pub fn WorldScreen() -> impl IntoView {
                             <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
                         </div>
                     }.into_any(),
-                    Sheet::Challenge(id) => view! {
-                        <Challenge id=id on_cancel=move || sheet.set(None) before=move || sheet.set(None) />
-                    }.into_any(),
+                    Sheet::Challenge(id) => {
+                        let face = face_of(&id);
+                        let quote = said.with_value(|s| s.clone().filter(|(who, _)| *who == id).map(|(_, l)| l));
+                        view! {
+                            <Challenge id=id face=face quote=quote on_cancel=move || sheet.set(None) before=move || sheet.set(None)
+                                on_decks=move || { last_tab.set(MenuTab::Decks); editing.set(None); sheet.set(Some(Sheet::Menu)) } />
+                        }.into_any()
+                    }
                     Sheet::Ladder => view! {
                         <div class="sheet-head">
                             <h2 id="world-sheet-title">{tr("The Warden's ladder", "Le tableau de la Gardienne")}</h2>

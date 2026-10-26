@@ -302,8 +302,8 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
         <p class="page-lead">
             {move || match total() {
                 0 => tr(
-                    "You have no packs left. Win a duel against the AI, beat a rival or win the daily duel to earn more.",
-                    "Vous n'avez plus de boosters. Gagnez un duel contre l'IA, battez un rival ou remportez le duel du jour pour en obtenir.",
+                    "You have no packs left. Win a quick duel, beat a rival or win the daily duel to earn more.",
+                    "Vous n'avez plus de boosters. Gagnez un duel rapide, battez un rival ou remportez le duel du jour pour en obtenir.",
                 ).to_string(),
                 1 => tr("You have 1 pack to open.", "Vous avez 1 booster à ouvrir.").to_string(),
                 n => tr(format!("You have {n} packs to open."), format!("Vous avez {n} boosters à ouvrir.")),

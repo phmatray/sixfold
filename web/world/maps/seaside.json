@@ -1830,7 +1830,7 @@
           ],
           "lines_fr": [
             "Champion, de retour sur ma jetée. Les tables des marées n'avaient rien prévu de tel.",
-            "Une autre partie ? Trois Récompenses, et je ne te ferai pas de cadeau."
+            "Une autre partie ? Trois cartes Récompense, et je ne te ferai pas de cadeau."
           ],
           "do": [
             "duel:marlo"
@@ -1857,7 +1857,7 @@
           "lines_fr": [
             "Chut. Écoute… c'est la mer. Ou une bouilloire. Difficile à dire, par ici.",
             "Moi, c'est Marlo. Je lis les tables des marées, et quiconque s'assoit en face de moi.",
-            "Trois Récompenses. Prends une caisse, les cartes sont déjà distribuées."
+            "Trois cartes Récompense. Prends une caisse, les cartes sont déjà distribuées."
           ],
           "do": [
             "duel:marlo"
@@ -2214,7 +2214,7 @@
           "lines_fr": [
             "Les nuages s'empilent sur la mer. Un temps idéal pour un duel.",
             "Je suis Quill. Je note le vent, la pluie et chaque duel que je joue.",
-            "Quatre Récompenses, et je noterai tout."
+            "Quatre cartes Récompense, et je noterai tout."
           ],
           "do": [
             "duel:quill"
@@ -2241,7 +2241,7 @@
         ],
         "challenge_fr": [
           "Ah. Bonjour. Je trie des coquillages depuis que la mer s'est retirée. Rien ne presse.",
-          "Un long duel, je crois. Trois Récompenses, et mes Ruissecorne ont tout l'après-midi."
+          "Un long duel, je crois. Trois cartes Récompense, et mes Ruissecorne ont tout l'après-midi."
         ],
         "win": [
           "Well now. You found the one shell I'd missed.",

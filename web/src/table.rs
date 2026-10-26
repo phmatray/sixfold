@@ -515,12 +515,7 @@ pub fn Station(player: usize) -> impl IntoView {
     let sub = if me {
         tr("You", "Vous").to_string()
     } else {
-        match level {
-            Some(sixfold_engine::ai::Difficulty::Easy) => tr("AI · Easy", "IA · Facile"),
-            Some(sixfold_engine::ai::Difficulty::Hard) => tr("AI · Hard", "IA · Difficile"),
-            _ => tr("AI · Normal", "IA · Normale"),
-        }
-        .to_string()
+        crate::campaign::temper(level.unwrap_or_default()).to_string()
     };
     let left = move || info.with(|i| i.prizes.iter().filter(|p| **p).count());
     let Legal(legal) = expect_context::<Legal>();

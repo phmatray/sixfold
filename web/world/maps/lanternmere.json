@@ -2020,7 +2020,7 @@
         ],
         "challenge_fr": [
           "Un Hexon qui ne s'est jamais Éveillé est une graine qu'on n'a jamais plantée.",
-          "Ma règle maison : au moins deux Hexons d'Éveil 2 dans ton deck. Trois Récompenses. Montre-moi ce que tes Hexons peuvent devenir."
+          "Ma règle maison : au moins deux Hexons d'Éveil 2 dans ton deck. Trois cartes Récompense. Montre-moi ce que tes Hexons peuvent devenir."
         ],
         "lose": [
           "Patience. An Awakening takes three turns at least, and a lifetime at most."
@@ -2080,7 +2080,7 @@
         ],
         "challenge_fr": [
           "J'ai rentré mes rames pour regarder passer les lanternes. Tu es venu à pied sur elles ? Courageux.",
-          "Reste un moment. Trois Récompenses, ici, au milieu du lac. Personne ne rame mieux que moi la nuit."
+          "Reste un moment. Trois cartes Récompense, ici, au milieu du lac. Personne ne rame mieux que moi la nuit."
         ],
         "win": [
           "Capsized. In the middle of the mere. Well rowed."
@@ -2119,7 +2119,7 @@
           "Lanterns for the east shore! Mind the wire. Oh, a duellist. Two prizes, while the wax sets?"
         ],
         "challenge_fr": [
-          "Des lanternes pour la rive est ! Attention au fil. Oh, un duelliste. Deux Récompenses, le temps que la cire prenne ?"
+          "Des lanternes pour la rive est ! Attention au fil. Oh, un duelliste. Deux cartes Récompense, le temps que la cire prenne ?"
         ],
         "win": [
           "Snuffed out. Fair enough."

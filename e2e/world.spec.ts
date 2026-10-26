@@ -65,3 +65,38 @@ test("the world: walk, take a door and back, open the menu, and Continue resumes
   await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", saved.split(",").slice(1).join(","));
   expect(await at(page)).toEqual(saved);
 });
+
+test("a duelist's challenge stays in the world: their words, the terms, arrows and Escape", async ({ page }) => {
+  await title(page);
+  await menuItem(page, "Explore the world").click();
+  await loaded(page);
+  await page.keyboard.press("Escape"); // the intro scene
+  await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
+  // Face Tobin from the tile south of him (out of his line of sight, so he
+  // doesn't come over on his own) and talk to him: he challenges.
+  await page.locator(".world-host").evaluate((el) => (el as unknown as { sixfoldWarp: (...a: unknown[]) => void }).sixfoldWarp("overworld", 23, 28, "n"));
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^23,28/, { timeout: 15_000 });
+  // The act prompt (a key tap can fall between two frames of a slow headless scene).
+  await page.getByRole("button", { name: /^Talk to Tobin/ }).click();
+  const talk = page.locator(".talk-box");
+  await expect(talk).toBeVisible({ timeout: 15_000 });
+  while (await talk.isVisible()) {
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(400);
+  }
+
+  const offer = page.getByRole("dialog", { name: "Challenge Tobin?" });
+  await expect(offer).toBeVisible();
+  await expect(offer).toContainText("Duel me!"); // the line he just said
+  await expect(offer).toContainText("Laid-back");
+  await expect(offer).not.toContainText(/\bAI\b/);
+  const go = offer.getByRole("button", { name: /^Challenge/ });
+  await expect(go).toBeFocused();
+  // Arrows move between the answers; Escape is Not now.
+  await page.keyboard.press("ArrowLeft");
+  await expect(offer.getByRole("button", { name: /^Not now/ })).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(go).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(offer).toBeHidden();
+});

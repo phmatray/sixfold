@@ -349,7 +349,7 @@ pub fn TitleScreen() -> impl IntoView {
                     } else {
                         view! { <MenuItem icon="continue" label=tr("Continue", "Continuer") sub=Signal::derive(continue_sub) to=Screen::World primary=true /> }.into_any()
                     }}
-                    <MenuItem icon="duel" label=tr("Play a duel", "Jouer un duel") sub=tr("Your deck against the AI", "Votre deck contre l'IA") to=Screen::Duel />
+                    <MenuItem icon="duel" label=tr("Play a duel", "Jouer un duel") sub=tr("Your deck against a practice opponent", "Votre deck contre un adversaire d'entraînement") to=Screen::Duel />
                     <MenuItem icon="campaign" label=tr("Campaign", "Campagne") sub=Signal::derive(campaign_sub) to=Screen::Campaign />
                     <MenuItem icon="packs" label=tr("Open packs", "Ouvrir des boosters") sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
                     <MenuItem icon="decks" label=tr("My decks", "Mes decks") sub=Signal::derive(decks) to=Screen::Decks />

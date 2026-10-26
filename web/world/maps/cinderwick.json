@@ -3048,7 +3048,7 @@
         ],
         "challenge_fr": [
           "Des Éveils ? Des béquilles. Un vrai duelliste gagne avec des Hexons de Base.",
-          "Prouve-moi le contraire : Hexons de Base uniquement, trois Récompenses. Mes Braisecorne t'attendent."
+          "Prouve-moi le contraire : Hexons de Base uniquement, trois cartes Récompense. Mes Braisecorne t'attendent."
         ],
         "lose": [
           "Simplicity wins again. Come back when your deck's purer."
@@ -3237,7 +3237,7 @@
           "My Waxwick burns slow and steady, like a good kiln."
         ],
         "challenge_fr": [
-          "Un duel ? J'ai une fournée qui recuit, alors j'ai une heure pile. Deux Récompenses.",
+          "Un duel ? J'ai une fournée qui recuit, alors j'ai une heure pile. Deux cartes Récompense.",
           "Mon Cirèche brûle lent et régulier, comme un bon four."
         ],
         "win": [
