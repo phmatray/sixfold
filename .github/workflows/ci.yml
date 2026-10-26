@@ -19,11 +19,11 @@ jobs:
     name: No game data tracked
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: ./scripts/check-no-game-data.sh
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
       - run: node --test web/gamepad.test.mjs
       - run: node tools/check-maps.mjs web/world --strict && node tools/check-fence-table.mjs web/world/props.js
       - run: node --test tools/check-tokens.test.mjs && node tools/check-tokens.mjs web/style.css
@@ -32,7 +32,7 @@ jobs:
     name: Engine tests, lint and web build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
@@ -68,14 +68,14 @@ jobs:
       run:
         working-directory: e2e
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v4
         with:
           name: web-dist
           path: web/dist
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: e2e/package-lock.json
       - run: npm ci
