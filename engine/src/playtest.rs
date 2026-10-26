@@ -811,11 +811,6 @@ fn campaign_sweep() {
         .map(|seed| {
             let (duels, packs, log, progress, _) = playthrough(seed, 1_000);
             assert!(champion(&progress), "pack seed {seed} never finished");
-            assert!(
-                duels - route <= RIVAL_DUELS,
-                "pack seed {seed} needs {} rival duels, over the budget of {RIVAL_DUELS}",
-                duels - route
-            );
             let mut losses: Vec<(&str, usize)> = RIVALS
                 .iter()
                 .map(|r| (r.id, log.iter().filter(|&&(id, won)| id == r.id && !won).count()))
@@ -841,5 +836,11 @@ fn campaign_sweep() {
         rivals[0],
         rivals[15],
         (rivals[7] + rivals[8]) / 2
+    );
+    // After the printout, so an overrun still shows every seed and its wall.
+    assert!(
+        rivals[15] <= RIVAL_DUELS,
+        "the slowest seed needs {} rival duels, over the budget of {RIVAL_DUELS}",
+        rivals[15]
     );
 }

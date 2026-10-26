@@ -545,7 +545,10 @@ export async function build(map, got, reduced) {
   const wet = (x, z) => SIDES.some(([dx, dz]) => "~H".includes(tile(x + dx, z + dz) ?? "-"));
   const rise = (x, z) => riseOf(map, x, z);
   const lip = (x, z) => [-1, 0, 1].some((dx) => [-1, 0, 1].some((dz) => rise(x + dx, z + dz) < rise(x, z)));
-  const open = (x, z) => !blocked(x, z) && (tile(x, z) === "." || rise(x, z) > 0) && floor[z * W + x] === rise(x, z) && !wet(x, z) && !lip(x, z);
+  // A painted path or stone stays bare too, and painted sand unless the map turned "s" into another ground.
+  const bare = map.ground.sand ? "pr" : "prs";
+  const painted = (x, z) => bare.includes(map.paint?.[z]?.[x] ?? "-");
+  const open = (x, z) => !blocked(x, z) && (tile(x, z) === "." || rise(x, z) > 0) && floor[z * W + x] === rise(x, z) && !painted(x, z) && !wet(x, z) && !lip(x, z);
   const exits = map.exits ?? [];
   const tufts = (map.ground.tufts ?? 1800) / 1800; // grass density, 0 on sand
   if (!L.indoor) {

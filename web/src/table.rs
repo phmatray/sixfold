@@ -537,7 +537,8 @@ pub fn Station(player: usize) -> impl IntoView {
             </div>
             <div class="prizes" class:undealt=move || info.with(|i| i.prizes.is_empty()) role="img" aria-label=move || {
                 let n = left();
-                let s = if n == 1 { "" } else { "s" };
+                // French keeps 0 and 1 singular.
+                let s = if n == 1 || (n == 0 && fr()) { "" } else { "s" };
                 match (me, fr()) {
                     (true, false) => format!("You have {n} prize{s} left"),
                     (false, false) => format!("Opponent has {n} prize{s} left"),

@@ -1150,7 +1150,7 @@ select option { background: var(--panel); color: var(--ink); }
 .confirm p { margin: 0 0 10px; }
 /* On a wide screen the Save slot and Settings panels open upward over the page, so the footer
    row never reflows (Settings used to jump to the other side) and the panel opens in view. */
-@media (min-width: 641px) {
+@media (min-width: 960px) {
   .foot-menus details { position: relative; }
   .foot-menus details[open] > .settings-body { position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 5; width: min(420px, calc(100vw - 32px)); max-height: min(72dvh, 640px); overflow: auto; margin: 0; }
 }
