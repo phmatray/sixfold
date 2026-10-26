@@ -12,6 +12,9 @@
 // hidden or the game is muted.
 
 const KEY = "sixfold.audio";
+// The beds sat 20-25 dB under the music at the default levels, masked: +10 dB puts them
+// about 10-15 dB under, heard but never over a line of music (measured with debug().levels).
+const BED_TRIM = 3.2;
 const DEFAULTS = { master: 0.8, music: 0.5, ambience: 0.6, sfx: 0.8, muted: 0 };
 const prefs = { ...DEFAULTS };
 try {
@@ -46,7 +49,7 @@ function applyLevels() {
   master.gain.setTargetAtTime(prefs.muted ? 0 : prefs.master ** 2, t, 0.03);
   musicBus.gain.setTargetAtTime(prefs.music ** 2, t, 0.03);
   sfxBus.gain.setTargetAtTime(prefs.sfx ** 2, t, 0.03);
-  ambBus.gain.setTargetAtTime(prefs.ambience ** 2, t, 0.03);
+  ambBus.gain.setTargetAtTime(prefs.ambience ** 2 * BED_TRIM, t, 0.03);
 }
 
 // ---------- Context, gesture unlock, visibility ----------
