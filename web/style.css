@@ -60,6 +60,12 @@ button, input, select { font: inherit; color: inherit; }
   outline-offset: 2px;
 }
 
+/* A gamepad moves focus by script (gamepad.js): show the ring there too. */
+html[data-input="pad"] :focus:not(:focus-visible):not([tabindex="-1"]) {
+  outline: 3px solid var(--brass-hi);
+  outline-offset: 2px;
+}
+
 /* Headings take focus on a screen change (to start reading there); they aren't controls. */
 h1[tabindex="-1"]:focus, main[tabindex="-1"]:focus { outline: none; }
 
@@ -1061,6 +1067,13 @@ body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
   .world-prompt { left: auto; right: max(16px, env(safe-area-inset-right)); margin: 0; max-width: calc(100% - 210px); white-space: normal; font-size: 16px; padding: 12px 14px; }
   .world-prompt kbd { display: none; }
 }
+/* Prompts follow the device in use (input.rs): a pad's buttons are round, touch has none to name. */
+html[data-input="pad"] kbd { border-radius: 999px; min-width: 1.6em; text-align: center; }
+html[data-input="pad"] .world-prompt kbd { display: inline-block; }
+kbd:empty { display: none; }
+/* The duel's key badges (1-4, P, R, E) mean nothing on a pad or a touch screen: a pad plays by focus. */
+html[data-input="pad"] .duel .key, html[data-input="touch"] .duel .key { display: none; }
+html[data-input="touch"] .world-prompt kbd { display: none; }
 @media (max-width: 520px) and (hover: hover) { .world-hint { font-size: 12px; line-height: 1.25; } }
 
 /* ---------- Browser surfaces ---------- */
@@ -2514,7 +2527,18 @@ p.atlas-pick { color: var(--muted); }
   /* Every tab in sight: two rows of three instead of a strip that scrolls. */
   .menu-tabs { display: grid; grid-template-columns: repeat(3, 1fr); }
   .menu-tabs button { padding: 0 6px; }
+  .menu-tabs .tab-key { display: none; }
 }
+
+/* Options: the controls (input.rs). */
+.controls-set { display: grid; gap: 10px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.controls-set legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
+.controls-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.controls-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.controls-list .bind { min-width: 7.5em; justify-content: center; text-align: center; }
+.controls-list .bind[aria-pressed="true"] { border-color: var(--brass-hi); color: var(--brass-hi); }
+.menu-tabs .tab-key { align-self: center; flex: none; font: 700 12px var(--body); padding: 2px 8px; border: 1px solid var(--line); color: var(--muted); }
+
 /* ======================================================================
    The duel: one mirrored grid on a lit table (your side at the bottom).
    Type: 12 / 14 / 16 / 20 / 28. Radii: 6 (chips, tiles), 12 (plates, panels).

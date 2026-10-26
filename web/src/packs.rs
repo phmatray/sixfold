@@ -533,7 +533,8 @@ fn Reveal(
                     "On retourne les cartes… Maintenez ou touchez pour accélérer.",
                 ).to_string()
             } else {
-                tr("Tear it open: tap the pack, or press Enter.", "Ouvrez-le : touchez le booster, ou appuyez sur Entrée.").to_string()
+                let k = crate::input::named(crate::input::Ctrl::Confirm);
+                tr(format!("Tear it open: tap the pack, or press {k}."), format!("Ouvrez-le : touchez le booster, ou appuyez sur {k}."))
             }}</p>
         </div>
         <div class="opening" node_ref=stage class:open=move || open.get() class:instant=move || instant.get()

@@ -14,6 +14,7 @@ mod ctl;
 mod decks;
 mod duel;
 mod history;
+mod input;
 mod journal;
 mod offline;
 mod overlays;
@@ -152,6 +153,7 @@ fn App() -> impl IntoView {
     provide_context(world::LastTab(RwSignal::new(world::MenuTab::Decks)));
     store::provide();
     stats::provide();
+    input::provide();
     // A save from before promos: hand over those of rivals already beaten.
     let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
     let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
@@ -445,6 +447,14 @@ fn MatchScreen() -> impl IntoView {
     // On the window, so they work wherever focus is (or isn't).
     let keys = window_event_listener(leptos::ev::keydown, on_key);
     on_cleanup(move || keys.remove());
+    // A pad's Start (gamepad.js) opens and closes the duel menu.
+    let pad_menu = window_event_listener_untyped("sixfold-input", move |e| {
+        if input::action(&e).as_deref() == Some("menu") {
+            e.prevent_default();
+            menu.update(|m| *m = !*m);
+        }
+    });
+    on_cleanup(move || pad_menu.remove());
     // The browser's Back (a phone's back gesture) would leave the app and lose
     // the duel: a history entry of our own catches it and asks first, like the
     // menu's Leave. A finished duel keeps its result's own buttons (credits,
