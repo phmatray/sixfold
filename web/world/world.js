@@ -614,7 +614,7 @@ export function mount(el, controls, cb, start, edit = false) {
       w.nearKey = nk;
       cb("near", front?.kind ?? "", front?.text ?? "");
     }
-    if (w.door) w.door.want = front?.kind === "warp" || h.step?.warp ? 1 : 0;
+    for (const d of w.doors) d.want = d === (front?.warp ?? h.step?.warp)?.door ? 1 : 0; // the door ahead opens
 
     // Camera: fixed pitch, on a soft spring behind a point a little ahead of a
     // walking hero; leans in after a while idle; indoors, kept inside the room.

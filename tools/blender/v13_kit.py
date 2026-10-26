@@ -24,7 +24,7 @@ import build_area_props as A  # noqa: E402  (imports build_assets and extends it
 import build_assets as B  # noqa: E402
 from build_assets import T, box, contact, cyl, ico, jitter, prism, sphere  # noqa: E402,F401
 
-shadow, empty, beam, stratum, loft, planks = A.shadow, A.empty, A.beam, A.stratum, A.loft, A.planks
+shadow, empty, beam, stratum, loft, planks, door_leaf = A.shadow, A.empty, A.beam, A.stratum, A.loft, A.planks, A.door_leaf
 clamp01 = B.clamp01
 
 # Shared colours: the seal colours (props-v2) double as the region colours for the waymark crystal.
@@ -265,9 +265,7 @@ def export(name, objs, out_dir, animated=False):
     roots = [(o, o.location.copy()) for o in objs if o.parent is None]
     for o, _ in roots:
         o.location = (0, 0, 0)
-    for e in objs[1:]:  # Blender suffixes repeated names (smoke_origin.001); the game wants the plain one
-        if e.type != "EMPTY":
-            continue
+    for e in objs[1:]:  # Blender suffixes repeated names (smoke_origin.001, door.001); the game wants the plain one
         base = e.name.split(".")[0]
         other = bpy.data.objects.get(base)
         if other and other is not e:

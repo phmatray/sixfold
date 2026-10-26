@@ -12,6 +12,7 @@ import random
 import bmesh
 from mathutils import Matrix, Vector
 
+from v13_kit import door_leaf  # noqa: E402
 from v13_kit import (B, T, arc, arch_pts, beam, box, chain, clamp01, contact, curve, cyl, empty, ico, jitter,  # noqa: F401
                      lathe, open_part, prism, ribbon, rock, shadow, sphere, torus, tube, FRONT)
 
@@ -132,6 +133,13 @@ def build_willow(k):
             v.co.x, v.co.y = v.co.x * f, v.co.y * f
     k.add(jitter(dome, rng, 0.02), "dr_willow", smooth=True)
     k.add(jitter(ico(0.26, 1), rng, 0.02), "dr_willow_lt", T((0, 0, 3.72), scale=(1, 1, 0.5)), smooth=True)
+    # leafy clumps over the dome: from the 50 deg camera the crown reads as soft foliage, not a star of locks
+    for i in range(7):
+        a = i / 7 * math.tau + 0.3
+        r, z = (0.0, 3.62) if i == 0 else (0.72, 3.3)
+        a = a if i else 0.0
+        k.add(jitter(ico(0.48 if i == 0 else 0.44, 1), rng, 0.05), "dr_willow_lt" if i == 0 or i % 3 == 1 else "dr_willow",
+              T((r * math.cos(a), r * math.sin(a), z), scale=(1, 1, 0.62)), smooth=True)
     over = [(0.3, 3.71), (0.7, 3.53), (0.99, 3.24), (1.19, 2.9)]   # just over the dome, crown to rim
 
     def lock(a, r0, hem, w, m, drift):
@@ -148,7 +156,7 @@ def build_willow(k):
     for i in range(20):  # outer locks, long and short in turn, gaps between them
         a = i / 20 * math.tau + rng.uniform(-0.05, 0.05)
         hem = rng.uniform(0.5, 0.85) if i % 2 == 0 else rng.uniform(1.05, 1.45)
-        lock(a, 0.3 if i % 2 == 0 else 0.7, hem, rng.uniform(0.22, 0.27),
+        lock(a, 0.95, hem, rng.uniform(0.22, 0.27),  # from the rim, under the clumps
              rng.choice(["dr_willow", "dr_willow", "dr_willow_lt", "dr_willow_dk"]), rng.uniform(-0.1, 0.1))
     for i in range(7):  # a darker inner ring, shorter, hanging behind from under the dome
         a = (i + 0.5) / 7 * math.tau + rng.uniform(-0.1, 0.1)
@@ -313,12 +321,13 @@ def build_wisteria_arch(k):
         k.add(box(2.14, 0.1, 0.12, 0.015), "dr_wood_dk", T((0, y, 2.28)))
     for i in range(6):
         k.add(box(0.07, 0.86, 0.05, 0.01), "dr_wood_lt", T((-0.88 + i * 0.352, 0, 2.375)))
-    for loc, r, m in (((-0.7, 0.0, 2.5), 0.36, "dr_leaf"), ((-0.25, 0.08, 2.55), 0.38, "dr_leaf_dk"), ((0.25, -0.05, 2.55), 0.38, "dr_leaf"),
-                      ((0.7, 0.05, 2.5), 0.35, "dr_leaf_dk")):
-        k.add(jitter(ico(r, 1), rng, r * 0.1), m, T(loc, scale=(1.4, 1.15, 0.42)), smooth=True)
-    for i in range(9):  # blossom showing on top of the leaves
-        k.add(jitter(ico(0.12, 1), rng, 0.015), rng.choice(["dr_wisteria", "dr_wisteria_lt"]),
-              T((rng.uniform(-0.85, 0.85), rng.uniform(-0.3, 0.3), rng.uniform(2.55, 2.66)), scale=(1.3, 1.1, 0.6)), smooth=True)
+    # a leafy crown, level and mirrored about the arch's centre, humped in the middle: it read as a tilted slab
+    for x, z, r, m in ((-0.72, 2.47, 0.34, "dr_leaf_dk"), (-0.26, 2.56, 0.36, "dr_leaf"), (0.26, 2.56, 0.36, "dr_leaf"),
+                       (0.72, 2.47, 0.34, "dr_leaf_dk")):
+        k.add(jitter(ico(r, 1), rng, r * 0.06), m, T((x, 0, z), scale=(1.35, 1.3, 0.55)), smooth=True)
+    for x, y in ((-0.75, -0.2), (-0.45, 0.22), (-0.15, -0.24), (0.15, 0.24), (0.45, -0.22), (0.75, 0.2), (0.0, 0.0)):
+        k.add(jitter(ico(0.12, 1), rng, 0.015), "dr_wisteria_lt" if abs(x) < 0.3 else "dr_wisteria",
+              T((x, y, 2.66 + 0.1 * (1 - abs(x))), scale=(1.3, 1.1, 0.6)), smooth=True)
     cols = ["dr_wisteria", "dr_wisteria_lt", "dr_wisteria_dk"]
     for i in range(34):
         x = rng.uniform(-1.0, 1.0)
@@ -422,9 +431,10 @@ def build_lake_house(k):
     dy = -math.sqrt(1.35 ** 2 - 0.5 ** 2)
     phi = math.degrees(math.atan2(0.5 / 1.35, -dy / 1.35))
     D = T((0.5, dy, 0.31), (0, 0, phi))
-    k.add(prism(arch_pts(0.78, 1.55, 8), 0.08), "dr_wood_dk", D @ T((0, -0.02, 0.0)))
+    k.add(prism(arch_pts(0.76, 1.53, 8), 0.01), "doorway", D @ T((0, -0.04, 0.01)))  # behind the leaf: dark when it swings in
+    leaf = [(prism(arch_pts(0.78, 1.55, 8), 0.08), "dr_wood_dk", D @ T((0, -0.02, 0.0))),
+            (sphere(0.035, 6, 4), "dr_brass", D @ T((0.22, -0.08, 0.75)))]
     k.add(ribbon(arch_pts(0.86, 1.6, 8), 0.07, 0.06), "dr_wood_lt", D @ T((0, -0.03, -0.012), FRONT))
-    k.add(sphere(0.035, 6, 4), "dr_brass", D @ T((0.22, -0.08, 0.75)))
     k.add(box(0.95, 0.4, 0.04), "dr_wood_lt", D @ T((0, -0.3, 0.006)))
     # round windows (glow at night), front-left, left, right, back
     for a in (232, 180, 330, 0):
@@ -461,7 +471,7 @@ def build_lake_house(k):
         k.add(cyl(0.006, 0.006, 0.12, 3), "dr_iron", T((mid[0], mid[1], mid[2] + 0.16)))
         k.add(sphere(0.13, 6, 4), ("dr_paper_glow", "dr_rose_glow")[i % 2], T(mid, scale=(1, 1, 1.15)), smooth=True)
     _ = rng
-    return empty("smoke_origin", (-0.9, 0.55, 3.35))
+    return door_leaf(leaf, D @ T((-0.39, -0.02, 0.0)), empty("smoke_origin", (-0.9, 0.55, 3.35)))
 
 
 # ---------------------------------------------------------------- 1.3 PR 3: the moth brooch, Lanternmere and Quiet Lamp interiors

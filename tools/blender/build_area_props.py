@@ -43,6 +43,8 @@ B.PALETTE.update({
     "roof_brown": "#a4553a", "roof_brown_dk": "#7c3d29", "apple": "#d9473d", "pear": "#b9c94a",
     "bread": "#d79a52", "fish": "#9fb8c4", "crate": "#b07a46", "crate_dk": "#8a5c34",
     "fstone": "#d8cdb8", "fstone_dk": "#b9ad97", "fcap": "#ece2cf", "water": "#6cc3d1",
+    # doors: the dark doorway behind a leaf that swings open
+    "doorway": "#1d1714",
     # items
     "brass": "#d4a43c", "paper": "#f3ead6", "paper_dk": "#e0d2b4", "wax": "#b8333a", "wax_dk": "#8e2229",
 })
@@ -76,6 +78,35 @@ def empty(name, loc):
         coll.objects.link(e)
         return [e]
     return after
+
+
+def door_leaf(parts, hinge, then=None, name="door"):
+    """after() hook: a door leaf as its own node, origin on its hinge, so the game swings it inward (+80 deg about +Y:
+    web/world/ASSETS.md). `door` hangs on its -X edge; the right leaf of a double door is `door_r`, on its +X edge.
+    parts: [(bm, mat, M)] in the prop's coordinates; hinge: the node's matrix (its Z is the hinge line, at the sill).
+    `then`: another after() hook to chain (smoke_origin)."""
+    def after(ob, coll):
+        k = B.Kit(name)
+        inv = hinge.inverted()
+        for bm, mat, M in parts:
+            k.add(bm, mat, inv @ M)
+        d = k.build(coll)
+        d.parent = ob
+        d.matrix_basis = hinge
+        return [d] + (then(ob, coll) if then else [])
+    return after
+
+
+def courses(k, w, d, h, y0, z0, n, mat, lip=0.035):
+    """Shingle courses on a gable roof (base w along X by d along Y at z0, ridge at z0 + h over y0): n strips per
+    slope, so the slopes read as roofs, not flat slabs, from the 50 deg camera."""
+    a = math.atan2(h, d / 2)
+    for s in (-1, 1):
+        nrm = Vector((0, s * h, d / 2)).normalized()
+        for i in range(1, n + 1):
+            t = i / (n + 1)
+            p = Vector((0, y0 + s * d / 2 * (1 - t), z0 + h * t)) + nrm * (lip / 2 + 0.005)
+            k.add(box(w + 0.02, 0.08, lip), mat, T(p, (-s * math.degrees(a), 0, 0)))
 
 
 # ---------------------------------------------------------------- woodland
@@ -361,7 +392,8 @@ def build_cottage(k):
         k.add(box(0.1, 0.06, 1.1), "timber", T((x, fy - 0.02, 1.85)))
     # roof (gable along X) with eaves, ridge, gable-end timber
     k.add(gable(ww + 0.5, wd + 0.5, 1.6), "roof_brown", T((0, by, top + 0.06), (0, 0, 90)))
-    k.add(box(ww + 0.6, 0.2, 0.14, 0.04), "roof_brown_dk", T((0, by, top + 1.66)))
+    courses(k, ww + 0.5, wd + 0.5, 1.6, by, top + 0.06, 4, "roof_brown_dk")
+    k.add(box(ww + 0.6, 0.26, 0.16, 0.04), "roof_brown_dk", T((0, by, top + 1.66)))
     for sy in (-1, 1):
         k.add(box(ww + 0.55, 0.08, 0.1), "roof_brown_dk", T((0, by + sy * (wd + 0.5) / 2, top + 0.06)))
     # chimney (back right)
@@ -369,8 +401,8 @@ def build_cottage(k):
     k.add(box(0.6, 0.6, 0.1, 0.02), "stone_dk", T((1.5, by + 0.6, top + 2.2)))
     # door, centre column, with a step and a little canopy
     k.add(box(1.0, 0.12, 2.0, 0.03), "timber", T((0, fy - 0.02, 1.15)))
-    k.add(box(0.8, 0.08, 1.85, 0.02), "brick_dk", T((0, fy - 0.07, 1.1)))
-    k.add(sphere(0.04, 6, 4), "knob", T((0.28, fy - 0.12, 1.05)))
+    k.add(box(0.78, 0.01, 1.83), "doorway", T((0, fy - 0.09, 1.1)))  # behind the leaf: dark when it swings in
+    leaf = [(box(0.8, 0.08, 1.85, 0.02), "brick_dk", T((0, fy - 0.07, 1.1))), (sphere(0.04, 6, 4), "knob", T((0.28, fy - 0.12, 1.05)))]
     k.add(box(1.2, 0.36, 0.14, 0.03), "stone", T((0, fy - 0.2, 0.06)))
     k.add(box(1.3, 0.5, 0.06, 0.02), "roof_brown_dk", T((0, fy - 0.25, 2.2), (-12, 0, 0)))
     # bay window on the left
@@ -390,7 +422,7 @@ def build_cottage(k):
     k.add(sphere(0.12, 10, 6), "bread", T((-0.95, fy - 0.45, 1.8), scale=(1.1, 0.25, 0.55)), smooth=True)
     for x in (-2.2, 2.2):  # side windows
         k.add(box(0.1, 0.7, 0.6, 0.02), "timber", T((x * 1.005 + (0.02 if x > 0 else -0.02), by + 0.3, 1.8)))
-    return empty("smoke_origin", (1.5, by + 0.6, top + 2.3))
+    return door_leaf(leaf, T((-0.4, fy - 0.07, 0.175)), empty("smoke_origin", (1.5, by + 0.6, top + 2.3)))
 
 
 def build_workshop(k):
@@ -413,18 +445,24 @@ def build_workshop(k):
             k.add(box(0.03, wd / 10 - 0.03, top - 0.04), rng.choice(["plank_grey_lt", "plank_grey_dk"]), T((sx * (ww / 2 + 0.015), y, top / 2 + 0.02)))
     # gable roof, slate blue, and a filled gable end
     k.add(gable(ww + 0.45, wd + 0.6, 1.45), "slate", T((0, by, top + 0.02), (0, 0, 90)))
+    courses(k, ww + 0.45, wd + 0.6, 1.45, by, top + 0.02, 3, "slate_dk")
     k.add(box(ww + 0.5, 0.18, 0.12, 0.03), "slate_dk", T((0, by, top + 1.49)))
     for sy in (-1, 1):
         k.add(box(ww + 0.5, 0.06, 0.08), "slate_dk", T((0, by + sy * (wd + 0.6) / 2, top + 0.02)))
-    # double door with braces
+    # double door with braces, each leaf hinged on its outer edge; the doorway behind is dark
+    k.add(box(1.04, 0.01, 1.83), "doorway", T((0, fy - 0.04, 0.97)))
+    leaves = {}
     for sx in (-1, 1):
-        k.add(box(0.52, 0.08, 1.85, 0.02), "wood_dk", T((sx * 0.27, fy - 0.03, 0.97)))
-        beam(k, (sx * 0.06, fy - 0.08, 0.2), (sx * 0.48, fy - 0.08, 1.7), 0.07, 0.03, "wood")
+        lk = B.Kit("leaf")
+        lk.add(box(0.52, 0.08, 1.85, 0.02), "wood_dk", T((sx * 0.27, fy - 0.03, 0.97)))
+        beam(lk, (sx * 0.06, fy - 0.08, 0.2), (sx * 0.48, fy - 0.08, 1.7), 0.07, 0.03, "wood")
+        leaves[sx] = [(bm, mat, Matrix()) for bm, mat, *_ in lk.parts]
     k.add(box(1.2, 0.12, 0.12, 0.02), "wood_dk", T((0, fy - 0.03, 1.95)))
     # a coiled rope and a leaning oar by the door
     k.add(cyl(0.16, 0.16, 0.1, 10), "oar", T((0.95, fy - 0.25, 0.04)))
     k.add(cyl(0.02, 0.02, 1.4, 6), "oar", T((-0.95, fy - 0.12, 0.7), (-10, 8, 0)))
     k.add(box(0.14, 0.02, 0.38), "oar", T((-1.05, fy - 0.24, 1.35), (-10, 8, 0)))
+    return door_leaf(leaves[-1], T((-0.53, fy - 0.03, 0.045)), door_leaf(leaves[1], T((0.53, fy - 0.03, 0.045)), name="door_r"))
 
 
 def build_fountain(k):
@@ -693,7 +731,7 @@ def main(argv):
         built = build_all(scn, only)
         if out:
             for name, objs in built.items():
-                for e in objs[1:]:  # Blender suffixes repeated names (light_origin.001); the game wants the plain one
+                for e in objs[1:]:  # Blender suffixes repeated names (light_origin.001, door.001); the game wants the plain one
                     base = e.name.split(".")[0]
                     other = bpy.data.objects.get(base)
                     if other and other is not e:
