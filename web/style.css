@@ -4381,7 +4381,10 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html
 /* A note: the house rule, or why there is no duel yet. */
 .ch-note { margin: 0; padding: 9px 14px; border: 2px dashed var(--toon-soft); border-radius: 10px; background: color-mix(in srgb, var(--paper-lo) 45%, var(--paper)); text-wrap: pretty; }
 .ch-note.no { color: var(--danger-on-paper); font-weight: 700; border-color: color-mix(in srgb, var(--danger-on-paper) 55%, transparent); }
-.ch-decks { grid-area: deck; justify-self: start; align-self: start; }
+.ch-note p { margin: 0; }
+.ch-note .ch-decks { margin-top: 10px; color: var(--toon); font-weight: 800; }
+/* No duel to accept: Not now on its own. */
+.challenge .ch-actions:not(:has(.ch-go)) { display: flex; justify-content: flex-end; }
 
 /* The deck taken: one plaque; left and right (its arrows, or the keys) change it. */
 .ch-deck { display: grid; gap: 6px; min-width: 0; align-content: start; }

@@ -797,16 +797,20 @@ pub fn Challenge(
                 }.into_any()
             } else if let Some(r) = rule {
                 view! {
-                    <p class="ch-note no">{tr(
-                        format!("None of your decks keeps this house rule: {} Build one in My decks.", r.text()),
-                        format!("Aucun de vos decks ne respecte cette règle maison : {} Construisez-en un dans Mes decks.", r.text()),
-                    )}</p>
-                    {to_decks()}
+                    <div class="ch-note no">
+                        <p>{tr(
+                            format!("None of your decks keeps this house rule: {} Build one in My decks.", r.text()),
+                            format!("Aucun de vos decks ne respecte cette règle maison : {} Construisez-en un dans Mes decks.", r.text()),
+                        )}</p>
+                        {to_decks()}
+                    </div>
                 }.into_any()
             } else {
                 view! {
-                    <p class="ch-note no">{tr("None of your decks can play yet. Fix one in My decks.", "Aucun de vos decks n'est encore jouable. Corrigez-en un dans Mes decks.")}</p>
-                    {to_decks()}
+                    <div class="ch-note no">
+                        <p>{tr("None of your decks can play yet. Fix one in My decks.", "Aucun de vos decks n'est encore jouable. Corrigez-en un dans Mes decks.")}</p>
+                        {to_decks()}
+                    </div>
                 }.into_any()
             }}
             <div class="ch-actions">

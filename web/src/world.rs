@@ -1539,7 +1539,7 @@ pub fn WorldScreen() -> impl IntoView {
                         let quote = said.with_value(|s| s.clone().filter(|(who, _)| *who == id).map(|(_, l)| l));
                         view! {
                             <Challenge id=id face=face quote=quote on_cancel=move || sheet.set(None) before=move || sheet.set(None)
-                                on_decks=move || { last_tab.set(MenuTab::Decks); open_menu() } />
+                                on_decks=move || { last_tab.set(MenuTab::Decks); editing.set(None); sheet.set(Some(Sheet::Menu)) } />
                         }.into_any()
                     }
                     Sheet::Ladder => view! {
