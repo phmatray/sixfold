@@ -92,7 +92,11 @@ export function actor(src, tint, scale, idle, outfit = null, hair = null, wear =
   blob.userData.shared = true;
   blob.scale.setScalar(0.8 * scale);
   const head = new THREE.Box3().setFromObject(obj).max.y;
-  const a = { obj, blob, head: Number.isFinite(head) ? head : 1.45, base: obj.scale.x, mixer: null, actions: {}, clip: null, idle: 0, t: 0, turnedAt: -1, idleName: (idle ?? "idle").toLowerCase() };
+  // `lap`: how high a seat is under a person sitting on it, from their hips (seat.js; the Sit clip's thighs rest there).
+  obj.updateMatrixWorld(true);
+  const hips = obj.getObjectByName("Hips")?.getWorldPosition(new THREE.Vector3()).y ?? 0.54 * scale;
+  const a = { obj, blob, head: Number.isFinite(head) ? head : 1.45, base: obj.scale.x, mixer: null, actions: {}, clip: null, idle: 0, t: 0, turnedAt: -1, idleName: (idle ?? "idle").toLowerCase(),
+    lap: hips * 0.87, sit: null, pose: null };
   if (src?.animations.length) {
     a.mixer = new THREE.AnimationMixer(obj);
     // The first clip of each name wins: exports can carry duplicates.
@@ -107,13 +111,15 @@ export function actor(src, tint, scale, idle, outfit = null, hair = null, wear =
 // (`floorAt`: decks, stairs, cliff tops); turn toward its facing.
 export function place(a, dt, floorAt) {
   const t = a.step ? a.step.t : 0;
-  const px = a.x + 0.5 + (a.step ? (a.step.x - a.x) * t : 0);
-  const pz = a.z + 0.5 + (a.step ? (a.step.z - a.z) * t : 0);
+  let px = a.x + 0.5 + (a.step ? (a.step.x - a.x) * t : 0);
+  let pz = a.z + 0.5 + (a.step ? (a.step.z - a.z) * t : 0);
   const y0 = floorAt(a.x, a.z);
   a.fy = a.step ? y0 + (floorAt(a.step.x, a.step.z) - y0) * t : y0;
+  const s = a.sit; // sitting (seat.js): eased from its tile onto the seat
+  if (s) (px += (s.ax - px) * s.s), (pz += (s.az - pz) * s.s), (a.fy += (s.y - a.fy) * s.s);
   a.obj.position.set(px, a.obj.position.y, pz);
-  a.blob.position.set(px, a.fy + 0.015, pz);
-  const want = angle(a.face), cur = a.obj.rotation.y;
+  a.blob.position.set(px, (s ? y0 : a.fy) + 0.015, pz);
+  const want = angle(s?.face ?? a.face), cur = a.obj.rotation.y;
   const turn = Math.atan2(Math.sin(want - cur), Math.cos(want - cur));
   a.obj.rotation.y = cur + Math.sign(turn) * Math.min(Math.abs(turn), TURN_SPEED * dt);
   return [px, pz];
@@ -123,16 +129,18 @@ export function animateActor(a, dt, reduced) {
   const walking = !!a.step;
   a.t += dt;
   if (a.mixer) {
-    const want = walking ? (a.running && a.actions.run ? "run" : "walk") : a.idleName;
+    // `pose`: a clip held over the rest (seat.js: sitdown, sit, standup; the first and last play once).
+    const want = a.pose && a.actions[a.pose] ? a.pose : walking ? (a.running && a.actions.run ? "run" : "walk") : a.idleName;
     if (want !== a.clip && a.actions[want]) {
       a.actions[a.clip]?.fadeOut(0.15);
-      a.actions[want].reset().fadeIn(0.15).play();
+      const once = want === "sitdown" || want === "standup";
+      a.actions[want].reset().setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity).fadeIn(0.15).play().clampWhenFinished = once;
       a.clip = want;
     }
     if (a.actions.walk) a.actions.walk.timeScale = a.running && !a.actions.run ? 2 : 1; // no Run clip: a faster Walk
     // A fidget clip once the hero has stood still a while, if the model has one.
     const fidget = a.actions.fidget ?? a.actions.look;
-    if (fidget && a.idle > FIDGET_AFTER && !a.fidgeted) {
+    if (fidget && a.idle > FIDGET_AFTER && !a.fidgeted && !a.pose) {
       a.fidgeted = true;
       fidget.reset().setLoop(THREE.LoopOnce, 1).fadeIn(0.2).play();
       a.mixer.addEventListener("finished", () => fidget.fadeOut(0.3));
@@ -160,8 +168,10 @@ export function route(w, hero, tx, tz) {
   const { width: W, height: H } = w.map;
   if (tx === hero.x && tz === hero.z) return [];
   const solid = (x, z) => w.blocked(x, z) || !!w.npcAt(x, z);
+  const seat = w.seats?.get(key(tx, tz)); // a seat: from in front or beside, not from behind (seat.js)
   const goal = !solid(tx, tz) ? [[tx, tz, null]] : Object.entries(DIR).flatMap(([f, [dx, dz]]) => {
     const [x, z] = [tx - dx, tz - dz];
+    if (f === seat?.face) return [];
     if (!solid(x, z)) return w.climb(x, z, tx, tz) ? [[x, z, f]] : [];
     const far = [tx - 2 * dx, tz - 2 * dz, f];
     return w.npcAt(tx, tz) && ACROSS.has(w.propAt.get(key(x, z))?.asset) && !solid(far[0], far[1]) ? [far] : [];

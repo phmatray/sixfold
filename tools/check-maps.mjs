@@ -33,6 +33,7 @@ const DECK = eval(`(${src.match(/export const DECK = (\{[\s\S]*?\});/)[1]})`);
 const WALKABLE = new Set([...eval(`(${src.match(/export const WALKABLE = new Set\((\[[\s\S]*?\])\);/)[1]})`), ...Object.keys(DECK)]);
 const ACROSS = new Set(eval(`(${src.match(/export const ACROSS = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TALL = eval(`(${src.match(/export const TALL = (\{[\s\S]*?\});/)[1]})`);
+const SEAT = eval(`(${src.match(/export const SEAT = (\{[\s\S]*?\});/)[1]})`);
 // Heights (m) for depth stacking, from ASSETS.md / ASSETS_V13.md; TALL (props.js) fills the rest.
 const HEIGHT = { tree: 3.5, pine: 3.8, birch: 3.6, willow: 3.8, house: 5, sign: 1.3, signpost: 1.6, lantern: 2.2, bush: 0.7, flowers: 0.3,
   rock: 0.6, crates: 0.9, glow_mushroom: 0.35, glow_mushroom_tall: 0.9, glow_shelf: 0.62, bench: 0.9, stall: 2.3, stall_b: 2.3, fountain: 1.6, stump: 0.55, log: 0.55, hanging_sign: 2.5, boat: 0.4, reeds: 0.9,
@@ -113,8 +114,33 @@ for (const [name, m] of Object.entries(maps)) {
     for (const y of [l.bottom ?? height[k] ?? 0, l.top])
       if (!liftLandings(l, y, solid, height).length) fail.push(`${name}: lift ${l.id} has no landing at ${y} m`);
   }
-  for (const n of m.npcs ?? []) if (solid.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} stands on a solid tile`);
+  // Seats (seat.js): every footprint tile of a bench or chair is a place, sat on from in front or beside (not from
+  // behind). A person with `sit: true` sits on one; a seat nobody can walk up to must say `seat: false` (scenery).
+  const FACE = { 0: "s", 90: "e", 180: "n", 270: "w" };
+  const seatAt = new Map();
+  for (const p of m.props) {
+    if (!SEAT[p.asset] || p.seat === false || p.if) continue;
+    let [w, d] = FOOT[p.asset] ?? [1, 1];
+    if (p.rot % 180 === 90) [w, d] = [d, w];
+    for (let x = p.x; x < p.x + w; x++) for (let z = p.z; z < p.z + d; z++) seatAt.set(`${x},${z}`, { p, face: FACE[(((p.rot ?? 0) % 360) + 360) % 360] ?? "s" });
+  }
+  for (const n of m.npcs ?? []) {
+    if (n.sit) {
+      if (!seatAt.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} sits where there is no seat`);
+      if (n.route) fail.push(`${name}: ${n.id} sits, so it can't walk a route`);
+    } else if (solid.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} stands on a solid tile`);
+  }
   const all = reach(name, m, solid, height);
+  const sittable = new Set();
+  for (const [k, { p, face }] of seatAt) {
+    const [x, z] = k.split(",").map(Number);
+    for (const [f, [dx, dz]] of Object.entries(DIR)) {
+      const a = `${x - dx},${z - dz}`; // the hero there faces f
+      if (f !== face && all.has(a) && Math.abs((height[a] ?? 0) - (height[k] ?? 0)) <= 0.6) sittable.add(p);
+    }
+  }
+  for (const p of new Set([...seatAt.values()].map((s) => s.p)))
+    if (!sittable.has(p)) rule.push(`${name}: the ${p.asset} at ${p.x},${p.z} has no free tile in front or beside it to sit from; free one, or mark it "seat": false`);
   // Underground nothing could power a street lamp: caves (`dark`, kind `cave`, a `cave` room) light with mushrooms,
   // crystals and glow plants, a worked mine with oil lanterns on its timbers (WORLD_RULES §2.6). Always an error.
   if (m.dark || m.kind === "cave" || m.cave)
