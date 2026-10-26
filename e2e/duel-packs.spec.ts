@@ -45,8 +45,8 @@ test("opening packs adds cards to the collection @phone", async ({ page }) => {
   };
   await open();
   const first = await readSave(page);
-  // "Open another" goes back to the shelf.
-  await page.getByRole("button", { name: "Open another (2 left)" }).click();
+  // "Choose another" goes back to the shelf.
+  await page.getByRole("button", { name: "Choose another (2 left)" }).click();
   await open();
   const second = await readSave(page);
   expect(owned(second)).toBeGreaterThan(owned(first));

@@ -81,13 +81,17 @@ pub fn PacksScreen() -> impl IntoView {
             return;
         }
         // After the actions have rendered: the Skip button just went away.
+        // Without scrolling, so a phone keeps the Rare in view.
         set_timeout(
             move || {
                 if let Some(b) = actions
                     .get_untracked()
                     .and_then(|el| el.query_selector("button").ok().flatten())
                 {
-                    let _ = wasm_bindgen::JsCast::unchecked_into::<web_sys::HtmlElement>(b).focus();
+                    let opts = web_sys::FocusOptions::new();
+                    opts.set_prevent_scroll(true);
+                    let _ = wasm_bindgen::JsCast::unchecked_into::<web_sys::HtmlElement>(b)
+                        .focus_with_options(&opts);
                 }
             },
             Duration::from_millis(0),
@@ -573,7 +577,7 @@ fn Reveal(
                 view! {
                     {(more() > 0).then(|| view! {
                         <button type="button" class="btn primary" on:click=move |_| again()>
-                            {tr(format!("Open another ({} left)", more()), format!("Un autre ({} restant{})", more(), if more() > 1 { "s" } else { "" }))}
+                            {tr(format!("Choose another ({} left)", more()), format!("Un autre ({} restant{})", more(), if more() > 1 { "s" } else { "" }))}
                         </button>
                     })}
                     <button type="button" class="btn" on:click=move |_| screen.set(Screen::Collection)>{tr("See the collection", "Voir la collection")}</button>
