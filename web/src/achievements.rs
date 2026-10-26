@@ -83,7 +83,7 @@ fn granted(p: &Progress) -> Vec<&'static Achievement> {
 }
 
 /// 3,975 (EN) or 3 975 (FR, a narrow no-break space).
-fn thousands(n: u32) -> String {
+pub fn thousands(n: u64) -> String {
     let sep = tr(",", "\u{202f}");
     let d = n.to_string();
     let mut out = String::new();
@@ -111,8 +111,24 @@ pub fn count_line(p: &Progress) -> String {
 pub fn Toaster() -> impl IntoView {
     let toasts = expect_context::<Toasts>().0;
     let current = RwSignal::new(None::<Toast>);
+    let retry = Trigger::new();
     Effect::new(move |_| {
+        retry.track();
         if current.get().is_some() || toasts.with(VecDeque::is_empty) {
+            return;
+        }
+        // A world sheet is a modal <dialog>: everything outside it is inert, so a
+        // toast now would be covered and never read out. Wait until it closes.
+        if document()
+            .query_selector("dialog:modal")
+            .ok()
+            .flatten()
+            .is_some()
+        {
+            set_timeout(
+                move || retry.notify(),
+                std::time::Duration::from_millis(500),
+            );
             return;
         }
         let mut next = None;
@@ -141,7 +157,10 @@ pub fn Toaster() -> impl IntoView {
                         <p>
                             <span class="ach-kicker">{kicker}</span>
                             <b>{name}</b>
-                            <span class="ach-pay">{format!("+⬡ {facets}")}</span>
+                            <span class="ach-pay">
+                                "+"<span class="gem" aria-hidden="true"></span>{facets}
+                                <span class="sr-only">{tr(" Facets", " Facettes")}</span>
+                            </span>
                         </p>
                     </div>
                 }
@@ -159,10 +178,13 @@ pub fn AchievementsPanel() -> impl IntoView {
     let paid = move || got().iter().map(|a| a.facets).sum::<u32>();
     view! {
         <div class="achievements">
-            <p class="page-lead">{move || tr(
-                format!("{} — ⬡ {} of {} earned.", progress.with(count_line), thousands(paid()), thousands(total)),
-                format!("{} — ⬡ {} gagnées sur {}.", progress.with(count_line), thousands(paid()), thousands(total)),
-            )}</p>
+            <p class="page-lead">
+                {move || progress.with(count_line)}" · "<span class="gem" aria-hidden="true"></span>" "
+                {move || tr(
+                    format!("{} of {} Facets earned.", thousands(paid().into()), thousands(total.into())),
+                    format!("{} Facettes gagnées sur {}.", thousands(paid().into()), thousands(total.into())),
+                )}
+            </p>
             <ul class="ach-list">
                 {ACHIEVEMENTS.iter().map(|a| {
                     let done = move || progress.with(|p| p.has_flag(&a.flag()));
@@ -180,8 +202,9 @@ pub fn AchievementsPanel() -> impl IntoView {
                             </div>
                             <span class="ach-pay">
                                 <span class="gem" aria-hidden="true"></span>
-                                <span class="sr-only">{tr("Pays ⬡", "Rapporte ⬡")}</span>
+                                <span class="sr-only">{tr("Pays", "Rapporte")}" "</span>
                                 {a.facets}
+                                <span class="sr-only">{tr(" Facets", " Facettes")}</span>
                             </span>
                             <span class="ach-state">{move || if done() {
                                 tr("Earned", "Obtenu")

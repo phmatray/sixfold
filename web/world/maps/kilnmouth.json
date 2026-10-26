@@ -4677,8 +4677,8 @@
   "gates": [
     {
       "id": "vent_w",
-      "name": "the west steam vent, gone quiet",
-      "name_fr": "l'évent de vapeur ouest, apaisé",
+      "name": "the west steam vent",
+      "name_fr": "l'évent de vapeur côté ouest",
       "tiles": [
         [
           8,
@@ -4704,8 +4704,8 @@
     },
     {
       "id": "vent_e",
-      "name": "the east steam vent, gone quiet",
-      "name_fr": "l'évent de vapeur est, apaisé",
+      "name": "the east steam vent",
+      "name_fr": "l'évent de vapeur côté est",
       "tiles": [
         [
           28,

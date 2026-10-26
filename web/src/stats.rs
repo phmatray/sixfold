@@ -8,7 +8,7 @@ use sixfold_engine::profile::Profile;
 use sixfold_engine::stats::{award, Duel, Stats};
 use sixfold_engine::{fr, tr, Game};
 
-use crate::achievements::Toasts;
+use crate::achievements::{thousands, Toasts};
 use crate::ctl::{Ctl, Post, HUMAN};
 use crate::store::Loaded;
 
@@ -91,7 +91,7 @@ pub fn provide() {
 #[component]
 pub fn StatsPanel() -> impl IntoView {
     let stats = expect_context::<RwSignal<Stats>>();
-    let n = move |k: &'static str| move || stats.with(|s| s.get(k));
+    let n = move |k: &'static str| move || thousands(stats.with(|s| s.get(k)));
     let row = move |label: &'static str, k: &'static str| {
         view! { <div class="stat"><dt>{label}</dt><dd>{n(k)}</dd></div> }
     };
@@ -103,7 +103,7 @@ pub fn StatsPanel() -> impl IntoView {
         stats.with(|s| match s.get("duels") {
             0 => "–".to_string(),
             d => {
-                let pc = s.get("wins") * 100 / d;
+                let pc = (s.get("wins") * 100 + d / 2) / d;
                 tr(format!("{pc}%"), format!("{pc}\u{202f}%"))
             }
         })
@@ -119,7 +119,7 @@ pub fn StatsPanel() -> impl IntoView {
                     {row(tr("Rival wins", "Victoires contre les rivaux"), "rival_wins")}
                     {row(tr("Route duelist wins", "Victoires sur les routes"), "trainer_wins")}
                     {row(tr("Quick duel wins", "Victoires en duel rapide"), "quick_wins")}
-                    {row(tr("…on Hard", "…en Difficile"), "quick_wins_hard")}
+                    {row(tr("Quick duel wins on Hard", "Victoires en duel rapide, en Difficile"), "quick_wins_hard")}
                     {row(tr("Current streak", "Série en cours"), "streak")}
                     {row(tr("Best streak", "Meilleure série"), "streak_best")}
                     {row(tr("Daily duels won", "Duels du jour gagnés"), "daily_days")}
@@ -130,7 +130,7 @@ pub fn StatsPanel() -> impl IntoView {
                 <dl>
                     {row(tr("Prize cards taken", "Récompenses prises"), "prizes")}
                     {row(tr("Knock-outs", "K.O."), "kos")}
-                    {row(tr("…on the Bench", "…sur le Banc"), "bench_kos")}
+                    {row(tr("Knock-outs on the Bench", "K.O. sur le Banc"), "bench_kos")}
                     {row(tr("Awaken 2 Hexons played", "Hexons d'Éveil 2 joués"), "stage2_played")}
                     {row(tr("Most heads in a row", "Faces d'affilée, au mieux"), "heads_run_best")}
                     {row(tr("Comebacks", "Retournements"), "comebacks")}
