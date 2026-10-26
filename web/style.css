@@ -1257,8 +1257,8 @@ select option { background: var(--panel); color: var(--ink); }
   transition: opacity 240ms ease;
 }
 .autosave.show { opacity: 1; }
-/* A phone pack opening: above its Faster / Skip bar, not over it. */
-@media (max-width: 760px) { body:has(.reveal-actions.live) .autosave { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 76px); } }
+/* A phone pack opening or the credits: above their bar of buttons, not over it. */
+@media (max-width: 760px) { body:has(.reveal-actions.live, .credits) .autosave { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 76px); } }
 .autosave.failed { background: #5a1f1c; border-color: rgba(255, 93, 82, 0.6); color: #ffd5d0; }
 .update-toast {
   position: fixed;
@@ -2147,7 +2147,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .credits-stage { position: absolute; inset: 0; }
 .credits-plate {
   position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain;
-  display: grid; place-content: center; justify-items: center; gap: 18px;
+  display: grid; place-content: safe center; justify-items: center; gap: 18px;
   padding: max(40px, env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom)); text-align: center;
   opacity: 0; visibility: hidden; filter: blur(10px); transform: translateY(14px) scale(0.985);
   transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1), filter 700ms cubic-bezier(0.16, 1, 0.3, 1), transform 700ms cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 700ms;
@@ -2186,7 +2186,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .credits-plate .wordmark { font-size: clamp(64px, 14vw, 140px); }
 .credits-plate .champion-title { font-size: clamp(56px, 13vw, 132px); line-height: 1.02; text-wrap: balance; }
 .credits-plate .champion-title.long { font-size: clamp(38px, 7vw, 92px); max-width: 11em; }
-.credits-continue { margin-top: 18px; min-width: 12em; justify-content: center; }
+.credits-continue { margin-top: 18px; min-width: 12em; justify-content: center; text-align: center; }
 .credits-line.small { font-size: calc(14px * var(--ts)); }
 .credits-seals { justify-content: center; gap: 12px; }
 .credits-seals .seal { width: clamp(34px, 6vw, 48px); }
@@ -3492,7 +3492,8 @@ button.pile { cursor: pointer; }
   padding: 8px 14px;
   background: var(--world-panel);
 }
-.world-skip kbd, .talk-skip kbd { font: 700 calc(12px * var(--ts)) var(--body); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
+.world-skip kbd, .talk-skip kbd, .credits-foot kbd { font: 700 calc(12px * var(--ts)) var(--body); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
+.credits-foot kbd { margin-left: 8px; }
 @media (hover: none) { .world-skip kbd { display: none; } }
 .talk-skip { display: block; margin: 6px 0 0 auto; min-height: 44px; font-size: calc(14px * var(--ts)); }
 .talk-skip kbd { margin-left: 8px; }
@@ -3657,6 +3658,8 @@ button.pile { cursor: pointer; }
 /* Prizes: the card lifts off and flies to its taker's hand (--dx/--dy, aimed
    by table.rs); the winning prize flies at half speed. */
 .prize.taking { position: relative; z-index: 30; animation: prize-fly calc(600ms * var(--pace, 1)) cubic-bezier(0.45, 0, 0.25, 1) forwards; }
+/* Its cell is boxed in under the bench, the hand and the Active: lift the whole cell while it flies. */
+.cell:has(.prize.taking) { z-index: 6; }
 .duel[data-beat="last-prize"] .prize.taking { animation-duration: calc(1200ms * var(--pace, 1)); }
 @keyframes prize-fly {
   0% { transform: none; }
@@ -3709,3 +3712,6 @@ button.pile { cursor: pointer; }
 @keyframes prize-fade { 30% { box-shadow: inset 0 0 0 1px var(--brass-hi), 0 0 10px var(--brass-hi); } 100% { opacity: 0; } }
 @keyframes spark-calm { from { opacity: 0.9; } to { opacity: 0; } }
 @keyframes face-calm { from { opacity: 0; } to { opacity: 1; } }
+/* A phone's energy column sits over the card's left edge: the number and its stamp
+   lean right of centre, so the "−" stays clear of the pips. */
+@media (max-width: 640px) { .hexon-card .pop { left: 58%; } }

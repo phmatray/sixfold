@@ -1,6 +1,7 @@
 //! The credits, rolled once the Hex Warden falls (and on demand from the
-//! campaign screen). After the Warden they open on the finale (#67): the seal
-//! stone lighting its six faces, then the champion's title. The credits are
+//! campaign screen, which only a champion has). They open on the finale (#67):
+//! the seal stone lighting its six faces, then the champion's title, so a
+//! champion can see those again from the campaign. The credits are
 //! plates shown one at a time, each for a while, then the next fades in; with
 //! reduced motion they swap without a fade. Next (or →) moves on, ← goes back,
 //! Skip (or Escape) ends them. After the Warden they end in the duel hall, by
@@ -170,11 +171,11 @@ fn and_list(parts: Vec<AnyView>) -> Vec<AnyView> {
     out
 }
 
-/// The run so far, in one sentence: up to five of the stats, the ones that
-/// aren't zero first, and always at least three. Read only.
+/// The run so far, in one sentence: the stats that aren't zero (a save from
+/// before 1.7 may have only its duels won). Read only.
 fn run_line(s: &Stats) -> impl IntoView {
     let n = |k: &str| s.get(k);
-    let mut facts: Vec<(u64, String, String)> = vec![
+    let facts: Vec<(u64, String, String)> = vec![
         (n("wins"), " duels won".into(), " duels gagnés".into()),
         (n("kos"), " knock-outs".into(), " K.O.".into()),
         (n("steps"), " steps walked".into(), " pas".into()),
@@ -189,12 +190,11 @@ fn run_line(s: &Stats) -> impl IntoView {
             " boosters ouverts".into(),
         ),
     ];
-    // Stable: the non-zero ones keep their order, ahead of the zeros.
-    facts.sort_by_key(|f| f.0 == 0);
+    // A champion has won at least once; "0 steps walked" is no boast.
     let nonzero = facts.iter().filter(|f| f.0 > 0).count();
     let facts: Vec<AnyView> = facts
         .into_iter()
-        .take(nonzero.max(3))
+        .filter(|f| f.0 > 0 || nonzero == 0)
         .map(|(v, en, fr)| view! { <b>{thousands(v)}</b>{tr(en, fr)} }.into_any())
         .collect();
     view! { <p class="credits-run">{and_list(facts)}"."</p> }
@@ -274,6 +274,12 @@ pub fn Credits(won: bool) -> impl IntoView {
     let progress = expect_context::<RwSignal<Progress>>();
     let stats = expect_context::<RwSignal<Stats>>();
     // After the Warden: back into the world, in the hall (the save written now).
+    // Saved now too, so a reload during the credits comes back in the hall, not
+    // in the Warden's room with the scene spent (the stone and the title stay
+    // on the campaign screen's "Watch the credits").
+    if won {
+        store::set_world_at(HALL_DOOR);
+    }
     let done = move || {
         if won {
             store::set_world_at(HALL_DOOR);
@@ -300,37 +306,33 @@ pub fn Credits(won: bool) -> impl IntoView {
     // The plates, in order: (how long each shows in ms, its name for the
     // status line, what it shows). The last one stays until Continue.
     let mut plates: Vec<(u32, String, AnyView)> = vec![];
-    if won {
-        let lit = tr("Six faces, all lit.", "Six faces, toutes allumées.");
-        plates.push((
-            RING_AT + 1900,
-            lit.into(),
-            view! {
-                {seal_stone()}
-                <p class="credits-line">{lit}</p>
-            }
-            .into_any(),
-        ));
-        plates.push((
-            4600,
-            title.get().into(),
-            view! {
-                <h2 class="wordmark champion-title" class:long={title.en.len() > 10}>{title.get()}</h2>
-                <p class="credits-line">{tr("Six seals and the Warden's chair.", "Six sceaux et le fauteuil de la Gardienne.")}</p>
-            }
-            .into_any(),
-        ));
-    }
+    let lit = tr("Six faces, all lit.", "Six faces, toutes allumées.");
+    // The peak: the stone stays lit a few seconds once the ring has bloomed.
+    plates.push((
+        RING_AT + 4200,
+        lit.into(),
+        view! {
+            {seal_stone()}
+            // It waits for the ring (its own copy of the timing: `--ring-at` is set on the stone).
+            <p class="credits-line" style=format!("--ring-at: {RING_AT}ms")>{lit}</p>
+        }
+        .into_any(),
+    ));
+    plates.push((
+        4600,
+        title.get().into(),
+        view! {
+            <h2 class="wordmark champion-title" class:long={title.en.len() > 10}>{title.get()}</h2>
+            <p class="credits-line">{tr("Six seals and the Warden's chair.", "Six sceaux et le fauteuil de la Gardienne.")}</p>
+        }
+        .into_any(),
+    ));
     plates.push((
         5000,
         "Sixfold".into(),
         view! {
             <h1 class="wordmark">"Sixfold"</h1>
-            <p class="credits-line">{if won {
-                tr("Six seals, one Warden, and a new champion.", "Six sceaux, une Gardienne… et une nouvelle légende.")
-            } else {
-                tr("The people and the tools behind it.", "Ceux qui l'ont fait, et avec quoi.")
-            }}</p>
+            <p class="credits-line">{tr("The people and the tools behind it.", "Ceux qui l'ont fait, et avec quoi.")}</p>
         }
         .into_any(),
     ));
@@ -466,7 +468,6 @@ pub fn Credits(won: bool) -> impl IntoView {
     let durations: Vec<u32> = plates.iter().map(|p| p.0).collect();
     let names: Vec<String> = plates.iter().map(|p| p.1.clone()).collect();
     let n = plates.len();
-    let stone = won.then_some(0);
 
     // The plate on show, and whether the plates wait for Next (Pause; from the
     // start with reduced motion, read at the reader's pace). Each change bumps
@@ -474,16 +475,20 @@ pub fn Credits(won: bool) -> impl IntoView {
     let at = RwSignal::new(0usize);
     let paused = RwSignal::new(still);
     let armed = StoredValue::new(0u32);
+    // The same plate again (Back on the first) changes nothing: no bells rung twice.
     let show = move |i: usize| {
-        armed.update_value(|t| *t += 1);
-        at.set(i.min(n - 1));
+        let i = i.min(n - 1);
+        if i != at.get_untracked() {
+            armed.update_value(|t| *t += 1);
+            at.set(i);
+        }
     };
     // A memo: the foot's buttons are rebuilt only when it flips, not on every plate.
     let last = Memo::new(move |_| at.get() + 1 == n);
     Effect::new(move |_| {
         let i = at.get();
         // The stone rings a bell per face as it lights, then all at once.
-        if stone == Some(i) {
+        if i == 0 {
             if !still {
                 for k in 0..6 {
                     later(armed, FACE_AT + k * FACE_GAP, move || {
@@ -517,15 +522,18 @@ pub fn Credits(won: bool) -> impl IntoView {
         armed.update_value(|t| *t += 1);
         paused.update(|p| *p = !*p);
     };
-    let on_key = move |e: leptos::ev::KeyboardEvent| match e.key().as_str() {
+    // On the window, so the keys (and a pad's, which gamepad.js sends as keys)
+    // still work once a click on a plate has taken the focus off the buttons.
+    let keys = window_event_listener(leptos::ev::keydown, move |e| match e.key().as_str() {
         "Escape" => {
             e.prevent_default();
             done();
         }
         "ArrowRight" if !last.get_untracked() => show(at.get_untracked() + 1),
-        "ArrowLeft" if at.get_untracked() > 0 => show(at.get_untracked() - 1),
+        "ArrowLeft" => show(at.get_untracked().saturating_sub(1)),
         _ => {}
-    };
+    });
+    on_cleanup(move || keys.remove());
     let status = move || {
         let i = at.get();
         tr(
@@ -534,7 +542,7 @@ pub fn Credits(won: bool) -> impl IntoView {
         )
     };
     view! {
-        <main class="credits" class:still=still on:keydown=on_key aria-label=tr("Credits", "Générique")>
+        <main class="credits" class:still=still aria-label=tr("Credits", "Générique")>
             <ol class="credits-pips" aria-hidden="true">
                 {(0..n).map(|i| view! { <li class:on=move || at.get() == i class:past=move || { at.get() > i }></li> }).collect_view()}
             </ol>
@@ -562,7 +570,7 @@ pub fn Credits(won: bool) -> impl IntoView {
                     </button>
                 })}
                 <button type="button" class="btn ghost icon" aria-label=tr("Back", "Retour")
-                    on:click=move |_| show(at.get_untracked().saturating_sub(1))>
+                    aria-disabled=move || (at.get() == 0).to_string() on:click=move |_| show(at.get_untracked().saturating_sub(1))>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                 </button>
                 {move || (!last.get()).then(|| view! {
@@ -571,8 +579,9 @@ pub fn Credits(won: bool) -> impl IntoView {
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
                     </button>
                     // Focus starts on Skip (see `focus_heading`), so Enter works straight away.
-                    <button type="button" class="btn ghost" data-screen-focus on:click=move |_| done()>
+                    <button type="button" class="btn ghost" data-screen-focus aria-keyshortcuts="Escape" on:click=move |_| done()>
                         {tr("Skip the credits", "Passer le générique")}
+                        <kbd aria-hidden="true">{move || crate::input::prompt(crate::input::Ctrl::Cancel)}</kbd>
                     </button>
                 })}
             </div>
