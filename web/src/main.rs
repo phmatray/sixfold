@@ -18,6 +18,7 @@ mod input;
 mod journal;
 mod offline;
 mod overlays;
+mod reading;
 mod packs;
 mod saves;
 mod shops;

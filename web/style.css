@@ -1016,6 +1016,86 @@ body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
 .world-sheet::backdrop { background: color-mix(in srgb, var(--felt-deep) 25%, transparent); }
 .world-sheet h2 { font-size: calc(22px * var(--ts)); }
 .world-sheet .dialog-sub { margin-bottom: 4px; }
+
+/* Reading a book (#104): the dialog turns into a clear layer over the scene, which draws
+   the book (world/book.js); this layer holds the title, the page count, the controls and
+   the page's text (for screen readers, or shown plain with "Text"). */
+.world-sheet.reading-sheet {
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  animation: none;
+  overflow: hidden;
+}
+.world-sheet.reading-sheet::backdrop { background: transparent; }
+body:has(.reading-sheet[open]) :is(.world-top, .world-prompt) { visibility: hidden; }
+.reading { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.reading-surface { position: absolute; inset: 0; cursor: pointer; touch-action: pan-y; }
+.reading-head {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px 14px;
+  padding: max(14px, env(safe-area-inset-top)) 16px 0;
+  text-align: center;
+  pointer-events: none;
+  color: #f6ecd2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+.world-sheet .reading-head h2 { font-size: calc(19px * var(--ts)); letter-spacing: 0.01em; }
+.reading-count { font: 600 calc(14px * var(--ts)) var(--body); color: #e6d9b8; font-variant-numeric: tabular-nums; }
+.reading-controls {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px max(16px, env(safe-area-inset-bottom));
+}
+.reading-controls .btn { min-height: 48px; min-width: 48px; gap: 8px; }
+.reading-controls .btn:not(.primary) { background: color-mix(in srgb, var(--felt-deep) 78%, transparent); }
+.reading-controls .btn[aria-pressed="true"] { border-color: var(--brass-hi); color: var(--brass-hi); }
+.reading-controls .btn:disabled { opacity: 0.45; }
+.reading-text {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); border: 0;
+}
+.reading.plain .reading-text {
+  width: auto;
+  height: auto;
+  margin: 0;
+  clip: auto;
+  inset: calc(64px + 2.4em * var(--ts)) max(16px, calc(50% - 320px)) calc(88px + 1.2em * var(--ts));
+  overflow: auto;
+  padding: 22px 26px;
+  border-radius: 6px;
+  background: #f3e9d0;
+  color: #2a2018;
+  font-size: calc(18px * var(--ts));
+  line-height: 1.55;
+  box-shadow: 0 18px 50px -16px rgba(0, 0, 0, 0.8);
+  user-select: text;
+  -webkit-user-select: text;
+}
+.reading.plain .reading-text h3 { font-size: 1.2em; margin-bottom: 0.5em; color: #7a2e28; }
+.reading.plain.family-world .reading-text h3 { color: #2c5a4c; }
+.reading.plain.family-tales .reading-text h3 { color: #4a3a6c; }
+.reading-text p { margin: 0 0 0.7em; }
+@media (max-width: 520px) {
+  .reading-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .reading-controls { gap: 8px; }
+}
 .talk-box {
   display: grid;
   gap: 6px;
@@ -2448,6 +2528,33 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .quest-steps .tick { flex: none; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--muted); transform: translateY(1px); }
 .quest-steps li.done { color: var(--muted); }
 .quest-steps li.done .tick { border-color: var(--heal); background: var(--heal); }
+/* The Journal's Library (#104): the books read, spines on a shelf, each opened again. */
+.library { margin-top: 18px; display: grid; gap: 8px; }
+.library-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 10px; }
+.library-head h3 { font-size: calc(18px * var(--ts)); }
+.library-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.library-book {
+  --leather: #7a2e28;
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(214, 172, 74, 0.35);
+  background: rgba(19, 33, 58, 0.75);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.library-book.family-world { --leather: #2c5a4c; }
+.library-book.family-tales { --leather: #4a3a6c; }
+.library-book:hover:not(:disabled) { border-color: var(--brass-hi); }
+.library-spine { grid-row: 1 / 3; border-radius: 3px; background: var(--leather); box-shadow: inset 0 0 0 1px rgba(232, 196, 106, 0.6); }
+.library-title { font-weight: 700; font-size: calc(15px * var(--ts)); }
+.library-family { font-size: calc(13px * var(--ts)); color: var(--muted); }
 @media (max-width: 520px) {
   .journal-label { display: none; }
   .journal-btn { min-width: 44px; justify-content: center; padding-inline: 10px; }
