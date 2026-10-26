@@ -445,6 +445,33 @@ fn MatchScreen() -> impl IntoView {
     // On the window, so they work wherever focus is (or isn't).
     let keys = window_event_listener(leptos::ev::keydown, on_key);
     on_cleanup(move || keys.remove());
+    // The browser's Back (a phone's back gesture) would leave the app and lose
+    // the duel: a history entry of our own catches it and asks first, like the
+    // menu's Leave. Leaving another way takes that entry back off.
+    const GUARD: &str = "sixfold-duel";
+    let history = window().history().ok();
+    let guard = move || {
+        if let Some(h) = &history {
+            _ = h.push_state(&GUARD.into(), "");
+        }
+    };
+    guard();
+    let back = window_event_listener(leptos::ev::popstate, move |_| {
+        if over() {
+            leave()
+        } else {
+            guard();
+            asking.set(true)
+        }
+    });
+    on_cleanup(move || {
+        back.remove();
+        if let Ok(h) = window().history() {
+            if h.state().ok().and_then(|s| s.as_string()).as_deref() == Some(GUARD) {
+                _ = h.back();
+            }
+        }
+    });
     // Focus never falls to the page: when the focused control goes (a card
     // played, a panel closed), it lands back on your hand or End turn.
     // Only for keyboard players: a touch or mouse player never sees a card
