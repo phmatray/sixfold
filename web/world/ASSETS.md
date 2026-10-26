@@ -36,8 +36,8 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | File | What | Footprint (X × Z) | Height guide |
 |---|---|---|---|
 | `house.glb` | The duel hall, door on the front (+Z) edge | 7 × 5 | ~5 m |
-| `cottage.glb` | Small house (Hob's bakery), door on column 2 of the front row, `smoke_origin` on the chimney | 5 × 4 | ~4.5 m |
-| `workshop.glb` | Shed (boathouse, letter office), door on column 1 of the front row | 3 × 3 | ~3.8 m |
+| `cottage.glb` | Small house (Hob's bakery), door on column 2 of the front row, shingle courses on the roof, `smoke_origin` on the chimney | 5 × 4 | ~4.5 m |
+| `workshop.glb` | Shed (boathouse, letter office), double door (`door`, `door_r`) on column 1 of the front row | 3 × 3 | ~3.8 m |
 | `lighthouse.glb` | Striped tower, `light_origin` in the lantern room (the game adds a pulsing glow) | 2 × 2 | ~7 m |
 | `fountain.glb` | Hexagonal basin; meshes whose material name contains `water` get rippling water | 3 × 3 | ~1.6 m |
 | `pine.glb`, `birch.glb` | Woodland trees, varied like `tree` | 1 × 1 | ~3.8, ~3.6 m |
@@ -126,9 +126,11 @@ Rules for every model:
   Without it, the game uses height above the ground.
 - **Shadows:** bake a soft contact-shadow disc into prop bases; the game adds one only
   under placeholders and characters.
-- **House:** an empty `smoke_origin` at the chimney top. The door opens with an `Open` clip
-  (played forward to open, back to close); without one, a node named `door` swings about
-  +Y on its own origin (put it on the hinge).
+- **Doors:** every model with a door warp has its leaf as a node named `door`, origin on the hinge (the leaf's -X
+  edge, at the sill); a double door's right leaf is `door_r`, hinged on its +X edge. The game swings it 80° inward
+  about +Y (`door_r` the other way) while the hero faces or takes the door, and shut after. Behind the leaf, a thin
+  `doorway` panel (near black) is the dark doorway it reveals. The leaf is merged on its own (one more draw), the rest
+  of the model as usual. The hall's old `Open` clip is ignored. Chimneys: an empty `smoke_origin` at the top.
 - **Lamp:** an empty `light_origin` where the warm point light sits.
 - **Glow:** a material whose name contains `glow` (`oven_glow`, `lamp_glow`, `crystal_glow`, `lightbox_glow`) is
   the part that turns emissive at dusk and night; keep it out of the merged vertex-colour mesh so its name survives.

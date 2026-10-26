@@ -38,6 +38,15 @@ const TALL_FADE = 1.3;
 const tall = (o) => (o.userData.tall ??= new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()).y >= TALL_FADE);
 const fadeAll = (o) => o.traverse((m) => m.isMesh && !m.material.transparent && fadeable(m.material));
 
+const DOOR_SWING = THREE.MathUtils.degToRad(80); // a door opens inward this far about its hinge
+const DOOR = /^door(_r)?$/; // a door leaf hinged on its -X edge, or a double door's right leaf on its +X edge
+const leaves = (o) => {
+  const out = [];
+  o.traverse((n) => n !== o && DOOR.test(n.name) && out.push(n));
+  return out;
+};
+const doorOnly = (clip) => clip.tracks.every((t) => DOOR.test(t.name.split(".")[0])); // the hall's `Open` clip: the door swings without it
+
 // Re-check what a condition shows or hides (`holds(cond)`), after a map is built
 // and whenever the game state may have changed (a dialogue closed, the time of day
 // turned): people, spots and props with an `if` come and go, the fireflies round each
@@ -138,7 +147,7 @@ export function dispose(root) {
   });
 }
 
-// The house door easing open or shut, a sign wobbling after it was read, boats
+// Doors easing open or shut, a sign wobbling after it was read, boats
 // bobbing and the lighthouse beacon.
 export function animateProps(w, dt, reduced) {
   for (const b of w.blooms ?? []) if (b.k !== b.want) (b.k += Math.sign(b.want - b.k) * Math.min(Math.abs(b.want - b.k), dt / 3)), showBloom(b);
@@ -170,13 +179,9 @@ export function animateProps(w, dt, reduced) {
     }
     for (const g of w.glows) g.material.opacity = 0.55 + 0.3 * Math.sin(w.now * 2.2);
   }
-  const d = w.door;
-  if (d) {
+  for (const d of w.doors) {
     d.open = reduced ? d.want : d.open + (d.want - d.open) * Math.min(1, dt * 7);
-    if (d.action) {
-      d.action.time = d.open * d.action.getClip().duration;
-      d.mixer.update(0);
-    } else if (d.node) d.node.rotation.y = d.rest + d.open * 1.5;
+    for (const n of d.nodes) n.node.rotation.y = n.rest + n.turn * d.open * DOOR_SWING;
   }
   for (const it of w.talk.values()) {
     const o = it.obj;
@@ -251,14 +256,25 @@ function glowing(template, color) {
 }
 
 // One placed model, merged (`flatten`), keeping its named empties (light_origin,
-// smoke_origin) for the lamps and the smoke.
+// smoke_origin) for the lamps and the smoke. Door leaves (nodes named `door`, `door_r`, their
+// origin on the hinge) are merged on their own under a pivot of that name, so they can still swing (animateProps).
 function merged(obj) {
   obj.updateMatrixWorld(true);
   const out = new THREE.Group();
   delete obj.userData.flat; // a clone carries a (JSON-copied) cache from its template
+  const inv = new THREE.Matrix4().copy(obj.matrixWorld).invert();
+  for (const leaf of leaves(obj)) {
+    const hinge = new THREE.Group();
+    hinge.name = leaf.name;
+    new THREE.Matrix4().multiplyMatrices(inv, leaf.matrixWorld).decompose(hinge.position, hinge.quaternion, hinge.scale);
+    leaf.removeFromParent();
+    leaf.position.set(0, 0, 0), leaf.quaternion.identity(), leaf.scale.setScalar(1);
+    leaf.updateMatrixWorld(true);
+    hinge.add(flatten(leaf));
+    out.add(hinge);
+  }
   out.add(flatten(obj));
   out.traverse((o) => o.isMesh && ((o.castShadow = !o.material.transparent), (o.receiveShadow = true)));
-  const inv = new THREE.Matrix4().copy(obj.matrixWorld).invert();
   obj.traverse((o) => {
     if (o.isMesh || o === obj || !o.name) return;
     const e = new THREE.Object3D();
@@ -427,9 +443,9 @@ export async function build(map, got, reduced) {
         else (o.material = o.material.clone()), o.material.color.set(c);
       });
       if (p.glow) obj.traverse((o) => o.isMesh && /glow/i.test(o.material.name) && ((o.material = o.material.clone()), o.material.color.set(p.glow), o.material.emissive.set(p.glow).multiplyScalar(0.55))); // a waymark's region colour
-      // A static model (no clip, not afloat) is merged like the instanced ones: one
+      // A static model (no clip but its door's, not afloat) is merged like the instanced ones: one
       // draw for its flat-coloured parts instead of one per material.
-      if (got[p.asset] && !got[p.asset].animations.length && !BOB.has(p.asset)) obj = merged(obj);
+      if (got[p.asset] && got[p.asset].animations.every(doorOnly) && !BOB.has(p.asset)) obj = merged(obj);
       if (tall(obj)) fadeAll(obj);
       root.add(obj);
       if (BLOB[p.asset] && !got[p.asset]) blobs.push([cx, cz, BLOB[p.asset]]);
@@ -463,10 +479,10 @@ export async function build(map, got, reduced) {
     return { cond: b.cond, closed, opened, open: null, k: 0, want: 0 };
   });
   // Props with an `Open` clip (a pylon's lever, moonflowers at dusk) play it while
-  // their `open` condition holds; the house door opens as the hero walks up (below).
+  // their `open` condition holds; doors open as the hero walks up (below).
   const openers = [];
   for (const p of props) {
-    const clip = p.obj && p.asset !== "house" && got[p.asset]?.animations.find((a) => a.name.toLowerCase() === "open");
+    const clip = p.obj && !leaves(p.obj).length && got[p.asset]?.animations.find((a) => a.name.toLowerCase() === "open");
     if (!clip) continue;
     const mixer = new THREE.AnimationMixer(p.obj), action = mixer.clipAction(clip);
     action.play();
@@ -698,21 +714,15 @@ export async function build(map, got, reduced) {
   grid.visible = false;
   root.add(grid);
 
-  // The house door: its "Open" clip when the model has one, else a node named "door"
-  // swung on its origin (the hinge). `open` eases toward `want`, 0 shut to 1 open.
-  const house = props.find((p) => p.asset === "house")?.obj;
-  let door = null;
-  if (house) {
-    const clip = got.house?.animations.find((a) => a.name.toLowerCase() === "open");
-    door = { open: 0, want: 0, node: house.getObjectByName("door") ?? null, mixer: null, action: null };
-    if (clip) {
-      door.mixer = new THREE.AnimationMixer(house);
-      door.action = door.mixer.clipAction(clip);
-      door.action.play();
-      door.action.paused = true;
-    }
-    if (door.node) door.rest = door.node.rotation.y;
+  // Doors: a model's `door` node (merged: its pivot on the hinge) swings in while the hero faces or
+  // takes its warp, and shut after (animateProps). `open` eases toward `want`, 0 shut to 1 open.
+  const doors = [];
+  for (const wp of warps.values()) {
+    const obj = !wp.dir && propAt.get(key(wp.x, wp.z))?.obj;
+    const nodes = obj ? leaves(obj).map((node) => ({ node, rest: node.rotation.y, turn: node.name === "door_r" ? -1 : 1 })) : [];
+    if (nodes.length) doors.push((wp.door = { nodes, open: 0, want: 0 }));
   }
+  const house = props.find((p) => p.asset === "house")?.obj;
 
   root.updateMatrixWorld(true);
   // Smoke: the first chimney; every kiln and furnace (soot); vents (steam), a gate's
@@ -739,7 +749,7 @@ export async function build(map, got, reduced) {
   smoke.length = Math.min(smoke.length, SMOKE);
   const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
   const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0 }, reduced);
-  return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, door, life, boats, glows, fireflies: flies,
+  return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, doors, life, boats, glows, fireflies: flies,
     gates, gateAt, shown, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }
 
