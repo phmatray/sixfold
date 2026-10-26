@@ -41,6 +41,8 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test -p sixfold-engine
+      # The web crate's unit tests run on the host too (no browser, no wasm).
+      - run: cargo test -p sixfold-web
       - name: Install Trunk
         run: curl -sSfL https://github.com/trunk-rs/trunk/releases/download/v0.22.0/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C /usr/local/bin
       - name: Build web app

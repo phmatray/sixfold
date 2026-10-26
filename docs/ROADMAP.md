@@ -35,19 +35,26 @@ reliability and game-feel releases, and duel juice moves to 1.6.
 | 1.6.0 | Game feel | #60 `feat(ui): screen transitions and one visual grammar` · #61 `feat(duel): juice` · #62 `feat(world): dialogue polish, current objective and clear unlocks` |
 | 1.7.0 | Story | #63 `feat(world): cutscene scripts` · #64 `feat(story): Rook and the seventh face` · #65 `feat: stats and achievements` |
 | 1.8.0 | Presentation | #66 `feat: a studio splash and a living title screen` (Atypical Play → Sixfold → press to start) · #67 `feat: a final victory sequence and staged credits` · #68 `feat(cards): a binder worth completing and better pack openings` |
-| 1.9.0 | Controls and accessibility | #69 `feat: gamepad support` · #70 `feat(a11y): readable, high-contrast, screen-reader-friendly` · #71 `feat(audio): a soundscape per region and music for rivals and bosses` |
-| 1.10.0 | World foundations | #110 `feat(tools): check-maps v2 — blocking and advisory level-design checks` · #111 `feat(tools): world debug overlays` · #112 `feat(world): Fernhollow Trail, the reference map` |
-| 1.11.0 | A living world | #113 `feat(world): NPC routines` · #114 `feat(world): reactions and persistence` · #115 `feat(world): ambient life and micro-events` |
+| 1.9.0 | Accessibility, menus and a world to live in | #94 `feat(a11y): readable, high-contrast, screen-reader-friendly` (#70) · #96 `feat(ui): screen transitions and one visual grammar` (#60) · #101 `feat(ui): a title that shows the world, and game-like menus` (#100, with the painted kit) · #103 `feat(decks): a deck builder with an auto mode, suggestions and unlockable decks` (#102) · #106 `feat(world): books you can take from the shelves` (#104) · #107 `feat(world): sit on benches and chairs` · #108 `feat(world): a challenge panel that stays in the world` · #109 `fix(world): the hero climbs porch steps` · #126 `feat(world): doors that open on every building, and model fixes` · #128 `feat: a logo for Sixfold` · #138 `fix: 1.9 design audit and stable browser tests`. Gamepad (#69) shipped in 1.7 and the soundscape (#71) in 1.5 |
+| 1.10.0 | World foundations and seal keepers | #110 `feat(tools): check-maps v2 — blocking and advisory level-design checks` · #111 `feat(tools): world debug overlays` · #112 `feat(world): Fernhollow Trail, the reference map` (after #149) · the seal keepers, #140 `feat(world): seal keepers you have to earn, and an epic seal duel`: #149 `the six seal keepers stand at their seal sites` · #150 `a seal keeper accepts only once you've beaten enough of their region's duelists` · #151 `a seal duel looks like one` · #152 `an arrival and an entrance at every seal site` · #153 `the seal is won on stage, and a defeat is met with respect` · #154 `the Warden's duel is the grandest` · #155 `the seal-duel staging, polished to an independent critique` |
+| 1.11.0 | A living world | #113 `feat(world): NPC routines` · #114 `feat(world): reactions and persistence` · #115 `feat(world): ambient life and micro-events` · #148 `feat(world): three camera angles to choose from` (40°, 50° and 60°) |
 | 1.12.0 | Secrets and connections | #116 `feat(world): secrets` · #117 `feat(world): loops, shortcuts and an honest world map` · #118 `feat(world): biome transitions on every border` |
 | 1.13.0 | Regions to the Fernhollow standard (1) | #119 `feat(world): the meadow and Grove to the Fernhollow standard` · #120 `feat(world): Ember and Stone to the Fernhollow standard` · #121 `feat(world): Tide and Storm to the Fernhollow standard` |
 | 1.14.0 | Regions (2) and validation | #122 `feat(world): Dream to the Fernhollow standard` · #123 `feat(world): discovery staging for major places` · #124 `fix(world): the five-pass playtest and its fixes` |
+| 1.15.0 | Base-set quick wins | #129 `feat(cards): eight new cards for the base set` · #130 `fix(cards): resistance errata and real prices for dormant mechanics` · #131 `feat(cards): set marks and Rare Basics in packs` |
+| 1.16.0 | Crossroads | #132 `feat(engine): the Crossroads mechanics and rules` · #133 `feat(cards): the 64 Crossroads cards with lore, bestiary and art` · #134 `feat(world): Crossroads packs, unlocks and rival lists for the Open campaign` |
+| 1.17.0 | Deep Seals | #135 `feat(engine): the Deep Seals mechanics, one-per-deck rule and AI for locks` · #136 `feat(cards): the 62 Deep Seals cards with lore, bestiary and art` · #137 `feat(world): the Sleepers quest, Deep Seals packs, relic finds and rematch lists` |
 | 2.0.0 | Release | #72 `chore: release readiness` (a checklist: blind playtests, real-phone performance, a full EN/FR read-through, a rights audit, press material, a complete audit, every platform, a full run); the fixes it finds are its PRs |
 
 **1.10 to 1.14 are about the world.** They follow the owner's level-design guide, `docs/LEVEL_DESIGN.md`:
 first the tools and a reference map (Fernhollow Trail), then life, then secrets and connections, then every
 region brought to the reference's standard, and finally a whole-world five-pass playtest.
 `docs/WORLD_RULES.md` stays the source of truth for placement, and check-maps v2 enforces the new rules map by
-map as each region opts in.
+map as each region opts in. 1.10 also brings the seal keepers to their seal sites (#140); #149 lands before
+#112, since it takes Bramble and Lumen off Fernhollow Trail.
+
+**1.15 to 1.17 are about the cards** (`docs/SET_DESIGN.md`): quick wins on the base set, then the two
+expansions, Crossroads and Deep Seals, so both ship before 2.0.
 
 Each version is also a GitHub milestone of the same name.
 
