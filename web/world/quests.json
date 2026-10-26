@@ -275,6 +275,36 @@
           "done": "flag:bex_swap"
         }
       ]
+    },
+    {
+      "id": "rook_story",
+      "title": "The Seventh Face",
+      "title_fr": "La septième face",
+      "giver": "Rook",
+      "start": "flag:rook_1",
+      "done": "flag:rook_apprentice",
+      "steps": [
+        {
+          "text": "Rook is mapping the seal stones. With three seals, look for him below the Stormwatch observatory, where the road leaves for the Rodspire.",
+          "text_fr": "Rook relève les pierres de sceau. Avec trois sceaux, cherchez-le sous l'observatoire de Guette-Orage, là où la route part vers l'Aiguille-Foudre.",
+          "done": "flag:rook_2"
+        },
+        {
+          "text": "Rook walks Lanternmere's lantern path at night. Find him out on the lake with five seals.",
+          "text_fr": "Rook marche la nuit sur le chemin de lanternes du Lac-aux-Lanternes. Retrouvez-le sur le lac avec cinq sceaux.",
+          "done": "flag:rook_3"
+        },
+        {
+          "text": "With all six seals, Rook will be waiting by the sealed door in the duel hall.",
+          "text_fr": "Avec les six sceaux, Rook vous attendra près de la porte scellée de la salle des duels.",
+          "done": "flag:rook_4"
+        },
+        {
+          "text": "Beat Sable, then find Rook in the duel hall.",
+          "text_fr": "Battez Sable, puis retrouvez Rook dans la salle des duels.",
+          "done": "flag:rook_apprentice"
+        }
+      ]
     }
   ]
 }

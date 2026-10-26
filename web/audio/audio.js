@@ -709,6 +709,20 @@ TRACKS.duel_boss = {
   hot: HOT,
   mix: { lead: 0.08, pad: 0.03, bass: 0.15, keys: 0.025 },
 };
+// Rook's theme (WORLD_DESIGN §14.3): minor, 100 bpm, a tune that climbs toward the sixth and
+// never quite settles; his scenes play it (`music:rook`), and his duels play it as a rival's
+// theme, quicker and over the rival drums.
+TRACKS.rook = {
+  bpm: 100, root: 62, scale: "minor", chords: [0, 5, 3, 6, 0, 5, 4, 4],
+  lead:
+    "3---5-6-7---6-5-" + "4---3-----------" + "3---5-6-a---9-7-" + "8-------7-------" +
+    "a---9-7-8---7-5-" + "6---5-4-3-------" + "2-3-4-5-6-5-4-2-" + "3---------------",
+  bass: "x...x.5.x...5.o.",
+  keys: "..x...x...x...x.",
+  drums: { kick: "x.......x.......", snare: "....x.......x...", shaker: "..x...x...x...x." },
+  mix: { lead: 0.075, pad: 0.03, bass: 0.13, keys: 0.022 },
+};
+TRACKS.duel_rook = { ...RIVAL, root: 62, bpm: 118, scale: "minor", chords: TRACKS.rook.chords, lead: TRACKS.rook.lead, keys: TRACKS.rook.keys };
 // After dark, every outdoor track has a night variant made the same way: slower,
 // filtered, half the drums (only the kick and a soft shaker), the lead held back.
 for (const k of ["overworld", "ember", "storm", "tide", "dream", "grove", "stone"]) {
@@ -792,7 +806,7 @@ function startPlayer(name, t) {
 
 let current = null, duelTrack = "duel";
 
-/// The theme "duel" plays from now on ("duel", "duel_rival_<region>", "duel_boss"); set as each duel starts.
+/// The theme "duel" plays from now on ("duel", "duel_rival_<region>", "duel_boss", "duel_rook"); set as each duel starts.
 export function duelTheme(name) {
   duelTrack = TRACKS[name] ? name : "duel";
 }

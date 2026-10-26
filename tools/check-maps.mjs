@@ -42,6 +42,7 @@ const TALL_OF = (a) => TALL[a] ?? 1;
 const LADDER = new Set(eval(`(${src.match(/export const LADDER = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove", "stone", "cave"]);
 const BEDS = new Set([...TRACKS, "interior"]); // audio.js BEDS
+const THEMES = new Set([...BEDS, "rook"]); // a scene's `music:` may also be a character's theme (engine overworld::TRACKS)
 const FENCES = new Set(["fence", "wall_dry", "hedge"]);
 const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/atlas.json`, "utf8")) : null;
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
@@ -205,7 +206,7 @@ function scripts(name, m, solid, inMap) {
         if (["walk", "face", "emote"].includes(kind) && !actor(a[0])) bad(`no actor ${a[0]} on this map`);
         if (kind === "face" && !DIR[a[1]]) bad("faces n, e, s or w");
         if (kind === "wait" && !(/^\d+$/.test(a[0]) && +a[0] <= 5000)) bad("waits 0 to 5000 ms");
-        if (kind === "music" && !BEDS.has(a[0])) bad(`not a track (${[...BEDS].join(", ")})`);
+        if (kind === "music" && !THEMES.has(a[0])) bad(`not a track (${[...THEMES].join(", ")})`);
         if (kind === "cam" && !(a.length === 1 ? actor(a[0]) : a.length === 2 && inMap(+a[0], +a[1]))) bad("looks at hero, an actor on this map or a tile on it");
         if (kind === "walk") {
           if (!/^[nesw]+$/.test(a[1] ?? "")) bad("walks a path of n, e, s and w");

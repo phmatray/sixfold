@@ -213,6 +213,12 @@ impl Objective {
     /// The Journal's line, in the current language.
     pub fn text(&self, p: &Progress) -> String {
         match self {
+            // The intro sends the hero to Wynne's first (her running shoes).
+            Objective::Lesson if !p.has_item("running_shoes") => tr(
+                "Drop in at Wynne's shop up the path, then duel Tobin in Sixfold Meadow: he'll show you how a duel goes.",
+                "Passez à la boutique de Wynne, en haut du chemin, puis défiez Tobin au Pré de Sixfold : il vous montrera comment se passe un duel.",
+            )
+            .into(),
             Objective::Lesson => tr(
                 "Duel Tobin in Sixfold Meadow: he'll show you how a duel goes.",
                 "Défiez Tobin au Pré de Sixfold : il vous montrera comment se passe un duel.",
@@ -278,6 +284,14 @@ mod tests {
             Objective::Rival(rival("bramble").unwrap()),
             "skipped"
         );
+    }
+
+    #[test]
+    fn the_lesson_sends_a_new_player_to_wynne_first() {
+        let new = Objective::Lesson.text(&Progress::default());
+        assert!(new.contains("Wynne") && new.contains("Tobin"), "{new}");
+        let shod = Objective::Lesson.text(&with(&["give:running_shoes"]));
+        assert!(!shod.contains("Wynne") && shod.contains("Tobin"), "{shod}");
     }
 
     #[test]

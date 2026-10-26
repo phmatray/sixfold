@@ -50,3 +50,42 @@ jobs:
           if grep -q cdn.jsdelivr.net web/dist/index.html; then echo 'index.html still loads from a CDN'; exit 1; fi
           grep -q '"./vendor/three/build/three.module.min.js"' web/dist/sw.js
           grep -qx "$(sed -n 's/^THREE_VERSION=\${1:-\(.*\)}$/\1/p' tools/vendor-three.sh)" web/vendor/three/VERSION
+      # The e2e job tests this very build rather than building again.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: web/dist
+          include-hidden-files: true
+          retention-days: 3
+
+  e2e:
+    name: Browser tests (Playwright)
+    needs: rust
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: web/dist
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+      - run: npm ci
+      # The runner image already has the browser's system libraries (--with-deps spends minutes on apt).
+      - run: npx playwright install --only-shell chromium
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-report
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+          retention-days: 7

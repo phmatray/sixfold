@@ -10,7 +10,6 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::campaign::rival;
 use sixfold_engine::clock::{self, Phase};
 use sixfold_engine::objective;
 use sixfold_engine::overworld::{parse_effect, Applied, CamTarget, Cue, Effect as Fx, Progress};
@@ -84,11 +83,16 @@ const REOPEN: &str = "sixfold.reopen-world";
 /// Retry after the scene's modules failed to load: the browser keeps a failed
 /// module import for the page's whole life, so reload and come back here.
 fn reload_into_world() {
-    let w = window();
-    if let Ok(Some(s)) = w.session_storage() {
+    reopen_after_reload();
+    _ = window().location().reload();
+}
+
+/// The next reload opens the world again, not the title (a retry, or the
+/// language switched from the world's menu).
+pub(crate) fn reopen_after_reload() {
+    if let Ok(Some(s)) = window().session_storage() {
         _ = s.set_item(REOPEN, "1");
     }
-    _ = w.location().reload();
 }
 
 /// Whether the page was reloaded to retry the world (see `reload_into_world`); once.
@@ -424,11 +428,7 @@ impl Talk {
 /// The speaker's face: a rival's portrait, a person's bust, none for the hero
 /// or anything that isn't a person on this map.
 fn face_of(id: &str) -> Option<String> {
-    if rival(id).is_some() {
-        Some(format!("world/assets/portraits/{id}.webp"))
-    } else {
-        Some(world_portrait(id)).filter(|u| !u.is_empty())
-    }
+    crate::campaign::portrait_url(id).or_else(|| Some(world_portrait(id)).filter(|u| !u.is_empty()))
 }
 
 /// One step of a cutscene (`docs/WORLD_DESIGN.md` §9.1), as world.js sends it.
@@ -1355,8 +1355,8 @@ pub fn WorldScreen() -> impl IntoView {
                 aria-label=move || {
                     let (walk, act) = (input::prompt(Ctrl::Walk), input::prompt(Ctrl::Act));
                     tr(
-                        format!("The Sixfold world: a meadow, a square, a woodland trail, a boardwalk and a quarry to walk around. {walk} to walk, {act} to act."),
-                        format!("Le monde de Sixfold : un pré, une place, un sentier des bois, une promenade et une carrière à parcourir. {walk} pour marcher, {act} pour agir."),
+                        format!("The Sixfold world: six regions round a meadow, with towns, routes and caves to walk around. {walk} to walk, {act} to act."),
+                        format!("Le monde de Sixfold : six régions autour d'un pré, avec des villes, des routes et des grottes à parcourir. {walk} pour marcher, {act} pour agir."),
                     )
                 }>
                 <div class="world-host" node_ref=host></div>
