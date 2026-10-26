@@ -1484,7 +1484,9 @@ pub fn WorldScreen() -> impl IntoView {
                 on:cancel=on_cancel on:keydown=on_key
                 // Should the browser close the dialog itself, the world must not stay paused
                 // (and a cutscene goes on rather than wait for a line nobody can see).
-                on:close=move |_| if script_talk() { next() } else if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
+                // A close event that arrives once the dialog is open again (closed and reopened in
+                // one go, e.g. J pressed just after a book is put back) is stale: ignored.
+                on:close=move |_| if dlg.get_untracked().is_some_and(|d| d.open()) {} else if script_talk() { next() } else if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
                 // Each line of a talk or a cutscene, read as it comes (a live region outside
                 // the modal dialog would be inert).
                 <p class="sr-only" id="talk-live" aria-live="polite">{move || sheet.with(|s| match s {
