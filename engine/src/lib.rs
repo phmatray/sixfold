@@ -62,7 +62,8 @@ pub use collection::{starter_collection, Collection, LoadError};
 pub use condition::{ActiveEffects, Condition, Placed, Poison, Shield, Special, Status};
 pub use damage::Hit;
 pub use deck::{
-    validate_deck, AddError, DeckError, DeckList, DeckListError, SortBy, DECK_SIZE, MAX_COPIES,
+    deck_errors, hints, validate_deck, AddError, Advice, DeckError, DeckList, DeckListError, Hints,
+    SortBy, DECK_SIZE, MAX_COPIES,
 };
 pub use describe::summarise_turn;
 pub use effect::{Choice, Effect, Find};

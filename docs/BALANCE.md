@@ -222,12 +222,24 @@ within one duel per route duelist plus 45 rival duels and buy at least 10 packs,
 three playthroughs (pack seeds 1, 2 and 3). The rival budget was 40 from 1.2 (risk E1: 54 duels with
 14 route duelists); 1.3 raises it to 45, because pack seed 1 now needs 42 rival duels and seed 2
 (before Tide and Dream) took exactly the old limit. With the 39 route duelists of Tide and Dream that
-is 84 duels; with the 53 of Grove and Stone it is 98, and seeds 1, 2 and 3 finish in 78, 92 and 80 duels
-(25, 39 and 27 rival duels; 23, 25 and 28 packs bought). The budget stays at 45: the rivals still take a
-median of 27 duels, but 2 of the 16 seeds below (10 and 15) need 45 and 55 rival duels.
+is 84 duels; with the 53 of Grove and Stone it is 98. In 1.5 two of the 16 seeds (10 and 15) needed
+45 and 55 rival duels; once achievements paid Facets (1.7 below) that went away.
 
-One seeded run swings widely on the packs alone. `campaign_length` (ignored) plays 16 pack seeds with
-no budget:
+**1.6 decision: the budget stays at 45.** `campaign_sweep` (ignored) plays 16 pack seeds with no budget
+and asserts each fits `RIVAL_DUELS`; it prints the rival each seed lost to most. Re-measured on
+1.6.0's main: 69–98 duels (median 81), 16–45 rival duels (median 28), 27–35 packs. Every seed fits;
+the slowest (13) takes exactly 45. The always-on seeds 1, 2 and 3 take 39, 30 and 18 rival duels.
+The losses are spread (Orla holds back 6 seeds, Bramble 3, Cinza 3, the Warden 3, Marlo 1), and the
+five slowest seeds (39–45 rival duels) are all Orla's, so if a change pushes a
+seed over, ease Orla (5 prizes, Normal) before raising the budget.
+
+| Pack seed | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Duels | 92 | 83 | 71 | 92 | 80 | 89 | 71 | 69 | 78 | 69 | 92 | 84 | 98 | 78 | 69 | 92 |
+| Rival duels | 39 | 30 | 18 | 39 | 27 | 36 | 18 | 16 | 25 | 16 | 39 | 31 | 45 | 25 | 16 | 39 |
+| Held back by | Orla | Cinza | Bramble | Orla | Warden | Bramble | Cinza | Bramble | Cinza | Marlo | Orla | Warden | Orla | Warden | Orla | Orla |
+
+One seeded run swings widely on the packs alone:
 
 | Build | Route duelists | Duels (16 seeds) | Median | Mean |
 |---|---|---|---|---|
@@ -237,6 +249,7 @@ no budget:
 | Tide and Dream (#40) | 39 | 50–78 | 55 | 61 |
 | Tide and Dream + 1.3 | 39 | 55–83 | 66 | 67 |
 | Grove and Stone | 53 | 69–108 | 80 | 82 |
+| Achievement Facets (1.6 audit) | 53 | 69–98 | 81 | 82 |
 
 The boosters release made the campaign easier, and 1.3 gives that back, so no reward moves. Take away
 the 39 route duels and the rivals take a median of 27 duels instead of 16. The 1.3 rules cause it, not
@@ -492,3 +505,39 @@ duel, every find, card and duelist, streaks and records) and pay after the campa
 less else to buy. The campaign playthrough now pays the achievements it can see as they are earned
 (wins, seals, the champion, duelists, cards, packs; it doesn't track the board): over the three pack
 seeds it finished in 92, 83 and 71 duels (78, 92 and 80 before), inside its 98-duel budget.
+
+## 1.7: Rook's story duels
+
+Rook's four duels (`rook_1` … `rook_4`, `engine/src/trainers.rs`, `docs/WORLD_DESIGN.md` §8.2) are in
+`TRAINERS` but never a seal, the champion or a route duelist. Each scene sets `flag:rook_<n>` before its
+duel, so the story moves on whether the player wins or loses; a first win pays ⬡ 100 / 150 / 200 / 300
+and marks `beat:rook_<n>`, a loss pays the usual consolation, and the hall rematch (`rook_4`, after the
+Warden) pays ⬡ 60 a win, like a rival's rematch. The decks are §8.2's lists; Kit::deck pads a Neutral
+deck with Fire and Water, so Blank Slate holds 20 Fire and 21 Water (the table says 21 and 20) and the
+others are exact.
+
+`rook_decks_sweep` (ignored) plays each deck as it plays (its prizes and AI) against the starter, 60 games,
+and against the deck the campaign playthrough holds when it meets that scene (pack seeds 1, 2 and 3, 40 games
+each), the player on Normal, seats alternating. For the record, the six prebuilts (a hand-made deck of a few
+seals' strength) in an earlier run of the same sweep. Rook's win rate:
+
+| Duel | Deck | Prizes, AI | vs the starter | vs the playthrough's deck at that scene | vs the prebuilts |
+|---|---|---|---|---|---|
+| `rook_1` | Blank Slate | 2, Normal | 2% | 5% | 3% |
+| `rook_2` | Open Sky | 4, Normal | 43% | 49% | 31% |
+| `rook_3` | Hollow Crown | 5, Hard | 70% | 88% | 49% |
+| `rook_4` | Seventh Face | 6, Hard | 72% | 90% | 62% |
+
+Blank Slate is §8.2's near-copy of the Scrap kit (Basics only, 3% in `kit_sweep`): the first meeting is a
+formality, as the story wants (he "lost to everyone"). The second is even. From the third, Rook is the
+hardest duel outside the rivals: about even with a prebuilt-level deck, and far ahead of the playthrough's
+greedy builder, whose decks are piles of whatever it owns. A loss never blocks anything (the scene has already
+moved the story on), so the two Hard duels are where *Blank Cheque* (win all four at the first try) earns its
+"hard" mark; `campaign_length` over 16 pack seeds goes from 69–98 duels (median 81) to 71–111 (median 92),
+four of them Rook's and the rest the seeds' usual swing.
+
+`economy_sim` counts each scene once (a minute, plus two minutes a prize) for half its purse (a first
+playthrough wins about half of them) plus a consolation: the first playthrough moves from 5.34 to **5.30
+packs an hour**; exploring stays at 5.23. The campaign playthrough meets Rook as each scene's seals are met
+(one duel, won or lost) and wins the first two, loses the last two, on all three pack seeds; it finishes in
+92, 92 and 80 duels (92, 83 and 71 before), inside its budget, now 102 duels (57 trainers plus 45).

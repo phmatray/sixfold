@@ -104,22 +104,25 @@ async function groundSampler(base) {
 }
 
 // `open(x, z)`: grass may grow on this tile; `tile(x, z)`: its map character.
-// `density` scales the whole field (the map's `ground.tufts` / 1800).
-export async function grass(root, map, tile, open, density = 1) {
+// `density` scales the whole field (the map's `ground.tufts` / 1800); `rise(x, z)`: the
+// tile's ground height, so tufts stand on plateau tops too.
+export async function grass(root, map, tile, open, density = 1, rise = () => 0) {
   const st = styleOf(map), k = Math.sqrt(density) * st.n; // sqrt: a sparse map still gets drifts
   const { width: W, height: H } = map;
   const r = rng(W * 977 + H * 31 + 5);
   const ground = await groundSampler(map.ground.base);
   const short = [], tall = [], blooms = [];
   const poisson = (l) => Math.floor(l) + (r() < l % 1 ? 1 : 0);
+  let y = 0; // the current tile's height
   const put = (x, z, edge) => {
     const list = r() < st.tall * (edge ? 2.5 : 1) ? tall : short;
-    list.push({ x, z, s: edge ? 1.05 + r() * 0.35 : 0.75 + r() * 0.5 });
-    if (st.bloom.length && !edge && r() < 0.07) blooms.push({ x: x + (r() - 0.5) * 0.1, z: z + (r() - 0.5) * 0.1 });
+    list.push({ x, y, z, s: edge ? 1.05 + r() * 0.35 : 0.75 + r() * 0.5 });
+    if (st.bloom.length && !edge && r() < 0.07) blooms.push({ x: x + (r() - 0.5) * 0.1, y, z: z + (r() - 0.5) * 0.1 });
   };
   for (let z = 0; z < H; z++)
     for (let x = 0; x < W; x++) {
       if (!open(x, z)) continue;
+      y = rise(x, z);
       // Soft drifts: patches of thick grass, thin lawn between.
       const drift = smooth(0.38, 0.78, noise(x * 0.3, z * 0.3) * 0.7 + noise(x * 0.85 + 9.1, z * 0.85 - 3.3) * 0.3);
       for (let n = poisson(k * (0.12 + 3.2 * drift)); n--; ) {
@@ -147,7 +150,7 @@ export async function grass(root, map, tile, open, density = 1) {
     list.forEach((p, i) => {
       e.set((r() - 0.5) * 0.25, r() * Math.PI * 2, (r() - 0.5) * 0.25);
       const xz = 0.85 + r() * 0.35;
-      inst.setMatrixAt(i, m.compose(v.set(p.x, 0, p.z), q.setFromEuler(e), s.set(xz, p.s, xz)));
+      inst.setMatrixAt(i, m.compose(v.set(p.x, p.y, p.z), q.setFromEuler(e), s.set(xz, p.s, xz)));
       inst.setColorAt(i, ground(p.x, p.z, col));
       col.copy(tip).offsetHSL((r() - 0.5) * 0.04, (r() - 0.5) * 0.1, (r() - 0.5) * 0.1);
       tips.set([col.r, col.g, col.b], i * 3);
@@ -171,7 +174,7 @@ export async function grass(root, map, tile, open, density = 1) {
     geo.setAttribute("windw", new THREE.Float32BufferAttribute(new Array(geo.attributes.position.count).fill(0.8), 1));
     const bloom = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial(), blooms.length);
     blooms.forEach((p, i) => {
-      bloom.setMatrixAt(i, m.compose(v.set(p.x, st.h * (0.6 + r() * 0.3), p.z), q.identity(), s.set(1, 0.6, 1)));
+      bloom.setMatrixAt(i, m.compose(v.set(p.x, p.y + st.h * (0.6 + r() * 0.3), p.z), q.identity(), s.set(1, 0.6, 1)));
       bloom.setColorAt(i, col.set(st.bloom[Math.floor(r() * st.bloom.length)]));
     });
     bloom.computeBoundingSphere();

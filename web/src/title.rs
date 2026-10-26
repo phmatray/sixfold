@@ -91,10 +91,18 @@ fn LessonItem(
 #[component]
 fn LangSwitch() -> impl IntoView {
     let now = sixfold_engine::lang();
+    // Switched from the world's menu, the reload lands back in the world.
+    let screen = use_context::<RwSignal<Screen>>();
+    let switch = move |l: Lang| {
+        if screen.is_some_and(|s| s.get_untracked() == Screen::World) {
+            crate::world::reopen_after_reload();
+        }
+        store::set_lang(l)
+    };
     let button = move |l: Lang, short: &'static str, name: &'static str| {
         view! {
             <button type="button" lang=l.code() aria-label=name aria-pressed=(l == now).to_string()
-                on:click=move |_| if l != now { store::set_lang(l) }>{short}</button>
+                on:click=move |_| if l != now { switch(l) }>{short}</button>
         }
     };
     view! {
@@ -146,6 +154,7 @@ pub fn OptionsPanel() -> impl IntoView {
             <LangSwitch />
             <TextSize />
             <AudioSettings />
+            <crate::input::ControlsSettings />
             <SaveSettings />
             <crate::offline::OfflineStatus />
             {move || if confirm.get() {
@@ -312,7 +321,7 @@ pub fn TitleScreen() -> impl IntoView {
                             <MenuItem label="Collection" sub=Signal::derive(found) to=Screen::Collection />
                             <MenuItem label=tr("Records", "Palmarès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
                             {move || if due.get() {
-                                view! { <MenuItem label=tr("Explore the world", "Explorer le monde") sub=tr("Explore the meadow and the four roads out of it", "Le pré et les quatre routes qui en partent") to=Screen::World /> }.into_any()
+                                view! { <MenuItem label=tr("Explore the world", "Explorer le monde") sub=tr("Six regions round the meadow, and the roads between", "Six régions autour du pré, et les routes qui les relient") to=Screen::World /> }.into_any()
                             } else {
                                 view! { <LessonItem label=tr("How to play", "Comment jouer") sub=tr("Replay the guided first duel", "Rejouer le premier duel guidé") /> }.into_any()
                             }}

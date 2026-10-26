@@ -8,6 +8,15 @@ use sixfold_engine::{
 
 use crate::art::{card_art, card_color, color_key, glyph_svg};
 
+/// The player asked for less motion: animations become cuts.
+pub fn reduced_motion() -> bool {
+    window()
+        .match_media("(prefers-reduced-motion: reduce)")
+        .ok()
+        .flatten()
+        .is_some_and(|m| m.matches())
+}
+
 pub fn kind_label(def: &CardDef) -> String {
     match &def.kind {
         CardKind::Creature(c) => c.stage.to_string(),

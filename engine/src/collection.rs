@@ -101,6 +101,17 @@ impl Collection {
         self.missing(deck).is_empty()
     }
 
+    /// Binder progress over the set's cards that `keep` selects: (distinct
+    /// cards owned, cards in the selection). Basic energy is left out (it is
+    /// always owned), so a selection of only basic energy is (0, 0).
+    pub fn completion(&self, keep: impl Fn(CardId) -> bool) -> (usize, usize) {
+        crate::set::ids()
+            .filter(|&id| !crate::card::card(id).is_basic_energy() && keep(id))
+            .fold((0, 0), |(have, all), id| {
+                (have + usize::from(self.count(id) > 0), all + 1)
+            })
+    }
+
     /// `v1;<id>:<count>,...;<checksum>`: decimal ids in ascending order,
     /// checksum the FNV-1a hash of everything before the last `;`, as 8 hex
     /// digits. The same collection always gives the same string.
@@ -186,8 +197,25 @@ pub fn starter_collection() -> Collection {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::card::card;
     use crate::decks::ember_rush;
     use crate::set::*;
+
+    #[test]
+    fn completion_counts_distinct_cards_owned() {
+        let mut c = Collection::new();
+        let total = ids().filter(|&id| !card(id).is_basic_energy()).count();
+        assert_eq!(c.completion(|_| true), (0, total));
+        c.add(CINDREL, 3);
+        c.add(PYREQUILL, 1);
+        assert_eq!(c.completion(|_| true), (2, total));
+        let rares = ids().filter(|&id| card(id).rarity == crate::Rarity::Rare);
+        assert_eq!(
+            c.completion(|id| card(id).rarity == crate::Rarity::Rare),
+            (1, rares.count())
+        );
+        assert_eq!(c.completion(|id| card(id).is_basic_energy()), (0, 0));
+    }
 
     #[test]
     fn add_remove_count() {

@@ -14,6 +14,7 @@ mod ctl;
 mod decks;
 mod duel;
 mod history;
+mod input;
 mod journal;
 mod offline;
 mod overlays;
@@ -153,6 +154,7 @@ fn App() -> impl IntoView {
     provide_context(world::LastTab(RwSignal::new(world::MenuTab::Decks)));
     store::provide();
     stats::provide();
+    input::provide();
     // A save from before promos: hand over those of rivals already beaten.
     let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
     let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
@@ -446,6 +448,48 @@ fn MatchScreen() -> impl IntoView {
     // On the window, so they work wherever focus is (or isn't).
     let keys = window_event_listener(leptos::ev::keydown, on_key);
     on_cleanup(move || keys.remove());
+    // A pad's Start (gamepad.js) opens and closes the duel menu.
+    let pad_menu = window_event_listener_untyped("sixfold-input", move |e| {
+        if input::action(&e).as_deref() == Some("menu") {
+            e.prevent_default();
+            menu.update(|m| *m = !*m);
+        }
+    });
+    on_cleanup(move || pad_menu.remove());
+    // The browser's Back (a phone's back gesture) would leave the app and lose
+    // the duel: a history entry of our own catches it and asks first, like the
+    // menu's Leave. A finished duel keeps its result's own buttons (credits,
+    // the next rung), so Back does nothing there. Leaving another way takes
+    // the entry back off; a duel replayed in place keeps it.
+    const GUARD: &str = "sixfold-duel";
+    let guarded = || {
+        window()
+            .history()
+            .ok()
+            .and_then(|h| h.state().ok())
+            .and_then(|s| s.as_string())
+            .as_deref()
+            == Some(GUARD)
+    };
+    let guard = move || {
+        if let (false, Ok(h)) = (guarded(), window().history()) {
+            _ = h.push_state(&GUARD.into(), "");
+        }
+    };
+    guard();
+    let back = window_event_listener(leptos::ev::popstate, move |_| {
+        guard();
+        if !over() {
+            asking.set(true)
+        }
+    });
+    on_cleanup(move || {
+        back.remove();
+        let replay = screen.try_get_untracked() == Some(Screen::Match);
+        if let (false, true, Ok(h)) = (replay, guarded(), window().history()) {
+            _ = h.back();
+        }
+    });
     // Focus never falls to the page: when the focused control goes (a card
     // played, a panel closed), it lands back on your hand or End turn.
     // Only for keyboard players: a touch or mouse player never sees a card

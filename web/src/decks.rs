@@ -3,13 +3,14 @@
 use leptos::prelude::*;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{
-    card, card_id, fr, tr, AddError, CardId, CardKind, Collection, DeckError, DeckList,
-    DeckListError, SortBy, DECK_SIZE,
+    card, card_id, fr, hints, tr, AddError, Advice, CardId, CardKind, Collection, DeckError,
+    DeckList, DeckListError, SortBy, DECK_SIZE, MAX_COPIES,
 };
+use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 use crate::art::card_color;
-use crate::binder::{inspect_handlers, FilterBar, Filters, Own, PageBar};
+use crate::binder::{inspect_handlers, FilterBar, Filters, Kind, Own, PageBar};
 use crate::board::cards;
 use crate::cards::{deck_colors, deck_star, face_text, CardFace, Pip};
 use crate::overlays::Inspector;
@@ -96,6 +97,203 @@ pub(crate) fn de(name: &str) -> String {
         format!("d'{name}")
     } else {
         format!("de {name}")
+    }
+}
+
+// A refused add shakes its button. A card flies from where it was added to where it lands in the deck pane
+// (or the Deck tab on a phone), and the landing spot glows. Nothing moves
+// under prefers-reduced-motion.
+#[wasm_bindgen(inline_js = r#"
+export function shake(el) {
+  if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  el.animate([{ translate: "0" }, { translate: "-5px" }, { translate: "4px" }, { translate: "-2px" }, { translate: "0" }], { duration: 280, easing: "ease-out" });
+}
+export function fly_card(from, to) {
+  if (!from || !to || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+  if (!a.width || !b.width) return;
+  const ghost = from.cloneNode(true);
+  ghost.removeAttribute("id");
+  ghost.setAttribute("aria-hidden", "true");
+  Object.assign(ghost.style, { position: "fixed", left: a.left + "px", top: a.top + "px", width: a.width + "px", height: a.height + "px", margin: 0, zIndex: 90, pointerEvents: "none", "--w": a.width + "px" });
+  ghost.classList.add("flying");
+  // Inside a modal dialog (the in-game menu), the top layer would hide it from the body.
+  (from.closest("dialog") ?? document.body).append(ghost);
+  const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2);
+  const s = Math.max(0.18, Math.min(1, (b.height * 1.6) / a.height));
+  ghost.animate(
+    [
+      { transform: "translate(0, 0) rotate(0) scale(1)", opacity: 1 },
+      { transform: `translate(${dx * 0.45}px, ${dy * 0.45 - 40}px) rotate(-6deg) scale(${(1 + s) / 2})`, opacity: 1, offset: 0.45 },
+      { transform: `translate(${dx}px, ${dy}px) rotate(0) scale(${s})`, opacity: 0.2 },
+    ],
+    { duration: 520, easing: "cubic-bezier(0.3, 0.7, 0.2, 1)" },
+  ).finished.finally(() => {
+    ghost.remove();
+    to.animate([{ boxShadow: "0 0 0 2px rgba(243, 213, 137, 0.9), 0 0 18px rgba(243, 213, 137, 0.55)" }, { boxShadow: "0 0 0 2px rgba(243, 213, 137, 0)" }], { duration: 700, easing: "ease-out" });
+  });
+}
+"#)]
+extern "C" {
+    fn shake(el: Option<web_sys::Element>);
+    fn fly_card(from: Option<web_sys::Element>, to: Option<web_sys::Element>);
+}
+
+/// One way to fix a deck problem in place.
+#[derive(Clone, Copy, PartialEq)]
+enum Fix {
+    /// [`DeckList::repair`] knows the fix.
+    Repair(DeckListError),
+    /// Filter "Your cards" to the Basic Hexons.
+    ShowBasics,
+    /// Show the deck pane, to choose what comes out.
+    ShowDeck,
+    /// Show every card of "Your cards", to choose what goes in.
+    ShowCards,
+}
+
+/// A deck problem as a sentence naming the rule, and the fix the editor
+/// offers for it (with its button label), if any.
+fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Option<(String, Fix)>) {
+    let repairable = || d.clone().repair(e, owned);
+    match e {
+        DeckListError::Illegal(DeckError::WrongSize(n)) if n < DECK_SIZE => {
+            let short = DECK_SIZE - n;
+            let rule = tr(
+                format!("A deck holds exactly {DECK_SIZE} cards: {short} to go."),
+                format!("Un deck compte exactement {DECK_SIZE} cartes : encore {short}."),
+            );
+            // Energy fills the gap only while that leaves a playable mix.
+            let mut filled = d.clone();
+            let fills = filled.repair(e, owned);
+            let heavy = hints(&filled.cards)
+                .advice()
+                .iter()
+                .any(|a| matches!(a, Advice::MuchEnergy(_)));
+            if fills && !heavy {
+                let label = tr(
+                    format!("Fill with {short} energy"),
+                    format!("Compléter avec {short} énergies"),
+                );
+                (rule, Some((label, Fix::Repair(e))))
+            } else {
+                (
+                    tr(
+                        format!("{rule} Energy alone would leave too few Hexons and trainers: add some first."),
+                        format!("{rule} Avec seulement des énergies, il resterait trop peu d'Hexons et de Dresseurs : ajoutez-en d'abord."),
+                    ),
+                    Some((tr("Show your cards", "Voir vos cartes").into(), Fix::ShowCards)),
+                )
+            }
+        }
+        DeckListError::Illegal(DeckError::WrongSize(n)) => {
+            let over = n - DECK_SIZE;
+            (
+                tr(
+                    format!("A deck holds exactly {DECK_SIZE} cards: {over} too many."),
+                    format!("Un deck compte exactement {DECK_SIZE} cartes : {over} de trop."),
+                ),
+                Some(if repairable() {
+                    (
+                        tr(
+                            format!("Take out {over} basic energy"),
+                            format!("Retirer {over} énergies de base"),
+                        ),
+                        Fix::Repair(e),
+                    )
+                } else {
+                    (tr("Show the deck", "Voir le deck").into(), Fix::ShowDeck)
+                }),
+            )
+        }
+        DeckListError::Illegal(DeckError::NoBasic) => (
+            tr(
+                "A deck needs at least one Basic Hexon to start a duel.",
+                "Un deck doit compter au moins un Hexon de Base pour commencer un duel.",
+            )
+            .into(),
+            Some((
+                tr("Show Basic Hexons", "Voir les Hexons de Base").into(),
+                Fix::ShowBasics,
+            )),
+        ),
+        DeckListError::Illegal(DeckError::TooManyCopies(name)) => {
+            let label = card_id(name).map_or(name, |id| card(id).label());
+            let n = d.copies(name);
+            (
+                tr(
+                    format!("At most {MAX_COPIES} cards of one name (basic energy aside): {n} {label}."),
+                    format!("{MAX_COPIES} cartes d'un même nom au plus (hors énergies de base) : {n} exemplaires {}.", de(label)),
+                ),
+                Some((
+                    tr(format!("Keep {MAX_COPIES}"), format!("En garder {MAX_COPIES}")),
+                    Fix::Repair(e),
+                )),
+            )
+        }
+        DeckListError::NotOwned(id) => {
+            let label = card(id).label();
+            let (n, have) = (
+                d.cards.iter().filter(|&&c| c == id).count(),
+                owned.count(id),
+            );
+            (
+                tr(
+                    format!("A deck uses only cards you own: {n} {label} in it, {have} in your collection."),
+                    format!("Un deck n'utilise que vos cartes : {n} exemplaires {} dedans, {have} dans votre collection.", de(label)),
+                ),
+                Some((
+                    match have {
+                        0 => tr("Take them out", "Les retirer").to_string(),
+                        _ => tr(format!("Keep {have}"), format!("En garder {have}")),
+                    },
+                    Fix::Repair(e),
+                )),
+            )
+        }
+        DeckListError::Illegal(DeckError::UnknownCard(_)) => (
+            tr(
+                "It holds a card this version of the set doesn't have.",
+                "Il contient une carte absente de cette version du jeu.",
+            )
+            .into(),
+            Some((tr("Remove it", "La retirer").into(), Fix::Repair(e))),
+        ),
+    }
+}
+
+/// Composition advice as a sentence (soft: the deck stays legal).
+fn advise(a: Advice) -> String {
+    match a {
+        Advice::FewBasics(n) => {
+            let (en, fr) = match n {
+                1 => ("Only 1 Basic Hexon".to_string(), "Un seul Hexon de Base".to_string()),
+                n => (format!("Only {n} Basic Hexons"), format!("Seulement {n} Hexons de Base")),
+            };
+            tr(
+                format!("{en}: opening hands without one get likely. Most decks run 10 to 15."),
+                format!("{fr} : une main de départ sans aucun devient probable. La plupart des decks en comptent 10 à 15."),
+            )
+        }
+        Advice::FewEnergy(n) => tr(
+            format!("Only {n} energy cards: attacks will wait. Most decks run 22 to 28."),
+            format!("Seulement {n} énergies : les attaques vont attendre. La plupart des decks en comptent 22 à 28."),
+        ),
+        Advice::MuchEnergy(n) => tr(
+            format!("{n} energy cards leave little room for Hexons and trainers. Most decks run 22 to 28."),
+            format!("{n} énergies laissent peu de place aux Hexons et aux Dresseurs. La plupart des decks en comptent 22 à 28."),
+        ),
+        Advice::Stranded(id) => {
+            let def = card(id);
+            let from = def
+                .creature()
+                .and_then(|c| c.evolves_from)
+                .map_or("?", |f| card_id(f).map_or(f, |i| card(i).label()));
+            tr(
+                format!("{} awakens from {from}, which isn't in the deck.", def.label()),
+                format!("{} s'éveille de {from}, absent du deck.", def.label()),
+            )
+        }
     }
 }
 
@@ -363,12 +561,81 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
         }));
     };
     let total = move || draft.with(|d| d.cards.len());
-    let problem = move || profile.with(|p| draft.with(|d| deck_problem(d, &p.collection)));
-    let kinds = move || {
-        draft.with(|d| {
-            ["Creatures", "Trainers", "Energy"]
-                .map(|g| (g, d.cards.iter().filter(|&&id| group_of(id) == g).count()))
+    // Bumped on every change to the deck's size: renders the counts (read
+    // untracked there, so they render once) and replays their bump.
+    let pulse = RwSignal::new(0u32);
+    Effect::new(move |prev: Option<usize>| {
+        let n = total();
+        if prev.is_some_and(|p| p != n) {
+            pulse.update(|k| *k += 1);
+        }
+        n
+    });
+    let problems = move || {
+        profile.with(|p| {
+            draft.with(|d| {
+                let mut list = d.problems(&p.collection);
+                // The size last: its fix depends on what the others take out.
+                list.sort_by_key(|e| matches!(e, DeckListError::Illegal(DeckError::WrongSize(_))));
+                list.into_iter()
+                    .map(|e| explain(e, d, &p.collection))
+                    .collect::<Vec<_>>()
+            })
         })
+    };
+    let comp = move || draft.with(|d| hints(&d.cards));
+    let apply = move |fix: Fix| match fix {
+        Fix::Repair(e) => {
+            let changed = profile.with_untracked(|p| {
+                draft
+                    .try_update(|d| d.repair(e, &p.collection))
+                    .unwrap_or(false)
+            });
+            if changed {
+                crate::audio::sfx("place", 0.0);
+                msg.set(Some(tr("Fixed.", "Corrigé.").into()));
+                // The button just went away: on to the next fix, or the status line.
+                request_animation_frame(|| {
+                    let doc = document();
+                    let next = doc
+                        .query_selector(".deck-checks .btn.fix")
+                        .ok()
+                        .flatten()
+                        .or_else(|| doc.query_selector(".editor-msg").ok().flatten());
+                    if let Some(el) = next.and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok()) {
+                        let _ = el.focus();
+                    }
+                });
+            }
+        }
+        Fix::ShowCards => {
+            f.clear();
+            tab.set(Tab::Cards);
+            if let Some(el) = document().get_element_by_id("pane-cards") {
+                el.scroll_into_view();
+            }
+        }
+        Fix::ShowDeck => {
+            tab.set(Tab::Deck);
+            if let Some(el) = document().get_element_by_id("pane-deck") {
+                el.scroll_into_view();
+            }
+        }
+        Fix::ShowBasics => {
+            f.clear();
+            f.kind.set(Kind::Basic);
+            tab.set(Tab::Cards);
+            msg.set(Some(
+                tr(
+                    "Your Basic Hexons are shown: add one.",
+                    "Vos Hexons de Base sont affichés : ajoutez-en un.",
+                )
+                .into(),
+            ));
+            if let Some(el) = document().get_element_by_id("pane-cards") {
+                el.scroll_into_view();
+            }
+        }
     };
     let curve = move || draft.with(energy_curve);
     // Escape steps back one layer: the card sheet, the leave question, then
@@ -417,13 +684,22 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 </div>
             })}
             <section class="deck-stats" aria-label=tr("Deck summary", "Résumé du deck")>
-                <p class="deck-total"><b>{total}</b>" / " {DECK_SIZE}{tr(" cards", " cartes")}</p>
-                {move || match problem() {
-                    None => view! { <span class="legal yes">{tr("Ready to play", "Prêt à jouer")}</span> }.into_any(),
-                    Some(p) => view! { <span class="legal no">{tr("Not legal yet: ", "Pas encore valide : ")} {p}</span> }.into_any(),
-                }}
-                <ul class="kind-counts">
-                    {move || kinds().into_iter().map(|(g, n)| view! { <li><b>{n}</b>" " {group_label(g)}</li> }).collect_view()}
+                <p class="deck-total">{move || { let k = pulse.get(); view! { <b class:bump={k > 0}>{draft.with_untracked(|d| d.cards.len())}</b> } }}" / " {DECK_SIZE}{tr(" cards", " cartes")}</p>
+                <ul class="kind-counts" aria-label=tr("Composition", "Composition")>
+                    {move || {
+                        let h = comp();
+                        let share = (h.energy * 100).checked_div(h.total).unwrap_or(0);
+                        [
+                            (h.basics, tr("Basic", "de Base")),
+                            (h.stage1, tr("Stage 1", "Niveau 1")),
+                            (h.stage2, tr("Stage 2", "Niveau 2")),
+                            (h.trainers, tr("Trainers", "Dresseurs")),
+                        ]
+                        .into_iter()
+                        .map(|(n, l)| view! { <li><b>{n}</b>" " {l}</li> }.into_any())
+                        .chain(std::iter::once(view! { <li><b>{h.energy}</b>" " {tr("Energy", "Énergies")}<span class="share">{format!(" · {share} %")}</span></li> }.into_any()))
+                        .collect_view()
+                    }}
                 </ul>
                 <figure class="curve">
                     <div class="curve-bars" role="img" aria-label=move || {
@@ -447,13 +723,57 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                     </div>
                     <figcaption>{tr("Energy for each Hexon's biggest attack", "Énergie de l'attaque la plus chère de chaque Hexon")}</figcaption>
                 </figure>
-                <p class="editor-msg" role="status" aria-live="polite">{move || msg.get()}</p>
+                <div class="deck-checks">
+                    {move || {
+                        let list = problems();
+                        if list.is_empty() {
+                            view! { <p class="legal yes">{tr("Ready to play", "Prêt à jouer")}</p> }.into_any()
+                        } else {
+                            view! {
+                                <h2 class="checks-title">{tr("Not legal yet", "Pas encore valide")}</h2>
+                                <ul class="checks">
+                                    {list.into_iter().map(|(text, fix)| view! {
+                                        <li class="check no">
+                                            <span>{text}</span>
+                                            {fix.map(|(label, fx)| view! { <button type="button" class="btn fix" on:click=move |_| apply(fx)>{label}</button> })}
+                                        </li>
+                                    }).collect_view()}
+                                </ul>
+                            }.into_any()
+                        }
+                    }}
+                    <ul class="checks advice">
+                        {move || comp().advice().into_iter().map(|a| {
+                            // A stranded evolution: one tap adds its pre-evolution when it can go in.
+                            let add = match a {
+                                Advice::Stranded(id) => card(id).creature().and_then(|c| c.evolves_from).and_then(card_id)
+                                    .filter(|&pre| profile.with(|p| draft.with(|d| d.check_add(pre, &p.collection).is_ok()))),
+                                _ => None,
+                            };
+                            view! {
+                                <li class="check hint">
+                                    <span>{advise(a)}</span>
+                                    {matches!(a, Advice::FewBasics(_)).then(|| view! {
+                                        <button type="button" class="btn fix" on:click=move |_| apply(Fix::ShowBasics)>{tr("Show Basic Hexons", "Voir les Hexons de Base")}</button>
+                                    })}
+                                    {add.map(|pre| view! {
+                                        <button type="button" class="btn fix" on:click=move |_| { try_add(pre, profile, draft, msg, None); }>
+                                            {tr(format!("Add {}", card(pre).label()), format!("Ajouter {}", card(pre).label()))}
+                                        </button>
+                                    })}
+                                </li>
+                            }
+                        }).collect_view()}
+                    </ul>
+                </div>
+                <p class="editor-msg" role="status" aria-live="polite" tabindex="-1">{move || msg.get()}</p>
             </section>
+
             <div class="editor-tabs" role="tablist" aria-label=tr("Editor panes", "Volets de l'éditeur")>
                 <button type="button" role="tab" id="tab-cards" aria-controls="pane-cards" aria-selected=move || (tab.get() == Tab::Cards).to_string()
                     on:click=move |_| tab.set(Tab::Cards)>{tr("Your cards", "Vos cartes")}</button>
                 <button type="button" role="tab" id="tab-deck" aria-controls="pane-deck" aria-selected=move || (tab.get() == Tab::Deck).to_string()
-                    on:click=move |_| tab.set(Tab::Deck)>{move || format!("Deck ({})", total())}</button>
+                    on:click=move |_| tab.set(Tab::Deck)>"Deck " {move || { let k = pulse.get(); view! { <span class="tab-count" class:bump={k > 0}>{format!("({})", draft.with_untracked(|d| d.cards.len()))}</span> } }}</button>
             </div>
             <main class="editor-panes">
                 <section class="pane pane-cards" id="pane-cards" role="tabpanel" aria-labelledby="tab-cards" class:inactive=move || tab.get() != Tab::Cards>
@@ -494,13 +814,15 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
     .into_any()
 }
 
-/// Try to add a card; says why when it can't go in.
+/// Try to add a card; says why when it can't go in. `from` is the card
+/// face it was added from, which flies to where it lands.
 fn try_add(
     id: CardId,
     profile: RwSignal<Profile>,
     draft: RwSignal<DeckList>,
     msg: RwSignal<Option<String>>,
-) {
+    from: Option<web_sys::Element>,
+) -> bool {
     let r = profile.with_untracked(|p| {
         draft
             .try_update(|d| {
@@ -509,13 +831,31 @@ fn try_add(
             })
             .unwrap_or(Ok(()))
     });
+    let ok = r.is_ok();
+    crate::audio::sfx(if ok { "place" } else { "impact" }, 0.0);
     msg.set(Some(match r {
         Ok(()) => tr(
             format!("Added {}.", card(id).label()),
-            format!("Ajout : {}.", card(id).label()),
+            format!("Ajout : {}.", card(id).label()),
         ),
         Err(why) => why,
     }));
+    if ok && from.is_some() {
+        // Once the deck pane shows the new line: its row, or the Deck tab
+        // on a phone (where the pane is hidden).
+        request_animation_frame(move || {
+            let doc = document();
+            let visible = |e: &web_sys::Element| e.client_width() > 0;
+            let to = doc
+                .query_selector(&format!(".deck-line[data-card=\"{}\"]", id.0))
+                .ok()
+                .flatten()
+                .filter(visible)
+                .or_else(|| doc.get_element_by_id("tab-deck").filter(visible));
+            fly_card(from, to);
+        });
+    }
+    ok
 }
 
 #[component]
@@ -534,13 +874,23 @@ fn PickTile(id: CardId, draft: RwSignal<DeckList>, msg: RwSignal<Option<String>>
             })
         })
     };
+    let face = NodeRef::<leptos::html::Button>::new();
+    let add_btn = NodeRef::<leptos::html::Button>::new();
+    let add = move |_| {
+        let from = face
+            .get_untracked()
+            .and_then(|b| b.query_selector(".card").ok().flatten());
+        if !try_add(id, profile, draft, msg, from) {
+            shake(add_btn.get_untracked().map(Into::into));
+        }
+    };
     view! {
         <li class="pick" class:blocked=move || blocked().is_some()>
-            <button type="button" class="bind-card" aria-label=tr(format!("{}, details", face_text(id)), format!("{}, détails", face_text(id)))
+            <button type="button" class="bind-card" node_ref=face aria-label=tr(format!("{}, details", face_text(id)), format!("{}, détails", face_text(id)))
                 on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
                 <CardFace id=id />
             </button>
-            <span class="pick-count">
+            <span class="pick-count" class:has={move || in_deck() > 0}>
                 {move || match owned() {
                     usize::MAX => tr(format!("{} in deck", in_deck()), format!("{} dans le deck", in_deck())),
                     n => tr(format!("{} of {n} in deck", in_deck()), format!("{} sur {n} dans le deck", in_deck())),
@@ -552,7 +902,8 @@ fn PickTile(id: CardId, draft: RwSignal<DeckList>, msg: RwSignal<Option<String>>
                     Some(why) => tr(format!("Add {}: {why}", def.label()), format!("Ajouter {} : {why}", def.label())),
                 }
                 title=move || blocked().unwrap_or_default()
-                on:click=move |_| try_add(id, profile, draft, msg)>
+                node_ref=add_btn
+                on:click=add>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
                 {tr("Add", "Ajouter")}
             </button>
@@ -574,13 +925,14 @@ fn DeckLine(
         draft.update(|d| {
             d.remove(id);
         });
+        crate::audio::sfx("flip", 0.0);
         msg.set(Some(tr(
             format!("Removed {}.", def.label()),
             format!("Retrait : {}.", def.label()),
         )));
     };
     view! {
-        <li class="deck-line">
+        <li class="deck-line" data-card=id.0>
             <span class="line-count">{format!("{n}×")}</span>
             {match card_color(def) {
                 Some(c) => view! { <Pip color=c /> }.into_any(),
@@ -592,7 +944,7 @@ fn DeckLine(
             <button type="button" class="btn icon" aria-label=tr(format!("Remove one {}", def.label()), format!("Retirer un exemplaire {}", de(def.label()))) on:click=remove>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /></svg>
             </button>
-            <button type="button" class="btn icon" aria-label=tr(format!("Add one {}", def.label()), format!("Ajouter un exemplaire {}", de(def.label()))) on:click=move |_| try_add(id, profile, draft, msg)>
+            <button type="button" class="btn icon" aria-label=tr(format!("Add one {}", def.label()), format!("Ajouter un exemplaire {}", de(def.label()))) on:click=move |_| { try_add(id, profile, draft, msg, None); }>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
             </button>
         </li>

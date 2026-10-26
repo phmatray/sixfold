@@ -1239,6 +1239,37 @@ def sable(c):
     prop(c, "R", HEXSTAFF, "staff_trim", tube([Vector((hp.x - 0.02, hp.y - 0.03, 0.03)), top], 0.018, 6))
     prop(c, "R", HEXSTAFF, "gold", torus(0.1, 0.018, 6, 4), T(tuple(top + Vector((0, 0, 0.1))), (90, 0, 0)))
 
+# ---------------------------------------------------------------- Rook, the story rival (1.7)
+
+SLOUCH = {"Torso": ((0, 0, 0), (6, 0, 0)), "Head": ((0, 0, 0), (-4, 0, 6)),
+          "Arm.L": ((0, 0, 0), (0, 4, 8)), "Arm.R": ((0, 0, 0), (0, -4, -8))}
+
+
+@person("rival_colorless", palette(hair="#3a3a40", hair_tip="#e9e7e2", hoodie="#6f6d69", hood_dk="#53514d", patch="#f4f2ec",
+                                   tally="#f4f2ec", trousers="#4a4a50", shoe="#e9e7e2", sole="#bdbab3"),
+        bz=1.12, bw=0.98, hs=0.94, leg=1.04, pose=SLOUCH, swing=0.8)
+def rook(c):
+    """Rook, The Blank: a grey hoodie with the hood down, a blank white hexagon patch where a colour would go, a tally
+    of wins chalked on the left sleeve, untidy dark hair with one pale streak, scuffed white trainers."""
+    boots(c, "shoe", sole="sole")
+    legs(c, "trousers")
+    torso(c, "hoodie")
+    skirt(c, "hoodie", 0.5, 0.62, 0.19, 0.17, target=110)
+    c.fuse("hood_dk", "Torso", [sp(0.13, (0, 0.11, 0.94), (1.25, 0.9, 0.55))], 140)  # the hood, down on the shoulders
+    c.add(cyl(0.05, 0.05, 0.01, 6), "patch", "Torso", T((0, -0.168, 0.76), (90, 30, 0)), smooth=False)  # the blank hexagon
+    arms(c, "hoodie", cuff="hood_dk", target=120)
+    for i in range(4):  # four chalk strokes and one across, on the left sleeve
+        c.add(box(0.008, 0.012, 0.07), "tally", "Arm.L", T((0.262, -0.035 + i * 0.022, 0.8)), smooth=False)
+    c.add(box(0.008, 0.1, 0.01), "tally", "Arm.L", T((0.264, -0.002, 0.8), (18, 0, 0)), smooth=False)
+    head(c)
+    face(c, "smirk", brow=(0.072, 0.016, 0.012), lid=("skin", 0.1))
+    tufts = [sp(0.06, (x, y, 1.42 + h), (0.7, 0.7, 1.9), (rx, 0, rz)) for x, y, h, rx, rz in
+             ((-0.12, -0.08, 0.0, -30, 25), (-0.03, -0.11, 0.03, -35, 5), (0.07, -0.09, 0.02, -30, -15),
+              (0.14, -0.02, -0.02, -20, -35), (0.0, 0.1, 0.0, -60, 0))]
+    hair_cap(c, sq=0.74, extra=tufts, target=420)
+    c.fuse("hair_tip", "Head", [sp(0.05, (0.06, -0.16, 1.43), (0.8, 1.8, 0.7), (-40, 0, -15))], 80, smooth=False)  # the pale streak
+
+
 # ---------------------------------------------------------------- build and export
 
 def export(name, objs, out_dir):

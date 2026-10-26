@@ -12,7 +12,7 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 use sixfold_engine::ai::{Ai, Difficulty, Style};
-use sixfold_engine::campaign::{rival, RivalLines};
+use sixfold_engine::campaign::{self, RivalLines};
 use sixfold_engine::tutorial;
 use sixfold_engine::{
     card, fr, summarise_turn, tr, Action, CardId, Config, Event, Game, PromptKind,
@@ -311,12 +311,11 @@ impl Ctl {
     }
 
     /// The rival's duel lines, in a world or post-game duel against a rival
-    /// (route duelists, quick duels and the tutorial have none).
+    /// or Rook (route duelists, quick duels and the tutorial have none).
     pub fn lines(&self) -> Option<&'static RivalLines> {
         self.setup
             .with_value(|s| s.as_ref()?.face())
-            .and_then(rival)
-            .map(|r| &r.lines)
+            .and_then(campaign::lines)
     }
 
     /// Say one of the rival's lines, at most once per duel (`bit`: 1 intro,

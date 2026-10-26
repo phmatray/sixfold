@@ -8,7 +8,7 @@ head sphere (skin faces weighted to the Head bone; skin is the palette's `*skin`
 hat or hair, and framed low enough that the tallest hat or antenna still fits. Each rival faces its
 own way and tilts to its temper (`POSE`); a key light, a rim light in the rival's colour, then a
 background in that colour carrying a motif of its own (`MOTIF`: leaves, waves, flame rays, a
-lightning zigzag, strata, stars, the six-sided seal pattern for the Warden).
+lightning zigzag, strata, stars, the six-sided seal pattern for the Warden, chalk tally marks for Rook).
 Writes <out>/<rival id>.webp (cwebp, must be on PATH); ids as in engine/src/campaign.rs.
 """
 import json
@@ -29,6 +29,7 @@ RIVALS = {  # id: (model, centre tint, edge colour) — the card colours of web/
     "orla": ("rival_fighting", "#f2c595", "#a8642f"),
     "lumen": ("rival_psychic", "#e5c7ff", "#8a4fc9"),
     "warden": ("rival_champion", "#efe0b0", "#3a3f5c"),
+    "rook": ("rival_colorless", "#eeece6", "#8c8a86"),  # Rook (1.7): Neutral, no colour
 }
 
 
@@ -36,6 +37,7 @@ RIVALS = {  # id: (model, centre tint, edge colour) — the card colours of web/
 POSE = {
     "bramble": (1, 0, "leaves"), "marlo": (-1, -3, "waves"), "cinza": (1, 6, "rays"), "quill": (1, 4, "zigzag"),
     "orla": (1, -2, "strata"), "lumen": (-1, -5, "stars"), "warden": (1, 0, "hexes"),
+    "rook": (-1, -4, "tally"),
 }
 
 
@@ -49,6 +51,11 @@ def motif(kind, xx, yy, rng):
     if kind == "zigzag":
         tri = np.abs(((xx * 5) % 1) - 0.5) * 0.22
         return (np.abs(((yy + tri) * 7) % 1 - 0.5) < 0.12).astype(np.float32)
+    if kind == "tally":  # rows of chalk tally marks, four strokes and one across
+        cell, row = (xx * 6) % 1, (yy * 6) % 1
+        strokes = ((cell * 5) % 1 < 0.18) & (cell < 0.8) & (row > 0.25) & (row < 0.75)
+        across = np.abs((row - 0.5) - (cell - 0.4) * 0.6) < 0.035
+        return (strokes | (across & (cell < 0.85))).astype(np.float32)
     if kind == "strata":
         return (((yy + 0.02 * np.sin(xx * 9)) * 9) % 1 < 0.16).astype(np.float32)
     if kind == "hexes":
