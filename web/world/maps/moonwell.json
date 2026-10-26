@@ -41,14 +41,14 @@
   "props": [
     {
       "asset": "signpost",
-      "x": 22,
+      "x": 21,
       "z": 2,
       "rot": 0
     },
     {
-      "asset": "signpost",
-      "x": 16,
-      "z": 3,
+      "asset": "sign",
+      "x": 17,
+      "z": 2,
       "rot": 0
     },
     {
@@ -1335,12 +1335,12 @@
       "kind": "sign",
       "text": "North: Lanternmere, by the shore path round the mere.",
       "text_fr": "Nord : Lac-aux-Lanternes, par le chemin de la rive autour du lac.",
-      "x": 22,
+      "x": 21,
       "z": 2
     },
     {
-      "x": 16,
-      "z": 3,
+      "x": 17,
+      "z": 2,
       "kind": "sign",
       "text": "The Moonwell Garden. Please walk softly: the flowers are sleeping. (By day.)",
       "text_fr": "Le Jardin du Puits-de-Lune. Marchez doucement, s'il vous plaît : les fleurs dorment. (Le jour.)"

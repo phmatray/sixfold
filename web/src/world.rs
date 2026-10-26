@@ -82,11 +82,16 @@ const REOPEN: &str = "sixfold.reopen-world";
 /// Retry after the scene's modules failed to load: the browser keeps a failed
 /// module import for the page's whole life, so reload and come back here.
 fn reload_into_world() {
-    let w = window();
-    if let Ok(Some(s)) = w.session_storage() {
+    reopen_after_reload();
+    _ = window().location().reload();
+}
+
+/// The next reload opens the world again, not the title (a retry, or the
+/// language switched from the world's menu).
+pub(crate) fn reopen_after_reload() {
+    if let Ok(Some(s)) = window().session_storage() {
         _ = s.set_item(REOPEN, "1");
     }
-    _ = w.location().reload();
 }
 
 /// Whether the page was reloaded to retry the world (see `reload_into_world`); once.
@@ -1334,8 +1339,8 @@ pub fn WorldScreen() -> impl IntoView {
             </header>
             <main class="world-stage" node_ref=stage tabindex="-1"
                 aria-label=tr(
-                    "The Sixfold world: a meadow, a square, a woodland trail, a boardwalk and a quarry to walk around. Use the arrow keys or the pad, and E to act.",
-                    "Le monde de Sixfold : un pré, une place, un sentier des bois, une promenade et une carrière à parcourir. Utilisez les flèches ou le pavé, et E pour agir.",
+                    "The Sixfold world: six regions round a meadow, with towns, routes and caves to walk around. Use the arrow keys or the pad, and E to act.",
+                    "Le monde de Sixfold : six régions autour d'un pré, avec des villes, des routes et des grottes à parcourir. Utilisez les flèches ou le pavé, et E pour agir.",
                 )>
                 <div class="world-host" node_ref=host></div>
                 <p class="sr-only" aria-live="polite">{move || announce.get()}</p>
