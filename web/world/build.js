@@ -13,6 +13,7 @@ import { key, glowTex, blobGeo, blobMat } from "./actors.js";
 import { spawnNpcs } from "./npc.js";
 import { fireflies } from "./fireflies.js";
 import { OPTIONAL, RING } from "./map.js";
+import { rise as riseOf } from "./terrain.js";
 
 // Instanced: static, never animated, never read like a sign (one draw per mesh of the model, not per prop).
 const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "reeds", "boardwalk", "pier", "bridge", "stairs",
@@ -539,13 +540,16 @@ export async function build(map, got, reduced) {
   });
   const gateAt = new Map(gates.flatMap((g) => g.tiles.map((t) => [key(t.x, t.z), g])));
 
-  // Open grass: plain base tiles, not under a prop, a deck or a cliff.
+  // Open grass: plain ground at any level ("." or a plateau's digit), not under a prop
+  // or a deck, not by water, and not on a plateau's lip (a lower tile around it).
   const wet = (x, z) => SIDES.some(([dx, dz]) => "~H".includes(tile(x + dx, z + dz) ?? "-"));
-  const open = (x, z) => !blocked(x, z) && tile(x, z) === "." && floor[z * W + x] === 0 && !wet(x, z);
+  const rise = (x, z) => riseOf(map, x, z);
+  const lip = (x, z) => [-1, 0, 1].some((dx) => [-1, 0, 1].some((dz) => rise(x + dx, z + dz) < rise(x, z)));
+  const open = (x, z) => !blocked(x, z) && (tile(x, z) === "." || rise(x, z) > 0) && floor[z * W + x] === rise(x, z) && !wet(x, z) && !lip(x, z);
   const exits = map.exits ?? [];
   const tufts = (map.ground.tufts ?? 1800) / 1800; // grass density, 0 on sand
   if (!L.indoor) {
-    if (tufts) await grass(root, map, tile, open, tufts);
+    if (tufts) await grass(root, map, tile, open, tufts, rise);
     // A denser, darker band of trees beyond the map edge hides the empty plain,
     // on the sides the map asks for (not over the sea), with a gap at each exit.
     const outer = (map.ring ?? RING).filter((n) => got[n] || !OPTIONAL.test(n));
