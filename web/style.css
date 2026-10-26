@@ -4313,7 +4313,7 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html
 }
 .world-sheet:has(> .challenge)::backdrop { background: linear-gradient(0deg, color-mix(in srgb, var(--toon) 45%, transparent), transparent 55%); }
 .challenge {
-  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 16px 24px;
+  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: 16px 24px;
   grid-template-areas: "head head" "terms deck" "note note" "act act";
 }
 .ch-head { grid-area: head; }
@@ -4440,7 +4440,7 @@ button.ch-deck-now:active { transform: translateY(3px); box-shadow: 0 0 0 var(--
   .ch-deck-now { min-height: 52px; padding-block: 4px; }
   .ch-star .card { --w: 28px; }
   .ch-deck-name { font-size: var(--fs-lg); }
-  .ch-actions { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 10px 44px; padding: 0 0 0 44px; }
+  .ch-actions { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 44px; padding: 0 0 0 44px; }
   .challenge .ch-actions .btn { min-width: 0; min-height: 50px; padding-inline: 8px; font-size: var(--fs-lg); }
   .challenge kbd { display: none; }
 }
