@@ -537,11 +537,12 @@ pub fn Station(player: usize) -> impl IntoView {
             </div>
             <div class="prizes" class:undealt=move || info.with(|i| i.prizes.is_empty()) role="img" aria-label=move || {
                 let n = left();
+                let s = if n == 1 { "" } else { "s" };
                 match (me, fr()) {
-                    (true, false) => format!("You have {n} prizes left"),
-                    (false, false) => format!("Opponent has {n} prizes left"),
-                    (true, true) => format!("Il vous reste {n} Récompenses"),
-                    (false, true) => format!("Il reste {n} Récompenses à l'adversaire"),
+                    (true, false) => format!("You have {n} prize{s} left"),
+                    (false, false) => format!("Opponent has {n} prize{s} left"),
+                    (true, true) => format!("Il vous reste {n} Récompense{s}"),
+                    (false, true) => format!("Il reste {n} Récompense{s} à l'adversaire"),
                 }
             }>
                 <span class="prize-grid">

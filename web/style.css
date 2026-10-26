@@ -1240,7 +1240,8 @@ select option { background: var(--panel); color: var(--ink); }
 
 .page { min-height: 100dvh; display: grid; grid-template-rows: auto 1fr; align-content: start; }
 .page .btn { min-height: 44px; }
-.page-bar { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+/* The bar over every menu screen (#48 dropped the old duel `.topbar` rules it leaned on). */
+.page-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; padding: 8px 16px; border-bottom: 1px solid var(--line); background: rgba(8, 15, 28, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .page-bar .btn { min-height: 44px; }
 .btn.back { display: inline-flex; align-items: center; gap: 4px; padding-left: 8px; }
 .page-title { font-size: 22px; letter-spacing: -0.02em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1742,6 +1743,7 @@ select option { background: var(--panel); color: var(--ink); }
   .menu-label { font-size: 20px; }
   .menu-item.primary .menu-label { font-size: 23px; }
   .page-title { font-size: 19px; }
+  .page-bar { gap: 8px; padding-block: 4px; }
   .pick-grid { --w: calc((100vw - 32px - 24px) / 3); gap: 14px 12px; }
   /* Two across, so the cards are full ones (attacks and all). */
   .binder { --w: calc((100vw - 32px - 12px) / 2); gap: 14px 12px; }
@@ -2247,7 +2249,8 @@ p.atlas-pick { color: var(--muted); }
 .menu-tabs { display: flex; gap: 4px; padding: 6px 20px 10px; overflow-x: auto; scrollbar-width: none; }
 .menu-tabs button { flex: none; min-height: 44px; padding: 0 14px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
 .menu-tabs button:hover { color: var(--ink); }
-.menu-tabs button[aria-selected="true"] { background: var(--panel-2); border-color: var(--brass); color: var(--brass-hi); }
+/* Selected is a filled brass tab, so it never reads as the focus ring (an outline). */
+.menu-tabs button[aria-selected="true"] { background: var(--brass); border-color: var(--brass); color: var(--stock-ink); }
 .menu-panel { flex: 1; min-width: 0; padding: 16px 20px 24px; }
 .menu-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
 .menu-split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
