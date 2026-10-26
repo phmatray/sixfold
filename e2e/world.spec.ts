@@ -72,11 +72,12 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   await loaded(page);
   await page.keyboard.press("Escape"); // the intro scene
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
-  // Two tiles east of Tobin, who looks east: one step west and he spots the hero.
-  await page.locator(".world-host").evaluate((el) => (el as unknown as { sixfoldWarp: (...a: unknown[]) => void }).sixfoldWarp("overworld", 26, 27, "w"));
-  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^26,27/, { timeout: 15_000 });
+  // Face Tobin from the next tile and talk to him: he challenges.
+  await page.locator(".world-host").evaluate((el) => (el as unknown as { sixfoldWarp: (...a: unknown[]) => void }).sixfoldWarp("overworld", 24, 27, "w"));
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^24,27/, { timeout: 15_000 });
+  await expect(page.getByRole("button", { name: /^Talk to Tobin/ })).toBeVisible();
   await page.locator(".world-stage").focus();
-  await walk(page, "ArrowLeft", /^overworld,2[45],27,/);
+  await page.keyboard.press("e");
   const talk = page.locator(".talk-box");
   await expect(talk).toBeVisible({ timeout: 15_000 });
   while (await talk.isVisible()) {
