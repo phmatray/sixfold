@@ -2597,6 +2597,8 @@ button.pile { cursor: pointer; }
 .dock .inspector .close { display: none; }
 .dock .inspect-card .card { --w: min(clamp(150px, 14vw, 220px), 76cqw); }
 .dock .inspect-body { justify-items: center; }
+/* The dock is ~200px wide at 1280: its panels wrap inside it instead of scrolling sideways. */
+@media (min-width: 1180px) { .dock .inspect-body, .dock .details { grid-template-columns: minmax(0, 1fr); } .dock .details-head, .dock .detail-attack-head { flex-wrap: wrap; } }
 .dock .inplay, .dock .details { width: 100%; max-width: 280px; }
 .dock .empty-note { color: var(--text-faint); font-size: 14px; text-align: center; }
 .dock .coach { margin: 0; }
