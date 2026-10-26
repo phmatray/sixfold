@@ -11,7 +11,7 @@ const opener = new WeakMap();
 let open = [];
 
 const focusables = (root) =>
-  [...root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+  [...root.querySelectorAll('button, summary, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
     .filter((el) => !el.disabled && el.getClientRects().length > 0);
 
 let home = null;

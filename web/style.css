@@ -68,6 +68,9 @@ html[data-input="pad"] :focus:not(:focus-visible):not([tabindex="-1"]) {
 
 /* Headings take focus on a screen change (to start reading there); they aren't controls. */
 h1[tabindex="-1"]:focus, main[tabindex="-1"]:focus { outline: none; }
+/* A section title (now reachable by a pad): a rounded ring inside its panel, like the buttons'. */
+/* (!important: the duel's and the pad's focus rules are more specific and push it outward.) */
+summary:focus { outline-offset: 0 !important; border-radius: 8px; }
 
 h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 
@@ -1068,6 +1071,7 @@ body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
 /* Prompts follow the device in use (input.rs): a pad's buttons are round, touch has none to name. */
 html[data-input="pad"] kbd { border-radius: 999px; min-width: 1.6em; text-align: center; }
 html[data-input="pad"] .world-prompt kbd { display: inline-block; }
+html[data-input="pad"] .seam-btn kbd { padding: 1px 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
 kbd:empty { display: none; }
 /* The duel's key badges (1-4, P, R, E) mean nothing on a pad or a touch screen: a pad plays by focus. */
 html[data-input="pad"] .duel .key, html[data-input="touch"] .duel .key { display: none; }
@@ -1231,6 +1235,8 @@ select option { background: var(--panel); color: var(--ink); }
   transition: opacity 240ms ease;
 }
 .autosave.show { opacity: 1; }
+/* A phone pack opening: above its Faster / Skip bar, not over it. */
+@media (max-width: 760px) { body:has(.reveal-actions.live) .autosave { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 76px); } }
 .autosave.failed { background: #5a1f1c; border-color: rgba(255, 93, 82, 0.6); color: #ffd5d0; }
 .update-toast {
   position: fixed;
@@ -1406,6 +1412,7 @@ select option { background: var(--panel); color: var(--ink); }
 .binder-book { grid-area: book; }
 .tally { grid-area: tally; }
 .tally .rarity { margin: 0; width: 14px; height: 14px; }
+.tally-mark { display: inline-flex; }
 /* Wide: the filters and the tally beside the page, so a whole sheet fits. */
 @container binder (min-width: 740px) {
   .binder-layout { grid-template-columns: minmax(0, 1fr) minmax(250px, 330px); grid-template-areas: "book filters" "book tally"; grid-template-rows: auto 1fr; }
@@ -1435,7 +1442,7 @@ select option { background: var(--panel); color: var(--ink); }
 }
 /* A clear pocket: a sleeve with a lip along its top. */
 @container (max-width: 480px) {
-  .binder.sheet { --w: clamp(80px, calc((100cqw - 86px) / 3), 160px); gap: 8px; padding: 10px 8px 10px 30px; background-position: -6px 0, -6px 0, -6px 0, 0 0, 0 0; }
+  .binder.sheet { --w: clamp(80px, calc((100cqw - 96px) / 3), 160px); gap: 8px; padding: 10px 8px 10px 30px; background-position: -6px 0, -6px 0, -6px 0, 0 0, 0 0; }
   .sheet .bind-slot { padding: 5px 5px 3px; }
 }
 .sheet .bind-slot { padding: 7px 7px 5px; border-radius: 8px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03) 18%, rgba(255, 255, 255, 0.045)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.35); }
@@ -1477,6 +1484,9 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .tally-bar { grid-column: 1 / -1; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
 .tally-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--brass), var(--brass-hi)); }
 .tally-row.done .tally-bar span { background: var(--heal); }
+/* Promos, a part of the Rare row above them. */
+.tally li:has(.tally-of) { padding-left: 22px; }
+.tally-of { font-size: 13px; color: var(--muted); }
 .tally-row.done .tally-n b { color: var(--heal); }
 
 /* The showcase: owned Rares and promos on a dark velvet wall, each under its
@@ -2505,6 +2515,11 @@ p.atlas-pick { color: var(--muted); }
 .menu-split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
 .menu-split .side-panel { top: 120px; min-height: 0; max-height: calc(100dvh - 180px); border: 1px solid var(--line); border-radius: 14px; }
 .menu-panel .settings-body { max-width: 480px; margin: 0; box-shadow: none; }
+/* A wide menu: Options in two columns (sound, then controls, then saves) instead of a narrow strip. */
+@media (min-width: 1100px) {
+  .menu-panel .settings-body { max-width: 1000px; columns: 2; column-gap: 40px; }
+  .menu-panel .settings-body > * { break-inside: avoid; }
+}
 .menu-panel .atlas, .menu-panel .quests { margin-top: 0; }
 /* The binder in the menu: its viewer does the inspector's job, and the
    menu's own head takes room the sheet must leave for its pager. */
@@ -2532,7 +2547,10 @@ p.atlas-pick { color: var(--muted); }
 .controls-set { display: grid; gap: 10px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
 .controls-set legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
 .controls-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.controls-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.controls-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; }
+/* A refused key or button: said under its own row. */
+.controls-list .note { grid-row: 2; grid-column: 1 / -1; font-size: 13px; color: var(--brass-hi); }
+.controls-list .note:empty { display: none; }
 .controls-list .bind { min-width: 7.5em; justify-content: center; text-align: center; }
 .controls-list .bind[aria-pressed="true"] { border-color: var(--brass-hi); color: var(--brass-hi); }
 .menu-tabs .tab-key { align-self: center; flex: none; font: 700 12px var(--body); padding: 2px 8px; border: 1px solid var(--line); color: var(--muted); }
@@ -3376,6 +3394,7 @@ button.pile { cursor: pointer; }
 .world-skip kbd, .talk-skip kbd { font: 700 12px var(--body); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
 @media (hover: none) { .world-skip kbd { display: none; } }
 .talk-skip { display: block; margin: 6px 0 0 auto; min-height: 44px; font-size: 14px; }
+.talk-skip kbd { margin-left: 8px; }
 .world.in-scene .world-controls { visibility: hidden; } /* the pad does nothing while a scene plays */
 /* ---------- Opening: studio mark, logo, press to start (splash.rs) ---------- */
 

@@ -349,7 +349,13 @@ enum Shelf {
 pub fn CollectionPanel() -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
     let f = Filters::new(Own::All);
-    let shown = Memo::new(move |_| profile.with(|p| f.apply(&p.collection)));
+    // The binder holds the cards to collect: basic energy (always yours) stays
+    // out, so its pages, the viewer's n / total and the progress count the same set.
+    let shown = Memo::new(move |_| {
+        let mut ids = profile.with(|p| f.apply(&p.collection));
+        ids.retain(|&id| !card(id).is_basic_energy());
+        ids
+    });
     let showcase = Memo::new(move |_| {
         profile.with(|p| {
             set::ids()
@@ -448,6 +454,28 @@ pub fn CollectionPanel() -> impl IntoView {
             turn(if dx < 0 { p + 1 } else { p.saturating_sub(1) }, true);
         }
     };
+    // After a page turn, focus the first or last pocket of the new page (once
+    // the leaf has come down on it when turning back).
+    let focus_card = move |last: bool| {
+        let wait = if leaf.get_untracked().is_some() {
+            TURN_MS + 20
+        } else {
+            16
+        };
+        set_timeout(
+            move || {
+                let cards = document().query_selector_all(".sheets > .sheet .bind-card");
+                let n = cards.as_ref().map_or(0, |c| c.length());
+                if let Some(el) = cards
+                    .ok()
+                    .and_then(|c| c.item(if last { n.saturating_sub(1) } else { 0 }))
+                {
+                    _ = el.unchecked_into::<web_sys::HtmlElement>().focus();
+                }
+            },
+            Duration::from_millis(wait),
+        );
+    };
     let on_key = move |e: leptos::ev::KeyboardEvent| {
         if in_field(&e)
             || viewing.get_untracked().is_some()
@@ -456,6 +484,53 @@ pub fn CollectionPanel() -> impl IntoView {
             return;
         }
         let p = page.get_untracked();
+        // On a card the arrows (a pad's D-pad too) move between the pockets,
+        // and turn the page past its first or last card.
+        let card_el = e
+            .target()
+            .and_then(|t| t.dyn_into::<web_sys::HtmlElement>().ok())
+            .filter(|t| t.class_list().contains("bind-card"));
+        if let Some(el) = card_el {
+            let step: i32 = match e.key().as_str() {
+                "ArrowLeft" => -1,
+                "ArrowRight" => 1,
+                "ArrowUp" => -3,
+                "ArrowDown" => 3,
+                _ => 0,
+            };
+            if step != 0 {
+                let cards = el
+                    .closest(".sheet")
+                    .ok()
+                    .flatten()
+                    .and_then(|s| s.query_selector_all(".bind-card").ok());
+                let Some(cards) = cards else { return };
+                let n = cards.length() as i32;
+                let at = (0..n).find(|&i| {
+                    cards
+                        .item(i as u32)
+                        .is_some_and(|c| c.is_same_node(Some(el.unchecked_ref())))
+                });
+                let Some(at) = at else { return };
+                let to = at + step;
+                if (0..n).contains(&to) {
+                    if let Some(c) = cards.item(to as u32) {
+                        _ = c.unchecked_into::<web_sys::HtmlElement>().focus();
+                    }
+                } else if step.abs() == 1
+                    && (step > 0 || p > 0)
+                    && (step < 0 || p + 1 < pages.get_untracked())
+                {
+                    turn(if step > 0 { p + 1 } else { p - 1 }, true);
+                    focus_card(step < 0);
+                } else {
+                    // Off the sheet, no page that way: focus goes on to the controls around it.
+                    return;
+                }
+                e.prevent_default();
+                return;
+            }
+        }
         let to = match e.key().as_str() {
             "ArrowRight" | "PageDown" => p + 1,
             "ArrowLeft" | "PageUp" => p.saturating_sub(1),
@@ -466,6 +541,18 @@ pub fn CollectionPanel() -> impl IntoView {
         e.prevent_default();
         turn(to, true);
     };
+    // On arrival focus is on the page's heading (or nowhere), outside the
+    // binder: the arrows turn its pages from there too.
+    let arrival = window_event_listener(leptos::ev::keydown, move |e| {
+        let lost = e
+            .target()
+            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+            .is_none_or(|t| t.matches("body, .page-title").unwrap_or(false));
+        if lost {
+            on_key(e);
+        }
+    });
+    on_cleanup(move || arrival.remove());
     let page_words = move || {
         tr(
             format!("Page {} of {}", page.get() + 1, pages.get()),
@@ -635,20 +722,15 @@ fn Tally(f: Filters) -> impl IntoView {
         (Kind::Energy, tr("Special energy", "Énergie spéciale")),
     ]
     .map(|(k, l)| {
-        // Special energy is a row, not a filter: the Energy filter also
-        // shows basic energy, which the tally leaves out.
-        let on = (k != Kind::Energy).then(|| {
-            (
-                Signal::derive(move || f.kind.get() == k),
-                Callback::new(move |()| {
-                    f.kind.update(|v| *v = if *v == k { Kind::All } else { k })
-                }),
-            )
-        });
+        // The binder leaves basic energy out, so its Energy filter is the special energy.
+        let on = (
+            Signal::derive(move || f.kind.get() == k),
+            Callback::new(move |()| f.kind.update(|v| *v = if *v == k { Kind::All } else { k })),
+        );
         row(
             view! { {l} }.into_any(),
             Box::new(move |id| kind_of(id) == k),
-            on,
+            Some(on),
         )
     });
     let rarities = [Rarity::Common, Rarity::Uncommon, Rarity::Rare].map(|r| {
@@ -660,13 +742,14 @@ fn Tally(f: Filters) -> impl IntoView {
             }),
         );
         row(
-            view! { <RarityMark rarity=r />{rarity_label(r)} }.into_any(),
+            view! { <span class="tally-mark" aria-hidden="true"><RarityMark rarity=r /></span>{rarity_label(r)} }.into_any(),
             Box::new(move |id| card(id).rarity == r),
             Some(on),
         )
     });
+    // Promos are Rares: a part of the Rare row, not a fourth rarity.
     let promo = row(
-        view! { <span class="promo-badge">"Promo"</span> }.into_any(),
+        view! { <span class="tally-of">{tr("of which", "dont")}</span><span class="promo-badge">"Promo"</span> }.into_any(),
         Box::new(set::is_promo),
         None,
     );
