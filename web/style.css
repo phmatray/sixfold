@@ -1558,7 +1558,7 @@ body > .title > .lang-switch { right: max(16px, calc((100% - 1088px) / 2)); }
   body > .title .foot-menus details[open] > .settings-body { left: 0; right: auto; }
 }
 /* The title has its language switch up top: Settings doesn't repeat it. */
-body > .title .settings-body .lang-switch { display: none; }
+body > .title .settings-body .lang { display: none; }
 
 /* Records (1.7): achievements and stats, and the toast that announces one. */
 .records .records-tabs { padding: 0 0 14px; }

@@ -105,7 +105,7 @@ fn LangSwitch() -> impl IntoView {
         }
     };
     view! {
-        <div class="lang-switch" role="group" aria-label=tr("Language", "Langue")>
+        <div class="lang-switch lang" role="group" aria-label=tr("Language", "Langue")>
             {button(Lang::En, "EN", "English")}
             {button(Lang::Fr, "FR", "Français")}
         </div>
