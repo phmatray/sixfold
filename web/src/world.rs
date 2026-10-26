@@ -1439,6 +1439,7 @@ pub fn WorldScreen() -> impl IntoView {
                             {script.then(|| view! {
                                 <button type="button" class="btn ghost talk-skip" aria-keyshortcuts="Escape" on:click=move |_| skip()>
                                     {tr("Skip scene", "Passer la scène")}
+                                    <kbd>{move || input::prompt(Ctrl::Cancel)}</kbd>
                                 </button>
                             })}
                         }.into_any()
