@@ -297,8 +297,8 @@ defensive tools; two more after playtests. **Not included:** hand-shuffle for th
 recursion loops.
 
 **Special energies (3).** One unit of any colour that also counts its Hexon as weak to Stone; a
-Neutral unit that blocks conditions on its Hexon; a Neutral unit that is discarded at the end of
-the turn but gives two units for that turn's attack only (a burst with no build-up).
+Neutral unit that blocks conditions on its Hexon; a Neutral unit that draws its owner a card when
+attached from the hand. All three are one unit (Twofold stays the only two-unit energy).
 
 **Archetypes enabled.** Lantern lock (Dream Sleeper with a Power hush + damage moving); Deep strata
 wall (Stone threshold wall + heal); relic rush (shards + ancient lines, evolution-heavy); anti-evolution
