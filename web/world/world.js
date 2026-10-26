@@ -74,7 +74,7 @@ export function mount(el, controls, cb, start, edit = false) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap; // soft since r182 (PCFSoftShadowMap is gone)
   renderer.shadowMap.autoUpdate = false; // updated once per frame, before the three passes
   renderer.autoClear = false;
   renderer.info.autoReset = false; // counted over the whole frame (shadows and the three passes)
@@ -97,7 +97,7 @@ export function mount(el, controls, cb, start, edit = false) {
   let canRun = false, runToggle = false, shift = false, lastHero = "";
   // The clock (the engine owns the saved minute; Rust hands it over with setClock).
   let minute = 480, lastHour = -1, lastPhase = "", bgAt = 0;
-  const clock = new THREE.Clock();
+  const clock = new THREE.Timer();
   const look = new THREE.Vector3(), lookVel = new THREE.Vector3(), aim = new THREE.Vector3();
   let first = true, zoom = 1, readySent = false, drawnPaused = false, cover = 0;
   const resize = () => {
@@ -525,7 +525,7 @@ export function mount(el, controls, cb, start, edit = false) {
     .finally(() => (warping = false))
     .then(() => {
       if (!alive) return;
-      clock.getDelta();
+      clock.update();
       raf = requestAnimationFrame(frame);
       if (edit)
         import("./editor.js").then((m) => {
@@ -541,7 +541,7 @@ export function mount(el, controls, cb, start, edit = false) {
   let stats = { calls: 0, triangles: 0 };
   function frame() {
     raf = requestAnimationFrame(frame);
-    const dt = Math.min(clock.getDelta(), 0.05);
+    const dt = Math.min(clock.update().getDelta(), 0.05);
     if (paused && !book.live()) {
       // A modal is open: draw one last frame, then nothing until it closes (a book being read draws on).
       if (drawnPaused) return;
@@ -861,7 +861,7 @@ export function mount(el, controls, cb, start, edit = false) {
       if (world) world.path = [];
       if (paused && world) cb("clock", String(Math.floor(minute)), ""); // a duel may follow: keep the time
       if (!paused && world) {
-        clock.getDelta();
+        clock.update();
         world.npcs.forEach((n) => (n.busy = false));
         if (world.engage?.talked) (duelists.release(world), (world.calm = true)); // the talk with a duelist is over
         recheck(true); // a find may be gone now, a gate open

@@ -72,7 +72,7 @@ export function mount(el) {
   U.uSway.value = reduced ? 0 : 1;
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap; // soft since r182 (PCFSoftShadowMap is gone)
   renderer.shadowMap.autoUpdate = false;
   renderer.autoClear = false;
   const canvas = renderer.domElement;
