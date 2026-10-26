@@ -2514,6 +2514,11 @@ p.atlas-pick { color: var(--muted); }
 .menu-split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
 .menu-split .side-panel { top: 120px; min-height: 0; max-height: calc(100dvh - 180px); border: 1px solid var(--line); border-radius: 14px; }
 .menu-panel .settings-body { max-width: 480px; margin: 0; box-shadow: none; }
+/* A wide menu: Options in two columns (sound, then controls, then saves) instead of a narrow strip. */
+@media (min-width: 1100px) {
+  .menu-panel .settings-body { max-width: 1000px; columns: 2; column-gap: 40px; }
+  .menu-panel .settings-body > * { break-inside: avoid; }
+}
 .menu-panel .atlas, .menu-panel .quests { margin-top: 0; }
 /* The binder in the menu: its viewer does the inspector's job, and the
    menu's own head takes room the sheet must leave for its pager. */
