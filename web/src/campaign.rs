@@ -551,7 +551,7 @@ pub fn Challenge(
         ),
         (None, Some(t)) if t.win_pays(p) > 0 => tr(
             format!("Rematch win: ⬡ {}", t.win_pays(p)),
-            format!("Revanche gagnée : ⬡ {}", t.win_pays(p)),
+            format!("Victoire en revanche : ⬡ {}", t.win_pays(p)),
         ),
         _ => tr(
             "A friendly rematch, no purse",
