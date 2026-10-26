@@ -61,7 +61,7 @@ pub fn my_opts(p: &Profile) -> Vec<Opt> {
 }
 
 /// "60 cards, 14 creatures", with French plurals (0 and 1 singular).
-fn deck_count(cards: usize, creatures: usize) -> String {
+pub(crate) fn deck_count(cards: usize, creatures: usize) -> String {
     if sixfold_engine::fr() {
         let s = |n: usize| if n > 1 { "s" } else { "" };
         format!(

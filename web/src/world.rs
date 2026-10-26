@@ -631,6 +631,8 @@ pub fn WorldScreen() -> impl IntoView {
 
     let near = RwSignal::new(None::<(String, String)>);
     let sheet = RwSignal::new(None::<Sheet>);
+    // The last line someone said before their duel offer: the offer quotes it.
+    let said = StoredValue::new(None::<(String, String)>);
     let typed = RwSignal::new(0usize);
     let loading = RwSignal::new(true);
     // The first map's models loaded, (done, total), for the loading line.
@@ -1126,6 +1128,7 @@ pub fn WorldScreen() -> impl IntoView {
                 p.settle();
             }
         });
+        said.set_value(t.lines.last().map(|l| (t.id.clone(), l.clone())));
         apply_effects(
             t.effects
                 .into_iter()
@@ -1530,9 +1533,13 @@ pub fn WorldScreen() -> impl IntoView {
                             <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
                         </div>
                     }.into_any(),
-                    Sheet::Challenge(id) => view! {
-                        <Challenge id=id on_cancel=move || sheet.set(None) before=move || sheet.set(None) />
-                    }.into_any(),
+                    Sheet::Challenge(id) => {
+                        let face = face_of(&id);
+                        let quote = said.with_value(|s| s.clone().filter(|(who, _)| *who == id).map(|(_, l)| l));
+                        view! {
+                            <Challenge id=id face=face quote=quote on_cancel=move || sheet.set(None) before=move || sheet.set(None) />
+                        }.into_any()
+                    }
                     Sheet::Ladder => view! {
                         <div class="sheet-head">
                             <h2 id="world-sheet-title">{tr("The Warden's ladder", "Le tableau de la Gardienne")}</h2>
