@@ -52,7 +52,7 @@ test("keyboard: arrows move the hand through the title and two menu screens, Esc
   await expect(decks.nth(1)).toBeFocused();
   await expect(decks.nth(1)).toBeChecked();
   await page.keyboard.press("ArrowRight");
-  await expect(page.getByRole("group", { name: "The AI plays" }).getByRole("radio").first()).toBeFocused();
+  await expect(page.getByRole("group", { name: "Your opponent plays" }).getByRole("radio").first()).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible();
 

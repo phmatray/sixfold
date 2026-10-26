@@ -695,7 +695,8 @@ pub fn Challenge(
                 </span>
                 <div class="ch-who">
                     <h2 id="world-sheet-title" class="ch-name">
-                        <span class="sr-only">{tr("Challenge ", "Défier ")}</span>{name}<span class="sr-only">{tr("?", " ?")}</span>
+                        <span class="sr-only">{tr(format!("Challenge {name}?"), format!("Défier {name} ?"))}</span>
+                        <span aria-hidden="true">{name}</span>
                     </h2>
                     <p class="ch-title">
                         {what}

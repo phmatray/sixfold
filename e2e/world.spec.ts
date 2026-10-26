@@ -76,9 +76,7 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   await page.locator(".world-host").evaluate((el) => (el as unknown as { sixfoldWarp: (...a: unknown[]) => void }).sixfoldWarp("overworld", 26, 27, "w"));
   await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^26,27/, { timeout: 15_000 });
   await page.locator(".world-stage").focus();
-  await page.keyboard.down("ArrowLeft");
-  await page.waitForTimeout(250);
-  await page.keyboard.up("ArrowLeft");
+  await walk(page, "ArrowLeft", /^overworld,2[45],27,/);
   const talk = page.locator(".talk-box");
   await expect(talk).toBeVisible({ timeout: 15_000 });
   while (await talk.isVisible()) {

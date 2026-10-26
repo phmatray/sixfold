@@ -1425,7 +1425,8 @@ pub fn WorldScreen() -> impl IntoView {
                     </div>
                 </div>
             })}
-            <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title" aria-describedby="world-sheet-desc"
+            <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title"
+                aria-describedby=move || sheet.with(|s| matches!(s, Some(Sheet::Challenge(_)))).then_some("world-sheet-desc")
                 on:cancel=on_cancel on:keydown=on_key
                 // Should the browser close the dialog itself, the world must not stay paused
                 // (and a cutscene goes on rather than wait for a line nobody can see).
