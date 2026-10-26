@@ -688,7 +688,10 @@ fn MatchScreen() -> impl IntoView {
         tr("Leave the duel…", "Quitter le duel…")
     };
     view! {
-        <div class="duel" class:tutorial=tutorial>
+        <div class="duel" class:tutorial=tutorial
+            class:hitstop=move || ctl.fx.with(|f| f.frozen)
+            data-beat=move || ctl.fx.with(|f| f.beat)
+            style=move || format!("--pace:{}", ctl.pace_factor())>
             <main class="mat">
                 <h1 class="sr-only">{title}</h1>
                 <section class="half me" aria-label=tr("Your side", "Votre côté")>

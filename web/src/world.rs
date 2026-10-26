@@ -962,7 +962,7 @@ pub fn WorldScreen() -> impl IntoView {
             warp_to(map, *x, *z, facing, false);
         }
         if gained > 0 {
-            crate::audio::sfx("facets", 0.0);
+            crate::audio::sfx("reward", 0.0);
             let have = progress.with_untracked(Progress::coins);
             announce.set(tr(
                 format!("+{gained} Facets. You have {have}."),
@@ -1000,14 +1000,14 @@ pub fn WorldScreen() -> impl IntoView {
             announce.set(text);
         }
         if let Some(Sheet::Card(id)) = &next {
-            crate::audio::sfx("jingle", 0.0);
+            crate::audio::sfx("reward", 0.0);
             announce.set(tr(
                 format!("You found {}.", card(*id).label()),
                 format!("Vous trouvez : {}.", card(*id).label()),
             ));
         }
         if let Some(Sheet::Item(item)) = &next {
-            crate::audio::sfx("jingle", 0.0);
+            crate::audio::sfx("reward", 0.0);
             let opens = objective::opens_names(item).join(", ");
             let (en, fr) = if opens.is_empty() {
                 (String::new(), String::new())

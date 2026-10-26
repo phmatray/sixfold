@@ -320,9 +320,28 @@ pub fn Hexon(
                     <For
                         each=move || pops.get()
                         key=|p| p.key
-                        children=move |p| view! { <span class=format!("pop {}", p.kind)>{p.text}</span> }
+                        children=move |p| {
+                            // The number grows with the damage; 100 and more lands with a bounce.
+                            let class = format!("pop {}{}", p.kind, if p.amount >= 100 { " big" } else { "" });
+                            view! {
+                                <span class=class style=format!("--n:{}", p.amount.min(120))>
+                                    {p.text}
+                                    {p.stamps.into_iter().map(|(c, t)| view! { <span class=format!("stamp {c}")>{t}</span> }).collect_view()}
+                                </span>
+                            }
+                        }
                     />
                 </span>
+                // The KO: a crack runs down the card before it falls.
+                <Show when=move || fx.get().3>
+                    <svg class="crack" viewBox="0 0 100 140" preserveAspectRatio="none" aria-hidden="true">
+                        <path pathLength="1" d="M57 16 L50 32 L61 47 L44 66 L56 82 L41 102 L52 118 L46 142" />
+                    </svg>
+                </Show>
+                // An energy just attached: a spark in its colour.
+                {move || ctl.spark.get().filter(|s| s.1 == uid).map(|(_, _, tone)| view! {
+                    <span class=format!("spark t-{tone}") aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                })}
             </button>
         </div>
     }
@@ -467,6 +486,22 @@ impl BenchPlaces {
     }
 }
 
+/// Point a prize's flight (`--dx`, `--dy`) at the centre of `player`'s hand.
+fn aim_at_hand(el: &web_sys::Element, player: usize) {
+    let hand = if player == HUMAN {
+        ".hand-zone"
+    } else {
+        ".opp-hand"
+    };
+    let Some(to) = document().query_selector(hand).ok().flatten() else {
+        return;
+    };
+    let (a, b) = (el.get_bounding_client_rect(), to.get_bounding_client_rect());
+    let dx = b.x() + b.width() / 2.0 - a.x() - a.width() / 2.0;
+    let dy = b.y() + b.height() / 2.0 - a.y() - a.height() / 2.0;
+    _ = el.set_attribute("style", &format!("--dx:{dx:.0}px;--dy:{dy:.0}px"));
+}
+
 /// Portrait, name, prizes; on your side, this turn's energy and retreat.
 #[component]
 pub fn Station(player: usize) -> impl IntoView {
@@ -531,7 +566,7 @@ pub fn Station(player: usize) -> impl IntoView {
     };
     view! {
         <div class=if me { "station me" } else { "station opp" }>
-            <div class="station-id">
+            <div class="station-id" class:shake=move || !me && ctl.said.with(|s| s.is_some_and(|s| s.ko))>
                 {portrait}
                 <div class="station-name"><b>{name.clone()}</b>{(sub != name).then(|| view! { <span>{sub.clone()}</span> })}</div>
             </div>
@@ -549,7 +584,16 @@ pub fn Station(player: usize) -> impl IntoView {
                 <span class="prize-grid">
                     {move || info.with(|i| i.prizes.clone()).into_iter().enumerate().map(|(k, p)| {
                         let taking = move || ctl.fx.with(|f| f.prize == Some((player, k)));
-                        view! { <span class="prize" class:taken=!p class:taking=taking></span> }
+                        let node = NodeRef::<leptos::html::Span>::new();
+                        // The prize flies to its taker's hand: aim it there.
+                        Effect::new(move |_| {
+                            if taking() {
+                                if let Some(el) = node.get_untracked() {
+                                    aim_at_hand(&el, player);
+                                }
+                            }
+                        });
+                        view! { <span class="prize" class:taken=!p class:taking=taking node_ref=node></span> }
                     }).collect_view()}
                 </span>
                 <span class="prize-n"><b>{left}</b><span class="res-long">{move || if left() == 1 { tr("prize left", "Récompense restante") } else { tr("prizes left", "Récompenses restantes") }}</span><span class="res-short">{tr("left", "restantes")}</span></span>

@@ -132,6 +132,29 @@ pub fn Seal(r: &'static Rival, #[prop(into)] earned: Signal<bool>) -> impl IntoV
     }
 }
 
+/// A seal just won (WORLD_DESIGN §12.1): the hexagon fills face by face in
+/// the rival's colour, in step with the stinger [`SEAL_AT`] ms after the
+/// result shows.
+#[component]
+pub fn SealFill(r: &'static Rival) -> impl IntoView {
+    let tone = r.colors.first().map_or("colorless", |&c| color_key(c));
+    // The hexagon's corners, clockwise from the top (the `.seal` clip-path).
+    const P: [(u8, u8); 6] = [(50, 0), (93, 28), (93, 82), (50, 110), (7, 82), (7, 28)];
+    view! {
+        <span class=format!("seal-fill t-{tone}") style=format!("--at:{SEAL_AT}ms") aria-hidden="true">
+            <svg viewBox="0 0 100 110">
+                {(0..6).map(|i| {
+                    let (a, b) = (P[i], P[(i + 1) % 6]);
+                    view! { <path class="face" style=format!("--i:{i}") d=format!("M50 55L{} {}L{} {}Z", a.0, a.1, b.0, b.1) /> }
+                }).collect_view()}
+            </svg>
+        </span>
+    }
+}
+
+/// When a won seal starts to fill, after the result's own fanfare (ms).
+pub const SEAL_AT: u32 = 1200;
+
 /// The six seals and every rival: beaten, open or locked.
 #[component]
 pub fn Roster() -> impl IntoView {
