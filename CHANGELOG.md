@@ -5,6 +5,19 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.8.0](https://github.com/phmatray/sixfold/compare/v1.7.0...v1.8.0) (2026-10-26)
+
+
+### Added
+
+* a final victory sequence and staged credits ([#67](https://github.com/phmatray/sixfold/issues/67)) ([#93](https://github.com/phmatray/sixfold/issues/93)) ([21e59cc](https://github.com/phmatray/sixfold/commit/21e59cc0fb6bc131cccbeb099151bf89e1322f49))
+* **duel:** juice — hit-stop, damage stamps, prize flight and feedback sounds ([#61](https://github.com/phmatray/sixfold/issues/61)) ([#92](https://github.com/phmatray/sixfold/issues/92)) ([a117dcc](https://github.com/phmatray/sixfold/commit/a117dcc161b76ca2c75f6b6843cf88ea6c196c0f))
+
+
+### Fixed
+
+* 1.8 design audit — duel juice, finale and credits ([#99](https://github.com/phmatray/sixfold/issues/99)) ([be715de](https://github.com/phmatray/sixfold/commit/be715de1743df5b52765c2a28a896a84b8181d75))
+
 ## [1.7.0](https://github.com/phmatray/sixfold/compare/v1.6.0...v1.7.0) (2026-10-26)
 
 
