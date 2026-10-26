@@ -2570,6 +2570,7 @@ p.atlas-pick { color: var(--muted); }
 .menu-top { position: sticky; top: 0; z-index: 30; background: #172845; border-bottom: 1px solid var(--line); }
 .menu-head { padding: 14px 20px 4px; }
 .menu-head h2 { margin-right: auto; }
+.menu-head .btn.ghost { color: var(--muted); }
 /* Top padding: room for the focus ring, which the scrolling strip would clip. */
 .menu-tabs { display: flex; gap: 4px; padding: 6px 20px 10px; overflow-x: auto; scrollbar-width: none; }
 .menu-tabs button { flex: none; min-height: 44px; padding: 0 14px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
