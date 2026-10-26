@@ -552,7 +552,7 @@ pub fn Station(player: usize) -> impl IntoView {
                         view! { <span class="prize" class:taken=!p class:taking=taking></span> }
                     }).collect_view()}
                 </span>
-                <span class="prize-n"><b>{left}</b><span class="res-long">{tr("prizes left", "Récompenses restantes")}</span><span class="res-short">{tr("left", "restantes")}</span></span>
+                <span class="prize-n"><b>{left}</b><span class="res-long">{move || if left() == 1 { tr("prize left", "Récompense restante") } else { tr("prizes left", "Récompenses restantes") }}</span><span class="res-short">{tr("left", "restantes")}</span></span>
             </div>
             {me.then(|| view! {
                 <ul class="turn-res" class:idle=move || !res.with(|r| r.as_ref().is_some_and(|r| r.0)) aria-label=tr("This turn", "Ce tour")>

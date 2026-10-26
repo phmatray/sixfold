@@ -1257,7 +1257,7 @@ select option { background: var(--panel); color: var(--ink); }
 .page { min-height: 100dvh; display: grid; grid-template-rows: auto 1fr; align-content: start; }
 .page .btn { min-height: 44px; }
 /* The bar over every menu screen (#48 dropped the old duel `.topbar` rules it leaned on). */
-.page-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; padding: 8px 16px; border-bottom: 1px solid var(--line); background: rgba(8, 15, 28, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.page-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; padding: 8px 16px; border-bottom: 1px solid var(--line); background: rgba(8, 15, 28, 0.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .page-bar .btn { min-height: 44px; }
 .btn.back { display: inline-flex; align-items: center; gap: 4px; padding-left: 8px; }
 .page-title { font-size: 22px; letter-spacing: -0.02em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
