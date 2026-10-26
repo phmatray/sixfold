@@ -20,7 +20,7 @@ use crate::lang::T;
 use crate::overworld::Progress;
 use crate::profile::Profile;
 use crate::set::{self, PROMOS};
-use crate::trainers::{Rule, Trainer, TRAINERS};
+use crate::trainers::{trainer, Rule, Trainer, TRAINERS};
 
 /// Hidden finds in the world's maps (`engine/tests/world_data.rs` counts them).
 pub const FINDS: usize = 101;
@@ -164,7 +164,7 @@ impl Stats {
             }
             Duel::World(id) => {
                 self.add("trainer_wins", one);
-                if id.starts_with("rook_") {
+                if trainer(id).is_some_and(Trainer::story) {
                     self.add("rook_lost", 1 - one);
                 }
             }
@@ -251,7 +251,7 @@ impl Achievement {
 
 /// Route duelists (not Rook's story duels).
 fn route() -> impl Iterator<Item = &'static Trainer> {
-    TRAINERS.iter().filter(|t| t.id.starts_with("t_"))
+    TRAINERS.iter().filter(|t| !t.story())
 }
 
 fn all_beaten(p: &Progress, keep: fn(&Trainer) -> bool) -> bool {

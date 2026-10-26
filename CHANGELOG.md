@@ -5,6 +5,20 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.6.0](https://github.com/phmatray/sixfold/compare/v1.5.0...v1.6.0) (2026-10-26)
+
+
+### Added
+
+* **duel:** a redesigned duel screen ([#48](https://github.com/phmatray/sixfold/issues/48)) ([55f86ee](https://github.com/phmatray/sixfold/commit/55f86eecfba039b6ed5fee4d2327a9f6a37841bc))
+* **title:** a studio splash and a living title screen ([#66](https://github.com/phmatray/sixfold/issues/66)) ([#82](https://github.com/phmatray/sixfold/issues/82)) ([c6626df](https://github.com/phmatray/sixfold/commit/c6626dfa7fe3c8c3e26907c6c26dd09cb7628b2d))
+* **world:** cutscene scripts ([#63](https://github.com/phmatray/sixfold/issues/63)) ([#85](https://github.com/phmatray/sixfold/issues/85)) ([d714307](https://github.com/phmatray/sixfold/commit/d714307641a2b4e640c7c90eeed1d6f0dfa40f9e))
+
+
+### Fixed
+
+* 1.6 design audit and loose ends ([#55](https://github.com/phmatray/sixfold/issues/55)) ([#89](https://github.com/phmatray/sixfold/issues/89)) ([e79ec11](https://github.com/phmatray/sixfold/commit/e79ec11e810d0580cd307989275dad6233a8cb63))
+
 ## [1.5.0](https://github.com/phmatray/sixfold/compare/v1.4.0...v1.5.0) (2026-10-26)
 
 

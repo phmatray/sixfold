@@ -313,7 +313,7 @@ pub fn craft_with_voucher(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::campaign::{record, rival, RIVAL_PURSE, WARDEN_PURSE};
+    use crate::campaign::{record, rival, CONSOLATION_PER_PRIZE, RIVAL_PURSE, WARDEN_PURSE};
     use crate::set::*;
     use crate::trainers::{PURSE_BASE, PURSE_PER_PRIZE, TRAINERS};
 
@@ -551,9 +551,17 @@ mod tests {
     #[test]
     fn economy_sim() {
         let mut first = vec![];
-        first.extend(TRAINERS.iter().map(|t| Source {
+        first.extend(TRAINERS.iter().filter(|t| !t.story()).map(|t| Source {
             minutes: 5,
             facets: t.purse(),
+            packs: 0,
+        }));
+        // 1.7 Rook's four scenes (§8.2), each played once whatever the result:
+        // a minute's scene and two minutes a prize; a first playthrough wins
+        // about half of them (the purse), and a loss pays the consolation.
+        first.extend(TRAINERS.iter().filter(|t| t.story()).map(|t| Source {
+            minutes: 1 + 2 * u32::from(t.prizes),
+            facets: (t.purse() + 4 * CONSOLATION_PER_PRIZE) / 2,
             packs: 0,
         }));
         first.extend(RIVALS.iter().map(|r| Source {
@@ -652,6 +660,14 @@ mod tests {
                 .filter(|a| on_the_way.contains(&a.id))
                 .map(|a| a.facets)
                 .sum(),
+            packs: 0,
+        });
+        // A lost duel pays CONSOLATION_PER_PRIZE, plus as much per prize
+        // taken: about one loss per rival on a first playthrough (its time is
+        // counted above), taking 3 prizes on average.
+        first.push(Source {
+            minutes: 0,
+            facets: RIVALS.len() as u32 * 4 * CONSOLATION_PER_PRIZE,
             packs: 0,
         });
         let rate = packs_per_hour(&first);

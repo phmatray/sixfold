@@ -2970,6 +2970,201 @@
           ]
         }
       ]
+    },
+    {
+      "id": "rook_1",
+      "name": "Rook",
+      "model": "rival_colorless",
+      "x": 35,
+      "z": 9,
+      "facing": "s",
+      "idle": "Idle",
+      "if": "seals:1 & !flag:rook_1_left",
+      "dialogue": [
+        {
+          "if": "won:rook_1",
+          "lines": [
+            "Huh. So a seal's worth something after all.",
+            "That's one on my sleeve for you. I keep count.",
+            "See you on the road. I'm always a little ahead."
+          ],
+          "lines_fr": [
+            "Tiens. Un sceau, ça vaut donc quelque chose.",
+            "Un trait sur ma manche pour toi. Je tiens les comptes.",
+            "On se reverra sur la route. J'ai toujours un peu d'avance."
+          ],
+          "do": [
+            "flag:rook_1_left"
+          ]
+        },
+        {
+          "if": "lost:rook_1",
+          "lines": [
+            "Told you. No colour, no excuses.",
+            "Don't sulk. I lost to everyone in that hall once. Everyone.",
+            "See you on the road."
+          ],
+          "lines_fr": [
+            "Je te l'avais dit. Pas de couleur, pas d'excuses.",
+            "Fais pas la tête. Un jour, j'ai perdu contre tout le monde dans cette salle. Tout le monde.",
+            "On se reverra sur la route."
+          ],
+          "do": [
+            "flag:rook_1_left"
+          ]
+        },
+        {
+          "if": "flag:rook_1",
+          "lines": [
+            "Scared of a blank deck? I'll wait. I'm good at waiting."
+          ],
+          "lines_fr": [
+            "Peur d'un deck tout blanc ? J'attendrai. Je sais attendre."
+          ],
+          "do": [
+            "duel:rook_1"
+          ]
+        },
+        {
+          "lines": [
+            "Not here. By the hall door. You'll see."
+          ],
+          "lines_fr": [
+            "Pas ici. Devant la porte de la salle. Tu verras."
+          ]
+        }
+      ]
+    }
+  ],
+  "scripts": [
+    {
+      "id": "intro",
+      "if": "!flag:intro & !item:running_shoes",
+      "on": "enter",
+      "at": [
+        [
+          25,
+          15
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "wait:500",
+            "cam:26:21",
+            "wait:1400",
+            "cam:25:11",
+            "wait:700"
+          ]
+        },
+        {
+          "say": "hero",
+          "lines": [
+            "Sixfold Meadow. Every road out of here ends at a seal.",
+            "Wynne's shop is just up the path. She said to come by before anything else."
+          ],
+          "lines_fr": [
+            "Le Pré de Sixfold. Toutes les routes qui partent d'ici mènent à un sceau.",
+            "La boutique de Wynne est juste en haut du chemin. Elle a dit de passer avant toute chose."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "walk:hero:nn",
+            "flag:intro"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rook_1",
+      "if": "seals:1 & !flag:rook_1",
+      "at": [
+        [
+          24,
+          12
+        ],
+        [
+          25,
+          12
+        ],
+        [
+          26,
+          12
+        ],
+        [
+          27,
+          12
+        ],
+        [
+          24,
+          13
+        ],
+        [
+          25,
+          13
+        ],
+        [
+          26,
+          13
+        ],
+        [
+          27,
+          13
+        ],
+        [
+          24,
+          14
+        ],
+        [
+          25,
+          14
+        ],
+        [
+          26,
+          14
+        ],
+        [
+          27,
+          14
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:rook",
+            "cam:rook_1",
+            "emote:rook_1:bang",
+            "walk:rook_1:sssswwwwww",
+            "face:rook_1:w",
+            "face:hero:e",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "rook_1",
+          "lines": [
+            "Hold on. Is that a seal?",
+            "One. They gave me none, the year I tried.",
+            "I'm Rook. No colour, before you ask. On purpose, these days.",
+            "Show me what a seal is worth."
+          ],
+          "lines_fr": [
+            "Attends. C'est un sceau, ça ?",
+            "Un. Moi, on ne m'en a donné aucun, l'année où j'ai essayé.",
+            "Je m'appelle Rook. Pas de couleur, avant que tu demandes. Exprès, maintenant.",
+            "Montre-moi ce que vaut un sceau."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:rook_1",
+            "duel:rook_1"
+          ]
+        }
+      ]
     }
   ],
   "camera": {

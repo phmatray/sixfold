@@ -38,14 +38,16 @@ pub fn start(back: Screen) {
 fn target(l: &Lesson, g: &Game, selected: Option<CardId>) -> Option<String> {
     let a = l.action?;
     Some(match (tutorial::hand_of(a), a) {
+        // The card is held: its glowing target on the table, or the duel
+        // line's Play button for a trainer.
         (Some(h), _) if selected.is_some() && selected == g.view(HUMAN).hand.get(h).copied() => {
-            ".action-bar .bar-group.plays .btn:not(.end)".into()
+            ".half.me .target .hexon-card, .half.me .spot.target, .seam .play".into()
         }
         (Some(h), _) => format!(".hand .hand-slot:nth-child({}) .hand-card", h + 1),
         (None, Action::Attack(i)) => {
-            format!(".action-bar .attacks .btn.attack:nth-child({})", i + 1)
+            format!(".plates > button.plate.attack:nth-of-type({})", i + 1)
         }
-        (None, Action::Done) => ".action-bar .btn.end".into(),
+        (None, Action::Done) => ".seam .end-turn".into(),
         _ => return None,
     })
 }
@@ -90,16 +92,19 @@ pub fn Coach() -> impl IntoView {
         })
     };
     let skip = move |_| {
+        let sure = window()
+            .confirm_with_message(tr(
+                "Skip the lesson? You can replay it from the title screen.",
+                "Passer la leçon ? Vous pourrez la rejouer depuis l'écran titre.",
+            ))
+            .unwrap_or(true);
+        if !sure {
+            return;
+        }
         crate::store::tutorial_done();
         ctl.stop();
         screen.set(Screen::Title);
     };
-    // On a phone the coach leaves the board even shorter: each step acts on
-    // your side, so keep it in view.
-    Effect::new(move |_| {
-        lesson.track();
-        crate::board::show_my_side();
-    });
     let ring = move || {
         sel.get().map(|s| {
             format!("{s}{{outline:3px solid var(--brass-hi);outline-offset:4px;border-radius:12px;animation:coach-ring 1.8s cubic-bezier(.16,1,.3,1) infinite}}")
@@ -180,16 +185,15 @@ pub fn Finish() -> impl IntoView {
             .with_untracked(|p| rivals.iter().find(|r| !r.beaten(p)))
             .unwrap_or(&rivals[0]);
         let next = match (open, first) {
-            (true, true) => tr(
-                format!(
-                    "Open your packs, then head into the world. First rival: {}, {}.",
-                    r.name, r.place
-                ),
-                format!(
-                    "Ouvrez vos boosters, puis partez dans le monde. Premier rival : {}, {}.",
-                    r.name, r.place
-                ),
-            ),
+            // The Journal's first objective, word for word, so the two agree.
+            (true, true) => {
+                let goal =
+                    progress.with_untracked(|p| sixfold_engine::objective::objective(p).text(p));
+                tr(
+                    format!("Open your packs, then head into the world. {goal}"),
+                    format!("Ouvrez vos boosters, puis partez dans le monde. {goal}"),
+                )
+            }
             _ => tr(
                 format!("Next rival: {}, {}.", r.name, r.place),
                 format!("Prochain rival : {}, {}.", r.name, r.place),

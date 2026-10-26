@@ -12,7 +12,7 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 use sixfold_engine::ai::{Ai, Difficulty, Style};
-use sixfold_engine::campaign::{rival, RivalLines};
+use sixfold_engine::campaign::{self, RivalLines};
 use sixfold_engine::tutorial;
 use sixfold_engine::{card, fr, tr, Action, CardId, Config, Event, Game, PromptKind};
 
@@ -69,6 +69,26 @@ pub struct Said {
     pub ko: bool,
 }
 
+/// One play in the history rail: who acted, the card to show and what
+/// came of it (the engine's own sentences, in order).
+#[derive(Clone, PartialEq)]
+pub struct Play {
+    pub key: u32,
+    /// Whose turn it was.
+    pub side: usize,
+    /// Counted from 1 for people.
+    pub turn: u32,
+    /// attack, power, trainer, energy, awaken, retreat, bench or ko.
+    pub kind: &'static str,
+    pub card: CardId,
+    /// The Hexon it went to or hit.
+    pub target: Option<CardId>,
+    /// Total damage an attack did.
+    pub amount: Option<u16>,
+    pub title: String,
+    pub lines: Vec<String>,
+}
+
 #[derive(Clone, PartialEq)]
 pub struct LogLine {
     pub key: u32,
@@ -121,6 +141,24 @@ pub struct Ctl {
     pub busy: RwSignal<bool>,
     pub fx: RwSignal<Fx>,
     pub log: RwSignal<Vec<LogLine>>,
+    /// The plays of this duel, oldest first (the rail shows the latest).
+    pub history: RwSignal<Vec<Play>>,
+    /// (turn player, turn) of the turn being played back.
+    turn_of: StoredValue<(usize, u32)>,
+    /// The opponent's moves play faster (a saved preference).
+    pub fast: RwSignal<bool>,
+    /// Held down: the opponent's turn runs at a tenth of the pace (display only).
+    pub rush: RwSignal<bool>,
+    /// Whose turn the playback has reached (set the moment a turn starts,
+    /// before the table catches up).
+    pub turn_side: RwSignal<Option<usize>>,
+    /// The turn the current rule tip came up on (it goes a full round later).
+    tip_turn: StoredValue<u32>,
+    /// Energy discards since the last play began: a retreat's payment comes
+    /// before the retreat itself, so the retreat takes them back.
+    discards: StoredValue<Vec<String>>,
+    /// The rule tip to show now, and whose Active it points at.
+    pub tip: RwSignal<Option<(crate::tips::Tip, usize)>>,
     /// The opponent's setup placements stay face down until the first turn.
     pub revealed: RwSignal<bool>,
     pub seed: RwSignal<u64>,
@@ -162,6 +200,14 @@ impl Ctl {
             busy: RwSignal::new(false),
             fx: RwSignal::new(Fx::default()),
             log: RwSignal::new(vec![]),
+            history: RwSignal::new(vec![]),
+            turn_of: StoredValue::new((0, 0)),
+            fast: RwSignal::new(crate::store::fast_opponent()),
+            rush: RwSignal::new(false),
+            tip_turn: StoredValue::new(0),
+            turn_side: RwSignal::new(None),
+            discards: StoredValue::new(vec![]),
+            tip: RwSignal::new(None),
             revealed: RwSignal::new(false),
             seed: RwSignal::new(0),
             error: RwSignal::new(None),
@@ -221,6 +267,10 @@ impl Ctl {
         crate::audio::duel_theme(&setup);
         self.setup.set_value(Some(setup));
         self.log.set(vec![]);
+        self.turn_side.set(None);
+        self.history.set(vec![]);
+        self.turn_of.set_value((0, 0));
+        self.tip.set(None);
         self.heard.set_value(vec![]);
         self.announce.set(String::new());
         self.said.set(None);
@@ -254,12 +304,11 @@ impl Ctl {
     }
 
     /// The rival's duel lines, in a world or post-game duel against a rival
-    /// (route duelists, quick duels and the tutorial have none).
+    /// or Rook (route duelists, quick duels and the tutorial have none).
     pub fn lines(&self) -> Option<&'static RivalLines> {
         self.setup
             .with_value(|s| s.as_ref()?.face())
-            .and_then(rival)
-            .map(|r| &r.lines)
+            .and_then(campaign::lines)
     }
 
     /// Say one of the rival's lines, at most once per duel (`bit`: 1 intro,
@@ -332,6 +381,7 @@ impl Ctl {
             let ms = self.play(&event);
             if ms > 0 {
                 let ms = if self.reduced_motion { ms * 6 / 10 } else { ms };
+                let ms = self.pace(ms);
                 set_timeout(move || self.step(generation), Duration::from_millis(ms));
                 return;
             }
@@ -365,7 +415,7 @@ impl Ctl {
                 matches!(p.kind, PromptKind::ChooseActive | PromptKind::ChooseBench)
             })
         });
-        let think = if setup { 350 } else { 750 };
+        let think = self.pace(if setup { 350 } else { 750 });
         let tutorial = self.tutorial();
         set_timeout(
             move || {
@@ -393,13 +443,13 @@ impl Ctl {
 
     /// Debug builds only (`trunk serve`): with `?autoplay` in the URL the Hard
     /// AI plays the human's seat too, so a whole duel, a Warden win and the
-    /// credits after it can be checked in the browser.
+    /// credits after it can be checked in the browser. `?autoplay=lose` only
+    /// ends the turn, to check a lost duel's screen.
     #[cfg(debug_assertions)]
     fn autoplay(self, generation: u32) {
-        let on = window()
-            .location()
-            .search()
-            .is_ok_and(|s| s.contains("autoplay"));
+        let search = window().location().search().unwrap_or_default();
+        let on = search.contains("autoplay");
+        let lose = search.contains("autoplay=lose");
         let mine = self.real.with_value(|g| {
             g.as_ref()
                 .is_some_and(|g| g.winner().is_none() && g.view(HUMAN).waiting_on == Some(HUMAN))
@@ -414,8 +464,13 @@ impl Ctl {
                 }
                 let seed = self.seed.get_untracked() ^ u64::from(self.next_key());
                 let action = self.real.with_value(|g| {
-                    g.as_ref()
-                        .map(|g| Ai::new(seed, Difficulty::Hard).choose_action(g, HUMAN))
+                    g.as_ref().map(|g| {
+                        if lose && g.legal_actions().contains(&Action::Done) {
+                            Action::Done
+                        } else {
+                            Ai::new(seed, Difficulty::Hard).choose_action(g, HUMAN)
+                        }
+                    })
                 });
                 if let Some(action) = action {
                     self.run(action);
@@ -470,6 +525,187 @@ impl Ctl {
         });
     }
 
+    /// Pauses shrink to a third while the opponent plays, if the player
+    /// asked for a faster opponent.
+    fn pace(&self, ms: u64) -> u64 {
+        let theirs = self.turn_of.get_value().0 == AI && self.revealed.get_untracked();
+        if theirs && self.rush.get_untracked() {
+            ms / 10
+        } else if theirs && self.fast.get_untracked() {
+            ms / 3
+        } else {
+            ms
+        }
+    }
+
+    /// Point a rule tip at `player`'s Active the first time its rule comes up
+    /// (never in the guided duel, which explains as it goes).
+    pub fn tip_once(&self, tip: crate::tips::Tip, player: usize) {
+        if self.tutorial() || tip.seen() || self.tip.get_untracked().is_some() {
+            return;
+        }
+        tip.mark_seen();
+        self.tip_turn.set_value(self.turn_of.get_value().1);
+        self.heard
+            .update_value(|h| h.push(format!("{}: {}", tip.title(), tip.text())));
+        self.tip.set(Some((tip, player)));
+    }
+
+    /// Add the event to the play history: a play starts a new entry, what
+    /// follows from it (damage, a knock-out's details, a coin) joins it.
+    fn record(&self, event: &Event, text: &str, kind: &'static str) {
+        use crate::tips::Tip;
+        match event {
+            Event::FirstPlayer { player } if *player == HUMAN => {
+                self.tip_once(Tip::FirstTurn, HUMAN)
+            }
+            Event::ConditionApplied { player, status } => {
+                self.tip_once(Tip::for_status(*status), *player)
+            }
+            Event::SuddenDeath => self.tip_once(Tip::SuddenDeath, 2),
+            _ => {}
+        }
+        if let Event::TurnStarted { player, turn } = event {
+            // A turn with no play still leaves a trace: "passed".
+            let (side, last) = self.turn_of.get_value();
+            let played = self
+                .history
+                .with_untracked(|h| h.last().is_some_and(|p| p.turn == last));
+            let face = self.shown.with_untracked(|g| {
+                g.as_ref()
+                    .and_then(|g| g.view(HUMAN).sides[side].active.map(|a| a.top()))
+            });
+            if let (true, false, Some(c)) = (last > 0, played, face) {
+                let key = self.next_key();
+                self.history.update(|h| {
+                    h.push(Play {
+                        key,
+                        side,
+                        turn: last,
+                        kind: "pass",
+                        card: c,
+                        target: None,
+                        amount: None,
+                        title: tr("No play", "Aucun coup").into(),
+                        lines: vec![tr(
+                            "Drew a card and ended the turn.",
+                            "A pioché une carte et fini son tour.",
+                        )
+                        .into()],
+                    })
+                });
+            }
+            self.turn_of.set_value((*player, turn + 1));
+            self.turn_side.set(Some(*player));
+            if self.tip.get_untracked().is_some() && turn + 1 >= self.tip_turn.get_value() + 2 {
+                self.tip.set(None);
+            }
+            return;
+        }
+        let (side, turn) = self.turn_of.get_value();
+        let play = |kind: &'static str, card: CardId, target: Option<CardId>, title: String| Play {
+            key: self.next_key(),
+            side,
+            turn,
+            kind,
+            card,
+            target,
+            amount: None,
+            title,
+            lines: vec![],
+        };
+        let new = match event {
+            Event::AttackUsed {
+                attack, creature, ..
+            } => Some(play(
+                "attack",
+                *creature,
+                None,
+                card(*creature)
+                    .creature()
+                    .and_then(|c| c.attacks.get(*attack))
+                    .map_or(tr("Attack", "Attaque"), |a| a.label())
+                    .into(),
+            )),
+            Event::PowerUsed { creature, .. } => Some(play(
+                "power",
+                *creature,
+                None,
+                card(*creature)
+                    .creature()
+                    .and_then(|c| c.power.as_ref())
+                    .map_or(tr("Power", "Pouvoir"), |p| p.label())
+                    .into(),
+            )),
+            Event::TrainerPlayed { card: c, .. } => {
+                Some(play("trainer", *c, None, card(*c).label().into()))
+            }
+            Event::EnergyAttached {
+                creature, card: c, ..
+            } => Some(play("energy", *c, Some(*creature), card(*c).label().into())),
+            Event::Evolved { card: c, .. } => {
+                Some(play("awaken", *c, None, tr("Awakened", "Éveil").into()))
+            }
+            Event::Retreated { creature, .. } => Some(play(
+                "retreat",
+                *creature,
+                None,
+                tr("Retreat", "Retraite").into(),
+            )),
+            Event::KnockedOut { card: c, .. } => {
+                Some(play("ko", *c, None, tr("Knocked out", "K.O.").into()))
+            }
+            Event::Placed { card: c, .. } if turn > 0 => {
+                Some(play("bench", *c, None, tr("Benched", "Sur le Banc").into()))
+            }
+            _ => None,
+        };
+        let is_discard = matches!(event, Event::EnergyDiscarded { .. });
+        let retreat = matches!(event, Event::Retreated { .. });
+        let moved = if new.is_some() {
+            self.discards.with_value(|d| d.clone())
+        } else {
+            vec![]
+        };
+        if new.is_some() {
+            self.discards.set_value(vec![]);
+        }
+        self.history.update(|h| {
+            if let Some(mut p) = new {
+                if retreat && !moved.is_empty() {
+                    if let Some(prev) = h.last_mut() {
+                        prev.lines.retain(|l| !moved.contains(l));
+                    }
+                    p.lines.extend(moved.iter().cloned());
+                }
+                h.push(p);
+                if h.len() > 600 {
+                    h.drain(..h.len() - 600);
+                }
+            }
+            let Some(last) = h.last_mut().filter(|l| l.turn == turn) else {
+                return;
+            };
+            if let Event::Damage {
+                creature, amount, ..
+            } = event
+            {
+                // The tile shows what the attack did to its target; other
+                // Hexons it hit are in its lines.
+                if last.kind == "attack" && last.target.is_none_or(|t| t == *creature) {
+                    last.amount = Some(last.amount.unwrap_or(0) + amount);
+                    last.target.get_or_insert(*creature);
+                }
+            }
+            if !text.is_empty() && kind != "quiet" && kind != "turn" {
+                last.lines.push(text.to_string());
+            }
+            if is_discard && !text.is_empty() {
+                self.discards.update_value(|d| d.push(text.to_string()));
+            }
+        });
+    }
+
     /// Log one event, start its effect, and return how long to pause (ms).
     fn play(&self, event: &Event) -> u64 {
         crate::audio::duel_event(event);
@@ -517,6 +753,7 @@ impl Ctl {
             self.turn_flip
                 .set_value(matches!(event, Event::TurnStarted { .. }));
         }
+        self.record(event, &text, kind);
         self.log.update(|l| {
             l.push(LogLine { key, text, kind });
             if l.len() > 300 {

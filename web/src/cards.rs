@@ -266,7 +266,13 @@ pub fn face_text(id: CardId) -> String {
         ""
     };
     match def.creature() {
-        Some(c) => format!("{} {} {}{promo}", def.label(), c.hp, foot(def)),
+        Some(c) => format!(
+            "{} {} {} {}{promo}",
+            def.label(),
+            c.hp,
+            sixfold_engine::tr("HP", "PV"),
+            foot(def)
+        ),
         None => format!("{} {}{promo}", def.label(), foot(def)),
     }
 }

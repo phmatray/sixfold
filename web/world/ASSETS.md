@@ -71,7 +71,7 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `interior/chair.glb`, `plant.glb`, `display_case.glb`, `lamp.glb` | Furniture | 1 × 1 | — |
 | `interior/rug.glb` | Rug, ≥ 1 cm thick (walkable) | 3 × 2 | — |
 | `interior/exit_mat.glb` | Door mat on the exit tile, ≥ 1 cm thick (walkable) | 1 × 1 | — |
-| `npc/<model>.glb` | A person (`Idle`, `Walk`, `Fidget`), one draw on a palette texture: the townsfolk archetypes `npc_kid`, `npc_gardener`, `npc_elder`, `npc_sailor`, `npc_shopkeeper`, `npc_scholar`, `npc_worker`, `npc_wanderer`, `npc_rival`, and the campaign rivals `rival_<colour>.glb` and `rival_champion.glb` | — | ~1.1–1.8 m |
+| `npc/<model>.glb` | A person (`Idle`, `Walk`, `Fidget`), one draw on a palette texture: the townsfolk archetypes `npc_kid`, `npc_gardener`, `npc_elder`, `npc_sailor`, `npc_shopkeeper`, `npc_scholar`, `npc_worker`, `npc_wanderer`, `npc_rival`, the campaign rivals `rival_<colour>.glb` and `rival_champion.glb`, and Rook, the story rival, `rival_colorless.glb` (1.7) | — | ~1.1–1.8 m |
 | `interior/oven.glb` | Brick bread oven against the north wall, glowing mouth (`oven_glow`), flue, a ledge with loaves and the tip jar on its right | 2 × 1 | ~2.45 m |
 | `interior/printing_press.glb` | Hand press: frame, screw and bar, bed on rails along X, raised tympan on the left, ink table on the right | 2 × 1 | ~1.8 m |
 | `interior/type_case.glb` | Compositor's cabinet: drawers (one pulled out), a sloping case of compartments | 1 × 1 | ~1.35 m |
@@ -86,6 +86,7 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `brass_thimble.glb`, `heron_feather.glb`, `message_bottle.glb`, `fossil_fern.glb`, `tin_hex.glb`, `lead_type.glb` | The six 1.2 curios, named by curio id, centred on the origin (≤ 600 tris) | — | any (fitted) |
 | `waymark.glb` | Hex stone post holding a crystal (`crystal_glow`, near white: tint it with the region colour) | 1 × 1 | ~1.9 m |
 | `seal_stone.glb` | Hex seal stone on a stepped base, one coloured face per colour (`seal_<colour>`: front fire, then counter-clockwise seen from above water, lightning, psychic, fighting, grass), a blank pale top (`seal_top`) | 2 × 2 | ~1.9 m |
+| `seal_stone_carved.glb` | The duel hall's seal stone after the story's epilogue (1.7): the same stone, its top cut with a hexagon outline, still blank | 2 × 2 | ~1.9 m |
 | `cave_mouth.glb` | A rough arch of boulders round a black throat in a sandstone face, timber bracing, a lantern on the lintel (`lamp_glow`), roots and vines over the top, crystals glinting inside (`crystal_glow`); back flush with the north edge: put it against a cliff on the row behind (≥ 2 m); the door warp is its tile | 2 × 1 | ~2.1 m |
 | `climb_wall.glb` | Two rough steps (tops 0.5 m front, 1.0 m back) with painted holds, chalk, a knotted rope from an iron stake and vines; climbs toward −Z, floor 0.5 m, stacks with `y` like `stairs` | 1 × 1 | 1 m |
 | `inn_sign.glb` | Two posts, a board with a crescent moon and stars (both faces), a lantern (`lamp_glow`) | 1 × 1 | ~2.35 m |

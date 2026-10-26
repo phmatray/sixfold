@@ -702,16 +702,16 @@ keep 60; the last is given in full:
 
 | # | Id | Where, trigger | Deck (prizes, AI) | Beat |
 |---|---|---|---|---|
-| 1 | `rook_1` | Meadow, on entering with `seals:1 & !flag:rook_1` | **Blank Slate**: Burrowbit 4, Pecklet 4, Pocketmouse 4, Scampit 3, Relay Baton 2, Lucky Satchel 2, Ember 21, Tide 20 (2, Normal) | He walks down from the north path, blocks the hall door, looks at your seal. "One. They gave me none, the year I tried." |
-| 2 | `rook_2` | Stormwatch, the observatory roof, on entering with `seals:3 & !flag:rook_2` | **Open Sky**: + Warrenbuck 3, Galeheron 3, Echopup 2, Haulox 2, Twofold Energy 2 (4, Normal) | Cam pans to the Rodspire; he's mapping the seal sites. "Six stones. Six faces each. And one nobody carves." |
-| 3 | `rook_3` | Lanternmere's lantern path at night, `seals:5 & time:night & !flag:rook_3` | **Hollow Crown**: + Warrenking 2, Mendlark 3, Wide Satchel 1, Snare Hook 1 (5, Hard) | Halfway across the lake, lanterns bobbing; he's tired, almost friendly. "You're the only one who's ever caught up." |
-| 4 | `rook_4` | Duel hall, stepping toward the sealed door with `seals:6 & !flag:rook_4` | **Seventh Face**: Burrowbit 4, Warrenbuck 3, Warrenking 2, Pecklet 4, Galeheron 3, Mendlark 3, Echopup 2, Haulox 2, Pocketmouse 2, Lucky Satchel 3, Trail Compass 2, Snare Hook 2, Hearty Broth 2, Wide Satchel 1, Relay Baton 1, Twofold Energy 4, Ember 10, Tide 10 (6, Hard) | He's already at the door. The duel; then the door opens on its own, Sable walks out. |
+| 1 | `rook_1` | Meadow, stepping onto the hall's plaza with `seals:1 & !flag:rook_1` | **Blank Slate**: Burrowbit 4, Pecklet 4, Pocketmouse 4, Scampit 3, Relay Baton 2, Lucky Satchel 2, Ember 21, Tide 20 (2, Normal) | He walks down from the north path, blocks the hall door, looks at your seal. "One. They gave me none, the year I tried." |
+| 2 | `rook_2` | Stormwatch, below the observatory bluff where the road leaves for the Rodspire (built in 1.7; the roof deck stays an idea), crossing that road with `seals:3 & flag:rook_1 & !flag:rook_2` | **Open Sky**: + Warrenbuck 3, Galeheron 3, Echopup 2, Haulox 2, Twofold Energy 2 (4, Normal) | Cam pans to the Rodspire; he's mapping the seal sites. "Six stones. Six faces each. And one nobody carves." |
+| 3 | `rook_3` | Lanternmere's lantern path at night, from either end, `seals:5 & flag:rook_2 & time:night & !flag:rook_4 & !flag:rook_3` (the hero walks out to the pier halfway; skipped once the hall scene has played) | **Hollow Crown**: + Warrenking 2, Mendlark 3, Wide Satchel 1, Snare Hook 1 (5, Hard) | Halfway across the lake, lanterns bobbing; he's tired, almost friendly. "You're the only one who's ever caught up." |
+| 4 | `rook_4` | Duel hall, stepping toward the sealed door with `seals:6 & flag:rook_2 & !flag:rook_4` (not waiting for the night scene, so the ending is never out of reach) | **Seventh Face**: Burrowbit 4, Warrenbuck 3, Warrenking 2, Pecklet 4, Galeheron 3, Mendlark 3, Echopup 2, Haulox 2, Pocketmouse 2, Lucky Satchel 3, Trail Compass 2, Snare Hook 2, Hearty Broth 2, Wide Satchel 1, Relay Baton 1, Twofold Energy 4, Ember 10, Tide 10 (6, Hard) | He's already at the door. The duel; then the door opens on its own, Sable walks out. |
 | — | epilogue | after `beat:warden` | Rook stands in the hall; rematch `rook_4` for ⬡ 60 | Sable has carved a seventh face on the hall's stone: blank still, "for whoever brings someone else along". Rook takes Wynne's apprentice job. Champion title becomes "Champion of the Seventh Face" once `flag:rook_4`. |
 
 ### 8.3 Cutscenes
 
-Six scripts, each under a minute, all skippable (hold E / long-press: jumps to the end state, applying every
-state effect and skipping cues):
+Six scripts, each under a minute, all skippable (Escape, or the Skip button, also in the dialogue box: jumps to
+the end state, applying every state effect and skipping cues; walks still arrive and faces still turn):
 
 1. `intro` — new game: Wynne in the hall gives the shoes and ⬡ 100, points at the six roads. (Existing
    dialogue, upgraded with a camera pan over the meadow.)
@@ -748,7 +748,7 @@ Scripts:
 "scripts": [{
   "id": "rook_1",
   "if": "seals:1 & !flag:rook_1",
-  "on": "enter",                                   // or "at": [[13,11],[14,11]]
+  "on": "enter",                                   // or "at": [[13,11],[14,11]] (both: entering on those tiles)
   "steps": [
     { "do": ["cam:rook", "walk:rook:sssss", "face:hero:n", "emote:rook:bang", "wait:400"] },
     { "say": "rook", "lines": ["One seal.", "They gave me none, the year I tried."],
@@ -759,7 +759,10 @@ Scripts:
 ```
 
 A step is either `say` (a dialogue sheet from that actor; actor `hero` has no name plate) or `do` (effects in
-order). A `duel:` ends the script; the post-duel lines come from the NPC's `won:`/`lost:` branches, as for
+order). Cues play one at a time; state effects are kept and applied once, when the scene ends (played out or
+skipped), and the hero's tile isn't saved while it plays, so a reload mid-scene replays it from the start. The
+hero takes no input and the in-game menu waits; a scene's `walk` never takes a door or an exit (a `warp:` cue
+does), so a skip lands where playing out would. A `duel:` goes in the last step and ends the script; the post-duel lines come from the NPC's `won:`/`lost:` branches, as for
 rivals today. The NPC `rook` exists on the map with `"if": "seals:1 & !beat:rook_1 & !flag:rook_1_left"` so he
 is there for the scene and leaves afterwards (a final `walk` and `flag:rook_1_left`).
 

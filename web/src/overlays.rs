@@ -9,7 +9,7 @@ use sixfold_engine::{card, fr, tr, Color, Event};
 use crate::art::glyph_svg;
 use crate::board::{find_mon, slot_name, status_class};
 use crate::cards::{energy_pips, CardDetails, CardFace};
-use crate::ctl::{Ctl, Post, HUMAN};
+use crate::ctl::{Ctl, Post, AI, HUMAN};
 use crate::{Inspect, Screen, Ui};
 
 #[component]
@@ -70,15 +70,33 @@ pub fn Inspector() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let ui = expect_context::<Ui>();
     let in_play = Memo::new(move |_| {
-        let at = ui.inspect.get().and_then(|i| i.at)?;
+        // Nothing pointed at: the opponent's Active, the card you play against.
+        let fallback = move || {
+            let acting = ctl
+                .fx
+                .with(|f| f.callout.as_ref().is_some_and(|c| c.card.is_some()));
+            (ui.selected.with(Option::is_none) && !acting).then(|| {
+                ctl.shown.with(|g| {
+                    g.as_ref()
+                        .and_then(|g| g.view(HUMAN).sides[AI].active.map(|a| (AI, a.uid)))
+                })
+            })?
+        };
+        let at = match ui.inspect.get() {
+            Some(i) => i.at?,
+            None => fallback().filter(|_| ctl.revealed.get())?,
+        };
         ctl.shown
             .with(|g| g.as_ref().and_then(|g| find_mon(g, at.0, at.1)))
             .map(|m| (at.0, m))
     });
+    // The card under the pointer or focus, else the one being played.
     let shown_card = move || {
         in_play
             .with(|m| m.as_ref().map(|(_, m)| m.top))
             .or_else(|| ui.inspect.get().map(|i| i.card))
+            .or_else(|| ui.selected.get().map(|k| k.0))
+            .or_else(|| ctl.fx.with(|f| f.callout.as_ref().and_then(|c| c.card)))
     };
     let close = NodeRef::<leptos::html::Button>::new();
     Effect::new(move |_| {
@@ -132,31 +150,49 @@ pub fn Inspector() -> impl IntoView {
     }
 }
 
+/// The full text log, newest first: for reading back, and for screen readers.
 #[component]
-pub fn LogPanel() -> impl IntoView {
+pub fn LogDrawer() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let ui = expect_context::<Ui>();
-    let list = NodeRef::<leptos::html::Ol>::new();
+    let all = RwSignal::new(false);
+    let close = NodeRef::<leptos::html::Button>::new();
+    let list = NodeRef::<leptos::html::Div>::new();
     Effect::new(move |_| {
-        ctl.log.track();
-        if let Some(el) = list.get() {
-            el.set_scroll_top(el.scroll_height());
+        if ui.log_open.get() {
+            if let Some(b) = close.get() {
+                let _ = b.focus();
+            }
         }
     });
-    view! {
-        <section class="log" class:open=move || ui.log_open.get() aria-label=tr("Battle log", "Journal du duel")>
-            <h2>{tr("Battle log", "Journal du duel")}</h2>
-            {move || ctl.log.with(Vec::is_empty).then(|| view! {
-                <p class="empty-note">{tr("Every draw, attack and coin flip shows up here.", "Chaque pioche, attaque et pile ou face s'affiche ici.")}</p>
-            })}
-            <ol class="log-list" node_ref=list>
-                <For
-                    each=move || ctl.log.get()
-                    key=|l| l.key
-                    children=move |l| view! { <li class=format!("l-{}", l.kind)>{l.text}</li> }
-                />
-            </ol>
-        </section>
+    move || {
+        ui.log_open.get().then(|| view! {
+            <div class="sheet-scrim" on:click=move |_| ui.log_open.set(false)></div>
+            <section class="drawer" role="dialog" aria-modal="true" aria-labelledby="log-title"
+                on:keydown=move |e| { if e.key() == "Escape" { ui.log_open.set(false) } }>
+                <header>
+                    <h2 id="log-title">{tr("Duel log", "Journal du duel")}</h2>
+                    <button class="icon-btn" node_ref=close aria-label=tr("Close", "Fermer") on:click=move |_| ui.log_open.set(false)>
+                        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                    </button>
+                </header>
+                <label class="check">
+                    <input type="checkbox" prop:checked=move || all.get() on:change=move |e| all.set(event_target_checked(&e)) />
+                    {tr("Every event, as text", "Chaque événement, en texte")}
+                </label>
+                <div class="log-scroll" node_ref=list>
+                    {move || if all.get() {
+                        view! {
+                            <ol class="log-list">
+                                {ctl.log.with(|l| l.iter().map(|l| view! { <li class=format!("l-{}", l.kind)>{l.text.clone()}</li> }).collect_view())}
+                            </ol>
+                        }.into_any()
+                    } else {
+                        view! { <crate::history::LogPlays /> }.into_any()
+                    }}
+                </div>
+            </section>
+        })
     }
 }
 
@@ -247,7 +283,22 @@ pub fn GameOver() -> impl IntoView {
                     "Votre adversaire n'avait plus de Hexon en jeu.",
                 ),
             };
-            Some((w, v.sudden_death, left, why))
+            // What the cause teaches, for the "why you lost" panel.
+            let cause = match (deck_out, left[w] == 0) {
+                (true, _) => tr(
+                    "Your deck ran out. Play fewer cards that make you draw, and keep your deck at full size.",
+                    "Votre pioche s'est vidée. Jouez moins de cartes qui font piocher, et gardez un deck complet.",
+                ),
+                (false, true) => tr(
+                    "They knocked out six of your Hexons. Spread energy over two Hexons, so one knock-out doesn't send you back to zero.",
+                    "Six de vos Hexons ont été mis K.O. Répartissez l'énergie sur deux Hexons, pour qu'un K.O. ne vous ramène pas à zéro.",
+                ),
+                (false, false) => tr(
+                    "Your Active was knocked out with no one on your Bench to take its place. Keep at least one Basic Hexon on your Bench.",
+                    "Votre Actif a été mis K.O. sans personne sur le Banc pour le remplacer. Gardez toujours au moins un Hexon de Base sur le Banc.",
+                ),
+            };
+            Some((w, v.sudden_death, left, why, cause))
         })
     });
     // The reward is granted once per match, when its result first shows: a
@@ -263,7 +314,8 @@ pub fn GameOver() -> impl IntoView {
     let quoted = ctl
         .setup
         .with_value(|s| s.as_ref().and_then(|s| s.face()))
-        .and_then(campaign::rival);
+        .and_then(campaign::opponent)
+        .and_then(|o| o.lines.map(|l| (o.id, o.name, l)));
     let duelist = opponent.and_then(sixfold_engine::trainers::trainer);
     let post = ctl.setup.with_value(|s| s.as_ref().and_then(|s| s.post));
     let back = ctl
@@ -271,6 +323,15 @@ pub fn GameOver() -> impl IntoView {
         .with_value(|s| s.as_ref().map_or(Screen::Title, |s| s.back));
     let level = ctl.setup.with_value(|s| s.as_ref().map(|s| s.difficulty));
     let reward = RwSignal::new(None::<u32>);
+    // A loss pays Facets per prize taken (campaign::CONSOLATION_PER_PRIZE).
+    let consolation = RwSignal::new(None::<u32>);
+    let start_prizes = ctl
+        .setup
+        .with_value(|s| s.as_ref().map_or(6, |s| usize::from(s.prizes)));
+    // The board stays readable behind the result: "Look at the board" hides it.
+    let peek = RwSignal::new(false);
+    let mags = RwSignal::new(false);
+    let lesson = loss_lesson(ctl);
     let campaign_reward = RwSignal::new(None::<campaign::Reward>);
     let duelist_reward = RwSignal::new(None::<campaign::Reward>);
     let rung_result = RwSignal::new(None::<RungResult>);
@@ -282,6 +343,14 @@ pub fn GameOver() -> impl IntoView {
                 return;
             }
             let won = winner == HUMAN;
+            let taken = result
+                .with_untracked(|r| r.as_ref().map(|r| start_prizes.saturating_sub(r.2[HUMAN])))
+                .unwrap_or(0);
+            if !won && !matches!(post, Some(Post::Tutorial | Post::Gauntlet | Post::Daily(_))) {
+                let mut got = 0;
+                progress.update(|pr| got = campaign::record_consolation(pr, taken));
+                consolation.set(Some(got));
+            }
             match (rival, post) {
                 (None, Some(Post::Gauntlet)) => {
                     let mut got = None;
@@ -360,8 +429,14 @@ pub fn GameOver() -> impl IntoView {
             .is_some_and(|(rw, r)| rw.won && rw.first && !r.seal)
     };
     move || {
-        let (winner, sudden, left, why) = result.get()?;
+        let (winner, sudden, left, why, cause) = result.get()?;
         let won = winner == HUMAN;
+        if peek.get() {
+            return Some(view! {
+                <button class="btn primary show-result" on:click=move |_| peek.set(false)>{tr("Show the result", "Voir le résultat")}</button>
+            }.into_any());
+        }
+        let lesson = lesson.clone();
         Some(view! {
             <div class="scrim end">
                 <div class=if won { "dialog result won" } else { "dialog result lost" } role="dialog" aria-modal="true" aria-labelledby="result-title">
@@ -379,12 +454,40 @@ pub fn GameOver() -> impl IntoView {
                         )}
                         {sudden.then_some(tr(" Decided in sudden death.", " Décidé en mort subite."))}
                     </p>
-                    {quoted.filter(|_| won).map(|r| view! {
+                    {(!won).then(|| {
+                        let (hints, advice) = lesson.clone();
+                        view! {
+                            <section class="why" aria-labelledby="why-title">
+                                <h3 id="why-title">{tr("Why you lost", "Pourquoi cette défaite")}</h3>
+                                <p class="why-cause">{cause}</p>
+                                {(!hints.is_empty()).then(|| view! { <h4>{tr("Next time", "La prochaine fois")}</h4> })}
+                                {hints.into_iter().map(|h| view! { <p>{h}</p> }).collect_view()}
+                                {move || mags.get().then(|| view! {
+                                    <ul class="mags">{advice.iter().map(|a| view! { <li>{a.clone()}</li> }).collect_view()}</ul>
+                                })}
+                            </section>
+                        }
+                    })}
+                    {move || consolation.get().map(|n| {
+                        let per = campaign::CONSOLATION_PER_PRIZE;
+                        let taken = (n / per).saturating_sub(1);
+                        view! {
+                        <div class="reward" role="status">
+                            <span class="gem" aria-hidden="true"></span>
+                            <p><b>{tr(format!("+{n} Facets"), format!("+{n} Facettes"))}</b><span>{match (taken, fr()) {
+                                (0, false) => "For playing it out to the end.".to_string(),
+                                (0, true) => "Pour avoir joué jusqu'au bout.".to_string(),
+                                (t, false) => format!("{per} for playing it out, and {per} for each of the {t} prizes you took."),
+                                (t, true) => format!("{per} pour avoir joué jusqu'au bout, et {per} pour chacune des {t} Récompenses prises."),
+                            }}</span></p>
+                        </div>
+                    }                    })}
+                    {quoted.filter(|_| won).map(|(id, name, lines)| view! {
                         <figure class="rival-quote">
-                            <crate::campaign::Portrait id=r.id name=r.name />
+                            <crate::campaign::Portrait id=id name=name />
                             <blockquote>
-                                <p>{r.lines.defeat.get()}</p>
-                                <footer>{r.name}</footer>
+                                <p>{lines.defeat.get()}</p>
+                                <footer>{name}</footer>
                             </blockquote>
                         </figure>
                     })}
@@ -393,7 +496,7 @@ pub fn GameOver() -> impl IntoView {
                         view! {
                         <div class="reward" role="status">
                             <span class="gem" aria-hidden="true"></span>
-                            <p><b>{format!("+⬡ {n}")}</b>
+                            <p><b>{tr(format!("+{n} Facets"), format!("+{n} Facettes"))}</b>
                                 <span>{tr(
                                     format!("You have ⬡ {coins}. Spend Facets on packs at the duel hall."),
                                     format!("Vous avez ⬡ {coins}. Dépensez vos Facettes en boosters à la salle des duels."),
@@ -428,12 +531,12 @@ pub fn GameOver() -> impl IntoView {
                                         }.into_any(),
                                         (true, ..) => view! { <b>{tr("Rematch won", "Revanche gagnée")}</b> }.into_any(),
                                         _ => view! {
-                                            <b>{tr("No reward this time", "Pas de récompense cette fois")}</b>
+                                            <b>{tr("No seal this time", "Pas de sceau cette fois")}</b>
                                             <span>{tr(format!("Talk to {} again for a rematch.", r.name), format!("Reparlez à {} pour une revanche.", r.name))}</span>
                                         }.into_any(),
                                     }}
                                     {(n > 0).then(|| view! { <span>{format!("+{}", crate::campaign::packs_label(b, n))}</span> })}
-                                    {(rw.facets > 0).then(|| view! { <span>{format!("+⬡ {}", rw.facets)}</span> })}
+                                    {(rw.facets > 0).then(|| view! { <span>{tr(format!("+{} Facets", rw.facets), format!("+{} Facettes", rw.facets))}</span> })}
                                     {rw.promo.map(|c| view! { <span>{tr(
                                         format!("+ the promo card {}, now in your collection", card(c).label()),
                                         format!("+ la carte promo {}, ajoutée à votre collection", card(c).label()),
@@ -449,7 +552,7 @@ pub fn GameOver() -> impl IntoView {
                                 {(rw.facets > 0).then(|| view! { <span class="gem" aria-hidden="true"></span> })}
                                 <p>{if rw.facets > 0 {
                                     view! {
-                                        <b>{format!("+⬡ {}", rw.facets)}</b>
+                                        <b>{tr(format!("+{} Facets", rw.facets), format!("+{} Facettes", rw.facets))}</b>
                                         <span>{tr(
                                             format!("{}'s purse. You have ⬡ {coins}.", t.name),
                                             format!("La bourse de {}. Vous avez ⬡ {coins}.", t.name),
@@ -459,6 +562,12 @@ pub fn GameOver() -> impl IntoView {
                                     view! {
                                         <b>{tr("Won again", "Encore gagné")}</b>
                                         <span>{tr(format!("{} pays a purse only once.", t.name), format!("{} ne paie sa bourse qu'une fois.", t.name))}</span>
+                                    }.into_any()
+                                } else if t.story() && !progress.with(|p| p.has_flag("sable_door")) {
+                                    // Rook's story goes on whatever the result (not his hall rematch).
+                                    view! {
+                                        <b>{tr("The story goes on", "L'histoire continue")}</b>
+                                        <span>{tr(format!("{} will remember this one.", t.name), format!("{} s'en souviendra.", t.name))}</span>
                                     }.into_any()
                                 } else {
                                     view! {
@@ -540,18 +649,88 @@ pub fn GameOver() -> impl IntoView {
                         }.into_any(),
                         (None, None) => view! {
                     <div class="dialog-foot">
+                        <button class="btn primary" on:click=rematch autofocus>{tr("Rematch", "Revanche")}</button>
                         {won.then(|| view! {
                             <button class="btn" on:click=move |_| { ctl.stop(); screen.set(Screen::Packs) }>{tr("Open packs", "Ouvrir des boosters")}</button>
                         })}
-                        <button class="btn primary" on:click=rematch autofocus>{tr("Rematch", "Revanche")}</button>
                         <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(Screen::Duel) }>{tr("Change decks", "Changer de deck")}</button>
                     </div>
                         }.into_any(),
                     }}
+                    <div class="result-extra">
+                        {(!won && !lesson.1.is_empty()).then(|| view! {
+                            <button class="btn" aria-expanded=move || mags.get().to_string() on:click=move |_| mags.update(|m| *m = !*m)>
+                                {tr("Ask Mags, the deck doctor", "Demander conseil à Mags")}
+                            </button>
+                        })}
+                        <button class="btn ghost" on:click=move |_| peek.set(true)>{tr("Look at the board", "Revoir le plateau")}</button>
+                    </div>
                 </div>
             </div>
-        })
+        }.into_any())
     }
+}
+
+/// What a lost duel teaches: the opponent's weakness and your deck's main
+/// problem, from the deck doctor (Mags). (hints, Mags's full reading)
+fn loss_lesson(ctl: Ctl) -> (Vec<String>, Vec<String>) {
+    use sixfold_engine::Color;
+    let Some(setup) = ctl.setup.get_value() else {
+        return (vec![], vec![]);
+    };
+    if setup.post == Some(Post::Tutorial) {
+        return (vec![], vec![]);
+    }
+    let mut hints = vec![];
+    let mut weak: Vec<(Color, usize)> = vec![];
+    for &id in &setup.decks[1] {
+        if let Some(w) = card(id).creature().and_then(|c| c.weakness) {
+            match weak.iter_mut().find(|(c, _)| *c == w) {
+                Some(e) => e.1 += 1,
+                None => weak.push((w, 1)),
+            }
+        }
+    }
+    weak.sort_by_key(|(_, n)| std::cmp::Reverse(*n));
+    if let Some(&(w, _)) = weak.first() {
+        let mine = setup.decks[0]
+            .iter()
+            .filter(|&&id| card(id).creature().is_some_and(|c| c.color == w))
+            .count();
+        let opp = setup.names[1].clone();
+        hints.push(if mine == 0 {
+            tr(
+                format!("Most of {opp}'s Hexons are weak to {w}, and your deck has none: one {w} Hexon would double your damage."),
+                format!("La plupart des Hexons de {opp} sont faibles face à {w}, et votre deck n'en a aucun : un Hexon {w} doublerait vos dégâts."),
+            )
+        } else {
+            tr(
+                format!("Most of {opp}'s Hexons are weak to {w}: lead with your {w} Hexons ({mine} in your deck)."),
+                format!("La plupart des Hexons de {opp} sont faibles face à {w} : menez avec vos Hexons {w} ({mine} dans votre deck)."),
+            )
+        });
+    }
+    let owned = expect_context::<RwSignal<sixfold_engine::profile::Profile>>()
+        .with_untracked(|p| p.collection.clone());
+    let advice = sixfold_engine::doctor::diagnose(&setup.decks[0], &owned);
+    let reading: Vec<String> = advice
+        .iter()
+        .filter(|a| a.issue != sixfold_engine::doctor::Issue::Healthy)
+        .map(|a| match &a.swap {
+            Some(sw) => format!("{} {}", a.text(), sw.text()),
+            None => a.text(),
+        })
+        .collect();
+    match reading.first() {
+        Some(first) => hints.push(tr(format!("Mags: {first}"), format!("Mags : {first}"))),
+        // Only when nothing else explains it: never "nothing wrong" after a named weakness.
+        None if hints.is_empty() => hints.push(tr(
+            "Mags, the deck doctor, finds nothing wrong with your deck: the draw went against you this time.",
+            "Mags, la docteure des decks, ne trouve rien à redire à votre deck : la pioche vous a desservi cette fois.",
+        ).into()),
+        None => {}
+    }
+    (hints, reading)
 }
 
 /// The rival's face in the duel header, and the speech bubble their lines
@@ -559,7 +738,12 @@ pub fn GameOver() -> impl IntoView {
 /// polite live region reads it out. For rivals (world and post-game) and
 /// route duelists.
 #[component]
-pub fn RivalFace() -> impl IntoView {
+pub fn RivalFace(
+    /// Only the speech bubble: the duel table shows the portrait in the
+    /// rival's station.
+    #[prop(optional)]
+    bubble_only: bool,
+) -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let Some(id) = ctl.setup.with_value(|s| s.as_ref().and_then(|s| s.face())) else {
         return ().into_any();
@@ -581,8 +765,8 @@ pub fn RivalFace() -> impl IntoView {
     });
     let ko = move || ctl.said.with(|s| s.is_some_and(|s| s.ko));
     view! {
-        <span class="opp-face" class:shake=ko>
-            <crate::campaign::Portrait id=id name=name />
+        <span class="opp-face" class:shake=ko class:bubble-only=bubble_only>
+            {(!bubble_only).then(|| view! { <crate::campaign::Portrait id=id name=name /> })}
             <span class="rival-say-live" aria-live="polite">
                 {move || ctl.said.get().map(|s| view! {
                     <button type="button" class="rival-say" on:click=move |_| ctl.said.set(None)
@@ -594,4 +778,167 @@ pub fn RivalFace() -> impl IntoView {
         </span>
     }
     .into_any()
+}
+
+/// The first-time rule tip, beside the Hexon it concerns (pinned under the
+/// history strip on a phone). It never blocks play; "Got it" or Escape dismisses it.
+#[component]
+pub fn RuleTip() -> impl IntoView {
+    let ctl = expect_context::<Ctl>();
+    let style = RwSignal::new(String::new());
+    Effect::new(move |_| {
+        let Some((tip, player)) = ctl.tip.get() else {
+            return;
+        };
+        // On a phone the strip lies over the opponent's side: it folds away on its own.
+        if window()
+            .inner_width()
+            .ok()
+            .and_then(|v| v.as_f64())
+            .unwrap_or(1024.0)
+            <= 640.0
+        {
+            set_timeout(
+                move || {
+                    if ctl.tip.get_untracked().is_some_and(|(t, _)| t == tip) {
+                        ctl.tip.set(None);
+                    }
+                },
+                std::time::Duration::from_secs(8),
+            );
+        }
+        request_animation_frame(move || {
+            let w = window()
+                .inner_width()
+                .ok()
+                .and_then(|v| v.as_f64())
+                .unwrap_or(1024.0);
+            let sel = match player {
+                HUMAN => Some(".half.me .zone .hexon-card"),
+                1 => Some(".half.opp .zone .hexon-card"),
+                _ => None,
+            };
+            let rect = sel
+                .and_then(|s| document().query_selector(s).ok().flatten())
+                .map(|e| e.get_bounding_client_rect());
+            style.set(match rect {
+                _ if w >= 1180.0 => String::new(),
+                Some(_) if w <= 640.0 => {
+                    "left:6px;right:6px;top:calc(62px + env(safe-area-inset-top))".into()
+                }
+                Some(r) if r.right() + 330.0 < w => {
+                    format!("left:{}px;top:{}px", r.right() + 18.0, r.top() + 4.0)
+                }
+                Some(r) => format!(
+                    "left:{}px;top:{}px",
+                    (r.left() - 318.0).max(8.0),
+                    r.top() + 4.0
+                ),
+                None => "left:50%;top:40%;transform:translateX(-50%)".into(),
+            });
+        });
+    });
+    move || {
+        let over = ctl
+            .shown
+            .with(|g| g.as_ref().is_some_and(|g| g.winner().is_some()));
+        ctl.tip.get().filter(|_| !over).map(|(tip, _)| view! {
+            <aside class="rule-tip" role="note" aria-labelledby="tip-title" style=move || style.get()
+                on:keydown=move |e| { if e.key() == "Escape" { ctl.tip.set(None) } }>
+                <h3 id="tip-title">{tip.title()}</h3>
+                <p>{tip.text()}</p>
+                <div>
+                    <span>{tr("Rule tip. The duel menu shows them again.", "Astuce. Le menu du duel les remontre.")}</span>
+                    <button on:click=move |_| ctl.tip.set(None)>{tr("Got it", "Compris")}</button>
+                </div>
+            </aside>
+        })
+    }
+}
+
+/// The duel menu: sound, the opponent's speed, tips, shortcuts, the duel's
+/// details (its seed) and conceding.
+#[component]
+pub fn DuelMenu(
+    open: RwSignal<bool>,
+    #[prop(into)] on_leave: Callback<()>,
+    leave_label: &'static str,
+) -> impl IntoView {
+    let ctl = expect_context::<Ctl>();
+    let tips_reset = RwSignal::new(false);
+    let copied = RwSignal::new(false);
+    let close = NodeRef::<leptos::html::Button>::new();
+    Effect::new(move |_| {
+        if open.get() {
+            if let Some(b) = close.get() {
+                let _ = b.focus();
+            }
+        }
+    });
+    let tutorial = ctl.tutorial();
+    move || {
+        open.get().then(|| {
+            let seed = ctl.seed.get_untracked();
+            let prizes = ctl.setup.with_value(|s| s.as_ref().map_or(6, |s| s.prizes));
+            view! {
+                <div class="sheet-scrim" on:click=move |_| open.set(false)></div>
+                <section class="drawer" role="dialog" aria-modal="true" aria-labelledby="menu-title"
+                    on:keydown=move |e| { if e.key() == "Escape" { open.set(false) } }>
+                    <header>
+                        <h2 id="menu-title">{tr("Duel menu", "Menu du duel")}</h2>
+                        <button class="icon-btn" node_ref=close aria-label=tr("Close", "Fermer") on:click=move |_| open.set(false)>
+                            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                        </button>
+                    </header>
+                    <crate::audio::AudioSettings />
+                    <fieldset class="seg">
+                        <legend>{tr("Opponent's speed", "Vitesse de l'adversaire")}</legend>
+                        <label><input type="radio" name="speed" prop:checked=move || !ctl.fast.get()
+                            on:change=move |_| { ctl.fast.set(false); crate::store::set_fast_opponent(false); } />{tr("Normal", "Normale")}</label>
+                        <label><input type="radio" name="speed" prop:checked=move || ctl.fast.get()
+                            on:change=move |_| { ctl.fast.set(true); crate::store::set_fast_opponent(true); } />{tr("Fast", "Rapide")}</label>
+                    </fieldset>
+                    <p class="fine">{tr("Only the pace changes. During their turn, hold the fast-forward button for even quicker play; every move stays in the history.",
+                        "Seul le rythme change. Pendant leur tour, maintenez le bouton d'accélération ; chaque coup reste dans l'historique.")}</p>
+                    <button class="btn" on:click=move |_| { crate::tips::reset(); tips_reset.set(true) }>
+                        {move || if tips_reset.get() { tr("Rule tips will show again", "Les astuces reviendront") } else { tr("Show rule tips again", "Remontrer les astuces") }}
+                    </button>
+                    <details>
+                        <summary>{tr("Keyboard shortcuts", "Raccourcis clavier")}</summary>
+                        <dl class="keys">
+                            <dt><kbd>"1"</kbd>" – "<kbd>"4"</kbd></dt><dd>{tr("Attack", "Attaquer")}</dd>
+                            <dt><kbd>"P"</kbd></dt><dd>{tr("Use your Active's Power", "Pouvoir de votre Actif")}</dd>
+                            <dt><kbd>"R"</kbd></dt><dd>{tr("Retreat", "Retraite")}</dd>
+                            <dt><kbd>"E"</kbd></dt><dd>{tr("End turn (twice if you can still attack)", "Fin du tour (deux fois si vous pouvez encore attaquer)")}</dd>
+                            <dt><kbd>"H"</kbd></dt><dd>{tr("Go to your hand", "Aller à votre main")}</dd>
+                            <dt><kbd>"0"</kbd>" – "<kbd>"5"</kbd></dt><dd>{tr("With a card held: the Active (0) or a Bench place (1–5, from the left)", "Carte en main : l'Actif (0) ou une place du Banc (1–5, depuis la gauche)")}</dd>
+                            <dt><kbd>"L"</kbd></dt><dd>{tr("The duel log", "Le journal du duel")}</dd>
+                            <dt><kbd>"I"</kbd></dt><dd>{tr("Read the card", "Lire la carte")}</dd>
+                            <dt><kbd>"M"</kbd></dt><dd>{tr("This menu", "Ce menu")}</dd>
+                            <dt><kbd>"Esc"</kbd></dt><dd>{tr("Put the card back, close a panel", "Reposer la carte, fermer un panneau")}</dd>
+                        </dl>
+                    </details>
+                    {(!tutorial).then(|| view! {
+                        <details>
+                            <summary>{tr("Duel details", "Détails du duel")}</summary>
+                            <dl class="details">
+                                <dt>{tr("Seed", "Graine")}</dt>
+                                <dd><code>{seed}</code>
+                                    <button class="btn ghost" on:click=move |_| {
+                                        let _ = window().navigator().clipboard().write_text(&seed.to_string());
+                                        copied.set(true);
+                                    }>{move || if copied.get() { tr("Copied", "Copiée") } else { tr("Copy", "Copier") }}</button>
+                                </dd>
+                                <dt>{tr("Prizes", "Récompenses")}</dt><dd>{prizes}</dd>
+                            </dl>
+                            <p class="fine">{tr("The seed replays this exact shuffle. Add it to a bug report.", "La graine rejoue ce mélange exact. Joignez-la à un signalement de bug.")}</p>
+                        </details>
+                    })}
+                    <div class="drawer-foot">
+                        <button class="btn danger" on:click=move |_| { open.set(false); on_leave.run(()) }>{leave_label}</button>
+                    </div>
+                </section>
+            }
+        })
+    }
 }
