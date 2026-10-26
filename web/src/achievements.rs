@@ -302,11 +302,10 @@ pub fn RecordsLink(
     back: Screen,
     before: impl Fn() + Copy + Send + Sync + 'static,
 ) -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
     let progress = expect_context::<RwSignal<Progress>>();
     let go = move |t: Tab| {
         before();
-        screen.set(Screen::Records(Origin::of(back), t));
+        crate::go(Screen::Records(Origin::of(back), t));
     };
     view! {
         <section class="records-link" aria-labelledby="records-link-title">

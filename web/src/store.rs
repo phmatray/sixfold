@@ -82,8 +82,35 @@ pub fn set_lang(l: sixfold_engine::Lang) {
     }
 }
 
+const TEXT: &str = "sixfold.text";
+
+/// The text size in percent: 100, 125 or 150 (a browser preference, like the language).
+pub fn text_size() -> u32 {
+    get(TEXT)
+        .and_then(|v| v.parse().ok())
+        .filter(|p| [100, 125, 150].contains(p))
+        .unwrap_or(100)
+}
+
+/// Keep the choice and apply it at once (the `--ts` multiplier in style.css).
+pub fn set_text_size(percent: u32) {
+    set(TEXT, &percent.to_string());
+    apply_text_size();
+}
+
+pub fn apply_text_size() {
+    let scale = f64::from(text_size()) / 100.0;
+    if let Some(html) = web_sys::window()
+        .and_then(|w| w.document())
+        .and_then(|d| d.document_element())
+    {
+        let _ = html.set_attribute("style", &format!("--ts: {scale}"));
+    }
+}
+
 const FAST: &str = "sixfold.fast";
 const TIPS: &str = "sixfold.tips";
+const HINT_SEEN: &str = "sixfold.hint-seen";
 
 /// The opponent's moves play faster (a browser preference, like the language).
 pub fn fast_opponent() -> bool {
@@ -95,6 +122,15 @@ pub fn set_fast_opponent(on: bool) {
 }
 
 /// The rule tips already shown, one bit each (see `tips::Tip`).
+/// Whether the hero has walked once (the world's controls hint is spent).
+pub fn hint_seen() -> bool {
+    get(HINT_SEEN).is_some()
+}
+
+pub fn mark_hint_seen() {
+    set(HINT_SEEN, "1");
+}
+
 pub fn tips_seen() -> u32 {
     get(TIPS).and_then(|v| v.parse().ok()).unwrap_or(0)
 }

@@ -288,8 +288,7 @@ pub fn new_deck() -> Option<usize> {
 
 #[component]
 pub fn DecksScreen() -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
-    let edit = Callback::new(move |i| screen.set(Screen::Editor(i)));
+    let edit = Callback::new(move |i| crate::go(Screen::Editor(i)));
     view! {
         <div class="page">
             <PageBar title=tr("My decks", "Mes decks")>
@@ -414,7 +413,7 @@ fn DeckRow(
                         <button type="button" class="btn primary" on:click=move |_| on_edit.run(i)>{tr("Edit", "Modifier")}</button>
                         <button type="button" class="btn" on:click=duplicate>{tr("Duplicate", "Dupliquer")}</button>
                         <button type="button" class="btn" on:click=move |_| { deleting.set(None); renaming.set(Some(i)) }>{tr("Rename", "Renommer")}</button>
-                        <button type="button" class="btn ghost" on:click=move |_| { renaming.set(None); deleting.set(Some(i)) }>{tr("Delete", "Supprimer")}</button>
+                        <button type="button" class="btn ghost danger" on:click=move |_| { renaming.set(None); deleting.set(Some(i)) }>{tr("Delete", "Supprimer")}</button>
                     </div>
                 }.into_any()
             }}
@@ -463,8 +462,7 @@ fn energy_curve(d: &DeckList) -> [usize; 5] {
 
 #[component]
 pub fn Editor(index: usize) -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
-    view! { <EditorPanel index=index on_done=Callback::new(move |()| screen.set(Screen::Decks)) /> }
+    view! { <EditorPanel index=index on_done=Callback::new(move |()| crate::go(Screen::Decks)) /> }
 }
 
 /// The deck editor (its own screen, or inside the in-game menu's Decks tab).

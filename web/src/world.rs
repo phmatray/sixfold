@@ -16,9 +16,8 @@ use sixfold_engine::overworld::{parse_effect, Applied, CamTarget, Cue, Effect as
 use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
 
-use crate::audio::MuteToggle;
 use crate::binder::CollectionPanel;
-use crate::campaign::{packs_label, CampaignPanel, Challenge, Ladder, Roster, SealBadge};
+use crate::campaign::{packs_label, CampaignPanel, Challenge, Ladder};
 use crate::ctl::Ctl;
 use crate::decks::{new_deck, DecksPanel, EditorPanel};
 use crate::input::{self, pad, titled, Ctrl};
@@ -511,7 +510,6 @@ enum Sheet {
     Card(CardId),
     /// A rival's or route duelist's duel offer, by id.
     Challenge(String),
-    Roster,
     /// The post-game ladder: the Gauntlet, the daily duel and a Warden rematch.
     Ladder,
     Journal,
@@ -623,7 +621,6 @@ fn prompt_label(kind: &str, text: &str) -> String {
 #[component]
 pub fn WorldScreen() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
     let host = NodeRef::<html::Div>::new();
     let controls = NodeRef::<html::Div>::new();
@@ -660,7 +657,7 @@ pub fn WorldScreen() -> impl IntoView {
     Effect::new(move |seen: Option<()>| {
         slot.track();
         if seen.is_some() {
-            screen.set(Screen::Title);
+            crate::go(Screen::Title);
         }
     });
     let reduced = web_sys::window()
@@ -1028,7 +1025,7 @@ pub fn WorldScreen() -> impl IntoView {
         sheet.set(next);
         if credits {
             // Last, once everything above is granted: the world is torn down from here.
-            screen.set(Screen::Credits(true));
+            crate::go(Screen::Credits(true));
         }
     };
 
@@ -1192,7 +1189,7 @@ pub fn WorldScreen() -> impl IntoView {
     let duel = move |_| {
         if let Some(setup) = crate::duel::default_setup() {
             if ctl.start(setup, crate::new_seed()) {
-                screen.set(Screen::Match);
+                crate::go(Screen::Match);
             }
         }
     };
@@ -1308,12 +1305,39 @@ pub fn WorldScreen() -> impl IntoView {
         }
     });
     on_cleanup(move || pad_menu.remove());
-    // The top bar's Journal, map and roster: not over a cutscene.
-    let open_sheet = move |s: Sheet| {
-        if !playing.get_untracked() {
-            sheet.set(Some(s));
+    // The controls hint shows until the first steps, then fades for good
+    // (it stays in the menu's Options).
+    let hint = RwSignal::new(!store::hint_seen());
+    let fading = StoredValue::new(false);
+    let fade_hint = move || {
+        if hint.get_untracked() && !fading.get_value() {
+            fading.set_value(true);
+            set_timeout(
+                move || {
+                    _ = hint.try_set(false);
+                    store::mark_hint_seen();
+                },
+                std::time::Duration::from_millis(2500),
+            );
         }
     };
+    // The walk keys (fixed: arrows, WASD and AZERTY's ZQSD; a pad's stick
+    // sends arrows too) or a tap on the ground (the stage's pointerdown).
+    let hint_keys = window_event_listener(leptos::ev::keydown, move |e| {
+        use wasm_bindgen::JsCast;
+        let typing = e
+            .target()
+            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+            .is_some_and(|el| matches!(el.tag_name().as_str(), "INPUT" | "TEXTAREA" | "SELECT"));
+        if typing {
+            return;
+        }
+        let k = e.key().to_lowercase();
+        if k.starts_with("arrow") || matches!(k.as_str(), "w" | "a" | "s" | "d" | "z" | "q") {
+            fade_hint();
+        }
+    });
+    on_cleanup(move || hint_keys.remove());
     // The head of a panel sheet: title, the Facets held, Close.
     let head = move |title: &'static str, facets: bool| {
         view! {
@@ -1327,41 +1351,30 @@ pub fn WorldScreen() -> impl IntoView {
 
     view! {
         <div class="world" class:in-scene=move || playing.get()>
+            // Only what is glanceable stays over the scene (DESIGN.md): the time
+            // of day, the Facets and the menu. The Journal, the map, the seals and
+            // sound are in the menu, and on their keys.
             <header class="world-top">
-                <span class="wordmark small">"Sixfold"</span>
-                <span class="world-hint">{crate::input::world_hint}</span>
-                <button type="button" class="btn ghost journal-btn" aria-keyshortcuts=move || input::shortcut(Ctrl::Journal)
-                    aria-label="Journal" title=move || titled("Journal", Ctrl::Journal)
-                    on:click=move |_| open_sheet(Sheet::Journal)>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z" /><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" /></svg>
-                    <span class="journal-label">"Journal"</span>
-                </button>
-                <button type="button" class="btn ghost journal-btn map-btn" aria-keyshortcuts=move || input::shortcut(Ctrl::Map)
-                    aria-label=tr("World map", "Carte du monde") title=move || titled(tr("World map", "Carte du monde"), Ctrl::Map)
-                    on:click=move |_| open_sheet(Sheet::Atlas)>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20Z" /><path d="M9 4v13.5M15 6.5V20" /></svg>
-                    <span class="journal-label">{tr("Map", "Carte")}</span>
+                <span class="world-hint" class:gone=move || !hint.get() aria-hidden=move || (!hint.get()).then_some("true")>{crate::input::world_hint}</span>
+                <div class="world-hud">
                     <crate::worldmap::DayDial />
-                </button>
-                <crate::worldmap::DayDial />
-                <Facets />
-                <SealBadge on_open=move || open_sheet(Sheet::Roster) />
-                <MuteToggle />
-                // Until the scene is up the menu can't open: say so rather than ignore the press.
-                <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
-                    aria-keyshortcuts="Escape"
-                    aria-disabled=move || (loading.get() || failed.with(Option::is_some)).then_some("true")
-                    title=move || if loading.get() || failed.with(Option::is_some) {
-                        tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé").to_string()
-                    } else {
-                        titled("Menu", Ctrl::Menu)
-                    }
-                    on:click=move |_| toggle_menu()>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
-                    <span class="journal-label">"Menu"</span>
-                </button>
+                    <Facets />
+                    // Until the scene is up the menu can't open: say so rather than ignore the press.
+                    <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
+                        aria-keyshortcuts="Escape"
+                        aria-disabled=move || (loading.get() || failed.with(Option::is_some)).then_some("true")
+                        title=move || if loading.get() || failed.with(Option::is_some) {
+                            tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé").to_string()
+                        } else {
+                            titled("Menu", Ctrl::Menu)
+                        }
+                        on:click=move |_| toggle_menu()>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                        <span class="journal-label">"Menu"</span>
+                    </button>
+                </div>
             </header>
-            <main class="world-stage" node_ref=stage tabindex="-1"
+            <main class="world-stage" node_ref=stage tabindex="-1" on:pointerdown=move |_| fade_hint()
                 aria-label=move || {
                     let (walk, act) = (input::prompt(Ctrl::Walk), input::prompt(Ctrl::Act));
                     tr(
@@ -1404,7 +1417,7 @@ pub fn WorldScreen() -> impl IntoView {
                     )}</p>
                     <div class="row">
                         <button class="btn primary" on:click=retry>{tr("Retry", "Réessayer")}</button>
-                        <button class="btn" on:click=move |_| screen.set(Screen::Title)>{tr("Back to title", "Retour au titre")}</button>
+                        <button class="btn" on:click=move |_| crate::go(Screen::Title)>{tr("Back to title", "Retour au titre")}</button>
                     </div>
                 </div>
             })}
@@ -1413,6 +1426,13 @@ pub fn WorldScreen() -> impl IntoView {
                 // Should the browser close the dialog itself, the world must not stay paused
                 // (and a cutscene goes on rather than wait for a line nobody can see).
                 on:close=move |_| if script_talk() { next() } else if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
+                // Each line of a talk or a cutscene, read as it comes (a live region outside
+                // the modal dialog would be inert).
+                <p class="sr-only" id="talk-live" aria-live="polite">{move || sheet.with(|s| match s {
+                    Some(Sheet::Talk(t)) if t.name.is_empty() => t.line().to_string(),
+                    Some(Sheet::Talk(t)) => format!("{}: {}", t.name, t.line()),
+                    _ => String::new(),
+                })}</p>
                 {move || sheet.get().map(|s| match s {
                     Sheet::Talk(t) => {
                         let line = t.line().to_string();
@@ -1422,7 +1442,8 @@ pub fn WorldScreen() -> impl IntoView {
                         let named = !t.name.is_empty();
                         let script = t.script;
                         view! {
-                            <button class="talk-box" class:has-face=t.face.is_some() on:click=move |_| advance()>
+                            // Described by the live line, so the first line is read on focus (later ones as they come).
+                            <button class="talk-box" class:has-face=t.face.is_some() aria-describedby="talk-live" on:click=move |_| advance()>
                                 // The face slides in with the first line only.
                                 {t.face.clone().map(|src| view! {
                                     <img class="talk-face" class:enter=t.at == 0 src=src alt="" width="96" height="96" />
@@ -1435,7 +1456,8 @@ pub fn WorldScreen() -> impl IntoView {
                                 <span class="talk-line" aria-hidden="true">
                                     {move || line.chars().take(typed.get()).collect::<String>()}
                                 </span>
-                                <span class="sr-only">{t.line().to_string()}</span>
+                                // The line itself is read by the live line below; the button says what it does.
+                                <span class="sr-only">{if more { tr("Next line", "Réplique suivante") } else if script { tr("Continue", "Continuer") } else { tr("Close", "Fermer") }}</span>
                                 // Shown once the line is out: more to come, or the end.
                                 <svg class="talk-next" class:ready={move || typed.get() >= len} class:end=!more viewBox="0 0 12 12" aria-hidden="true">
                                     {if more {
@@ -1587,13 +1609,6 @@ pub fn WorldScreen() -> impl IntoView {
                         </div>
                         <crate::worldmap::WorldMap here=here on_travel=travel />
                     }.into_any(),
-                    Sheet::Roster => view! {
-                        <div class="sheet-head">
-                            <h2 id="world-sheet-title">{tr("Rivals and seals", "Rivaux et sceaux")}</h2>
-                            <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
-                        </div>
-                        <Roster />
-                    }.into_any(),
                     Sheet::Menu => view! {
                         <GameMenu editing=editing here=here on_travel=travel
                             on_close=Callback::new(move |()| sheet.set(None)) />
@@ -1642,7 +1657,6 @@ fn GameMenu(
     on_close: Callback<()>,
 ) -> impl IntoView {
     let tab = expect_context::<LastTab>().0;
-    let screen = expect_context::<RwSignal<Screen>>();
     let ui = expect_context::<Ui>();
     let focus = |sel: &'static str| {
         request_animation_frame(move || {
@@ -1705,7 +1719,7 @@ fn GameMenu(
                     <div class="sheet-head menu-head">
                         <h2 id="world-sheet-title">"Menu"</h2>
                         // Close, back to the world, is the usual way out; quitting is the quieter one.
-                        <button type="button" class="btn ghost" on:click=move |_| screen.set(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
+                        <button type="button" class="btn ghost" on:click=move |_| crate::go(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
                         <button type="button" class="btn" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
                     </div>
                     <div class="menu-tabs" role="tablist" aria-label="Menu" on:keydown=on_tabs_key>
@@ -1746,7 +1760,10 @@ fn GameMenu(
                     (MenuTab::Campaign, _) => view! {
                         <div class="campaign"><CampaignPanel back=Screen::World before=move || on_close.run(()) /></div>
                     }.into_any(),
-                    (MenuTab::Options, _) => view! { <OptionsPanel /> }.into_any(),
+                    (MenuTab::Options, _) => view! {
+                        <p class="options-hint">{crate::input::world_hint}</p>
+                        <OptionsPanel />
+                    }.into_any(),
                 }}
             </div>
         </div>

@@ -54,10 +54,9 @@ fn MenuItem(
     #[prop(optional)] primary: bool,
     #[prop(optional, into)] badge: Option<Signal<u32>>,
 ) -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
     view! {
         <li>
-            <button type="button" class="menu-item" class:primary=primary on:click=move |_| screen.set(to)>
+            <button type="button" class="menu-item" class:primary=primary on:click=move |_| crate::go(to)>
                 <span class="menu-label">{label}</span>
                 <span class="menu-sub">{move || sub.get()}</span>
                 {badge.map(|b| view! {
@@ -106,14 +105,39 @@ fn LangSwitch() -> impl IntoView {
         }
     };
     view! {
-        <div class="lang-switch" role="group" aria-label=tr("Language", "Langue")>
+        <div class="lang-switch lang" role="group" aria-label=tr("Language", "Langue")>
             {button(Lang::En, "EN", "English")}
             {button(Lang::Fr, "FR", "Français")}
         </div>
     }
 }
 
-/// The settings: language, sound, saves and the reset. The title screen's
+/// Text size: 100, 125 or 150 %, applied at once.
+#[component]
+fn TextSize() -> impl IntoView {
+    let now = RwSignal::new(store::text_size());
+    let option = move |p: u32| {
+        view! {
+            <label class="seg">
+                <input type="radio" name="text-size" value=p.to_string()
+                    prop:checked=move || now.get() == p
+                    on:change=move |_| {
+                        store::set_text_size(p);
+                        now.set(p);
+                    } />
+                <span>{format!("{p}{}", tr("%", "\u{a0}%"))}</span>
+            </label>
+        }
+    };
+    view! {
+        <fieldset class="text-size">
+            <legend>{tr("Text size", "Taille du texte")}</legend>
+            <div class="segs">{option(100)}{option(125)}{option(150)}</div>
+        </fieldset>
+    }
+}
+
+/// The settings: language, text size, sound, saves and the reset. The title screen's
 /// Settings menu and the world's in-game menu both show it.
 #[component]
 pub fn OptionsPanel() -> impl IntoView {
@@ -127,6 +151,7 @@ pub fn OptionsPanel() -> impl IntoView {
     view! {
         <div class="settings-body">
             <LangSwitch />
+            <TextSize />
             <AudioSettings />
             <crate::input::ControlsSettings />
             <SaveSettings />
