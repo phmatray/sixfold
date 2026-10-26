@@ -1519,6 +1519,66 @@
           ]
         }
       ]
+    },
+    {
+      "id": "rook_2",
+      "name": "Rook",
+      "model": "rival_colorless",
+      "x": 44,
+      "z": 10,
+      "facing": "e",
+      "idle": "Idle",
+      "if": "seals:3 & flag:rook_1 & !flag:rook_2_left",
+      "dialogue": [
+        {
+          "if": "won:rook_2",
+          "lines": [
+            "Fine. Two on my sleeve for you.",
+            "Doesn't change the map. Every top face is still blank. Still waiting."
+          ],
+          "lines_fr": [
+            "Bon. Deux traits sur ma manche pour toi.",
+            "Ça ne change rien à la carte. Toutes les faces du dessus sont encore blanches. Elles attendent."
+          ],
+          "do": [
+            "flag:rook_2_left"
+          ]
+        },
+        {
+          "if": "lost:rook_2",
+          "lines": [
+            "One back for me. The sleeve's evening up.",
+            "Go and get your fourth. I'll be ahead of you."
+          ],
+          "lines_fr": [
+            "Un pour moi. La manche s'équilibre.",
+            "Va chercher ton quatrième. J'aurai de l'avance."
+          ],
+          "do": [
+            "flag:rook_2_left"
+          ]
+        },
+        {
+          "if": "flag:rook_2",
+          "lines": [
+            "Scared of a blank deck? I'll wait. I'm good at waiting."
+          ],
+          "lines_fr": [
+            "Peur d'un deck tout blanc ? J'attendrai. Je sais attendre."
+          ],
+          "do": [
+            "duel:rook_2"
+          ]
+        },
+        {
+          "lines": [
+            "Shh. I'm counting stones."
+          ],
+          "lines_fr": [
+            "Chut. Je compte les pierres."
+          ]
+        }
+      ]
     }
   ],
   "ground": {
@@ -1572,5 +1632,77 @@
       "near": 14,
       "far": 32
     }
-  }
+  },
+  "scripts": [
+    {
+      "id": "rook_2",
+      "if": "seals:3 & flag:rook_1 & !flag:rook_2",
+      "at": [
+        [
+          47,
+          15
+        ],
+        [
+          47,
+          16
+        ],
+        [
+          47,
+          17
+        ],
+        [
+          47,
+          18
+        ],
+        [
+          47,
+          19
+        ],
+        [
+          47,
+          20
+        ],
+        [
+          47,
+          21
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:rook",
+            "cam:rook_2",
+            "emote:rook_2:dots",
+            "wait:600",
+            "cam:51:17",
+            "wait:1400",
+            "cam:rook_2",
+            "face:rook_2:s"
+          ]
+        },
+        {
+          "say": "rook_2",
+          "lines": [
+            "You again. Three seals already? You don't hang about.",
+            "See the Rodspire, out past the road? There's a stone on top, like the others.",
+            "Six stones. Six faces each. And one nobody carves.",
+            "I've been mapping them. Every top face is blank. Every single one."
+          ],
+          "lines_fr": [
+            "Encore toi. Déjà trois sceaux ? Tu ne traînes pas.",
+            "Tu vois l'Aiguille-Foudre, au bout de la route ? Il y a une pierre là-haut, comme les autres.",
+            "Six pierres. Six faces chacune. Et une que personne ne grave.",
+            "Je les ai toutes relevées. La face du dessus est blanche. Partout."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:rook_2",
+            "duel:rook_2"
+          ]
+        }
+      ]
+    }
+  ]
 }

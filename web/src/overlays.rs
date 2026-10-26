@@ -314,7 +314,8 @@ pub fn GameOver() -> impl IntoView {
     let quoted = ctl
         .setup
         .with_value(|s| s.as_ref().and_then(|s| s.face()))
-        .and_then(campaign::rival);
+        .and_then(campaign::opponent)
+        .and_then(|o| o.lines.map(|l| (o.id, o.name, l)));
     let duelist = opponent.and_then(sixfold_engine::trainers::trainer);
     let post = ctl.setup.with_value(|s| s.as_ref().and_then(|s| s.post));
     let back = ctl
@@ -481,12 +482,12 @@ pub fn GameOver() -> impl IntoView {
                             }}</span></p>
                         </div>
                     }                    })}
-                    {quoted.filter(|_| won).map(|r| view! {
+                    {quoted.filter(|_| won).map(|(id, name, lines)| view! {
                         <figure class="rival-quote">
-                            <crate::campaign::Portrait id=r.id name=r.name />
+                            <crate::campaign::Portrait id=id name=name />
                             <blockquote>
-                                <p>{r.lines.defeat.get()}</p>
-                                <footer>{r.name}</footer>
+                                <p>{lines.defeat.get()}</p>
+                                <footer>{name}</footer>
                             </blockquote>
                         </figure>
                     })}
@@ -561,6 +562,12 @@ pub fn GameOver() -> impl IntoView {
                                     view! {
                                         <b>{tr("Won again", "Encore gagné")}</b>
                                         <span>{tr(format!("{} pays a purse only once.", t.name), format!("{} ne paie sa bourse qu'une fois.", t.name))}</span>
+                                    }.into_any()
+                                } else if t.story() && !progress.with(|p| p.has_flag("sable_door")) {
+                                    // Rook's story goes on whatever the result (not his hall rematch).
+                                    view! {
+                                        <b>{tr("The story goes on", "L'histoire continue")}</b>
+                                        <span>{tr(format!("{} will remember this one.", t.name), format!("{} s'en souviendra.", t.name))}</span>
                                     }.into_any()
                                 } else {
                                     view! {
