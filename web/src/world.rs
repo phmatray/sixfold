@@ -4,6 +4,7 @@
 //! with a typewriter, the item popup, campaign duels, and progression, which
 //! is the engine's [`Progress`] (in context, saved by `store`).
 
+use std::collections::VecDeque;
 use std::time::Duration;
 
 use leptos::html;
@@ -12,7 +13,7 @@ use leptos::web_sys;
 use sixfold_engine::campaign::rival;
 use sixfold_engine::clock::{self, Phase};
 use sixfold_engine::objective;
-use sixfold_engine::overworld::{Applied, Cue, Progress};
+use sixfold_engine::overworld::{parse_effect, Applied, CamTarget, Cue, Effect as Fx, Progress};
 use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
 
@@ -104,6 +105,25 @@ pub(crate) fn warp_to(map: &str, x: u32, z: u32, facing: &str, travel: bool) {
     world_cue(&format!(
         r#"{{"warp":{{"map":"{map}","x":{x},"z":{z},"facing":"{facing}"}},"travel":{travel}}}"#
     ));
+}
+
+/// A cue as world.js reads it (`cue(json)`). Names are `[a-z0-9_]` (the
+/// engine checked them), so nothing needs escaping.
+fn cue_json(c: &Cue) -> String {
+    match c {
+        Cue::Emote { actor, emote } => format!(r#"{{"actor":"{actor}","emote":"{emote}"}}"#),
+        Cue::Sfx(name) => format!(r#"{{"sfx":"{name}"}}"#),
+        Cue::Warp { map, x, z, facing } => {
+            format!(r#"{{"warp":{{"map":"{map}","x":{x},"z":{z},"facing":"{facing}"}}}}"#)
+        }
+        Cue::Walk { actor, path } => format!(r#"{{"actor":"{actor}","walk":"{path}"}}"#),
+        Cue::Face { actor, dir } => format!(r#"{{"actor":"{actor}","face":"{dir}"}}"#),
+        Cue::Cam(CamTarget::Hero) => r#"{"cam":"hero"}"#.into(),
+        Cue::Cam(CamTarget::Actor(id)) => format!(r#"{{"cam":"{id}"}}"#),
+        Cue::Cam(CamTarget::Tile(x, z)) => format!(r#"{{"cam":[{x},{z}]}}"#),
+        Cue::Wait(ms) => format!(r#"{{"wait":{ms}}}"#),
+        Cue::Music(track) => format!(r#"{{"music":"{track}"}}"#),
+    }
 }
 
 /// Hand the owned items to the scene (the shoes unlock running).
@@ -390,11 +410,82 @@ struct Talk {
     lines: Vec<String>,
     effects: Vec<String>,
     at: usize,
+    /// A cutscene's `say` step: at its end the scene goes on (no effects, no talked-to flag).
+    script: bool,
 }
 
 impl Talk {
     fn line(&self) -> &str {
         self.lines.get(self.at).map_or("", String::as_str)
+    }
+}
+
+/// The speaker's face: a rival's portrait, a person's bust, none for the hero
+/// or anything that isn't a person on this map.
+fn face_of(id: &str) -> Option<String> {
+    if rival(id).is_some() {
+        Some(format!("world/assets/portraits/{id}.webp"))
+    } else {
+        Some(world_portrait(id)).filter(|u| !u.is_empty())
+    }
+}
+
+/// One step of a cutscene (`docs/WORLD_DESIGN.md` §9.1), as world.js sends it.
+enum Step {
+    /// Lines from an actor (`name` is empty for the hero) in the dialogue box.
+    Say {
+        actor: String,
+        name: String,
+        lines: Vec<String>,
+    },
+    /// Effects in order: cues played one at a time, state kept for the end.
+    Do(Vec<String>),
+}
+
+/// A cutscene under way. Its state effects are applied once, when it ends
+/// (played out or skipped), so a reload mid-scene finds nothing half done.
+struct Scene {
+    steps: VecDeque<Step>,
+    /// The current `do` step's cues still to play, as world.js reads them.
+    cues: VecDeque<String>,
+    effects: Vec<String>,
+    /// The id of the cue world.js is playing.
+    waiting: Option<u32>,
+}
+
+/// `{"steps": [{"say", "name", "lines"} | {"do": [...]}]}` as sent by world.js.
+fn parse_scene(json: &str) -> Option<Scene> {
+    let v = js_sys::JSON::parse(json).ok()?;
+    let steps = field(&v, "steps")
+        .dyn_into::<js_sys::Array>()
+        .ok()?
+        .iter()
+        .map(|st| match field(&st, "say").as_string() {
+            Some(actor) => Step::Say {
+                actor,
+                name: field(&st, "name").as_string().unwrap_or_default(),
+                lines: strings(field(&st, "lines")),
+            },
+            None => Step::Do(strings(field(&st, "do"))),
+        })
+        .collect();
+    Some(Scene {
+        steps,
+        cues: VecDeque::new(),
+        effects: vec![],
+        waiting: None,
+    })
+}
+
+/// Sort a step's effects: cues to play (world.js JSON), state effects to keep.
+/// A malformed one (the data test catches them) is dropped.
+fn sort_effects(effects: Vec<String>, cues: &mut impl Extend<String>, state: &mut Vec<String>) {
+    for e in effects {
+        match parse_effect(&e) {
+            Ok(Fx::Cue(c)) => cues.extend([cue_json(&c)]),
+            Ok(_) => state.push(e),
+            Err(err) => leptos::logging::warn!("world: script: {err}"),
+        }
     }
 }
 
@@ -589,20 +680,24 @@ pub fn WorldScreen() -> impl IntoView {
             return;
         };
         typed.set(0);
-        let face = if rival(&id).is_some() {
-            Some(format!("world/assets/portraits/{id}.webp"))
-        } else {
-            Some(world_portrait(&id)).filter(|u| !u.is_empty())
-        };
         sheet.set(Some(Sheet::Talk(Talk {
-            face,
+            face: face_of(&id),
             id,
             name,
             lines: b.lines,
             effects: b.effects,
             at: 0,
+            script: false,
         })));
     };
+
+    // A cutscene (script.js starts it, `next` below runs it): the one under way,
+    // whether one plays (the Skip button, input), the latest one world.js asked
+    // for, and a tick each time the cue under way has finished.
+    let scene = StoredValue::new(None::<Scene>);
+    let playing = RwSignal::new(false);
+    let scene_in = RwSignal::new(None::<String>);
+    let cue_done = RwSignal::new(0u32);
 
     // ponytail: the callback is leaked once per visit (a few bytes); keep a handle if visits ever get frequent.
     let cb = Closure::<dyn Fn(String, String, String) -> bool>::new(
@@ -638,6 +733,13 @@ pub fn WorldScreen() -> impl IntoView {
                     }
                 }
                 "at" => store::set_world_at(&format!("{a},{b}")),
+                "script" => _ = scene_in.try_set(Some(b)),
+                "cue_done" => {
+                    let waiting = scene.try_with_value(|s| s.as_ref().and_then(|s| s.waiting));
+                    if waiting.flatten().is_some_and(|id| a.parse() == Ok(id)) {
+                        _ = cue_done.try_update(|n| *n += 1);
+                    }
+                }
                 "near" => {
                     let now = (!a.is_empty()).then(|| (a.clone(), b.clone()));
                     if let Some((k, t)) = &now {
@@ -790,10 +892,9 @@ pub fn WorldScreen() -> impl IntoView {
         }
     });
 
-    // Talk to the end: apply the branch's effects (and a talked-to flag) in the
-    // engine (saved by the store), then show what follows: a duel offer, a new
-    // item or a pack. Talking to the rival of the last duel settles its result.
-    let finish = move |t: Talk| {
+    // Apply effects in the engine (saved by the store), then show what follows:
+    // a duel offer, a new item or a pack.
+    let apply_effects = move |effects: Vec<String>| {
         let mut next = None;
         let mut packs = vec![];
         let mut cards = vec![];
@@ -802,15 +903,6 @@ pub fn WorldScreen() -> impl IntoView {
         let mut warp = None;
         let mut rested = None;
         progress.update(|p| {
-            if p.last_duel().is_some_and(|(id, _)| id == t.id) {
-                p.settle();
-            }
-            let effects: Vec<String> = t
-                .effects
-                .iter()
-                .cloned()
-                .chain([format!("flag:talked_{}", t.id)])
-                .collect();
             match p.apply_all(&effects) {
                 Ok(done) => {
                     for a in done {
@@ -825,15 +917,10 @@ pub fn WorldScreen() -> impl IntoView {
                                 }
                             }
                             Applied::Coins(n) => gained += n,
-                            Applied::Cue(Cue::Emote { actor, emote }) => {
-                                cues.push(format!(r#"{{"actor":"{actor}","emote":"{emote}"}}"#))
-                            }
-                            Applied::Cue(Cue::Sfx(name)) => {
-                                cues.push(format!(r#"{{"sfx":"{name}"}}"#))
-                            }
                             Applied::Cue(Cue::Warp { map, x, z, facing }) => {
                                 warp = Some((map, x, z, facing))
                             }
+                            Applied::Cue(c) => cues.push(cue_json(&c)),
                             Applied::Clock(phase) => rested = Some(phase),
                             Applied::Show(panel) => match panel.as_str() {
                                 "ladder" => next = Some(Sheet::Ladder),
@@ -935,6 +1022,108 @@ pub fn WorldScreen() -> impl IntoView {
         }
         sheet.set(next);
     };
+
+    // The cutscene runner: play the current step's cues one at a time (each
+    // waits for world.js's `cue_done`), show a `say` in the dialogue box, and
+    // at the end hand back the scene (`{"end": [cues]}`) and apply its state
+    // effects. A skip jumps over what's left the same way.
+    let script_talk =
+        move || sheet.with_untracked(|s| matches!(s, Some(Sheet::Talk(t)) if t.script));
+    let end_scene = move |s: Scene, rest: Vec<String>| {
+        if script_talk() {
+            sheet.set(None);
+        }
+        playing.set(false);
+        world_cue(&format!(r#"{{"end":[{}]}}"#, rest.join(",")));
+        apply_effects(s.effects);
+    };
+    let next = move || {
+        let mut taken = None;
+        scene.update_value(|s| taken = s.take());
+        let Some(mut s) = taken else { return };
+        s.waiting = None;
+        loop {
+            if let Some(c) = s.cues.pop_front() {
+                if script_talk() {
+                    sheet.set(None);
+                }
+                let id = cue_done.get_untracked() + 1;
+                s.waiting = Some(id);
+                scene.set_value(Some(s));
+                world_cue(&format!(r#"{{"id":{id},{}"#, &c[1..]));
+                return;
+            }
+            match s.steps.pop_front() {
+                Some(Step::Do(effects)) => sort_effects(effects, &mut s.cues, &mut s.effects),
+                Some(Step::Say { actor, name, lines }) => {
+                    scene.set_value(Some(s));
+                    typed.set(0);
+                    sheet.set(Some(Sheet::Talk(Talk {
+                        face: face_of(&actor),
+                        id: actor,
+                        name,
+                        lines,
+                        effects: vec![],
+                        at: 0,
+                        script: true,
+                    })));
+                    return;
+                }
+                None => return end_scene(s, vec![]),
+            }
+        }
+    };
+    // Skip (Escape, or the Skip button): every state effect left is applied
+    // once, the cues are dropped but walks still arrive and faces still turn.
+    let skip = move || {
+        let mut taken = None;
+        scene.update_value(|s| taken = s.take());
+        let Some(mut s) = taken else { return };
+        let mut rest: Vec<String> = s.cues.drain(..).collect();
+        for step in s.steps.drain(..) {
+            if let Step::Do(effects) = step {
+                sort_effects(effects, &mut rest, &mut s.effects);
+            }
+        }
+        end_scene(s, rest);
+    };
+    Effect::new(move |_| {
+        let Some(json) = scene_in.get() else { return };
+        scene_in.set(None);
+        match parse_scene(&json) {
+            Some(s) => {
+                scene.set_value(Some(s));
+                playing.set(true);
+                next();
+            }
+            None => world_cue(r#"{"end":[]}"#),
+        }
+    });
+    Effect::new(move |seen: Option<()>| {
+        cue_done.track();
+        if seen.is_some() {
+            next();
+        }
+    });
+
+    // Talk to the end: apply the branch's effects and a talked-to flag. Talking
+    // to the rival of the last duel settles its result. A cutscene's line goes on.
+    let finish = move |t: Talk| {
+        if t.script {
+            return next();
+        }
+        progress.update(|p| {
+            if p.last_duel().is_some_and(|(id, _)| id == t.id) {
+                p.settle();
+            }
+        });
+        apply_effects(
+            t.effects
+                .into_iter()
+                .chain([format!("flag:talked_{}", t.id)])
+                .collect(),
+        );
+    };
     let advance = move || {
         let Some(Sheet::Talk(mut t)) = sheet.get_untracked() else {
             return;
@@ -954,6 +1143,8 @@ pub fn WorldScreen() -> impl IntoView {
     let on_cancel = move |e: web_sys::Event| {
         e.prevent_default();
         match sheet.get_untracked() {
+            // Escape in a cutscene's line skips the scene.
+            Some(Sheet::Talk(t)) if t.script => skip(),
             Some(Sheet::Talk(t)) if typed.get_untracked() < t.line().chars().count() => {
                 typed.set(usize::MAX)
             }
@@ -1022,10 +1213,14 @@ pub fn WorldScreen() -> impl IntoView {
         ));
     });
     // The menu opens only over a still world: no sheet (a talk, a duel offer),
-    // no inn rest, and nothing under way in the scene (loading, a warp's fade,
-    // a duelist walking over, a lift). A cutscene (#63) adds its own term here.
-    let menu_blocked =
-        move || sheet.with_untracked(Option::is_some) || resting.get_untracked() || world_busy();
+    // no inn rest, no cutscene, and nothing under way in the scene (loading, a
+    // warp's fade, a duelist walking over, a lift).
+    let menu_blocked = move || {
+        sheet.with_untracked(Option::is_some)
+            || resting.get_untracked()
+            || playing.get_untracked()
+            || world_busy()
+    };
     // Opens the menu on its last tab; the gamepad's Start (#69) calls this too.
     let open_menu = move || {
         if !menu_blocked() {
@@ -1052,6 +1247,12 @@ pub fn WorldScreen() -> impl IntoView {
                     .is_some()
             });
         let k = e.key().to_lowercase();
+        // In a cutscene, Escape skips it (the menu waits).
+        if k == "escape" && !e.repeat() && playing.get_untracked() {
+            e.prevent_default();
+            skip();
+            return;
+        }
         if k == "escape" && !e.repeat() && sheet.with_untracked(Option::is_none) {
             // Cancelled, so the same key can't also close the menu it opens.
             e.prevent_default();
@@ -1073,13 +1274,19 @@ pub fn WorldScreen() -> impl IntoView {
             Sheet::Atlas
         };
         match sheet.get_untracked() {
-            None if !resting.get_untracked() => sheet.set(Some(want)),
+            None if !resting.get_untracked() && !playing.get_untracked() => sheet.set(Some(want)),
             Some(s) if s == want => sheet.set(None),
             _ => return,
         }
         e.prevent_default();
     });
     on_cleanup(move || journal_key.remove());
+    // The top bar's Journal, map and roster: not over a cutscene.
+    let open_sheet = move |s: Sheet| {
+        if !playing.get_untracked() {
+            sheet.set(Some(s));
+        }
+    };
     // The head of a panel sheet: title, the Facets held, Close.
     let head = move |title: &'static str, facets: bool| {
         view! {
@@ -1092,7 +1299,7 @@ pub fn WorldScreen() -> impl IntoView {
     };
 
     view! {
-        <div class="world">
+        <div class="world" class:in-scene=move || playing.get()>
             <header class="world-top">
                 <span class="wordmark small">"Sixfold"</span>
                 <span class="world-hint">{tr(
@@ -1101,20 +1308,20 @@ pub fn WorldScreen() -> impl IntoView {
                 )}</span>
                 <button type="button" class="btn ghost journal-btn" aria-keyshortcuts="J"
                     aria-label="Journal" title=tr("Journal (J)", "Journal (J)")
-                    on:click=move |_| sheet.set(Some(Sheet::Journal))>
+                    on:click=move |_| open_sheet(Sheet::Journal)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z" /><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" /></svg>
                     <span class="journal-label">"Journal"</span>
                 </button>
                 <button type="button" class="btn ghost journal-btn map-btn" aria-keyshortcuts="M"
                     aria-label=tr("World map", "Carte du monde") title=tr("World map (M)", "Carte du monde (M)")
-                    on:click=move |_| sheet.set(Some(Sheet::Atlas))>
+                    on:click=move |_| open_sheet(Sheet::Atlas)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20Z" /><path d="M9 4v13.5M15 6.5V20" /></svg>
                     <span class="journal-label">{tr("Map", "Carte")}</span>
                     <crate::worldmap::DayDial />
                 </button>
                 <crate::worldmap::DayDial />
                 <Facets />
-                <SealBadge on_open=move || sheet.set(Some(Sheet::Roster)) />
+                <SealBadge on_open=move || open_sheet(Sheet::Roster) />
                 <MuteToggle />
                 // Until the scene is up the menu can't open: say so rather than ignore the press.
                 <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
@@ -1139,10 +1346,17 @@ pub fn WorldScreen() -> impl IntoView {
                 <p class="sr-only" aria-live="polite">{move || announce.get()}</p>
             </main>
             <div class="world-controls" node_ref=controls></div>
-            {move || near.get().map(|(k, t)| view! {
+            {move || near.get().filter(|_| !playing.get()).map(|(k, t)| view! {
                 <button class="btn primary world-prompt" node_ref=prompt on:click=move |_| world_act()>
                     {prompt_label(&k, &t)}
                     <kbd>"E"</kbd>
+                </button>
+            })}
+            // Over a line the dialogue box has its own Skip.
+            {move || (playing.get() && sheet.with(Option::is_none)).then(|| view! {
+                <button type="button" class="btn ghost world-skip" aria-keyshortcuts="Escape" on:click=move |_| skip()>
+                    {tr("Skip", "Passer")}
+                    <kbd>{tr("Esc", "Échap")}</kbd>
                 </button>
             })}
             <div class="world-rest" class:on=move || resting.get() aria-hidden="true"></div>
@@ -1169,8 +1383,9 @@ pub fn WorldScreen() -> impl IntoView {
             })}
             <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title"
                 on:cancel=on_cancel on:keydown=on_key
-                // Should the browser close the dialog itself, the world must not stay paused.
-                on:close=move |_| if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
+                // Should the browser close the dialog itself, the world must not stay paused
+                // (and a cutscene goes on rather than wait for a line nobody can see).
+                on:close=move |_| if script_talk() { next() } else if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
                 {move || sheet.get().map(|s| match s {
                     Sheet::Talk(t) => {
                         let line = t.line().to_string();
@@ -1178,6 +1393,7 @@ pub fn WorldScreen() -> impl IntoView {
                         let more = t.at + 1 < t.lines.len();
                         // The hero's own lines (a sign, a thought) carry no name plate.
                         let named = !t.name.is_empty();
+                        let script = t.script;
                         view! {
                             <button class="talk-box" class:has-face=t.face.is_some() on:click=move |_| advance()>
                                 // The face slides in with the first line only.
@@ -1202,6 +1418,12 @@ pub fn WorldScreen() -> impl IntoView {
                                     }}
                                 </svg>
                             </button>
+                            // A cutscene's line: the scene can be skipped from here too (a tap on a phone).
+                            {script.then(|| view! {
+                                <button type="button" class="btn ghost talk-skip" aria-keyshortcuts="Escape" on:click=move |_| skip()>
+                                    {tr("Skip scene", "Passer la scène")}
+                                </button>
+                            })}
                         }.into_any()
                     }
                     Sheet::Item(id) => {

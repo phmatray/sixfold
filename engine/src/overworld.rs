@@ -31,6 +31,11 @@
 //! - `emote:<actor>:<emote>` and `warp:<map>:<x>:<z>:<facing>` (fade and load
 //!   a map at a tile: a ferry, a lift), cues for the world ([`Cue`]): state is
 //!   untouched
+//! - the cutscene cues (1.4): `walk:<actor>:<path>` (a path of `n`/`e`/`s`/`w`
+//!   letters), `face:<actor>:<dir>`, `cam:<actor>` / `cam:<x>:<z>` / `cam:hero`
+//!   (the camera's look-at target), `wait:<ms>` (0 to [`MAX_WAIT`]),
+//!   `sfx:<sound>` and `music:<track>` (one of [`TRACKS`]); the actor `hero`
+//!   is the player
 //!
 //! Save string: comma-separated `i:<item>`, `f:<flag>`, `won:<id>` /
 //! `lost:<id>`, `g:<beaten>_<deck print>` (a Gauntlet run), `d:<day>` (the
@@ -72,6 +77,20 @@ const FACINGS: [&str; 4] = ["n", "e", "s", "w"];
 pub const EMOTES: [&str; 5] = ["bang", "what", "dots", "heart", "note"];
 /// Sounds a `sfx:` cue may play (the world's sound names in `web/audio/audio.js`).
 pub const SOUNDS: [&str; 5] = ["spark", "chime", "jingle", "gate", "seal"];
+/// Tracks a `music:` cue may switch to (the world's tracks in `web/audio/audio.js`).
+pub const TRACKS: [&str; 9] = [
+    "overworld",
+    "interior",
+    "ember",
+    "storm",
+    "tide",
+    "dream",
+    "grove",
+    "stone",
+    "cave",
+];
+/// The longest `wait:` a cutscene may hold, in milliseconds.
+pub const MAX_WAIT: u16 = 5000;
 
 /// Flags named after an NPC who has since been renamed, and their new names.
 const RENAMED: [(&str, &str); 3] = [
@@ -170,6 +189,27 @@ pub enum Cue {
     },
     /// Play one of [`SOUNDS`].
     Sfx(String),
+    /// An actor walks a path of `n`/`e`/`s`/`w` letters, one tile each.
+    Walk { actor: String, path: String },
+    /// An actor turns to face `dir`.
+    Face { actor: String, dir: String },
+    /// The camera eases its look-at target over (its pitch never changes).
+    Cam(CamTarget),
+    /// Hold for this many milliseconds (at most [`MAX_WAIT`]).
+    Wait(u16),
+    /// Switch the music to one of [`TRACKS`] (the map's own comes back after the scene).
+    Music(String),
+}
+
+/// What a `cam:` cue looks at.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum CamTarget {
+    /// Back to following the hero.
+    Hero,
+    /// An NPC on the map, by id.
+    Actor(String),
+    /// The centre of a tile.
+    Tile(u32, u32),
 }
 
 /// What applying an effect did.
@@ -321,6 +361,29 @@ pub fn parse_effect(e: &str) -> Result<Effect, String> {
             emote: s(emote),
         }),
         ("sfx", [name]) if SOUNDS.contains(name) => Effect::Cue(Cue::Sfx(s(name))),
+        ("walk", [actor, path]) if path.bytes().all(|b| b"nesw".contains(&b)) => {
+            Effect::Cue(Cue::Walk {
+                actor: s(actor),
+                path: s(path),
+            })
+        }
+        ("face", [actor, dir]) if FACINGS.contains(dir) => Effect::Cue(Cue::Face {
+            actor: s(actor),
+            dir: s(dir),
+        }),
+        // A lone number is a tile missing its z, not an actor.
+        ("cam", [who]) if !who.bytes().all(|b| b.is_ascii_digit()) => {
+            Effect::Cue(Cue::Cam(match *who {
+                "hero" => CamTarget::Hero,
+                id => CamTarget::Actor(s(id)),
+            }))
+        }
+        ("cam", [x, z]) => Effect::Cue(Cue::Cam(CamTarget::Tile(num(x)?, num(z)?))),
+        ("wait", [ms]) => match ms.parse::<u16>() {
+            Ok(ms) if ms <= MAX_WAIT => Effect::Cue(Cue::Wait(ms)),
+            _ => return Err(format!("wait is 0 to {MAX_WAIT} ms in {e:?}")),
+        },
+        ("music", [track]) if TRACKS.contains(track) => Effect::Cue(Cue::Music(s(track))),
         ("clock", [p]) => Effect::Clock(Phase::parse(p).ok_or_else(bad)?),
         ("warp", [map, x, z, f]) if FACINGS.contains(f) => Effect::Cue(Cue::Warp {
             map: s(map),
@@ -995,6 +1058,68 @@ mod tests {
             parse_cond("time:night"),
             Ok(Cond(vec![(false, Test::Time(Phase::Night))]))
         );
+    }
+
+    /// §9.2 (1.4): the cutscene cues. Each parses to a [`Cue`] that never
+    /// touches state; malformed arguments are refused with a message.
+    #[test]
+    fn parse_effect_reads_the_cutscene_cues() {
+        let cue = |e: &str| match parse_effect(e) {
+            Ok(Effect::Cue(c)) => c,
+            other => panic!("{e:?}: {other:?}"),
+        };
+        assert_eq!(
+            cue("walk:rook:sssss"),
+            Cue::Walk {
+                actor: "rook".into(),
+                path: "sssss".into()
+            }
+        );
+        assert_eq!(
+            cue("face:hero:n"),
+            Cue::Face {
+                actor: "hero".into(),
+                dir: "n".into()
+            }
+        );
+        assert_eq!(cue("cam:hero"), Cue::Cam(CamTarget::Hero));
+        assert_eq!(cue("cam:rook"), Cue::Cam(CamTarget::Actor("rook".into())));
+        assert_eq!(cue("cam:25:11"), Cue::Cam(CamTarget::Tile(25, 11)));
+        assert_eq!(cue("wait:0"), Cue::Wait(0));
+        assert_eq!(cue("wait:5000"), Cue::Wait(5000));
+        assert_eq!(cue("music:storm"), Cue::Music("storm".into()));
+        for bad in [
+            "walk:rook",
+            "walk:rook:",
+            "walk:rook:snx",
+            "walk:rook:nn:e",
+            "face:hero",
+            "face:hero:up",
+            "cam",
+            "cam:25",
+            "cam:25:x",
+            "cam:1:2:3",
+            "wait",
+            "wait:5001",
+            "wait:-1",
+            "wait:soon",
+            "music",
+            "music:polka",
+        ] {
+            let err = parse_effect(bad).expect_err(bad);
+            assert!(err.contains(bad), "{bad:?}: {err}");
+        }
+        let mut p = Progress::default();
+        for e in [
+            "walk:moss:ee",
+            "face:moss:w",
+            "cam:9:9",
+            "wait:300",
+            "music:cave",
+        ] {
+            assert!(matches!(p.apply(e), Ok(Applied::Cue(_))), "{e:?}");
+        }
+        assert_eq!(p, Progress::default(), "cues never change state");
     }
 
     #[test]
