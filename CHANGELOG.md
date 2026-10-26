@@ -5,6 +5,20 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.7.0](https://github.com/phmatray/sixfold/compare/v1.6.0...v1.7.0) (2026-10-26)
+
+
+### Added
+
+* **cards:** a binder worth completing and better pack openings ([#68](https://github.com/phmatray/sixfold/issues/68)) ([#80](https://github.com/phmatray/sixfold/issues/80)) ([7584944](https://github.com/phmatray/sixfold/commit/758494462490df62b8fc3d7713e8fa30b18b9799))
+* gamepad support ([#69](https://github.com/phmatray/sixfold/issues/69)) ([#86](https://github.com/phmatray/sixfold/issues/86)) ([932a5fb](https://github.com/phmatray/sixfold/commit/932a5fbb79ca6e4b3e6d6fd49f346dc8cf82c38e))
+* **story:** Rook and the seventh face ([#64](https://github.com/phmatray/sixfold/issues/64)) ([#90](https://github.com/phmatray/sixfold/issues/90)) ([e92bd61](https://github.com/phmatray/sixfold/commit/e92bd61162b9d63bd2d0ad422ab899f8abee50ae))
+
+
+### Fixed
+
+* 1.7 design audit — Rook's story, binder and packs, gamepad prompts ([#97](https://github.com/phmatray/sixfold/issues/97)) ([7d20b72](https://github.com/phmatray/sixfold/commit/7d20b72ac95a6faa9f3700a4721faa0ab2fe2c26))
+
 ## [1.6.0](https://github.com/phmatray/sixfold/compare/v1.5.0...v1.6.0) (2026-10-26)
 
 
