@@ -29,6 +29,7 @@ The camera looks north and down at about 50°. A prop therefore hides what stand
 | 1.5 | A post keeps one clear tile between itself and any other interactable. Things you use are never side by side, and never stacked in depth. A shop's hanging sign or inn sign may stand beside its own door. | error |
 | 1.6 | People walk their `route` on open tiles only. | error |
 | 1.7 | Coming out of a house puts you on the tile in front of the door that leads back in. | error |
+| 1.8 | Going in, the hero climbs a house's steps to its door and never wades through them: every prop a door warp sits on has a `STOOP` entry in `props.js` (how far in to walk, and the tread heights read off the model). | error |
 
 ## 2. Lamps follow use — *l'éclairage suit l'usage*
 

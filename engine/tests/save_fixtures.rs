@@ -67,7 +67,7 @@ fn a_0_6_save_migrates_from_its_keys() {
             decks: 2,
             packs: 4,
             seals: 1,
-            champion: false,
+            title: None,
             facets: STARTING_COINS,
         }
     );
@@ -98,7 +98,7 @@ fn a_save_from_every_release_loads() {
                 decks: 2,
                 packs: 4,
                 seals: 1,
-                champion: false,
+                title: None,
                 facets,
             },
             "{version}"

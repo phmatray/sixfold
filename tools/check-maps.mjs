@@ -1,7 +1,7 @@
 // Run: node tools/check-maps.mjs web/world
 // Check every map: at most 80 x 72 tiles (80 x 64 in all); each edge exit has a matching exit back, the
 // edge tiles of both spans are walkable, every warp and exit leads to a map that exists,
-// and no NPC stands on a solid tile or a blocking prop; NPC ids are unique on a map, and
+// and no NPC stands on a solid tile or a blocking prop; a door on a prop has its STOOP (props.js); NPC ids are unique on a map, and
 // no two spots share a tile. Every player-facing string (lines, text, label, locked, title,
 // a duelist's challenge / win / lose / after, and an interaction's speaker name) has a
 // French `x_fr` twin of the same shape.
@@ -33,6 +33,7 @@ const DECK = eval(`(${src.match(/export const DECK = (\{[\s\S]*?\});/)[1]})`);
 const WALKABLE = new Set([...eval(`(${src.match(/export const WALKABLE = new Set\((\[[\s\S]*?\])\);/)[1]})`), ...Object.keys(DECK)]);
 const ACROSS = new Set(eval(`(${src.match(/export const ACROSS = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TALL = eval(`(${src.match(/export const TALL = (\{[\s\S]*?\});/)[1]})`);
+const STOOP = eval(`(${src.match(/export const STOOP = (\{[\s\S]*?\} \});/)[1]})`);
 // Heights (m) for depth stacking, from ASSETS.md / ASSETS_V13.md; TALL (props.js) fills the rest.
 const HEIGHT = { tree: 3.5, pine: 3.8, birch: 3.6, willow: 3.8, house: 5, sign: 1.3, signpost: 1.6, lantern: 2.2, bush: 0.7, flowers: 0.3,
   rock: 0.6, crates: 0.9, glow_mushroom: 0.35, glow_mushroom_tall: 0.9, glow_shelf: 0.62, bench: 0.9, stall: 2.3, stall_b: 2.3, fountain: 1.6, stump: 0.55, log: 0.55, hanging_sign: 2.5, boat: 0.4, reeds: 0.9,
@@ -434,6 +435,9 @@ function rules(name, m, solid, all) {
   const spots = (m.interactions ?? []).map((i) => ({ x: i.x, z: i.z, what: i.kind === "find" ? `find ${i.id}` : `${i.kind} ${i.id ?? ""}`.trim(), host: at.get(`${i.x},${i.z}`)?.[0] }));
   const things = [...spots, ...npcs.map((n) => ({ x: n.x, z: n.z, what: `npc ${n.id}`, npc: true })),
     ...(m.warps ?? []).filter((w) => !w.dir).map((w) => ({ x: w.x, z: w.z, what: `door to ${w.to}`, door: true, host: at.get(`${w.x},${w.z}`)?.[0] }))];
+  // A door on a prop (a house's front row) needs that prop's STOOP (props.js): how far in the hero walks and the
+  // heights of its steps, or the hero wades through them.
+  for (const t of things) if (t.door && t.host && !t.host.if && !STOOP[t.host.asset]) fail.push(`${name}: the ${t.what} at ${t.x},${t.z} is on a ${t.host.asset}, which has no STOOP entry in props.js`);
   for (const p of m.props.filter((p) => POST.has(p.asset))) {
     const f = { 0: [0, 1], 90: [1, 0], 180: [0, -1], 270: [-1, 0] }[p.rot % 360] ?? [0, 1];
     if (!free(p.x + f[0], p.z + f[1])) rule.push(`${name}: ${who(p)} has no free tile in front of its face (${p.x + f[0]},${p.z + f[1]})`);

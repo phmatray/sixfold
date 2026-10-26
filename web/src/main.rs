@@ -50,6 +50,7 @@ fn main() {
     if let Some(html) = document().document_element() {
         let _ = html.set_attribute("lang", lang.code());
     }
+    store::apply_text_size();
     // The kit's component sheet, for reviewing the controls (`?sheet`).
     if window()
         .location()
