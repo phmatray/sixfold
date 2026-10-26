@@ -20,11 +20,12 @@ async function pointsAt(page: Page, target: Locator) {
         if (t.width < 4 && label) t = label.getBoundingClientRect();
         const side = hd.dataset.side;
         const ok = side === "left" ? h.right <= t.left + 6 : side === "right" ? h.left >= t.right - 6
-          : side === "above" ? h.bottom <= t.top + 6 : side === "below" ? h.top >= t.bottom - 6 : false;
+          : side === "above" ? h.bottom <= t.top + 6 : side === "below" ? h.top >= t.bottom - 6
+          : side === "inside" ? h.left >= t.left - 2 && h.right <= t.left + 48 : false;
         return ok ? side : `wrong: ${side} ${JSON.stringify(h)} ${JSON.stringify(t)}`;
       }),
     )
-    .toMatch(/^(left|right|above|below)$/);
+    .toMatch(/^(left|right|above|below|inside)$/);
 }
 
 test("keyboard: arrows move the hand through the title and two menu screens, Escape goes back", async ({ page }) => {

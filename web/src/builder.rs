@@ -545,12 +545,14 @@ pub fn BuildSheet(
                 </fieldset>
                 <fieldset class="seg build-style">
                     <legend>{tr("Style", "Style")}</legend>
+                    <span class="seg-tray">
                     {Style::ALL.into_iter().map(|s| view! {
                         <label>
                             <input type="radio" name="build-style" prop:checked=move || style.get() == s on:change=move |_| style.set(s) />
                             {s.label()}
                         </label>
                     }).collect_view()}
+                    </span>
                     <p class="style-blurb">{move || style.get().blurb()}</p>
                 </fieldset>
                 <section class="build-preview" aria-labelledby="preview-title">

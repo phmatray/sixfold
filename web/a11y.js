@@ -199,9 +199,12 @@ addEventListener("keydown", (e) => {
       return [[x, y], tip].every(([px, py]) => !document.elementFromPoint(px, py)?.closest(BUSY));
     };
     // The side is picked once per control (no flicker while it moves), the place every frame.
-    side ??= (sides.find((s) => s[3] && free(s)) ?? sides.find((s) => s[3]) ?? sides[0])[0];
+    // Hemmed in on every side (a phone's two-column title grid): over the control's own
+    // icon, pointing at its label as a game menu's cursor does, rather than over a neighbour.
+    sides.push(["inside", r.left + 22, mid, r.width >= 120]);
+    side ??= (sides.find((s) => s[3] && free(s)) ?? sides.find((s) => s[0] === "inside" && s[3]) ?? sides.find((s) => s[3]) ?? sides[0])[0];
     const [, cx, cy] = sides.find((s) => s[0] === side);
-    hand.dataset.side = side;
+    hand.dataset.side = at.dataset.hand = side;
     hand.style.translate = `${Math.round(cx - 20)}px ${Math.round(cy - 16)}px`;
     raf = requestAnimationFrame(place);
   };

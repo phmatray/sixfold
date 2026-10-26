@@ -835,13 +835,22 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                         {move || {
                             let c = curve();
                             let max = c.iter().copied().max().unwrap_or(0).max(1);
-                            c.iter().enumerate().map(|(i, &n)| view! {
+                            // What the numbers on top and the ones underneath count.
+                            std::iter::once(view! {
+                                <span class="curve-col curve-axis">
+                                    <span>{tr("Hexons", "Hexons")}</span>
+                                    <span></span>
+                                    <span>{tr("Energy", "Énergie")}</span>
+                                </span>
+                            }.into_any())
+                            .chain(c.iter().enumerate().map(|(i, &n)| view! {
                                 <span class="curve-col">
                                     <span class="curve-n">{n}</span>
                                     <span class="curve-bar" style=format!("height:{}%", n * 100 / max)></span>
                                     <span class="curve-x">{if i == 4 { "4+".to_string() } else { i.to_string() }}</span>
                                 </span>
-                            }).collect_view()
+                            }.into_any()))
+                            .collect_view()
                         }}
                     </div>
                     <figcaption>{tr("Energy for each Hexon's biggest attack", "Énergie de l'attaque la plus chère de chaque Hexon")}</figcaption>

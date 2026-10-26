@@ -66,39 +66,45 @@ fn Library() -> impl IntoView {
     let progress = expect_context::<RwSignal<Progress>>();
     // The Journal opens inside the world, which provides it.
     let ReadBook(open) = expect_context::<ReadBook>();
-    let read: Vec<_> =
-        progress.with_untracked(|p| BOOKS.iter().filter(|b| books::is_read(p, b.id)).collect());
-    let (n, total) = (read.len(), BOOKS.len());
+    // Every book has its place on the shelf: the ones not found yet leave a gap of their kind.
+    let read: Vec<bool> =
+        progress.with_untracked(|p| BOOKS.iter().map(|b| books::is_read(p, b.id)).collect());
+    let (n, total) = (read.iter().filter(|&&r| r).count(), BOOKS.len());
     view! {
         <section class="library" aria-labelledby="library-title">
             <div class="library-head">
                 <h3 id="library-title">{tr("Library", "Bibliothèque")}</h3>
                 <span class="quest-state">{tr(format!("{n} of {total} found"), format!("{n} sur {total} trouvés"))}</span>
             </div>
-            {if read.is_empty() {
-                view! {
-                    <p class="dialog-sub">{tr(
-                        "Books wait on the shelves of houses and inns. Face one and read it: it comes here.",
-                        "Des livres attendent sur les étagères des maisons et des auberges. Lisez-en un : il viendra ici.",
-                    )}</p>
-                }.into_any()
-            } else {
-                view! {
-                    <ul class="library-list">
-                        {read.into_iter().map(|b| view! {
-                            <li>
-                                <button type="button" class=format!("library-book family-{}", b.family.name())
-                                    on:click=move |_| open.run(b.id)>
-                                    <span class="library-spine" aria-hidden="true"></span>
-                                    <span class="library-title">{b.title.get()}</span>
-                                    <span class="library-family">{b.family.label().get()}</span>
-                                    <span class="library-open" aria-hidden="true">{tr("Read again", "Relire")}</span>
-                                </button>
-                            </li>
-                        }).collect_view()}
-                    </ul>
-                }.into_any()
-            }}
+            {(n == 0).then(|| view! {
+                <p class="dialog-sub">{tr(
+                    "Books wait on the shelves of houses and inns. Face one and read it: it comes here.",
+                    "Des livres attendent sur les étagères des maisons et des auberges. Lisez-en un : il viendra ici.",
+                )}</p>
+            })}
+            <ul class="library-list">
+                {BOOKS.iter().zip(read).map(|(b, found)| if found {
+                    view! {
+                        <li>
+                            <button type="button" class=format!("library-book family-{}", b.family.name())
+                                on:click=move |_| open.run(b.id)>
+                                <span class="library-spine" aria-hidden="true"></span>
+                                <span class="library-title">{b.title.get()}</span>
+                                <span class="library-family">{b.family.label().get()}</span>
+                                <span class="library-open" aria-hidden="true">{tr("Read again", "Relire")}</span>
+                            </button>
+                        </li>
+                    }.into_any()
+                } else {
+                    view! {
+                        <li class=format!("library-book missing family-{}", b.family.name())>
+                            <span class="library-spine" aria-hidden="true"></span>
+                            <span class="library-title">{tr("Not found yet", "Pas encore trouvé")}</span>
+                            <span class="library-family">{b.family.label().get()}</span>
+                        </li>
+                    }.into_any()
+                }).collect_view()}
+            </ul>
         </section>
     }
 }
