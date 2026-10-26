@@ -445,7 +445,7 @@ fn DeckRow(
                         <button type="button" class="btn primary" on:click=move |_| on_edit.run(i)>{tr("Edit", "Modifier")}</button>
                         <button type="button" class="btn" on:click=duplicate>{tr("Duplicate", "Dupliquer")}</button>
                         <button type="button" class="btn" on:click=move |_| { deleting.set(None); renaming.set(Some(i)) }>{tr("Rename", "Renommer")}</button>
-                        <button type="button" class="btn ghost" on:click=move |_| { renaming.set(None); deleting.set(Some(i)) }>{tr("Delete", "Supprimer")}</button>
+                        <button type="button" class="btn ghost danger" on:click=move |_| { renaming.set(None); deleting.set(Some(i)) }>{tr("Delete", "Supprimer")}</button>
                     </div>
                 }.into_any()
             }}

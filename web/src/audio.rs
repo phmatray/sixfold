@@ -154,6 +154,7 @@ pub fn AudioSettings() -> impl IntoView {
                 <span>{label}</span>
                 <input type="range" name=key min="0" max="100" step="5"
                     prop:value=move || value.get()
+                    style=move || format!("--fill: {}%", value.get())
                     aria-valuetext=move || format!("{}{}", value.get(), tr("%", " %"))
                     on:input=move |e| {
                         let v = event_target_value(&e).parse::<f64>().unwrap_or(0.0);
