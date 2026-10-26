@@ -1,5 +1,7 @@
-//! The deck builder's brain (#102): "Build for me" ([`auto_build`]), each
-//! choice with a one-line [`Reason`] in the player's language.
+//! The deck builder's brain (#102): "Build for me" ([`auto_build`]), "Complete my
+//! deck" ([`complete`]), live [`suggestions`] and the deck test's opening odds
+//! ([`opening`], [`sample_hand`]); each choice with a one-line [`Reason`] in
+//! the player's language.
 //!
 //! Deterministic: the same collection and plan always give the same deck.
 //! Hexons are ranked on the value budget (`docs/BALANCE.md`, `set::value`),
@@ -9,8 +11,8 @@ use std::collections::BTreeMap;
 
 use crate::card::{card, card_id, CardDef, CardId, CardKind, Color, EnergyCard, Stage, Trainer};
 use crate::collection::Collection;
-use crate::deck::{DECK_SIZE, MAX_COPIES};
-use crate::doctor::{ENERGY, MIN_BASICS};
+use crate::deck::{DeckList, DECK_SIZE, MAX_COPIES};
+use crate::doctor::{Issue, ENERGY};
 use crate::effect::{Effect, Find};
 use crate::lang::tr;
 use crate::set::{self, basic_energy, budget::effect_value};
@@ -122,6 +124,11 @@ pub enum Why {
     Energy(Color, usize),
     /// Twofold Energy for the Neutral symbols.
     Twofold,
+    /// The player's own picks, kept by [`complete`].
+    Kept,
+    /// Taken out by [`complete`]: not owned, over the limit, or an
+    /// Awakening with nothing it can awaken from.
+    Dropped,
 }
 
 fn list(cards: &[(CardId, usize)]) -> String {
@@ -232,7 +239,7 @@ impl Reason {
             Why::Basics(total) => {
                 let none = pct(none_in(DECK_SIZE, *total, 7));
                 tr(
-                    format!("{l}: more Basics, {total} in all, so only {none}% of opening hands lack one."),
+                    format!("{l}: more Basics, {total} in all, so just {none}% of opening hands lack one."),
                     format!("{l} : plus d'Hexons de Base, {total} en tout, pour que {none} % seulement des mains de départ en manquent."),
                 )
             }
@@ -251,6 +258,17 @@ impl Reason {
             Why::Twofold => tr(
                 format!("{l}: each pays two Neutral symbols."),
                 format!("{l} : chacune paie deux symboles Neutres."),
+            ),
+            Why::Kept => {
+                let n: usize = self.cards.iter().map(|c| c.1).sum();
+                tr(
+                    format!("Your {n} cards stay in."),
+                    format!("Vos {n} cartes restent dans le deck."),
+                )
+            }
+            Why::Dropped => tr(
+                format!("{l}: taken out; you don't own that many, they break the 4-copy limit, or you own nothing they awaken from."),
+                format!("{l} : retirées ; vous n'en possédez pas autant, elles dépassent la limite de 4, ou vous ne possédez rien d'où elles s'éveillent."),
             ),
         }
     }
@@ -513,10 +531,13 @@ impl Draft<'_> {
     /// would overshoot goes in without its top stage, or as its Basics.
     fn take_lines(&mut self, target: usize) {
         for (_, copies) in self.lines() {
-            let room = target.saturating_sub(self.creatures());
+            let free = DECK_SIZE.saturating_sub(self.len());
+            let room = target.saturating_sub(self.creatures()).min(free);
             if room == 0 {
                 return;
             }
+            // One over the target is fine, never over 60.
+            let slack = room + usize::from(free > room);
             let adds = |c: &[(CardId, usize)]| -> usize {
                 c.iter()
                     .map(|&(id, k)| k.saturating_sub(self.count(id)).min(self.room(id)))
@@ -525,7 +546,7 @@ impl Draft<'_> {
             let variant = (1..=copies.len())
                 .rev()
                 .map(|len| &copies[..len])
-                .find(|c| adds(c) <= room + 1 && adds(c) > 0);
+                .find(|c| adds(c) <= slack && adds(c) > 0);
             if let Some(c) = variant {
                 let c = c.to_vec();
                 self.take(&c, Why::Line);
@@ -533,10 +554,10 @@ impl Draft<'_> {
         }
     }
 
-    /// One more copy of the best Basic at a time until [`MIN_BASICS`].
+    /// One more copy of the best Basic at a time until [`BASICS`].
     fn top_up_basics(&mut self) {
         let mut added: BTreeMap<CardId, usize> = BTreeMap::new();
-        while self.total(CardDef::is_basic) < MIN_BASICS {
+        while self.total(CardDef::is_basic) < BASICS && self.len() < DECK_SIZE {
             let best = set::ids()
                 .filter(|&id| card(id).is_basic() && self.fits(id) && self.room(id) > 0)
                 .max_by_key(|&id| (power(id, self.style), std::cmp::Reverse(id)));
@@ -698,7 +719,12 @@ fn fill(
     d.take_lines(style.creatures());
     d.top_up_basics();
     let slots = DECK_SIZE.saturating_sub(d.creatures() + d.energy_target());
-    d.take_trainers(slots.saturating_sub(d.total(|c| matches!(c.kind, CardKind::Trainer(_)))));
+    let trainers = d.total(|c| matches!(c.kind, CardKind::Trainer(_)));
+    d.take_trainers(
+        slots
+            .saturating_sub(trainers)
+            .min(DECK_SIZE.saturating_sub(d.len())),
+    );
     // Too few trainers owned leaves too much energy: more Hexons first.
     let energy =
         DECK_SIZE.saturating_sub(d.len()) + d.total(|c| matches!(c.kind, CardKind::Energy(_)));
@@ -712,6 +738,10 @@ fn fill(
         reasons: d.reasons,
     }
 }
+
+/// The Basics the builder aims for, above the doctor's [`crate::doctor::MIN_BASICS`]:
+/// about one opening hand in five without one, as in the prebuilts.
+const BASICS: usize = 12;
 
 /// How good a built deck looks to the builder: its Hexons' and trainers'
 /// worth, with a Basic-less hand counted against it.
@@ -766,7 +796,7 @@ fn ranked_builds(owned: &Collection, style: Style) -> Vec<(Vec<Color>, Built)> {
 
 /// Build a 60-card deck from the collection: complete Awaken lines of the
 /// chosen colours (best on the value budget, by the style), at least
-/// [`MIN_BASICS`] Basics when owned, draw and search trainers first, and
+/// [`BASICS`] Basics when owned, draw and search trainers first, and
 /// energy shared by the attack costs. Every card is owned. With no colour,
 /// or [`Pick::Surprise`], the builder picks among its three best colour
 /// choices by the seed.
@@ -795,12 +825,522 @@ pub fn auto_build(owned: &Collection, plan: &Plan) -> Built {
     builds.swap_remove(k).1
 }
 
+/// The deck's colours, most-played first (Neutral aside), at most two.
+fn colours_of(n: &BTreeMap<CardId, usize>) -> Vec<Color> {
+    let mut by = [0usize; 6];
+    for (&id, &k) in n {
+        if let Some(c) = card(id).creature().filter(|c| c.color != Color::Colorless) {
+            by[c.color as usize] += k;
+        }
+    }
+    let mut c: Vec<usize> = (0..6).filter(|&c| by[c] > 0).collect();
+    c.sort_by_key(|&c| (std::cmp::Reverse(by[c]), c));
+    c.into_iter().take(2).map(|c| Color::ALL[c]).collect()
+}
+
+/// The card the deck can best spare: basic energy past the band, else the
+/// least worth card nothing in the deck awakens from, else basic energy.
+fn weakest(n: &BTreeMap<CardId, usize>, style: Style) -> Option<CardId> {
+    let energy: usize = n
+        .iter()
+        .filter(|(&id, _)| matches!(card(id).kind, CardKind::Energy(_)))
+        .map(|(_, &k)| k)
+        .sum();
+    let most_energy = n
+        .iter()
+        .filter(|(&id, _)| card(id).is_basic_energy())
+        .max_by_key(|(&id, &k)| (k, std::cmp::Reverse(id)))
+        .map(|(&id, _)| id);
+    if energy > *ENERGY.end() {
+        return most_energy;
+    }
+    let stage2 = n.keys().any(|&id| {
+        card(id)
+            .creature()
+            .is_some_and(|c| c.stage == Stage::Stage2)
+    });
+    let needed = |id: CardId| {
+        n.keys()
+            .any(|&e| card(e).creature().and_then(|c| c.evolves_from) == Some(card(id).name))
+    };
+    n.keys()
+        .copied()
+        .filter(|&id| !card(id).is_basic_energy() && !needed(id))
+        .min_by_key(|&id| {
+            let w = match card(id).kind {
+                CardKind::Creature(_) | CardKind::TrainerBasic(_) => 40 + power(id, style),
+                CardKind::Trainer(_) => trainer_power(id, style, stage2).unwrap_or(0) / 2,
+                CardKind::Energy(_) => 30,
+            };
+            (w, id)
+        })
+        .or(most_energy)
+}
+
+/// Complete the player's deck: keep their picks that are owned and legal,
+/// take out what isn't (and Awakenings with nothing they can awaken from),
+/// cut a deck over 60 down, then fill to 60 like [`auto_build`] in the
+/// deck's colours. A healthy 60-card deck comes back unchanged.
+pub fn complete(deck: &[CardId], owned: &Collection, style: Style) -> Built {
+    let mut base: BTreeMap<CardId, usize> = BTreeMap::new();
+    let mut dropped: BTreeMap<CardId, usize> = BTreeMap::new();
+    let mut names: BTreeMap<&str, usize> = BTreeMap::new();
+    for &id in deck {
+        let Some(d) = crate::card::try_card(id) else {
+            continue;
+        };
+        let named = names.entry(d.name).or_default();
+        let have = base.get(&id).copied().unwrap_or(0);
+        if have < owned.count(id) && (d.is_basic_energy() || *named < MAX_COPIES) {
+            *named += 1;
+            *base.entry(id).or_default() += 1;
+        } else {
+            *dropped.entry(id).or_default() += 1;
+        }
+    }
+    for stage in [Stage::Stage1, Stage::Stage2] {
+        let lost: Vec<CardId> = base
+            .keys()
+            .copied()
+            .filter(|&id| {
+                card(id).creature().is_some_and(|c| c.stage == stage)
+                    && card(id)
+                        .creature()
+                        .and_then(|c| c.evolves_from)
+                        .and_then(card_id)
+                        .is_none_or(|u| {
+                            base.get(&u).copied().unwrap_or(0) == 0 && owned.count(u) == 0
+                        })
+            })
+            .collect();
+        for id in lost {
+            *dropped.entry(id).or_default() += base.remove(&id).unwrap_or(0);
+        }
+    }
+    while base.values().sum::<usize>() > DECK_SIZE {
+        let Some(id) = weakest(&base, style) else {
+            break;
+        };
+        *dropped.entry(id).or_default() += 1;
+        match base.get_mut(&id) {
+            Some(k) if *k > 1 => *k -= 1,
+            _ => {
+                base.remove(&id);
+            }
+        }
+    }
+    let colors = match colours_of(&base) {
+        c if c.is_empty() => ranked_builds(owned, style)
+            .into_iter()
+            .next()
+            .map_or(vec![Color::Fire], |b| b.0),
+        c => c,
+    };
+    let kept: Vec<(CardId, usize)> = base.iter().map(|(&id, &k)| (id, k)).collect();
+    let mut built = fill(base, owned, colors, style);
+    let mut head = vec![];
+    if !kept.is_empty() {
+        head.push(Reason {
+            cards: kept,
+            why: Why::Kept,
+        });
+    }
+    if !dropped.is_empty() {
+        head.push(Reason {
+            cards: dropped.into_iter().collect(),
+            why: Why::Dropped,
+        });
+    }
+    head.append(&mut built.reasons);
+    built.reasons = head;
+    built
+}
+
+/// Why a [`Suggestion`] is made.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Hint {
+    /// What the deck doctor finds ([`crate::doctor::diagnose`]).
+    Doctor(Issue),
+    /// A colour's attacks ask for about `want` of its energy; the deck has `have`.
+    Share {
+        color: Color,
+        have: usize,
+        want: usize,
+    },
+    /// A stronger Basic of the deck's colours.
+    Upgrade,
+    /// `n` of the deck's `of` Hexon cards are weak to this colour.
+    Weak { color: Color, n: usize, of: usize },
+    /// The deck has this many cards over 60.
+    Over(usize),
+    /// Toward 60 cards: what "Complete my deck" would add, and why.
+    Build(Why),
+}
+
+/// One change to a deck: add `into`, take out `out`, or swap them.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Suggestion {
+    pub out: Option<CardId>,
+    pub into: Option<CardId>,
+    pub why: Hint,
+}
+
+impl Suggestion {
+    /// What to do, short: "Add Cindrel", "Swap Kelpup for Brineling".
+    pub fn title(&self) -> String {
+        let l = |id: CardId| card(id).label();
+        match (self.out, self.into) {
+            (Some(o), Some(i)) => tr(
+                format!("Swap {} for {}", l(o), l(i)),
+                format!("Remplacer {} par {}", l(o), l(i)),
+            ),
+            (None, Some(i)) => tr(format!("Add {}", l(i)), format!("Ajouter {}", l(i))),
+            (Some(o), None) => tr(format!("Take out {}", l(o)), format!("Retirer {}", l(o))),
+            (None, None) => String::new(),
+        }
+    }
+
+    /// Why, in one sentence.
+    pub fn text(&self) -> String {
+        let l = |id: Option<CardId>| id.map_or("?", |id| card(id).label());
+        let (out, into) = (l(self.out), l(self.into));
+        match &self.why {
+            Hint::Doctor(Issue::FewBasics(n)) => {
+                let none = pct(none_in(DECK_SIZE, *n, 7));
+                tr(
+                    format!("Only {n} Basic Hexons: {none}% of opening hands have none, and you must redraw."),
+                    format!("Seulement {n} Hexons de Base : {none} % des mains de départ n'en ont aucun, et il faut repiocher."),
+                )
+            }
+            Hint::Doctor(issue) => crate::doctor::Advice {
+                severity: crate::doctor::Severity::Tip,
+                issue: *issue,
+                swap: None,
+            }
+            .text(),
+            Hint::Share { color, have, want } => {
+                let e = color.energy_name();
+                tr(
+                    format!("Your {color} attacks want about {want} {e}; the deck has {have}."),
+                    format!(
+                        "Vos attaques {color} demandent environ {want} {e} ; le deck en a {have}."
+                    ),
+                )
+            }
+            Hint::Upgrade => tr(
+                format!("{into} hits harder or lasts longer than {out}."),
+                format!("{into} frappe plus fort ou tient plus longtemps que {out}."),
+            ),
+            Hint::Weak { color, n, of } => tr(
+                format!("{n} of your {of} Hexons are weak to {color}; {into} isn't."),
+                format!(
+                    "{n} de vos {of} Hexons sont faibles face à {color} ; {into} ne l'est pas."
+                ),
+            ),
+            Hint::Over(n) => tr(
+                format!("{n} over 60: {out} is the card the deck needs least."),
+                format!("{n} de trop : {out} est la carte dont le deck a le moins besoin."),
+            ),
+            Hint::Build(why) => {
+                let what = match why {
+                    Why::Under => tr(
+                        "an Awakening in the deck awakens from it",
+                        "un Éveil du deck en a besoin",
+                    ),
+                    Why::Line => tr(
+                        "it builds up an Awaken line",
+                        "elle étoffe une lignée d'Éveil",
+                    ),
+                    Why::Basics(_) => tr(
+                        "one more Basic to open with",
+                        "un Hexon de Base de plus pour démarrer",
+                    ),
+                    Why::Trainer(r) => r.text(),
+                    Why::Energy(..) | Why::Twofold => tr(
+                        "your attacks need the energy",
+                        "vos attaques ont besoin de cette énergie",
+                    ),
+                    Why::Kept | Why::Dropped => "",
+                };
+                tr(
+                    format!("Toward 60 cards: {what}."),
+                    format!("Pour arriver à 60 cartes : {what}."),
+                )
+            }
+        }
+    }
+
+    /// Make the change. False, and the deck unchanged, when it can't be
+    /// made (the card to take out isn't there, the one to add can't go in).
+    pub fn apply(&self, d: &mut DeckList, owned: &Collection) -> bool {
+        let before = d.cards.clone();
+        let ok = self.out.is_none_or(|o| d.remove(o))
+            && self.into.is_none_or(|i| d.add(i, owned).is_ok());
+        if !ok {
+            d.cards = before;
+        }
+        ok
+    }
+}
+
+/// Up to this many suggestions at a time.
+pub const SUGGESTIONS: usize = 6;
+
+/// Cards to add, take out or swap, most serious first: the deck doctor's
+/// findings, energy against the attack costs, a weakness most of the deck
+/// shares, a stronger Basic, and the size. Each is buildable from the
+/// collection and never makes the deck break a rule it keeps today.
+pub fn suggestions(deck: &[CardId], owned: &Collection) -> Vec<Suggestion> {
+    let size = deck.len();
+    let mut n: BTreeMap<CardId, usize> = BTreeMap::new();
+    for &id in deck
+        .iter()
+        .filter(|&&id| crate::card::try_card(id).is_some())
+    {
+        *n.entry(id).or_default() += 1;
+    }
+    let mut all = vec![];
+    let fit = |out: Option<CardId>, into: Option<CardId>| match size.cmp(&DECK_SIZE) {
+        std::cmp::Ordering::Less => (None, into),
+        std::cmp::Ordering::Greater => (out, None),
+        std::cmp::Ordering::Equal => (out, into),
+    };
+    for a in crate::doctor::diagnose(deck, owned) {
+        let judged_at_60 = matches!(a.issue, Issue::FewBasics(_) | Issue::Energy(_));
+        if size != DECK_SIZE && judged_at_60 {
+            continue;
+        }
+        if let Some(s) = a.swap {
+            let (out, into) = fit(Some(s.out), Some(s.into));
+            all.push(Suggestion {
+                out,
+                into,
+                why: Hint::Doctor(a.issue),
+            });
+        }
+    }
+    let x = Draft {
+        owned,
+        style: Style::Balanced,
+        colors: colours_of(&n),
+        n: n.clone(),
+        reasons: vec![],
+    };
+    match size.cmp(&DECK_SIZE) {
+        std::cmp::Ordering::Equal => {
+            all.extend(share(&x));
+            all.extend(weak(&x));
+            all.extend(upgrade(&x));
+        }
+        std::cmp::Ordering::Less => {
+            let c = complete(deck, owned, Style::Balanced);
+            for r in c
+                .reasons
+                .iter()
+                .filter(|r| !matches!(r.why, Why::Kept | Why::Dropped))
+            {
+                if let Some(&(id, _)) = r.cards.first() {
+                    all.push(Suggestion {
+                        out: None,
+                        into: Some(id),
+                        why: Hint::Build(r.why.clone()),
+                    });
+                }
+            }
+        }
+        std::cmp::Ordering::Greater => {
+            let mut left = n.clone();
+            for _ in 0..3 {
+                let Some(id) = weakest(&left, Style::Balanced) else {
+                    break;
+                };
+                all.push(Suggestion {
+                    out: Some(id),
+                    into: None,
+                    why: Hint::Over(size - DECK_SIZE),
+                });
+                left.remove(&id);
+            }
+        }
+    }
+    let base = DeckList {
+        name: String::new(),
+        cards: deck.to_vec(),
+    };
+    let problems = base.problems(owned).len();
+    let mut out: Vec<Suggestion> = vec![];
+    for s in all {
+        let mut d = base.clone();
+        let same = |o: &Suggestion| o.out == s.out && o.into == s.into;
+        if out.iter().any(same) || !s.apply(&mut d, owned) || d.problems(owned).len() > problems {
+            continue;
+        }
+        out.push(s);
+        if out.len() == SUGGESTIONS {
+            break;
+        }
+    }
+    out
+}
+
+/// Basic energy in the deck by colour.
+fn energy_by_colour(x: &Draft) -> [usize; 6] {
+    let mut have = [0usize; 6];
+    for (&id, &k) in &x.n {
+        if let CardKind::Energy(EnergyCard::Basic(c)) = card(id).kind {
+            have[c as usize] += k;
+        }
+    }
+    have
+}
+
+/// A colour short of energy for its attacks by 3 or more: one energy from
+/// the colour with the most to spare.
+fn share(x: &Draft) -> Option<Suggestion> {
+    let (s, _) = x.symbols();
+    let have = energy_by_colour(x);
+    let (sym, energy): (usize, usize) = (s.iter().sum(), have.iter().sum());
+    if sym == 0 || energy == 0 {
+        return None;
+    }
+    let want = |c: usize| ((energy * s[c]) as f64 / sym as f64).round() as usize;
+    let short = (0..6)
+        .filter(|&c| want(c) >= have[c] + 3)
+        .max_by_key(|&c| (want(c) - have[c], 6 - c))?;
+    let spare = (0..6)
+        .filter(|&c| have[c] > want(c))
+        .max_by_key(|&c| (have[c] - want(c), 6 - c))?;
+    Some(Suggestion {
+        out: basic_energy(Color::ALL[spare]),
+        into: basic_energy(Color::ALL[short]),
+        why: Hint::Share {
+            color: Color::ALL[short],
+            have: have[short],
+            want: want(short),
+        },
+    })
+}
+
+/// Nothing in the deck awakens from this card.
+fn alone(x: &Draft, id: CardId) -> bool {
+    !x.n.keys()
+        .any(|&e| card(e).creature().and_then(|c| c.evolves_from) == Some(card(id).name))
+}
+
+/// The best Basic of the deck's colours that can go in and passes `keep`.
+fn best_basic(x: &Draft, keep: impl Fn(&crate::card::Creature) -> bool) -> Option<CardId> {
+    set::ids()
+        .filter(|&id| card(id).is_basic() && x.fits(id) && x.room(id) > 0)
+        .filter(|&id| card(id).creature().is_some_and(&keep))
+        .max_by_key(|&id| (power(id, Style::Balanced), std::cmp::Reverse(id)))
+}
+
+/// Two thirds or more of the Hexon cards (eight at least) weak to one
+/// colour: the weakest of them for a Basic that isn't.
+fn weak(x: &Draft) -> Option<Suggestion> {
+    let mut by = [0usize; 7];
+    let mut of = 0;
+    for (&id, &k) in &x.n {
+        if let Some(c) = card(id).creature() {
+            of += k;
+            if let Some(w) = c.weakness {
+                by[w as usize] += k;
+            }
+        }
+    }
+    let w = (0..7).max_by_key(|&c| (by[c], 7 - c))?;
+    if by[w] < 8 || by[w] * 3 < of * 2 {
+        return None;
+    }
+    let color = Color::ALL[w];
+    let into = best_basic(x, |c| c.weakness != Some(color))?;
+    let out =
+        x.n.keys()
+            .copied()
+            .filter(|&id| {
+                card(id)
+                    .creature()
+                    .is_some_and(|c| c.weakness == Some(color))
+                    && alone(x, id)
+            })
+            .min_by_key(|&id| (power(id, Style::Balanced), id))?;
+    Some(Suggestion {
+        out: Some(out),
+        into: Some(into),
+        why: Hint::Weak {
+            color,
+            n: by[w],
+            of,
+        },
+    })
+}
+
+/// The weakest Basic nothing awakens from, for a clearly stronger one.
+fn upgrade(x: &Draft) -> Option<Suggestion> {
+    let out =
+        x.n.keys()
+            .copied()
+            .filter(|&id| card(id).is_basic() && alone(x, id))
+            .min_by_key(|&id| (power(id, Style::Balanced), id))?;
+    let into = best_basic(x, |_| true)
+        .filter(|&i| power(i, Style::Balanced) >= power(out, Style::Balanced) + 15)?;
+    Some(Suggestion {
+        out: Some(out),
+        into: Some(into),
+        why: Hint::Upgrade,
+    })
+}
+
+/// What an opening hand of 7 looks like for a deck, exactly (hypergeometric).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Opening {
+    /// No Basic among the 7: show the hand and redraw (a mulligan).
+    pub mulligan: f64,
+    /// Basics in the 7, on average.
+    pub basics: f64,
+    /// At least one energy card among the 7.
+    pub energy: f64,
+}
+
+/// The opening-hand odds of a deck (any size; empty gives zeros and a sure mulligan).
+pub fn opening(deck: &[CardId]) -> Opening {
+    let n = deck.len();
+    let count = |keep: fn(&CardDef) -> bool| {
+        deck.iter()
+            .filter(|&&id| crate::card::try_card(id).is_some_and(keep))
+            .count()
+    };
+    let (b, e) = (
+        count(CardDef::is_basic),
+        count(|c| matches!(c.kind, CardKind::Energy(_))),
+    );
+    Opening {
+        mulligan: none_in(n, b, 7),
+        basics: if n == 0 {
+            0.0
+        } else {
+            7.0 * b as f64 / n as f64
+        },
+        energy: if n == 0 { 0.0 } else { 1.0 - none_in(n, e, 7) },
+    }
+}
+
+/// Seven cards off the top of the deck shuffled with the engine's RNG: the
+/// deck test's sample hand. The same seed draws the same hand.
+pub fn sample_hand(deck: &[CardId], seed: u64) -> Vec<CardId> {
+    let mut v = deck.to_vec();
+    crate::rng::Rng::new(seed).shuffle(&mut v);
+    v.truncate(7);
+    v
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::decks::STARTER;
     use crate::doctor::{diagnose, Issue};
     use crate::lang::{set_lang, Lang};
-    use crate::{starter_collection, DeckList};
+    use crate::starter_collection;
 
     fn everything() -> Collection {
         let mut c = Collection::new();
@@ -938,5 +1478,181 @@ mod tests {
             "{fr:?}"
         );
         assert!(en.iter().zip(&fr).all(|(e, f)| e != f));
+    }
+
+    #[test]
+    fn surprise_is_seeded_and_picks_among_the_best() {
+        let all = everything();
+        let p = |seed| Plan {
+            pick: Pick::Surprise(seed),
+            style: Style::Balanced,
+        };
+        assert_eq!(auto_build(&all, &p(4)), auto_build(&all, &p(4)));
+        let decks: Vec<Vec<CardId>> = (0..3).map(|s| auto_build(&all, &p(s)).cards).collect();
+        assert!(
+            decks[0] != decks[1] && decks[1] != decks[2],
+            "three seeds, three decks"
+        );
+        for d in &decks {
+            check(
+                &all,
+                &Built {
+                    cards: d.clone(),
+                    reasons: auto_build(&all, &p(0)).reasons,
+                },
+                "surprise",
+            );
+        }
+    }
+
+    #[test]
+    fn complete_keeps_the_picks_and_fills_to_60() {
+        let all = everything();
+        let half: Vec<CardId> = STARTER
+            .cards()
+            .into_iter()
+            .filter(|&id| !card(id).is_basic_energy())
+            .take(30)
+            .collect();
+        let c = complete(&half, &all, Style::Balanced);
+        let d = DeckList {
+            name: "t".into(),
+            cards: c.cards.clone(),
+        };
+        assert_eq!(d.validate(&all), Ok(()));
+        let mut left = c.cards.clone();
+        for id in &half {
+            let i = left.iter().position(|x| x == id).expect("every pick kept");
+            left.remove(i);
+        }
+        assert!(matches!(c.reasons[0].why, Why::Kept));
+        // A healthy deck comes back unchanged.
+        let starter = starter_collection();
+        let mut sorted = STARTER.cards();
+        sorted.sort();
+        assert_eq!(
+            complete(&STARTER.cards(), &starter, Style::Balanced).cards,
+            sorted
+        );
+        // What isn't owned goes, with a reason.
+        let c = complete(&crate::decks::EMBER_RUSH.cards(), &starter, Style::Balanced);
+        assert!(starter.can_build(&c.cards) && c.cards.len() == DECK_SIZE);
+        assert!(c.reasons.iter().any(|r| r.why == Why::Dropped));
+        // Over 60: cut down.
+        let mut big = STARTER.cards();
+        big.extend(std::iter::repeat_n(set::FIRE_ENERGY, 10));
+        let c = complete(&big, &all, Style::Balanced);
+        assert_eq!(
+            c.cards.len(),
+            DECK_SIZE,
+            "{:?}",
+            c.reasons.iter().map(Reason::text).collect::<Vec<_>>()
+        );
+    }
+
+    fn without(deck: &[CardId], id: CardId) -> Vec<CardId> {
+        deck.iter()
+            .map(|&c| if c == id { set::FIRE_ENERGY } else { c })
+            .collect()
+    }
+
+    #[test]
+    fn suggestions_fix_lines_and_basics_with_reasons() {
+        let all = everything();
+        let s = suggestions(&without(&STARTER.cards(), set::CINDREL), &all);
+        let fix = s
+            .iter()
+            .find(|s| s.into == Some(set::CINDREL))
+            .expect("add Cindrel");
+        assert!(fix.text().contains("Flarrow"), "{}", fix.text());
+        // Seven Basics: a Basic in, with the odds of a Basic-less hand.
+        let mut few = STARTER.cards();
+        for b in [set::ASHPAW, set::PUDDOCK] {
+            few = without(&few, b);
+        }
+        let basics = few.iter().filter(|&&id| card(id).is_basic()).count();
+        assert!(basics < crate::doctor::MIN_BASICS, "{basics}");
+        let s = suggestions(&few, &all);
+        let b = s
+            .iter()
+            .find(|s| matches!(s.why, Hint::Doctor(Issue::FewBasics(_))))
+            .expect("a Basic");
+        assert!(card(b.into.unwrap()).is_basic());
+        assert!(b.text().contains('%'), "{}", b.text());
+        // Short of 60: adds; over: takes out.
+        let short = &STARTER.cards()[..50];
+        assert!(suggestions(short, &all)
+            .iter()
+            .all(|s| s.out.is_none() && s.into.is_some()));
+        let mut big = STARTER.cards();
+        big.extend([set::FIRE_ENERGY; 3]);
+        assert!(suggestions(&big, &all)
+            .iter()
+            .all(|s| s.into.is_none() && s.out.is_some()));
+    }
+
+    #[test]
+    fn applying_a_suggestion_never_breaks_a_rule_or_borrows_a_card() {
+        let starter = starter_collection();
+        let all = everything();
+        let mut decks: Vec<Vec<CardId>> =
+            crate::decks::PREBUILT.iter().map(|d| d.cards()).collect();
+        decks.push(without(&STARTER.cards(), set::PUDDOCK));
+        decks.push(STARTER.cards()[..40].to_vec());
+        for owned in [&starter, &all] {
+            for cards in &decks {
+                let d = DeckList {
+                    name: "t".into(),
+                    cards: cards.clone(),
+                };
+                let before = d.problems(owned).len();
+                let s = suggestions(cards, owned);
+                assert!(s.len() <= SUGGESTIONS);
+                for x in s {
+                    let mut e = d.clone();
+                    assert!(x.apply(&mut e, owned), "{}", x.title());
+                    assert!(e.problems(owned).len() <= before, "{}", x.title());
+                    assert!(!x.title().is_empty() && !x.text().is_empty());
+                }
+            }
+        }
+        // A healthy deck from an all-card collection still hears of better cards, never of a broken one.
+        let s = suggestions(&STARTER.cards(), &starter);
+        assert!(s
+            .iter()
+            .all(|s| !matches!(s.why, Hint::Doctor(Issue::BrokenLine(_)))));
+    }
+
+    #[test]
+    fn opening_odds_and_sample_hands() {
+        let one: Vec<CardId> = std::iter::once(set::CINDREL)
+            .chain(std::iter::repeat_n(set::FIRE_ENERGY, 59))
+            .collect();
+        let o = opening(&one);
+        assert!((o.mulligan - 53.0 / 60.0).abs() < 1e-9, "{}", o.mulligan);
+        assert!((o.energy - 1.0).abs() < 1e-9);
+        let s = opening(&STARTER.cards());
+        assert!(s.mulligan < 0.15, "{}", s.mulligan);
+        assert!(s.basics > 1.5);
+        let h = sample_hand(&STARTER.cards(), 9);
+        assert_eq!(h.len(), 7);
+        assert_eq!(h, sample_hand(&STARTER.cards(), 9));
+        assert_ne!(h, sample_hand(&STARTER.cards(), 10));
+        assert!(h.iter().all(|id| STARTER.cards().contains(id)));
+        assert_eq!(opening(&[]).mulligan, 1.0);
+    }
+
+    #[test]
+    fn suggestions_read_in_french() {
+        let all = everything();
+        let s = suggestions(&without(&STARTER.cards(), set::CINDREL), &all);
+        set_lang(Lang::Fr);
+        let fr: Vec<(String, String)> = s.iter().map(|s| (s.title(), s.text())).collect();
+        set_lang(Lang::En);
+        assert!(
+            fr.iter()
+                .all(|(t, x)| !t.starts_with("Add") && !t.starts_with("Swap") && !x.is_empty()),
+            "{fr:?}"
+        );
     }
 }
