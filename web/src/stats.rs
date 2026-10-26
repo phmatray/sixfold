@@ -120,7 +120,7 @@ pub fn StatsPanel() -> impl IntoView {
                     {row(tr("Rival wins", "Victoires contre les rivaux"), "rival_wins")}
                     {row(tr("Route duelist wins", "Victoires sur les routes"), "trainer_wins")}
                     {row(tr("Quick duel wins", "Victoires en duel rapide"), "quick_wins")}
-                    {row(tr("Quick duel wins on Hard", "Victoires en duel rapide, en Difficile"), "quick_wins_hard")}
+                    {row(tr("Quick duel wins against a formidable opponent", "Victoires en duel rapide contre un adversaire redoutable"), "quick_wins_hard")}
                     {row(tr("Current streak", "Série en cours"), "streak")}
                     {row(tr("Best streak", "Meilleure série"), "streak_best")}
                     {row(tr("Daily duels won", "Duels du jour gagnés"), "daily_days")}

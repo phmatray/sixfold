@@ -22,6 +22,7 @@ mod logo;
 mod offline;
 mod overlays;
 mod packs;
+mod reading;
 mod saves;
 mod shops;
 mod splash;

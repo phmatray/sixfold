@@ -48,8 +48,8 @@ test("keyboard: arrows move the hand through the title and two menu screens, Esc
   const decks = page.getByRole("group", { name: "Your deck" }).getByRole("radio");
   await moveTo(page, decks.first(), "ArrowDown");
   await pointsAt(page, decks.first());
-  // A new player holds one deck (prebuilts unlock later, #102); the AI's list has them all.
-  const theirs = page.getByRole("group", { name: "The AI plays" }).getByRole("radio");
+  // A new player holds one deck (prebuilts unlock later, #102); the opponent's list has them all.
+  const theirs = page.getByRole("group", { name: "Your opponent plays" }).getByRole("radio");
   await page.keyboard.press("ArrowRight");
   await expect(theirs.first()).toBeFocused();
   await page.keyboard.press("ArrowDown");

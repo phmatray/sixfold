@@ -95,6 +95,12 @@
       "give": "card:dowsing_rod",
       "text": "On the map table, under the stone that holds down the blank west corner: a card, left for whoever walks out that way.",
       "text_fr": "Sur la table des cartes, sous la pierre qui retient le coin ouest, resté en blanc : une carte, laissée pour qui ira par là."
+    },
+    {
+      "x": 9,
+      "z": 4,
+      "kind": "book",
+      "id": "ring_of_regions"
     }
   ],
   "warps": [

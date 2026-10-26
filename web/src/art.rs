@@ -63,7 +63,7 @@ pub fn card_color(def: &CardDef) -> Option<Color> {
 }
 
 /// One 24×24 path per colour, filled with `currentColor`.
-fn glyph_path(c: Color) -> &'static str {
+pub(crate) fn glyph_path(c: Color) -> &'static str {
     match c {
         Color::Grass => "M12 2.5C5 7 4.5 15 12 21.5C19.5 15 19 7 12 2.5ZM12 7.5V18.5L11 18.5V7.5Z",
         Color::Fire => "M12 2C14.5 6.5 19 9 18.5 15A6.5 6.5 0 0 1 5.5 15C5.5 11.5 8 10 8.5 6.5C10.5 8.5 12 6.5 12 2Z",

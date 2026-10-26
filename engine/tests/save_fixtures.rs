@@ -4,13 +4,15 @@
 //! release), never by today's code: the same played game every time — a pack
 //! opened, a second deck, the running shoes, the first rival beaten and the
 //! result not yet seen, the hero in the woodland — plus Facets (1.2) and the
-//! clock, a waymark and a seen map (1.3). 0.6 kept one localStorage key per
-//! part: that fixture is the keys as JSON, read through `Save::from_legacy`
-//! (0.7 wrote the same keys, byte for byte). Each release adds one.
+//! clock, a waymark and a seen map (1.3); none has read a book (1.9). 0.6
+//! kept one localStorage key per part: that fixture is the keys as JSON, read
+//! through `Save::from_legacy` (0.7 wrote the same keys, byte for byte). Each
+//! release adds one.
 
 use std::collections::BTreeMap;
 use std::path::Path;
 
+use sixfold_engine::books::{is_read, read_count, read_flag, BOOKS};
 use sixfold_engine::overworld::STARTING_COINS;
 use sixfold_engine::save::{Save, Summary, CAMPAIGN_DECK, WORLD_AT};
 
@@ -49,6 +51,16 @@ fn check_common(version: &str, s: &Save) -> Summary {
     let back = Save::decode(&again.encode()).unwrap();
     assert_eq!(back.summary(), s.summary(), "{version}");
     assert_eq!(back.progress(), p, "{version}");
+    // 1.9 (#104): no save from before the books has read one, and a book read
+    // is kept by the progress section, so an old save takes one on unchanged.
+    assert_eq!(read_count(&p), 0, "{version}");
+    let mut read = p.clone();
+    read.apply(&format!("flag:{}", read_flag(BOOKS[0].id)))
+        .unwrap();
+    again.set_progress(&read);
+    let back = Save::decode(&again.encode()).unwrap().progress();
+    assert!(is_read(&back, BOOKS[0].id), "{version}");
+    assert_eq!(read_count(&back), 1, "{version}");
     s.summary()
 }
 

@@ -115,15 +115,15 @@
       "x": 2,
       "z": 4,
       "kind": "duel",
-      "text": "A duel table, cards already laid out. Play a six-prize duel against the AI?",
-      "text_fr": "Une table de duel, les cartes déjà en place. Jouer un duel à six Récompenses contre l'IA ?"
+      "text": "A duel table, cards already laid out. Sit down for a six-prize practice duel?",
+      "text_fr": "Une table de duel, les cartes déjà en place. S'asseoir pour un duel d'entraînement à six cartes Récompense ?"
     },
     {
       "x": 3,
       "z": 4,
       "kind": "duel",
-      "text": "A duel table, cards already laid out. Play a six-prize duel against the AI?",
-      "text_fr": "Une table de duel, les cartes déjà en place. Jouer un duel à six Récompenses contre l'IA ?"
+      "text": "A duel table, cards already laid out. Sit down for a six-prize practice duel?",
+      "text_fr": "Une table de duel, les cartes déjà en place. S'asseoir pour un duel d'entraînement à six cartes Récompense ?"
     },
     {
       "x": 9,
@@ -139,6 +139,31 @@
       "if": "beat:warden & flag:sable_door",
       "text": "A seal stone, six coloured faces, and on top a seventh, freshly cut: a hexagon, still blank. Chalked underneath, in Sable's hand: for whoever brings someone else along.",
       "text_fr": "Une pierre de sceau, six faces de couleur, et dessus une septième, fraîchement taillée : un hexagone, encore blanc. Dessous, à la craie, de la main de Sable : pour qui amène quelqu'un avec soi."
+    },
+    {
+      "x": 1,
+      "z": 1,
+      "kind": "book",
+      "id": "duel"
+    },
+    {
+      "x": 2,
+      "z": 1,
+      "kind": "book",
+      "id": "energy"
+    },
+    {
+      "x": 3,
+      "z": 1,
+      "kind": "book",
+      "id": "conditions"
+    },
+    {
+      "x": 4,
+      "z": 1,
+      "kind": "book",
+      "id": "seventh_face",
+      "if": "flag:sable_door"
     }
   ],
   "warps": [
@@ -341,7 +366,7 @@
           "lines_fr": [
             "Wynne m'a pris comme apprenti. Tu y crois ? Je balaie, je trie les boosters, je donne les cartes à la table.",
             "Sable a gravé la pierre près de l'entrée, tu as vu ? Une septième face. Encore blanche.",
-            "Une partie ? Mon meilleur deck, six Récompenses. Le perdant balaie."
+            "Une partie ? Mon meilleur deck, six cartes Récompense. Le perdant balaie."
           ],
           "do": [
             "flag:rook_apprentice",
@@ -354,7 +379,7 @@
             "Rook's table is open. Six prizes, best deck, no excuses."
           ],
           "lines_fr": [
-            "La table de Rook est ouverte. Six Récompenses, meilleur deck, pas d'excuses."
+            "La table de Rook est ouverte. Six cartes Récompense, meilleur deck, pas d'excuses."
           ],
           "do": [
             "duel:rook_4"

@@ -29,6 +29,7 @@ mod turn;
 mod view;
 
 pub mod ai;
+pub mod books;
 pub mod booster;
 pub mod builder;
 pub mod campaign;

@@ -2783,7 +2783,7 @@
           ],
           "lines_fr": [
             "Champion, et tu cours la route du four comme nous autres. Ha !",
-            "Quatre Récompenses. Voyons si le titre t'a donné des ailes."
+            "Quatre cartes Récompense. Voyons si le titre t'a donné des ailes."
           ],
           "do": [
             "duel:cinza"
@@ -2810,7 +2810,7 @@
           "lines_fr": [
             "Tu marches comme quelqu'un qui n'a jamais été pressé.",
             "Moi, c'est Cinza. Je cours la route du four le matin et je fais des duels l'après-midi.",
-            "Quatre Récompenses. Essaie de suivre."
+            "Quatre cartes Récompense. Essaie de suivre."
           ],
           "do": [
             "duel:cinza"
@@ -2899,7 +2899,7 @@
         ],
         "challenge_fr": [
           "Tu vois cette perle ? Du verre fondu. Toute la carrière était un volcan, autrefois. Personne ne me croit.",
-          "Mes Braisecorne, eux, me croient. Trois Récompenses, et tu me croiras aussi."
+          "Mes Braisecorne, eux, me croient. Trois cartes Récompense, et tu me croiras aussi."
         ],
         "win": [
           "Hmph. Still a volcano.",
@@ -2987,7 +2987,7 @@
           ],
           "lines_fr": [
             "Champion, dans ma carrière. Attention au gravier, il se fiche des titres.",
-            "Cinq Récompenses, comme toujours. On y va ?"
+            "Cinq cartes Récompense, comme toujours. On y va ?"
           ],
           "do": [
             "duel:orla"
@@ -2999,7 +2999,7 @@
             "Another shift? Five prizes, same as ever."
           ],
           "lines_fr": [
-            "On rembauche ? Cinq Récompenses, comme toujours."
+            "On rembauche ? Cinq cartes Récompense, comme toujours."
           ],
           "do": [
             "duel:orla"
@@ -3012,7 +3012,7 @@
           ],
           "lines_fr": [
             "Port du casque obligatoire. Enfin, il le serait, si j'avais un casque.",
-            "Orla. C'est moi qui dirige la carrière. Cinq Récompenses, pas de raccourcis."
+            "Orla. C'est moi qui dirige la carrière. Cinq cartes Récompense, pas de raccourcis."
           ],
           "do": [
             "duel:orla"
