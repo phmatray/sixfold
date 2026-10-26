@@ -2,7 +2,8 @@
 
 use leptos::prelude::*;
 use sixfold_engine::ai::Difficulty;
-use sixfold_engine::decks::PREBUILT;
+use sixfold_engine::decks::{unlocked, PREBUILT};
+use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{card, tr, CardId};
 
@@ -33,8 +34,9 @@ fn prebuilt_opts() -> Vec<Opt> {
         .collect()
 }
 
-/// Your saved decks first, then the prebuilts you don't already hold as-is.
-pub fn my_opts(p: &Profile) -> Vec<Opt> {
+/// Your saved decks first, then the decks you have unlocked (on loan) that
+/// you don't already hold as-is.
+pub fn my_opts(p: &Profile, progress: &Progress) -> Vec<Opt> {
     let mut held: Vec<Vec<CardId>> = p.decks.iter().map(|d| sorted(&d.cards)).collect();
     held.sort();
     p.decks
@@ -46,16 +48,18 @@ pub fn my_opts(p: &Profile) -> Vec<Opt> {
             problem: deck_problem(d, &p.collection),
         })
         .chain(
-            prebuilt_opts()
+            unlocked(progress)
                 .into_iter()
-                .filter(|o| held.binary_search(&sorted(&o.cards)).is_err())
-                .map(|o| Opt {
+                .map(|u| Opt {
+                    name: u.deck.name.to_string(),
                     desc: tr(
-                        format!("Prebuilt. {}", o.desc),
-                        format!("Préconstruit. {}", o.desc),
+                        format!("On loan. {}", u.deck.description),
+                        format!("Prêté. {}", u.deck.description),
                     ),
-                    ..o
-                }),
+                    cards: u.deck.cards(),
+                    problem: None,
+                })
+                .filter(|o| held.binary_search(&sorted(&o.cards)).is_err()),
         )
         .collect()
 }
@@ -138,9 +142,10 @@ pub fn DuelSetup() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<Profile>>();
-    let mine_opts = profile.with_untracked(my_opts);
+    let progress = expect_context::<RwSignal<Progress>>();
+    let mine_opts = profile.with_untracked(|p| progress.with_untracked(|g| my_opts(p, g)));
     let theirs_opts = prebuilt_opts();
-    // Every prebuilt is listed, as your copy or on its own, so a deck is always playable.
+    // Your decks, then the unlocked ones on loan; the first that plays is picked.
     let first_legal = mine_opts.iter().position(|o| o.problem.is_none());
     let mine = RwSignal::new(first_legal.unwrap_or(0));
     // Ember Rush, a plain attacking deck: a gentler first opponent than a
@@ -154,10 +159,12 @@ pub fn DuelSetup() -> impl IntoView {
         StoredValue::new(theirs_opts.clone()),
     );
     let start = move || {
-        let (a, b) = (
-            m.with_value(|o| o[mine.get()].clone()),
-            t.with_value(|o| o[theirs.get()].clone()),
-        );
+        let (Some(a), Some(b)) = (
+            m.with_value(|o| o.get(mine.get()).cloned()),
+            t.with_value(|o| o.get(theirs.get()).cloned()),
+        ) else {
+            return;
+        };
         if a.problem.is_some() {
             return;
         }
@@ -193,6 +200,9 @@ pub fn DuelSetup() -> impl IntoView {
                         <p class="note">{tr("Tap or hover any card to read it. Asleep and Paralyzed Hexons can't attack or retreat; Confused ones may hurt themselves.", "Touchez ou survolez une carte pour la lire. Un Hexon Endormi ou Paralysé ne peut ni attaquer ni battre en retraite ; un Hexon Confus peut se blesser lui-même.")}</p>
                     </details>
                     <div class="pickers">
+                        {first_legal.is_none().then(|| view! {
+                            <p class="note">{tr("None of your decks can play yet: finish one in My decks, or unlock a deck by beating a rival.", "Aucun de vos decks ne peut encore jouer : terminez-en un dans Mes decks, ou débloquez un deck en battant un rival.")}</p>
+                        })}
                         <DeckPicker legend=tr("Your deck", "Votre deck") name="mine" opts=mine_opts choice=mine />
                         <DeckPicker legend=tr("The AI plays", "Deck de l'IA") name="theirs" opts=theirs_opts choice=theirs />
                     </div>

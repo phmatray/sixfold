@@ -569,3 +569,18 @@ sides (`GAMES=… PACKS=…` to change it):
 From a new player's cards the builder rebuilds the starter, give or take two energy (the gap is the card-order
 noise above). From ten packs on it is ahead (one Surprise pick ties, 38% to 39%), and the gap grows with the
 collection.
+
+### Unlockable decks: lent, not given
+
+The six prebuilts and the five rival decks that aren't one (`decks::UNLOCKABLE`) start locked and unlock with
+something the game already records: the rival who plays the deck (Cinza, Quill, Bramble, Marlo, Orla, Lumen),
+an achievement (*Full Bloom* for Grove Bloom, *Waylaid* for Tide Mind, *Halfway Round* for Stone Fist), the
+end of Rook's story (Dream Veil) or the Gauntlet (Sixfold Crown). The unlock state is read from those flags,
+so there is no new save section and an old save unlocks whatever it has already earned.
+
+**Decision: an unlocked deck is a loan.** It plays as it is in a Quick duel (where the prebuilts were free
+before 1.9) and can be copied to the player's decks, where the cards they don't own show as missing and
+"Complete my deck" fills the gaps from their own cards. No card is granted, because granting would have
+been a second, uncapped source of cards next to the packs: one rival win would hand over 30-odd cards and
+move `economy_sim` (packs an hour) and the campaign playthroughs, whose decks are built from the
+collection. As a loan it moves neither; a campaign duel still needs a deck the player owns.
