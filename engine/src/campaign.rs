@@ -137,10 +137,15 @@ pub enum Stakes {
     Rival(Color),
     /// The Warden: the one rival with no seal to give.
     Boss,
+    /// One of Rook's story duels: his own theme.
+    Story,
 }
 
 /// The stakes of a duel against `id`, a rival's or route duelist's id.
 pub fn stakes(id: Option<&str>) -> Stakes {
+    if id.and_then(trainer).is_some_and(|t| t.story()) {
+        return Stakes::Story;
+    }
     match id.and_then(rival) {
         Some(r) if !r.seal => Stakes::Boss,
         Some(r) => r
@@ -160,6 +165,41 @@ pub fn seals(p: &Progress) -> usize {
 pub fn champion(p: &Progress) -> bool {
     RIVALS.iter().any(|r| !r.seal && r.beaten(p))
 }
+
+/// The champion's title, once the Warden falls: "Champion", and "Champion of
+/// the Seventh Face" once Rook's story is done (`flag:rook_4`, §8.2).
+pub fn title(p: &Progress) -> Option<T> {
+    champion(p).then(|| {
+        if p.has_flag("rook_4") {
+            T::new(
+                "Champion of the Seventh Face",
+                "Champion de la septième face",
+            )
+        } else {
+            T::new("Champion", "Champion")
+        }
+    })
+}
+
+/// What Rook says in his duels (all four).
+pub static ROOK_LINES: RivalLines = RivalLines {
+    intro: T::new(
+        "No colour, no excuses. Let's see what yours are worth.",
+        "Pas de couleur, pas d'excuses. Voyons ce que valent les tiennes.",
+    ),
+    first_ko: T::new(
+        "That's one more tally mark. For me, this time.",
+        "Un trait de plus sur ma manche. Pour moi, cette fois.",
+    ),
+    ropes: T::new(
+        "Go on, then. Finish it. I'll still be here.",
+        "Vas-y. Termine. Je serai encore là.",
+    ),
+    defeat: T::new(
+        "Blank again. Fine. I'll carve it myself one day.",
+        "Encore blanc. Bon. Je la graverai moi-même, un jour.",
+    ),
+};
 
 /// Saves from before promos existed: give the promo of every rival already
 /// beaten that the collection lacks. Returns the cards added.
@@ -247,7 +287,7 @@ pub fn opponent(id: &str) -> Option<Opponent> {
         prizes: t.prizes,
         difficulty: t.difficulty,
         style: Style::Balanced,
-        lines: None,
+        lines: t.story().then_some(&ROOK_LINES),
         rival: false,
     })
 }
@@ -762,6 +802,52 @@ mod tests {
         let promos: Vec<CardId> = RIVALS.iter().map(Rival::promo).collect();
         assert_eq!(promos, PROMOS);
         assert_eq!(rival("warden").unwrap().promo(), HEXCREST);
+    }
+
+    /// §8: Rook is a story duel, never a rival, a seal or the champion; his
+    /// scenes move on whether the player wins or loses (the scene sets
+    /// `flag:rook_<n>` before the duel, and the next scene waits only for
+    /// that flag and the seals), and once his story is done the champion's
+    /// title says so.
+    #[test]
+    fn rook_moves_the_story_on_and_never_counts_as_a_seal_or_the_champion() {
+        let (mut p, mut pr) = (Progress::default(), Profile::new_player());
+        for n in 1..=4 {
+            let id = format!("rook_{n}");
+            assert!(rival(&id).is_none() && !RIVALS.iter().any(|r| r.id == id));
+            assert_eq!(stakes(Some(&id)), Stakes::Story);
+            let o = opponent(&id).unwrap();
+            assert!(!o.rival && o.name == "Rook" && o.lines.is_some());
+        }
+        // Rook's first scene, then a lost duel: the story still moves on.
+        p.apply_all(&["flag:rook_1", "duel:rook_1"]).unwrap();
+        let lost = record_opponent("rook_1", false, &mut p, &mut pr).unwrap();
+        assert!(!lost.won && lost.facets == 0 && !lost.seal);
+        assert!(p.check("lost:rook_1") && !p.check("beat:rook_1"));
+        beat(&mut p, &["bramble", "marlo", "cinza"]);
+        let next = "seals:3 & flag:rook_1 & !flag:rook_2";
+        assert!(p.check(next), "a loss never blocks the next scene");
+        // Won, the next one pays its purse and is beaten.
+        p.apply_all(&["flag:rook_2", "duel:rook_2"]).unwrap();
+        let won = record_opponent("rook_2", true, &mut p, &mut pr).unwrap();
+        assert!(won.won && won.first && won.facets == 150 && !won.seal && won.packs.1 == 0);
+        assert!(p.check("beat:rook_2") && !p.check(next));
+        // Every Rook duel won: still three seals, no champion.
+        for n in 3..=4 {
+            record_opponent(&format!("rook_{n}"), true, &mut p, &mut pr).unwrap();
+        }
+        assert_eq!((seals(&p), champion(&p), title(&p)), (3, false, None));
+        beat(&mut p, &["quill", "orla", "lumen", "warden"]);
+        assert_eq!(title(&p).map(|t| t.en), Some("Champion"));
+        p.apply("flag:rook_4").unwrap();
+        assert_eq!(
+            title(&p).map(|t| t.en),
+            Some("Champion of the Seventh Face")
+        );
+        assert_eq!(
+            title(&p).map(|t| t.fr),
+            Some("Champion de la septième face")
+        );
     }
 
     #[test]

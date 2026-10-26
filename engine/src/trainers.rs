@@ -5,6 +5,11 @@
 //! Their decks come from twenty short [`Recipe`]s ("kits"), padded to 60 with
 //! basic energy by [`Kit::deck`], plus one signature card per duelist so two
 //! duelists on one kit still play differently.
+//!
+//! Rook's four story duels (`rook_1` … `rook_4`, §8) sit here too, with
+//! hand-written decks of Neutral Hexons: they pay a purse like a duelist,
+//! never a seal, and a cutscene moves the story on whether the player wins or
+//! loses ([`Trainer::story`]).
 
 use crate::ai::Difficulty;
 use crate::card::{card, CardId, CardKind, Color, EnergyCard, Rarity, Stage};
@@ -215,6 +220,11 @@ impl Trainer {
         p.has_flag(&self.flag())
     }
 
+    /// One of Rook's story duels (`rook_<n>`), not a route duelist.
+    pub fn story(&self) -> bool {
+        self.id.starts_with("rook_")
+    }
+
     /// The Facets the first win pays: 15 + 15 per prize (half again at night).
     pub fn purse(&self) -> u32 {
         let base = self
@@ -235,9 +245,16 @@ pub fn trainer(id: &str) -> Option<&'static Trainer> {
 
 /// Record a finished duel against `t`: remember the result for the post-duel
 /// line; the first win marks the duelist beaten and pays its purse, returned.
+/// A story duel won again (Rook's rematch in the hall) pays like a rival's
+/// rematch, 10 per prize.
 pub fn record(t: &Trainer, won: bool, p: &mut Progress) -> u32 {
     let first = won && !t.beaten(p);
     p.set_last_duel(t.id, won);
+    if won && !first && t.story() {
+        let n = crate::campaign::REMATCH_PER_PRIZE * u32::from(t.prizes);
+        p.earn(n);
+        return n;
+    }
     if !first {
         return 0;
     }
@@ -285,6 +302,17 @@ pub static TRANCE: Recipe =
 pub static SCRAP: Recipe = recipe!("Scrap", None, [BURROWBIT 4, PECKLET 4, POCKETMOUSE 3, SCAMPIT 3, RELAY_BATON 2, TWOFOLD_ENERGY 2]);
 pub static FLOCK: Recipe = recipe!("Flock", Some(&SCRAP), [WARRENBUCK 3, GALEHERON 2, ECHOPUP 2, HAULOX 1, MENDLARK 1, LUCKY_SATCHEL 2, TRAIL_COMPASS 1]);
 
+// Rook's decks (§8.2): each the one before plus a few cards, basic energy
+// trimmed to keep 60 (Kit::deck pads Fire and Water for a Neutral deck); the
+// last is its own list.
+pub static BLANK_SLATE: Recipe = recipe!("Blank Slate", None, [BURROWBIT 4, PECKLET 4, POCKETMOUSE 4, SCAMPIT 3, RELAY_BATON 2, LUCKY_SATCHEL 2]);
+pub static OPEN_SKY: Recipe = recipe!("Open Sky", Some(&BLANK_SLATE), [WARRENBUCK 3, GALEHERON 3, ECHOPUP 2, HAULOX 2, TWOFOLD_ENERGY 2]);
+pub static HOLLOW_CROWN: Recipe = recipe!("Hollow Crown", Some(&OPEN_SKY), [WARRENKING 2, MENDLARK 3, WIDE_SATCHEL 1, SNARE_HOOK 1]);
+pub static SEVENTH_FACE: Recipe = recipe!("Seventh Face", None, [
+    BURROWBIT 4, WARRENBUCK 3, WARRENKING 2, PECKLET 4, GALEHERON 3, MENDLARK 3, ECHOPUP 2, HAULOX 2, POCKETMOUSE 2,
+    LUCKY_SATCHEL 3, TRAIL_COMPASS 2, SNARE_HOOK 2, HEARTY_BROTH 2, WIDE_SATCHEL 1, RELAY_BATON 1, TWOFOLD_ENERGY 4,
+]);
+
 /// Every kit, Sprout tiers first per colour.
 pub static KITS: [&Recipe; 20] = [
     &KINDLING, &BELLOWS, &FORGE, &PUDDLE, &CURRENT, &UNDERTOW, &SEEDLING, &HEDGEROW, &CANOPY,
@@ -314,14 +342,32 @@ macro_rules! duelist {
     };
 }
 
+macro_rules! rook {
+    ($id:literal, $kit:expr, $prizes:literal, $level:ident, $purse:literal) => {
+        Trainer {
+            id: $id,
+            name: "Rook",
+            class: T::new("The Blank", "Le Sans-Couleur"),
+            kit: One($kit),
+            signature: None,
+            prizes: $prizes,
+            difficulty: Difficulty::$level,
+            night: false,
+            purse: Some($purse),
+            rule: None,
+        }
+    };
+}
+
 use Kit::{Mix, One};
 
 /// The roster, by map. 1.2: meadow, woodland, boardwalk, quarry, square.
 /// 1.3 Ember: cinderwick, kilnmouth; Storm: downs, rodspire, stormwatch;
 /// Tide: gullhaven, bellflats; Dream: hushlane, lanternmere, moonwell;
 /// Grove: rootholm, elder_ring, woodland (Vesper); Stone: undermine,
-/// screepass, climb_school, bastion, anvilstead.
-pub static TRAINERS: [Trainer; 53] = [
+/// screepass, climb_school, bastion, anvilstead. Last, Rook's four story
+/// duels (1.7): meadow, stormwatch, lanternmere, the duel hall.
+pub static TRAINERS: [Trainer; 57] = [
     duelist!("t_tobin", "Tobin", "Junior Duelist" / "Duelliste en herbe", One(&SCRAP), WARRENBUCK 2, 1, Easy),
     duelist!("t_hazel", "Hazel", "Beekeeper" / "Apicultrice", Mix(&SEEDLING, &SPARK), HIVEVOLT 2, 2, Easy),
     duelist!("t_ossian", "Ossian", "Birdwatcher" / "Ornithologue", One(&SCRAP), GALEHERON 2, 1, Easy),
@@ -417,6 +463,10 @@ pub static TRAINERS: [Trainer; 53] = [
         purse: Some(120),
         ..duelist!("t_dov", "Dov", "Bare-Knuckle" / "Poings nus", One(&RUBBLE), KNOLLGRIM 1, 3, Normal)
     },
+    rook!("rook_1", &BLANK_SLATE, 2, Normal, 100),
+    rook!("rook_2", &OPEN_SKY, 4, Normal, 150),
+    rook!("rook_3", &HOLLOW_CROWN, 5, Hard, 200),
+    rook!("rook_4", &SEVENTH_FACE, 6, Hard, 300),
 ];
 
 #[cfg(test)]
@@ -481,15 +531,15 @@ mod tests {
 
     #[test]
     fn the_roster_is_well_formed() {
-        for (i, t) in TRAINERS.iter().enumerate() {
+        let route = &TRAINERS[..TRAINERS.len() - 4];
+        assert!(route.iter().all(|t| !t.story()));
+        for (i, t) in route.iter().enumerate() {
             assert!(
                 t.id.starts_with("t_") && t.id.bytes().all(|b| b.is_ascii_lowercase() || b == b'_'),
                 "{}",
                 t.id
             );
-            assert!(TRAINERS[..i]
-                .iter()
-                .all(|o| o.id != t.id && o.name != t.name));
+            assert!(route[..i].iter().all(|o| o.id != t.id && o.name != t.name));
             assert!(rival(t.id).is_none());
             assert!((1..=3).contains(&t.prizes), "{}", t.name);
             assert!(!t.class.en.is_empty() && !t.class.fr.is_empty());
@@ -500,7 +550,7 @@ mod tests {
         // Dream 30 + 45 + 45 + 60 + 60 + 90 + 120 (840); §10.5-10.6: Grove 30 + 45 + 45
         // + 60 + 90 + 120, Stone 30 + 45 + 45 + 45 + 45 + 60 + 90 + 120 (870).
         assert_eq!(
-            TRAINERS.iter().map(Trainer::purse).sum::<u32>(),
+            route.iter().map(Trainer::purse).sum::<u32>(),
             585 + 360 + 450 + 390 + 450 + 390 + 480
         );
         // A night duelist plays Hard; a rule duelist's own deck keeps its rule
@@ -527,6 +577,83 @@ mod tests {
         assert!(p.has_flag("beat_t_hazel") && p.check("count:beat_t_:1"));
         assert_eq!(record(hazel, true, &mut p), 0, "once per duelist");
         assert_eq!((p.coins(), seals(&p)), (start + 45, 0));
+    }
+
+    /// §8.2: Rook's four decks, legal, Neutral Hexons only, each growing on
+    /// the one before (the last its own list), with their prizes and AI.
+    #[test]
+    fn rooks_decks_are_neutral_and_grow() {
+        let rook: Vec<&Trainer> = TRAINERS.iter().filter(|t| t.story()).collect();
+        let ids: Vec<&str> = rook.iter().map(|t| t.id).collect();
+        assert_eq!(ids, ["rook_1", "rook_2", "rook_3", "rook_4"]);
+        let shape: Vec<(u8, Difficulty, u32)> = rook
+            .iter()
+            .map(|t| (t.prizes, t.difficulty, t.purse()))
+            .collect();
+        use Difficulty::{Hard, Normal};
+        assert_eq!(
+            shape,
+            [
+                (2, Normal, 100),
+                (4, Normal, 150),
+                (5, Hard, 200),
+                (6, Hard, 300)
+            ]
+        );
+        for t in &rook {
+            let d = t.deck();
+            assert_eq!(validate_deck(&d), Ok(()), "{}", t.id);
+            assert!(
+                d.iter()
+                    .filter_map(|&id| card(id).creature())
+                    .all(|c| c.color == Color::Colorless),
+                "{}: Neutral Hexons only",
+                t.id
+            );
+            assert!(t.name == "Rook" && t.rule.is_none() && !t.night);
+            assert_eq!(t.class.fr, "Le Sans-Couleur");
+        }
+        let n = |t: &Trainer, id| t.deck().iter().filter(|&&c| c == id).count();
+        // Blank Slate: 19 cards and 41 energy; Open Sky adds 12, Hollow Crown 7.
+        let energy = |t: &Trainer| n(t, FIRE_ENERGY) + n(t, WATER_ENERGY);
+        assert_eq!(
+            rook.iter().map(|t| energy(t)).collect::<Vec<_>>(),
+            [41, 29, 22, 20]
+        );
+        assert_eq!((n(rook[1], GALEHERON), n(rook[1], TWOFOLD_ENERGY)), (3, 2));
+        assert_eq!((n(rook[2], WARRENKING), n(rook[2], SNARE_HOOK)), (2, 1));
+        // Seventh Face: two Pocketmouse, no Scampit, ten of each energy.
+        let last = rook[3];
+        assert_eq!((n(last, POCKETMOUSE), n(last, SCAMPIT)), (2, 0));
+        assert_eq!(
+            (
+                n(last, FIRE_ENERGY),
+                n(last, WATER_ENERGY),
+                n(last, TWOFOLD_ENERGY)
+            ),
+            (10, 10, 4)
+        );
+    }
+
+    /// A story duel won pays its purse once and marks it beaten; lost, it
+    /// pays nothing here (the consolation comes on top, as for any loss). Won
+    /// again (the hall rematch), it pays 10 per prize.
+    #[test]
+    fn a_rook_win_pays_more_than_a_loss_and_a_rematch_pays_by_prizes() {
+        let mut p = Progress::default();
+        let r1 = trainer("rook_1").unwrap();
+        assert_eq!(record(r1, false, &mut p), 0);
+        assert!(p.check("lost:rook_1") && !p.check("beat:rook_1"));
+        let r4 = trainer("rook_4").unwrap();
+        assert_eq!(record(r4, true, &mut p), 300);
+        assert!(p.check("won:rook_4") && p.has_flag("beat_rook_4"));
+        assert_eq!(record(r4, true, &mut p), 60, "the rematch");
+        assert_eq!(record(r4, false, &mut p), 0);
+        assert_eq!(
+            (p.coins() - Progress::default().coins(), seals(&p)),
+            (360, 0)
+        );
+        assert!(!p.check("count:beat_t_:1"), "never a route duelist");
     }
 
     #[test]

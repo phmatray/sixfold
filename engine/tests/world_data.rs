@@ -294,7 +294,8 @@ fn every_map_reads_with_the_engine_grammar() {
         maps += 1;
     }
     assert!(maps >= 7, "only {maps} maps found in {}", dir.display());
-    for t in &TRAINERS {
+    // Rook's story duels are started by his scenes, not a trainer block.
+    for t in TRAINERS.iter().filter(|t| !t.story()) {
         if !seen.trainers.contains_key(t.id) {
             bad.push(format!("{} ({}) is on no map", t.id, t.name));
         }

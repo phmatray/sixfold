@@ -18,7 +18,7 @@ extern "C" {
     pub fn music(track: &str);
     /// 1 while the duel is down to someone's last prize.
     pub fn intensity(level: f64);
-    /// The theme `music("duel")` plays: "duel", "duel_rival_<region>" or "duel_boss".
+    /// The theme `music("duel")` plays: "duel", "duel_rival_<region>", "duel_boss" or "duel_rook".
     #[wasm_bindgen(js_name = duelTheme)]
     fn duel_theme_js(track: &str);
     #[wasm_bindgen(js_name = getPref)]
@@ -43,6 +43,7 @@ pub fn duel_theme(setup: &Setup) {
         Stakes::Ordinary => "duel".to_string(),
         Stakes::Rival(c) => format!("duel_rival_{}", region(c)),
         Stakes::Boss => "duel_boss".to_string(),
+        Stakes::Story => "duel_rook".to_string(),
     });
 }
 
