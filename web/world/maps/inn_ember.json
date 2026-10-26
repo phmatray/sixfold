@@ -104,6 +104,12 @@
       "kind": "sign",
       "text": "A slate of chalked race times, the quarry road, top to bottom. Every line at the top says \"Cinza\".",
       "text_fr": "Une ardoise de temps de course à la craie, la route de la carrière, de haut en bas. Toutes les lignes du haut disent « Cinza »."
+    },
+    {
+      "x": 5,
+      "z": 1,
+      "kind": "book",
+      "id": "hearth_tales"
     }
   ],
   "warps": [
