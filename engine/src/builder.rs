@@ -44,7 +44,7 @@ impl Style {
         match self {
             Style::Aggro => tr(
                 "Cheap attacks and plenty of Basics: hit before they set up.",
-                "Des attaques bon marché et beaucoup d'Hexons de Base : frappez avant qu'ils s'installent.",
+                "Des attaques bon marché et beaucoup d'Hexons de Base : frappez avant qu'ils s'installent.",
             ),
             Style::Balanced => tr(
                 "Strong Awaken lines with draw and a little of everything.",
@@ -52,7 +52,7 @@ impl Style {
             ),
             Style::Control => tr(
                 "Conditions, healing and disruption: outlast them.",
-                "Altérations, soins et perturbation : tenez plus longtemps qu'eux.",
+                "Altérations, soins et perturbation : tenez plus longtemps qu'eux.",
             ),
         }
     }
@@ -213,7 +213,7 @@ impl Reason {
         match &self.why {
             Why::Line if self.cards.len() == 1 => tr(
                 format!("{l}: a Basic Hexon to start the duel with."),
-                format!("{l} : un Hexon de Base pour commencer le duel."),
+                format!("{l} : un Hexon de Base pour commencer le duel."),
             ),
             Why::Line => {
                 let top = self
@@ -231,7 +231,7 @@ impl Reason {
                             a.cost.len()
                         ),
                         format!(
-                            "{l} : une lignée d'Éveil complète ; {} de {} fait {} dégâts pour {} énergie{}.",
+                            "{l} : une lignée d'Éveil complète ; {} de {} fait {} dégâts pour {} énergie{}.",
                             a.label(),
                             card(top).label(),
                             a.damage,
@@ -241,7 +241,7 @@ impl Reason {
                     ),
                     None => tr(
                         format!("{l}: a complete Awaken line."),
-                        format!("{l} : une lignée d'Éveil complète."),
+                        format!("{l} : une lignée d'Éveil complète."),
                     ),
                 }
             }
@@ -249,16 +249,16 @@ impl Reason {
                 let none = pct(none_in(DECK_SIZE, *total, 7));
                 tr(
                     format!("{l}: more Basics, {total} in all, so just {none}% of opening hands lack one."),
-                    format!("{l} : plus d'Hexons de Base, {total} en tout, pour que {none} % seulement des mains de départ en manquent."),
+                    format!("{l} : plus d'Hexons de Base, {total} en tout, pour que {none} % seulement des mains de départ en manquent."),
                 )
             }
             Why::Under => tr(
                 format!("{l}: what your Awakenings awaken from."),
-                format!("{l} : ce dont vos Éveils ont besoin pour s'éveiller."),
+                format!("{l} : ce dont vos Éveils ont besoin pour s'éveiller."),
             ),
             Why::Trainer(r) => tr(
                 format!("{l}: {}.", r.text()),
-                format!("{l} : {}.", r.text()),
+                format!("{l} : {}.", r.text()),
             ),
             Why::Energy(c, n) => tr(
                 format!("{l} for the {n} {c} symbols in your attack costs."),
@@ -266,7 +266,7 @@ impl Reason {
             ),
             Why::Twofold => tr(
                 format!("{l}: each pays two Neutral symbols."),
-                format!("{l} : chacune paie deux symboles Neutres."),
+                format!("{l} : chacune paie deux symboles Neutres."),
             ),
             Why::Kept => {
                 let n: usize = self.cards.iter().map(|c| c.1).sum();
@@ -277,7 +277,7 @@ impl Reason {
             }
             Why::Dropped => tr(
                 format!("{l}: taken out; you don't own that many, they break the 4-copy limit, or you own nothing they awaken from."),
-                format!("{l} : retirées ; vous n'en possédez pas autant, elles dépassent la limite de 4, ou vous ne possédez rien d'où elles s'éveillent."),
+                format!("{l} : retirées ; vous n'en possédez pas autant, elles dépassent la limite de 4, ou vous ne possédez rien d'où elles s'éveillent."),
             ),
         }
     }
@@ -1091,7 +1091,7 @@ impl Suggestion {
                 let none = pct(none_in(DECK_SIZE, *n, 7));
                 tr(
                     format!("Only {n} Basic Hexons: {none}% of opening hands have none, and you must redraw."),
-                    format!("Seulement {n} Hexons de Base : {none} % des mains de départ n'en ont aucun, et il faut repiocher."),
+                    format!("Seulement {n} Hexons de Base : {none} % des mains de départ n'en ont aucun, et il faut repiocher."),
                 )
             }
             Hint::Doctor(issue) => crate::doctor::Advice {
@@ -1121,7 +1121,7 @@ impl Suggestion {
             ),
             Hint::Over(n) => tr(
                 format!("{n} over 60: {out} is the card the deck needs least."),
-                format!("{n} de trop : {out} est la carte dont le deck a le moins besoin."),
+                format!("{n} de trop : {out} est la carte dont le deck a le moins besoin."),
             ),
             Hint::Build(why) => {
                 let what = match why {
@@ -1146,7 +1146,7 @@ impl Suggestion {
                 };
                 tr(
                     format!("Toward 60 cards: {what}."),
-                    format!("Pour arriver à 60 cartes : {what}."),
+                    format!("Pour arriver à 60 cartes : {what}."),
                 )
             }
         }

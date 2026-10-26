@@ -27,12 +27,21 @@ const COLOURS: [Color; 6] = [
 /// Changes this far back can be undone.
 const UNDO_DEPTH: usize = 50;
 
-/// The editor's undo: the deck's cards before each change, whatever made it
-/// (a tap on +, a fix, a suggestion, "Build for me").
+/// The deck as undo keeps it: its cards and its name.
+type Snap = (Vec<CardId>, String);
+
+/// The editor's undo and redo: the deck before each change to its cards,
+/// whatever made it (a tap on +, a fix, a suggestion, "Build for me"), with
+/// the name it had then.
 #[derive(Clone, Copy)]
 pub struct Undo {
-    past: RwSignal<Vec<Vec<CardId>>>,
+    past: RwSignal<Vec<Snap>>,
+    future: RwSignal<Vec<Snap>>,
     skip: StoredValue<bool>,
+}
+
+fn snap(d: &DeckList) -> Snap {
+    (d.cards.clone(), d.name.clone())
 }
 
 impl Undo {
@@ -40,18 +49,22 @@ impl Undo {
     pub fn track(draft: RwSignal<DeckList>) -> Undo {
         let u = Undo {
             past: RwSignal::new(vec![]),
+            future: RwSignal::new(vec![]),
             skip: StoredValue::new(false),
         };
-        Effect::new(move |prev: Option<Vec<CardId>>| {
-            let now = draft.with(|d| d.cards.clone());
+        Effect::new(move |prev: Option<Snap>| {
+            let now = draft.with(snap);
             match prev {
-                Some(p) if p != now && u.skip.get_value() => u.skip.set_value(false),
-                Some(p) if p != now => u.past.update(|v| {
-                    v.push(p);
-                    if v.len() > UNDO_DEPTH {
-                        v.remove(0);
-                    }
-                }),
+                Some(p) if p.0 != now.0 && u.skip.get_value() => u.skip.set_value(false),
+                Some(p) if p.0 != now.0 => {
+                    u.past.update(|v| {
+                        v.push(p);
+                        if v.len() > UNDO_DEPTH {
+                            v.remove(0);
+                        }
+                    });
+                    u.future.update(Vec::clear);
+                }
                 _ => {}
             }
             now
@@ -63,15 +76,51 @@ impl Undo {
         self.past.with(|v| !v.is_empty())
     }
 
-    /// Put the cards back as they were before the last change.
-    pub fn undo(&self, draft: RwSignal<DeckList>) -> bool {
-        let Some(prev) = self.past.try_update(|v| v.pop()).flatten() else {
+    pub fn can_redo(&self) -> bool {
+        self.future.with(|v| !v.is_empty())
+    }
+
+    fn step(
+        &self,
+        draft: RwSignal<DeckList>,
+        from: RwSignal<Vec<Snap>>,
+        to: RwSignal<Vec<Snap>>,
+    ) -> bool {
+        let Some((cards, name)) = from.try_update(|v| v.pop()).flatten() else {
             return false;
         };
+        to.update(|v| v.push(draft.with_untracked(snap)));
         self.skip.set_value(true);
-        draft.update(|d| d.cards = prev);
+        draft.update(|d| {
+            d.cards = cards;
+            d.name = name;
+        });
         true
     }
+
+    /// Put the deck back as it was before the last change.
+    pub fn undo(&self, draft: RwSignal<DeckList>) -> bool {
+        self.step(draft, self.past, self.future)
+    }
+
+    /// Make the last undone change again.
+    pub fn redo(&self, draft: RwSignal<DeckList>) -> bool {
+        self.step(draft, self.future, self.past)
+    }
+}
+
+/// Focus the first element `selector` finds, once the view has settled.
+pub fn focus_later(selector: &'static str) {
+    request_animation_frame(move || {
+        if let Some(el) = document()
+            .query_selector(selector)
+            .ok()
+            .flatten()
+            .and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok())
+        {
+            _ = el.focus();
+        }
+    });
 }
 
 /// Move focus to the nearest control that way (`a11y.js`, the same as the
@@ -107,7 +156,7 @@ pub fn mulligan_word(p: f64) -> &'static str {
     } else if p <= 0.25 {
         tr("risky", "risqué")
     } else {
-        tr("too high: add Basics", "trop : ajoutez des Hexons de Base")
+        tr("too high: add Basics", "trop : ajoutez des Hexons de Base")
     }
 }
 
@@ -167,7 +216,7 @@ pub fn Advisor(
         crate::audio::sfx("place", 0.0);
         msg.set(Some(tr(
             format!("{}. Undo takes it back.", s.title()),
-            format!("{}. « Annuler » revient en arrière.", s.title()),
+            format!("{}. « Annuler » revient en arrière.", s.title()),
         )));
         // The row just went: on to the next tip, or the status line.
         request_animation_frame(|| {
@@ -193,14 +242,14 @@ pub fn Advisor(
                 if list.is_empty() {
                     let full = draft.with(|d| d.cards.len() == DECK_SIZE);
                     return full.then(|| view! {
-                        <p class="advice-none">{tr("Nothing to suggest: the lines are whole, the Basics and the energy are where they should be.", "Rien à suggérer : les lignées sont complètes, les Hexons de Base et l'énergie sont à leur place.")}</p>
+                        <p class="advice-none">{tr("Nothing to suggest: the lines are whole, the Basics and the energy are where they should be.", "Rien à suggérer : les lignées sont complètes, les Hexons de Base et l'énergie sont à leur place.")}</p>
                     }).into_any();
                 }
                 view! {
                     <ul class="advice-list" data-focus-home="">
                         {list.into_iter().map(|s| {
                             let (title, text) = (s.title(), s.text());
-                            let label = tr(format!("Apply: {title}"), format!("Appliquer : {title}"));
+                            let label = tr(format!("Apply: {title}"), format!("Appliquer : {title}"));
                             let kind = match (s.out, s.into) {
                                 (Some(_), Some(_)) => "swap",
                                 (None, _) => "add",
@@ -252,16 +301,29 @@ fn hexon_colours(cards: &[CardId]) -> Vec<Color> {
     by.into_iter().take(2).map(|c| c.0).collect()
 }
 
-/// A dialog over the editor; Escape (or B) closes it and nothing else.
-fn esc_closes(open: RwSignal<bool>) -> impl Fn(leptos::ev::KeyboardEvent) + Copy {
+/// Close a sheet and give focus back to the tool that opened it.
+fn close(open: RwSignal<bool>, opener: &'static str) {
+    open.set(false);
+    focus_later(opener);
+}
+
+/// A sheet over the editor; Escape (or B) closes it and nothing else.
+fn esc_closes(
+    open: RwSignal<bool>,
+    opener: &'static str,
+) -> impl Fn(leptos::ev::KeyboardEvent) + Copy {
     move |e| {
         if e.key() == "Escape" {
             e.prevent_default();
             e.stop_propagation();
-            open.set(false);
+            close(open, opener);
         }
     }
 }
+
+/// The tools the sheets come back to.
+const BUILD_TOOL: &str = ".bench-actions .btn.build";
+const TEST_TOOL: &str = ".bench-actions .btn.test";
 
 /// Copies per card.
 fn counts(cards: &[CardId]) -> std::collections::BTreeMap<CardId, i32> {
@@ -325,7 +387,7 @@ fn diff_line(from: &[CardId], to: &[CardId]) -> String {
     tr(
         format!("Changes from your deck: {}{tail}.", shown.join(", ")),
         format!(
-            "Changements par rapport à votre deck : {}{tail}.",
+            "Changements par rapport à votre deck : {}{tail}.",
             shown.join(", ")
         ),
     )
@@ -394,7 +456,7 @@ pub fn BuildSheet(
         if !can {
             refused.set(Some(tr(
                 format!("You own no Basic {c} Hexon yet, so there is no {c} deck to build: {c} packs have them."),
-                format!("Vous n'avez encore aucun Hexon {c} de Base, donc pas de deck {c} possible : les boosters {c} en contiennent."),
+                format!("Vous n'avez encore aucun Hexon {c} de Base, donc pas de deck {c} possible : les boosters {c} en contiennent."),
             )));
             return;
         }
@@ -432,28 +494,22 @@ pub fn BuildSheet(
         msg.set(Some(
             tr(
                 "Built a 60-card deck from your cards. Undo brings yours back.",
-                "Deck de 60 cartes construit avec vos cartes. « Annuler » rend le vôtre.",
+                "Deck de 60 cartes construit avec vos cartes. « Annuler » rend le vôtre.",
             )
             .into(),
         ));
-        open.set(false);
-        // Back to the tool that opened the sheet.
-        request_animation_frame(|| {
-            if let Some(el) = document()
-                .query_selector(".bench-actions .btn.build")
-                .ok()
-                .flatten()
-                .and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok())
-            {
-                _ = el.focus();
-            }
-        });
+        close(open, BUILD_TOOL);
     };
+    focus_later("#build-title");
+    let diff = Memo::new(move |_| {
+        let b = built.get();
+        draft.with_untracked(|d| diff_line(&d.cards, &b.cards))
+    });
     view! {
-        <div class="scrim" on:keydown=esc_closes(open)>
+        <div class="scrim" on:keydown=esc_closes(open, BUILD_TOOL)>
             <div class="dialog wide build-sheet" role="dialog" aria-modal="true" aria-labelledby="build-title">
                 <div class="sheet-scroll">
-                <h2 id="build-title" tabindex="-1" autofocus>{tr("Build for me", "Construire pour moi")}</h2>
+                <h2 id="build-title" tabindex="-1">{tr("Build for me", "Construire pour moi")}</h2>
                 <p class="dialog-sub">{tr(
                     "Pick one or two colours, or let the builder surprise you, and a way to play. It uses only cards you own and says why each one is in.",
                     "Choisissez une ou deux couleurs, ou laissez-vous surprendre, et une façon de jouer. Seules vos cartes sont utilisées, et chacune a sa raison d'être.",
@@ -488,6 +544,7 @@ pub fn BuildSheet(
                     <p class="style-blurb">{move || style.get().blurb()}</p>
                 </fieldset>
                 <section class="build-preview" aria-labelledby="preview-title">
+                    <p class="preview-diff" role="status">{move || diff.get()}</p>
                     {move || {
                         let b = built.get();
                         let asked = if surprise.get().is_none() { colours.get() } else { vec![] };
@@ -500,7 +557,6 @@ pub fn BuildSheet(
                         let names: Vec<String> = colours.iter().map(|c| c.to_string()).collect();
                         let has = hexon_colours(&b.cards);
                         let missing: Vec<String> = asked.iter().filter(|c| !has.contains(c)).map(|c| c.to_string()).collect();
-                        let diff = draft.with_untracked(|d| diff_line(&d.cards, &b.cards));
                         let summary = tr(
                             format!("{hexons} Hexons · {trainers} trainers · {energy} energy · {} of opening hands lack a Basic ({})", pc(odds.mulligan), mulligan_word(odds.mulligan)),
                             format!("{hexons} Hexons · {trainers} Dresseurs · {energy} énergies · {} des mains de départ sans Hexon de Base ({})", pc(odds.mulligan), mulligan_word(odds.mulligan)),
@@ -517,11 +573,10 @@ pub fn BuildSheet(
                                     <p class="preview-sum">{summary}</p>
                                 </div>
                             </header>
-                            <p class="preview-diff" role="status">{diff}</p>
                             {(!missing.is_empty()).then(|| view! {
                                 <p class="preview-warn">{tr(
                                     format!("Too few {} Hexons in your collection to build on: the deck leaves them out.", missing.join(" / ")),
-                                    format!("Trop peu d'Hexons {} dans votre collection pour bâtir dessus : le deck s'en passe.", missing.join(" / ")),
+                                    format!("Trop peu d'Hexons {} dans votre collection pour bâtir dessus : le deck s'en passe.", missing.join(" / ")),
                                 )}</p>
                             })}
                             {(odds.mulligan > 0.25 || energy > 28).then(|| view! {
@@ -540,15 +595,15 @@ pub fn BuildSheet(
                         }
                     }}
                 </section>
-                </div>
-                <div class="dialog-foot sheet-foot">
                     {(had > 0).then(|| view! {
-                        <p class="note">{tr(
+                        <p class="note replace-note">{tr(
                             format!("Replaces the {had} cards in the deck; Undo brings them back."),
-                            format!("Remplace les {had} cartes du deck ; « Annuler » les rend."),
+                            format!("Remplace les {had} cartes du deck ; « Annuler » les rend."),
                         )}</p>
                     })}
-                    <button type="button" class="btn ghost" on:click=move |_| open.set(false)>{tr("Keep my deck", "Garder mon deck")}</button>
+                </div>
+                <div class="dialog-foot sheet-foot">
+                    <button type="button" class="btn ghost" on:click=move |_| close(open, BUILD_TOOL)>{tr("Keep my deck", "Garder mon deck")}</button>
                     <button type="button" class="btn primary" on:click=use_it>{tr("Use this deck", "Prendre ce deck")}</button>
                 </div>
             </div>
@@ -563,10 +618,11 @@ pub fn TestSheet(open: RwSignal<bool>, draft: RwSignal<DeckList>) -> impl IntoVi
     let seed = RwSignal::new(crate::new_seed());
     let hand = move || draft.with(|d| builder::sample_hand(&d.cards, seed.get()));
     let odds = move || draft.with(|d| builder::opening(&d.cards));
+    focus_later("#test-title");
     view! {
-        <div class="scrim" on:keydown=esc_closes(open)>
+        <div class="scrim" on:keydown=esc_closes(open, TEST_TOOL)>
             <div class="dialog wide test-sheet" role="dialog" aria-modal="true" aria-labelledby="test-title">
-                <h2 id="test-title">{tr("Test a hand", "Tester une main")}</h2>
+                <h2 id="test-title" tabindex="-1">{tr("Test a hand", "Tester une main")}</h2>
                 <p class="dialog-sub">{tr("Seven cards off the top of the shuffled deck, as a duel starts.", "Sept cartes du dessus du deck mélangé, comme au début d'un duel.")}</p>
                 <ul class="test-hand" aria-label=tr("Your opening hand", "Votre main de départ")>
                     {move || hand().into_iter().map(|id| view! { <li class:basic=card(id).is_basic()><CardFace id=id /></li> }).collect_view()}
@@ -574,7 +630,7 @@ pub fn TestSheet(open: RwSignal<bool>, draft: RwSignal<DeckList>) -> impl IntoVi
                 <p class="test-verdict" role="status">{move || {
                     let n = hand().iter().filter(|&&id| card(id).is_basic()).count();
                     match n {
-                        0 => tr("No Basic Hexon: you would show this hand and draw a new one (a mulligan).", "Aucun Hexon de Base : vous montreriez cette main et en piocheriez une autre (un mulligan).").to_string(),
+                        0 => tr("No Basic Hexon: you would show this hand and draw a new one (a mulligan).", "Aucun Hexon de Base : vous montreriez cette main et en piocheriez une autre (un mulligan).").to_string(),
                         1 => tr("1 Basic Hexon to start with.", "1 Hexon de Base pour commencer.").to_string(),
                         n => tr(format!("{n} Basic Hexons to start with."), format!("{n} Hexons de Base pour commencer.")),
                     }
@@ -588,8 +644,8 @@ pub fn TestSheet(open: RwSignal<bool>, draft: RwSignal<DeckList>) -> impl IntoVi
                     <div><dt>{tr("Hands with an energy", "Mains avec une énergie")}</dt><dd>{move || pc(odds().energy)}</dd></div>
                 </dl>
                 <div class="dialog-foot">
-                    <button type="button" class="btn ghost" on:click=move |_| open.set(false)>{tr("Close", "Fermer")}</button>
-                    <button type="button" class="btn primary" autofocus on:click=move |_| { crate::audio::sfx("flip", 0.0); seed.update(|s| *s = s.wrapping_add(1)) }>
+                    <button type="button" class="btn ghost" on:click=move |_| close(open, TEST_TOOL)>{tr("Close", "Fermer")}</button>
+                    <button type="button" class="btn primary" on:click=move |_| { crate::audio::sfx("flip", 0.0); seed.update(|s| *s = s.wrapping_add(1)) }>
                         {tr("Draw again", "Repiocher")}
                     </button>
                 </div>
@@ -618,7 +674,7 @@ pub fn DeckShelf() -> impl IntoView {
             </div>
             <p class="shelf-sub">{tr(
                 "Decks you unlock are lent to you: they join your decks under “Play a duel”, as they are. Copy one here to change it and build toward it.",
-                "Les decks débloqués vous sont prêtés : ils rejoignent vos decks dans « Jouer un duel », tels quels. Copiez-en un ici pour le modifier et vous en approcher.",
+                "Les decks débloqués vous sont prêtés : ils rejoignent vos decks dans « Jouer un duel », tels quels. Copiez-en un ici pour le modifier et vous en approcher.",
             )}</p>
             <ul class="shelf-grid" data-focus-home="">
                 {move || {
@@ -642,10 +698,10 @@ pub fn DeckShelf() -> impl IntoView {
                             if let Some((n, missing)) = mine {
                                 crate::audio::sfx("place", 0.0);
                                 note.set(Some(match missing {
-                                    0 => tr(format!("“{n}” is in your decks, ready to play."), format!("« {n} » est dans vos decks, prêt à jouer.")),
+                                    0 => tr(format!("“{n}” is in your decks, ready to play."), format!("« {n} » est dans vos decks, prêt à jouer.")),
                                     k => tr(
                                         format!("“{n}” is in your decks. You own all but {k} of its cards: open it and “Complete my deck” fills the gaps."),
-                                        format!("« {n} » est dans vos decks. Il vous manque {k} de ses cartes : ouvrez-le, « Compléter mon deck » comble les trous."),
+                                        format!("« {n} » est dans vos decks. Il vous manque {k} de ses cartes : ouvrez-le, « Compléter mon deck » comble les trous."),
                                     ),
                                 }));
                             }
@@ -657,6 +713,10 @@ pub fn DeckShelf() -> impl IntoView {
                             <div class="shelf-info">
                                 <h3>{name.clone()}</h3>
                                 <span class="deck-colors">{colours.into_iter().map(|c| view! { <Pip color=c /> }).collect_view()}</span>
+                                <details class="shelf-peek">
+                                    <summary>{tr("See its cards", "Voir ses cartes")}</summary>
+                                    <ul>{u.deck.list.iter().map(|&(id, n)| view! { <li><b>{n}</b>" " {card(id).label()}</li> }).collect_view()}</ul>
+                                </details>
                                 {move || if open() {
                                     let copy = copy.clone();
                                     view! {

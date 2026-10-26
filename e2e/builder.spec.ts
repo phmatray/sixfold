@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { menuItem, readSave, title } from "./helpers";
 
@@ -6,6 +7,18 @@ async function editStarter(page: Page) {
   await menuItem(page, "My decks").click();
   await page.getByRole("button", { name: "Edit", exact: true }).first().click();
   await expect(page.getByRole("heading", { level: 1, name: "Deck editor" })).toBeAttached();
+}
+
+/** axe-core: no serious or critical WCAG 2.2 A/AA violation on what is shown. */
+async function scan(page: Page, what: string) {
+  const { violations } = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+    .exclude("canvas")
+    .analyze();
+  const bad = violations
+    .filter((v) => v.impact === "serious" || v.impact === "critical")
+    .map((v) => `${what}: ${v.id} (${v.impact}) ${v.nodes.map((n) => n.target.join(" ")).slice(0, 5).join(", ")}`);
+  expect(bad, bad.join("\n")).toEqual([]);
 }
 
 /** The number of copies the deck pane lists for a card ("3×"), 0 when absent. */
@@ -45,6 +58,7 @@ test("build for me makes a legal deck from your cards and says why", async ({ pa
   await expect(sheet.locator(".reasons li").first()).toContainText("complete Awaken line");
   expect(await sheet.locator(".reasons li").count()).toBeGreaterThan(5);
   await expect(sheet.getByText("A new deck from your cards.")).toBeVisible();
+  await scan(page, "build for me");
   // A colour you own no Basic of can't be picked, and says why.
   await sheet.getByRole("button", { name: /^Grove/ }).click({ force: true });
   await expect(sheet.getByText("You own no Basic Grove Hexon yet")).toBeVisible();
@@ -62,6 +76,7 @@ test("build for me makes a legal deck from your cards and says why", async ({ pa
   const test = page.getByRole("dialog", { name: "Test a hand" });
   await expect(test.getByRole("list", { name: "Your opening hand" }).getByRole("listitem")).toHaveCount(7);
   await expect(test.getByText("Hands with no Basic")).toBeVisible();
+  await scan(page, "test a hand");
   await test.getByRole("button", { name: "Draw again" }).click();
   await test.getByRole("button", { name: "Close" }).click();
 
@@ -82,6 +97,7 @@ test("a suggestion applies in one tap, and Undo takes it back", async ({ page })
   // Flarrow has nothing to awaken from: the advice says so and adds Cindrel.
   const tip = page.locator(".advice-item.tip", { hasText: "Add Cindrel" });
   await expect(tip).toContainText("Flarrow");
+  await scan(page, "the editor with advice");
   await page.getByRole("button", { name: "Apply: Add Cindrel" }).click();
   await expect.poll(() => copies(page, "Cindrel")).toBe(1);
   await expect(page.getByRole("status").filter({ hasText: "Undo takes it back" })).toBeVisible();
@@ -101,6 +117,7 @@ test("the deck shelf shows locked decks and how to unlock them", async ({ page }
   const ember = shelf.getByRole("listitem").filter({ hasText: "Ember Rush" });
   await expect(ember).toContainText("Beat Cinza");
   await expect(ember.getByRole("button")).toHaveCount(0);
+  await scan(page, "the deck shelf");
 });
 
 test("keyboard only: build a deck for me, undo it, walk the cards, leave", async ({ page }) => {

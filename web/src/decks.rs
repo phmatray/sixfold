@@ -164,7 +164,7 @@ fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Optio
             let short = DECK_SIZE - n;
             let rule = tr(
                 format!("A deck holds exactly {DECK_SIZE} cards: {short} to go."),
-                format!("Un deck compte exactement {DECK_SIZE} cartes : encore {short}."),
+                format!("Un deck compte exactement {DECK_SIZE} cartes : encore {short}."),
             );
             // The one smart fill, the same as the tool rail's.
             (
@@ -180,7 +180,7 @@ fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Optio
             (
                 tr(
                     format!("A deck holds exactly {DECK_SIZE} cards: {over} too many."),
-                    format!("Un deck compte exactement {DECK_SIZE} cartes : {over} de trop."),
+                    format!("Un deck compte exactement {DECK_SIZE} cartes : {over} de trop."),
                 ),
                 Some(if repairable() {
                     (
@@ -212,7 +212,7 @@ fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Optio
             (
                 tr(
                     format!("At most {MAX_COPIES} cards of one name (basic energy aside): {n} {label}."),
-                    format!("{MAX_COPIES} cartes d'un même nom au plus (hors énergies de base) : {n} exemplaires {}.", de(label)),
+                    format!("{MAX_COPIES} cartes d'un même nom au plus (hors énergies de base) : {n} exemplaires {}.", de(label)),
                 ),
                 Some((
                     tr(format!("Keep {MAX_COPIES}"), format!("En garder {MAX_COPIES}")),
@@ -229,7 +229,7 @@ fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Optio
             (
                 tr(
                     format!("A deck uses only cards you own: {n} {label} in it, {have} in your collection."),
-                    format!("Un deck n'utilise que vos cartes : {n} exemplaires {} dedans, {have} dans votre collection.", de(label)),
+                    format!("Un deck n'utilise que vos cartes : {n} exemplaires {} dedans, {have} dans votre collection.", de(label)),
                 ),
                 Some((
                     match have {
@@ -533,7 +533,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             msg.set(Some(
                 tr(
                     "Nothing to add or take out: the deck is complete.",
-                    "Rien à ajouter ni à retirer : le deck est complet.",
+                    "Rien à ajouter ni à retirer : le deck est complet.",
                 )
                 .into(),
             ));
@@ -548,7 +548,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
         crate::audio::sfx("place", 0.0);
         msg.set(Some(tr(
             format!("Completed: {kept} of your cards kept, {} added from your collection. Undo takes it back.", DECK_SIZE - kept),
-            format!("Complété : {kept} de vos cartes gardées, {} ajoutées depuis votre collection. « Annuler » revient en arrière.", DECK_SIZE - kept),
+            format!("Complété : {kept} de vos cartes gardées, {} ajoutées depuis votre collection. « Annuler » revient en arrière.", DECK_SIZE - kept),
         )));
     };
     let do_undo = move || {
@@ -557,10 +557,21 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             let n = draft.with_untracked(|d| d.cards.len());
             msg.set(Some(tr(
                 format!("Undone: the deck is back to {n} cards."),
-                format!("Annulé : le deck revient à {n} cartes."),
+                format!("Annulé : le deck revient à {n} cartes."),
             )));
         }
     };
+    let do_redo = move || {
+        if undo.redo(draft) {
+            crate::audio::sfx("place", 0.0);
+            let n = draft.with_untracked(|d| d.cards.len());
+            msg.set(Some(tr(
+                format!("Redone: the deck has {n} cards again."),
+                format!("Rétabli : le deck a de nouveau {n} cartes."),
+            )));
+        }
+    };
+    let sheet = move || building.get() || testing.get();
     let total = move || draft.with(|d| d.cards.len());
     let tips = Memo::new(move |_| {
         profile
@@ -627,7 +638,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             msg.set(Some(
                 tr(
                     "Your Basic Hexons are shown: add one.",
-                    "Vos Hexons de Base sont affichés : ajoutez-en un.",
+                    "Vos Hexons de Base sont affichés : ajoutez-en un.",
                 )
                 .into(),
             ));
@@ -656,7 +667,14 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             }
         } else if (e.ctrl_key() || e.meta_key()) && e.key().eq_ignore_ascii_case("z") && !in_field {
             e.prevent_default();
-            do_undo();
+            if e.shift_key() {
+                do_redo()
+            } else {
+                do_undo()
+            }
+        } else if (e.ctrl_key() || e.meta_key()) && e.key().eq_ignore_ascii_case("y") && !in_field {
+            e.prevent_default();
+            do_redo();
         } else if let Some(dir) = arrow(&e.key()).filter(|_| !in_field && !e.default_prevented()) {
             // The arrows walk the cards and the lists, like the D-pad.
             e.prevent_default();
@@ -665,7 +683,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
     };
     view! {
         <div class="page editor with-side" on:keydown=on_key>
-            <header class="topbar page-bar">
+            <header class="topbar page-bar" inert=sheet>
                 <button type="button" class="btn ghost back" on:click=move |_| back()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                     "Decks"
@@ -680,7 +698,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                     </button>
                 </div>
             </header>
-            <main class="editor-main">
+            <main class="editor-main" inert=sheet>
             {move || leaving.get().then(|| view! {
                 <div class="leave-bar confirm row" role="alertdialog" aria-labelledby="leave-q">
                     <span id="leave-q">{tr("You have unsaved changes to this deck.", "Ce deck a des modifications non enregistrées.")}</span>
@@ -690,25 +708,37 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 </div>
             })}
             <div class="bench-actions" role="toolbar" aria-label=tr("Deck tools", "Outils du deck")>
-                <button type="button" class="btn primary build" aria-haspopup="dialog" on:click=move |_| building.set(true)>
+                <button type="button" class="btn build" class:primary=move || total() != 0 aria-haspopup="dialog" on:click=move |_| building.set(true)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.3L20 9l-4.4 3.7L17 18.5 12 15.6 7 18.5l1.4-5.8L4 9l5.8-.7z" /></svg>
                     {tr("Build for me", "Construire pour moi")}
                 </button>
                 <button type="button" class="btn" on:click=move |_| complete()>{tr("Complete my deck", "Compléter mon deck")}</button>
-                <button type="button" class="btn" aria-haspopup="dialog" disabled=move || total() < 7 on:click=move |_| testing.set(true)>{tr("Test a hand", "Tester une main")}</button>
+                <button type="button" class="btn test" aria-haspopup="dialog" disabled=move || total() < 7 on:click=move |_| testing.set(true)>{tr("Test a hand", "Tester une main")}</button>
                 <button type="button" class="btn ghost undo" disabled=move || !undo.can() aria-keyshortcuts="Control+Z Meta+Z" on:click=move |_| do_undo()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7L4 12l5 5M4 12h11a5 5 0 0 1 0 10h-2" /></svg>
                     {tr("Undo", "Annuler")}
+                </button>
+                <button type="button" class="btn ghost redo" disabled=move || !undo.can_redo() aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y" on:click=move |_| do_redo()>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7l5 5-5 5M20 12H9a5 5 0 0 0 0 10h2" /></svg>
+                    {tr("Redo", "Rétablir")}
                 </button>
             </div>
             <p class="editor-msg" role="status" aria-live="polite" tabindex="-1">{move || msg.get()}</p>
             <div class="editor-tabs" role="tablist" aria-label=tr("Editor panes", "Volets de l'éditeur")>
                 <button type="button" role="tab" id="tab-advice" aria-controls="pane-advice" aria-selected=move || (tab.get() == Tab::Advice).to_string()
+                    aria-label=move || {
+                        let n = tips.with(Vec::len);
+                        let bad = !problems().is_empty();
+                        match (n, bad) {
+                            (0, false) => tr("Advice", "Conseils").to_string(),
+                            (n, false) => tr(format!("Advice, {n} suggestions"), format!("Conseils, {n} suggestions")),
+                            (n, true) => tr(format!("Advice, {n} suggestions, not legal yet"), format!("Conseils, {n} suggestions, pas encore valide")),
+                        }
+                    }
                     on:click=move |_| tab.set(Tab::Advice)>{tr("Advice", "Conseils")}
-                    {move || {
-                        let n = tips.with(Vec::len) + problems().len();
-                        (n > 0).then(|| view! { <span class="tab-badge" class:bad=move || !problems().is_empty()>{n}</span> })
-                    }}</button>
+                    {move || { let n = tips.with(Vec::len); (n > 0).then(|| view! { <span class="tab-badge" aria-hidden="true">{n}</span> }) }}
+                    {move || (!problems().is_empty()).then(|| view! { <span class="tab-dot" aria-hidden="true"></span> })}
+                    </button>
                 <button type="button" role="tab" id="tab-cards" aria-controls="pane-cards" aria-selected=move || (tab.get() == Tab::Cards).to_string()
                     on:click=move |_| tab.set(Tab::Cards)>{tr("Your cards", "Vos cartes")}</button>
                 <button type="button" role="tab" id="tab-deck" aria-controls="pane-deck" aria-selected=move || (tab.get() == Tab::Deck).to_string()
@@ -718,7 +748,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 {move || (total() == 0).then(|| view! {
                     <div class="start-panel">
                         <h2>{tr("Start this deck", "Lancez ce deck")}</h2>
-                        <p>{tr("Let the builder make one from your cards, then change what you like. Or pick Basic Hexons yourself: every deck needs at least one, and 60 cards in all.", "Laissez le constructeur en faire un avec vos cartes, puis changez ce qui vous plaît. Ou choisissez vous-même des Hexons de Base : chaque deck en compte au moins un, et 60 cartes en tout.")}</p>
+                        <p>{tr("Let the builder make one from your cards, then change what you like. Or pick Basic Hexons yourself: every deck needs at least one, and 60 cards in all.", "Laissez le constructeur en faire un avec vos cartes, puis changez ce qui vous plaît. Ou choisissez vous-même des Hexons de Base : chaque deck en compte au moins un, et 60 cartes en tout.")}</p>
                         <div class="start-actions">
                             <button type="button" class="btn primary" aria-haspopup="dialog" on:click=move |_| building.set(true)>{tr("Build for me", "Construire pour moi")}</button>
                             <button type="button" class="btn" on:click=move |_| apply(Fix::ShowBasics)>{tr("Show Basic Hexons", "Voir les Hexons de Base")}</button>
@@ -824,7 +854,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 </section>
             </div>
             </main>
-            <div class="side-panel"><Inspector /></div>
+            <div class="side-panel" inert=sheet><Inspector /></div>
             {move || building.get().then(|| view! { <BuildSheet open=building draft=draft msg=msg /> })}
             {move || testing.get().then(|| view! { <TestSheet open=testing draft=draft /> })}
         </div>
@@ -854,7 +884,7 @@ fn try_add(
     msg.set(Some(match r {
         Ok(()) => tr(
             format!("Added {}.", card(id).label()),
-            format!("Ajout : {}.", card(id).label()),
+            format!("Ajout : {}.", card(id).label()),
         ),
         Err(why) => why,
     }));
