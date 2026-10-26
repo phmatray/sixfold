@@ -8,7 +8,7 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { windify, waterify, ambience } from "./life.js";
 import { grass } from "./grass.js";
 import { groundMesh } from "./ground.js";
-import { rng, mesh, group, toon, fadeable, PLACEHOLDER, FOOT, WALKABLE, DECK, LADDER, BOB, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox } from "./props.js";
+import { rng, mesh, group, toon, fadeable, PLACEHOLDER, FOOT, WALKABLE, DECK, LADDER, BOB, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox, STOOP } from "./props.js";
 import { key, glowTex, blobGeo, blobMat } from "./actors.js";
 import { spawnNpcs } from "./npc.js";
 import { fireflies } from "./fireflies.js";
@@ -651,7 +651,8 @@ export async function build(map, got, reduced) {
   });
 
   const talk = new Map(map.interactions.map((i) => [key(i.x, i.z), i]));
-  const warps = new Map((map.warps ?? []).map((wp) => [key(wp.x, wp.z), wp]));
+  // A door on a house's front row carries its stoop (props.js STOOP): how far in the hero walks, and the steps.
+  const warps = new Map((map.warps ?? []).map((wp) => [key(wp.x, wp.z), { ...wp, stoop: STOOP[propAt.get(key(wp.x, wp.z))?.asset] }]));
   // Edge exits: walking off side `side` at a tile within `span` leads to map `to`.
   const exitAt = (x, z) => {
     if (inMap(x, z)) return null;

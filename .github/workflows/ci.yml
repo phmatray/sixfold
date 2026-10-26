@@ -26,6 +26,7 @@ jobs:
           node-version: 22
       - run: node --test web/gamepad.test.mjs
       - run: node tools/check-maps.mjs web/world --strict && node tools/check-fence-table.mjs web/world/props.js
+      - run: node --test tools/check-tokens.test.mjs && node tools/check-tokens.mjs web/style.css
 
   rust:
     name: Engine tests, lint and web build

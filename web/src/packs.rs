@@ -295,7 +295,6 @@ pub fn PackOdds(b: usize) -> impl IntoView {
 #[component]
 fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let total = move || profile.with(|p| p.wallet.total());
     view! {
         <p class="page-lead">
@@ -339,7 +338,7 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
             }).collect_view()}
         </ul>
         {move || (total() == 0).then(|| view! {
-            <button type="button" class="btn" on:click=move |_| screen.set(Screen::Duel)>{tr("Play a duel", "Jouer un duel")}</button>
+            <button type="button" class="btn" on:click=move |_| crate::go(Screen::Duel)>{tr("Play a duel", "Jouer un duel")}</button>
         })}
     }
 }
@@ -389,7 +388,6 @@ fn Reveal(
     again: impl Fn() + Copy + Send + Sync + 'static,
 ) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let instant = RwSignal::new(false);
     let open = RwSignal::new(false);
     let fresh = o.cards.iter().filter(|c| c.1).count();
@@ -580,8 +578,8 @@ fn Reveal(
                             {tr(format!("Choose another ({} left)", more()), format!("En choisir un autre ({} restant{})", more(), if more() > 1 { "s" } else { "" }))}
                         </button>
                     })}
-                    <button type="button" class="btn" on:click=move |_| screen.set(Screen::Collection)>{tr("See the collection", "Voir la collection")}</button>
-                    <button type="button" class="btn ghost" on:click=move |_| screen.set(Screen::Decks)>{tr("Build a deck", "Construire un deck")}</button>
+                    <button type="button" class="btn" on:click=move |_| crate::go(Screen::Collection)>{tr("See the collection", "Voir la collection")}</button>
+                    <button type="button" class="btn ghost" on:click=move |_| crate::go(Screen::Decks)>{tr("Build a deck", "Construire un deck")}</button>
                 }.into_any()
             } else if open.get() {
                 view! {

@@ -366,8 +366,10 @@ export function mount(el, controls, cb, start, edit = false) {
     return startStep(x, z, carry, null);
   }
   function startStep(x, z, carry, door) {
-    const dur = canRun && (shift || runToggle) && !cut.playing ? RUN_STEP : STEP; // a scene walks
-    hero.step = { x, z, t: carry / dur, dur, warp: door };
+    const stoop = door?.stoop; // a house door: only as far as its door, up its steps (props.js STOOP)
+    const run = canRun && (shift || runToggle) && !cut.playing; // a scene walks
+    const dur = (run ? RUN_STEP : STEP) * (stoop ? 0.5 + stoop.in : 1);
+    hero.step = { x, z, t: carry / dur, dur, run, warp: door, stoop };
     return true;
   }
 
@@ -541,7 +543,13 @@ export function mount(el, controls, cb, start, edit = false) {
     let carry = 0, chained = false, spotted = null;
     if (h.step) {
       h.step.t += dt / h.step.dur;
-      if (h.step.t >= 1) {
+      if (h.step.t >= 1 && h.step.stoop) {
+        // Into a house: hold the last pose, on its steps at the door, while the fade comes up (`enter`
+        // places the hero inside; if that fails, it steps back where it was).
+        const s = h.step;
+        s.t = 1;
+        if (!s.going) (s.going = true), warp(s.warp).finally(() => h.step === s && (h.step = null));
+      } else if (h.step.t >= 1) {
         const done = h.step, left = w.gateAt.get(key(h.x, h.z));
         carry = (done.t - 1) * done.dur;
         h.x = done.x;
@@ -592,7 +600,7 @@ export function mount(el, controls, cb, start, edit = false) {
       sound("step", w.map.tiles[h.step.z]?.[h.step.x] === "w" ? 1 : 0); // "w": a wooden floor
     }
     h.idle = h.step || held.length ? 0 : h.idle + dt;
-    h.running = !!h.step && h.step.dur < STEP;
+    h.running = !!h.step?.run;
 
     lifts.update(w, dt);
     const [px, pz] = place(h, dt, w.floorAt);
@@ -669,7 +677,8 @@ export function mount(el, controls, cb, start, edit = false) {
 
     // The shadows (shadowEye), then the scene. Tall scenery between the camera and the
     // hero thins out round the hero (props.js `fadeable`); the hero is never drawn through it.
-    if (hero && !warping) CUTAWAY.hero.value.set(hero.obj.position.x, hero.obj.position.y + 0.8, hero.obj.position.z);
+    // Kept through a warp's fade too: switching it off there popped the thinned scenery back in front of the door.
+    if (hero) CUTAWAY.hero.value.set(hero.obj.position.x, hero.obj.position.y + 0.8, hero.obj.position.z);
     else CUTAWAY.hero.value.set(0, -1e4, 0);
     renderer.shadowMap.needsUpdate = true;
     renderer.info.reset();

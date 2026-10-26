@@ -54,10 +54,9 @@ fn MenuItem(
     #[prop(optional)] primary: bool,
     #[prop(optional, into)] badge: Option<Signal<u32>>,
 ) -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
     view! {
         <li>
-            <button type="button" class="menu-item" class:primary=primary on:click=move |_| screen.set(to)>
+            <button type="button" class="menu-item" class:primary=primary on:click=move |_| crate::go(to)>
                 <span class="menu-label">{label}</span>
                 <span class="menu-sub">{move || sub.get()}</span>
                 {badge.map(|b| view! {
@@ -106,7 +105,7 @@ fn LangSwitch() -> impl IntoView {
         }
     };
     view! {
-        <div class="lang-switch" role="group" aria-label=tr("Language", "Langue")>
+        <div class="lang-switch lang" role="group" aria-label=tr("Language", "Langue")>
             {button(Lang::En, "EN", "English")}
             {button(Lang::Fr, "FR", "Français")}
         </div>
