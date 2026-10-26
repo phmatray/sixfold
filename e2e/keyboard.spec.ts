@@ -61,7 +61,8 @@ test("keyboard only: packs, collection, decks, campaign and records", async ({ p
     await expect(page.getByRole("heading", { level: 1, name: heading })).toBeAttached();
   };
   const back = async () => {
-    await moveTo(page, page.getByRole("button", { name: "Back", exact: true }));
+    // Back sits at the top: walk up to it.
+    await moveTo(page, page.getByRole("button", { name: "Back", exact: true }), "Shift+Tab", 400);
     await page.keyboard.press("Enter");
     await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible();
   };
