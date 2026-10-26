@@ -627,7 +627,12 @@ fn prompt_label(kind: &str, text: &str) -> String {
         "gate" => tr("Look at the way", "Examiner le passage").into(),
         "book" => books::book(text).map_or_else(
             || tr("Read", "Lire").into(),
-            |b| tr(format!("Read “{}”", b.title.en), format!("Lire « {} »", b.title.fr)),
+            |b| {
+                tr(
+                    format!("Read “{}”", b.title.en),
+                    format!("Lire « {} »", b.title.fr),
+                )
+            },
         ),
         _ => tr("Take a look", "Regarder").into(),
     }
@@ -720,6 +725,10 @@ pub fn WorldScreen() -> impl IntoView {
         sheet.set(Some(Sheet::Book(b.id)));
         world_read(&crate::reading::book_value(b, shelf));
     };
+    // The Journal's Library opens a book read before; it rises into view.
+    provide_context(crate::journal::ReadBook(Callback::new(move |id| {
+        open_book(id, false)
+    })));
     // Put back once its sheet is gone (closed, or replaced by another).
     Effect::new(move |was: Option<bool>| {
         let reading = sheet.with(|s| matches!(s, Some(Sheet::Book(_))));

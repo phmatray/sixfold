@@ -119,19 +119,30 @@ pub fn Reading(
     };
     // A swipe turns a page; a tap on either half of the book turns that way.
     let down = StoredValue::new(None::<(i32, i32)>);
-    let on_down = move |e: web_sys::PointerEvent| down.set_value(Some((e.client_x(), e.client_y())));
+    let on_down =
+        move |e: web_sys::PointerEvent| down.set_value(Some((e.client_x(), e.client_y())));
     let on_up = move |e: web_sys::PointerEvent| {
-        let Some((x, y)) = down.get_value() else { return };
+        let Some((x, y)) = down.get_value() else {
+            return;
+        };
         down.set_value(None);
         let (dx, dy) = (e.client_x() - x, e.client_y() - y);
         if dx.abs() > 40 && dx.abs() > dy.abs() {
-            if dx < 0 { next() } else { prev() }
+            if dx < 0 {
+                next()
+            } else {
+                prev()
+            }
         } else if dx.abs() < 12 && dy.abs() < 12 {
             let w = web_sys::window()
                 .and_then(|w| w.inner_width().ok())
                 .and_then(|v| v.as_f64())
                 .unwrap_or(1.0);
-            if f64::from(e.client_x()) < w / 2.0 { prev() } else { next() }
+            if f64::from(e.client_x()) < w / 2.0 {
+                prev()
+            } else {
+                next()
+            }
         }
     };
     let page = move || &book.pages[at.get()];

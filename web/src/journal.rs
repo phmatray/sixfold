@@ -1,8 +1,10 @@
 //! The Journal (`docs/WORLD_DESIGN.md` §5.4): the errands people gave, read
 //! from `world/quests.json` and ticked off by the engine's conditions, under
-//! the current objective (the engine's [`objective`]).
+//! the current objective (the engine's [`objective`]), then the Library: the
+//! books read on the world's shelves (#104), each opened again from here.
 
 use leptos::prelude::*;
+use sixfold_engine::books::{self, BOOKS};
 use sixfold_engine::objective::objective;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::{fr, tr};
@@ -54,6 +56,52 @@ fn quests() -> Vec<Quest> {
         .collect()
 }
 
+/// Opens a book read before, from the Library (the world provides it).
+#[derive(Clone, Copy)]
+pub struct ReadBook(pub Callback<&'static str>);
+
+/// The books read (#104), re-readable, and how many of them there are.
+#[component]
+fn Library() -> impl IntoView {
+    let progress = expect_context::<RwSignal<Progress>>();
+    let open = use_context::<ReadBook>();
+    let read: Vec<_> =
+        progress.with_untracked(|p| BOOKS.iter().filter(|b| books::is_read(p, b.id)).collect());
+    let (n, total) = (read.len(), BOOKS.len());
+    view! {
+        <section class="library" aria-labelledby="library-title">
+            <div class="library-head">
+                <h3 id="library-title">{tr("Library", "Bibliothèque")}</h3>
+                <span class="quest-state">{tr(format!("{n} of {total} found"), format!("{n} sur {total} trouvés"))}</span>
+            </div>
+            {if read.is_empty() {
+                view! {
+                    <p class="dialog-sub">{tr(
+                        "Books wait on the shelves of houses and inns. Face one and read it: it comes here.",
+                        "Des livres attendent sur les étagères des maisons et des auberges. Lisez-en un : il viendra ici.",
+                    )}</p>
+                }.into_any()
+            } else {
+                view! {
+                    <ul class="library-list">
+                        {read.into_iter().map(|b| view! {
+                            <li>
+                                <button type="button" class=format!("library-book family-{}", b.family.name())
+                                    disabled=open.is_none()
+                                    on:click=move |_| if let Some(ReadBook(f)) = open { f.run(b.id) }>
+                                    <span class="library-spine" aria-hidden="true"></span>
+                                    <span class="library-title">{b.title.get()}</span>
+                                    <span class="library-family">{b.family.label().get()}</span>
+                                </button>
+                            </li>
+                        }).collect_view()}
+                    </ul>
+                }.into_any()
+            }}
+        </section>
+    }
+}
+
 #[component]
 pub fn Journal() -> impl IntoView {
     let progress = expect_context::<RwSignal<Progress>>();
@@ -82,6 +130,7 @@ pub fn Journal() -> impl IntoView {
                 "No errands yet. People around the world will ask.",
                 "Aucune quête pour l'instant. Les gens que vous croiserez vous en confieront.",
             )}</p>
+            <Library />
         }
         .into_any();
     }
@@ -111,6 +160,7 @@ pub fn Journal() -> impl IntoView {
                 </li>
             }).collect_view()}
         </ul>
+        <Library />
     }
     .into_any()
 }
