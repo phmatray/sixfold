@@ -4064,7 +4064,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 /* ---------- Buttons ---------- */
 /* Plain: a paper plate with the toon outline and a thickness it sinks into. */
 .btn {
-  min-height: 46px;
+  min-height: 48px;
   padding: 6px 18px;
   border: 2px solid var(--toon);
   border-radius: 10px;
@@ -4108,7 +4108,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 
 /* ---------- Controls ---------- */
 select {
-  min-height: 46px; border: 2px solid var(--toon); border-radius: 10px; background-color: var(--paper-hi); color: var(--toon); font-weight: 700;
+  min-height: 48px; border: 2px solid var(--toon); border-radius: 10px; background-color: var(--paper-hi); color: var(--toon); font-weight: 700;
   box-shadow: 0 3px 0 var(--toon);
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'><path d='M1 1.5l5 5 5-5' fill='none' stroke='%232a170b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
 }

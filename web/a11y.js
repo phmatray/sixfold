@@ -169,7 +169,8 @@ addEventListener("keydown", (e) => {
   document.body.append(hand);
   document.documentElement.classList.add("hand-cursor");
   const OWN = ".duel .mat *, .world-stage, .world-stage *, .card, .hexon-card, .hand-card, .atlas-post, .talk-box, .press-start, h1, h2, main, [tabindex='-1']";
-  let at = null, raf = 0;
+  const CONTROLS = "button, a[href], input, select, textarea, summary, label, [role='tab'], [tabindex]:not([tabindex='-1'])";
+  let at = null, raf = 0, side = null;
   const shown = (el) => el.matches(":focus-visible") || (document.documentElement.dataset.input === "pad" && el.matches(":focus"));
   // A visually hidden input (a deck's radio, a segment) stands for its label.
   const box = (el) => {
@@ -180,15 +181,21 @@ addEventListener("keydown", (e) => {
     raf = 0;
     if (!at?.isConnected || document.activeElement !== at) return hide();
     const r = box(at);
-    // The hand points AT the control, from the first side with room: left of it
+    // The hand points AT the control, from the first side with room and nothing
+    // else to press there (a tab row's neighbours, a grid's next cell): left of it
     // (pointing right), right of it (pointing left), above (pointing down), below
     // (pointing up). `data-side` turns the glyph (style.css); 40 × 32, centred.
     const mid = r.top + Math.min(r.height, 60) / 2, near = r.left + Math.min(28, r.width / 2);
-    const [side, cx, cy] =
-      r.left >= 44 ? ["left", r.left - 22, mid]
-      : r.right <= innerWidth - 44 ? ["right", r.right + 22, mid]
-      : r.top >= 44 ? ["above", near, r.top - 22]
-      : ["below", near, r.bottom + 22];
+    const sides = [
+      ["left", r.left - 22, mid, r.left >= 44],
+      ["right", r.right + 22, mid, r.right <= innerWidth - 44],
+      ["above", near, r.top - 22, r.top >= 44],
+      ["below", near, r.bottom + 22, r.bottom <= innerHeight - 44],
+    ];
+    const free = ([, x, y]) => !document.elementFromPoint(x, y)?.closest(CONTROLS);
+    // The side is picked once per control (no flicker while it moves), the place every frame.
+    side ??= (sides.find((s) => s[3] && free(s)) ?? sides.find((s) => s[3]) ?? sides[0])[0];
+    const [, cx, cy] = sides.find((s) => s[0] === side);
     hand.dataset.side = side;
     hand.style.translate = `${Math.round(cx - 20)}px ${Math.round(cy - 16)}px`;
     raf = requestAnimationFrame(place);
@@ -204,6 +211,7 @@ addEventListener("keydown", (e) => {
     const el = e.target;
     if (!(el instanceof Element) || el.matches(OWN) || !shown(el)) return hide();
     at?.removeAttribute("data-hand");
+    if (at !== el) side = null;
     at = el;
     el.setAttribute("data-hand", "");
     // Back on top of whatever opened since (a dialog joins the top layer after it).
