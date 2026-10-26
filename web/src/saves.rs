@@ -201,16 +201,20 @@ pub fn SlotPicker() -> impl IntoView {
             </li>
         }
     };
+    // A sheet over the title while open: keys and a pad stay in it, Escape folds it.
+    let open = RwSignal::new(false);
     view! {
-        <details class="slots">
+        <details class="slots" on:toggle=move |e| open.set(event_target::<web_sys::Element>(&e).has_attribute("open"))>
             <summary class="btn ghost">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5z" /><path d="M8 4v5h7V4M8 20v-6h8v6" /></svg>
                 <span>{tr("Save slot: ", "Emplacement : ")} <b>{current_name}</b></span>
             </summary>
-            <div class="settings-body">
-                <ul class="slot-list">{(1..=SLOTS).map(row).collect_view()}</ul>
-                <p class="note" role="status">{move || status.get()}</p>
-            </div>
+            {move || open.get().then(|| view! {
+                <div class="settings-body" role="dialog" aria-modal="true" aria-label=tr("Save slots", "Emplacements")>
+                    <ul class="slot-list">{(1..=SLOTS).map(row).collect_view()}</ul>
+                    <p class="note" role="status">{move || status.get()}</p>
+                </div>
+            })}
         </details>
     }
 }

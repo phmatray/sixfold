@@ -113,7 +113,9 @@ pub fn PacksScreen() -> impl IntoView {
         done.set(false);
     };
     let on_key = move |e: leptos::ev::KeyboardEvent| {
-        if e.key() == "Escape" {
+        // Closing the card sheet is this Escape's whole job (not the page's Back too).
+        if e.key() == "Escape" && ui.sheet.get_untracked() {
+            e.prevent_default();
             ui.sheet.set(false);
         }
     };

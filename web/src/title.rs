@@ -199,7 +199,9 @@ fn Settings() -> impl IntoView {
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg>
                 {tr("Settings", "Réglages")}
             </summary>
-            {move || open.get().then(|| view! { <OptionsPanel /> })}
+            {move || open.get().then(|| view! {
+                <div class="options-sheet" role="dialog" aria-modal="true" aria-label=tr("Settings", "Réglages")><OptionsPanel /></div>
+            })}
         </details>
     }
 }
