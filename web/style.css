@@ -1878,10 +1878,12 @@ select option { background: var(--panel); color: var(--ink); }
 .stone-seventh { fill: #0e1d33; stroke: rgba(243, 213, 137, 0.35); stroke-width: 1.5; }
 .stone-ring { fill: none; stroke: var(--brass-hi); stroke-width: 2; opacity: 0; transform-origin: center; transform-box: fill-box; }
 .stone-sheen { pointer-events: none; opacity: 0.5; }
-.credits-plate.on .stone-face { animation: face-lit 900ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(500ms + var(--i) * 450ms); }
-.credits-plate.on .stone-seventh { animation: seventh-lit 1600ms cubic-bezier(0.16, 1, 0.3, 1) 3350ms both; }
-.credits-plate.on .stone-ring { animation: ring-bloom 1800ms cubic-bezier(0.16, 1, 0.3, 1) 3350ms both; }
-.credits-plate.on .stone + .credits-line { animation: credits-dawn 1200ms cubic-bezier(0.16, 1, 0.3, 1) 3500ms both; }
+.stone-rim { fill: none; stroke: var(--brass); stroke-width: 3.5; stroke-linejoin: round; }
+/* The timings come from credits.rs (--face-at, --face-gap, --ring-at), which rings the bells. */
+.credits-plate.on .stone-face { animation: face-lit 900ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(var(--face-at) + var(--i) * var(--face-gap)); }
+.credits-plate.on .stone-seventh { animation: seventh-lit 1600ms cubic-bezier(0.16, 1, 0.3, 1) var(--ring-at) both; }
+.credits-plate.on .stone-ring { animation: ring-bloom 1800ms cubic-bezier(0.16, 1, 0.3, 1) var(--ring-at) both; }
+.credits-plate.on .stone + .credits-line { animation: credits-dawn 1200ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ring-at) + 150ms) both; }
 @keyframes face-lit {
   0% { fill: color-mix(in srgb, var(--c) 16%, #0b1729); filter: none; }
   30% { fill: var(--tint); filter: brightness(1.4); }
@@ -1890,14 +1892,15 @@ select option { background: var(--panel); color: var(--ink); }
 @keyframes seventh-lit { to { fill: #f6e7bd; stroke: var(--brass-hi); } }
 @keyframes ring-bloom { 0% { opacity: 0.9; transform: scale(0.96); } 100% { opacity: 0; transform: scale(1.22); } }
 
-.champion-title { margin: 0; font-size: clamp(56px, 13vw, 132px); text-wrap: balance; }
-.champion-title.long { font-size: clamp(40px, 8.5vw, 96px); max-width: 11em; line-height: 0.95; }
 
 .reward-card { --w: 64px; flex: none; transform: rotate(-4deg); }
 /* What the plates hold: a display heading in brass, then names over what they did. */
 .credits-plate h1, .credits-plate h2 { margin: 0; }
 .credits-plate h2:not(.wordmark) { font: 800 clamp(30px, 5vw, 48px)/1.05 var(--display); letter-spacing: -0.025em; color: var(--brass-hi); text-wrap: balance; }
 .credits-plate .wordmark { font-size: clamp(64px, 14vw, 140px); }
+.credits-plate .champion-title { font-size: clamp(56px, 13vw, 132px); line-height: 1.02; text-wrap: balance; }
+.credits-plate .champion-title.long { font-size: clamp(38px, 7vw, 92px); max-width: 11em; }
+.credits-continue { margin-top: 18px; min-width: 12em; justify-content: center; }
 .credits-line.small { font-size: 14px; }
 .credits-seals { justify-content: center; gap: 12px; }
 .credits-seals .seal { width: clamp(34px, 6vw, 48px); }
@@ -1925,9 +1928,10 @@ select option { background: var(--panel); color: var(--ink); }
 .hexons span { font: 700 13px/1.2 var(--display); }
 /* Where the credits are: a pip per plate. */
 .credits-pips { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 11; display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; }
-.credits-pips li { width: 9px; aspect-ratio: 1 / 1.1; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: rgba(255, 255, 255, 0.18); transition: background-color 400ms ease; }
-.credits-pips li.past { background: rgba(243, 213, 137, 0.45); }
+.credits-pips li { width: 9px; aspect-ratio: 1 / 1.1; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: rgba(255, 255, 255, 0.4); transition: background-color 400ms ease; }
+.credits-pips li.past { background: rgba(243, 213, 137, 0.7); }
 .credits-pips li.on { background: var(--brass-hi); }
+.btn.icon { min-width: 44px; padding-inline: 10px; }
 .credits-foot { position: fixed; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 11; display: flex; gap: 8px; align-items: center; }
 @media (max-width: 640px) {
   .credits-list { grid-template-columns: minmax(0, 22em); gap: 10px; }

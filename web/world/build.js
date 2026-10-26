@@ -157,9 +157,9 @@ export function animateProps(w, dt, reduced) {
   for (const m of w.waymarks) if (m.flash) m.flash = Math.max(0, m.flash - dt * 0.8);
   for (const p of w.pulses) {
     // A crackle every ~3.5 s (steady with reduced motion), brighter in a lightning flash.
-    const k = reduced ? 0.6 : Math.max(0, Math.sin(w.now * 1.8)) ** 12 + Math.max(0, Math.sin(w.now * 23)) * 0.15;
+    const k = reduced ? Math.max(0.6, p.glow) : Math.max(p.glow, Math.max(0, Math.sin(w.now * 1.8)) ** 12 + Math.max(0, Math.sin(w.now * 23)) * 0.15);
     p.sprite.material.opacity = p.on ? Math.min(1, k + (w.flash ?? 0)) : 0;
-    p.sprite.scale.setScalar(2.4 + k * 2);
+    p.sprite.scale.setScalar((2.4 + k * 2) * p.size);
   }
   if (!reduced) {
     for (const b of w.boats) {
@@ -651,16 +651,18 @@ export async function build(map, got, reduced) {
   const levels = [...new Set([...floor].map(Math.round))].sort((a, b) => b - a);
   const flies = fireflies(map.interactions, floorAt, root);
   // Prop `pulse` (a condition): an arc of light at its `light_origin` every few seconds
-  // while it holds (the Rodspire's tip once its pylons are on).
+  // while it holds (the Rodspire's tip once its pylons are on). Without one it sits
+  // `pulse_at` m up (3), sized to match; `pulse_color` tints it (an electric blue), and
+  // `pulse_glow` (0..1) keeps it lit at least that much between arcs.
   const pulses = props.filter((p) => p.pulse && p.obj).map((p) => {
-    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: "#9feaff", transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: p.pulse_color ?? "#9feaff", transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
     p.obj.updateMatrixWorld(true);
-    const o = p.obj.getObjectByName("light_origin");
+    const o = p.obj.getObjectByName("light_origin"), at = p.pulse_at ?? 3;
     if (o) o.getWorldPosition(s.position);
-    else s.position.set(p.cx, p.y + 3, p.cz);
+    else s.position.set(p.cx, p.y + at, p.cz);
     s.scale.setScalar(3.2);
     root.add(s);
-    return { sprite: s, cond: p.pulse, on: false };
+    return { sprite: s, cond: p.pulse, on: false, size: o ? 1 : at / 3, glow: p.pulse_glow ?? 0 };
   });
   // Boats, buoys and lanterns afloat bob; a lighthouse beacon glows at its `light_origin`.
   boats.push(...props.filter((p) => BOB.has(p.asset) && p.obj));

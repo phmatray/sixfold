@@ -20,7 +20,8 @@ use crate::audio::MuteToggle;
 use crate::{store, Screen};
 
 /// Where the champion stands once the credits end: the duel hall, just out of
-/// the Warden's door (`web/world/maps/shop.json`, the sealed door's spawn).
+/// the Warden's door (the way back's spawn in `web/world/maps/warden.json`;
+/// `engine/tests/world_data.rs` fails if it moves).
 const HALL_DOOR: &str = "shop,1,6,e";
 
 /// The people of the world, as the credits list them.
@@ -83,24 +84,24 @@ const TOOLS: &[(&str, T)] = &[
     (
         "Rust & WebAssembly",
         T::new(
-            "the rules engine and every screen",
-            "le moteur de règles et tous les écrans",
+            "the rules engine",
+            "le moteur de règles",
         ),
     ),
-    ("Leptos", T::new("the screens", "les écrans")),
+    ("Leptos", T::new("every screen", "tous les écrans")),
     ("three.js", T::new("the world", "le monde")),
     (
         "Blender",
         T::new(
             "every prop, character and portrait, modelled by script",
-            "chaque objet, personnage et portrait, modelés par script",
+            "tous les objets, personnages et portraits, modelés par script",
         ),
     ),
     (
-        "FLUX 3 Image Klein",
+        "FLUX 3 Image Klein, with mflux",
         T::new(
-            "the card pictures, drawn on our own machine from hand-written captions",
-            "les illustrations des cartes, dessinées sur notre machine d'après des légendes écrites à la main",
+            "the card pictures, generated on our own machine from hand-written captions",
+            "les illustrations des cartes, générées sur notre machine d'après des légendes écrites à la main",
         ),
     ),
     (
@@ -183,31 +184,33 @@ fn and_list(parts: Vec<AnyView>) -> Vec<AnyView> {
 }
 
 /// The run so far, in one sentence: up to five of the stats, the ones that
-/// aren't zero. Read only; None before anything happened.
-fn run_line(s: &Stats) -> Option<impl IntoView> {
+/// aren't zero first, and always at least three. Read only.
+fn run_line(s: &Stats) -> impl IntoView {
     let n = |k: &str| s.get(k);
-    let fact = |v: u64, en: String, fr: String| {
-        (v > 0).then(|| view! { <b>{thousands(v)}</b>{tr(en, fr)} }.into_any())
-    };
-    let facts: Vec<AnyView> = [
-        fact(n("wins"), " duels won".into(), " duels gagnés".into()),
-        fact(n("kos"), " knock-outs".into(), " K.O.".into()),
-        fact(n("steps"), " steps walked".into(), " pas".into()),
-        fact(
+    let mut facts: Vec<(u64, String, String)> = vec![
+        (n("wins"), " duels won".into(), " duels gagnés".into()),
+        (n("kos"), " knock-outs".into(), " K.O.".into()),
+        (n("steps"), " steps walked".into(), " pas".into()),
+        (
             n("finds"),
             format!(" of {FINDS} finds"),
             format!(" trouvailles sur {FINDS}"),
         ),
-        fact(
+        (
             n("packs"),
             " packs opened".into(),
             " boosters ouverts".into(),
         ),
-    ]
-    .into_iter()
-    .flatten()
-    .collect();
-    (!facts.is_empty()).then(|| view! { <p class="credits-run">{and_list(facts)}"."</p> })
+    ];
+    // Stable: the non-zero ones keep their order, ahead of the zeros.
+    facts.sort_by_key(|f| f.0 == 0);
+    let nonzero = facts.iter().filter(|f| f.0 > 0).count();
+    let facts: Vec<AnyView> = facts
+        .into_iter()
+        .take(nonzero.max(3))
+        .map(|(v, en, fr)| view! { <b>{thousands(v)}</b>{tr(en, fr)} }.into_any())
+        .collect();
+    view! { <p class="credits-run">{and_list(facts)}"."</p> }
 }
 
 /// When the seal stone's faces light (ms after its plate shows), one per
@@ -234,7 +237,7 @@ fn seal_stone() -> impl IntoView {
             .join(" ")
     };
     let faces = RIVALS.iter().filter(|r| r.seal).enumerate().map(|(k, r)| {
-        let tone = r.colors.first().map_or("colorless", |&c| color_key(c));
+        let tone = tone(r);
         let ((x0, y0), (x1, y1), (x2, y2), (x3, y3)) = (v(k, 34.0), v(k, 100.0), v(k + 1, 100.0), v(k + 1, 34.0));
         view! {
             <path class=format!("stone-face t-{tone}") style=format!("--i: {k}")
@@ -242,19 +245,40 @@ fn seal_stone() -> impl IntoView {
         }
     });
     view! {
-        <svg class="stone" viewBox="-112 -112 224 224" aria-hidden="true">
+        // The CSS lights each face when its bell rings: one set of timings, from here.
+        <svg class="stone" viewBox="-112 -112 224 224" aria-hidden="true"
+            style=format!("--face-at: {FACE_AT}ms; --face-gap: {FACE_GAP}ms; --ring-at: {RING_AT}ms")>
             <defs>
                 <radialGradient id="stone-sheen" cx="35%" cy="25%" r="80%">
                     <stop offset="0" stop-color="#fff" stop-opacity="0.32" />
                     <stop offset="0.55" stop-color="#fff" stop-opacity="0" />
                 </radialGradient>
+                <linearGradient id="stone-shade" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0.45" stop-color="#000" stop-opacity="0" />
+                    <stop offset="1" stop-color="#000" stop-opacity="0.32" />
+                </linearGradient>
             </defs>
             <polygon class="stone-ring" points=hex(104.0) />
             {faces.collect_view()}
             <polygon class="stone-seventh" points=hex(34.0) />
             <polygon class="stone-sheen" points=hex(100.0) fill="url(#stone-sheen)" />
+            <polygon class="stone-sheen" points=hex(100.0) fill="url(#stone-shade)" />
+            <polygon class="stone-rim" points=hex(100.0) />
         </svg>
     }
+}
+
+/// Run `f` in `ms`, unless the credits moved on meanwhile (`armed` changed).
+fn later(armed: StoredValue<u32>, ms: u32, f: impl FnOnce() + 'static) {
+    let t = armed.get_value();
+    set_timeout(
+        move || {
+            if armed.try_get_value() == Some(t) {
+                f()
+            }
+        },
+        Duration::from_millis(u64::from(ms)),
+    );
 }
 
 #[component]
@@ -282,20 +306,24 @@ pub fn Credits(won: bool) -> impl IntoView {
 
     let title = progress.with_untracked(champion_title);
     let seal_rivals = || RIVALS.iter().filter(|r| r.seal);
-    // The plates, in order: (how long each shows in ms, what it shows). The
-    // last one stays until Continue.
-    let mut plates: Vec<(u32, AnyView)> = vec![];
+    let primary = NodeRef::<leptos::html::Button>::new();
+    // The plates, in order: (how long each shows in ms, its name for the
+    // status line, what it shows). The last one stays until Continue.
+    let mut plates: Vec<(u32, String, AnyView)> = vec![];
     if won {
+        let lit = tr("Six faces, all lit.", "Six faces, toutes allumées.");
         plates.push((
             RING_AT + 1900,
+            lit.into(),
             view! {
                 {seal_stone()}
-                <p class="credits-line">{tr("Six faces, all lit.", "Six faces, toutes allumées.")}</p>
+                <p class="credits-line">{lit}</p>
             }
             .into_any(),
         ));
         plates.push((
             4600,
+            title.get().into(),
             view! {
                 <h2 class="wordmark champion-title" class:long={title.en.len() > 10}>{title.get()}</h2>
                 <p class="credits-line">{tr("Six seals and the Warden's chair.", "Six sceaux et le fauteuil de la Gardienne.")}</p>
@@ -305,6 +333,7 @@ pub fn Credits(won: bool) -> impl IntoView {
     }
     plates.push((
         5000,
+        "Sixfold".into(),
         view! {
             <h1 class="wordmark">"Sixfold"</h1>
             <p class="credits-line">{if won {
@@ -315,21 +344,21 @@ pub fn Credits(won: bool) -> impl IntoView {
         }
         .into_any(),
     ));
-    if let Some(line) = stats.with_untracked(run_line) {
-        plates.push((
-            7000,
-            view! {
-                <h2>{tr("Your run", "Votre partie")}</h2>
-                <ul class="seals credits-seals" aria-hidden="true">
-                    {seal_rivals().map(|r| view! {
-                        <li><crate::campaign::Seal r=r earned=progress.with_untracked(|p| r.beaten(p)) /></li>
-                    }).collect_view()}
-                </ul>
-                {line}
-            }
-            .into_any(),
-        ));
-    }
+    let heading = |en: &'static str, fr: &'static str| tr(en, fr).to_string();
+    plates.push((
+        7000,
+        heading("Your run", "Votre partie"),
+        view! {
+            <h2>{tr("Your run", "Votre partie")}</h2>
+            <ul class="seals credits-seals" aria-hidden="true">
+                {seal_rivals().map(|r| view! {
+                    <li><crate::campaign::Seal r=r earned=progress.with_untracked(|p| r.beaten(p)) /></li>
+                }).collect_view()}
+            </ul>
+            {stats.with_untracked(run_line)}
+        }
+        .into_any(),
+    ));
     let face = |r: &'static Rival| {
         view! {
             <li class=format!("cast-one t-{}", tone(r))>
@@ -340,7 +369,8 @@ pub fn Credits(won: bool) -> impl IntoView {
         }
     };
     plates.push((
-        8000,
+        9000,
+        heading("The rivals", "Les rivaux"),
         view! {
             <h2>{tr("The rivals", "Les rivaux")}</h2>
             <ul class="cast">{seal_rivals().map(face).collect_view()}</ul>
@@ -349,7 +379,8 @@ pub fn Credits(won: bool) -> impl IntoView {
         .into_any(),
     ));
     plates.push((
-        6500,
+        7000,
+        heading("The Hexons", "Les Hexons"),
         view! {
             <h2>{tr("The Hexons", "Les Hexons")}</h2>
             <ul class="hexons">
@@ -371,7 +402,8 @@ pub fn Credits(won: bool) -> impl IntoView {
         .into_any(),
     ));
     plates.push((
-        8000,
+        10000,
+        heading("The townsfolk", "Les gens du coin"),
         view! {
             <h2>{tr("The townsfolk", "Les gens du coin")}</h2>
             <ul class="credits-list">
@@ -384,6 +416,7 @@ pub fn Credits(won: bool) -> impl IntoView {
     ));
     plates.push((
         6000,
+        heading("A game by Atypical Play", "Un jeu Atypical Play"),
         view! {
             <h2>{tr("A game by Atypical Play", "Un jeu Atypical Play")}</h2>
             <ul class="credits-list solo">
@@ -393,7 +426,8 @@ pub fn Credits(won: bool) -> impl IntoView {
         .into_any(),
     ));
     plates.push((
-        8000,
+        13000,
+        heading("Made with", "Fait avec"),
         view! {
             <h2>{tr("Made with", "Fait avec")}</h2>
             <ul class="credits-list">
@@ -405,7 +439,8 @@ pub fn Credits(won: bool) -> impl IntoView {
         .into_any(),
     ));
     plates.push((
-        9000,
+        14000,
+        heading("Licences", "Licences"),
         view! {
             <h2>{tr("Licences", "Licences")}</h2>
             <ul class="credits-list licences">
@@ -413,93 +448,103 @@ pub fn Credits(won: bool) -> impl IntoView {
                     <li><b>{name.get()}</b><span>{what.get()}</span></li>
                 }).collect_view()}
             </ul>
-            <p class="credits-line small">{tr("Sixfold's own code is MIT too.", "Le code de Sixfold est lui aussi sous licence MIT.")}</p>
-        }
-        .into_any(),
-    ));
-    plates.push((
-        0,
-        view! {
-            <p class="credits-end">{tr("Thank you for playing.", "Merci d'avoir joué.")}</p>
-            <p class="credits-line">{tr(
-                "Every Hexon, card, place, picture and sound here is original. Only the rules come from a classic handheld card game.",
-                "Chaque Hexon, carte, lieu, image et son de ce jeu est original. Seules les règles viennent d'un grand classique du jeu de cartes sur console portable.",
+            <p class="credits-line small">{tr(
+                "Sixfold's own code is MIT too. Every Hexon, card, place, picture and sound here is original; only the rules come from a classic handheld card game.",
+                "Le code de Sixfold est lui aussi sous licence MIT. Chaque Hexon, carte, lieu, image et son de ce jeu est original ; seules les règles viennent d'un grand classique du jeu de cartes sur console portable.",
             )}</p>
         }
         .into_any(),
     ));
-    let durations: Vec<u32> = plates.iter().map(|(ms, _)| *ms).collect();
+    let thanks = tr("Thank you for playing.", "Merci d'avoir joué.");
+    plates.push((
+        0,
+        thanks.into(),
+        view! {
+            <p class="credits-end">{thanks}</p>
+            <button type="button" class="btn primary credits-continue" node_ref=primary on:click=move |_| done()>
+                {tr("Continue", "Continuer")}
+            </button>
+        }
+        .into_any(),
+    ));
+    let durations: Vec<u32> = plates.iter().map(|p| p.0).collect();
+    let names: Vec<String> = plates.iter().map(|p| p.1.clone()).collect();
     let n = plates.len();
     let stone = won.then_some(0);
 
-    // The plate on show. Each change bumps `armed`, so a timer armed for an
-    // earlier plate (before a Next, Back or Skip) does nothing.
+    // The plate on show, and whether the plates wait for Next (Pause; from the
+    // start with reduced motion, read at the reader's pace). Each change bumps
+    // `armed`, so a timer armed before a Next, Back, Pause or Skip does nothing.
     let at = RwSignal::new(0usize);
+    let paused = RwSignal::new(still);
     let armed = StoredValue::new(0u32);
     let show = move |i: usize| {
         armed.update_value(|t| *t += 1);
         at.set(i.min(n - 1));
     };
-    let later = move |ms: u32, f: Box<dyn FnOnce()>| {
-        let t = armed.get_value();
-        set_timeout(
-            move || {
-                if armed.try_get_value() == Some(t) {
-                    f()
-                }
-            },
-            Duration::from_millis(u64::from(ms)),
-        );
-    };
+    // A memo: the foot's buttons are rebuilt only when it flips, not on every plate.
+    let last = Memo::new(move |_| at.get() + 1 == n);
     Effect::new(move |_| {
         let i = at.get();
         // The stone rings a bell per face as it lights, then all at once.
         if stone == Some(i) {
             if !still {
                 for k in 0..6 {
-                    later(
-                        FACE_AT + k * FACE_GAP,
-                        Box::new(move || crate::audio::sfx("face", f64::from(k))),
-                    );
+                    later(armed, FACE_AT + k * FACE_GAP, move || {
+                        crate::audio::sfx("face", f64::from(k))
+                    });
                 }
             }
-            later(
-                if still { 200 } else { RING_AT },
-                Box::new(|| crate::audio::sfx("face", 6.0)),
-            );
+            later(armed, if still { 200 } else { RING_AT }, || {
+                crate::audio::sfx("face", 6.0)
+            });
         }
-        if let Some(&ms) = durations.get(i).filter(|&&ms| ms > 0 && i + 1 < n) {
-            later(ms, Box::new(move || show(i + 1)));
+        // The last plate: Continue takes the focus (Next and Skip are gone).
+        if i + 1 == n {
+            request_animation_frame(move || {
+                if let Some(b) = primary.get_untracked() {
+                    _ = b.focus();
+                }
+            });
         }
     });
-
-    let last = move || at.get() + 1 == n;
-    // Next disappears on the last plate: focus goes on to Continue, not lost.
-    let primary = NodeRef::<leptos::html::Button>::new();
-    let next = move |_| {
-        show(at.get_untracked() + 1);
-        if at.get_untracked() + 1 == n {
-            if let Some(b) = primary.get_untracked() {
-                _ = b.focus();
-            }
+    Effect::new(move |_| {
+        let i = at.get();
+        if paused.get() {
+            return;
         }
+        if let Some(&ms) = durations.get(i).filter(|&&ms| ms > 0 && i + 1 < n) {
+            later(armed, ms, move || show(i + 1));
+        }
+    });
+    let pause = move |_| {
+        armed.update_value(|t| *t += 1);
+        paused.update(|p| *p = !*p);
     };
     let on_key = move |e: leptos::ev::KeyboardEvent| match e.key().as_str() {
         "Escape" => {
             e.prevent_default();
             done();
         }
-        "ArrowRight" if !last() => show(at.get_untracked() + 1),
+        "ArrowRight" if !last.get_untracked() => show(at.get_untracked() + 1),
         "ArrowLeft" if at.get_untracked() > 0 => show(at.get_untracked() - 1),
         _ => {}
+    };
+    let status = move || {
+        let i = at.get();
+        tr(
+            format!("{} of {n}: {}", i + 1, names[i]),
+            format!("{} sur {n} : {}", i + 1, names[i]),
+        )
     };
     view! {
         <main class="credits" class:still=still on:keydown=on_key aria-label=tr("Credits", "Générique")>
             <ol class="credits-pips" aria-hidden="true">
                 {(0..n).map(|i| view! { <li class:on=move || at.get() == i class:past=move || { at.get() > i }></li> }).collect_view()}
             </ol>
-            <div class="credits-stage" aria-live="polite">
-                {plates.into_iter().enumerate().map(|(i, (_, v))| view! {
+            <p class="sr-only" role="status">{status}</p>
+            <div class="credits-stage">
+                {plates.into_iter().enumerate().map(|(i, (_, _, v))| view! {
                     <div class="credits-plate" class:on=move || at.get() == i
                         aria-hidden=move || (at.get() != i).to_string() inert=move || at.get() != i>
                         {v}
@@ -508,13 +553,32 @@ pub fn Credits(won: bool) -> impl IntoView {
             </div>
             <div class="credits-foot">
                 <MuteToggle />
-                {move || (!last()).then(|| view! {
-                    <button type="button" class="btn ghost" on:click=next>{tr("Next", "Suivant")}</button>
+                {move || (!last.get()).then(|| view! {
+                    <button type="button" class="btn ghost icon" aria-pressed=move || paused.get().to_string()
+                        aria-label=tr("Pause the credits", "Mettre le générique en pause") on:click=pause>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            {move || if paused.get() {
+                                view! { <path d="M8 5v14l11-7z" /> }.into_any()
+                            } else {
+                                view! { <path d="M7 5h3v14H7zM14 5h3v14h-3z" /> }.into_any()
+                            }}
+                        </svg>
+                    </button>
                 })}
-                // Focus starts on Skip (see `focus_heading`), so Enter works straight away.
-                <button type="button" class="btn primary" data-screen-focus node_ref=primary on:click=move |_| done()>
-                    {move || if last() { tr("Continue", "Continuer") } else { tr("Skip the credits", "Passer le générique") }}
+                <button type="button" class="btn ghost icon" aria-label=tr("Back", "Retour")
+                    on:click=move |_| show(at.get_untracked().saturating_sub(1))>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                 </button>
+                {move || (!last.get()).then(|| view! {
+                    <button type="button" class="btn ghost icon" aria-label=tr("Next", "Suivant")
+                        on:click=move |_| show(at.get_untracked() + 1)>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                    // Focus starts on Skip (see `focus_heading`), so Enter works straight away.
+                    <button type="button" class="btn ghost" data-screen-focus on:click=move |_| done()>
+                        {tr("Skip the credits", "Passer le générique")}
+                    </button>
+                })}
             </div>
         </main>
     }

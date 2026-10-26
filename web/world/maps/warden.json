@@ -41,7 +41,11 @@
       "asset": "display_case",
       "x": 2,
       "z": 1,
-      "rot": 0
+      "rot": 0,
+      "pulse": "won:warden & !flag:finale",
+      "pulse_color": "#f3d589",
+      "pulse_at": 1.3,
+      "pulse_glow": 0.7
     },
     {
       "asset": "display_case",
@@ -268,7 +272,7 @@
         },
         {
           "do": [
-            "cam:warden",
+            "cam:5:3",
             "emote:warden:note",
             "wait:400"
           ]
@@ -281,7 +285,7 @@
           ],
           "lines_fr": [
             "Tous les rivaux de la région ont appris de moi, ou ont essayé. À partir d'aujourd'hui, c'est de toi qu'ils apprendront.",
-            "La salle t'attend. Va leur montrer leur champion."
+            "La salle t'attend. Va te montrer : elle attend son champion."
           ]
         },
         {
