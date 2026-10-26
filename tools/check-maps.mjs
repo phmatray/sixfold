@@ -42,7 +42,7 @@ const TALL_OF = (a) => TALL[a] ?? 1;
 const LADDER = new Set(eval(`(${src.match(/export const LADDER = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove", "stone", "cave"]);
 const BEDS = new Set([...TRACKS, "interior"]); // audio.js BEDS
-const THEMES = new Set([...BEDS, "finale"]); // a scene's `music:` may also be a theme of its own (engine overworld::TRACKS)
+const THEMES = new Set([...BEDS, "rook", "finale"]); // a scene's `music:` may also be a theme of its own (engine overworld::TRACKS)
 const FENCES = new Set(["fence", "wall_dry", "hedge"]);
 const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/atlas.json`, "utf8")) : null;
 const BACK = { n: "s", s: "n", e: "w", w: "e" };

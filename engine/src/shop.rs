@@ -551,9 +551,17 @@ mod tests {
     #[test]
     fn economy_sim() {
         let mut first = vec![];
-        first.extend(TRAINERS.iter().map(|t| Source {
+        first.extend(TRAINERS.iter().filter(|t| !t.story()).map(|t| Source {
             minutes: 5,
             facets: t.purse(),
+            packs: 0,
+        }));
+        // 1.7 Rook's four scenes (§8.2), each played once whatever the result:
+        // a minute's scene and two minutes a prize; a first playthrough wins
+        // about half of them (the purse), and a loss pays the consolation.
+        first.extend(TRAINERS.iter().filter(|t| t.story()).map(|t| Source {
+            minutes: 1 + 2 * u32::from(t.prizes),
+            facets: (t.purse() + 4 * CONSOLATION_PER_PRIZE) / 2,
             packs: 0,
         }));
         first.extend(RIVALS.iter().map(|r| Source {

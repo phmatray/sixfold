@@ -134,12 +134,14 @@ const clouds = (() => {
 // "p" path (the map's `ground.path` layer), "s" and "=" sand, "r" stone,
 // "~" and "H" (a pier) water. Anything else shows the base layer. A map's optional
 // `paint` rows (same size as `tiles`) paint a layer on any tile, a raised one too.
+// `ground.sand` swaps the "s" layer's texture: a far bank borrowing the next region's
+// ground (WORLD_RULES 5.7) paints "s" with `"sand": "moss"`.
 const CHANNEL = { p: 0, s: 1, "=": 1, r: 2, "~": 3, H: 3 };
 
 // Overlay textures a map uses (the base stands in for the unused ones).
 export const groundLayers = (map) => {
-  const g = map.ground, t = map.tiles.join("");
-  return [g.base, g.path ?? g.base, /[s=]/.test(t) ? "sand" : g.base, t.includes("r") ? "stone" : g.base];
+  const g = map.ground, t = map.tiles.join("") + (map.paint ?? []).join("");
+  return [g.base, g.path ?? g.base, /[s=]/.test(t) ? g.sand ?? "sand" : g.base, t.includes("r") ? "stone" : g.base];
 };
 
 // `tile(x, z)` is the map's tile character.

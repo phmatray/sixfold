@@ -217,20 +217,11 @@ const SFX = {
     tone(d, t + 0.45, hz(96), 0.9, { peak: 0.05 });
   },
   heal: (d, t) => notes(d, t, [79, 84], 0.1, { peak: 0.1, dur: 0.35 }),
-  // A pack: the tear, ten cards turning (the Rare last and slower), its shine.
-  // Matches the reveal's timeline in packs.rs. n = 1: shown all at once.
-  pack: (d, t, n) => {
-    if (packBus) packBus.disconnect();
-    packBus = ctx.createGain();
-    packBus.connect(sfxBus);
-    const p = packBus;
-    noise(p, t, 0.35, { f: 1200, f2: 4500, q: 0.8, a: 0.05, peak: 0.3 });
-    noise(p, t + 0.12, 0.2, { type: "highpass", f: 3000, peak: 0.12 });
-    if (n) return SFX.rare(p, t + 0.4);
-    // FLIP_AT, FLIP_STEP and RARE_AT in packs.rs.
-    for (let i = 0; i < 9; i++) SFX.flip(p, t + 0.9 + i * 0.18 + 0.28);
-    SFX.flip(p, t + 3.12 + 0.45);
-    SFX.rare(p, t + 3.12 + 0.75);
+  // The held beat before a pack's Rare: a low swell and a hiss rising into it.
+  swell: (d, t, dur) => {
+    tone(d, t, hz(43), dur, { type: "sawtooth", f2: hz(55), a: dur * 0.9, peak: 0.035, lin: true, rel: 0.08 });
+    tone(d, t, hz(67), dur, { type: "triangle", f2: hz(79), a: dur * 0.9, peak: 0.04, lin: true, rel: 0.08 });
+    noise(d, t, 0.12, { f: 3000, q: 2.5, a: dur, peak: 0.07 });
   },
   packstop: () => {
     if (packBus) packBus.disconnect();
@@ -372,6 +363,32 @@ export function sfx(name, n = 0) {
   stats.sfx++;
   stats.last = name;
   f(sfxBus, t + 0.005, n);
+}
+
+// A pack's reveal, from `from` ms on its timeline, played `rate` times as
+// fast: the tear, the nine cards turning, the held beat, the Rare. The
+// timeline is packs.rs's (FLIP_AT, FLIP_STEP, BEAT_AT, RARE_AT), passed in;
+// the offsets below are halfway through a turn (style.css: .flip-inner 560ms,
+// .flip.rare 900ms) and the Rare's shine.
+// Called again when the speed changes; "packstop" silences it.
+export function packReveal(from, rate, flipAt, flipStep, beatAt, rareAt) {
+  if (!ctx || ctx.state !== "running") return;
+  if (packBus) packBus.disconnect();
+  packBus = ctx.createGain();
+  packBus.connect(sfxBus);
+  const p = packBus, t0 = ctx.currentTime + 0.005;
+  const at = (ms) => t0 + Math.max(0, ms - from) / 1000 / rate;
+  if (from <= 0) {
+    noise(p, t0, 0.35, { f: 1200, f2: 4500, q: 0.8, a: 0.05, peak: 0.3 });
+    noise(p, t0 + 0.12, 0.2, { type: "highpass", f: 3000, peak: 0.12 });
+  }
+  // Each card is heard halfway through its turn.
+  for (let i = 0; i < 9; i++) if (flipAt + i * flipStep + 280 >= from) SFX.flip(p, at(flipAt + i * flipStep + 280));
+  if (from < rareAt) SFX.swell(p, at(Math.max(from, beatAt)), (rareAt - Math.max(from, beatAt)) / 1000 / rate);
+  if (rareAt + 450 >= from) SFX.flip(p, at(rareAt + 450));
+  if (rareAt + 750 >= from) SFX.rare(p, at(rareAt + 750));
+  stats.sfx++;
+  stats.last = "pack";
 }
 
 // ---------- Ambience: a bed per region, by day and by night ----------
@@ -721,6 +738,20 @@ TRACKS.duel_boss = {
   hot: HOT,
   mix: { lead: 0.08, pad: 0.03, bass: 0.15, keys: 0.025 },
 };
+// Rook's theme (WORLD_DESIGN §14.3): minor, 100 bpm, a tune that climbs toward the sixth and
+// never quite settles; his scenes play it (`music:rook`), and his duels play it as a rival's
+// theme, quicker and over the rival drums.
+TRACKS.rook = {
+  bpm: 100, root: 62, scale: "minor", chords: [0, 5, 3, 6, 0, 5, 4, 4],
+  lead:
+    "3---5-6-7---6-5-" + "4---3-----------" + "3---5-6-a---9-7-" + "8-------7-------" +
+    "a---9-7-8---7-5-" + "6---5-4-3-------" + "2-3-4-5-6-5-4-2-" + "3---------------",
+  bass: "x...x.5.x...5.o.",
+  keys: "..x...x...x...x.",
+  drums: { kick: "x.......x.......", snare: "....x.......x...", shaker: "..x...x...x...x." },
+  mix: { lead: 0.075, pad: 0.03, bass: 0.13, keys: 0.022 },
+};
+TRACKS.duel_rook = { ...RIVAL, root: 62, bpm: 118, scale: "minor", chords: TRACKS.rook.chords, lead: TRACKS.rook.lead, keys: TRACKS.rook.keys };
 // The ending (#67). The finale's hall scene: the title's hook slowed to a processional,
 // held on the pads, no drums but a soft shaker (a `music:finale` cue).
 TRACKS.finale = {
@@ -825,7 +856,7 @@ function startPlayer(name, t) {
 
 let current = null, duelTrack = "duel";
 
-/// The theme "duel" plays from now on ("duel", "duel_rival_<region>", "duel_boss"); set as each duel starts.
+/// The theme "duel" plays from now on ("duel", "duel_rival_<region>", "duel_boss", "duel_rook"); set as each duel starts.
 export function duelTheme(name) {
   duelTrack = TRACKS[name] ? name : "duel";
 }

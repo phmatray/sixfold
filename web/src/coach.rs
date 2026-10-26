@@ -185,16 +185,15 @@ pub fn Finish() -> impl IntoView {
             .with_untracked(|p| rivals.iter().find(|r| !r.beaten(p)))
             .unwrap_or(&rivals[0]);
         let next = match (open, first) {
-            (true, true) => tr(
-                format!(
-                    "Open your packs, then head into the world. First rival: {}, {}.",
-                    r.name, r.place
-                ),
-                format!(
-                    "Ouvrez vos boosters, puis partez dans le monde. Premier rival : {}, {}.",
-                    r.name, r.place
-                ),
-            ),
+            // The Journal's first objective, word for word, so the two agree.
+            (true, true) => {
+                let goal =
+                    progress.with_untracked(|p| sixfold_engine::objective::objective(p).text(p));
+                tr(
+                    format!("Open your packs, then head into the world. {goal}"),
+                    format!("Ouvrez vos boosters, puis partez dans le monde. {goal}"),
+                )
+            }
             _ => tr(
                 format!("Next rival: {}, {}.", r.name, r.place),
                 format!("Prochain rival : {}, {}.", r.name, r.place),

@@ -78,9 +78,10 @@ const FACINGS: [&str; 4] = ["n", "e", "s", "w"];
 /// The bubbles an `emote:` cue may pop over a head.
 pub const EMOTES: [&str; 5] = ["bang", "what", "dots", "heart", "note"];
 /// Sounds a `sfx:` cue may play (the world's sound names in `web/audio/audio.js`).
-pub const SOUNDS: [&str; 5] = ["spark", "chime", "jingle", "gate", "seal"];
-/// Tracks a `music:` cue may switch to (the world's tracks in `web/audio/audio.js`).
-pub const TRACKS: [&str; 10] = [
+pub const SOUNDS: [&str; 6] = ["spark", "chime", "jingle", "gate", "seal", "door"];
+/// Tracks a `music:` cue may switch to (the world's tracks in `web/audio/audio.js`,
+/// and Rook's theme for his scenes).
+pub const TRACKS: [&str; 11] = [
     "overworld",
     "interior",
     "ember",
@@ -90,6 +91,7 @@ pub const TRACKS: [&str; 10] = [
     "grove",
     "stone",
     "cave",
+    "rook",
     // The finale's hall scene (#67): the title's hook, slow and solemn.
     "finale",
 ];

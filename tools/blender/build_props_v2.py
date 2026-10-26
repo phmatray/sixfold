@@ -650,6 +650,15 @@ def build_seal_stone(k):
     contact(k, 1.0)
 
 
+def build_seal_stone_carved(k):
+    """The duel hall's seal stone after Sable's carving (1.7, the story's epilogue): the same stone, its seventh face
+    cut with a hexagon outline, still blank inside."""
+    build_seal_stone(k)
+    H = (0, 0, 30)
+    k.add(cyl(0.42, 0.42, 0.012, 6), "seal_dk", T((0, 0, 1.894), H))
+    k.add(cyl(0.36, 0.36, 0.016, 6), "seal_top", T((0, 0, 1.896), H))
+
+
 def build_cave_mouth(k):
     """2 x 1 cave opening at the foot of a cliff (the cliff stands on the row behind): a rough arch of
     boulders round a deep black throat, timber bracing just inside, a lantern on the lintel (`lamp_glow`),
@@ -822,7 +831,7 @@ def build_log(k):
 
 FINDS = {"stump": build_stump, "log": build_log}
 
-SHARED = {"waymark": build_waymark, "seal_stone": build_seal_stone, "cave_mouth": build_cave_mouth,
+SHARED = {"waymark": build_waymark, "seal_stone": build_seal_stone, "seal_stone_carved": build_seal_stone_carved, "cave_mouth": build_cave_mouth,
           "climb_wall": build_climb_wall, "inn_sign": build_inn_sign}
 
 OUTDOOR = {"hanging_sign": build_hanging_sign, "curio_cabinet": build_curio_cabinet}
@@ -841,7 +850,7 @@ B.ALPHA.update({"jar_glass": 0.4, "bottle_glass": 0.45})
 SLOTS = {  # Blender (x, y) in the PropsV2 scene; footprints never overlap
     "oven": (-9, 6), "printing_press": (-6, 6), "type_case": (-3.5, 6), "bookcase": (-1, 6), "bed": (2, 6),
     "workbench": (5, 6), "light_box": (8, 6), "net_locker": (10.5, 6),
-    "hanging_sign": (-9.5, 3), "curio_cabinet": (-7, 3), "waymark": (-4.5, 3), "seal_stone": (-2, 2.5),
+    "hanging_sign": (-9.5, 3), "curio_cabinet": (-7, 3), "waymark": (-4.5, 3), "seal_stone": (-2, 2.5), "seal_stone_carved": (13, 3),
     "cave_mouth": (1, 3), "climb_wall": (3.5, 3), "inn_sign": (5.5, 3),
     "stump": (8, 3), "log": (10.5, 3),
     "curio": (-9, 0), "brass_thimble": (-8, 0), "heron_feather": (-7, 0), "message_bottle": (-6, 0),

@@ -289,7 +289,7 @@ export const FOOT = {
   bridge: [2, 4], lighthouse: [2, 2], boat: [2, 1], stall: [2, 1], stall_b: [2, 1], cottage: [5, 4],
   workshop: [3, 3], fountain: [3, 3], bench: [2, 1],
   oven: [2, 1], printing_press: [2, 1], bookcase: [2, 1], bed: [2, 1], workbench: [2, 1], light_box: [2, 1],
-  curio_cabinet: [2, 1], seal_stone: [2, 2], cave_mouth: [2, 1], log: [2, 1],
+  curio_cabinet: [2, 1], seal_stone: [2, 2], seal_stone_carved: [2, 2], cave_mouth: [2, 1], log: [2, 1],
   ferry: [4, 2], cave_mouth_slate: [2, 1],
   kiln: [4, 4], glass_furnace: [2, 2], glass_rack: [2, 1], lava_glass: [2, 2], // Ember
   observatory: [5, 5], lift_tower: [2, 1], rodspire: [3, 3], telescope: [2, 2], // Storm
