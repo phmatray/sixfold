@@ -501,8 +501,9 @@ fn voice(id: &str) -> f64 {
 #[derive(Clone, PartialEq)]
 enum Sheet {
     Duel(String),
-    /// A sign, a locked door, a gift: a title and a line.
-    Note(&'static str, String),
+    /// A sign, a locked door, a gift: a title, a line, and for a shut way
+    /// the hint saying what would open it.
+    Note(&'static str, String, Option<String>),
     Talk(Talk),
     Item(String),
     /// A card found in the world, now in the collection.
@@ -754,16 +755,15 @@ pub fn WorldScreen() -> impl IntoView {
                     // A gated door or gate sends "kind cond": once the hero has been
                     // where its field item comes from, its text says what would open it.
                     let (kind, cond) = a.split_once(' ').unwrap_or((&a, ""));
-                    let text = match progress.with_untracked(|p| objective::hint(p, cond)) {
-                        Some(k) => format!("{b}\n\n{}", k.get.get()),
-                        None => b,
-                    };
+                    let hint = progress
+                        .with_untracked(|p| objective::hint(p, cond))
+                        .map(|k| k.get.get().to_string());
                     let title = match kind {
                         "locked" => tr("Locked", "Fermé à clé"),
                         "gate" => tr("No way through", "Pas de passage"),
                         _ => tr("It says", "On peut lire"),
                     };
-                    _ = sheet.try_set(Some(Sheet::Note(title, text)));
+                    _ = sheet.try_set(Some(Sheet::Note(title, b, hint)));
                 }
                 // A gate on this map just opened: "A way opens: <name>", said once.
                 // A phase that just arrived (a time gate's reason) is kept in front.
@@ -941,6 +941,7 @@ pub fn WorldScreen() -> impl IntoView {
                                         format!("You have ⬡ {}.", p.coins()),
                                         format!("Vous avez ⬡ {}.", p.coins()),
                                     ),
+                                    None,
                                 ))
                             }
                             // Facets show in the counter (it reads Progress).
@@ -992,7 +993,11 @@ pub fn WorldScreen() -> impl IntoView {
                     names.join(" et ")
                 ),
             );
-            next = next.or(Some(Sheet::Note(tr("A gift", "Un cadeau"), text.clone())));
+            next = next.or(Some(Sheet::Note(
+                tr("A gift", "Un cadeau"),
+                text.clone(),
+                None,
+            )));
             announce.set(text);
         }
         if let Some(Sheet::Card(id)) = &next {
@@ -1405,9 +1410,13 @@ pub fn WorldScreen() -> impl IntoView {
                                 </span>
                                 <span class="sr-only">{t.line().to_string()}</span>
                                 // Shown once the line is out: more to come, or the end.
-                                <span class="talk-next" class:ready={move || typed.get() >= len} aria-hidden="true">
-                                    {if more { "▾" } else { "■" }}
-                                </span>
+                                <svg class="talk-next" class:ready={move || typed.get() >= len} class:end=!more viewBox="0 0 12 12" aria-hidden="true">
+                                    {if more {
+                                        view! { <path d="M1 3h10l-5 6.5z" /> }.into_any()
+                                    } else {
+                                        view! { <rect x="2" y="2" width="8" height="8" rx="1.5" /> }.into_any()
+                                    }}
+                                </svg>
                             </button>
                             // A cutscene's line: the scene can be skipped from here too (a tap on a phone).
                             {script.then(|| view! {
@@ -1459,9 +1468,12 @@ pub fn WorldScreen() -> impl IntoView {
                             <button class="btn primary" autofocus on:click=duel>{tr("Duel", "Jouer")}</button>
                         </div>
                     }.into_any(),
-                    Sheet::Note(title, text) => view! {
+                    Sheet::Note(title, text, hint) => view! {
                         <h2 id="world-sheet-title">{title}</h2>
                         <p class="dialog-sub note-text">{text}</p>
+                        {hint.map(|h| view! {
+                            <p class="note-hint"><b>{tr("To open it", "Pour l'ouvrir")}</b>{h}</p>
+                        })}
                         <div class="dialog-foot">
                             <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
                         </div>
@@ -1581,7 +1593,7 @@ fn Facets() -> impl IntoView {
             // Keyed on `pop`, so the animation restarts on every gain.
             {move || {
                 let gains = pop.get();
-                view! { <span class="facets-n" class:pop={gains > 0}>
+                view! { <span class="facets-n" class:gain={gains > 0}>
                     <span class="hex" aria-hidden="true"></span>{move || coins.get()}
                 </span> }
             }}

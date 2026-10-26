@@ -299,9 +299,12 @@ export function mount(el, controls, cb, start, edit = false) {
   const recheck = (animate) => {
     refresh(world, holds, gate, animate);
     if (world.gateSound !== undefined) sound(world.gateSound ? "gate" : "door"), (world.gateSound = undefined);
-    // A gate that just opened, named on screen and in the live region (once: it opened now).
-    for (const name of new Set(world.opened?.splice(0))) {
-      const text = tr(`A way opens: ${name}`, `Un passage s'ouvre : ${name}`);
+    // The gates that just opened, named on screen and in the live region (once: they opened now);
+    // two at once (both vents at nightfall) share one banner rather than the second hiding the first.
+    const names = [...new Set(world.opened?.splice(0))];
+    if (names.length) {
+      const list = names.join(tr(" and ", " et "));
+      const text = names.length > 1 ? tr(`Ways open: ${list}`, `Des passages s'ouvrent : ${list}`) : tr(`A way opens: ${list}`, `Un passage s'ouvre : ${list}`);
       showBanner(text, 4000), cb("opened", text, "");
     }
   };

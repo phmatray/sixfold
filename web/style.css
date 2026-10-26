@@ -1414,7 +1414,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .talk-box:focus-visible { outline-width: 2px; outline-offset: 6px; border-radius: 6px; }
 .talk-name { font: 700 14px var(--display); color: var(--brass-hi); letter-spacing: 0.02em; }
 .talk-line { min-height: 3em; }
-.talk-next { justify-self: end; color: var(--brass-hi); font-size: 18px; line-height: 1; opacity: 0; transition: opacity 120ms ease; }
+.talk-next { justify-self: end; width: 16px; height: 16px; fill: var(--brass-hi); opacity: 0; transition: opacity 120ms ease; }
 /* The cue shows once the line is out, and bobs: tap, click, E, Enter or Space goes on. */
 .talk-next.ready { opacity: 1; animation: talk-bob 1.1s ease-in-out infinite; }
 @keyframes talk-bob { 50% { transform: translateY(3px); } }
@@ -1442,8 +1442,16 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .item-opens { margin: 10px 0 4px; }
 .item-opens h3 { margin: 0 0 4px; font: 700 12px var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass-hi); }
 .item-opens ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: 15px; }
+/* What would open a shut way: set apart from the flavour text above it. */
+.note-hint { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: rgba(214, 172, 74, 0.1); border: 1px solid rgba(214, 172, 74, 0.35); color: var(--ink); text-wrap: pretty; }
+.note-hint b { display: block; margin-bottom: 2px; font: 700 12px var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass-hi); }
 .item-preview { flex: none; width: 140px; height: 140px; border-radius: 14px; background: radial-gradient(circle, #24406a, #111d33 70%); }
-@media (max-width: 520px) { .item-got { flex-direction: column; text-align: center; } .item-got .dialog-foot { justify-content: center; } }
+@media (max-width: 520px) {
+  .item-got { flex-direction: column; text-align: center; }
+  .item-got .dialog-foot { justify-content: center; }
+  /* Centred lines: bullets would hang far left of them. */
+  .item-opens ul { list-style: none; padding: 0; }
+}
 
 @media (hover: none) {
   /* Phones: just the wordmark and Leave up top; 44 px targets. */
@@ -1654,7 +1662,7 @@ select option { background: var(--panel); color: var(--ink); }
 .ach-text span { color: var(--muted); font-size: 14px; }
 .ach-pay { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
 .ach-state { font-size: 13px; color: var(--muted); min-width: 7ch; text-align: right; }
-.ach-medal { width: 30px; aspect-ratio: 1 / 1.1; flex: none; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--line); }
+.ach-medal { width: 30px; aspect-ratio: 1; flex: none; clip-path: polygon(50% 0, 64.4% 25%, 93.3% 25%, 78.9% 50%, 93.3% 75%, 64.4% 75%, 50% 100%, 35.6% 75%, 6.7% 75%, 21.1% 50%, 6.7% 25%, 35.6% 25%); background: color-mix(in srgb, var(--muted) 30%, var(--panel-2)); }
 .ach.done { border-color: rgba(214, 172, 74, 0.45); background: color-mix(in srgb, var(--brass) 8%, var(--panel)); }
 .ach.done .ach-medal, .ach-toast .ach-medal { background: linear-gradient(150deg, var(--brass-hi) 10%, var(--brass) 55%, #8a6421 95%); }
 .ach.done .ach-pay, .ach.done .ach-state { color: var(--brass-hi); }
@@ -1662,9 +1670,9 @@ select option { background: var(--panel); color: var(--ink); }
 .stats { display: grid; gap: 22px; }
 .stats h2 { font-size: 18px; margin: 0 0 8px; }
 .stats dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
-.stat { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
-.stat dt { color: var(--muted); }
-.stat dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stats .stat { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
+.stats .stat dt { color: var(--muted); }
+.stats .stat dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
 .stats-note { color: var(--muted); font-size: 14px; margin: 0; }
 .records-link { margin-top: 28px; }
 .records-link .page-lead { margin-bottom: 10px; }
@@ -1674,6 +1682,7 @@ select option { background: var(--panel); color: var(--ink); }
 .ach-toast .ach-kicker { grid-column: 1 / -1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brass-hi); }
 .ach-toast b { font: 800 17px/1.25 var(--display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ach-toast .ach-pay { color: var(--brass-hi); }
+.ach-toast .gem, .achievements .page-lead .gem { display: inline-block; width: 14px; vertical-align: -2px; }
 @keyframes ach-in { from { opacity: 0; transform: translateY(-12px); } }
 @media (prefers-reduced-motion: reduce) { .ach-toast { animation: none; } }
 @media (max-width: 560px) {
@@ -2173,11 +2182,11 @@ select option { background: var(--panel); color: var(--ink); }
 .facets-n { display: inline-flex; align-items: center; gap: 7px; }
 .facets .hex, .gem { width: 17px; flex: none; aspect-ratio: 1 / 1.1; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: linear-gradient(150deg, #e9fbff 10%, #7fd3e6 45%, #2f8fae 80%); }
 .reward .gem { width: 34px; }
-.facets-n.pop { animation: facets-pop 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
-.facets-n.pop .hex { animation: facets-spin 0.6s ease-out; }
+.facets-n.gain { animation: facets-pop 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+.facets-n.gain .hex { animation: facets-spin 0.6s ease-out; }
 @keyframes facets-pop { 30% { transform: scale(1.28); color: #bff1ff; } }
 @keyframes facets-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .facets-n.pop, .facets-n.pop .hex { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .facets-n.gain, .facets-n.gain .hex { animation: none; } }
 .found-card { --w: 120px; flex: none; transform: rotate(-3deg); }
 .world-top .seal-badge + .btn { margin-left: 0; }
 
