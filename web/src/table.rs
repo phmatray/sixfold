@@ -537,11 +537,13 @@ pub fn Station(player: usize) -> impl IntoView {
             </div>
             <div class="prizes" class:undealt=move || info.with(|i| i.prizes.is_empty()) role="img" aria-label=move || {
                 let n = left();
+                // French keeps 0 and 1 singular.
+                let s = if n == 1 || (n == 0 && fr()) { "" } else { "s" };
                 match (me, fr()) {
-                    (true, false) => format!("You have {n} prizes left"),
-                    (false, false) => format!("Opponent has {n} prizes left"),
-                    (true, true) => format!("Il vous reste {n} Récompenses"),
-                    (false, true) => format!("Il reste {n} Récompenses à l'adversaire"),
+                    (true, false) => format!("You have {n} prize{s} left"),
+                    (false, false) => format!("Opponent has {n} prize{s} left"),
+                    (true, true) => format!("Il vous reste {n} Récompense{s}"),
+                    (false, true) => format!("Il reste {n} Récompense{s} à l'adversaire"),
                 }
             }>
                 <span class="prize-grid">
@@ -550,7 +552,7 @@ pub fn Station(player: usize) -> impl IntoView {
                         view! { <span class="prize" class:taken=!p class:taking=taking></span> }
                     }).collect_view()}
                 </span>
-                <span class="prize-n"><b>{left}</b><span class="res-long">{tr("prizes left", "Récompenses restantes")}</span><span class="res-short">{tr("left", "restantes")}</span></span>
+                <span class="prize-n"><b>{left}</b><span class="res-long">{move || if left() == 1 { tr("prize left", "Récompense restante") } else { tr("prizes left", "Récompenses restantes") }}</span><span class="res-short">{tr("left", "restantes")}</span></span>
             </div>
             {me.then(|| view! {
                 <ul class="turn-res" class:idle=move || !res.with(|r| r.as_ref().is_some_and(|r| r.0)) aria-label=tr("This turn", "Ce tour")>

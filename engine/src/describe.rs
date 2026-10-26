@@ -605,7 +605,7 @@ fn name(id: CardId) -> &'static str {
 /// unnumbered (the Hexon's name says which one).
 fn slot_label(slot: usize) -> String {
     if slot == 0 {
-        "Active".to_string()
+        tr("Active", "Actif").to_string()
     } else {
         tr("Bench", "Banc").to_string()
     }
@@ -1542,7 +1542,7 @@ mod tests {
                 "Pendant votre prochain tour, votre Actif ne peut pas battre en retraite",
                 "Pendant son prochain tour, l'Actif adverse ne peut pas battre en retraite",
                 "Pendant votre prochain tour, l'Actif adverse ne subit aucun dégât des attaques",
-                "Attacher Énergie Bosquet à Mossling (Active)",
+                "Attacher Énergie Bosquet à Mossling (Actif)",
                 "Terminer le tour",
                 "Votre tour",
             ]
