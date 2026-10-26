@@ -4324,7 +4324,7 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html
 }
 .world-sheet:has(> .challenge)::backdrop { background: linear-gradient(0deg, color-mix(in srgb, var(--outline) 45%, transparent), transparent 55%); }
 .challenge {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px 28px;
+  display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 16px 24px;
   grid-template-areas: "head head" "terms deck" "note note" "act act";
 }
 .ch-head { grid-area: head; }
@@ -4371,7 +4371,7 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html
 /* A ledger: label, then what it says, one line each. */
 .ch-terms { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 16px; align-content: start; align-items: center; margin: 0; padding: 2px 0 0 2px; }
 .ch-term { display: contents; }
-.ch-term dt { font-size: var(--fs-sm); font-weight: 700; color: var(--wood-dk); }
+.ch-term dt { align-self: start; padding-top: 3px; font-size: var(--fs-sm); font-weight: 700; color: var(--wood-dk); }
 .ch-term dd { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0; }
 .ch-term dd > b { font: 800 var(--fs-xl)/1.1 var(--display); }
 .ch-prizes { display: inline-flex; padding-left: 6px; }
@@ -4415,7 +4415,17 @@ button.ch-deck-now:active { transform: translateY(3px); box-shadow: 0 0 0 var(--
 .ch-star .card { --w: 34px; transform: rotate(-4deg); }
 .ch-deck-info { display: grid; gap: 2px; min-width: 0; }
 .ch-deck-name { font: 800 var(--fs-xl)/1.15 var(--display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ch-deck-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: var(--fs-sm); color: var(--wood-dk); }
+.ch-deck-meta { display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--wood-dk); white-space: nowrap; }
+.ch-deck-meta .ch-colors { font-size: var(--fs-md); }
+/* While the offer is open the frozen scene slides up, so the hero and the
+   duelist stay in view above the sheet. */
+.world-host { transition: transform var(--dur-screen) var(--ease-out); }
+.world:has(.world-sheet[open] > .challenge) .world-stage { background: var(--outline); }
+.world:has(.world-sheet[open] > .challenge) .world-host {
+  transform: translateY(min(-120px, -18vh));
+  -webkit-mask-image: linear-gradient(0deg, transparent, #000 160px);
+  mask-image: linear-gradient(0deg, transparent, #000 160px);
+}
 .ch-step { flex: none; display: grid; place-items: center; width: 34px; height: 44px; padding: 0; border: 0; background: none; color: var(--outline); cursor: pointer; }
 .ch-step svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; transition: transform var(--dur-quick) ease; }
 .ch-step:hover svg { transform: scale(1.25); }
@@ -4452,16 +4462,21 @@ html[data-input="pad"] .challenge :is(.btn, button.ch-deck-now):focus::before { 
 @media (max-width: 560px) {
   .world-sheet:has(> .challenge) { padding: 14px 14px 16px; }
   .challenge { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "terms" "deck" "note" "act"; gap: 12px; }
-  .ch-head { grid-template-areas: "face who" "say say"; column-gap: 14px; align-items: center; }
-  .ch-frame { width: 76px; }
-  .world-sheet .ch-name { font-size: var(--fs-3xl); padding: 1px 12px 4px; }
-  .ch-title { font-size: var(--fs-sm); margin-top: 6px; }
-  .ch-say { font-size: var(--fs-lg); padding: 8px 12px; }
-  .ch-say::before { left: 26px; top: -11px; border-width: 2.5px 0 0 2.5px; }
-  .ch-head { padding-bottom: 12px; }
-  .ch-terms { gap: 6px 14px; }
-  .ch-actions { display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px 34px; padding-left: 30px; }
-  .challenge .btn { padding-inline: 10px; font-size: var(--fs-lg); }
+  .ch-head { grid-template-areas: "face who" "say say"; gap: 8px 12px; align-items: center; padding-bottom: 10px; }
+  .ch-frame { width: 64px; border-radius: 10px; }
+  .world-sheet .ch-name { font-size: var(--fs-3xl); padding: 0 12px 3px; }
+  .ch-title { font-size: var(--fs-sm); margin-top: 4px; }
+  .ch-say { font-size: var(--fs-base); padding: 7px 12px; }
+  .ch-say::before { left: 22px; top: -11px; border-width: 2.5px 0 0 2.5px; }
+  .ch-terms { gap: 4px 14px; }
+  .ch-term dd > b, .ch-facets b { font-size: var(--fs-lg); }
+  .ch-deck { gap: 4px; }
+  .ch-deck-now { min-height: 52px; padding-block: 4px; }
+  .ch-star .card { --w: 28px; }
+  .ch-deck-name { font-size: var(--fs-lg); }
+  .ch-actions { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 10px 34px; padding: 0 0 0 30px; }
+  .challenge .btn { min-width: 0; min-height: 50px; padding-inline: 8px; font-size: var(--fs-lg); }
+  .challenge kbd { display: none; }
   .challenge .btn.primary { min-width: 0; }
   .challenge :is(.btn, button.ch-deck-now)::before { left: -32px; width: 28px; }
   .ch-deck-row:has(.ch-step) button.ch-deck-now::before { left: -70px; }
@@ -4469,7 +4484,7 @@ html[data-input="pad"] .challenge :is(.btn, button.ch-deck-now):focus::before { 
 @media (prefers-reduced-motion: reduce) {
   .world-sheet .ch-name { animation: none; }
   .challenge :is(.btn, button.ch-deck-now)::before { animation: none !important; transition: none; }
-  .challenge .btn, button.ch-deck-now { transition: none; }
+  .challenge .btn, button.ch-deck-now, .world-host { transition: none; }
 }
 @media (max-width: 760px), (orientation: portrait) {
   .title-foot details[open] .settings-body { bottom: calc(128px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 160px); }

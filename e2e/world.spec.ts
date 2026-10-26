@@ -65,3 +65,39 @@ test("the world: walk, take a door and back, open the menu, and Continue resumes
   await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", saved.split(",").slice(1).join(","));
   expect(await at(page)).toEqual(saved);
 });
+
+test("a duelist's challenge stays in the world: their words, the terms, arrows and Escape", async ({ page }) => {
+  await title(page);
+  await menuItem(page, "Explore the world").click();
+  await loaded(page);
+  await page.keyboard.press("Escape"); // the intro scene
+  await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
+  // Two tiles east of Tobin, who looks east: one step west and he spots the hero.
+  await page.locator(".world-host").evaluate((el) => (el as unknown as { sixfoldWarp: (...a: unknown[]) => void }).sixfoldWarp("overworld", 26, 27, "w"));
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^26,27/, { timeout: 15_000 });
+  await page.locator(".world-stage").focus();
+  await page.keyboard.down("ArrowLeft");
+  await page.waitForTimeout(250);
+  await page.keyboard.up("ArrowLeft");
+  const talk = page.locator(".talk-box");
+  await expect(talk).toBeVisible({ timeout: 15_000 });
+  while (await talk.isVisible()) {
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(400);
+  }
+
+  const offer = page.getByRole("dialog", { name: "Challenge Tobin?" });
+  await expect(offer).toBeVisible();
+  await expect(offer).toContainText("Duel me!"); // the line he just said
+  await expect(offer).toContainText("Laid-back");
+  await expect(offer).not.toContainText(/\bAI\b/);
+  const go = offer.getByRole("button", { name: /^Challenge/ });
+  await expect(go).toBeFocused();
+  // Arrows move between the answers; Escape is Not now.
+  await page.keyboard.press("ArrowLeft");
+  await expect(offer.getByRole("button", { name: /^Not now/ })).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(go).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(offer).toBeHidden();
+});
