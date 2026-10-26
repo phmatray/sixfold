@@ -354,7 +354,12 @@ export function mount(el, controls, cb, start, edit = false) {
     moved: () => (lastHero = ""), // the hero's tile is saved again (not during a scene: a reload replays it)
   });
   const opens = (wp) => holds(wp.if);
-  const facing = () => (hero.sit ? null : lifts.facing(world, hero) ?? facingOf(world, hero, opens)) ?? seats.facing(world, hero);
+  // A find already taken on a seat (coins under a bench) gives the place back to sitting.
+  const spent = (it) => it?.kind === "find" && holds(`flag:found_${it.id}`);
+  const facing = () => {
+    const it = hero.sit ? null : lifts.facing(world, hero) ?? facingOf(world, hero, opens);
+    return (spent(it) && seats.facing(world, hero)) || (it ?? seats.facing(world, hero));
+  };
 
   // Start a step toward `f`. A door warp is entered even though its tile is solid;
   // pushing against the wall from a warp tile with that `dir` leaves the room.
