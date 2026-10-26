@@ -3046,7 +3046,8 @@ button.pile { cursor: pointer; }
   .station-name b { white-space: normal; max-width: 86px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.15; }
   .prize-n .res-short { display: inline; font-size: 12px; }
   .plate-note { -webkit-line-clamp: 2; line-clamp: 2; }
-  .dock .coach { top: calc(62px + env(safe-area-inset-top)); }
+  /* The lesson hides the history rail, so the coach takes its row, beside the menu button. */
+  .dock .coach { top: calc(6px + env(safe-area-inset-top)); right: 60px; }
   .duel-menu-btn { z-index: 45; }
   .end-turn { font-size: 14px; }
   .prompt.theirs { padding-right: 12px; }
