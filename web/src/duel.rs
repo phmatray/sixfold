@@ -2,7 +2,8 @@
 
 use leptos::prelude::*;
 use sixfold_engine::ai::Difficulty;
-use sixfold_engine::decks::PREBUILT;
+use sixfold_engine::decks::{unlocked, PREBUILT, STARTER};
+use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{card, tr, CardId};
 
@@ -33,8 +34,9 @@ fn prebuilt_opts() -> Vec<Opt> {
         .collect()
 }
 
-/// Your saved decks first, then the prebuilts you don't already hold as-is.
-pub fn my_opts(p: &Profile) -> Vec<Opt> {
+/// Your saved decks first, then the starter and the decks you have unlocked
+/// (on loan) that you don't already hold as-is.
+pub fn my_opts(p: &Profile, progress: &Progress) -> Vec<Opt> {
     let mut held: Vec<Vec<CardId>> = p.decks.iter().map(|d| sorted(&d.cards)).collect();
     held.sort();
     p.decks
@@ -46,16 +48,19 @@ pub fn my_opts(p: &Profile) -> Vec<Opt> {
             problem: deck_problem(d, &p.collection),
         })
         .chain(
-            prebuilt_opts()
-                .into_iter()
-                .filter(|o| held.binary_search(&sorted(&o.cards)).is_err())
-                .map(|o| Opt {
+            // The starter on loan too, so a duel is always possible.
+            std::iter::once(&STARTER)
+                .chain(unlocked(progress).into_iter().map(|u| u.deck))
+                .map(|d| Opt {
+                    name: d.name.to_string(),
                     desc: tr(
-                        format!("Prebuilt. {}", o.desc),
-                        format!("Préconstruit. {}", o.desc),
+                        format!("On loan. {}", d.description),
+                        format!("Prêté. {}", d.description),
                     ),
-                    ..o
-                }),
+                    cards: d.cards(),
+                    problem: None,
+                })
+                .filter(|o| held.binary_search(&sorted(&o.cards)).is_err()),
         )
         .collect()
 }
@@ -137,9 +142,10 @@ pub fn DeckPicker(
 pub fn DuelSetup() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let profile = expect_context::<RwSignal<Profile>>();
-    let mine_opts = profile.with_untracked(my_opts);
+    let progress = expect_context::<RwSignal<Progress>>();
+    let mine_opts = profile.with_untracked(|p| progress.with_untracked(|g| my_opts(p, g)));
     let theirs_opts = prebuilt_opts();
-    // Every prebuilt is listed, as your copy or on its own, so a deck is always playable.
+    // Your decks, then the unlocked ones on loan; the first that plays is picked.
     let first_legal = mine_opts.iter().position(|o| o.problem.is_none());
     let mine = RwSignal::new(first_legal.unwrap_or(0));
     // Ember Rush, a plain attacking deck: a gentler first opponent than a
@@ -153,10 +159,12 @@ pub fn DuelSetup() -> impl IntoView {
         StoredValue::new(theirs_opts.clone()),
     );
     let start = move || {
-        let (a, b) = (
-            m.with_value(|o| o[mine.get()].clone()),
-            t.with_value(|o| o[theirs.get()].clone()),
-        );
+        let (Some(a), Some(b)) = (
+            m.with_value(|o| o.get(mine.get()).cloned()),
+            t.with_value(|o| o.get(theirs.get()).cloned()),
+        ) else {
+            return;
+        };
         if a.problem.is_some() {
             return;
         }

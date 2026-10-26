@@ -3,8 +3,8 @@
 use leptos::prelude::*;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{
-    card, card_id, fr, hints, tr, AddError, Advice, CardId, CardKind, Collection, DeckError,
-    DeckList, DeckListError, SortBy, DECK_SIZE, MAX_COPIES,
+    card, card_id, fr, hints, tr, AddError, CardId, CardKind, Collection, DeckError, DeckList,
+    DeckListError, SortBy, DECK_SIZE, MAX_COPIES,
 };
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -12,6 +12,9 @@ use wasm_bindgen::JsCast;
 use crate::art::card_color;
 use crate::binder::{inspect_handlers, FilterBar, Filters, Kind, Own, PageBar};
 use crate::board::cards;
+use crate::builder::{
+    arrow, move_focus, Advisor, BuildSheet, DeckShelf, EnergyReadout, TestSheet, Undo,
+};
 use crate::cards::{deck_colors, deck_star, face_text, CardFace, Pip};
 use crate::overlays::Inspector;
 use crate::{Screen, Ui};
@@ -148,8 +151,8 @@ enum Fix {
     ShowBasics,
     /// Show the deck pane, to choose what comes out.
     ShowDeck,
-    /// Show every card of "Your cards", to choose what goes in.
-    ShowCards,
+    /// "Complete my deck": keep the picks, fill the rest from the collection.
+    Complete,
 }
 
 /// A deck problem as a sentence naming the rule, and the fix the editor
@@ -161,37 +164,23 @@ fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Optio
             let short = DECK_SIZE - n;
             let rule = tr(
                 format!("A deck holds exactly {DECK_SIZE} cards: {short} to go."),
-                format!("Un deck compte exactement {DECK_SIZE} cartes : encore {short}."),
+                format!("Un deck compte exactement {DECK_SIZE} cartes : encore {short}."),
             );
-            // Energy fills the gap only while that leaves a playable mix.
-            let mut filled = d.clone();
-            let fills = filled.repair(e, owned);
-            let heavy = hints(&filled.cards)
-                .advice()
-                .iter()
-                .any(|a| matches!(a, Advice::MuchEnergy(_)));
-            if fills && !heavy {
-                let label = tr(
-                    format!("Fill with {short} energy"),
-                    format!("Compléter avec {short} énergies"),
-                );
-                (rule, Some((label, Fix::Repair(e))))
-            } else {
-                (
-                    tr(
-                        format!("{rule} Energy alone would leave too few Hexons and trainers: add some first."),
-                        format!("{rule} Avec seulement des énergies, il resterait trop peu d'Hexons et de Dresseurs : ajoutez-en d'abord."),
-                    ),
-                    Some((tr("Show your cards", "Voir vos cartes").into(), Fix::ShowCards)),
-                )
-            }
+            // The one smart fill, the same as the tool rail's.
+            (
+                rule,
+                Some((
+                    tr("Complete my deck", "Compléter mon deck").into(),
+                    Fix::Complete,
+                )),
+            )
         }
         DeckListError::Illegal(DeckError::WrongSize(n)) => {
             let over = n - DECK_SIZE;
             (
                 tr(
                     format!("A deck holds exactly {DECK_SIZE} cards: {over} too many."),
-                    format!("Un deck compte exactement {DECK_SIZE} cartes : {over} de trop."),
+                    format!("Un deck compte exactement {DECK_SIZE} cartes : {over} de trop."),
                 ),
                 Some(if repairable() {
                     (
@@ -223,7 +212,7 @@ fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Optio
             (
                 tr(
                     format!("At most {MAX_COPIES} cards of one name (basic energy aside): {n} {label}."),
-                    format!("{MAX_COPIES} cartes d'un même nom au plus (hors énergies de base) : {n} exemplaires {}.", de(label)),
+                    format!("{MAX_COPIES} cartes d'un même nom au plus (hors énergies de base) : {n} exemplaires {}.", de(label)),
                 ),
                 Some((
                     tr(format!("Keep {MAX_COPIES}"), format!("En garder {MAX_COPIES}")),
@@ -240,7 +229,7 @@ fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Optio
             (
                 tr(
                     format!("A deck uses only cards you own: {n} {label} in it, {have} in your collection."),
-                    format!("Un deck n'utilise que vos cartes : {n} exemplaires {} dedans, {have} dans votre collection.", de(label)),
+                    format!("Un deck n'utilise que vos cartes : {n} exemplaires {} dedans, {have} dans votre collection.", de(label)),
                 ),
                 Some((
                     match have {
@@ -262,43 +251,8 @@ fn explain(e: DeckListError, d: &DeckList, owned: &Collection) -> (String, Optio
     }
 }
 
-/// Composition advice as a sentence (soft: the deck stays legal).
-fn advise(a: Advice) -> String {
-    match a {
-        Advice::FewBasics(n) => {
-            let (en, fr) = match n {
-                1 => ("Only 1 Basic Hexon".to_string(), "Un seul Hexon de Base".to_string()),
-                n => (format!("Only {n} Basic Hexons"), format!("Seulement {n} Hexons de Base")),
-            };
-            tr(
-                format!("{en}: opening hands without one get likely. Most decks run 10 to 15."),
-                format!("{fr} : une main de départ sans aucun devient probable. La plupart des decks en comptent 10 à 15."),
-            )
-        }
-        Advice::FewEnergy(n) => tr(
-            format!("Only {n} energy cards: attacks will wait. Most decks run 22 to 28."),
-            format!("Seulement {n} énergies : les attaques vont attendre. La plupart des decks en comptent 22 à 28."),
-        ),
-        Advice::MuchEnergy(n) => tr(
-            format!("{n} energy cards leave little room for Hexons and trainers. Most decks run 22 to 28."),
-            format!("{n} énergies laissent peu de place aux Hexons et aux Dresseurs. La plupart des decks en comptent 22 à 28."),
-        ),
-        Advice::Stranded(id) => {
-            let def = card(id);
-            let from = def
-                .creature()
-                .and_then(|c| c.evolves_from)
-                .map_or("?", |f| card_id(f).map_or(f, |i| card(i).label()));
-            tr(
-                format!("{} awakens from {from}, which isn't in the deck.", def.label()),
-                format!("{} s'éveille de {from}, absent du deck.", def.label()),
-            )
-        }
-    }
-}
-
 /// `base`, or `base 2`, `base 3`… whichever no deck uses yet.
-fn unique_name(p: &Profile, base: &str) -> String {
+pub(crate) fn unique_name(p: &Profile, base: &str) -> String {
     let taken = |n: &str| p.decks.iter().any(|d| d.name == n);
     if !taken(base) {
         return base.to_string();
@@ -346,6 +300,7 @@ pub fn DecksPanel(on_edit: Callback<usize>) -> impl IntoView {
         <ul class="deck-list" data-focus-home="">
             {move || (0..rows()).map(|i| view! { <DeckRow i=i renaming=renaming deleting=deleting on_edit=on_edit /> }).collect_view()}
         </ul>
+        <DeckShelf />
     }
 }
 
@@ -457,6 +412,8 @@ fn DeckRow(
 enum Tab {
     Cards,
     Deck,
+    /// The readouts and the advice (a tab of its own on a phone).
+    Advice,
 }
 
 /// Groups of the deck pane, in [`SortBy::Kind`] order.
@@ -511,6 +468,9 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
         .into_any();
     };
     let draft = RwSignal::new(saved);
+    let undo = Undo::track(draft);
+    let building = RwSignal::new(false);
+    let testing = RwSignal::new(false);
     let dirty = Memo::new(move |_| {
         profile.with(|p| p.decks.get(index).is_some_and(|s| draft.with(|d| d != s)))
     });
@@ -558,7 +518,65 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             ),
         }));
     };
+    let complete = move || {
+        let (before, built) = profile.with_untracked(|p| {
+            draft.with_untracked(|d| {
+                let mut sorted = d.cards.clone();
+                sorted.sort();
+                (
+                    sorted,
+                    sixfold_engine::builder::complete(&d.cards, &p.collection, Default::default()),
+                )
+            })
+        });
+        if built.cards == before {
+            msg.set(Some(
+                tr(
+                    "Nothing to add or take out: the deck is complete.",
+                    "Rien à ajouter ni à retirer : le deck est complet.",
+                )
+                .into(),
+            ));
+            return;
+        }
+        let kept = built
+            .reasons
+            .first()
+            .filter(|r| r.why == sixfold_engine::builder::Why::Kept)
+            .map_or(0, |r| r.cards.iter().map(|c| c.1).sum::<usize>());
+        draft.update(|d| d.cards = built.cards);
+        crate::audio::sfx("place", 0.0);
+        msg.set(Some(tr(
+            format!("Completed: {kept} of your cards kept, {} added from your collection. Undo takes it back.", DECK_SIZE - kept),
+            format!("Complété : {kept} de vos cartes gardées, {} ajoutées depuis votre collection. « Annuler » revient en arrière.", DECK_SIZE - kept),
+        )));
+    };
+    let do_undo = move || {
+        if undo.undo(draft) {
+            crate::audio::sfx("flip", 0.0);
+            let n = draft.with_untracked(|d| d.cards.len());
+            msg.set(Some(tr(
+                format!("Undone: the deck is back to {n} cards."),
+                format!("Annulé : le deck revient à {n} cartes."),
+            )));
+        }
+    };
+    let do_redo = move || {
+        if undo.redo(draft) {
+            crate::audio::sfx("place", 0.0);
+            let n = draft.with_untracked(|d| d.cards.len());
+            msg.set(Some(tr(
+                format!("Redone: the deck has {n} cards again."),
+                format!("Rétabli : le deck a de nouveau {n} cartes."),
+            )));
+        }
+    };
+    let sheet = move || building.get() || testing.get();
     let total = move || draft.with(|d| d.cards.len());
+    let tips = Memo::new(move |_| {
+        profile
+            .with(|p| draft.with(|d| sixfold_engine::builder::suggestions(&d.cards, &p.collection)))
+    });
     // Bumped on every change to the deck's size: renders the counts (read
     // untracked there, so they render once) and replays their bump.
     let pulse = RwSignal::new(0u32);
@@ -606,13 +624,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 });
             }
         }
-        Fix::ShowCards => {
-            f.clear();
-            tab.set(Tab::Cards);
-            if let Some(el) = document().get_element_by_id("pane-cards") {
-                el.scroll_into_view();
-            }
-        }
+        Fix::Complete => complete(),
         Fix::ShowDeck => {
             tab.set(Tab::Deck);
             if let Some(el) = document().get_element_by_id("pane-deck") {
@@ -626,7 +638,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             msg.set(Some(
                 tr(
                     "Your Basic Hexons are shown: add one.",
-                    "Vos Hexons de Base sont affichés : ajoutez-en un.",
+                    "Vos Hexons de Base sont affichés : ajoutez-en un.",
                 )
                 .into(),
             ));
@@ -653,11 +665,27 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             } else {
                 back();
             }
+        } else if building.get_untracked() || testing.get_untracked() {
+            // A sheet is open: its keys are its own, the deck behind stays put.
+        } else if (e.ctrl_key() || e.meta_key()) && e.key().eq_ignore_ascii_case("z") && !in_field {
+            e.prevent_default();
+            if e.shift_key() {
+                do_redo()
+            } else {
+                do_undo()
+            }
+        } else if (e.ctrl_key() || e.meta_key()) && e.key().eq_ignore_ascii_case("y") && !in_field {
+            e.prevent_default();
+            do_redo();
+        } else if let Some(dir) = arrow(&e.key()).filter(|_| !in_field && !e.default_prevented()) {
+            // The arrows walk the cards and the lists, like the D-pad.
+            e.prevent_default();
+            move_focus(dir);
         }
     };
     view! {
         <div class="page editor with-side" on:keydown=on_key>
-            <header class="topbar page-bar">
+            <header class="topbar page-bar" inert=sheet>
                 <button type="button" class="btn ghost back" on:click=move |_| back()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                     "Decks"
@@ -672,7 +700,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                     </button>
                 </div>
             </header>
-            <div class="editor-main">
+            <main class="editor-main" inert=sheet>
             {move || leaving.get().then(|| view! {
                 <div class="leave-bar confirm row" role="alertdialog" aria-labelledby="leave-q">
                     <span id="leave-q">{tr("You have unsaved changes to this deck.", "Ce deck a des modifications non enregistrées.")}</span>
@@ -681,7 +709,78 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                     <button type="button" class="btn ghost" on:click=move |_| leaving.set(false)>{tr("Stay", "Rester")}</button>
                 </div>
             })}
-            <section class="deck-stats" aria-label=tr("Deck summary", "Résumé du deck")>
+            <div class="bench-actions" role="toolbar" aria-label=tr("Deck tools", "Outils du deck")>
+                <button type="button" class="btn build" class:primary=move || total() != 0 aria-haspopup="dialog" on:click=move |_| building.set(true)>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.3L20 9l-4.4 3.7L17 18.5 12 15.6 7 18.5l1.4-5.8L4 9l5.8-.7z" /></svg>
+                    {tr("Build for me", "Construire pour moi")}
+                </button>
+                <button type="button" class="btn" on:click=move |_| complete()>{tr("Complete my deck", "Compléter mon deck")}</button>
+                <button type="button" class="btn test" aria-haspopup="dialog" aria-disabled=move || (total() < 7).to_string()
+                    title=move || if total() < 7 { tr("A hand needs 7 cards in the deck.", "Une main demande 7 cartes dans le deck.") } else { "" }
+                    on:click=move |_| if total() < 7 { msg.set(Some(tr("Add cards first: a test hand needs at least 7 in the deck.", "Ajoutez d'abord des cartes : une main de test en demande au moins 7 dans le deck.").into())) } else { testing.set(true) }>{tr("Test a hand", "Tester une main")}</button>
+                <button type="button" class="btn ghost undo" aria-disabled=move || (!undo.can()).to_string() aria-keyshortcuts="Control+Z Meta+Z" on:click=move |_| do_undo()>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7L4 12l5 5M4 12h11a5 5 0 0 1 0 10h-2" /></svg>
+                    {tr("Undo", "Annuler")}
+                </button>
+                <button type="button" class="btn ghost redo" aria-disabled=move || (!undo.can_redo()).to_string() aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y" on:click=move |_| do_redo()>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7l5 5-5 5M20 12H9a5 5 0 0 0 0 10h2" /></svg>
+                    {tr("Redo", "Rétablir")}
+                </button>
+            </div>
+            <p class="editor-msg" role="status" aria-live="polite" tabindex="-1">{move || msg.get()}</p>
+            <div class="editor-tabs" role="tablist" aria-label=tr("Editor panes", "Volets de l'éditeur")>
+                <button type="button" role="tab" id="tab-advice" aria-controls="pane-advice" aria-selected=move || (tab.get() == Tab::Advice).to_string()
+                    aria-label=move || {
+                        let n = if total() == 0 { 0 } else { tips.with(Vec::len) };
+                        let bad = !problems().is_empty();
+                        match (n, bad) {
+                            (0, false) => tr("Advice", "Conseils").to_string(),
+                            (n, false) => tr(format!("Advice, {n} suggestions"), format!("Conseils, {n} suggestions")),
+                            (n, true) => tr(format!("Advice, {n} suggestions, not legal yet"), format!("Conseils, {n} suggestions, pas encore valide")),
+                        }
+                    }
+                    on:click=move |_| tab.set(Tab::Advice)>{tr("Advice", "Conseils")}
+                    {move || { let n = if total() == 0 { 0 } else { tips.with(Vec::len) }; (n > 0).then(|| view! { <span class="tab-badge" aria-hidden="true">{n}</span> }) }}
+                    {move || (!problems().is_empty()).then(|| view! { <span class="tab-dot" aria-hidden="true"></span> })}
+                    </button>
+                <button type="button" role="tab" id="tab-cards" aria-controls="pane-cards" aria-selected=move || (tab.get() == Tab::Cards).to_string()
+                    on:click=move |_| tab.set(Tab::Cards)>{tr("Your cards", "Vos cartes")}</button>
+                <button type="button" role="tab" id="tab-deck" aria-controls="pane-deck" aria-selected=move || (tab.get() == Tab::Deck).to_string()
+                    on:click=move |_| tab.set(Tab::Deck)>"Deck " {move || { let k = pulse.get(); view! { <span class="tab-count" class:bump={k > 0}>{format!("({})", draft.with_untracked(|d| d.cards.len()))}</span> } }}</button>
+            </div>
+            <section class="pane pane-advice deck-stats" id="pane-advice" role="tabpanel" aria-labelledby="tab-advice" class:inactive=move || tab.get() != Tab::Advice>
+                {move || (total() == 0).then(|| view! {
+                    <div class="start-panel">
+                        <h2>{tr("Start this deck", "Lancez ce deck")}</h2>
+                        <p>{tr("Let the builder make one from your cards, then change what you like. Or pick Basic Hexons yourself: every deck needs at least one, and 60 cards in all.", "Laissez le constructeur en faire un avec vos cartes, puis changez ce qui vous plaît. Ou choisissez vous-même des Hexons de Base : chaque deck en compte au moins un, et 60 cartes en tout.")}</p>
+                        <div class="start-actions">
+                            <button type="button" class="btn primary" aria-haspopup="dialog" on:click=move |_| building.set(true)>{tr("Build for me", "Construire pour moi")}</button>
+                            <button type="button" class="btn" on:click=move |_| apply(Fix::ShowBasics)>{tr("Show Basic Hexons", "Voir les Hexons de Base")}</button>
+                        </div>
+                    </div>
+                })}
+                <div class="deck-checks" class:hidden=move || total() == 0>
+                    {move || {
+                        let list = problems();
+                        if list.is_empty() {
+                            view! { <p class="legal yes">{tr("Ready to play", "Prêt à jouer")}</p> }.into_any()
+                        } else {
+                            view! {
+                                <h2 class="checks-title">{tr("Not legal yet", "Pas encore valide")}</h2>
+                                <ul class="checks">
+                                    {list.into_iter().map(|(text, fix)| view! {
+                                        <li class="check no">
+                                            <span>{text}</span>
+                                            {fix.map(|(label, fx)| view! { <button type="button" class="btn fix" on:click=move |_| apply(fx)>{label}</button> })}
+                                        </li>
+                                    }).collect_view()}
+                                </ul>
+                            }.into_any()
+                        }
+                    }}
+                    <Advisor draft=draft tips=tips msg=msg />
+                </div>
+                <div class="bench-readouts" class:hidden=move || total() == 0>
                 <p class="deck-total">{move || { let k = pulse.get(); view! { <b class:bump={k > 0}>{draft.with_untracked(|d| d.cards.len())}</b> } }}" / " {DECK_SIZE}{tr(" cards", " cartes")}</p>
                 <ul class="kind-counts" aria-label=tr("Composition", "Composition")>
                     {move || {
@@ -721,59 +820,10 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                     </div>
                     <figcaption>{tr("Energy for each Hexon's biggest attack", "Énergie de l'attaque la plus chère de chaque Hexon")}</figcaption>
                 </figure>
-                <div class="deck-checks">
-                    {move || {
-                        let list = problems();
-                        if list.is_empty() {
-                            view! { <p class="legal yes">{tr("Ready to play", "Prêt à jouer")}</p> }.into_any()
-                        } else {
-                            view! {
-                                <h2 class="checks-title">{tr("Not legal yet", "Pas encore valide")}</h2>
-                                <ul class="checks">
-                                    {list.into_iter().map(|(text, fix)| view! {
-                                        <li class="check no">
-                                            <span>{text}</span>
-                                            {fix.map(|(label, fx)| view! { <button type="button" class="btn fix" on:click=move |_| apply(fx)>{label}</button> })}
-                                        </li>
-                                    }).collect_view()}
-                                </ul>
-                            }.into_any()
-                        }
-                    }}
-                    <ul class="checks advice">
-                        {move || comp().advice().into_iter().map(|a| {
-                            // A stranded evolution: one tap adds its pre-evolution when it can go in.
-                            let add = match a {
-                                Advice::Stranded(id) => card(id).creature().and_then(|c| c.evolves_from).and_then(card_id)
-                                    .filter(|&pre| profile.with(|p| draft.with(|d| d.check_add(pre, &p.collection).is_ok()))),
-                                _ => None,
-                            };
-                            view! {
-                                <li class="check hint">
-                                    <span>{advise(a)}</span>
-                                    {matches!(a, Advice::FewBasics(_)).then(|| view! {
-                                        <button type="button" class="btn fix" on:click=move |_| apply(Fix::ShowBasics)>{tr("Show Basic Hexons", "Voir les Hexons de Base")}</button>
-                                    })}
-                                    {add.map(|pre| view! {
-                                        <button type="button" class="btn fix" on:click=move |_| { try_add(pre, profile, draft, msg, None); }>
-                                            {tr(format!("Add {}", card(pre).label()), format!("Ajouter {}", card(pre).label()))}
-                                        </button>
-                                    })}
-                                </li>
-                            }
-                        }).collect_view()}
-                    </ul>
+                <EnergyReadout draft=draft />
                 </div>
-                <p class="editor-msg" role="status" aria-live="polite" tabindex="-1">{move || msg.get()}</p>
             </section>
-
-            <div class="editor-tabs" role="tablist" aria-label=tr("Editor panes", "Volets de l'éditeur")>
-                <button type="button" role="tab" id="tab-cards" aria-controls="pane-cards" aria-selected=move || (tab.get() == Tab::Cards).to_string()
-                    on:click=move |_| tab.set(Tab::Cards)>{tr("Your cards", "Vos cartes")}</button>
-                <button type="button" role="tab" id="tab-deck" aria-controls="pane-deck" aria-selected=move || (tab.get() == Tab::Deck).to_string()
-                    on:click=move |_| tab.set(Tab::Deck)>"Deck " {move || { let k = pulse.get(); view! { <span class="tab-count" class:bump={k > 0}>{format!("({})", draft.with_untracked(|d| d.cards.len()))}</span> } }}</button>
-            </div>
-            <main class="editor-panes">
+            <div class="editor-panes">
                 <section class="pane pane-cards" id="pane-cards" role="tabpanel" aria-labelledby="tab-cards" class:inactive=move || tab.get() != Tab::Cards>
                     <h2 class="pane-title">{tr("Your cards", "Vos cartes")}</h2>
                     <FilterBar f=f />
@@ -786,7 +836,9 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 <section class="pane pane-deck" id="pane-deck" role="tabpanel" aria-labelledby="tab-deck" class:inactive=move || tab.get() != Tab::Deck>
                     <div class="pane-head">
                         <h2 class="pane-title">{tr("In the deck", "Dans le deck")}</h2>
-                        <button type="button" class="btn" on:click=fill>{tr("Fill with energy", "Compléter en énergies")}</button>
+                        {move || (total() < DECK_SIZE && total() > 0).then(|| view! {
+                            <button type="button" class="btn ghost" on:click=fill>{tr("Fill with energy", "Remplir d'énergies")}</button>
+                        })}
                     </div>
                     {move || (total() == 0).then(|| view! {
                         <p class="empty-note">{tr("Empty. Add cards from your collection; a deck needs at least one Basic Hexon and exactly 60 cards.", "Vide. Ajoutez des cartes de votre collection ; un deck doit compter au moins un Hexon de Base et exactement 60 cartes.")}</p>
@@ -804,9 +856,11 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                         }).collect_view()
                     }}
                 </section>
-            </main>
             </div>
-            <div class="side-panel"><Inspector /></div>
+            </main>
+            <div class="side-panel" inert=sheet><Inspector /></div>
+            {move || building.get().then(|| view! { <BuildSheet open=building draft=draft msg=msg /> })}
+            {move || testing.get().then(|| view! { <TestSheet open=testing draft=draft /> })}
         </div>
     }
     .into_any()
@@ -834,7 +888,7 @@ fn try_add(
     msg.set(Some(match r {
         Ok(()) => tr(
             format!("Added {}.", card(id).label()),
-            format!("Ajout : {}.", card(id).label()),
+            format!("Ajout : {}.", card(id).label()),
         ),
         Err(why) => why,
     }));

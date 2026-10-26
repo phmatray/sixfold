@@ -60,6 +60,7 @@ pub fn provide() {
         if let Some((m, p0, pf0)) = last.get_value() {
             if m == n {
                 stats.update(|s| s.observe((&p0, &pf0), (&p, &pf)));
+                toasts.decks(sixfold_engine::decks::newly_unlocked(&p0, &p));
             }
         }
         last.set_value(Some((n, p, pf)));

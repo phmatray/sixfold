@@ -125,6 +125,9 @@ to 62 (38–83). The 1.3 holo rate helps: with the old one pack in three, the sa
 Because one seeded run swings this much, the test plays three seeds and requires two to finish within
 budget. `economy_sim` doesn't change, since prices and income are untouched.
 
+Unlockable decks (1.9, `docs/BALANCE.md`) are lent, not given: unlocking a deck adds no card to the
+collection, so packs stay the only source of cards and none of the numbers above move.
+
 ### 7. Changing it
 
 `COMMONS`, `UNCOMMONS`, `HOLO_ODDS` and `SHARES` are public constants. The shop's odds panel and the pack
@@ -249,6 +252,10 @@ duellistes de route de Marée et Songe, la campagne demande une médiane de 66 d
 sans les règles de la 1.3. Comme une seule partie
 tirée au sort varie autant, le test joue trois graines et exige que deux finissent dans le budget.
 `economy_sim` ne change pas, car prix et revenus sont intacts.
+
+Les decks à débloquer (1.9, `docs/BALANCE.md`) sont prêtés, pas donnés : débloquer un deck n'ajoute
+aucune carte à la collection, les boosters restent donc la seule source de cartes et aucun des chiffres
+ci-dessus ne bouge.
 
 ### 7. Modifier
 

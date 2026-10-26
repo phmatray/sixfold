@@ -541,3 +541,46 @@ playthrough wins about half of them) plus a consolation: the first playthrough m
 packs an hour**; exploring stays at 5.23. The campaign playthrough meets Rook as each scene's seals are met
 (one duel, won or lost) and wins the first two, loses the last two, on all three pack seeds; it finishes in
 92, 92 and 80 duels (92, 83 and 71 before), inside its budget, now 102 duels (57 trainers plus 45).
+
+## 1.9: the deck builder
+
+"Build for me" (`engine/src/builder.rs`, #102) builds from the player's own cards: whole Awaken lines of the
+chosen colours (4-3-2, never more of a stage than of the one below), at least 12 Basics when owned, draw and
+search trainers first, then the style's (Aggro: boosts and gusts; Control: healing, conditions and
+disruption), and energy shared by each Hexon's main attack cost. Hexons are ranked on the board rather than
+against their stage's curve: HP, twice what the main attack is worth (damage plus the value of its effects,
+from the table above) less 15 an energy, the Power and the rest of the value budget, less a setup cost per
+stage (Aggro 40, Balanced 20, Control 15). "Surprise me" judges every one- and two-colour build the same way
+whatever the style and picks among the best three that sit within 3% of the best.
+
+`auto_built_decks_play_at_least_as_well_as_the_starter` (always on) holds "Build for me" (Balanced, Surprise
+seed 0) to the starter on the same collection: a new player's, and after 10 and 20 packs, 20 seeded games
+against each prebuilt, both decks sorted (card order alone moves a 1,200-game rate by two points). The
+ignored `auto_build_sweep` gives the wider picture, 100 games against each prebuilt, the AI on Normal on both
+sides (`GAMES=… PACKS=…` to change it):
+
+| Collection | Starter | Aggro (seeds 0–2) | Balanced (seeds 0–2) | Control (seeds 0–2) |
+|---|---|---|---|---|
+| New player | 44% | 42 · 42 · 42% | 42 · 42 · 42% | 42 · 42 · 42% |
+| + 10 packs | 39% | 51 · 51 · 51% | 52 · 38 · 57% | 45 · 45 · 45% |
+| + 20 packs | 40% | 55 · 48 · 46% | 56 · 58 · 56% | 54 · 54 · 54% |
+| + 40 packs | 37% | 75 · 69 · 76% | 74 · 68 · 74% | 71 · 68 · 61% |
+
+From a new player's cards the builder rebuilds the starter, give or take two energy (the gap is the card-order
+noise above). From ten packs on it is ahead (one Surprise pick ties, 38% to 39%), and the gap grows with the
+collection.
+
+### Unlockable decks: lent, not given
+
+The six prebuilts and the five rival decks that aren't one (`decks::UNLOCKABLE`) start locked and unlock with
+something the game already records: the rival who plays the deck (Cinza, Quill, Bramble, Marlo, Orla, Lumen),
+an achievement (*Full Bloom* for Grove Bloom, *Waylaid* for Tide Mind, *Halfway Round* for Stone Fist), the
+end of Rook's story (Dream Veil) or the Gauntlet (Sixfold Crown). The unlock state is read from those flags,
+so there is no new save section and an old save unlocks whatever it has already earned.
+
+**Decision: an unlocked deck is a loan.** It plays as it is in a Quick duel (where the prebuilts were free
+before 1.9, and where the starter is always on loan, so a duel is always possible) and can be copied to the player's decks, where the cards they don't own show as missing and
+"Complete my deck" fills the gaps from their own cards. No card is granted, because granting would have
+been a second, uncapped source of cards next to the packs: one rival win would hand over 30-odd cards and
+move `economy_sim` (packs an hour) and the campaign playthroughs, whose decks are built from the
+collection. As a loan it moves neither; a campaign duel still needs a deck the player owns.

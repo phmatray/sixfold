@@ -48,11 +48,13 @@ test("keyboard: arrows move the hand through the title and two menu screens, Esc
   const decks = page.getByRole("group", { name: "Your deck" }).getByRole("radio");
   await moveTo(page, decks.first(), "ArrowDown");
   await pointsAt(page, decks.first());
-  await page.keyboard.press("ArrowDown");
-  await expect(decks.nth(1)).toBeFocused();
-  await expect(decks.nth(1)).toBeChecked();
+  // A new player holds one deck (prebuilts unlock later, #102); the opponent's list has them all.
+  const theirs = page.getByRole("group", { name: "Your opponent plays" }).getByRole("radio");
   await page.keyboard.press("ArrowRight");
-  await expect(page.getByRole("group", { name: "Your opponent plays" }).getByRole("radio").first()).toBeFocused();
+  await expect(theirs.first()).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(theirs.nth(1)).toBeFocused();
+  await expect(theirs.nth(1)).toBeChecked();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible();
 

@@ -1363,9 +1363,10 @@ mod tests {
 
 /// The value budget (`docs/BALANCE.md`, "Value budget"): every creature is
 /// scored in damage-equivalents (10 = 10 damage = 10 HP) against the curve
-/// for its stage, so a new or changed card can't drift off the curve.
-#[cfg(test)]
-mod budget {
+/// for its stage, so a new or changed card can't drift off the curve. The
+/// deck builder ranks Hexons and trainers with it too.
+#[cfg_attr(not(test), allow(dead_code))]
+pub(crate) mod budget {
     use super::*;
     use crate::condition::{Placed, Shield, Status};
     use crate::effect::Effect;
@@ -1396,7 +1397,7 @@ mod budget {
     }
 
     /// Damage-equivalent of one effect; drawbacks are negative.
-    pub(super) fn effect_value(e: &Effect) -> i32 {
+    pub(crate) fn effect_value(e: &Effect) -> i32 {
         use Effect::*;
         let status = |s: &Status| match s {
             Status::Paralyzed | Status::DoublePoisoned => 20,
@@ -1484,7 +1485,7 @@ mod budget {
     }
 
     #[derive(Debug, PartialEq)]
-    pub(super) enum Role {
+    pub(crate) enum Role {
         Attacker,
         Wall,
         Support,
@@ -1492,7 +1493,7 @@ mod budget {
         Tech,
     }
 
-    pub(super) struct Score {
+    pub(crate) struct Score {
         pub hp: i32,
         pub attack: i32,
         pub power: i32,
@@ -1509,7 +1510,7 @@ mod budget {
 
     /// The score of one creature: HP, its best attack against the curve,
     /// its Power, retreat, weakness and resistance.
-    pub(super) fn score(cr: &Creature) -> Score {
+    pub(crate) fn score(cr: &Creature) -> Score {
         let s = stage(cr.stage);
         let value = |a: &Attack| {
             i32::from(a.damage) + a.effects.iter().map(effect_value).sum::<i32>()
@@ -1582,6 +1583,7 @@ mod budget {
     }
 
     /// Prints the table (`-- --nocapture`) and fails on a card off its budget.
+    #[cfg(test)]
     #[test]
     fn every_creature_is_within_its_budget() {
         let mut off = vec![];

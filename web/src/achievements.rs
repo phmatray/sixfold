@@ -5,6 +5,7 @@
 use std::collections::VecDeque;
 
 use leptos::prelude::*;
+use sixfold_engine::decks::Unlockable;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::stats::{Achievement, ACHIEVEMENTS};
 use sixfold_engine::tr;
@@ -21,6 +22,8 @@ pub enum Toast {
     One(&'static Achievement),
     /// Several at once (an older save's first load): how many, and the Facets.
     Many(usize, u32),
+    /// A deck unlocked for the deck shelf (#102).
+    Deck(&'static Unlockable),
 }
 
 /// More than this many at once are announced as one toast.
@@ -36,6 +39,15 @@ impl Toasts {
                 q.extend(got.into_iter().map(Toast::One));
             }
         });
+    }
+
+    /// Queue the decks just unlocked.
+    pub fn decks(&self, got: Vec<&'static Unlockable>) {
+        // Most changes unlock nothing: leave the queue (and its watchers) alone.
+        if !got.is_empty() {
+            self.0
+                .update(|q| q.extend(got.into_iter().map(Toast::Deck)));
+        }
     }
 }
 
@@ -144,11 +156,16 @@ pub fn Toaster() -> impl IntoView {
         <div class="ach-toast-region" role="status" aria-live="polite" aria-atomic="true">
             {move || current.get().map(|t| {
                 let (kicker, name, facets) = match t {
-                    Toast::One(a) => (tr("Achievement", "Succès"), a.name.get().to_string(), a.facets),
+                    Toast::One(a) => (tr("Achievement", "Succès"), a.name.get().to_string(), Some(a.facets)),
                     Toast::Many(n, f) => (
                         tr("Achievements", "Succès"),
                         tr(format!("{n} earned — see Records"), format!("{n} obtenus — voir le Palmarès")),
-                        f,
+                        Some(f),
+                    ),
+                    Toast::Deck(u) => (
+                        tr("Deck unlocked — on your deck shelf", "Deck débloqué — sur votre étagère"),
+                        u.deck.name.to_string(),
+                        None,
                     ),
                 };
                 view! {
@@ -157,10 +174,12 @@ pub fn Toaster() -> impl IntoView {
                         <p>
                             <span class="ach-kicker">{kicker}</span>
                             <b>{name}</b>
-                            <span class="ach-pay">
-                                "+"<span class="gem" aria-hidden="true"></span>{facets}
-                                <span class="sr-only">{tr(" Facets", " Facettes")}</span>
-                            </span>
+                            {facets.map(|facets| view! {
+                                <span class="ach-pay">
+                                    "+"<span class="gem" aria-hidden="true"></span>{facets}
+                                    <span class="sr-only">{tr(" Facets", " Facettes")}</span>
+                                </span>
+                            })}
                         </p>
                     </div>
                 }
