@@ -2663,3 +2663,21 @@ p.atlas-pick { color: var(--muted); }
   .menu-tabs { display: grid; grid-template-columns: repeat(3, 1fr); }
   .menu-tabs button { padding: 0 6px; }
 }
+
+/* A cutscene's way out (Escape, or a tap): the scene plays on under it. */
+.world-skip {
+  position: absolute;
+  z-index: 2;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px;
+  background: var(--world-panel);
+}
+.world-skip kbd, .talk-skip kbd { font: 700 12px var(--body); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
+@media (hover: none) { .world-skip kbd { display: none; } }
+.talk-skip { display: block; margin: 6px 0 0 auto; min-height: 44px; font-size: 14px; }
+.world.in-scene .world-controls { visibility: hidden; } /* the pad does nothing while a scene plays */

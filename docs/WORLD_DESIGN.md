@@ -710,8 +710,8 @@ keep 60; the last is given in full:
 
 ### 8.3 Cutscenes
 
-Six scripts, each under a minute, all skippable (hold E / long-press: jumps to the end state, applying every
-state effect and skipping cues):
+Six scripts, each under a minute, all skippable (Escape, or the Skip button, also in the dialogue box: jumps to
+the end state, applying every state effect and skipping cues; walks still arrive and faces still turn):
 
 1. `intro` — new game: Wynne in the hall gives the shoes and ⬡ 100, points at the six roads. (Existing
    dialogue, upgraded with a camera pan over the meadow.)
@@ -759,7 +759,9 @@ Scripts:
 ```
 
 A step is either `say` (a dialogue sheet from that actor; actor `hero` has no name plate) or `do` (effects in
-order). A `duel:` ends the script; the post-duel lines come from the NPC's `won:`/`lost:` branches, as for
+order). Cues play one at a time; state effects are kept and applied once, when the scene ends (played out or
+skipped), and the hero's tile isn't saved while it plays, so a reload mid-scene replays it from the start. The
+hero takes no input and the in-game menu waits. A `duel:` goes in the last step and ends the script; the post-duel lines come from the NPC's `won:`/`lost:` branches, as for
 rivals today. The NPC `rook` exists on the map with `"if": "seals:1 & !beat:rook_1 & !flag:rook_1_left"` so he
 is there for the scene and leaves afterwards (a final `walk` and `flag:rook_1_left`).
 

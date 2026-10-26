@@ -325,7 +325,7 @@ export function mount(el, controls, cb, start, edit = false) {
   // Cutscenes (script.js): the camera reports when it has reached what it was sent to look at.
   const cut = scenes({
     world: () => world, hero: () => hero, reduced: () => reduced, holds, cb, sound, tune, warp,
-    settled: () => look.distanceTo(aim) < 0.05 && lookVel.lengthSq() < 0.01,
+    settled: () => look.distanceTo(aim) < 0.12 && lookVel.lengthSq() < 0.04,
     moved: () => (lastHero = ""), // the hero's tile is saved again (not during a scene: a reload replays it)
   });
   const opens = (wp) => holds(wp.if);
@@ -630,7 +630,7 @@ export function mount(el, controls, cb, start, edit = false) {
     }
     if (first || reduced) look.copy(aim), lookVel.set(0, 0, 0);
     else {
-      const k = cut.playing ? 6 : 28, c = 2 * Math.sqrt(k) * (cut.playing ? 1 : 0.85); // slightly under-damped; a scene pans slowly
+      const k = cut.playing ? 10 : 28, c = 2 * Math.sqrt(k) * (cut.playing ? 1 : 0.85); // slightly under-damped; a scene pans slowly
       lookVel.addScaledVector(aim.clone().sub(look), k * dt).addScaledVector(lookVel, -c * dt);
       look.addScaledVector(lookVel, dt);
     }
