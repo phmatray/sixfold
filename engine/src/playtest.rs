@@ -925,3 +925,104 @@ fn campaign_sweep() {
         rivals[15]
     );
 }
+
+/// A collection grown from a new player's by opening `packs` packs, the
+/// boosters in turn, from a fixed seed.
+fn grown(packs: u32) -> Collection {
+    let mut p = Profile::new_player();
+    for i in 0..packs {
+        let b = i as usize % BOOSTERS.len();
+        p.wallet.grant(b, 1);
+        p.open_pack(b, 9_000 + u64::from(i));
+    }
+    p.collection
+}
+
+/// Wins of `deck` against each prebuilt, `games` each, seats alternating.
+fn wins_vs_prebuilts(deck: &[CardId], games: u64, salt: u64) -> u64 {
+    let mut won = 0;
+    for (k, d) in PREBUILT.iter().enumerate() {
+        for g in 0..games {
+            let seed = salt * 100_000 + k as u64 * 1000 + g;
+            let mine_first = g % 2 == 0;
+            let pair = if mine_first {
+                [deck.to_vec(), d.cards()]
+            } else {
+                [d.cards(), deck.to_vec()]
+            };
+            let w = play(pair, seed, 6, [Difficulty::Normal; 2]);
+            won += u64::from((w == 0) == mine_first);
+        }
+    }
+    won
+}
+
+/// Tuning aid: the auto-built decks of each style against the starter, on
+/// grown collections, against the prebuilts.
+/// `cargo test --release -p sixfold-engine auto_build_sweep -- --ignored --nocapture`.
+#[test]
+#[ignore]
+fn auto_build_sweep() {
+    use crate::builder::{auto_build, Pick, Plan, Style};
+    let games: u64 = std::env::var("GAMES")
+        .ok()
+        .and_then(|g| g.parse().ok())
+        .unwrap_or(40);
+    let sizes: Vec<u32> = std::env::var("PACKS")
+        .ok()
+        .map_or(vec![0, 10, 20, 40], |p| {
+            p.split(',').map(|x| x.parse().unwrap()).collect()
+        });
+    for packs in sizes {
+        let c = grown(packs);
+        let starter = wins_vs_prebuilts(&STARTER.cards(), games, packs.into());
+        let mut row = format!(
+            "{packs:>2} packs: starter {:>3}%",
+            starter * 100 / (games * 6)
+        );
+        for style in Style::ALL {
+            for seed in 0..3 {
+                let d = auto_build(
+                    &c,
+                    &Plan {
+                        pick: Pick::Surprise(seed),
+                        style,
+                    },
+                );
+                let w = wins_vs_prebuilts(&d.cards, games, packs.into());
+                row += &format!(" | {style:?}{seed} {:>3}%", w * 100 / (games * 6));
+            }
+        }
+        println!("{row}");
+    }
+}
+
+/// "Build for me" makes a deck the AI wins with at least as often as the
+/// starter, from the same collection: a new player's (where the two are
+/// all but the same deck), and after 10 and 20 packs. Both decks sorted, so
+/// card order isn't what differs; 20 seeded games against each prebuilt.
+#[test]
+fn auto_built_decks_play_at_least_as_well_as_the_starter() {
+    use crate::builder::{auto_build, Pick, Plan, Style};
+    let mut starter = STARTER.cards();
+    starter.sort();
+    let (mut mine, mut theirs) = (0, 0);
+    for packs in [0, 10, 20] {
+        let c = grown(packs);
+        let plan = Plan {
+            pick: Pick::Surprise(0),
+            style: Style::Balanced,
+        };
+        let auto = auto_build(&c, &plan).cards;
+        let (a, s) = (
+            wins_vs_prebuilts(&auto, 20, packs.into()),
+            wins_vs_prebuilts(&starter, 20, packs.into()),
+        );
+        eprintln!("{packs} packs: auto-built {a}/120, starter {s}/120");
+        if packs > 0 {
+            assert!(a >= s, "{packs} packs: auto-built {a}, starter {s}");
+        }
+        (mine, theirs) = (mine + a, theirs + s);
+    }
+    assert!(mine >= theirs, "auto-built {mine}, starter {theirs}");
+}

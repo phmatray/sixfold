@@ -4,7 +4,7 @@
 //! the player's language.
 //!
 //! Deterministic: the same collection and plan always give the same deck.
-//! Hexons are ranked on the value budget (`docs/BALANCE.md`, `set::value`),
+//! Hexons are ranked with the value budget (`docs/BALANCE.md`, `set::budget`),
 //! lines are kept whole, the energy follows the attack costs.
 
 use std::collections::BTreeMap;
@@ -63,6 +63,15 @@ impl Style {
             Style::Aggro => 22,
             Style::Balanced => 20,
             Style::Control => 18,
+        }
+    }
+
+    /// Trainers at most: past this, more Hexons or energy serve better.
+    fn trainers(self) -> usize {
+        match self {
+            Style::Aggro => 12,
+            Style::Balanced => 14,
+            Style::Control => 17,
         }
     }
 }
@@ -313,17 +322,29 @@ fn power(id: CardId, style: Style) -> i32 {
     let Some(cr) = card(id).creature() else {
         return 0;
     };
-    let cost = main_attack(id).map_or(0, |a| a.cost.len() as i32);
-    let stage = match cr.stage {
+    let Some(a) = main_attack(id) else {
+        return 0;
+    };
+    let cost = a.cost.len() as i32;
+    // On the board, not against its stage's curve: HP, twice what the main
+    // attack is worth less what its energy costs, the Power and the rest
+    // of the value budget, less the setup an Awakening takes.
+    let sc = set::budget::score(cr);
+    let hit = i32::from(a.damage) + a.effects.iter().map(effect_value).sum::<i32>();
+    let setup = match style {
+        Style::Aggro => 40,
+        Style::Balanced => 20,
+        Style::Control => 15,
+    } * match cr.stage {
         Stage::Basic => 0,
-        Stage::Stage1 => 20,
-        Stage::Stage2 => 35,
+        Stage::Stage1 => 1,
+        Stage::Stage2 => 2,
     };
     let taste = match style {
-        Style::Aggro => 10 * (2 - cost),
+        Style::Aggro => 15 * (2 - cost),
         Style::Balanced => 0,
         Style::Control => {
-            8 * cr
+            12 * cr
                 .attacks
                 .iter()
                 .flat_map(|a| a.effects)
@@ -331,7 +352,7 @@ fn power(id: CardId, style: Style) -> i32 {
                 .count() as i32
         }
     };
-    set::value(cr) + stage + taste
+    i32::from(cr.hp) + 2 * hit - 15 * cost + sc.power + sc.rest - setup + taste
 }
 
 /// A trainer's worth to a deck of this style.
@@ -515,11 +536,14 @@ impl Draft<'_> {
                     .filter(|&(_, k)| k > 0)
                     .collect();
                 let top = copies.last().expect("the Basic").0;
-                let setup =
-                    (copies.len() as i32 - 1) * if self.style == Style::Aggro { 15 } else { 5 };
-                let sum: usize = copies.iter().map(|c| c.1).sum();
-                let score =
-                    power(top, self.style) + power(b, self.style) / 4 - setup + 3 * sum as i32;
+                // Fewer than four Basics: the line shows up late, if at all.
+                let thin = 15 * (MAX_COPIES - copies[0].1) as i32
+                    + if copies.len() > 1 && copies[copies.len() - 1].1 == 1 {
+                        10
+                    } else {
+                        0
+                    };
+                let score = power(top, self.style) - thin;
                 (score, copies)
             })
             .collect();
@@ -536,8 +560,8 @@ impl Draft<'_> {
             if room == 0 {
                 return;
             }
-            // One over the target is fine, never over 60.
-            let slack = room + usize::from(free > room);
+            // A whole line may go two over the target, never over 60.
+            let slack = (room + 2).min(free);
             let adds = |c: &[(CardId, usize)]| -> usize {
                 c.iter()
                     .map(|&(id, k)| k.saturating_sub(self.count(id)).min(self.room(id)))
@@ -570,6 +594,26 @@ impl Draft<'_> {
             self.reasons.push(Reason {
                 cards: added.into_iter().collect(),
                 why: Why::Basics(total),
+            });
+        }
+    }
+
+    /// More copies of the best Basics, while the deck has fewer than
+    /// `target` Hexons (no line left to add).
+    fn top_up_basics_to(&mut self, target: usize) {
+        let mut added: BTreeMap<CardId, usize> = BTreeMap::new();
+        while self.creatures() < target && self.len() < DECK_SIZE {
+            let best = set::ids()
+                .filter(|&id| card(id).is_basic() && self.fits(id) && self.room(id) > 0)
+                .max_by_key(|&id| (power(id, self.style), std::cmp::Reverse(id)));
+            let Some(id) = best else { break };
+            *self.n.entry(id).or_default() += 1;
+            *added.entry(id).or_default() += 1;
+        }
+        if !added.is_empty() {
+            self.reasons.push(Reason {
+                cards: added.into_iter().collect(),
+                why: Why::Line,
             });
         }
     }
@@ -647,7 +691,16 @@ impl Draft<'_> {
                 Why::Twofold,
             );
         }
-        let mut weight = s;
+        // Each Hexon's whole main cost counts for its colour: its Neutral
+        // symbols are paid with that colour's energy too.
+        let mut weight = [0usize; 6];
+        for (&id, &k) in &self.n {
+            if let (Some(c), Some(a)) = (card(id).creature(), main_attack(id)) {
+                if c.color != Color::Colorless {
+                    weight[c.color as usize] += k * a.cost.len();
+                }
+            }
+        }
         if weight.iter().all(|&w| w == 0) {
             // Only Neutral costs: share by the Hexons' colours.
             for (&id, &k) in &self.n {
@@ -718,19 +771,29 @@ fn fill(
     d.fix_lines();
     d.take_lines(style.creatures());
     d.top_up_basics();
-    let slots = DECK_SIZE.saturating_sub(d.creatures() + d.energy_target());
+    let slots = DECK_SIZE
+        .saturating_sub(d.creatures() + d.energy_target())
+        .min(style.trainers());
     let trainers = d.total(|c| matches!(c.kind, CardKind::Trainer(_)));
     d.take_trainers(
         slots
             .saturating_sub(trainers)
             .min(DECK_SIZE.saturating_sub(d.len())),
     );
-    // Too few trainers owned leaves too much energy: more Hexons first.
-    let energy =
-        DECK_SIZE.saturating_sub(d.len()) + d.total(|c| matches!(c.kind, CardKind::Energy(_)));
-    if energy > *ENERGY.end() {
-        let more = d.creatures() + energy - ENERGY.end();
+    // Room past the energy the costs ask for (too few trainers owned):
+    // more Hexons, then trainers past the style's share.
+    let spare = |d: &Draft| {
+        let energy = d.total(|c| matches!(c.kind, CardKind::Energy(_)));
+        DECK_SIZE.saturating_sub(d.len() + d.energy_target().saturating_sub(energy))
+    };
+    if spare(&d) > 1 {
+        let more = d.creatures() + spare(&d) - 1;
         d.take_lines(more);
+        d.top_up_basics_to(more);
+    }
+    if spare(&d) > 1 {
+        let k = spare(&d) - 1;
+        d.take_trainers(k);
     }
     d.take_energy();
     Built {
@@ -743,9 +806,11 @@ fn fill(
 /// about one opening hand in five without one, as in the prebuilts.
 const BASICS: usize = 12;
 
-/// How good a built deck looks to the builder: its Hexons' and trainers'
-/// worth, with a Basic-less hand counted against it.
-fn rating(b: &Built, style: Style) -> i32 {
+/// How strong a built deck looks, whatever its style (the style shapes
+/// the deck, not how its colours are judged): its Hexons' and trainers'
+/// worth, with Basic-less hands and energy out of the band counted against.
+fn rating(b: &Built) -> i32 {
+    let style = Style::Balanced;
     let stage2 = b.cards.iter().any(|&id| {
         card(id)
             .creature()
@@ -760,7 +825,13 @@ fn rating(b: &Built, style: Style) -> i32 {
         })
         .sum();
     let basics = b.cards.iter().filter(|&&id| card(id).is_basic()).count();
-    worth - (none_in(DECK_SIZE, basics, 7) * 1000.0) as i32
+    let energy = b
+        .cards
+        .iter()
+        .filter(|&&id| matches!(card(id).kind, CardKind::Energy(_)))
+        .count();
+    let off_band = energy.saturating_sub(*ENERGY.end()) + ENERGY.start().saturating_sub(energy);
+    worth - (none_in(DECK_SIZE, basics, 7) * 1000.0) as i32 - 40 * off_band as i32
 }
 
 /// The six colours of Hexons (Neutral fits every deck).
@@ -780,8 +851,12 @@ fn ranked_builds(owned: &Collection, style: Style) -> Vec<(Vec<Color>, Built)> {
         for &b in &COLOURS[i..] {
             let colors = if a == b { vec![a] } else { vec![a, b] };
             let built = fill(BTreeMap::new(), owned, colors.clone(), style);
-            if crate::validate_deck(&built.cards).is_ok() && owned.can_build(&built.cards) {
-                all.push((rating(&built, style), colors, built));
+            let fresh = all
+                .iter()
+                .all(|(_, _, b): &(i32, Vec<Color>, Built)| b.cards != built.cards);
+            if fresh && crate::validate_deck(&built.cards).is_ok() && owned.can_build(&built.cards)
+            {
+                all.push((rating(&built), colors, built));
             }
         }
     }
@@ -821,7 +896,14 @@ pub fn auto_build(owned: &Collection, plan: &Plan) -> Built {
     if builds.is_empty() {
         return fill(BTreeMap::new(), owned, vec![Color::Fire], plan.style);
     }
-    let k = (seed % builds.len().min(3) as u64) as usize;
+    // Among the three best, as long as they are within 3% of the best.
+    let best = rating(&builds[0].1);
+    let close = builds
+        .iter()
+        .take(3)
+        .take_while(|b| rating(&b.1) >= best - best.abs() / 33)
+        .count();
+    let k = (seed % close as u64) as usize;
     builds.swap_remove(k).1
 }
 
@@ -1416,12 +1498,26 @@ mod tests {
         let aggro = auto_build(&all, &p).cards;
         let control =
             auto_build(&all, &plan(&[Color::Fire, Color::Fighting], Style::Control)).cards;
+        // The styles build different decks, Aggro's attacks no dearer.
+        assert_ne!(aggro, control);
+        assert!(mean_cost(&aggro) <= mean_cost(&control));
+        let decks: Vec<Vec<CardId>> = Style::ALL
+            .iter()
+            .map(|&style| {
+                auto_build(&grown_a_bit(), &plan(&[Color::Fire, Color::Water], style)).cards
+            })
+            .collect();
         assert!(
-            mean_cost(&aggro) < mean_cost(&control),
-            "{} vs {}",
-            mean_cost(&aggro),
-            mean_cost(&control)
+            decks[0] != decks[1] && decks[1] != decks[2],
+            "three styles, three decks"
         );
+    }
+
+    /// The starter's cards and two of everything else.
+    fn grown_a_bit() -> Collection {
+        let mut c = starter_collection();
+        set::ids().for_each(|id| c.add(id, 2));
+        c
     }
 
     #[test]
@@ -1488,20 +1584,18 @@ mod tests {
             style: Style::Balanced,
         };
         assert_eq!(auto_build(&all, &p(4)), auto_build(&all, &p(4)));
-        let decks: Vec<Vec<CardId>> = (0..3).map(|s| auto_build(&all, &p(s)).cards).collect();
-        assert!(
-            decks[0] != decks[1] && decks[1] != decks[2],
-            "three seeds, three decks"
-        );
-        for d in &decks {
-            check(
-                &all,
-                &Built {
-                    cards: d.clone(),
-                    reasons: auto_build(&all, &p(0)).reasons,
-                },
-                "surprise",
+        let best: Vec<Vec<CardId>> = ranked_builds(&all, Style::Balanced)
+            .into_iter()
+            .take(3)
+            .map(|b| b.1.cards)
+            .collect();
+        for seed in 0..6 {
+            let b = auto_build(&all, &p(seed));
+            assert!(
+                best.contains(&b.cards),
+                "seed {seed}: one of the three best"
             );
+            check(&all, &b, "surprise");
         }
     }
 
