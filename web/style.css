@@ -15,8 +15,96 @@
   --damage: #ff5d52;
   --heal: #6fe39a;
 
+  /* The grammar (DESIGN.md), grown from the duel's table (#48): every screen
+     draws from these. Raw colours and font sizes live only in token
+     definitions (tools/check-tokens.mjs, in CI). */
+  --felt-hi: #1d3657;
+  --deep: #0b1424;
+  --sheet-bg: #0d1a30;
+  --panel-hi: #253a60;
+  --chip: #172741;
+  --steel: #a9c1e3;
+  --steel-line: rgba(157, 183, 220, 0.42);
+  --text-soft: #d7dfeb;
+  --text-dim: #c6d0de;
+  --text-faint: #aeb9ca;
+  --on-brass: #2a1d02;
+  --brass-light: #f6dc94;
+  --brass-mid: #d6ac4a;
+  --brass-line: color-mix(in srgb, var(--brass) 45%, transparent);
+  --card-back: #2a4277;
+  --ink-dark: #1d2230;
+  --hit: #ff7468;
+  --danger-bg: #5a1f1c;
+  --danger-ink: #ffd5d0;
+  --danger-text: #ffb1aa;
+  --bar-bg: rgba(8, 15, 28, 0.9);
+  --scrim: rgba(4, 9, 18, 0.62);
+  /* Focus is a cream ring, held off the control; selection is brass: a
+     brass-washed fill inside a brass line. Brass fill is for the primary action only. */
+  --focus: #fbf6e9;
+  --sel-bg: color-mix(in srgb, var(--brass) 18%, transparent);
+  --sel-line: var(--brass);
+  --sel-ink: var(--brass-hi);
+
   --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Type: one ramp, scaled by --text-scale (the reading-size setting). */
+  --text-scale: 1;
+  --fs-2xs: calc(11px * var(--text-scale));
+  --fs-xs: calc(12px * var(--text-scale));
+  --fs-sm: calc(13px * var(--text-scale));
+  --fs-md: calc(14px * var(--text-scale));
+  --fs-base: calc(15px * var(--text-scale));
+  --fs-lg: calc(16px * var(--text-scale));
+  --fs-xl: calc(18px * var(--text-scale));
+  --fs-2xl: calc(20px * var(--text-scale));
+  --fs-3xl: calc(22px * var(--text-scale));
+  --fs-4xl: calc(28px * var(--text-scale));
+  /* ...and its voice per context. Menus: a title, sections, item labels, body, meta. */
+  --type-menu-title: var(--fs-3xl);
+  --type-menu-section: var(--fs-2xl);
+  --type-menu-label: var(--fs-xl);
+  --type-menu-body: var(--fs-base);
+  --type-menu-meta: var(--fs-sm);
+  /* The duel: 12 / 14 / 16 / 20 / 28. */
+  --type-duel-fine: var(--fs-xs);
+  --type-duel-body: var(--fs-md);
+  --type-duel-label: var(--fs-lg);
+  --type-duel-title: var(--fs-2xl);
+  --type-duel-big: var(--fs-4xl);
+  /* The world: few words over a live scene; a spoken line reads larger. */
+  --type-world-hud: var(--fs-md);
+  --type-world-name: var(--fs-md);
+  --type-world-line: var(--fs-xl);
+  --type-world-sheet: var(--fs-3xl);
+
+  /* Space: a 4 px step. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Radii: chips and keys; controls, tiles and plates; sheets and dialogs. */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  /* Elevation: resting on the felt, lifted, floating over the screen. */
+  --elev-1: 0 2px 6px rgba(0, 0, 0, 0.45);
+  --elev-2: 0 16px 40px -16px rgba(0, 0, 0, 0.7);
+  --elev-3: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+
+  /* Motion: a quick state change, a panel, a screen; one ease-out for all. */
+  --dur-quick: 140ms;
+  --dur-panel: 220ms;
+  --dur-screen: 380ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Card widths; heights follow the 5:7 card ratio. */
   --aw: clamp(64px, min(10.5vw, 15vh), 136px);
@@ -2553,23 +2641,9 @@ p.atlas-pick { color: var(--muted); }
   --H: clamp(78px, 10.4vh, 116px);
   --seam: clamp(52px, 6.2vh, 60px);
   --gap: 24px;
-  --r1: 6px;
-  --r2: 12px;
-  --deep: #0b1424;
-  --sheet-bg: #0d1a30;
-  --steel: #a9c1e3;
-  --steel-line: rgba(157, 183, 220, 0.42);
-  --hit: #ff7468;
-  --focus: #fbf6e9;
-  --text-soft: #d7dfeb;
-  --text-dim: #c6d0de;
-  --text-faint: #aeb9ca;
-  --on-brass: #2a1d02;
-  --chip: #172741;
-  --brass-light: #f6dc94;
-  --brass-mid: #d6ac4a;
-  --card-back: #2a4277;
-  --ink-dark: #1d2230;
+  /* Its colours are the grammar's own (:root). */
+  --r1: var(--radius-sm);
+  --r2: var(--radius-md);
   position: relative;
   height: 100dvh;
   overflow: hidden;
