@@ -178,8 +178,8 @@ export function mount(el, reduced) {
         o.geometry?.dispose();
         for (const m of [o.material].flat()) m?.dispose();
       });
+      renderer.forceContextLoss(); // the world screen makes its own context next
       renderer.dispose();
-      renderer.forceContextLoss();
       renderer.domElement.remove();
       el.classList.remove("live");
     },

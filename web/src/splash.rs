@@ -43,7 +43,7 @@ fn mark_shown() {
 }
 
 /// How long each step holds before the next, untouched (studio, logo); the
-/// prompt waits for the player.
+/// prompt (step 2) waits for the player, and step 3 is the swap to the title.
 const HOLD: [u64; 2] = [2000, 1100];
 
 /// The studio's die: one pip more than any die has.
@@ -99,12 +99,10 @@ pub fn Splash() -> impl IntoView {
     };
 
     let start = move || {
-        if step.get_untracked() < 2 {
-            advance();
-            return;
-        }
-        if let Some(t) = timer.get_value() {
-            t.clear();
+        match step.get_untracked() {
+            0 | 1 => return advance(),
+            2 => step.set(3), // started: the swap is under way, later presses do nothing
+            _ => return,
         }
         audio::sfx("sting", 0.0);
         crate::focus_menu_next();
