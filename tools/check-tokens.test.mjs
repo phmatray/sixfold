@@ -18,8 +18,16 @@ const check = (css) => {
 };
 const root = ":root {\n  --a: #123456;\n}\n";
 
-test("tokens, definitions and fluid sizes pass", () => {
-  assert.equal(check(`${root}.x { color: var(--a); --b: #123456; font-size: var(--fs-md); }\n.y { font-size: clamp(12px, 2vw, 16px); font: 700 1em serif; }\n`), "");
+test("tokens and fluid sizes pass", () => {
+  assert.equal(check(`${root}.x { color: var(--a); --b: var(--a); font-size: var(--fs-md); }\n.y { font-size: clamp(12px, 2vw, 16px); font: 700 1em serif; }\n`), "");
+});
+
+test("the space-separated rgb() syntax is caught too", () => {
+  assert.match(check(`${root}.x { color: rgb(18 52 86 / 0.4); }\n`), /is --a/);
+});
+
+test("a local custom property may not hold a token's raw value", () => {
+  assert.match(check(`${root}.x { --b: #123456; }\n`), /#123456 is --a/);
 });
 
 test("a raw colour a token covers, at any alpha, and bare px sizes fail", () => {

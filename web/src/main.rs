@@ -162,13 +162,13 @@ fn App() -> impl IntoView {
     profile.update(|pr| {
         progress.with_untracked(|p| _ = sixfold_engine::campaign::backfill_promos(p, pr))
     });
-    // Each screen starts at the top with nothing selected in the inspector.
+    // Each screen starts with nothing selected in the inspector (and at the
+    // top: no screen scrolls as a page, and its own scroller is new).
     // Keyboard and screen-reader users land on the new screen's heading.
     Effect::new(move |first: Option<()>| {
         screen.track();
         ui.inspect.set(None);
         ui.sheet.set(false);
-        window().scroll_to_with_x_and_y(0.0, 0.0);
         if first.is_some() {
             request_animation_frame(focus_heading);
         }
@@ -216,6 +216,8 @@ thread_local! {
     static TO_MENU: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
     /// The App's screen, for `go`.
     static SCREEN: std::cell::Cell<Option<RwSignal<Screen>>> = const { std::cell::Cell::new(None) };
+    /// The screen a transition is on its way to (a repeated press doesn't go twice).
+    static GOING: std::cell::Cell<Option<Screen>> = const { std::cell::Cell::new(None) };
 }
 
 // A screen change runs as a view transition (style.css, "Screen transitions"),
@@ -230,10 +232,17 @@ export function can_swap() {
 }
 export function swap(kind, cb, done) {
   const d = document.documentElement;
+  const id = (d.swapId = (d.swapId || 0) + 1); // a later swap owns the attribute
   d.dataset.swap = kind;
-  const t = document.startViewTransition(() => { cb(); return new Promise((r) => setTimeout(r, 0)); });
+  // The new screen is shot once its pictures are in (150 ms at most), so art
+  // doesn't pop in after the transition.
+  const art = () => {
+    const imgs = [...document.images].filter((i) => !i.complete);
+    return Promise.race([Promise.all(imgs.map((i) => i.decode().catch(() => {}))), new Promise((r) => setTimeout(r, 150))]);
+  };
+  const t = document.startViewTransition(() => { cb(); return new Promise((r) => setTimeout(r, 0)).then(art); });
   t.updateCallbackDone.then(() => requestAnimationFrame(done), () => {});
-  t.finished.finally(() => { if (d.dataset.swap === kind) delete d.dataset.swap; });
+  t.finished.finally(() => { if (d.swapId === id) delete d.dataset.swap; });
   t.ready.catch(() => {}); // skipped (a hidden tab, a second swap): the change still happened
 }
 "#)]
@@ -246,12 +255,23 @@ extern "C" {
 /// transition. Into a duel the table opens out of a hexagon; out of one it
 /// folds back into it; between other screens the new one rises into place.
 pub fn go(to: Screen) {
+    go_with(to, || {});
+}
+
+/// `go`, running `then` as the screen changes: after the old screen is shot
+/// for the transition (a duel's table is cleared only once it has folded away).
+pub fn go_with(to: Screen, then: impl FnOnce() + 'static) {
     let Some(screen) = SCREEN.get() else {
         return;
     };
     if !can_swap() {
+        then();
         return screen.set(to);
     }
+    if GOING.get() == Some(to) {
+        return;
+    }
+    GOING.set(Some(to));
     let kind = match (screen.get_untracked(), to) {
         (Screen::Splash, _) => "splash",
         (_, Screen::Match) => "duel-in",
@@ -259,7 +279,11 @@ pub fn go(to: Screen) {
         _ => "screen",
     };
     let menu = TO_MENU.get();
-    let cb = Closure::once_into_js(move || screen.set(to));
+    let cb = Closure::once_into_js(move || {
+        GOING.set(None);
+        then();
+        screen.set(to);
+    });
     let done = Closure::once_into_js(move || {
         TO_MENU.set(menu);
         focus_heading();
@@ -331,10 +355,10 @@ fn MatchScreen() -> impl IntoView {
     let asking = RwSignal::new(false);
     let leave = move || {
         forfeit();
-        ctl.stop();
-        // The question goes first, so the duel folds away without it.
+        // The question goes first, so the duel folds away without it; the
+        // table is cleared once it has.
         asking.set(false);
-        go(quit_to)
+        go_with(quit_to, move || ctl.stop())
     };
     let quit = move || {
         if over() {

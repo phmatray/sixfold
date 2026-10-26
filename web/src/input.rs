@@ -167,25 +167,7 @@ pub fn titled(name: &str, c: Ctrl) -> String {
     }
 }
 
-/// The world's top-bar hint, for the device in use.
-const HINT_SEEN: &str = "sixfold.hint-seen";
-
-/// Whether the player has walked once (the world's controls hint is spent).
-pub fn hint_seen() -> bool {
-    window()
-        .local_storage()
-        .ok()
-        .flatten()
-        .and_then(|s| s.get_item(HINT_SEEN).ok().flatten())
-        .is_some()
-}
-
-pub fn mark_hint_seen() {
-    if let Ok(Some(s)) = window().local_storage() {
-        _ = s.set_item(HINT_SEEN, "1");
-    }
-}
-
+/// The world's controls hint (until the first steps, then in Options), for the device in use.
 pub fn world_hint() -> String {
     if input().device.with(|d| d == "touch") {
         return tr(

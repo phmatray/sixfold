@@ -23,8 +23,8 @@ or keyboard player always knows both where they are and what is chosen.
   `--muted`), card stock (`--stock`, `--stock-ink`), brass (`--brass`, `--brass-hi`, `--brass-light`,
   `--brass-line`), the opponent's steel (`--steel`, `--steel-line`), and signal colours (`--damage`,
   `--hit`, `--heal`, `--danger-*`).
-- **Type.** One ramp, `--fs-2xs` (11) to `--fs-4xl` (28), multiplied by `--text-scale` (the reading
-  size setting). Each context has its own voice on top of it:
+- **Type.** One ramp, `--fs-2xs` (11) to `--fs-5xl` (32), multiplied by `--text-scale` (1 for now:
+  the one knob a reading-size setting turns, #70). Each context has its own voice on top of it:
   - *Menus*: `--type-menu-title` 22, `-section` 20, `-label` 18, `-body` 15, `-meta` 13.
   - *Duel*: `--type-duel-fine` 12, `-body` 14, `-label` 16, `-title` 20, `-big` 28.
   - *World*: `--type-world-hud` 14, `-name` 14, `-line` 18 (a spoken line reads larger), `-sheet` 22.

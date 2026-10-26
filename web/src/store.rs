@@ -84,6 +84,7 @@ pub fn set_lang(l: sixfold_engine::Lang) {
 
 const FAST: &str = "sixfold.fast";
 const TIPS: &str = "sixfold.tips";
+const HINT_SEEN: &str = "sixfold.hint-seen";
 
 /// The opponent's moves play faster (a browser preference, like the language).
 pub fn fast_opponent() -> bool {
@@ -95,6 +96,15 @@ pub fn set_fast_opponent(on: bool) {
 }
 
 /// The rule tips already shown, one bit each (see `tips::Tip`).
+/// Whether the hero has walked once (the world's controls hint is spent).
+pub fn hint_seen() -> bool {
+    get(HINT_SEEN).is_some()
+}
+
+pub fn mark_hint_seen() {
+    set(HINT_SEEN, "1");
+}
+
 pub fn tips_seen() -> u32 {
     get(TIPS).and_then(|v| v.parse().ok()).unwrap_or(0)
 }

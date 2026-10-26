@@ -1297,7 +1297,7 @@ pub fn WorldScreen() -> impl IntoView {
     on_cleanup(move || pad_menu.remove());
     // The controls hint shows until the first steps, then fades for good
     // (it stays in the menu's Options).
-    let hint = RwSignal::new(!input::hint_seen());
+    let hint = RwSignal::new(!store::hint_seen());
     let fading = StoredValue::new(false);
     let fade_hint = move || {
         if hint.get_untracked() && !fading.get_value() {
@@ -1305,36 +1305,29 @@ pub fn WorldScreen() -> impl IntoView {
             set_timeout(
                 move || {
                     _ = hint.try_set(false);
-                    input::mark_hint_seen();
+                    store::mark_hint_seen();
                 },
                 std::time::Duration::from_millis(2500),
             );
         }
     };
+    // The walk keys (fixed: arrows, WASD and AZERTY's ZQSD; a pad's stick
+    // sends arrows too) or a tap on the ground (the stage's pointerdown).
     let hint_keys = window_event_listener(leptos::ev::keydown, move |e| {
-        if matches!(
-            e.key().as_str(),
-            "ArrowUp"
-                | "ArrowDown"
-                | "ArrowLeft"
-                | "ArrowRight"
-                | "w"
-                | "a"
-                | "s"
-                | "d"
-                | "W"
-                | "A"
-                | "S"
-                | "D"
-        ) {
+        use wasm_bindgen::JsCast;
+        let typing = e
+            .target()
+            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+            .is_some_and(|el| matches!(el.tag_name().as_str(), "INPUT" | "TEXTAREA" | "SELECT"));
+        if typing {
+            return;
+        }
+        let k = e.key().to_lowercase();
+        if k.starts_with("arrow") || matches!(k.as_str(), "w" | "a" | "s" | "d" | "z" | "q") {
             fade_hint();
         }
     });
-    let hint_taps = window_event_listener(leptos::ev::pointerdown, move |_| fade_hint());
-    on_cleanup(move || {
-        hint_keys.remove();
-        hint_taps.remove();
-    });
+    on_cleanup(move || hint_keys.remove());
     // The head of a panel sheet: title, the Facets held, Close.
     let head = move |title: &'static str, facets: bool| {
         view! {
@@ -1371,7 +1364,7 @@ pub fn WorldScreen() -> impl IntoView {
                     </button>
                 </div>
             </header>
-            <main class="world-stage" node_ref=stage tabindex="-1"
+            <main class="world-stage" node_ref=stage tabindex="-1" on:pointerdown=move |_| fade_hint()
                 aria-label=move || {
                     let (walk, act) = (input::prompt(Ctrl::Walk), input::prompt(Ctrl::Act));
                     tr(

@@ -52,3 +52,21 @@ test("keyboard only: title, duel setup, a duel started, then left", async ({ pag
   await page.keyboard.press("Enter");
   await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible();
 });
+
+test.describe("with motion", () => {
+  test.use({ reducedMotion: "no-preference" });
+
+  test("a screen change plays its transition and still lands focus on the new screen", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: "Press to start" })).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(menuItem(page, "Learn to play")).toBeFocused();
+    await moveTo(page, menuItem(page, "Play a duel"));
+    const swapped = page.evaluate(() => new Promise((r) => {
+      new MutationObserver(() => document.documentElement.dataset.swap && r(document.documentElement.dataset.swap)).observe(document.documentElement, { attributes: true });
+    }));
+    await page.keyboard.press("Enter");
+    expect(await swapped).toBe("screen");
+    await expect(page.getByRole("heading", { level: 1, name: "Play a duel" })).toBeFocused();
+  });
+});

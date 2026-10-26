@@ -1,7 +1,7 @@
-// The visual grammar's guard (DESIGN.md): outside a custom property definition,
-// web/style.css may not use a raw colour that a :root colour token covers (at
-// any alpha: use color-mix with the token), nor a font size in bare pixels
-// (use the type ramp, --fs-*, or a fluid clamp/em/cqw size).
+// The visual grammar's guard (DESIGN.md): outside :root, web/style.css may not
+// use a raw colour that a :root colour token covers (at any alpha: use
+// color-mix with the token), nor a font size in bare pixels (use the type
+// ramp, --fs-*, or a fluid clamp/em/cqw size).
 //   node tools/check-tokens.mjs [web/style.css]
 import { readFileSync } from "node:fs";
 
@@ -29,15 +29,15 @@ for (const l of lines.slice(start + 1, end)) {
 const bad = [];
 lines.forEach((line, i) => {
   if (i >= start && i <= end) return;
-  // Token definitions (anywhere) and data URIs may hold raw values.
-  const l = line.replace(/--[\w-]+\s*:[^;]*;?/g, "").replace(/url\([^)]*\)/g, "");
+  // Data URIs may hold raw values (an SVG's own fill).
+  const l = line.replace(/url\([^)]*\)/g, "");
   const at = `${file}:${i + 1}`;
   for (const m of l.matchAll(/#(?:[0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3,4})\b/gi)) {
     // #rgba and #rrggbbaa: the colour without its alpha.
     const k = hex(m[0].length === 5 || m[0].length === 9 ? m[0].slice(0, m[0].length === 5 ? 4 : 7) : m[0]);
     if (tokens.has(k)) bad.push(`${at}: ${m[0]} is ${tokens.get(k)}`);
   }
-  for (const m of l.matchAll(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g)) {
+  for (const m of l.matchAll(/rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/g)) {
     const k = `${m[1]},${m[2]},${m[3]}`;
     if (tokens.has(k)) bad.push(`${at}: ${m[0]}…) is ${tokens.get(k)} (color-mix it)`);
   }

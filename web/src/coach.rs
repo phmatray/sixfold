@@ -30,7 +30,7 @@ pub fn start(back: Screen) {
         back,
     };
     if ctl.start(setup, 0) {
-        expect_context::<RwSignal<Screen>>().set(Screen::Match);
+        crate::go(Screen::Match);
     }
 }
 
@@ -101,8 +101,7 @@ pub fn Coach() -> impl IntoView {
             return;
         }
         crate::store::tutorial_done();
-        ctl.stop();
-        crate::go(Screen::Title);
+        crate::go_with(Screen::Title, move || ctl.stop());
     };
     let ring = move || {
         sel.get().map(|s| {
@@ -156,10 +155,7 @@ pub fn Finish() -> impl IntoView {
             crate::store::tutorial_done();
         }
     });
-    let go = move |to: Screen| {
-        ctl.stop();
-        crate::go(to);
-    };
+    let go = move |to: Screen| crate::go_with(to, move || ctl.stop());
     move || {
         let l = done.get()?;
         let (deck, packs) = profile.with_untracked(|p| {
