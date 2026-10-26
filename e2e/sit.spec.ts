@@ -5,7 +5,7 @@ import { menuItem, readSave, title } from "./helpers";
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
 const sitting = (page: Page) => page.evaluate(() => (document.querySelector(".world-host") as any)?.sixfoldStats?.().sitting);
 
-test("sit on a bench: Sit, stand up with Escape, a move or E, and a reload stands in front of it", async ({ page }) => {
+test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands in front of it", async ({ page }) => {
   page.on("dialog", (d) => d.accept());
   await title(page);
   await menuItem(page, "Learn to play").click();
@@ -33,14 +33,13 @@ test("sit on a bench: Sit, stand up with Escape, a move or E, and a reload stand
   await expect.poll(() => sitting(page)).toBe(false);
   await expect(page.getByRole("dialog", { name: "Menu" })).toBeHidden();
 
-  // Facing away now: turn back, sit with the prompt, stand up with a move key and walk off.
+  // Facing away now: turn back, sit with the prompt, and a move key stands up (on the same tile).
   await page.keyboard.press("ArrowUp");
   await sit.click();
   await expect.poll(() => sitting(page)).toBe(true);
-  await page.keyboard.down("ArrowLeft");
-  await expect.poll(() => at(page)).toMatch(/^overworld,2[01],17,/);
-  await page.keyboard.up("ArrowLeft");
-  expect(await sitting(page)).toBe(false);
+  await page.keyboard.press("ArrowLeft");
+  await expect.poll(() => sitting(page)).toBe(false);
+  expect(await at(page)).toBe("overworld,22,17,s");
 
   // Seated, a reload stands the hero on the tile in front of the bench.
   await page.evaluate(() => (document.querySelector(".world-host") as any).sixfoldWarp("overworld", 22, 17, "n"));

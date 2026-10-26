@@ -132,9 +132,13 @@ export function animateActor(a, dt, reduced) {
     // `pose`: a clip held over the rest (seat.js: sitdown, sit, standup; the first and last play once).
     const want = a.pose && a.actions[a.pose] ? a.pose : walking ? (a.running && a.actions.run ? "run" : "walk") : a.idleName;
     if (want !== a.clip && a.actions[want]) {
-      a.actions[a.clip]?.fadeOut(0.15);
-      const once = want === "sitdown" || want === "standup";
-      a.actions[want].reset().setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity).fadeIn(0.15).play().clampWhenFinished = once;
+      const once = want === "sitdown" || want === "standup", fade = reduced && (a.sit || a.clip === "sit") ? 0 : 0.15; // reduced motion: sit and stand at once
+      if (fade) a.actions[a.clip]?.fadeOut(fade);
+      else a.actions[a.clip]?.stop();
+      const next = a.actions[want].reset().setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
+      next.clampWhenFinished = once;
+      if (once && a.sit) next.time = (want === "sitdown" ? a.sit.k : 1 - a.sit.k) * next.getClip().duration; // turned back half way: from where it is
+      (fade ? next.fadeIn(fade) : next).play();
       a.clip = want;
     }
     if (a.actions.walk) a.actions.walk.timeScale = a.running && !a.actions.run ? 2 : 1; // no Run clip: a faster Walk
