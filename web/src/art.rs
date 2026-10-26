@@ -67,7 +67,8 @@ fn glyph_path(c: Color) -> &'static str {
     match c {
         Color::Grass => "M12 2.5C5 7 4.5 15 12 21.5C19.5 15 19 7 12 2.5ZM12 7.5V18.5L11 18.5V7.5Z",
         Color::Fire => "M12 2C14.5 6.5 19 9 18.5 15A6.5 6.5 0 0 1 5.5 15C5.5 11.5 8 10 8.5 6.5C10.5 8.5 12 6.5 12 2Z",
-        Color::Water => "M12 2.5C16.5 9 18.5 12 18.5 15A6.5 6.5 0 0 1 5.5 15C5.5 12 7.5 9 12 2.5Z",
+        // A drop crossed by a wave, so it can't be taken for Fire's flame without its colour.
+        Color::Water => "M12 2.5C16.5 9 18.5 12 18.5 15A6.5 6.5 0 0 1 5.5 15C5.5 12 7.5 9 12 2.5ZM6.6 14.6C8.6 12.9 10.2 12.9 12 14.4S15.4 15.9 17.4 14.2L17.6 16.9C15.6 18.6 13.8 18.6 12 17.1S8.6 15.6 6.4 17.3Z",
         Color::Lightning => "M13.5 1.5L4.5 13.5H11L9.5 22.5L19.5 9H13Z",
         Color::Fighting => "M12 2.5L20.5 8.5L17.5 20.5H6.5L3.5 8.5ZM12 7L8 10L9.5 16H14.5L16 10Z",
         Color::Psychic => "M1.5 12C6 4.5 18 4.5 22.5 12C18 19.5 6 19.5 1.5 12ZM12 8A4 4 0 1 0 12 16A4 4 0 1 0 12 8Z",

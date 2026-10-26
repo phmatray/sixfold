@@ -17,10 +17,9 @@ fn plural(n: usize, one: &str, many: &str) -> String {
 
 /// "54 cards · 2 decks · 3 packs · 1 seal".
 pub fn describe(s: &Summary) -> String {
-    let seals = if s.champion {
-        "Champion".to_string()
-    } else {
-        plural(s.seals, tr("seal", "sceau"), tr("seals", "sceaux"))
+    let seals = match s.title {
+        Some(t) => t.get().to_string(),
+        None => plural(s.seals, tr("seal", "sceau"), tr("seals", "sceaux")),
     };
     format!(
         "{} · {} · {} · {seals}",

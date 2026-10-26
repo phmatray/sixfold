@@ -49,6 +49,7 @@ fn main() {
     if let Some(html) = document().document_element() {
         let _ = html.set_attribute("lang", lang.code());
     }
+    store::apply_text_size();
     mount_to_body(App);
 }
 

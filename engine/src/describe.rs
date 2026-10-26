@@ -1404,6 +1404,48 @@ impl Event {
     }
 }
 
+/// What a screen reader hears once the viewer can act again: everything since
+/// they last did, the other side's whole turn included, as one announcement.
+/// One sentence per event, without the bookkeeping (shuffles, turn ends, the
+/// face-down draw that starts a turn); a line repeated back to back is said
+/// once with its count.
+pub fn summarise_turn(events: &[Event], viewer: usize) -> String {
+    let mut lines: Vec<String> = vec![];
+    for (i, e) in events.iter().enumerate() {
+        let turn_draw = matches!(e, Event::CardDrawn { .. })
+            && e.is_private(viewer)
+            && matches!(
+                i.checked_sub(1).map(|j| &events[j]),
+                Some(Event::TurnStarted { .. })
+            );
+        let quiet = matches!(
+            e,
+            Event::Shuffled { .. } | Event::BetweenTurns | Event::TurnEnded { .. }
+        );
+        if !quiet && !turn_draw {
+            lines.push(e.describe(viewer));
+        }
+    }
+    let mut out: Vec<String> = vec![];
+    let mut i = 0;
+    while i < lines.len() {
+        let n = lines[i..].iter().take_while(|l| **l == lines[i]).count();
+        let line = lines[i].trim_end_matches('.');
+        // "You win!" keeps its own mark rather than gaining a full stop.
+        let stop = if line.ends_with(['!', '?']) { "" } else { "." };
+        out.push(if n > 1 {
+            tr(
+                format!("{line} ({n} times){stop}"),
+                format!("{line} ({n} fois){stop}"),
+            )
+        } else {
+            format!("{line}{stop}")
+        });
+        i += n;
+    }
+    out.join(" ")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1564,5 +1606,121 @@ mod tests {
             card: FIRE_E,
         };
         assert_eq!(prize.describe(1), "Opponent took a prize card");
+    }
+
+    /// A screen reader hears the opponent's whole turn as one announcement:
+    /// what they did and what it did to you, without the bookkeeping
+    /// (shuffles, their face-down draw, turn ends).
+    fn a_turn() -> Vec<Event> {
+        vec![
+            Event::Damage {
+                player: 1,
+                slot: 0,
+                uid: 9,
+                creature: MOSSLING,
+                amount: 20,
+                hp: 20,
+                weakness: false,
+                resistance: false,
+            },
+            Event::TurnEnded { player: 0 },
+            Event::TurnStarted { player: 1, turn: 3 },
+            Event::CardDrawn {
+                player: 1,
+                card: FIRE_E,
+            },
+            Event::EnergyAttached {
+                player: 1,
+                slot: 0,
+                uid: 9,
+                creature: MOSSLING,
+                card: GRASS_E,
+            },
+            Event::AttackUsed {
+                player: 1,
+                attack: 0,
+                uid: 9,
+                creature: MOSSLING,
+            },
+            Event::CoinFlip {
+                player: 1,
+                heads: true,
+            },
+            Event::Damage {
+                player: 0,
+                slot: 0,
+                uid: 2,
+                creature: EMBERKIT,
+                amount: 30,
+                hp: 0,
+                weakness: true,
+                resistance: false,
+            },
+            Event::KnockedOut {
+                player: 0,
+                slot: 0,
+                uid: 2,
+                card: EMBERKIT,
+            },
+            Event::PrizeTaken {
+                player: 1,
+                prize: 0,
+                card: FIRE_E,
+            },
+            Event::TurnEnded { player: 1 },
+            Event::BetweenTurns,
+            Event::Shuffled { player: 0 },
+            Event::TurnStarted { player: 0, turn: 4 },
+            Event::CardDrawn {
+                player: 0,
+                card: FIELD_NOTES,
+            },
+        ]
+    }
+
+    #[test]
+    fn summarise_turn_reads_the_opponents_turn_in_one_go() {
+        assert_eq!(
+            summarise_turn(&a_turn(), 0),
+            "Opponent's Mossling took 20 damage. Turn 4: Opponent's turn. \
+             Opponent attached Grove Energy to Mossling. Opponent's Mossling used Vine Poke. \
+             Opponent flipped a coin: heads. Your Emberkit took 30 damage (weakness). \
+             Your Emberkit was knocked out. Opponent took a prize card. \
+             Turn 5: Your turn. You drew Field Notes."
+        );
+    }
+
+    #[test]
+    fn summarise_turn_collapses_repeats_and_keeps_the_result() {
+        let draw = Event::CardDrawn {
+            player: 1,
+            card: FIRE_E,
+        };
+        let played = Event::TrainerPlayed {
+            player: 1,
+            card: FIELD_NOTES,
+        };
+        let events = [played, draw.clone(), draw, Event::GameOver { winner: 0 }];
+        assert_eq!(
+            summarise_turn(&events, 0),
+            "Opponent played Field Notes. Opponent drew a card (2 times). You win!"
+        );
+        assert_eq!(summarise_turn(&[Event::Shuffled { player: 0 }], 0), "");
+    }
+
+    #[test]
+    fn summarise_turn_in_french() {
+        use crate::lang::{set_lang, Lang};
+        set_lang(Lang::Fr);
+        let fr = summarise_turn(&a_turn(), 0);
+        set_lang(Lang::En);
+        assert_eq!(
+            fr,
+            "Mossling adverse subit 20 dégâts. Tour 4\u{a0}: à l'adversaire. \
+             L'adversaire attache Énergie Bosquet à Mossling. Mossling adverse utilise Vine Poke. \
+             L'adversaire lance une pièce\u{a0}: face. Votre Emberkit subit 30 dégâts (Faiblesse). \
+             Votre Emberkit est K.O. L'adversaire prend une Récompense. \
+             Tour 5\u{a0}: à vous. Vous piochez Field Notes."
+        );
     }
 }

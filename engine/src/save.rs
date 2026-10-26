@@ -38,10 +38,10 @@
 
 use std::collections::BTreeMap;
 
-use crate::campaign::{seals, RIVALS};
+use crate::campaign::{self, seals};
 use crate::collection::{fnv1a, starter_collection, Collection};
 use crate::deck::DeckList;
-use crate::lang::tr;
+use crate::lang::{tr, T};
 use crate::overworld::Progress;
 use crate::profile::{Profile, Wallet};
 use crate::stats::Stats;
@@ -125,8 +125,8 @@ pub struct Summary {
     pub decks: usize,
     pub packs: u32,
     pub seals: usize,
-    /// Every rival, the Warden included, beaten.
-    pub champion: bool,
+    /// The champion's title once the Warden is beaten ([`campaign::title`]).
+    pub title: Option<T>,
     pub facets: u32,
 }
 
@@ -356,7 +356,7 @@ impl Save {
             decks: p.decks.len(),
             packs: p.wallet.total(),
             seals: seals(&progress),
-            champion: RIVALS.iter().all(|r| r.beaten(&progress)),
+            title: campaign::title(&progress),
             facets: progress.coins(),
         }
     }
@@ -445,7 +445,7 @@ mod tests {
         let mut s = Save::new_player("Champ");
         let mut pr = Profile::new_player();
         let mut p = Progress::default();
-        for r in &RIVALS {
+        for r in &crate::campaign::RIVALS {
             crate::campaign::record(r, true, &mut p, &mut pr);
         }
         p.settle();
@@ -455,7 +455,7 @@ mod tests {
         s.set_profile(&pr);
         let back = Save::decode(&s.encode()).unwrap();
         let bp = back.progress();
-        assert!(crate::campaign::champion(&bp) && back.summary().champion);
+        assert!(crate::campaign::champion(&bp) && back.summary().title.is_some());
         assert_eq!(bp.gauntlet(), p.gauntlet());
         assert_eq!(bp.daily(), Some(20_385));
         let promos = back.profile().0.collection;
@@ -564,7 +564,7 @@ mod tests {
         assert_eq!(sum.decks, 1);
         assert_eq!(sum.packs, 5);
         assert_eq!(sum.seals, 1);
-        assert!(!sum.champion);
+        assert!(sum.title.is_none());
         assert_eq!(sum.name, "Ada");
     }
 
