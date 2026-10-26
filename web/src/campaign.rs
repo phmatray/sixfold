@@ -85,7 +85,7 @@ pub fn reward_line(r: &Rival, p: &Progress) -> String {
         ),
         (true, _) => tr(
             format!("Rematch win: ⬡ {facets}"),
-            format!("Revanche gagnée : ⬡ {facets}"),
+            format!("Victoire en revanche : ⬡ {facets}"),
         ),
     }
 }

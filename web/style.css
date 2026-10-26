@@ -68,6 +68,9 @@ html[data-input="pad"] :focus:not(:focus-visible):not([tabindex="-1"]) {
 
 /* Headings take focus on a screen change (to start reading there); they aren't controls. */
 h1[tabindex="-1"]:focus, main[tabindex="-1"]:focus { outline: none; }
+/* A section title (now reachable by a pad): a rounded ring inside its panel, like the buttons'. */
+/* (!important: the duel's and the pad's focus rules are more specific and push it outward.) */
+summary:focus { outline-offset: 0 !important; border-radius: 8px; }
 
 h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 

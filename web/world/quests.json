@@ -285,8 +285,8 @@
       "done": "flag:rook_apprentice",
       "steps": [
         {
-          "text": "Rook was waiting by the duel hall in the meadow. Duel him: he stands east of the plaza.",
-          "text_fr": "Rook vous attendait près de la salle des duels, dans le pré. Affrontez-le : il se tient à l'est de la place.",
+          "text": "Rook waits by the duel hall in the meadow, east of the plaza. Duel him there.",
+          "text_fr": "Rook vous attend près de la salle des duels, dans le pré, à l'est de la place. Affrontez-le là-bas.",
           "done": "flag:rook_1_left"
         },
         {

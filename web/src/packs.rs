@@ -577,7 +577,7 @@ fn Reveal(
                 view! {
                     {(more() > 0).then(|| view! {
                         <button type="button" class="btn primary" on:click=move |_| again()>
-                            {tr(format!("Choose another ({} left)", more()), format!("Un autre ({} restant{})", more(), if more() > 1 { "s" } else { "" }))}
+                            {tr(format!("Choose another ({} left)", more()), format!("En choisir un autre ({} restant{})", more(), if more() > 1 { "s" } else { "" }))}
                         </button>
                     })}
                     <button type="button" class="btn" on:click=move |_| screen.set(Screen::Collection)>{tr("See the collection", "Voir la collection")}</button>
