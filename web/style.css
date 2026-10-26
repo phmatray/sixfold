@@ -1317,7 +1317,7 @@ body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
 }
 .world-sheet.reading-sheet::backdrop { background: transparent; }
 /* Hidden from the moment a book is taken until it is back on its shelf. */
-.world.book-out :is(.world-top, .world-prompt) { visibility: hidden; }
+.world.book-out :is(.world-top, .world-prompt, .world-controls) { visibility: hidden; }
 .reading { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; }
 .reading-surface { position: absolute; inset: 0; touch-action: pan-y; }
 .reading-head {

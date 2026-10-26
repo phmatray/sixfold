@@ -134,19 +134,20 @@ function board(g, x, y, w, h) {
   g.restore();
 }
 
+// A picture by URL, loading or loaded, shared by every page that shows it.
+function image(images, src) {
+  let im = images.get(src);
+  if (!im) (im = new Image()), (im.decoding = "async"), (im.src = src), images.set(src, im);
+  return im;
+}
+
 // The picture of a page in the box (x, y, w, h); `ready` once an image has loaded.
 function picture(g, art, x, y, w, h, images, ready) {
   if (!art || w < 8 || h < 8) return 0;
   const cx = x + w / 2, cy = y + h / 2;
   if (art.kind === "img") {
-    let im = images.get(art.src);
-    if (!im) {
-      im = new Image();
-      im.decoding = "async";
-      im.onload = ready;
-      im.src = art.src;
-      images.set(art.src, im);
-    }
+    const im = image(images, art.src);
+    if (!im.complete) im.addEventListener("load", ready, { once: true }); // painted again once it is in
     const iw = Math.min(w, h * (10 / 7)), ih = iw * 0.7;
     const ix = cx - iw / 2, iy = y + (h - ih) / 2;
     g.save();
@@ -593,6 +594,7 @@ export function createBook({ reduced, sound }) {
       data = book;
       at = Math.min(book.at ?? 0, book.pages.length - 1); // where it was left this visit
       from = ndc;
+      for (const p of book.pages) if (p.art?.kind === "img") image(images, p.art.src); // fetched ahead of their pages
       paintCover(coverCanvas, book.title, book.family);
       coverTex.needsUpdate = true;
       leather.color.set((COVER[book.family] ?? COVER.world).leather);
