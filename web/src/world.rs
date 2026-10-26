@@ -12,7 +12,7 @@ use leptos::web_sys;
 use sixfold_engine::campaign::rival;
 use sixfold_engine::clock::{self, Phase};
 use sixfold_engine::objective;
-use sixfold_engine::overworld::{Applied, Cue, Progress};
+use sixfold_engine::overworld::{Applied, CamTarget, Cue, Progress};
 use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
 
@@ -104,6 +104,25 @@ pub(crate) fn warp_to(map: &str, x: u32, z: u32, facing: &str, travel: bool) {
     world_cue(&format!(
         r#"{{"warp":{{"map":"{map}","x":{x},"z":{z},"facing":"{facing}"}},"travel":{travel}}}"#
     ));
+}
+
+/// A cue as world.js reads it (`cue(json)`). Names are `[a-z0-9_]` (the
+/// engine checked them), so nothing needs escaping.
+fn cue_json(c: &Cue) -> String {
+    match c {
+        Cue::Emote { actor, emote } => format!(r#"{{"actor":"{actor}","emote":"{emote}"}}"#),
+        Cue::Sfx(name) => format!(r#"{{"sfx":"{name}"}}"#),
+        Cue::Warp { map, x, z, facing } => {
+            format!(r#"{{"warp":{{"map":"{map}","x":{x},"z":{z},"facing":"{facing}"}}}}"#)
+        }
+        Cue::Walk { actor, path } => format!(r#"{{"actor":"{actor}","walk":"{path}"}}"#),
+        Cue::Face { actor, dir } => format!(r#"{{"actor":"{actor}","face":"{dir}"}}"#),
+        Cue::Cam(CamTarget::Hero) => r#"{"cam":"hero"}"#.into(),
+        Cue::Cam(CamTarget::Actor(id)) => format!(r#"{{"cam":"{id}"}}"#),
+        Cue::Cam(CamTarget::Tile(x, z)) => format!(r#"{{"cam":[{x},{z}]}}"#),
+        Cue::Wait(ms) => format!(r#"{{"wait":{ms}}}"#),
+        Cue::Music(track) => format!(r#"{{"music":"{track}"}}"#),
+    }
 }
 
 /// Hand the owned items to the scene (the shoes unlock running).
@@ -825,15 +844,10 @@ pub fn WorldScreen() -> impl IntoView {
                                 }
                             }
                             Applied::Coins(n) => gained += n,
-                            Applied::Cue(Cue::Emote { actor, emote }) => {
-                                cues.push(format!(r#"{{"actor":"{actor}","emote":"{emote}"}}"#))
-                            }
-                            Applied::Cue(Cue::Sfx(name)) => {
-                                cues.push(format!(r#"{{"sfx":"{name}"}}"#))
-                            }
                             Applied::Cue(Cue::Warp { map, x, z, facing }) => {
                                 warp = Some((map, x, z, facing))
                             }
+                            Applied::Cue(c) => cues.push(cue_json(&c)),
                             Applied::Clock(phase) => rested = Some(phase),
                             Applied::Show(panel) => match panel.as_str() {
                                 "ladder" => next = Some(Sheet::Ladder),
