@@ -1,7 +1,8 @@
 # Sixfold's visual grammar
 
 One game, one table: a felt playmat at night, card stock, and brass for whatever is yours to act on.
-The duel screen (#48) set this language; every other screen speaks it. The tokens live in `:root`
+The duel screen (#48) set this language; the menus speak it in the world's own materials (#100,
+"the painted kit", below). The tokens live in `:root`
 in `web/style.css`, and `tools/check-tokens.mjs` (in CI) fails when a rule outside a token
 definition uses a raw colour or font size that a token covers.
 
@@ -11,10 +12,59 @@ definition uses a raw colour or font size that a token covers.
 |---|---|---|
 | **Act** (the primary action, the one thing to press) | Brass fill, dark ink | `--brass`, `--on-brass` |
 | **Selected** (a tab, a chip, a chosen deck, a toggle that is on) | Brass wash inside a 1.5 px brass line, brass-light text | `--sel-bg`, `--sel-line`, `--sel-ink` |
-| **Focus** (where the keyboard or pad is) | Cream ring held 3 px off the control; it closes in from 7 px | `--focus` |
+| **Focus** (where the keyboard or pad is) | A painted hand pointing at the control (menus); a cream ring on the duel's board, the cards and the world's scene | `.focus-hand`, `--focus` |
 
 A selected tab never looks like a button to press, and focus never looks like selection, so a pad
 or keyboard player always knows both where they are and what is chosen.
+
+## The painted kit (#100)
+
+The menus are made of the world's materials: **wood** for what you act on and for headers, **paper**
+for what you read, and **one toon outline** round both, like the world's cel-shaded models. The
+kit is the last section of `web/style.css`; its materials are tokens:
+
+| Material | Tokens | Used for |
+|---|---|---|
+| Wood | `--wood`, `--wood-hi`, `--wood-lo`, `--grain-wood`, `--plank`, `--plank-lit` | the title's sign and menu planks, page headers (`.page-bar`, the world menu's top), the chosen tab |
+| Brass plank | `--plank-brass`, `--brass-deep`, `--brass-ink` | the act button (`.btn.primary`), the title's first entry |
+| Paper | `--paper`, `--paper-hi`, `--paper-lo`, `--paper-ink-soft`, `--paper-muted` | sheets, dialogs, panels, rows, plain buttons, fields |
+| Outline and paint | `--toon`, `--toon-w`, `--toon-soft`, `--paint`, `--painted-text`, `--edge`, `--edge-soft` | the outline (3 px on planks and sheets, soft 2 px on rows), painted titles, a button's thickness |
+| Signals | `--sprout` (a toggle that is on), `--danger-paint`, `--danger-on-paper`, `--heal-on-paper` | |
+
+- **Paper turns the ink dark.** A paper surface (`.dialog`, `.drawer`, `.settings-body`, the world's
+  sheets, and rows such as `.deck-row`, `.slot`, `.ach`, `.rival`, `.shelf-item`, `.quest`) remaps
+  the ink tokens (`--ink`, `--muted`, `--text-*`, `--line`, `--panel*`, `--sel-*`, `--brass-hi`…)
+  to their on-paper values, so a component placed on it reads without rules of its own. Add a new
+  paper surface to that list rather than recolouring its children.
+- **Dense screens stay calm.** Wood, grain and the thick outline are for the title, headers and the
+  act button. Rows, lists and editors are plain paper with the soft outline: the content leads.
+- **Buttons.** Plain `.btn`: a paper plate with the outline and a 3 px thickness it sinks into when
+  pressed. `.primary`: the brass plank. `.ghost`: no plate, an outline in the ink of what it sits
+  on. `.danger`: oxblood paint. Disabled: flat, no thickness, faded ink (still readable).
+- **Choices on a tray** (tabs, segments, chips, the language and shelf switches): paper tabs; the
+  chosen one is a plank with painted text.
+- **Fields**: paper wells with the outline; sliders a paper groove filled with brass and a paint
+  knob; toggles go `--sprout` green when on.
+- **The title**: the real world behind (`web/world/title.js`), the name painted on a sign (no
+  ropes), the menu as planks, one help line on paper for the entry under the cursor, the place's
+  name on a paper card. On a phone the entries become a two-column grid.
+- **The sheet** `?sheet` shows every control in each state (rest, hover, pressed, focus, disabled).
+
+## Keys and pad, everywhere
+
+Every menu is driven by the keyboard and by a pad (`gamepad.js` plays the pad as keys):
+
+- **The hand** (`a11y.js`) points at the focused control when the keys or a pad moved focus, never
+  after a pointer click or on touch. It lives in the top layer, so it shows over dialogs, and
+  follows its control. Where it points, the ring is dropped: one marker.
+- **Arrows / D-pad**: the nearest control that way (`sixfoldMoveFocus`), inside the open modal if
+  any. In a set of choices (the decks on offer) the choice follows; the arrows lead out of it. Text
+  fields, sliders, selects and tab lists keep their own arrows; the world walks; the duel's board
+  has its own keys.
+- **Enter / A** confirms. **Escape / B** folds the open panel, else closes the dialog, else goes
+  Back. **L / R** switch tabs.
+- A modal (`aria-modal`) keeps focus inside and gives it back to what opened it, unless another
+  modal took over. The title's Settings and Save slots are modal sheets.
 
 ## Tokens
 
@@ -42,20 +92,17 @@ or keyboard player always knows both where they are and what is chosen.
 
 ## Components
 
-- **Button** `.btn`: panel fill, hairline, 12 px radius, 44 px tall. `.primary` brass (act),
-  `.ghost` no fill, `.danger` oxblood (leaving, deleting, resetting).
-- **Panel**: `--panel` on the felt with a hairline; a **sheet/dialog** is `--sheet-bg` with a brass
-  hairline, `--radius-lg` and `--elev-3`, rising in over `--dur-panel`.
-- **Selector** (`select`): a button-shaped field with a brass chevron; where the browser allows it
-  (`appearance: base-select`) its list is a panel too. Native underneath, so it reads and types as
-  a select.
-- **Slider** (`input[type=range]`): a felt groove filled with brass up to the value, a brass hex
-  thumb.
-- **Toggle** (`input[type=checkbox]`): a switch, brass when on.
-- **Segmented choice** (`.seg`, `.lang-switch`, tabs, chips): options on one tray, the chosen one
-  in the selected style.
+Their look is the painted kit's (above). Underneath:
+
+- **Button** `.btn`, at least 44 px tall: `.primary` (act), `.ghost`, `.danger` (leaving,
+  deleting, resetting).
+- **Sheet/dialog**: paper, rising in over `--dur-panel`.
+- **Selector** (`select`): native underneath, so it reads and types as a select; where the browser
+  allows it (`appearance: base-select`) its list is paper too.
+- **Slider** (`input[type=range]`), **toggle** (`input[type=checkbox]`), **segmented choice**
+  (`.seg`, `.segs`, `.lang-switch`, tabs, chips).
 - **Scrolling**: no screen scrolls as a page. Each screen fills the viewport; only regions inside it
-  (a menu screen's body, a panel, a log) scroll, with a thin brass scrollbar.
+  (a menu screen's body, a panel, a log) scroll, with a thin wood scrollbar.
 
 ## Screen transitions
 

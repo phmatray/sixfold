@@ -40,12 +40,14 @@ new MutationObserver((records) => {
       });
     }
   }
-  open = open.filter((d) => {
-    if (d.isConnected) return true;
+  const closed = open.filter((d) => !d.isConnected);
+  open = open.filter((d) => d.isConnected);
+  // Focus goes back to what opened a closed modal, unless another one is open
+  // (a menu that gave way to its confirmation): that one takes it.
+  for (const d of closed) {
     const back = opener.get(d);
-    if (lost() && back?.isConnected) back.focus();
-    return false;
-  });
+    if (lost() && back?.isConnected && !open.length) back.focus();
+  }
   if (lost() && home?.isConnected && !open.length) {
     const region = home;
     requestAnimationFrame(() => {
@@ -115,3 +117,120 @@ window.sixfoldMoveFocus = (dir) => {
   }
   if (best) go(best);
 };
+
+// Escape (a pad's B) folds the open <details> that focus is in or on (the title's
+// Options, a section), and focus goes back to its summary: back, one step at a time.
+addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || e.defaultPrevented) return;
+  const d = document.activeElement?.closest?.("details[open]");
+  if (!d || d.closest('dialog, [aria-modal="true"]')) return;
+  e.preventDefault();
+  d.open = false;
+  d.querySelector(":scope > summary")?.focus();
+});
+// Escape that nothing else took, on a menu screen: its Back (as a pad's B does).
+addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || e.defaultPrevented || e.target.closest?.('input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea')) return;
+  if (document.querySelector('dialog[open], [aria-modal="true"]')) return;
+  const back = document.querySelector(".page-bar .back");
+  if (back?.getClientRects().length) e.preventDefault(), back.click();
+});
+
+// The arrows move the cursor on menu screens too (#100), as a pad's D-pad does: the
+// nearest control that way. Not where arrows already mean something: text fields,
+// sliders, selects, a radio group, a tab list, the world's walking and the duel's board.
+const DIRS = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
+addEventListener("keydown", (e) => {
+  const dir = DIRS[e.key];
+  if (!dir || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+  const t = e.target;
+  if (t.closest?.('input:not([type="checkbox"], [type="radio"]), select, textarea, [role="tab"], [role="listbox"], [role="grid"], [contenteditable="true"]')) return;
+  const layered = window.sixfoldLayer() !== document.body;
+  if (!layered && document.querySelector(".world-stage, .duel")) return;
+  e.preventDefault();
+  window.sixfoldMoveFocus(t === document.body ? null : dir);
+  // Within a set of choices (the decks on offer), the choice follows the cursor,
+  // as a radio group's arrows do; the arrows also lead out of it.
+  const to = document.activeElement;
+  if (t.type === "radio" && to !== t && to?.type === "radio" && to.name === t.name && !to.disabled) to.click();
+});
+
+// The cursor (#100): a painted hand beside whatever the keys or a pad focus, the
+// one focus marker (style.css drops the ring where it points). A pointer click
+// shows none, as a ring wouldn't. It lives in the top layer (a popover), so it
+// shows over open dialogs, and follows its control while that moves or scrolls.
+// The duel's board, the world's scene and the cards keep their own focus looks.
+(() => {
+  const hand = document.createElement("div");
+  hand.className = "focus-hand";
+  hand.setAttribute("aria-hidden", "true");
+  const top = "showPopover" in hand;
+  if (top) hand.popover = "manual";
+  document.body.append(hand);
+  document.documentElement.classList.add("hand-cursor");
+  const OWN = ".duel .mat *, .world-stage, .world-stage > canvas, .world-prompt, .card, .hexon-card, .hand-card, .atlas-post, .talk-box, .press-start, h1, h2, main, [tabindex='-1']";
+  const CONTROLS = "button, a[href], input, select, textarea, summary, label, [role='tab'], [tabindex]:not([tabindex='-1'])";
+  let at = null, raf = 0, side = null;
+  const shown = (el) => el.matches(":focus-visible") || (document.documentElement.dataset.input === "pad" && el.matches(":focus"));
+  // A visually hidden input (a deck's radio, a segment) stands for its label.
+  const box = (el) => {
+    const r = el.getBoundingClientRect(), label = el.labels?.[0] ?? el.closest("label");
+    return r.width < 4 && label ? label.getBoundingClientRect() : r;
+  };
+  const place = () => {
+    raf = 0;
+    if (!at?.isConnected || document.activeElement !== at) return hide();
+    const r = box(at);
+    // The hand points AT the control, from the first side with room and nothing
+    // else to press there (a tab row's neighbours, a grid's next cell): left of it
+    // (pointing right), right of it (pointing left), above (pointing down), below
+    // (pointing up). `data-side` turns the glyph (style.css); 40 × 32, centred.
+    const mid = r.top + Math.min(r.height, 60) / 2, near = r.left + Math.min(28, r.width / 2);
+    const sides = [
+      ["left", r.left - 22, mid, r.left >= 44],
+      ["right", r.right + 22, mid, r.right <= innerWidth - 44],
+      ["above", near, r.top - 22, r.top >= 44],
+      ["below", near, r.bottom + 22, r.bottom <= innerHeight - 44],
+    ];
+    // Free: nothing to press and nothing to read under the hand (its middle and its tip).
+    const BUSY = `${CONTROLS}, p, h1, h2, h3, h4, legend, dt, dd, figcaption, img, svg, .card, .pack, .deck-name, .deck-desc`;
+    const free = ([s, x, y]) => {
+      const tip = { left: [x + 18, y], right: [x - 18, y], above: [x, y + 18], below: [x, y - 18] }[s];
+      return [[x, y], tip].every(([px, py]) => !document.elementFromPoint(px, py)?.closest(BUSY));
+    };
+    // The side is picked once per control (no flicker while it moves), the place every frame.
+    side ??= (sides.find((s) => s[3] && free(s)) ?? sides.find((s) => s[3]) ?? sides[0])[0];
+    const [, cx, cy] = sides.find((s) => s[0] === side);
+    hand.dataset.side = side;
+    hand.style.translate = `${Math.round(cx - 20)}px ${Math.round(cy - 16)}px`;
+    raf = requestAnimationFrame(place);
+  };
+  const hide = () => {
+    cancelAnimationFrame(raf);
+    raf = 0;
+    at?.removeAttribute("data-hand");
+    at = null;
+    hand.classList.remove("on");
+  };
+  addEventListener("focusin", (e) => {
+    const el = e.target;
+    if (!(el instanceof Element) || el.matches(OWN) || !shown(el)) return hide();
+    at?.removeAttribute("data-hand");
+    if (at !== el) side = null;
+    at = el;
+    el.setAttribute("data-hand", "");
+    // Back on top of whatever opened since (a dialog joins the top layer after it).
+    if (top) {
+      if (hand.matches(":popover-open")) hand.hidePopover();
+      hand.showPopover();
+    }
+    if (!hand.classList.contains("on")) {
+      // Appears where it points, then glides from there.
+      hand.classList.add("on", "fresh");
+      requestAnimationFrame(() => requestAnimationFrame(() => hand.classList.remove("fresh")));
+    }
+    if (!raf) place();
+  });
+  addEventListener("focusout", (e) => e.target === at && requestAnimationFrame(() => document.activeElement !== at && hide()));
+  addEventListener("pointerdown", (e) => e.pointerType && hide(), true);
+})();

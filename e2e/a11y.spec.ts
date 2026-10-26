@@ -20,9 +20,12 @@ async function scan(page: Page, screen: string) {
 test("title, settings, campaign, collection, records, packs and decks @phone", async ({ page }) => {
   await title(page);
   await scan(page, "title");
-  await page.getByText("Settings").click();
+  // Settings opens as a sheet over the title (#100): its summary opens and closes it.
+  const settings = page.locator("summary", { hasText: "Settings" });
+  await settings.click();
+  await expect(page.getByRole("dialog", { name: "Settings" })).toBeVisible();
   await scan(page, "settings");
-  await page.getByText("Settings").click();
+  await settings.click();
 
   for (const [item, heading] of [
     ["Campaign", "Campaign"],
