@@ -1148,6 +1148,20 @@ select option { background: var(--panel); color: var(--ink); }
   font-size: 14px;
 }
 .confirm p { margin: 0 0 10px; }
+/* On a wide screen the Save slot and Settings panels open upward over the page, so the footer
+   row never reflows (Settings used to jump to the other side) and the panel opens in view. */
+@media (min-width: 641px) {
+  .foot-menus details { position: relative; }
+  .foot-menus details[open] > .settings-body { position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 5; width: min(420px, calc(100vw - 32px)); max-height: min(72dvh, 640px); overflow: auto; margin: 0; }
+}
+/* A short desktop window (1280×800, 1440×900) keeps the title and its footer in one screen. */
+@media (min-width: 641px) and (max-height: 960px) {
+  .title { padding-top: 20px; padding-bottom: 12px; }
+  .hero { margin-bottom: 12px; }
+  .title .wordmark { font-size: clamp(56px, min(11vw, 13dvh), 128px); }
+  .menu { margin-top: 18px; }
+  .menu-item { min-height: 50px; padding-block: 7px; }
+}
 
 /* Sound: the Settings sliders, and the mute button in the duel and world headers. */
 .audio-settings { display: grid; gap: 10px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
