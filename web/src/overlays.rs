@@ -265,7 +265,7 @@ fn counted(
 fn count_up(n: u32) -> (RwSignal<u32>, u32) {
     const AT: u32 = 700;
     const STEP: u32 = 60;
-    let reduced = crate::packs::reduced_motion();
+    let reduced = crate::cards::reduced_motion();
     let shown = RwSignal::new(if reduced { n } else { 0 });
     if n == 0 {
         return (shown, n);
@@ -356,7 +356,8 @@ pub fn GameOver() -> impl IntoView {
     let quoted = ctl
         .setup
         .with_value(|s| s.as_ref().and_then(|s| s.face()))
-        .and_then(campaign::rival);
+        .and_then(campaign::opponent)
+        .and_then(|o| o.lines.map(|l| (o.id, o.name, l)));
     let duelist = opponent.and_then(sixfold_engine::trainers::trainer);
     let post = ctl.setup.with_value(|s| s.as_ref().and_then(|s| s.post));
     let back = ctl
@@ -527,12 +528,12 @@ pub fn GameOver() -> impl IntoView {
                             }}</span></p>
                         </div>
                     }                    })}
-                    {quoted.filter(|_| won).map(|r| view! {
+                    {quoted.filter(|_| won).map(|(id, name, lines)| view! {
                         <figure class="rival-quote">
-                            <crate::campaign::Portrait id=r.id name=r.name />
+                            <crate::campaign::Portrait id=id name=name />
                             <blockquote>
-                                <p>{r.lines.defeat.get()}</p>
-                                <footer>{r.name}</footer>
+                                <p>{lines.defeat.get()}</p>
+                                <footer>{name}</footer>
                             </blockquote>
                         </figure>
                     })}
@@ -609,6 +610,12 @@ pub fn GameOver() -> impl IntoView {
                                     view! {
                                         <b>{tr("Won again", "Encore gagné")}</b>
                                         <span>{tr(format!("{} pays a purse only once.", t.name), format!("{} ne paie sa bourse qu'une fois.", t.name))}</span>
+                                    }.into_any()
+                                } else if t.story() && !progress.with(|p| p.has_flag("sable_door")) {
+                                    // Rook's story goes on whatever the result (not his hall rematch).
+                                    view! {
+                                        <b>{tr("The story goes on", "L'histoire continue")}</b>
+                                        <span>{tr(format!("{} will remember this one.", t.name), format!("{} s'en souviendra.", t.name))}</span>
                                     }.into_any()
                                 } else {
                                     view! {
@@ -944,6 +951,21 @@ pub fn DuelMenu(
                     <button class="btn" on:click=move |_| { crate::tips::reset(); tips_reset.set(true) }>
                         {move || if tips_reset.get() { tr("Rule tips will show again", "Les astuces reviendront") } else { tr("Show rule tips again", "Remontrer les astuces") }}
                     </button>
+                    // With a pad the duel is played by focus: say how (#69).
+                    {move || crate::input::pad().then(|| {
+                        use crate::input::{prompt, Ctrl};
+                        view! {
+                            <details>
+                                <summary>{tr("Gamepad", "Manette")}</summary>
+                                <dl class="keys">
+                                    <dt><kbd>{prompt(Ctrl::Walk)}</kbd></dt><dd>{tr("Move between cards and buttons", "Passer d'une carte ou d'un bouton à l'autre")}</dd>
+                                    <dt><kbd>{prompt(Ctrl::Act)}</kbd></dt><dd>{tr("Pick, play, confirm", "Choisir, jouer, valider")}</dd>
+                                    <dt><kbd>{prompt(Ctrl::Cancel)}</kbd></dt><dd>{tr("Put the card back, close a panel", "Reposer la carte, fermer un panneau")}</dd>
+                                    <dt><kbd>{prompt(Ctrl::Menu)}</kbd></dt><dd>{tr("This menu", "Ce menu")}</dd>
+                                </dl>
+                            </details>
+                        }
+                    })}
                     <details>
                         <summary>{tr("Keyboard shortcuts", "Raccourcis clavier")}</summary>
                         <dl class="keys">

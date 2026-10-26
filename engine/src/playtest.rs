@@ -14,7 +14,7 @@ use crate::profile::Profile;
 use crate::set::{self, basic_energy};
 use crate::shop::{buy_pack, pack_price};
 use crate::stats::{award, Stats};
-use crate::trainers::{self, Kit, KITS, SPROUTS, TRAINERS};
+use crate::trainers::{self, Kit, KITS, ROOK_SEALS, SPROUTS, TRAINERS};
 use crate::{card_id, validate_deck, Collection, Config, Game, DECK_SIZE, MAX_COPIES};
 
 /// Play one game to the end; returns the winner's seat.
@@ -268,6 +268,61 @@ fn kit_sweep() {
     }
 }
 
+thread_local! {
+    /// The player's deck at each of Rook's scenes in the playthroughs run on
+    /// this thread, for `rook_decks_sweep`.
+    static STORY_DECKS: std::cell::RefCell<Vec<(&'static str, Vec<CardId>)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// Rook's four decks as they play (prizes, AI) against the starter a new
+/// player holds, 60 games, and against the deck the campaign playthrough
+/// holds when it meets each scene (pack seeds 1, 2 and 3), 40 games each;
+/// the player on Normal, seats alternating; recorded in `docs/BALANCE.md`.
+/// `cargo test --release -p sixfold-engine rook_decks_sweep -- --ignored --nocapture`.
+#[test]
+#[ignore]
+fn rook_decks_sweep() {
+    let rate = |t: &trainers::Trainer, against: &[Vec<CardId>], games: u64| {
+        let mut wins = 0;
+        for (k, other) in against.iter().enumerate() {
+            for seed in 0..games {
+                let swap = seed % 2 == 1;
+                let mut pair = [other.clone(), t.deck()];
+                let mut levels = [Difficulty::Normal, t.difficulty];
+                if swap {
+                    pair.swap(0, 1);
+                    levels.swap(0, 1);
+                }
+                let w = play(pair, 11_000 + 100 * k as u64 + seed, t.prizes, levels);
+                wins += usize::from((w == 1) != swap);
+            }
+        }
+        wins as f32 / (games as usize * against.len()) as f32
+    };
+    STORY_DECKS.with_borrow_mut(Vec::clear);
+    for seed in [1, 2, 3] {
+        playthrough(seed, RIVAL_DUELS);
+    }
+    let met = STORY_DECKS.with_borrow(Clone::clone);
+    for t in TRAINERS.iter().filter(|t| t.story()) {
+        let decks: Vec<Vec<CardId>> = met
+            .iter()
+            .filter(|(id, _)| *id == t.id)
+            .map(|(_, d)| d.clone())
+            .collect();
+        println!(
+            "{} ({} prizes, {:?}): {:>3.0}% vs the starter, {:>3.0}% vs the player's deck at that scene ({} playthroughs)",
+            t.id,
+            t.prizes,
+            t.difficulty,
+            rate(t, &[STARTER.cards()], 60) * 100.0,
+            rate(t, &decks, 40) * 100.0,
+            decks.len()
+        );
+    }
+}
+
 /// The colours a deck builder may pick: every colour but Colorless.
 const COLOURS: [Color; 6] = [
     Color::Grass,
@@ -414,7 +469,8 @@ fn achieve(
 
 /// A full playthrough: a new player, played by the Normal AI, first meets
 /// every route duelist once (win or lose, they walk on), then takes on the
-/// first open rival they haven't beaten, rebuilding their deck from the
+/// first open rival they haven't beaten, and Rook each time his seals are
+/// met (one duel, won or lost: the story moves on), rebuilding their deck from the
 /// collection before every duel. Every Facet earned buys themed packs at
 /// the shop and every pack is opened, from `pack_seed` on, and achievements pay out as earned. Rivals play with
 /// their AI style. Stops when the Warden falls or after one duel per route
@@ -431,7 +487,7 @@ fn playthrough(
     open_counted(&mut stats, &mut profile, &mut pack_seed);
     let mut duels = 0;
     let mut log = vec![];
-    for t in &TRAINERS {
+    for t in TRAINERS.iter().filter(|t| !t.story()) {
         let deck = build_deck(&profile.collection);
         let won = play(
             [deck, t.deck()],
@@ -449,6 +505,29 @@ fn playthrough(
         log.push((t.id, won));
     }
     while !champion(&progress) && duels < TRAINERS.len() as u64 + rival_duels {
+        let story = ROOK_SEALS
+            .iter()
+            .find(|&&(id, n)| seals(&progress) >= n && !progress.has_flag(id));
+        if let Some(t) = story.and_then(|&(id, _)| trainers::trainer(id)) {
+            let deck = build_deck(&profile.collection);
+            STORY_DECKS.with_borrow_mut(|d| d.push((t.id, deck.clone())));
+            let won = play(
+                [deck, t.deck()],
+                8_000 + duels,
+                t.prizes,
+                [Difficulty::Normal, t.difficulty],
+            ) == 0;
+            let before = (progress.clone(), profile.clone());
+            progress.apply(&format!("flag:{}", t.id)).unwrap();
+            trainers::record(t, won, &mut progress);
+            progress.settle();
+            achieve(&mut stats, before, won, &mut progress, &profile);
+            packs += shop_packs(&mut progress, &mut profile, &mut bought);
+            open_counted(&mut stats, &mut profile, &mut pack_seed);
+            duels += 1;
+            log.push((t.id, won));
+            continue;
+        }
         let r = RIVALS
             .iter()
             .find(|r| r.open(&progress) && !r.beaten(&progress))
@@ -499,6 +578,8 @@ fn the_campaign_can_be_finished_from_a_new_profile() {
             .iter()
             .all(|&id| profile.collection.count(id) == 1));
         assert!(rival("warden").unwrap().beaten(&progress));
+        // Rook's four scenes all played, won or lost, and never a seal.
+        assert!(ROOK_SEALS.iter().all(|(id, _)| progress.has_flag(id)));
         // The achievements met on the way paid out.
         for id in [
             "first_win",

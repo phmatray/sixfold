@@ -417,7 +417,10 @@ pub fn WorldMap(
             let name = w.name.clone();
             let on = lit.read_value()[i];
             let label = move || {
-                let state = blocked(i).unwrap_or(tr("Press Enter to travel.", "Entrée pour voyager."));
+                let state = blocked(i).map(str::to_string).unwrap_or_else(|| {
+                    let k = crate::input::named(crate::input::Ctrl::Confirm);
+                    tr(format!("Press {k} to travel."), format!("{k} pour voyager."))
+                });
                 format!("{name}. {state}")
             };
             view! {
@@ -510,7 +513,12 @@ pub fn WorldMap(
                 }}
             </div>
             {(!empty).then(|| view! {
-                <p class="atlas-keys">{tr("Arrow keys pick a waymark, Enter travels.", "Les flèches choisissent une borne, Entrée lance le voyage.")}</p>
+                <p class="atlas-keys">{move || if crate::input::pad() {
+                    let k = crate::input::named(crate::input::Ctrl::Confirm);
+                    tr(format!("The D-pad picks a waymark, {k} travels."), format!("La croix choisit une borne, {k} lance le voyage."))
+                } else {
+                    tr("Arrow keys pick a waymark, Enter travels.", "Les flèches choisissent une borne, Entrée lance le voyage.").to_string()
+                }}</p>
             })}
         </div>
     }

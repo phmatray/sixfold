@@ -13,12 +13,23 @@ use crate::ctl::{Setup, HUMAN};
 extern "C" {
     /// Play one effect; `n` is its variant (damage dealt, heads, surface, voice…).
     pub fn sfx(name: &str, n: f64);
+    /// A pack's reveal from `from` ms on its timeline, `rate` times as fast
+    /// (the timeline's marks in ms: see packs.rs).
+    #[wasm_bindgen(js_name = packReveal)]
+    pub fn pack_reveal(
+        from: f64,
+        rate: f64,
+        flip_at: f64,
+        flip_step: f64,
+        beat_at: f64,
+        rare_at: f64,
+    );
     /// Crossfade to a track: "title", "duel" (the theme [`duel_theme`] chose),
     /// "overworld", "interior", or "" for none.
     pub fn music(track: &str);
     /// 1 while the duel is down to someone's last prize.
     pub fn intensity(level: f64);
-    /// The theme `music("duel")` plays: "duel", "duel_rival_<region>" or "duel_boss".
+    /// The theme `music("duel")` plays: "duel", "duel_rival_<region>", "duel_boss" or "duel_rook".
     #[wasm_bindgen(js_name = duelTheme)]
     fn duel_theme_js(track: &str);
     #[wasm_bindgen(js_name = getPref)]
@@ -43,6 +54,7 @@ pub fn duel_theme(setup: &Setup) {
         Stakes::Ordinary => "duel".to_string(),
         Stakes::Rival(c) => format!("duel_rival_{}", region(c)),
         Stakes::Boss => "duel_boss".to_string(),
+        Stakes::Story => "duel_rook".to_string(),
     });
 }
 

@@ -1127,7 +1127,7 @@ pub fn Seam() -> impl IntoView {
                         <button class="seam-btn read" aria-keyshortcuts="I" on:click=move |_| {
                             if let Some(k) = ui.selected.get_untracked() { ui.open(crate::Inspect { card: k.0, at: None }) }
                         }>{tr("Details", "Voir la carte")}</button>
-                        <button class="seam-btn" aria-keyshortcuts="Escape" on:click=move |_| ui.selected.set(None)>{tr("Cancel", "Annuler")}<kbd>"Esc"</kbd></button>
+                        <button class="seam-btn" aria-keyshortcuts="Escape" on:click=move |_| ui.selected.set(None)>{tr("Cancel", "Annuler")}<kbd>{move || crate::input::prompt(crate::input::Ctrl::Cancel)}</kbd></button>
                     </p>
                 }.into_any(),
                 Line::Banner { title, sub } => view! {

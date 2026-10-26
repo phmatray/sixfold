@@ -128,6 +128,7 @@ pub fn OptionsPanel() -> impl IntoView {
         <div class="settings-body">
             <LangSwitch />
             <AudioSettings />
+            <crate::input::ControlsSettings />
             <SaveSettings />
             <crate::offline::OfflineStatus />
             {move || if confirm.get() {

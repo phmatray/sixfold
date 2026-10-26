@@ -10,7 +10,6 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::campaign::rival;
 use sixfold_engine::clock::{self, Phase};
 use sixfold_engine::objective;
 use sixfold_engine::overworld::{parse_effect, Applied, CamTarget, Cue, Effect as Fx, Progress};
@@ -22,6 +21,7 @@ use crate::binder::CollectionPanel;
 use crate::campaign::{packs_label, CampaignPanel, Challenge, Ladder, Roster, SealBadge};
 use crate::ctl::Ctl;
 use crate::decks::{new_deck, DecksPanel, EditorPanel};
+use crate::input::{self, pad, titled, Ctrl};
 use crate::overlays::Inspector;
 use crate::title::OptionsPanel;
 use crate::worldmap::Waymark;
@@ -143,8 +143,8 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             tr("Running Shoes", "Chaussures de course").into(),
             "shoes",
             tr(
-                "Light soles, quick feet. Hold Shift, or switch on Run, to cover two tiles in the time of one.",
-                "Semelles légères, pas rapides. Maintenez Maj, ou activez Courir, pour franchir deux cases le temps d'une.",
+                "Light soles, quick feet. Hold {run}, or switch on Run, to cover two tiles in the time of one.",
+                "Semelles légères, pas rapides. Maintenez {run}, ou activez Courir, pour franchir deux cases le temps d'une.",
             ),
         ),
         "field_lens" => (
@@ -428,11 +428,7 @@ impl Talk {
 /// The speaker's face: a rival's portrait, a person's bust, none for the hero
 /// or anything that isn't a person on this map.
 fn face_of(id: &str) -> Option<String> {
-    if rival(id).is_some() {
-        Some(format!("world/assets/portraits/{id}.webp"))
-    } else {
-        Some(world_portrait(id)).filter(|u| !u.is_empty())
-    }
+    crate::campaign::portrait_url(id).or_else(|| Some(world_portrait(id)).filter(|u| !u.is_empty()))
 }
 
 /// One step of a cutscene (`docs/WORLD_DESIGN.md` §9.1), as world.js sends it.
@@ -748,9 +744,10 @@ pub fn WorldScreen() -> impl IntoView {
                 "near" => {
                     let now = (!a.is_empty()).then(|| (a.clone(), b.clone()));
                     if let Some((k, t)) = &now {
-                        _ = announce.try_set(tr(
-                            format!("{}. Press E.", prompt_label(k, t)),
-                            format!("{}. Appuyez sur E.", prompt_label(k, t)),
+                        _ = announce.try_set(format!(
+                            "{}. {}",
+                            prompt_label(k, t),
+                            input::press_to_act()
                         ));
                     }
                     _ = near.try_set(now);
@@ -1286,6 +1283,21 @@ pub fn WorldScreen() -> impl IntoView {
         e.prevent_default();
     });
     on_cleanup(move || journal_key.remove());
+    // The gamepad's Start (gamepad.js): opens the menu, and leaves it the way Escape does.
+    let pad_menu = window_event_listener_untyped("sixfold-input", move |e| {
+        if input::action(&e).as_deref() != Some("menu") {
+            return;
+        }
+        match sheet.get_untracked() {
+            Some(Sheet::Menu) => on_cancel(e),
+            None => {
+                e.prevent_default();
+                open_menu();
+            }
+            _ => e.prevent_default(),
+        }
+    });
+    on_cleanup(move || pad_menu.remove());
     // The top bar's Journal, map and roster: not over a cutscene.
     let open_sheet = move |s: Sheet| {
         if !playing.get_untracked() {
@@ -1307,18 +1319,15 @@ pub fn WorldScreen() -> impl IntoView {
         <div class="world" class:in-scene=move || playing.get()>
             <header class="world-top">
                 <span class="wordmark small">"Sixfold"</span>
-                <span class="world-hint">{tr(
-                    "Arrows or WASD to walk · E to act · Shift to run · M for the map · Esc for the menu",
-                    "Flèches ou ZQSD pour marcher · E pour agir · Maj pour courir · M pour la carte · Échap pour le menu",
-                )}</span>
-                <button type="button" class="btn ghost journal-btn" aria-keyshortcuts="J"
-                    aria-label="Journal" title=tr("Journal (J)", "Journal (J)")
+                <span class="world-hint">{crate::input::world_hint}</span>
+                <button type="button" class="btn ghost journal-btn" aria-keyshortcuts=move || input::shortcut(Ctrl::Journal)
+                    aria-label="Journal" title=move || titled("Journal", Ctrl::Journal)
                     on:click=move |_| open_sheet(Sheet::Journal)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z" /><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" /></svg>
                     <span class="journal-label">"Journal"</span>
                 </button>
-                <button type="button" class="btn ghost journal-btn map-btn" aria-keyshortcuts="M"
-                    aria-label=tr("World map", "Carte du monde") title=tr("World map (M)", "Carte du monde (M)")
+                <button type="button" class="btn ghost journal-btn map-btn" aria-keyshortcuts=move || input::shortcut(Ctrl::Map)
+                    aria-label=tr("World map", "Carte du monde") title=move || titled(tr("World map", "Carte du monde"), Ctrl::Map)
                     on:click=move |_| open_sheet(Sheet::Atlas)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20Z" /><path d="M9 4v13.5M15 6.5V20" /></svg>
                     <span class="journal-label">{tr("Map", "Carte")}</span>
@@ -1333,9 +1342,9 @@ pub fn WorldScreen() -> impl IntoView {
                     aria-keyshortcuts="Escape"
                     aria-disabled=move || (loading.get() || failed.with(Option::is_some)).then_some("true")
                     title=move || if loading.get() || failed.with(Option::is_some) {
-                        tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé")
+                        tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé").to_string()
                     } else {
-                        tr("Menu (Esc)", "Menu (Échap)")
+                        titled("Menu", Ctrl::Menu)
                     }
                     on:click=move |_| toggle_menu()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
@@ -1343,10 +1352,13 @@ pub fn WorldScreen() -> impl IntoView {
                 </button>
             </header>
             <main class="world-stage" node_ref=stage tabindex="-1"
-                aria-label=tr(
-                    "The Sixfold world: six regions round a meadow, with towns, routes and caves to walk around. Use the arrow keys or the pad, and E to act.",
-                    "Le monde de Sixfold : six régions autour d'un pré, avec des villes, des routes et des grottes à parcourir. Utilisez les flèches ou le pavé, et E pour agir.",
-                )>
+                aria-label=move || {
+                    let (walk, act) = (input::prompt(Ctrl::Walk), input::prompt(Ctrl::Act));
+                    tr(
+                        format!("The Sixfold world: six regions round a meadow, with towns, routes and caves to walk around. {walk} to walk, {act} to act."),
+                        format!("Le monde de Sixfold : six régions autour d'un pré, avec des villes, des routes et des grottes à parcourir. {walk} pour marcher, {act} pour agir."),
+                    )
+                }>
                 <div class="world-host" node_ref=host></div>
                 <p class="sr-only" aria-live="polite">{move || announce.get()}</p>
             </main>
@@ -1354,14 +1366,14 @@ pub fn WorldScreen() -> impl IntoView {
             {move || near.get().filter(|_| !playing.get()).map(|(k, t)| view! {
                 <button class="btn primary world-prompt" node_ref=prompt on:click=move |_| world_act()>
                     {prompt_label(&k, &t)}
-                    <kbd>"E"</kbd>
+                    <kbd>{move || input::prompt(Ctrl::Act)}</kbd>
                 </button>
             })}
             // Over a line the dialogue box has its own Skip.
             {move || (playing.get() && sheet.with(Option::is_none)).then(|| view! {
                 <button type="button" class="btn ghost world-skip" aria-keyshortcuts="Escape" on:click=move |_| skip()>
                     {tr("Skip", "Passer")}
-                    <kbd>{tr("Esc", "Échap")}</kbd>
+                    <kbd>{move || input::prompt(Ctrl::Cancel)}</kbd>
                 </button>
             })}
             <div class="world-rest" class:on=move || resting.get() aria-hidden="true"></div>
@@ -1433,6 +1445,8 @@ pub fn WorldScreen() -> impl IntoView {
                     }
                     Sheet::Item(id) => {
                         let (name, _, blurb) = item_info(&id);
+                        // The run control, for the device in use (#69).
+                        let blurb = blurb.replace("{run}", &untrack(|| input::named(Ctrl::Run)));
                         let opens = objective::opens_names(&id);
                         view! {
                             <div class="item-got">
@@ -1684,6 +1698,8 @@ fn GameMenu(
                         <button type="button" class="btn" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
                     </div>
                     <div class="menu-tabs" role="tablist" aria-label="Menu" on:keydown=on_tabs_key>
+                        // With a pad, its shoulders switch tabs (gamepad.js): say so at each end.
+                        {move || pad().then(|| view! { <kbd class="tab-key" aria-hidden="true">"L"</kbd> })}
                         {MenuTab::ALL.into_iter().map(|t| view! {
                             <button type="button" role="tab" id=t.id() aria-controls="menu-panel"
                                 aria-selected=move || (tab.get() == t).to_string()
@@ -1691,6 +1707,7 @@ fn GameMenu(
                                 autofocus=t == first
                                 on:click=move |_| select(t)>{t.label()}</button>
                         }).collect_view()}
+                        {move || pad().then(|| view! { <kbd class="tab-key" aria-hidden="true">"R"</kbd> })}
                     </div>
                     </div>
                 }.into_any()

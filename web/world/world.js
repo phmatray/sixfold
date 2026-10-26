@@ -180,7 +180,10 @@ export function mount(el, controls, cb, start, edit = false) {
       return release(k);
     }
     if (k === "shift") return void (shift = true);
-    if (busy() || e.target.closest?.("input, select, textarea, dialog")) return;
+    if (e.target.closest?.("input, select, textarea, dialog")) return;
+    // The arrows stay the world's while it is busy too (a warp, a lift): a pad
+    // (web/gamepad.js) moves focus with the arrows nothing takes.
+    if (busy()) return void (KEYS[k] && e.preventDefault());
     // Enter and Space belong to whatever button has focus; only on the stage do
     // they act. E is the dedicated action key.
     const onStage = e.target === document.body || !!e.target.closest?.(".world-stage");
