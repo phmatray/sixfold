@@ -65,6 +65,7 @@ pub use deck::{
     deck_errors, hints, validate_deck, AddError, Advice, DeckError, DeckList, DeckListError, Hints,
     SortBy, DECK_SIZE, MAX_COPIES,
 };
+pub use describe::summarise_turn;
 pub use effect::{Choice, Effect, Find};
 pub use game::{Config, End, Game, GameSummary, SetupError, MAX_BENCH};
 pub use lang::{fr, lang, set_lang, tr, Lang, T};
