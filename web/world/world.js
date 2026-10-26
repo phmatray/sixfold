@@ -1,7 +1,7 @@
 // The overworld test: tile-grid maps (./maps/<name>.json) drawn with three.js.
 // `mount(host, controls, cb, start, edit)` builds it (at `start` = "map,x,z,facing"
 // when given; `edit`: a debug build with ?edit loads the map editor) and returns an
-// api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, portrait, meet, cue).
+// api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, portrait, meet, cue, busy).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
 //   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate; a gated
@@ -13,6 +13,8 @@
 //   ("clock", minute, "")  the game clock, every game hour and at each phase change
 //   ("seen", map, "in"|"out") a map was entered (indoors or out)
 //   ("talk", npcId, json)  spoke to an NPC (or a duelist walked up): {"name", "dialogue"} for Leptos to run
+//   ("script", id, json)   a cutscene starts: {"steps"} for Leptos to run (script.js)
+//   ("cue_done", id, "")   a cutscene cue sent with an `id` has finished
 //   ("area", title, "")    entered an outdoor area that has a `title`
 //   ("progress", "done/total", "") models loaded for the first map (the loading screen)
 //   ("ready", "", "")      first frame drawn;  ("error", "", message)
@@ -28,6 +30,7 @@
 //   npc.js     placing NPCs, their routes, `facing` (what the hero can talk to or use)
 //   trainer.js route duelists: line of sight, the walk over, going quiet
 //   lift.js    cages that carry the hero between two heights (the Rodspire)
+//   script.js  cutscenes: a map's `scripts` start there, and it plays their cues one at a time
 //   daylight.js the light at each minute of the day: sun, moon, sky, fog, lamps, glow
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
 import * as THREE from "three";
@@ -41,6 +44,7 @@ import { updateNpc, facing as facingOf } from "./npc.js";
 import * as duelists from "./trainer.js";
 import * as lifts from "./lift.js";
 import { daylight, phaseOf, DAY } from "./daylight.js";
+import { scenes } from "./script.js";
 
 const STEP = 0.25, RUN_STEP = 0.17; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
@@ -168,7 +172,7 @@ export function mount(el, controls, cb, start, edit = false) {
     const i = held.indexOf(k);
     if (i >= 0) held.splice(i, 1);
   };
-  const busy = () => paused || warping || !world || !!world.engage || !!world.ride; // a duelist coming over, a lift ride lock input
+  const busy = () => paused || warping || !world || !!world.engage || !!world.ride || cut.playing; // a duelist coming over, a lift ride, a cutscene lock input
   const onKey = (e) => {
     const k = e.key.toLowerCase();
     if (e.type === "keyup") {
@@ -318,6 +322,12 @@ export function mount(el, controls, cb, start, edit = false) {
     lastHour = hour;
     lastPhase = phase;
   };
+  // Cutscenes (script.js): the camera reports when it has reached what it was sent to look at.
+  const cut = scenes({
+    world: () => world, hero: () => hero, reduced: () => reduced, holds, cb, sound, tune, warp,
+    settled: () => look.distanceTo(aim) < 0.05 && lookVel.lengthSq() < 0.01,
+    moved: () => (lastHero = ""), // the hero's tile is saved again (not during a scene: a reload replays it)
+  });
   const opens = (wp) => holds(wp.if);
   const facing = () => lifts.facing(world, hero) ?? facingOf(world, hero, opens);
 
@@ -342,7 +352,7 @@ export function mount(el, controls, cb, start, edit = false) {
     return startStep(x, z, carry, null);
   }
   function startStep(x, z, carry, door) {
-    const dur = canRun && (shift || runToggle) ? RUN_STEP : STEP;
+    const dur = canRun && (shift || runToggle) && !cut.playing ? RUN_STEP : STEP; // a scene walks
     hero.step = { x, z, t: carry / dur, dur, warp: door };
     return true;
   }
@@ -442,6 +452,7 @@ export function mount(el, controls, cb, start, edit = false) {
     const L = map.light;
     scene.fog = L.indoor ? null : new THREE.Fog(L.background, L.fog?.near ?? 60, L.fog?.far ?? 90);
     lastPhase = phaseOf(minute);
+    world.scriptsDue = true; // an `enter` cutscene starts once the map is on screen
     cb("clock", String(Math.floor(minute)), "");
     cb("seen", name, L.indoor ? "in" : "out");
     tune();
@@ -525,18 +536,20 @@ export function mount(el, controls, cb, start, edit = false) {
         if (left?.open && w.gateAt.get(key(h.x, h.z)) !== left) recheck(true);
         const wp = done.warp ?? w.warps.get(key(h.x, h.z));
         if (wp) warp(wp);
+        else cut.stepped(w, h.x, h.z);
       }
     }
+    if (w.scriptsDue && !warping && !paused && !h.step) (w.scriptsDue = false), cut.entered(w);
     // Standing on a tile (a step just ended, or still): does a duelist see the hero?
     // After one was dealt with, the next waits for the hero's next step.
-    if (!h.step && !warping && !paused && !w.engage && !w.ride && !w.calm && !editing() && (spotted = duelists.watch(w, h, holds))) {
+    if (!h.step && !warping && !paused && !w.engage && !w.ride && !w.calm && !cut.playing && !editing() && (spotted = duelists.watch(w, h, holds))) {
       held.length = 0;
       w.path = [];
       duelists.spot(w, spotted, h, sound);
     }
     if (!paused) duelists.update(w, dt, talkTo);
     if (!h.step && !warping && !paused && !w.engage) {
-      const k = held[held.length - 1];
+      const k = cut.playing ? null : held[held.length - 1]; // a cutscene walks the hero itself
       if (k) {
         const f = dirOf(k);
         if (f !== h.face) {
@@ -576,7 +589,8 @@ export function mount(el, controls, cb, start, edit = false) {
 
     const pos = `${h.x},${h.z},${h.face}`;
     const inside = h.x >= 0 && h.z >= 0 && h.x < w.map.width && h.z < w.map.height; // not mid-way off an edge
-    if (pos !== lastHero && inside) (el.dataset.hero = lastHero = pos), cb("at", w.name, pos); // written only on change
+    // Written only on change, and never mid-scene: a reload then replays the cutscene from where it began.
+    if (pos !== lastHero && inside && !cut.playing) (el.dataset.hero = lastHero = pos), cb("at", w.name, pos);
 
     // What the hero faces, while standing still.
     const front = h.step || warping ? null : facing();
@@ -591,7 +605,9 @@ export function mount(el, controls, cb, start, edit = false) {
     // walking hero; leans in after a while idle; indoors, kept inside the room.
     const pitch = THREE.MathUtils.degToRad(cam.pitch), off = cam.lookAtOffset;
     const ahead = h.step && !reduced ? 0.7 : 0;
-    aim.set(px + off[0] + DIR[h.face][0] * ahead, off[1] + h.fy, pz + off[2] + DIR[h.face][1] * ahead);
+    const shot = cut.aim(); // a cutscene's `cam` target
+    if (shot) aim.set(shot[0] + off[0], off[1] + shot[1], shot[2] + off[2]);
+    else aim.set(px + off[0] + DIR[h.face][0] * ahead, off[1] + h.fy, pz + off[2] + DIR[h.face][1] * ahead);
     if (cam.clamp) {
       // Keep the view inside the room: the ground it shows spans [aim + top, aim + bottom]
       // along z (perspective makes the far side longer) and ±halfW along x.
@@ -614,11 +630,12 @@ export function mount(el, controls, cb, start, edit = false) {
     }
     if (first || reduced) look.copy(aim), lookVel.set(0, 0, 0);
     else {
-      const k = 28, c = 2 * Math.sqrt(k) * 0.85; // slightly under-damped
+      const k = cut.playing ? 6 : 28, c = 2 * Math.sqrt(k) * (cut.playing ? 1 : 0.85); // slightly under-damped; a scene pans slowly
       lookVel.addScaledVector(aim.clone().sub(look), k * dt).addScaledVector(lookVel, -c * dt);
       look.addScaledVector(lookVel, dt);
     }
     first = false;
+    if (!paused) cut.update(dt);
     zoom += ((h.idle > FIDGET_AFTER && !reduced ? 0.88 : 1) - zoom) * Math.min(1, dt * 1.5);
     const dz = dist * zoom;
     camera.position.set(look.x, look.y + Math.sin(pitch) * dz, look.z + Math.cos(pitch) * dz);
@@ -773,7 +790,7 @@ export function mount(el, controls, cb, start, edit = false) {
   return {
     stop,
     act,
-    busy: () => warping || !world || !!world.engage || !!world.ride, // the in-game menu waits for these
+    busy: () => warping || !world || !!world.engage || !!world.ride || cut.playing, // the in-game menu waits for these
     pause(p) {
       paused = !!p;
       clearHeld();
@@ -795,9 +812,12 @@ export function mount(el, controls, cb, start, edit = false) {
     },
     // A dialogue cue (engine `Cue`), e.g. {"emote": "heart", "actor": "moss"}; actor "hero" is the hero.
     // {"warp": {"map", "x", "z", "facing"}, "travel": true}: fade and load (a ferry, fast travel).
-    // {"sfx": "spark"}: a sound.
+    // {"sfx": "spark"}: a sound. A cutscene's cues carry an `id` (script.js answers `cue_done`), and
+    // {"end": [cues]} closes the scene, jumping over those cues (a skip).
     cue(json) {
       const c = JSON.parse(json);
+      if (c.end) return void (world && cut.end(c.end));
+      if (c.id !== undefined) return void (world ? cut.play(c) : cb("cue_done", String(c.id), ""));
       if (c.warp) {
         const { map, x, z, facing } = c.warp;
         if (world && !warping) warp({ to: map, spawn: { x, z, facing }, travel: !!c.travel });
