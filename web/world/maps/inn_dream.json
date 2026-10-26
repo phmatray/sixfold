@@ -111,6 +111,12 @@
       "kind": "sign",
       "text": "A shelf of dream journals left by guests, one per night. The latest entry, in a careful hand: \"Dreamed of a seventh colour. Woke up before I could see it.\"",
       "text_fr": "Une étagère de carnets de rêves laissés par les clients, un par nuit. La dernière page, d'une écriture soignée : « Rêvé d'une septième couleur. Réveillé avant de pouvoir la voir. »"
+    },
+    {
+      "x": 5,
+      "z": 1,
+      "kind": "book",
+      "id": "lantern_tales"
     }
   ],
   "warps": [

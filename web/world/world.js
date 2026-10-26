@@ -1,11 +1,13 @@
 // The overworld test: tile-grid maps (./maps/<name>.json) drawn with three.js.
 // `mount(host, controls, cb, start, edit)` builds it (at `start` = "map,x,z,facing"
 // when given; `edit`: a debug build with ?edit loads the map editor) and returns an
-// api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, portrait, meet, cue, busy).
+// api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, portrait, meet, cue, busy, read, page).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
 //   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate; a gated
-//                          door or gate sends "kind cond" (e.g. "gate item:wading_boots")
+//                          door or gate sends "kind cond" (e.g. "gate item:wading_boots"); a book
+//                          on a shelf sends ("use", "book", id)
+//   ("book", "closed", "") a book read (`read`) is back on its shelf
 //   ("opened", text, "")   a gate on this map just opened ("A way opens: <its name>"), for the live region
 //   ("at", map, "x,z,f")   the hero stands on a new tile or faces a new way
 //   ("check", cond, "")    asks whether a condition (a gated warp's `if`) holds (returns a bool)
@@ -33,6 +35,7 @@
 //   seat.js    sitting on benches and chairs (the hero, and people placed sitting)
 //   script.js  cutscenes: a map's `scripts` start there, and it plays their cues one at a time
 //   daylight.js the light at each minute of the day: sun, moon, sky, fog, lamps, glow
+//   book.js    a book taken from a shelf: its flight, its pages, the hero's reach
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
 import * as THREE from "three";
 import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
@@ -47,6 +50,7 @@ import * as lifts from "./lift.js";
 import * as seats from "./seat.js";
 import { daylight, phaseOf, DAY } from "./daylight.js";
 import { scenes } from "./script.js";
+import { createBook } from "./book.js";
 
 const STEP = 0.25, RUN_STEP = 0.17; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
@@ -106,7 +110,10 @@ export function mount(el, controls, cb, start, edit = false) {
     camera.fov = w < h ? cam.fovPortrait : cam.fov; // portrait phones: pull back and widen
     dist = w < h ? cam.distancePortrait : cam.distance;
     camera.updateProjectionMatrix();
+    book.resize(w, h);
   };
+  const book = createBook({ reduced: () => reduced, sound });
+  let shelf = null; // the book spot last used: where a book read from the world comes from
   const ro = new ResizeObserver(resize);
   ro.observe(el);
 
@@ -174,7 +181,7 @@ export function mount(el, controls, cb, start, edit = false) {
     const i = held.indexOf(k);
     if (i >= 0) held.splice(i, 1);
   };
-  const busy = () => paused || warping || !world || !!world.engage || !!world.ride || cut.playing; // a duelist coming over, a lift ride, a cutscene lock input
+  const busy = () => paused || warping || !world || !!world.engage || !!world.ride || cut.playing || book.live(); // a duelist coming over, a lift ride, a cutscene, a book lock input
   const onKey = (e) => {
     const k = e.key.toLowerCase();
     if (e.type === "keyup") {
@@ -391,7 +398,10 @@ export function mount(el, controls, cb, start, edit = false) {
     }
     else if (it.kind === "seat") (world.path = []), seats.sit(hero, it.place, reduced);
     else if (it.kind === "stand") seats.stand(hero);
-    else {
+    else if (it.kind === "book") {
+      shelf = it;
+      cb("use", "book", it.id);
+    } else {
       if (it.obj && !reduced) it.obj.userData.wobble = 1;
       // A spot with its own `dialogue` (a lost item, a letter box) talks like a person.
       if (it.dialogue) cb("talk", it.id, JSON.stringify({ name: it.name ?? "", dialogue: it.dialogue }));
@@ -532,8 +542,8 @@ export function mount(el, controls, cb, start, edit = false) {
   function frame() {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(clock.getDelta(), 0.05);
-    if (paused) {
-      // A modal is open: draw one last frame, then nothing until it closes.
+    if (paused && !book.live()) {
+      // A modal is open: draw one last frame, then nothing until it closes (a book being read draws on).
       if (drawnPaused) return;
       drawnPaused = true;
     } else drawnPaused = false;
@@ -613,6 +623,7 @@ export function mount(el, controls, cb, start, edit = false) {
     lifts.update(w, dt);
     const [px, pz] = place(h, dt, w.floorAt);
     animateActor(h, dt, reduced);
+    book.pose(h);
     for (const n of w.npcs) updateNpc(w, n, dt, paused);
     animateProps(w, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);
@@ -627,10 +638,11 @@ export function mount(el, controls, cb, start, edit = false) {
 
     // What the hero faces, while standing still.
     const front = h.step || warping ? null : facing();
-    const nk = front ? `${front.kind}:${front.text}` : "";
+    const said = front?.kind === "book" ? front.id : front?.text; // a book is named by Rust, from its id
+    const nk = front ? `${front.kind}:${said}` : "";
     if (nk !== w.nearKey) {
       w.nearKey = nk;
-      cb("near", front?.kind ?? "", front?.text ?? "");
+      cb("near", front?.kind ?? "", said ?? "");
     }
     for (const d of w.doors) d.want = d === (front?.warp ?? h.step?.warp)?.door ? 1 : 0; // the door ahead opens
 
@@ -691,6 +703,7 @@ export function mount(el, controls, cb, start, edit = false) {
     renderer.render(scene, shadowEye);
     renderer.clear();
     renderer.render(scene, camera);
+    book.render(renderer, dt);
     stats = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles };
     if (!readySent) (readySent = true), cb("ready", "", "");
   }
@@ -809,6 +822,7 @@ export function mount(el, controls, cb, start, edit = false) {
     bustR?.forceContextLoss();
     stopEditor();
     previewStop();
+    book.dispose();
     cancelAnimationFrame(raf);
     ro.disconnect();
     mq.removeEventListener("change", onMotion);
@@ -825,7 +839,22 @@ export function mount(el, controls, cb, start, edit = false) {
   return {
     stop,
     act,
-    busy: () => warping || !world || !!world.engage || !!world.ride || cut.playing, // the in-game menu waits for these
+    busy: () => warping || !world || !!world.engage || !!world.ride || cut.playing || book.live(), // the in-game menu waits for these
+    // A book to read ({id, family, title, pages: [{heading, text, art}], shelf}): from the shelf
+    // last used when `shelf` is true, else it rises into view. null puts it back ("book closed" after).
+    read(b) {
+      if (!b) return void book.close(() => alive && cb("book", "closed", ""));
+      let ndc = null;
+      if (b.shelf && shelf && world) {
+        const v = new THREE.Vector3(shelf.x + 0.5, world.floorAt(shelf.x, shelf.z) + 1.15, shelf.z + 0.95).project(camera);
+        ndc = { x: v.x, y: v.y };
+      }
+      book.open(b, ndc);
+    },
+    // Where the open book is on screen ([left, top, right, bottom], CSS pixels): taps outside it don't turn pages.
+    bookRect: () => book.rect(),
+    // Turn to page `n` (a spread), from the open book's current one.
+    page: (n) => book.page(n),
     pause(p) {
       paused = !!p;
       clearHeld();

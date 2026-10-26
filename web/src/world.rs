@@ -10,6 +10,7 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
+use sixfold_engine::books;
 use sixfold_engine::clock::{self, Phase};
 use sixfold_engine::objective;
 use sixfold_engine::overworld::{parse_effect, Applied, CamTarget, Cue, Effect as Fx, Progress};
@@ -48,6 +49,9 @@ export function world_cue(json) { api?.cue(json); }
 export function world_clock(m) { minute = m; api?.setClock(m); }
 export function world_busy() { return !api || api.busy(); }
 export function world_portrait(id) { return api?.portrait(id) ?? ""; }
+export function world_read(b) { api?.read(b); }
+export function world_page(n) { api?.page(n); }
+export function world_book_rect() { return api?.bookRect() ?? []; }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
@@ -75,6 +79,12 @@ extern "C" {
     /// A person's bust, drawn from their own rig and colours (a data URL), or
     /// empty for anyone who isn't a person on this map (a sign, a gangway).
     fn world_portrait(id: &str) -> String;
+    /// Open a book in the scene (`reading::book_value`); `null` puts it back.
+    fn world_read(book: &JsValue);
+    /// Turn the open book to this spread.
+    fn world_page(n: usize);
+    /// The open book on screen, `[left, top, right, bottom]` in CSS pixels (empty when none).
+    pub(crate) fn world_book_rect() -> JsValue;
 }
 
 const REOPEN: &str = "sixfold.reopen-world";
@@ -524,6 +534,8 @@ enum Sheet {
     Atlas,
     /// The in-game menu (Escape or the top bar), on its [`LastTab`].
     Menu,
+    /// A book being read (`world/book.js` holds it open), by id.
+    Book(&'static str),
 }
 
 /// The in-game menu's tabs.
@@ -614,6 +626,15 @@ fn prompt_label(kind: &str, text: &str) -> String {
         "duel" => tr("Play a duel", "Jouer un duel").into(),
         "locked" => tr("Try the door", "Essayer la porte").into(),
         "gate" => tr("Look at the way", "Examiner le passage").into(),
+        "book" => books::book(text).map_or_else(
+            || tr("Read", "Lire").into(),
+            |b| {
+                tr(
+                    format!("Read “{}”", b.title.en),
+                    format!("Lire « {} »", b.title.fr),
+                )
+            },
+        ),
         _ => tr("Take a look", "Regarder").into(),
     }
 }
@@ -692,6 +713,40 @@ pub fn WorldScreen() -> impl IntoView {
         })));
     };
 
+    // A book (#104): opened off the shelf the hero faces (or, from the Journal, rising
+    // into view), marked read; the spread shown is `book_at`, and where each book was
+    // left this visit is where it opens again. Until it is back on its shelf (`book_out`)
+    // the world's top bar and prompt stay hidden.
+    let book_at = RwSignal::new(0usize);
+    let left_at = StoredValue::new(std::collections::HashMap::<&'static str, usize>::new());
+    let book_out = RwSignal::new(false);
+    let open_book = move |id: &str, shelf: bool| {
+        let Some(b) = books::book(id) else {
+            leptos::logging::warn!("world: no book {id}");
+            return;
+        };
+        if !progress.with_untracked(|p| books::is_read(p, b.id)) {
+            progress.update(|p| _ = p.apply(&format!("flag:{}", books::read_flag(b.id))));
+        }
+        let at = left_at.with_value(|m| m.get(b.id).copied().unwrap_or(0));
+        book_at.set(at);
+        book_out.set(true);
+        sheet.set(Some(Sheet::Book(b.id)));
+        world_read(&crate::reading::book_value(b, shelf, at));
+    };
+    // The Journal's Library opens a book read before; it rises into view.
+    provide_context(crate::journal::ReadBook(Callback::new(move |id| {
+        open_book(id, false)
+    })));
+    // Put back once its sheet is gone (closed, or replaced by another).
+    Effect::new(move |was: Option<bool>| {
+        let reading = sheet.with(|s| matches!(s, Some(Sheet::Book(_))));
+        if was == Some(true) && !reading {
+            world_read(&JsValue::NULL);
+        }
+        reading
+    });
+
     // A cutscene (script.js starts it, `next` below runs it): the one under way,
     // whether one plays (the Skip button, input), the latest one world.js asked
     // for, and a tick each time the cue under way has finished.
@@ -753,6 +808,9 @@ pub fn WorldScreen() -> impl IntoView {
                     _ = near.try_set(now);
                 }
                 "use" if a == "duel" => _ = sheet.try_set(Some(Sheet::Duel(b))),
+                "use" if a == "book" => open_book(&b, true),
+                // The book is back on its shelf.
+                "book" => _ = book_out.try_set(false),
                 "use" => {
                     // A gated door or gate sends "kind cond": once the hero has been
                     // where its field item comes from, its text says what would open it.
@@ -1354,7 +1412,7 @@ pub fn WorldScreen() -> impl IntoView {
     };
 
     view! {
-        <div class="world" class:in-scene=move || playing.get()>
+        <div class="world" class:in-scene=move || playing.get() class:book-out=move || book_out.get()>
             // Only what is glanceable stays over the scene (DESIGN.md): the time
             // of day, the Facets and the menu. The Journal, the map, the seals and
             // sound are in the menu, and on their keys.
@@ -1427,10 +1485,13 @@ pub fn WorldScreen() -> impl IntoView {
             })}
             <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title"
                 aria-describedby=move || sheet.with(|s| matches!(s, Some(Sheet::Challenge(_)))).then_some("world-sheet-desc")
+                class:reading-sheet=move || sheet.with(|s| matches!(s, Some(Sheet::Book(_))))
                 on:cancel=on_cancel on:keydown=on_key
                 // Should the browser close the dialog itself, the world must not stay paused
                 // (and a cutscene goes on rather than wait for a line nobody can see).
-                on:close=move |_| if script_talk() { next() } else if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
+                // A close event that arrives once the dialog is open again (closed and reopened in
+                // one go, e.g. J pressed just after a book is put back) is stale: ignored.
+                on:close=move |_| if dlg.get_untracked().is_some_and(|d| d.open()) {} else if script_talk() { next() } else if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
                 // Each line of a talk or a cutscene, read as it comes (a live region outside
                 // the modal dialog would be inert).
                 <p class="sr-only" id="talk-live" aria-live="polite">{move || sheet.with(|s| match s {
@@ -1619,6 +1680,18 @@ pub fn WorldScreen() -> impl IntoView {
                         </div>
                         <crate::worldmap::WorldMap here=here on_travel=travel />
                     }.into_any(),
+                    Sheet::Book(id) => match books::book(id) {
+                        Some(b) => view! {
+                            <crate::reading::Reading book=b at=book_at
+                                turn=Callback::new(move |n| {
+                                    book_at.set(n);
+                                    left_at.update_value(|m| _ = m.insert(id, n));
+                                    world_page(n);
+                                })
+                                close=Callback::new(move |()| sheet.set(None)) />
+                        }.into_any(),
+                        None => ().into_any(),
+                    },
                     Sheet::Menu => view! {
                         <GameMenu editing=editing here=here on_travel=travel
                             on_close=Callback::new(move |()| sheet.set(None)) />

@@ -1334,6 +1334,94 @@ body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
 .world-sheet::backdrop { background: color-mix(in srgb, var(--felt-deep) 25%, transparent); }
 .world-sheet h2 { font-size: var(--type-world-sheet); }
 .world-sheet .dialog-sub { margin-bottom: 4px; }
+
+/* Reading a book (#104): the dialog turns into a clear layer over the scene, which draws
+   the book (world/book.js); this layer holds the title, the page count, the controls and
+   the page's text (for screen readers, or shown plain with "Text"). */
+.world-sheet.reading-sheet {
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  animation: none;
+  overflow: hidden;
+}
+.world-sheet.reading-sheet::backdrop { background: transparent; }
+/* Hidden from the moment a book is taken until it is back on its shelf. */
+.world.book-out :is(.world-top, .world-prompt, .world-controls) { visibility: hidden; }
+.reading { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.reading-surface { position: absolute; inset: 0; touch-action: pan-y; }
+.reading-head {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px 14px;
+  padding: max(14px, env(safe-area-inset-top)) 16px 0;
+  text-align: center;
+  padding-bottom: 28px;
+  pointer-events: none;
+  color: #f6ecd2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  background: linear-gradient(to bottom, rgba(8, 6, 4, 0.55), transparent);
+}
+.world-sheet .reading-head h2 { font-size: var(--fs-xl); letter-spacing: 0.01em; }
+.reading-count { font: 600 var(--fs-md) var(--body); color: #e6d9b8; font-variant-numeric: tabular-nums; }
+.reading-controls {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px max(16px, env(safe-area-inset-bottom));
+}
+.reading-controls .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; min-width: 48px; gap: 8px; }
+.reading-controls kbd { font: 700 var(--fs-xs) var(--body); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
+/* The title and the controls come in once the book is in the hands, not over its flight. */
+.reading-head, .reading-controls { animation: reading-in 260ms ease-out 900ms both; }
+@keyframes reading-in { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .reading-head, .reading-controls { animation: none; } }
+.reading-controls .btn:not(.primary) { background: color-mix(in srgb, var(--felt-deep) 78%, transparent); }
+.reading-controls .btn[aria-pressed="true"] { border-color: var(--brass-hi); color: var(--brass-hi); }
+.reading-controls .btn:disabled { opacity: 0.45; }
+.reading-text {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); border: 0;
+}
+.reading.plain .reading-text {
+  width: auto;
+  height: auto;
+  margin: 0;
+  clip: auto;
+  inset: calc(64px + 2.4em * var(--ts)) max(16px, calc(50% - 320px)) calc(88px + 1.2em * var(--ts));
+  overflow: auto;
+  padding: 22px 26px;
+  border-radius: 6px;
+  background: #f3e9d0;
+  color: #2a2018;
+  font-size: var(--fs-xl);
+  line-height: 1.55;
+  box-shadow: 0 18px 50px -16px rgba(0, 0, 0, 0.8);
+  user-select: text;
+  -webkit-user-select: text;
+}
+.reading.plain .reading-text h3 { font-size: 1.2em; margin-bottom: 0.5em; color: #7a2e28; }
+.reading.plain.family-world .reading-text h3 { color: #2c5a4c; }
+.reading.plain.family-tales .reading-text h3 { color: #4a3a6c; }
+.reading-text p { margin: 0 0 0.7em; }
+@media (max-width: 520px) {
+  .reading-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .reading-controls { gap: 8px; }
+}
 .talk-box {
   display: grid;
   gap: 6px;
@@ -2743,6 +2831,36 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .quest-steps .tick { flex: none; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--muted); transform: translateY(1px); }
 .quest-steps li.done { color: var(--muted); }
 .quest-steps li.done .tick { border-color: var(--heal); background: var(--heal); }
+/* The Journal's Library (#104): the books read, spines on a shelf, each opened again. */
+.library { margin-top: 18px; display: grid; gap: 8px; }
+.library-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 10px; }
+.library-head h3 { font-size: var(--fs-xl); }
+.library-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.library-book {
+  --leather: #7a2e28;
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 10px;
+  border: 1.5px solid color-mix(in srgb, var(--brass) 35%, transparent);
+  background: color-mix(in srgb, var(--panel) 75%, transparent);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.library-book.family-world { --leather: #2c5a4c; }
+.library-book.family-tales { --leather: #4a3a6c; }
+.library-book:hover:not(:disabled) { border-color: var(--brass-hi); }
+.library-spine { grid-row: 1 / 3; border-radius: 3px; background: var(--leather); box-shadow: inset 0 0 0 1px rgba(232, 196, 106, 0.6); }
+.library-title { font-weight: 700; font-size: var(--fs-base); }
+.library-family { font-size: var(--fs-sm); color: var(--muted); }
+.library-book { grid-template-columns: 10px 1fr auto; }
+.library-open { grid-column: 3; grid-row: 1 / 3; align-self: center; font-weight: 700; font-size: var(--fs-sm); color: var(--muted); }
+.library-book:is(:hover, :focus-visible) .library-open { color: var(--brass-hi); }
 @media (max-width: 520px) {
   /* Three cards a row in the 390px sheet (two gutters, the sheet's padding). */
   .stock { --w: calc((100vw - 120px) / 3); grid-template-columns: repeat(3, 1fr); }
@@ -4011,7 +4129,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 
 /* ---------- Paper: sheets, dialogs and rows you read. The ink tokens turn
    dark inside, so every component on it reads without its own rules. ---------- */
-:is(.dialog, .drawer, .settings-body, .world-sheet:not(:has(.challenge)), .play-pop, .update-toast, .ach-toast, .world-hud, .world-hint,
+:is(.dialog, .drawer, .settings-body, .world-sheet:not(:has(.challenge, .reading)), .play-pop, .update-toast, .ach-toast, .world-hud, .world-hint,
   .deck-tile, .deck-row, .slot, .ach, .stats .stat, .shelf-item, .rival, .ladder-part, .quest, .advice-item, .sell-row) {
   --ink: var(--toon);
   --text-soft: var(--paper-ink-soft);
@@ -4039,12 +4157,12 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   color: var(--ink);
 }
 /* A sheet over the scene: paper, the toon outline, a little thickness. */
-:is(.dialog, .drawer, .settings-body, .world-sheet:not(:has(.challenge))) {
+:is(.dialog, .drawer, .settings-body, .world-sheet:not(:has(.challenge, .reading))) {
   background: var(--paper);
   border: var(--toon-w) solid var(--toon);
   box-shadow: 0 6px 0 var(--toon), var(--elev-3);
 }
-.world-sheet:not(:has(.challenge)), .dialog { border-radius: 16px; }
+.world-sheet:not(:has(.challenge, .reading)), .dialog { border-radius: 16px; }
 .drawer { border-width: 0 0 0 var(--toon-w); border-radius: 0; box-shadow: -6px 0 0 var(--toon), var(--elev-3); }
 /* The world's menu: a wooden header over its paper. */
 .menu-top { background: var(--plank); border-bottom: var(--toon-w) solid var(--toon); }
