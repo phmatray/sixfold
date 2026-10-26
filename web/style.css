@@ -1459,6 +1459,10 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
   .world-prompt { left: auto; right: max(16px, env(safe-area-inset-right)); margin: 0; max-width: calc(100% - 210px); white-space: normal; font-size: 16px; padding: 12px 14px; }
   .world-prompt kbd { display: none; }
 }
+/* Prompts follow the device in use (input.rs): a pad's buttons are round, touch has none to name. */
+html[data-input="pad"] kbd { border-radius: 999px; min-width: 1.6em; text-align: center; }
+html[data-input="pad"] .world-prompt kbd { display: inline-block; }
+html[data-input="touch"] .world-prompt kbd { display: none; }
 @media (max-width: 520px) and (hover: hover) { .world-hint { font-size: 12px; line-height: 1.25; } }
 
 /* ---------- Browser surfaces ---------- */
@@ -2669,3 +2673,12 @@ p.atlas-pick { color: var(--muted); }
   .menu-tabs { display: grid; grid-template-columns: repeat(3, 1fr); }
   .menu-tabs button { padding: 0 6px; }
 }
+
+/* Options: the controls (input.rs). */
+.controls-set { display: grid; gap: 10px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.controls-set legend { padding: 0; margin-bottom: 4px; font: 700 15px/1.2 var(--display); }
+.controls-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.controls-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.controls-list .bind { min-width: 7.5em; justify-content: center; text-align: center; }
+.controls-list .bind[aria-pressed="true"] { border-color: var(--brass-hi); color: var(--brass-hi); }
+.menu-tabs .tab-key { align-self: center; flex: none; font: 700 12px var(--body); padding: 2px 8px; border: 1px solid var(--line); color: var(--muted); }

@@ -21,6 +21,7 @@ use crate::binder::CollectionPanel;
 use crate::campaign::{packs_label, CampaignPanel, Challenge, Ladder, Roster, SealBadge};
 use crate::ctl::Ctl;
 use crate::decks::{new_deck, DecksPanel, EditorPanel};
+use crate::input::{self, pad, titled, Ctrl};
 use crate::overlays::Inspector;
 use crate::title::OptionsPanel;
 use crate::worldmap::Waymark;
@@ -1109,18 +1110,15 @@ pub fn WorldScreen() -> impl IntoView {
         <div class="world">
             <header class="world-top">
                 <span class="wordmark small">"Sixfold"</span>
-                <span class="world-hint">{tr(
-                    "Arrows or WASD to walk · E to act · Shift to run · M for the map · Esc for the menu",
-                    "Flèches ou ZQSD pour marcher · E pour agir · Maj pour courir · M pour la carte · Échap pour le menu",
-                )}</span>
+                <span class="world-hint">{crate::input::world_hint}</span>
                 <button type="button" class="btn ghost journal-btn" aria-keyshortcuts="J"
-                    aria-label="Journal" title=tr("Journal (J)", "Journal (J)")
+                    aria-label="Journal" title=move || titled("Journal", Ctrl::Journal)
                     on:click=move |_| sheet.set(Some(Sheet::Journal))>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z" /><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" /></svg>
                     <span class="journal-label">"Journal"</span>
                 </button>
                 <button type="button" class="btn ghost journal-btn map-btn" aria-keyshortcuts="M"
-                    aria-label=tr("World map", "Carte du monde") title=tr("World map (M)", "Carte du monde (M)")
+                    aria-label=tr("World map", "Carte du monde") title=move || titled(tr("World map", "Carte du monde"), Ctrl::Map)
                     on:click=move |_| sheet.set(Some(Sheet::Atlas))>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20Z" /><path d="M9 4v13.5M15 6.5V20" /></svg>
                     <span class="journal-label">{tr("Map", "Carte")}</span>
@@ -1135,9 +1133,9 @@ pub fn WorldScreen() -> impl IntoView {
                     aria-keyshortcuts="Escape"
                     aria-disabled=move || (loading.get() || failed.with(Option::is_some)).then_some("true")
                     title=move || if loading.get() || failed.with(Option::is_some) {
-                        tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé")
+                        tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé").to_string()
                     } else {
-                        tr("Menu (Esc)", "Menu (Échap)")
+                        titled("Menu", Ctrl::Menu)
                     }
                     on:click=move |_| toggle_menu()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
@@ -1145,10 +1143,13 @@ pub fn WorldScreen() -> impl IntoView {
                 </button>
             </header>
             <main class="world-stage" node_ref=stage tabindex="-1"
-                aria-label=tr(
-                    "The Sixfold world: a meadow, a square, a woodland trail, a boardwalk and a quarry to walk around. Use the arrow keys or the pad, and E to act.",
-                    "Le monde de Sixfold : un pré, une place, un sentier des bois, une promenade et une carrière à parcourir. Utilisez les flèches ou le pavé, et E pour agir.",
-                )>
+                aria-label=move || {
+                    let (walk, act) = (input::prompt(Ctrl::Walk), input::prompt(Ctrl::Act));
+                    tr(
+                        format!("The Sixfold world: a meadow, a square, a woodland trail, a boardwalk and a quarry to walk around. {walk} to walk, {act} to act."),
+                        format!("Le monde de Sixfold : un pré, une place, un sentier des bois, une promenade et une carrière à parcourir. {walk} pour marcher, {act} pour agir."),
+                    )
+                }>
                 <div class="world-host" node_ref=host></div>
                 <p class="sr-only" aria-live="polite">{move || announce.get()}</p>
             </main>
@@ -1156,7 +1157,7 @@ pub fn WorldScreen() -> impl IntoView {
             {move || near.get().map(|(k, t)| view! {
                 <button class="btn primary world-prompt" node_ref=prompt on:click=move |_| world_act()>
                     {prompt_label(&k, &t)}
-                    <kbd>"E"</kbd>
+                    <kbd>{move || input::prompt(Ctrl::Act)}</kbd>
                 </button>
             })}
             <div class="world-rest" class:on=move || resting.get() aria-hidden="true"></div>
@@ -1464,6 +1465,8 @@ fn GameMenu(
                         <button type="button" class="btn" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
                     </div>
                     <div class="menu-tabs" role="tablist" aria-label="Menu" on:keydown=on_tabs_key>
+                        // With a pad, its shoulders switch tabs (gamepad.js): say so at each end.
+                        {move || pad().then(|| view! { <kbd class="tab-key" aria-hidden="true">"L"</kbd> })}
                         {MenuTab::ALL.into_iter().map(|t| view! {
                             <button type="button" role="tab" id=t.id() aria-controls="menu-panel"
                                 aria-selected=move || (tab.get() == t).to_string()
@@ -1471,6 +1474,7 @@ fn GameMenu(
                                 autofocus=t == first
                                 on:click=move |_| select(t)>{t.label()}</button>
                         }).collect_view()}
+                        {move || pad().then(|| view! { <kbd class="tab-key" aria-hidden="true">"R"</kbd> })}
                     </div>
                     </div>
                 }.into_any()
