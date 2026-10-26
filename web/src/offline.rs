@@ -32,7 +32,7 @@ pub fn OfflineStatus() -> impl IntoView {
                     <p class="note">{if pct == 100 {
                         tr("The whole world is downloaded: Sixfold plays offline.".to_string(), "Le monde entier est téléchargé : Sixfold se joue hors ligne.".to_string())
                     } else {
-                        tr(format!("Available offline: {pct}% of the world, downloading while you play."), format!("Disponible hors ligne : {pct} % du monde, téléchargé pendant que vous jouez."))
+                        tr(format!("Available offline: {pct}% of the world."), format!("Disponible hors ligne : {pct} % du monde."))
                     }}</p>
                     <span class="progress-bar" aria-hidden="true"><span style:width=format!("{pct}%")></span></span>
                 </fieldset>
