@@ -659,3 +659,57 @@ fn every_way_a_field_item_opens_is_in_its_table() {
     }
     assert!(bad.is_empty(), "{}", bad.join("\n"));
 }
+
+/// #67: the finale (`finale` on the Warden's map) plays on coming back from
+/// the first Warden win and never after a loss; once played or skipped it
+/// is done (`flag:finale`, the hook later scenes chain on), and its last
+/// effect rolls the credits (`show:credits`). Its music is a known track.
+#[test]
+fn the_finale_plays_after_the_warden_falls_once() {
+    use sixfold_engine::campaign::{record, rival, RIVALS};
+    use sixfold_engine::overworld::Progress;
+    use sixfold_engine::profile::Profile;
+
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let m: Value =
+        serde_json::from_str(&std::fs::read_to_string(dir.join("warden.json")).unwrap()).unwrap();
+    let s = m["scripts"]
+        .as_array()
+        .and_then(|l| l.iter().find(|s| s["id"] == "finale"))
+        .expect("the Warden's map has a `finale` script");
+    assert_eq!(s["on"], "enter");
+    let cond = s["if"].as_str().unwrap();
+    let effects: Vec<&str> = s["steps"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .flat_map(|st| strs(&st["do"]))
+        .collect();
+    assert!(effects.contains(&"flag:finale") && effects.last() == Some(&"show:credits"));
+    assert!(effects.contains(&"music:finale"));
+    // The credits then put the champion where the Warden's door leads back into the
+    // hall: `HALL_DOOR` in web/src/credits.rs ("shop,1,6,e") must stay that spawn.
+    let back = m["warps"]
+        .as_array()
+        .and_then(|l| l.iter().find(|w| w["to"] == "shop"))
+        .expect("the Warden's room leads back to the hall");
+    let spawn = &back["spawn"];
+    assert_eq!(
+        (&spawn["x"], &spawn["z"], &spawn["facing"]),
+        (&1.into(), &6.into(), &"e".into()),
+        "update HALL_DOOR in web/src/credits.rs too"
+    );
+
+    let (mut p, mut pr) = (Progress::default(), Profile::new_player());
+    for r in RIVALS.iter().filter(|r| r.seal) {
+        record(r, true, &mut p, &mut pr);
+        p.settle();
+    }
+    let warden = rival("warden").unwrap();
+    record(warden, false, &mut p, &mut pr);
+    assert!(!p.check(cond), "a loss changes nothing");
+    record(warden, true, &mut p, &mut pr);
+    assert!(p.check(cond), "the first win plays it");
+    p.apply("flag:finale").unwrap();
+    assert!(!p.check(cond), "once");
+}
