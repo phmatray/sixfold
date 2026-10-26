@@ -1364,8 +1364,16 @@ mod tests {
 /// The value budget (`docs/BALANCE.md`, "Value budget"): every creature is
 /// scored in damage-equivalents (10 = 10 damage = 10 HP) against the curve
 /// for its stage, so a new or changed card can't drift off the curve.
-#[cfg(test)]
-mod budget {
+/// A Hexon's score on the value budget (`docs/BALANCE.md`), in
+/// damage-equivalents over its stage's curve: what the deck builder ranks by.
+pub(crate) fn value(cr: &Creature) -> i32 {
+    budget::score(cr).total()
+}
+
+/// The value budget (`docs/BALANCE.md`): the always-on test holds every
+/// Hexon to it, and [`value`] lends it to the deck builder.
+#[cfg_attr(not(test), allow(dead_code))]
+pub(crate) mod budget {
     use super::*;
     use crate::condition::{Placed, Shield, Status};
     use crate::effect::Effect;
@@ -1396,7 +1404,7 @@ mod budget {
     }
 
     /// Damage-equivalent of one effect; drawbacks are negative.
-    pub(super) fn effect_value(e: &Effect) -> i32 {
+    pub(crate) fn effect_value(e: &Effect) -> i32 {
         use Effect::*;
         let status = |s: &Status| match s {
             Status::Paralyzed | Status::DoublePoisoned => 20,
@@ -1582,6 +1590,7 @@ mod budget {
     }
 
     /// Prints the table (`-- --nocapture`) and fails on a card off its budget.
+    #[cfg(test)]
     #[test]
     fn every_creature_is_within_its_budget() {
         let mut off = vec![];

@@ -30,6 +30,7 @@ mod view;
 
 pub mod ai;
 pub mod booster;
+pub mod builder;
 pub mod campaign;
 pub mod clock;
 pub mod decks;
