@@ -255,6 +255,9 @@ fn count_up(n: u32) -> RwSignal<u32> {
     const STEP: u32 = 60;
     let reduced = crate::packs::reduced_motion();
     let shown = RwSignal::new(if reduced { n } else { 0 });
+    if n == 0 {
+        return shown;
+    }
     let steps = if reduced { 1 } else { n.clamp(1, 12) };
     for s in 1..=steps {
         set_timeout(
@@ -396,10 +399,13 @@ pub fn GameOver() -> impl IntoView {
                     progress.update(|pr| {
                         profile.update(|p| got = Some(campaign::record(r, won, pr, p)))
                     });
-                    if got.as_ref().is_some_and(|g| g.seal || g.first) {
-                        // After the win fanfare, as the seal fills.
+                    // After the win fanfare: the stinger as a seal fills, the
+                    // progress chime for the champion's title.
+                    if let Some(name) = got.as_ref().and_then(|g| {
+                        (g.seal || g.first).then_some(if g.seal { "stinger" } else { "progress" })
+                    }) {
                         set_timeout(
-                            || crate::audio::sfx("stinger", 0.0),
+                            move || crate::audio::sfx(name, 0.0),
                             std::time::Duration::from_millis(crate::campaign::SEAL_AT.into()),
                         );
                     }

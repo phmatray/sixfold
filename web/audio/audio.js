@@ -96,10 +96,10 @@ for (const ev of ["pointerdown", "keydown", "touchend"]) addEventListener(ev, un
 document.addEventListener("visibilitychange", wake);
 
 // One delegated listener for every button: a soft click, a confirm for a primary button, a
-// refuse for one that can't be used now (or what its `data-sfx` names); a tick on hover (mouse only).
+// refuse for one that can't be used now; a tick on hover (mouse only).
 document.addEventListener("click", (e) => {
   const b = e.target.closest?.("button, summary, a[href]");
-  if (b) sfx(b.dataset.sfx || (b.matches("[aria-disabled=true]") ? "refuse" : b.matches(".primary") ? "confirm" : "click"));
+  if (b) sfx(b.matches("[aria-disabled=true]") ? "refuse" : b.matches(".primary") ? "confirm" : "click");
 }, true);
 // A disabled button gets no click: its pointerdown still says no.
 document.addEventListener("pointerdown", (e) => e.target.closest?.("button:disabled") && sfx("refuse"), true);
@@ -301,6 +301,8 @@ const SFX = {
     noise(d, t, 0.25, { f: 400, f2: 2400, q: 2, a: 0.1, peak: 0.25 });
     notes(d, t + 0.18, [67, 74, 79], 0.07, { type: "square", peak: 0.05, dur: 0.18 });
   },
+  // Map cues may still say "sfx:seal" (engine::overworld::SOUNDS).
+  seal: (d, t) => SFX.stinger(d, t),
   // A seal won: one note per face as the hexagon fills (110 ms apart, SealFill), then its chord.
   stinger: (d, t) => {
     notes(d, t, [72, 74, 76, 79, 81, 84], 0.11, { type: "triangle", peak: 0.1, dur: 0.28 });

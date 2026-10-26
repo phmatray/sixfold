@@ -329,6 +329,8 @@ impl Ctl {
         self.announce.set(String::new());
         self.said.set(None);
         self.spoken.set_value(0);
+        self.taken.set_value([0; 2]);
+        self.attacking.set_value(false);
         self.fx.set(Fx::default());
         self.revealed.set(false);
         self.busy.set(true);
@@ -401,8 +403,6 @@ impl Ctl {
         });
         if mine && !self.busy.get_untracked() {
             self.run(action);
-        } else {
-            crate::audio::sfx("refuse", 0.0);
         }
     }
 
@@ -663,24 +663,14 @@ impl Ctl {
     /// asked for a faster opponent.
     fn pace(&self, ms: u64) -> u64 {
         let theirs = self.turn_of.get_value().0 == AI && self.revealed.get_untracked();
-        if theirs && self.rush.get_untracked() {
-            ms / 10
-        } else if theirs && self.fast.get_untracked() {
-            ms / 3
-        } else {
-            ms
-        }
+        ms / slowdown(theirs, self.rush.get_untracked(), self.fast.get_untracked())
     }
 
     /// `pace` as a factor, for the table's juice (`--pace` in the CSS):
     /// under Fast or a held fast-forward its beats play quicker too.
     pub fn pace_factor(&self) -> f32 {
         let theirs = self.turn_side.get() == Some(AI) && self.revealed.get();
-        match (theirs, self.rush.get(), self.fast.get()) {
-            (true, true, _) => 0.1,
-            (true, false, true) => 0.34,
-            _ => 1.0,
-        }
+        1.0 / slowdown(theirs, self.rush.get(), self.fast.get()) as f32
     }
 
     /// Point a rule tip at `player`'s Active the first time its rule comes up
@@ -1069,9 +1059,12 @@ impl Ctl {
                     f.hp.insert(*uid, *hp);
                 });
                 self.pop_with(Some(*uid), format!("−{amount}"), kind, *amount, stamps);
-                // A knock-out blow hands over to the KO while it still shakes
+                // A knock-out blow hands over to its KO while it still shakes
                 // (the KO's hit-stop freezes it).
-                if *hp == 0 {
+                let ko_next = self.queue.with_value(
+                    |q| matches!(q.front(), Some(Event::KnockedOut { uid: u, .. }) if u == uid),
+                );
+                if *hp == 0 && ko_next {
                     450
                 } else {
                     850
@@ -1126,9 +1119,20 @@ impl Ctl {
                 } else {
                     600
                 };
+                let land = if self.reduced_motion {
+                    ms * 6 / 10
+                } else {
+                    ms * 86 / 100
+                };
+                let generation = self.generation.get_value();
+                let me = *self;
                 set_timeout(
-                    || crate::audio::sfx("reward", 0.0),
-                    Duration::from_millis(self.pace(ms * 86 / 100)),
+                    move || {
+                        if me.generation.get_value() == generation {
+                            crate::audio::sfx("reward", 0.0);
+                        }
+                    },
+                    Duration::from_millis(self.pace(land)),
                 );
                 ms
             }
@@ -1217,6 +1221,16 @@ impl Ctl {
             }
             _ => 0,
         }
+    }
+}
+
+/// How much quicker the opponent's turn plays: a tenth of the time held
+/// down, a third with Fast on.
+fn slowdown(theirs: bool, rush: bool, fast: bool) -> u64 {
+    match (theirs, rush, fast) {
+        (true, true, _) => 10,
+        (true, false, true) => 3,
+        _ => 1,
     }
 }
 
