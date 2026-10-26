@@ -332,11 +332,7 @@ pub fn Credits(won: bool) -> impl IntoView {
         "Sixfold".into(),
         view! {
             <h1 class="wordmark">"Sixfold"</h1>
-            <p class="credits-line">{if won {
-                tr("Six seals, one Warden, and a new champion.", "Six sceaux, une Gardienne… et une nouvelle légende.")
-            } else {
-                tr("The people and the tools behind it.", "Ceux qui l'ont fait, et avec quoi.")
-            }}</p>
+            <p class="credits-line">{tr("The people and the tools behind it.", "Ceux qui l'ont fait, et avec quoi.")}</p>
         }
         .into_any(),
     ));
@@ -479,9 +475,13 @@ pub fn Credits(won: bool) -> impl IntoView {
     let at = RwSignal::new(0usize);
     let paused = RwSignal::new(still);
     let armed = StoredValue::new(0u32);
+    // The same plate again (Back on the first) changes nothing: no bells rung twice.
     let show = move |i: usize| {
-        armed.update_value(|t| *t += 1);
-        at.set(i.min(n - 1));
+        let i = i.min(n - 1);
+        if i != at.get_untracked() {
+            armed.update_value(|t| *t += 1);
+            at.set(i);
+        }
     };
     // A memo: the foot's buttons are rebuilt only when it flips, not on every plate.
     let last = Memo::new(move |_| at.get() + 1 == n);
@@ -522,15 +522,18 @@ pub fn Credits(won: bool) -> impl IntoView {
         armed.update_value(|t| *t += 1);
         paused.update(|p| *p = !*p);
     };
-    let on_key = move |e: leptos::ev::KeyboardEvent| match e.key().as_str() {
+    // On the window, so the keys (and a pad's, which gamepad.js sends as keys)
+    // still work once a click on a plate has taken the focus off the buttons.
+    let keys = window_event_listener(leptos::ev::keydown, move |e| match e.key().as_str() {
         "Escape" => {
             e.prevent_default();
             done();
         }
         "ArrowRight" if !last.get_untracked() => show(at.get_untracked() + 1),
-        "ArrowLeft" if at.get_untracked() > 0 => show(at.get_untracked() - 1),
+        "ArrowLeft" => show(at.get_untracked().saturating_sub(1)),
         _ => {}
-    };
+    });
+    on_cleanup(move || keys.remove());
     let status = move || {
         let i = at.get();
         tr(
@@ -539,7 +542,7 @@ pub fn Credits(won: bool) -> impl IntoView {
         )
     };
     view! {
-        <main class="credits" class:still=still on:keydown=on_key aria-label=tr("Credits", "Générique")>
+        <main class="credits" class:still=still aria-label=tr("Credits", "Générique")>
             <ol class="credits-pips" aria-hidden="true">
                 {(0..n).map(|i| view! { <li class:on=move || at.get() == i class:past=move || { at.get() > i }></li> }).collect_view()}
             </ol>
@@ -567,7 +570,7 @@ pub fn Credits(won: bool) -> impl IntoView {
                     </button>
                 })}
                 <button type="button" class="btn ghost icon" aria-label=tr("Back", "Retour")
-                    on:click=move |_| show(at.get_untracked().saturating_sub(1))>
+                    aria-disabled=move || (at.get() == 0).to_string() on:click=move |_| show(at.get_untracked().saturating_sub(1))>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                 </button>
                 {move || (!last.get()).then(|| view! {
@@ -578,6 +581,7 @@ pub fn Credits(won: bool) -> impl IntoView {
                     // Focus starts on Skip (see `focus_heading`), so Enter works straight away.
                     <button type="button" class="btn ghost" data-screen-focus on:click=move |_| done()>
                         {tr("Skip the credits", "Passer le générique")}
+                        <kbd>{move || crate::input::prompt(crate::input::Ctrl::Cancel)}</kbd>
                     </button>
                 })}
             </div>
