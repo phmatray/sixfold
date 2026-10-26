@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { menuItem, readSave, title } from "./helpers";
+import { frames, menuItem, readSave, title } from "./helpers";
 
 /** Where the save says the hero stands: `map,x,z,facing`. */
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
@@ -76,8 +76,12 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   // doesn't come over on his own) and talk to him: he challenges.
   await page.locator(".world-host").evaluate((el) => (el as unknown as { sixfoldWarp: (...a: unknown[]) => void }).sixfoldWarp("overworld", 23, 28, "n"));
   await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^23,28/, { timeout: 15_000 });
-  // The act prompt (a key tap can fall between two frames of a slow headless scene).
-  await page.getByRole("button", { name: /^Talk to Tobin/ }).click();
+  // The act prompt (a key tap can fall between two frames of a slow headless scene), once the
+  // scene has drawn the warp (its first frames compile shaders: slow on CI's software GL).
+  const prompt = page.getByRole("button", { name: /^Talk to Tobin/ });
+  await expect(prompt).toBeVisible();
+  await frames(page);
+  await prompt.click();
   const talk = page.locator(".talk-box");
   await expect(talk).toBeVisible({ timeout: 15_000 });
   while (await talk.isVisible()) {

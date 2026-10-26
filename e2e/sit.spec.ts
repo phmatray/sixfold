@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { menuItem, readSave, title } from "./helpers";
+import { frames, menuItem, readSave, title } from "./helpers";
 
 /** Where the save says the hero stands: `map,x,z,facing`. */
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
@@ -38,6 +38,8 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
   await page.keyboard.down("ArrowUp");
   await expect.poll(() => at(page)).toBe("overworld,22,17,n");
   await page.keyboard.up("ArrowUp");
+  await expect(sit).toBeVisible();
+  await frames(page);
   await sit.click();
   await expect.poll(() => sitting(page)).toBe(true);
   await page.keyboard.down("ArrowLeft");

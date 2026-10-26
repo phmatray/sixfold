@@ -35,7 +35,9 @@ test("a new player opens the game, plays the guided duel and comes back to Conti
   // The lesson's gift: packs to open; from there, back to the title.
   await won.getByRole("button", { name: "Open my packs" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Open packs" })).toBeVisible();
-  await page.getByRole("button", { name: "Back" }).click();
-  await expect(menuItem(page, "Continue")).toBeVisible();
+  // Back to the title, which builds the world behind it (slow on CI's software GL): the click
+  // doesn't wait on that, and the menu gets as long as the title's first load.
+  await page.getByRole("button", { name: "Back" }).click({ noWaitAfter: true });
+  await expect(menuItem(page, "Continue")).toBeVisible({ timeout: 30_000 });
   await expect(menuItem(page, "Learn to play")).toHaveCount(0);
 });

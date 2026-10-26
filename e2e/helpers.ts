@@ -56,3 +56,12 @@ export async function moveTo(page: Page, target: Locator, key = "Tab", tries = 6
   }
   await expect(target).toBeFocused();
 }
+
+/**
+ * Two frames drawn: the page's main thread is free again. On CI's software GL the first frames
+ * after a warp or a map build compile shaders and can hold the thread for many seconds, and a
+ * click sent then times out waiting for the page; wait for the frames (on the test's clock) first.
+ */
+export async function frames(page: Page) {
+  await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+}
