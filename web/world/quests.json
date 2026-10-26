@@ -285,6 +285,11 @@
       "done": "flag:rook_apprentice",
       "steps": [
         {
+          "text": "Rook was waiting by the duel hall in the meadow. Duel him: he stands east of the plaza.",
+          "text_fr": "Rook vous attendait près de la salle des duels, dans le pré. Affrontez-le : il se tient à l'est de la place.",
+          "done": "flag:rook_1_left"
+        },
+        {
           "text": "Rook is mapping the seal stones. With three seals, look for him below the Stormwatch observatory, where the road leaves for the Rodspire.",
           "text_fr": "Rook relève les pierres de sceau. Avec trois sceaux, cherchez-le sous l'observatoire de Guette-Orage, là où la route part vers l'Aiguille-Foudre.",
           "done": "flag:rook_2"
