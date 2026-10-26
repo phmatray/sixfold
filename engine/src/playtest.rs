@@ -523,7 +523,7 @@ fn the_deck_builder_makes_legal_decks() {
 
 /// English left in a French text: words French never has, as words.
 fn english_in(line: &str) -> Option<&'static str> {
-    const MARKERS: [&str; 15] = [
+    const MARKERS: [&str; 16] = [
         " the ",
         "The ",
         "You ",
@@ -539,6 +539,7 @@ fn english_in(line: &str) -> Option<&'static str> {
         " heads",
         " tails",
         "Choose ",
+        "(Active)",
     ];
     let padded = format!(" {line} ");
     MARKERS.into_iter().find(|m| padded.contains(m))
