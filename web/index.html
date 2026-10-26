@@ -42,6 +42,9 @@
     <link data-trunk rel="rust" href="Cargo.toml" data-wasm-opt="z" data-integrity="none" data-initializer="loader.js"
       data-wasm-opt-params="--enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-reference-types --enable-multivalue" />
     <link data-trunk rel="css" href="style.css" />
+    <!-- #100 prototypes: three directions for the kit, picked with ?kit=a|b|c. -->
+    <link data-trunk rel="css" href="kits.css" />
+    <script>document.documentElement.dataset.kit = new URLSearchParams(location.search).get("kit") ?? "a";</script>
     <link data-trunk rel="copy-dir" href="world" />
     <!-- Card illustrations, cards/<slug>.webp (see build.rs); cached on first use, never precached. -->
     <link data-trunk rel="copy-dir" href="cards" />

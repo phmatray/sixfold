@@ -1554,22 +1554,6 @@ body > .page > .side-panel { position: relative; top: auto; align-self: stretch;
 body > .page > .page-body:has(> .setup > .options) { padding-bottom: 0; }
 body > .page .pane-deck { top: var(--space-4); max-height: calc(100dvh - 61px - 2 * var(--space-4)); }
 @media (max-width: 760px) { body > .page .editor-tabs { top: 0; } }
-/* The title is one screen at a desktop size; a phone scrolls it inside. */
-body > .title { height: 100dvh; overflow-y: auto; max-width: none; padding-inline: max(16px, calc((100% - 1088px) / 2)); }
-body > .title > .lang-switch { right: max(16px, calc((100% - 1088px) / 2)); }
-/* A wide screen: the footer (save slot, settings, the fine print) sits under
-   the card fan, so the menu column has the whole height. */
-@media (min-width: 900px) and (orientation: landscape) {
-  body > .title { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-rows: minmax(0, 1fr) auto; column-gap: clamp(16px, 4vw, 48px); align-items: center; }
-  body > .title > .hero { display: contents; }
-  body > .title .hero-fan { grid-column: 1; grid-row: 1; }
-  body > .title .hero-text { grid-column: 2; grid-row: 1 / span 2; }
-  body > .title > .foot { grid-column: 1; grid-row: 2; align-self: end; margin-top: var(--space-4); flex-direction: column-reverse; align-items: flex-start; gap: var(--space-3); }
-  /* Its panels open up from the footer's left edge, over the fan, never over the menu. */
-  body > .title .foot-menus { position: relative; }
-  body > .title .foot-menus details { position: static; }
-  body > .title .foot-menus details[open] > .settings-body { left: 0; right: auto; }
-}
 /* The title has its language switch up top: Settings doesn't repeat it. */
 body > .title .settings-body .lang { display: none; }
 
@@ -3821,8 +3805,9 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   pointer-events: none;
   background: #16233d; /* the scene's sea, while it loads */
 }
-.title-backdrop canvas { display: block; opacity: 0; transition: opacity 900ms ease; }
-.title-backdrop.live canvas { opacity: 1; }
+.title-backdrop canvas { display: block; position: absolute; inset: 0; opacity: 0; transition: opacity 900ms ease; }
+.title-backdrop .title-veil { opacity: 0; transition: none; }
+.title-backdrop.live canvas:not(.title-veil) { opacity: 1; }
 /* A scrim where the text sits: the menu side on a wide screen, the lower part on a tall one. */
 .title-backdrop::after {
   content: "";

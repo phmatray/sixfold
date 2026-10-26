@@ -16,6 +16,7 @@ mod duel;
 mod history;
 mod input;
 mod journal;
+mod kit;
 mod offline;
 mod overlays;
 mod packs;
@@ -48,6 +49,14 @@ fn main() {
     sixfold_engine::set_lang(lang);
     if let Some(html) = document().document_element() {
         let _ = html.set_attribute("lang", lang.code());
+    }
+    // The kit's component sheet, for reviewing the controls (`?sheet`).
+    if window()
+        .location()
+        .search()
+        .is_ok_and(|q| q.contains("sheet"))
+    {
+        return mount_to_body(kit::KitSheet);
     }
     mount_to_body(App);
 }

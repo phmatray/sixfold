@@ -1,185 +1,222 @@
-// The title's living backdrop: a hex island at dusk, its cottage lit and a
-// campfire going, embers rising, the camera swaying gently in front of it. Built from hex
-// prisms and the world's own models (title.rs mounts it behind the menu).
+// The title's living backdrop: the real world, full-bleed. A slow cinematic camera
+// drifts over a few recognisable places of the regions (SHOTS), by day and by night,
+// cross-fading from one to the next. Each place is the world's own map, built by the
+// world's own code (map.js, build.js, daylight.js), with its wind, water, smoke,
+// lamps, people and fireflies; only the camera is the title's.
 //
-// It gives way to the flat CSS backdrop (`.title-backdrop.flat`) when WebGL is
-// missing or the first frames come in under 50 fps (the canvas stays hidden
-// until they pass). With reduced motion it is one still frame.
+// It loads progressively: the flat CSS backdrop (`.title-backdrop.flat` look, under
+// the canvas) holds until the first place is built, and the next place loads while
+// the current one plays. It gives way to the flat backdrop for good when WebGL is
+// missing or the first frames come in under 45 fps. With reduced motion it is one
+// still frame of the first place.
+//
+// `el.sixfoldTitle` (for screenshots and the console): `.shot(i)` holds shot i,
+// `.play()` resumes the reel.
 import * as THREE from "three";
-import { loadAsset } from "./map.js";
-import { prep, rng, toon } from "./props.js";
+import { U } from "./life.js";
+import { loadMap, loadAsset, assetNames, tr } from "./map.js";
+import { build, dispose, refresh, animateProps } from "./build.js";
+import { updateNpc } from "./npc.js";
+import { daylight, phaseOf } from "./daylight.js";
 
-const MODELS = ["cottage", "tree", "tree_b", "pine", "bush", "rock", "campfire", "lantern", "flowers", "waymark"];
-const R = 4; // island radius, in hexes
-const FACING = 0.6; // the camera's bearing: the fire in front, the cottage behind it
-const FIRE = [0, 2]; // the hex toward the camera, in clear space under the card fan
-const S = 1.05; // hex circumradius (a tile is about 1 m)
+// A place: the map, the hour (game minute), what the camera looks at (tile x, z, and a
+// height), and the camera's path round it: bearing (degrees, 0 = from the south, the
+// world's own view), pitch and distance, each from → to over the shot.
+const SHOTS = [
+  { map: "overworld", minute: 620, at: [23, 14, 1], yaw: [-34, -22], pitch: [31, 29], dist: [36, 32] }, // the meadow, mid-morning
+  { map: "gullhaven", minute: 800, at: [34, 14, 0.5], yaw: [42, 28], pitch: [29, 27], dist: [36, 32] }, // the harbour, afternoon
+  { map: "cinderwick", minute: 1150, at: [22, 15, 1], yaw: [-26, -14], pitch: [31, 29], dist: [32, 28] }, // the kilns at dusk
+  { map: "lanternmere", minute: 1330, at: [28, 18, 0.3], yaw: [16, 4], pitch: [31, 29], dist: [28, 25] }, // the lantern lake at night
+  { map: "square", minute: 400, at: [25, 13, 1], yaw: [-20, -8], pitch: [31, 29], dist: [31, 28] }, // the town square at dawn
+];
+const HOLD = 13; // seconds on a place
+const FADE = 1.6; // seconds of cross-fade
 
-/// Start the models downloading (the splash calls this, so the title opens on them).
-export const preload = () => MODELS.forEach(loadAsset);
+const holds = (cond) => !cond; // only what is always there: no story state on the title
+const nobody = { x: -99, z: -99, step: null }; // the people's paths are never blocked by a hero
 
-const NIGHT = "#16233d"; // the sea fading out, close to the felt behind the menu
+/// Start the first place downloading (the splash calls this, so the title opens on it).
+export const preload = () => fetchShot(SHOTS[0]).catch(() => {});
 
-// Axial hex coordinates within `r` of the centre.
-function hexes(r) {
-  const out = [];
-  for (let q = -r; q <= r; q++)
-    for (let s = Math.max(-r, -q - r); s <= Math.min(r, -q + r); s++) out.push([q, s, Math.max(Math.abs(q), Math.abs(s), Math.abs(q + s))]);
-  return out;
+function fetchShot(s) {
+  return loadMap(s.map).then((map) => {
+    const names = assetNames(map).filter((n) => n !== "hero");
+    return Promise.all(names.map(loadAsset)).then((g) => ({ map, got: Object.fromEntries(names.map((n, i) => [n, g[i]])) }));
+  });
 }
-const at = (q, s) => [S * Math.sqrt(3) * (q + s / 2), S * 1.5 * s];
 
 export function mount(el) {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const flat = () => el.classList.add("flat");
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "low-power" });
+    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
   } catch {
     flat();
     return { stop() {} };
   }
+  U.uSway.value = reduced ? 0 : 1;
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-  renderer.domElement.setAttribute("aria-hidden", "true");
-  el.appendChild(renderer.domElement);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false;
+  renderer.autoClear = false;
+  const canvas = renderer.domElement;
+  canvas.setAttribute("aria-hidden", "true");
+  // The cross-fade: the last frame of a place, held on a 2D canvas over the new one and faded out.
+  const veil = document.createElement("canvas");
+  veil.className = "title-veil";
+  veil.setAttribute("aria-hidden", "true");
+  // The place's name and hour, like a film's location card.
+  const place = document.createElement("p");
+  place.className = "title-place";
+  place.setAttribute("aria-hidden", "true");
+  el.append(canvas, veil, place);
+  const HOURS = { dawn: tr("Dawn", "Aube"), day: tr("Day", "Jour"), dusk: tr("Dusk", "Crépuscule"), night: tr("Night", "Nuit") };
+  const vctx = veil.getContext("2d");
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(NIGHT);
-  scene.fog = new THREE.Fog(NIGHT, 30, 62);
-  const camera = new THREE.PerspectiveCamera(30, 1, 1, 160);
+  const camera = new THREE.PerspectiveCamera(34, 1, 0.5, 90);
+  // As in world.js: the shadow pass through a camera that holds every layer (the
+  // terrain's shadow-only caster is on layer 2) and sees nothing itself.
+  const shadowEye = new THREE.OrthographicCamera(-0.01, 0.01, 0.01, -0.01, 0.1, 0.2);
+  shadowEye.position.set(0, -1e4, 0);
+  shadowEye.updateMatrixWorld();
+  shadowEye.layers.enableAll();
 
-  scene.add(new THREE.HemisphereLight("#7f8fc4", "#2a2233", 1.5));
-  const sun = new THREE.DirectionalLight("#ffab73", 1.9);
-  sun.position.set(-8, 4, -6);
-  scene.add(sun);
-  const fire = new THREE.PointLight("#ff9440", 6, 7, 1.6);
-  scene.add(fire);
-
-  // The island: hex prisms, sand at the rim, grass inland, a rise behind the cottage.
-  const r = rng(6);
-  const geo = new THREE.CylinderGeometry(S * 0.97, S * 0.97, 1, 6);
-  geo.translate(0, -0.5, 0); // top face at y = 0, scaled down from there
-  const side = toon("#5b4636"), sand = toon("#d6bf8a"), grass = [toon("#6f9d4c"), toon("#7aa956"), toon("#628f45")], stone = toon("#8e8a80");
-  const tops = new Map();
-  const island = new THREE.Group();
-  for (const [q, s, d] of hexes(R)) {
-    const rim = d === R;
-    const rise = Math.max(0, 1.6 - Math.hypot(q + 1, s + 1.5)) * 0.35; // a low hill behind the cottage
-    const h = rim ? 0.18 + r() * 0.08 : Math.round((0.4 + rise + r() * 0.12) * 8) / 8;
-    const top = rim ? sand : d === R - 1 && r() < 0.25 ? stone : grass[Math.floor(r() * 3)];
-    const m = new THREE.Mesh(geo, [side, top, side]);
-    const [x, z] = at(q, s);
-    m.position.set(x, h, z);
-    m.scale.y = h + 1.2; // down under the water line
-    island.add(m);
-    tops.set(`${q},${s}`, [x, h, z, d]);
-  }
-  scene.add(island);
-  const water = new THREE.Mesh(new THREE.CircleGeometry(140, 48).rotateX(-Math.PI / 2), toon("#2b5480"));
-  water.position.y = 0.05;
-  scene.add(water);
-
-  // Embers from the fire, drifting up and fading.
-  const N = 36;
-  const embers = new THREE.Points(
-    new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(N * 3), 3)),
-    new THREE.PointsMaterial({ size: 0.07, color: "#ffc070", transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending }),
-  );
-  const seeds = Array.from({ length: N }, () => [Math.random(), Math.random() * 6.28, 0.25 + Math.random() * 0.5]);
-  scene.add(embers);
-
-  let fireAt = [0, 0, 0];
-  const put = (gltf, q, s, rot = 0, scale = 1) => {
-    const t = tops.get(`${q},${s}`);
-    if (!gltf || !t) return null;
-    const o = gltf.scene.clone(true);
-    prep(o, false);
-    o.position.set(t[0], t[1], t[2]);
-    o.rotation.y = rot;
-    o.scale.setScalar(scale);
-    island.add(o);
-    return o;
-  };
-  const loaded = Promise.all(MODELS.map(loadAsset)).then((g) => {
-    const m = Object.fromEntries(MODELS.map((n, i) => [n, g[i]]));
-    put(m.cottage, -1, -1, 0.5);
-    put(m.campfire, FIRE[0], FIRE[1]);
-    put(m.lantern, -2, 1, 0.3);
-    put(m.waymark, 2, -3, -0.4);
-    put(m.flowers, 0, 1);
-    put(m.flowers, -3, 2, 1.2);
-    const trees = [[1, -3, "tree"], [2, -2, "tree_b"], [-2, -2, "pine"], [-3, 0, "tree"], [-1, -3, "pine"], [3, -1, "tree_b"], [-3, 1, "pine"], [0, -4 + 1, "tree"]];
-    for (const [q, s, k] of trees) put(m[k], q, s, r() * 6.28, 0.85 + r() * 0.3);
-    for (const [q, s] of [[3, 0], [-1, 3], [1, 2]]) put(m.bush, q, s, r() * 6.28);
-    for (const [q, s] of [[4, -2], [-4, 3], [2, 2], [-2, 4]]) put(m.rock, q, s, r() * 6.28, 0.8);
-    const t = tops.get(FIRE.join(","));
-    fireAt = [t[0], t[1], t[2]];
-    fire.position.set(t[0], t[1] + 0.6, t[2]);
-  });
-
-  // Framing: the island sits behind the card fan (left) on a wide screen, high
-  // and centred on a tall one, where the menu covers the lower part.
+  let wide = true;
   const resize = () => {
     const w = el.clientWidth || 1, h = el.clientHeight || 1;
     renderer.setSize(w, h);
+    veil.width = canvas.width;
+    veil.height = canvas.height;
     camera.aspect = w / h;
-    const wide = w > 900 && w > h;
-    camera.fov = wide ? 26 : 52;
-    camera.setViewOffset(w, h, wide ? w * 0.15 : 0, wide ? -h * 0.16 : h * 0.3, w, h);
+    wide = w > h;
+    // The place sits clear of the menu: right of it on a wide screen, above it on a tall one.
+    camera.fov = wide ? 34 : 52;
+    camera.setViewOffset(w, h, wide ? -w * 0.14 : 0, wide ? 0 : h * 0.16, w, h);
     camera.updateProjectionMatrix();
-    if (reduced) draw(0);
+    if (reduced && world) draw(0);
   };
 
-  let angle = FACING, raf = 0, last = 0, alive = true;
-  const times = [];
-  const look = new THREE.Vector3(0, 1.2, 0);
-  function draw(t) {
-    camera.position.set(Math.sin(angle) * 34, 13, Math.cos(angle) * 34);
+  let world = null, shot = 0, t0 = 0, held = -1, alive = true, raf = 0, last = 0, fade = 0, minute = 0;
+  const look = new THREE.Vector3();
+  const ease = (k) => k * k * (3 - 2 * k);
+
+  // Build place `i` (its models already fetched), replacing the one on screen.
+  async function show(i) {
+    const s = SHOTS[i];
+    const { map, got } = await fetchShot(s);
+    if (!alive) return false;
+    const next = await build(map, got, reduced);
+    if (!alive) return dispose(next.root), false;
+    next.hero = nobody;
+    refresh(next, holds, () => false);
+    next.day = daylight(next, reduced);
+    if (world) dispose(world.root);
+    world = next;
+    scene.add(world.root);
+    const L = map.light;
+    scene.fog = new THREE.Fog(L.background, 40, 80);
+    shot = i;
+    minute = s.minute;
+    t0 = performance.now() / 1000;
+    place.innerHTML = `<b>${map.title ?? ""}</b><span>${HOURS[phaseOf(minute)]}</span>`;
+    draw(0, 0);
+    // A still of the place, for the menu screens behind their panels (`--world-still`).
+    canvas.toBlob((b) => {
+      if (!b || !alive) return;
+      const root = document.documentElement, old = root.dataset.worldStill, url = URL.createObjectURL(b);
+      root.dataset.worldStill = url;
+      root.style.setProperty("--world-still", `url("${url}")`);
+      if (old) setTimeout(() => URL.revokeObjectURL(old), 1000);
+    }, "image/jpeg", 0.8);
+    await renderer.compileAsync(scene, camera).catch(() => {});
+    globalThis.sixfoldAudio?.ambience(map.ambience ?? map.music ?? "overworld", phaseOf(minute));
+    return true;
+  }
+
+  // One frame of the current place, `k` (0..1) of the way through its shot.
+  function draw(k, dt = 0) {
+    const s = SHOTS[shot], w = world;
+    const lerp = (a) => a[0] + (a[1] - a[0]) * ease(k);
+    const yaw = THREE.MathUtils.degToRad(lerp(s.yaw)), pitch = THREE.MathUtils.degToRad(lerp(s.pitch)), d = lerp(s.dist);
+    look.set(s.at[0] + 0.5, s.at[2], s.at[1] + 0.5);
+    camera.position.set(look.x + Math.sin(yaw) * Math.cos(pitch) * d, look.y + Math.sin(pitch) * d, look.z + Math.cos(yaw) * Math.cos(pitch) * d);
     camera.lookAt(look);
-    if (!reduced) {
-      fire.intensity = 5 + Math.sin(t * 9.1) * 0.8 + Math.sin(t * 23.7) * 0.5;
-      const p = embers.geometry.attributes.position;
-      for (let i = 0; i < N; i++) {
-        const [k, ph, sp] = seeds[i], y = (k + t * sp * 0.25) % 1;
-        p.setXYZ(i, fireAt[0] + Math.sin(ph + t * 0.8) * 0.25 * y, fireAt[1] + 0.3 + y * 2.6, fireAt[2] + Math.cos(ph + t * 0.7) * 0.25 * y);
-      }
-      p.needsUpdate = true;
-    }
-    embers.visible = !reduced && fireAt[1] > 0;
+    w.now += dt;
+    U.uTime.value = w.now;
+    if (!reduced) U.uDrift.value = w.now;
+    for (const n of w.npcs) updateNpc(w, n, dt, false);
+    animateProps(w, dt, reduced);
+    const lit = w.day.update(minute, look.x, look.z, dt);
+    w.life.update(dt, w.now, look.x, look.z, lit.night);
+    w.fireflies.update(dt, w.now, lit.night, reduced);
+    // The fog keeps the far ground soft without eating the place: kept past the camera's distance.
+    renderer.setClearColor(lit.color ?? lit.bg);
+    scene.fog.color.copy(lit.color ?? lit.bg);
+    scene.fog.near = Math.max(lit.near, d + 6);
+    scene.fog.far = Math.max(lit.far, d + 40);
+    w.sun.position.set(look.x + lit.from.x, lit.from.y, look.z + lit.from.z);
+    w.sun.target.position.set(look.x, 0, look.z);
+    renderer.shadowMap.needsUpdate = true;
+    renderer.render(scene, shadowEye);
+    renderer.clear();
     renderer.render(scene, camera);
   }
-  let since = 0;
+
+  // Hold the frame just drawn on the veil (same task as the render: the buffer is still there).
+  const cover = () => {
+    vctx.clearRect(0, 0, veil.width, veil.height);
+    vctx.drawImage(canvas, 0, 0);
+    fade = 1;
+    veil.style.opacity = 1;
+  };
+
+  // The frame-time probe: frames 30 to 120 of the first place. Under 45 fps (a weak
+  // GPU, a battery saver capping the page), the flat backdrop instead.
+  const times = [];
+  let switching = false;
   const loop = (ms) => {
     if (!alive) return;
     raf = requestAnimationFrame(loop);
     const t = ms / 1000, dt = last ? Math.min(t - last, 0.1) : 0;
     last = t;
-    angle = FACING + Math.sin((t * Math.PI * 2) / 48) * 0.38; // a slow sway, never round the back
-    // The frame-time probe, drawing every frame: frames 30 to 120. Under 50 fps
-    // (a weak GPU, or a battery saver capping the page), the flat backdrop instead.
-    if (times.length < 120) {
-      draw(t);
-      if (dt && times.push(dt) === 120) {
-        if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 50) api.stop(), flat();
-        else el.classList.add("live");
-      }
-      return;
+    if (switching) return;
+    const age = t - t0, k = held >= 0 ? 0.5 : Math.min(1, age / HOLD);
+    draw(k, dt);
+    if (fade > 0) (fade = Math.max(0, fade - dt / FADE)), (veil.style.opacity = ease(fade));
+    if (times.length < 120 && dt && times.push(dt) === 120) {
+      if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 45) return void (api.stop(), flat());
     }
-    // Then 30 fps is plenty for a slow sway and a fire, and spares the battery.
-    since += dt;
-    if (since < 1 / 31) return;
-    since = 0;
-    draw(t);
+    if (held < 0 && age >= HOLD) {
+      switching = true;
+      cover();
+      show((shot + 1) % SHOTS.length)
+        .catch(() => {}) // a place that fails to load: the next one
+        .finally(() => (switching = false));
+    }
   };
+
   const ro = new ResizeObserver(resize);
   ro.observe(el);
-  // Fade in once the models are in (or failed: the bare island still reads).
-  loaded.finally(() => {
-    if (!alive) return;
-    resize();
-    if (reduced) el.classList.add("live");
-    else raf = requestAnimationFrame(loop);
-  });
+  show(0)
+    .then((ok) => {
+      if (!ok || !alive) return;
+      resize();
+      el.classList.add("live");
+      if (reduced) draw(0.5);
+      else raf = requestAnimationFrame(loop);
+      // The next place downloads while this one plays.
+      if (!reduced) fetchShot(SHOTS[1]).catch(() => {});
+    })
+    .catch(() => (alive ? (api.stop(), flat()) : null));
+
+  el.sixfoldTitle = {
+    shot: async (i) => ((held = i), await show(i), draw(0.5)),
+    play: () => ((held = -1), (t0 = performance.now() / 1000)),
+    shots: SHOTS,
+  };
 
   const api = {
     stop() {
@@ -187,12 +224,11 @@ export function mount(el) {
       alive = false;
       cancelAnimationFrame(raf);
       ro.disconnect();
-      // Only what this file made: the models' geometry is shared with the world's cache.
-      for (const g of [geo, water.geometry, embers.geometry]) g.dispose();
-      for (const m of [side, sand, stone, ...grass, water.material, embers.material]) m.dispose();
+      if (world) dispose(world.root);
       renderer.forceContextLoss(); // the world screen makes its own context next
       renderer.dispose();
-      renderer.domElement.remove();
+      canvas.remove();
+      veil.remove();
       el.classList.remove("live");
     },
   };
