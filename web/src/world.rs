@@ -10,7 +10,6 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::campaign::rival;
 use sixfold_engine::clock::{self, Phase};
 use sixfold_engine::objective;
 use sixfold_engine::overworld::{parse_effect, Applied, CamTarget, Cue, Effect as Fx, Progress};
@@ -423,11 +422,7 @@ impl Talk {
 /// The speaker's face: a rival's portrait, a person's bust, none for the hero
 /// or anything that isn't a person on this map.
 fn face_of(id: &str) -> Option<String> {
-    if rival(id).is_some() {
-        Some(format!("world/assets/portraits/{id}.webp"))
-    } else {
-        Some(world_portrait(id)).filter(|u| !u.is_empty())
-    }
+    crate::campaign::portrait_url(id).or_else(|| Some(world_portrait(id)).filter(|u| !u.is_empty()))
 }
 
 /// One step of a cutscene (`docs/WORLD_DESIGN.md` §9.1), as world.js sends it.

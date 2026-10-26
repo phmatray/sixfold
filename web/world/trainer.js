@@ -82,10 +82,11 @@ export function engaged(w, n, face) {
 }
 
 // Back from a duel against `id`: a duelist that walked over before the duel stands
-// by the hero again (the world was rebuilt with it at its post). Returns the NPC.
+// by the hero again (the world was rebuilt with it at its post), and so does anyone
+// a cutscene brought to the hero (Rook); after the talk they walk back. Returns the NPC.
 export function meet(w, hero, id) {
   const n = w.npcs.find((m) => m.def.id === id && !m.hidden);
-  if (!n?.def.trainer) return n ?? null;
+  if (!n) return null;
   const [dx, dz] = DIR[hero.face], x = hero.x + dx, z = hero.z + dz;
   if ((n.x !== x || n.z !== z) && !w.blocked(x, z) && !w.npcAt(x, z)) {
     w.engage = { n, post: { x: n.x, z: n.z, face: n.face }, talked: true };

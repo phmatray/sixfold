@@ -225,6 +225,17 @@ impl Trainer {
         self.id.starts_with("rook_")
     }
 
+    /// The Facets a win pays now: the purse the first time; again, nothing,
+    /// but a story duel (Rook's rematch in the hall) pays like a rival's
+    /// rematch, 10 per prize.
+    pub fn win_pays(&self, p: &Progress) -> u32 {
+        match (self.beaten(p), self.story()) {
+            (false, _) => self.purse(),
+            (true, true) => crate::campaign::REMATCH_PER_PRIZE * u32::from(self.prizes),
+            (true, false) => 0,
+        }
+    }
+
     /// The Facets the first win pays: 15 + 15 per prize (half again at night).
     pub fn purse(&self) -> u32 {
         let base = self
@@ -244,24 +255,17 @@ pub fn trainer(id: &str) -> Option<&'static Trainer> {
 }
 
 /// Record a finished duel against `t`: remember the result for the post-duel
-/// line; the first win marks the duelist beaten and pays its purse, returned.
-/// A story duel won again (Rook's rematch in the hall) pays like a rival's
-/// rematch, 10 per prize.
+/// line; a win pays [`Trainer::win_pays`] (returned), and the first one marks
+/// the duelist beaten.
 pub fn record(t: &Trainer, won: bool, p: &mut Progress) -> u32 {
-    let first = won && !t.beaten(p);
+    let pays = if won { t.win_pays(p) } else { 0 };
     p.set_last_duel(t.id, won);
-    if won && !first && t.story() {
-        let n = crate::campaign::REMATCH_PER_PRIZE * u32::from(t.prizes);
-        p.earn(n);
-        return n;
+    if won && !t.beaten(p) {
+        p.apply(&format!("flag:{}", t.flag()))
+            .expect("duelist ids are valid flag names");
     }
-    if !first {
-        return 0;
-    }
-    p.apply(&format!("flag:{}", t.flag()))
-        .expect("duelist ids are valid flag names");
-    p.earn(t.purse());
-    t.purse()
+    p.earn(pays);
+    pays
 }
 
 macro_rules! recipe {

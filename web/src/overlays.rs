@@ -562,6 +562,12 @@ pub fn GameOver() -> impl IntoView {
                                         <b>{tr("Won again", "Encore gagné")}</b>
                                         <span>{tr(format!("{} pays a purse only once.", t.name), format!("{} ne paie sa bourse qu'une fois.", t.name))}</span>
                                     }.into_any()
+                                } else if t.story() {
+                                    // Rook's story goes on whatever the result.
+                                    view! {
+                                        <b>{tr("The story goes on", "L'histoire continue")}</b>
+                                        <span>{tr(format!("{} will remember this one.", t.name), format!("{} s'en souviendra.", t.name))}</span>
+                                    }.into_any()
                                 } else {
                                     view! {
                                         <b>{tr("No purse this time", "Pas de bourse cette fois")}</b>

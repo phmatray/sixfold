@@ -8,7 +8,7 @@
 use leptos::prelude::*;
 use sixfold_engine::ai::Difficulty;
 use sixfold_engine::booster::{BOOSTERS, WILD};
-use sixfold_engine::campaign::{champion, opponent, rival, seals, Rival, RIVALS, SEALS};
+use sixfold_engine::campaign::{champion, opponent, rival, seals, title, Rival, RIVALS, SEALS};
 use sixfold_engine::endgame::{self, Rung, CLEAR_FLAG, CLEAR_PACKS, GAUNTLET};
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
@@ -90,14 +90,30 @@ pub fn reward_line(r: &Rival, p: &Progress) -> String {
     }
 }
 
-/// A duelist's face: a rival's portrait (`world/assets/portraits/<id>.webp`,
-/// relative to the page so it works under the deployed sub-path), or a
-/// monogram disc for a route duelist, who has none.
+/// A duelist's painted portrait, relative to the page so it works under the
+/// deployed sub-path: a rival's (`world/assets/portraits/<id>.webp`, also
+/// for Sable as the hall's `sable`) or Rook's, one for his four duels; None
+/// for a route duelist.
+pub fn portrait_url(id: &str) -> Option<String> {
+    let file = if rival(id).is_some() {
+        id
+    } else if id == "sable" {
+        "warden" // Sable outside her duels (the hall scene)
+    } else if trainer(id).is_some_and(|t| t.story()) {
+        "rook"
+    } else {
+        return None;
+    };
+    Some(format!("world/assets/portraits/{file}.webp"))
+}
+
+/// A duelist's face: their portrait ([`portrait_url`]), or a monogram disc
+/// for a route duelist, who has none.
 #[component]
 pub fn Portrait(id: &'static str, name: &'static str) -> impl IntoView {
-    if rival(id).is_some() {
+    if let Some(src) = portrait_url(id) {
         view! {
-            <img class="portrait" src=format!("world/assets/portraits/{id}.webp") width="256" height="256"
+            <img class="portrait" src=src width="256" height="256"
                 loading="lazy" decoding="async" alt=tr(format!("{name}'s portrait"), format!("Portrait de {name}")) />
         }
         .into_any()
@@ -125,10 +141,10 @@ pub fn SealBadge(on_open: impl Fn() + 'static) -> impl IntoView {
     let champ = move || progress.with(champion);
     view! {
         <button type="button" class="btn ghost seal-badge" class:champion=champ on:click=move |_| on_open()
-            aria-label=move || if champ() {
+            aria-label=move || if let Some(t) = progress.with(title) {
                 tr(
-                    format!("Champion, {} of {SEALS} seals. Show the rivals", n()),
-                    format!("Champion, {} sur {SEALS}. Voir les rivaux", seals_n(n())),
+                    format!("{}, {} of {SEALS} seals. Show the rivals", t.en, n()),
+                    format!("{}, {} sur {SEALS}. Voir les rivaux", t.fr, seals_n(n())),
                 )
             } else {
                 tr(
@@ -167,7 +183,7 @@ pub fn Roster() -> impl IntoView {
                     }).collect_view()}
                 </ul>
                 <p class="seal-count"><b>{n}</b>{move || tr(format!(" of {SEALS} seals"), format!(" {} sur {SEALS}", if n() > 1 { "sceaux" } else { "sceau" }))}
-                    {move || progress.with(champion).then(|| view! { <span class="champion-chip">"Champion"</span> })}
+                    {move || progress.with(title).map(|t| view! { <span class="champion-chip">{t.get()}</span> })}
                 </p>
             </div>
             <ol class="rivals">
@@ -531,6 +547,10 @@ pub fn Challenge(
         (None, Some(t)) if !t.beaten(p) => tr(
             format!("First win: ⬡ {}", t.purse()),
             format!("Première victoire : ⬡ {}", t.purse()),
+        ),
+        (None, Some(t)) if t.win_pays(p) > 0 => tr(
+            format!("Rematch win: ⬡ {}", t.win_pays(p)),
+            format!("Revanche gagnée : ⬡ {}", t.win_pays(p)),
         ),
         _ => tr(
             "A friendly rematch, no purse",

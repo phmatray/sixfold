@@ -11,7 +11,8 @@
 //! 1.7: the achievements' "every" totals (finds, curios, waymarks, field
 //! items, seal sites) match what the maps hold. Cutscene `scripts` (§9.1):
 //! the `if` and every `do` effect parse, and every actor a step names (`say`,
-//! `walk`, `face`, `cam`, `emote`) stands on the map.
+//! `walk`, `face`, `cam`, `emote`) stands on the map; each of Rook's story
+//! duels is started by some cutscene.
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
@@ -34,6 +35,8 @@ struct Seen {
     warps: Vec<(String, String)>,
     /// Waymark ids, and the map each is on.
     waymarks: HashMap<String, String>,
+    /// Story duels some cutscene starts.
+    story: HashSet<String>,
 }
 
 /// Note what an effect gives or sets.
@@ -225,6 +228,12 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
             for e in strs(&step["do"]) {
                 effect(&format!("{at}.steps[{j}]"), e, &mut bad);
                 sets(e, seen);
+                // A story duel is placed by the scene that starts it.
+                if let Ok(Effect::Duel(id)) = parse_effect(e) {
+                    if trainer(&id).is_some_and(|t| t.story()) {
+                        seen.story.insert(id);
+                    }
+                }
             }
             if let Some(who) = step["say"].as_str() {
                 if !actors.contains(&who) {
@@ -295,6 +304,11 @@ fn every_map_reads_with_the_engine_grammar() {
     }
     assert!(maps >= 7, "only {maps} maps found in {}", dir.display());
     // Rook's story duels are started by his scenes, not a trainer block.
+    for t in TRAINERS.iter().filter(|t| t.story()) {
+        if !seen.story.contains(t.id) {
+            bad.push(format!("{} (Rook) is started by no cutscene", t.id));
+        }
+    }
     for t in TRAINERS.iter().filter(|t| !t.story()) {
         if !seen.trainers.contains_key(t.id) {
             bad.push(format!("{} ({}) is on no map", t.id, t.name));

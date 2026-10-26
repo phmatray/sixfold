@@ -28,7 +28,7 @@
     "..p...~~~ssss~~~~~~~~~~~~~~~~~~~~~~~~~~~~pp....~~~~~",
     "..p....~~ssss~~~~~~~~~~~~~~~~~~~~~~~~~~~.pp....~~~~~",
     "..p....~~ssss~~~~~~~~~~~~~~~~~~~~~~~~~~~.pp....~~~~~",
-    "..p...~~~ssss~~~~~~~~~~~~~H~~~~~~~~~~~===pp....~~~~~",
+    "..p...~~~ssss~~~~~~~~~~~~~HH~~~~~~~~~~===pp....~~~~~",
     "..p...~~~~~~~~~~~~~~~~~~~~H~~~~~~~~~~~~~~pp....~~~~~",
     "..p...~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~pp....~~~~~",
     ".......~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.pp....~~~~~",
@@ -1860,6 +1860,10 @@
         [
           26,
           22
+        ],
+        [
+          27,
+          21
         ]
       ],
       "if": "time:night",
@@ -2126,6 +2130,66 @@
       },
       "outfit": "#c89b3c",
       "hair": "#4a3426"
+    },
+    {
+      "id": "rook_3",
+      "name": "Rook",
+      "model": "rival_colorless",
+      "x": 27,
+      "z": 21,
+      "facing": "w",
+      "idle": "Idle",
+      "if": "seals:5 & flag:rook_2 & time:night & !flag:rook_3_left",
+      "dialogue": [
+        {
+          "if": "won:rook_3",
+          "lines": [
+            "You're good, you know that? Properly good.",
+            "One more stone, then the sealed door in the hall. I'll be there first."
+          ],
+          "lines_fr": [
+            "Tu joues bien, tu sais ? Vraiment bien.",
+            "Encore une pierre, et puis la porte scellée de la salle. J'y serai avant toi."
+          ],
+          "do": [
+            "flag:rook_3_left"
+          ]
+        },
+        {
+          "if": "lost:rook_3",
+          "lines": [
+            "Ha. Still got it, out here at least.",
+            "One more stone for you, then the sealed door in the hall. I'll be there."
+          ],
+          "lines_fr": [
+            "Ha. J'ai encore la main, ici au moins.",
+            "Encore une pierre pour toi, et puis la porte scellée de la salle. J'y serai."
+          ],
+          "do": [
+            "flag:rook_3_left"
+          ]
+        },
+        {
+          "if": "flag:rook_3",
+          "lines": [
+            "Scared of a blank deck? I'll wait. I'm good at waiting."
+          ],
+          "lines_fr": [
+            "Peur d'un deck tout blanc ? J'attendrai. Je sais attendre."
+          ],
+          "do": [
+            "duel:rook_3"
+          ]
+        },
+        {
+          "lines": [
+            "The lanterns don't mind who walks on them."
+          ],
+          "lines_fr": [
+            "Les lanternes se moquent de qui marche dessus."
+          ]
+        }
+      ]
     }
   ],
   "ground": {
@@ -2185,5 +2249,109 @@
       "near": 14,
       "far": 34
     }
-  }
+  },
+  "scripts": [
+    {
+      "id": "rook_3",
+      "if": "seals:5 & flag:rook_2 & time:night & !flag:rook_3",
+      "at": [
+        [
+          24,
+          14
+        ],
+        [
+          25,
+          14
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:rook",
+            "cam:rook_3",
+            "wait:500",
+            "cam:31:21",
+            "wait:1200",
+            "cam:hero",
+            "walk:hero:ssssssseee",
+            "face:hero:e",
+            "emote:rook_3:dots"
+          ]
+        },
+        {
+          "say": "rook_3",
+          "lines": [
+            "Oh. It's you.",
+            "I walk out here at night. The lanterns don't care what colour you are.",
+            "Five seals. You're the only one who's ever caught up.",
+            "Sit a while. Then deal."
+          ],
+          "lines_fr": [
+            "Oh. C'est toi.",
+            "Je viens marcher ici la nuit. Les lanternes se fichent de ta couleur.",
+            "Cinq sceaux. Tu es la seule personne à m'avoir jamais rattrapé.",
+            "Assieds-toi un moment. Et puis on joue."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:rook_3",
+            "duel:rook_3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rook_3_south",
+      "if": "seals:5 & flag:rook_2 & time:night & !flag:rook_3",
+      "at": [
+        [
+          24,
+          29
+        ],
+        [
+          25,
+          29
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:rook",
+            "cam:rook_3",
+            "wait:500",
+            "cam:31:21",
+            "wait:1200",
+            "cam:hero",
+            "walk:hero:nnnnnnnneee",
+            "face:hero:e",
+            "emote:rook_3:dots"
+          ]
+        },
+        {
+          "say": "rook_3",
+          "lines": [
+            "Oh. It's you.",
+            "I walk out here at night. The lanterns don't care what colour you are.",
+            "Five seals. You're the only one who's ever caught up.",
+            "Sit a while. Then deal."
+          ],
+          "lines_fr": [
+            "Oh. C'est toi.",
+            "Je viens marcher ici la nuit. Les lanternes se fichent de ta couleur.",
+            "Cinq sceaux. Tu es la seule personne à m'avoir jamais rattrapé.",
+            "Assieds-toi un moment. Et puis on joue."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:rook_3",
+            "duel:rook_3"
+          ]
+        }
+      ]
+    }
+  ]
 }

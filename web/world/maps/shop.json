@@ -75,7 +75,7 @@
     },
     {
       "asset": "plant",
-      "x": 1,
+      "x": 9,
       "z": 7,
       "rot": 0
     },
@@ -96,6 +96,13 @@
       "x": 1,
       "z": 5,
       "rot": 0
+    },
+    {
+      "asset": "seal_stone_carved",
+      "x": 7,
+      "z": 6,
+      "rot": 0,
+      "if": "beat:warden & flag:sable_door"
     }
   ],
   "spawn": {
@@ -124,6 +131,14 @@
       "kind": "sign",
       "text": "Behind the glass: a deck box carved from pale wood. A card says: not for sale, not even for you.",
       "text_fr": "Derrière la vitre : une boîte à deck en bois clair sculpté. Un carton indique : pas à vendre, même pas pour vous."
+    },
+    {
+      "x": 7,
+      "z": 6,
+      "kind": "sign",
+      "if": "beat:warden & flag:sable_door",
+      "text": "A seal stone, six coloured faces, and on top a seventh, freshly cut: a hexagon, still blank. Chalked underneath, in Sable's hand: for whoever brings someone else along.",
+      "text_fr": "Une pierre de sceau, six faces de couleur, et dessus une septième, fraîchement taillée : un hexagone, encore blanc. Dessous, à la craie, de la main de Sable : pour qui amène quelqu'un avec soi."
     }
   ],
   "warps": [
@@ -185,6 +200,20 @@
           ]
         },
         {
+          "if": "beat:warden & flag:sable_door",
+          "lines": [
+            "I've taken on an apprentice, have you met him? Rook. Sharp lad, terrible at dusting.",
+            "Sable carved the old stone for him. Or for you. She wouldn't say."
+          ],
+          "lines_fr": [
+            "J'ai pris un apprenti, tu l'as rencontré ? Rook. Un garçon vif, mais nul pour la poussière.",
+            "Sable a gravé la vieille pierre pour lui. Ou pour toi. Elle n'a pas voulu dire."
+          ],
+          "do": [
+            "show:shop_hall"
+          ]
+        },
+        {
           "if": "beat:warden",
           "lines": [
             "The Hex Warden, beaten in my shop's back room! I'm framing the scorch marks.",
@@ -239,6 +268,150 @@
           ]
         }
       ]
+    },
+    {
+      "id": "rook_4",
+      "name": "Rook",
+      "model": "rival_colorless",
+      "x": 2,
+      "z": 7,
+      "facing": "e",
+      "idle": "Idle",
+      "if": "seals:6 & flag:rook_3",
+      "dialogue": [
+        {
+          "if": "won:rook_4 & flag:sable_door",
+          "lines": [
+            "Again? You're relentless.",
+            "Here, your purse. Wynne says paying the winner is part of the job."
+          ],
+          "lines_fr": [
+            "Encore ? Tu es infatigable.",
+            "Tiens, ta bourse. Wynne dit que payer le gagnant fait partie du métier."
+          ]
+        },
+        {
+          "if": "lost:rook_4 & flag:sable_door",
+          "lines": [
+            "Ha! Write that down somewhere.",
+            "No, really. Wynne keeps a ledger."
+          ],
+          "lines_fr": [
+            "Ha ! Note-le quelque part.",
+            "Non, vraiment. Wynne tient un registre."
+          ]
+        },
+        {
+          "if": "won:rook_4",
+          "lines": [
+            "...That's it, then. Blank to the end.",
+            "Go on. The door's yours."
+          ],
+          "lines_fr": [
+            "…Voilà. Blanc jusqu'au bout.",
+            "Vas-y. La porte est à toi."
+          ],
+          "do": [
+            "flag:rook_4_left",
+            "sfx:door"
+          ]
+        },
+        {
+          "if": "lost:rook_4",
+          "lines": [
+            "I won. I actually won. At the door.",
+            "...And it still didn't open. Huh."
+          ],
+          "lines_fr": [
+            "J'ai gagné. J'ai vraiment gagné. Devant la porte.",
+            "…Et elle ne s'est toujours pas ouverte. Tiens."
+          ],
+          "do": [
+            "flag:rook_4_left",
+            "sfx:door"
+          ]
+        },
+        {
+          "if": "beat:warden & flag:sable_door & !flag:rook_apprentice",
+          "lines": [
+            "Wynne took me on. Apprentice, can you believe it. I sweep, I sort the packs, I deal at the table.",
+            "Sable carved the stone by the door, did you see? A seventh face. Still blank.",
+            "Fancy a game? My best deck, six prizes. Loser sweeps."
+          ],
+          "lines_fr": [
+            "Wynne m'a pris comme apprenti. Tu y crois ? Je balaie, je trie les boosters, je donne les cartes à la table.",
+            "Sable a gravé la pierre près de l'entrée, tu as vu ? Une septième face. Encore blanche.",
+            "Une partie ? Mon meilleur deck, six Récompenses. Le perdant balaie."
+          ],
+          "do": [
+            "flag:rook_apprentice",
+            "duel:rook_4"
+          ]
+        },
+        {
+          "if": "beat:warden & flag:sable_door",
+          "lines": [
+            "Rook's table is open. Six prizes, best deck, no excuses."
+          ],
+          "lines_fr": [
+            "La table de Rook est ouverte. Six Récompenses, meilleur deck, pas d'excuses."
+          ],
+          "do": [
+            "duel:rook_4"
+          ]
+        },
+        {
+          "if": "flag:sable_door",
+          "lines": [
+            "Go on. She's waiting for you, not me.",
+            "Wynne offered me a job, you know. Sweeping. I might say yes."
+          ],
+          "lines_fr": [
+            "Vas-y. C'est toi qu'elle attend, pas moi.",
+            "Wynne m'a proposé du travail, tu sais. Balayer. Je vais peut-être dire oui."
+          ]
+        },
+        {
+          "if": "flag:rook_4",
+          "lines": [
+            "The door can wait one more duel."
+          ],
+          "lines_fr": [
+            "La porte peut bien attendre un duel de plus."
+          ],
+          "do": [
+            "duel:rook_4"
+          ]
+        },
+        {
+          "lines": [
+            "Six. Come closer."
+          ],
+          "lines_fr": [
+            "Six. Approche."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sable",
+      "name": "Sable",
+      "model": "rival_champion",
+      "x": 1,
+      "z": 6,
+      "facing": "e",
+      "idle": "Idle",
+      "if": "flag:rook_4_left & !flag:sable_door",
+      "dialogue": [
+        {
+          "lines": [
+            "Give us a moment."
+          ],
+          "lines_fr": [
+            "Laisse-nous un instant."
+          ]
+        }
+      ]
     }
   ],
   "camera": {
@@ -282,5 +455,269 @@
     },
     "background": "#1c140e",
     "note": "Indoors the sun is the window light, placed from the room centre (not the hero); lamp lights sit on each lamp prop."
-  }
+  },
+  "scripts": [
+    {
+      "id": "rook_4",
+      "if": "seals:6 & flag:rook_3 & !flag:rook_4",
+      "at": [
+        [
+          3,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          3,
+          6
+        ],
+        [
+          3,
+          7
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:rook",
+            "cam:rook_4",
+            "face:rook_4:e",
+            "emote:rook_4:bang",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "rook_4",
+          "lines": [
+            "Six. I knew you'd make it.",
+            "I asked that door once, you know. It doesn't open for no colour.",
+            "So here's my last try. Me and you, at the door.",
+            "Win or lose, I'll know."
+          ],
+          "lines_fr": [
+            "Six. Je savais que tu y arriverais.",
+            "J'ai demandé à cette porte, une fois. Elle ne s'ouvre pas pour qui n'a pas de couleur.",
+            "Alors voilà mon dernier essai. Toi et moi, devant la porte.",
+            "Gagné ou perdu, je saurai."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:rook_4",
+            "duel:rook_4"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sable_door",
+      "if": "flag:rook_4_left & !flag:sable_door",
+      "at": [
+        [
+          5,
+          1
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          8,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          5,
+          2
+        ],
+        [
+          9,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          5,
+          3
+        ],
+        [
+          6,
+          3
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          8,
+          3
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          7,
+          4
+        ],
+        [
+          8,
+          4
+        ],
+        [
+          9,
+          4
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          9,
+          5
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          3,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          6,
+          6
+        ],
+        [
+          1,
+          7
+        ],
+        [
+          3,
+          7
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          5,
+          7
+        ],
+        [
+          6,
+          7
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:rook",
+            "cam:1:6",
+            "wait:400",
+            "walk:sable:e",
+            "face:sable:s",
+            "face:rook_4:n",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "sable",
+          "lines": [
+            "Rook. You knocked, in the end.",
+            "The seventh face was never for one colour, nor for none. It's for whoever brings someone else along."
+          ],
+          "lines_fr": [
+            "Rook. Tu as frappé, finalement.",
+            "La septième face n'a jamais été pour une couleur, ni pour aucune. Elle est pour qui amène quelqu'un avec soi."
+          ]
+        },
+        {
+          "say": "rook_4",
+          "lines": [
+            "Someone else along... the one who kept catching up.",
+            "Then I walked the ring the wrong way round. Every year."
+          ],
+          "lines_fr": [
+            "Quelqu'un avec soi… quelqu'un qui me rattrapait toujours.",
+            "Alors j'ai fait le tour à l'envers. Chaque année."
+          ]
+        },
+        {
+          "do": [
+            "face:sable:e",
+            "wait:400",
+            "walk:sable:w",
+            "face:rook_4:e",
+            "cam:hero",
+            "flag:sable_door"
+          ]
+        }
+      ]
+    }
+  ]
 }
