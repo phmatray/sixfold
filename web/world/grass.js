@@ -67,7 +67,7 @@ function grassMaterial() {
       .replace("#include <color_vertex>", "#include <color_vertex>\nvGH = gh;\nvTip = gtip;");
     sh.fragmentShader = sh.fragmentShader
       .replace("#include <common>", "#include <common>\nvarying float vGH;\nvarying vec3 vTip;")
-      .replace("#include <color_fragment>", "diffuseColor.rgb *= mix(vColor, vTip, smoothstep(0.0, 1.0, vGH));")
+      .replace("#include <color_fragment>", "diffuseColor.rgb *= mix(vColor.rgb, vTip, smoothstep(0.0, 1.0, vGH));")
       .replace("#include <normal_fragment_begin>", "#include <normal_fragment_begin>\nnormal = normalize(vNormal);");
   };
   return mat;

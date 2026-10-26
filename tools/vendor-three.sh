@@ -15,4 +15,8 @@ for f in LICENSE build/three.module.min.js examples/jsm/loaders/GLTFLoader.js \
   mkdir -p "$out/$(dirname "$f")"
   curl -sSfL "https://cdn.jsdelivr.net/npm/three@$THREE_VERSION/$f" -o "$out/$f"
 done
+# Since r171 three.module.js imports its core from "./three.core.js", and the
+# package no longer ships .min builds (jsDelivr minifies them on request), so the
+# minified core is saved under the name the module imports.
+curl -sSfL "https://cdn.jsdelivr.net/npm/three@$THREE_VERSION/build/three.core.min.js" -o "$out/build/three.core.js"
 echo "$THREE_VERSION" > "$out/VERSION"
