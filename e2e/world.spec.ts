@@ -67,6 +67,8 @@ test("the world: walk, take a door and back, open the menu, and Continue resumes
 });
 
 test("a duelist's challenge stays in the world: their words, the terms, arrows and Escape", async ({ page }) => {
+  const logs: string[] = [];
+  page.on("console", (m) => m.type() !== "debug" && logs.push(`${m.type()}: ${m.text()}`.slice(0, 200)));
   await title(page);
   await menuItem(page, "Explore the world").click();
   await loaded(page);
@@ -87,7 +89,20 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   await frames(page);
   await prompt.click();
   const talk = page.locator(".talk-box");
-  await expect(talk).toBeVisible({ timeout: 15_000 });
+  await expect(talk).toBeVisible({ timeout: 15_000 }).catch(async (e) => {
+    // What the world was doing (reported in the failure, for a CI-only race).
+    const state = await page.evaluate(() => {
+      const host = document.querySelector(".world-host") as unknown as { sixfoldStats?: () => unknown; dataset: DOMStringMap };
+      return {
+        stats: host?.sixfoldStats?.(),
+        hero: host?.dataset.hero,
+        prompt: [...document.querySelectorAll(".world-prompt")].map((p) => `${p.textContent} visible=${(p as HTMLElement).checkVisibility()}`),
+        dialogs: [...document.querySelectorAll("dialog[open], [role=dialog]")].map((d) => `${d.className}: ${(d.textContent ?? "").slice(0, 120)}`),
+        statuses: [...document.querySelectorAll("[role=status], [aria-live]")].map((d) => (d.textContent ?? "").slice(0, 80)).filter(Boolean),
+      };
+    });
+    throw new Error(`${e.message}\nworld: ${JSON.stringify(state)}\nconsole: ${logs.join(" | ")}`);
+  });
   while (await talk.isVisible()) {
     await page.keyboard.press("Enter");
     await page.waitForTimeout(400);
