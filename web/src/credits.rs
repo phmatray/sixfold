@@ -19,6 +19,7 @@ use sixfold_engine::{card, tr, T};
 use crate::achievements::thousands;
 use crate::art::{art_src, color_key};
 use crate::audio::MuteToggle;
+use crate::logo::Wordmark;
 use crate::{store, Screen};
 
 /// Where the champion stands once the credits end: the duel hall, just out of
@@ -330,7 +331,7 @@ pub fn Credits(won: bool) -> impl IntoView {
         5000,
         "Sixfold".into(),
         view! {
-            <h1 class="wordmark">"Sixfold"</h1>
+            <h1 class="wordmark"><Wordmark /></h1>
             <p class="credits-line">{tr("The people and the tools behind it.", "Ceux qui l'ont fait, et avec quoi.")}</p>
         }
         .into_any(),
