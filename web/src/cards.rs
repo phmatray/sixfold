@@ -91,7 +91,12 @@ fn type_class(def: &CardDef) -> String {
 /// the full card (stage line, attacks, weakness and retreat), below it the
 /// compact one (name, picture, HP, stage) for the hand and the table.
 #[component]
-pub fn CardFace(id: CardId) -> impl IntoView {
+pub fn CardFace(
+    id: CardId,
+    /// Hidden from screen readers: the control around it says the card in words.
+    #[prop(optional)]
+    hidden: bool,
+) -> impl IntoView {
     let def = card(id);
     let promo = sixfold_engine::set::is_promo(id);
     // A gilt frame on Rares and promos; the foil itself (style.css): rainbow on
@@ -117,7 +122,7 @@ pub fn CardFace(id: CardId) -> impl IntoView {
     let mark =
         card_color(def).map(|c| view! { <span class="card-type" inner_html=glyph_svg(c)></span> });
     view! {
-        <div class=class>
+        <div class=class aria-hidden=hidden.then_some("true")>
             <div class="face">
                 // The " " text nodes don't show (flex and grid drop them) but keep
                 // the words apart in the text that "label in name" checks compare.

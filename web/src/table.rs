@@ -258,7 +258,6 @@ pub fn Hexon(
         <div class=class data-uid=uid data-place=place.map(|p| (p + 1).to_string())>
             <button
                 class="hexon-card"
-                aria-label=label
                 on:click=click
                 on:mouseenter=move |_| { if let Some(i) = peek() { ui.inspect.set(Some(i)) } }
                 on:mouseleave=move |_| panel_back(ui)
@@ -277,8 +276,10 @@ pub fn Hexon(
                 {move || if hidden() {
                     view! { <CardBack /> }.into_any()
                 } else {
-                    top.get().map(|id| view! { <CardFace id=id /> }).into_any()
+                    top.get().map(|id| view! { <CardFace id=id hidden=true /> }).into_any()
                 }}
+                // Its name, in words (the face, the bars and the pips are pictures of it).
+                <span class="sr-only">{label}</span>
                 <Show when=move || !hidden()>
                     <span class="hexon-energy" aria-hidden="true">
                         {move || mon.with(|m| m.as_ref().map(|m| m.energy.iter().map(|&e| crate::cards::energy_pips(e)).collect_view()))}
@@ -634,13 +635,14 @@ pub fn Piles(player: usize) -> impl IntoView {
                 <span class="pile-n">{move || info.with(|i| i.deck)}</span>
                 <small aria-hidden="true">{tr("Deck", "Pioche")}</small>
             </div>
-            <button class="pile" on:click=move |_| ui.discard.set(Some(player)) aria-label=move || {
-                let n = cards(info.with(|i| i.discard));
-                if me { tr(format!("Your discard pile: {n}. Open"), format!("Votre défausse : {n}. Ouvrir")) } else { tr(format!("Opponent's discard pile: {n}. Open"), format!("Défausse adverse : {n}. Ouvrir")) }
-            }>
-                <span class="pile-card discard">{move || info.with(|i| i.discard_top).map(|id| view! { <CardFace id=id /> })}</span>
-                <span class="pile-n">{move || info.with(|i| i.discard)}</span>
+            <button class="pile" on:click=move |_| ui.discard.set(Some(player))>
+                <span class="pile-card discard" aria-hidden="true">{move || info.with(|i| i.discard_top).map(|id| view! { <CardFace id=id /> })}</span>
+                <span class="pile-n" aria-hidden="true">{move || info.with(|i| i.discard)}</span>
                 <small aria-hidden="true">{tr("Discard", "Défausse")}</small>
+                <span class="sr-only">{move || {
+                    let n = cards(info.with(|i| i.discard));
+                    if me { tr(format!("Your discard pile: {n}. Open"), format!("Votre défausse : {n}. Ouvrir")) } else { tr(format!("Opponent's discard pile: {n}. Open"), format!("Défausse adverse : {n}. Ouvrir")) }
+                }}</span>
             </button>
         </div>
     }
@@ -838,28 +840,29 @@ pub fn Plates() -> impl IntoView {
                         class:ko=a.ko && !blocked
                         class:live=move || !blocked && !holding()
                         aria-disabled=blocked.to_string()
-                        aria-label=label
                         aria-describedby=described
                         aria-keyshortcuts=(i + 1).to_string()
                         title=a.text.clone()
                         on:click=move |_| { if holding() { ui.selected.set(None) } else if !blocked { act(action) } }
                     >
-                        <span class="plate-name">{a.name}</span>
+                        <span class="plate-name" aria-hidden="true">{a.name}</span>
                         {
                             // The damage it would do now, big; the printed number when it differs.
                             let printed = a.damage.clone();
                             let now = a.preview.filter(|p| p.0 > 0).map(|p| format!("{}{}{}", p.0, if a.coins { "+" } else { "" }, if a.needs_heads { "?" } else { "" }));
                             let differs = now.as_deref().map(|n| n.trim_end_matches('?')) .is_some_and(|n| Some(n) != printed.as_deref());
                             view! {
-                                <span class="plate-dmg" class:changed=differs>
+                                <span class="plate-dmg" class:changed=differs aria-hidden="true">
                                     {now.clone().or(printed.clone())}
                                     {differs.then(|| view! { <s class="plate-printed" aria-hidden="true">{printed.clone()}</s> })}
                                 </span>
                             }
                         }
-                        <span class="plate-cost">{cost_pips(a.cost)}</span>
-                        <span class="plate-note" id=id>{note}</span>
+                        <span class="plate-cost" aria-hidden="true">{cost_pips(a.cost)}</span>
+                        // Said as the description (aria-describedby reads hidden text too).
+                        <span class="plate-note" id=id aria-hidden="true">{note}</span>
                         <kbd class="key" aria-hidden="true">{(i + 1).to_string()}</kbd>
+                        <span class="sr-only">{label}</span>
                     </button>
                 }
             }).collect_view()}
@@ -868,35 +871,35 @@ pub fn Plates() -> impl IntoView {
                 let ok = why.is_none();
                 view! {
                 <button class="plate power" class:live=ok aria-disabled=(!ok).to_string() aria-keyshortcuts=(slot == 0).then_some("P")
-                    aria-label=match why {
-                        None => tr(format!("Use {owner}'s Power, {name}. It doesn't end your turn"), format!("Utiliser le Pouvoir de {owner}, {name}. Le tour continue")),
-                        Some(w) => tr(format!("{owner}'s Power, {name}. {w}"), format!("Pouvoir de {owner}, {name}. {w}")),
-                    }
                     on:mouseenter=move |_| ctl.tip_once(crate::tips::Tip::Power, HUMAN)
                     on:focus=move |_| ctl.tip_once(crate::tips::Tip::Power, HUMAN)
                     on:click=move |_| { if ok { act(Action::UsePower(slot)) } }>
                     <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>
-                    <span class="plate-name">{name.clone()}</span>
+                    <span class="plate-name" aria-hidden="true">{name.clone()}</span>
                     {(slot > 0).then(|| view! { <span class="plate-owner" aria-hidden="true">{owner.clone()}</span> })}
                     {why.map(|w| view! { <span class="plate-why" aria-hidden="true">{w}</span> })}
                     {(slot == 0).then(|| view! { <kbd class="key" aria-hidden="true">"P"</kbd> })}
+                    <span class="sr-only">{match why {
+                        None => tr(format!("Use {owner}'s Power, {name}. It doesn't end your turn"), format!("Utiliser le Pouvoir de {owner}, {name}. Le tour continue")),
+                        Some(w) => tr(format!("{owner}'s Power, {name}. {w}"), format!("Pouvoir de {owner}, {name}. {w}")),
+                    }}</span>
                 </button>
             }}).collect_view()}
             {move || model.with(|m| m.1.clone()).map(|(cost, ok, why)| view! {
                 <button class="plate retreat" class:live=ok aria-disabled=(!ok).to_string() aria-keyshortcuts="R"
-                    aria-label=move || {
-                        let base = tr(format!("Retreat, costs {cost} energy"), format!("Retraite, coûte {cost} énergie"));
-                        match &why { Some(w) => format!("{base}. {w}"), None => base }
-                    }
                     on:mouseenter=move |_| ctl.tip_once(crate::tips::Tip::Retreat, HUMAN)
                     on:focus=move |_| ctl.tip_once(crate::tips::Tip::Retreat, HUMAN)
                     on:click=move |_| { if ok { act(Action::Retreat) } }>
                     <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 4 9l4 4M4 9h10.5a5 5 0 0 1 0 10H9"/></svg>
-                    <span class="plate-name">{tr("Retreat", "Retraite")}</span>
-                    <span class="plate-cost">{(0..cost).map(|_| view! { <Pip color=sixfold_engine::Color::Colorless /> }).collect_view()}
+                    <span class="plate-name" aria-hidden="true">{tr("Retreat", "Retraite")}</span>
+                    <span class="plate-cost" aria-hidden="true">{(0..cost).map(|_| view! { <Pip color=sixfold_engine::Color::Colorless /> }).collect_view()}
                         {(cost == 0).then(|| tr("Free", "Gratuite"))}</span>
                     {why.clone().map(|w| view! { <span class="plate-why" aria-hidden="true">{w}</span> })}
                     <kbd class="key" aria-hidden="true">"R"</kbd>
+                    <span class="sr-only">{
+                        let base = tr(format!("Retreat, costs {cost} energy"), format!("Retraite, coûte {cost} énergie"));
+                        match &why { Some(w) => format!("{base}. {w}"), None => base }
+                    }</span>
                 </button>
             })}
             </div>
@@ -1233,7 +1236,6 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
                 class:playable=playable
                 class:selected=selected
                 aria-pressed=move || selected().to_string()
-                aria-label=move || format!("{face}{}", if selected() { tr(", selected", ", sélectionnée") } else if playable() { tr(", playable", ", jouable") } else { tr(", can't be played now", ", injouable pour l'instant") })
                 on:click=move |e| {
                     if long.get_value() {
                         long.set_value(false);
@@ -1269,7 +1271,8 @@ fn HandCard(key: (CardId, usize), hand: Memo<Vec<(CardId, usize)>>) -> impl Into
                 on:pointerleave=move |_| clear()
                 on:pointercancel=move |_| clear()
             >
-                <CardFace id=id />
+                <CardFace id=id hidden=true />
+                <span class="sr-only">{move || format!("{face}{}", if selected() { tr(", selected", ", sélectionnée") } else if playable() { tr(", playable", ", jouable") } else { tr(", can't be played now", ", injouable pour l'instant") })}</span>
             </button>
         </li>
     }

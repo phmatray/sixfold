@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { frames, menuItem, readSave, title } from "./helpers";
+import { menuItem, readSave, title } from "./helpers";
 
 /** Where the save says the hero stands: `map,x,z,facing`. */
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
@@ -67,8 +67,6 @@ test("the world: walk, take a door and back, open the menu, and Continue resumes
 });
 
 test("a duelist's challenge stays in the world: their words, the terms, arrows and Escape", async ({ page }) => {
-  const logs: string[] = [];
-  page.on("console", (m) => m.type() !== "debug" && logs.push(`${m.type()}: ${m.text()}`.slice(0, 200)));
   await title(page);
   await menuItem(page, "Explore the world").click();
   await loaded(page);
@@ -82,27 +80,14 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   // doesn't come over on his own) and talk to him: he challenges.
   await page.locator(".world-host").evaluate((el) => (el as unknown as { sixfoldWarp: (...a: unknown[]) => void }).sixfoldWarp("overworld", 23, 28, "n"));
   await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^23,28/, { timeout: 15_000 });
-  // The act prompt (a key tap can fall between two frames of a slow headless scene), once the
-  // scene has drawn the warp (its first frames compile shaders: slow on CI's software GL).
+  // The act prompt shows only when a press would act (world.js): then E talks. (A click on it
+  // could land on the scene behind while the prompt still settled after the warp, and a tap
+  // there walks the hero instead: the CI retries.)
   const prompt = page.getByRole("button", { name: /^Talk to Tobin/ });
   await expect(prompt).toBeVisible();
-  await frames(page);
-  await prompt.click();
+  await page.keyboard.press("e");
   const talk = page.locator(".talk-box");
-  await expect(talk).toBeVisible({ timeout: 15_000 }).catch(async (e) => {
-    // What the world was doing (reported in the failure, for a CI-only race).
-    const state = await page.evaluate(() => {
-      const host = document.querySelector(".world-host") as unknown as { sixfoldStats?: () => unknown; dataset: DOMStringMap };
-      return {
-        stats: host?.sixfoldStats?.(),
-        hero: host?.dataset.hero,
-        prompt: [...document.querySelectorAll(".world-prompt")].map((p) => `${p.textContent} visible=${(p as HTMLElement).checkVisibility()}`),
-        dialogs: [...document.querySelectorAll("dialog[open], [role=dialog]")].map((d) => `${d.className}: ${(d.textContent ?? "").slice(0, 120)}`),
-        statuses: [...document.querySelectorAll("[role=status], [aria-live]")].map((d) => (d.textContent ?? "").slice(0, 80)).filter(Boolean),
-      };
-    });
-    throw new Error(`${e.message}\nworld: ${JSON.stringify(state)}\nconsole: ${logs.join(" | ")}`);
-  });
+  await expect(talk).toBeVisible();
   while (await talk.isVisible()) {
     await page.keyboard.press("Enter");
     await page.waitForTimeout(400);

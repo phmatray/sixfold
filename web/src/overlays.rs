@@ -229,8 +229,9 @@ pub fn DiscardViewer() -> impl IntoView {
                     }}</p>
                     <div class="discard-grid">
                         {cards.into_iter().map(|id| view! {
-                            <button class="discard-card" aria-label=crate::cards::face_text(id) on:click=move |_| ui.open(Inspect { card: id, at: None })>
-                                <CardFace id=id />
+                            <button class="discard-card" on:click=move |_| ui.open(Inspect { card: id, at: None })>
+                                <CardFace id=id hidden=true />
+                                <span class="sr-only">{crate::cards::face_text(id)}</span>
                             </button>
                         }).collect_view()}
                     </div>

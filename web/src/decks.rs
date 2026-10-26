@@ -973,9 +973,10 @@ fn PickTile(id: CardId, draft: RwSignal<DeckList>, msg: RwSignal<Option<String>>
     };
     view! {
         <li class="pick" class:blocked=move || blocked().is_some()>
-            <button type="button" class="bind-card" node_ref=face aria-label=tr(format!("{}, details", face_text(id)), format!("{}, détails", face_text(id)))
+            <button type="button" class="bind-card" node_ref=face
                 on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
-                <CardFace id=id />
+                <CardFace id=id hidden=true />
+                <span class="sr-only">{tr(format!("{}, details", face_text(id)), format!("{}, détails", face_text(id)))}</span>
             </button>
             <span class="pick-count" class:has={move || in_deck() > 0}>
                 {move || match owned() {

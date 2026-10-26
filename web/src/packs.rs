@@ -327,10 +327,11 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
                             <p>{b.description.get()}</p>
                             <PackOdds b=i />
                             <button type="button" class="btn" class:primary=move || first() == Some(i) disabled=move || n.get() == 0
-                                aria-label=move || tr(
-                                    format!("Open one {}, {} left", b.name, n.get()),
-                                    format!("Ouvrir un {}, il en reste {}", b.name, n.get()),
-                                )
+                                // Starts with what it shows (label in name, WCAG 2.5.3).
+                                aria-label=move || match n.get() {
+                                    0 => tr(format!("None left, {}", b.name), format!("Aucun, {}", b.name)),
+                                    n => tr(format!("Open one {}, {n} left", b.name), format!("En ouvrir un, {}, il en reste {n}", b.name)),
+                                }
                                 on:click=move |_| open(i)>
                                 {move || match n.get() {
                                     0 => tr("None left", "Aucun").to_string(),

@@ -153,7 +153,7 @@ fn LangSwitch() -> impl IntoView {
     };
     let button = move |l: Lang, short: &'static str, name: &'static str| {
         view! {
-            <button type="button" lang=l.code() aria-label=name aria-pressed=(l == now).to_string()
+            <button type="button" lang=l.code() aria-label=format!("{short}, {name}") aria-pressed=(l == now).to_string()
                 on:click=move |e| if l != now { switch(l, e.detail() == 0) }>{short}</button>
         }
     };

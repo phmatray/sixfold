@@ -284,9 +284,10 @@ pub fn Advisor(
                                 let (peek, open) = crate::binder::inspect_handlers(id);
                                 let name = card(id).label();
                                 view! {
-                                    <button type="button" class="tip-face" aria-label=tr(format!("{name}, details"), format!("{name}, détails"))
+                                    <button type="button" class="tip-face"
                                         on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
-                                        <CardFace id=id />
+                                        <CardFace id=id hidden=true />
+                                        <span class="sr-only">{tr(format!("{name}, details"), format!("{name}, détails"))}</span>
                                     </button>
                                 }
                             });
@@ -550,7 +551,7 @@ pub fn BuildSheet(
                                 aria-pressed=move || colours.with(|v| v.contains(&c)).to_string()
                                 aria-label=tr(format!("{c}, {n} Hexon cards owned"), format!("{c}, {n} cartes Hexon possédées"))
                                 on:click=move |_| toggle(c, can)>
-                                <Pip color=c />{c.to_string()}<span class="chip-n" aria-hidden="true">{n}</span>
+                                <Pip color=c />{c.to_string()}" "<span class="chip-n" aria-hidden="true">{n}</span>
                             </button>
                         }).collect_view()}
                         <button type="button" class="chip surprise" aria-pressed=move || surprise.get().is_some().to_string()

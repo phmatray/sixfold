@@ -13,7 +13,7 @@ async function scan(page: Page, screen: string) {
     .analyze();
   const bad = violations
     .filter((v) => v.impact === "serious" || v.impact === "critical")
-    .map((v) => `${screen}: ${v.id} (${v.impact}) ${v.nodes.map((n) => n.target.join(" ")).slice(0, 5).join(", ")}`);
+    .map((v) => `${screen}: ${v.id} (${v.impact}) ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
   expect(bad, bad.join("\n")).toEqual([]);
 }
 
