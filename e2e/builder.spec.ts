@@ -137,6 +137,8 @@ test("keyboard only: build a deck for me, undo it, walk the cards, leave", async
   await moveTo(page, sheet.getByRole("button", { name: "Use this deck" }));
   await page.keyboard.press("Enter");
   await expect(sheet).toBeHidden();
+  // Focus goes back to what opened the sheet (on the next frame): wait for it, or it lands mid-walk.
+  await expect(page.locator(".bench-actions .build")).toBeFocused();
   await expect(page.getByRole("button", { name: "Save deck" })).toBeEnabled();
 
   // Ctrl+Z: the deck as it was, nothing left to save.
@@ -148,7 +150,8 @@ test("keyboard only: build a deck for me, undo it, walk the cards, leave", async
   await first.focus();
   await page.keyboard.press("ArrowRight");
   await expect(first).not.toBeFocused();
-  expect(await page.evaluate(() => document.activeElement?.closest(".pick-grid") ? "ok" : (document.activeElement?.outerHTML.slice(0, 200) + " | was " + JSON.stringify(document.querySelector(".pick-grid .bind-card")?.getBoundingClientRect()) + " vp " + innerHeight))).toBe("ok");
+  // Still in the grid (else: what took focus).
+  expect(await page.evaluate(() => (document.activeElement?.closest(".pick-grid") ? "grid" : document.activeElement?.outerHTML.slice(0, 120)))).toBe("grid");
 
   // Escape leaves (nothing unsaved).
   await page.keyboard.press("Escape");
