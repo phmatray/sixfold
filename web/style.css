@@ -133,6 +133,40 @@
 
   --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 
+  /* The painted kit (#100): the world's own materials. Wood for what you act
+     on and for headers (planks, the title's sign), paper for what you read
+     (sheets, rows, dialogs), one toon outline round both, like the world's
+     cel-shaded models. Dense screens get paper with the soft outline. */
+  --wood: #9a6235;
+  --wood-hi: #c08550;
+  --wood-lo: #6b3f1f;
+  --toon: #2a170b;
+  --paint: #f6ead0;
+  --paper: #f1e4c3;
+  --paper-hi: #f8efd9;
+  --paper-lo: #e2d0a6;
+  --paper-ink-soft: #3d2a17;
+  --paper-muted: #5b4630;
+  --brass-deep: #a87a2a;
+  --brass-ink: #6b4a0e;
+  --sprout: #7fb35b;
+  --danger-paint: #a63f35;
+  --danger-on-paper: #962a20;
+  --heal-on-paper: #2c6e3a;
+  --steel-on-paper: #34507a;
+  --toon-w: 3px;
+  --toon-soft: color-mix(in srgb, var(--toon) 24%, transparent);
+  --edge: 0 4px 0 var(--toon);
+  --edge-soft: 0 2px 0 color-mix(in srgb, var(--toon) 30%, transparent);
+  --grain-wood: repeating-linear-gradient(176deg, transparent 0 7px, rgba(60, 30, 10, 0.18) 7px 8px, transparent 8px 15px, rgba(255, 220, 170, 0.08) 15px 17px);
+  --plank: var(--grain-wood), linear-gradient(180deg, var(--wood-hi), var(--wood) 55%, var(--wood-lo));
+  --plank-lit: var(--grain-wood), linear-gradient(180deg, color-mix(in srgb, var(--wood-hi) 80%, var(--paint)), var(--wood-hi) 55%, var(--wood));
+  /* For painted text on wood (AA): the plank's darker half only. */
+  --plank-deep: var(--grain-wood), linear-gradient(180deg, var(--wood), var(--wood-lo));
+  --plank-deep-lit: var(--grain-wood), linear-gradient(180deg, color-mix(in srgb, var(--wood) 80%, var(--wood-hi)), color-mix(in srgb, var(--wood-lo) 85%, var(--wood)));
+  --plank-brass: var(--grain-wood), linear-gradient(180deg, var(--brass-light), var(--brass) 60%, var(--brass-deep));
+  --painted-text: 2px 0 0 var(--toon), -2px 0 0 var(--toon), 0 2px 0 var(--toon), 0 -2px 0 var(--toon), 0 4px 0 var(--toon);
+
   color-scheme: dark;
 }
 /* On a phone the board has no room left: its labels stay put, and the larger
@@ -954,7 +988,7 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
   -webkit-backface-visibility: hidden;
 }
 .coin-face.heads {
-  color: #6b4a0e;
+  color: var(--brass-ink);
   background: radial-gradient(circle at 35% 30%, #fff1c2, var(--brass) 55%, #8a6417);
   box-shadow: inset 0 0 0 6px rgba(255, 241, 194, 0.35), inset 0 -6px 12px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.6);
 }
@@ -1679,22 +1713,6 @@ body > .page > .side-panel { position: relative; top: auto; align-self: stretch;
 body > .page > .page-body:has(> .setup > .options) { padding-bottom: 0; }
 body > .page .pane-deck { top: var(--space-4); max-height: calc(100dvh - 61px - 2 * var(--space-4)); }
 @media (max-width: 760px) { body > .page .editor-tabs { top: 0; } }
-/* The title is one screen at a desktop size; a phone scrolls it inside. */
-body > .title { height: 100dvh; overflow-y: auto; max-width: none; padding-inline: max(16px, calc((100% - 1088px) / 2)); }
-body > .title > .lang-switch { right: max(16px, calc((100% - 1088px) / 2)); }
-/* A wide screen: the footer (save slot, settings, the fine print) sits under
-   the card fan, so the menu column has the whole height. */
-@media (min-width: 900px) and (orientation: landscape) {
-  body > .title { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-rows: minmax(0, 1fr) auto; column-gap: clamp(16px, 4vw, 48px); align-items: center; }
-  body > .title > .hero { display: contents; }
-  body > .title .hero-fan { grid-column: 1; grid-row: 1; }
-  body > .title .hero-text { grid-column: 2; grid-row: 1 / span 2; }
-  body > .title > .foot { grid-column: 1; grid-row: 2; align-self: end; margin-top: var(--space-4); flex-direction: column-reverse; align-items: flex-start; gap: var(--space-3); }
-  /* Its panels open up from the footer's left edge, over the fan, never over the menu. */
-  body > .title .foot-menus { position: relative; }
-  body > .title .foot-menus details { position: static; }
-  body > .title .foot-menus details[open] > .settings-body { left: 0; right: auto; }
-}
 /* The title has its language switch up top: Settings doesn't repeat it. */
 body > .title .settings-body .lang { display: none; }
 
@@ -3983,8 +4001,9 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   pointer-events: none;
   background: #16233d; /* the scene's sea, while it loads */
 }
-.title-backdrop canvas { display: block; opacity: 0; transition: opacity 900ms ease; }
-.title-backdrop.live canvas { opacity: 1; }
+.title-backdrop canvas { display: block; position: absolute; inset: 0; opacity: 0; transition: opacity 900ms ease; }
+.title-backdrop .title-veil { opacity: 0; transition: none; }
+.title-backdrop.live canvas:not(.title-veil) { opacity: 1; }
 /* A scrim where the text sits: the menu side on a wide screen, the lower part on a tall one. */
 .title-backdrop::after {
   content: "";
@@ -4109,3 +4128,346 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 /* A phone's energy column sits over the card's left edge: the number and its stamp
    lean right of centre, so the "−" stays clear of the pips. */
 @media (max-width: 640px) { .hexon-card .pop { left: 58%; } }
+
+/* ======================================================================
+   The painted kit (#100, DESIGN.md): wood and paper, one toon outline.
+   Loaded last: it is the look of every control; screens keep their layout.
+   ====================================================================== */
+
+/* ---------- Paper: sheets, dialogs and rows you read. The ink tokens turn
+   dark inside, so every component on it reads without its own rules. ---------- */
+:is(.dialog, .drawer, .settings-body, .world-sheet:not(:has(.challenge)), .play-pop, .update-toast, .ach-toast, .world-hud, .world-hint,
+  .deck-tile, .deck-row, .slot, .ach, .stats .stat, .shelf-item, .rival, .ladder-part, .quest, .advice-item, .sell-row) {
+  --ink: var(--toon);
+  --text-soft: var(--paper-ink-soft);
+  --text-dim: var(--paper-ink-soft);
+  --text-faint: var(--paper-muted);
+  --muted: var(--paper-muted);
+  --line: var(--toon-soft);
+  --panel: var(--paper-hi);
+  --panel-2: var(--paper-lo);
+  --panel-hi: var(--paper-lo);
+  --chip: var(--paper-lo);
+  --deep: var(--paper-hi);
+  --sheet-bg: var(--paper);
+  --brass-hi: var(--brass-ink);
+  --brass-line: color-mix(in srgb, var(--brass-deep) 70%, transparent);
+  --sel-bg: color-mix(in srgb, var(--brass) 32%, var(--paper-hi));
+  --sel-line: var(--brass-deep);
+  --sel-ink: var(--brass-ink);
+  --danger-text: var(--danger-on-paper);
+  --damage: var(--danger-on-paper);
+  --hit: var(--danger-on-paper);
+  --heal: var(--heal-on-paper);
+  --steel: var(--steel-on-paper);
+  --steel-line: color-mix(in srgb, var(--steel-on-paper) 45%, transparent);
+  color: var(--ink);
+}
+/* A sheet over the scene: paper, the toon outline, a little thickness. */
+:is(.dialog, .drawer, .settings-body, .world-sheet:not(:has(.challenge))) {
+  background: var(--paper);
+  border: var(--toon-w) solid var(--toon);
+  box-shadow: 0 6px 0 var(--toon), var(--elev-3);
+}
+.world-sheet:not(:has(.challenge)), .dialog { border-radius: 16px; }
+.drawer { border-width: 0 0 0 var(--toon-w); border-radius: 0; box-shadow: -6px 0 0 var(--toon), var(--elev-3); }
+/* The world's menu: a wooden header over its paper. */
+.menu-top { background: var(--plank); border-bottom: var(--toon-w) solid var(--toon); }
+.menu-top h2 { color: var(--paint); text-shadow: var(--painted-text); }
+.menu-top .btn.ghost { background: var(--paper-hi); color: var(--toon); border-color: var(--toon); box-shadow: 0 3px 0 var(--toon); }
+.menu-top .tab-key { color: var(--paint); border-color: var(--paint); }
+/* The world's HUD: small paper plates over the scene. */
+.world-hud, .world-hint { background: var(--paper); border: 2px solid var(--toon); box-shadow: 0 3px 0 var(--toon); }
+/* A row on paper or felt: calm paper, the soft outline, no texture. */
+:is(.deck-row, .slot, .ach, .stats .stat, .shelf-item, .rival, .ladder-part, .quest, .advice-item, .sell-row) {
+  background: var(--paper-hi);
+  border: 2px solid var(--toon-soft);
+  box-shadow: var(--edge-soft);
+}
+.ach.done { background: color-mix(in srgb, var(--brass) 18%, var(--paper-hi)); border-color: var(--brass-line); }
+.rival.champion { background: linear-gradient(120deg, color-mix(in srgb, var(--wood) 22%, var(--paper-hi)), var(--paper-hi)); }
+
+/* ---------- Buttons ---------- */
+/* Plain: a paper plate with the toon outline and a thickness it sinks into. */
+.btn {
+  min-height: 48px;
+  padding: 6px 18px;
+  border: 2px solid var(--toon);
+  border-radius: 10px;
+  background: var(--paper-hi);
+  color: var(--toon);
+  font-family: var(--display);
+  font-weight: 700;
+  box-shadow: 0 3px 0 var(--toon);
+  transition: transform var(--dur-quick) var(--ease-out), box-shadow var(--dur-quick) var(--ease-out), filter var(--dur-quick) ease;
+}
+.btn:is(:hover, .is-hover):not(:disabled) { background: var(--paint); border-color: var(--toon); transform: translateY(-1px); box-shadow: 0 4px 0 var(--toon); }
+.btn:is(:active, .is-active):not(:disabled) { transform: translateY(3px); box-shadow: 0 0 0 var(--toon); }
+/* Act: the brass plank. */
+.btn.primary { background: var(--plank-brass); color: var(--toon); border: var(--toon-w) solid var(--toon); box-shadow: var(--edge); font-weight: 800; }
+.btn.primary:is(:hover, .is-hover):not(:disabled) { background: var(--plank-brass); filter: brightness(1.08); box-shadow: 0 5px 0 var(--toon); }
+.btn.primary:is(:active, .is-active):not(:disabled) { box-shadow: 0 0 0 var(--toon); }
+/* Quiet: no plate, an outline in the ink of what it sits on. */
+.btn.ghost { background: transparent; color: var(--ink); border-color: color-mix(in srgb, var(--ink) 45%, transparent); box-shadow: none; }
+.btn.ghost:is(:hover, .is-hover):not(:disabled) { background: color-mix(in srgb, var(--ink) 10%, transparent); border-color: var(--ink); box-shadow: none; transform: none; }
+.btn.ghost:is(:active, .is-active):not(:disabled) { transform: translateY(1px); }
+.btn.danger { background: var(--danger-paint); color: var(--paint); border-color: var(--toon); }
+.btn.danger:is(:hover, .is-hover):not(:disabled) { background: var(--danger-paint); filter: brightness(1.1); }
+.btn.ghost.danger { background: transparent; color: var(--danger-text); border-color: color-mix(in srgb, var(--danger-text) 60%, transparent); }
+.btn.ghost.danger:is(:hover, .is-hover):not(:disabled) { background: var(--danger-paint); color: var(--paint); }
+/* Can't be used now: flat, no thickness, faded ink (still readable). */
+.btn:disabled, .btn.primary:disabled, .btn[aria-disabled="true"] {
+  background: color-mix(in srgb, var(--paper-lo) 55%, transparent); color: color-mix(in srgb, var(--toon) 62%, var(--paper-lo));
+  border: 2px solid color-mix(in srgb, var(--toon) 40%, transparent); box-shadow: none; filter: none; transform: none; opacity: 1;
+}
+.btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; vertical-align: -3px; }
+.btn.start { font-size: var(--fs-2xl); padding: 8px 30px; }
+
+/* ---------- Headers: a wooden beam with a painted title ---------- */
+.page-bar { background: var(--plank); border-bottom: var(--toon-w) solid var(--toon); box-shadow: 0 5px 0 color-mix(in srgb, var(--toon) 35%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.page-title { font-size: var(--fs-4xl); font-weight: 800; color: var(--paint); text-shadow: var(--painted-text); padding-bottom: 4px; }
+.page-bar .btn.ghost { background: var(--paper-hi); color: var(--toon); border-color: var(--toon); box-shadow: 0 3px 0 var(--toon); }
+.page-bar .btn.ghost:hover { background: var(--paint); }
+.page-bar .note, .page-bar .bar-actions { color: var(--paint); }
+/* A section's name: bold paint with a brush stroke under it. */
+:is(.deck-picker legend, .kit-block > h2) { font-size: var(--fs-xl); font-weight: 800; color: var(--paint); padding-bottom: 6px; background: linear-gradient(90deg, var(--brass), color-mix(in srgb, var(--brass) 0%, transparent)) left bottom / 72px 3px no-repeat; }
+
+/* ---------- Controls ---------- */
+select {
+  min-height: 48px; border: 2px solid var(--toon); border-radius: 10px; background-color: var(--paper-hi); color: var(--toon); font-weight: 700;
+  box-shadow: 0 3px 0 var(--toon);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'><path d='M1 1.5l5 5 5-5' fill='none' stroke='%232a170b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+select:hover { background-color: var(--paint); border-color: var(--toon); }
+select option { background: var(--paper-hi); color: var(--toon); }
+@supports (appearance: base-select) {
+  select { background-image: none; }
+  select::picker-icon { background: var(--toon); }
+  select:open { border-color: var(--toon); }
+  ::picker(select) { background: var(--paper); border: 2px solid var(--toon); border-radius: 10px; box-shadow: 0 4px 0 var(--toon), var(--elev-2); }
+  select option:hover, select option:focus-visible { background: var(--paper-lo); }
+  select option:checked { background: color-mix(in srgb, var(--brass) 40%, var(--paper-hi)); color: var(--toon); }
+  select option::checkmark { color: var(--toon); }
+}
+:where(input:not([type]), input[type="text"], input[type="search"], input[type="number"], textarea) {
+  border: 2px solid var(--toon); border-radius: 10px; background: var(--paper-hi); color: var(--toon); box-shadow: inset 0 2px 0 color-mix(in srgb, var(--toon) 14%, transparent);
+}
+:where(input:not([type]), input[type="text"], input[type="search"], input[type="number"], textarea):hover { border-color: var(--toon); }
+::placeholder { color: var(--paper-muted); }
+input[type="range"]::-webkit-slider-runnable-track { height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--brass) var(--fill, 0%), var(--paper-lo) var(--fill, 0%)); box-shadow: 0 0 0 2px var(--toon); }
+input[type="range"]::-moz-range-track { height: 12px; border-radius: 6px; background: var(--paper-lo); box-shadow: 0 0 0 2px var(--toon); }
+input[type="range"]::-moz-range-progress { height: 12px; border-radius: 6px; background: var(--brass); }
+input[type="range"]::-webkit-slider-thumb { width: 26px; height: 26px; margin-top: -7px; clip-path: none; border-radius: 50%; background: var(--paint); box-shadow: 0 0 0 2.5px var(--toon), 0 3px 0 2.5px var(--toon); }
+input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; clip-path: none; border-radius: 50%; background: var(--paint); border: 2.5px solid var(--toon); }
+input[type="checkbox"] { width: 54px; height: 30px; border-radius: 15px; background: var(--paper-lo); box-shadow: 0 0 0 2px var(--toon); }
+input[type="checkbox"]::before { top: 4px; left: 4px; width: 22px; height: 22px; background: var(--paint); box-shadow: 0 0 0 2px var(--toon); }
+input[type="checkbox"]:checked { background: var(--sprout); box-shadow: 0 0 0 2px var(--toon); }
+input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--paint); }
+/* Choices on a tray (tabs, segments, chips, language): paper tabs, the chosen one a plank. */
+:is(.menu-tabs, .editor-tabs, .shelf-switch) button, .seg label, .segs .seg span, .lang-switch button, .chip, .btn.speed {
+  min-height: 44px; border: 2px solid var(--toon); border-radius: 10px; background: var(--paper-lo); color: var(--toon);
+  font-family: var(--display); font-weight: 800; box-shadow: 0 3px 0 var(--toon);
+}
+:is(.menu-tabs, .editor-tabs, .shelf-switch) button:hover, .seg label:hover, .segs .seg:hover span, .lang-switch button:hover, .chip:hover { background: var(--paper-hi); color: var(--toon); }
+:is(.menu-tabs, .editor-tabs) button[aria-selected="true"], .shelf-switch button[aria-pressed="true"], .seg label:has(:checked), .segs .seg input:checked + span, .lang-switch button[aria-pressed="true"], .chip:is([aria-pressed="true"], .on), .btn.speed[aria-pressed="true"] {
+  background: var(--plank); color: var(--paint); border-color: var(--toon); text-shadow: 0 1px 0 var(--toon); box-shadow: 0 3px 0 var(--toon);
+}
+.menu-tabs { gap: 8px; padding-bottom: 12px; }
+.segs, .shelf-switch { gap: 6px; padding: 0; border: 0; background: none; }
+.segs .seg span { border-radius: 10px; }
+.shelf-switch .shelf-count { color: inherit; }
+.lang-switch { gap: 6px; padding: 0; border: 0; }
+.lang-switch button { border-radius: 10px; }
+.count-badge { background: var(--danger-paint); color: var(--paint); border: 2px solid var(--toon); box-shadow: 0 2px 0 var(--toon); font-weight: 800; }
+.count-badge.zero { background: var(--paper-lo); color: var(--paper-muted); }
+/* Deck choices: a card of paper; the chosen one framed in brass with a ribbon. */
+.deck-tile { border: 2px solid var(--toon-soft); border-radius: 12px; background: var(--paper-hi); box-shadow: var(--edge-soft); transition: transform var(--dur-panel) var(--ease-out), box-shadow var(--dur-quick) ease; }
+.deck-tile:hover { border-color: var(--toon); transform: translateY(-2px); }
+.deck-tile.chosen { background: color-mix(in srgb, var(--brass) 16%, var(--paper-hi)); border: var(--toon-w) solid var(--toon); box-shadow: 0 0 0 4px var(--brass), 0 7px 0 var(--toon); }
+.deck-tile:focus-within { outline: none; }
+.options { background: var(--plank); border-top: var(--toon-w) solid var(--toon); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.options .field span, .options .more-options summary { color: var(--paint); font-weight: 700; text-shadow: 0 1px 0 var(--toon); }
+/* Scrollbars: thin wood. */
+* { scrollbar-color: var(--wood) transparent; }
+
+/* ---------- The title: the sign, the planks, the world behind ---------- */
+.title {
+  position: relative; max-width: none; margin: 0; height: 100dvh; overflow: hidden;
+  padding: clamp(20px, 4.5vh, 56px) clamp(16px, 4.5vw, 72px) clamp(14px, 2.5vh, 28px);
+  display: grid; grid-template-columns: minmax(0, 420px) 1fr; grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "brand brand" "menu ." "foot foot"; gap: clamp(12px, 2.5vh, 28px) 32px;
+}
+.title-backdrop::after { background: linear-gradient(0deg, color-mix(in srgb, var(--toon) 55%, transparent), transparent 22%), linear-gradient(90deg, color-mix(in srgb, var(--toon) 40%, transparent), transparent 42%); }
+/* The name on a sign board (mounted: no ropes): the seal-stone and the lettered wordmark (web/brand/). */
+.title-brand {
+  grid-area: brand; justify-self: start; display: flex; align-items: center; gap: clamp(8px, 1.2vw, 16px);
+  padding: 10px 28px 12px 18px; transform: rotate(-2deg);
+  background: var(--plank); border: 4px solid var(--toon); border-radius: 16px; box-shadow: 0 6px 0 var(--toon), 0 18px 30px -10px rgba(0, 0, 0, 0.7);
+}
+.title-brand .logo-mark { flex: none; width: clamp(52px, min(6.4vw, 9.5vh), 92px); filter: drop-shadow(0 3px 0 var(--toon)); }
+.title-brand .wordmark { margin: 0; font-size: clamp(44px, min(6.2vw, 9vh), 80px); text-shadow: none; }
+.title-brand .tagline { display: none; }
+.title-notice { grid-area: brand; align-self: end; margin: 0; display: flex; gap: 8px; align-items: center; }
+.title-menu { grid-area: menu; align-self: center; position: relative; }
+.title .menu { margin: 0; max-width: none; gap: 8px; }
+.title-foot { grid-area: foot; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 24px; margin: 0; }
+.title-foot .foot-menus { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.title-legal { margin: 0; color: var(--paint); text-shadow: 0 1px 2px var(--toon); font-size: var(--fs-xs); max-width: 46ch; text-align: right; }
+.menu-icon { grid-area: icon; width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+/* A plank. */
+.menu-item {
+  position: relative; min-height: 48px; padding: 4px 18px; border-radius: 10px;
+  grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "icon label sub badge"; column-gap: 12px;
+  background: var(--plank-deep); border: var(--toon-w) solid var(--toon); color: var(--paint);
+  box-shadow: var(--edge), 0 12px 18px -8px rgba(0, 0, 0, 0.6), inset 0 2px 0 color-mix(in srgb, var(--paint) 30%, transparent);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform var(--dur-panel) var(--ease-out), box-shadow var(--dur-quick) ease;
+}
+.menu li:nth-child(odd) .menu-item { --tilt: -0.7deg; }
+.menu li:nth-child(even) .menu-item { --tilt: 0.6deg; }
+.menu-label { font-size: var(--fs-xl); font-weight: 800; text-shadow: 0 2px 0 var(--toon); }
+.menu-item .menu-icon { filter: drop-shadow(0 2px 0 var(--toon)); }
+.menu-item:is(:hover, .is-hover, :focus-visible, .is-focus), html[data-input="pad"] .menu-item:focus { --tilt: 0deg; transform: translateY(-2px) scale(1.03); background: var(--plank-deep-lit); }
+.menu-item:is(:active, .is-active) { transform: translateY(3px) scale(1.03); box-shadow: 0 0 0 var(--toon); }
+.menu-item.primary { min-height: 64px; margin-bottom: 4px; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "icon label badge" "icon sub badge"; background: var(--plank-brass); color: var(--toon); }
+.menu-item.primary .menu-label { font-size: var(--fs-4xl); text-shadow: 0 2px 0 color-mix(in srgb, var(--paint) 60%, transparent); }
+.menu-item.primary .menu-sub { color: var(--toon); font-weight: 700; }
+.menu-item.primary .menu-icon { width: 34px; height: 34px; filter: none; }
+/* Each entry's status on a paper tag nailed to its plank (dark ink: AA at a small size). */
+.title .menu-item:not(.primary) .menu-sub {
+  justify-self: end; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  padding: 2px 8px; border-radius: 6px; background: var(--paper); color: var(--toon); font-size: var(--fs-xs); font-weight: 700;
+  box-shadow: 0 0 0 1.5px var(--toon); text-shadow: none;
+}
+.title .menu-item .count-badge { margin-left: 4px; }
+/* The footer's controls: small planks, as the menu's. */
+.title-foot summary.btn.ghost { background: var(--plank-deep); color: var(--paint); border: 2px solid var(--toon); box-shadow: 0 3px 0 var(--toon); text-shadow: 0 1px 0 var(--toon); }
+.title-foot summary.btn.ghost:hover { background: var(--plank-deep-lit); }
+.title-legal { padding: 4px 10px; border-radius: 8px; background: color-mix(in srgb, var(--toon) 60%, transparent); text-shadow: none; }
+/* The place's card, like a film's. */
+.title-place { position: absolute; z-index: 1; right: clamp(16px, 4.5vw, 72px); bottom: clamp(96px, 13vh, 128px); margin: 0; display: grid; gap: 2px; padding: 8px 16px;
+  background: var(--paper); border: var(--toon-w) solid var(--toon); border-radius: 8px; box-shadow: var(--edge); transform: rotate(1.5deg); opacity: 0; transition: opacity 900ms ease; }
+.title-backdrop.live .title-place { opacity: 1; }
+.title-place b { font: 800 var(--fs-xl)/1.1 var(--display); color: var(--toon); }
+.title-place span { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--paper-muted); }
+.title-backdrop.flat .title-place { display: none; }
+@media (max-width: 760px), (orientation: portrait) {
+  .title { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; grid-template-areas: "brand" "." "menu" "foot"; padding-top: max(16px, env(safe-area-inset-top)); gap: 10px; }
+  .title-brand { justify-self: center; }
+  .title-brand { padding: 8px 18px 10px 12px; }
+  .title-brand .wordmark { font-size: clamp(48px, 13vw, 60px); }
+  .title-brand .logo-mark { width: clamp(44px, 12vw, 60px); }
+  .title-menu { align-self: end; }
+  .title-legal { display: none; }
+  .title .menu-item:not(.primary) .menu-sub { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); padding: 0; }
+  .title .menu-item:not(.primary) { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "icon label badge"; }
+  .menu-item:is(:hover, .is-hover, :focus-visible, .is-focus), html[data-input="pad"] .menu-item:focus { transform: scale(1.03); }
+  .title-foot { justify-content: center; }
+  .title-foot .foot-menus { justify-content: center; gap: 6px; }
+  .title-foot .btn { padding-inline: 10px; font-size: var(--fs-sm); white-space: nowrap; }
+  /* A phone: the act item on its own, the rest a two-by-three grid of planks. */
+  .title .menu { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .title .menu li:first-child, .title .menu li:last-child:nth-child(even) { grid-column: 1 / -1; }
+  .title .menu-item:not(.primary) { min-height: 52px; padding: 6px 10px; column-gap: 8px; }
+  .title .menu-item:not(.primary) .menu-label { font-size: var(--fs-md); line-height: 1.1; }
+  .title .menu-item .menu-icon { width: 22px; height: 22px; }
+  .title .menu-item.primary .menu-label { font-size: var(--fs-3xl); }
+  .title .menu-item.primary .menu-sub { font-size: var(--fs-sm); }
+  .title-place { top: clamp(130px, 18vh, 160px); bottom: auto; right: 16px; }
+}
+
+/* ---------- The cursor: a painted hand (a11y.js), the one focus marker ---------- */
+.focus-hand {
+  position: fixed; inset: 0 auto auto 0; z-index: 1000; width: 40px; height: 32px; margin: 0; padding: 0; border: 0; background: none; overflow: visible;
+  pointer-events: none; opacity: 0; transition: opacity var(--dur-quick) ease, translate var(--dur-panel) var(--ease-out);
+  /* On the box, not the glyph: the shadow falls down whichever way the hand turns. */
+  filter: drop-shadow(0 2px 0 color-mix(in srgb, var(--toon) 50%, transparent));
+  --bx: 5px; --by: 0px;
+}
+.focus-hand.on { opacity: 1; }
+.focus-hand.fresh { transition: none; }
+/* The glyph points right; each side turns it toward the control. */
+.focus-hand::before {
+  content: ""; position: absolute; inset: 0;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 38 30'><g transform='matrix(-1 0 0 1 38 0)'><path d='M2 11h18l-3-6c-1-2 1-4 3-3l12 9c2 1 3 3 3 5v4c0 3-2 6-5 6H17c-2 0-3-1-3-3v-1h-2c-2 0-3-1-3-2.5S10 17 12 17H4c-2 0-3-1.5-3-3s1-3 1-3z' fill='%23f6ead0' stroke='%232a170b' stroke-width='2.5' stroke-linejoin='round'/></g></svg>") no-repeat center / contain;
+}
+.focus-hand[data-side="right"] { --bx: -5px; }
+.focus-hand[data-side="right"]::before { scale: -1 1; }
+.focus-hand[data-side="above"] { --bx: 0px; --by: 5px; }
+.focus-hand[data-side="above"]::before { rotate: 90deg; }
+.focus-hand[data-side="below"] { --bx: 0px; --by: -5px; }
+.focus-hand[data-side="below"]::before { rotate: -90deg; }
+@media (prefers-reduced-motion: no-preference) { .focus-hand.on::before { animation: hand-point 0.9s ease-in-out infinite; } }
+@keyframes hand-point { 50% { translate: var(--bx) var(--by); } }
+html[data-input="touch"] .focus-hand { display: none; }
+/* Where the hand points, no ring: one marker. */
+html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html.hand-cursor .seg [data-hand] + span { outline: none !important; animation: none !important; }
+
+/* ---------- The kit's sheet (?sheet) ---------- */
+.kit-sheet .page-body { display: grid; gap: 28px; max-width: 1240px; }
+.kit-block { display: grid; gap: 14px; align-content: start; }
+.kit-states { display: flex; flex-wrap: wrap; gap: 18px 22px; align-items: end; }
+.kit-states figure { margin: 0; display: grid; gap: 8px; justify-items: start; }
+.kit-states figcaption { font-size: var(--fs-xs); color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+.kit-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 28px; }
+.kit-panel { max-width: none !important; margin: 0 !important; padding: 22px; }
+.options-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+.kit-list { display: grid; gap: 8px; }
+.title-foot summary.btn.ghost b { color: inherit; }
+/* The title's Options and Save slots: a sheet in the middle of the screen, over a dimmed world. */
+.title-foot .foot-menus details { position: static; }
+.title-foot details[open] .settings-body {
+  position: fixed; z-index: 50; left: 50%; top: auto; right: auto; bottom: calc(84px + env(safe-area-inset-bottom)); translate: -50% 0; margin: 0;
+  width: min(560px, calc(100vw - 32px)); max-height: min(calc(100dvh - 120px), 760px); overflow: auto; padding: 22px;
+  box-shadow: 0 6px 0 var(--toon), 0 0 0 100vmax color-mix(in srgb, var(--toon) 55%, transparent);
+}
+@media (max-width: 760px), (orientation: portrait) {
+  .title-foot details[open] .settings-body { bottom: calc(128px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 160px); }
+}
+
+/* ---------- The kit, second pass (#100 critique) ---------- */
+/* One control, one tray: a single paper frame; the chosen slot is the plank in it. */
+.lang-switch, .segs, .shelf-switch {
+  display: inline-flex; gap: 2px; padding: 3px; border: 2px solid var(--toon); border-radius: 12px;
+  background: var(--paper-lo); box-shadow: 0 3px 0 var(--toon);
+}
+:is(.lang-switch, .shelf-switch) button, .segs .seg span { border: 0; box-shadow: none; background: transparent; border-radius: 8px; min-height: 40px; }
+:is(.lang-switch, .shelf-switch) button:hover, .segs .seg:hover span { background: var(--paper-hi); }
+:is(.lang-switch button[aria-pressed="true"], .shelf-switch button[aria-pressed="true"], .segs .seg input:checked + span) { background: var(--plank-deep); color: var(--paint); box-shadow: none; }
+/* Can't be used now: flat and hatched, the ink faded (still readable). */
+.btn:disabled, .btn.primary:disabled, .btn[aria-disabled="true"] {
+  background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--toon) 7%, transparent) 6px 8px), color-mix(in srgb, var(--paper-lo) 70%, transparent);
+  border-color: color-mix(in srgb, var(--toon) 30%, transparent);
+}
+/* Where the hand points, the control also stands up a little: focus stays plain if the hand is cut off. */
+html.hand-cursor :is(.btn, .chip, [role="tab"], summary)[data-hand] { translate: 0 -2px; filter: brightness(1.05); }
+html.hand-cursor .deck-tile:has([data-hand]) { translate: 0 -2px; }
+/* Menu screens over a dimmed still of the place the title last showed (felt when there is none). */
+body:has(> .page)::before {
+  content: ""; position: fixed; inset: -24px; z-index: -1; pointer-events: none;
+  /* A fixed navy veil over the still: text on the page keeps AA whatever the place. */
+  background: linear-gradient(color-mix(in srgb, var(--felt-deep) 62%, transparent), color-mix(in srgb, var(--felt-deep) 62%, transparent)), var(--world-still, none) center / cover;
+  filter: blur(10px) brightness(0.55) saturate(0.85);
+}
+body:has(> .page) .page-body { background: none; }
+/* The duel setup's bar: a plank with rounded ends, sitting on the page rather than half-spanning it. */
+.options { margin-inline: 0; border: var(--toon-w) solid var(--toon); border-bottom: 0; border-radius: 14px 14px 0 0; }
+.options .field { display: flex; align-items: center; gap: 10px; }
+/* Bindings read as keycaps. */
+.controls-list .bind { min-width: 4.5em; border-radius: 8px; box-shadow: 0 4px 0 var(--toon); font-family: var(--display); font-weight: 800; }
+/* The duel's menu: a toned paper (no glare over the dark table) under a wooden header. */
+.drawer { --sheet-bg: color-mix(in srgb, var(--paper) 86%, var(--wood-lo)); background: var(--sheet-bg); }
+.drawer > header { margin: -18px -20px 12px; padding: 12px 20px; background: var(--plank-deep); border-bottom: var(--toon-w) solid var(--toon); }
+.drawer > header h2 { color: var(--paint); text-shadow: var(--painted-text); }
+.drawer .icon-btn, .duel-menu-btn { background: var(--plank-deep); color: var(--paint); border: 2px solid var(--toon); box-shadow: 0 3px 0 var(--toon); border-radius: 10px; }
+.drawer .icon-btn:hover, .duel-menu-btn:hover { background: var(--plank-deep-lit); }
+.drawer .icon-btn .ic, .duel-menu-btn .ic { stroke: currentColor; }
+/* Painted disclosure triangles, not the browser's. */
+.drawer summary, .settings-body details > summary { display: flex; align-items: center; gap: 10px; list-style: none; }
+.drawer summary::-webkit-details-marker, .settings-body details > summary::-webkit-details-marker { display: none; }
+.drawer summary::before, .settings-body details > summary:not(.btn)::before {
+  content: ""; flex: none; width: 12px; height: 14px; background: var(--toon);
+  clip-path: polygon(0 0, 100% 50%, 0 100%); transition: rotate var(--dur-quick) var(--ease-out);
+}
+.drawer details[open] > summary::before, .settings-body details[open] > summary:not(.btn)::before { rotate: 90deg; }
+.sheet-head { margin-bottom: 14px; }
