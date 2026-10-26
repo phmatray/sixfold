@@ -8,6 +8,10 @@ These are the placement rules every map follows. A map author applies them while
 for a person to judge, and **eye** is checked by walking the map (overhead view, then ground level, by day
 and by night, on a desktop and a phone).
 
+The level-design guide these rules serve (the ten principles, points of interest and secrets, connections,
+a living world, the A–J checklist, per-map budgets and the five-pass test) is `docs/LEVEL_DESIGN.md`. This file
+wins wherever the two disagree.
+
 They come from the owner's level-design checklist (landmarks, guiding without arrows, readable
 collisions, rhythm, density, scale) and from what went wrong in 1.3: props stacked one in front of
 another, lamps scattered with no reason, maps too small to feel like places, and exits you had to hunt for.
@@ -178,3 +182,4 @@ reward rules (6.3–6.5) apply to every screen. A screen with nothing to stop fo
 4. Run `node tools/check-maps.mjs web/world --strict` and fix every error. Read every warning.
 5. **Walk every exit both ways**, by day and by night, on a desktop and a phone. Make sure it's obvious
    where to go.
+6. Review the map against `docs/LEVEL_DESIGN.md`: its checklist, its budgets and the five-pass test.
