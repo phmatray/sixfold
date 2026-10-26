@@ -60,9 +60,9 @@ fn StudioMark() -> impl IntoView {
         <svg class="studio-die" viewBox="0 0 120 120" aria-hidden="true">
             <rect class="die-face" x="6" y="6" width="108" height="108" rx="24" />
             {pips.into_iter().enumerate().map(|(i, (x, y))| view! {
-                <circle class="pip" cx=x cy=y r="8.5" style=format!("--i:{i}") />
+                <circle class="die-pip" cx=x cy=y r="8.5" style=format!("--i:{i}") />
             }).collect_view()}
-            <circle class="pip seventh" cx="60" cy="60" r="10" />
+            <circle class="die-pip seventh" cx="60" cy="60" r="10" />
         </svg>
     }
 }
