@@ -447,6 +447,14 @@ fn MatchScreen() -> impl IntoView {
     // On the window, so they work wherever focus is (or isn't).
     let keys = window_event_listener(leptos::ev::keydown, on_key);
     on_cleanup(move || keys.remove());
+    // A pad's Start (gamepad.js) opens and closes the duel menu.
+    let pad_menu = window_event_listener_untyped("sixfold-input", move |e| {
+        if input::action(&e).as_deref() == Some("menu") {
+            e.prevent_default();
+            menu.update(|m| *m = !*m);
+        }
+    });
+    on_cleanup(move || pad_menu.remove());
     // Focus never falls to the page: when the focused control goes (a card
     // played, a panel closed), it lands back on your hand or End turn.
     // Only for keyboard players: a touch or mouse player never sees a card

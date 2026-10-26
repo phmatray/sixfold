@@ -896,6 +896,21 @@ pub fn DuelMenu(
                     <button class="btn" on:click=move |_| { crate::tips::reset(); tips_reset.set(true) }>
                         {move || if tips_reset.get() { tr("Rule tips will show again", "Les astuces reviendront") } else { tr("Show rule tips again", "Remontrer les astuces") }}
                     </button>
+                    // With a pad the duel is played by focus: say how (#69).
+                    {move || crate::input::pad().then(|| {
+                        use crate::input::{prompt, Ctrl};
+                        view! {
+                            <details>
+                                <summary>{tr("Gamepad", "Manette")}</summary>
+                                <dl class="keys">
+                                    <dt><kbd>{prompt(Ctrl::Walk)}</kbd></dt><dd>{tr("Move between cards and buttons", "Passer d'une carte ou d'un bouton à l'autre")}</dd>
+                                    <dt><kbd>{prompt(Ctrl::Act)}</kbd></dt><dd>{tr("Pick, play, confirm", "Choisir, jouer, valider")}</dd>
+                                    <dt><kbd>{prompt(Ctrl::Cancel)}</kbd></dt><dd>{tr("Put the card back, close a panel", "Reposer la carte, fermer un panneau")}</dd>
+                                    <dt><kbd>{prompt(Ctrl::Menu)}</kbd></dt><dd>{tr("This menu", "Ce menu")}</dd>
+                                </dl>
+                            </details>
+                        }
+                    })}
                     <details>
                         <summary>{tr("Keyboard shortcuts", "Raccourcis clavier")}</summary>
                         <dl class="keys">

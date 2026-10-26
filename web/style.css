@@ -1068,6 +1068,9 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 /* Prompts follow the device in use (input.rs): a pad's buttons are round, touch has none to name. */
 html[data-input="pad"] kbd { border-radius: 999px; min-width: 1.6em; text-align: center; }
 html[data-input="pad"] .world-prompt kbd { display: inline-block; }
+kbd:empty { display: none; }
+/* The duel's key badges (1-4, P, R, E) mean nothing on a pad or a touch screen: a pad plays by focus. */
+html[data-input="pad"] .duel .key, html[data-input="touch"] .duel .key { display: none; }
 html[data-input="touch"] .world-prompt kbd { display: none; }
 @media (max-width: 520px) and (hover: hover) { .world-hint { font-size: 12px; line-height: 1.25; } }
 

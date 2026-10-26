@@ -4,6 +4,7 @@
 //! and offers the remapping in the Options panel.
 
 use leptos::prelude::*;
+use leptos::web_sys;
 use sixfold_engine::{fr, tr};
 use wasm_bindgen::prelude::*;
 
@@ -17,6 +18,9 @@ extern "C" {
     #[wasm_bindgen(js_name = prompt)]
     fn label(action: &str, device: &str, fr: bool) -> String;
     fn capture(device: &str, action: &str);
+    /// The keyboard key bound to an action, as `KeyboardEvent.key` names it.
+    #[wasm_bindgen(js_name = keyOf)]
+    fn key_of(action: &str) -> String;
     #[wasm_bindgen(js_name = stopCapture)]
     fn stop_capture();
     #[wasm_bindgen(js_name = resetBindings)]
@@ -55,6 +59,14 @@ pub fn provide() {
 
 thread_local! {
     static INPUT: std::cell::Cell<Option<Input>> = const { std::cell::Cell::new(None) };
+}
+
+/// The action of a `sixfold-input` event ("menu", "act"…), as gamepad.js sends it.
+pub fn action(e: &web_sys::Event) -> Option<String> {
+    js_sys::Reflect::get(e, &"detail".into())
+        .and_then(|d| js_sys::Reflect::get(&d, &"action".into()))
+        .ok()
+        .and_then(|a| a.as_string())
 }
 
 /// A control the prompts can name; the first six can be remapped.
@@ -138,11 +150,23 @@ pub fn named(c: Ctrl) -> String {
     }
 }
 
-/// "Press E." for the act control, "Tap to act." on a touch screen.
+/// "Press E." for the act control, "Tap to act." on a touch screen. Untracked:
+/// for the world's callbacks, outside any view.
 pub fn press_to_act() -> String {
-    match prompt(Ctrl::Act) {
+    match untrack(|| prompt(Ctrl::Act)) {
         k if k.is_empty() => tr("Tap to act.", "Touchez pour agir.").into(),
         k => tr(format!("Press {k}."), format!("Appuyez sur {k}.")),
+    }
+}
+
+/// The key bound to a control, as `aria-keyshortcuts` names it ("J", "Escape").
+pub fn shortcut(c: Ctrl) -> String {
+    input().bound.track();
+    let k = key_of(c.id());
+    if k.chars().count() == 1 {
+        k.to_uppercase()
+    } else {
+        k
     }
 }
 
@@ -186,13 +210,24 @@ pub fn ControlsSettings() -> impl IntoView {
             return;
         }
         waiting.set(None);
+        // French: "une touche", "un bouton".
+        let pad = dev.get_untracked() == "pad";
         note.set(match result.as_str() {
-            "reserved" => tr(
+            "reserved" if pad => tr(
                 "That one stays for moving and switching tabs.",
-                "Celle-ci reste pour se déplacer et changer d'onglet.",
+                "Celui-ci reste pour se déplacer et changer d'onglet.",
+            )
+            .into(),
+            "reserved" => tr(
+                "That one stays for moving, menus and tabs.",
+                "Celle-ci reste pour se déplacer, les menus et les onglets.",
             )
             .into(),
             r => match r.strip_prefix("taken:").and_then(Ctrl::from_id) {
+                Some(c) if pad => tr(
+                    format!("Already used for “{}”.", c.name()),
+                    format!("Déjà pris pour « {} ».", c.name()),
+                ),
                 Some(c) => tr(
                     format!("Already used for “{}”.", c.name()),
                     format!("Déjà prise pour « {} ».", c.name()),

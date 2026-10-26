@@ -127,6 +127,10 @@ export function prompt(action, dev, fr) {
   return label(dev || device, action, fr, binds);
 }
 
+export function keyOf(action) {
+  return binds.keys[action] ?? "";
+}
+
 /** Bind the next key or pad button pressed to `action`; `sixfold-bindings` reports the outcome. */
 export function capture(dev, action) {
   capturing = { dev, action };
@@ -160,8 +164,11 @@ function send(type, key, repeat = false, target = document.activeElement ?? docu
 
 const ARROWS = { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" };
 const shown = (el) => el.getClientRects().length > 0;
-const layer = () => [...document.querySelectorAll('dialog[open], [aria-modal="true"]')].filter(shown).pop();
-const inWorld = (el) => document.querySelector(".world-stage") && !el?.closest?.('dialog, [aria-modal="true"]');
+const layer = () => globalThis.sixfoldLayer?.() ?? document.body; // a11y.js: the open modal, else the page
+const world = () => document.querySelector(".world-stage");
+// In the world, A is E (talk, use) while focus is on the scene or its act prompt; any other
+// control (Retry, the top bar, Skip) is clicked like everywhere else.
+const onStage = (el) => world() && (!el || el === document.body || !!el.closest?.(".world-stage, .world-prompt"));
 
 // A direction nothing took: step a slider, else move focus.
 function nudge(dir) {
@@ -175,8 +182,7 @@ function nudge(dir) {
 
 function activate() {
   const el = document.activeElement;
-  // In the world, A is E (talk, use) unless a dialog is open over it.
-  if (inWorld(el)) return void (send("keydown", KEY_DEFAULTS.act), send("keyup", KEY_DEFAULTS.act));
+  if (onStage(el)) return void (send("keydown", KEY_DEFAULTS.act), send("keyup", KEY_DEFAULTS.act));
   if (el && el !== document.body && el.matches('button, a[href], summary, input[type="checkbox"], input[type="radio"], [role="button"], [role="tab"], [role="option"]')) {
     return el.click();
   }
@@ -191,7 +197,7 @@ function activate() {
 
 function back() {
   const el = document.activeElement ?? document.body;
-  const layered = document.querySelector('dialog[open], [aria-modal="true"], .inspector.open, details[open]');
+  const layered = document.querySelector('dialog[open], [aria-modal="true"], .inspector.open');
   if (send("keydown", "Escape")) return;
   // A native modal closes on a real Escape only; a played one asks it the same way.
   const dialog = [...document.querySelectorAll("dialog[open]")].pop();
@@ -210,7 +216,7 @@ function back() {
 }
 
 function tab(step) {
-  const list = (layer() ?? document).querySelector('[role="tablist"]');
+  const list = layer().querySelector('[role="tablist"]');
   const tabs = [...(list?.querySelectorAll('[role="tab"]') ?? [])].filter(shown);
   if (!tabs.length) return;
   const at = tabs.findIndex((t) => t.getAttribute("aria-selected") === "true");
@@ -273,13 +279,16 @@ function onKey(e) {
   if (ours.has(e)) return;
   if (e.type === "keydown") setDevice("keys");
   if (capturing?.dev === "keys" && e.type === "keydown") {
+    // Tab still moves on (and gives up waiting): the panel stays keyboard-usable.
+    if (e.key === "Tab") return void ((capturing = null), changed("cancelled"));
     e.preventDefault();
     e.stopImmediatePropagation();
     if (e.repeat) return;
     if (e.key === "Escape" && capturing.action !== "cancel" && capturing.action !== "menu") return void ((capturing = null), changed("cancelled"));
     return bind(e.key);
   }
-  if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest?.("input, select, textarea")) return;
+  // Remapping is the world's (its controls); the duel and the menus keep their own keys.
+  if (!world() || e.ctrlKey || e.metaKey || e.altKey || e.target.closest?.("input, select, textarea")) return;
   const to = translateKey(e.key, binds.keys);
   if (to === undefined) return;
   e.preventDefault();
@@ -293,7 +302,11 @@ export function start() {
   started = true;
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) ?? "{}");
-    for (const d of ["keys", "pad"]) for (const a of ACTIONS) if (saved[d]?.[a] !== undefined) binds[d][a] = saved[d][a];
+    // Only well-typed values: a broken entry must not break every prompt.
+    for (const a of ACTIONS) {
+      if (typeof saved.keys?.[a] === "string" && saved.keys[a]) binds.keys[a] = saved.keys[a];
+      if (Number.isInteger(saved.pad?.[a])) binds.pad[a] = saved.pad[a];
+    }
   } catch {}
   device = matchMedia("(pointer: coarse)").matches ? "touch" : "keys";
   document.documentElement.dataset.input = device;

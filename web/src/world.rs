@@ -1285,11 +1285,7 @@ pub fn WorldScreen() -> impl IntoView {
     on_cleanup(move || journal_key.remove());
     // The gamepad's Start (gamepad.js): opens the menu, and leaves it the way Escape does.
     let pad_menu = window_event_listener_untyped("sixfold-input", move |e| {
-        let action = js_sys::Reflect::get(&e, &"detail".into())
-            .and_then(|d| js_sys::Reflect::get(&d, &"action".into()))
-            .ok()
-            .and_then(|a| a.as_string());
-        if action.as_deref() != Some("menu") {
+        if input::action(&e).as_deref() != Some("menu") {
             return;
         }
         match sheet.get_untracked() {
@@ -1324,13 +1320,13 @@ pub fn WorldScreen() -> impl IntoView {
             <header class="world-top">
                 <span class="wordmark small">"Sixfold"</span>
                 <span class="world-hint">{crate::input::world_hint}</span>
-                <button type="button" class="btn ghost journal-btn" aria-keyshortcuts="J"
+                <button type="button" class="btn ghost journal-btn" aria-keyshortcuts=move || input::shortcut(Ctrl::Journal)
                     aria-label="Journal" title=move || titled("Journal", Ctrl::Journal)
                     on:click=move |_| open_sheet(Sheet::Journal)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z" /><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" /></svg>
                     <span class="journal-label">"Journal"</span>
                 </button>
-                <button type="button" class="btn ghost journal-btn map-btn" aria-keyshortcuts="M"
+                <button type="button" class="btn ghost journal-btn map-btn" aria-keyshortcuts=move || input::shortcut(Ctrl::Map)
                     aria-label=tr("World map", "Carte du monde") title=move || titled(tr("World map", "Carte du monde"), Ctrl::Map)
                     on:click=move |_| open_sheet(Sheet::Atlas)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20Z" /><path d="M9 4v13.5M15 6.5V20" /></svg>
@@ -1377,7 +1373,7 @@ pub fn WorldScreen() -> impl IntoView {
             {move || (playing.get() && sheet.with(Option::is_none)).then(|| view! {
                 <button type="button" class="btn ghost world-skip" aria-keyshortcuts="Escape" on:click=move |_| skip()>
                     {tr("Skip", "Passer")}
-                    <kbd>{tr("Esc", "Échap")}</kbd>
+                    <kbd>{move || input::prompt(Ctrl::Cancel)}</kbd>
                 </button>
             })}
             <div class="world-rest" class:on=move || resting.get() aria-hidden="true"></div>
@@ -1450,7 +1446,7 @@ pub fn WorldScreen() -> impl IntoView {
                     Sheet::Item(id) => {
                         let (name, _, blurb) = item_info(&id);
                         // The run control, for the device in use (#69).
-                        let blurb = blurb.replace("{run}", &input::named(Ctrl::Run));
+                        let blurb = blurb.replace("{run}", &untrack(|| input::named(Ctrl::Run)));
                         let opens = objective::opens_names(&id);
                         view! {
                             <div class="item-got">

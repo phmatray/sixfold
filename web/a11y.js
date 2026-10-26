@@ -73,9 +73,11 @@ addEventListener("keydown", (e) => {
 // nearest control in that direction, inside the open modal if there is one.
 // With nothing focused (or `dir` null), the first control on screen.
 const AXES = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+// The open modal on top (a <dialog> or an [aria-modal]), else the page.
+window.sixfoldLayer = () =>
+  [...document.querySelectorAll('dialog[open], [aria-modal="true"]')].filter((d) => d.getClientRects().length).pop() ?? document.body;
 window.sixfoldMoveFocus = (dir) => {
-  const layers = [...document.querySelectorAll('dialog[open], [aria-modal="true"]')].filter((d) => d.getClientRects().length);
-  const root = layers[layers.length - 1] ?? document.body;
+  const root = window.sixfoldLayer();
   // checkVisibility: not inside a closed <details> or a hidden layer, which keep their boxes.
   const all = focusables(root).filter((el) => el.checkVisibility?.({ visibilityProperty: true }) ?? true);
   const cur = document.activeElement;
