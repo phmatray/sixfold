@@ -1164,6 +1164,7 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
 @media (max-width: 520px) { .world-hud .menu-btn { min-width: 44px; justify-content: center; padding-inline: 10px; } .journal-label { display: none; } }
 /* A menu sheet open over the scene: the HUD behind it steps away rather than peek round its edges. */
 .world:has(.world-sheet[open]:not(.reading-sheet)):not(:has(.challenge)) .world-top { opacity: 0; visibility: hidden; }
+.world:has(.world-sheet[open]) .world-prompt { visibility: hidden; }
 .options-hint { margin: 0 0 var(--space-4); color: var(--text-dim); max-width: 62ch; }
 
 /* The loading screen (index.html #loader, driven by loader.js): shown before the game runs. */
@@ -1397,8 +1398,9 @@ body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
 .reading-head, .reading-controls { animation: reading-in 260ms ease-out 900ms both; }
 @keyframes reading-in { from { opacity: 0; transform: translateY(6px); } }
 @media (prefers-reduced-motion: reduce) { .reading-head, .reading-controls { animation: none; } }
-.reading-controls .btn:not(.primary) { background: color-mix(in srgb, var(--felt-deep) 78%, transparent); }
-.reading-controls .btn[aria-pressed="true"] { border-color: var(--brass-hi); color: var(--brass-hi); }
+/* The kit's plates: paper for Back, Text and Close, the brass plank for Next; Text when on, a plank. */
+.reading-controls .btn[aria-pressed="true"] { background: var(--plank-deep); color: var(--paint); }
+.reading-controls .btn:not(.primary) kbd { border-color: color-mix(in srgb, var(--toon) 45%, transparent); }
 .reading-controls .btn:disabled { opacity: 0.45; }
 .reading-text {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -1421,6 +1423,8 @@ body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
   user-select: text;
   -webkit-user-select: text;
 }
+/* The page as text: the book behind steps back so the paper card reads alone. */
+.reading.plain .reading-surface { background: color-mix(in srgb, var(--toon) 72%, transparent); }
 .reading.plain .reading-text h3 { font-size: 1.2em; margin-bottom: 0.5em; color: #7a2e28; }
 .reading.plain.family-world .reading-text h3 { color: #2c5a4c; }
 .reading.plain.family-tales .reading-text h3 { color: #4a3a6c; }
@@ -1638,7 +1642,7 @@ input, select { caret-color: var(--brass-hi); }
 .offline-status { display: grid; gap: 8px; margin: 0 0 14px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--line); min-width: 0; }
 .offline-status legend { padding: 0; margin-bottom: 4px; font: 700 var(--fs-base)/1.2 var(--display); }
 .offline-status .note { margin: 0; }
-.save-settings textarea { width: 100%; min-height: 64px; resize: vertical; padding: 8px 10px; border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--felt-deep); color: var(--ink); font: var(--fs-sm)/1.4 ui-monospace, monospace; }
+.save-settings textarea { width: 100%; min-height: 64px; resize: vertical; padding: 8px 10px; border-radius: var(--radius-md); border: 2px solid var(--toon); background: var(--paper-hi); color: var(--toon); font: var(--fs-sm)/1.4 ui-monospace, monospace; }
 .file-pick { display: inline-flex; align-items: center; }
 .file-pick:focus-within { outline: 3px solid var(--focus); outline-offset: 3px; }
 .import-diff { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; margin: 0 0 10px; }
@@ -2352,9 +2356,10 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 
 /* My decks */
 .deck-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+/* The name and its facts keep room to read (large text, French): short of it, the actions go under them. */
 .deck-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   align-items: center;
   padding: 12px 14px;
@@ -2362,7 +2367,9 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
   background: color-mix(in srgb, var(--panel) 75%, transparent);
   border: 1px solid var(--line);
 }
-.deck-row .deck-star { width: 64px; }
+.deck-row .deck-star { flex: none; width: 64px; }
+.deck-row .deck-info { flex: 1 1 14em; min-width: 0; }
+.deck-row :is(.deck-actions, .confirm) { flex: 0 1 auto; margin-left: auto; }
 .deck-row .deck-star .card { --w: 64px; }
 .deck-row .deck-name { font-size: var(--fs-2xl); }
 .deck-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
@@ -2416,9 +2423,11 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .deck-group { display: flex; justify-content: space-between; font-size: var(--fs-md); color: var(--muted); margin: 14px 0 6px; }
 .deck-group span { font-variant-numeric: tabular-nums; }
 .deck-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.deck-line { display: grid; grid-template-columns: 2.4em auto minmax(0, 1fr) auto auto; gap: 8px; align-items: center; font-size: var(--fs-base); }
-.line-count { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
-.line-name { min-height: 44px; padding: 0 4px; border: 0; background: none; text-align: left; cursor: zoom-in; overflow-wrap: anywhere; line-height: 1.15; border-radius: var(--radius-sm); }
+/* A name keeps its words whole: short of room (large text), the − and + go under it, at the right. */
+.deck-line { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; font-size: var(--fs-base); }
+.line-count { flex: 0 0 2.4em; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.line-name { flex: 1 1 7.5em; min-width: 0; min-height: 44px; padding: 0 4px; border: 0; background: none; text-align: left; cursor: zoom-in; overflow-wrap: break-word; hyphens: auto; line-height: 1.15; border-radius: var(--radius-sm); }
+.line-step { display: flex; gap: 8px; margin-left: auto; }
 .line-name:hover { color: var(--brass-hi); }
 .deck-line .btn.icon { min-height: 44px; width: 44px; }
 .pip-trainer { width: 1.3em; height: 1.3em; border-radius: 4px; background: linear-gradient(160deg, #6b7c99, #273249); flex: none; }
@@ -2580,8 +2589,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
   .pick-grid { --w: calc((100vw - 32px - 24px) / 3); gap: 14px 12px; }
   .shelf-item { grid-template-columns: auto minmax(0, 1fr); padding: 12px; gap: 14px; }
   .shelf .pack { --pack-w: 84px; }
-  .deck-row { grid-template-columns: auto minmax(0, 1fr); }
-  .deck-row .deck-actions, .deck-row .confirm { grid-column: 1 / -1; justify-content: flex-start; max-width: none; }
+  .deck-row .deck-actions, .deck-row .confirm { flex-basis: 100%; justify-content: flex-start; max-width: none; }
   .deck-actions .btn { flex: 1 1 auto; text-align: center; }
   .deck-stats { gap: 8px 16px; padding: 12px 0; }
   .editor-main { padding: 0 16px 40px; }
@@ -3146,6 +3154,7 @@ p.atlas-pick { color: var(--muted); }
 .menu-tabs button[aria-selected="true"] { background: var(--sel-bg); border-color: var(--sel-line); color: var(--sel-ink); }
 .menu-panel { flex: 1; min-width: 0; padding: 16px 20px 24px; }
 .menu-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.menu-actions.shelf-head { justify-content: space-between; align-items: center; }
 .menu-split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
 .menu-split .side-panel { top: 120px; min-height: 0; max-height: calc(100dvh - 180px); border: 1px solid var(--line); border-radius: var(--radius-md); }
 .menu-panel .settings-body { max-width: 480px; margin: 0; box-shadow: none; }
@@ -4064,11 +4073,13 @@ button.pile { cursor: pointer; }
   margin-top: 18px;
   min-height: 48px;
   padding: 10px 26px;
-  border: 1px solid color-mix(in srgb, var(--brass) 50%, transparent);
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--felt-deep) 60%, transparent);
-  color: var(--brass-hi);
-  font: 700 var(--fs-xl)/1 var(--display);
+  /* The kit's act: the brass plank, as on the title it opens onto. */
+  border: var(--toon-w) solid var(--toon);
+  border-radius: 12px;
+  background: var(--plank-brass);
+  color: var(--toon);
+  box-shadow: var(--edge);
+  font: 800 var(--fs-xl)/1 var(--display);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
@@ -4077,10 +4088,12 @@ button.pile { cursor: pointer; }
 }
 .splash[data-step="2"] .press-start { opacity: 1; animation: press-breathe 2.4s ease-in-out 400ms infinite; }
 .press-start:focus-visible { outline-width: 2px; outline-offset: 5px; }
-.press-start:hover { background: color-mix(in srgb, var(--brass) 14%, transparent); }
+.press-start:hover { filter: brightness(1.08); }
 @keyframes logo-focus { from { opacity: 0; filter: blur(14px); letter-spacing: 0.02em; } }
 @keyframes facet-on { to { opacity: 1; } }
-@keyframes press-breathe { 50% { border-color: color-mix(in srgb, var(--brass-hi) 95%, transparent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--brass) 8%, transparent); } }
+@keyframes press-breathe { 50% { translate: 0 -2px; filter: brightness(1.08); } }
+/* The opening is no place for "Saved": the first write of a new player happens behind it. */
+body:has(.splash) .autosave { display: none; }
 
 /* ---------- Screen transitions (crate::go, its kind on html[data-swap]) ---------- */
 
@@ -4446,6 +4459,13 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 .title-notice { grid-area: brand; align-self: end; margin: 0; display: flex; gap: 8px; align-items: center; }
 .title-menu { grid-area: menu; align-self: center; position: relative; }
 .title .menu { margin: 0; max-width: none; gap: 8px; }
+/* The help line: a paper note pinned beside the plank under the cursor, the whole of its tag. */
+.title-help {
+  position: absolute; left: calc(100% + 20px); translate: 0 -50%; z-index: 1; width: max-content; max-width: min(36ch, 40vw); margin: 0;
+  padding: 6px 12px; border-radius: 8px; background: var(--paper); color: var(--toon); border: 2px solid var(--toon); box-shadow: 0 3px 0 var(--toon);
+  font-size: var(--fs-md); font-weight: 700; pointer-events: none;
+}
+.title-help::before { content: ""; position: absolute; right: 100%; top: 50%; translate: 0 -50%; border: 7px solid transparent; border-right-color: var(--toon); }
 .title-foot { grid-area: foot; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 24px; margin: 0; }
 .title-foot .foot-menus { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .title-legal { margin: 0; color: var(--paint); text-shadow: 0 1px 2px var(--toon); font-size: var(--fs-xs); max-width: 46ch; text-align: right; }
@@ -4503,6 +4523,7 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
   .title-foot .btn { padding-inline: 10px; font-size: var(--fs-sm); white-space: nowrap; }
   /* A phone: the act item on its own, the rest a two-by-three grid of planks. */
   .title .menu { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .title-help { display: none; }
   .title .menu li:first-child, .title .menu li:last-child:nth-child(even) { grid-column: 1 / -1; }
   .title .menu-item:not(.primary) { min-height: 52px; padding: 6px 10px; column-gap: 8px; }
   .title .menu-item:not(.primary) .menu-label { font-size: var(--fs-md); line-height: 1.1; }
@@ -4703,7 +4724,8 @@ button.ch-deck-now:active { transform: translateY(3px); box-shadow: 0 0 0 var(--
   .ch-deck-now { min-height: 52px; padding-block: 4px; }
   .ch-star .card { --w: 28px; }
   .ch-deck-name { font-size: var(--fs-lg); }
-  .ch-actions { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 44px; padding: 0 0 0 44px; }
+  /* Room for the hand between and before the two, not so much that large text spills out of Challenge. */
+  .ch-actions { display: grid; grid-template-columns: auto minmax(max-content, 1fr); gap: 10px 26px; padding: 0 0 0 26px; }
   .challenge .ch-actions .btn { min-width: 0; min-height: 50px; padding-inline: 8px; font-size: var(--fs-lg); }
   .challenge kbd { display: none; }
   /* A taller sheet on a phone: the scene slides further. */

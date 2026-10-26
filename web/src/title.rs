@@ -77,7 +77,7 @@ fn MenuItem(
 ) -> impl IntoView {
     view! {
         <li>
-            <button type="button" class="menu-item" class:primary=primary on:click=move |_| crate::go(to)>
+            <button type="button" class="menu-item" class:primary=primary on:click=move |e| { note_entry(&e); crate::go(to) }>
                 <MenuIcon name=icon />
                 <span class="menu-label">{label}</span>
                 <span class="menu-sub">{move || sub.get()}</span>
@@ -86,6 +86,24 @@ fn MenuItem(
                 })}
             </button>
         </li>
+    }
+}
+
+/// Remember which entry was opened, so coming back to the title puts the cursor on it.
+fn note_entry(e: &web_sys::MouseEvent) {
+    use wasm_bindgen::JsCast;
+    let Some(me) = e
+        .current_target()
+        .and_then(|t| t.dyn_into::<web_sys::Node>().ok())
+    else {
+        return;
+    };
+    if let Ok(all) = document().query_selector_all(".title .menu .menu-item") {
+        if let Some(i) =
+            (0..all.length()).find(|&i| all.get(i).is_some_and(|n| n.is_same_node(Some(&me))))
+        {
+            crate::opened_title_entry(i as usize);
+        }
     }
 }
 
@@ -98,7 +116,7 @@ fn LessonItem(
 ) -> impl IntoView {
     view! {
         <li>
-            <button type="button" class="menu-item" class:primary=primary on:click=move |_| crate::coach::start(Screen::Title)>
+            <button type="button" class="menu-item" class:primary=primary on:click=move |e| { note_entry(&e); crate::coach::start(Screen::Title) }>
                 <MenuIcon name=if primary { "learn" } else { "howto" } />
                 <span class="menu-label">{label}</span>
                 <span class="menu-sub">{sub}</span>
@@ -107,22 +125,40 @@ fn LessonItem(
     }
 }
 
+/// Note (`set`) that the language switch should have focus after the reload, or take that
+/// note back and say whether it was there.
+fn refocus_lang(set: bool) -> bool {
+    const KEY: &str = "sixfold.refocus-lang";
+    let Some(ss) = web_sys::window().and_then(|w| w.session_storage().ok().flatten()) else {
+        return false;
+    };
+    if set {
+        return ss.set_item(KEY, "1").is_ok();
+    }
+    let was = ss.get_item(KEY).ok().flatten().is_some();
+    let _ = ss.remove_item(KEY);
+    was
+}
+
 /// EN | FR. Switching reloads the page in the other language.
 #[component]
 fn LangSwitch() -> impl IntoView {
     let now = sixfold_engine::lang();
     // Switched from the world's menu, the reload lands back in the world.
     let screen = use_context::<RwSignal<Screen>>();
-    let switch = move |l: Lang| {
+    let switch = move |l: Lang, keys: bool| {
         if screen.is_some_and(|s| s.get_untracked() == Screen::World) {
             crate::world::reopen_after_reload();
+        } else if keys {
+            // Pressed with the keys or a pad: after the reload, the cursor is back on the switch.
+            refocus_lang(true);
         }
         store::set_lang(l)
     };
     let button = move |l: Lang, short: &'static str, name: &'static str| {
         view! {
             <button type="button" lang=l.code() aria-label=name aria-pressed=(l == now).to_string()
-                on:click=move |_| if l != now { switch(l) }>{short}</button>
+                on:click=move |e| if l != now { switch(l, e.detail() == 0) }>{short}</button>
         }
     };
     view! {
@@ -225,7 +261,7 @@ pub fn OptionsPanel(
             } else {
                 view! {
                     <div class="row">
-                        <button type="button" class="btn" on:click=move |_| confirm.set(true)>{tr("Reset progress…", "Réinitialiser…")}</button>
+                        <button type="button" class="btn ghost danger" on:click=move |_| confirm.set(true)>{tr("Reset progress…", "Réinitialiser…")}</button>
                         {move || done.get().then(|| view! { <span class="note" role="status">{tr("Progress reset. You start with 3 packs.", "Progression effacée. Vous repartez avec 3 boosters.")}</span> })}
                     </div>
                 }.into_any()
@@ -327,6 +363,32 @@ pub fn TitleScreen() -> impl IntoView {
             format!("{n} boosters à ouvrir"),
         ),
     };
+    // The help line (DESIGN.md): the whole of an entry's note, on paper beside the plank under
+    // the pointer or the focus (its tag on the plank may be cut short). The act entry shows its own.
+    let help = RwSignal::new(None::<(String, i32)>);
+    let show = move |t: Option<web_sys::EventTarget>| {
+        use wasm_bindgen::JsCast;
+        let item = t
+            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+            .and_then(|t| t.closest(".menu-item:not(.primary)").ok().flatten())
+            .and_then(|i| i.dyn_into::<web_sys::HtmlElement>().ok());
+        help.set(item.map(|i| {
+            let text = i
+                .query_selector(".menu-sub")
+                .ok()
+                .flatten()
+                .and_then(|s| s.text_content());
+            (
+                text.unwrap_or_default(),
+                i.offset_top() + i.offset_height() / 2,
+            )
+        }));
+    };
+    if refocus_lang(false) {
+        request_animation_frame(|| {
+            crate::focus_first(&[".title-foot .lang-switch [aria-pressed=\"true\"]"])
+        });
+    }
     view! {
         <main class="title">
             <Backdrop />
@@ -342,7 +404,9 @@ pub fn TitleScreen() -> impl IntoView {
             })}
             // A new save starts with the lesson; after it, Continue leads
             // back into the world, and the lesson stays a menu away.
-            <nav class="title-menu" aria-label=tr("Main menu", "Menu principal")>
+            <nav class="title-menu" aria-label=tr("Main menu", "Menu principal")
+                on:mouseover=move |e| show(e.target()) on:focusin=move |e| show(e.target())
+                on:mouseleave=move |_| help.set(None) on:focusout=move |_| help.set(None)>
                 <ul class="menu">
                     {move || if due.get() {
                         view! { <LessonItem primary=true label=tr("Learn to play", "Apprendre à jouer") sub=tr("A guided first duel, four turns long", "Un premier duel guidé, en quatre tours") /> }.into_any()
@@ -361,6 +425,10 @@ pub fn TitleScreen() -> impl IntoView {
                         view! { <LessonItem label=tr("How to play", "Comment jouer") sub=tr("Replay the guided first duel", "Rejouer le premier duel guidé") /> }.into_any()
                     }}
                 </ul>
+                // Read out already: each entry's name carries its note.
+                {move || help.get().map(|(text, y)| view! {
+                    <p class="title-help" aria-hidden="true" style=format!("top:{y}px")>{text}</p>
+                })}
             </nav>
             <footer class="title-foot foot">
                 <div class="foot-menus">

@@ -232,6 +232,8 @@ thread_local! {
     static SCREEN: std::cell::Cell<Option<RwSignal<Screen>>> = const { std::cell::Cell::new(None) };
     /// The screen a transition is on its way to (a repeated press doesn't go twice).
     static GOING: std::cell::Cell<Option<Screen>> = const { std::cell::Cell::new(None) };
+    /// The title's entry last opened: back on the title, the cursor is on it again.
+    static TITLE_ENTRY: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
     /// What had focus when the screen began to change (the control that changed it).
     static FOCUS_FROM: std::cell::RefCell<Option<web_sys::Element>> = const { std::cell::RefCell::new(None) };
 }
@@ -308,6 +310,11 @@ pub fn go_with(to: Screen, then: impl FnOnce() + 'static) {
     swap(kind, &cb, &done);
 }
 
+/// The title's entry the player just opened (its place in the menu), to come back to.
+pub fn opened_title_entry(i: usize) {
+    TITLE_ENTRY.set(Some(i));
+}
+
 /// The next screen change lands focus on the first menu item (after "Press to
 /// start", where the player is about to choose, not read).
 pub fn focus_menu_next() {
@@ -335,10 +342,23 @@ pub(crate) fn focus_heading() {
     if moved.is_some() {
         return;
     }
-    let el = [menu, "[data-screen-focus]", "h1"]
-        .iter()
-        .find_map(|s| doc.query_selector(s).ok().flatten())
-        .or_else(|| doc.query_selector("main").ok().flatten());
+    // Back on the title: the entry the player opened, not the name painted on the sign.
+    let on_title = doc.query_selector(".title .menu").ok().flatten().is_some();
+    let entry = on_title
+        .then(|| TITLE_ENTRY.take())
+        .flatten()
+        .and_then(|i| {
+            doc.query_selector_all(".title .menu .menu-item")
+                .ok()
+                .and_then(|l| l.get(i as u32))
+                .and_then(|n| n.dyn_into::<web_sys::Element>().ok())
+        });
+    let el = entry.or_else(|| {
+        [menu, "[data-screen-focus]", "h1"]
+            .iter()
+            .find_map(|s| doc.query_selector(s).ok().flatten())
+            .or_else(|| doc.query_selector("main").ok().flatten())
+    });
     if let Some(el) = el.and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok()) {
         if el.tab_index() < 0 && !el.has_attribute("tabindex") {
             let _ = el.set_attribute("tabindex", "-1");

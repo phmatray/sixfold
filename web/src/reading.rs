@@ -178,12 +178,12 @@ pub fn Reading(
                     <span aria-hidden="true">"←"</span>
                     <span class="reading-label">{tr("Back", "Retour")}</span>
                 </button>
-                <button type="button" class="btn ghost reading-plain" aria-pressed=move || plain.get().to_string()
+                <button type="button" class="btn reading-plain" aria-pressed=move || plain.get().to_string()
                     title=tr("Show the page as plain text", "Afficher la page en texte simple")
                     on:click=move |_| plain.update(|p| *p = !*p)>
                     {tr("Text", "Texte")}
                 </button>
-                <button type="button" class="btn ghost reading-close" aria-keyshortcuts="Escape" on:click=move |_| close.run(())>
+                <button type="button" class="btn reading-close" aria-keyshortcuts="Escape" on:click=move |_| close.run(())>
                     {tr("Close", "Fermer")}
                     <kbd>{move || input::prompt(Ctrl::Cancel)}</kbd>
                 </button>

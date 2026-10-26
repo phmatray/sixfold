@@ -189,7 +189,7 @@ pub fn SlotPicker() -> impl IntoView {
                                     draft.set(name());
                                     renaming.set(Some(n));
                                 }>{tr("Rename", "Renommer")}<span class="sr-only">{move || format!(" {}", name())}</span></button>
-                                <button type="button" class="btn ghost" id=format!("slot-delete-{n}") on:click=move |_| {
+                                <button type="button" class="btn ghost danger" id=format!("slot-delete-{n}") on:click=move |_| {
                                     renaming.set(None);
                                     deleting.set(Some(n));
                                 }>{tr("Delete", "Supprimer")}<span class="sr-only">{move || format!(" {}", name())}</span></button>

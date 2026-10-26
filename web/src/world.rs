@@ -1827,7 +1827,8 @@ fn GameMenu(
                 {move || match (tab.get(), editing.get()) {
                     (MenuTab::Decks, Some(i)) => view! { <EditorPanel index=i on_done=done_editing /> }.into_any(),
                     (MenuTab::Decks, None) => view! {
-                        <div class="menu-actions">
+                        <div class="menu-actions shelf-head">
+                            <h2>{tr("Your decks", "Vos decks")}</h2>
                             <button type="button" class="btn primary" on:click=move |_| { if let Some(i) = new_deck() { edit(i) } }>{tr("New deck", "Nouveau deck")}</button>
                         </div>
                         <DecksPanel on_edit=Callback::new(edit) />

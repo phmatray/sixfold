@@ -733,7 +733,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 </div>
             })}
             <div class="bench-actions" role="toolbar" aria-label=tr("Deck tools", "Outils du deck")>
-                <button type="button" class="btn build" class:primary=move || total() != 0 aria-haspopup="dialog" on:click=move |_| building.set(true)>
+                <button type="button" class="btn build" class:primary=move || total() != 0 && !problems().is_empty() aria-haspopup="dialog" on:click=move |_| building.set(true)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.3L20 9l-4.4 3.7L17 18.5 12 15.6 7 18.5l1.4-5.8L4 9l5.8-.7z" /></svg>
                     {tr("Build for me", "Construire pour moi")}
                 </button>
@@ -1028,12 +1028,14 @@ fn DeckLine(
             <button type="button" class="line-name" on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
                 {def.label()}
             </button>
+            <span class="line-step">
             <button type="button" class="btn icon" aria-label=tr(format!("Remove one {}", def.label()), format!("Retirer un exemplaire {}", de(def.label()))) on:click=remove>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /></svg>
             </button>
             <button type="button" class="btn icon" aria-label=tr(format!("Add one {}", def.label()), format!("Ajouter un exemplaire {}", de(def.label()))) on:click=move |_| { try_add(id, profile, draft, msg, None); }>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
             </button>
+            </span>
         </li>
     }
 }
