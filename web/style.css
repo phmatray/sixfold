@@ -1163,7 +1163,7 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
 .world-hud .menu-btn { display: inline-flex; align-items: center; gap: 6px; }
 @media (max-width: 520px) { .world-hud .menu-btn { min-width: 44px; justify-content: center; padding-inline: 10px; } .journal-label { display: none; } }
 /* A menu sheet open over the scene: the HUD behind it steps away rather than peek round its edges. */
-.world:has(.world-sheet[open]:not(:has(.challenge, .reading))) .world-top { opacity: 0; visibility: hidden; }
+.world:has(.world-sheet[open]:not(.reading-sheet)):not(:has(.challenge)) .world-top { opacity: 0; visibility: hidden; }
 .options-hint { margin: 0 0 var(--space-4); color: var(--text-dim); max-width: 62ch; }
 
 /* The loading screen (index.html #loader, driven by loader.js): shown before the game runs. */
@@ -2872,6 +2872,9 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .world-sheet:has(.press) { scroll-padding-bottom: 150px; }
 .world-sheet .sheet-head .facets { margin-left: auto; }
 .world-sheet .sheet-head h2 { min-width: 0; }
+/* A button's label stays on one line (large text on a phone): the head wraps instead. */
+.world-sheet .sheet-head { flex-wrap: wrap; }
+.world-sheet .sheet-head .btn { white-space: nowrap; }
 .shop { display: grid; gap: 18px; margin-top: 4px; }
 .shop h3, .quest h3 { font-size: var(--fs-xl); }
 .shop section { display: grid; gap: 10px; }

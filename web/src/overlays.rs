@@ -927,12 +927,12 @@ pub fn DuelMenu(
                     <crate::audio::AudioSettings />
                     <fieldset class="seg">
                         <legend>{tr("Opponent's speed", "Vitesse de l'adversaire")}</legend>
-                        <span class="seg-tray">
+                        <div class="seg-tray">
                         <label><input type="radio" name="speed" prop:checked=move || !ctl.fast.get()
                             on:change=move |_| { ctl.fast.set(false); crate::store::set_fast_opponent(false); } />{tr("Normal", "Normale")}</label>
                         <label><input type="radio" name="speed" prop:checked=move || ctl.fast.get()
                             on:change=move |_| { ctl.fast.set(true); crate::store::set_fast_opponent(true); } />{tr("Fast", "Rapide")}</label>
-                        </span>
+                        </div>
                     </fieldset>
                     <p class="fine">{tr("Only the pace changes. During their turn, hold the fast-forward button for even quicker play; every move stays in the history.",
                         "Seul le rythme change. Pendant leur tour, maintenez le bouton d'accélération ; chaque coup reste dans l'historique.")}</p>
