@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 /**
  * The save in slot `n` as the game stored it (`sixfold.save.<n>` in localStorage):
@@ -37,4 +37,22 @@ export async function title(page: Page) {
 /** A title menu entry, by its label (each entry also carries a subtitle). */
 export function menuItem(page: Page, label: string) {
   return page.getByRole("navigation", { name: "Main menu" }).getByRole("button", { name: new RegExp(`^${label}`) });
+}
+
+/**
+ * Press `key` until `target` has focus. One key, one move: after each press it waits (frame by frame,
+ * at most a second) for focus to leave where it was, so a slow frame never has two keys land on the
+ * same control, nor a key land before the app moved focus itself.
+ */
+export async function moveTo(page: Page, target: Locator, key = "Tab", tries = 60) {
+  const here = () => target.evaluate((el) => el === document.activeElement, undefined, { timeout: 2_000 }).catch(() => false);
+  for (let i = 0; i < tries; i++) {
+    if (await here()) return;
+    await page.evaluate(() => ((window as unknown as { was: Element | null }).was = document.activeElement));
+    await page.keyboard.press(key);
+    await page
+      .waitForFunction(() => document.activeElement !== (window as unknown as { was: Element | null }).was, null, { polling: "raf", timeout: 1_000 })
+      .catch(() => {});
+  }
+  await expect(target).toBeFocused();
 }

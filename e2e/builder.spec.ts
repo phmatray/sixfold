@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { menuItem, readSave, title } from "./helpers";
+import { menuItem, readSave, title, moveTo } from "./helpers";
 
 /** From the title to the deck editor of the first deck (the starter). */
 async function editStarter(page: Page) {
@@ -26,15 +26,6 @@ async function copies(page: Page, name: string): Promise<number> {
   const line = page.getByRole("tabpanel", { name: /^Deck/ }).locator(".deck-line", { hasText: name });
   if ((await line.count()) === 0) return 0;
   return Number((await line.locator(".line-count").innerText()).replace("×", ""));
-}
-
-/** Press `key` (Tab by default) until `target` has focus. */
-async function moveTo(page: Page, target: Locator, key = "Tab") {
-  for (let i = 0; i < 60; i++) {
-    if (await target.evaluate((el) => el === document.activeElement).catch(() => false)) return;
-    await page.keyboard.press(key);
-  }
-  await expect(target).toBeFocused();
 }
 
 test("build for me makes a legal deck from your cards and says why", async ({ page }) => {

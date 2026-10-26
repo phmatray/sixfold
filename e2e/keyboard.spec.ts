@@ -1,14 +1,5 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
-import { menuItem, title } from "./helpers";
-
-/** Press `key` (Tab by default) until `target` has focus. */
-async function moveTo(page: Page, target: Locator, key = "Tab", tries = 40) {
-  for (let i = 0; i < tries; i++) {
-    if (await target.evaluate((el) => el === document.activeElement).catch(() => false)) return;
-    await page.keyboard.press(key);
-  }
-  await expect(target).toBeFocused();
-}
+import { expect, test } from "@playwright/test";
+import { menuItem, title, moveTo } from "./helpers";
 
 test("keyboard only: title, duel setup, a duel started, then left", async ({ page }) => {
   await page.goto("/");

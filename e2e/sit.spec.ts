@@ -48,8 +48,11 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
   // Seated, a reload stands the hero on the tile in front of the bench.
   await page.evaluate(() => (document.querySelector(".world-host") as any).sixfoldWarp("overworld", 22, 17, "n"));
   await expect.poll(() => at(page)).toBe("overworld,22,17,n");
+  await expect(sit).toBeVisible(); // the warp has faded in: E acts again
   await page.keyboard.press("e");
   await expect.poll(() => sitting(page)).toBe(true);
+  // Sitting turns the hero at once, but the turn is saved on the next frame: wait for the save, then reload.
+  await expect.poll(() => at(page)).toBe("overworld,22,17,s");
   await page.reload();
   await menuItem(page, "Continue").click();
   await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });

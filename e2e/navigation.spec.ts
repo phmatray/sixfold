@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { menuItem, title } from "./helpers";
+import { menuItem, title, moveTo } from "./helpers";
 
 // #100: every menu is driven by the keys and by a pad. The painted hand points at
 // the focused control; the arrows (a pad's D-pad) move it; Enter (A) confirms;
@@ -25,15 +25,6 @@ async function pointsAt(page: Page, target: Locator) {
       }),
     )
     .toMatch(/^(left|right|above|below)$/);
-}
-
-/** Press `key` until `target` has focus. */
-async function moveTo(page: Page, target: Locator, key: string) {
-  for (let i = 0; i < 20; i++) {
-    if (await target.evaluate((el) => el === document.activeElement).catch(() => false)) return;
-    await page.keyboard.press(key);
-  }
-  await expect(target).toBeFocused();
 }
 
 test("keyboard: arrows move the hand through the title and two menu screens, Escape goes back", async ({ page }) => {
