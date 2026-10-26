@@ -33,13 +33,17 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
   await expect.poll(() => sitting(page)).toBe(false);
   await expect(page.getByRole("dialog", { name: "Menu" })).toBeHidden();
 
-  // Facing away now: turn back, sit with the prompt, and a move key stands up (on the same tile).
-  await page.keyboard.press("ArrowUp");
+  // Facing away now: turn back (held until a frame sees it; the bench stops the step), sit with the prompt,
+  // and a move key stands up and walks on.
+  await page.keyboard.down("ArrowUp");
+  await expect.poll(() => at(page)).toBe("overworld,22,17,n");
+  await page.keyboard.up("ArrowUp");
   await sit.click();
   await expect.poll(() => sitting(page)).toBe(true);
-  await page.keyboard.press("ArrowLeft");
+  await page.keyboard.down("ArrowLeft");
   await expect.poll(() => sitting(page)).toBe(false);
-  expect(await at(page)).toBe("overworld,22,17,s");
+  await page.keyboard.up("ArrowLeft");
+  await expect.poll(() => at(page)).toMatch(/^overworld,\d+,17,w$/);
 
   // Seated, a reload stands the hero on the tile in front of the bench.
   await page.evaluate(() => (document.querySelector(".world-host") as any).sixfoldWarp("overworld", 22, 17, "n"));

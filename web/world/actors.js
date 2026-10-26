@@ -12,6 +12,8 @@ export const BACK = { n: "s", s: "n", e: "w", w: "e" };
 export const angle = (f) => Math.atan2(DIR[f][0], DIR[f][1]);
 export const key = (x, z) => `${x},${z}`;
 const TURN_SPEED = Math.PI / 2 / 0.12; // a quarter turn in 0.12 s
+// Pose clips played once, held on their last frame (`a.pose`: sitting in seat.js, a book off a shelf).
+const ONCE = new Set(["sitdown", "standup", "reach", "putback"]);
 export const FIDGET_AFTER = 6; // seconds idle before the hero fidgets and the camera leans in
 
 function radial(inner, outer) {
@@ -129,15 +131,15 @@ export function animateActor(a, dt, reduced) {
   const walking = !!a.step;
   a.t += dt;
   if (a.mixer) {
-    // `pose`: a clip held over the rest (seat.js: sitdown, sit, standup; the first and last play once).
+    // `pose`: a clip held over the rest (seat.js: sitdown, sit, standup; ONCE ones play once).
     const want = a.pose && a.actions[a.pose] ? a.pose : walking ? (a.running && a.actions.run ? "run" : "walk") : a.idleName;
     if (want !== a.clip && a.actions[want]) {
-      const once = want === "sitdown" || want === "standup", fade = reduced && (a.sit || a.clip === "sit") ? 0 : 0.15; // reduced motion: sit and stand at once
+      const once = ONCE.has(want), fade = reduced && (a.sit || a.clip === "sit") ? 0 : 0.15; // reduced motion: sit and stand at once
       if (fade) a.actions[a.clip]?.fadeOut(fade);
       else a.actions[a.clip]?.stop();
       const next = a.actions[want].reset().setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
       next.clampWhenFinished = once;
-      if (once && a.sit) next.time = (want === "sitdown" ? a.sit.k : 1 - a.sit.k) * next.getClip().duration; // turned back half way: from where it is
+      if (once && a.sit && (want === "sitdown" || want === "standup")) next.time = (want === "sitdown" ? a.sit.k : 1 - a.sit.k) * next.getClip().duration; // turned back half way: from where it is
       (fade ? next.fadeIn(fade) : next).play();
       a.clip = want;
     }
