@@ -82,6 +82,32 @@ pub fn set_lang(l: sixfold_engine::Lang) {
     }
 }
 
+const TEXT: &str = "sixfold.text";
+
+/// The text size in percent: 100, 125 or 150 (a browser preference, like the language).
+pub fn text_size() -> u32 {
+    get(TEXT)
+        .and_then(|v| v.parse().ok())
+        .filter(|p| [100, 125, 150].contains(p))
+        .unwrap_or(100)
+}
+
+/// Keep the choice and apply it at once (the `--ts` multiplier in style.css).
+pub fn set_text_size(percent: u32) {
+    set(TEXT, &percent.to_string());
+    apply_text_size();
+}
+
+pub fn apply_text_size() {
+    let scale = f64::from(text_size()) / 100.0;
+    if let Some(html) = web_sys::window()
+        .and_then(|w| w.document())
+        .and_then(|d| d.document_element())
+    {
+        let _ = html.set_attribute("style", &format!("--ts: {scale}"));
+    }
+}
+
 const FAST: &str = "sixfold.fast";
 const TIPS: &str = "sixfold.tips";
 
