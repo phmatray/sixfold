@@ -4443,6 +4443,8 @@ button.ch-deck-now:active { transform: translateY(3px); box-shadow: 0 0 0 var(--
   .ch-actions { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 44px; padding: 0 0 0 44px; }
   .challenge .ch-actions .btn { min-width: 0; min-height: 50px; padding-inline: 8px; font-size: var(--fs-lg); }
   .challenge kbd { display: none; }
+  /* A taller sheet on a phone: the scene slides further. */
+  .world:has(.world-sheet[open] > .challenge) .world-host { transform: translateY(-27vh); }
 }
 @media (prefers-reduced-motion: reduce) {
   .world-sheet .ch-name { animation: none; }
