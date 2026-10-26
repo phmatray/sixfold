@@ -1359,7 +1359,7 @@ fn Facets() -> impl IntoView {
             // Keyed on `pop`, so the animation restarts on every gain.
             {move || {
                 let gains = pop.get();
-                view! { <span class="facets-n" class:pop={gains > 0}>
+                view! { <span class="facets-n" class:gain={gains > 0}>
                     <span class="hex" aria-hidden="true"></span>{move || coins.get()}
                 </span> }
             }}

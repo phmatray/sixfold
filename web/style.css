@@ -2173,11 +2173,11 @@ select option { background: var(--panel); color: var(--ink); }
 .facets-n { display: inline-flex; align-items: center; gap: 7px; }
 .facets .hex, .gem { width: 17px; flex: none; aspect-ratio: 1 / 1.1; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: linear-gradient(150deg, #e9fbff 10%, #7fd3e6 45%, #2f8fae 80%); }
 .reward .gem { width: 34px; }
-.facets-n.pop { animation: facets-pop 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
-.facets-n.pop .hex { animation: facets-spin 0.6s ease-out; }
+.facets-n.gain { animation: facets-pop 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+.facets-n.gain .hex { animation: facets-spin 0.6s ease-out; }
 @keyframes facets-pop { 30% { transform: scale(1.28); color: #bff1ff; } }
 @keyframes facets-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .facets-n.pop, .facets-n.pop .hex { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .facets-n.gain, .facets-n.gain .hex { animation: none; } }
 .found-card { --w: 120px; flex: none; transform: rotate(-3deg); }
 .world-top .seal-badge + .btn { margin-left: 0; }
 
