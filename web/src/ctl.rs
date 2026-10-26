@@ -14,7 +14,9 @@ use leptos::prelude::*;
 use sixfold_engine::ai::{Ai, Difficulty, Style};
 use sixfold_engine::campaign::{rival, RivalLines};
 use sixfold_engine::tutorial;
-use sixfold_engine::{card, fr, tr, Action, CardId, Config, Event, Game, PromptKind};
+use sixfold_engine::{
+    card, fr, summarise_turn, tr, Action, CardId, Config, Event, Game, PromptKind,
+};
 
 pub const HUMAN: usize = 0;
 pub const AI: usize = 1;
@@ -170,7 +172,10 @@ pub struct Ctl {
     pub said: RwSignal<Option<Said>>,
     /// The rival lines already said this duel, one bit each.
     spoken: StoredValue<u8>,
-    heard: StoredValue<Vec<String>>,
+    /// What happened since the human last acted, for [`Ctl::announce`].
+    heard: StoredValue<Vec<Event>>,
+    /// Rule tips that came up meanwhile, read after it.
+    heard_tips: StoredValue<Vec<String>>,
     pub setup: StoredValue<Option<Setup>>,
     real: StoredValue<Option<Game>>,
     ai: StoredValue<Option<Ai>>,
@@ -215,6 +220,7 @@ impl Ctl {
             said: RwSignal::new(None),
             spoken: StoredValue::new(0),
             heard: StoredValue::new(vec![]),
+            heard_tips: StoredValue::new(vec![]),
             setup: StoredValue::new(None),
             real: StoredValue::new(None),
             ai: StoredValue::new(None),
@@ -272,6 +278,7 @@ impl Ctl {
         self.turn_of.set_value((0, 0));
         self.tip.set(None);
         self.heard.set_value(vec![]);
+        self.heard_tips.set_value(vec![]);
         self.announce.set(String::new());
         self.said.set(None);
         self.spoken.set_value(0);
@@ -404,8 +411,16 @@ impl Ctl {
                 .heard
                 .try_update_value(std::mem::take)
                 .unwrap_or_default();
-            if !heard.is_empty() {
-                self.announce.set(summary(&heard));
+            let mut said = summarise_turn(&heard, HUMAN);
+            for tip in self
+                .heard_tips
+                .try_update_value(std::mem::take)
+                .unwrap_or_default()
+            {
+                said = format!("{said} {tip}").trim_start().to_string();
+            }
+            if !said.is_empty() {
+                self.announce.set(said);
             }
             #[cfg(debug_assertions)]
             self.autoplay(generation);
@@ -547,7 +562,7 @@ impl Ctl {
         }
         tip.mark_seen();
         self.tip_turn.set_value(self.turn_of.get_value().1);
-        self.heard
+        self.heard_tips
             .update_value(|h| h.push(format!("{}: {}", tip.title(), tip.text())));
         self.tip.set(Some((tip, player)));
     }
@@ -713,13 +728,7 @@ impl Ctl {
         let key = self.next_key();
         let text = event.describe(HUMAN);
         let kind = log_kind(event);
-        if !matches!(
-            event,
-            Event::Shuffled { .. } | Event::BetweenTurns | Event::TurnEnded { .. }
-        ) && !text.is_empty()
-        {
-            self.heard.update_value(|h| h.push(text.clone()));
-        }
+        self.heard.update_value(|h| h.push(event.clone()));
         let reason = match event {
             Event::PrizesSet { .. } => Some(tr("Who goes first?", "Qui commence ?").to_string()),
             Event::TurnStarted { .. } => Some(tr("Coin flip", "Pile ou face").into()),
@@ -1028,29 +1037,6 @@ impl Ctl {
             _ => 0,
         }
     }
-}
-
-/// The lines heard since the human last acted, as one sentence each; a line
-/// repeated in a row ("Opponent drew a card") is said once with a count.
-fn summary(lines: &[String]) -> String {
-    let mut out: Vec<String> = vec![];
-    let mut i = 0;
-    while i < lines.len() {
-        let n = lines[i..].iter().take_while(|l| **l == lines[i]).count();
-        let line = lines[i].trim_end_matches('.');
-        // "You win!" keeps its own mark rather than gaining a full stop.
-        let stop = if line.ends_with(['!', '?']) { "" } else { "." };
-        out.push(if n > 1 {
-            tr(
-                format!("{line} ({n} times){stop}"),
-                format!("{line} ({n} fois){stop}"),
-            )
-        } else {
-            format!("{line}{stop}")
-        });
-        i += n;
-    }
-    out.join(" ")
 }
 
 fn log_kind(e: &Event) -> &'static str {

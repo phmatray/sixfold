@@ -64,6 +64,7 @@ pub use damage::Hit;
 pub use deck::{
     validate_deck, AddError, DeckError, DeckList, DeckListError, SortBy, DECK_SIZE, MAX_COPIES,
 };
+pub use describe::summarise_turn;
 pub use effect::{Choice, Effect, Find};
 pub use game::{Config, End, Game, GameSummary, SetupError, MAX_BENCH};
 pub use lang::{fr, lang, set_lang, tr, Lang, T};
