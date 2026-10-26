@@ -14,32 +14,58 @@ use sixfold_engine::{card, tr, CardId, Color, Rarity};
 
 use crate::art::{color_key, glyph_svg};
 use crate::binder::{inspect_handlers, PageBar};
-use crate::cards::{CardBack, CardFace};
+use crate::cards::{reduced_motion, CardBack, CardFace};
 use crate::overlays::Inspector;
 use crate::Screen;
 use crate::Ui;
+use wasm_bindgen::prelude::*;
 
-/// The reveal's timeline in ms, from the tear (matches style.css and the
-/// "pack" sound in audio.js): the nine cards turn from `FLIP_AT`, one every
-/// `FLIP_STEP`, the Rare slot at `RARE_AT`, and all is shown by `REVEAL_MS`.
+/// The reveal's timeline in ms from the tear, at normal speed. Each card's
+/// delay (`--d`), the held beat (`--beat`, `--rare`) in style.css and the
+/// "pack" sound (audio.js `packReveal`) take their marks from here; how long
+/// one card takes to turn stays the CSS's (560 ms, 900 ms for the Rare),
+/// and the sound lands halfway through it. The nine cards turn from `FLIP_AT`, one every `FLIP_STEP`; then a
+/// held beat from `BEAT_AT` builds to the Rare slot, which turns at
+/// `RARE_AT`; all is shown by `REVEAL_MS`.
 const FLIP_AT: u64 = 900;
 const FLIP_STEP: u64 = 180;
-const RARE_AT: u64 = FLIP_AT + 9 * FLIP_STEP + 600;
+const BEAT_AT: u64 = FLIP_AT + 9 * FLIP_STEP;
+const RARE_AT: u64 = BEAT_AT + 1100;
 const REVEAL_MS: u64 = RARE_AT + 1500;
+/// Holding the pack (or tapping it, or the Faster button) plays it this fast.
+const FAST: f64 = 3.0;
+
+// Every animation of the reveal at once, mid-flight and without a jump:
+// the Web Animations playback rate scales the CSS delays and durations.
+#[wasm_bindgen(inline_js = r#"
+export function pack_rate(el, r) {
+  if (el) for (const a of el.getAnimations({ subtree: true })) a.updatePlaybackRate(r);
+}
+"#)]
+extern "C" {
+    fn pack_rate(el: Option<web_sys::Element>, rate: f64);
+}
+
+fn now_ms() -> f64 {
+    js_sys::Date::now()
+}
+
+fn pack_sound(from: f64, rate: f64) {
+    crate::audio::pack_reveal(
+        from,
+        rate,
+        FLIP_AT as f64,
+        FLIP_STEP as f64,
+        BEAT_AT as f64,
+        RARE_AT as f64,
+    );
+}
 
 #[derive(Clone, PartialEq)]
 struct Opened {
     key: u32,
     booster: usize,
     cards: Vec<(CardId, bool)>,
-}
-
-fn reduced_motion() -> bool {
-    window()
-        .match_media("(prefers-reduced-motion: reduce)")
-        .ok()
-        .flatten()
-        .is_some_and(|m| m.matches())
 }
 
 #[component]
@@ -54,7 +80,7 @@ pub fn PacksScreen() -> impl IntoView {
         if done.try_set(true).is_some() {
             return;
         }
-        // After the actions have rendered: the "Show all" button just went away.
+        // After the actions have rendered: the Skip button just went away.
         set_timeout(
             move || {
                 if let Some(b) = actions
@@ -82,19 +108,6 @@ pub fn PacksScreen() -> impl IntoView {
         }));
         done.set(false);
     };
-    // The pack is torn: the cards come out, and the reveal ends on its own.
-    let torn = move |instant: bool| {
-        let key = opened.with_untracked(|o| o.as_ref().map(|o| o.key));
-        crate::audio::sfx("pack", f64::from(u8::from(instant)));
-        set_timeout(
-            move || {
-                if opened.try_with_untracked(|o| o.as_ref().map(|o| o.key)) == Some(key) {
-                    finish();
-                }
-            },
-            Duration::from_millis(if instant { 50 } else { REVEAL_MS }),
-        );
-    };
     let on_key = move |e: leptos::ev::KeyboardEvent| {
         if e.key() == "Escape" {
             ui.sheet.set(false);
@@ -107,7 +120,7 @@ pub fn PacksScreen() -> impl IntoView {
             <main class="page-body">
                 {move || match opened.get() {
                     None => view! { <Shelf open=open /> }.into_any(),
-                    Some(o) => view! { <Reveal o=o done=done torn=torn skip=finish actions=actions again=move || opened.set(None) /> }.into_any(),
+                    Some(o) => view! { <Reveal o=o done=done finish=finish actions=actions again=move || opened.set(None) /> }.into_any(),
                 }}
             </main>
             <div class="side-panel"><Inspector /></div>
@@ -329,8 +342,15 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
 
 /// One card of the reveal: its back, then its face once it has turned.
 #[component]
-fn Flip(id: CardId, new: bool, i: usize, #[prop(optional)] rare: bool) -> impl IntoView {
+fn Flip(
+    id: CardId,
+    new: bool,
+    i: usize,
+    done: RwSignal<bool>,
+    #[prop(optional)] rare: bool,
+) -> impl IntoView {
     let (peek, open) = inspect_handlers(id);
+    let rarity = crate::cards::rarity_key(card(id).rarity);
     let holo = is_holo(id) || sixfold_engine::set::is_promo(id);
     let delay = if rare {
         RARE_AT
@@ -339,10 +359,11 @@ fn Flip(id: CardId, new: bool, i: usize, #[prop(optional)] rare: bool) -> impl I
     };
     view! {
         // The Rare slot tilts (tilt.js) once it has turned.
-        <li class="flip" class:rare=rare class:holo=holo data-tilt=rare.then_some("") style=format!("--i:{i};--d:{delay}ms")>
-            // Named by the card's own first words (see binder.rs).
+        <li class=format!("flip r-{rarity}") class:rare=rare class:holo=holo data-tilt=rare.then_some("") style=format!("--i:{i};--d:{delay}ms")>
+            // Named by the card's own first words (see binder.rs). Mid-reveal
+            // a tap speeds the reveal up (Reveal) rather than opening the card.
             <button type="button" class="flip-inner"
-                on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
+                on:click=move |_| { if done.get_untracked() { open() } } on:mouseenter=move |_| peek() on:focus=move |_| peek()>
                 <span class="side back-face"><CardBack /></span>
                 <span class="side front-face"><CardFace id=id /></span>
                 {new.then(|| view! { <span class="sr-only">{tr(", new", ", nouvelle")}</span> })}
@@ -359,8 +380,7 @@ fn Flip(id: CardId, new: bool, i: usize, #[prop(optional)] rare: bool) -> impl I
 fn Reveal(
     o: Opened,
     done: RwSignal<bool>,
-    torn: impl Fn(bool) + Copy + Send + Sync + 'static,
-    skip: impl Fn() + Copy + Send + Sync + 'static,
+    finish: impl Fn() + Copy + Send + Sync + 'static,
     actions: NodeRef<leptos::html::Div>,
     again: impl Fn() + Copy + Send + Sync + 'static,
 ) -> impl IntoView {
@@ -389,6 +409,62 @@ fn Reveal(
     let more = move || profile.with(|p| p.wallet.total());
     let booster = BOOSTERS[o.booster];
     let b = o.booster;
+    // The reveal's clock: where it is on the timeline (ms at normal speed)
+    // as of a real time, and how fast it runs. Each change of speed re-aims
+    // the end and the sound; `epoch` voids the end aimed before.
+    let clock = StoredValue::new((0.0f64, 0.0f64, 1.0f64));
+    let epoch = StoredValue::new(0u32);
+    let fast = RwSignal::new(false);
+    let stage = NodeRef::<leptos::html::Div>::new();
+    let at = move || {
+        let (pos, t, rate) = clock.get_value();
+        pos + (now_ms() - t) * rate
+    };
+    let aim_end = move |pos: f64, rate: f64| {
+        epoch.update_value(|e| *e += 1);
+        let e = epoch.get_value();
+        set_timeout(
+            move || {
+                if epoch.try_get_value() == Some(e) {
+                    finish();
+                }
+            },
+            Duration::from_millis(((REVEAL_MS as f64 - pos).max(0.0) / rate) as u64),
+        );
+    };
+    let set_speed = move |on: bool| {
+        if !open.get_untracked()
+            || done.get_untracked()
+            || instant.get_untracked()
+            || fast.get_untracked() == on
+        {
+            return;
+        }
+        let rate = if on { FAST } else { 1.0 };
+        let pos = at();
+        clock.set_value((pos, now_ms(), rate));
+        fast.set(on);
+        pack_rate(stage.get_untracked().map(Into::into), rate);
+        pack_sound(pos, rate);
+        aim_end(pos, rate);
+    };
+    let skip = move || {
+        if done.get_untracked() {
+            return;
+        }
+        epoch.update_value(|e| *e += 1);
+        instant.set(true);
+        finish();
+        crate::audio::sfx("packstop", 0.0);
+        crate::audio::sfx("rare", 0.0);
+    };
+    // Shown in full: the halo and rays go on at their own pace.
+    Effect::new(move |_| {
+        if done.get() {
+            pack_rate(stage.get_untracked().map(Into::into), 1.0);
+            fast.set(false);
+        }
+    });
     let tear = move || {
         if open.get_untracked() {
             return;
@@ -396,7 +472,39 @@ fn Reveal(
         let now = reduced_motion();
         instant.set(now);
         open.set(true);
-        torn(now);
+        clock.set_value((0.0, now_ms(), 1.0));
+        if now {
+            crate::audio::sfx("rare", 0.0);
+            set_timeout(finish, Duration::from_millis(50));
+        } else {
+            pack_sound(0.0, 1.0);
+            aim_end(0.0, 1.0);
+            // The Tear button just went away: keyboards land on Faster.
+            request_animation_frame(move || {
+                if let Some(b) = actions
+                    .get_untracked()
+                    .and_then(|el| el.query_selector(".btn.speed").ok().flatten())
+                {
+                    let _ = wasm_bindgen::JsCast::unchecked_into::<web_sys::HtmlElement>(b).focus();
+                }
+            });
+        }
+    };
+    // Holding the pack plays it fast while held; a tap leaves it fast.
+    let down_at = StoredValue::new(None::<f64>);
+    let on_down = move |_| {
+        if open.get_untracked() && !done.get_untracked() {
+            down_at.set_value(Some(now_ms()));
+            set_speed(true);
+        }
+    };
+    let on_up = move |_| {
+        if let Some(t) = down_at.get_value() {
+            down_at.set_value(None);
+            if now_ms() - t > 350.0 {
+                set_speed(false);
+            }
+        }
     };
     let (rare, rest) = o
         .cards
@@ -420,13 +528,18 @@ fn Reveal(
                     n => tr(format!("{n} new cards for your collection."), format!("{n} nouvelles cartes pour votre collection.")),
                 }
             } else if open.get() {
-                tr("Turning the cards over…", "On retourne les cartes…").to_string()
+                tr(
+                    "Turning the cards over… Hold or tap to go faster.",
+                    "On retourne les cartes… Maintenez ou touchez pour accélérer.",
+                ).to_string()
             } else {
                 let k = crate::input::named(crate::input::Ctrl::Confirm);
                 tr(format!("Tear it open: tap the pack, or press {k}."), format!("Ouvrez-le : touchez le booster, ou appuyez sur {k}."))
             }}</p>
         </div>
-        <div class="opening" class:open=move || open.get() class:instant=move || instant.get()>
+        <div class="opening" node_ref=stage class:open=move || open.get() class:instant=move || instant.get()
+            style=format!("--beat:{BEAT_AT}ms;--rare:{RARE_AT}ms")
+            on:pointerdown=on_down on:pointerup=on_up on:pointercancel=on_up on:pointerleave=on_up>
             <div class="sealed" data-tilt=move || (!open.get()).then_some("")>
                 // The pack itself is a pointer target; keyboards use the button below.
                 <button type="button" class="tear" aria-label=tear_label tabindex="-1" on:click=move |_| tear()
@@ -439,13 +552,13 @@ fn Reveal(
             // tearing it only flips a class.
             <div class="reveal-stage">
                 <ol class="reveal" aria-label=tr(format!("The {} cards in this pack", o.cards.len()), format!("Les {} cartes de ce booster", o.cards.len()))>
-                    {rest.into_iter().enumerate().map(|(i, (id, new))| view! { <Flip id=id new=new i=i /> }).collect_view()}
-                    <Flip id=rare.0 new=rare.1 i=9 rare=true />
+                    {rest.into_iter().enumerate().map(|(i, (id, new))| view! { <Flip id=id new=new i=i done=done /> }).collect_view()}
+                    <Flip id=rare.0 new=rare.1 i=9 done=done rare=true />
                 </ol>
             </div>
         </div>
         <p class="sr-only" aria-live="polite">{move || done.get().then(|| summary.clone())}</p>
-        <div class="reveal-actions" node_ref=actions>
+        <div class="reveal-actions" class:live=move || open.get() && !done.get() node_ref=actions>
             {move || if done.get() {
                 view! {
                     {(more() > 0).then(|| view! {
@@ -458,12 +571,12 @@ fn Reveal(
                 }.into_any()
             } else if open.get() {
                 view! {
-                    <button type="button" class="btn ghost" on:click=move |_| {
-                        instant.set(true);
-                        skip();
-                        crate::audio::sfx("packstop", 0.0);
-                        crate::audio::sfx("rare", 0.0);
-                    }>{tr("Show all", "Tout montrer")}</button>
+                    <button type="button" class="btn speed" aria-pressed=move || fast.get().to_string()
+                        on:click=move |_| set_speed(!fast.get_untracked())>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6l7 6-7 6zM13 6l7 6-7 6z" /></svg>
+                        {tr("Faster ×3", "Plus vite ×3")}
+                    </button>
+                    <button type="button" class="btn ghost" on:click=move |_| skip()>{tr("Skip: show all", "Passer : tout montrer")}</button>
                 }.into_any()
             } else {
                 view! {
