@@ -5,6 +5,7 @@ mod art;
 mod audio;
 mod binder;
 mod board;
+mod builder;
 mod campaign;
 mod cards;
 mod coach;

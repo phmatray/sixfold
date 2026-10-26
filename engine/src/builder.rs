@@ -1416,6 +1416,30 @@ pub fn sample_hand(deck: &[CardId], seed: u64) -> Vec<CardId> {
     v
 }
 
+/// Per colour, the deck's basic energy against the symbols its Hexons'
+/// main attacks ask for (each Hexon's Neutral symbols counted for its own
+/// colour, as the builder shares energy): `(colour, energy, symbols)`, the
+/// colours with either, in colour order.
+pub fn energy_needs(deck: &[CardId]) -> Vec<(Color, usize, usize)> {
+    let (mut have, mut want) = ([0usize; 6], [0usize; 6]);
+    for &id in deck {
+        let Some(d) = crate::card::try_card(id) else {
+            continue;
+        };
+        match &d.kind {
+            CardKind::Energy(EnergyCard::Basic(c)) => have[*c as usize] += 1,
+            CardKind::Creature(c) if c.color != Color::Colorless => {
+                want[c.color as usize] += main_attack(id).map_or(0, |a| a.cost.len())
+            }
+            _ => {}
+        }
+    }
+    (0..6)
+        .filter(|&c| have[c] + want[c] > 0)
+        .map(|c| (Color::ALL[c], have[c], want[c]))
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1748,5 +1772,14 @@ mod tests {
                 .all(|(t, x)| !t.starts_with("Add") && !t.starts_with("Swap") && !x.is_empty()),
             "{fr:?}"
         );
+    }
+
+    #[test]
+    fn energy_needs_by_colour() {
+        let n = energy_needs(&STARTER.cards());
+        let colours: Vec<Color> = n.iter().map(|x| x.0).collect();
+        assert_eq!(colours, [Color::Fire, Color::Water]);
+        assert!(n.iter().all(|&(_, e, s)| e == 13 && s > 0), "{n:?}");
+        assert!(energy_needs(&[]).is_empty());
     }
 }
