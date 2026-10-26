@@ -47,7 +47,8 @@
       "asset": "chair",
       "x": 9,
       "z": 5,
-      "rot": 0
+      "rot": 0,
+      "seat": false
     },
     {
       "asset": "rug",

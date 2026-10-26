@@ -11,6 +11,7 @@ use wasm_bindgen::prelude::*;
 use crate::achievements::{count_line, Origin, Tab};
 use crate::audio::AudioSettings;
 use crate::binder::progress;
+use crate::logo::{Mark, Wordmark};
 use crate::saves::{SaveSettings, SlotPicker};
 use crate::store::{self, Notice, TutorialDue};
 use crate::Screen;
@@ -330,7 +331,8 @@ pub fn TitleScreen() -> impl IntoView {
         <main class="title">
             <Backdrop />
             <header class="title-brand">
-                <h1 class="wordmark">"Sixfold"</h1>
+                <Mark />
+                <h1 class="wordmark"><Wordmark /></h1>
                 <p class="tagline">{tr("A Hexon card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.", "Un duel de cartes Hexon aux règles d'antan : six Récompenses, du pile ou face, et pas de seconde chance sur une mauvaise main.")}</p>
             </header>
             {move || notice.get().map(|n| view! {

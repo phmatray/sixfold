@@ -36,7 +36,18 @@ reliability and game-feel releases, and duel juice moves to 1.6.
 | 1.7.0 | Story | #63 `feat(world): cutscene scripts` · #64 `feat(story): Rook and the seventh face` · #65 `feat: stats and achievements` |
 | 1.8.0 | Presentation | #66 `feat: a studio splash and a living title screen` (Atypical Play → Sixfold → press to start) · #67 `feat: a final victory sequence and staged credits` · #68 `feat(cards): a binder worth completing and better pack openings` |
 | 1.9.0 | Controls and accessibility | #69 `feat: gamepad support` · #70 `feat(a11y): readable, high-contrast, screen-reader-friendly` · #71 `feat(audio): a soundscape per region and music for rivals and bosses` |
+| 1.10.0 | World foundations | #110 `feat(tools): check-maps v2 — blocking and advisory level-design checks` · #111 `feat(tools): world debug overlays` · #112 `feat(world): Fernhollow Trail, the reference map` |
+| 1.11.0 | A living world | #113 `feat(world): NPC routines` · #114 `feat(world): reactions and persistence` · #115 `feat(world): ambient life and micro-events` |
+| 1.12.0 | Secrets and connections | #116 `feat(world): secrets` · #117 `feat(world): loops, shortcuts and an honest world map` · #118 `feat(world): biome transitions on every border` |
+| 1.13.0 | Regions to the Fernhollow standard (1) | #119 `feat(world): the meadow and Grove to the Fernhollow standard` · #120 `feat(world): Ember and Stone to the Fernhollow standard` · #121 `feat(world): Tide and Storm to the Fernhollow standard` |
+| 1.14.0 | Regions (2) and validation | #122 `feat(world): Dream to the Fernhollow standard` · #123 `feat(world): discovery staging for major places` · #124 `fix(world): the five-pass playtest and its fixes` |
 | 2.0.0 | Release | #72 `chore: release readiness` (a checklist: blind playtests, real-phone performance, a full EN/FR read-through, a rights audit, press material, a complete audit, every platform, a full run); the fixes it finds are its PRs |
+
+**1.10 to 1.14 are about the world.** They follow the owner's level-design guide, `docs/LEVEL_DESIGN.md`:
+first the tools and a reference map (Fernhollow Trail), then life, then secrets and connections, then every
+region brought to the reference's standard, and finally a whole-world five-pass playtest.
+`docs/WORLD_RULES.md` stays the source of truth for placement, and check-maps v2 enforces the new rules map by
+map as each region opts in.
 
 Each version is also a GitHub milestone of the same name.
 

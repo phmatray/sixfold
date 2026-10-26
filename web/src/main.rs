@@ -17,6 +17,7 @@ mod history;
 mod input;
 mod journal;
 mod kit;
+mod logo;
 mod offline;
 mod overlays;
 mod packs;

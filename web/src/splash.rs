@@ -7,6 +7,7 @@ use std::time::Duration;
 use leptos::prelude::*;
 use sixfold_engine::tr;
 
+use crate::logo::{Mark, Wordmark};
 use crate::{audio, Screen};
 
 const SHOWN: &str = "sixfold.splashed";
@@ -142,12 +143,9 @@ pub fn Splash() -> impl IntoView {
                 </p>
             </div>
             <div class="splash-layer game" aria-hidden=move || (step.get() == 0).to_string()>
-                <h1 class="wordmark">"Sixfold"</h1>
-                <div class="splash-facets" aria-hidden="true">
-                    {(0..6).map(|i| view! {
-                        <svg viewBox="0 0 24 24" style=format!("--i:{i}")><path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z" /></svg>
-                    }).collect_view()}
-                </div>
+                // The stone, its six faces lighting in turn, then the name.
+                <Mark />
+                <h1 class="wordmark"><Wordmark /></h1>
                 <button type="button" class="press-start" tabindex=move || if step.get() == 2 { "0" } else { "-1" }>
                     {if coarse { tr("Tap to start", "Touchez pour commencer") } else { tr("Press to start", "Appuyez pour commencer") }}
                 </button>
