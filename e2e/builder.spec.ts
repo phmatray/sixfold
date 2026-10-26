@@ -30,7 +30,9 @@ test("build for me makes a legal deck from your cards and says why", async ({ pa
   await page.getByRole("button", { name: "New deck" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Deck editor" })).toBeAttached();
 
-  await page.getByRole("button", { name: "Build for me" }).click();
+  // An empty deck opens on a start panel: build it, or pick Basics.
+  await expect(page.getByRole("heading", { name: "Start this deck" })).toBeVisible();
+  await page.getByRole("toolbar", { name: "Deck tools" }).getByRole("button", { name: "Build for me" }).click();
   const sheet = page.getByRole("dialog", { name: "Build for me" });
   await expect(sheet).toBeVisible();
   await sheet.getByRole("button", { name: "Ember" }).click();
@@ -42,8 +44,14 @@ test("build for me makes a legal deck from your cards and says why", async ({ pa
   // Every part of the deck comes with its reason.
   await expect(sheet.locator(".reasons li").first()).toContainText("complete Awaken line");
   expect(await sheet.locator(".reasons li").count()).toBeGreaterThan(5);
+  await expect(sheet.getByText("A new deck from your cards.")).toBeVisible();
+  // A colour you own no Basic of can't be picked, and says why.
+  await sheet.getByRole("button", { name: /^Grove/ }).click({ force: true });
+  await expect(sheet.getByText("You own no Basic Grove Hexon yet")).toBeVisible();
+  await expect(sheet.getByRole("button", { name: /^Grove/ })).toHaveAttribute("aria-pressed", "false");
   await sheet.getByRole("button", { name: "Use this deck" }).click();
   await expect(sheet).toBeHidden();
+  await expect(page.getByRole("toolbar", { name: "Deck tools" }).getByRole("button", { name: "Build for me" })).toBeFocused();
 
   await expect(page.locator(".deck-total b")).toHaveText("60");
   await expect(page.getByText("Ready to play")).toBeVisible();
@@ -104,11 +112,11 @@ test("keyboard only: build a deck for me, undo it, walk the cards, leave", async
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 1, name: "Deck editor" })).toBeAttached();
 
-  // Tab to "Build for me"; the sheet opens on "Use this deck".
+  // Tab to "Build for me"; the sheet opens on its title.
   await moveTo(page, page.getByRole("button", { name: "Build for me" }));
   await page.keyboard.press("Enter");
   const sheet = page.getByRole("dialog", { name: "Build for me" });
-  await expect(sheet.getByRole("button", { name: "Use this deck" })).toBeFocused();
+  await expect(sheet.getByRole("heading", { name: "Build for me" })).toBeFocused();
   // Escape closes the sheet only, focus back on its button.
   await page.keyboard.press("Escape");
   await expect(sheet).toBeHidden();
@@ -177,7 +185,9 @@ test("gamepad: build a deck for me, walk the cards, save and leave", async ({ pa
   await page.getByRole("button", { name: "Build for me" }).focus();
   await press(page, A);
   const sheet = page.getByRole("dialog", { name: "Build for me" });
-  await expect(sheet.getByRole("button", { name: "Use this deck" })).toBeFocused();
+  await expect(sheet.getByRole("heading", { name: "Build for me" })).toBeFocused();
+  // The D-pad reaches the sheet's buttons; A uses the deck.
+  await sheet.getByRole("button", { name: "Use this deck" }).focus();
   await press(page, A);
   await expect(sheet).toBeHidden();
 
@@ -195,7 +205,8 @@ test("gamepad: build a deck for me, walk the cards, save and leave", async ({ pa
   expect((await readSave(page)).decks?.[0]).toMatch(/Balanced|Trailhead/);
 });
 
-test("on a phone: the tools stay at hand, the advice and the deck have their tabs @phone", async ({ page }) => {
+test("on a phone: the tools stay at hand, the advice and the deck have their tabs @phone", async ({ page }, info) => {
+  test.skip(info.project.name !== "phone", "the tabs are the phone layout");
   await title(page);
   await editStarter(page);
   await page.getByRole("tab", { name: "Advice" }).click();

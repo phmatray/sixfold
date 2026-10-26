@@ -253,22 +253,30 @@ impl Unlockable {
 
 /// The six prebuilts and the five rival decks that aren't one, each with
 /// one way to unlock it: the rival who plays it, an achievement, Rook's
-/// story or the Gauntlet.
+/// story or the Gauntlet. In about the order a playthrough meets them.
 pub static UNLOCKABLE: [Unlockable; 11] = [
+    Unlockable {
+        deck: &RIVALS[0].deck,
+        flag: "beat_bramble",
+        how: T::new(
+            "Beat Bramble, by the Fernhollow bridge.",
+            "Battez Bramble, près du pont de Creuse-Fougère.",
+        ),
+    },
+    Unlockable {
+        deck: &RIVALS[1].deck,
+        flag: "beat_marlo",
+        how: T::new(
+            "Beat Marlo, at the end of the Saltwind pier.",
+            "Battez Marlo, au bout de la jetée de Ventsalé.",
+        ),
+    },
     Unlockable {
         deck: &EMBER_RUSH,
         flag: "beat_cinza",
         how: T::new(
             "Beat Cinza, down in Emberstep Quarry.",
             "Battez Cinza, au fond de la carrière de Pas-de-Braise.",
-        ),
-    },
-    Unlockable {
-        deck: &STORM_FRONT,
-        flag: "beat_quill",
-        how: T::new(
-            "Beat Quill, under the Saltwind lighthouse.",
-            "Battez Quill, sous le phare de Ventsalé.",
         ),
     },
     Unlockable {
@@ -288,35 +296,19 @@ pub static UNLOCKABLE: [Unlockable; 11] = [
         ),
     },
     Unlockable {
+        deck: &STORM_FRONT,
+        flag: "beat_quill",
+        how: T::new(
+            "Beat Quill, under the Saltwind lighthouse.",
+            "Battez Quill, sous le phare de Ventsalé.",
+        ),
+    },
+    Unlockable {
         deck: &STONE_FIST,
         flag: "ach_three_seals",
         how: T::new(
             "Earn “Halfway Round”: hold three seals.",
             "Obtenez « À mi-chemin » : réunissez trois sceaux.",
-        ),
-    },
-    Unlockable {
-        deck: &DREAM_VEIL,
-        flag: "rook_4",
-        how: T::new(
-            "Follow Rook's story to its end.",
-            "Suivez l'histoire de Rook jusqu'au bout.",
-        ),
-    },
-    Unlockable {
-        deck: &RIVALS[0].deck,
-        flag: "beat_bramble",
-        how: T::new(
-            "Beat Bramble, by the Fernhollow bridge.",
-            "Battez Bramble, près du pont de Creuse-Fougère.",
-        ),
-    },
-    Unlockable {
-        deck: &RIVALS[1].deck,
-        flag: "beat_marlo",
-        how: T::new(
-            "Beat Marlo, at the end of the Saltwind pier.",
-            "Battez Marlo, au bout de la jetée de Ventsalé.",
         ),
     },
     Unlockable {
@@ -333,6 +325,14 @@ pub static UNLOCKABLE: [Unlockable; 11] = [
         how: T::new(
             "Beat Lumen, in the moonflower glade.",
             "Battez Lumen, dans la clairière des fleurs de lune.",
+        ),
+    },
+    Unlockable {
+        deck: &DREAM_VEIL,
+        flag: "rook_4",
+        how: T::new(
+            "Follow Rook's story to its end.",
+            "Suivez l'histoire de Rook jusqu'au bout.",
         ),
     },
     Unlockable {

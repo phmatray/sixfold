@@ -5,7 +5,7 @@
 
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::builder::{self, Pick, Plan, Style, Suggestion};
+use sixfold_engine::builder::{self, Pick, Plan, Style, Suggestion, Why};
 use sixfold_engine::decks::UNLOCKABLE;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
@@ -100,13 +100,25 @@ fn pc(p: f64) -> String {
     tr(format!("{n}%"), format!("{n}\u{202f}%"))
 }
 
+/// What a chance of a Basic-less opening hand means for the player.
+pub fn mulligan_word(p: f64) -> &'static str {
+    if p <= 0.15 {
+        tr("fine", "bien")
+    } else if p <= 0.25 {
+        tr("risky", "risqué")
+    } else {
+        tr("too high: add Basics", "trop : ajoutez des Hexons de Base")
+    }
+}
+
 /// Per colour, its share of the deck's energy against its share of the
-/// attack costs: the two bars should be about level.
+/// attack costs: the two should be about level.
 #[component]
 pub fn EnergyReadout(draft: RwSignal<DeckList>) -> impl IntoView {
     let rows = move || draft.with(|d| builder::energy_needs(&d.cards));
     view! {
         <figure class="energy-needs">
+            <figcaption>{tr("Energy for each colour, against what its attacks cost", "L'énergie de chaque couleur, face au coût de ses attaques")}</figcaption>
             <ul aria-label=tr("Energy by colour", "Énergie par couleur")>
                 {move || {
                     let rows = rows();
@@ -114,36 +126,35 @@ pub fn EnergyReadout(draft: RwSignal<DeckList>) -> impl IntoView {
                     rows.into_iter().map(|(c, have, want)| {
                         let (e, s) = (have * 100 / all_e.max(1), want * 100 / all_s.max(1));
                         let short = s > e + 15;
-                        let label = tr(
-                            format!("{c}: {e}% of the energy, {s}% of the attack costs"),
-                            format!("{c} : {e} % de l'énergie, {s} % des coûts d'attaque"),
-                        );
                         view! {
-                            <li class="need" class:short=short aria-label=label>
+                            <li class="need" class:short=short>
                                 <Pip color=c />
                                 <span class="need-bars" aria-hidden="true">
                                     <span class="need-have" style=format!("width:{e}%")></span>
                                     <span class="need-want" style=format!("width:{s}%")></span>
                                 </span>
-                                <span class="need-n" aria-hidden="true"><b>{have}</b></span>
+                                <span class="need-n">
+                                    {tr(format!("{have} energy ({e}%) · costs {s}%"), format!("{have} énergies ({e}\u{202f}%) · coûts {s}\u{202f}%"))}
+                                    {short.then(|| view! { <b class="need-flag">{tr(" · short", " · trop peu")}</b> })}
+                                </span>
                             </li>
                         }
                     }).collect_view()
                 }}
             </ul>
-            <figcaption>{tr("Energy by colour (top bar) against the attack costs (bottom bar)", "Énergie par couleur (barre du haut) face aux coûts d'attaque (barre du bas)")}</figcaption>
         </figure>
     }
 }
 
-/// The live advice: up to six changes, each with its reason and one tap to
-/// apply (undoable).
+/// The live advice (`tips`, the engine's suggestions for the deck): each
+/// change with its card, its reason and one tap to apply (undoable).
 #[component]
-pub fn Advisor(draft: RwSignal<DeckList>, msg: RwSignal<Option<String>>) -> impl IntoView {
+pub fn Advisor(
+    draft: RwSignal<DeckList>,
+    tips: Memo<Vec<Suggestion>>,
+    msg: RwSignal<Option<String>>,
+) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
-    let tips = Memo::new(move |_| {
-        profile.with(|p| draft.with(|d| builder::suggestions(&d.cards, &p.collection)))
-    });
     let apply = move |s: Suggestion| {
         let done = profile.with_untracked(|p| {
             draft
@@ -181,13 +192,9 @@ pub fn Advisor(draft: RwSignal<DeckList>, msg: RwSignal<Option<String>>) -> impl
                 let list = tips.get();
                 if list.is_empty() {
                     let full = draft.with(|d| d.cards.len() == DECK_SIZE);
-                    return view! {
-                        <p class="advice-none">{if full {
-                            tr("Nothing to suggest: the lines are whole, the Basics and the energy are where they should be.", "Rien à suggérer : les lignées sont complètes, les Hexons de Base et l'énergie sont à leur place.")
-                        } else {
-                            tr("Add cards, or let “Build for me” start the deck.", "Ajoutez des cartes, ou laissez « Construire pour moi » lancer le deck.")
-                        }}</p>
-                    }.into_any();
+                    return full.then(|| view! {
+                        <p class="advice-none">{tr("Nothing to suggest: the lines are whole, the Basics and the energy are where they should be.", "Rien à suggérer : les lignées sont complètes, les Hexons de Base et l'énergie sont à leur place.")}</p>
+                    }).into_any();
                 }
                 view! {
                     <ul class="advice-list" data-focus-home="">
@@ -199,10 +206,19 @@ pub fn Advisor(draft: RwSignal<DeckList>, msg: RwSignal<Option<String>>) -> impl
                                 (None, _) => "add",
                                 _ => "remove",
                             };
-                            let face = s.into.or(s.out);
+                            let face = s.into.or(s.out).map(|id| {
+                                let (peek, open) = crate::binder::inspect_handlers(id);
+                                let name = card(id).label();
+                                view! {
+                                    <button type="button" class="tip-face" aria-label=tr(format!("{name}, details"), format!("{name}, détails"))
+                                        on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
+                                        <CardFace id=id />
+                                    </button>
+                                }
+                            });
                             view! {
                                 <li class=format!("advice-item tip {kind}")>
-                                    {face.map(|id| view! { <span class="tip-face" aria-hidden="true"><CardFace id=id /></span> })}
+                                    {face}
                                     <div class="tip-body">
                                         <b class="tip-title">{title}</b>
                                         <p>{text}</p>
@@ -247,8 +263,86 @@ fn esc_closes(open: RwSignal<bool>) -> impl Fn(leptos::ev::KeyboardEvent) + Copy
     }
 }
 
+/// Copies per card.
+fn counts(cards: &[CardId]) -> std::collections::BTreeMap<CardId, i32> {
+    let mut m = std::collections::BTreeMap::new();
+    for &id in cards {
+        *m.entry(id).or_insert(0) += 1;
+    }
+    m
+}
+
+/// What a built deck changes from the deck in the editor: "Same as your
+/// deck", or the biggest changes ("+2 Ember Energy, −2 Tide Energy").
+fn diff_line(from: &[CardId], to: &[CardId]) -> String {
+    let (a, b) = (counts(from), counts(to));
+    let mut d: Vec<(CardId, i32)> = a
+        .keys()
+        .chain(b.keys())
+        .copied()
+        .collect::<std::collections::BTreeSet<_>>()
+        .into_iter()
+        .map(|id| {
+            (
+                id,
+                b.get(&id).copied().unwrap_or(0) - a.get(&id).copied().unwrap_or(0),
+            )
+        })
+        .filter(|&(_, n)| n != 0)
+        .collect();
+    if d.is_empty() {
+        return tr(
+            "Same cards as your deck.",
+            "Les mêmes cartes que votre deck.",
+        )
+        .into();
+    }
+    if from.is_empty() {
+        return tr(
+            "A new deck from your cards.",
+            "Un nouveau deck fait de vos cartes.",
+        )
+        .into();
+    }
+    d.sort_by_key(|&(id, n)| (std::cmp::Reverse(n.abs()), id));
+    let shown: Vec<String> = d
+        .iter()
+        .take(4)
+        .map(|&(id, n)| {
+            format!(
+                "{}{} {}",
+                if n > 0 { "+" } else { "−" },
+                n.abs(),
+                card(id).label()
+            )
+        })
+        .collect();
+    let more = d.len().saturating_sub(4);
+    let tail = match more {
+        0 => String::new(),
+        k => tr(format!(" and {k} more"), format!(" et {k} de plus")),
+    };
+    tr(
+        format!("Changes from your deck: {}{tail}.", shown.join(", ")),
+        format!(
+            "Changements par rapport à votre deck : {}{tail}.",
+            shown.join(", ")
+        ),
+    )
+}
+
+/// The group a reason belongs to in the preview: Hexons, trainers, energy.
+fn group(why: &Why) -> usize {
+    match why {
+        Why::Trainer(_) => 1,
+        Why::Energy(..) | Why::Twofold => 2,
+        _ => 0,
+    }
+}
+
 /// "Build for me": colours (or a surprise) and a style, a live preview of
-/// the deck with why each part is there, then use it (undoable).
+/// the deck with what it changes and why each part is there, then use it
+/// (undoable).
 #[component]
 pub fn BuildSheet(
     open: RwSignal<bool>,
@@ -256,10 +350,34 @@ pub fn BuildSheet(
     msg: RwSignal<Option<String>>,
 ) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
-    let start = draft.with_untracked(|d| hexon_colours(&d.cards));
+    // Hexon cards owned of each colour, and whether one is a Basic.
+    let owned: Vec<(Color, usize, bool)> = profile.with_untracked(|p| {
+        COLOURS
+            .iter()
+            .map(|&c| {
+                let of = |basic: bool| {
+                    p.collection
+                        .iter()
+                        .filter(|&(id, _)| {
+                            card(id).creature().is_some_and(|cr| cr.color == c)
+                                && (!basic || card(id).is_basic())
+                        })
+                        .map(|(_, n)| n)
+                        .sum::<usize>()
+                };
+                (c, of(false), of(true) > 0)
+            })
+            .collect()
+    });
+    let start: Vec<Color> = draft
+        .with_untracked(|d| hexon_colours(&d.cards))
+        .into_iter()
+        .filter(|c| owned.iter().any(|o| o.0 == *c && o.2))
+        .collect();
     let surprise = RwSignal::new(start.is_empty().then(crate::new_seed));
     let colours = RwSignal::new(start);
     let style = RwSignal::new(Style::Balanced);
+    let refused = RwSignal::new(None::<String>);
     let plan = move || Plan {
         pick: match surprise.get() {
             Some(s) => Pick::Surprise(s),
@@ -272,7 +390,15 @@ pub fn BuildSheet(
         profile.with(|p| builder::auto_build(&p.collection, &plan))
     });
     let had = draft.with_untracked(|d| d.cards.len());
-    let toggle = move |c: Color| {
+    let toggle = move |c: Color, can: bool| {
+        if !can {
+            refused.set(Some(tr(
+                format!("You own no Basic {c} Hexon yet, so there is no {c} deck to build: {c} packs have them."),
+                format!("Vous n'avez encore aucun Hexon {c} de Base, donc pas de deck {c} possible : les boosters {c} en contiennent."),
+            )));
+            return;
+        }
+        refused.set(None);
         surprise.set(None);
         colours.update(|v| {
             if let Some(i) = v.iter().position(|&x| x == c) {
@@ -311,30 +437,45 @@ pub fn BuildSheet(
             .into(),
         ));
         open.set(false);
+        // Back to the tool that opened the sheet.
+        request_animation_frame(|| {
+            if let Some(el) = document()
+                .query_selector(".bench-actions .btn.build")
+                .ok()
+                .flatten()
+                .and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok())
+            {
+                _ = el.focus();
+            }
+        });
     };
     view! {
         <div class="scrim" on:keydown=esc_closes(open)>
             <div class="dialog wide build-sheet" role="dialog" aria-modal="true" aria-labelledby="build-title">
-                <h2 id="build-title">{tr("Build for me", "Construire pour moi")}</h2>
+                <div class="sheet-scroll">
+                <h2 id="build-title" tabindex="-1" autofocus>{tr("Build for me", "Construire pour moi")}</h2>
                 <p class="dialog-sub">{tr(
                     "Pick one or two colours, or let the builder surprise you, and a way to play. It uses only cards you own and says why each one is in.",
                     "Choisissez une ou deux couleurs, ou laissez-vous surprendre, et une façon de jouer. Seules vos cartes sont utilisées, et chacune a sa raison d'être.",
                 )}</p>
                 <fieldset class="build-colours">
-                    <legend>{tr("Colours (up to two)", "Couleurs (deux au plus)")}</legend>
+                    <legend>{tr("Colours (up to two), with the Hexon cards you own", "Couleurs (deux au plus), avec vos cartes Hexon")}</legend>
                     <div class="colour-row">
-                        {COLOURS.into_iter().map(|c| view! {
-                            <button type="button" class="chip colour" aria-pressed=move || colours.with(|v| v.contains(&c)).to_string()
-                                on:click=move |_| toggle(c)>
-                                <Pip color=c />{c.to_string()}
+                        {owned.iter().map(|&(c, n, can)| view! {
+                            <button type="button" class="chip colour" aria-disabled=(!can).to_string()
+                                aria-pressed=move || colours.with(|v| v.contains(&c)).to_string()
+                                aria-label=tr(format!("{c}, {n} Hexon cards owned"), format!("{c}, {n} cartes Hexon possédées"))
+                                on:click=move |_| toggle(c, can)>
+                                <Pip color=c />{c.to_string()}<span class="chip-n" aria-hidden="true">{n}</span>
                             </button>
                         }).collect_view()}
                         <button type="button" class="chip surprise" aria-pressed=move || surprise.get().is_some().to_string()
-                            on:click=move |_| { colours.set(vec![]); surprise.set(Some(crate::new_seed())) }>
+                            on:click=move |_| { refused.set(None); colours.set(vec![]); surprise.set(Some(crate::new_seed())) }>
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l10 10h3M4 17h3l3-3M14 10l3-3h3M18 4l2 3-2 3M18 14l2 3-2 3" /></svg>
                             {move || if surprise.get().is_some() { tr("Surprise me again", "Encore une surprise") } else { tr("Surprise me", "Surprenez-moi") }}
                         </button>
                     </div>
+                    <p class="refused" role="status">{move || refused.get()}</p>
                 </fieldset>
                 <fieldset class="seg build-style">
                     <legend>{tr("Style", "Style")}</legend>
@@ -346,42 +487,69 @@ pub fn BuildSheet(
                     }).collect_view()}
                     <p class="style-blurb">{move || style.get().blurb()}</p>
                 </fieldset>
-                <section class="build-preview" aria-labelledby="preview-title" aria-live="polite">
+                <section class="build-preview" aria-labelledby="preview-title">
                     {move || {
                         let b = built.get();
+                        let asked = if surprise.get().is_none() { colours.get() } else { vec![] };
                         let count = |keep: fn(&sixfold_engine::CardDef) -> bool| b.cards.iter().filter(|&&id| keep(card(id))).count();
                         let hexons = count(|c| c.creature().is_some());
                         let trainers = count(|c| matches!(c.kind, sixfold_engine::CardKind::Trainer(_)));
                         let energy = b.cards.len() - hexons - trainers;
                         let odds = builder::opening(&b.cards);
                         let colours = deck_colors(&b.cards);
+                        let names: Vec<String> = colours.iter().map(|c| c.to_string()).collect();
+                        let has = hexon_colours(&b.cards);
+                        let missing: Vec<String> = asked.iter().filter(|c| !has.contains(c)).map(|c| c.to_string()).collect();
+                        let diff = draft.with_untracked(|d| diff_line(&d.cards, &b.cards));
                         let summary = tr(
-                            format!("{hexons} Hexons · {trainers} trainers · {energy} energy · {} of opening hands lack a Basic", pc(odds.mulligan)),
-                            format!("{hexons} Hexons · {trainers} Dresseurs · {energy} énergies · {} des mains de départ sans Hexon de Base", pc(odds.mulligan)),
+                            format!("{hexons} Hexons · {trainers} trainers · {energy} energy · {} of opening hands lack a Basic ({})", pc(odds.mulligan), mulligan_word(odds.mulligan)),
+                            format!("{hexons} Hexons · {trainers} Dresseurs · {energy} énergies · {} des mains de départ sans Hexon de Base ({})", pc(odds.mulligan), mulligan_word(odds.mulligan)),
                         );
+                        let groups = [tr("Hexons", "Hexons"), tr("Trainers", "Dresseurs"), tr("Energy", "Énergie")];
                         view! {
                             <header class="preview-head">
                                 {deck_star(&b.cards).map(|s| view! { <span class="deck-star" aria-hidden="true"><CardFace id=s /></span> })}
                                 <div>
-                                    <h3 id="preview-title">{tr("The deck", "Le deck")} <span class="deck-colors">{colours.into_iter().map(|c| view! { <Pip color=c /> }).collect_view()}</span></h3>
+                                    <h3 id="preview-title">
+                                        {if names.is_empty() { tr("Your deck", "Votre deck").to_string() } else { tr(format!("Your {} deck", names.join("–")), format!("Votre deck {}", names.join("–"))) }}
+                                        <span class="deck-colors">{colours.into_iter().map(|c| view! { <Pip color=c /> }).collect_view()}</span>
+                                    </h3>
                                     <p class="preview-sum">{summary}</p>
                                 </div>
                             </header>
-                            <ul class="reasons">
-                                {b.reasons.iter().map(|r| view! { <li>{r.text()}</li> }).collect_view()}
-                            </ul>
+                            <p class="preview-diff" role="status">{diff}</p>
+                            {(!missing.is_empty()).then(|| view! {
+                                <p class="preview-warn">{tr(
+                                    format!("Too few {} Hexons in your collection to build on: the deck leaves them out.", missing.join(" / ")),
+                                    format!("Trop peu d'Hexons {} dans votre collection pour bâtir dessus : le deck s'en passe.", missing.join(" / ")),
+                                )}</p>
+                            })}
+                            {(odds.mulligan > 0.25 || energy > 28).then(|| view! {
+                                <p class="preview-warn">{tr(
+                                    "Your cards in these colours make a thin deck. Try other colours, or open packs for more.",
+                                    "Vos cartes de ces couleurs donnent un deck maigre. Essayez d'autres couleurs, ou ouvrez des boosters.",
+                                )}</p>
+                            })}
+                            {groups.into_iter().enumerate().map(|(g, name)| {
+                                let lines: Vec<String> = b.reasons.iter().filter(|r| group(&r.why) == g).map(|r| r.text()).collect();
+                                (!lines.is_empty()).then(|| view! {
+                                    <h4 class="reasons-group">{name}</h4>
+                                    <ul class="reasons">{lines.into_iter().map(|t| view! { <li>{t}</li> }).collect_view()}</ul>
+                                })
+                            }).collect_view()}
                         }
                     }}
                 </section>
-                {(had > 0).then(|| view! {
-                    <p class="note">{tr(
-                        format!("This replaces the {had} cards in the deck now; Undo brings them back."),
-                        format!("Ceci remplace les {had} cartes du deck ; « Annuler » les rend."),
-                    )}</p>
-                })}
-                <div class="dialog-foot">
+                </div>
+                <div class="dialog-foot sheet-foot">
+                    {(had > 0).then(|| view! {
+                        <p class="note">{tr(
+                            format!("Replaces the {had} cards in the deck; Undo brings them back."),
+                            format!("Remplace les {had} cartes du deck ; « Annuler » les rend."),
+                        )}</p>
+                    })}
                     <button type="button" class="btn ghost" on:click=move |_| open.set(false)>{tr("Keep my deck", "Garder mon deck")}</button>
-                    <button type="button" class="btn primary" autofocus on:click=use_it>{tr("Use this deck", "Prendre ce deck")}</button>
+                    <button type="button" class="btn primary" on:click=use_it>{tr("Use this deck", "Prendre ce deck")}</button>
                 </div>
             </div>
         </div>
@@ -412,7 +580,7 @@ pub fn TestSheet(open: RwSignal<bool>, draft: RwSignal<DeckList>) -> impl IntoVi
                     }
                 }}</p>
                 <dl class="odds">
-                    <div><dt>{tr("Hands with no Basic", "Mains sans Hexon de Base")}</dt><dd>{move || pc(odds().mulligan)}</dd></div>
+                    <div><dt>{tr("Hands with no Basic", "Mains sans Hexon de Base")}</dt><dd>{move || pc(odds().mulligan)}<span class="odds-word">{move || mulligan_word(odds().mulligan)}</span></dd></div>
                     <div><dt>{tr("Basics in a hand, on average", "Hexons de Base par main, en moyenne")}</dt><dd>{move || {
                         let b = odds().basics;
                         if fr() { format!("{b:.1}").replace('.', ",") } else { format!("{b:.1}") }
@@ -449,11 +617,15 @@ pub fn DeckShelf() -> impl IntoView {
                 )}</p>
             </div>
             <p class="shelf-sub">{tr(
-                "Decks you unlock are lent to you: play them as they are in a Quick duel, or copy one to your decks and build toward it.",
-                "Les decks débloqués vous sont prêtés : jouez-les tels quels en duel rapide, ou copiez-en un dans vos decks pour vous en approcher.",
+                "Decks you unlock are lent to you: they join your decks under “Play a duel”, as they are. Copy one here to change it and build toward it.",
+                "Les decks débloqués vous sont prêtés : ils rejoignent vos decks dans « Jouer un duel », tels quels. Copiez-en un ici pour le modifier et vous en approcher.",
             )}</p>
             <ul class="shelf-grid" data-focus-home="">
-                {UNLOCKABLE.iter().map(|u| {
+                {move || {
+                    // Unlocked first, then the rest in the order a playthrough meets them.
+                    let mut shelf: Vec<_> = UNLOCKABLE.iter().collect();
+                    progress.with(|p| shelf.sort_by_key(|u| !u.unlocked(p)));
+                    shelf.into_iter().map(|u| {
                     let open = move || progress.with(|p| u.unlocked(p));
                     let name = u.deck.name.to_string();
                     let cards = u.deck.cards();
@@ -505,7 +677,8 @@ pub fn DeckShelf() -> impl IntoView {
                             </div>
                         </li>
                     }
-                }).collect_view()}
+                }).collect_view()
+                }}
             </ul>
             <p class="shelf-note" role="status" aria-live="polite">{move || note.get()}</p>
         </section>
