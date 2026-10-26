@@ -18,6 +18,7 @@ mod overlays;
 mod packs;
 mod saves;
 mod shops;
+mod splash;
 mod store;
 mod title;
 mod world;
@@ -46,6 +47,8 @@ fn main() {
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Screen {
+    /// The opening (studio, logo, press to start): once per launch.
+    Splash,
     Title,
     /// Duel setup: pick your deck and the AI's.
     Duel,
@@ -100,6 +103,8 @@ fn App() -> impl IntoView {
     let ctl = Ctl::new();
     let screen = RwSignal::new(if world::reopen() {
         Screen::World
+    } else if splash::due() {
+        Screen::Splash
     } else {
         Screen::Title
     });
@@ -156,9 +161,12 @@ fn App() -> impl IntoView {
     Effect::new(move |_| match screen.get() {
         Screen::Match => audio::music("duel"),
         Screen::World => {}
+        // Silence until "Press to start" (the gesture the title music waits for).
+        Screen::Splash => audio::music(""),
         _ => audio::music("title"),
     });
     let page = move || match screen.get() {
+        Screen::Splash => view! { <splash::Splash /> }.into_any(),
         Screen::Title => view! { <title::TitleScreen /> }.into_any(),
         Screen::Duel => view! { <duel::DuelSetup /> }.into_any(),
         Screen::Match => view! { <MatchScreen /> }.into_any(),
@@ -173,14 +181,29 @@ fn App() -> impl IntoView {
     view! { {page} <saves::SaveIndicator /> }
 }
 
+thread_local! {
+    static TO_MENU: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// The next screen change lands focus on the first menu item (after "Press to
+/// start", where the player is about to choose, not read).
+pub fn focus_menu_next() {
+    TO_MENU.set(true);
+}
+
 /// Focus the screen's `[data-screen-focus]` control if it names one (the
 /// credits' Skip), else its `h1` (or its `main`), so focus never sits on a
 /// button that the screen change removed.
-fn focus_heading() {
+pub(crate) fn focus_heading() {
     use wasm_bindgen::JsCast;
     let doc = document();
     // Two queries: a selector list would return whichever comes first in the page.
-    let el = ["[data-screen-focus]", "h1"]
+    let menu = if TO_MENU.take() {
+        ".menu .menu-item"
+    } else {
+        "[data-screen-focus]"
+    };
+    let el = [menu, "[data-screen-focus]", "h1"]
         .iter()
         .find_map(|s| doc.query_selector(s).ok().flatten())
         .or_else(|| doc.query_selector("main").ok().flatten());
