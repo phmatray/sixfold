@@ -9,10 +9,13 @@
 use std::time::Duration;
 
 use leptos::prelude::*;
-use sixfold_engine::campaign::RIVALS;
+use sixfold_engine::campaign::{Rival, RIVALS};
 use sixfold_engine::overworld::Progress;
-use sixfold_engine::{tr, T};
+use sixfold_engine::stats::{Stats, FINDS};
+use sixfold_engine::{card, tr, T};
 
+use crate::achievements::thousands;
+use crate::art::{art_src, color_key};
 use crate::audio::MuteToggle;
 use crate::{store, Screen};
 
@@ -75,6 +78,138 @@ fn champion_title(p: &Progress) -> T {
     }
 }
 
+/// What the credits list under "Made with": (name, what it did).
+const TOOLS: &[(&str, T)] = &[
+    (
+        "Rust & WebAssembly",
+        T::new(
+            "the rules engine and every screen",
+            "le moteur de règles et tous les écrans",
+        ),
+    ),
+    ("Leptos", T::new("the screens", "les écrans")),
+    ("three.js", T::new("the world", "le monde")),
+    (
+        "Blender",
+        T::new(
+            "every prop, character and portrait, modelled by script",
+            "chaque objet, personnage et portrait, modelés par script",
+        ),
+    ),
+    (
+        "FLUX 3 Image Klein",
+        T::new(
+            "the card pictures, drawn on our own machine from hand-written captions",
+            "les illustrations des cartes, dessinées sur notre machine d'après des légendes écrites à la main",
+        ),
+    ),
+    (
+        "Web Audio",
+        T::new(
+            "every note and every sound, played live, never recorded",
+            "chaque note et chaque son, joués en direct, jamais enregistrés",
+        ),
+    ),
+    ("Trunk", T::new("the build", "la compilation")),
+    ("Playwright", T::new("the browser tests", "les tests dans le navigateur")),
+    (
+        "Claude Code",
+        T::new(
+            "a coding companion, from Anthropic",
+            "un compagnon de code, par Anthropic",
+        ),
+    ),
+];
+
+/// What ships in the game under someone else's licence: (what, the licence).
+/// Checked against `web/vendor/three/LICENSE`, `web/index.html` (the fonts)
+/// and `cargo tree -p sixfold-web --target wasm32-unknown-unknown -e normal`.
+const LICENCES: &[(T, T)] = &[
+    (T::new("three.js", "three.js"), T::new("MIT", "MIT")),
+    (T::new("Leptos", "Leptos"), T::new("MIT", "MIT")),
+    (
+        T::new("wasm-bindgen, js-sys, web-sys", "wasm-bindgen, js-sys, web-sys"),
+        T::new("MIT or Apache-2.0", "MIT ou Apache-2.0"),
+    ),
+    (
+        T::new(
+            "The other Rust crates in the WebAssembly build",
+            "Les autres crates Rust de la version WebAssembly",
+        ),
+        T::new(
+            "MIT, Apache-2.0, Zlib, BSL-1.0, Unicode-3.0 or Unlicense",
+            "MIT, Apache-2.0, Zlib, BSL-1.0, Unicode-3.0 ou Unlicense",
+        ),
+    ),
+    (
+        T::new(
+            "Bricolage Grotesque, Atkinson Hyperlegible",
+            "Bricolage Grotesque, Atkinson Hyperlegible",
+        ),
+        T::new("SIL Open Font License 1.1", "SIL Open Font License 1.1"),
+    ),
+    (
+        T::new("FLUX 3 Image Klein", "FLUX 3 Image Klein"),
+        T::new(
+            "the Black Forest Labs community licence, which allows its pictures in this free game",
+            "la licence communautaire de Black Forest Labs, qui permet ses images dans ce jeu gratuit",
+        ),
+    ),
+];
+
+/// A rival's colour class (`t-fire` …), from their first colour.
+fn tone(r: &Rival) -> &'static str {
+    r.colors.first().map_or("colorless", |&c| color_key(c))
+}
+
+/// "a, b, c and d" (or "et").
+fn and_list(parts: Vec<AnyView>) -> Vec<AnyView> {
+    let n = parts.len();
+    let mut out = vec![];
+    for (i, p) in parts.into_iter().enumerate() {
+        if i > 0 {
+            out.push(
+                if i + 1 == n {
+                    tr(" and ", " et ")
+                } else {
+                    ", "
+                }
+                .into_any(),
+            );
+        }
+        out.push(p);
+    }
+    out
+}
+
+/// The run so far, in one sentence: up to five of the stats, the ones that
+/// aren't zero. Read only; None before anything happened.
+fn run_line(s: &Stats) -> Option<impl IntoView> {
+    let n = |k: &str| s.get(k);
+    let fact = |v: u64, en: String, fr: String| {
+        (v > 0).then(|| view! { <b>{thousands(v)}</b>{tr(en, fr)} }.into_any())
+    };
+    let facts: Vec<AnyView> = [
+        fact(n("wins"), " duels won".into(), " duels gagnés".into()),
+        fact(n("kos"), " knock-outs".into(), " K.O.".into()),
+        fact(n("steps"), " steps walked".into(), " pas".into()),
+        fact(
+            n("finds"),
+            format!(" of {FINDS} finds"),
+            format!(" trouvailles sur {FINDS}"),
+        ),
+        fact(
+            n("packs"),
+            " packs opened".into(),
+            " boosters ouverts".into(),
+        ),
+    ]
+    .into_iter()
+    .flatten()
+    .collect();
+    (!facts.is_empty()).then(|| view! { <p class="credits-run">{and_list(facts)}"."</p> })
+}
+
 /// When the seal stone's faces light (ms after its plate shows), one per
 /// seal, and when the whole stone rings.
 const FACE_AT: u32 = 500;
@@ -99,7 +234,7 @@ fn seal_stone() -> impl IntoView {
             .join(" ")
     };
     let faces = RIVALS.iter().filter(|r| r.seal).enumerate().map(|(k, r)| {
-        let tone = r.colors.first().map_or("colorless", |&c| crate::art::color_key(c));
+        let tone = r.colors.first().map_or("colorless", |&c| color_key(c));
         let ((x0, y0), (x1, y1), (x2, y2), (x3, y3)) = (v(k, 34.0), v(k, 100.0), v(k + 1, 100.0), v(k + 1, 34.0));
         view! {
             <path class=format!("stone-face t-{tone}") style=format!("--i: {k}")
@@ -126,6 +261,7 @@ fn seal_stone() -> impl IntoView {
 pub fn Credits(won: bool) -> impl IntoView {
     let screen = expect_context::<RwSignal<Screen>>();
     let progress = expect_context::<RwSignal<Progress>>();
+    let stats = expect_context::<RwSignal<Stats>>();
     // After the Warden: back into the world, in the hall (the save written now).
     let done = move || {
         if won {
@@ -145,8 +281,9 @@ pub fn Credits(won: bool) -> impl IntoView {
         .is_some_and(|m| m.matches());
 
     let title = progress.with_untracked(champion_title);
-    let ended = RwSignal::new(still);
-    // The plates, in order: (how long each shows in ms, what it shows).
+    let seal_rivals = || RIVALS.iter().filter(|r| r.seal);
+    // The plates, in order: (how long each shows in ms, what it shows). The
+    // last one stays until Continue.
     let mut plates: Vec<(u32, AnyView)> = vec![];
     if won {
         plates.push((
@@ -160,60 +297,134 @@ pub fn Credits(won: bool) -> impl IntoView {
         plates.push((
             4600,
             view! {
-                <h1 class="wordmark champion-title" class:long={title.en.len() > 10}>{title.get()}</h1>
+                <h2 class="wordmark champion-title" class:long={title.en.len() > 10}>{title.get()}</h2>
                 <p class="credits-line">{tr("Six seals and the Warden's chair.", "Six sceaux et le fauteuil de la Gardienne.")}</p>
             }
             .into_any(),
         ));
     }
     plates.push((
+        5000,
+        view! {
+            <h1 class="wordmark">"Sixfold"</h1>
+            <p class="credits-line">{if won {
+                tr("Six seals, one Warden, and a new champion.", "Six sceaux, une Gardienne… et une nouvelle légende.")
+            } else {
+                tr("The people and the tools behind it.", "Ceux qui l'ont fait, et avec quoi.")
+            }}</p>
+        }
+        .into_any(),
+    ));
+    if let Some(line) = stats.with_untracked(run_line) {
+        plates.push((
+            7000,
+            view! {
+                <h2>{tr("Your run", "Votre partie")}</h2>
+                <ul class="seals credits-seals" aria-hidden="true">
+                    {seal_rivals().map(|r| view! {
+                        <li><crate::campaign::Seal r=r earned=progress.with_untracked(|p| r.beaten(p)) /></li>
+                    }).collect_view()}
+                </ul>
+                {line}
+            }
+            .into_any(),
+        ));
+    }
+    let face = |r: &'static Rival| {
+        view! {
+            <li class=format!("cast-one t-{}", tone(r))>
+                <img src=format!("world/assets/portraits/{}.webp", r.id) alt="" width="256" height="256" decoding="async" />
+                <b>{r.name}</b>
+                <span>{r.title.get()}</span>
+            </li>
+        }
+    };
+    plates.push((
+        8000,
+        view! {
+            <h2>{tr("The rivals", "Les rivaux")}</h2>
+            <ul class="cast">{seal_rivals().map(face).collect_view()}</ul>
+            <ul class="cast warden">{RIVALS.iter().filter(|r| !r.seal).map(face).collect_view()}</ul>
+        }
+        .into_any(),
+    ));
+    plates.push((
+        6500,
+        view! {
+            <h2>{tr("The Hexons", "Les Hexons")}</h2>
+            <ul class="hexons">
+                {RIVALS.iter().enumerate().map(|(i, r)| {
+                    let c = card(r.promo());
+                    view! {
+                        <li style=format!("--i: {i}")>
+                            {art_src(c).map(|src| view! { <img src=src alt="" width="800" height="560" decoding="async" /> })}
+                            <span>{c.label()}</span>
+                        </li>
+                    }
+                }).collect_view()}
+            </ul>
+            <p class="credits-line">{tr(
+                "Seventy-eight Hexons, each one invented for this game. These seven are the rivals' own.",
+                "Soixante-dix-huit Hexons, tous inventés pour ce jeu. Ces sept-là appartiennent aux rivaux.",
+            )}</p>
+        }
+        .into_any(),
+    ));
+    plates.push((
+        8000,
+        view! {
+            <h2>{tr("The townsfolk", "Les gens du coin")}</h2>
+            <ul class="credits-list">
+                {TOWNSFOLK.iter().map(|(name, what)| view! {
+                    <li><b>{*name}</b><span>{what.get()}</span></li>
+                }).collect_view()}
+            </ul>
+        }
+        .into_any(),
+    ));
+    plates.push((
+        6000,
+        view! {
+            <h2>{tr("A game by Atypical Play", "Un jeu Atypical Play")}</h2>
+            <ul class="credits-list solo">
+                <li><b>"Philippe Matray"</b><span>{tr("direction, game design, code, writing and cards", "direction, conception, code, écriture et cartes")}</span></li>
+            </ul>
+        }
+        .into_any(),
+    ));
+    plates.push((
+        8000,
+        view! {
+            <h2>{tr("Made with", "Fait avec")}</h2>
+            <ul class="credits-list">
+                {TOOLS.iter().map(|(name, what)| view! {
+                    <li><b>{*name}</b><span>{what.get()}</span></li>
+                }).collect_view()}
+            </ul>
+        }
+        .into_any(),
+    ));
+    plates.push((
+        9000,
+        view! {
+            <h2>{tr("Licences", "Licences")}</h2>
+            <ul class="credits-list licences">
+                {LICENCES.iter().map(|(name, what)| view! {
+                    <li><b>{name.get()}</b><span>{what.get()}</span></li>
+                }).collect_view()}
+            </ul>
+            <p class="credits-line small">{tr("Sixfold's own code is MIT too.", "Le code de Sixfold est lui aussi sous licence MIT.")}</p>
+        }
+        .into_any(),
+    ));
+    plates.push((
         0,
         view! {
-            <div class="credits-roll" class:ended=move || ended.get()
-                on:animationend=move |_| ended.set(true)>
-                <h2 id="credits-title" class="wordmark">"Sixfold"</h2>
-                {won.then(|| view! {
-                    <p class="credits-lead">{tr("Six seals, one Warden, and a new champion.", "Six sceaux, une Gardienne… et une nouvelle légende.")}</p>
-                    <ul class="seals credits-seals" aria-hidden="true">
-                        {RIVALS.iter().filter(|r| r.seal).map(|r| view! {
-                            <li><crate::campaign::Seal r=r earned=true /></li>
-                        }).collect_view()}
-                    </ul>
-                })}
-                <section>
-                    <h2>{tr("The rivals", "Les rivaux")}</h2>
-                    <ul>
-                        {RIVALS.iter().map(|r| view! {
-                            <li><b>{r.name}</b>" "<span>{r.title.get()}</span></li>
-                        }).collect_view()}
-                    </ul>
-                </section>
-                <section>
-                    <h2>{tr("The townsfolk", "Les gens du coin")}</h2>
-                    <ul>
-                        {TOWNSFOLK.iter().map(|(name, what)| view! {
-                            <li><b>{*name}</b>" "<span>{what.get()}</span></li>
-                        }).collect_view()}
-                    </ul>
-                </section>
-                <section>
-                    <h2>{tr("Made by", "Créé par")}</h2>
-                    <ul><li><b>"Philippe Matray"</b>" "<span>{tr("design, code and cards", "conception, code et cartes")}</span></li></ul>
-                </section>
-                <section>
-                    <h2>{tr("Built with", "Fait avec")}</h2>
-                    <ul>
-                        <li><b>"Rust"</b>" "<span>{tr("and WebAssembly", "et WebAssembly")}</span></li>
-                        <li><b>"Leptos"</b>" "<span>{tr("for the screens", "pour les écrans")}</span></li>
-                        <li><b>"three.js"</b>" "<span>{tr("for the world", "pour le monde")}</span></li>
-                        <li><b>"Blender"</b>" "<span>{tr("for every prop, made by script", "pour chaque objet du décor, modelé par script")}</span></li>
-                    </ul>
-                </section>
-                <section>
-                    <p>{tr("Every Hexon, card, place, picture and sound here is original. Only the rules come from a classic handheld card game.", "Chaque Hexon, carte, lieu, image et son de ce jeu est original. Seules les règles viennent d'un grand classique du jeu de cartes sur console portable.")}</p>
-                </section>
-                <p class="credits-end">{tr("Thank you for playing.", "Merci d'avoir joué.")}</p>
-            </div>
+            <p class="credits-end">{tr("Thank you for playing.", "Merci d'avoir joué.")}</p>
+            <p class="credits-line">{tr(
+                "Every Hexon, card, place, picture and sound here is original. Only the rules come from a classic handheld card game.",
+                "Chaque Hexon, carte, lieu, image et son de ce jeu est original. Seules les règles viennent d'un grand classique du jeu de cartes sur console portable.",
+            )}</p>
         }
         .into_any(),
     ));
@@ -263,6 +474,16 @@ pub fn Credits(won: bool) -> impl IntoView {
     });
 
     let last = move || at.get() + 1 == n;
+    // Next disappears on the last plate: focus goes on to Continue, not lost.
+    let primary = NodeRef::<leptos::html::Button>::new();
+    let next = move |_| {
+        show(at.get_untracked() + 1);
+        if at.get_untracked() + 1 == n {
+            if let Some(b) = primary.get_untracked() {
+                _ = b.focus();
+            }
+        }
+    };
     let on_key = move |e: leptos::ev::KeyboardEvent| match e.key().as_str() {
         "Escape" => {
             e.prevent_default();
@@ -274,6 +495,9 @@ pub fn Credits(won: bool) -> impl IntoView {
     };
     view! {
         <main class="credits" class:still=still on:keydown=on_key aria-label=tr("Credits", "Générique")>
+            <ol class="credits-pips" aria-hidden="true">
+                {(0..n).map(|i| view! { <li class:on=move || at.get() == i class:past=move || { at.get() > i }></li> }).collect_view()}
+            </ol>
             <div class="credits-stage" aria-live="polite">
                 {plates.into_iter().enumerate().map(|(i, (_, v))| view! {
                     <div class="credits-plate" class:on=move || at.get() == i
@@ -285,11 +509,11 @@ pub fn Credits(won: bool) -> impl IntoView {
             <div class="credits-foot">
                 <MuteToggle />
                 {move || (!last()).then(|| view! {
-                    <button type="button" class="btn ghost" on:click=move |_| show(at.get_untracked() + 1)>{tr("Next", "Suivant")}</button>
+                    <button type="button" class="btn ghost" on:click=next>{tr("Next", "Suivant")}</button>
                 })}
                 // Focus starts on Skip (see `focus_heading`), so Enter works straight away.
-                <button type="button" class="btn primary" data-screen-focus on:click=move |_| done()>
-                    {move || if last() && ended.get() { tr("Continue", "Continuer") } else { tr("Skip the credits", "Passer le générique") }}
+                <button type="button" class="btn primary" data-screen-focus node_ref=primary on:click=move |_| done()>
+                    {move || if last() { tr("Continue", "Continuer") } else { tr("Skip the credits", "Passer le générique") }}
                 </button>
             </div>
         </main>
