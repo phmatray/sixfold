@@ -1065,7 +1065,7 @@ impl Ctl {
                     |q| matches!(q.front(), Some(Event::KnockedOut { uid: u, .. }) if u == uid),
                 );
                 if *hp == 0 && ko_next {
-                    450
+                    260
                 } else {
                     850
                 }
@@ -1125,10 +1125,11 @@ impl Ctl {
                     ms * 86 / 100
                 };
                 let generation = self.generation.get_value();
-                let me = *self;
+                let (me, mine) = (*self, *player == HUMAN);
                 set_timeout(
                     move || {
-                        if me.generation.get_value() == generation {
+                        // Only your own prize is a reward; theirs just flies.
+                        if me.generation.get_value() == generation && mine {
                             crate::audio::sfx("reward", 0.0);
                         }
                     },

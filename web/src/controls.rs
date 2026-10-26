@@ -339,6 +339,11 @@ pub fn PromptModal() -> impl IntoView {
         }
     });
     move || {
+        // While the choice plays out (a prize flying to the hand), the old
+        // prompt has nothing left to offer: let the table be seen.
+        if ctl.busy.get() {
+            return None;
+        }
         let d = dialog.get()?;
         if peek.get() {
             return Some(

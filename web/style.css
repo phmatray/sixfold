@@ -3258,7 +3258,10 @@ button.pile { cursor: pointer; }
 /* KO: the blow freezes for 80 ms (hit-stop), the table jolts 6 px, a crack
    runs down the card and it drops away. */
 .duel.hitstop .mat *, .duel.hitstop .mat *::before, .duel.hitstop .mat *::after { animation-play-state: paused !important; }
-.duel[data-beat="ko"] .mat { animation: table-jolt calc(340ms * var(--pace, 1)) cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+/* What the halves hold (.half is display: contents) and the seam jolt, not .mat: a
+   transform on .mat would re-anchor the fixed .dock on a phone. Never shorter than a
+   readable jolt. */
+.duel[data-beat="ko"] .half > *, .duel[data-beat="ko"] .half::before, .duel[data-beat="ko"] .mat > .seam { animation: table-jolt max(160ms, calc(340ms * var(--pace, 1))) cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
 .hexon.ko { pointer-events: none; animation: ko-fall calc(900ms * var(--pace, 1)) cubic-bezier(0.55, 0, 0.9, 0.4) forwards; }
 .crack { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; overflow: visible; }
 .crack path { fill: none; stroke: #fff6ea; stroke-width: 2.5px; stroke-linejoin: bevel; vector-effect: non-scaling-stroke; stroke-dasharray: 1; filter: drop-shadow(0 0 1.5px #000) drop-shadow(0 0 4px rgba(0, 0, 0, 0.6)); animation: crack-run calc(170ms * var(--pace, 1)) cubic-bezier(0.16, 1, 0.3, 1) both; }
@@ -3323,7 +3326,7 @@ button.pile { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   /* No jolt, no flight, no bounce: the KO fades, the prize fades in place,
      the seal's faces appear together with the stinger. Sounds stay. */
-  .duel[data-beat="ko"] .mat { animation: none; }
+  .duel[data-beat="ko"] .half > *, .duel[data-beat="ko"] .half::before, .duel[data-beat="ko"] .mat > .seam { animation: none; }
   .hexon.ko { animation: ko-fade 600ms ease forwards !important; }
   .prize.taking { animation: prize-fade 600ms ease forwards !important; }
   .spark i { display: none; }

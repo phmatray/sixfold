@@ -247,16 +247,28 @@ fn facets_gain(n: u32) -> String {
     tr(format!("+{n} Facets"), format!("+{n} Facettes"))
 }
 
+/// A counting figure: the count for the eye, the final figure for screen
+/// readers (the reward is a live region, which would read every step).
+fn counted(
+    (shown, n): (RwSignal<u32>, u32),
+    text: impl Fn(u32) -> String + Copy + Send + Sync + 'static,
+) -> impl IntoView {
+    view! {
+        <span aria-hidden="true">{move || text(shown.get())}</span>
+        <span class="sr-only">{text(n)}</span>
+    }
+}
+
 /// Facets counting up into the wallet (WORLD_DESIGN §12.1): 0 → `n` with a
 /// tick per step once the reward has risen in, then the reward sound. Under
 /// reduced motion the number is there at once and only the reward sounds.
-fn count_up(n: u32) -> RwSignal<u32> {
+fn count_up(n: u32) -> (RwSignal<u32>, u32) {
     const AT: u32 = 700;
     const STEP: u32 = 60;
     let reduced = crate::packs::reduced_motion();
     let shown = RwSignal::new(if reduced { n } else { 0 });
     if n == 0 {
-        return shown;
+        return (shown, n);
     }
     let steps = if reduced { 1 } else { n.clamp(1, 12) };
     for s in 1..=steps {
@@ -269,7 +281,7 @@ fn count_up(n: u32) -> RwSignal<u32> {
             std::time::Duration::from_millis((AT + s * STEP).into()),
         );
     }
-    shown
+    (shown, n)
 }
 
 #[component]
@@ -507,7 +519,7 @@ pub fn GameOver() -> impl IntoView {
                         view! {
                         <div class="reward" role="status">
                             <span class="gem" aria-hidden="true"></span>
-                            <p><b>{move || facets_gain(shown.get())}</b><span>{match (taken, fr()) {
+                            <p><b>{counted(shown, facets_gain)}</b><span>{match (taken, fr()) {
                                 (0, false) => "For playing it out to the end.".to_string(),
                                 (0, true) => "Pour avoir joué jusqu'au bout.".to_string(),
                                 (t, false) => format!("{per} for playing it out, and {per} for each of the {t} prizes you took."),
@@ -530,11 +542,11 @@ pub fn GameOver() -> impl IntoView {
                         view! {
                         <div class="reward" role="status">
                             <span class="gem" aria-hidden="true"></span>
-                            <p><b>{move || facets_gain(shown.get())}</b>
-                                <span>{move || { let coins = before + shown.get(); tr(
+                            <p><b>{counted(shown, facets_gain)}</b>
+                                <span>{counted(shown, move |s| { let coins = before + s; tr(
                                     format!("You have ⬡ {coins}. Spend Facets on packs at the duel hall."),
                                     format!("Vous avez ⬡ {coins}. Dépensez vos Facettes en boosters à la salle des duels."),
-                                )}}</span></p>
+                                )})}</span></p>
                         </div>
                     }})}
                     {move || campaign_reward.get().zip(rival).map(|(rw, r)| {
@@ -570,7 +582,7 @@ pub fn GameOver() -> impl IntoView {
                                         }.into_any(),
                                     }}
                                     {(n > 0).then(|| view! { <span>{format!("+{}", crate::campaign::packs_label(b, n))}</span> })}
-                                    {(rw.facets > 0).then(|| { let shown = count_up(rw.facets); view! { <span>{move || facets_gain(shown.get())}</span> } })}
+                                    {(rw.facets > 0).then(|| { let shown = count_up(rw.facets); view! { <span>{counted(shown, facets_gain)}</span> } })}
                                     {rw.promo.map(|c| view! { <span>{tr(
                                         format!("+ the promo card {}, now in your collection", card(c).label()),
                                         format!("+ la carte promo {}, ajoutée à votre collection", card(c).label()),
@@ -587,11 +599,11 @@ pub fn GameOver() -> impl IntoView {
                                 {(rw.facets > 0).then(|| view! { <span class="gem" aria-hidden="true"></span> })}
                                 <p>{if rw.facets > 0 {
                                     view! {
-                                        <b>{move || facets_gain(shown.get())}</b>
-                                        <span>{move || { let coins = before + shown.get(); tr(
+                                        <b>{counted(shown, facets_gain)}</b>
+                                        <span>{counted(shown, move |s| { let coins = before + s; tr(
                                             format!("{}'s purse. You have ⬡ {coins}.", t.name),
                                             format!("La bourse de {}. Vous avez ⬡ {coins}.", t.name),
-                                        )}}</span>
+                                        )})}</span>
                                     }.into_any()
                                 } else if rw.won {
                                     view! {

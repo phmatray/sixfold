@@ -335,7 +335,7 @@ pub fn Hexon(
                 // The KO: a crack runs down the card before it falls.
                 <Show when=move || fx.get().3>
                     <svg class="crack" viewBox="0 0 100 140" preserveAspectRatio="none" aria-hidden="true">
-                        <path pathLength="1" d="M58 -2 L50 24 L61 41 L44 63 L56 80 L41 101 L52 118 L46 142" />
+                        <path pathLength="1" d="M57 16 L50 32 L61 47 L44 66 L56 82 L41 102 L52 118 L46 142" />
                     </svg>
                 </Show>
                 // An energy just attached: a spark in its colour.
