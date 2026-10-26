@@ -46,9 +46,19 @@ kit is the last section of `web/style.css`; its materials are tokens:
 - **Fields**: paper wells with the outline; sliders a paper groove filled with brass and a paint
   knob; toggles go `--sprout` green when on.
 - **The title**: the real world behind (`web/world/title.js`), the name painted on a sign (no
-  ropes), the menu as planks, one help line on paper for the entry under the cursor, the place's
-  name on a paper card. On a phone the entries become a two-column grid.
+  ropes), the menu as planks, one help line on paper beside the plank under the cursor (the whole
+  of its tag), the place's name on a paper card. On a phone the entries become a two-column grid.
 - **The sheet** `?sheet` shows every control in each state (rest, hover, pressed, focus, disabled).
+
+## What comes first
+
+Every screen leads with what the player most often wants next: it is the first control in the
+keys' and the pad's order, and the one brass act. The world is the game, so the title's first
+plank is the world (Continue, or Explore the world on a new save), the guided duel after it; the
+in-world menu opens on the Journal (what to do next), then the Map; the Campaign page leads with
+going out into the world; a won Gauntlet rung with more to climb leads with the next one; a pack
+shelf has one brass Open. An audit asks it of each screen: what is it for, what will the player
+want next, and is that first and most prominent?
 
 ## Keys and pad, everywhere
 
