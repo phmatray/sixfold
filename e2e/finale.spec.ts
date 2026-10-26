@@ -55,6 +55,8 @@ test("the finale: back from the first Warden win, the scene, the credits, and th
   // The credits open on the seal stone, then the title; Next moves on.
   const credits = page.getByRole("main", { name: "Credits" });
   await expect(credits.getByText("Six faces, all lit.", { exact: true })).toBeVisible();
+  // Saved in the hall already: a reload during the credits doesn't leave the champion in the Warden's room.
+  expect((await readSave(page)).world_at?.[0]).toBe("shop,1,6,e");
   await credits.getByRole("button", { name: "Next" }).click();
   await expect(credits.getByRole("heading", { name: "Champion", exact: true })).toBeVisible();
 
@@ -75,7 +77,7 @@ test("the finale: back from the first Warden win, the scene, the credits, and th
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
 });
 
-test("the credits from the campaign: no finale, every plate by hand, and back to the campaign", async ({ page }) => {
+test("the credits from the campaign: no scene, every plate by hand, and back to the campaign", async ({ page }) => {
   page.on("dialog", (d) => d.accept());
   await title(page);
   await menuItem(page, "Learn to play").click();
@@ -89,11 +91,15 @@ test("the credits from the campaign: no finale, every plate by hand, and back to
   await menuItem(page, "Campaign").click();
   await page.getByRole("button", { name: "Watch the credits" }).click();
 
-  // No seal stone or title: they open on the wordmark. With reduced motion they wait for Next.
+  // No scene, but the seal stone and the title open them again (a reload during the finale's
+  // credits loses neither), then the wordmark. With reduced motion they wait for Next.
   const credits = page.getByRole("main", { name: "Credits" });
-  await expect(credits.getByRole("heading", { name: "Sixfold", level: 1 })).toBeVisible();
-  await expect(credits.getByText("Six faces, all lit.", { exact: true })).toBeHidden();
+  await expect(credits.getByText("Six faces, all lit.", { exact: true })).toBeVisible();
   const next = credits.getByRole("button", { name: "Next" });
+  await next.click();
+  await expect(credits.getByRole("heading", { name: "Champion", exact: true })).toBeVisible();
+  await next.click();
+  await expect(credits.getByRole("heading", { name: "Sixfold", level: 1 })).toBeVisible();
   while (await next.isVisible()) await next.click();
 
   // The last plate: Continue has the focus (Next is gone), and leads back to the campaign.

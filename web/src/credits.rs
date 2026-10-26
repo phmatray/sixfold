@@ -1,6 +1,7 @@
 //! The credits, rolled once the Hex Warden falls (and on demand from the
-//! campaign screen). After the Warden they open on the finale (#67): the seal
-//! stone lighting its six faces, then the champion's title. The credits are
+//! campaign screen, which only a champion has). They open on the finale (#67):
+//! the seal stone lighting its six faces, then the champion's title, so a
+//! champion can see those again from the campaign. The credits are
 //! plates shown one at a time, each for a while, then the next fades in; with
 //! reduced motion they swap without a fade. Next (or →) moves on, ← goes back,
 //! Skip (or Escape) ends them. After the Warden they end in the duel hall, by
@@ -170,8 +171,8 @@ fn and_list(parts: Vec<AnyView>) -> Vec<AnyView> {
     out
 }
 
-/// The run so far, in one sentence: up to five of the stats, the ones that
-/// aren't zero first, and always at least three. Read only.
+/// The run so far, in one sentence: the stats that aren't zero (up to five; a
+/// save from before 1.7 may have only its duels won). Read only.
 fn run_line(s: &Stats) -> impl IntoView {
     let n = |k: &str| s.get(k);
     let mut facts: Vec<(u64, String, String)> = vec![
@@ -189,12 +190,12 @@ fn run_line(s: &Stats) -> impl IntoView {
             " boosters ouverts".into(),
         ),
     ];
-    // Stable: the non-zero ones keep their order, ahead of the zeros.
-    facts.sort_by_key(|f| f.0 == 0);
+    // A champion has won at least once; "0 steps walked" is no boast.
     let nonzero = facts.iter().filter(|f| f.0 > 0).count();
     let facts: Vec<AnyView> = facts
         .into_iter()
-        .take(nonzero.max(3))
+        .filter(|f| f.0 > 0 || nonzero == 0)
+        .take(5)
         .map(|(v, en, fr)| view! { <b>{thousands(v)}</b>{tr(en, fr)} }.into_any())
         .collect();
     view! { <p class="credits-run">{and_list(facts)}"."</p> }
@@ -274,6 +275,12 @@ pub fn Credits(won: bool) -> impl IntoView {
     let progress = expect_context::<RwSignal<Progress>>();
     let stats = expect_context::<RwSignal<Stats>>();
     // After the Warden: back into the world, in the hall (the save written now).
+    // Saved now too, so a reload during the credits comes back in the hall, not
+    // in the Warden's room with the scene spent (the stone and the title stay
+    // on the campaign screen's "Watch the credits").
+    if won {
+        store::set_world_at(HALL_DOOR);
+    }
     let done = move || {
         if won {
             store::set_world_at(HALL_DOOR);
@@ -300,27 +307,26 @@ pub fn Credits(won: bool) -> impl IntoView {
     // The plates, in order: (how long each shows in ms, its name for the
     // status line, what it shows). The last one stays until Continue.
     let mut plates: Vec<(u32, String, AnyView)> = vec![];
-    if won {
-        let lit = tr("Six faces, all lit.", "Six faces, toutes allumées.");
-        plates.push((
-            RING_AT + 1900,
-            lit.into(),
-            view! {
-                {seal_stone()}
-                <p class="credits-line">{lit}</p>
-            }
-            .into_any(),
-        ));
-        plates.push((
-            4600,
-            title.get().into(),
-            view! {
-                <h2 class="wordmark champion-title" class:long={title.en.len() > 10}>{title.get()}</h2>
-                <p class="credits-line">{tr("Six seals and the Warden's chair.", "Six sceaux et le fauteuil de la Gardienne.")}</p>
-            }
-            .into_any(),
-        ));
-    }
+    let lit = tr("Six faces, all lit.", "Six faces, toutes allumées.");
+    // The peak: the stone stays lit a few seconds once the ring has bloomed.
+    plates.push((
+        RING_AT + 4200,
+        lit.into(),
+        view! {
+            {seal_stone()}
+            <p class="credits-line">{lit}</p>
+        }
+        .into_any(),
+    ));
+    plates.push((
+        4600,
+        title.get().into(),
+        view! {
+            <h2 class="wordmark champion-title" class:long={title.en.len() > 10}>{title.get()}</h2>
+            <p class="credits-line">{tr("Six seals and the Warden's chair.", "Six sceaux et le fauteuil de la Gardienne.")}</p>
+        }
+        .into_any(),
+    ));
     plates.push((
         5000,
         "Sixfold".into(),
@@ -466,7 +472,6 @@ pub fn Credits(won: bool) -> impl IntoView {
     let durations: Vec<u32> = plates.iter().map(|p| p.0).collect();
     let names: Vec<String> = plates.iter().map(|p| p.1.clone()).collect();
     let n = plates.len();
-    let stone = won.then_some(0);
 
     // The plate on show, and whether the plates wait for Next (Pause; from the
     // start with reduced motion, read at the reader's pace). Each change bumps
@@ -483,7 +488,7 @@ pub fn Credits(won: bool) -> impl IntoView {
     Effect::new(move |_| {
         let i = at.get();
         // The stone rings a bell per face as it lights, then all at once.
-        if stone == Some(i) {
+        if i == 0 {
             if !still {
                 for k in 0..6 {
                     later(armed, FACE_AT + k * FACE_GAP, move || {
