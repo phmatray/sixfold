@@ -28,11 +28,10 @@ pub fn PageBar(
     on_back: Option<Callback<()>>,
     #[prop(optional)] children: Option<Children>,
 ) -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
     let back = back.unwrap_or(Screen::Title);
     let go = move || match on_back {
         Some(f) => f.run(()),
-        None => screen.set(back),
+        None => crate::go(back),
     };
     view! {
         <header class="topbar page-bar">
@@ -638,6 +637,7 @@ pub fn CollectionPanel() -> impl IntoView {
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                             </button>
                             <input type="range" class="page-range" min="1" max=move || pages.get() prop:value=move || page.get() + 1
+                                style=move || format!("--fill: {}%", (page.get() * 100).checked_div(pages.get().saturating_sub(1)).unwrap_or(100))
                                 aria-label=tr("Page", "Page") aria-valuetext=page_words
                                 on:input=move |e| turn(event_target_value(&e).parse::<usize>().unwrap_or(1).saturating_sub(1), false) />
                             <span class="page-of" aria-live="polite">{page_words}</span>

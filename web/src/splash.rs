@@ -6,30 +6,10 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 use sixfold_engine::tr;
-use wasm_bindgen::prelude::*;
 
 use crate::{audio, Screen};
 
 const SHOWN: &str = "sixfold.splashed";
-
-// The swap to the title runs as a view transition (the wordmark glides into
-// the hero) where the browser has them and motion is welcome. Focus can't
-// move while the transition holds the page, so `done` runs once it lets go.
-// Without a transition the App's own focus pass (`focus_menu_next`) lands it,
-// and `done` is dropped (ponytail: its closure leaks, a few bytes once a launch).
-#[wasm_bindgen(inline_js = r#"
-export function view_swap(cb, done) {
-  if (!document.startViewTransition || matchMedia("(prefers-reduced-motion: reduce)").matches) return cb();
-  // No rAF in here: the page doesn't render while the callback is pending. A
-  // macrotask lets Leptos apply the change first.
-  const t = document.startViewTransition(() => { cb(); return new Promise((r) => setTimeout(r, 0)); });
-  t.updateCallbackDone.then(() => requestAnimationFrame(done), () => {});
-  t.ready.catch(() => {}); // skipped (a hidden tab): the swap still happened
-}
-"#)]
-extern "C" {
-    fn view_swap(cb: &JsValue, done: &JsValue);
-}
 
 /// Whether this launch still owes the opening. A reload in the same tab (the
 /// language switch, a new version) goes straight to the title.
@@ -69,7 +49,6 @@ fn StudioMark() -> impl IntoView {
 
 #[component]
 pub fn Splash() -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
     mark_shown();
     crate::title::backdrop_preload();
     let step = RwSignal::new(0u8);
@@ -110,13 +89,9 @@ pub fn Splash() -> impl IntoView {
             _ => return,
         }
         audio::sfx("sting", 0.0);
+        // The wordmark glides into the title's hero (style.css, the splash swap).
         crate::focus_menu_next();
-        let swap = Closure::once_into_js(move || screen.set(Screen::Title));
-        let done = Closure::once_into_js(|| {
-            crate::focus_menu_next();
-            crate::focus_heading();
-        });
-        view_swap(&swap, &done);
+        crate::go(Screen::Title);
     };
     // The die lands: its knock, if sound is already allowed (it rarely is yet).
 

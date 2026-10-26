@@ -159,17 +159,6 @@ pub fn press_to_act() -> String {
     }
 }
 
-/// The key bound to a control, as `aria-keyshortcuts` names it ("J", "Escape").
-pub fn shortcut(c: Ctrl) -> String {
-    input().bound.track();
-    let k = key_of(c.id());
-    if k.chars().count() == 1 {
-        k.to_uppercase()
-    } else {
-        k
-    }
-}
-
 /// A button's tooltip, "Journal (J)", when the device has a control to name.
 pub fn titled(name: &str, c: Ctrl) -> String {
     match prompt(c) {
@@ -178,7 +167,7 @@ pub fn titled(name: &str, c: Ctrl) -> String {
     }
 }
 
-/// The world's top-bar hint, for the device in use.
+/// The world's controls hint (until the first steps, then in Options), for the device in use.
 pub fn world_hint() -> String {
     if input().device.with(|d| d == "touch") {
         return tr(

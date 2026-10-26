@@ -136,7 +136,6 @@ pub fn DeckPicker(
 #[component]
 pub fn DuelSetup() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<Profile>>();
     let mine_opts = profile.with_untracked(my_opts);
     let theirs_opts = prebuilt_opts();
@@ -173,7 +172,7 @@ pub fn DuelSetup() -> impl IntoView {
             back: Screen::Title,
         };
         if ctl.start(setup, seed.get()) {
-            screen.set(Screen::Match);
+            crate::go(Screen::Match);
         }
     };
     view! {
