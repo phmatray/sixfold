@@ -87,11 +87,13 @@ export function label(device, action, fr, binds = { keys: KEY_DEFAULTS, pad: PAD
   const t = (en, f) => (fr ? f : en);
   if (device === "pad") {
     if (action === "walk") return t("Stick or D-pad", "Stick ou croix");
+    if (action === "confirm") action = "act";
     const b = binds.pad[action];
     return PAD_NAMES[b] ?? t(`Button ${b}`, `Bouton ${b}`);
   }
   if (device !== "keys") return "";
   if (action === "walk") return t("Arrows or WASD", "Flèches ou ZQSD");
+  if (action === "confirm") return t("Enter", "Entrée");
   const k = binds.keys[action];
   return KEY_NAMES[k]?.[fr ? 1 : 0] ?? (k.length === 1 ? k.toUpperCase() : k);
 }

@@ -41,6 +41,12 @@ test("a remapped key plays as its default; a freed default key is dropped", () =
   assert.equal(translateKey("e"), undefined);
 });
 
+test("two actions trading keys each play as their own default", () => {
+  const keys = { ...KEY_DEFAULTS, act: "f", journal: "e" };
+  assert.equal(translateKey("e", keys), "j");
+  assert.equal(translateKey("j", keys), null);
+});
+
 test("Escape always stays itself", () => {
   assert.equal(translateKey("Escape", { ...KEY_DEFAULTS, cancel: "x", menu: "x" }), undefined);
   assert.equal(translateKey("x", { ...KEY_DEFAULTS, cancel: "x" }), "Escape");
@@ -57,6 +63,8 @@ test("conflicts and reserved controls are refused", () => {
   assert.equal(checkBind(binds, "keys", "menu", "Escape"), ""); // shared with cancel on a keyboard
   assert.equal(checkBind(binds, "pad", "act", 1), "taken:cancel");
   assert.equal(checkBind(binds, "pad", "act", 12), "reserved");
+  assert.equal(checkBind(binds, "pad", "act", 4), "reserved");
+  assert.equal(checkBind(binds, "pad", "act", 5), "reserved");
   assert.equal(checkBind(binds, "pad", "act", 7), "");
 });
 
@@ -69,6 +77,8 @@ test("prompts name the control for the device, in both languages", () => {
   assert.equal(label("pad", "menu", false), "Start");
   assert.equal(label("pad", "walk", true), "Stick ou croix");
   assert.equal(label("touch", "act", false), "");
+  assert.equal(label("keys", "confirm", true), "Entrée");
+  assert.equal(label("pad", "confirm", false), "A");
   const binds = { keys: { ...KEY_DEFAULTS, act: "f" }, pad: { ...PAD_DEFAULTS, act: 3 } };
   assert.equal(label("keys", "act", false, binds), "F");
   assert.equal(label("pad", "act", false, binds), "Y");

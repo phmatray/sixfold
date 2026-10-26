@@ -119,8 +119,8 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             tr("Running Shoes", "Chaussures de course").into(),
             "shoes",
             tr(
-                "Light soles, quick feet. Hold Shift, or switch on Run, to cover two tiles in the time of one.",
-                "Semelles légères, pas rapides. Maintenez Maj, ou activez Courir, pour franchir deux cases le temps d'une.",
+                "Light soles, quick feet. Hold {run}, or switch on Run, to cover two tiles in the time of one.",
+                "Semelles légères, pas rapides. Maintenez {run}, ou activez Courir, pour franchir deux cases le temps d'une.",
             ),
         ),
         "field_lens" => (
@@ -641,9 +641,10 @@ pub fn WorldScreen() -> impl IntoView {
                 "near" => {
                     let now = (!a.is_empty()).then(|| (a.clone(), b.clone()));
                     if let Some((k, t)) = &now {
-                        _ = announce.try_set(tr(
-                            format!("{}. Press E.", prompt_label(k, t)),
-                            format!("{}. Appuyez sur E.", prompt_label(k, t)),
+                        _ = announce.try_set(format!(
+                            "{}. {}",
+                            prompt_label(k, t),
+                            input::press_to_act()
                         ));
                     }
                     _ = near.try_set(now);
@@ -1217,6 +1218,8 @@ pub fn WorldScreen() -> impl IntoView {
                     }
                     Sheet::Item(id) => {
                         let (name, _, blurb) = item_info(&id);
+                        // The run control, for the device in use (#69).
+                        let blurb = blurb.replace("{run}", &input::named(Ctrl::Run));
                         let opens = objective::opens_names(&id);
                         view! {
                             <div class="item-got">

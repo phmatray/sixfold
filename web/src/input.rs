@@ -24,14 +24,15 @@ extern "C" {
 }
 
 /// The device last used, and the outcome of the last change of bindings
-/// (which prompts also follow).
+/// (which prompts also follow). Kept in a thread-local, not the context, so
+/// the world's callbacks (outside any component) can name controls too.
 #[derive(Clone, Copy)]
 struct Input {
     device: RwSignal<String>,
     bound: RwSignal<(u32, String)>,
 }
 
-/// Start the input layer and follow it; once, in the app.
+/// Start the input layer and follow it; once, as the app starts.
 pub fn provide() {
     start();
     let input = Input {
@@ -49,7 +50,11 @@ pub fn provide() {
             .unwrap_or_default();
         input.bound.update(|(n, r)| (*n, *r) = (*n + 1, result));
     });
-    provide_context(input);
+    INPUT.set(Some(input));
+}
+
+thread_local! {
+    static INPUT: std::cell::Cell<Option<Input>> = const { std::cell::Cell::new(None) };
 }
 
 /// A control the prompts can name; the first six can be remapped.
@@ -62,6 +67,8 @@ pub enum Ctrl {
     Journal,
     Map,
     Walk,
+    /// Enter on a keyboard, the act button on a pad.
+    Confirm,
 }
 
 const REMAP: [Ctrl; 6] = [
@@ -83,6 +90,7 @@ impl Ctrl {
             Ctrl::Journal => "journal",
             Ctrl::Map => "map",
             Ctrl::Walk => "walk",
+            Ctrl::Confirm => "confirm",
         }
     }
 
@@ -95,6 +103,7 @@ impl Ctrl {
             Ctrl::Journal => "Journal",
             Ctrl::Map => tr("World map", "Carte du monde"),
             Ctrl::Walk => tr("Walk", "Marcher"),
+            Ctrl::Confirm => tr("Confirm", "Valider"),
         }
     }
 
@@ -104,7 +113,7 @@ impl Ctrl {
 }
 
 fn input() -> Input {
-    expect_context::<Input>()
+    INPUT.get().expect("input::provide runs first")
 }
 
 /// The control's name on the device in use ("" on a touch screen: nothing to
@@ -118,6 +127,23 @@ pub fn prompt(c: Ctrl) -> String {
 /// A gamepad is the device in use.
 pub fn pad() -> bool {
     input().device.with(|d| d == "pad")
+}
+
+/// The control's name, falling back to its key on a touch screen (for text
+/// that has to name something, like an item's description).
+pub fn named(c: Ctrl) -> String {
+    match prompt(c) {
+        k if k.is_empty() => label(c.id(), "keys", fr()),
+        k => k,
+    }
+}
+
+/// "Press E." for the act control, "Tap to act." on a touch screen.
+pub fn press_to_act() -> String {
+    match prompt(Ctrl::Act) {
+        k if k.is_empty() => tr("Tap to act.", "Touchez pour agir.").into(),
+        k => tr(format!("Press {k}."), format!("Appuyez sur {k}.")),
+    }
 }
 
 /// A button's tooltip, "Journal (J)", when the device has a control to name.
