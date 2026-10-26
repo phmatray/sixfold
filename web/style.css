@@ -943,6 +943,8 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .world-controls, .world-pad { pointer-events: none; } /* the pad's empty corners let taps reach the scene */
 .world-pad button, .world-run { pointer-events: auto; }
 .world-run { order: -1; } /* above the pad */
+/* A dialogue or sheet takes the input: the pad steps aside instead of peeking round its edges. */
+body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
 .world-pad {
   display: grid;
   grid-template: repeat(3, 52px) / repeat(3, 52px);
@@ -1939,7 +1941,7 @@ select option { background: var(--panel); color: var(--ink); }
 .challenge-head .portrait { width: 72px; }
 .challenge-head .portrait.mono { font-size: 28px; }
 /* A challenge-rule duelist's house rule, set off like a brass plaque. */
-.challenge-rule { margin: 0 0 12px; padding: 8px 12px; border-left: 3px solid rgba(214, 172, 74, 0.8); background: rgba(214, 172, 74, 0.08); border-radius: 0 6px 6px 0; text-wrap: pretty; }
+.challenge-rule { margin: 0 0 12px; padding: 8px 12px; border: 1px solid rgba(214, 172, 74, 0.45); background: rgba(214, 172, 74, 0.08); border-radius: 6px; text-wrap: pretty; }
 .challenge-rule b { color: var(--ink); }
 .rival { grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; }
 .rival > .portrait { grid-row: 1 / span 4; align-self: start; }
