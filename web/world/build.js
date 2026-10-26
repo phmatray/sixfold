@@ -555,8 +555,12 @@ export async function build(map, got, reduced) {
     const outer = (map.ring ?? RING).filter((n) => got[n] || !OPTIONAL.test(n));
     const sides = map.ringSides ?? "nesw";
     const gap = (side, c) => exits.some((e) => e.side === side && c > e.span[0] - 2.2 && c < e.span[1] + 3.2);
+    // The ground runs the edge tiles out under the ring, so a river leaving the map keeps
+    // flowing: no tree stands in it.
+    const near = (v, n) => Math.min(n - 1, Math.max(0, Math.floor(v)));
+    const afloat = (x, z) => [-1, 0, 1].some((dx) => [-1, 0, 1].some((dz) => tile(near(x, W) + dx, near(z, H) + dz) === "~"));
     const ring = (side, x, z) => {
-      if (!sides.includes(side) || gap(side, "ns".includes(side) ? x : z)) return;
+      if (!sides.includes(side) || gap(side, "ns".includes(side) ? x : z) || afloat(x, z)) return;
       const n = outer[Math.floor(r() * outer.length)];
       batch.add(n, tpl(n), at(x, z, r() * Math.PI * 2, 1.05 + r() * 0.45), tint("#b9c9a8", 0.05));
     };
