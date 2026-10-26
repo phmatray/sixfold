@@ -688,9 +688,9 @@
             "music:rook",
             "cam:1:6",
             "wait:400",
-            "walk:sable:e",
-            "face:sable:s",
-            "face:rook_4:n",
+            "walk:sable:s",
+            "face:sable:e",
+            "face:rook_4:w",
             "wait:300"
           ]
         },
@@ -718,9 +718,9 @@
         },
         {
           "do": [
-            "face:sable:e",
+            "face:sable:n",
             "wait:400",
-            "walk:sable:w",
+            "walk:sable:n",
             "face:rook_4:e",
             "cam:hero",
             "flag:sable_door"
