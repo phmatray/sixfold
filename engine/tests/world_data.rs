@@ -18,11 +18,11 @@ use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 use serde_json::Value;
-use sixfold_engine::campaign::rival;
+use sixfold_engine::campaign::{rival, RIVALS};
 use sixfold_engine::doctor::APPLIED_FLAG;
-use sixfold_engine::overworld::{parse_cond, parse_effect, CamTarget, Cue, Effect, Test};
+use sixfold_engine::overworld::{parse_cond, parse_effect, CamTarget, Cue, Effect, Progress, Test};
 use sixfold_engine::stats::{CURIOS, FIELD_ITEMS, FINDS, SEAL_SITES, WAYMARKS};
-use sixfold_engine::trainers::{trainer, TRAINERS};
+use sixfold_engine::trainers::{trainer, ROOK_SEALS, TRAINERS};
 
 /// What every map seen so far placed.
 #[derive(Default)]
@@ -254,6 +254,53 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
     }
     seen.warps.extend(warps);
     bad
+}
+
+/// Rook's story, as the maps stage it: at each scene's seals (`ROOK_SEALS`),
+/// with the scenes before it played and at night, some scene starting that
+/// duel holds; once it has played, none does. A typo in a scene's `if` would
+/// leave the story stuck while every other check stays green.
+#[test]
+fn rooks_scenes_play_in_order_at_their_seals() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let mut scripts: Vec<(String, Vec<String>)> = vec![];
+    for entry in std::fs::read_dir(&dir).expect("the world's maps") {
+        let path = entry.unwrap().path();
+        if path.extension().is_none_or(|e| e != "json") {
+            continue;
+        }
+        let m: Value = serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
+        for sc in m["scripts"].as_array().into_iter().flatten() {
+            let effects = sc["steps"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .flat_map(|st| strs(&st["do"]))
+                .map(String::from)
+                .collect();
+            scripts.push((sc["if"].as_str().unwrap_or("").to_string(), effects));
+        }
+    }
+    let seal_rivals: Vec<&str> = RIVALS.iter().filter(|r| r.seal).map(|r| r.id).collect();
+    for (i, &(id, seals)) in ROOK_SEALS.iter().enumerate() {
+        let mut p = Progress::default();
+        for r in &seal_rivals[..seals] {
+            p.apply(&format!("flag:beat_{r}")).unwrap();
+        }
+        for (before, _) in &ROOK_SEALS[..i] {
+            p.apply(&format!("flag:{before}")).unwrap();
+        }
+        p.apply("clock:night").unwrap();
+        let duel = format!("duel:{id}");
+        let starts = |p: &Progress| {
+            scripts
+                .iter()
+                .any(|(cond, fx)| fx.contains(&duel) && p.check(cond))
+        };
+        assert!(starts(&p), "no scene starts {id} at {seals} seals");
+        p.apply(&format!("flag:{id}")).unwrap();
+        assert!(!starts(&p), "{id} would play again");
+    }
 }
 
 /// A script is read like dialogue: its `if`, every cue and every actor.
