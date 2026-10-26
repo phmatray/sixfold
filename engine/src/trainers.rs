@@ -346,6 +346,11 @@ macro_rules! duelist {
     };
 }
 
+/// The seals each of Rook's scenes waits for (the maps' `scripts` say so too,
+/// and `engine/tests/world_data.rs` holds them to it).
+pub const ROOK_SEALS: [(&str, usize); 4] =
+    [("rook_1", 1), ("rook_2", 3), ("rook_3", 5), ("rook_4", 6)];
+
 macro_rules! rook {
     ($id:literal, $kit:expr, $prizes:literal, $level:ident, $purse:literal) => {
         Trainer {
@@ -535,8 +540,7 @@ mod tests {
 
     #[test]
     fn the_roster_is_well_formed() {
-        let route = &TRAINERS[..TRAINERS.len() - 4];
-        assert!(route.iter().all(|t| !t.story()));
+        let route: Vec<&Trainer> = TRAINERS.iter().filter(|t| !t.story()).collect();
         for (i, t) in route.iter().enumerate() {
             assert!(
                 t.id.starts_with("t_") && t.id.bytes().all(|b| b.is_ascii_lowercase() || b == b'_'),
@@ -554,7 +558,7 @@ mod tests {
         // Dream 30 + 45 + 45 + 60 + 60 + 90 + 120 (840); §10.5-10.6: Grove 30 + 45 + 45
         // + 60 + 90 + 120, Stone 30 + 45 + 45 + 45 + 45 + 60 + 90 + 120 (870).
         assert_eq!(
-            route.iter().map(Trainer::purse).sum::<u32>(),
+            route.iter().map(|t| t.purse()).sum::<u32>(),
             585 + 360 + 450 + 390 + 450 + 390 + 480
         );
         // A night duelist plays Hard; a rule duelist's own deck keeps its rule

@@ -277,7 +277,7 @@
       "z": 7,
       "facing": "e",
       "idle": "Idle",
-      "if": "seals:6 & flag:rook_3",
+      "if": "seals:6 & flag:rook_2",
       "dialogue": [
         {
           "if": "won:rook_4 & flag:sable_door",
@@ -372,6 +372,15 @@
           ]
         },
         {
+          "if": "flag:rook_4_left",
+          "lines": [
+            "Shh. Someone's at the door."
+          ],
+          "lines_fr": [
+            "Chut. Quelqu'un est à la porte."
+          ]
+        },
+        {
           "if": "flag:rook_4",
           "lines": [
             "The door can wait one more duel."
@@ -459,7 +468,7 @@
   "scripts": [
     {
       "id": "rook_4",
-      "if": "seals:6 & flag:rook_3 & !flag:rook_4",
+      "if": "seals:6 & flag:rook_2 & !flag:rook_4",
       "at": [
         [
           3,

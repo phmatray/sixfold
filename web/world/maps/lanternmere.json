@@ -2139,7 +2139,7 @@
       "z": 21,
       "facing": "w",
       "idle": "Idle",
-      "if": "seals:5 & flag:rook_2 & time:night & !flag:rook_3_left",
+      "if": "seals:5 & flag:rook_2 & time:night & !flag:rook_4 & !flag:rook_3_left",
       "dialogue": [
         {
           "if": "won:rook_3",
@@ -2253,7 +2253,7 @@
   "scripts": [
     {
       "id": "rook_3",
-      "if": "seals:5 & flag:rook_2 & time:night & !flag:rook_3",
+      "if": "seals:5 & flag:rook_2 & time:night & !flag:rook_4 & !flag:rook_3",
       "at": [
         [
           24,
@@ -2304,7 +2304,7 @@
     },
     {
       "id": "rook_3_south",
-      "if": "seals:5 & flag:rook_2 & time:night & !flag:rook_3",
+      "if": "seals:5 & flag:rook_2 & time:night & !flag:rook_4 & !flag:rook_3",
       "at": [
         [
           24,

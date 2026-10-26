@@ -201,6 +201,13 @@ pub static ROOK_LINES: RivalLines = RivalLines {
     ),
 };
 
+/// The duel lines of a rival or of Rook, by id (route duelists have none).
+pub fn lines(id: &str) -> Option<&'static RivalLines> {
+    rival(id)
+        .map(|r| &r.lines)
+        .or_else(|| trainer(id).filter(|t| t.story()).map(|_| &ROOK_LINES))
+}
+
 /// Saves from before promos existed: give the promo of every rival already
 /// beaten that the collection lacks. Returns the cards added.
 pub fn backfill_promos(p: &Progress, profile: &mut Profile) -> Vec<CardId> {
@@ -287,7 +294,7 @@ pub fn opponent(id: &str) -> Option<Opponent> {
         prizes: t.prizes,
         difficulty: t.difficulty,
         style: Style::Balanced,
-        lines: t.story().then_some(&ROOK_LINES),
+        lines: lines(t.id),
         rival: false,
     })
 }

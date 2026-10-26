@@ -503,19 +503,25 @@ Warden) pays ⬡ 60 a win, like a rival's rematch. The decks are §8.2's lists; 
 deck with Fire and Water, so Blank Slate holds 20 Fire and 21 Water (the table says 21 and 20) and the
 others are exact.
 
-`rook_sweep` (ignored) plays each deck as it plays (its prizes and AI) against the starter and against the
-six prebuilts, the player on Normal, 60 games a pair, seats alternating. Rook's win rate:
+`rook_decks_sweep` (ignored) plays each deck as it plays (its prizes and AI) against the starter, 60 games,
+and against the deck the campaign playthrough holds when it meets that scene (pack seeds 1, 2 and 3, 40 games
+each), the player on Normal, seats alternating. For the record, the six prebuilts (a hand-made deck of a few
+seals' strength) in an earlier run of the same sweep. Rook's win rate:
 
-| Duel | Deck | Prizes, AI | vs the starter | vs the prebuilts |
-|---|---|---|---|---|
-| `rook_1` | Blank Slate | 2, Normal | 2% | 3% |
-| `rook_2` | Open Sky | 4, Normal | 43% | 31% |
-| `rook_3` | Hollow Crown | 5, Hard | 70% | 49% |
-| `rook_4` | Seventh Face | 6, Hard | 72% | 62% |
+| Duel | Deck | Prizes, AI | vs the starter | vs the playthrough's deck at that scene | vs the prebuilts |
+|---|---|---|---|---|---|
+| `rook_1` | Blank Slate | 2, Normal | 2% | 5% | 3% |
+| `rook_2` | Open Sky | 4, Normal | 43% | 49% | 31% |
+| `rook_3` | Hollow Crown | 5, Hard | 70% | 88% | 49% |
+| `rook_4` | Seventh Face | 6, Hard | 72% | 90% | 62% |
 
 Blank Slate is §8.2's near-copy of the Scrap kit (Basics only, 3% in `kit_sweep`): the first meeting is a
-formality, as the story wants (he "lost to everyone"). From the third, Rook is a real fight, about even with
-a prebuilt-level deck at five seals, and the hardest duel before the Warden at six.
+formality, as the story wants (he "lost to everyone"). The second is even. From the third, Rook is the
+hardest duel outside the rivals: about even with a prebuilt-level deck, and far ahead of the playthrough's
+greedy builder, whose decks are piles of whatever it owns. A loss never blocks anything (the scene has already
+moved the story on), so the two Hard duels are where *Blank Cheque* (win all four at the first try) earns its
+"hard" mark; `campaign_length` over 16 pack seeds goes from 69–98 duels (median 81) to 71–111 (median 92),
+four of them Rook's and the rest the seeds' usual swing.
 
 `economy_sim` counts each scene once (a minute, plus two minutes a prize) for half its purse (a first
 playthrough wins about half of them) plus a consolation: the first playthrough moves from 5.34 to **5.30

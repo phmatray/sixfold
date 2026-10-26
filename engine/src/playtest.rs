@@ -14,7 +14,7 @@ use crate::profile::Profile;
 use crate::set::{self, basic_energy};
 use crate::shop::{buy_pack, pack_price};
 use crate::stats::{award, Stats};
-use crate::trainers::{self, Kit, KITS, SPROUTS, TRAINERS};
+use crate::trainers::{self, Kit, KITS, ROOK_SEALS, SPROUTS, TRAINERS};
 use crate::{card_id, validate_deck, Collection, Config, Game, DECK_SIZE, MAX_COPIES};
 
 /// Play one game to the end; returns the winner's seat.
@@ -268,18 +268,25 @@ fn kit_sweep() {
     }
 }
 
+thread_local! {
+    /// The player's deck at each of Rook's scenes in the playthroughs run on
+    /// this thread, for `rook_decks_sweep`.
+    static STORY_DECKS: std::cell::RefCell<Vec<(&'static str, Vec<CardId>)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
+}
+
 /// Rook's four decks as they play (prizes, AI) against the starter a new
-/// player holds and against the six prebuilts (a deck built from a few
-/// seals' packs), the player on Normal, seats alternating, 60 games each;
-/// recorded in `docs/BALANCE.md`.
-/// `cargo test --release -p sixfold-engine rook_sweep -- --ignored --nocapture`.
+/// player holds, 60 games, and against the deck the campaign playthrough
+/// holds when it meets each scene (pack seeds 1, 2 and 3), 40 games each;
+/// the player on Normal, seats alternating; recorded in `docs/BALANCE.md`.
+/// `cargo test --release -p sixfold-engine rook_decks_sweep -- --ignored --nocapture`.
 #[test]
 #[ignore]
-fn rook_sweep() {
-    let rate = |t: &trainers::Trainer, against: &[Vec<CardId>]| {
+fn rook_decks_sweep() {
+    let rate = |t: &trainers::Trainer, against: &[Vec<CardId>], games: u64| {
         let mut wins = 0;
         for (k, other) in against.iter().enumerate() {
-            for seed in 0..60u64 {
+            for seed in 0..games {
                 let swap = seed % 2 == 1;
                 let mut pair = [other.clone(), t.deck()];
                 let mut levels = [Difficulty::Normal, t.difficulty];
@@ -291,17 +298,27 @@ fn rook_sweep() {
                 wins += usize::from((w == 1) != swap);
             }
         }
-        wins as f32 / (60 * against.len()) as f32
+        wins as f32 / (games as usize * against.len()) as f32
     };
-    let prebuilts: Vec<Vec<CardId>> = PREBUILT.iter().map(|d| d.cards()).collect();
+    STORY_DECKS.with_borrow_mut(Vec::clear);
+    for seed in [1, 2, 3] {
+        playthrough(seed, RIVAL_DUELS);
+    }
+    let met = STORY_DECKS.with_borrow(Clone::clone);
     for t in TRAINERS.iter().filter(|t| t.story()) {
+        let decks: Vec<Vec<CardId>> = met
+            .iter()
+            .filter(|(id, _)| *id == t.id)
+            .map(|(_, d)| d.clone())
+            .collect();
         println!(
-            "{} ({} prizes, {:?}): {:>3.0}% vs the starter, {:>3.0}% vs the prebuilts",
+            "{} ({} prizes, {:?}): {:>3.0}% vs the starter, {:>3.0}% vs the player's deck at that scene ({} playthroughs)",
             t.id,
             t.prizes,
             t.difficulty,
-            rate(t, &[STARTER.cards()]) * 100.0,
-            rate(t, &prebuilts) * 100.0
+            rate(t, &[STARTER.cards()], 60) * 100.0,
+            rate(t, &decks, 40) * 100.0,
+            decks.len()
         );
     }
 }
@@ -448,9 +465,6 @@ fn achieve(
     award(stats, progress, profile);
 }
 
-/// The seals each of Rook's scenes waits for (the maps' `scripts`, §8.2).
-const ROOK_SEALS: [(&str, usize); 4] = [("rook_1", 1), ("rook_2", 3), ("rook_3", 5), ("rook_4", 6)];
-
 /// A full playthrough: a new player, played by the Normal AI, first meets
 /// every route duelist once (win or lose, they walk on), then takes on the
 /// first open rival they haven't beaten, and Rook each time his seals are
@@ -494,6 +508,7 @@ fn playthrough(
             .find(|&&(id, n)| seals(&progress) >= n && !progress.has_flag(id));
         if let Some(t) = story.and_then(|&(id, _)| trainers::trainer(id)) {
             let deck = build_deck(&profile.collection);
+            STORY_DECKS.with_borrow_mut(|d| d.push((t.id, deck.clone())));
             let won = play(
                 [deck, t.deck()],
                 8_000 + duels,

@@ -308,8 +308,7 @@ impl Ctl {
     pub fn lines(&self) -> Option<&'static RivalLines> {
         self.setup
             .with_value(|s| s.as_ref()?.face())
-            .and_then(campaign::opponent)
-            .and_then(|o| o.lines)
+            .and_then(campaign::lines)
     }
 
     /// Say one of the rival's lines, at most once per duel (`bit`: 1 intro,
