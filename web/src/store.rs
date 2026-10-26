@@ -127,27 +127,34 @@ fn open(n: usize) -> Option<String> {
     if err.is_some() || (from == Source::Slot && !save.profile().1.is_empty()) {
         keep_bad(n);
     }
-    let note = err.map(|e| match from {
-        Source::Prev => tr(
-            format!(
-                "{} couldn't be read ({e}), so the copy kept before your last change was loaded. What changed since is lost.",
-                save.name()
+    // The error is a sentence of its own; a save from a newer Sixfold can
+    // come back once this one updates (Settings → Save).
+    let note = err.map(|e| {
+        let name = match from {
+            Source::Prev => save.name().to_string(),
+            _ => default_name(n),
+        };
+        let what = match from {
+            Source::Prev => tr(
+                "The copy kept before your last change was loaded instead; what changed since is lost.",
+                "La copie gardée avant votre dernière modification a été chargée à la place ; ce qui a changé depuis est perdu.",
             ),
-            format!(
-                "{} est illisible ({e}) : la copie gardée avant votre dernière modification a été chargée. Ce qui a changé depuis est perdu.",
-                save.name()
+            _ => tr(
+                "It starts again as a new game, and the unreadable copy is kept in this browser.",
+                "Elle repart de zéro, et la copie illisible est gardée dans ce navigateur.",
             ),
-        ),
-        _ => tr(
-            format!(
-                "{} couldn't be read ({e}), so it starts again. A copy was kept in this browser.",
-                default_name(n)
+        };
+        let then = match e {
+            SaveError::Newer(_) => tr(
+                " Update Sixfold, then restore it from Settings → Save.",
+                " Mettez Sixfold à jour, puis restaurez-la depuis Réglages → Sauvegarde.",
             ),
-            format!(
-                "{} est illisible ({e}) : elle repart de zéro. Une copie est gardée dans ce navigateur.",
-                default_name(n)
-            ),
-        ),
+            _ => "",
+        };
+        tr(
+            format!("“{name}” couldn't be read. {e} {what}{then}"),
+            format!("« {name} » est illisible. {e} {what}{then}"),
+        )
     });
     CURRENT.set((n, save));
     set(SLOT, &n.to_string());
@@ -325,9 +332,11 @@ fn bad_key() -> String {
     CURRENT.with_borrow(|(n, _)| format!("{}.bad", slot_key(*n)))
 }
 
-/// A copy of an unreadable save is kept for the current slot.
-pub fn has_bad() -> bool {
-    get(&bad_key()).is_some()
+/// The copy of an unreadable save kept for the current slot, if any: its
+/// name when it reads now (a save from a newer build, once this one is
+/// updated), else why it still doesn't.
+pub fn kept_copy() -> Option<Result<String, SaveError>> {
+    get(&bad_key()).map(|t| Save::decode(&t).map(|s| s.name().to_string()))
 }
 
 /// Play that kept copy again when it reads now (a save from a newer build,

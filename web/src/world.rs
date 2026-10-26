@@ -1064,8 +1064,16 @@ pub fn WorldScreen() -> impl IntoView {
                 <Facets />
                 <SealBadge on_open=move || sheet.set(Some(Sheet::Roster)) />
                 <MuteToggle />
+                // Until the scene is up the menu can't open: say so rather than ignore the press.
                 <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
-                    aria-keyshortcuts="Escape" title=tr("Menu (Esc)", "Menu (Échap)") on:click=move |_| toggle_menu()>
+                    aria-keyshortcuts="Escape"
+                    aria-disabled=move || (loading.get() || failed.with(Option::is_some)).then_some("true")
+                    title=move || if loading.get() || failed.with(Option::is_some) {
+                        tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé")
+                    } else {
+                        tr("Menu (Esc)", "Menu (Échap)")
+                    }
+                    on:click=move |_| toggle_menu()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
                     <span class="journal-label">"Menu"</span>
                 </button>
@@ -1364,8 +1372,9 @@ fn GameMenu(
                     <div class="menu-top">
                     <div class="sheet-head menu-head">
                         <h2 id="world-sheet-title">"Menu"</h2>
-                        <button type="button" class="btn" on:click=move |_| screen.set(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
-                        <button type="button" class="btn ghost" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
+                        // Close, back to the world, is the usual way out; quitting is the quieter one.
+                        <button type="button" class="btn ghost" on:click=move |_| screen.set(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
+                        <button type="button" class="btn" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
                     </div>
                     <div class="menu-tabs" role="tablist" aria-label="Menu" on:keydown=on_tabs_key>
                         {MenuTab::ALL.into_iter().map(|t| view! {
