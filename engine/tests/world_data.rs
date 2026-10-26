@@ -625,6 +625,18 @@ fn the_finale_plays_after_the_warden_falls_once() {
         .collect();
     assert!(effects.contains(&"flag:finale") && effects.last() == Some(&"show:credits"));
     assert!(effects.contains(&"music:finale"));
+    // The credits then put the champion where the Warden's door leads back into the
+    // hall: `HALL_DOOR` in web/src/credits.rs ("shop,1,6,e") must stay that spawn.
+    let back = m["warps"]
+        .as_array()
+        .and_then(|l| l.iter().find(|w| w["to"] == "shop"))
+        .expect("the Warden's room leads back to the hall");
+    let spawn = &back["spawn"];
+    assert_eq!(
+        (&spawn["x"], &spawn["z"], &spawn["facing"]),
+        (&1.into(), &6.into(), &"e".into()),
+        "update HALL_DOOR in web/src/credits.rs too"
+    );
 
     let (mut p, mut pr) = (Progress::default(), Profile::new_player());
     for r in RIVALS.iter().filter(|r| r.seal) {
