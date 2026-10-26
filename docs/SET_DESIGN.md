@@ -6,8 +6,15 @@ classic sets are used (counts, distributions, curves), as in `docs/BALANCE.md`; 
 text from them appears here or in the game. Everything proposed below is original and is written in
 terms of our own rules (`docs/RULES.md`) and world (`docs/WORLD_DESIGN.md`).
 
-Status: analysis and proposal. Nothing here is implemented; each expansion becomes issues once the
-owner has chosen.
+Status: analysis and plan. Nothing here is implemented yet. The owner's decisions (2026-10-26):
+
+1. **Crossroads ships before 2.0**: the quick wins in 1.15, Crossroads in 1.16. Deep Seals follows
+   2.0, in 2.1.
+2. **Sizes 64 + 62**, as proposed.
+3. **Two balance rules are adopted**: Powers that lock (Powers, awakening) only on cards limited to
+   one per deck; never a second two-unit energy.
+4. **The campaign plays in the Open format**: expansion cards are usable everywhere once unlocked,
+   the campaign included. There is no Classic-only mode (§5.4).
 
 ## 1. How big the classic pool really is
 
@@ -98,7 +105,7 @@ None of these should be copied. Most are already guarded against in `docs/BALANC
 | Gust + denial + +10 lock | Basic beatdown with forced switch and denial left the opponent no turn | Snare Hook and Drain Brush are Rares; first-turn attack barred since 1.3 |
 | Full-hand refresh at low rarity, search-anything, trainer recursion loops | Decks played the same 20 trainers, every game the same | Clean Slate is Rare; no search-anything; Scrap Ledger recovers one trainer |
 | Heal-all walls | A big Basic plus heal-all trainers plus damage moving stalled to deck-out | Heal effects priced in the value budget; HealAll capped at 20 |
-| Global locks at 4 copies | Power blocker or evolution lock shut off whole archetypes | **New rule proposed: lock Powers only on one-per-deck cards** (§5.2) |
+| Global locks at 4 copies | Power blocker or evolution lock shut off whole archetypes | **Rule (adopted): lock Powers only on one-per-deck cards** (§5.2) |
 | A second two-unit special energy | Made colourless attackers splashable at double speed | Twofold Energy stays the only one |
 | Coin flips everywhere | 36–41% of attacks; games decided by flips | Ours 17%, target 15–25% |
 | First-player edge | Attacking on turn one | Barred since 1.3; edge measured at ~3 points |
@@ -183,8 +190,8 @@ Eight new cards (104 → 112), each with a bestiary sheet, dex line, French name
 ## 5. Two expansions
 
 Both are sized like the classic expansions in printed cards, which makes them a third larger in
-distinct designs. Both enter after the campaign's main path, so the campaign keeps the balance it
-was tuned for.
+distinct designs. Crossroads unlocks early in the campaign (after the first seal), Deep Seals after
+the champion's title; both play in the one Open format (§5.4).
 
 ### 5.1 Expansion A: **Crossroads** / *Carrefours* (64 cards)
 
@@ -246,6 +253,8 @@ road calls); a first real Storm and Neutral Awaken 2 deck.
   suggestions must understand branching lines.
 - **Route duelists**: a few travellers on the roads between regions (the long links of §2.1) carry
   Crossroads kits.
+- **Rivals**: each rival met after `flag:rook_1` gets 2–4 Crossroads cards of their colours, so the
+  Open campaign keeps pace (§5.4).
 
 ### 5.2 Expansion B: **Deep Seals** / *Sceaux profonds* (62 cards)
 
@@ -297,16 +306,16 @@ wall (Stone threshold wall + heal); relic rush (shards + ancient lines, evolutio
 
 **How it enters the game.**
 
-- **Unlock**: after the champion's title (`beat:warden`): post-game content that doesn't disturb
-  the campaign.
+- **Unlock**: after the champion's title (`beat:warden`): post-game content. Its cards then play
+  everywhere, rematches and the daily duel included (Open format).
 - **The Deep Seals pack** is sold at Anvilstead (Stone) and Lanternmere (Dream), the two places that
   hold the set's story.
 - **Sleepers**: a post-game quest, *The Sleepers*, takes the player back to each seal stone; a
   night-time duel at each (an AI deck built around that Sleeper) awakens it and gives one copy. They
   are also in packs as Holos.
 - **Relics**: seal shards as finds in the Undermine and dig spots (ties to the 1.12 secrets, #116).
-- **Gauntlet**: a second ladder in the "Open" format (all sets); the six rivals' rematch decks get
-  Deep Seals cards.
+- **Gauntlet**: a second ladder built on all three sets; the six rivals' rematch decks get Deep
+  Seals cards.
 - **Deck builder (#102)**: two unlockable lists, *Lantern Lock* and *Deep Strata*, unlocked by the
   quest's Dream and Stone duels.
 
@@ -321,11 +330,45 @@ wall (Stone threshold wall + heal); relic rush (shards + ancient lines, evolutio
 | Decks | Two prebuilt/unlockable lists per expansion, rival rematch lists, route-duelist kits |
 | Boosters | One pack line per expansion; `booster_report`, completion odds and `economy_sim` in band |
 | Content | FR names (`set_fr.rs`), dex lines (`lore.rs`), bestiary sheets (15 sections, EN/FR) in a new file per expansion, FLUX art through `tools/art/prompts.json` as for set 1 |
-| Balance | `deck_sweep` with the new lists in both formats; `balance_indicators`; set-1 decks stay within their bands in the Classic format |
+| Balance | `deck_sweep` over the Open field (set-1 prebuilts, rival lists and the new lists); `balance_indicators`; `campaign_sweep` and `economy_sim` (§5.4) |
 | UI | Set filter in the binder and deck builder; branching-awakening choice; revealed hand; the Sleeper mark |
 
-**Formats.** "Classic" (set 1 only) keeps today's balance, campaign and Gauntlet. "Open" (all sets)
-for the post-game, the daily duel and Quick duels. The set mark makes this a filter, not a rotation.
+### 5.4 One format: the Open campaign
+
+Every card the player has unlocked plays everywhere: campaign duels, route duelists, the Gauntlet, the
+daily duel and Quick duels. There is no Classic-only mode; the set mark is a filter in the binder and
+the deck builder, and keeps a Classic option possible later without a save change. What this asks of
+each part of the game:
+
+**Rival decks.** Rivals are tuned by prizes and AI level (`docs/ENGINE_API.md` §11) against a player
+holding set-1 cards. Crossroads unlocks after the first seal, so the rivals met after it face decks
+that may hold face-taking lines, Wayfarers and special energy. Each rival met after `flag:rook_1`
+gets 2–4 Crossroads cards of their colours in their list (their face's face-taking Awaken 1, one
+Wayfarer or special energy where it fits), so the field keeps pace. The first rival stays as it is.
+Rook's lists are Crossroads by design. Gauntlet and daily-duel lists are rebuilt on all sets owned at
+that point of the game (Crossroads for the Gauntlet's first ladder, all three for the second).
+
+**Campaign budget and sweeps.** Nothing in the economy changes price, but there is a new pack line
+to spend on from the first seal. Each Crossroads release re-runs and keeps in band:
+
+| Check | Band today | With Crossroads |
+|---|---|---|
+| `campaign_sweep` (greedy builder buys the packs it can, Crossroads from `rook_1`) | median 62 duels (38–83); 2 of 3 seeds within budget | same band; the builder may buy Crossroads packs |
+| `economy_sim` | 3.5–6 packs an hour | same band |
+| `deck_sweep` | each prebuilt 42–58%, no prebuilt pairing beyond 75/25 | same, over the Open field with the Crossroads lists and the updated rival lists |
+| `balance_indicators` | first player 50 ± 3%, spread ≤ 6 | same |
+
+If the campaign gets easier (the median drops below the band), the lever is the rivals' lists and
+prizes, never the cards' stats: the cards are balanced against each other by the value budget, the
+campaign by its decks.
+
+**Onboarding.** The first seal is learned with set 1 only: the starter deck, the tutorial and the
+first rival don't change. Rook's first duel is the introduction (his deck shows a face-taking line;
+his after-duel line points at the hall shop, where the Crossroads pack appears). The first time a
+branching line can awaken, the duel shows a one-line tip on the choice. The rule books (#104) gain a
+page per new mechanic and the set's lore, and the deck doctor and auto-builder (#102) understand
+branching lines before the cards ship. Deep Seals follows the same pattern at the champion's title,
+with the Sleepers quest as its introduction.
 
 ## 6. Release slotting
 
@@ -334,18 +377,15 @@ around them:
 
 | Version | Content | PRs (three a version) |
 |---|---|---|
-| 1.15.0 | **Set 1 completed**: quick wins Q1–Q8 | engine + budget; cards, art and bestiary; AI and sweeps |
-| 2.0.0 | Release readiness, unchanged | — |
-| 2.1.0 | **Crossroads I**: engine rules, set mark, pricing, first half of the cards | engine; cards 1–32 with art; AI |
-| 2.2.0 | **Crossroads II**: the rest, pack line, unlocks, Rook's lists, Open format | cards 33–64; boosters and world; decks and sweeps |
-| 2.3.0 | Second human player (the roadmap's post-2.0 item) | — |
-| 2.4.0 | **Deep Seals I**: one-per-deck rule, lock pricing, relics, first half | engine; cards 1–31; AI |
-| 2.5.0 | **Deep Seals II**: Sleepers quest, pack line, Gauntlet II | cards 32–62; quest and world; decks and sweeps |
+| 1.15.0 | **Set 1 completed**: quick wins Q1–Q8 | eight new cards; resistance errata and real prices for the dormant hooks; set marks and Rare Basics in packs |
+| 1.16.0 | **Crossroads** | engine mechanics and rules; the 64 cards with lore, bestiary and art; packs, unlocks, rival lists, deck-builder lists and balance sweeps |
+| 2.0.0 | Release readiness, unchanged; its blind playtests and full run include Crossroads | — |
+| 2.1.0 | **Deep Seals** | engine mechanics, the one-per-deck rule and lock pricing; the 62 cards with lore, bestiary and art; the Sleepers quest, packs, relic finds, rematch lists and sweeps |
+| later | Second human player (the roadmap's post-2.0 item) | — |
 
-If 2.0 should ship with an expansion, Crossroads can move to 1.15–1.16 and the quick wins fold into
-it; Deep Seals stays post-2.0 either way, because its locks need the most balance time.
+Deep Seals stays after 2.0 because its locks need the most balance time.
 
-### 6.1 Constraints that hold
+### 6.1 Constraints that hold (adopted)
 
 - Card ids are save positions: append only, never reorder.
 - Every name, text and picture is original (`CLAUDE.md`).
