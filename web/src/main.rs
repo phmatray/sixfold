@@ -13,6 +13,7 @@ mod credits;
 mod ctl;
 mod decks;
 mod duel;
+mod input;
 mod journal;
 mod offline;
 mod overlays;
@@ -140,6 +141,7 @@ fn App() -> impl IntoView {
     provide_context(world::LastTab(RwSignal::new(world::MenuTab::Decks)));
     store::provide();
     stats::provide();
+    input::provide();
     // A save from before promos: hand over those of rivals already beaten.
     let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
     let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();

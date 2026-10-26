@@ -21,6 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: ./scripts/check-no-game-data.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test web/gamepad.test.mjs
       - run: node tools/check-maps.mjs web/world --strict && node tools/check-fence-table.mjs web/world/props.js
 
   rust:
