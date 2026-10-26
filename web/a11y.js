@@ -180,12 +180,17 @@ addEventListener("keydown", (e) => {
     raf = 0;
     if (!at?.isConnected || document.activeElement !== at) return hide();
     const r = box(at);
-    // Left of the control, pointing at it; from the right when it starts at the
-    // screen's edge; else as far left as the screen allows.
-    const right = r.left < 24 && r.right <= innerWidth - 44;
-    const x = right ? r.right + 2 : Math.max(2, r.left - 42), y = r.top + Math.min(r.height, 60) / 2 - 16;
-    hand.classList.toggle("flip", right);
-    hand.style.translate = `${Math.round(x)}px ${Math.round(y)}px`;
+    // The hand points AT the control, from the first side with room: left of it
+    // (pointing right), right of it (pointing left), above (pointing down), below
+    // (pointing up). `data-side` turns the glyph (style.css); 40 × 32, centred.
+    const mid = r.top + Math.min(r.height, 60) / 2, near = r.left + Math.min(28, r.width / 2);
+    const [side, cx, cy] =
+      r.left >= 44 ? ["left", r.left - 22, mid]
+      : r.right <= innerWidth - 44 ? ["right", r.right + 22, mid]
+      : r.top >= 44 ? ["above", near, r.top - 22]
+      : ["below", near, r.bottom + 22];
+    hand.dataset.side = side;
+    hand.style.translate = `${Math.round(cx - 20)}px ${Math.round(cy - 16)}px`;
     raf = requestAnimationFrame(place);
   };
   const hide = () => {

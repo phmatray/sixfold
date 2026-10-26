@@ -150,9 +150,10 @@
   --brass-deep: #a87a2a;
   --brass-ink: #6b4a0e;
   --sprout: #7fb35b;
-  --danger-paint: #b5473d;
+  --danger-paint: #a63f35;
   --danger-on-paper: #962a20;
   --heal-on-paper: #2c6e3a;
+  --steel-on-paper: #34507a;
   --toon-w: 3px;
   --toon-soft: color-mix(in srgb, var(--toon) 24%, transparent);
   --edge: 0 4px 0 var(--toon);
@@ -4029,7 +4030,11 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   --sel-line: var(--brass-deep);
   --sel-ink: var(--brass-ink);
   --danger-text: var(--danger-on-paper);
+  --damage: var(--danger-on-paper);
+  --hit: var(--danger-on-paper);
   --heal: var(--heal-on-paper);
+  --steel: var(--steel-on-paper);
+  --steel-line: color-mix(in srgb, var(--steel-on-paper) 45%, transparent);
   color: var(--ink);
 }
 /* A sheet over the scene: paper, the toon outline, a little thickness. */
@@ -4133,15 +4138,18 @@ input[type="checkbox"]::before { top: 4px; left: 4px; width: 22px; height: 22px;
 input[type="checkbox"]:checked { background: var(--sprout); box-shadow: 0 0 0 2px var(--toon); }
 input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--paint); }
 /* Choices on a tray (tabs, segments, chips, language): paper tabs, the chosen one a plank. */
-:is(.menu-tabs, .editor-tabs) button, .seg label, .lang-switch button, .chip {
+:is(.menu-tabs, .editor-tabs, .shelf-switch) button, .seg label, .segs .seg span, .lang-switch button, .chip, .btn.speed {
   min-height: 44px; border: 2px solid var(--toon); border-radius: 10px; background: var(--paper-lo); color: var(--toon);
   font-family: var(--display); font-weight: 800; box-shadow: 0 3px 0 var(--toon);
 }
-:is(.menu-tabs, .editor-tabs) button:hover, .seg label:hover, .lang-switch button:hover, .chip:hover { background: var(--paper-hi); color: var(--toon); }
-:is(.menu-tabs, .editor-tabs) button[aria-selected="true"], .seg label:has(:checked), .lang-switch button[aria-pressed="true"], .chip:is([aria-pressed="true"], .on) {
+:is(.menu-tabs, .editor-tabs, .shelf-switch) button:hover, .seg label:hover, .segs .seg:hover span, .lang-switch button:hover, .chip:hover { background: var(--paper-hi); color: var(--toon); }
+:is(.menu-tabs, .editor-tabs) button[aria-selected="true"], .shelf-switch button[aria-pressed="true"], .seg label:has(:checked), .segs .seg input:checked + span, .lang-switch button[aria-pressed="true"], .chip:is([aria-pressed="true"], .on), .btn.speed[aria-pressed="true"] {
   background: var(--plank); color: var(--paint); border-color: var(--toon); text-shadow: 0 1px 0 var(--toon); box-shadow: 0 3px 0 var(--toon);
 }
 .menu-tabs { gap: 8px; padding-bottom: 12px; }
+.segs, .shelf-switch { gap: 6px; padding: 0; border: 0; background: none; }
+.segs .seg span { border-radius: 10px; }
+.shelf-switch .shelf-count { color: inherit; }
 .lang-switch { gap: 6px; padding: 0; border: 0; }
 .lang-switch button { border-radius: 10px; }
 .count-badge { background: var(--danger-paint); color: var(--paint); border: 2px solid var(--toon); box-shadow: 0 2px 0 var(--toon); font-weight: 800; }
@@ -4234,20 +4242,28 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 .focus-hand {
   position: fixed; inset: 0 auto auto 0; z-index: 1000; width: 40px; height: 32px; margin: 0; padding: 0; border: 0; background: none; overflow: visible;
   pointer-events: none; opacity: 0; transition: opacity var(--dur-quick) ease, translate var(--dur-panel) var(--ease-out);
+  /* On the box, not the glyph: the shadow falls down whichever way the hand turns. */
+  filter: drop-shadow(0 2px 0 color-mix(in srgb, var(--toon) 50%, transparent));
+  --bx: 5px; --by: 0px;
 }
 .focus-hand.on { opacity: 1; }
 .focus-hand.fresh { transition: none; }
-.focus-hand.flip::before { scale: -1 1; }
-html[data-input="touch"] .focus-hand { display: none; }
+/* The glyph points right; each side turns it toward the control. */
 .focus-hand::before {
   content: ""; position: absolute; inset: 0;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 38 30'><path d='M2 11h18l-3-6c-1-2 1-4 3-3l12 9c2 1 3 3 3 5v4c0 3-2 6-5 6H17c-2 0-3-1-3-3v-1h-2c-2 0-3-1-3-2.5S10 17 12 17H4c-2 0-3-1.5-3-3s1-3 1-3z' fill='%23f6ead0' stroke='%232a170b' stroke-width='2.5' stroke-linejoin='round'/></svg>") no-repeat center / contain;
-  filter: drop-shadow(0 2px 0 color-mix(in srgb, var(--toon) 50%, transparent));
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 38 30'><g transform='matrix(-1 0 0 1 38 0)'><path d='M2 11h18l-3-6c-1-2 1-4 3-3l12 9c2 1 3 3 3 5v4c0 3-2 6-5 6H17c-2 0-3-1-3-3v-1h-2c-2 0-3-1-3-2.5S10 17 12 17H4c-2 0-3-1.5-3-3s1-3 1-3z' fill='%23f6ead0' stroke='%232a170b' stroke-width='2.5' stroke-linejoin='round'/></g></svg>") no-repeat center / contain;
 }
+.focus-hand[data-side="right"] { --bx: -5px; }
+.focus-hand[data-side="right"]::before { scale: -1 1; }
+.focus-hand[data-side="above"] { --bx: 0px; --by: 5px; }
+.focus-hand[data-side="above"]::before { rotate: 90deg; }
+.focus-hand[data-side="below"] { --bx: 0px; --by: -5px; }
+.focus-hand[data-side="below"]::before { rotate: -90deg; }
 @media (prefers-reduced-motion: no-preference) { .focus-hand.on::before { animation: hand-point 0.9s ease-in-out infinite; } }
-@keyframes hand-point { 50% { translate: 5px 0; } }
+@keyframes hand-point { 50% { translate: var(--bx) var(--by); } }
+html[data-input="touch"] .focus-hand { display: none; }
 /* Where the hand points, no ring: one marker. */
-html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]) { outline: none !important; animation: none !important; }
+html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html.hand-cursor .seg [data-hand] + span { outline: none !important; animation: none !important; }
 
 /* ---------- The kit's sheet (?sheet) ---------- */
 .kit-sheet .page-body { display: grid; gap: 28px; max-width: 1240px; }
@@ -4263,7 +4279,10 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]) { out
 /* The title's Options and Save slots: a sheet in the middle of the screen, over a dimmed world. */
 .title-foot .foot-menus details { position: static; }
 .title-foot details[open] .settings-body {
-  position: fixed; z-index: 50; left: 50%; top: 50%; right: auto; bottom: auto; translate: -50% -50%; margin: 0;
-  width: min(560px, calc(100vw - 32px)); max-height: min(84dvh, 760px); overflow: auto; padding: 22px;
+  position: fixed; z-index: 50; left: 50%; top: auto; right: auto; bottom: calc(84px + env(safe-area-inset-bottom)); translate: -50% 0; margin: 0;
+  width: min(560px, calc(100vw - 32px)); max-height: min(calc(100dvh - 120px), 760px); overflow: auto; padding: 22px;
   box-shadow: 0 6px 0 var(--toon), 0 0 0 100vmax color-mix(in srgb, var(--toon) 55%, transparent);
+}
+@media (max-width: 760px), (orientation: portrait) {
+  .title-foot details[open] .settings-body { bottom: calc(128px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 160px); }
 }

@@ -7,6 +7,26 @@ import { menuItem, title } from "./helpers";
 
 const hand = (page: Page) => page.locator(".focus-hand.on");
 
+/** The hand sits on one side of `target` and points at it (its glyph turned toward it). */
+async function pointsAt(page: Page, target: Locator) {
+  await expect(hand(page)).toBeVisible();
+  await expect
+    .poll(() =>
+      target.evaluate((el) => {
+        const hd = document.querySelector<HTMLElement>(".focus-hand")!;
+        const h = hd.getBoundingClientRect();
+        let t = el.getBoundingClientRect();
+        const label = (el as HTMLInputElement).labels?.[0] ?? el.closest("label");
+        if (t.width < 4 && label) t = label.getBoundingClientRect();
+        const side = hd.dataset.side;
+        const ok = side === "left" ? h.right <= t.left + 6 : side === "right" ? h.left >= t.right - 6
+          : side === "above" ? h.bottom <= t.top + 6 : side === "below" ? h.top >= t.bottom - 6 : false;
+        return ok ? side : `wrong: ${side} ${JSON.stringify(h)} ${JSON.stringify(t)}`;
+      }),
+    )
+    .toMatch(/^(left|right|above|below)$/);
+}
+
 /** Press `key` until `target` has focus. */
 async function moveTo(page: Page, target: Locator, key: string) {
   for (let i = 0; i < 20; i++) {
@@ -20,13 +40,14 @@ test("keyboard: arrows move the hand through the title and two menu screens, Esc
   await title(page);
   await page.keyboard.press("ArrowDown"); // nothing focused yet: the first control
   await moveTo(page, menuItem(page, "Play a duel"), "ArrowDown");
-  await expect(hand(page)).toBeVisible();
+  await pointsAt(page, menuItem(page, "Play a duel"));
+  await expect(page.locator(".focus-hand")).toHaveAttribute("data-side", "left");
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 1, name: "Play a duel" })).toBeVisible();
   // The arrows reach the deck choices (the choice follows), and lead on out of them.
   const decks = page.getByRole("group", { name: "Your deck" }).getByRole("radio");
   await moveTo(page, decks.first(), "ArrowDown");
-  await expect(hand(page)).toBeVisible();
+  await pointsAt(page, decks.first());
   await page.keyboard.press("ArrowDown");
   await expect(decks.nth(1)).toBeFocused();
   await expect(decks.nth(1)).toBeChecked();
@@ -48,6 +69,7 @@ test("keyboard: arrows move the hand through the title and two menu screens, Esc
   const sheet = page.getByRole("dialog", { name: "Settings" });
   await expect(sheet).toBeVisible();
   await expect.poll(() => sheet.evaluate((d) => d.contains(document.activeElement))).toBe(true);
+  await pointsAt(page, page.locator(":focus"));
   await page.keyboard.press("Tab");
   await expect.poll(() => sheet.evaluate((d) => d.contains(document.activeElement))).toBe(true);
   await page.keyboard.press("Escape");
@@ -85,7 +107,7 @@ test("gamepad: the D-pad moves the hand, A opens, R switches tabs, B goes back",
   for (let i = 0; i < 12 && !(await target.evaluate((el) => el === document.activeElement)); i++) await tap(DOWN);
   await expect(target).toBeFocused();
   await expect(page.locator("html")).toHaveAttribute("data-input", "pad");
-  await expect(hand(page)).toBeVisible();
+  await pointsAt(page, target);
   await tap(A);
   await expect(page.getByRole("heading", { level: 1, name: "Records" })).toBeVisible();
   await tap(R);
@@ -99,4 +121,14 @@ test("gamepad: the D-pad moves the hand, A opens, R switches tabs, B goes back",
   await expect(page.getByRole("heading", { level: 1, name: "My decks" })).toBeVisible();
   await tap(B);
   await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible();
+});
+
+test("on a phone, the hand still points at what has focus, from whichever side has room @phone", async ({ page }) => {
+  await title(page);
+  for (const label of ["Learn to play", "Play a duel", "Campaign", "Collection", "Records"]) {
+    await moveTo(page, menuItem(page, label), "Tab");
+    await pointsAt(page, menuItem(page, label));
+  }
+  await moveTo(page, page.locator("summary", { hasText: "Settings" }), "Tab");
+  await pointsAt(page, page.locator("summary", { hasText: "Settings" }));
 });
