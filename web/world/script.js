@@ -33,10 +33,15 @@ export function scenes(env) {
     return true;
   }
   const on = (s, x, z) => s.at?.some(([ax, az]) => ax === x && az === z);
-  // A map is up (the hero placed, no fade): its first `enter` script that holds (with `at`: only arriving there).
-  const entered = (w) => {
+  // The map's first `enter` script that holds (with `at`: only arriving there).
+  const due = (w) => {
     const h = env.hero();
-    return !playing && (w.map.scripts ?? []).some((s) => s.on === "enter" && (!s.at || on(s, h.x, h.z)) && env.holds(s.if) && start(s));
+    return playing ? null : (w.map.scripts ?? []).find((s) => s.on === "enter" && (!s.at || on(s, h.x, h.z)) && env.holds(s.if));
+  };
+  // A map is up (the hero placed, no fade): that script starts.
+  const entered = (w) => {
+    const s = due(w);
+    return !!s && start(s);
   };
   // The hero just stepped onto (x, z): a script with `at` tiles and no `on`.
   const stepped = (w, x, z) => !playing && (w.map.scripts ?? []).some((s) => !s.on && on(s, x, z) && env.holds(s.if) && start(s));
@@ -124,5 +129,5 @@ export function scenes(env) {
     env.moved();
   }
 
-  return { get playing() { return playing; }, entered, stepped, play, update, aim, end };
+  return { get playing() { return playing; }, due, entered, stepped, play, update, aim, end };
 }
