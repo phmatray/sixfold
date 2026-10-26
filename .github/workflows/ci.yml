@@ -51,6 +51,7 @@ jobs:
         with:
           name: web-dist
           path: web/dist
+          include-hidden-files: true
           retention-days: 3
 
   e2e:
@@ -73,7 +74,8 @@ jobs:
           cache: npm
           cache-dependency-path: e2e/package-lock.json
       - run: npm ci
-      - run: npx playwright install --with-deps --only-shell chromium
+      # The runner image already has the browser's system libraries (--with-deps spends minutes on apt).
+      - run: npx playwright install --only-shell chromium
       - run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: failure()

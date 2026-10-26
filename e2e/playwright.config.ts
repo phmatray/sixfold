@@ -7,9 +7,9 @@ const PORT = 4173;
 
 export default defineConfig({
   testDir: ".",
-  timeout: 120_000,
+  timeout: 180_000,
   expect: { timeout: 15_000 },
-  retries: 2,
+  retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : 1,
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {

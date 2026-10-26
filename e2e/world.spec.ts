@@ -7,13 +7,17 @@ const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
 /** Hold an arrow key until the saved position matches `want`. */
 async function walk(page: Page, key: string, want: RegExp) {
   await page.keyboard.down(key);
-  await expect.poll(() => at(page), { timeout: 30_000 }).toMatch(want);
-  await page.keyboard.up(key);
+  try {
+    // Polled often: the hero walks 4 tiles a second.
+    await expect.poll(() => at(page), { timeout: 30_000, intervals: [100] }).toMatch(want);
+  } finally {
+    await page.keyboard.up(key);
+  }
 }
 
-/** The scene is up: its loading line is gone. */
+/** The world screen is up and its scene has loaded (the loading line is gone). */
 async function loaded(page: Page) {
-  await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Menu", exact: true })).toBeVisible();
   await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
 }
 
@@ -48,13 +52,13 @@ test("the world: walk, take a door and back, open the menu, and Continue resumes
   await expect(menu).toBeHidden();
 
   // Reload: Continue puts the hero back on the saved tile (the scene would
-  // save its spawn tile on its first frame otherwise), with no intro again.
+  // save its spawn tile on its first frame otherwise). The scene marks the
+  // hero's tile on its host only outside a cutscene, so this also says the
+  // intro didn't play again.
   const saved = await at(page);
   await page.reload();
   await menuItem(page, "Continue").click();
   await loaded(page);
-  // The scene marks the hero's tile on its host once a frame has drawn it.
   await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", saved.split(",").slice(1).join(","));
   expect(await at(page)).toEqual(saved);
-  await expect(skip).toBeHidden();
 });

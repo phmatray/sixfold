@@ -4,7 +4,8 @@ import { menuItem, owned, readSave, title } from "./helpers";
 test("a duel against the AI is played to the end", async ({ page }) => {
   await title(page);
   await menuItem(page, "Play a duel").click();
-  // One prize and a fixed seed: the same short duel every run.
+  // One prize and a fixed seed: the same short duel every run (an engine or AI
+  // change that asks the player something mid-duel would need a step here).
   await page.getByText("Seed and prizes").click();
   await page.getByLabel("Seed").fill("59");
   await page.getByLabel("Prizes").selectOption("1");
