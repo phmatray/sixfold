@@ -7,6 +7,7 @@ use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{card, tr, CardId, Lang};
 
+use crate::achievements::{count_line, Origin, Tab};
 use crate::audio::AudioSettings;
 use crate::binder::progress;
 use crate::cards::{deck_star, CardFace};
@@ -173,6 +174,7 @@ pub fn TitleScreen() -> impl IntoView {
     };
     let due = expect_context::<TutorialDue>().0;
     let progress = expect_context::<RwSignal<Progress>>();
+    let records = move || progress.with(count_line);
     let campaign_sub = move || {
         progress.with(|p| {
             let next = RIVALS.iter().find(|r| r.open(p) && !r.beaten(p));
@@ -250,6 +252,7 @@ pub fn TitleScreen() -> impl IntoView {
                             <MenuItem label=tr("Open packs", "Ouvrir des boosters") sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
                             <MenuItem label=tr("My decks", "Mes decks") sub=Signal::derive(decks) to=Screen::Decks />
                             <MenuItem label="Collection" sub=Signal::derive(found) to=Screen::Collection />
+                            <MenuItem label=tr("Records", "Palmarès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
                             {move || if due.get() {
                                 view! { <MenuItem label=tr("Explore the world", "Explorer le monde") sub=tr("Explore the meadow and the four roads out of it", "Le pré et les quatre routes qui en partent") to=Screen::World /> }.into_any()
                             } else {

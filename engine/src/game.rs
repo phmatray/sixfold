@@ -411,6 +411,126 @@ impl Game {
     }
 }
 
+/// How a finished duel was won (R-KO-06, R-TURN-02).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum End {
+    /// The winner took their last prize card.
+    Prizes,
+    /// The loser had to draw from an empty deck.
+    DeckOut,
+    /// The loser was left with no creature in play.
+    NoCreatures,
+}
+
+/// A duel in a few numbers, for stats and achievements (`docs/WORLD_DESIGN.md`
+/// §12.2). Per-side arrays are indexed by player.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct GameSummary {
+    pub winner: Option<usize>,
+    /// None while the duel is under way.
+    pub end: Option<End>,
+    /// Prize cards each side started with (before any sudden death).
+    pub prizes: u8,
+    /// Prize cards each side took.
+    pub taken: [u32; 2],
+    /// Knock-outs each side scored, and how many of them on the Bench.
+    pub kos: [u32; 2],
+    pub bench_kos: [u32; 2],
+    /// Stage 2 creatures each side evolved into.
+    pub stage2: [u32; 2],
+    /// Each side's longest run of heads on its own coins (in turns: the
+    /// first-player coin doesn't count).
+    pub heads_run: [u32; 2],
+    /// The biggest prize deficit the winner came back from (prizes still to
+    /// take minus the opponent's).
+    pub deficit: u32,
+    /// The winner once needed four prizes or more while the loser needed one
+    /// (in the game that decided it: a sudden death starts the race again).
+    pub brink: bool,
+    pub sudden_death: bool,
+}
+
+impl Game {
+    /// The duel so far, read from its log.
+    pub fn summary(&self) -> GameSummary {
+        let mut s = GameSummary {
+            winner: self.winner,
+            prizes: self.prize_count,
+            sudden_death: self.sudden_death,
+            ..GameSummary::default()
+        };
+        let mut left: [Option<u32>; 2] = [None; 2];
+        let mut set = false;
+        let mut run = [0; 2];
+        // Coins of turns only: the first-player coin is nobody's luck.
+        let mut playing = false;
+        // Prizes still to take, (needed by the winner, by the loser), over time.
+        let mut gaps = vec![];
+        let mut decked = None;
+        for e in &self.log {
+            match *e {
+                Event::PrizesSet { player, count } => {
+                    if !set {
+                        s.prizes = count;
+                        set = true;
+                    }
+                    left[player] = Some(u32::from(count));
+                    decked = None;
+                }
+                Event::PrizeTaken { player, .. } => {
+                    s.taken[player] += 1;
+                    left[player] = left[player].map(|n| n.saturating_sub(1));
+                }
+                Event::KnockedOut { player, slot, .. } => {
+                    s.kos[1 - player] += 1;
+                    s.bench_kos[1 - player] += u32::from(slot > 0);
+                }
+                Event::Evolved {
+                    player, card: c, ..
+                } => {
+                    let two = card(c)
+                        .creature()
+                        .is_some_and(|cr| cr.stage == crate::card::Stage::Stage2);
+                    s.stage2[player] += u32::from(two);
+                }
+                Event::TurnStarted { .. } => playing = true,
+                // A restart: a new setup coin, and the old prize race is over.
+                Event::SuddenDeath => {
+                    playing = false;
+                    gaps.clear();
+                    left = [None; 2];
+                }
+                Event::CoinFlip { player, heads } if playing => {
+                    run[player] = if heads { run[player] + 1 } else { 0 };
+                    s.heads_run[player] = s.heads_run[player].max(run[player]);
+                }
+                Event::DeckOut { player } => decked = Some(player),
+                _ => {}
+            }
+            if let [Some(a), Some(b)] = left {
+                gaps.push([a, b]);
+            }
+        }
+        let Some(w) = self.winner else {
+            return s;
+        };
+        let l = 1 - w;
+        for g in gaps {
+            s.deficit = s.deficit.max(g[w].saturating_sub(g[l]));
+            s.brink |= g[w] >= 4 && g[l] == 1;
+        }
+        // The last prize wins even when it also empties the loser's board.
+        s.end = Some(if decked == Some(l) {
+            End::DeckOut
+        } else if self.players[w].prizes_left() == 0 {
+            End::Prizes
+        } else {
+            End::NoCreatures
+        });
+        s
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -640,5 +760,117 @@ mod tests {
             (d.turn, d.turn_player, &d.prompt)
         );
         assert_ne!(g.rng.clone().next_u32(), d.rng.clone().next_u32());
+    }
+}
+
+#[cfg(test)]
+mod summary_tests {
+    use super::*;
+    use crate::fixtures::*;
+    use crate::testkit::*;
+
+    /// A main phase whose log starts the way a dealt game's does: prizes set.
+    fn dealt(left: [u8; 2]) -> Game {
+        let mut g = main_phase(0);
+        for (player, count) in left.into_iter().enumerate() {
+            g.players[player].prizes = vec![Some(FIRE_E); count.into()];
+            g.log.push(Event::PrizesSet { player, count });
+        }
+        g
+    }
+
+    #[test]
+    fn summary_of_a_deck_out_win() {
+        let mut g = dealt([6, 6]);
+        g.players[1].deck.clear();
+        ok(&mut g, Action::Done);
+        let s = g.summary();
+        assert_eq!(
+            (s.winner, s.end, s.prizes),
+            (Some(0), Some(End::DeckOut), 6)
+        );
+        assert_eq!(
+            (s.taken, s.kos, s.deficit, s.brink),
+            ([0, 0], [0, 0], 0, false)
+        );
+    }
+
+    #[test]
+    fn summary_of_an_empty_bench_win() {
+        let mut g = dealt([6, 6]);
+        attack_with(&mut g, 200, &[]);
+        let s = g.summary();
+        assert_eq!((s.winner, s.end), (Some(0), Some(End::NoCreatures)));
+        assert_eq!((s.kos, s.bench_kos, s.taken), ([1, 0], [0, 0], [1, 0]));
+    }
+
+    #[test]
+    fn the_last_prize_is_a_prize_win_even_on_an_empty_board() {
+        let mut g = dealt([1, 6]);
+        attack_with(&mut g, 200, &[]);
+        let s = g.summary();
+        assert_eq!(
+            (s.winner, s.end, s.taken),
+            (Some(0), Some(End::Prizes), [1, 0])
+        );
+    }
+
+    #[test]
+    fn a_sudden_death_starts_the_prize_race_again() {
+        let mut g = dealt([4, 1]);
+        g.log.push(Event::SuddenDeath);
+        g.sudden_death = true;
+        for player in [0, 1] {
+            g.log.push(Event::PrizesSet { player, count: 1 });
+        }
+        g.players[1].deck.clear();
+        ok(&mut g, Action::Done);
+        let s = g.summary();
+        assert_eq!((s.winner, s.brink, s.sudden_death), (Some(0), false, true));
+    }
+
+    #[test]
+    fn summary_of_a_comeback() {
+        // Four prizes to take while the opponent needs one; then they deck out.
+        let mut g = dealt([4, 1]);
+        g.players[1].deck.clear();
+        ok(&mut g, Action::Done);
+        let s = g.summary();
+        assert_eq!((s.winner, s.deficit, s.brink), (Some(0), 3, true));
+        // An unfinished duel has no end and no comeback.
+        let s = dealt([4, 1]).summary();
+        assert_eq!((s.winner, s.end, s.brink), (None, None, false));
+    }
+
+    #[test]
+    fn summary_counts_stage2s_and_runs_of_heads() {
+        let mut g = dealt([6, 6]);
+        let coin = |player, heads| Event::CoinFlip { player, heads };
+        g.log.extend([
+            // The first-player coin, before any turn, is no one's run.
+            coin(0, true),
+            coin(0, true),
+            Event::TurnStarted { player: 0, turn: 0 },
+            coin(0, true),
+            coin(0, true),
+            coin(1, false),
+            coin(0, true),
+            coin(0, false),
+            coin(0, true),
+            Event::Evolved {
+                player: 0,
+                slot: 0,
+                uid: 1,
+                card: MOSSGIANT,
+            },
+            Event::Evolved {
+                player: 0,
+                slot: 0,
+                uid: 1,
+                card: MOSSBACK,
+            },
+        ]);
+        let s = g.summary();
+        assert_eq!((s.heads_run, s.stage2), ([3, 0], [1, 0]));
     }
 }

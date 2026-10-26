@@ -8,6 +8,8 @@
 //! 1.3: gate, prop `if`, `open` and `pulse` conditions parse; a `warp:` leads to
 //! a map that exists; a night duelist is out only at night (`time:night` in
 //! its `if`); waymark ids are unique and charted in `web/world/atlas.json`.
+//! 1.7: the achievements' "every" totals (finds, curios, waymarks, field
+//! items, seal sites) match what the maps hold.
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
@@ -16,6 +18,7 @@ use serde_json::Value;
 use sixfold_engine::campaign::rival;
 use sixfold_engine::doctor::APPLIED_FLAG;
 use sixfold_engine::overworld::{parse_cond, parse_effect, Cue, Effect, Test};
+use sixfold_engine::stats::{CURIOS, FIELD_ITEMS, FINDS, SEAL_SITES, WAYMARKS};
 use sixfold_engine::trainers::{trainer, TRAINERS};
 
 /// What every map seen so far placed.
@@ -256,6 +259,34 @@ fn every_map_reads_with_the_engine_grammar() {
     for (id, map) in &seen.waymarks {
         if !charted.contains(id.as_str()) {
             bad.push(format!("{map}: waymark {id:?} is not in atlas.json"));
+        }
+    }
+    let curios = seen
+        .sets
+        .iter()
+        .filter(|s| s.starts_with("item:curio_"))
+        .count();
+    let totals = [
+        ("finds", seen.finds.len(), FINDS),
+        ("curios", curios, CURIOS),
+        ("waymarks", charted.len(), WAYMARKS),
+    ];
+    for (what, maps, engine) in totals {
+        if maps != engine {
+            bad.push(format!(
+                "the maps hold {maps} {what}, stats.rs says {engine}"
+            ));
+        }
+    }
+    for item in FIELD_ITEMS {
+        if !seen.sets.contains(&format!("item:{item}")) {
+            bad.push(format!("field item {item:?} is given by no map"));
+        }
+    }
+    for site in SEAL_SITES {
+        let text = std::fs::read_to_string(dir.join(format!("{site}.json"))).unwrap_or_default();
+        if !text.contains("\"seal_stone\"") {
+            bad.push(format!("seal site {site:?} is no map with a seal stone"));
         }
     }
     let quests =

@@ -44,6 +44,7 @@ use crate::deck::DeckList;
 use crate::lang::tr;
 use crate::overworld::Progress;
 use crate::profile::{Profile, Wallet};
+use crate::stats::Stats;
 
 /// The envelope version this build writes. It reads this one and older.
 pub const VERSION: u32 = 1;
@@ -62,6 +63,9 @@ pub const CAMPAIGN_DECK: &str = "campaign_deck";
 /// `due` while the guided first duel hasn't been played or skipped. A save
 /// from before 1.1 has no such section: its player is past the lesson.
 pub const TUTORIAL: &str = "tutorial";
+/// Play counters (`docs/WORLD_DESIGN.md` §12.2), see [`Stats`]. A save from
+/// before 1.7 has none: it reads as zeros plus what its progress shows.
+pub const STATS: &str = "stats";
 
 /// The localStorage keys of a 0.6 save (one per part), with the section each
 /// one becomes, for [`Save::from_legacy`].
@@ -325,6 +329,17 @@ impl Save {
 
     pub fn set_progress(&mut self, p: &Progress) {
         self.set(PROGRESS, &p.encode());
+    }
+
+    /// The play counters, backfilled from the progress (see [`Stats::backfill`]).
+    pub fn stats(&self) -> Stats {
+        let mut s = Stats::decode(self.get(STATS).unwrap_or(""));
+        s.backfill(&self.progress());
+        s
+    }
+
+    pub fn set_stats(&mut self, s: &Stats) {
+        self.set(STATS, &s.encode());
     }
 
     pub fn summary(&self) -> Summary {
@@ -711,5 +726,33 @@ woodland,12,8,e";
         );
         assert!(back.get(PROGRESS).unwrap().ends_with(",c:100"));
         assert_eq!(back.progress(), p);
+    }
+
+    /// 1.7: the stats ride in their own section; a save without one (every
+    /// save before 1.7) reads as zeros plus what its progress shows.
+    #[test]
+    fn stats_section_round_trips_and_old_saves_backfill() {
+        let mut s = sample();
+        let mut st = Stats::default();
+        st.add("duels", 7);
+        st.add("wins", 4);
+        st.max("heads_run_best", 5);
+        s.set_stats(&st);
+        let text = s.encode();
+        assert!(text.contains("[stats]\ns1;duels=7,heads_run_best=5,wins=4"));
+        assert_eq!(Save::decode(&text).unwrap().stats(), st);
+        // No section: zeros, but the duel already won is counted.
+        let mut old = sample();
+        let mut p = old.progress();
+        p.apply("flag:beat_bramble").unwrap();
+        old.set_progress(&p);
+        let back = Save::decode(&old.encode()).unwrap();
+        assert_eq!(back.get(STATS), None);
+        let st = back.stats();
+        assert_eq!(
+            (st.get("rival_wins"), st.get("wins"), st.get("kos")),
+            (1, 1, 0)
+        );
+        assert_eq!(Save::default().stats(), Stats::default());
     }
 }
