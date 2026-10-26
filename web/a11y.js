@@ -168,7 +168,7 @@ addEventListener("keydown", (e) => {
   if (top) hand.popover = "manual";
   document.body.append(hand);
   document.documentElement.classList.add("hand-cursor");
-  const OWN = ".duel .mat *, .world-stage, .world-stage *, .card, .hexon-card, .hand-card, .atlas-post, .talk-box, .press-start, h1, h2, main, [tabindex='-1']";
+  const OWN = ".duel .mat *, .world-stage, .world-stage > canvas, .world-prompt, .card, .hexon-card, .hand-card, .atlas-post, .talk-box, .press-start, h1, h2, main, [tabindex='-1']";
   const CONTROLS = "button, a[href], input, select, textarea, summary, label, [role='tab'], [tabindex]:not([tabindex='-1'])";
   let at = null, raf = 0, side = null;
   const shown = (el) => el.matches(":focus-visible") || (document.documentElement.dataset.input === "pad" && el.matches(":focus"));

@@ -4318,7 +4318,9 @@ html.hand-cursor .deck-tile:has([data-hand]) { translate: 0 -2px; }
 /* Menu screens over a dimmed still of the place the title last showed (felt when there is none). */
 body:has(> .page)::before {
   content: ""; position: fixed; inset: -24px; z-index: -1; pointer-events: none;
-  background: var(--world-still, none) center / cover; filter: blur(10px) brightness(0.32) saturate(0.85);
+  /* A fixed navy veil over the still: text on the page keeps AA whatever the place. */
+  background: linear-gradient(color-mix(in srgb, var(--felt-deep) 62%, transparent), color-mix(in srgb, var(--felt-deep) 62%, transparent)), var(--world-still, none) center / cover;
+  filter: blur(10px) brightness(0.55) saturate(0.85);
 }
 body:has(> .page) .page-body { background: none; }
 /* The duel setup's bar: a plank with rounded ends, sitting on the page rather than half-spanning it. */

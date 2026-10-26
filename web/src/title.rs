@@ -354,7 +354,7 @@ pub fn TitleScreen() -> impl IntoView {
                     <MenuItem icon="collection" label="Collection" sub=Signal::derive(found) to=Screen::Collection />
                     <MenuItem icon="records" label=tr("Records", "Palmarès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
                     {move || if due.get() {
-                        view! { <MenuItem icon="explore" label=tr("Explore the world", "Explorer le monde") sub=tr("Six regions round the meadow, and the roads between", "Six régions autour du pré, et les routes qui les relient") to=Screen::World /> }.into_any()
+                        view! { <MenuItem icon="explore" label=tr("Explore the world", "Explorer le monde") sub=tr("Six regions to walk", "Six régions à parcourir") to=Screen::World /> }.into_any()
                     } else {
                         view! { <LessonItem label=tr("How to play", "Comment jouer") sub=tr("Replay the guided first duel", "Rejouer le premier duel guidé") /> }.into_any()
                     }}
