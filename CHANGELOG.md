@@ -5,6 +5,20 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.5.0](https://github.com/phmatray/sixfold/compare/v1.4.0...v1.5.0) (2026-10-26)
+
+
+### Added
+
+* **audio:** a soundscape per region and music for rivals and bosses ([#71](https://github.com/phmatray/sixfold/issues/71)) ([#81](https://github.com/phmatray/sixfold/issues/81)) ([316f1ec](https://github.com/phmatray/sixfold/commit/316f1ec2253308db42c4348daee7ed9e92e911d7))
+* stats and achievements ([#65](https://github.com/phmatray/sixfold/issues/65)) ([#79](https://github.com/phmatray/sixfold/issues/79)) ([6086ad9](https://github.com/phmatray/sixfold/commit/6086ad935508ae2284a00737c614e8645ae49e69))
+* **world:** dialogue polish, current objective and clear unlocks ([#62](https://github.com/phmatray/sixfold/issues/62)) ([#78](https://github.com/phmatray/sixfold/issues/78)) ([d37b494](https://github.com/phmatray/sixfold/commit/d37b4940849447a22660d58fda623f98fad3acf6))
+
+
+### Fixed
+
+* **ui:** 1.5 design audit — dialogue, objective, records, audio settings ([#87](https://github.com/phmatray/sixfold/issues/87)) ([0577c48](https://github.com/phmatray/sixfold/commit/0577c486bcc95db1c19385d56b8a879b2f60c78c))
+
 ## [1.4.0](https://github.com/phmatray/sixfold/compare/v1.3.0...v1.4.0) (2026-10-26)
 
 
