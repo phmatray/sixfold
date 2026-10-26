@@ -70,8 +70,12 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   await title(page);
   await menuItem(page, "Explore the world").click();
   await loaded(page);
-  await page.keyboard.press("Escape"); // the intro scene
-  await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
+  // The intro scene: wait for it to be playing before skipping it. Escape pressed before it starts
+  // skips nothing, and the scene then plays over the warp below (moving the hero, holding input).
+  const skip = page.getByRole("button", { name: /^Skip/ });
+  await expect(skip).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(skip).toBeHidden();
   // Face Tobin from the tile south of him (out of his line of sight, so he
   // doesn't come over on his own) and talk to him: he challenges.
   await page.locator(".world-host").evaluate((el) => (el as unknown as { sixfoldWarp: (...a: unknown[]) => void }).sixfoldWarp("overworld", 23, 28, "n"));
