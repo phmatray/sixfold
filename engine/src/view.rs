@@ -18,6 +18,8 @@ pub struct View<'a> {
     pub turn_player: usize,
     /// The turn player already used this turn's energy attachment.
     pub energy_attached: bool,
+    /// The turn player already retreated this turn (R-RETREAT-05).
+    pub retreated: bool,
     /// The pending decision, only when it is this player's (a deck-search
     /// prompt lists deck cards).
     pub prompt: Option<&'a Prompt>,
@@ -72,6 +74,7 @@ impl Game {
             turn: self.turn,
             turn_player: self.turn_player,
             energy_attached: self.energy_attached,
+            retreated: self.retreated,
             prompt: self.prompt.as_ref().filter(|pr| pr.player == me),
             waiting_on: self.prompt.as_ref().map(|pr| pr.player),
             winner: self.winner,
