@@ -480,14 +480,17 @@ pub fn BuildSheet(
         let b = built.get_untracked();
         let colours = deck_colors(&b.cards);
         let style = style.get_untracked();
+        let names: Vec<String> = colours.iter().take(2).map(|c| c.to_string()).collect();
+        let auto = profile.with_untracked(|p| {
+            crate::decks::unique_name(p, &format!("{} {}", names.join("–"), style.label()))
+        });
         draft.update(|d| {
             d.cards = b.cards;
             let untitled = d.name.trim().is_empty()
                 || d.name.starts_with("New deck")
                 || d.name.starts_with("Nouveau deck");
             if untitled {
-                let names: Vec<String> = colours.iter().take(2).map(|c| c.to_string()).collect();
-                d.name = format!("{} {}", names.join("–"), style.label());
+                d.name = auto;
             }
         });
         crate::audio::sfx("place", 0.0);
@@ -713,10 +716,6 @@ pub fn DeckShelf() -> impl IntoView {
                             <div class="shelf-info">
                                 <h3>{name.clone()}</h3>
                                 <span class="deck-colors">{colours.into_iter().map(|c| view! { <Pip color=c /> }).collect_view()}</span>
-                                <details class="shelf-peek">
-                                    <summary>{tr("See its cards", "Voir ses cartes")}</summary>
-                                    <ul>{u.deck.list.iter().map(|&(id, n)| view! { <li><b>{n}</b>" " {card(id).label()}</li> }).collect_view()}</ul>
-                                </details>
                                 {move || if open() {
                                     let copy = copy.clone();
                                     view! {
@@ -734,6 +733,10 @@ pub fn DeckShelf() -> impl IntoView {
                                         </p>
                                     }.into_any()
                                 }}
+                                <details class="shelf-peek">
+                                    <summary>{tr("See its cards", "Voir ses cartes")}</summary>
+                                    <ul>{u.deck.list.iter().map(|&(id, n)| view! { <li><b>{n}</b>" " {card(id).label()}</li> }).collect_view()}</ul>
+                                </details>
                             </div>
                         </li>
                     }

@@ -713,7 +713,9 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                     {tr("Build for me", "Construire pour moi")}
                 </button>
                 <button type="button" class="btn" on:click=move |_| complete()>{tr("Complete my deck", "Compléter mon deck")}</button>
-                <button type="button" class="btn test" aria-haspopup="dialog" disabled=move || total() < 7 on:click=move |_| testing.set(true)>{tr("Test a hand", "Tester une main")}</button>
+                <button type="button" class="btn test" aria-haspopup="dialog" aria-disabled=move || (total() < 7).to_string()
+                    title=move || if total() < 7 { tr("A hand needs 7 cards in the deck.", "Une main demande 7 cartes dans le deck.") } else { "" }
+                    on:click=move |_| if total() < 7 { msg.set(Some(tr("Add cards first: a test hand needs at least 7 in the deck.", "Ajoutez d'abord des cartes : une main de test en demande au moins 7 dans le deck.").into())) } else { testing.set(true) }>{tr("Test a hand", "Tester une main")}</button>
                 <button type="button" class="btn ghost undo" disabled=move || !undo.can() aria-keyshortcuts="Control+Z Meta+Z" on:click=move |_| do_undo()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7L4 12l5 5M4 12h11a5 5 0 0 1 0 10h-2" /></svg>
                     {tr("Undo", "Annuler")}
@@ -727,7 +729,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             <div class="editor-tabs" role="tablist" aria-label=tr("Editor panes", "Volets de l'éditeur")>
                 <button type="button" role="tab" id="tab-advice" aria-controls="pane-advice" aria-selected=move || (tab.get() == Tab::Advice).to_string()
                     aria-label=move || {
-                        let n = tips.with(Vec::len);
+                        let n = if total() == 0 { 0 } else { tips.with(Vec::len) };
                         let bad = !problems().is_empty();
                         match (n, bad) {
                             (0, false) => tr("Advice", "Conseils").to_string(),
@@ -736,7 +738,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                         }
                     }
                     on:click=move |_| tab.set(Tab::Advice)>{tr("Advice", "Conseils")}
-                    {move || { let n = tips.with(Vec::len); (n > 0).then(|| view! { <span class="tab-badge" aria-hidden="true">{n}</span> }) }}
+                    {move || { let n = if total() == 0 { 0 } else { tips.with(Vec::len) }; (n > 0).then(|| view! { <span class="tab-badge" aria-hidden="true">{n}</span> }) }}
                     {move || (!problems().is_empty()).then(|| view! { <span class="tab-dot" aria-hidden="true"></span> })}
                     </button>
                 <button type="button" role="tab" id="tab-cards" aria-controls="pane-cards" aria-selected=move || (tab.get() == Tab::Cards).to_string()

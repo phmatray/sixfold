@@ -1569,7 +1569,12 @@ input, select { caret-color: var(--brass-hi); }
 /* Large text on a phone: the bar's controls shrink and wrap rather than push the screen wider. */
 .page-bar > * { min-width: 0; }
 .page-bar .bar-actions .btn { white-space: normal; }
-.deck-name-input { min-width: 0; text-overflow: ellipsis; }
+.page-bar .deck-name-input { min-width: 0; width: 0; flex: 1 1 0; text-overflow: ellipsis; }
+.page-bar .bar-actions { flex: 0 0 auto; }
+/* A narrow bar (a phone, large text): Back keeps its arrow and its name, not its label's width. */
+@media (max-width: 420px) {
+  .page-bar .btn.back { flex: none; width: 44px; padding: 0; justify-content: center; font-size: 0; }
+}
 .btn.back { display: inline-flex; align-items: center; gap: 4px; padding-left: 8px; }
 .page-title { font-size: var(--type-menu-title); letter-spacing: -0.02em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bar-actions { margin-left: auto; display: flex; gap: 8px; }
