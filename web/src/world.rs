@@ -35,7 +35,7 @@ export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
     .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb, start, edit && new URLSearchParams(location.search).has("edit")); api.setItems(items); api.setClock(minute); api.pause(paused); })
-    .catch((e) => { console.error("world: could not load the scene", e); cb("error", "", String(e)); });
+    .catch((e) => { console.error("world: could not load the scene", e); cb("error", "import", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
 export function world_act() { api?.act(); }
@@ -75,6 +75,28 @@ extern "C" {
     /// A person's bust, drawn from their own rig and colours (a data URL), or
     /// empty for anyone who isn't a person on this map (a sign, a gangway).
     fn world_portrait(id: &str) -> String;
+}
+
+const REOPEN: &str = "sixfold.reopen-world";
+
+/// Retry after the scene's modules failed to load: the browser keeps a failed
+/// module import for the page's whole life, so reload and come back here.
+fn reload_into_world() {
+    let w = window();
+    if let Ok(Some(s)) = w.session_storage() {
+        _ = s.set_item(REOPEN, "1");
+    }
+    _ = w.location().reload();
+}
+
+/// Whether the page was reloaded to retry the world (see `reload_into_world`); once.
+pub(crate) fn reopen() -> bool {
+    let Ok(Some(s)) = window().session_storage() else {
+        return false;
+    };
+    let yes = s.get_item(REOPEN).ok().flatten().is_some();
+    _ = s.remove_item(REOPEN);
+    yes
 }
 
 /// Fade the world to a map tile: a `warp:` cue, or fast travel (its own sound).
@@ -521,6 +543,9 @@ pub fn WorldScreen() -> impl IntoView {
     let sheet = RwSignal::new(None::<Sheet>);
     let typed = RwSignal::new(0usize);
     let loading = RwSignal::new(true);
+    // The first map's models loaded, (done, total), for the loading line.
+    let loaded = RwSignal::new((0u32, 0u32));
+    // Some("import") when the scene's modules could not load, Some("") when the scene failed.
     let failed = RwSignal::new(None::<String>);
     let announce = RwSignal::new(String::new());
     // When the live region last took a phase or a way opening (they can come together).
@@ -655,13 +680,18 @@ pub fn WorldScreen() -> impl IntoView {
                 }
                 "talk" => start_talk(a, b),
                 "area" => _ = announce.try_set(a),
+                "progress" => {
+                    if let Some((d, t)) = a.split_once('/') {
+                        _ = loaded.try_set((d.parse().unwrap_or(0), t.parse().unwrap_or(0)));
+                    }
+                }
                 "ready" => {
                     _ = loading.try_set(false);
                     if let Some(id) = &returning {
                         world_meet(id);
                     }
                 }
-                _ => _ = failed.try_set(Some(b)),
+                _ => _ = failed.try_set(Some(a)),
             }
             false
         },
@@ -686,8 +716,12 @@ pub fn WorldScreen() -> impl IntoView {
         world_unmount();
     });
     let retry = move |_| {
+        if failed.get_untracked().as_deref() == Some("import") {
+            return reload_into_world();
+        }
         failed.set(None);
         loading.set(true);
+        loaded.set((0, 0));
         world_unmount();
         mount();
     };
@@ -1077,8 +1111,16 @@ pub fn WorldScreen() -> impl IntoView {
                 <Facets />
                 <SealBadge on_open=move || sheet.set(Some(Sheet::Roster)) />
                 <MuteToggle />
+                // Until the scene is up the menu can't open: say so rather than ignore the press.
                 <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
-                    aria-keyshortcuts="Escape" title=tr("Menu (Esc)", "Menu (Échap)") on:click=move |_| toggle_menu()>
+                    aria-keyshortcuts="Escape"
+                    aria-disabled=move || (loading.get() || failed.with(Option::is_some)).then_some("true")
+                    title=move || if loading.get() || failed.with(Option::is_some) {
+                        tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé")
+                    } else {
+                        tr("Menu (Esc)", "Menu (Échap)")
+                    }
+                    on:click=move |_| toggle_menu()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
                     <span class="journal-label">"Menu"</span>
                 </button>
@@ -1099,8 +1141,14 @@ pub fn WorldScreen() -> impl IntoView {
                 </button>
             })}
             <div class="world-rest" class:on=move || resting.get() aria-hidden="true"></div>
-            {move || (loading.get() && failed.with(Option::is_none)).then(|| view! {
-                <p class="world-loading" role="status">{tr("Loading the world…", "Chargement du monde…")}</p>
+            {move || (loading.get() && failed.with(Option::is_none)).then(|| {
+                let pct = move || loaded.with(|&(d, t)| (d * 100).checked_div(t).unwrap_or(0).min(100));
+                view! {
+                    <div class="world-loading" role="status">
+                        <p>{tr("Loading the world…", "Chargement du monde…")}</p>
+                        <span class="progress-bar" aria-hidden="true"><span style:width=move || format!("{}%", pct())></span></span>
+                    </div>
+                }
             })}
             {move || failed.get().map(|_| view! {
                 <div class="world-error" role="alert">
@@ -1392,8 +1440,9 @@ fn GameMenu(
                     <div class="menu-top">
                     <div class="sheet-head menu-head">
                         <h2 id="world-sheet-title">"Menu"</h2>
-                        <button type="button" class="btn" on:click=move |_| screen.set(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
-                        <button type="button" class="btn ghost" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
+                        // Close, back to the world, is the usual way out; quitting is the quieter one.
+                        <button type="button" class="btn ghost" on:click=move |_| screen.set(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
+                        <button type="button" class="btn" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
                     </div>
                     <div class="menu-tabs" role="tablist" aria-label="Menu" on:keydown=on_tabs_key>
                         {MenuTab::ALL.into_iter().map(|t| view! {

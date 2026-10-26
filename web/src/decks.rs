@@ -217,7 +217,8 @@ fn DeckRow(
                             <label class="sr-only" for=format!("rename-{i}")>{tr("Deck name", "Nom du deck")}</label>
                             <input id=format!("rename-{i}") node_ref=input maxlength="40" prop:value=move || draft.get()
                                 on:input=move |e| draft.set(event_target_value(&e))
-                                on:keydown=move |e| { if e.key() == "Escape" { e.stop_propagation(); renaming.set(None) } } />
+                                // Cancelled too, so a host dialog (the in-game menu) doesn't also close.
+                                on:keydown=move |e| { if e.key() == "Escape" { e.prevent_default(); e.stop_propagation(); renaming.set(None) } } />
                             <button type="submit" class="btn primary">{tr("Save name", "Enregistrer")}</button>
                             <button type="button" class="btn ghost" on:click=move |_| renaming.set(None)>{tr("Cancel", "Annuler")}</button>
                         </form>

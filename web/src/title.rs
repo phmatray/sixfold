@@ -89,6 +89,7 @@ pub fn OptionsPanel() -> impl IntoView {
             <LangSwitch />
             <AudioSettings />
             <SaveSettings />
+            <crate::offline::OfflineStatus />
             {move || if confirm.get() {
                 view! {
                     <div class="confirm" role="group" aria-labelledby="reset-q">
@@ -231,7 +232,7 @@ pub fn TitleScreen() -> impl IntoView {
                     <h1 class="wordmark">"Sixfold"</h1>
                     <p class="tagline">{tr("A Hexon card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.", "Un duel de cartes Hexon aux règles d'antan : six Récompenses, du pile ou face, et pas de seconde chance sur une mauvaise main.")}</p>
                     {move || notice.get().map(|n| view! {
-                        <p class="error" role="alert">{n} " "
+                        <p class="error"><span role="alert">{n}</span> " "
                             <button type="button" class="btn ghost" on:click=move |_| notice.set(None)>{tr("Dismiss", "Fermer")}</button>
                         </p>
                     })}

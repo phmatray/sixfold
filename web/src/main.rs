@@ -13,6 +13,7 @@ mod ctl;
 mod decks;
 mod duel;
 mod journal;
+mod offline;
 mod overlays;
 mod packs;
 mod saves;
@@ -97,7 +98,11 @@ pub fn new_seed() -> u64 {
 #[component]
 fn App() -> impl IntoView {
     let ctl = Ctl::new();
-    let screen = RwSignal::new(Screen::Title);
+    let screen = RwSignal::new(if world::reopen() {
+        Screen::World
+    } else {
+        Screen::Title
+    });
     let ui = Ui {
         inspect: RwSignal::new(None),
         sheet: RwSignal::new(false),
