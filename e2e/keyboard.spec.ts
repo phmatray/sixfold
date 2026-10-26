@@ -100,7 +100,7 @@ test("keyboard only: packs, collection, decks, campaign and records", async ({ p
   await page.keyboard.press("Enter");
   await back();
 
-  // The campaign: a rival's challenge opens and closes.
+  // The campaign and the records, in and back out.
   await go("Campaign", "Campaign");
   await back();
   await go("Records", "Records");
@@ -120,12 +120,13 @@ test("keyboard only: the world, a cutscene and the in-game menu", async ({ page 
 
   // The intro scene: Enter goes on to the next line, which is read out; Escape skips the rest.
   const scene = page.getByRole("dialog");
-  await expect(scene.getByRole("button", { name: /Next line|Close/ })).toBeFocused({ timeout: 30_000 });
+  await expect(scene.getByRole("button", { name: /Next line|Continue|Close/ })).toBeFocused({ timeout: 30_000 });
   const first = await scene.locator("[aria-live]").textContent();
   expect(first).toBeTruthy();
   await page.keyboard.press("Enter");
   await page.keyboard.press("Enter");
   await expect(scene.locator("[aria-live]")).not.toHaveText(first!);
+  await expect(scene.locator("[aria-live]")).not.toBeEmpty();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
 

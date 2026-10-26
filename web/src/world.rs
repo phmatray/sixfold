@@ -1405,7 +1405,7 @@ pub fn WorldScreen() -> impl IntoView {
                 on:close=move |_| if script_talk() { next() } else if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
                 // Each line of a talk or a cutscene, read as it comes (a live region outside
                 // the modal dialog would be inert).
-                <p class="sr-only" aria-live="polite">{move || sheet.with(|s| match s {
+                <p class="sr-only" id="talk-live" aria-live="polite">{move || sheet.with(|s| match s {
                     Some(Sheet::Talk(t)) if t.name.is_empty() => t.line().to_string(),
                     Some(Sheet::Talk(t)) => format!("{}: {}", t.name, t.line()),
                     _ => String::new(),
@@ -1419,7 +1419,8 @@ pub fn WorldScreen() -> impl IntoView {
                         let named = !t.name.is_empty();
                         let script = t.script;
                         view! {
-                            <button class="talk-box" class:has-face=t.face.is_some() on:click=move |_| advance()>
+                            // Described by the live line, so the first line is read on focus (later ones as they come).
+                            <button class="talk-box" class:has-face=t.face.is_some() aria-describedby="talk-live" on:click=move |_| advance()>
                                 // The face slides in with the first line only.
                                 {t.face.clone().map(|src| view! {
                                     <img class="talk-face" class:enter=t.at == 0 src=src alt="" width="96" height="96" />
@@ -1433,7 +1434,7 @@ pub fn WorldScreen() -> impl IntoView {
                                     {move || line.chars().take(typed.get()).collect::<String>()}
                                 </span>
                                 // The line itself is read by the live line below; the button says what it does.
-                                <span class="sr-only">{if more { tr("Next line", "Réplique suivante") } else { tr("Close", "Fermer") }}</span>
+                                <span class="sr-only">{if more { tr("Next line", "Réplique suivante") } else if script { tr("Continue", "Continuer") } else { tr("Close", "Fermer") }}</span>
                                 // Shown once the line is out: more to come, or the end.
                                 <svg class="talk-next" class:ready={move || typed.get() >= len} class:end=!more viewBox="0 0 12 12" aria-hidden="true">
                                     {if more {

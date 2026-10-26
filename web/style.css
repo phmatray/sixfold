@@ -2605,7 +2605,7 @@ p.atlas-pick { color: var(--muted); }
 }
 .duel :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .duel .ic { width: 1.2em; height: 1.2em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
-.duel kbd { font: 700 calc(11px * var(--ts))/1 var(--body); }
+.duel kbd { font: 700 calc(11px * var(--tsb))/1 var(--body); }
 
 /* ---------- The table ---------- */
 .mat {
@@ -2706,13 +2706,13 @@ p.atlas-pick { color: var(--muted); }
 .hexon-energy { position: absolute; left: calc(var(--w) * -0.08); top: 24%; display: grid; gap: 2px; font-size: max(13px, calc(var(--w) * 0.11)); }
 .hexon-energy .pip { box-shadow: 0 0 0 2px var(--deep), 0 2px 6px rgba(0, 0, 0, 0.5); }
 .hexon-energy > span { display: grid; gap: 2px; }
-.hexon-status { position: absolute; left: 50%; bottom: calc(var(--w) * 0.035 + max(12px, var(--w) * 0.09) + 16px); transform: translateX(-50%); padding: 3px 8px; border-radius: var(--r1); font-size: calc(12px * var(--ts)); font-weight: 700; color: #fff; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
+.hexon-status { position: absolute; left: 50%; bottom: calc(var(--w) * 0.035 + max(12px, var(--w) * 0.09) + 16px); transform: translateX(-50%); padding: 3px 8px; border-radius: var(--r1); font-size: calc(12px * var(--tsb)); font-weight: 700; color: #fff; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
 .hexon-status.asleep { background: #4c5fcf; }
 .hexon-status.paralyzed { background: #e2ad19; color: #2a1e00; }
 .hexon-status.confused { background: #c4498a; }
 .hexon-status.poisoned { background: #7d3cb8; }
 .hexon-status.poisoned.double { box-shadow: 0 0 0 2px #c79cf0; }
-.hexon-more { position: absolute; left: 0; right: 0; top: calc(100% + 4px); font-size: calc(12px * var(--ts)); color: var(--text-soft); text-align: center; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; pointer-events: none; }
+.hexon-more { position: absolute; left: 0; right: 0; top: calc(100% + 4px); font-size: calc(12px * var(--tsb)); color: var(--text-soft); text-align: center; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; pointer-events: none; }
 .hexon-power { position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); min-height: 44px; padding: 0 12px; border: 0; border-radius: var(--r1); background: #6b2414; color: #fff6ea; font-weight: 700; white-space: nowrap; box-shadow: inset 0 0 0 1.5px var(--brass), 0 6px 12px -6px #000; z-index: 2; }
 
 .hexon.target .hexon-card { transform: translateY(-5px); cursor: pointer; }
@@ -3103,11 +3103,11 @@ button.pile { cursor: pointer; }
 .bench { display: grid; grid-template-columns: repeat(5, var(--B)); gap: 12px; min-height: calc(var(--B) * 1.4); }
 .bench .spot { background: none; box-shadow: none; outline: 1px dashed rgba(255, 255, 255, 0.1); outline-offset: -1px; }
 .bench .spot.target { outline: 0; display: grid; place-items: center; cursor: pointer; background: rgba(243, 213, 137, 0.1); box-shadow: inset 0 0 0 2px var(--brass-hi), 0 0 22px rgba(243, 213, 137, 0.35); }
-.bench .spot.target::before { content: "+"; font: 800 calc(28px * var(--ts))/1 var(--display); color: var(--brass-hi); }
+.bench .spot.target::before { content: "+"; font: 800 calc(28px * var(--tsb))/1 var(--display); color: var(--brass-hi); }
 .bench .spot.target:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .bench .hexon-card .card-head { font-size: max(12px, 12.5cqw); }
 .bench .hexon-hp small { font-size: max(11px, 0.8em); }
-.bench .hexon-energy { top: auto; bottom: calc(var(--w) * 0.36); left: 2px; display: flex; font-size: calc(11px * var(--ts)); }
+.bench .hexon-energy { top: auto; bottom: calc(var(--w) * 0.36); left: 2px; display: flex; font-size: calc(11px * var(--tsb)); }
 .bench .hexon-energy > span { display: flex; }
 
 .plate-dmg { display: grid; justify-items: end; }
@@ -3159,14 +3159,14 @@ button.pile { cursor: pointer; }
     content: attr(data-place);
     position: absolute; top: -9px; right: -9px; z-index: 3;
     display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px;
-    border-radius: 6px; background: var(--brass-hi); color: var(--on-brass); font: 800 calc(12px * var(--ts))/1 var(--body);
+    border-radius: 6px; background: var(--brass-hi); color: var(--on-brass); font: 800 calc(12px * var(--tsb))/1 var(--body);
     box-shadow: 0 0 0 2px var(--deep);
   }
   .duel:has(.hand.holding) .half.me .zone .target::after { content: "0"; }
   .bench .spot.target { position: relative; }
 }
 .hexon-stage { position: absolute; right: 3px; top: calc(var(--w) * 0.2); padding: 1px 5px; border-radius: 5px; background: var(--deep); color: var(--ink); font: 700 11px/1.3 var(--body); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18); }
-.bench .hexon-card .card-head { font-size: calc(11px * var(--ts)); letter-spacing: -0.01em; padding-inline: 3px; }
+.bench .hexon-card .card-head { font-size: 11px; letter-spacing: -0.01em; padding-inline: 3px; }
 
 /* Power and Retreat each get a full-width row; with a Power present the
    attack plates tighten so the column keeps the Active's height. */
