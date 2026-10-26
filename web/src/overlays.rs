@@ -107,7 +107,8 @@ pub fn Inspector() -> impl IntoView {
         }
     });
     view! {
-        <aside class="inspector" class:open=move || ui.sheet.get() aria-label=tr("Card details", "Détails de la carte")>
+        // Focusable: it scrolls on its own, and the keyboard can scroll it too.
+        <aside class="inspector" tabindex="0" class:open=move || ui.sheet.get() aria-label=tr("Card details", "Détails de la carte")>
             <button class="btn ghost close" node_ref=close on:click=move |_| ui.sheet.set(false) aria-label=tr("Close card details", "Fermer les détails de la carte")>{tr("Close", "Fermer")}</button>
             {move || match shown_card() {
                 None => view! { <p class="empty-note">{tr("Hover or focus a card, or press and hold it, to read it here.", "Survolez ou sélectionnez une carte, ou maintenez-la appuyée, pour la lire ici.")}</p> }.into_any(),

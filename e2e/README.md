@@ -1,7 +1,8 @@
 # Browser tests
 
 Playwright drives Chromium through the main journeys (new game and the guided duel, a duel to
-the end, packs, deck editing, the world, a keyboard-only run, one journey at phone size) against
+the end, packs, deck editing, the world, keyboard-only runs of each, axe-core on every screen, one
+journey at phone size) against
 a release build. Assertions read what the player sees (roles, labels, live regions) and what the
 game saved (`sixfold.save.<n>` in localStorage).
 
