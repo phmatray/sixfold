@@ -1,3 +1,5 @@
+<p align="center"><img src="web/brand/sixfold-lockup.svg" alt="Sixfold" width="560"></p>
+
 # Sixfold
 
 A clean-room card duel between Hexons, the creatures of Sixfold, with the old

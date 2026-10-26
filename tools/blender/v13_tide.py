@@ -11,6 +11,7 @@ import random
 import bmesh
 from mathutils import Matrix, Vector
 
+from v13_kit import door_leaf  # noqa: E402
 from v13_kit import (A, B, T, arch_pts, beam, box, chain, contact, curve, cyl, empty, ico, jitter, lathe,  # noqa: F401
                      prism, ribbon, rock, shadow, sphere, stratum, torus, tube, FRONT)
 
@@ -257,10 +258,11 @@ def build_harbour_house(k):
     k.add(torus(0.22, 0.05, 10, 4), "td_trim", T((0, gy - 0.02, top + 0.6), (90, 0, 0)))
     k.add(cyl(0.2, 0.2, 0.03, 12), "td_window_glow", T((0, gy, top + 0.6), (90, 0, 0)))
     k.add(box(1.02, 0.08, 1.95), "td_trim", T((0, gy - 0.03, fz + 0.96)))
-    k.add(box(0.8, 0.06, 1.78), "td_door", T((0, gy - 0.06, fz + 0.89)))
+    k.add(box(0.78, 0.01, 1.76), "doorway", T((0, gy - 0.078, fz + 0.89)))  # behind the leaf: dark when it swings in
+    leaf = [(box(0.8, 0.06, 1.78), "td_door", T((0, gy - 0.06, fz + 0.89)))]
     for z in (fz + 0.45, fz + 1.35):
-        k.add(box(0.62, 0.02, 0.5), "td_trim", T((0, gy - 0.095, z)))
-    k.add(sphere(0.04, 6, 4), "knob", T((0.28, gy - 0.11, fz + 0.9)))
+        leaf.append((box(0.62, 0.02, 0.5), "td_trim", T((0, gy - 0.095, z))))
+    leaf.append((sphere(0.04, 6, 4), "knob", T((0.28, gy - 0.11, fz + 0.9))))
     k.add(box(1.3, 0.5, 0.06), "td_roof", T((0, gy - 0.25, fz + 2.03), (-14, 0, 0)))
     for sx in (-1, 1):
         x = sx * 1.35
@@ -304,7 +306,7 @@ def build_harbour_house(k):
     roof_z = top + 0.05 + gh * (1 - sx / 2.12) + 0.1
     k.add(cyl(0.09, 0.09, 0.8, 8), "iron", T((sx, sy, roof_z + 0.2)))
     k.add(cyl(0.14, 0.0, 0.12, 8), "iron", T((sx, sy, roof_z + 0.68)))
-    return empty("smoke_origin", (sx, sy, roof_z + 0.75))
+    return door_leaf(leaf, T((-0.4, gy - 0.06, fz)), empty("smoke_origin", (sx, sy, roof_z + 0.75)))
 
 
 # ---------------------------------------------------------------- ferry (4 x 2, bobs)

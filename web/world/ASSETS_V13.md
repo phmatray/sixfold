@@ -115,7 +115,7 @@ slit and windows, the lift's landings and winch house).
 | `heather` | 1×1 | solid | 0.5 m | wind | 442 | 18 | ring and scatter: olive cushions crowned with lilac bloom |
 | `chime_post` | 1×1 | solid | 2.6 m | wind | 734 | 56 | the chime ring on the Downs (the `st_chimes` night find) |
 | `pylon` | 1×1 | solid | 3.2 m | `coil_glow`; `Open` (node `pylon_lever`, knife switch off → on) | 1880 | 96 | the three relay pylons; play `Open` and light the coil when `flag:pylon_n` is set |
-| `observatory` | 5×5 | solid; door tile origin + (2, 4) | 5.7 m | `lamp_glow` | 2886 | 148 | Stormwatch's observatory (warp to `observatory`); telescope through the slit, gallery ring at ~2.6 m |
+| `observatory` | 5×5 | solid; door tile origin + (2, 4) | 5.7 m | `lamp_glow`; `door` | 2926 | 151 | Stormwatch's observatory (warp to `observatory`); telescope through the slit, gallery ring at ~2.6 m |
 | `lift_tower` | 2×1 | solid; the east tile is the lift's shaft (map `lifts`) | 9.6 m | `lamp_glow`; two `light_origin` (both landings) | 2680 | 149 | the Rodspire lift against the 6 m stack (cliff face on the tile edge behind): weathered timber posts and X braces anchored into the rock, two iron guide rails, a head frame with a copper sheave (axle at 9.1 m), a winch house on the west bay at the summit's height, a plank landing with guard rails on the summit behind the shaft |
 | `lift_cage` | 1×1 | — (lift.js moves it) | 2.6 m | `coil_glow`; nodes `gate_front`, `gate_back`, `cable_cage` | 728 | 41 | the cage that rides the shaft: floor top 0.1 m, open above two waist-high gates |
 | `rodspire` | 3×3 | solid | 12.1 m | `coil_glow`; `light_origin` at the tip | 2494 | 128 | the copper spire on the sea stack (arcs at night from `light_origin`): a stout four-legged lattice tower (X-braced bays, verdigris collars) round a core with two glowing coil drums, halo rings and a finned crown on a big orb |
@@ -145,7 +145,7 @@ posts, the leaning half-drowned bell tower, bobbing red buoys, sea-worn buff cli
 
 | Asset | Foot | Collision | Height | Glow / empties / clip / wind | Tris | KB | Use |
 |---|---|---|---|---|---|---|---|
-| `harbour_house` | 5×4 | solid; door on column 2 of the front row (warp tile origin + (2, 3)), steps down from a 0.68 m porch | 4.3 m | `td_window_glow`, `lamp_glow`; `smoke_origin` | 2930 | 146 | Gullhaven houses, the inn and the Harbour Office (tint per house if wanted) |
+| `harbour_house` | 5×4 | solid; door on column 2 of the front row (warp tile origin + (2, 3)), steps down from a 0.68 m porch | 4.3 m | `td_window_glow`, `lamp_glow`; `smoke_origin`, `door` | 2942 | 148 | Gullhaven houses, the inn and the Harbour Office (tint per house if wanted) |
 | `ferry` | 4×2 | solid (deck top 0.44 for scripts); bow +X | 2.1 m | `td_window_glow`, `lamp_glow`; `light_origin` (masthead) | 1738 | 99 | Bo and Lou's ferry at the Gullhaven pier, the Stormwatch dock and the Lanternmere jetty; bobs |
 | `bell_tower` | 3×3 | solid, leans ~7° | 6.8 m | `lamp_glow`; `light_origin` | 2388 | 126 | the Bellflats islet's drowned bell tower (`t_bell` by day, `t_lamp` at night) |
 | `crab_pots` | 1×1 | solid | 0.45 m | — | 688 | 39 | quay and dock dressing (`st_dock` find) |
@@ -180,15 +180,15 @@ a line across the water, the moonwell's crescent arch. Ground `dusk_grass`, path
 
 | Asset | Foot | Collision | Height | Glow / empties / clip / wind | Tris | KB | Use |
 |---|---|---|---|---|---|---|---|
-| `willow` | 2×2 | solid | 3.8 m | wind (the hanging lock tips most) | 2225 | 62 | the region's ring and lane tree: a domed, lit crown with beaded locks springing from it, arching over the rim and hanging in separate tapered strands, gaps showing the trunk and shade |
+| `willow` | 2×2 | solid | 3.8 m | wind (the hanging lock tips most) | 2065 | 59 | the region's ring and lane tree: a domed crown under leafy clumps (from the camera it reads as foliage, not a star of locks), beaded locks hanging from its rim in separate tapered strands, gaps showing the trunk and shade |
 | `wishing_tree` | 2×2 | solid | 3.8 m | wind | 1578 | 99 | Hushwillow Lane's wishing tree: blossom, ribbons and tags, a coin bowl (`d_tree` find) |
 | `floating_lantern` | 1×1 | solid (on water) | 0.6 m | `dr_paper_glow` | 344 | 18 | lanterns on Lanternmere; bobs |
 | `lantern_raft` | 1×1 | deck 0.1 | 0.75 m (pole) | `dr_rose_glow` | 504 | 29 | the lantern path gate's `prop_open` (`floor: 0.1`); bobs |
 | `ford_stones` | 1×1 | over water, low | tops ≤ 0.1 m | — | 412 | 26 | the Hushwillow ford gate's `prop` (always shown): stepping stones, foam, reeds |
 | `moonflower` | 1×1 | solid | 0.5 m | `dr_moon_glow`; `Open` (buds `moonflower_bud0..6` shrink, blooms `moonflower_bloom0..6` grow and twist open) | 1574 | 60 | the Moonwell's beds and the Fernhollow glade: play `Open` at dusk, backwards at dawn (`d_bed`, `g_glade`) |
-| `wisteria_arch` | 2×1 | walk-under (posts at x ±0.9) | 2.7 m | wind | 1920 | 96 | arches over lanes and the Moonwell's paths |
+| `wisteria_arch` | 2×1 | walk-under (posts at x ±0.9) | 2.7 m | wind | 2084 | 103 | arches over lanes and the Moonwell's paths: a true arch (2.15 m at the posts, 2.6 m at the crown) under leaves and blossom |
 | `moonwell` | 3×3 | solid | 3.7 m | `dr_moonpool_glow`, `dr_paper_glow`; `light_origin` | 2516 | 138 | the seal-site well: stone ring open at the front, steps down to a glowing pool, crescent arch and lantern. The 2×2 `seal_stone` stands beside it (it can't fit inside) |
-| `lake_house` | 4×4 | solid; door tile origin + (2, 3) | 4.6 m | `dr_window_glow`, `dr_paper_glow`, `dr_rose_glow`; `smoke_origin` | 2912 | 145 | Lanternmere's round houses on piles, the tailor's lake house |
+| `lake_house` | 4×4 | solid; door tile origin + (2, 3) | 4.6 m | `dr_window_glow`, `dr_paper_glow`, `dr_rose_glow`; `smoke_origin`, `door` | 2952 | 149 | Lanternmere's round houses on piles, the tailor's lake house |
 
 Suggested `props.js`:
 
@@ -219,7 +219,7 @@ the seven ancient trees with flat stepped canopies, clipped hedges. Ground `moss
 | `hedge`, `_corner`, `_end`, `_t` | 1×1 | solid, auto-tiled | 1.3 m | — | 628 / 604 / 424 / 808 | 18–32 | `"fence": "hedge"` in the Elder Ring maze and the Moonwell's walls |
 | `standing_tree` | 3×3 | solid | 5.7 m | wind (canopy plates only) | 2836 | 109 | the Elder Ring's seven: buttressed gnarled trunk, a hollow, a red cord with ribbons, three flat stepped canopy plates with hanging moss |
 | `great_root` | 4×2 | solid | 3.0 m | `lamp_glow`; `light_origin` | 1412 | 62 | root arches round Rootholm (houses hide under them) |
-| `fallen_trunk` | 4×3 | solid | 2.9 m (+ ferns) | — | 896 | 41 | the fallen elder across Rootholm's north: tile segments along X; ends are open, so run them off-map or close with the end piece |
+| `fallen_trunk` | 4×3 | solid | 2.9 m (+ ferns) | — | 1376 | 64 | the fallen elder across Rootholm's north: tile segments along X; each end is a sawn face just inside the bark (hidden where segments chain), or close the run with the end piece |
 | `fallen_trunk_end` | 4×3 | solid | 4.1 m | — | 1764 | 74 | the root plate (on +X; rot 180 puts it on the west) |
 | `treehouse` | 4×4 | solid; door at 3 m, door tile origin + (2, 3) | 7.6 m | `gv_window_glow`, `lamp_glow`; `light_origin`, `smoke_origin` | 2320 | 110 | Rootholm's treehouse (Jory); put a `ladder` at origin + (2, 4), rot 0 |
 | `ladder` | 1×1 | deck (needs the ladder rule, top 3.1) | 3.4 m | — | 808 | 40 | up to the canopy walkway and the treehouse porch |
@@ -256,7 +256,7 @@ on rails, leaning menhirs, flagged cairns, timber mine sets and pale crystals in
 | `cliff_slate`, `cliff_slate_b` | 1×1 | cliff block, top 1.0 | 1 m | — | 550 / 618 | 35 / 40 | the cliff set: thin tilted beds, rust-weathered beds (flat stains laid on the bed faces, thin runs dribbling down), a plated top that hides the grid; `_b` adds lichen and a grass tuft |
 | `stairs_slate` | 1×1 | deck 0.5 | 1 m | — | 652 | 37 | as `stairs` (Scree Pass switchbacks, Anvilstead and Bastion terraces) |
 | `headframe` | 3×3 | solid | 6.1 m | `sn_lamp_glow`; `light_origin` | 2630 | 149 | the winding tower over Anvilstead's old shaft (the `sn_headframe` gloves find) |
-| `terrace_house` | 4×3 | solid; back flush with the north edge, door on column 1 of the front row (warp tile origin + (1, 2)) | 5.0 m | `sn_window_glow`, `sn_lamp_glow`; `smoke_origin` | 2718 | 152 | Anvilstead's houses, the Tally Room inn, the climbing school, backed into a cliff on the row behind |
+| `terrace_house` | 4×3 | solid; back flush with the north edge, door on column 1 of the front row (warp tile origin + (1, 2)) | 5.0 m | `sn_window_glow`, `sn_lamp_glow`; `smoke_origin`, `door` | 2730 | 154 | Anvilstead's houses, the Tally Room inn, the climbing school, backed into a cliff on the row behind |
 | `minecart` | 2×1 | solid | 1.1 m | `sn_gem_glow` | 1170 | 71 | ore carts on the rails (along X; wheels at the 0.6 m gauge) |
 | `rail` | 1×1 | walkable flat | 0.07 m | — | 160 | 12 | track along X (rot 90 for Z); rails reach the tile edges |
 | `rubble` | 1×1 | solid | 1.4 m | — | 820 | 52 | the Undermine's `rubble_1..3` gates' `prop_closed` |

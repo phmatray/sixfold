@@ -11,6 +11,7 @@ import random
 
 import bmesh
 
+from v13_kit import door_leaf  # noqa: E402
 from v13_kit import (B, T, beam, box, contact, cyl, empty, ico, jitter, prism, ribbon, shadow, sphere,  # noqa: F401
                      torus, tube, curve, half_sphere, arch_pts, arc, stratum, FRONT, clamp01, chain, open_part, lathe)
 
@@ -311,10 +312,11 @@ def build_observatory(k):
     # door: arched, recessed in a granite frame, two steps
     fy = -R
     k.add(ribbon(arch_pts(1.12, 2.0), 0.16, 0.18), "st_granite_lt", T((0, fy + 0.08, 0.27), FRONT))
-    k.add(prism(arch_pts(0.92, 1.88), 0.1), "st_door", T((0, fy + 0.02, 0.27)))
+    k.add(prism(arch_pts(0.9, 1.86), 0.01), "doorway", T((0, fy, 0.28)))  # behind the leaf: dark when it swings in
+    leaf = [(prism(arch_pts(0.92, 1.88), 0.1), "st_door", T((0, fy + 0.02, 0.27)))]
     for x in (-0.2, 0.2):
-        k.add(box(0.04, 0.03, 1.4), "st_steel_dk", T((x, fy - 0.04, 1.0)))
-    k.add(sphere(0.045, 6, 4), "brass", T((0.3, fy - 0.06, 1.05)))
+        leaf.append((box(0.04, 0.03, 1.4), "st_steel_dk", T((x, fy - 0.04, 1.0))))
+    leaf.append((sphere(0.045, 6, 4), "brass", T((0.3, fy - 0.06, 1.05))))
     k.add(box(1.4, 0.4, 0.16, 0.02), "st_granite", T((0, fy - 0.24, 0.065)))
     k.add(box(1.2, 0.3, 0.14, 0.02), "st_granite_lt", T((0, fy - 0.2, 0.2)))
     k.add(cyl(0.16, 0.16, 0.05, 6), "hex", T((0, fy - 0.07, 2.42), (90, 30, 0)))
@@ -327,6 +329,7 @@ def build_observatory(k):
         k.add(ribbon(arch_pts(0.52, 0.78), 0.06, 0.085), "st_granite_lt", M @ T((0, 0.035, -0.03), FRONT))
         k.add(box(0.03, 0.08, 0.7), "st_steel_dk", M @ T((0, -0.03, 0.36)))
     contact(k, 2.45)
+    return door_leaf(leaf, T((-0.46, fy + 0.02, 0.27)))
 
 
 LIFT_TOP = 6.0     # the summit the lift serves (the Rodspire stack)

@@ -12,6 +12,7 @@ import random
 import bmesh
 from mathutils import Vector
 
+from v13_kit import door_leaf  # noqa: E402
 from v13_kit import (B, T, along, beam, box, centre, chain, contact, cyl, empty, facet_block, ico, jitter, lathe,  # noqa: F401
                      prism, quad, ribbon, rock, shadow, sphere, torus, tube, curve, clamp01, FRONT)
 
@@ -328,10 +329,11 @@ def build_terrace_house(k):
         k.add(cyl(0.07, 0.06, 0.18, 8), "sn_rust_dk", T((1.35 + px, 1.1, 4.86)), smooth=True)
     # door on column 1 (x = -0.5), step, canopy and lamp
     k.add(box(0.95, 0.1, 1.85, 0.02), "sn_timber_dk", T((-0.5, fy - 0.04, 1.05)))
-    k.add(box(0.78, 0.08, 1.7, 0.02), "sn_door", T((-0.5, fy - 0.08, 1.0)))
+    k.add(box(0.76, 0.01, 1.68), "doorway", T((-0.5, fy - 0.1, 1.0)))  # behind the leaf: dark when it swings in
+    leaf = [(box(0.78, 0.08, 1.7, 0.02), "sn_door", T((-0.5, fy - 0.08, 1.0)))]
     for z in (0.5, 1.45):
-        k.add(box(0.78, 0.03, 0.08), "sn_rust_dk", T((-0.5, fy - 0.13, z)))
-    k.add(sphere(0.04, 6, 4), "brass", T((-0.22, fy - 0.15, 1.0)))
+        leaf.append((box(0.78, 0.03, 0.08), "sn_rust_dk", T((-0.5, fy - 0.13, z))))
+    leaf.append((sphere(0.04, 6, 4), "brass", T((-0.22, fy - 0.15, 1.0))))
     k.add(box(1.2, 0.34, 0.14, 0.03), "sn_slate_top", T((-0.5, fy - 0.2, 0.06)))
     k.add(box(1.25, 0.55, 0.06, 0.02), "sn_roof", T((-0.5, fy - 0.27, 2.12), (-14, 0, 0)))
     for sx in (-1, 1):
@@ -357,7 +359,7 @@ def build_terrace_house(k):
     for z in (0.08, 0.45):
         k.add(cyl(0.21, 0.21, 0.04, 10), "sn_rust_dk", T((1.6, fy - 0.3, z)))
     shadow(k, 2.0, 1.0, 0.8)
-    return empty("smoke_origin", (1.35, 1.1, 4.95))
+    return door_leaf(leaf, T((-0.89, fy - 0.08, 0.15)), empty("smoke_origin", (1.35, 1.1, 4.95)))
 
 
 # ---------------------------------------------------------------- mining kit

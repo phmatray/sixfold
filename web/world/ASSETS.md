@@ -36,8 +36,8 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | File | What | Footprint (X × Z) | Height guide |
 |---|---|---|---|
 | `house.glb` | The duel hall, door on the front (+Z) edge | 7 × 5 | ~5 m |
-| `cottage.glb` | Small house (Hob's bakery), door on column 2 of the front row, `smoke_origin` on the chimney | 5 × 4 | ~4.5 m |
-| `workshop.glb` | Shed (boathouse, letter office), door on column 1 of the front row | 3 × 3 | ~3.8 m |
+| `cottage.glb` | Small house (Hob's bakery), door on column 2 of the front row, shingle courses on the roof, `smoke_origin` on the chimney | 5 × 4 | ~4.5 m |
+| `workshop.glb` | Shed (boathouse, letter office), double door (`door`, `door_r`) on column 1 of the front row | 3 × 3 | ~3.8 m |
 | `lighthouse.glb` | Striped tower, `light_origin` in the lantern room (the game adds a pulsing glow) | 2 × 2 | ~7 m |
 | `fountain.glb` | Hexagonal basin; meshes whose material name contains `water` get rippling water | 3 × 3 | ~1.6 m |
 | `pine.glb`, `birch.glb` | Woodland trees, varied like `tree` | 1 × 1 | ~3.8, ~3.6 m |
@@ -71,7 +71,7 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `interior/chair.glb`, `plant.glb`, `display_case.glb`, `lamp.glb` | Furniture | 1 × 1 | — |
 | `interior/rug.glb` | Rug, ≥ 1 cm thick (walkable) | 3 × 2 | — |
 | `interior/exit_mat.glb` | Door mat on the exit tile, ≥ 1 cm thick (walkable) | 1 × 1 | — |
-| `npc/<model>.glb` | A person (`Idle`, `Walk`, `Fidget`), one draw on a palette texture: the townsfolk archetypes `npc_kid`, `npc_gardener`, `npc_elder`, `npc_sailor`, `npc_shopkeeper`, `npc_scholar`, `npc_worker`, `npc_wanderer`, `npc_rival`, the campaign rivals `rival_<colour>.glb` and `rival_champion.glb`, and Rook, the story rival, `rival_colorless.glb` (1.7) | — | ~1.1–1.8 m |
+| `npc/<model>.glb` | A person (`Idle`, `Walk`, `Fidget`, `Sit`), one draw on a palette texture: the townsfolk archetypes `npc_kid`, `npc_gardener`, `npc_elder`, `npc_sailor`, `npc_shopkeeper`, `npc_scholar`, `npc_worker`, `npc_wanderer`, `npc_rival`, the campaign rivals `rival_<colour>.glb` and `rival_champion.glb`, and Rook, the story rival, `rival_colorless.glb` (1.7) | — | ~1.1–1.8 m |
 | `interior/oven.glb` | Brick bread oven against the north wall, glowing mouth (`oven_glow`), flue, a ledge with loaves and the tip jar on its right | 2 × 1 | ~2.45 m |
 | `interior/printing_press.glb` | Hand press: frame, screw and bar, bed on rails along X, raised tympan on the left, ink table on the right | 2 × 1 | ~1.8 m |
 | `interior/type_case.glb` | Compositor's cabinet: drawers (one pulled out), a sloping case of compartments | 1 × 1 | ~1.35 m |
@@ -110,7 +110,11 @@ Rules for every model:
 - **Budget:** ≤ 3k triangles per prop, ≤ 6k for a character.
 - **Characters:** `Idle` (breathing, blink) and `Walk` (an in-place loop, one leg forward
   per 0.25 s tile), optional `Run` (else Walk plays twice as fast) and `Fidget` (played once
-  after ~6 s idle). The first clip of each name wins. The game adds the step bounce.
+  after ~6 s idle). People also have `Sit` (a seated loop: thighs level, hands on the knees; the seat sits 0.87 x
+  the hips' height under them); the hero also `SitDown` and `StandUp` (0.6 s each, played once), and for a book off a shelf `Reach` (0.5 s: the right
+  hand up beside the face, about 1.3 m, grips and pulls down to the chest), `HoldBook` (4 s loop: both hands at the
+  chest, head bowed, reading) and `PutBack` (0.5 s: up again, let go, back to standing); a held book rides on `Fore.R`. The first clip
+  of each name wins. The game adds the step bounce.
 - **Draw calls:** static props (trees, bushes, rocks, decks, cliffs, stalls, lanterns …) are
   instanced, and the flat-coloured opaque parts of each model are merged into one mesh with
   vertex colours, so a model costs one draw (plus one shadow draw) however many there are.
@@ -122,9 +126,11 @@ Rules for every model:
   Without it, the game uses height above the ground.
 - **Shadows:** bake a soft contact-shadow disc into prop bases; the game adds one only
   under placeholders and characters.
-- **House:** an empty `smoke_origin` at the chimney top. The door opens with an `Open` clip
-  (played forward to open, back to close); without one, a node named `door` swings about
-  +Y on its own origin (put it on the hinge).
+- **Doors:** every model with a door warp has its leaf as a node named `door`, origin on the hinge (the leaf's -X
+  edge, at the sill); a double door's right leaf is `door_r`, hinged on its +X edge. The game swings it 80° inward
+  about +Y (`door_r` the other way) while the hero faces or takes the door, and shut after. Behind the leaf, a thin
+  `doorway` panel (near black) is the dark doorway it reveals. The leaf is merged on its own (one more draw), the rest
+  of the model as usual. The hall's old `Open` clip is ignored. Chimneys: an empty `smoke_origin` at the top.
 - **Lamp:** an empty `light_origin` where the warm point light sits.
 - **Glow:** a material whose name contains `glow` (`oven_glow`, `lamp_glow`, `crystal_glow`, `lightbox_glow`) is
   the part that turns emissive at dusk and night; keep it out of the merged vertex-colour mesh so its name survives.
@@ -216,6 +222,9 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   (optional: a tree or a rock on a cliff top, stairs from one ledge to the next). Decks
   (`boardwalk`, `pier`, `bridge`, `stairs`) are walkable, even over water, and set the floor
   height of their tiles.
+  Seats (`SEAT` in props.js: `bench`, `chair`) can be sat on (Sit, E): each footprint tile is a place,
+  facing the prop's front, reached from the tile in front of it or beside it, never from behind.
+  `seat: false` makes one scenery; check-maps fails a seat with no such tile the hero can reach.
 - **exits:** walking off the map's `side` (`n`, `e`, `s`, `w`) on a tile whose coordinate
   along that edge is within `span` (inclusive) fades to map `to`. The hero comes in on the
   matching edge of `to`, at the same offset along the exit there that leads back (same
@@ -239,7 +248,8 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   garments take the opposite hue), and `hair` recolours the hair: two people on one model then look like two
   people. `wear` (a list of `cap`, `glasses`, `headband`, `scarf`, `bag`, whichever the model carries) shows
   accessories; a route duelist without `wear` puts on one of them, picked by its id. `look` (directions) turns them
-  between those ways every 2.5 s. `if` (a condition): they are only there while it holds.
+  between those ways every 2.5 s. `if` (a condition): they are only there while it holds. `sit: true` on a
+  bench or chair tile: they sit there (their `Sit` clip), facing the way the seat faces, and are spoken to from in front or beside.
   `route` (optional) is a loop of one-tile steps. Speaking (E or tap while facing them, also
   across a counter or a duel table) turns them to the hero and runs `dialogue`: the first
   branch whose `if` holds plays its `lines`, then applies its `do` effects. Conditions and
