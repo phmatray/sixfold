@@ -2643,6 +2643,30 @@
           "Odile dit que ma musique ferait tourner le lait. Hob dit que ça aide la pâte à lever. J'ai choisi de croire Hob."
         ]
       }
+    },
+    {
+      "id": "wendel",
+      "name": "Wendel",
+      "model": "npc_elder",
+      "outfit": "#5f7a4a",
+      "hair": "#d9d2c4",
+      "x": 18,
+      "z": 27,
+      "facing": "s",
+      "sit": true,
+      "if": "time:day",
+      "dialogue": [
+        {
+          "lines": [
+            "Sit a while, if you like. The other end of the bench is free.",
+            "I come for the light. By dusk the lamps take over, and I go and find my supper."
+          ],
+          "lines_fr": [
+            "Asseyez-vous un moment, si ça vous dit. L'autre bout du banc est libre.",
+            "Je viens pour la lumière. Au crépuscule, les lampes prennent le relais, et je vais chercher mon souper."
+          ]
+        }
+      ]
     }
   ],
   "ground": {

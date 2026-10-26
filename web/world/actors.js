@@ -12,6 +12,8 @@ export const BACK = { n: "s", s: "n", e: "w", w: "e" };
 export const angle = (f) => Math.atan2(DIR[f][0], DIR[f][1]);
 export const key = (x, z) => `${x},${z}`;
 const TURN_SPEED = Math.PI / 2 / 0.12; // a quarter turn in 0.12 s
+// Pose clips played once, held on their last frame (`a.pose`: sitting in seat.js, a book off a shelf).
+const ONCE = new Set(["sitdown", "standup", "reach", "putback"]);
 export const FIDGET_AFTER = 6; // seconds idle before the hero fidgets and the camera leans in
 
 function radial(inner, outer) {
@@ -92,7 +94,11 @@ export function actor(src, tint, scale, idle, outfit = null, hair = null, wear =
   blob.userData.shared = true;
   blob.scale.setScalar(0.8 * scale);
   const head = new THREE.Box3().setFromObject(obj).max.y;
-  const a = { obj, blob, head: Number.isFinite(head) ? head : 1.45, base: obj.scale.x, mixer: null, actions: {}, clip: null, idle: 0, t: 0, turnedAt: -1, idleName: (idle ?? "idle").toLowerCase() };
+  // `lap`: how high a seat is under a person sitting on it, from their hips (seat.js; the Sit clip's thighs rest there).
+  obj.updateMatrixWorld(true);
+  const hips = obj.getObjectByName("Hips")?.getWorldPosition(new THREE.Vector3()).y ?? 0.54 * scale;
+  const a = { obj, blob, head: Number.isFinite(head) ? head : 1.45, base: obj.scale.x, mixer: null, actions: {}, clip: null, idle: 0, t: 0, turnedAt: -1, idleName: (idle ?? "idle").toLowerCase(),
+    lap: hips * 0.87, sit: null, pose: null };
   if (src?.animations.length) {
     a.mixer = new THREE.AnimationMixer(obj);
     // The first clip of each name wins: exports can carry duplicates.
@@ -117,13 +123,15 @@ function stoopAt(steps, d) {
 export function place(a, dt, floorAt) {
   const s = a.step, stoop = s?.stoop;
   const t = s ? s.t * (stoop ? 0.5 + stoop.in : 1) : 0;
-  const px = a.x + 0.5 + (s ? (s.x - a.x) * t : 0);
-  const pz = a.z + 0.5 + (s ? (s.z - a.z) * t : 0);
+  let px = a.x + 0.5 + (s ? (s.x - a.x) * t : 0);
+  let pz = a.z + 0.5 + (s ? (s.z - a.z) * t : 0);
   const y0 = floorAt(a.x, a.z);
   a.fy = !s ? y0 : stoop ? y0 + stoopAt(stoop.steps, t - 0.5 + LEAD) : y0 + (floorAt(s.x, s.z) - y0) * t;
+  const sit = a.sit; // sitting (seat.js): eased from its tile onto the seat
+  if (sit) (px += (sit.ax - px) * sit.s), (pz += (sit.az - pz) * sit.s), (a.fy += (sit.y - a.fy) * sit.s);
   a.obj.position.set(px, a.obj.position.y, pz);
-  a.blob.position.set(px, a.fy + 0.015, pz);
-  const want = angle(a.face), cur = a.obj.rotation.y;
+  a.blob.position.set(px, (sit ? y0 : a.fy) + 0.015, pz);
+  const want = angle(sit?.face ?? a.face), cur = a.obj.rotation.y;
   const turn = Math.atan2(Math.sin(want - cur), Math.cos(want - cur));
   a.obj.rotation.y = cur + Math.sign(turn) * Math.min(Math.abs(turn), TURN_SPEED * dt);
   return [px, pz];
@@ -133,16 +141,22 @@ export function animateActor(a, dt, reduced) {
   const walking = !!a.step && a.step.t < 1; // a door's last pose is held while the fade comes up
   a.t += dt;
   if (a.mixer) {
-    const want = walking ? (a.running && a.actions.run ? "run" : "walk") : a.idleName;
+    // `pose`: a clip held over the rest (seat.js: sitdown, sit, standup; ONCE ones play once).
+    const want = a.pose && a.actions[a.pose] ? a.pose : walking ? (a.running && a.actions.run ? "run" : "walk") : a.idleName;
     if (want !== a.clip && a.actions[want]) {
-      a.actions[a.clip]?.fadeOut(0.15);
-      a.actions[want].reset().fadeIn(0.15).play();
+      const once = ONCE.has(want), fade = reduced && (a.sit || a.clip === "sit") ? 0 : 0.15; // reduced motion: sit and stand at once
+      if (fade) a.actions[a.clip]?.fadeOut(fade);
+      else a.actions[a.clip]?.stop();
+      const next = a.actions[want].reset().setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
+      next.clampWhenFinished = once;
+      if (once && a.sit && (want === "sitdown" || want === "standup")) next.time = (want === "sitdown" ? a.sit.k : 1 - a.sit.k) * next.getClip().duration; // turned back half way: from where it is
+      (fade ? next.fadeIn(fade) : next).play();
       a.clip = want;
     }
     if (a.actions.walk) a.actions.walk.timeScale = a.running && !a.actions.run ? 2 : 1; // no Run clip: a faster Walk
     // A fidget clip once the hero has stood still a while, if the model has one.
     const fidget = a.actions.fidget ?? a.actions.look;
-    if (fidget && a.idle > FIDGET_AFTER && !a.fidgeted) {
+    if (fidget && a.idle > FIDGET_AFTER && !a.fidgeted && !a.pose) {
       a.fidgeted = true;
       fidget.reset().setLoop(THREE.LoopOnce, 1).fadeIn(0.2).play();
       a.mixer.addEventListener("finished", () => fidget.fadeOut(0.3));
@@ -170,8 +184,10 @@ export function route(w, hero, tx, tz) {
   const { width: W, height: H } = w.map;
   if (tx === hero.x && tz === hero.z) return [];
   const solid = (x, z) => w.blocked(x, z) || !!w.npcAt(x, z);
+  const seat = w.seats?.get(key(tx, tz)); // a seat: from in front or beside, not from behind (seat.js)
   const goal = !solid(tx, tz) ? [[tx, tz, null]] : Object.entries(DIR).flatMap(([f, [dx, dz]]) => {
     const [x, z] = [tx - dx, tz - dz];
+    if (f === seat?.face) return [];
     if (!solid(x, z)) return w.climb(x, z, tx, tz) ? [[x, z, f]] : [];
     const far = [tx - 2 * dx, tz - 2 * dz, f];
     return w.npcAt(tx, tz) && ACROSS.has(w.propAt.get(key(x, z))?.asset) && !solid(far[0], far[1]) ? [far] : [];

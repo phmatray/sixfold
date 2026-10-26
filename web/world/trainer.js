@@ -34,6 +34,7 @@ export function sightLine(w, n, face = n.face) {
 
 // The duelist that sees the hero (the nearest, when two do), or null.
 export function watch(w, hero, holds) {
+  if (hero.sit) return null; // nobody challenges someone resting on a seat (seat.js): they look again once it stands
   let best = null, near = Infinity;
   for (const n of w.npcs) {
     if (!n.def.trainer || n.hidden || n.busy || n.step || n.go?.length || quiet.ids.has(n.def.id)) continue;
