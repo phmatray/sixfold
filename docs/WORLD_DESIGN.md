@@ -724,7 +724,9 @@ the end state, applying every state effect and skipping cues; walks still arrive
    title in two lines, then `flag:finale` and `show:credits`. The credits open on the seal stone lighting its
    six faces and the champion's title ("Champion", or "Champion of the Seventh Face" with `flag:rook_4`), and
    end with the hero in the duel hall by the sealed door (`shop` 1,6), saved. Coming back from a duel, a
-   scene due on entering the map plays instead of the rival's post-duel line. **Hook for later scenes:**
+   scene due on entering the map plays instead of the rival's post-duel line, and any scene that ends settles
+   the last duel's result. The case under glass glows while the scene is due (a prop `pulse` with
+   `pulse_color`, `pulse_at` and `pulse_glow`). **Hook for later scenes:**
    `flag:finale` is set whether the scene played out or was skipped, so an epilogue in the hall can wait for
    it (`on: "enter"`, `if: "flag:finale & …"`): it plays as the hero lands there after the credits.
 
@@ -741,6 +743,7 @@ Scripts are map data (§9.1), triggered `on: "enter"` or by stepping on `at` til
 | `*_fr` | any text field | 1.2 | French sibling (from the i18n PR) |
 | `trainer` | npc | 1.2 | route duelist block (§4.1) |
 | `if` | npc, interaction; prop (1.3) | 1.2 | only present while the condition holds (night NPCs, story NPCs, quest finds, the hub's seal dressing) |
+| `pulse` | prop | 1.3 | an arc of light at its `light_origin` while the condition holds; 1.8: without one it sits `pulse_at` m up (3), tinted `pulse_color`, lit at least `pulse_glow` (0..1) between arcs |
 | `kind: "find"` | interaction | 1.2 | hidden find shorthand (§5.1) |
 | `kind: "waymark"` | interaction | 1.3 | fast-travel post (§7.3) |
 | `gates` | map | 1.3 | conditional walkability (§7.1) |
