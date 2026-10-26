@@ -4,7 +4,8 @@
 // the state effects for the end, and hands the cues here one at a time (`play`), waiting for
 // `cb("cue_done", id)` before the next. `end(rest)` closes the scene: the cue under way and every cue
 // in `rest` (what a skip jumps over) finish at once, so nobody is left mid-walk, and the camera goes
-// back to the hero. While a scene plays the hero takes no input (world.js `busy`).
+// back to the hero. While a scene plays the hero takes no input (world.js `busy`). Dialogue cues (no `id`)
+// play here too, unanswered.
 //
 // Cues (engine `Cue`): walk (a path of n/e/s/w; an NPC at its walking pace, the hero at its own),
 // face, cam (eased by world.js's camera spring, a cut under reduced motion), wait, sfx, music,
@@ -31,10 +32,14 @@ export function scenes(env) {
     env.cb("script", s.id ?? "", JSON.stringify({ steps }));
     return true;
   }
-  // A map is up (the hero placed, no fade): its first `enter` script that holds.
-  const entered = (w) => !playing && (w.map.scripts ?? []).some((s) => s.on === "enter" && env.holds(s.if) && start(s));
-  // The hero just stepped onto (x, z).
-  const stepped = (w, x, z) => !playing && (w.map.scripts ?? []).some((s) => s.at?.some(([ax, az]) => ax === x && az === z) && env.holds(s.if) && start(s));
+  const on = (s, x, z) => s.at?.some(([ax, az]) => ax === x && az === z);
+  // A map is up (the hero placed, no fade): its first `enter` script that holds (with `at`: only arriving there).
+  const entered = (w) => {
+    const h = env.hero();
+    return !playing && (w.map.scripts ?? []).some((s) => s.on === "enter" && (!s.at || on(s, h.x, h.z)) && env.holds(s.if) && start(s));
+  };
+  // The hero just stepped onto (x, z): a script with `at` tiles and no `on`.
+  const stepped = (w, x, z) => !playing && (w.map.scripts ?? []).some((s) => !s.on && on(s, x, z) && env.holds(s.if) && start(s));
 
   // Where `a` ends up walking `path` from where it stands: each step taken while the way is open.
   function arrive(a, path) {
@@ -54,7 +59,7 @@ export function scenes(env) {
   // Play one cue; `cb("cue_done", id)` once it has finished (never for a cue a skip cut short).
   function play(c) {
     const id = c.id, me = { id, c, t: 0 };
-    me.done = () => setTimeout(() => cur === me && ((cur = null), env.cb("cue_done", String(id), "")));
+    me.done = () => setTimeout(() => cur === me && ((cur = null), id !== undefined && env.cb("cue_done", String(id), "")));
     cur = me;
     const a = c.actor !== undefined ? actorOf(c.actor) : null;
     if (c.walk !== undefined) {

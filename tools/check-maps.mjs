@@ -168,7 +168,7 @@ for (const [name, m] of Object.entries(maps)) {
   }
 }
 
-// Cutscenes (WORLD_DESIGN §9.1): a unique id, an `if`, `on: "enter"` or in-bounds `at` tiles, and steps that are each
+// Cutscenes (WORLD_DESIGN §9.1): a unique id, an `if`, `on: "enter"` and/or in-bounds `at` tiles, and steps that are each
 // a `say` (an actor on the map or the hero, with lines; lines_fr is checked with the other text) or a `do` list. The
 // cues' arguments as the engine reads them (engine/tests/world_data.rs parses every effect): walk paths of n/e/s/w
 // that keep an NPC on open tiles, face directions, cam on an actor or an in-bounds tile, waits of 0..5000 ms, music
@@ -183,7 +183,7 @@ function scripts(name, m, solid, inMap) {
     const at = `${name}: script ${s.id}`;
     if (!/^[a-z0-9_]+$/.test(s.id ?? "") || ids.filter((i) => i === s.id).length > 1) fail.push(`${at}: needs a unique id of a-z, 0-9 and _`);
     if (typeof s.if !== "string") fail.push(`${at}: needs an if (or it plays every time)`);
-    if ((s.on === "enter") === (s.at !== undefined)) fail.push(`${at}: starts either on: "enter" or at: [[x, z], ...]`);
+    if (!(s.on === "enter" || (s.on === undefined && s.at !== undefined))) fail.push(`${at}: starts on: "enter" (optionally only arriving on at tiles) or at: [[x, z], ...]`);
     if (s.at !== undefined && !(Array.isArray(s.at) && s.at.length && s.at.every((t) => Array.isArray(t) && inMap(t[0], t[1]) && !solid.has(`${t[0]},${t[1]}`))))
       fail.push(`${at}: at tiles must be open tiles on the map`);
     const steps = Array.isArray(s.steps) ? s.steps : [];

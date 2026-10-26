@@ -734,7 +734,8 @@ pub fn WorldScreen() -> impl IntoView {
                 "at" => store::set_world_at(&format!("{a},{b}")),
                 "script" => _ = scene_in.try_set(Some(b)),
                 "cue_done" => {
-                    if a.parse().ok() == scene.with_value(|s| s.as_ref().and_then(|s| s.waiting)) {
+                    let waiting = scene.try_with_value(|s| s.as_ref().and_then(|s| s.waiting));
+                    if waiting.flatten().is_some_and(|id| a.parse() == Ok(id)) {
                         _ = cue_done.try_update(|n| *n += 1);
                     }
                 }
@@ -1275,6 +1276,12 @@ pub fn WorldScreen() -> impl IntoView {
         e.prevent_default();
     });
     on_cleanup(move || journal_key.remove());
+    // The top bar's Journal, map and roster: not over a cutscene.
+    let open_sheet = move |s: Sheet| {
+        if !playing.get_untracked() {
+            sheet.set(Some(s));
+        }
+    };
     // The head of a panel sheet: title, the Facets held, Close.
     let head = move |title: &'static str, facets: bool| {
         view! {
@@ -1296,20 +1303,20 @@ pub fn WorldScreen() -> impl IntoView {
                 )}</span>
                 <button type="button" class="btn ghost journal-btn" aria-keyshortcuts="J"
                     aria-label="Journal" title=tr("Journal (J)", "Journal (J)")
-                    on:click=move |_| if !playing.get_untracked() { sheet.set(Some(Sheet::Journal)) }>
+                    on:click=move |_| open_sheet(Sheet::Journal)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z" /><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" /></svg>
                     <span class="journal-label">"Journal"</span>
                 </button>
                 <button type="button" class="btn ghost journal-btn map-btn" aria-keyshortcuts="M"
                     aria-label=tr("World map", "Carte du monde") title=tr("World map (M)", "Carte du monde (M)")
-                    on:click=move |_| if !playing.get_untracked() { sheet.set(Some(Sheet::Atlas)) }>
+                    on:click=move |_| open_sheet(Sheet::Atlas)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20Z" /><path d="M9 4v13.5M15 6.5V20" /></svg>
                     <span class="journal-label">{tr("Map", "Carte")}</span>
                     <crate::worldmap::DayDial />
                 </button>
                 <crate::worldmap::DayDial />
                 <Facets />
-                <SealBadge on_open=move || if !playing.get_untracked() { sheet.set(Some(Sheet::Roster)) } />
+                <SealBadge on_open=move || open_sheet(Sheet::Roster) />
                 <MuteToggle />
                 // Until the scene is up the menu can't open: say so rather than ignore the press.
                 <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
@@ -1371,8 +1378,9 @@ pub fn WorldScreen() -> impl IntoView {
             })}
             <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title"
                 on:cancel=on_cancel on:keydown=on_key
-                // Should the browser close the dialog itself, the world must not stay paused.
-                on:close=move |_| if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
+                // Should the browser close the dialog itself, the world must not stay paused
+                // (and a cutscene goes on rather than wait for a line nobody can see).
+                on:close=move |_| if script_talk() { next() } else if sheet.with_untracked(Option::is_some) { sheet.set(None) }>
                 {move || sheet.get().map(|s| match s {
                     Sheet::Talk(t) => {
                         let line = t.line().to_string();

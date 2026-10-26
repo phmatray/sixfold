@@ -39,7 +39,7 @@ import { U } from "./life.js";
 import { PLACEHOLDER, group, prep, CUTAWAY } from "./props.js";
 import { tr, loadMap, loadAsset, assetNames, preload, PERSON, OPTIONAL } from "./map.js";
 import { build, dispose, refresh, animateProps } from "./build.js";
-import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route, emote } from "./actors.js";
+import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route } from "./actors.js";
 import { updateNpc, facing as facingOf } from "./npc.js";
 import * as duelists from "./trainer.js";
 import * as lifts from "./lift.js";
@@ -318,7 +318,7 @@ export function mount(el, controls, cb, start, edit = false) {
     minute = (minute + dt * CLOCK_RATE) % DAY;
     const hour = Math.floor(minute / 60), phase = phaseOf(minute);
     if (phase !== lastPhase || hour !== lastHour) cb("clock", String(Math.floor(minute)), "");
-    if (phase !== lastPhase && lastPhase) recheck(true), tune();
+    if (phase !== lastPhase && lastPhase) recheck(true), cut.playing || tune(); // a scene's `music:` holds until it ends
     lastHour = hour;
     lastPhase = phase;
   };
@@ -336,16 +336,17 @@ export function mount(el, controls, cb, start, edit = false) {
   function tryStep(f, carry) {
     const w = world, x = hero.x + DIR[f][0], z = hero.z + DIR[f][1];
     hero.face = f;
-    const door = w.warps.get(key(x, z));
+    const free = !cut.playing; // a cutscene's walk never leaves the map (a `warp:` cue does), so skipping lands the same
+    const door = free && w.warps.get(key(x, z));
     if (door && !door.dir && opens(door)) return startStep(x, z, carry, door);
-    const exit = w.exitAt(x, z);
+    const exit = free && w.exitAt(x, z);
     if (exit) {
       // Off the edge into the next area: take the step while the fade comes up.
       warp({ to: exit.to, edge: true, spawn: arrival(w, exit, f) });
       return startStep(x, z, carry, null);
     }
     if (w.blocked(x, z) || w.npcAt(x, z) || !w.climb(hero.x, hero.z, x, z)) {
-      const here = w.warps.get(key(hero.x, hero.z));
+      const here = free && w.warps.get(key(hero.x, hero.z));
       if (here?.dir === f) warp(here);
       return false;
     }
@@ -535,11 +536,11 @@ export function mount(el, controls, cb, start, edit = false) {
         // Off a gate that only stayed open for the hero (rafts at dawn): it may shut now.
         if (left?.open && w.gateAt.get(key(h.x, h.z)) !== left) recheck(true);
         const wp = done.warp ?? w.warps.get(key(h.x, h.z));
-        if (wp) warp(wp);
-        else cut.stepped(w, h.x, h.z);
+        if (wp && !cut.playing) warp(wp);
+        else if (!wp) cut.stepped(w, h.x, h.z);
       }
     }
-    if (w.scriptsDue && !warping && !paused && !h.step) (w.scriptsDue = false), cut.entered(w);
+    if (w.scriptsDue && !warping && !paused && !h.step && !cut.playing) (w.scriptsDue = false), cut.entered(w); // after a scene that warped here, too
     // Standing on a tile (a step just ended, or still): does a duelist see the hero?
     // After one was dealt with, the next waits for the hero's next step.
     if (!h.step && !warping && !paused && !w.engage && !w.ride && !w.calm && !cut.playing && !editing() && (spotted = duelists.watch(w, h, holds))) {
@@ -817,15 +818,13 @@ export function mount(el, controls, cb, start, edit = false) {
     cue(json) {
       const c = JSON.parse(json);
       if (c.end) return void (world && cut.end(c.end));
-      if (c.id !== undefined) return void (world ? cut.play(c) : cb("cue_done", String(c.id), ""));
-      if (c.warp) {
+      if (c.warp && c.id === undefined) {
         const { map, x, z, facing } = c.warp;
         if (world && !warping) warp({ to: map, spawn: { x, z, facing }, travel: !!c.travel });
         return;
       }
-      if (c.sfx) return sound(c.sfx);
-      const a = c.actor === "hero" ? hero : world?.npcs.find((n) => n.def.id === c.actor);
-      if (c.emote && a) emote(a, c.emote);
+      if (world) cut.play(c); // one cue player (script.js), for dialogue and cutscenes alike
+      else if (c.id !== undefined) cb("cue_done", String(c.id), "");
     },
     setItems(list) {
       canRun = list.split(",").includes("running_shoes");
