@@ -96,6 +96,8 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 
 The house is 7 wide so the door sits on the centre column: door tile = footprint
 origin + (3, 4), the house's warp tile.
+A model with a door warp on its front row gets a `STOOP` entry in `props.js`: how far past the front edge the
+hero walks (to the door's face, or through it when it opens) and its step heights at 0, 0.25 and 0.5 m in.
 
 Rules for every model:
 

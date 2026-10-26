@@ -270,7 +270,6 @@ fn later(armed: StoredValue<u32>, ms: u32, f: impl FnOnce() + 'static) {
 
 #[component]
 pub fn Credits(won: bool) -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
     let progress = expect_context::<RwSignal<Progress>>();
     let stats = expect_context::<RwSignal<Stats>>();
     // After the Warden: back into the world, in the hall (the save written now).
@@ -283,9 +282,9 @@ pub fn Credits(won: bool) -> impl IntoView {
     let done = move || {
         if won {
             store::set_world_at(HALL_DOOR);
-            screen.set(Screen::World);
+            crate::go(Screen::World);
         } else {
-            screen.set(Screen::Campaign);
+            crate::go(Screen::Campaign);
         }
     };
     // With reduced motion the plates swap without a fade and the stone is lit at once.

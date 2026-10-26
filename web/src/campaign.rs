@@ -155,33 +155,6 @@ pub fn SealFill(r: &'static Rival) -> impl IntoView {
 /// When a won seal starts to fill, after the result's own fanfare (ms).
 pub const SEAL_AT: u32 = 1200;
 
-/// The world header's badge: the seal count, and the champion's title once
-/// the Warden falls; opens the roster.
-#[component]
-pub fn SealBadge(on_open: impl Fn() + 'static) -> impl IntoView {
-    let progress = expect_context::<RwSignal<Progress>>();
-    let n = move || progress.with(seals);
-    let champ = move || progress.with(champion);
-    view! {
-        <button type="button" class="btn ghost seal-badge" class:champion=champ on:click=move |_| on_open()
-            aria-label=move || if let Some(t) = progress.with(title) {
-                tr(
-                    format!("{}, {} of {SEALS} seals. Show the rivals", t.en, n()),
-                    format!("{}, {} sur {SEALS}. Voir les rivaux", t.fr, seals_n(n())),
-                )
-            } else {
-                tr(
-                    format!("Seals: {} of {SEALS}. Show the rivals", n()),
-                    format!("Sceaux : {} sur {SEALS}. Voir les rivaux", n()),
-                )
-            }>
-            <span class="seal earned t-colorless" aria-hidden="true"></span>
-            <span aria-hidden="true">{move || format!("{}/{SEALS}", n())}</span>
-            {move || champ().then(|| view! { <span class="champion-chip" aria-hidden="true">"Champion"</span> })}
-        </button>
-    }
-}
-
 /// The six seals and every rival: beaten, open or locked.
 #[component]
 pub fn Roster() -> impl IntoView {
@@ -245,7 +218,6 @@ pub fn Roster() -> impl IntoView {
 /// The campaign screen from the title menu.
 #[component]
 pub fn CampaignScreen() -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
     let progress = expect_context::<RwSignal<Progress>>();
     let champ = move || progress.with(champion);
     view! {
@@ -254,9 +226,9 @@ pub fn CampaignScreen() -> impl IntoView {
             <main class="page-body campaign">
                 <CampaignPanel back=Screen::Campaign before=|| () />
                 <div class="row">
-                    <button type="button" class="btn primary" on:click=move |_| screen.set(Screen::World)>{tr("Explore the world", "Explorer le monde")}</button>
+                    <button type="button" class="btn primary" on:click=move |_| crate::go(Screen::World)>{tr("Explore the world", "Explorer le monde")}</button>
                     {move || champ().then(|| view! {
-                        <button type="button" class="btn" on:click=move |_| screen.set(Screen::Credits(false))>{tr("Watch the credits", "Voir le générique")}</button>
+                        <button type="button" class="btn" on:click=move |_| crate::go(Screen::Credits(false))>{tr("Watch the credits", "Voir le générique")}</button>
                     })}
                 </div>
             </main>
@@ -348,7 +320,6 @@ pub fn gauntlet_setup(rung: &Rung, name: String, cards: Vec<CardId>, back: Scree
 #[component]
 pub fn Ladder(back: Screen, before: impl Fn() + Copy + Send + Sync + 'static) -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<Profile>>();
     let progress = expect_context::<RwSignal<Progress>>();
     let (opts, pick) = profile.with_untracked(|p| deck_opts(p, None));
@@ -365,7 +336,7 @@ pub fn Ladder(back: Screen, before: impl Fn() + Copy + Send + Sync + 'static) ->
         crate::audio::sfx("challenge", 0.0);
         before();
         if ctl.start(setup, seed) {
-            screen.set(Screen::Match);
+            crate::go(Screen::Match);
         }
     };
     let play_daily = move |_| {
@@ -522,7 +493,6 @@ pub fn Challenge(
     before: impl Fn() + Copy + 'static,
 ) -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<Profile>>();
     let progress = expect_context::<RwSignal<Progress>>();
     let Some(o) = opponent(&id) else {
@@ -559,7 +529,7 @@ pub fn Challenge(
             back: Screen::World,
         };
         if ctl.start(setup, crate::new_seed()) {
-            screen.set(Screen::Match);
+            crate::go(Screen::Match);
         }
     };
     let what = match r {

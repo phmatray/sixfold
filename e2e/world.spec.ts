@@ -43,6 +43,9 @@ test("the world: walk, take a door and back, open the menu, and Continue resumes
   await walk(page, "ArrowDown", /^overworld,/);
   await walk(page, "ArrowDown", /^overworld,25,1[4-9],/);
   expect(await at(page)).not.toEqual(start);
+  // The controls hint has done its job once the hero has walked: it fades for good.
+  await expect(page.locator(".world-hint")).toHaveClass(/gone/);
+  expect(await page.evaluate(() => localStorage.getItem("sixfold.hint-seen"))).toBe("1");
 
   // Escape opens the in-game menu, and closes it.
   await page.keyboard.press("Escape");

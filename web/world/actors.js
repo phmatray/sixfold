@@ -111,24 +111,34 @@ export function actor(src, tint, scale, idle, outfit = null, hair = null, wear =
 
 // Put an actor on its tile, or between two while stepping, at the floor height
 // (`floorAt`: decks, stairs, cliff tops); turn toward its facing.
+// A step into a door (`step.stoop`, props.js STOOP) goes only `in` metres past the house's front edge and up
+// its stoop instead: the leading foot (LEAD ahead) finds each tread.
+const LEAD = 0.1;
+function stoopAt(steps, d) {
+  if (d <= -LEAD) return 0;
+  if (d < 0) return (steps[0] * (d + LEAD)) / LEAD;
+  const i = Math.min(d / 0.25, steps.length - 1), j = Math.floor(i);
+  return steps[j] + ((steps[j + 1] ?? steps[j]) - steps[j]) * (i - j);
+}
 export function place(a, dt, floorAt) {
-  const t = a.step ? a.step.t : 0;
-  let px = a.x + 0.5 + (a.step ? (a.step.x - a.x) * t : 0);
-  let pz = a.z + 0.5 + (a.step ? (a.step.z - a.z) * t : 0);
+  const s = a.step, stoop = s?.stoop;
+  const t = s ? s.t * (stoop ? 0.5 + stoop.in : 1) : 0;
+  let px = a.x + 0.5 + (s ? (s.x - a.x) * t : 0);
+  let pz = a.z + 0.5 + (s ? (s.z - a.z) * t : 0);
   const y0 = floorAt(a.x, a.z);
-  a.fy = a.step ? y0 + (floorAt(a.step.x, a.step.z) - y0) * t : y0;
-  const s = a.sit; // sitting (seat.js): eased from its tile onto the seat
-  if (s) (px += (s.ax - px) * s.s), (pz += (s.az - pz) * s.s), (a.fy += (s.y - a.fy) * s.s);
+  a.fy = !s ? y0 : stoop ? y0 + stoopAt(stoop.steps, t - 0.5 + LEAD) : y0 + (floorAt(s.x, s.z) - y0) * t;
+  const sit = a.sit; // sitting (seat.js): eased from its tile onto the seat
+  if (sit) (px += (sit.ax - px) * sit.s), (pz += (sit.az - pz) * sit.s), (a.fy += (sit.y - a.fy) * sit.s);
   a.obj.position.set(px, a.obj.position.y, pz);
-  a.blob.position.set(px, (s ? y0 : a.fy) + 0.015, pz);
-  const want = angle(s?.face ?? a.face), cur = a.obj.rotation.y;
+  a.blob.position.set(px, (sit ? y0 : a.fy) + 0.015, pz);
+  const want = angle(sit?.face ?? a.face), cur = a.obj.rotation.y;
   const turn = Math.atan2(Math.sin(want - cur), Math.cos(want - cur));
   a.obj.rotation.y = cur + Math.sign(turn) * Math.min(Math.abs(turn), TURN_SPEED * dt);
   return [px, pz];
 }
 
 export function animateActor(a, dt, reduced) {
-  const walking = !!a.step;
+  const walking = !!a.step && a.step.t < 1; // a door's last pose is held while the fade comes up
   a.t += dt;
   if (a.mixer) {
     // `pose`: a clip held over the rest (seat.js: sitdown, sit, standup; ONCE ones play once).

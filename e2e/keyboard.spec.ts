@@ -156,3 +156,30 @@ test("keyboard only: the world, a cutscene and the in-game menu", async ({ page 
   await page.keyboard.press("Escape");
   await expect(menu).toBeHidden();
 });
+
+test.describe("with motion", () => {
+  test.use({ reducedMotion: "no-preference" });
+
+  test("a screen change plays its transition and still lands focus on the new screen", async ({ page }) => {
+    // Note each transition's kind (html[data-swap]) as it starts.
+    await page.addInitScript(() => {
+      const start = document.startViewTransition?.bind(document);
+      if (!start) return;
+      (window as unknown as { swaps: string[] }).swaps = [];
+      document.startViewTransition = ((cb: () => unknown) => {
+        (window as unknown as { swaps: string[] }).swaps.push(document.documentElement.dataset.swap ?? "");
+        return start(cb);
+      }) as typeof document.startViewTransition;
+    });
+    const swaps = () => page.evaluate(() => (window as unknown as { swaps?: string[] }).swaps ?? []);
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: "Press to start" })).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect.poll(swaps).toContain("splash");
+    await expect(menuItem(page, "Learn to play")).toBeFocused();
+    await moveTo(page, menuItem(page, "Play a duel"));
+    await page.keyboard.press("Enter");
+    await expect.poll(swaps).toContain("screen");
+    await expect(page.getByRole("heading", { level: 1, name: "Play a duel" })).toBeFocused();
+  });
+});

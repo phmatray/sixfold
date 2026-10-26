@@ -312,6 +312,15 @@ export const ACROSS = new Set(["counter", "duel_table", "stall", "stall_b", "cur
 // footprint row along the prop's own Z (front row first; one value for every row).
 export const DECK = { boardwalk: [0.1], pier: [0.3], bridge: [0.12, 0.24, 0.24, 0.12], stairs: [0.5], climb_wall: [0.5], climb_wall_basalt: [0.5], stairs_basalt: [0.5], stairs_heath: [0.5],
   lantern_raft: [0.1], ladder: [1.5], canopy_deck: [0.1], rope_bridge: [0.1], stairs_slate: [0.5], climb_wall_slate: [0.5], climb_wall_root: [0.5] };
+// Doors: a warp on the front row of one of these props. The hero walks `in` metres past the footprint's front
+// edge (up to the door's face, or through it when it swings open: the house) and climbs its stoop, whose tread
+// heights at 0, 0.25 and 0.5 m past that edge are `steps` (read off the models). Every prop a door warp sits on
+// needs an entry (tools/check-maps.mjs), so a new house can't have the hero wade through its steps.
+export const STOOP = { house: { in: 0.5, steps: [0.14, 0.28, 0.28] }, cottage: { in: 0.45, steps: [0, 0, 0.13] },
+  terrace_house: { in: 0.1, steps: [0.13, 0.13, 0.19] }, harbour_house: { in: 0.5, steps: [0.17, 0.34, 0.68] },
+  lake_house: { in: 0.45, steps: [0, 0.3, 0.34] }, workshop: { in: 0.2, steps: [0, 0, 0.14] }, observatory: { in: 0.25, steps: [0, 0.28, 0.28] },
+  moonwell: { in: 0.5, steps: [0.14, 0.14, 0.14] }, cave_mouth: { in: 0.5, steps: [0.05, 0.05, 0.05] }, cave_mouth_slate: { in: 0.5, steps: [0, 0, 0] },
+  fallen_trunk: { in: 0.5, steps: [0, 0, 0] } };
 // Ladders join their front and back neighbours whatever the height (floor 0 in front, a 3 m deck behind).
 export const LADDER = new Set(["ladder"]);
 // Afloat: they bob on the water (never instanced).
