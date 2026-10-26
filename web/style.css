@@ -1662,9 +1662,9 @@ select option { background: var(--panel); color: var(--ink); }
 .stats { display: grid; gap: 22px; }
 .stats h2 { font-size: 18px; margin: 0 0 8px; }
 .stats dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
-.stat { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
-.stat dt { color: var(--muted); }
-.stat dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stats .stat { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
+.stats .stat dt { color: var(--muted); }
+.stats .stat dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
 .stats-note { color: var(--muted); font-size: 14px; margin: 0; }
 .records-link { margin-top: 28px; }
 .records-link .page-lead { margin-bottom: 10px; }
