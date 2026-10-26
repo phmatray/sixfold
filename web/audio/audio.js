@@ -95,8 +95,14 @@ function wake() {
 for (const ev of ["pointerdown", "keydown", "touchend"]) addEventListener(ev, unlock, { capture: true, passive: true });
 document.addEventListener("visibilitychange", wake);
 
-// One delegated listener for every button: a soft click, and a tick on hover (mouse only).
-document.addEventListener("click", (e) => e.target.closest?.("button, summary, a[href]") && sfx("click"), true);
+// One delegated listener for every button: a soft click, a confirm for a primary button, a
+// refuse for one that can't be used now (or what its `data-sfx` names); a tick on hover (mouse only).
+document.addEventListener("click", (e) => {
+  const b = e.target.closest?.("button, summary, a[href]");
+  if (b) sfx(b.dataset.sfx || (b.matches("[aria-disabled=true]") ? "refuse" : b.matches(".primary") ? "confirm" : "click"));
+}, true);
+// A disabled button gets no click: its pointerdown still says no.
+document.addEventListener("pointerdown", (e) => e.target.closest?.("button:disabled") && sfx("refuse"), true);
 let hovered = null;
 document.addEventListener("pointerover", (e) => {
   if (e.pointerType !== "mouse") return;
@@ -157,10 +163,30 @@ const notes = (dest, t, list, step, o) => list.forEach((m, i) => tone(dest, t + 
 
 // Rapid repeats of one sound (a 7-card draw) queue up into a riffle; too many are dropped.
 const nextFree = {};
-const GAP = { draw: 0.05, place: 0.06, hover: 0.04, click: 0.03, blip: 0.03, step: 0.05 };
+const GAP = { draw: 0.05, place: 0.06, hover: 0.04, click: 0.03, blip: 0.03, step: 0.05, tick: 0.035, refuse: 0.15 };
 
 const SFX = {
   click: (d, t) => tone(d, t, 1250, 0.03, { f2: 800, peak: 0.12 }),
+  // The four kinds of feedback, each its own shape, the same on every screen:
+  // confirm (a primary action taken) rises a fourth, quick and bright;
+  confirm: (d, t) => notes(d, t, [79, 84], 0.055, { type: "triangle", peak: 0.11, dur: 0.14 }),
+  // refuse (a move that can't be made) is a low, soft double "uh-uh", never a buzzer;
+  refuse: (d, t) => {
+    tone(d, t, 233, 0.07, { type: "square", f2: 207, peak: 0.06 });
+    tone(d, t + 0.11, 196, 0.1, { type: "square", f2: 174, peak: 0.06 });
+  },
+  // reward (a prize, a pack, Facets) is a glassy arpeggio with a sparkle;
+  reward: (d, t) => {
+    notes(d, t, [84, 88, 91, 96], 0.06, { type: "triangle", peak: 0.11, dur: 0.42 });
+    noise(d, t + 0.12, 0.25, { type: "highpass", f: 8500, peak: 0.045 });
+  },
+  // progress (an achievement, a step towards a goal) is slower and warmer: a fifth that swells.
+  progress: (d, t) => {
+    notes(d, t, [74, 81], 0.13, { type: "sine", peak: 0.06, a: 0.03, dur: 0.45, lin: true, rel: 0.3 });
+    tone(d, t + 0.26, hz(86), 0.7, { type: "triangle", peak: 0.04, rel: 0.4 });
+  },
+  // A count going up: one small glass tick per step.
+  tick: (d, t) => tone(d, t, 3300, 0.018, { type: "triangle", f2: 3600, peak: 0.05 }),
   hover: (d, t) => tone(d, t, 2400, 0.012, { peak: 0.025 }),
   draw: (d, t) => noise(d, t, 0.09, { f: 3200, f2: 1400, q: 1.2, peak: 0.18 }),
   place: (d, t) => {
@@ -179,16 +205,21 @@ const SFX = {
     noise(d, t, 0.08 + 0.1 * k, { type: "lowpass", f: 2400 + 2000 * k, f2: 300, peak: 0.25 + 0.2 * k });
     if (n >= 60) tone(d, t + 0.02, 55, 0.5, { type: "triangle", peak: 0.2 }); // big hits rumble
   },
+  // The KO, after its hit-stop: the falling whine, and the thud as the card drops away (ko-fall).
   ko: (d, t) => {
-    tone(d, t, 520, 0.7, { type: "triangle", f2: 70, peak: 0.22, lin: true });
-    tone(d, t + 0.05, 260, 0.6, { type: "sawtooth", f2: 45, peak: 0.05, lin: true });
-    noise(d, t + 0.55, 0.4, { type: "lowpass", f: 900, f2: 120, peak: 0.3 });
-    tone(d, t + 0.55, 70, 0.4, { f2: 35, peak: 0.35 });
+    tone(d, t, 520, 0.8, { type: "triangle", f2: 70, peak: 0.22, lin: true });
+    tone(d, t + 0.05, 260, 0.7, { type: "sawtooth", f2: 45, peak: 0.05, lin: true });
+    noise(d, t + 0.72, 0.4, { type: "lowpass", f: 900, f2: 120, peak: 0.3 });
+    tone(d, t + 0.72, 70, 0.4, { f2: 35, peak: 0.35 });
   },
-  prize: (d, t) => {
-    notes(d, t, [84, 91], 0.09, { peak: 0.16, dur: 0.5 });
-    notes(d, t, [96, 103], 0.09, { peak: 0.04, dur: 0.4 });
+  // The card cracking, as the crack runs down it.
+  crack: (d, t) => {
+    noise(d, t, 0.05, { type: "highpass", f: 2800, peak: 0.32 });
+    for (let i = 0; i < 4; i++) noise(d, t + 0.03 + i * 0.035, 0.025, { f: 1800 + i * 600, q: 3, peak: 0.12 });
+    tone(d, t, 160, 0.12, { type: "square", f2: 60, peak: 0.05 });
   },
+  // A prize flying to the hand; n = 1: the winning one, at half speed.
+  fly: (d, t, n) => noise(d, t, n ? 0.9 : 0.45, { f: 700, f2: 3400, q: 2.2, a: n ? 0.3 : 0.12, peak: 0.36 }),
   // Spin pings that speed up then settle, then the landing: bright for heads, low for tails.
   coin: (d, t, heads) => {
     const pings = [0, 0.16, 0.29, 0.39, 0.47, 0.54, 0.61, 0.69, 0.79, 0.92];
@@ -258,28 +289,23 @@ const SFX = {
   },
   // n: semitones above the base voice, one per character.
   blip: (d, t, n) => tone(d, t, hz(64 + n) * (0.97 + Math.random() * 0.06), 0.035, { type: "square", peak: 0.03 }),
-  jingle: (d, t) => {
-    notes(d, t, [84, 88, 91, 96], 0.08, { type: "triangle", peak: 0.12, dur: 0.4 });
-    [0.05, 0.13, 0.21, 0.29].forEach((p) => noise(d, t + p, 0.05, { type: "highpass", f: 7000, peak: 0.06 }));
-  },
+  // Something found or given (map scripts say "sfx:jingle"): a reward.
+  jingle: (d, t) => SFX.reward(d, t),
   // A route duelist spots the hero: a quick rising "!" sting.
   spot: (d, t) => {
     notes(d, t, [76, 83], 0.07, { type: "square", peak: 0.06, dur: 0.12 });
     noise(d, t, 0.12, { type: "highpass", f: 5000, peak: 0.05 });
-  },
-  // Facets gained: small glassy chimes.
-  facets: (d, t) => {
-    notes(d, t, [88, 93, 100], 0.05, { type: "triangle", peak: 0.08, dur: 0.35 });
-    noise(d, t + 0.1, 0.12, { type: "highpass", f: 9000, peak: 0.04 });
   },
   // Campaign: a rival's duel accepted, a seal earned, the sealed door opening.
   challenge: (d, t) => {
     noise(d, t, 0.25, { f: 400, f2: 2400, q: 2, a: 0.1, peak: 0.25 });
     notes(d, t + 0.18, [67, 74, 79], 0.07, { type: "square", peak: 0.05, dur: 0.18 });
   },
-  seal: (d, t) => {
-    notes(d, t, [79, 83, 86, 91], 0.09, { type: "triangle", peak: 0.12, dur: 0.6 });
-    tone(d, t + 0.36, hz(55), 1.2, { peak: 0.12, lin: true, rel: 0.6 });
+  // A seal won: one note per face as the hexagon fills (110 ms apart, SealFill), then its chord.
+  stinger: (d, t) => {
+    notes(d, t, [72, 74, 76, 79, 81, 84], 0.11, { type: "triangle", peak: 0.1, dur: 0.28 });
+    [72, 76, 79, 84, 88].forEach((m) => tone(d, t + 0.66, hz(m), 1.3, { type: "triangle", peak: 0.06, lin: true, rel: 0.7 }));
+    tone(d, t + 0.66, hz(48), 1.3, { peak: 0.14, lin: true, rel: 0.7 });
   },
   gate: (d, t) => {
     SFX.door(d, t);
@@ -778,12 +804,24 @@ const VOICES = {
   shaker: (d, t) => noise(d, t, 0.05, { type: "highpass", f: 5500, a: 0.015, peak: 0.025 }),
 };
 
+// Loudness: every track's own gain, so the title, the world and the duels sit at one level
+// (switching screens never jumps). Measured with debug().levels: each track's music-bus RMS,
+// power-averaged over 16-24 s (a full loop or most of one) at the default sliders, then set to
+// meet -35.5 dBFS, the median. Re-measure a track after changing its patterns or `mix`.
+const GAIN = {
+  title: 0.97, duel: 0.97, overworld: 1.07, duel_boss: 0.87, interior: 1.16, ember: 1.14, storm: 1.06,
+  tide: 1.07, dream: 1.01, grove: 1.15, stone: 1.01, cave: 1.07, duel_rival_ember: 0.90,
+  duel_rival_storm: 0.93, duel_rival_tide: 0.95, duel_rival_dream: 0.94, duel_rival_grove: 0.95,
+  duel_rival_stone: 0.98, overworld_night: 1.10, ember_night: 1.15, storm_night: 1.02, tide_night: 1.02,
+  dream_night: 0.89, grove_night: 1.15, stone_night: 1.02,
+};
+
 function startPlayer(name, t) {
   const def = TRACKS[name], out = ctx.createGain(), flt = ctx.createBiquadFilter();
   flt.type = "lowpass";
   flt.frequency.value = def.cutoff ?? 9000;
   out.gain.setValueAtTime(0, t);
-  out.gain.setTargetAtTime(1, t, 0.5);
+  out.gain.setTargetAtTime(GAIN[name] ?? 1, t, 0.5);
   out.connect(flt).connect(musicBus);
   const p = { name, def, out, flt, step: 0, next: t + 0.1, endAt: 0 };
   players.push(p);

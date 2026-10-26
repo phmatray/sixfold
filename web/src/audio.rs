@@ -62,7 +62,7 @@ pub fn duel_event(e: &Event) {
         Event::Damage { amount, .. } => ("impact", f64::from(*amount)),
         Event::Healed { .. } => ("heal", 0.0),
         Event::KnockedOut { .. } => ("ko", 0.0),
-        Event::PrizeTaken { .. } => ("prize", 0.0),
+        // The prize's flight and landing sound with its beat (ctl.rs).
         Event::CoinFlip { heads, .. } => ("coin", f64::from(u8::from(*heads))),
         Event::ConditionApplied { status, .. } => (
             "status",
@@ -148,7 +148,7 @@ pub fn AudioSettings() -> impl IntoView {
                         set_pref(key, v / 100.0);
                         value.set(v);
                     }
-                    on:change=move |_| sfx(if key == "music" || key == "ambience" { "click" } else { "prize" }, 0.0) />
+                    on:change=move |_| sfx(if key == "music" || key == "ambience" { "click" } else { "reward" }, 0.0) />
                 <span class="vol-pct" aria-hidden="true">{move || format!("{}{}", value.get(), tr("%", " %"))}</span>
             </label>
         }
