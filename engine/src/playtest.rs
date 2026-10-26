@@ -13,6 +13,7 @@ use crate::overworld::Progress;
 use crate::profile::Profile;
 use crate::set::{self, basic_energy};
 use crate::shop::{buy_pack, pack_price};
+use crate::stats::{award, Stats};
 use crate::trainers::{self, Kit, KITS, SPROUTS, TRAINERS};
 use crate::{card_id, validate_deck, Collection, Config, Game, DECK_SIZE, MAX_COPIES};
 
@@ -386,11 +387,34 @@ fn shop_packs(progress: &mut Progress, profile: &mut Profile, bought: &mut [u32]
 /// rival duels over 16 pack seeds, against 16 before; pack seed 1 took 42).
 const RIVAL_DUELS: u64 = 45;
 
+/// Open every pack, counting them for the stats.
+fn open_counted(stats: &mut Stats, profile: &mut Profile, pack_seed: &mut u64) {
+    let held = profile.wallet.total();
+    open_all(profile, pack_seed);
+    stats.add("packs", (held - profile.wallet.total()).into());
+}
+
+/// Count a duel (a win, and the Facets it paid) and pay the achievements
+/// earned so far: the playthrough sees wins, seals, the champion, duelists,
+/// cards and packs, not the board (no Awaken 2 or empty-bench wins). Their
+/// Facets buy packs at the next shop visit, like any others.
+fn achieve(
+    stats: &mut Stats,
+    before: (Progress, Profile),
+    won: bool,
+    progress: &mut Progress,
+    profile: &Profile,
+) {
+    stats.add("wins", u64::from(won));
+    stats.observe((&before.0, &before.1), (progress, profile));
+    award(stats, progress, profile);
+}
+
 /// A full playthrough: a new player, played by the Normal AI, first meets
 /// every route duelist once (win or lose, they walk on), then takes on the
 /// first open rival they haven't beaten, rebuilding their deck from the
 /// collection before every duel. Every Facet earned buys themed packs at
-/// the shop and every pack is opened, from `pack_seed` on. Rivals play with
+/// the shop and every pack is opened, from `pack_seed` on, and achievements pay out as earned. Rivals play with
 /// their AI style. Stops when the Warden falls or after one duel per route
 /// duelist plus `rival_duels`; returns the duels played, the packs
 /// bought, the log and the final state.
@@ -400,8 +424,9 @@ fn playthrough(
 ) -> (u64, u32, Vec<(&'static str, bool)>, Progress, Profile) {
     let (mut progress, mut profile) = (Progress::default(), Profile::new_player());
     let mut bought = vec![0; BOOSTERS.len()];
+    let mut stats = Stats::default();
     let mut packs = shop_packs(&mut progress, &mut profile, &mut bought);
-    open_all(&mut profile, &mut pack_seed);
+    open_counted(&mut stats, &mut profile, &mut pack_seed);
     let mut duels = 0;
     let mut log = vec![];
     for t in &TRAINERS {
@@ -412,10 +437,12 @@ fn playthrough(
             t.prizes,
             [Difficulty::Normal, t.difficulty],
         ) == 0;
+        let before = (progress.clone(), profile.clone());
         trainers::record(t, won, &mut progress);
         progress.settle();
+        achieve(&mut stats, before, won, &mut progress, &profile);
         packs += shop_packs(&mut progress, &mut profile, &mut bought);
-        open_all(&mut profile, &mut pack_seed);
+        open_counted(&mut stats, &mut profile, &mut pack_seed);
         duels += 1;
         log.push((t.id, won));
     }
@@ -434,10 +461,12 @@ fn playthrough(
                 (r.difficulty, r.style),
             ],
         ) == 0;
+        let before = (progress.clone(), profile.clone());
         record(r, won, &mut progress, &mut profile);
         progress.settle();
+        achieve(&mut stats, before, won, &mut progress, &profile);
         packs += shop_packs(&mut progress, &mut profile, &mut bought);
-        open_all(&mut profile, &mut pack_seed);
+        open_counted(&mut stats, &mut profile, &mut pack_seed);
         duels += 1;
         log.push((r.id, won));
     }
@@ -468,6 +497,17 @@ fn the_campaign_can_be_finished_from_a_new_profile() {
             .iter()
             .all(|&id| profile.collection.count(id) == 1));
         assert!(rival("warden").unwrap().beaten(&progress));
+        // The achievements met on the way paid out.
+        for id in [
+            "first_win",
+            "all_seals",
+            "champion",
+            "trainers_10",
+            "packs_25",
+            "cards_50",
+        ] {
+            assert!(progress.has_flag(&format!("ach_{id}")), "{id} not earned");
+        }
         finished += 1;
     }
     assert!(finished >= 2, "only {finished} of 3 playthroughs finished");

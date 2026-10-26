@@ -1646,6 +1646,42 @@ select option { background: var(--panel); color: var(--ink); }
 .page-lead { color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
 .page.with-side { grid-template-columns: minmax(0, 1fr) 340px; }
 .page.with-side > .page-bar { grid-column: 1 / -1; }
+
+/* Records (1.7): achievements and stats, and the toast that announces one. */
+.records .records-tabs { padding: 0 0 14px; }
+.ach-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ach { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 4px 14px; align-items: center; padding: 12px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); }
+.ach-text { display: grid; gap: 2px; min-width: 0; }
+.ach-text b { font: 700 16px/1.25 var(--display); }
+.ach-text span { color: var(--muted); font-size: 14px; }
+.ach-pay { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.ach-state { font-size: 13px; color: var(--muted); min-width: 7ch; text-align: right; }
+.ach-medal { width: 30px; aspect-ratio: 1 / 1.1; flex: none; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--line); }
+.ach.done { border-color: rgba(214, 172, 74, 0.45); background: color-mix(in srgb, var(--brass) 8%, var(--panel)); }
+.ach.done .ach-medal, .ach-toast .ach-medal { background: linear-gradient(150deg, var(--brass-hi) 10%, var(--brass) 55%, #8a6421 95%); }
+.ach.done .ach-pay, .ach.done .ach-state { color: var(--brass-hi); }
+.ach.secret .ach-text b { letter-spacing: 0.2em; color: var(--muted); }
+.stats { display: grid; gap: 22px; }
+.stats h2 { font-size: 18px; margin: 0 0 8px; }
+.stats dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.stat { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
+.stat dt { color: var(--muted); }
+.stat dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stats-note { color: var(--muted); font-size: 14px; margin: 0; }
+.records-link { margin-top: 28px; }
+.records-link .page-lead { margin-bottom: 10px; }
+.ach-toast-region { position: fixed; z-index: 95; top: max(68px, calc(env(safe-area-inset-top) + 64px)); left: 50%; transform: translateX(-50%); width: min(420px, calc(100vw - 32px)); pointer-events: none; }
+.ach-toast { display: flex; gap: 12px; align-items: center; padding: 12px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--brass); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45); animation: ach-in 360ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both; }
+.ach-toast p { margin: 0; display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 12px; min-width: 0; flex: 1; }
+.ach-toast .ach-kicker { grid-column: 1 / -1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brass-hi); }
+.ach-toast b { font: 800 17px/1.25 var(--display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ach-toast .ach-pay { color: var(--brass-hi); }
+@keyframes ach-in { from { opacity: 0; transform: translateY(-12px); } }
+@media (prefers-reduced-motion: reduce) { .ach-toast { animation: none; } }
+@media (max-width: 560px) {
+  .ach { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .ach-state { grid-column: 2 / -1; text-align: left; }
+}
 .side-panel {
   position: sticky;
   top: 61px;

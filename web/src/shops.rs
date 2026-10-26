@@ -522,8 +522,10 @@ pub fn Press() -> impl IntoView {
     });
     let count = move |id: CardId| profile.with(|p| p.collection.count(id));
     let voucher = Memo::new(move |_| progress.with(|p| p.has_item(shop::VOUCHER)));
+    let stats = expect_context::<RwSignal<sixfold_engine::stats::Stats>>();
     let done = move |id: CardId, how: Result<(), ShopError>| match how {
         Ok(()) => {
+            stats.update(|s| s.add("crafts", 1));
             crate::audio::sfx("jingle", 0.0);
             said.set(tr(
                 format!(

@@ -1,5 +1,6 @@
 //! Sixfold: a single-player duel against the AI, rendering `sixfold_engine`.
 
+mod achievements;
 mod art;
 mod audio;
 mod binder;
@@ -19,6 +20,7 @@ mod packs;
 mod saves;
 mod shops;
 mod splash;
+mod stats;
 mod store;
 mod title;
 mod world;
@@ -63,6 +65,8 @@ pub enum Screen {
     Campaign,
     /// The credits; `true` right after the Warden falls (they end in the world).
     Credits(bool),
+    /// Achievements and stats, opened from there on this tab.
+    Records(achievements::Origin, achievements::Tab),
 }
 
 /// A card to show in the inspector; `at` = (player, uid) when it is in play.
@@ -141,6 +145,7 @@ fn App() -> impl IntoView {
     provide_context(Legal(legal));
     provide_context(world::LastTab(RwSignal::new(world::MenuTab::Decks)));
     store::provide();
+    stats::provide();
     // A save from before promos: hand over those of rivals already beaten.
     let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
     let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
@@ -178,8 +183,11 @@ fn App() -> impl IntoView {
         Screen::Editor(i) => view! { <decks::Editor index=i /> }.into_any(),
         Screen::Campaign => view! { <campaign::CampaignScreen /> }.into_any(),
         Screen::Credits(won) => view! { <credits::Credits won=won /> }.into_any(),
+        Screen::Records(from, tab) => {
+            view! { <achievements::Records from=from tab=tab /> }.into_any()
+        }
     };
-    view! { {page} <saves::SaveIndicator /> }
+    view! { {page} <saves::SaveIndicator /> <achievements::Toaster /> }
 }
 
 thread_local! {
