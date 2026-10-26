@@ -6,7 +6,7 @@ a release build. Assertions read what the player sees (roles, labels, live regio
 game saved (`sixfold.save.<n>` in localStorage).
 
 ```bash
-cd web && trunk build --release        # the suite serves web/dist (needs python3)
+cd web && trunk build --release        # the suite serves web/dist
 cd ../e2e && npm ci && npx playwright install chromium --only-shell
 npx playwright test                    # all journeys, desktop and phone
 npx playwright test world --headed     # one spec, in a visible browser

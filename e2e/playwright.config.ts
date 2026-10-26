@@ -17,6 +17,7 @@ export default defineConfig({
     locale: "en-US",
     reducedMotion: "reduce",
     serviceWorkers: "block",
+    actionTimeout: 15_000,
     trace: "on-first-retry",
     // WebGL for the three.js world in headless Chromium.
     launchOptions: { args: ["--enable-unsafe-swiftshader", "--use-angle=swiftshader"] },
@@ -31,9 +32,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `python3 -m http.server ${PORT} --bind 127.0.0.1 --directory ../web/dist`,
+    command: `node serve.mjs ${PORT}`,
     url: `http://127.0.0.1:${PORT}/index.html`,
     reuseExistingServer: !process.env.CI,
-    stderr: "ignore",
   },
 });
