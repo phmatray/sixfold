@@ -2,7 +2,7 @@
 
 use leptos::prelude::*;
 use sixfold_engine::ai::Difficulty;
-use sixfold_engine::decks::{unlocked, PREBUILT};
+use sixfold_engine::decks::{unlocked, PREBUILT, STARTER};
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{card, tr, CardId};
@@ -34,8 +34,8 @@ fn prebuilt_opts() -> Vec<Opt> {
         .collect()
 }
 
-/// Your saved decks first, then the decks you have unlocked (on loan) that
-/// you don't already hold as-is.
+/// Your saved decks first, then the starter and the decks you have unlocked
+/// (on loan) that you don't already hold as-is.
 pub fn my_opts(p: &Profile, progress: &Progress) -> Vec<Opt> {
     let mut held: Vec<Vec<CardId>> = p.decks.iter().map(|d| sorted(&d.cards)).collect();
     held.sort();
@@ -48,15 +48,16 @@ pub fn my_opts(p: &Profile, progress: &Progress) -> Vec<Opt> {
             problem: deck_problem(d, &p.collection),
         })
         .chain(
-            unlocked(progress)
-                .into_iter()
-                .map(|u| Opt {
-                    name: u.deck.name.to_string(),
+            // The starter on loan too, so a duel is always possible.
+            std::iter::once(&STARTER)
+                .chain(unlocked(progress).into_iter().map(|u| u.deck))
+                .map(|d| Opt {
+                    name: d.name.to_string(),
                     desc: tr(
-                        format!("On loan. {}", u.deck.description),
-                        format!("Prêté. {}", u.deck.description),
+                        format!("On loan. {}", d.description),
+                        format!("Prêté. {}", d.description),
                     ),
-                    cards: u.deck.cards(),
+                    cards: d.cards(),
                     problem: None,
                 })
                 .filter(|o| held.binary_search(&sorted(&o.cards)).is_err()),
@@ -199,9 +200,6 @@ pub fn DuelSetup() -> impl IntoView {
                         <p class="note">{tr("Tap or hover any card to read it. Asleep and Paralyzed Hexons can't attack or retreat; Confused ones may hurt themselves.", "Touchez ou survolez une carte pour la lire. Un Hexon Endormi ou Paralysé ne peut ni attaquer ni battre en retraite ; un Hexon Confus peut se blesser lui-même.")}</p>
                     </details>
                     <div class="pickers">
-                        {first_legal.is_none().then(|| view! {
-                            <p class="note">{tr("None of your decks can play yet: finish one in My decks, or unlock a deck by beating a rival.", "Aucun de vos decks ne peut encore jouer : terminez-en un dans Mes decks, ou débloquez un deck en battant un rival.")}</p>
-                        })}
                         <DeckPicker legend=tr("Your deck", "Votre deck") name="mine" opts=mine_opts choice=mine />
                         <DeckPicker legend=tr("The AI plays", "Deck de l'IA") name="theirs" opts=theirs_opts choice=theirs />
                     </div>

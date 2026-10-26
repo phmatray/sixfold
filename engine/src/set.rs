@@ -1363,9 +1363,8 @@ mod tests {
 
 /// The value budget (`docs/BALANCE.md`, "Value budget"): every creature is
 /// scored in damage-equivalents (10 = 10 damage = 10 HP) against the curve
-/// for its stage, so a new or changed card can't drift off the curve.
-/// The value budget (`docs/BALANCE.md`): the always-on test holds every
-/// Hexon to it, and the deck builder ranks Hexons and trainers with it.
+/// for its stage, so a new or changed card can't drift off the curve. The
+/// deck builder ranks Hexons and trainers with it too.
 #[cfg_attr(not(test), allow(dead_code))]
 pub(crate) mod budget {
     use super::*;

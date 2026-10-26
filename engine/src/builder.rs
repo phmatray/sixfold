@@ -129,7 +129,7 @@ pub enum Why {
     /// What the deck's Awakenings awaken from.
     Under,
     Trainer(Role),
-    /// Basic energy for this many attack-cost symbols of its colour.
+    /// Basic energy for this colour's Hexons, whose main attacks cost this much.
     Energy(Color, usize),
     /// Twofold Energy for the Neutral symbols.
     Twofold,
@@ -261,8 +261,8 @@ impl Reason {
                 format!("{l} : {}.", r.text()),
             ),
             Why::Energy(c, n) => tr(
-                format!("{l} for the {n} {c} symbols in your attack costs."),
-                format!("{l} pour les {n} symboles {c} de vos coûts d'attaque."),
+                format!("{l} for the {n} energy your {c} Hexons' main attacks cost."),
+                format!("{l} pour les {n} énergies que coûtent les attaques principales de vos Hexons {c}."),
             ),
             Why::Twofold => tr(
                 format!("{l}: each pays two Neutral symbols."),
@@ -613,7 +613,7 @@ impl Draft<'_> {
         if !added.is_empty() {
             self.reasons.push(Reason {
                 cards: added.into_iter().collect(),
-                why: Why::Line,
+                why: Why::Basics(self.total(CardDef::is_basic)),
             });
         }
     }
@@ -737,10 +737,9 @@ impl Draft<'_> {
         for c in 0..6 {
             if added[c] > 0 {
                 let e = basic_energy(Color::ALL[c]).expect("every colour has a basic energy");
-                let symbols = if s.iter().any(|&w| w > 0) { s[c] } else { 0 };
                 self.reasons.push(Reason {
                     cards: vec![(e, added[c])],
-                    why: Why::Energy(Color::ALL[c], symbols),
+                    why: Why::Energy(Color::ALL[c], weight[c]),
                 });
             }
         }
@@ -796,6 +795,19 @@ fn fill(
         d.take_trainers(k);
     }
     d.take_energy();
+    // The picks a deck came with plus what its Awakenings need can pass 60:
+    // the least needed cards go.
+    while d.len() > DECK_SIZE {
+        let Some(id) = weakest(&d.n, style) else {
+            break;
+        };
+        match d.n.get_mut(&id) {
+            Some(k) if *k > 1 => *k -= 1,
+            _ => {
+                d.n.remove(&id);
+            }
+        }
+    }
     Built {
         cards: d.cards(),
         reasons: d.reasons,
@@ -980,24 +992,30 @@ pub fn complete(deck: &[CardId], owned: &Collection, style: Style) -> Built {
             *dropped.entry(id).or_default() += 1;
         }
     }
-    for stage in [Stage::Stage1, Stage::Stage2] {
-        let lost: Vec<CardId> = base
-            .keys()
-            .copied()
-            .filter(|&id| {
-                card(id).creature().is_some_and(|c| c.stage == stage)
-                    && card(id)
-                        .creature()
-                        .and_then(|c| c.evolves_from)
-                        .and_then(card_id)
-                        .is_none_or(|u| {
-                            base.get(&u).copied().unwrap_or(0) == 0 && owned.count(u) == 0
-                        })
-            })
-            .collect();
-        for id in lost {
-            *dropped.entry(id).or_default() += base.remove(&id).unwrap_or(0);
+    // An Awakening stays only when its whole line, down to a Basic, is in
+    // the deck or owned.
+    let rooted = |id: CardId, base: &BTreeMap<CardId, usize>| {
+        let mut at = id;
+        loop {
+            let d = card(at);
+            if d.is_basic() {
+                return true;
+            }
+            match d.creature().and_then(|c| c.evolves_from).and_then(card_id) {
+                Some(u) if base.get(&u).copied().unwrap_or(0) > 0 || owned.count(u) > 0 => at = u,
+                _ => return false,
+            }
         }
+    };
+    let lost: Vec<CardId> = base
+        .keys()
+        .copied()
+        .filter(|&id| {
+            card(id).creature().is_some_and(|c| c.stage != Stage::Basic) && !rooted(id, &base)
+        })
+        .collect();
+    for id in lost {
+        *dropped.entry(id).or_default() += base.remove(&id).unwrap_or(0);
     }
     while base.values().sum::<usize>() > DECK_SIZE {
         let Some(id) = weakest(&base, style) else {
@@ -1011,7 +1029,19 @@ pub fn complete(deck: &[CardId], owned: &Collection, style: Style) -> Built {
             }
         }
     }
-    let colors = match colours_of(&base) {
+    // Only colours the player owns a Basic of can carry the deck.
+    let can_open = |c: &Color| {
+        set::ids().any(|id| {
+            card(id).is_basic()
+                && card(id).creature().is_some_and(|cr| cr.color == *c)
+                && owned.count(id) > 0
+        })
+    };
+    let colors = match colours_of(&base)
+        .into_iter()
+        .filter(can_open)
+        .collect::<Vec<_>>()
+    {
         c if c.is_empty() => ranked_builds(owned, style)
             .into_iter()
             .next()
@@ -1781,5 +1811,27 @@ mod tests {
         assert_eq!(colours, [Color::Fire, Color::Water]);
         assert!(n.iter().all(|&(_, e, s)| e == 13 && s > 0), "{n:?}");
         assert!(energy_needs(&[]).is_empty());
+    }
+
+    #[test]
+    fn complete_stays_at_60_and_keeps_a_basic() {
+        let all = everything();
+        // Four Flarrow and 56 energy: their Cindrel go in, and it stays 60.
+        let mut d = vec![set::FLARROW; 4];
+        d.extend(std::iter::repeat_n(set::FIRE_ENERGY, 56));
+        let c = complete(&d, &all, Style::Balanced);
+        assert_eq!(c.cards.len(), DECK_SIZE);
+        assert_eq!(crate::validate_deck(&c.cards), Ok(()));
+        assert!(c.cards.contains(&set::CINDREL));
+        // An Awaken 2 whose line has no owned Basic goes, and the deck is
+        // built in colours the player can open with.
+        let mut poor = Collection::new();
+        poor.add(set::STREAMFIN, 2);
+        poor.add(set::GULFWYRM, 2);
+        poor.add(set::CINDREL, 4);
+        poor.add(set::FLARROW, 3);
+        let c = complete(&[set::GULFWYRM, set::GULFWYRM], &poor, Style::Balanced);
+        assert_eq!(crate::validate_deck(&c.cards), Ok(()));
+        assert!(!c.cards.contains(&set::GULFWYRM));
     }
 }

@@ -27,8 +27,10 @@ const COLOURS: [Color; 6] = [
 /// Changes this far back can be undone.
 const UNDO_DEPTH: usize = 50;
 
-/// The deck as undo keeps it: its cards and its name.
-type Snap = (Vec<CardId>, String);
+/// One step of history: the cards to go back to, the name to go back to,
+/// and the name the deck had just after the change. The name is restored
+/// only while it is still that one, so a rename made since is kept.
+type Snap = (Vec<CardId>, String, String);
 
 /// The editor's undo and redo: the deck before each change to its cards,
 /// whatever made it (a tap on +, a fix, a suggestion, "Build for me"), with
@@ -40,10 +42,6 @@ pub struct Undo {
     skip: StoredValue<bool>,
 }
 
-fn snap(d: &DeckList) -> Snap {
-    (d.cards.clone(), d.name.clone())
-}
-
 impl Undo {
     /// Follow `draft`: every change to its cards can be taken back.
     pub fn track(draft: RwSignal<DeckList>) -> Undo {
@@ -52,13 +50,13 @@ impl Undo {
             future: RwSignal::new(vec![]),
             skip: StoredValue::new(false),
         };
-        Effect::new(move |prev: Option<Snap>| {
-            let now = draft.with(snap);
+        Effect::new(move |prev: Option<(Vec<CardId>, String)>| {
+            let now = draft.with(|d| (d.cards.clone(), d.name.clone()));
             match prev {
                 Some(p) if p.0 != now.0 && u.skip.get_value() => u.skip.set_value(false),
-                Some(p) if p.0 != now.0 => {
+                Some((cards, name)) if cards != now.0 => {
                     u.past.update(|v| {
-                        v.push(p);
+                        v.push((cards, name, now.1.clone()));
                         if v.len() > UNDO_DEPTH {
                             v.remove(0);
                         }
@@ -86,14 +84,23 @@ impl Undo {
         from: RwSignal<Vec<Snap>>,
         to: RwSignal<Vec<Snap>>,
     ) -> bool {
-        let Some((cards, name)) = from.try_update(|v| v.pop()).flatten() else {
+        let Some((cards, name, expected)) = from.try_update(|v| v.pop()).flatten() else {
             return false;
         };
-        to.update(|v| v.push(draft.with_untracked(snap)));
+        let (now_cards, now_name) = draft.with_untracked(|d| (d.cards.clone(), d.name.clone()));
+        let rename = now_name == expected;
+        let after = if rename {
+            name.clone()
+        } else {
+            now_name.clone()
+        };
+        to.update(|v| v.push((now_cards, now_name, after)));
         self.skip.set_value(true);
         draft.update(|d| {
             d.cards = cards;
-            d.name = name;
+            if rename {
+                d.name = name;
+            }
         });
         true
     }

@@ -665,6 +665,8 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
             } else {
                 back();
             }
+        } else if building.get_untracked() || testing.get_untracked() {
+            // A sheet is open: its keys are its own, the deck behind stays put.
         } else if (e.ctrl_key() || e.meta_key()) && e.key().eq_ignore_ascii_case("z") && !in_field {
             e.prevent_default();
             if e.shift_key() {
@@ -716,11 +718,11 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 <button type="button" class="btn test" aria-haspopup="dialog" aria-disabled=move || (total() < 7).to_string()
                     title=move || if total() < 7 { tr("A hand needs 7 cards in the deck.", "Une main demande 7 cartes dans le deck.") } else { "" }
                     on:click=move |_| if total() < 7 { msg.set(Some(tr("Add cards first: a test hand needs at least 7 in the deck.", "Ajoutez d'abord des cartes : une main de test en demande au moins 7 dans le deck.").into())) } else { testing.set(true) }>{tr("Test a hand", "Tester une main")}</button>
-                <button type="button" class="btn ghost undo" disabled=move || !undo.can() aria-keyshortcuts="Control+Z Meta+Z" on:click=move |_| do_undo()>
+                <button type="button" class="btn ghost undo" aria-disabled=move || (!undo.can()).to_string() aria-keyshortcuts="Control+Z Meta+Z" on:click=move |_| do_undo()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7L4 12l5 5M4 12h11a5 5 0 0 1 0 10h-2" /></svg>
                     {tr("Undo", "Annuler")}
                 </button>
-                <button type="button" class="btn ghost redo" disabled=move || !undo.can_redo() aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y" on:click=move |_| do_redo()>
+                <button type="button" class="btn ghost redo" aria-disabled=move || (!undo.can_redo()).to_string() aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y" on:click=move |_| do_redo()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7l5 5-5 5M20 12H9a5 5 0 0 0 0 10h2" /></svg>
                     {tr("Redo", "Rétablir")}
                 </button>

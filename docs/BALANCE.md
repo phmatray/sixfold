@@ -579,7 +579,7 @@ end of Rook's story (Dream Veil) or the Gauntlet (Sixfold Crown). The unlock sta
 so there is no new save section and an old save unlocks whatever it has already earned.
 
 **Decision: an unlocked deck is a loan.** It plays as it is in a Quick duel (where the prebuilts were free
-before 1.9) and can be copied to the player's decks, where the cards they don't own show as missing and
+before 1.9, and where the starter is always on loan, so a duel is always possible) and can be copied to the player's decks, where the cards they don't own show as missing and
 "Complete my deck" fills the gaps from their own cards. No card is granted, because granting would have
 been a second, uncapped source of cards next to the packs: one rival win would hand over 30-odd cards and
 move `economy_sim` (packs an hour) and the campaign playthroughs, whose decks are built from the
