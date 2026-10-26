@@ -88,10 +88,12 @@ fn Library() -> impl IntoView {
                             <li>
                                 <button type="button" class=format!("library-book family-{}", b.family.name())
                                     disabled=open.is_none()
+                                    title=open.is_none().then(|| tr("Books open in the world", "Les livres s'ouvrent dans le monde"))
                                     on:click=move |_| if let Some(ReadBook(f)) = open { f.run(b.id) }>
                                     <span class="library-spine" aria-hidden="true"></span>
                                     <span class="library-title">{b.title.get()}</span>
                                     <span class="library-family">{b.family.label().get()}</span>
+                                    <span class="library-open" aria-hidden="true">{tr("Read again", "Relire")}</span>
                                 </button>
                             </li>
                         }).collect_view()}

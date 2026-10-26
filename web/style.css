@@ -1036,7 +1036,8 @@ body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
   overflow: hidden;
 }
 .world-sheet.reading-sheet::backdrop { background: transparent; }
-body:has(.reading-sheet[open]) :is(.world-top, .world-prompt) { visibility: hidden; }
+/* Hidden from the moment a book is taken until it is back on its shelf. */
+.world.book-out :is(.world-top, .world-prompt) { visibility: hidden; }
 .reading { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; }
 .reading-surface { position: absolute; inset: 0; cursor: pointer; touch-action: pan-y; }
 .reading-head {
@@ -1048,9 +1049,11 @@ body:has(.reading-sheet[open]) :is(.world-top, .world-prompt) { visibility: hidd
   gap: 4px 14px;
   padding: max(14px, env(safe-area-inset-top)) 16px 0;
   text-align: center;
+  padding-bottom: 28px;
   pointer-events: none;
   color: #f6ecd2;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  background: linear-gradient(to bottom, rgba(8, 6, 4, 0.55), transparent);
 }
 .world-sheet .reading-head h2 { font-size: calc(19px * var(--ts)); letter-spacing: 0.01em; }
 .reading-count { font: 600 calc(14px * var(--ts)) var(--body); color: #e6d9b8; font-variant-numeric: tabular-nums; }
@@ -2560,6 +2563,9 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .library-spine { grid-row: 1 / 3; border-radius: 3px; background: var(--leather); box-shadow: inset 0 0 0 1px rgba(232, 196, 106, 0.6); }
 .library-title { font-weight: 700; font-size: calc(15px * var(--ts)); }
 .library-family { font-size: calc(13px * var(--ts)); color: var(--muted); }
+.library-book { grid-template-columns: 10px 1fr auto; }
+.library-open { grid-column: 3; grid-row: 1 / 3; align-self: center; font-weight: 700; font-size: calc(13px * var(--ts)); color: var(--brass-hi); }
+.library-book:disabled .library-open { display: none; }
 @media (max-width: 520px) {
   .journal-label { display: none; }
   .journal-btn { min-width: 44px; justify-content: center; padding-inline: 10px; }

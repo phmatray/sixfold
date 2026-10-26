@@ -823,6 +823,8 @@ export function mount(el, controls, cb, start, edit = false) {
       }
       book.open(b, ndc);
     },
+    // Where the open book is on screen ([left, top, right, bottom], CSS pixels): taps outside it don't turn pages.
+    bookRect: () => book.rect(),
     // Turn to page `n` (a spread), from the open book's current one.
     page: (n) => book.page(n),
     pause(p) {

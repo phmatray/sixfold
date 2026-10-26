@@ -52,6 +52,7 @@ export function world_busy() { return !api || api.busy(); }
 export function world_portrait(id) { return api?.portrait(id) ?? ""; }
 export function world_read(b) { api?.read(b); }
 export function world_page(n) { api?.page(n); }
+export function world_book_rect() { return api?.bookRect() ?? []; }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
@@ -83,6 +84,8 @@ extern "C" {
     fn world_read(book: &JsValue);
     /// Turn the open book to this spread.
     fn world_page(n: usize);
+    /// The open book on screen, `[left, top, right, bottom]` in CSS pixels (empty when none).
+    pub(crate) fn world_book_rect() -> JsValue;
 }
 
 const REOPEN: &str = "sixfold.reopen-world";
@@ -711,8 +714,12 @@ pub fn WorldScreen() -> impl IntoView {
     };
 
     // A book (#104): opened off the shelf the hero faces (or, from the Journal, rising
-    // into view), marked read; the spread shown is `book_at`.
+    // into view), marked read; the spread shown is `book_at`, and where each book was
+    // left this visit is where it opens again. Until it is back on its shelf (`book_out`)
+    // the world's top bar and prompt stay hidden.
     let book_at = RwSignal::new(0usize);
+    let left_at = StoredValue::new(std::collections::HashMap::<&'static str, usize>::new());
+    let book_out = RwSignal::new(false);
     let open_book = move |id: &str, shelf: bool| {
         let Some(b) = books::book(id) else {
             leptos::logging::warn!("world: no book {id}");
@@ -721,9 +728,11 @@ pub fn WorldScreen() -> impl IntoView {
         if !progress.with_untracked(|p| books::is_read(p, b.id)) {
             progress.update(|p| _ = p.apply(&format!("flag:{}", books::read_flag(b.id))));
         }
-        book_at.set(0);
+        let at = left_at.with_value(|m| m.get(b.id).copied().unwrap_or(0));
+        book_at.set(at);
+        book_out.set(true);
         sheet.set(Some(Sheet::Book(b.id)));
-        world_read(&crate::reading::book_value(b, shelf));
+        world_read(&crate::reading::book_value(b, shelf, at));
     };
     // The Journal's Library opens a book read before; it rises into view.
     provide_context(crate::journal::ReadBook(Callback::new(move |id| {
@@ -800,8 +809,8 @@ pub fn WorldScreen() -> impl IntoView {
                 }
                 "use" if a == "duel" => _ = sheet.try_set(Some(Sheet::Duel(b))),
                 "use" if a == "book" => open_book(&b, true),
-                // The book is back on its shelf: nothing more to do.
-                "book" => {}
+                // The book is back on its shelf.
+                "book" => _ = book_out.try_set(false),
                 "use" => {
                     // A gated door or gate sends "kind cond": once the hero has been
                     // where its field item comes from, its text says what would open it.
@@ -1375,7 +1384,7 @@ pub fn WorldScreen() -> impl IntoView {
     };
 
     view! {
-        <div class="world" class:in-scene=move || playing.get()>
+        <div class="world" class:in-scene=move || playing.get() class:book-out=move || book_out.get()>
             <header class="world-top">
                 <span class="wordmark small">"Sixfold"</span>
                 <span class="world-hint">{crate::input::world_hint}</span>
@@ -1656,7 +1665,11 @@ pub fn WorldScreen() -> impl IntoView {
                     Sheet::Book(id) => match books::book(id) {
                         Some(b) => view! {
                             <crate::reading::Reading book=b at=book_at
-                                turn=Callback::new(move |n| { book_at.set(n); world_page(n); })
+                                turn=Callback::new(move |n| {
+                                    book_at.set(n);
+                                    left_at.update_value(|m| _ = m.insert(id, n));
+                                    world_page(n);
+                                })
                                 close=Callback::new(move |()| sheet.set(None)) />
                         }.into_any(),
                         None => ().into_any(),

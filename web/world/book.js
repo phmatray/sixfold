@@ -198,7 +198,7 @@ function picture(g, art, x, y, w, h, images, ready) {
 
 // One page. `side` "L" or "R"; `spread` a page of the book ({heading, text, art}) or null
 // (the endpapers); `single`: the tall layout (the right page carries everything).
-function paintPage(c, { side, spread, single, num, family, ts, cssH, images, ready }) {
+function paintPage(c, { side, spread, single, family, ts, cssH, images, ready }) {
   const g = c.getContext("2d"), W = c.width, H = c.height;
   const look = COVER[family] ?? COVER.world;
   g.save();
@@ -233,12 +233,12 @@ function paintPage(c, { side, spread, single, num, family, ts, cssH, images, rea
     g.restore();
     return;
   }
-  if (num) {
-    g.fillStyle = FAINT;
-    g.font = `italic 400 ${Math.round(13 * px)}px ${BODY}`;
-    g.textAlign = "center";
-    g.fillText(String(num), (x0 + x1) / 2, H - bottom * 0.45);
-  }
+  // No printed folio: the page count above the book is the one count on screen.
+  g.fillStyle = FAINT;
+  g.globalAlpha = 0.35;
+  hexPath(g, (x0 + x1) / 2, H - bottom * 0.5, Math.round(5 * px));
+  g.fill();
+  g.globalAlpha = 1;
   const heading = (y, size) => {
     g.fillStyle = look.ink;
     g.font = `700 ${size}px ${DISPLAY}`;
@@ -280,10 +280,11 @@ function paintPage(c, { side, spread, single, num, family, ts, cssH, images, rea
   } else if (single) {
     let y = heading(top, hSize);
     const room = H - bottom - y;
-    // Room for the picture only if the text still fits at the reader's size beside it.
+    // At 100 % the picture always has a place (the text gives a little if it must); at a
+    // larger text size, only the room the text leaves at the reader's size.
     g.font = `400 ${BODY_PX * ts * px}px ${BODY}`;
     const need = lines(g, spread.text, tw).length * BODY_PX * ts * px * 1.45;
-    const pic = spread.art ? Math.min(room - need - H * 0.02, H * 0.26) : 0;
+    const pic = spread.art ? Math.min(Math.max(room - need - H * 0.02, ts <= 1 ? H * 0.18 : 0), H * 0.26) : 0;
     if (pic > H * 0.1) y += picture(g, spread.art, x0, y, tw, pic, images, ready) + H * 0.025;
     body(y, H - bottom - y);
   } else body(top, H - top - bottom);
@@ -426,7 +427,7 @@ export function createBook({ reduced, sound }) {
     t.anisotropy = 4;
     const paint = () => {
       const spread = data?.pages[i] ?? null;
-      paintPage(canvas, { side, spread, single, num: spread ? 2 * i + (side === "R" ? 2 : 1) : 0, family: data?.family, ts: textScale(), cssH: cssPageH(), images, ready: () => {
+      paintPage(canvas, { side, spread, single, family: data?.family, ts: textScale(), cssH: cssPageH(), images, ready: () => {
         if (pages.get(k) !== p) return;
         paint();
         if (back?.source === t.source) back.needsUpdate = true; // the leaf's mirrored copy
@@ -621,9 +622,9 @@ export function createBook({ reduced, sound }) {
   return {
     // `book`: {id, family, title, pages: [{heading, text, art}]}; `ndc`: the shelf on screen, or null.
     open(book, ndc) {
-      if (data) finish();
+      if (data) (closed = null), finish(); // the one still flying back: dropped, nobody waits for it
       data = book;
-      at = 0;
+      at = Math.min(book.at ?? 0, book.pages.length - 1); // where it was left this visit
       from = ndc;
       paintCover(coverCanvas, book.title, book.family);
       coverTex.needsUpdate = true;
@@ -667,6 +668,13 @@ export function createBook({ reduced, sound }) {
       run("close", DUR.close, { a: current() });
     },
     live: () => !!data,
+    // The open spread on screen, in CSS pixels of the view: [left, top, right, bottom].
+    rect() {
+      const t = Math.tan(THREE.MathUtils.degToRad(FOV / 2)), d = readDist();
+      const toX = (x) => (0.5 + x / (2 * d * t * aspect)) * viewH * aspect, toY = (y) => (0.5 - y / (2 * d * t)) * viewH;
+      const x0 = single ? -PW / 2 - CW : -CW, x1 = single ? CW - PW / 2 : CW;
+      return [toX(x0), toY(CH / 2), toX(x1), toY(-CH / 2)];
+    },
     busy: () => !!data && !!state && state.kind !== "turn",
     pose,
     resize(w, h) {

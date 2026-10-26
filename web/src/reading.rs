@@ -64,8 +64,9 @@ fn art(key: &str) -> JsValue {
 }
 
 /// The book for `world.read`, in the current language; `shelf`: it comes off the
-/// shelf the hero faces (else it rises into view, from the Journal).
-pub fn book_value(b: &Book, shelf: bool) -> JsValue {
+/// shelf the hero faces (else it rises into view, from the Journal); `at`: the
+/// spread to open on.
+pub fn book_value(b: &Book, shelf: bool, at: usize) -> JsValue {
     let pages: js_sys::Array = b
         .pages
         .iter()
@@ -83,6 +84,7 @@ pub fn book_value(b: &Book, shelf: bool) -> JsValue {
         ("title", b.title.get().into()),
         ("pages", pages.into()),
         ("shelf", shelf.into()),
+        ("at", at.into()),
     ])
 }
 
@@ -134,14 +136,24 @@ pub fn Reading(
                 prev()
             }
         } else if dx.abs() < 12 && dy.abs() < 12 {
+            // A tap on the book turns toward its side (of the part in view); off the book, nothing.
+            let r: Vec<f64> = js_sys::Array::from(&crate::world::world_book_rect())
+                .iter()
+                .filter_map(|v| v.as_f64())
+                .collect();
             let w = web_sys::window()
                 .and_then(|w| w.inner_width().ok())
                 .and_then(|v| v.as_f64())
                 .unwrap_or(1.0);
-            if f64::from(e.client_x()) < w / 2.0 {
-                prev()
-            } else {
-                next()
+            let (px, py) = (f64::from(e.client_x()), f64::from(e.client_y()));
+            if let [x0, y0, x1, y1] = r[..] {
+                if px >= x0 && px <= x1 && py >= y0 && py <= y1 {
+                    if px < (x0.max(0.0) + x1.min(w)) / 2.0 {
+                        prev()
+                    } else {
+                        next()
+                    }
+                }
             }
         }
     };
