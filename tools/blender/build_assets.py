@@ -47,7 +47,7 @@ PALETTE = {
     "petal_heart": "#fff2c4", "leaf": "#3f9a3a", "leaf_lt": "#62b84c", "leaf_dk": "#2f7d33",
     "stone": "#c9bfae", "brick_wall": "#a9553f", "plaster": "#f3ead6", "roof_teal": "#2f7f86",
     "roof_dk": "#1f565c", "door_navy": "#2c3e6b", "awning_red": "#c8473d", "cream": "#f6ecd2",
-    "gold": "#e9b949", "roof_tiles": "#ffffff",
+    "gold": "#e9b949", "roof_tiles": "#ffffff", "doorway": "#1d1714",  # doorway: dark behind a door that swings open
     # interior
     "leaf_xdk": "#24602a", "leaf_yl": "#8cc451", "fruit": "#f08a3c", "contact_in": "#1c3216", "contact_out": "#1c3216",
     "plaster_in": "#f1e2c4", "wainscot": "#9a6440", "wood_mid": "#a86f45", "wood_lt": "#c99263",
@@ -366,6 +366,7 @@ def build_house(k):
 
     # door frame (the leaf is its own node, below)
     k.add(box(1.16, 0.14, 2.2, 0.04), "timber", T((0, fy - 0.03, sill - 0.02 + 1.1)))
+    k.add(box(0.9, 0.01, 2.03), "doorway", T((0, fy - 0.115, sill + 1.015)))  # behind the leaf: dark when it swings in
 
     # striped awning over the door, sloping out to y = -2.45, with a valance
     for i in range(5):
@@ -826,7 +827,7 @@ PROPS.update(INTERIOR)
 
 
 ASSETS_SCENE, PREVIEW_SCENE = "Assets", "Preview"
-CLIPS = {"Idle", "Walk", "Run", "Fidget", "Open"}
+CLIPS = {"Idle", "Walk", "Run", "Fidget", "Open", "Sit", "SitDown", "StandUp", "Reach", "HoldBook", "PutBack"}
 
 
 def use_scene(scn):
@@ -947,7 +948,7 @@ def validate_glb(path, name):
         problems.append("skin in a prop")
     if name == "hero" and (sorted(clips) != sorted(HERO_CLIPS) or len(j.get("skins", [])) != 1):
         problems.append(f"hero clips {clips}, skins {len(j.get('skins', []))}")
-    if npc and (sorted(clips) != sorted(NPC_CLIPS) or len(j.get("skins", [])) != 1):
+    if npc and (sorted(set(clips) - {"Sit"}) != sorted(NPC_CLIPS) or len(j.get("skins", [])) != 1):  # people sit; the sheep doesn't
         problems.append(f"npc clips {clips}, skins {len(j.get('skins', []))}")
     if name != "hero" and not npc and clips and name != "house":
         problems.append(f"unexpected clips {clips}")
@@ -955,11 +956,11 @@ def validate_glb(path, name):
         raise RuntimeError(f"[sixfold] bad export {os.path.basename(path)}: " + "; ".join(problems))
 
 
-HERO_CLIPS = ["Idle", "Walk", "Run", "Fidget"]
+HERO_CLIPS = ["Idle", "Walk", "Run", "Fidget", "Sit", "SitDown", "StandUp", "Reach", "HoldBook", "PutBack"]
 
 
 def is_npc(name):
-    """NPC and rival characters: the hero's rig with Idle/Walk/Fidget, exported to assets/npc/."""
+    """NPC and rival characters: the hero's rig with Idle/Walk/Fidget (people also Sit), exported to assets/npc/."""
     return name.startswith(("npc_", "rival_"))
 
 NPC_CLIPS = ["Idle", "Walk", "Fidget"]

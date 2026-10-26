@@ -319,6 +319,17 @@ def trunk_dressing(k, rng, x0, x1):
         k.add(jitter(ico(0.12, 1), rng, 0.02), "gv_moss_dk", T((rng.uniform(x0 + 0.3, x1 - 0.3), rng.choice((-1, 1)) * 1.38, 0.05), scale=(1.4, 0.9, 0.5)), smooth=True)
 
 
+def sawn_end(k, x, side):
+    """The trunk's cut face at x, facing `side` (+1: +X), a little inside the bark's rim: pale wood with a darker
+    ring and the heart; chained pieces hide it inside the bark."""
+    n = len(RIDGE)
+    face = [(TRUNK_R * RIDGE[j] * 0.99 * math.cos(j / n * math.tau), TRUNK_Z + TRUNK_R * RIDGE[j] * 0.99 * math.sin(j / n * math.tau))
+            for j in range(n)]
+    k.add(prism(face, 0.05), "gv_heart", T((x, 0, 0), (0, 0, 90)))
+    for r, d, m in ((0.9, 0.0, "gv_ring"), (0.8, 0.03, "gv_heart"), (0.22, 0.06, "gv_ring")):
+        k.add(cyl(TRUNK_R * r, TRUNK_R * r, 0.02, 16), m, T((x + side * (0.035 + d), 0, TRUNK_Z), (0, 90, 0)))
+
+
 def build_fallen_trunk(k):
     """4 x 3 segment of the colossal fallen elder lying along X (~2.9 m), open ends: chain segments along X."""
     rng = random.Random(503)
@@ -328,6 +339,8 @@ def build_fallen_trunk(k):
         r = TRUNK_R * RIDGE[j] + 0.005
         k.add(box(4.0, 0.1, 0.06), "gv_bark_dk", T((0, r * math.cos(a), TRUNK_Z + r * math.sin(a)), (math.degrees(a) - 90, 0, 0)))
     trunk_dressing(k, rng, -2.0, 2.0)
+    for x in (-1.85, 1.85):  # sawn faces, so an end that shows (Fernhollow's cut) is solid wood, not an open arch
+        sawn_end(k, x, 1 if x > 0 else -1)
     shadow(k, 1.0, 2.1, 1.65)
 
 

@@ -263,7 +263,9 @@ pub fn inspect_handlers(id: CardId) -> (impl Fn() + Copy, impl Fn() + Copy) {
 pub fn CollectionScreen() -> impl IntoView {
     let ui = expect_context::<Ui>();
     let on_key = move |e: leptos::ev::KeyboardEvent| {
-        if e.key() == "Escape" {
+        // Closing the card sheet is this Escape's whole job (not the page's Back too).
+        if e.key() == "Escape" && ui.sheet.get_untracked() {
+            e.prevent_default();
             ui.sheet.set(false);
         }
     };

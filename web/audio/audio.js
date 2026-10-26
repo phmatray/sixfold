@@ -103,6 +103,13 @@ document.addEventListener("click", (e) => {
 }, true);
 // A disabled button gets no click: its pointerdown still says no.
 document.addEventListener("pointerdown", (e) => e.target.closest?.("button:disabled") && sfx("refuse"), true);
+// The cursor moving under the keys or a pad (Tab, the arrows, the D-pad: gamepad.js
+// plays those as keys) ticks like a hover; focus moved by the page itself stays silent.
+let stepped = 0;
+addEventListener("keydown", (e) => (stepped = /^(Arrow|Tab$)/.test(e.key) ? performance.now() : 0), true);
+document.addEventListener("focusin", (e) => {
+  if (performance.now() - stepped < 250 && e.target.matches?.("button:not(:disabled), summary, a[href], [role=tab], input, select, label")) sfx("hover");
+});
 let hovered = null;
 document.addEventListener("pointerover", (e) => {
   if (e.pointerType !== "mouse") return;
