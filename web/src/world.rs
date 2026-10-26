@@ -1196,9 +1196,9 @@ pub fn WorldScreen() -> impl IntoView {
                                 // Shown once the line is out: more to come, or the end.
                                 <svg class="talk-next" class:ready={move || typed.get() >= len} class:end=!more viewBox="0 0 12 12" aria-hidden="true">
                                     {if more {
-                                        view! { <path d="M2 4h8l-4 5z" /> }.into_any()
+                                        view! { <path d="M1 3h10l-5 6.5z" /> }.into_any()
                                     } else {
-                                        view! { <rect x="3" y="3" width="6" height="6" rx="1" /> }.into_any()
+                                        view! { <rect x="2" y="2" width="8" height="8" rx="1.5" /> }.into_any()
                                     }}
                                 </svg>
                             </button>

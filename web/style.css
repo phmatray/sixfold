@@ -1414,7 +1414,7 @@ h1, h2, h3, h4 { font-family: var(--display); margin: 0; line-height: 1.1; }
 .talk-box:focus-visible { outline-width: 2px; outline-offset: 6px; border-radius: 6px; }
 .talk-name { font: 700 14px var(--display); color: var(--brass-hi); letter-spacing: 0.02em; }
 .talk-line { min-height: 3em; }
-.talk-next { justify-self: end; width: 14px; height: 14px; fill: var(--brass-hi); opacity: 0; transition: opacity 120ms ease; }
+.talk-next { justify-self: end; width: 16px; height: 16px; fill: var(--brass-hi); opacity: 0; transition: opacity 120ms ease; }
 /* The cue shows once the line is out, and bobs: tap, click, E, Enter or Space goes on. */
 .talk-next.ready { opacity: 1; animation: talk-bob 1.1s ease-in-out infinite; }
 @keyframes talk-bob { 50% { transform: translateY(3px); } }
