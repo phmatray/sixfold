@@ -8,8 +8,8 @@ terms of our own rules (`docs/RULES.md`) and world (`docs/WORLD_DESIGN.md`).
 
 Status: analysis and plan. Nothing here is implemented yet. The owner's decisions (2026-10-26):
 
-1. **Crossroads ships before 2.0**: the quick wins in 1.15, Crossroads in 1.16. Deep Seals follows
-   2.0, in 2.1.
+1. **Crossroads ships before 2.0**: the quick wins in 1.15, Crossroads in 1.16, Deep Seals in 1.17,
+   so both expansions ship before 2.0 (Deep Seals moved from 2.1 on 2026-10-26).
 2. **Sizes 64 + 62**, as proposed.
 3. **Two balance rules are adopted**: Powers that lock (Powers, awakening) only on cards limited to
    one per deck; never a second two-unit energy.
@@ -379,11 +379,11 @@ around them:
 |---|---|---|
 | 1.15.0 | **Set 1 completed**: quick wins Q1–Q8 | #129 eight new cards; #130 resistance errata and real prices for the dormant hooks; #131 set marks and Rare Basics in packs |
 | 1.16.0 | **Crossroads** | #132 engine mechanics and rules; #133 the 64 cards with lore, bestiary and art; #134 packs, unlocks, rival lists, deck-builder lists and balance sweeps |
-| 2.0.0 | Release readiness, unchanged; its blind playtests and full run include Crossroads | — |
-| 2.1.0 | **Deep Seals** | #135 engine mechanics, the one-per-deck rule and the AI for locks; #136 the 62 cards with lore, bestiary and art; #137 the Sleepers quest, packs, relic finds, rematch lists and sweeps |
+| 1.17.0 | **Deep Seals** | #135 engine mechanics, the one-per-deck rule and the AI for locks; #136 the 62 cards with lore, bestiary and art; #137 the Sleepers quest, packs, relic finds, rematch lists and sweeps |
+| 2.0.0 | Release readiness; its blind playtests and full run include both expansions | — |
 | later | Second human player (the roadmap's post-2.0 item) | — |
 
-Deep Seals stays after 2.0 because its locks need the most balance time.
+Deep Seals ships last before 2.0 because its locks need the most balance time; 2.0's playtests cover it.
 
 ### 6.1 Constraints that hold (adopted)
 
