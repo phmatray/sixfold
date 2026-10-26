@@ -623,7 +623,6 @@ fn prompt_label(kind: &str, text: &str) -> String {
 #[component]
 pub fn WorldScreen() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
     let host = NodeRef::<html::Div>::new();
     let controls = NodeRef::<html::Div>::new();
@@ -660,7 +659,7 @@ pub fn WorldScreen() -> impl IntoView {
     Effect::new(move |seen: Option<()>| {
         slot.track();
         if seen.is_some() {
-            screen.set(Screen::Title);
+            crate::go(Screen::Title);
         }
     });
     let reduced = web_sys::window()
@@ -1182,7 +1181,7 @@ pub fn WorldScreen() -> impl IntoView {
     let duel = move |_| {
         if let Some(setup) = crate::duel::default_setup() {
             if ctl.start(setup, crate::new_seed()) {
-                screen.set(Screen::Match);
+                crate::go(Screen::Match);
             }
         }
     };
@@ -1394,7 +1393,7 @@ pub fn WorldScreen() -> impl IntoView {
                     )}</p>
                     <div class="row">
                         <button class="btn primary" on:click=retry>{tr("Retry", "Réessayer")}</button>
-                        <button class="btn" on:click=move |_| screen.set(Screen::Title)>{tr("Back to title", "Retour au titre")}</button>
+                        <button class="btn" on:click=move |_| crate::go(Screen::Title)>{tr("Back to title", "Retour au titre")}</button>
                     </div>
                 </div>
             })}
@@ -1631,7 +1630,6 @@ fn GameMenu(
     on_close: Callback<()>,
 ) -> impl IntoView {
     let tab = expect_context::<LastTab>().0;
-    let screen = expect_context::<RwSignal<Screen>>();
     let ui = expect_context::<Ui>();
     let focus = |sel: &'static str| {
         request_animation_frame(move || {
@@ -1694,7 +1692,7 @@ fn GameMenu(
                     <div class="sheet-head menu-head">
                         <h2 id="world-sheet-title">"Menu"</h2>
                         // Close, back to the world, is the usual way out; quitting is the quieter one.
-                        <button type="button" class="btn ghost" on:click=move |_| screen.set(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
+                        <button type="button" class="btn ghost" on:click=move |_| crate::go(Screen::Title)>{tr("Quit to title", "Retour au titre")}</button>
                         <button type="button" class="btn" on:click=move |_| on_close.run(())>{tr("Close", "Fermer")}</button>
                     </div>
                     <div class="menu-tabs" role="tablist" aria-label="Menu" on:keydown=on_tabs_key>

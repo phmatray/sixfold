@@ -51,9 +51,8 @@ const TOWNSFOLK: &[(&str, T)] = &[
 
 #[component]
 pub fn Credits(won: bool) -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
     let next = if won { Screen::World } else { Screen::Campaign };
-    let done = move || screen.set(next);
+    let done = move || crate::go(next);
     let on_key = move |e: leptos::ev::KeyboardEvent| {
         if e.key() == "Escape" {
             e.prevent_default();

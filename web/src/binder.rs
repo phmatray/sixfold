@@ -28,11 +28,10 @@ pub fn PageBar(
     on_back: Option<Callback<()>>,
     #[prop(optional)] children: Option<Children>,
 ) -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
     let back = back.unwrap_or(Screen::Title);
     let go = move || match on_back {
         Some(f) => f.run(()),
-        None => screen.set(back),
+        None => crate::go(back),
     };
     view! {
         <header class="topbar page-bar">

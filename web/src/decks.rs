@@ -320,8 +320,7 @@ pub fn new_deck() -> Option<usize> {
 
 #[component]
 pub fn DecksScreen() -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
-    let edit = Callback::new(move |i| screen.set(Screen::Editor(i)));
+    let edit = Callback::new(move |i| crate::go(Screen::Editor(i)));
     view! {
         <div class="page">
             <PageBar title=tr("My decks", "Mes decks")>
@@ -492,8 +491,7 @@ fn energy_curve(d: &DeckList) -> [usize; 5] {
 
 #[component]
 pub fn Editor(index: usize) -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
-    view! { <EditorPanel index=index on_done=Callback::new(move |()| screen.set(Screen::Decks)) /> }
+    view! { <EditorPanel index=index on_done=Callback::new(move |()| crate::go(Screen::Decks)) /> }
 }
 
 /// The deck editor (its own screen, or inside the in-game menu's Decks tab).

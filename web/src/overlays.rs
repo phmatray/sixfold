@@ -245,7 +245,6 @@ pub fn DiscardViewer() -> impl IntoView {
 #[component]
 pub fn GameOver() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let result = Memo::new(move |_| {
         ctl.shown.with(|g| {
             let g = g.as_ref()?;
@@ -627,11 +626,11 @@ pub fn GameOver() -> impl IntoView {
                             <div class="dialog-foot">
                                 {move || if champion_now() {
                                     view! {
-                                        <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(Screen::Credits(true)) }>{tr("Roll the credits", "Voir le générique")}</button>
+                                        <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); crate::go(Screen::Credits(true)) }>{tr("Roll the credits", "Voir le générique")}</button>
                                     }.into_any()
                                 } else {
                                     view! {
-                                        <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(Screen::World) }>{tr("Back to the world", "Retour au monde")}</button>
+                                        <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); crate::go(Screen::World) }>{tr("Back to the world", "Retour au monde")}</button>
                                     }.into_any()
                                 }}
                             </div>
@@ -644,16 +643,16 @@ pub fn GameOver() -> impl IntoView {
                                 {matches!(p, Post::Daily(_)).then(|| view! {
                                     <button class="btn" on:click=rematch>{tr("Play it again", "Rejouer")}</button>
                                 })}
-                                <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); screen.set(back) }>{tr("Back", "Retour")}</button>
+                                <button class="btn primary" autofocus on:click=move |_| { ctl.stop(); crate::go(back) }>{tr("Back", "Retour")}</button>
                             </div>
                         }.into_any(),
                         (None, None) => view! {
                     <div class="dialog-foot">
                         <button class="btn primary" on:click=rematch autofocus>{tr("Rematch", "Revanche")}</button>
                         {won.then(|| view! {
-                            <button class="btn" on:click=move |_| { ctl.stop(); screen.set(Screen::Packs) }>{tr("Open packs", "Ouvrir des boosters")}</button>
+                            <button class="btn" on:click=move |_| { ctl.stop(); crate::go(Screen::Packs) }>{tr("Open packs", "Ouvrir des boosters")}</button>
                         })}
-                        <button class="btn ghost" on:click=move |_| { ctl.stop(); screen.set(Screen::Duel) }>{tr("Change decks", "Changer de deck")}</button>
+                        <button class="btn ghost" on:click=move |_| { ctl.stop(); crate::go(Screen::Duel) }>{tr("Change decks", "Changer de deck")}</button>
                     </div>
                         }.into_any(),
                     }}

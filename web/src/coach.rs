@@ -63,7 +63,6 @@ fn focus(sel: &str) {
 pub fn Coach() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let ui = expect_context::<Ui>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let lesson = Memo::new(move |_| ctl.shown.with(|g| g.as_ref().map(tutorial::lesson)));
     let busy = move || ctl.busy.get();
     let selected = move || ui.selected.get().map(|k| k.0);
@@ -103,7 +102,7 @@ pub fn Coach() -> impl IntoView {
         }
         crate::store::tutorial_done();
         ctl.stop();
-        screen.set(Screen::Title);
+        crate::go(Screen::Title);
     };
     let ring = move || {
         sel.get().map(|s| {
@@ -139,7 +138,6 @@ pub fn Coach() -> impl IntoView {
 #[component]
 pub fn Finish() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<Profile>>();
     let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
     // A replay (from the title or the duel page) gives nothing: say so.
@@ -160,7 +158,7 @@ pub fn Finish() -> impl IntoView {
     });
     let go = move |to: Screen| {
         ctl.stop();
-        screen.set(to);
+        crate::go(to);
     };
     move || {
         let l = done.get()?;

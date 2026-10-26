@@ -222,7 +222,6 @@ pub fn Roster() -> impl IntoView {
 /// The campaign screen from the title menu.
 #[component]
 pub fn CampaignScreen() -> impl IntoView {
-    let screen = expect_context::<RwSignal<Screen>>();
     let progress = expect_context::<RwSignal<Progress>>();
     let champ = move || progress.with(champion);
     view! {
@@ -231,9 +230,9 @@ pub fn CampaignScreen() -> impl IntoView {
             <main class="page-body campaign">
                 <CampaignPanel back=Screen::Campaign before=|| () />
                 <div class="row">
-                    <button type="button" class="btn primary" on:click=move |_| screen.set(Screen::World)>{tr("Explore the world", "Explorer le monde")}</button>
+                    <button type="button" class="btn primary" on:click=move |_| crate::go(Screen::World)>{tr("Explore the world", "Explorer le monde")}</button>
                     {move || champ().then(|| view! {
-                        <button type="button" class="btn" on:click=move |_| screen.set(Screen::Credits(false))>{tr("Watch the credits", "Voir le générique")}</button>
+                        <button type="button" class="btn" on:click=move |_| crate::go(Screen::Credits(false))>{tr("Watch the credits", "Voir le générique")}</button>
                     })}
                 </div>
             </main>
@@ -324,7 +323,6 @@ pub fn gauntlet_setup(rung: &Rung, name: String, cards: Vec<CardId>, back: Scree
 #[component]
 pub fn Ladder(back: Screen, before: impl Fn() + Copy + Send + Sync + 'static) -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<Profile>>();
     let progress = expect_context::<RwSignal<Progress>>();
     let (opts, pick) = profile.with_untracked(|p| deck_opts(p, None));
@@ -341,7 +339,7 @@ pub fn Ladder(back: Screen, before: impl Fn() + Copy + Send + Sync + 'static) ->
         crate::audio::sfx("challenge", 0.0);
         before();
         if ctl.start(setup, seed) {
-            screen.set(Screen::Match);
+            crate::go(Screen::Match);
         }
     };
     let play_daily = move |_| {
@@ -498,7 +496,6 @@ pub fn Challenge(
     before: impl Fn() + Copy + 'static,
 ) -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let screen = expect_context::<RwSignal<Screen>>();
     let profile = expect_context::<RwSignal<Profile>>();
     let progress = expect_context::<RwSignal<Progress>>();
     let Some(o) = opponent(&id) else {
@@ -535,7 +532,7 @@ pub fn Challenge(
             back: Screen::World,
         };
         if ctl.start(setup, crate::new_seed()) {
-            screen.set(Screen::Match);
+            crate::go(Screen::Match);
         }
     };
     let what = match r {

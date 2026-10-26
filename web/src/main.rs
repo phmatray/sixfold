@@ -32,6 +32,7 @@ mod worldmap;
 
 use leptos::prelude::*;
 use sixfold_engine::{tr, Action, CardId};
+use wasm_bindgen::prelude::*;
 
 use controls::PromptModal;
 use ctl::{Ctl, AI, HUMAN};
@@ -149,6 +150,7 @@ fn App() -> impl IntoView {
     provide_context(ctl);
     provide_context(ui);
     provide_context(screen);
+    SCREEN.set(Some(screen));
     provide_context(Legal(legal));
     provide_context(world::LastTab(RwSignal::new(world::MenuTab::Decks)));
     store::provide();
@@ -212,6 +214,57 @@ pub fn focus_first(sels: &[&str]) {
 
 thread_local! {
     static TO_MENU: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    /// The App's screen, for `go`.
+    static SCREEN: std::cell::Cell<Option<RwSignal<Screen>>> = const { std::cell::Cell::new(None) };
+}
+
+// A screen change runs as a view transition (style.css, "Screen transitions"),
+// its kind on `<html data-swap>`, where the browser has them and motion is
+// welcome; elsewhere it is a cut. No rAF inside the callback: the page doesn't
+// render while it is pending, and a macrotask lets Leptos apply the change.
+// Focus can't move while the transition holds the page, so `done` lands it
+// once the new screen is in (after a cut the App's own pass does).
+#[wasm_bindgen(inline_js = r#"
+export function can_swap() {
+  return !!document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+export function swap(kind, cb, done) {
+  const d = document.documentElement;
+  d.dataset.swap = kind;
+  const t = document.startViewTransition(() => { cb(); return new Promise((r) => setTimeout(r, 0)); });
+  t.updateCallbackDone.then(() => requestAnimationFrame(done), () => {});
+  t.finished.finally(() => { if (d.dataset.swap === kind) delete d.dataset.swap; });
+  t.ready.catch(() => {}); // skipped (a hidden tab, a second swap): the change still happened
+}
+"#)]
+extern "C" {
+    fn can_swap() -> bool;
+    fn swap(kind: &str, cb: &JsValue, done: &JsValue);
+}
+
+/// Go to `to`: every screen change comes through here, so each plays its
+/// transition. Into a duel the table opens out of a hexagon; out of one it
+/// folds back into it; between other screens the new one rises into place.
+pub fn go(to: Screen) {
+    let Some(screen) = SCREEN.get() else {
+        return;
+    };
+    if !can_swap() {
+        return screen.set(to);
+    }
+    let kind = match (screen.get_untracked(), to) {
+        (Screen::Splash, _) => "splash",
+        (_, Screen::Match) => "duel-in",
+        (Screen::Match, _) => "duel-out",
+        _ => "screen",
+    };
+    let menu = TO_MENU.get();
+    let cb = Closure::once_into_js(move || screen.set(to));
+    let done = Closure::once_into_js(move || {
+        TO_MENU.set(menu);
+        focus_heading();
+    });
+    swap(kind, &cb, &done);
 }
 
 /// The next screen change lands focus on the first menu item (after "Press to
@@ -279,7 +332,9 @@ fn MatchScreen() -> impl IntoView {
     let leave = move || {
         forfeit();
         ctl.stop();
-        screen.set(quit_to)
+        // The question goes first, so the duel folds away without it.
+        asking.set(false);
+        go(quit_to)
     };
     let quit = move || {
         if over() {
