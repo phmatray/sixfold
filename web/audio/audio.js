@@ -846,7 +846,7 @@ const GAIN = {
   tide: 1.07, dream: 1.01, grove: 1.15, stone: 1.01, cave: 1.07, duel_rival_ember: 0.90,
   duel_rival_storm: 0.93, duel_rival_tide: 0.95, duel_rival_dream: 0.94, duel_rival_grove: 0.95,
   duel_rival_stone: 0.98, overworld_night: 1.10, ember_night: 1.15, storm_night: 1.02, tide_night: 1.02,
-  dream_night: 0.89, grove_night: 1.15, stone_night: 1.02,
+  dream_night: 0.89, grove_night: 1.15, stone_night: 1.02, rook: 1.04, duel_rook: 0.92,
 };
 
 function startPlayer(name, t) {
