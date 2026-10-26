@@ -132,33 +132,6 @@ pub fn Seal(r: &'static Rival, #[prop(into)] earned: Signal<bool>) -> impl IntoV
     }
 }
 
-/// The world header's badge: the seal count, and the champion's title once
-/// the Warden falls; opens the roster.
-#[component]
-pub fn SealBadge(on_open: impl Fn() + 'static) -> impl IntoView {
-    let progress = expect_context::<RwSignal<Progress>>();
-    let n = move || progress.with(seals);
-    let champ = move || progress.with(champion);
-    view! {
-        <button type="button" class="btn ghost seal-badge" class:champion=champ on:click=move |_| on_open()
-            aria-label=move || if let Some(t) = progress.with(title) {
-                tr(
-                    format!("{}, {} of {SEALS} seals. Show the rivals", t.en, n()),
-                    format!("{}, {} sur {SEALS}. Voir les rivaux", t.fr, seals_n(n())),
-                )
-            } else {
-                tr(
-                    format!("Seals: {} of {SEALS}. Show the rivals", n()),
-                    format!("Sceaux : {} sur {SEALS}. Voir les rivaux", n()),
-                )
-            }>
-            <span class="seal earned t-colorless" aria-hidden="true"></span>
-            <span aria-hidden="true">{move || format!("{}/{SEALS}", n())}</span>
-            {move || champ().then(|| view! { <span class="champion-chip" aria-hidden="true">"Champion"</span> })}
-        </button>
-    }
-}
-
 /// The six seals and every rival: beaten, open or locked.
 #[component]
 pub fn Roster() -> impl IntoView {

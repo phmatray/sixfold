@@ -16,9 +16,8 @@ use sixfold_engine::overworld::{parse_effect, Applied, CamTarget, Cue, Effect as
 use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
 
-use crate::audio::MuteToggle;
 use crate::binder::CollectionPanel;
-use crate::campaign::{packs_label, CampaignPanel, Challenge, Ladder, Roster, SealBadge};
+use crate::campaign::{packs_label, CampaignPanel, Challenge, Ladder};
 use crate::ctl::Ctl;
 use crate::decks::{new_deck, DecksPanel, EditorPanel};
 use crate::input::{self, pad, titled, Ctrl};
@@ -511,7 +510,6 @@ enum Sheet {
     Card(CardId),
     /// A rival's or route duelist's duel offer, by id.
     Challenge(String),
-    Roster,
     /// The post-game ladder: the Gauntlet, the daily duel and a Warden rematch.
     Ladder,
     Journal,
@@ -1297,12 +1295,46 @@ pub fn WorldScreen() -> impl IntoView {
         }
     });
     on_cleanup(move || pad_menu.remove());
-    // The top bar's Journal, map and roster: not over a cutscene.
-    let open_sheet = move |s: Sheet| {
-        if !playing.get_untracked() {
-            sheet.set(Some(s));
+    // The controls hint shows until the first steps, then fades for good
+    // (it stays in the menu's Options).
+    let hint = RwSignal::new(!input::hint_seen());
+    let fading = StoredValue::new(false);
+    let fade_hint = move || {
+        if hint.get_untracked() && !fading.get_value() {
+            fading.set_value(true);
+            set_timeout(
+                move || {
+                    _ = hint.try_set(false);
+                    input::mark_hint_seen();
+                },
+                std::time::Duration::from_millis(2500),
+            );
         }
     };
+    let hint_keys = window_event_listener(leptos::ev::keydown, move |e| {
+        if matches!(
+            e.key().as_str(),
+            "ArrowUp"
+                | "ArrowDown"
+                | "ArrowLeft"
+                | "ArrowRight"
+                | "w"
+                | "a"
+                | "s"
+                | "d"
+                | "W"
+                | "A"
+                | "S"
+                | "D"
+        ) {
+            fade_hint();
+        }
+    });
+    let hint_taps = window_event_listener(leptos::ev::pointerdown, move |_| fade_hint());
+    on_cleanup(move || {
+        hint_keys.remove();
+        hint_taps.remove();
+    });
     // The head of a panel sheet: title, the Facets held, Close.
     let head = move |title: &'static str, facets: bool| {
         view! {
@@ -1316,39 +1348,28 @@ pub fn WorldScreen() -> impl IntoView {
 
     view! {
         <div class="world" class:in-scene=move || playing.get()>
+            // Only what is glanceable stays over the scene (DESIGN.md): the time
+            // of day, the Facets and the menu. The Journal, the map, the seals and
+            // sound are in the menu, and on their keys.
             <header class="world-top">
-                <span class="wordmark small">"Sixfold"</span>
-                <span class="world-hint">{crate::input::world_hint}</span>
-                <button type="button" class="btn ghost journal-btn" aria-keyshortcuts=move || input::shortcut(Ctrl::Journal)
-                    aria-label="Journal" title=move || titled("Journal", Ctrl::Journal)
-                    on:click=move |_| open_sheet(Sheet::Journal)>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z" /><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6" /></svg>
-                    <span class="journal-label">"Journal"</span>
-                </button>
-                <button type="button" class="btn ghost journal-btn map-btn" aria-keyshortcuts=move || input::shortcut(Ctrl::Map)
-                    aria-label=tr("World map", "Carte du monde") title=move || titled(tr("World map", "Carte du monde"), Ctrl::Map)
-                    on:click=move |_| open_sheet(Sheet::Atlas)>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20Z" /><path d="M9 4v13.5M15 6.5V20" /></svg>
-                    <span class="journal-label">{tr("Map", "Carte")}</span>
+                <span class="world-hint" class:gone=move || !hint.get() aria-hidden=move || (!hint.get()).then_some("true")>{crate::input::world_hint}</span>
+                <div class="world-hud">
                     <crate::worldmap::DayDial />
-                </button>
-                <crate::worldmap::DayDial />
-                <Facets />
-                <SealBadge on_open=move || open_sheet(Sheet::Roster) />
-                <MuteToggle />
-                // Until the scene is up the menu can't open: say so rather than ignore the press.
-                <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
-                    aria-keyshortcuts="Escape"
-                    aria-disabled=move || (loading.get() || failed.with(Option::is_some)).then_some("true")
-                    title=move || if loading.get() || failed.with(Option::is_some) {
-                        tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé").to_string()
-                    } else {
-                        titled("Menu", Ctrl::Menu)
-                    }
-                    on:click=move |_| toggle_menu()>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
-                    <span class="journal-label">"Menu"</span>
-                </button>
+                    <Facets />
+                    // Until the scene is up the menu can't open: say so rather than ignore the press.
+                    <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
+                        aria-keyshortcuts="Escape"
+                        aria-disabled=move || (loading.get() || failed.with(Option::is_some)).then_some("true")
+                        title=move || if loading.get() || failed.with(Option::is_some) {
+                            tr("The menu opens once the world has loaded", "Le menu s'ouvre une fois le monde chargé").to_string()
+                        } else {
+                            titled("Menu", Ctrl::Menu)
+                        }
+                        on:click=move |_| toggle_menu()>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                        <span class="journal-label">"Menu"</span>
+                    </button>
+                </div>
             </header>
             <main class="world-stage" node_ref=stage tabindex="-1"
                 aria-label=move || {
@@ -1575,13 +1596,6 @@ pub fn WorldScreen() -> impl IntoView {
                         </div>
                         <crate::worldmap::WorldMap here=here on_travel=travel />
                     }.into_any(),
-                    Sheet::Roster => view! {
-                        <div class="sheet-head">
-                            <h2 id="world-sheet-title">{tr("Rivals and seals", "Rivaux et sceaux")}</h2>
-                            <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
-                        </div>
-                        <Roster />
-                    }.into_any(),
                     Sheet::Menu => view! {
                         <GameMenu editing=editing here=here on_travel=travel
                             on_close=Callback::new(move |()| sheet.set(None)) />
@@ -1733,7 +1747,10 @@ fn GameMenu(
                     (MenuTab::Campaign, _) => view! {
                         <div class="campaign"><CampaignPanel back=Screen::World before=move || on_close.run(()) /></div>
                     }.into_any(),
-                    (MenuTab::Options, _) => view! { <OptionsPanel /> }.into_any(),
+                    (MenuTab::Options, _) => view! {
+                        <p class="options-hint">{crate::input::world_hint}</p>
+                        <OptionsPanel />
+                    }.into_any(),
                 }}
             </div>
         </div>

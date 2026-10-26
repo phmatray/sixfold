@@ -159,17 +159,6 @@ pub fn press_to_act() -> String {
     }
 }
 
-/// The key bound to a control, as `aria-keyshortcuts` names it ("J", "Escape").
-pub fn shortcut(c: Ctrl) -> String {
-    input().bound.track();
-    let k = key_of(c.id());
-    if k.chars().count() == 1 {
-        k.to_uppercase()
-    } else {
-        k
-    }
-}
-
 /// A button's tooltip, "Journal (J)", when the device has a control to name.
 pub fn titled(name: &str, c: Ctrl) -> String {
     match prompt(c) {
@@ -179,6 +168,24 @@ pub fn titled(name: &str, c: Ctrl) -> String {
 }
 
 /// The world's top-bar hint, for the device in use.
+const HINT_SEEN: &str = "sixfold.hint-seen";
+
+/// Whether the player has walked once (the world's controls hint is spent).
+pub fn hint_seen() -> bool {
+    window()
+        .local_storage()
+        .ok()
+        .flatten()
+        .and_then(|s| s.get_item(HINT_SEEN).ok().flatten())
+        .is_some()
+}
+
+pub fn mark_hint_seen() {
+    if let Ok(Some(s)) = window().local_storage() {
+        _ = s.set_item(HINT_SEEN, "1");
+    }
+}
+
 pub fn world_hint() -> String {
     if input().device.with(|d| d == "touch") {
         return tr(
