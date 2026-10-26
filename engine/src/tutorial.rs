@@ -184,8 +184,8 @@ pub fn lesson(g: &Game) -> Lesson {
                 Goal::PlaceActive,
                 Some(Action::PlayBasic(h)),
                 tr(
-                    format!("Tap {} in your hand, then put it in play.", name(ASHPAW)),
-                    format!("Touchez {} dans votre main, puis mettez-la en jeu.", name(ASHPAW)),
+                    format!("Choose {} in your hand, then put it in play.", name(ASHPAW)),
+                    format!("Choisissez {} dans votre main, puis mettez-la en jeu.", name(ASHPAW)),
                 ),
                 tr(
                     "Your first Basic Hexon becomes your Active: the one that attacks and takes hits.",
@@ -212,7 +212,7 @@ pub fn lesson(g: &Game) -> Lesson {
         (PromptKind::ChooseBench, _) => Some(l(
             Goal::EndSetup,
             Some(Action::Done),
-            tr("Press Done to start the duel.", "Touchez Terminé pour lancer le duel.").into(),
+            tr("Press Done to start the duel.", "Appuyez sur Terminé pour lancer le duel.").into(),
             tr(
                 "A coin decides who goes first: today, the opponent. Whoever goes first can't attack on their first turn.",
                 "Une pièce décide qui commence : aujourd'hui, l'adversaire. Celui qui commence ne peut pas attaquer à son premier tour.",
@@ -225,8 +225,8 @@ pub fn lesson(g: &Game) -> Lesson {
                     Goal::Attach,
                     Some(Action::AttachEnergy { hand: h, slot: 0 }),
                     tr(
-                        format!("Tap an Ember energy, then attach it to {}.", name(ASHPAW)),
-                        format!("Touchez une énergie Braise, puis attachez-la à {}.", name(ASHPAW)),
+                        format!("Choose an Ember energy, then attach it to {}.", name(ASHPAW)),
+                        format!("Choisissez une énergie Braise, puis attachez-la à {}.", name(ASHPAW)),
                     ),
                     tr(
                         "Attacks cost energy, shown as coloured pips. You can attach one energy per turn.",
@@ -253,8 +253,8 @@ pub fn lesson(g: &Game) -> Lesson {
                 Goal::Evolve,
                 Some(Action::Evolve { hand: h, slot: 0 }),
                 tr(
-                    format!("Tap {} and awaken {} into it.", name(BLAZELYNX), name(ASHPAW)),
-                    format!("Touchez {} pour éveiller {}.", name(BLAZELYNX), name(ASHPAW)),
+                    format!("Choose {} and awaken {} into it.", name(BLAZELYNX), name(ASHPAW)),
+                    format!("Choisissez {} pour éveiller {}.", name(BLAZELYNX), name(ASHPAW)),
                 ),
                 tr(
                     "An Awakening goes on top of the Hexon it names. It keeps its energy and damage, and gets more HP and stronger attacks.",
