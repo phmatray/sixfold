@@ -4136,7 +4136,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 
 /* ---------- Paper: sheets, dialogs and rows you read. The ink tokens turn
    dark inside, so every component on it reads without its own rules. ---------- */
-:is(.dialog, .drawer, .settings-body, .world-sheet:not(:has(.challenge)), .play-pop, .update-toast, .ach-toast, .world-hud, .world-hint,
+:is(.dialog, .drawer, .settings-body, .world-sheet:not(:has(.challenge, .reading)), .play-pop, .update-toast, .ach-toast, .world-hud, .world-hint,
   .deck-tile, .deck-row, .slot, .ach, .stats .stat, .shelf-item, .rival, .ladder-part, .quest, .advice-item, .sell-row) {
   --ink: var(--toon);
   --text-soft: var(--paper-ink-soft);
@@ -4164,12 +4164,12 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   color: var(--ink);
 }
 /* A sheet over the scene: paper, the toon outline, a little thickness. */
-:is(.dialog, .drawer, .settings-body, .world-sheet:not(:has(.challenge))) {
+:is(.dialog, .drawer, .settings-body, .world-sheet:not(:has(.challenge, .reading))) {
   background: var(--paper);
   border: var(--toon-w) solid var(--toon);
   box-shadow: 0 6px 0 var(--toon), var(--elev-3);
 }
-.world-sheet:not(:has(.challenge)), .dialog { border-radius: 16px; }
+.world-sheet:not(:has(.challenge, .reading)), .dialog { border-radius: 16px; }
 .drawer { border-width: 0 0 0 var(--toon-w); border-radius: 0; box-shadow: -6px 0 0 var(--toon), var(--elev-3); }
 /* The world's menu: a wooden header over its paper. */
 .menu-top { background: var(--plank); border-bottom: var(--toon-w) solid var(--toon); }
