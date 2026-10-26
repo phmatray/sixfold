@@ -303,6 +303,9 @@ export const FOOT = {
 };
 // Props the hero walks over; every other prop blocks its footprint.
 export const WALKABLE = new Set(["rug", "exit_mat", "tidepool", "wisteria_arch", "rail", "support_beam", "oil_lantern"]); // the arch and the mine frames: walked under
+// Seats (seat.js): [the seat's top, how far in front of each tile's centre the hips go (along the prop's
+// facing, +Z at rot 0)], in m. Every footprint tile is a place: a bench seats two. `seat: false` on a map's prop: scenery.
+export const SEAT = { bench: [0.47, 0.02], chair: [0.52, 0.06] };
 // People are spoken to across these (a person behind a counter or a duel table).
 export const ACROSS = new Set(["counter", "duel_table", "stall", "stall_b", "curio_cabinet"]);
 // Decks: walkable even over water, with the floor height the hero stands at, per

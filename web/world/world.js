@@ -30,6 +30,7 @@
 //   npc.js     placing NPCs, their routes, `facing` (what the hero can talk to or use)
 //   trainer.js route duelists: line of sight, the walk over, going quiet
 //   lift.js    cages that carry the hero between two heights (the Rodspire)
+//   seat.js    sitting on benches and chairs (the hero, and people placed sitting)
 //   script.js  cutscenes: a map's `scripts` start there, and it plays their cues one at a time
 //   daylight.js the light at each minute of the day: sun, moon, sky, fog, lamps, glow
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
@@ -43,6 +44,7 @@ import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route 
 import { updateNpc, facing as facingOf } from "./npc.js";
 import * as duelists from "./trainer.js";
 import * as lifts from "./lift.js";
+import * as seats from "./seat.js";
 import { daylight, phaseOf, DAY } from "./daylight.js";
 import { scenes } from "./script.js";
 
@@ -198,6 +200,13 @@ export function mount(el, controls, cb, start, edit = false) {
       legend.hidden = !world.grid.visible;
     }
   };
+  // Escape (or a pad's B) while sitting stands up, before it can open the menu.
+  const onEsc = (e) => {
+    if (e.key !== "Escape" || !hero?.sit || paused || e.repeat) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    seats.stand(hero);
+  };
   const clearHeld = () => ((held.length = 0), (shift = false));
   const padDir = (e) => e.target.closest?.("[data-dir]")?.dataset.dir;
   const padDown = (e) => {
@@ -217,9 +226,11 @@ export function mount(el, controls, cb, start, edit = false) {
   const padClick = (e) => {
     const f = padDir(e);
     if (!f || e.detail !== 0 || busy() || hero.step) return;
+    if (hero.sit) return seats.stand(hero);
     tryStep(f, 0);
   };
   addEventListener("keydown", onKey);
+  addEventListener("keydown", onEsc, true);
   addEventListener("keyup", onKey);
   addEventListener("blur", clearHeld);
   pad.addEventListener("pointerdown", padDown);
@@ -274,6 +285,7 @@ export function mount(el, controls, cb, start, edit = false) {
   let stopEditor = () => {}, editing = () => false; // the map editor (?edit), when loaded
   const onTap = (e) => {
     if (busy() || e.button) return;
+    if (hero.sit) return seats.stand(hero); // a tap stands up
     const b = renderer.domElement.getBoundingClientRect();
     ndc.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
@@ -286,7 +298,7 @@ export function mount(el, controls, cb, start, edit = false) {
   const walkTo = (tx, tz, npc) => {
     const path = route(world, hero, tx, tz), lift = lifts.at(world, tx, tz);
     if (lift && tx === hero.x && tz === hero.z) path.push("act"); // already in the cage: ride
-    else if (path.length && (npc || lift || world.talk.has(key(tx, tz)) || world.gateAt.get(key(tx, tz))?.open === false)) path.push("act");
+    else if (path.length && (npc || lift || world.talk.has(key(tx, tz)) || world.seats.has(key(tx, tz)) || world.gateAt.get(key(tx, tz))?.open === false)) path.push("act");
     path.npc = npc;
     return path;
   };
@@ -335,7 +347,7 @@ export function mount(el, controls, cb, start, edit = false) {
     moved: () => (lastHero = ""), // the hero's tile is saved again (not during a scene: a reload replays it)
   });
   const opens = (wp) => holds(wp.if);
-  const facing = () => lifts.facing(world, hero) ?? facingOf(world, hero, opens);
+  const facing = () => (hero.sit ? null : lifts.facing(world, hero) ?? facingOf(world, hero, opens)) ?? seats.facing(world, hero);
 
   // Start a step toward `f`. A door warp is entered even though its tile is solid;
   // pushing against the wall from a warp tile with that `dir` leaves the room.
@@ -377,6 +389,8 @@ export function mount(el, controls, cb, start, edit = false) {
       world.path = [];
       lifts.use(world, hero, it, { holds, reduced, sound, say: (t) => cb("use", "locked", t), fade: (on) => fade.classList.toggle("on", on), step: (f) => tryStep(f, 0) });
     }
+    else if (it.kind === "seat") (world.path = []), seats.sit(hero, it.place, reduced);
+    else if (it.kind === "stand") seats.stand(hero);
     else {
       if (it.obj && !reduced) it.obj.userData.wobble = 1;
       // A spot with its own `dialogue` (a lost item, a letter box) talks like a person.
@@ -448,6 +462,7 @@ export function mount(el, controls, cb, start, edit = false) {
     const next = await build(map, got, reduced);
     if (!alive) return;
     lifts.attach(next, got, spawn);
+    seats.attach(next);
     next.name = name;
     duelists.enterMap(name);
     // Gates first see the hero where it arrives (a gate it stands on lets it stay).
@@ -466,7 +481,7 @@ export function mount(el, controls, cb, start, edit = false) {
     cb("seen", name, L.indoor ? "in" : "out");
     tune();
     const s = spawn && !next.blocked(spawn.x, spawn.z) && !next.npcAt(spawn.x, spawn.z) ? spawn : map.spawn; // a stale saved tile falls back
-    Object.assign(hero, { x: s.x, z: s.z, face: s.facing, step: null, idle: 0, turnedAt: -Infinity }); // a fresh map clock
+    Object.assign(hero, { x: s.x, z: s.z, face: s.facing, step: null, idle: 0, turnedAt: -Infinity, sit: null, pose: null }); // a fresh map clock; standing
     hero.obj.rotation.y = angle(s.facing);
     world.hero = hero;
     sky(world.day.update(minute, s.x + 0.5, s.z + 0.5, 0), true);
@@ -563,7 +578,10 @@ export function mount(el, controls, cb, start, edit = false) {
       duelists.spot(w, spotted, h, sound);
     }
     if (!paused) duelists.update(w, dt, talkTo);
-    if (!h.step && !warping && !paused && !w.engage) {
+    // Sitting: a move (key, stick, pad, a walk sent) or a scene stands the hero up; it walks on once up.
+    if (h.sit && (held.length || w.path.length || cut.playing)) (w.path = []), seats.stand(h);
+    seats.update(h, dt, reduced);
+    if (!h.step && !warping && !paused && !w.engage && !h.sit) {
       const k = cut.playing ? null : held[held.length - 1]; // a cutscene walks the hero itself
       if (k) {
         const f = dirOf(k);
@@ -651,7 +669,7 @@ export function mount(el, controls, cb, start, edit = false) {
     }
     first = false;
     if (!paused) cut.update(dt);
-    zoom += ((h.idle > FIDGET_AFTER && !reduced ? 0.88 : 1) - zoom) * Math.min(1, dt * 1.5);
+    zoom += (((h.sit || h.idle > FIDGET_AFTER) && !reduced ? 0.88 : 1) - zoom) * Math.min(1, dt * 1.5); // sitting: in a little
     const dz = dist * zoom;
     camera.position.set(look.x, look.y + Math.sin(pitch) * dz, look.z + Math.cos(pitch) * dz);
     camera.lookAt(look);
@@ -696,7 +714,7 @@ export function mount(el, controls, cb, start, edit = false) {
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
-  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face] });
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit });
 
   // Item popup preview: the model turning in its own small canvas.
   let pv = null;
@@ -795,6 +813,7 @@ export function mount(el, controls, cb, start, edit = false) {
     ro.disconnect();
     mq.removeEventListener("change", onMotion);
     removeEventListener("keydown", onKey);
+    removeEventListener("keydown", onEsc, true);
     removeEventListener("keyup", onKey);
     removeEventListener("blur", clearHeld);
     dispose(scene);

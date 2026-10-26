@@ -16,6 +16,7 @@ mod duel;
 mod history;
 mod input;
 mod journal;
+mod logo;
 mod offline;
 mod overlays;
 mod packs;

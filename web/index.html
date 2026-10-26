@@ -25,7 +25,19 @@
       href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap"
     />
     <!-- data-integrity="none": Chrome ignores (and warns about) integrity on icons and wasm preloads. -->
+    <link rel="icon" href="favicon.ico" sizes="32x32" />
     <link data-trunk rel="icon" type="image/svg+xml" href="favicon.svg" data-integrity="none" />
+    <link data-trunk rel="copy-file" href="favicon.ico" />
+    <!-- The logo's drawings (logo.rs inlines them; the loading screen shows them before the game runs). -->
+    <link data-trunk rel="copy-dir" href="brand" />
+    <!-- Link previews: the lock-up on felt (not precached, see sw-manifest.sh). -->
+    <meta property="og:title" content="Sixfold" />
+    <meta property="og:description" content="A Hexon card duel with the old handheld rules: collect original cards, build decks, duel the AI and explore the world. Plays offline." />
+    <meta property="og:image" content="https://phmatray.github.io/sixfold/social-preview.png" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="640" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link data-trunk rel="copy-file" href="social-preview.png" />
     <!-- Installable and playable offline: the manifest, its icons and sw.js (written by sw-manifest.sh). -->
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
@@ -49,7 +61,8 @@
   <body>
     <!-- The loading screen, before the game runs (loader.js fills it in and removes it). -->
     <div id="loader" class="loader" role="status">
-      <p class="wordmark" aria-hidden="true">Sixfold</p>
+      <img class="loader-mark" src="brand/sixfold-mark.svg" alt="" />
+      <img class="loader-word" src="brand/sixfold-wordmark.svg" alt="Sixfold" />
       <div class="progress-bar" role="progressbar" aria-label="Loading" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
       <p class="loader-msg"></p>
       <button type="button" class="btn primary" hidden></button>
