@@ -23,7 +23,8 @@ How a model is made:
 - Rig: Root, Hips, Torso, Head, Eye.L/R (blink), Leg.L/R + Shin.L/R (knees), Arm.L/R + Fore.L/R (elbows),
   rigid weights. Clips: Idle (4 s: breaths, weight shift, a blink), Fidget (2.5 s look-around), Walk (0.5 s,
   two 0.25 s steps, one tile each), Run (hero only; two 0.17 s steps, the game's run speed), Sit (8 s seated
-  loop: benches and chairs, web/world/seat.js), SitDown and StandUp (hero only; 0.6 s each way).
+  loop: benches and chairs, web/world/seat.js), SitDown and StandUp (hero only; 0.6 s each way), Reach,
+  HoldBook and PutBack (hero only: a book off a shelf, read, put back).
 """
 import json
 import math
@@ -525,6 +526,30 @@ def rig(c, objs, coll, clips, pose=None, hold=None, arm_swing=1.0, stride=1.0):
     down = [(0, rest), (6, bend), (11, dict(seated(), Torso=((0, 0, 0), (4, 0, 0)))), (14, seated())]
     make("SitDown", down, pose)
     make("StandUp", [(14 - f, p) for f, p in reversed(down)], pose)
+
+    # A book off a shelf (hero only; the readable books): Reach (0.5 s) lifts the right hand up and forward to a
+    # shelf (the hand tops out about 1.3 m up on tiptoe, just in front of the face), grips and pulls the book down to the
+    # chest; HoldBook (4 s loop) holds it there in both hands, head bowed to read; PutBack (0.5 s) reaches up
+    # again and lets go, back to standing. The book itself is the game's, carried by the right hand (Fore.R).
+    held_pose = {"Torso": ((0, 0, 0), (3, 0, 0)), "Head": ((0, 0, 0), (12, 0, 0)), "Hips": z,
+                 "Leg.L": z, "Leg.R": z, "Shin.L": z, "Shin.R": z,
+                 "Arm.L": ((0, 0, 0), (-38, 0, -10)), "Arm.R": ((0, 0, 0), (-38, 0, 10)),
+                 "Fore.L": ((0, 0, 0), (-80, 0, 0)), "Fore.R": ((0, 0, 0), (-80, 0, 0))}
+    up = dict(rest, **{"Hips": ((0, 0.06, 0), (0, 0, 0)), "Torso": ((0, 0, 0), (-6, 0, 3)), "Head": ((0, 0, 0), (-14, 0, 0)),
+                       "Arm.R": ((0, 0, 0), (-165, 0, 8)), "Fore.R": ((0, 0, 0), (-8, 0, 0)),
+                       "Arm.L": ((0, 0, 0), (-10, 0, 6)), "Fore.L": ((0, 0, 0), (-20, 0, 0))})
+    grip = dict(up, **{"Fore.R": ((0, 0, 0), (-24, 0, 0))})
+    make("Reach", [(0, rest), (5, up), (7, grip), (12, dict(rest, **held_pose))])
+    book = []
+    for f in sorted(set(range(0, 97, 8)) | {58, 60, 62}):
+        br = (1 - math.cos(math.tau * f / 48)) / 2
+        p = dict(held_pose)
+        p["Torso"] = ((0, 0.006 * br, 0), (3 - 1.5 * br, 0, 0))
+        p["Head"] = ((0, 0.004 * br, 0), (12 + 2 * br, 3 * math.sin(math.tau * f / 96), 0))  # eyes along the lines
+        p["Eye.L"] = p["Eye.R"] = ((0, 0, 0), (0, 0, 0), (1, 0.1 if f == 60 else 0.55, 1))  # lids half down, reading
+        book.append((f, p))
+    make("HoldBook", book)
+    make("PutBack", [(0, dict(rest, **held_pose)), (5, grip), (7, up), (12, rest)])
     return rg
 
 
@@ -1332,7 +1357,7 @@ def build(names, out_dir):
             spec["fn"](c)
             wearables(c, spec["wear"])
             objs = c.build(coll)
-            clips = ("Idle", "Fidget", "Walk", "Run", "Sit", "SitDown", "StandUp") if name == "hero" else ("Idle", "Fidget", "Walk", "Sit")
+            clips = ("Idle", "Fidget", "Walk", "Run", "Sit", "SitDown", "StandUp", "Reach", "HoldBook", "PutBack") if name == "hero" else ("Idle", "Fidget", "Walk", "Sit")
             rg = rig(c, objs, coll, clips, spec["pose"], spec["hold"], spec["swing"])
             body = ba.tris(objs["body"])
             accs = {g: ba.tris(o) for g, o in objs.items() if g != "body"}

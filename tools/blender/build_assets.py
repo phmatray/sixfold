@@ -826,7 +826,7 @@ PROPS.update(INTERIOR)
 
 
 ASSETS_SCENE, PREVIEW_SCENE = "Assets", "Preview"
-CLIPS = {"Idle", "Walk", "Run", "Fidget", "Open", "Sit", "SitDown", "StandUp"}
+CLIPS = {"Idle", "Walk", "Run", "Fidget", "Open", "Sit", "SitDown", "StandUp", "Reach", "HoldBook", "PutBack"}
 
 
 def use_scene(scn):
@@ -955,7 +955,7 @@ def validate_glb(path, name):
         raise RuntimeError(f"[sixfold] bad export {os.path.basename(path)}: " + "; ".join(problems))
 
 
-HERO_CLIPS = ["Idle", "Walk", "Run", "Fidget", "Sit", "SitDown", "StandUp"]
+HERO_CLIPS = ["Idle", "Walk", "Run", "Fidget", "Sit", "SitDown", "StandUp", "Reach", "HoldBook", "PutBack"]
 
 
 def is_npc(name):

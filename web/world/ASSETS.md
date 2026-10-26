@@ -109,7 +109,9 @@ Rules for every model:
 - **Characters:** `Idle` (breathing, blink) and `Walk` (an in-place loop, one leg forward
   per 0.25 s tile), optional `Run` (else Walk plays twice as fast) and `Fidget` (played once
   after ~6 s idle). People also have `Sit` (a seated loop: thighs level, hands on the knees; the seat sits 0.87 x
-  the hips' height under them); the hero also `SitDown` and `StandUp` (0.6 s each, played once). The first clip
+  the hips' height under them); the hero also `SitDown` and `StandUp` (0.6 s each, played once), and for a book off a shelf `Reach` (0.5 s: the right
+  hand up beside the face, about 1.3 m, grips and pulls down to the chest), `HoldBook` (4 s loop: both hands at the
+  chest, head bowed, reading) and `PutBack` (0.5 s: up again, let go, back to standing); a held book rides on `Fore.R`. The first clip
   of each name wins. The game adds the step bounce.
 - **Draw calls:** static props (trees, bushes, rocks, decks, cliffs, stalls, lanterns …) are
   instanced, and the flat-coloured opaque parts of each model are merged into one mesh with
