@@ -815,6 +815,8 @@
   "gates": [
     {
       "id": "spire_ledge",
+      "name": "the ledge on the Rodspire",
+      "name_fr": "la corniche de l'Aiguille-Foudre",
       "tiles": [
         [
           24,

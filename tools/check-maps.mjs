@@ -196,6 +196,7 @@ function reach(name, m, solid0, height0) {
     for (const t of g.tiles ?? []) if (!inMap(t[0], t[1])) fail.push(`${name}: gate ${g.id} tile ${t} is off the map`);
     if (typeof g.if !== "string") fail.push(`${name}: gate ${g.id} has no if`);
     if (!g.text) fail.push(`${name}: gate ${g.id} needs a text for when it's shut`);
+    if (!g.name) fail.push(`${name}: gate ${g.id} needs a name (announced when it opens)`);
     if (g.floor !== undefined && !(g.floor >= 0)) fail.push(`${name}: gate ${g.id} floor ${g.floor} is below the ground (it would hide the hero's feet)`);
   }
   const flood = (open, starts = [[m.spawn.x, m.spawn.z]]) => {

@@ -36,6 +36,7 @@ pub mod decks;
 pub mod doctor;
 pub mod endgame;
 pub mod lore;
+pub mod objective;
 pub mod overworld;
 pub mod profile;
 pub mod save;
