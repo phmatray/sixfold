@@ -171,11 +171,11 @@ fn and_list(parts: Vec<AnyView>) -> Vec<AnyView> {
     out
 }
 
-/// The run so far, in one sentence: the stats that aren't zero (up to five; a
-/// save from before 1.7 may have only its duels won). Read only.
+/// The run so far, in one sentence: the stats that aren't zero (a save from
+/// before 1.7 may have only its duels won). Read only.
 fn run_line(s: &Stats) -> impl IntoView {
     let n = |k: &str| s.get(k);
-    let mut facts: Vec<(u64, String, String)> = vec![
+    let facts: Vec<(u64, String, String)> = vec![
         (n("wins"), " duels won".into(), " duels gagnés".into()),
         (n("kos"), " knock-outs".into(), " K.O.".into()),
         (n("steps"), " steps walked".into(), " pas".into()),
@@ -195,7 +195,6 @@ fn run_line(s: &Stats) -> impl IntoView {
     let facts: Vec<AnyView> = facts
         .into_iter()
         .filter(|f| f.0 > 0 || nonzero == 0)
-        .take(5)
         .map(|(v, en, fr)| view! { <b>{thousands(v)}</b>{tr(en, fr)} }.into_any())
         .collect();
     view! { <p class="credits-run">{and_list(facts)}"."</p> }
