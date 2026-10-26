@@ -826,7 +826,7 @@ PROPS.update(INTERIOR)
 
 
 ASSETS_SCENE, PREVIEW_SCENE = "Assets", "Preview"
-CLIPS = {"Idle", "Walk", "Run", "Fidget", "Open"}
+CLIPS = {"Idle", "Walk", "Run", "Fidget", "Open", "Sit", "SitDown", "StandUp"}
 
 
 def use_scene(scn):
@@ -947,7 +947,7 @@ def validate_glb(path, name):
         problems.append("skin in a prop")
     if name == "hero" and (sorted(clips) != sorted(HERO_CLIPS) or len(j.get("skins", [])) != 1):
         problems.append(f"hero clips {clips}, skins {len(j.get('skins', []))}")
-    if npc and (sorted(clips) != sorted(NPC_CLIPS) or len(j.get("skins", [])) != 1):
+    if npc and (sorted(set(clips) - {"Sit"}) != sorted(NPC_CLIPS) or len(j.get("skins", [])) != 1):  # people sit; the sheep doesn't
         problems.append(f"npc clips {clips}, skins {len(j.get('skins', []))}")
     if name != "hero" and not npc and clips and name != "house":
         problems.append(f"unexpected clips {clips}")
@@ -955,11 +955,11 @@ def validate_glb(path, name):
         raise RuntimeError(f"[sixfold] bad export {os.path.basename(path)}: " + "; ".join(problems))
 
 
-HERO_CLIPS = ["Idle", "Walk", "Run", "Fidget"]
+HERO_CLIPS = ["Idle", "Walk", "Run", "Fidget", "Sit", "SitDown", "StandUp"]
 
 
 def is_npc(name):
-    """NPC and rival characters: the hero's rig with Idle/Walk/Fidget, exported to assets/npc/."""
+    """NPC and rival characters: the hero's rig with Idle/Walk/Fidget (people also Sit), exported to assets/npc/."""
     return name.startswith(("npc_", "rival_"))
 
 NPC_CLIPS = ["Idle", "Walk", "Fidget"]

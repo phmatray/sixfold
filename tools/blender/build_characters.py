@@ -22,7 +22,8 @@ How a model is made:
   meshes on the same skeleton and palette, hidden unless the map asks for them (`wear`).
 - Rig: Root, Hips, Torso, Head, Eye.L/R (blink), Leg.L/R + Shin.L/R (knees), Arm.L/R + Fore.L/R (elbows),
   rigid weights. Clips: Idle (4 s: breaths, weight shift, a blink), Fidget (2.5 s look-around), Walk (0.5 s,
-  two 0.25 s steps, one tile each), Run (hero only; two 0.17 s steps, the game's run speed).
+  two 0.25 s steps, one tile each), Run (hero only; two 0.17 s steps, the game's run speed), Sit (8 s seated
+  loop: benches and chairs, web/world/seat.js), SitDown and StandUp (hero only; 0.6 s each way).
 """
 import json
 import math
@@ -494,6 +495,36 @@ def rig(c, objs, coll, clips, pose=None, hold=None, arm_swing=1.0, stride=1.0):
     run_step = 0.17 * FPS  # world.js RUN_STEP: one tile per 0.17 s
     make("Run", gait(((0, 1, -1, 0), (run_step / 2, 0, 1, -1), (run_step, -1, -1, 0), (run_step * 1.5, 0, 1, 1), (run_step * 2, 1, -1, 0)),
                      thigh=40, knee=62, arm=50, elbow=50, lean=12, bob=0.03, roll=7))
+
+    # Seated (web/world/seat.js): thighs level, shins hanging a little forward (the feet dangle off a 0.47 m seat),
+    # hands on the knees. Sit is the calm loop (8 s: breaths, a slow look round, the feet swinging, a blink);
+    # SitDown (0.6 s) bends from standing into it, leaning forward as the body lowers; StandUp is SitDown backwards.
+    def seated(br=0.0, look=0.0, kick=0.0, blink=1.0):
+        return {"Hips": z, "Torso": ((0, 0.006 * br, 0), (-1.5 * br - 2, look * 0.2, 0)),
+                "Head": ((0, 0.004 * br, 0), (2 * br - 2, look, 0)),
+                "Leg.L": ((0, 0, 0), (-88, 0, 3)), "Leg.R": ((0, 0, 0), (-88, 0, -3)),
+                "Shin.L": ((0, 0, 0), (74 + 8 * kick, 0, 0)), "Shin.R": ((0, 0, 0), (74 - 8 * kick, 0, 0)),
+                "Arm.L": ((0, 0.006 * br, 0), (-34, 0, -6)), "Arm.R": ((0, 0.006 * br, 0), (-34, 0, 6)),
+                "Fore.L": ((0, 0, 0), (-36, 0, 0)), "Fore.R": ((0, 0, 0), (-36, 0, 0)),
+                "Eye.L": ((0, 0, 0), (0, 0, 0), (1, blink, 1)), "Eye.R": ((0, 0, 0), (0, 0, 0), (1, blink, 1))}
+    sit = []
+    for f in sorted(set(range(0, 193, 8)) | {118, 120, 122}):
+        br = (1 - math.cos(math.tau * f / 64)) / 2  # a slower breath than standing
+        look = 26 * math.sin(math.tau * f / 192) ** 3  # a long look one way, then the other
+        sit.append((f, seated(br, look, math.sin(math.tau * f / 96), 0.1 if f == 120 else 1.0)))
+    make("Sit", sit, pose)
+    rest = {"Hips": z, "Torso": z, "Head": z, "Leg.L": z, "Leg.R": z, "Shin.L": z, "Shin.R": z,
+            "Arm.L": ((0, 0, 0), (0, 0, 3)), "Arm.R": ((0, 0, 0), (0, 0, -3)),
+            "Fore.L": ((0, 0, 0), (-8, 0, 0)), "Fore.R": ((0, 0, 0), (-8, 0, 0)),
+            "Eye.L": ((0, 0, 0), (0, 0, 0), (1, 1, 1)), "Eye.R": ((0, 0, 0), (0, 0, 0), (1, 1, 1))}
+    bend = dict(seated(), **{"Hips": ((0, -0.05, 0), (0, 0, 0)), "Torso": ((0, 0, 0), (18, 0, 0)), "Head": ((0, 0, 0), (-10, 0, 0)),
+                             "Leg.L": ((0, 0, 0), (-50, 0, 2)), "Leg.R": ((0, 0, 0), (-50, 0, -2)),
+                             "Shin.L": ((0, 0, 0), (56, 0, 0)), "Shin.R": ((0, 0, 0), (56, 0, 0)),
+                             "Arm.L": ((0, 0, 0), (-24, 0, -2)), "Arm.R": ((0, 0, 0), (-24, 0, 2)),
+                             "Fore.L": ((0, 0, 0), (-26, 0, 0)), "Fore.R": ((0, 0, 0), (-26, 0, 0))})
+    down = [(0, rest), (6, bend), (11, dict(seated(), Torso=((0, 0, 0), (4, 0, 0)))), (14, seated())]
+    make("SitDown", down, pose)
+    make("StandUp", [(14 - f, p) for f, p in reversed(down)], pose)
     return rg
 
 
@@ -1301,7 +1332,7 @@ def build(names, out_dir):
             spec["fn"](c)
             wearables(c, spec["wear"])
             objs = c.build(coll)
-            clips = ("Idle", "Fidget", "Walk", "Run") if name == "hero" else ("Idle", "Fidget", "Walk")
+            clips = ("Idle", "Fidget", "Walk", "Run", "Sit", "SitDown", "StandUp") if name == "hero" else ("Idle", "Fidget", "Walk", "Sit")
             rg = rig(c, objs, coll, clips, spec["pose"], spec["hold"], spec["swing"])
             body = ba.tris(objs["body"])
             accs = {g: ba.tris(o) for g, o in objs.items() if g != "body"}
