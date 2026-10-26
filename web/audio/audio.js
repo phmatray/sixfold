@@ -2,20 +2,25 @@
 // sampled. Rust calls the exports through wasm-bindgen (web/src/audio.rs);
 // world.js reaches the same functions through `globalThis.sixfoldAudio`.
 //
+// Three groups, each under the master: music (the tracks), ambience (the
+// regional beds), effects (sfx and the UI's clicks), all through one
+// compressor. `sixfoldAudio.debug().levels` reads each group's loudness.
+//
 // No sound before the first user gesture: the AudioContext is created inside
 // a pointerdown/keydown handler. Music runs on a look-ahead step sequencer
 // clocked by the AudioContext; the context is suspended while the tab is
 // hidden or the game is muted.
 
 const KEY = "sixfold.audio";
-const DEFAULTS = { master: 0.8, music: 0.5, sfx: 0.8, muted: 0 };
+const DEFAULTS = { master: 0.8, music: 0.5, ambience: 0.6, sfx: 0.8, muted: 0 };
 const prefs = { ...DEFAULTS };
 try {
   Object.assign(prefs, JSON.parse(localStorage.getItem(KEY) ?? "{}"));
 } catch {}
 
-let ctx = null, master, musicBus, sfxBus, packBus = null, noiseBuf, timer = 0;
-let want = "", intense = false;
+let ctx = null, master, musicBus, sfxBus, ambBus, packBus = null, noiseBuf, timer = 0;
+let want = "", wantBed = [""], intense = false;
+let taps = {}, meters = null;
 const players = [];
 const stats = { sfx: 0, last: "", notes: 0 };
 
@@ -41,6 +46,7 @@ function applyLevels() {
   master.gain.setTargetAtTime(prefs.muted ? 0 : prefs.master ** 2, t, 0.03);
   musicBus.gain.setTargetAtTime(prefs.music ** 2, t, 0.03);
   sfxBus.gain.setTargetAtTime(prefs.sfx ** 2, t, 0.03);
+  ambBus.gain.setTargetAtTime(prefs.ambience ** 2, t, 0.03);
 }
 
 // ---------- Context, gesture unlock, visibility ----------
@@ -57,15 +63,18 @@ function unlock() {
     master.connect(comp).connect(ctx.destination);
     musicBus = ctx.createGain();
     sfxBus = ctx.createGain();
-    musicBus.connect(master);
-    sfxBus.connect(master);
-    noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    ambBus = ctx.createGain();
+    for (const b of [musicBus, sfxBus, ambBus]) b.connect(master);
+    taps = { music: musicBus, ambience: ambBus, sfx: sfxBus, out: comp };
+    // Four seconds, so a looping bed never repeats audibly.
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     applyLevels();
     const w = want;
     want = "";
     music(w);
+    ambience(...wantBed);
   }
   wake();
 }
@@ -340,6 +349,192 @@ export function sfx(name, n = 0) {
   f(sfxBus, t + 0.005, n);
 }
 
+// ---------- Ambience: a bed per region, by day and by night ----------
+//
+// A bed is a few looping noise layers, each filtered and slowly swelling
+// (wind, surf, a forge's roar), plus sparse voices at random intervals (a gull,
+// a chime, a drip). Layer: filter `type`, `f` Hz, `q`, `gain`; `lfo` [Hz, depth
+// 0..1] swells the level, `sweep` [Hz, depth 0..1] moves the filter.
+// Voice: [name, at least, at most] seconds between two.
+
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+const breeze = (gain, f = 500) => ({ type: "bandpass", f, q: 0.6, gain, lfo: [0.07, 0.7], sweep: [0.05, 0.4] });
+const wind = (gain, f = 800) => ({ type: "bandpass", f, q: 1.4, gain, lfo: [0.11, 0.85], sweep: [0.09, 0.6] });
+const surf = (gain) => ({ type: "lowpass", f: 700, q: 0.4, gain, lfo: [0.085, 0.95], sweep: [0.085, 0.5] });
+const spray = (gain) => ({ type: "highpass", f: 3200, q: 0.5, gain, lfo: [0.085, 0.95] });
+const roar = (gain, f = 260) => ({ type: "lowpass", f, q: 0.8, gain, lfo: [0.05, 0.3] });
+// A choir of insects: a narrow band, beating fast.
+const insects = (gain, f = 4800) => ({ type: "bandpass", f, q: 9, gain, lfo: [7, 0.9] });
+
+const BEDS = {
+  // The meadow (and the default for any outdoor map).
+  overworld: {
+    day: { layers: [breeze(0.05)], voices: [["bird", 2, 7], ["leaves", 6, 14]] },
+    night: { layers: [breeze(0.035, 380), insects(0.006)], voices: [["cricket", 0.8, 2.5], ["owl", 18, 40]] },
+  },
+  // Ember: the forges' roar, coals crackling, steam from the vents.
+  ember: {
+    day: { layers: [roar(0.06), breeze(0.02, 700)], voices: [["crackle", 0.8, 2.5], ["vent", 8, 18]] },
+    night: { layers: [roar(0.06, 200)], voices: [["crackle", 1.2, 3.5], ["vent", 10, 22], ["cricket", 3, 7]] },
+  },
+  // Storm: wind over slate, chimes, thunder far off.
+  storm: {
+    day: { layers: [wind(0.06)], voices: [["chime", 4, 10], ["thunder", 25, 50]] },
+    night: { layers: [wind(0.07, 600)], voices: [["chime", 5, 12], ["thunder", 18, 40]] },
+  },
+  // Tide: surf and gulls; at night the swell and a buoy's bell.
+  tide: {
+    day: { layers: [surf(0.06), spray(0.009)], voices: [["gull", 5, 12]] },
+    night: { layers: [surf(0.05), spray(0.006)], voices: [["bell", 12, 25]] },
+  },
+  // Dream: a hush, high shimmer by day, a whole choir of insects at night.
+  dream: {
+    day: { layers: [breeze(0.035, 900)], voices: [["shimmer", 5, 11], ["bird", 8, 18]] },
+    night: { layers: [insects(0.02), insects(0.01, 6200), breeze(0.02, 700)], voices: [["cricket", 0.6, 1.8], ["shimmer", 7, 15]] },
+  },
+  // Grove: leaves and birdsong; frogs and an owl at night.
+  grove: {
+    day: { layers: [breeze(0.035, 1400)], voices: [["bird", 1.2, 4], ["leaves", 3, 8]] },
+    night: { layers: [breeze(0.022, 900), insects(0.005)], voices: [["frog", 2, 6], ["owl", 12, 30], ["cricket", 1, 3]] },
+  },
+  // Stone: wind on the ledges, distant picks and drips; the quarry rests at night.
+  stone: {
+    day: { layers: [wind(0.06, 450)], voices: [["pick", 5, 12], ["drip", 3, 8]] },
+    night: { layers: [wind(0.05, 380)], voices: [["drip", 3, 7], ["owl", 20, 45]] },
+  },
+  // Caves: a low rumble and drips with an echo.
+  cave: { day: { layers: [roar(0.08, 110)], voices: [["drip", 1.5, 5]] } },
+  // Indoors: room tone, the odd creak of a board.
+  interior: { day: { layers: [roar(0.04, 180)], voices: [["creak", 10, 25]] } },
+};
+
+// Bed voices: (dest, time). Quiet by design: they sit under music and dialogue.
+const BED_VOICES = {
+  bird: (d, t) => {
+    const f = rnd(2600, 3800), n = 2 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < n; i++) tone(d, t + i * rnd(0.08, 0.14), f * rnd(0.9, 1.15), 0.06, { f2: f * rnd(1.1, 1.4), peak: 0.035 });
+  },
+  leaves: (d, t) => noise(d, t, rnd(0.5, 1), { f: 2400, q: 0.8, a: 0.25, peak: 0.03 }),
+  cricket: (d, t) => {
+    const f = rnd(4200, 4700);
+    for (let i = 0; i < 3; i++) tone(d, t + i * 0.06, f, 0.025, { peak: 0.012 });
+  },
+  owl: (d, t) => {
+    tone(d, t, 410, 0.3, { f2: 370, peak: 0.03, a: 0.06, lin: true, rel: 0.2 });
+    tone(d, t + 0.6, 400, 0.45, { f2: 350, peak: 0.03, a: 0.08, lin: true, rel: 0.25 });
+  },
+  frog: (d, t) => {
+    for (let i = 0; i < 2; i++) tone(d, t + i * 0.16, 210, 0.07, { type: "triangle", f2: 160, peak: 0.04 });
+  },
+  crackle: (d, t) => {
+    for (let i = 0, n = 3 + Math.floor(Math.random() * 6); i < n; i++) noise(d, t + rnd(0, 0.6), 0.012, { type: "highpass", f: rnd(2500, 6000), peak: rnd(0.02, 0.06) });
+  },
+  vent: (d, t) => noise(d, t, 1.6, { type: "highpass", f: 2600, f2: 1800, a: 0.6, peak: 0.03 }),
+  chime: (d, t) => {
+    for (let i = 0, n = 2 + Math.floor(Math.random() * 3); i < n; i++)
+      tone(d, t + i * rnd(0.12, 0.3), hz(84 + [0, 2, 4, 7, 9, 12][Math.floor(Math.random() * 6)]), 1.6, { peak: 0.018, detune: rnd(-8, 8) });
+  },
+  thunder: (d, t) => noise(d, t, 3, { type: "lowpass", f: 260, f2: 50, a: 0.5, peak: 0.12 }),
+  gull: (d, t) => {
+    for (let i = 0, n = 2 + Math.floor(Math.random() * 2); i < n; i++)
+      tone(d, t + i * 0.32, rnd(1300, 1600), 0.25, { type: "triangle", f2: 850, glide: 0.25, peak: 0.022, a: 0.03 });
+  },
+  bell: (d, t) => {
+    tone(d, t, hz(69), 2.6, { peak: 0.02 });
+    tone(d, t, hz(69) * 2.76, 1.6, { peak: 0.008 });
+  },
+  shimmer: (d, t) => notes(d, t, [93, 98, 100, 105].sort(() => Math.random() - 0.5), 0.18, { peak: 0.012, dur: 1.4 }),
+  drip: (d, t) => {
+    const f = rnd(900, 1500);
+    tone(d, t, f, 0.05, { f2: f * 1.8, glide: 0.04, peak: 0.04 });
+    tone(d, t + 0.28, f, 0.05, { f2: f * 1.8, glide: 0.04, peak: 0.012 }); // its echo
+  },
+  pick: (d, t) => {
+    for (let i = 0; i < 3; i++) {
+      const at = t + i * rnd(0.8, 1.1);
+      noise(d, at, 0.06, { f: 2800, q: 9, peak: 0.03 });
+      noise(d, at + 0.3, 0.06, { f: 2800, q: 9, peak: 0.01 });
+    }
+  },
+  creak: (d, t) => {
+    tone(d, t, 150, 0.35, { type: "sawtooth", f2: 210, peak: 0.006, a: 0.05, lin: true });
+    noise(d, t, 0.35, { f: 900, f2: 1200, q: 9, a: 0.05, peak: 0.02 });
+  },
+};
+
+const beds = [];
+let bed = null;
+
+function startBed(key, def, t) {
+  const out = ctx.createGain(), stop = [];
+  out.gain.setValueAtTime(0, t);
+  out.gain.setTargetAtTime(1, t, 0.35);
+  out.connect(ambBus);
+  for (const L of def.layers) {
+    const src = ctx.createBufferSource(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = noiseBuf;
+    src.loop = true;
+    flt.type = L.type;
+    flt.frequency.value = L.f;
+    flt.Q.value = L.q;
+    const [rate, depth] = L.lfo ?? [0, 0];
+    g.gain.value = L.gain * (1 - depth / 2);
+    src.connect(flt).connect(g).connect(out);
+    src.start(t, rnd(0, 4));
+    stop.push(src);
+    // A slow sine on the level and one on the filter, each at its own drifting rate.
+    for (const [r, amt, param] of [[rate, (L.gain * depth) / 2, g.gain], [L.sweep?.[0], L.f * (L.sweep?.[1] ?? 0), flt.frequency]]) {
+      if (!r || !amt) continue;
+      const lfo = ctx.createOscillator(), lg = ctx.createGain();
+      lfo.frequency.value = r * rnd(0.8, 1.2);
+      lg.gain.value = amt;
+      lfo.connect(lg).connect(param);
+      lfo.start(t, 0);
+      stop.push(lfo);
+    }
+  }
+  const voices = (def.voices ?? []).map(([v, lo, hi]) => ({ v, lo, hi, next: t + rnd(0.5, hi) }));
+  const b = { key, out, stop, voices, endAt: 0 };
+  beds.push(b);
+  return b;
+}
+
+/// Cross-fade to a region's bed ("tide", "cave", "interior", … or "" for none) at a phase
+/// ("dawn", "day", "dusk", "night"): the night has its own bed, the rest share the day's.
+export function ambience(name, phase = "day") {
+  if (!ctx) return void (wantBed = [name, phase]);
+  const set = BEDS[name], half = phase === "night" && set?.night ? "night" : "day";
+  const key = set ? `${name}:${half}` : "";
+  if ((bed?.key ?? "") === key) return;
+  const t = ctx.currentTime;
+  if (bed) {
+    bed.out.gain.setTargetAtTime(0, t, 0.35);
+    bed.endAt = t + 1.5;
+  }
+  bed = set ? startBed(key, set[half], t) : null;
+}
+
+function tickBeds(now) {
+  for (let i = beds.length - 1; i >= 0; i--) {
+    const b = beds[i];
+    if (b.endAt && now > b.endAt) {
+      b.stop.forEach((s) => s.stop());
+      b.out.disconnect();
+      beds.splice(i, 1);
+      continue;
+    }
+    if (b.endAt) continue;
+    for (const v of b.voices) {
+      if (v.next < now - 1) v.next = now + rnd(v.lo, v.hi); // the timer stalled (a hidden tab): don't burst
+      while (v.next < now + LOOKAHEAD) {
+        BED_VOICES[v.v](b.out, v.next);
+        v.next += rnd(v.lo, v.hi);
+      }
+    }
+  }
+}
+
 // ---------- Music: a tiny step sequencer ----------
 //
 // A track is 16 steps (sixteenth notes) per bar. `chords` holds the scale
@@ -350,7 +545,7 @@ export function sfx(name, n = 0) {
 // keys: "x" a soft chord stab. Drums: "x" a hit.
 
 // A scale degree past the last note climbs an octave (pentatonic has five, the others seven).
-const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10], pentatonic: [0, 2, 4, 7, 9] };
+const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], harmonic: [0, 2, 3, 5, 7, 8, 11], dorian: [0, 2, 3, 5, 7, 9, 10], pentatonic: [0, 2, 4, 7, 9] };
 const DIGITS = "0123456789abcdef";
 
 const TRACKS = {
@@ -362,7 +557,8 @@ const TRACKS = {
       "7---5-6-7---a---" + "9---8-7-8-------" + "6-5-4-5-6---8---" + "7-------4---2---",
     bass: "x-------5---x---",
     drums: { kick: "x.......x.......", shaker: "....x.......x..." },
-    mix: { lead: 0.09, pad: 0.035, bass: 0.13, keys: 0.03 },
+    // A touch under the others: it was 3 dB louder than the world and the duels.
+    mix: { lead: 0.075, pad: 0.03, bass: 0.105, keys: 0.025 },
   },
   // The duel: a little more urgent, still friendly. Intensifies on the last prize.
   duel: {
@@ -470,6 +666,33 @@ TRACKS.interior = {
   drums: { shaker: "....x.......x..." },
   mix: { lead: 0.06, pad: 0.03, bass: 0.1, keys: 0.03 },
 };
+// Duels by stakes. "duel" (above) is the ordinary one: route duelists, quick duels.
+// A rival's theme is one tune played in their colour's region: its key, scale (a
+// pentatonic colour sings it differently), pace and keys. The Warden's is its own.
+const HOT = { shaker: "xxxxxxxxxxxxxxxx", arp: "x.x.x.x.x.x.x.x." };
+const RIVAL = {
+  chords: [0, 5, 3, 4, 0, 5, 6, 4],
+  lead:
+    "3-5-7-.7-8-7-5-." + "6---5-3-5-------" + "3-5-7-.7-a-9-7-." + "8-------7---5---" +
+    "a-.a-9-7-8-.8-7-" + "6---7-8-7-------" + "5-6-7-8-9-8-7-6-" + "7-------3---.3..",
+  bass: "x.x.xx.x.x.x5.o.",
+  drums: { kick: "x...x...x...x...", snare: "....x.......x.x.", hat: "..x...x...x...x." },
+  hot: HOT,
+  mix: { lead: 0.08, pad: 0.028, bass: 0.14, keys: 0.022 },
+};
+for (const [k, root, bpm] of [["ember", 62, 120], ["storm", 64, 124], ["tide", 67, 108], ["dream", 69, 104], ["grove", 65, 114], ["stone", 59, 110]])
+  TRACKS[`duel_rival_${k}`] = { ...RIVAL, root, bpm, scale: TRACKS[k].scale, keys: TRACKS[k].keys };
+TRACKS.duel_boss = {
+  bpm: 126, root: 62, scale: "harmonic", chords: [0, 0, 5, 4, 0, 3, 5, 4],
+  lead:
+    "3---4-5-6-5-4-3-" + "2-------3-------" + "3---4-5-7-6-5-4-" + "5-------6---7---" +
+    "a---9-8-7---8-9-" + "a-------9-------" + "8-7-6-5-6-5-4-2-" + "3-------.3.3.3..",
+  bass: "x.x.x.x.x.x.x5o.",
+  keys: "x..x..x...x..x..",
+  drums: { kick: "x...x...x...x...", snare: "....x.......x...", hat: "x.x.x.x.x.x.x.x." },
+  hot: HOT,
+  mix: { lead: 0.08, pad: 0.03, bass: 0.15, keys: 0.025 },
+};
 // After dark, every outdoor track has a night variant made the same way: slower,
 // filtered, half the drums (only the kick and a soft shaker), the lead held back.
 for (const k of ["overworld", "ember", "storm", "tide", "dream", "grove", "stone"]) {
@@ -551,10 +774,16 @@ function startPlayer(name, t) {
   return p;
 }
 
-let current = null;
+let current = null, duelTrack = "duel";
+
+/// The theme "duel" plays from now on ("duel", "duel_rival_<region>", "duel_boss"); set as each duel starts.
+export function duelTheme(name) {
+  duelTrack = TRACKS[name] ? name : "duel";
+}
 
 /// Crossfade to a track ("title", "duel", "overworld", "interior", a region's, "<track>_night"), or to silence ("").
 export function music(name) {
+  if (name === "duel") name = duelTrack;
   if (!ctx) return void (want = name);
   if ((current?.name ?? "") === name) return;
   const t = ctx.currentTime;
@@ -563,7 +792,7 @@ export function music(name) {
     current.endAt = t + 2.5;
   }
   current = TRACKS[name] ? startPlayer(name, t) : null;
-  if (name === "duel") intense = false;
+  if (name.startsWith("duel")) intense = false;
 }
 
 /// 1: the duel is down to someone's last prize (busier drums, an arpeggio, a touch faster).
@@ -574,6 +803,7 @@ export function intensity(level) {
 const LOOKAHEAD = 0.15;
 function tick() {
   const now = ctx.currentTime;
+  tickBeds(now);
   for (let i = players.length - 1; i >= 0; i--) {
     const p = players[i];
     if (p.endAt && now > p.endAt) {
@@ -597,7 +827,29 @@ function tick() {
 
 /// What is playing, for debugging from the console: `sixfoldAudio.debug()`.
 function debug() {
-  return { state: ctx?.state ?? "none", tracks: players.map((p) => p.name + (p.endAt ? " (fading)" : "")), intense, prefs: { ...prefs }, ...stats };
+  return {
+    state: ctx?.state ?? "none",
+    tracks: players.map((p) => p.name + (p.endAt ? " (fading)" : "")),
+    beds: beds.map((b) => b.key + (b.endAt ? " (fading)" : "")),
+    intense,
+    prefs: { ...prefs },
+    levels: levels(),
+    ...stats,
+  };
 }
 
-globalThis.sixfoldAudio = { sfx, music, intensity, debug };
+// RMS of the last ~40 ms per group, in dBFS (-inf is silence): each group after its slider, `out` after the master.
+function levels() {
+  // Tapped on first use only: each group after its slider, and what leaves the speakers.
+  if (!meters && ctx) meters = Object.fromEntries(Object.entries(taps).map(([k, n]) => [k, n.connect(ctx.createAnalyser())]));
+  const buf = new Float32Array(2048);
+  return Object.fromEntries(
+    Object.entries(meters ?? {}).map(([k, a]) => {
+      a.getFloatTimeDomainData(buf);
+      const rms = Math.sqrt(buf.reduce((s, x) => s + x * x, 0) / buf.length);
+      return [k, Math.round(20 * Math.log10(rms) * 10) / 10];
+    }),
+  );
+}
+
+globalThis.sixfoldAudio = { sfx, music, ambience, intensity, debug };

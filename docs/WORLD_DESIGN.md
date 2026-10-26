@@ -738,6 +738,7 @@ Scripts are map data (§9.1), triggered `on: "enter"` or by stepping on `at` til
 | `dark` | map | 1.3 | cave lighting: no sun, the hero's lantern is the light |
 | `light_dawn` / `_dusk` / `_night` | map | 1.3 | phase overrides |
 | `music` | map | 1.3 | track id (`ember`, `storm`, `tide`, `dream`, `grove`, `stone`, `cave`, default `overworld`) |
+| `ambience` | map | 1.9 | ambience bed (a track id or `interior`), default the map's track (`interior` indoors, `cave` in the dark) |
 | `region` | map | 1.3 | region id, for the world map and achievements |
 | `scripts` | map | 1.4 | cutscenes (below) |
 
@@ -1851,6 +1852,13 @@ New tracker entries in `web/audio/audio.js` (original, procedural, like today's)
 `dream`, `grove`, `stone`, `cave`, `rook` (1.4, minor, 100 bpm, Rook's theme for his scenes). Two new scales:
 `dorian` and `pentatonic`. A night variant of every outdoor track is derived the way `interior` is (filtered,
 half drums). Map JSON names its track with `music`.
+
+1.9: under the music, an **ambience bed** per region, the caves and indoors (`BEDS` in `audio.js`): looping
+filtered noise that swells (wind, surf, a forge) and sparse voices (birds, gulls, chimes, drips, crickets), with
+its own night bed, cross-fading in about a second. Duels play by stakes: `duel` for route duelists and quick
+duels, `duel_rival_<region>` (one rival theme in the rival's first colour's key and scale), `duel_boss` for the
+Hex Warden; each keeps the last-prize `hot` layer. Four volumes: Master over Music, Ambience and Effects
+(sfx and the interface's clicks); `sixfoldAudio.debug().levels` reads each group in dBFS.
 
 ---
 
