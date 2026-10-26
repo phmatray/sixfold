@@ -1075,6 +1075,25 @@ pub fn WorldScreen() -> impl IntoView {
         e.prevent_default();
     });
     on_cleanup(move || journal_key.remove());
+    // The gamepad's Start (gamepad.js): opens the menu, and leaves it the way Escape does.
+    let pad_menu = window_event_listener_untyped("sixfold-input", move |e| {
+        let action = js_sys::Reflect::get(&e, &"detail".into())
+            .and_then(|d| js_sys::Reflect::get(&d, &"action".into()))
+            .ok()
+            .and_then(|a| a.as_string());
+        if action.as_deref() != Some("menu") {
+            return;
+        }
+        match sheet.get_untracked() {
+            Some(Sheet::Menu) => on_cancel(e),
+            None => {
+                e.prevent_default();
+                open_menu();
+            }
+            _ => e.prevent_default(),
+        }
+    });
+    on_cleanup(move || pad_menu.remove());
     // The head of a panel sheet: title, the Facets held, Close.
     let head = move |title: &'static str, facets: bool| {
         view! {
