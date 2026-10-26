@@ -134,7 +134,7 @@ pub fn Toaster() -> impl IntoView {
         let mut next = None;
         toasts.update(|q| next = q.pop_front());
         current.set(next);
-        crate::audio::sfx("chime", 0.0);
+        crate::audio::sfx("progress", 0.0);
         set_timeout(
             move || current.set(None),
             std::time::Duration::from_millis(TOAST_MS),

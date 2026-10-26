@@ -85,7 +85,7 @@ pub fn reward_line(r: &Rival, p: &Progress) -> String {
         ),
         (true, _) => tr(
             format!("Rematch win: ⬡ {facets}"),
-            format!("Revanche gagnée : ⬡ {facets}"),
+            format!("Victoire en revanche : ⬡ {facets}"),
         ),
     }
 }
@@ -131,6 +131,29 @@ pub fn Seal(r: &'static Rival, #[prop(into)] earned: Signal<bool>) -> impl IntoV
         <span class=format!("seal t-{tone}") class:earned=move || earned.get() aria-hidden="true"></span>
     }
 }
+
+/// A seal just won (WORLD_DESIGN §12.1): the hexagon fills face by face in
+/// the rival's colour, in step with the stinger [`SEAL_AT`] ms after the
+/// result shows.
+#[component]
+pub fn SealFill(r: &'static Rival) -> impl IntoView {
+    let tone = r.colors.first().map_or("colorless", |&c| color_key(c));
+    // The hexagon's corners, clockwise from the top (the `.seal` clip-path).
+    const P: [(u8, u8); 6] = [(50, 0), (93, 28), (93, 82), (50, 110), (7, 82), (7, 28)];
+    view! {
+        <span class=format!("seal-fill t-{tone}") style=format!("--at:{SEAL_AT}ms") aria-hidden="true">
+            <svg viewBox="0 0 100 110">
+                {(0..6).map(|i| {
+                    let (a, b) = (P[i], P[(i + 1) % 6]);
+                    view! { <path class="face" style=format!("--i:{i}") d=format!("M50 55L{} {}L{} {}Z", a.0, a.1, b.0, b.1) /> }
+                }).collect_view()}
+            </svg>
+        </span>
+    }
+}
+
+/// When a won seal starts to fill, after the result's own fanfare (ms).
+pub const SEAL_AT: u32 = 1200;
 
 /// The world header's badge: the seal count, and the champion's title once
 /// the Warden falls; opens the roster.
@@ -249,14 +272,15 @@ pub fn CampaignPanel(
     before: impl Fn() + Copy + Send + Sync + 'static,
 ) -> impl IntoView {
     let progress = expect_context::<RwSignal<Progress>>();
-    let champ = move || progress.with(champion);
     view! {
-        <p class="page-lead">{move || if champ() {
-            tr("You hold all six seals and the Warden's title. The rivals still take rematches, and the Gauntlet and the daily duel are below.",
-                "Vous détenez les six sceaux et le titre de la Gardienne. Les rivaux acceptent toujours une revanche ; l'Épreuve et le duel du jour vous attendent plus bas.")
-        } else {
-            tr("Six rivals wait out on the trail, the boardwalk and the quarry. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden.",
-                "Six rivaux vous attendent sur le sentier, sur la promenade et à la carrière. Battez-les un à un pour gagner leur sceau ; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.")
+        <p class="page-lead">{move || match progress.with(title) {
+            // "Champion", or "Champion of the Seventh Face" once Rook's story is done.
+            Some(t) => tr(
+                format!("You hold all six seals and the title {}. The rivals still take rematches, and the Gauntlet and the daily duel are below.", t.get()),
+                format!("Vous détenez les six sceaux et le titre de {}. Les rivaux acceptent toujours une revanche ; l'Épreuve et le duel du jour vous attendent plus bas.", t.get()),
+            ),
+            None => tr("Six rivals wait out on the trail, the boardwalk and the quarry. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden.",
+                "Six rivaux vous attendent sur le sentier, sur la promenade et à la carrière. Battez-les un à un pour gagner leur sceau ; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.").to_string(),
         }}</p>
         <Roster />
         <section class="ladder-page" aria-labelledby="ladder-title">
@@ -550,7 +574,7 @@ pub fn Challenge(
         ),
         (None, Some(t)) if t.win_pays(p) > 0 => tr(
             format!("Rematch win: ⬡ {}", t.win_pays(p)),
-            format!("Revanche gagnée : ⬡ {}", t.win_pays(p)),
+            format!("Victoire en revanche : ⬡ {}", t.win_pays(p)),
         ),
         _ => tr(
             "A friendly rematch, no purse",

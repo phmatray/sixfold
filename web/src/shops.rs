@@ -86,7 +86,7 @@ pub fn Trader() -> impl IntoView {
         shop::buy_single(p, pr, day, slot)
     }) {
         Ok(id) => {
-            crate::audio::sfx("jingle", 0.0);
+            crate::audio::sfx("reward", 0.0);
             said.set(
                 tr(
                     format!("Bought {}. It's in your collection.", card(id).label()),
@@ -101,7 +101,7 @@ pub fn Trader() -> impl IntoView {
     };
     let sell = move |id: CardId| match deal((progress, profile), |p, pr| shop::sell(p, pr, id)) {
         Ok(n) => {
-            crate::audio::sfx("facets", 0.0);
+            crate::audio::sfx("reward", 0.0);
             said.set(
                 tr(
                     format!("Sold 1 {} for ⬡ {n}.", card(id).label()),
@@ -117,7 +117,7 @@ pub fn Trader() -> impl IntoView {
     let sell_extras = move |_| {
         let n = deal((progress, profile), |p, pr| Ok(shop::sell_extras(p, pr))).unwrap_or(0);
         if n > 0 {
-            crate::audio::sfx("facets", 0.0);
+            crate::audio::sfx("reward", 0.0);
         }
         said.set(
             tr(
@@ -239,7 +239,7 @@ pub fn InnCounter(stock: &'static InnStock) -> impl IntoView {
     let buy_pack = move |b: usize| match deal((progress, profile), |p, pr| shop::buy_pack(p, pr, b))
     {
         Ok(()) => {
-            crate::audio::sfx("jingle", 0.0);
+            crate::audio::sfx("reward", 0.0);
             said.set(
                 tr(
                     format!(
@@ -259,7 +259,7 @@ pub fn InnCounter(stock: &'static InnStock) -> impl IntoView {
         shop::buy_inn_single(p, pr, stock, slot)
     }) {
         Ok(id) => {
-            crate::audio::sfx("jingle", 0.0);
+            crate::audio::sfx("reward", 0.0);
             said.set(
                 tr(
                     format!("Bought {}. It's in your collection.", card(id).label()),
@@ -333,7 +333,7 @@ pub fn PackCounter() -> impl IntoView {
     let said = RwSignal::new(String::new());
     let buy = move |b: usize| match deal((progress, profile), |p, pr| shop::buy_pack(p, pr, b)) {
         Ok(()) => {
-            crate::audio::sfx("jingle", 0.0);
+            crate::audio::sfx("reward", 0.0);
             said.set(
                 tr(
                     format!(
@@ -526,7 +526,7 @@ pub fn Press() -> impl IntoView {
     let done = move |id: CardId, how: Result<(), ShopError>| match how {
         Ok(()) => {
             stats.update(|s| s.add("crafts", 1));
-            crate::audio::sfx("jingle", 0.0);
+            crate::audio::sfx("reward", 0.0);
             said.set(tr(
                 format!(
                     "Printed: one more {}. You have {}.",
