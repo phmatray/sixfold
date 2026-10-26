@@ -41,6 +41,8 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test -p sixfold-engine
+      # The web crate's unit tests run on the host too (no browser, no wasm).
+      - run: cargo test -p sixfold-web
       - name: Install Trunk
         run: curl -sSfL https://github.com/trunk-rs/trunk/releases/download/v0.22.0/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C /usr/local/bin
       - name: Build web app
@@ -52,7 +54,7 @@ jobs:
           grep -q '"./vendor/three/build/three.module.min.js"' web/dist/sw.js
           grep -qx "$(sed -n 's/^THREE_VERSION=\${1:-\(.*\)}$/\1/p' tools/vendor-three.sh)" web/vendor/three/VERSION
       # The e2e job tests this very build rather than building again.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: web-dist
           path: web/dist
@@ -69,7 +71,7 @@ jobs:
         working-directory: e2e
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: web-dist
           path: web/dist
@@ -82,7 +84,7 @@ jobs:
       # The runner image already has the browser's system libraries (--with-deps spends minutes on apt).
       - run: npx playwright install --only-shell chromium
       - run: npx playwright test
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: e2e-report
