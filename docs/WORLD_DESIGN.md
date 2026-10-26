@@ -719,6 +719,15 @@ the end state, applying every state effect and skipping cues; walks still arrive
 3. `sable_door` — after `rook_4`: the sealed door's `Open` clip, Sable walks out three tiles, faces Rook, faces
    the hero, two lines each, Sable walks back in, the door stays open.
 
+4. `finale` (1.8, #67) — the Warden's room, on coming back from the first Warden win
+   (`won:warden & !flag:finale`): the seal stones ring (`music:finale`, `sfx:seal`), Sable hands over the
+   title in two lines, then `flag:finale` and `show:credits`. The credits open on the seal stone lighting its
+   six faces and the champion's title ("Champion", or "Champion of the Seventh Face" with `flag:rook_4`), and
+   end with the hero in the duel hall by the sealed door (`shop` 1,6), saved. Coming back from a duel, a
+   scene due on entering the map plays instead of the rival's post-duel line. **Hook for later scenes:**
+   `flag:finale` is set whether the scene played out or was skipped, so an epilogue in the hall can wait for
+   it (`on: "enter"`, `if: "flag:finale & …"`): it plays as the hero lands there after the credits.
+
 Scripts are map data (§9.1), triggered `on: "enter"` or by stepping on `at` tiles.
 
 ---
@@ -1853,7 +1862,9 @@ mask table is the same for all three).
 
 New tracker entries in `web/audio/audio.js` (original, procedural, like today's): `ember`, `storm`, `tide`,
 `dream`, `grove`, `stone`, `cave`, `rook` (1.4, minor, 100 bpm, Rook's theme for his scenes). Two new scales:
-`dorian` and `pentatonic`. A night variant of every outdoor track is derived the way `interior` is (filtered,
+`dorian` and `pentatonic`. 1.8 (#67): `finale` (the title's hook slowed to a processional, for the finale's
+hall scene), `credits` (the credits' own theme, a warm walk round the same hook) and the `face` sound (a
+bell per seal-stone face as it lights, then the whole stone). A night variant of every outdoor track is derived the way `interior` is (filtered,
 half drums). Map JSON names its track with `music`.
 
 1.9: under the music, an **ambience bed** per region, the caves and indoors (`BEDS` in `audio.js`): looping

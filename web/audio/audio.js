@@ -331,6 +331,18 @@ const SFX = {
     [62, 69, 74, 78, 83].forEach((m, i) => tone(d, t + 0.26 + i * 0.03, hz(m), 1.5, { type: i ? "triangle" : "sine", peak: i ? 0.05 : 0.14, a: 0.06, lin: true, rel: 0.9 }));
     noise(d, t + 0.24, 1.1, { type: "highpass", f: 7000, a: 0.3, peak: 0.05 });
   },
+  // The finale's seal stone (#67): a struck bell as each face lights (n 0..5, climbing the scale
+  // up to the sixth, the game's six), then (n 6) the whole stone rings in the title's chord.
+  face: (d, t, n) => {
+    if (n < 6) {
+      const m = [74, 76, 78, 79, 81, 83][n];
+      tone(d, t, hz(m), 1.3, { type: "triangle", peak: 0.09, rel: 0.7 });
+      tone(d, t, hz(m + 12), 0.6, { peak: 0.022, detune: 5, rel: 0.4 });
+      return;
+    }
+    [62, 69, 74, 78, 83].forEach((m, i) => tone(d, t + i * 0.04, hz(m), 2.6, { type: i ? "triangle" : "sine", peak: i ? 0.05 : 0.13, a: 0.08, lin: true, rel: 1.3 }));
+    noise(d, t, 1.4, { type: "highpass", f: 7000, a: 0.4, peak: 0.04 });
+  },
   win: (d, t) => {
     notes(d, t, [72, 76, 79], 0.12, { type: "triangle", peak: 0.15, dur: 0.3 });
     [72, 76, 79, 84].forEach((m) => tone(d, t + 0.38, hz(m), 1.4, { type: "triangle", peak: 0.09, lin: true, rel: 0.6 }));
@@ -708,6 +720,27 @@ TRACKS.duel_boss = {
   drums: { kick: "x...x...x...x...", snare: "....x.......x...", hat: "x.x.x.x.x.x.x.x." },
   hot: HOT,
   mix: { lead: 0.08, pad: 0.03, bass: 0.15, keys: 0.025 },
+};
+// The ending (#67). The finale's hall scene: the title's hook slowed to a processional,
+// held on the pads, no drums but a soft shaker (a `music:finale` cue).
+TRACKS.finale = {
+  ...TRACKS.title, bpm: 66, cutoff: 3200,
+  bass: "x.......x.......",
+  keys: undefined,
+  drums: { shaker: "........x......." },
+  mix: { lead: 0.07, pad: 0.04, bass: 0.1, keys: 0.02 },
+};
+// The credits: a theme of their own, a warm walk that keeps coming back to the
+// hook (tonic up to the sixth), I-IV-vi-V under it.
+TRACKS.credits = {
+  bpm: 88, root: 62, scale: "major", chords: [0, 3, 5, 4, 0, 3, 1, 4],
+  lead:
+    "3---5-8-------7-" + "8-a-8-7-5-------" + "3---5-8---a---c-" + "b-------a-------" +
+    "8---a-c---a-8-7-" + "8-------5---3---" + "4-5-6-8-7-6-5-4-" + "3---------------",
+  bass: "x...5...x...5.o.",
+  keys: "..x...x...x...x.",
+  drums: { kick: "x.......x.......", shaker: "..x...x...x...x." },
+  mix: { lead: 0.075, pad: 0.03, bass: 0.12, keys: 0.02 },
 };
 // After dark, every outdoor track has a night variant made the same way: slower,
 // filtered, half the drums (only the kick and a soft shaker), the lead held back.

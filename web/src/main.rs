@@ -173,6 +173,7 @@ fn App() -> impl IntoView {
     Effect::new(move |_| match screen.get() {
         Screen::Match => audio::music("duel"),
         Screen::World => {}
+        Screen::Credits(_) => audio::music("credits"),
         // Silence until "Press to start" (the gesture the title music waits for).
         Screen::Splash => audio::music(""),
         _ => audio::music("title"),

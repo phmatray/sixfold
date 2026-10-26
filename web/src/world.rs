@@ -930,6 +930,8 @@ pub fn WorldScreen() -> impl IntoView {
                                 "press" => next = Some(Sheet::Press),
                                 "inn" => next = Some(Sheet::Inn),
                                 "map" => next = Some(Sheet::Atlas),
+                                // The finale's last beat (#67): the seal stone, the title, the credits.
+                                "credits" => screen.set(Screen::Credits(true)),
                                 // Odile works through dialogue; the rest are 1.3.
                                 "curios" => {}
                                 _ => leptos::logging::warn!("world: no panel {panel}"),

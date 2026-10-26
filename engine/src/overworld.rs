@@ -57,7 +57,7 @@ use crate::trainers::trainer;
 pub const STARTING_COINS: u32 = 100;
 
 /// The UI panels a `show:` effect may open.
-pub const PANELS: [&str; 10] = [
+pub const PANELS: [&str; 11] = [
     "ladder",
     "inn",
     "shop_hall",
@@ -68,6 +68,8 @@ pub const PANELS: [&str; 10] = [
     "inn_shop",
     "map",
     "tailor",
+    // The credits, after the Warden falls (#67): they end in the duel hall.
+    "credits",
 ];
 
 /// The ways a `warp:` cue may leave the hero facing.
@@ -78,7 +80,7 @@ pub const EMOTES: [&str; 5] = ["bang", "what", "dots", "heart", "note"];
 /// Sounds a `sfx:` cue may play (the world's sound names in `web/audio/audio.js`).
 pub const SOUNDS: [&str; 5] = ["spark", "chime", "jingle", "gate", "seal"];
 /// Tracks a `music:` cue may switch to (the world's tracks in `web/audio/audio.js`).
-pub const TRACKS: [&str; 9] = [
+pub const TRACKS: [&str; 10] = [
     "overworld",
     "interior",
     "ember",
@@ -88,6 +90,8 @@ pub const TRACKS: [&str; 9] = [
     "grove",
     "stone",
     "cave",
+    // The finale's hall scene (#67): the title's hook, slow and solemn.
+    "finale",
 ];
 /// The longest `wait:` a cutscene may hold, in milliseconds.
 pub const MAX_WAIT: u16 = 5000;
