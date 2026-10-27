@@ -2424,7 +2424,7 @@
             "A brass tally tag nailed over the door, worn smooth by thumbs. Through the window: a kettle, a cat, a pick on two hooks."
           ],
           "lines_fr": [
-            "Un jeton de laiton cloué au-dessus de la porte, poli par les pouces. Par la fenêtre : une bouilloire, un chat, une pioche sur deux crochets."
+            "Un jeton de laiton cloué au-dessus de la porte, poli par les pouces. Par la fenêtre : une bouilloire, un chat, une pioche sur deux crochets."
           ]
         }
       ]
@@ -2442,7 +2442,7 @@
             "Chalked on the door: \"Gone to the Bastion. Back for supper. Don't let the dog in.\" There is no dog in sight."
           ],
           "lines_fr": [
-            "Écrit à la craie sur la porte : « Partie au Bastion. Retour pour le souper. Ne laissez pas entrer le chien. » Aucun chien en vue."
+            "Écrit à la craie sur la porte : « Partie au Bastion. Retour pour le souper. Ne laissez pas entrer le chien. » Aucun chien en vue."
           ]
         }
       ]
@@ -2478,7 +2478,7 @@
             "Window boxes of heather, and a brass plate: \"Shift captain. Knock loud.\""
           ],
           "lines_fr": [
-            "Des jardinières de bruyère, et une plaque de laiton : « Chef de poste. Frappez fort. »"
+            "Des jardinières de bruyère, et une plaque de laiton : « Chef de poste. Frappez fort. »"
           ]
         }
       ]
@@ -2496,7 +2496,7 @@
             "Children's chalk drawings all over the doorstep: carts, cairns, a tall stick-person with a pick, labelled \"MUM\"."
           ],
           "lines_fr": [
-            "Des dessins à la craie d'enfants partout sur le seuil : des wagonnets, des cairns, un grand bonhomme en bâtons avec une pioche, marqué « MAMAN »."
+            "Des dessins à la craie d'enfants partout sur le seuil : des wagonnets, des cairns, un grand bonhomme en bâtons avec une pioche, marqué « MAMAN »."
           ]
         }
       ]
@@ -2544,7 +2544,7 @@
       "z": 2,
       "give": "card:bouldergut",
       "text": "In the brake-man's box on the ledge, under a coil of greased cable: a card, left by whoever last worked the winding gear.",
-      "text_fr": "Dans la caisse du freineur, sur la corniche, sous une bobine de câble graissé : une carte, laissée par le dernier qui a fait tourner le treuil."
+      "text_fr": "Dans la caisse du freineur, sur la corniche, sous une bobine de câble graissé : une carte, laissée par le dernier qui a fait tourner le treuil."
     },
     {
       "x": 47,
@@ -2559,7 +2559,7 @@
             "From here you see the whole valley: the rail street, the plaza, the stream, and the switchbacks of Scree Pass going down and down. West, the cut terraces of the Bastion catch the light."
           ],
           "lines_fr": [
-            "D'ici, on voit toute la vallée : la rue des rails, la place, le torrent, et les lacets du Col des Éboulis qui descendent, descendent. À l'ouest, les gradins taillés du Bastion prennent la lumière."
+            "D'ici, on voit toute la vallée : la rue des rails, la place, le torrent, et les lacets du Col des Éboulis qui descendent, descendent. À l'ouest, les gradins taillés du Bastion prennent la lumière."
           ]
         }
       ]
@@ -2595,7 +2595,7 @@
             "Scales in the window, and jars of ore with labels in a tidy hand. A note: \"Closed for lunch. Lunch is long.\""
           ],
           "lines_fr": [
-            "Des balances à la fenêtre, et des bocaux de minerai avec des étiquettes d'une écriture soignée. Un mot : « Fermé pour le déjeuner. Le déjeuner est long. »"
+            "Des balances à la fenêtre, et des bocaux de minerai avec des étiquettes d'une écriture soignée. Un mot : « Fermé pour le déjeuner. Le déjeuner est long. »"
           ]
         }
       ]
@@ -2605,7 +2605,7 @@
       "z": 13,
       "kind": "sign",
       "text": "West: The Bastion, Orla's quarry and the seal of the Stonebacks. Down the steps: the plaza and the road to Scree Pass.",
-      "text_fr": "Ouest : Le Bastion, la carrière d'Orla et le sceau des Échines. En bas des marches : la place et la route du Col des Éboulis."
+      "text_fr": "Ouest : Le Bastion, la carrière d'Orla et le sceau des Échines. En bas des marches : la place et la route du Col des Éboulis."
     },
     {
       "kind": "waymark",
@@ -2644,7 +2644,7 @@
             "On the windowsill, rows and rows of pebbles, sorted by colour. A label: \"DO NOT TOUCH. COUNTED.\""
           ],
           "lines_fr": [
-            "Sur le rebord de la fenêtre, des rangées et des rangées de cailloux, triés par couleur. Une étiquette : « NE PAS TOUCHER. COMPTÉS. »"
+            "Sur le rebord de la fenêtre, des rangées et des rangées de cailloux, triés par couleur. Une étiquette : « NE PAS TOUCHER. COMPTÉS. »"
           ]
         }
       ]
@@ -2662,7 +2662,7 @@
             "A tin bath hangs on the wall, and a row of boots stands by the door, smallest to biggest: five of them."
           ],
           "lines_fr": [
-            "Un baquet de fer pend au mur, et une rangée de bottes attend près de la porte, de la plus petite à la plus grande : cinq."
+            "Un baquet de fer pend au mur, et une rangée de bottes attend près de la porte, de la plus petite à la plus grande : cinq."
           ]
         }
       ]
@@ -2680,7 +2680,7 @@
             "A slate on the door: \"Night shift. SLEEPING. This means you, Bex.\""
           ],
           "lines_fr": [
-            "Une ardoise sur la porte : « Équipe de nuit. JE DORS. Ça veut dire toi, Bex. »"
+            "Une ardoise sur la porte : « Équipe de nuit. JE DORS. Ça veut dire toi, Bex. »"
           ]
         }
       ]
@@ -2690,7 +2690,7 @@
       "z": 32,
       "kind": "sign",
       "text": "South: Scree Pass, down to the Undermine and the Emberstep Quarry. North, up the steps: the rail street, the Tally Room and Ropes & Holds.",
-      "text_fr": "Sud : le Col des Éboulis, jusqu'aux Galeries Basses et la Carrière de Pas-de-Braise. Au nord, en haut des marches : la rue des rails, la Salle des Comptes et Cordes et Prises."
+      "text_fr": "Sud : le Col des Éboulis, jusqu'aux Galeries Basses et la Carrière de Pas-de-Braise. Au nord, en haut des marches : la rue des rails, la Salle des Comptes et Cordes et Prises."
     }
   ],
   "warps": [
@@ -2786,7 +2786,7 @@
             "Right. Favour for favour. The crew clears the second passage tonight."
           ],
           "lines_fr": [
-            "Ma pioche ! Quarante ans qu'elle porte bonheur, et le seul jour où je la pose sur le col…",
+            "Ma pioche ! Quarante ans qu'elle porte bonheur, et le seul jour où je la pose sur le col…",
             "Bon. Service pour service. L'équipe dégage le deuxième passage ce soir."
           ],
           "do": [
@@ -2802,8 +2802,8 @@
             "Favour for favour: the third passage, cleared. Go and see what's behind it."
           ],
           "lines_fr": [
-            "Tu as battu notre Jet ? Ha ! Il poussera des wagonnets pendant un mois, comme promis. C'est ce qu'il lui faut.",
-            "Service pour service : le troisième passage, dégagé. Va voir ce qu'il y a derrière."
+            "Tu as battu notre Jet ? Ha ! Il poussera des wagonnets pendant un mois, comme promis. C'est ce qu'il lui faut.",
+            "Service pour service : le troisième passage, dégagé. Va voir ce qu'il y a derrière."
           ],
           "do": [
             "flag:rubble_3",
@@ -2816,7 +2816,7 @@
             "Still at it? Lunch to Ros at the east cut (Dagny has the pail), my pick somewhere on the Scree Pass switchbacks, and a lesson for my nephew Jet, on the rails in the Undermine. Each one's a passage cleared."
           ],
           "lines_fr": [
-            "Toujours dessus ? Le déjeuner pour Ros, à la saignée est (Dagny a la gamelle), ma pioche quelque part dans les lacets du Col, et une leçon pour mon neveu Jet, sur les rails des Galeries. Chacun, c'est un passage dégagé."
+            "Toujours dessus ? Le déjeuner pour Ros, à la saignée est (Dagny a la gamelle), ma pioche quelque part dans les lacets du Col, et une leçon pour mon neveu Jet, sur les rails des Galeries. Chacun, c'est un passage dégagé."
           ]
         },
         {
@@ -2827,9 +2827,9 @@
             "Each one, a passage cleared. Off you go."
           ],
           "lines_fr": [
-            "Huw. Chef d'équipe d'Orla. Tu es monté par les Galeries ? Alors tu as vu ce qu'il en reste.",
-            "Trois passages latéraux se sont effondrés, il y a des années. L'équipe peut les dégager, mais l'équipe ne soulève pas une pioche pour rien. C'est la règle, ici : service pour service.",
-            "Trois services, alors. Dagny, à la Salle des Comptes, a la gamelle de l'équipe ; porte-la à Ros, à la saignée est. J'ai perdu ma pioche porte-bonheur sur le col ; retrouve-la. Et mon neveu Jet se croit trop bon pour pousser des wagonnets. Bats-le aux cartes.",
+            "Huw. Chef d'équipe d'Orla. Tu es monté par les Galeries ? Alors tu as vu ce qu'il en reste.",
+            "Trois passages latéraux se sont effondrés, il y a des années. L'équipe peut les dégager, mais l'équipe ne soulève pas une pioche pour rien. C'est la règle, ici : service pour service.",
+            "Trois services, alors. Dagny, à la Salle des Comptes, a la gamelle de l'équipe ; porte-la à Ros, à la saignée est. J'ai perdu ma pioche porte-bonheur sur le col ; retrouve-la. Et mon neveu Jet se croit trop bon pour pousser des wagonnets. Bats-le aux cartes.",
             "Chacun, un passage dégagé. Allez, file."
           ],
           "do": [
@@ -2858,8 +2858,8 @@
             "Here, a swap: my best card for your best cairn. I can't take the cairn, so just the card."
           ],
           "lines_fr": [
-            "Tu les as TOUS construits ? Tu as de la poussière d'ardoise sur les mains, ça se voit.",
-            "Tiens, un échange : ma meilleure carte contre ton meilleur cairn. Je peux pas prendre le cairn, alors juste la carte."
+            "Tu les as TOUS construits ? Tu as de la poussière d'ardoise sur les mains, ça se voit.",
+            "Tiens, un échange : ma meilleure carte contre ton meilleur cairn. Je peux pas prendre le cairn, alors juste la carte."
           ],
           "do": [
             "card:shalepup",
@@ -2873,7 +2873,7 @@
             "Pebble count today: four hundred and twelve. One is a fossil. One might be an egg."
           ],
           "lines_fr": [
-            "Le compte de cailloux aujourd'hui : quatre cent douze. Un, c'est un fossile. Un, c'est peut-être un œuf."
+            "Le compte de cailloux aujourd'hui : quatre cent douze. Un, c'est un fossile. Un, c'est peut-être un œuf."
           ]
         },
         {
@@ -2909,7 +2909,7 @@
           ],
           "lines_fr": [
             "Je ne dors pas. Quarante ans que j'ai travaillé là-dessous, et le noir m'appelle encore.",
-            "Les Galeries allaient de la carrière jusque sous toute la montagne. Les passages latéraux, c'est là qu'on gardait les bonnes choses : les réserves, les vieux wagonnets, nos gages. Quand le toit est tombé, tout est resté dedans.",
+            "Les Galeries allaient de la carrière jusque sous toute la montagne. Les passages latéraux, c'est là qu'on gardait les bonnes choses : les réserves, les vieux wagonnets, nos gages. Quand le toit est tombé, tout est resté dedans.",
             "Et les cristaux. Si tu as une lanterne, regarde parmi eux. On cachait notre paie là où la lueur cache tout.",
             "La pierre du sceau d'Orla, en haut au Bastion, a une septième face, vide comme le noir. Mon père disait que la montagne la gardait pour quelqu'un."
           ]

@@ -56,7 +56,7 @@ pub static LORE: &[(&str, Lore)] = &[
         "Solarlynx",
         Lore {
             en: "It greets the sunrise with its ruff wide open. After a Supernova Leap it lies grey for days, and the ash where it rests keeps glowing.",
-            fr: "Il salue le lever du jour collerette grande ouverte. Après un Saut supernova, il reste gris des jours ; la cendre où il dort luit encore.",
+            fr: "Il salue le lever du jour collerette grande ouverte. Après un Saut supernova, il reste gris des jours\u{202f}; la cendre où il dort luit encore.",
         },
     ),
     // 007
@@ -160,7 +160,7 @@ pub static LORE: &[(&str, Lore)] = &[
         "Kelpwarden",
         Lore {
             en: "It keeps a kelp bed the way a gardener keeps a hedge. Each glass float on its mantle holds a bead of tide, and it gives the oldest away.",
-            fr: "Il entretient sa forêt d'algues comme un jardinier sa haie. Chaque flotteur de son manteau garde une perle de marée ; il donne le plus vieux.",
+            fr: "Il entretient sa forêt d'algues comme un jardinier sa haie. Chaque flotteur de son manteau garde une perle de marée\u{202f}; il donne le plus vieux.",
         },
     ),
     // 020
@@ -368,7 +368,7 @@ pub static LORE: &[(&str, Lore)] = &[
         "Knollop",
         Lore {
             en: "It carries a little hill of sandstone on its back. Anvilstead's miners follow its tunnels: a Knollop never digs where the roof will fall.",
-            fr: "Il porte une petite colline de grès sur le dos. Les mineurs de Bourg-l'Enclume suivent ses galeries : un Mottelot ne creuse jamais là où le plafond va tomber.",
+            fr: "Il porte une petite colline de grès sur le dos. Les mineurs de Bourg-l'Enclume suivent ses galeries\u{a0}: un Mottelot ne creuse jamais là où le plafond va tomber.",
         },
     ),
     // 046
@@ -448,7 +448,7 @@ pub static LORE: &[(&str, Lore)] = &[
         "Bouldergut",
         Lore {
             en: "It carries a round boulder in an open cradle in its belly. To move a thing, it leans on it; to stop one, it drops the boulder.",
-            fr: "Il porte un rocher rond dans un berceau ouvert au creux du ventre. Pour déplacer une chose, il s'appuie ; pour l'arrêter, il lâche le rocher.",
+            fr: "Il porte un rocher rond dans un berceau ouvert au creux du ventre. Pour déplacer une chose, il s'appuie\u{202f}; pour l'arrêter, il lâche le rocher.",
         },
     ),
     // 056
@@ -560,7 +560,7 @@ pub static LORE: &[(&str, Lore)] = &[
         "Warrenbuck",
         Lore {
             en: "Four ears hear four winds. Couriers race it at dawn on the six roads; nobody has won yet.",
-            fr: "Quatre oreilles entendent quatre vents. Les coursiers des six routes font la course avec lui à l'aube ; personne n'a encore gagné.",
+            fr: "Quatre oreilles entendent quatre vents. Les coursiers des six routes font la course avec lui à l'aube\u{202f}; personne n'a encore gagné.",
         },
     ),
     // 070

@@ -85,19 +85,19 @@ impl Advice {
             Issue::Healthy => tr("Clean bill of health.", "Rien à signaler.").into(),
             Issue::FewBasics(n) => tr(
                 format!("Only {n} Basic Hexons: some opening hands will have none. Aim for {MIN_BASICS} or more."),
-                format!("Seulement {n} Hexons de Base : certaines mains de départ n'en auront aucun. Visez-en {MIN_BASICS} ou plus."),
+                format!("Seulement {n} Hexons de Base\u{a0}: certaines mains de départ n'en auront aucun. Visez-en {MIN_BASICS} ou plus."),
             ),
             Issue::Energy(n) if n < *ENERGY.start() => tr(
                 format!("Only {n} energy: your attacks will stall. Aim for 18 to 28."),
-                format!("Seulement {n} énergies : vos attaques vont piétiner. Visez entre 18 et 28."),
+                format!("Seulement {n} énergies\u{a0}: vos attaques vont piétiner. Visez entre 18 et 28."),
             ),
             Issue::Energy(n) => tr(
                 format!("{n} energy is a lot: you'll draw it instead of Hexons. Aim for 18 to 28."),
-                format!("{n} énergies, c'est beaucoup : vous les piocherez à la place de vos Hexons. Visez entre 18 et 28."),
+                format!("{n} énergies, c'est beaucoup\u{a0}: vous les piocherez à la place de vos Hexons. Visez entre 18 et 28."),
             ),
             Issue::BrokenLine(id) => tr(
                 format!("{} has nothing to awaken from: add {}.", label(id), below(id)),
-                format!("{} n'a rien d'où s'éveiller : ajoutez {}.", label(id), below(id)),
+                format!("{} n'a rien d'où s'éveiller\u{a0}: ajoutez {}.", label(id), below(id)),
             ),
             Issue::NoEnergyFor(c) => tr(
                 format!("Some attacks need {c} energy, and the deck has none."),
@@ -105,7 +105,7 @@ impl Advice {
             ),
             Issue::NoDrawTrainers => tr(
                 format!("No draw or search trainers: a {} or a {} would keep your hand full.", label(LUCKY_SATCHEL), label(TRAIL_COMPASS)),
-                format!("Aucune carte Dresseur de pioche ou de recherche : {} ou {} garderait votre main pleine.", label(LUCKY_SATCHEL), label(TRAIL_COMPASS)),
+                format!("Aucune carte Dresseur de pioche ou de recherche\u{a0}: {} ou {} garderait votre main pleine.", label(LUCKY_SATCHEL), label(TRAIL_COMPASS)),
             ),
             Issue::TooManyColours(n) => tr(
                 format!("{n} colours is a lot to power. Two is easier."),
@@ -113,7 +113,7 @@ impl Advice {
             ),
             Issue::TopHeavy(id) => tr(
                 format!("More {} than {} underneath: some will be stuck in your hand.", label(id), below(id)),
-                format!("Plus de {} que de {} en dessous : certains resteront coincés dans votre main.", label(id), below(id)),
+                format!("Plus de {} que de {} en dessous\u{a0}: certains resteront coincés dans votre main.", label(id), below(id)),
             ),
         }
     }

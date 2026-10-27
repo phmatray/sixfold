@@ -91,7 +91,7 @@
       "z": 3,
       "kind": "sign",
       "text": "A sea chart, pinned to the wall. A dotted line runs east from this jetty to a harbour drawn as a gull. Someone has pencilled in: \"Gullhaven, two hours, calm days only.\"",
-      "text_fr": "Une carte marine, punaisée au mur. Un pointillé file vers l'est, de cet embarcadère à un port dessiné comme une mouette. Quelqu'un a ajouté au crayon : « Havre-aux-Mouettes, deux heures, par temps calme seulement. »"
+      "text_fr": "Une carte marine, punaisée au mur. Un pointillé file vers l'est, de cet embarcadère à un port dessiné comme une mouette. Quelqu'un a ajouté au crayon : « Havre-aux-Mouettes, deux heures, par temps calme seulement. »"
     },
     {
       "kind": "find",
@@ -101,7 +101,7 @@
       "hidden": true,
       "give": "coins:40",
       "text": "In the net locker, under an oilskin that smells of tar: a purse of Facets, tied with a fisherman's knot.",
-      "text_fr": "Dans le casier à filets, sous un ciré qui sent le goudron : une bourse de Facettes, fermée d'un nœud de pêcheur."
+      "text_fr": "Dans le casier à filets, sous un ciré qui sent le goudron : une bourse de Facettes, fermée d'un nœud de pêcheur."
     }
   ],
   "warps": [
@@ -162,7 +162,7 @@
           ],
           "lines_fr": [
             "Un filet, ce n'est que des trous noués avec soin. Comme un deck, si tu veux mon avis.",
-            "Le cerf-volant de Dace ? Je l'avais prévenue, cette petite : jamais près de la lanterne. Jamais."
+            "Le cerf-volant de Dace ? Je l'avais prévenue, cette petite : jamais près de la lanterne. Jamais."
           ]
         },
         {

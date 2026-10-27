@@ -236,17 +236,17 @@ impl Objective {
             // The intro sends the hero to Wynne's first (her running shoes).
             Objective::Lesson if !p.has_item("running_shoes") => tr(
                 "Drop in at Wynne's shop up the path, then duel Tobin in Sixfold Meadow: he'll show you how a duel goes.",
-                "Passez à la boutique de Wynne, en haut du chemin, puis défiez Tobin au Pré de Sixfold : il vous montrera comment se passe un duel.",
+                "Passez à la boutique de Wynne, en haut du chemin, puis défiez Tobin au Pré de Sixfold\u{a0}: il vous montrera comment se passe un duel.",
             )
             .into(),
             Objective::Lesson => tr(
                 "Duel Tobin in Sixfold Meadow: he'll show you how a duel goes.",
-                "Défiez Tobin au Pré de Sixfold : il vous montrera comment se passe un duel.",
+                "Défiez Tobin au Pré de Sixfold\u{a0}: il vous montrera comment se passe un duel.",
             )
             .into(),
             Objective::Rival(r) if !r.seal => tr(
                 format!("Six seals: challenge {}, {}. {}.", r.name, lower_first(r.title.en), r.place.en),
-                format!("Six sceaux : défiez {}, {}. {}.", r.name, lower_first(r.title.fr), r.place.fr),
+                format!("Six sceaux\u{a0}: défiez {}, {}. {}.", r.name, lower_first(r.title.fr), r.place.fr),
             ),
             // #150: the seals are met, the region's duelists not yet.
             Objective::Rival(r) if r.open(p) && !r.earned(p) => {

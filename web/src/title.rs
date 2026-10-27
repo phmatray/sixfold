@@ -248,7 +248,7 @@ pub fn OptionsPanel(
             {move || if confirm.get() {
                 view! {
                     <div class="confirm" role="group" aria-labelledby="reset-q">
-                        <p id="reset-q">{tr("Delete this slot's cards, decks, packs and world progress, and start again as a new player?", "Effacer les cartes, decks, boosters et la progression de cet emplacement, et repartir comme nouveau joueur ?")}</p>
+                        <p id="reset-q">{tr("Delete this slot's cards, decks, packs and world progress, and start again as a new player?", "Effacer les cartes, decks, boosters et la progression de cet emplacement, et repartir comme nouveau joueur\u{202f}?")}</p>
                         <div class="row">
                             <button type="button" class="btn danger" on:click=reset>{tr("Reset progress", "Tout effacer")}</button>
                             <button type="button" class="btn ghost" on:click=move |_| confirm.set(false) autofocus>{tr("Keep my progress", "Garder ma progression")}</button>
@@ -390,7 +390,7 @@ pub fn TitleScreen() -> impl IntoView {
             <header class="title-brand">
                 <Mark />
                 <h1 class="wordmark"><Wordmark /></h1>
-                <p class="tagline">{tr("A Hexon card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.", "Un duel de cartes Hexon aux règles d'antan : six Récompenses, du pile ou face, et pas de seconde chance sur une mauvaise main.")}</p>
+                <p class="tagline">{tr("A Hexon card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.", "Un duel de cartes Hexon aux règles d'antan\u{a0}: six Récompenses, du pile ou face, et pas de seconde chance sur une mauvaise main.")}</p>
             </header>
             {move || notice.get().map(|n| view! {
                 <p class="error title-notice"><span role="alert">{n}</span> " "

@@ -1832,7 +1832,7 @@
       "give": "coins:50",
       "hidden": true,
       "text": "At the foot of the south menhir, under a flat stone the crew uses as a step: a little cache of Facets, wrapped in an oilcloth.",
-      "text_fr": "Au pied du menhir sud, sous une pierre plate dont l'équipe se sert comme marche : une petite réserve de Facettes, enveloppée dans une toile cirée."
+      "text_fr": "Au pied du menhir sud, sous une pierre plate dont l'équipe se sert comme marche : une petite réserve de Facettes, enveloppée dans une toile cirée."
     },
     {
       "kind": "waymark",
@@ -1847,7 +1847,7 @@
       "z": 3,
       "give": "card:cragmastiff",
       "text": "Moonlight falls on the cut slate and every seam shines like a vein of silver. In the brightest seam, wedged in a crack: a card, cold to the touch.",
-      "text_fr": "La lune tombe sur l'ardoise taillée et chaque veine brille comme de l'argent. Dans la plus brillante, coincée dans une fente : une carte, froide au toucher.",
+      "text_fr": "La lune tombe sur l'ardoise taillée et chaque veine brille comme de l'argent. Dans la plus brillante, coincée dans une fente : une carte, froide au toucher.",
       "if": "time:night"
     },
     {
@@ -1884,7 +1884,7 @@
             "A board on the door: \"BASTION WORKS. Day shift: Orla's crew. Night shift: Morwen's. Visitors: wear a hat.\" There is a hook with one hat on it."
           ],
           "lines_fr": [
-            "Un panneau sur la porte : « CHANTIER DU BASTION. Équipe de jour : Orla. Équipe de nuit : Morwen. Visiteurs : portez un chapeau. » Il y a un crochet avec un chapeau dessus."
+            "Un panneau sur la porte : « CHANTIER DU BASTION. Équipe de jour : Orla. Équipe de nuit : Morwen. Visiteurs : portez un chapeau. » Il y a un crochet avec un chapeau dessus."
           ]
         }
       ]
@@ -1912,14 +1912,14 @@
       "z": 29,
       "kind": "sign",
       "text": "South: The Elder Ring, at the foot of the cliff. There's a wall of old pegs down; you'd need gloves to use it. East: Anvilstead.",
-      "text_fr": "Sud : Le Cercle des Anciens, au pied de la falaise. Il y a une paroi de vieux pitons pour descendre ; il faudrait des gants. Est : Bourg-l'Enclume."
+      "text_fr": "Sud : Le Cercle des Anciens, au pied de la falaise. Il y a une paroi de vieux pitons pour descendre ; il faudrait des gants. Est : Bourg-l'Enclume."
     },
     {
       "x": 37,
       "z": 14,
       "kind": "sign",
       "text": "East: Anvilstead, along the rail road. Up the terraces: the stone ring and the seal.",
-      "text_fr": "Est : Bourg-l'Enclume, par la route des rails. En haut des gradins : le cercle de pierres et le sceau."
+      "text_fr": "Est : Bourg-l'Enclume, par la route des rails. En haut des gradins : le cercle de pierres et le sceau."
     }
   ],
   "warps": [],
@@ -1980,7 +1980,7 @@
             "The crews have been talking: you've done the rounds of the Stonebacks. Orla's expecting you up top."
           ],
           "lines_fr": [
-            "Les équipes en parlent : tu as fait le tour des Échines de Pierre. Orla t'attend là-haut."
+            "Les équipes en parlent : tu as fait le tour des Échines de Pierre. Orla t'attend là-haut."
           ]
         },
         {
@@ -2017,7 +2017,7 @@
             "Orla says it's the mountain settling. Orla says a lot of things."
           ],
           "lines_fr": [
-            "L'équipe de nuit, c'est Morwen. Je ne suis debout que parce que la pierre bourdonne après la tombée de la nuit. Écoute. Tu l'entends ?",
+            "L'équipe de nuit, c'est Morwen. Je ne suis debout que parce que la pierre bourdonne après la tombée de la nuit. Écoute. Tu l'entends ?",
             "Orla dit que c'est la montagne qui se tasse. Orla dit beaucoup de choses."
           ]
         },
@@ -2048,8 +2048,8 @@
           "Three prizes. We cut slate here; we don't cut corners."
         ],
         "challenge_fr": [
-          "Un casque ? Non ? Alors tu as intérêt à être vif.",
-          "Trois cartes Récompense. Ici, on taille l'ardoise ; on ne taille pas les virages."
+          "Un casque ? Non ? Alors tu as intérêt à être vif.",
+          "Trois cartes Récompense. Ici, on taille l'ardoise ; on ne taille pas les virages."
         ],
         "win": [
           "Split clean down the grain. Good work."

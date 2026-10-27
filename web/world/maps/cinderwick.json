@@ -2796,21 +2796,21 @@
     {
       "kind": "sign",
       "text": "The Kilnmouth: north, up the Kiln road. Mind the heat.",
-      "text_fr": "La Gueule-du-Four : au nord, par la route du Four. Attention à la chaleur.",
+      "text_fr": "La Gueule-du-Four : au nord, par la route du Four. Attention à la chaleur.",
       "x": 28,
       "z": 4
     },
     {
       "kind": "sign",
       "text": "East: the Thrumming Downs, and on to Stormwatch. West: Cinderwick plaza.",
-      "text_fr": "Les Landes Vibrantes, à l'est, puis Guette-Orage. À l'ouest : la place de Mèche-Cendre.",
+      "text_fr": "Les Landes Vibrantes, à l'est, puis Guette-Orage. À l'ouest : la place de Mèche-Cendre.",
       "x": 47,
       "z": 17
     },
     {
       "kind": "sign",
       "text": "North: Cinderwick. South: Emberstep Quarry, and the meadow beyond.",
-      "text_fr": "Nord : Mèche-Cendre. Sud : la Carrière de Pas-de-Braise, et le pré au-delà.",
+      "text_fr": "Nord : Mèche-Cendre. Sud : la Carrière de Pas-de-Braise, et le pré au-delà.",
       "x": 22,
       "z": 31
     },
@@ -2848,7 +2848,7 @@
       "give": "give:curio_glass_marble",
       "hidden": true,
       "text": "Behind the bottles on the bottom shelf, wrapped in a rag: a glass marble the size of a plum, with a twist of ember inside.",
-      "text_fr": "Derrière les bouteilles de l'étagère du bas, enveloppée dans un chiffon : une bille de verre grosse comme une prune, avec une volute de braise dedans."
+      "text_fr": "Derrière les bouteilles de l'étagère du bas, enveloppée dans un chiffon : une bille de verre grosse comme une prune, avec une volute de braise dedans."
     },
     {
       "kind": "find",
@@ -2857,7 +2857,7 @@
       "z": 3,
       "give": "card:furnaceback",
       "text": "On the flue-watchers' perch, weighed down by a stone so the wind can't take it: a card, its edges a little scorched.",
-      "text_fr": "Sur le perchoir des guetteurs de cheminée, coincée sous une pierre pour que le vent ne l'emporte pas : une carte, aux bords un peu roussis."
+      "text_fr": "Sur le perchoir des guetteurs de cheminée, coincée sous une pierre pour que le vent ne l'emporte pas : une carte, aux bords un peu roussis."
     },
     {
       "kind": "find",
@@ -2866,7 +2866,7 @@
       "z": 23,
       "give": "coins:60",
       "text": "On the rock at the pond's rim, where the glassblowers sit to cool their hands: a little stack of Facets someone forgot.",
-      "text_fr": "Sur le rocher au bord du bassin, là où les souffleurs viennent rafraîchir leurs mains : une petite pile de Facettes oubliée."
+      "text_fr": "Sur le rocher au bord du bassin, là où les souffleurs viennent rafraîchir leurs mains : une petite pile de Facettes oubliée."
     },
     {
       "x": 30,
@@ -2931,7 +2931,7 @@
       "id": "e_coalcart",
       "give": "coins:40",
       "text": "Under the coal in the cart, in a tin gone black: a stoker's savings.",
-      "text_fr": "Sous le charbon du wagonnet, dans une boîte noircie : les économies d'un chauffeur.",
+      "text_fr": "Sous le charbon du wagonnet, dans une boîte noircie : les économies d'un chauffeur.",
       "x": 38,
       "z": 13
     }
@@ -3047,8 +3047,8 @@
           "Prove me wrong: Basic Hexons only, three prizes. My Cinderhorns are waiting."
         ],
         "challenge_fr": [
-          "Des Éveils ? Des béquilles. Un vrai duelliste gagne avec des Hexons de Base.",
-          "Prouve-moi le contraire : Hexons de Base uniquement, trois cartes Récompense. Mes Braisecorne t'attendent."
+          "Des Éveils ? Des béquilles. Un vrai duelliste gagne avec des Hexons de Base.",
+          "Prouve-moi le contraire : Hexons de Base uniquement, trois cartes Récompense. Mes Braisecorne t'attendent."
         ],
         "lose": [
           "Simplicity wins again. Come back when your deck's purer."
@@ -3087,7 +3087,7 @@
             "Beaten fair, with Basics. Again? Fine. You're not wrong, you're just annoying."
           ],
           "lines_fr": [
-            "Battu à la loyale, avec des Bases. Encore ? Bon. Tu n'as pas tort, tu es juste agaçant."
+            "Battu à la loyale, avec des Bases. Encore ? Bon. Tu n'as pas tort, tu es juste agaçant."
           ]
         }
       ]
@@ -3127,7 +3127,7 @@
           ],
           "lines_fr": [
             "Chut. Écoute.",
-            "Tu entends ? Comme une cloche au loin. Les gens me trouvent bizarre. Les gens n'ont pas écouté."
+            "Tu entends ? Comme une cloche au loin. Les gens me trouvent bizarre. Les gens n'ont pas écouté."
           ],
           "do": [
             "sfx:chime"
@@ -3179,7 +3179,7 @@
             "Everything here was blown at the Glassworks. Clio does the hard pieces. She hums in fractions while she works."
           ],
           "lines_fr": [
-            "Bouteilles, bols, flotteurs pour les pêcheurs de la côte ! On regarde, on ne touche pas. Bon, on touche un peu.",
+            "Bouteilles, bols, flotteurs pour les pêcheurs de la côte ! On regarde, on ne touche pas. Bon, on touche un peu.",
             "Tout ce qui est ici sort de la Verrerie. Clio fait les pièces difficiles. Elle fredonne en fractions en travaillant."
           ]
         }
@@ -3204,8 +3204,8 @@
             "Want her weak spot? She burns all her energy early. Make her wait. She HATES waiting."
           ],
           "lines_fr": [
-            "Tu l'as BATTUE ? Personne ne la bat ! Bon, deux personnes, mais elles étaient super vieilles.",
-            "Tu veux son point faible ? Elle brûle toute son énergie au début. Fais-la attendre. Elle DÉTESTE attendre."
+            "Tu l'as BATTUE ? Personne ne la bat ! Bon, deux personnes, mais elles étaient super vieilles.",
+            "Tu veux son point faible ? Elle brûle toute son énergie au début. Fais-la attendre. Elle DÉTESTE attendre."
           ]
         },
         {
@@ -3215,7 +3215,7 @@
             "That's our house. Don't touch her running shoes, she counts them."
           ],
           "lines_fr": [
-            "T'esdupré? Pardon. Tu viens du pré ? Ma sœur, c'est Cinza. Elle est rapide. Mais genre vraiment.",
+            "T'esdupré? Pardon. Tu viens du pré ? Ma sœur, c'est Cinza. Elle est rapide. Mais genre vraiment.",
             "Elle court la route de la carrière tous les matins. Un jour, elle fera ses duels à la Gueule-du-Four, près de la grande pierre. Elle dit.",
             "C'est notre maison. Touche pas à ses chaussures de course, elle les compte."
           ]
@@ -3237,7 +3237,7 @@
           "My Waxwick burns slow and steady, like a good kiln."
         ],
         "challenge_fr": [
-          "Un duel ? J'ai une fournée qui recuit, alors j'ai une heure pile. Deux cartes Récompense.",
+          "Un duel ? J'ai une fournée qui recuit, alors j'ai une heure pile. Deux cartes Récompense.",
           "Mon Cirèche brûle lent et régulier, comme un bon four."
         ],
         "win": [
@@ -3250,14 +3250,14 @@
           "Ha! Slow and steady."
         ],
         "lose_fr": [
-          "Ha ! Lent et régulier."
+          "Ha ! Lent et régulier."
         ],
         "after": [
           "Want a secret? Clio's lanterns are better than mine. Don't tell her I said so.",
           "She'd only correct me on the exact percentage."
         ],
         "after_fr": [
-          "Tu veux un secret ? Les lanternes de Clio sont meilleures que les miennes. Ne lui dis pas que je l'ai dit.",
+          "Tu veux un secret ? Les lanternes de Clio sont meilleures que les miennes. Ne lui dis pas que je l'ai dit.",
           "Elle me corrigerait sur le pourcentage exact."
         ]
       },

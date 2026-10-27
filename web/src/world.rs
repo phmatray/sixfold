@@ -205,7 +205,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "brass_thimble",
             tr(
                 "Dented on one side, polished bright on the other. Somebody sewed a great deal with it. A curio: Odile in Brightwell Square collects them.",
-                "Cabossé d'un côté, poli à force de servir de l'autre. Quelqu'un a beaucoup cousu avec. Une curiosité : Odile, sur la Place de Clairpuits, les collectionne.",
+                "Cabossé d'un côté, poli à force de servir de l'autre. Quelqu'un a beaucoup cousu avec. Une curiosité\u{a0}: Odile, sur la Place de Clairpuits, les collectionne.",
             ),
         ),
         "curio_heron_feather" => (
@@ -221,7 +221,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "message_bottle",
             tr(
                 "The cork is waxed shut and the paper inside says, as far as you can read it, \"Wish you were here.\" A curio for Odile.",
-                "Le bouchon est scellé à la cire et le papier dit, autant qu'on puisse lire : « J'aurais aimé que tu sois là. » Une curiosité pour Odile.",
+                "Le bouchon est scellé à la cire et le papier dit, autant qu'on puisse lire\u{a0}: « J'aurais aimé que tu sois là. » Une curiosité pour Odile.",
             ),
         ),
         "curio_fossil_fern" => (
@@ -237,7 +237,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "tin_hex",
             tr(
                 "A toy seal, six colours flaking off a tin hexagon. Every child in Brightwell had one once. A curio for Odile.",
-                "Un sceau jouet : six couleurs qui s'écaillent sur un hexagone de fer-blanc. Tous les enfants de Clairpuits en ont eu un. Une curiosité pour Odile.",
+                "Un sceau jouet\u{a0}: six couleurs qui s'écaillent sur un hexagone de fer-blanc. Tous les enfants de Clairpuits en ont eu un. Une curiosité pour Odile.",
             ),
         ),
         "curio_lead_type" => (
@@ -253,7 +253,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "curio",
             tr(
                 "A twist of paper with Moss's handwriting on it: \"Runner beans. Do NOT eat.\" Moss tends the garden in Sixfold Meadow.",
-                "Un cornet de papier, de l'écriture de Moss : « Haricots grimpants. NE PAS MANGER. » Moss soigne le potager du Pré des Six.",
+                "Un cornet de papier, de l'écriture de Moss\u{a0}: « Haricots grimpants. NE PAS MANGER. » Moss soigne le potager du Pré des Six.",
             ),
         ),
         "kite_line" => (
@@ -376,7 +376,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "lunch_pail",
             tr(
                 "The crew's lunch from the Tally Room: four pasties, two apples, a flask of tea. Counted. For Ros at the Undermine's east cut.",
-                "Le déjeuner de l'équipe, de la Salle des Comptes : quatre chaussons, deux pommes, une gourde de thé. Compté. Pour Ros, à la saignée est des Galeries Basses.",
+                "Le déjeuner de l'équipe, de la Salle des Comptes\u{a0}: quatre chaussons, deux pommes, une gourde de thé. Compté. Pour Ros, à la saignée est des Galeries Basses.",
             ),
         ),
         "lucky_pick" => (
@@ -1145,7 +1145,7 @@ pub fn WorldScreen() -> impl IntoView {
             crate::audio::sfx("reward", 0.0);
             announce.set(tr(
                 format!("You found {}.", card(*id).label()),
-                format!("Vous trouvez : {}.", card(*id).label()),
+                format!("Vous trouvez\u{a0}: {}.", card(*id).label()),
             ));
         }
         if let Some(Sheet::Item(item)) = &next {
@@ -1154,7 +1154,10 @@ pub fn WorldScreen() -> impl IntoView {
             let (en, fr) = if opens.is_empty() {
                 (String::new(), String::new())
             } else {
-                (format!(" It opens {opens}."), format!(" Ouvre : {opens}."))
+                (
+                    format!(" It opens {opens}."),
+                    format!(" Ouvre\u{a0}: {opens}."),
+                )
             };
             announce.set(tr(
                 format!("You got {}.{en}", item_info(item).0),
@@ -1180,7 +1183,7 @@ pub fn WorldScreen() -> impl IntoView {
         let Some(r) = campaign::rival(id) else { return };
         announce.set(tr(
             format!("{}'s seal!", r.name),
-            format!("Le sceau de {} !", r.name),
+            format!("Le sceau de {}\u{202f}!", r.name),
         ));
         if !fly {
             return;
@@ -1563,7 +1566,7 @@ pub fn WorldScreen() -> impl IntoView {
                     let (walk, act) = (input::prompt(Ctrl::Walk), input::prompt(Ctrl::Act));
                     tr(
                         format!("The Sixfold world: six regions round a meadow, with towns, routes and caves to walk around. {walk} to walk, {act} to act."),
-                        format!("Le monde de Sixfold : six régions autour d'un pré, avec des villes, des routes et des grottes à parcourir. {walk} pour marcher, {act} pour agir."),
+                        format!("Le monde de Sixfold\u{a0}: six régions autour d'un pré, avec des villes, des routes et des grottes à parcourir. {walk} pour marcher, {act} pour agir."),
                     )
                 }>
                 <div class="world-host" node_ref=host></div>
@@ -1705,7 +1708,7 @@ pub fn WorldScreen() -> impl IntoView {
                         <div class="item-got">
                             <span class="found-card" aria-hidden="true"><crate::cards::CardFace id=id /></span>
                             <div>
-                                <h2 id="world-sheet-title">{tr(format!("You found {}!", card(id).label()), format!("Vous trouvez : {} !", card(id).label()))}</h2>
+                                <h2 id="world-sheet-title">{tr(format!("You found {}!", card(id).label()), format!("Vous trouvez\u{a0}: {}\u{202f}!", card(id).label()))}</h2>
                                 <p class="dialog-sub">{tr("It's in your collection now.", "La carte rejoint votre collection.")}</p>
                                 <div class="dialog-foot">
                                     <button class="btn primary" autofocus on:click=close>{tr("Nice", "Super")}</button>

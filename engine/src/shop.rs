@@ -59,7 +59,7 @@ impl fmt::Display for ShopError {
         match self {
             ShopError::Short(n) => f.write_str(&tr(
                 format!("Not enough Facets: ⬡ {n} short."),
-                format!("Pas assez de Facettes : il en manque ⬡ {n}."),
+                format!("Pas assez de Facettes\u{a0}: il en manque ⬡ {n}."),
             )),
             ShopError::NotForSale => f.write_str(tr("Not for sale.", "Pas à vendre.")),
             ShopError::SoldOut => {
@@ -524,7 +524,7 @@ mod tests {
         set_lang(Lang::Fr);
         let fr = ShopError::Short(5).to_string();
         set_lang(Lang::En);
-        assert_eq!(fr, "Pas assez de Facettes : il en manque ⬡ 5.");
+        assert_eq!(fr, "Pas assez de Facettes\u{a0}: il en manque ⬡ 5.");
     }
 
     /// One scripted source: minutes it takes, Facets and packs it pays.

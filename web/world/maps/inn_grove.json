@@ -177,7 +177,7 @@
           ],
           "lines_fr": [
             "Quarante duellistes battus, à ce qu'on dit. QUARANTE. Jory raconte à tout le monde que tu lui as tout appris, c'est un mensonge, mais un joli.",
-            "Tu te reposes un peu ?"
+            "Tu te reposes un peu ?"
           ],
           "do": [
             "show:inn"
@@ -190,8 +190,8 @@
             "A bed?"
           ],
           "lines_fr": [
-            "Vingt duellistes, dit Gorse, et il ne se trompe jamais sur les chiffres. Fenna veut savoir comment tu joues tes Hexons de Base. Je lui ai dit : vite.",
-            "Un lit ?"
+            "Vingt duellistes, dit Gorse, et il ne se trompe jamais sur les chiffres. Fenna veut savoir comment tu joues tes Hexons de Base. Je lui ai dit : vite.",
+            "Un lit ?"
           ],
           "do": [
             "show:inn"
@@ -205,7 +205,7 @@
           ],
           "lines_fr": [
             "Briony est sur la passerelle avec ses chouettes, Corvin les compte, et Agnes parle encore à ses abeilles. La nuit à Racinemont.",
-            "Un lit ?"
+            "Un lit ?"
           ],
           "do": [
             "show:inn"
@@ -218,7 +218,7 @@
           ],
           "lines_fr": [
             "Tobiah a ouvert sa porte, Jory est sur sa passerelle, et Linden peint quelque chose en vert. Comme tous les jours.",
-            "Repos, soupe, ou les deux ?"
+            "Repos, soupe, ou les deux ?"
           ],
           "do": [
             "show:inn"
@@ -245,7 +245,7 @@
           ],
           "lines_fr": [
             "Bonsoir. Je viens pour la soupe et je reste pour les disputes.",
-            "La tasse au bout, la vierge ? Hester y grave un nom quand quelqu'un reste assez longtemps. Ça pourrait être le tien."
+            "La tasse au bout, la vierge ? Hester y grave un nom quand quelqu'un reste assez longtemps. Ça pourrait être le tien."
           ]
         }
       ]

@@ -103,7 +103,7 @@
       "z": 3,
       "kind": "sign",
       "text": "The storm log, chalked on the wall in Rhian's big hand: \"Third gale this week. Lightning on the Rodspire, twice. Bo says the ferry's still laid up. Bo says a lot.\"",
-      "text_fr": "Le journal des tempêtes, à la craie sur le mur, de la grosse écriture de Rhian : « Troisième coup de vent de la semaine. Foudre sur l'Aiguille, deux fois. Bo dit que le bac est toujours à quai. Bo dit beaucoup de choses. »"
+      "text_fr": "Le journal des tempêtes, à la craie sur le mur, de la grosse écriture de Rhian : « Troisième coup de vent de la semaine. Foudre sur l'Aiguille, deux fois. Bo dit que le bac est toujours à quai. Bo dit beaucoup de choses. »"
     }
   ],
   "warps": [
@@ -142,8 +142,8 @@
             "And if you're buying, the counter has Storm packs and a Fulgurex I keep polished."
           ],
           "lines_fr": [
-            "Bienvenue à la Girouette ! Ferme la porte, le vent a des avis, ce soir.",
-            "Des lits, un feu, et un journal des tempêtes pour savoir ce que tu as manqué en dormant. Le repos est gratuit pour les duellistes. Jusqu'à quand ?",
+            "Bienvenue à la Girouette ! Ferme la porte, le vent a des avis, ce soir.",
+            "Des lits, un feu, et un journal des tempêtes pour savoir ce que tu as manqué en dormant. Le repos est gratuit pour les duellistes. Jusqu'à quand ?",
             "Et si tu achètes, le comptoir a des boosters Orage et un Fulgurion que je garde bien astiqué."
           ],
           "do": [
@@ -157,8 +157,8 @@
             "Bed?"
           ],
           "lines_fr": [
-            "Tu entends ? De la foudre au-delà de l'Aiguille. Belle nuit pour rester au chaud.",
-            "Un lit ?"
+            "Tu entends ? De la foudre au-delà de l'Aiguille. Belle nuit pour rester au chaud.",
+            "Un lit ?"
           ],
           "do": [
             "show:inn"
@@ -170,8 +170,8 @@
             "A rest?"
           ],
           "lines_fr": [
-            "Te revoilà ! Ton lit est là où tu l'as laissé, le vent aussi.",
-            "Tu te reposes ?"
+            "Te revoilà ! Ton lit est là où tu l'as laissé, le vent aussi.",
+            "Tu te reposes ?"
           ],
           "do": [
             "show:inn"

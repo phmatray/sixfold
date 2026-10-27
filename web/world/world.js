@@ -426,7 +426,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const names = [...new Set(world.opened?.splice(0))];
     if (names.length) {
       const list = names.join(tr(" and ", " et "));
-      const text = names.length > 1 ? tr(`Ways open: ${list}`, `Des passages s'ouvrent : ${list}`) : tr(`A way opens: ${list}`, `Un passage s'ouvre : ${list}`);
+      const text = names.length > 1 ? tr(`Ways open: ${list}`, `Des passages s'ouvrent\u00a0: ${list}`) : tr(`A way opens: ${list}`, `Un passage s'ouvre\u00a0: ${list}`);
       showBanner(text, 4000), cb("opened", text, "");
     }
   };
