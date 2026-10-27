@@ -262,8 +262,8 @@ pub fn CampaignPanel(
                 format!("You hold all six seals and the title {}. The rivals still take rematches, and the Gauntlet and the daily duel are below.", t.get()),
                 format!("Vous détenez les six sceaux et le titre de {}. Les rivaux acceptent toujours une revanche ; l'Épreuve et le duel du jour vous attendent plus bas.", t.get()),
             ),
-            None => tr("Six rivals wait out on the trail, the boardwalk and the quarry. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden.",
-                "Six rivaux vous attendent sur le sentier, sur la promenade et à la carrière. Battez-les un à un pour gagner leur sceau ; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.").to_string(),
+            None => tr("Six rivals keep the seal stones, one at each region's seal site. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden.",
+                "Six rivaux gardent les pierres de sceau, chacun au site de sceau de sa région. Battez-les un à un pour gagner leur sceau ; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.").to_string(),
         }}</p>
         <Roster />
         <section class="ladder-page" aria-labelledby="ladder-title">

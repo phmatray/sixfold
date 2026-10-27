@@ -308,6 +308,21 @@ mod tests {
     }
 
     #[test]
+    fn a_keepers_objective_names_their_seal_site() {
+        use crate::lang::{set_lang, Lang};
+        let p = with(&["flag:beat_t_tobin"]);
+        let en = objective(&p).text(&p);
+        set_lang(Lang::Fr);
+        let fr = objective(&p).text(&p);
+        set_lang(Lang::En);
+        assert!(en.contains("Bramble") && en.contains("Elder Ring"), "{en}");
+        assert!(
+            fr.contains("Bramble") && fr.contains("Cercle des Anciens"),
+            "{fr}"
+        );
+    }
+
+    #[test]
     fn objective_with_all_seals_is_the_warden() {
         let p = with(&ALL_SEALS);
         assert_eq!(objective(&p), Objective::Rival(rival("warden").unwrap()));

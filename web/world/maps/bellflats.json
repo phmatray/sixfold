@@ -4123,6 +4123,94 @@
       "outfit": "#8fa858",
       "hair": "#c89a5a",
       "if": "time:day"
+    },
+    {
+      "id": "marlo",
+      "name": "Marlo",
+      "model": "rival_water",
+      "tint": "#73b8f2",
+      "scale": 1,
+      "idle": "Idle",
+      "x": 22,
+      "z": 15,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "won:marlo&flag:thanked_marlo",
+          "lines": [
+            "Washed out twice. The tide likes you today."
+          ],
+          "lines_fr": [
+            "Emporté deux fois. La marée t'aime bien, aujourd'hui."
+          ]
+        },
+        {
+          "if": "won:marlo",
+          "lines": [
+            "Washed out, fair and square.",
+            "Take my seal, it's still a little damp.",
+            "This Brinemoth washed up with it. Yours now."
+          ],
+          "lines_fr": [
+            "Balayé par la vague, à la loyale.",
+            "Prends mon sceau, il est encore un peu humide.",
+            "Ce Saumite s'est échoué avec. À toi, maintenant."
+          ],
+          "do": [
+            "flag:thanked_marlo"
+          ]
+        },
+        {
+          "if": "lost:marlo",
+          "lines": [
+            "Low tide for you today. The water always comes back in."
+          ],
+          "lines_fr": [
+            "Marée basse pour toi aujourd'hui. Mais la mer finit toujours par remonter."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "The champion, back on my flats. The tide tables never mentioned you.",
+            "One more round? Three prizes, and I won't go easy."
+          ],
+          "lines_fr": [
+            "Champion, de retour sur mes grèves. Les tables des marées n'avaient rien prévu de tel.",
+            "Une autre partie ? Trois cartes Récompense, et je ne te ferai pas de cadeau."
+          ],
+          "do": [
+            "duel:marlo"
+          ]
+        },
+        {
+          "if": "beat:marlo",
+          "lines": [
+            "The tide's turned. Another round?"
+          ],
+          "lines_fr": [
+            "La marée a tourné. Une autre partie ?"
+          ],
+          "do": [
+            "duel:marlo"
+          ]
+        },
+        {
+          "lines": [
+            "Shh. Listen... that's the sea. Or a kettle. Hard to tell out here.",
+            "I'm Marlo. I read the tide tables, and whoever sits down across from me.",
+            "Three prizes. Pull up a crate, the cards are already dealt."
+          ],
+          "lines_fr": [
+            "Chut. Écoute… c'est la mer. Ou une bouilloire. Difficile à dire, par ici.",
+            "Moi, c'est Marlo. Je lis les tables des marées, et quiconque s'assoit en face de moi.",
+            "Trois cartes Récompense. Prends une caisse, les cartes sont déjà distribuées."
+          ],
+          "do": [
+            "duel:marlo"
+          ]
+        }
+      ]
     }
   ],
   "ground": {

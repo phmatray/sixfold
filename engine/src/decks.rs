@@ -259,24 +259,24 @@ pub static UNLOCKABLE: [Unlockable; 11] = [
         deck: &RIVALS[0].deck,
         flag: "beat_bramble",
         how: T::new(
-            "Beat Bramble, by the Fernhollow bridge.",
-            "Battez Bramble, près du pont de Creuse-Fougère.",
+            "Beat Bramble, at the Elder Ring.",
+            "Battez Bramble, au Cercle des Anciens.",
         ),
     },
     Unlockable {
         deck: &RIVALS[1].deck,
         flag: "beat_marlo",
         how: T::new(
-            "Beat Marlo, at the end of the Saltwind pier.",
-            "Battez Marlo, au bout de la jetée de Ventsalé.",
+            "Beat Marlo, out on the Bellflats.",
+            "Battez Marlo, aux Grèves de la Cloche.",
         ),
     },
     Unlockable {
         deck: &EMBER_RUSH,
         flag: "beat_cinza",
         how: T::new(
-            "Beat Cinza, down in Emberstep Quarry.",
-            "Battez Cinza, au fond de la carrière de Pas-de-Braise.",
+            "Beat Cinza, down in the Kilnmouth.",
+            "Battez Cinza, au fond de la Gueule-du-Four.",
         ),
     },
     Unlockable {
@@ -299,8 +299,8 @@ pub static UNLOCKABLE: [Unlockable; 11] = [
         deck: &STORM_FRONT,
         flag: "beat_quill",
         how: T::new(
-            "Beat Quill, under the Saltwind lighthouse.",
-            "Battez Quill, sous le phare de Ventsalé.",
+            "Beat Quill, up on the Rodspire.",
+            "Battez Quill, en haut de l'Aiguille-Foudre.",
         ),
     },
     Unlockable {
@@ -315,16 +315,16 @@ pub static UNLOCKABLE: [Unlockable; 11] = [
         deck: &RIVALS[4].deck,
         flag: "beat_orla",
         how: T::new(
-            "Beat Orla, up on the quarry ledge.",
-            "Battez Orla, en haut de la corniche de la carrière.",
+            "Beat Orla, up at the Bastion.",
+            "Battez Orla, en haut du Bastion.",
         ),
     },
     Unlockable {
         deck: &RIVALS[5].deck,
         flag: "beat_lumen",
         how: T::new(
-            "Beat Lumen, in the moonflower glade.",
-            "Battez Lumen, dans la clairière des fleurs de lune.",
+            "Beat Lumen, in the Moonwell Garden.",
+            "Battez Lumen, au Jardin du Puits-de-Lune.",
         ),
     },
     Unlockable {
