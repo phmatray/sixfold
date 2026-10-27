@@ -5,6 +5,40 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.9.0](https://github.com/phmatray/sixfold/compare/v1.8.0...v1.9.0) (2026-10-27)
+
+
+### Added
+
+* a logo for Sixfold ([#128](https://github.com/phmatray/sixfold/issues/128)) ([c4a990f](https://github.com/phmatray/sixfold/commit/c4a990fb4cb4d18c28810c088ec42ab014beb378))
+* **a11y:** readable, high-contrast, screen-reader-friendly ([#70](https://github.com/phmatray/sixfold/issues/70)) ([#94](https://github.com/phmatray/sixfold/issues/94)) ([4d38132](https://github.com/phmatray/sixfold/commit/4d3813284e64b59138c444fff8c3d207effa04d6))
+* **decks:** a deck builder with an auto mode, suggestions and unlockable decks ([#102](https://github.com/phmatray/sixfold/issues/102)) ([#103](https://github.com/phmatray/sixfold/issues/103)) ([3cf7484](https://github.com/phmatray/sixfold/commit/3cf7484eb144ec1d5c0631202e02f2e641cead3b))
+* **ui:** a title that shows the world, and game-like menus ([#101](https://github.com/phmatray/sixfold/issues/101)) ([ac568a4](https://github.com/phmatray/sixfold/commit/ac568a48ecf59ddcd404c5dd4562a158ee6fc356))
+* **ui:** screen transitions and one visual grammar ([#60](https://github.com/phmatray/sixfold/issues/60)) ([#96](https://github.com/phmatray/sixfold/issues/96)) ([ba2f169](https://github.com/phmatray/sixfold/commit/ba2f16947d3ed9a203c4703aa472eca512926616))
+* **world:** a challenge panel that stays in the world ([#108](https://github.com/phmatray/sixfold/issues/108)) ([93e32bb](https://github.com/phmatray/sixfold/commit/93e32bbad7a032a1941fa27e4de34ec14e499864))
+* **world:** books you can take from the shelves to read about the rules and the world ([#104](https://github.com/phmatray/sixfold/issues/104)) ([#106](https://github.com/phmatray/sixfold/issues/106)) ([1e9e4a6](https://github.com/phmatray/sixfold/commit/1e9e4a67314a65e13153c2579a31b84a4ee00750))
+* **world:** doors that open on every building, and model fixes ([#126](https://github.com/phmatray/sixfold/issues/126)) ([e2db937](https://github.com/phmatray/sixfold/commit/e2db9371f934922b921a1b60562295b3bd80dbc3))
+* **world:** sit on benches and chairs ([#107](https://github.com/phmatray/sixfold/issues/107)) ([275552d](https://github.com/phmatray/sixfold/commit/275552df390ca559b0a14e12144e2d58cc9a3da3))
+
+
+### Fixed
+
+* 1.9 design audit and stable browser tests ([#138](https://github.com/phmatray/sixfold/issues/138)) ([9503417](https://github.com/phmatray/sixfold/commit/950341740701565c0db6836896f59c397e91f7ae))
+* **world:** the hero climbs porch steps instead of walking through them ([#109](https://github.com/phmatray/sixfold/issues/109)) ([6fa7931](https://github.com/phmatray/sixfold/commit/6fa7931e368511345f9c38f2fd8e95cbb6df3a21))
+
+
+### Changed
+
+* run the web crate's tests ([#156](https://github.com/phmatray/sixfold/issues/156)) ([105401d](https://github.com/phmatray/sixfold/commit/105401d25d3a9d40569ae841c08dda78513b4fb5))
+
+
+### Documentation
+
+* Deep Seals moves to 1.17, before 2.0 ([#139](https://github.com/phmatray/sixfold/issues/139)) ([e444003](https://github.com/phmatray/sixfold/commit/e44400389be5155744c58891b017d75b6bcd0398))
+* level-design guide and the world roadmap (1.10 to 1.14) ([#125](https://github.com/phmatray/sixfold/issues/125)) ([94ea881](https://github.com/phmatray/sixfold/commit/94ea881b1b225da2126182fccc372ea534271a29))
+* refresh the roadmap (1.9 to 2.0) ([#157](https://github.com/phmatray/sixfold/issues/157)) ([5b9290a](https://github.com/phmatray/sixfold/commit/5b9290a539a61a56bfb66c786567054c8d907c60))
+* set design analysis and two expansions ([#127](https://github.com/phmatray/sixfold/issues/127)) ([349f50c](https://github.com/phmatray/sixfold/commit/349f50cb08cf419a17e2211b7fd18eba3e595072))
+
 ## [1.8.0](https://github.com/phmatray/sixfold/compare/v1.7.0...v1.8.0) (2026-10-26)
 
 
