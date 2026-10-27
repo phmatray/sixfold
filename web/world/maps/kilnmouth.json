@@ -5226,6 +5226,43 @@
           ]
         }
       ]
+    },
+    {
+      "id": "victory_cinza",
+      "if": "won:cinza & !flag:sealed_cinza",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_ember",
+            "cam:19:11",
+            "stone:wake",
+            "wait:600",
+            "sfx:seal",
+            "stone:seal:cinza",
+            "wait:1200",
+            "face:cinza:hero",
+            "cam:cinza"
+          ]
+        },
+        {
+          "say": "cinza",
+          "lines": [
+            "Hear that? The Ember's face caught, like a kiln on the first cold morning.",
+            "Now run. Somebody has to keep that seal warm."
+          ],
+          "lines_fr": [
+            "Tu entends ? La face de la Braise a pris, comme un four le premier matin froid.",
+            "Maintenant, cours. Il faut bien quelqu'un pour garder ce sceau au chaud."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:sealed_cinza"
+          ]
+        }
+      ]
     }
   ]
 }

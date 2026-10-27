@@ -1282,6 +1282,43 @@
           ]
         }
       ]
+    },
+    {
+      "id": "victory_quill",
+      "if": "won:quill & !flag:sealed_quill",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_storm",
+            "cam:18:4",
+            "stone:wake",
+            "wait:600",
+            "sfx:seal",
+            "stone:seal:quill",
+            "wait:1200",
+            "face:quill:hero",
+            "cam:quill"
+          ]
+        },
+        {
+          "say": "quill",
+          "lines": [
+            "Noted: the Storm's face, lit, and staying lit. I'll date the page.",
+            "Go on. The forecast says there are more stones on your road."
+          ],
+          "lines_fr": [
+            "Noté : la face de l'Orage, allumée, et pour de bon. Je date la page.",
+            "Va. La météo annonce d'autres pierres sur ta route."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:sealed_quill"
+          ]
+        }
+      ]
     }
   ]
 }

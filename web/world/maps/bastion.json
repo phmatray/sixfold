@@ -2375,6 +2375,43 @@
           ]
         }
       ]
+    },
+    {
+      "id": "victory_orla",
+      "if": "won:orla & !flag:sealed_orla",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_stone",
+            "cam:19:3",
+            "stone:wake",
+            "wait:600",
+            "sfx:seal",
+            "stone:seal:orla",
+            "wait:1200",
+            "face:orla:hero",
+            "cam:orla"
+          ]
+        },
+        {
+          "say": "orla",
+          "lines": [
+            "The Stone's face took it. Cut that deep, a light doesn't wear off.",
+            "Mind the gravel on your way down."
+          ],
+          "lines_fr": [
+            "La face du Roc l'a pris. Taillée aussi profond, une lumière ne s'use pas.",
+            "Attention au gravier en descendant."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:sealed_orla"
+          ]
+        }
+      ]
     }
   ]
 }
