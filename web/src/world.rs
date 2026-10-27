@@ -1168,10 +1168,12 @@ pub fn WorldScreen() -> impl IntoView {
         });
         let n = flight.with_untracked(|f| f.as_ref().map_or(0, |f| f.2)) + 1;
         flight.set(Some((r, to.unwrap_or_default(), n)));
+        // `try_`: the world may be gone by then (left for a duel or the title).
         set_timeout(
             move || {
-                if flight.with_untracked(|f| f.as_ref().is_some_and(|f| f.2 == n)) {
-                    flight.set(None);
+                if flight.try_with_untracked(|f| f.as_ref().is_some_and(|f| f.2 == n)) == Some(true)
+                {
+                    _ = flight.try_set(None);
                 }
             },
             Duration::from_millis(SEAL_FLIGHT_MS),

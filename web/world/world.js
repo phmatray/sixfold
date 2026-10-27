@@ -86,7 +86,13 @@ function stoneRig(w, held) {
   }
   for (const f of faces) f.dormant = f.color.clone().lerp(DORMANT, DORMANT_K);
   const at = w.root.worldToLocal(box.getCenter(new THREE.Vector3()));
-  return { faces, color, light, at, held, k: 0, want: 0, dirty: true, burst: null };
+  // The seal's motes, made with the map and drawn once unseen, so the seal won on stage compiles no shader.
+  const geo = new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(new Float32Array(BURST * 3), 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: mote(), size: 0.42, transparent: true, opacity: 0, depthWrite: false }));
+  pts.frustumCulled = false;
+  w.root.add(pts);
+  const burst = { pts, vel: new Float32Array(BURST * 3), t: BURST_S - 1e-3 }; // its first frame draws it at opacity 0
+  return { faces, color, light, at, held, k: 0, want: 0, dirty: true, burst };
 }
 // Ease the stone toward its want (a cut under reduced motion): the faces' glow and the light together.
 function stoneStep(s, dt, reduced) {
@@ -115,35 +121,32 @@ const WHITE = new THREE.Color("#ffffff");
 // A seal won on stage (`stone:seal`): its face lights for good and the rest of the glow gathers into it
 // (the wake fades), while BURST motes in its colour rise off the stone and fade over BURST_S, one draw
 // call. Under reduced motion the face just lights: no motes.
-function sealFace(s, colour, root, reduced) {
+function sealFace(s, colour, reduced) {
   s.held.add(colour);
   s.dirty = true;
   s.want = 0;
   const f = s.faces.find((f) => f.colour === colour);
   if (reduced || !f) return;
-  if (s.burst) s.burst.pts.removeFromParent();
-  const pos = new Float32Array(BURST * 3), vel = new Float32Array(BURST * 3);
+  const b = s.burst, pos = b.pts.geometry.attributes.position;
   for (let i = 0; i < BURST; i++) {
     const a = Math.random() * Math.PI * 2, r = 0.4 + Math.random() * 1.2;
-    pos.set([s.at.x, s.at.y + 0.3, s.at.z], i * 3);
-    vel.set([Math.cos(a) * r, 1 + Math.random() * 1.8, Math.sin(a) * r], i * 3);
+    pos.array.set([s.at.x, s.at.y + 0.3, s.at.z], i * 3);
+    b.vel.set([Math.cos(a) * r, 1 + Math.random() * 1.8, Math.sin(a) * r], i * 3);
   }
-  const geo = new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(pos, 3));
-  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: mote(), size: 0.42, color: f.color.clone().lerp(WHITE, 0.25), transparent: true, depthWrite: false }));
-  pts.frustumCulled = false;
-  root.add(pts);
-  s.burst = { pts, vel, t: 0 };
+  b.pts.material.color.copy(f.color).lerp(WHITE, 0.25);
+  b.pts.visible = true;
+  b.t = 0;
 }
 function burstStep(s, dt) {
   const b = s.burst, p = b.pts.geometry.attributes.position;
+  if (b.t >= BURST_S) return void (b.pts.visible = false); // spent, or (at the map's start) drawn once unseen
   b.t += dt;
   for (let i = 0; i < BURST * 3; i += 3) {
     b.vel[i + 1] -= dt * 1.2; // they slow as they rise
     for (let k = 0; k < 3; k++) p.array[i + k] += b.vel[i + k] * dt;
   }
   p.needsUpdate = true;
-  b.pts.material.opacity = 1 - (b.t / BURST_S) ** 2; // a fade, never a blink
-  if (b.t >= BURST_S) b.pts.removeFromParent(), b.pts.geometry.dispose(), b.pts.material.dispose(), (s.burst = null);
+  b.pts.material.opacity = Math.max(0, 1 - (b.t / BURST_S) ** 2); // a fade, never a blink
 }
 
 // ---------- Mount ----------
@@ -450,7 +453,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     stone: (state, face) => {
       const s = world?.stone;
       if (!s) return;
-      if (state === "seal") sealFace(s, face, world.root, reduced);
+      if (state === "seal") sealFace(s, face, reduced);
       else s.want = state === "wake" ? 1 : 0;
     },
     settled: () => look.distanceTo(aim) < 0.12 && lookVel.lengthSq() < 0.04,
