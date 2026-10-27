@@ -1,0 +1,55 @@
+// node --test tools/ld.test.mjs — the level-design analysis (web/world/ld.js).
+import test from "node:test";
+import assert from "node:assert/strict";
+import { grids, visible, pathGraph, walkTime, scatter, density } from "../web/world/ld.js";
+
+const T = { FOOT: { cottage: [5, 4] }, DECK: {}, WALKABLE: new Set(), tall: (a) => ({ pine: 3.8, bush: 0.7, cottage: 4.5 })[a] ?? 1 };
+const blank = (w, h, rows = {}) => Array.from({ length: h }, (_, z) => rows[z] ?? ".".repeat(w));
+const map = (props, tiles = blank(20, 20)) => ({ width: tiles[0].length, height: tiles.length, tiles, props, camera: { pitch: 50, distance: 12 } });
+
+test("a pine two tiles south of a door hides it at the real camera pitch; a bush doesn't", () => {
+  const house = { asset: "cottage", x: 8, z: 4, rot: 0 }; // door on its front row, z = 7
+  const door = { x: 10, z: 7, y: 2, self: house };
+  const from = { x: 10, z: 8 };
+  for (const [asset, seen] of [["pine", false], ["bush", true]]) {
+    const g = grids(map([house, { asset, x: 10, z: 9, rot: 0 }]), T);
+    assert.equal(visible(map([]), g.boxes, from, door), seen, asset);
+  }
+  // North of the door (behind the house) the pine hides nothing.
+  const g = grids(map([house, { asset: "pine", x: 10, z: 2, rot: 0 }]), T);
+  assert.equal(visible(map([]), g.boxes, from, door), true);
+});
+
+test("a 1-wide dead-end branch is found, with its length back to the junction", () => {
+  const rows = { 10: "p".repeat(20) };
+  for (let z = 4; z < 10; z++) rows[z] = ".".repeat(12) + "p" + ".".repeat(7);
+  const { deadEnds, junctions } = pathGraph(grids(map([], blank(20, 20, rows)), T));
+  assert.ok(junctions.some((j) => j.x === 12 && j.z === 10));
+  const branch = deadEnds.find((d) => d.x === 12);
+  assert.deepEqual([branch.x, branch.z], [12, 4]);
+  assert.ok(branch.length > 3, `length ${branch.length}`);
+  // A loose piece of path, with no junction, measures its own length: 4 tiles is short enough, 8 isn't.
+  const piece = (n) => pathGraph(grids(map([], blank(20, 20, { 16: "..." + "p".repeat(n) + ".".repeat(17 - n) })), T)).deadEnds;
+  assert.ok(piece(4).length && piece(4).every((d) => d.length <= 3), JSON.stringify(piece(4)));
+  assert.ok(piece(8).some((d) => d.length === 7), JSON.stringify(piece(8)));
+});
+
+test("walking 40 tiles takes 10 s", () => assert.equal(walkTime(40), 10));
+
+test("an evenly spaced grid scores a scatter ratio over 1.1, a clump under 1", () => {
+  const grid = [];
+  for (let x = 0; x < 5; x++) for (let z = 0; z < 5; z++) grid.push({ x: x * 3, z: z * 3, asset: "bush" });
+  assert.ok(scatter(grid).ratio > 1.1, `grid ${scatter(grid).ratio}`);
+  const clump = [];
+  for (const [cx, cz] of [[0, 0], [18, 0], [0, 18], [18, 18]]) for (const [dx, dz] of [[0, 0], [1, 0], [0, 1], [1, 1]]) clump.push({ x: cx + dx, z: cz + dz, asset: "bush" });
+  assert.ok(scatter(clump).ratio < 1, `clump ${scatter(clump).ratio}`);
+  assert.equal(scatter(clump).chunks[0].share, 1);
+});
+
+test("density counts props a screen at a time along the route", () => {
+  const route = Array.from({ length: 39 }, (_, x) => [x, 5]);
+  const d = density([{ x: 2, z: 5 }, { x: 3, z: 4 }, { x: 27, z: 6 }], route);
+  assert.deepEqual(d.curve, [2, 0, 1]);
+  assert.deepEqual(d.breathers, [1]);
+  assert.ok(d.cv > 0.25);
+});

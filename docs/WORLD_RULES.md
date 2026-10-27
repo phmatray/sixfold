@@ -173,6 +173,17 @@ reward rules (6.3–6.5) apply to every screen. A screen with nothing to stop fo
 - `cave` (an interior): a cave room; no lamps (2.6).
 - `glow` (a glow prop): its hue, such as teal `#5fe0c8` on the coast, violet in the Hushlands or amber in the Stonebacks. `light: true` (indoors) gives the prop the room's point light, in that hue.
 
+Level design (§11):
+
+- `level_design: 2` (an outdoor map): the §11 rules are errors for this map. Without it they are only listed in the report.
+- `landmark: true` (a prop): the map's landmark. A big town may mark more than one.
+- `poi` (a prop, a spot, a person or a warp): its tier, `major`, `secondary`, `micro` or `secret`. Warps, waymarks, exit
+  signposts and people who start a story duel (a rival, a seal keeper: a `duel:` cue in what they say) are `major` by default.
+- `clue` (on a `secret`): `[[x, z], …]`, the tiles that hint at it.
+- `view` (a map): `[x, z]` or `[[x, z], …]`, viewpoints. A path that ends within 2 tiles of one is not a dead end.
+- `vista` (a map): `[[x0, z0, x1, z1], …]`, open ground meant to be seen, not reached (an island seen early).
+- `optional: true` (a spot, a person or a warp): not a mandatory interaction.
+
 ## 10. Method — *méthode*
 
 1. **Paper map first.** Mark the links, the landmark, the districts and the gates (WORLD_DESIGN §2.1, §10).
@@ -183,3 +194,31 @@ reward rules (6.3–6.5) apply to every screen. A screen with nothing to stop fo
 5. **Walk every exit both ways**, by day and by night, on a desktop and a phone. Make sure it's obvious
    where to go.
 6. Review the map against `docs/LEVEL_DESIGN.md`: its checklist, its budgets and the five-pass test.
+
+## 11. Level design checks — *contrôles de conception*
+
+Sections 1–9 say where a thing may stand. These rules check whether a map is **composed**: it has a landmark,
+what you must use can be seen, paths lead somewhere and connections hold. The geometry is `web/world/ld.js`
+(shared with the debug overlays); the budgets are in `tools/level-design.json`. A map opts in with
+`"level_design": 2`, and then each rule is an **error** with `--strict`. On the other outdoor maps they are listed
+in the report until their region pass opts them in (#112 first).
+
+The camera test casts a ray from the map's real camera (its `pitch` and `distance`, following the hero on the tile
+named) to the top centre of the target. Any prop box other than the target's own that it hits first hides the
+target. Props are their bounding boxes (FOOT × height), which is strict; the terrain hides nothing.
+
+| # | Rule (`[name]` in the message) | Fails when | Check |
+|---|---|---|---|
+| 11.1 | `landmark` | no prop carries `landmark: true` (`landmarks_min`), or a landmark can't be seen from any path tile within a screen (13 × 9) of it | error (v2) |
+| 11.2 | `hidden-mandatory` | a warp, waymark, exit signpost or `major` POI (not `optional`) is hidden from the camera when you stand on its approach tile (south of it first) | error (v2) |
+| 11.3 | `dead-end` | a path branch runs more than 3 tiles from a junction and nothing is within 2 tiles of its end: a spot, a person, a warp, a POI, an exit or a `view` | error (v2) |
+| 11.4 | `exit-both-ways` | from the tile 4 inside an exit's middle, fewer than 2 of its edge tiles are on screen and seen; checked on both maps of the pair | error (v2) |
+| 11.5 | `unreachable` | a pocket of 4 or more open tiles can't be reached with every gate open, and no `vista` covers it | error (v2) |
+| 11.6 | `connection` | a warp from or to the map lands on its way back or facing it (a loop), away from the door back, or facing out of the map | error (v2) |
+
+**The report** (`node tools/check-maps.mjs web/world --report`, or `--report=<file.md>`) never fails. Per outdoor
+map it lists the landmark, POIs per tier against the budget for the map's kind, the longest walk without a
+discovery (a POI or a find) in seconds and tiles, crossroads with more than `crossroads_max` ways out, the
+scatter ratio (Clark–Evans: under 1 clumped, over `scatter_ratio_max` too even) and each 16 × 16 chunk's
+dominant asset, the density curve along the main path with its breathers, and the §11 findings of a map not yet
+on `level_design: 2`.
