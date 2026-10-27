@@ -12,7 +12,9 @@
 //! - `item:<item>`, `flag:<flag>`, `seals:<n>` (at least n seals)
 //! - `beat:<id>` (a rival or route duelist beaten at least once), `won:<id>` /
 //!   `lost:<id>` (the result of the last duel, until [`Progress::settle`]),
-//!   `open:<rival>` (enough seals to duel them)
+//!   `open:<rival>` (enough seals to duel them), `earned:<rival>` (enough of
+//!   their region's duelists bested), `bested:<rival>:<n>` (at least n of
+//!   their region's duelists bested)
 //! - `coins:<n>` (at least n Facets), `count:<prefix>:<n>` (at least n flags
 //!   and items start with the prefix, e.g. `count:found_:30`)
 //! - `time:<phase>` (the clock is in `dawn`, `day`, `dusk` or `night`; see
@@ -149,6 +151,10 @@ pub enum Test {
     Beat(String),
     /// A rival the seals let the player duel.
     Open(String),
+    /// A rival whose region's duelists the player has bested enough of.
+    Earned(String),
+    /// At least this many of a rival's region's duelists bested.
+    Bested(String, usize),
     Won(String),
     Lost(String),
     Coins(u32),
@@ -335,6 +341,8 @@ fn parse_test(c: &str) -> Option<Test> {
         ("won", [id]) if duelist(id) => Test::Won(s(id)),
         ("lost", [id]) if duelist(id) => Test::Lost(s(id)),
         ("open", [id]) if rival(id).is_some() => Test::Open(s(id)),
+        ("earned", [id]) if rival(id).is_some() => Test::Earned(s(id)),
+        ("bested", [id, n]) if rival(id).is_some() => Test::Bested(s(id), n.parse().ok()?),
         ("coins", [n]) => Test::Coins(n.parse().ok()?),
         ("count", [prefix, n]) => Test::Count(s(prefix), n.parse().ok()?),
         ("time", [p]) => Test::Time(Phase::parse(p)?),
@@ -534,6 +542,8 @@ impl Progress {
             Test::Seals(n) => seals(self) >= *n,
             Test::Beat(id) => self.has_flag(&format!("beat_{id}")),
             Test::Open(id) => rival(id).is_some_and(|r| r.open(self)),
+            Test::Earned(id) => rival(id).is_some_and(|r| r.earned(self)),
+            Test::Bested(id, n) => rival(id).is_some_and(|r| r.bested(self) >= *n),
             Test::Won(id) => self.last_duel() == Some((id, true)),
             Test::Lost(id) => self.last_duel() == Some((id, false)),
             Test::Coins(n) => self.coins >= *n,
@@ -796,6 +806,30 @@ mod tests {
             "won:nobody",
         ] {
             assert!(!p.check(bad), "{bad:?}");
+        }
+    }
+
+    /// #150: `earned:` and `bested:` read a keeper's region's duelists.
+    #[test]
+    fn keeper_conditions_read_their_regions_duelists() {
+        let mut p = Progress::default();
+        assert!(!p.check("earned:marlo") && p.check("!earned:marlo"));
+        assert!(p.check("bested:marlo:0") && !p.check("bested:marlo:1"));
+        assert!(p.check("earned:warden"));
+        p.apply_all(&["flag:beat_t_pell", "flag:beat_t_nell"])
+            .unwrap();
+        assert!(p.check("bested:marlo:2") && !p.check("bested:marlo:3"));
+        assert!(!p.check("earned:marlo") && !p.check("bested:bramble:1"));
+        p.apply("flag:beat_t_skye").unwrap();
+        assert!(p.check("earned:marlo") && p.check("bested:marlo:3"));
+        for bad in [
+            "earned:nobody",
+            "bested:marlo:x",
+            "bested:t_pell:1",
+            "bested:marlo",
+            "earned:t_pell",
+        ] {
+            assert!(parse_cond(bad).is_err(), "{bad:?}");
         }
     }
 
