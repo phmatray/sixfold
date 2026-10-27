@@ -133,7 +133,8 @@
       "asset": "seal_stone",
       "x": 19,
       "z": 3,
-      "rot": 0
+      "rot": 0,
+      "y": 4
     },
     {
       "asset": "menhir",
@@ -2064,7 +2065,7 @@
       "scale": 1,
       "idle": "Idle",
       "x": 21,
-      "z": 6,
+      "z": 5,
       "facing": "s",
       "dialogue": [
         {
