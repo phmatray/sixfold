@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { bustsDrawn, menuItem, readSave, skipSplash, title } from "./helpers";
+import { frames, menuItem, readSave, skipSplash, title } from "./helpers";
 
 /** Where the save says the hero stands: `map,x,z,facing`. */
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
@@ -100,7 +100,7 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   const prompt = page.getByRole("button", { name: /^Talk to Tobin/ });
   await expect(prompt).toBeVisible();
   await page.keyboard.press("e");
-  // The map's first talk opens at once: busts are baked ahead of time (#159).
+  // The map's first talk opens at once: a bust not drawn yet follows (#159).
   const talk = page.locator(".talk-box");
   await expect(talk).toBeVisible();
   while (await talk.isVisible()) {
@@ -146,8 +146,8 @@ test("on a phone, a tap on the ground walks only once Options allow it @phone", 
   await page.waitForTimeout(1500);
   expect(await host.getAttribute("data-hero")).toEqual(start);
 
-  // Options: tap to walk, kept in this browser. (Once the page is free: see `bustsDrawn`.)
-  await bustsDrawn(page);
+  // Options: tap to walk, kept in this browser. (Once the page is free: see `frames`.)
+  await frames(page);
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("tab", { name: "Options" }).click();
   const option = page.getByRole("checkbox", { name: /Tap the ground to walk/ });

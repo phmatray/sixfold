@@ -850,7 +850,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
-  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, busts: bustQ.length + (baking ? 1 : 0) });
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit });
 
   // Item popup preview: the model turning in its own small canvas.
   let pv = null;
@@ -912,15 +912,15 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // After a map loads: queue its people, nearest first, and bake them one per idle slot.
   function bakeBusts(s) {
     bustsReset();
+    // Only where shaders compile off the page's thread: without KHR_parallel_shader_compile (software GL, CI)
+    // each bake stalls the page for seconds, mid-walk or under a menu, so a bust is drawn when its talk opens.
+    if (!renderer.extensions.has("KHR_parallel_shader_compile")) return;
     const far = (n) => (n.hidden ? 1e9 : Math.hypot(n.x - s.x, n.z - s.z));
     bustQ = world.npcs.filter((n) => n.obj).sort((a, b) => far(a) - far(b)).map((n) => n.def.id);
     idle(bakeNext);
   }
   async function bakeNext() {
     if (baking || !alive || warping || !bustQ.length || bustsOf !== world) return; // a warp's end queues the next map's
-    // Ahead of a talk, never while the world is paused (a menu, a sheet open): the page is the UI's then,
-    // and a bake holds it (seconds, on software GL). A talk waiting for its bust bakes at once.
-    if (paused && !bustWant.size) return void setTimeout(() => idle(bakeNext), 500);
     baking = true;
     const w = world, id = bustQ.shift();
     let url = "";
