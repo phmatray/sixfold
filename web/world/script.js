@@ -77,7 +77,7 @@ export function scenes(env) {
 
   // Play one cue; `cb("cue_done", id)` once it has finished (never for a cue a skip cut short).
   function play(c) {
-    const id = c.id, me = { id, c, t: 0 };
+    const id = c.id, me = { id, c, t: 0, at: performance.now() };
     me.done = () => setTimeout(() => cur === me && ((cur = null), id !== undefined && env.cb("cue_done", String(id), "")));
     cur = me;
     const a = c.actor !== undefined ? actorOf(c.actor) : null;
@@ -124,7 +124,8 @@ export function scenes(env) {
       if (moving) arrive(a, isHero(a) ? env.world().path : a.go); // stuck: arrive anyway
     } else if (me.c.cam === undefined) return;
     // Under reduced motion a shot is a cut, held a beat so it still reads (#155); the way back to the hero isn't.
-    else if (env.reduced() ? me.c.cam !== "hero" && me.t < CUT_HOLD : !env.settled() && me.t < CAM_MAX) return;
+    // The hold is wall-clock time: frame time is capped (world.js), so on a slow machine it would stretch.
+    else if (env.reduced() ? me.c.cam !== "hero" && performance.now() - me.at < CUT_HOLD * 1000 : !env.settled() && me.t < CAM_MAX) return;
     me.finished = true;
     me.done();
   }
