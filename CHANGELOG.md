@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.9.1](https://github.com/phmatray/sixfold/compare/v1.9.0...v1.9.1) (2026-10-27)
+
+
+### Fixed
+
+* **world:** tap to walk is an option on touch screens, the on-screen arrows by default ([#160](https://github.com/phmatray/sixfold/issues/160)) ([47e28d8](https://github.com/phmatray/sixfold/commit/47e28d82da9f4a93c1596e1329042b3673260947))
+
 ## [1.9.0](https://github.com/phmatray/sixfold/compare/v1.8.0...v1.9.0) (2026-10-27)
 
 
