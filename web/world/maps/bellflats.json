@@ -4172,11 +4172,11 @@
         {
           "if": "beat:warden",
           "lines": [
-            "The champion, back on my pier. The tide tables never mentioned you.",
+            "The champion, back on my flats. The tide tables never mentioned you.",
             "One more round? Three prizes, and I won't go easy."
           ],
           "lines_fr": [
-            "Champion, de retour sur ma jetée. Les tables des marées n'avaient rien prévu de tel.",
+            "Champion, de retour sur mes grèves. Les tables des marées n'avaient rien prévu de tel.",
             "Une autre partie ? Trois cartes Récompense, et je ne te ferai pas de cadeau."
           ],
           "do": [
