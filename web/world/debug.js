@@ -361,12 +361,77 @@ const BUILD = {
     return layer(n, kids, tiles(sight, COL.orange, 0.4));
   },
 
-  pois: () => layer(0),
-  npcs: () => layer(0),
-  lights: () => layer(0),
-  links: () => layer(0),
+  // The landmark, POIs by tier, secrets with dashed lines to their clues, and the longest walk without a discovery.
+  pois(c) {
+    const { m, g, pois, all, walk } = c, kids = [];
+    for (const p of m.props.filter((q) => q.landmark)) {
+      const b = g.boxes.find((q) => q.prop === p);
+      if (b) kids.push(lines(boxEdges(b), COL.gold), label(`★ landmark ${p.asset}`, (b.x0 + b.x1) / 2, b.y1 + 0.2, (b.z0 + b.z1) / 2, COL.gold));
+    }
+    for (const p of pois) {
+      const col = TIER[p.tier] ?? COL.white, [x, y, z] = mid(c, p.x, p.z);
+      kids.push(lines([[x, y, z], [x, y + 1.9, z]], col), label(`${p.tier} · ${p.what}`, x, y + 1.9, z, col));
+      for (const [cx, cz] of p.o?.clue ?? p.prop?.clue ?? []) kids.push(lines([[x, y + 0.1, z], mid(c, cx, cz, 0.1)], COL.violet, true), tiles([at(c, cx, cz)], COL.violet, 0.4));
+    }
+    // As check-maps' report, but for the landings of warps from other maps (it reads every map; this reads one).
+    const finds = ld.discoveries(m, pois, all, FOOT), entrances = [{ what: "the spawn", tiles: [key(m.spawn.x, m.spawn.z)] },
+      ...(m.exits ?? []).map((e) => ({ what: `the exit ${e.side} to ${e.to}`, tiles: [key(...ld.edgeTile(m, e.side, Math.round((e.span[0] + e.span[1]) / 2)))] }))].filter((e) => e.tiles.every((t) => all.has(t)));
+    const gap = ld.gap([...entrances, ...finds], finds, walk), stretch = [];
+    if (gap) {
+      const xz = (t) => t.split(",").map(Number);
+      for (let t = gap.to, p = gap.parent.get(t); p; t = p, p = gap.parent.get(p)) stretch.push(mid(c, ...xz(t), 0.2), mid(c, ...xz(p), 0.2));
+      kids.push(lines(stretch, COL.white, true), label(`${ld.walkTime(gap.tiles).toFixed(1)} s without a discovery`, ...mid(c, ...xz(gap.to), 0.4)));
+    }
+    return layer(pois.length + m.props.filter((q) => q.landmark).length, kids);
+  },
+
+  // Per person: the tiles to talk from, a duelist's sight, the extent of a route.
+  npcs(c) {
+    const { w } = c, talk = [], sight = [], kids = [];
+    for (const n of w.npcs) {
+      for (const [dx, dz] of Object.values(DIR)) if (!w.blocked(n.x + dx, n.z + dz)) talk.push(at(c, n.x + dx, n.z + dz));
+      if (n.def.trainer) for (const f of n.def.trainer.look ?? [n.face]) sight.push(...sightLine(w, n, f).map(([x, z]) => at(c, x, z)));
+      if (n.def.route?.length) {
+        let [x, z] = [n.def.x, n.def.z], x0 = x, x1 = x, z0 = z, z1 = z;
+        for (const f of n.def.route) (x += DIR[f][0]), (z += DIR[f][1]), (x0 = Math.min(x0, x)), (x1 = Math.max(x1, x)), (z0 = Math.min(z0, z)), (z1 = Math.max(z1, z));
+        kids.push(lines(edges(x0, 0.1, z0, x1 + 1, 0.1, z1 + 1).slice(0, 8), COL.cyan));
+      }
+      kids.push(label(n.def.id, ...mid(c, n.x, n.z, 2.1), n.def.trainer ? COL.orange : COL.green));
+    }
+    return layer(w.npcs.length, tiles(talk, COL.green, 0.3, 0.6), tiles(sight, COL.orange, 0.4), kids);
+  },
+
+  // Every lamp (hollow), the live point lights (filled, with their reach on the ground), each lamp's `why`.
+  lights(c) {
+    const { w, m } = c, live = (w.day.lights ?? []).filter((l) => l.intensity > 0), kids = [];
+    for (const p of w.lamps) kids.push(ball(p.x, p.y, p.z, COL.gold, false, 0.25));
+    for (const l of live) kids.push(ball(l.position.x, l.position.y, l.position.z, COL.gold, true, 0.2), lines(circle(l.position.x, w.floorAt(Math.floor(l.position.x), Math.floor(l.position.z)) + 0.1, l.position.z, l.distance || 8), COL.amber));
+    for (const p of m.props.filter((q) => q.why)) kids.push(label(`why: ${p.why}`, ...mid(c, p.x, p.z, 2.6), COL.gold));
+    kids.push(label(`${live.length} live lights · ${w.lamps.length} lamps`, ...mid(c, m.spawn.x, m.spawn.z, 3), COL.gold));
+    return layer(w.lamps.length, kids);
+  },
+
+  // Exits with where they go, warps with where they land, waymarks, the atlas's roads from this map.
+  links(c) {
+    const { w, m, dests, atlas } = c, kids = [];
+    for (const e of m.exits ?? []) {
+      const ts = ld.edgeTiles(m, e), [mx, mz] = ts[ts.length >> 1];
+      kids.push(tiles(ts.map(([x, z]) => at(c, x, z)), COL.blue, 0.6), label(`exit ${e.side} → ${dests[e.to]?.title ?? e.to}`, ...mid(c, mx, mz, 1.2), COL.blue));
+    }
+    for (const wp of m.warps ?? []) {
+      const s = wp.spawn ?? dests[wp.to]?.spawn, here = mid(c, wp.x, wp.z, 0.15);
+      kids.push(tiles([at(c, wp.x, wp.z)], COL.violet, 0.6), label(`warp → ${wp.to}${s ? ` ${s.x},${s.z}` : ""}${wp.if ? ` if ${wp.if}` : ""}`, ...mid(c, wp.x, wp.z, 1.6), COL.violet));
+      if (wp.to === w.name && s) kids.push(lines(arrow(here, mid(c, s.x, s.z, 0.15)), COL.violet));
+    }
+    for (const i of (m.interactions ?? []).filter((q) => q.kind === "waymark")) kids.push(label(`waymark ${i.id ?? ""}`, ...mid(c, i.x, i.z, 2.2), COL.cyan));
+    const roads = (atlas?.links ?? []).filter((l) => l.a === w.name || l.b === w.name).map((l) => (l.a === w.name ? l.b : l.a));
+    if (roads.length) kids.push(label(`atlas roads: ${roads.join(", ")}`, ...mid(c, m.spawn.x, m.spawn.z, 2.6), COL.blue));
+    return layer((m.exits ?? []).length + (m.warps ?? []).length, kids);
+  },
 };
 
 // The layers that follow what moves: a signature each frame, the layer redrawn when it changes.
 const DYNAMIC = {
+  npcs: (c) => c.w.npcs.map((n) => `${n.x},${n.z},${n.face}`).join(" "),
+  lights: (c) => (c.w.day.lights ?? []).map((l) => (l.intensity > 0 ? `${Math.round(l.position.x)},${Math.round(l.position.z)}` : "-")).join(" "), // per tile
 };
