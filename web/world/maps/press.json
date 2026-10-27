@@ -94,7 +94,7 @@
       "hidden": true,
       "give": "give:curio_lead_type",
       "text": "In the type case, in the compartment marked \"S\": one S that doesn't match the others. Gus won't miss it. Probably.",
-      "text_fr": "Dans la casse, dans le compartiment marqué « S » : un S qui ne ressemble pas aux autres. Gus ne s'en apercevra pas. Sans doute."
+      "text_fr": "Dans la casse, dans le compartiment marqué « S » : un S qui ne ressemble pas aux autres. Gus ne s'en apercevra pas. Sans doute."
     }
   ],
   "warps": [
@@ -137,8 +137,8 @@
           ],
           "lines_fr": [
             "Attention à l'encre. Il y en a partout. Il y en a sur moi.",
-            "Gus Ferrand, imprimeur. Choisis une carte, je la compose et je t'en tire un exemplaire. Les Facettes d'abord ; le crénage est offert.",
-            "Tu ne l'as jamais eue ? Je peux quand même faire les Communes et les Peu communes, un peu plus cher. Les Rares, il faudra les tirer des boosters. Sauf si tu m'apportes un bon."
+            "Gus Ferrand, imprimeur. Choisis une carte, je la compose et je t'en tire un exemplaire. Les Facettes d'abord ; le crénage est offert.",
+            "Tu ne l'as jamais eue ? Je peux quand même faire les Communes et les Peu communes, un peu plus cher. Les Rares, il faudra les tirer des boosters. Sauf si tu m'apportes un bon."
           ]
         },
         {
@@ -150,7 +150,7 @@
             "Is that one of Odile's vouchers? Well, well. Any card you like. Rares too."
           ],
           "lines_fr": [
-            "C'est un des bons d'Odile ? Tiens, tiens. La carte de ton choix. Les Rares aussi."
+            "C'est un des bons d'Odile ? Tiens, tiens. La carte de ton choix. Les Rares aussi."
           ]
         },
         {
@@ -161,7 +161,7 @@
             "What'll it be? Mind the kerning. Nobody minds the kerning."
           ],
           "lines_fr": [
-            "Qu'est-ce que ce sera ? Attention au crénage. Personne ne fait attention au crénage."
+            "Qu'est-ce que ce sera ? Attention au crénage. Personne ne fait attention au crénage."
           ]
         }
       ]

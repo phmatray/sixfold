@@ -1411,14 +1411,14 @@
       "z": 6,
       "kind": "sign",
       "text": "West: the Saltwind Boardwalk, and the meadow beyond. South, through the dunes: the Bellflats.",
-      "text_fr": "Ouest : la Promenade de Ventsalé, et le pré au-delà. Au sud, par les dunes : Les Grèves de la Cloche."
+      "text_fr": "Ouest : la Promenade de Ventsalé, et le pré au-delà. Au sud, par les dunes : Les Grèves de la Cloche."
     },
     {
       "x": 5,
       "z": 31,
       "kind": "sign",
       "text": "South: The Bellflats. The tide goes out at eight in the morning and comes back at six. After dark, keep to the boardwalk.",
-      "text_fr": "Sud : Les Grèves de la Cloche. La mer se retire à huit heures du matin et revient à six heures du soir. Une fois la nuit tombée, restez sur le ponton."
+      "text_fr": "Sud : Les Grèves de la Cloche. La mer se retire à huit heures du matin et revient à six heures du soir. Une fois la nuit tombée, restez sur le ponton."
     },
     {
       "x": 11,
@@ -1435,7 +1435,7 @@
       "give": "card:streamfin",
       "hidden": true,
       "text": "Under the fish crates, pressed flat in waxed paper: a card. It smells of mackerel and it's perfectly fine.",
-      "text_fr": "Sous les caisses de poisson, aplatie dans du papier ciré : une carte. Elle sent le maquereau et elle est en parfait état."
+      "text_fr": "Sous les caisses de poisson, aplatie dans du papier ciré : une carte. Elle sent le maquereau et elle est en parfait état."
     },
     {
       "x": 26,
@@ -1452,7 +1452,7 @@
             "\"HIGH WATER 6 to 8. Flats under the sea, causeway under the sea. Take the boardwalk, or the ferry.\""
           ],
           "lines_fr": [
-            "Un tableau peint, mis à jour à la craie ce matin :",
+            "Un tableau peint, mis à jour à la craie ce matin :",
             "« BASSE MER de 8 h à 18 h. Grèves praticables, chaussée de Lac-aux-Lanternes ouverte. »",
             "« PLEINE MER de 18 h à 8 h. Grèves sous la mer, chaussée sous la mer. Prenez le ponton, ou le bac. »"
           ]
@@ -1473,14 +1473,14 @@
       "give": "coins:50",
       "hidden": true,
       "text": "Wedged between two crates on the quay, where the gulls can't get at it: a little purse of Facets.",
-      "text_fr": "Coincée entre deux caisses sur le quai, là où les mouettes ne l'atteignent pas : une petite bourse de Facettes."
+      "text_fr": "Coincée entre deux caisses sur le quai, là où les mouettes ne l'atteignent pas : une petite bourse de Facettes."
     },
     {
       "kind": "find",
       "id": "t_lookout",
       "give": "coins:40",
       "text": "Under the lookout bench, behind a leg: a tin of Facets and a pencil stub. Somebody counts ships up here.",
-      "text_fr": "Sous le banc du belvédère, derrière un pied : une boîte de Facettes et un bout de crayon. Quelqu'un compte les bateaux, ici.",
+      "text_fr": "Sous le banc du belvédère, derrière un pied : une boîte de Facettes et un bout de crayon. Quelqu'un compte les bateaux, ici.",
       "x": 46,
       "z": 1
     },
@@ -1509,7 +1509,7 @@
             "The gangway's chained. A tin plate on the chain: \"STORMWATCH. Passes only. Harbour Office, up the quay.\""
           ],
           "lines_fr": [
-            "La passerelle est fermée par une chaîne. Une plaque de fer-blanc dessus : « GUETTE-ORAGE. Laissez-passer obligatoire. Capitainerie, en haut du quai. »"
+            "La passerelle est fermée par une chaîne. Une plaque de fer-blanc dessus : « GUETTE-ORAGE. Laissez-passer obligatoire. Capitainerie, en haut du quai. »"
           ]
         }
       ]
@@ -1539,7 +1539,7 @@
             "A lilac launch with a brass rail. The gangway's chained: \"LANTERNMERE. Passes only. Harbour Office, up the quay.\""
           ],
           "lines_fr": [
-            "Une vedette lilas à la rambarde de laiton. La passerelle est fermée par une chaîne : « LAC-AUX-LANTERNES. Laissez-passer obligatoire. Capitainerie, en haut du quai. »"
+            "Une vedette lilas à la rambarde de laiton. La passerelle est fermée par une chaîne : « LAC-AUX-LANTERNES. Laissez-passer obligatoire. Capitainerie, en haut du quai. »"
           ]
         }
       ]
@@ -1558,7 +1558,7 @@
       "z": 30,
       "give": "coins:40",
       "text": "In a crack of the old sea wall, behind the weed: Facets, green at the edges. Someone hid them here a long tide ago.",
-      "text_fr": "Dans une fente du vieux mur de mer, derrière les algues : des Facettes, vertes sur les bords. Quelqu'un les a cachées là il y a bien des marées."
+      "text_fr": "Dans une fente du vieux mur de mer, derrière les algues : des Facettes, vertes sur les bords. Quelqu'un les a cachées là il y a bien des marées."
     }
   ],
   "warps": [
@@ -1649,9 +1649,9 @@
             "And the old bell tower has a lamp nobody lights. Except it's lit some nights. Spooky, right?"
           ],
           "lines_fr": [
-            "Gagné ! Enfin, contre les mouettes. Elles ne savent pas qu'on fait la course, ça aide.",
-            "Tu veux un secret ? Sur les Grèves, quand la mer est partie, il y a des flaques pleines de bestioles. Des profondes. Il faut des bottes pour toucher le fond.",
-            "Et la vieille tour de la cloche a une lampe que personne n'allume. Sauf qu'elle est allumée certaines nuits. Ça fait peur, hein ?"
+            "Gagné ! Enfin, contre les mouettes. Elles ne savent pas qu'on fait la course, ça aide.",
+            "Tu veux un secret ? Sur les Grèves, quand la mer est partie, il y a des flaques pleines de bestioles. Des profondes. Il faut des bottes pour toucher le fond.",
+            "Et la vieille tour de la cloche a une lampe que personne n'allume. Sauf qu'elle est allumée certaines nuits. Ça fait peur, hein ?"
           ]
         }
       ]
@@ -1675,7 +1675,7 @@
           ],
           "lines_fr": [
             "Maquereau ce matin, crabe cet après-midi, et des ragots toute la journée, gratuitement.",
-            "Hanne, au Bassin de radoub, prend le meilleur pour sa chaudrée. Elle fredonne en tournant la louche. Toujours le même air : l'air de la marée, qu'elle dit."
+            "Hanne, au Bassin de radoub, prend le meilleur pour sa chaudrée. Elle fredonne en tournant la louche. Toujours le même air : l'air de la marée, qu'elle dit."
           ]
         }
       ]
@@ -1698,7 +1698,7 @@
             "Big ferry on the right for Stormwatch, lilac launch on the left for Lanternmere. Right for the cliffs, left for the lake."
           ],
           "lines_fr": [
-            "Laissez-passer ! Laissez-passer. Laissez-passer. Tamponné deux fois, façon Ines. Parfait, parfait, parfait.",
+            "Laissez-passer ! Laissez-passer. Laissez-passer. Tamponné deux fois, façon Ines. Parfait, parfait, parfait.",
             "Le gros bac à droite pour Guette-Orage, la vedette lilas à gauche pour Lac-aux-Lanternes. À droite les falaises, à gauche le lac."
           ]
         },
@@ -1709,8 +1709,8 @@
             "Two boats, two runs: the ferry to Stormwatch, the launch to Lanternmere. Passes from the Harbour Office, up the quay. Ines stamps them. Twice. Twice! Twice."
           ],
           "lines_fr": [
-            "Bo te salue ? Bo te salue. Bo ne salue jamais personne. Ça doit être l'effet du laissez-passer.",
-            "Deux bateaux, deux lignes : le bac pour Guette-Orage, la vedette pour Lac-aux-Lanternes. Les laissez-passer, à la Capitainerie, en haut du quai. Ines les tamponne. Deux fois. Deux fois ! Deux fois."
+            "Bo te salue ? Bo te salue. Bo ne salue jamais personne. Ça doit être l'effet du laissez-passer.",
+            "Deux bateaux, deux lignes : le bac pour Guette-Orage, la vedette pour Lac-aux-Lanternes. Les laissez-passer, à la Capitainerie, en haut du quai. Ines les tamponne. Deux fois. Deux fois ! Deux fois."
           ]
         },
         {
@@ -1720,7 +1720,7 @@
           ],
           "lines_fr": [
             "Le bac, le bac, le bac. Guette-Orage au nord, Lac-aux-Lanternes en bas de la côte, et retour.",
-            "Les laissez-passer, à la Capitainerie, en haut du quai. Ines les tamponne. Deux fois. Deux fois ! Deux fois."
+            "Les laissez-passer, à la Capitainerie, en haut du quai. Ines les tamponne. Deux fois. Deux fois ! Deux fois."
           ]
         }
       ]
@@ -1740,20 +1740,20 @@
           "Quick duel while we wait? One prize. Deckhands play fast."
         ],
         "challenge_fr": [
-          "Tu attends le bac ? Moi aussi. Lou recompte encore tout trois fois.",
-          "Un petit duel en attendant ? Une carte Récompense. Les matelots jouent vite."
+          "Tu attends le bac ? Moi aussi. Lou recompte encore tout trois fois.",
+          "Un petit duel en attendant ? Une carte Récompense. Les matelots jouent vite."
         ],
         "win": [
           "Overboard! That's me, I'm overboard. Fair win."
         ],
         "win_fr": [
-          "Un homme à la mer ! C'est moi, l'homme à la mer. Bien joué."
+          "Un homme à la mer ! C'est moi, l'homme à la mer. Bien joué."
         ],
         "lose": [
           "Ha! Swab the deck and try again."
         ],
         "lose_fr": [
-          "Ha ! Passe la serpillière et réessaie."
+          "Ha ! Passe la serpillière et réessaie."
         ],
         "after": [
           "Ferry's late. Ferry's always late. Lou says it's early for tomorrow."
@@ -1783,8 +1783,8 @@
             "A tip, since you're here: hold one Basic back on your Bench. When your Active Hexon goes down, you're not left with nothing to send in."
           ],
           "lines_fr": [
-            "L'étal est fermé. Ici, c'est l'équipe de nuit : des cartes, une lanterne, et Brann qui fait semblant de ne pas gagner.",
-            "Un conseil, puisque tu es là : garde toujours un Hexon de Base sur ton Banc. Quand ton Hexon Actif tombe, tu n'es pas pris de court."
+            "L'étal est fermé. Ici, c'est l'équipe de nuit : des cartes, une lanterne, et Brann qui fait semblant de ne pas gagner.",
+            "Un conseil, puisque tu es là : garde toujours un Hexon de Base sur ton Banc. Quand ton Hexon Actif tombe, tu n'es pas pris de court."
           ]
         }
       ]
@@ -1805,7 +1805,7 @@
         ],
         "challenge_fr": [
           "La pêche de nuit, c'est lent. Les cartes, c'est plus rapide.",
-          "Assieds-toi. Trois cartes Récompense, et je joue comme la mer : patiemment, puis d'un coup."
+          "Assieds-toi. Trois cartes Récompense, et je joue comme la mer : patiemment, puis d'un coup."
         ],
         "win": [
           "Well. The sea doesn't always win either. Take it, you earned it."

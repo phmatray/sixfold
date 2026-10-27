@@ -98,7 +98,7 @@
       "z": 1,
       "kind": "sign",
       "text": "Binders, floor to ceiling, sorted by colour. One just says \"Strays\".",
-      "text_fr": "Des classeurs du sol au plafond, rangés par couleur. Sur l'un, juste : « Égarées »."
+      "text_fr": "Des classeurs du sol au plafond, rangés par couleur. Sur l'un, juste : « Égarées »."
     },
     {
       "kind": "find",
@@ -108,7 +108,7 @@
       "hidden": true,
       "give": "coins:50",
       "text": "A drawer in the bookcase, left ajar: Facets, under a note that says \"float\".",
-      "text_fr": "Un tiroir de la bibliothèque, entrouvert : des Facettes, sous un billet qui dit « fonds de caisse »."
+      "text_fr": "Un tiroir de la bibliothèque, entrouvert : des Facettes, sous un billet qui dit « fonds de caisse »."
     }
   ],
   "warps": [
@@ -145,7 +145,7 @@
           ],
           "lines_fr": [
             "Entre, entre. Attention aux classeurs.",
-            "Les prix du jour : justes, avec possibilité de plus justes encore.",
+            "Les prix du jour : justes, avec possibilité de plus justes encore.",
             "Je ne marchande pas, note bien. Une carte vaut ce qu'elle vaut."
           ],
           "do": [

@@ -149,7 +149,7 @@
           ],
           "lines_fr": [
             "De la soupe.",
-            "Les lits sont en haut. Le repos est gratuit. Aube, jour, crépuscule ou nuit : dis-moi.",
+            "Les lits sont en haut. Le repos est gratuit. Aube, jour, crépuscule ou nuit : dis-moi.",
             "Au comptoir, des boosters et des cartes. Héliolynx, si tu as les Facettes. Peu les ont."
           ],
           "do": [
@@ -164,7 +164,7 @@
           ],
           "lines_fr": [
             "Tard. La soupe est encore chaude.",
-            "Un lit ?"
+            "Un lit ?"
           ],
           "do": [
             "show:inn"
@@ -177,7 +177,7 @@
           ],
           "lines_fr": [
             "De la soupe.",
-            "Te reposer ?"
+            "Te reposer ?"
           ],
           "do": [
             "show:inn"

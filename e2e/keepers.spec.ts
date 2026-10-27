@@ -59,7 +59,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   // The menu's Campaign roster counts them too.
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("tab", { name: "Campaign" }).click();
-  await expect(page.locator("li.rival").filter({ hasText: "Marlo" })).toContainText("Duelists bested: 2 of 3");
+  await expect(page.locator("li.rival").filter({ hasText: "Marlo" })).toContainText("Saltreach duelists bested: 2 of 3");
   await page.keyboard.press("Escape");
   await expect(page.locator("li.rival")).toHaveCount(0);
 

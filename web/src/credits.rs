@@ -448,7 +448,7 @@ pub fn Credits(won: bool) -> impl IntoView {
             </ul>
             <p class="credits-line small">{tr(
                 "Sixfold's own code is MIT too. Every Hexon, card, place, picture and sound here is original; only the rules come from a classic handheld card game.",
-                "Le code de Sixfold est lui aussi sous licence MIT. Chaque Hexon, carte, lieu, image et son de ce jeu est original ; seules les règles viennent d'un grand classique du jeu de cartes sur console portable.",
+                "Le code de Sixfold est lui aussi sous licence MIT. Chaque Hexon, carte, lieu, image et son de ce jeu est original\u{202f}; seules les règles viennent d'un grand classique du jeu de cartes sur console portable.",
             )}</p>
         }
         .into_any(),
@@ -538,7 +538,7 @@ pub fn Credits(won: bool) -> impl IntoView {
         let i = at.get();
         tr(
             format!("{} of {n}: {}", i + 1, names[i]),
-            format!("{} sur {n} : {}", i + 1, names[i]),
+            format!("{} sur {n}\u{a0}: {}", i + 1, names[i]),
         )
     };
     view! {

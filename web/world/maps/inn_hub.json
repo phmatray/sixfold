@@ -97,7 +97,7 @@
       "z": 1,
       "kind": "sign",
       "text": "The guest book. The last line reads: \"Slept like a stone. Dreamt of a seventh colour. — R.\"",
-      "text_fr": "Le livre d'or. La dernière ligne dit : « Dormi comme une pierre. Rêvé d'une septième couleur. — R. »"
+      "text_fr": "Le livre d'or. La dernière ligne dit : « Dormi comme une pierre. Rêvé d'une septième couleur. — R. »"
     },
     {
       "x": 5,
@@ -142,8 +142,8 @@
             "Rest as long as you like: it's free for anyone who duels. Sleep till morning, or till the night folk come out."
           ],
           "lines_fr": [
-            "Bienvenue aux Chambres de l'Âtre ! Des lits à l'étage, de la soupe sur le feu, et l'horloge la plus discrète de Clairpuits.",
-            "Repose-toi autant que tu veux : c'est gratuit pour qui joue aux cartes. Dors jusqu'au matin, ou jusqu'à ce que les gens de la nuit sortent."
+            "Bienvenue aux Chambres de l'Âtre ! Des lits à l'étage, de la soupe sur le feu, et l'horloge la plus discrète de Clairpuits.",
+            "Repose-toi autant que tu veux : c'est gratuit pour qui joue aux cartes. Dors jusqu'au matin, ou jusqu'à ce que les gens de la nuit sortent."
           ]
         },
         {
@@ -156,7 +156,7 @@
             "There's a bed free if you want one."
           ],
           "lines_fr": [
-            "Encore debout ? Les lampes sont allumées, la bouilloire aussi.",
+            "Encore debout ? Les lampes sont allumées, la bouilloire aussi.",
             "Il y a un lit de libre, si tu veux."
           ]
         },
@@ -169,8 +169,8 @@
             "A rest, then?"
           ],
           "lines_fr": [
-            "Te revoilà ! Ta chambre est comme tu l'as laissée.",
-            "Tu te reposes un peu ?"
+            "Te revoilà ! Ta chambre est comme tu l'as laissée.",
+            "Tu te reposes un peu ?"
           ]
         }
       ]

@@ -4523,7 +4523,7 @@
     {
       "kind": "sign",
       "text": "South: back down to Cinderwick. Up the steps and over the rim: the Kilnmouth floor and its seal stone. Keep to the stairs.",
-      "text_fr": "Sud : retour à Mèche-Cendre. Par les marches et par-dessus le bord : le fond de la Gueule-du-Four et sa pierre de sceau. Restez sur les marches.",
+      "text_fr": "Sud : retour à Mèche-Cendre. Par les marches et par-dessus le bord : le fond de la Gueule-du-Four et sa pierre de sceau. Restez sur les marches.",
       "x": 23,
       "z": 25
     },
@@ -4567,7 +4567,7 @@
             "Clio's third piece."
           ],
           "lines_fr": [
-            "À moitié enterré dans la cendre : un gros éclat de vieux verre vert, épais comme un pouce, tiède de la roche.",
+            "À moitié enterré dans la cendre : un gros éclat de vieux verre vert, épais comme un pouce, tiède de la roche.",
             "Le troisième morceau pour Clio."
           ],
           "do": [
@@ -4598,7 +4598,7 @@
             "The top is smooth, pale and blank, as if something was meant to be cut there and never was."
           ],
           "lines_fr": [
-            "Une pierre hexagonale, tiède sous la main. Chacune de ses six faces a une couleur : la face Braise, tournée vers la route du four, luit faiblement.",
+            "Une pierre hexagonale, tiède sous la main. Chacune de ses six faces a une couleur : la face Braise, tournée vers la route du four, luit faiblement.",
             "Le dessus est lisse, pâle et vide, comme si quelque chose devait y être gravé et ne l'avait jamais été."
           ]
         }
@@ -4611,7 +4611,7 @@
       "z": 13,
       "give": "card:solarlynx",
       "text": "At the pool's edge the ash glows by night, and in the glow, half melted into the glass crust: a card, perfectly unburnt.",
-      "text_fr": "Au bord du bassin, la cendre luit la nuit, et dans la lueur, à moitié prise dans la croûte de verre : une carte, intacte.",
+      "text_fr": "Au bord du bassin, la cendre luit la nuit, et dans la lueur, à moitié prise dans la croûte de verre : une carte, intacte.",
       "if": "time:night"
     },
     {
@@ -4621,7 +4621,7 @@
       "z": 6,
       "give": "coins:100",
       "text": "Behind the boulder, where the steam keeps everyone away all day: a pouch of Facets, dry as a bone.",
-      "text_fr": "Derrière le rocher, là où la vapeur éloigne tout le monde la journée : une bourse de Facettes, sèche comme un os."
+      "text_fr": "Derrière le rocher, là où la vapeur éloigne tout le monde la journée : une bourse de Facettes, sèche comme un os."
     },
     {
       "kind": "find",
@@ -4630,7 +4630,7 @@
       "z": 6,
       "give": "card:cinderhorn",
       "text": "In a crack of the boulder, out of the steam's reach: a card in a tin, its corners warm.",
-      "text_fr": "Dans une fente du rocher, hors de portée de la vapeur : une carte dans une boîte en fer, aux coins tièdes."
+      "text_fr": "Dans une fente du rocher, hors de portée de la vapeur : une carte dans une boîte en fer, aux coins tièdes."
     },
     {
       "x": 16,
@@ -4660,7 +4660,7 @@
       "z": 3,
       "give": "pack:ember",
       "text": "On the crater's lip, tucked under a stone where only a climber would look: a sealed booster.",
-      "text_fr": "Sur la lèvre du cratère, glissé sous une pierre où seul un grimpeur regarderait : un booster scellé."
+      "text_fr": "Sur la lèvre du cratère, glissé sous une pierre où seul un grimpeur regarderait : un booster scellé."
     }
   ],
   "warps": [],
@@ -4760,74 +4760,64 @@
       "hair": "#e8e0d6",
       "dialogue": [
         {
+          "if": "!beat:cinza & !flag:talked_edda",
+          "more": true,
+          "lines": [
+            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
+            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
+            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
+          ],
+          "lines_fr": [
+            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
+            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
+            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
+          ]
+        },
+        {
+          "if": "!beat:cinza & open:cinza & earned:cinza",
+          "lines": [
+            "The vents have been gossiping: the Emberlands' duelists have had their fill of you. Cinza's waiting by the stone."
+          ],
+          "lines_fr": [
+            "Les évents bavardent : les duellistes des Braisières en ont assez de toi. Cinza t'attend près de la pierre."
+          ]
+        },
+        {
+          "if": "!beat:cinza & open:cinza & !earned:cinza & bested:cinza:2",
+          "lines": [
+            "Cinza won't race just anyone. Beat one more duelist of the Emberlands and she'll meet you by the stone."
+          ],
+          "lines_fr": [
+            "Cinza ne fait pas la course avec n'importe qui. Bats encore un duelliste des Braisières et elle t'attendra près de la pierre."
+          ]
+        },
+        {
+          "if": "!beat:cinza & open:cinza & !earned:cinza & bested:cinza:1",
+          "lines": [
+            "Cinza won't race just anyone. Beat two more duelists of the Emberlands and she'll meet you by the stone."
+          ],
+          "lines_fr": [
+            "Cinza ne fait pas la course avec n'importe qui. Bats encore deux duellistes des Braisières et elle t'attendra près de la pierre."
+          ]
+        },
+        {
+          "if": "!beat:cinza & open:cinza & !earned:cinza & bested:cinza:0",
+          "lines": [
+            "Cinza won't race just anyone. Beat three more duelists of the Emberlands and she'll meet you by the stone."
+          ],
+          "lines_fr": [
+            "Cinza ne fait pas la course avec n'importe qui. Bats encore trois duellistes des Braisières et elle t'attendra près de la pierre."
+          ]
+        },
+        {
           "if": "!time:day & !time:dawn",
           "lines": [
             "Hear that? Nothing. The vents are asleep. Go on: the high terrace is yours till dawn.",
             "Vela's up on the north rim, if you're looking for trouble. She usually is."
           ],
           "lines_fr": [
-            "Tu entends ? Rien. Les évents dorment. Vas-y : la haute terrasse est à toi jusqu'à l'aube.",
+            "Tu entends ? Rien. Les évents dorment. Vas-y : la haute terrasse est à toi jusqu'à l'aube.",
             "Vela est sur le rebord nord, si tu cherches les ennuis. Elle, elle les cherche toujours."
-          ]
-        },
-        {
-          "if": "!beat:cinza & open:cinza & earned:cinza",
-          "lines": [
-            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
-            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
-            "The vents have been gossiping: the Emberlands' duelists have had their fill of you. Cinza's waiting by the stone."
-          ],
-          "lines_fr": [
-            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
-            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
-            "Les évents bavardent : les duellistes des Braisières en ont assez de toi. Cinza t'attend près de la pierre."
-          ]
-        },
-        {
-          "if": "!beat:cinza & !earned:cinza & bested:cinza:2",
-          "lines": [
-            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
-            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
-            "Cinza won't race just anyone. Beat one more duelist of the Emberlands and she'll meet you by the stone."
-          ],
-          "lines_fr": [
-            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
-            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
-            "Cinza ne fait pas la course avec n'importe qui. Bats encore un duelliste des Braisières et elle t'attendra près de la pierre."
-          ]
-        },
-        {
-          "if": "!beat:cinza & !earned:cinza & bested:cinza:1",
-          "lines": [
-            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
-            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
-            "Cinza won't race just anyone. Beat two more duelists of the Emberlands and she'll meet you by the stone."
-          ],
-          "lines_fr": [
-            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
-            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
-            "Cinza ne fait pas la course avec n'importe qui. Bats encore deux duellistes des Braisières et elle t'attendra près de la pierre."
-          ]
-        },
-        {
-          "if": "!beat:cinza & !earned:cinza & bested:cinza:0",
-          "lines": [
-            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
-            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
-            "Cinza won't race just anyone. Beat three more duelists of the Emberlands and she'll meet you by the stone."
-          ],
-          "lines_fr": [
-            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
-            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
-            "Cinza ne fait pas la course avec n'importe qui. Bats encore trois duellistes des Braisières et elle t'attendra près de la pierre."
           ]
         },
         {
@@ -4839,7 +4829,7 @@
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
+            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
           ]
         }
       ]
@@ -4859,7 +4849,7 @@
           "Three prizes. My Blazelynx don't blink."
         ],
         "challenge_fr": [
-          "Tu es descendu par la spirale ? Alors tu supportes la chaleur.",
+          "Tu es descendu par la spirale ? Alors tu supportes la chaleur.",
           "Trois cartes Récompense. Mes Brasilynx ne clignent pas des yeux."
         ],
         "win": [
@@ -4952,7 +4942,7 @@
           "Back down the spiral. Mind the vents: they wake at dawn."
         ],
         "lose_fr": [
-          "Redescends la spirale. Attention aux évents : ils se réveillent à l'aube."
+          "Redescends la spirale. Attention aux évents : ils se réveillent à l'aube."
         ],
         "after": [
           "From up here you can see Cinderwick glow. Forty years of Marthe. I'm next, she says."
@@ -5020,9 +5010,9 @@
             "Three, two... no, just go!"
           ],
           "lines_fr": [
-            "Enfin ! J'ai couru deux fois la route du four pendant que tu arrivais.",
+            "Enfin ! J'ai couru deux fois la route du four pendant que tu arrivais.",
             "Cinza. Le sceau des Braisières est dans cette pierre, et il est encore chaud. Quatre cartes Récompense, sans échauffement.",
-            "Trois, deux… non, on y va !"
+            "Trois, deux… non, on y va !"
           ],
           "do": [
             "flag:met_cinza",
@@ -5215,9 +5205,9 @@
             "Three, two... no, just go!"
           ],
           "lines_fr": [
-            "Enfin ! J'ai couru deux fois la route du four pendant que tu arrivais.",
+            "Enfin ! J'ai couru deux fois la route du four pendant que tu arrivais.",
             "Cinza. Le sceau des Braisières est dans cette pierre, et il est encore chaud. Quatre cartes Récompense, sans échauffement.",
-            "Trois, deux… non, on y va !"
+            "Trois, deux… non, on y va !"
           ]
         },
         {
@@ -5254,7 +5244,7 @@
             "Now run. Somebody has to keep that seal warm."
           ],
           "lines_fr": [
-            "Tu entends ? La face de la Braise a pris, comme un four le premier matin froid.",
+            "Tu entends ? La face de la Braise a pris, comme un four le premier matin froid.",
             "Maintenant, cours. Il faut bien quelqu'un pour garder ce sceau au chaud."
           ]
         },

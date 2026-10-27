@@ -80,8 +80,8 @@
     },
     {
       "asset": "standing_tree",
-      "x": 50,
-      "z": 6,
+      "x": 49,
+      "z": 7,
       "rot": 0,
       "landmark": true
     },
@@ -92,10 +92,11 @@
       "rot": 90
     },
     {
-      "asset": "fallen_trunk",
+      "asset": "log",
       "x": 1,
       "z": 12,
-      "rot": 90
+      "rot": 90,
+      "why": "the sawn-off length of the elder, rolled clear of the road"
     },
     {
       "asset": "lantern",
@@ -378,14 +379,14 @@
     },
     {
       "asset": "crates",
-      "x": 16,
-      "z": 14,
+      "x": 15,
+      "z": 13,
       "rot": 0
     },
     {
       "asset": "crates",
-      "x": 17,
-      "z": 14,
+      "x": 16,
+      "z": 13,
       "rot": 0
     },
     {
@@ -420,7 +421,7 @@
     },
     {
       "asset": "glow_mushroom_tall",
-      "x": 49,
+      "x": 54,
       "z": 8,
       "rot": 0,
       "glow": "#6fe8c4"
@@ -1256,32 +1257,8 @@
     {
       "asset": "pine",
       "x": 0,
-      "z": 13,
-      "rot": 114
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 14,
-      "rot": 13
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 15,
-      "rot": 19
-    },
-    {
-      "asset": "pine",
-      "x": 0,
       "z": 16,
       "rot": 318
-    },
-    {
-      "asset": "birch",
-      "x": 1,
-      "z": 16,
-      "rot": 280
     },
     {
       "asset": "pine",
@@ -2872,6 +2849,24 @@
       "x": 37,
       "z": 22,
       "rot": 211
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 13,
+      "rot": 114
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 14,
+      "rot": 13
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 15,
+      "rot": 19
     }
   ],
   "spawn": {
@@ -2885,35 +2880,35 @@
       "z": 9,
       "kind": "sign",
       "text": "Fernhollow Trail. East: Sixfold Meadow. West, by the new bridge and Wick's camp: Rootholm.",
-      "text_fr": "Sentier de Creuse-Fougère. À l'est : le Pré de Sixfold. À l'ouest, par le nouveau pont et le camp de Wick : Racinemont."
+      "text_fr": "Sentier de Creuse-Fougère. À l'est : le Pré de Sixfold. À l'ouest, par le nouveau pont et le camp de Wick : Racinemont."
     },
     {
       "x": 46,
       "z": 8,
       "kind": "sign",
       "text": "The standing tree. North-west: the ranger's lodge and the hives. South-west: the new bridge, then Rootholm. West: the old road, to the narrows where its bridge went out.",
-      "text_fr": "L'arbre debout. Au nord-ouest : le relais du garde et les ruches. Au sud-ouest : le nouveau pont, puis Racinemont. À l'ouest : la vieille route, jusqu'aux étroits où son pont a été emporté."
+      "text_fr": "L'arbre debout. Au nord-ouest : le relais du garde et les ruches. Au sud-ouest : le nouveau pont, puis Racinemont. À l'ouest : la vieille route, jusqu'aux étroits où son pont a été emporté."
     },
     {
       "x": 19,
       "z": 8,
       "kind": "sign",
       "text": "Fork. West: Rootholm. South-east: Wick's camp and the new bridge, the way to the meadow. East: the old road to the narrows, where the rangers keep a plank. The short way to the lodge, if it's down.",
-      "text_fr": "Fourche. À l'ouest : Racinemont. Au sud-est : le camp de Wick et le nouveau pont, vers le pré. À l'est : la vieille route jusqu'aux étroits, où les gardes gardent une planche. Le chemin court vers le relais, si elle est posée."
+      "text_fr": "Fourche. À l'ouest : Racinemont. Au sud-est : le camp de Wick et le nouveau pont, vers le pré. À l'est : la vieille route jusqu'aux étroits, où les gardes gardent une planche. Le chemin court vers le relais, si elle est posée."
     },
     {
       "x": 4,
       "z": 8,
       "kind": "sign",
       "text": "West: Rootholm, under the Broken Elder. The rangers sawed the old road open again. East: the new bridge, the ranger's lodge and Sixfold Meadow.",
-      "text_fr": "À l'ouest : Racinemont, sous le Vieil-Arbre brisé. Les gardes ont rouvert la vieille route à la scie. À l'est : le nouveau pont, le relais du garde et le Pré de Sixfold."
+      "text_fr": "À l'ouest : Racinemont, sous le Vieil-Arbre brisé. Les gardes ont rouvert la vieille route à la scie. À l'est : le nouveau pont, le relais du garde et le Pré de Sixfold."
     },
     {
       "x": 31,
       "z": 9,
       "kind": "sign",
       "text": "Old road. The bridge went in the spring flood; the rangers keep a plank on the far bank. New bridge downstream, past the reed bed.",
-      "text_fr": "Vieille route. Le pont a été emporté par la crue du printemps ; les gardes gardent une planche sur l'autre rive. Nouveau pont en aval, après la roselière."
+      "text_fr": "Vieille route. Le pont a été emporté par la crue du printemps ; les gardes gardent une planche sur l'autre rive. Nouveau pont en aval, après la roselière."
     },
     {
       "x": 32,
@@ -2924,8 +2919,8 @@
       "poi": "secondary"
     },
     {
-      "x": 51,
-      "z": 8,
+      "x": 50,
+      "z": 9,
       "kind": "sign",
       "id": "standing_tree",
       "name": "The standing tree",
@@ -2936,7 +2931,7 @@
             "An oak older than the trail. Every spring the rangers tie a red cord round it and hang their wishes from it on slips of bark: dry summers, no fires, the herons back."
           ],
           "lines_fr": [
-            "Un chêne plus vieux que le sentier. Chaque printemps, les gardes lui nouent une corde rouge et y suspendent leurs vœux sur des copeaux d'écorce : des étés secs, pas d'incendie, le retour des hérons."
+            "Un chêne plus vieux que le sentier. Chaque printemps, les gardes lui nouent une corde rouge et y suspendent leurs vœux sur des copeaux d'écorce : des étés secs, pas d'incendie, le retour des hérons."
           ]
         }
       ]
@@ -2951,10 +2946,10 @@
       "dialogue": [
         {
           "lines": [
-            "The elder came down across the road in the spring gales. The rangers sawed a gap through it, a cart wide, and left the two halves where they fell. The rings say it was older than Rootholm."
+            "The elder came down across the road in the spring gales. The rangers sawed a cart's width out of it and rolled that length clear of the road; the rest lies where it fell. The rings say it was older than Rootholm."
           ],
           "lines_fr": [
-            "L'ancien est tombé en travers de la route lors des coups de vent du printemps. Les gardes y ont scié un passage, large comme une charrette, et laissé les deux moitiés là où elles sont tombées. Les cernes disent qu'il était plus vieux que Racinemont."
+            "L'ancien est tombé en travers de la route lors des coups de vent du printemps. Les gardes y ont scié la largeur d'une charrette et roulé ce tronçon hors de la route ; le reste gît là où il est tombé. Les cernes disent qu'il était plus vieux que Racinemont."
           ]
         }
       ]
@@ -2966,7 +2961,7 @@
       "z": 1,
       "give": "give:curio_heron_feather",
       "text": "Caught in a crack of the lookout stump, turning in the wind: a long grey feather.",
-      "text_fr": "Coincée dans une fente de la souche du belvédère, elle tourne au vent : une longue plume grise."
+      "text_fr": "Coincée dans une fente de la souche du belvédère, elle tourne au vent : une longue plume grise."
     },
     {
       "kind": "find",
@@ -2976,7 +2971,7 @@
       "hidden": true,
       "give": "coins:40",
       "text": "In the reeds below the bridge, out of sight of the path: a little pile of Facets.",
-      "text_fr": "Dans les roseaux sous le pont, hors de vue du chemin : un petit tas de Facettes."
+      "text_fr": "Dans les roseaux sous le pont, hors de vue du chemin : un petit tas de Facettes."
     },
     {
       "kind": "find",
@@ -2985,7 +2980,7 @@
       "z": 3,
       "give": "pack:wild",
       "text": "Among the moonflowers, shut tight by day: a booster, sealed and beaded with dew.",
-      "text_fr": "Parmi les fleurs de lune, bien fermées le jour : un booster scellé, perlé de rosée."
+      "text_fr": "Parmi les fleurs de lune, bien fermées le jour : un booster scellé, perlé de rosée."
     },
     {
       "kind": "find",
@@ -2994,7 +2989,7 @@
       "z": 3,
       "give": "coins:100",
       "text": "The moonflowers are wide open, glowing like lamps. Under the brightest, where an owl has been dropping shiny things all summer: a little heap of Facets.",
-      "text_fr": "Les belles-de-lune sont grandes ouvertes, elles brillent comme des lampes. Sous la plus lumineuse, là où une chouette laisse tomber des choses brillantes tout l'été : un petit tas de Facettes.",
+      "text_fr": "Les belles-de-lune sont grandes ouvertes, elles brillent comme des lampes. Sous la plus lumineuse, là où une chouette laisse tomber des choses brillantes tout l'été : un petit tas de Facettes.",
       "if": "time:night",
       "poi": "secret",
       "clue": [
@@ -3024,7 +3019,7 @@
       "give": "coins:40",
       "hidden": true,
       "text": "In the hollow stump, under a lid of bark someone fitted on purpose: a forgotten purse of Facets. A ranger's emergency money, by the look of the knot.",
-      "text_fr": "Dans la souche creuse, sous un couvercle d'écorce taillé exprès : une bourse de Facettes oubliée. L'argent de secours d'un garde, à en juger par le nœud."
+      "text_fr": "Dans la souche creuse, sous un couvercle d'écorce taillé exprès : une bourse de Facettes oubliée. L'argent de secours d'un garde, à en juger par le nœud."
     },
     {
       "kind": "find",
@@ -3033,7 +3028,7 @@
       "z": 15,
       "give": "coins:30",
       "text": "Under the curl of the fallen birch's bark, like a letter in its envelope: a few Facets.",
-      "text_fr": "Sous l'écorce enroulée du bouleau tombé, comme une lettre dans son enveloppe : quelques Facettes."
+      "text_fr": "Sous l'écorce enroulée du bouleau tombé, comme une lettre dans son enveloppe : quelques Facettes."
     },
     {
       "kind": "find",
@@ -3042,7 +3037,7 @@
       "z": 19,
       "give": "coins:50",
       "text": "Inside the mossy log: a twist of Facets, dry as a bone.",
-      "text_fr": "Dans le tronc moussu : quelques Facettes, bien au sec."
+      "text_fr": "Dans le tronc moussu : quelques Facettes, bien au sec."
     },
     {
       "kind": "find",
@@ -3052,7 +3047,7 @@
       "hidden": true,
       "give": "give:seed_packet_1",
       "text": "In the hollow of the stump, a twist of paper: \"Runner beans. Do NOT eat.\" Moss's handwriting.",
-      "text_fr": "Dans le creux de la souche, un cornet de papier : « Haricots grimpants. NE PAS MANGER. » L'écriture de Moss.",
+      "text_fr": "Dans le creux de la souche, un cornet de papier : « Haricots grimpants. NE PAS MANGER. » L'écriture de Moss.",
       "if": "flag:seeds_asked"
     },
     {
@@ -3063,7 +3058,7 @@
       "hidden": true,
       "give": "card:moss_poultice",
       "text": "In the hidden glade, an old ranger's box, its lid swollen with damp. Inside, wrapped in oilcloth: a card.",
-      "text_fr": "Dans la clairière cachée, une vieille caisse de garde, au couvercle gonflé d'humidité. Dedans, enveloppée dans une toile cirée : une carte.",
+      "text_fr": "Dans la clairière cachée, une vieille caisse de garde, au couvercle gonflé d'humidité. Dedans, enveloppée dans une toile cirée : une carte.",
       "poi": "secret",
       "clue": [
         [
@@ -3084,7 +3079,7 @@
       "hidden": true,
       "give": "card:clearwater_vial",
       "text": "Snagged in the reeds where the stream slows: a corked vial with a card rolled up inside.",
-      "text_fr": "Accrochée dans les roseaux, là où le ruisseau ralentit : une fiole bouchée, une carte roulée dedans."
+      "text_fr": "Accrochée dans les roseaux, là où le ruisseau ralentit : une fiole bouchée, une carte roulée dedans."
     },
     {
       "kind": "find",
@@ -3102,7 +3097,7 @@
       "give": "coins:40",
       "hidden": true,
       "text": "Under the log by the cold camp, where someone sat to lace their boots: a few Facets.",
-      "text_fr": "Sous la bûche du campement froid, là où quelqu'un s'est assis pour lacer ses chaussures : quelques Facettes.",
+      "text_fr": "Sous la bûche du campement froid, là où quelqu'un s'est assis pour lacer ses chaussures : quelques Facettes.",
       "x": 33,
       "z": 21
     },
@@ -3182,8 +3177,8 @@
           "A duel? Sure! Mid-lunge! My Briarhog's warmed up already!"
         ],
         "challenge_fr": [
-          "Oh ! Salut ! Fais pas attention, je… m'étire… hnngh.",
-          "Un duel ? Bien sûr ! En pleine fente ! Mon Roncisson est déjà échauffé !"
+          "Oh ! Salut ! Fais pas attention, je… m'étire… hnngh.",
+          "Un duel ? Bien sûr ! En pleine fente ! Mon Roncisson est déjà échauffé !"
         ],
         "win": [
           "Pulled something. Pride, mostly.",
@@ -3197,7 +3192,7 @@
           "Personal best! Same time tomorrow?"
         ],
         "lose_fr": [
-          "Record personnel ! Même heure demain ?"
+          "Record personnel ! Même heure demain ?"
         ],
         "after": [
           "Twelve laps of the trail before breakfast. You should try it. Actually, don't. It's awful."
@@ -3230,7 +3225,7 @@
         ],
         "challenge_fr": [
           "Les abeilles disent que tu as une démarche de duelliste.",
-          "Tu entends ce bourdonnement ? Mes Ruchevolt veulent un duel."
+          "Tu entends ce bourdonnement ? Mes Ruchevolt veulent un duel."
         ],
         "win": [
           "Buzz off, then. Kindly.",
@@ -3263,7 +3258,7 @@
             "Here, the new comb, still warm. Tell her it's from the east hives. She'll pretend she can taste the difference."
           ],
           "lines_fr": [
-            "C'est Maman qui t'envoie ? Le trèfle est en avance, hein. Ça veut dire qu'elle veut du miel sans le dire.",
+            "C'est Maman qui t'envoie ? Le trèfle est en avance, hein. Ça veut dire qu'elle veut du miel sans le dire.",
             "Tiens, le nouveau rayon, encore tiède. Dis-lui que ça vient des ruches de l'est. Elle fera semblant de sentir la différence."
           ],
           "do": [
@@ -3341,6 +3336,9 @@
             "Chut… non, envolé. Un martin-pêcheur, je crois. Sans ma longue-vue, tout est flou.",
             "Je l'ai perdue à la Carrière de Pas-de-Braise, au nord du pré, en guettant les faucons sur la haute corniche.",
             "Si tu passes par là, tu ouvres l'œil ? Elle brille."
+          ],
+          "do": [
+            "flag:talked_fennel"
           ]
         }
       ],
@@ -3472,7 +3470,7 @@
           "lines_fr": [
             "Du charbon pour la forge du cordonnier de Racinemont, et pour la verrerie, quand Mèche-Cendre en manque. Il faut une semaine pour cuire une meule. Je reste avec, pour qu'elle ne boude pas.",
             "La nuit, le feu, c'est la seule lumière entre le pont et le Vieil-Arbre brisé. Les chouettes viennent le regarder. Vesper aussi, le gardien des chouettes. Il ne parle pas beaucoup.",
-            "Tu repars vers l'est ? La planche des gardes est de ce côté, là où la vieille route rejoint l'eau. Pose-la en travers et tu es au relais en un rien de temps."
+            "Tu repars vers l'est ? La planche des gardes est de ce côté, là où la vieille route rejoint l'eau. Pose-la en travers et tu es au relais en un rien de temps."
           ]
         },
         {
@@ -3509,7 +3507,7 @@
           "(If we must duel, duel quietly. My Galeherons prefer it.)"
         ],
         "challenge_fr": [
-          "(Chut. Chut ! Tu fais peur aux hérons.)",
+          "(Chut. Chut ! Tu fais peur aux hérons.)",
           "(S'il faut un duel, alors en silence. Mes Rafaléron préfèrent.)"
         ],
         "win": [
@@ -3552,7 +3550,7 @@
           "Beat me and my Bogblossoms, and I still won't say."
         ],
         "challenge_fr": [
-          "Tu cherches des champignons ? Ceux-là sont sans danger. Sans doute. Je ne dirai pas lesquels.",
+          "Tu cherches des champignons ? Ceux-là sont sans danger. Sans doute. Je ne dirai pas lesquels.",
           "Bats-nous, mes Tourbefleur et moi, et je ne le dirai toujours pas."
         ],
         "win": [
@@ -3567,13 +3565,13 @@
           "Picked clean! Come back when you can tell a cep from a death cap."
         ],
         "lose_fr": [
-          "Cueilli ! Reviens quand tu sauras distinguer un cèpe d'une amanite."
+          "Cueilli ! Reviens quand tu sauras distinguer un cèpe d'une amanite."
         ],
         "after": [
           "The ones with the white gills? No. Never. Not even to look at."
         ],
         "after_fr": [
-          "Ceux qui ont des lamelles blanches ? Non. Jamais. Même pas pour les regarder."
+          "Ceux qui ont des lamelles blanches ? Non. Jamais. Même pas pour les regarder."
         ]
       },
       "look": [
@@ -3641,7 +3639,7 @@
       "if": "flag:fern_shortcut",
       "prop_open": "boardwalk",
       "text": "The stream runs deep and fast where the old bridge stood. A plank could cross it: the rangers keep one, drawn up on the west bank.",
-      "text_fr": "Le ruisseau est profond et rapide là où se dressait le vieux pont. Une planche pourrait le traverser : les gardes en gardent une, remontée sur la rive ouest."
+      "text_fr": "Le ruisseau est profond et rapide là où se dressait le vieux pont. Une planche pourrait le traverser : les gardes en gardent une, remontée sur la rive ouest."
     }
   ],
   "fence": "hedge",

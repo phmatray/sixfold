@@ -205,7 +205,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "brass_thimble",
             tr(
                 "Dented on one side, polished bright on the other. Somebody sewed a great deal with it. A curio: Odile in Brightwell Square collects them.",
-                "Cabossé d'un côté, poli à force de servir de l'autre. Quelqu'un a beaucoup cousu avec. Une curiosité : Odile, sur la Place de Clairpuits, les collectionne.",
+                "Cabossé d'un côté, poli à force de servir de l'autre. Quelqu'un a beaucoup cousu avec. Une curiosité\u{a0}: Odile, sur la Place de Clairpuits, les collectionne.",
             ),
         ),
         "curio_heron_feather" => (
@@ -221,7 +221,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "message_bottle",
             tr(
                 "The cork is waxed shut and the paper inside says, as far as you can read it, \"Wish you were here.\" A curio for Odile.",
-                "Le bouchon est scellé à la cire et le papier dit, autant qu'on puisse lire : « J'aurais aimé que tu sois là. » Une curiosité pour Odile.",
+                "Le bouchon est scellé à la cire et le papier dit, autant qu'on puisse lire\u{a0}: « J'aurais aimé que tu sois là. » Une curiosité pour Odile.",
             ),
         ),
         "curio_fossil_fern" => (
@@ -237,7 +237,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "tin_hex",
             tr(
                 "A toy seal, six colours flaking off a tin hexagon. Every child in Brightwell had one once. A curio for Odile.",
-                "Un sceau jouet : six couleurs qui s'écaillent sur un hexagone de fer-blanc. Tous les enfants de Clairpuits en ont eu un. Une curiosité pour Odile.",
+                "Un sceau jouet\u{a0}: six couleurs qui s'écaillent sur un hexagone de fer-blanc. Tous les enfants de Clairpuits en ont eu un. Une curiosité pour Odile.",
             ),
         ),
         "curio_lead_type" => (
@@ -253,7 +253,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "curio",
             tr(
                 "A twist of paper with Moss's handwriting on it: \"Runner beans. Do NOT eat.\" Moss tends the garden in Sixfold Meadow.",
-                "Un cornet de papier, de l'écriture de Moss : « Haricots grimpants. NE PAS MANGER. » Moss soigne le potager du Pré des Six.",
+                "Un cornet de papier, de l'écriture de Moss\u{a0}: « Haricots grimpants. NE PAS MANGER. » Moss soigne le potager du Pré des Six.",
             ),
         ),
         "kite_line" => (
@@ -376,7 +376,7 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
             "lunch_pail",
             tr(
                 "The crew's lunch from the Tally Room: four pasties, two apples, a flask of tea. Counted. For Ros at the Undermine's east cut.",
-                "Le déjeuner de l'équipe, de la Salle des Comptes : quatre chaussons, deux pommes, une gourde de thé. Compté. Pour Ros, à la saignée est des Galeries Basses.",
+                "Le déjeuner de l'équipe, de la Salle des Comptes\u{a0}: quatre chaussons, deux pommes, une gourde de thé. Compté. Pour Ros, à la saignée est des Galeries Basses.",
             ),
         ),
         "lucky_pick" => (
@@ -407,9 +407,11 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
     }
 }
 
-/// One dialogue branch from the map JSON: shown when `cond` holds.
+/// One dialogue branch from the map JSON: shown when `cond` holds; a `more`
+/// branch leads into the next one that holds ([`Progress::pick_chain`]).
 struct Branch {
     cond: String,
+    more: bool,
     lines: Vec<String>,
     effects: Vec<String>,
 }
@@ -434,6 +436,7 @@ fn parse_talk(json: &str) -> Option<(String, Vec<Branch>)> {
         .iter()
         .map(|b| Branch {
             cond: field(&b, "if").as_string().unwrap_or_default(),
+            more: field(&b, "more").as_bool().unwrap_or(false),
             lines: strings(field(&b, "lines")),
             effects: strings(field(&b, "do")),
         })
@@ -660,6 +663,20 @@ fn prompt_label(kind: &str, text: &str) -> String {
         "warp" | "lift" | "seat" | "stand" => text.to_string(),
         "duel" => tr("Play a duel", "Jouer un duel").into(),
         "locked" => tr("Try the door", "Essayer la porte").into(),
+        "sign" | "find" | "gate" if !text.is_empty() => {
+            // "The rangers' plank" → "the rangers' plank"; a name that starts with a
+            // possessive ("Gorse's workshop") keeps its capital.
+            let first = text.split(' ').next().unwrap_or("");
+            let name = if first.ends_with("'s") || first.ends_with("s'") {
+                text.to_string()
+            } else {
+                let mut c = text.chars();
+                c.next()
+                    .map(|f| f.to_lowercase().chain(c).collect())
+                    .unwrap_or_default()
+            };
+            tr(format!("Look at {name}"), format!("Regarder {name}"))
+        }
         "gate" => tr("Look at the way", "Examiner le passage").into(),
         "book" => books::book(text).map_or_else(
             || tr("Read", "Lire").into(),
@@ -732,18 +749,29 @@ pub fn WorldScreen() -> impl IntoView {
             leptos::logging::warn!("world: bad dialogue for {id}");
             return;
         };
-        let pick = progress.with_untracked(|p| p.pick(branches.iter().map(|b| b.cond.as_str())));
-        let Some(b) = pick.and_then(|i| branches.into_iter().nth(i)) else {
+        let said = progress
+            .with_untracked(|p| p.pick_chain(branches.iter().map(|b| (b.cond.as_str(), b.more))));
+        if said.is_empty() {
             return;
-        };
+        }
+        let (mut lines, mut effects) = (vec![], vec![]);
+        for b in branches
+            .into_iter()
+            .enumerate()
+            .filter(|(i, _)| said.contains(i))
+            .map(|(_, b)| b)
+        {
+            lines.extend(b.lines);
+            effects.extend(b.effects);
+        }
         typed.set(0);
         sheet.set(Some(Sheet::Talk(Talk {
             face: face_of(&id),
             fade: false,
             id,
             name,
-            lines: b.lines,
-            effects: b.effects,
+            lines,
+            effects,
             at: 0,
             script: false,
         })));
@@ -1117,7 +1145,7 @@ pub fn WorldScreen() -> impl IntoView {
             crate::audio::sfx("reward", 0.0);
             announce.set(tr(
                 format!("You found {}.", card(*id).label()),
-                format!("Vous trouvez : {}.", card(*id).label()),
+                format!("Vous trouvez\u{a0}: {}.", card(*id).label()),
             ));
         }
         if let Some(Sheet::Item(item)) = &next {
@@ -1126,7 +1154,10 @@ pub fn WorldScreen() -> impl IntoView {
             let (en, fr) = if opens.is_empty() {
                 (String::new(), String::new())
             } else {
-                (format!(" It opens {opens}."), format!(" Ouvre : {opens}."))
+                (
+                    format!(" It opens {opens}."),
+                    format!(" Ouvre\u{a0}: {opens}."),
+                )
             };
             announce.set(tr(
                 format!("You got {}.{en}", item_info(item).0),
@@ -1152,7 +1183,7 @@ pub fn WorldScreen() -> impl IntoView {
         let Some(r) = campaign::rival(id) else { return };
         announce.set(tr(
             format!("{}'s seal!", r.name),
-            format!("Le sceau de {} !", r.name),
+            format!("Le sceau de {}\u{202f}!", r.name),
         ));
         if !fly {
             return;
@@ -1535,7 +1566,7 @@ pub fn WorldScreen() -> impl IntoView {
                     let (walk, act) = (input::prompt(Ctrl::Walk), input::prompt(Ctrl::Act));
                     tr(
                         format!("The Sixfold world: six regions round a meadow, with towns, routes and caves to walk around. {walk} to walk, {act} to act."),
-                        format!("Le monde de Sixfold : six régions autour d'un pré, avec des villes, des routes et des grottes à parcourir. {walk} pour marcher, {act} pour agir."),
+                        format!("Le monde de Sixfold\u{a0}: six régions autour d'un pré, avec des villes, des routes et des grottes à parcourir. {walk} pour marcher, {act} pour agir."),
                     )
                 }>
                 <div class="world-host" node_ref=host></div>
@@ -1595,7 +1626,7 @@ pub fn WorldScreen() -> impl IntoView {
                 // the modal dialog would be inert).
                 <p class="sr-only" id="talk-live" aria-live="polite">{move || sheet.with(|s| match s {
                     Some(Sheet::Talk(t)) if t.name.is_empty() => t.line().to_string(),
-                    Some(Sheet::Talk(t)) => format!("{}: {}", t.name, t.line()),
+                    Some(Sheet::Talk(t)) => tr(format!("{}: {}", t.name, t.line()), format!("{}\u{a0}: {}", t.name, t.line())),
                     _ => String::new(),
                 })}</p>
                 {move || sheet.get().map(|s| match s {
@@ -1605,6 +1636,8 @@ pub fn WorldScreen() -> impl IntoView {
                         let more = t.at + 1 < t.lines.len();
                         // The hero's own lines (a sign, a thought) carry no name plate.
                         let named = !t.name.is_empty();
+                        // The placeholder's monogram while the bust bakes.
+                        let initial: String = t.name.chars().take(1).collect();
                         let script = t.script;
                         view! {
                             // Described by the live line, so the first line is read on focus (later ones as they come).
@@ -1612,10 +1645,10 @@ pub fn WorldScreen() -> impl IntoView {
                                 // The face slides in with the first line only; a bust still baking is
                                 // a placeholder, and the bust fades in over it.
                                 {t.face.clone().map(|src| if src == BUST_PENDING {
-                                    view! { <span class="talk-face" class:enter=t.at == 0 aria-hidden="true"></span> }.into_any()
+                                    view! { <span class="talk-face" class:enter=t.at == 0 aria-hidden="true">{initial.clone()}</span> }.into_any()
                                 } else {
                                     view! {
-                                        {t.fade.then(|| view! { <span class="talk-face" aria-hidden="true"></span> })}
+                                        {t.fade.then(|| view! { <span class="talk-face" aria-hidden="true">{initial.clone()}</span> })}
                                         <img class="talk-face" class:enter=t.at == 0 && !t.fade class:bust-in=t.fade src=src alt="" width="96" height="96" />
                                     }.into_any()
                                 })}
@@ -1675,7 +1708,7 @@ pub fn WorldScreen() -> impl IntoView {
                         <div class="item-got">
                             <span class="found-card" aria-hidden="true"><crate::cards::CardFace id=id /></span>
                             <div>
-                                <h2 id="world-sheet-title">{tr(format!("You found {}!", card(id).label()), format!("Vous trouvez : {} !", card(id).label()))}</h2>
+                                <h2 id="world-sheet-title">{tr(format!("You found {}!", card(id).label()), format!("Vous trouvez\u{a0}: {}\u{202f}!", card(id).label()))}</h2>
                                 <p class="dialog-sub">{tr("It's in your collection now.", "La carte rejoint votre collection.")}</p>
                                 <div class="dialog-foot">
                                     <button class="btn primary" autofocus on:click=close>{tr("Nice", "Super")}</button>

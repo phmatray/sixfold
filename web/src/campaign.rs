@@ -193,18 +193,25 @@ pub fn Roster() -> impl IntoView {
             </div>
             <ol class="rivals">
                 {RIVALS.iter().map(|r| {
+                    // "earning": the seals are met, their region's duelists not yet (#150): never
+                    // in the brass of "Ready to duel".
                     let state = move || progress.with(|p| {
-                        if r.beaten(p) { "beaten" } else if r.open(p) { "open" } else { "locked" }
+                        if r.beaten(p) { "beaten" } else if !r.open(p) { "locked" } else if r.earned(p) { "open" } else { "earning" }
                     });
                     let status = move || match state() {
-                        "beaten" if !r.seal => tr("Champion beaten", "Victoire, titre obtenu").to_string(),
-                        "beaten" => tr("Beaten, seal earned", "Victoire, sceau obtenu").to_string(),
-                        "open" if !progress.with(|p| r.earned(p)) => {
-                            let n = progress.with(|p| r.bested(p));
-                            tr(format!("Duelists bested: {n} of {}", r.earn), format!("Duellistes battus : {n} sur {}", r.earn))
+                        "beaten" if !r.seal => tr("Champion beaten", "Victoire, titre obtenu").into_any(),
+                        "beaten" => tr("Beaten, seal earned", "Victoire, sceau obtenu").into_any(),
+                        "earning" => {
+                            let (n, line) = progress.with(|p| (r.bested(p), r.bested_line(p)));
+                            view! {
+                                <span class="ch-temper" aria-hidden="true">
+                                    {(0..r.earn).map(|i| view! { <i class:on=i < n></i> }).collect_view()}
+                                </span>
+                                {line}
+                            }.into_any()
                         }
-                        "open" => tr("Ready to duel", "Disponible pour un duel").to_string(),
-                        _ => tr(format!("Locked: needs {} seals", r.needs), format!("Verrouillé : il faut {}", seals_n(r.needs))),
+                        "open" => tr("Ready to duel", "Disponible pour un duel").into_any(),
+                        _ => tr(format!("Locked: needs {} seals", r.needs), format!("Verrouillé : il faut {}", seals_n(r.needs))).into_any(),
                     };
                     view! {
                         <li class=move || format!("rival {}", state()) class:champion=!r.seal>
@@ -264,10 +271,10 @@ pub fn CampaignPanel(
             // "Champion", or "Champion of the Seventh Face" once Rook's story is done.
             Some(t) => tr(
                 format!("You hold all six seals and the title {}. The rivals still take rematches, and the Gauntlet and the daily duel are below.", t.get()),
-                format!("Vous détenez les six sceaux et le titre de {}. Les rivaux acceptent toujours une revanche ; l'Épreuve et le duel du jour vous attendent plus bas.", t.get()),
+                format!("Vous détenez les six sceaux et le titre de {}. Les rivaux acceptent toujours une revanche\u{202f}; l'Épreuve et le duel du jour vous attendent plus bas.", t.get()),
             ),
             None => tr("Six rivals keep the seal stones, one at each region's seal site. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden.",
-                "Six rivaux gardent les pierres de sceau, chacun au site de sceau de sa région. Battez-les un à un pour gagner leur sceau ; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.").to_string(),
+                "Six rivaux gardent les pierres de sceau, chacun au site de sceau de sa région. Battez-les un à un pour gagner leur sceau\u{202f}; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.").to_string(),
         }}</p>
         <Roster />
         <section class="ladder-page" aria-labelledby="ladder-title">
@@ -707,7 +714,7 @@ pub fn Challenge(
                 </span>
                 <div class="ch-who">
                     <h2 id="world-sheet-title" class="ch-name">
-                        <span class="sr-only">{tr(format!("Challenge {name}?"), format!("Défier {name} ?"))}</span>
+                        <span class="sr-only">{tr(format!("Challenge {name}?"), format!("Défier {name}\u{202f}?"))}</span>
                         <span aria-hidden="true">{name}</span>
                     </h2>
                     <p class="ch-title">
@@ -753,15 +760,15 @@ pub fn Challenge(
                 let held = progress.with_untracked(seals);
                 view! { <p class="ch-note no">{tr(
                     format!("{} needs {} before accepting a duel. You hold {held}: beat the rivals of the other regions for theirs.", r.name, seals_n(r.needs)),
-                    format!("{} exige {} avant d'accepter un duel. Vous en avez {held} : battez les rivaux des autres régions pour les leurs.", r.name, seals_n(r.needs)),
+                    format!("{} exige {} avant d'accepter un duel. Vous en avez {held}\u{a0}: battez les rivaux des autres régions pour les leurs.", r.name, seals_n(r.needs)),
                 )}</p> }.into_any()
             } else if let Some(r) = r.filter(|_| !accepted) {
-                let n = progress.with_untracked(|p| r.bested(p));
+                let (n, wait) = progress.with_untracked(|p| (r.bested(p), r.waiting_line(p).map(|w| format!(" {w}")).unwrap_or_default()));
                 let of = tr(format!("{n} of {}", r.earn), format!("{n} sur {}", r.earn));
                 view! { <div class="ch-note no">
                     <p>{tr(
-                        format!("{} wants {} of {}'s duelists bested first. You've bested {n}.", r.name, r.earn, r.region.en),
-                        format!("{} veut que vous battiez d'abord {} duellistes {}. Vous en avez battu {n}.", r.name, r.earn, r.region_de()),
+                        format!("{} wants {} of {}'s duelists bested first. You've bested {n}.{wait}", r.name, r.earn, r.region.en),
+                        format!("{} veut que vous battiez d'abord {} duellistes {}. Vous en avez battu {n}.{wait}", r.name, r.earn, r.region_de()),
                     )}</p>
                     <p class="ch-pips">
                         <span class="ch-temper" role="img" aria-label=of.clone()>
@@ -774,7 +781,7 @@ pub fn Challenge(
                 view! {
                     {rule.map(|r| view! {
                         <p class="ch-note">
-                            <b>{tr("House rule: ", "Règle maison : ")}</b>{r.text().to_string()}
+                            <b>{tr("House rule: ", "Règle maison\u{a0}: ")}</b>{r.text().to_string()}
                             {(left_out > 0).then(|| tr(
                                 format!(" {left_out} of your decks break it and sit this one out."),
                                 format!(" {left_out} de vos decks l'enfreignent et ne jouent pas ce duel."),
@@ -806,7 +813,7 @@ pub fn Challenge(
                             if playable > 1 {
                                 let label = tr(
                                     format!("Your deck: {}, {count}. Left or right to change it.", d.name),
-                                    format!("Votre deck : {}, {count}. Gauche ou droite pour en changer.", d.name),
+                                    format!("Votre deck\u{a0}: {}, {count}. Gauche ou droite pour en changer.", d.name),
                                 );
                                 view! {
                                     <button type="button" class="ch-deck-now" aria-label=label on:click=on_deck_click>
@@ -816,7 +823,7 @@ pub fn Challenge(
                                     </button>
                                 }.into_any()
                             } else {
-                                view! { <span class="ch-deck-now solo" role="group" aria-label=tr(format!("Your deck: {}, {count}.", d.name), format!("Votre deck : {}, {count}.", d.name))>{inner}</span> }.into_any()
+                                view! { <span class="ch-deck-now solo" role="group" aria-label=tr(format!("Your deck: {}, {count}.", d.name), format!("Votre deck\u{a0}: {}, {count}.", d.name))>{inner}</span> }.into_any()
                             }
                         }}
                         // A change of deck, said once.
@@ -828,7 +835,7 @@ pub fn Challenge(
                     <div class="ch-note no">
                         <p>{tr(
                             format!("None of your decks keeps this house rule: {} Build one in My decks.", r.text()),
-                            format!("Aucun de vos decks ne respecte cette règle maison : {} Construisez-en un dans Mes decks.", r.text()),
+                            format!("Aucun de vos decks ne respecte cette règle maison\u{a0}: {} Construisez-en un dans Mes decks.", r.text()),
                         )}</p>
                         {to_decks()}
                     </div>

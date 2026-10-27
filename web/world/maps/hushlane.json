@@ -1694,14 +1694,14 @@
       "z": 4,
       "kind": "sign",
       "text": "North: Brightwell Square. South: Lanternmere, on its lake. West, over the ford: the Deepgrove.",
-      "text_fr": "Nord : la Place de Clairpuits. Sud : Lac-aux-Lanternes, sur son lac. Ouest, après le gué : le Bois-Profond."
+      "text_fr": "Nord : la Place de Clairpuits. Sud : Lac-aux-Lanternes, sur son lac. Ouest, après le gué : le Bois-Profond."
     },
     {
       "x": 15,
       "z": 39,
       "kind": "sign",
       "text": "South: Lanternmere and its lanterns. North, up the lane: Brightwell Square.",
-      "text_fr": "Sud : Lac-aux-Lanternes et ses lanternes. Nord, en remontant l'allée : la Place de Clairpuits."
+      "text_fr": "Sud : Lac-aux-Lanternes et ses lanternes. Nord, en remontant l'allée : la Place de Clairpuits."
     },
     {
       "x": 9,
@@ -1715,7 +1715,7 @@
       "z": 27,
       "kind": "sign",
       "text": "West: Rootholm, the Deepgrove's town under the Broken Elder. East, over the Hush ford: Hushwillow Lane and Brightwell Square.",
-      "text_fr": "À l'ouest : Racinemont, la ville du Bois-Profond sous le Vieil-Arbre brisé. À l'est, après le gué du Murmure : l'Allée des Saules-Murmures et la Place de Clairpuits."
+      "text_fr": "À l'ouest : Racinemont, la ville du Bois-Profond sous le Vieil-Arbre brisé. À l'est, après le gué du Murmure : l'Allée des Saules-Murmures et la Place de Clairpuits."
     },
     {
       "x": 3,
@@ -1732,7 +1732,7 @@
             "\"A door you thought was a wall.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« Une porte que vous preniez pour un mur. »"
           ],
           "do": [
@@ -1748,7 +1748,7 @@
             "\"Count your Bench before you count your prizes.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« Comptez votre Banc avant de compter vos Récompenses. »"
           ],
           "do": [
@@ -1764,7 +1764,7 @@
             "\"The tide goes out so it can come back.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« La mer se retire pour pouvoir revenir. »"
           ],
           "do": [
@@ -1780,7 +1780,7 @@
             "\"Someone in a lantern-lit town is thinking of you. Probably about soup.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« Quelqu'un, dans une ville aux lanternes, pense à vous. Sans doute à propos de soupe. »"
           ],
           "do": [
@@ -1796,7 +1796,7 @@
             "\"Your next pack has one card you'll keep forever.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« Votre prochain booster contient une carte que vous garderez toujours. »"
           ],
           "do": [
@@ -1812,7 +1812,7 @@
             "\"Walk slowly past the willows. They're listening.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« Passez doucement sous les saules. Ils écoutent. »"
           ],
           "do": [
@@ -1828,7 +1828,7 @@
             "\"An Awaken 2 is three wishes, patiently made.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« Un Éveil 2, ce sont trois vœux, faits avec patience. »"
           ],
           "do": [
@@ -1844,7 +1844,7 @@
             "\"Look up at night. Then look again.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« Levez les yeux la nuit. Puis regardez encore. »"
           ],
           "do": [
@@ -1860,7 +1860,7 @@
             "\"The seventh face is blank because it is waiting.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« La septième face est vide parce qu'elle attend. »"
           ],
           "do": [
@@ -1876,7 +1876,7 @@
             "\"Lose once, learn twice.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« Perdre une fois, apprendre deux fois. »"
           ],
           "do": [
@@ -1892,7 +1892,7 @@
             "\"The lanterns know the way. Follow them.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« Les lanternes connaissent le chemin. Suivez-les. »"
           ],
           "do": [
@@ -1908,7 +1908,7 @@
             "\"You'll be a long way from here, and glad of it.\""
           ],
           "lines_fr": [
-            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
+            "Vous nouez dix Facettes dans un ruban et vous l'accrochez à une branche basse. Une étiquette de papier tombe en voletant dans votre main :",
             "« Vous serez loin d'ici, et content de l'être. »"
           ],
           "do": [
@@ -1931,7 +1931,7 @@
             "Ribbons and paper tags, hundreds of them, whispering. A little sign: \"Ten Facets a wish. The tree answers.\""
           ],
           "lines_fr": [
-            "Des rubans et des étiquettes de papier, des centaines, qui chuchotent. Un petit écriteau : « Dix Facettes le vœu. L'arbre répond. »"
+            "Des rubans et des étiquettes de papier, des centaines, qui chuchotent. Un petit écriteau : « Dix Facettes le vœu. L'arbre répond. »"
           ]
         }
       ]
@@ -1944,7 +1944,7 @@
       "give": "coins:40",
       "hidden": true,
       "text": "Between two roots, where the coins people drop roll to: a little hoard of Facets. The tree won't miss them. Probably.",
-      "text_fr": "Entre deux racines, là où roulent les pièces que les gens laissent tomber : un petit magot de Facettes. L'arbre ne s'en apercevra pas. Sans doute."
+      "text_fr": "Entre deux racines, là où roulent les pièces que les gens laissent tomber : un petit magot de Facettes. L'arbre ne s'en apercevra pas. Sans doute."
     },
     {
       "kind": "find",
@@ -1954,7 +1954,7 @@
       "give": "card:dozel",
       "hidden": true,
       "text": "In a hollow of the old willow, behind the curtain of leaves: a card, curled up like something asleep.",
-      "text_fr": "Dans un creux du vieux saule, derrière le rideau de feuilles : une carte, enroulée comme une bête qui dort."
+      "text_fr": "Dans un creux du vieux saule, derrière le rideau de feuilles : une carte, enroulée comme une bête qui dort."
     },
     {
       "kind": "find",
@@ -1988,7 +1988,7 @@
       "id": "d_nook_lane",
       "give": "coins:30",
       "text": "Inside the hollow stump, under a fall of willow leaves: a little pouch of Facets, damp but whole.",
-      "text_fr": "Dans la souche creuse, sous une pluie de feuilles de saule : une petite bourse de Facettes, humide mais intacte.",
+      "text_fr": "Dans la souche creuse, sous une pluie de feuilles de saule : une petite bourse de Facettes, humide mais intacte.",
       "x": 20,
       "z": 37
     }
@@ -2065,7 +2065,7 @@
           "Rhymes with... no. Duel me while I think. Two prizes."
         ],
         "challenge_fr": [
-          "Halte ! Ne bouge pas. Tu viens d'entrer dans un vers. De mon poème. Il parle des saules.",
+          "Halte ! Ne bouge pas. Tu viens d'entrer dans un vers. De mon poème. Il parle des saules.",
           "Rime avec… non. Fais un duel pendant que je réfléchis. Deux cartes Récompense."
         ],
         "win": [
@@ -2078,13 +2078,13 @@
           "Victory! It scans."
         ],
         "lose_fr": [
-          "Victoire ! Ça sonne juste."
+          "Victoire ! Ça sonne juste."
         ],
         "after": [
           "A willow is a tree that has decided to listen. I wrote that. Do you like it? Don't answer."
         ],
         "after_fr": [
-          "Un saule est un arbre qui a décidé d'écouter. C'est de moi. Ça te plaît ? Ne réponds pas."
+          "Un saule est un arbre qui a décidé d'écouter. C'est de moi. Ça te plaît ? Ne réponds pas."
         ]
       },
       "outfit": "#5a6fb0",
@@ -2110,7 +2110,7 @@
           ],
           "lines_fr": [
             "Des baguettes de saule. Je les fais tremper dans le ruisseau, puis je tresse. Des paniers, des clôtures, un berceau, une fois.",
-            "L'allée est calme le jour. Reviens après le crépuscule : les lucioles montent de l'eau, les belles-de-lune s'ouvrent, et Luce se promène en dormant.",
+            "L'allée est calme le jour. Reviens après le crépuscule : les lucioles montent de l'eau, les belles-de-lune s'ouvrent, et Luce se promène en dormant.",
             "Ne la réveille pas. Fais-lui un duel, si tu veux. Elle joue mieux endormie."
           ]
         }
@@ -2131,7 +2131,7 @@
           "One prize. Don't wake me up..."
         ],
         "challenge_fr": [
-          "Mm… c'est à moi ? C'est toujours à moi, dans le rêve.",
+          "Mm… c'est à moi ? C'est toujours à moi, dans le rêve.",
           "Une carte Récompense. Ne me réveille pas…"
         ],
         "win": [

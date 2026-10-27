@@ -305,11 +305,11 @@ fn own_words(id: CardId, n: usize) -> String {
         0 if set::is_promo(id) => match from {
             Some(r) => tr(
                 format!("not earned yet: beat {}", r.name),
-                format!("pas encore gagnée : battez {}", r.name),
+                format!("pas encore gagnée\u{a0}: battez {}", r.name),
             ),
             None => tr(
                 "not earned yet: beat a rival",
-                "pas encore gagnée : battez un rival",
+                "pas encore gagnée\u{a0}: battez un rival",
             )
             .into(),
         },

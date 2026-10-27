@@ -1668,7 +1668,7 @@
       "give": "coins:50",
       "hidden": true,
       "text": "Between two buttress roots of the old tree, where pilgrims have tucked their offerings for a hundred years: Facets, green with moss.",
-      "text_fr": "Entre deux racines-contreforts du vieil arbre, là où les pèlerins glissent leurs offrandes depuis cent ans : des Facettes, vertes de mousse."
+      "text_fr": "Entre deux racines-contreforts du vieil arbre, là où les pèlerins glissent leurs offrandes depuis cent ans : des Facettes, vertes de mousse."
     },
     {
       "kind": "find",
@@ -1710,7 +1710,7 @@
             "Clipped into the hedge, very small, so you only see them from this dead end: two Bs, a little crooked, and a hexagon."
           ],
           "lines_fr": [
-            "Taillées dans la haie, toutes petites, si bien qu'on ne les voit que de ce cul-de-sac : deux B, un peu de travers, et un hexagone."
+            "Taillées dans la haie, toutes petites, si bien qu'on ne les voit que de ce cul-de-sac : deux B, un peu de travers, et un hexagone."
           ]
         }
       ]
@@ -1722,14 +1722,14 @@
       "z": 1,
       "give": "pack:grove",
       "text": "Up on the ledge, out of the wind behind a slab of slate: a sealed Grove pack, left by a climber who meant to come back for it.",
-      "text_fr": "En haut de la corniche, à l'abri du vent derrière une dalle d'ardoise : un booster Bosquet scellé, laissé par un grimpeur qui comptait revenir le chercher."
+      "text_fr": "En haut de la corniche, à l'abri du vent derrière une dalle d'ardoise : un booster Bosquet scellé, laissé par un grimpeur qui comptait revenir le chercher."
     },
     {
       "x": 25,
       "z": 1,
       "kind": "sign",
       "text": "North, up the scree: The Bastion, Orla's quarry. South, down the wall: the Elder Ring.",
-      "text_fr": "Au nord, en haut des éboulis : Le Bastion, la carrière d'Orla. Au sud, en bas de la paroi : le Cercle des Anciens."
+      "text_fr": "Au nord, en haut des éboulis : Le Bastion, la carrière d'Orla. Au sud, en bas de la paroi : le Cercle des Anciens."
     },
     {
       "kind": "waymark",
@@ -1742,14 +1742,14 @@
       "z": 31,
       "kind": "sign",
       "text": "South: Rootholm, through the Broken Elder. North: the Elder Ring and its maze. Mind the hedges; they mind you.",
-      "text_fr": "Au sud : Racinemont, par le Vieil-Arbre brisé. Au nord : le Cercle des Anciens et son labyrinthe. Respectez les haies ; elles vous respectent."
+      "text_fr": "Au sud : Racinemont, par le Vieil-Arbre brisé. Au nord : le Cercle des Anciens et son labyrinthe. Respectez les haies ; elles vous respectent."
     },
     {
       "x": 24,
       "z": 24,
       "kind": "sign",
       "text": "The Maze of the Elder Ring. Keep one hand on the hedge. Don't feed the hedgehogs. The seal is in the middle; so is Elspeth.",
-      "text_fr": "Le Labyrinthe du Cercle des Anciens. Gardez une main sur la haie. Ne nourrissez pas les hérissons. Le sceau est au milieu ; Elspeth aussi."
+      "text_fr": "Le Labyrinthe du Cercle des Anciens. Gardez une main sur la haie. Ne nourrissez pas les hérissons. Le sceau est au milieu ; Elspeth aussi."
     }
   ],
   "warps": [],
@@ -1796,7 +1796,7 @@
       "if": "item:grip_gloves",
       "prop": "climb_wall_slate",
       "text": "The slate face of the Stonebacks, with old iron pegs hammered in a zigzag up to the ledge. Bare hands won't do; you'd need gloves with a grip.",
-      "text_fr": "La paroi d'ardoise des Échines, avec de vieux pitons de fer plantés en zigzag jusqu'à la corniche. À mains nues, impossible ; il faudrait des gants qui accrochent."
+      "text_fr": "La paroi d'ardoise des Échines, avec de vieux pitons de fer plantés en zigzag jusqu'à la corniche. À mains nues, impossible ; il faudrait des gants qui accrochent."
     }
   ],
   "npcs": [
@@ -1812,74 +1812,64 @@
       "hair": "#e8e8e0",
       "dialogue": [
         {
+          "if": "!beat:bramble & !flag:talked_elspeth",
+          "more": true,
+          "lines": [
+            "You found the middle. Most people find the hedgehogs first.",
+            "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
+            "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years."
+          ],
+          "lines_fr": [
+            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
+            "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
+            "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans."
+          ]
+        },
+        {
+          "if": "!beat:bramble & open:bramble & earned:bramble",
+          "lines": [
+            "The Deepgrove's duelists have been talking about you, and the trees heard. Bramble's ready by the stone."
+          ],
+          "lines_fr": [
+            "Les duellistes du Bois-Profond parlent de toi, et les arbres ont entendu. Bramble t'attend près de la pierre."
+          ]
+        },
+        {
+          "if": "!beat:bramble & open:bramble & !earned:bramble & bested:bramble:2",
+          "lines": [
+            "Bramble won't trim a hedge he hasn't seen grow. Beat one more duelist of the Deepgrove and he'll duel you."
+          ],
+          "lines_fr": [
+            "Bramble ne taille pas une haie qu'il n'a pas vue pousser. Bats encore un duelliste du Bois-Profond et il t'affrontera."
+          ]
+        },
+        {
+          "if": "!beat:bramble & open:bramble & !earned:bramble & bested:bramble:1",
+          "lines": [
+            "Bramble won't trim a hedge he hasn't seen grow. Beat two more duelists of the Deepgrove and he'll duel you."
+          ],
+          "lines_fr": [
+            "Bramble ne taille pas une haie qu'il n'a pas vue pousser. Bats encore deux duellistes du Bois-Profond et il t'affrontera."
+          ]
+        },
+        {
+          "if": "!beat:bramble & open:bramble & !earned:bramble & bested:bramble:0",
+          "lines": [
+            "Bramble won't trim a hedge he hasn't seen grow. Beat three more duelists of the Deepgrove and he'll duel you."
+          ],
+          "lines_fr": [
+            "Bramble ne taille pas une haie qu'il n'a pas vue pousser. Bats encore trois duellistes du Bois-Profond et il t'affrontera."
+          ]
+        },
+        {
           "if": "time:night",
           "lines": [
             "Out in the dark? Good. The trees talk more at night. Listen: that creak is the oldest one, turning over in its sleep.",
             "Bramble's back at his seal. You can tell: the hedges stand up straighter."
           ],
           "lines_fr": [
-            "Dehors dans le noir ? Bien. Les arbres parlent davantage la nuit. Écoute : ce craquement, c'est le plus vieux, qui se retourne dans son sommeil.",
-            "Bramble est revenu à son sceau. Ça se voit : les haies se tiennent plus droites."
-          ]
-        },
-        {
-          "if": "!beat:bramble & open:bramble & earned:bramble",
-          "lines": [
-            "You found the middle. Most people find the hedgehogs first.",
-            "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
-            "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years.",
-            "The Deepgrove's duelists have been talking about you, and the trees heard. Bramble's ready by the stone."
-          ],
-          "lines_fr": [
-            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
-            "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
-            "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans.",
-            "Les duellistes du Bois-Profond parlent de toi, et les arbres ont entendu. Bramble t'attend près de la pierre."
-          ]
-        },
-        {
-          "if": "!beat:bramble & !earned:bramble & bested:bramble:2",
-          "lines": [
-            "You found the middle. Most people find the hedgehogs first.",
-            "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
-            "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years.",
-            "Bramble won't trim a hedge he hasn't seen grow. Beat one more duelist of the Deepgrove and he'll duel you."
-          ],
-          "lines_fr": [
-            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
-            "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
-            "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans.",
-            "Bramble ne taille pas une haie qu'il n'a pas vue pousser. Bats encore un duelliste du Bois-Profond et il t'affrontera."
-          ]
-        },
-        {
-          "if": "!beat:bramble & !earned:bramble & bested:bramble:1",
-          "lines": [
-            "You found the middle. Most people find the hedgehogs first.",
-            "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
-            "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years.",
-            "Bramble won't trim a hedge he hasn't seen grow. Beat two more duelists of the Deepgrove and he'll duel you."
-          ],
-          "lines_fr": [
-            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
-            "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
-            "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans.",
-            "Bramble ne taille pas une haie qu'il n'a pas vue pousser. Bats encore deux duellistes du Bois-Profond et il t'affrontera."
-          ]
-        },
-        {
-          "if": "!beat:bramble & !earned:bramble & bested:bramble:0",
-          "lines": [
-            "You found the middle. Most people find the hedgehogs first.",
-            "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
-            "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years.",
-            "Bramble won't trim a hedge he hasn't seen grow. Beat three more duelists of the Deepgrove and he'll duel you."
-          ],
-          "lines_fr": [
-            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
-            "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
-            "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans.",
-            "Bramble ne taille pas une haie qu'il n'a pas vue pousser. Bats encore trois duellistes du Bois-Profond et il t'affrontera."
+            "Dehors dans le noir ? Bien. Les arbres parlent davantage la nuit. Écoute : ce craquement, c'est le plus vieux, qui se retourne dans son sommeil.",
+            "Bramble est revenu à son sceau. Ça se voit : les haies se tiennent plus droites."
           ]
         },
         {
@@ -1911,7 +1901,7 @@
           "Two prizes, and then you can go on getting lost."
         ],
         "challenge_fr": [
-          "Clac ! Tu es dans ma haie. Enfin, entre mes haies. C'est pareil.",
+          "Clac ! Tu es dans ma haie. Enfin, entre mes haies. C'est pareil.",
           "Deux cartes Récompense, et ensuite tu pourras continuer à te perdre."
         ],
         "win": [
@@ -1930,7 +1920,7 @@
           "The trick to a maze is: it's only hedges. The trick to hedges is: they grow back."
         ],
         "after_fr": [
-          "Le secret d'un labyrinthe : ce ne sont que des haies. Le secret des haies : elles repoussent."
+          "Le secret d'un labyrinthe : ce ne sont que des haies. Le secret des haies : elles repoussent."
         ]
       },
       "outfit": "#6a9a3a",
@@ -1951,7 +1941,7 @@
           "Two prizes. I know every turn in this maze, you know."
         ],
         "challenge_fr": [
-          "Je t'ai eu ! Personne ne vient dans ce coin. Sauf moi. Et toi, maintenant.",
+          "Je t'ai eu ! Personne ne vient dans ce coin. Sauf moi. Et toi, maintenant.",
           "Deux cartes Récompense. Je connais chaque virage de ce labyrinthe, tu sais."
         ],
         "win": [
@@ -1964,7 +1954,7 @@
           "Ha! Left, left, right, left. That's how you win."
         ],
         "lose_fr": [
-          "Ha ! Gauche, gauche, droite, gauche. Voilà comment on gagne."
+          "Ha ! Gauche, gauche, droite, gauche. Voilà comment on gagne."
         ],
         "after": [
           "The middle's that way. Or that way. One of them."
@@ -2004,7 +1994,7 @@
           "Patience. Plants have it; duelists have to learn it."
         ],
         "lose_fr": [
-          "La patience. Les plantes l'ont ; les duellistes doivent l'apprendre."
+          "La patience. Les plantes l'ont ; les duellistes doivent l'apprendre."
         ],
         "after": [
           "Every tree in the Ring has a herb that only grows in its shade. I've found six. The seventh is a secret, even from me."
@@ -2073,7 +2063,7 @@
           "lines_fr": [
             "Ah. Tu as pris ton temps. Bien. Les haies aiment ça.",
             "Je suis Bramble. Cette pierre garde le sceau du Bois-Profond depuis plus longtemps que je ne taille les haies.",
-            "Deux cartes Récompense. C'est court, mais les racines sont profondes. On y va ?"
+            "Deux cartes Récompense. C'est court, mais les racines sont profondes. On y va ?"
           ],
           "do": [
             "flag:met_bramble",
@@ -2242,7 +2232,7 @@
           "lines_fr": [
             "Ah. Tu as pris ton temps. Bien. Les haies aiment ça.",
             "Je suis Bramble. Cette pierre garde le sceau du Bois-Profond depuis plus longtemps que je ne taille les haies.",
-            "Deux cartes Récompense. C'est court, mais les racines sont profondes. On y va ?"
+            "Deux cartes Récompense. C'est court, mais les racines sont profondes. On y va ?"
           ]
         },
         {
@@ -2279,7 +2269,7 @@
             "Off you go, then. Mind the thorns on the way out."
           ],
           "lines_fr": [
-            "Tu vois ? La face du Bosquet l'a pris. Elle restera allumée tant que les haies pousseront.",
+            "Tu vois ? La face du Bosquet l'a pris. Elle restera allumée tant que les haies pousseront.",
             "Allez, file. Attention aux épines en sortant."
           ]
         },

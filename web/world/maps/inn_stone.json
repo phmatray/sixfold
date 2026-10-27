@@ -109,7 +109,7 @@
       "z": 1,
       "kind": "sign",
       "text": "The tally board: a slate covered in chalk strokes, in fives. Carts out, carts in, pasties sold, duels won and lost on the premises. One column just says \"Huw: owes\".",
-      "text_fr": "Le tableau des comptes : une ardoise couverte de traits de craie, par cinq. Wagonnets sortis, wagonnets rentrés, chaussons vendus, duels gagnés et perdus dans la maison. Une colonne dit seulement « Huw : doit »."
+      "text_fr": "Le tableau des comptes : une ardoise couverte de traits de craie, par cinq. Wagonnets sortis, wagonnets rentrés, chaussons vendus, duels gagnés et perdus dans la maison. Une colonne dit seulement « Huw : doit »."
     }
   ],
   "warps": [
@@ -147,8 +147,8 @@
             "Ros is at the east cut in the Undermine, by the quarry end. Don't swing it; the tea leaks."
           ],
           "lines_fr": [
-            "L'équipe de Huw ? Une gamelle. Quatre chaussons, deux pommes, une gourde de thé, un mot de la mère de Ros. Compté.",
-            "Ros est à la saignée est des Galeries, côté carrière. Ne la balance pas ; le thé fuit."
+            "L'équipe de Huw ? Une gamelle. Quatre chaussons, deux pommes, une gourde de thé, un mot de la mère de Ros. Compté.",
+            "Ros est à la saignée est des Galeries, côté carrière. Ne la balance pas ; le thé fuit."
           ],
           "do": [
             "give:lunch_pail"
@@ -163,8 +163,8 @@
           ],
           "lines_fr": [
             "Bienvenue à la Salle des Comptes. Un client. Compté.",
-            "Les lits sont en haut, et le repos est gratuit : aube, jour, crépuscule ou nuit. Ça aussi, je le compte.",
-            "Et au comptoir : des boosters Roc, et un Mâtin-de-Roc que je garde pour qui aura compté ses Facettes."
+            "Les lits sont en haut, et le repos est gratuit : aube, jour, crépuscule ou nuit. Ça aussi, je le compte.",
+            "Et au comptoir : des boosters Roc, et un Mâtin-de-Roc que je garde pour qui aura compté ses Facettes."
           ],
           "do": [
             "show:inn"
@@ -177,8 +177,8 @@
             "A bed?"
           ],
           "lines_fr": [
-            "Trente trouvailles, d'après mes comptes. Trente ! Le tableau va manquer de place.",
-            "Un lit ?"
+            "Trente trouvailles, d'après mes comptes. Trente ! Le tableau va manquer de place.",
+            "Un lit ?"
           ],
           "do": [
             "show:inn"
@@ -192,7 +192,7 @@
           ],
           "lines_fr": [
             "L'équipe de nuit est au Bastion, l'équipe de jour mange ici. Je compte les deux.",
-            "Un lit ?"
+            "Un lit ?"
           ],
           "do": [
             "show:inn"
@@ -205,7 +205,7 @@
           ],
           "lines_fr": [
             "Un client, encore. Toi. Compté.",
-            "Tu te reposes un peu ?"
+            "Tu te reposes un peu ?"
           ],
           "do": [
             "show:inn"
@@ -243,7 +243,7 @@
             "Right. Favour for favour. The crew clears the second passage tonight."
           ],
           "lines_fr": [
-            "Ma pioche ! Quarante ans qu'elle porte bonheur, et le seul jour où je la pose sur le col…",
+            "Ma pioche ! Quarante ans qu'elle porte bonheur, et le seul jour où je la pose sur le col…",
             "Bon. Service pour service. L'équipe dégage le deuxième passage ce soir."
           ],
           "do": [
@@ -259,8 +259,8 @@
             "Favour for favour: the third passage, cleared. Go and see what's behind it."
           ],
           "lines_fr": [
-            "Tu as battu notre Jet ? Ha ! Il poussera des wagonnets pendant un mois, comme promis. C'est ce qu'il lui faut.",
-            "Service pour service : le troisième passage, dégagé. Va voir ce qu'il y a derrière."
+            "Tu as battu notre Jet ? Ha ! Il poussera des wagonnets pendant un mois, comme promis. C'est ce qu'il lui faut.",
+            "Service pour service : le troisième passage, dégagé. Va voir ce qu'il y a derrière."
           ],
           "do": [
             "flag:rubble_3",
@@ -273,7 +273,7 @@
             "Still at it? Lunch to Ros at the east cut (Dagny has the pail), my pick somewhere on the Scree Pass switchbacks, and a lesson for my nephew Jet, on the rails in the Undermine. Each one's a passage cleared."
           ],
           "lines_fr": [
-            "Toujours dessus ? Le déjeuner pour Ros, à la saignée est (Dagny a la gamelle), ma pioche quelque part dans les lacets du Col, et une leçon pour mon neveu Jet, sur les rails des Galeries. Chacun, c'est un passage dégagé."
+            "Toujours dessus ? Le déjeuner pour Ros, à la saignée est (Dagny a la gamelle), ma pioche quelque part dans les lacets du Col, et une leçon pour mon neveu Jet, sur les rails des Galeries. Chacun, c'est un passage dégagé."
           ]
         },
         {
@@ -284,9 +284,9 @@
             "Each one, a passage cleared. Off you go."
           ],
           "lines_fr": [
-            "Huw. Chef d'équipe d'Orla. Tu es monté par les Galeries ? Alors tu as vu ce qu'il en reste.",
-            "Trois passages latéraux se sont effondrés, il y a des années. L'équipe peut les dégager, mais l'équipe ne soulève pas une pioche pour rien. C'est la règle, ici : service pour service.",
-            "Trois services, alors. Dagny, à la Salle des Comptes, a la gamelle de l'équipe ; porte-la à Ros, à la saignée est. J'ai perdu ma pioche porte-bonheur sur le col ; retrouve-la. Et mon neveu Jet se croit trop bon pour pousser des wagonnets. Bats-le aux cartes.",
+            "Huw. Chef d'équipe d'Orla. Tu es monté par les Galeries ? Alors tu as vu ce qu'il en reste.",
+            "Trois passages latéraux se sont effondrés, il y a des années. L'équipe peut les dégager, mais l'équipe ne soulève pas une pioche pour rien. C'est la règle, ici : service pour service.",
+            "Trois services, alors. Dagny, à la Salle des Comptes, a la gamelle de l'équipe ; porte-la à Ros, à la saignée est. J'ai perdu ma pioche porte-bonheur sur le col ; retrouve-la. Et mon neveu Jet se croit trop bon pour pousser des wagonnets. Bats-le aux cartes.",
             "Chacun, un passage dégagé. Allez, file."
           ],
           "do": [

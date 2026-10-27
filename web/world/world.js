@@ -426,7 +426,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const names = [...new Set(world.opened?.splice(0))];
     if (names.length) {
       const list = names.join(tr(" and ", " et "));
-      const text = names.length > 1 ? tr(`Ways open: ${list}`, `Des passages s'ouvrent : ${list}`) : tr(`A way opens: ${list}`, `Un passage s'ouvre : ${list}`);
+      const text = names.length > 1 ? tr(`Ways open: ${list}`, `Des passages s'ouvrent\u00a0: ${list}`) : tr(`A way opens: ${list}`, `Un passage s'ouvre\u00a0: ${list}`);
       showBanner(text, 4000), cb("opened", text, "");
     }
   };
@@ -760,7 +760,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     // Only what pressing it would do: none while the world can't act (a cutscene, a duelist
     // coming over, a sheet open), so the prompt never offers a press that does nothing.
     const front = h.step || busy() ? null : facing();
-    const said = front?.kind === "book" ? front.id : front?.text; // a book is named by Rust, from its id
+    // A book is named by Rust, from its id; a sign, find or shut gate by its own name when it has one.
+    const said = front?.kind === "book" ? front.id : ["sign", "find", "gate"].includes(front?.kind) ? (front.name ?? "") : front?.text;
     const nk = front ? `${front.kind}:${said}` : "";
     if (nk !== w.nearKey) {
       w.nearKey = nk;

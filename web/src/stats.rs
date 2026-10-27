@@ -152,7 +152,7 @@ pub fn StatsPanel() -> impl IntoView {
                 </dl>
             </section>
             <p class="stats-note">{move || if fr() {
-                "Le temps est celui du jeu : une heure de jeu passe en une minute."
+                "Le temps est celui du jeu\u{a0}: une heure de jeu passe en une minute."
             } else {
                 "Time is game time: a game hour passes in a real minute."
             }}</p>
