@@ -2659,7 +2659,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .rival.open .rival-status { color: var(--brass-hi); }
 .rival.beaten .rival-status { color: var(--heal); }
 /* Seals met, the region's duelists still to best: the challenge sheet's pips, in the reading ink. */
-.rival.earning .rival-status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; color: var(--muted); font-weight: 600; }
+.rival.earning .rival-status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; color: var(--muted); font-weight: 600; text-wrap: balance; }
 .rival.locked { opacity: 0.72; }
 .rival.champion { grid-column: 1 / -1; background: linear-gradient(120deg, rgba(138, 79, 201, 0.25), color-mix(in srgb, var(--panel) 75%, transparent)); }
 .world-sheet .roster { margin-top: 12px; }

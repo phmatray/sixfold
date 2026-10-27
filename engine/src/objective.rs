@@ -253,13 +253,15 @@ impl Objective {
                 let (n, k) = (r.bested(p), r.earn - r.bested(p));
                 let s = if k == 1 { "" } else { "s" };
                 let de = if r.name.starts_with(['A', 'E', 'I', 'O', 'U']) { "d'" } else { "de " };
+                // Where they are, so the player isn't sent to the keeper's own site for them.
+                let wait = r.waiting_line(p).map(|w| format!(" {w}")).unwrap_or_default();
                 tr(
                     format!(
-                        "Beat {k} more duelist{s} of {} to earn {}'s challenge ({n} of {}). {}.",
+                        "Beat {k} more duelist{s} of {} to earn {}'s challenge ({n} of {}). {}.{wait}",
                         r.region.en, r.name, r.earn, r.place.en
                     ),
                     format!(
-                        "Battez encore {k} duelliste{s} {} pour mériter le défi {de}{} ({n} sur {}). {}.",
+                        "Battez encore {k} duelliste{s} {} pour mériter le défi {de}{} ({n} sur {}). {}.{wait}",
                         r.region_de(), r.name, r.earn, r.place.fr
                     ),
                 )
@@ -394,6 +396,29 @@ mod tests {
             en_none.starts_with("Beat 3 more duelists of the Saltreach"),
             "{en_none}"
         );
+        // Where the rest are: Pell and Nell are on the boardwalk, with two more.
+        assert!(
+            en.ends_with(
+                "Some still wait on the Bellflats, in Gullhaven and on the Saltwind Boardwalk."
+            ),
+            "{en}"
+        );
+        assert!(
+            fr.ends_with("Il en reste sur les Grèves de la Cloche, à Havre-aux-Mouettes et sur la Promenade de Ventsalé."),
+            "{fr}"
+        );
+        // Hushwillow Lane done: two places left, in campaign order.
+        let lumen = rival("lumen").unwrap();
+        let two = with(&["flag:beat_t_iver", "flag:beat_t_luce"]);
+        assert_eq!(
+            lumen.waiting_line(&two).as_deref(),
+            Some("Some still wait in Lanternmere and in the Moonwell Garden.")
+        );
+        assert_eq!(
+            lumen.waiting_line(&with(&["flag:vouched"])),
+            None,
+            "earned: nowhere to send"
+        );
         // Earned: back to the seal.
         let p = with(&[
             "flag:beat_t_tobin",
@@ -451,7 +476,10 @@ mod tests {
             objective(&p).short(&p).as_deref(),
             Some("1 more Saltreach duelist for Marlo")
         );
-        assert_eq!(marlo.bested_line(&p), "Saltreach duelists bested: 2 of 3");
+        assert_eq!(
+            marlo.bested_line(&p),
+            "Saltreach duelists bested: 2\u{a0}of\u{a0}3"
+        );
         set_lang(Lang::Fr);
         let fr = objective(&p).short(&p);
         let line = marlo.bested_line(&p);
@@ -462,7 +490,10 @@ mod tests {
             fr.as_deref(),
             Some("encore 1 duelliste de la Côte Salée pour Marlo")
         );
-        assert_eq!(line, "Duellistes de la Côte Salée battus\u{a0}: 2 sur 3");
+        assert_eq!(
+            line,
+            "Duellistes de la Côte Salée battus\u{a0}: 2\u{a0}sur\u{a0}3"
+        );
         assert_eq!(
             fr_none.as_deref(),
             Some("encore 3 duellistes de la Côte Salée pour Marlo")

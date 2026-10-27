@@ -1626,7 +1626,7 @@ pub fn WorldScreen() -> impl IntoView {
                 // the modal dialog would be inert).
                 <p class="sr-only" id="talk-live" aria-live="polite">{move || sheet.with(|s| match s {
                     Some(Sheet::Talk(t)) if t.name.is_empty() => t.line().to_string(),
-                    Some(Sheet::Talk(t)) => format!("{}: {}", t.name, t.line()),
+                    Some(Sheet::Talk(t)) => tr(format!("{}: {}", t.name, t.line()), format!("{}\u{a0}: {}", t.name, t.line())),
                     _ => String::new(),
                 })}</p>
                 {move || sheet.get().map(|s| match s {

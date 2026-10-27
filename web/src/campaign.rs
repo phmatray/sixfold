@@ -763,12 +763,12 @@ pub fn Challenge(
                     format!("{} exige {} avant d'accepter un duel. Vous en avez {held}\u{a0}: battez les rivaux des autres régions pour les leurs.", r.name, seals_n(r.needs)),
                 )}</p> }.into_any()
             } else if let Some(r) = r.filter(|_| !accepted) {
-                let n = progress.with_untracked(|p| r.bested(p));
+                let (n, wait) = progress.with_untracked(|p| (r.bested(p), r.waiting_line(p).map(|w| format!(" {w}")).unwrap_or_default()));
                 let of = tr(format!("{n} of {}", r.earn), format!("{n} sur {}", r.earn));
                 view! { <div class="ch-note no">
                     <p>{tr(
-                        format!("{} wants {} of {}'s duelists bested first. You've bested {n}.", r.name, r.earn, r.region.en),
-                        format!("{} veut que vous battiez d'abord {} duellistes {}. Vous en avez battu {n}.", r.name, r.earn, r.region_de()),
+                        format!("{} wants {} of {}'s duelists bested first. You've bested {n}.{wait}", r.name, r.earn, r.region.en),
+                        format!("{} veut que vous battiez d'abord {} duellistes {}. Vous en avez battu {n}.{wait}", r.name, r.earn, r.region_de()),
                     )}</p>
                     <p class="ch-pips">
                         <span class="ch-temper" role="img" aria-label=of.clone()>

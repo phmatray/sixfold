@@ -136,9 +136,44 @@ impl Rival {
         let (n, of) = (self.bested(p), self.earn);
         let region = self.region.en.trim_start_matches("the ");
         crate::tr(
-            format!("{region} duelists bested: {n} of {of}"),
-            format!("Duellistes {} battus\u{a0}: {n} sur {of}", self.region_de()),
+            format!("{region} duelists bested: {n}\u{a0}of\u{a0}{of}"),
+            format!(
+                "Duellistes {} battus\u{a0}: {n}\u{a0}sur\u{a0}{of}",
+                self.region_de()
+            ),
         )
+    }
+
+    /// The maps that still hold a duelist of their region not yet beaten,
+    /// none once earned.
+    pub fn waiting(&self, p: &Progress) -> Vec<&'static Ground> {
+        if self.earned(p) {
+            return vec![];
+        }
+        GROUNDS
+            .iter()
+            .filter(|g| {
+                g.duelists
+                    .iter()
+                    .any(|id| self.duelists.contains(id) && !p.has_flag(&format!("beat_{id}")))
+            })
+            .collect()
+    }
+
+    /// Where the duelists still to best are, as a sentence: "Some still wait
+    /// on the Bellflats and in Gullhaven." None once earned.
+    pub fn waiting_line(&self, p: &Progress) -> Option<String> {
+        let at: Vec<&str> = self.waiting(p).iter().map(|g| g.at.get()).collect();
+        let (last, rest) = at.split_last()?;
+        let list = if rest.is_empty() {
+            last.to_string()
+        } else {
+            format!("{} {} {last}", rest.join(", "), crate::tr("and", "et"))
+        };
+        Some(crate::tr(
+            format!("Some still wait {list}."),
+            format!("Il en reste {list}."),
+        ))
     }
 
     /// The region after French "de": "de la Côte Salée", "du Bois-Profond",
@@ -194,6 +229,41 @@ pub struct Reward {
     /// Facets earned.
     pub facets: u32,
 }
+
+/// A map that holds route duelists of a keeper's region, and where that is,
+/// as a sentence says it ("on the Bellflats", "sur les Grèves de la
+/// Cloche"). `engine/tests/world_data.rs` holds it to the maps and their titles.
+#[derive(Debug)]
+pub struct Ground {
+    pub map: &'static str,
+    pub at: T,
+    pub duelists: &'static [&'static str],
+}
+
+/// Every map with a keeper's region's duelists, region by region.
+#[rustfmt::skip]
+pub static GROUNDS: [Ground; 20] = [
+    Ground { map: "elder_ring", at: T::new("in the Elder Ring", "au Cercle des Anciens"), duelists: &["t_fenna", "t_heath", "t_rue"] },
+    Ground { map: "rootholm", at: T::new("in Rootholm", "à Racinemont"), duelists: &["t_jory", "t_linden"] },
+    Ground { map: "woodland", at: T::new("on Fernhollow Trail", "sur le Sentier de Creuse-Fougère"), duelists: &["t_bryn", "t_hazel", "t_ossian", "t_sorrel", "t_vesper"] },
+    Ground { map: "bellflats", at: T::new("on the Bellflats", "sur les Grèves de la Cloche"), duelists: &["t_finch", "t_harrow", "t_mirela", "t_liesl"] },
+    Ground { map: "gullhaven", at: T::new("in Gullhaven", "à Havre-aux-Mouettes"), duelists: &["t_dorrit", "t_brann"] },
+    Ground { map: "seaside", at: T::new("on the Saltwind Boardwalk", "sur la Promenade de Ventsalé"), duelists: &["t_pell", "t_nell", "t_skye", "t_morrow"] },
+    Ground { map: "cinderwick", at: T::new("in Cinderwick", "à Mèche-Cendre"), duelists: &["t_basil", "t_tavish"] },
+    Ground { map: "kilnmouth", at: T::new("in the Kilnmouth", "dans la Gueule-du-Four"), duelists: &["t_carys", "t_dunstan", "t_vela"] },
+    Ground { map: "quarry", at: T::new("in Emberstep Quarry", "à la Carrière de Pas-de-Braise"), duelists: &["t_tamsin", "t_rusk", "t_cole", "t_marigold"] },
+    Ground { map: "downs", at: T::new("on the Thrumming Downs", "sur les Landes Vibrantes"), duelists: &["t_odo", "t_hew", "t_maren", "t_tull"] },
+    Ground { map: "rodspire", at: T::new("on the Rodspire", "sur l'Aiguille-Foudre"), duelists: &["t_corra", "t_ves"] },
+    Ground { map: "stormwatch", at: T::new("in Stormwatch", "à Guette-Orage"), duelists: &["t_greer"] },
+    Ground { map: "anvilstead", at: T::new("in Anvilstead", "à Bourg-l'Enclume"), duelists: &["t_dov"] },
+    Ground { map: "climb_school", at: T::new("at the Anvilstead climbing school", "à l'école d'escalade de Bourg-l'Enclume"), duelists: &["t_ida", "t_garth"] },
+    Ground { map: "bastion", at: T::new("at the Bastion", "au Bastion"), duelists: &["t_petra", "t_morwen"] },
+    Ground { map: "screepass", at: T::new("in Scree Pass", "au Col des Éboulis"), duelists: &["t_mica", "t_ulric"] },
+    Ground { map: "undermine", at: T::new("in the Undermine", "dans les Galeries Basses"), duelists: &["t_jet"] },
+    Ground { map: "hushlane", at: T::new("on Hushwillow Lane", "dans l'Allée des Saules-Murmures"), duelists: &["t_iver", "t_luce"] },
+    Ground { map: "lanternmere", at: T::new("in Lanternmere", "à Lac-aux-Lanternes"), duelists: &["t_yara", "t_ambrose", "t_clem"] },
+    Ground { map: "moonwell", at: T::new("in the Moonwell Garden", "au Jardin du Puits-de-Lune"), duelists: &["t_maud", "t_noor"] },
+];
 
 /// Rival by id.
 pub fn rival(id: &str) -> Option<&'static Rival> {

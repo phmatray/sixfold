@@ -80,8 +80,8 @@
     },
     {
       "asset": "standing_tree",
-      "x": 50,
-      "z": 6,
+      "x": 49,
+      "z": 7,
       "rot": 0,
       "landmark": true
     },
@@ -92,10 +92,11 @@
       "rot": 90
     },
     {
-      "asset": "fallen_trunk",
+      "asset": "log",
       "x": 1,
       "z": 12,
-      "rot": 90
+      "rot": 90,
+      "why": "the sawn-off length of the elder, rolled clear of the road"
     },
     {
       "asset": "lantern",
@@ -378,14 +379,14 @@
     },
     {
       "asset": "crates",
-      "x": 16,
-      "z": 14,
+      "x": 15,
+      "z": 13,
       "rot": 0
     },
     {
       "asset": "crates",
-      "x": 17,
-      "z": 14,
+      "x": 16,
+      "z": 13,
       "rot": 0
     },
     {
@@ -420,7 +421,7 @@
     },
     {
       "asset": "glow_mushroom_tall",
-      "x": 49,
+      "x": 54,
       "z": 8,
       "rot": 0,
       "glow": "#6fe8c4"
@@ -1256,32 +1257,8 @@
     {
       "asset": "pine",
       "x": 0,
-      "z": 13,
-      "rot": 114
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 14,
-      "rot": 13
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 15,
-      "rot": 19
-    },
-    {
-      "asset": "pine",
-      "x": 0,
       "z": 16,
       "rot": 318
-    },
-    {
-      "asset": "birch",
-      "x": 1,
-      "z": 16,
-      "rot": 280
     },
     {
       "asset": "pine",
@@ -2872,6 +2849,24 @@
       "x": 37,
       "z": 22,
       "rot": 211
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 13,
+      "rot": 114
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 14,
+      "rot": 13
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 15,
+      "rot": 19
     }
   ],
   "spawn": {
@@ -2924,8 +2919,8 @@
       "poi": "secondary"
     },
     {
-      "x": 51,
-      "z": 8,
+      "x": 50,
+      "z": 9,
       "kind": "sign",
       "id": "standing_tree",
       "name": "The standing tree",
@@ -2951,10 +2946,10 @@
       "dialogue": [
         {
           "lines": [
-            "The elder came down across the road in the spring gales. The rangers sawed a gap through it, a cart wide, and left the two halves where they fell. The rings say it was older than Rootholm."
+            "The elder came down across the road in the spring gales. The rangers sawed a cart's width out of it and rolled that length clear of the road; the rest lies where it fell. The rings say it was older than Rootholm."
           ],
           "lines_fr": [
-            "L'ancien est tombé en travers de la route lors des coups de vent du printemps. Les gardes y ont scié un passage, large comme une charrette, et laissé les deux moitiés là où elles sont tombées. Les cernes disent qu'il était plus vieux que Racinemont."
+            "L'ancien est tombé en travers de la route lors des coups de vent du printemps. Les gardes y ont scié la largeur d'une charrette et roulé ce tronçon hors de la route ; le reste gît là où il est tombé. Les cernes disent qu'il était plus vieux que Racinemont."
           ]
         }
       ]
