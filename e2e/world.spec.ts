@@ -85,10 +85,9 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   const prompt = page.getByRole("button", { name: /^Talk to Tobin/ });
   await expect(prompt).toBeVisible();
   await page.keyboard.press("e");
-  // The map's first talk draws the speaker's portrait in a new offscreen WebGL context, at once:
-  // on CI's software GL that holds the page for ~25 s (measured), as loading the world does.
+  // The map's first talk opens at once: busts are baked ahead of time (#159).
   const talk = page.locator(".talk-box");
-  await expect(talk).toBeVisible({ timeout: 60_000 });
+  await expect(talk).toBeVisible();
   while (await talk.isVisible()) {
     await page.keyboard.press("Enter");
     await page.waitForTimeout(400);
