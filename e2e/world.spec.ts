@@ -80,34 +80,15 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   // doesn't come over on his own) and talk to him: he challenges.
   await page.locator(".world-host").evaluate((el) => (el as unknown as { sixfoldWarp: (...a: unknown[]) => void }).sixfoldWarp("overworld", 23, 28, "n"));
   await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^23,28/, { timeout: 15_000 });
-  // The act prompt shows only when a press would act (world.js): then E talks. (A click on it
-  // could land on the scene behind while the prompt still settled after the warp, and a tap
-  // there walks the hero instead: the CI retries.)
+  // The act prompt shows only when a press would act (world.js): then E talks. (A key press,
+  // not a click: a click's own 15 s wait would run into the hold below.)
   const prompt = page.getByRole("button", { name: /^Talk to Tobin/ });
   await expect(prompt).toBeVisible();
-  // ponytail: a timeline of the talk opening, reported if it doesn't (a CI-only race under study).
-  await page.evaluate(() => {
-    const w = window as unknown as { tl: string[] };
-    w.tl = [];
-    const t0 = performance.now();
-    const at = (s: string) => w.tl.push(`${Math.round(performance.now() - t0)} ${s}`);
-    addEventListener("keydown", (e) => at(`keydown ${e.key}`), true);
-    let had = false;
-    new MutationObserver(() => {
-      const has = !!document.querySelector(".talk-box");
-      if (has !== had) at(has ? "talk-box +" : "talk-box -"), (had = has);
-    }).observe(document.body, { subtree: true, childList: true });
-    for (const d of document.querySelectorAll("dialog")) for (const ev of ["close", "cancel"]) d.addEventListener(ev, () => at(`${ev} ${d.className}`));
-    let frames = 0;
-    const tick = () => (frames++, requestAnimationFrame(tick));
-    tick();
-    setInterval(() => at(`frames ${frames} hero ${(document.querySelector(".world-host") as HTMLElement)?.dataset.hero} prompt ${document.querySelector(".world-prompt")?.textContent ?? "-"}`), 1000);
-  });
   await page.keyboard.press("e");
+  // The map's first talk draws the speaker's portrait in a new offscreen WebGL context, at once:
+  // on CI's software GL that holds the page for ~25 s (measured), as loading the world does.
   const talk = page.locator(".talk-box");
-  await expect(talk).toBeVisible().catch(async (e) => {
-    throw new Error(`${e.message}\ntimeline: ${(await page.evaluate(() => (window as unknown as { tl: string[] }).tl)).join(" | ")}`);
-  });
+  await expect(talk).toBeVisible({ timeout: 60_000 });
   while (await talk.isVisible()) {
     await page.keyboard.press("Enter");
     await page.waitForTimeout(400);
