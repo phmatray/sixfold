@@ -25,7 +25,12 @@
 // round), lamps by paths and with a `why` out of town, routes on open tiles, doors out landing in front of the door back
 // in, size per `kind` in screens, exits 3 wide with a path to the edge, an open throat and a signpost naming where they
 // go, and a closed border everywhere else. No street lamp or house lamp in a cave (an error even without --strict).
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+// Level design v2 (#110, WORLD_RULES §11): the six blocking rules (landmark, hidden-mandatory, dead-end,
+// exit-both-ways, unreachable, connection) for maps with `"level_design": 2`, errors with --strict; on other maps
+// they are only listed in the report. `--report` (or `--report=<file.md>`) prints an advisory section per outdoor
+// map against the budgets in tools/level-design.json (`--budgets=<file>` for another), and never fails.
+import { readFileSync, readdirSync, existsSync, writeFileSync } from "node:fs";
+import * as ld from "../web/world/ld.js";
 const dir = process.argv.slice(2).find((a) => !a.startsWith("--")) ?? "web/world";
 const src = readFileSync(`${dir}/props.js`, "utf8");
 const FOOT = eval(`(${src.match(/export const FOOT = (\{[\s\S]*?\});/)[1]})`);
@@ -41,6 +46,7 @@ const HEIGHT = { tree: 3.5, pine: 3.8, birch: 3.6, willow: 3.8, house: 5, sign: 
   shelf: 2, bookcase: 2.3, oven: 2.45, printing_press: 1.8, workbench: 1.8, net_locker: 1.95, plant: 1, chair: 0.9, display_case: 1.1, lamp: 1.6,
   bed: 1.1, light_box: 1.25, type_case: 1.35, curio_cabinet: 2.3, seal_stone: 1.9, cave_mouth: 2.2, crab_pots: 0.45, net_rack: 1.45, bollard: 0.6, rock_sea: 0.55 };
 const TALL_OF = (a) => TALL[a] ?? 1;
+const LD = { FOOT, DECK, WALKABLE, tall: (a) => HEIGHT[a] ?? TALL_OF(a) }; // the tables web/world/ld.js reads
 const LADDER = new Set(eval(`(${src.match(/export const LADDER = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove", "stone", "cave"]);
 const BEDS = new Set([...TRACKS, "interior"]); // audio.js BEDS
@@ -50,6 +56,9 @@ const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
 const maps = Object.fromEntries(readdirSync(`${dir}/maps`).map((f) => [f.replace(".json", ""), JSON.parse(readFileSync(`${dir}/maps/${f}`, "utf8"))]));
 const fail = [], warn = [];
+// Level-design budgets, in one place (tools/level-design.json; --budgets=<file> reads another).
+const BUDGET = JSON.parse(readFileSync(process.argv.find((a) => a.startsWith("--budgets="))?.slice(10) || new URL("./level-design.json", import.meta.url), "utf8"));
+const ctx = {}, designed = {}; // per map: what the level-design pass needs (solid, reachable, floor heights), and its findings
 const open = {}; // per map: is a tile open ground (for warp: cues from other maps)
 // The placement rules (docs/WORLD_RULES.md) fail the build with --strict (as CI runs it); without it they are listed
 // as warnings, for a map in progress.
@@ -132,6 +141,7 @@ for (const [name, m] of Object.entries(maps)) {
     } else if (solid.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} stands on a solid tile`);
   }
   const all = reach(name, m, solid, height);
+  ctx[name] = { m, solid, all, height };
   const sittable = new Set();
   for (const [k, { p, face }] of seatAt) {
     const [x, z] = k.split(",").map(Number);
@@ -422,6 +432,7 @@ else {
       if (Math.hypot(a.x - b.x, a.y - b.y) < 1.7) fail.push(`atlas: waymarks ${atlas.waymarks[i].id} and ${atlas.waymarks[j].id} are under 1.7 squares apart on the chart`);
     }
 }
+levelDesign();
 if (STRICT) fail.push(...rule);
 else warn.unshift(...rule);
 if (warn.length) console.warn(`${warn.length} placement warnings (docs/WORLD_RULES.md; judge each one):\n  ${warn.join("\n  ")}`);
@@ -583,4 +594,154 @@ function rules(name, m, solid, all) {
     for (let dx = -3; dx <= 3; dx++) for (let dz = 0; dz <= 4; dz++) near ||= pathy(w.x + dx, w.z + dz);
     if (!near) warn.push(`${name}: the door to ${w.to} at ${w.x},${w.z} has no path in front of it`);
   }
+}
+
+// Level design v2 (#110, docs/WORLD_RULES.md §11, docs/LEVEL_DESIGN.md). The geometry is web/world/ld.js, shared
+// with the browser overlays. The tags are checked on every map; the six blocking rules are errors (with --strict)
+// on maps with `"level_design": 2` and report lines on the rest.
+function levelDesign() {
+  const TIERS = ["major", "secondary", "micro", "secret"];
+  const tile = (t) => Array.isArray(t) && t.length === 2 && t.every(Number.isInteger);
+  for (const [name, m] of Object.entries(maps)) {
+    const inMap = ([x, z]) => x >= 0 && z >= 0 && x < m.width && z < m.height;
+    if (m.level_design !== undefined && m.level_design !== 2) fail.push(`${name}: level_design is 2 (or left out)`);
+    if (m.level_design === 2 && m.light.indoor) fail.push(`${name}: level_design 2 is for outdoor maps`);
+    for (const v of views(m)) if (!tile(v) || !inMap(v)) fail.push(`${name}: view ${JSON.stringify(v)} is not a tile on the map`);
+    if (m.vista !== undefined && !(Array.isArray(m.vista) && m.vista.every((r) => Array.isArray(r) && r.length === 4 && r.every(Number.isInteger))))
+      fail.push(`${name}: vista is [[x0, z0, x1, z1], …]`);
+    const tagged = [...m.props.map((p) => ["prop", p]), ...(m.interactions ?? []).map((i) => ["spot", i]), ...(m.npcs ?? []).map((n) => ["npc", n]), ...(m.warps ?? []).map((w) => ["warp", w])];
+    for (const [what, o] of tagged) {
+      const at = `${name}: the ${what} at ${o.x},${o.z}`;
+      if (o.poi !== undefined && !TIERS.includes(o.poi)) fail.push(`${at}: poi is ${TIERS.join(" / ")}`);
+      if (o.landmark !== undefined && (what !== "prop" || o.landmark !== true)) fail.push(`${at}: landmark is true, on a prop`);
+      if (o.optional !== undefined && (what === "prop" || o.optional !== true)) fail.push(`${at}: optional is true, on a spot, a person or a warp`);
+      if (o.clue !== undefined && (o.poi !== "secret" || !Array.isArray(o.clue) || !o.clue.every((c) => tile(c) && inMap(c)))) fail.push(`${at}: clue is [[x, z], …] on a secret`);
+    }
+  }
+  for (const [name, m] of Object.entries(maps)) {
+    if (m.light.indoor) continue;
+    const found = design(name).blocking;
+    if (m.level_design === 2) rule.push(...found.map((f) => `${name}: ${f}`));
+  }
+}
+// `view` (a map's viewpoints): one [x, z] or a list of them.
+function views(m) {
+  return m.view === undefined ? [] : Array.isArray(m.view?.[0]) ? m.view : [m.view];
+}
+// One outdoor map's level-design analysis: the blocking findings, and what the report shows.
+function design(name) {
+  if (designed[name]) return designed[name];
+  const { m, all, height } = ctx[name], W = m.width, H = m.height;
+  const g = ld.grids(m, LD), boxes = g.boxes, blocking = [];
+  const k = (x, z) => `${x},${z}`, floor = (x, z) => height[k(x, z)] ?? 0;
+  const near4 = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // south first: the camera looks north, the hero mostly faces it
+  const approach = (x, z) => near4.map(([dx, dz]) => [x + dx, z + dz]).find(([a, b]) => all.has(k(a, b)));
+  const hostOf = (x, z) => boxes.find((b) => x >= b.x0 && x < b.x1 && z >= b.z0 && z < b.z1);
+  const seen = (from, target) => ld.visible(m, boxes, { x: from[0], z: from[1], y: floor(...from) }, target);
+  const edge = (side, c) => ({ n: [c, 0], s: [c, H - 1], w: [0, c], e: [W - 1, c] })[side];
+  const exitSign = (e) => (m.interactions ?? []).find((i) => i.kind === "sign" && maps[e.to]?.title && String(i.text).includes(maps[e.to].title)
+    && Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => edge(e.side, e.span[0] + c)).some(([x, z]) => Math.abs(i.x - x) + Math.abs(i.z - z) <= 6));
+  const signs = new Set((m.exits ?? []).map(exitSign).filter(Boolean));
+  // Points of interest by tier: a `poi` tag, or major by default for warps, waymarks, exit signposts and people
+  // who start a story duel (a rival, a seal keeper: a `duel:` cue in what they say).
+  const duelist = (n) => n.model === "npc_rival" || /"duel:/.test(JSON.stringify(n.dialogue ?? []));
+  const pois = [
+    ...m.props.filter((p) => p.poi).map((p) => ({ x: p.x, z: p.z, tier: p.poi, what: `${p.asset} ${p.x},${p.z}`, prop: p })),
+    ...(m.interactions ?? []).map((i) => ({ x: i.x, z: i.z, tier: i.poi ?? (i.kind === "waymark" || signs.has(i) ? "major" : null), what: `${i.kind} ${i.id ?? ""} ${i.x},${i.z}`.replace("  ", " "), o: i })),
+    ...(m.npcs ?? []).map((n) => ({ x: n.x, z: n.z, tier: n.poi ?? (duelist(n) ? "major" : null), what: `${n.id} ${n.x},${n.z}`, npc: true, o: n })),
+    ...(m.warps ?? []).map((w) => ({ x: w.x, z: w.z, tier: w.poi ?? "major", what: `warp to ${w.to} ${w.x},${w.z}`, o: w })),
+  ].filter((p) => p.tier);
+
+  // Landmark: one or more props tagged, each seen from a main-path tile within a screen of it.
+  const marks = m.props.filter((p) => p.landmark);
+  if (marks.length < BUDGET.landmarks_min) blocking.push(`[landmark] ${marks.length ? `only ${marks.length} props carry` : "no prop carries"} "landmark": true (${BUDGET.landmarks_min} wanted)`);
+  const walkway = [...g.path].filter((t) => all.has(t)).map((t) => t.split(",").map(Number));
+  const lanes = walkway.length ? walkway : [...all].map((t) => t.split(",").map(Number));
+  for (const p of marks) {
+    const box = boxes.find((b) => b.prop === p), [w, d] = ld.foot(p, FOOT), tops = [];
+    for (let x = p.x; x < p.x + w; x++) for (let z = p.z; z < p.z + d; z++) tops.push({ x, z, y: box?.y1 ?? 1, self: p });
+    const ok = tops.some((t) => lanes.some(([x, z]) => Math.abs(x - t.x) <= SCREEN[0] >> 1 && Math.abs(z - t.z) <= SCREEN[1] >> 1 && seen([x, z], t)));
+    if (!ok) blocking.push(`[landmark] the ${p.asset} at ${p.x},${p.z} can't be seen from any path tile within a screen of it`);
+  }
+
+  // Hidden mandatory: every warp, waymark, exit signpost and major POI is seen from the tile you use it from.
+  for (const p of pois) {
+    if (p.tier !== "major" || p.o?.optional) continue;
+    const box = p.prop ? boxes.find((b) => b.prop === p.prop) : hostOf(p.x, p.z);
+    const [w, d] = p.prop ? ld.foot(p.prop, FOOT) : [1, 1];
+    let from = null;
+    for (let x = p.x; x < p.x + w && !from; x++) for (let z = p.z; z < p.z + d && !from; z++) from = approach(x, z);
+    if (!from) continue; // unreachable: the reach rules already say so
+    const y = p.prop ? box?.y1 ?? 1 : p.npc ? 1.45 : box ? Math.min(box.y1, 2) : 1;
+    if (!seen(from, { x: p.x, z: p.z, w, d, y, self: box })) blocking.push(`[hidden-mandatory] the ${p.what} is hidden from the camera when you stand at ${from}`);
+  }
+
+  // Dead ends: a path branch over 3 tiles long ends within 2 tiles of something (or a `view`).
+  const ends = [
+    ...(m.interactions ?? []), ...(m.npcs ?? []), ...(m.warps ?? []), ...m.props.filter((p) => p.poi || p.landmark),
+    ...views(m).map(([x, z]) => ({ x, z })),
+    ...(m.exits ?? []).flatMap((e) => Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => edge(e.side, e.span[0] + c)).map(([x, z]) => ({ x, z }))),
+  ];
+  const graph = ld.pathGraph(g);
+  for (const e of graph.deadEnds) {
+    if (e.length <= 3 || ends.some((o) => Math.max(Math.abs(o.x - e.x), Math.abs(o.z - e.z)) <= 2)) continue;
+    blocking.push(`[dead-end] the path ending at ${e.x},${e.z} runs ${Number.isFinite(e.length) ? `${e.length} tiles from a junction` : "with no junction"} to nothing; end it on something to find, a person or a "view"`);
+  }
+
+  // Exits both ways: from 4 tiles inside, 2+ of the exit's edge tiles are on screen and seen (here and on the map
+  // it leads to).
+  for (const e of m.exits ?? []) {
+    for (const [on, ex] of [[name, e], [e.to, maps[e.to]?.exits?.find((b) => b.side === BACK[e.side] && b.to === name)]]) {
+      if (!ex || !ctx[on]) continue;
+      const n = exitSeen(on, ex);
+      if (n < 2) blocking.push(`[exit-both-ways] ${on === name ? "" : `on ${on}, `}exit ${ex.side} to ${ex.to}: ${n} of its edge tiles can be seen from 4 tiles inside (2 needed)`);
+    }
+  }
+
+  // Unreachable: no pocket of 4+ open tiles the hero can't reach with every gate open, unless a `vista` covers it.
+  const rock = (x, z) => m.tiles[z][x] >= "1" && m.tiles[z][x] <= "9";
+  const lost = new Set();
+  for (let x = 0; x < W; x++) for (let z = 0; z < H; z++) if (!ctx[name].solid.has(k(x, z)) && !all.has(k(x, z)) && m.tiles[z][x] !== "~" && !rock(x, z)) lost.add(k(x, z));
+  const vista = (x, z) => (m.vista ?? []).some(([x0, z0, x1, z1]) => x >= x0 && x <= x1 && z >= z0 && z <= z1);
+  for (const t of lost) {
+    const pocket = [...ld.bfs(lost, [t.split(",").map(Number)]).dist.keys()];
+    pocket.forEach((p) => lost.delete(p));
+    if (pocket.length >= 4 && !pocket.every((p) => vista(...p.split(",").map(Number))))
+      blocking.push(`[unreachable] ${pocket.length} open tiles round ${t} can't be reached with every gate open; fill them, or list them in "vista"`);
+  }
+
+  // Connections: every warp from or to this map lands beside its way back, not on it or facing it, and facing into
+  // the map.
+  for (const [from, f] of Object.entries(maps))
+    for (const w of f.warps ?? []) {
+      if (from !== name && w.to !== name) continue;
+      const to = maps[w.to], s = w.spawn ?? to?.spawn;
+      if (!to || !s || w.to === from) continue;
+      const back = new Set([...(to.warps ?? []).filter((b) => b.to === from).map((b) => k(b.x, b.z)),
+        ...(to.exits ?? []).filter((e) => e.to === from).flatMap((e) => Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => k(...({ n: [e.span[0] + c, 0], s: [e.span[0] + c, to.height - 1], w: [0, e.span[0] + c], e: [to.width - 1, e.span[0] + c] })[e.side])))]);
+      const ahead = DIR[s.facing] ? [s.x + DIR[s.facing][0], s.z + DIR[s.facing][1]] : null;
+      const at = `[connection] the warp at ${from} ${w.x},${w.z} lands on ${w.to} ${s.x},${s.z}`;
+      if (back.has(k(s.x, s.z))) blocking.push(`${at}, on the way back (a loop)`);
+      else if (ahead && back.has(k(...ahead))) blocking.push(`${at} facing the way back (one step and it loops)`);
+      if (ahead && !(ahead[0] >= 0 && ahead[1] >= 0 && ahead[0] < to.width && ahead[1] < to.height)) blocking.push(`${at} facing out of the map`);
+      const doors = (to.warps ?? []).filter((b) => b.to === from && !b.dir);
+      if (doors.length && !doors.some((b) => Math.abs(b.x - s.x) + Math.abs(b.z - s.z) <= 1)) blocking.push(`${at}, away from the door back (land beside it)`);
+    }
+
+  return (designed[name] = { blocking, g, graph, pois, marks, lanes });
+}
+// How many of an exit's edge tiles are on screen and seen from the tile 4 inside its middle.
+function exitSeen(name, e) {
+  const { m, height } = ctx[name], W = m.width, H = m.height;
+  const boxes = (designed[name]?.g ?? ld.grids(m, LD)).boxes;
+  const edge = (c) => ({ n: [c, 0], s: [c, H - 1], w: [0, c], e: [W - 1, c] })[e.side];
+  const inward = { n: [0, 1], s: [0, -1], w: [1, 0], e: [-1, 0] }[e.side];
+  const mid = edge(Math.round((e.span[0] + e.span[1]) / 2)), hero = [mid[0] + inward[0] * 4, mid[1] + inward[1] * 4];
+  let n = 0;
+  for (let c = e.span[0]; c <= e.span[1]; c++) {
+    const [x, z] = edge(c);
+    if (Math.abs(x - hero[0]) > SCREEN[0] >> 1 || Math.abs(z - hero[1]) > SCREEN[1] >> 1) continue;
+    if (ld.visible(m, boxes, { x: hero[0], z: hero[1], y: height[`${hero[0]},${hero[1]}`] ?? 0 }, { x, z, y: (height[`${x},${z}`] ?? 0) + 0.1 })) n++;
+  }
+  return n;
 }
