@@ -282,8 +282,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     if (k === "shift") return void (shift = true);
     if (e.target.closest?.("input, select, textarea, dialog")) return;
     // The arrows stay the world's while it is busy too (a warp, a lift): a pad
-    // (web/gamepad.js) moves focus with the arrows nothing takes.
-    if (busy()) return void (KEYS[k] && e.preventDefault());
+    // (web/gamepad.js) moves focus with the arrows nothing takes. One pressed during
+    // a warp is kept (the warp drops only those held before it): the hero walks once it is in.
+    if (busy() && !(warping && KEYS[k])) return void (KEYS[k] && e.preventDefault());
     // Enter and Space belong to whatever button has focus; only on the stage do
     // they act. E is the dedicated action key.
     const onStage = e.target === document.body || !!e.target.closest?.(".world-stage");
@@ -309,7 +310,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   const padDir = (e) => e.target.closest?.("[data-dir]")?.dataset.dir;
   const padDown = (e) => {
     const f = padDir(e);
-    if (!f || busy()) return;
+    if (!f || (busy() && !warping)) return; // pressed during a warp: kept, as a key is
     e.preventDefault();
     press(`pad-${f}`);
     try {
@@ -912,6 +913,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // After a map loads: queue its people, nearest first, and bake them one per idle slot.
   function bakeBusts(s) {
     bustsReset();
+    // Only where shaders compile off the page's thread: without KHR_parallel_shader_compile (software GL, CI)
+    // each bake stalls the page for seconds, mid-walk or under a menu, so a bust is drawn when its talk opens.
+    if (!renderer.extensions.has("KHR_parallel_shader_compile")) return;
     const far = (n) => (n.hidden ? 1e9 : Math.hypot(n.x - s.x, n.z - s.z));
     bustQ = world.npcs.filter((n) => n.obj).sort((a, b) => far(a) - far(b)).map((n) => n.def.id);
     idle(bakeNext);
@@ -963,7 +967,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     renderer.setRenderTarget(null);
     await ready;
     await painted(); // a talk opened meanwhile shows first (software GL links shaders on first draw: slow)
-    if (warping || bustsOf !== world) return ""; // never in a warp: the next map's busts come after it
+    if (!alive || warping || bustsOf !== world) return ""; // never in a warp (the next map's busts come after it), nor once the world is gone
     const sky = renderer.getClearColor(new THREE.Color()), skyA = renderer.getClearAlpha();
     renderer.setRenderTarget(bustRT);
     renderer.setClearColor(0x000000, 0);
