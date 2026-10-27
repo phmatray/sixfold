@@ -138,12 +138,13 @@ test("--report=<file> writes the report there", () => {
 test("AC6: a changed budget changes the report, with no code change", () => {
   const woodland = (out) => out.split("\n## ").find((s) => s.startsWith("woodland"));
   const before = woodland(run(WEB, "--report").stdout);
-  assert.match(before, /\[poi-budget\] 0 secondary POIs \(2–4 for a route\)/);
+  // Fernhollow Trail is the reference map (#112): it meets the route budget, so a stricter one flags it.
+  assert.doesNotMatch(before, /\[poi-budget\] \d+ secondary POIs/);
   const budgets = JSON.parse(readFileSync(new URL("./level-design.json", import.meta.url), "utf8"));
-  budgets.route.secondary = [0, 4];
+  budgets.route.secondary = [9, 9];
   const file = join(mkdtempSync(join(tmpdir(), "ld-")), "level-design.json");
   writeFileSync(file, JSON.stringify(budgets));
   const after = woodland(run(WEB, "--report", `--budgets=${file}`).stdout);
-  assert.doesNotMatch(after, /0 secondary POIs/);
-  assert.match(after, /budget: secondary 0–4/);
+  assert.match(after, /\[poi-budget\] \d+ secondary POIs \(9 for a route\)/);
+  assert.match(after, /budget: secondary 9/);
 });
