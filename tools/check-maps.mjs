@@ -47,7 +47,8 @@ const TIERS = ["major", "secondary", "micro", "secret"]; // points of interest (
 const LADDER = new Set(eval(`(${src.match(/export const LADDER = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove", "stone", "cave"]);
 const BEDS = new Set([...TRACKS, "interior"]); // audio.js BEDS
-const THEMES = new Set([...BEDS, "rook", "finale"]); // a scene's `music:` may also be a theme of its own (engine overworld::TRACKS)
+// A scene's `music:` may also be a theme of its own (engine overworld::TRACKS): Rook's, the finale's, a keeper's duel theme.
+const THEMES = new Set([...BEDS, "rook", "finale", ...["ember", "storm", "tide", "dream", "grove", "stone"].map((r) => `duel_rival_${r}`)]);
 const FENCES = new Set(["fence", "wall_dry", "hedge"]);
 const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/atlas.json`, "utf8")) : null;
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
@@ -191,7 +192,7 @@ for (const [name, m] of Object.entries(maps)) {
     if (!i.id || !i.give || !i.text) fail.push(`${name}: a find at ${i.x},${i.z} needs an id, a give and a text`);
     if (!solid.has(`${i.x},${i.z}`)) fail.push(`${name}: find ${i.id} sits on an open tile; put it on something`);
   }
-  scripts(name, m, solid, inMap);
+  scripts(name, m, solid, inMap, all);
   for (const t of [...(m.warps ?? []), ...(m.exits ?? [])]) if (!maps[t.to]) fail.push(`${name}: leads to missing map ${t.to}`);
   for (const e of m.exits ?? []) {
     const back = maps[e.to]?.exits?.find((b) => b.side === BACK[e.side] && b.to === name);
@@ -207,8 +208,11 @@ for (const [name, m] of Object.entries(maps)) {
 // a `say` (an actor on the map or the hero, with lines; lines_fr is checked with the other text) or a `do` list. The
 // cues' arguments as the engine reads them (engine/tests/world_data.rs parses every effect): walk paths of n/e/s/w
 // that keep an NPC on open tiles, face directions, cam on an actor or an in-bounds tile, waits of 0..5000 ms, music
-// tracks; a `duel:` only in the last step (it ends the scene).
-function scripts(name, m, solid, inMap) {
+// tracks, `stone:wake` only on a map with a seal stone; a `duel:` only in the last step (it ends the scene).
+// A seal site's staging (#152; engine/tests/world_data.rs holds the rest of its shape): `reveal_<map>` keeps to
+// 3 `cam` and 2 000 ms of `wait`; `entrance_<keeper>` starts on every reachable open tile two from the keeper (but
+// one where someone stands for good: no route), so nobody walks up to them without it.
+function scripts(name, m, solid, inMap, reached) {
   const list = m.scripts ?? [];
   if (!Array.isArray(list)) return void fail.push(`${name}: scripts is a list`);
   const npcs = Object.fromEntries((m.npcs ?? []).map((n) => [n.id, n]));
@@ -223,6 +227,20 @@ function scripts(name, m, solid, inMap) {
       fail.push(`${at}: at tiles must be open tiles on the map`);
     const steps = Array.isArray(s.steps) ? s.steps : [];
     if (!steps.length) fail.push(`${at}: has no steps`);
+    const fx = steps.flatMap((st) => (Array.isArray(st.do) ? st.do : []));
+    if (s.id?.startsWith("reveal_")) {
+      const cams = fx.filter((e) => e.startsWith("cam:")).length, waits = fx.reduce((t, e) => t + (e.startsWith("wait:") ? +e.slice(5) || 0 : 0), 0);
+      if (cams > 3 || waits > 2000) fail.push(`${at}: a reveal keeps to 3 cams and 2000 ms of waits (has ${cams} and ${waits} ms)`);
+    }
+    const keeper = s.id?.startsWith("entrance_") && npcs[s.id.slice(9)];
+    if (keeper) {
+      const others = new Set((m.npcs ?? []).filter((n) => n !== keeper && !n.route).map((n) => `${n.x},${n.z}`)), tiles = new Set((s.at ?? []).map((t) => `${t[0]},${t[1]}`));
+      for (let dx = -2; dx <= 2; dx++)
+        for (let dz = -2; dz <= 2; dz++) {
+          const k = `${keeper.x + dx},${keeper.z + dz}`;
+          if (Math.max(Math.abs(dx), Math.abs(dz)) === 2 && reached.has(k) && !solid.has(k) && !others.has(k) && !tiles.has(k)) fail.push(`${at}: ${k} is two from ${keeper.id} and reachable, so it starts the entrance too`);
+        }
+    }
     const pos = {}; // where each NPC stands as the scene goes on
     steps.forEach((st, i) => {
       const where = `${at}.steps[${i}]`;
@@ -238,9 +256,11 @@ function scripts(name, m, solid, inMap) {
         const bad = (why) => fail.push(`${where}: ${e}: ${why}`);
         if (kind === "duel" && i !== steps.length - 1) bad("a duel ends the scene, so it goes in the last step");
         if (["walk", "face", "emote"].includes(kind) && !actor(a[0])) bad(`no actor ${a[0]} on this map`);
-        if (kind === "face" && !DIR[a[1]]) bad("faces n, e, s or w");
+        if (kind === "face" && !DIR[a[1]] && a[1] !== "hero") bad("faces n, e, s, w or hero");
         if (kind === "wait" && !(/^\d+$/.test(a[0]) && +a[0] <= 5000)) bad("waits 0 to 5000 ms");
         if (kind === "music" && !THEMES.has(a[0])) bad(`not a track (${[...THEMES].join(", ")})`);
+        if (kind === "stone" && !(a.length === 1 && a[0] === "wake")) bad("is stone:wake");
+        else if (kind === "stone" && !(m.props ?? []).some((p) => p.asset === "seal_stone")) bad("this map has no seal_stone to wake");
         if (kind === "cam" && !(a.length === 1 ? actor(a[0]) : a.length === 2 && inMap(+a[0], +a[1]))) bad("looks at hero, an actor on this map or a tile on it");
         if (kind === "walk") {
           if (!/^[nesw]+$/.test(a[1] ?? "")) bad("walks a path of n, e, s and w");

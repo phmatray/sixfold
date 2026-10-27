@@ -2064,6 +2064,23 @@
           ]
         },
         {
+          "if": "earned:bramble & open:bramble & !beat:bramble & !flag:met_bramble",
+          "lines": [
+            "Ah. You took your time. Good. Hedges like that.",
+            "I'm Bramble. This stone has kept the Deepgrove's seal longer than I've kept the hedges.",
+            "Two prizes. Short, but the roots go deep. Shall we?"
+          ],
+          "lines_fr": [
+            "Ah. Tu as pris ton temps. Bien. Les haies aiment ça.",
+            "Je suis Bramble. Cette pierre garde le sceau du Bois-Profond depuis plus longtemps que je ne taille les haies.",
+            "Deux cartes Récompense. C'est court, mais les racines sont profondes. On y va ?"
+          ],
+          "do": [
+            "flag:met_bramble",
+            "duel:bramble"
+          ]
+        },
+        {
           "if": "beat:warden",
           "lines": [
             "Champion! The hedges stood up straighter when they heard.",
@@ -2157,5 +2174,85 @@
       "near": 14,
       "far": 30
     }
-  }
+  },
+  "scripts": [
+    {
+      "id": "reveal_elder_ring",
+      "if": "!flag:reveal_elder_ring",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_grove",
+            "cam:20:15",
+            "stone:wake",
+            "wait:1000",
+            "cam:bramble",
+            "wait:800",
+            "cam:hero",
+            "flag:reveal_elder_ring"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "entrance_bramble",
+      "if": "open:bramble & earned:bramble & !beat:bramble & !flag:met_bramble",
+      "at": [
+        [
+          17,
+          14
+        ],
+        [
+          17,
+          15
+        ],
+        [
+          17,
+          16
+        ],
+        [
+          17,
+          17
+        ],
+        [
+          21,
+          17
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_grove",
+            "cam:bramble",
+            "face:bramble:e",
+            "stone:wake",
+            "wait:700",
+            "face:bramble:hero",
+            "wait:400"
+          ]
+        },
+        {
+          "say": "bramble",
+          "lines": [
+            "Ah. You took your time. Good. Hedges like that.",
+            "I'm Bramble. This stone has kept the Deepgrove's seal longer than I've kept the hedges.",
+            "Two prizes. Short, but the roots go deep. Shall we?"
+          ],
+          "lines_fr": [
+            "Ah. Tu as pris ton temps. Bien. Les haies aiment ça.",
+            "Je suis Bramble. Cette pierre garde le sceau du Bois-Profond depuis plus longtemps que je ne taille les haies.",
+            "Deux cartes Récompense. C'est court, mais les racines sont profondes. On y va ?"
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:met_bramble",
+            "duel:bramble"
+          ]
+        }
+      ]
+    }
+  ]
 }

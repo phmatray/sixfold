@@ -1066,6 +1066,23 @@
           ]
         },
         {
+          "if": "earned:quill & open:quill & !beat:quill & !flag:met_quill",
+          "lines": [
+            "Wind from the south, pressure dropping, one challenger arriving. It's all in the notebook.",
+            "I'm Quill. The Galewold's seal rides on this one, so I'll be writing down every move.",
+            "Four prizes. Forecast: a storm, on one side of the table."
+          ],
+          "lines_fr": [
+            "Vent du sud, pression en baisse, un adversaire en approche. Tout est dans le carnet.",
+            "Je suis Quill. Le sceau des Hautes-Rafales est en jeu, alors je note chaque coup.",
+            "Quatre cartes Récompense. Prévisions : orage, d'un seul côté de la table."
+          ],
+          "do": [
+            "flag:met_quill",
+            "duel:quill"
+          ]
+        },
+        {
           "if": "!open:quill",
           "lines": [
             "Hold on. You carry fewer than three seals.",
@@ -1166,5 +1183,105 @@
       "near": 14,
       "far": 34
     }
-  }
+  },
+  "scripts": [
+    {
+      "id": "reveal_rodspire",
+      "if": "!flag:reveal_rodspire",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_storm",
+            "cam:18:4",
+            "stone:wake",
+            "wait:1000",
+            "cam:quill",
+            "wait:800",
+            "cam:hero",
+            "flag:reveal_rodspire"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "entrance_quill",
+      "if": "open:quill & earned:quill & !beat:quill & !flag:met_quill",
+      "at": [
+        [
+          18,
+          6
+        ],
+        [
+          18,
+          7
+        ],
+        [
+          18,
+          9
+        ],
+        [
+          19,
+          9
+        ],
+        [
+          20,
+          5
+        ],
+        [
+          20,
+          9
+        ],
+        [
+          22,
+          6
+        ],
+        [
+          22,
+          7
+        ],
+        [
+          22,
+          8
+        ],
+        [
+          22,
+          9
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_storm",
+            "cam:quill",
+            "face:quill:n",
+            "stone:wake",
+            "wait:700",
+            "face:quill:hero",
+            "wait:400"
+          ]
+        },
+        {
+          "say": "quill",
+          "lines": [
+            "Wind from the south, pressure dropping, one challenger arriving. It's all in the notebook.",
+            "I'm Quill. The Galewold's seal rides on this one, so I'll be writing down every move.",
+            "Four prizes. Forecast: a storm, on one side of the table."
+          ],
+          "lines_fr": [
+            "Vent du sud, pression en baisse, un adversaire en approche. Tout est dans le carnet.",
+            "Je suis Quill. Le sceau des Hautes-Rafales est en jeu, alors je note chaque coup.",
+            "Quatre cartes Récompense. Prévisions : orage, d'un seul côté de la table."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:met_quill",
+            "duel:quill"
+          ]
+        }
+      ]
+    }
+  ]
 }
