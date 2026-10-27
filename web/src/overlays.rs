@@ -821,7 +821,9 @@ pub fn RivalFace(
     .into_any()
 }
 
-/// The `t-<tone>` class a seal duel wears: its keeper's first colour.
+/// The `t-<tone>` class a seal duel wears: its keeper's first colour. Written
+/// out (not `t-{color_key}`) because a class that changes name in place must
+/// be a `&'static str`.
 pub fn seal_tone(s: &SealDuel) -> &'static str {
     match s.rival.colors.first() {
         Some(Color::Grass) => "t-grass",
@@ -850,7 +852,15 @@ pub fn SealCard(
     let done = move || {
         if leaving.try_get_untracked() == Some(false) {
             leaving.set(true);
-            set_timeout(on_done, Duration::from_millis(180));
+            // Only while this card is still up: a later duel's card is not ours to end.
+            set_timeout(
+                move || {
+                    if leaving.try_get_untracked().is_some() {
+                        on_done()
+                    }
+                },
+                Duration::from_millis(180),
+            );
         }
     };
     set_timeout(done, Duration::from_millis(2200));
@@ -868,6 +878,8 @@ pub fn SealCard(
     });
     on_cleanup(move || keys.remove());
     let root = NodeRef::<leptos::html::Div>::new();
+    // Focus comes to the card; once it is gone, the duel's own lost-focus
+    // landing (main.rs) puts a key player on the hand.
     Effect::new(move |_| {
         if let Some(el) = root.get() {
             _ = el.focus();

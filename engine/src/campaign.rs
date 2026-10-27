@@ -717,16 +717,14 @@ mod tests {
         for id in [Some("t_pell"), Some("rook_1"), None] {
             assert!(seal_duel(id, &Progress::default()).is_none(), "{id:?}");
         }
-        // Every rival has its own heading, written out in both languages.
-        for r in &RIVALS {
-            let h = seal_duel(Some(r.id), &Progress::default())
-                .unwrap()
-                .heading();
-            assert!(
-                !h.en.is_empty() && !h.fr.is_empty() && h.en != h.fr,
-                "{}",
-                r.id
-            );
+        // Every keeper has its own heading, written out in both languages
+        // (never the fallback).
+        let heading = |id| seal_duel(Some(id), &Progress::default()).unwrap().heading();
+        for r in RIVALS.iter().filter(|r| r.seal) {
+            let h = heading(r.id);
+            assert!(h.en.starts_with("Seal of the "), "{}", r.id);
+            assert!(h.fr.starts_with("Sceau d"), "{}", r.id);
+            assert!(RIVALS.iter().all(|o| o.id == r.id || heading(o.id) != h));
         }
     }
 

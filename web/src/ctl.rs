@@ -1174,9 +1174,9 @@ impl Ctl {
                 self.fx.update(|f| f.prize = Some((*player, *prize)));
                 // The winning prize flies at half speed (a seal's slower still);
                 // it chimes as it lands in the hand (86% into prize-fly).
-                let ms = match beat.map(|b| b.class) {
-                    Some("last-prize seal-final") => 1600,
-                    Some("last-prize") => 1200,
+                let ms = match beat.map(|b| b.class.split(' ').collect::<Vec<_>>()) {
+                    Some(c) if c.contains(&"seal-final") => 1600,
+                    Some(c) if c.contains(&"last-prize") => 1200,
                     _ => 600,
                 };
                 let land = if self.reduced_motion {

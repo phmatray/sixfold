@@ -4301,7 +4301,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   outline: none;
   animation: fade-in var(--dur-panel) ease-out both;
 }
-.seal-card.grand { --c: var(--brass); --c2: var(--brass-ink); --tint: var(--brass-light); }
+.seal-card.grand, .duel.grand-duel { --c: var(--brass); --c2: var(--brass-ink); --tint: var(--brass-light); }
 .seal-card.leaving { animation: seal-card-out 180ms ease-in forwards; }
 .seal-card-stage { display: grid; justify-items: center; text-align: center; max-width: min(44rem, 100%); }
 .seal-card-hex {
