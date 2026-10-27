@@ -4391,7 +4391,8 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   .spark::before { animation: spark-calm 460ms ease both !important; }
   .station-id.shake .portrait { animation: none; }
   .seal-fill .face { animation: face-calm 300ms ease var(--at) forwards !important; }
-  .seal-flight { transform: translate(var(--tx), calc(var(--ty) + 60px)) scale(0.5); animation: fade-in var(--dur-panel) ease both, seal-out 300ms ease 1550ms forwards; }
+  /* Beside the Menu button, fading in and out for its time (calm-show; the global rule would end it at once). */
+  .seal-flight { transform: translate(var(--tx), calc(var(--ty) + 60px)) scale(0.5); animation: calm-show 1850ms linear forwards !important; }
   .duel[data-beat~="seal-final"] .mat { animation: seal-ring-calm 1000ms ease both; }
   /* A seal duel's card fades in place and holds as long; nothing grows or slides. */
   .seal-card-hex, .seal-card h2, .seal-card-who, .seal-card-pips { animation: fade-in var(--dur-panel) ease both; }
