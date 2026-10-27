@@ -40,11 +40,7 @@ const ACROSS = new Set(eval(`(${src.match(/export const ACROSS = new Set\((\[[\s
 const TALL = eval(`(${src.match(/export const TALL = (\{[\s\S]*?\});/)[1]})`);
 const SEAT = eval(`(${src.match(/export const SEAT = (\{[\s\S]*?\});/)[1]})`);
 const STOOP = eval(`(${src.match(/export const STOOP = (\{[\s\S]*?\} \});/)[1]})`);
-// Heights (m) for depth stacking, from ASSETS.md / ASSETS_V13.md; TALL (props.js) fills the rest.
-const HEIGHT = { tree: 3.5, pine: 3.8, birch: 3.6, willow: 3.8, house: 5, sign: 1.3, signpost: 1.6, lantern: 2.2, bush: 0.7, flowers: 0.3,
-  rock: 0.6, crates: 0.9, glow_mushroom: 0.35, glow_mushroom_tall: 0.9, glow_shelf: 0.62, bench: 0.9, stall: 2.3, stall_b: 2.3, fountain: 1.6, stump: 0.55, log: 0.55, hanging_sign: 2.5, boat: 0.4, reeds: 0.9,
-  shelf: 2, bookcase: 2.3, oven: 2.45, printing_press: 1.8, workbench: 1.8, net_locker: 1.95, plant: 1, chair: 0.9, display_case: 1.1, lamp: 1.6,
-  bed: 1.1, light_box: 1.25, type_case: 1.35, curio_cabinet: 2.3, seal_stone: 1.9, cave_mouth: 2.2, crab_pots: 0.45, net_rack: 1.45, bollard: 0.6, rock_sea: 0.55 };
+const HEIGHT = ld.HEIGHT; // heights (m) for depth stacking (web/world/ld.js)
 const TALL_OF = (a) => TALL[a] ?? 1;
 const LD = { FOOT, DECK, WALKABLE, tall: (a) => HEIGHT[a] ?? TALL_OF(a) }; // the tables web/world/ld.js reads
 const TIERS = ["major", "secondary", "micro", "secret"]; // points of interest (`poi`), WORLD_RULES §9
@@ -642,25 +638,13 @@ function report(name) {
   const budget = BUDGET[m.kind] ?? {};
   for (const [t, [lo, hi]] of Object.entries(budget)) if (count[t] < lo || count[t] > hi) advice.push(`[poi-budget] ${count[t]} ${t} POIs (${range([lo, hi])} for a ${m.kind})`);
   // Discovery spacing: from each entrance and each discovery (a POI or a find), the walk to the nearest other one.
-  const finds = (m.interactions ?? []).filter((i) => i.kind === "find" && !d.pois.some((p) => p.o === i)).map((i) => ({ x: i.x, z: i.z, what: `find ${i.id} ${i.x},${i.z}` }));
-  const near = (x, z) => [[0, 0], [0, 1], [1, 0], [-1, 0], [0, -1]].map(([dx, dz]) => k(x + dx, z + dz)).filter((t) => all.has(t));
-  const finds2 = [...d.pois.map((p) => {
-    const [w, dd] = p.prop ? ld.foot(p.prop, FOOT) : [1, 1], tiles = [];
-    for (let x = p.x - 1; x <= p.x + w; x++) for (let z = p.z - 1; z <= p.z + dd; z++) if (all.has(k(x, z))) tiles.push(k(x, z));
-    return { what: p.what, tiles };
-  }), ...finds.map((f) => ({ what: f.what, tiles: near(f.x, f.z) }))].filter((f) => f.tiles.length);
-  const edgeMid = (e) => edgeTile(m, e.side, Math.round((e.span[0] + e.span[1]) / 2));
+  const finds2 = ld.discoveries(m, d.pois, all, FOOT);
+  const edgeMid = (e) => ld.edgeTile(m, e.side, Math.round((e.span[0] + e.span[1]) / 2));
   const entrances = [{ what: "the spawn", tiles: [k(m.spawn.x, m.spawn.z)] }, ...(landing[name] ?? []).map((t) => ({ what: `the landing ${t}`, tiles: [t] })),
     ...(m.exits ?? []).map((e) => ({ what: `the exit ${e.side} to ${e.to}`, tiles: [k(...edgeMid(e))] }))].filter((e) => e.tiles.every((t) => all.has(t)));
-  let gap = null;
-  for (const src of [...entrances, ...finds2]) {
-    const { dist } = walk(src.tiles.map(xz));
-    let best = Infinity;
-    for (const f of finds2) if (f !== src) for (const t of f.tiles) best = Math.min(best, dist.get(t) ?? Infinity);
-    if (Number.isFinite(best) && (!gap || best > gap.tiles)) gap = { tiles: best, from: src.what };
-  }
-  const gapLine = gap ? `${ld.walkTime(gap.tiles).toFixed(1)} s (${gap.tiles} tiles), from ${gap.from}` : "no discoveries to measure";
-  if (gap && ld.walkTime(gap.tiles) > BUDGET.discovery_gap_s[1]) advice.push(`[discovery-gap] ${ld.walkTime(gap.tiles).toFixed(1)} s without a discovery from ${gap.from} (${range(BUDGET.discovery_gap_s)} s)`);
+  const gap = ld.gap([...entrances, ...finds2], finds2, walk);
+  const gapLine = gap ? `${ld.walkTime(gap.tiles).toFixed(1)} s (${gap.tiles} tiles), from ${gap.from.what}` : "no discoveries to measure";
+  if (gap && ld.walkTime(gap.tiles) > BUDGET.discovery_gap_s[1]) advice.push(`[discovery-gap] ${ld.walkTime(gap.tiles).toFixed(1)} s without a discovery from ${gap.from.what} (${range(BUDGET.discovery_gap_s)} s)`);
   // Crossroads: one line per cluster of junction tiles, at its widest.
   const wide = d.graph.junctions.filter((j) => j.branches > BUDGET.crossroads_max), left = new Set(wide.map((j) => k(j.x, j.z))), crossroads = [];
   for (const j of wide) {
@@ -701,17 +685,9 @@ function report(name) {
     "",
   ];
 }
-// The tile on a map's edge at position c along an exit's side.
-function edgeTile(m, side, c) {
-  return { n: [c, 0], s: [c, m.height - 1], w: [0, c], e: [m.width - 1, c] }[side];
-}
-function edgeTiles(m, e) {
-  return Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => edgeTile(m, e.side, e.span[0] + c));
-}
-// An exit's signpost: a sign within 6 tiles of the exit's edge naming the map it leads to (WORLD_RULES 5).
+// An exit's signpost (web/world/ld.js, with edgeTile and edgeTiles).
 function exitSign(m, e) {
-  const dest = maps[e.to];
-  return dest?.title && (m.interactions ?? []).find((i) => i.kind === "sign" && String(i.text).includes(dest.title) && edgeTiles(m, e).some(([x, z]) => Math.abs(i.x - x) + Math.abs(i.z - z) <= 6));
+  return ld.exitSign(m, e, maps[e.to]);
 }
 // `view` (a map's viewpoints): one [x, z] or a list of them.
 function views(m) {
@@ -723,20 +699,9 @@ function design(name) {
   const { m, all, height } = ctx[name], W = m.width, H = m.height;
   const g = ld.grids(m, LD), boxes = g.boxes, blocking = [];
   const k = (x, z) => `${x},${z}`, floor = (x, z) => height[k(x, z)] ?? 0;
-  const near4 = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // south first: the camera looks north, the hero mostly faces it
-  const approach = (x, z) => near4.map(([dx, dz]) => [x + dx, z + dz]).find(([a, b]) => all.has(k(a, b)));
-  const hostOf = (x, z) => boxes.find((b) => x >= b.x0 && x < b.x1 && z >= b.z0 && z < b.z1);
   const seen = (from, target) => ld.visible(m, boxes, { x: from[0], z: from[1], y: floor(...from) }, target);
   const signs = new Set((m.exits ?? []).map((e) => exitSign(m, e)).filter(Boolean));
-  // Points of interest by tier: a `poi` tag, or major by default for warps, waymarks, exit signposts and people
-  // who start a story duel (a rival, a seal keeper: a `duel:` cue in what they say).
-  const duelist = (n) => n.model === "npc_rival" || /"duel:/.test(JSON.stringify(n.dialogue ?? []));
-  const pois = [
-    ...m.props.filter((p) => p.poi).map((p) => ({ x: p.x, z: p.z, tier: p.poi, what: `${p.asset} ${p.x},${p.z}`, prop: p })),
-    ...(m.interactions ?? []).map((i) => ({ x: i.x, z: i.z, tier: i.poi ?? (i.kind === "waymark" || signs.has(i) ? "major" : null), what: `${i.kind} ${i.id ?? ""} ${i.x},${i.z}`.replace("  ", " "), o: i })),
-    ...(m.npcs ?? []).map((n) => ({ x: n.x, z: n.z, tier: n.poi ?? (duelist(n) ? "major" : null), what: `${n.id} ${n.x},${n.z}`, npc: true, o: n })),
-    ...(m.warps ?? []).map((w) => ({ x: w.x, z: w.z, tier: w.poi ?? "major", what: `warp to ${w.to} ${w.x},${w.z}`, o: w })),
-  ].filter((p) => p.tier);
+  const pois = ld.pois(m, signs); // points of interest by tier (web/world/ld.js)
 
   // Landmark: one or more props tagged, each seen from a main-path tile within a screen of it.
   const marks = m.props.filter((p) => p.landmark);
@@ -753,13 +718,9 @@ function design(name) {
   // Hidden mandatory: every warp, waymark, exit signpost and major POI is seen from the tile you use it from.
   for (const p of pois) {
     if (p.tier !== "major" || p.o?.optional) continue;
-    const box = p.prop ? boxes.find((b) => b.prop === p.prop) : hostOf(p.x, p.z);
-    const [w, d] = p.prop ? ld.foot(p.prop, FOOT) : [1, 1];
-    let from = null;
-    for (let z = p.z + d - 1; z >= p.z && !from; z--) for (let x = p.x; x < p.x + w && !from; x++) from = approach(x, z); // front row first
-    if (!from) continue; // unreachable: the reach rules already say so
-    const y = p.prop ? box?.y1 ?? 1 : p.npc ? 1.45 : box ? Math.min(box.y1, 2) : 1;
-    if (!seen(from, { x: p.x, z: p.z, w, d, y, self: box })) blocking.push(`[hidden-mandatory] the ${p.what} is hidden from the camera when you stand at ${from}`);
+    const a = ld.approach(p, g, all, floor, FOOT);
+    if (!a) continue; // unreachable: the reach rules already say so
+    if (!ld.visible(m, boxes, a.from, a.target)) blocking.push(`[hidden-mandatory] the ${p.what} is hidden from the camera when you stand at ${a.from.x},${a.from.z}`);
   }
 
   // Dead ends: a path branch over 3 tiles long ends within 2 tiles of something (or a `view`), or of a stair or
@@ -773,7 +734,7 @@ function design(name) {
     ...(m.interactions ?? []), ...(m.npcs ?? []), ...(m.warps ?? []),
     ...m.props.filter((p) => p.poi || p.landmark || Math.max(...(DECK[p.asset] ?? [0])) >= 0.5).flatMap(tilesOf),
     ...views(m).map(([x, z]) => ({ x, z })),
-    ...(m.exits ?? []).flatMap((e) => edgeTiles(m, e).map(([x, z]) => ({ x, z }))),
+    ...(m.exits ?? []).flatMap((e) => ld.edgeTiles(m, e).map(([x, z]) => ({ x, z }))),
   ];
   const graph = ld.pathGraph(g);
   for (const e of graph.deadEnds) {
@@ -830,12 +791,12 @@ function exitSeen(name, e) {
   const boxes = (designed[name]?.g ?? ld.grids(m, LD)).boxes;
   const inward = { n: [0, 1], s: [0, -1], w: [1, 0], e: [-1, 0] }[e.side];
   // The tile 4 in from the exit's middle, or the nearest reachable one on the way out to it.
-  const mid = edgeTile(m, e.side, Math.round((e.span[0] + e.span[1]) / 2));
+  const mid = ld.edgeTile(m, e.side, Math.round((e.span[0] + e.span[1]) / 2));
   let hero = null;
   for (let d = 4; d >= 0 && !hero; d--) if (all.has(`${mid[0] + inward[0] * d},${mid[1] + inward[1] * d}`)) hero = [mid[0] + inward[0] * d, mid[1] + inward[1] * d];
   if (!hero) return 0;
   let n = 0;
-  for (const [x, z] of edgeTiles(m, e)) {
+  for (const [x, z] of ld.edgeTiles(m, e)) {
     if (Math.abs(x - hero[0]) > SCREEN[0] >> 1 || Math.abs(z - hero[1]) > SCREEN[1] >> 1) continue;
     if (ld.visible(m, boxes, { x: hero[0], z: hero[1], y: height[`${hero[0]},${hero[1]}`] ?? 0 }, { x, z, y: (height[`${x},${z}`] ?? 0) + 1.45 })) n++;
   }
