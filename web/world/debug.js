@@ -37,7 +37,7 @@ export function attach({ world, scene, camera, el }) {
   scene.add(root);
   const saved = read();
   let on = new Set((saved.on ?? []).filter((l) => LAYERS.includes(l))), clean = !!saved.clean;
-  let shown = null, sig = "", ctx = null, ready = null, alive = true, raf = 0;
+  let shown = null, sig = "", ctx = null, ready = null, failed = null, alive = true, raf = 0;
   const groups = {};
 
   // ----- The panel -----
@@ -74,6 +74,7 @@ export function attach({ world, scene, camera, el }) {
   // ----- Layers -----
   const free = (o) =>
     o.traverse((c) => {
+      if (c.isInstancedMesh) c.dispose(); // its instance buffer
       c.geometry?.dispose();
       c.material?.map?.dispose();
       c.material?.dispose();
@@ -83,7 +84,7 @@ export function attach({ world, scene, camera, el }) {
     if (!ctx) return;
     for (const l of LAYERS) {
       if (groups[l] && (!on.has(l) || force.includes(l))) root.remove(groups[l]), free(groups[l]), delete groups[l];
-      if (on.has(l) && !groups[l]) root.add((groups[l] = BUILD[l](ctx)));
+      if (on.has(l) && !groups[l]) root.add((groups[l] = BUILD[l](ctx))), (groups[l].userData.sig = DYNAMIC[l]?.(ctx));
     }
     count.textContent = LAYERS.filter((l) => groups[l]).map((l) => `${l} ${groups[l].userData.count}`).join(" · ");
   }
@@ -98,14 +99,19 @@ export function attach({ world, scene, camera, el }) {
     if (w.hero) (w.hero.obj.visible = !clean), (w.hero.blob.visible = !clean);
     if (w !== shown) {
       shown = w;
-      ctx = null;
+      ctx = failed = null;
       for (const l of Object.keys(groups)) root.remove(groups[l]), free(groups[l]), delete groups[l];
       ready = analyse(w).then((c) => {
         if (!alive || shown !== w) return;
         ctx = c;
         sig = gates(w);
         draw();
-      });
+      })
+        .catch((e) => {
+          failed = e;
+          count.textContent = String(e.message ?? e);
+          console.error("debug: could not analyse the map", e);
+        });
       return;
     }
     if (!ctx) return;
@@ -113,8 +119,7 @@ export function attach({ world, scene, camera, el }) {
     if (g !== sig) (sig = g), draw(LAYERS.filter((l) => !DYNAMIC[l]));
     for (const [l, f] of Object.entries(DYNAMIC)) {
       if (!groups[l]) continue;
-      const s = f(ctx);
-      if (s !== groups[l].userData.sig) draw([l]), (groups[l].userData.sig = s);
+      if (f(ctx) !== groups[l].userData.sig) draw([l]);
     }
   }
   raf = requestAnimationFrame(frame);
@@ -126,13 +131,15 @@ export function attach({ world, scene, camera, el }) {
       boxes.forEach((b, i) => (b.firstChild.checked = on.has(LAYERS[i])));
       save();
     }
-    while (!ctx && alive) await Promise.all([ready, new Promise((r) => requestAnimationFrame(r))]);
+    while (!ctx && alive) {
+      if (failed) throw failed;
+      await Promise.all([ready, new Promise((r) => requestAnimationFrame(r))]);
+    }
     draw();
     return { on: [...on], clean, counts: Object.fromEntries([...on].map((l) => [l, groups[l]?.userData.count ?? 0])) };
   };
 
   return {
-    refresh: () => draw(LAYERS),
     stop() {
       alive = false;
       cancelAnimationFrame(raf);
@@ -155,12 +162,9 @@ const gates = (w) => w.gates.map((g) => (g.open ? 1 : 0)).join("");
 // ----- The analysis (web/world/ld.js, as tools/check-maps.mjs runs it) -----
 
 const LD = { FOOT, DECK, WALKABLE: new Set([...WALKABLE, ...Object.keys(DECK)]), tall: (a) => ld.HEIGHT[a] ?? TALL[a] ?? 1 };
-const files = new Map();
-// A map's file as written (the game plays a localized, expanded copy; check-maps reads this one).
-const file = (name) => {
-  if (!files.has(name)) files.set(name, fetch(new URL(`maps/${name}.json`, import.meta.url), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null));
-  return files.get(name);
-};
+// A map's file as written (the game plays a localized, expanded copy; check-maps reads this one), fresh each
+// time: the editor (?edit&debug) may have just changed it.
+const file = (name) => fetch(new URL(`maps/${name}.json`, import.meta.url), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 const atlas = () => file("../atlas");
 
 async function analyse(w) {
@@ -174,11 +178,12 @@ async function analyse(w) {
   const gated = new Map(w.gates.flatMap((gt) => gt.tiles.map((t) => [key(t.x, t.z), t])));
   const F = (x, z) => gated.get(key(x, z))?.open ?? w.floorAt(x, z);
   const ladders = new Map(m.props.filter((p) => LADDER.has(p.asset)).map((p) => [key(p.x, p.z), p.rot % 180 === 90 ? "x" : "z"]));
-  const step = (ax, az, bx, bz) => Math.abs(F(bx, bz) - F(ax, az)) <= 0.6 || [key(ax, az), key(bx, bz)].some((k) => ladders.get(k) === (ax !== bx ? "x" : "z"));
+  // As in check-maps: reach() climbs a ladder along its axis, the report's walks take any ladder tile.
+  const climb = (ax, az, bx, bz, any) => Math.abs(F(bx, bz) - F(ax, az)) <= 0.6 || [key(ax, az), key(bx, bz)].some((k) => ladders.has(k) && (any || ladders.get(k) === (ax !== bx ? "x" : "z")));
   const open = new Set();
   for (let z = 0; z < m.height; z++) for (let x = 0; x < m.width; x++) if (!w.blocked(x, z) || gated.has(key(x, z))) open.add(key(x, z));
-  const walk = (starts) => ld.bfs(open, starts, step);
-  const all = walk([[m.spawn.x, m.spawn.z]]).dist;
+  const all = ld.bfs(open, [[m.spawn.x, m.spawn.z]], (...t) => climb(...t, false)).dist;
+  const walk = (starts) => ld.bfs(all, starts, (...t) => climb(...t, true));
   const signs = new Set((m.exits ?? []).map((e) => ld.exitSign(m, e, dests[e.to])).filter(Boolean));
   const pois = ld.pois(m, signs);
   return { w, m, g, floor, all, walk, dests, signs, pois, atlas: await atlas() };
@@ -196,7 +201,6 @@ function tiles(list, color, opacity = 0.35, size = 0.9) {
   const m = new THREE.InstancedMesh(new THREE.PlaneGeometry(size, size).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial(over({ color, opacity })), Math.max(1, list.length));
   m.count = list.length;
   list.forEach(([x, z, y], i) => m.setMatrixAt(i, M4.makeTranslation(x + 0.5, y + 0.05, z + 0.5)));
-  m.frustumCulled = false;
   m.renderOrder = 998;
   return m;
 }
@@ -205,7 +209,6 @@ function lines(pts, color, dashed = false) {
   const geo = new THREE.BufferGeometry().setFromPoints(pts.map((p) => new THREE.Vector3(...p)));
   const l = new THREE.LineSegments(geo, dashed ? new THREE.LineDashedMaterial(over({ color, dashSize: 0.3, gapSize: 0.2 })) : new THREE.LineBasicMaterial(over({ color })));
   if (dashed) l.computeLineDistances();
-  l.frustumCulled = false;
   l.renderOrder = 999;
   return l;
 }
@@ -261,6 +264,9 @@ const layer = (count, ...kids) => {
   g.userData.count = count;
   return g;
 };
+// The tiles a route duelist watches (trainer.js), every way it looks.
+const sight = (c, n) => (n.def.trainer ? (n.def.trainer.look ?? [n.face]).flatMap((f) => sightLine(c.w, n, f).map(([x, z]) => at(c, x, z))) : []);
+const xz = (t) => t.split(",").map(Number);
 const at = (c, x, z) => [x, z, c.w.floorAt(x, z)];
 const mid = (c, x, z, up = 0) => [x + 0.5, c.w.floorAt(x, z) + up, z + 0.5];
 
@@ -296,8 +302,8 @@ const BUILD = {
         const t = m.tiles[z][x];
         if (!g.solid.has(key(x, z)) && !all.has(key(x, z)) && t !== "~" && !(t >= "1" && t <= "9")) lost.push(at(c, x, z));
       }
-    const reach = [...all.keys()].map((k) => at(c, ...k.split(",").map(Number)));
-    const gates = [...w.gateAt.keys()].map((k) => at(c, ...k.split(",").map(Number)));
+    const reach = [...all.keys()].map((k) => at(c, ...xz(k)));
+    const gates = [...w.gateAt.keys()].map((k) => at(c, ...xz(k)));
     const vista = (m.vista ?? []).flatMap(([x0, z0, x1, z1]) => edges(x0, 0.1, z0, x1 + 1, 0.1, z1 + 1).slice(0, 8));
     return layer(reach.length, tiles(reach, COL.green, 0.22), tiles(gates, COL.amber, 0.5), tiles(lost, COL.magenta, 0.45), lines(vista, COL.cyan),
       (m.vista ?? []).map(([x0, z0]) => label("vista", x0 + 0.5, 0.2, z0 + 0.5, COL.cyan)));
@@ -306,7 +312,7 @@ const BUILD = {
   // The path graph: path tiles, junctions with their ways out, dead ends, people's routes, the main route.
   circulation(c) {
     const { m, g, walk, all } = c, graph = ld.pathGraph(g);
-    const path = [...g.path].map((k) => at(c, ...k.split(",").map(Number)));
+    const path = [...g.path].map((k) => at(c, ...xz(k)));
     // One label per cluster of junction tiles, at its widest (as check-maps' crossroads).
     const left = new Set(graph.junctions.map((j) => key(j.x, j.z))), junctions = [];
     for (const j of [...graph.junctions].sort((a, b) => b.branches - a.branches)) {
@@ -326,7 +332,7 @@ const BUILD = {
     });
     // The main route: between the two entrances (the spawn, the exits' middles) farthest apart, as check-maps' report.
     const ends2 = [key(m.spawn.x, m.spawn.z), ...(m.exits ?? []).map((e) => key(...ld.edgeTile(m, e.side, Math.round((e.span[0] + e.span[1]) / 2))))].filter((t) => all.has(t));
-    const xz = (t) => t.split(",").map(Number), far = (from) => {
+    const far = (from) => {
       const r = walk([xz(from)]);
       return { r, to: ends2.reduce((a, b) => ((r.dist.get(b) ?? -1) > (r.dist.get(a) ?? -1) ? b : a)) };
     };
@@ -357,8 +363,7 @@ const BUILD = {
         kids.push(box, lines(boxEdges(b), COL.red), label(`hides ${p.what}`, (b.x0 + b.x1) / 2, b.y1 + 0.1, (b.z0 + b.z1) / 2, COL.red));
       }
     }
-    const sight = w.npcs.filter((q) => q.def.trainer).flatMap((q) => (q.def.trainer.look ?? [q.face]).flatMap((f) => sightLine(w, q, f).map(([x, z]) => at(c, x, z))));
-    return layer(n, kids, tiles(sight, COL.orange, 0.4));
+    return layer(n, kids, tiles(w.npcs.flatMap((q) => sight(c, q)), COL.orange, 0.4));
   },
 
   // The landmark, POIs by tier, secrets with dashed lines to their clues, and the longest walk without a discovery.
@@ -378,7 +383,6 @@ const BUILD = {
       ...(m.exits ?? []).map((e) => ({ what: `the exit ${e.side} to ${e.to}`, tiles: [key(...ld.edgeTile(m, e.side, Math.round((e.span[0] + e.span[1]) / 2)))] }))].filter((e) => e.tiles.every((t) => all.has(t)));
     const gap = ld.gap([...entrances, ...finds], finds, walk), stretch = [];
     if (gap) {
-      const xz = (t) => t.split(",").map(Number);
       for (let t = gap.to, p = gap.parent.get(t); p; t = p, p = gap.parent.get(p)) stretch.push(mid(c, ...xz(t), 0.2), mid(c, ...xz(p), 0.2));
       kids.push(lines(stretch, COL.white, true), label(`${ld.walkTime(gap.tiles).toFixed(1)} s without a discovery`, ...mid(c, ...xz(gap.to), 0.4)));
     }
@@ -387,10 +391,10 @@ const BUILD = {
 
   // Per person: the tiles to talk from, a duelist's sight, the extent of a route.
   npcs(c) {
-    const { w } = c, talk = [], sight = [], kids = [];
+    const { w } = c, talk = [], seen = [], kids = [];
     for (const n of w.npcs) {
       for (const [dx, dz] of Object.values(DIR)) if (!w.blocked(n.x + dx, n.z + dz)) talk.push(at(c, n.x + dx, n.z + dz));
-      if (n.def.trainer) for (const f of n.def.trainer.look ?? [n.face]) sight.push(...sightLine(w, n, f).map(([x, z]) => at(c, x, z)));
+      seen.push(...sight(c, n));
       if (n.def.route?.length) {
         let [x, z] = [n.def.x, n.def.z], x0 = x, x1 = x, z0 = z, z1 = z;
         for (const f of n.def.route) (x += DIR[f][0]), (z += DIR[f][1]), (x0 = Math.min(x0, x)), (x1 = Math.max(x1, x)), (z0 = Math.min(z0, z)), (z1 = Math.max(z1, z));
@@ -398,16 +402,16 @@ const BUILD = {
       }
       kids.push(label(n.def.id, ...mid(c, n.x, n.z, 2.1), n.def.trainer ? COL.orange : COL.green));
     }
-    return layer(w.npcs.length, tiles(talk, COL.green, 0.3, 0.6), tiles(sight, COL.orange, 0.4), kids);
+    return layer(w.npcs.length, tiles(talk, COL.green, 0.3, 0.6), tiles(seen, COL.orange, 0.4), kids);
   },
 
   // Every lamp (hollow), the live point lights (filled, with their reach on the ground), each lamp's `why`.
   lights(c) {
-    const { w, m } = c, live = (w.day.lights ?? []).filter((l) => l.intensity > 0), kids = [];
+    const { w, m } = c, live = (w.day.lamps ?? []).filter((l) => l.intensity > 0), kids = [];
     for (const p of w.lamps) kids.push(ball(p.x, p.y, p.z, COL.gold, false, 0.25));
     for (const l of live) kids.push(ball(l.position.x, l.position.y, l.position.z, COL.gold, true, 0.2), lines(circle(l.position.x, w.floorAt(Math.floor(l.position.x), Math.floor(l.position.z)) + 0.1, l.position.z, l.distance || 8), COL.amber));
     for (const p of m.props.filter((q) => q.why)) kids.push(label(`why: ${p.why}`, ...mid(c, p.x, p.z, 2.6), COL.gold));
-    kids.push(label(`${live.length} live lights · ${w.lamps.length} lamps`, ...mid(c, m.spawn.x, m.spawn.z, 3), COL.gold));
+    kids.push(label(`${live.length} lamps lit for real${w.day.lantern ? " + the hero's lantern" : ""} · ${w.lamps.length} lamps`, ...mid(c, m.spawn.x, m.spawn.z, 3), COL.gold));
     return layer(w.lamps.length, kids);
   },
 
@@ -432,6 +436,7 @@ const BUILD = {
 
 // The layers that follow what moves: a signature each frame, the layer redrawn when it changes.
 const DYNAMIC = {
+  visibility: (c) => c.w.npcs.filter((n) => n.def.trainer).map((n) => `${n.x},${n.z},${n.face}`).join(" "),
   npcs: (c) => c.w.npcs.map((n) => `${n.x},${n.z},${n.face}`).join(" "),
-  lights: (c) => (c.w.day.lights ?? []).map((l) => (l.intensity > 0 ? `${Math.round(l.position.x)},${Math.round(l.position.z)}` : "-")).join(" "), // per tile
+  lights: (c) => (c.w.day.lamps ?? []).map((l) => (l.intensity > 0 ? `${Math.round(l.position.x)},${Math.round(l.position.z)}` : "-")).join(" "), // per tile
 };

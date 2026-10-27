@@ -159,8 +159,9 @@ export function daylight(w, reduced) {
   let lastKey = "", pick = 0, near = [];
   const tmp = new THREE.Color();
   return {
-    // The real point lights (the hero's lantern, then the nearest lamps'), read-only: the debug overlay draws them.
-    lights: [lantern, ...pool].filter(Boolean),
+    // The real point lights, read-only (the debug overlay draws them): the hero's lantern and the nearest lamps'.
+    lantern,
+    lamps: pool,
     // The light at `minute` around the hero at (hx, hz); `dt` in real seconds.
     update(minute, hx, hz, dt) {
       const p = phaseOf(minute), prev = ORDER[(ORDER.indexOf(p) + 3) % 4];

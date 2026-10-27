@@ -551,7 +551,10 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
           stopEditor = tool.stop;
           editing = tool.editing;
         });
-      if (debug) import("./debug.js").then((m) => alive && (stopDebug = m.attach({ world: () => world, scene, camera, el }).stop));
+      if (debug)
+        import("./debug.js")
+          .then((m) => alive && (stopDebug = m.attach({ world: () => world, scene, camera, el }).stop))
+          .catch((e) => console.error("world: could not load the debug overlays", e));
     })
     .catch(fail);
 
