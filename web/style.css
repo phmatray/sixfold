@@ -30,6 +30,8 @@
   --text-faint: #aeb9ca;
   --on-brass: #2a1d02;
   --brass-light: #f6dc94;
+  /* The six seals' colours (the .t-* swatches and the champion's ring read them). */
+  --seal-grass: #3f9a52; --seal-water: #2f7fd0; --seal-fire: #e1572f; --seal-lightning: #e2ad19; --seal-fighting: #a8642f; --seal-psychic: #8a4fc9;
   --brass-mid: #d6ac4a;
   --brass-line: color-mix(in srgb, var(--brass) 45%, transparent);
   --card-back: #2a4277;
@@ -706,12 +708,12 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
 .card-art .medal { fill: var(--brass); stroke: #8a6a22; stroke-width: 1; filter: drop-shadow(0 1.5px 1px rgba(20, 24, 36, 0.35)); }
 .card-art .emblem { fill: none; stroke: var(--stock-ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
-.t-grass     { --c: #3f9a52; --c2: #1d5a2e; --tint: #c6eba9; --body-c: #8fd17a; }
-.t-fire      { --c: #e1572f; --c2: #8a2512; --tint: #ffd08a; --body-c: #ff9a5c; }
-.t-water     { --c: #2f7fd0; --c2: #143d78; --tint: #b3e0ff; --body-c: #73b8f2; }
-.t-lightning { --c: #e2ad19; --c2: #7f5800; --tint: #fff2a8; --body-c: #ffd84d; }
-.t-fighting  { --c: #a8642f; --c2: #552d12; --tint: #f2c595; --body-c: #d39058; }
-.t-psychic   { --c: #8a4fc9; --c2: #43206c; --tint: #e5c7ff; --body-c: #ba8ce9; }
+.t-grass     { --c: var(--seal-grass); --c2: #1d5a2e; --tint: #c6eba9; --body-c: #8fd17a; }
+.t-fire      { --c: var(--seal-fire); --c2: #8a2512; --tint: #ffd08a; --body-c: #ff9a5c; }
+.t-water     { --c: var(--seal-water); --c2: #143d78; --tint: #b3e0ff; --body-c: #73b8f2; }
+.t-lightning { --c: var(--seal-lightning); --c2: #7f5800; --tint: #fff2a8; --body-c: #ffd84d; }
+.t-fighting  { --c: var(--seal-fighting); --c2: #552d12; --tint: #f2c595; --body-c: #d39058; }
+.t-psychic   { --c: var(--seal-psychic); --c2: #43206c; --tint: #e5c7ff; --body-c: #ba8ce9; }
 .t-colorless { --c: #8d91a2; --c2: #474b5c; --tint: #f3f3f7; --body-c: #d2d5de; }
 .t-trainer   { --c: #4d5d78; --c2: #273249; --tint: #d4dceb; }
 
@@ -2082,7 +2084,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
     var(--pk-base, linear-gradient(165deg, var(--pk-hi), var(--pk) 42%, var(--pk-lo)));
   color: #fff;
 }
-.p-wild .pack-body { --pk-base: conic-gradient(from 210deg at 50% 45%, #3f9a52, #e2ad19, #e1572f, #8a4fc9, #2f7fd0, #3f9a52); }
+.p-wild .pack-body { --pk-base: conic-gradient(from 210deg at 50% 45%, var(--seal-grass), var(--seal-lightning), var(--seal-fire), var(--seal-psychic), var(--seal-water), var(--seal-grass)); }
 .p-wild .pack-body::before { inset: 0; background: linear-gradient(180deg, rgb(10 16 30 / 0.35), rgb(10 16 30 / 0.1) 40%, rgb(10 16 30 / 0.55)); }
 /* Light on the foil: a fixed glint, the pointer's glare (tilt.js, moved by
    transform), and a sheen across it on hover. */
@@ -2142,7 +2144,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .pack-emblem .glyph { display: block; width: 100%; height: 100%; fill: currentColor; }
 .t-wild { --c: #fff; --c2: #222; --tint: #fff; }
 .pack-emblem.t-wild { padding: 1.6cqw; }
-.w-grass { fill: #3f9a52; } .w-fire { fill: #e1572f; } .w-water { fill: #2f7fd0; }
+.w-grass { fill: var(--seal-grass); } .w-fire { fill: var(--seal-fire); } .w-water { fill: var(--seal-water); }
 .w-lightning { fill: #e2ad19; } .w-fighting { fill: #a8642f; } .w-psychic { fill: #8a4fc9; }
 .pack-name {
   position: absolute;
@@ -4262,12 +4264,12 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 @keyframes seal-portrait { 30%, 70% { box-shadow: 0 0 0 4px var(--tint), 0 0 0 8px var(--c), 0 0 28px 8px color-mix(in srgb, var(--c) 60%, transparent); } }
 @keyframes seal-ring-grand {
   0% { outline: 8px solid transparent; outline-offset: -44px; }
-  12% { outline: 8px solid #3f9a52; outline-offset: -10px; }
-  24% { outline-color: #2f7fd0; }
-  36% { outline-color: #e1572f; }
-  48% { outline-color: #e2ad19; }
-  60% { outline-color: #a8642f; }
-  72% { outline: 8px solid #8a4fc9; outline-offset: -6px; }
+  12% { outline: 8px solid var(--seal-grass); outline-offset: -10px; }
+  24% { outline-color: var(--seal-water); }
+  36% { outline-color: var(--seal-fire); }
+  48% { outline-color: var(--seal-lightning); }
+  60% { outline-color: var(--seal-fighting); }
+  72% { outline: 8px solid var(--seal-psychic); outline-offset: -6px; }
   86% { outline: 8px solid var(--tint); outline-offset: -6px; }
   100% { outline: 8px solid transparent; outline-offset: -6px; }
 }
@@ -4331,6 +4333,15 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
     radial-gradient(ellipse 75% 70% at 50% 46%, color-mix(in srgb, var(--c) 30%, #1d3758) 0%, color-mix(in srgb, var(--c) 26%, #142944) 50%, color-mix(in srgb, var(--c) 18%, #0b1a2e) 82%, color-mix(in srgb, var(--c) 12%, #081320) 100%);
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 60%, transparent), inset 0 40px 90px -40px rgba(0, 0, 0, 0.7), inset 0 0 140px rgba(0, 0, 0, 0.45);
 }
+/* The champion's table keeps the night felt (#155: brass mixed into navy went khaki): the brass is only
+   on its rim, the seam, the plaque and the hexagon pressed into it. */
+.duel.grand-duel .mat {
+  background:
+    radial-gradient(ellipse 80% 38% at 50% 0%, color-mix(in srgb, var(--brass) 9%, transparent), transparent 72%),
+    radial-gradient(ellipse 60% 22% at 50% 47%, color-mix(in srgb, var(--brass-light) 7%, transparent), transparent 70%),
+    radial-gradient(ellipse 75% 70% at 50% 46%, #1d3758 0%, #142944 50%, #0b1a2e 82%, #081320 100%);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brass) 75%, transparent), inset 0 0 0 5px color-mix(in srgb, var(--brass-ink) 60%, transparent), inset 0 40px 90px -40px rgba(0, 0, 0, 0.7), inset 0 0 140px rgba(0, 0, 0, 0.45);
+}
 /* The seal at stake, pressed faintly into the felt under the Actives, behind every card. */
 .duel.seal-duel .mat::before {
   content: "";
@@ -4383,7 +4394,8 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   -webkit-backdrop-filter: blur(6px);
   cursor: pointer;
   outline: none;
-  animation: fade-in var(--dur-panel) ease-out both;
+  /* Nothing on it moves until the hexagon wipe into the duel has covered the screen (#155). */
+  animation: fade-in var(--dur-panel) ease-out var(--dur-screen) both;
 }
 .seal-card.grand, .duel.grand-duel { --c: var(--brass); --c2: var(--brass-ink); --tint: var(--brass-light); }
 .seal-card.leaving { animation: seal-card-out 180ms ease-in forwards; }
@@ -4396,7 +4408,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   aspect-ratio: 1 / 1.1;
   margin-bottom: var(--space-5);
   filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.55));
-  animation: seal-card-hex 620ms var(--ease-out) both;
+  animation: seal-card-hex 620ms var(--ease-out) var(--dur-screen) both;
 }
 .seal-card-hex > i {
   position: absolute;
@@ -4423,12 +4435,12 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   color: var(--tint);
   text-wrap: balance;
   text-shadow: 0 2px 0 var(--c2), 0 10px 26px rgba(0, 0, 0, 0.55);
-  animation: seal-card-name 560ms var(--ease-out) 140ms both;
+  animation: seal-card-name 560ms var(--ease-out) calc(var(--dur-screen) + 140ms) both;
 }
-.seal-card-who { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0 10px; margin: var(--space-3) 0 0; animation: seal-card-rise 420ms var(--ease-out) 280ms both; }
+.seal-card-who { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0 10px; margin: var(--space-3) 0 0; animation: seal-card-rise 420ms var(--ease-out) calc(var(--dur-screen) + 280ms) both; }
 .seal-card-who b { font: 700 var(--fs-3xl)/1.2 var(--display); color: var(--ink); }
 .seal-card-who span { font-size: var(--fs-lg); color: color-mix(in srgb, var(--tint) 70%, var(--ink)); }
-.seal-card-pips { display: flex; gap: var(--space-2); margin: var(--space-4) 0 0; animation: seal-card-rise 420ms var(--ease-out) 360ms both; }
+.seal-card-pips { display: flex; gap: var(--space-2); margin: var(--space-4) 0 0; animation: seal-card-rise 420ms var(--ease-out) calc(var(--dur-screen) + 360ms) both; }
 .seal-card-pips .pip { width: 26px; height: 26px; }
 /* How long it holds: a hairline that fills, then the duel begins. */
 .seal-card-hold {
@@ -4460,7 +4472,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 }
 .seal-card.grand .seal-card-hex > i { inset: 3px; }
 .seal-card-seals { display: flex; gap: var(--space-2); margin: var(--space-5) 0 0; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)); }
-.seal-card-seals > i { display: block; animation: seal-card-rise 380ms var(--ease-out) calc(520ms + var(--i) * 90ms) both; }
+.seal-card-seals > i { display: block; animation: seal-card-rise 380ms var(--ease-out) calc(var(--dur-screen) + 520ms + var(--i) * 90ms) both; }
 .seal-card-seals .seal { display: block; width: 30px; }
 .seal-card-hold::after { animation-duration: var(--hold, 2200ms); }
 @media (max-width: 640px) {
@@ -4481,13 +4493,14 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   .seal-fill .face { animation: face-calm 300ms ease var(--at) forwards !important; }
   /* Beside the Menu button, fading in and out for its time (calm-show; the global rule would end it at once). */
   .seal-flight { transform: translate(var(--tx), calc(var(--ty) + 60px)) scale(0.5); animation: calm-show 1850ms linear forwards !important; }
-  .duel[data-beat~="seal-final"] .mat { animation: seal-ring-calm 1000ms ease both !important; }
-  .duel[data-beat~="seal-final"] .half.opp .portrait { animation: seal-portrait 1000ms ease both !important; }
+  /* Inside the beat's own time under reduced motion (60% of 1 600 / 2 200 ms: 960 / 1 320 ms). */
+  .duel[data-beat~="seal-final"] .mat { animation: seal-ring-calm 900ms ease both !important; }
+  .duel[data-beat~="seal-final"] .half.opp .portrait { animation: seal-portrait 900ms ease both !important; }
   /* A seal duel's card fades in place and holds as long; nothing grows or slides. */
   .seal-card-hex, .seal-card h2, .seal-card-who, .seal-card-pips, .seal-card-seals > i { animation: fade-in var(--dur-panel) ease both; }
   /* The champion's ring: no cycle through the colours, a brass ring that fades in, holds and fades. */
-  .duel[data-beat~="grand"] .mat { animation: seal-ring-calm 1400ms ease both !important; }
-  .duel[data-beat~="grand"] .half.opp .portrait { animation: seal-portrait 1400ms ease both !important; }
+  .duel[data-beat~="grand"] .mat { animation: seal-ring-calm 1250ms ease both !important; }
+  .duel[data-beat~="grand"] .half.opp .portrait { animation: seal-portrait 1250ms ease both !important; }
   /* The hold still shows the card will move on, in four cuts rather than a slide (#155). */
   .seal-card-hold::after { animation: seal-card-hold var(--hold, 2200ms) steps(4, end) both !important; }
 }
@@ -4827,6 +4840,7 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html
   display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: 16px 24px;
   grid-template-areas: "head head" "terms deck" "note note" "act act";
 }
+.challenge.earning { grid-template-areas: "head head" "note note" "terms terms" "act act"; }
 .ch-head { grid-area: head; }
 .ch-terms { grid-area: terms; }
 .ch-deck { grid-area: deck; }
@@ -4953,6 +4967,7 @@ button.ch-deck-now:active { transform: translateY(3px); box-shadow: 0 0 0 var(--
 @media (max-width: 560px) {
   .world-sheet:has(> .challenge) { padding: 14px 14px 16px; }
   .challenge { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "terms" "deck" "note" "act"; gap: 12px; }
+  .challenge.earning { grid-template-areas: "head" "note" "terms" "act"; }
   .ch-head { grid-template-areas: "face who" "say say"; gap: 8px 12px; align-items: center; padding-bottom: 10px; }
   .ch-frame { width: 64px; border-radius: 10px; }
   .world-sheet .ch-name { font-size: var(--fs-3xl); padding: 0 12px 3px; }

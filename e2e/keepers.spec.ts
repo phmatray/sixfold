@@ -42,7 +42,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   // `f:reveal_bellflats`: the site has shown itself already (#152), so no scene covers the talk.
   await atMarlo(page, ["f:keepers", "f:intro", "f:reveal_bellflats", "f:beat_t_tobin", "f:beat_bramble", "f:beat_t_pell", "f:beat_t_nell"]);
   const offer = await talkToMarlo(page);
-  await expect(offer).toContainText("The tide doesn't turn for strangers.");
+  await expect(offer).toContainText("Come back with the flats behind you.");
   await expect(offer).toContainText("Marlo wants 3 of the Saltreach's duelists bested first. You've bested 2.");
   await expect(offer.getByRole("img", { name: "2 of 3" })).toBeVisible();
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toHaveCount(0);
@@ -53,7 +53,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   // The Journal's next step names the duelists still needed.
   await page.keyboard.press("j");
   const journal = page.getByRole("dialog", { name: "Journal" });
-  await expect(journal).toContainText("Beat 1 more duelist of the Saltreach to earn Marlo's challenge (2 of 3).");
+  await expect(journal).toContainText("Beat one more Saltreach duelist (2 of 3):");
   await page.keyboard.press("Escape");
   await expect(journal).toBeHidden();
   // The menu's Campaign roster counts them too.
@@ -230,11 +230,12 @@ test("Marlo's seal is won on stage at the stone, once, and a skip keeps it", asy
   expect(progress, "the scene settles the duel it spoke for").not.toContain("won:marlo");
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
 
-  // Once only: a reload comes back with no scene.
+  // Once only: a reload comes back with no scene, a tile back from Marlo where the scene stepped the hero (#155).
+  await expect.poll(async () => (await readSave(page)).world_at?.[0]).toMatch(/^bellflats,22,17,/);
   await page.reload();
   await menuItem(page, "Continue").click();
   await loaded(page);
-  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^22,16/);
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^22,17/);
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
   await expect(talk).toBeHidden();
 });
@@ -245,9 +246,8 @@ test("after losing to Marlo, he encourages, and the challenge is still open", as
   const tide = ["f:beat_t_pell", "f:beat_t_nell", "f:beat_t_skye"];
   await atMarlo(page, ["f:keepers", "f:intro", "f:reveal_bellflats", "f:met_marlo", ...tide, "lost:marlo"]);
 
-  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^22,16/, { timeout: 15_000 });
-  await page.keyboard.press("e");
-  // His lines, read to the end: a kind word, and the seal and the duelists bested still waiting.
+  // Back from the loss, wherever the duel began, his scene plays (#155): he turns to the hero, who
+  // steps back a tile, and his lines, read to the end: a kind word, the seal and the duelists bested still waiting.
   const talk = page.getByRole("dialog", { name: "Marlo" });
   await expect(talk).toBeVisible({ timeout: 60_000 });
   const said: string[] = [];
@@ -257,7 +257,11 @@ test("after losing to Marlo, he encourages, and the challenge is still open", as
     await page.waitForTimeout(400);
   }
   expect(said.join(" ")).toContain("The seal will wait on the flats, and the Saltreach's duelists you've bested still count.");
+  await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
 
+  // Once only: the scene settled the loss. A step back to him, and the challenge is still open.
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^22,17/, { timeout: 15_000 });
+  expect(await walk(page, 22, 16)).toBeGreaterThan(0);
   const offer = await talkToMarlo(page);
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toBeEnabled();
   await expect(offer).not.toContainText("bested first");

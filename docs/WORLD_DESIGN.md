@@ -2006,7 +2006,10 @@ I played the design through on paper. Here is what was still hollow, and what th
    reduced motion on and off, scored it 31/40; after the fixes (a keeper says "not yet" below the threshold, a
    bench-out win still plays the seal's beat, the Warden's door is seen and its bells captioned, the felt takes
    the region's hue, each stone turns its own face to the camera, a reduced-motion cut holds 1.2 s, a seal duel's
-   result speaks the seal's language) a second independent critique scored it TBD/40.
+   result speaks the seal's language) a second, stricter one scored it 28/40. Its fixes: every keeper and Sable
+   speak after each loss wherever the duel began (`defeat_<id>`, on enter while `lost:<id>` holds), the champion's
+   table keeps the night felt with brass only on its trim, the refusal leads with what is missing, the challenge
+   opens as the camera returns, and the Journal says who and where, then the keeper. A third scored it TBD/40.
 9. **"The economy is a spreadsheet."** Facets with nothing exciting to buy feel like points. *Fixed*: each inn
    stocks one Rare to save up for, the Press can make the one card you need, the voucher is a real prize, and
    outfits give late Facets somewhere to go. The `economy_sim` keeps packs at about one per 12 minutes of

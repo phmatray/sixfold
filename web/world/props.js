@@ -259,9 +259,9 @@ export const PLACEHOLDER = {
     leaf.name = "door";
     leaf.position.set(-0.4, 0, 0.02);
     const [cy, cz] = [2.2, 0.48];
-    const medal = group(hex(0.36, 0, cy, cz, stone), hex(0.09, -0.03, cy, cz, brass));
+    const medal = group(hex(0.4, 0, cy, cz, stone), hex(0.1, -0.03, cy, cz, brass));
     SEAL_ORDER.forEach((c, i) => {
-      const a = (i * Math.PI) / 3, m = hex(0.065, -0.035, cy + 0.21 * Math.cos(a), cz + 0.21 * Math.sin(a), toon("#2a1d14"));
+      const a = (i * Math.PI) / 3, m = hex(0.08, -0.035, cy + 0.245 * Math.cos(a), cz + 0.245 * Math.sin(a), toon("#2a1d14"));
       m.name = `inlay_${i}`;
       m.userData.lit = c;
       medal.add(m);

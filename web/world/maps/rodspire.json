@@ -1198,8 +1198,8 @@
       "id": "reveal_rodspire",
       "if": "!flag:reveal_rodspire",
       "on": "enter",
-      "caption": "A seal stone. The Galewold's seal is kept here.",
-      "caption_fr": "Une pierre de sceau. Le sceau des Hautes-Rafales y est gardé.",
+      "caption": "A seal stone. Quill keeps the Galewold's seal here.",
+      "caption_fr": "Une pierre de sceau. Quill y garde le sceau des Hautes-Rafales.",
       "steps": [
         {
           "do": [
@@ -1208,6 +1208,7 @@
             "stone:wake",
             "wait:1000",
             "cam:quill",
+            "face:quill:hero",
             "wait:800",
             "cam:hero",
             "flag:reveal_rodspire"
@@ -1301,6 +1302,7 @@
       "steps": [
         {
           "do": [
+            "walk:hero:s",
             "music:duel_rival_storm",
             "cam:18:4",
             "stone:wake",
@@ -1309,6 +1311,7 @@
             "stone:seal:quill",
             "wait:1200",
             "face:quill:hero",
+            "face:hero:quill",
             "cam:quill"
           ]
         },
@@ -1329,6 +1332,38 @@
           "do": [
             "cam:hero",
             "flag:sealed_quill"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "defeat_quill",
+      "if": "lost:quill",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "walk:hero:s",
+            "face:quill:hero",
+            "face:hero:quill",
+            "cam:quill",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "quill",
+          "lines": [
+            "A close one. I'm writing it down as a squall, not a rout.",
+            "The seal stays on the spire, and the Galewold's duelists you've bested still count. Come back for the next page."
+          ],
+          "lines_fr": [
+            "C'était serré. Je le note comme une bourrasque, pas une déroute.",
+            "Le sceau reste sur la flèche, et les duellistes des Hautes-Rafales que tu as battus comptent toujours. Reviens pour la page suivante."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
           ]
         }
       ]

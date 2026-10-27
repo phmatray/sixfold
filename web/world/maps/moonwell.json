@@ -1900,8 +1900,8 @@
       "id": "reveal_moonwell",
       "if": "!flag:reveal_moonwell",
       "on": "enter",
-      "caption": "A seal stone. The Hushlands' seal is kept here.",
-      "caption_fr": "Une pierre de sceau. Le sceau des Terres du Murmure y est gardé.",
+      "caption": "A seal stone. Lumen keeps the Hushlands' seal here.",
+      "caption_fr": "Une pierre de sceau. Lumen y garde le sceau des Terres du Murmure.",
       "steps": [
         {
           "do": [
@@ -1910,6 +1910,7 @@
             "stone:wake",
             "wait:1000",
             "cam:lumen",
+            "face:lumen:hero",
             "wait:800",
             "cam:hero",
             "flag:reveal_moonwell"
@@ -1999,6 +2000,7 @@
       "steps": [
         {
           "do": [
+            "walk:hero:e",
             "music:duel_rival_dream",
             "cam:22:14",
             "stone:wake",
@@ -2007,6 +2009,7 @@
             "stone:seal:lumen",
             "wait:1200",
             "face:lumen:hero",
+            "face:hero:lumen",
             "cam:lumen"
           ]
         },
@@ -2027,6 +2030,38 @@
           "do": [
             "cam:hero",
             "flag:sealed_lumen"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "defeat_lumen",
+      "if": "lost:lumen",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "walk:hero:e",
+            "face:lumen:hero",
+            "face:hero:lumen",
+            "cam:lumen",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "lumen",
+          "lines": [
+            "Sweet dreams. You were nearly there.",
+            "The seal will keep until you wake, and the Hushlands' duelists you've bested still count."
+          ],
+          "lines_fr": [
+            "Fais de beaux rêves. Tu y étais presque.",
+            "Le sceau t'attendra à ton réveil, et les duellistes des Terres du Murmure que tu as battus comptent toujours."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
           ]
         }
       ]

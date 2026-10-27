@@ -2184,8 +2184,8 @@
       "id": "reveal_elder_ring",
       "if": "!flag:reveal_elder_ring",
       "on": "enter",
-      "caption": "A seal stone. The Deepgrove's seal is kept here.",
-      "caption_fr": "Une pierre de sceau. Le sceau du Bois-Profond y est gardé.",
+      "caption": "A seal stone. Bramble keeps the Deepgrove's seal here.",
+      "caption_fr": "Une pierre de sceau. Bramble y garde le sceau du Bois-Profond.",
       "steps": [
         {
           "do": [
@@ -2194,6 +2194,7 @@
             "stone:wake",
             "wait:1000",
             "cam:bramble",
+            "face:bramble:hero",
             "wait:800",
             "cam:hero",
             "flag:reveal_elder_ring"
@@ -2267,6 +2268,7 @@
       "steps": [
         {
           "do": [
+            "walk:hero:e",
             "music:duel_rival_grove",
             "cam:20:15",
             "stone:wake",
@@ -2275,6 +2277,7 @@
             "stone:seal:bramble",
             "wait:1200",
             "face:bramble:hero",
+            "face:hero:bramble",
             "cam:bramble"
           ]
         },
@@ -2295,6 +2298,38 @@
           "do": [
             "cam:hero",
             "flag:sealed_bramble"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "defeat_bramble",
+      "if": "lost:bramble",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "walk:hero:e",
+            "face:bramble:hero",
+            "face:hero:bramble",
+            "cam:bramble",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "bramble",
+          "lines": [
+            "Tangled up this time. It happens to the best of us.",
+            "The seal stays right here, and the Deepgrove's duelists you've bested still count. Come back whenever you like."
+          ],
+          "lines_fr": [
+            "Emmêlé, cette fois. Ça arrive aux meilleurs.",
+            "Le sceau reste ici, et les duellistes du Bois-Profond que tu as battus comptent toujours. Reviens quand tu veux."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
           ]
         }
       ]

@@ -5143,8 +5143,8 @@
       "id": "reveal_kilnmouth",
       "if": "!flag:reveal_kilnmouth",
       "on": "enter",
-      "caption": "A seal stone. The Emberlands' seal is kept here.",
-      "caption_fr": "Une pierre de sceau. Le sceau des Braisières y est gardé.",
+      "caption": "A seal stone. Cinza keeps the Emberlands' seal here.",
+      "caption_fr": "Une pierre de sceau. Cinza y garde le sceau des Braisières.",
       "steps": [
         {
           "do": [
@@ -5153,6 +5153,7 @@
             "stone:wake",
             "wait:1000",
             "cam:cinza",
+            "face:cinza:hero",
             "wait:800",
             "cam:hero",
             "flag:reveal_kilnmouth"
@@ -5242,6 +5243,7 @@
       "steps": [
         {
           "do": [
+            "walk:hero:s",
             "music:duel_rival_ember",
             "cam:19:11",
             "stone:wake",
@@ -5250,6 +5252,7 @@
             "stone:seal:cinza",
             "wait:1200",
             "face:cinza:hero",
+            "face:hero:cinza",
             "cam:cinza"
           ]
         },
@@ -5270,6 +5273,38 @@
           "do": [
             "cam:hero",
             "flag:sealed_cinza"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "defeat_cinza",
+      "if": "lost:cinza",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "walk:hero:s",
+            "face:cinza:hero",
+            "face:hero:cinza",
+            "cam:cinza",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "cinza",
+          "lines": [
+            "You kept pace longer than most. Catch your breath.",
+            "The seal isn't going anywhere, and the Emberlands' duelists you've bested still count. Race me again when you're ready."
+          ],
+          "lines_fr": [
+            "Tu as tenu le rythme plus longtemps que la plupart. Reprends ton souffle.",
+            "Le sceau ne bouge pas d'ici, et les duellistes des Braisières que tu as battus comptent toujours. Reviens me défier quand tu veux."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
           ]
         }
       ]

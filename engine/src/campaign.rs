@@ -609,7 +609,8 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Pruned. It'll grow back stronger. Yours might not.", "Taillé. Ça repoussera plus fort. Le tien, je n'en suis pas sûr."),
             ropes: T::new("You've found the gap in my hedge. Mind the thorns on the way through.", "Tu as trouvé le trou dans ma haie. Attention aux épines en passant."),
             defeat: T::new("Well grown. Go on, I've some pride to mulch.", "Bien poussé. Va, j'ai de la fierté à pailler."),
-            refuse: T::new("Not so fast. A hedge takes root before it flowers. Duel the Deepgrove's folk first, then come and find me.", "Pas si vite. Une haie prend racine avant de fleurir. Affronte d'abord les duellistes du Bois-Profond, puis reviens me voir."),
+            // A short line under the keeper's own words (#155): the panel never says it all again.
+            refuse: T::new("Come back when the roots have heard of you.", "Reviens quand les racines auront entendu parler de toi."),
         },
     },
     Rival {
@@ -654,7 +655,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Out with the ebb. It always comes back in, you know. Mine does.", "Parti avec le reflux. Ça revient toujours, tu sais. Chez moi, en tout cas."),
             ropes: T::new("Slack water. Nothing moves, except you, apparently.", "L'étale. Plus rien ne bouge, sauf toi, visiblement."),
             defeat: T::new("High-water mark. I'll chalk it on the piling.", "Laisse de haute mer. Je la marque à la craie sur le pilotis."),
-            refuse: T::new("The tide doesn't turn for strangers. Show the Saltreach's duelists what you've got first.", "La marée ne tourne pas pour les inconnus. Montre d'abord aux duellistes de la Côte Salée ce que tu vaux."),
+            refuse: T::new("Come back with the flats behind you.", "Reviens quand l'estran parlera pour toi."),
         },
     },
     Rival {
@@ -683,7 +684,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Ha! Out of the fire and straight into the ash!", "Ha\u{202f}! Sorti du feu, direct dans la cendre\u{202f}!"),
             ropes: T::new("Okay, okay, I'm stoking, I'm stoking!", "D'accord, d'accord, je rallume, je rallume\u{202f}!"),
             defeat: T::new("Burnt out. Rematch the second I've cooled down. So, now?", "Grillée. Revanche dès que j'ai refroidi. Donc, maintenant\u{202f}?"),
-            refuse: T::new("Whoa, cold start! Warm up on the Emberlands' duelists first. I don't race beginners.", "Hé, démarrage à froid\u{202f}! Échauffe-toi d'abord contre les duellistes des Braisières. Je ne fais pas la course avec les débutants."),
+            refuse: T::new("Come back warmed up. I'll keep the kiln hot.", "Reviens après l'échauffement. Je garde le four chaud."),
         },
     },
     Rival {
@@ -712,7 +713,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Called it. I always log a direct hit.", "Je l'avais prévu. Je note toujours un coup au but."),
             ropes: T::new("Unexpected front moving in. I'll have to revise the forecast.", "Front inattendu. Je vais devoir revoir mes prévisions."),
             defeat: T::new("Clear skies for you. Mark it in the logbook: today, I was wrong.", "Ciel dégagé pour toi. Note-le au carnet\u{a0}: aujourd'hui, je me suis trompé."),
-            refuse: T::new("Your page is still blank. Fill it with a few of the Galewold's duelists, then I'll read it.", "Ta page est encore blanche. Remplis-la de quelques duellistes des Hautes-Rafales, et je la lirai."),
+            refuse: T::new("Come back when there's something to write down.", "Reviens quand il y aura quelque chose à noter."),
         },
     },
     Rival {
@@ -760,7 +761,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("That's one block shifted. Plenty more in the pile.", "Un bloc de déplacé. Il en reste plein le tas."),
             ropes: T::new("Hm. You've found the fault line. Most don't.", "Hm. Tu as trouvé la faille. La plupart ne la voient pas."),
             defeat: T::new("Solid work. I'd hire you, if you could lift a crate.", "Du travail solide. Je t'embaucherais, si tu savais porter une caisse."),
-            refuse: T::new("Nobody works my seal on their first shift. Prove yourself against the Stonebacks' crews first.", "Personne ne touche à mon sceau dès son premier jour. Fais d'abord tes preuves contre les équipes des Échines de Pierre."),
+            refuse: T::new("Come back once you've put in your shifts.", "Reviens quand tu auras fait tes quarts."),
         },
     },
     Rival {
@@ -809,7 +810,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Sleep now. The moths will keep watch.", "Dors, maintenant. Les phalènes veilleront."),
             ropes: T::new("You walk through dreams like someone who knows the way.", "Tu traverses les rêves comme quelqu'un qui connaît le chemin."),
             defeat: T::new("Morning, already? Then go. You've woken the garden.", "Déjà le matin\u{202f}? Alors va. Tu as réveillé le jardin."),
-            refuse: T::new("Shh. The garden doesn't know you yet. Let the Hushlands' duelists tell it your name first.", "Chut. Le jardin ne te connaît pas encore. Laisse d'abord les duellistes des Terres du Murmure lui dire ton nom."),
+            refuse: T::new("Come back when the garden can say your name.", "Reviens quand le jardin saura dire ton nom."),
         },
     },
     Rival {

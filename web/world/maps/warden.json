@@ -322,6 +322,36 @@
       ]
     },
     {
+      "id": "defeat_warden",
+      "if": "lost:warden",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "face:warden:hero",
+            "cam:warden",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "warden",
+          "lines": [
+            "That was a champion's duel, and you held your own in it.",
+            "Rest, look over your deck. My door stays open, and so does my chair."
+          ],
+          "lines_fr": [
+            "C'était un duel de champion, et tu as tenu bon.",
+            "Repose-toi, revois ton deck. Ma porte reste ouverte, et mon fauteuil aussi."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
+          ]
+        }
+      ]
+    },
+    {
       "id": "entrance_warden",
       "if": "seals:6 & !beat:warden & !flag:met_warden",
       "on": "enter",

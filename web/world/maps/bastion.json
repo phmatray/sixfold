@@ -2299,8 +2299,8 @@
       "id": "reveal_bastion",
       "if": "!flag:reveal_bastion",
       "on": "enter",
-      "caption": "A seal stone. The Stonebacks' seal is kept here.",
-      "caption_fr": "Une pierre de sceau. Le sceau des Échines de Pierre y est gardé.",
+      "caption": "A seal stone. Orla keeps the Stonebacks' seal here.",
+      "caption_fr": "Une pierre de sceau. Orla y garde le sceau des Échines de Pierre.",
       "steps": [
         {
           "do": [
@@ -2309,6 +2309,7 @@
             "stone:wake",
             "wait:1000",
             "cam:orla",
+            "face:orla:hero",
             "wait:800",
             "cam:hero",
             "flag:reveal_bastion"
@@ -2406,6 +2407,7 @@
       "steps": [
         {
           "do": [
+            "walk:hero:s",
             "music:duel_rival_stone",
             "cam:19:3",
             "stone:wake",
@@ -2414,6 +2416,7 @@
             "stone:seal:orla",
             "wait:1200",
             "face:orla:hero",
+            "face:hero:orla",
             "cam:orla"
           ]
         },
@@ -2434,6 +2437,38 @@
           "do": [
             "cam:hero",
             "flag:sealed_orla"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "defeat_orla",
+      "if": "lost:orla",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "walk:hero:s",
+            "face:orla:hero",
+            "face:hero:orla",
+            "cam:orla",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "orla",
+          "lines": [
+            "Good swings. The rock just held, this time.",
+            "The seal stays in the stone, and the Stonebacks' duelists you've bested still count. Come back with a sharper pick."
+          ],
+          "lines_fr": [
+            "Bons coups. La roche a juste tenu, cette fois.",
+            "Le sceau reste dans la pierre, et les duellistes des Échines de Pierre que tu as battus comptent toujours. Reviens avec une pioche plus affûtée."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
           ]
         }
       ]

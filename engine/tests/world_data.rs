@@ -1573,3 +1573,59 @@ fn the_warden_is_staged_grandest() {
     }
     assert!(!won.check(door_if) && !won.check(entrance_if), "a champion");
 }
+
+/// #155: after a loss, the keeper (and Sable) has their kind word on the way
+/// back, wherever the duel was launched from: `defeat_<id>` plays on enter
+/// while `lost:<id>` holds (the scene's end settles the duel, so it plays after
+/// each loss), turns to the hero, says the `lost:` branch's lines with their
+/// French, and gives the camera back.
+#[test]
+fn every_keeper_has_a_word_after_a_defeat() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let mut bad = vec![];
+    for site in SEAL_SITES.iter().copied().chain(["warden"]) {
+        let m: Value = serde_json::from_str(
+            &std::fs::read_to_string(dir.join(format!("{site}.json"))).unwrap(),
+        )
+        .unwrap();
+        let keeper = m["npcs"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .find(|n| n["id"].as_str().and_then(rival).is_some())
+            .unwrap();
+        let id = keeper["id"].as_str().unwrap();
+        let want = format!("defeat_{id}");
+        let Some(s) = m["scripts"]
+            .as_array()
+            .and_then(|l| l.iter().find(|s| s["id"] == want.as_str()))
+        else {
+            bad.push(format!("{site}: no {want}"));
+            continue;
+        };
+        if s["on"] != "enter" || s["if"] != format!("lost:{id}").as_str() {
+            bad.push(format!("{site}: {want} plays on enter, if lost:{id}"));
+        }
+        let steps = s["steps"].as_array().unwrap();
+        let fx: Vec<&str> = steps.iter().flat_map(|st| strs(&st["do"])).collect();
+        if !fx.contains(&format!("face:{id}:hero").as_str()) || fx.last() != Some(&"cam:hero") {
+            bad.push(format!(
+                "{site}: {want} turns {id} to the hero and ends on cam:hero"
+            ));
+        }
+        let lost = keeper["dialogue"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|d| d["if"] == format!("lost:{id}").as_str())
+            .unwrap();
+        let says: Vec<&Value> = steps.iter().filter(|st| st["say"] == id).collect();
+        if says.len() != 1
+            || says[0]["lines"] != lost["lines"]
+            || says[0]["lines_fr"] != lost["lines_fr"]
+        {
+            bad.push(format!("{site}: {want}: {id} says their lost: lines once"));
+        }
+    }
+    assert!(bad.is_empty(), "{}", bad.join("\n"));
+}

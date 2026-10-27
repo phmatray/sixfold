@@ -248,21 +248,44 @@ impl Objective {
                 format!("Six seals: challenge {}, {}. {}.", r.name, lower_first(r.title.en), r.place.en),
                 format!("Six sceaux\u{a0}: défiez {}, {}. {}.", r.name, lower_first(r.title.fr), r.place.fr),
             ),
-            // #150: the seals are met, the region's duelists not yet.
+            // #150: the seals are met, the region's duelists not yet. Two sentences (#155): who
+            // and where first, then the keeper and where they wait.
             Objective::Rival(r) if r.open(p) && !r.earned(p) => {
                 let (n, k) = (r.bested(p), r.earn - r.bested(p));
                 let s = if k == 1 { "" } else { "s" };
-                let de = if r.name.starts_with(['A', 'E', 'I', 'O', 'U']) { "d'" } else { "de " };
-                // Where they are, so the player isn't sent to the keeper's own site for them.
-                let wait = r.waiting_line(p).map(|w| format!("{w} ")).unwrap_or_default();
+                let (en_k, fr_k) = match k {
+                    1 => ("one", "un"),
+                    2 => ("two", "deux"),
+                    3 => ("three", "trois"),
+                    4 => ("four", "quatre"),
+                    _ => ("several", "plusieurs"),
+                };
+                let at = |or: &str| {
+                    let at: Vec<&str> = r.waiting(p).iter().map(|g| g.at.get()).collect();
+                    match at.split_last() {
+                        Some((last, [])) => format!(": {last}"),
+                        Some((last, rest)) => format!(": {} {or} {last}", rest.join(", ")),
+                        None => String::new(),
+                    }
+                };
+                // "The Bellflats, by the seal stone…": the keeper's spot, without the map's name.
+                let spot = |t: &'static str| t.split_once(", ").map_or(t, |(_, s)| s);
                 tr(
                     format!(
-                        "Beat {k} more duelist{s} of {} to earn {}'s challenge ({n} of {}). {wait}{}.",
-                        r.region.en, r.name, r.earn, r.place.en
+                        "Beat {en_k} more {} duelist{s} ({n} of {}){}. Then {}, {}.",
+                        r.region.en.trim_start_matches("the "),
+                        r.earn,
+                        at("or"),
+                        r.name,
+                        spot(r.place.en)
                     ),
                     format!(
-                        "Battez encore {k} duelliste{s} {} pour mériter le défi {de}{} ({n} sur {}). {wait}{}.",
-                        r.region_de(), r.name, r.earn, r.place.fr
+                        "Battez encore {fr_k} duelliste{s} {} ({n} sur {}){}. Puis {}, {}.",
+                        r.region_de(),
+                        r.earn,
+                        at("ou").replacen(": ", "\u{a0}: ", 1),
+                        r.name,
+                        spot(r.place.fr)
                     ),
                 )
             }
@@ -372,9 +395,7 @@ mod tests {
         ]);
         let en = objective(&p).text(&p);
         assert!(
-            en.starts_with(
-                "Beat 1 more duelist of the Saltreach to earn Marlo's challenge (2 of 3)."
-            ),
+            en.starts_with("Beat one more Saltreach duelist (2 of 3): "),
             "{en}"
         );
         assert!(en.contains("Bellflats"), "{en}");
@@ -384,26 +405,27 @@ mod tests {
         let fr_none = objective(&none).text(&none);
         set_lang(Lang::En);
         assert!(
-            fr.starts_with("Battez encore 1 duelliste de la Côte Salée pour mériter le défi de Marlo (2 sur 3)."),
+            fr.starts_with("Battez encore un duelliste de la Côte Salée (2 sur 3)\u{a0}: "),
             "{fr}"
         );
         assert!(
-            fr_none.starts_with("Battez encore 3 duellistes de la Côte Salée"),
+            fr_none.starts_with("Battez encore trois duellistes de la Côte Salée"),
             "{fr_none}"
         );
         let en_none = objective(&none).text(&none);
         assert!(
-            en_none.starts_with("Beat 3 more duelists of the Saltreach"),
+            en_none.starts_with("Beat three more Saltreach duelists"),
             "{en_none}"
         );
-        // Where the rest are: Pell and Nell are on the boardwalk, with two more.
-        assert!(
-            en.contains("(2 of 3). Some still wait on the Bellflats, in Gullhaven and on the Saltwind Boardwalk. The Bellflats,"),
-            "{en}"
+        // Where the rest are (Pell and Nell are on the boardwalk, with two more), then the
+        // keeper's spot, in two sentences (#155).
+        assert_eq!(
+            en,
+            "Beat one more Saltreach duelist (2 of 3): on the Bellflats, in Gullhaven or on the Saltwind Boardwalk. Then Marlo, by the seal stone on the bell-tower islet."
         );
-        assert!(
-            fr.contains("(2 sur 3). Il en reste sur les Grèves de la Cloche, à Havre-aux-Mouettes et sur la Promenade de Ventsalé. Les Grèves"),
-            "{fr}"
+        assert_eq!(
+            fr,
+            "Battez encore un duelliste de la Côte Salée (2 sur 3)\u{a0}: sur les Grèves de la Cloche, à Havre-aux-Mouettes ou sur la Promenade de Ventsalé. Puis Marlo, près de la pierre de sceau sur l'îlot du clocher."
         );
         // Hushwillow Lane done: two places left, in campaign order.
         let lumen = rival("lumen").unwrap();
@@ -447,7 +469,8 @@ mod tests {
         let fr = objective(&p).text(&p);
         set_lang(Lang::En);
         assert!(
-            fr.starts_with("Battez encore 3 duellistes des Échines de Pierre pour mériter le défi d'Orla (0 sur 3)."),
+            fr.starts_with("Battez encore trois duellistes des Échines de Pierre (0 sur 3)")
+                && fr.contains(". Puis Orla, "),
             "{fr}"
         );
     }
@@ -497,7 +520,9 @@ mod tests {
             Some("encore 3 duellistes de la Côte Salée pour Marlo")
         );
         // The Journal's count and the short one are the same number.
-        assert!(objective(&p).text(&p).starts_with("Beat 1 more duelist"));
+        assert!(objective(&p)
+            .text(&p)
+            .starts_with("Beat one more Saltreach duelist"));
         // Earned: just the name, as before.
         let p = with(&[
             "flag:beat_t_tobin",

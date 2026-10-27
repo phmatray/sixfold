@@ -4373,8 +4373,8 @@
       "id": "reveal_bellflats",
       "if": "!flag:reveal_bellflats",
       "on": "enter",
-      "caption": "A seal stone. The Saltreach's seal is kept here.",
-      "caption_fr": "Une pierre de sceau. Le sceau de la Côte Salée y est gardé.",
+      "caption": "A seal stone. Marlo keeps the Saltreach's seal here.",
+      "caption_fr": "Une pierre de sceau. Marlo y garde le sceau de la Côte Salée.",
       "steps": [
         {
           "do": [
@@ -4383,6 +4383,7 @@
             "stone:wake",
             "wait:1000",
             "cam:marlo",
+            "face:marlo:hero",
             "wait:800",
             "cam:hero",
             "flag:reveal_bellflats"
@@ -4488,6 +4489,7 @@
       "steps": [
         {
           "do": [
+            "walk:hero:s",
             "music:duel_rival_tide",
             "cam:23:13",
             "stone:wake",
@@ -4496,6 +4498,7 @@
             "stone:seal:marlo",
             "wait:1200",
             "face:marlo:hero",
+            "face:hero:marlo",
             "cam:marlo"
           ]
         },
@@ -4516,6 +4519,38 @@
           "do": [
             "cam:hero",
             "flag:sealed_marlo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "defeat_marlo",
+      "if": "lost:marlo",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "walk:hero:s",
+            "face:marlo:hero",
+            "face:hero:marlo",
+            "cam:marlo",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "marlo",
+          "lines": [
+            "Low tide for you today. It always comes back in.",
+            "The seal will wait on the flats, and the Saltreach's duelists you've bested still count."
+          ],
+          "lines_fr": [
+            "Marée basse pour toi aujourd'hui. Elle finit toujours par remonter.",
+            "Le sceau attendra sur l'estran, et les duellistes de la Côte Salée que tu as battus comptent toujours."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
           ]
         }
       ]

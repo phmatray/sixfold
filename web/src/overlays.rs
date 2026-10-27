@@ -581,13 +581,11 @@ pub fn GameOver() -> impl IntoView {
                                         }.into_any(),
                                         (true, ..) => view! { <b>{tr("Rematch won", "Revanche gagnée")}</b> }.into_any(),
                                         // A seal duel lost (#153): the challenge stands, and so does the threshold.
-                                        // Its keeper says the rest, in their own voice, back in the world (#155).
-                                        _ if ctl.seal().is_some_and(|s| !s.grand) => view! {
-                                            <b>{tr("No seal this time", "Pas de sceau cette fois")}</b>
-                                        }.into_any(),
-                                        // The champion's duel lost (#154): the title was at stake, not a seal.
-                                        _ if ctl.seal().is_some_and(|s| s.grand) => view! {
-                                            <b>{tr("Not the title, this time", "Pas le titre, cette fois")}</b>
+                                        // A seal (or the title, #154) not won: the headline said so; this says what
+                                        // follows, and the keeper says the rest in their own voice back in the world (#155).
+                                        _ if ctl.seal().is_some() => view! {
+                                            <b>{tr("The challenge stands", "Le défi tient toujours")}</b>
+                                            <span>{tr(format!("{} will sit down again.", r.name), format!("{} se rassiéra face à vous.", r.name))}</span>
                                         }.into_any(),
                                         _ => view! {
                                             <b>{if r.seal { tr("No seal this time", "Pas de sceau cette fois") } else { tr("Not this time", "Pas cette fois") }}</b>
@@ -887,7 +885,8 @@ pub fn SealCard(
             );
         }
     };
-    let hold = if seal.grand { 3000 } else { 2200 };
+    // Its own time starts once the wipe into the duel (--dur-screen, 380 ms) has covered the screen.
+    let hold = if seal.grand { 3380 } else { 2580 };
     set_timeout(done, Duration::from_millis(hold));
     // The press that accepted the challenge can still be on its way to the
     // window when the card mounts (a cut, under reduced motion): not ours.

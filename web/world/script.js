@@ -26,10 +26,12 @@ export function scenes(env) {
   let playing = false, cur = null, cam = null, caption = null;
   const actorOf = (id) => (id === "hero" ? env.hero() : env.world()?.npcs.find((n) => n.def.id === id && !n.hidden));
   const isHero = (a) => a === env.hero();
-  // A `face` cue's direction: `hero` turns toward the hero (along the longer axis).
+  // A `face` cue's direction: `hero` (or another actor's id) turns toward them (along the longer axis).
   const toward = (a, f) => {
-    if (f !== "hero") return f;
-    const h = env.hero(), dx = h.x - a.x, dz = h.z - a.z;
+    if (DIR[f]) return f;
+    const h = actorOf(f);
+    if (!h) return a.face;
+    const dx = h.x - a.x, dz = h.z - a.z;
     return Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? "e" : "w") : dz > 0 ? "s" : "n";
   };
 
@@ -125,7 +127,9 @@ export function scenes(env) {
     } else if (me.c.cam === undefined) return;
     // Under reduced motion a shot is a cut, held a beat so it still reads (#155); the way back to the hero isn't.
     // The hold is wall-clock time: frame time is capped (world.js), so on a slow machine it would stretch.
-    else if (env.reduced() ? me.c.cam !== "hero" && performance.now() - me.at < CUT_HOLD * 1000 : !env.settled() && me.t < CAM_MAX) return;
+    // The way back to the hero is never waited for: the camera eases home while the scene goes on (#155:
+    // an entrance opens its challenge as the camera returns, not 1.8 s after).
+    else if (me.c.cam !== "hero" && (env.reduced() ? performance.now() - me.at < CUT_HOLD * 1000 : !env.settled() && me.t < CAM_MAX)) return;
     me.finished = true;
     me.done();
   }

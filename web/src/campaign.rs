@@ -694,6 +694,7 @@ pub fn Challenge(
         (None, None) => title.to_string(),
     };
     let accepted = accepts();
+    let earning = r.is_some() && open() && !accepted;
     let quote = match r {
         Some(r) if open() && !accepted => Some(r.lines.refuse.get().to_string()),
         _ => quote.or_else(|| o.lines.map(|l| l.intro.get().to_string())),
@@ -711,7 +712,8 @@ pub fn Challenge(
         }
     };
     view! {
-        <form class="challenge" on:submit=move |e| { e.prevent_default(); start() } on:keydown=on_key>
+        // Still to earn (#155): what's missing comes right under their words, and the purse is one line.
+        <form class="challenge" class:earning=earning on:submit=move |e| { e.prevent_default(); start() } on:keydown=on_key>
             <header class="ch-head">
                 <span class="ch-frame">
                     {match face {
@@ -755,7 +757,9 @@ pub fn Challenge(
                 <div class="ch-term ch-wins">
                     <dt>{win_label}</dt>
                     <dd>
-                        {if wins.is_empty() {
+                        {if let Some(r) = r.filter(|_| earning) {
+                            view! { <span class="ch-win"><Seal r=r earned=true />{tr(format!("{}'s seal, and more", r.name), format!("Le sceau {}, et plus", de(r.name)))}</span> }.into_any()
+                        } else if wins.is_empty() {
                             view! { <span class="ch-none">{tr("Friendly, no purse", "Amicale, sans bourse")}</span> }.into_any()
                         } else {
                             view! { <ul>{wins.into_iter().map(win_view).collect_view()}</ul> }.into_any()

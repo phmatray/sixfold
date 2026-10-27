@@ -83,10 +83,18 @@ impl Advice {
     pub fn text(&self) -> String {
         match self.issue {
             Issue::Healthy => tr("Clean bill of health.", "Rien à signaler.").into(),
-            Issue::FewBasics(n) => tr(
-                format!("Only {n} Basic Hexons: some opening hands will have none. Aim for {MIN_BASICS} or more."),
-                format!("Seulement {n} Hexons de Base\u{a0}: certaines mains de départ n'en auront aucun. Visez-en {MIN_BASICS} ou plus."),
-            ),
+            Issue::FewBasics(n) => {
+                let s = if n == 1 { "" } else { "s" };
+                tr(
+                    format!("Only {n} Basic Hexon{s}: some opening hands will have none. Aim for {MIN_BASICS} or more."),
+                    format!("Seulement {n} Hexon{s} de Base\u{a0}: certaines mains de départ n'en auront aucun. Visez-en {MIN_BASICS} ou plus."),
+                )
+            }
+            Issue::Energy(1) => tr(
+                "Only 1 energy: your attacks will stall. Aim for 18 to 28.",
+                "Seulement 1 énergie\u{a0}: vos attaques vont piétiner. Visez entre 18 et 28.",
+            )
+            .into(),
             Issue::Energy(n) if n < *ENERGY.start() => tr(
                 format!("Only {n} energy: your attacks will stall. Aim for 18 to 28."),
                 format!("Seulement {n} énergies\u{a0}: vos attaques vont piétiner. Visez entre 18 et 28."),

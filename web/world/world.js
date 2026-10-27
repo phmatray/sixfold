@@ -257,7 +257,24 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     clearTimeout(bannerTimer);
     bannerTimer = setTimeout(() => (banner.style.opacity = 0), ms);
   };
-  el.append(fade, legend, banner);
+  // A scene's caption (a reveal's line, the door's bells, #155): a paper plate lower down, never mistaken for
+  // the area's name on its dark pill.
+  const caption = document.createElement("div");
+  caption.setAttribute("aria-hidden", "true");
+  Object.assign(caption.style, {
+    position: "absolute", zIndex: 2, left: "50%", bottom: "26%", transform: "translateX(-50%)", pointerEvents: "none",
+    padding: "10px 20px", borderRadius: "12px", background: "var(--paper)", color: "var(--toon)", border: "2.5px solid var(--toon)",
+    boxShadow: "0 3px 0 var(--toon)", font: "600 clamp(15px, 2vw, 19px) 'Bricolage Grotesque', system-ui, sans-serif",
+    width: "max-content", maxWidth: "calc(100% - 32px)", textAlign: "center", textWrap: "balance", opacity: 0, transition: "opacity 0.4s ease",
+  });
+  let captionTimer = 0;
+  const showCaption = (text, ms) => {
+    caption.textContent = text;
+    caption.style.opacity = 1;
+    clearTimeout(captionTimer);
+    captionTimer = setTimeout(() => (caption.style.opacity = 0), ms);
+  };
+  el.append(fade, legend, banner, caption);
 
   // ---------- Input ----------
   const held = []; // pressed inputs, newest last: key names or "pad-<dir>"
@@ -460,7 +477,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     world: () => world, hero: () => hero, reduced: () => reduced, holds, cb, sound, tune, warp,
     caption: (en, fr) => {
       const text = tr(en, fr);
-      showBanner(text, 3200);
+      showCaption(text, 3400);
       cb("area", text, "");
     },
     // The door's bells (#154), seen and read too (#155): an inlay lights per bell, and the count builds up on screen;
@@ -468,7 +485,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     bell: (n) => {
       ringDoor(n);
       const text = tr("The door rings: ", "La porte sonne\u00a0: ") + BELLS.slice(0, n + 1).join("… ") + (n >= 5 ? "." : "…");
-      showBanner(text, n >= 5 ? 2600 : 1200);
+      showCaption(text, n >= 5 ? 2600 : 1200);
       if (n >= 5) cb("area", text, "");
     },
     stone: (state, face) => {
@@ -810,8 +827,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       // (and its back wall, about 1 m) in view.
       const fit = (v, lo, hi) => THREE.MathUtils.clamp(v, Math.min(lo, hi), Math.max(lo, hi));
       // A scene's shot of something by a wall (the sealed door) may show a strip past it, so what it
-      // aims at sits 15% in from the frame's edge rather than off it.
-      const near = shot ? 0.7 * halfW : Infinity;
+      // aims at sits about a fifth in from the frame's edge rather than off it.
+      const near = shot ? 0.55 * halfW : Infinity;
       aim.x = fit(aim.x, Math.min(halfW, aim.x + near), Math.max(w.map.width - halfW, aim.x - near));
       if (Number.isFinite(top)) {
         // A room deeper than the view leans to its back row (counters, shelves) as
