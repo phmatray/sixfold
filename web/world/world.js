@@ -43,7 +43,7 @@ import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
 import { U } from "./life.js";
 import { PLACEHOLDER, group, prep, CUTAWAY } from "./props.js";
 import { tr, loadMap, loadAsset, assetNames, preload, PERSON, OPTIONAL } from "./map.js";
-import { build, dispose, refresh, animateProps, SEAL_FACE } from "./build.js";
+import { build, dispose, refresh, animateProps } from "./build.js";
 import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route } from "./actors.js";
 import { updateNpc, facing as facingOf } from "./npc.js";
 import * as duelists from "./trainer.js";
@@ -64,17 +64,17 @@ const STONE_LIGHT = 3; // its light at full wake
 // The seal-stone face whose colour is the region's, by the map's `region` (stone:wake).
 const REGION_FACE = { ember: "fire", storm: "lightning", tide: "water", dream: "psychic", grove: "grass", stone: "fighting" };
 
-// A map's seal stone, ready to wake in a scene (script.js `stone:wake`): its coloured faces (build.js keeps
-// them apart, SEAL_FACE; put back to rest here, so a wake cut short by a warp never stays lit) and, outdoors, one real light at it, made with the map at 0 so waking it
-// never recompiles a shader. With the hero's lantern and the three live lamps that is five, under the six
-// (WORLD_DESIGN P1). The region's colour is its own face's; a map with no region wakes each face in its own.
+// A map's seal stone, ready to wake in a scene (script.js `stone:wake`): its coloured faces (the vertices
+// build.js notes in the stone's merged mesh, `seal`: recoloured, so waking costs no draw call) and, outdoors,
+// one real light at it, made with the map at 0 so waking it never recompiles a shader. With the hero's
+// lantern and the three live lamps that is five, under the six (WORLD_DESIGN P1). The region's colour is
+// its own face's; a map with no region wakes each face in its own.
 function stoneRig(w) {
-  const mats = new Set(), box = new THREE.Box3();
+  const faces = [], box = new THREE.Box3();
   w.root.updateMatrixWorld(true);
-  w.root.traverse((o) => o.isMesh && SEAL_FACE.test(o.material.name) && o.material.emissive && (mats.add(o.material), box.expandByObject(o)));
-  if (!mats.size) return null;
-  for (const m of mats) (m.userData.rest ??= m.emissive.clone()), (m.userData.paint ??= m.color.clone()), m.emissive.copy(m.userData.rest), m.color.copy(m.userData.paint);
-  const color = [...mats].find((m) => m.name.endsWith(`seal_${REGION_FACE[w.map.region]}`))?.color.clone() ?? null;
+  w.root.traverse((o) => o.isMesh && o.userData.seal && (faces.push(...o.userData.seal.map((f) => ({ ...f, attr: o.geometry.attributes.color }))), box.expandByObject(o)));
+  if (!faces.length) return null;
+  const color = faces.find((f) => f.colour === REGION_FACE[w.map.region])?.color.clone() ?? null;
   let light = null;
   if (!w.map.light.indoor) {
     light = new THREE.PointLight(color ?? "#ffe2a0", 0, 7, 1.5);
@@ -82,22 +82,23 @@ function stoneRig(w) {
     light.layers.enableAll();
     w.root.add(light);
   }
-  return { mats: [...mats], color, light, k: 0, want: 0 };
+  return { faces, color, light, k: 0, want: 0 };
 }
 // Ease the stone toward its want (a cut under reduced motion): the faces' glow and the light together.
 function stoneStep(s, dt, reduced) {
   if (!s || s.k === s.want) return;
   s.k = reduced ? s.want : s.k + Math.sign(s.want - s.k) * Math.min(Math.abs(s.want - s.k), (dt * 1000) / WAKE_MS);
   const e = s.k * s.k * (3 - 2 * s.k);
-  // Each face takes on the region's colour and shines with it (a map with no region: each its own).
-  for (const m of s.mats) {
-    const to = s.color ?? m.userData.paint;
-    m.color.copy(m.userData.paint).lerp(to, e * 0.7);
-    m.emissive.copy(m.userData.rest).lerp(tmpColor.copy(to).multiplyScalar(0.9), e);
+  // Each face takes on the region's colour, brighter than paint (a map with no region: each its own).
+  for (const f of s.faces) {
+    tmpColor.copy(f.color).lerp(tmpColor2.copy(s.color ?? f.color).multiplyScalar(GLOW), e);
+    for (let i = f.start; i < f.start + f.count; i++) f.attr.setXYZ(i, tmpColor.r, tmpColor.g, tmpColor.b);
+    f.attr.needsUpdate = true;
   }
   if (s.light) s.light.intensity = STONE_LIGHT * e;
 }
-const tmpColor = new THREE.Color();
+const tmpColor = new THREE.Color(), tmpColor2 = new THREE.Color();
+const GLOW = 1.8; // an awake face: its colour this much over paint (vertex colours may pass 1)
 
 // ---------- Mount ----------
 

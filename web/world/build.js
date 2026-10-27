@@ -30,7 +30,7 @@ const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // p
 const BLOOMS = new Set(["moonflower"]); // with an `open` condition: instanced closed and open, cross-faded (build, refresh)
 const SMOKE = 8;
 // A seal stone's six coloured faces (seal_stone.glb `sx_seal_<colour>`; not its top or body).
-export const SEAL_FACE = /seal_(fire|water|lightning|psychic|fighting|grass)$/;
+const SEAL_FACE = /seal_(fire|water|lightning|psychic|fighting|grass)$/;
 const CHUNK = 16; // tiles per side of an instanced scenery chunk (culled as one)
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
@@ -201,14 +201,19 @@ const SHADOWLESS = new Set(["grass_edge", "boardwalk", "flowers", "reeds"]); // 
 function flatten(template) {
   if (template.userData.flat) return template.userData.flat;
   template.updateMatrixWorld(true);
-  const inv = new THREE.Matrix4().copy(template.matrixWorld).invert(), keep = [], parts = [];
+  const inv = new THREE.Matrix4().copy(template.matrixWorld).invert(), keep = [], parts = [], faces = [];
+  let at = 0; // vertices merged so far
   template.traverse((m) => {
     if (!m.isMesh || !m.visible) return; // a part `recolor` hid
     const rel = new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld);
-    // Textured, see-through, `glow` and `glass` parts (lit at night, by name) stay apart, and a seal stone's
-    // coloured faces (`sx_seal_<colour>`: world.js wakes them in a scene).
-    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass/i.test(m.material.name) || SEAL_FACE.test(m.material.name)) return keep.push([m, rel]);
+    // Textured, see-through, `glow` and `glass` parts (lit at night, by name) stay apart.
+    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass/i.test(m.material.name)) return keep.push([m, rel]);
     const src = m.geometry, n = src.attributes.position.count, c = m.material.color;
+    // A seal stone's coloured faces are merged too, their vertices noted (`seal`: world.js wakes them in a scene
+    // by recolouring them, which costs no draw call).
+    const face = SEAL_FACE.exec(m.material.name);
+    if (face) faces.push({ colour: face[1], start: at, count: n, color: c.clone() });
+    at += n;
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", src.attributes.position.clone());
     g.setAttribute("normal", src.attributes.normal.clone());
@@ -222,6 +227,7 @@ function flatten(template) {
   if (parts.length) {
     const merged = new THREE.Mesh(mergeGeometries(parts), toon("#ffffff", { vertexColors: true }));
     merged.userData.flat = true;
+    if (faces.length) merged.userData.seal = faces;
     out.add(merged);
   }
   for (const [m, rel] of keep) {
