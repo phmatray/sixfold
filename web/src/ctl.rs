@@ -67,8 +67,14 @@ pub struct Beat {
 
 /// The beat of `event`, if it is a big moment. `next` is the event after it,
 /// `attack` says an attack is resolving, `left` is what its taker has left
-/// once a prize lands.
-pub fn beat(event: &Event, next: Option<&Event>, attack: bool, left: usize) -> Option<Beat> {
+/// once a prize lands, `seal` that this prize would win a seal (or the title).
+pub fn beat(
+    event: &Event,
+    next: Option<&Event>,
+    attack: bool,
+    left: usize,
+    seal: bool,
+) -> Option<Beat> {
     let b = |class, sfx, hold_ms| {
         Some(Beat {
             class,
@@ -78,7 +84,10 @@ pub fn beat(event: &Event, next: Option<&Event>, attack: bool, left: usize) -> O
     };
     match event {
         Event::KnockedOut { .. } => b("ko", Some(("crack", 0.0)), 80),
-        // The winning prize flies at half speed.
+        // The winning prize flies at half speed; a seal's holds first, to its sting.
+        Event::PrizeTaken { .. } if left == 0 && seal => {
+            b("last-prize seal-final", Some(("stinger", 0.0)), 240)
+        }
         Event::PrizeTaken { .. } if left == 0 => b("last-prize", Some(("fly", 1.0)), 0),
         Event::PrizeTaken { .. } => b("prize", Some(("fly", 0.0)), 0),
         // The last flip of an attack's run of flips settles it.
@@ -514,12 +523,17 @@ impl Ctl {
 
     /// The beat of the next event to play, from the replay's own state.
     fn beat_of(&self, event: &Event) -> Option<Beat> {
-        let left = match event {
-            Event::PrizeTaken { player, .. } => self.prizes_left(*player).saturating_sub(1),
-            _ => usize::MAX,
+        let (left, mine) = match event {
+            Event::PrizeTaken { player, .. } => (
+                self.prizes_left(*player).saturating_sub(1),
+                *player == HUMAN,
+            ),
+            _ => (usize::MAX, false),
         };
         let next = self.queue.with_value(|q| q.front().cloned());
-        beat(event, next.as_ref(), self.attacking.get_value(), left)
+        // Only the player's winning prize wins the seal; the keeper's is a plain last prize.
+        let seal = mine && self.seal.with_untracked(Option::is_some);
+        beat(event, next.as_ref(), self.attacking.get_value(), left, seal)
     }
 
     /// The prizes `player` has left at this point of the playback.
@@ -1158,12 +1172,12 @@ impl Ctl {
                     crate::audio::intensity(1.0);
                 }
                 self.fx.update(|f| f.prize = Some((*player, *prize)));
-                // The winning prize flies at half speed; it chimes as it lands
-                // in the hand (86% into prize-fly).
-                let ms = if beat.is_some_and(|b| b.class == "last-prize") {
-                    1200
-                } else {
-                    600
+                // The winning prize flies at half speed (a seal's slower still);
+                // it chimes as it lands in the hand (86% into prize-fly).
+                let ms = match beat.map(|b| b.class) {
+                    Some("last-prize seal-final") => 1600,
+                    Some("last-prize") => 1200,
+                    _ => 600,
                 };
                 let land = if self.reduced_motion {
                     ms * 6 / 10
@@ -1312,13 +1326,19 @@ mod tests {
             card: CardId(0),
         };
         // Only the last flip of an attack settles it; a turn's flip never does.
-        assert_eq!(beat(&flip, Some(&flip), true, 9), None);
-        assert_eq!(beat(&flip, None, true, 9).map(|b| b.class), Some("decide"));
-        assert_eq!(beat(&flip, None, false, 9), None);
-        // The winning prize is the slow one.
-        assert_eq!(beat(&prize, None, false, 1).map(|b| b.class), Some("prize"));
+        assert_eq!(beat(&flip, Some(&flip), true, 9, false), None);
         assert_eq!(
-            beat(&prize, None, false, 0).map(|b| b.class),
+            beat(&flip, None, true, 9, false).map(|b| b.class),
+            Some("decide")
+        );
+        assert_eq!(beat(&flip, None, false, 9, false), None);
+        // The winning prize is the slow one.
+        assert_eq!(
+            beat(&prize, None, false, 1, false).map(|b| b.class),
+            Some("prize")
+        );
+        assert_eq!(
+            beat(&prize, None, false, 0, false).map(|b| b.class),
             Some("last-prize")
         );
         let ko = Event::KnockedOut {
@@ -1327,6 +1347,27 @@ mod tests {
             uid: 3,
             card: CardId(0),
         };
-        assert_eq!(beat(&ko, None, false, 9).map(|b| b.hold_ms), Some(80));
+        assert_eq!(
+            beat(&ko, None, false, 9, false).map(|b| b.hold_ms),
+            Some(80)
+        );
+        // A seal duel's winning prize lands with weight: a longer hold, the
+        // seal's sting, its own class beside the last prize's.
+        assert_eq!(
+            beat(&prize, None, false, 0, true),
+            Some(Beat {
+                class: "last-prize seal-final",
+                sfx: Some(("stinger", 0.0)),
+                hold_ms: 240,
+            })
+        );
+        assert_eq!(
+            beat(&prize, None, false, 1, true).map(|b| b.class),
+            Some("prize")
+        );
+        assert_eq!(
+            beat(&prize, None, false, 0, false).map(|b| b.hold_ms),
+            Some(0)
+        );
     }
 }
