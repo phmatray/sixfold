@@ -814,6 +814,8 @@ The engine stays the only parser (`engine/src/overworld.rs`). Arguments are spli
 | `wait:<ms>` | pause, 0–5000 | cue | 1.4 |
 | `emote:<actor>:<bang\|what\|dots\|heart\|note>` | bubble over a head (the trainer "!" uses this) | cue | 1.2 |
 | `sfx:<name>`, `music:<track>` | sound | cue | 1.4 |
+| `music:duel_rival_<region>` | a keeper's own duel theme (`ember`, `storm`, `tide`, `dream`, `grove`, `stone`), for their entrance; the map's music comes back when the scene ends | cue | 1.10 |
+| `stone:wake` | the map's seal stone wakes until the scene ends: its six coloured faces glow in the region's colour over 600 ms (a cut under reduced motion) with one live light at it (outdoors, made with the map: five point lights in all); only on a map with a `seal_stone` | cue | 1.10 |
 
 `apply` returns `Applied::Cue(Cue)` for cue effects without touching state; `web/src/world.rs` forwards a cue
 to `world_cue(json)` and waits for `cb("cue_done")` before the next effect. `Progress::apply_all(&[&str])`

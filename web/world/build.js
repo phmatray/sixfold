@@ -203,8 +203,9 @@ function flatten(template) {
   template.traverse((m) => {
     if (!m.isMesh || !m.visible) return; // a part `recolor` hid
     const rel = new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld);
-    // Textured, see-through, `glow` and `glass` parts (lit at night, by name) stay apart.
-    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass/i.test(m.material.name)) return keep.push([m, rel]);
+    // Textured, see-through, `glow` and `glass` parts (lit at night, by name) stay apart, and a seal stone's
+    // coloured faces (`seal_<colour>`: world.js wakes them in a scene).
+    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass|^seal_(?!top)/i.test(m.material.name)) return keep.push([m, rel]);
     const src = m.geometry, n = src.attributes.position.count, c = m.material.color;
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", src.attributes.position.clone());

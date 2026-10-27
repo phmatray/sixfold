@@ -59,6 +59,40 @@ const FADE = 350; // ms, warp fade
 const KEYS = { w: "n", z: "n", arrowup: "n", s: "s", arrowdown: "s", a: "w", q: "w", arrowleft: "w", d: "e", arrowright: "e" }; // WASD and AZERTY ZQSD
 const CLOCK_RATE = 1; // game minutes per real second: a day is 24 minutes (WORLD_DESIGN §7.2)
 const PHASE_FADE = 20; // daylight.js cross-fades this many game minutes into a phase
+const WAKE_MS = 600; // a seal stone wakes (and goes back to rest) over this long
+const STONE_LIGHT = 3; // its light at full wake
+// The seal-stone face whose colour is the region's, by the map's region track (stone:wake).
+const REGION_FACE = { ember: "fire", storm: "lightning", tide: "water", dream: "psychic", grove: "grass", stone: "fighting" };
+
+// A map's seal stone, ready to wake in a scene (script.js `stone:wake`): its coloured faces (build.js keeps
+// them apart, `seal_<colour>`) and, outdoors, one real light at it, made with the map at 0 so waking it
+// never recompiles a shader. With the hero's lantern and the three live lamps that is five, under the six
+// (WORLD_DESIGN P1). The region's colour is its own face's; a map with no region wakes each face in its own.
+function stoneRig(w) {
+  const mats = new Set(), box = new THREE.Box3();
+  w.root.updateMatrixWorld(true);
+  w.root.traverse((o) => o.isMesh && /^seal_(?!top)/.test(o.material.name) && o.material.emissive && (mats.add(o.material), box.expandByObject(o)));
+  if (!mats.size) return null;
+  for (const m of mats) m.userData.rest ??= m.emissive.clone();
+  const color = [...mats].find((m) => m.name === `seal_${REGION_FACE[w.map.music]}`)?.color.clone() ?? null;
+  let light = null;
+  if (!w.map.light.indoor) {
+    light = new THREE.PointLight(color ?? "#ffe2a0", 0, 7, 1.5);
+    box.getCenter(light.position).add(new THREE.Vector3(0, 0.6, 1)); // a little over it, toward the camera: the faces and the ground in front
+    light.layers.enableAll();
+    w.root.add(light);
+  }
+  return { mats: [...mats], color, light, k: 0, want: 0 };
+}
+// Ease the stone toward its want (a cut under reduced motion): the faces' glow and the light together.
+function stoneStep(s, dt, reduced) {
+  if (!s || s.k === s.want) return;
+  s.k = reduced ? s.want : s.k + Math.sign(s.want - s.k) * Math.min(Math.abs(s.want - s.k), (dt * 1000) / WAKE_MS);
+  const e = s.k * s.k * (3 - 2 * s.k);
+  for (const m of s.mats) m.emissive.copy(m.userData.rest).lerp(tmpColor.copy(s.color ?? m.color).multiplyScalar(0.9), e);
+  if (s.light) s.light.intensity = STONE_LIGHT * e;
+}
+const tmpColor = new THREE.Color();
 
 // ---------- Mount ----------
 
@@ -360,6 +394,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // Cutscenes (script.js): the camera reports when it has reached what it was sent to look at.
   const cut = scenes({
     world: () => world, hero: () => hero, reduced: () => reduced, holds, cb, sound, tune, warp,
+    stone: (state) => world?.stone && (world.stone.want = state === "wake" ? 1 : 0),
     settled: () => look.distanceTo(aim) < 0.12 && lookVel.lengthSq() < 0.04,
     moved: () => (lastHero = ""), // the hero's tile is saved again (not during a scene: a reload replays it)
   });
@@ -499,6 +534,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     world = next;
     world.hero = null;
     world.day = daylight(world, reduced);
+    world.stone = stoneRig(world);
     scene.add(world.root);
     const L = map.light;
     scene.fog = L.indoor ? null : new THREE.Fog(L.background, L.fog?.near ?? 60, L.fog?.far ?? 90);
@@ -648,6 +684,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     book.pose(h);
     for (const n of w.npcs) updateNpc(w, n, dt, paused);
     animateProps(w, dt, reduced);
+    stoneStep(w.stone, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);
     sky(lit);
     w.life.update(dt, w.now, px, pz, lit.night);
