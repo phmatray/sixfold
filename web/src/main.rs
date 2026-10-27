@@ -165,7 +165,7 @@ fn App() -> impl IntoView {
     provide_context(screen);
     SCREEN.set(Some(screen));
     provide_context(Legal(legal));
-    provide_context(world::LastTab(RwSignal::new(world::MenuTab::Decks)));
+    provide_context(world::LastTab(RwSignal::new(world::MenuTab::Journal)));
     store::provide();
     stats::provide();
     input::provide();
@@ -232,6 +232,10 @@ thread_local! {
     static SCREEN: std::cell::Cell<Option<RwSignal<Screen>>> = const { std::cell::Cell::new(None) };
     /// The screen a transition is on its way to (a repeated press doesn't go twice).
     static GOING: std::cell::Cell<Option<Screen>> = const { std::cell::Cell::new(None) };
+    /// The title's entry last opened: back on the title, the cursor is on it again.
+    static TITLE_ENTRY: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
+    /// What had focus when the screen began to change (the control that changed it).
+    static FOCUS_FROM: std::cell::RefCell<Option<web_sys::Element>> = const { std::cell::RefCell::new(None) };
 }
 
 // A screen change runs as a view transition (style.css, "Screen transitions"),
@@ -278,6 +282,7 @@ pub fn go_with(to: Screen, then: impl FnOnce() + 'static) {
     let Some(screen) = SCREEN.get() else {
         return;
     };
+    FOCUS_FROM.set(document().active_element());
     if !can_swap() {
         then();
         return screen.set(to);
@@ -305,6 +310,11 @@ pub fn go_with(to: Screen, then: impl FnOnce() + 'static) {
     swap(kind, &cb, &done);
 }
 
+/// The title's entry the player just opened (its place in the menu), to come back to.
+pub fn opened_title_entry(i: usize) {
+    TITLE_ENTRY.set(Some(i));
+}
+
 /// The next screen change lands focus on the first menu item (after "Press to
 /// start", where the player is about to choose, not read).
 pub fn focus_menu_next() {
@@ -323,10 +333,32 @@ pub(crate) fn focus_heading() {
     } else {
         "[data-screen-focus]"
     };
-    let el = [menu, "[data-screen-focus]", "h1"]
-        .iter()
-        .find_map(|s| doc.query_selector(s).ok().flatten())
-        .or_else(|| doc.query_selector("main").ok().flatten());
+    // A key or a pad already took focus into the new screen while it came in: leave it there.
+    let moved = doc.active_element().filter(|a| {
+        a.is_connected()
+            && FOCUS_FROM.with_borrow(|from| from.as_ref() != Some(a))
+            && doc.body().is_none_or(|b| !b.is_same_node(Some(a)))
+    });
+    if moved.is_some() {
+        return;
+    }
+    // Back on the title: the entry the player opened, not the name painted on the sign.
+    let on_title = doc.query_selector(".title .menu").ok().flatten().is_some();
+    let entry = on_title
+        .then(|| TITLE_ENTRY.take())
+        .flatten()
+        .and_then(|i| {
+            doc.query_selector_all(".title .menu .menu-item")
+                .ok()
+                .and_then(|l| l.get(i as u32))
+                .and_then(|n| n.dyn_into::<web_sys::Element>().ok())
+        });
+    let el = entry.or_else(|| {
+        [menu, "[data-screen-focus]", "h1"]
+            .iter()
+            .find_map(|s| doc.query_selector(s).ok().flatten())
+            .or_else(|| doc.query_selector("main").ok().flatten())
+    });
     if let Some(el) = el.and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok()) {
         if el.tab_index() < 0 && !el.has_attribute("tabindex") {
             let _ = el.set_attribute("tabindex", "-1");

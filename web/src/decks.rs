@@ -648,6 +648,29 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
         }
     };
     let curve = move || draft.with(energy_curve);
+    // The phone's panes are a tab list: the arrows (and Home, End) choose and focus the next one.
+    let tab_keys = move |e: leptos::ev::KeyboardEvent| {
+        const ORDER: [(Tab, &str); 3] = [
+            (Tab::Advice, "tab-advice"),
+            (Tab::Cards, "tab-cards"),
+            (Tab::Deck, "tab-deck"),
+        ];
+        let i = ORDER
+            .iter()
+            .position(|(t, _)| *t == tab.get_untracked())
+            .unwrap_or(1) as i32;
+        let to = match e.key().as_str() {
+            "ArrowRight" => i + 1,
+            "ArrowLeft" => i - 1,
+            "Home" => 0,
+            "End" => 2,
+            _ => return,
+        };
+        e.prevent_default();
+        let (t, id) = ORDER[to.rem_euclid(3) as usize];
+        tab.set(t);
+        crate::focus_first(&[&format!("#{id}")]);
+    };
     // Escape steps back one layer: the card sheet, the leave question, then
     // out of the editor (through the guard). Handled here, so a host dialog
     // doesn't close on the same key. In a text field, Escape stays the field's.
@@ -710,7 +733,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 </div>
             })}
             <div class="bench-actions" role="toolbar" aria-label=tr("Deck tools", "Outils du deck")>
-                <button type="button" class="btn build" class:primary=move || total() != 0 aria-haspopup="dialog" on:click=move |_| building.set(true)>
+                <button type="button" class="btn build" class:primary=move || total() != 0 && !problems().is_empty() aria-haspopup="dialog" on:click=move |_| building.set(true)>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.3L20 9l-4.4 3.7L17 18.5 12 15.6 7 18.5l1.4-5.8L4 9l5.8-.7z" /></svg>
                     {tr("Build for me", "Construire pour moi")}
                 </button>
@@ -728,8 +751,9 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 </button>
             </div>
             <p class="editor-msg" role="status" aria-live="polite" tabindex="-1">{move || msg.get()}</p>
-            <div class="editor-tabs" role="tablist" aria-label=tr("Editor panes", "Volets de l'éditeur")>
+            <div class="editor-tabs" role="tablist" aria-label=tr("Editor panes", "Volets de l'éditeur") on:keydown=tab_keys>
                 <button type="button" role="tab" id="tab-advice" aria-controls="pane-advice" aria-selected=move || (tab.get() == Tab::Advice).to_string()
+                    tabindex=move || if tab.get() == Tab::Advice { "0" } else { "-1" }
                     aria-label=move || {
                         let n = if total() == 0 { 0 } else { tips.with(Vec::len) };
                         let bad = !problems().is_empty();
@@ -744,8 +768,10 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                     {move || (!problems().is_empty()).then(|| view! { <span class="tab-dot" aria-hidden="true"></span> })}
                     </button>
                 <button type="button" role="tab" id="tab-cards" aria-controls="pane-cards" aria-selected=move || (tab.get() == Tab::Cards).to_string()
+                    tabindex=move || if tab.get() == Tab::Cards { "0" } else { "-1" }
                     on:click=move |_| tab.set(Tab::Cards)>{tr("Your cards", "Vos cartes")}</button>
                 <button type="button" role="tab" id="tab-deck" aria-controls="pane-deck" aria-selected=move || (tab.get() == Tab::Deck).to_string()
+                    tabindex=move || if tab.get() == Tab::Deck { "0" } else { "-1" }
                     on:click=move |_| tab.set(Tab::Deck)>"Deck " {move || { let k = pulse.get(); view! { <span class="tab-count" class:bump={k > 0}>{format!("({})", draft.with_untracked(|d| d.cards.len()))}</span> } }}</button>
             </div>
             <section class="pane pane-advice deck-stats" id="pane-advice" role="tabpanel" aria-labelledby="tab-advice" class:inactive=move || tab.get() != Tab::Advice>
@@ -809,13 +835,22 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                         {move || {
                             let c = curve();
                             let max = c.iter().copied().max().unwrap_or(0).max(1);
-                            c.iter().enumerate().map(|(i, &n)| view! {
+                            // What the numbers on top and the ones underneath count.
+                            std::iter::once(view! {
+                                <span class="curve-col curve-axis">
+                                    <span>{tr("Hexons", "Hexons")}</span>
+                                    <span></span>
+                                    <span>{tr("Energy", "Énergie")}</span>
+                                </span>
+                            }.into_any())
+                            .chain(c.iter().enumerate().map(|(i, &n)| view! {
                                 <span class="curve-col">
                                     <span class="curve-n">{n}</span>
                                     <span class="curve-bar" style=format!("height:{}%", n * 100 / max)></span>
                                     <span class="curve-x">{if i == 4 { "4+".to_string() } else { i.to_string() }}</span>
                                 </span>
-                            }).collect_view()
+                            }.into_any()))
+                            .collect_view()
                         }}
                     </div>
                     <figcaption>{tr("Energy for each Hexon's biggest attack", "Énergie de l'attaque la plus chère de chaque Hexon")}</figcaption>
@@ -938,9 +973,10 @@ fn PickTile(id: CardId, draft: RwSignal<DeckList>, msg: RwSignal<Option<String>>
     };
     view! {
         <li class="pick" class:blocked=move || blocked().is_some()>
-            <button type="button" class="bind-card" node_ref=face aria-label=tr(format!("{}, details", face_text(id)), format!("{}, détails", face_text(id)))
+            <button type="button" class="bind-card" node_ref=face
                 on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
-                <CardFace id=id />
+                <CardFace id=id hidden=true />
+                <span class="sr-only">{tr(format!("{}, details", face_text(id)), format!("{}, détails", face_text(id)))}</span>
             </button>
             <span class="pick-count" class:has={move || in_deck() > 0}>
                 {move || match owned() {
@@ -993,12 +1029,14 @@ fn DeckLine(
             <button type="button" class="line-name" on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
                 {def.label()}
             </button>
+            <span class="line-step">
             <button type="button" class="btn icon" aria-label=tr(format!("Remove one {}", def.label()), format!("Retirer un exemplaire {}", de(def.label()))) on:click=remove>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /></svg>
             </button>
             <button type="button" class="btn icon" aria-label=tr(format!("Add one {}", def.label()), format!("Ajouter un exemplaire {}", de(def.label()))) on:click=move |_| { try_add(id, profile, draft, msg, None); }>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
             </button>
+            </span>
         </li>
     }
 }

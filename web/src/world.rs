@@ -550,11 +550,13 @@ pub enum MenuTab {
 }
 
 impl MenuTab {
+    // What a player in the world most often opens the menu for comes first: what to do
+    // next (the Journal), where to go (the Map), then the decks for the next duel.
     const ALL: [MenuTab; 6] = [
-        MenuTab::Decks,
-        MenuTab::Collection,
         MenuTab::Journal,
         MenuTab::Map,
+        MenuTab::Decks,
+        MenuTab::Collection,
         MenuTab::Campaign,
         MenuTab::Options,
     ];
@@ -1827,7 +1829,8 @@ fn GameMenu(
                 {move || match (tab.get(), editing.get()) {
                     (MenuTab::Decks, Some(i)) => view! { <EditorPanel index=i on_done=done_editing /> }.into_any(),
                     (MenuTab::Decks, None) => view! {
-                        <div class="menu-actions">
+                        <div class="menu-actions shelf-head">
+                            <h2>{tr("Your decks", "Vos decks")}</h2>
                             <button type="button" class="btn primary" on:click=move |_| { if let Some(i) = new_deck() { edit(i) } }>{tr("New deck", "Nouveau deck")}</button>
                         </div>
                         <DecksPanel on_edit=Callback::new(edit) />

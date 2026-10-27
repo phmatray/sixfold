@@ -354,7 +354,14 @@ export function mount(el, controls, cb, start, edit = false) {
     moved: () => (lastHero = ""), // the hero's tile is saved again (not during a scene: a reload replays it)
   });
   const opens = (wp) => holds(wp.if);
-  const facing = () => (hero.sit ? null : lifts.facing(world, hero) ?? facingOf(world, hero, opens)) ?? seats.facing(world, hero);
+  // A find already taken on a seat (coins under a bench) gives the place back to sitting.
+  const spent = (it) => it?.kind === "find" && holds(`flag:found_${it.id}`);
+  const facing = () => {
+    const it = hero.sit ? null : lifts.facing(world, hero) ?? facingOf(world, hero, opens);
+    // Taken, on a seat: the seat (or, from behind it, nothing) rather than "Nothing else here".
+    if (spent(it) && world.seats.has(key(hero.x + DIR[hero.face][0], hero.z + DIR[hero.face][1]))) return seats.facing(world, hero);
+    return it ?? seats.facing(world, hero);
+  };
 
   // Start a step toward `f`. A door warp is entered even though its tile is solid;
   // pushing against the wall from a warp tile with that `dir` leaves the room.
@@ -637,7 +644,9 @@ export function mount(el, controls, cb, start, edit = false) {
     if (pos !== lastHero && inside && !cut.playing) (el.dataset.hero = lastHero = pos), cb("at", w.name, pos);
 
     // What the hero faces, while standing still.
-    const front = h.step || warping ? null : facing();
+    // Only what pressing it would do: none while the world can't act (a cutscene, a duelist
+    // coming over, a sheet open), so the prompt never offers a press that does nothing.
+    const front = h.step || busy() ? null : facing();
     const said = front?.kind === "book" ? front.id : front?.text; // a book is named by Rust, from its id
     const nk = front ? `${front.kind}:${said}` : "";
     if (nk !== w.nearKey) {

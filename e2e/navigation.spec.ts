@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { menuItem, title } from "./helpers";
+import { menuItem, title, moveTo } from "./helpers";
 
 // #100: every menu is driven by the keys and by a pad. The painted hand points at
 // the focused control; the arrows (a pad's D-pad) move it; Enter (A) confirms;
@@ -20,20 +20,12 @@ async function pointsAt(page: Page, target: Locator) {
         if (t.width < 4 && label) t = label.getBoundingClientRect();
         const side = hd.dataset.side;
         const ok = side === "left" ? h.right <= t.left + 6 : side === "right" ? h.left >= t.right - 6
-          : side === "above" ? h.bottom <= t.top + 6 : side === "below" ? h.top >= t.bottom - 6 : false;
+          : side === "above" ? h.bottom <= t.top + 6 : side === "below" ? h.top >= t.bottom - 6
+          : side === "inside" ? h.left >= t.left - 2 && h.right <= t.left + 48 : false;
         return ok ? side : `wrong: ${side} ${JSON.stringify(h)} ${JSON.stringify(t)}`;
       }),
     )
-    .toMatch(/^(left|right|above|below)$/);
-}
-
-/** Press `key` until `target` has focus. */
-async function moveTo(page: Page, target: Locator, key: string) {
-  for (let i = 0; i < 20; i++) {
-    if (await target.evaluate((el) => el === document.activeElement).catch(() => false)) return;
-    await page.keyboard.press(key);
-  }
-  await expect(target).toBeFocused();
+    .toMatch(/^(left|right|above|below|inside)$/);
 }
 
 test("keyboard: arrows move the hand through the title and two menu screens, Escape goes back", async ({ page }) => {
@@ -99,7 +91,7 @@ const FAKE_PAD = () => {
     await read();
   };
 };
-const DOWN = 13, A = 0, B = 1, R = 5;
+const UP = 12, DOWN = 13, A = 0, B = 1, R = 5;
 
 test("gamepad: the D-pad moves the hand, A opens, R switches tabs, B goes back", async ({ page }) => {
   await page.addInitScript(FAKE_PAD);
@@ -116,9 +108,11 @@ test("gamepad: the D-pad moves the hand, A opens, R switches tabs, B goes back",
   await expect(page.getByRole("tab", { name: "Stats" })).toHaveAttribute("aria-selected", "true");
   await tap(B);
   await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible();
+  // Back on the title, the cursor is on the entry that was opened; My decks is above it.
+  await expect(target).toBeFocused();
 
   const decks = menuItem(page, "My decks");
-  for (let i = 0; i < 12 && !(await decks.evaluate((el) => el === document.activeElement)); i++) await tap(DOWN);
+  for (let i = 0; i < 12 && !(await decks.evaluate((el) => el === document.activeElement)); i++) await tap(UP);
   await tap(A);
   await expect(page.getByRole("heading", { level: 1, name: "My decks" })).toBeVisible();
   await tap(B);

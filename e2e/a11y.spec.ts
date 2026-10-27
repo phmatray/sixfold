@@ -13,7 +13,7 @@ async function scan(page: Page, screen: string) {
     .analyze();
   const bad = violations
     .filter((v) => v.impact === "serious" || v.impact === "critical")
-    .map((v) => `${screen}: ${v.id} (${v.impact}) ${v.nodes.map((n) => n.target.join(" ")).slice(0, 5).join(", ")}`);
+    .map((v) => `${screen}: ${v.id} (${v.impact}) ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
   expect(bad, bad.join("\n")).toEqual([]);
 }
 
@@ -64,7 +64,8 @@ test("a duel: setup, the board, the log and the menu @phone", async ({ page }) =
   await hand.getByRole("button", { name: /, playable$/ }).first().click();
   await page.getByRole("button", { name: /^Empty Active spot/ }).click();
   await page.getByRole("button", { name: /^Done/ }).click();
-  await expect(page.getByRole("button", { name: /^End turn/ })).toBeVisible({ timeout: 60_000 });
+  // Your turn: End turn enabled (it shows, disabled, while the opponent's first turn still plays out).
+  await expect(page.getByRole("button", { name: /^End turn/ })).toBeEnabled({ timeout: 60_000 });
   // A screen reader hears the setup and whose turn it is, in one announcement.
   await expect(page.getByRole("status").filter({ hasText: /Turn \d+: Your turn/ })).toBeAttached();
   await scan(page, "duel board");

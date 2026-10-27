@@ -88,10 +88,12 @@ window.sixfoldMoveFocus = (dir) => {
     const a = all.find((el) => { const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; }) ?? all[0];
     return go(a);
   }
-  // A visually hidden input (a deck's radio) stands for its label, the card around it.
+  // A visually hidden input (a deck's radio) stands for its label, the card around it; a
+  // checkbox or radio inside its label, for the whole row (a toggle and its words).
   const box = (el) => {
     const r = el.getBoundingClientRect(), label = el.labels?.[0] ?? el.closest("label");
-    return r.width < 4 && label ? label.getBoundingClientRect() : r;
+    const row = /^(checkbox|radio)$/.test(el.type) && el.closest("label");
+    return (r.width < 4 || row) && label ? label.getBoundingClientRect() : r;
   };
   const [dx, dy] = AXES[dir];
   const a = box(cur);
@@ -109,10 +111,14 @@ window.sixfoldMoveFocus = (dir) => {
     const cx = (b.left + b.right) / 2, cy = (b.top + b.bottom) / 2;
     const top = cx >= 0 && cy >= 0 && cx < innerWidth && cy < innerHeight && document.elementFromPoint(cx, cy);
     if (top && !el.contains(top) && !(el.labels?.[0] ?? el.closest("label"))?.contains(top)) continue;
-    const along = Math.max(0, gap);
-    const across = Math.max(0, dx ? Math.max(b.top - a.bottom, a.top - b.bottom) : Math.max(b.left - a.right, a.left - b.right));
-    // In line first (the boxes overlap across the way), then the nearest.
-    const s = along + across * 3 + (across > 0 ? 1e5 : 0);
+    // In 6 px steps: a plank's tilt (a pixel or two) doesn't beat reading order, the first in the page.
+    const along = Math.round(Math.max(0, gap) / 6) * 6;
+    const overlap = dx ? Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) : Math.min(a.right, b.right) - Math.max(a.left, b.left);
+    const across = Math.max(0, -overlap);
+    // In line (overlapping across the way by a real share, not a sliver) before the rest, unless
+    // something off the line is much nearer: a row's buttons below a heading, not a card far down.
+    const inLine = overlap > Math.min(dx ? a.height : a.width, dx ? b.height : b.width) / 4;
+    const s = along + across * 3 + (inLine ? 0 : 150);
     if (s < score) (score = s), (best = el);
   }
   if (best) go(best);
@@ -172,10 +178,11 @@ addEventListener("keydown", (e) => {
   const CONTROLS = "button, a[href], input, select, textarea, summary, label, [role='tab'], [tabindex]:not([tabindex='-1'])";
   let at = null, raf = 0, side = null;
   const shown = (el) => el.matches(":focus-visible") || (document.documentElement.dataset.input === "pad" && el.matches(":focus"));
-  // A visually hidden input (a deck's radio, a segment) stands for its label.
+  // A visually hidden input (a deck's radio, a segment) stands for its label; an input inside
+  // its label (a slider, a toggle) for the whole row, so the hand never sits on the row's name.
   const box = (el) => {
     const r = el.getBoundingClientRect(), label = el.labels?.[0] ?? el.closest("label");
-    return r.width < 4 && label ? label.getBoundingClientRect() : r;
+    return (r.width < 4 || (el.matches("input") && el.closest("label"))) && label ? label.getBoundingClientRect() : r;
   };
   const place = () => {
     raf = 0;
@@ -194,14 +201,20 @@ addEventListener("keydown", (e) => {
     ];
     // Free: nothing to press and nothing to read under the hand (its middle and its tip).
     const BUSY = `${CONTROLS}, p, h1, h2, h3, h4, legend, dt, dd, figcaption, img, svg, .card, .pack, .deck-name, .deck-desc`;
-    const free = ([s, x, y]) => {
-      const tip = { left: [x + 18, y], right: [x - 18, y], above: [x, y + 18], below: [x, y - 18] }[s];
-      return [[x, y], tip].every(([px, py]) => !document.elementFromPoint(px, py)?.closest(BUSY));
+    const free = ([s, x, y], busy = BUSY) => {
+      // Its middle, its tip and its wrist: a neighbour close by (two buttons side by side) is under the wrist.
+      const [dx, dy] = { left: [18, 0], right: [-18, 0], above: [0, 14], below: [0, -14] }[s];
+      return [[x, y], [x + dx, y + dy], [x - dx, y - dy]].every(([px, py]) => !document.elementFromPoint(px, py)?.closest(busy));
     };
     // The side is picked once per control (no flicker while it moves), the place every frame.
-    side ??= (sides.find((s) => s[3] && free(s)) ?? sides.find((s) => s[3]) ?? sides[0])[0];
+    // Hemmed in on every side, it may cover words but never another control (a phone's tab
+    // row: below, over the pane). A plank in a phone's two-column title grid has controls all
+    // round: the hand goes over its own icon, pointing at its label as a game menu's cursor does.
+    side ??= (sides.find((s) => s[3] && free(s)) ?? sides.find((s) => s[3] && free(s, CONTROLS)))?.[0] ??
+      (at.matches(".menu-item") && r.width >= 120 ? "inside" : (sides.find((s) => s[3]) ?? sides[0])[0]);
+    if (side === "inside") sides.push(["inside", r.left + 22, mid]);
     const [, cx, cy] = sides.find((s) => s[0] === side);
-    hand.dataset.side = side;
+    hand.dataset.side = at.dataset.hand = side;
     hand.style.translate = `${Math.round(cx - 20)}px ${Math.round(cy - 16)}px`;
     raf = requestAnimationFrame(place);
   };

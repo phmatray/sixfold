@@ -121,7 +121,8 @@ pub fn PacksScreen() -> impl IntoView {
     };
     on_cleanup(|| crate::audio::sfx("packstop", 0.0));
     view! {
-        <div class="page with-side" on:keydown=on_key>
+        // The card inspector only once there are cards to read: on the shelf, the packs take the room.
+        <div class="page" class:with-side=move || opened.with(Option::is_some) on:keydown=on_key>
             <PageBar title=tr("Open packs", "Ouvrir des boosters") />
             <main class="page-body">
                 {move || match opened.get() {
@@ -129,7 +130,7 @@ pub fn PacksScreen() -> impl IntoView {
                     Some(o) => view! { <Reveal o=o done=done finish=finish actions=actions again=move || opened.set(None) /> }.into_any(),
                 }}
             </main>
-            <div class="side-panel"><Inspector /></div>
+            {move || opened.with(Option::is_some).then(|| view! { <div class="side-panel"><Inspector /></div> })}
         </div>
     }
 }
@@ -298,6 +299,8 @@ pub fn PackOdds(b: usize) -> impl IntoView {
 fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
     let total = move || profile.with(|p| p.wallet.total());
+    // One act on the shelf: the first pack the player holds is the brass one; the others are plain.
+    let first = move || profile.with(|p| (0..BOOSTERS.len()).find(|&j| p.wallet.packs(j) > 0));
     view! {
         <p class="page-lead">
             {move || match total() {
@@ -323,15 +326,17 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
                             <h2>{b.name.get()}</h2>
                             <p>{b.description.get()}</p>
                             <PackOdds b=i />
-                            <button type="button" class="btn primary" disabled=move || n.get() == 0
-                                aria-label=move || tr(
-                                    format!("Open one {}, {} left", b.name, n.get()),
-                                    format!("Ouvrir un {}, il en reste {}", b.name, n.get()),
-                                )
+                            <button type="button" class="btn" class:primary=move || first() == Some(i) disabled=move || n.get() == 0
+                                // Starts with what it shows (label in name, WCAG 2.5.3).
+                                aria-label=move || match n.get() {
+                                    0 => tr(format!("None left, {}", b.name), format!("Aucun, {}", b.name)),
+                                    n => tr(format!("Open one {}, {n} left", b.name), format!("En ouvrir un, {}, il en reste {n}", b.name)),
+                                }
                                 on:click=move |_| open(i)>
                                 {move || match n.get() {
                                     0 => tr("None left", "Aucun").to_string(),
-                                    n => tr(format!("Open one ({n} left)"), format!("En ouvrir un ({n})")),
+                                    // How many: the badge on the pack says it (and the button's name).
+                                    _ => tr("Open one", "En ouvrir un").to_string(),
                                 }}
                             </button>
                         </div>

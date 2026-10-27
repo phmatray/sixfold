@@ -107,6 +107,12 @@ pub fn Reading(
     let prev = move || go(at.get_untracked().saturating_sub(1));
     let next = move || go(at.get_untracked() + 1);
     let on_key = move |e: web_sys::KeyboardEvent| {
+        // Escape folds the plain text first, then (next press) puts the book back.
+        if e.key() == "Escape" && plain.get_untracked() {
+            e.prevent_default();
+            e.stop_propagation();
+            return plain.set(false);
+        }
         let n = at.get_untracked();
         let to = match e.key().as_str() {
             "ArrowRight" | "PageDown" => n + 1,
@@ -178,12 +184,12 @@ pub fn Reading(
                     <span aria-hidden="true">"←"</span>
                     <span class="reading-label">{tr("Back", "Retour")}</span>
                 </button>
-                <button type="button" class="btn ghost reading-plain" aria-pressed=move || plain.get().to_string()
+                <button type="button" class="btn reading-plain" aria-pressed=move || plain.get().to_string()
                     title=tr("Show the page as plain text", "Afficher la page en texte simple")
                     on:click=move |_| plain.update(|p| *p = !*p)>
                     {tr("Text", "Texte")}
                 </button>
-                <button type="button" class="btn ghost reading-close" aria-keyshortcuts="Escape" on:click=move |_| close.run(())>
+                <button type="button" class="btn reading-close" aria-keyshortcuts="Escape" on:click=move |_| close.run(())>
                     {tr("Close", "Fermer")}
                     <kbd>{move || input::prompt(Ctrl::Cancel)}</kbd>
                 </button>

@@ -229,8 +229,9 @@ pub fn DiscardViewer() -> impl IntoView {
                     }}</p>
                     <div class="discard-grid">
                         {cards.into_iter().map(|id| view! {
-                            <button class="discard-card" aria-label=crate::cards::face_text(id) on:click=move |_| ui.open(Inspect { card: id, at: None })>
-                                <CardFace id=id />
+                            <button class="discard-card" on:click=move |_| ui.open(Inspect { card: id, at: None })>
+                                <CardFace id=id hidden=true />
+                                <span class="sr-only">{crate::cards::face_text(id)}</span>
                             </button>
                         }).collect_view()}
                     </div>
@@ -672,13 +673,19 @@ pub fn GameOver() -> impl IntoView {
                         }.into_any(),
                         (None, Some(p)) => view! {
                             <div class="dialog-foot">
+                                // A rung won with more to climb: the next one is what the player wants, so it leads.
                                 {move || (p == Post::Gauntlet && rung_result.get().is_some_and(|r| r.won && !r.cleared)).then(|| view! {
-                                    <button class="btn" on:click=next_rung>{tr("Next rung", "Palier suivant")}</button>
+                                    <button class="btn primary" autofocus on:click=next_rung>{tr("Next rung", "Palier suivant")}</button>
                                 })}
                                 {matches!(p, Post::Daily(_)).then(|| view! {
                                     <button class="btn" on:click=rematch>{tr("Play it again", "Rejouer")}</button>
                                 })}
-                                <button class="btn primary" autofocus on:click=move |_| { crate::go_with(back, move || ctl.stop()) }>{tr("Back", "Retour")}</button>
+                                {move || {
+                                    let climbing = p == Post::Gauntlet && rung_result.get().is_some_and(|r| r.won && !r.cleared);
+                                    view! {
+                                        <button class="btn" class:primary=!climbing autofocus=!climbing on:click=move |_| { crate::go_with(back, move || ctl.stop()) }>{tr("Back", "Retour")}</button>
+                                    }
+                                }}
                             </div>
                         }.into_any(),
                         (None, None) => view! {
@@ -927,10 +934,12 @@ pub fn DuelMenu(
                     <crate::audio::AudioSettings />
                     <fieldset class="seg">
                         <legend>{tr("Opponent's speed", "Vitesse de l'adversaire")}</legend>
+                        <div class="seg-tray">
                         <label><input type="radio" name="speed" prop:checked=move || !ctl.fast.get()
                             on:change=move |_| { ctl.fast.set(false); crate::store::set_fast_opponent(false); } />{tr("Normal", "Normale")}</label>
                         <label><input type="radio" name="speed" prop:checked=move || ctl.fast.get()
                             on:change=move |_| { ctl.fast.set(true); crate::store::set_fast_opponent(true); } />{tr("Fast", "Rapide")}</label>
+                        </div>
                     </fieldset>
                     <p class="fine">{tr("Only the pace changes. During their turn, hold the fast-forward button for even quicker play; every move stays in the history.",
                         "Seul le rythme change. Pendant leur tour, maintenez le bouton d'accélération ; chaque coup reste dans l'historique.")}</p>

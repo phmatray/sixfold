@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { menuItem, readSave, title } from "./helpers";
+import { menuItem, readSave, title, moveTo } from "./helpers";
 
 /** From the title to the deck editor of the first deck (the starter). */
 async function editStarter(page: Page) {
@@ -17,7 +17,7 @@ async function scan(page: Page, what: string) {
     .analyze();
   const bad = violations
     .filter((v) => v.impact === "serious" || v.impact === "critical")
-    .map((v) => `${what}: ${v.id} (${v.impact}) ${v.nodes.map((n) => n.target.join(" ")).slice(0, 5).join(", ")}`);
+    .map((v) => `${what}: ${v.id} (${v.impact}) ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
   expect(bad, bad.join("\n")).toEqual([]);
 }
 
@@ -26,15 +26,6 @@ async function copies(page: Page, name: string): Promise<number> {
   const line = page.getByRole("tabpanel", { name: /^Deck/ }).locator(".deck-line", { hasText: name });
   if ((await line.count()) === 0) return 0;
   return Number((await line.locator(".line-count").innerText()).replace("×", ""));
-}
-
-/** Press `key` (Tab by default) until `target` has focus. */
-async function moveTo(page: Page, target: Locator, key = "Tab") {
-  for (let i = 0; i < 60; i++) {
-    if (await target.evaluate((el) => el === document.activeElement).catch(() => false)) return;
-    await page.keyboard.press(key);
-  }
-  await expect(target).toBeFocused();
 }
 
 test("build for me makes a legal deck from your cards and says why", async ({ page }) => {
@@ -146,6 +137,8 @@ test("keyboard only: build a deck for me, undo it, walk the cards, leave", async
   await moveTo(page, sheet.getByRole("button", { name: "Use this deck" }));
   await page.keyboard.press("Enter");
   await expect(sheet).toBeHidden();
+  // Focus goes back to what opened the sheet (on the next frame): wait for it, or it lands mid-walk.
+  await expect(page.locator(".bench-actions .build")).toBeFocused();
   await expect(page.getByRole("button", { name: "Save deck" })).toBeEnabled();
 
   // Ctrl+Z: the deck as it was, nothing left to save.
@@ -157,7 +150,8 @@ test("keyboard only: build a deck for me, undo it, walk the cards, leave", async
   await first.focus();
   await page.keyboard.press("ArrowRight");
   await expect(first).not.toBeFocused();
-  expect(await page.evaluate(() => !!document.activeElement?.closest(".pick-grid"))).toBe(true);
+  // Still in the grid (else: what took focus).
+  expect(await page.evaluate(() => (document.activeElement?.closest(".pick-grid") ? "grid" : document.activeElement?.outerHTML.slice(0, 120)))).toBe("grid");
 
   // Escape leaves (nothing unsaved).
   await page.keyboard.press("Escape");
@@ -228,6 +222,12 @@ test("on a phone: the tools stay at hand, the advice and the deck have their tab
   await editStarter(page);
   await page.getByRole("tab", { name: "Advice" }).click();
   await expect(page.getByRole("tabpanel", { name: "Advice" }).getByText("Ready to play")).toBeVisible();
+  // A tab list: the arrows choose and focus the next tab, Home the first.
+  await page.getByRole("tab", { name: "Advice" }).press("ArrowRight");
+  await expect(page.getByRole("tab", { name: "Your cards" })).toBeFocused();
+  await expect(page.getByRole("tab", { name: "Your cards" })).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("Home");
+  await expect(page.getByRole("tab", { name: "Advice" })).toHaveAttribute("aria-selected", "true");
   await page.getByRole("button", { name: "Build for me" }).click();
   const sheet = page.getByRole("dialog", { name: "Build for me" });
   await sheet.getByRole("radio", { name: "Aggro" }).check();

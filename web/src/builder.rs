@@ -116,10 +116,28 @@ impl Undo {
     }
 }
 
-/// Focus the first element `selector` finds, once the view has settled.
+/// Focus the first element `selector` finds, once the view has settled, unless the player has
+/// moved focus elsewhere meanwhile (a frame can come late on a busy page: it mustn't pull the
+/// cursor back from where a key or the pad just took it).
 pub fn focus_later(selector: &'static str) {
+    let was = document().active_element();
     request_animation_frame(move || {
-        if let Some(el) = document()
+        let doc = document();
+        let now = doc.active_element();
+        let moved = now.as_ref().is_some_and(|a| {
+            a.is_connected()
+                && was.as_ref() != Some(a)
+                && doc.body().is_none_or(|b| !b.is_same_node(Some(a)))
+        });
+        // The opener already has it back (a modal's close gives focus back at once): nothing to do.
+        if moved
+            && !now
+                .as_ref()
+                .is_some_and(|a| a.matches(selector).unwrap_or(false))
+        {
+            return;
+        }
+        if let Some(el) = doc
             .query_selector(selector)
             .ok()
             .flatten()
@@ -266,9 +284,10 @@ pub fn Advisor(
                                 let (peek, open) = crate::binder::inspect_handlers(id);
                                 let name = card(id).label();
                                 view! {
-                                    <button type="button" class="tip-face" aria-label=tr(format!("{name}, details"), format!("{name}, détails"))
+                                    <button type="button" class="tip-face"
                                         on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
-                                        <CardFace id=id />
+                                        <CardFace id=id hidden=true />
+                                        <span class="sr-only">{tr(format!("{name}, details"), format!("{name}, détails"))}</span>
                                     </button>
                                 }
                             });
@@ -532,7 +551,7 @@ pub fn BuildSheet(
                                 aria-pressed=move || colours.with(|v| v.contains(&c)).to_string()
                                 aria-label=tr(format!("{c}, {n} Hexon cards owned"), format!("{c}, {n} cartes Hexon possédées"))
                                 on:click=move |_| toggle(c, can)>
-                                <Pip color=c />{c.to_string()}<span class="chip-n" aria-hidden="true">{n}</span>
+                                <Pip color=c />{c.to_string()}" "<span class="chip-n" aria-hidden="true">{n}</span>
                             </button>
                         }).collect_view()}
                         <button type="button" class="chip surprise" aria-pressed=move || surprise.get().is_some().to_string()
@@ -545,12 +564,14 @@ pub fn BuildSheet(
                 </fieldset>
                 <fieldset class="seg build-style">
                     <legend>{tr("Style", "Style")}</legend>
+                    <div class="seg-tray">
                     {Style::ALL.into_iter().map(|s| view! {
                         <label>
                             <input type="radio" name="build-style" prop:checked=move || style.get() == s on:change=move |_| style.set(s) />
                             {s.label()}
                         </label>
                     }).collect_view()}
+                    </div>
                     <p class="style-blurb">{move || style.get().blurb()}</p>
                 </fieldset>
                 <section class="build-preview" aria-labelledby="preview-title">

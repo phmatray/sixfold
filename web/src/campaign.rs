@@ -233,13 +233,15 @@ pub fn CampaignScreen() -> impl IntoView {
         <div class="page">
             <PageBar title=tr("Campaign", "Campagne") />
             <main class="page-body campaign">
-                <CampaignPanel back=Screen::Campaign before=|| () />
-                <div class="row">
+                // The rivals are out in the world: going there is the act, first and in brass,
+                // not under the six cards (which say who and where, but can't be played from here).
+                <div class="row campaign-go">
                     <button type="button" class="btn primary" on:click=move |_| crate::go(Screen::World)>{tr("Explore the world", "Explorer le monde")}</button>
                     {move || champ().then(|| view! {
                         <button type="button" class="btn" on:click=move |_| crate::go(Screen::Credits(false))>{tr("Watch the credits", "Voir le générique")}</button>
                     })}
                 </div>
+                <CampaignPanel back=Screen::Campaign before=|| () />
             </main>
         </div>
     }
@@ -459,7 +461,7 @@ pub fn Ladder(back: Screen, before: impl Fn() + Copy + Send + Sync + 'static) ->
                     }.into_any(),
                     _ => ().into_any(),
                 }}
-                <button type="button" class="btn primary" disabled=!playable on:click=play_daily>{tr("Play today's duel", "Jouer le duel du jour")}</button>
+                <button type="button" class="btn" class:primary=back != Screen::Campaign disabled=!playable on:click=play_daily>{tr("Play today's duel", "Jouer le duel du jour")}</button>
             </div>
         </div>
     }

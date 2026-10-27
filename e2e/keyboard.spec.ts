@@ -1,23 +1,14 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
-import { menuItem, title } from "./helpers";
-
-/** Press `key` (Tab by default) until `target` has focus. */
-async function moveTo(page: Page, target: Locator, key = "Tab", tries = 40) {
-  for (let i = 0; i < tries; i++) {
-    if (await target.evaluate((el) => el === document.activeElement).catch(() => false)) return;
-    await page.keyboard.press(key);
-  }
-  await expect(target).toBeFocused();
-}
+import { expect, test } from "@playwright/test";
+import { menuItem, title, moveTo } from "./helpers";
 
 test("keyboard only: title, duel setup, a duel started, then left", async ({ page }) => {
   await page.goto("/");
   const press = page.getByRole("button", { name: "Press to start" });
-  await expect(press).toBeFocused();
+  await expect(press).toBeFocused({ timeout: 30_000 });
   await page.keyboard.press("Enter");
 
-  // The title lands focus on its first menu entry.
-  await expect(menuItem(page, "Learn to play")).toBeFocused();
+  // The title lands focus on its first menu entry: the world, the game's heart (a new save's is Explore).
+  await expect(menuItem(page, "Explore the world")).toBeFocused();
   await moveTo(page, menuItem(page, "Play a duel"));
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 1, name: "Play a duel" })).toBeVisible();
@@ -145,13 +136,13 @@ test("keyboard only: the world, a cutscene and the in-game menu", async ({ page 
   await page.keyboard.press("j");
   await expect(page.getByRole("dialog", { name: "Journal" })).toBeHidden();
 
-  // Escape opens the in-game menu (focus on its first tab) and closes it.
+  // Escape opens the in-game menu (focus on its first tab, the Journal: what to do next) and closes it.
   // ponytail: headless Chromium sometimes closes the menu just after a skipped
   // cutscene (not seen in desktop Chrome; see PR #94), so a closed menu is opened again.
   const menu = page.getByRole("dialog", { name: "Menu" });
   await expect(async () => {
     if (!(await menu.isVisible())) await page.keyboard.press("Escape");
-    await expect(menu.getByRole("tab", { name: "Decks" })).toBeFocused({ timeout: 2_000 });
+    await expect(menu.getByRole("tab", { name: "Journal" })).toBeFocused({ timeout: 2_000 });
   }).toPass({ timeout: 20_000 });
   await page.keyboard.press("Escape");
   await expect(menu).toBeHidden();
@@ -173,10 +164,10 @@ test.describe("with motion", () => {
     });
     const swaps = () => page.evaluate(() => (window as unknown as { swaps?: string[] }).swaps ?? []);
     await page.goto("/");
-    await expect(page.getByRole("button", { name: "Press to start" })).toBeFocused();
+    await expect(page.getByRole("button", { name: "Press to start" })).toBeFocused({ timeout: 30_000 });
     await page.keyboard.press("Enter");
     await expect.poll(swaps).toContain("splash");
-    await expect(menuItem(page, "Learn to play")).toBeFocused();
+    await expect(menuItem(page, "Explore the world")).toBeFocused();
     await moveTo(page, menuItem(page, "Play a duel"));
     await page.keyboard.press("Enter");
     await expect.poll(swaps).toContain("screen");

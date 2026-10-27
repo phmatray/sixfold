@@ -73,10 +73,10 @@ pub fn KitSheet() -> impl IntoView {
                             <label class="field"><span>"Opponent"</span>
                                 <select><option>"Laid-back"</option><option selected>"Steady"</option><option>"Formidable"</option></select>
                             </label>
-                            <fieldset class="seg"><legend>"Prizes"</legend>
+                            <fieldset class="seg"><legend>"Prizes"</legend><div class="seg-tray">
                                 <label><input type="radio" name="kp" />"4"</label>
                                 <label><input type="radio" name="kp" checked />"6"</label>
-                            </fieldset>
+                            </div></fieldset>
                         </div>
                     </section>
                     <section class="kit-block">

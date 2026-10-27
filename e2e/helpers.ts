@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 /**
  * The save in slot `n` as the game stored it (`sixfold.save.<n>` in localStorage):
@@ -31,10 +31,37 @@ export async function skipSplash(page: Page) {
 export async function title(page: Page) {
   await skipSplash(page);
   await page.goto("/");
-  await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible({ timeout: 30_000 }); // the first load compiles the wasm: slower on a busy machine
 }
 
 /** A title menu entry, by its label (each entry also carries a subtitle). */
 export function menuItem(page: Page, label: string) {
   return page.getByRole("navigation", { name: "Main menu" }).getByRole("button", { name: new RegExp(`^${label}`) });
+}
+
+/**
+ * Press `key` until `target` has focus. One key, one move: after each press it waits (frame by frame,
+ * at most a second) for focus to leave where it was, so a slow frame never has two keys land on the
+ * same control, nor a key land before the app moved focus itself.
+ */
+export async function moveTo(page: Page, target: Locator, key = "Tab", tries = 60) {
+  const here = () => target.evaluate((el) => el === document.activeElement, undefined, { timeout: 2_000 }).catch(() => false);
+  for (let i = 0; i < tries; i++) {
+    if (await here()) return;
+    await page.evaluate(() => ((window as unknown as { was: Element | null }).was = document.activeElement));
+    await page.keyboard.press(key);
+    await page
+      .waitForFunction(() => document.activeElement !== (window as unknown as { was: Element | null }).was, null, { polling: "raf", timeout: 1_000 })
+      .catch(() => {});
+  }
+  await expect(target).toBeFocused();
+}
+
+/**
+ * Two frames drawn: the page's main thread is free again. On CI's software GL the first frames
+ * after a warp or a map build compile shaders and can hold the thread for many seconds, and a
+ * click sent then times out waiting for the page; wait for the frames (on the test's clock) first.
+ */
+export async function frames(page: Page) {
+  await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
 }
