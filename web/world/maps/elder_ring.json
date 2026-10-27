@@ -2055,12 +2055,12 @@
         {
           "if": "lost:bramble",
           "lines": [
-            "Ha, tangled up! Happens to everyone the first time.",
-            "Catch your breath and come try again."
+            "Tangled up this time. It happens to the best of us.",
+            "The seal stays right here, and the Deepgrove's duelists you've bested still count. Come back whenever you like."
           ],
           "lines_fr": [
-            "Ha, pris dans les ronces ! Ça arrive à tout le monde, la première fois.",
-            "Reprends ton souffle et reviens tenter ta chance."
+            "Emmêlé, cette fois. Ça arrive aux meilleurs.",
+            "Le sceau reste ici, et les duellistes du Bois-Profond que tu as battus comptent toujours. Reviens quand tu veux."
           ]
         },
         {

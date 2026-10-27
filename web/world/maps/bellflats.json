@@ -4238,10 +4238,12 @@
         {
           "if": "lost:marlo",
           "lines": [
-            "Low tide for you today. The water always comes back in."
+            "Low tide for you today. It always comes back in.",
+            "The seal will wait on the flats, and the Saltreach's duelists you've bested still count."
           ],
           "lines_fr": [
-            "Marée basse pour toi aujourd'hui. Mais la mer finit toujours par remonter."
+            "Marée basse pour toi aujourd'hui. Elle finit toujours par remonter.",
+            "Le sceau attendra sur l'estran, et les duellistes de la Côte Salée que tu as battus comptent toujours."
           ]
         },
         {

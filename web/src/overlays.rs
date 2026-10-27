@@ -571,6 +571,14 @@ pub fn GameOver() -> impl IntoView {
                                             <span>{tr("Every seal, and the champion's title.", "Tous les sceaux, et le titre de champion.")}</span>
                                         }.into_any(),
                                         (true, ..) => view! { <b>{tr("Rematch won", "Revanche gagnée")}</b> }.into_any(),
+                                        // A seal duel lost (#153): the challenge stands, and so does the threshold.
+                                        _ if ctl.seal().is_some_and(|s| !s.grand) => view! {
+                                            <b>{tr("No seal this time", "Pas de sceau cette fois")}</b>
+                                            <span>{tr(
+                                                format!("{} will duel you again whenever you're ready. The duelists you've bested still count.", r.name),
+                                                format!("{} vous affrontera de nouveau quand vous voudrez. Les duellistes que vous avez battus comptent toujours.", r.name),
+                                            )}</span>
+                                        }.into_any(),
                                         _ => view! {
                                             <b>{tr("No seal this time", "Pas de sceau cette fois")}</b>
                                             <span>{tr(format!("Talk to {} again for a rematch.", r.name), format!("Reparlez à {} pour une revanche.", r.name))}</span>

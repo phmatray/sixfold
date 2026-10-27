@@ -2148,10 +2148,12 @@
         {
           "if": "lost:orla",
           "lines": [
-            "Solid stone stays solid. Come back with a sharper pick."
+            "Good swings. The rock just held, this time.",
+            "The seal stays in the stone, and the Stonebacks' duelists you've bested still count. Come back with a sharper pick."
           ],
           "lines_fr": [
-            "La pierre dure reste dure. Reviens avec une pioche mieux affûtée."
+            "Bons coups. La roche a juste tenu, cette fois.",
+            "Le sceau reste dans la pierre, et les duellistes des Échines de Pierre que tu as battus comptent toujours. Reviens avec une pioche plus affûtée."
           ]
         },
         {

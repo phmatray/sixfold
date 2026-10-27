@@ -1059,10 +1059,12 @@
         {
           "if": "lost:quill",
           "lines": [
-            "Clear skies for me today. Check the forecast and come back."
+            "A close one. I'm writing it down as a squall, not a rout.",
+            "The seal stays on the spire, and the Galewold's duelists you've bested still count. Come back for the next page."
           ],
           "lines_fr": [
-            "Ciel dégagé pour moi aujourd'hui. Consulte la météo et reviens."
+            "C'était serré. Je le note comme une bourrasque, pas une déroute.",
+            "Le sceau reste sur la flèche, et les duellistes des Hautes-Rafales que tu as battus comptent toujours. Reviens pour la page suivante."
           ]
         },
         {

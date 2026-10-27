@@ -5004,10 +5004,12 @@
         {
           "if": "lost:cinza",
           "lines": [
-            "Too slow! The road's still warm, come race me again."
+            "You kept pace longer than most. Catch your breath.",
+            "The seal isn't going anywhere, and the Emberlands' duelists you've bested still count. Race me again when you're ready."
           ],
           "lines_fr": [
-            "Pas assez vite ! La route est encore chaude, reviens faire la course."
+            "Tu as tenu le rythme plus longtemps que la plupart. Reprends ton souffle.",
+            "Le sceau ne bouge pas d'ici, et les duellistes des Braisières que tu as battus comptent toujours. Reviens me défier quand tu veux."
           ]
         },
         {
