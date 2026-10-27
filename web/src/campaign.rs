@@ -210,7 +210,8 @@ pub fn Roster() -> impl IntoView {
                         "earning" => {
                             let (n, line) = progress.with(|p| (r.bested(p), r.bested_line(p)));
                             view! {
-                                <span class="ch-temper" aria-hidden="true">
+                                // The challenge sheet's own pips, in the region's colour (#155), never the Temper's.
+                                <span class=format!("ch-earn t-{}", r.colors.first().map_or("colorless", |&c| color_key(c))) aria-hidden="true">
                                     {(0..r.earn).map(|i| view! { <i class:on=i < n></i> }).collect_view()}
                                 </span>
                                 {line}
