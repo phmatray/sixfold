@@ -374,9 +374,36 @@ Play once with a new save and once with an advanced save.
 composition, secrets, environmental storytelling, life and circulation. Every other region is then brought to
 its standard. The plan is in `docs/ROADMAP.md` (1.10 to 1.14).
 
+### Fernhollow Trail, as built — *tel que construit*
+
+The paper map, the screenshots, the five-pass log and the A–J table are in the PR (#112). What to copy from it:
+
+| Rule | How Fernhollow does it |
+|---|---|
+| An intention per screen | The stream is the spine. The ranger's side (east) holds the arrival, the standing tree's plaza, the lodge yard, the hives and the lookout. The old grove (west) holds the fork, Wick's camp, the glades and the Rootholm approach. |
+| One landmark, staged | The standing tree (`landmark: true`) stands over the plaza you arrive on, with glow at its foot by night. You can read it (E). |
+| Three levels of discovery | The obvious destination is the lodge. The side places (`poi: secondary`) are the lookout, the hives, Wick's camp and the reed bed. The secrets (`poi: secret`, with `clue` tiles) are a hedge break with trodden ground in front of it, leading to a hidden glade, and the moonflower glade's find, there only by night. |
+| A loop | A goat track round the hive meadow: the road, the lookout, the hives, the lodge yard. |
+| A permanent shortcut that tells its own story | The old road runs straight from Rootholm to the narrows, where its bridge went out. A sign says so; the rangers' plank lies on the far bank, seen first from the east, out of reach. From the west bank, E at the water lowers it (`flag:fern_shortcut`, gate `fern_plank`), and it stays down. Measured, it saves 12 tiles back to the meadow and 22 to the lodge door. The road meanwhile goes round by a new bridge. |
+| Groves, not bands | Broad trees (2 × 2) mixed with pines, birches and undergrowth in masses, open clearings between. Nothing tall in the two rows south of a path, or beside a diagonal one. Nothing tall in front of anything you use. |
+| Transitions | Moss and dark undergrowth over the last 6 tiles to Rootholm (`paint` "s" with `ground.sand: "moss"`); flowers, broad trees and birches toward the meadow. |
+| Life by the hour | Fennel walks a `route` by day, sits on Wick's bench at dusk (a `time:dusk` twin), and is indoors at night, where the lodge window is lit. Bryn and Hazel go home at night, and Vesper comes out. The `look` loops have different lengths. |
+| Night | No street lamp; one lantern with a `why` (the lodge door). Glow mushrooms mark the junctions, the standing tree and the plank's bank. |
+
+Its report (`--report`) is the reference for a forest route:
+
+- 1 landmark, 4 secondary POIs and 2 secrets, each with a clue;
+- the longest walk without a discovery is under 4 s;
+- no crossroads over 3 ways;
+- a density cv about 0.3.
+
+On the phone at night with the CPU slowed 4×, a frame takes 16.7 ms.
+
+One advisory remains: the scatter ratio is about 1.25. Clark–Evans counts props as points on a grid, and a route that is mostly forest can't stay under 1.1 with more than about 430 props, however clumped its groves are.
+
 | Region | Maps | Issue | Status |
 |---|---|---|---|
-| Grove (reference) | `woodland` | #112 | planned |
+| Grove (reference) | `woodland` | #112 | done: `level_design: 2` |
 | Hub and Grove | `overworld`, `square`, `rootholm`, `elder_ring` | #119 | planned |
 | Ember and Stone | `quarry`, `cinderwick`, `kilnmouth`, `undermine`, `screepass`, `anvilstead`, `bastion` | #120 | planned |
 | Tide and Storm | `seaside`, `gullhaven`, `bellflats`, `downs`, `stormwatch`, `rodspire` | #121 | planned |
