@@ -1302,14 +1302,14 @@ dependencies = [
 
 [[package]]
 name = "sixfold-engine"
-version = "1.9.0"
+version = "1.9.1"
 dependencies = [
  "serde_json",
 ]
 
 [[package]]
 name = "sixfold-web"
-version = "1.9.0"
+version = "1.9.1"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",
