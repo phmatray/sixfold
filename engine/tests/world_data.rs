@@ -99,6 +99,10 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
             if let Some(c) = b["if"].as_str() {
                 cond(&format!("{at}.dialogue[{i}].if"), c, bad);
             }
+            // `more`: the branch leads into the next that holds (Progress::pick_chain).
+            if !b["more"].is_null() && !b["more"].is_boolean() {
+                bad.push(format!("{at}.dialogue[{i}].more: true or false"));
+            }
             for e in strs(&b["do"]) {
                 effect(&format!("{at}.dialogue[{i}].do"), e, bad);
             }
@@ -958,6 +962,28 @@ fn keepers_ask_for_some_of_their_regions_duelists() {
                 let last = d[key].as_array().unwrap().last().unwrap().as_str().unwrap();
                 assert!(last.contains(word), "{} at {k} bested says {last:?}", r.id);
             }
+        }
+        // Audit 1.10: a keeper who wants seals is never promised on duelists alone. Every
+        // branch that counts them, or says the duel is earned, also asks `open:`, and
+        // someone says the seals come first.
+        if r.needs > 0 {
+            let (open, shut) = (format!("open:{}", r.id), format!("!open:{}", r.id));
+            let earned = format!("earned:{}", r.id);
+            for c in &conds {
+                let promises = c
+                    .split(" & ")
+                    .any(|t| t.starts_with(prefix.as_str()) || t == earned);
+                assert!(
+                    !promises || c.split(" & ").any(|t| t == open),
+                    "{}: {c:?} promises a duel the seals still block",
+                    r.id
+                );
+            }
+            assert!(
+                conds.iter().any(|c| c.split(" & ").any(|t| t == shut)),
+                "no one by {} says the seals come first",
+                r.id
+            );
         }
         let says = (0..r.earn)
             .map(|k| format!("bested:{}:{k}", r.id))

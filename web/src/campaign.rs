@@ -193,18 +193,25 @@ pub fn Roster() -> impl IntoView {
             </div>
             <ol class="rivals">
                 {RIVALS.iter().map(|r| {
+                    // "earning": the seals are met, their region's duelists not yet (#150): never
+                    // in the brass of "Ready to duel".
                     let state = move || progress.with(|p| {
-                        if r.beaten(p) { "beaten" } else if r.open(p) { "open" } else { "locked" }
+                        if r.beaten(p) { "beaten" } else if !r.open(p) { "locked" } else if r.earned(p) { "open" } else { "earning" }
                     });
                     let status = move || match state() {
-                        "beaten" if !r.seal => tr("Champion beaten", "Victoire, titre obtenu").to_string(),
-                        "beaten" => tr("Beaten, seal earned", "Victoire, sceau obtenu").to_string(),
-                        "open" if !progress.with(|p| r.earned(p)) => {
-                            let n = progress.with(|p| r.bested(p));
-                            tr(format!("Duelists bested: {n} of {}", r.earn), format!("Duellistes battus : {n} sur {}", r.earn))
+                        "beaten" if !r.seal => tr("Champion beaten", "Victoire, titre obtenu").into_any(),
+                        "beaten" => tr("Beaten, seal earned", "Victoire, sceau obtenu").into_any(),
+                        "earning" => {
+                            let (n, line) = progress.with(|p| (r.bested(p), r.bested_line(p)));
+                            view! {
+                                <span class="ch-temper" aria-hidden="true">
+                                    {(0..r.earn).map(|i| view! { <i class:on=i < n></i> }).collect_view()}
+                                </span>
+                                {line}
+                            }.into_any()
                         }
-                        "open" => tr("Ready to duel", "Disponible pour un duel").to_string(),
-                        _ => tr(format!("Locked: needs {} seals", r.needs), format!("Verrouillé : il faut {}", seals_n(r.needs))),
+                        "open" => tr("Ready to duel", "Disponible pour un duel").into_any(),
+                        _ => tr(format!("Locked: needs {} seals", r.needs), format!("Verrouillé : il faut {}", seals_n(r.needs))).into_any(),
                     };
                     view! {
                         <li class=move || format!("rival {}", state()) class:champion=!r.seal>

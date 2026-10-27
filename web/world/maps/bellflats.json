@@ -4136,54 +4136,50 @@
       "hair": "#d9d2c4",
       "dialogue": [
         {
-          "if": "!beat:marlo & open:marlo & earned:marlo",
+          "if": "!beat:marlo & !flag:talked_gilda",
+          "more": true,
           "lines": [
             "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
-            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
-            "I rang the bell for you: the whole Saltreach heard. Marlo's waiting by the stone."
+            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables."
           ],
           "lines_fr": [
             "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
-            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées.",
+            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées."
+          ]
+        },
+        {
+          "if": "!beat:marlo & open:marlo & earned:marlo",
+          "lines": [
+            "I rang the bell for you: the whole Saltreach heard. Marlo's waiting by the stone."
+          ],
+          "lines_fr": [
             "J'ai sonné la cloche pour toi : toute la Côte Salée l'a entendue. Marlo t'attend près de la pierre."
           ]
         },
         {
-          "if": "!beat:marlo & !earned:marlo & bested:marlo:2",
+          "if": "!beat:marlo & open:marlo & !earned:marlo & bested:marlo:2",
           "lines": [
-            "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
-            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
             "Marlo won't sit down across from a stranger. Beat one more duelist of the Saltreach and I'll ring you over."
           ],
           "lines_fr": [
-            "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
-            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées.",
             "Marlo ne s'assoit pas en face d'un inconnu. Bats encore un duelliste de la Côte Salée et je sonnerai pour toi."
           ]
         },
         {
-          "if": "!beat:marlo & !earned:marlo & bested:marlo:1",
+          "if": "!beat:marlo & open:marlo & !earned:marlo & bested:marlo:1",
           "lines": [
-            "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
-            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
             "Marlo won't sit down across from a stranger. Beat two more duelists of the Saltreach and I'll ring you over."
           ],
           "lines_fr": [
-            "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
-            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées.",
             "Marlo ne s'assoit pas en face d'un inconnu. Bats encore deux duellistes de la Côte Salée et je sonnerai pour toi."
           ]
         },
         {
-          "if": "!beat:marlo & !earned:marlo & bested:marlo:0",
+          "if": "!beat:marlo & open:marlo & !earned:marlo & bested:marlo:0",
           "lines": [
-            "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
-            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
             "Marlo won't sit down across from a stranger. Beat three more duelists of the Saltreach and I'll ring you over."
           ],
           "lines_fr": [
-            "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
-            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées.",
             "Marlo ne s'assoit pas en face d'un inconnu. Bats encore trois duellistes de la Côte Salée et je sonnerai pour toi."
           ]
         },

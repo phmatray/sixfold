@@ -207,6 +207,29 @@ fn lower_first(s: &str) -> String {
 }
 
 impl Objective {
+    /// The same step in a few words, for the title's "next:": "Tobin's
+    /// lesson", "Marlo", or while a keeper's duel is still to earn "1 more
+    /// Saltreach duelist for Marlo". None once champion (the Journal has it).
+    pub fn short(&self, p: &Progress) -> Option<String> {
+        match self {
+            Objective::Lesson => Some(tr("Tobin's lesson", "la leçon de Tobin").into()),
+            Objective::Rival(r) if r.open(p) && r.to_best(p) > 0 => {
+                let k = r.to_best(p);
+                let s = if k == 1 { "" } else { "s" };
+                Some(tr(
+                    format!(
+                        "{k} more {} duelist{s} for {}",
+                        r.region.en.trim_start_matches("the "),
+                        r.name
+                    ),
+                    format!("encore {k} duelliste{s} {} pour {}", r.region_de(), r.name),
+                ))
+            }
+            Objective::Rival(r) => Some(r.name.into()),
+            _ => None,
+        }
+    }
+
     /// The Journal's line, in the current language.
     pub fn text(&self, p: &Progress) -> String {
         match self {
@@ -404,6 +427,60 @@ mod tests {
             fr.starts_with("Battez encore 3 duellistes des Échines de Pierre pour mériter le défi d'Orla (0 sur 3)."),
             "{fr}"
         );
+    }
+
+    /// The title's hint and the roster say what the Journal says (audit 1.10):
+    /// a keeper still to earn is never named as if they would duel.
+    #[test]
+    fn the_short_step_and_the_roster_count_agree_with_the_journal() {
+        use crate::lang::{set_lang, Lang};
+        assert_eq!(
+            objective(&Progress::default())
+                .short(&Progress::default())
+                .as_deref(),
+            Some("Tobin's lesson")
+        );
+        let p = with(&[
+            "flag:beat_t_tobin",
+            "flag:beat_bramble",
+            "flag:beat_t_pell",
+            "flag:beat_t_nell",
+        ]);
+        let marlo = rival("marlo").unwrap();
+        assert_eq!(
+            objective(&p).short(&p).as_deref(),
+            Some("1 more Saltreach duelist for Marlo")
+        );
+        assert_eq!(marlo.bested_line(&p), "Saltreach duelists bested: 2 of 3");
+        set_lang(Lang::Fr);
+        let fr = objective(&p).short(&p);
+        let line = marlo.bested_line(&p);
+        let none = with(&["flag:beat_t_tobin", "flag:beat_bramble"]);
+        let fr_none = objective(&none).short(&none);
+        set_lang(Lang::En);
+        assert_eq!(
+            fr.as_deref(),
+            Some("encore 1 duelliste de la Côte Salée pour Marlo")
+        );
+        assert_eq!(line, "Duellistes de la Côte Salée battus\u{a0}: 2 sur 3");
+        assert_eq!(
+            fr_none.as_deref(),
+            Some("encore 3 duellistes de la Côte Salée pour Marlo")
+        );
+        // The Journal's count and the short one are the same number.
+        assert!(objective(&p).text(&p).starts_with("Beat 1 more duelist"));
+        // Earned: just the name, as before.
+        let p = with(&[
+            "flag:beat_t_tobin",
+            "flag:beat_bramble",
+            "flag:beat_t_pell",
+            "flag:beat_t_nell",
+            "flag:beat_t_skye",
+        ]);
+        assert_eq!(objective(&p).short(&p).as_deref(), Some("Marlo"));
+        assert_eq!(marlo.to_best(&p), 0);
+        let champ = with(&[&ALL_SEALS[..], &["flag:beat_warden"]].concat());
+        assert_eq!(objective(&champ).short(&champ), None);
     }
 
     #[test]

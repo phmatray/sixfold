@@ -4760,6 +4760,56 @@
       "hair": "#e8e0d6",
       "dialogue": [
         {
+          "if": "!beat:cinza & !flag:talked_edda",
+          "more": true,
+          "lines": [
+            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
+            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
+            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
+          ],
+          "lines_fr": [
+            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
+            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
+            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
+          ]
+        },
+        {
+          "if": "!beat:cinza & open:cinza & earned:cinza",
+          "lines": [
+            "The vents have been gossiping: the Emberlands' duelists have had their fill of you. Cinza's waiting by the stone."
+          ],
+          "lines_fr": [
+            "Les évents bavardent : les duellistes des Braisières en ont assez de toi. Cinza t'attend près de la pierre."
+          ]
+        },
+        {
+          "if": "!beat:cinza & open:cinza & !earned:cinza & bested:cinza:2",
+          "lines": [
+            "Cinza won't race just anyone. Beat one more duelist of the Emberlands and she'll meet you by the stone."
+          ],
+          "lines_fr": [
+            "Cinza ne fait pas la course avec n'importe qui. Bats encore un duelliste des Braisières et elle t'attendra près de la pierre."
+          ]
+        },
+        {
+          "if": "!beat:cinza & open:cinza & !earned:cinza & bested:cinza:1",
+          "lines": [
+            "Cinza won't race just anyone. Beat two more duelists of the Emberlands and she'll meet you by the stone."
+          ],
+          "lines_fr": [
+            "Cinza ne fait pas la course avec n'importe qui. Bats encore deux duellistes des Braisières et elle t'attendra près de la pierre."
+          ]
+        },
+        {
+          "if": "!beat:cinza & open:cinza & !earned:cinza & bested:cinza:0",
+          "lines": [
+            "Cinza won't race just anyone. Beat three more duelists of the Emberlands and she'll meet you by the stone."
+          ],
+          "lines_fr": [
+            "Cinza ne fait pas la course avec n'importe qui. Bats encore trois duellistes des Braisières et elle t'attendra près de la pierre."
+          ]
+        },
+        {
           "if": "!time:day & !time:dawn",
           "lines": [
             "Hear that? Nothing. The vents are asleep. Go on: the high terrace is yours till dawn.",
@@ -4768,66 +4818,6 @@
           "lines_fr": [
             "Tu entends ? Rien. Les évents dorment. Vas-y : la haute terrasse est à toi jusqu'à l'aube.",
             "Vela est sur le rebord nord, si tu cherches les ennuis. Elle, elle les cherche toujours."
-          ]
-        },
-        {
-          "if": "!beat:cinza & open:cinza & earned:cinza",
-          "lines": [
-            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
-            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
-            "The vents have been gossiping: the Emberlands' duelists have had their fill of you. Cinza's waiting by the stone."
-          ],
-          "lines_fr": [
-            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
-            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
-            "Les évents bavardent : les duellistes des Braisières en ont assez de toi. Cinza t'attend près de la pierre."
-          ]
-        },
-        {
-          "if": "!beat:cinza & !earned:cinza & bested:cinza:2",
-          "lines": [
-            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
-            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
-            "Cinza won't race just anyone. Beat one more duelist of the Emberlands and she'll meet you by the stone."
-          ],
-          "lines_fr": [
-            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
-            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
-            "Cinza ne fait pas la course avec n'importe qui. Bats encore un duelliste des Braisières et elle t'attendra près de la pierre."
-          ]
-        },
-        {
-          "if": "!beat:cinza & !earned:cinza & bested:cinza:1",
-          "lines": [
-            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
-            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
-            "Cinza won't race just anyone. Beat two more duelists of the Emberlands and she'll meet you by the stone."
-          ],
-          "lines_fr": [
-            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
-            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
-            "Cinza ne fait pas la course avec n'importe qui. Bats encore deux duellistes des Braisières et elle t'attendra près de la pierre."
-          ]
-        },
-        {
-          "if": "!beat:cinza & !earned:cinza & bested:cinza:0",
-          "lines": [
-            "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
-            "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
-            "Cinza won't race just anyone. Beat three more duelists of the Emberlands and she'll meet you by the stone."
-          ],
-          "lines_fr": [
-            "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
-            "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
-            "Cinza ne fait pas la course avec n'importe qui. Bats encore trois duellistes des Braisières et elle t'attendra près de la pierre."
           ]
         },
         {

@@ -3341,6 +3341,9 @@
             "Chut… non, envolé. Un martin-pêcheur, je crois. Sans ma longue-vue, tout est flou.",
             "Je l'ai perdue à la Carrière de Pas-de-Braise, au nord du pré, en guettant les faucons sur la haute corniche.",
             "Si tu passes par là, tu ouvres l'œil ? Elle brille."
+          ],
+          "do": [
+            "flag:talked_fennel"
           ]
         }
       ],

@@ -932,77 +932,70 @@
           ]
         },
         {
-          "if": "!beat:quill & open:quill & earned:quill",
+          "if": "!beat:quill & !flag:talked_nils",
+          "more": true,
           "lines": [
             "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
             "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works.",
-            "Word came down the wire: the Galewold's duelists know your name now. Quill's ready to write you up."
+            "Nicely never works."
           ],
           "lines_fr": [
             "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
             "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais.",
-            "La nouvelle est descendue par le câble : les duellistes des Hautes-Rafales connaissent ton nom. Quill est prêt à te consigner."
+            "Poliment, ça ne marche jamais."
           ]
         },
         {
-          "if": "!beat:quill & !earned:quill & bested:quill:3",
+          "if": "!beat:quill & !open:quill",
           "lines": [
-            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
-            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works.",
+            "Quill won't write up anyone carrying fewer than three seals. Come back with them."
+          ],
+          "lines_fr": [
+            "Quill ne consigne personne qui porte moins de trois sceaux. Reviens quand tu les auras."
+          ]
+        },
+        {
+          "if": "!beat:quill & open:quill & earned:quill",
+          "lines": [
+            "Word came down the wire: the Galewold's duelists know your name now. Quill's ready to write you up: throw the three pylon switches and ride the lift."
+          ],
+          "lines_fr": [
+            "La nouvelle est descendue par le câble : les duellistes des Hautes-Rafales connaissent ton nom. Quill est prêt à te consigner : baisse les trois leviers des pylônes et prends l'ascenseur."
+          ]
+        },
+        {
+          "if": "!beat:quill & open:quill & !earned:quill & bested:quill:3",
+          "lines": [
             "Quill only writes up duels against someone with a record. Beat one more duelist of the Galewold first."
           ],
           "lines_fr": [
-            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
-            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais.",
             "Quill ne raconte que les duels contre quelqu'un qui a fait ses preuves. Bats encore un duelliste des Hautes-Rafales d'abord."
           ]
         },
         {
-          "if": "!beat:quill & !earned:quill & bested:quill:2",
+          "if": "!beat:quill & open:quill & !earned:quill & bested:quill:2",
           "lines": [
-            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
-            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works.",
             "Quill only writes up duels against someone with a record. Beat two more duelists of the Galewold first."
           ],
           "lines_fr": [
-            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
-            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais.",
             "Quill ne raconte que les duels contre quelqu'un qui a fait ses preuves. Bats encore deux duellistes des Hautes-Rafales d'abord."
           ]
         },
         {
-          "if": "!beat:quill & !earned:quill & bested:quill:1",
+          "if": "!beat:quill & open:quill & !earned:quill & bested:quill:1",
           "lines": [
-            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
-            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works.",
             "Quill only writes up duels against someone with a record. Beat three more duelists of the Galewold first."
           ],
           "lines_fr": [
-            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
-            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais.",
             "Quill ne raconte que les duels contre quelqu'un qui a fait ses preuves. Bats encore trois duellistes des Hautes-Rafales d'abord."
           ]
         },
         {
-          "if": "!beat:quill & !earned:quill & bested:quill:0",
+          "if": "!beat:quill & open:quill & !earned:quill & bested:quill:0",
           "lines": [
-            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
-            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works.",
             "Quill only writes up duels against someone with a record. Beat four more duelists of the Galewold first."
           ],
           "lines_fr": [
-            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
-            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais.",
             "Quill ne raconte que les duels contre quelqu'un qui a fait ses preuves. Bats encore quatre duellistes des Hautes-Rafales d'abord."
           ]
         },

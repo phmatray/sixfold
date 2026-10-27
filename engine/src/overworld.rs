@@ -651,6 +651,25 @@ impl Progress {
         conds.into_iter().position(|c| self.check(c))
     }
 
+    /// The branches a talk says, in order: each one whose condition holds, up
+    /// to and including the first that isn't marked `more` (a `more` branch,
+    /// such as a first meeting's introduction, leads into the next that holds).
+    pub fn pick_chain<'a>(
+        &self,
+        branches: impl IntoIterator<Item = (&'a str, bool)>,
+    ) -> Vec<usize> {
+        let mut said = vec![];
+        for (i, (cond, more)) in branches.into_iter().enumerate() {
+            if self.check(cond) {
+                said.push(i);
+                if !more {
+                    break;
+                }
+            }
+        }
+        said
+    }
+
     /// Compact save string, stable across runs (sorted).
     pub fn encode(&self) -> String {
         let items = self.items.iter().map(|i| format!("i:{i}"));
@@ -810,6 +829,26 @@ mod tests {
         p.apply("give:running_shoes").unwrap();
         assert_eq!(p.pick(branches), Some(1));
         assert_eq!(p.pick(["flag:nope"]), None);
+    }
+
+    #[test]
+    fn a_more_branch_leads_into_the_next_that_holds() {
+        let mut p = Progress::default();
+        let branches = [
+            ("!flag:talked_kessa", true),
+            ("flag:nope", false),
+            ("", false),
+            ("", false),
+        ];
+        assert_eq!(p.pick_chain(branches), [0, 2]);
+        p.apply("flag:talked_kessa").unwrap();
+        assert_eq!(p.pick_chain(branches), [2]);
+        assert_eq!(
+            p.pick_chain([("", true)]),
+            [0],
+            "a lone introduction still plays"
+        );
+        assert!(p.pick_chain([("flag:nope", false)]).is_empty());
     }
 
     #[test]

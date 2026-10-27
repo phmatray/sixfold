@@ -407,9 +407,11 @@ fn item_info(id: &str) -> (String, &'static str, &'static str) {
     }
 }
 
-/// One dialogue branch from the map JSON: shown when `cond` holds.
+/// One dialogue branch from the map JSON: shown when `cond` holds; a `more`
+/// branch leads into the next one that holds ([`Progress::pick_chain`]).
 struct Branch {
     cond: String,
+    more: bool,
     lines: Vec<String>,
     effects: Vec<String>,
 }
@@ -434,6 +436,7 @@ fn parse_talk(json: &str) -> Option<(String, Vec<Branch>)> {
         .iter()
         .map(|b| Branch {
             cond: field(&b, "if").as_string().unwrap_or_default(),
+            more: field(&b, "more").as_bool().unwrap_or(false),
             lines: strings(field(&b, "lines")),
             effects: strings(field(&b, "do")),
         })
@@ -660,6 +663,20 @@ fn prompt_label(kind: &str, text: &str) -> String {
         "warp" | "lift" | "seat" | "stand" => text.to_string(),
         "duel" => tr("Play a duel", "Jouer un duel").into(),
         "locked" => tr("Try the door", "Essayer la porte").into(),
+        "sign" | "find" | "gate" if !text.is_empty() => {
+            // "The rangers' plank" → "the rangers' plank"; a name that starts with a
+            // possessive ("Gorse's workshop") keeps its capital.
+            let first = text.split(' ').next().unwrap_or("");
+            let name = if first.ends_with("'s") || first.ends_with("s'") {
+                text.to_string()
+            } else {
+                let mut c = text.chars();
+                c.next()
+                    .map(|f| f.to_lowercase().chain(c).collect())
+                    .unwrap_or_default()
+            };
+            tr(format!("Look at {name}"), format!("Regarder {name}"))
+        }
         "gate" => tr("Look at the way", "Examiner le passage").into(),
         "book" => books::book(text).map_or_else(
             || tr("Read", "Lire").into(),
@@ -732,18 +749,29 @@ pub fn WorldScreen() -> impl IntoView {
             leptos::logging::warn!("world: bad dialogue for {id}");
             return;
         };
-        let pick = progress.with_untracked(|p| p.pick(branches.iter().map(|b| b.cond.as_str())));
-        let Some(b) = pick.and_then(|i| branches.into_iter().nth(i)) else {
+        let said = progress
+            .with_untracked(|p| p.pick_chain(branches.iter().map(|b| (b.cond.as_str(), b.more))));
+        if said.is_empty() {
             return;
-        };
+        }
+        let (mut lines, mut effects) = (vec![], vec![]);
+        for b in branches
+            .into_iter()
+            .enumerate()
+            .filter(|(i, _)| said.contains(i))
+            .map(|(_, b)| b)
+        {
+            lines.extend(b.lines);
+            effects.extend(b.effects);
+        }
         typed.set(0);
         sheet.set(Some(Sheet::Talk(Talk {
             face: face_of(&id),
             fade: false,
             id,
             name,
-            lines: b.lines,
-            effects: b.effects,
+            lines,
+            effects,
             at: 0,
             script: false,
         })));
@@ -1605,6 +1633,8 @@ pub fn WorldScreen() -> impl IntoView {
                         let more = t.at + 1 < t.lines.len();
                         // The hero's own lines (a sign, a thought) carry no name plate.
                         let named = !t.name.is_empty();
+                        // The placeholder's monogram while the bust bakes.
+                        let initial: String = t.name.chars().take(1).collect();
                         let script = t.script;
                         view! {
                             // Described by the live line, so the first line is read on focus (later ones as they come).
@@ -1612,10 +1642,10 @@ pub fn WorldScreen() -> impl IntoView {
                                 // The face slides in with the first line only; a bust still baking is
                                 // a placeholder, and the bust fades in over it.
                                 {t.face.clone().map(|src| if src == BUST_PENDING {
-                                    view! { <span class="talk-face" class:enter=t.at == 0 aria-hidden="true"></span> }.into_any()
+                                    view! { <span class="talk-face" class:enter=t.at == 0 aria-hidden="true">{initial.clone()}</span> }.into_any()
                                 } else {
                                     view! {
-                                        {t.fade.then(|| view! { <span class="talk-face" aria-hidden="true"></span> })}
+                                        {t.fade.then(|| view! { <span class="talk-face" aria-hidden="true">{initial.clone()}</span> })}
                                         <img class="talk-face" class:enter=t.at == 0 && !t.fade class:bust-in=t.fade src=src alt="" width="96" height="96" />
                                     }.into_any()
                                 })}

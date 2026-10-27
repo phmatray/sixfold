@@ -121,6 +121,26 @@ impl Rival {
         self.open(p) && self.earned(p)
     }
 
+    /// Their region's duelists still to best before they accept (0 once earned).
+    pub fn to_best(&self, p: &Progress) -> usize {
+        if self.earned(p) {
+            0
+        } else {
+            self.earn.saturating_sub(self.bested(p))
+        }
+    }
+
+    /// The roster's count while the duel is still to earn, naming the region:
+    /// "Saltreach duelists bested: 2 of 3".
+    pub fn bested_line(&self, p: &Progress) -> String {
+        let (n, of) = (self.bested(p), self.earn);
+        let region = self.region.en.trim_start_matches("the ");
+        crate::tr(
+            format!("{region} duelists bested: {n} of {of}"),
+            format!("Duellistes {} battus\u{a0}: {n} sur {of}", self.region_de()),
+        )
+    }
+
     /// The region after French "de": "de la Côte Salée", "du Bois-Profond",
     /// "des Braisières".
     pub fn region_de(&self) -> String {
