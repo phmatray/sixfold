@@ -12,7 +12,8 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 use sixfold_engine::ai::{Ai, Difficulty, Style};
-use sixfold_engine::campaign::{self, RivalLines};
+use sixfold_engine::campaign::{self, RivalLines, SealDuel};
+use sixfold_engine::overworld::Progress;
 use sixfold_engine::tutorial;
 use sixfold_engine::{
     card, fr, summarise_turn, tr, Action, CardId, Config, Event, Game, PromptKind,
@@ -241,6 +242,11 @@ pub struct Ctl {
     counter: StoredValue<u32>,
     /// The finished match's result hasn't been rewarded yet.
     unrewarded: StoredValue<bool>,
+    /// The seal (or the champion's title) this match is for, if any.
+    seal: RwSignal<Option<SealDuel>>,
+    /// The seal duel's title card is up: the playback waits for [`Ctl::begin`].
+    pub card: RwSignal<bool>,
+    progress: Option<RwSignal<Progress>>,
     reduced_motion: bool,
 }
 
@@ -284,6 +290,9 @@ impl Ctl {
             generation: StoredValue::new(0),
             counter: StoredValue::new(0),
             unrewarded: StoredValue::new(false),
+            seal: RwSignal::new(None),
+            card: RwSignal::new(false),
+            progress: use_context::<RwSignal<Progress>>(),
             reduced_motion,
         }
     }
@@ -325,6 +334,10 @@ impl Ctl {
             Ai::new(seed ^ 0x5eed_0a11, setup.difficulty).with_style(setup.style),
         ));
         crate::audio::duel_theme(&setup);
+        // From the progress now, so a rematch after the win is a plain duel.
+        let seal = self
+            .progress
+            .and_then(|p| p.with_untracked(|p| campaign::seal_duel(setup.opponent, p)));
         self.setup.set_value(Some(setup));
         self.log.set(vec![]);
         self.turn_side.set(None);
@@ -346,8 +359,32 @@ impl Ctl {
         self.shown.set(Some(game));
         self.queue.set_value(events.into());
         crate::audio::music("duel");
-        self.step(self.generation.get_value());
+        self.seal.set(seal);
+        self.card.set(seal.is_some());
+        match seal {
+            // The title card holds the opening until it is dismissed.
+            Some(s) => self.announce.set(format!(
+                "{}. {}, {}.",
+                s.heading(),
+                s.rival.name,
+                s.rival.title
+            )),
+            None => self.step(self.generation.get_value()),
+        }
         true
+    }
+
+    /// The seal this match is for, if any.
+    pub fn seal(&self) -> Option<SealDuel> {
+        self.seal.get()
+    }
+
+    /// The title card is done: the duel begins (once).
+    pub fn begin(&self) {
+        if self.card.get_untracked() {
+            self.card.set(false);
+            self.step(self.generation.get_value());
+        }
     }
 
     /// True once per match: whoever shows its result grants the reward.
@@ -362,6 +399,7 @@ impl Ctl {
         self.generation.update_value(|g| *g += 1);
         self.queue.set_value(VecDeque::new());
         self.busy.set(false);
+        self.card.set(false);
         self.shown.set(None);
         self.real.set_value(None);
     }

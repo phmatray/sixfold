@@ -42,7 +42,8 @@ use controls::PromptModal;
 use ctl::{Ctl, AI, HUMAN};
 use history::{HistoryRail, PlayPopup};
 use overlays::{
-    CoinOverlay, DiscardViewer, DuelMenu, GameOver, Inspector, LogDrawer, RivalFace, RuleTip,
+    seal_tone, CoinOverlay, DiscardViewer, DuelMenu, GameOver, Inspector, LogDrawer, RivalFace,
+    RuleTip, SealCard,
 };
 use table::{ActiveSpot, Bench, HandFan, OppHand, Piles, Plates, Seam, Station};
 
@@ -124,6 +125,8 @@ pub fn new_seed() -> u64 {
 
 #[component]
 fn App() -> impl IntoView {
+    // First: the controller reads the progress (a seal duel's stakes).
+    store::provide();
     let ctl = Ctl::new();
     let screen = RwSignal::new(if world::reopen() {
         splash::mark_shown();
@@ -166,7 +169,6 @@ fn App() -> impl IntoView {
     SCREEN.set(Some(screen));
     provide_context(Legal(legal));
     provide_context(world::LastTab(RwSignal::new(world::MenuTab::Journal)));
-    store::provide();
     stats::provide();
     input::provide();
     // A save from before promos: hand over those of rivals already beaten.
@@ -734,8 +736,21 @@ fn MatchScreen() -> impl IntoView {
         tr("Leave the duel…", "Quitter le duel…")
     };
     view! {
-        <div class="duel" class:tutorial=tutorial
-            class:hitstop=move || ctl.fx.with(|f| f.frozen)
+        // One class string: a seal duel's tone is a class whose name changes.
+        <div class=move || {
+                let mut c = String::from("duel");
+                if tutorial {
+                    c.push_str(" tutorial");
+                }
+                if ctl.fx.with(|f| f.frozen) {
+                    c.push_str(" hitstop");
+                }
+                if let Some(s) = ctl.seal() {
+                    c.push_str(" seal-duel ");
+                    c.push_str(seal_tone(&s));
+                }
+                c
+            }
             data-beat=move || ctl.fx.with(|f| f.beat)
             style=move || format!("--pace:{}", ctl.pace_factor())>
             <main class="mat">
@@ -794,6 +809,9 @@ fn MatchScreen() -> impl IntoView {
             <LogDrawer />
             <PromptModal />
             <CoinOverlay />
+            {move || ctl.card.get().then(|| ctl.seal()).flatten().map(|s| view! {
+                <SealCard seal=s on_done=move || ctl.begin() />
+            })}
             <DiscardViewer />
             {if tutorial { view! { <coach::Finish /> }.into_any() } else { view! { <GameOver /> }.into_any() }}
         </div>

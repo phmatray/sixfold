@@ -2,13 +2,13 @@
 //! battle log, discard viewer and the game-over screen.
 
 use leptos::prelude::*;
-use sixfold_engine::campaign;
+use sixfold_engine::campaign::{self, SealDuel};
 use sixfold_engine::endgame::{self, RungResult, CLEAR_PACKS, GAUNTLET};
 use sixfold_engine::{card, fr, tr, Color, Event};
 
 use crate::art::glyph_svg;
 use crate::board::{find_mon, slot_name, status_class};
-use crate::cards::{energy_pips, CardDetails, CardFace};
+use crate::cards::{energy_pips, CardDetails, CardFace, Pip};
 use crate::ctl::{Ctl, Post, AI, HUMAN};
 use crate::{Inspect, Screen, Ui};
 
@@ -819,6 +819,78 @@ pub fn RivalFace(
         </span>
     }
     .into_any()
+}
+
+/// The `t-<tone>` class a seal duel wears: its keeper's first colour.
+pub fn seal_tone(s: &SealDuel) -> &'static str {
+    match s.rival.colors.first() {
+        Some(Color::Grass) => "t-grass",
+        Some(Color::Fire) => "t-fire",
+        Some(Color::Water) => "t-water",
+        Some(Color::Lightning) => "t-lightning",
+        Some(Color::Fighting) => "t-fighting",
+        Some(Color::Psychic) => "t-psychic",
+        _ => "t-colorless",
+    }
+}
+
+/// A seal duel's title card: the seal at stake over the keeper's face, name,
+/// title and colours. It holds 2.2 s; Enter, Space, Escape, a click or a tap
+/// ends it at once. A held key's repeats don't, so a fast-forward can't skip
+/// it unseen. Then it fades and `on_done` lets the duel begin.
+#[component]
+pub fn SealCard(
+    seal: SealDuel,
+    on_done: impl Fn() + Copy + Send + Sync + 'static,
+) -> impl IntoView {
+    use std::time::Duration;
+    let r = seal.rival;
+    let leaving = RwSignal::new(false);
+    // Timers may outlive the card: `try_` once it is gone.
+    let done = move || {
+        if leaving.try_get_untracked() == Some(false) {
+            leaving.set(true);
+            set_timeout(on_done, Duration::from_millis(180));
+        }
+    };
+    set_timeout(done, Duration::from_millis(2200));
+    // The press that accepted the challenge can still be on its way to the
+    // window when the card mounts (a cut, under reduced motion): not ours.
+    let born = window().performance().map_or(0.0, |p| p.now());
+    let keys = window_event_listener(leptos::ev::keydown, move |e| {
+        if e.time_stamp() > born
+            && !e.repeat()
+            && matches!(e.key().as_str(), "Enter" | " " | "Escape")
+        {
+            e.prevent_default();
+            done();
+        }
+    });
+    on_cleanup(move || keys.remove());
+    let root = NodeRef::<leptos::html::Div>::new();
+    Effect::new(move |_| {
+        if let Some(el) = root.get() {
+            _ = el.focus();
+        }
+    });
+    view! {
+        <div node_ref=root class=format!("seal-card {}", seal_tone(&seal)) class:grand=seal.grand
+            class:leaving=move || leaving.get() role="dialog" aria-modal="true"
+            aria-labelledby="seal-card-h" tabindex="-1" on:click=move |_| done()>
+            <div class="seal-card-stage">
+                <div class="seal-card-hex" aria-hidden="true">
+                    <i></i>
+                    <crate::campaign::Portrait id=r.id name=r.name />
+                </div>
+                <h2 id="seal-card-h">{seal.heading().get()}</h2>
+                <p class="seal-card-who"><b>{r.name}</b><span>{r.title.get()}</span></p>
+                <p class="seal-card-pips">
+                    {r.colors.iter().map(|&c| view! { <Pip color=c /> }).collect_view()}
+                </p>
+            </div>
+            <span class="seal-card-hold" aria-hidden="true"></span>
+        </div>
+    }
 }
 
 /// The first-time rule tip, beside the Hexon it concerns (pinned under the
