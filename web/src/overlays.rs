@@ -413,10 +413,13 @@ pub fn GameOver() -> impl IntoView {
                     progress.update(|pr| {
                         profile.update(|p| got = Some(campaign::record(r, won, pr, p)))
                     });
-                    // After the win fanfare: the stinger as a seal fills, the
-                    // progress chime for the champion's title.
-                    if let Some(name) = got.as_ref().and_then(|g| {
-                        (g.seal || g.first).then_some(if g.seal { "stinger" } else { "progress" })
+                    // After the win fanfare: the stinger as a seal fills (unless
+                    // it already rang on the winning prize), the progress chime
+                    // for the champion's title.
+                    if let Some(name) = got.as_ref().and_then(|g| match (g.seal, g.first) {
+                        (true, _) => (!ctl.stung()).then_some("stinger"),
+                        (false, true) => Some("progress"),
+                        _ => None,
                     }) {
                         set_timeout(
                             move || crate::audio::sfx(name, 0.0),

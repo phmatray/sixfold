@@ -253,6 +253,9 @@ pub struct Ctl {
     unrewarded: StoredValue<bool>,
     /// The seal (or the champion's title) this match is for, if any.
     seal: RwSignal<Option<SealDuel>>,
+    /// The seal's stinger has played on the winning prize (the result screen
+    /// doesn't play it again).
+    stung: StoredValue<bool>,
     /// The seal duel's title card is up: the playback waits for [`Ctl::begin`].
     pub card: RwSignal<bool>,
     progress: Option<RwSignal<Progress>>,
@@ -300,6 +303,7 @@ impl Ctl {
             counter: StoredValue::new(0),
             unrewarded: StoredValue::new(false),
             seal: RwSignal::new(None),
+            stung: StoredValue::new(false),
             card: RwSignal::new(false),
             progress: use_context::<RwSignal<Progress>>(),
             reduced_motion,
@@ -336,6 +340,7 @@ impl Ctl {
         };
         self.generation.update_value(|g| *g += 1);
         self.unrewarded.set_value(true);
+        self.stung.set_value(false);
         self.error.set(None);
         self.seed.set(seed);
         // Its own seed, so the AI's random choices don't mirror the game's coins.
@@ -394,6 +399,11 @@ impl Ctl {
             self.card.set(false);
             self.step(self.generation.get_value());
         }
+    }
+
+    /// The seal's stinger already played in this match (on its winning prize).
+    pub fn stung(&self) -> bool {
+        self.stung.get_value()
     }
 
     /// True once per match: whoever shows its result grants the reward.
@@ -555,6 +565,9 @@ impl Ctl {
         let ms = self.play(event, beat);
         if let Some((name, n)) = beat.and_then(|b| b.sfx) {
             crate::audio::sfx(name, n);
+            if name == "stinger" {
+                self.stung.set_value(true);
+            }
         }
         if ms == 0 {
             return false;
