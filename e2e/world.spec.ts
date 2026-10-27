@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { frames, menuItem, readSave, skipSplash, title } from "./helpers";
+import { bustsDrawn, menuItem, readSave, skipSplash, title } from "./helpers";
 
 /** Where the save says the hero stands: `map,x,z,facing`. */
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
@@ -146,8 +146,8 @@ test("on a phone, a tap on the ground walks only once Options allow it @phone", 
   await page.waitForTimeout(1500);
   expect(await host.getAttribute("data-hero")).toEqual(start);
 
-  // Options: tap to walk, kept in this browser. (Once the page is free: see `frames`.)
-  await frames(page);
+  // Options: tap to walk, kept in this browser. (Once the page is free: see `bustsDrawn`.)
+  await bustsDrawn(page);
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("tab", { name: "Options" }).click();
   const option = page.getByRole("checkbox", { name: /Tap the ground to walk/ });

@@ -67,6 +67,14 @@ export async function frames(page: Page) {
 }
 
 /**
+ * Every bust on this map drawn (world.js bakes them ahead of a talk, one at a time): on CI's software GL each
+ * holds the page for seconds, and a click sent then times out. None is drawn while a menu is open.
+ */
+export async function bustsDrawn(page: Page) {
+  await page.waitForFunction(() => (document.querySelector(".world-host") as unknown as { sixfoldStats: () => { busts: number } }).sixfoldStats().busts === 0, null, { timeout: 0 });
+}
+
+/**
  * Rewrite slot 1 the way the game stores it: `sixfold-save;1;<fnv1a>` over the
  * section lines (engine `save.rs`). `edit` changes the sections in place.
  */
