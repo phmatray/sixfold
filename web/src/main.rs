@@ -42,7 +42,8 @@ use controls::PromptModal;
 use ctl::{Ctl, AI, HUMAN};
 use history::{HistoryRail, PlayPopup};
 use overlays::{
-    CoinOverlay, DiscardViewer, DuelMenu, GameOver, Inspector, LogDrawer, RivalFace, RuleTip,
+    seal_tone, CoinOverlay, DiscardViewer, DuelMenu, GameOver, Inspector, LogDrawer, RivalFace,
+    RuleTip, SealCard,
 };
 use table::{ActiveSpot, Bench, HandFan, OppHand, Piles, Plates, Seam, Station};
 
@@ -124,6 +125,8 @@ pub fn new_seed() -> u64 {
 
 #[component]
 fn App() -> impl IntoView {
+    // First: the controller reads the progress (a seal duel's stakes).
+    store::provide();
     let ctl = Ctl::new();
     let screen = RwSignal::new(if world::reopen() {
         splash::mark_shown();
@@ -166,7 +169,6 @@ fn App() -> impl IntoView {
     SCREEN.set(Some(screen));
     provide_context(Legal(legal));
     provide_context(world::LastTab(RwSignal::new(world::MenuTab::Journal)));
-    store::provide();
     stats::provide();
     input::provide();
     // A save from before promos: hand over those of rivals already beaten.
@@ -428,6 +430,10 @@ fn MatchScreen() -> impl IntoView {
     // still possible), Escape puts the card back and closes panels.
     let on_key = move |e: leptos::ev::KeyboardEvent| {
         use wasm_bindgen::JsCast;
+        // A seal duel's title card takes the keys while it is up.
+        if ctl.card.get_untracked() {
+            return;
+        }
         if e.ctrl_key() || e.meta_key() || e.alt_key() {
             return;
         }
@@ -581,7 +587,7 @@ fn MatchScreen() -> impl IntoView {
     on_cleanup(move || keys.remove());
     // A pad's Start (gamepad.js) opens and closes the duel menu.
     let pad_menu = window_event_listener_untyped("sixfold-input", move |e| {
-        if input::action(&e).as_deref() == Some("menu") {
+        if input::action(&e).as_deref() == Some("menu") && !ctl.card.get_untracked() {
             e.prevent_default();
             menu.update(|m| *m = !*m);
         }
@@ -635,6 +641,7 @@ fn MatchScreen() -> impl IntoView {
     Effect::new(move |_| {
         ctl.shown.track();
         ui.selected.track();
+        ctl.card.track();
         if !by_key.get_value() {
             return;
         }
@@ -734,8 +741,13 @@ fn MatchScreen() -> impl IntoView {
         tr("Leave the duel…", "Quitter le duel…")
     };
     view! {
-        <div class="duel" class:tutorial=tutorial
+        // The one `class=` is the seal duel's tone, a class whose name changes
+        // with the region; the rest are toggles (classList, so `nudge` survives).
+        <div class:duel=true class:tutorial=tutorial
             class:hitstop=move || ctl.fx.with(|f| f.frozen)
+            class:seal-duel=move || ctl.seal().is_some()
+            class:grand-duel=move || ctl.seal().is_some_and(|s| s.grand)
+            class=move || ctl.seal().map_or(("t-colorless", false), |s| (seal_tone(&s), true))
             data-beat=move || ctl.fx.with(|f| f.beat)
             style=move || format!("--pace:{}", ctl.pace_factor())>
             <main class="mat">
@@ -794,6 +806,9 @@ fn MatchScreen() -> impl IntoView {
             <LogDrawer />
             <PromptModal />
             <CoinOverlay />
+            {move || ctl.card.get().then(|| ctl.seal()).flatten().map(|s| view! {
+                <SealCard seal=s on_done=move || ctl.begin() />
+            })}
             <DiscardViewer />
             {if tutorial { view! { <coach::Finish /> }.into_any() } else { view! { <GameOver /> }.into_any() }}
         </div>

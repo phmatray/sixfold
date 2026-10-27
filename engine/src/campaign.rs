@@ -208,6 +208,44 @@ pub fn stakes(id: Option<&str>) -> Stakes {
     }
 }
 
+/// A duel with a seal (or the champion's title) at stake.
+#[derive(Debug, Clone, Copy)]
+pub struct SealDuel {
+    pub rival: &'static Rival,
+    /// The Warden: the champion's title rather than a seal.
+    pub grand: bool,
+}
+
+/// Some while `id` is a seal keeper not yet beaten (`grand: false`) or the
+/// Warden before the first win (`grand: true`); None for rematches, route
+/// duelists, Rook and post-game duels.
+pub fn seal_duel(id: Option<&str>, p: &Progress) -> Option<SealDuel> {
+    let rival = id.and_then(rival).filter(|r| !r.beaten(p))?;
+    Some(SealDuel {
+        rival,
+        grand: !rival.seal,
+    })
+}
+
+impl SealDuel {
+    /// The title card's heading, written out per region so the French
+    /// articles are right.
+    pub fn heading(&self) -> T {
+        if self.grand {
+            return T::new("The Champion's Duel", "Le Duel du champion");
+        }
+        match self.rival.id {
+            "bramble" => T::new("Seal of the Grove", "Sceau du Bosquet"),
+            "marlo" => T::new("Seal of the Tide", "Sceau de la Marée"),
+            "cinza" => T::new("Seal of the Ember", "Sceau de la Braise"),
+            "quill" => T::new("Seal of the Storm", "Sceau de l'Orage"),
+            "orla" => T::new("Seal of the Stone", "Sceau du Roc"),
+            "lumen" => T::new("Seal of the Dream", "Sceau du Songe"),
+            _ => T::new("A Seal at Stake", "Un sceau en jeu"),
+        }
+    }
+}
+
 /// The next rival to duel: the first not yet beaten who accepts, else the
 /// first whose seals are met (their region's duelists still to best).
 pub fn next_rival(p: &Progress) -> Option<&'static Rival> {
@@ -743,6 +781,41 @@ mod tests {
         let mut pr = Profile::new_player();
         for id in ids {
             record(rival(id).unwrap(), true, p, &mut pr);
+        }
+    }
+
+    #[test]
+    fn a_seal_is_at_stake_until_its_keeper_falls() {
+        let mut p = Progress::default();
+        let s = seal_duel(Some("marlo"), &p).expect("Marlo's seal is at stake");
+        assert_eq!((s.rival.id, s.grand), ("marlo", false));
+        assert_eq!(s.heading(), T::new("Seal of the Tide", "Sceau de la Marée"));
+        beat(&mut p, &["marlo"]);
+        assert!(seal_duel(Some("marlo"), &p).is_none(), "a rematch");
+
+        let h = seal_duel(Some("bramble"), &p).unwrap().heading();
+        assert_eq!(h, T::new("Seal of the Grove", "Sceau du Bosquet"));
+
+        let w = seal_duel(Some("warden"), &p).expect("the title is at stake");
+        assert!(w.grand);
+        assert_eq!(
+            w.heading(),
+            T::new("The Champion's Duel", "Le Duel du champion")
+        );
+        beat(&mut p, &["warden"]);
+        assert!(seal_duel(Some("warden"), &p).is_none());
+
+        for id in [Some("t_pell"), Some("rook_1"), None] {
+            assert!(seal_duel(id, &Progress::default()).is_none(), "{id:?}");
+        }
+        // Every keeper has its own heading, written out in both languages
+        // (never the fallback).
+        let heading = |id| seal_duel(Some(id), &Progress::default()).unwrap().heading();
+        for r in RIVALS.iter().filter(|r| r.seal) {
+            let h = heading(r.id);
+            assert!(h.en.starts_with("Seal of the "), "{}", r.id);
+            assert!(h.fr.starts_with("Sceau d"), "{}", r.id);
+            assert!(RIVALS.iter().all(|o| o.id == r.id || heading(o.id) != h));
         }
     }
 
