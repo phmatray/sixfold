@@ -3,7 +3,8 @@ import { defineConfig, devices } from "@playwright/test";
 // The journeys run against a release build in ../web/dist (`trunk build --release`),
 // served as static files. Every test gets a fresh browser context (empty storage),
 // and the service worker is blocked so nothing is served from an old cache.
-const PORT = 4173;
+// PW_PORT picks another port, so two checkouts can run their journeys side by side.
+const PORT = Number(process.env.PW_PORT ?? 4173);
 
 export default defineConfig({
   testDir: ".",
