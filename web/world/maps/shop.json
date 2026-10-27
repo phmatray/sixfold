@@ -752,6 +752,52 @@
           ]
         }
       ]
+    },
+    {
+      "id": "door_warden",
+      "if": "seals:6 & !beat:warden & !flag:met_warden & !flag:door_warden",
+      "at": [
+        [
+          1,
+          6
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:duel_boss",
+            "cam:0:6",
+            "wait:400",
+            "sfx:bell:0",
+            "wait:250",
+            "sfx:bell:1",
+            "wait:250",
+            "sfx:bell:2",
+            "wait:250",
+            "sfx:bell:3",
+            "wait:250",
+            "sfx:bell:4",
+            "wait:250",
+            "sfx:bell:5",
+            "wait:750"
+          ]
+        },
+        {
+          "say": "sable",
+          "lines": [
+            "Six. I heard them all from in here. Come through; the door has waited long enough."
+          ],
+          "lines_fr": [
+            "Six. Je les ai tous entendus d'ici. Entre ; la porte a assez attendu."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:door_warden"
+          ]
+        }
+      ]
     }
   ]
 }
