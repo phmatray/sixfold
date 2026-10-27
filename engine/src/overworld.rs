@@ -36,8 +36,9 @@
 //! - the cutscene cues (1.4): `walk:<actor>:<path>` (a path of `n`/`e`/`s`/`w`
 //!   letters), `face:<actor>:<dir>` (`dir` may be `hero`), `cam:<actor>` / `cam:<x>:<z>` / `cam:hero`
 //!   (the camera's look-at target), `wait:<ms>` (0 to [`MAX_WAIT`]),
-//!   `sfx:<sound>` and `music:<track>` (one of [`TRACKS`]); the actor `hero`
-//!   is the player
+//!   `sfx:<sound>`, `sfx:bell:<0..5>` (#154: the finale's bell, climbing the
+//!   scale) and `music:<track>` (one of [`TRACKS`]); the actor `hero` is the
+//!   player
 //! - `stone:wake` (#152): the map's seal stone glows in the region's colour
 //!   until the scene ends; `stone:seal:<keeper>` (#153): the keeper's face of
 //!   it lights, and stays lit
@@ -86,7 +87,7 @@ pub const EMOTES: [&str; 5] = ["bang", "what", "dots", "heart", "note"];
 pub const SOUNDS: [&str; 6] = ["spark", "chime", "jingle", "gate", "seal", "door"];
 /// Tracks a `music:` cue may switch to (the world's tracks in `web/audio/audio.js`,
 /// and Rook's theme for his scenes).
-pub const TRACKS: [&str; 17] = [
+pub const TRACKS: [&str; 18] = [
     "overworld",
     "interior",
     "ember",
@@ -106,6 +107,8 @@ pub const TRACKS: [&str; 17] = [
     "duel_rival_dream",
     "duel_rival_grove",
     "duel_rival_stone",
+    // The Warden's theme, for the sealed door and her entrance (#154).
+    "duel_boss",
 ];
 /// The longest `wait:` a cutscene may hold, in milliseconds.
 pub const MAX_WAIT: u16 = 5000;
@@ -398,6 +401,9 @@ pub fn parse_effect(e: &str) -> Result<Effect, String> {
             emote: s(emote),
         }),
         ("sfx", [name]) if SOUNDS.contains(name) => Effect::Cue(Cue::Sfx(s(name))),
+        ("sfx", ["bell", n]) if matches!(*n, "0" | "1" | "2" | "3" | "4" | "5") => {
+            Effect::Cue(Cue::Sfx(format!("bell:{n}")))
+        }
         ("walk", [actor, path]) if path.bytes().all(|b| b"nesw".contains(&b)) => {
             Effect::Cue(Cue::Walk {
                 actor: s(actor),
@@ -1122,6 +1128,13 @@ mod tests {
             p.apply("sfx:spark"),
             Ok(Applied::Cue(Cue::Sfx("spark".into())))
         );
+        // #154: the bell climbs the scale, one step per seal.
+        assert_eq!(
+            p.apply("sfx:bell:5"),
+            Ok(Applied::Cue(Cue::Sfx("bell:5".into())))
+        );
+        assert!(p.apply("sfx:bell:6").is_err() && p.apply("sfx:bell").is_err());
+        assert!(p.apply("sfx:spark:1").is_err());
         assert!(p.apply("sfx:boom").is_err() && p.apply("sfx").is_err());
         assert_eq!(p, Progress::default(), "cues never change state");
     }

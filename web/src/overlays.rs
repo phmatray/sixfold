@@ -582,8 +582,16 @@ pub fn GameOver() -> impl IntoView {
                                                 format!("{} vous affrontera de nouveau quand vous voudrez. Les duellistes que vous avez battus comptent toujours.", r.name),
                                             )}</span>
                                         }.into_any(),
+                                        // The champion's duel lost (#154): the title was at stake, not a seal.
+                                        _ if ctl.seal().is_some_and(|s| s.grand) => view! {
+                                            <b>{tr("Not the title, this time", "Pas le titre, cette fois")}</b>
+                                            <span>{tr(
+                                                format!("{} will duel you again whenever you're ready. Your six seals still open her door.", r.name),
+                                                format!("{} vous affrontera de nouveau quand vous voudrez. Vos six sceaux vous ouvrent toujours sa porte.", r.name),
+                                            )}</span>
+                                        }.into_any(),
                                         _ => view! {
-                                            <b>{tr("No seal this time", "Pas de sceau cette fois")}</b>
+                                            <b>{if r.seal { tr("No seal this time", "Pas de sceau cette fois") } else { tr("Not this time", "Pas cette fois") }}</b>
                                             <span>{tr(format!("Talk to {} again for a rematch.", r.name), format!("Reparlez à {} pour une revanche.", r.name))}</span>
                                         }.into_any(),
                                     }}
@@ -848,8 +856,9 @@ pub fn seal_tone(s: &SealDuel) -> &'static str {
 }
 
 /// A seal duel's title card: the seal at stake over the keeper's face, name,
-/// title and colours. It holds 2.2 s; Enter, Space, Escape, a click or a tap
-/// ends it at once. A held key's repeats don't, so a fast-forward can't skip
+/// title and colours. It holds 2.2 s; the champion's (`grand`, #154) holds
+/// 3 s and shows the six seals that opened the Warden's door in place of her
+/// colours. Enter, Space, Escape, a click or a tap ends it at once. A held key's repeats don't, so a fast-forward can't skip
 /// it unseen. Then it fades and `on_done` lets the duel begin.
 #[component]
 pub fn SealCard(
@@ -874,7 +883,8 @@ pub fn SealCard(
             );
         }
     };
-    set_timeout(done, Duration::from_millis(2200));
+    let hold = if seal.grand { 3000 } else { 2200 };
+    set_timeout(done, Duration::from_millis(hold));
     // The press that accepted the challenge can still be on its way to the
     // window when the card mounts (a cut, under reduced motion): not ours.
     let born = window().performance().map_or(0.0, |p| p.now());
@@ -898,7 +908,7 @@ pub fn SealCard(
     });
     view! {
         <div node_ref=root class=format!("seal-card {}", seal_tone(&seal)) class:grand=seal.grand
-            class:leaving=move || leaving.get() role="dialog" aria-modal="true"
+            class:leaving=move || leaving.get() style=format!("--hold:{hold}ms") role="dialog" aria-modal="true"
             aria-labelledby="seal-card-h" tabindex="-1" on:click=move |_| done()>
             <div class="seal-card-stage">
                 <div class="seal-card-hex" aria-hidden="true">
@@ -907,9 +917,21 @@ pub fn SealCard(
                 </div>
                 <h2 id="seal-card-h">{seal.heading().get()}</h2>
                 <p class="seal-card-who"><b>{r.name}</b><span>{r.title.get()}</span></p>
-                <p class="seal-card-pips">
-                    {r.colors.iter().map(|&c| view! { <Pip color=c /> }).collect_view()}
-                </p>
+                {if seal.grand {
+                    view! {
+                        <p class="seal-card-seals" role="img" aria-label=tr("Your six seals", "Vos six sceaux")>
+                            {campaign::RIVALS.iter().filter(|k| k.seal).enumerate().map(|(i, k)| view! {
+                                <i style=format!("--i:{i}")><crate::campaign::Seal r=k earned=true /></i>
+                            }).collect_view()}
+                        </p>
+                    }.into_any()
+                } else {
+                    view! {
+                        <p class="seal-card-pips">
+                            {r.colors.iter().map(|&c| view! { <Pip color=c /> }).collect_view()}
+                        </p>
+                    }.into_any()
+                }}
             </div>
             <span class="seal-card-hold" aria-hidden="true"></span>
         </div>

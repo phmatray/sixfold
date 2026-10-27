@@ -262,3 +262,44 @@ test("after losing to Marlo, he encourages, and the challenge is still open", as
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toBeEnabled();
   await expect(offer).not.toContainText("bested first");
 });
+
+// #154: the Warden's duel is the grandest. With six seals the sealed door rings and Sable speaks through it,
+// her room stages her entrance, a skip of either still lands on her challenge, and the duel opens on the champion's card.
+test("the sealed door rings for six seals, and Sable's entrance lands on her challenge", async ({ page }) => {
+  await newSave(page);
+  const seals = ["bramble", "marlo", "cinza", "quill", "orla", "lumen"].map((r) => `f:beat_${r}`);
+  await editSave(page, `secs.progress = [(secs.progress?.[0] ?? "") + ",f:intro,f:vouched,${seals.join(",")}"]; secs.world_at = ["shop,2,6,w"];`);
+  await page.reload();
+  await menuItem(page, "Continue").click();
+  await loaded(page);
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^2,6/, { timeout: 15_000 });
+
+  // The tile before the door: the bells, then Sable's voice through it. Escape skips.
+  expect(await walk(page, 1, 6)).toBeGreaterThan(0);
+  const sable = page.getByRole("dialog", { name: "Sable" });
+  await expect(sable).toContainText("Come through", { timeout: 60_000 });
+  await page.keyboard.press("Escape");
+  await expect(sable).toBeHidden();
+  expect((await readSave(page)).progress?.[0]).toContain("f:door_warden");
+
+  // Through the door: her entrance plays on arrival; skipped, it still ends on her challenge.
+  await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
+  expect(await walk(page, 0, 6)).toBeGreaterThan(0);
+  await expect(sable).toContainText("Six seals.", { timeout: 60_000 });
+  await page.keyboard.press("Escape");
+  const offer = page.getByRole("dialog", { name: "Challenge Sable?" });
+  const accept = offer.getByRole("button", { name: /^Challenge/ });
+  await expect(accept).toBeFocused();
+  expect((await readSave(page)).progress?.[0]).toContain("f:met_warden");
+
+  // The champion's card: its own heading, the six seals that opened the door, brass.
+  await page.waitForTimeout(600); // the panel ignores presses in its first half second
+  await accept.click();
+  const card = page.getByRole("dialog", { name: "The Champion's Duel" });
+  await expect(card).toBeVisible();
+  await expect(card).toContainText("Sable");
+  await expect(card.getByRole("img", { name: "Your six seals" }).locator(".seal.earned")).toHaveCount(6);
+  await expect(page.locator(".duel")).toHaveClass(/\bgrand-duel\b/);
+  await page.keyboard.press("Enter");
+  await expect(card).toBeHidden();
+});
