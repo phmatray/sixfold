@@ -142,15 +142,15 @@ pub fn Seal(r: &'static Rival, #[prop(into)] earned: Signal<bool>) -> impl IntoV
 }
 
 /// A seal just won (WORLD_DESIGN §12.1): the hexagon fills face by face in
-/// the rival's colour, in step with the stinger [`SEAL_AT`] ms after the
-/// result shows.
+/// the rival's colour, in step with the stinger `at` ms (by default
+/// [`SEAL_AT`], after the result shows) from when it appears.
 #[component]
-pub fn SealFill(r: &'static Rival) -> impl IntoView {
+pub fn SealFill(r: &'static Rival, #[prop(default = SEAL_AT)] at: u32) -> impl IntoView {
     let tone = r.colors.first().map_or("colorless", |&c| color_key(c));
     // The hexagon's corners, clockwise from the top (the `.seal` clip-path).
     const P: [(u8, u8); 6] = [(50, 0), (93, 28), (93, 82), (50, 110), (7, 82), (7, 28)];
     view! {
-        <span class=format!("seal-fill t-{tone}") style=format!("--at:{SEAL_AT}ms") aria-hidden="true">
+        <span class=format!("seal-fill t-{tone}") style=format!("--at:{at}ms") aria-hidden="true">
             <svg viewBox="0 0 100 110">
                 {(0..6).map(|i| {
                     let (a, b) = (P[i], P[(i + 1) % 6]);

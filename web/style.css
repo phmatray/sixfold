@@ -4268,6 +4268,15 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 .seal-fill .face:nth-child(odd) { fill: color-mix(in srgb, var(--c) 72%, var(--tint)); }
 @keyframes face-in { from { opacity: 0; transform: scale(0.55); } to { opacity: 1; transform: none; } }
 @keyframes seal-glow { 40% { filter: drop-shadow(0 0 10px var(--c)); } }
+/* A seal won on stage (#153): over the stage the hexagon fills in its keeper's
+   colour, then flies to the Menu button (where the seals live, --tx/--ty from
+   world.rs) and fades into it. Reduced motion: it fills beside the button and
+   fades there; nothing travels. */
+.seal-flight { position: fixed; left: 50%; top: 50%; z-index: 4; pointer-events: none; translate: -50% -50%;
+  animation: seal-fly 900ms cubic-bezier(0.5, 0, 0.2, 1) 650ms forwards, seal-out 300ms ease 1550ms forwards; }
+.seal-flight .seal-fill { display: block; width: 112px; }
+@keyframes seal-fly { to { transform: translate(var(--tx), var(--ty)) scale(0.3); } }
+@keyframes seal-out { to { opacity: 0; } }
 .reward b { font-variant-numeric: tabular-nums; }
 
 /* ---------- A seal duel (#151) ----------
@@ -4382,6 +4391,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   .spark::before { animation: spark-calm 460ms ease both !important; }
   .station-id.shake .portrait { animation: none; }
   .seal-fill .face { animation: face-calm 300ms ease var(--at) forwards !important; }
+  .seal-flight { transform: translate(var(--tx), calc(var(--ty) + 60px)) scale(0.5); animation: fade-in var(--dur-panel) ease both, seal-out 300ms ease 1550ms forwards; }
   .duel[data-beat~="seal-final"] .mat { animation: seal-ring-calm 1000ms ease both; }
   /* A seal duel's card fades in place and holds as long; nothing grows or slides. */
   .seal-card-hex, .seal-card h2, .seal-card-who, .seal-card-pips { animation: fade-in var(--dur-panel) ease both; }

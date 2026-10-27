@@ -11,6 +11,7 @@ use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
 use sixfold_engine::books;
+use sixfold_engine::campaign;
 use sixfold_engine::clock::{self, Phase};
 use sixfold_engine::objective;
 use sixfold_engine::overworld::{
@@ -33,17 +34,18 @@ use crate::{store, Screen, Ui};
 // three.js comes from the import map in index.html and never touches the wasm.
 // Calls made before the module is in (items, pause) are replayed once it is.
 #[wasm_bindgen(inline_js = r#"
-let api = null, gen = 0, items = "", paused = false, minute = 480;
+let api = null, gen = 0, items = "", seals = "", paused = false, minute = 480;
 export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setClock(minute); api.pause(paused); })
+    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setSeals(seals); api.setClock(minute); api.pause(paused); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "import", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
 export function world_act() { api?.act(); }
 export function world_pause(p) { paused = p; api?.pause(p); }
 export function world_items(csv) { items = csv; api?.setItems(csv); }
+export function world_seals(csv) { seals = csv; api?.setSeals(csv); }
 export function world_preview(el, name) { api?.preview(el, name); }
 export function world_preview_stop() { api?.previewStop(); }
 export function world_meet(id) { api?.meet(id); }
@@ -66,6 +68,8 @@ extern "C" {
     fn world_pause(paused: bool);
     /// The items the player owns, comma-separated (the shoes unlock running).
     fn world_items(csv: &str);
+    /// The seals held, as the colour keys of the seal stones' faces to light (#153).
+    fn world_seals(csv: &str);
     fn world_preview(el: &JsValue, model: &str);
     fn world_preview_stop();
     /// Back from a duel against `id`: that person (a route duelist walks back
@@ -90,6 +94,9 @@ extern "C" {
 }
 
 const REOPEN: &str = "sixfold.reopen-world";
+/// How long a seal won on stage shows (#153): it fills, flies to the Menu
+/// button and fades (`.seal-flight` in style.css).
+const SEAL_FLIGHT_MS: u64 = 1900;
 
 /// Retry after the scene's modules failed to load: the browser keeps a failed
 /// module import for the page's whole life, so reload and come back here.
@@ -140,12 +147,29 @@ fn cue_json(c: &Cue) -> String {
         Cue::Wait(ms) => format!(r#"{{"wait":{ms}}}"#),
         Cue::Music(track) => format!(r#"{{"music":"{track}"}}"#),
         Cue::Stone(StoneCue::Wake) => r#"{"stone":"wake"}"#.into(),
+        Cue::Stone(StoneCue::Seal(id)) => format!(
+            r#"{{"stone":"seal","rival":"{id}","colour":"{}"}}"#,
+            seal_colour(id)
+        ),
     }
 }
 
-/// Hand the owned items to the scene (the shoes unlock running).
+/// The colour key of a seal keeper's face of the seal stone (their first colour).
+fn seal_colour(id: &str) -> &'static str {
+    campaign::rival(id)
+        .and_then(|r| r.colors.first())
+        .map_or("colorless", |&c| crate::art::color_key(c))
+}
+
+/// Hand the owned items to the scene (the shoes unlock running), and the seals
+/// held (their stone faces light).
 fn push_items(p: &Progress) {
     world_items(&p.items().collect::<Vec<_>>().join(","));
+    let faces: Vec<_> = campaign::lit_faces(p)
+        .into_iter()
+        .map(crate::art::color_key)
+        .collect();
+    world_seals(&faces.join(","));
 }
 
 /// Display name, model and blurb of an item.
@@ -465,8 +489,8 @@ enum Step {
 /// (played out or skipped), so a reload mid-scene finds nothing half done.
 struct Scene {
     steps: VecDeque<Step>,
-    /// The current `do` step's cues still to play, as world.js reads them.
-    cues: VecDeque<String>,
+    /// The current `do` step's cues still to play.
+    cues: VecDeque<Cue>,
     effects: Vec<String>,
     /// The id of the cue world.js is playing.
     waiting: Option<u32>,
@@ -496,12 +520,12 @@ fn parse_scene(json: &str) -> Option<Scene> {
     })
 }
 
-/// Sort a step's effects: cues to play (world.js JSON), state effects to keep.
+/// Sort a step's effects: cues to play, state effects to keep.
 /// A malformed one (the data test catches them) is dropped.
-fn sort_effects(effects: Vec<String>, cues: &mut impl Extend<String>, state: &mut Vec<String>) {
+fn sort_effects(effects: Vec<String>, cues: &mut impl Extend<Cue>, state: &mut Vec<String>) {
     for e in effects {
         match parse_effect(&e) {
-            Ok(Fx::Cue(c)) => cues.extend([cue_json(&c)]),
+            Ok(Fx::Cue(c)) => cues.extend([c]),
             Ok(_) => state.push(e),
             Err(err) => leptos::logging::warn!("world: script: {err}"),
         }
@@ -766,6 +790,10 @@ pub fn WorldScreen() -> impl IntoView {
     let playing = RwSignal::new(false);
     let scene_in = RwSignal::new(None::<String>);
     let cue_done = RwSignal::new(0u32);
+    // The seal flying to the Menu button (#153): the keeper, the button's offset
+    // from the stage's centre (px), and a count so an old timer can't clear a new one.
+    let flight = RwSignal::new(None::<(&'static campaign::Rival, (f64, f64), u32)>);
+    let menu_btn = NodeRef::<html::Button>::new();
 
     // ponytail: the callback is leaked once per visit (a few bytes); keep a handle if visits ever get frequent.
     let cb = Closure::<dyn Fn(String, String, String) -> bool>::new(
@@ -1118,6 +1146,37 @@ pub fn WorldScreen() -> impl IntoView {
     // effects. A skip jumps over what's left the same way.
     let script_talk =
         move || sheet.with_untracked(|s| matches!(s, Some(Sheet::Talk(t)) if t.script));
+    // A seal won on stage (#153): said in the live region, and (`fly`) its
+    // hexagon flies from the stage to the Menu button, where the seals live.
+    let sealed = move |id: &str, fly: bool| {
+        let Some(r) = campaign::rival(id) else { return };
+        announce.set(tr(
+            format!("{}'s seal!", r.name),
+            format!("Le sceau de {} !", r.name),
+        ));
+        if !fly {
+            return;
+        }
+        let to = menu_btn.get_untracked().map(|b| {
+            let (b, w) = (b.get_bounding_client_rect(), window());
+            let half =
+                |v: Result<JsValue, JsValue>| v.ok().and_then(|v| v.as_f64()).unwrap_or(0.0) / 2.0;
+            (
+                b.left() + b.width() / 2.0 - half(w.inner_width()),
+                b.top() + b.height() / 2.0 - half(w.inner_height()),
+            )
+        });
+        let n = flight.with_untracked(|f| f.as_ref().map_or(0, |f| f.2)) + 1;
+        flight.set(Some((r, to.unwrap_or_default(), n)));
+        set_timeout(
+            move || {
+                if flight.with_untracked(|f| f.as_ref().is_some_and(|f| f.2 == n)) {
+                    flight.set(None);
+                }
+            },
+            Duration::from_millis(SEAL_FLIGHT_MS),
+        );
+    };
     let end_scene = move |s: Scene, rest: Vec<String>| {
         if script_talk() {
             sheet.set(None);
@@ -1139,10 +1198,13 @@ pub fn WorldScreen() -> impl IntoView {
                 if script_talk() {
                     sheet.set(None);
                 }
+                if let Cue::Stone(StoneCue::Seal(r)) = &c {
+                    sealed(r, true);
+                }
                 let id = cue_done.get_untracked() + 1;
                 s.waiting = Some(id);
                 scene.set_value(Some(s));
-                world_cue(&format!(r#"{{"id":{id},{}"#, &c[1..]));
+                world_cue(&format!(r#"{{"id":{id},{}"#, &cue_json(&c)[1..]));
                 return;
             }
             match s.steps.pop_front() {
@@ -1172,13 +1234,19 @@ pub fn WorldScreen() -> impl IntoView {
         let mut taken = None;
         scene.update_value(|s| taken = s.take());
         let Some(mut s) = taken else { return };
-        let mut rest: Vec<String> = s.cues.drain(..).collect();
+        let mut rest: Vec<Cue> = s.cues.drain(..).collect();
         for step in s.steps.drain(..) {
             if let Step::Do(effects) = step {
                 sort_effects(effects, &mut rest, &mut s.effects);
             }
         }
-        end_scene(s, rest);
+        // A seal skipped past is still won out loud (its face lights with the flag).
+        for c in &rest {
+            if let Cue::Stone(StoneCue::Seal(r)) = c {
+                sealed(r, false);
+            }
+        }
+        end_scene(s, rest.iter().map(cue_json).collect());
     };
     Effect::new(move |_| {
         let Some(json) = scene_in.get() else { return };
@@ -1446,7 +1514,7 @@ pub fn WorldScreen() -> impl IntoView {
                     <crate::worldmap::DayDial />
                     <Facets />
                     // Until the scene is up the menu can't open: say so rather than ignore the press.
-                    <button type="button" class="btn ghost menu-btn" aria-label="Menu" aria-haspopup="dialog"
+                    <button type="button" class="btn ghost menu-btn" node_ref=menu_btn aria-label="Menu" aria-haspopup="dialog"
                         aria-keyshortcuts="Escape"
                         aria-disabled=move || (loading.get() || failed.with(Option::is_some)).then_some("true")
                         title=move || if loading.get() || failed.with(Option::is_some) {
@@ -1486,6 +1554,11 @@ pub fn WorldScreen() -> impl IntoView {
                 </button>
             })}
             <div class="world-rest" class:on=move || resting.get() aria-hidden="true"></div>
+            {move || flight.get().map(|(r, (x, y), _)| view! {
+                <div class="seal-flight" style=format!("--tx:{x:.0}px;--ty:{y:.0}px") aria-hidden="true">
+                    <crate::campaign::SealFill r=r at=0 />
+                </div>
+            })}
             {move || (loading.get() && failed.with(Option::is_none)).then(|| {
                 let pct = move || loaded.with(|&(d, t)| (d * 100).checked_div(t).unwrap_or(0).min(100));
                 view! {
