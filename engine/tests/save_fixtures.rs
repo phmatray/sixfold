@@ -13,6 +13,7 @@ use std::collections::BTreeMap;
 use std::path::Path;
 
 use sixfold_engine::books::{is_read, read_count, read_flag, BOOKS};
+use sixfold_engine::campaign::{KEEPERS, RIVALS, VOUCHED};
 use sixfold_engine::overworld::STARTING_COINS;
 use sixfold_engine::save::{Save, Summary, CAMPAIGN_DECK, WORLD_AT};
 
@@ -38,6 +39,9 @@ fn check_common(version: &str, s: &Save) -> Summary {
     assert!(p.has_item("running_shoes"), "{version}");
     assert!(p.check("beat:bramble"), "{version}");
     assert_eq!(p.last_duel(), Some(("bramble", true)), "{version}");
+    // 1.10 (#150): it met a keeper before the threshold, so it is vouched for.
+    assert!(RIVALS.iter().all(|r| r.earned(&p)), "{version}");
+    assert!(p.has_flag(VOUCHED) && p.has_flag(KEEPERS), "{version}");
     assert_eq!(s.get(WORLD_AT), Some("woodland,12,8,e"), "{version}");
     assert_eq!(s.get(CAMPAIGN_DECK), Some("Second"), "{version}");
     assert!(
@@ -116,6 +120,14 @@ fn a_save_from_every_release_loads() {
             "{version}"
         );
     }
+}
+
+/// 1.10 (#150): a new player has earned no keeper yet.
+#[test]
+fn a_new_player_earns_the_keepers() {
+    let p = Save::new_player("Ada").progress();
+    assert!(p.has_flag(KEEPERS) && !p.has_flag(VOUCHED));
+    assert!(RIVALS.iter().filter(|r| r.seal).all(|r| !r.earned(&p)));
 }
 
 /// 1.3 added the clock, waymarks and seen maps to the progress.

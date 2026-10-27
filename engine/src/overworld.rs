@@ -50,7 +50,7 @@
 use std::collections::BTreeSet;
 
 use crate::booster::BOOSTERS;
-use crate::campaign::{rival, seals};
+use crate::campaign::{rival, seals, KEEPERS, RIVALS, VOUCHED};
 use crate::card::{card, CardId};
 use crate::clock::{self, Phase};
 use crate::trainers::trainer;
@@ -126,11 +126,12 @@ pub struct Progress {
 }
 
 impl Default for Progress {
-    /// A new player: nothing done yet, [`STARTING_COINS`] Facets.
+    /// A new player: nothing done yet but [`KEEPERS`] (they meet the
+    /// keepers' threshold), [`STARTING_COINS`] Facets.
     fn default() -> Progress {
         Progress {
             items: BTreeSet::new(),
-            flags: BTreeSet::new(),
+            flags: BTreeSet::from([KEEPERS.to_string()]),
             last: None,
             gauntlet: None,
             daily: None,
@@ -654,8 +655,11 @@ impl Progress {
 
     /// Read a save string, skipping anything malformed (an old or tampered save
     /// must not crash the game). Flags of renamed NPCs get their new names.
+    /// A save from before the keepers' threshold (no [`KEEPERS`]) that had
+    /// already beaten or duelled a keeper is [`VOUCHED`] for, once.
     pub fn decode(s: &str) -> Progress {
         let mut p = Progress::default();
+        p.flags.remove(KEEPERS);
         for token in s.split(',') {
             match split(token) {
                 Some(("i", item)) => {
@@ -688,6 +692,16 @@ impl Progress {
                 _ => {}
             }
         }
+        if !p.has_flag(KEEPERS) {
+            let met = RIVALS
+                .iter()
+                .filter(|r| r.seal)
+                .any(|r| r.beaten(&p) || p.last.as_ref().is_some_and(|(id, _)| id == r.id));
+            if met {
+                p.flags.insert(VOUCHED.to_string());
+            }
+        }
+        p.flags.insert(KEEPERS.to_string());
         p
     }
 }
@@ -809,6 +823,24 @@ mod tests {
         }
     }
 
+    /// #150: a new player meets the keepers' threshold; a save from before
+    /// it that had met a keeper is vouched for, once; one that hadn't isn't.
+    #[test]
+    fn saves_from_before_the_threshold_are_vouched_for_once() {
+        let new = Progress::decode(&Progress::default().encode());
+        assert!(new.has_flag(KEEPERS) && !new.has_flag(VOUCHED));
+        for old in ["f:beat_marlo", "lost:cinza", "won:bramble"] {
+            let p = Progress::decode(old);
+            assert!(p.has_flag(VOUCHED) && p.has_flag(KEEPERS), "{old}");
+        }
+        for old in ["", "f:beat_t_pell", "f:beat_warden", "lost:t_tobin"] {
+            let p = Progress::decode(old);
+            assert!(!p.has_flag(VOUCHED) && p.has_flag(KEEPERS), "{old:?}");
+        }
+        // Saved by this build: never vouched for later, whatever it holds.
+        assert!(!Progress::decode("f:keepers,f:beat_marlo").has_flag(VOUCHED));
+    }
+
     /// #150: `earned:` and `bested:` read a keeper's region's duelists.
     #[test]
     fn keeper_conditions_read_their_regions_duelists() {
@@ -837,10 +869,13 @@ mod tests {
     fn save_string_keeps_the_last_duel() {
         let mut p = Progress::decode("f:beat_marlo,lost:marlo");
         assert_eq!(p.last_duel(), Some(("marlo", false)));
-        assert_eq!(p.encode(), "f:beat_marlo,lost:marlo,c:100");
+        assert_eq!(
+            p.encode(),
+            "f:beat_marlo,f:keepers,f:vouched,lost:marlo,c:100"
+        );
         assert_eq!(Progress::decode(&p.encode()), p);
         p.settle();
-        assert_eq!(p.encode(), "f:beat_marlo,c:100");
+        assert_eq!(p.encode(), "f:beat_marlo,f:keepers,f:vouched,c:100");
     }
 
     #[test]
@@ -849,7 +884,7 @@ mod tests {
         p.set_gauntlet(Some((3, 0xdead_beef)));
         p.set_daily(20_385);
         let s = p.encode();
-        assert_eq!(s, "f:beat_warden,g:3_deadbeef,d:20385,c:100");
+        assert_eq!(s, "f:beat_warden,f:keepers,g:3_deadbeef,d:20385,c:100");
         assert_eq!(Progress::decode(&s), p);
         // Junk in the new tokens is skipped, like any other.
         assert_eq!(Progress::decode("g:x_y,d:soon,g:3"), Progress::default());
@@ -863,7 +898,7 @@ mod tests {
         p.apply("flag:talked_wren").unwrap();
         p.apply("flag:met").unwrap();
         let s = p.encode();
-        assert_eq!(s, "i:running_shoes,f:met,f:talked_wren,c:100");
+        assert_eq!(s, "i:running_shoes,f:keepers,f:met,f:talked_wren,c:100");
         assert_eq!(Progress::decode(&s), p);
         assert_eq!(Progress::decode(""), Progress::default());
         assert_eq!(
@@ -882,7 +917,7 @@ mod tests {
         assert_eq!(Progress::decode("c:0").coins(), 0);
         p.earn(25);
         assert!(!p.spend(126) && p.spend(125));
-        assert_eq!(p.encode(), "c:0");
+        assert_eq!(p.encode(), "f:keepers,c:0");
         assert_eq!(Progress::decode(&p.encode()), p);
     }
 
@@ -1061,9 +1096,9 @@ mod tests {
     fn the_clock_rides_in_the_save_string() {
         let mut p = Progress::default();
         assert_eq!(p.minute(), clock::START);
-        assert_eq!(p.encode(), "c:100", "08:00 writes nothing");
+        assert_eq!(p.encode(), "f:keepers,c:100", "08:00 writes nothing");
         p.set_minute(21 * 60 + 30);
-        assert_eq!(p.encode(), "c:100,t:1290");
+        assert_eq!(p.encode(), "f:keepers,c:100,t:1290");
         assert_eq!(Progress::decode(&p.encode()), p);
         assert_eq!(Progress::decode("f:beat_bramble").minute(), clock::START);
         for junk in ["t:1440", "t:night", "t:-5", "t:"] {
@@ -1239,7 +1274,7 @@ mod tests {
         assert!(!p.has_flag("juniper_gift") && p.has_flag("talked_wren"));
         assert_eq!(
             p.encode(),
-            "f:talked_tarn,f:talked_wren,f:talked_wynne,f:wynne_gift,c:100"
+            "f:keepers,f:talked_tarn,f:talked_wren,f:talked_wynne,f:wynne_gift,c:100"
         );
     }
 }
