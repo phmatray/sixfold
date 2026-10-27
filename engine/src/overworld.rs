@@ -34,10 +34,12 @@
 //!   a map at a tile: a ferry, a lift), cues for the world ([`Cue`]): state is
 //!   untouched
 //! - the cutscene cues (1.4): `walk:<actor>:<path>` (a path of `n`/`e`/`s`/`w`
-//!   letters), `face:<actor>:<dir>`, `cam:<actor>` / `cam:<x>:<z>` / `cam:hero`
+//!   letters), `face:<actor>:<dir>` (`dir` may be `hero`), `cam:<actor>` / `cam:<x>:<z>` / `cam:hero`
 //!   (the camera's look-at target), `wait:<ms>` (0 to [`MAX_WAIT`]),
 //!   `sfx:<sound>` and `music:<track>` (one of [`TRACKS`]); the actor `hero`
 //!   is the player
+//! - `stone:wake` (#152): the map's seal stone glows in the region's colour
+//!   until the scene ends
 //!
 //! Save string: comma-separated `i:<item>`, `f:<flag>`, `won:<id>` /
 //! `lost:<id>`, `g:<beaten>_<deck print>` (a Gauntlet run), `d:<day>` (the
@@ -83,7 +85,7 @@ pub const EMOTES: [&str; 5] = ["bang", "what", "dots", "heart", "note"];
 pub const SOUNDS: [&str; 6] = ["spark", "chime", "jingle", "gate", "seal", "door"];
 /// Tracks a `music:` cue may switch to (the world's tracks in `web/audio/audio.js`,
 /// and Rook's theme for his scenes).
-pub const TRACKS: [&str; 11] = [
+pub const TRACKS: [&str; 17] = [
     "overworld",
     "interior",
     "ember",
@@ -96,6 +98,13 @@ pub const TRACKS: [&str; 11] = [
     "rook",
     // The finale's hall scene (#67): the title's hook, slow and solemn.
     "finale",
+    // A keeper's own duel theme, for their entrance at the seal site (#152).
+    "duel_rival_ember",
+    "duel_rival_storm",
+    "duel_rival_tide",
+    "duel_rival_dream",
+    "duel_rival_grove",
+    "duel_rival_stone",
 ];
 /// The longest `wait:` a cutscene may hold, in milliseconds.
 pub const MAX_WAIT: u16 = 5000;
@@ -204,7 +213,7 @@ pub enum Cue {
     Sfx(String),
     /// An actor walks a path of `n`/`e`/`s`/`w` letters, one tile each.
     Walk { actor: String, path: String },
-    /// An actor turns to face `dir`.
+    /// An actor turns to face `dir` (`n`/`e`/`s`/`w`, or `hero`: toward wherever the hero stands).
     Face { actor: String, dir: String },
     /// The camera eases its look-at target over (its pitch never changes).
     Cam(CamTarget),
@@ -212,6 +221,15 @@ pub enum Cue {
     Wait(u16),
     /// Switch the music to one of [`TRACKS`] (the map's own comes back after the scene).
     Music(String),
+    /// The map's seal stone changes look until the scene ends.
+    Stone(StoneCue),
+}
+
+/// What a `stone:` cue does to the map's seal stone.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum StoneCue {
+    /// `stone:wake`: its faces glow in the region's colour, with one live light.
+    Wake,
 }
 
 /// What a `cam:` cue looks at.
@@ -382,10 +400,12 @@ pub fn parse_effect(e: &str) -> Result<Effect, String> {
                 path: s(path),
             })
         }
-        ("face", [actor, dir]) if FACINGS.contains(dir) => Effect::Cue(Cue::Face {
-            actor: s(actor),
-            dir: s(dir),
-        }),
+        ("face", [actor, dir]) if FACINGS.contains(dir) || *dir == "hero" => {
+            Effect::Cue(Cue::Face {
+                actor: s(actor),
+                dir: s(dir),
+            })
+        }
         // A lone number is a tile missing its z, not an actor.
         ("cam", [who]) if !who.bytes().all(|b| b.is_ascii_digit()) => {
             Effect::Cue(Cue::Cam(match *who {
@@ -399,6 +419,7 @@ pub fn parse_effect(e: &str) -> Result<Effect, String> {
             _ => return Err(format!("wait is 0 to {MAX_WAIT} ms in {e:?}")),
         },
         ("music", [track]) if TRACKS.contains(track) => Effect::Cue(Cue::Music(s(track))),
+        ("stone", ["wake"]) => Effect::Cue(Cue::Stone(StoneCue::Wake)),
         ("clock", [p]) => Effect::Clock(Phase::parse(p).ok_or_else(bad)?),
         ("warp", [map, x, z, f]) if FACINGS.contains(f) => Effect::Cue(Cue::Warp {
             map: s(map),
@@ -1195,6 +1216,37 @@ mod tests {
             assert!(matches!(p.apply(e), Ok(Applied::Cue(_))), "{e:?}");
         }
         assert_eq!(p, Progress::default(), "cues never change state");
+    }
+
+    /// #152: a seal stone wakes, and the keepers' duel themes play in scenes.
+    #[test]
+    fn parse_effect_reads_the_stone_and_the_keepers_themes() {
+        assert_eq!(
+            parse_effect("stone:wake"),
+            Ok(Effect::Cue(Cue::Stone(StoneCue::Wake)))
+        );
+        for region in ["ember", "storm", "tide", "dream", "grove", "stone"] {
+            let track = format!("duel_rival_{region}");
+            assert_eq!(
+                parse_effect(&format!("music:{track}")),
+                Ok(Effect::Cue(Cue::Music(track)))
+            );
+        }
+        assert_eq!(
+            parse_effect("face:marlo:hero"),
+            Ok(Effect::Cue(Cue::Face {
+                actor: "marlo".into(),
+                dir: "hero".into()
+            }))
+        );
+        for bad in [
+            "stone",
+            "stone:sleep",
+            "stone:wake:now",
+            "music:duel_rival_moon",
+        ] {
+            assert!(parse_effect(bad).is_err(), "{bad:?}");
+        }
     }
 
     #[test]

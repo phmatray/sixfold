@@ -13,7 +13,9 @@ use leptos::web_sys;
 use sixfold_engine::books;
 use sixfold_engine::clock::{self, Phase};
 use sixfold_engine::objective;
-use sixfold_engine::overworld::{parse_effect, Applied, CamTarget, Cue, Effect as Fx, Progress};
+use sixfold_engine::overworld::{
+    parse_effect, Applied, CamTarget, Cue, Effect as Fx, Progress, StoneCue,
+};
 use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
 
@@ -137,6 +139,7 @@ fn cue_json(c: &Cue) -> String {
         Cue::Cam(CamTarget::Tile(x, z)) => format!(r#"{{"cam":[{x},{z}]}}"#),
         Cue::Wait(ms) => format!(r#"{{"wait":{ms}}}"#),
         Cue::Music(track) => format!(r#"{{"music":"{track}"}}"#),
+        Cue::Stone(StoneCue::Wake) => r#"{"stone":"wake"}"#.into(),
     }
 }
 

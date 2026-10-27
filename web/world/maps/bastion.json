@@ -2155,6 +2155,23 @@
           ]
         },
         {
+          "if": "earned:orla & open:orla & !beat:orla & !flag:met_orla",
+          "lines": [
+            "Right. Word from the crews is you've put in your shifts.",
+            "Orla, foreman. The Stonebacks' seal sits in that stone, and it doesn't leave on a handshake.",
+            "Five prizes, no shortcuts. Let's break ground."
+          ],
+          "lines_fr": [
+            "Bon. Les équipes disent que tu as fait tes heures.",
+            "Orla, contremaîtresse. Le sceau des Échines de Pierre repose dans cette pierre, et il ne part pas sur une poignée de main.",
+            "Cinq cartes Récompense, pas de raccourcis. On attaque la roche."
+          ],
+          "do": [
+            "flag:met_orla",
+            "duel:orla"
+          ]
+        },
+        {
           "if": "!open:orla",
           "lines": [
             "Not yet. This stone only listens to someone carrying three seals.",
@@ -2255,5 +2272,109 @@
       "near": 16,
       "far": 34
     }
-  }
+  },
+  "scripts": [
+    {
+      "id": "reveal_bastion",
+      "if": "!flag:reveal_bastion",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_stone",
+            "cam:19:3",
+            "stone:wake",
+            "wait:1000",
+            "cam:orla",
+            "wait:800",
+            "cam:hero",
+            "flag:reveal_bastion"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "entrance_orla",
+      "if": "open:orla & earned:orla & !beat:orla & !flag:met_orla",
+      "at": [
+        [
+          19,
+          5
+        ],
+        [
+          19,
+          6
+        ],
+        [
+          20,
+          7
+        ],
+        [
+          21,
+          3
+        ],
+        [
+          21,
+          7
+        ],
+        [
+          22,
+          3
+        ],
+        [
+          22,
+          7
+        ],
+        [
+          23,
+          3
+        ],
+        [
+          23,
+          4
+        ],
+        [
+          23,
+          5
+        ],
+        [
+          23,
+          7
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_stone",
+            "cam:orla",
+            "face:orla:n",
+            "stone:wake",
+            "wait:700",
+            "face:orla:hero",
+            "wait:400"
+          ]
+        },
+        {
+          "say": "orla",
+          "lines": [
+            "Right. Word from the crews is you've put in your shifts.",
+            "Orla, foreman. The Stonebacks' seal sits in that stone, and it doesn't leave on a handshake.",
+            "Five prizes, no shortcuts. Let's break ground."
+          ],
+          "lines_fr": [
+            "Bon. Les équipes disent que tu as fait tes heures.",
+            "Orla, contremaîtresse. Le sceau des Échines de Pierre repose dans cette pierre, et il ne part pas sur une poignée de main.",
+            "Cinq cartes Récompense, pas de raccourcis. On attaque la roche."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:met_orla",
+            "duel:orla"
+          ]
+        }
+      ]
+    }
+  ]
 }

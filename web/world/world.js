@@ -59,6 +59,46 @@ const FADE = 350; // ms, warp fade
 const KEYS = { w: "n", z: "n", arrowup: "n", s: "s", arrowdown: "s", a: "w", q: "w", arrowleft: "w", d: "e", arrowright: "e" }; // WASD and AZERTY ZQSD
 const CLOCK_RATE = 1; // game minutes per real second: a day is 24 minutes (WORLD_DESIGN §7.2)
 const PHASE_FADE = 20; // daylight.js cross-fades this many game minutes into a phase
+const WAKE_MS = 600; // a seal stone wakes (and goes back to rest) over this long
+const STONE_LIGHT = 3; // its light at full wake
+// The seal-stone face whose colour is the region's, by the map's `region` (stone:wake).
+const REGION_FACE = { ember: "fire", storm: "lightning", tide: "water", dream: "psychic", grove: "grass", stone: "fighting" };
+
+// A map's seal stone, ready to wake in a scene (script.js `stone:wake`): its coloured faces (the vertices
+// build.js notes in the stone's merged mesh, `seal`: recoloured, so waking costs no draw call) and, outdoors,
+// one real light at it, made with the map at 0 so waking it never recompiles a shader. With the hero's
+// lantern and the three live lamps that is five, under the six (WORLD_DESIGN P1). The region's colour is
+// its own face's; a map with no region wakes each face in its own.
+function stoneRig(w) {
+  const faces = [], box = new THREE.Box3();
+  w.root.updateMatrixWorld(true);
+  w.root.traverse((o) => o.isMesh && o.userData.seal && (faces.push(...o.userData.seal.map((f) => ({ ...f, attr: o.geometry.attributes.color }))), box.expandByObject(o)));
+  if (!faces.length) return null;
+  const color = faces.find((f) => f.colour === REGION_FACE[w.map.region])?.color.clone() ?? null;
+  let light = null;
+  if (!w.map.light.indoor) {
+    light = new THREE.PointLight(color ?? "#ffe2a0", 0, 7, 1.5);
+    w.root.worldToLocal(box.getCenter(light.position).add(new THREE.Vector3(0, 0.6, 1))); // a little over it, toward the camera
+    light.layers.enableAll();
+    w.root.add(light);
+  }
+  return { faces, color, light, k: 0, want: 0 };
+}
+// Ease the stone toward its want (a cut under reduced motion): the faces' glow and the light together.
+function stoneStep(s, dt, reduced) {
+  if (!s || s.k === s.want) return;
+  s.k = reduced ? s.want : s.k + Math.sign(s.want - s.k) * Math.min(Math.abs(s.want - s.k), (dt * 1000) / WAKE_MS);
+  const e = s.k * s.k * (3 - 2 * s.k);
+  // Each face takes on the region's colour, brighter than paint (a map with no region: each its own).
+  for (const f of s.faces) {
+    tmpColor.copy(f.color).lerp(tmpColor2.copy(s.color ?? f.color).multiplyScalar(GLOW), e);
+    for (let i = f.start; i < f.start + f.count; i++) f.attr.setXYZ(i, tmpColor.r, tmpColor.g, tmpColor.b);
+    f.attr.needsUpdate = true;
+  }
+  if (s.light) s.light.intensity = STONE_LIGHT * e;
+}
+const tmpColor = new THREE.Color(), tmpColor2 = new THREE.Color();
+const GLOW = 1.8; // an awake face: its colour this much over paint (vertex colours may pass 1)
 
 // ---------- Mount ----------
 
@@ -360,6 +400,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // Cutscenes (script.js): the camera reports when it has reached what it was sent to look at.
   const cut = scenes({
     world: () => world, hero: () => hero, reduced: () => reduced, holds, cb, sound, tune, warp,
+    stone: (state) => world?.stone && (world.stone.want = state === "wake" ? 1 : 0),
     settled: () => look.distanceTo(aim) < 0.12 && lookVel.lengthSq() < 0.04,
     moved: () => (lastHero = ""), // the hero's tile is saved again (not during a scene: a reload replays it)
   });
@@ -499,6 +540,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     world = next;
     world.hero = null;
     world.day = daylight(world, reduced);
+    world.stone = stoneRig(world);
     scene.add(world.root);
     const L = map.light;
     scene.fog = L.indoor ? null : new THREE.Fog(L.background, L.fog?.near ?? 60, L.fog?.far ?? 90);
@@ -648,6 +690,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     book.pose(h);
     for (const n of w.npcs) updateNpc(w, n, dt, paused);
     animateProps(w, dt, reduced);
+    stoneStep(w.stone, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);
     sky(lit);
     w.life.update(dt, w.now, px, pz, lit.night);

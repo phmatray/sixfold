@@ -809,11 +809,13 @@ The engine stays the only parser (`engine/src/overworld.rs`). Arguments are spli
 | `clock:<phase>` | jump the clock to the start of a phase | state | 1.3 |
 | `warp:<map>:<x>:<z>:<dir>` | fade and load a map at a tile (ferry, lift, travel) | cue | 1.3 |
 | `walk:<actor>:<path>` | actor walks a path of `n/e/s/w` letters; waits until done | cue | 1.4 |
-| `face:<actor>:<dir>` | turn | cue | 1.4 |
+| `face:<actor>:<dir>` | turn; `dir` may be `hero` (toward where the hero stands, 1.10) | cue | 1.4 |
 | `cam:<actor>` / `cam:<x>:<z>` / `cam:hero` | ease the camera's look-at target (pitch never changes) | cue | 1.4 |
 | `wait:<ms>` | pause, 0–5000 | cue | 1.4 |
 | `emote:<actor>:<bang\|what\|dots\|heart\|note>` | bubble over a head (the trainer "!" uses this) | cue | 1.2 |
 | `sfx:<name>`, `music:<track>` | sound | cue | 1.4 |
+| `music:duel_rival_<region>` | a keeper's own duel theme (`ember`, `storm`, `tide`, `dream`, `grove`, `stone`), for their entrance; the map's music comes back when the scene ends | cue | 1.10 |
+| `stone:wake` | the map's seal stone wakes until the scene ends: its six coloured faces glow in the region's colour over 600 ms (a cut under reduced motion) with one live light at it (outdoors, made with the map: five point lights in all); only on a map with a `seal_stone` | cue | 1.10 |
 
 `apply` returns `Applied::Cue(Cue)` for cue effects without touching state; `web/src/world.rs` forwards a cue
 to `world_cue(json)` and waits for `cb("cue_done")` before the next effect. `Progress::apply_all(&[&str])`
@@ -1976,9 +1978,17 @@ I played the design through on paper. Here is what was still hollow, and what th
    Rook's epilogue; and every key-gated find is still there to sweep.
 7. **"Quests are text you forget."** There was no record of what you'd been asked. *Fixed*: the Journal (§5.4),
    data-driven, so it can't drift from the maps.
-8. **"Seal sites arrive without ceremony."** *Fixed (1.4)*: each seal site gets a 3-second camera reveal
-   script on the first visit (`on: enter`, `!flag:seen_<map>`): pan to the seal stone and the rival, back to the
-   hero. The fixed pitch is kept; only the look-at target moves.
+8. **"Seal sites arrive without ceremony."** Planned for 1.4, never built. *Fixed (1.10, #152)*: on the first
+   visit each seal site plays `reveal_<map>` (`on: enter`, `!flag:reveal_<map>`): the keeper's theme starts, the
+   camera eases to the seal stone, the stone wakes in the region's colour (`stone:wake`), the camera moves to the
+   keeper and back to the hero, at most 3 `cam` and 2 000 ms of `wait`. Once the keeper is earned
+   (`open:` & `earned:` & `!beat:` & `!flag:met_<id>`), stepping onto any tile two from them plays
+   `entrance_<id>`: the theme, the camera on the keeper, who turns to the stone as it wakes and then to the hero,
+   two or three lines in their voice naming the region's seal, then `flag:met_<id>` and `duel:<id>` open the
+   challenge panel (a skip still lands there). Talked to first, the keeper's dialogue says the same lines and
+   does the same (a branch first after the duel results). The fixed pitch is kept; only the look-at target
+   moves, and reduced motion makes every move a cut. `engine/tests/world_data.rs` and `check-maps` hold the
+   shape.
 9. **"The economy is a spreadsheet."** Facets with nothing exciting to buy feel like points. *Fixed*: each inn
    stocks one Rare to save up for, the Press can make the one card you need, the voucher is a real prize, and
    outfits give late Facets somewhere to go. The `economy_sim` keeps packs at about one per 12 minutes of

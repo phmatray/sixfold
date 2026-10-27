@@ -5011,6 +5011,23 @@
           ]
         },
         {
+          "if": "earned:cinza & open:cinza & !beat:cinza & !flag:met_cinza",
+          "lines": [
+            "Finally! I've run the kiln road twice while you were getting here.",
+            "Cinza. The Emberlands' seal is in that stone, and it's still warm. Four prizes, no warm-up.",
+            "Three, two... no, just go!"
+          ],
+          "lines_fr": [
+            "Enfin ! J'ai couru deux fois la route du four pendant que tu arrivais.",
+            "Cinza. Le sceau des Braisières est dans cette pierre, et il est encore chaud. Quatre cartes Récompense, sans échauffement.",
+            "Trois, deux… non, on y va !"
+          ],
+          "do": [
+            "flag:met_cinza",
+            "duel:cinza"
+          ]
+        },
+        {
           "if": "beat:warden",
           "lines": [
             "The champion, running the kiln road like the rest of us. Ha!",
@@ -5114,5 +5131,101 @@
       "near": 16,
       "far": 34
     }
-  }
+  },
+  "scripts": [
+    {
+      "id": "reveal_kilnmouth",
+      "if": "!flag:reveal_kilnmouth",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_ember",
+            "cam:19:11",
+            "stone:wake",
+            "wait:1000",
+            "cam:cinza",
+            "wait:800",
+            "cam:hero",
+            "flag:reveal_kilnmouth"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "entrance_cinza",
+      "if": "open:cinza & earned:cinza & !beat:cinza & !flag:met_cinza",
+      "at": [
+        [
+          19,
+          13
+        ],
+        [
+          19,
+          14
+        ],
+        [
+          19,
+          15
+        ],
+        [
+          20,
+          15
+        ],
+        [
+          21,
+          11
+        ],
+        [
+          21,
+          15
+        ],
+        [
+          23,
+          11
+        ],
+        [
+          23,
+          12
+        ],
+        [
+          23,
+          15
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_ember",
+            "cam:cinza",
+            "face:cinza:n",
+            "stone:wake",
+            "wait:700",
+            "face:cinza:hero",
+            "wait:400"
+          ]
+        },
+        {
+          "say": "cinza",
+          "lines": [
+            "Finally! I've run the kiln road twice while you were getting here.",
+            "Cinza. The Emberlands' seal is in that stone, and it's still warm. Four prizes, no warm-up.",
+            "Three, two... no, just go!"
+          ],
+          "lines_fr": [
+            "Enfin ! J'ai couru deux fois la route du four pendant que tu arrivais.",
+            "Cinza. Le sceau des Braisières est dans cette pierre, et il est encore chaud. Quatre cartes Récompense, sans échauffement.",
+            "Trois, deux… non, on y va !"
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:met_cinza",
+            "duel:cinza"
+          ]
+        }
+      ]
+    }
+  ]
 }
