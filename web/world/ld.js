@@ -82,7 +82,7 @@ export function branches(path, x, z) {
 }
 
 // The path graph: junctions (3+ ways out) and dead ends (one narrow way out, 1-2 tiles wide), each dead end with
-// its length back to the nearest junction along the path (Infinity when no junction is reached).
+// its length back to the nearest junction along the path; a piece of path with no junction measures its own length.
 export function pathGraph(g) {
   const { path } = g, junctions = [], endTiles = new Set(), runs = {};
   for (const k of path) {
@@ -101,20 +101,22 @@ export function pathGraph(g) {
       const d = dist.get(c) ?? Infinity;
       if (!best || d > best.length) best = { x: +c.split(",")[0], z: +c.split(",")[1], length: d };
     }
+    if (!Number.isFinite(best.length)) best.length = Math.max(...bfs(path, [[best.x, best.z]]).dist.values());
     deadEnds.push(best);
   }
   return { junctions, deadEnds };
 }
 
 // Breadth-first search over a set of open tiles from one or more starts: tile -> steps, and each tile's parent.
-export function bfs(open, starts) {
+// `step(ax, az, bx, bz)`, when given, says whether the hero can step between two neighbours (a ledge can't be).
+export function bfs(open, starts, step = () => true) {
   const dist = new Map(), parent = new Map(), queue = [];
   for (const [x, z] of starts) if (open.has(key(x, z)) && !dist.has(key(x, z))) dist.set(key(x, z), 0), queue.push([x, z]);
   for (let i = 0; i < queue.length; i++) {
     const [x, z] = queue[i], d = dist.get(key(x, z));
     for (const [dx, dz] of DIRS) {
       const k = key(x + dx, z + dz);
-      if (!open.has(k) || dist.has(k)) continue;
+      if (!open.has(k) || dist.has(k) || !step(x, z, x + dx, z + dz)) continue;
       dist.set(k, d + 1), parent.set(k, key(x, z)), queue.push([x + dx, z + dz]);
     }
   }

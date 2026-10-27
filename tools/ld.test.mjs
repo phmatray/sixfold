@@ -28,6 +28,10 @@ test("a 1-wide dead-end branch is found, with its length back to the junction", 
   const branch = deadEnds.find((d) => d.x === 12);
   assert.deepEqual([branch.x, branch.z], [12, 4]);
   assert.ok(branch.length > 3, `length ${branch.length}`);
+  // A loose piece of path, with no junction, measures its own length: 4 tiles is short enough, 8 isn't.
+  const piece = (n) => pathGraph(grids(map([], blank(20, 20, { 16: "..." + "p".repeat(n) + ".".repeat(17 - n) })), T)).deadEnds;
+  assert.ok(piece(4).length && piece(4).every((d) => d.length <= 3), JSON.stringify(piece(4)));
+  assert.ok(piece(8).some((d) => d.length === 7), JSON.stringify(piece(8)));
 });
 
 test("walking 40 tiles takes 10 s", () => assert.equal(walkTime(40), 10));

@@ -47,6 +47,7 @@ const HEIGHT = { tree: 3.5, pine: 3.8, birch: 3.6, willow: 3.8, house: 5, sign: 
   bed: 1.1, light_box: 1.25, type_case: 1.35, curio_cabinet: 2.3, seal_stone: 1.9, cave_mouth: 2.2, crab_pots: 0.45, net_rack: 1.45, bollard: 0.6, rock_sea: 0.55 };
 const TALL_OF = (a) => TALL[a] ?? 1;
 const LD = { FOOT, DECK, WALKABLE, tall: (a) => HEIGHT[a] ?? TALL_OF(a) }; // the tables web/world/ld.js reads
+const TIERS = ["major", "secondary", "micro", "secret"]; // points of interest (`poi`), WORLD_RULES §9
 const LADDER = new Set(eval(`(${src.match(/export const LADDER = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove", "stone", "cave"]);
 const BEDS = new Set([...TRACKS, "interior"]); // audio.js BEDS
@@ -570,9 +571,7 @@ function rules(name, m, solid, all) {
       for (let d = 1; d <= 2; d++) if (!free(x + inward[e.side][0] * d, z + inward[e.side][1] * d)) rule.push(`${name}: exit ${e.side} to ${e.to}: ${x + inward[e.side][0] * d},${z + inward[e.side][1] * d} blocks the way in`);
     }
     if (path < 2) rule.push(`${name}: exit ${e.side} to ${e.to} has no path running out to the edge`);
-    const dest = maps[e.to], names = [dest?.title, dest?.title_fr].filter(Boolean);
-    const sign = (m.interactions ?? []).find((i) => i.kind === "sign" && Array.from({ length: width }, (_, k) => edge(e.side, e.span[0] + k)).some(([x, z]) => Math.abs(i.x - x) + Math.abs(i.z - z) <= 6)
-      && names.length && dest.title && String(i.text).includes(dest.title));
+    const dest = maps[e.to], sign = exitSign(m, e);
     if (!sign) rule.push(`${name}: exit ${e.side} to ${e.to} has no signpost within 6 tiles naming "${dest?.title}"`);
     else if (dest.title_fr && !String(sign.text_fr).includes(dest.title_fr)) warn.push(`${name}: the signpost at ${sign.x},${sign.z} names ${dest.title} but not "${dest.title_fr}" in French`);
   }
@@ -600,7 +599,6 @@ function rules(name, m, solid, all) {
 // with the browser overlays. The tags are checked on every map; the six blocking rules are errors (with --strict)
 // on maps with `"level_design": 2` and report lines on the rest.
 function levelDesign() {
-  const TIERS = ["major", "secondary", "micro", "secret"];
   const tile = (t) => Array.isArray(t) && t.length === 2 && t.every(Number.isInteger);
   for (const [name, m] of Object.entries(maps)) {
     const inMap = ([x, z]) => x >= 0 && z >= 0 && x < m.width && z < m.height;
@@ -631,11 +629,16 @@ function levelDesign() {
 }
 // One outdoor map's section of the advisory report (never a failure): what design() found, against the budgets.
 function report(name) {
-  const { m, all } = ctx[name], d = design(name), k = (x, z) => `${x},${z}`, advice = [];
+  const { m, all, height } = ctx[name], d = design(name), k = (x, z) => `${x},${z}`, advice = [];
+  // Walks follow the 0.6 m step and ladders, as reach() does. ponytail: lifts and the per-row deck heights are left
+  // out, so a walk through a lift reads as unreachable (skipped), never as shorter.
+  const ladders = new Set(m.props.filter((p) => LADDER.has(p.asset)).map((p) => k(p.x, p.z)));
+  const step = (ax, az, bx, bz) => Math.abs((height[k(bx, bz)] ?? 0) - (height[k(ax, az)] ?? 0)) <= 0.6 || ladders.has(k(ax, az)) || ladders.has(k(bx, bz));
+  const walk = (starts) => ld.bfs(all, starts, step);
   const xz = (t) => t.split(",").map(Number);
   const range = ([lo, hi]) => (lo === hi ? `${lo}` : `${lo}–${hi}`);
   // POIs per tier, against the budget for the map's kind.
-  const count = Object.fromEntries(["major", "secondary", "micro", "secret"].map((t) => [t, d.pois.filter((p) => p.tier === t).length]));
+  const count = Object.fromEntries(TIERS.map((t) => [t, d.pois.filter((p) => p.tier === t).length]));
   const budget = BUDGET[m.kind] ?? {};
   for (const [t, [lo, hi]] of Object.entries(budget)) if (count[t] < lo || count[t] > hi) advice.push(`[poi-budget] ${count[t]} ${t} POIs (${range([lo, hi])} for a ${m.kind})`);
   // Discovery spacing: from each entrance and each discovery (a POI or a find), the walk to the nearest other one.
@@ -646,12 +649,12 @@ function report(name) {
     for (let x = p.x - 1; x <= p.x + w; x++) for (let z = p.z - 1; z <= p.z + dd; z++) if (all.has(k(x, z))) tiles.push(k(x, z));
     return { what: p.what, tiles };
   }), ...finds.map((f) => ({ what: f.what, tiles: near(f.x, f.z) }))].filter((f) => f.tiles.length);
-  const edgeMid = (e) => ({ n: [Math.round((e.span[0] + e.span[1]) / 2), 0], s: [Math.round((e.span[0] + e.span[1]) / 2), m.height - 1], w: [0, Math.round((e.span[0] + e.span[1]) / 2)], e: [m.width - 1, Math.round((e.span[0] + e.span[1]) / 2)] })[e.side];
+  const edgeMid = (e) => edgeTile(m, e.side, Math.round((e.span[0] + e.span[1]) / 2));
   const entrances = [{ what: "the spawn", tiles: [k(m.spawn.x, m.spawn.z)] }, ...(landing[name] ?? []).map((t) => ({ what: `the landing ${t}`, tiles: [t] })),
     ...(m.exits ?? []).map((e) => ({ what: `the exit ${e.side} to ${e.to}`, tiles: [k(...edgeMid(e))] }))].filter((e) => e.tiles.every((t) => all.has(t)));
   let gap = null;
   for (const src of [...entrances, ...finds2]) {
-    const { dist } = ld.bfs(all, src.tiles.map(xz));
+    const { dist } = walk(src.tiles.map(xz));
     let best = Infinity;
     for (const f of finds2) if (f !== src) for (const t of f.tiles) best = Math.min(best, dist.get(t) ?? Infinity);
     if (Number.isFinite(best) && (!gap || best > gap.tiles)) gap = { tiles: best, from: src.what };
@@ -675,7 +678,7 @@ function report(name) {
   for (const c of dom) advice.push(`[variety] chunk ${c.chunk} is ${Math.round(c.share * 100)}% ${c.asset} (${c.n} props; ${Math.round(BUDGET.dominant_share_max * 100)}% at most)`);
   const ends = entrances.map((e) => e.tiles[0]);
   const far = (from) => {
-    const r = ld.bfs(all, [xz(from)]), pool = ends.length > 1 ? ends : [...r.dist.keys()];
+    const r = walk([xz(from)]), pool = ends.length > 1 ? ends : [...r.dist.keys()];
     return { r, to: pool.reduce((a, b) => ((r.dist.get(b) ?? -1) > (r.dist.get(a) ?? -1) ? b : a)) };
   };
   const a = far(k(m.spawn.x, m.spawn.z)).to, { r, to: b } = far(a), route = [];
@@ -698,6 +701,18 @@ function report(name) {
     "",
   ];
 }
+// The tile on a map's edge at position c along an exit's side.
+function edgeTile(m, side, c) {
+  return { n: [c, 0], s: [c, m.height - 1], w: [0, c], e: [m.width - 1, c] }[side];
+}
+function edgeTiles(m, e) {
+  return Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => edgeTile(m, e.side, e.span[0] + c));
+}
+// An exit's signpost: a sign within 6 tiles of the exit's edge naming the map it leads to (WORLD_RULES 5).
+function exitSign(m, e) {
+  const dest = maps[e.to];
+  return dest?.title && (m.interactions ?? []).find((i) => i.kind === "sign" && String(i.text).includes(dest.title) && edgeTiles(m, e).some(([x, z]) => Math.abs(i.x - x) + Math.abs(i.z - z) <= 6));
+}
 // `view` (a map's viewpoints): one [x, z] or a list of them.
 function views(m) {
   return m.view === undefined ? [] : Array.isArray(m.view?.[0]) ? m.view : [m.view];
@@ -712,10 +727,7 @@ function design(name) {
   const approach = (x, z) => near4.map(([dx, dz]) => [x + dx, z + dz]).find(([a, b]) => all.has(k(a, b)));
   const hostOf = (x, z) => boxes.find((b) => x >= b.x0 && x < b.x1 && z >= b.z0 && z < b.z1);
   const seen = (from, target) => ld.visible(m, boxes, { x: from[0], z: from[1], y: floor(...from) }, target);
-  const edge = (side, c) => ({ n: [c, 0], s: [c, H - 1], w: [0, c], e: [W - 1, c] })[side];
-  const exitSign = (e) => (m.interactions ?? []).find((i) => i.kind === "sign" && maps[e.to]?.title && String(i.text).includes(maps[e.to].title)
-    && Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => edge(e.side, e.span[0] + c)).some(([x, z]) => Math.abs(i.x - x) + Math.abs(i.z - z) <= 6));
-  const signs = new Set((m.exits ?? []).map(exitSign).filter(Boolean));
+  const signs = new Set((m.exits ?? []).map((e) => exitSign(m, e)).filter(Boolean));
   // Points of interest by tier: a `poi` tag, or major by default for warps, waymarks, exit signposts and people
   // who start a story duel (a rival, a seal keeper: a `duel:` cue in what they say).
   const duelist = (n) => n.model === "npc_rival" || /"duel:/.test(JSON.stringify(n.dialogue ?? []));
@@ -744,7 +756,7 @@ function design(name) {
     const box = p.prop ? boxes.find((b) => b.prop === p.prop) : hostOf(p.x, p.z);
     const [w, d] = p.prop ? ld.foot(p.prop, FOOT) : [1, 1];
     let from = null;
-    for (let x = p.x; x < p.x + w && !from; x++) for (let z = p.z; z < p.z + d && !from; z++) from = approach(x, z);
+    for (let z = p.z + d - 1; z >= p.z && !from; z--) for (let x = p.x; x < p.x + w && !from; x++) from = approach(x, z); // front row first
     if (!from) continue; // unreachable: the reach rules already say so
     const y = p.prop ? box?.y1 ?? 1 : p.npc ? 1.45 : box ? Math.min(box.y1, 2) : 1;
     if (!seen(from, { x: p.x, z: p.z, w, d, y, self: box })) blocking.push(`[hidden-mandatory] the ${p.what} is hidden from the camera when you stand at ${from}`);
@@ -761,7 +773,7 @@ function design(name) {
     ...(m.interactions ?? []), ...(m.npcs ?? []), ...(m.warps ?? []),
     ...m.props.filter((p) => p.poi || p.landmark || Math.max(...(DECK[p.asset] ?? [0])) >= 0.5).flatMap(tilesOf),
     ...views(m).map(([x, z]) => ({ x, z })),
-    ...(m.exits ?? []).flatMap((e) => Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => edge(e.side, e.span[0] + c)).map(([x, z]) => ({ x, z }))),
+    ...(m.exits ?? []).flatMap((e) => edgeTiles(m, e).map(([x, z]) => ({ x, z }))),
   ];
   const graph = ld.pathGraph(g);
   for (const e of graph.deadEnds) {
@@ -773,7 +785,7 @@ function design(name) {
   // it leads to).
   for (const e of m.exits ?? []) {
     for (const [on, ex] of [[name, e], [e.to, maps[e.to]?.exits?.find((b) => b.side === BACK[e.side] && b.to === name)]]) {
-      if (!ex || !ctx[on]) continue;
+      if (!ex || !ctx[on] || (on !== name && maps[on].level_design === 2)) continue; // a v2 neighbour reports its own
       const n = exitSeen(on, ex);
       if (n < 2) blocking.push(`[exit-both-ways] ${on === name ? "" : `on ${on}, `}exit ${ex.side} to ${ex.to}: ${n} of its edge tiles can be seen from 4 tiles inside (2 needed)`);
     }
@@ -796,7 +808,7 @@ function design(name) {
   // its way out, not facing off the map (world.js tryStep).
   for (const [from, f] of Object.entries(maps))
     for (const w of f.warps ?? []) {
-      if (from !== name && w.to !== name) continue;
+      if (from !== name && (w.to !== name || f.level_design === 2)) continue; // a v2 map reports its own warps
       const to = maps[w.to], s = w.spawn ?? to?.spawn;
       if (!to || !s || w.to === from) continue;
       const backs = (to.warps ?? []).filter((b) => b.to === from), on = backs.find((b) => b.x === s.x && b.z === s.z);
@@ -814,14 +826,16 @@ function design(name) {
 // How many of an exit's edge tiles are on screen and seen (a person's height above them, 1.45 m) from the tile 4
 // inside its middle.
 function exitSeen(name, e) {
-  const { m, height } = ctx[name], W = m.width, H = m.height;
+  const { m, height, all } = ctx[name];
   const boxes = (designed[name]?.g ?? ld.grids(m, LD)).boxes;
-  const edge = (c) => ({ n: [c, 0], s: [c, H - 1], w: [0, c], e: [W - 1, c] })[e.side];
   const inward = { n: [0, 1], s: [0, -1], w: [1, 0], e: [-1, 0] }[e.side];
-  const mid = edge(Math.round((e.span[0] + e.span[1]) / 2)), hero = [mid[0] + inward[0] * 4, mid[1] + inward[1] * 4];
+  // The tile 4 in from the exit's middle, or the nearest reachable one on the way out to it.
+  const mid = edgeTile(m, e.side, Math.round((e.span[0] + e.span[1]) / 2));
+  let hero = null;
+  for (let d = 4; d >= 0 && !hero; d--) if (all.has(`${mid[0] + inward[0] * d},${mid[1] + inward[1] * d}`)) hero = [mid[0] + inward[0] * d, mid[1] + inward[1] * d];
+  if (!hero) return 0;
   let n = 0;
-  for (let c = e.span[0]; c <= e.span[1]; c++) {
-    const [x, z] = edge(c);
+  for (const [x, z] of edgeTiles(m, e)) {
     if (Math.abs(x - hero[0]) > SCREEN[0] >> 1 || Math.abs(z - hero[1]) > SCREEN[1] >> 1) continue;
     if (ld.visible(m, boxes, { x: hero[0], z: hero[1], y: height[`${hero[0]},${hero[1]}`] ?? 0 }, { x, z, y: (height[`${x},${z}`] ?? 0) + 1.45 })) n++;
   }
