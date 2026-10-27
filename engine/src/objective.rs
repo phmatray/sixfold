@@ -254,14 +254,14 @@ impl Objective {
                 let s = if k == 1 { "" } else { "s" };
                 let de = if r.name.starts_with(['A', 'E', 'I', 'O', 'U']) { "d'" } else { "de " };
                 // Where they are, so the player isn't sent to the keeper's own site for them.
-                let wait = r.waiting_line(p).map(|w| format!(" {w}")).unwrap_or_default();
+                let wait = r.waiting_line(p).map(|w| format!("{w} ")).unwrap_or_default();
                 tr(
                     format!(
-                        "Beat {k} more duelist{s} of {} to earn {}'s challenge ({n} of {}). {}.{wait}",
+                        "Beat {k} more duelist{s} of {} to earn {}'s challenge ({n} of {}). {wait}{}.",
                         r.region.en, r.name, r.earn, r.place.en
                     ),
                     format!(
-                        "Battez encore {k} duelliste{s} {} pour mériter le défi {de}{} ({n} sur {}). {}.{wait}",
+                        "Battez encore {k} duelliste{s} {} pour mériter le défi {de}{} ({n} sur {}). {wait}{}.",
                         r.region_de(), r.name, r.earn, r.place.fr
                     ),
                 )
@@ -398,13 +398,11 @@ mod tests {
         );
         // Where the rest are: Pell and Nell are on the boardwalk, with two more.
         assert!(
-            en.ends_with(
-                "Some still wait on the Bellflats, in Gullhaven and on the Saltwind Boardwalk."
-            ),
+            en.contains("(2 of 3). Some still wait on the Bellflats, in Gullhaven and on the Saltwind Boardwalk. The Bellflats,"),
             "{en}"
         );
         assert!(
-            fr.ends_with("Il en reste sur les Grèves de la Cloche, à Havre-aux-Mouettes et sur la Promenade de Ventsalé."),
+            fr.contains("(2 sur 3). Il en reste sur les Grèves de la Cloche, à Havre-aux-Mouettes et sur la Promenade de Ventsalé. Les Grèves"),
             "{fr}"
         );
         // Hushwillow Lane done: two places left, in campaign order.
