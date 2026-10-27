@@ -1,7 +1,14 @@
 // Level-design analysis (#110): the geometry tools/check-maps.mjs judges a map with, and the debug overlays
-// (#111) draw. Plain ES with no imports, so Node and the browser share one truth. Tables (FOOT, DECK, WALKABLE,
-// heights) come in as arguments; nothing here reads props.js.
+// (#111) draw. Plain ES with no imports, so Node and the browser share one truth. The props.js tables (FOOT, DECK,
+// WALKABLE, TALL) come in as arguments; nothing here reads props.js.
 // Tile (x, z) covers [x, x + 1] x [z, z + 1]; north is -z, the camera sits south (+z) looking north and down.
+
+// Prop heights (m), from ASSETS.md / ASSETS_V13.md, for the camera boxes and depth stacking; props.js TALL fills
+// the rest (the `tall` table check-maps and the overlays pass to grids()).
+export const HEIGHT = { tree: 3.5, pine: 3.8, birch: 3.6, willow: 3.8, house: 5, sign: 1.3, signpost: 1.6, lantern: 2.2, bush: 0.7, flowers: 0.3,
+  rock: 0.6, crates: 0.9, glow_mushroom: 0.35, glow_mushroom_tall: 0.9, glow_shelf: 0.62, bench: 0.9, stall: 2.3, stall_b: 2.3, fountain: 1.6, stump: 0.55, log: 0.55, hanging_sign: 2.5, boat: 0.4, reeds: 0.9,
+  shelf: 2, bookcase: 2.3, oven: 2.45, printing_press: 1.8, workbench: 1.8, net_locker: 1.95, plant: 1, chair: 0.9, display_case: 1.1, lamp: 1.6,
+  bed: 1.1, light_box: 1.25, type_case: 1.35, curio_cabinet: 2.3, seal_stone: 1.9, cave_mouth: 2.2, crab_pots: 0.45, net_rack: 1.45, bollard: 0.6, rock_sea: 0.55 };
 
 const DIRS = [[0, -1], [0, 1], [1, 0], [-1, 0]];
 const key = (x, z) => `${x},${z}`;
@@ -42,11 +49,18 @@ export function grids(map, t) {
 // from: { x, z, y? (floor) }; target: { x, z, w = 1, d = 1, y (top, m), self? }.
 // ponytail: props are their bounding boxes and the terrain (cliffs, raised tiles) hides nothing; a real mesh
 // test belongs in the browser overlay if the boxes prove too strict.
-export function visible(map, boxes, from, target) {
+export const visible = (map, boxes, from, target) => !blocker(map, boxes, from, target);
+
+// That ray: the camera's eye `o` and the target's top centre `e`, both [x, y, z].
+export function ray(map, from, target) {
   const cam = map.camera ?? {}, pitch = ((cam.pitch ?? 50) * Math.PI) / 180, dist = cam.distance ?? 12, off = cam.lookAtOffset ?? [0, 0.75, 0];
   const look = [from.x + 0.5 + off[0], (from.y ?? 0) + off[1], from.z + 0.5 + off[2]];
-  const o = [look[0], look[1] + Math.sin(pitch) * dist, look[2] + Math.cos(pitch) * dist];
-  const e = [target.x + (target.w ?? 1) / 2, target.y, target.z + (target.d ?? 1) / 2];
+  return { o: [look[0], look[1] + Math.sin(pitch) * dist, look[2] + Math.cos(pitch) * dist], e: [target.x + (target.w ?? 1) / 2, target.y, target.z + (target.d ?? 1) / 2] };
+}
+
+// The first box in `boxes` that blocks that ray (null: the target is seen); the debug overlay highlights it.
+export function blocker(map, boxes, from, target) {
+  const { o, e } = ray(map, from, target);
   const dir = [e[0] - o[0], e[1] - o[1], e[2] - o[2]];
   const self = new Set([target.self ?? []].flat());
   for (const b of boxes) {
@@ -62,9 +76,71 @@ export function visible(map, boxes, from, target) {
       if (a > c) [a, c] = [c, a];
       t0 = Math.max(t0, a), t1 = Math.min(t1, c);
     }
-    if (t0 < t1) return false;
+    if (t0 < t1) return b;
   }
-  return true;
+  return null;
+}
+
+// Points of interest by tier (WORLD_RULES §9): a `poi` tag, or major by default for warps, waymarks, exit
+// signposts (`signs`, a Set of interactions) and people who start a story duel (a rival, a seal keeper: a `duel:`
+// cue in what they say). Each: { x, z, tier, what, prop? (a tagged prop), o? (the spot, person or warp), npc? }.
+export function pois(m, signs = new Set()) {
+  const duelist = (n) => n.model === "npc_rival" || /"duel:/.test(JSON.stringify(n.dialogue ?? []));
+  return [
+    ...m.props.filter((p) => p.poi).map((p) => ({ x: p.x, z: p.z, tier: p.poi, what: `${p.asset} ${p.x},${p.z}`, prop: p })),
+    ...(m.interactions ?? []).map((i) => ({ x: i.x, z: i.z, tier: i.poi ?? (i.kind === "waymark" || signs.has(i) ? "major" : null), what: `${i.kind} ${i.id ?? ""} ${i.x},${i.z}`.replace("  ", " "), o: i })),
+    ...(m.npcs ?? []).map((n) => ({ x: n.x, z: n.z, tier: n.poi ?? (duelist(n) ? "major" : null), what: `${n.id} ${n.x},${n.z}`, npc: true, o: n })),
+    ...(m.warps ?? []).map((w) => ({ x: w.x, z: w.z, tier: w.poi ?? "major", what: `warp to ${w.to} ${w.x},${w.z}`, o: w })),
+  ].filter((p) => p.tier);
+}
+
+// The hidden-mandatory check (§11) on one POI of `pois`: the tile it is used from (its front row first, then
+// south, east, west, north of each tile: the camera looks north) and the target the camera must see from there
+// (its top). null when no reachable tile is beside it. g: grids(); open: a Set of reachable tiles; floor(x, z).
+export function approach(p, g, open, floor, FOOT) {
+  const near4 = [[0, 1], [1, 0], [-1, 0], [0, -1]];
+  const box = p.prop ? g.boxes.find((b) => b.prop === p.prop) : g.boxes.find((b) => p.x >= b.x0 && p.x < b.x1 && p.z >= b.z0 && p.z < b.z1);
+  const [w, d] = p.prop ? foot(p.prop, FOOT) : [1, 1];
+  let from = null;
+  for (let z = p.z + d - 1; z >= p.z && !from; z--)
+    for (let x = p.x; x < p.x + w && !from; x++) from = near4.map(([dx, dz]) => [x + dx, z + dz]).find(([a, b]) => open.has(key(a, b))) ?? null;
+  if (!from) return null;
+  const y = p.prop ? box?.y1 ?? 1 : p.npc ? 1.45 : box ? Math.min(box.y1, 2) : 1;
+  return { from: { x: from[0], z: from[1], y: floor(...from) }, target: { x: p.x, z: p.z, w, d, y, self: box } };
+}
+
+// The tile on a map's edge at position c along an exit's side, and all of an exit's edge tiles.
+export const edgeTile = (m, side, c) => ({ n: [c, 0], s: [c, m.height - 1], w: [0, c], e: [m.width - 1, c] })[side];
+export const edgeTiles = (m, e) => Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => edgeTile(m, e.side, e.span[0] + c));
+// An exit's signpost: a sign within 6 tiles of the exit's edge naming `dest`, the map it leads to (WORLD_RULES 5).
+export function exitSign(m, e, dest) {
+  return dest?.title && (m.interactions ?? []).find((i) => i.kind === "sign" && String(i.text).includes(dest.title) && edgeTiles(m, e).some(([x, z]) => Math.abs(i.x - x) + Math.abs(i.z - z) <= 6));
+}
+
+// The discoveries of a map, for its spacing: each POI (the reachable tiles round its footprint) and each find
+// that isn't one (its tile and the four round it). [{ what, tiles: ["x,z"] }], those with a reachable tile.
+export function discoveries(m, pois, open, FOOT) {
+  const finds = (m.interactions ?? []).filter((i) => i.kind === "find" && !pois.some((p) => p.o === i)).map((i) => ({ x: i.x, z: i.z, what: `find ${i.id} ${i.x},${i.z}` }));
+  const near = (x, z) => [[0, 0], [0, 1], [1, 0], [-1, 0], [0, -1]].map(([dx, dz]) => key(x + dx, z + dz)).filter((t) => open.has(t));
+  return [...pois.map((p) => {
+    const [w, d] = p.prop ? foot(p.prop, FOOT) : [1, 1], tiles = [];
+    for (let x = p.x - 1; x <= p.x + w; x++) for (let z = p.z - 1; z <= p.z + d; z++) if (open.has(key(x, z))) tiles.push(key(x, z));
+    return { what: p.what, tiles };
+  }), ...finds.map((f) => ({ what: f.what, tiles: near(f.x, f.z) }))].filter((f) => f.tiles.length);
+}
+
+// The longest walk without a discovery: from each of `sources` ({ what, tiles }) the walk to the nearest of `finds`
+// (not itself), the longest of those. { tiles, from (the source), to (the tile reached), parent (to trace the walk
+// back) }, or null. walk(starts) is a bfs() over the map's open tiles.
+export function gap(sources, finds, walk) {
+  let best = null;
+  for (const src of sources) {
+    const { dist, parent } = walk(src.tiles.map((t) => t.split(",").map(Number)));
+    let near = null;
+    for (const f of finds) if (f !== src) for (const t of f.tiles) if (dist.has(t) && (!near || dist.get(t) < near.tiles)) near = { tiles: dist.get(t), to: t };
+    if (near && (!best || near.tiles > best.tiles)) best = { ...near, from: src, parent };
+  }
+  return best;
 }
 
 // The ring of tiles 2 away round (x, z), in order round the loop.

@@ -29,6 +29,10 @@
 //!   Facets (1.2), no `[tutorial]` section a player past the lesson (1.1).
 //! - A renamed flag is mapped on read ([`Progress::decode`]), never left
 //!   behind; ids of maps, rivals and items are never renamed.
+//! - A progress without the `keepers` flag predates the keepers' threshold
+//!   (1.10): if it already beat or duelled a keeper, [`Progress::decode`]
+//!   vouches for it (`vouched`, every keeper accepts), then marks it
+//!   `keepers`, so it is vouched for at most once.
 //! - Bump [`VERSION`] only for a change an older build would misread, and
 //!   keep reading every older version.
 //! - `engine/tests/fixtures/saves/` holds a save written by every release

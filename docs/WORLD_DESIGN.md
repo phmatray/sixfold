@@ -1795,6 +1795,7 @@ grow the pieces:
 | `daylight.js` | clock tick, phase presets and cross-fade, lamp budget (6 live), `glow` materials, lightning |
 | `ground.js`, `life.js`, `props.js` | as today; `life.js` adds fireflies, moths, rain; `props.js` adds FOOT/DECK entries |
 | `editor.js` | debug builds only, loaded by `?edit` (below) |
+| `debug.js`, `ld.js` | debug builds only, `?debug`: eight level-design overlays (keys 1–8, 0 for a clean capture, `el.sixfoldDebug([...])`) drawn from `ld.js`, the analysis `tools/check-maps.mjs` shares |
 
 New bridge events JS → Rust: `clock` (minute), `cue_done`, `steps` (batched), `seen` (map entered). Rust →
 JS: `world_cue(json)`, `world_refresh()`, `world_warp(map, x, z, facing)`, `world_clock(minute)`.

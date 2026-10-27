@@ -26,6 +26,14 @@ use crate::set::*;
 /// Seals there are to earn: one per rival, the Warden excluded.
 pub const SEALS: usize = 6;
 
+/// A save from before the keepers' threshold that had already met a keeper:
+/// every keeper accepts it ([`Rival::earned`]), set once by
+/// [`Progress::decode`].
+pub const VOUCHED: &str = "vouched";
+/// Every progress from this build on holds it: a save without it predates
+/// the threshold, and is vouched for on load if it already met a keeper.
+pub const KEEPERS: &str = "keepers";
+
 /// Facets a rival's first win pays; the Warden's.
 pub const RIVAL_PURSE: u32 = 300;
 pub const WARDEN_PURSE: u32 = 600;
@@ -43,6 +51,9 @@ pub struct RivalLines {
     pub ropes: T,
     /// The game-over screen, when the player won.
     pub defeat: T,
+    /// The challenge panel, when they won't duel yet: too few of their
+    /// region's duelists bested ([`Rival::earned`]).
+    pub refuse: T,
 }
 
 #[derive(Debug)]
@@ -61,6 +72,14 @@ pub struct Rival {
     pub needs: usize,
     /// The first win earns a seal (every rival but the Warden).
     pub seal: bool,
+    /// Their region, as a sentence names it ("the Saltreach"); empty for the
+    /// Warden.
+    pub region: T,
+    /// The route duelists of their region (its maps and its town's
+    /// interiors; `engine/tests/world_data.rs` holds the list to the maps).
+    pub duelists: &'static [&'static str],
+    /// How many of them must be bested before they accept a duel (never all).
+    pub earn: usize,
     /// Index into [`crate::booster::BOOSTERS`] of the packs they give.
     pub booster: usize,
     /// Packs the first win grants.
@@ -80,6 +99,39 @@ impl Rival {
 
     pub fn open(&self, p: &Progress) -> bool {
         seals(p) >= self.needs
+    }
+
+    /// Their region's duelists beaten so far (rook ids never count).
+    pub fn bested(&self, p: &Progress) -> usize {
+        self.duelists
+            .iter()
+            .filter(|id| p.has_flag(&format!("beat_{id}")))
+            .count()
+    }
+
+    /// Enough of their region's duelists bested for them to duel: always for
+    /// the Warden, once beaten, and for a save from before the threshold
+    /// ([`VOUCHED`]).
+    pub fn earned(&self, p: &Progress) -> bool {
+        !self.seal || self.beaten(p) || p.has_flag(VOUCHED) || self.bested(p) >= self.earn
+    }
+
+    /// They accept a duel now: the seals are met and the duel is earned.
+    pub fn accepts(&self, p: &Progress) -> bool {
+        self.open(p) && self.earned(p)
+    }
+
+    /// The region after French "de": "de la Côte Salée", "du Bois-Profond",
+    /// "des Braisières".
+    pub fn region_de(&self) -> String {
+        let r = self.region.fr;
+        if let Some(rest) = r.strip_prefix("les ") {
+            format!("des {rest}")
+        } else if let Some(rest) = r.strip_prefix("le ") {
+            format!("du {rest}")
+        } else {
+            format!("de {r}")
+        }
     }
 
     /// The promo card the first win against this rival gives.
@@ -156,6 +208,53 @@ pub fn stakes(id: Option<&str>) -> Stakes {
     }
 }
 
+/// A duel with a seal (or the champion's title) at stake.
+#[derive(Debug, Clone, Copy)]
+pub struct SealDuel {
+    pub rival: &'static Rival,
+    /// The Warden: the champion's title rather than a seal.
+    pub grand: bool,
+}
+
+/// Some while `id` is a seal keeper not yet beaten (`grand: false`) or the
+/// Warden before the first win (`grand: true`); None for rematches, route
+/// duelists, Rook and post-game duels.
+pub fn seal_duel(id: Option<&str>, p: &Progress) -> Option<SealDuel> {
+    let rival = id.and_then(rival).filter(|r| !r.beaten(p))?;
+    Some(SealDuel {
+        rival,
+        grand: !rival.seal,
+    })
+}
+
+impl SealDuel {
+    /// The title card's heading, written out per region so the French
+    /// articles are right.
+    pub fn heading(&self) -> T {
+        if self.grand {
+            return T::new("The Champion's Duel", "Le Duel du champion");
+        }
+        match self.rival.id {
+            "bramble" => T::new("Seal of the Grove", "Sceau du Bosquet"),
+            "marlo" => T::new("Seal of the Tide", "Sceau de la Marée"),
+            "cinza" => T::new("Seal of the Ember", "Sceau de la Braise"),
+            "quill" => T::new("Seal of the Storm", "Sceau de l'Orage"),
+            "orla" => T::new("Seal of the Stone", "Sceau du Roc"),
+            "lumen" => T::new("Seal of the Dream", "Sceau du Songe"),
+            _ => T::new("A Seal at Stake", "Un sceau en jeu"),
+        }
+    }
+}
+
+/// The next rival to duel: the first not yet beaten who accepts, else the
+/// first whose seals are met (their region's duelists still to best).
+pub fn next_rival(p: &Progress) -> Option<&'static Rival> {
+    let unbeaten = || RIVALS.iter().filter(|r| !r.beaten(p));
+    unbeaten()
+        .find(|r| r.accepts(p))
+        .or_else(|| unbeaten().find(|r| r.open(p)))
+}
+
 /// Seals earned so far.
 pub fn seals(p: &Progress) -> usize {
     RIVALS.iter().filter(|r| r.seal && r.beaten(p)).count()
@@ -199,6 +298,8 @@ pub static ROOK_LINES: RivalLines = RivalLines {
         "Blank again. Fine. I'll carve it myself one day.",
         "Encore blanc. Bon. Je la graverai moi-même, un jour.",
     ),
+    // Rook never refuses: his scenes start his duels.
+    refuse: T::new("Not now.", "Pas maintenant."),
 };
 
 /// The duel lines of a rival or of Rook, by id (route duelists have none).
@@ -389,6 +490,9 @@ pub static RIVALS: [Rival; 7] = [
         prizes: 2,
         needs: 0,
         seal: true,
+        region: T::new("the Deepgrove", "le Bois-Profond"),
+        duelists: &["t_fenna", "t_heath", "t_rue", "t_jory", "t_linden", "t_bryn", "t_hazel", "t_ossian", "t_sorrel", "t_vesper"],
+        earn: 3,
         booster: 3, // Grove
         packs: 2,
         style: Style::Stall,
@@ -397,6 +501,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Pruned. It'll grow back stronger. Yours might not.", "Taillé. Ça repoussera plus fort. Le tien, je n'en suis pas sûr."),
             ropes: T::new("You've found the gap in my hedge. Mind the thorns on the way through.", "Tu as trouvé le trou dans ma haie. Attention aux épines en passant."),
             defeat: T::new("Well grown. Go on, I've some pride to mulch.", "Bien poussé. Va, j'ai de la fierté à pailler."),
+            refuse: T::new("Not so fast. A hedge takes root before it flowers. Duel the Deepgrove's folk first, then come and find me.", "Pas si vite. Une haie prend racine avant de fleurir. Affronte d'abord les duellistes du Bois-Profond, puis reviens me voir."),
         },
     },
     Rival {
@@ -430,6 +535,9 @@ pub static RIVALS: [Rival; 7] = [
         prizes: 3,
         needs: 0,
         seal: true,
+        region: T::new("the Saltreach", "la Côte Salée"),
+        duelists: &["t_finch", "t_harrow", "t_mirela", "t_liesl", "t_dorrit", "t_brann", "t_pell", "t_nell", "t_skye", "t_morrow"],
+        earn: 3,
         booster: 1, // Tide
         packs: 2,
         style: Style::Stall,
@@ -438,6 +546,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Out with the ebb. It always comes back in, you know. Mine does.", "Parti avec le reflux. Ça revient toujours, tu sais. Chez moi, en tout cas."),
             ropes: T::new("Slack water. Nothing moves, except you, apparently.", "L'étale. Plus rien ne bouge, sauf toi, visiblement."),
             defeat: T::new("High-water mark. I'll chalk it on the piling.", "Laisse de haute mer. Je la marque à la craie sur le pilotis."),
+            refuse: T::new("The tide doesn't turn for strangers. Show the Saltreach's duelists what you've got first.", "La marée ne tourne pas pour les inconnus. Montre d'abord aux duellistes de la Côte Salée ce que tu vaux."),
         },
     },
     Rival {
@@ -455,6 +564,9 @@ pub static RIVALS: [Rival; 7] = [
         prizes: 4,
         needs: 0,
         seal: true,
+        region: T::new("the Emberlands", "les Braisières"),
+        duelists: &["t_basil", "t_tavish", "t_carys", "t_dunstan", "t_vela", "t_tamsin", "t_rusk", "t_cole", "t_marigold"],
+        earn: 3,
         booster: 0, // Ember
         packs: 2,
         style: Style::Aggressive,
@@ -463,6 +575,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Ha! Out of the fire and straight into the ash!", "Ha ! Sorti du feu, direct dans la cendre !"),
             ropes: T::new("Okay, okay, I'm stoking, I'm stoking!", "D'accord, d'accord, je rallume, je rallume !"),
             defeat: T::new("Burnt out. Rematch the second I've cooled down. So, now?", "Grillée. Revanche dès que j'ai refroidi. Donc, maintenant ?"),
+            refuse: T::new("Whoa, cold start! Warm up on the Emberlands' duelists first. I don't race beginners.", "Hé, démarrage à froid ! Échauffe-toi d'abord contre les duellistes des Braisières. Je ne fais pas la course avec les débutants."),
         },
     },
     Rival {
@@ -480,6 +593,9 @@ pub static RIVALS: [Rival; 7] = [
         prizes: 4,
         needs: 3,
         seal: true,
+        region: T::new("the Galewold", "les Hautes-Rafales"),
+        duelists: &["t_odo", "t_hew", "t_maren", "t_tull", "t_corra", "t_ves", "t_greer"],
+        earn: 4,
         booster: 4, // Storm
         packs: 2,
         style: Style::BenchSniper,
@@ -488,6 +604,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Called it. I always log a direct hit.", "Je l'avais prévu. Je note toujours un coup au but."),
             ropes: T::new("Unexpected front moving in. I'll have to revise the forecast.", "Front inattendu. Je vais devoir revoir mes prévisions."),
             defeat: T::new("Clear skies for you. Mark it in the logbook: today, I was wrong.", "Ciel dégagé pour toi. Note-le au carnet : aujourd'hui, je me suis trompé."),
+            refuse: T::new("Your page is still blank. Fill it with a few of the Galewold's duelists, then I'll read it.", "Ta page est encore blanche. Remplis-la de quelques duellistes des Hautes-Rafales, et je la lirai."),
         },
     },
     Rival {
@@ -524,6 +641,9 @@ pub static RIVALS: [Rival; 7] = [
         prizes: 5,
         needs: 3,
         seal: true,
+        region: T::new("the Stonebacks", "les Échines de Pierre"),
+        duelists: &["t_dov", "t_petra", "t_morwen", "t_mica", "t_ulric", "t_jet", "t_ida", "t_garth"],
+        earn: 3,
         booster: 5, // Stone
         packs: 2,
         style: Style::Aggressive,
@@ -532,6 +652,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("That's one block shifted. Plenty more in the pile.", "Un bloc de déplacé. Il en reste plein le tas."),
             ropes: T::new("Hm. You've found the fault line. Most don't.", "Hm. Tu as trouvé la faille. La plupart ne la voient pas."),
             defeat: T::new("Solid work. I'd hire you, if you could lift a crate.", "Du travail solide. Je t'embaucherais, si tu savais porter une caisse."),
+            refuse: T::new("Nobody works my seal on their first shift. Prove yourself against the Stonebacks' crews first.", "Personne ne touche à mon sceau dès son premier jour. Fais d'abord tes preuves contre les équipes des Échines de Pierre."),
         },
     },
     Rival {
@@ -569,6 +690,9 @@ pub static RIVALS: [Rival; 7] = [
         prizes: 6,
         needs: 5,
         seal: true,
+        region: T::new("the Hushlands", "les Terres du Murmure"),
+        duelists: &["t_iver", "t_luce", "t_yara", "t_ambrose", "t_clem", "t_maud", "t_noor"],
+        earn: 3,
         booster: 6, // Dream
         packs: 2,
         style: Style::BenchSniper,
@@ -577,6 +701,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Sleep now. The moths will keep watch.", "Dors, maintenant. Les phalènes veilleront."),
             ropes: T::new("You walk through dreams like someone who knows the way.", "Tu traverses les rêves comme quelqu'un qui connaît le chemin."),
             defeat: T::new("Morning, already? Then go. You've woken the garden.", "Déjà le matin ? Alors va. Tu as réveillé le jardin."),
+            refuse: T::new("Shh. The garden doesn't know you yet. Let the Hushlands' duelists tell it your name first.", "Chut. Le jardin ne te connaît pas encore. Laisse d'abord les duellistes des Terres du Murmure lui dire ton nom."),
         },
     },
     Rival {
@@ -613,6 +738,9 @@ pub static RIVALS: [Rival; 7] = [
         prizes: 6,
         needs: SEALS,
         seal: false,
+        region: T::new("", ""),
+        duelists: &[],
+        earn: 0,
         booster: 2, // Wild
         packs: 3,
         style: Style::Balanced,
@@ -621,6 +749,7 @@ pub static RIVALS: [Rival; 7] = [
             first_ko: T::new("Every champion falls once in this room. Usually more.", "Tout champion tombe au moins une fois dans cette salle. Souvent plus."),
             ropes: T::new("There it is: the look they all get, just before.", "Le voilà : ce regard qu'ils ont tous, juste avant."),
             defeat: T::new("The door was always going to open for you. I just had to be sure.", "La porte allait s'ouvrir pour toi, de toute façon. Je devais juste en être sûre."),
+            refuse: T::new("Six seals first. Then we'll see.", "Six sceaux d'abord. Ensuite, on verra."),
         },
     },
 ];
@@ -652,6 +781,41 @@ mod tests {
         let mut pr = Profile::new_player();
         for id in ids {
             record(rival(id).unwrap(), true, p, &mut pr);
+        }
+    }
+
+    #[test]
+    fn a_seal_is_at_stake_until_its_keeper_falls() {
+        let mut p = Progress::default();
+        let s = seal_duel(Some("marlo"), &p).expect("Marlo's seal is at stake");
+        assert_eq!((s.rival.id, s.grand), ("marlo", false));
+        assert_eq!(s.heading(), T::new("Seal of the Tide", "Sceau de la Marée"));
+        beat(&mut p, &["marlo"]);
+        assert!(seal_duel(Some("marlo"), &p).is_none(), "a rematch");
+
+        let h = seal_duel(Some("bramble"), &p).unwrap().heading();
+        assert_eq!(h, T::new("Seal of the Grove", "Sceau du Bosquet"));
+
+        let w = seal_duel(Some("warden"), &p).expect("the title is at stake");
+        assert!(w.grand);
+        assert_eq!(
+            w.heading(),
+            T::new("The Champion's Duel", "Le Duel du champion")
+        );
+        beat(&mut p, &["warden"]);
+        assert!(seal_duel(Some("warden"), &p).is_none());
+
+        for id in [Some("t_pell"), Some("rook_1"), None] {
+            assert!(seal_duel(id, &Progress::default()).is_none(), "{id:?}");
+        }
+        // Every keeper has its own heading, written out in both languages
+        // (never the fallback).
+        let heading = |id| seal_duel(Some(id), &Progress::default()).unwrap().heading();
+        for r in RIVALS.iter().filter(|r| r.seal) {
+            let h = heading(r.id);
+            assert!(h.en.starts_with("Seal of the "), "{}", r.id);
+            assert!(h.fr.starts_with("Sceau d"), "{}", r.id);
+            assert!(RIVALS.iter().all(|o| o.id == r.id || heading(o.id) != h));
         }
     }
 
@@ -770,7 +934,7 @@ mod tests {
     fn rivals_have_their_lines_and_styles() {
         for r in &RIVALS {
             let l = &r.lines;
-            for t in [l.intro, l.first_ko, l.ropes, l.defeat] {
+            for t in [l.intro, l.first_ko, l.ropes, l.defeat, l.refuse] {
                 assert!(
                     !t.en.is_empty() && !t.fr.is_empty() && t.en != t.fr,
                     "{}",
@@ -855,6 +1019,39 @@ mod tests {
             title(&p).map(|t| t.fr),
             Some("Champion de la septième face")
         );
+    }
+
+    /// #150: a keeper accepts once enough of their region's duelists are
+    /// bested; the Warden and a vouched-for save never wait.
+    #[test]
+    fn a_keeper_accepts_once_enough_of_their_duelists_are_bested() {
+        let marlo = rival("marlo").unwrap();
+        let mut p = Progress::default();
+        assert_eq!(marlo.bested(&p), 0);
+        assert!(marlo.open(&p) && !marlo.earned(&p) && !marlo.accepts(&p));
+        // Another region's duelists and Rook don't count.
+        p.apply_all(&["flag:beat_t_fenna", "flag:beat_t_tobin", "flag:beat_rook_1"])
+            .unwrap();
+        assert_eq!(marlo.bested(&p), 0);
+        p.apply_all(&["flag:beat_t_pell", "flag:beat_t_nell"])
+            .unwrap();
+        assert_eq!(marlo.bested(&p), 2);
+        assert!(!marlo.accepts(&p));
+        p.apply("flag:beat_t_skye").unwrap();
+        assert!(marlo.earned(&p) && marlo.accepts(&p));
+        // The Warden is always earned (the six seals gate her).
+        assert!(rival("warden").unwrap().earned(&Progress::default()));
+        // A vouched-for save has earned every keeper.
+        let mut v = Progress::default();
+        v.apply(&format!("flag:{VOUCHED}")).unwrap();
+        assert!(RIVALS.iter().all(|r| r.earned(&v)));
+        // A keeper once beaten stays earned.
+        let mut b = Progress::default();
+        beat(&mut b, &["bramble"]);
+        assert!(rival("bramble").unwrap().earned(&b));
+        assert_eq!(marlo.region_de(), "de la Côte Salée");
+        assert_eq!(rival("bramble").unwrap().region_de(), "du Bois-Profond");
+        assert_eq!(rival("cinza").unwrap().region_de(), "des Braisières");
     }
 
     #[test]
