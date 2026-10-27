@@ -629,7 +629,7 @@ pub fn BuildSheet(
                     {(had > 0).then(|| view! {
                         <p class="note replace-note">{tr(
                             format!("Replaces the {had} cards in the deck; Undo brings them back."),
-                            format!("Remplace les {had} cartes du deck ; « Annuler » les rend."),
+                            format!("Remplace les {had} cartes du deck\u{202f}; « Annuler » les rend."),
                         )}</p>
                     })}
                 </div>

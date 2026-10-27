@@ -512,10 +512,10 @@ fn MatchScreen() -> impl IntoView {
                             );
                         }
                         ctl.announce.set(if at.is_empty() {
-                            tr("This card doesn't go on the table: press Enter to play it, or Escape.", "Cette carte ne se pose pas : Entrée pour la jouer, ou Échap.").to_string()
+                            tr("This card doesn't go on the table: press Enter to play it, or Escape.", "Cette carte ne se pose pas\u{a0}: Entrée pour la jouer, ou Échap.").to_string()
                         } else {
                             if active_ok {
-                                tr(format!("Not there. It can go to: {keys} (0 is the Active)."), format!("Pas là. Elle peut aller en : {keys} (0 est l'Actif)."))
+                                tr(format!("Not there. It can go to: {keys} (0 is the Active)."), format!("Pas là. Elle peut aller en\u{a0}: {keys} (0 est l'Actif)."))
                             } else {
                                 tr(format!("Not there. It can go to Bench place {keys}."), format!("Pas là. Elle peut aller en place {keys} du Banc."))
                             }
@@ -789,12 +789,12 @@ fn MatchScreen() -> impl IntoView {
                     <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="quit-q">
                         <h2 id="quit-q">{if gauntlet {
                             tr("Leave this duel? It can't be resumed, and it ends your Gauntlet run.",
-                                "Quitter ce duel ? Il ne pourra pas être repris, et votre Épreuve s'arrêtera.").to_string()
+                                "Quitter ce duel\u{202f}? Il ne pourra pas être repris, et votre Épreuve s'arrêtera.").to_string()
                         } else if let Some(name) = story {
                             tr(format!("Leave this duel? It can't be resumed, but you can challenge {name} again nearby."),
-                                format!("Quitter ce duel ? Il ne pourra pas être repris, mais vous pourrez redéfier {name} tout près."))
+                                format!("Quitter ce duel\u{202f}? Il ne pourra pas être repris, mais vous pourrez redéfier {name} tout près."))
                         } else {
-                            tr("Leave this duel? It can't be resumed.", "Quitter ce duel ? Il ne pourra pas être repris.").to_string()
+                            tr("Leave this duel? It can't be resumed.", "Quitter ce duel\u{202f}? Il ne pourra pas être repris.").to_string()
                         }}</h2>
                         <div class="dialog-foot">
                             <button type="button" class="btn danger" on:click=move |_| leave()>{tr("Leave", "Partir")}</button>

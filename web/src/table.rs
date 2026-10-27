@@ -386,9 +386,9 @@ fn Spot(
         match target.get() {
         Some(a) => view! {
             <button class="spot target" data-place=place.map(|p| (p + 1).to_string()) aria-label=match (place, fr()) {
-                    (None, _) => tr("Empty Active spot: put it here", "Zone Active vide : le placer ici").to_string(),
+                    (None, _) => tr("Empty Active spot: put it here", "Zone Active vide\u{a0}: le placer ici").to_string(),
                     (Some(p), false) => format!("Bench place {}, empty: put it here", p + 1),
-                    (Some(p), true) => format!("Place {} du Banc, libre : le placer ici", p + 1),
+                    (Some(p), true) => format!("Place {} du Banc, libre\u{a0}: le placer ici", p + 1),
                 }
                 on:click=move |_| { ui.selected.set(None); ctl.act(a) }></button>
         }.into_any(),
@@ -633,7 +633,7 @@ pub fn Piles(player: usize) -> impl IntoView {
         <div class="piles">
             <div class="pile" role="img" aria-label=move || {
                 let n = cards(info.with(|i| i.deck));
-                if me { tr(format!("Your deck: {n}"), format!("Votre pioche : {n}")) } else { tr(format!("Opponent's deck: {n}"), format!("Pioche adverse : {n}")) }
+                if me { tr(format!("Your deck: {n}"), format!("Votre pioche\u{a0}: {n}")) } else { tr(format!("Opponent's deck: {n}"), format!("Pioche adverse\u{a0}: {n}")) }
             }>
                 <span class="pile-card deck">{move || (info.with(|i| i.deck) > 0).then(|| view! { <CardBack /> })}</span>
                 <span class="pile-n">{move || info.with(|i| i.deck)}</span>
@@ -645,7 +645,7 @@ pub fn Piles(player: usize) -> impl IntoView {
                 <small aria-hidden="true">{tr("Discard", "Défausse")}</small>
                 <span class="sr-only">{move || {
                     let n = cards(info.with(|i| i.discard));
-                    if me { tr(format!("Your discard pile: {n}. Open"), format!("Votre défausse : {n}. Ouvrir")) } else { tr(format!("Opponent's discard pile: {n}. Open"), format!("Défausse adverse : {n}. Ouvrir")) }
+                    if me { tr(format!("Your discard pile: {n}. Open"), format!("Votre défausse\u{a0}: {n}. Ouvrir")) } else { tr(format!("Opponent's discard pile: {n}. Open"), format!("Défausse adverse\u{a0}: {n}. Ouvrir")) }
                 }}</span>
             </button>
         </div>
@@ -659,7 +659,7 @@ pub fn OppHand() -> impl IntoView {
     view! {
         <div class="opp-hand" role="img" aria-label=move || {
             let n = cards(info.with(|i| i.hand));
-            tr(format!("Opponent's hand: {n}"), format!("Main adverse : {n}"))
+            tr(format!("Opponent's hand: {n}"), format!("Main adverse\u{a0}: {n}"))
         }>
             <span class="opp-fan">
                 {move || {
@@ -972,32 +972,32 @@ pub fn Seam() -> impl IntoView {
                     None => Line::Hold {
                         text: tr(
                             format!("{name} can't be played now: {why}"),
-                            format!("{name} ne peut pas être jouée : {why}"),
+                            format!("{name} ne peut pas être jouée\u{a0}: {why}"),
                         ),
                         play: None,
                     },
                     Some(Action::PlayTrainer(_)) => Line::Hold {
-                        text: tr(format!("Play {name}?"), format!("Jouer {name} ?")),
+                        text: tr(format!("Play {name}?"), format!("Jouer {name}\u{202f}?")),
                         play: mine.first().copied(),
                     },
                     Some(Action::AttachEnergy { .. }) => Line::Hold {
                         text: tr(
                             format!("{name}: pick a glowing Hexon"),
-                            format!("{name} : choisissez un Hexon en surbrillance"),
+                            format!("{name}\u{a0}: choisissez un Hexon en surbrillance"),
                         ),
                         play: None,
                     },
                     Some(Action::Evolve { .. }) => Line::Hold {
                         text: tr(
                             format!("Awaken with {name}: pick the glowing Hexon"),
-                            format!("Éveil avec {name} : choisissez le Hexon en surbrillance"),
+                            format!("Éveil avec {name}\u{a0}: choisissez le Hexon en surbrillance"),
                         ),
                         play: None,
                     },
                     Some(_) => Line::Hold {
                         text: tr(
                             format!("{name}: pick a glowing spot"),
-                            format!("{name} : choisissez une place en surbrillance"),
+                            format!("{name}\u{a0}: choisissez une place en surbrillance"),
                         ),
                         play: None,
                     },
@@ -1017,7 +1017,7 @@ pub fn Seam() -> impl IntoView {
             Some(PromptKind::ChooseActive) => Line::Hint(
                 tr(
                     "Choose your Active: pick a Basic Hexon from your hand",
-                    "Choisissez votre Actif : un Hexon de Base de votre main",
+                    "Choisissez votre Actif\u{a0}: un Hexon de Base de votre main",
                 )
                 .into(),
             ),
@@ -1030,7 +1030,7 @@ pub fn Seam() -> impl IntoView {
                 } else {
                     tr(
                         "No other Basic in your hand: press Done",
-                        "Plus d'autre Hexon de Base en main : touchez Terminé",
+                        "Plus d'autre Hexon de Base en main\u{a0}: touchez Terminé",
                     )
                 }
                 .into(),
@@ -1141,7 +1141,7 @@ pub fn Seam() -> impl IntoView {
                     <p class="prompt theirs" role="status"><span>{tr(format!("{opp} is playing"), format!("{opp} joue"))}</span></p>
                     // While they play, the End turn slot holds the fast-forward (display only).
                     <button class="end-turn speed" class:on=move || ctl.rush.get()
-                        aria-label=tr("Speed up their turn: press and hold", "Accélérer leur tour : maintenir appuyé")
+                        aria-label=tr("Speed up their turn: press and hold", "Accélérer leur tour\u{a0}: maintenir appuyé")
                         on:pointerdown=move |_| ctl.rush.set(true)
                         on:pointerup=move |_| ctl.rush.set(false)
                         on:pointerleave=move |_| ctl.rush.set(false)
@@ -1187,7 +1187,7 @@ pub fn HandFan() -> impl IntoView {
         <div class="hand-zone" data-focus-home="">
             <ul class="hand" class:holding=move || ui.selected.with(Option::is_some) class:many=move || hand.with(|h| h.len() > 8) aria-label=move || {
                 let n = cards(hand.with(|h| h.len()));
-                tr(format!("Your hand: {n}"), format!("Votre main : {n}"))
+                tr(format!("Your hand: {n}"), format!("Votre main\u{a0}: {n}"))
             }>
                 <For
                     each=move || hand.get()

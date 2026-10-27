@@ -494,7 +494,7 @@ pub fn WorldMap(
                     None => view! {
                         <p class="atlas-pick">{tr(
                             "No waymarks yet. Their crystals glow on posts along the roads: touch one to put it on your map.",
-                            "Aucune borne pour l'instant. Leurs cristaux brillent sur des poteaux au bord des routes : touchez-en une pour l'ajouter à votre carte.",
+                            "Aucune borne pour l'instant. Leurs cristaux brillent sur des poteaux au bord des routes\u{a0}: touchez-en une pour l'ajouter à votre carte.",
                         )}</p>
                     }.into_any(),
                     Some(i) => {

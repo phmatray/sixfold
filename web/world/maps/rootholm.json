@@ -1928,7 +1928,7 @@
       "z": 1,
       "give": "give:curio_acorn_whistle",
       "text": "Wedged in a fork of the root plate, where the elder tore out of the earth: an acorn as big as a fist, hollowed and pierced. Blow into it and it hoots like an owl.",
-      "text_fr": "Coincé dans une fourche du plateau de racines, là où le vieil arbre s'est arraché à la terre : un gland gros comme un poing, creusé et percé. On souffle dedans, il hulule comme une chouette."
+      "text_fr": "Coincé dans une fourche du plateau de racines, là où le vieil arbre s'est arraché à la terre : un gland gros comme un poing, creusé et percé. On souffle dedans, il hulule comme une chouette."
     },
     {
       "kind": "find",
@@ -1937,7 +1937,7 @@
       "z": 22,
       "give": "coins:60",
       "text": "At the far end of the walkway, over the brook mouth, a crate of pruning shears and twine. Under the twine: Facets, the kind people lose through the planks.",
-      "text_fr": "Au bout de la passerelle, au-dessus de l'embouchure du ruisseau, une caisse de sécateurs et de ficelle. Sous la ficelle : des Facettes, celles qu'on perd entre les planches."
+      "text_fr": "Au bout de la passerelle, au-dessus de l'embouchure du ruisseau, une caisse de sécateurs et de ficelle. Sous la ficelle : des Facettes, celles qu'on perd entre les planches."
     },
     {
       "x": 4,
@@ -1952,7 +1952,7 @@
             "A painted board on the door: a hexagon, a skull made of acorns, and \"DUELISTS ONLY\". Someone has added \"and Mum\" underneath, in smaller letters."
           ],
           "lines_fr": [
-            "Une planche peinte sur la porte : un hexagone, une tête de mort en glands, et « DUELLISTES SEULEMENT ». Quelqu'un a ajouté « et Maman » dessous, en plus petit."
+            "Une planche peinte sur la porte : un hexagone, une tête de mort en glands, et « DUELLISTES SEULEMENT ». Quelqu'un a ajouté « et Maman » dessous, en plus petit."
           ]
         }
       ]
@@ -1968,14 +1968,14 @@
       "z": 12,
       "kind": "sign",
       "text": "The Moot of Rootholm. North, through the Broken Elder: the Elder Ring. East: Fernhollow Trail and the Meadow. South, over the brook: the cobbler's lane and the ford to Hushwillow Lane. West: the Knothole and the walkway.",
-      "text_fr": "Le Moot de Racinemont. Au nord, par le Vieil-Arbre brisé : le Cercle des Anciens. À l'est : le Sentier de Creuse-Fougère et le Pré. Au sud, après le ruisseau : la ruelle du cordonnier et le gué vers l'Allée des Saules-Murmures. À l'ouest : le Nœud et la passerelle."
+      "text_fr": "Le Moot de Racinemont. Au nord, par le Vieil-Arbre brisé : le Cercle des Anciens. À l'est : le Sentier de Creuse-Fougère et le Pré. Au sud, après le ruisseau : la ruelle du cordonnier et le gué vers l'Allée des Saules-Murmures. À l'ouest : le Nœud et la passerelle."
     },
     {
       "x": 33,
       "z": 9,
       "kind": "sign",
       "text": "Notices, pinned to the bark. \"LOST: one hive, answers to buzzing. Agnes.\" \"Walkway closed at dusk for the owls. B.\" \"Whoever keeps beating Jory, he wants a rematch. Everyone.\"",
-      "text_fr": "Des avis, punaisés sur l'écorce. « PERDU : une ruche, répond au bourdonnement. Agnes. » « Passerelle fermée au crépuscule pour les chouettes. B. » « À qui bat Jory sans arrêt : il veut une revanche. Tout le monde. »"
+      "text_fr": "Des avis, punaisés sur l'écorce. « PERDU : une ruche, répond au bourdonnement. Agnes. » « Passerelle fermée au crépuscule pour les chouettes. B. » « À qui bat Jory sans arrêt : il veut une revanche. Tout le monde. »"
     },
     {
       "x": 33,
@@ -1990,7 +1990,7 @@
             "Shavings drift out under the door. Inside, on every shelf: bowls, spoons and cups, all turned from the elder's fallen roots."
           ],
           "lines_fr": [
-            "Des copeaux s'échappent sous la porte. À l'intérieur, sur chaque étagère : des bols, des cuillères, des tasses, tous tournés dans les racines tombées du vieil arbre."
+            "Des copeaux s'échappent sous la porte. À l'intérieur, sur chaque étagère : des bols, des cuillères, des tasses, tous tournés dans les racines tombées du vieil arbre."
           ]
         }
       ]
@@ -2008,7 +2008,7 @@
             "Green roof, green walls, green door, green shutters. Even the doorstep has been painted green. A card is tucked in the knocker: \"One colour is enough. L.\""
           ],
           "lines_fr": [
-            "Toit vert, murs verts, porte verte, volets verts. Même la marche a été peinte en vert. Une carte est glissée dans le heurtoir : « Une couleur suffit. L. »"
+            "Toit vert, murs verts, porte verte, volets verts. Même la marche a été peinte en vert. Une carte est glissée dans le heurtoir : « Une couleur suffit. L. »"
           ]
         }
       ]
@@ -2018,7 +2018,7 @@
       "z": 8,
       "kind": "sign",
       "text": "East: Fernhollow Trail, then the Meadow at Sixfold. West: the Moot of Rootholm.",
-      "text_fr": "À l'est : le Sentier de Creuse-Fougère, puis le Pré de Sixfold. À l'ouest : le Moot de Racinemont."
+      "text_fr": "À l'est : le Sentier de Creuse-Fougère, puis le Pré de Sixfold. À l'ouest : le Moot de Racinemont."
     },
     {
       "x": 33,
@@ -2064,21 +2064,21 @@
       "give": "card:honeymane",
       "hidden": true,
       "text": "Under the oldest skep, where the bees have stopped minding you: a card, sealed in a little wax envelope. It smells of clover.",
-      "text_fr": "Sous la plus vieille ruche, là où les abeilles ont cessé de faire attention à vous : une carte, scellée dans une petite enveloppe de cire. Elle sent le trèfle."
+      "text_fr": "Sous la plus vieille ruche, là où les abeilles ont cessé de faire attention à vous : une carte, scellée dans une petite enveloppe de cire. Elle sent le trèfle."
     },
     {
       "x": 46,
       "z": 27,
       "kind": "sign",
       "text": "East, over the Hush ford: Hushwillow Lane, then Brightwell Square. Wading boots advised; ask Tobiah.",
-      "text_fr": "À l'est, après le gué du Murmure : l'Allée des Saules-Murmures, puis la Place de Clairpuits. Bottes de gué conseillées ; demander à Tobiah."
+      "text_fr": "À l'est, après le gué du Murmure : l'Allée des Saules-Murmures, puis la Place de Clairpuits. Bottes de gué conseillées ; demander à Tobiah."
     },
     {
       "x": 29,
       "z": 3,
       "kind": "sign",
       "text": "North, through the Broken Elder: The Elder Ring, where Bramble keeps the seal. South: the Moot.",
-      "text_fr": "Au nord, par le Vieil-Arbre brisé : Le Cercle des Anciens, où Bramble garde le sceau. Au sud : le Moot."
+      "text_fr": "Au nord, par le Vieil-Arbre brisé : Le Cercle des Anciens, où Bramble garde le sceau. Au sud : le Moot."
     }
   ],
   "warps": [
@@ -2196,8 +2196,8 @@
             "She says hello? She never says hello. You're kind to lie. Here, for your legs."
           ],
           "lines_fr": [
-            "Ah, voilà le miel de ma Hazel ! Le même pot que je lui ai donné au printemps, la petite voleuse.",
-            "Elle te dit bonjour ? Elle ne dit jamais bonjour. Tu es gentil de mentir. Tiens, pour tes jambes."
+            "Ah, voilà le miel de ma Hazel ! Le même pot que je lui ai donné au printemps, la petite voleuse.",
+            "Elle te dit bonjour ? Elle ne dit jamais bonjour. Tu es gentil de mentir. Tiens, pour tes jambes."
           ],
           "do": [
             "take:honey_jar",
@@ -2221,7 +2221,7 @@
             "Off you go, then. Fernhollow, east. Hazel keeps her hives by the trail; you'll hear her before you see her."
           ],
           "lines_fr": [
-            "Allez, file. Creuse-Fougère, à l'est. Hazel garde ses ruches au bord du sentier ; tu l'entendras avant de la voir."
+            "Allez, file. Creuse-Fougère, à l'est. Hazel garde ses ruches au bord du sentier ; tu l'entendras avant de la voir."
           ]
         },
         {
@@ -2285,7 +2285,7 @@
           ],
           "lines_fr": [
             "Clac. Clac. Si les lianes gagnent la passerelle, elles écartent les planches en une saison.",
-            "Bramble ? Mon frère est rentré au Cercle, près de sa pierre de sceau. Chaque année il part sur Creuse-Fougère mettre les nouveaux à l'épreuve, et chaque année il revient persuadé d'avoir grandi.",
+            "Bramble ? Mon frère est rentré au Cercle, près de sa pierre de sceau. Chaque année il part sur Creuse-Fougère mettre les nouveaux à l'épreuve, et chaque année il revient persuadé d'avoir grandi.",
             "Il faut quand même bien que quelqu'un taille. Fenna et Heath font le labyrinthe. Moi, je fais le ciel."
           ]
         }
@@ -2361,7 +2361,7 @@
           ],
           "lines_fr": [
             "Le vieil arbre est tombé l'hiver de ma naissance. Ma mère disait que toute la vallée l'a entendu, et qu'ensuite personne n'a parlé pendant un jour.",
-            "Les gens ont bâti sous les racines parce que les racines étaient là. Puis la passerelle, parce que la tourbière était là. Racinemont est comme ça : on vit là où l'arbre a laissé de la place.",
+            "Les gens ont bâti sous les racines parce que les racines étaient là. Puis la passerelle, parce que la tourbière était là. Racinemont est comme ça : on vit là où l'arbre a laissé de la place.",
             "Des bols, des cuillères, des tasses. Tout vient des racines. Soixante-dix ans, et je n'en ai pas usé une."
           ]
         }
@@ -2386,7 +2386,7 @@
           ],
           "lines_fr": [
             "Des girolles, des morilles, et quelques-unes que je ne nommerai pas devant les enfants. Tout cueilli ce matin sur les rives de Creuse-Fougère.",
-            "Les pâles qui brillent la nuit ? Ne les mange pas. Suis-les. Elles poussent le long des vieux chemins ; les racines du vieil arbre les nourrissent."
+            "Les pâles qui brillent la nuit ? Ne les mange pas. Suis-les. Elles poussent le long des vieux chemins ; les racines du vieil arbre les nourrissent."
           ]
         }
       ]
@@ -2448,7 +2448,7 @@
           "I made the rules. One prize, because you're new."
         ],
         "challenge_fr": [
-          "Halte ! C'est une passerelle à péage. Le péage, c'est un duel.",
+          "Halte ! C'est une passerelle à péage. Le péage, c'est un duel.",
           "C'est moi qui fais les règles. Une carte Récompense, parce que t'es nouveau."
         ],
         "win": [
@@ -2461,7 +2461,7 @@
           "Toll paid! You may cross. Mind the third plank, it talks."
         ],
         "lose_fr": [
-          "Péage payé ! Tu peux passer. Attention à la troisième planche, elle parle."
+          "Péage payé ! Tu peux passer. Attention à la troisième planche, elle parle."
         ],
         "after": [
           "Mum says I can live up here till I'm twelve. I'm going to be twelve forever."
@@ -2488,8 +2488,8 @@
           "My house rule: one colour, plus the Neutrals. Bring a deck like that, and we'll see whose colour is deeper."
         ],
         "challenge_fr": [
-          "Vert. Rien que du vert. Tu vois comme tout est plus calme ?",
-          "Ma règle : une seule couleur, plus les Neutres. Viens avec un deck comme ça, et on verra quelle couleur est la plus profonde."
+          "Vert. Rien que du vert. Tu vois comme tout est plus calme ?",
+          "Ma règle : une seule couleur, plus les Neutres. Viens avec un deck comme ça, et on verra quelle couleur est la plus profonde."
         ],
         "win": [
           "Mm. Yours was deeper. I'll have to think about my shutters."

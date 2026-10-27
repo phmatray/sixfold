@@ -144,7 +144,7 @@
       "kind": "sign",
       "if": "beat:warden & flag:sable_door",
       "text": "A seal stone, six coloured faces, and on top a seventh, freshly cut: a hexagon, still blank. Chalked underneath, in Sable's hand: for whoever brings someone else along.",
-      "text_fr": "Une pierre de sceau, six faces de couleur, et dessus une septième, fraîchement taillée : un hexagone, encore blanc. Dessous, à la craie, de la main de Sable : pour qui amène quelqu'un avec soi."
+      "text_fr": "Une pierre de sceau, six faces de couleur, et dessus une septième, fraîchement taillée : un hexagone, encore blanc. Dessous, à la craie, de la main de Sable : pour qui amène quelqu'un avec soi."
     },
     {
       "x": 1,
@@ -237,7 +237,7 @@
             "Sable carved the old stone for him. Or for you. She wouldn't say."
           ],
           "lines_fr": [
-            "J'ai pris un apprenti, tu l'as rencontré ? Rook. Un garçon vif, mais nul pour la poussière.",
+            "J'ai pris un apprenti, tu l'as rencontré ? Rook. Un garçon vif, mais nul pour la poussière.",
             "Sable a gravé la vieille pierre pour lui. Ou pour toi. Elle n'a pas voulu dire."
           ],
           "do": [
@@ -291,7 +291,7 @@
             "Packs are on the counter, priced in Facets. The table by the window is free if you fancy a duel."
           ],
           "lines_fr": [
-            "Et ces chaussures ? Maintiens Maj, ou touche COURIR, et c'est parti.",
+            "Et ces chaussures ? Maintiens Maj, ou touche COURIR, et c'est parti.",
             "Les boosters sont sur le comptoir, avec leur prix en Facettes. La table près de la fenêtre est libre, si un duel te tente."
           ],
           "do": [
@@ -317,7 +317,7 @@
             "Here, your purse. Wynne says paying the winner is part of the job."
           ],
           "lines_fr": [
-            "Encore ? Tu es infatigable.",
+            "Encore ? Tu es infatigable.",
             "Tiens, ta bourse. Wynne dit que payer le gagnant fait partie du métier."
           ]
         },
@@ -328,7 +328,7 @@
             "No, really. Wynne keeps a ledger."
           ],
           "lines_fr": [
-            "Ha ! Note-le quelque part.",
+            "Ha ! Note-le quelque part.",
             "Non, vraiment. Wynne tient un registre."
           ]
         },
@@ -370,9 +370,9 @@
             "Fancy a game? My best deck, six prizes. Loser sweeps."
           ],
           "lines_fr": [
-            "Wynne m'a pris comme apprenti. Tu y crois ? Je balaie, je trie les boosters, je donne les cartes à la table.",
-            "Sable a gravé la pierre près de l'entrée, tu as vu ? Une septième face. Encore blanche.",
-            "Une partie ? Mon meilleur deck, six cartes Récompense. Le perdant balaie."
+            "Wynne m'a pris comme apprenti. Tu y crois ? Je balaie, je trie les boosters, je donne les cartes à la table.",
+            "Sable a gravé la pierre près de l'entrée, tu as vu ? Une septième face. Encore blanche.",
+            "Une partie ? Mon meilleur deck, six cartes Récompense. Le perdant balaie."
           ],
           "do": [
             "flag:rook_apprentice",
@@ -794,7 +794,7 @@
             "Six. I heard them all from in here. Come through; the door has waited long enough."
           ],
           "lines_fr": [
-            "Six. Je les ai tous entendus d'ici. Entre ; la porte a assez attendu."
+            "Six. Je les ai tous entendus d'ici. Entre ; la porte a assez attendu."
           ]
         },
         {

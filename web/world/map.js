@@ -86,7 +86,7 @@ export function expand(map) {
           "Les bornes allumées sont reliées. Depuis l'une d'elles, ou depuis votre carte dès que vous êtes dehors, vous pouvez voyager jusqu'à une autre.")],
         do: [`flag:${flag}`, "show:map"],
       },
-      { lines: [tr("The waymark hums. Where to?", "La borne bourdonne. Où aller ?")], do: ["show:map"] },
+      { lines: [tr("The waymark hums. Where to?", "La borne bourdonne. Où aller\u202f?")], do: ["show:map"] },
     ];
   }
   return map;

@@ -1832,7 +1832,7 @@
       "give": "coins:50",
       "hidden": true,
       "text": "At the foot of the south menhir, under a flat stone the crew uses as a step: a little cache of Facets, wrapped in an oilcloth.",
-      "text_fr": "Au pied du menhir sud, sous une pierre plate dont l'équipe se sert comme marche : une petite réserve de Facettes, enveloppée dans une toile cirée."
+      "text_fr": "Au pied du menhir sud, sous une pierre plate dont l'équipe se sert comme marche : une petite réserve de Facettes, enveloppée dans une toile cirée."
     },
     {
       "kind": "waymark",
@@ -1847,7 +1847,7 @@
       "z": 3,
       "give": "card:cragmastiff",
       "text": "Moonlight falls on the cut slate and every seam shines like a vein of silver. In the brightest seam, wedged in a crack: a card, cold to the touch.",
-      "text_fr": "La lune tombe sur l'ardoise taillée et chaque veine brille comme de l'argent. Dans la plus brillante, coincée dans une fente : une carte, froide au toucher.",
+      "text_fr": "La lune tombe sur l'ardoise taillée et chaque veine brille comme de l'argent. Dans la plus brillante, coincée dans une fente : une carte, froide au toucher.",
       "if": "time:night"
     },
     {
@@ -1884,7 +1884,7 @@
             "A board on the door: \"BASTION WORKS. Day shift: Orla's crew. Night shift: Morwen's. Visitors: wear a hat.\" There is a hook with one hat on it."
           ],
           "lines_fr": [
-            "Un panneau sur la porte : « CHANTIER DU BASTION. Équipe de jour : Orla. Équipe de nuit : Morwen. Visiteurs : portez un chapeau. » Il y a un crochet avec un chapeau dessus."
+            "Un panneau sur la porte : « CHANTIER DU BASTION. Équipe de jour : Orla. Équipe de nuit : Morwen. Visiteurs : portez un chapeau. » Il y a un crochet avec un chapeau dessus."
           ]
         }
       ]
@@ -1912,14 +1912,14 @@
       "z": 29,
       "kind": "sign",
       "text": "South: The Elder Ring, at the foot of the cliff. There's a wall of old pegs down; you'd need gloves to use it. East: Anvilstead.",
-      "text_fr": "Sud : Le Cercle des Anciens, au pied de la falaise. Il y a une paroi de vieux pitons pour descendre ; il faudrait des gants. Est : Bourg-l'Enclume."
+      "text_fr": "Sud : Le Cercle des Anciens, au pied de la falaise. Il y a une paroi de vieux pitons pour descendre ; il faudrait des gants. Est : Bourg-l'Enclume."
     },
     {
       "x": 37,
       "z": 14,
       "kind": "sign",
       "text": "East: Anvilstead, along the rail road. Up the terraces: the stone ring and the seal.",
-      "text_fr": "Est : Bourg-l'Enclume, par la route des rails. En haut des gradins : le cercle de pierres et le sceau."
+      "text_fr": "Est : Bourg-l'Enclume, par la route des rails. En haut des gradins : le cercle de pierres et le sceau."
     }
   ],
   "warps": [],
@@ -1954,75 +1954,80 @@
       "hair": "#d8c8a0",
       "dialogue": [
         {
+          "if": "!beat:orla & !flag:talked_kessa",
+          "more": true,
+          "lines": [
+            "Kessa. Shift boss. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
+            "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry."
+          ],
+          "lines_fr": [
+            "Kessa. Cheffe d'équipe. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
+            "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière."
+          ]
+        },
+        {
+          "if": "!beat:orla & !open:orla",
+          "lines": [
+            "Orla won't even look up until you carry three seals. Come back with them."
+          ],
+          "lines_fr": [
+            "Orla ne lèvera même pas les yeux avant que tu portes trois sceaux. Reviens quand tu les auras."
+          ]
+        },
+        {
+          "if": "!beat:orla & open:orla & earned:orla",
+          "lines": [
+            "The crews have been talking: you've done the rounds of the Stonebacks. Orla's expecting you up top."
+          ],
+          "lines_fr": [
+            "Les équipes en parlent : tu as fait le tour des Échines de Pierre. Orla t'attend là-haut."
+          ]
+        },
+        {
+          "if": "!beat:orla & open:orla & !earned:orla & bested:orla:2",
+          "lines": [
+            "Orla doesn't duel just anyone off the road. Beat one more duelist of the Stonebacks and she'll see you on the top terrace."
+          ],
+          "lines_fr": [
+            "Orla n'affronte pas le premier venu. Bats encore un duelliste des Échines de Pierre et elle te recevra sur la haute terrasse."
+          ]
+        },
+        {
+          "if": "!beat:orla & open:orla & !earned:orla & bested:orla:1",
+          "lines": [
+            "Orla doesn't duel just anyone off the road. Beat two more duelists of the Stonebacks and she'll see you on the top terrace."
+          ],
+          "lines_fr": [
+            "Orla n'affronte pas le premier venu. Bats encore deux duellistes des Échines de Pierre et elle te recevra sur la haute terrasse."
+          ]
+        },
+        {
+          "if": "!beat:orla & open:orla & !earned:orla & bested:orla:0",
+          "lines": [
+            "Orla doesn't duel just anyone off the road. Beat three more duelists of the Stonebacks and she'll see you on the top terrace."
+          ],
+          "lines_fr": [
+            "Orla n'affronte pas le premier venu. Bats encore trois duellistes des Échines de Pierre et elle te recevra sur la haute terrasse."
+          ]
+        },
+        {
           "if": "time:night",
           "lines": [
             "Night shift's Morwen's. I'm only up because the stone hums after dark. Listen. Hear it?",
             "Orla says it's the mountain settling. Orla says a lot of things."
           ],
           "lines_fr": [
-            "L'équipe de nuit, c'est Morwen. Je ne suis debout que parce que la pierre bourdonne après la tombée de la nuit. Écoute. Tu l'entends ?",
+            "L'équipe de nuit, c'est Morwen. Je ne suis debout que parce que la pierre bourdonne après la tombée de la nuit. Écoute. Tu l'entends ?",
             "Orla dit que c'est la montagne qui se tasse. Orla dit beaucoup de choses."
           ]
         },
         {
-          "if": "!beat:orla & open:orla & earned:orla",
           "lines": [
-            "Kessa. Foreman. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
-            "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry.",
-            "The crews have been talking: you've done the rounds of the Stonebacks. Orla's expecting you up top."
-          ],
-          "lines_fr": [
-            "Kessa. Contremaîtresse. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
-            "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière.",
-            "Les équipes en parlent : tu as fait le tour des Échines de Pierre. Orla t'attend là-haut."
-          ]
-        },
-        {
-          "if": "!beat:orla & !earned:orla & bested:orla:2",
-          "lines": [
-            "Kessa. Foreman. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
-            "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry.",
-            "Orla doesn't duel just anyone off the road. Beat one more duelist of the Stonebacks and she'll see you on the top terrace."
-          ],
-          "lines_fr": [
-            "Kessa. Contremaîtresse. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
-            "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière.",
-            "Orla n'affronte pas le premier venu. Bats encore un duelliste des Échines de Pierre et elle te recevra sur la haute terrasse."
-          ]
-        },
-        {
-          "if": "!beat:orla & !earned:orla & bested:orla:1",
-          "lines": [
-            "Kessa. Foreman. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
-            "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry.",
-            "Orla doesn't duel just anyone off the road. Beat two more duelists of the Stonebacks and she'll see you on the top terrace."
-          ],
-          "lines_fr": [
-            "Kessa. Contremaîtresse. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
-            "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière.",
-            "Orla n'affronte pas le premier venu. Bats encore deux duellistes des Échines de Pierre et elle te recevra sur la haute terrasse."
-          ]
-        },
-        {
-          "if": "!beat:orla & !earned:orla & bested:orla:0",
-          "lines": [
-            "Kessa. Foreman. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
-            "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry.",
-            "Orla doesn't duel just anyone off the road. Beat three more duelists of the Stonebacks and she'll see you on the top terrace."
-          ],
-          "lines_fr": [
-            "Kessa. Contremaîtresse. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
-            "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière.",
-            "Orla n'affronte pas le premier venu. Bats encore trois duellistes des Échines de Pierre et elle te recevra sur la haute terrasse."
-          ]
-        },
-        {
-          "lines": [
-            "Kessa. Foreman. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
+            "Kessa. Shift boss. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
             "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry."
           ],
           "lines_fr": [
-            "Kessa. Contremaîtresse. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
+            "Kessa. Cheffe d'équipe. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
             "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière."
           ]
         }
@@ -2043,8 +2048,8 @@
           "Three prizes. We cut slate here; we don't cut corners."
         ],
         "challenge_fr": [
-          "Un casque ? Non ? Alors tu as intérêt à être vif.",
-          "Trois cartes Récompense. Ici, on taille l'ardoise ; on ne taille pas les virages."
+          "Un casque ? Non ? Alors tu as intérêt à être vif.",
+          "Trois cartes Récompense. Ici, on taille l'ardoise ; on ne taille pas les virages."
         ],
         "win": [
           "Split clean down the grain. Good work."

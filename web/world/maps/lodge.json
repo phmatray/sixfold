@@ -85,7 +85,7 @@
       "z": 3,
       "kind": "sign",
       "text": "Fennel's shelf: bird books, a heron on every spine, and a gap where a field guide used to be.",
-      "text_fr": "L'étagère de Fennel : des livres d'oiseaux, un héron sur chaque tranche, et un vide là où se trouvait un guide de terrain."
+      "text_fr": "L'étagère de Fennel : des livres d'oiseaux, un héron sur chaque tranche, et un vide là où se trouvait un guide de terrain."
     },
     {
       "kind": "find",
@@ -94,7 +94,7 @@
       "z": 5,
       "give": "card:dowsing_rod",
       "text": "On the map table, under the stone that holds down the blank west corner: a card, left for whoever walks out that way.",
-      "text_fr": "Sur la table des cartes, sous la pierre qui retient le coin ouest, resté en blanc : une carte, laissée pour qui ira par là."
+      "text_fr": "Sur la table des cartes, sous la pierre qui retient le coin ouest, resté en blanc : une carte, laissée pour qui ira par là."
     },
     {
       "x": 9,
@@ -140,7 +140,7 @@
           ],
           "lines_fr": [
             "Essuie tes bottes. Tout le monde rapporte un bout du sentier.",
-            "Moi, c'est Alder. J'entretiens le sentier : le pont, les panneaux, et la tranquillité des hérons.",
+            "Moi, c'est Alder. J'entretiens le sentier : le pont, les panneaux, et la tranquillité des hérons.",
             "Fennel loge ici quand elle n'est pas dehors avec sa longue-vue. Si elle n'est pas sur le sentier, c'est qu'elle dort."
           ]
         },
@@ -165,7 +165,7 @@
             "Bramble sent word from the Ring: since you beat him, he trims his hedges very, very neatly."
           ],
           "lines_fr": [
-            "Bramble m'a fait dire, depuis le Cercle : depuis que tu l'as battu, il taille ses haies très, très soigneusement."
+            "Bramble m'a fait dire, depuis le Cercle : depuis que tu l'as battu, il taille ses haies très, très soigneusement."
           ]
         },
         {

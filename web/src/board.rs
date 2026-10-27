@@ -66,7 +66,7 @@ pub fn find_mon(g: &Game, player: usize, uid: u32) -> Option<Mon> {
                 }
                 Placed::Weaken(n) => tr(
                     format!("Attacks do {n} less"),
-                    format!("Attaques : {n} de moins"),
+                    format!("Attaques\u{a0}: {n} de moins"),
                 ),
             }
         }));

@@ -2281,12 +2281,12 @@
       "z": 30,
       "kind": "sign",
       "text": "South: Hushwillow Lane, under the willows, and Lanternmere on its lake.",
-      "text_fr": "Sud : l'Allée des Saules-Murmures, sous les saules, et Lac-aux-Lanternes sur son lac."
+      "text_fr": "Sud : l'Allée des Saules-Murmures, sous les saules, et Lac-aux-Lanternes sur son lac."
     },
     {
       "kind": "sign",
       "text": "Brightwell Square. North: Bakers' Row and Sixfold Meadow. East: the Hearth Rooms. South: Mill Lane, the Green and Hushwillow Lane.",
-      "text_fr": "Place de Clairpuits. Nord : la rue des Boulangers et le Pré de Sixfold. Est : les Chambres de l'Âtre. Sud : la ruelle du Moulin, le Square et l'Allée des Saules-Murmures.",
+      "text_fr": "Place de Clairpuits. Nord : la rue des Boulangers et le Pré de Sixfold. Est : les Chambres de l'Âtre. Sud : la ruelle du Moulin, le Square et l'Allée des Saules-Murmures.",
       "x": 23,
       "z": 12
     },
@@ -2297,7 +2297,7 @@
       "z": 17,
       "give": "coins:15",
       "text": "At the bottom of the fountain basin, among the wishes: a few Facets nobody wished hard enough for.",
-      "text_fr": "Au fond du bassin de la fontaine, parmi les vœux : quelques Facettes que personne n'a souhaitées assez fort."
+      "text_fr": "Au fond du bassin de la fontaine, parmi les vœux : quelques Facettes que personne n'a souhaitées assez fort."
     },
     {
       "kind": "find",
@@ -2307,7 +2307,7 @@
       "hidden": true,
       "give": "card:field_guide",
       "text": "In a crate behind the stall, under a sack of flour: a card, lightly dusted.",
-      "text_fr": "Dans une caisse derrière l'étal, sous un sac de farine : une carte, à peine enfarinée."
+      "text_fr": "Dans une caisse derrière l'étal, sous un sac de farine : une carte, à peine enfarinée."
     },
     {
       "kind": "find",
@@ -2316,7 +2316,7 @@
       "z": 20,
       "give": "coins:30",
       "text": "Under the bench, stuck to the slats with a bit of jam: Facets.",
-      "text_fr": "Sous le banc, collées aux lattes par un peu de confiture : des Facettes."
+      "text_fr": "Sous le banc, collées aux lattes par un peu de confiture : des Facettes."
     },
     {
       "x": 37,
@@ -2330,7 +2330,7 @@
       "id": "sq_moving",
       "give": "coins:30",
       "text": "Between the boxes of someone moving in, fallen out of a coat pocket: a few Facets.",
-      "text_fr": "Entre les cartons de quelqu'un qui emménage, tombées d'une poche de manteau : quelques Facettes.",
+      "text_fr": "Entre les cartons de quelqu'un qui emménage, tombées d'une poche de manteau : quelques Facettes.",
       "x": 10,
       "z": 28
     },
@@ -2342,7 +2342,7 @@
       "hidden": true,
       "give": "give:curio_tin_hex",
       "text": "In the flowerbed, pressed into the soil: a little tin hexagon, its six colours flaking.",
-      "text_fr": "Dans le massif, enfoncé dans la terre : un petit hexagone de fer-blanc, ses six couleurs écaillées."
+      "text_fr": "Dans le massif, enfoncé dans la terre : un petit hexagone de fer-blanc, ses six couleurs écaillées."
     },
     {
       "kind": "find",
@@ -2352,7 +2352,7 @@
       "hidden": true,
       "give": "give:seed_packet_2",
       "text": "In the bush at the square's edge, a twist of paper: \"Runner beans. Do NOT eat.\"",
-      "text_fr": "Dans le buisson, au bord de la place, un cornet de papier : « Haricots grimpants. NE PAS MANGER. »",
+      "text_fr": "Dans le buisson, au bord de la place, un cornet de papier : « Haricots grimpants. NE PAS MANGER. »",
       "if": "flag:seeds_asked"
     },
     {
@@ -2362,7 +2362,7 @@
       "z": 11,
       "give": "coins:20",
       "text": "In the little door at the lantern's base, beside the spare wick: a few Facets.",
-      "text_fr": "Dans la petite trappe au pied du réverbère, à côté de la mèche de rechange : quelques Facettes."
+      "text_fr": "Dans la petite trappe au pied du réverbère, à côté de la mèche de rechange : quelques Facettes."
     }
   ],
   "warps": [
@@ -2546,7 +2546,7 @@
             "Bring me six and I'll have something better. Something the Press can't refuse."
           ],
           "lines_fr": [
-            "Trois ! Fais voir. L'usure sur celle-ci… et la couleur de celle-là…",
+            "Trois ! Fais voir. L'usure sur celle-ci… et la couleur de celle-là…",
             "Une vitrine a besoin d'un début, et tu me l'as donné. Deux boosters Sauvages, pour ta peine.",
             "Apporte-m'en six et j'aurai mieux. Quelque chose que l'Imprimerie ne peut pas refuser."
           ]
@@ -2563,8 +2563,8 @@
             "Here: a Press voucher. Gus will print you any card you like on it. Any card. Even a Rare."
           ],
           "lines_fr": [
-            "Six. Six ! Toute la collection de ce que ce coin du monde oublie.",
-            "Tiens : un bon de l'Imprimerie. Gus t'imprimera dessus la carte de ton choix. N'importe laquelle. Même une Rare."
+            "Six. Six ! Toute la collection de ce que ce coin du monde oublie.",
+            "Tiens : un bon de l'Imprimerie. Gus t'imprimera dessus la carte de ton choix. N'importe laquelle. Même une Rare."
           ]
         },
         {
@@ -2575,8 +2575,8 @@
             "Show me three and I'll pay you in packs. Six, and in something rarer."
           ],
           "lines_fr": [
-            "Des curiosités ! Apporte-moi des curiosités ! Petites, vieilles, bizarres. Un dé à coudre. Une plume. Une bouteille avec un billet dedans.",
-            "Je ne les garde pas, note bien ; c'est toi qui les gardes. J'ai juste besoin de les voir.",
+            "Des curiosités ! Apporte-moi des curiosités ! Petites, vieilles, bizarres. Un dé à coudre. Une plume. Une bouteille avec un billet dedans.",
+            "Je ne les garde pas, note bien ; c'est toi qui les gardes. J'ai juste besoin de les voir.",
             "Montre-m'en trois et je te paie en boosters. Six, et en quelque chose de plus rare."
           ]
         },
@@ -2620,14 +2620,14 @@
         ],
         "challenge_fr": [
           "*Couiiiic-onk*",
-          "Pardon. Pardon ! L'accordéon déteste le matin. Mon deck, non, Échouaf compris. Un duel, contre un air ?"
+          "Pardon. Pardon ! L'accordéon déteste le matin. Mon deck, non, Échouaf compris. Un duel, contre un air ?"
         ],
         "win": [
           "You win! Shall I play you something? No? Probably wise.",
           "Here's the purse. Don't tell anyone it's mostly small change."
         ],
         "win_fr": [
-          "Tu as gagné ! Je te joue quelque chose ? Non ? C'est sans doute plus sage.",
+          "Tu as gagné ! Je te joue quelque chose ? Non ? C'est sans doute plus sage.",
           "Voilà la bourse. Ne dis à personne que c'est surtout de la petite monnaie."
         ],
         "lose": [

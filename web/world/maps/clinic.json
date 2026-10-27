@@ -94,14 +94,14 @@
       "z": 3,
       "give": "card:trail_compass",
       "text": "Between two volumes of \"Common Ailments of the Sixty-Card Deck\": a card, used as a bookmark.",
-      "text_fr": "Entre deux tomes des « Maux courants du deck de soixante cartes » : une carte, glissée en marque-page."
+      "text_fr": "Entre deux tomes des « Maux courants du deck de soixante cartes » : une carte, glissée en marque-page."
     },
     {
       "x": 10,
       "z": 3,
       "kind": "sign",
       "text": "A chart on the wall: card names in rows, each smaller than the last. The bottom line just says \"shuffle\".",
-      "text_fr": "Un tableau au mur : des noms de cartes en lignes, de plus en plus petits. La dernière ligne dit juste « mélangez »."
+      "text_fr": "Un tableau au mur : des noms de cartes en lignes, de plus en plus petits. La dernière ligne dit juste « mélangez »."
     }
   ],
   "warps": [
@@ -144,7 +144,7 @@
             "Here, for taking such good care of it. Bring any deck by, any time."
           ],
           "lines_fr": [
-            "Déjà de retour ? Écoutons… Mieux. Bien mieux. On l'entend respirer.",
+            "Déjà de retour ? Écoutons… Mieux. Bien mieux. On l'entend respirer.",
             "Tiens, pour en avoir pris si bien soin. Amène-moi n'importe quel deck, quand tu veux."
           ]
         },
@@ -160,7 +160,7 @@
             "Here, for your trouble all the same. Bring any deck by, any time."
           ],
           "lines_fr": [
-            "Déjà de retour ? Ton deck se portait très bien. Rien à soigner, et je n'opère pas pour le plaisir.",
+            "Déjà de retour ? Ton deck se portait très bien. Rien à soigner, et je n'opère pas pour le plaisir.",
             "Tiens, pour ta peine quand même. Amène-moi n'importe quel deck, quand tu veux."
           ]
         },
@@ -189,7 +189,7 @@
             "Next patient! Let's see that deck."
           ],
           "lines_fr": [
-            "Patient suivant ! Voyons ce deck."
+            "Patient suivant ! Voyons ce deck."
           ]
         }
       ]

@@ -765,12 +765,12 @@ fn loss_lesson(ctl: Ctl) -> (Vec<String>, Vec<String>) {
         hints.push(if mine == 0 {
             tr(
                 format!("Most of {opp}'s Hexons are weak to {w}, and your deck has none: one {w} Hexon would double your damage."),
-                format!("La plupart des Hexons de {opp} sont faibles face à {w}, et votre deck n'en a aucun : un Hexon {w} doublerait vos dégâts."),
+                format!("La plupart des Hexons de {opp} sont faibles face à {w}, et votre deck n'en a aucun\u{a0}: un Hexon {w} doublerait vos dégâts."),
             )
         } else {
             tr(
                 format!("Most of {opp}'s Hexons are weak to {w}: lead with your {w} Hexons ({mine} in your deck)."),
-                format!("La plupart des Hexons de {opp} sont faibles face à {w} : menez avec vos Hexons {w} ({mine} dans votre deck)."),
+                format!("La plupart des Hexons de {opp} sont faibles face à {w}\u{a0}: menez avec vos Hexons {w} ({mine} dans votre deck)."),
             )
         });
     }
@@ -786,11 +786,11 @@ fn loss_lesson(ctl: Ctl) -> (Vec<String>, Vec<String>) {
         })
         .collect();
     match reading.first() {
-        Some(first) => hints.push(tr(format!("Mags: {first}"), format!("Mags : {first}"))),
+        Some(first) => hints.push(tr(format!("Mags: {first}"), format!("Mags\u{a0}: {first}"))),
         // Only when nothing else explains it: never "nothing wrong" after a named weakness.
         None if hints.is_empty() => hints.push(tr(
             "Mags, the deck doctor, finds nothing wrong with your deck: the draw went against you this time.",
-            "Mags, la docteure des decks, ne trouve rien à redire à votre deck : la pioche vous a desservi cette fois.",
+            "Mags, la docteure des decks, ne trouve rien à redire à votre deck\u{a0}: la pioche vous a desservi cette fois.",
         ).into()),
         None => {}
     }
@@ -1063,7 +1063,7 @@ pub fn DuelMenu(
                         </div>
                     </fieldset>
                     <p class="fine">{tr("Only the pace changes. During their turn, hold the fast-forward button for even quicker play; every move stays in the history.",
-                        "Seul le rythme change. Pendant leur tour, maintenez le bouton d'accélération ; chaque coup reste dans l'historique.")}</p>
+                        "Seul le rythme change. Pendant leur tour, maintenez le bouton d'accélération\u{202f}; chaque coup reste dans l'historique.")}</p>
                     <button class="btn" on:click=move |_| { crate::tips::reset(); tips_reset.set(true) }>
                         {move || if tips_reset.get() { tr("Rule tips will show again", "Les astuces reviendront") } else { tr("Show rule tips again", "Remontrer les astuces") }}
                     </button>
@@ -1090,7 +1090,7 @@ pub fn DuelMenu(
                             <dt><kbd>"R"</kbd></dt><dd>{tr("Retreat", "Retraite")}</dd>
                             <dt><kbd>"E"</kbd></dt><dd>{tr("End turn (twice if you can still attack)", "Fin du tour (deux fois si vous pouvez encore attaquer)")}</dd>
                             <dt><kbd>"H"</kbd></dt><dd>{tr("Go to your hand", "Aller à votre main")}</dd>
-                            <dt><kbd>"0"</kbd>" – "<kbd>"5"</kbd></dt><dd>{tr("With a card held: the Active (0) or a Bench place (1–5, from the left)", "Carte en main : l'Actif (0) ou une place du Banc (1–5, depuis la gauche)")}</dd>
+                            <dt><kbd>"0"</kbd>" – "<kbd>"5"</kbd></dt><dd>{tr("With a card held: the Active (0) or a Bench place (1–5, from the left)", "Carte en main\u{a0}: l'Actif (0) ou une place du Banc (1–5, depuis la gauche)")}</dd>
                             <dt><kbd>"L"</kbd></dt><dd>{tr("The duel log", "Le journal du duel")}</dd>
                             <dt><kbd>"I"</kbd></dt><dd>{tr("Read the card", "Lire la carte")}</dd>
                             <dt><kbd>"M"</kbd></dt><dd>{tr("This menu", "Ce menu")}</dd>

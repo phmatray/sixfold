@@ -1334,7 +1334,7 @@
     {
       "kind": "sign",
       "text": "North: Lanternmere, by the shore path round the mere.",
-      "text_fr": "Nord : Lac-aux-Lanternes, par le chemin de la rive autour du lac.",
+      "text_fr": "Nord : Lac-aux-Lanternes, par le chemin de la rive autour du lac.",
       "x": 21,
       "z": 2
     },
@@ -1343,7 +1343,7 @@
       "z": 2,
       "kind": "sign",
       "text": "The Moonwell Garden. Please walk softly: the flowers are sleeping. (By day.)",
-      "text_fr": "Le Jardin du Puits-de-Lune. Marchez doucement, s'il vous plaît : les fleurs dorment. (Le jour.)"
+      "text_fr": "Le Jardin du Puits-de-Lune. Marchez doucement, s'il vous plaît : les fleurs dorment. (Le jour.)"
     },
     {
       "x": 12,
@@ -1377,7 +1377,7 @@
             "The top is smooth, pale and blank, as if something was meant to be cut there and never was."
           ],
           "lines_fr": [
-            "Une pierre hexagonale, fraîche et couverte de rosée. Chacune de ses six faces a une couleur : la face Songe, tournée vers le puits, chatoie quand on détourne les yeux.",
+            "Une pierre hexagonale, fraîche et couverte de rosée. Chacune de ses six faces a une couleur : la face Songe, tournée vers le puits, chatoie quand on détourne les yeux.",
             "Le dessus est lisse, pâle et vide, comme si quelque chose devait y être gravé et ne l'avait jamais été."
           ]
         }
@@ -1396,7 +1396,7 @@
       "z": 18,
       "give": "card:hexmage",
       "text": "The moonflowers are open, and in the brightest bed, laid among the petals like a pressed leaf: a card. By day you'd never have seen it under the buds.",
-      "text_fr": "Les belles-de-lune sont ouvertes, et dans le massif le plus lumineux, posée parmi les pétales comme une feuille séchée : une carte. Le jour, sous les boutons, vous ne l'auriez jamais vue.",
+      "text_fr": "Les belles-de-lune sont ouvertes, et dans le massif le plus lumineux, posée parmi les pétales comme une feuille séchée : une carte. Le jour, sous les boutons, vous ne l'auriez jamais vue.",
       "if": "time:night"
     },
     {
@@ -1413,7 +1413,7 @@
             "The pool drains under the hedge into a channel, and the channel into the mere. A few strokes, and you bump against the lantern jetty."
           ],
           "lines_fr": [
-            "Un esquif attaché à un anneau, les rames rentrées. Une carte de l'écriture ronde de Nim : « Pour les invités de Lumen : retour au village. Poussez, le courant connaît le chemin. »",
+            "Un esquif attaché à un anneau, les rames rentrées. Une carte de l'écriture ronde de Nim : « Pour les invités de Lumen : retour au village. Poussez, le courant connaît le chemin. »",
             "Le bassin s'écoule sous la haie dans un chenal, et le chenal dans le lac. Quelques coups de rame, et vous touchez le ponton aux lanternes."
           ],
           "do": [
@@ -1427,7 +1427,7 @@
       "id": "d_hedge_nook",
       "give": "coins:40",
       "text": "Tucked in the stump behind the hedge, where Nim keeps her pruning knife: the knife, and a twist of Facets for seeds.",
-      "text_fr": "Dans la souche, derrière la haie, là où Nim range son sécateur : le sécateur, et un cornet de Facettes pour les graines.",
+      "text_fr": "Dans la souche, derrière la haie, là où Nim range son sécateur : le sécateur, et un cornet de Facettes pour les graines.",
       "x": 34,
       "z": 7
     }
@@ -1474,66 +1474,60 @@
       "dialogue": [
         {
           "if": "!flag:talked_nim",
+          "more": true,
           "lines": [
             "The moonflowers are open! This is the busy hour. Water, prune, whisper. In that order.",
             "I'm Nim. Lumen's apprentice. She's home from the Fernhollow shade with her seeds, and she's by the seal stone again.",
             "She keeps the seal; I keep the beds. The well knew she was coming before we did."
           ],
           "lines_fr": [
-            "Les belles-de-lune sont ouvertes ! C'est l'heure de pointe. Arroser, tailler, chuchoter. Dans cet ordre.",
+            "Les belles-de-lune sont ouvertes ! C'est l'heure de pointe. Arroser, tailler, chuchoter. Dans cet ordre.",
             "Moi, c'est Nim. L'apprentie de Lumen. Elle est rentrée de l'ombre de Creuse-Fougère avec ses graines, et elle est de nouveau près de la pierre de sceau.",
             "Elle garde le sceau, moi les massifs. Le puits savait qu'elle revenait avant nous."
           ]
         },
         {
+          "if": "!beat:lumen & !open:lumen",
+          "lines": [
+            "Lumen won't duel anyone carrying fewer than five seals. The garden can wait for you."
+          ],
+          "lines_fr": [
+            "Lumen n'affronte personne qui porte moins de cinq sceaux. Le jardin peut t'attendre."
+          ]
+        },
+        {
           "if": "!beat:lumen & open:lumen & earned:lumen",
           "lines": [
-            "Don't step on the beds. Do look in them. Things turn up in moonflowers.",
-            "The well stair goes down to an old alcove. It's black as a closed eye in there. I never go without a light.",
             "The moonflowers turned when you came in. That means the Hushlands know you. Lumen will duel you now."
           ],
           "lines_fr": [
-            "Ne marche pas sur les massifs. Mais regarde dedans. On trouve des choses dans les belles-de-lune.",
-            "L'escalier du puits descend jusqu'à une vieille alcôve. Il fait noir comme un œil fermé, là-dedans. Je n'y vais jamais sans lumière.",
             "Les belles-de-lune se sont tournées à ton arrivée. Ça veut dire que les Terres du Murmure te connaissent. Lumen veut bien t'affronter, maintenant."
           ]
         },
         {
-          "if": "!beat:lumen & !earned:lumen & bested:lumen:2",
+          "if": "!beat:lumen & open:lumen & !earned:lumen & bested:lumen:2",
           "lines": [
-            "Don't step on the beds. Do look in them. Things turn up in moonflowers.",
-            "The well stair goes down to an old alcove. It's black as a closed eye in there. I never go without a light.",
             "Lumen says the garden has to know you first. Beat one more duelist of the Hushlands and it will."
           ],
           "lines_fr": [
-            "Ne marche pas sur les massifs. Mais regarde dedans. On trouve des choses dans les belles-de-lune.",
-            "L'escalier du puits descend jusqu'à une vieille alcôve. Il fait noir comme un œil fermé, là-dedans. Je n'y vais jamais sans lumière.",
             "Lumen dit que le jardin doit d'abord te connaître. Bats encore un duelliste des Terres du Murmure, et il te connaîtra."
           ]
         },
         {
-          "if": "!beat:lumen & !earned:lumen & bested:lumen:1",
+          "if": "!beat:lumen & open:lumen & !earned:lumen & bested:lumen:1",
           "lines": [
-            "Don't step on the beds. Do look in them. Things turn up in moonflowers.",
-            "The well stair goes down to an old alcove. It's black as a closed eye in there. I never go without a light.",
             "Lumen says the garden has to know you first. Beat two more duelists of the Hushlands and it will."
           ],
           "lines_fr": [
-            "Ne marche pas sur les massifs. Mais regarde dedans. On trouve des choses dans les belles-de-lune.",
-            "L'escalier du puits descend jusqu'à une vieille alcôve. Il fait noir comme un œil fermé, là-dedans. Je n'y vais jamais sans lumière.",
             "Lumen dit que le jardin doit d'abord te connaître. Bats encore deux duellistes des Terres du Murmure, et il te connaîtra."
           ]
         },
         {
-          "if": "!beat:lumen & !earned:lumen & bested:lumen:0",
+          "if": "!beat:lumen & open:lumen & !earned:lumen & bested:lumen:0",
           "lines": [
-            "Don't step on the beds. Do look in them. Things turn up in moonflowers.",
-            "The well stair goes down to an old alcove. It's black as a closed eye in there. I never go without a light.",
             "Lumen says the garden has to know you first. Beat three more duelists of the Hushlands and it will."
           ],
           "lines_fr": [
-            "Ne marche pas sur les massifs. Mais regarde dedans. On trouve des choses dans les belles-de-lune.",
-            "L'escalier du puits descend jusqu'à une vieille alcôve. Il fait noir comme un œil fermé, là-dedans. Je n'y vais jamais sans lumière.",
             "Lumen dit que le jardin doit d'abord te connaître. Bats encore trois duellistes des Terres du Murmure, et il te connaîtra."
           ]
         },
@@ -1564,7 +1558,7 @@
           "You owe me a moth. Three prizes will do."
         ],
         "challenge_fr": [
-          "Ne bouge pas ! Il y a une phalène sur ton épaule. Une rare. Oh, elle est partie.",
+          "Ne bouge pas ! Il y a une phalène sur ton épaule. Une rare. Oh, elle est partie.",
           "Tu me dois une phalène. Trois cartes Récompense feront l'affaire."
         ],
         "win": [
@@ -1577,7 +1571,7 @@
           "Netted! Come back when you're a little faster on the wing."
         ],
         "lose_fr": [
-          "Dans le filet ! Reviens quand tu auras l'aile un peu plus rapide."
+          "Dans le filet ! Reviens quand tu auras l'aile un peu plus rapide."
         ],
         "after": [
           "Ruben counts them, I catch them. We argue about which of us loves moths more. It's me."
@@ -1604,7 +1598,7 @@
           "Three prizes. I read the deck before I read the hand."
         ],
         "challenge_fr": [
-          "Assieds-toi. Raconte-moi ton rêve de la nuit dernière. Non ? Alors laisse les cartes rêver pour toi.",
+          "Assieds-toi. Raconte-moi ton rêve de la nuit dernière. Non ? Alors laisse les cartes rêver pour toi.",
           "Trois cartes Récompense. Je lis le deck avant de lire la main."
         ],
         "win": [
@@ -1642,54 +1636,59 @@
       "if": "time:day",
       "dialogue": [
         {
-          "if": "!beat:lumen & open:lumen & earned:lumen",
+          "if": "!beat:lumen & !flag:talked_nim_day",
+          "more": true,
           "lines": [
             "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
-            "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it.",
-            "Lumen's asleep, but she knows about you: the Hushlands talk. Come back at dusk."
+            "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it."
           ],
           "lines_fr": [
-            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
-            "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup.",
-            "Lumen dort, mais elle sait qui tu es : les Terres du Murmure parlent. Reviens au crépuscule."
+            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
+            "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup."
           ]
         },
         {
-          "if": "!beat:lumen & !earned:lumen & bested:lumen:2",
+          "if": "!beat:lumen & !open:lumen",
           "lines": [
-            "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
-            "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it.",
+            "Lumen's asleep, like everything here. And she won't duel anyone carrying fewer than five seals."
+          ],
+          "lines_fr": [
+            "Lumen dort, comme tout ici. Et elle n'affronte personne qui porte moins de cinq sceaux."
+          ]
+        },
+        {
+          "if": "!beat:lumen & open:lumen & earned:lumen",
+          "lines": [
+            "Lumen's asleep, but she knows about you: the Hushlands talk. Come back at dusk."
+          ],
+          "lines_fr": [
+            "Lumen dort, mais elle sait qui tu es : les Terres du Murmure parlent. Reviens au crépuscule."
+          ]
+        },
+        {
+          "if": "!beat:lumen & open:lumen & !earned:lumen & bested:lumen:2",
+          "lines": [
             "Lumen's asleep, like everything here. When she wakes she'll want one more duelist of the Hushlands beaten first."
           ],
           "lines_fr": [
-            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
-            "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup.",
             "Lumen dort, comme tout ici. À son réveil, elle voudra que tu aies battu encore un duelliste des Terres du Murmure."
           ]
         },
         {
-          "if": "!beat:lumen & !earned:lumen & bested:lumen:1",
+          "if": "!beat:lumen & open:lumen & !earned:lumen & bested:lumen:1",
           "lines": [
-            "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
-            "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it.",
             "Lumen's asleep, like everything here. When she wakes she'll want two more duelists of the Hushlands beaten first."
           ],
           "lines_fr": [
-            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
-            "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup.",
             "Lumen dort, comme tout ici. À son réveil, elle voudra que tu aies battu encore deux duellistes des Terres du Murmure."
           ]
         },
         {
-          "if": "!beat:lumen & !earned:lumen & bested:lumen:0",
+          "if": "!beat:lumen & open:lumen & !earned:lumen & bested:lumen:0",
           "lines": [
-            "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
-            "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it.",
             "Lumen's asleep, like everything here. When she wakes she'll want three more duelists of the Hushlands beaten first."
           ],
           "lines_fr": [
-            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
-            "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup.",
             "Lumen dort, comme tout ici. À son réveil, elle voudra que tu aies battu encore trois duellistes des Terres du Murmure."
           ]
         },
@@ -1699,7 +1698,7 @@
             "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it."
           ],
           "lines_fr": [
-            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
+            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
             "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup."
           ]
         }

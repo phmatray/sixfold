@@ -1500,12 +1500,12 @@
       "z": 2,
       "kind": "sign",
       "text": "THE BELLFLATS. Low water 8 to 6: the flats are yours. High water 6 to 8: keep to the boardwalk. The causeway to Lanternmere goes under with the flats. North: back to Gullhaven.",
-      "text_fr": "LES GRÈVES DE LA CLOCHE. Basse mer de 8 h à 18 h : les grèves sont à vous. Pleine mer de 18 h à 8 h : restez sur le ponton. La chaussée de Lac-aux-Lanternes est sous l'eau en même temps que les grèves. Au nord : retour à Havre-aux-Mouettes."
+      "text_fr": "LES GRÈVES DE LA CLOCHE. Basse mer de 8 h à 18 h : les grèves sont à vous. Pleine mer de 18 h à 8 h : restez sur le ponton. La chaussée de Lac-aux-Lanternes est sous l'eau en même temps que les grèves. Au nord : retour à Havre-aux-Mouettes."
     },
     {
       "kind": "sign",
       "text": "South, over the causeway at low water: Lanternmere.",
-      "text_fr": "Au sud, par la chaussée à marée basse : Lac-aux-Lanternes.",
+      "text_fr": "Au sud, par la chaussée à marée basse : Lac-aux-Lanternes.",
       "x": 34,
       "z": 25
     },
@@ -1546,7 +1546,7 @@
       "z": 12,
       "give": "coins:100",
       "text": "The tower's lamp is lit tonight, though no one keeps it. Under it, in a tin box tied with tarred string: Facets, and a note: \"for whoever comes to look\".",
-      "text_fr": "La lampe de la tour est allumée ce soir, alors que personne ne l'entretient. Dessous, dans une boîte en fer nouée de ficelle goudronnée : des Facettes, et un mot : « pour qui viendra voir ».",
+      "text_fr": "La lampe de la tour est allumée ce soir, alors que personne ne l'entretient. Dessous, dans une boîte en fer nouée de ficelle goudronnée : des Facettes, et un mot : « pour qui viendra voir ».",
       "if": "time:night"
     },
     {
@@ -1563,7 +1563,7 @@
             "The top is smooth, pale and blank, as if something was meant to be cut there and never was."
           ],
           "lines_fr": [
-            "Une pierre hexagonale, perlée de sel. Chacune de ses six faces a une couleur : la face Marée, tournée vers le large, est froide sous la main.",
+            "Une pierre hexagonale, perlée de sel. Chacune de ses six faces a une couleur : la face Marée, tournée vers le large, est froide sous la main.",
             "Le dessus est lisse, pâle et vide, comme si quelque chose devait y être gravé et ne l'avait jamais été."
           ]
         }
@@ -1620,7 +1620,7 @@
       "z": 11,
       "give": "coins:80",
       "text": "Boots on, you wade out to the far side of the pool. Wedged under a ledge of weed: a pouch of Facets, crusted with tiny shells.",
-      "text_fr": "Bottes aux pieds, vous traversez la flaque jusqu'au bord opposé. Coincée sous un rebord d'algues : une bourse de Facettes, couverte de minuscules coquillages.",
+      "text_fr": "Bottes aux pieds, vous traversez la flaque jusqu'au bord opposé. Coincée sous un rebord d'algues : une bourse de Facettes, couverte de minuscules coquillages.",
       "if": "item:wading_boots"
     },
     {
@@ -1664,7 +1664,7 @@
             "Crab pots on a line, and tide marks cut into the rail, year after year. The highest is an arm's length above the boardwalk: \"the great flood\". Nobody remembers which year."
           ],
           "lines_fr": [
-            "Des casiers au bout d'une corde, et des marques de marée gravées dans la rambarde, année après année. La plus haute est à une longueur de bras au-dessus du ponton : « la grande crue ». Personne ne se souvient de l'année."
+            "Des casiers au bout d'une corde, et des marques de marée gravées dans la rambarde, année après année. La plus haute est à une longueur de bras au-dessus du ponton : « la grande crue ». Personne ne se souvient de l'année."
           ]
         }
       ]
@@ -1683,7 +1683,7 @@
             "You cast off and pole round the outside of the flats, past the breakwater, and nose up on the sand by Old Brann's cottage."
           ],
           "lines_fr": [
-            "Une barque attachée au ponton, une perche posée dedans. Un panneau peint : « Retour à Havre-aux-Mouettes, par le plus court. Laissez-la à la cale de Brann. »",
+            "Une barque attachée au ponton, une perche posée dedans. Un panneau peint : « Retour à Havre-aux-Mouettes, par le plus court. Laissez-la à la cale de Brann. »",
             "Vous larguez l'amarre et poussez à la perche autour des grèves, le long du brise-lames, jusqu'à échouer sur le sable près de la maison du vieux Brann."
           ],
           "do": [
@@ -3942,7 +3942,7 @@
           "I mend, I watch, I duel. Two prizes, and my knots never slip."
         ],
         "challenge_fr": [
-          "Attention aux filets ! Ah, tu n'es pas une mouette. Tant mieux.",
+          "Attention aux filets ! Ah, tu n'es pas une mouette. Tant mieux.",
           "Je ramende, je surveille, je fais des duels. Deux cartes Récompense, et mes nœuds ne glissent jamais."
         ],
         "win": [
@@ -4014,7 +4014,7 @@
             "Keep it. A bell with no tongue is still a bell. It just listens instead."
           ],
           "lines_fr": [
-            "Tu as trouvé le battant ? Alors tu es entré à marée basse. Courageux.",
+            "Tu as trouvé le battant ? Alors tu es entré à marée basse. Courageux.",
             "Garde-le. Une cloche sans langue reste une cloche. Elle écoute, voilà tout."
           ],
           "do": [
@@ -4039,7 +4039,7 @@
         ],
         "challenge_fr": [
           "La mer n'utilise pas de ruses. Elle vient, et vient, et vient encore.",
-          "Ma règle maison : des Hexons et de l'énergie, aucun Dresseur. Trois cartes Récompense. Toi et la marée, c'est tout."
+          "Ma règle maison : des Hexons et de l'énergie, aucun Dresseur. Trois cartes Récompense. Toi et la marée, c'est tout."
         ],
         "lose": [
           "You leaned on your tricks. The tide doesn't care for them."
@@ -4098,7 +4098,7 @@
           "Make it up to me. Two prizes, quick, before the tide turns."
         ],
         "challenge_fr": [
-          "Chut ! Les palourdes t'entendent arriver. Voilà, elles se sont enfoncées. Merci.",
+          "Chut ! Les palourdes t'entendent arriver. Voilà, elles se sont enfoncées. Merci.",
           "Rattrape-toi. Deux cartes Récompense, vite, avant que la marée tourne."
         ],
         "win": [
@@ -4111,7 +4111,7 @@
           "Ha! Back to the boardwalk with you, the sea's coming."
         ],
         "lose_fr": [
-          "Ha ! Retourne sur le ponton, la mer arrive."
+          "Ha ! Retourne sur le ponton, la mer arrive."
         ],
         "after": [
           "Low water, high water. Six hours each, near enough. I've never been late. Well. Once. I swam."
@@ -4136,54 +4136,50 @@
       "hair": "#d9d2c4",
       "dialogue": [
         {
-          "if": "!beat:marlo & open:marlo & earned:marlo",
+          "if": "!beat:marlo & !flag:talked_gilda",
+          "more": true,
           "lines": [
             "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
-            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
-            "I rang the bell for you: the whole Saltreach heard. Marlo's waiting by the stone."
+            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables."
           ],
           "lines_fr": [
-            "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
-            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées.",
-            "J'ai sonné la cloche pour toi : toute la Côte Salée l'a entendue. Marlo t'attend près de la pierre."
+            "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
+            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées."
           ]
         },
         {
-          "if": "!beat:marlo & !earned:marlo & bested:marlo:2",
+          "if": "!beat:marlo & open:marlo & earned:marlo",
           "lines": [
-            "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
-            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
+            "I rang the bell for you: the whole Saltreach heard. Marlo's waiting by the stone."
+          ],
+          "lines_fr": [
+            "J'ai sonné la cloche pour toi : toute la Côte Salée l'a entendue. Marlo t'attend près de la pierre."
+          ]
+        },
+        {
+          "if": "!beat:marlo & open:marlo & !earned:marlo & bested:marlo:2",
+          "lines": [
             "Marlo won't sit down across from a stranger. Beat one more duelist of the Saltreach and I'll ring you over."
           ],
           "lines_fr": [
-            "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
-            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées.",
             "Marlo ne s'assoit pas en face d'un inconnu. Bats encore un duelliste de la Côte Salée et je sonnerai pour toi."
           ]
         },
         {
-          "if": "!beat:marlo & !earned:marlo & bested:marlo:1",
+          "if": "!beat:marlo & open:marlo & !earned:marlo & bested:marlo:1",
           "lines": [
-            "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
-            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
             "Marlo won't sit down across from a stranger. Beat two more duelists of the Saltreach and I'll ring you over."
           ],
           "lines_fr": [
-            "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
-            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées.",
             "Marlo ne s'assoit pas en face d'un inconnu. Bats encore deux duellistes de la Côte Salée et je sonnerai pour toi."
           ]
         },
         {
-          "if": "!beat:marlo & !earned:marlo & bested:marlo:0",
+          "if": "!beat:marlo & open:marlo & !earned:marlo & bested:marlo:0",
           "lines": [
-            "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
-            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
             "Marlo won't sit down across from a stranger. Beat three more duelists of the Saltreach and I'll ring you over."
           ],
           "lines_fr": [
-            "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
-            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées.",
             "Marlo ne s'assoit pas en face d'un inconnu. Bats encore trois duellistes de la Côte Salée et je sonnerai pour toi."
           ]
         },
@@ -4193,7 +4189,7 @@
             "I'm Gilda. I've kept this bell longer than anyone's printed tide tables."
           ],
           "lines_fr": [
-            "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
+            "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
             "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées."
           ]
         }

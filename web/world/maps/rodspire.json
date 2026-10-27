@@ -640,7 +640,7 @@
             "A knife switch as long as your arm. You heave it down: a crack, a smell of hot copper, and the coil wakes up blue."
           ],
           "lines_fr": [
-            "Un levier à couteau long comme le bras. Vous le baissez de toutes vos forces : un claquement, une odeur de cuivre chaud, et la bobine s'éveille en bleu."
+            "Un levier à couteau long comme le bras. Vous le baissez de toutes vos forces : un claquement, une odeur de cuivre chaud, et la bobine s'éveille en bleu."
           ],
           "do": [
             "flag:pylon_1",
@@ -671,7 +671,7 @@
             "A knife switch as long as your arm. You heave it down: a crack, a smell of hot copper, and the coil wakes up blue."
           ],
           "lines_fr": [
-            "Un levier à couteau long comme le bras. Vous le baissez de toutes vos forces : un claquement, une odeur de cuivre chaud, et la bobine s'éveille en bleu."
+            "Un levier à couteau long comme le bras. Vous le baissez de toutes vos forces : un claquement, une odeur de cuivre chaud, et la bobine s'éveille en bleu."
           ],
           "do": [
             "flag:pylon_2",
@@ -702,7 +702,7 @@
             "A knife switch as long as your arm. You heave it down: a crack, a smell of hot copper, and the coil wakes up blue."
           ],
           "lines_fr": [
-            "Un levier à couteau long comme le bras. Vous le baissez de toutes vos forces : un claquement, une odeur de cuivre chaud, et la bobine s'éveille en bleu."
+            "Un levier à couteau long comme le bras. Vous le baissez de toutes vos forces : un claquement, une odeur de cuivre chaud, et la bobine s'éveille en bleu."
           ],
           "do": [
             "flag:pylon_3",
@@ -763,7 +763,7 @@
       "z": 11,
       "give": "give:curio_bottled_spark",
       "text": "On the ledge, jammed in a crack where the spray can't reach: a stoppered bottle with a little lightning caught inside.",
-      "text_fr": "Sur la corniche, coincée dans une fente que les embruns n'atteignent pas : une bouteille bouchée avec un petit éclair enfermé dedans."
+      "text_fr": "Sur la corniche, coincée dans une fente que les embruns n'atteignent pas : une bouteille bouchée avec un petit éclair enfermé dedans."
     },
     {
       "kind": "find",
@@ -772,12 +772,12 @@
       "z": 25,
       "give": "pack:storm",
       "text": "Under a stone on the lonely islet, tied up in a fishing net: a sealed booster.",
-      "text_fr": "Sous une pierre de l'îlot solitaire, ficelé dans un filet de pêche : un booster scellé."
+      "text_fr": "Sous une pierre de l'îlot solitaire, ficelé dans un filet de pêche : un booster scellé."
     },
     {
       "kind": "sign",
       "text": "The Rodspire. West: back to Stormwatch. Relay pylons power the lift to the top. Keep off the cables in a storm.",
-      "text_fr": "L'Aiguille-Foudre. Ouest : retour à Guette-Orage. Des pylônes relais alimentent l'ascenseur du sommet. Ne touchez pas aux câbles par temps d'orage.",
+      "text_fr": "L'Aiguille-Foudre. Ouest : retour à Guette-Orage. Des pylônes relais alimentent l'ascenseur du sommet. Ne touchez pas aux câbles par temps d'orage.",
       "x": 4,
       "z": 14
     },
@@ -786,7 +786,7 @@
       "id": "st_wreck",
       "give": "coins:45",
       "text": "In a split crate washed up from the supply boat: a few Facets, crusted with salt.",
-      "text_fr": "Dans une caisse fendue, rejetée par le canot de ravitaillement : quelques Facettes, croûtées de sel.",
+      "text_fr": "Dans une caisse fendue, rejetée par le canot de ravitaillement : quelques Facettes, croûtées de sel.",
       "x": 33,
       "z": 21
     }
@@ -846,7 +846,7 @@
           "Three prizes. My Arcfang bites through insulation."
         ],
         "challenge_fr": [
-          "Ce pylône, c'est moi qui le garde. Tu veux le levier ? Gagne-le.",
+          "Ce pylône, c'est moi qui le garde. Tu veux le levier ? Gagne-le.",
           "Trois cartes Récompense. Mon Arcroc mord à travers l'isolant."
         ],
         "win": [
@@ -928,81 +928,74 @@
             "All three humming! Listen to that. The lift's live: up you go."
           ],
           "lines_fr": [
-            "Les trois bourdonnent ! Écoute-moi ça. L'ascenseur est sous tension : monte."
+            "Les trois bourdonnent ! Écoute-moi ça. L'ascenseur est sous tension : monte."
+          ]
+        },
+        {
+          "if": "!beat:quill & !flag:talked_nils",
+          "more": true,
+          "lines": [
+            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
+            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
+            "Nicely never works."
+          ],
+          "lines_fr": [
+            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
+            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
+            "Poliment, ça ne marche jamais."
+          ]
+        },
+        {
+          "if": "!beat:quill & !open:quill",
+          "lines": [
+            "Quill won't write up anyone carrying fewer than three seals. Come back with them."
+          ],
+          "lines_fr": [
+            "Quill ne consigne personne qui porte moins de trois sceaux. Reviens quand tu les auras."
           ]
         },
         {
           "if": "!beat:quill & open:quill & earned:quill",
           "lines": [
-            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
-            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works.",
-            "Word came down the wire: the Galewold's duelists know your name now. Quill's ready to write you up."
+            "Word came down the wire: the Galewold's duelists know your name now. Quill's ready to write you up: throw the three pylon switches and ride the lift."
           ],
           "lines_fr": [
-            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
-            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais.",
-            "La nouvelle est descendue par le câble : les duellistes des Hautes-Rafales connaissent ton nom. Quill est prêt à te consigner."
+            "La nouvelle est descendue par le câble : les duellistes des Hautes-Rafales connaissent ton nom. Quill est prêt à te consigner : baisse les trois leviers des pylônes et prends l'ascenseur."
           ]
         },
         {
-          "if": "!beat:quill & !earned:quill & bested:quill:3",
+          "if": "!beat:quill & open:quill & !earned:quill & bested:quill:3",
           "lines": [
-            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
-            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works.",
             "Quill only writes up duels against someone with a record. Beat one more duelist of the Galewold first."
           ],
           "lines_fr": [
-            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
-            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais.",
             "Quill ne raconte que les duels contre quelqu'un qui a fait ses preuves. Bats encore un duelliste des Hautes-Rafales d'abord."
           ]
         },
         {
-          "if": "!beat:quill & !earned:quill & bested:quill:2",
+          "if": "!beat:quill & open:quill & !earned:quill & bested:quill:2",
           "lines": [
-            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
-            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works.",
             "Quill only writes up duels against someone with a record. Beat two more duelists of the Galewold first."
           ],
           "lines_fr": [
-            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
-            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais.",
             "Quill ne raconte que les duels contre quelqu'un qui a fait ses preuves. Bats encore deux duellistes des Hautes-Rafales d'abord."
           ]
         },
         {
-          "if": "!beat:quill & !earned:quill & bested:quill:1",
+          "if": "!beat:quill & open:quill & !earned:quill & bested:quill:1",
           "lines": [
-            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
-            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works.",
             "Quill only writes up duels against someone with a record. Beat three more duelists of the Galewold first."
           ],
           "lines_fr": [
-            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
-            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais.",
             "Quill ne raconte que les duels contre quelqu'un qui a fait ses preuves. Bats encore trois duellistes des Hautes-Rafales d'abord."
           ]
         },
         {
-          "if": "!beat:quill & !earned:quill & bested:quill:0",
+          "if": "!beat:quill & open:quill & !earned:quill & bested:quill:0",
           "lines": [
-            "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
-            "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
-            "Nicely never works.",
             "Quill only writes up duels against someone with a record. Beat four more duelists of the Galewold first."
           ],
           "lines_fr": [
-            "Trois pylônes relais, trois leviers, un ascenseur. Baisse les trois et la cage grimpe le long du rocher.",
-            "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
-            "Poliment, ça ne marche jamais.",
             "Quill ne raconte que les duels contre quelqu'un qui a fait ses preuves. Bats encore quatre duellistes des Hautes-Rafales d'abord."
           ]
         },
@@ -1077,7 +1070,7 @@
           "lines_fr": [
             "Vent du sud, pression en baisse, un adversaire en approche. Tout est dans le carnet.",
             "Je suis Quill. Le sceau des Hautes-Rafales est en jeu, alors je note chaque coup.",
-            "Quatre cartes Récompense. Prévisions : orage, d'un seul côté de la table."
+            "Quatre cartes Récompense. Prévisions : orage, d'un seul côté de la table."
           ],
           "do": [
             "flag:met_quill",
@@ -1289,7 +1282,7 @@
           "lines_fr": [
             "Vent du sud, pression en baisse, un adversaire en approche. Tout est dans le carnet.",
             "Je suis Quill. Le sceau des Hautes-Rafales est en jeu, alors je note chaque coup.",
-            "Quatre cartes Récompense. Prévisions : orage, d'un seul côté de la table."
+            "Quatre cartes Récompense. Prévisions : orage, d'un seul côté de la table."
           ]
         },
         {
@@ -1327,7 +1320,7 @@
             "Go on. The forecast says there are more stones on your road."
           ],
           "lines_fr": [
-            "Noté : la face de l'Orage, allumée, et pour de bon. Je date la page.",
+            "Noté : la face de l'Orage, allumée, et pour de bon. Je date la page.",
             "Milanorage va avec. Fais-le voler un jour de grand vent.",
             "Va. La météo annonce d'autres pierres sur ta route."
           ]

@@ -1464,14 +1464,25 @@ body:has(.world-sheet[open]) .world-controls { visibility: hidden; }
   height: 96px;
   border-radius: var(--radius-lg);
   object-fit: cover;
-  background: radial-gradient(circle at 50% 38%, #2f5182, var(--panel) 78%);
+  background: var(--panel);
   border: 1px solid var(--brass-line);
 }
-/* A bust baked after the talk opened fades in over its placeholder (the same cell). */
+/* While the bust bakes: the speaker's initial, like the roster's monogram, breathing slowly
+   (reduced motion holds it still). A bust baked after the talk opened fades in over it (the same cell). */
+span.talk-face {
+  display: grid;
+  place-items: center;
+  font: 700 var(--fs-4xl)/1 var(--display);
+  color: var(--muted);
+  background: radial-gradient(circle at 50% 38%, var(--paper-hi), var(--paper-lo) 80%);
+  animation: talk-face-breathe 1.4s ease-in-out infinite alternate;
+}
 .talk-face { grid-column: 1; }
-.talk-face.bust-in { animation: fade-in 220ms ease-out both; }
+.talk-face.bust-in { animation: fade-in var(--dur-panel) var(--ease-out) both; }
 .talk-face.enter { animation: talk-face-in 260ms cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+span.talk-face.enter { animation: talk-face-in 260ms cubic-bezier(0.2, 0.8, 0.3, 1) both, talk-face-breathe 1.4s ease-in-out 260ms infinite alternate; }
 @keyframes talk-face-in { from { opacity: 0; transform: translateX(-12px) scale(0.92); } }
+@keyframes talk-face-breathe { to { color: color-mix(in srgb, var(--muted) 45%, transparent); } }
 @media (max-width: 520px) {
   .talk-box.has-face { grid-template-columns: 64px minmax(0, 1fr); column-gap: 12px; }
   .talk-face { width: 64px; height: 64px; border-radius: var(--radius-md); }
@@ -2651,6 +2662,8 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .rival.open { border-color: color-mix(in srgb, var(--brass) 55%, transparent); }
 .rival.open .rival-status { color: var(--brass-hi); }
 .rival.beaten .rival-status { color: var(--heal); }
+/* Seals met, the region's duelists still to best: the challenge sheet's pips, in the reading ink. */
+.rival.earning .rival-status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; color: var(--muted); font-weight: 600; text-wrap: balance; }
 .rival.locked { opacity: 0.72; }
 .rival.champion { grid-column: 1 / -1; background: linear-gradient(120deg, rgba(138, 79, 201, 0.25), color-mix(in srgb, var(--panel) 75%, transparent)); }
 .world-sheet .roster { margin-top: 12px; }

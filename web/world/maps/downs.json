@@ -1181,21 +1181,21 @@
     {
       "kind": "sign",
       "text": "East along the coast road: Stormwatch. West: Cinderwick and the Emberlands.",
-      "text_fr": "À l'est, par la route de la côte : Guette-Orage. À l'ouest : Mèche-Cendre et les Braisières.",
+      "text_fr": "À l'est, par la route de la côte : Guette-Orage. À l'ouest : Mèche-Cendre et les Braisières.",
       "x": 4,
       "z": 9
     },
     {
       "kind": "sign",
       "text": "South: Stormwatch, on its bluff. North: the Downs.",
-      "text_fr": "Sud : Guette-Orage, sur sa falaise. Nord : les Landes.",
+      "text_fr": "Sud : Guette-Orage, sur sa falaise. Nord : les Landes.",
       "x": 51,
       "z": 21
     },
     {
       "kind": "sign",
       "text": "The north lane: the old walls and the high fields. The coast road runs on east to the sea.",
-      "text_fr": "Le chemin du nord : les vieux murs et les champs d'en haut. La route de la côte continue vers l'est, jusqu'à la mer.",
+      "text_fr": "Le chemin du nord : les vieux murs et les champs d'en haut. La route de la côte continue vers l'est, jusqu'à la mer.",
       "x": 10,
       "z": 9
     },
@@ -1206,7 +1206,7 @@
       "z": 18,
       "give": "card:stormox",
       "text": "At night a hollow in the standing stone glows faintly blue. Inside, dry and humming: a card.",
-      "text_fr": "La nuit, un creux de la pierre levée luit d'un bleu pâle. Dedans, sèche et bourdonnante : une carte.",
+      "text_fr": "La nuit, un creux de la pierre levée luit d'un bleu pâle. Dedans, sèche et bourdonnante : une carte.",
       "if": "time:night"
     },
     {
@@ -1247,7 +1247,7 @@
       "give": "coins:50",
       "hidden": true,
       "text": "A loose stone at the end of the wall comes away in your hand. Behind it: Facets, wrapped in a shepherd's rag.",
-      "text_fr": "Une pierre branlante au bout du mur vient toute seule. Derrière : des Facettes, roulées dans un chiffon de berger."
+      "text_fr": "Une pierre branlante au bout du mur vient toute seule. Derrière : des Facettes, roulées dans un chiffon de berger."
     },
     {
       "kind": "find",
@@ -1256,7 +1256,7 @@
       "z": 20,
       "give": "coins:40",
       "text": "Wedged in a crack on the cliff's lip, where the sea wind howls: a little purse of Facets.",
-      "text_fr": "Coincée dans une fente au bord de la falaise, là où hurle le vent du large : une petite bourse de Facettes."
+      "text_fr": "Coincée dans une fente au bord de la falaise, là où hurle le vent du large : une petite bourse de Facettes."
     }
   ],
   "warps": [],
@@ -1294,7 +1294,7 @@
           "Three prizes, and Stormox charges like the sky."
         ],
         "challenge_fr": [
-          "Dehors dans le noir ? Moi aussi. Je chasse les orages. Ce soir, c'est toi que j'ai attrapé.",
+          "Dehors dans le noir ? Moi aussi. Je chasse les orages. Ce soir, c'est toi que j'ai attrapé.",
           "Trois cartes Récompense, et Taurorage charge comme le ciel."
         ],
         "win": [
@@ -1307,13 +1307,13 @@
           "Struck! Ha!"
         ],
         "lose_fr": [
-          "Foudroyé ! Ha !"
+          "Foudroyé ! Ha !"
         ],
         "after": [
           "The stone in this ring glows at night. Something's hidden in it. I never looked: I'm always looking up."
         ],
         "after_fr": [
-          "La pierre de ce cercle luit la nuit. Quelque chose y est caché. Je n'ai jamais regardé : je regarde toujours en l'air."
+          "La pierre de ce cercle luit la nuit. Quelque chose y est caché. Je n'ai jamais regardé : je regarde toujours en l'air."
         ]
       },
       "outfit": "#2f3a5a",
@@ -1339,7 +1339,7 @@
             "The flock likes you. Well, Biscuit does. Biscuit likes everyone."
           ],
           "lines_fr": [
-            "Tu as battu notre Hew ? Tant mieux. Il aurait été insupportable pendant une semaine.",
+            "Tu as battu notre Hew ? Tant mieux. Il aurait été insupportable pendant une semaine.",
             "Le troupeau t'aime bien. Enfin, Biscuit. Biscuit aime tout le monde."
           ]
         },
@@ -1350,7 +1350,7 @@
             "When the wind comes off the sea, every chime post on the Downs hums at once. That's why they call them the Thrumming Downs."
           ],
           "lines_fr": [
-            "Bonjour ! Attention au troupeau, ils ont un avis sur les étrangers.",
+            "Bonjour ! Attention au troupeau, ils ont un avis sur les étrangers.",
             "Hew, c'est mon petit-fils. Il défie tout le monde sur le chemin du nord. Ça lui vient de sa grand-mère.",
             "Quand le vent vient du large, tous les poteaux à carillons des Landes bourdonnent en même temps. C'est pour ça qu'on les appelle les Landes Vibrantes."
           ]
@@ -1520,8 +1520,8 @@
           "Meet Echopup: best sheepdog on the Downs. Well, card dog."
         ],
         "challenge_fr": [
-          "Grand-père dit que je ne dois pas défier les étrangers. Tu n'as pas l'air étrange. Une carte Récompense !",
-          "Je te présente Échouaf : le meilleur chien de berger des Landes. Enfin, chien de cartes."
+          "Grand-père dit que je ne dois pas défier les étrangers. Tu n'as pas l'air étrange. Une carte Récompense !",
+          "Je te présente Échouaf : le meilleur chien de berger des Landes. Enfin, chien de cartes."
         ],
         "win": [
           "Aw. Echopup says good game."
@@ -1533,7 +1533,7 @@
           "Ha! Herded!"
         ],
         "lose_fr": [
-          "Ha ! Rassemblé !"
+          "Ha ! Rassemblé !"
         ],
         "after": [
           "Grandad's down by the fold with the flock. Don't tell him I lost."
@@ -1600,7 +1600,7 @@
           "Two prizes. Ohmrunner keeps perfect time."
         ],
         "challenge_fr": [
-          "Tu entends ce poteau ? Faux. Tout sonne faux aujourd'hui, même mon humeur. Un duel ?",
+          "Tu entends ce poteau ? Faux. Tout sonne faux aujourd'hui, même mon humeur. Un duel ?",
           "Deux cartes Récompense. Ohmcoureur garde le tempo parfait."
         ],
         "win": [
@@ -1613,7 +1613,7 @@
           "Off-key! Come back in tune."
         ],
         "lose_fr": [
-          "Faux ! Reviens accordé."
+          "Faux ! Reviens accordé."
         ],
         "after": [
           "There's a ring of old posts by the west wall. At night they play a chord nobody tuned. Not me, anyway."

@@ -1766,8 +1766,8 @@
             "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
           ],
           "lines_fr": [
-            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
-            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
           ],
           "do": [
             "flag:cairn_1",
@@ -1812,8 +1812,8 @@
             "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
           ],
           "lines_fr": [
-            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
-            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
           ],
           "do": [
             "flag:cairn_2",
@@ -1858,8 +1858,8 @@
             "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
           ],
           "lines_fr": [
-            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
-            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
           ],
           "do": [
             "flag:cairn_3",
@@ -1904,8 +1904,8 @@
             "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
           ],
           "lines_fr": [
-            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
-            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
           ],
           "do": [
             "flag:cairn_4",
@@ -1950,8 +1950,8 @@
             "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
           ],
           "lines_fr": [
-            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
-            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
           ],
           "do": [
             "flag:cairn_5",
@@ -1996,8 +1996,8 @@
             "Under the summit stone, someone has left a tin for whoever builds them all. Inside: Facets, and a note: \"Well climbed.\""
           ],
           "lines_fr": [
-            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
-            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
+            "Vous ajoutez une pierre plate au sommet du cairn. C'est le sixième : chaque cairn du col porte maintenant votre pierre.",
+            "Sous la pierre du sommet, quelqu'un a laissé une boîte pour qui les construirait tous. Dedans : des Facettes, et un mot : « Bien grimpé. »"
           ],
           "do": [
             "flag:cairn_6",
@@ -2023,7 +2023,7 @@
       "z": 3,
       "kind": "sign",
       "text": "North: Anvilstead, the town on the terraces. South, down the switchbacks: the Undermine, and through it the Emberstep Quarry.",
-      "text_fr": "Au nord : Bourg-l'Enclume, le bourg en terrasses. Au sud, en bas des lacets : les Galeries Basses, et au-delà la Carrière de Pas-de-Braise."
+      "text_fr": "Au nord : Bourg-l'Enclume, le bourg en terrasses. Au sud, en bas des lacets : les Galeries Basses, et au-delà la Carrière de Pas-de-Braise."
     },
     {
       "kind": "find",
@@ -2032,7 +2032,7 @@
       "z": 3,
       "give": "coins:60",
       "text": "At the top of the scree, wedged under a slab where the wind can't get it: a climber's purse, heavy with Facets.",
-      "text_fr": "En haut des éboulis, coincée sous une dalle à l'abri du vent : la bourse d'un grimpeur, lourde de Facettes."
+      "text_fr": "En haut des éboulis, coincée sous une dalle à l'abri du vent : la bourse d'un grimpeur, lourde de Facettes."
     },
     {
       "kind": "find",
@@ -2041,7 +2041,7 @@
       "z": 23,
       "give": "give:lucky_pick",
       "text": "Half buried in the scree, its handle wrapped in faded red cord: a pick. Huw's, by the initials burned into the wood.",
-      "text_fr": "À moitié enfouie dans les éboulis, le manche entouré d'une cordelette rouge passée : une pioche. Celle de Huw, d'après les initiales brûlées dans le bois.",
+      "text_fr": "À moitié enfouie dans les éboulis, le manche entouré d'une cordelette rouge passée : une pioche. Celle de Huw, d'après les initiales brûlées dans le bois.",
       "if": "flag:pick_asked"
     },
     {
@@ -2049,7 +2049,7 @@
       "z": 34,
       "kind": "sign",
       "text": "A slate plaque on a post: \"For the miners of the Undermine, who dug the road under the mountain. Walk it, and remember them.\" Someone has left a sprig of heather.",
-      "text_fr": "Une plaque d'ardoise sur un poteau : « Aux mineurs des Galeries Basses, qui ont creusé la route sous la montagne. Empruntez-la, et souvenez-vous d'eux. » Quelqu'un a laissé un brin de bruyère."
+      "text_fr": "Une plaque d'ardoise sur un poteau : « Aux mineurs des Galeries Basses, qui ont creusé la route sous la montagne. Empruntez-la, et souvenez-vous d'eux. » Quelqu'un a laissé un brin de bruyère."
     }
   ],
   "warps": [
@@ -2095,7 +2095,7 @@
           "Two prizes, and you can tell me if it glints."
         ],
         "challenge_fr": [
-          "Halte ! Je surveille ce filon de quartz depuis ce matin et tu viens de marcher dessus.",
+          "Halte ! Je surveille ce filon de quartz depuis ce matin et tu viens de marcher dessus.",
           "Deux cartes Récompense, et tu me diras si ça brille."
         ],
         "win": [
@@ -2108,13 +2108,13 @@
           "Struck it rich! Well. Struck it."
         ],
         "lose_fr": [
-          "J'ai fait fortune ! Enfin. J'ai frappé."
+          "J'ai fait fortune ! Enfin. J'ai frappé."
         ],
         "after": [
           "Every stone on this pass has a story. Most of them say \"I fell off the mountain.\""
         ],
         "after_fr": [
-          "Chaque pierre de ce col a une histoire. La plupart disent : « Je suis tombée de la montagne. »"
+          "Chaque pierre de ce col a une histoire. La plupart disent : « Je suis tombée de la montagne. »"
         ]
       },
       "outfit": "#8a6a4a",
@@ -2135,7 +2135,7 @@
           "Two prizes."
         ],
         "challenge_fr": [
-          "Tu grimpes mon col. Tu as ajouté une pierre à mon cairn ? Non ? Le duel d'abord, les pierres ensuite.",
+          "Tu grimpes mon col. Tu as ajouté une pierre à mon cairn ? Non ? Le duel d'abord, les pierres ensuite.",
           "Deux cartes Récompense."
         ],
         "win": [
@@ -2178,7 +2178,7 @@
             "The miners who dug the Undermine came up this way every evening. My grandmother sold them soup at the top. Now there's only me and the sheep, and you."
           ],
           "lines_fr": [
-            "Attention aux moutons. Ils connaissent le col mieux que toi ; ils se mettent où ils veulent.",
+            "Attention aux moutons. Ils connaissent le col mieux que toi ; ils se mettent où ils veulent.",
             "Les mineurs qui ont creusé les Galeries montaient par ici chaque soir. Ma grand-mère leur vendait de la soupe en haut. Maintenant, il n'y a plus que moi, les moutons, et toi."
           ]
         }
@@ -2244,7 +2244,7 @@
           ],
           "lines_fr": [
             "Prends une pierre. Le feu, c'est la seule chose chaude du col après la nuit tombée.",
-            "Prospecter la nuit ? Non. Regarder les étoiles. Les Échines sont près du ciel.",
+            "Prospecter la nuit ? Non. Regarder les étoiles. Les Échines sont près du ciel.",
             "Seren, en haut à Bourg-l'Enclume, travaillait aux Galeries avant l'éboulement. Demande-lui pour les passages latéraux. Elle sait ce qu'il y a derrière chacun."
           ]
         }

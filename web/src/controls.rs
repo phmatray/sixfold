@@ -42,7 +42,7 @@ pub(crate) fn reason(e: RuleError) -> &'static str {
         RuleError::BenchFull => tr("Your Bench is full", "Votre Banc est plein"),
         RuleError::NotThisTurn => tr(
             "Played this turn: awaken it next turn",
-            "Posé ce tour : éveil au prochain tour",
+            "Posé ce tour\u{a0}: éveil au prochain tour",
         ),
         RuleError::NoMatchingCreature => tr("No Hexon it awakens from", "Aucun Hexon à éveiller"),
         RuleError::EvolutionLocked => tr("Awakening is blocked", "L'Éveil est bloqué"),

@@ -231,7 +231,7 @@ impl Reason {
                             a.cost.len()
                         ),
                         format!(
-                            "{l} : une lignée d'Éveil complète ; {} de {} fait {} dégâts pour {} énergie{}.",
+                            "{l} : une lignée d'Éveil complète\u{202f}; {} de {} fait {} dégâts pour {} énergie{}.",
                             a.label(),
                             card(top).label(),
                             a.damage,
@@ -277,7 +277,7 @@ impl Reason {
             }
             Why::Dropped => tr(
                 format!("{l}: taken out; you don't own that many, they break the 4-copy limit, or you own nothing they awaken from."),
-                format!("{l} : retirées ; vous n'en possédez pas autant, elles dépassent la limite de 4, ou vous ne possédez rien d'où elles s'éveillent."),
+                format!("{l} : retirées\u{202f}; vous n'en possédez pas autant, elles dépassent la limite de 4, ou vous ne possédez rien d'où elles s'éveillent."),
             ),
         }
     }
@@ -1135,7 +1135,7 @@ impl Suggestion {
                 tr(
                     format!("Your {color} attacks want about {want} {e}; the deck has {have}."),
                     format!(
-                        "Vos attaques {color} demandent environ {want} {e} ; le deck en a {have}."
+                        "Vos attaques {color} demandent environ {want} {e}\u{202f}; le deck en a {have}."
                     ),
                 )
             }
@@ -1146,7 +1146,7 @@ impl Suggestion {
             Hint::Weak { color, n, of } => tr(
                 format!("{n} of your {of} Hexons are weak to {color}; {into} isn't."),
                 format!(
-                    "{n} de vos {of} Hexons sont faibles face à {color} ; {into} ne l'est pas."
+                    "{n} de vos {of} Hexons sont faibles face à {color}\u{202f}; {into} ne l'est pas."
                 ),
             ),
             Hint::Over(n) => tr(

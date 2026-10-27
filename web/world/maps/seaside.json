@@ -1578,14 +1578,14 @@
       "z": 13,
       "kind": "sign",
       "text": "Saltwind Boardwalk. West: back to Sixfold Meadow. North: the boathouse and the pier. East: the lighthouse, then Gullhaven.",
-      "text_fr": "Promenade de Ventsalé. Ouest : retour au Pré de Sixfold. Nord : la remise à bateaux et la jetée. Est : le phare, puis Havre-aux-Mouettes."
+      "text_fr": "Promenade de Ventsalé. Ouest : retour au Pré de Sixfold. Nord : la remise à bateaux et la jetée. Est : le phare, puis Havre-aux-Mouettes."
     },
     {
       "x": 55,
       "z": 13,
       "kind": "sign",
       "text": "East along the boardwalk: Gullhaven, the harbour town. West: Sixfold Meadow.",
-      "text_fr": "À l'est, par la promenade : Havre-aux-Mouettes, la ville du port. À l'ouest : le Pré de Sixfold."
+      "text_fr": "À l'est, par la promenade : Havre-aux-Mouettes, la ville du port. À l'ouest : le Pré de Sixfold."
     },
     {
       "kind": "find",
@@ -1595,7 +1595,7 @@
       "hidden": true,
       "give": "coins:60",
       "text": "Under the boardwalk's first plank, out of the spray: a tin of Facets somebody never came back for.",
-      "text_fr": "Sous la première planche de la promenade, à l'abri des embruns : une boîte de Facettes que quelqu'un n'est jamais revenu chercher."
+      "text_fr": "Sous la première planche de la promenade, à l'abri des embruns : une boîte de Facettes que quelqu'un n'est jamais revenu chercher."
     },
     {
       "kind": "find",
@@ -1605,7 +1605,7 @@
       "hidden": true,
       "give": "card:relay_baton",
       "text": "In the crates by the rowboat, under a coil of rope: a card, bone dry.",
-      "text_fr": "Dans les caisses près de la barque, sous un rouleau de corde : une carte, parfaitement sèche."
+      "text_fr": "Dans les caisses près de la barque, sous un rouleau de corde : une carte, parfaitement sèche."
     },
     {
       "kind": "find",
@@ -1623,7 +1623,7 @@
       "z": 1,
       "give": "give:curio_message_bottle",
       "text": "Wedged between the crates at the end of the pier: a bottle, corked and waxed, a rolled note inside.",
-      "text_fr": "Coincée entre les caisses au bout de la jetée : une bouteille bouchée à la cire, un billet roulé à l'intérieur."
+      "text_fr": "Coincée entre les caisses au bout de la jetée : une bouteille bouchée à la cire, un billet roulé à l'intérieur."
     },
     {
       "kind": "find",
@@ -1632,7 +1632,7 @@
       "z": 16,
       "give": "pack:tide",
       "text": "Half buried in the dune grass: a booster, still sealed. The sand got everywhere except inside.",
-      "text_fr": "À moitié enfoui dans les oyats : un booster encore scellé. Le sable s'est glissé partout, sauf dedans."
+      "text_fr": "À moitié enfoui dans les oyats : un booster encore scellé. Le sable s'est glissé partout, sauf dedans."
     },
     {
       "kind": "find",
@@ -1641,7 +1641,7 @@
       "z": 2,
       "give": "coins:40",
       "text": "On the lighthouse step, under a loose stone worn smooth by boots: a few Facets.",
-      "text_fr": "Sur la marche du phare, sous une pierre branlante polie par les bottes : quelques Facettes."
+      "text_fr": "Sur la marche du phare, sous une pierre branlante polie par les bottes : quelques Facettes."
     },
     {
       "kind": "find",
@@ -1651,7 +1651,7 @@
       "hidden": true,
       "give": "coins:25",
       "text": "In the hollow of the driftwood, where the sea wore it out: a few Facets and a great deal of sand.",
-      "text_fr": "Dans le creux du bois flotté, là où la mer l'a usé : quelques Facettes et beaucoup de sable."
+      "text_fr": "Dans le creux du bois flotté, là où la mer l'a usé : quelques Facettes et beaucoup de sable."
     }
   ],
   "warps": [
@@ -1706,7 +1706,7 @@
         ],
         "challenge_fr": [
           "Chut, tu vas faire fuir le… ah. De toute façon, rien ne mordait.",
-          "Je t'ai parlé du poisson ? Long comme ça. J'ai mis un Nageflot dans mon deck en son honneur. Un duel ?"
+          "Je t'ai parlé du poisson ? Long comme ça. J'ai mis un Nageflot dans mon deck en son honneur. Un duel ?"
         ],
         "win": [
           "Slipped off the hook. Like the fish.",
@@ -1721,7 +1721,7 @@
           "Patience and bait. Mostly bait."
         ],
         "lose_fr": [
-          "Ferré ! La patience, c'est tout le secret.",
+          "Ferré ! La patience, c'est tout le secret.",
           "La patience et l'appât. Surtout l'appât."
         ],
         "after": [
@@ -1750,7 +1750,7 @@
           "Marlo's gone back to the Bellflats, and my Kelpwardens are still in the way. Rules are rules."
         ],
         "challenge_fr": [
-          "*Tuiiit !* On ne court pas sur la jetée !",
+          "*Tuiiit !* On ne court pas sur la jetée !",
           "Marlo est reparti aux Grèves de la Cloche, et mes Gardevarech sont toujours sur le chemin. Le règlement, c'est le règlement."
         ],
         "win": [
@@ -1766,7 +1766,7 @@
           "Back to the beach, and warm up properly this time."
         ],
         "lose_fr": [
-          "*Tuiiit ! Tuiiit !* Faute ! Tu as laissé ton Hexon Actif sécher au soleil.",
+          "*Tuiiit ! Tuiiit !* Faute ! Tu as laissé ton Hexon Actif sécher au soleil.",
           "Retour à la plage, et échauffe-toi correctement cette fois."
         ],
         "after": [
@@ -1801,9 +1801,9 @@
             "Here. Mum says I have to give you something, so: a pack. It's a Storm one. Kite weather."
           ],
           "lines_fr": [
-            "La ligne ! La ligne de Skye ! Tiens ce bout. Tire. Doucement… DOUCEMENT…",
-            "Il est libre ! Regarde-le filer !",
-            "Tiens. Maman dit que je dois te donner quelque chose, alors : un booster. Un Orage. Un temps à cerf-volant."
+            "La ligne ! La ligne de Skye ! Tiens ce bout. Tire. Doucement… DOUCEMENT…",
+            "Il est libre ! Regarde-le filer !",
+            "Tiens. Maman dit que je dois te donner quelque chose, alors : un booster. Un Orage. Un temps à cerf-volant."
           ]
         },
         {
@@ -1817,7 +1817,7 @@
             "Skye's got line, loads of it. But Skye won't hand anything over until you've duelled her. That's just Skye."
           ],
           "lines_fr": [
-            "Tu vois la queue rouge, là-haut, sur la rambarde du phare ? C'est mon cerf-volant. C'est Skye qui me l'a fait.",
+            "Tu vois la queue rouge, là-haut, sur la rambarde du phare ? C'est mon cerf-volant. C'est Skye qui me l'a fait.",
             "Le vent l'a emporté. Maintenant il est coincé, je n'arrive pas à l'attraper, et Ottilie dit que la rambarde, « ce n'est pas pour les enfants ».",
             "Skye a de la ligne, des tonnes. Mais elle ne donne rien tant qu'on ne l'a pas affrontée en duel. Skye, c'est comme ça."
           ]
@@ -1893,7 +1893,7 @@
         ],
         "challenge_fr": [
           "Vent d'ouest, rafales force quatre. Un temps parfait pour un duel.",
-          "Moi, je lis le vent ; mon Taurorage lit le reste. On y va ?"
+          "Moi, je lis le vent ; mon Taurorage lit le reste. On y va ?"
         ],
         "win": [
           "The wind turned on me. It does that.",
@@ -1915,7 +1915,7 @@
           "See the red tail on the lighthouse rail? I built that kite. Dace flew it. The wind kept it."
         ],
         "after_fr": [
-          "Tu vois la queue rouge, sur la rambarde du phare ? Ce cerf-volant, c'est moi qui l'ai fabriqué. Dace l'a fait voler. Le vent l'a gardé."
+          "Tu vois la queue rouge, sur la rambarde du phare ? Ce cerf-volant, c'est moi qui l'ai fabriqué. Dace l'a fait voler. Le vent l'a gardé."
         ]
       },
       "dialogue": [
@@ -1930,8 +1930,8 @@
             "Here, my spare reel. Waxed line, long enough to reach the lamp room. Tie it to the tail and tug gently. Gently!"
           ],
           "lines_fr": [
-            "C'est Dace qui t'envoie ? Évidemment, c'est Dace.",
-            "Tiens, ma bobine de secours. Une ligne cirée, assez longue pour atteindre la lanterne. Noue-la à la queue et tire doucement. Doucement !"
+            "C'est Dace qui t'envoie ? Évidemment, c'est Dace.",
+            "Tiens, ma bobine de secours. Une ligne cirée, assez longue pour atteindre la lanterne. Noue-la à la queue et tire doucement. Doucement !"
           ]
         }
       ]
@@ -2028,8 +2028,8 @@
             "Seventy-three ships I've named from this step. Never once got a wave back. Doesn't matter. The light's for them, not for me."
           ],
           "lines_fr": [
-            "Regarde. Rouge et blanc, tout bas : c'est la bouée de l'Aiguille-Foudre. Les deux carrés de lumière chaude qui filent au nord : le bac de Lou, en retard comme toujours.",
-            "Et cette lueur lilas, toute pâle, loin là-bas vers l'embouchure ? La vedette de Lac-aux-Lanternes. On dit que les lanternes de ce lac peuvent porter quelqu'un. Je n'ai jamais essayé.",
+            "Regarde. Rouge et blanc, tout bas : c'est la bouée de l'Aiguille-Foudre. Les deux carrés de lumière chaude qui filent au nord : le bac de Lou, en retard comme toujours.",
+            "Et cette lueur lilas, toute pâle, loin là-bas vers l'embouchure ? La vedette de Lac-aux-Lanternes. On dit que les lanternes de ce lac peuvent porter quelqu'un. Je n'ai jamais essayé.",
             "Soixante-treize navires nommés depuis cette marche. Jamais un salut en retour. Ça ne fait rien. La lumière est pour eux, pas pour moi."
           ]
         }
