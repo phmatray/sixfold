@@ -112,6 +112,9 @@ function door() {
   return hinge;
 }
 
+// The six seals' colours in the campaign's order (the .t-* swatches in style.css).
+export const SEAL_ORDER = ["#3f9a52", "#2f7fd0", "#e1572f", "#e2ad19", "#a8642f", "#8a4fc9"];
+
 export const PLACEHOLDER = {
   house() {
     const wall = toon("#efe4cc"), wood = toon("#7a5a3c"), glass = toon("#9fd3f0");
@@ -238,6 +241,34 @@ export const PLACEHOLDER = {
     return group(mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.06, 12), toon("#5b4a3a"), 0, 0.03, 0), mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.4, 6), toon("#5b4a3a"), 0, 0.72, 0),
       mesh(new THREE.CylinderGeometry(0.16, 0.3, 0.32, 12, 1, true), new THREE.MeshBasicMaterial({ color: "#ffd9a0", side: THREE.DoubleSide }), 0, 1.5, 0));
   },
+  // The sealed door to the Warden (#155), set in the duel hall's wall: a dark leaf in a stone frame, a brass
+  // hexagon on it, and over it a stone medallion standing out from the wall, toward the camera, with six
+  // hexagons carved round a brass one, one per seal. As the door rings, `inlay_<i>` lights in that seal's
+  // colour (world.js `ringDoor`, in the campaign's order). The leaf is a `door`: it swings when taken.
+  seal_door() {
+    const stone = toon("#9a9080"), brass = toon("#f3d589");
+    const hex = (r, x, y, z, mat) => {
+      const m = mesh(new THREE.CylinderGeometry(r, r, 0.05, 6), mat, x, y, z);
+      m.rotation.set(Math.PI / 6, 0, Math.PI / 2); // flat to the leaf's side, toward the camera once turned
+      return m;
+    };
+    const leaf = group(mesh(new THREE.BoxGeometry(0.8, 2.15, 0.12), toon("#4a3426"), 0.4, 1.075, 0));
+    const boss = mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.04, 6), brass, 0.4, 1.3, 0.07);
+    boss.rotation.x = Math.PI / 2;
+    leaf.add(boss);
+    leaf.name = "door";
+    leaf.position.set(-0.4, 0, 0.02);
+    const [cy, cz] = [2.2, 0.48];
+    const medal = group(hex(0.36, 0, cy, cz, stone), hex(0.09, -0.03, cy, cz, brass));
+    SEAL_ORDER.forEach((c, i) => {
+      const a = (i * Math.PI) / 3, m = hex(0.065, -0.035, cy + 0.21 * Math.cos(a), cz + 0.21 * Math.sin(a), toon("#2a1d14"));
+      m.name = `inlay_${i}`;
+      m.userData.lit = c;
+      medal.add(m);
+    });
+    return group(leaf, medal, mesh(new THREE.BoxGeometry(1.0, 0.45, 0.4), stone, 0, 2.375, 0),
+      mesh(new THREE.BoxGeometry(0.12, 2.15, 0.4), stone, -0.46, 1.075, 0), mesh(new THREE.BoxGeometry(0.12, 2.15, 0.4), stone, 0.46, 1.075, 0));
+  },
   exit_mat() {
     return group(mesh(new THREE.BoxGeometry(0.9, 0.02, 0.62), toon("#5d7a4a"), 0, 0.011, 0));
   },
@@ -321,7 +352,7 @@ export const STOOP = { house: { in: 0.5, steps: [0.14, 0.28, 0.28] }, cottage: {
   terrace_house: { in: 0.4, steps: [0.13, 0.13, 0.19] }, harbour_house: { in: 1.0, steps: [0.17, 0.34, 0.68] },
   lake_house: { in: 0.75, steps: [0, 0.3, 0.34] }, workshop: { in: 0.5, steps: [0, 0, 0.14] }, observatory: { in: 0.55, steps: [0, 0.28, 0.28] },
   moonwell: { in: 0.5, steps: [0.14, 0.14, 0.14] }, cave_mouth: { in: 0.5, steps: [0.05, 0.05, 0.05] }, cave_mouth_slate: { in: 0.5, steps: [0, 0, 0] },
-  fallen_trunk: { in: 0.5, steps: [0, 0, 0] } };
+  fallen_trunk: { in: 0.5, steps: [0, 0, 0] }, seal_door: { in: 0.4, steps: [0, 0, 0] } };
 // Ladders join their front and back neighbours whatever the height (floor 0 in front, a 3 m deck behind).
 export const LADDER = new Set(["ladder"]);
 // Afloat: they bob on the water (never instanced).

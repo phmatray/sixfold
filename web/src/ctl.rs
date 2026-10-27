@@ -103,6 +103,22 @@ pub fn beat(
     }
 }
 
+/// Whether `event` is the prize that wins the duel: the winner's last prize
+/// of the batch (`rest` is what still follows it). A bench-out wins with
+/// prizes still left, so the count alone can't say (#155).
+pub fn wins_the_duel<'a>(
+    event: &Event,
+    rest: impl IntoIterator<Item = &'a Event>,
+    winner: Option<usize>,
+) -> bool {
+    let taker = |e: &Event| match e {
+        Event::PrizeTaken { player, .. } => Some(*player),
+        _ => None,
+    };
+    taker(event)
+        .is_some_and(|p| winner == Some(p) && !rest.into_iter().any(|e| taker(e) == Some(p)))
+}
+
 #[derive(Clone, PartialEq, Default)]
 pub struct Fx {
     pub lunge: Option<u32>,
@@ -538,11 +554,13 @@ impl Ctl {
 
     /// The beat of the next event to play, from the replay's own state.
     fn beat_of(&self, event: &Event) -> Option<Beat> {
+        let winner = self.real.with_value(|g| g.as_ref().and_then(Game::winner));
         let (left, mine) = match event {
-            Event::PrizeTaken { player, .. } => (
-                self.prizes_left(*player).saturating_sub(1),
-                *player == HUMAN,
-            ),
+            Event::PrizeTaken { player, .. } => {
+                let wins = self.queue.with_value(|q| wins_the_duel(event, q, winner));
+                let left = self.prizes_left(*player).saturating_sub(1);
+                (if wins { 0 } else { left }, *player == HUMAN)
+            }
             _ => (usize::MAX, false),
         };
         let next = self.queue.with_value(|q| q.front().cloned());
@@ -1401,5 +1419,22 @@ mod tests {
             beat(&prize, None, false, 1, Some(true)).map(|b| b.class),
             Some("prize")
         );
+    }
+
+    #[test]
+    fn a_bench_out_win_still_takes_the_winning_prize() {
+        let prize = |player| Event::PrizeTaken {
+            player,
+            prize: 0,
+            card: CardId(0),
+        };
+        let over = Event::GameOver { winner: 0 };
+        // The batch's last prize of the winner wins it, prizes left or not.
+        assert!(wins_the_duel(&prize(0), [&over], Some(0)));
+        // Not while another of theirs follows, nor the loser's, nor mid-duel.
+        assert!(!wins_the_duel(&prize(0), [&prize(0), &over], Some(0)));
+        assert!(!wins_the_duel(&prize(1), [&over], Some(0)));
+        assert!(!wins_the_duel(&prize(0), [], None));
+        assert!(!wins_the_duel(&over, [], Some(0)));
     }
 }

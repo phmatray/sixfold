@@ -15,13 +15,15 @@ import { DIR, angle, emote } from "./actors.js";
 
 const EMOTE_HOLD = 600; // ms an emote holds the scene, so it reads
 const CAM_MAX = 2.5; // s: a pan longer than this is cut short
+const CUT_HOLD = 1.2; // s: under reduced motion, how long a cut to a shot holds before the scene goes on
 
-// env: world(), hero(), reduced(), settled() (the camera reached its target), warp(wp) -> Promise,
+// env: world(), hero(), reduced(), settled() (the camera reached its target), warp(wp) -> Promise, bell(n) (the door's nth bell, seen),
+// caption(en, fr) (a reveal's line, on screen and to the live region),
 // sound(name, n), tune() (the map's music back), stone(state, colour) (the seal stone's look, null at rest;
 // "seal" lights that colour's face for good),
 // moved() (the hero's tile is reported again), holds(cond), cb.
 export function scenes(env) {
-  let playing = false, cur = null, cam = null;
+  let playing = false, cur = null, cam = null, caption = null;
   const actorOf = (id) => (id === "hero" ? env.hero() : env.world()?.npcs.find((n) => n.def.id === id && !n.hidden));
   const isHero = (a) => a === env.hero();
   // A `face` cue's direction: `hero` turns toward the hero (along the longer axis).
@@ -35,6 +37,7 @@ export function scenes(env) {
     const w = env.world();
     playing = true;
     cur = cam = null;
+    caption = s.caption ? [s.caption, s.caption_fr ?? s.caption] : null; // said as the stone wakes (a reveal's, #155)
     w.path = [];
     // Each `say` carries its speaker's name (the hero's own lines have none).
     // Someone not out (Sable behind the sealed door, #154) still speaks under their own name.
@@ -93,9 +96,14 @@ export function scenes(env) {
     else if (c.sfx) {
       const [name, n] = c.sfx.split(":"); // `bell:<n>` (#154): the bell's step up the scale
       env.sound(name, +n || 0), me.done();
+      if (name === "bell") env.bell(+n || 0);
     }
     else if (c.music) globalThis.sixfoldAudio?.music(c.music), me.done();
-    else if (c.stone) env.stone(c.stone, c.colour), me.done();
+    else if (c.stone) {
+      env.stone(c.stone, c.colour);
+      if (c.stone === "wake" && caption) env.caption(...caption), (caption = null);
+      me.done();
+    }
     else if (c.emote) {
       if (a) emote(a, c.emote);
       setTimeout(me.done, a ? EMOTE_HOLD : 0);
@@ -114,7 +122,9 @@ export function scenes(env) {
       const a = me.a, moving = a.step || (isHero(a) ? env.world().path.length : a.go?.length);
       if (moving && me.t < me.limit) return;
       if (moving) arrive(a, isHero(a) ? env.world().path : a.go); // stuck: arrive anyway
-    } else if (me.c.cam === undefined || (!env.reduced() && !env.settled() && me.t < CAM_MAX)) return;
+    } else if (me.c.cam === undefined) return;
+    // Under reduced motion a shot is a cut, held a beat so it still reads (#155); the way back to the hero isn't.
+    else if (env.reduced() ? me.c.cam !== "hero" && me.t < CUT_HOLD : !env.settled() && me.t < CAM_MAX) return;
     me.finished = true;
     me.done();
   }

@@ -752,6 +752,7 @@ fn MatchScreen() -> impl IntoView {
             style=move || format!("--pace:{}", ctl.pace_factor())>
             <main class="mat">
                 <h1 class="sr-only">{title}</h1>
+                {move || ctl.seal().map(|s| view! { <p class="seal-plaque" aria-hidden="true">{s.heading().get()}</p> })}
                 <section class="half me" aria-label=tr("Your side", "Votre côté")>
                     <HandFan />
                     <div class="cell active"><ActiveSpot player=HUMAN /></div>

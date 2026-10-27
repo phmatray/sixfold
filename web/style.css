@@ -1150,6 +1150,8 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
   transition: opacity 700ms ease, translate 700ms var(--ease-out), visibility 0s linear 700ms;
 }
 .world-hint.gone { opacity: 0; translate: 0 -6px; visibility: hidden; pointer-events: none; }
+/* A scene has the hero's controls: the walk hint steps aside until it ends (#155). */
+.world.in-scene .world-hint { opacity: 0; visibility: hidden; }
 .world-hud {
   display: flex;
   flex: none;
@@ -1672,6 +1674,8 @@ input, select { caret-color: var(--brass-hi); }
 .autosave.show { opacity: 1; }
 /* A phone pack opening or the credits: above their bar of buttons, not over it. */
 @media (max-width: 760px) { body:has(.reveal-actions.live, .credits) .autosave { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 76px); } }
+/* A phone's D-pad and a duel's result own the bottom corner: the note goes up beside the HUD (#155). */
+@media (max-width: 640px) { body:has(.world-pad, .scrim.end) .autosave { top: max(18px, calc(env(safe-area-inset-top) + 10px)); bottom: auto; } }
 .autosave.failed { background: var(--danger-bg); border-color: color-mix(in srgb, var(--damage) 60%, transparent); color: var(--danger-ink); }
 .update-toast {
   position: fixed;
@@ -3358,7 +3362,7 @@ p.atlas-pick { color: var(--muted); }
 .station .portrait.mono { font-size: var(--fsb-3xl); }
 .station-name { display: grid; }
 .station-name b { font: 700 var(--fsb-lg)/1.2 var(--display); }
-.station-name span { font-size: var(--fsb-xs); color: var(--muted); }
+.station-name > span { font-size: var(--fsb-xs); color: var(--muted); }
 .prizes { display: flex; align-items: center; gap: 10px; flex-direction: row-reverse; }
 .prize-grid { display: grid; grid-template-columns: repeat(3, 20px); gap: 4px; }
 .prize { width: 20px; height: 28px; border-radius: 3px; background: linear-gradient(160deg, var(--card-back), #121d3a); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brass) 55%, transparent), 0 2px 3px rgba(0, 0, 0, 0.5); }
@@ -3805,7 +3809,7 @@ button.pile { cursor: pointer; }
   .bench { gap: 6px; }
   .cell.outer { display: none; }
   .station { gap: 6px; }
-  .station-name span { display: none; }
+  .station-name > span, .station-title { display: none; }
   .station-name b { font-size: var(--fsb-xs); max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .station .portrait { width: 44px; height: 44px; }
   .station .portrait.mono { font-size: var(--fsb-xl); }
@@ -4239,16 +4243,20 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
    order), easing from one to the next (never a cut), before it settles in brass. */
 .duel[data-beat~="grand"] .prize.taking { animation-duration: calc(2200ms * var(--pace, 1)); }
 .duel[data-beat~="grand"] .mat { animation: seal-ring-grand calc(2200ms * var(--pace, 1)) var(--ease-out) both; }
+/* The ring is the edge of the screen; the portrait across the table rings too, where the eye already is (#155). */
+.duel[data-beat~="seal-final"] .half.opp .portrait { animation: seal-portrait calc(1600ms * var(--pace, 1)) var(--ease-out) both; }
+.duel[data-beat~="grand"] .half.opp .portrait { animation-duration: calc(2200ms * var(--pace, 1)); }
+@keyframes seal-portrait { 30%, 70% { box-shadow: 0 0 0 4px var(--tint), 0 0 0 8px var(--c), 0 0 28px 8px color-mix(in srgb, var(--c) 60%, transparent); } }
 @keyframes seal-ring-grand {
-  0% { outline: 5px solid transparent; outline-offset: -44px; }
-  12% { outline: 5px solid #3f9a52; outline-offset: -10px; }
+  0% { outline: 8px solid transparent; outline-offset: -44px; }
+  12% { outline: 8px solid #3f9a52; outline-offset: -10px; }
   24% { outline-color: #2f7fd0; }
   36% { outline-color: #e1572f; }
   48% { outline-color: #e2ad19; }
   60% { outline-color: #a8642f; }
-  72% { outline: 5px solid #8a4fc9; outline-offset: -5px; }
-  86% { outline: 5px solid var(--tint); outline-offset: -4px; }
-  100% { outline: 5px solid transparent; outline-offset: -4px; }
+  72% { outline: 8px solid #8a4fc9; outline-offset: -6px; }
+  86% { outline: 8px solid var(--tint); outline-offset: -6px; }
+  100% { outline: 8px solid transparent; outline-offset: -6px; }
 }
 @keyframes prize-fly {
   0% { transform: none; }
@@ -4300,13 +4308,48 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
    region's colour (.duel.seal-duel.t-<tone>: the keeper's first colour, from
    the .t-* swatches) for the whole duel, and its winning prize closes a ring
    of that colour round the table. The Warden's card (.grand) is brass. */
+/* The felt itself takes the region's hue (#155: a tint over the night-blue felt read as a route duel). */
 .duel.seal-duel .mat {
+  isolation: isolate;
   background:
-    radial-gradient(ellipse 80% 38% at 50% 0%, color-mix(in srgb, var(--c) 16%, transparent), transparent 72%),
-    radial-gradient(ellipse 80% 38% at 50% 100%, color-mix(in srgb, var(--c) 12%, transparent), transparent 72%),
-    radial-gradient(ellipse 60% 22% at 50% 47%, color-mix(in srgb, var(--tint) 10%, transparent), transparent 70%),
-    radial-gradient(ellipse 75% 70% at 50% 46%, #1d3758 0%, #142944 50%, #0b1a2e 82%, #081320 100%);
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 45%, transparent), inset 0 40px 90px -40px rgba(0, 0, 0, 0.7), inset 0 0 140px rgba(0, 0, 0, 0.45);
+    radial-gradient(ellipse 80% 38% at 50% 0%, color-mix(in srgb, var(--c) 22%, transparent), transparent 72%),
+    radial-gradient(ellipse 80% 38% at 50% 100%, color-mix(in srgb, var(--c) 16%, transparent), transparent 72%),
+    radial-gradient(ellipse 60% 22% at 50% 47%, color-mix(in srgb, var(--tint) 12%, transparent), transparent 70%),
+    radial-gradient(ellipse 75% 70% at 50% 46%, color-mix(in srgb, var(--c) 30%, #1d3758) 0%, color-mix(in srgb, var(--c) 26%, #142944) 50%, color-mix(in srgb, var(--c) 18%, #0b1a2e) 82%, color-mix(in srgb, var(--c) 12%, #081320) 100%);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 60%, transparent), inset 0 40px 90px -40px rgba(0, 0, 0, 0.7), inset 0 0 140px rgba(0, 0, 0, 0.45);
+}
+/* The seal at stake, pressed faintly into the felt under the Actives, behind every card. */
+.duel.seal-duel .mat::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  grid-column: left / outer;
+  grid-row: ofront / mbench;
+  inset: 0;
+  margin: auto;
+  width: min(300px, 60%);
+  aspect-ratio: 1 / 1.1;
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--tint) 10%, transparent), color-mix(in srgb, var(--c) 13%, transparent) 70%);
+  pointer-events: none;
+}
+/* Its name on a small plaque at the felt's head, for the whole duel (the card says it once). */
+.seal-plaque {
+  position: absolute;
+  z-index: 3;
+  top: 2px;
+  left: 50%;
+  translate: -50% 0;
+  margin: 0;
+  padding: 1px 12px 2px;
+  border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--c2) 85%, transparent);
+  color: var(--tint);
+  font: 700 var(--fs-xs)/1.4 var(--display);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
 }
 .duel.seal-duel .seam::before {
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--tint) 55%, transparent) 18%, color-mix(in srgb, var(--tint) 85%, transparent) 50%, color-mix(in srgb, var(--tint) 55%, transparent) 82%, transparent);
@@ -4425,18 +4468,21 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   .seal-fill .face { animation: face-calm 300ms ease var(--at) forwards !important; }
   /* Beside the Menu button, fading in and out for its time (calm-show; the global rule would end it at once). */
   .seal-flight { transform: translate(var(--tx), calc(var(--ty) + 60px)) scale(0.5); animation: calm-show 1850ms linear forwards !important; }
-  .duel[data-beat~="seal-final"] .mat { animation: seal-ring-calm 1000ms ease both; }
+  .duel[data-beat~="seal-final"] .mat { animation: seal-ring-calm 1000ms ease both !important; }
+  .duel[data-beat~="seal-final"] .half.opp .portrait { animation: seal-portrait 1000ms ease both !important; }
   /* A seal duel's card fades in place and holds as long; nothing grows or slides. */
   .seal-card-hex, .seal-card h2, .seal-card-who, .seal-card-pips, .seal-card-seals > i { animation: fade-in var(--dur-panel) ease both; }
   /* The champion's ring: no cycle through the colours, a brass ring that fades in, holds and fades. */
-  .duel[data-beat~="grand"] .mat { animation: seal-ring-calm 1400ms ease both; }
-  .seal-card-hold { display: none; }
+  .duel[data-beat~="grand"] .mat { animation: seal-ring-calm 1400ms ease both !important; }
+  .duel[data-beat~="grand"] .half.opp .portrait { animation: seal-portrait 1400ms ease both !important; }
+  /* The hold still shows the card will move on, in four cuts rather than a slide (#155). */
+  .seal-card-hold::after { animation: seal-card-hold var(--hold, 2200ms) steps(4, end) both !important; }
 }
 @keyframes ko-fade { to { opacity: 0; filter: grayscale(1); } }
 @keyframes prize-fade { 30% { box-shadow: inset 0 0 0 1px var(--brass-hi), 0 0 10px var(--brass-hi); } 100% { opacity: 0; } }
 @keyframes spark-calm { from { opacity: 0.9; } to { opacity: 0; } }
 @keyframes face-calm { from { opacity: 0; } to { opacity: 1; } }
-@keyframes seal-ring-calm { 0%, 100% { outline: 4px solid transparent; outline-offset: -4px; } 40%, 70% { outline: 4px solid var(--c); outline-offset: -4px; } }
+@keyframes seal-ring-calm { 0%, 100% { outline: 6px solid transparent; outline-offset: -6px; } 40%, 70% { outline: 6px solid var(--c); outline-offset: -6px; } }
 /* A phone's energy column sits over the card's left edge: the number and its stamp
    lean right of centre, so the "−" stays clear of the pips. */
 @media (max-width: 640px) { .hexon-card .pop { left: 58%; } }
@@ -4541,6 +4587,9 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 .page-bar { background: var(--plank); border-bottom: var(--toon-w) solid var(--toon); box-shadow: 0 5px 0 color-mix(in srgb, var(--toon) 35%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
 .page-title { font-size: var(--fs-4xl); font-weight: 800; color: var(--paint); text-shadow: var(--painted-text); padding-bottom: 4px; }
 .page-bar .btn.ghost { background: var(--paper-hi); color: var(--toon); border-color: var(--toon); box-shadow: 0 3px 0 var(--toon); }
+/* A scene's Skip sits over the world itself (sand, snow, felt): a paper plate like the HUD's, never see-through (#155). */
+.btn.ghost.world-skip { background: var(--paper-hi); color: var(--toon); border-color: var(--toon); box-shadow: 0 3px 0 var(--toon); }
+.world-skip kbd { border-color: color-mix(in srgb, var(--toon) 40%, transparent); }
 .page-bar .btn.ghost:hover { background: var(--paint); }
 .page-bar .note, .page-bar .bar-actions { color: var(--paint); }
 /* A section's name: bold paint with a brush stroke under it. */
@@ -4800,6 +4849,7 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html
 }
 .ch-say p { margin: 0; }
 .ch-say p::before { content: "“"; } .ch-say p::after { content: "”"; }
+:root:lang(fr) .ch-say p::before { content: "«\00a0"; } :root:lang(fr) .ch-say p::after { content: "\00a0»"; }
 /* The tail points back at the face. */
 .ch-say::before { content: ""; position: absolute; left: -11px; top: 16px; width: 18px; height: 18px; background: var(--paper-hi); border: solid var(--toon); border-width: 0 0 2.5px 2.5px; transform: rotate(45deg); }
 
@@ -4833,9 +4883,21 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html
 .ch-note { margin: 0; padding: 9px 14px; border: 2px dashed var(--toon-soft); border-radius: 10px; background: color-mix(in srgb, var(--paper-lo) 45%, var(--paper)); text-wrap: pretty; }
 .ch-note.no { color: var(--danger-on-paper); font-weight: 700; border-color: color-mix(in srgb, var(--danger-on-paper) 55%, transparent); }
 .ch-note p { margin: 0; }
+/* On the way to a keeper's seal (#155): progress, so the brass of information, not the red of a refusal. */
+.ch-note.earn { font-weight: 600; border-style: solid; border-color: color-mix(in srgb, var(--brass) 60%, transparent); background: color-mix(in srgb, var(--brass) 12%, var(--paper)); }
+/* Duelists bested: round tokens in the region's colour, never the Temper's bronze hexes. */
+.ch-earn { display: inline-flex; gap: 5px; }
+.ch-earn i { width: 16px; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--toon); background: var(--paper-hi); }
+.ch-earn i.on { background: radial-gradient(circle at 38% 34%, var(--tint), var(--c) 62%, var(--c2)); }
+.ch-pips b { font: 800 var(--fs-lg)/1 var(--display); }
+/* A seal not won (#155): its socket, empty, in the seal's colour. */
+.seal-empty .seal { position: relative; width: 44px; background: color-mix(in srgb, var(--c) 75%, var(--toon)); box-shadow: none; }
+.seal-empty .seal::after { content: ""; position: absolute; inset: 4px; clip-path: inherit; background: var(--paper-lo); }
 .ch-note .ch-decks { margin-top: 10px; color: var(--toon); font-weight: 800; }
 /* No duel to accept: Not now on its own. */
 .challenge .ch-actions:not(:has(.ch-go)) { display: flex; justify-content: flex-end; }
+/* On a phone the keys' hand points down at Challenge from above: room for it over the deck plaque (#155). */
+@media (max-width: 640px) { .challenge .ch-actions { padding-top: 24px; } }
 
 /* The deck taken: one plaque; left and right (its arrows, or the keys) change it. */
 .ch-deck { display: grid; gap: 6px; min-width: 0; align-content: start; }

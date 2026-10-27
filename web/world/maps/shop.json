@@ -103,6 +103,12 @@
       "z": 6,
       "rot": 0,
       "if": "beat:warden & flag:sable_door"
+    },
+    {
+      "asset": "seal_door",
+      "x": 0,
+      "z": 6,
+      "rot": 90
     }
   ],
   "spawn": {

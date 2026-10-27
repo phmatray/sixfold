@@ -5030,6 +5030,20 @@
           ]
         },
         {
+          "if": "open:cinza & !earned:cinza & !beat:cinza",
+          "lines": [
+            "Whoa, not so fast. The kiln only lights for someone the Emberlands know.",
+            "Beat a few of their duelists first. Word runs faster than I do."
+          ],
+          "lines_fr": [
+            "Doucement, pas si vite. Le four ne s'allume que pour quelqu'un que les Braisières connaissent.",
+            "Bats d'abord quelques-uns de leurs duellistes. Les nouvelles courent plus vite que moi."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        },
+        {
           "if": "beat:warden",
           "lines": [
             "The champion, running the kiln road like the rest of us. Ha!",
@@ -5139,6 +5153,8 @@
       "id": "reveal_kilnmouth",
       "if": "!flag:reveal_kilnmouth",
       "on": "enter",
+      "caption": "A seal stone. The Emberlands' seal is kept here.",
+      "caption_fr": "Une pierre de sceau. Le sceau des Braisières y est gardé.",
       "steps": [
         {
           "do": [
@@ -5251,10 +5267,12 @@
           "say": "cinza",
           "lines": [
             "Hear that? The Ember's face caught, like a kiln on the first cold morning.",
+            "And take Kilnfox. It runs hotter than I do.",
             "Now run. Somebody has to keep that seal warm."
           ],
           "lines_fr": [
             "Tu entends ? La face de la Braise a pris, comme un four le premier matin froid.",
+            "Et prends Fournard. Il chauffe encore plus que moi.",
             "Maintenant, cours. Il faut bien quelqu'un pour garder ce sceau au chaud."
           ]
         },

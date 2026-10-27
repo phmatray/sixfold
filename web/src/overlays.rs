@@ -319,11 +319,11 @@ pub fn GameOver() -> impl IntoView {
                 ),
                 (false, false, true) => tr(
                     "You had no Hexon left in play.",
-                    "Vous n'aviez plus de Hexon en jeu.",
+                    "Vous n'aviez plus d'Hexon en jeu.",
                 ),
                 (false, false, false) => tr(
                     "Your opponent had no Hexon left in play.",
-                    "Votre adversaire n'avait plus de Hexon en jeu.",
+                    "Votre adversaire n'avait plus d'Hexon en jeu.",
                 ),
             };
             // What the cause teaches, for the "why you lost" panel.
@@ -482,11 +482,14 @@ pub fn GameOver() -> impl IntoView {
         Some(view! {
             <div class="scrim end">
                 <div class=if won { "dialog result won" } else { "dialog result lost" } role="dialog" aria-modal="true" aria-labelledby="result-title">
-                    <h2 id="result-title">{match (won, fr()) {
-                        (true, false) => "You win",
-                        (false, false) => "You lose",
-                        (true, true) => "Victoire !",
-                        (false, true) => "Défaite",
+                    // A seal duel's result speaks the seal's language (#155): its name won, or the seal holding.
+                    <h2 id="result-title">{match (ctl.seal(), won) {
+                        (Some(s), true) if !s.grand => s.heading().get(),
+                        (Some(_), true) => tr("Champion of Sixfold", "Champion de Sixfold"),
+                        (Some(s), false) if !s.grand => tr("The seal holds", "Le sceau résiste"),
+                        (Some(_), false) => tr("The title holds", "Le titre résiste"),
+                        (None, true) => tr("You win", "Victoire !"),
+                        (None, false) => tr("You lose", "Défaite"),
                     }}</h2>
                     <p class="dialog-sub">
                         {why} " "
@@ -554,6 +557,9 @@ pub fn GameOver() -> impl IntoView {
                             <div class="reward campaign-reward" role="status">
                                 {if rw.seal {
                                     view! { <crate::campaign::SealFill r=r /> }.into_any()
+                                } else if !rw.won && r.seal && ctl.seal().is_some() {
+                                    // The seal not won: its outline, empty, never a pack that wasn't given.
+                                    view! { <span class="seal-empty"><crate::campaign::Seal r=r earned=false /></span> }.into_any()
                                 } else if let Some(c) = rw.promo {
                                     // The Warden's promo: show the card itself.
                                     view! { <span class="reward-card" aria-hidden="true"><crate::cards::CardFace id=c /></span> }.into_any()
@@ -575,20 +581,13 @@ pub fn GameOver() -> impl IntoView {
                                         }.into_any(),
                                         (true, ..) => view! { <b>{tr("Rematch won", "Revanche gagnée")}</b> }.into_any(),
                                         // A seal duel lost (#153): the challenge stands, and so does the threshold.
+                                        // Its keeper says the rest, in their own voice, back in the world (#155).
                                         _ if ctl.seal().is_some_and(|s| !s.grand) => view! {
                                             <b>{tr("No seal this time", "Pas de sceau cette fois")}</b>
-                                            <span>{tr(
-                                                format!("{} will duel you again whenever you're ready. The duelists you've bested still count.", r.name),
-                                                format!("{} vous affrontera de nouveau quand vous voudrez. Les duellistes que vous avez battus comptent toujours.", r.name),
-                                            )}</span>
                                         }.into_any(),
                                         // The champion's duel lost (#154): the title was at stake, not a seal.
                                         _ if ctl.seal().is_some_and(|s| s.grand) => view! {
                                             <b>{tr("Not the title, this time", "Pas le titre, cette fois")}</b>
-                                            <span>{tr(
-                                                format!("{} will duel you again whenever you're ready. Your six seals still open her door.", r.name),
-                                                format!("{} vous affrontera de nouveau quand vous voudrez. Vos six sceaux vous ouvrent toujours sa porte.", r.name),
-                                            )}</span>
                                         }.into_any(),
                                         _ => view! {
                                             <b>{if r.seal { tr("No seal this time", "Pas de sceau cette fois") } else { tr("Not this time", "Pas cette fois") }}</b>
@@ -649,7 +648,7 @@ pub fn GameOver() -> impl IntoView {
                                             <b>{tr("Gauntlet cleared!", "Épreuve réussie !")}</b>
                                             <span>{tr(
                                                 format!("All {} rivals in a row. +{CLEAR_PACKS} Wild Packs.", GAUNTLET.len()),
-                                                format!("Les {} rivaux d'affilée. +{CLEAR_PACKS} Boosters Sauvage.", GAUNTLET.len()),
+                                                format!("Les {} rivaux d'affilée. +{CLEAR_PACKS} Boosters Sauvages.", GAUNTLET.len()),
                                             )}</span>
                                         }.into_any(),
                                         (true, false) => view! { <b>{tr(
@@ -757,7 +756,12 @@ fn loss_lesson(ctl: Ctl) -> (Vec<String>, Vec<String>) {
             .iter()
             .filter(|&&id| card(id).creature().is_some_and(|c| c.color == w))
             .count();
-        let opp = setup.names[1].clone();
+        // "Marlo", not "Marlo, Tide Reader": a possessive can't carry the title (#155).
+        let opp = setup.names[1]
+            .split(", ")
+            .next()
+            .unwrap_or_default()
+            .to_string();
         hints.push(if mine == 0 {
             tr(
                 format!("Most of {opp}'s Hexons are weak to {w}, and your deck has none: one {w} Hexon would double your damage."),

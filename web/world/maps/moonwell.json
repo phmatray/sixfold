@@ -87,7 +87,7 @@
       "asset": "seal_stone",
       "x": 22,
       "z": 14,
-      "rot": 0
+      "rot": 180
     },
     {
       "asset": "moonflower",
@@ -1770,6 +1770,20 @@
           ]
         },
         {
+          "if": "open:lumen & !earned:lumen & !beat:lumen",
+          "lines": [
+            "Not yet. The garden doesn't know your steps.",
+            "Duel the Hushlands' duelists first. They whisper to me at night."
+          ],
+          "lines_fr": [
+            "Pas encore. Le jardin ne connaît pas tes pas.",
+            "Affronte d'abord les duellistes des Terres du Murmure. Ils me le murmurent la nuit."
+          ],
+          "do": [
+            "duel:lumen"
+          ]
+        },
+        {
           "if": "!open:lumen",
           "lines": [
             "You look tired. Five seals first, then we'll talk.",
@@ -1887,6 +1901,8 @@
       "id": "reveal_moonwell",
       "if": "!flag:reveal_moonwell",
       "on": "enter",
+      "caption": "A seal stone. The Hushlands' seal is kept here.",
+      "caption_fr": "Une pierre de sceau. Le sceau des Terres du Murmure y est gardé.",
       "steps": [
         {
           "do": [
@@ -1999,10 +2015,12 @@
           "say": "lumen",
           "lines": [
             "There. The Dream's face is awake now, and it won't sleep again.",
+            "And Moonmoth. It sings, but only at night.",
             "Neither should you, not yet. The duel hall is waiting."
           ],
           "lines_fr": [
             "Voilà. La face du Songe est éveillée, et elle ne se rendormira plus.",
+            "Et Phalune. Elle chante, mais seulement la nuit.",
             "Toi non plus, pas encore. La salle des duels t'attend."
           ]
         },

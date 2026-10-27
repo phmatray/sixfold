@@ -1117,6 +1117,28 @@ fn staging_problems(site: &str, m: &Value) -> Vec<String> {
             "{site}: {id}'s first branch after a duel's result is the entrance's ({fallback:?})"
         )),
     }
+    // #155: below the threshold the keeper says "not yet" before anything that
+    // invites a duel, so the challenge panel's refusal never contradicts them.
+    let unearned = conds(&format!("open:{id} & !earned:{id} & !beat:{id}"));
+    let not_yet = branches
+        .iter()
+        .position(|b| conds(b["if"].as_str().unwrap_or("")) == unearned);
+    let default = branches.iter().position(|b| b.get("if").is_none());
+    match not_yet {
+        Some(i) if default.is_none_or(|d| i < d) => {
+            let (en, fr) = (&branches[i]["lines"], &branches[i]["lines_fr"]);
+            if en.as_array().is_none_or(Vec::is_empty)
+                || en.as_array().map(Vec::len) != fr.as_array().map(Vec::len)
+            {
+                bad.push(format!(
+                    "{site}: {id}'s not-yet branch says lines, each with its French"
+                ));
+            }
+        }
+        _ => bad.push(format!(
+            "{site}: {id} has no not-yet branch ({unearned:?}) before the default"
+        )),
+    }
     bad
 }
 
@@ -1400,7 +1422,13 @@ fn the_warden_is_staged_grandest() {
         (&"enter".into(), &STAGED.into())
     );
     let fx = effects(&entrance);
-    assert_eq!(fx[..2], ["music:duel_boss", "cam:warden"]);
+    // The camera comes to her last (#155): from the door, past the stones, to her.
+    let opening = strs(&entrance["steps"][0]["do"]);
+    assert_eq!(opening[0], "music:duel_boss");
+    assert_eq!(
+        opening.iter().rev().find(|e| e.starts_with("cam:")),
+        Some(&"cam:warden")
+    );
     assert_eq!(
         fx[fx.len() - 3..],
         ["cam:hero", "flag:met_warden", "duel:warden"]

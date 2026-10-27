@@ -115,7 +115,7 @@ const tmpColor = new THREE.Color(), tmpColor2 = new THREE.Color();
 const GLOW = 1.8; // an awake face: its colour this much over paint (vertex colours may pass 1)
 const LIT = 1.5; // a held seal's face, lit for good: its colour this much over paint, with no light (#153)
 // A face whose seal isn't held yet rests dormant: its paint sunk most of the way into the stone.
-const DORMANT = new THREE.Color("#9c968b"), DORMANT_K = 0.55;
+const DORMANT = new THREE.Color("#9c968b"), DORMANT_K = 0.75;
 const BURST = 60, BURST_S = 1.2; // the motes a seal won on stage sends up, and for how long (s)
 const WHITE = new THREE.Color("#ffffff");
 // A seal won on stage (`stone:seal`): its face lights for good and the rest of the glow gathers into it
@@ -418,9 +418,15 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   const holds = (cond) => !cond || cb("check", cond, "") === true;
   // A gate's state is the engine's rule too (it never shuts under the hero).
   const gate = (cond, was, on) => cb("gate", cond, `${was ? 1 : 0}${on ? 1 : 0}`) === true;
+  // The sealed door's `n`th inlay lights in its seal's colour, for good (props.js seal_door).
+  const ringDoor = (n) => {
+    const m = world?.root.getObjectByName(`inlay_${n}`);
+    if (m) m.material.color.set(m.userData.lit), m.material.emissive.set(m.userData.lit).multiplyScalar(0.7);
+  };
   const recheck = (animate) => {
     refresh(world, holds, gate, animate);
     if (world.gateSound !== undefined) sound(world.gateSound ? "gate" : "door"), (world.gateSound = undefined);
+    if (holds("flag:door_warden") || holds("beat:warden")) for (let i = 0; i < 6; i++) ringDoor(i); // the sealed door, rung
     // The gates that just opened, named on screen and in the live region (once: they opened now);
     // two at once (both vents at nightfall) share one banner rather than the second hiding the first.
     const names = [...new Set(world.opened?.splice(0))];
@@ -448,8 +454,22 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     lastPhase = phase;
   };
   // Cutscenes (script.js): the camera reports when it has reached what it was sent to look at.
+  const BELLS = tr(["one", "two", "three", "four", "five", "six"], ["un", "deux", "trois", "quatre", "cinq", "six"]);
   const cut = scenes({
     world: () => world, hero: () => hero, reduced: () => reduced, holds, cb, sound, tune, warp,
+    caption: (en, fr) => {
+      const text = tr(en, fr);
+      showBanner(text, 3200);
+      cb("area", text, "");
+    },
+    // The door's bells (#154), seen and read too (#155): an inlay lights per bell, and the count builds up on screen;
+    // the live region gets the whole count once.
+    bell: (n) => {
+      ringDoor(n);
+      const text = tr("The door rings: ", "La porte sonne\u00a0: ") + BELLS.slice(0, n + 1).join("… ") + (n >= 5 ? "." : "…");
+      showBanner(text, n >= 5 ? 2600 : 1200);
+      if (n >= 5) cb("area", text, "");
+    },
     stone: (state, face) => {
       const s = world?.stone;
       if (!s) return;
@@ -787,7 +807,10 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       // camera still follows the hero, but only as far as keeps the whole room
       // (and its back wall, about 1 m) in view.
       const fit = (v, lo, hi) => THREE.MathUtils.clamp(v, Math.min(lo, hi), Math.max(lo, hi));
-      aim.x = fit(aim.x, halfW, w.map.width - halfW);
+      // A scene's shot of something by a wall (the sealed door) may show a strip past it, so what it
+      // aims at sits 15% in from the frame's edge rather than off it.
+      const near = shot ? 0.7 * halfW : Infinity;
+      aim.x = fit(aim.x, Math.min(halfW, aim.x + near), Math.max(w.map.width - halfW, aim.x - near));
       if (Number.isFinite(top)) {
         // A room deeper than the view leans to its back row (counters, shelves) as
         // long as the hero stays a little over the bottom edge.

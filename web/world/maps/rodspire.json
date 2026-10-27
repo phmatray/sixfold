@@ -94,7 +94,7 @@
       "asset": "seal_stone",
       "x": 18,
       "z": 4,
-      "rot": 0,
+      "rot": 240,
       "y": 6
     },
     {
@@ -1085,6 +1085,20 @@
           ]
         },
         {
+          "if": "open:quill & !earned:quill & !beat:quill",
+          "lines": [
+            "Your page in my notebook is still blank.",
+            "Duel the Galewold's duelists first. I'll hear about it on the wind."
+          ],
+          "lines_fr": [
+            "Ta page dans mon carnet est encore blanche.",
+            "Affronte d'abord les duellistes des Hautes-Rafales. Le vent me le dira."
+          ],
+          "do": [
+            "duel:quill"
+          ]
+        },
+        {
           "if": "!open:quill",
           "lines": [
             "Hold on. You carry fewer than three seals.",
@@ -1191,6 +1205,8 @@
       "id": "reveal_rodspire",
       "if": "!flag:reveal_rodspire",
       "on": "enter",
+      "caption": "A seal stone. The Galewold's seal is kept here.",
+      "caption_fr": "Une pierre de sceau. Le sceau des Hautes-Rafales y est gardé.",
       "steps": [
         {
           "do": [
@@ -1307,10 +1323,12 @@
           "say": "quill",
           "lines": [
             "Noted: the Storm's face, lit, and staying lit. I'll date the page.",
+            "Squallkite comes with it. Fly it on a windy day.",
             "Go on. The forecast says there are more stones on your road."
           ],
           "lines_fr": [
             "Noté : la face de l'Orage, allumée, et pour de bon. Je date la page.",
+            "Milanorage va avec. Fais-le voler un jour de grand vent.",
             "Va. La météo annonce d'autres pierres sur ta route."
           ]
         },

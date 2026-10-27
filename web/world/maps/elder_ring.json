@@ -83,7 +83,7 @@
       "asset": "seal_stone",
       "x": 20,
       "z": 15,
-      "rot": 0
+      "rot": 60
     },
     {
       "asset": "standing_tree",
@@ -2081,6 +2081,20 @@
           ]
         },
         {
+          "if": "open:bramble & !earned:bramble & !beat:bramble",
+          "lines": [
+            "Not yet, dear. The hedges don't know you.",
+            "Duel a few of the Deepgrove's duelists. The roots carry word to me."
+          ],
+          "lines_fr": [
+            "Pas encore, mon petit. Les haies ne te connaissent pas.",
+            "Affronte quelques duellistes du Bois-Profond. Les racines me feront passer le mot."
+          ],
+          "do": [
+            "duel:bramble"
+          ]
+        },
+        {
           "if": "beat:warden",
           "lines": [
             "Champion! The hedges stood up straighter when they heard.",
@@ -2180,6 +2194,8 @@
       "id": "reveal_elder_ring",
       "if": "!flag:reveal_elder_ring",
       "on": "enter",
+      "caption": "A seal stone. The Deepgrove's seal is kept here.",
+      "caption_fr": "Une pierre de sceau. Le sceau du Bois-Profond y est gardé.",
       "steps": [
         {
           "do": [
@@ -2276,10 +2292,12 @@
           "say": "bramble",
           "lines": [
             "See that? The Grove's face took it. It'll stay lit as long as the hedges grow.",
+            "And a Thistlewick for your binder. It only pricks a little.",
             "Off you go, then. Mind the thorns on the way out."
           ],
           "lines_fr": [
             "Tu vois ? La face du Bosquet l'a pris. Elle restera allumée tant que les haies pousseront.",
+            "Et un Chardomèche pour ton classeur. Il ne pique qu'un peu.",
             "Allez, file. Attention aux épines en sortant."
           ]
         },

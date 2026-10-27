@@ -28,7 +28,13 @@ pub fn packs_label(b: usize, n: u32) -> String {
     let name = BOOSTERS[b].name;
     match (n, fr()) {
         (0 | 1, true) => format!("{n} {name}"),
-        (_, true) => format!("{n} {}", name.fr.replacen("Booster", "Boosters", 1)),
+        // "Booster Sauvage" is an adjective, so it agrees; "Booster Marée" names a region and doesn't.
+        (_, true) => format!(
+            "{n} {}",
+            name.fr
+                .replacen("Booster", "Boosters", 1)
+                .replace("Sauvage", "Sauvages")
+        ),
         (1, false) => format!("1 {name}"),
         _ => format!("{n} {name}s"),
     }
@@ -758,13 +764,15 @@ pub fn Challenge(
             } else if let Some(r) = r.filter(|_| !accepted) {
                 let n = progress.with_untracked(|p| r.bested(p));
                 let of = tr(format!("{n} of {}", r.earn), format!("{n} sur {}", r.earn));
-                view! { <div class="ch-note no">
+                // Progress, not an error (#155): the brass note, and pips in the region's colour.
+                let tone = r.colors.first().map_or("colorless", |&c| color_key(c));
+                view! { <div class="ch-note earn">
                     <p>{tr(
                         format!("{} wants {} of {}'s duelists bested first. You've bested {n}.", r.name, r.earn, r.region.en),
                         format!("{} veut que vous battiez d'abord {} duellistes {}. Vous en avez battu {n}.", r.name, r.earn, r.region_de()),
                     )}</p>
                     <p class="ch-pips">
-                        <span class="ch-temper" role="img" aria-label=of.clone()>
+                        <span class=format!("ch-earn t-{tone}") role="img" aria-label=of.clone()>
                             {(0..r.earn).map(|i| view! { <i class:on=i < n></i> }).collect_view()}
                         </span>
                         <b aria-hidden="true">{of}</b>

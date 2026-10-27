@@ -30,6 +30,8 @@ const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // p
 const BLOOMS = new Set(["moonflower"]); // with an `open` condition: instanced closed and open, cross-faded (build, refresh)
 const SMOKE = 8;
 // A seal stone's six coloured faces (seal_stone.glb `sx_seal_<colour>`; not its top or body).
+// Its faces at rot 0, clockwise from the front (+z): fire, water, lightning, psychic, fighting, grass; a seal
+// site turns its stone (rot 360 - 60 k) so its own region's face looks at the camera (#155).
 const SEAL_FACE = /seal_(fire|water|lightning|psychic|fighting|grass)$/;
 const CHUNK = 16; // tiles per side of an instanced scenery chunk (culled as one)
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)

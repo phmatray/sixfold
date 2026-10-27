@@ -131,8 +131,10 @@ pub fn Toaster() -> impl IntoView {
         }
         // A world sheet is a modal <dialog>: everything outside it is inert, so a
         // toast now would be covered and never read out. Wait until it closes.
+        // A duel's result and a seal on its way to the Menu are their own moment
+        // (#155): the toasts wait until the seal has landed.
         if document()
-            .query_selector("dialog:modal")
+            .query_selector("dialog:modal, .scrim.end, .seal-card, .seal-flight")
             .ok()
             .flatten()
             .is_some()

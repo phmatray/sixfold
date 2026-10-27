@@ -285,7 +285,7 @@ test("the sealed door rings for six seals, and Sable's entrance lands on her cha
   // Through the door: her entrance plays on arrival; skipped, it still ends on her challenge.
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
   expect(await walk(page, 0, 6)).toBeGreaterThan(0);
-  await expect(sable).toContainText("Six seals.", { timeout: 60_000 });
+  await expect(sable).toContainText("So you're the one who rang them.", { timeout: 60_000 });
   await page.keyboard.press("Escape");
   const offer = page.getByRole("dialog", { name: "Challenge Sable?" });
   const accept = offer.getByRole("button", { name: /^Challenge/ });
