@@ -248,7 +248,7 @@
     {
       "asset": "reeds",
       "x": 30,
-      "z": 17,
+      "z": 20,
       "rot": 0
     },
     {
@@ -534,27 +534,21 @@
     },
     {
       "asset": "reeds",
-      "x": 30,
-      "z": 21,
-      "rot": 194
-    },
-    {
-      "asset": "reeds",
       "x": 26,
       "z": 3,
-      "rot": 349
+      "rot": 194
     },
     {
       "asset": "reeds",
       "x": 30,
       "z": 7,
-      "rot": 339
+      "rot": 349
     },
     {
       "asset": "reeds",
       "x": 27,
       "z": 13,
-      "rot": 53
+      "rot": 339
     },
     {
       "asset": "glow_mushroom",
@@ -576,232 +570,220 @@
       "rot": 0
     },
     {
-      "asset": "tree",
+      "asset": "bush_dark",
       "x": 0,
+      "z": 0,
+      "rot": 233
+    },
+    {
+      "asset": "tree",
+      "x": 1,
       "z": 0,
       "rot": 90
     },
     {
       "asset": "pine",
-      "x": 2,
-      "z": 0,
-      "rot": 47
-    },
-    {
-      "asset": "tree",
       "x": 3,
       "z": 0,
-      "rot": 0
-    },
-    {
-      "asset": "bush_dark",
-      "x": 5,
-      "z": 0,
-      "rot": 303
-    },
-    {
-      "asset": "tree",
-      "x": 6,
-      "z": 0,
-      "rot": 270
+      "rot": 20
     },
     {
       "asset": "pine",
-      "x": 8,
+      "x": 4,
       "z": 0,
-      "rot": 21
+      "rot": 251
     },
     {
-      "asset": "birch",
-      "x": 9,
+      "asset": "tree",
+      "x": 5,
       "z": 0,
       "rot": 180
+    },
+    {
+      "asset": "pine",
+      "x": 7,
+      "z": 0,
+      "rot": 177
+    },
+    {
+      "asset": "tree",
+      "x": 8,
+      "z": 0,
+      "rot": 0
     },
     {
       "asset": "bush",
       "x": 10,
       "z": 0,
-      "rot": 14
+      "rot": 43
     },
     {
       "asset": "tree",
       "x": 11,
       "z": 0,
-      "rot": 0
+      "rot": 90
     },
     {
       "asset": "pine",
       "x": 13,
       "z": 0,
-      "rot": 312
+      "rot": 219
     },
     {
       "asset": "pine",
       "x": 14,
       "z": 0,
-      "rot": 92
+      "rot": 179
     },
     {
-      "asset": "pine",
+      "asset": "bush_dark",
       "x": 15,
       "z": 0,
-      "rot": 166
+      "rot": 312
     },
     {
       "asset": "tree",
       "x": 16,
       "z": 0,
-      "rot": 180
+      "rot": 0
     },
     {
-      "asset": "pine",
+      "asset": "tree",
       "x": 18,
       "z": 0,
-      "rot": 98
-    },
-    {
-      "asset": "bush",
-      "x": 19,
-      "z": 0,
-      "rot": 157
+      "rot": 0
     },
     {
       "asset": "tree",
       "x": 20,
       "z": 0,
-      "rot": 270
+      "rot": 180
     },
     {
-      "asset": "birch",
+      "asset": "bush",
       "x": 22,
       "z": 0,
-      "rot": 333
-    },
-    {
-      "asset": "birch",
-      "x": 23,
-      "z": 0,
-      "rot": 306
+      "rot": 99
     },
     {
       "asset": "tree",
-      "x": 24,
+      "x": 23,
       "z": 0,
-      "rot": 90
+      "rot": 0
+    },
+    {
+      "asset": "pine",
+      "x": 25,
+      "z": 0,
+      "rot": 206
     },
     {
       "asset": "pine",
       "x": 26,
       "z": 0,
-      "rot": 292
+      "rot": 8
     },
     {
       "asset": "birch",
       "x": 31,
       "z": 0,
-      "rot": 212
-    },
-    {
-      "asset": "birch",
-      "x": 32,
-      "z": 0,
-      "rot": 168
+      "rot": 195
     },
     {
       "asset": "bush",
+      "x": 32,
+      "z": 0,
+      "rot": 297
+    },
+    {
+      "asset": "pine",
       "x": 33,
       "z": 0,
-      "rot": 147
+      "rot": 345
     },
     {
       "asset": "bush_dark",
       "x": 34,
       "z": 0,
-      "rot": 247
+      "rot": 257
     },
     {
-      "asset": "birch",
+      "asset": "bush",
       "x": 35,
       "z": 0,
-      "rot": 207
+      "rot": 41
     },
     {
       "asset": "pine",
       "x": 36,
       "z": 0,
-      "rot": 215
+      "rot": 229
     },
     {
-      "asset": "bush",
+      "asset": "birch",
       "x": 37,
       "z": 0,
-      "rot": 43
+      "rot": 167
     },
     {
       "asset": "birch",
       "x": 38,
       "z": 0,
-      "rot": 279
+      "rot": 124
     },
     {
       "asset": "tree",
       "x": 39,
       "z": 0,
-      "rot": 180
+      "rot": 270
     },
     {
-      "asset": "tree",
+      "asset": "pine",
       "x": 41,
       "z": 0,
-      "rot": 270
+      "rot": 78
+    },
+    {
+      "asset": "birch",
+      "x": 42,
+      "z": 0,
+      "rot": 73
     },
     {
       "asset": "tree",
       "x": 43,
       "z": 0,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 45,
+      "z": 0,
       "rot": 270
     },
     {
-      "asset": "pine",
-      "x": 45,
-      "z": 0,
-      "rot": 324
-    },
-    {
-      "asset": "pine",
-      "x": 46,
-      "z": 0,
-      "rot": 41
-    },
-    {
-      "asset": "bush",
+      "asset": "tree",
       "x": 47,
       "z": 0,
-      "rot": 238
-    },
-    {
-      "asset": "bush_dark",
-      "x": 48,
-      "z": 0,
-      "rot": 325
+      "rot": 180
     },
     {
       "asset": "bush",
       "x": 49,
       "z": 0,
-      "rot": 347
-    },
-    {
-      "asset": "pine",
-      "x": 50,
-      "z": 0,
-      "rot": 341
+      "rot": 242
     },
     {
       "asset": "tree",
-      "x": 51,
+      "x": 50,
       "z": 0,
       "rot": 90
+    },
+    {
+      "asset": "birch",
+      "x": 52,
+      "z": 0,
+      "rot": 21
     },
     {
       "asset": "tree",
@@ -813,814 +795,844 @@
       "asset": "tree",
       "x": 55,
       "z": 0,
-      "rot": 180
-    },
-    {
-      "asset": "pine",
-      "x": 57,
-      "z": 0,
-      "rot": 51
-    },
-    {
-      "asset": "bush_dark",
-      "x": 58,
-      "z": 0,
-      "rot": 268
-    },
-    {
-      "asset": "birch",
-      "x": 59,
-      "z": 0,
-      "rot": 198
-    },
-    {
-      "asset": "bush",
-      "x": 5,
-      "z": 1,
-      "rot": 110
-    },
-    {
-      "asset": "pine",
-      "x": 8,
-      "z": 1,
-      "rot": 118
-    },
-    {
-      "asset": "birch",
-      "x": 9,
-      "z": 1,
-      "rot": 72
-    },
-    {
-      "asset": "tree",
-      "x": 22,
-      "z": 1,
       "rot": 0
     },
     {
       "asset": "pine",
-      "x": 45,
-      "z": 1,
-      "rot": 98
-    },
-    {
-      "asset": "bush",
-      "x": 46,
-      "z": 1,
-      "rot": 205
+      "x": 57,
+      "z": 0,
+      "rot": 59
     },
     {
       "asset": "pine",
-      "x": 47,
+      "x": 58,
+      "z": 0,
+      "rot": 130
+    },
+    {
+      "asset": "pine",
+      "x": 59,
+      "z": 0,
+      "rot": 135
+    },
+    {
+      "asset": "pine",
+      "x": 0,
       "z": 1,
-      "rot": 207
+      "rot": 341
+    },
+    {
+      "asset": "birch",
+      "x": 3,
+      "z": 1,
+      "rot": 295
+    },
+    {
+      "asset": "pine",
+      "x": 4,
+      "z": 1,
+      "rot": 341
+    },
+    {
+      "asset": "pine",
+      "x": 7,
+      "z": 1,
+      "rot": 120
+    },
+    {
+      "asset": "bush",
+      "x": 13,
+      "z": 1,
+      "rot": 204
+    },
+    {
+      "asset": "tree",
+      "x": 14,
+      "z": 1,
+      "rot": 90
+    },
+    {
+      "asset": "bush",
+      "x": 22,
+      "z": 1,
+      "rot": 32
+    },
+    {
+      "asset": "bush",
+      "x": 25,
+      "z": 1,
+      "rot": 297
+    },
+    {
+      "asset": "bush",
+      "x": 41,
+      "z": 1,
+      "rot": 295
+    },
+    {
+      "asset": "birch",
+      "x": 42,
+      "z": 1,
+      "rot": 149
+    },
+    {
+      "asset": "pine",
+      "x": 49,
+      "z": 1,
+      "rot": 182
     },
     {
       "asset": "tree",
       "x": 57,
       "z": 1,
-      "rot": 270
+      "rot": 0
     },
     {
-      "asset": "pine",
+      "asset": "birch",
       "x": 59,
       "z": 1,
-      "rot": 41
+      "rot": 19
     },
     {
       "asset": "tree",
       "x": 0,
       "z": 22,
-      "rot": 270
+      "rot": 180
     },
     {
       "asset": "tree",
       "x": 2,
       "z": 22,
-      "rot": 180
+      "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "tree",
       "x": 4,
       "z": 22,
-      "rot": 25
-    },
-    {
-      "asset": "tree",
-      "x": 5,
-      "z": 22,
-      "rot": 270
-    },
-    {
-      "asset": "tree",
-      "x": 12,
-      "z": 22,
-      "rot": 90
-    },
-    {
-      "asset": "tree",
-      "x": 14,
-      "z": 22,
-      "rot": 90
-    },
-    {
-      "asset": "bush_dark",
-      "x": 18,
-      "z": 22,
-      "rot": 232
-    },
-    {
-      "asset": "tree",
-      "x": 19,
-      "z": 22,
-      "rot": 270
-    },
-    {
-      "asset": "tree",
-      "x": 21,
-      "z": 22,
       "rot": 180
     },
     {
-      "asset": "pine",
-      "x": 23,
-      "z": 22,
-      "rot": 40
-    },
-    {
       "asset": "tree",
-      "x": 29,
+      "x": 6,
       "z": 22,
       "rot": 90
     },
     {
       "asset": "birch",
-      "x": 31,
+      "x": 8,
       "z": 22,
-      "rot": 295
+      "rot": 39
     },
     {
-      "asset": "bush",
-      "x": 35,
+      "asset": "pine",
+      "x": 10,
       "z": 22,
-      "rot": 33
-    },
-    {
-      "asset": "bush",
-      "x": 37,
-      "z": 22,
-      "rot": 276
+      "rot": 303
     },
     {
       "asset": "tree",
-      "x": 38,
+      "x": 11,
       "z": 22,
-      "rot": 180
+      "rot": 90
+    },
+    {
+      "asset": "tree",
+      "x": 18,
+      "z": 22,
+      "rot": 270
+    },
+    {
+      "asset": "birch",
+      "x": 20,
+      "z": 22,
+      "rot": 54
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 22,
+      "rot": 65
+    },
+    {
+      "asset": "bush",
+      "x": 44,
+      "z": 22,
+      "rot": 206
+    },
+    {
+      "asset": "pine",
+      "x": 45,
+      "z": 22,
+      "rot": 27
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 22,
+      "rot": 161
     },
     {
       "asset": "tree",
       "x": 47,
       "z": 22,
-      "rot": 270
+      "rot": 180
     },
     {
-      "asset": "birch",
+      "asset": "tree",
       "x": 49,
       "z": 22,
-      "rot": 337
-    },
-    {
-      "asset": "birch",
-      "x": 50,
-      "z": 22,
-      "rot": 191
+      "rot": 0
     },
     {
       "asset": "tree",
       "x": 51,
       "z": 22,
-      "rot": 90
+      "rot": 270
     },
     {
-      "asset": "birch",
+      "asset": "tree",
       "x": 53,
       "z": 22,
-      "rot": 185
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 55,
+      "z": 22,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 57,
+      "z": 22,
+      "rot": 0
     },
     {
       "asset": "birch",
-      "x": 54,
-      "z": 22,
-      "rot": 107
-    },
-    {
-      "asset": "bush_dark",
       "x": 59,
       "z": 22,
-      "rot": 38
-    },
-    {
-      "asset": "birch",
-      "x": 4,
-      "z": 23,
-      "rot": 200
-    },
-    {
-      "asset": "birch",
-      "x": 7,
-      "z": 23,
-      "rot": 117
+      "rot": 31
     },
     {
       "asset": "pine",
       "x": 8,
       "z": 23,
-      "rot": 280
+      "rot": 355
+    },
+    {
+      "asset": "birch",
+      "x": 9,
+      "z": 23,
+      "rot": 40
     },
     {
       "asset": "pine",
-      "x": 9,
+      "x": 10,
       "z": 23,
-      "rot": 305
+      "rot": 277
+    },
+    {
+      "asset": "pine",
+      "x": 13,
+      "z": 23,
+      "rot": 331
     },
     {
       "asset": "bush",
-      "x": 10,
+      "x": 14,
       "z": 23,
-      "rot": 332
+      "rot": 338
     },
     {
-      "asset": "birch",
-      "x": 11,
+      "asset": "pine",
+      "x": 15,
       "z": 23,
-      "rot": 122
+      "rot": 314
     },
     {
-      "asset": "birch",
+      "asset": "pine",
       "x": 16,
       "z": 23,
-      "rot": 23
+      "rot": 52
     },
     {
-      "asset": "pine",
+      "asset": "bush_dark",
       "x": 17,
       "z": 23,
-      "rot": 31
+      "rot": 202
+    },
+    {
+      "asset": "bush",
+      "x": 20,
+      "z": 23,
+      "rot": 9
     },
     {
       "asset": "pine",
-      "x": 18,
+      "x": 21,
       "z": 23,
-      "rot": 209
+      "rot": 38
+    },
+    {
+      "asset": "bush_dark",
+      "x": 22,
+      "z": 23,
+      "rot": 41
     },
     {
       "asset": "pine",
       "x": 23,
       "z": 23,
-      "rot": 89
+      "rot": 347
     },
     {
-      "asset": "bush",
+      "asset": "pine",
       "x": 24,
       "z": 23,
-      "rot": 352
+      "rot": 272
     },
     {
       "asset": "bush",
       "x": 26,
       "z": 23,
-      "rot": 100
+      "rot": 283
+    },
+    {
+      "asset": "birch",
+      "x": 29,
+      "z": 23,
+      "rot": 188
     },
     {
       "asset": "pine",
       "x": 31,
       "z": 23,
-      "rot": 249
+      "rot": 325
     },
     {
-      "asset": "birch",
+      "asset": "bush_dark",
       "x": 35,
       "z": 23,
-      "rot": 178
+      "rot": 260
     },
     {
       "asset": "pine",
       "x": 36,
       "z": 23,
-      "rot": 157
+      "rot": 242
     },
     {
-      "asset": "birch",
+      "asset": "pine",
       "x": 37,
       "z": 23,
-      "rot": 214
+      "rot": 261
+    },
+    {
+      "asset": "pine",
+      "x": 38,
+      "z": 23,
+      "rot": 116
     },
     {
       "asset": "birch",
+      "x": 39,
+      "z": 23,
+      "rot": 221
+    },
+    {
+      "asset": "pine",
       "x": 40,
       "z": 23,
-      "rot": 19
+      "rot": 229
     },
     {
-      "asset": "birch",
+      "asset": "pine",
       "x": 41,
       "z": 23,
-      "rot": 260
-    },
-    {
-      "asset": "birch",
-      "x": 42,
-      "z": 23,
-      "rot": 292
+      "rot": 343
     },
     {
       "asset": "bush",
+      "x": 42,
+      "z": 23,
+      "rot": 154
+    },
+    {
+      "asset": "bush_dark",
       "x": 43,
       "z": 23,
-      "rot": 342
+      "rot": 269
     },
     {
       "asset": "pine",
       "x": 44,
       "z": 23,
-      "rot": 195
-    },
-    {
-      "asset": "pine",
-      "x": 45,
-      "z": 23,
-      "rot": 144
-    },
-    {
-      "asset": "pine",
-      "x": 46,
-      "z": 23,
-      "rot": 284
-    },
-    {
-      "asset": "birch",
-      "x": 49,
-      "z": 23,
-      "rot": 33
-    },
-    {
-      "asset": "bush",
-      "x": 50,
-      "z": 23,
-      "rot": 69
-    },
-    {
-      "asset": "bush",
-      "x": 53,
-      "z": 23,
-      "rot": 323
-    },
-    {
-      "asset": "pine",
-      "x": 54,
-      "z": 23,
-      "rot": 288
-    },
-    {
-      "asset": "pine",
-      "x": 55,
-      "z": 23,
-      "rot": 217
-    },
-    {
-      "asset": "bush_dark",
-      "x": 56,
-      "z": 23,
-      "rot": 253
-    },
-    {
-      "asset": "pine",
-      "x": 57,
-      "z": 23,
-      "rot": 318
-    },
-    {
-      "asset": "bush_dark",
-      "x": 58,
-      "z": 23,
-      "rot": 129
-    },
-    {
-      "asset": "bush_dark",
-      "x": 59,
-      "z": 23,
-      "rot": 323
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 2,
-      "rot": 316
-    },
-    {
-      "asset": "birch",
-      "x": 1,
-      "z": 2,
-      "rot": 75
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 3,
-      "rot": 332
-    },
-    {
-      "asset": "pine",
-      "x": 1,
-      "z": 3,
-      "rot": 187
-    },
-    {
-      "asset": "bush_dark",
-      "x": 0,
-      "z": 4,
-      "rot": 332
-    },
-    {
-      "asset": "bush_dark",
-      "x": 1,
-      "z": 4,
-      "rot": 227
-    },
-    {
-      "asset": "bush_dark",
-      "x": 0,
-      "z": 5,
-      "rot": 342
-    },
-    {
-      "asset": "bush_dark",
-      "x": 0,
-      "z": 6,
-      "rot": 288
-    },
-    {
-      "asset": "bush_dark",
-      "x": 0,
-      "z": 7,
-      "rot": 204
-    },
-    {
-      "asset": "birch",
-      "x": 0,
-      "z": 8,
-      "rot": 350
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 12,
-      "rot": 214
-    },
-    {
-      "asset": "bush_dark",
-      "x": 0,
-      "z": 13,
-      "rot": 102
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 14,
-      "rot": 10
-    },
-    {
-      "asset": "bush_dark",
-      "x": 0,
-      "z": 15,
-      "rot": 107
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 16,
-      "rot": 274
-    },
-    {
-      "asset": "bush_dark",
-      "x": 1,
-      "z": 16,
-      "rot": 309
-    },
-    {
-      "asset": "bush_dark",
-      "x": 0,
-      "z": 17,
-      "rot": 189
-    },
-    {
-      "asset": "pine",
-      "x": 1,
-      "z": 17,
-      "rot": 183
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 18,
-      "rot": 188
-    },
-    {
-      "asset": "bush_dark",
-      "x": 1,
-      "z": 18,
-      "rot": 318
-    },
-    {
-      "asset": "birch",
-      "x": 0,
-      "z": 19,
-      "rot": 37
-    },
-    {
-      "asset": "pine",
-      "x": 0,
-      "z": 20,
       "rot": 358
     },
     {
-      "asset": "birch",
+      "asset": "bush",
+      "x": 45,
+      "z": 23,
+      "rot": 25
+    },
+    {
+      "asset": "bush",
+      "x": 46,
+      "z": 23,
+      "rot": 339
+    },
+    {
+      "asset": "pine",
+      "x": 59,
+      "z": 23,
+      "rot": 56
+    },
+    {
+      "asset": "pine",
       "x": 0,
-      "z": 21,
-      "rot": 39
+      "z": 2,
+      "rot": 185
+    },
+    {
+      "asset": "bush_dark",
+      "x": 1,
+      "z": 2,
+      "rot": 210
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 3,
+      "rot": 104
     },
     {
       "asset": "pine",
       "x": 1,
-      "z": 21,
-      "rot": 241
+      "z": 3,
+      "rot": 141
     },
     {
-      "asset": "bush",
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 4,
+      "rot": 343
+    },
+    {
+      "asset": "bush_dark",
+      "x": 1,
+      "z": 4,
+      "rot": 36
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 5,
+      "rot": 204
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 6,
+      "rot": 235
+    },
+    {
+      "asset": "birch",
+      "x": 0,
+      "z": 7,
+      "rot": 168
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 8,
+      "rot": 38
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 12,
+      "rot": 57
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 13,
+      "rot": 114
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 14,
+      "rot": 13
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 15,
+      "rot": 19
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 16,
+      "rot": 318
+    },
+    {
+      "asset": "birch",
+      "x": 1,
+      "z": 16,
+      "rot": 280
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 17,
+      "rot": 213
+    },
+    {
+      "asset": "bush_dark",
+      "x": 1,
+      "z": 17,
+      "rot": 351
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 18,
+      "rot": 322
+    },
+    {
+      "asset": "pine",
+      "x": 1,
+      "z": 18,
+      "rot": 145
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 19,
+      "rot": 199
+    },
+    {
+      "asset": "pine",
+      "x": 1,
+      "z": 19,
+      "rot": 252
+    },
+    {
+      "asset": "pine",
+      "x": 0,
+      "z": 20,
+      "rot": 203
+    },
+    {
+      "asset": "pine",
+      "x": 1,
+      "z": 20,
+      "rot": 223
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 21,
+      "rot": 69
+    },
+    {
+      "asset": "birch",
+      "x": 1,
+      "z": 21,
+      "rot": 58
+    },
+    {
+      "asset": "pine",
       "x": 59,
       "z": 2,
-      "rot": 281
+      "rot": 302
     },
     {
       "asset": "flowers",
       "x": 59,
       "z": 3,
-      "rot": 317
+      "rot": 198
     },
     {
       "asset": "birch",
       "x": 59,
       "z": 4,
-      "rot": 184
+      "rot": 346
     },
     {
       "asset": "flowers",
       "x": 59,
       "z": 5,
-      "rot": 99
+      "rot": 177
     },
     {
-      "asset": "birch",
+      "asset": "bush",
       "x": 59,
       "z": 6,
-      "rot": 139
+      "rot": 209
     },
     {
-      "asset": "bush",
+      "asset": "birch",
       "x": 59,
       "z": 7,
-      "rot": 150
+      "rot": 258
     },
     {
-      "asset": "bush",
+      "asset": "birch",
       "x": 59,
       "z": 8,
-      "rot": 304
+      "rot": 69
     },
     {
-      "asset": "bush",
+      "asset": "pine",
       "x": 59,
       "z": 9,
-      "rot": 123
-    },
-    {
-      "asset": "birch",
-      "x": 59,
-      "z": 10,
-      "rot": 216
+      "rot": 323
     },
     {
       "asset": "bush",
-      "x": 58,
-      "z": 14,
-      "rot": 78
+      "x": 59,
+      "z": 10,
+      "rot": 311
     },
     {
-      "asset": "birch",
+      "asset": "flowers",
       "x": 59,
       "z": 15,
-      "rot": 159
+      "rot": 4
     },
     {
-      "asset": "birch",
+      "asset": "flowers",
       "x": 59,
       "z": 16,
-      "rot": 322
+      "rot": 227
     },
     {
       "asset": "bush",
       "x": 59,
       "z": 17,
-      "rot": 184
+      "rot": 255
     },
     {
-      "asset": "pine",
+      "asset": "birch",
       "x": 59,
       "z": 18,
-      "rot": 297
+      "rot": 205
     },
     {
-      "asset": "bush",
+      "asset": "birch",
       "x": 59,
       "z": 19,
-      "rot": 76
+      "rot": 103
     },
     {
       "asset": "birch",
       "x": 59,
       "z": 20,
-      "rot": 285
+      "rot": 135
     },
     {
-      "asset": "birch",
+      "asset": "bush",
       "x": 59,
       "z": 21,
-      "rot": 86
+      "rot": 161
     },
     {
       "asset": "pine",
       "x": 2,
-      "z": 1,
-      "rot": 111
+      "z": 2,
+      "rot": 135
     },
     {
-      "asset": "bush_dark",
-      "x": 2,
+      "asset": "pine",
+      "x": 3,
       "z": 2,
-      "rot": 59
+      "rot": 168
+    },
+    {
+      "asset": "pine",
+      "x": 2,
+      "z": 3,
+      "rot": 45
     },
     {
       "asset": "birch",
       "x": 3,
-      "z": 2,
-      "rot": 129
+      "z": 3,
+      "rot": 128
     },
     {
-      "asset": "tree",
+      "asset": "birch",
       "x": 2,
-      "z": 3,
-      "rot": 0
+      "z": 4,
+      "rot": 24
+    },
+    {
+      "asset": "bush_dark",
+      "x": 3,
+      "z": 4,
+      "rot": 290
+    },
+    {
+      "asset": "pine",
+      "x": 4,
+      "z": 5,
+      "rot": 308
+    },
+    {
+      "asset": "bush_dark",
+      "x": 4,
+      "z": 6,
+      "rot": 311
     },
     {
       "asset": "bush_dark",
       "x": 6,
       "z": 11,
-      "rot": 296
+      "rot": 335
     },
     {
       "asset": "bush_dark",
-      "x": 1,
-      "z": 20,
-      "rot": 54
+      "x": 4,
+      "z": 12,
+      "rot": 138
+    },
+    {
+      "asset": "bush_dark",
+      "x": 5,
+      "z": 12,
+      "rot": 34
+    },
+    {
+      "asset": "bush_dark",
+      "x": 6,
+      "z": 12,
+      "rot": 238
+    },
+    {
+      "asset": "bush_dark",
+      "x": 4,
+      "z": 13,
+      "rot": 48
+    },
+    {
+      "asset": "birch",
+      "x": 5,
+      "z": 13,
+      "rot": 186
+    },
+    {
+      "asset": "pine",
+      "x": 6,
+      "z": 13,
+      "rot": 222
+    },
+    {
+      "asset": "pine",
+      "x": 4,
+      "z": 14,
+      "rot": 144
+    },
+    {
+      "asset": "pine",
+      "x": 5,
+      "z": 14,
+      "rot": 326
+    },
+    {
+      "asset": "bush_dark",
+      "x": 6,
+      "z": 14,
+      "rot": 48
     },
     {
       "asset": "pine",
       "x": 5,
       "z": 20,
-      "rot": 349
+      "rot": 73
     },
     {
-      "asset": "pine",
+      "asset": "bush_dark",
       "x": 6,
       "z": 20,
-      "rot": 343
+      "rot": 244
     },
     {
       "asset": "bush_dark",
       "x": 2,
       "z": 21,
-      "rot": 23
+      "rot": 309
     },
     {
-      "asset": "bush_dark",
+      "asset": "pine",
       "x": 4,
       "z": 21,
-      "rot": 151
+      "rot": 32
     },
     {
       "asset": "birch",
       "x": 5,
       "z": 21,
-      "rot": 69
+      "rot": 239
     },
     {
       "asset": "bush_dark",
       "x": 6,
       "z": 21,
-      "rot": 207
-    },
-    {
-      "asset": "bush_dark",
-      "x": 1,
-      "z": 19,
-      "rot": 94
+      "rot": 310
     },
     {
       "asset": "pine",
-      "x": 14,
-      "z": 1,
-      "rot": 150
+      "x": 13,
+      "z": 2,
+      "rot": 328
     },
     {
-      "asset": "pine",
-      "x": 15,
-      "z": 1,
-      "rot": 16
+      "asset": "tree",
+      "x": 16,
+      "z": 2,
+      "rot": 0
     },
     {
       "asset": "pine",
       "x": 18,
-      "z": 1,
-      "rot": 5
+      "z": 2,
+      "rot": 286
     },
     {
-      "asset": "birch",
+      "asset": "tree",
       "x": 19,
-      "z": 1,
-      "rot": 55
-    },
-    {
-      "asset": "bush",
-      "x": 13,
-      "z": 2,
-      "rot": 138
-    },
-    {
-      "asset": "birch",
-      "x": 14,
-      "z": 2,
-      "rot": 150
-    },
-    {
-      "asset": "birch",
-      "x": 15,
-      "z": 2,
-      "rot": 232
-    },
-    {
-      "asset": "birch",
-      "x": 16,
       "z": 2,
       "rot": 90
     },
     {
       "asset": "pine",
-      "x": 17,
-      "z": 2,
-      "rot": 282
-    },
-    {
-      "asset": "bush",
-      "x": 18,
-      "z": 2,
-      "rot": 253
-    },
-    {
-      "asset": "pine",
-      "x": 19,
-      "z": 2,
-      "rot": 26
-    },
-    {
-      "asset": "pine",
-      "x": 20,
-      "z": 2,
-      "rot": 276
-    },
-    {
-      "asset": "pine",
       "x": 21,
       "z": 2,
-      "rot": 359
+      "rot": 356
     },
     {
-      "asset": "bush",
+      "asset": "pine",
+      "x": 22,
+      "z": 2,
+      "rot": 258
+    },
+    {
+      "asset": "birch",
+      "x": 23,
+      "z": 2,
+      "rot": 273
+    },
+    {
+      "asset": "pine",
       "x": 24,
       "z": 2,
-      "rot": 4
+      "rot": 326
     },
     {
-      "asset": "bush",
+      "asset": "birch",
       "x": 25,
       "z": 2,
       "rot": 273
@@ -1629,1129 +1641,1237 @@
       "asset": "birch",
       "x": 13,
       "z": 3,
-      "rot": 240
-    },
-    {
-      "asset": "birch",
-      "x": 14,
-      "z": 3,
-      "rot": 92
-    },
-    {
-      "asset": "tree",
-      "x": 15,
-      "z": 3,
-      "rot": 90
-    },
-    {
-      "asset": "bush",
-      "x": 17,
-      "z": 3,
-      "rot": 281
+      "rot": 112
     },
     {
       "asset": "pine",
+      "x": 14,
+      "z": 3,
+      "rot": 96
+    },
+    {
+      "asset": "pine",
+      "x": 15,
+      "z": 3,
+      "rot": 139
+    },
+    {
+      "asset": "birch",
       "x": 18,
       "z": 3,
-      "rot": 195
+      "rot": 222
     },
     {
-      "asset": "pine",
-      "x": 19,
-      "z": 3,
-      "rot": 4
-    },
-    {
-      "asset": "pine",
-      "x": 20,
-      "z": 3,
-      "rot": 259
-    },
-    {
-      "asset": "birch",
+      "asset": "bush",
       "x": 21,
       "z": 3,
-      "rot": 248
+      "rot": 7
     },
     {
       "asset": "birch",
       "x": 22,
       "z": 3,
-      "rot": 149
+      "rot": 258
     },
     {
-      "asset": "bush",
+      "asset": "tree",
       "x": 23,
       "z": 3,
-      "rot": 169
-    },
-    {
-      "asset": "birch",
-      "x": 24,
-      "z": 3,
-      "rot": 19
-    },
-    {
-      "asset": "bush",
-      "x": 25,
-      "z": 3,
-      "rot": 5
-    },
-    {
-      "asset": "birch",
-      "x": 13,
-      "z": 4,
-      "rot": 309
-    },
-    {
-      "asset": "birch",
-      "x": 14,
-      "z": 4,
-      "rot": 255
-    },
-    {
-      "asset": "tree",
-      "x": 17,
-      "z": 4,
-      "rot": 180
-    },
-    {
-      "asset": "pine",
-      "x": 19,
-      "z": 4,
-      "rot": 307
-    },
-    {
-      "asset": "tree",
-      "x": 20,
-      "z": 4,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 22,
-      "z": 4,
-      "rot": 90
-    },
-    {
-      "asset": "birch",
-      "x": 24,
-      "z": 4,
-      "rot": 196
-    },
-    {
-      "asset": "pine",
-      "x": 25,
-      "z": 4,
-      "rot": 330
-    },
-    {
-      "asset": "tree",
-      "x": 26,
-      "z": 4,
-      "rot": 0
-    },
-    {
-      "asset": "pine",
-      "x": 13,
-      "z": 5,
-      "rot": 190
-    },
-    {
-      "asset": "birch",
-      "x": 14,
-      "z": 5,
-      "rot": 356
-    },
-    {
-      "asset": "pine",
-      "x": 15,
-      "z": 5,
-      "rot": 43
-    },
-    {
-      "asset": "birch",
-      "x": 16,
-      "z": 5,
-      "rot": 317
-    },
-    {
-      "asset": "birch",
-      "x": 19,
-      "z": 5,
-      "rot": 69
-    },
-    {
-      "asset": "pine",
-      "x": 24,
-      "z": 5,
-      "rot": 185
-    },
-    {
-      "asset": "bush",
-      "x": 25,
-      "z": 5,
-      "rot": 122
-    },
-    {
-      "asset": "pine",
-      "x": 15,
-      "z": 6,
-      "rot": 93
-    },
-    {
-      "asset": "birch",
-      "x": 17,
-      "z": 6,
-      "rot": 175
-    },
-    {
-      "asset": "pine",
-      "x": 18,
-      "z": 6,
-      "rot": 290
-    },
-    {
-      "asset": "birch",
-      "x": 21,
-      "z": 6,
-      "rot": 93
-    },
-    {
-      "asset": "pine",
-      "x": 22,
-      "z": 6,
-      "rot": 243
-    },
-    {
-      "asset": "pine",
-      "x": 23,
-      "z": 6,
-      "rot": 97
-    },
-    {
-      "asset": "bush",
-      "x": 24,
-      "z": 6,
-      "rot": 5
-    },
-    {
-      "asset": "bush",
-      "x": 25,
-      "z": 6,
-      "rot": 105
-    },
-    {
-      "asset": "birch",
-      "x": 26,
-      "z": 6,
-      "rot": 136
-    },
-    {
-      "asset": "pine",
-      "x": 25,
-      "z": 7,
-      "rot": 242
-    },
-    {
-      "asset": "birch",
-      "x": 22,
-      "z": 13,
-      "rot": 277
-    },
-    {
-      "asset": "bush",
-      "x": 23,
-      "z": 13,
-      "rot": 76
-    },
-    {
-      "asset": "bush",
-      "x": 24,
-      "z": 13,
-      "rot": 172
-    },
-    {
-      "asset": "tree",
-      "x": 25,
-      "z": 13,
       "rot": 270
     },
     {
-      "asset": "bush",
-      "x": 23,
-      "z": 14,
-      "rot": 28
-    },
-    {
-      "asset": "reeds",
-      "x": 24,
-      "z": 14,
-      "rot": 177
-    },
-    {
-      "asset": "tree",
-      "x": 11,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 18,
-      "z": 20,
-      "rot": 329
-    },
-    {
-      "asset": "bush",
-      "x": 20,
-      "z": 20,
-      "rot": 254
-    },
-    {
-      "asset": "bush_dark",
-      "x": 21,
-      "z": 20,
-      "rot": 61
-    },
-    {
-      "asset": "birch",
-      "x": 22,
-      "z": 20,
-      "rot": 352
+      "asset": "pine",
+      "x": 25,
+      "z": 3,
+      "rot": 268
     },
     {
       "asset": "birch",
       "x": 13,
-      "z": 21,
-      "rot": 261
+      "z": 4,
+      "rot": 65
     },
     {
-      "asset": "birch",
-      "x": 15,
-      "z": 21,
-      "rot": 72
-    },
-    {
-      "asset": "tree",
-      "x": 16,
-      "z": 21,
-      "rot": 0
-    },
-    {
-      "asset": "birch",
-      "x": 18,
-      "z": 21,
-      "rot": 294
-    },
-    {
-      "asset": "bush",
-      "x": 19,
-      "z": 21,
-      "rot": 331
-    },
-    {
-      "asset": "bush_dark",
-      "x": 20,
-      "z": 21,
-      "rot": 136
-    },
-    {
-      "asset": "birch",
-      "x": 21,
-      "z": 21,
-      "rot": 249
-    },
-    {
-      "asset": "bush",
-      "x": 22,
-      "z": 21,
-      "rot": 302
-    },
-    {
-      "asset": "bush_dark",
-      "x": 23,
-      "z": 21,
-      "rot": 144
-    },
-    {
-      "asset": "birch",
-      "x": 11,
-      "z": 22,
-      "rot": 296
-    },
-    {
-      "asset": "bush",
-      "x": 21,
-      "z": 19,
-      "rot": 221
-    },
-    {
-      "asset": "bush",
-      "x": 32,
-      "z": 8,
+      "asset": "pine",
+      "x": 14,
+      "z": 4,
       "rot": 167
     },
     {
-      "asset": "bush",
-      "x": 36,
-      "z": 8,
-      "rot": 123
-    },
-    {
-      "asset": "bush",
-      "x": 37,
-      "z": 8,
-      "rot": 311
-    },
-    {
-      "asset": "bush",
-      "x": 33,
-      "z": 9,
-      "rot": 323
-    },
-    {
-      "asset": "bush",
-      "x": 36,
-      "z": 9,
-      "rot": 49
-    },
-    {
-      "asset": "bush",
-      "x": 39,
-      "z": 11,
-      "rot": 158
-    },
-    {
-      "asset": "bush",
-      "x": 40,
-      "z": 11,
-      "rot": 142
-    },
-    {
-      "asset": "bush",
-      "x": 38,
-      "z": 12,
-      "rot": 44
-    },
-    {
-      "asset": "bush",
-      "x": 40,
-      "z": 12,
-      "rot": 81
+      "asset": "pine",
+      "x": 15,
+      "z": 4,
+      "rot": 5
     },
     {
       "asset": "birch",
-      "x": 32,
-      "z": 13,
-      "rot": 180
+      "x": 16,
+      "z": 4,
+      "rot": 140
     },
     {
-      "asset": "tree",
-      "x": 33,
-      "z": 13,
-      "rot": 90
-    },
-    {
-      "asset": "birch",
-      "x": 35,
-      "z": 13,
-      "rot": 298
-    },
-    {
-      "asset": "tree",
-      "x": 36,
-      "z": 13,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 38,
-      "z": 13,
-      "rot": 90
-    },
-    {
-      "asset": "birch",
-      "x": 40,
-      "z": 13,
+      "asset": "bush",
+      "x": 17,
+      "z": 4,
       "rot": 159
     },
     {
       "asset": "birch",
-      "x": 41,
-      "z": 13,
-      "rot": 123
+      "x": 18,
+      "z": 4,
+      "rot": 91
     },
     {
       "asset": "birch",
-      "x": 35,
-      "z": 14,
-      "rot": 215
-    },
-    {
-      "asset": "birch",
-      "x": 33,
-      "z": 15,
-      "rot": 135
-    },
-    {
-      "asset": "bush",
-      "x": 34,
-      "z": 15,
-      "rot": 30
-    },
-    {
-      "asset": "birch",
-      "x": 35,
-      "z": 15,
-      "rot": 105
+      "x": 19,
+      "z": 4,
+      "rot": 296
     },
     {
       "asset": "pine",
-      "x": 36,
-      "z": 15,
-      "rot": 180
+      "x": 20,
+      "z": 4,
+      "rot": 195
     },
     {
       "asset": "birch",
-      "x": 33,
-      "z": 16,
-      "rot": 63
-    },
-    {
-      "asset": "pine",
-      "x": 39,
-      "z": 19,
-      "rot": 58
+      "x": 21,
+      "z": 4,
+      "rot": 349
     },
     {
       "asset": "birch",
-      "x": 40,
-      "z": 19,
-      "rot": 308
+      "x": 22,
+      "z": 4,
+      "rot": 217
     },
     {
       "asset": "birch",
-      "x": 41,
-      "z": 19,
-      "rot": 63
-    },
-    {
-      "asset": "tree",
-      "x": 42,
-      "z": 19,
-      "rot": 270
-    },
-    {
-      "asset": "birch",
-      "x": 44,
-      "z": 19,
-      "rot": 148
-    },
-    {
-      "asset": "tree",
-      "x": 45,
-      "z": 19,
-      "rot": 90
-    },
-    {
-      "asset": "pine",
-      "x": 47,
-      "z": 19,
-      "rot": 77
-    },
-    {
-      "asset": "bush_dark",
-      "x": 48,
-      "z": 19,
-      "rot": 107
-    },
-    {
-      "asset": "tree",
-      "x": 49,
-      "z": 19,
-      "rot": 90
-    },
-    {
-      "asset": "birch",
-      "x": 51,
-      "z": 19,
-      "rot": 301
-    },
-    {
-      "asset": "bush",
-      "x": 37,
-      "z": 20,
-      "rot": 228
-    },
-    {
-      "asset": "pine",
-      "x": 38,
-      "z": 20,
-      "rot": 243
-    },
-    {
-      "asset": "tree",
-      "x": 39,
-      "z": 20,
-      "rot": 180
-    },
-    {
-      "asset": "pine",
-      "x": 41,
-      "z": 20,
-      "rot": 102
-    },
-    {
-      "asset": "birch",
-      "x": 44,
-      "z": 20,
-      "rot": 232
-    },
-    {
-      "asset": "tree",
-      "x": 47,
-      "z": 20,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 51,
-      "z": 20,
-      "rot": 90
-    },
-    {
-      "asset": "birch",
-      "x": 36,
-      "z": 21,
-      "rot": 294
-    },
-    {
-      "asset": "birch",
-      "x": 38,
-      "z": 21,
-      "rot": 213
-    },
-    {
-      "asset": "tree",
-      "x": 41,
-      "z": 21,
-      "rot": 270
-    },
-    {
-      "asset": "pine",
-      "x": 43,
-      "z": 21,
-      "rot": 137
-    },
-    {
-      "asset": "pine",
-      "x": 44,
-      "z": 21,
-      "rot": 4
-    },
-    {
-      "asset": "birch",
-      "x": 45,
-      "z": 21,
-      "rot": 251
-    },
-    {
-      "asset": "pine",
-      "x": 46,
-      "z": 21,
-      "rot": 191
-    },
-    {
-      "asset": "birch",
-      "x": 49,
-      "z": 21,
+      "x": 25,
+      "z": 4,
       "rot": 62
     },
     {
-      "asset": "bush",
-      "x": 50,
-      "z": 21,
-      "rot": 120
-    },
-    {
-      "asset": "birch",
-      "x": 40,
-      "z": 22,
-      "rot": 203
-    },
-    {
       "asset": "pine",
-      "x": 43,
-      "z": 22,
-      "rot": 144
-    },
-    {
-      "asset": "pine",
-      "x": 44,
-      "z": 22,
-      "rot": 302
-    },
-    {
-      "asset": "bush",
-      "x": 45,
-      "z": 22,
-      "rot": 60
-    },
-    {
-      "asset": "birch",
-      "x": 46,
-      "z": 22,
-      "rot": 268
-    },
-    {
-      "asset": "bush",
-      "x": 45,
-      "z": 16,
-      "rot": 41
-    },
-    {
-      "asset": "bush",
-      "x": 47,
-      "z": 16,
-      "rot": 177
-    },
-    {
-      "asset": "tree",
-      "x": 48,
-      "z": 16,
-      "rot": 180
-    },
-    {
-      "asset": "pine",
-      "x": 50,
-      "z": 16,
-      "rot": 136
-    },
-    {
-      "asset": "tree",
-      "x": 51,
-      "z": 16,
-      "rot": 90
-    },
-    {
-      "asset": "bush",
-      "x": 42,
-      "z": 17,
-      "rot": 66
-    },
-    {
-      "asset": "tree",
-      "x": 45,
-      "z": 17,
-      "rot": 270
-    },
-    {
-      "asset": "bush_dark",
-      "x": 47,
-      "z": 17,
-      "rot": 334
-    },
-    {
-      "asset": "birch",
-      "x": 50,
-      "z": 17,
-      "rot": 109
-    },
-    {
-      "asset": "birch",
-      "x": 42,
-      "z": 18,
-      "rot": 244
-    },
-    {
-      "asset": "bush_dark",
-      "x": 43,
-      "z": 18,
-      "rot": 50
-    },
-    {
-      "asset": "pine",
-      "x": 44,
-      "z": 18,
-      "rot": 70
-    },
-    {
-      "asset": "birch",
-      "x": 47,
-      "z": 18,
-      "rot": 102
-    },
-    {
-      "asset": "birch",
-      "x": 48,
-      "z": 18,
-      "rot": 60
-    },
-    {
-      "asset": "bush",
-      "x": 49,
-      "z": 18,
-      "rot": 117
-    },
-    {
-      "asset": "pine",
-      "x": 50,
-      "z": 18,
-      "rot": 95
-    },
-    {
-      "asset": "bush",
-      "x": 51,
-      "z": 18,
-      "rot": 238
-    },
-    {
-      "asset": "bush",
-      "x": 48,
-      "z": 15,
-      "rot": 100
-    },
-    {
-      "asset": "pine",
-      "x": 49,
-      "z": 15,
-      "rot": 53
-    },
-    {
-      "asset": "pine",
-      "x": 50,
-      "z": 15,
-      "rot": 102
-    },
-    {
-      "asset": "pine",
-      "x": 51,
-      "z": 15,
-      "rot": 71
-    },
-    {
-      "asset": "birch",
-      "x": 48,
-      "z": 1,
-      "rot": 285
-    },
-    {
-      "asset": "birch",
-      "x": 45,
-      "z": 2,
-      "rot": 318
-    },
-    {
-      "asset": "tree",
-      "x": 48,
-      "z": 2,
-      "rot": 270
-    },
-    {
-      "asset": "pine",
-      "x": 45,
-      "z": 3,
-      "rot": 357
-    },
-    {
-      "asset": "birch",
-      "x": 46,
-      "z": 3,
-      "rot": 321
-    },
-    {
-      "asset": "birch",
-      "x": 47,
-      "z": 3,
-      "rot": 109
-    },
-    {
-      "asset": "tree",
-      "x": 53,
-      "z": 2,
-      "rot": 270
-    },
-    {
-      "asset": "tree",
-      "x": 55,
-      "z": 2,
-      "rot": 180
-    },
-    {
-      "asset": "tree",
-      "x": 57,
-      "z": 3,
-      "rot": 270
-    },
-    {
-      "asset": "birch",
-      "x": 56,
+      "x": 26,
       "z": 4,
-      "rot": 240
+      "rot": 2
     },
     {
-      "asset": "bush",
-      "x": 56,
+      "asset": "pine",
+      "x": 13,
       "z": 5,
-      "rot": 73
+      "rot": 15
+    },
+    {
+      "asset": "pine",
+      "x": 14,
+      "z": 5,
+      "rot": 89
+    },
+    {
+      "asset": "pine",
+      "x": 15,
+      "z": 5,
+      "rot": 57
+    },
+    {
+      "asset": "birch",
+      "x": 16,
+      "z": 5,
+      "rot": 28
     },
     {
       "asset": "tree",
-      "x": 57,
+      "x": 17,
+      "z": 5,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 19,
       "z": 5,
       "rot": 270
     },
     {
       "asset": "birch",
-      "x": 52,
-      "z": 15,
+      "x": 21,
+      "z": 5,
+      "rot": 299
+    },
+    {
+      "asset": "birch",
+      "x": 22,
+      "z": 5,
+      "rot": 223
+    },
+    {
+      "asset": "birch",
+      "x": 23,
+      "z": 5,
       "rot": 161
     },
     {
-      "asset": "bush",
-      "x": 53,
-      "z": 15,
-      "rot": 141
-    },
-    {
-      "asset": "flowers",
-      "x": 57,
-      "z": 15,
-      "rot": 152
-    },
-    {
       "asset": "pine",
-      "x": 58,
-      "z": 15,
-      "rot": 173
-    },
-    {
-      "asset": "birch",
-      "x": 53,
-      "z": 16,
-      "rot": 114
+      "x": 24,
+      "z": 5,
+      "rot": 27
     },
     {
       "asset": "tree",
-      "x": 57,
-      "z": 16,
+      "x": 25,
+      "z": 5,
       "rot": 180
     },
     {
-      "asset": "flowers",
-      "x": 53,
-      "z": 17,
-      "rot": 33
+      "asset": "pine",
+      "x": 13,
+      "z": 6,
+      "rot": 176
     },
     {
       "asset": "birch",
-      "x": 52,
-      "z": 18,
-      "rot": 280
+      "x": 14,
+      "z": 6,
+      "rot": 120
     },
     {
-      "asset": "tree",
-      "x": 53,
-      "z": 18,
-      "rot": 270
+      "asset": "pine",
+      "x": 15,
+      "z": 6,
+      "rot": 257
+    },
+    {
+      "asset": "pine",
+      "x": 21,
+      "z": 6,
+      "rot": 258
+    },
+    {
+      "asset": "pine",
+      "x": 22,
+      "z": 6,
+      "rot": 269
+    },
+    {
+      "asset": "pine",
+      "x": 23,
+      "z": 6,
+      "rot": 43
+    },
+    {
+      "asset": "pine",
+      "x": 24,
+      "z": 6,
+      "rot": 282
     },
     {
       "asset": "bush",
-      "x": 56,
-      "z": 18,
-      "rot": 100
+      "x": 20,
+      "z": 11,
+      "rot": 344
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 11,
+      "rot": 255
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 11,
+      "rot": 157
+    },
+    {
+      "asset": "bush",
+      "x": 23,
+      "z": 12,
+      "rot": 321
+    },
+    {
+      "asset": "bush_dark",
+      "x": 25,
+      "z": 12,
+      "rot": 9
+    },
+    {
+      "asset": "bush",
+      "x": 26,
+      "z": 12,
+      "rot": 55
+    },
+    {
+      "asset": "pine",
+      "x": 22,
+      "z": 13,
+      "rot": 77
     },
     {
       "asset": "tree",
-      "x": 57,
-      "z": 18,
+      "x": 23,
+      "z": 13,
+      "rot": 270
+    },
+    {
+      "asset": "tree",
+      "x": 25,
+      "z": 13,
+      "rot": 270
+    },
+    {
+      "asset": "bush_dark",
+      "x": 11,
+      "z": 20,
+      "rot": 200
+    },
+    {
+      "asset": "bush",
+      "x": 12,
+      "z": 20,
+      "rot": 144
+    },
+    {
+      "asset": "tree",
+      "x": 16,
+      "z": 20,
       "rot": 0
     },
     {
       "asset": "birch",
-      "x": 52,
-      "z": 19,
-      "rot": 244
+      "x": 18,
+      "z": 20,
+      "rot": 109
+    },
+    {
+      "asset": "bush_dark",
+      "x": 20,
+      "z": 20,
+      "rot": 197
     },
     {
       "asset": "birch",
-      "x": 55,
-      "z": 19,
-      "rot": 92
+      "x": 21,
+      "z": 20,
+      "rot": 25
     },
     {
-      "asset": "flowers",
-      "x": 56,
-      "z": 19,
-      "rot": 151
+      "asset": "bush_dark",
+      "x": 22,
+      "z": 20,
+      "rot": 303
+    },
+    {
+      "asset": "pine",
+      "x": 11,
+      "z": 21,
+      "rot": 352
+    },
+    {
+      "asset": "bush",
+      "x": 12,
+      "z": 21,
+      "rot": 228
+    },
+    {
+      "asset": "birch",
+      "x": 13,
+      "z": 21,
+      "rot": 9
+    },
+    {
+      "asset": "bush",
+      "x": 15,
+      "z": 21,
+      "rot": 200
+    },
+    {
+      "asset": "pine",
+      "x": 18,
+      "z": 21,
+      "rot": 245
+    },
+    {
+      "asset": "pine",
+      "x": 19,
+      "z": 21,
+      "rot": 174
+    },
+    {
+      "asset": "bush",
+      "x": 20,
+      "z": 21,
+      "rot": 144
+    },
+    {
+      "asset": "birch",
+      "x": 21,
+      "z": 21,
+      "rot": 157
     },
     {
       "asset": "tree",
-      "x": 57,
+      "x": 22,
+      "z": 21,
+      "rot": 180
+    },
+    {
+      "asset": "pine",
+      "x": 13,
+      "z": 22,
+      "rot": 112
+    },
+    {
+      "asset": "birch",
+      "x": 14,
+      "z": 22,
+      "rot": 115
+    },
+    {
+      "asset": "pine",
+      "x": 15,
+      "z": 22,
+      "rot": 89
+    },
+    {
+      "asset": "pine",
+      "x": 16,
+      "z": 22,
+      "rot": 280
+    },
+    {
+      "asset": "bush",
+      "x": 17,
+      "z": 22,
+      "rot": 192
+    },
+    {
+      "asset": "bush",
+      "x": 21,
+      "z": 19,
+      "rot": 281
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 8,
+      "rot": 68
+    },
+    {
+      "asset": "bush",
+      "x": 38,
+      "z": 8,
+      "rot": 156
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 8,
+      "rot": 105
+    },
+    {
+      "asset": "bush",
+      "x": 40,
+      "z": 8,
+      "rot": 50
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 9,
+      "rot": 318
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 9,
+      "rot": 326
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 11,
+      "rot": 303
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 11,
+      "rot": 231
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 11,
+      "rot": 74
+    },
+    {
+      "asset": "bush",
+      "x": 33,
+      "z": 12,
+      "rot": 93
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 12,
+      "rot": 146
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 12,
+      "rot": 31
+    },
+    {
+      "asset": "bush",
+      "x": 37,
+      "z": 12,
+      "rot": 113
+    },
+    {
+      "asset": "bush",
+      "x": 38,
+      "z": 12,
+      "rot": 45
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 12,
+      "rot": 355
+    },
+    {
+      "asset": "bush",
+      "x": 40,
+      "z": 12,
+      "rot": 351
+    },
+    {
+      "asset": "pine",
+      "x": 32,
+      "z": 13,
+      "rot": 310
+    },
+    {
+      "asset": "birch",
+      "x": 33,
+      "z": 13,
+      "rot": 116
+    },
+    {
+      "asset": "bush",
+      "x": 34,
+      "z": 13,
+      "rot": 243
+    },
+    {
+      "asset": "birch",
+      "x": 35,
+      "z": 13,
+      "rot": 313
+    },
+    {
+      "asset": "tree",
+      "x": 36,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 33,
+      "z": 14,
+      "rot": 270
+    },
+    {
+      "asset": "bush",
+      "x": 35,
+      "z": 14,
+      "rot": 301
+    },
+    {
+      "asset": "birch",
+      "x": 35,
+      "z": 15,
+      "rot": 61
+    },
+    {
+      "asset": "birch",
+      "x": 36,
+      "z": 15,
+      "rot": 144
+    },
+    {
+      "asset": "birch",
+      "x": 33,
+      "z": 16,
+      "rot": 217
+    },
+    {
+      "asset": "bush",
+      "x": 39,
+      "z": 19,
+      "rot": 29
+    },
+    {
+      "asset": "pine",
+      "x": 40,
+      "z": 19,
+      "rot": 313
+    },
+    {
+      "asset": "tree",
+      "x": 41,
+      "z": 19,
+      "rot": 90
+    },
+    {
+      "asset": "tree",
+      "x": 43,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "tree",
+      "x": 45,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 47,
+      "z": 19,
+      "rot": 49
+    },
+    {
+      "asset": "pine",
+      "x": 48,
+      "z": 19,
+      "rot": 286
+    },
+    {
+      "asset": "tree",
+      "x": 49,
+      "z": 19,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 51,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 35,
       "z": 20,
       "rot": 90
     },
     {
       "asset": "birch",
-      "x": 53,
-      "z": 21,
-      "rot": 24
+      "x": 40,
+      "z": 20,
+      "rot": 189
     },
     {
-      "asset": "flowers",
-      "x": 54,
+      "asset": "pine",
+      "x": 47,
+      "z": 20,
+      "rot": 131
+    },
+    {
+      "asset": "birch",
+      "x": 48,
+      "z": 20,
+      "rot": 314
+    },
+    {
+      "asset": "bush_dark",
+      "x": 39,
       "z": 21,
-      "rot": 238
+      "rot": 275
+    },
+    {
+      "asset": "birch",
+      "x": 40,
+      "z": 21,
+      "rot": 70
+    },
+    {
+      "asset": "tree",
+      "x": 41,
+      "z": 21,
+      "rot": 180
+    },
+    {
+      "asset": "pine",
+      "x": 43,
+      "z": 21,
+      "rot": 192
+    },
+    {
+      "asset": "pine",
+      "x": 44,
+      "z": 21,
+      "rot": 47
+    },
+    {
+      "asset": "pine",
+      "x": 45,
+      "z": 21,
+      "rot": 102
     },
     {
       "asset": "bush",
-      "x": 55,
+      "x": 46,
       "z": 21,
+      "rot": 224
+    },
+    {
+      "asset": "birch",
+      "x": 47,
+      "z": 21,
+      "rot": 148
+    },
+    {
+      "asset": "birch",
+      "x": 48,
+      "z": 21,
+      "rot": 107
+    },
+    {
+      "asset": "birch",
+      "x": 49,
+      "z": 21,
+      "rot": 73
+    },
+    {
+      "asset": "birch",
+      "x": 50,
+      "z": 21,
+      "rot": 123
+    },
+    {
+      "asset": "bush_dark",
+      "x": 51,
+      "z": 21,
+      "rot": 55
+    },
+    {
+      "asset": "pine",
+      "x": 35,
+      "z": 22,
+      "rot": 295
+    },
+    {
+      "asset": "birch",
+      "x": 38,
+      "z": 22,
+      "rot": 204
+    },
+    {
+      "asset": "birch",
+      "x": 39,
+      "z": 22,
+      "rot": 223
+    },
+    {
+      "asset": "bush",
+      "x": 40,
+      "z": 22,
+      "rot": 215
+    },
+    {
+      "asset": "birch",
+      "x": 43,
+      "z": 22,
+      "rot": 341
+    },
+    {
+      "asset": "birch",
+      "x": 47,
+      "z": 16,
+      "rot": 293
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 16,
+      "rot": 158
+    },
+    {
+      "asset": "pine",
+      "x": 49,
+      "z": 16,
+      "rot": 144
+    },
+    {
+      "asset": "birch",
+      "x": 50,
+      "z": 16,
+      "rot": 146
+    },
+    {
+      "asset": "bush",
+      "x": 44,
+      "z": 17,
+      "rot": 140
+    },
+    {
+      "asset": "pine",
+      "x": 45,
+      "z": 17,
+      "rot": 183
+    },
+    {
+      "asset": "tree",
+      "x": 46,
+      "z": 17,
+      "rot": 90
+    },
+    {
+      "asset": "pine",
+      "x": 48,
+      "z": 17,
+      "rot": 93
+    },
+    {
+      "asset": "birch",
+      "x": 49,
+      "z": 17,
+      "rot": 18
+    },
+    {
+      "asset": "bush",
+      "x": 50,
+      "z": 17,
+      "rot": 168
+    },
+    {
+      "asset": "pine",
+      "x": 51,
+      "z": 17,
+      "rot": 41
+    },
+    {
+      "asset": "pine",
+      "x": 42,
+      "z": 18,
+      "rot": 69
+    },
+    {
+      "asset": "birch",
+      "x": 43,
+      "z": 18,
+      "rot": 284
+    },
+    {
+      "asset": "pine",
+      "x": 44,
+      "z": 18,
+      "rot": 335
+    },
+    {
+      "asset": "pine",
+      "x": 45,
+      "z": 18,
+      "rot": 338
+    },
+    {
+      "asset": "bush",
+      "x": 48,
+      "z": 18,
+      "rot": 17
+    },
+    {
+      "asset": "birch",
+      "x": 49,
+      "z": 18,
+      "rot": 78
+    },
+    {
+      "asset": "pine",
+      "x": 50,
+      "z": 18,
+      "rot": 178
+    },
+    {
+      "asset": "birch",
+      "x": 51,
+      "z": 18,
+      "rot": 254
+    },
+    {
+      "asset": "bush",
+      "x": 49,
+      "z": 14,
+      "rot": 356
+    },
+    {
+      "asset": "pine",
+      "x": 48,
+      "z": 15,
+      "rot": 151
+    },
+    {
+      "asset": "birch",
+      "x": 49,
+      "z": 15,
+      "rot": 338
+    },
+    {
+      "asset": "bush_dark",
+      "x": 50,
+      "z": 15,
+      "rot": 294
+    },
+    {
+      "asset": "bush",
+      "x": 45,
+      "z": 2,
+      "rot": 33
+    },
+    {
+      "asset": "birch",
+      "x": 48,
+      "z": 2,
+      "rot": 214
+    },
+    {
+      "asset": "birch",
+      "x": 49,
+      "z": 2,
+      "rot": 244
+    },
+    {
+      "asset": "bush",
+      "x": 45,
+      "z": 3,
+      "rot": 47
+    },
+    {
+      "asset": "pine",
+      "x": 46,
+      "z": 3,
+      "rot": 286
+    },
+    {
+      "asset": "tree",
+      "x": 47,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 49,
+      "z": 3,
+      "rot": 268
+    },
+    {
+      "asset": "bush",
+      "x": 54,
+      "z": 2,
+      "rot": 193
+    },
+    {
+      "asset": "birch",
+      "x": 55,
+      "z": 2,
+      "rot": 200
+    },
+    {
+      "asset": "bush",
+      "x": 56,
+      "z": 2,
       "rot": 287
     },
     {
-      "asset": "bush",
+      "asset": "tree",
       "x": 55,
-      "z": 22,
-      "rot": 67
+      "z": 3,
+      "rot": 180
+    },
+    {
+      "asset": "birch",
+      "x": 57,
+      "z": 3,
+      "rot": 262
+    },
+    {
+      "asset": "birch",
+      "x": 58,
+      "z": 3,
+      "rot": 300
+    },
+    {
+      "asset": "bush",
+      "x": 57,
+      "z": 4,
+      "rot": 260
+    },
+    {
+      "asset": "birch",
+      "x": 58,
+      "z": 4,
+      "rot": 191
+    },
+    {
+      "asset": "birch",
+      "x": 56,
+      "z": 5,
+      "rot": 31
+    },
+    {
+      "asset": "birch",
+      "x": 54,
+      "z": 15,
+      "rot": 275
+    },
+    {
+      "asset": "tree",
+      "x": 55,
+      "z": 15,
+      "rot": 180
+    },
+    {
+      "asset": "birch",
+      "x": 57,
+      "z": 15,
+      "rot": 289
+    },
+    {
+      "asset": "birch",
+      "x": 57,
+      "z": 16,
+      "rot": 258
+    },
+    {
+      "asset": "birch",
+      "x": 58,
+      "z": 16,
+      "rot": 326
+    },
+    {
+      "asset": "tree",
+      "x": 55,
+      "z": 17,
+      "rot": 180
+    },
+    {
+      "asset": "bush",
+      "x": 57,
+      "z": 17,
+      "rot": 225
     },
     {
       "asset": "flowers",
       "x": 58,
-      "z": 22,
-      "rot": 135
+      "z": 17,
+      "rot": 359
+    },
+    {
+      "asset": "flowers",
+      "x": 52,
+      "z": 18,
+      "rot": 276
+    },
+    {
+      "asset": "pine",
+      "x": 53,
+      "z": 18,
+      "rot": 18
+    },
+    {
+      "asset": "birch",
+      "x": 54,
+      "z": 18,
+      "rot": 2
+    },
+    {
+      "asset": "pine",
+      "x": 57,
+      "z": 18,
+      "rot": 79
+    },
+    {
+      "asset": "tree",
+      "x": 53,
+      "z": 19,
+      "rot": 180
+    },
+    {
+      "asset": "tree",
+      "x": 55,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 52,
+      "z": 21,
+      "rot": 200
+    },
+    {
+      "asset": "pine",
+      "x": 53,
+      "z": 21,
+      "rot": 73
+    },
+    {
+      "asset": "birch",
+      "x": 54,
+      "z": 21,
+      "rot": 315
+    },
+    {
+      "asset": "bush",
+      "x": 55,
+      "z": 21,
+      "rot": 346
+    },
+    {
+      "asset": "bush",
+      "x": 56,
+      "z": 21,
+      "rot": 222
+    },
+    {
+      "asset": "birch",
+      "x": 57,
+      "z": 21,
+      "rot": 191
+    },
+    {
+      "asset": "bush",
+      "x": 58,
+      "z": 21,
+      "rot": 175
     },
     {
       "asset": "flowers",
       "x": 58,
       "z": 10,
-      "rot": 90
+      "rot": 331
     },
     {
       "asset": "flowers",
       "x": 57,
       "z": 14,
-      "rot": 292
+      "rot": 303
+    },
+    {
+      "asset": "flowers",
+      "x": 58,
+      "z": 15,
+      "rot": 122
+    },
+    {
+      "asset": "flowers",
+      "x": 55,
+      "z": 14,
+      "rot": 334
     },
     {
       "asset": "flowers",
       "x": 53,
       "z": 13,
-      "rot": 227
-    },
-    {
-      "asset": "flowers",
-      "x": 52,
-      "z": 14,
-      "rot": 117
+      "rot": 41
     },
     {
       "asset": "flowers",
       "x": 55,
       "z": 8,
-      "rot": 139
+      "rot": 137
     },
     {
       "asset": "flowers",
       "x": 56,
       "z": 7,
-      "rot": 107
+      "rot": 168
     },
     {
       "asset": "bush",
       "x": 25,
       "z": 23,
-      "rot": 192
+      "rot": 57
     },
     {
       "asset": "bush",
       "x": 30,
       "z": 0,
-      "rot": 241
+      "rot": 236
+    },
+    {
+      "asset": "bush",
+      "x": 30,
+      "z": 23,
+      "rot": 232
     },
     {
       "asset": "bush",
       "x": 32,
       "z": 23,
-      "rot": 228
+      "rot": 156
     },
     {
       "asset": "bush",
       "x": 33,
       "z": 23,
-      "rot": 58
+      "rot": 212
     },
     {
       "asset": "bush",
       "x": 34,
       "z": 23,
-      "rot": 126
-    },
-    {
-      "asset": "bush",
-      "x": 13,
-      "z": 1,
-      "rot": 1
+      "rot": 30
     },
     {
       "asset": "bush",
       "x": 45,
       "z": 4,
-      "rot": 336
-    },
-    {
-      "asset": "bush",
-      "x": 39,
-      "z": 12,
-      "rot": 305
+      "rot": 293
     },
     {
       "asset": "flowers",
-      "x": 53,
-      "z": 20,
-      "rot": 321
-    },
-    {
-      "asset": "flowers",
-      "x": 54,
-      "z": 20,
-      "rot": 266
-    },
-    {
-      "asset": "bush",
-      "x": 55,
-      "z": 20,
-      "rot": 161
-    },
-    {
-      "asset": "bush",
-      "x": 56,
-      "z": 20,
-      "rot": 168
-    },
-    {
-      "asset": "bush",
-      "x": 29,
-      "z": 21,
-      "rot": 128
-    },
-    {
-      "asset": "bush",
-      "x": 56,
-      "z": 21,
-      "rot": 173
-    },
-    {
-      "asset": "flowers",
-      "x": 56,
-      "z": 22,
-      "rot": 311
+      "x": 58,
+      "z": 18,
+      "rot": 214
     },
     {
       "asset": "bush",
       "x": 57,
+      "z": 19,
+      "rot": 4
+    },
+    {
+      "asset": "bush",
+      "x": 58,
+      "z": 19,
+      "rot": 77
+    },
+    {
+      "asset": "bush",
+      "x": 57,
+      "z": 20,
+      "rot": 11
+    },
+    {
+      "asset": "bush",
+      "x": 58,
+      "z": 20,
+      "rot": 108
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 21,
+      "rot": 28
+    },
+    {
+      "asset": "bush",
+      "x": 37,
       "z": 22,
-      "rot": 120
+      "rot": 211
     }
   ],
   "spawn": {
@@ -2970,7 +3090,7 @@
       "kind": "find",
       "id": "reed_fibre",
       "x": 30,
-      "z": 17,
+      "z": 20,
       "give": "give:reed_fibre",
       "text": "Long pale reeds, the kind Tobiah wants. You pick the longest, strip them and tie them in a bundle.",
       "text_fr": "De longs roseaux pâles, ceux que veut Tobiah. Vous choisissez les plus longs, vous les effeuillez et vous en faites une botte.",
@@ -3052,8 +3172,8 @@
       "tint": "#4ab0d8",
       "outfit": "#2f8fc0",
       "hair": "#d8a050",
-      "x": 55,
-      "z": 15,
+      "x": 52,
+      "z": 14,
       "facing": "n",
       "trainer": {
         "sight": 2,
@@ -3102,7 +3222,6 @@
         "look": [
           "s",
           "w",
-          "s",
           "e"
         ],
         "challenge": [
@@ -3152,8 +3271,7 @@
             "flag:hazel_gave"
           ]
         }
-      ],
-      "if": "!time:night"
+      ]
     },
     {
       "id": "fennel",
@@ -3370,8 +3488,7 @@
       ],
       "look": [
         "s",
-        "w",
-        "s"
+        "w"
       ]
     },
     {

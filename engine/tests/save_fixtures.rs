@@ -212,13 +212,22 @@ fn a_save_on_the_old_fernhollow_trail_keeps_its_finds_and_lands_on_open_ground()
         assert!(finds.contains(&id), "{id} is no longer on Fernhollow Trail");
     }
 
-    // Open ground: not water, rock, a fence or a wall, and under no prop but a deck or a rug.
+    // Open ground: not water, rock, a fence or a wall, and under no prop but one walked on (a deck, or
+    // one of props.js WALKABLE: a rug, a mat, a rail...).
     let src = std::fs::read_to_string(web.join("props.js")).unwrap();
     let foot: HashMap<String, Vec<f64>> = props_table(&src, "FOOT").into_iter().collect();
-    let deck: Vec<String> = props_table(&src, "DECK")
+    let mut walked: Vec<String> = props_table(&src, "DECK")
         .into_iter()
         .map(|(k, _)| k)
         .collect();
+    let set = &src[src.find("export const WALKABLE = new Set([").unwrap()..];
+    walked.extend(
+        set[..set.find(']').unwrap()]
+            .split('"')
+            .skip(1)
+            .step_by(2)
+            .map(String::from),
+    );
     let open = |x: i64, z: i64| {
         let row = map["tiles"][z as usize].as_str().unwrap().as_bytes();
         !b"~#fWV".contains(&row[x as usize])
@@ -232,7 +241,7 @@ fn a_save_on_the_old_fernhollow_trail_keeps_its_finds_and_lands_on_open_ground()
                     (w, d) = (d, w);
                 }
                 q.get("if").is_none()
-                    && !deck.iter().any(|k| k == asset)
+                    && !walked.iter().any(|k| k == asset)
                     && (px..px + w).contains(&x)
                     && (pz..pz + d).contains(&z)
             })
