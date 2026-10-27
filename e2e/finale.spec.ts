@@ -1,10 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-import { editSave, menuItem, readSave, title } from "./helpers";
-
-async function loaded(page: Page) {
-  await expect(page.getByRole("button", { name: "Menu", exact: true })).toBeVisible();
-  await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
-}
+import { expect, test } from "@playwright/test";
+import { editSave, loaded, menuItem, readSave, title } from "./helpers";
 
 test("the finale: back from the first Warden win, the scene, the credits, and the champion in the hall", async ({ page }) => {
   page.on("dialog", (d) => d.accept());

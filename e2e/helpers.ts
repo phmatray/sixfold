@@ -90,3 +90,9 @@ export async function editSave(page: Page, edit: string) {
     localStorage.removeItem("sixfold.save.1.prev");
   }, edit);
 }
+
+/** The world is up: its menu button shown, the loading status gone. */
+export async function loaded(page: Page) {
+  await expect(page.getByRole("button", { name: "Menu", exact: true })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
+}

@@ -442,6 +442,11 @@ fn shop_packs(progress: &mut Progress, profile: &mut Profile, bought: &mut [u32]
 /// rival duels over 16 pack seeds, against 16 before; pack seed 1 took 42).
 /// Re-measured for 1.6 (`campaign_sweep`): every one of the 16 seeds fits,
 /// the slowest taking exactly 45, so it stays.
+/// Re-measured for 1.10 (#150, keepers ask for some of their region's
+/// duelists): 14-54 rival duels, median 35, rematches included; main before
+/// it measured the same 14-54 and median 35 (seeds 11, 12 and 13 at 51, 54
+/// and 45: the Warden's wall, not the threshold). Stone and Dream were
+/// lowered from 4 to 3, which their rematches had pushed seeds 1 and 2 to 51.
 const RIVAL_DUELS: u64 = 45;
 
 /// Open every pack, counting them for the stats.
@@ -469,7 +474,8 @@ fn achieve(
 
 /// A full playthrough: a new player, played by the Normal AI, first meets
 /// every route duelist once (win or lose, they walk on), then takes on the
-/// first open rival they haven't beaten, and Rook each time his seals are
+/// first rival that accepts them (#150: else they meet again the first
+/// duelist still standing in an open keeper's region), and Rook each time his seals are
 /// met (one duel, won or lost: the story moves on), rebuilding their deck from the
 /// collection before every duel. Every Facet earned buys themed packs at
 /// the shop and every pack is opened, from `pack_seed` on, and achievements pay out as earned. Rivals play with
@@ -528,10 +534,35 @@ fn playthrough(
             log.push((t.id, won));
             continue;
         }
-        let r = RIVALS
+        let Some(r) = RIVALS
             .iter()
-            .find(|r| r.open(&progress) && !r.beaten(&progress))
-            .expect("an open rival while the Warden stands");
+            .find(|r| r.accepts(&progress) && !r.beaten(&progress))
+        else {
+            // No keeper accepts yet (#150): meet again the first duelist still
+            // standing in the region of the first keeper whose seals are met.
+            let t = RIVALS
+                .iter()
+                .filter(|r| r.open(&progress) && !r.earned(&progress))
+                .flat_map(|r| r.duelists.iter().filter_map(|id| trainers::trainer(id)))
+                .find(|t| !t.beaten(&progress))
+                .expect("an accepting rival or a duelist to beat while the Warden stands");
+            let deck = build_deck(&profile.collection);
+            let won = play(
+                [deck, t.deck()],
+                6_000 + duels,
+                t.prizes,
+                [Difficulty::Normal, t.difficulty],
+            ) == 0;
+            let before = (progress.clone(), profile.clone());
+            trainers::record(t, won, &mut progress);
+            progress.settle();
+            achieve(&mut stats, before, won, &mut progress, &profile);
+            packs += shop_packs(&mut progress, &mut profile, &mut bought);
+            open_counted(&mut stats, &mut profile, &mut pack_seed);
+            duels += 1;
+            log.push((t.id, won));
+            continue;
+        };
         let deck = build_deck(&profile.collection);
         let won = play_styled(
             [deck, r.deck.cards()],
@@ -578,6 +609,23 @@ fn the_campaign_can_be_finished_from_a_new_profile() {
             .iter()
             .all(|&id| profile.collection.count(id) == 1));
         assert!(rival("warden").unwrap().beaten(&progress));
+        // #150: every keeper was met only with enough of their region's
+        // duelists bested.
+        let mut bested: Vec<&str> = vec![];
+        for &(id, won) in &log {
+            match rival(id) {
+                Some(r) => {
+                    let n = r.duelists.iter().filter(|d| bested.contains(d)).count();
+                    assert!(
+                        n >= r.earn,
+                        "pack seed {seed}: {id} met with {n} of {}",
+                        r.earn
+                    );
+                }
+                None if won => bested.push(id),
+                None => {}
+            }
+        }
         // Rook's four scenes all played, won or lost, and never a seal.
         assert!(ROOK_SEALS.iter().all(|(id, _)| progress.has_flag(id)));
         // The achievements met on the way paid out.
@@ -897,8 +945,13 @@ fn campaign_sweep() {
                 .map(|r| (r.id, log.iter().filter(|&&(id, won)| id == r.id && !won).count()))
                 .collect();
             losses.sort_by_key(|&(_, n)| std::cmp::Reverse(n));
+            // Duelists met again to earn a keeper (#150).
+            let again = log[TRAINERS.iter().filter(|t| !t.story()).count()..]
+                .iter()
+                .filter(|(id, _)| rival(id).is_none() && !id.starts_with("rook_"))
+                .count();
             println!(
-                "pack seed {seed}: {duels} duels ({} rival), {packs} packs, held back by {} ({} losses)",
+                "pack seed {seed}: {duels} duels ({} rival, {again} rematches), {packs} packs, held back by {} ({} losses)",
                 duels - route,
                 losses[0].0,
                 losses[0].1
