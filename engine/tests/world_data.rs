@@ -971,3 +971,201 @@ fn keepers_ask_for_some_of_their_regions_duelists() {
         }
     }
 }
+
+/// #152: what is wrong with a seal site's staging, one line each. The site
+/// reveals itself once on arrival (`reveal_<map>`: at most 3 `cam`, at most
+/// 2 000 ms of `wait`, the stone wakes, it sets its own flag), and its keeper
+/// stages an entrance once earned (`entrance_<keeper>`: on tiles two from them,
+/// 2–3 lines with their French, the stone wakes, ending on `flag:met_<id>`
+/// then `duel:<id>`). Talked to first, the keeper says the same and does the
+/// same: a dialogue branch first among those that aren't a duel's result.
+fn staging_problems(site: &str, m: &Value) -> Vec<String> {
+    let mut bad = vec![];
+    let keeper = m["npcs"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .find(|n| n["id"].as_str().and_then(rival).is_some_and(|r| r.seal));
+    let Some(keeper) = keeper else {
+        return vec![format!("{site}: no keeper stands here")];
+    };
+    let id = keeper["id"].as_str().unwrap();
+    let scripts = m["scripts"].as_array().map_or(&[][..], Vec::as_slice);
+    let script = |want: &str| {
+        let found: Vec<&Value> = scripts.iter().filter(|s| s["id"] == want).collect();
+        (found.len() == 1).then(|| found[0])
+    };
+    let effects = |s: &Value| -> Vec<String> {
+        s["steps"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .flat_map(|st| strs(&st["do"]))
+            .map(String::from)
+            .collect()
+    };
+    let conds =
+        |c: &str| -> HashSet<String> { c.split('&').map(|t| t.trim().to_string()).collect() };
+
+    let reveal = format!("reveal_{site}");
+    match script(&reveal) {
+        None => bad.push(format!("{site}: no single {reveal} script")),
+        Some(s) => {
+            let fx = effects(s);
+            if s["on"] != "enter" || s["if"] != format!("!flag:{reveal}").as_str() {
+                bad.push(format!(
+                    "{site}: {reveal} plays on enter, if !flag:{reveal}"
+                ));
+            }
+            if !fx.contains(&format!("flag:{reveal}")) {
+                bad.push(format!("{site}: {reveal} never sets flag:{reveal}"));
+            }
+            if !fx.iter().any(|e| e == "stone:wake") {
+                bad.push(format!("{site}: {reveal} never wakes the stone"));
+            }
+            let cams = fx.iter().filter(|e| e.starts_with("cam:")).count();
+            let waits: u32 = fx
+                .iter()
+                .filter_map(|e| e.strip_prefix("wait:")?.parse::<u32>().ok())
+                .sum();
+            if cams > 3 || waits > 2000 {
+                bad.push(format!(
+                    "{site}: {reveal} has {cams} cams and {waits} ms of waits (at most 3 and 2000)"
+                ));
+            }
+        }
+    }
+
+    let entrance = format!("entrance_{id}");
+    let mut said: Option<(Value, Value)> = None;
+    match script(&entrance) {
+        None => bad.push(format!("{site}: no single {entrance} script")),
+        Some(s) => {
+            let c = conds(s["if"].as_str().unwrap_or(""));
+            for want in [
+                format!("open:{id}"),
+                format!("earned:{id}"),
+                format!("!beat:{id}"),
+                format!("!flag:met_{id}"),
+            ] {
+                if !c.contains(&want) {
+                    bad.push(format!("{site}: {entrance} plays without {want}"));
+                }
+            }
+            let (kx, kz) = (keeper["x"].as_i64().unwrap(), keeper["z"].as_i64().unwrap());
+            let at = s["at"].as_array().map_or(&[][..], Vec::as_slice);
+            if at.is_empty() || s.get("on").is_some() {
+                bad.push(format!("{site}: {entrance} starts on its at tiles"));
+            }
+            for t in at {
+                let (x, z) = (t[0].as_i64().unwrap_or(-9), t[1].as_i64().unwrap_or(-9));
+                if (x - kx).abs().max((z - kz).abs()) != 2 {
+                    bad.push(format!(
+                        "{site}: {entrance} tile {x},{z} is not two from {id}"
+                    ));
+                }
+            }
+            let steps = s["steps"].as_array().map_or(&[][..], Vec::as_slice);
+            let last = steps.last().map(|st| strs(&st["do"])).unwrap_or_default();
+            let flag = format!("flag:met_{id}");
+            let duel = format!("duel:{id}");
+            if last.len() < 2 || last[last.len() - 2..] != [flag.as_str(), duel.as_str()] {
+                bad.push(format!("{site}: {entrance} ends on {flag} then {duel}"));
+            }
+            if !effects(s).iter().any(|e| e == "stone:wake") {
+                bad.push(format!("{site}: {entrance} never wakes the stone"));
+            }
+            let says: Vec<&Value> = steps.iter().filter(|st| st["say"] == id).collect();
+            match says[..] {
+                [say] => {
+                    let n = say["lines"].as_array().map_or(0, Vec::len);
+                    let fr = say["lines_fr"].as_array().map_or(0, Vec::len);
+                    if !(2..=3).contains(&n) || fr != n {
+                        bad.push(format!(
+                            "{site}: {entrance}: {id} says 2 or 3 lines, each with its French"
+                        ));
+                    }
+                    said = Some((say["lines"].clone(), say["lines_fr"].clone()));
+                }
+                _ => bad.push(format!("{site}: {entrance}: {id} speaks once")),
+            }
+        }
+    }
+
+    let fallback = conds(&format!(
+        "earned:{id} & open:{id} & !beat:{id} & !flag:met_{id}"
+    ));
+    let branches = keeper["dialogue"].as_array().map_or(&[][..], Vec::as_slice);
+    let first = branches.iter().position(|b| {
+        let c = b["if"].as_str().unwrap_or("");
+        !c.contains("won:") && !c.contains("lost:")
+    });
+    match first.map(|i| &branches[i]) {
+        Some(b) if conds(b["if"].as_str().unwrap_or("")) == fallback => {
+            if strs(&b["do"]) != [format!("flag:met_{id}"), format!("duel:{id}")] {
+                bad.push(format!(
+                    "{site}: {id}'s entrance branch does flag:met_{id}, duel:{id}"
+                ));
+            }
+            if said.is_some_and(|(en, fr)| b["lines"] != en || b["lines_fr"] != fr) {
+                bad.push(format!(
+                    "{site}: {id}'s entrance branch says the entrance's lines"
+                ));
+            }
+        }
+        _ => bad.push(format!(
+            "{site}: {id}'s first branch after a duel's result is the entrance's ({fallback:?})"
+        )),
+    }
+    bad
+}
+
+#[test]
+fn every_seal_site_reveals_itself_and_stages_its_keeper() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let load = |site: &str| -> Value {
+        serde_json::from_str(&std::fs::read_to_string(dir.join(format!("{site}.json"))).unwrap())
+            .unwrap()
+    };
+    let bad: Vec<String> = SEAL_SITES
+        .iter()
+        .flat_map(|site| staging_problems(site, &load(site)))
+        .collect();
+    assert!(bad.is_empty(), "{}", bad.join("\n"));
+
+    // The checker refuses a site without its reveal, an entrance that duels
+    // before it marks the meeting, and a reveal that holds too long.
+    let mut m = load("bellflats");
+    let scripts = m["scripts"].as_array_mut().unwrap();
+    scripts.retain(|s| s["id"] != "reveal_bellflats");
+    let entrance = scripts
+        .iter_mut()
+        .find(|s| s["id"] == "entrance_marlo")
+        .unwrap();
+    let last = entrance["steps"]
+        .as_array_mut()
+        .unwrap()
+        .last_mut()
+        .unwrap();
+    last["do"] = serde_json::json!(["cam:hero", "duel:marlo", "flag:met_marlo"]);
+    let errors = staging_problems("bellflats", &m).join("\n");
+    for want in [
+        "no single reveal_bellflats",
+        "ends on flag:met_marlo then duel:marlo",
+    ] {
+        assert!(errors.contains(want), "{want:?} in {errors}");
+    }
+    let mut m = load("bellflats");
+    let reveal = m["scripts"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .find(|s| s["id"] == "reveal_bellflats")
+        .unwrap();
+    reveal["steps"][0]["do"]
+        .as_array_mut()
+        .unwrap()
+        .push("wait:1500".into());
+    let errors = staging_problems("bellflats", &m).join("\n");
+    assert!(errors.contains("ms of waits"), "{errors}");
+}

@@ -4245,6 +4245,23 @@
           ]
         },
         {
+          "if": "earned:marlo & open:marlo & !beat:marlo & !flag:met_marlo",
+          "lines": [
+            "There you are. The tables said someone would come in on this tide.",
+            "I'm Marlo, and this stone keeps the Saltreach's seal. Its duelists say you've earned a look at it.",
+            "Three prizes. Win, and the seal goes out with you on the ebb."
+          ],
+          "lines_fr": [
+            "Te voilà. Les tables disaient que quelqu'un arriverait avec cette marée.",
+            "Moi, c'est Marlo, et cette pierre garde le sceau de la Côte Salée. Ses duellistes disent que tu as gagné le droit de le voir.",
+            "Trois cartes Récompense. Gagne, et le sceau repart avec toi au reflux."
+          ],
+          "do": [
+            "flag:met_marlo",
+            "duel:marlo"
+          ]
+        },
+        {
           "if": "beat:warden",
           "lines": [
             "The champion, back on my flats. The tide tables never mentioned you.",
@@ -4338,5 +4355,117 @@
       "near": 18,
       "far": 40
     }
-  }
+  },
+  "scripts": [
+    {
+      "id": "reveal_bellflats",
+      "if": "!flag:reveal_bellflats",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_tide",
+            "cam:23:13",
+            "stone:wake",
+            "wait:1000",
+            "cam:marlo",
+            "wait:800",
+            "cam:hero",
+            "flag:reveal_bellflats"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "entrance_marlo",
+      "if": "open:marlo & earned:marlo & !beat:marlo & !flag:met_marlo",
+      "at": [
+        [
+          20,
+          13
+        ],
+        [
+          20,
+          14
+        ],
+        [
+          20,
+          15
+        ],
+        [
+          20,
+          16
+        ],
+        [
+          20,
+          17
+        ],
+        [
+          21,
+          13
+        ],
+        [
+          21,
+          17
+        ],
+        [
+          22,
+          13
+        ],
+        [
+          22,
+          17
+        ],
+        [
+          23,
+          17
+        ],
+        [
+          24,
+          15
+        ],
+        [
+          24,
+          16
+        ],
+        [
+          24,
+          17
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_tide",
+            "cam:marlo",
+            "face:marlo:n",
+            "stone:wake",
+            "wait:700",
+            "face:marlo:hero",
+            "wait:400"
+          ]
+        },
+        {
+          "say": "marlo",
+          "lines": [
+            "There you are. The tables said someone would come in on this tide.",
+            "I'm Marlo, and this stone keeps the Saltreach's seal. Its duelists say you've earned a look at it.",
+            "Three prizes. Win, and the seal goes out with you on the ebb."
+          ],
+          "lines_fr": [
+            "Te voilà. Les tables disaient que quelqu'un arriverait avec cette marée.",
+            "Moi, c'est Marlo, et cette pierre garde le sceau de la Côte Salée. Ses duellistes disent que tu as gagné le droit de le voir.",
+            "Trois cartes Récompense. Gagne, et le sceau repart avec toi au reflux."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:met_marlo",
+            "duel:marlo"
+          ]
+        }
+      ]
+    }
+  ]
 }

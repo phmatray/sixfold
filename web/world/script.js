@@ -8,7 +8,7 @@
 // play here too, unanswered.
 //
 // Cues (engine `Cue`): walk (a path of n/e/s/w; an NPC at its walking pace, the hero at its own),
-// face, cam (eased by world.js's camera spring, a cut under reduced motion), wait, sfx, music,
+// face (n/e/s/w, or `hero`: toward where the hero stands), cam (eased by world.js's camera spring, a cut under reduced motion), wait, sfx, music,
 // emote, warp and stone (the map's seal stone wakes until the scene ends). A walk that can't go on (someone stands in the way) arrives anyway after a while.
 import { DIR, angle, emote } from "./actors.js";
 
@@ -21,6 +21,12 @@ export function scenes(env) {
   let playing = false, cur = null, cam = null;
   const actorOf = (id) => (id === "hero" ? env.hero() : env.world()?.npcs.find((n) => n.def.id === id && !n.hidden));
   const isHero = (a) => a === env.hero();
+  // A `face` cue's direction: `hero` turns toward the hero (along the longer axis).
+  const toward = (a, f) => {
+    if (f !== "hero") return f;
+    const h = env.hero(), dx = h.x - a.x, dz = h.z - a.z;
+    return Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? "e" : "w") : dz > 0 ? "s" : "n";
+  };
 
   function start(s) {
     const w = env.world();
@@ -74,7 +80,7 @@ export function scenes(env) {
       if (isHero(a)) env.world().path = [...c.walk];
       else a.go = [...c.walk];
     } else if (c.face !== undefined) {
-      if (a) a.face = c.face;
+      if (a) a.face = toward(a, c.face);
       me.done();
     } else if (c.cam !== undefined) {
       cam = c.cam === "hero" ? null : c.cam;
@@ -122,7 +128,7 @@ export function scenes(env) {
     for (const c of rest) {
       const a = c.actor !== undefined ? actorOf(c.actor) : null;
       if (c.walk !== undefined && a) arrive(a, c.walk);
-      else if (c.face !== undefined && a) (a.face = c.face), (a.obj.rotation.y = angle(c.face));
+      else if (c.face !== undefined && a) (a.face = toward(a, c.face)), (a.obj.rotation.y = angle(a.face));
       else if (c.warp) env.warp({ to: c.warp.map, spawn: c.warp, travel: true });
     }
     playing = false;

@@ -1751,6 +1751,23 @@
           ]
         },
         {
+          "if": "earned:lumen & open:lumen & !beat:lumen & !flag:met_lumen",
+          "lines": [
+            "Shh. The garden heard your steps. It has been telling me about you.",
+            "I'm Lumen. The Hushlands' seal sleeps in that stone, and it only wakes for a duel.",
+            "Six prizes. Don't drift off before the last one."
+          ],
+          "lines_fr": [
+            "Chut. Le jardin a entendu tes pas. Il m'a parlé de toi.",
+            "Je suis Lumen. Le sceau des Terres du Murmure dort dans cette pierre, et ne s'éveille que pour un duel.",
+            "Six cartes Récompense. Ne t'endors pas avant la dernière."
+          ],
+          "do": [
+            "flag:met_lumen",
+            "duel:lumen"
+          ]
+        },
+        {
           "if": "!open:lumen",
           "lines": [
             "You look tired. Five seals first, then we'll talk.",
@@ -1862,5 +1879,101 @@
       "near": 14,
       "far": 34
     }
-  }
+  },
+  "scripts": [
+    {
+      "id": "reveal_moonwell",
+      "if": "!flag:reveal_moonwell",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_dream",
+            "cam:22:14",
+            "stone:wake",
+            "wait:1000",
+            "cam:lumen",
+            "wait:800",
+            "cam:hero",
+            "flag:reveal_moonwell"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "entrance_lumen",
+      "if": "open:lumen & earned:lumen & !beat:lumen & !flag:met_lumen",
+      "at": [
+        [
+          19,
+          16
+        ],
+        [
+          19,
+          17
+        ],
+        [
+          19,
+          18
+        ],
+        [
+          20,
+          18
+        ],
+        [
+          21,
+          14
+        ],
+        [
+          22,
+          18
+        ],
+        [
+          23,
+          16
+        ],
+        [
+          23,
+          17
+        ],
+        [
+          23,
+          18
+        ]
+      ],
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_dream",
+            "cam:lumen",
+            "face:lumen:n",
+            "stone:wake",
+            "wait:700",
+            "face:lumen:hero",
+            "wait:400"
+          ]
+        },
+        {
+          "say": "lumen",
+          "lines": [
+            "Shh. The garden heard your steps. It has been telling me about you.",
+            "I'm Lumen. The Hushlands' seal sleeps in that stone, and it only wakes for a duel.",
+            "Six prizes. Don't drift off before the last one."
+          ],
+          "lines_fr": [
+            "Chut. Le jardin a entendu tes pas. Il m'a parlé de toi.",
+            "Je suis Lumen. Le sceau des Terres du Murmure dort dans cette pierre, et ne s'éveille que pour un duel.",
+            "Six cartes Récompense. Ne t'endors pas avant la dernière."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:met_lumen",
+            "duel:lumen"
+          ]
+        }
+      ]
+    }
+  ]
 }

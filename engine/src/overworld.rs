@@ -34,7 +34,7 @@
 //!   a map at a tile: a ferry, a lift), cues for the world ([`Cue`]): state is
 //!   untouched
 //! - the cutscene cues (1.4): `walk:<actor>:<path>` (a path of `n`/`e`/`s`/`w`
-//!   letters), `face:<actor>:<dir>`, `cam:<actor>` / `cam:<x>:<z>` / `cam:hero`
+//!   letters), `face:<actor>:<dir>` (`dir` may be `hero`), `cam:<actor>` / `cam:<x>:<z>` / `cam:hero`
 //!   (the camera's look-at target), `wait:<ms>` (0 to [`MAX_WAIT`]),
 //!   `sfx:<sound>` and `music:<track>` (one of [`TRACKS`]); the actor `hero`
 //!   is the player
@@ -213,7 +213,7 @@ pub enum Cue {
     Sfx(String),
     /// An actor walks a path of `n`/`e`/`s`/`w` letters, one tile each.
     Walk { actor: String, path: String },
-    /// An actor turns to face `dir`.
+    /// An actor turns to face `dir` (`n`/`e`/`s`/`w`, or `hero`: toward wherever the hero stands).
     Face { actor: String, dir: String },
     /// The camera eases its look-at target over (its pitch never changes).
     Cam(CamTarget),
@@ -400,10 +400,12 @@ pub fn parse_effect(e: &str) -> Result<Effect, String> {
                 path: s(path),
             })
         }
-        ("face", [actor, dir]) if FACINGS.contains(dir) => Effect::Cue(Cue::Face {
-            actor: s(actor),
-            dir: s(dir),
-        }),
+        ("face", [actor, dir]) if FACINGS.contains(dir) || *dir == "hero" => {
+            Effect::Cue(Cue::Face {
+                actor: s(actor),
+                dir: s(dir),
+            })
+        }
         // A lone number is a tile missing its z, not an actor.
         ("cam", [who]) if !who.bytes().all(|b| b.is_ascii_digit()) => {
             Effect::Cue(Cue::Cam(match *who {
@@ -1230,6 +1232,13 @@ mod tests {
                 Ok(Effect::Cue(Cue::Music(track)))
             );
         }
+        assert_eq!(
+            parse_effect("face:marlo:hero"),
+            Ok(Effect::Cue(Cue::Face {
+                actor: "marlo".into(),
+                dir: "hero".into()
+            }))
+        );
         for bad in [
             "stone",
             "stone:sleep",

@@ -29,6 +29,8 @@ const TREES = new Set(["tree", "pine", "birch", "ash_pine", "willow"]); // varie
 const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // props whose smoke_origin smokes
 const BLOOMS = new Set(["moonflower"]); // with an `open` condition: instanced closed and open, cross-faded (build, refresh)
 const SMOKE = 8;
+// A seal stone's six coloured faces (seal_stone.glb `sx_seal_<colour>`; not its top or body).
+export const SEAL_FACE = /seal_(fire|water|lightning|psychic|fighting|grass)$/;
 const CHUNK = 16; // tiles per side of an instanced scenery chunk (culled as one)
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
 const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
@@ -204,8 +206,8 @@ function flatten(template) {
     if (!m.isMesh || !m.visible) return; // a part `recolor` hid
     const rel = new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld);
     // Textured, see-through, `glow` and `glass` parts (lit at night, by name) stay apart, and a seal stone's
-    // coloured faces (`seal_<colour>`: world.js wakes them in a scene).
-    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass|^seal_(?!top)/i.test(m.material.name)) return keep.push([m, rel]);
+    // coloured faces (`sx_seal_<colour>`: world.js wakes them in a scene).
+    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass/i.test(m.material.name) || SEAL_FACE.test(m.material.name)) return keep.push([m, rel]);
     const src = m.geometry, n = src.attributes.position.count, c = m.material.color;
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", src.attributes.position.clone());
