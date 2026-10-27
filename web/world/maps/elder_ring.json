@@ -1815,22 +1815,22 @@
           "if": "time:night",
           "lines": [
             "Out in the dark? Good. The trees talk more at night. Listen: that creak is the oldest one, turning over in its sleep.",
-            "Bramble's still off on Fernhollow. When he comes back to his seal, you'll know: the hedges stand up straighter."
+            "Bramble's back at his seal. You can tell: the hedges stand up straighter."
           ],
           "lines_fr": [
             "Dehors dans le noir ? Bien. Les arbres parlent davantage la nuit. Écoute : ce craquement, c'est le plus vieux, qui se retourne dans son sommeil.",
-            "Bramble est toujours sur Creuse-Fougère. Quand il reviendra à son sceau, tu le sauras : les haies se tiendront plus droites."
+            "Bramble est revenu à son sceau. Ça se voit : les haies se tiennent plus droites."
           ]
         },
         {
           "lines": [
             "You found the middle. Most people find the hedgehogs first.",
-            "I keep the Ring while Bramble's away. He's out on Fernhollow, testing the newcomers, as he does every year. He'll come back to his seal when he's ready, and not a day sooner.",
+            "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
             "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years."
           ],
           "lines_fr": [
             "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
-            "Je garde le Cercle pendant que Bramble est absent. Il est sur Creuse-Fougère, à mettre les nouveaux à l'épreuve, comme chaque année. Il reviendra à son sceau quand il sera prêt, pas un jour avant.",
+            "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
             "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans."
           ]
         }

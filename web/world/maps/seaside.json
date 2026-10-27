@@ -1747,11 +1747,11 @@
         "sight": 3,
         "challenge": [
           "*Fweet!* No running on the pier!",
-          "Marlo's at the end, and my Kelpwardens are in the way. Rules are rules."
+          "Marlo's gone back to the Bellflats, and my Kelpwardens are still in the way. Rules are rules."
         ],
         "challenge_fr": [
           "*Tuiiit !* On ne court pas sur la jetée !",
-          "Marlo est au bout, et mes Gardevarech sont sur le chemin. Le règlement, c'est le règlement."
+          "Marlo est reparti aux Grèves de la Cloche, et mes Gardevarech sont toujours sur le chemin. Le règlement, c'est le règlement."
         ],
         "win": [
           "*Fweet.* Clean win. I'd have blown for anything less.",
@@ -1770,10 +1770,10 @@
           "Retour à la plage, et échauffe-toi correctement cette fois."
         ],
         "after": [
-          "Marlo's at the end of the pier. Walking pace, please. The planks are wet."
+          "Marlo's out at the Bellflats now. Walking pace, please. The planks are wet."
         ],
         "after_fr": [
-          "Marlo est au bout de la jetée. Au pas, s'il te plaît. Les planches sont mouillées."
+          "Marlo est aux Grèves de la Cloche, maintenant. Au pas, s'il te plaît. Les planches sont mouillées."
         ]
       }
     },
@@ -1863,11 +1863,11 @@
         {
           "lines": [
             "Nothing's biting. I think the fish are duelling too.",
-            "Marlo sits at the end of the pier. Bring a good deck, the tide's on Marlo's side."
+            "Marlo's gone back out to the Bellflats, by the seal stone. Bring a good deck, the tide's on Marlo's side."
           ],
           "lines_fr": [
             "Ça ne mord pas. Je crois que les poissons font des duels, eux aussi.",
-            "Marlo est au bout de la jetée. Prends un bon deck, la marée est du côté de Marlo."
+            "Marlo est reparti aux Grèves de la Cloche, près de la pierre de sceau. Prends un bon deck, la marée est du côté de Marlo."
           ]
         }
       ],

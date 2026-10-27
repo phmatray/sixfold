@@ -362,7 +362,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "bramble",
         name: "Bramble",
         title: T::new("Hedge Tender", "Soigne-haies"),
-        place: T::new("Fernhollow Trail, by the bridge", "Sentier de Creuse-Fougère, près du pont"),
+        place: T::new("The Elder Ring, by the seal stone at its heart", "Le Cercle des Anciens, près de la pierre de sceau, en son cœur"),
         colors: &[Grass],
         deck: Prebuilt {
             name: T::new("Thicket", "Fourré"),
@@ -403,7 +403,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "marlo",
         name: "Marlo",
         title: T::new("Tide Reader", "Liseur de marées"),
-        place: T::new("Saltwind Boardwalk, at the end of the pier", "Promenade de Ventsalé, au bout de la jetée"),
+        place: T::new("The Bellflats, by the seal stone on the bell-tower islet", "Les Grèves de la Cloche, près de la pierre de sceau sur l'îlot du clocher"),
         colors: &[Water, Psychic],
         deck: Prebuilt {
             name: T::new("Low Tide", "Marée basse"),
@@ -444,7 +444,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "cinza",
         name: "Cinza",
         title: T::new("Kiln Runner", "Coureuse du four"),
-        place: T::new("Emberstep Quarry, down on the quarry floor", "Carrière de Pas-de-Braise, tout au fond"),
+        place: T::new("The Kilnmouth, by the seal stone on the crater floor", "La Gueule-du-Four, près de la pierre de sceau au fond du cratère"),
         colors: &[Fire, Fighting],
         deck: Prebuilt {
             name: EMBER_RUSH.name,
@@ -469,7 +469,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "quill",
         name: "Quill",
         title: T::new("Weather Watcher", "Vigie du ciel"),
-        place: T::new("Saltwind Boardwalk, under the lighthouse", "Promenade de Ventsalé, sous le phare"),
+        place: T::new("The Rodspire, by the seal stone on top of the stack", "L'Aiguille-Foudre, près de la pierre de sceau en haut du rocher"),
         colors: &[Lightning, Water],
         deck: Prebuilt {
             name: STORM_FRONT.name,
@@ -494,7 +494,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "orla",
         name: "Orla",
         title: T::new("Quarry Foreman", "Contremaîtresse"),
-        place: T::new("Emberstep Quarry, up on the ledge", "Carrière de Pas-de-Braise, en haut de la corniche"),
+        place: T::new("The Bastion, by the seal stone on the top terrace", "Le Bastion, près de la pierre de sceau sur la haute terrasse"),
         colors: &[Fighting],
         deck: Prebuilt {
             name: T::new("Bedrock", "Roche-mère"),
@@ -538,7 +538,7 @@ pub static RIVALS: [Rival; 7] = [
         id: "lumen",
         name: "Lumen",
         title: T::new("Night Gardener", "Jardinière de nuit"),
-        place: T::new("Fernhollow Trail, in the moonflower glade", "Sentier de Creuse-Fougère, dans la clairière des fleurs de lune"),
+        place: T::new("The Moonwell Garden, between the moonwell and the seal stone", "Le Jardin du Puits-de-Lune, entre le puits et la pierre de sceau"),
         colors: &[Psychic, Water],
         deck: Prebuilt {
             name: T::new("Moonlit Tide", "Marée de lune"),

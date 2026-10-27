@@ -1476,13 +1476,13 @@
           "if": "!flag:talked_nim",
           "lines": [
             "The moonflowers are open! This is the busy hour. Water, prune, whisper. In that order.",
-            "I'm Nim. Lumen's apprentice. She's away in the Fernhollow shade, gathering seeds, so the garden is mine for now.",
-            "She'll come home to keep the seal when the time comes. The well always knows before we do."
+            "I'm Nim. Lumen's apprentice. She's home from the Fernhollow shade with her seeds, and she's by the seal stone again.",
+            "She keeps the seal; I keep the beds. The well knew she was coming before we did."
           ],
           "lines_fr": [
             "Les belles-de-lune sont ouvertes ! C'est l'heure de pointe. Arroser, tailler, chuchoter. Dans cet ordre.",
-            "Moi, c'est Nim. L'apprentie de Lumen. Elle est partie à l'ombre de Creuse-Fougère ramasser des graines, alors le jardin est à moi, pour l'instant.",
-            "Elle reviendra garder le sceau le moment venu. Le puits le sait toujours avant nous."
+            "Moi, c'est Nim. L'apprentie de Lumen. Elle est rentrée de l'ombre de Creuse-Fougère avec ses graines, et elle est de nouveau près de la pierre de sceau.",
+            "Elle garde le sceau, moi les massifs. Le puits savait qu'elle revenait avant nous."
           ]
         },
         {
