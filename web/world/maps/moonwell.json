@@ -1476,13 +1476,13 @@
           "if": "!flag:talked_nim",
           "lines": [
             "The moonflowers are open! This is the busy hour. Water, prune, whisper. In that order.",
-            "I'm Nim. Lumen's apprentice. She's away in the Fernhollow shade, gathering seeds, so the garden is mine for now.",
-            "She'll come home to keep the seal when the time comes. The well always knows before we do."
+            "I'm Nim. Lumen's apprentice. She's home from the Fernhollow shade with her seeds, and she's by the seal stone again.",
+            "She keeps the seal; I keep the beds. The well knew she was coming before we did."
           ],
           "lines_fr": [
             "Les belles-de-lune sont ouvertes ! C'est l'heure de pointe. Arroser, tailler, chuchoter. Dans cet ordre.",
-            "Moi, c'est Nim. L'apprentie de Lumen. Elle est partie à l'ombre de Creuse-Fougère ramasser des graines, alors le jardin est à moi, pour l'instant.",
-            "Elle reviendra garder le sceau le moment venu. Le puits le sait toujours avant nous."
+            "Moi, c'est Nim. L'apprentie de Lumen. Elle est rentrée de l'ombre de Creuse-Fougère avec ses graines, et elle est de nouveau près de la pierre de sceau.",
+            "Elle garde le sceau, moi les massifs. Le puits savait qu'elle revenait avant nous."
           ]
         },
         {
@@ -1597,6 +1597,103 @@
           "lines_fr": [
             "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
             "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lumen",
+      "name": "Lumen",
+      "model": "rival_psychic",
+      "tint": "#ba8ce9",
+      "scale": 1,
+      "idle": "Idle",
+      "x": 21,
+      "z": 16,
+      "facing": "e",
+      "dialogue": [
+        {
+          "if": "won:lumen&flag:thanked_lumen",
+          "lines": [
+            "Wide awake again. I'll have to brew something stronger."
+          ],
+          "lines_fr": [
+            "Toujours les yeux grands ouverts. Il me faudra une infusion plus forte."
+          ]
+        },
+        {
+          "if": "won:lumen",
+          "lines": [
+            "You stayed awake the whole time. Impressive.",
+            "My seal. With six, the sealed door in the duel hall is yours.",
+            "And Moonmoth. It sings, but only at night."
+          ],
+          "lines_fr": [
+            "Tu n'as pas fermé l'œil de tout le duel. Impressionnant.",
+            "Mon sceau. Avec six, la porte scellée de la salle des duels est à toi.",
+            "Et Phalune. Elle chante, mais seulement la nuit."
+          ],
+          "do": [
+            "flag:thanked_lumen"
+          ]
+        },
+        {
+          "if": "lost:lumen",
+          "lines": [
+            "Sweet dreams. Wake up and try again."
+          ],
+          "lines_fr": [
+            "Fais de beaux rêves. Puis réveille-toi et réessaie."
+          ]
+        },
+        {
+          "if": "!open:lumen",
+          "lines": [
+            "You look tired. Five seals first, then we'll talk.",
+            "Rest up: the others are still waiting."
+          ],
+          "lines_fr": [
+            "Tu as une petite mine. Cinq sceaux d'abord, on en reparlera.",
+            "Repose-toi : les autres t'attendent encore."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "You beat Sable and you're still not yawning. Remarkable.",
+            "The moon's up. One more? Six prizes."
+          ],
+          "lines_fr": [
+            "Tu as battu Sable et tu ne bâilles toujours pas. Remarquable.",
+            "La lune est levée. Encore un ? Six cartes Récompense."
+          ],
+          "do": [
+            "duel:lumen"
+          ]
+        },
+        {
+          "if": "beat:lumen",
+          "lines": [
+            "The moon's up again. Shall we?"
+          ],
+          "lines_fr": [
+            "La lune s'est encore levée. On y va ?"
+          ],
+          "do": [
+            "duel:lumen"
+          ]
+        },
+        {
+          "lines": [
+            "You found my garden. Good. It only grows at night.",
+            "I'm Lumen. Six prizes, and I don't let anyone sleep through them."
+          ],
+          "lines_fr": [
+            "Tu as trouvé mon jardin. Bien. Il ne pousse que la nuit.",
+            "Je suis Lumen. Six cartes Récompense, et personne ne s'endort pendant mes duels."
+          ],
+          "do": [
+            "duel:lumen"
           ]
         }
       ]

@@ -318,6 +318,99 @@ fn rooks_scenes_play_in_order_at_their_seals() {
     }
 }
 
+/// 1.10: each seal keeper stands at their region's seal site, within 3 tiles
+/// of its seal stone (a 2 x 2 footprint), and on no other map.
+#[test]
+fn seal_keepers_stand_by_their_stones() {
+    use sixfold_engine::Color::*;
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let maps: Vec<(String, Value)> = std::fs::read_dir(&dir)
+        .expect("the world's maps")
+        .map(|e| e.unwrap().path())
+        .filter(|p| p.extension().is_some_and(|e| e == "json"))
+        .map(|p| {
+            let name = p.file_stem().unwrap().to_string_lossy().into_owned();
+            (
+                name,
+                serde_json::from_str(&std::fs::read_to_string(&p).unwrap()).unwrap(),
+            )
+        })
+        .collect();
+    for r in RIVALS.iter().filter(|r| r.seal) {
+        let region = match r.colors[0] {
+            Fire => "ember",
+            Lightning => "storm",
+            Water => "tide",
+            Psychic => "dream",
+            Grass => "grove",
+            Fighting => "stone",
+            Colorless => unreachable!("{} keeps no region", r.id),
+        };
+        let at: Vec<(&str, &Value, &Value)> = maps
+            .iter()
+            .flat_map(|(name, m)| {
+                m["npcs"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .filter(|n| n["id"] == r.id)
+                    .map(move |n| (name.as_str(), m, n))
+            })
+            .collect();
+        assert_eq!(
+            at.len(),
+            1,
+            "{} stands on {:?}",
+            r.id,
+            at.iter().map(|a| a.0).collect::<Vec<_>>()
+        );
+        let (name, m, n) = at[0];
+        assert!(
+            SEAL_SITES.contains(&name),
+            "{} stands on {name}, not a seal site",
+            r.id
+        );
+        assert_eq!(
+            m["region"], region,
+            "{} stands on {name}, not the {region} site",
+            r.id
+        );
+        let stone = m["props"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|p| p["asset"] == "seal_stone")
+            .unwrap_or_else(|| panic!("{name} has no seal stone"));
+        let (x, z) = (n["x"].as_i64().unwrap(), n["z"].as_i64().unwrap());
+        let (sx, sz) = (stone["x"].as_i64().unwrap(), stone["z"].as_i64().unwrap());
+        // Chebyshev distance to the 2 x 2 footprint.
+        let gap = |v: i64, s: i64| (s - v).max(v - (s + 1)).max(0);
+        let d = gap(x, sx).max(gap(z, sz));
+        assert!(d <= 3, "{} stands {d} tiles from {name}'s seal stone", r.id);
+        // On the stone's level: a digit tile is a terrace height, and the stone's `y` must match it.
+        let level = |x: i64, z: i64| {
+            let c = m["tiles"][z as usize].as_str().unwrap().as_bytes()[x as usize];
+            if c.is_ascii_digit() {
+                i64::from(c - b'0')
+            } else {
+                0
+            }
+        };
+        let y = stone["y"].as_i64().unwrap_or(0);
+        assert_eq!(
+            level(x, z),
+            y,
+            "{} and {name}'s seal stone stand on different levels",
+            r.id
+        );
+        assert_eq!(
+            level(sx, sz),
+            y,
+            "{name}'s seal stone is not on its tile's level"
+        );
+    }
+}
+
 /// A script is read like dialogue: its `if`, every cue and every actor.
 #[test]
 fn scripts_are_checked_like_dialogue() {

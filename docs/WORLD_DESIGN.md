@@ -141,6 +141,10 @@ Sable, the Hex Warden, stays behind the sealed door of the duel hall. Seal thres
 `campaign.rs` (`needs` 0/0/0/3/3/5/6), which the ring respects: the three hub-adjacent regions are the
 first three seals.
 
+The move was planned for 1.3 but only landed in 1.10 (#149): each keeper stands within 3 tiles of their
+site's seal stone (held by `seal_keepers_stand_by_their_stones` in `engine/tests/world_data.rs`), and the
+stewards who covered for them (Kessa, Elspeth, Nim) now say they are back.
+
 When a 1.3 save resumes on a tile that is now solid (the old rival spots were re-laid), the loader puts the
 hero on that map's `spawn` instead. That's the only migration.
 

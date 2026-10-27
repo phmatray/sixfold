@@ -4904,6 +4904,94 @@
       "outfit": "#3a2f3a",
       "hair": "#b5462f",
       "if": "time:night"
+    },
+    {
+      "id": "cinza",
+      "name": "Cinza",
+      "model": "rival_fire",
+      "tint": "#ff9a5c",
+      "scale": 1,
+      "idle": "Idle",
+      "x": 21,
+      "z": 13,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "won:cinza&flag:thanked_cinza",
+          "lines": [
+            "Again?! Fine. The kiln needed cooling anyway."
+          ],
+          "lines_fr": [
+            "Encore ?! Bon. Le four avait besoin de refroidir, de toute façon."
+          ]
+        },
+        {
+          "if": "won:cinza",
+          "lines": [
+            "Burnt out... You're quicker than you look.",
+            "Here, my seal. Don't let it cool off in a drawer.",
+            "And take Kilnfox. It runs hotter than I do."
+          ],
+          "lines_fr": [
+            "Grillée… Tu es plus rapide que tu en as l'air.",
+            "Tiens, mon sceau. Ne le laisse pas refroidir au fond d'un tiroir.",
+            "Et prends Fournard. Il chauffe encore plus que moi."
+          ],
+          "do": [
+            "flag:thanked_cinza"
+          ]
+        },
+        {
+          "if": "lost:cinza",
+          "lines": [
+            "Too slow! The road's still warm, come race me again."
+          ],
+          "lines_fr": [
+            "Pas assez vite ! La route est encore chaude, reviens faire la course."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "The champion, running the kiln road like the rest of us. Ha!",
+            "Four prizes. Let's see if the title made you any faster."
+          ],
+          "lines_fr": [
+            "Champion, et tu cours la route du four comme nous autres. Ha !",
+            "Quatre cartes Récompense. Voyons si le titre t'a donné des ailes."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        },
+        {
+          "if": "beat:cinza",
+          "lines": [
+            "Again? Good. I've been stoking the fire."
+          ],
+          "lines_fr": [
+            "Encore ? Parfait. J'ai attisé le feu."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        },
+        {
+          "lines": [
+            "You walk like someone who's never been in a hurry.",
+            "I'm Cinza. I run the kiln road every morning and duel every afternoon.",
+            "Four prizes. Try to keep up."
+          ],
+          "lines_fr": [
+            "Tu marches comme quelqu'un qui n'a jamais été pressé.",
+            "Moi, c'est Cinza. Je cours la route du four le matin et je fais des duels l'après-midi.",
+            "Quatre cartes Récompense. Essaie de suivre."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        }
+      ]
     }
   ],
   "ground": {
