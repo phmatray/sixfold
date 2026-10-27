@@ -1,6 +1,7 @@
 // The overworld test: tile-grid maps (./maps/<name>.json) drawn with three.js.
-// `mount(host, controls, cb, start, edit)` builds it (at `start` = "map,x,z,facing"
-// when given; `edit`: a debug build with ?edit loads the map editor) and returns an
+// `mount(host, controls, cb, start, edit, debug)` builds it (at `start` = "map,x,z,facing"
+// when given; `edit`/`debug`: a debug build with ?edit loads the map editor, with ?debug
+// the level-design overlays, debug.js) and returns an
 // api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, portrait, meet, cue, busy, read, page).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
@@ -64,7 +65,7 @@ const PHASE_FADE = 20; // daylight.js cross-fades this many game minutes into a 
 // Sounds come from web/audio/audio.js (loaded with the wasm), when it is there.
 const sound = (name, n = 0) => globalThis.sixfoldAudio?.sfx(name, n);
 
-export function mount(el, controls, cb, start, edit = false) {
+export function mount(el, controls, cb, start, edit = false, debug = false) {
   const mq = matchMedia("(prefers-reduced-motion: reduce)");
   let reduced = mq.matches;
   const onMotion = (e) => ((reduced = e.matches), (U.uSway.value = reduced ? 0 : 1));
@@ -289,7 +290,7 @@ export function mount(el, controls, cb, start, edit = false) {
     }
     return null;
   };
-  let stopEditor = () => {}, editing = () => false; // the map editor (?edit), when loaded
+  let stopEditor = () => {}, editing = () => false, stopDebug = () => {}; // the map editor (?edit) and overlays (?debug), when loaded
   // A finger walks by tapping only when the player chose it in Options (web/src/store.rs):
   // otherwise a tap that misses the pad's buttons would send the hero across the map.
   const tapWalk = () => {
@@ -550,6 +551,7 @@ export function mount(el, controls, cb, start, edit = false) {
           stopEditor = tool.stop;
           editing = tool.editing;
         });
+      if (debug) import("./debug.js").then((m) => alive && (stopDebug = m.attach({ world: () => world, scene, camera, el }).stop));
     })
     .catch(fail);
 
@@ -839,6 +841,7 @@ export function mount(el, controls, cb, start, edit = false) {
     bustR?.dispose();
     bustR?.forceContextLoss();
     stopEditor();
+    stopDebug();
     previewStop();
     book.dispose();
     cancelAnimationFrame(raf);

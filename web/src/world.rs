@@ -35,7 +35,7 @@ let api = null, gen = 0, items = "", paused = false, minute = 480;
 export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb, start, edit && new URLSearchParams(location.search).has("edit")); api.setItems(items); api.setClock(minute); api.pause(paused); })
+    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setClock(minute); api.pause(paused); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "import", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
@@ -55,7 +55,7 @@ export function world_book_rect() { return api?.bookRect() ?? []; }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
-    /// `edit`: a debug build, where `?edit` in the URL loads the map editor.
+    /// `edit`: a debug build, where `?edit` in the URL loads the map editor and `?debug` the overlays.
     fn world_mount(el: &JsValue, controls: &JsValue, cb: &JsValue, start: &str, edit: bool);
     fn world_unmount();
     /// Act on the faced tile, as E does.
