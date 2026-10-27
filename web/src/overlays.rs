@@ -413,10 +413,13 @@ pub fn GameOver() -> impl IntoView {
                     progress.update(|pr| {
                         profile.update(|p| got = Some(campaign::record(r, won, pr, p)))
                     });
-                    // After the win fanfare: the stinger as a seal fills, the
-                    // progress chime for the champion's title.
-                    if let Some(name) = got.as_ref().and_then(|g| {
-                        (g.seal || g.first).then_some(if g.seal { "stinger" } else { "progress" })
+                    // After the win fanfare: the stinger as a seal fills (unless
+                    // it already rang on the winning prize), the progress chime
+                    // for the champion's title.
+                    if let Some(name) = got.as_ref().and_then(|g| match (g.seal, g.first) {
+                        (true, _) => (!ctl.stung()).then_some("stinger"),
+                        (false, true) => Some("progress"),
+                        _ => None,
                     }) {
                         set_timeout(
                             move || crate::audio::sfx(name, 0.0),
@@ -571,6 +574,14 @@ pub fn GameOver() -> impl IntoView {
                                             <span>{tr("Every seal, and the champion's title.", "Tous les sceaux, et le titre de champion.")}</span>
                                         }.into_any(),
                                         (true, ..) => view! { <b>{tr("Rematch won", "Revanche gagnée")}</b> }.into_any(),
+                                        // A seal duel lost (#153): the challenge stands, and so does the threshold.
+                                        _ if ctl.seal().is_some_and(|s| !s.grand) => view! {
+                                            <b>{tr("No seal this time", "Pas de sceau cette fois")}</b>
+                                            <span>{tr(
+                                                format!("{} will duel you again whenever you're ready. The duelists you've bested still count.", r.name),
+                                                format!("{} vous affrontera de nouveau quand vous voudrez. Les duellistes que vous avez battus comptent toujours.", r.name),
+                                            )}</span>
+                                        }.into_any(),
                                         _ => view! {
                                             <b>{tr("No seal this time", "Pas de sceau cette fois")}</b>
                                             <span>{tr(format!("Talk to {} again for a rematch.", r.name), format!("Reparlez à {} pour une revanche.", r.name))}</span>

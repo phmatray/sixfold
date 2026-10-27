@@ -209,3 +209,56 @@ test("a seal duel opens on its title card and wears its region's colour; a route
   await expect(page.getByRole("dialog", { name: /^Seal of/ })).toHaveCount(0);
   await expect(page.locator(".duel")).not.toHaveClass(/seal-duel/);
 });
+
+// #153: back from the first win, the seal is won on stage; Escape keeps the seal, and it plays once.
+test("Marlo's seal is won on stage at the stone, once, and a skip keeps it", async ({ page }) => {
+  await newSave(page);
+  // What `campaign::record` leaves after the first win (`won:marlo` still to be spoken for).
+  const tide = ["f:beat_t_pell", "f:beat_t_nell", "f:beat_t_skye"];
+  await atMarlo(page, ["f:keepers", "f:intro", "f:reveal_bellflats", "f:met_marlo", ...tide, "f:beat_marlo", "won:marlo"]);
+
+  // The stone wakes, the Tide face lights (said aloud), and Marlo's farewell, in his own voice.
+  const talk = page.getByRole("dialog", { name: "Marlo" });
+  await expect(talk).toContainText("The Tide's face has it now", { timeout: 60_000 });
+  await expect(page.locator(".world-stage [aria-live]")).toHaveText("Marlo's seal!");
+  await page.keyboard.press("Escape");
+  await expect(talk).toBeHidden();
+
+  // Skipped: the seal is kept, the duel settled; input is back.
+  const progress = (await readSave(page)).progress?.[0] ?? "";
+  expect(progress).toContain("f:sealed_marlo");
+  expect(progress, "the scene settles the duel it spoke for").not.toContain("won:marlo");
+  await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
+
+  // Once only: a reload comes back with no scene.
+  await page.reload();
+  await menuItem(page, "Continue").click();
+  await loaded(page);
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^22,16/);
+  await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
+  await expect(talk).toBeHidden();
+});
+
+// #153: a lost seal duel is met kindly, and the challenge stands (no duelist to beat again).
+test("after losing to Marlo, he encourages, and the challenge is still open", async ({ page }) => {
+  await newSave(page);
+  const tide = ["f:beat_t_pell", "f:beat_t_nell", "f:beat_t_skye"];
+  await atMarlo(page, ["f:keepers", "f:intro", "f:reveal_bellflats", "f:met_marlo", ...tide, "lost:marlo"]);
+
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^22,16/, { timeout: 15_000 });
+  await page.keyboard.press("e");
+  // His lines, read to the end: a kind word, and the seal and the duelists bested still waiting.
+  const talk = page.getByRole("dialog", { name: "Marlo" });
+  await expect(talk).toBeVisible({ timeout: 60_000 });
+  const said: string[] = [];
+  while (await talk.isVisible()) {
+    said.push((await talk.textContent()) ?? "");
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(400);
+  }
+  expect(said.join(" ")).toContain("The seal will wait on the flats, and the Saltreach's duelists you've bested still count.");
+
+  const offer = await talkToMarlo(page);
+  await expect(offer.getByRole("button", { name: /^Challenge/ })).toBeEnabled();
+  await expect(offer).not.toContainText("bested first");
+});

@@ -16,6 +16,8 @@ const DAY = new THREE.Color("#2a2614"), NIGHT = new THREE.Color("#e4ff86");
 
 // A firefly: a small solid body in a faint halo (by day, a speck). One for every map.
 let tex = null;
+// The mote texture, made once (a seal stone's burst draws with it too, world.js).
+export const mote = () => (tex ??= moteTex());
 function moteTex() {
   const c = document.createElement("canvas");
   c.width = c.height = 64;
@@ -46,7 +48,7 @@ export function fireflies(interactions, floorAt, root) {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(all.length * 3), 3));
   geo.setAttribute("color", new THREE.Float32BufferAttribute(new Float32Array(all.length * 4).fill(1), 4)); // alpha per mote
-  const mat = new THREE.PointsMaterial({ map: (tex ??= moteTex()), size: 0.05, vertexColors: true, transparent: true, depthWrite: false });
+  const mat = new THREE.PointsMaterial({ map: mote(), size: 0.05, vertexColors: true, transparent: true, depthWrite: false });
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false;
   pts.visible = all.length > 0;

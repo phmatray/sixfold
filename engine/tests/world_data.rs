@@ -1169,3 +1169,139 @@ fn every_seal_site_reveals_itself_and_stages_its_keeper() {
     let errors = staging_problems("bellflats", &m).join("\n");
     assert!(errors.contains("ms of waits"), "{errors}");
 }
+
+/// #153: what is wrong with a seal site's stage victory, one line each. Its
+/// keeper's first win plays `victory_<keeper>` on return (`on: enter`, if
+/// `won:<id> & !flag:sealed_<id>`): the stone wakes, `sfx:seal` with
+/// `stone:seal:<id>` lights the keeper's face, at most 3 600 ms of `wait`, the
+/// keeper's farewell with its French, ending on `flag:sealed_<id>`. No
+/// `stone:seal` on the map names anyone but its own keeper.
+fn victory_problems(site: &str, m: &Value) -> Vec<String> {
+    let mut bad = vec![];
+    let Some(id) = m["npcs"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|n| n["id"].as_str())
+        .find(|id| rival(id).is_some_and(|r| r.seal))
+    else {
+        return vec![format!("{site}: no keeper stands here")];
+    };
+    let scripts = m["scripts"].as_array().map_or(&[][..], Vec::as_slice);
+    let effects = |s: &Value| -> Vec<String> {
+        s["steps"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .flat_map(|st| strs(&st["do"]))
+            .map(String::from)
+            .collect()
+    };
+    let own = format!("stone:seal:{id}");
+    for s in scripts {
+        for e in effects(s) {
+            if e.starts_with("stone:seal:") && e != own {
+                bad.push(format!(
+                    "{site}: {} lights another keeper's seal ({e})",
+                    s["id"]
+                ));
+            }
+        }
+    }
+    let want = format!("victory_{id}");
+    let found: Vec<&Value> = scripts.iter().filter(|s| s["id"] == want).collect();
+    let [s] = found[..] else {
+        bad.push(format!("{site}: no single {want} script"));
+        return bad;
+    };
+    let conds: HashSet<&str> = s["if"]
+        .as_str()
+        .unwrap_or("")
+        .split('&')
+        .map(str::trim)
+        .collect();
+    let sealed = format!("flag:sealed_{id}");
+    if s["on"] != "enter"
+        || conds != HashSet::from([format!("won:{id}").as_str(), &format!("!{sealed}")])
+    {
+        bad.push(format!(
+            "{site}: {want} plays on enter, if won:{id} & !{sealed}"
+        ));
+    }
+    let fx = effects(s);
+    for cue in ["stone:wake", "sfx:seal", own.as_str()] {
+        if !fx.iter().any(|e| e == cue) {
+            bad.push(format!("{site}: {want} never plays {cue}"));
+        }
+    }
+    let waits: u32 = fx
+        .iter()
+        .filter_map(|e| e.strip_prefix("wait:")?.parse::<u32>().ok())
+        .sum();
+    if waits > 3600 {
+        bad.push(format!("{site}: {want} waits {waits} ms (at most 3600)"));
+    }
+    let steps = s["steps"].as_array().map_or(&[][..], Vec::as_slice);
+    if steps
+        .last()
+        .map(|st| strs(&st["do"]))
+        .and_then(|d| d.last().copied())
+        != Some(sealed.as_str())
+    {
+        bad.push(format!("{site}: {want} ends on {sealed}"));
+    }
+    let says: Vec<&Value> = steps.iter().filter(|st| st["say"] == id).collect();
+    let farewell = |say: &&Value| {
+        let n = say["lines"].as_array().map_or(0, Vec::len);
+        n > 0 && say["lines_fr"].as_array().map_or(0, Vec::len) == n
+    };
+    if says.len() != 1 || !says.iter().all(farewell) {
+        bad.push(format!(
+            "{site}: {want}: {id} says a farewell once, each line with its French"
+        ));
+    }
+    bad
+}
+
+#[test]
+fn every_keeper_awards_the_seal_on_stage() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let load = |site: &str| -> Value {
+        serde_json::from_str(&std::fs::read_to_string(dir.join(format!("{site}.json"))).unwrap())
+            .unwrap()
+    };
+    let bad: Vec<String> = SEAL_SITES
+        .iter()
+        .flat_map(|site| victory_problems(site, &load(site)))
+        .collect();
+    assert!(bad.is_empty(), "{}", bad.join("\n"));
+
+    // The checker refuses a site without its victory, a victory without its
+    // French, and a seal lit for another site's keeper.
+    let mut m = load("bellflats");
+    m["scripts"]
+        .as_array_mut()
+        .unwrap()
+        .retain(|s| s["id"] != "victory_marlo");
+    assert!(victory_problems("bellflats", &m)
+        .join("\n")
+        .contains("no single victory_marlo"));
+    let mut m = load("bellflats");
+    let scripts = m["scripts"].as_array_mut().unwrap();
+    let victory = scripts
+        .iter_mut()
+        .find(|s| s["id"] == "victory_marlo")
+        .unwrap();
+    victory["steps"][1]
+        .as_object_mut()
+        .unwrap()
+        .remove("lines_fr");
+    victory["steps"][0]["do"]
+        .as_array_mut()
+        .unwrap()
+        .push("stone:seal:bramble".into());
+    let errors = victory_problems("bellflats", &m).join("\n");
+    for want in ["each line with its French", "lights another keeper's seal"] {
+        assert!(errors.contains(want), "{want:?} in {errors}");
+    }
+}

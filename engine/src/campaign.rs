@@ -260,6 +260,18 @@ pub fn seals(p: &Progress) -> usize {
     RIVALS.iter().filter(|r| r.seal && r.beaten(p)).count()
 }
 
+/// The seal stones' lit faces (#153): the first colour of every seal keeper
+/// beaten, but for a first win whose stage victory (`victory_<id>`, which
+/// sets `sealed_<id>`) is still to play: that face lights in the scene.
+pub fn lit_faces(p: &Progress) -> Vec<Color> {
+    RIVALS
+        .iter()
+        .filter(|r| r.seal && r.beaten(p))
+        .filter(|r| p.last_duel() != Some((r.id, true)) || p.has_flag(&format!("sealed_{}", r.id)))
+        .filter_map(|r| r.colors.first().copied())
+        .collect()
+}
+
 /// The Warden has been beaten: the player is the champion.
 pub fn champion(p: &Progress) -> bool {
     RIVALS.iter().any(|r| !r.seal && r.beaten(p))
@@ -337,6 +349,12 @@ pub fn record(r: &Rival, won: bool, p: &mut Progress, profile: &mut Profile) -> 
             .expect("rival ids are valid flag names");
         profile.wallet.grant(packs.0, packs.1);
         p.earn(facets);
+    }
+    // A rematch won: the seal was won on stage already (or, on a save from
+    // before the stage, long ago), so `victory_<id>` never plays for it.
+    if won && !first && r.seal {
+        p.apply(&format!("flag:sealed_{}", r.id))
+            .expect("rival ids are valid flag names");
     }
     let promo = first.then(|| r.promo());
     if let Some(id) = promo {
@@ -782,6 +800,29 @@ mod tests {
         for id in ids {
             record(rival(id).unwrap(), true, p, &mut pr);
         }
+    }
+
+    #[test]
+    fn a_seal_stone_lights_the_faces_of_the_seals_held() {
+        let mut p = Progress::default();
+        assert!(lit_faces(&p).is_empty());
+        // Marlo's first win: the face waits dark for the stage, which lights it.
+        beat(&mut p, &["marlo"]);
+        assert!(lit_faces(&p).is_empty(), "the victory scene lights it");
+        p.apply("flag:sealed_marlo").unwrap();
+        assert_eq!(lit_faces(&p), [Color::Water]);
+        // A save from before the stage (the result settled, no `sealed_`) keeps it lit,
+        // and so does a rematch won; the Warden has no face.
+        let mut old = Progress::default();
+        beat(&mut old, &["marlo", "bramble"]);
+        old.settle();
+        assert_eq!(lit_faces(&old), [Color::Grass, Color::Water]);
+        // Its rematch won is no stage victory: it marks the seal as staged.
+        beat(&mut old, &["marlo"]);
+        assert!(old.check("won:marlo") && old.has_flag("sealed_marlo"));
+        assert_eq!(lit_faces(&old), [Color::Grass, Color::Water]);
+        beat(&mut p, &["marlo", "warden"]);
+        assert_eq!(lit_faces(&p), [Color::Water]);
     }
 
     #[test]

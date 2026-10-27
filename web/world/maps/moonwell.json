@@ -1744,10 +1744,12 @@
         {
           "if": "lost:lumen",
           "lines": [
-            "Sweet dreams. Wake up and try again."
+            "Sweet dreams. You were nearly there.",
+            "The seal will keep until you wake, and the Hushlands' duelists you've bested still count."
           ],
           "lines_fr": [
-            "Fais de beaux rêves. Puis réveille-toi et réessaie."
+            "Fais de beaux rêves. Tu y étais presque.",
+            "Le sceau t'attendra à ton réveil, et les duellistes des Terres du Murmure que tu as battus comptent toujours."
           ]
         },
         {
@@ -1971,6 +1973,43 @@
             "cam:hero",
             "flag:met_lumen",
             "duel:lumen"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "victory_lumen",
+      "if": "won:lumen & !flag:sealed_lumen",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_dream",
+            "cam:22:14",
+            "stone:wake",
+            "wait:600",
+            "sfx:seal",
+            "stone:seal:lumen",
+            "wait:1200",
+            "face:lumen:hero",
+            "cam:lumen"
+          ]
+        },
+        {
+          "say": "lumen",
+          "lines": [
+            "There. The Dream's face is awake now, and it won't sleep again.",
+            "Neither should you, not yet. The duel hall is waiting."
+          ],
+          "lines_fr": [
+            "Voilà. La face du Songe est éveillée, et elle ne se rendormira plus.",
+            "Toi non plus, pas encore. La salle des duels t'attend."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:sealed_lumen"
           ]
         }
       ]

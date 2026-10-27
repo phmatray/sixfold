@@ -10,14 +10,15 @@
 // Cues (engine `Cue`): walk (a path of n/e/s/w; an NPC at its walking pace, the hero at its own),
 // face (n/e/s/w, or `hero`: toward where the hero stands), cam (eased by world.js's camera spring, a cut
 // under reduced motion), wait, sfx, music, emote, warp and stone (the map's seal stone wakes until the scene
-// ends). A walk that can't go on (someone stands in the way) arrives anyway after a while.
+// ends; `seal` lights a keeper's face of it for good). A walk that can't go on (someone stands in the way) arrives anyway after a while.
 import { DIR, angle, emote } from "./actors.js";
 
 const EMOTE_HOLD = 600; // ms an emote holds the scene, so it reads
 const CAM_MAX = 2.5; // s: a pan longer than this is cut short
 
 // env: world(), hero(), reduced(), settled() (the camera reached its target), warp(wp) -> Promise,
-// sound(name), tune() (the map's music back), stone(state) (the seal stone's look, null at rest),
+// sound(name), tune() (the map's music back), stone(state, colour) (the seal stone's look, null at rest;
+// "seal" lights that colour's face for good),
 // moved() (the hero's tile is reported again), holds(cond), cb.
 export function scenes(env) {
   let playing = false, cur = null, cam = null;
@@ -89,7 +90,7 @@ export function scenes(env) {
     } else if (c.wait !== undefined) setTimeout(me.done, c.wait);
     else if (c.sfx) env.sound(c.sfx), me.done();
     else if (c.music) globalThis.sixfoldAudio?.music(c.music), me.done();
-    else if (c.stone) env.stone(c.stone), me.done();
+    else if (c.stone) env.stone(c.stone, c.colour), me.done();
     else if (c.emote) {
       if (a) emote(a, c.emote);
       setTimeout(me.done, a ? EMOTE_HOLD : 0);

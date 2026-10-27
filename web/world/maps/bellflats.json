@@ -4238,10 +4238,12 @@
         {
           "if": "lost:marlo",
           "lines": [
-            "Low tide for you today. The water always comes back in."
+            "Low tide for you today. It always comes back in.",
+            "The seal will wait on the flats, and the Saltreach's duelists you've bested still count."
           ],
           "lines_fr": [
-            "Marée basse pour toi aujourd'hui. Mais la mer finit toujours par remonter."
+            "Marée basse pour toi aujourd'hui. Elle finit toujours par remonter.",
+            "Le sceau attendra sur l'estran, et les duellistes de la Côte Salée que tu as battus comptent toujours."
           ]
         },
         {
@@ -4463,6 +4465,43 @@
             "cam:hero",
             "flag:met_marlo",
             "duel:marlo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "victory_marlo",
+      "if": "won:marlo & !flag:sealed_marlo",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_tide",
+            "cam:23:13",
+            "stone:wake",
+            "wait:600",
+            "sfx:seal",
+            "stone:seal:marlo",
+            "wait:1200",
+            "face:marlo:hero",
+            "cam:marlo"
+          ]
+        },
+        {
+          "say": "marlo",
+          "lines": [
+            "There. The Tide's face has it now, and it won't go out with the water.",
+            "Go on. The flats will still be here when the tide comes back in."
+          ],
+          "lines_fr": [
+            "Voilà. La face de la Marée l'a pris, et elle ne s'éteindra pas avec l'eau.",
+            "Va. L'estran sera encore là quand la marée remontera."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:sealed_marlo"
           ]
         }
       ]

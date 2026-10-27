@@ -816,6 +816,7 @@ The engine stays the only parser (`engine/src/overworld.rs`). Arguments are spli
 | `sfx:<name>`, `music:<track>` | sound | cue | 1.4 |
 | `music:duel_rival_<region>` | a keeper's own duel theme (`ember`, `storm`, `tide`, `dream`, `grove`, `stone`), for their entrance; the map's music comes back when the scene ends | cue | 1.10 |
 | `stone:wake` | the map's seal stone wakes until the scene ends: its six coloured faces glow in the region's colour over 600 ms (a cut under reduced motion) with one live light at it (outdoors, made with the map: five point lights in all); only on a map with a `seal_stone` | cue | 1.10 |
+| `stone:seal:<keeper>` | the keeper's face of the seal stone lights for good (its own colour, brighter than paint, with no live light), the wake's glow gathers into it, and a burst of at most 60 motes in its colour rises off the stone for 1.2 s (none under reduced motion); the web shows the seal flying to the Menu button and says "{name}'s seal!". Every map load also lights the faces of the seals already held (`campaign::lit_faces`, `world_seals`), and the others rest dormant; only at that keeper's own seal stone | cue | 1.10 |
 
 `apply` returns `Applied::Cue(Cue)` for cue effects without touching state; `web/src/world.rs` forwards a cue
 to `world_cue(json)` and waits for `cb("cue_done")` before the next effect. `Progress::apply_all(&[&str])`
@@ -1989,6 +1990,12 @@ I played the design through on paper. Here is what was still hollow, and what th
    does the same (a branch first after the duel results). The fixed pitch is kept; only the look-at target
    moves, and reduced motion makes every move a cut. `engine/tests/world_data.rs` and `check-maps` hold the
    shape.
+   *And the seal is won there (#153)*: back from a keeper's first win, `victory_<id>` (`on: enter`, `won:<id> &
+   !flag:sealed_<id>`, instead of the post-duel line) wakes the stone, lights the keeper's face with the seal's
+   sting (`stone:seal:<id>`), flies the seal to the Menu button, and gives the keeper's farewell, at most
+   3 600 ms of `wait`, ending on `flag:sealed_<id>`. From then on the stone shows the seals held. A loss is short:
+   the keeper's `lost:` line is kind and says the seal and the region's duelists bested still count, and the
+   result screen says the keeper will duel again (the threshold holds).
 9. **"The economy is a spreadsheet."** Facets with nothing exciting to buy feel like points. *Fixed*: each inn
    stocks one Rare to save up for, the Press can make the one card you need, the voucher is a real prize, and
    outfits give late Facets somewhere to go. The `economy_sim` keeps packs at about one per 12 minutes of
