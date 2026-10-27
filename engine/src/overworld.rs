@@ -39,7 +39,8 @@
 //!   `sfx:<sound>` and `music:<track>` (one of [`TRACKS`]); the actor `hero`
 //!   is the player
 //! - `stone:wake` (#152): the map's seal stone glows in the region's colour
-//!   until the scene ends
+//!   until the scene ends; `stone:seal:<keeper>` (#153): the keeper's face of
+//!   it lights, and stays lit
 //!
 //! Save string: comma-separated `i:<item>`, `f:<flag>`, `won:<id>` /
 //! `lost:<id>`, `g:<beaten>_<deck print>` (a Gauntlet run), `d:<day>` (the
@@ -230,6 +231,9 @@ pub enum Cue {
 pub enum StoneCue {
     /// `stone:wake`: its faces glow in the region's colour, with one live light.
     Wake,
+    /// `stone:seal:<keeper>`: that seal keeper's face lights and stays lit
+    /// (the seal is won on stage, #153).
+    Seal(String),
 }
 
 /// What a `cam:` cue looks at.
@@ -420,6 +424,9 @@ pub fn parse_effect(e: &str) -> Result<Effect, String> {
         },
         ("music", [track]) if TRACKS.contains(track) => Effect::Cue(Cue::Music(s(track))),
         ("stone", ["wake"]) => Effect::Cue(Cue::Stone(StoneCue::Wake)),
+        ("stone", ["seal", id]) if rival(id).is_some_and(|r| r.seal) => {
+            Effect::Cue(Cue::Stone(StoneCue::Seal(s(id))))
+        }
         ("clock", [p]) => Effect::Clock(Phase::parse(p).ok_or_else(bad)?),
         ("warp", [map, x, z, f]) if FACINGS.contains(f) => Effect::Cue(Cue::Warp {
             map: s(map),
@@ -1239,11 +1246,20 @@ mod tests {
                 dir: "hero".into()
             }))
         );
+        // #153: a seal keeper's face lights; a route duelist and the Warden have none.
+        assert_eq!(
+            parse_effect("stone:seal:marlo"),
+            Ok(Effect::Cue(Cue::Stone(StoneCue::Seal("marlo".into()))))
+        );
         for bad in [
             "stone",
             "stone:sleep",
             "stone:wake:now",
             "music:duel_rival_moon",
+            "stone:seal",
+            "stone:seal:t_pell",
+            "stone:seal:warden",
+            "stone:seal:marlo:now",
         ] {
             assert!(parse_effect(bad).is_err(), "{bad:?}");
         }

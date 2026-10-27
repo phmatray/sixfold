@@ -2,7 +2,7 @@
 // `mount(host, controls, cb, start, edit, debug)` builds it (at `start` = "map,x,z,facing"
 // when given; `edit`/`debug`: a debug build with ?edit loads the map editor, with ?debug
 // the level-design overlays, debug.js) and returns an
-// api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, portrait, meet, cue, busy, read, page).
+// api for Leptos (stop, act, pause, setItems, setSeals, setClock, preview, previewStop, portrait, meet, cue, busy, read, page).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
 //   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate; a gated
@@ -44,6 +44,7 @@ import { U } from "./life.js";
 import { PLACEHOLDER, group, prep, CUTAWAY } from "./props.js";
 import { tr, loadMap, loadAsset, assetNames, preload, PERSON, OPTIONAL } from "./map.js";
 import { build, dispose, refresh, animateProps } from "./build.js";
+import { mote } from "./fireflies.js";
 import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route } from "./actors.js";
 import { updateNpc, facing as facingOf } from "./npc.js";
 import * as duelists from "./trainer.js";
@@ -69,7 +70,8 @@ const REGION_FACE = { ember: "fire", storm: "lightning", tide: "water", dream: "
 // one real light at it, made with the map at 0 so waking it never recompiles a shader. With the hero's
 // lantern and the three live lamps that is five, under the six (WORLD_DESIGN P1). The region's colour is
 // its own face's; a map with no region wakes each face in its own.
-function stoneRig(w) {
+// A face whose seal is held (`held`, the colour keys setSeals gives) stays lit; the others rest dormant (#153).
+function stoneRig(w, held) {
   const faces = [], box = new THREE.Box3();
   w.root.updateMatrixWorld(true);
   w.root.traverse((o) => o.isMesh && o.userData.seal && (faces.push(...o.userData.seal.map((f) => ({ ...f, attr: o.geometry.attributes.color }))), box.expandByObject(o)));
@@ -82,16 +84,28 @@ function stoneRig(w) {
     light.layers.enableAll();
     w.root.add(light);
   }
-  return { faces, color, light, k: 0, want: 0 };
+  for (const f of faces) f.dormant = f.color.clone().lerp(DORMANT, DORMANT_K);
+  const at = w.root.worldToLocal(box.getCenter(new THREE.Vector3()));
+  // The seal's motes, made with the map and drawn once unseen, so the seal won on stage compiles no shader.
+  const geo = new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(new Float32Array(BURST * 3), 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: mote(), size: 0.42, transparent: true, opacity: 0, depthWrite: false }));
+  pts.frustumCulled = false;
+  w.root.add(pts);
+  const burst = { pts, vel: new Float32Array(BURST * 3), t: BURST_S - 1e-3 }; // its first frame draws it at opacity 0
+  return { faces, color, light, at, held, k: 0, want: 0, dirty: true, burst };
 }
 // Ease the stone toward its want (a cut under reduced motion): the faces' glow and the light together.
 function stoneStep(s, dt, reduced) {
-  if (!s || s.k === s.want) return;
+  if (s?.burst) burstStep(s, dt);
+  if (!s || (s.k === s.want && !s.dirty)) return;
+  s.dirty = false;
   s.k = reduced ? s.want : s.k + Math.sign(s.want - s.k) * Math.min(Math.abs(s.want - s.k), (dt * 1000) / WAKE_MS);
   const e = s.k * s.k * (3 - 2 * s.k);
-  // Each face takes on the region's colour, brighter than paint (a map with no region: each its own).
+  // Each face takes on the region's colour, brighter than paint (a map with no region: each its own); a held
+  // seal's face stays lit in its own colour through it all, and the others rest dormant.
   for (const f of s.faces) {
-    tmpColor.copy(f.color).lerp(tmpColor2.copy(s.color ?? f.color).multiplyScalar(GLOW), e);
+    if (s.held.has(f.colour)) tmpColor.copy(f.color).multiplyScalar(LIT);
+    else tmpColor.copy(f.dormant).lerp(tmpColor2.copy(s.color ?? f.color).multiplyScalar(GLOW), e);
     for (let i = f.start; i < f.start + f.count; i++) f.attr.setXYZ(i, tmpColor.r, tmpColor.g, tmpColor.b);
     f.attr.needsUpdate = true;
   }
@@ -99,6 +113,41 @@ function stoneStep(s, dt, reduced) {
 }
 const tmpColor = new THREE.Color(), tmpColor2 = new THREE.Color();
 const GLOW = 1.8; // an awake face: its colour this much over paint (vertex colours may pass 1)
+const LIT = 1.5; // a held seal's face, lit for good: its colour this much over paint, with no light (#153)
+// A face whose seal isn't held yet rests dormant: its paint sunk most of the way into the stone.
+const DORMANT = new THREE.Color("#9c968b"), DORMANT_K = 0.55;
+const BURST = 60, BURST_S = 1.2; // the motes a seal won on stage sends up, and for how long (s)
+const WHITE = new THREE.Color("#ffffff");
+// A seal won on stage (`stone:seal`): its face lights for good and the rest of the glow gathers into it
+// (the wake fades), while BURST motes in its colour rise off the stone and fade over BURST_S, one draw
+// call. Under reduced motion the face just lights: no motes.
+function sealFace(s, colour, reduced) {
+  s.held.add(colour);
+  s.dirty = true;
+  s.want = 0;
+  const f = s.faces.find((f) => f.colour === colour);
+  if (reduced || !f) return;
+  const b = s.burst, pos = b.pts.geometry.attributes.position;
+  for (let i = 0; i < BURST; i++) {
+    const a = Math.random() * Math.PI * 2, r = 0.4 + Math.random() * 1.2;
+    pos.array.set([s.at.x, s.at.y + 0.3, s.at.z], i * 3);
+    b.vel.set([Math.cos(a) * r, 1 + Math.random() * 1.8, Math.sin(a) * r], i * 3);
+  }
+  b.pts.material.color.copy(f.color).lerp(WHITE, 0.25);
+  b.pts.visible = true;
+  b.t = 0;
+}
+function burstStep(s, dt) {
+  const b = s.burst, p = b.pts.geometry.attributes.position;
+  if (b.t >= BURST_S) return void (b.pts.visible = false); // spent, or (at the map's start) drawn once unseen
+  b.t += dt;
+  for (let i = 0; i < BURST * 3; i += 3) {
+    b.vel[i + 1] -= dt * 1.2; // they slow as they rise
+    for (let k = 0; k < 3; k++) p.array[i + k] += b.vel[i + k] * dt;
+  }
+  p.needsUpdate = true;
+  b.pts.material.opacity = Math.max(0, 1 - (b.t / BURST_S) ** 2); // a fade, never a blink
+}
 
 // ---------- Mount ----------
 
@@ -136,6 +185,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   let cam = { fov: 40, fovPortrait: 50, pitch: 50, distance: 12, distancePortrait: 15, lookAtOffset: [0, 0.75, 0] };
   let dist = 12, alive = true, raf = 0, paused = false, warping = false, world = null, hero = null;
   let canRun = false, runToggle = false, shift = false, lastHero = "";
+  const sealsHeld = new Set(); // the seals held (setSeals): their stone faces stay lit
   // The clock (the engine owns the saved minute; Rust hands it over with setClock).
   let minute = 480, lastHour = -1, lastPhase = "", bgAt = 0;
   const clock = new THREE.Timer();
@@ -400,7 +450,12 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // Cutscenes (script.js): the camera reports when it has reached what it was sent to look at.
   const cut = scenes({
     world: () => world, hero: () => hero, reduced: () => reduced, holds, cb, sound, tune, warp,
-    stone: (state) => world?.stone && (world.stone.want = state === "wake" ? 1 : 0),
+    stone: (state, face) => {
+      const s = world?.stone;
+      if (!s) return;
+      if (state === "seal") sealFace(s, face, reduced);
+      else s.want = state === "wake" ? 1 : 0;
+    },
     settled: () => look.distanceTo(aim) < 0.12 && lookVel.lengthSq() < 0.04,
     moved: () => (lastHero = ""), // the hero's tile is saved again (not during a scene: a reload replays it)
   });
@@ -540,7 +595,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     world = next;
     world.hero = null;
     world.day = daylight(world, reduced);
-    world.stone = stoneRig(world);
+    world.stone = stoneRig(world, sealsHeld);
     scene.add(world.root);
     const L = map.light;
     scene.fog = L.indoor ? null : new THREE.Fog(L.background, L.fog?.near ?? 60, L.fog?.far ?? 90);
@@ -1021,6 +1076,12 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       }
       if (world) cut.play(c); // one cue player (script.js), for dialogue and cutscenes alike
       else if (c.id !== undefined) cb("cue_done", String(c.id), "");
+    },
+    // The seals held, as colour keys (`water,grass`): those faces of any seal stone stay lit (#153).
+    setSeals(csv) {
+      sealsHeld.clear();
+      for (const c of csv.split(",")) if (c) sealsHeld.add(c);
+      if (world?.stone) world.stone.dirty = true;
     },
     setItems(list) {
       canRun = list.split(",").includes("running_shoes");

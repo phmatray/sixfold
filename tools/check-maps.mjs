@@ -49,6 +49,7 @@ const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove",
 const BEDS = new Set([...TRACKS, "interior"]); // audio.js BEDS
 // A scene's `music:` may also be a theme of its own (engine overworld::TRACKS): Rook's, the finale's, a keeper's duel theme.
 const THEMES = new Set([...BEDS, "rook", "finale", ...["ember", "storm", "tide", "dream", "grove", "stone"].map((r) => `duel_rival_${r}`)]);
+const KEEPERS = ["bramble", "marlo", "cinza", "quill", "orla", "lumen"]; // the seal keepers (engine campaign::RIVALS with a seal)
 const FENCES = new Set(["fence", "wall_dry", "hedge"]);
 const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/atlas.json`, "utf8")) : null;
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
@@ -208,7 +209,8 @@ for (const [name, m] of Object.entries(maps)) {
 // a `say` (an actor on the map or the hero, with lines; lines_fr is checked with the other text) or a `do` list. The
 // cues' arguments as the engine reads them (engine/tests/world_data.rs parses every effect): walk paths of n/e/s/w
 // that keep an NPC on open tiles, face directions, cam on an actor or an in-bounds tile, waits of 0..5000 ms, music
-// tracks, `stone:wake` only on a map with a seal stone; a `duel:` only in the last step (it ends the scene).
+// tracks, `stone:wake` only on a map with a seal stone, `stone:seal:<keeper>` (#153) only at that keeper's own seal
+// stone; a `duel:` only in the last step (it ends the scene).
 // A seal site's staging (#152; engine/tests/world_data.rs holds the rest of its shape): `reveal_<map>` keeps to
 // 3 `cam` and 2 000 ms of `wait`; `entrance_<keeper>` starts on every reachable open tile two from the keeper (but
 // one where someone stands for good: no route), so nobody walks up to them without it.
@@ -259,7 +261,9 @@ function scripts(name, m, solid, inMap, reached) {
         if (kind === "face" && !DIR[a[1]] && a[1] !== "hero") bad("faces n, e, s, w or hero");
         if (kind === "wait" && !(/^\d+$/.test(a[0]) && +a[0] <= 5000)) bad("waits 0 to 5000 ms");
         if (kind === "music" && !THEMES.has(a[0])) bad(`not a track (${[...THEMES].join(", ")})`);
-        if (kind === "stone" && !(a.length === 1 && a[0] === "wake")) bad("is stone:wake");
+        const seal = a[0] === "seal" && a.length === 2;
+        if (kind === "stone" && !((a.length === 1 && a[0] === "wake") || seal)) bad("is stone:wake or stone:seal:<keeper>");
+        else if (kind === "stone" && seal && !(KEEPERS.includes(a[1]) && npcs[a[1]])) bad(`lights the seal of a keeper who stands here (${KEEPERS.join(", ")})`);
         else if (kind === "stone" && !(m.props ?? []).some((p) => p.asset === "seal_stone")) bad("this map has no seal_stone to wake");
         if (kind === "cam" && !(a.length === 1 ? actor(a[0]) : a.length === 2 && inMap(+a[0], +a[1]))) bad("looks at hero, an actor on this map or a tile on it");
         if (kind === "walk") {

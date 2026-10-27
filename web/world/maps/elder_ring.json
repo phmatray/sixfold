@@ -2055,12 +2055,12 @@
         {
           "if": "lost:bramble",
           "lines": [
-            "Ha, tangled up! Happens to everyone the first time.",
-            "Catch your breath and come try again."
+            "Tangled up this time. It happens to the best of us.",
+            "The seal stays right here, and the Deepgrove's duelists you've bested still count. Come back whenever you like."
           ],
           "lines_fr": [
-            "Ha, pris dans les ronces ! Ça arrive à tout le monde, la première fois.",
-            "Reprends ton souffle et reviens tenter ta chance."
+            "Emmêlé, cette fois. Ça arrive aux meilleurs.",
+            "Le sceau reste ici, et les duellistes du Bois-Profond que tu as battus comptent toujours. Reviens quand tu veux."
           ]
         },
         {
@@ -2250,6 +2250,43 @@
             "cam:hero",
             "flag:met_bramble",
             "duel:bramble"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "victory_bramble",
+      "if": "won:bramble & !flag:sealed_bramble",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_grove",
+            "cam:20:15",
+            "stone:wake",
+            "wait:600",
+            "sfx:seal",
+            "stone:seal:bramble",
+            "wait:1200",
+            "face:bramble:hero",
+            "cam:bramble"
+          ]
+        },
+        {
+          "say": "bramble",
+          "lines": [
+            "See that? The Grove's face took it. It'll stay lit as long as the hedges grow.",
+            "Off you go, then. Mind the thorns on the way out."
+          ],
+          "lines_fr": [
+            "Tu vois ? La face du Bosquet l'a pris. Elle restera allumée tant que les haies pousseront.",
+            "Allez, file. Attention aux épines en sortant."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:sealed_bramble"
           ]
         }
       ]

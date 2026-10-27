@@ -5004,10 +5004,12 @@
         {
           "if": "lost:cinza",
           "lines": [
-            "Too slow! The road's still warm, come race me again."
+            "You kept pace longer than most. Catch your breath.",
+            "The seal isn't going anywhere, and the Emberlands' duelists you've bested still count. Race me again when you're ready."
           ],
           "lines_fr": [
-            "Pas assez vite ! La route est encore chaude, reviens faire la course."
+            "Tu as tenu le rythme plus longtemps que la plupart. Reprends ton souffle.",
+            "Le sceau ne bouge pas d'ici, et les duellistes des Braisières que tu as battus comptent toujours. Reviens me défier quand tu veux."
           ]
         },
         {
@@ -5223,6 +5225,43 @@
             "cam:hero",
             "flag:met_cinza",
             "duel:cinza"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "victory_cinza",
+      "if": "won:cinza & !flag:sealed_cinza",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "music:duel_rival_ember",
+            "cam:19:11",
+            "stone:wake",
+            "wait:600",
+            "sfx:seal",
+            "stone:seal:cinza",
+            "wait:1200",
+            "face:cinza:hero",
+            "cam:cinza"
+          ]
+        },
+        {
+          "say": "cinza",
+          "lines": [
+            "Hear that? The Ember's face caught, like a kiln on the first cold morning.",
+            "Now run. Somebody has to keep that seal warm."
+          ],
+          "lines_fr": [
+            "Tu entends ? La face de la Braise a pris, comme un four le premier matin froid.",
+            "Maintenant, cours. Il faut bien quelqu'un pour garder ce sceau au chaud."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero",
+            "flag:sealed_cinza"
           ]
         }
       ]
