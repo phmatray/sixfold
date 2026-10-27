@@ -845,9 +845,21 @@
       "rot": 0
     },
     {
-      "asset": "tree",
+      "asset": "bush",
       "x": 0,
       "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "bush_dark",
+      "x": 0,
+      "z": 24,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 1,
+      "z": 24,
       "rot": 0
     },
     {

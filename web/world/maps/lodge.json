@@ -112,8 +112,8 @@
       "label": "Go outside",
       "label_fr": "Sortir",
       "spawn": {
-        "x": 48,
-        "z": 10,
+        "x": 42,
+        "z": 6,
         "facing": "s"
       }
     }
@@ -179,6 +179,80 @@
           ]
         }
       ]
+    },
+    {
+      "id": "fennel",
+      "name": "Fennel",
+      "model": "npc_wanderer",
+      "tint": "#a3d9a5",
+      "scale": 0.96,
+      "dialogue": [
+        {
+          "if": "beat:warden&flag:lens_returned",
+          "lines": [
+            "I saw a champion through my lens today! ...Oh, it was you. It still counts."
+          ],
+          "lines_fr": [
+            "J'ai repéré un champion à la longue-vue aujourd'hui ! …Ah, c'était toi. Ça compte quand même."
+          ]
+        },
+        {
+          "if": "flag:lens_returned",
+          "lines": [
+            "A grey heron! Right there! ...You missed it. It's fine, there'll be another.",
+            "Thanks again for the lens. Everything is so close now."
+          ],
+          "lines_fr": [
+            "Un héron cendré ! Juste là ! …Tu l'as raté. C'est rien, il en passera un autre.",
+            "Merci encore pour la longue-vue. Tout est si proche, maintenant."
+          ]
+        },
+        {
+          "if": "item:field_lens",
+          "lines": [
+            "Is that my field lens? Scratched cap, brass ring... it is!",
+            "You found it up at the quarry? I must have set it down watching the falcons.",
+            "Please, take this pack. I'd only lose it too."
+          ],
+          "lines_fr": [
+            "C'est ma longue-vue ? Capuchon rayé, bague en laiton… c'est elle !",
+            "Tu l'as trouvée à la carrière ? J'ai dû la poser en regardant les faucons.",
+            "Tiens, prends ce booster. Je finirais par le perdre aussi."
+          ],
+          "do": [
+            "flag:lens_returned",
+            "pack:grove"
+          ]
+        },
+        {
+          "if": "flag:talked_fennel",
+          "lines": [
+            "Still no lens. The last place I had it was the high ledge in Emberstep Quarry.",
+            "Up the quarry steps, and up again. Watch the edges."
+          ],
+          "lines_fr": [
+            "Toujours pas de longue-vue. Je l'avais encore sur la haute corniche de la Carrière de Pas-de-Braise.",
+            "Monte les marches de la carrière, puis monte encore. Attention au bord."
+          ]
+        },
+        {
+          "lines": [
+            "Shh... no, it's gone. A kingfisher, I think. Without my field lens it's all just blurs.",
+            "I lost it somewhere up at Emberstep Quarry, north of the meadow, watching the falcons on the high ledge.",
+            "If you're passing that way, keep an eye out? It glints."
+          ],
+          "lines_fr": [
+            "Chut… non, envolé. Un martin-pêcheur, je crois. Sans ma longue-vue, tout est flou.",
+            "Je l'ai perdue à la Carrière de Pas-de-Braise, au nord du pré, en guettant les faucons sur la haute corniche.",
+            "Si tu passes par là, tu ouvres l'œil ? Elle brille."
+          ]
+        }
+      ],
+      "idle": "Idle",
+      "x": 3,
+      "z": 2,
+      "facing": "s",
+      "if": "time:night"
     }
   ],
   "ground": {
