@@ -779,8 +779,7 @@
             "sfx:bell:4",
             "wait:250",
             "sfx:bell:5",
-            "wait:250",
-            "wait:500"
+            "wait:750"
           ]
         },
         {

@@ -4235,8 +4235,8 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   100% { outline: 4px solid transparent; outline-offset: -4px; }
 }
 /* The champion's duel (#154): a 400 ms hold, the slowest flight, and the ring
-   closes through the six seals' colours in the order they were won, easing from
-   one to the next (never a cut), before it settles in brass. */
+   closes through the six seals' colours (the .t-* swatches, in the campaign's
+   order), easing from one to the next (never a cut), before it settles in brass. */
 .duel[data-beat~="grand"] .prize.taking { animation-duration: calc(2200ms * var(--pace, 1)); }
 .duel[data-beat~="grand"] .mat { animation: seal-ring-grand calc(2200ms * var(--pace, 1)) var(--ease-out) both; }
 @keyframes seal-ring-grand {

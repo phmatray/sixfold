@@ -370,7 +370,7 @@ const SFX = {
     noise(d, t, 1.4, { type: "highpass", f: 7000, a: 0.4, peak: 0.04 });
   },
   // The sealed door (#154, a map's `sfx:bell:<n>`): the same bell, a face per seal.
-  bell: (d, t, n) => SFX.face(d, t, Math.min(n, 5)),
+  bell: (d, t, n) => SFX.face(d, t, n),
   win: (d, t) => {
     notes(d, t, [72, 76, 79], 0.12, { type: "triangle", peak: 0.15, dur: 0.3 });
     [72, 76, 79, 84].forEach((m) => tone(d, t + 0.38, hz(m), 1.4, { type: "triangle", peak: 0.09, lin: true, rel: 0.6 }));
