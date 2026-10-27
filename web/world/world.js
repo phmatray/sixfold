@@ -1,6 +1,7 @@
 // The overworld test: tile-grid maps (./maps/<name>.json) drawn with three.js.
-// `mount(host, controls, cb, start, edit)` builds it (at `start` = "map,x,z,facing"
-// when given; `edit`: a debug build with ?edit loads the map editor) and returns an
+// `mount(host, controls, cb, start, edit, debug)` builds it (at `start` = "map,x,z,facing"
+// when given; `edit`/`debug`: a debug build with ?edit loads the map editor, with ?debug
+// the level-design overlays, debug.js) and returns an
 // api for Leptos (stop, act, pause, setItems, setClock, preview, previewStop, portrait, meet, cue, busy, read, page).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
@@ -64,7 +65,7 @@ const PHASE_FADE = 20; // daylight.js cross-fades this many game minutes into a 
 // Sounds come from web/audio/audio.js (loaded with the wasm), when it is there.
 const sound = (name, n = 0) => globalThis.sixfoldAudio?.sfx(name, n);
 
-export function mount(el, controls, cb, start, edit = false) {
+export function mount(el, controls, cb, start, edit = false, debug = false) {
   const mq = matchMedia("(prefers-reduced-motion: reduce)");
   let reduced = mq.matches;
   const onMotion = (e) => ((reduced = e.matches), (U.uSway.value = reduced ? 0 : 1));
@@ -289,7 +290,7 @@ export function mount(el, controls, cb, start, edit = false) {
     }
     return null;
   };
-  let stopEditor = () => {}, editing = () => false; // the map editor (?edit), when loaded
+  let stopEditor = () => {}, editing = () => false, stopDebug = () => {}; // the map editor (?edit) and overlays (?debug), when loaded
   // A finger walks by tapping only when the player chose it in Options (web/src/store.rs):
   // otherwise a tap that misses the pad's buttons would send the hero across the map.
   const tapWalk = () => {
@@ -517,6 +518,7 @@ export function mount(el, controls, cb, start, edit = false) {
     await renderer.compileAsync(scene, camera).catch(() => {});
     if (map.title && !L.indoor) showBanner(map.title), cb("area", map.title, "");
     preload(map, () => alive);
+    bakeBusts(s);
   }
 
   // The sky behind the scene and the fog: one colour (fog fades into the sky).
@@ -550,6 +552,10 @@ export function mount(el, controls, cb, start, edit = false) {
           stopEditor = tool.stop;
           editing = tool.editing;
         });
+      if (debug)
+        import("./debug.js")
+          .then((m) => alive && (stopDebug = m.attach({ world: () => world, scene, camera, el }).stop))
+          .catch((e) => console.error("world: could not load the debug overlays", e));
     })
     .catch(fail);
 
@@ -792,28 +798,51 @@ export function mount(el, controls, cb, start, edit = false) {
     pv = null;
   }
 
-  // A speaker's bust for the dialogue box: their own rig in their own outfit and hair, in the pose
-  // they hold now, drawn once per map visit by a small offscreen renderer.
-  // The renderer is dropped on each new map, so the people it uploaded never pile up.
-  let bustR = null, busts = new Map(), bustsOf = null;
-  function portrait(id) {
-    const n = world?.npcs.find((p) => p.def.id === id);
-    if (!n?.obj) return "";
-    if (bustsOf !== world) {
-      // A new map: drop the last one's busts and the people uploaded to draw them.
-      bustR?.dispose(), bustR?.forceContextLoss();
-      (bustR = null), (busts = new Map()), (bustsOf = world);
+  // A speaker's bust for the dialogue box: their own rig in their own outfit and hair, drawn once
+  // per map visit by the world's own renderer into a small target (no second WebGL context), ahead
+  // of time at idle once the map is up, the people nearest the hero first. A talk that comes
+  // sooner shows a placeholder ("pending") and the bust follows (cb "bust", id, url).
+  const BUST = 256;
+  let bustRT = null, busts = new Map(), bustsOf = null, bustQ = [], bustWant = new Set(), baking = false;
+  const idle = (f) => (globalThis.requestIdleCallback ?? ((g) => setTimeout(g, 50)))(f, { timeout: 1500 });
+  const painted = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r))); // the next frame is on screen
+  function bustsReset() {
+    for (const u of busts.values()) URL.revokeObjectURL(u);
+    (busts = new Map()), (bustsOf = world), (bustQ = []), bustWant.clear();
+  }
+  // After a map loads: queue its people, nearest first, and bake them one per idle slot.
+  function bakeBusts(s) {
+    bustsReset();
+    const far = (n) => (n.hidden ? 1e9 : Math.hypot(n.x - s.x, n.z - s.z));
+    bustQ = world.npcs.filter((n) => n.obj).sort((a, b) => far(a) - far(b)).map((n) => n.def.id);
+    idle(bakeNext);
+  }
+  async function bakeNext() {
+    if (baking || !alive || warping || !bustQ.length || bustsOf !== world) return; // a warp's end queues the next map's
+    baking = true;
+    const w = world, id = bustQ.shift();
+    let url = "";
+    try {
+      url = await bake(w.npcs.find((p) => p.def.id === id));
+    } catch (e) {
+      console.warn("world: no bust for", id, e);
     }
-    if (busts.has(id)) return busts.get(id);
-    const S = 256;
-    bustR ??= new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-    bustR.setPixelRatio(1);
-    bustR.setSize(S, S, false);
+    baking = false;
+    if (!alive) return void (url && URL.revokeObjectURL(url));
+    if (bustsOf !== w) url && URL.revokeObjectURL(url); // baked for the map just left
+    else {
+      if (url) busts.set(id, url);
+      if (bustWant.delete(id) && url) cb("bust", id, url); // else the placeholder stays
+    }
+    if (bustQ.length) bustWant.size ? bakeNext() : idle(bakeNext); // a talk waiting: at once
+  }
+  async function bake(n) {
+    if (!n?.obj) return "";
     const s = new THREE.Scene();
     const key = new THREE.DirectionalLight("#fff4dc", 2.6), rim = new THREE.DirectionalLight("#cfe0ff", 1.8);
     key.position.set(-1.5, 2.5, 3);
     rim.position.set(2, 1.5, -2.5);
-    const o = cloneSkinned(n.obj);
+    const o = cloneSkinned(n.obj); // in the pose they hold then
     o.position.set(0, 0, 0);
     o.rotation.set(0, 0, 0); // facing +z, toward the camera
     s.add(new THREE.HemisphereLight("#ffffff", "#6a5a4a", 1.8), key, rim, o);
@@ -827,18 +856,60 @@ export function mount(el, controls, cb, start, edit = false) {
     const dir = new THREE.Vector3(0.42, 0.14, 1).normalize();
     cam.position.set(0, cy, 0).addScaledVector(dir, h / 2 / Math.tan(THREE.MathUtils.degToRad(11)));
     cam.lookAt(0, cy, 0);
-    bustR.render(s, cam);
-    const url = bustR.domElement.toDataURL("image/webp", 0.85);
-    busts.set(id, url);
-    return url;
+    // An sRGB target: the same colours a canvas showed. Shaders are built for it (the target
+    // set while they compile), in parallel where the browser can.
+    bustRT ??= new THREE.WebGLRenderTarget(BUST, BUST, { samples: 4, colorSpace: THREE.SRGBColorSpace });
+    renderer.setRenderTarget(bustRT);
+    const ready = renderer.compileAsync(s, cam);
+    renderer.setRenderTarget(null);
+    await ready;
+    await painted(); // a talk opened meanwhile shows first (software GL links shaders on first draw: slow)
+    if (warping || bustsOf !== world) return ""; // never in a warp: the next map's busts come after it
+    const sky = renderer.getClearColor(new THREE.Color()), skyA = renderer.getClearAlpha();
+    renderer.setRenderTarget(bustRT);
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear();
+    renderer.render(s, cam);
+    renderer.setRenderTarget(null);
+    renderer.setClearColor(sky, skyA);
+    o.traverse((m) => m.skeleton?.dispose()); // the clone's bone texture
+    const px = new Uint8Array(BUST * BUST * 4);
+    await renderer.readRenderTargetPixelsAsync(bustRT, 0, 0, BUST, BUST, px);
+    // GL rows run bottom-up and the edges come premultiplied: flipped and divided out for a 2D canvas.
+    const img = new ImageData(BUST, BUST), d = img.data, row = BUST * 4;
+    for (let y = 0; y < BUST; y++)
+      for (let i = 0, f = (BUST - 1 - y) * row, t = y * row; i < row; i += 4) {
+        const a = px[f + i + 3], k = a ? 255 / a : 0;
+        d[t + i] = px[f + i] * k;
+        d[t + i + 1] = px[f + i + 1] * k;
+        d[t + i + 2] = px[f + i + 2] * k;
+        d[t + i + 3] = a;
+      }
+    const cv = document.createElement("canvas");
+    cv.width = cv.height = BUST;
+    cv.getContext("2d").putImageData(img, 0, 0);
+    const blob = await new Promise((r) => cv.toBlob(r, "image/webp", 0.85));
+    return blob ? URL.createObjectURL(blob) : "";
+  }
+  // The face for a talk: the bust's URL, "pending" while it is baking, "" for no one on this map.
+  function portrait(id) {
+    const n = world?.npcs.find((p) => p.def.id === id);
+    if (!n?.obj) return "";
+    if (bustsOf !== world) bustsReset();
+    if (busts.has(id)) return busts.get(id);
+    bustQ = [id, ...bustQ.filter((q) => q !== id)];
+    bustWant.add(id);
+    painted().then(bakeNext); // the talk shows first
+    return "pending";
   }
 
   const stop = () => {
     alive = false;
     globalThis.sixfoldAudio?.ambience("");
-    bustR?.dispose();
-    bustR?.forceContextLoss();
+    bustsReset();
+    bustRT?.dispose();
     stopEditor();
+    stopDebug();
     previewStop();
     book.dispose();
     cancelAnimationFrame(raf);
