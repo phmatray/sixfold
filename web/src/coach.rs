@@ -94,7 +94,7 @@ pub fn Coach() -> impl IntoView {
         let sure = window()
             .confirm_with_message(tr(
                 "Skip the lesson? You can replay it from the title screen.",
-                "Passer la leçon ? Vous pourrez la rejouer depuis l'écran titre.",
+                "Passer la leçon\u{202f}? Vous pourrez la rejouer depuis l'écran titre.",
             ))
             .unwrap_or(true);
         if !sure {
@@ -190,13 +190,13 @@ pub fn Finish() -> impl IntoView {
             }
             _ => tr(
                 format!("Next rival: {}, {}.", r.name, r.place),
-                format!("Prochain rival : {}, {}.", r.name, r.place),
+                format!("Prochain rival\u{a0}: {}, {}.", r.name, r.place),
             ),
         };
         Some(view! {
             <div class="scrim end">
                 <div class="dialog result won coach-finish" role="dialog" aria-modal="true" aria-labelledby="result-title" aria-describedby="finish-sub">
-                    <h2 id="result-title">{tr("You win", "Victoire !")}</h2>
+                    <h2 id="result-title">{tr("You win", "Victoire\u{202f}!")}</h2>
                     <p class="dialog-sub" id="finish-sub">{l.hint} " " {l.why}</p>
                     <div class="reward" role="status">
                         <p><b>{gift}</b>

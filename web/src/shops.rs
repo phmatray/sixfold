@@ -152,7 +152,7 @@ pub fn Trader() -> impl IntoView {
         <div class="shop">
             <p class="dialog-sub">{tr(
                 "Six singles a day, one copy each, new stock at midnight. Perrin buys back what you can spare: never your last copy, nor what your decks use.",
-                "Six cartes par jour, un exemplaire de chaque, renouvelées à minuit. Perrin rachète ce dont vous pouvez vous passer : jamais votre dernier exemplaire, ni ce qu'utilisent vos decks.",
+                "Six cartes par jour, un exemplaire de chaque, renouvelées à minuit. Perrin rachète ce dont vous pouvez vous passer\u{a0}: jamais votre dernier exemplaire, ni ce qu'utilisent vos decks.",
             )}</p>
             <section aria-labelledby="stock-title">
                 <h3 id="stock-title">{tr("Today's stock", "En rayon aujourd'hui")}</h3>
@@ -168,7 +168,7 @@ pub fn Trader() -> impl IntoView {
                                 <span class="stock-meta" aria-hidden="true"><RarityMark rarity=def.rarity /><span>{move || match have() { 0 => tr("New", "Nouvelle").to_string(), n => format!("×{n}") }}</span></span>
                                 <button type="button" class="btn primary" aria-disabled=move || sold().to_string()
                                     aria-label=move || if sold() {
-                                        tr(format!("{}: sold out for today, {}", def.label(), owned(have())), format!("{} : épuisée pour aujourd'hui, {}", def.label(), owned(have())))
+                                        tr(format!("{}: sold out for today, {}", def.label(), owned(have())), format!("{}\u{a0}: épuisée pour aujourd'hui, {}", def.label(), owned(have())))
                                     } else {
                                         tr(format!("Buy {}, {}, {}, for {price} Facets", def.label(), rarity_label(def.rarity), owned(have())),
                                            format!("Acheter {}, {}, {}, pour {price} Facettes", def.label(), rarity_label(def.rarity), owned(have())))
@@ -192,16 +192,16 @@ pub fn Trader() -> impl IntoView {
                     <button type="button" class="btn" aria-disabled=move || (extras.get() == 0).to_string() on:click=sell_extras>
                         {move || match extras.get() {
                             0 => tr("No extras to sell", "Aucun surplus à vendre").to_string(),
-                            n => tr(format!("Sell extras: ⬡ {n}"), format!("Vendre le surplus : ⬡ {n}")),
+                            n => tr(format!("Sell extras: ⬡ {n}"), format!("Vendre le surplus\u{a0}: ⬡ {n}")),
                         }}
                     </button>
                 </div>
                 <p class="rival-meta">{tr(
                     "Sell extras sells every copy beyond four of a card: a deck never uses more.",
-                    "« Vendre le surplus » vend chaque exemplaire au-delà de quatre : un deck n'en utilise jamais plus.",
+                    "« Vendre le surplus » vend chaque exemplaire au-delà de quatre\u{a0}: un deck n'en utilise jamais plus.",
                 )}</p>
                 {move || sellable.with(Vec::is_empty).then(|| view! {
-                    <p class="empty-note">{tr("Nothing to spare yet: open packs or win duels, then come back.", "Rien à céder pour l'instant : ouvrez des boosters ou gagnez des duels, puis revenez.")}</p>
+                    <p class="empty-note">{tr("Nothing to spare yet: open packs or win duels, then come back.", "Rien à céder pour l'instant\u{a0}: ouvrez des boosters ou gagnez des duels, puis revenez.")}</p>
                 })}
                 <ul class="sell-list">
                     <For each=move || sellable.get() key=|id| id.0 let:id>
@@ -353,7 +353,7 @@ pub fn PackCounter() -> impl IntoView {
         <div class="shop">
             <p class="dialog-sub">{tr(
                 "Packs go to your wallet: open them from the title screen. More themes go on sale as you beat their rivals.",
-                "Les boosters vont dans votre portefeuille : ouvrez-les depuis l'écran titre. D'autres thèmes arrivent en rayon à mesure que vous battez leurs rivaux.",
+                "Les boosters vont dans votre portefeuille\u{a0}: ouvrez-les depuis l'écran titre. D'autres thèmes arrivent en rayon à mesure que vous battez leurs rivaux.",
             )}</p>
             <ul class="shelf pack-counter">
                 {BOOSTERS.iter().enumerate().map(|(i, b)| {
@@ -460,7 +460,7 @@ pub fn Doctor() -> impl IntoView {
                 card(s.into).label()
             ),
             format!(
-                "C'est fait : {} sort, {} entre. Voici le nouveau bilan.",
+                "C'est fait\u{a0}: {} sort, {} entre. Voici le nouveau bilan.",
                 card(s.out).label(),
                 card(s.into).label()
             ),
@@ -469,7 +469,7 @@ pub fn Doctor() -> impl IntoView {
     };
     view! {
         <div class="shop clinic">
-            <DeckPicker legend=tr("Which deck should Mags read?", "Quel deck Mags doit-elle lire ?") name="clinic" opts=opts choice=choice />
+            <DeckPicker legend=tr("Which deck should Mags read?", "Quel deck Mags doit-elle lire\u{202f}?") name="clinic" opts=opts choice=choice />
             <h3>{tr("Mags's reading", "Le bilan de Mags")}</h3>
             <ul class="advice">
                 {move || reading.get().into_iter().map(|a| {
@@ -534,7 +534,7 @@ pub fn Press() -> impl IntoView {
                     count(id)
                 ),
                 format!(
-                    "C'est imprimé : un {} de plus. Vous en avez {}.",
+                    "C'est imprimé\u{a0}: un {} de plus. Vous en avez {}.",
                     card(id).label(),
                     count(id)
                 ),
@@ -561,7 +561,7 @@ pub fn Press() -> impl IntoView {
         <div class="shop press">
             <p class="dialog-sub">{tr(
                 "Pick a card and Gus prints one more copy. Cheaper if you've owned one; Rares you have to pull from packs, unless you bring a voucher.",
-                "Choisissez une carte : Gus en imprime un exemplaire de plus. C'est moins cher si vous en avez déjà eu une ; les Rares, il faut les tirer des boosters, sauf si vous apportez un bon.",
+                "Choisissez une carte\u{a0}: Gus en imprime un exemplaire de plus. C'est moins cher si vous en avez déjà eu une\u{202f}; les Rares, il faut les tirer des boosters, sauf si vous apportez un bon.",
             )}</p>
             <label class="field press-search">
                 <span>{tr("Search", "Rechercher")}</span>
@@ -570,7 +570,7 @@ pub fn Press() -> impl IntoView {
             </label>
             // Folded away, so the cards come first on a phone.
             <details class="press-filters">
-                <summary class="btn ghost">{tr("Filters: colour, kind, rarity, owned", "Filtres : couleur, type, rareté, possédées")}</summary>
+                <summary class="btn ghost">{tr("Filters: colour, kind, rarity, owned", "Filtres\u{a0}: couleur, type, rareté, possédées")}</summary>
                 <FilterBar f=f show_own=true />
             </details>
             {move || shown.with(Vec::is_empty).then(|| view! {
@@ -598,8 +598,8 @@ pub fn Press() -> impl IntoView {
                         let can = Memo::new(move |_| price.get().is_some());
                         let line = move || match (price.get(), count(id)) {
                             (None, _) => tr("Rares must come out of a pack once before Gus can print them.", "Une Rare doit d'abord sortir d'un booster avant que Gus puisse l'imprimer.").to_string(),
-                            (Some(n), 0) => tr(format!("Never owned: ⬡ {n}."), format!("Jamais possédée : ⬡ {n}.")),
-                            (Some(n), have) => tr(format!("You have {have}: one more is ⬡ {n}."), format!("Vous en avez {have} : une de plus coûte ⬡ {n}.")),
+                            (Some(n), 0) => tr(format!("Never owned: ⬡ {n}."), format!("Jamais possédée\u{a0}: ⬡ {n}.")),
+                            (Some(n), have) => tr(format!("You have {have}: one more is ⬡ {n}."), format!("Vous en avez {have}\u{a0}: une de plus coûte ⬡ {n}.")),
                         };
                         let n = move || price.get().unwrap_or(0);
                         view! {

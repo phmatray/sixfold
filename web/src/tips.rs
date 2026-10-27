@@ -47,15 +47,15 @@ impl Tip {
         match self {
             Tip::FirstTurn => tr(
                 "The player who goes first can't attack on their first turn. Set up instead: Basics, energy, trainers.",
-                "Le premier joueur ne peut pas attaquer à son premier tour. Préparez-vous : Hexons de Base, énergie, Dresseurs.",
+                "Le premier joueur ne peut pas attaquer à son premier tour. Préparez-vous\u{a0}: Hexons de Base, énergie, Dresseurs.",
             ),
             Tip::Asleep => tr(
                 "An Asleep Hexon can't attack or retreat. Between turns its owner flips a coin: heads, it wakes up.",
-                "Un Hexon Endormi ne peut ni attaquer ni battre en retraite. Entre les tours, son joueur lance une pièce : face, il se réveille.",
+                "Un Hexon Endormi ne peut ni attaquer ni battre en retraite. Entre les tours, son joueur lance une pièce\u{a0}: face, il se réveille.",
             ),
             Tip::Confused => tr(
                 "A Confused Hexon flips a coin to attack: tails, the attack fails and it takes 20 damage. It stays Confused until it leaves the Active spot.",
-                "Un Hexon Confus lance une pièce pour attaquer : pile, l'attaque échoue et il subit 20 dégâts. Il reste Confus tant qu'il est Actif.",
+                "Un Hexon Confus lance une pièce pour attaquer\u{a0}: pile, l'attaque échoue et il subit 20 dégâts. Il reste Confus tant qu'il est Actif.",
             ),
             Tip::Paralyzed => tr(
                 "A Paralyzed Hexon can't attack or retreat. It recovers at the end of its owner's next turn.",
@@ -71,11 +71,11 @@ impl Tip {
             ),
             Tip::Power => tr(
                 "A Power is a Hexon's ability, used without attacking: it doesn't end your turn. An Asleep, Confused or Paralyzed Active can't use it.",
-                "Un Pouvoir est une capacité du Hexon, utilisée sans attaquer : elle ne finit pas le tour. Un Actif Endormi, Confus ou Paralysé ne peut pas s'en servir.",
+                "Un Pouvoir est une capacité du Hexon, utilisée sans attaquer\u{a0}: elle ne finit pas le tour. Un Actif Endormi, Confus ou Paralysé ne peut pas s'en servir.",
             ),
             Tip::SuddenDeath => tr(
                 "Both players won at once. A new setup starts with 1 prize each: the first to take it wins.",
-                "Les deux joueurs gagnent en même temps. Une nouvelle partie commence avec 1 Récompense chacun : le premier qui la prend gagne.",
+                "Les deux joueurs gagnent en même temps. Une nouvelle partie commence avec 1 Récompense chacun\u{a0}: le premier qui la prend gagne.",
             ),
         }
     }

@@ -148,8 +148,8 @@
             "And the counter has Tide packs and a Gulfwyrm I keep for whoever can afford her."
           ],
           "lines_fr": [
-            "Mm-hm-hm… oh ! Quelqu'un. Assieds-toi, assieds-toi. La chaudrée d'abord, les questions après.",
-            "Les lits sont au fond, et le repos est gratuit. Aube, jour, crépuscule ou nuit : la marée s'en moque, alors pourquoi pas toi ?",
+            "Mm-hm-hm… oh ! Quelqu'un. Assieds-toi, assieds-toi. La chaudrée d'abord, les questions après.",
+            "Les lits sont au fond, et le repos est gratuit. Aube, jour, crépuscule ou nuit : la marée s'en moque, alors pourquoi pas toi ?",
             "Et au comptoir, des boosters Marée et une Golfeguivre que je garde pour qui pourra se l'offrir."
           ],
           "do": [
@@ -164,7 +164,7 @@
           ],
           "lines_fr": [
             "Les bateaux sont rentrés, les lampes allumées. Brann est sur le ponton à faire semblant de pêcher.",
-            "Un lit ?"
+            "Un lit ?"
           ],
           "do": [
             "show:inn"
@@ -177,7 +177,7 @@
           ],
           "lines_fr": [
             "Mm-hm-hm. C'est l'air de la marée. Elle part, elle revient, elle ne rate jamais.",
-            "Tu te reposes un peu ?"
+            "Tu te reposes un peu ?"
           ],
           "do": [
             "show:inn"

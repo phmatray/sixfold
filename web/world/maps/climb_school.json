@@ -85,7 +85,7 @@
       "z": 1,
       "kind": "sign",
       "text": "A training wall, bolted with holds painted every colour. The chalked arrows show routes, each with a name: \"The Slab\", \"Garth's Patience\", \"Three Points\".",
-      "text_fr": "Un mur d'entraînement, garni de prises peintes de toutes les couleurs. Les flèches à la craie montrent des voies, chacune avec un nom : « La Dalle », « La Patience de Garth », « Trois Appuis »."
+      "text_fr": "Un mur d'entraînement, garni de prises peintes de toutes les couleurs. Les flèches à la craie montrent des voies, chacune avec un nom : « La Dalle », « La Patience de Garth », « Trois Appuis »."
     }
   ],
   "warps": [
@@ -120,20 +120,20 @@
           "Gloves? You earn gloves. Beat me, beat Garth, and they're yours. Two prizes. Chalk up!"
         ],
         "challenge_fr": [
-          "Trois appuis ! Toujours trois appuis. Deux mains, un pied. Ou une main, deux pieds.",
-          "Des gants ? Les gants, ça se mérite. Bats-moi, bats Garth, et ils sont à toi. Deux cartes Récompense. Mets de la magnésie !"
+          "Trois appuis ! Toujours trois appuis. Deux mains, un pied. Ou une main, deux pieds.",
+          "Des gants ? Les gants, ça se mérite. Bats-moi, bats Garth, et ils sont à toi. Deux cartes Récompense. Mets de la magnésie !"
         ],
         "win": [
           "Ooh, a clean send! Three points of contact the whole way."
         ],
         "win_fr": [
-          "Oh, une voie propre ! Trois appuis tout du long."
+          "Oh, une voie propre ! Trois appuis tout du long."
         ],
         "lose": [
           "You came off the wall! It happens. Chalk up and go again!"
         ],
         "lose_fr": [
-          "Tu es tombé du mur ! Ça arrive. Remets de la magnésie et recommence !"
+          "Tu es tombé du mur ! Ça arrive. Remets de la magnésie et recommence !"
         ],
         "after": [
           "Three points of contact. I say it in my sleep. My husband says I say it in my sleep."
@@ -153,9 +153,9 @@
             "Three points of contact!"
           ],
           "lines_fr": [
-            "Tu nous as battus tous les deux ! Alors ils sont à toi : les Gants d'escalade, paumes à la magnésie, bouts cousus.",
-            "Les parois à prises, les corniches, les vieux barreaux de fer : à toi de monter. La falaise du Cercle des Anciens, sous le Bastion. La cabane du frein, près du chevalement. Même l'Aiguille-Foudre, à l'est, et les niches de la carrière autour de Mèche-Cendre.",
-            "Trois appuis !"
+            "Tu nous as battus tous les deux ! Alors ils sont à toi : les Gants d'escalade, paumes à la magnésie, bouts cousus.",
+            "Les parois à prises, les corniches, les vieux barreaux de fer : à toi de monter. La falaise du Cercle des Anciens, sous le Bastion. La cabane du frein, près du chevalement. Même l'Aiguille-Foudre, à l'est, et les niches de la carrière autour de Mèche-Cendre.",
+            "Trois appuis !"
           ],
           "do": [
             "give:grip_gloves",
@@ -168,7 +168,7 @@
             "Now Garth! He's slow, but he never lets go."
           ],
           "lines_fr": [
-            "Maintenant, Garth ! Il est lent, mais il ne lâche jamais."
+            "Maintenant, Garth ! Il est lent, mais il ne lâche jamais."
           ]
         }
       ]

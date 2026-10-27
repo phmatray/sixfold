@@ -215,7 +215,7 @@ fn open(n: usize) -> Option<String> {
         let what = match from {
             Source::Prev => tr(
                 "The copy kept before your last change was loaded instead; what changed since is lost.",
-                "La copie gardée avant votre dernière modification a été chargée à la place ; ce qui a changé depuis est perdu.",
+                "La copie gardée avant votre dernière modification a été chargée à la place\u{202f}; ce qui a changé depuis est perdu.",
             ),
             _ => tr(
                 "It starts again as a new game, and the unreadable copy is kept in this browser.",

@@ -1216,21 +1216,21 @@
     {
       "kind": "sign",
       "text": "North: the Thrumming Downs, and Cinderwick beyond. South: the harbour.",
-      "text_fr": "Nord : Les Landes Vibrantes, et Mèche-Cendre au-delà. Sud : le port.",
+      "text_fr": "Nord : Les Landes Vibrantes, et Mèche-Cendre au-delà. Sud : le port.",
       "x": 27,
       "z": 3
     },
     {
       "kind": "sign",
       "text": "East: The Rodspire, along the causeway. Mind the waves, and the lightning.",
-      "text_fr": "Est : L'Aiguille-Foudre, par la chaussée. Attention aux vagues, et à la foudre.",
+      "text_fr": "Est : L'Aiguille-Foudre, par la chaussée. Attention aux vagues, et à la foudre.",
       "x": 47,
       "z": 14
     },
     {
       "kind": "sign",
       "text": "Stormwatch square. North: the Downs road. East: the causeway to The Rodspire. South: the harbour and the ferry. West: the lanes and the Weathervane.",
-      "text_fr": "Place de Guette-Orage. Nord : la route des Landes. Est : la chaussée de L'Aiguille-Foudre. Sud : le port et le bac. Ouest : les ruelles et la Girouette.",
+      "text_fr": "Place de Guette-Orage. Nord : la route des Landes. Est : la chaussée de L'Aiguille-Foudre. Sud : le port et le bac. Ouest : les ruelles et la Girouette.",
       "x": 22,
       "z": 12
     },
@@ -1255,7 +1255,7 @@
       "give": "card:jolt_wire",
       "hidden": true,
       "text": "Under the rosemary, in the corner the wind never reaches: a card in an oilcloth wrap.",
-      "text_fr": "Sous le romarin, dans le coin que le vent n'atteint jamais : une carte dans un emballage de toile cirée."
+      "text_fr": "Sous le romarin, dans le coin que le vent n'atteint jamais : une carte dans un emballage de toile cirée."
     },
     {
       "kind": "find",
@@ -1264,14 +1264,14 @@
       "z": 28,
       "give": "coins:60",
       "text": "In the bottom of a crab pot, under the weed: Facets. Somebody's emergency fund, or a crab's.",
-      "text_fr": "Au fond d'un casier à crabes, sous les algues : des Facettes. La réserve de quelqu'un, ou celle d'un crabe."
+      "text_fr": "Au fond d'un casier à crabes, sous les algues : des Facettes. La réserve de quelqu'un, ou celle d'un crabe."
     },
     {
       "kind": "find",
       "id": "st_struck",
       "give": "coins:40",
       "text": "In the split of the pine the lightning opened, fused into the bark: a few Facets, still faintly warm.",
-      "text_fr": "Dans la fente du pin que la foudre a ouvert, soudées à l'écorce : quelques Facettes, encore un peu tièdes.",
+      "text_fr": "Dans la fente du pin que la foudre a ouvert, soudées à l'écorce : quelques Facettes, encore un peu tièdes.",
       "x": 42,
       "z": 26
     }
@@ -1355,7 +1355,7 @@
             "Forty-one lamps in Stormwatch, and the wind blows out forty. I've made my peace with it."
           ],
           "lines_fr": [
-            "Bonsoir ! Les lampes d'abord, la soupe après.",
+            "Bonsoir ! Les lampes d'abord, la soupe après.",
             "Quarante et une lampes à Guette-Orage, et le vent en souffle quarante. J'ai fait la paix avec ça."
           ]
         }
@@ -1376,14 +1376,14 @@
           "My house rule: at most sixteen energy cards. Three prizes. Lightweight, not lightly."
         ],
         "challenge_fr": [
-          "De l'énergie ? J'en porte le moins possible. Seize cartes, pas plus. Et toi ?",
-          "Ma règle maison : seize cartes Énergie au plus. Trois cartes Récompense. Poids plume, pas à la légère."
+          "De l'énergie ? J'en porte le moins possible. Seize cartes, pas plus. Et toi ?",
+          "Ma règle maison : seize cartes Énergie au plus. Trois cartes Récompense. Poids plume, pas à la légère."
         ],
         "lose": [
           "Too heavy! Shed some energy and come back."
         ],
         "lose_fr": [
-          "Trop lourd ! Allège ton énergie et reviens."
+          "Trop lourd ! Allège ton énergie et reviens."
         ],
         "after": [
           "Fewer cards, faster hands. That's the whole secret."
@@ -1416,7 +1416,7 @@
             "Light, and still too much for you. Hm. No: you were lighter."
           ],
           "lines_fr": [
-            "Léger, et encore trop pour toi. Hum. Non : c'est toi qui étais plus léger."
+            "Léger, et encore trop pour toi. Hum. Non : c'est toi qui étais plus léger."
           ]
         }
       ]
@@ -1440,7 +1440,7 @@
             "Oh. I wasn't supposed to say that. Forget I said that."
           ],
           "lines_fr": [
-            "Moi, c'est Pim ! L'apprenti de Quill. Enfin, le teneur de journal. Elle est là-haut sur l'Aiguille-Foudre, près de la pierre de sceau, en ce moment.",
+            "Moi, c'est Pim ! L'apprenti de Quill. Enfin, le teneur de journal. Elle est là-haut sur l'Aiguille-Foudre, près de la pierre de sceau, en ce moment.",
             "Elle dit que l'Aiguille-Foudre, c'est la meilleure place de la côte. Et que tout le monde oublie de surveiller son Banc.",
             "Oh. Je n'étais pas censé dire ça. Oublie que j'ai dit ça."
           ]
@@ -1465,7 +1465,7 @@
             "Rhian buys half my catch for the Weathervane's stew. The other half, Bo eats while pretending to count it."
           ],
           "lines_fr": [
-            "Maquereau ! Crabe ! Un truc avec trop de pattes, demande-moi plus tard !",
+            "Maquereau ! Crabe ! Un truc avec trop de pattes, demande-moi plus tard !",
             "Rhian m'achète la moitié de ma pêche pour le ragoût de la Girouette. L'autre moitié, Bo la mange en faisant semblant de la compter."
           ]
         }
@@ -1488,7 +1488,7 @@
             "Pass: stamped. Twice. Ines. Wind: fair. Gullhaven: aboard."
           ],
           "lines_fr": [
-            "Laissez-passer : tamponné. Deux fois. Ines. Vent : favorable. Havre-aux-Mouettes : embarque."
+            "Laissez-passer : tamponné. Deux fois. Ines. Vent : favorable. Havre-aux-Mouettes : embarque."
           ],
           "do": [
             "warp:gullhaven:31:25:n"
@@ -1503,7 +1503,7 @@
           ],
           "lines_fr": [
             "Pardon, trop de sel dans la bouche. Je le redis lentement.",
-            "Le bac va jusqu'à Havre-aux-Mouettes, sur la Côte Salée. La Capitainerie de là-bas tamponne les laissez-passer, maintenant : deux cent cinquante Facettes, et Ines Varga tamponne deux fois.",
+            "Le bac va jusqu'à Havre-aux-Mouettes, sur la Côte Salée. La Capitainerie de là-bas tamponne les laissez-passer, maintenant : deux cent cinquante Facettes, et Ines Varga tamponne deux fois.",
             "Vas-y par la côte, par le pré et la Promenade de Ventsalé. Reviens avec un laissez-passer et on traversera avant midi. Lou tient l'autre rive."
           ]
         },
@@ -1512,7 +1512,7 @@
             "Ferry: ready. Pass: none. Office: Gullhaven. Price: two-fifty. Lou: far side. Wind: sou'west, freshening."
           ],
           "lines_fr": [
-            "Bac : paré. Laissez-passer : aucun. Bureau : Havre-aux-Mouettes. Prix : deux cent cinquante. Lou : en face. Vent : suroît, fraîchissant."
+            "Bac : paré. Laissez-passer : aucun. Bureau : Havre-aux-Mouettes. Prix : deux cent cinquante. Lou : en face. Vent : suroît, fraîchissant."
           ],
           "do": [
             "flag:bo_asked"
@@ -1564,7 +1564,7 @@
             "Scared of a blank deck? I'll wait. I'm good at waiting."
           ],
           "lines_fr": [
-            "Peur d'un deck tout blanc ? J'attendrai. Je sais attendre."
+            "Peur d'un deck tout blanc ? J'attendrai. Je sais attendre."
           ],
           "do": [
             "duel:rook_2"
@@ -1689,8 +1689,8 @@
             "I've been mapping them. Every top face is blank. Every single one."
           ],
           "lines_fr": [
-            "Encore toi. Déjà trois sceaux ? Tu ne traînes pas.",
-            "Tu vois l'Aiguille-Foudre, au bout de la route ? Il y a une pierre là-haut, comme les autres.",
+            "Encore toi. Déjà trois sceaux ? Tu ne traînes pas.",
+            "Tu vois l'Aiguille-Foudre, au bout de la route ? Il y a une pierre là-haut, comme les autres.",
             "Six pierres. Six faces chacune. Et une que personne ne grave.",
             "Je les ai toutes relevées. La face du dessus est blanche. Partout."
           ]

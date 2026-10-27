@@ -2384,14 +2384,14 @@
     {
       "kind": "sign",
       "text": "Emberstep Quarry. South: back to Sixfold Meadow. North, through the cutting: Cinderwick.",
-      "text_fr": "Carrière de Pas-de-Braise. Sud : retour au Pré de Sixfold. Au nord, par la tranchée : Mèche-Cendre.",
+      "text_fr": "Carrière de Pas-de-Braise. Sud : retour au Pré de Sixfold. Au nord, par la tranchée : Mèche-Cendre.",
       "x": 16,
       "z": 39
     },
     {
       "kind": "sign",
       "text": "North: Cinderwick, the glassblowers' town. South: Emberstep Quarry and Sixfold Meadow.",
-      "text_fr": "Nord : Mèche-Cendre, la ville des souffleurs de verre. Sud : Carrière de Pas-de-Braise et le Pré de Sixfold.",
+      "text_fr": "Nord : Mèche-Cendre, la ville des souffleurs de verre. Sud : Carrière de Pas-de-Braise et le Pré de Sixfold.",
       "x": 17,
       "z": 4
     },
@@ -2402,7 +2402,7 @@
       "z": 16,
       "give": "pack:ember",
       "text": "Hung on the lantern's hook, out of the dust: a booster, still sealed.",
-      "text_fr": "Accroché au crochet de la lanterne, à l'abri de la poussière : un booster encore scellé."
+      "text_fr": "Accroché au crochet de la lanterne, à l'abri de la poussière : un booster encore scellé."
     },
     {
       "kind": "find",
@@ -2412,7 +2412,7 @@
       "hidden": true,
       "give": "card:ash_sifter",
       "text": "In the stacked crates, packed in straw like something fragile: a card.",
-      "text_fr": "Dans les caisses empilées, calée dans la paille comme un objet fragile : une carte."
+      "text_fr": "Dans les caisses empilées, calée dans la paille comme un objet fragile : une carte."
     },
     {
       "x": 21,
@@ -2448,7 +2448,7 @@
             "Clio wanted three of these."
           ],
           "lines_fr": [
-            "Un éclat de verre vert, épais comme un pouce, à moitié enterré près des caisses : du calcin, tombé d'une charrette de Mèche-Cendre.",
+            "Un éclat de verre vert, épais comme un pouce, à moitié enterré près des caisses : du calcin, tombé d'une charrette de Mèche-Cendre.",
             "Clio en voulait trois."
           ],
           "do": [
@@ -2483,14 +2483,14 @@
       "hidden": true,
       "give": "coins:35",
       "text": "Under a loose stone on the quarry floor: Facets, warm from the sun.",
-      "text_fr": "Sous une pierre branlante, au fond de la carrière : des Facettes, tièdes de soleil."
+      "text_fr": "Sous une pierre branlante, au fond de la carrière : des Facettes, tièdes de soleil."
     },
     {
       "kind": "find",
       "id": "q_cart",
       "give": "coins:40",
       "text": "In the bed of the buried cart, under the gravel: the last hauler's wages, never collected.",
-      "text_fr": "Dans la benne du wagonnet enseveli, sous le gravier : la paie du dernier haleur, jamais réclamée.",
+      "text_fr": "Dans la benne du wagonnet enseveli, sous le gravier : la paie du dernier haleur, jamais réclamée.",
       "x": 8,
       "z": 32
     },
@@ -2502,7 +2502,7 @@
       "hidden": true,
       "give": "card:spike_charm",
       "text": "Tucked behind the rocks on the first ledge, where the wind can't reach: a card.",
-      "text_fr": "Glissée derrière les rochers de la première corniche, là où le vent ne passe pas : une carte."
+      "text_fr": "Glissée derrière les rochers de la première corniche, là où le vent ne passe pas : une carte."
     },
     {
       "x": 2,
@@ -2544,7 +2544,7 @@
       "z": 19,
       "give": "give:curio_fossil_fern",
       "text": "A slab split off the ledge, and inside it, pressed flat in the stone: a fern.",
-      "text_fr": "Une dalle s'est détachée de la corniche, et dedans, pressée à plat dans la pierre : une fougère."
+      "text_fr": "Une dalle s'est détachée de la corniche, et dedans, pressée à plat dans la pierre : une fougère."
     },
     {
       "kind": "find",
@@ -2553,7 +2553,7 @@
       "z": 3,
       "give": "coins:80",
       "text": "In the nook, wedged behind a basalt block where no one without a grip could reach: a pouch of Facets.",
-      "text_fr": "Dans la niche, coincée derrière un bloc de basalte que personne ne pourrait atteindre sans prise : une bourse de Facettes."
+      "text_fr": "Dans la niche, coincée derrière un bloc de basalte que personne ne pourrait atteindre sans prise : une bourse de Facettes."
     },
     {
       "kind": "find",
@@ -2562,7 +2562,7 @@
       "z": 16,
       "give": "coins:80",
       "text": "Between the pine's roots, at the very top of the quarry: a heap of Facets someone climbed a long way to hide.",
-      "text_fr": "Entre les racines du pin, tout en haut de la carrière : un tas de Facettes : quelqu'un a grimpé bien haut pour les cacher."
+      "text_fr": "Entre les racines du pin, tout en haut de la carrière : un tas de Facettes : quelqu'un a grimpé bien haut pour les cacher."
     }
   ],
   "warps": [
@@ -2748,7 +2748,7 @@
           "Duel first, questions after. Mostly about bread."
         ],
         "challenge_fr": [
-          "Hé, toi ! Tu m'aides à tester le four ? Il est chaud, j'ai chaud, et mes Fournaidos sont brûlants.",
+          "Hé, toi ! Tu m'aides à tester le four ? Il est chaud, j'ai chaud, et mes Fournaidos sont brûlants.",
           "Le duel d'abord, les questions après. Surtout sur le pain."
         ],
         "win": [
@@ -2756,7 +2756,7 @@
           "Here's your purse. It smells of smoke, sorry."
         ],
         "win_fr": [
-          "Ha ! Carbonisé. Moi, je veux dire.",
+          "Ha ! Carbonisé. Moi, je veux dire.",
           "Voilà ta bourse. Elle sent la fumée, désolé."
         ],
         "lose": [
@@ -2764,7 +2764,7 @@
           "Cool off and come back."
         ],
         "lose_fr": [
-          "Sorti du feu, direct dans la cendre ! C'est ce qu'on dit, ici.",
+          "Sorti du feu, direct dans la cendre ! C'est ce qu'on dit, ici.",
           "Va te rafraîchir et reviens."
         ],
         "after": [
@@ -2786,7 +2786,7 @@
             "Here, the finest grey in the quarry. Tell him we're square about the goat."
           ],
           "lines_fr": [
-            "De la cendre pour Hob ? Pour un pain en croûte de cendre ? Il se lance enfin !",
+            "De la cendre pour Hob ? Pour un pain en croûte de cendre ? Il se lance enfin !",
             "Tiens, la plus belle cendre grise de la carrière. Dis-lui qu'on est quittes pour la chèvre."
           ]
         }
@@ -2810,7 +2810,7 @@
           "My Cinderhorns believe me. Three prizes, and you will too."
         ],
         "challenge_fr": [
-          "Tu vois cette perle ? Du verre fondu. Toute la carrière était un volcan, autrefois. Personne ne me croit.",
+          "Tu vois cette perle ? Du verre fondu. Toute la carrière était un volcan, autrefois. Personne ne me croit.",
           "Mes Braisecorne, eux, me croient. Trois cartes Récompense, et tu me croiras aussi."
         ],
         "win": [
@@ -2825,7 +2825,7 @@
           "Molten! You'll cool down. Then you'll believe me."
         ],
         "lose_fr": [
-          "En fusion ! Tu vas refroidir. Et là, tu me croiras."
+          "En fusion ! Tu vas refroidir. Et là, tu me croiras."
         ],
         "after": [
           "Put your hand on the rock under the top ledge. Warm. I told you. Volcano."

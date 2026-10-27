@@ -121,6 +121,61 @@ impl Rival {
         self.open(p) && self.earned(p)
     }
 
+    /// Their region's duelists still to best before they accept (0 once earned).
+    pub fn to_best(&self, p: &Progress) -> usize {
+        if self.earned(p) {
+            0
+        } else {
+            self.earn.saturating_sub(self.bested(p))
+        }
+    }
+
+    /// The roster's count while the duel is still to earn, naming the region:
+    /// "Saltreach duelists bested: 2 of 3".
+    pub fn bested_line(&self, p: &Progress) -> String {
+        let (n, of) = (self.bested(p), self.earn);
+        let region = self.region.en.trim_start_matches("the ");
+        crate::tr(
+            format!("{region} duelists bested: {n}\u{a0}of\u{a0}{of}"),
+            format!(
+                "Duellistes {} battus\u{a0}: {n}\u{a0}sur\u{a0}{of}",
+                self.region_de()
+            ),
+        )
+    }
+
+    /// The maps that still hold a duelist of their region not yet beaten,
+    /// none once earned.
+    pub fn waiting(&self, p: &Progress) -> Vec<&'static Ground> {
+        if self.earned(p) {
+            return vec![];
+        }
+        GROUNDS
+            .iter()
+            .filter(|g| {
+                g.duelists
+                    .iter()
+                    .any(|id| self.duelists.contains(id) && !p.has_flag(&format!("beat_{id}")))
+            })
+            .collect()
+    }
+
+    /// Where the duelists still to best are, as a sentence: "Some still wait
+    /// on the Bellflats and in Gullhaven." None once earned.
+    pub fn waiting_line(&self, p: &Progress) -> Option<String> {
+        let at: Vec<&str> = self.waiting(p).iter().map(|g| g.at.get()).collect();
+        let (last, rest) = at.split_last()?;
+        let list = if rest.is_empty() {
+            last.to_string()
+        } else {
+            format!("{} {} {last}", rest.join(", "), crate::tr("and", "et"))
+        };
+        Some(crate::tr(
+            format!("Some still wait {list}."),
+            format!("Il en reste {list}."),
+        ))
+    }
+
     /// The region after French "de": "de la Côte Salée", "du Bois-Profond",
     /// "des Braisières".
     pub fn region_de(&self) -> String {
@@ -174,6 +229,41 @@ pub struct Reward {
     /// Facets earned.
     pub facets: u32,
 }
+
+/// A map that holds route duelists of a keeper's region, and where that is,
+/// as a sentence says it ("on the Bellflats", "sur les Grèves de la
+/// Cloche"). `engine/tests/world_data.rs` holds it to the maps and their titles.
+#[derive(Debug)]
+pub struct Ground {
+    pub map: &'static str,
+    pub at: T,
+    pub duelists: &'static [&'static str],
+}
+
+/// Every map with a keeper's region's duelists, region by region.
+#[rustfmt::skip]
+pub static GROUNDS: [Ground; 20] = [
+    Ground { map: "elder_ring", at: T::new("in the Elder Ring", "au Cercle des Anciens"), duelists: &["t_fenna", "t_heath", "t_rue"] },
+    Ground { map: "rootholm", at: T::new("in Rootholm", "à Racinemont"), duelists: &["t_jory", "t_linden"] },
+    Ground { map: "woodland", at: T::new("on Fernhollow Trail", "sur le Sentier de Creuse-Fougère"), duelists: &["t_bryn", "t_hazel", "t_ossian", "t_sorrel", "t_vesper"] },
+    Ground { map: "bellflats", at: T::new("on the Bellflats", "sur les Grèves de la Cloche"), duelists: &["t_finch", "t_harrow", "t_mirela", "t_liesl"] },
+    Ground { map: "gullhaven", at: T::new("in Gullhaven", "à Havre-aux-Mouettes"), duelists: &["t_dorrit", "t_brann"] },
+    Ground { map: "seaside", at: T::new("on the Saltwind Boardwalk", "sur la Promenade de Ventsalé"), duelists: &["t_pell", "t_nell", "t_skye", "t_morrow"] },
+    Ground { map: "cinderwick", at: T::new("in Cinderwick", "à Mèche-Cendre"), duelists: &["t_basil", "t_tavish"] },
+    Ground { map: "kilnmouth", at: T::new("in the Kilnmouth", "dans la Gueule-du-Four"), duelists: &["t_carys", "t_dunstan", "t_vela"] },
+    Ground { map: "quarry", at: T::new("in Emberstep Quarry", "à la Carrière de Pas-de-Braise"), duelists: &["t_tamsin", "t_rusk", "t_cole", "t_marigold"] },
+    Ground { map: "downs", at: T::new("on the Thrumming Downs", "sur les Landes Vibrantes"), duelists: &["t_odo", "t_hew", "t_maren", "t_tull"] },
+    Ground { map: "rodspire", at: T::new("on the Rodspire", "sur l'Aiguille-Foudre"), duelists: &["t_corra", "t_ves"] },
+    Ground { map: "stormwatch", at: T::new("in Stormwatch", "à Guette-Orage"), duelists: &["t_greer"] },
+    Ground { map: "anvilstead", at: T::new("in Anvilstead", "à Bourg-l'Enclume"), duelists: &["t_dov"] },
+    Ground { map: "climb_school", at: T::new("at the Anvilstead climbing school", "à l'école d'escalade de Bourg-l'Enclume"), duelists: &["t_ida", "t_garth"] },
+    Ground { map: "bastion", at: T::new("at the Bastion", "au Bastion"), duelists: &["t_petra", "t_morwen"] },
+    Ground { map: "screepass", at: T::new("in Scree Pass", "au Col des Éboulis"), duelists: &["t_mica", "t_ulric"] },
+    Ground { map: "undermine", at: T::new("in the Undermine", "dans les Galeries Basses"), duelists: &["t_jet"] },
+    Ground { map: "hushlane", at: T::new("on Hushwillow Lane", "dans l'Allée des Saules-Murmures"), duelists: &["t_iver", "t_luce"] },
+    Ground { map: "lanternmere", at: T::new("in Lanternmere", "à Lac-aux-Lanternes"), duelists: &["t_yara", "t_ambrose", "t_clem"] },
+    Ground { map: "moonwell", at: T::new("in the Moonwell Garden", "au Jardin du Puits-de-Lune"), duelists: &["t_maud", "t_noor"] },
+];
 
 /// Rival by id.
 pub fn rival(id: &str) -> Option<&'static Rival> {
@@ -589,11 +679,11 @@ pub static RIVALS: [Rival; 7] = [
         packs: 2,
         style: Style::Aggressive,
         lines: RivalLines {
-            intro: T::new("No warm-up, no waiting. The kiln's already hot!", "Pas d'échauffement, pas d'attente. Le four est déjà chaud !"),
-            first_ko: T::new("Ha! Out of the fire and straight into the ash!", "Ha ! Sorti du feu, direct dans la cendre !"),
-            ropes: T::new("Okay, okay, I'm stoking, I'm stoking!", "D'accord, d'accord, je rallume, je rallume !"),
-            defeat: T::new("Burnt out. Rematch the second I've cooled down. So, now?", "Grillée. Revanche dès que j'ai refroidi. Donc, maintenant ?"),
-            refuse: T::new("Whoa, cold start! Warm up on the Emberlands' duelists first. I don't race beginners.", "Hé, démarrage à froid ! Échauffe-toi d'abord contre les duellistes des Braisières. Je ne fais pas la course avec les débutants."),
+            intro: T::new("No warm-up, no waiting. The kiln's already hot!", "Pas d'échauffement, pas d'attente. Le four est déjà chaud\u{202f}!"),
+            first_ko: T::new("Ha! Out of the fire and straight into the ash!", "Ha\u{202f}! Sorti du feu, direct dans la cendre\u{202f}!"),
+            ropes: T::new("Okay, okay, I'm stoking, I'm stoking!", "D'accord, d'accord, je rallume, je rallume\u{202f}!"),
+            defeat: T::new("Burnt out. Rematch the second I've cooled down. So, now?", "Grillée. Revanche dès que j'ai refroidi. Donc, maintenant\u{202f}?"),
+            refuse: T::new("Whoa, cold start! Warm up on the Emberlands' duelists first. I don't race beginners.", "Hé, démarrage à froid\u{202f}! Échauffe-toi d'abord contre les duellistes des Braisières. Je ne fais pas la course avec les débutants."),
         },
     },
     Rival {
@@ -621,7 +711,7 @@ pub static RIVALS: [Rival; 7] = [
             intro: T::new("Barometer's falling. Expect scattered strikes, mostly on your bench.", "Le baromètre chute. Prévois des éclairs épars, surtout sur ton Banc."),
             first_ko: T::new("Called it. I always log a direct hit.", "Je l'avais prévu. Je note toujours un coup au but."),
             ropes: T::new("Unexpected front moving in. I'll have to revise the forecast.", "Front inattendu. Je vais devoir revoir mes prévisions."),
-            defeat: T::new("Clear skies for you. Mark it in the logbook: today, I was wrong.", "Ciel dégagé pour toi. Note-le au carnet : aujourd'hui, je me suis trompé."),
+            defeat: T::new("Clear skies for you. Mark it in the logbook: today, I was wrong.", "Ciel dégagé pour toi. Note-le au carnet\u{a0}: aujourd'hui, je me suis trompé."),
             refuse: T::new("Your page is still blank. Fill it with a few of the Galewold's duelists, then I'll read it.", "Ta page est encore blanche. Remplis-la de quelques duellistes des Hautes-Rafales, et je la lirai."),
         },
     },
@@ -718,7 +808,7 @@ pub static RIVALS: [Rival; 7] = [
             intro: T::new("Shh. The moonflowers are opening. Let's not wake them.", "Chut. Les fleurs de lune s'ouvrent. Ne les réveillons pas."),
             first_ko: T::new("Sleep now. The moths will keep watch.", "Dors, maintenant. Les phalènes veilleront."),
             ropes: T::new("You walk through dreams like someone who knows the way.", "Tu traverses les rêves comme quelqu'un qui connaît le chemin."),
-            defeat: T::new("Morning, already? Then go. You've woken the garden.", "Déjà le matin ? Alors va. Tu as réveillé le jardin."),
+            defeat: T::new("Morning, already? Then go. You've woken the garden.", "Déjà le matin\u{202f}? Alors va. Tu as réveillé le jardin."),
             refuse: T::new("Shh. The garden doesn't know you yet. Let the Hushlands' duelists tell it your name first.", "Chut. Le jardin ne te connaît pas encore. Laisse d'abord les duellistes des Terres du Murmure lui dire ton nom."),
         },
     },
@@ -765,7 +855,7 @@ pub static RIVALS: [Rival; 7] = [
         lines: RivalLines {
             intro: T::new("Six seals. Let's see the hand that carried them.", "Six sceaux. Voyons la main qui les a portés."),
             first_ko: T::new("Every champion falls once in this room. Usually more.", "Tout champion tombe au moins une fois dans cette salle. Souvent plus."),
-            ropes: T::new("There it is: the look they all get, just before.", "Le voilà : ce regard qu'ils ont tous, juste avant."),
+            ropes: T::new("There it is: the look they all get, just before.", "Le voilà\u{a0}: ce regard qu'ils ont tous, juste avant."),
             defeat: T::new("The door was always going to open for you. I just had to be sure.", "La porte allait s'ouvrir pour toi, de toute façon. Je devais juste en être sûre."),
             refuse: T::new("Six seals first. Then we'll see.", "Six sceaux d'abord. Ensuite, on verra."),
         },

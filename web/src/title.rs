@@ -2,7 +2,8 @@
 
 use leptos::html;
 use leptos::prelude::*;
-use sixfold_engine::campaign::{next_rival, seals, RIVALS, SEALS};
+use sixfold_engine::campaign::{seals, RIVALS, SEALS};
+use sixfold_engine::objective::objective;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{tr, Lang};
@@ -247,7 +248,7 @@ pub fn OptionsPanel(
             {move || if confirm.get() {
                 view! {
                     <div class="confirm" role="group" aria-labelledby="reset-q">
-                        <p id="reset-q">{tr("Delete this slot's cards, decks, packs and world progress, and start again as a new player?", "Effacer les cartes, decks, boosters et la progression de cet emplacement, et repartir comme nouveau joueur ?")}</p>
+                        <p id="reset-q">{tr("Delete this slot's cards, decks, packs and world progress, and start again as a new player?", "Effacer les cartes, decks, boosters et la progression de cet emplacement, et repartir comme nouveau joueur\u{202f}?")}</p>
                         <div class="row">
                             <button type="button" class="btn danger" on:click=reset>{tr("Reset progress", "Tout effacer")}</button>
                             <button type="button" class="btn ghost" on:click=move |_| confirm.set(false) autofocus>{tr("Keep my progress", "Garder ma progression")}</button>
@@ -314,34 +315,33 @@ pub fn TitleScreen() -> impl IntoView {
     let loaded = expect_context::<store::Loaded>().0;
     let progress = expect_context::<RwSignal<Progress>>();
     let records = move || progress.with(count_line);
+    // The next step said short, from the engine's objective (the Journal's own), so the
+    // title never names a keeper who would still refuse.
+    let next_step = move |p: &Progress| objective(p).short(p);
     let campaign_sub = move || {
-        progress.with(|p| {
-            let next = next_rival(p);
-            match (seals(p), next) {
-                (n, _) if RIVALS.iter().all(|r| r.beaten(p)) => tr(
-                    format!("All {n} seals. Champion! The Gauntlet is open"),
-                    format!("Les {n} sceaux. Champion ! L'Épreuve est ouverte"),
+        progress.with(|p| match (seals(p), next_step(p)) {
+            (n, _) if RIVALS.iter().all(|r| r.beaten(p)) => tr(
+                format!("All {n} seals. Champion! The Gauntlet is open"),
+                format!("Les {n} sceaux. Champion\u{202f}! L'Épreuve est ouverte"),
+            ),
+            (n, Some(next)) => tr(
+                format!("{n} of {SEALS} seals · next: {next}"),
+                format!(
+                    "{n} sceau{} sur {SEALS} · ensuite\u{a0}: {next}",
+                    if n > 1 { "x" } else { "" }
                 ),
-                (n, Some(r)) => tr(
-                    format!("{n} of {SEALS} seals · next: {}", r.name),
-                    format!(
-                        "{n} sceau{} sur {SEALS} · ensuite : {}",
-                        if n > 1 { "x" } else { "" },
-                        r.name
-                    ),
-                ),
-                (n, None) => tr(
-                    format!("{n} of {SEALS} seals"),
-                    format!("{n} sceau{} sur {SEALS}", if n > 1 { "x" } else { "" }),
-                ),
-            }
+            ),
+            (n, None) => tr(
+                format!("{n} of {SEALS} seals"),
+                format!("{n} sceau{} sur {SEALS}", if n > 1 { "x" } else { "" }),
+            ),
         })
     };
     let continue_sub = move || {
-        progress.with(|p| match next_rival(p) {
-            Some(r) => tr(
-                format!("Back into the world · next rival: {}", r.name),
-                format!("Retour dans le monde · prochain rival : {}", r.name),
+        progress.with(|p| match next_step(p) {
+            Some(next) => tr(
+                format!("Back into the world · next: {next}"),
+                format!("Retour dans le monde · ensuite\u{a0}: {next}"),
             ),
             None => tr("Back into the world", "Retour dans le monde").to_string(),
         })
@@ -390,7 +390,7 @@ pub fn TitleScreen() -> impl IntoView {
             <header class="title-brand">
                 <Mark />
                 <h1 class="wordmark"><Wordmark /></h1>
-                <p class="tagline">{tr("A Hexon card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.", "Un duel de cartes Hexon aux règles d'antan : six Récompenses, du pile ou face, et pas de seconde chance sur une mauvaise main.")}</p>
+                <p class="tagline">{tr("A Hexon card duel with the old rules: six prizes, coin flips, and no second chances on a bad hand.", "Un duel de cartes Hexon aux règles d'antan\u{a0}: six Récompenses, du pile ou face, et pas de seconde chance sur une mauvaise main.")}</p>
             </header>
             {move || notice.get().map(|n| view! {
                 <p class="error title-notice"><span role="alert">{n}</span> " "

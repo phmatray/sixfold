@@ -79,7 +79,7 @@ fn Library() -> impl IntoView {
             {(n == 0).then(|| view! {
                 <p class="dialog-sub">{tr(
                     "Books wait on the shelves of houses and inns. Face one and read it: it comes here.",
-                    "Des livres attendent sur les étagères des maisons et des auberges. Lisez-en un : il viendra ici.",
+                    "Des livres attendent sur les étagères des maisons et des auberges. Lisez-en un\u{a0}: il viendra ici.",
                 )}</p>
             })}
             <ul class="library-list">

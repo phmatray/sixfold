@@ -248,17 +248,17 @@ pub fn PackOdds(b: usize) -> impl IntoView {
     let mix = if booster.is_wild() {
         tr(
             "Every card in the set, evenly: each Common, Uncommon or Rare as likely as the others of its rarity.".to_string(),
-            "Toutes les cartes de la série, à parts égales : chaque Commune, Peu commune ou Rare aussi probable que les autres de sa rareté.".to_string(),
+            "Toutes les cartes de la série, à parts égales\u{a0}: chaque Commune, Peu commune ou Rare aussi probable que les autres de sa rareté.".to_string(),
         )
     } else if booster.colors.contains(&Color::Colorless) {
         tr(
             format!("Each Common and Uncommon: {own}% {types} Hexons, {neutral}% trainers and the special energy, {off}% other types."),
-            format!("Chaque Commune et Peu commune : {own} % Hexons {}, {neutral} % Dresseurs et l'énergie spéciale, {off} % autres types.", types.replace("Neutre", "Neutres")),
+            format!("Chaque Commune et Peu commune\u{a0}: {own} % Hexons {}, {neutral} % Dresseurs et l'énergie spéciale, {off} % autres types.", types.replace("Neutre", "Neutres")),
         )
     } else {
         tr(
             format!("Each Common and Uncommon: {own}% {types} Hexons, {neutral}% trainers and Neutral Hexons, {off}% other types."),
-            format!("Chaque Commune et Peu commune : {own} % Hexons {types}, {neutral} % Dresseurs et Hexons Neutres, {off} % autres types."),
+            format!("Chaque Commune et Peu commune\u{a0}: {own} % Hexons {types}, {neutral} % Dresseurs et Hexons Neutres, {off} % autres types."),
         )
     };
     let holo_line = if booster.is_wild() {
@@ -278,12 +278,12 @@ pub fn PackOdds(b: usize) -> impl IntoView {
             <ul>
                 <li>{tr(
                     format!("{COMMONS} Commons, {UNCOMMONS} Uncommons and a Rare slot; never the same card twice in a pack."),
-                    format!("{COMMONS} Communes, {UNCOMMONS} Peu communes et un emplacement Rare ; jamais deux fois la même carte."),
+                    format!("{COMMONS} Communes, {UNCOMMONS} Peu communes et un emplacement Rare\u{202f}; jamais deux fois la même carte."),
                 )}</li>
                 <li>{mix}</li>
                 <li>{tr(
                     format!("Rare slot: a Holo Rare in {holo_n} packs of {holo_of} ({}%), {holo_line}, {each_holo}% each; otherwise one of the {rares} Rares, {each_rare}% each.", pct(holo_odds)),
-                    format!("Emplacement Rare : une Rare Holo dans {holo_n} boosters sur {holo_of} ({} %), {holo_line}, {} % chacune ; sinon l'une des {rares} Rares, {} % chacune.", pct(holo_odds), each_holo, each_rare),
+                    format!("Emplacement Rare\u{a0}: une Rare Holo dans {holo_n} boosters sur {holo_of} ({} %), {holo_line}, {} % chacune\u{202f}; sinon l'une des {rares} Rares, {} % chacune.", pct(holo_odds), each_holo, each_rare),
                 )}</li>
                 <li>{tr(
                     "The Rare slot skips cards you already have 4 of.",
@@ -412,7 +412,7 @@ fn Reveal(
             .collect();
         tr(
             format!("You got {}.", names.join(", ")),
-            format!("Vous obtenez : {}.", names.join(", ")),
+            format!("Vous obtenez\u{a0}: {}.", names.join(", ")),
         )
     };
     let more = move || profile.with(|p| p.wallet.total());
@@ -548,10 +548,10 @@ fn Reveal(
                         format!("Turning the cards over… Press {k} to go faster."),
                         format!("On retourne les cartes… Appuyez sur {k} pour accélérer."),
                     ),
-                    (false, true) => tr("Tear it open: tap the pack.", "Ouvrez-le : touchez le booster.").to_string(),
+                    (false, true) => tr("Tear it open: tap the pack.", "Ouvrez-le\u{a0}: touchez le booster.").to_string(),
                     (false, false) => tr(
                         format!("Tear it open: tap the pack, or press {k}."),
-                        format!("Ouvrez-le : touchez le booster, ou appuyez sur {k}."),
+                        format!("Ouvrez-le\u{a0}: touchez le booster, ou appuyez sur {k}."),
                     ),
                 }
             }}</p>
@@ -595,7 +595,7 @@ fn Reveal(
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6l7 6-7 6zM13 6l7 6-7 6z" /></svg>
                         {tr("Faster ×3", "Plus vite ×3")}
                     </button>
-                    <button type="button" class="btn ghost" on:click=move |_| skip()>{tr("Skip: show all", "Passer : tout montrer")}</button>
+                    <button type="button" class="btn ghost" on:click=move |_| skip()>{tr("Skip: show all", "Passer\u{a0}: tout montrer")}</button>
                 }.into_any()
             } else {
                 view! {

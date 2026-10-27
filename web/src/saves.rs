@@ -360,7 +360,7 @@ pub fn SaveSettings() -> impl IntoView {
             }
             Err(e) => restore_error.set(Some(tr(
                 format!("The kept copy still can't be read: {e} Nothing was changed."),
-                format!("La copie gardée reste illisible : {e} Rien n'a été modifié."),
+                format!("La copie gardée reste illisible\u{a0}: {e} Rien n'a été modifié."),
             ))),
         }
         restored.update(|r| *r += 1);

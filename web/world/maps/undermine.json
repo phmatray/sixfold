@@ -505,7 +505,7 @@
             "The rockfall you saw from the quarry side, dug through by hand. Pick marks on every stone, chalk tallies on the timbers: one stroke per cart of spoil. There are a great many strokes."
           ],
           "lines_fr": [
-            "L'éboulement que vous aviez vu côté carrière, creusé à la main. Des traces de pic sur chaque pierre, des tailles à la craie sur les bois : un trait par wagonnet de déblais. Il y a énormément de traits."
+            "L'éboulement que vous aviez vu côté carrière, creusé à la main. Des traces de pic sur chaque pierre, des tailles à la craie sur les bois : un trait par wagonnet de déblais. Il y a énormément de traits."
           ]
         }
       ]
@@ -517,7 +517,7 @@
       "z": 1,
       "give": "card:shalehound",
       "text": "Behind the fall, a miners' cubby: a bench, a cold lamp, and in a tin box with a hexagon scratched on the lid, a card.",
-      "text_fr": "Derrière l'éboulis, un réduit de mineurs : un banc, une lampe froide, et dans une boîte en fer avec un hexagone gravé sur le couvercle, une carte."
+      "text_fr": "Derrière l'éboulis, un réduit de mineurs : un banc, une lampe froide, et dans une boîte en fer avec un hexagone gravé sur le couvercle, une carte."
     },
     {
       "kind": "find",
@@ -526,7 +526,7 @@
       "z": 1,
       "give": "give:curio_miner_tally",
       "text": "An old ore cart, abandoned when the roof came down. Hooked on its rim, a ring of brass tally tags, one punched with a hexagon: the miner who never came back for them.",
-      "text_fr": "Un vieux wagonnet, abandonné quand le toit s'est effondré. Accroché à son rebord, un anneau de jetons de laiton, l'un poinçonné d'un hexagone : le mineur qui n'est jamais revenu les chercher."
+      "text_fr": "Un vieux wagonnet, abandonné quand le toit s'est effondré. Accroché à son rebord, un anneau de jetons de laiton, l'un poinçonné d'un hexagone : le mineur qui n'est jamais revenu les chercher."
     },
     {
       "kind": "find",
@@ -535,7 +535,7 @@
       "z": 1,
       "give": "pack:stone",
       "text": "The crew's old store: rope, wedges, a crate of candles. At the bottom, still in its wax paper, a sealed Stone pack.",
-      "text_fr": "L'ancienne réserve de l'équipe : de la corde, des coins, une caisse de bougies. Au fond, encore dans son papier ciré, un booster Roc scellé."
+      "text_fr": "L'ancienne réserve de l'équipe : de la corde, des coins, une caisse de bougies. Au fond, encore dans son papier ciré, un booster Roc scellé."
     },
     {
       "kind": "find",
@@ -552,14 +552,14 @@
       "z": 6,
       "kind": "sign",
       "text": "Painted on the timber: an arrow pointing west, and \"SCREE PASS. ANVILSTEAD UP TOP.\" Underneath, smaller: \"Mind your head.\"",
-      "text_fr": "Peint sur le bois : une flèche vers l'ouest, et « COL DES ÉBOULIS. BOURG-L'ENCLUME EN HAUT. » Dessous, plus petit : « Attention à la tête. »"
+      "text_fr": "Peint sur le bois : une flèche vers l'ouest, et « COL DES ÉBOULIS. BOURG-L'ENCLUME EN HAUT. » Dessous, plus petit : « Attention à la tête. »"
     },
     {
       "x": 46,
       "z": 8,
       "kind": "sign",
       "text": "A board nailed across a timber: \"QUARRY THIS WAY. EMBERSTEP. -O's crew.\"",
-      "text_fr": "Une planche clouée en travers d'un bois : « CARRIÈRE PAR LÀ. PAS-DE-BRAISE. -L'équipe d'O. »"
+      "text_fr": "Une planche clouée en travers d'un bois : « CARRIÈRE PAR LÀ. PAS-DE-BRAISE. -L'équipe d'O. »"
     }
   ],
   "warps": [
@@ -605,7 +605,7 @@
       "if": "flag:rubble_1",
       "prop_closed": "rubble",
       "text": "Fallen slate, floor to roof. Orla's crew could shift it; they're the ones who dig round here.",
-      "text_fr": "De l'ardoise effondrée, du sol au plafond. L'équipe d'Orla pourrait la dégager ; c'est elle qui creuse par ici."
+      "text_fr": "De l'ardoise effondrée, du sol au plafond. L'équipe d'Orla pourrait la dégager ; c'est elle qui creuse par ici."
     },
     {
       "id": "rubble_2",
@@ -620,7 +620,7 @@
       "if": "flag:rubble_2",
       "prop_closed": "rubble",
       "text": "Fallen slate, floor to roof. Orla's crew could shift it; they're the ones who dig round here.",
-      "text_fr": "De l'ardoise effondrée, du sol au plafond. L'équipe d'Orla pourrait la dégager ; c'est elle qui creuse par ici."
+      "text_fr": "De l'ardoise effondrée, du sol au plafond. L'équipe d'Orla pourrait la dégager ; c'est elle qui creuse par ici."
     },
     {
       "id": "rubble_3",
@@ -635,7 +635,7 @@
       "if": "flag:rubble_3",
       "prop_closed": "rubble",
       "text": "Fallen slate, floor to roof. Orla's crew could shift it; they're the ones who dig round here.",
-      "text_fr": "De l'ardoise effondrée, du sol au plafond. L'équipe d'Orla pourrait la dégager ; c'est elle qui creuse par ici."
+      "text_fr": "De l'ardoise effondrée, du sol au plafond. L'équipe d'Orla pourrait la dégager ; c'est elle qui creuse par ici."
     }
   ],
   "npcs": [
@@ -657,7 +657,7 @@
             "Right. For that, the fall on the first side passage comes down this afternoon. Stand back."
           ],
           "lines_fr": [
-            "À manger ! Huw a envoyé à manger ! T'es un héros. Un petit héros plein de poussière.",
+            "À manger ! Huw a envoyé à manger ! T'es un héros. Un petit héros plein de poussière.",
             "Bon. Pour la peine, l'éboulis du premier passage tombe cet après-midi. Recule-toi."
           ],
           "do": [
@@ -672,7 +672,7 @@
             "The three side passages fell in years ago. We clear one when Huw says, and Huw says when somebody does him a favour. That's the rule of the Stonebacks: favour for favour."
           ],
           "lines_fr": [
-            "Les trois passages latéraux se sont effondrés il y a des années. On en dégage un quand Huw le dit, et Huw le dit quand quelqu'un lui rend service. C'est la règle des Échines : service pour service."
+            "Les trois passages latéraux se sont effondrés il y a des années. On en dégage un quand Huw le dit, et Huw le dit quand quelqu'un lui rend service. C'est la règle des Échines : service pour service."
           ]
         },
         {
@@ -680,7 +680,7 @@
             "All three open. The old Undermine breathes again. Listen: you can hear the air moving."
           ],
           "lines_fr": [
-            "Les trois ouverts. Les vieilles Galeries respirent de nouveau. Écoute : on entend l'air bouger."
+            "Les trois ouverts. Les vieilles Galeries respirent de nouveau. Écoute : on entend l'air bouger."
           ]
         }
       ]
@@ -723,7 +723,7 @@
           "One prize. Then you can push this cart. I'm on a break."
         ],
         "challenge_fr": [
-          "Hé ! T'es sur mes rails. Enfin, les rails de l'oncle Huw. C'est pareil.",
+          "Hé ! T'es sur mes rails. Enfin, les rails de l'oncle Huw. C'est pareil.",
           "Une carte Récompense. Après, c'est toi qui pousses le wagonnet. Je suis en pause."
         ],
         "win": [
@@ -736,7 +736,7 @@
           "Ha! Tell Uncle Huw I'm too good to push carts."
         ],
         "lose_fr": [
-          "Ha ! Dis à l'oncle Huw que je suis trop fort pour pousser des wagonnets."
+          "Ha ! Dis à l'oncle Huw que je suis trop fort pour pousser des wagonnets."
         ],
         "after": [
           "Uncle Huw says if I lose to you, I push carts for a month. So. I'm pushing carts for a month."

@@ -263,6 +263,11 @@ The loader expands `trainer` into ordinary dialogue branches, so one grammar sti
 nothing would ever play. Mind the conditions: a hand-written branch that holds before the duelist is beaten
 replaces the challenge. (Built in `web/world/map.js` `expand`.)
 
+A talk plays the first branch whose `if` holds. A branch with `"more": true` leads into the next one that
+holds: its lines come first, then that branch's, and both branches' `do` apply (engine
+`Progress::pick_chain`). It is how someone introduces themselves once (`!flag:talked_<id>`, set by every talk
+to the end) and then gets to the point: the seal stewards' count, first time and every time after.
+
 Line of sight:
 
 1. Scan from the duelist's tile along its facing, up to `sight` tiles. The ray continues only while each

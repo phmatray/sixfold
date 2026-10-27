@@ -1495,19 +1495,19 @@
       "z": 3,
       "kind": "sign",
       "text": "North: Hushwillow Lane and Brightwell Square. North-east, at low water only: the causeway to the Bellflats.",
-      "text_fr": "Nord : l'Allée des Saules-Murmures et la Place de Clairpuits. Nord-est, à marée basse seulement : la chaussée des Grèves."
+      "text_fr": "Nord : l'Allée des Saules-Murmures et la Place de Clairpuits. Nord-est, à marée basse seulement : la chaussée des Grèves."
     },
     {
       "kind": "sign",
       "text": "The Bellflats, by the causeway: low water only, 8 in the morning to 6 in the evening. After that the sea has it.",
-      "text_fr": "Les Grèves de la Cloche, par la chaussée : à marée basse seulement, de 8 h à 18 h. Ensuite, la mer la reprend.",
+      "text_fr": "Les Grèves de la Cloche, par la chaussée : à marée basse seulement, de 8 h à 18 h. Ensuite, la mer la reprend.",
       "x": 41,
       "z": 4
     },
     {
       "kind": "sign",
       "text": "South: The Moonwell Garden. Straight across the mere by the lanterns at night; round the east shore at any hour.",
-      "text_fr": "Sud : Le Jardin du Puits-de-Lune. Tout droit sur le lac par les lanternes, la nuit ; par la rive est, à toute heure.",
+      "text_fr": "Sud : Le Jardin du Puits-de-Lune. Tout droit sur le lac par les lanternes, la nuit ; par la rive est, à toute heure.",
       "x": 22,
       "z": 31
     },
@@ -1516,14 +1516,14 @@
       "z": 12,
       "kind": "sign",
       "text": "The east shore path: round the mere to the Moonwell Garden, and over the river to the launch jetty.",
-      "text_fr": "Le chemin de la rive est : autour du lac jusqu'au Jardin du Puits-de-Lune, et par le pont jusqu'à l'embarcadère de la vedette."
+      "text_fr": "Le chemin de la rive est : autour du lac jusqu'au Jardin du Puits-de-Lune, et par le pont jusqu'à l'embarcadère de la vedette."
     },
     {
       "x": 8,
       "z": 7,
       "kind": "sign",
       "text": "The Quiet Lamp. Rooms by the day: our guests sleep while the sun is up.",
-      "text_fr": "La Lampe Tranquille. Chambres à la journée : nos clients dorment tant que le soleil est levé."
+      "text_fr": "La Lampe Tranquille. Chambres à la journée : nos clients dorment tant que le soleil est levé."
     },
     {
       "kind": "waymark",
@@ -1538,7 +1538,7 @@
       "z": 20,
       "give": "coins:100",
       "text": "A lantern drifts up against the raft, and in its paper base, folded small: Facets. Someone's wish, maybe. Or someone's change.",
-      "text_fr": "Une lanterne vient buter contre le radeau, et dans son socle de papier, pliées serré : des Facettes. Le vœu de quelqu'un, peut-être. Ou sa monnaie.",
+      "text_fr": "Une lanterne vient buter contre le radeau, et dans son socle de papier, pliées serré : des Facettes. Le vœu de quelqu'un, peut-être. Ou sa monnaie.",
       "if": "time:night"
     },
     {
@@ -1548,7 +1548,7 @@
       "z": 18,
       "give": "pack:dream",
       "text": "Under the islet's willow, wrapped in oilcloth against the damp: a sealed booster. The lanterns must see it every night.",
-      "text_fr": "Sous le saule de l'îlot, enveloppé de toile cirée contre l'humidité : un booster scellé. Les lanternes doivent le voir toutes les nuits."
+      "text_fr": "Sous le saule de l'îlot, enveloppé de toile cirée contre l'humidité : un booster scellé. Les lanternes doivent le voir toutes les nuits."
     },
     {
       "x": 3,
@@ -1563,7 +1563,7 @@
             "An old rowboat, upturned on the shore, moss in its seams. Painted on the hull, nearly gone: \"Ambrose\". He rows a newer one now. Under it, someone keeps a jar of lantern wicks dry."
           ],
           "lines_fr": [
-            "Une vieille barque retournée sur la rive, de la mousse dans les joints. Peint sur la coque, presque effacé : « Ambrose ». Il rame dans une plus récente, maintenant. Dessous, quelqu'un garde au sec un bocal de mèches à lanterne."
+            "Une vieille barque retournée sur la rive, de la mousse dans les joints. Peint sur la coque, presque effacé : « Ambrose ». Il rame dans une plus récente, maintenant. Dessous, quelqu'un garde au sec un bocal de mèches à lanterne."
           ]
         }
       ]
@@ -1573,7 +1573,7 @@
       "z": 20,
       "kind": "sign",
       "text": "A round house on piles, lanterns hung all round the porch. A note on the door: \"Out lighting the shore. Back by dawn. Clem.\"",
-      "text_fr": "Une maison ronde sur pilotis, des lanternes tout autour du porche. Un mot sur la porte : « Parti allumer la rive. De retour à l'aube. Clem. »"
+      "text_fr": "Une maison ronde sur pilotis, des lanternes tout autour du porche. Un mot sur la porte : « Parti allumer la rive. De retour à l'aube. Clem. »"
     },
     {
       "x": 44,
@@ -1600,7 +1600,7 @@
             "A lilac launch with a brass rail, and a bell on the jetty post. A tin plate: \"GULLHAVEN. Passes from the Harbour Office there.\""
           ],
           "lines_fr": [
-            "Une vedette lilas à la rambarde de laiton, et une cloche sur le poteau de l'embarcadère. Une plaque de fer-blanc : « HAVRE-AUX-MOUETTES. Laissez-passer à la Capitainerie, là-bas. »"
+            "Une vedette lilas à la rambarde de laiton, et une cloche sur le poteau de l'embarcadère. Une plaque de fer-blanc : « HAVRE-AUX-MOUETTES. Laissez-passer à la Capitainerie, là-bas. »"
           ]
         }
       ]
@@ -1612,14 +1612,14 @@
       "z": 28,
       "give": "card:gloamowl",
       "text": "In a crate by the jetty, under a coil of rope, in a jar to keep the river out: a card. A label says \"for the first one off the boat\".",
-      "text_fr": "Dans une caisse près de l'embarcadère, sous un rouleau de corde, dans un bocal pour la garder de l'eau : une carte. Une étiquette dit « pour le premier qui descend du bateau »."
+      "text_fr": "Dans une caisse près de l'embarcadère, sous un rouleau de corde, dans un bocal pour la garder de l'eau : une carte. Une étiquette dit « pour le premier qui descend du bateau »."
     },
     {
       "kind": "find",
       "id": "d_inn_stump",
       "give": "coins:40",
       "text": "In the old stump behind the inn, where Mina's guests hide what they mean to come back for: Facets nobody came back for.",
-      "text_fr": "Dans la vieille souche derrière l'auberge, là où les clients de Mina cachent ce qu'ils comptent reprendre : des Facettes que personne n'est revenu chercher.",
+      "text_fr": "Dans la vieille souche derrière l'auberge, là où les clients de Mina cachent ce qu'ils comptent reprendre : des Facettes que personne n'est revenu chercher.",
       "x": 3,
       "z": 13
     }
@@ -1948,8 +1948,8 @@
             "The Moonwell Garden is over there: Lumen's garden. Lumen's home again, and Nim tends the beds. The lanterns like them both."
           ],
           "lines_fr": [
-            "Les voilà parties. Regarde : elles dérivent, elles tournent, elles s'alignent. Chaque nuit, la même ligne, jusqu'au Puits-de-Lune.",
-            "Le Jardin du Puits-de-Lune est là-bas : le jardin de Lumen. Lumen est rentrée, et Nim soigne les massifs. Les lanternes les aiment bien toutes les deux."
+            "Les voilà parties. Regarde : elles dérivent, elles tournent, elles s'alignent. Chaque nuit, la même ligne, jusqu'au Puits-de-Lune.",
+            "Le Jardin du Puits-de-Lune est là-bas : le jardin de Lumen. Lumen est rentrée, et Nim soigne les massifs. Les lanternes les aiment bien toutes les deux."
           ]
         }
       ]
@@ -1999,7 +1999,7 @@
           "lines_fr": [
             "Trois cent douze. Trois cent treize. Des phalènes. Autour de chaque lampe de Lac-aux-Lanternes.",
             "Je les compte, je ne les attrape pas. Enfin, je les attrape, je les compte, je les relâche. La phalène ne s'en formalise pas. Trop.",
-            "Des indices, pour un ami des compteurs de phalènes : les lanternes du lac portent plus que des vœux. Les massifs de belles-de-lune du Puits-de-Lune cachent quelque chose, la nuit seulement. Et l'îlot : il te faudrait des bottes."
+            "Des indices, pour un ami des compteurs de phalènes : les lanternes du lac portent plus que des vœux. Les massifs de belles-de-lune du Puits-de-Lune cachent quelque chose, la nuit seulement. Et l'îlot : il te faudrait des bottes."
           ]
         }
       ]
@@ -2020,7 +2020,7 @@
         ],
         "challenge_fr": [
           "Un Hexon qui ne s'est jamais Éveillé est une graine qu'on n'a jamais plantée.",
-          "Ma règle maison : au moins deux Hexons d'Éveil 2 dans ton deck. Trois cartes Récompense. Montre-moi ce que tes Hexons peuvent devenir."
+          "Ma règle maison : au moins deux Hexons d'Éveil 2 dans ton deck. Trois cartes Récompense. Montre-moi ce que tes Hexons peuvent devenir."
         ],
         "lose": [
           "Patience. An Awakening takes three turns at least, and a lifetime at most."
@@ -2079,7 +2079,7 @@
           "Sit a moment. Three prizes, out here in the middle of the mere. Nobody rows better at night."
         ],
         "challenge_fr": [
-          "J'ai rentré mes rames pour regarder passer les lanternes. Tu es venu à pied sur elles ? Courageux.",
+          "J'ai rentré mes rames pour regarder passer les lanternes. Tu es venu à pied sur elles ? Courageux.",
           "Reste un moment. Trois cartes Récompense, ici, au milieu du lac. Personne ne rame mieux que moi la nuit."
         ],
         "win": [
@@ -2092,7 +2092,7 @@
           "Overboard! Swim for the lanterns, they'll carry you."
         ],
         "lose_fr": [
-          "Par-dessus bord ! Nage vers les lanternes, elles te porteront."
+          "Par-dessus bord ! Nage vers les lanternes, elles te porteront."
         ],
         "after": [
           "At dawn the lanterns go home and so do I. Mind you're off the water by then. Well, they'll wait for you if you're on them."
@@ -2119,7 +2119,7 @@
           "Lanterns for the east shore! Mind the wire. Oh, a duellist. Two prizes, while the wax sets?"
         ],
         "challenge_fr": [
-          "Des lanternes pour la rive est ! Attention au fil. Oh, un duelliste. Deux cartes Récompense, le temps que la cire prenne ?"
+          "Des lanternes pour la rive est ! Attention au fil. Oh, un duelliste. Deux cartes Récompense, le temps que la cire prenne ?"
         ],
         "win": [
           "Snuffed out. Fair enough."
@@ -2131,7 +2131,7 @@
           "Lit you up! Come back with a brighter deck."
         ],
         "lose_fr": [
-          "Je t'ai éclairé ! Reviens avec un deck plus lumineux."
+          "Je t'ai éclairé ! Reviens avec un deck plus lumineux."
         ],
         "after": [
           "The long way round is the lit way round. Every post, every night. My legs know it by heart."
@@ -2160,7 +2160,7 @@
             "One more stone, then the sealed door in the hall. I'll be there first."
           ],
           "lines_fr": [
-            "Tu joues bien, tu sais ? Vraiment bien.",
+            "Tu joues bien, tu sais ? Vraiment bien.",
             "Encore une pierre, et puis la porte scellée de la salle. J'y serai avant toi."
           ],
           "do": [
@@ -2187,7 +2187,7 @@
             "Scared of a blank deck? I'll wait. I'm good at waiting."
           ],
           "lines_fr": [
-            "Peur d'un deck tout blanc ? J'attendrai. Je sais attendre."
+            "Peur d'un deck tout blanc ? J'attendrai. Je sais attendre."
           ],
           "do": [
             "duel:rook_3"

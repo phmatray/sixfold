@@ -183,11 +183,11 @@ impl Rule {
         match self {
             Rule::BasicsOnly => T::new(
                 "Basic Hexons only: no Awaken 1 or Awaken 2.",
-                "Hexons de Base uniquement : ni Éveil 1 ni Éveil 2.",
+                "Hexons de Base uniquement\u{a0}: ni Éveil 1 ni Éveil 2.",
             ),
             Rule::NoTrainers => T::new(
                 "Hexons and energy only: no Trainers.",
-                "Hexons et énergies uniquement : aucun Dresseur.",
+                "Hexons et énergies uniquement\u{a0}: aucun Dresseur.",
             ),
             Rule::MonoColour => T::new(
                 "One colour only, plus Neutral Hexons.",

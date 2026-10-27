@@ -740,7 +740,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 <button type="button" class="btn" on:click=move |_| complete()>{tr("Complete my deck", "Compléter mon deck")}</button>
                 <button type="button" class="btn test" aria-haspopup="dialog" aria-disabled=move || (total() < 7).to_string()
                     title=move || if total() < 7 { tr("A hand needs 7 cards in the deck.", "Une main demande 7 cartes dans le deck.") } else { "" }
-                    on:click=move |_| if total() < 7 { msg.set(Some(tr("Add cards first: a test hand needs at least 7 in the deck.", "Ajoutez d'abord des cartes : une main de test en demande au moins 7 dans le deck.").into())) } else { testing.set(true) }>{tr("Test a hand", "Tester une main")}</button>
+                    on:click=move |_| if total() < 7 { msg.set(Some(tr("Add cards first: a test hand needs at least 7 in the deck.", "Ajoutez d'abord des cartes\u{a0}: une main de test en demande au moins 7 dans le deck.").into())) } else { testing.set(true) }>{tr("Test a hand", "Tester une main")}</button>
                 <button type="button" class="btn ghost undo" aria-disabled=move || (!undo.can()).to_string() aria-keyshortcuts="Control+Z Meta+Z" on:click=move |_| do_undo()>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7L4 12l5 5M4 12h11a5 5 0 0 1 0 10h-2" /></svg>
                     {tr("Undo", "Annuler")}

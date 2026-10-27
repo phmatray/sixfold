@@ -139,12 +139,12 @@ pub fn lesson(g: &Game) -> Lesson {
             None,
             tr(
                 "You took your last prize card: you win!",
-                "Vous avez pris votre dernière Récompense : vous gagnez !",
+                "Vous avez pris votre dernière Récompense\u{a0}: vous gagnez\u{202f}!",
             )
             .into(),
             tr(
                 "Real duels use six prizes, so expect a longer fight.",
-                "Les vrais duels se jouent avec six Récompenses : attendez-vous à un combat plus long.",
+                "Les vrais duels se jouent avec six Récompenses\u{a0}: attendez-vous à un combat plus long.",
             )
             .into(),
         );
@@ -157,12 +157,12 @@ pub fn lesson(g: &Game) -> Lesson {
             if g.turn() == 0 {
                 tr(
                     "It goes first, so it can't attack this turn: it attaches an energy and ends its turn.",
-                    "Il commence, donc il ne peut pas attaquer ce tour : il attache une énergie et termine son tour.",
+                    "Il commence, donc il ne peut pas attaquer ce tour\u{a0}: il attache une énergie et termine son tour.",
                 )
             } else {
                 tr(
                     "Watch what it does: it attaches an energy and attacks, just like you.",
-                    "Observez : il attache une énergie et attaque, comme vous.",
+                    "Observez\u{a0}: il attache une énergie et attaque, comme vous.",
                 )
             }
             .into(),
@@ -189,7 +189,7 @@ pub fn lesson(g: &Game) -> Lesson {
                 ),
                 tr(
                     "Your first Basic Hexon becomes your Active: the one that attacks and takes hits.",
-                    "Votre premier Hexon de Base devient votre Actif : c'est lui qui attaque et encaisse.",
+                    "Votre premier Hexon de Base devient votre Actif\u{a0}: c'est lui qui attaque et encaisse.",
                 )
                 .into(),
             )
@@ -204,7 +204,7 @@ pub fn lesson(g: &Game) -> Lesson {
                 ),
                 tr(
                     "Benched Hexons wait their turn: Retreat swaps your Active for one of them, paying its energy cost. If your Active is knocked out with an empty Bench, you lose.",
-                    "Les Hexons du Banc attendent leur tour : la Retraite échange votre Actif contre l'un d'eux, en payant son coût en énergie. Si votre Actif est mis K.O. sans personne sur le Banc, vous perdez.",
+                    "Les Hexons du Banc attendent leur tour\u{a0}: la Retraite échange votre Actif contre l'un d'eux, en payant son coût en énergie. Si votre Actif est mis K.O. sans personne sur le Banc, vous perdez.",
                 )
                 .into(),
             )
@@ -215,7 +215,7 @@ pub fn lesson(g: &Game) -> Lesson {
             tr("Press Done to start the duel.", "Appuyez sur Terminé pour lancer le duel.").into(),
             tr(
                 "A coin decides who goes first: today, the opponent. Whoever goes first can't attack on their first turn.",
-                "Une pièce décide qui commence : aujourd'hui, l'adversaire. Celui qui commence ne peut pas attaquer à son premier tour.",
+                "Une pièce décide qui commence\u{a0}: aujourd'hui, l'adversaire. Celui qui commence ne peut pas attaquer à son premier tour.",
             )
             .into(),
         )),
@@ -245,7 +245,7 @@ pub fn lesson(g: &Game) -> Lesson {
             ),
             tr(
                 format!("It does 10, but {} is weak to Ember: weakness doubles it to 20. Attacking ends your turn.", name(POLLENPUP)),
-                format!("Elle inflige 10, mais {} a une Faiblesse Braise, ce qui double les dégâts : 20. Attaquer termine votre tour.", name(POLLENPUP)),
+                format!("Elle inflige 10, mais {} a une Faiblesse Braise, ce qui double les dégâts\u{a0}: 20. Attaquer termine votre tour.", name(POLLENPUP)),
             ),
         )),
         (PromptKind::MainPhase, Some(ASHPAW)) => find(g, BLAZELYNX).map(|h| {
@@ -305,7 +305,7 @@ pub fn lesson(g: &Game) -> Lesson {
             ),
             tr(
                 "30, doubled by weakness: more than its HP left. Each knock-out takes a prize card, and this duel has just one.",
-                "30, doublés par la Faiblesse : plus que ses PV restants. Chaque K.O. rapporte une Récompense, et ce duel n'en compte qu'une.",
+                "30, doublés par la Faiblesse\u{a0}: plus que ses PV restants. Chaque K.O. rapporte une Récompense, et ce duel n'en compte qu'une.",
             )
             .into(),
         )),

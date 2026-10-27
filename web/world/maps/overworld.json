@@ -2570,35 +2570,35 @@
     {
       "kind": "sign",
       "text": "North: Emberstep Quarry, its stairs and the kilns beyond.",
-      "text_fr": "Nord : Carrière de Pas-de-Braise, ses escaliers et les fours au-delà.",
+      "text_fr": "Nord : Carrière de Pas-de-Braise, ses escaliers et les fours au-delà.",
       "x": 40,
       "z": 3
     },
     {
       "kind": "sign",
       "text": "East: Saltwind Boardwalk and the sea.",
-      "text_fr": "Est : Promenade de Ventsalé et la mer.",
+      "text_fr": "Est : Promenade de Ventsalé et la mer.",
       "x": 48,
       "z": 17
     },
     {
       "kind": "sign",
       "text": "South: Brightwell Square, the bakery and the market.",
-      "text_fr": "Sud : Place de Clairpuits, la boulangerie et le marché.",
+      "text_fr": "Sud : Place de Clairpuits, la boulangerie et le marché.",
       "x": 23,
       "z": 31
     },
     {
       "kind": "sign",
       "text": "West: Fernhollow Trail, the woods and the stream.",
-      "text_fr": "Ouest : Sentier de Creuse-Fougère, les bois et le ruisseau.",
+      "text_fr": "Ouest : Sentier de Creuse-Fougère, les bois et le ruisseau.",
       "x": 3,
       "z": 18
     },
     {
       "kind": "sign",
       "text": "Crossroads. North: the duel hall and the quarry road. West: Fernhollow Trail. East: Saltwind Boardwalk. South: Brightwell Square.",
-      "text_fr": "Carrefour. Nord : la salle des duels et la route de la carrière. Ouest : Sentier de Creuse-Fougère. Est : Promenade de Ventsalé. Sud : Place de Clairpuits.",
+      "text_fr": "Carrefour. Nord : la salle des duels et la route de la carrière. Ouest : Sentier de Creuse-Fougère. Est : Promenade de Ventsalé. Sud : Place de Clairpuits.",
       "x": 28,
       "z": 18
     },
@@ -2623,7 +2623,7 @@
       "hidden": true,
       "give": "card:recall_horn",
       "text": "Behind the crates stacked against the hall's east wall: a card someone dropped long ago.",
-      "text_fr": "Derrière les caisses empilées contre le mur est de la salle : une carte perdue il y a longtemps."
+      "text_fr": "Derrière les caisses empilées contre le mur est de la salle : une carte perdue il y a longtemps."
     },
     {
       "x": 13,
@@ -2639,7 +2639,7 @@
       "z": 6,
       "give": "coins:40",
       "text": "Tucked in the hollow stump: a little heap of Facets.",
-      "text_fr": "Cachée dans la souche creuse : une petite poignée de Facettes."
+      "text_fr": "Cachée dans la souche creuse : une petite poignée de Facettes."
     },
     {
       "kind": "find",
@@ -2649,7 +2649,7 @@
       "hidden": true,
       "give": "coins:30",
       "text": "Where the path bends, at the foot of the tree: Facets, half under the roots.",
-      "text_fr": "Là où le chemin tourne, au pied de l'arbre : des Facettes, à moitié sous les racines."
+      "text_fr": "Là où le chemin tourne, au pied de l'arbre : des Facettes, à moitié sous les racines."
     },
     {
       "kind": "find",
@@ -2658,7 +2658,7 @@
       "z": 27,
       "give": "give:curio_brass_thimble",
       "text": "Something glints among the flowers: a brass thimble, dented and polished bright.",
-      "text_fr": "Quelque chose brille entre les fleurs : un dé à coudre en laiton, cabossé et poli à force de servir."
+      "text_fr": "Quelque chose brille entre les fleurs : un dé à coudre en laiton, cabossé et poli à force de servir."
     },
     {
       "kind": "find",
@@ -2668,7 +2668,7 @@
       "hidden": true,
       "give": "coins:30",
       "text": "Down among Moss's bean rows, in a flowerpot turned upside down: a few Facets.",
-      "text_fr": "Entre les rangs de haricots de Moss, sous un pot de fleurs retourné : quelques Facettes."
+      "text_fr": "Entre les rangs de haricots de Moss, sous un pot de fleurs retourné : quelques Facettes."
     },
     {
       "kind": "find",
@@ -2677,7 +2677,7 @@
       "z": 18,
       "give": "coins:25",
       "text": "Under the flat stone by the crossroads signpost, where travellers leave a coin for luck: Facets.",
-      "text_fr": "Sous la pierre plate près du panneau du carrefour, là où les voyageurs laissent une pièce pour la chance : des Facettes."
+      "text_fr": "Sous la pierre plate près du panneau du carrefour, là où les voyageurs laissent une pièce pour la chance : des Facettes."
     },
     {
       "kind": "find",
@@ -2687,7 +2687,7 @@
       "hidden": true,
       "give": "give:seed_packet_3",
       "text": "Caught in the roots at the meadow's edge, a twist of paper: \"Runner beans. Do NOT eat.\"",
-      "text_fr": "Coincé dans les racines, en lisière du pré, un cornet de papier : « Haricots grimpants. NE PAS MANGER. »",
+      "text_fr": "Coincé dans les racines, en lisière du pré, un cornet de papier : « Haricots grimpants. NE PAS MANGER. »",
       "if": "flag:seeds_asked"
     }
   ],
@@ -2737,15 +2737,15 @@
           "I've read the rules twice, and my Warrenbucks have waited all morning. Duel me!"
         ],
         "challenge_fr": [
-          "Hé ! T'as un deck, ça se voit à ta façon de marcher.",
-          "J'ai lu les règles deux fois, et mes Garenbouquin attendent depuis ce matin. Un duel !"
+          "Hé ! T'as un deck, ça se voit à ta façon de marcher.",
+          "J'ai lu les règles deux fois, et mes Garenbouquin attendent depuis ce matin. Un duel !"
         ],
         "win": [
           "Wait. I forgot to attach energy again, didn't I?",
           "Here, my purse. Fair's fair."
         ],
         "win_fr": [
-          "Attends. J'ai encore oublié d'attacher une énergie, c'est ça ?",
+          "Attends. J'ai encore oublié d'attacher une énergie, c'est ça ?",
           "Tiens, ma bourse. C'est la règle."
         ],
         "lose": [
@@ -2753,7 +2753,7 @@
           "Read them twice too, then come back."
         ],
         "lose_fr": [
-          "Ha ! Les règles lues deux fois gagnent encore !",
+          "Ha ! Les règles lues deux fois gagnent encore !",
           "Lis-les deux fois toi aussi, et reviens."
         ],
         "after": [
@@ -2911,8 +2911,8 @@
             "Here: Facets for your trouble, and a card I've been saving. It's a seed too, in its way."
           ],
           "lines_fr": [
-            "Les trois ! Et pas un seul mangé. Tu me redonnes foi en l'humanité.",
-            "Tiens : des Facettes pour ta peine, et une carte que je gardais de côté. C'est une graine, elle aussi, à sa façon."
+            "Les trois ! Et pas un seul mangé. Tu me redonnes foi en l'humanité.",
+            "Tiens : des Facettes pour ta peine, et une carte que je gardais de côté. C'est une graine, elle aussi, à sa façon."
           ]
         },
         {
@@ -2922,7 +2922,7 @@
             "They'll be tucked wherever a bean would hide. Stumps. Bushes. Bean-ish places."
           ],
           "lines_fr": [
-            "Alors ? Un sur le Sentier de Creuse-Fougère, un sur la Place de Clairpuits, un près des arbres à l'ouest du pré.",
+            "Alors ? Un sur le Sentier de Creuse-Fougère, un sur la Place de Clairpuits, un près des arbres à l'ouest du pré.",
             "Ils seront cachés là où un haricot se cacherait. Des souches. Des buissons. Des coins à haricots."
           ]
         },
@@ -2937,8 +2937,8 @@
             "One on the trail, one in the square, one by the west trees, I'd guess. Bring them back and I'll make it worth your while."
           ],
           "lines_fr": [
-            "Ah, c'est toi. Tu n'aurais pas vu trois cornets de papier ? Grands comme ça. Il y a écrit « NE PAS MANGER » dessus.",
-            "Mes graines de haricots grimpants. Elles ont fait l'aller-retour jusqu'au bois dans la poche de mon tablier, puis la place, et maintenant : envolées.",
+            "Ah, c'est toi. Tu n'aurais pas vu trois cornets de papier ? Grands comme ça. Il y a écrit « NE PAS MANGER » dessus.",
+            "Mes graines de haricots grimpants. Elles ont fait l'aller-retour jusqu'au bois dans la poche de mon tablier, puis la place, et maintenant : envolées.",
             "Un sur le sentier, un sur la place, un près des arbres de l'ouest, à mon avis. Rapporte-les-moi et tu ne le regretteras pas."
           ]
         },
@@ -3031,7 +3031,7 @@
             "Scared of a blank deck? I'll wait. I'm good at waiting."
           ],
           "lines_fr": [
-            "Peur d'un deck tout blanc ? J'attendrai. Je sais attendre."
+            "Peur d'un deck tout blanc ? J'attendrai. Je sais attendre."
           ],
           "do": [
             "duel:rook_1"
@@ -3163,7 +3163,7 @@
             "Show me what a seal is worth."
           ],
           "lines_fr": [
-            "Attends. C'est un sceau, ça ?",
+            "Attends. C'est un sceau, ça ?",
             "Un. Moi, on ne m'en a donné aucun, l'année où j'ai essayé.",
             "Je m'appelle Rook. Pas de couleur, avant que tu demandes. Exprès, maintenant.",
             "Montre-moi ce que vaut un sceau."

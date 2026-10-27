@@ -21,7 +21,7 @@ use std::path::Path;
 
 use serde_json::Value;
 use sixfold_engine::books::{book, BOOKS};
-use sixfold_engine::campaign::{rival, RIVALS};
+use sixfold_engine::campaign::{rival, GROUNDS, RIVALS};
 use sixfold_engine::doctor::APPLIED_FLAG;
 use sixfold_engine::overworld::{parse_cond, parse_effect, CamTarget, Cue, Effect, Progress, Test};
 use sixfold_engine::stats::{CURIOS, FIELD_ITEMS, FINDS, SEAL_SITES, WAYMARKS};
@@ -98,6 +98,10 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
         for (i, b) in d.as_array().into_iter().flatten().enumerate() {
             if let Some(c) = b["if"].as_str() {
                 cond(&format!("{at}.dialogue[{i}].if"), c, bad);
+            }
+            // `more`: the branch leads into the next that holds (Progress::pick_chain).
+            if !b["more"].is_null() && !b["more"].is_boolean() {
+                bad.push(format!("{at}.dialogue[{i}].more: true or false"));
             }
             for e in strs(&b["do"]) {
                 effect(&format!("{at}.dialogue[{i}].do"), e, bad);
@@ -959,6 +963,28 @@ fn keepers_ask_for_some_of_their_regions_duelists() {
                 assert!(last.contains(word), "{} at {k} bested says {last:?}", r.id);
             }
         }
+        // Audit 1.10: a keeper who wants seals is never promised on duelists alone. Every
+        // branch that counts them, or says the duel is earned, also asks `open:`, and
+        // someone says the seals come first.
+        if r.needs > 0 {
+            let (open, shut) = (format!("open:{}", r.id), format!("!open:{}", r.id));
+            let earned = format!("earned:{}", r.id);
+            for c in &conds {
+                let promises = c
+                    .split(" & ")
+                    .any(|t| t.starts_with(prefix.as_str()) || t == earned);
+                assert!(
+                    !promises || c.split(" & ").any(|t| t == open),
+                    "{}: {c:?} promises a duel the seals still block",
+                    r.id
+                );
+            }
+            assert!(
+                conds.iter().any(|c| c.split(" & ").any(|t| t == shut)),
+                "no one by {} says the seals come first",
+                r.id
+            );
+        }
         let says = (0..r.earn)
             .map(|k| format!("bested:{}:{k}", r.id))
             .chain([format!("earned:{}", r.id)]);
@@ -1303,6 +1329,71 @@ fn every_keeper_awards_the_seal_on_stage() {
     let errors = victory_problems("bellflats", &m).join("\n");
     for want in ["each line with its French", "lights another keeper's seal"] {
         assert!(errors.contains(want), "{want:?} in {errors}");
+    }
+}
+
+/// The Journal and the challenge sheet say where a keeper's duelists still
+/// wait (`campaign::GROUNDS`): every one of them is on exactly one ground,
+/// each ground lists the keepers' duelists its map holds, and its words name
+/// the map by its title (an interior by the title of the map it opens from).
+#[test]
+fn grounds_name_the_maps_that_hold_each_regions_duelists() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let map = |name: &str| -> Value {
+        serde_json::from_str(&std::fs::read_to_string(dir.join(format!("{name}.json"))).unwrap())
+            .unwrap()
+    };
+    let keepers: Vec<&str> = RIVALS
+        .iter()
+        .flat_map(|r| r.duelists.iter().copied())
+        .collect();
+    for id in &keepers {
+        let n = GROUNDS.iter().filter(|g| g.duelists.contains(id)).count();
+        assert_eq!(n, 1, "{id} is on {n} grounds");
+    }
+    let bare = |t: &str| -> String {
+        ["The ", "Le ", "La ", "Les ", "L'"]
+            .iter()
+            .find_map(|a| t.strip_prefix(a))
+            .unwrap_or(t)
+            .to_string()
+    };
+    for g in &GROUNDS {
+        let m = map(g.map);
+        let mut on: Vec<&str> = m["npcs"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter(|n| n.get("trainer").is_some())
+            .filter_map(|n| n["id"].as_str())
+            .filter(|id| keepers.contains(id))
+            .collect();
+        let mut listed = g.duelists.to_vec();
+        on.sort_unstable();
+        listed.sort_unstable();
+        assert_eq!(listed, on, "{}: the keepers' duelists on the map", g.map);
+        // An interior has no title: the map whose door leads in names it.
+        let titled = if m["title"].is_null() {
+            std::fs::read_dir(&dir)
+                .unwrap()
+                .map(|e| e.unwrap().path())
+                .filter(|p| p.extension().is_some_and(|e| e == "json"))
+                .map(|p| {
+                    serde_json::from_str::<Value>(&std::fs::read_to_string(p).unwrap()).unwrap()
+                })
+                .find(|o| {
+                    o["warps"]
+                        .as_array()
+                        .is_some_and(|w| w.iter().any(|w| w["to"] == g.map))
+                })
+                .unwrap()
+        } else {
+            m
+        };
+        for (title, at) in [("title", g.at.en), ("title_fr", g.at.fr)] {
+            let t = bare(titled[title].as_str().unwrap());
+            assert!(at.contains(&t), "{}: {at:?} doesn't name {t:?}", g.map);
+        }
     }
 }
 
