@@ -4234,6 +4234,22 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   70% { outline: 4px solid var(--c); outline-offset: -4px; }
   100% { outline: 4px solid transparent; outline-offset: -4px; }
 }
+/* The champion's duel (#154): a 400 ms hold, the slowest flight, and the ring
+   closes through the six seals' colours in the order they were won, easing from
+   one to the next (never a cut), before it settles in brass. */
+.duel[data-beat~="grand"] .prize.taking { animation-duration: calc(2200ms * var(--pace, 1)); }
+.duel[data-beat~="grand"] .mat { animation: seal-ring-grand calc(2200ms * var(--pace, 1)) var(--ease-out) both; }
+@keyframes seal-ring-grand {
+  0% { outline: 5px solid transparent; outline-offset: -44px; }
+  12% { outline: 5px solid #3f9a52; outline-offset: -10px; }
+  24% { outline-color: #2f7fd0; }
+  36% { outline-color: #e1572f; }
+  48% { outline-color: #e2ad19; }
+  60% { outline-color: #a8642f; }
+  72% { outline: 5px solid #8a4fc9; outline-offset: -5px; }
+  86% { outline: 5px solid var(--tint); outline-offset: -4px; }
+  100% { outline: 5px solid transparent; outline-offset: -4px; }
+}
 @keyframes prize-fly {
   0% { transform: none; }
   22% { transform: translateY(-10px) scale(1.6) rotate(-6deg); box-shadow: inset 0 0 0 1px var(--brass-hi), 0 8px 18px rgba(0, 0, 0, 0.55); }
@@ -4376,9 +4392,25 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 @keyframes seal-card-rise { from { opacity: 0; transform: translateY(8px); } }
 @keyframes seal-card-hold { from { transform: scaleX(0); } }
 @keyframes seal-card-out { to { opacity: 0; } }
+/* The champion's card (#154): a bigger seal set in a brass bezel, and in place of
+   her colours the six seals that opened her door, set one after another. */
+.seal-card.grand .seal-card-hex { width: clamp(184px, 30vmin, 252px); }
+.seal-card.grand .seal-card-hex::before {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: linear-gradient(160deg, var(--brass-hi), var(--brass-deep) 55%, var(--brass-ink));
+}
+.seal-card.grand .seal-card-hex > i { inset: 3px; }
+.seal-card-seals { display: flex; gap: var(--space-2); margin: var(--space-5) 0 0; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)); }
+.seal-card-seals > i { display: block; animation: seal-card-rise 380ms var(--ease-out) calc(520ms + var(--i) * 90ms) both; }
+.seal-card-seals .seal { display: block; width: 30px; }
+.seal-card-hold::after { animation-duration: var(--hold, 2200ms); }
 @media (max-width: 640px) {
   .seal-card .portrait { width: 88px; height: 88px; }
   .seal-card-hex { margin-bottom: var(--space-4); }
+  .seal-card-seals .seal { width: 26px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4395,7 +4427,9 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   .seal-flight { transform: translate(var(--tx), calc(var(--ty) + 60px)) scale(0.5); animation: calm-show 1850ms linear forwards !important; }
   .duel[data-beat~="seal-final"] .mat { animation: seal-ring-calm 1000ms ease both; }
   /* A seal duel's card fades in place and holds as long; nothing grows or slides. */
-  .seal-card-hex, .seal-card h2, .seal-card-who, .seal-card-pips { animation: fade-in var(--dur-panel) ease both; }
+  .seal-card-hex, .seal-card h2, .seal-card-who, .seal-card-pips, .seal-card-seals > i { animation: fade-in var(--dur-panel) ease both; }
+  /* The champion's ring: no cycle through the colours, a brass ring that fades in, holds and fades. */
+  .duel[data-beat~="grand"] .mat { animation: seal-ring-calm 1400ms ease both; }
   .seal-card-hold { display: none; }
 }
 @keyframes ko-fade { to { opacity: 0; filter: grayscale(1); } }
