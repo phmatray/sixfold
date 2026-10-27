@@ -337,8 +337,8 @@ forest, a market and a seal site don't share quotas.
 3. **Blockout.** Paths, plazas, the closed border and exits. Walk it in the overhead view
    (`el.sixfoldCam({ distance: 40, pitch: 62 })`).
 4. **Dress by function**, district by district.
-5. **Check.** `node tools/check-maps.mjs web/world --strict` must pass. Once check-maps v2 lands, also read the
-   per-map advisory report (`--report`).
+5. **Check.** `node tools/check-maps.mjs web/world --strict` must pass (with `"level_design": 2` it holds the
+   level-design rules, WORLD_RULES §11). Also read the per-map advisory report (`--report`).
 6. **Look.** Use the world debug overlays in a dev build (`?debug`): collisions, walkable ground,
    circulation, visibility and occlusion, POIs and secrets, NPC zones, lights, map links.
 7. **Human artistic review** at the real camera: beauty, credibility, the pleasure of discovery, landmarks
