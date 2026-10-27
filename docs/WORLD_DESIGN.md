@@ -2009,7 +2009,11 @@ I played the design through on paper. Here is what was still hollow, and what th
    result speaks the seal's language) a second, stricter one scored it 28/40. Its fixes: every keeper and Sable
    speak after each loss wherever the duel began (`defeat_<id>`, on enter while `lost:<id>` holds), the champion's
    table keeps the night felt with brass only on its trim, the refusal leads with what is missing, the challenge
-   opens as the camera returns, and the Journal says who and where, then the keeper. A third scored it TBD/40.
+   opens as the camera returns, and the Journal says who and where, then the keeper. A third scored it 31/40, with
+   nothing serious: its fixes make the Warden escalate (the hero walks in, her stone answers the six bells, her
+   felt carries the six seals that light in turn at the grand beat), let the seal flare on the felt at every
+   keeper's final beat, frame the sealed door with no void and the lamps dimmed, keep captions off what they name,
+   count the prizes a loss really took, and give scenes a lean-in and a letterbox. A fourth scored it TBD/40.
 9. **"The economy is a spreadsheet."** Facets with nothing exciting to buy feel like points. *Fixed*: each inn
    stocks one Rare to save up for, the Press can make the one card you need, the voucher is a real prize, and
    outfits give late Facets somewhere to go. The `economy_sim` keeps packs at about one per 12 minutes of

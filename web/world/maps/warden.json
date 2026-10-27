@@ -186,7 +186,7 @@
           ],
           "lines_fr": [
             "C'est donc toi qui les as fait sonner. Assieds-toi ; cette table attend depuis longtemps.",
-            "Pas de sceau sur cette table. Seulement le titre : champion de Sixfold.",
+            "Pas de sceau sur cette table. Seulement le titre : Champion de Sixfold.",
             "Six cartes Récompense. Montre-moi ce que les gardiens t'ont appris."
           ],
           "do": [
@@ -307,7 +307,7 @@
           ],
           "lines_fr": [
             "Tous les rivaux de la région ont appris de moi, ou ont essayé. À partir d'aujourd'hui, c'est de toi qu'ils apprendront.",
-            "La salle t'attend. Va leur montrer leur nouveau champion."
+            "La salle t'attend. Va leur montrer qui tient le titre."
           ]
         },
         {
@@ -359,12 +359,24 @@
         {
           "do": [
             "music:duel_boss",
-            "cam:5:6",
-            "wait:300",
+            "walk:hero:nn",
             "cam:6:1",
-            "wait:700",
+            "wait:200",
+            "sfx:bell:0",
+            "wait:220",
+            "sfx:bell:1",
+            "wait:220",
+            "sfx:bell:2",
+            "wait:220",
+            "sfx:bell:3",
+            "wait:220",
+            "sfx:bell:4",
+            "wait:220",
+            "sfx:bell:5",
+            "wait:220",
+            "wait:300",
             "cam:warden",
-            "wait:600"
+            "wait:500"
           ]
         },
         {
@@ -376,7 +388,7 @@
           ],
           "lines_fr": [
             "C'est donc toi qui les as fait sonner. Assieds-toi ; cette table attend depuis longtemps.",
-            "Pas de sceau sur cette table. Seulement le titre : champion de Sixfold.",
+            "Pas de sceau sur cette table. Seulement le titre : Champion de Sixfold.",
             "Six cartes Récompense. Montre-moi ce que les gardiens t'ont appris."
           ]
         },

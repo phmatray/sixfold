@@ -117,6 +117,7 @@ const LIT = 1.5; // a held seal's face, lit for good: its colour this much over 
 // A face whose seal isn't held yet rests dormant: its paint sunk most of the way into the stone.
 const DORMANT = new THREE.Color("#9c968b"), DORMANT_K = 0.75;
 const BURST = 60, BURST_S = 1.2; // the motes a seal won on stage sends up, and for how long (s)
+const SEAL_KEYS = ["grass", "water", "fire", "lightning", "fighting", "psychic"]; // the bells' order (props.js SEAL_ORDER)
 const WHITE = new THREE.Color("#ffffff");
 // A seal won on stage (`stone:seal`): its face lights for good and the rest of the glow gathers into it
 // (the wake fades), while BURST motes in its colour rise off the stone and fade over BURST_S, one draw
@@ -257,18 +258,23 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     clearTimeout(bannerTimer);
     bannerTimer = setTimeout(() => (banner.style.opacity = 0), ms);
   };
-  // A scene's caption (a reveal's line, the door's bells, #155): a paper plate lower down, never mistaken for
-  // the area's name on its dark pill.
+  // A scene's caption (a reveal's line, the door's bells, #155): a paper plate, never mistaken for the area's
+  // name on its dark pill.
+  // Up under where the area's name shows (a reveal: the keeper stands below their stone), low for the door's
+  // bells (the door is high on the wall), so it never sits on what it names; a talk box hides it
+  // (style.css `.scene-caption`).
   const caption = document.createElement("div");
+  caption.className = "scene-caption";
   caption.setAttribute("aria-hidden", "true");
   Object.assign(caption.style, {
-    position: "absolute", zIndex: 2, left: "50%", bottom: "26%", transform: "translateX(-50%)", pointerEvents: "none",
+    position: "absolute", zIndex: 2, left: "50%", bottom: "18%", transform: "translateX(-50%)", pointerEvents: "none",
     padding: "10px 20px", borderRadius: "12px", background: "var(--paper)", color: "var(--toon)", border: "2.5px solid var(--toon)",
     boxShadow: "0 3px 0 var(--toon)", font: "600 clamp(15px, 2vw, 19px) 'Bricolage Grotesque', system-ui, sans-serif",
     width: "max-content", maxWidth: "calc(100% - 32px)", textAlign: "center", textWrap: "balance", opacity: 0, transition: "opacity 0.4s ease",
   });
   let captionTimer = 0;
-  const showCaption = (text, ms) => {
+  const showCaption = (text, ms, low = false) => {
+    Object.assign(caption.style, low ? { top: "auto", bottom: "18%" } : { top: "calc(22% + 48px)", bottom: "auto" });
     caption.textContent = text;
     caption.style.opacity = 1;
     clearTimeout(captionTimer);
@@ -436,6 +442,18 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   const holds = (cond) => !cond || cb("check", cond, "") === true;
   // A gate's state is the engine's rule too (it never shuts under the hero).
   const gate = (cond, was, on) => cb("gate", cond, `${was ? 1 : 0}${on ? 1 : 0}`) === true;
+  // The room's lamps (lights, glows, shades) at `k` of their strength: the door's bells dim them so the inlays
+  // are the brightest thing in the room (#155); the scene's end brings them back.
+  const dimLamps = (k) => world?.root.traverse((o) => {
+    const v = o.userData.lamp;
+    if (v === undefined) return;
+    if (o.isLight) o.intensity = v * k;
+    else if (o.isSprite) o.material.opacity = v * k;
+    else if (o.material?.color) {
+      o.material.color.copy(v).multiplyScalar(0.35 + 0.65 * k);
+      if (o.material.emissive) o.material.emissiveIntensity = k;
+    }
+  });
   // The sealed door's `n`th inlay lights in its seal's colour, for good (props.js seal_door).
   const ringDoor = (n) => {
     const m = world?.root.getObjectByName(`inlay_${n}`);
@@ -482,10 +500,15 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     },
     // The door's bells (#154), seen and read too (#155): an inlay lights per bell, and the count builds up on screen;
     // the live region gets the whole count once.
+    ended: () => dimLamps(1),
     bell: (n) => {
+      // Sable's own stone answers the door's bells (#155): each rings up a face of it, motes in that seal's colour.
+      const door = world?.root.getObjectByName(`inlay_${n}`);
+      if (!door && world?.stone) return void sealFace(world.stone, SEAL_KEYS[n], reduced);
+      if (n === 0) dimLamps(0.25);
       ringDoor(n);
       const text = tr("The door rings: ", "La porte sonne\u00a0: ") + BELLS.slice(0, n + 1).join("… ") + (n >= 5 ? "." : "…");
-      showCaption(text, n >= 5 ? 2600 : 1200);
+      showCaption(text, n >= 5 ? 2600 : 1200, true);
       if (n >= 5) cb("area", text, "");
     },
     stone: (state, face) => {
@@ -818,23 +841,25 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       // Keep the view inside the room: the ground it shows spans [aim + top, aim + bottom]
       // along z (perspective makes the far side longer) and ±halfW along x.
       // The top edge is the top bar's lower edge, not the canvas's.
-      const half = THREE.MathUtils.degToRad(camera.fov / 2), hc = dist * Math.sin(pitch) + off[1], d0 = dist * Math.cos(pitch);
+      // At the camera's real distance: a scene's lean-in (zoom) lets the shot go closer to a wall (#155).
+      const dzc = dist * zoom;
+      const half = THREE.MathUtils.degToRad(camera.fov / 2), hc = dzc * Math.sin(pitch) + off[1], d0 = dzc * Math.cos(pitch);
       const halfTop = Math.atan((1 - 2 * cover) * Math.tan(half));
       const top = pitch > halfTop ? d0 - hc / Math.tan(pitch - halfTop) : -Infinity, bottom = d0 - hc / Math.tan(pitch + half);
-      const halfW = dist * Math.tan(half) * camera.aspect;
+      const halfW = dzc * Math.tan(half) * camera.aspect;
       // A room bigger than the view: the view stays inside it. Smaller: the
       // camera still follows the hero, but only as far as keeps the whole room
       // (and its back wall, about 1 m) in view.
       const fit = (v, lo, hi) => THREE.MathUtils.clamp(v, Math.min(lo, hi), Math.max(lo, hi));
-      // A scene's shot of something by a wall (the sealed door) may show a strip past it, so what it
-      // aims at sits about a fifth in from the frame's edge rather than off it.
-      const near = shot ? 0.55 * halfW : Infinity;
-      aim.x = fit(aim.x, Math.min(halfW, aim.x + near), Math.max(w.map.width - halfW, aim.x - near));
+      // A scene's shot of a tile by the wall (the sealed door) may take in the wall's own thickness, no more,
+      // so what it shows isn't cut by the frame's edge (#155).
+      const wall = shot ? 0.6 : 0;
+      aim.x = fit(aim.x, halfW - wall, w.map.width - halfW + wall);
       if (Number.isFinite(top)) {
         // A room deeper than the view leans to its back row (counters, shelves) as
-        // long as the hero stays a little over the bottom edge.
+        // long as the hero stays a little over the bottom edge; a scene's shot holds its own depth.
         const lo = -top - 1, hi = w.map.height - bottom;
-        aim.z = fit(aim.z, lo, lo < hi ? Math.max(lo, Math.min(hi, pz + 1.2 - bottom)) : hi);
+        aim.z = fit(aim.z, lo, lo < hi ? (shot ? hi : Math.max(lo, Math.min(hi, pz + 1.2 - bottom))) : hi);
       }
     }
     if (first || reduced) look.copy(aim), lookVel.set(0, 0, 0);
@@ -845,7 +870,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     }
     first = false;
     if (!paused) cut.update(dt);
-    zoom += (((h.sit || h.idle > FIDGET_AFTER) && !reduced ? 0.88 : 1) - zoom) * Math.min(1, dt * 1.5); // sitting: in a little
+    // Sitting, idle a while or in a scene (#155: a scene reads as one): in a little. Reduced motion stays put.
+    const lean = reduced ? 1 : cut.playing ? 0.85 : h.sit || h.idle > FIDGET_AFTER ? 0.88 : 1;
+    zoom += (lean - zoom) * Math.min(1, dt * 1.5);
     const dz = dist * zoom;
     camera.position.set(look.x, look.y + Math.sin(pitch) * dz, look.z + Math.cos(pitch) * dz);
     camera.lookAt(look);

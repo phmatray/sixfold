@@ -1127,6 +1127,22 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
   pointer-events: none;
   background: radial-gradient(ellipse 75% 70% at 50% 48%, transparent 55%, color-mix(in srgb, var(--felt-deep) 40%, transparent));
 }
+/* A scene (#155): the edges close in a little more, a light letterbox, so it reads as one; it fades, never slides. */
+.world-stage::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 500ms ease;
+  background:
+    linear-gradient(to bottom, color-mix(in srgb, var(--felt-deep) 70%, transparent), transparent 9%, transparent 91%, color-mix(in srgb, var(--felt-deep) 70%, transparent)),
+    radial-gradient(ellipse 80% 75% at 50% 48%, transparent 50%, color-mix(in srgb, var(--felt-deep) 45%, transparent));
+}
+.world.in-scene .world-stage::before { opacity: 1; }
+/* A scene's caption steps aside while someone speaks (world.js `showCaption`). */
+body:has(.talk-box) .scene-caption { visibility: hidden; }
 .world-top, .world-prompt, .world-controls, .world-loading, .world-error, .world-legend { position: absolute; z-index: 2; }
 /* The HUD: the controls hint (until the first steps) on the left, and one
    small tray of what is glanceable on the right. */
@@ -4041,8 +4057,10 @@ button.pile { cursor: pointer; }
 .world-skip kbd, .talk-skip kbd, .credits-foot kbd { font: 700 var(--fs-xs) var(--body); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.3); }
 .credits-foot kbd { margin-left: 8px; }
 @media (hover: none) { .world-skip kbd { display: none; } }
-.talk-skip { display: block; margin: 6px 0 0 auto; min-height: 44px; font-size: var(--fs-md); }
-.talk-skip kbd { margin-left: 8px; }
+/* Its own footer row, clear of the talk box's inner frame (#155); its key hint inked for paper, and gone on touch. */
+.talk-skip { display: block; margin: 16px 0 0 auto; min-height: 44px; font-size: var(--fs-md); }
+.talk-skip kbd { margin-left: 8px; border-color: color-mix(in srgb, var(--toon) 35%, transparent); }
+@media (hover: none) { .talk-skip kbd { display: none; } }
 .world.in-scene .world-controls { visibility: hidden; } /* the pad does nothing while a scene plays */
 /* ---------- Opening: studio mark, logo, press to start (splash.rs) ---------- */
 
@@ -4258,6 +4276,22 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
    order), easing from one to the next (never a cut), before it settles in brass. */
 .duel[data-beat~="grand"] .prize.taking { animation-duration: calc(2200ms * var(--pace, 1)); }
 .duel[data-beat~="grand"] .mat { animation: seal-ring-grand calc(2200ms * var(--pace, 1)) var(--ease-out) both; }
+/* The seal itself answers on the table (#155): the hexagon pressed into the felt flares in the region's
+   colour and the plaque pulses; at the champion's, the six inlays light in turn before the centre flares. */
+.duel[data-beat~="seal-final"] .mat::before { animation: centre-flare calc(1600ms * var(--pace, 1)) var(--ease-out) both; }
+.duel[data-beat~="seal-final"] .seal-plaque { animation: plaque-pulse calc(1600ms * var(--pace, 1)) var(--ease-out) both; }
+.duel[data-beat~="grand"] .mat::before { animation: centre-flare calc(2200ms * var(--pace, 1)) var(--ease-out) calc(900ms * var(--pace, 1)) both; }
+.duel[data-beat~="grand"] .grand-inlays i { animation: inlay-lit calc(1300ms * var(--pace, 1)) var(--ease-out) calc(var(--i) * 140ms * var(--pace, 1)) both; }
+@keyframes centre-flare {
+  0% { filter: none; }
+  45% { filter: brightness(3.2) saturate(1.4) drop-shadow(0 0 18px var(--c)); }
+  100% { filter: brightness(1.6) saturate(1.2); }
+}
+@keyframes plaque-pulse { 30%, 60% { box-shadow: 0 0 0 3px var(--tint), 0 0 22px 4px var(--c); } }
+@keyframes inlay-lit {
+  0% { background: color-mix(in srgb, var(--c) 28%, transparent); }
+  35%, 100% { background: var(--c); filter: drop-shadow(0 0 10px var(--c)); }
+}
 /* The ring is the edge of the screen; the portrait across the table rings too, where the eye already is (#155). */
 .duel[data-beat~="seal-final"] .half.opp .portrait { animation: seal-portrait calc(1600ms * var(--pace, 1)) var(--ease-out) both; }
 .duel[data-beat~="grand"] .half.opp .portrait { animation-duration: calc(2200ms * var(--pace, 1)); }
@@ -4356,6 +4390,28 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
   background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--tint) 10%, transparent), color-mix(in srgb, var(--c) 13%, transparent) 70%);
   pointer-events: none;
+}
+/* The champion's felt (#155): the six seals, small hexagons pressed in a ring round the centre one. */
+.grand-inlays {
+  position: absolute;
+  z-index: -1;
+  grid-column: left / outer;
+  grid-row: ofront / mbench;
+  inset: 0;
+  margin: auto;
+  width: min(300px, 60%);
+  aspect-ratio: 1 / 1.1;
+  pointer-events: none;
+}
+.grand-inlays i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 15%;
+  aspect-ratio: 1 / 1.1;
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: color-mix(in srgb, var(--c) 28%, transparent);
+  transform: translate(-50%, -50%) rotate(calc(var(--i) * 60deg)) translateY(-200%) rotate(calc(var(--i) * -60deg));
 }
 /* Its name on a small plaque at the felt's head, for the whole duel (the card says it once). */
 .seal-plaque {
@@ -4500,6 +4556,10 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   .seal-card-hex, .seal-card h2, .seal-card-who, .seal-card-pips, .seal-card-seals > i { animation: fade-in var(--dur-panel) ease both; }
   /* The champion's ring: no cycle through the colours, a brass ring that fades in, holds and fades. */
   .duel[data-beat~="grand"] .mat { animation: seal-ring-calm 1250ms ease both !important; }
+  .duel[data-beat~="seal-final"] .mat::before { animation: centre-flare 900ms ease both !important; }
+  .duel[data-beat~="seal-final"] .seal-plaque { animation: plaque-pulse 900ms ease both !important; }
+  .duel[data-beat~="grand"] .mat::before { animation: centre-flare 1250ms ease both !important; }
+  .duel[data-beat~="grand"] .grand-inlays i { animation: inlay-lit 1250ms steps(1, start) both !important; }
   .duel[data-beat~="grand"] .half.opp .portrait { animation: seal-portrait 1250ms ease both !important; }
   /* The hold still shows the card will move on, in four cuts rather than a slide (#155). */
   .seal-card-hold::after { animation: seal-card-hold var(--hold, 2200ms) steps(4, end) both !important; }

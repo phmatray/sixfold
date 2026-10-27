@@ -155,6 +155,7 @@ export function scenes(env) {
       else if (c.warp) env.warp({ to: c.warp.map, spawn: c.warp, travel: true });
     }
     playing = false;
+    env.ended();
     env.stone(null);
     env.tune();
     env.moved();

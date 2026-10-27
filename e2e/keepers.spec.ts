@@ -53,7 +53,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   // The Journal's next step names the duelists still needed.
   await page.keyboard.press("j");
   const journal = page.getByRole("dialog", { name: "Journal" });
-  await expect(journal).toContainText("Beat one more Saltreach duelist (2 of 3):");
+  await expect(journal).toContainText("Marlo's seal: beat one more Saltreach duelist (●●○ 2 of 3),");
   await page.keyboard.press("Escape");
   await expect(journal).toBeHidden();
   // The menu's Campaign roster counts them too.

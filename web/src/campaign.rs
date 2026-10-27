@@ -96,7 +96,7 @@ pub fn reward_line(r: &Rival, p: &Progress) -> String {
         ),
         (false, false) => tr(
             format!("First win: the champion's title, {packs}, ⬡ {facets} and the {promo} promo card"),
-            format!("Première victoire : le titre de champion, {packs}, ⬡ {facets} et la carte promo {promo}"),
+            format!("Première victoire : le titre de Champion de Sixfold, {packs}, ⬡ {facets} et la carte promo {promo}"),
         ),
         (true, _) => tr(
             format!("Rematch win: ⬡ {facets}"),
@@ -554,7 +554,7 @@ fn win_view(w: Win) -> impl IntoView {
         }
         .into_any(),
         Win::Title => view! {
-            <li class="ch-win"><span class="ch-crown" aria-hidden="true"></span>{tr("The champion's title", "Le titre de champion")}</li>
+            <li class="ch-win"><span class="ch-crown" aria-hidden="true"></span>{tr("The champion's title", "Le titre de Champion de Sixfold")}</li>
         }
         .into_any(),
         Win::Packs(label) => view! {

@@ -620,6 +620,11 @@ export async function build(map, got, reduced) {
       const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
       glow.position.copy(light.position);
       glow.scale.setScalar(1.3);
+      // Noted so a scene can dim the room round what it shows (world.js `dimLamps`, the door's bells).
+      light.userData.lamp = light.intensity;
+      glow.userData.lamp = glow.material.opacity;
+      // The model's own lit parts (a glow material, kept apart when merged) dim with it.
+      p.obj?.traverse((o) => o.isMesh && /glow|shade|bulb/i.test(o.material?.name ?? "") && o.userData.lamp === undefined && (o.material = o.material.clone(), (o.userData.lamp = o.material.color.clone())));
       root.add(light, glow);
     }
   }

@@ -1288,7 +1288,12 @@ pub fn WorldScreen() -> impl IntoView {
             Some(s) => {
                 scene.set_value(Some(s));
                 playing.set(true);
-                next();
+                // Options' "Skip every cutscene": skipped at once, its effects kept.
+                if store::skip_scenes() {
+                    skip();
+                } else {
+                    next();
+                }
             }
             None => world_cue(r#"{"end":[]}"#),
         }

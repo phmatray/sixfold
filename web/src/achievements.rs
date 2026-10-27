@@ -134,7 +134,7 @@ pub fn Toaster() -> impl IntoView {
         // A duel's result and a seal on its way to the Menu are their own moment
         // (#155): the toasts wait until the seal has landed.
         if document()
-            .query_selector("dialog:modal, .scrim.end, .seal-card, .seal-flight")
+            .query_selector("dialog:modal, .scrim.end, .seal-card, .seal-flight, .world.in-scene")
             .ok()
             .flatten()
             .is_some()

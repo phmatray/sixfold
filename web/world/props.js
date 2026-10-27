@@ -238,8 +238,14 @@ export const PLACEHOLDER = {
     return g;
   },
   lamp() {
+    // The lit shade (`userData.lamp`: its colour, so a scene can dim it, world.js `dimLamps`).
+    const shade = () => {
+      const m = mesh(new THREE.CylinderGeometry(0.16, 0.3, 0.32, 12, 1, true), new THREE.MeshBasicMaterial({ color: "#ffd9a0", side: THREE.DoubleSide }), 0, 1.5, 0);
+      m.userData.lamp = m.material.color.clone();
+      return m;
+    };
     return group(mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.06, 12), toon("#5b4a3a"), 0, 0.03, 0), mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.4, 6), toon("#5b4a3a"), 0, 0.72, 0),
-      mesh(new THREE.CylinderGeometry(0.16, 0.3, 0.32, 12, 1, true), new THREE.MeshBasicMaterial({ color: "#ffd9a0", side: THREE.DoubleSide }), 0, 1.5, 0));
+      shade());
   },
   // The sealed door to the Warden (#155), set in the duel hall's wall: a dark leaf in a stone frame, a brass
   // hexagon on it, and over it a stone medallion standing out from the wall, toward the camera, with six
