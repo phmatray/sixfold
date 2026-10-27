@@ -9,7 +9,7 @@
 //! through `Save::from_legacy` (0.7 wrote the same keys, byte for byte). Each
 //! release adds one.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::Path;
 
 use sixfold_engine::books::{is_read, read_count, read_flag, BOOKS};
@@ -125,4 +125,119 @@ fn a_1_3_save_keeps_its_clock_and_map() {
     assert_eq!(p.minute(), 1200);
     assert_eq!(p.waymarks().collect::<Vec<_>>(), ["meadow"]);
     assert!(p.seen("woodland"));
+}
+
+/// The entries of a `export const NAME = { key: [a, b], … };` table in props.js.
+fn props_table(src: &str, name: &str) -> Vec<(String, Vec<f64>)> {
+    let head = format!("export const {name} = {{");
+    let body = &src[src
+        .find(&head)
+        .unwrap_or_else(|| panic!("props.js has no {name}"))
+        + head.len()..];
+    let body: String = body[..body.find("};").unwrap()]
+        .lines()
+        .map(|l| l.split("//").next().unwrap())
+        .collect::<Vec<_>>()
+        .join("\n");
+    let mut out = vec![];
+    let mut rest = body.as_str();
+    while let Some(colon) = rest.find(':') {
+        let key = rest[..colon]
+            .rsplit(|c: char| !(c.is_alphanumeric() || c == '_'))
+            .next()
+            .unwrap();
+        let after = &rest[colon + 1..];
+        let (open, close) = (after.find('[').unwrap(), after.find(']').unwrap());
+        let nums = after[open + 1..close]
+            .split(',')
+            .map(|n| n.trim().parse().unwrap())
+            .collect();
+        out.push((key.to_string(), nums));
+        rest = &after[close + 1..];
+    }
+    out
+}
+
+/// 1.10 (#112): Fernhollow Trail was re-laid. A save written on the old trail (by 1.9.1, every find
+/// collected, the hero halfway over the old bridge) still loads: each find it collected is still on
+/// the map and still collected, so none comes back; and the tile it stood on is in the stream now,
+/// so the world puts the hero on the map's spawn (`web/world/world.js`, WORLD_DESIGN risk S1),
+/// which is open ground.
+#[test]
+fn a_save_on_the_old_fernhollow_trail_keeps_its_finds_and_lands_on_open_ground() {
+    let s = Save::decode(&fixture("v1.9.1-fernhollow.txt")).unwrap();
+    let p = s.progress();
+    let web = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world");
+    let map: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(web.join("maps/woodland.json")).unwrap())
+            .unwrap();
+    let finds: Vec<&str> = map["interactions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|i| i["kind"] == "find")
+        .filter_map(|i| i["id"].as_str())
+        .collect();
+    let before = [
+        "w_lookout",
+        "w_reeds",
+        "w_bridge",
+        "w_glade",
+        "w_birch",
+        "seed_1",
+        "w_log",
+        "w_camp",
+        "w_corner",
+        "g_glade",
+        "reed_fibre",
+        "w_hollow",
+    ];
+    for id in before {
+        assert!(
+            p.has_flag(&format!("found_{id}")),
+            "the save had collected {id}"
+        );
+        assert!(finds.contains(&id), "{id} is no longer on Fernhollow Trail");
+    }
+
+    // Open ground: not water, rock, a fence or a wall, and under no prop but a deck or a rug.
+    let src = std::fs::read_to_string(web.join("props.js")).unwrap();
+    let foot: HashMap<String, Vec<f64>> = props_table(&src, "FOOT").into_iter().collect();
+    let deck: Vec<String> = props_table(&src, "DECK")
+        .into_iter()
+        .map(|(k, _)| k)
+        .collect();
+    let open = |x: i64, z: i64| {
+        let row = map["tiles"][z as usize].as_str().unwrap().as_bytes();
+        !b"~#fWV".contains(&row[x as usize])
+            && !map["props"].as_array().unwrap().iter().any(|q| {
+                let asset = q["asset"].as_str().unwrap();
+                let (px, pz) = (q["x"].as_i64().unwrap(), q["z"].as_i64().unwrap());
+                let (mut w, mut d) = foot
+                    .get(asset)
+                    .map_or((1, 1), |f| (f[0] as i64, f[1] as i64));
+                if q["rot"].as_i64().unwrap_or(0) % 180 == 90 {
+                    (w, d) = (d, w);
+                }
+                q.get("if").is_none()
+                    && !deck.iter().any(|k| k == asset)
+                    && (px..px + w).contains(&x)
+                    && (pz..pz + d).contains(&z)
+            })
+    };
+    let at: Vec<&str> = s.get(WORLD_AT).unwrap().split(',').collect();
+    assert_eq!(at[0], "woodland");
+    let (x, z) = (at[1].parse().unwrap(), at[2].parse().unwrap());
+    let spawn = (
+        map["spawn"]["x"].as_i64().unwrap(),
+        map["spawn"]["z"].as_i64().unwrap(),
+    );
+    assert!(
+        !open(x, z),
+        "the old bridge's tile {x},{z} should be in the stream now"
+    );
+    assert!(
+        open(spawn.0, spawn.1),
+        "the spawn {spawn:?} is not open ground"
+    );
 }
