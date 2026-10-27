@@ -2055,6 +2055,103 @@
       "outfit": "#2a3040",
       "hair": "#c8c8c8",
       "if": "time:night"
+    },
+    {
+      "id": "orla",
+      "name": "Orla",
+      "model": "rival_fighting",
+      "tint": "#d39058",
+      "scale": 1,
+      "idle": "Idle",
+      "x": 21,
+      "z": 6,
+      "facing": "s",
+      "dialogue": [
+        {
+          "if": "won:orla&flag:thanked_orla",
+          "lines": [
+            "Cracked it again. I'll need a harder rock."
+          ],
+          "lines_fr": [
+            "Encore fendue. Il me faudra une roche plus dure."
+          ]
+        },
+        {
+          "if": "won:orla",
+          "lines": [
+            "You cracked the bedrock. Respect.",
+            "My seal. Earned, not quarried.",
+            "Slatebrow too. Built like my site hut, and twice as stubborn."
+          ],
+          "lines_fr": [
+            "Tu as fendu la roche-mère. Respect.",
+            "Mon sceau. Gagné, pas extrait.",
+            "Ardoisfront aussi. Bâti comme ma cabane de chantier, et deux fois plus têtu."
+          ],
+          "do": [
+            "flag:thanked_orla"
+          ]
+        },
+        {
+          "if": "lost:orla",
+          "lines": [
+            "Solid stone stays solid. Come back with a sharper pick."
+          ],
+          "lines_fr": [
+            "La pierre dure reste dure. Reviens avec une pioche mieux affûtée."
+          ]
+        },
+        {
+          "if": "!open:orla",
+          "lines": [
+            "Not yet. The quarry only opens to those with three seals.",
+            "Go on, the others won't beat themselves."
+          ],
+          "lines_fr": [
+            "Pas encore. La carrière ne s'ouvre qu'à ceux qui ont trois sceaux.",
+            "Allez, les autres ne vont pas se battre tout seuls."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "Champion on my quarry floor. Mind the gravel, it doesn't care about titles.",
+            "Five prizes, same as ever. Shall we?"
+          ],
+          "lines_fr": [
+            "Champion, dans ma carrière. Attention au gravier, il se fiche des titres.",
+            "Cinq cartes Récompense, comme toujours. On y va ?"
+          ],
+          "do": [
+            "duel:orla"
+          ]
+        },
+        {
+          "if": "beat:orla",
+          "lines": [
+            "Another shift? Five prizes, same as ever."
+          ],
+          "lines_fr": [
+            "On rembauche ? Cinq cartes Récompense, comme toujours."
+          ],
+          "do": [
+            "duel:orla"
+          ]
+        },
+        {
+          "lines": [
+            "Hard hat zone. Well, it would be, if I had a hard hat.",
+            "Orla. I run this quarry. Five prizes, no shortcuts."
+          ],
+          "lines_fr": [
+            "Port du casque obligatoire. Enfin, il le serait, si j'avais un casque.",
+            "Orla. C'est moi qui dirige la carrière. Cinq cartes Récompense, pas de raccourcis."
+          ],
+          "do": [
+            "duel:orla"
+          ]
+        }
+      ]
     }
   ],
   "cliff": [

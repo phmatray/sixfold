@@ -1955,6 +1955,96 @@
       },
       "outfit": "#5a7a5a",
       "hair": "#8a8a7a"
+    },
+    {
+      "id": "bramble",
+      "name": "Bramble",
+      "model": "rival_grass",
+      "tint": "#8fd17a",
+      "scale": 1,
+      "idle": "Idle",
+      "x": 19,
+      "z": 16,
+      "facing": "e",
+      "dialogue": [
+        {
+          "if": "won:bramble&flag:thanked_bramble",
+          "lines": [
+            "Pruned again! Green thumbs and sharp cards, that's you."
+          ],
+          "lines_fr": [
+            "Encore élagué ! La main verte et des cartes affûtées, c'est bien toi."
+          ]
+        },
+        {
+          "if": "won:bramble",
+          "lines": [
+            "Well! You pruned me right back.",
+            "Take my seal. Five more rivals carry one each.",
+            "And a Thistlewick for your binder. It only pricks a little."
+          ],
+          "lines_fr": [
+            "Eh bien ! Tu m'as taillé à ras.",
+            "Prends mon sceau. Cinq autres rivaux en ont chacun un.",
+            "Et un Chardomèche pour ton classeur. Il ne pique qu'un peu."
+          ],
+          "do": [
+            "flag:thanked_bramble"
+          ]
+        },
+        {
+          "if": "lost:bramble",
+          "lines": [
+            "Ha, tangled up! Happens to everyone the first time.",
+            "Catch your breath and come try again."
+          ],
+          "lines_fr": [
+            "Ha, pris dans les ronces ! Ça arrive à tout le monde, la première fois.",
+            "Reprends ton souffle et reviens tenter ta chance."
+          ]
+        },
+        {
+          "if": "beat:warden",
+          "lines": [
+            "Champion! The hedges stood up straighter when they heard.",
+            "Fancy a trim? Two prizes, as always."
+          ],
+          "lines_fr": [
+            "Champion ! Les haies se sont redressées en apprenant la nouvelle.",
+            "Un petit coup de sécateur ? Deux cartes Récompense, comme toujours."
+          ],
+          "do": [
+            "duel:bramble"
+          ]
+        },
+        {
+          "if": "beat:bramble",
+          "lines": [
+            "Back for more thorns? Two prizes, same as before."
+          ],
+          "lines_fr": [
+            "Tu reviens chercher des épines ? Deux cartes Récompense, comme la dernière fois."
+          ],
+          "do": [
+            "duel:bramble"
+          ]
+        },
+        {
+          "lines": [
+            "Mind the hedge, it bites. Only a little.",
+            "I'm Bramble. I keep the hedges along this trail tidy, and I keep a deck for visitors.",
+            "A short one, two prizes. Shall we?"
+          ],
+          "lines_fr": [
+            "Attention à la haie, elle mord. Juste un peu.",
+            "Moi, c'est Bramble. J'entretiens les haies du sentier, et je garde un deck pour les visiteurs.",
+            "Un duel court, deux cartes Récompense. On y va ?"
+          ],
+          "do": [
+            "duel:bramble"
+          ]
+        }
+      ]
     }
   ],
   "fence": "hedge",
