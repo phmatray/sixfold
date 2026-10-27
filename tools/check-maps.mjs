@@ -47,8 +47,8 @@ const TIERS = ["major", "secondary", "micro", "secret"]; // points of interest (
 const LADDER = new Set(eval(`(${src.match(/export const LADDER = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove", "stone", "cave"]);
 const BEDS = new Set([...TRACKS, "interior"]); // audio.js BEDS
-// A scene's `music:` may also be a theme of its own (engine overworld::TRACKS): Rook's, the finale's, a keeper's duel theme.
-const THEMES = new Set([...BEDS, "rook", "finale", ...["ember", "storm", "tide", "dream", "grove", "stone"].map((r) => `duel_rival_${r}`)]);
+// A scene's `music:` may also be a theme of its own (engine overworld::TRACKS): Rook's, the finale's, a keeper's or the Warden's duel theme.
+const THEMES = new Set([...BEDS, "rook", "finale", "duel_boss", ...["ember", "storm", "tide", "dream", "grove", "stone"].map((r) => `duel_rival_${r}`)]);
 const KEEPERS = ["bramble", "marlo", "cinza", "quill", "orla", "lumen"]; // the seal keepers (engine campaign::RIVALS with a seal)
 const FENCES = new Set(["fence", "wall_dry", "hedge"]);
 const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/atlas.json`, "utf8")) : null;
@@ -213,7 +213,8 @@ for (const [name, m] of Object.entries(maps)) {
 // stone; a `duel:` only in the last step (it ends the scene).
 // A seal site's staging (#152; engine/tests/world_data.rs holds the rest of its shape): `reveal_<map>` keeps to
 // 3 `cam` and 2 000 ms of `wait`; `entrance_<keeper>` starts on every reachable open tile two from the keeper (but
-// one where someone stands for good: no route), so nobody walks up to them without it.
+// one where someone stands for good: no route), so nobody walks up to them without it; one that plays on arriving
+// (the Warden's, #154) needs no ring.
 function scripts(name, m, solid, inMap, reached) {
   const list = m.scripts ?? [];
   if (!Array.isArray(list)) return void fail.push(`${name}: scripts is a list`);
@@ -234,7 +235,7 @@ function scripts(name, m, solid, inMap, reached) {
       const cams = fx.filter((e) => e.startsWith("cam:")).length, waits = fx.reduce((t, e) => t + (e.startsWith("wait:") ? +e.slice(5) || 0 : 0), 0);
       if (cams > 3 || waits > 2000) fail.push(`${at}: a reveal keeps to 3 cams and 2000 ms of waits (has ${cams} and ${waits} ms)`);
     }
-    const keeper = s.id?.startsWith("entrance_") && npcs[s.id.slice(9)];
+    const keeper = s.id?.startsWith("entrance_") && s.on !== "enter" && npcs[s.id.slice(9)];
     if (keeper) {
       const others = new Set((m.npcs ?? []).filter((n) => n !== keeper && !n.route).map((n) => `${n.x},${n.z}`)), tiles = new Set((s.at ?? []).map((t) => `${t[0]},${t[1]}`));
       for (let dx = -2; dx <= 2; dx++)

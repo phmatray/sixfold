@@ -1305,3 +1305,152 @@ fn every_keeper_awards_the_seal_on_stage() {
         assert!(errors.contains(want), "{want:?} in {errors}");
     }
 }
+
+/// #154: the Warden's duel is staged grandest. With six seals the sealed door
+/// rings once (`door_warden`, on the tile before it: her theme, the camera on
+/// the door, a bell per seal climbing the scale, a line from Sable through
+/// it), her room stages her entrance once (`entrance_warden`, on arriving),
+/// she says the same if talked to first, and the finale stays the victory.
+#[test]
+fn the_warden_is_staged_grandest() {
+    use sixfold_engine::campaign::record;
+    use sixfold_engine::profile::Profile;
+
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let load = |name: &str| -> Value {
+        serde_json::from_str(&std::fs::read_to_string(dir.join(format!("{name}.json"))).unwrap())
+            .unwrap()
+    };
+    let script = |m: &Value, id: &str| -> Value {
+        m["scripts"]
+            .as_array()
+            .and_then(|l| l.iter().find(|s| s["id"] == id))
+            .cloned()
+            .unwrap_or_else(|| panic!("no {id} script"))
+    };
+    let effects = |s: &Value| -> Vec<String> {
+        s["steps"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .flat_map(|st| strs(&st["do"]))
+            .map(String::from)
+            .collect()
+    };
+    // The one `say` of `who` in `s`: n lines, each with its French.
+    let said = |s: &Value, who: &str, n: usize| -> (Value, Value) {
+        let says: Vec<&Value> = s["steps"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|st| st["say"] == who)
+            .collect();
+        assert_eq!(says.len(), 1, "{who} speaks once in {}", s["id"]);
+        let (en, fr) = (&says[0]["lines"], &says[0]["lines_fr"]);
+        assert_eq!(en.as_array().map(Vec::len), Some(n), "{}", s["id"]);
+        assert_eq!(fr.as_array().map(Vec::len), Some(n), "{}: French", s["id"]);
+        (en.clone(), fr.clone())
+    };
+    const STAGED: &str = "seals:6 & !beat:warden & !flag:met_warden";
+
+    // The door.
+    let shop = load("shop");
+    let door = script(&shop, "door_warden");
+    assert_eq!(door["if"], format!("{STAGED} & !flag:door_warden").as_str());
+    let warp = shop["warps"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|w| w["to"] == "warden")
+        .expect("the sealed door");
+    let (wx, wz) = (warp["x"].as_i64().unwrap(), warp["z"].as_i64().unwrap());
+    assert_eq!(
+        door["at"],
+        serde_json::json!([[wx + 1, wz]]),
+        "the tile before the door"
+    );
+    assert!(door.get("on").is_none());
+    let fx = effects(&door);
+    assert_eq!(
+        fx[..2],
+        ["music:duel_boss", format!("cam:{wx}:{wz}").as_str()]
+    );
+    let bells: Vec<&String> = fx.iter().filter(|e| e.starts_with("sfx:")).collect();
+    assert_eq!(
+        bells,
+        (0..6)
+            .map(|n| format!("sfx:bell:{n}"))
+            .collect::<Vec<_>>()
+            .iter()
+            .collect::<Vec<_>>(),
+        "a bell per seal, climbing"
+    );
+    assert!(
+        !fx.iter().any(|e| e.starts_with("warp:")),
+        "the door stays the way in"
+    );
+    assert_eq!(fx[fx.len() - 2..], ["cam:hero", "flag:door_warden"]);
+    said(&door, "sable", 1);
+
+    // The entrance.
+    let room = load("warden");
+    let entrance = script(&room, "entrance_warden");
+    assert_eq!(
+        (&entrance["on"], &entrance["if"]),
+        (&"enter".into(), &STAGED.into())
+    );
+    let fx = effects(&entrance);
+    assert_eq!(fx[..2], ["music:duel_boss", "cam:warden"]);
+    assert_eq!(
+        fx[fx.len() - 3..],
+        ["cam:hero", "flag:met_warden", "duel:warden"]
+    );
+    let lines = said(&entrance, "warden", 3);
+    // Talked to first, Sable says the same and does the same.
+    let sable = room["npcs"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == "warden")
+        .unwrap();
+    let branches = sable["dialogue"].as_array().unwrap();
+    let first = branches
+        .iter()
+        .find(|b| {
+            let c = b["if"].as_str().unwrap_or("");
+            !c.contains("won:") && !c.contains("lost:") && c != "!open:warden"
+        })
+        .unwrap();
+    assert_eq!(first["if"], STAGED);
+    assert_eq!((first["lines"].clone(), first["lines_fr"].clone()), lines);
+    assert_eq!(strs(&first["do"]), ["flag:met_warden", "duel:warden"]);
+    // A loss is met in a line or two, with the French.
+    let lost = branches.iter().find(|b| b["if"] == "lost:warden").unwrap();
+    let n = lost["lines"].as_array().map_or(0, Vec::len);
+    assert!((1..=2).contains(&n) && lost["lines_fr"].as_array().map(Vec::len) == Some(n));
+    // The finale is untouched.
+    assert_eq!(script(&room, "finale")["if"], "won:warden & !flag:finale");
+
+    // Each plays once, with six seals, and never once the Warden has fallen.
+    let (mut p, mut pr) = (Progress::default(), Profile::new_player());
+    let (door_if, entrance_if) = (door["if"].as_str().unwrap(), STAGED);
+    for r in RIVALS.iter().filter(|r| r.seal) {
+        assert!(
+            !p.check(door_if) && !p.check(entrance_if),
+            "before six seals"
+        );
+        record(r, true, &mut p, &mut pr);
+        p.settle();
+    }
+    assert!(p.check(door_if) && p.check(entrance_if));
+    p.apply("flag:door_warden").unwrap();
+    assert!(!p.check(door_if) && p.check(entrance_if));
+    p.apply("flag:met_warden").unwrap();
+    assert!(!p.check(entrance_if), "once");
+    let mut won = Progress::default();
+    for r in RIVALS.iter() {
+        record(r, true, &mut won, &mut pr);
+        won.settle();
+    }
+    assert!(!won.check(door_if) && !won.check(entrance_if), "a champion");
+}

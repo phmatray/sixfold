@@ -262,3 +262,32 @@ test("after losing to Marlo, he encourages, and the challenge is still open", as
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toBeEnabled();
   await expect(offer).not.toContainText("bested first");
 });
+
+// #154: the Warden's duel is the grandest. With six seals the sealed door rings and Sable speaks through it,
+// her room stages her entrance, and a skip of either still lands on her challenge.
+test("the sealed door rings for six seals, and Sable's entrance lands on her challenge", async ({ page }) => {
+  await newSave(page);
+  const seals = ["bramble", "marlo", "cinza", "quill", "orla", "lumen"].map((r) => `f:beat_${r}`);
+  await editSave(page, `secs.progress = [(secs.progress?.[0] ?? "") + ",f:intro,f:vouched,${seals.join(",")}"]; secs.world_at = ["shop,2,6,w"];`);
+  await page.reload();
+  await menuItem(page, "Continue").click();
+  await loaded(page);
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^2,6/, { timeout: 15_000 });
+
+  // The tile before the door: the bells, then Sable's voice through it. Escape skips.
+  expect(await walk(page, 1, 6)).toBeGreaterThan(0);
+  const sable = page.getByRole("dialog", { name: "Sable" });
+  await expect(sable).toContainText("Come through", { timeout: 60_000 });
+  await page.keyboard.press("Escape");
+  await expect(sable).toBeHidden();
+  expect((await readSave(page)).progress?.[0]).toContain("f:door_warden");
+
+  // Through the door: her entrance plays on arrival; skipped, it still ends on her challenge.
+  await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
+  expect(await walk(page, 0, 6)).toBeGreaterThan(0);
+  await expect(sable).toContainText("Six seals.", { timeout: 60_000 });
+  await page.keyboard.press("Escape");
+  const offer = page.getByRole("dialog", { name: "Challenge Sable?" });
+  await expect(offer.getByRole("button", { name: /^Challenge/ })).toBeVisible();
+  expect((await readSave(page)).progress?.[0]).toContain("f:met_warden");
+});

@@ -17,7 +17,7 @@ const EMOTE_HOLD = 600; // ms an emote holds the scene, so it reads
 const CAM_MAX = 2.5; // s: a pan longer than this is cut short
 
 // env: world(), hero(), reduced(), settled() (the camera reached its target), warp(wp) -> Promise,
-// sound(name), tune() (the map's music back), stone(state, colour) (the seal stone's look, null at rest;
+// sound(name, n), tune() (the map's music back), stone(state, colour) (the seal stone's look, null at rest;
 // "seal" lights that colour's face for good),
 // moved() (the hero's tile is reported again), holds(cond), cb.
 export function scenes(env) {
@@ -37,7 +37,9 @@ export function scenes(env) {
     cur = cam = null;
     w.path = [];
     // Each `say` carries its speaker's name (the hero's own lines have none).
-    const steps = (s.steps ?? []).map((st) => (st.say ? { ...st, name: st.say === "hero" ? "" : (actorOf(st.say)?.def.name ?? "") } : st));
+    // Someone not out (Sable behind the sealed door, #154) still speaks under their own name.
+    const named = (id) => actorOf(id)?.def.name ?? w.map.npcs?.find((n) => n.id === id)?.name ?? "";
+    const steps = (s.steps ?? []).map((st) => (st.say ? { ...st, name: st.say === "hero" ? "" : named(st.say) } : st));
     env.cb("script", s.id ?? "", JSON.stringify({ steps }));
     return true;
   }
@@ -88,7 +90,10 @@ export function scenes(env) {
     } else if (c.cam !== undefined) {
       cam = c.cam === "hero" ? null : c.cam;
     } else if (c.wait !== undefined) setTimeout(me.done, c.wait);
-    else if (c.sfx) env.sound(c.sfx), me.done();
+    else if (c.sfx) {
+      const [name, n] = c.sfx.split(":"); // `bell:<n>` (#154): the bell's step up the scale
+      env.sound(name, +n || 0), me.done();
+    }
     else if (c.music) globalThis.sixfoldAudio?.music(c.music), me.done();
     else if (c.stone) env.stone(c.stone, c.colour), me.done();
     else if (c.emote) {
