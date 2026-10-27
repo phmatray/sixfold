@@ -210,8 +210,8 @@ for (const [name, m] of Object.entries(maps)) {
 // that keep an NPC on open tiles, face directions, cam on an actor or an in-bounds tile, waits of 0..5000 ms, music
 // tracks, `stone:wake` only on a map with a seal stone; a `duel:` only in the last step (it ends the scene).
 // A seal site's staging (#152; engine/tests/world_data.rs holds the rest of its shape): `reveal_<map>` keeps to
-// 3 `cam` and 2 000 ms of `wait`; `entrance_<keeper>` starts on every reachable open tile two from the keeper (no
-// one else standing there), so nobody walks up to them without it.
+// 3 `cam` and 2 000 ms of `wait`; `entrance_<keeper>` starts on every reachable open tile two from the keeper (but
+// one where someone stands for good: no route), so nobody walks up to them without it.
 function scripts(name, m, solid, inMap, reached) {
   const list = m.scripts ?? [];
   if (!Array.isArray(list)) return void fail.push(`${name}: scripts is a list`);
@@ -234,7 +234,7 @@ function scripts(name, m, solid, inMap, reached) {
     }
     const keeper = s.id?.startsWith("entrance_") && npcs[s.id.slice(9)];
     if (keeper) {
-      const others = new Set((m.npcs ?? []).filter((n) => n !== keeper).map((n) => `${n.x},${n.z}`)), tiles = new Set((s.at ?? []).map((t) => `${t[0]},${t[1]}`));
+      const others = new Set((m.npcs ?? []).filter((n) => n !== keeper && !n.route).map((n) => `${n.x},${n.z}`)), tiles = new Set((s.at ?? []).map((t) => `${t[0]},${t[1]}`));
       for (let dx = -2; dx <= 2; dx++)
         for (let dz = -2; dz <= 2; dz++) {
           const k = `${keeper.x + dx},${keeper.z + dz}`;

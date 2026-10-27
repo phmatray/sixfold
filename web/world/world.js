@@ -61,11 +61,11 @@ const CLOCK_RATE = 1; // game minutes per real second: a day is 24 minutes (WORL
 const PHASE_FADE = 20; // daylight.js cross-fades this many game minutes into a phase
 const WAKE_MS = 600; // a seal stone wakes (and goes back to rest) over this long
 const STONE_LIGHT = 3; // its light at full wake
-// The seal-stone face whose colour is the region's, by the map's region track (stone:wake).
+// The seal-stone face whose colour is the region's, by the map's `region` (stone:wake).
 const REGION_FACE = { ember: "fire", storm: "lightning", tide: "water", dream: "psychic", grove: "grass", stone: "fighting" };
 
 // A map's seal stone, ready to wake in a scene (script.js `stone:wake`): its coloured faces (build.js keeps
-// them apart, SEAL_FACE) and, outdoors, one real light at it, made with the map at 0 so waking it
+// them apart, SEAL_FACE; put back to rest here, so a wake cut short by a warp never stays lit) and, outdoors, one real light at it, made with the map at 0 so waking it
 // never recompiles a shader. With the hero's lantern and the three live lamps that is five, under the six
 // (WORLD_DESIGN P1). The region's colour is its own face's; a map with no region wakes each face in its own.
 function stoneRig(w) {
@@ -73,12 +73,12 @@ function stoneRig(w) {
   w.root.updateMatrixWorld(true);
   w.root.traverse((o) => o.isMesh && SEAL_FACE.test(o.material.name) && o.material.emissive && (mats.add(o.material), box.expandByObject(o)));
   if (!mats.size) return null;
-  for (const m of mats) (m.userData.rest ??= m.emissive.clone()), (m.userData.paint ??= m.color.clone());
-  const color = [...mats].find((m) => m.name.endsWith(`seal_${REGION_FACE[w.map.music]}`))?.color.clone() ?? null;
+  for (const m of mats) (m.userData.rest ??= m.emissive.clone()), (m.userData.paint ??= m.color.clone()), m.emissive.copy(m.userData.rest), m.color.copy(m.userData.paint);
+  const color = [...mats].find((m) => m.name.endsWith(`seal_${REGION_FACE[w.map.region]}`))?.color.clone() ?? null;
   let light = null;
   if (!w.map.light.indoor) {
     light = new THREE.PointLight(color ?? "#ffe2a0", 0, 7, 1.5);
-    box.getCenter(light.position).add(new THREE.Vector3(0, 0.6, 1)); // a little over it, toward the camera: the faces and the ground in front
+    w.root.worldToLocal(box.getCenter(light.position).add(new THREE.Vector3(0, 0.6, 1))); // a little over it, toward the camera
     light.layers.enableAll();
     w.root.add(light);
   }

@@ -8,15 +8,17 @@
 // play here too, unanswered.
 //
 // Cues (engine `Cue`): walk (a path of n/e/s/w; an NPC at its walking pace, the hero at its own),
-// face (n/e/s/w, or `hero`: toward where the hero stands), cam (eased by world.js's camera spring, a cut under reduced motion), wait, sfx, music,
-// emote, warp and stone (the map's seal stone wakes until the scene ends). A walk that can't go on (someone stands in the way) arrives anyway after a while.
+// face (n/e/s/w, or `hero`: toward where the hero stands), cam (eased by world.js's camera spring, a cut
+// under reduced motion), wait, sfx, music, emote, warp and stone (the map's seal stone wakes until the scene
+// ends). A walk that can't go on (someone stands in the way) arrives anyway after a while.
 import { DIR, angle, emote } from "./actors.js";
 
 const EMOTE_HOLD = 600; // ms an emote holds the scene, so it reads
 const CAM_MAX = 2.5; // s: a pan longer than this is cut short
 
 // env: world(), hero(), reduced(), settled() (the camera reached its target), warp(wp) -> Promise,
-// sound(name), tune() (the map's music back), stone(state) (the seal stone's look, null at rest), moved() (the hero's tile is reported again), holds(cond), cb.
+// sound(name), tune() (the map's music back), stone(state) (the seal stone's look, null at rest),
+// moved() (the hero's tile is reported again), holds(cond), cb.
 export function scenes(env) {
   let playing = false, cur = null, cam = null;
   const actorOf = (id) => (id === "hero" ? env.hero() : env.world()?.npcs.find((n) => n.def.id === id && !n.hidden));
