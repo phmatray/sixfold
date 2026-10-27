@@ -34,6 +34,8 @@ extern "C" {
 struct Input {
     device: RwSignal<String>,
     bound: RwSignal<(u32, String)>,
+    /// Tap the ground to walk (touch screens; off by default).
+    tap: RwSignal<bool>,
 }
 
 /// Start the input layer and follow it; once, as the app starts.
@@ -42,6 +44,7 @@ pub fn provide() {
     let input = Input {
         device: RwSignal::new(current_device()),
         bound: RwSignal::new((0, String::new())),
+        tap: RwSignal::new(crate::store::tap_walk()),
     };
     _ = window_event_listener_untyped("sixfold-device", move |_| {
         input.device.set(current_device())
@@ -170,10 +173,17 @@ pub fn titled(name: &str, c: Ctrl) -> String {
 /// The world's controls hint (until the first steps, then in Options), for the device in use.
 pub fn world_hint() -> String {
     if input().device.with(|d| d == "touch") {
-        return tr(
-            "Tap the ground to walk · tap someone to talk",
-            "Touchez le sol pour marcher · touchez quelqu'un pour lui parler",
-        )
+        return if input().tap.get() {
+            tr(
+                "Tap the ground to walk · tap someone to talk",
+                "Touchez le sol pour marcher · touchez quelqu'un pour lui parler",
+            )
+        } else {
+            tr(
+                "Arrows to walk · tap the button that appears to act",
+                "Flèches pour marcher · touchez le bouton qui apparaît pour agir",
+            )
+        }
         .into();
     }
     let [walk, act, run, map, menu] =
@@ -229,6 +239,9 @@ pub fn ControlsSettings() -> impl IntoView {
         });
     });
     on_cleanup(stop_capture);
+    let touch = web_sys::window()
+        .and_then(|w| w.match_media("(any-pointer: coarse)").ok().flatten())
+        .is_some_and(|m| m.matches());
     let pick = move |d: &'static str| {
         stop_capture();
         waiting.set(None);
@@ -285,6 +298,18 @@ pub fn ControlsSettings() -> impl IntoView {
                     {tr("Reset to defaults", "Valeurs par défaut")}
                 </button>
             </div>
+            // Touch screens only: tapping anywhere fights the on-screen pad, so it is opt-in.
+            {touch.then(|| view! {
+                <label class="vol-mute">
+                    <input type="checkbox" name="tap-walk" prop:checked=move || i.tap.get()
+                        on:change=move |e| {
+                            let on = event_target_checked(&e);
+                            crate::store::set_tap_walk(on);
+                            i.tap.set(on);
+                        } />
+                    {tr("Tap the ground to walk (as well as the arrows)", "Toucher le sol pour marcher (en plus des flèches)")}
+                </label>
+            })}
         </fieldset>
     }
 }

@@ -111,6 +111,8 @@ pub fn apply_text_size() {
 const FAST: &str = "sixfold.fast";
 const TIPS: &str = "sixfold.tips";
 const HINT_SEEN: &str = "sixfold.hint-seen";
+/// Read by web/world/world.js too.
+const TAP_WALK: &str = "sixfold.tap-walk";
 
 /// The opponent's moves play faster (a browser preference, like the language).
 pub fn fast_opponent() -> bool {
@@ -121,7 +123,16 @@ pub fn set_fast_opponent(on: bool) {
     set(FAST, if on { "1" } else { "0" });
 }
 
-/// The rule tips already shown, one bit each (see `tips::Tip`).
+/// On a touch screen, a tap on the ground walks there (off: only the on-screen
+/// pad moves, so a tap that misses its buttons does nothing).
+pub fn tap_walk() -> bool {
+    get(TAP_WALK).is_some_and(|v| v == "1")
+}
+
+pub fn set_tap_walk(on: bool) {
+    set(TAP_WALK, if on { "1" } else { "0" });
+}
+
 /// Whether the hero has walked once (the world's controls hint is spent).
 pub fn hint_seen() -> bool {
     get(HINT_SEEN).is_some()
@@ -131,6 +142,7 @@ pub fn mark_hint_seen() {
     set(HINT_SEEN, "1");
 }
 
+/// The rule tips already shown, one bit each (see `tips::Tip`).
 pub fn tips_seen() -> u32 {
     get(TIPS).and_then(|v| v.parse().ok()).unwrap_or(0)
 }

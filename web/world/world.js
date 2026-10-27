@@ -290,8 +290,17 @@ export function mount(el, controls, cb, start, edit = false) {
     return null;
   };
   let stopEditor = () => {}, editing = () => false; // the map editor (?edit), when loaded
+  // A finger walks by tapping only when the player chose it in Options (web/src/store.rs):
+  // otherwise a tap that misses the pad's buttons would send the hero across the map.
+  const tapWalk = () => {
+    try {
+      return localStorage.getItem("sixfold.tap-walk") === "1";
+    } catch {
+      return false;
+    }
+  };
   const onTap = (e) => {
-    if (busy() || e.button) return;
+    if (busy() || e.button || (e.pointerType !== "mouse" && !tapWalk())) return;
     if (hero.sit) return seats.stand(hero); // a tap stands up
     const b = renderer.domElement.getBoundingClientRect();
     ndc.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1);
