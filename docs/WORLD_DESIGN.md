@@ -1994,8 +1994,14 @@ I played the design through on paper. Here is what was still hollow, and what th
    !flag:sealed_<id>`, instead of the post-duel line) wakes the stone, lights the keeper's face with the seal's
    sting (`stone:seal:<id>`), flies the seal to the Menu button, and gives the keeper's farewell, at most
    3 600 ms of `wait`, ending on `flag:sealed_<id>`. From then on the stone shows the seals held. A loss is short:
-   the keeper's `lost:` line is kind and says the seal and the region's duelists bested still count, and the
-   result screen says the keeper will duel again (the threshold holds).
+   the keeper's `lost:` line is kind and says the seal and the region's duelists bested still count (the
+   threshold holds); the result screen only says the seal holds, so the reassurance is the keeper's own.
+   *And it holds up to fresh eyes (#155)*: an independent critique of the whole arc (refused, earning, arriving,
+   the entrance, the card, the final beat, the victory or defeat, the Warden), desktop and phone, EN and FR,
+   reduced motion on and off, scored it 31/40; after the fixes (a keeper says "not yet" below the threshold, a
+   bench-out win still plays the seal's beat, the Warden's door is seen and its bells captioned, the felt takes
+   the region's hue, each stone turns its own face to the camera, a reduced-motion cut holds 1.2 s, a seal duel's
+   result speaks the seal's language) a second independent critique scored it TBD/40.
 9. **"The economy is a spreadsheet."** Facets with nothing exciting to buy feel like points. *Fixed*: each inn
    stocks one Rare to save up for, the Press can make the one card you need, the voucher is a real prize, and
    outfits give late Facets somewhere to go. The `economy_sim` keeps packs at about one per 12 minutes of
