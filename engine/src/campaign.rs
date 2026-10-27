@@ -350,6 +350,12 @@ pub fn record(r: &Rival, won: bool, p: &mut Progress, profile: &mut Profile) -> 
         profile.wallet.grant(packs.0, packs.1);
         p.earn(facets);
     }
+    // A rematch won: the seal was won on stage already (or, on a save from
+    // before the stage, long ago), so `victory_<id>` never plays for it.
+    if won && !first && r.seal {
+        p.apply(&format!("flag:sealed_{}", r.id))
+            .expect("rival ids are valid flag names");
+    }
     let promo = first.then(|| r.promo());
     if let Some(id) = promo {
         profile.collection.add(id, 1);
@@ -810,6 +816,10 @@ mod tests {
         let mut old = Progress::default();
         beat(&mut old, &["marlo", "bramble"]);
         old.settle();
+        assert_eq!(lit_faces(&old), [Color::Grass, Color::Water]);
+        // Its rematch won is no stage victory: it marks the seal as staged.
+        beat(&mut old, &["marlo"]);
+        assert!(old.check("won:marlo") && old.has_flag("sealed_marlo"));
         assert_eq!(lit_faces(&old), [Color::Grass, Color::Water]);
         beat(&mut p, &["marlo", "warden"]);
         assert_eq!(lit_faces(&p), [Color::Water]);
