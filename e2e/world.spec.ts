@@ -109,3 +109,38 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   await page.keyboard.press("Escape");
   await expect(offer).toBeHidden();
 });
+
+test("on a phone, a tap on the ground walks only once Options allow it @phone", async ({ page }, info) => {
+  test.skip(info.project.name !== "phone", "taps are a touch screen's");
+  await title(page);
+  await menuItem(page, "Explore the world").click();
+  await loaded(page);
+  const skip = page.getByRole("button", { name: /^Skip/ });
+  await expect(skip).toBeVisible();
+  await skip.click();
+  await expect(skip).toBeHidden();
+  const host = page.locator(".world-host");
+  await expect(host).toHaveAttribute("data-hero", /\d/);
+  const canvas = host.locator("canvas");
+  const box = (await canvas.boundingBox())!;
+  // The path a few tiles below the hero (the camera keeps the hero near the middle).
+  const ground = { x: box.width / 2, y: box.height * 0.72 };
+
+  // By default the on-screen arrows walk; a tap on the scene does nothing.
+  const start = await host.getAttribute("data-hero");
+  await canvas.tap({ position: ground });
+  await page.waitForTimeout(1500);
+  expect(await host.getAttribute("data-hero")).toEqual(start);
+
+  // Options: tap to walk, kept in this browser.
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("tab", { name: "Options" }).click();
+  const option = page.getByRole("checkbox", { name: /Tap the ground to walk/ });
+  await expect(option).not.toBeChecked();
+  await option.check();
+  expect(await page.evaluate(() => localStorage.getItem("sixfold.tap-walk"))).toBe("1");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+
+  await canvas.tap({ position: ground });
+  await expect.poll(() => host.getAttribute("data-hero"), { timeout: 10_000 }).not.toEqual(start);
+});
