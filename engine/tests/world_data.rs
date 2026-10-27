@@ -831,3 +831,143 @@ fn the_finale_plays_after_the_warden_falls_once() {
     p.apply("flag:finale").unwrap();
     assert!(!p.check(cond), "once");
 }
+
+/// #150: each seal keeper asks for some of their region's duelists: the
+/// trainers standing on the maps of their region and on those maps'
+/// interiors (a door's map with no region of its own, like the climbing
+/// school), never all of them, and no more than those out by day.
+#[test]
+fn keepers_ask_for_some_of_their_regions_duelists() {
+    use sixfold_engine::Color::*;
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let maps: HashMap<String, Value> = std::fs::read_dir(&dir)
+        .expect("the world's maps")
+        .map(|e| e.unwrap().path())
+        .filter(|p| p.extension().is_some_and(|e| e == "json"))
+        .map(|p| {
+            let name = p.file_stem().unwrap().to_string_lossy().into_owned();
+            (
+                name,
+                serde_json::from_str(&std::fs::read_to_string(&p).unwrap()).unwrap(),
+            )
+        })
+        .collect();
+    // Each map's region; an interior takes the region of the map whose door leads in.
+    let mut region: HashMap<&str, &str> = maps
+        .iter()
+        .filter_map(|(name, m)| Some((name.as_str(), m["region"].as_str()?)))
+        .collect();
+    for m in maps.values() {
+        let Some(r) = m["region"].as_str() else {
+            continue;
+        };
+        for w in m["warps"].as_array().into_iter().flatten() {
+            if let Some(to) = w["to"].as_str() {
+                if maps.get(to).is_some_and(|t| t["region"].is_null()) {
+                    region.entry(maps.get_key_value(to).unwrap().0).or_insert(r);
+                }
+            }
+        }
+    }
+    for r in RIVALS.iter().filter(|r| r.seal) {
+        let want = match r.colors[0] {
+            Fire => "ember",
+            Lightning => "storm",
+            Water => "tide",
+            Psychic => "dream",
+            Grass => "grove",
+            Fighting => "stone",
+            Colorless => unreachable!("{} keeps no region", r.id),
+        };
+        let mut found: Vec<&str> = vec![];
+        let mut day = 0;
+        for (name, m) in &maps {
+            if region.get(name.as_str()) != Some(&want) {
+                continue;
+            }
+            for n in m["npcs"].as_array().into_iter().flatten() {
+                if n.get("trainer").is_none() {
+                    continue;
+                }
+                let id = n["id"].as_str().unwrap();
+                found.push(id);
+                let c = n["if"].as_str().unwrap_or("");
+                if !c.contains("time:night") && !c.contains("!time:day") {
+                    day += 1;
+                }
+            }
+        }
+        found.sort_unstable();
+        let mut listed: Vec<&str> = r.duelists.to_vec();
+        listed.sort_unstable();
+        assert_eq!(listed, found, "{}'s duelists against the {want} maps", r.id);
+        assert!(
+            r.duelists.iter().all(|id| trainer(id).is_some()),
+            "{}: a duelist that is no route duelist",
+            r.id
+        );
+        assert!(
+            1 <= r.earn && r.earn < r.duelists.len(),
+            "{} asks for {} of {}",
+            r.id,
+            r.earn,
+            r.duelists.len()
+        );
+        assert!(
+            r.earn <= day,
+            "{} asks for {} but only {day} duel by day",
+            r.id,
+            r.earn
+        );
+        assert!(!r.region.en.is_empty() && !r.region.fr.is_empty());
+        // Someone at the keeper's site says how many more, and once earned.
+        let site = maps
+            .values()
+            .find(|m| {
+                m["npcs"]
+                    .as_array()
+                    .is_some_and(|n| n.iter().any(|n| n["id"] == r.id))
+            })
+            .unwrap();
+        let branches: Vec<&Value> = site["npcs"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|n| n["id"] != r.id)
+            .flat_map(|n| n["dialogue"].as_array().into_iter().flatten())
+            .collect();
+        let conds: Vec<&str> = branches.iter().filter_map(|d| d["if"].as_str()).collect();
+        // Each count branch names how many more: earn - k, in words.
+        let prefix = format!("bested:{}:", r.id);
+        for d in &branches {
+            let Some(k) = d["if"].as_str().and_then(|c| {
+                c.split(" & ")
+                    .find_map(|t| t.strip_prefix(prefix.as_str())?.parse::<usize>().ok())
+            }) else {
+                continue;
+            };
+            assert!(k < r.earn, "{}: a branch for {k} bested never plays", r.id);
+            let more = [
+                ("", ""),
+                ("one more", "encore un "),
+                ("two more", "encore deux "),
+                ("three more", "encore trois "),
+                ("four more", "encore quatre "),
+            ][r.earn - k];
+            for (key, word) in [("lines", more.0), ("lines_fr", more.1)] {
+                let last = d[key].as_array().unwrap().last().unwrap().as_str().unwrap();
+                assert!(last.contains(word), "{} at {k} bested says {last:?}", r.id);
+            }
+        }
+        let says = (0..r.earn)
+            .map(|k| format!("bested:{}:{k}", r.id))
+            .chain([format!("earned:{}", r.id)]);
+        for c in says {
+            assert!(
+                conds.iter().any(|x| x.contains(&c)),
+                "no one by {} says {c}",
+                r.id
+            );
+        }
+    }
+}
