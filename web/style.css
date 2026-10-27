@@ -4649,6 +4649,7 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html
 .ch-prizes i { width: 15px; height: 21px; margin-left: -6px; border: 2px solid var(--toon); border-radius: 3px; background: radial-gradient(circle at 50% 50%, var(--sky-hi) 0 2.5px, transparent 3px), var(--card-back); }
 .ch-prizes i:nth-child(odd) { transform: rotate(-6deg); } .ch-prizes i:nth-child(even) { transform: rotate(5deg) translateY(1px); }
 .ch-temper { display: inline-flex; gap: 3px; }
+.ch-pips { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; }
 .ch-temper i { width: 16px; aspect-ratio: 1 / 1.1; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: var(--toon); display: grid; }
 .ch-temper i::after { content: ""; margin: 2.5px; clip-path: inherit; background: var(--paper-hi); }
 .ch-temper i.on::after { background: linear-gradient(160deg, var(--brass), var(--wood) 70%, var(--wood-lo)); }

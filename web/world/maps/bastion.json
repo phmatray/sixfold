@@ -1954,6 +1954,71 @@
       "hair": "#d8c8a0",
       "dialogue": [
         {
+          "if": "!beat:orla & earned:orla",
+          "lines": [
+            "Kessa. Foreman. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
+            "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry.",
+            "The crews have been talking: you've done the rounds of the Stonebacks. Orla's expecting you up top."
+          ],
+          "lines_fr": [
+            "Kessa. Contremaîtresse. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
+            "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière.",
+            "Les équipes en parlent : tu as fait le tour des Échines de Pierre. Orla t'attend là-haut."
+          ]
+        },
+        {
+          "if": "!beat:orla & bested:orla:3",
+          "lines": [
+            "Kessa. Foreman. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
+            "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry.",
+            "Orla doesn't duel just anyone off the road. Beat one more duelist of the Stonebacks and she'll see you on the top terrace."
+          ],
+          "lines_fr": [
+            "Kessa. Contremaîtresse. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
+            "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière.",
+            "Orla n'affronte pas le premier venu. Bats encore un duelliste des Échines de Pierre et elle te recevra sur la haute terrasse."
+          ]
+        },
+        {
+          "if": "!beat:orla & bested:orla:2",
+          "lines": [
+            "Kessa. Foreman. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
+            "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry.",
+            "Orla doesn't duel just anyone off the road. Beat two more duelists of the Stonebacks and she'll see you on the top terrace."
+          ],
+          "lines_fr": [
+            "Kessa. Contremaîtresse. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
+            "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière.",
+            "Orla n'affronte pas le premier venu. Bats encore deux duellistes des Échines de Pierre et elle te recevra sur la haute terrasse."
+          ]
+        },
+        {
+          "if": "!beat:orla & bested:orla:1",
+          "lines": [
+            "Kessa. Foreman. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
+            "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry.",
+            "Orla doesn't duel just anyone off the road. Beat three more duelists of the Stonebacks and she'll see you on the top terrace."
+          ],
+          "lines_fr": [
+            "Kessa. Contremaîtresse. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
+            "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière.",
+            "Orla n'affronte pas le premier venu. Bats encore trois duellistes des Échines de Pierre et elle te recevra sur la haute terrasse."
+          ]
+        },
+        {
+          "if": "!beat:orla & bested:orla:0",
+          "lines": [
+            "Kessa. Foreman. Orla's back up at her seal, by the stone on the top terrace. She's done minding the old face at Emberstep for the season, and you'll have heard her before you saw her.",
+            "I still keep the ring. Seven stones round one seal, and the crew swears none of them were ever moved. They were here before the quarry.",
+            "Orla doesn't duel just anyone off the road. Beat four more duelists of the Stonebacks and she'll see you on the top terrace."
+          ],
+          "lines_fr": [
+            "Kessa. Contremaîtresse. Orla est remontée à son sceau, près de la pierre, sur la haute terrasse. Elle a fini de surveiller le vieux front de taille de Pas-de-Braise pour la saison, et tu l'auras entendue avant de la voir.",
+            "Moi, je garde toujours le cercle. Sept pierres autour d'un sceau, et l'équipe jure qu'aucune n'a jamais été déplacée. Elles étaient là avant la carrière.",
+            "Orla n'affronte pas le premier venu. Bats encore quatre duellistes des Échines de Pierre et elle te recevra sur la haute terrasse."
+          ]
+        },
+        {
           "if": "time:night",
           "lines": [
             "Night shift's Morwen's. I'm only up because the stone hums after dark. Listen. Hear it?",
@@ -2105,11 +2170,11 @@
         {
           "if": "!open:orla",
           "lines": [
-            "Not yet. The quarry only opens to those with three seals.",
+            "Not yet. This stone only listens to someone carrying three seals.",
             "Go on, the others won't beat themselves."
           ],
           "lines_fr": [
-            "Pas encore. La carrière ne s'ouvre qu'à ceux qui ont trois sceaux.",
+            "Pas encore. Cette pierre n'écoute que quelqu'un qui porte trois sceaux.",
             "Allez, les autres ne vont pas se battre tout seuls."
           ]
         },

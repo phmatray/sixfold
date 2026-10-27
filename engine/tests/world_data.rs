@@ -920,5 +920,32 @@ fn keepers_ask_for_some_of_their_regions_duelists() {
             r.earn
         );
         assert!(!r.region.en.is_empty() && !r.region.fr.is_empty());
+        // Someone at the keeper's site says how many more, and once earned.
+        let site = maps
+            .values()
+            .find(|m| {
+                m["npcs"]
+                    .as_array()
+                    .is_some_and(|n| n.iter().any(|n| n["id"] == r.id))
+            })
+            .unwrap();
+        let conds: Vec<&str> = site["npcs"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|n| n["id"] != r.id)
+            .flat_map(|n| n["dialogue"].as_array().into_iter().flatten())
+            .filter_map(|d| d["if"].as_str())
+            .collect();
+        let says = (0..r.earn)
+            .map(|k| format!("bested:{}:{k}", r.id))
+            .chain([format!("earned:{}", r.id)]);
+        for c in says {
+            assert!(
+                conds.iter().any(|x| x.contains(&c)),
+                "no one by {} says {c}",
+                r.id
+            );
+        }
     }
 }

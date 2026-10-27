@@ -199,6 +199,10 @@ pub fn Roster() -> impl IntoView {
                     let status = move || match state() {
                         "beaten" if !r.seal => tr("Champion beaten", "Victoire, titre obtenu").to_string(),
                         "beaten" => tr("Beaten, seal earned", "Victoire, sceau obtenu").to_string(),
+                        "open" if !progress.with(|p| r.earned(p)) => {
+                            let n = progress.with(|p| r.bested(p));
+                            tr(format!("Duelists bested: {n} of {}", r.earn), format!("Duellistes battus : {n} sur {}", r.earn))
+                        }
                         "open" => tr("Ready to duel", "Disponible pour un duel").to_string(),
                         _ => tr(format!("Locked: needs {} seals", r.needs), format!("Verrouillé : il faut {}", seals_n(r.needs))),
                     };
@@ -582,6 +586,8 @@ pub fn Challenge(
     };
     let r = rival(&id);
     let open = move || progress.with_untracked(|p| r.is_none_or(|r| r.open(p)));
+    // #150: the seals met, the keeper also wants some of their region's duelists bested.
+    let accepts = move || progress.with_untracked(|p| r.is_none_or(|r| r.accepts(p)));
     let rule = trainer(&id).and_then(|t| t.rule);
     let (opts, pick) = profile.with_untracked(|p| deck_opts(p, rule));
     let playable = opts.iter().filter(|o| o.problem.is_none()).count();
@@ -599,7 +605,7 @@ pub fn Challenge(
         let Some(mine) = opts.with_value(|o| o.get(choice.get_untracked()).cloned()) else {
             return;
         };
-        if mine.problem.is_some() || !open() {
+        if mine.problem.is_some() || !accepts() {
             return;
         }
         store::set_campaign_deck(&mine.name);
@@ -673,10 +679,14 @@ pub fn Challenge(
         ),
         (None, None) => title.to_string(),
     };
-    let quote = quote.or_else(|| o.lines.map(|l| l.intro.get().to_string()));
+    let earned = accepts();
+    let quote = match r {
+        Some(r) if open() && !earned => Some(r.lines.refuse.get().to_string()),
+        _ => quote.or_else(|| o.lines.map(|l| l.intro.get().to_string())),
+    };
     let (win_label, wins) = progress.with_untracked(|p| winnings(&id, p));
     let open = open();
-    let can = open && playable > 0;
+    let can = open && earned && playable > 0;
     let initial: String = name.chars().take(1).collect();
     let deck = move || opts.with_value(|o| o[choice.get()].clone());
     let to_decks = move || {
@@ -745,6 +755,21 @@ pub fn Challenge(
                     format!("{} needs {} before accepting a duel. You hold {held}: beat the rivals of the other regions for theirs.", r.name, seals_n(r.needs)),
                     format!("{} exige {} avant d'accepter un duel. Vous en avez {held} : battez les rivaux des autres régions pour les leurs.", r.name, seals_n(r.needs)),
                 )}</p> }.into_any()
+            } else if let Some(r) = r.filter(|_| !earned) {
+                let n = progress.with_untracked(|p| r.bested(p));
+                let of = tr(format!("{n} of {}", r.earn), format!("{n} sur {}", r.earn));
+                view! { <div class="ch-note no">
+                    <p>{tr(
+                        format!("{} wants {} of {}'s duelists bested first. You've bested {n}.", r.name, r.earn, r.region.en),
+                        format!("{} veut que vous battiez d'abord {} duellistes {}. Vous en avez battu {n}.", r.name, r.earn, r.region_de()),
+                    )}</p>
+                    <p class="ch-pips">
+                        <span class="ch-temper" role="img" aria-label=of.clone()>
+                            {(0..r.earn).map(|i| view! { <i class:on=i < n></i> }).collect_view()}
+                        </span>
+                        <b aria-hidden="true">{of}</b>
+                    </p>
+                </div> }.into_any()
             } else if playable > 0 {
                 view! {
                     {rule.map(|r| view! {
@@ -817,7 +842,7 @@ pub fn Challenge(
                 }.into_any()
             }}
             <div class="ch-actions">
-                <button type="button" class="btn ch-no" aria-keyshortcuts="Escape" autofocus=!open on:click=move |_| on_cancel()>
+                <button type="button" class="btn ch-no" aria-keyshortcuts="Escape" autofocus=!(open && earned) on:click=move |_| on_cancel()>
                     {tr("Not now", "Pas maintenant")}
                     <kbd aria-hidden="true">{move || prompt(Ctrl::Cancel)}</kbd>
                 </button>

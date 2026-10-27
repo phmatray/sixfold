@@ -228,6 +228,22 @@ impl Objective {
                 format!("Six seals: challenge {}, {}. {}.", r.name, lower_first(r.title.en), r.place.en),
                 format!("Six sceaux : défiez {}, {}. {}.", r.name, lower_first(r.title.fr), r.place.fr),
             ),
+            // #150: the seals are met, the region's duelists not yet.
+            Objective::Rival(r) if r.open(p) && !r.earned(p) => {
+                let (n, k) = (r.bested(p), r.earn - r.bested(p));
+                let s = if k == 1 { "" } else { "s" };
+                let de = if r.name.starts_with(['A', 'E', 'I', 'O', 'U']) { "d'" } else { "de " };
+                tr(
+                    format!(
+                        "Beat {k} more duelist{s} of {} to earn {}'s challenge ({n} of {}). {}.",
+                        r.region.en, r.name, r.earn, r.place.en
+                    ),
+                    format!(
+                        "Battez encore {k} duelliste{s} {} pour mériter le défi {de}{} ({n} sur {}). {}.",
+                        r.region_de(), r.name, r.earn, r.place.fr
+                    ),
+                )
+            }
             Objective::Rival(r) => {
                 let n = seals(p);
                 tr(
@@ -322,6 +338,53 @@ mod tests {
         );
     }
 
+    /// #150: a keeper whose region's duelists aren't bested yet: how many more.
+    #[test]
+    fn a_keepers_objective_counts_the_duelists_still_needed() {
+        use crate::lang::{set_lang, Lang};
+        let p = with(&[
+            "flag:beat_t_tobin",
+            "flag:beat_bramble",
+            "flag:beat_t_pell",
+            "flag:beat_t_nell",
+        ]);
+        let en = objective(&p).text(&p);
+        assert!(
+            en.starts_with(
+                "Beat 1 more duelist of the Saltreach to earn Marlo's challenge (2 of 3)."
+            ),
+            "{en}"
+        );
+        assert!(en.contains("Bellflats"), "{en}");
+        set_lang(Lang::Fr);
+        let fr = objective(&p).text(&p);
+        let none = with(&["flag:beat_t_tobin", "flag:beat_bramble"]);
+        let fr_none = objective(&none).text(&none);
+        set_lang(Lang::En);
+        assert!(
+            fr.starts_with("Battez encore 1 duelliste de la Côte Salée pour mériter le défi de Marlo (2 sur 3)."),
+            "{fr}"
+        );
+        assert!(
+            fr_none.starts_with("Battez encore 3 duellistes de la Côte Salée"),
+            "{fr_none}"
+        );
+        let en_none = objective(&none).text(&none);
+        assert!(
+            en_none.starts_with("Beat 3 more duelists of the Saltreach"),
+            "{en_none}"
+        );
+        // Earned: back to the seal.
+        let p = with(&[
+            "flag:beat_t_tobin",
+            "flag:beat_bramble",
+            "flag:beat_t_pell",
+            "flag:beat_t_nell",
+            "flag:beat_t_skye",
+        ]);
+        assert!(objective(&p).text(&p).starts_with("Earn Marlo's seal"));
+    }
+
     #[test]
     fn objective_with_all_seals_is_the_warden() {
         let p = with(&ALL_SEALS);
@@ -364,7 +427,7 @@ mod tests {
 
     #[test]
     fn objective_lines_read_in_both_languages() {
-        let p = with(&["flag:beat_t_tobin", "flag:beat_bramble"]);
+        let p = with(&["flag:beat_t_tobin", "flag:beat_bramble", "flag:vouched"]);
         let line = objective(&p).text(&p);
         assert!(line.contains("Marlo") && line.contains("1 of 6"), "{line}");
         let p = with(&ALL_SEALS);

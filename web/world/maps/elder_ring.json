@@ -1812,6 +1812,66 @@
       "hair": "#e8e8e0",
       "dialogue": [
         {
+          "if": "!beat:bramble & earned:bramble",
+          "lines": [
+            "You found the middle. Most people find the hedgehogs first.",
+            "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
+            "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years.",
+            "The Deepgrove's duelists have been talking about you, and the trees heard. Bramble's ready by the stone."
+          ],
+          "lines_fr": [
+            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
+            "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
+            "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans.",
+            "Les duellistes du Bois-Profond parlent de toi, et les arbres ont entendu. Bramble t'attend près de la pierre."
+          ]
+        },
+        {
+          "if": "!beat:bramble & bested:bramble:2",
+          "lines": [
+            "You found the middle. Most people find the hedgehogs first.",
+            "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
+            "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years.",
+            "Bramble won't trim a hedge he hasn't seen grow. Beat one more duelist of the Deepgrove and he'll duel you."
+          ],
+          "lines_fr": [
+            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
+            "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
+            "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans.",
+            "Bramble ne taille pas une haie qu'il n'a pas vue pousser. Bats encore un duelliste du Bois-Profond et il t'affrontera."
+          ]
+        },
+        {
+          "if": "!beat:bramble & bested:bramble:1",
+          "lines": [
+            "You found the middle. Most people find the hedgehogs first.",
+            "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
+            "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years.",
+            "Bramble won't trim a hedge he hasn't seen grow. Beat two more duelists of the Deepgrove and he'll duel you."
+          ],
+          "lines_fr": [
+            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
+            "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
+            "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans.",
+            "Bramble ne taille pas une haie qu'il n'a pas vue pousser. Bats encore deux duellistes du Bois-Profond et il t'affrontera."
+          ]
+        },
+        {
+          "if": "!beat:bramble & bested:bramble:0",
+          "lines": [
+            "You found the middle. Most people find the hedgehogs first.",
+            "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
+            "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years.",
+            "Bramble won't trim a hedge he hasn't seen grow. Beat three more duelists of the Deepgrove and he'll duel you."
+          ],
+          "lines_fr": [
+            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
+            "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
+            "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans.",
+            "Bramble ne taille pas une haie qu'il n'a pas vue pousser. Bats encore trois duellistes du Bois-Profond et il t'affrontera."
+          ]
+        },
+        {
           "if": "time:night",
           "lines": [
             "Out in the dark? Good. The trees talk more at night. Listen: that creak is the oldest one, turning over in its sleep.",

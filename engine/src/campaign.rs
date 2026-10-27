@@ -596,7 +596,7 @@ pub static RIVALS: [Rival; 7] = [
         seal: true,
         region: T::new("the Stonebacks", "les Échines de Pierre"),
         duelists: &["t_dov", "t_petra", "t_morwen", "t_mica", "t_ulric", "t_jet", "t_ida", "t_garth"],
-        earn: 4,
+        earn: 3,
         booster: 5, // Stone
         packs: 2,
         style: Style::Aggressive,
@@ -645,7 +645,7 @@ pub static RIVALS: [Rival; 7] = [
         seal: true,
         region: T::new("the Hushlands", "les Terres du Murmure"),
         duelists: &["t_iver", "t_luce", "t_yara", "t_ambrose", "t_clem", "t_maud", "t_noor"],
-        earn: 4,
+        earn: 3,
         booster: 6, // Dream
         packs: 2,
         style: Style::BenchSniper,

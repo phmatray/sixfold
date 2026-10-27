@@ -239,6 +239,25 @@ seed over, ease Orla (5 prizes, Normal) before raising the budget.
 | Rival duels | 39 | 30 | 18 | 39 | 27 | 36 | 18 | 16 | 25 | 16 | 39 | 31 | 45 | 25 | 16 | 39 |
 | Held back by | Orla | Cinza | Bramble | Orla | Warden | Bramble | Cinza | Bramble | Cinza | Marlo | Orla | Warden | Orla | Warden | Orla | Orla |
 
+**1.10 (#150): keepers ask for some of their region's duelists.** Each seal keeper accepts only once
+enough of their region's route duelists are beaten (`Rival::earn`). The playthrough now takes the first
+rival that *accepts*; when none does, it meets again the first duelist still standing in the region of
+the first keeper whose seals are met (a rematch pays once, and counts against the rival budget). The
+thresholds started at 3 for Grove, Tide and Ember and 4 for Storm, Stone and Dream; Stone's and Dream's
+rematches (Dov, Petra, Iver, Luce) pushed the always-on seeds 1 and 2 from 35 to 51 rival duels, so both
+are 3. Final thresholds: Grove 3 of 10, Tide 3 of 10, Ember 3 of 9, Storm 4 of 7, Stone 3 of 8, Dream 3 of 7.
+
+`campaign_sweep` on 1.10's main *before* #150 already ran 14–54 rival duels (median 35): seeds 11, 12 and
+13 take 51, 54 and 45, every one held back by the Warden. With the threshold it measures the same 14–54
+(median 35): the always-on seeds 1, 2 and 3 take 35, 35 and 23. The sweep's overrun predates the
+threshold (seed 12 meets one duelist again and still needs 54) and is left to a Warden pass.
+
+| Pack seed | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Rival duels, before | 35 | 35 | 23 | 41 | 23 | 41 | 23 | 41 | 24 | 21 | 51 | 54 | 45 | 14 | 35 | 35 |
+| Rival duels, #150 | 35 | 35 | 23 | 41 | 23 | 41 | 23 | 41 | 35 | 21 | 35 | 54 | 51 | 14 | 35 | 35 |
+| Of which rematches | 5 | 11 | 0 | 0 | 2 | 0 | 3 | 0 | 5 | 4 | 4 | 1 | 11 | 0 | 2 | 4 |
+
 One seeded run swings widely on the packs alone:
 
 | Build | Route duelists | Duels (16 seeds) | Median | Mean |
