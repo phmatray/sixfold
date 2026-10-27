@@ -623,6 +623,80 @@ function levelDesign() {
     const found = design(name).blocking;
     if (m.level_design === 2) rule.push(...found.map((f) => `${name}: ${f}`));
   }
+  const flag = process.argv.find((a) => a === "--report" || a.startsWith("--report="));
+  if (!flag) return;
+  const text = ["# Level design report", "", ...Object.keys(maps).filter((n) => !maps[n].light.indoor).flatMap(report)].join("\n");
+  if (flag.includes("=")) writeFileSync(flag.slice(9), text + "\n");
+  else console.log(text);
+}
+// One outdoor map's section of the advisory report (never a failure): what design() found, against the budgets.
+function report(name) {
+  const { m, all } = ctx[name], d = design(name), k = (x, z) => `${x},${z}`, advice = [];
+  const xz = (t) => t.split(",").map(Number);
+  const range = ([lo, hi]) => (lo === hi ? `${lo}` : `${lo}–${hi}`);
+  // POIs per tier, against the budget for the map's kind.
+  const count = Object.fromEntries(["major", "secondary", "micro", "secret"].map((t) => [t, d.pois.filter((p) => p.tier === t).length]));
+  const budget = BUDGET[m.kind] ?? {};
+  for (const [t, [lo, hi]] of Object.entries(budget)) if (count[t] < lo || count[t] > hi) advice.push(`[poi-budget] ${count[t]} ${t} POIs (${range([lo, hi])} for a ${m.kind})`);
+  // Discovery spacing: from each entrance and each discovery (a POI or a find), the walk to the nearest other one.
+  const finds = (m.interactions ?? []).filter((i) => i.kind === "find" && !d.pois.some((p) => p.o === i)).map((i) => ({ x: i.x, z: i.z, what: `find ${i.id} ${i.x},${i.z}` }));
+  const near = (x, z) => [[0, 0], [0, 1], [1, 0], [-1, 0], [0, -1]].map(([dx, dz]) => k(x + dx, z + dz)).filter((t) => all.has(t));
+  const finds2 = [...d.pois.map((p) => {
+    const [w, dd] = p.prop ? ld.foot(p.prop, FOOT) : [1, 1], tiles = [];
+    for (let x = p.x - 1; x <= p.x + w; x++) for (let z = p.z - 1; z <= p.z + dd; z++) if (all.has(k(x, z))) tiles.push(k(x, z));
+    return { what: p.what, tiles };
+  }), ...finds.map((f) => ({ what: f.what, tiles: near(f.x, f.z) }))].filter((f) => f.tiles.length);
+  const edgeMid = (e) => ({ n: [Math.round((e.span[0] + e.span[1]) / 2), 0], s: [Math.round((e.span[0] + e.span[1]) / 2), m.height - 1], w: [0, Math.round((e.span[0] + e.span[1]) / 2)], e: [m.width - 1, Math.round((e.span[0] + e.span[1]) / 2)] })[e.side];
+  const entrances = [{ what: "the spawn", tiles: [k(m.spawn.x, m.spawn.z)] }, ...(landing[name] ?? []).map((t) => ({ what: `the landing ${t}`, tiles: [t] })),
+    ...(m.exits ?? []).map((e) => ({ what: `the exit ${e.side} to ${e.to}`, tiles: [k(...edgeMid(e))] }))].filter((e) => e.tiles.every((t) => all.has(t)));
+  let gap = null;
+  for (const src of [...entrances, ...finds2]) {
+    const { dist } = ld.bfs(all, src.tiles.map(xz));
+    let best = Infinity;
+    for (const f of finds2) if (f !== src) for (const t of f.tiles) best = Math.min(best, dist.get(t) ?? Infinity);
+    if (Number.isFinite(best) && (!gap || best > gap.tiles)) gap = { tiles: best, from: src.what };
+  }
+  const gapLine = gap ? `${ld.walkTime(gap.tiles).toFixed(1)} s (${gap.tiles} tiles), from ${gap.from}` : "no discoveries to measure";
+  if (gap && ld.walkTime(gap.tiles) > BUDGET.discovery_gap_s[1]) advice.push(`[discovery-gap] ${ld.walkTime(gap.tiles).toFixed(1)} s without a discovery from ${gap.from} (${range(BUDGET.discovery_gap_s)} s)`);
+  // Crossroads: one line per cluster of junction tiles, at its widest.
+  const wide = d.graph.junctions.filter((j) => j.branches > BUDGET.crossroads_max), left = new Set(wide.map((j) => k(j.x, j.z))), crossroads = [];
+  for (const j of wide) {
+    if (!left.has(k(j.x, j.z))) continue;
+    const cluster = [...ld.bfs(left, [[j.x, j.z]]).dist.keys()];
+    cluster.forEach((t) => left.delete(t));
+    const top = wide.filter((o) => cluster.includes(k(o.x, o.z))).sort((a, b) => b.branches - a.branches)[0];
+    crossroads.push(`${top.x},${top.z} (${top.branches} ways)`);
+    advice.push(`[crossroads] ${top.branches} ways out at ${top.x},${top.z} (${BUDGET.crossroads_max} at most)`);
+  }
+  // Scatter and variety, then density along the main path (between the two entrances farthest apart).
+  const props = d.g.boxes.map((b) => ({ x: b.x0, z: b.z0, asset: b.prop.asset, rot: b.prop.rot }));
+  const sc = ld.scatter(props), dom = sc.chunks.filter((c) => c.n >= 8 && c.share > BUDGET.dominant_share_max);
+  if (sc.ratio > BUDGET.scatter_ratio_max) advice.push(`[scatter] props spread evenly (ratio ${sc.ratio.toFixed(2)}, ${BUDGET.scatter_ratio_max} at most): cluster them by function`);
+  for (const c of dom) advice.push(`[variety] chunk ${c.chunk} is ${Math.round(c.share * 100)}% ${c.asset} (${c.n} props; ${Math.round(BUDGET.dominant_share_max * 100)}% at most)`);
+  const ends = entrances.map((e) => e.tiles[0]);
+  const far = (from) => {
+    const r = ld.bfs(all, [xz(from)]), pool = ends.length > 1 ? ends : [...r.dist.keys()];
+    return { r, to: pool.reduce((a, b) => ((r.dist.get(b) ?? -1) > (r.dist.get(a) ?? -1) ? b : a)) };
+  };
+  const a = far(k(m.spawn.x, m.spawn.z)).to, { r, to: b } = far(a), route = [];
+  for (let t = b; t; t = r.parent.get(t)) route.unshift(xz(t));
+  const dn = ld.density(props, route, SCREEN);
+  if (dn.curve.length > 1 && dn.cv < BUDGET.density_cv_min) advice.push(`[density] flat along the main path ${a} → ${b} (cv ${dn.cv.toFixed(2)}, ${BUDGET.density_cv_min} at least): add a breather or a dense patch`);
+  for (const e of m.exits ?? []) if (e.span[1] - e.span[0] + 1 < BUDGET.exit_min) advice.push(`[exit] exit ${e.side} to ${e.to} is ${e.span[1] - e.span[0] + 1} wide (${BUDGET.exit_min} at least)`);
+  const v2 = m.level_design === 2;
+  return [
+    `## ${name} — ${m.title} (${m.kind})`, "",
+    `- level design: ${v2 ? "2 (the §11 rules are errors)" : "not opted in (the §11 rules are listed below, not enforced)"}`,
+    `- landmark: ${d.marks.map((p) => `${p.asset} ${p.x},${p.z}`).join(", ") || "none"}`,
+    `- POIs: ${Object.entries(count).map(([t, n]) => `${n} ${t}`).join(", ")}${Object.keys(budget).length ? ` (budget: ${Object.entries(budget).map(([t, b]) => `${t} ${range(b)}`).join(", ")})` : ""}`,
+    `- longest walk without a discovery: ${gapLine}`,
+    `- crossroads over ${BUDGET.crossroads_max} ways: ${crossroads.join(", ") || "none"}`,
+    `- scatter: ratio ${sc.ratio?.toFixed(2) ?? "–"} (${BUDGET.scatter_ratio_max} at most); dominant: ${sc.chunks.filter((c) => c.n >= 8).sort((a, b) => b.share - a.share).slice(0, 3).map((c) => `${c.asset} ${Math.round(c.share * 100)}% of chunk ${c.chunk}`).join(", ") || "–"}`,
+    `- density along the main path, a screen at a time: ${dn.curve.join(" · ") || "–"} (cv ${dn.cv.toFixed(2)}, ${BUDGET.density_cv_min} at least)${dn.breathers.length ? `; breathers at screens ${dn.breathers.map((i) => i + 1).join(", ")}` : ""}`,
+    `- advisories:${advice.length ? "" : " none"}`, ...advice.map((s) => `  - ${s}`),
+    ...(v2 ? [] : [`- §11 findings:${d.blocking.length ? "" : " none"}`, ...d.blocking.map((s) => `  - ${s}`)]),
+    "",
+  ];
 }
 // `view` (a map's viewpoints): one [x, z] or a list of them.
 function views(m) {
@@ -676,9 +750,16 @@ function design(name) {
     if (!seen(from, { x: p.x, z: p.z, w, d, y, self: box })) blocking.push(`[hidden-mandatory] the ${p.what} is hidden from the camera when you stand at ${from}`);
   }
 
-  // Dead ends: a path branch over 3 tiles long ends within 2 tiles of something (or a `view`).
+  // Dead ends: a path branch over 3 tiles long ends within 2 tiles of something (or a `view`), or of a stair or
+  // ladder that takes it on at another height.
+  const tilesOf = (p) => {
+    const [w, d] = ld.foot(p, FOOT), t = [];
+    for (let x = p.x; x < p.x + w; x++) for (let z = p.z; z < p.z + d; z++) t.push({ x, z });
+    return t;
+  };
   const ends = [
-    ...(m.interactions ?? []), ...(m.npcs ?? []), ...(m.warps ?? []), ...m.props.filter((p) => p.poi || p.landmark),
+    ...(m.interactions ?? []), ...(m.npcs ?? []), ...(m.warps ?? []),
+    ...m.props.filter((p) => p.poi || p.landmark || Math.max(...(DECK[p.asset] ?? [0])) >= 0.5).flatMap(tilesOf),
     ...views(m).map(([x, z]) => ({ x, z })),
     ...(m.exits ?? []).flatMap((e) => Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => edge(e.side, e.span[0] + c)).map(([x, z]) => ({ x, z }))),
   ];
@@ -710,27 +791,28 @@ function design(name) {
       blocking.push(`[unreachable] ${pocket.length} open tiles round ${t} can't be reached with every gate open; fill them, or list them in "vista"`);
   }
 
-  // Connections: every warp from or to this map lands beside its way back, not on it or facing it, and facing into
-  // the map.
+  // Connections: every warp from or to this map lands beside its way back and never one step from taking it again:
+  // not on a door back or facing one (a door is entered by stepping into it), not on a mat (a `dir` warp) facing
+  // its way out, not facing off the map (world.js tryStep).
   for (const [from, f] of Object.entries(maps))
     for (const w of f.warps ?? []) {
       if (from !== name && w.to !== name) continue;
       const to = maps[w.to], s = w.spawn ?? to?.spawn;
       if (!to || !s || w.to === from) continue;
-      const back = new Set([...(to.warps ?? []).filter((b) => b.to === from).map((b) => k(b.x, b.z)),
-        ...(to.exits ?? []).filter((e) => e.to === from).flatMap((e) => Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => k(...({ n: [e.span[0] + c, 0], s: [e.span[0] + c, to.height - 1], w: [0, e.span[0] + c], e: [to.width - 1, e.span[0] + c] })[e.side])))]);
+      const backs = (to.warps ?? []).filter((b) => b.to === from), on = backs.find((b) => b.x === s.x && b.z === s.z);
       const ahead = DIR[s.facing] ? [s.x + DIR[s.facing][0], s.z + DIR[s.facing][1]] : null;
       const at = `[connection] the warp at ${from} ${w.x},${w.z} lands on ${w.to} ${s.x},${s.z}`;
-      if (back.has(k(s.x, s.z))) blocking.push(`${at}, on the way back (a loop)`);
-      else if (ahead && back.has(k(...ahead))) blocking.push(`${at} facing the way back (one step and it loops)`);
-      if (ahead && !(ahead[0] >= 0 && ahead[1] >= 0 && ahead[0] < to.width && ahead[1] < to.height)) blocking.push(`${at} facing out of the map`);
-      const doors = (to.warps ?? []).filter((b) => b.to === from && !b.dir);
-      if (doors.length && !doors.some((b) => Math.abs(b.x - s.x) + Math.abs(b.z - s.z) <= 1)) blocking.push(`${at}, away from the door back (land beside it)`);
+      if (on && !on.dir) blocking.push(`${at}, on the door back`);
+      else if (on && on.dir === s.facing) blocking.push(`${at} facing ${s.facing}, the way back (one push and it loops)`);
+      else if (ahead && backs.some((b) => !b.dir && b.x === ahead[0] && b.z === ahead[1])) blocking.push(`${at} facing the door back (one step and it loops)`);
+      else if (ahead && !(ahead[0] >= 0 && ahead[1] >= 0 && ahead[0] < to.width && ahead[1] < to.height)) blocking.push(`${at} facing out of the map`);
+      if (backs.length && !backs.some((b) => Math.abs(b.x - s.x) + Math.abs(b.z - s.z) <= 1)) blocking.push(`${at}, away from the way back (land on or beside it)`);
     }
 
   return (designed[name] = { blocking, g, graph, pois, marks, lanes });
 }
-// How many of an exit's edge tiles are on screen and seen from the tile 4 inside its middle.
+// How many of an exit's edge tiles are on screen and seen (a person's height above them, 1.45 m) from the tile 4
+// inside its middle.
 function exitSeen(name, e) {
   const { m, height } = ctx[name], W = m.width, H = m.height;
   const boxes = (designed[name]?.g ?? ld.grids(m, LD)).boxes;
@@ -741,7 +823,7 @@ function exitSeen(name, e) {
   for (let c = e.span[0]; c <= e.span[1]; c++) {
     const [x, z] = edge(c);
     if (Math.abs(x - hero[0]) > SCREEN[0] >> 1 || Math.abs(z - hero[1]) > SCREEN[1] >> 1) continue;
-    if (ld.visible(m, boxes, { x: hero[0], z: hero[1], y: height[`${hero[0]},${hero[1]}`] ?? 0 }, { x, z, y: (height[`${x},${z}`] ?? 0) + 0.1 })) n++;
+    if (ld.visible(m, boxes, { x: hero[0], z: hero[1], y: height[`${hero[0]},${hero[1]}`] ?? 0 }, { x, z, y: (height[`${x},${z}`] ?? 0) + 1.45 })) n++;
   }
   return n;
 }

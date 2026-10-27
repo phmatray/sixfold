@@ -3,7 +3,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, copyFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, copyFileSync, writeFileSync, readFileSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -40,8 +40,8 @@ function world(change = () => {}) {
   });
   const room = {
     width: 11, height: 9, light: { indoor: true }, props: [], spawn: { x: 5, z: 7, facing: "n" },
-    tiles: ["#".repeat(11), ...Array.from({ length: 7 }, () => `#${".".repeat(9)}#`), "#####.#####"],
-    warps: [{ x: 5, z: 8, to: "vale", label: "Go out", label_fr: "Sortir", spawn: { x: 16, z: 14, facing: "s" } }],
+    tiles: ["#".repeat(11), ...Array.from({ length: 7 }, () => `#${".".repeat(9)}#`), "#".repeat(11)],
+    warps: [{ x: 5, z: 7, dir: "s", to: "vale", label: "Go out", label_fr: "Sortir", spawn: { x: 16, z: 14, facing: "s" } }],
   };
   const maps = { vale, fell, vale_in: room };
   change(maps);
@@ -107,8 +107,43 @@ test("AC4: an unreachable 4-tile pocket fails; a vista over it passes", () => {
 });
 
 test("AC4: a warp landing on its own way back fails; a moved landing tile passes", () => {
-  fails(world((m) => (m.vale.warps[0].spawn = { x: 5, z: 8, facing: "n" })), "connection");
-  passes(world((m) => (m.vale.warps[0].spawn = { x: 5, z: 7, facing: "n" })));
+  // On the room's mat facing out: one push and the hero is back outside.
+  fails(world((m) => (m.vale.warps[0].spawn = { x: 5, z: 7, facing: "s" })), "connection");
+  passes(world((m) => (m.vale.warps[0].spawn = { x: 5, z: 6, facing: "s" })));
+  // Back outside on the door itself.
+  fails(world((m) => (m.vale_in.warps[0].spawn = { x: 16, z: 13, facing: "s" })), "connection");
 });
 
 test("a map without level_design only lists the rules (no error)", () => passes(world((m) => (delete m.vale.level_design, delete m.vale.props[1].landmark))));
+
+const outdoorMaps = readdirSync(join(WEB, "maps")).filter((f) => !JSON.parse(readFileSync(join(WEB, "maps", f), "utf8")).light.indoor);
+
+test("AC5: --report prints one section per outdoor map, with its measures, and exits 0 with advisories", () => {
+  const r = run(WEB, "--report");
+  assert.equal(r.code, 0, r.out);
+  const sections = r.stdout.split("\n## ").slice(1);
+  assert.equal(sections.length, outdoorMaps.length);
+  for (const s of sections)
+    for (const line of ["- landmark:", "- POIs:", "- longest walk without a discovery:", "- scatter: ratio", "- density along the main path"]) assert.ok(s.includes(line), `${s.split("\n")[0]} lacks ${line}`);
+  assert.match(r.stdout, /## woodland .*\n[\s\S]*?- POIs: \d+ major, \d+ secondary, \d+ micro, \d+ secret/);
+  assert.match(r.stdout, /\[poi-budget\]/);
+});
+
+test("--report=<file> writes the report there", () => {
+  const file = join(mkdtempSync(join(tmpdir(), "ld-")), "report.md");
+  assert.equal(run(world(), `--report=${file}`).code, 0);
+  assert.match(readFileSync(file, "utf8"), /^# Level design report\n[\s\S]*\n## vale — Vale \(village\)\n/);
+});
+
+test("AC6: a changed budget changes the report, with no code change", () => {
+  const woodland = (out) => out.split("\n## ").find((s) => s.startsWith("woodland"));
+  const before = woodland(run(WEB, "--report").stdout);
+  assert.match(before, /\[poi-budget\] 0 secondary POIs \(2–4 for a route\)/);
+  const budgets = JSON.parse(readFileSync(new URL("./level-design.json", import.meta.url), "utf8"));
+  budgets.route.secondary = [0, 4];
+  const file = join(mkdtempSync(join(tmpdir(), "ld-")), "level-design.json");
+  writeFileSync(file, JSON.stringify(budgets));
+  const after = woodland(run(WEB, "--report", `--budgets=${file}`).stdout);
+  assert.doesNotMatch(after, /0 secondary POIs/);
+  assert.match(after, /budget: secondary 0–4/);
+});
