@@ -346,7 +346,7 @@ fn seal_keepers_stand_by_their_stones() {
             Fighting => "stone",
             Colorless => unreachable!("{} keeps no region", r.id),
         };
-        let at: Vec<(&str, &Value)> = maps
+        let at: Vec<(&str, &Value, &Value)> = maps
             .iter()
             .flat_map(|(name, m)| {
                 m["npcs"]
@@ -354,7 +354,7 @@ fn seal_keepers_stand_by_their_stones() {
                     .into_iter()
                     .flatten()
                     .filter(|n| n["id"] == r.id)
-                    .map(move |n| (name.as_str(), n))
+                    .map(move |n| (name.as_str(), m, n))
             })
             .collect();
         assert_eq!(
@@ -364,8 +364,7 @@ fn seal_keepers_stand_by_their_stones() {
             r.id,
             at.iter().map(|a| a.0).collect::<Vec<_>>()
         );
-        let (name, n) = at[0];
-        let m = &maps.iter().find(|(m, _)| m == name).unwrap().1;
+        let (name, m, n) = at[0];
         assert!(
             SEAL_SITES.contains(&name),
             "{} stands on {name}, not a seal site",
@@ -388,6 +387,27 @@ fn seal_keepers_stand_by_their_stones() {
         let gap = |v: i64, s: i64| (s - v).max(v - (s + 1)).max(0);
         let d = gap(x, sx).max(gap(z, sz));
         assert!(d <= 3, "{} stands {d} tiles from {name}'s seal stone", r.id);
+        // On the stone's level: a digit tile is a terrace height, and the stone's `y` must match it.
+        let level = |x: i64, z: i64| {
+            let c = m["tiles"][z as usize].as_str().unwrap().as_bytes()[x as usize];
+            if c.is_ascii_digit() {
+                i64::from(c - b'0')
+            } else {
+                0
+            }
+        };
+        let y = stone["y"].as_i64().unwrap_or(0);
+        assert_eq!(
+            level(x, z),
+            y,
+            "{} and {name}'s seal stone stand on different levels",
+            r.id
+        );
+        assert_eq!(
+            level(sx, sz),
+            y,
+            "{name}'s seal stone is not on its tile's level"
+        );
     }
 }
 

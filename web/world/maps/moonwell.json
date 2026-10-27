@@ -1685,11 +1685,11 @@
         },
         {
           "lines": [
-            "You found the shade. Good. My garden only grows at night.",
+            "You found my garden. Good. It only grows at night.",
             "I'm Lumen. Six prizes, and I don't let anyone sleep through them."
           ],
           "lines_fr": [
-            "Tu as trouvé l'ombre. Bien. Mon jardin ne pousse que la nuit.",
+            "Tu as trouvé mon jardin. Bien. Il ne pousse que la nuit.",
             "Je suis Lumen. Six cartes Récompense, et personne ne s'endort pendant mes duels."
           ],
           "do": [
