@@ -1,15 +1,30 @@
 import { expect, test, type Page } from "@playwright/test";
-import { menuItem, readSave, skipSplash, title } from "./helpers";
+import { frames, menuItem, readSave, skipSplash, title } from "./helpers";
 
 /** Where the save says the hero stands: `map,x,z,facing`. */
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
 
-/** Hold an arrow key until the saved position matches `want`. */
+/**
+ * Hold an arrow key until the saved position matches `want`, checked every frame. Allowed 600 frames, not
+ * seconds: the world moves by frames (at most 0.05 s of walking each, world.js), so a walk and a door's
+ * load take about as many on CI's software GL, where one frame can take seconds, as anywhere else.
+ */
 async function walk(page: Page, key: string, want: RegExp) {
+  // Pressed at once (as the last walk's door may still be fading in: the press must count), then counted.
   await page.keyboard.down(key);
   try {
-    // Polled often: the hero walks 4 tiles a second.
-    await expect.poll(() => at(page), { timeout: 30_000, intervals: [100] }).toMatch(want);
+    await page.evaluate(() => ((window as unknown as { walked: number }).walked = 0));
+    await page.waitForFunction(
+      ([src, max]) => {
+        const at = /\[world_at\]\n(.*)/.exec(localStorage.getItem("sixfold.save.1") ?? "")?.[1] ?? "";
+        if (new RegExp(src).test(at)) return true;
+        const w = window as unknown as { walked: number };
+        if (++w.walked > max) throw new Error(`still at "${at}" after ${max} frames`);
+        return false;
+      },
+      [want.source, 600] as const,
+      { polling: "raf", timeout: 0 },
+    );
   } finally {
     await page.keyboard.up(key);
   }
@@ -85,7 +100,7 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   const prompt = page.getByRole("button", { name: /^Talk to Tobin/ });
   await expect(prompt).toBeVisible();
   await page.keyboard.press("e");
-  // The map's first talk opens at once: busts are baked ahead of time (#159).
+  // The map's first talk opens at once: a bust not drawn yet follows (#159).
   const talk = page.locator(".talk-box");
   await expect(talk).toBeVisible();
   while (await talk.isVisible()) {
@@ -131,7 +146,8 @@ test("on a phone, a tap on the ground walks only once Options allow it @phone", 
   await page.waitForTimeout(1500);
   expect(await host.getAttribute("data-hero")).toEqual(start);
 
-  // Options: tap to walk, kept in this browser.
+  // Options: tap to walk, kept in this browser. (Once the page is free: see `frames`.)
+  await frames(page);
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("tab", { name: "Options" }).click();
   const option = page.getByRole("checkbox", { name: /Tap the ground to walk/ });
