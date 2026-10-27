@@ -1,7 +1,7 @@
 // node --test tools/ld.test.mjs — the level-design analysis (web/world/ld.js).
 import test from "node:test";
 import assert from "node:assert/strict";
-import { grids, visible, pathGraph, walkTime, scatter, density } from "../web/world/ld.js";
+import { grids, visible, blocker, approach, pathGraph, walkTime, scatter, density } from "../web/world/ld.js";
 
 const T = { FOOT: { cottage: [5, 4] }, DECK: {}, WALKABLE: new Set(), tall: (a) => ({ pine: 3.8, bush: 0.7, cottage: 4.5 })[a] ?? 1 };
 const blank = (w, h, rows = {}) => Array.from({ length: h }, (_, z) => rows[z] ?? ".".repeat(w));
@@ -14,10 +14,19 @@ test("a pine two tiles south of a door hides it at the real camera pitch; a bush
   for (const [asset, seen] of [["pine", false], ["bush", true]]) {
     const g = grids(map([house, { asset, x: 10, z: 9, rot: 0 }]), T);
     assert.equal(visible(map([]), g.boxes, from, door), seen, asset);
+    // The overlay highlights the box that blocks the ray: the pine's.
+    assert.equal(blocker(map([]), g.boxes, from, door)?.prop.asset, seen ? undefined : "pine", asset);
   }
   // North of the door (behind the house) the pine hides nothing.
   const g = grids(map([house, { asset: "pine", x: 10, z: 2, rot: 0 }]), T);
   assert.equal(visible(map([]), g.boxes, from, door), true);
+});
+
+test("a warp is checked from the open tile south of it, at a door's height", () => {
+  const g = grids(map([]), T), open = new Set(["10,8", "11,7"]);
+  const a = approach({ x: 10, z: 7, tier: "major", o: {} }, g, open, () => 0, T.FOOT);
+  assert.deepEqual([a.from.x, a.from.z, a.target.y], [10, 8, 1]);
+  assert.equal(approach({ x: 3, z: 3, tier: "major", o: {} }, g, open, () => 0, T.FOOT), null);
 });
 
 test("a 1-wide dead-end branch is found, with its length back to the junction", () => {

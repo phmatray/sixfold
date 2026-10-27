@@ -35,7 +35,7 @@ let api = null, gen = 0, items = "", paused = false, minute = 480;
 export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g !== gen) return; api = m.mount(el, controls, cb, start, edit && new URLSearchParams(location.search).has("edit")); api.setItems(items); api.setClock(minute); api.pause(paused); })
+    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setClock(minute); api.pause(paused); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "import", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
@@ -55,7 +55,7 @@ export function world_book_rect() { return api?.bookRect() ?? []; }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
-    /// `edit`: a debug build, where `?edit` in the URL loads the map editor.
+    /// `edit`: a debug build, where `?edit` in the URL loads the map editor and `?debug` the overlays.
     fn world_mount(el: &JsValue, controls: &JsValue, cb: &JsValue, start: &str, edit: bool);
     fn world_unmount();
     /// Act on the faced tile, as E does.
@@ -418,9 +418,11 @@ fn parse_talk(json: &str) -> Option<(String, Vec<Branch>)> {
 struct Talk {
     id: String,
     name: String,
-    /// The speaker's face: a rival's portrait, a person's bust, none for the
-    /// hero's own lines (a sign, a thought).
+    /// The speaker's face: a rival's portrait, a person's bust ([`BUST_PENDING`]
+    /// while world.js bakes it), none for the hero's own lines (a sign, a thought).
     face: Option<String>,
+    /// The bust just came in for a placeholder: it fades in over it (this line only).
+    fade: bool,
     lines: Vec<String>,
     effects: Vec<String>,
     at: usize,
@@ -433,6 +435,10 @@ impl Talk {
         self.lines.get(self.at).map_or("", String::as_str)
     }
 }
+
+/// world.js's face for a person whose bust isn't baked yet: a placeholder
+/// shows, and the bust follows (the "bust" event).
+const BUST_PENDING: &str = "pending";
 
 /// The speaker's face: a rival's portrait, a person's bust, none for the hero
 /// or anything that isn't a person on this map.
@@ -706,6 +712,7 @@ pub fn WorldScreen() -> impl IntoView {
         typed.set(0);
         sheet.set(Some(Sheet::Talk(Talk {
             face: face_of(&id),
+            fade: false,
             id,
             name,
             lines: b.lines,
@@ -843,6 +850,16 @@ pub fn WorldScreen() -> impl IntoView {
                     said_at.set_value(now);
                 }
                 "talk" => start_talk(a, b),
+                // A bust baked: it takes the place of its placeholder in the talk on screen.
+                "bust" => {
+                    _ = sheet.try_update(|s| {
+                        if let Some(Sheet::Talk(t)) = s {
+                            if t.id == a && t.face.as_deref() == Some(BUST_PENDING) {
+                                (t.face, t.fade) = (Some(b), true);
+                            }
+                        }
+                    })
+                }
                 "area" => _ = announce.try_set(a),
                 "progress" => {
                     if let Some((d, t)) = a.split_once('/') {
@@ -1132,6 +1149,7 @@ pub fn WorldScreen() -> impl IntoView {
                     typed.set(0);
                     sheet.set(Some(Sheet::Talk(Talk {
                         face: face_of(&actor),
+                        fade: false,
                         id: actor,
                         name,
                         lines,
@@ -1206,6 +1224,7 @@ pub fn WorldScreen() -> impl IntoView {
             typed.set(len); // finish the line first
         } else if t.at + 1 < t.lines.len() {
             t.at += 1;
+            t.fade = false;
             typed.set(0);
             sheet.set(Some(Sheet::Talk(t)));
         } else {
@@ -1512,9 +1531,15 @@ pub fn WorldScreen() -> impl IntoView {
                         view! {
                             // Described by the live line, so the first line is read on focus (later ones as they come).
                             <button class="talk-box" class:has-face=t.face.is_some() aria-describedby="talk-live" on:click=move |_| advance()>
-                                // The face slides in with the first line only.
-                                {t.face.clone().map(|src| view! {
-                                    <img class="talk-face" class:enter=t.at == 0 src=src alt="" width="96" height="96" />
+                                // The face slides in with the first line only; a bust still baking is
+                                // a placeholder, and the bust fades in over it.
+                                {t.face.clone().map(|src| if src == BUST_PENDING {
+                                    view! { <span class="talk-face" class:enter=t.at == 0 aria-hidden="true"></span> }.into_any()
+                                } else {
+                                    view! {
+                                        {t.fade.then(|| view! { <span class="talk-face" aria-hidden="true"></span> })}
+                                        <img class="talk-face" class:enter=t.at == 0 && !t.fade class:bust-in=t.fade src=src alt="" width="96" height="96" />
+                                    }.into_any()
                                 })}
                                 {if named {
                                     view! { <span class="talk-name" id="world-sheet-title">{t.name.clone()}</span> }.into_any()
@@ -1599,7 +1624,7 @@ pub fn WorldScreen() -> impl IntoView {
                         </div>
                     }.into_any(),
                     Sheet::Challenge(id) => {
-                        let face = face_of(&id);
+                        let face = face_of(&id).filter(|f| f != BUST_PENDING);
                         let quote = said.with_value(|s| s.clone().filter(|(who, _)| *who == id).map(|(_, l)| l));
                         view! {
                             <Challenge id=id face=face quote=quote on_cancel=move || sheet.set(None) before=move || sheet.set(None)
