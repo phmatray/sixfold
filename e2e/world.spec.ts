@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { menuItem, readSave, title } from "./helpers";
+import { menuItem, readSave, skipSplash, title } from "./helpers";
 
 /** Where the save says the hero stands: `map,x,z,facing`. */
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
@@ -143,4 +143,17 @@ test("on a phone, a tap on the ground walks only once Options allow it @phone", 
 
   await canvas.tap({ position: ground });
   await expect.poll(() => host.getAttribute("data-hero"), { timeout: 10_000 }).not.toEqual(start);
+});
+
+test("a release build ignores ?debug: the overlays (web/world/debug.js) are never fetched", async ({ page }) => {
+  const asked: string[] = [];
+  page.on("request", (r) => asked.push(r.url()));
+  await skipSplash(page);
+  await page.goto("/?debug&edit");
+  await menuItem(page, "Explore the world").click();
+  await loaded(page);
+  await page.waitForTimeout(1000);
+  expect(asked.some((u) => u.includes("/world/world.js"))).toBe(true);
+  expect(asked.filter((u) => /\/world\/(debug|editor)\.js/.test(u))).toEqual([]);
+  await expect(page.locator(".debug-panel")).toHaveCount(0);
 });
