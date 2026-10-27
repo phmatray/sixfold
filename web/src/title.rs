@@ -2,7 +2,7 @@
 
 use leptos::html;
 use leptos::prelude::*;
-use sixfold_engine::campaign::{seals, RIVALS, SEALS};
+use sixfold_engine::campaign::{next_rival, seals, RIVALS, SEALS};
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
 use sixfold_engine::{tr, Lang};
@@ -316,7 +316,7 @@ pub fn TitleScreen() -> impl IntoView {
     let records = move || progress.with(count_line);
     let campaign_sub = move || {
         progress.with(|p| {
-            let next = RIVALS.iter().find(|r| r.open(p) && !r.beaten(p));
+            let next = next_rival(p);
             match (seals(p), next) {
                 (n, _) if RIVALS.iter().all(|r| r.beaten(p)) => tr(
                     format!("All {n} seals. Champion! The Gauntlet is open"),
@@ -338,15 +338,13 @@ pub fn TitleScreen() -> impl IntoView {
         })
     };
     let continue_sub = move || {
-        progress.with(
-            |p| match RIVALS.iter().find(|r| r.open(p) && !r.beaten(p)) {
-                Some(r) => tr(
-                    format!("Back into the world · next rival: {}", r.name),
-                    format!("Retour dans le monde · prochain rival : {}", r.name),
-                ),
-                None => tr("Back into the world", "Retour dans le monde").to_string(),
-            },
-        )
+        progress.with(|p| match next_rival(p) {
+            Some(r) => tr(
+                format!("Back into the world · next rival: {}", r.name),
+                format!("Retour dans le monde · prochain rival : {}", r.name),
+            ),
+            None => tr("Back into the world", "Retour dans le monde").to_string(),
+        })
     };
     let pack_sub = move || match packs.get() {
         0 => tr(

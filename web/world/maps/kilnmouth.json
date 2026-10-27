@@ -4760,7 +4760,18 @@
       "hair": "#e8e0d6",
       "dialogue": [
         {
-          "if": "!beat:cinza & earned:cinza",
+          "if": "!time:day & !time:dawn",
+          "lines": [
+            "Hear that? Nothing. The vents are asleep. Go on: the high terrace is yours till dawn.",
+            "Vela's up on the north rim, if you're looking for trouble. She usually is."
+          ],
+          "lines_fr": [
+            "Tu entends ? Rien. Les évents dorment. Vas-y : la haute terrasse est à toi jusqu'à l'aube.",
+            "Vela est sur le rebord nord, si tu cherches les ennuis. Elle, elle les cherche toujours."
+          ]
+        },
+        {
+          "if": "!beat:cinza & open:cinza & earned:cinza",
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
@@ -4775,7 +4786,7 @@
           ]
         },
         {
-          "if": "!beat:cinza & bested:cinza:2",
+          "if": "!beat:cinza & !earned:cinza & bested:cinza:2",
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
@@ -4790,7 +4801,7 @@
           ]
         },
         {
-          "if": "!beat:cinza & bested:cinza:1",
+          "if": "!beat:cinza & !earned:cinza & bested:cinza:1",
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
@@ -4805,7 +4816,7 @@
           ]
         },
         {
-          "if": "!beat:cinza & bested:cinza:0",
+          "if": "!beat:cinza & !earned:cinza & bested:cinza:0",
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
@@ -4817,17 +4828,6 @@
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
             "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
             "Cinza ne fait pas la course avec n'importe qui. Bats encore trois duellistes des Braisières et elle t'attendra près de la pierre."
-          ]
-        },
-        {
-          "if": "!time:day & !time:dawn",
-          "lines": [
-            "Hear that? Nothing. The vents are asleep. Go on: the high terrace is yours till dawn.",
-            "Vela's up on the north rim, if you're looking for trouble. She usually is."
-          ],
-          "lines_fr": [
-            "Tu entends ? Rien. Les évents dorment. Vas-y : la haute terrasse est à toi jusqu'à l'aube.",
-            "Vela est sur le rebord nord, si tu cherches les ennuis. Elle, elle les cherche toujours."
           ]
         },
         {

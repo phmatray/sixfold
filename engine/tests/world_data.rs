@@ -929,14 +929,36 @@ fn keepers_ask_for_some_of_their_regions_duelists() {
                     .is_some_and(|n| n.iter().any(|n| n["id"] == r.id))
             })
             .unwrap();
-        let conds: Vec<&str> = site["npcs"]
+        let branches: Vec<&Value> = site["npcs"]
             .as_array()
             .unwrap()
             .iter()
             .filter(|n| n["id"] != r.id)
             .flat_map(|n| n["dialogue"].as_array().into_iter().flatten())
-            .filter_map(|d| d["if"].as_str())
             .collect();
+        let conds: Vec<&str> = branches.iter().filter_map(|d| d["if"].as_str()).collect();
+        // Each count branch names how many more: earn - k, in words.
+        let prefix = format!("bested:{}:", r.id);
+        for d in &branches {
+            let Some(k) = d["if"].as_str().and_then(|c| {
+                c.split(" & ")
+                    .find_map(|t| t.strip_prefix(prefix.as_str())?.parse::<usize>().ok())
+            }) else {
+                continue;
+            };
+            assert!(k < r.earn, "{}: a branch for {k} bested never plays", r.id);
+            let more = [
+                ("", ""),
+                ("one more", "encore un "),
+                ("two more", "encore deux "),
+                ("three more", "encore trois "),
+                ("four more", "encore quatre "),
+            ][r.earn - k];
+            for (key, word) in [("lines", more.0), ("lines_fr", more.1)] {
+                let last = d[key].as_array().unwrap().last().unwrap().as_str().unwrap();
+                assert!(last.contains(word), "{} at {k} bested says {last:?}", r.id);
+            }
+        }
         let says = (0..r.earn)
             .map(|k| format!("bested:{}:{k}", r.id))
             .chain([format!("earned:{}", r.id)]);

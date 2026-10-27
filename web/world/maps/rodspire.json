@@ -932,7 +932,7 @@
           ]
         },
         {
-          "if": "!beat:quill & earned:quill",
+          "if": "!beat:quill & open:quill & earned:quill",
           "lines": [
             "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
             "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
@@ -947,7 +947,7 @@
           ]
         },
         {
-          "if": "!beat:quill & bested:quill:3",
+          "if": "!beat:quill & !earned:quill & bested:quill:3",
           "lines": [
             "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
             "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
@@ -962,7 +962,7 @@
           ]
         },
         {
-          "if": "!beat:quill & bested:quill:2",
+          "if": "!beat:quill & !earned:quill & bested:quill:2",
           "lines": [
             "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
             "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
@@ -977,7 +977,7 @@
           ]
         },
         {
-          "if": "!beat:quill & bested:quill:1",
+          "if": "!beat:quill & !earned:quill & bested:quill:1",
           "lines": [
             "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
             "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",
@@ -992,7 +992,7 @@
           ]
         },
         {
-          "if": "!beat:quill & bested:quill:0",
+          "if": "!beat:quill & !earned:quill & bested:quill:0",
           "lines": [
             "Three relay pylons, three switches, one lift. Throw all three and the cage climbs the stack.",
             "The lineworkers on the islets don't let just anyone near their pylons. Duel your way through, or ask nicely.",

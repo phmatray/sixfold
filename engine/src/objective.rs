@@ -7,7 +7,7 @@
 //! `engine/tests/world_data.rs` checks against every map's gates, gated
 //! doors and gangways, so the table can't drift from the world.
 
-use crate::campaign::{champion, rival, seals, Rival, RIVALS};
+use crate::campaign::{champion, next_rival, rival, seals, Rival};
 use crate::endgame::CLEAR_FLAG;
 use crate::overworld::{parse_cond, Progress, Test};
 use crate::{tr, T};
@@ -168,10 +168,7 @@ pub fn objective(p: &Progress) -> Objective {
         return Objective::Lesson;
     }
     if !champion(p) {
-        let next = RIVALS
-            .iter()
-            .find(|r| !r.beaten(p) && r.open(p))
-            .or_else(|| rival("warden"));
+        let next = next_rival(p).or_else(|| rival("warden"));
         return Objective::Rival(next.expect("the Warden is a rival"));
     }
     let missing = KEYS.iter().filter(|k| !p.has_item(k.item));
@@ -383,6 +380,30 @@ mod tests {
             "flag:beat_t_skye",
         ]);
         assert!(objective(&p).text(&p).starts_with("Earn Marlo's seal"));
+        // A keeper who accepts comes before one still to earn.
+        let p = with(&[
+            "flag:beat_t_tobin",
+            "flag:beat_t_pell",
+            "flag:beat_t_nell",
+            "flag:beat_t_skye",
+        ]);
+        assert_eq!(objective(&p), Objective::Rival(rival("marlo").unwrap()));
+        // Orla, by her name's vowel: "le défi d'Orla".
+        let p = with(&[
+            "flag:beat_t_tobin",
+            "flag:beat_bramble",
+            "flag:beat_marlo",
+            "flag:beat_cinza",
+            "flag:beat_quill",
+        ]);
+        assert_eq!(objective(&p), Objective::Rival(rival("orla").unwrap()));
+        set_lang(Lang::Fr);
+        let fr = objective(&p).text(&p);
+        set_lang(Lang::En);
+        assert!(
+            fr.starts_with("Battez encore 3 duellistes des Échines de Pierre pour mériter le défi d'Orla (0 sur 3)."),
+            "{fr}"
+        );
     }
 
     #[test]

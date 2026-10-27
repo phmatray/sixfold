@@ -1486,7 +1486,7 @@
           ]
         },
         {
-          "if": "!beat:lumen & earned:lumen",
+          "if": "!beat:lumen & open:lumen & earned:lumen",
           "lines": [
             "Don't step on the beds. Do look in them. Things turn up in moonflowers.",
             "The well stair goes down to an old alcove. It's black as a closed eye in there. I never go without a light.",
@@ -1499,7 +1499,7 @@
           ]
         },
         {
-          "if": "!beat:lumen & bested:lumen:3",
+          "if": "!beat:lumen & !earned:lumen & bested:lumen:2",
           "lines": [
             "Don't step on the beds. Do look in them. Things turn up in moonflowers.",
             "The well stair goes down to an old alcove. It's black as a closed eye in there. I never go without a light.",
@@ -1512,7 +1512,7 @@
           ]
         },
         {
-          "if": "!beat:lumen & bested:lumen:2",
+          "if": "!beat:lumen & !earned:lumen & bested:lumen:1",
           "lines": [
             "Don't step on the beds. Do look in them. Things turn up in moonflowers.",
             "The well stair goes down to an old alcove. It's black as a closed eye in there. I never go without a light.",
@@ -1525,7 +1525,7 @@
           ]
         },
         {
-          "if": "!beat:lumen & bested:lumen:1",
+          "if": "!beat:lumen & !earned:lumen & bested:lumen:0",
           "lines": [
             "Don't step on the beds. Do look in them. Things turn up in moonflowers.",
             "The well stair goes down to an old alcove. It's black as a closed eye in there. I never go without a light.",
@@ -1535,19 +1535,6 @@
             "Ne marche pas sur les massifs. Mais regarde dedans. On trouve des choses dans les belles-de-lune.",
             "L'escalier du puits descend jusqu'à une vieille alcôve. Il fait noir comme un œil fermé, là-dedans. Je n'y vais jamais sans lumière.",
             "Lumen dit que le jardin doit d'abord te connaître. Bats encore trois duellistes des Terres du Murmure, et il te connaîtra."
-          ]
-        },
-        {
-          "if": "!beat:lumen & bested:lumen:0",
-          "lines": [
-            "Don't step on the beds. Do look in them. Things turn up in moonflowers.",
-            "The well stair goes down to an old alcove. It's black as a closed eye in there. I never go without a light.",
-            "Lumen says the garden has to know you first. Beat four more duelists of the Hushlands and it will."
-          ],
-          "lines_fr": [
-            "Ne marche pas sur les massifs. Mais regarde dedans. On trouve des choses dans les belles-de-lune.",
-            "L'escalier du puits descend jusqu'à une vieille alcôve. Il fait noir comme un œil fermé, là-dedans. Je n'y vais jamais sans lumière.",
-            "Lumen dit que le jardin doit d'abord te connaître. Bats encore quatre duellistes des Terres du Murmure, et il te connaîtra."
           ]
         },
         {
@@ -1655,7 +1642,7 @@
       "if": "time:day",
       "dialogue": [
         {
-          "if": "!beat:lumen & earned:lumen",
+          "if": "!beat:lumen & open:lumen & earned:lumen",
           "lines": [
             "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
             "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it.",
@@ -1668,7 +1655,7 @@
           ]
         },
         {
-          "if": "!beat:lumen & bested:lumen:3",
+          "if": "!beat:lumen & !earned:lumen & bested:lumen:2",
           "lines": [
             "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
             "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it.",
@@ -1681,7 +1668,7 @@
           ]
         },
         {
-          "if": "!beat:lumen & bested:lumen:2",
+          "if": "!beat:lumen & !earned:lumen & bested:lumen:1",
           "lines": [
             "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
             "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it.",
@@ -1694,7 +1681,7 @@
           ]
         },
         {
-          "if": "!beat:lumen & bested:lumen:1",
+          "if": "!beat:lumen & !earned:lumen & bested:lumen:0",
           "lines": [
             "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
             "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it.",
@@ -1704,19 +1691,6 @@
             "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
             "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup.",
             "Lumen dort, comme tout ici. À son réveil, elle voudra que tu aies battu encore trois duellistes des Terres du Murmure."
-          ]
-        },
-        {
-          "if": "!beat:lumen & bested:lumen:0",
-          "lines": [
-            "Mm? Oh. Hello. Sorry. Garden hours are dusk to dawn. By day everything sleeps here, me included.",
-            "Rest at the Quiet Lamp in Lanternmere, and come back when the moonflowers open. It's worth it.",
-            "Lumen's asleep, like everything here. When she wakes she'll want four more duelists of the Hushlands beaten first."
-          ],
-          "lines_fr": [
-            "Mm ? Oh. Bonjour. Pardon. Le jardin vit du crépuscule à l'aube. Le jour, tout dort ici, moi comprise.",
-            "Repose-toi à la Lampe Tranquille, à Lac-aux-Lanternes, et reviens quand les belles-de-lune s'ouvrent. Ça vaut le coup.",
-            "Lumen dort, comme tout ici. À son réveil, elle voudra que tu aies battu encore quatre duellistes des Terres du Murmure."
           ]
         },
         {

@@ -38,7 +38,8 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   await expect(menuItem(page, "Continue")).toBeVisible();
 
   // Two of the Saltreach's duelists: Marlo refuses, in his own words, and counts them.
-  await atMarlo(page, ["f:intro", "f:beat_t_tobin", "f:beat_bramble", "f:beat_t_pell", "f:beat_t_nell"]);
+  // `f:keepers`: a save of this build, so not vouched for as an old one (which would earn every keeper).
+  await atMarlo(page, ["f:keepers", "f:intro", "f:beat_t_tobin", "f:beat_bramble", "f:beat_t_pell", "f:beat_t_nell"]);
   const offer = await talkToMarlo(page);
   await expect(offer).toContainText("The tide doesn't turn for strangers.");
   await expect(offer).toContainText("Marlo wants 3 of the Saltreach's duelists bested first. You've bested 2.");
@@ -54,6 +55,12 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   await expect(journal).toContainText("Beat 1 more duelist of the Saltreach to earn Marlo's challenge (2 of 3).");
   await page.keyboard.press("Escape");
   await expect(journal).toBeHidden();
+  // The menu's Campaign roster counts them too.
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("tab", { name: "Campaign" }).click();
+  await expect(page.locator("li.rival").filter({ hasText: "Marlo" })).toContainText("Duelists bested: 2 of 3");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("li.rival")).toHaveCount(0);
 
   // A third: the duel is on offer.
   await atMarlo(page, ["f:beat_t_skye"]);

@@ -250,7 +250,9 @@ are 3. Final thresholds: Grove 3 of 10, Tide 3 of 10, Ember 3 of 9, Storm 4 of 7
 `campaign_sweep` on 1.10's main *before* #150 already ran 14–54 rival duels (median 35): seeds 11, 12 and
 13 take 51, 54 and 45, every one held back by the Warden. With the threshold it measures the same 14–54
 (median 35): the always-on seeds 1, 2 and 3 take 35, 35 and 23. The sweep's overrun predates the
-threshold (seed 12 meets one duelist again and still needs 54) and is left to a Warden pass.
+threshold (seed 12 meets one duelist again and still needs 54) and is left to a Warden pass. Seed 13
+(45 before, 51 with #150, 11 rematches of Fenna and Odo) is the Warden's too: lowering Grove to 2 and
+Storm to 3 cut its rematches to 3 and it then took 54, so those two keep 3 and 4.
 
 | Pack seed | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|

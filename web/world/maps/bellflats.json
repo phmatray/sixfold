@@ -4136,7 +4136,7 @@
       "hair": "#d9d2c4",
       "dialogue": [
         {
-          "if": "!beat:marlo & earned:marlo",
+          "if": "!beat:marlo & open:marlo & earned:marlo",
           "lines": [
             "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
             "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
@@ -4149,7 +4149,7 @@
           ]
         },
         {
-          "if": "!beat:marlo & bested:marlo:2",
+          "if": "!beat:marlo & !earned:marlo & bested:marlo:2",
           "lines": [
             "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
             "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
@@ -4162,7 +4162,7 @@
           ]
         },
         {
-          "if": "!beat:marlo & bested:marlo:1",
+          "if": "!beat:marlo & !earned:marlo & bested:marlo:1",
           "lines": [
             "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
             "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
@@ -4175,7 +4175,7 @@
           ]
         },
         {
-          "if": "!beat:marlo & bested:marlo:0",
+          "if": "!beat:marlo & !earned:marlo & bested:marlo:0",
           "lines": [
             "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
             "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",

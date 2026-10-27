@@ -679,14 +679,14 @@ pub fn Challenge(
         ),
         (None, None) => title.to_string(),
     };
-    let earned = accepts();
+    let accepted = accepts();
     let quote = match r {
-        Some(r) if open() && !earned => Some(r.lines.refuse.get().to_string()),
+        Some(r) if open() && !accepted => Some(r.lines.refuse.get().to_string()),
         _ => quote.or_else(|| o.lines.map(|l| l.intro.get().to_string())),
     };
     let (win_label, wins) = progress.with_untracked(|p| winnings(&id, p));
     let open = open();
-    let can = open && earned && playable > 0;
+    let can = accepted && playable > 0;
     let initial: String = name.chars().take(1).collect();
     let deck = move || opts.with_value(|o| o[choice.get()].clone());
     let to_decks = move || {
@@ -755,7 +755,7 @@ pub fn Challenge(
                     format!("{} needs {} before accepting a duel. You hold {held}: beat the rivals of the other regions for theirs.", r.name, seals_n(r.needs)),
                     format!("{} exige {} avant d'accepter un duel. Vous en avez {held} : battez les rivaux des autres régions pour les leurs.", r.name, seals_n(r.needs)),
                 )}</p> }.into_any()
-            } else if let Some(r) = r.filter(|_| !earned) {
+            } else if let Some(r) = r.filter(|_| !accepted) {
                 let n = progress.with_untracked(|p| r.bested(p));
                 let of = tr(format!("{n} of {}", r.earn), format!("{n} sur {}", r.earn));
                 view! { <div class="ch-note no">
@@ -842,7 +842,7 @@ pub fn Challenge(
                 }.into_any()
             }}
             <div class="ch-actions">
-                <button type="button" class="btn ch-no" aria-keyshortcuts="Escape" autofocus=!(open && earned) on:click=move |_| on_cancel()>
+                <button type="button" class="btn ch-no" aria-keyshortcuts="Escape" autofocus=!accepted on:click=move |_| on_cancel()>
                     {tr("Not now", "Pas maintenant")}
                     <kbd aria-hidden="true">{move || prompt(Ctrl::Cancel)}</kbd>
                 </button>

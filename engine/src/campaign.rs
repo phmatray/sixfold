@@ -208,6 +208,15 @@ pub fn stakes(id: Option<&str>) -> Stakes {
     }
 }
 
+/// The next rival to duel: the first not yet beaten who accepts, else the
+/// first whose seals are met (their region's duelists still to best).
+pub fn next_rival(p: &Progress) -> Option<&'static Rival> {
+    let unbeaten = || RIVALS.iter().filter(|r| !r.beaten(p));
+    unbeaten()
+        .find(|r| r.accepts(p))
+        .or_else(|| unbeaten().find(|r| r.open(p)))
+}
+
 /// Seals earned so far.
 pub fn seals(p: &Progress) -> usize {
     RIVALS.iter().filter(|r| r.seal && r.beaten(p)).count()
