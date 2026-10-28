@@ -417,6 +417,10 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
    floors where a compact card would otherwise drop below 11px. */
 .card {
   position: relative;
+  /* Its own stacking context: the HP badge, the gloss and the foil stack
+     inside the card, never over whatever lies above it (the binder's
+     turning leaf, a dealt card). */
+  isolation: isolate;
   container-type: inline-size;
   width: var(--w, 100px);
   aspect-ratio: 5 / 7;
@@ -453,8 +457,14 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
   background: linear-gradient(125deg, rgba(255, 255, 255, 0.3), transparent 30%, transparent 75%, rgba(255, 255, 255, 0.1));
   pointer-events: none;
 }
-.face {
-  height: 100%;
+/* The face fills the stock inside the frame. Pinned by its edges, not
+   `height: 100%`: Safari resolves a percentage inside an aspect-ratio box
+   against its border box, which made the face taller than the card by
+   twice the frame and cut off the bottom row (the stage, the weakness
+   and retreat). */
+.card > .face {
+  position: absolute;
+  inset: 0;
   display: grid;
   grid-template: "head" auto "art" minmax(0, 1fr) "stage" auto / minmax(0, 1fr);
 }
@@ -573,7 +583,7 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
   opacity: calc(0.55 + var(--o, 0) * 0.45);
   transform: translate(calc(var(--px, 0) * -24%), calc(var(--py, 0) * -24%));
 }
-.card.promo .face { position: relative; z-index: 1; }
+.card.promo > .face { z-index: 1; }
 :hover > .card:is(.holo, .promo) .card-art::after, :focus-visible > .card:is(.holo, .promo) .card-art::after, .card:is(.holo, .promo):hover .card-art::after {
   animation: foil-sweep 1400ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
@@ -619,9 +629,15 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
 .pile-card .card-art { align-self: center; aspect-ratio: 1; }
 
 @container (min-width: 140px) {
-  .face {
-    /* The picture keeps the art's own 10:7, so nothing is cropped; the text takes what is left. */
-    grid-template: "stage" auto "head" auto "art" auto "body" minmax(0, 1fr) "foot" auto / minmax(0, 1fr);
+  .card > .face {
+    /* The text is never squeezed: the attacks get the height they need, the
+       picture the rest, up to its full width. On a crowded card (a Power
+       and two attacks) it gives up a little height and narrows to keep the
+       art's own 10:7, so nothing is cropped. The picture's row is capped at
+       its full-width height (the face's 91.4cqw inside padding and margin,
+       at 10:7, plus the margin), not sized from its content: Safari gives
+       a picture that has not loaded yet no height. */
+    grid-template: "stage" auto "head" auto "art" minmax(0, calc(91.4cqw * 0.7 + 1.4cqw)) "body" minmax(min-content, 1fr) "foot" auto / minmax(0, 1fr);
     padding: 2.6cqw 3.6cqw 2.4cqw;
     row-gap: 1.6cqw;
   }
@@ -633,7 +649,7 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
   .k-creature .card-hp { position: static; padding: 0; background: none; font-size: 1em; }
   .k-creature .card-hp small { display: inline; }
   .card-type { display: block; }
-  .card-art { aspect-ratio: 10 / 7; border-radius: 1.4cqw; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--stock-ink) 30%, transparent), 0 0 0 0.7cqw color-mix(in srgb, var(--c) 55%, #d8cfbd); margin: 0.7cqw; }
+  .card-art { aspect-ratio: 10 / 7; height: calc(100% - 1.4cqw); max-width: calc(100% - 1.4cqw); justify-self: center; border-radius: 1.4cqw; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--stock-ink) 30%, transparent), 0 0 0 0.7cqw color-mix(in srgb, var(--c) 55%, #d8cfbd); margin: 0.7cqw; }
   .card-body { display: flex; flex-direction: column; justify-content: center; min-height: 0; font-size: 6.6cqw; }
   .card-attack {
     display: grid;
@@ -3341,7 +3357,7 @@ p.atlas-pick { color: var(--muted); }
 .hexon-card .face { grid-template: "head" auto "art" minmax(0, 1fr) / minmax(0, 1fr); padding: 0; row-gap: 0; }
 .hexon-card .card-head { padding: 0.14em 0.35em 0.12em; font-size: clamp(11px, 12.5cqw, 21px); gap: 0.3em; }
 .hexon-card :is(.card-stage, .card-body, .card-foot, .card-type) { display: none; }
-.hexon-card .card-art { aspect-ratio: auto; border-radius: 0; margin: 0; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--stock-ink) 28%, transparent); }
+.hexon-card .card-art { aspect-ratio: auto; height: auto; max-width: none; justify-self: stretch; border-radius: 0; margin: 0; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--stock-ink) 28%, transparent); }
 .hexon-hp {
   position: absolute;
   left: 50%;
@@ -3678,7 +3694,7 @@ button.pile { cursor: pointer; }
 /* The dock shows a card's picture; its text is written out below it. */
 .dock .inspect-card .face { grid-template: "head" auto "art" minmax(0, 1fr) / minmax(0, 1fr); padding: 0; row-gap: 0; }
 .dock .inspect-card :is(.card-stage, .card-body, .card-foot, .card-type) { display: none; }
-.dock .inspect-card .card-art { aspect-ratio: auto; border-radius: 0; margin: 0; }
+.dock .inspect-card .card-art { aspect-ratio: auto; height: auto; max-width: none; justify-self: stretch; border-radius: 0; margin: 0; }
 
 /* The hand is half tucked under the table's edge; a card rises whole on
    hover, focus or selection. The zone reaches up over the Bench (without
