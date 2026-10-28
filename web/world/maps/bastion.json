@@ -175,7 +175,7 @@
     {
       "asset": "menhir",
       "x": 19,
-      "z": 7,
+      "z": 8,
       "rot": 0,
       "y": 4
     },
@@ -649,7 +649,7 @@
     },
     {
       "asset": "rock",
-      "x": 18,
+      "x": 19,
       "z": 7,
       "rot": 0,
       "y": 4
@@ -1850,7 +1850,7 @@
       "kind": "find",
       "id": "sn_menhir",
       "x": 19,
-      "z": 7,
+      "z": 8,
       "give": "coins:50",
       "hidden": true,
       "text": "At the foot of the south menhir, under a flat stone the crew uses as a step: a little cache of Facets, wrapped in an oilcloth.",

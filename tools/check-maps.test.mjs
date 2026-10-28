@@ -84,6 +84,14 @@ test("AC3: a pine two tiles south of a door hides it; north of the door it doesn
   passes(world((m) => m.vale.props.push({ asset: "pine", x: 16, z: 8, rot: 0 })));
 });
 
+test("#148: outdoors, depth stacking is checked at the lowest camera angle", () => {
+  // A bush (0.7 m) a tile in front of a sign passed at 50° and hides it at 40°; two tiles in front, it doesn't.
+  const r = run(world((m) => m.vale.props.push({ asset: "bush", x: 14, z: 4, rot: 0 })), "--strict");
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, /vale: bush 14,4 stands 1 tile in front of sign at 14,3 and hides it from the camera at 40°/);
+  passes(world((m) => m.vale.props.push({ asset: "bush", x: 14, z: 5, rot: 0 })));
+});
+
 test("AC4: a pointless dead end fails; a view at its end passes", () => {
   const branch = (m) => {
     for (let x = 13; x <= 19; x++) m.vale.tiles[7] = m.vale.tiles[7].slice(0, x) + "p" + m.vale.tiles[7].slice(x + 1);

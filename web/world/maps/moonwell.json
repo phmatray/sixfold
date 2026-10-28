@@ -34,7 +34,7 @@
     "..................ppp...................",
     "..................ppp...................",
     "..................ppp...................",
-    ".....fffffffffffffppp.ffffffffffffff....",
+    ".....fffffffffffffpppfffffffffffffff....",
     "....ff............ppp...............ff..",
     "...ff.............ppp................f..",
     "...f..pppppppppppppppppppppppppppp...f..",
@@ -82,14 +82,14 @@
     {
       "asset": "lantern",
       "x": 17,
-      "z": 5,
+      "z": 6,
       "rot": 0,
       "why": "the garden gate"
     },
     {
       "asset": "lantern",
       "x": 21,
-      "z": 5,
+      "z": 6,
       "rot": 0,
       "why": "the garden gate"
     },

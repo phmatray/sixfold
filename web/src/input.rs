@@ -81,18 +81,21 @@ pub enum Ctrl {
     Menu,
     Journal,
     Map,
+    /// The next outdoor camera angle (#148).
+    Camera,
     Walk,
     /// Enter on a keyboard, the act button on a pad.
     Confirm,
 }
 
-const REMAP: [Ctrl; 6] = [
+const REMAP: [Ctrl; 7] = [
     Ctrl::Act,
     Ctrl::Cancel,
     Ctrl::Run,
     Ctrl::Menu,
     Ctrl::Journal,
     Ctrl::Map,
+    Ctrl::Camera,
 ];
 
 impl Ctrl {
@@ -104,6 +107,7 @@ impl Ctrl {
             Ctrl::Menu => "menu",
             Ctrl::Journal => "journal",
             Ctrl::Map => "map",
+            Ctrl::Camera => "camera",
             Ctrl::Walk => "walk",
             Ctrl::Confirm => "confirm",
         }
@@ -117,6 +121,7 @@ impl Ctrl {
             Ctrl::Menu => "Menu",
             Ctrl::Journal => "Journal",
             Ctrl::Map => tr("World map", "Carte du monde"),
+            Ctrl::Camera => tr("Camera angle", "Angle de caméra"),
             Ctrl::Walk => tr("Walk", "Marcher"),
             Ctrl::Confirm => tr("Confirm", "Valider"),
         }
