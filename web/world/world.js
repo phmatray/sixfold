@@ -1073,7 +1073,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     if (!renderer.extensions.has("KHR_parallel_shader_compile")) return;
     const far = (n) => (n.hidden ? 1e9 : Math.hypot(n.x - s.x, n.z - s.z));
     bustQ = world.npcs.filter((n) => n.obj).sort((a, b) => far(a) - far(b)).map((n) => n.def.id);
-    if (!heroBaked) bustQ.push(HERO_BUST); // once a visit, after the people: the outfit worn now
+    // The hero first, once a visit (the outfit worn now): a busy map's people can take longer than a walk
+    // to the next duel. A talk still jumps the queue.
+    if (!heroBaked) bustQ.unshift(HERO_BUST);
     idle(bakeNext);
   }
   async function bakeNext() {
@@ -1117,6 +1119,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const cy = beast ? box.getCenter(new THREE.Vector3()).y : box.max.y - h * 0.5;
     const cam = new THREE.PerspectiveCamera(22, 1, 0.05, 50);
     const dir = new THREE.Vector3(0.42, 0.14, 1).normalize();
+    cam.layers.enableAll(); // the hero lives on layer 1 (no sun shadow)
     cam.position.set(0, cy, 0).addScaledVector(dir, h / 2 / Math.tan(THREE.MathUtils.degToRad(11)));
     cam.lookAt(0, cy, 0);
     // An sRGB target: the same colours a canvas showed. Shaders are built for it (the target

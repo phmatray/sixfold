@@ -4510,6 +4510,8 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 0.34;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
   animation: fade-in 700ms ease-out calc(var(--dur-screen) + 220ms) both;
 }
 .seal-card-motif.filled { fill: var(--tint); stroke: none; }
