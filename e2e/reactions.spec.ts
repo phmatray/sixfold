@@ -1,15 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
-import { editSave, loaded, menuItem, readSave, title } from "./helpers";
+import { editSave, loaded, menuItem, title, warpTo as warp } from "./helpers";
 
 /** Reactions (#114): people glance at the hero, and say a line in passing. Read through `sixfoldStats().people`. */
 type Person = { id: string; x: number; z: number; face: string };
 const who = (page: Page, id: string) =>
   page.evaluate((id) => ((document.querySelector(".world-host") as any).sixfoldStats().people as Person[]).find((p) => p.id === id), id);
 const host = (page: Page, f: string, ...args: unknown[]) => page.evaluate(([f, args]) => (document.querySelector(".world-host") as any)[f as string](...(args as unknown[])), [f, args] as const);
-const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
-// Asked again until it lands: a warp asked while the last one is still fading in is ignored.
-const warp = (page: Page, map: string, x: number, z: number, f: string) =>
-  expect.poll(async () => (await host(page, "sixfoldWarp", map, x, z, f), await at(page)), { timeout: 60_000 }).toBe(`${map},${x},${z},${f}`);
 
 /** In the world with three seals (and their scenes already played), at noon in Brightwell Square. */
 async function threeSeals(page: Page) {
