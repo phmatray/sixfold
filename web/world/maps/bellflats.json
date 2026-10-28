@@ -4292,14 +4292,42 @@
           ]
         },
         {
-          "if": "open:marlo & !earned:marlo & !beat:marlo",
+          "if": "open:marlo & !earned:marlo & !beat:marlo & bested:marlo:2",
           "lines": [
             "Shh. That's the tide talking, and it doesn't know you yet.",
-            "Beat a few of the Saltreach's duelists. The flats will tell me."
+            "Just one more of the Saltreach's duelists. The flats will tell me."
           ],
           "lines_fr": [
             "Chut. C'est la marée qui parle, et elle ne te connaît pas encore.",
-            "Bats quelques duellistes de la Côte Salée. L'estran me le dira."
+            "Plus qu'un duelliste de la Côte Salée. L'estran me le dira."
+          ],
+          "do": [
+            "duel:marlo"
+          ]
+        },
+        {
+          "if": "open:marlo & !earned:marlo & !beat:marlo & bested:marlo:1",
+          "lines": [
+            "Shh. That's the tide talking, and it doesn't know you yet.",
+            "Beat two more of the Saltreach's duelists. The flats will tell me."
+          ],
+          "lines_fr": [
+            "Chut. C'est la marée qui parle, et elle ne te connaît pas encore.",
+            "Bats encore deux duellistes de la Côte Salée. L'estran me le dira."
+          ],
+          "do": [
+            "duel:marlo"
+          ]
+        },
+        {
+          "if": "open:marlo & !earned:marlo & !beat:marlo",
+          "lines": [
+            "Shh. That's the tide talking, and it doesn't know you yet.",
+            "Beat three of the Saltreach's duelists. The flats will tell me."
+          ],
+          "lines_fr": [
+            "Chut. C'est la marée qui parle, et elle ne te connaît pas encore.",
+            "Bats trois duellistes de la Côte Salée. L'estran me le dira."
           ],
           "do": [
             "duel:marlo"

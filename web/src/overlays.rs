@@ -861,6 +861,22 @@ pub fn seal_tone(s: &SealDuel) -> &'static str {
     }
 }
 
+/// The region's own material, drawn faintly behind the seal on its title card
+/// (#177): the Saltreach's tide, the Galewold's wind, the Emberlands' sparks,
+/// the Hushlands' still pool, the Deepgrove's leaves, the Stonebacks' strata.
+/// `(path, filled)` in a 400×200 box; None for the Warden (her six seals).
+fn region_motif(keeper: &str) -> Option<(&'static str, bool)> {
+    Some(match keeper {
+        "marlo" => ("M0 112q25-14 50 0t50 0t50 0t50 0t50 0t50 0t50 0t50 0M0 136q25-14 50 0t50 0t50 0t50 0t50 0t50 0t50 0t50 0M0 160q25-14 50 0t50 0t50 0t50 0t50 0t50 0t50 0t50 0", false),
+        "quill" => ("M0 70c40-16 90-16 130 4M20 100c40-12 70-12 110 2M10 130c30-10 70-8 100 4M270 64c40-18 80-14 130 2M280 98c40-12 70-10 110 4M290 132c30-10 60-8 100 2", false),
+        "cinza" => ("M48 150l6-10 6 10-6 10zM92 118l4-7 4 7-4 7zM30 92l4-7 4 7-4 7zM120 160l5-8 5 8-5 8zM74 64l3-6 3 6-3 6zM340 150l6-10 6 10-6 10zM300 118l4-7 4 7-4 7zM364 92l4-7 4 7-4 7zM272 160l5-8 5 8-5 8zM324 64l3-6 3 6-3 6z", true),
+        "lumen" => ("M80 168a120 22 0 1 0 240 0a120 22 0 1 0-240 0M40 168a160 30 0 1 0 320 0a160 30 0 1 0-320 0M4 168a196 28 0 1 0 392 0", false),
+        "bramble" => ("M0 160C50 132 100 126 150 104M400 160C350 132 300 126 250 104M40 140q8-18 26-16q-6 16-26 16zM84 126q10-16 26-12q-8 14-26 12zM120 112q8-16 22-12q-6 12-22 12zM360 140q-8-18-26-16q6 16 26 16zM316 126q-10-16-26-12q8 14 26 12zM280 112q-8-16-22-12q6 12 22 12z", false),
+        "orla" => ("M0 120L60 112L120 122L160 116M240 116L290 110L340 122L400 114M0 146L70 138L130 148L160 142M240 142L300 136L360 148L400 140M0 172L50 164L110 174L160 168M240 168L280 162L340 172L400 166", false),
+        _ => return None,
+    })
+}
+
 /// A seal duel's title card: the seal at stake over the keeper's face, name,
 /// title and colours. It holds 2.2 s; the champion's (`grand`, #154) holds
 /// 3 s and shows the six seals that opened the Warden's door in place of her
@@ -919,6 +935,11 @@ pub fn SealCard(
             aria-labelledby="seal-card-h" tabindex="-1" on:click=move |_| done()>
             <div class="seal-card-stage">
                 <div class="seal-card-hex" aria-hidden="true">
+                    {region_motif(r.id).filter(|_| !seal.grand).map(|(d, filled)| view! {
+                        <svg class="seal-card-motif" class:filled=filled viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet">
+                            <path d=d />
+                        </svg>
+                    })}
                     <i></i>
                     <crate::campaign::Portrait id=r.id name=r.name />
                 </div>
