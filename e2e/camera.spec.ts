@@ -138,6 +138,27 @@ test("a reset leaves the Options radio and the next C on the loaded save's angle
   await expect.poll(async () => (await readSave(page)).camera).toEqual(["higher"]);
 });
 
+test("back on the title, a software renderer's flat backdrop opens no new WebGL context", async ({ page }) => {
+  // SwiftShader here: the first title finds the device weak. A context made again on every
+  // return waited on the GPU process, still busy with the screen just left, and froze the page.
+  await page.addInitScript(() => {
+    const get = HTMLCanvasElement.prototype.getContext;
+    (window as any).glMade = 0;
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, kind: string, ...rest: any[]) {
+      if (kind.startsWith("webgl")) (window as any).glMade++;
+      return (get as any).call(this, kind, ...rest);
+    } as any;
+  });
+  page.on("dialog", (d) => d.accept());
+  await title(page);
+  await expect(page.locator(".title-backdrop.flat")).toHaveCount(1);
+  const made = await page.evaluate(() => (window as any).glMade);
+  await menuItem(page, "Learn to play").click();
+  await page.getByRole("button", { name: "Skip the lesson" }).click();
+  await expect(page.locator(".title-backdrop.flat")).toHaveCount(1);
+  expect(await page.evaluate(() => (window as any).glMade)).toBe(made);
+});
+
 test("the title's Settings keep the angle in memory and create no save", async ({ page }) => {
   await title(page);
   await page.locator("summary", { hasText: "Settings" }).click();
