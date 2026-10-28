@@ -29,12 +29,22 @@
       {
         "kind": "squirrel",
         "zone": [
-          13,
-          2,
-          26,
+          5,
+          3,
+          10,
           6
         ],
-        "n": 3
+        "n": 2
+      },
+      {
+        "kind": "squirrel",
+        "zone": [
+          49,
+          3,
+          54,
+          6
+        ],
+        "n": 2
       },
       {
         "kind": "hedgehog",
