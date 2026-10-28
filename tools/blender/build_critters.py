@@ -47,7 +47,7 @@ B.PALETTE.update({
     "cr_bird": "#626b74", "cr_bird_dk": "#3c3f45", "cr_breast": "#c4703c", "cr_belly": "#ece2cf",
     # the fishing boat docking at a pier
     "fb_hull": "#2f6f7a", "fb_hull_dk": "#245760", "fb_stripe": "#f1e2c2", "fb_deck": "#b8875a", "fb_mast": "#8a6440",
-    "fb_sail": "#efe3c8", "fb_rope": "#c9a46a", "fb_crate": "#a8754a", "fb_fish": "#9fb8c4", "fb_lamp": "#ffd98a",
+    "fb_sail": "#efe3c8", "fb_rope": "#c9a46a", "fb_crate": "#a8754a", "fb_fish": "#9fb8c4", "fb_glow": "#ffd98a",
 })
 BUDGET = {"fishing_boat": 2000}  # triangles; every critter <= 1200 (instanced: at most 12 in view, life_schedule.js)
 
@@ -256,7 +256,7 @@ def build_fishing_boat(k):
     for x in (-0.45, -0.15, 0.1):
         k.add(cyl(0.07, 0.07, 0.02, 8), "fb_rope", T((x, 0, 0.68), (0, 90, 0), scale=(1.3, 1, 1)))
     k.add(cyl(0.006, 0.006, 1.2, 4), "fb_rope", T((0.65, 0, 1.0), (0, -35, 0)))                  # forestay
-    k.add(box(0.07, 0.07, 0.09, 0.01), "fb_lamp", T((0.25, 0, 1.68)))
+    k.add(box(0.07, 0.07, 0.09, 0.01), "fb_glow", T((0.25, 0, 1.68)))
     k.add(cyl(0.05, 0.0, 0.05, 6), "fb_hull_dk", T((0.25, 0, 1.75)))
     # The catch: a crate of fish and a coil of rope at the stern.
     k.add(box(0.28, 0.24, 0.14, 0.01), "fb_crate", T((-0.7, 0.09, 0.27)))

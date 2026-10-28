@@ -48,6 +48,8 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `stairs.glb` | Stone steps climbing toward −Z from 0 to 1 m (floor 0.5 m; `y` stacks them on a cliff) | 1 × 1 | 1 m |
 | `cliff.glb` (+ `cliff_b`, mossy) | A rock block (no longer stacked on digit tiles: `terrain.js` builds raised ground; its colours are the sandstone wall's) | 1 × 1 | 1 m |
 | `boat.glb` | Rowboat on the water (bobs in the game) | 2 × 1 | ~0.4 m |
+| `fishing_boat.glb` | The boat a map's `life` docks at a pier (`life.boats`): bow +X like `boat`, waterline at 0, a furled sail, `glow` lamp on the mast; ≤ 2k tris (built by `build_critters.py`) | 2 × 1 | ~1.8 m |
+| `critter_<kind>.glb` | Ambient life (`life.critters`, `life.perch`): `rabbit`, `squirrel`, `hedgehog`, `duck`, `crab`, `lizard`, `goat`, `glowbeetle` and the perch `bird`, at the size the game draws them, feet on the origin, front +Z, flat colours only, no contact shadow (they hop and fly); the game merges each into one vertex-coloured mesh, all of a kind in one instanced draw (glowbeetles glow on their own); ≤ 1.2k tris (built by `build_critters.py`) | — | 0.07–0.85 m |
 | `stall.glb`, `stall_b.glb` | Market stalls, counter on the front; a person can be talked to across one | 2 × 1 | ~2.3 m |
 | `lantern.glb` | Street lantern, `light_origin` at the glass | 1 × 1 | ~2.2 m |
 | `crates.glb`, `bench.glb` | Crates and a barrel; a park bench facing +Z | 1 × 1, 2 × 1 | — |

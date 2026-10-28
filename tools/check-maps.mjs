@@ -925,6 +925,8 @@ function lifeRules(name, m, solid) {
     for (let x = c.zone[0]; x <= c.zone[2]; x++) for (let z = c.zone[1]; z <= c.zone[3]; z++) free += open(x, z) ? 1 : 0;
     if (free < n) bad(`the ${c.kind} zone ${rect(c.zone)} has ${free} open tiles off the paths, fewer than its ${n} critters`);
   }
+  const models = [...(L.critters ?? []).filter((c) => CRITTERS[c.kind]).map((c) => `critter_${c.kind}`), ...((L.perch ?? []).length ? ["critter_bird"] : []), ...((L.boats ?? []).length ? ["fishing_boat"] : [])];
+  for (const f of new Set(models)) if (!existsSync(new URL(`${f}.glb`, ASSETS))) bad(`${f}.glb is missing (tools/blender/build_critters.py builds it)`);
   const on = (x, z, ok) =>
     m.props.some((p) => {
       let [w, d] = FOOT[p.asset] ?? [1, 1];
