@@ -15,6 +15,9 @@ desktop/gen/
 # Node (if a JS front-end is added)
 node_modules/
 
+# Ambient-life clips (e2e/life-clips.mjs): raw video, never committed
+e2e/clips/
+
 # OS / editor
 .DS_Store
 .idea/
