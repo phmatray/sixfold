@@ -31,6 +31,12 @@
 // map against the budgets in tools/level-design.json (`--budgets=<file>` for another), and never fails.
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "node:fs";
 import * as ld from "../web/world/ld.js";
+import { ANGLES, framing, lowestPitch } from "../web/world/camera.js";
+// The player picks the outdoor camera angle (#148): occlusion grows as the pitch drops, so the depth rule runs at
+// the lowest one, and the camera-ray test at every one.
+const rad = (deg) => (deg * Math.PI) / 180;
+const LOW = lowestPitch(), DEPTH_SCALE = Math.tan(rad(LOW)) / Math.tan(rad(50));
+const visibleAll = (m, boxes, from, target) => ANGLES.every((a) => ld.visible({ ...m, camera: framing({ pitch: 50, distance: 12, ...m.camera }, a, !!m.light?.indoor) }, boxes, from, target));
 const dir = process.argv.slice(2).find((a) => !a.startsWith("--")) ?? "web/world";
 const src = readFileSync(`${dir}/props.js`, "utf8");
 const FOOT = eval(`(${src.match(/export const FOOT = (\{[\s\S]*?\});/)[1]})`);
@@ -463,7 +469,8 @@ console.log(`maps ok (${Object.keys(maps).join(", ")})`);
 
 // The placement rules (docs/WORLD_RULES.md). `all`: the tiles the spawn reaches with every gate open.
 // Heights (m) of what a prop shows above the ground, for depth stacking: the camera looks north and
-// down at ~50°, so a prop hides what stands up to ~0.85 x its height behind it.
+// down at 40–60° outdoors (50° in rooms), so a prop hides what stands up to ~1.2 x its height behind it at 40°
+// (~0.85 x at 50°).
 function rules(name, m, solid, all) {
   const W = m.width, H = m.height, out = !m.light.indoor, inMap = (x, z) => x >= 0 && z >= 0 && x < W && z < H;
   const tile = (x, z) => m.tiles[z]?.[x];
@@ -510,9 +517,9 @@ function rules(name, m, solid, all) {
       const front = [...(at.get(k) ?? []).filter((p) => !p.if && !ACROSS.has(p.asset)).map((p) => ({ h: tall(p.asset), what: who(p), use: POST.has(p.asset) })),
         ...npcs.filter((n) => n.x === t.x && n.z === t.z + d).map((n) => ({ h: 1.45, what: `npc ${n.id}`, use: true }))];
       for (const f of front) {
-        const limit = [0, 0.95, 2.0, 3.0][d];
+        const limit = [0, 0.95, 2.0, 3.0][d] * (out ? DEPTH_SCALE : 1);
         if (f.h <= limit) continue;
-        const msg = `${name}: ${f.what} stands ${d} tile${d > 1 ? "s" : ""} in front of ${t.what} at ${t.x},${t.z} and hides it from the camera`;
+        const msg = `${name}: ${f.what} stands ${d} tile${d > 1 ? "s" : ""} in front of ${t.what} at ${t.x},${t.z} and hides it from the camera${out ? ` at ${LOW}°` : ""}`;
         if (d === 1 || f.use) rule.push(msg);
         else warn.push(msg);
       }
@@ -724,7 +731,7 @@ function design(name) {
   const { m, all, height } = ctx[name], W = m.width, H = m.height;
   const g = ld.grids(m, LD), boxes = g.boxes, blocking = [];
   const k = (x, z) => `${x},${z}`, floor = (x, z) => height[k(x, z)] ?? 0;
-  const seen = (from, target) => ld.visible(m, boxes, { x: from[0], z: from[1], y: floor(...from) }, target);
+  const seen = (from, target) => visibleAll(m, boxes, { x: from[0], z: from[1], y: floor(...from) }, target);
   const signs = new Set((m.exits ?? []).map((e) => exitSign(m, e)).filter(Boolean));
   const pois = ld.pois(m, signs); // points of interest by tier (web/world/ld.js)
 
@@ -745,7 +752,7 @@ function design(name) {
     if (p.tier !== "major" || p.o?.optional) continue;
     const a = ld.approach(p, g, all, floor, FOOT);
     if (!a) continue; // unreachable: the reach rules already say so
-    if (!ld.visible(m, boxes, a.from, a.target)) blocking.push(`[hidden-mandatory] the ${p.what} is hidden from the camera when you stand at ${a.from.x},${a.from.z}`);
+    if (!visibleAll(m, boxes, a.from, a.target)) blocking.push(`[hidden-mandatory] the ${p.what} is hidden from the camera when you stand at ${a.from.x},${a.from.z}`);
   }
 
   // Dead ends: a path branch over 3 tiles long ends within 2 tiles of something (or a `view`), or of a stair or
@@ -823,7 +830,7 @@ function exitSeen(name, e) {
   let n = 0;
   for (const [x, z] of ld.edgeTiles(m, e)) {
     if (Math.abs(x - hero[0]) > SCREEN[0] >> 1 || Math.abs(z - hero[1]) > SCREEN[1] >> 1) continue;
-    if (ld.visible(m, boxes, { x: hero[0], z: hero[1], y: height[`${hero[0]},${hero[1]}`] ?? 0 }, { x, z, y: (height[`${x},${z}`] ?? 0) + 1.45 })) n++;
+    if (visibleAll(m, boxes, { x: hero[0], z: hero[1], y: height[`${hero[0]},${hero[1]}`] ?? 0 }, { x, z, y: (height[`${x},${z}`] ?? 0) + 1.45 })) n++;
   }
   return n;
 }

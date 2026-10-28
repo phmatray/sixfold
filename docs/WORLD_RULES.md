@@ -16,8 +16,10 @@ They come from the owner's level-design checklist (landmarks, guiding without ar
 collisions, rhythm, density, scale) and from what went wrong in 1.3: props stacked one in front of
 another, lamps scattered with no reason, maps too small to feel like places, and exits you had to hunt for.
 
-The camera looks north and down at about 50°. A prop therefore hides what stands behind it, up to about
-0.85 × its height. "In front of" means south of, toward the camera. A prop's face is its +Z side
+The camera looks north and down at 40–60°: outdoors the player picks Lower (40°), Default (50°) or Higher (60°),
+and rooms stay at 50° (`web/world/camera.js`). A prop therefore hides what stands behind it, up to about 1.2 × its
+height at 40° (0.85 × at 50°). check-maps runs the depth rule at the lowest angle, so a map that passes there passes
+at all three. "In front of" means south of, toward the camera. A prop's face is its +Z side
 (`rot` 0 faces the camera).
 
 ---
@@ -204,7 +206,8 @@ what you must use can be seen, paths lead somewhere and connections hold. The ge
 in the report until their region pass opts them in (#112 first).
 
 The camera test casts a ray from the map's real camera (its `pitch` and `distance`, following the hero on the tile
-named) to the top centre of the target. Any prop box other than the target's own that it hits first hides the
+named) to the top centre of the target, once per outdoor angle (`ANGLES` in `web/world/camera.js`): the target must
+be seen at all three. Any prop box other than the target's own that it hits first hides the
 target. Props are their bounding boxes (FOOT × height), which is strict; the terrain hides nothing.
 
 | # | Rule (`[name]` in the message) | Fails when | Check |
