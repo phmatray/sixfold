@@ -671,6 +671,7 @@ fn prompt_label(kind: &str, text: &str) -> String {
         "npc" => tr(format!("Talk to {text}"), format!("Parler à {text}")),
         "warp" | "lift" | "seat" | "stand" => text.to_string(),
         "duel" => tr("Play a duel", "Jouer un duel").into(),
+        "bed" => tr("Rest", "Se reposer").into(),
         "locked" | "closed" => tr("Try the door", "Essayer la porte").into(),
         "sign" | "find" | "gate" if !text.is_empty() => {
             // "The rangers' plank" → "the rangers' plank"; a name that starts with a

@@ -1641,3 +1641,93 @@ fn every_keeper_has_a_word_after_a_defeat() {
     }
     assert!(bad.is_empty(), "{}", bad.join("\n"));
 }
+
+/// #193: every inn has an upstairs. The stairs in its common room lead to
+/// `<inn>_up`, whose stairwell leads back; each warp lands on an open tile next
+/// to the other's (so a save on either floor lands on open floor), and a bed up
+/// there opens the inn's rest panel.
+#[test]
+fn every_inn_has_an_upstairs_whose_stairs_meet() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
+    let map = |name: &str| -> Option<Value> {
+        serde_json::from_str(&std::fs::read_to_string(dir.join(format!("{name}.json"))).ok()?).ok()
+    };
+    let warp_to = |m: &Value, to: &str| -> Option<Value> {
+        m["warps"]
+            .as_array()?
+            .iter()
+            .find(|w| w["to"] == to)
+            .cloned()
+    };
+    let at = |v: &Value| (v["x"].as_i64().unwrap(), v["z"].as_i64().unwrap());
+    let open = |m: &Value, (x, z): (i64, i64)| {
+        m["tiles"][z as usize]
+            .as_str()
+            .and_then(|r| r.chars().nth(x as usize))
+            == Some('w')
+            && !m["props"].as_array().unwrap().iter().any(|p| {
+                // The inns' furniture at rot 0 (props.js FOOT): a rug is walked over.
+                let (w, d) = match p["asset"].as_str().unwrap_or("") {
+                    "rug" | "exit_mat" => (0, 0),
+                    "counter" => (3, 1),
+                    "bed" | "shelf" | "bookcase" | "duel_table" | "oven" | "chart_table"
+                    | "boot_rack" => (2, 1),
+                    _ => (1, 1),
+                };
+                let (px, pz) = at(p);
+                (px..px + w).contains(&x) && (pz..pz + d).contains(&z)
+            })
+    };
+    let mut inns: Vec<String> = std::fs::read_dir(&dir)
+        .unwrap()
+        .filter_map(|e| Some(e.ok()?.path().file_stem()?.to_string_lossy().into_owned()))
+        .filter(|n| n.starts_with("inn_") && !n.ends_with("_up"))
+        .collect();
+    inns.sort();
+    assert_eq!(inns.len(), 7, "the seven inns: {inns:?}");
+    let mut bad = vec![];
+    for inn in &inns {
+        let up_name = format!("{inn}_up");
+        let (Some(down), Some(up)) = (map(inn), map(&up_name)) else {
+            bad.push(format!("{inn}: no {up_name}.json"));
+            continue;
+        };
+        let (Some(stairs), Some(well)) = (warp_to(&down, &up_name), warp_to(&up, inn)) else {
+            bad.push(format!("{inn}: no stairs both ways with {up_name}"));
+            continue;
+        };
+        for (from, w, there, other) in [
+            (inn, &stairs, &up, &well),
+            (&up_name, &well, &down, &stairs),
+        ] {
+            let (land, (ox, oz)) = (at(&w["spawn"]), at(other));
+            if (land.0 - ox).abs() + (land.1 - oz).abs() != 1 || !open(there, land) {
+                bad.push(format!(
+                    "{from}: the stairs land at {land:?}, not on open floor next to the way back"
+                ));
+            }
+        }
+        if !open(&up, at(&up["spawn"])) {
+            bad.push(format!("{up_name}: its spawn is not open floor"));
+        }
+        let beds = up["interactions"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter(|i| i["kind"] == "bed")
+            .filter(|i| {
+                i["dialogue"].as_array().into_iter().flatten().all(|b| {
+                    b["do"]
+                        .as_array()
+                        .is_some_and(|d| d.iter().any(|e| e == "show:inn"))
+                })
+            })
+            .count();
+        if beds < 2 {
+            bad.push(format!(
+                "{up_name}: {beds} beds open the rest panel, not 2 or more"
+            ));
+        }
+    }
+    assert!(bad.is_empty(), "{}", bad.join("\n"));
+}
