@@ -46,8 +46,11 @@ kit is the last section of `web/style.css`; its materials are tokens:
 - **Fields**: paper wells with the outline; sliders a paper groove filled with brass and a paint
   knob; toggles go `--sprout` green when on.
 - **The title**: the real world behind (`web/world/title.js`), the name painted on a sign (no
-  ropes), the menu as planks, one help line on paper beside the plank under the cursor (the whole
-  of its tag), the place's name on a paper card. On a phone the entries become a two-column grid.
+  ropes), the menu as planks, each with its status on a paper tag that says its whole line (two
+  lines when it needs them, never an ellipsis), the place's name on a paper card. On a phone the
+  entries become a two-column grid. The tilted wood (planks, sign, card) sits over a live WebGL
+  canvas: it keeps a compositing layer of its own (`will-change: transform`), or WebKit redraws
+  its grain each time the canvases change and the boards blink.
 - **The sheet** `?sheet` shows every control in each state (rest, hover, pressed, focus, disabled).
 
 ## What comes first

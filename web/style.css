@@ -1599,7 +1599,6 @@ input, select { caret-color: var(--brass-hi); }
   color: var(--on-brass);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 10px 24px -10px color-mix(in srgb, var(--brass) 60%, transparent);
 }
-.menu-item.primary:hover { background: linear-gradient(180deg, #f8e2a6, var(--brass-hi)); }
 .menu-item.primary .menu-label { font-size: var(--fs-4xl); }
 .menu-item.primary .menu-sub { color: #4a3a12; }
 .menu-item.primary .menu-chev { stroke: #4a3a12; }
@@ -4779,17 +4778,18 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 * { scrollbar-color: var(--wood) transparent; }
 
 /* ---------- The title: the sign, the planks, the world behind ---------- */
+/* One screen; taller only when a large text size needs it (the page scrolls then, nothing overlaps). */
 .title {
-  position: relative; max-width: none; margin: 0; height: 100dvh; overflow: hidden;
+  position: relative; max-width: none; margin: 0; min-height: 100dvh; overflow-x: clip;
   padding: clamp(20px, 4.5vh, 56px) clamp(16px, 4.5vw, 72px) clamp(14px, 2.5vh, 28px);
-  display: grid; grid-template-columns: minmax(0, 420px) 1fr; grid-template-rows: auto minmax(0, 1fr) auto;
+  display: grid; grid-template-columns: minmax(0, 500px) 1fr; grid-template-rows: auto 1fr auto;
   grid-template-areas: "brand brand" "menu ." "foot foot"; gap: clamp(12px, 2.5vh, 28px) 32px;
 }
 .title-backdrop::after { background: linear-gradient(0deg, color-mix(in srgb, var(--toon) 55%, transparent), transparent 22%), linear-gradient(90deg, color-mix(in srgb, var(--toon) 40%, transparent), transparent 42%); }
 /* The name on a sign board (mounted: no ropes): the seal-stone and the lettered wordmark (web/brand/). */
 .title-brand {
   grid-area: brand; justify-self: start; display: flex; align-items: center; gap: clamp(8px, 1.2vw, 16px);
-  padding: 10px 28px 12px 18px; transform: rotate(-2deg);
+  padding: 10px 28px 12px 18px; transform: rotate(-2deg); will-change: transform; /* held on its layer, as a plank */
   background: var(--plank); border: 4px solid var(--toon); border-radius: 16px; box-shadow: 0 6px 0 var(--toon), 0 18px 30px -10px rgba(0, 0, 0, 0.7);
 }
 .title-brand .logo-mark { flex: none; width: clamp(52px, min(6.4vw, 9.5vh), 92px); filter: drop-shadow(0 3px 0 var(--toon)); }
@@ -4798,24 +4798,20 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 .title-notice { grid-area: brand; align-self: end; margin: 0; display: flex; gap: 8px; align-items: center; }
 .title-menu { grid-area: menu; align-self: center; position: relative; }
 .title .menu { margin: 0; max-width: none; gap: 8px; }
-/* The help line: a paper note pinned beside the plank under the cursor, the whole of its tag. */
-.title-help {
-  position: absolute; left: calc(100% + 20px); translate: 0 -50%; z-index: 1; width: max-content; max-width: min(36ch, 40vw); margin: 0;
-  padding: 6px 12px; border-radius: 8px; background: var(--paper); color: var(--toon); border: 2px solid var(--toon); box-shadow: 0 3px 0 var(--toon);
-  font-size: var(--fs-md); font-weight: 700; pointer-events: none;
-}
-.title-help::before { content: ""; position: absolute; right: 100%; top: 50%; translate: 0 -50%; border: 7px solid transparent; border-right-color: var(--toon); }
 .title-foot { grid-area: foot; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 24px; margin: 0; }
 .title-foot .foot-menus { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .title-legal { margin: 0; color: var(--paint); text-shadow: 0 1px 2px var(--toon); font-size: var(--fs-xs); max-width: 46ch; text-align: right; }
 .menu-icon { grid-area: icon; width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-/* A plank. */
+/* A plank. Tilted wood over the live world: on a layer of its own for good (will-change), so
+   WebKit never moves it between layers when the world's canvases change under it (a place's
+   cross-fade) or when a hover's lift starts and ends: each move redrew the fine grain at a new
+   angle and phase, and the planks blinked (Safari, the macOS app). */
 .menu-item {
   position: relative; min-height: 48px; padding: 4px 18px; border-radius: 10px;
   grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "icon label sub badge"; column-gap: 12px;
   background: var(--plank-deep); border: var(--toon-w) solid var(--toon); color: var(--paint);
   box-shadow: var(--edge), 0 12px 18px -8px rgba(0, 0, 0, 0.6), inset 0 2px 0 color-mix(in srgb, var(--paint) 30%, transparent);
-  transform: rotate(var(--tilt, 0deg));
+  transform: rotate(var(--tilt, 0deg)); will-change: transform;
   transition: transform var(--dur-panel) var(--ease-out), box-shadow var(--dur-quick) ease;
 }
 .menu li:nth-child(odd) .menu-item { --tilt: -0.7deg; }
@@ -4828,9 +4824,10 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 .menu-item.primary .menu-label { font-size: var(--fs-4xl); text-shadow: 0 2px 0 color-mix(in srgb, var(--paint) 60%, transparent); }
 .menu-item.primary .menu-sub { color: var(--toon); font-weight: 700; }
 .menu-item.primary .menu-icon { width: 34px; height: 34px; filter: none; }
-/* Each entry's status on a paper tag nailed to its plank (dark ink: AA at a small size). */
+/* Each entry's status on a paper tag nailed to its plank (dark ink: AA at a small size), the whole
+   line: a long one (French, a large text size) goes on to a second line rather than being cut. */
 .title .menu-item:not(.primary) .menu-sub {
-  justify-self: end; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  justify-self: end; max-width: 100%; text-align: center; text-wrap: balance; line-height: 1.25;
   padding: 2px 8px; border-radius: 6px; background: var(--paper); color: var(--toon); font-size: var(--fs-xs); font-weight: 700;
   box-shadow: 0 0 0 1.5px var(--toon); text-shadow: none;
 }
@@ -4841,7 +4838,7 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 .title-legal { padding: 4px 10px; border-radius: 8px; background: color-mix(in srgb, var(--toon) 60%, transparent); text-shadow: none; }
 /* The place's card, like a film's. */
 .title-place { position: absolute; z-index: 1; right: clamp(16px, 4.5vw, 72px); bottom: clamp(96px, 13vh, 128px); margin: 0; display: grid; gap: 2px; padding: 8px 16px;
-  background: var(--paper); border: var(--toon-w) solid var(--toon); border-radius: 8px; box-shadow: var(--edge); transform: rotate(1.5deg); opacity: 0; transition: opacity 900ms ease; }
+  background: var(--paper); border: var(--toon-w) solid var(--toon); border-radius: 8px; box-shadow: var(--edge); transform: rotate(1.5deg); will-change: transform; opacity: 0; transition: opacity 900ms ease; }
 .title-backdrop.live .title-place { opacity: 1; }
 .title-place b { font: 800 var(--fs-xl)/1.1 var(--display); color: var(--toon); }
 .title-place span { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--paper-muted); }
@@ -4862,7 +4859,6 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
   .title-foot .btn { padding-inline: 10px; font-size: var(--fs-sm); white-space: nowrap; }
   /* A phone: the act item on its own, the rest a two-by-three grid of planks. */
   .title .menu { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .title-help { display: none; }
   .title .menu li:first-child, .title .menu li:last-child:nth-child(even) { grid-column: 1 / -1; }
   .title .menu-item:not(.primary) { min-height: 52px; padding: 6px 10px; column-gap: 8px; }
   .title .menu-item:not(.primary) .menu-label { font-size: var(--fs-md); line-height: 1.1; }
