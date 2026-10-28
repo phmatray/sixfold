@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { loaded, menuItem, title } from "./helpers";
+import { frames, loaded, menuItem, title } from "./helpers";
 
 // A map's ambient life (#115), read through `el.sixfoldLife()`: what life.js drew last frame.
 type Life = { critters: Record<string, number>; leaves: number; embers: number; boats: { k: number; on: boolean; x: number; z: number }[]; event: string | null; calm: boolean } | null;
@@ -34,6 +34,7 @@ test.describe("with motion", () => {
 
     await at(page, "gullhaven", 19, 16);
     await expect.poll(async () => (await life(page))?.boats.length).toBe(1);
+    await frames(page); // the new map compiled its shaders: the page takes clicks again
     await page.getByRole("button", { name: "Menu", exact: true }).click();
     await expect(page.getByRole("dialog", { name: "Menu" })).toBeVisible();
     await page.waitForTimeout(500); // the frame that opened it is the last one drawn
