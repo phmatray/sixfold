@@ -1653,11 +1653,18 @@ fn every_inn_has_an_upstairs_whose_stairs_meet() {
             .as_str()
             .and_then(|r| r.chars().nth(x as usize))
             == Some('w')
-            && !m["props"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .any(|p| at(p) == (x, z))
+            && !m["props"].as_array().unwrap().iter().any(|p| {
+                // The inns' furniture at rot 0 (props.js FOOT): a rug is walked over.
+                let (w, d) = match p["asset"].as_str().unwrap_or("") {
+                    "rug" | "exit_mat" => (0, 0),
+                    "counter" => (3, 1),
+                    "bed" | "shelf" | "bookcase" | "duel_table" | "oven" | "chart_table"
+                    | "boot_rack" => (2, 1),
+                    _ => (1, 1),
+                };
+                let (px, pz) = at(p);
+                (px..px + w).contains(&x) && (pz..pz + d).contains(&z)
+            })
     };
     let mut inns: Vec<String> = std::fs::read_dir(&dir)
         .unwrap()

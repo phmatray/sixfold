@@ -302,7 +302,7 @@ export const PLACEHOLDER = {
   inn_stairwell() {
     const trim = toon("#8a5f3c", { name: "trim" });
     const g = group(mesh(new THREE.BoxGeometry(0.84, 0.02, 0.9), toon("#20160f"), 0, 0.011, 0));
-    ["#7a5434", "#5a3c26", "#3d2a1a"].forEach((c, i) => g.add(mesh(new THREE.BoxGeometry(0.8, 0.012, 0.14), toon(c, { name: i ? "" : "wood" }), 0, 0.022, 0.36 - i * 0.2)));
+    ["#7a5434", "#5a3c26", "#3d2a1a"].forEach((c, i) => g.add(mesh(new THREE.BoxGeometry(0.8, 0.012, 0.14), toon(c), 0, 0.022, 0.36 - i * 0.2)));
     for (const [x, z] of [[-0.45, 0.45], [0.45, 0.45], [-0.45, -0.45], [0.45, -0.45]]) g.add(mesh(new THREE.BoxGeometry(0.08, 0.95, 0.08), trim, x, 0.475, z));
     for (const x of [-0.45, 0.45]) g.add(mesh(new THREE.BoxGeometry(0.07, 0.07, 0.98), trim, x, 0.92, 0), mesh(new THREE.BoxGeometry(0.04, 0.9, 0.04), trim, x, 0.45, 0));
     g.add(mesh(new THREE.BoxGeometry(0.98, 0.07, 0.07), trim, 0, 0.92, -0.45), mesh(new THREE.BoxGeometry(0.04, 0.9, 0.04), trim, 0, 0.45, -0.45));
@@ -392,7 +392,7 @@ export const STOOP = { house: { in: 0.5, steps: [0.14, 0.28, 0.28] }, cottage: {
   lake_house: { in: 0.75, steps: [0, 0.3, 0.34] }, workshop: { in: 0.5, steps: [0, 0, 0.14] }, observatory: { in: 0.55, steps: [0, 0.28, 0.28] },
   moonwell: { in: 0.5, steps: [0.14, 0.14, 0.14] }, cave_mouth: { in: 0.5, steps: [0.05, 0.05, 0.05] }, cave_mouth_slate: { in: 0.5, steps: [0, 0, 0] },
   fallen_trunk: { in: 0.5, steps: [0, 0, 0] }, seal_door: { in: 0.4, steps: [0, 0, 0] },
-  inn_stairs: { in: 0.55, steps: [0.17, 0.34, 0.51] }, inn_stairwell: { in: 0.5, steps: [-0.1, -0.25, -0.4] } };
+  inn_stairs: { in: 0.55, steps: [0.17, 0.34, 0.51, 0.68] }, inn_stairwell: { in: 0.5, steps: [-0.1, -0.25, -0.4] } };
 // Ladders join their front and back neighbours whatever the height (floor 0 in front, a 3 m deck behind).
 export const LADDER = new Set(["ladder"]);
 // Afloat: they bob on the water (never instanced).
