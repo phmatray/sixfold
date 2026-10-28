@@ -157,6 +157,14 @@ phone viewport (390 × 844) at night with the CPU slowed 4×:
 | test 64 × 48 forest, with chunks | 194 | 505k | 0.6 s | 16.7 ms (p95 17.5) |
 | test 80 × 64 forest, with chunks | 195 | 505k | 0.6 s | 16.7 ms (p95 17.3) |
 
+People walking their routines cost frame time too, and a map lets at most 6 walk at once (`walkers_max`). With
+6 walking in Brightwell Square at night (six extra people added for the measurement, with reactions and ambient
+life on), same setup: median **16.7 ms**, p95 17.5 ms, no frame over 20 ms, over 5 runs; the main thread is busy
+9.0 ms a frame (8.9–9.3), against 9.2 ms (8.8–9.6) with the same people standing: walking costs nothing
+measurable. In WebKit, unthrottled: 17.0 ms, p95 18.0 ms (its frame times are whole milliseconds). The people
+code is under 2% of the profile. Re-measure with `cd e2e && node perf-walkers.mjs [--webkit]` after
+`trunk build --release`.
+
 Grass tufts scale with the map's area, so a big map keeps the same density.
 
 ### 8.5 Bigger is not emptier

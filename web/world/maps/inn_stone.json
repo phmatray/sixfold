@@ -2,7 +2,7 @@
   "width": 11,
   "height": 9,
   "tiles": [
-    "WWWWVWWWWWW",
+    "WWWWVWWW#WW",
     "WwwwwwwwwwW",
     "WwwwwwwwwwW",
     "WwwwwwwwwwW",
@@ -22,12 +22,6 @@
     {
       "asset": "shelf",
       "x": 4,
-      "z": 1,
-      "rot": 0
-    },
-    {
-      "asset": "bed",
-      "x": 8,
       "z": 1,
       "rot": 0
     },
@@ -96,6 +90,16 @@
       "x": 5,
       "z": 7,
       "rot": 0
+    },
+    {
+      "asset": "inn_stairs",
+      "x": 8,
+      "z": 0,
+      "rot": 0,
+      "recolor": {
+        "wood": "#9a7a5a",
+        "trim": "#5d5650"
+      }
     }
   ],
   "spawn": {
@@ -125,6 +129,18 @@
         "facing": "s"
       },
       "dir": "s"
+    },
+    {
+      "x": 8,
+      "z": 0,
+      "to": "inn_stone_up",
+      "label": "Go upstairs",
+      "label_fr": "Monter à l'étage",
+      "spawn": {
+        "x": 8,
+        "z": 2,
+        "facing": "s"
+      }
     }
   ],
   "exits": [],

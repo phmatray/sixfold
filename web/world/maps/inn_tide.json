@@ -2,7 +2,7 @@
   "width": 11,
   "height": 9,
   "tiles": [
-    "WWWWVWWWWWW",
+    "WWWWVWWW#WW",
     "WwwwwwwwwwW",
     "WwwwwwwwwwW",
     "WwwwwwwwwwW",
@@ -16,12 +16,6 @@
     {
       "asset": "chowder_stove",
       "x": 1,
-      "z": 1,
-      "rot": 0
-    },
-    {
-      "asset": "bed",
-      "x": 8,
       "z": 1,
       "rot": 0
     },
@@ -96,6 +90,16 @@
       "x": 5,
       "z": 7,
       "rot": 0
+    },
+    {
+      "asset": "inn_stairs",
+      "x": 8,
+      "z": 0,
+      "rot": 0,
+      "recolor": {
+        "wood": "#a39a88",
+        "trim": "#6b6a62"
+      }
     }
   ],
   "spawn": {
@@ -125,6 +129,18 @@
         "facing": "s"
       },
       "dir": "s"
+    },
+    {
+      "x": 8,
+      "z": 0,
+      "to": "inn_tide_up",
+      "label": "Go upstairs",
+      "label_fr": "Monter à l'étage",
+      "spawn": {
+        "x": 8,
+        "z": 2,
+        "facing": "s"
+      }
     }
   ],
   "exits": [],
