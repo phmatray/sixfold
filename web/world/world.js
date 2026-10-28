@@ -1264,6 +1264,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     preview,
     previewStop,
     portrait,
+    replay: (id) => !!world && !warping && cut.replay(id),
   };
 }
 

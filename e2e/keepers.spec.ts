@@ -149,6 +149,20 @@ test.describe(() => {
     await frames(page);
     await expect(skip).toBeHidden();
     expect(await walk(page, 9, 5), "no scene holds the hero").toBeGreaterThan(0);
+
+    // #177: from the seals screen, at the site, the arrival plays again, and keeps nothing.
+    const kept = async () => ((await readSave(page)).progress?.[0] ?? "").split(",").filter((t) => !t.startsWith("t:")).join(","); // the clock runs on
+    const before = await kept();
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
+    await page.getByRole("tab", { name: "Campaign" }).click();
+    const marlo = page.locator("li.rival").filter({ hasText: "Marlo" });
+    await expect(marlo.getByRole("button", { name: "Watch the seal won again" })).toHaveCount(0);
+    await marlo.getByRole("button", { name: "Watch the arrival again" }).click();
+    await expect(skip).toBeVisible();
+    await page.waitForTimeout(450);
+    await skip.click();
+    await expect(skip).toBeHidden();
+    expect(await kept()).toBe(before);
   });
 });
 

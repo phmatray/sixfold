@@ -2680,6 +2680,8 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .rival-colors { display: flex; gap: 4px; margin-left: auto; }
 .rival-status { font-weight: 700; font-size: var(--fs-md); }
 .rival-meta, .rival-reward { color: var(--muted); font-size: var(--fs-sm); max-width: 75ch; }
+/* At a seal site: its arrival and its seal won, watched again (#177). */
+.rival .rival-replay { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .rival.open { border-color: color-mix(in srgb, var(--brass) 55%, transparent); }
 .rival.open .rival-status { color: var(--brass-hi); }
 .rival.beaten .rival-status { color: var(--heal); }

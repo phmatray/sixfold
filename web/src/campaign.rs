@@ -170,10 +170,46 @@ pub fn SealFill(r: &'static Rival, #[prop(default = SEAL_AT)] at: u32) -> impl I
 /// When a won seal starts to fill, after the result's own fanfare (ms).
 pub const SEAL_AT: u32 = 1200;
 
-/// The six seals and every rival: beaten, open or locked.
+/// A keeper's seal site, by map.
+fn site(keeper: &str) -> Option<&'static str> {
+    Some(match keeper {
+        "bramble" => "elder_ring",
+        "marlo" => "bellflats",
+        "cinza" => "kilnmouth",
+        "quill" => "rodspire",
+        "orla" => "bastion",
+        "lumen" => "moonwell",
+        _ => return None,
+    })
+}
+
+/// The six seals and every rival: beaten, open or locked. In the world
+/// (`replay`), standing at a seal site, its arrival and its seal won can be
+/// watched again (#177).
 #[component]
-pub fn Roster() -> impl IntoView {
+pub fn Roster(#[prop(default = None)] replay: Option<Callback<String>>) -> impl IntoView {
     let progress = expect_context::<RwSignal<Progress>>();
+    let here = crate::store::world_at().and_then(|a| a.split(',').next().map(str::to_string));
+    let again = move |r: &'static Rival| {
+        let (replay, map) = (replay?, site(r.id).filter(|m| here.as_deref() == Some(*m))?);
+        let (reveal, victory) = (format!("reveal_{map}"), format!("victory_{}", r.id));
+        let seen = progress
+            .with_untracked(|p| (p.has_flag(&reveal), p.has_flag(&format!("sealed_{}", r.id))));
+        (seen.0 || seen.1).then(|| view! {
+            <p class="rival-replay">
+                {seen.0.then(|| view! {
+                    <button type="button" class="btn ghost" on:click=move |_| replay.run(reveal.clone())>
+                        {tr("Watch the arrival again", "Revoir l'arrivée")}
+                    </button>
+                })}
+                {seen.1.then(|| view! {
+                    <button type="button" class="btn ghost" on:click=move |_| replay.run(victory.clone())>
+                        {tr("Watch the seal won again", "Revoir le sceau gagné")}
+                    </button>
+                })}
+            </p>
+        })
+    };
     let n = move || progress.with(seals);
     view! {
         <div class="roster">
@@ -234,6 +270,7 @@ pub fn Roster() -> impl IntoView {
                                 {r.place.get()}
                             </p>
                             <p class="rival-reward">{move || progress.with(|p| reward_line(r, p))}</p>
+                            {again(r)}
                         </li>
                     }
                 }).collect_view()}
@@ -271,6 +308,7 @@ pub fn CampaignScreen() -> impl IntoView {
 pub fn CampaignPanel(
     back: Screen,
     before: impl Fn() + Copy + Send + Sync + 'static,
+    #[prop(optional)] replay: Option<Callback<String>>,
 ) -> impl IntoView {
     let progress = expect_context::<RwSignal<Progress>>();
     view! {
@@ -283,7 +321,7 @@ pub fn CampaignPanel(
             None => tr("Six rivals keep the seal stones, one at each region's seal site. Beat each one for their seal; with all six, the sealed door in the hall opens on the Hex Warden.",
                 "Six rivaux gardent les pierres de sceau, chacun au site de sceau de sa région. Battez-les un à un pour gagner leur sceau\u{202f}; avec les six, la porte scellée de la salle des duels s'ouvre sur la Gardienne des Six.").to_string(),
         }}</p>
-        <Roster />
+        <Roster replay=replay />
         <section class="ladder-page" aria-labelledby="ladder-title">
             <h2 id="ladder-title">{tr("After the campaign", "Après la campagne")}</h2>
             <Ladder back=back before=before />

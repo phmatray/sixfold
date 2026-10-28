@@ -35,7 +35,13 @@ export function scenes(env) {
     return Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? "e" : "w") : dz > 0 ? "s" : "n";
   };
 
-  function start(s) {
+  // Play a scene of this map again from the seals screen (#177): its cues only, nothing it keeps.
+  function replay(id) {
+    const s = (env.world()?.map.scripts ?? []).find((x) => x.id === id);
+    return !playing && !!s && start(s, true);
+  }
+
+  function start(s, again = false) {
     const w = env.world();
     playing = true;
     cur = cam = null;
@@ -48,7 +54,7 @@ export function scenes(env) {
     // Someone not out (Sable behind the sealed door, #154) still speaks under their own name.
     const named = (id) => actorOf(id)?.def.name ?? w.map.npcs?.find((n) => n.id === id)?.name ?? "";
     const steps = (s.steps ?? []).map((st) => (st.say ? { ...st, name: st.say === "hero" ? "" : named(st.say) } : st));
-    env.cb("script", s.id ?? "", JSON.stringify({ steps }));
+    env.cb("script", s.id ?? "", JSON.stringify(again ? { steps, replay: true } : { steps }));
     return true;
   }
   const on = (s, x, z) => s.at?.some(([ax, az]) => ax === x && az === z);
@@ -166,5 +172,5 @@ export function scenes(env) {
 
   // A `cam:<x>:<z>` shot holds (a place: a stone, a door), not a person or the hero.
   const onTile = () => playing && Array.isArray(cam);
-  return { get playing() { return playing; }, due, entered, stepped, play, update, aim, end, onTile };
+  return { get playing() { return playing; }, due, entered, stepped, play, replay, update, aim, end, onTile };
 }
