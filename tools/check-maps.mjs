@@ -36,7 +36,8 @@ import { ANGLES, framing, lowestPitch } from "../web/world/camera.js";
 // the lowest one, and the camera-ray test at every one.
 const rad = (deg) => (deg * Math.PI) / 180;
 const LOW = lowestPitch(), DEPTH_SCALE = Math.tan(rad(LOW)) / Math.tan(rad(50));
-const visibleAll = (m, boxes, from, target) => ANGLES.every((a) => ld.visible({ ...m, camera: framing({ pitch: 50, distance: 12, ...m.camera }, a, !!m.light?.indoor) }, boxes, from, target));
+const visibleAll = (m, boxes, from, target) =>
+  (m.light?.indoor ? ["default"] : ANGLES).every((a) => ld.visible({ ...m, camera: framing({ pitch: 50, distance: 12, ...m.camera }, a, false) }, boxes, from, target));
 const dir = process.argv.slice(2).find((a) => !a.startsWith("--")) ?? "web/world";
 const src = readFileSync(`${dir}/props.js`, "utf8");
 const FOOT = eval(`(${src.match(/export const FOOT = (\{[\s\S]*?\});/)[1]})`);

@@ -186,8 +186,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   shadowEye.layers.enableAll();
   shadowEye.layers.disable(1);
   let cam = { fov: 40, fovPortrait: 50, pitch: 50, distance: 12, distancePortrait: 15, lookAtOffset: [0, 0.75, 0] };
-  // The outdoor angle the player picked (camera.js, #148), and the pitch and distance easing toward it.
-  let camAngle = "default", pitchNow = 50, distNow = 12;
+  // The outdoor angle the player picked (camera.js, #148), and the pitch and distance easing toward it
+  // (only after a new angle: a rotated phone or sixfoldCam still cut).
+  let camAngle = "default", pitchNow = 50, distNow = 12, camEase = false;
   let dist = 12, alive = true, raf = 0, paused = false, warping = false, world = null, hero = null;
   let canRun = false, runToggle = false, shift = false, lastHero = "";
   const sealsHeld = new Set(); // the seals held (setSeals): their stone faces stay lit
@@ -343,7 +344,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     } else if (k === "g" && !e.repeat) {
       world.grid.visible = !world.grid.visible;
       legend.hidden = !world.grid.visible;
-    } else if (k === "c" && !e.repeat) {
+    } else if (k === "c" && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) { // not a copy (Ctrl/Cmd+C)
       setCamera(nextAngle(camAngle));
       cb("camera", camAngle, "");
     }
@@ -358,7 +359,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // The outdoor camera angle (#148): rooms keep their own framing; the frame eases to it.
   const setCamera = (a) => {
     camAngle = ANGLES.includes(a) ? a : "default";
-    if (world) (cam = framing(world.map.camera, camAngle, !!world.map.light.indoor)), resize();
+    if (world) (cam = framing(world.map.camera, camAngle, !!world.map.light.indoor)), resize(), (camEase = true);
   };
   const clearHeld = () => ((held.length = 0), (shift = false));
   const padDir = (e) => e.target.closest?.("[data-dir]")?.dataset.dir;
@@ -878,9 +879,10 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     // Camera: fixed pitch, on a soft spring behind a point a little ahead of a
     // walking hero; leans in after a while idle; indoors, kept inside the room.
     // A new angle (#148) eases the pitch and distance over about half a second (a cut on a new map or under reduced motion).
-    const ease = first || reduced ? 1 : Math.min(1, dt * 6);
+    const ease = first || reduced || !camEase ? 1 : Math.min(1, dt * 6);
     pitchNow += (cam.pitch - pitchNow) * ease;
     distNow += (dist - distNow) * ease;
+    if (Math.abs(cam.pitch - pitchNow) < 0.01 && Math.abs(dist - distNow) < 0.001) camEase = false;
     const pitch = THREE.MathUtils.degToRad(pitchNow), off = cam.lookAtOffset;
     const ahead = h.step && !reduced ? 0.7 : 0;
     const shot = cut.aim(); // a cutscene's `cam` target
