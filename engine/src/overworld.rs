@@ -19,6 +19,8 @@
 //!   and items start with the prefix, e.g. `count:found_:30`)
 //! - `time:<phase>` (the clock is in `dawn`, `day`, `dusk` or `night`; see
 //!   [`clock`](crate::clock))
+//! - `hour:<from>-<to>` (the clock's hour is in `from..to`, wrapping past
+//!   midnight when `from > to`: `hour:21-5` is 21:00 to 04:59)
 //!
 //! Effects ([`parse_effect`]):
 //!
@@ -176,6 +178,8 @@ pub enum Test {
     Count(String, usize),
     /// The clock is in this phase.
     Time(Phase),
+    /// The clock's hour is in `from..to`, wrapping past midnight.
+    Hour(u8, u8),
 }
 
 /// A parsed condition: every `(negated, test)` must hold.
@@ -357,6 +361,15 @@ pub fn parse_cond(s: &str) -> Result<Cond, String> {
 }
 
 fn parse_test(c: &str) -> Option<Test> {
+    // `hour:` carries a `-`, which `parts` refuses in a name.
+    if let Some((from, to)) = c
+        .trim()
+        .strip_prefix("hour:")
+        .and_then(|r| r.split_once('-'))
+    {
+        let (from, to): (u8, u8) = (from.parse().ok()?, to.parse().ok()?);
+        return (from < 24 && to <= 24 && from != to).then_some(Test::Hour(from, to));
+    }
     let (kind, args) = parts(c)?;
     let s = |x: &str| x.to_string();
     Some(match (kind, args.as_slice()) {
@@ -587,6 +600,14 @@ impl Progress {
             Test::Coins(n) => self.coins >= *n,
             Test::Count(prefix, n) => self.count(prefix) >= *n,
             Test::Time(p) => self.phase() == *p,
+            Test::Hour(from, to) => {
+                let h = (self.minute / 60) as u8;
+                if from < to {
+                    (*from..*to).contains(&h)
+                } else {
+                    h >= *from || h < *to
+                }
+            }
         }
     }
 
@@ -1215,6 +1236,55 @@ mod tests {
         assert_eq!(
             parse_cond("time:night"),
             Ok(Cond(vec![(false, Test::Time(Phase::Night))]))
+        );
+    }
+
+    /// #114: `hour:<from>-<to>` holds from `from`:00 up to `to`:00, and
+    /// wraps past midnight when `from > to`.
+    #[test]
+    fn hour_conditions_hold_inside_their_range_and_wrap() {
+        let mut p = Progress::default();
+        let at = |p: &mut Progress, h: u16, m: u16| p.set_minute(h * 60 + m);
+        at(&mut p, 8, 0);
+        assert!(p.check("hour:8-19") && !p.check("!hour:8-19"));
+        at(&mut p, 18, 59);
+        assert!(p.check("hour:8-19"));
+        at(&mut p, 19, 0);
+        assert!(!p.check("hour:8-19"), "the end hour is out");
+        at(&mut p, 7, 59);
+        assert!(!p.check("hour:8-19"));
+        for (h, inside) in [
+            (21, true),
+            (23, true),
+            (0, true),
+            (4, true),
+            (5, false),
+            (12, false),
+            (20, false),
+        ] {
+            at(&mut p, h, 30);
+            assert_eq!(p.check("hour:21-5"), inside, "{h}:30 in 21-5");
+        }
+        at(&mut p, 23, 30);
+        assert!(p.check("hour:17-24") && p.check("hour:0-24") && !p.check("hour:0-23"));
+        for bad in [
+            "hour:",
+            "hour:8",
+            "hour:8-",
+            "hour:-8",
+            "hour:8-8",
+            "hour:25-3",
+            "hour:3-25",
+            "hour:a-b",
+            "hour:8-19-20",
+            "hour:8:19",
+        ] {
+            assert!(parse_cond(bad).is_err(), "{bad:?}");
+            assert!(!p.check(bad), "{bad:?}");
+        }
+        assert_eq!(
+            parse_cond("hour:21-5"),
+            Ok(Cond(vec![(false, Test::Hour(21, 5))]))
         );
     }
 

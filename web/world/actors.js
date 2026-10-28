@@ -261,18 +261,55 @@ function bubbleTex(kind) {
   bubbles.set(kind, t);
   return t;
 }
+// A bark (npc.js): its words in a bubble of the same make, wrapped to a few short lines.
+function sayTex(text) {
+  const id = `say:${text}`;
+  if (bubbles.has(id)) return bubbles.get(id);
+  const c = document.createElement("canvas"), font = "600 30px system-ui, sans-serif", WRAP = 340, LINE = 38;
+  let g = c.getContext("2d");
+  g.font = font;
+  const lines = [];
+  for (const word of text.split(" ")) {
+    const l = lines.length ? `${lines[lines.length - 1]} ${word}` : "";
+    if (l && g.measureText(l).width <= WRAP) lines[lines.length - 1] = l;
+    else lines.push(word);
+  }
+  c.width = Math.ceil(Math.max(...lines.map((l) => g.measureText(l).width)) + 60);
+  c.height = lines.length * LINE + 64;
+  g = c.getContext("2d"); // resized: the context starts over
+  const w = c.width, h = c.height - 26, mid = w / 2;
+  Object.assign(g, { lineJoin: "round", lineWidth: 7, strokeStyle: INK, fillStyle: "#fffaf0" });
+  g.beginPath();
+  g.roundRect(4, 4, w - 8, h - 4, 26);
+  g.moveTo(mid - 10, h - 2);
+  g.lineTo(mid, c.height - 4);
+  g.lineTo(mid + 12, h - 2);
+  g.stroke();
+  g.fill();
+  g.fillRect(mid - 12, h - 10, 26, 10);
+  Object.assign(g, { font, fillStyle: INK, textAlign: "center", textBaseline: "middle" });
+  lines.forEach((l, i) => g.fillText(l, mid, 4 + (h - 4) / 2 + (i - (lines.length - 1) / 2) * LINE));
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.userData.size = [w / 128, c.height / 128];
+  bubbles.set(id, t);
+  return t;
+}
 const POP = 0.2, FADE_OUT = 0.25;
 // Pop a bubble over `a` for `hold` seconds (then it fades).
-export function emote(a, kind, hold = 1.2) {
+export const emote = (a, kind, hold = 1.2) => show(a, bubbleTex(kind), hold);
+// Say `text` in a bubble over `a` for `hold` seconds (a bark: no dialogue box).
+export const say = (a, text, hold) => show(a, sayTex(text), hold);
+function show(a, map, hold) {
   if (!a.bubble) {
     a.bubble = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthTest: false, depthWrite: false, fog: false }));
     a.bubble.renderOrder = 20;
     a.bubble.userData.shared = true; // module-wide textures; the sprite geometry is three's own
   }
   if (a.bubble.parent !== a.obj.parent) a.obj.parent?.add(a.bubble);
-  a.bubble.material.map = bubbleTex(kind);
+  a.bubble.material.map = map;
   a.bubble.material.needsUpdate = true;
-  Object.assign(a.bubble.userData, { t: 0, hold });
+  Object.assign(a.bubble.userData, { t: 0, hold, size: map.userData.size ?? [1, 1] });
   a.bubble.visible = true;
   bubble(a, 0, false);
 }
@@ -280,10 +317,11 @@ function bubble(a, dt, reduced) {
   const b = a.bubble, u = b.userData;
   u.t += dt;
   const t = u.t, pop = reduced || t > POP ? 1 : t < POP * 0.6 ? (t / (POP * 0.6)) * 1.25 : 1.25 - ((t - POP * 0.6) / (POP * 0.4)) * 0.25;
-  b.material.opacity = THREE.MathUtils.clamp(1 - (t - u.hold) / FADE_OUT, 0, 1);
+  b.material.opacity = reduced ? +(t < u.hold) : THREE.MathUtils.clamp(1 - (t - u.hold) / FADE_OUT, 0, 1); // reduced motion: in and out as cuts
   if (b.material.opacity === 0) b.visible = false;
-  b.scale.setScalar(0.74 * pop);
-  b.position.set(a.obj.position.x, a.obj.position.y + a.head + 0.42, a.obj.position.z);
+  const [sw, sh] = u.size;
+  b.scale.set(0.74 * pop * sw, 0.74 * pop * sh, 1);
+  b.position.set(a.obj.position.x, a.obj.position.y + a.head + 0.05 + 0.37 * sh, a.obj.position.z);
 }
 
 // ---------- Occupations: a routine's `do` (npc.js), laid over the idle clip ----------

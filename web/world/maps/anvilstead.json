@@ -133,19 +133,22 @@
       "asset": "terrace_house",
       "x": 2,
       "z": 4,
-      "rot": 0
+      "rot": 0,
+      "lit": "hour:17-23"
     },
     {
       "asset": "terrace_house",
       "x": 8,
       "z": 4,
-      "rot": 0
+      "rot": 0,
+      "lit": "hour:19-1"
     },
     {
       "asset": "terrace_house",
       "x": 14,
       "z": 4,
-      "rot": 0
+      "rot": 0,
+      "lit": "hour:18-22"
     },
     {
       "asset": "terrace_house",
@@ -154,7 +157,8 @@
       "rot": 0,
       "recolor": {
         "sx_sn_door": "#4a7a4a"
-      }
+      },
+      "lit": "hour:20-24"
     },
     {
       "asset": "terrace_house",
@@ -163,7 +167,8 @@
       "rot": 0,
       "recolor": {
         "sx_sn_door": "#8a4a6a"
-      }
+      },
+      "lit": "hour:17-21"
     },
     {
       "asset": "workshop",
@@ -217,7 +222,8 @@
       "recolor": {
         "sx_sn_door": "#d84a3a",
         "sx_sn_rust": "#d8a03a"
-      }
+      },
+      "lit": "hour:18-23"
     },
     {
       "asset": "hanging_sign",
@@ -233,7 +239,8 @@
       "rot": 0,
       "recolor": {
         "sx_sn_door": "#3a6a8a"
-      }
+      },
+      "lit": "hour:21-2"
     },
     {
       "asset": "inn_sign",
@@ -543,7 +550,8 @@
       "rot": 0,
       "recolor": {
         "sx_sn_door": "#6a5a3a"
-      }
+      },
+      "lit": "hour:17-23"
     },
     {
       "asset": "terrace_house",
@@ -552,7 +560,8 @@
       "rot": 0,
       "recolor": {
         "sx_sn_door": "#3a3a3a"
-      }
+      },
+      "lit": "hour:19-1"
     },
     {
       "asset": "crates",
@@ -632,7 +641,8 @@
         "sx_roof_brown_dk": "#454a55",
         "sx_awning_red": "#a8642f",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:18-22"
     },
     {
       "asset": "stall",
@@ -677,7 +687,8 @@
         "sx_roof_brown_dk": "#454a55",
         "sx_awning_red": "#7a5a3a",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:20-24"
     },
     {
       "asset": "cottage",
@@ -689,7 +700,8 @@
         "sx_roof_brown_dk": "#454a55",
         "sx_awning_red": "#7a5a3a",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:17-21"
     },
     {
       "asset": "bush",
@@ -2934,6 +2946,13 @@
             "Un mouton de montagne, hirsute comme un toit d'ardoise. Il te regarde comme si tu lui devais quelque chose."
           ]
         }
+      ],
+      "barks": [
+        {
+          "if": "flag:rubble_1 & flag:rubble_2 & flag:rubble_3",
+          "say": "You and Huw's crew cleared the road!",
+          "say_fr": "Avec l'équipe de Huw, vous avez dégagé la route !"
+        }
       ]
     },
     {
@@ -2953,6 +2972,13 @@
           "lines_fr": [
             "Un mouton de montagne, hirsute comme un toit d'ardoise. Il te regarde comme si tu lui devais quelque chose."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "if": "flag:bex_swap",
+          "say": "Bex says you found all six cairns!",
+          "say_fr": "Bex dit que vous avez trouvé les six cairns !"
         }
       ]
     },
@@ -2977,6 +3003,12 @@
             "Klang. Pardon, l'habitude. Klang.",
             "Chaque pioche des Échines passe par cette enclume tôt ou tard. C'est pour ça que le bourg s'appelle comme ça. Enfin. Ça, et la montagne lui ressemble, si on plisse les yeux depuis le Bastion."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Clang, clang. Hear the forge?",
+          "say_fr": "Clang, clang. Vous entendez la forge ?"
         }
       ]
     },
