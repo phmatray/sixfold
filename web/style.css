@@ -2278,6 +2278,11 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 }
 .flip.rare .flip-inner { animation-duration: 900ms; }
 .flip-inner > .side { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+/* WebKit culls a turned-away side's own layer, not a card inside it on a layer of
+   its own (the Rare's tilt, its charge, its shine): that card showed through the
+   turn (#205). So the card stays in the turn's 3D space and hides its own back. */
+.flip-inner > .side { transform-style: preserve-3d; }
+.flip-inner > .side > .card { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .flip-inner > .front-face { transform: rotateY(180deg); }
 .flip.rare .front-face .card { animation: rare-shine 1100ms calc(var(--d) + 700ms) ease-out both; }
 /* The Rare slot waits in a halo; a Holo Rare's turns to rainbow rays. */
