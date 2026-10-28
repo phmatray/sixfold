@@ -2093,8 +2093,8 @@ fn GameMenu(
 /// What the live region says when the camera angle changes.
 fn camera_said(angle: CameraAngle) -> &'static str {
     match angle {
-        CameraAngle::Lower => tr("Camera: lower", "Caméra : plus basse"),
-        CameraAngle::Default => tr("Camera: default", "Caméra : normale"),
-        CameraAngle::Higher => tr("Camera: higher", "Caméra : plus haute"),
+        CameraAngle::Lower => tr("Camera: lower", "Caméra\u{a0}: plus basse"),
+        CameraAngle::Default => tr("Camera: default", "Caméra\u{a0}: normale"),
+        CameraAngle::Higher => tr("Camera: higher", "Caméra\u{a0}: plus haute"),
     }
 }
