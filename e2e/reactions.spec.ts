@@ -27,15 +27,14 @@ async function threeSeals(page: Page) {
 }
 
 test("AC2: an idle townsperson turns to the hero and back once the hero has gone; a duelist doesn't turn", async ({ page }) => {
-  test.slow(); // a short walk, at ~1 frame a second on CI's software GL
+  test.slow(); // warps and fades at ~1 frame a second on CI's software GL
   await threeSeals(page);
   // Posy minds her stall facing south; the hero arrives beside her (west).
   expect(await who(page, "posy")).toMatchObject({ x: 18, z: 13, face: "s" });
   await warp(page, "square", 17, 13, "s");
   await expect.poll(async () => (await who(page, "posy"))?.face).toBe("w");
-  // Three tiles off, she is back at her stall's way.
-  await expect.poll(async () => ((await host(page, "sixfoldWalk", 17, 16)) as string[]).length).toBeGreaterThan(0);
-  await expect.poll(() => at(page), { timeout: 60_000 }).toMatch(/^square,17,16,/);
+  // Three tiles off (a warp, not a walk: CI draws ~1 frame a second), she is back at her stall's way.
+  await warp(page, "square", 17, 16, "s");
   await expect.poll(async () => (await who(page, "posy"))?.face).toBe("s");
   // Lark, a duelist, watches east along his line; the hero a tile south of him (beside) doesn't turn him.
   expect(await who(page, "t_lark")).toMatchObject({ x: 18, z: 17, face: "e" });
