@@ -58,6 +58,13 @@ test("opening packs adds cards to the collection @phone", async ({ page }) => {
       }),
     );
     expect(spills).toEqual([]);
+    // Each card turns in its flip's 3D space and hides its own back: WebKit lets a card on a
+    // layer of its own show through a turned-away side otherwise (#205). (Playwright's WebKit
+    // screenshots paint without 3D, so no pixel can tell; real Safari did.)
+    const flat = await page.locator(".reveal .flip-inner > .side > .card").evaluateAll((cards) =>
+      cards.filter((c) => getComputedStyle(c.parentElement!).transformStyle !== "preserve-3d" || getComputedStyle(c).backfaceVisibility !== "hidden").length,
+    );
+    expect(flat).toBe(0);
   };
   await open();
   const first = await readSave(page);
