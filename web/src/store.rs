@@ -113,6 +113,7 @@ const TIPS: &str = "sixfold.tips";
 const HINT_SEEN: &str = "sixfold.hint-seen";
 /// Read by web/world/world.js too.
 const TAP_WALK: &str = "sixfold.tap-walk";
+const SKIP_SCENES: &str = "sixfold.skip-scenes";
 
 /// The opponent's moves play faster (a browser preference, like the language).
 pub fn fast_opponent() -> bool {
@@ -131,6 +132,16 @@ pub fn tap_walk() -> bool {
 
 pub fn set_tap_walk(on: bool) {
     set(TAP_WALK, if on { "1" } else { "0" });
+}
+
+/// Every cutscene skipped as it starts, for a replay (off by default: a
+/// scene plays, its Skip still there). Its state effects still apply.
+pub fn skip_scenes() -> bool {
+    get(SKIP_SCENES).is_some_and(|v| v == "1")
+}
+
+pub fn set_skip_scenes(on: bool) {
+    set(SKIP_SCENES, if on { "1" } else { "0" });
 }
 
 /// Whether the hero has walked once (the world's controls hint is spent).

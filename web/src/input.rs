@@ -310,6 +310,12 @@ pub fn ControlsSettings() -> impl IntoView {
                     {tr("Tap the ground to walk (as well as the arrows)", "Toucher le sol pour marcher (en plus des flèches)")}
                 </label>
             })}
+            // A replay of the campaign (#155): every scene skips itself; what it gives is still given.
+            <label class="vol-mute">
+                <input type="checkbox" name="skip-scenes" prop:checked=crate::store::skip_scenes()
+                    on:change=move |e| crate::store::set_skip_scenes(event_target_checked(&e)) />
+                {tr("Skip every cutscene (what they give is kept)", "Passer toutes les cinématiques (ce qu'elles donnent est gardé)")}
+            </label>
         </fieldset>
     }
 }

@@ -410,7 +410,10 @@ pub fn parse_effect(e: &str) -> Result<Effect, String> {
                 path: s(path),
             })
         }
-        ("face", [actor, dir]) if FACINGS.contains(dir) || *dir == "hero" => {
+        // A direction, `hero`, or a rival to face (the hero turning back to a keeper, #155).
+        ("face", [actor, dir])
+            if FACINGS.contains(dir) || *dir == "hero" || rival(dir).is_some() =>
+        {
             Effect::Cue(Cue::Face {
                 actor: s(actor),
                 dir: s(dir),

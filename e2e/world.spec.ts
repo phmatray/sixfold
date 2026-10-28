@@ -48,6 +48,8 @@ test("the world: walk, take a door and back, open the menu, and Continue resumes
   await loaded(page);
   const skip = page.getByRole("button", { name: /^Skip/ });
   await expect(skip).toBeVisible();
+  // A scene ignores a skip in its first 400 ms (#155).
+  await page.waitForTimeout(450);
   await page.keyboard.press("Escape");
   await expect(skip).toBeHidden();
 
@@ -89,6 +91,8 @@ test("a duelist's challenge stays in the world: their words, the terms, arrows a
   // skips nothing, and the scene then plays over the warp below (moving the hero, holding input).
   const skip = page.getByRole("button", { name: /^Skip/ });
   await expect(skip).toBeVisible();
+  // A scene ignores a skip in its first 400 ms (#155).
+  await page.waitForTimeout(450);
   await page.keyboard.press("Escape");
   await expect(skip).toBeHidden();
   // Face Tobin from the tile south of him (out of his line of sight, so he
@@ -131,6 +135,7 @@ test("on a phone, a tap on the ground walks only once Options allow it @phone", 
   await loaded(page);
   const skip = page.getByRole("button", { name: /^Skip/ });
   await expect(skip).toBeVisible();
+  await page.waitForTimeout(450); // a scene ignores a skip in its first 400 ms (#155)
   await skip.click();
   await expect(skip).toBeHidden();
   const host = page.locator(".world-host");

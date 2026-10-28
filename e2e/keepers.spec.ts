@@ -42,8 +42,8 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   // `f:reveal_bellflats`: the site has shown itself already (#152), so no scene covers the talk.
   await atMarlo(page, ["f:keepers", "f:intro", "f:reveal_bellflats", "f:beat_t_tobin", "f:beat_bramble", "f:beat_t_pell", "f:beat_t_nell"]);
   const offer = await talkToMarlo(page);
-  await expect(offer).toContainText("The tide doesn't turn for strangers.");
-  await expect(offer).toContainText("Marlo wants 3 of the Saltreach's duelists bested first. You've bested 2.");
+  await expect(offer.locator(".ch-say")).toHaveCount(0);
+  await expect(offer).toContainText("One more Saltreach duelist, and Marlo will sit down.");
   await expect(offer.getByRole("img", { name: "2 of 3" })).toBeVisible();
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toHaveCount(0);
   await expect(offer.getByRole("button", { name: /^Not now/ })).toBeFocused();
@@ -53,7 +53,8 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   // The Journal's next step names the duelists still needed.
   await page.keyboard.press("j");
   const journal = page.getByRole("dialog", { name: "Journal" });
-  await expect(journal).toContainText("Beat 1 more duelist of the Saltreach to earn Marlo's challenge (2 of 3).");
+  await expect(journal).toContainText("Marlo's seal (the Tide): beat one more Saltreach duelist");
+  await expect(journal).toContainText("2\u00a0of\u00a03");
   await page.keyboard.press("Escape");
   await expect(journal).toBeHidden();
   // The menu's Campaign roster counts them too.
@@ -67,7 +68,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   await atMarlo(page, ["f:beat_t_skye"]);
   const again = await talkToMarlo(page);
   await expect(again.getByRole("button", { name: /^Challenge/ })).toBeVisible();
-  await expect(again).not.toContainText("bested first");
+  await expect(again).not.toContainText("will sit down");
 });
 
 /** A new game, its lesson skipped: a save to edit. */
@@ -131,6 +132,7 @@ test.describe(() => {
     const skip = page.getByRole("button", { name: /^Skip/ });
     await expect(skip).toBeVisible();
     expect(await walk(page, 9, 4), "no walking while the site shows itself").toBe(0);
+    await page.waitForTimeout(450); // a scene ignores a skip in its first 400 ms (#155)
     await skip.click();
     await expect(skip).toBeHidden();
     expect((await readSave(page)).progress?.[0]).toContain("f:reveal_bellflats");
@@ -230,11 +232,12 @@ test("Marlo's seal is won on stage at the stone, once, and a skip keeps it", asy
   expect(progress, "the scene settles the duel it spoke for").not.toContain("won:marlo");
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
 
-  // Once only: a reload comes back with no scene.
+  // Once only: a reload comes back with no scene, a tile back from Marlo where the scene stepped the hero (#155).
+  await expect.poll(async () => (await readSave(page)).world_at?.[0]).toMatch(/^bellflats,22,17,/);
   await page.reload();
   await menuItem(page, "Continue").click();
   await loaded(page);
-  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^22,16/);
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^22,17/);
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
   await expect(talk).toBeHidden();
 });
@@ -245,9 +248,8 @@ test("after losing to Marlo, he encourages, and the challenge is still open", as
   const tide = ["f:beat_t_pell", "f:beat_t_nell", "f:beat_t_skye"];
   await atMarlo(page, ["f:keepers", "f:intro", "f:reveal_bellflats", "f:met_marlo", ...tide, "lost:marlo"]);
 
-  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^22,16/, { timeout: 15_000 });
-  await page.keyboard.press("e");
-  // His lines, read to the end: a kind word, and the seal and the duelists bested still waiting.
+  // Back from the loss, wherever the duel began, his scene plays (#155): he turns to the hero, who
+  // steps back a tile, and his lines, read to the end: a kind word, the seal and the duelists bested still waiting.
   const talk = page.getByRole("dialog", { name: "Marlo" });
   await expect(talk).toBeVisible({ timeout: 60_000 });
   const said: string[] = [];
@@ -257,10 +259,14 @@ test("after losing to Marlo, he encourages, and the challenge is still open", as
     await page.waitForTimeout(400);
   }
   expect(said.join(" ")).toContain("The seal will wait on the flats, and the Saltreach's duelists you've bested still count.");
+  await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
 
+  // Once only: the scene settled the loss. A step back to him, and the challenge is still open.
+  await expect(page.locator("[data-hero]")).toHaveAttribute("data-hero", /^22,17/, { timeout: 15_000 });
+  expect(await walk(page, 22, 16)).toBeGreaterThan(0);
   const offer = await talkToMarlo(page);
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toBeEnabled();
-  await expect(offer).not.toContainText("bested first");
+  await expect(offer).not.toContainText("will sit down");
 });
 
 // #154: the Warden's duel is the grandest. With six seals the sealed door rings and Sable speaks through it,
@@ -285,7 +291,7 @@ test("the sealed door rings for six seals, and Sable's entrance lands on her cha
   // Through the door: her entrance plays on arrival; skipped, it still ends on her challenge.
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
   expect(await walk(page, 0, 6)).toBeGreaterThan(0);
-  await expect(sable).toContainText("Six seals.", { timeout: 60_000 });
+  await expect(sable).toContainText("So you're the one who rang them.", { timeout: 60_000 });
   await page.keyboard.press("Escape");
   const offer = page.getByRole("dialog", { name: "Challenge Sable?" });
   const accept = offer.getByRole("button", { name: /^Challenge/ });

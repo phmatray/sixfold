@@ -140,7 +140,7 @@
       "asset": "seal_stone",
       "x": 23,
       "z": 13,
-      "rot": 0
+      "rot": 300
     },
     {
       "asset": "waymark",
@@ -4260,6 +4260,20 @@
           ]
         },
         {
+          "if": "open:marlo & !earned:marlo & !beat:marlo",
+          "lines": [
+            "Shh. That's the tide talking, and it doesn't know you yet.",
+            "Beat a few of the Saltreach's duelists. The flats will tell me."
+          ],
+          "lines_fr": [
+            "Chut. C'est la marée qui parle, et elle ne te connaît pas encore.",
+            "Bats quelques duellistes de la Côte Salée. L'estran me le dira."
+          ],
+          "do": [
+            "duel:marlo"
+          ]
+        },
+        {
           "if": "beat:warden",
           "lines": [
             "The champion, back on my flats. The tide tables never mentioned you.",
@@ -4359,6 +4373,8 @@
       "id": "reveal_bellflats",
       "if": "!flag:reveal_bellflats",
       "on": "enter",
+      "caption": "A seal stone. Marlo keeps the Saltreach's seal here.",
+      "caption_fr": "Une pierre de sceau. Marlo y garde le sceau de la Côte Salée.",
       "steps": [
         {
           "do": [
@@ -4367,6 +4383,7 @@
             "stone:wake",
             "wait:1000",
             "cam:marlo",
+            "face:marlo:hero",
             "wait:800",
             "cam:hero",
             "flag:reveal_bellflats"
@@ -4472,14 +4489,16 @@
       "steps": [
         {
           "do": [
+            "walk:hero:s",
             "music:duel_rival_tide",
-            "cam:23:13",
+            "cam:23:15",
             "stone:wake",
             "wait:600",
             "sfx:seal",
             "stone:seal:marlo",
             "wait:1200",
             "face:marlo:hero",
+            "face:hero:marlo",
             "cam:marlo"
           ]
         },
@@ -4487,10 +4506,12 @@
           "say": "marlo",
           "lines": [
             "There. The Tide's face has it now, and it won't go out with the water.",
+            "This Brinemoth washed up with it. Yours now.",
             "Go on. The flats will still be here when the tide comes back in."
           ],
           "lines_fr": [
             "Voilà. La face de la Marée l'a pris, et elle ne s'éteindra pas avec l'eau.",
+            "Ce Saumite s'est échoué avec. À toi, maintenant.",
             "Va. L'estran sera encore là quand la marée remontera."
           ]
         },
@@ -4498,6 +4519,38 @@
           "do": [
             "cam:hero",
             "flag:sealed_marlo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "defeat_marlo",
+      "if": "lost:marlo",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "walk:hero:s",
+            "face:marlo:hero",
+            "face:hero:marlo",
+            "cam:marlo",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "marlo",
+          "lines": [
+            "Low tide for you today. It always comes back in.",
+            "The seal will wait on the flats, and the Saltreach's duelists you've bested still count."
+          ],
+          "lines_fr": [
+            "Marée basse pour toi aujourd'hui. Elle finit toujours par remonter.",
+            "Le sceau attendra sur l'estran, et les duellistes de la Côte Salée que tu as battus comptent toujours."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
           ]
         }
       ]

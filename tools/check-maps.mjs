@@ -259,7 +259,7 @@ function scripts(name, m, solid, inMap, reached) {
         const bad = (why) => fail.push(`${where}: ${e}: ${why}`);
         if (kind === "duel" && i !== steps.length - 1) bad("a duel ends the scene, so it goes in the last step");
         if (["walk", "face", "emote"].includes(kind) && !actor(a[0])) bad(`no actor ${a[0]} on this map`);
-        if (kind === "face" && !DIR[a[1]] && a[1] !== "hero") bad("faces n, e, s, w or hero");
+        if (kind === "face" && !DIR[a[1]] && !actor(a[1])) bad("faces n, e, s, w, the hero or an actor on this map");
         if (kind === "wait" && !(/^\d+$/.test(a[0]) && +a[0] <= 5000)) bad("waits 0 to 5000 ms");
         if (kind === "music" && !THEMES.has(a[0])) bad(`not a track (${[...THEMES].join(", ")})`);
         const seal = a[0] === "seal" && a.length === 2;

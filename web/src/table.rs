@@ -564,7 +564,11 @@ pub fn Station(player: usize) -> impl IntoView {
         <div class=if me { "station me" } else { "station opp" }>
             <div class="station-id" class:shake=move || !me && ctl.said.with(|s| s.is_some_and(|s| s.ko))>
                 {portrait}
-                <div class="station-name"><b>{name.clone()}</b>{(sub != name).then(|| view! { <span>{sub.clone()}</span> })}</div>
+                <div class="station-name"><b>{match name.split_once(", ") {
+                    // "Marlo, Tide Reader": on a phone only the name fits, so the title can go (#155).
+                    Some((who, title)) => view! { {who.to_string()}<span class="station-title">{format!(", {title}")}</span> }.into_any(),
+                    None => name.clone().into_any(),
+                }}</b>{(sub != name).then(|| view! { <span>{sub.clone()}</span> })}</div>
             </div>
             <div class="prizes" class:undealt=move || info.with(|i| i.prizes.is_empty()) role="img" aria-label=move || {
                 let n = left();

@@ -109,6 +109,8 @@ pub fn Inspector() -> impl IntoView {
     view! {
         // Focusable: it scrolls on its own, and the keyboard can scroll it too.
         <aside class="inspector" tabindex="0" class:open=move || ui.sheet.get() aria-label=tr("Card details", "Détails de la carte")>
+            // The board's outline: the duel's h1, then this, then the card's own h3 (#155: no jump from 1 to 3).
+            <h2 class="sr-only">{tr("Card details", "Détails de la carte")}</h2>
             <button class="btn ghost close" node_ref=close on:click=move |_| ui.sheet.set(false) aria-label=tr("Close card details", "Fermer les détails de la carte")>{tr("Close", "Fermer")}</button>
             {move || match shown_card() {
                 None => view! { <p class="empty-note">{tr("Hover or focus a card, or press and hold it, to read it here.", "Survolez ou sélectionnez une carte, ou maintenez-la appuyée, pour la lire ici.")}</p> }.into_any(),
@@ -304,42 +306,42 @@ pub fn GameOver() -> impl IntoView {
                 .iter()
                 .any(|e| matches!(e, Event::DeckOut { player } if *player == loser));
             let why = match (deck_out, left[w] == 0, loser == HUMAN) {
-                (true, _, true) => tr("You couldn't draw a card.", "Vous ne pouviez plus piocher."),
+                (true, _, true) => tr("You couldn't draw a card.", "Vous ne pouviez plus piocher.").to_string(),
                 (true, _, false) => tr(
                     "Your opponent couldn't draw a card.",
                     "Votre adversaire ne pouvait plus piocher.",
-                ),
+                ).to_string(),
                 (false, true, false) => tr(
                     "You took every prize.",
                     "Vous avez pris toutes vos Récompenses.",
-                ),
-                (false, true, true) => tr(
-                    "Your opponent took every prize.",
-                    "Votre adversaire a pris toutes ses Récompenses.",
-                ),
+                ).to_string(),
+                (false, true, true) => prized_out(v.sides[w].prizes.len()).to_string(),
                 (false, false, true) => tr(
                     "You had no Hexon left in play.",
-                    "Vous n'aviez plus de Hexon en jeu.",
-                ),
+                    "Vous n'aviez plus d'Hexon en jeu.",
+                ).to_string(),
                 (false, false, false) => tr(
                     "Your opponent had no Hexon left in play.",
-                    "Votre adversaire n'avait plus de Hexon en jeu.",
-                ),
+                    "Votre adversaire n'avait plus d'Hexon en jeu.",
+                ).to_string(),
             };
             // What the cause teaches, for the "why you lost" panel.
             let cause = match (deck_out, left[w] == 0) {
                 (true, _) => tr(
                     "Your deck ran out. Play fewer cards that make you draw, and keep your deck at full size.",
                     "Votre pioche s'est vidée. Jouez moins de cartes qui font piocher, et gardez un deck complet.",
-                ),
+                )
+                .to_string(),
                 (false, true) => tr(
-                    "They knocked out six of your Hexons. Spread energy over two Hexons, so one knock-out doesn't send you back to zero.",
-                    "Six de vos Hexons ont été mis K.O. Répartissez l'énergie sur deux Hexons, pour qu'un K.O. ne vous ramène pas à zéro.",
-                ),
+                    "Each knock-out gave them a prize. Spread energy over two Hexons, so one knock-out doesn't send you back to zero.",
+                    "Chaque K.O. leur a donné une Récompense. Répartissez l'énergie sur deux Hexons, pour qu'un K.O. ne vous ramène pas à zéro.",
+                )
+                .to_string(),
                 (false, false) => tr(
                     "Your Active was knocked out with no one on your Bench to take its place. Keep at least one Basic Hexon on your Bench.",
                     "Votre Actif a été mis K.O. sans personne sur le Banc pour le remplacer. Gardez toujours au moins un Hexon de Base sur le Banc.",
-                ),
+                )
+                .to_string(),
             };
             Some((w, v.sudden_death, left, why, cause))
         })
@@ -482,11 +484,15 @@ pub fn GameOver() -> impl IntoView {
         Some(view! {
             <div class="scrim end">
                 <div class=if won { "dialog result won" } else { "dialog result lost" } role="dialog" aria-modal="true" aria-labelledby="result-title">
-                    <h2 id="result-title">{match (won, fr()) {
-                        (true, false) => "You win",
-                        (false, false) => "You lose",
-                        (true, true) => "Victoire !",
-                        (false, true) => "Défaite",
+                    // A seal duel's result speaks the seal's language (#155): its name won, or the seal holding.
+                    <h2 id="result-title">{match (ctl.seal(), won) {
+                        // With a verb, so it says you won and not only what was at stake (#155).
+                        (Some(s), true) if !s.grand => won_heading(s.heading()),
+                        (Some(_), true) => tr("Champion of Sixfold", "Champion de Sixfold").to_string(),
+                        (Some(s), false) if !s.grand => tr("The seal holds", "Le sceau résiste").to_string(),
+                        (Some(s), false) => tr(format!("The title stays with {}", s.rival.name), format!("Le titre reste à {}", s.rival.name)),
+                        (None, true) => tr("You win", "Victoire !").to_string(),
+                        (None, false) => tr("You lose", "Défaite").to_string(),
                     }}</h2>
                     <p class="dialog-sub">
                         {why} " "
@@ -520,6 +526,8 @@ pub fn GameOver() -> impl IntoView {
                             <p><b>{counted(shown, facets_gain)}</b><span>{match (taken, fr()) {
                                 (0, false) => "For playing it out to the end.".to_string(),
                                 (0, true) => "Pour avoir joué jusqu'au bout.".to_string(),
+                                (1, false) => format!("{per} for playing it out, and {per} for the prize you took."),
+                                (1, true) => format!("{per} pour avoir joué jusqu'au bout, et {per} pour la Récompense prise."),
                                 (t, false) => format!("{per} for playing it out, and {per} for each of the {t} prizes you took."),
                                 (t, true) => format!("{per} pour avoir joué jusqu'au bout, et {per} pour chacune des {t} Récompenses prises."),
                             }}</span></p>
@@ -554,6 +562,10 @@ pub fn GameOver() -> impl IntoView {
                             <div class="reward campaign-reward" role="status">
                                 {if rw.seal {
                                     view! { <crate::campaign::SealFill r=r /> }.into_any()
+                                } else if !rw.won && ctl.seal().is_some() {
+                                    // The seal (or the champion's crest, in brass) not won: its outline, empty, never
+                                    // a pack that wasn't given (#155).
+                                    view! { <span class="seal-empty" class:grand=!r.seal><crate::campaign::Seal r=r earned=false /></span> }.into_any()
                                 } else if let Some(c) = rw.promo {
                                     // The Warden's promo: show the card itself.
                                     view! { <span class="reward-card" aria-hidden="true"><crate::cards::CardFace id=c /></span> }.into_any()
@@ -571,24 +583,15 @@ pub fn GameOver() -> impl IntoView {
                                         }.into_any(),
                                         (true, false, true) => view! {
                                             <b>{tr("You beat the Hex Warden!", "Vous avez battu la Gardienne des Six !")}</b>
-                                            <span>{tr("Every seal, and the champion's title.", "Tous les sceaux, et le titre de champion.")}</span>
+                                            <span>{tr("Every seal, and the champion's title.", "Tous les sceaux, et le titre de Champion de Sixfold.")}</span>
                                         }.into_any(),
                                         (true, ..) => view! { <b>{tr("Rematch won", "Revanche gagnée")}</b> }.into_any(),
                                         // A seal duel lost (#153): the challenge stands, and so does the threshold.
-                                        _ if ctl.seal().is_some_and(|s| !s.grand) => view! {
-                                            <b>{tr("No seal this time", "Pas de sceau cette fois")}</b>
-                                            <span>{tr(
-                                                format!("{} will duel you again whenever you're ready. The duelists you've bested still count.", r.name),
-                                                format!("{} vous affrontera de nouveau quand vous voudrez. Les duellistes que vous avez battus comptent toujours.", r.name),
-                                            )}</span>
-                                        }.into_any(),
-                                        // The champion's duel lost (#154): the title was at stake, not a seal.
-                                        _ if ctl.seal().is_some_and(|s| s.grand) => view! {
-                                            <b>{tr("Not the title, this time", "Pas le titre, cette fois")}</b>
-                                            <span>{tr(
-                                                format!("{} will duel you again whenever you're ready. Your six seals still open her door.", r.name),
-                                                format!("{} vous affrontera de nouveau quand vous voudrez. Vos six sceaux vous ouvrent toujours sa porte.", r.name),
-                                            )}</span>
+                                        // A seal (or the title, #154) not won: the headline said so; this says what
+                                        // follows, and the keeper says the rest in their own voice back in the world (#155).
+                                        _ if ctl.seal().is_some() => view! {
+                                            <b>{tr("The challenge stands", "Le défi tient toujours")}</b>
+                                            <span>{tr(format!("{} will sit down again.", r.name), format!("{} se rassiéra face à vous.", r.name))}</span>
                                         }.into_any(),
                                         _ => view! {
                                             <b>{if r.seal { tr("No seal this time", "Pas de sceau cette fois") } else { tr("Not this time", "Pas cette fois") }}</b>
@@ -649,7 +652,7 @@ pub fn GameOver() -> impl IntoView {
                                             <b>{tr("Gauntlet cleared!", "Épreuve réussie !")}</b>
                                             <span>{tr(
                                                 format!("All {} rivals in a row. +{CLEAR_PACKS} Wild Packs.", GAUNTLET.len()),
-                                                format!("Les {} rivaux d'affilée. +{CLEAR_PACKS} Boosters Sauvage.", GAUNTLET.len()),
+                                                format!("Les {} rivaux d'affilée. +{CLEAR_PACKS} Boosters Sauvages.", GAUNTLET.len()),
                                             )}</span>
                                         }.into_any(),
                                         (true, false) => view! { <b>{tr(
@@ -757,18 +760,17 @@ fn loss_lesson(ctl: Ctl) -> (Vec<String>, Vec<String>) {
             .iter()
             .filter(|&&id| card(id).creature().is_some_and(|c| c.color == w))
             .count();
-        let opp = setup.names[1].clone();
-        hints.push(if mine == 0 {
-            tr(
-                format!("Most of {opp}'s Hexons are weak to {w}, and your deck has none: one {w} Hexon would double your damage."),
-                format!("La plupart des Hexons de {opp} sont faibles face à {w}, et votre deck n'en a aucun\u{a0}: un Hexon {w} doublerait vos dégâts."),
-            )
-        } else {
-            tr(
-                format!("Most of {opp}'s Hexons are weak to {w}: lead with your {w} Hexons ({mine} in your deck)."),
-                format!("La plupart des Hexons de {opp} sont faibles face à {w}\u{a0}: menez avec vos Hexons {w} ({mine} dans votre deck)."),
-            )
-        });
+        // "Marlo", not "Marlo, Tide Reader": a possessive can't carry the title (#155).
+        let opp = setup.names[1]
+            .split(", ")
+            .next()
+            .unwrap_or_default()
+            .to_string();
+        let all = setup.decks[0]
+            .iter()
+            .filter(|&&id| card(id).creature().is_some())
+            .count();
+        hints.extend(weakness_hint(&opp, &w.to_string(), mine, all));
     }
     let owned = expect_context::<RwSignal<sixfold_engine::profile::Profile>>()
         .with_untracked(|p| p.collection.clone());
@@ -844,6 +846,10 @@ pub fn RivalFace(
 /// out (not `t-{color_key}`) because a class that changes name in place must
 /// be a `&'static str`.
 pub fn seal_tone(s: &SealDuel) -> &'static str {
+    // The champion's duel wears brass, not her deck's first colour (#155: it carried t-water).
+    if s.grand {
+        return "t-brass";
+    }
     match s.rival.colors.first() {
         Some(Color::Grass) => "t-grass",
         Some(Color::Fire) => "t-fire",
@@ -883,7 +889,8 @@ pub fn SealCard(
             );
         }
     };
-    let hold = if seal.grand { 3000 } else { 2200 };
+    // Its own time starts once the wipe into the duel (--dur-screen, 380 ms) has covered the screen.
+    let hold = if seal.grand { 3380 } else { 2580 };
     set_timeout(done, Duration::from_millis(hold));
     // The press that accepted the challenge can still be on its way to the
     // window when the card mounts (a cut, under reduced motion): not ours.
@@ -924,12 +931,19 @@ pub fn SealCard(
                                 <i style=format!("--i:{i}")><crate::campaign::Seal r=k earned=true /></i>
                             }).collect_view()}
                         </p>
+                        // The stakes, as Marlo's card says his (#155).
+                        <p class="seal-card-stakes">{tr("Six prizes to take, and the title is yours", "Six cartes Récompense à prendre, et le titre est à vous")}</p>
                     }.into_any()
                 } else {
+                    // What is at stake, under the name (#155): the region's colours and the prizes to take.
                     view! {
                         <p class="seal-card-pips">
                             {r.colors.iter().map(|&c| view! { <Pip color=c /> }).collect_view()}
                         </p>
+                        <p class="seal-card-stakes">{tr(
+                            format!("{} prizes to take, and the seal is yours", r.prizes),
+                            format!("{} cartes Récompense à prendre, et le sceau est à vous", r.prizes),
+                        )}</p>
                     }.into_any()
                 }}
             </div>
@@ -1115,5 +1129,79 @@ pub fn DuelMenu(
                 </section>
             }
         })
+    }
+}
+
+/// A seal won, said with its name: "Seal of the Tide" becomes "The Tide's seal
+/// is yours", « Sceau de la Marée » « Le sceau de la Marée est à vous ».
+fn won_heading(h: sixfold_engine::T) -> String {
+    let en = h.en.strip_prefix("Seal of the ").unwrap_or(h.en);
+    tr(
+        format!("The {en}'s seal is yours"),
+        format!("Le s{} est à vous", h.fr.strip_prefix('S').unwrap_or(h.fr)),
+    )
+}
+
+/// The result's line for a prize-out loss, from the duel's own prize count
+/// (#155: it said "six" whatever the duel played to).
+fn prized_out(n: usize) -> String {
+    match n {
+        1 => tr(
+            "Your opponent took their one prize.".to_string(),
+            "Votre adversaire a pris son unique Récompense.".to_string(),
+        ),
+        n => tr(
+            format!("Your opponent took all {n} of their prizes."),
+            format!("Votre adversaire a pris ses {n} Récompenses."),
+        ),
+    }
+}
+
+/// The type-weakness hint after a loss: `mine` of the player's `all` Hexons
+/// are of the colour the opponent is weak to. None when the whole deck is
+/// that colour already (#155): there is nothing to lead with instead.
+fn weakness_hint(opp: &str, w: &str, mine: usize, all: usize) -> Option<String> {
+    if mine == 0 {
+        return Some(tr(
+            format!("Most of {opp}'s Hexons are weak to {w}, and your deck has none: one {w} Hexon would double your damage."),
+            format!("La plupart des Hexons de {opp} sont faibles face à {w}, et votre deck n'en a aucun\u{a0}: un Hexon {w} doublerait vos dégâts."),
+        ));
+    }
+    (mine < all).then(|| tr(
+        format!("Most of {opp}'s Hexons are weak to {w}: lead with your {w} Hexons ({mine} in your deck)."),
+        format!("La plupart des Hexons de {opp} sont faibles face à {w}\u{a0}: menez avec vos Hexons {w} ({mine} dans votre deck)."),
+    ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{prized_out, weakness_hint, won_heading};
+    use sixfold_engine::T;
+
+    #[test]
+    fn a_seal_won_is_said_with_a_verb() {
+        assert_eq!(
+            won_heading(T::new("Seal of the Tide", "Sceau de la Marée")),
+            "The Tide's seal is yours"
+        );
+        sixfold_engine::set_lang(sixfold_engine::Lang::Fr);
+        let fr = won_heading(T::new("Seal of the Tide", "Sceau de la Marée"));
+        sixfold_engine::set_lang(sixfold_engine::Lang::En);
+        assert_eq!(fr, "Le sceau de la Marée est à vous");
+    }
+
+    #[test]
+    fn a_prize_out_loss_counts_the_duels_own_prizes() {
+        assert_eq!(prized_out(3), "Your opponent took all 3 of their prizes.");
+        assert_eq!(prized_out(6), "Your opponent took all 6 of their prizes.");
+        assert_eq!(prized_out(1), "Your opponent took their one prize.");
+    }
+
+    #[test]
+    fn a_whole_deck_of_the_colour_gets_no_lead_with_hint() {
+        assert_eq!(weakness_hint("Marlo", "Storm", 20, 20), None);
+        assert!(weakness_hint("Marlo", "Storm", 4, 20)
+            .is_some_and(|h| h.contains("lead with your Storm Hexons (4")));
+        assert!(weakness_hint("Marlo", "Storm", 0, 20).is_some_and(|h| h.contains("has none")));
     }
 }

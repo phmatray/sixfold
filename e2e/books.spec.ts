@@ -13,6 +13,8 @@ test("read a book from the duel hall shelf by keyboard", async ({ page }) => {
   await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
   const skip = page.getByRole("button", { name: /^Skip/ });
   await expect(skip).toBeVisible();
+  // A scene ignores a skip in its first 400 ms (#155).
+  await page.waitForTimeout(450);
   await page.keyboard.press("Escape");
   await expect(skip).toBeHidden();
 

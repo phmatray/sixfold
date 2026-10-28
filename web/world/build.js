@@ -30,6 +30,8 @@ const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // p
 const BLOOMS = new Set(["moonflower"]); // with an `open` condition: instanced closed and open, cross-faded (build, refresh)
 const SMOKE = 8;
 // A seal stone's six coloured faces (seal_stone.glb `sx_seal_<colour>`; not its top or body).
+// Its faces at rot 0, clockwise from the front (+z): fire, water, lightning, psychic, fighting, grass; a seal
+// site turns its stone (rot 360 - 60 k) so its own region's face looks at the camera (#155).
 const SEAL_FACE = /seal_(fire|water|lightning|psychic|fighting|grass)$/;
 const CHUNK = 16; // tiles per side of an instanced scenery chunk (culled as one)
 const CLIMB = 0.6; // the most the floor may rise or drop in one step (a cliff edge is more)
@@ -207,7 +209,7 @@ function flatten(template) {
     if (!m.isMesh || !m.visible) return; // a part `recolor` hid
     const rel = new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld);
     // Textured, see-through, `glow` and `glass` parts (lit at night, by name) stay apart.
-    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass/i.test(m.material.name)) return keep.push([m, rel]);
+    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass|shade|bulb/i.test(m.material.name)) return keep.push([m, rel]); // a lamp's lit parts too: a scene dims them (#155)
     const src = m.geometry, n = src.attributes.position.count, c = m.material.color;
     // A seal stone's coloured faces are merged too, their vertices noted (`seal`: world.js wakes them in a scene
     // by recolouring them, which costs no draw call).
@@ -618,6 +620,11 @@ export async function build(map, got, reduced) {
       const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
       glow.position.copy(light.position);
       glow.scale.setScalar(1.3);
+      // Noted so a scene can dim the room round what it shows (world.js `dimLamps`, the door's bells).
+      light.userData.lamp = light.intensity;
+      glow.userData.lamp = glow.material.opacity;
+      // The model's own lit parts (a glow material, kept apart when merged) dim with it.
+      p.obj?.traverse((o) => o.isMesh && /glow|shade|bulb/i.test(o.material?.name ?? "") && o.userData.lamp === undefined && (o.material = o.material.clone(), (o.userData.lamp = o.material.color.clone())));
       root.add(light, glow);
     }
   }
@@ -657,7 +664,8 @@ export async function build(map, got, reduced) {
     return glowAt.get(name);
   };
   const GLIMMER = { floating_lantern: ["#ffc98a", 1.3, 2.6], lantern_raft: ["#ffbcc0", 0.8, 1.1], moonflower: ["#cfdcff", 0.8, 2.2],
-    glow_mushroom: ["#8ff0d8", 0.7, 1.8], glow_mushroom_tall: ["#8ff0d8", 1.1, 2.8], glow_shelf: ["#8ff0d8", 0.8, 2.0] }; // a prop's `glow` overrides the colour
+    glow_mushroom: ["#8ff0d8", 0.7, 1.8], glow_mushroom_tall: ["#8ff0d8", 1.1, 2.8], glow_shelf: ["#8ff0d8", 0.8, 2.0],
+    lava_glass: ["#ff7a2e", 1.6, 3.4] }; // a prop's `glow` overrides the colour; the Kilnmouth's lava glows at night (#155)
   const glimmers = [];
   const spin = (v, deg) => v.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(deg));
   for (const p of props) {

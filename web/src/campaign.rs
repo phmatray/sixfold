@@ -28,7 +28,13 @@ pub fn packs_label(b: usize, n: u32) -> String {
     let name = BOOSTERS[b].name;
     match (n, fr()) {
         (0 | 1, true) => format!("{n} {name}"),
-        (_, true) => format!("{n} {}", name.fr.replacen("Booster", "Boosters", 1)),
+        // "Booster Sauvage" is an adjective, so it agrees; "Booster Marée" names a region and doesn't.
+        (_, true) => format!(
+            "{n} {}",
+            name.fr
+                .replacen("Booster", "Boosters", 1)
+                .replace("Sauvage", "Sauvages")
+        ),
         (1, false) => format!("1 {name}"),
         _ => format!("{n} {name}s"),
     }
@@ -90,7 +96,7 @@ pub fn reward_line(r: &Rival, p: &Progress) -> String {
         ),
         (false, false) => tr(
             format!("First win: the champion's title, {packs}, ⬡ {facets} and the {promo} promo card"),
-            format!("Première victoire : le titre de champion, {packs}, ⬡ {facets} et la carte promo {promo}"),
+            format!("Première victoire : le titre de Champion de Sixfold, {packs}, ⬡ {facets} et la carte promo {promo}"),
         ),
         (true, _) => tr(
             format!("Rematch win: ⬡ {facets}"),
@@ -204,7 +210,8 @@ pub fn Roster() -> impl IntoView {
                         "earning" => {
                             let (n, line) = progress.with(|p| (r.bested(p), r.bested_line(p)));
                             view! {
-                                <span class="ch-temper" aria-hidden="true">
+                                // The challenge sheet's own pips, in the region's colour (#155), never the Temper's.
+                                <span class=format!("ch-earn t-{}", r.colors.first().map_or("colorless", |&c| color_key(c))) aria-hidden="true">
                                     {(0..r.earn).map(|i| view! { <i class:on=i < n></i> }).collect_view()}
                                 </span>
                                 {line}
@@ -547,7 +554,7 @@ fn win_view(w: Win) -> impl IntoView {
         }
         .into_any(),
         Win::Title => view! {
-            <li class="ch-win"><span class="ch-crown" aria-hidden="true"></span>{tr("The champion's title", "Le titre de champion")}</li>
+            <li class="ch-win"><span class="ch-crown" aria-hidden="true"></span>{tr("The champion's title", "Le titre de Champion de Sixfold")}</li>
         }
         .into_any(),
         Win::Packs(label) => view! {
@@ -687,8 +694,11 @@ pub fn Challenge(
         (None, None) => title.to_string(),
     };
     let accepted = accepts();
+    let earning = r.is_some() && open() && !accepted;
     let quote = match r {
-        Some(r) if open() && !accepted => Some(r.lines.refuse.get().to_string()),
+        // Still to earn (#155): the keeper has just said it in the world and the note says what's missing, so
+        // no third refusal in the quote.
+        Some(_) if open() && !accepted => None,
         _ => quote.or_else(|| o.lines.map(|l| l.intro.get().to_string())),
     };
     let (win_label, wins) = progress.with_untracked(|p| winnings(&id, p));
@@ -704,7 +714,8 @@ pub fn Challenge(
         }
     };
     view! {
-        <form class="challenge" on:submit=move |e| { e.prevent_default(); start() } on:keydown=on_key>
+        // Still to earn (#155): what's missing comes right under their words, and the purse is one line.
+        <form class="challenge" class:earning=earning on:submit=move |e| { e.prevent_default(); start() } on:keydown=on_key>
             <header class="ch-head">
                 <span class="ch-frame">
                     {match face {
@@ -724,6 +735,35 @@ pub fn Challenge(
                 </div>
                 {quote.map(|q| view! { <blockquote class="ch-say"><p>{q}</p></blockquote> })}
             </header>
+            // Still to earn (#155): what is missing comes first, on screen and read out first (the dialog's
+            // description is this, then the terms), leading with how many more and where they wait.
+            {r.filter(|_| earning).map(|r| {
+                let (n, wait) = progress.with_untracked(|p| (r.bested(p), r.waiting_line(p).map(|w| format!(" {w}")).unwrap_or_default()));
+                let k = r.earn.saturating_sub(n);
+                let s = if k == 1 { "" } else { "s" };
+                let (en_k, fr_k) = match k {
+                    1 => ("One", "un"),
+                    2 => ("Two", "deux"),
+                    3 => ("Three", "trois"),
+                    4 => ("Four", "quatre"),
+                    _ => ("Several", "plusieurs"),
+                };
+                let of = tr(format!("{n} of {}", r.earn), format!("{n} sur {}", r.earn));
+                // Progress, not an error: the brass note, and pips in the region's colour.
+                let tone = r.colors.first().map_or("colorless", |&c| color_key(c));
+                view! { <div class="ch-note earn" id="ch-earn">
+                    <p>{tr(
+                        format!("{en_k} more {} duelist{s}, and {} will sit down.{wait}", r.region.en.trim_start_matches("the "), r.name),
+                        format!("Encore {fr_k} duelliste{s} {}, et {} s'assiéra face à vous.{wait}", r.region_de(), r.name),
+                    )}</p>
+                    <p class="ch-pips">
+                        <span class=format!("ch-earn t-{tone}") role="img" aria-label=of.clone()>
+                            {(0..r.earn).map(|i| view! { <i class:on=i < n></i> }).collect_view()}
+                        </span>
+                        <b aria-hidden="true">{of}</b>
+                    </p>
+                </div> }
+            })}
             // The dialog's description: what is at stake, read out as it opens.
             <dl class="ch-terms" id="world-sheet-desc">
                 <div class="ch-term">
@@ -748,7 +788,9 @@ pub fn Challenge(
                 <div class="ch-term ch-wins">
                     <dt>{win_label}</dt>
                     <dd>
-                        {if wins.is_empty() {
+                        {if let Some(r) = r.filter(|_| earning) {
+                            view! { <span class="ch-win"><Seal r=r earned=true />{tr(format!("{}'s seal, and more", r.name), format!("Le sceau {}, et plus", de(r.name)))}</span> }.into_any()
+                        } else if wins.is_empty() {
                             view! { <span class="ch-none">{tr("Friendly, no purse", "Amicale, sans bourse")}</span> }.into_any()
                         } else {
                             view! { <ul>{wins.into_iter().map(win_view).collect_view()}</ul> }.into_any()
@@ -762,21 +804,9 @@ pub fn Challenge(
                     format!("{} needs {} before accepting a duel. You hold {held}: beat the rivals of the other regions for theirs.", r.name, seals_n(r.needs)),
                     format!("{} exige {} avant d'accepter un duel. Vous en avez {held}\u{a0}: battez les rivaux des autres régions pour les leurs.", r.name, seals_n(r.needs)),
                 )}</p> }.into_any()
-            } else if let Some(r) = r.filter(|_| !accepted) {
-                let (n, wait) = progress.with_untracked(|p| (r.bested(p), r.waiting_line(p).map(|w| format!(" {w}")).unwrap_or_default()));
-                let of = tr(format!("{n} of {}", r.earn), format!("{n} sur {}", r.earn));
-                view! { <div class="ch-note no">
-                    <p>{tr(
-                        format!("{} wants {} of {}'s duelists bested first. You've bested {n}.{wait}", r.name, r.earn, r.region.en),
-                        format!("{} veut que vous battiez d'abord {} duellistes {}. Vous en avez battu {n}.{wait}", r.name, r.earn, r.region_de()),
-                    )}</p>
-                    <p class="ch-pips">
-                        <span class="ch-temper" role="img" aria-label=of.clone()>
-                            {(0..r.earn).map(|i| view! { <i class:on=i < n></i> }).collect_view()}
-                        </span>
-                        <b aria-hidden="true">{of}</b>
-                    </p>
-                </div> }.into_any()
+            } else if earning {
+                // Said first, above the terms (below).
+                ().into_any()
             } else if playable > 0 {
                 view! {
                     {rule.map(|r| view! {

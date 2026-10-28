@@ -92,17 +92,17 @@
       "rot": 0
     },
     {
-      "asset": "lamp",
-      "x": 1,
-      "z": 5,
-      "rot": 0
-    },
-    {
       "asset": "seal_stone_carved",
       "x": 7,
       "z": 6,
       "rot": 0,
       "if": "beat:warden & flag:sable_door"
+    },
+    {
+      "asset": "seal_door",
+      "x": 0,
+      "z": 6,
+      "rot": 90
     }
   ],
   "spawn": {
@@ -767,7 +767,9 @@
           "do": [
             "music:duel_boss",
             "cam:0:6",
-            "wait:400",
+            "walk:hero:e",
+            "face:hero:w",
+            "wait:200",
             "sfx:bell:0",
             "wait:250",
             "sfx:bell:1",
@@ -779,16 +781,16 @@
             "sfx:bell:4",
             "wait:250",
             "sfx:bell:5",
-            "wait:750"
+            "wait:1400"
           ]
         },
         {
           "say": "sable",
           "lines": [
-            "Six. I heard them all from in here. Come through; the door has waited long enough."
+            "Six. I heard them all from in here. Come through; it's open now."
           ],
           "lines_fr": [
-            "Six. Je les ai tous entendus d'ici. Entre ; la porte a assez attendu."
+            "Six. Je les ai toutes entendues d'ici. Entre ; elle est ouverte, maintenant."
           ]
         },
         {

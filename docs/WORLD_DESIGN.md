@@ -1999,8 +1999,30 @@ I played the design through on paper. Here is what was still hollow, and what th
    !flag:sealed_<id>`, instead of the post-duel line) wakes the stone, lights the keeper's face with the seal's
    sting (`stone:seal:<id>`), flies the seal to the Menu button, and gives the keeper's farewell, at most
    3 600 ms of `wait`, ending on `flag:sealed_<id>`. From then on the stone shows the seals held. A loss is short:
-   the keeper's `lost:` line is kind and says the seal and the region's duelists bested still count, and the
-   result screen says the keeper will duel again (the threshold holds).
+   the keeper's `lost:` line is kind and says the seal and the region's duelists bested still count (the
+   threshold holds); the result screen only says the seal holds, so the reassurance is the keeper's own.
+   *And it holds up to fresh eyes (#155)*: an independent critique of the whole arc (refused, earning, arriving,
+   the entrance, the card, the final beat, the victory or defeat, the Warden), desktop and phone, EN and FR,
+   reduced motion on and off, scored it 31/40; after the fixes (a keeper says "not yet" below the threshold, a
+   bench-out win still plays the seal's beat, the Warden's door is seen and its bells captioned, the felt takes
+   the region's hue, each stone turns its own face to the camera, a reduced-motion cut holds 1.2 s, a seal duel's
+   result speaks the seal's language) a second, stricter one scored it 28/40. Its fixes: every keeper and Sable
+   speak after each loss wherever the duel began (`defeat_<id>`, on enter while `lost:<id>` holds), the champion's
+   table keeps the night felt with brass only on its trim, the refusal leads with what is missing, the challenge
+   opens as the camera returns, and the Journal says who and where, then the keeper. A third scored it 31/40, with
+   nothing serious: its fixes make the Warden escalate (the hero walks in, her stone answers the six bells, her
+   felt carries the six seals that light in turn at the grand beat), let the seal flare on the felt at every
+   keeper's final beat, frame the sealed door with no void and the lamps dimmed, keep captions off what they name,
+   count the prizes a loss really took, and give scenes a lean-in and a letterbox. A fourth scored it 33/40, its
+   one serious finding the sealed door again: the six bells now play close on the medallion (an indoor shot of a
+   place comes in close), the lamp is gone from that wall, the room dims even under reduced motion, and the sixth
+   bell swings the door open with its light. A seal won stamps its colour into the felt and the plaque reads "won";
+   the victory frames stone and hero, and the seal flies from the stone to a seal count in the HUD that stays.
+   A fifth scored it 33/40 with nothing serious: scene shots now lift above the talk box, no area banner covers
+   an arrival's scene, the refusal is read out first, the regional felt has a framed rim, the door sits a third
+   in and holds on the open doorway, and the champion's result says "Champion of Sixfold". A sixth scored it 33/40.
+   Final round: its serious finding (the seal beat's dim animated the felt's rim, flooding the table) is fixed, with
+   the quick ones; the rest is deferred to 1.11. Scores, in order: 31, 28, 31, 33, 33, 33.
 9. **"The economy is a spreadsheet."** Facets with nothing exciting to buy feel like points. *Fixed*: each inn
    stocks one Rare to save up for, the Press can make the one card you need, the voucher is a real prize, and
    outfits give late Facets somewhere to go. The `economy_sim` keeps packs at about one per 12 minutes of

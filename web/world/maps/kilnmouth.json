@@ -5020,6 +5020,20 @@
           ]
         },
         {
+          "if": "open:cinza & !earned:cinza & !beat:cinza",
+          "lines": [
+            "Whoa, not so fast. The kiln only lights for someone the Emberlands know.",
+            "Beat a few of their duelists first. Word runs faster than I do."
+          ],
+          "lines_fr": [
+            "Doucement, pas si vite. Le four ne s'allume que pour quelqu'un que les Braisières connaissent.",
+            "Bats d'abord quelques-uns de leurs duellistes. Les nouvelles courent plus vite que moi."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        },
+        {
           "if": "beat:warden",
           "lines": [
             "The champion, running the kiln road like the rest of us. Ha!",
@@ -5129,6 +5143,8 @@
       "id": "reveal_kilnmouth",
       "if": "!flag:reveal_kilnmouth",
       "on": "enter",
+      "caption": "A seal stone. Cinza keeps the Emberlands' seal here.",
+      "caption_fr": "Une pierre de sceau. Cinza y garde le sceau des Braisières.",
       "steps": [
         {
           "do": [
@@ -5137,6 +5153,7 @@
             "stone:wake",
             "wait:1000",
             "cam:cinza",
+            "face:cinza:hero",
             "wait:800",
             "cam:hero",
             "flag:reveal_kilnmouth"
@@ -5226,14 +5243,16 @@
       "steps": [
         {
           "do": [
+            "walk:hero:s",
             "music:duel_rival_ember",
-            "cam:19:11",
+            "cam:20:13",
             "stone:wake",
             "wait:600",
             "sfx:seal",
             "stone:seal:cinza",
             "wait:1200",
             "face:cinza:hero",
+            "face:hero:cinza",
             "cam:cinza"
           ]
         },
@@ -5241,10 +5260,12 @@
           "say": "cinza",
           "lines": [
             "Hear that? The Ember's face caught, like a kiln on the first cold morning.",
+            "And take Kilnfox. It runs hotter than I do.",
             "Now run. Somebody has to keep that seal warm."
           ],
           "lines_fr": [
             "Tu entends ? La face de la Braise a pris, comme un four le premier matin froid.",
+            "Et prends Fournard. Il chauffe encore plus que moi.",
             "Maintenant, cours. Il faut bien quelqu'un pour garder ce sceau au chaud."
           ]
         },
@@ -5252,6 +5273,38 @@
           "do": [
             "cam:hero",
             "flag:sealed_cinza"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "defeat_cinza",
+      "if": "lost:cinza",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "walk:hero:s",
+            "face:cinza:hero",
+            "face:hero:cinza",
+            "cam:cinza",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "cinza",
+          "lines": [
+            "You kept pace longer than most. Catch your breath.",
+            "The seal isn't going anywhere, and the Emberlands' duelists you've bested still count. Race me again when you're ready."
+          ],
+          "lines_fr": [
+            "Tu as tenu le rythme plus longtemps que la plupart. Reprends ton souffle.",
+            "Le sceau ne bouge pas d'ici, et les duellistes des Braisières que tu as battus comptent toujours. Reviens me défier quand tu veux."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
           ]
         }
       ]

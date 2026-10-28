@@ -87,7 +87,7 @@
       "asset": "seal_stone",
       "x": 22,
       "z": 14,
-      "rot": 0
+      "rot": 180
     },
     {
       "asset": "moonflower",
@@ -1769,6 +1769,20 @@
           ]
         },
         {
+          "if": "open:lumen & !earned:lumen & !beat:lumen",
+          "lines": [
+            "Not yet. The garden doesn't know your steps.",
+            "Duel the Hushlands' duelists first. They whisper to me at night."
+          ],
+          "lines_fr": [
+            "Pas encore. Le jardin ne connaît pas tes pas.",
+            "Affronte d'abord les duellistes des Terres du Murmure. Ils me le murmurent la nuit."
+          ],
+          "do": [
+            "duel:lumen"
+          ]
+        },
+        {
           "if": "!open:lumen",
           "lines": [
             "You look tired. Five seals first, then we'll talk.",
@@ -1886,6 +1900,8 @@
       "id": "reveal_moonwell",
       "if": "!flag:reveal_moonwell",
       "on": "enter",
+      "caption": "A seal stone. Lumen keeps the Hushlands' seal here.",
+      "caption_fr": "Une pierre de sceau. Lumen y garde le sceau des Terres du Murmure.",
       "steps": [
         {
           "do": [
@@ -1894,6 +1910,7 @@
             "stone:wake",
             "wait:1000",
             "cam:lumen",
+            "face:lumen:hero",
             "wait:800",
             "cam:hero",
             "flag:reveal_moonwell"
@@ -1983,14 +2000,16 @@
       "steps": [
         {
           "do": [
+            "walk:hero:e",
             "music:duel_rival_dream",
-            "cam:22:14",
+            "cam:23:15",
             "stone:wake",
             "wait:600",
             "sfx:seal",
             "stone:seal:lumen",
             "wait:1200",
             "face:lumen:hero",
+            "face:hero:lumen",
             "cam:lumen"
           ]
         },
@@ -1998,10 +2017,12 @@
           "say": "lumen",
           "lines": [
             "There. The Dream's face is awake now, and it won't sleep again.",
+            "And Moonmoth. It sings, but only at night.",
             "Neither should you, not yet. The duel hall is waiting."
           ],
           "lines_fr": [
             "Voilà. La face du Songe est éveillée, et elle ne se rendormira plus.",
+            "Et Phalune. Elle chante, mais seulement la nuit.",
             "Toi non plus, pas encore. La salle des duels t'attend."
           ]
         },
@@ -2009,6 +2030,38 @@
           "do": [
             "cam:hero",
             "flag:sealed_lumen"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "defeat_lumen",
+      "if": "lost:lumen",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "walk:hero:e",
+            "face:lumen:hero",
+            "face:hero:lumen",
+            "cam:lumen",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "lumen",
+          "lines": [
+            "Sweet dreams. You were nearly there.",
+            "The seal will keep until you wake, and the Hushlands' duelists you've bested still count."
+          ],
+          "lines_fr": [
+            "Fais de beaux rêves. Tu y étais presque.",
+            "Le sceau t'attendra à ton réveil, et les duellistes des Terres du Murmure que tu as battus comptent toujours."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
           ]
         }
       ]

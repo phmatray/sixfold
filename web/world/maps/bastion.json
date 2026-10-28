@@ -133,7 +133,7 @@
       "asset": "seal_stone",
       "x": 19,
       "z": 3,
-      "rot": 0,
+      "rot": 120,
       "y": 4
     },
     {
@@ -2179,6 +2179,20 @@
           ]
         },
         {
+          "if": "open:orla & !earned:orla & !beat:orla",
+          "lines": [
+            "Not on my quarry floor. Nobody's vouched for you yet.",
+            "Put in some shifts against the Stonebacks' duelists. The crews will tell me."
+          ],
+          "lines_fr": [
+            "Pas sur mon chantier. Personne ne s'est encore porté garant de toi.",
+            "Fais quelques quarts contre les duellistes des Échines de Pierre. Les équipes me le diront."
+          ],
+          "do": [
+            "duel:orla"
+          ]
+        },
+        {
           "if": "!open:orla",
           "lines": [
             "Not yet. This stone only listens to someone carrying three seals.",
@@ -2285,6 +2299,8 @@
       "id": "reveal_bastion",
       "if": "!flag:reveal_bastion",
       "on": "enter",
+      "caption": "A seal stone. Orla keeps the Stonebacks' seal here.",
+      "caption_fr": "Une pierre de sceau. Orla y garde le sceau des Échines de Pierre.",
       "steps": [
         {
           "do": [
@@ -2293,6 +2309,7 @@
             "stone:wake",
             "wait:1000",
             "cam:orla",
+            "face:orla:hero",
             "wait:800",
             "cam:hero",
             "flag:reveal_bastion"
@@ -2390,14 +2407,16 @@
       "steps": [
         {
           "do": [
+            "walk:hero:s",
             "music:duel_rival_stone",
-            "cam:19:3",
+            "cam:20:5",
             "stone:wake",
             "wait:600",
             "sfx:seal",
             "stone:seal:orla",
             "wait:1200",
             "face:orla:hero",
+            "face:hero:orla",
             "cam:orla"
           ]
         },
@@ -2405,10 +2424,12 @@
           "say": "orla",
           "lines": [
             "The Stone's face took it. Cut that deep, a light doesn't wear off.",
+            "Slatebrow too. Built like my site hut, and twice as stubborn.",
             "Mind the gravel on your way down."
           ],
           "lines_fr": [
             "La face du Roc l'a pris. Taillée aussi profond, une lumière ne s'use pas.",
+            "Ardoisfront aussi. Bâti comme ma cabane de chantier, et deux fois plus têtu.",
             "Attention au gravier en descendant."
           ]
         },
@@ -2416,6 +2437,38 @@
           "do": [
             "cam:hero",
             "flag:sealed_orla"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "defeat_orla",
+      "if": "lost:orla",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "walk:hero:s",
+            "face:orla:hero",
+            "face:hero:orla",
+            "cam:orla",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "orla",
+          "lines": [
+            "Good swings. The rock just held, this time.",
+            "The seal stays in the stone, and the Stonebacks' duelists you've bested still count. Come back with a sharper pick."
+          ],
+          "lines_fr": [
+            "Bons coups. La roche a juste tenu, cette fois.",
+            "Le sceau reste dans la pierre, et les duellistes des Échines de Pierre que tu as battus comptent toujours. Reviens avec une pioche plus affûtée."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
           ]
         }
       ]

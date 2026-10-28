@@ -76,6 +76,12 @@
       "x": 5,
       "z": 7,
       "rot": 0
+    },
+    {
+      "asset": "seal_stone",
+      "x": 6,
+      "z": 1,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -174,14 +180,14 @@
         {
           "if": "seals:6 & !beat:warden & !flag:met_warden",
           "lines": [
-            "Six seals. I heard every one of them ring, from the first to the last.",
-            "What is at stake here is no seal, but the title: Champion of Sixfold.",
-            "Welcome, then. Six prizes. Show me what the keepers taught you."
+            "So you're the one who rang them. Sit; this table has waited a long time.",
+            "No seal on this table. Only the title: Champion of Sixfold.",
+            "Six prizes. Show me what the keepers taught you."
           ],
           "lines_fr": [
-            "Six sceaux. Je les ai tous entendus sonner, du premier au dernier.",
-            "Ici, ce n'est plus un sceau qui se joue, mais le titre : champion de Sixfold.",
-            "Bienvenue, alors. Six cartes Récompense. Montre-moi ce que les gardiens t'ont appris."
+            "C'est donc toi qui les as fait sonner. Assieds-toi ; cette table attend depuis longtemps.",
+            "Pas de sceau sur cette table. Seulement le titre : Champion de Sixfold.",
+            "Six cartes Récompense. Montre-moi ce que les gardiens t'ont appris."
           ],
           "do": [
             "flag:met_warden",
@@ -234,15 +240,15 @@
     "clamp": true
   },
   "ground": {
-    "base": "wood_floor",
-    "path": "wood_floor",
+    "base": "slate",
+    "path": "slate",
     "margin": 0
   },
   "light": {
     "indoor": true,
     "sun": {
       "color": "#e6dcff",
-      "intensity": 1.3,
+      "intensity": 1.0,
       "fromHero": [
         6,
         10,
@@ -252,11 +258,11 @@
     "hemisphere": {
       "sky": "#d9c9ff",
       "ground": "#3a2a4a",
-      "intensity": 1.4
+      "intensity": 1.0
     },
     "lamp": {
       "color": "#c9a2ff",
-      "intensity": 6,
+      "intensity": 7,
       "distance": 7
     },
     "background": "#130e1c"
@@ -301,7 +307,7 @@
           ],
           "lines_fr": [
             "Tous les rivaux de la région ont appris de moi, ou ont essayé. À partir d'aujourd'hui, c'est de toi qu'ils apprendront.",
-            "La salle t'attend. Va leur montrer leur nouveau champion."
+            "La salle t'attend. Va leur montrer qui tient le titre."
           ]
         },
         {
@@ -316,6 +322,36 @@
       ]
     },
     {
+      "id": "defeat_warden",
+      "if": "lost:warden",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "face:warden:hero",
+            "cam:warden",
+            "wait:300"
+          ]
+        },
+        {
+          "say": "warden",
+          "lines": [
+            "That was a champion's duel, and you held your own in it.",
+            "Rest, look over your deck. My door stays open, and so does my chair."
+          ],
+          "lines_fr": [
+            "C'était un duel de champion, et tu as tenu bon.",
+            "Repose-toi, revois ton deck. Ma porte reste ouverte, et mon fauteuil aussi."
+          ]
+        },
+        {
+          "do": [
+            "cam:hero"
+          ]
+        }
+      ]
+    },
+    {
       "id": "entrance_warden",
       "if": "seals:6 & !beat:warden & !flag:met_warden",
       "on": "enter",
@@ -323,21 +359,37 @@
         {
           "do": [
             "music:duel_boss",
+            "walk:hero:nn",
+            "cam:6:1",
+            "wait:200",
+            "sfx:bell:0",
+            "wait:220",
+            "sfx:bell:1",
+            "wait:220",
+            "sfx:bell:2",
+            "wait:220",
+            "sfx:bell:3",
+            "wait:220",
+            "sfx:bell:4",
+            "wait:220",
+            "sfx:bell:5",
+            "wait:220",
+            "wait:300",
             "cam:warden",
-            "wait:800"
+            "wait:500"
           ]
         },
         {
           "say": "warden",
           "lines": [
-            "Six seals. I heard every one of them ring, from the first to the last.",
-            "What is at stake here is no seal, but the title: Champion of Sixfold.",
-            "Welcome, then. Six prizes. Show me what the keepers taught you."
+            "So you're the one who rang them. Sit; this table has waited a long time.",
+            "No seal on this table. Only the title: Champion of Sixfold.",
+            "Six prizes. Show me what the keepers taught you."
           ],
           "lines_fr": [
-            "Six sceaux. Je les ai tous entendus sonner, du premier au dernier.",
-            "Ici, ce n'est plus un sceau qui se joue, mais le titre : champion de Sixfold.",
-            "Bienvenue, alors. Six cartes Récompense. Montre-moi ce que les gardiens t'ont appris."
+            "C'est donc toi qui les as fait sonner. Assieds-toi ; cette table attend depuis longtemps.",
+            "Pas de sceau sur cette table. Seulement le titre : Champion de Sixfold.",
+            "Six cartes Récompense. Montre-moi ce que les gardiens t'ont appris."
           ]
         },
         {
