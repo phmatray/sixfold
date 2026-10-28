@@ -539,7 +539,8 @@ pub fn DayDial(#[prop(optional)] full: bool) -> impl IntoView {
         <span class="day-dial" data-phase=move || phase.get().name() title=label role="img" aria-label=label>
             <svg viewBox="0 0 24 24" aria-hidden="true">
                 <g class="sun"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" /></g>
-                <path class="moon" d="M15.5 3.8a8.4 8.4 0 1 0 4.7 13.6 6.6 6.6 0 1 1-4.7-13.6Z" />
+                // A full moon with its seas, not a crescent: no shape that reads as a faith's symbol.
+                <g class="moon"><circle cx="12" cy="12" r="7.6" /><circle class="sea" cx="9.4" cy="10" r="1.9" /><circle class="sea" cx="14.2" cy="14.4" r="1.3" /><circle class="sea" cx="14.6" cy="8.6" r="0.9" /></g>
             </svg>
             <span class="day-dial-name" class:sr-only=!full>{move || phase.get().label()}</span>
             {full.then(|| view! { <span class="day-dial-time">{move || clock::hhmm(hour.get())}</span> })}

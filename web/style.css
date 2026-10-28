@@ -3162,6 +3162,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .day-dial .sun circle { fill: var(--sun); stroke: var(--sun-edge); stroke-width: 1.2; }
 .day-dial .sun path { fill: none; stroke: var(--sun); stroke-width: 1.8; stroke-linecap: round; }
 .day-dial .moon { fill: #d7defa; stroke: #8f9fd6; stroke-width: 1; display: none; }
+.day-dial .moon .sea { fill: #b4bfe6; stroke: none; }
 .day-dial[data-phase="dawn"] { --sun: #ffc0a8; --sun-edge: #e8846a; }
 .day-dial[data-phase="dusk"] { --sun: #ff9e6b; --sun-edge: #d0603a; }
 .day-dial[data-phase="dawn"] .sun, .day-dial[data-phase="dusk"] .sun { transform: translateY(3px); }
