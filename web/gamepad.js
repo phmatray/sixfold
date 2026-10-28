@@ -90,12 +90,14 @@ export function label(device, action, fr, binds = { keys: KEY_DEFAULTS, pad: PAD
     if (action === "walk") return t("Stick or D-pad", "Stick ou croix");
     if (action === "confirm") action = "act";
     const b = binds.pad[action];
+    if (b < 0) return t("unbound", "non assigné");
     return PAD_NAMES[b] ?? t(`Button ${b}`, `Bouton ${b}`);
   }
   if (device !== "keys") return "";
   if (action === "walk") return t("Arrows or WASD", "Flèches ou ZQSD");
   if (action === "confirm") return t("Enter", "Entrée");
   const k = binds.keys[action];
+  if (!k) return t("unbound", "non assigné");
   return KEY_NAMES[k]?.[fr ? 1 : 0] ?? (k.length === 1 ? k.toUpperCase() : k);
 }
 
@@ -297,17 +299,24 @@ function onKey(e) {
   if (to) send(e.type, to, e.repeat, e.target);
 }
 
+/** Lay saved bindings over `binds`. Controls saved before the camera action existed can already use its
+ *  default (C, R3) for another action: the saved one wins and the camera is left unbound (#184). */
+export function applySaved(binds, saved) {
+  // Only well-typed values: a broken entry must not break every prompt.
+  for (const a of ACTIONS) {
+    if (typeof saved?.keys?.[a] === "string" && saved.keys[a]) binds.keys[a] = saved.keys[a];
+    if (Number.isInteger(saved?.pad?.[a])) binds.pad[a] = saved.pad[a];
+  }
+  if (!saved?.keys?.camera && ACTIONS.some((a) => a !== "camera" && norm(binds.keys[a]) === norm(binds.keys.camera))) binds.keys.camera = "";
+  if (!Number.isInteger(saved?.pad?.camera) && ACTIONS.some((a) => a !== "camera" && binds.pad[a] === binds.pad.camera)) binds.pad.camera = -1;
+}
+
 /** Install the layer (once): listeners, saved bindings, the first device guess. */
 export function start() {
   if (started) return;
   started = true;
   try {
-    const saved = JSON.parse(localStorage.getItem(STORE) ?? "{}");
-    // Only well-typed values: a broken entry must not break every prompt.
-    for (const a of ACTIONS) {
-      if (typeof saved.keys?.[a] === "string" && saved.keys[a]) binds.keys[a] = saved.keys[a];
-      if (Number.isInteger(saved.pad?.[a])) binds.pad[a] = saved.pad[a];
-    }
+    applySaved(binds, JSON.parse(localStorage.getItem(STORE) ?? "{}"));
   } catch {}
   device = matchMedia("(pointer: coarse)").matches ? "touch" : "keys";
   document.documentElement.dataset.input = device;
