@@ -314,8 +314,8 @@ pub fn craft_with_voucher(
 mod tests {
     use super::*;
     use crate::campaign::{record, rival, CONSOLATION_PER_PRIZE, RIVAL_PURSE, WARDEN_PURSE};
+    use crate::duelists::{DUELISTS, PURSE_BASE, PURSE_PER_PRIZE};
     use crate::set::*;
-    use crate::trainers::{PURSE_BASE, PURSE_PER_PRIZE, TRAINERS};
 
     fn rich() -> (Progress, Profile) {
         let mut p = Progress::default();
@@ -551,7 +551,7 @@ mod tests {
     #[test]
     fn economy_sim() {
         let mut first = vec![];
-        first.extend(TRAINERS.iter().filter(|t| !t.story()).map(|t| Source {
+        first.extend(DUELISTS.iter().filter(|t| !t.story()).map(|t| Source {
             minutes: 5,
             facets: t.purse(),
             packs: 0,
@@ -559,7 +559,7 @@ mod tests {
         // 1.7 Rook's four scenes (§8.2), each played once whatever the result:
         // a minute's scene and two minutes a prize; a first playthrough wins
         // about half of them (the purse), and a loss pays the consolation.
-        first.extend(TRAINERS.iter().filter(|t| t.story()).map(|t| Source {
+        first.extend(DUELISTS.iter().filter(|t| t.story()).map(|t| Source {
             minutes: 1 + 2 * u32::from(t.prizes),
             facets: (t.purse() + 4 * CONSOLATION_PER_PRIZE) / 2,
             packs: 0,
@@ -595,7 +595,7 @@ mod tests {
                 packs,
             });
         }
-        // 1.3 Ember and Storm (§10.1-10.2): their duelists come with TRAINERS above;
+        // 1.3 Ember and Storm (§10.1-10.2): their duelists come with DUELISTS above;
         // their Facet finds (e_pond 60, e_vent_w 100, e_quarry_nook 80, st_wall 50,
         // st_cliff 40, st_dock 60) and two pack finds (e_rim, st_islet), over five
         // outdoor maps and four houses; the Lantern quest's errand (three shards on
@@ -646,7 +646,7 @@ mod tests {
             "three_seals",
             "all_seals",
             "champion",
-            "trainers_10",
+            "duelists_10",
             "finds_10",
             "cards_50",
             "packs_25",

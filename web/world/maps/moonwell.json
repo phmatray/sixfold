@@ -1573,7 +1573,7 @@
       "z": 9,
       "facing": "s",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Hold still! There's a moth on your shoulder. A rare one. Oh, it's gone.",
@@ -1613,7 +1613,7 @@
       "z": 14,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "Sit. Tell me what you dreamed last night. No? Then let the cards dream for you.",

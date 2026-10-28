@@ -54,7 +54,7 @@ def contact(names, dst, cols=4, tw=400, th=280, label=30):
 
 
 def sheets(cfg):
-    """One sheet per group in prompts.json (`_groups`: colour lines in evolution order, trainers, energy)."""
+    """One sheet per group in prompts.json (`_groups`: colour lines in evolution order, Gear cards, energy)."""
     for group, names in cfg["_groups"].items():
         contact(names, OUT / f"contact-{group}.png")
         print(f"contact: {OUT / f'contact-{group}.png'}")

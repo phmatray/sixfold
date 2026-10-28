@@ -18,8 +18,8 @@ pub struct InPlay {
     /// Remaining HP (R-DMG-06): knocked out exactly at 0.
     pub hp: u16,
     pub energy: Vec<CardId>,
-    /// Attached trainer cards: the +10 / −20 trainers (R-TRAINER-05).
-    pub trainers: Vec<CardId>,
+    /// Attached Gear cards: the +10 / −20 Gear cards (R-GEAR-05).
+    pub gears: Vec<CardId>,
     /// In play since the start of its owner's turn, so it may evolve (R-EVO-02/03).
     pub settled: bool,
     /// Once-per-turn Power already used this turn (R-POWER-04).
@@ -39,7 +39,7 @@ impl InPlay {
             stack: vec![id],
             hp,
             energy: vec![],
-            trainers: vec![],
+            gears: vec![],
             settled: false,
             power_used: false,
             once_used: false,
@@ -55,12 +55,12 @@ impl InPlay {
         self.color_override = None;
     }
 
-    /// Attached trainers whose effect is `kind` (`AttachPlus10` / `AttachMinus20`).
+    /// Attached Gear cards whose effect is `kind` (`AttachPlus10` / `AttachMinus20`).
     pub fn attached(&self, kind: Effect) -> usize {
-        self.trainers
+        self.gears
             .iter()
             .filter(|&&id| match &card(id).kind {
-                CardKind::Trainer(t) => t.effects.contains(&kind),
+                CardKind::Gear(t) => t.effects.contains(&kind),
                 _ => false,
             })
             .count()
@@ -84,8 +84,8 @@ impl InPlay {
         energy_units(&self.energy)
     }
 
-    pub fn is_trainer_basic(&self) -> bool {
-        matches!(card(self.top()).kind, CardKind::TrainerBasic(_))
+    pub fn is_gear_basic(&self) -> bool {
+        matches!(card(self.top()).kind, CardKind::GearBasic(_))
     }
 }
 
@@ -103,8 +103,8 @@ pub(crate) struct Player {
     pub bench: Vec<InPlay>,
     pub condition: Condition,
     pub effects: ActiveEffects,
-    /// R-TRAINER-04: can't play trainers until the end of this player's turn.
-    pub trainer_locked: bool,
+    /// R-GEAR-04: can't play Gear cards until the end of this player's turn.
+    pub gear_locked: bool,
 }
 
 impl Player {
@@ -184,11 +184,11 @@ impl Player {
 
     /// R-ZONE-05: a creature leaves play with every card in its slot.
     /// RULES: R-ZONE-05 — the order within one knock-out is not a rule (the
-    /// source uses deck-index order); here: stack, then energy, then trainers.
+    /// source uses deck-index order); here: stack, then energy, then Gear cards.
     pub fn discard_creature(&mut self, c: InPlay) {
         self.discard.extend(c.stack);
         self.discard.extend(c.energy);
-        self.discard.extend(c.trainers);
+        self.discard.extend(c.gears);
     }
 }
 

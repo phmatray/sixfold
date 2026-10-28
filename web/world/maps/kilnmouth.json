@@ -4867,7 +4867,7 @@
       "z": 7,
       "facing": "w",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "You came down the spiral? Then you can take some heat.",
@@ -4907,7 +4907,7 @@
       "z": 15,
       "facing": "w",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Every speck of this ash was a kiln once. I sift it for what's left.",
@@ -4947,7 +4947,7 @@
       "z": 3,
       "facing": "w",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 5,
         "challenge": [
           "You're on my rim at night. Nobody's on my rim at night.",

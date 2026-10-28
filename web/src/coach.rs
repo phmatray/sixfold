@@ -39,7 +39,7 @@ fn target(l: &Lesson, g: &Game, selected: Option<CardId>) -> Option<String> {
     let a = l.action?;
     Some(match (tutorial::hand_of(a), a) {
         // The card is held: its glowing target on the table, or the duel
-        // line's Play button for a trainer.
+        // line's Play button for a Gear card.
         (Some(h), _) if selected.is_some() && selected == g.view(HUMAN).hand.get(h).copied() => {
             ".half.me .target .hexon-card, .half.me .spot.target, .seam .play".into()
         }

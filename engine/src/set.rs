@@ -1,4 +1,4 @@
-//! The original card set: lines of creatures in every colour, trainers and
+//! The original card set: lines of creatures in every colour, Gear cards and
 //! energy, played through the prebuilt decks in [`crate::decks`].
 //!
 //! `CardId(n)` is the index into [`CARDS`]; keep the constants below in the
@@ -8,9 +8,9 @@
 use crate::card::{
     Attack, CardDef, CardId, CardKind,
     Color::*,
-    Creature, EnergyCard, Power, PowerKind, Rarity,
+    Creature, EnergyCard, Gear, Power, PowerKind, Rarity,
     Rarity::{Common, Rare, Uncommon},
-    Stage, Trainer,
+    Stage,
 };
 use crate::condition::{Placed, Shield, Status};
 use crate::effect::{Effect::*, Find};
@@ -33,7 +33,7 @@ pub const WISPELLE: CardId = CardId(12);
 pub const GLIMMOX: CardId = CardId(13);
 // Shared
 pub const SCAMPIT: CardId = CardId(14);
-// Trainers
+// Gear
 pub const TRAIL_COMPASS: CardId = CardId(15);
 pub const LUCKY_SATCHEL: CardId = CardId(16);
 pub const MOSS_POULTICE: CardId = CardId(17);
@@ -175,7 +175,7 @@ const fn creature(name: &'static str, rarity: Rarity, c: Creature) -> CardDef {
     }
 }
 
-const fn trainer(
+const fn gear(
     name: &'static str,
     rarity: Rarity,
     text: &'static str,
@@ -184,7 +184,7 @@ const fn trainer(
     CardDef {
         name,
         rarity,
-        kind: CardKind::Trainer(Trainer { text, effects }),
+        kind: CardKind::Gear(Gear { text, effects }),
     }
 }
 
@@ -317,8 +317,8 @@ pub static CARDS: &[CardDef] = &[
             Attack { name: "Bubble Spit", text: "Flip a coin. If heads, the defending Hexon is now Paralyzed.",
                      cost: &[Water], damage: 10,
                      effects: &[Inflict { status: Status::Paralyzed, coin: true }] },
-            Attack { name: "Silt Cloud", text: "Your opponent can't play trainer cards during their next turn.",
-                     cost: &[Water, Colorless], damage: 10, effects: &[TrainerLock] },
+            Attack { name: "Silt Cloud", text: "Your opponent can't play Gear cards during their next turn.",
+                     cost: &[Water, Colorless], damage: 10, effects: &[GearLock] },
         ],
         power: None,
     }),
@@ -421,30 +421,30 @@ pub static CARDS: &[CardDef] = &[
             kind: PowerKind::Activated { effects: &[Draw(1)], once_per_turn: true, settled_only: true },
         }),
     }),
-    // ----- Trainers -----
-    trainer("Trail Compass", Uncommon,
+    // ----- Gear -----
+    gear("Trail Compass", Uncommon,
             "Search your deck for a Basic Hexon card, put it into your hand, then shuffle your deck.",
             &[Search(Find::Basic)]),
-    trainer("Lucky Satchel", Uncommon, "Draw 2 cards.", &[Draw(2)]),
-    trainer("Moss Poultice", Common, "Remove up to 30 damage from your Active Hexon.", &[Heal(30)]),
-    trainer("Clearwater Vial", Common, "Your Active Hexon recovers from all conditions.", &[Cure { both: false }]),
-    trainer("Relay Baton", Common, "Switch your Active Hexon with 1 of your Benched Hexons.", &[SwitchSelf]),
-    trainer("Snare Hook", Rare,
+    gear("Lucky Satchel", Uncommon, "Draw 2 cards.", &[Draw(2)]),
+    gear("Moss Poultice", Common, "Remove up to 30 damage from your Active Hexon.", &[Heal(30)]),
+    gear("Clearwater Vial", Common, "Your Active Hexon recovers from all conditions.", &[Cure { both: false }]),
+    gear("Relay Baton", Common, "Switch your Active Hexon with 1 of your Benched Hexons.", &[SwitchSelf]),
+    gear("Snare Hook", Rare,
             "Choose 1 of your opponent's Benched Hexons and switch it with their Active Hexon.",
             &[SwitchDefender { chooser_is_attacker: true }]),
-    trainer("Drain Brush", Rare, "Discard 1 energy card attached to your opponent's Active Hexon.",
+    gear("Drain Brush", Rare, "Discard 1 energy card attached to your opponent's Active Hexon.",
             &[DiscardDefenderEnergy]),
-    trainer("Spike Charm", Uncommon, "Attach to your Active Hexon. Its attacks do 10 more damage this turn.",
+    gear("Spike Charm", Uncommon, "Attach to your Active Hexon. Its attacks do 10 more damage this turn.",
             &[AttachPlus10]),
-    trainer("Bark Shield", Uncommon,
+    gear("Bark Shield", Uncommon,
             "Attach to 1 of your Hexons. It takes 20 less damage from attacks until the end of your opponent's next turn.",
             &[AttachMinus20]),
-    trainer("Recall Horn", Uncommon, "Put a Hexon card from your discard pile into your hand.",
+    gear("Recall Horn", Uncommon, "Put a Hexon card from your discard pile into your hand.",
             &[Recover(Find::Creature)]),
-    trainer("Bloom Seed", Rare,
+    gear("Bloom Seed", Rare,
             "Put an Awaken 2 Hexon card from your hand onto the matching Basic Hexon in play. The Basic must have been in play since the start of your turn.",
             &[StageSkip]),
-    trainer("Unwind Spray", Rare,
+    gear("Unwind Spray", Rare,
             "Your opponent's awakened Active Hexon returns to its previous stage. Put the top card into your opponent's hand.",
             &[Devolve]),
     // ----- Energy -----
@@ -1044,32 +1044,32 @@ pub static CARDS: &[CardDef] = &[
         ],
         power: None,
     }),
-    // ----- Trainers -----
-    trainer("Dowsing Rod", Common,
+    // ----- Gear -----
+    gear("Dowsing Rod", Common,
             "Search your deck for a basic energy card, put it into your hand, then shuffle your deck.",
             &[Search(Find::BasicEnergy)]),
-    trainer("Field Guide", Uncommon,
+    gear("Field Guide", Uncommon,
             "Search your deck for a Hexon card, put it into your hand, then shuffle your deck.",
             &[Search(Find::Creature)]),
-    trainer("Ash Sifter", Common, "Put a basic energy card from your discard pile into your hand.",
+    gear("Ash Sifter", Common, "Put a basic energy card from your discard pile into your hand.",
             &[Recover(Find::BasicEnergy)]),
-    trainer("Scrap Ledger", Uncommon, "Put a trainer card from your discard pile into your hand.",
-            &[Recover(Find::Trainer)]),
-    trainer("Clean Slate", Rare, "Discard your hand, then draw 7 cards.", &[DiscardHand, Draw(7)]),
-    trainer("Grove Balm", Uncommon, "Remove up to 20 damage from each of your Hexons.", &[HealAll(20)]),
-    trainer("Charge Coil", Rare,
+    gear("Scrap Ledger", Uncommon, "Put a Gear card from your discard pile into your hand.",
+            &[Recover(Find::Gear)]),
+    gear("Clean Slate", Rare, "Discard your hand, then draw 7 cards.", &[DiscardHand, Draw(7)]),
+    gear("Grove Balm", Uncommon, "Remove up to 20 damage from each of your Hexons.", &[HealAll(20)]),
+    gear("Charge Coil", Rare,
             "Search your deck for a basic energy card and attach it to your Active Hexon, then shuffle your deck.",
             &[AttachFromDeck(Colorless)]),
-    trainer("Jolt Wire", Rare, "Do 20 damage to 1 of your opponent's Hexons.", &[Snipe(20)]),
-    trainer("Static Net", Common, "Your opponent's Active Hexon can't retreat during their next turn.",
+    gear("Jolt Wire", Rare, "Do 20 damage to 1 of your opponent's Hexons.", &[Snipe(20)]),
+    gear("Static Net", Common, "Your opponent's Active Hexon can't retreat during their next turn.",
             &[Place { placed: Placed::CantRetreat, coin: false }]),
-    trainer("Smoke Pellet", Uncommon,
+    gear("Smoke Pellet", Uncommon,
             "During your opponent's next turn, their Active Hexon must flip heads to attack.",
             &[Place { placed: Placed::Accuracy, coin: false }]),
-    trainer("Venom Dart", Uncommon, "Flip a coin. If heads, your opponent's Active Hexon is now Poisoned.",
+    gear("Venom Dart", Uncommon, "Flip a coin. If heads, your opponent's Active Hexon is now Poisoned.",
             &[Inflict { status: Status::Poisoned, coin: true }]),
-    trainer("Wide Satchel", Rare, "Draw 3 cards.", &[Draw(3)]),
-    trainer("Hearty Broth", Uncommon, "Remove up to 50 damage from your Active Hexon.", &[Heal(50)]),
+    gear("Wide Satchel", Rare, "Draw 3 cards.", &[Draw(3)]),
+    gear("Hearty Broth", Uncommon, "Remove up to 50 damage from your Active Hexon.", &[Heal(50)]),
     // ----- Promos (campaign rewards; see PROMOS) -----
     creature("Thistlewick", Rare, Creature {
         stage: Stage::Basic, evolves_from: None, hp: 70, color: Grass,
@@ -1199,16 +1199,16 @@ mod tests {
         }
     }
 
-    /// The 0.4.0 set: about 70 creatures, 25 trainers, 6 basic energies and
+    /// The 0.4.0 set: about 70 creatures, 25 Gear cards, 6 basic energies and
     /// the special energy; at least 9 creatures per colour.
     #[test]
     fn set_size_by_kind() {
         let creatures = CARDS.iter().filter(|c| c.creature().is_some()).count();
-        let trainers = CARDS
+        let gears = CARDS
             .iter()
-            .filter(|c| matches!(c.kind, CardKind::Trainer(_)))
+            .filter(|c| matches!(c.kind, CardKind::Gear(_)))
             .count();
-        assert_eq!((creatures, trainers, CARDS.len()), (78, 25, 110));
+        assert_eq!((creatures, gears, CARDS.len()), (78, 25, 110));
         for color in crate::Color::ALL {
             let n = CARDS
                 .iter()
@@ -1364,7 +1364,7 @@ mod tests {
 /// The value budget (`docs/BALANCE.md`, "Value budget"): every creature is
 /// scored in damage-equivalents (10 = 10 damage = 10 HP) against the curve
 /// for its stage, so a new or changed card can't drift off the curve. The
-/// deck builder ranks Hexons and trainers with it too.
+/// deck builder ranks Hexons and Gear cards with it too.
 #[cfg_attr(not(test), allow(dead_code))]
 pub(crate) mod budget {
     use super::*;
@@ -1438,7 +1438,7 @@ pub(crate) mod budget {
                 },
                 *c,
             ),
-            DisableAttack | TrainerLock | DefenderWeakness(_) => 10,
+            DisableAttack | GearLock | DefenderWeakness(_) => 10,
             DiscardEnergy { count, .. } => -10 * i32::from(*count),
             DiscardAllEnergy | OnceWhileInPlay => -30,
             DiscardDefenderEnergy | AttachFromDeck(_) => 20,

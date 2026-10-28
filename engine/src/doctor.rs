@@ -43,8 +43,8 @@ pub enum Issue {
     BrokenLine(CardId),
     /// Attacks cost this colour and the deck has no energy of it.
     NoEnergyFor(Color),
-    /// No draw or search trainer, though the collection holds one.
-    NoDrawTrainers,
+    /// No draw or search Gear, though the collection holds one.
+    NoDrawGear,
     /// This many creature colours.
     TooManyColours(usize),
     /// More copies of this evolution than of what it evolves from.
@@ -111,9 +111,9 @@ impl Advice {
                 format!("Some attacks need {c} energy, and the deck has none."),
                 format!("Certaines attaques demandent de l'énergie {c}, et le deck n'en a aucune."),
             ),
-            Issue::NoDrawTrainers => tr(
-                format!("No draw or search trainers: a {} or a {} would keep your hand full.", label(LUCKY_SATCHEL), label(TRAIL_COMPASS)),
-                format!("Aucune carte Dresseur de pioche ou de recherche\u{a0}: {} ou {} garderait votre main pleine.", label(LUCKY_SATCHEL), label(TRAIL_COMPASS)),
+            Issue::NoDrawGear => tr(
+                format!("No draw or search Gear cards: a {} or a {} would keep your hand full.", label(LUCKY_SATCHEL), label(TRAIL_COMPASS)),
+                format!("Aucune carte Objet de pioche ou de recherche\u{a0}: {} ou {} garderait votre main pleine.", label(LUCKY_SATCHEL), label(TRAIL_COMPASS)),
             ),
             Issue::TooManyColours(n) => tr(
                 format!("{n} colours is a lot to power. Two is easier."),
@@ -185,13 +185,13 @@ impl Chart<'_> {
     }
 
     /// What the deck can best spare: a basic energy while it has plenty, else
-    /// its most-copied trainer.
+    /// its most-copied Gear.
     fn spare(&self) -> Option<CardId> {
         let energy = self.cards().filter(|c| c.is_basic_energy()).count();
         if energy > *ENERGY.start() + 2 {
             return self.most(CardDef::is_basic_energy);
         }
-        self.most(|c| matches!(c.kind, CardKind::Trainer(_)))
+        self.most(|c| matches!(c.kind, CardKind::Gear(_)))
     }
 
     /// The sturdiest Basic of the deck's colours (or colorless) that can go in.
@@ -255,7 +255,7 @@ pub fn diagnose(deck: &[CardId], owned: &Collection) -> Vec<Advice> {
                         .count()
                 })
                 .and_then(basic_energy);
-            swap(x.most(|c| matches!(c.kind, CardKind::Trainer(_))), wanted)
+            swap(x.most(|c| matches!(c.kind, CardKind::Gear(_))), wanted)
         } else {
             let into = x.basic_to_add().or_else(|| {
                 [LUCKY_SATCHEL, TRAIL_COMPASS]
@@ -316,17 +316,13 @@ pub fn diagnose(deck: &[CardId], owned: &Collection) -> Vec<Advice> {
     }
 
     let draws = x.cards().any(|c| {
-        matches!(&c.kind, CardKind::Trainer(t) if matches!(t.effects.first(), Some(Effect::Draw(_) | Effect::Search(_))))
+        matches!(&c.kind, CardKind::Gear(t) if matches!(t.effects.first(), Some(Effect::Draw(_) | Effect::Search(_))))
     });
     let helper = [LUCKY_SATCHEL, TRAIL_COMPASS]
         .into_iter()
         .find(|&t| x.can_add(t));
     if !draws && helper.is_some() {
-        say(
-            Severity::Tip,
-            Issue::NoDrawTrainers,
-            swap(x.spare(), helper),
-        );
+        say(Severity::Tip, Issue::NoDrawGear, swap(x.spare(), helper));
     }
 
     let colours = x.colours().len();
@@ -456,17 +452,17 @@ mod tests {
         let water = d.iter().filter(|&&c| c == WATER_ENERGY).count();
         with(&mut d, WATER_ENERGY, FIRE_ENERGY, water);
         assert!(issues(&d, &all()).contains(&Issue::NoEnergyFor(Color::Water)));
-        // No draw or search trainers, while the collection has some.
+        // No draw or search Gear cards, while the collection has some.
         let mut nd = STARTER.cards();
         for t in [LUCKY_SATCHEL, TRAIL_COMPASS, DOWSING_ROD] {
             let n = nd.iter().filter(|&&c| c == t).count();
             with(&mut nd, t, FIRE_ENERGY, n);
         }
         let a = diagnose(&nd, &all());
-        let tip = a.iter().find(|a| a.issue == Issue::NoDrawTrainers).unwrap();
+        let tip = a.iter().find(|a| a.issue == Issue::NoDrawGear).unwrap();
         assert_eq!(tip.severity, Severity::Tip);
         assert!(matches!(tip.swap, Some(Swap { into, .. }) if into == LUCKY_SATCHEL));
-        assert!(!issues(&nd, &Collection::new()).contains(&Issue::NoDrawTrainers));
+        assert!(!issues(&nd, &Collection::new()).contains(&Issue::NoDrawGear));
         // Four creature colours.
         let mut four = STARTER.cards();
         with(&mut four, FIRE_ENERGY, SPARKIT, 2);

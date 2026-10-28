@@ -3231,7 +3231,7 @@
       "x": 52,
       "z": 14,
       "facing": "n",
-      "trainer": {
+      "duelist": {
         "sight": 2,
         "challenge": [
           "Oh! Hi! Don't mind me, just... stretching... hnngh.",
@@ -3273,7 +3273,7 @@
       "z": 4,
       "facing": "s",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 4,
         "look": [
           "s",
@@ -3507,7 +3507,7 @@
       "x": 31,
       "z": 16,
       "facing": "w",
-      "trainer": {
+      "duelist": {
         "sight": 2,
         "challenge": [
           "(Shh. Shh! You're scaring the herons.)",
@@ -3550,7 +3550,7 @@
       "x": 15,
       "z": 8,
       "facing": "s",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Looking for mushrooms? These ones are safe. Probably. I'm not saying which.",
@@ -3594,7 +3594,7 @@
       "z": 3,
       "facing": "s",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 4,
         "challenge": [
           "Hoo. You're out late. So are they.",

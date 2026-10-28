@@ -11,9 +11,9 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 use sixfold_engine::campaign::{self, Rival, RIVALS};
+use sixfold_engine::duelists::duelist;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::stats::{Stats, FINDS};
-use sixfold_engine::trainers::trainer;
 use sixfold_engine::{card, tr, T};
 
 use crate::achievements::thousands;
@@ -370,7 +370,7 @@ pub fn Credits(won: bool) -> impl IntoView {
             <ul class="cast">{seal_rivals().map(rival).collect_view()}</ul>
             // Rook (no colour, no seal) beside the Warden.
             <ul class="cast last">
-                {trainer("rook_4").map(|t| face(t.id, t.name, t.class, "colorless"))}
+                {duelist("rook_4").map(|t| face(t.id, t.name, t.class, "colorless"))}
                 {RIVALS.iter().filter(|r| !r.seal).map(rival).collect_view()}
             </ul>
         }

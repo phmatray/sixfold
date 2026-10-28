@@ -10,12 +10,12 @@
 //! card ([`Rival::promo`]) to the collection.
 //!
 //! [`opponent`] is the one view of anyone the player can duel in the world
-//! (a rival or a route duelist, [`crate::trainers`]), and [`record_opponent`]
+//! (a rival or a route duelist, [`crate::duelists`]), and [`record_opponent`]
 //! the one way to record such a duel.
 
 use crate::ai::{Difficulty, Style};
+use crate::duelists::{self, duelist};
 use crate::lang::T;
-use crate::trainers::{self, trainer};
 
 use crate::card::{CardId, Color};
 use crate::decks::{Prebuilt, EMBER_RUSH, STORM_FRONT};
@@ -286,7 +286,7 @@ pub enum Stakes {
 
 /// The stakes of a duel against `id`, a rival's or route duelist's id.
 pub fn stakes(id: Option<&str>) -> Stakes {
-    if id.and_then(trainer).is_some_and(|t| t.story()) {
+    if id.and_then(duelist).is_some_and(|t| t.story()) {
         return Stakes::Story;
     }
     match id.and_then(rival) {
@@ -409,7 +409,7 @@ pub static ROOK_LINES: RivalLines = RivalLines {
 pub fn lines(id: &str) -> Option<&'static RivalLines> {
     rival(id)
         .map(|r| &r.lines)
-        .or_else(|| trainer(id).filter(|t| t.story()).map(|_| &ROOK_LINES))
+        .or_else(|| duelist(id).filter(|t| t.story()).map(|_| &ROOK_LINES))
 }
 
 /// Saves from before promos existed: give the promo of every rival already
@@ -496,7 +496,7 @@ pub fn opponent(id: &str) -> Option<Opponent> {
             rival: true,
         });
     }
-    trainer(id).map(|t| Opponent {
+    duelist(id).map(|t| Opponent {
         id: t.id,
         name: t.name,
         title: t.class,
@@ -521,9 +521,9 @@ pub fn record_opponent(
     if let Some(r) = rival(id) {
         return Some(record(r, won, p, profile));
     }
-    let t = trainer(id)?;
+    let t = duelist(id)?;
     let first = won && !t.beaten(p);
-    let facets = trainers::record(t, won, p);
+    let facets = duelists::record(t, won, p);
     Some(Reward {
         won,
         first,
@@ -725,7 +725,7 @@ pub static RIVALS: [Rival; 7] = [
         colors: &[Fighting],
         deck: Prebuilt {
             name: T::new("Bedrock", "Roche-mère"),
-            description: T::new("Two Stone lines up to Awaken 2 and a wall of trainers.", "Deux lignées Roc jusqu'à l'Éveil 2 et un mur de cartes Dresseur."),
+            description: T::new("Two Stone lines up to Awaken 2 and a wall of Gear cards.", "Deux lignées Roc jusqu'à l'Éveil 2 et un mur de cartes Objet."),
             list: &[
                 (BRAWLET, 4),
                 (IRONBRAWL, 3),
@@ -1305,7 +1305,7 @@ mod tests {
         assert_eq!(stakes(Some("warden")), Stakes::Boss);
         assert_eq!(stakes(Some("quill")), Stakes::Rival(Color::Lightning));
         assert_eq!(stakes(Some("orla")), Stakes::Rival(Color::Fighting));
-        assert_eq!(stakes(Some(trainers::TRAINERS[0].id)), Stakes::Ordinary);
+        assert_eq!(stakes(Some(duelists::DUELISTS[0].id)), Stakes::Ordinary);
         assert_eq!(stakes(None), Stakes::Ordinary);
         // Every rival but the Warden plays a rival's theme.
         let bosses = RIVALS.iter().filter(|r| stakes(Some(r.id)) == Stakes::Boss);

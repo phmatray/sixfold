@@ -40,7 +40,7 @@ pub struct Side<'a> {
     pub bench: &'a [InPlay],
     pub condition: Condition,
     pub effects: ActiveEffects,
-    pub trainer_locked: bool,
+    pub gear_locked: bool,
     /// The Active's retreat cost now, reducers included (R-RETREAT-02).
     pub retreat_cost: u8,
 }
@@ -56,7 +56,7 @@ impl<'a> Side<'a> {
             bench: &pl.bench,
             condition: pl.condition,
             effects: pl.effects,
-            trainer_locked: pl.trainer_locked,
+            gear_locked: pl.gear_locked,
             retreat_cost: 0,
         }
     }

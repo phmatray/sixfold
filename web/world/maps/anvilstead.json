@@ -3020,7 +3020,7 @@
       "z": 28,
       "facing": "s",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "No fancy cards. No Rares. Just you, me and the basics, bare-knuckle.",

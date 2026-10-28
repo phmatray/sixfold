@@ -11,7 +11,7 @@
 import * as THREE from "three";
 import { setMap } from "./map.js";
 import { FOOT } from "./props.js";
-import { sightLine } from "./trainer.js";
+import { sightLine } from "./duelist.js";
 
 const TILES = [".", "p", "s", "r", "w", "=", "H", "~", "#", "f", "W", "V", "1", "2", "3"];
 const PROPS = ["tree", "pine", "birch", "bush", "flowers", "rock", "reeds", "stump", "log", "crates", "bench", "lantern", "sign", "signpost",
@@ -73,8 +73,8 @@ export function attach({ el: host, canvas, world, tileAt, rebuild }) {
     if (!w) return;
     const g = new THREE.Group(), quad = new THREE.PlaneGeometry(0.8, 0.8).rotateX(-Math.PI / 2);
     const mat = new THREE.MeshBasicMaterial({ color: "#ff5a3c", transparent: true, opacity: 0.45, depthWrite: false });
-    for (const n of w.npcs.filter((m) => m.def.trainer))
-      for (const f of n.def.trainer.look ?? [n.face])
+    for (const n of w.npcs.filter((m) => m.def.duelist))
+      for (const f of n.def.duelist.look ?? [n.face])
         for (const [x, z] of sightLine(w, n, f)) {
           const m = new THREE.Mesh(quad, mat);
           m.position.set(x + 0.5, w.floorAt(x, z) + 0.06, z + 0.5);
@@ -117,7 +117,7 @@ export function attach({ el: host, canvas, world, tileAt, rebuild }) {
       if (!id) return;
       const nm = id.replace(/^t_/, "");
       const npc = { id, name: nm[0].toUpperCase() + nm.slice(1), model: "npc_wanderer", x, z, facing: "s", idle: "Idle" };
-      if (id.startsWith("t_")) npc.trainer = { sight: 3, challenge: ["…"], challenge_fr: ["…"], win: ["…"], win_fr: ["…"], lose: ["…"], lose_fr: ["…"], after: ["…"], after_fr: ["…"] };
+      if (id.startsWith("t_")) npc.duelist = { sight: 3, challenge: ["…"], challenge_fr: ["…"], win: ["…"], win_fr: ["…"], lose: ["…"], lose_fr: ["…"], after: ["…"], after_fr: ["…"] };
       else npc.dialogue = [{ lines: ["…"], lines_fr: ["…"] }];
       (raw.npcs ??= []).push(npc);
       return apply(`${id} at ${x},${z}`);

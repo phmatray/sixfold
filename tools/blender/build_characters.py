@@ -1306,7 +1306,7 @@ SLOUCH = {"Torso": ((0, 0, 0), (6, 0, 0)), "Head": ((0, 0, 0), (-4, 0, 6)),
         bz=1.12, bw=0.98, hs=0.94, leg=1.04, pose=SLOUCH, swing=0.8)
 def rook(c):
     """Rook, The Blank: a grey hoodie with the hood down, a blank white hexagon patch where a colour would go, a tally
-    of wins chalked on the left sleeve, untidy dark hair with one pale streak, scuffed white trainers."""
+    of wins chalked on the left sleeve, untidy dark hair with one pale streak, scuffed white sneakers."""
     boots(c, "shoe", sole="sole")
     legs(c, "trousers")
     torso(c, "hoodie")

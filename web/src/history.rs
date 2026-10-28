@@ -16,7 +16,7 @@ fn kind_icon(kind: &str) -> &'static str {
     match kind {
         "attack" => "M5 19 13 4M9.5 20.5 17 7M14 21l6-11",
         "awaken" => "M6 13.5 12 7.5l6 6M6 19.5l6-6 6 6",
-        "trainer" => "M7 3h7l4 4v14H7zM14 3v4h4M10 12h5M10 16h5",
+        "gear" => "M7 3h7l4 4v14H7zM14 3v4h4M10 12h5M10 16h5",
         "ko" => "M12 2.5 14 9l6.5-2-4 5.3 4 5.2-6.5-2L12 22l-2-6.5-6.5 2 4-5.2-4-5.3L10 9z",
         "retreat" => "M8 5 4 9l4 4M4 9h10.5a5 5 0 0 1 0 10H9",
         "energy" => "M13.5 2 5 13.5h6L9.5 22 19 10h-6.5z",

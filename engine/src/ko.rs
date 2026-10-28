@@ -38,12 +38,12 @@ impl Game {
                 }
             }
         }
-        // R-KO-01: one prize per knocked-out creature (not Trainer-as-Basic),
+        // R-KO-01: one prize per knocked-out creature (not Gear-as-Basic),
         // capped at what is left. `take[p]` is what player p takes.
         let kos = |q: usize| {
             self.players[q]
                 .in_play()
-                .filter(|(_, c)| c.hp == 0 && !c.is_trainer_basic())
+                .filter(|(_, c)| c.hp == 0 && !c.is_gear_basic())
                 .count()
         };
         let take = [
@@ -251,7 +251,7 @@ mod tests {
 
     /// R-KO-01
     #[test]
-    fn trainer_as_basic_ko_gives_no_prize() {
+    fn gear_as_basic_ko_gives_no_prize() {
         let mut g = main_phase(0);
         g.players[1].bench = vec![creature(STRAW_DECOY, &[])];
         ko(&mut g, 1, 1);
@@ -644,10 +644,10 @@ mod tests {
         assert!(g.players[0].active.is_some());
     }
 
-    /// R-KO-09: also when a trainer or a Power knocks the defender out during
+    /// R-KO-09: also when a Gear card or a Power knocks the defender out during
     /// the turn (0B:58FF / 6789 / 7CCC → 01:6EF6).
     #[test]
-    fn counter_ko_also_after_trainer_or_power_damage() {
+    fn counter_ko_also_after_gear_or_power_damage() {
         for power in [false, true] {
             let mut g = main_phase(0);
             for p in 0..2 {
@@ -659,7 +659,7 @@ mod tests {
             if power {
                 power_with(&mut g, snipe);
             } else {
-                trainer_with(&mut g, snipe);
+                gear_with(&mut g, snipe);
             }
             let ev = ok(&mut g, Action::Choose(0));
             assert_eq!(kos(&ev), 2, "power: {power}");

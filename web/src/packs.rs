@@ -252,13 +252,13 @@ pub fn PackOdds(b: usize) -> impl IntoView {
         )
     } else if booster.colors.contains(&Color::Colorless) {
         tr(
-            format!("Each Common and Uncommon: {own}% {types} Hexons, {neutral}% trainers and the special energy, {off}% other types."),
-            format!("Chaque Commune et Peu commune\u{a0}: {own} % Hexons {}, {neutral} % Dresseurs et l'énergie spéciale, {off} % autres types.", types.replace("Neutre", "Neutres")),
+            format!("Each Common and Uncommon: {own}% {types} Hexons, {neutral}% Gear cards and the special energy, {off}% other types."),
+            format!("Chaque Commune et Peu commune\u{a0}: {own} % Hexons {}, {neutral} % Objets et l'énergie spéciale, {off} % autres types.", types.replace("Neutre", "Neutres")),
         )
     } else {
         tr(
-            format!("Each Common and Uncommon: {own}% {types} Hexons, {neutral}% trainers and Neutral Hexons, {off}% other types."),
-            format!("Chaque Commune et Peu commune\u{a0}: {own} % Hexons {types}, {neutral} % Dresseurs et Hexons Neutres, {off} % autres types."),
+            format!("Each Common and Uncommon: {own}% {types} Hexons, {neutral}% Gear cards and Neutral Hexons, {off}% other types."),
+            format!("Chaque Commune et Peu commune\u{a0}: {own} % Hexons {types}, {neutral} % Objets et Hexons Neutres, {off} % autres types."),
         )
     };
     let holo_line = if booster.is_wild() {

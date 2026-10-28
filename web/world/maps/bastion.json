@@ -2063,7 +2063,7 @@
       "z": 20,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 4,
         "challenge": [
           "Hard hat? No? Then you'd better be quick on your feet.",
@@ -2103,7 +2103,7 @@
       "z": 11,
       "facing": "w",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Night shift. We work by lantern and moon, and we don't like surprises.",

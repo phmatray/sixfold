@@ -27,7 +27,7 @@ export const BARK_HOLD = 2.5; // seconds a bark stays over the head
 // model's accessories, picked by its id (so each looks its own on a shared model).
 function wearOf(def, src) {
   if (def.wear) return def.wear;
-  if (!def.trainer) return [];
+  if (!def.duelist) return [];
   const names = [];
   src.scene.traverse((o) => /^acc_/.test(o.name) && names.push(o.name.slice(4)));
   let h = 0;
@@ -188,7 +188,7 @@ export function updateNpc(w, n, dt, paused, minute = 480) {
   }
   // A `look` list, or a routine's `look` activity (round about its facing); each at the person's own interval.
   const act = !n.walk && n.activity, f = act?.face ?? n.def.facing ?? "s";
-  const look = n.def.trainer?.look ?? n.def.look ?? (act?.do === "look" ? [CCW[f], f, CW[f], f] : null);
+  const look = n.def.duelist?.look ?? n.def.look ?? (act?.do === "look" ? [CCW[f], f, CW[f], f] : null);
   if (look?.length > 1 && !n.step && !n.go?.length && !n.busy && !paused && (n.lookT -= dt) <= 0) {
     n.lookT = n.seed.look;
     n.li = ((n.li ?? 0) + 1) % look.length; // a routine's list repeats its facing: counted, not looked up
@@ -216,7 +216,7 @@ export function updateNpc(w, n, dt, paused, minute = 480) {
 // Glances (#114): an idle person (not walking, sitting, talking or a duelist, which watches its line) turns to the
 // hero within GLANCE_NEAR tiles in front or beside it, at most every GLANCE_EVERY s; back to its own facing once the
 // hero has gone. `glance: false` opts out.
-const duels = (n) => (n.duels ??= !!n.def.trainer || JSON.stringify(n.def.dialogue ?? "").includes("duel:"));
+const duels = (n) => (n.duels ??= !!n.def.duelist || JSON.stringify(n.def.dialogue ?? "").includes("duel:"));
 function glance(w, n, paused) {
   const h = w.hero, dx = h.x - n.x, dz = h.z - n.z, [fx, fz] = DIR[n.face];
   const near = Math.abs(dx) + Math.abs(dz) <= GLANCE_NEAR && (dx || dz) && (n.glance || dx * fx + dz * fz >= 0); // not from behind

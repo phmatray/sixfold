@@ -1,4 +1,4 @@
-// Route duelists (WORLD_DESIGN §4.1): an NPC with a `trainer` block watches a
+// Route duelists (WORLD_DESIGN §4.1): an NPC with a `duelist` block watches a
 // straight line of tiles while it is unbeaten, there and not suppressed. When the
 // hero stands on that line: "!" over its head, it walks over until it stands by the
 // hero, and they talk (its `challenge` branch, which offers the duel). Turned down,
@@ -23,7 +23,7 @@ export function enterMap(name) {
 export function sightLine(w, n, face = n.face) {
   const [dx, dz] = DIR[face], line = [];
   let x = n.x, z = n.z;
-  for (let i = 0; i < (n.def.trainer.sight ?? SIGHT); i++) {
+  for (let i = 0; i < (n.def.duelist.sight ?? SIGHT); i++) {
     const nx = x + dx, nz = z + dz;
     if (w.blocked(nx, nz) || !w.climb(x, z, nx, nz) || w.npcAt(nx, nz, n)) break;
     line.push([nx, nz]);
@@ -37,7 +37,7 @@ export function watch(w, hero, holds) {
   if (hero.sit) return null; // nobody challenges someone resting on a seat (seat.js): they look again once it stands
   let best = null, near = Infinity;
   for (const n of w.npcs) {
-    if (!n.def.trainer || n.hidden || n.busy || n.step || n.go?.length || quiet.ids.has(n.def.id)) continue;
+    if (!n.def.duelist || n.hidden || n.busy || n.step || n.go?.length || quiet.ids.has(n.def.id)) continue;
     const i = sightLine(w, n).findIndex(([x, z]) => x === hero.x && z === hero.z);
     if (i >= 0 && i < near && holds(`!beat:${n.def.id}`)) (best = n), (near = i);
   }
@@ -79,7 +79,7 @@ export function release(w) {
 
 // Talking to a duelist directly counts as meeting it: afterwards it goes quiet too.
 export function engaged(w, n, face) {
-  if (n.def.trainer) w.engage ??= { n, post: { x: n.x, z: n.z, face }, talked: true };
+  if (n.def.duelist) w.engage ??= { n, post: { x: n.x, z: n.z, face }, talked: true };
 }
 
 // Back from a duel against `id`: a duelist that walked over before the duel stands
@@ -87,7 +87,7 @@ export function engaged(w, n, face) {
 // whom a cutscene brought to the hero; after the talk they walk back. Returns the NPC.
 export function meet(w, hero, id) {
   const n = w.npcs.find((m) => m.def.id === id && !m.hidden);
-  if (!n?.def.trainer && !/^rook_/.test(id)) return n ?? null;
+  if (!n?.def.duelist && !/^rook_/.test(id)) return n ?? null;
   const [dx, dz] = DIR[hero.face], x = hero.x + dx, z = hero.z + dz;
   if ((n.x !== x || n.z !== z) && !w.blocked(x, z) && !w.npcAt(x, z)) {
     w.engage = { n, post: { x: n.x, z: n.z, face: n.face }, talked: true };

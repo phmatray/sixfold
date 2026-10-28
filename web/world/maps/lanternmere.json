@@ -2052,7 +2052,7 @@
       "z": 7,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "A Hexon that has never Awakened is a seed that has never been planted.",
@@ -2112,7 +2112,7 @@
       "z": 25,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "Shipped my oars to watch the lanterns pass. You walked here on them? Brave.",
@@ -2153,7 +2153,7 @@
       "z": 14,
       "facing": "s",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 2,
         "challenge": [
           "Lanterns for the east shore! Mind the wire. Oh, a duellist. Two prizes, while the wax sets?"

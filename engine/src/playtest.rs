@@ -8,13 +8,13 @@ use crate::booster::BOOSTERS;
 use crate::campaign::{champion, record, rival, seals, RIVALS, SEALS};
 use crate::card::{card, CardId, CardKind, Color, Stage};
 use crate::decks::{Prebuilt, PREBUILT, STARTER};
+use crate::duelists::{self, Kit, DUELISTS, KITS, ROOK_SEALS, SPROUTS};
 use crate::endgame::GAUNTLET;
 use crate::overworld::Progress;
 use crate::profile::Profile;
 use crate::set::{self, basic_energy};
 use crate::shop::{buy_pack, pack_price};
 use crate::stats::{award, Stats};
-use crate::trainers::{self, Kit, KITS, ROOK_SEALS, SPROUTS, TRAINERS};
 use crate::{card_id, validate_deck, Collection, Config, Game, DECK_SIZE, MAX_COPIES};
 
 /// Play one game to the end; returns the winner's seat.
@@ -256,7 +256,7 @@ fn kit_sweep() {
         assert!(w <= 0.6, "{} wins {w:.2}", r.name);
     }
     let starter = [STARTER.cards()];
-    for t in &TRAINERS {
+    for t in &DUELISTS {
         let w = rate(&t.deck(), &starter, t.prizes, t.difficulty, 60);
         println!(
             "{:9} {:>3.0}% vs the starter ({} prizes, {:?})",
@@ -283,7 +283,7 @@ thread_local! {
 #[test]
 #[ignore]
 fn rook_decks_sweep() {
-    let rate = |t: &trainers::Trainer, against: &[Vec<CardId>], games: u64| {
+    let rate = |t: &duelists::Duelist, against: &[Vec<CardId>], games: u64| {
         let mut wins = 0;
         for (k, other) in against.iter().enumerate() {
             for seed in 0..games {
@@ -305,7 +305,7 @@ fn rook_decks_sweep() {
         playthrough(seed, RIVAL_DUELS);
     }
     let met = STORY_DECKS.with_borrow(Clone::clone);
-    for t in TRAINERS.iter().filter(|t| t.story()) {
+    for t in DUELISTS.iter().filter(|t| t.story()) {
         let decks: Vec<Vec<CardId>> = met
             .iter()
             .filter(|(id, _)| *id == t.id)
@@ -335,7 +335,7 @@ const COLOURS: [Color; 6] = [
 
 /// A simple deck builder: for one or two colours, every owned creature of
 /// those colours (and Colorless) whose line starts with an owned Basic, up to
-/// 24; owned trainers, two of each, up to 12; the rest basic energy split by
+/// 24; owned Gear cards, two of each, up to 12; the rest basic energy split by
 /// the creatures' colours.
 // ponytail: a greedy builder, no synergy; good enough to prove the campaign
 // can be finished with what the packs give.
@@ -355,12 +355,12 @@ fn deck_for(owned: &[(CardId, usize)], colors: [Color; 2]) -> Vec<CardId> {
             }
         }
     }
-    let trainers = owned
+    let gears = owned
         .iter()
-        .filter(|(id, _)| matches!(card(*id).kind, CardKind::Trainer(_)))
+        .filter(|(id, _)| matches!(card(*id).kind, CardKind::Gear(_)))
         .flat_map(|&(id, n)| std::iter::repeat_n(id, n.min(2)))
         .take(12);
-    deck.extend(trainers);
+    deck.extend(gears);
     let per = |c: Color| {
         deck.iter()
             .filter(|&&id| card(id).creature().is_some_and(|cr| cr.color == c))
@@ -493,7 +493,7 @@ fn playthrough(
     open_counted(&mut stats, &mut profile, &mut pack_seed);
     let mut duels = 0;
     let mut log = vec![];
-    for t in TRAINERS.iter().filter(|t| !t.story()) {
+    for t in DUELISTS.iter().filter(|t| !t.story()) {
         let deck = build_deck(&profile.collection);
         let won = play(
             [deck, t.deck()],
@@ -502,7 +502,7 @@ fn playthrough(
             [Difficulty::Normal, t.difficulty],
         ) == 0;
         let before = (progress.clone(), profile.clone());
-        trainers::record(t, won, &mut progress);
+        duelists::record(t, won, &mut progress);
         progress.settle();
         achieve(&mut stats, before, won, &mut progress, &profile);
         packs += shop_packs(&mut progress, &mut profile, &mut bought);
@@ -510,11 +510,11 @@ fn playthrough(
         duels += 1;
         log.push((t.id, won));
     }
-    while !champion(&progress) && duels < TRAINERS.len() as u64 + rival_duels {
+    while !champion(&progress) && duels < DUELISTS.len() as u64 + rival_duels {
         let story = ROOK_SEALS
             .iter()
             .find(|&&(id, n)| seals(&progress) >= n && !progress.has_flag(id));
-        if let Some(t) = story.and_then(|&(id, _)| trainers::trainer(id)) {
+        if let Some(t) = story.and_then(|&(id, _)| duelists::duelist(id)) {
             let deck = build_deck(&profile.collection);
             STORY_DECKS.with_borrow_mut(|d| d.push((t.id, deck.clone())));
             let won = play(
@@ -525,7 +525,7 @@ fn playthrough(
             ) == 0;
             let before = (progress.clone(), profile.clone());
             progress.apply(&format!("flag:{}", t.id)).unwrap();
-            trainers::record(t, won, &mut progress);
+            duelists::record(t, won, &mut progress);
             progress.settle();
             achieve(&mut stats, before, won, &mut progress, &profile);
             packs += shop_packs(&mut progress, &mut profile, &mut bought);
@@ -543,7 +543,7 @@ fn playthrough(
             let t = RIVALS
                 .iter()
                 .filter(|r| r.open(&progress) && !r.earned(&progress))
-                .flat_map(|r| r.duelists.iter().filter_map(|id| trainers::trainer(id)))
+                .flat_map(|r| r.duelists.iter().filter_map(|id| duelists::duelist(id)))
                 .find(|t| !t.beaten(&progress))
                 .expect("an accepting rival or a duelist to beat while the Warden stands");
             let deck = build_deck(&profile.collection);
@@ -554,7 +554,7 @@ fn playthrough(
                 [Difficulty::Normal, t.difficulty],
             ) == 0;
             let before = (progress.clone(), profile.clone());
-            trainers::record(t, won, &mut progress);
+            duelists::record(t, won, &mut progress);
             progress.settle();
             achieve(&mut stats, before, won, &mut progress, &profile);
             packs += shop_packs(&mut progress, &mut profile, &mut bought);
@@ -633,7 +633,7 @@ fn the_campaign_can_be_finished_from_a_new_profile() {
             "first_win",
             "all_seals",
             "champion",
-            "trainers_10",
+            "duelists_10",
             "packs_25",
             "cards_50",
         ] {
@@ -719,10 +719,10 @@ fn a_french_game_has_no_english_left() {
     }
     for c in set::CARDS {
         let effects = match &c.kind {
-            CardKind::Creature(cr) | CardKind::TrainerBasic(cr) => {
+            CardKind::Creature(cr) | CardKind::GearBasic(cr) => {
                 cr.attacks.iter().flat_map(|a| a.effects).collect()
             }
-            CardKind::Trainer(t) => t.effects.iter().collect(),
+            CardKind::Gear(t) => t.effects.iter().collect(),
             CardKind::Energy(_) => vec![],
         };
         lines.extend(effects.into_iter().map(|e| e.to_string()));
@@ -779,7 +779,7 @@ fn balance_indicators() {
                         Event::FirstPlayer { player, .. } => first = *player,
                         Event::Placed { player, card, .. }
                         | Event::Evolved { player, card, .. }
-                        | Event::TrainerPlayed { player, card, .. }
+                        | Event::GearPlayed { player, card, .. }
                         | Event::EnergyAttached { player, card, .. } => {
                             seen[*player].insert(*card);
                         }
@@ -935,7 +935,7 @@ fn postgame_first_player_edge() {
 #[test]
 #[ignore]
 fn campaign_sweep() {
-    let route = TRAINERS.len() as u64;
+    let route = DUELISTS.len() as u64;
     let mut all: Vec<(u64, u64)> = (1..=16)
         .map(|seed| {
             let (duels, packs, log, progress, _) = playthrough(seed, 1_000);
@@ -946,7 +946,7 @@ fn campaign_sweep() {
                 .collect();
             losses.sort_by_key(|&(_, n)| std::cmp::Reverse(n));
             // Duelists met again to earn a keeper (#150).
-            let again = log[TRAINERS.iter().filter(|t| !t.story()).count()..]
+            let again = log[DUELISTS.iter().filter(|t| !t.story()).count()..]
                 .iter()
                 .filter(|(id, _)| rival(id).is_none() && !id.starts_with("rook_"))
                 .count();

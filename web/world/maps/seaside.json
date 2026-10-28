@@ -1732,7 +1732,7 @@
       "x": 16,
       "z": 8,
       "facing": "s",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Shh, you'll scare the... oh. Nothing was biting anyway.",
@@ -1777,7 +1777,7 @@
       "x": 24,
       "z": 4,
       "facing": "s",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "*Fweet!* No running on the pier!",
@@ -1919,7 +1919,7 @@
       "x": 31,
       "z": 9,
       "facing": "s",
-      "trainer": {
+      "duelist": {
         "sight": 4,
         "challenge": [
           "Wind's from the west, gusting four. Perfect duelling weather.",
@@ -2080,7 +2080,7 @@
       "x": 53,
       "z": 13,
       "facing": "w",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Ah. Hello. I've been sorting shells since the tide went out. There's no hurry.",

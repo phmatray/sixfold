@@ -14,7 +14,7 @@ pub struct Mon {
     pub hp: u16,
     pub max: u16,
     pub energy: Vec<CardId>,
-    pub trainers: Vec<CardId>,
+    pub gears: Vec<CardId>,
     pub statuses: Vec<Status>,
     /// Lasting effects on the Active, as sentences.
     pub effects: Vec<String>,
@@ -131,7 +131,7 @@ pub fn find_mon(g: &Game, player: usize, uid: u32) -> Option<Mon> {
         hp: c.hp,
         max: cr.hp,
         energy: c.energy.clone(),
-        trainers: c.trainers.clone(),
+        gears: c.gears.clone(),
         statuses,
         effects,
         power: cr.power.as_ref().map(|_| g.power_works(player, slot)),
@@ -164,7 +164,7 @@ pub fn slot_name(player: usize, slot: usize) -> String {
 /// The hand index an action plays from, if any.
 pub fn hand_index(a: Action) -> Option<usize> {
     match a {
-        Action::PlayBasic(h) | Action::PlayTrainer(h) => Some(h),
+        Action::PlayBasic(h) | Action::PlayGear(h) => Some(h),
         Action::Evolve { hand, .. } | Action::AttachEnergy { hand, .. } => Some(hand),
         _ => None,
     }

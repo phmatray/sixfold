@@ -84,7 +84,7 @@ pub enum Goal {
     /// The first attack: weakness doubles it.
     Attack,
     Evolve,
-    Trainer,
+    Gear,
     Finish,
     /// The opponent is moving.
     Watch,
@@ -124,7 +124,7 @@ pub fn lesson(g: &Game) -> Lesson {
             Goal::Attack => 5,
             Goal::Evolve => 6,
             Goal::Attach => 7,
-            Goal::Trainer => 8,
+            Goal::Gear => 8,
             Goal::Finish => 9,
             _ => 0,
         },
@@ -282,15 +282,15 @@ pub fn lesson(g: &Game) -> Lesson {
         (PromptKind::MainPhase, Some(BLAZELYNX)) if find(g, MOSS_POULTICE).is_some() => {
             find(g, MOSS_POULTICE).map(|h| {
                 l(
-                    Goal::Trainer,
-                    Some(Action::PlayTrainer(h)),
+                    Goal::Gear,
+                    Some(Action::PlayGear(h)),
                     tr(
                         format!("Play {} to heal your Active.", name(MOSS_POULTICE)),
                         format!("Jouez {} pour soigner votre Actif.", name(MOSS_POULTICE)),
                     ),
                     tr(
-                        "Trainer cards are played from your hand for their effect, then discarded. Play as many as you like.",
-                        "Les cartes Dresseur se jouent depuis la main pour leur effet, puis vont à la défausse. Jouez-en autant que vous voulez.",
+                        "Gear cards are played from your hand for their effect, then discarded. Play as many as you like.",
+                        "Les cartes Objet se jouent depuis la main pour leur effet, puis vont à la défausse. Jouez-en autant que vous voulez.",
                     )
                     .into(),
                 )
@@ -322,7 +322,7 @@ fn attack_name(id: CardId, i: usize) -> &'static str {
 fn from_hand(a: Action, h: usize) -> Action {
     match a {
         Action::PlayBasic(_) => Action::PlayBasic(h),
-        Action::PlayTrainer(_) => Action::PlayTrainer(h),
+        Action::PlayGear(_) => Action::PlayGear(h),
         Action::Evolve { slot, .. } => Action::Evolve { hand: h, slot },
         Action::AttachEnergy { slot, .. } => Action::AttachEnergy { hand: h, slot },
         a => a,
@@ -332,7 +332,7 @@ fn from_hand(a: Action, h: usize) -> Action {
 /// The hand position an action plays from, if any.
 pub fn hand_of(a: Action) -> Option<usize> {
     match a {
-        Action::PlayBasic(h) | Action::PlayTrainer(h) => Some(h),
+        Action::PlayBasic(h) | Action::PlayGear(h) => Some(h),
         Action::Evolve { hand, .. } | Action::AttachEnergy { hand, .. } => Some(hand),
         _ => None,
     }
@@ -413,7 +413,7 @@ mod tests {
                 Goal::Attack,
                 Goal::Evolve,
                 Goal::Attach,
-                Goal::Trainer,
+                Goal::Gear,
                 Goal::Finish,
             ]
         );

@@ -1355,7 +1355,7 @@
       "z": 22,
       "facing": "n",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Out in the dark? Me too. I chase storms. Tonight I caught you.",
@@ -1581,7 +1581,7 @@
       "z": 6,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Grandad says I'm not to duel strangers. You don't look strange. One prize!",
@@ -1621,7 +1621,7 @@
       "z": 13,
       "facing": "n",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 4,
         "challenge": [
           "Gust from the north-west, force five. And a duellist, force... let's measure.",
@@ -1661,7 +1661,7 @@
       "z": 16,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 4,
         "challenge": [
           "Hear that post? Flat. Everything's flat today, including my mood. Duel?",

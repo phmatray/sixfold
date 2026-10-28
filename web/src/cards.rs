@@ -20,16 +20,14 @@ pub fn reduced_motion() -> bool {
 pub fn kind_label(def: &CardDef) -> String {
     match &def.kind {
         CardKind::Creature(c) => c.stage.to_string(),
-        CardKind::TrainerBasic(_) => tr(
-            "Trainer played as a Basic",
-            "Dresseur joué comme Hexon de Base",
-        )
-        .into(),
+        CardKind::GearBasic(_) => {
+            tr("Gear played as a Basic", "Objet joué comme Hexon de Base").into()
+        }
         CardKind::Energy(EnergyCard::Basic(_)) => tr("Basic energy", "Énergie de base").into(),
         CardKind::Energy(EnergyCard::DoubleColorless) => {
             tr("Special energy", "Énergie spéciale").into()
         }
-        CardKind::Trainer(_) => tr("Trainer", "Dresseur").into(),
+        CardKind::Gear(_) => tr("Gear", "Objet").into(),
     }
 }
 
@@ -78,11 +76,11 @@ pub fn rarity_key(r: Rarity) -> &'static str {
 
 fn type_class(def: &CardDef) -> String {
     let kind = match def.kind {
-        CardKind::Creature(_) | CardKind::TrainerBasic(_) => "k-creature",
+        CardKind::Creature(_) | CardKind::GearBasic(_) => "k-creature",
         CardKind::Energy(_) => "k-energy",
-        CardKind::Trainer(_) => "k-trainer",
+        CardKind::Gear(_) => "k-gear",
     };
-    let color = card_color(def).map_or("t-trainer".to_string(), |c| format!("t-{}", color_key(c)));
+    let color = card_color(def).map_or("t-gear".to_string(), |c| format!("t-{}", color_key(c)));
     format!("{kind} {color}")
 }
 
@@ -160,7 +158,7 @@ fn CardArt(def: &'static CardDef) -> impl IntoView {
     }
 }
 
-/// "Stage 1 · from Kilnback", "Basic", "Trainer"... (the compact card shows
+/// "Stage 1 · from Kilnback", "Basic", "Gear"... (the compact card shows
 /// only the stage).
 fn stage_line(def: &CardDef) -> impl IntoView {
     let from = def.creature().and_then(|c| c.evolves_from).map(|f| {
@@ -173,7 +171,7 @@ fn stage_line(def: &CardDef) -> impl IntoView {
 /// What the full card prints under the picture.
 fn body(def: &'static CardDef) -> AnyView {
     match &def.kind {
-        CardKind::Creature(c) | CardKind::TrainerBasic(c) => {
+        CardKind::Creature(c) | CardKind::GearBasic(c) => {
             let power = c.power.as_ref().map(|p| {
                 view! {
                     <div class="card-power">
@@ -197,7 +195,7 @@ fn body(def: &'static CardDef) -> AnyView {
                 .collect_view();
             view! { {power}{attacks} }.into_any()
         }
-        CardKind::Trainer(t) => {
+        CardKind::Gear(t) => {
             let text = if t.rules().is_empty() {
                 t.effects.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(" ")
             } else {
@@ -254,7 +252,7 @@ fn footer(def: &CardDef, promo: bool) -> impl IntoView {
 
 fn foot(def: &CardDef) -> String {
     match def.creature().map(|c| c.stage) {
-        Some(Stage::Basic) if !def.is_basic() => tr("Trainer", "Dresseur").to_string(),
+        Some(Stage::Basic) if !def.is_basic() => tr("Gear", "Objet").to_string(),
         Some(stage) => stage.to_string(),
         None => kind_label(def),
     }
@@ -360,7 +358,7 @@ pub fn damage_label(a: &Attack) -> Option<String> {
 pub fn CardDetails(id: CardId) -> impl IntoView {
     let def = card(id);
     let body = match &def.kind {
-        CardKind::Creature(c) | CardKind::TrainerBasic(c) => {
+        CardKind::Creature(c) | CardKind::GearBasic(c) => {
             let evolves = c.evolves_from.map(|f| {
                 let from = card_id(f).map_or(f, |id| card(id).label());
                 view! { <p class="evolves">{tr("Awakens from ", "S'éveille de ")} <b>{from}</b></p> }
@@ -408,7 +406,7 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
                         }}
                     </dd></div>
                 </dl>
-                {matches!(def.kind, CardKind::TrainerBasic(_)).then(|| view! {
+                {matches!(def.kind, CardKind::GearBasic(_)).then(|| view! {
                     <p class="note">{tr(
                         "Played as a Basic Hexon. It can't retreat and gives no prize when knocked out.",
                         "Se joue comme un Hexon de Base. Il ne peut pas battre en retraite et ne rapporte aucune Récompense quand il est K.O.",
@@ -417,7 +415,7 @@ pub fn CardDetails(id: CardId) -> impl IntoView {
             }
             .into_any()
         }
-        CardKind::Trainer(t) => {
+        CardKind::Gear(t) => {
             let text = if t.rules().is_empty() {
                 t.effects
                     .iter()

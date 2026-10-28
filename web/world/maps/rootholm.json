@@ -2503,7 +2503,7 @@
       "z": 19,
       "facing": "n",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "Halt! This is a toll walkway. The toll is one duel.",
@@ -2543,7 +2543,7 @@
       "z": 15,
       "facing": "s",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "Green. Only green. Do you see how much calmer everything is?",

@@ -307,19 +307,14 @@ mod tests {
         assert_eq!(damage_to(&attack_with(&mut g, 10, &[]), 1, 0), vec![20]);
     }
 
-    /// R-DMG-04: Power damage gets +10 on an Active but ignores −20 trainers.
+    /// R-DMG-04: Power damage gets +10 on an Active but ignores −20 Gear cards.
     #[test]
     fn power_damage_modifiers() {
         let mut g = main_phase(0);
         g.players[0].active = Some(creature(ZAPLING, &[]));
-        g.players[0]
-            .active
-            .as_mut()
-            .unwrap()
-            .trainers
-            .push(WHETSTONE);
+        g.players[0].active.as_mut().unwrap().gears.push(WHETSTONE);
         g.players[1].bench.push(creature(EMBERKIT, &[]));
-        g.players[1].bench[0].trainers.push(BUCKLER);
+        g.players[1].bench[0].gears.push(BUCKLER);
         ok(&mut g, Action::UsePower(0));
         let ev = ok(&mut g, Action::Choose(1));
         assert_eq!(

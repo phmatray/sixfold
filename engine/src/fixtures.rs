@@ -27,9 +27,9 @@ pub const SPROUTWING: CardId = id(6);
 pub const HUSHMOTH: CardId = id(7);
 /// Evolution-lock Power.
 pub const STILLSTONE: CardId = id(8);
-/// Trainer-as-Basic.
+/// Gear-as-Basic.
 pub const STRAW_DECOY: CardId = id(9);
-/// Trainer: draw 2.
+/// Gear: draw 2.
 pub const FIELD_NOTES: CardId = id(10);
 pub const GRASS_E: CardId = id(11);
 pub const FIRE_E: CardId = id(12);
@@ -61,27 +61,27 @@ pub const LUCKSHELL: CardId = id(26);
 pub const THORNBACK: CardId = id(27);
 /// Activated, any number of times: becomes Fire.
 pub const SHIFTER: CardId = id(28);
-/// Trainer: cure the Active.
+/// Gear: cure the Active.
 pub const TONIC: CardId = id(29);
-/// Trainer: heal 20.
+/// Gear: heal 20.
 pub const SALVE: CardId = id(30);
-/// Trainer: +10 trainer.
+/// Gear: +10 Gear.
 pub const WHETSTONE: CardId = id(31);
-/// Trainer: −20 trainer.
+/// Gear: −20 Gear.
 pub const BUCKLER: CardId = id(32);
-/// Trainer: switch the opposing Active with a Benched creature you pick.
+/// Gear: switch the opposing Active with a Benched creature you pick.
 pub const GALE_FAN: CardId = id(33);
-/// Trainer: switch your Active.
+/// Gear: switch your Active.
 pub const SWAP_ROPE: CardId = id(34);
-/// Trainer: search the deck for a Basic.
+/// Gear: search the deck for a Basic.
 pub const SCOUT_MAP: CardId = id(35);
-/// Trainer: a creature from the discard pile to the hand.
+/// Gear: a creature from the discard pile to the hand.
 pub const OLD_BONES: CardId = id(36);
-/// Trainer: discard the hand, draw 7.
+/// Gear: discard the hand, draw 7.
 pub const FRESH_START: CardId = id(37);
-/// Trainer: stage skip.
+/// Gear: stage skip.
 pub const LEAP_SEED: CardId = id(38);
-/// Trainer: devolve the defender.
+/// Gear: devolve the defender.
 pub const REWIND_MIST: CardId = id(39);
 pub const SPARKLET: CardId = id(40);
 pub const FOGLET: CardId = id(41);
@@ -170,11 +170,11 @@ const fn basic(
     }
 }
 
-const fn trainer(name: &'static str, effects: &'static [Effect]) -> CardDef {
+const fn gear(name: &'static str, effects: &'static [Effect]) -> CardDef {
     CardDef {
         name,
         rarity: Rarity::Common,
-        kind: CardKind::Trainer(Trainer { text: "", effects }),
+        kind: CardKind::Gear(Gear { text: "", effects }),
     }
 }
 
@@ -348,7 +348,7 @@ pub static CARDS: &[CardDef] = &[
     CardDef {
         name: "Straw Decoy",
         rarity: Rarity::Common,
-        kind: CardKind::TrainerBasic(Creature {
+        kind: CardKind::GearBasic(Creature {
             stage: Stage::Basic,
             evolves_from: None,
             hp: 10,
@@ -363,7 +363,7 @@ pub static CARDS: &[CardDef] = &[
     CardDef {
         name: "Field Notes",
         rarity: Rarity::Common,
-        kind: CardKind::Trainer(Trainer {
+        kind: CardKind::Gear(Gear {
             text: "Draw 2 cards.",
             effects: &[Effect::Draw(2)],
         }),
@@ -478,22 +478,22 @@ pub static CARDS: &[CardDef] = &[
         &[BUMP],
         activated(&[SetOwnColor(Fire)], false, false),
     ),
-    trainer("Tonic", &[Cure { both: false }]),
-    trainer("Salve", &[Heal(20)]),
-    trainer("Whetstone", &[AttachPlus10]),
-    trainer("Buckler", &[AttachMinus20]),
-    trainer(
+    gear("Tonic", &[Cure { both: false }]),
+    gear("Salve", &[Heal(20)]),
+    gear("Whetstone", &[AttachPlus10]),
+    gear("Buckler", &[AttachMinus20]),
+    gear(
         "Gale Fan",
         &[SwitchDefender {
             chooser_is_attacker: true,
         }],
     ),
-    trainer("Swap Rope", &[SwitchSelf]),
-    trainer("Scout Map", &[Search(Find::Basic)]),
-    trainer("Old Bones", &[Recover(Find::Creature)]),
-    trainer("Fresh Start", &[DiscardHand, Draw(7)]),
-    trainer("Leap Seed", &[StageSkip]),
-    trainer("Rewind Mist", &[Devolve]),
+    gear("Swap Rope", &[SwitchSelf]),
+    gear("Scout Map", &[Search(Find::Basic)]),
+    gear("Old Bones", &[Recover(Find::Creature)]),
+    gear("Fresh Start", &[DiscardHand, Draw(7)]),
+    gear("Leap Seed", &[StageSkip]),
+    gear("Rewind Mist", &[Devolve]),
     basic(
         "Sparklet",
         50,
@@ -625,7 +625,7 @@ pub static CARDS: &[CardDef] = &[
                             shield: Shield::Reduce(20),
                             coin: false,
                         },
-                        TrainerLock,
+                        GearLock,
                     ],
                 ),
                 atk(
@@ -754,7 +754,7 @@ pub static CARDS: &[CardDef] = &[
     ),
 ];
 
-/// A legal 60-card deck: 12 Basics, a Stage 1/2 line, 4 trainers, 39 energy.
+/// A legal 60-card deck: 12 Basics, a Stage 1/2 line, 4 Gear cards, 39 energy.
 pub fn deck() -> Vec<CardId> {
     let mut d = Vec::new();
     for (id, n) in [
@@ -782,7 +782,7 @@ fn build(cards: &[(CardId, usize)]) -> Vec<CardId> {
     d
 }
 
-/// A legal deck with every Power creature and every fixture trainer.
+/// A legal deck with every Power creature and every fixture Gear.
 pub fn power_deck() -> Vec<CardId> {
     let mut cards: Vec<(CardId, usize)> = (18..=39).map(|i| (id(i), 1)).collect();
     cards.extend([

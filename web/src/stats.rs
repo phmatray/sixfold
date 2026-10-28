@@ -118,7 +118,7 @@ pub fn StatsPanel() -> impl IntoView {
                     {row(tr("Won", "Gagnés"), "wins")}
                     <div class="stat"><dt>{tr("Win rate", "Taux de victoire")}</dt><dd>{rate}</dd></div>
                     {row(tr("Rival wins", "Victoires contre les rivaux"), "rival_wins")}
-                    {row(tr("Route duelist wins", "Victoires sur les routes"), "trainer_wins")}
+                    {row(tr("Route duelist wins", "Victoires sur les routes"), "duelist_wins")}
                     {row(tr("Quick duel wins", "Victoires en duel rapide"), "quick_wins")}
                     {row(tr("Quick duel wins against a formidable opponent", "Victoires en duel rapide contre un adversaire redoutable"), "quick_wins_hard")}
                     {row(tr("Current streak", "Série en cours"), "streak")}

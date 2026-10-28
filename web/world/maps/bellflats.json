@@ -3967,7 +3967,7 @@
       "z": 17,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 2,
         "challenge": [
           "Mind the nets! Oh, you're not a gull. Good.",
@@ -4007,7 +4007,7 @@
       "z": 11,
       "facing": "w",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "Nobody's rung this bell in sixty years. The sea took the floor out from under it, and then the clapper.",
@@ -4063,15 +4063,15 @@
       "z": 12,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "The sea doesn't use tricks. It just comes, and comes, and comes.",
-          "My house rule: Hexons and energy only, no Trainers. Three prizes. Just you and the tide."
+          "My house rule: Hexons and energy only, no Gear. Three prizes. Just you and the tide."
         ],
         "challenge_fr": [
           "La mer n'utilise pas de ruses. Elle vient, et vient, et vient encore.",
-          "Ma règle maison : des Hexons et de l'énergie, aucun Dresseur. Trois cartes Récompense. Toi et la marée, c'est tout."
+          "Ma règle maison : des Hexons et de l'énergie, aucun Objet. Trois cartes Récompense. Toi et la marée, c'est tout."
         ],
         "lose": [
           "You leaned on your tricks. The tide doesn't care for them."
@@ -4123,7 +4123,7 @@
       "z": 18,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Shh! The clams can hear you coming. Now they've gone deep. Thanks.",

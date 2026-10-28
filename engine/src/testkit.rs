@@ -63,9 +63,9 @@ pub fn attack_with(g: &mut Game, damage: u16, effects: &'static [Effect]) -> Vec
     resolve(g, Source::Attack, damage, effects)
 }
 
-/// The turn player resolves these effects as a trainer with no card.
-pub fn trainer_with(g: &mut Game, effects: &'static [Effect]) -> Vec<Event> {
-    resolve(g, Source::Trainer, 0, effects)
+/// The turn player resolves these effects as a Gear card with no card.
+pub fn gear_with(g: &mut Game, effects: &'static [Effect]) -> Vec<Event> {
+    resolve(g, Source::Gear, 0, effects)
 }
 
 /// The turn player's Active resolves these effects as an activated Power.

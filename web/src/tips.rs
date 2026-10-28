@@ -46,8 +46,8 @@ impl Tip {
     pub fn text(self) -> &'static str {
         match self {
             Tip::FirstTurn => tr(
-                "The player who goes first can't attack on their first turn. Set up instead: Basics, energy, trainers.",
-                "Le premier joueur ne peut pas attaquer à son premier tour. Préparez-vous\u{a0}: Hexons de Base, énergie, Dresseurs.",
+                "The player who goes first can't attack on their first turn. Set up instead: Basics, energy, Gear cards.",
+                "Le premier joueur ne peut pas attaquer à son premier tour. Préparez-vous\u{a0}: Hexons de Base, énergie, Objets.",
             ),
             Tip::Asleep => tr(
                 "An Asleep Hexon can't attack or retreat. Between turns its owner flips a coin: heads, it wakes up.",

@@ -15,11 +15,11 @@ pub struct CardFr {
     pub attacks: &'static [(&'static str, &'static str)],
     /// The Power's (name, rules text).
     pub power: Option<(&'static str, &'static str)>,
-    /// A trainer's rules text (empty for creatures and energy).
+    /// A Gear card's rules text (empty for creatures and energy).
     pub text: &'static str,
 }
 
-/// A creature (or Trainer-as-Basic).
+/// A creature (or Gear-as-Basic).
 const fn c(
     en: &'static str,
     name: &'static str,
@@ -35,7 +35,7 @@ const fn c(
     }
 }
 
-/// A trainer.
+/// A Gear card.
 const fn t(en: &'static str, name: &'static str, text: &'static str) -> CardFr {
     CardFr {
         en,
@@ -92,7 +92,7 @@ pub static FR: &[CardFr] = &[
     // ----- Tide Mind: Water line -----
     c("Puddock", "Flaquaud", &[
         ("Crachat de bulles", "Lancez une pièce. Si c'est face, le Hexon en défense est maintenant Paralysé."),
-        ("Nuage de vase", "Votre adversaire ne peut pas jouer de cartes Dresseur pendant son prochain tour."),
+        ("Nuage de vase", "Votre adversaire ne peut pas jouer de cartes Objet pendant son prochain tour."),
     ], None),
     c("Brookhorn", "Ruissecorne", &[
         ("Remous", "Votre adversaire échange le Hexon en défense contre 1 des Hexons de son Banc."),
@@ -123,7 +123,7 @@ pub static FR: &[CardFr] = &[
     c("Scampit", "Galopiot", &[
         ("Grignotage", ""),
     ], Some(("Fouinage", "Une fois pendant votre tour, si ce Hexon était en jeu au début de votre tour, vous pouvez piocher une carte."))),
-    // ----- Trainers -----
+    // ----- Gear -----
     t("Trail Compass", "Boussole", "Cherchez une carte Hexon de Base dans votre deck, ajoutez-la à votre main, puis mélangez votre deck."),
     t("Lucky Satchel", "Besace fétiche", "Piochez 2 cartes."),
     t("Moss Poultice", "Cataplasme", "Soigne jusqu'à 30 dégâts de votre Hexon Actif."),
@@ -372,11 +372,11 @@ pub static FR: &[CardFr] = &[
         ("Gazouillis soignant", "Soigne 20 dégâts de ce Hexon."),
         ("Air apaisant", "Guérit les deux Hexons Actifs de toutes leurs altérations."),
     ], None),
-    // ----- Trainers -----
+    // ----- Gear -----
     t("Dowsing Rod", "Baguette sourcière", "Cherchez une carte Énergie de base dans votre deck, ajoutez-la à votre main, puis mélangez votre deck."),
     t("Field Guide", "Guide nature", "Cherchez une carte Hexon dans votre deck, ajoutez-la à votre main, puis mélangez votre deck."),
     t("Ash Sifter", "Tamis à cendres", "Ajoutez une carte Énergie de base de votre défausse à votre main."),
-    t("Scrap Ledger", "Carnet de récup", "Ajoutez une carte Dresseur de votre défausse à votre main."),
+    t("Scrap Ledger", "Carnet de récup", "Ajoutez une carte Objet de votre défausse à votre main."),
     t("Clean Slate", "Table rase", "Défaussez votre main, puis piochez 7 cartes."),
     t("Grove Balm", "Baume du bosquet", "Soigne jusqu'à 20 dégâts de chacun de vos Hexons."),
     t("Charge Coil", "Bobine de charge", "Cherchez une carte Énergie de base dans votre deck et attachez-la à votre Hexon Actif, puis mélangez votre deck."),
@@ -424,7 +424,7 @@ mod tests {
     use crate::set::CARDS;
 
     /// One French row per card, in order, with the same attacks, Power and
-    /// trainer text, nothing left empty that English fills, and unique names.
+    /// Gear text, nothing left empty that English fills, and unique names.
     #[test]
     fn french_rows_match_the_set() {
         assert_eq!(FR.len(), CARDS.len(), "one French row per card");
@@ -438,10 +438,10 @@ mod tests {
                 f.name
             );
             let (attacks, power, text) = match &c.kind {
-                CardKind::Creature(cr) | CardKind::TrainerBasic(cr) => {
+                CardKind::Creature(cr) | CardKind::GearBasic(cr) => {
                     (cr.attacks, cr.power.as_ref(), "")
                 }
-                CardKind::Trainer(t) => (&[][..], None, t.text),
+                CardKind::Gear(t) => (&[][..], None, t.text),
                 CardKind::Energy(_) => (&[][..], None, ""),
             };
             assert_eq!(f.attacks.len(), attacks.len(), "{}: attack count", c.name);
@@ -469,12 +469,7 @@ mod tests {
                     p.name
                 );
             }
-            assert_eq!(
-                text.is_empty(),
-                f.text.is_empty(),
-                "{}: trainer text",
-                c.name
-            );
+            assert_eq!(text.is_empty(), f.text.is_empty(), "{}: Gear text", c.name);
         }
     }
 

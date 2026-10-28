@@ -1,10 +1,10 @@
 //! Effect primitives: the data cards use to describe what attacks, Powers and
-//! trainers do (R-EFFECT-01/04). The engine dispatches them; cards hold no code.
+//! Gear cards do (R-EFFECT-01/04). The engine dispatches them; cards hold no code.
 //!
 //! Each effect runs at a fixed pipeline phase (see [`Effect::phase`]); effects
 //! that need a decision ask for it in the selection step before anything is
 //! paid (`PromptKind::Choose`). "Defender" means the opponent's Active and
-//! "self" the creature using the attack or Power (the own Active for trainers).
+//! "self" the creature using the attack or Power (the own Active for Gear cards).
 
 use crate::card::{CardId, Color};
 use crate::condition::{Placed, Shield, Status};
@@ -43,7 +43,7 @@ pub enum Effect {
     /// Inflict a condition on self; ignores immunity and negation (R-STATUS-14).
     InflictSelf(Status),
     /// Clear the own Active's conditions (both Actives with `both`). As a
-    /// trainer or Power it needs a condition to clear (R-STATUS-12).
+    /// Gear or Power it needs a condition to clear (R-STATUS-12).
     Cure { both: bool },
 
     // ----- Shields and effects on the defender -----
@@ -56,9 +56,9 @@ pub enum Effect {
     /// The player picks one of the defender's attacks; it can't be used on its
     /// owner's next turn (R-TURN-05).
     DisableAttack,
-    /// The opponent can't play trainers on their next turn; set even when the
-    /// attack was negated (R-TRAINER-04).
-    TrainerLock,
+    /// The opponent can't play Gear cards on their next turn; set even when the
+    /// attack was negated (R-GEAR-04).
+    GearLock,
     /// Change the defender's weakness (R-DMG-03).
     DefenderWeakness(Color),
     /// Change self's resistance (R-DMG-03).
@@ -80,20 +80,20 @@ pub enum Effect {
     SwitchDefender { chooser_is_attacker: bool },
     /// Switch self with one of the player's Benched creatures (R-RETREAT-04).
     SwitchSelf,
-    /// Heal self (the own Active), capped at max HP. As a trainer or Power it
+    /// Heal self (the own Active), capped at max HP. As a Gear card or Power it
     /// needs damage to heal (R-EFFECT-04).
     Heal(u16),
     /// Heal every one of the player's creatures by up to N, capped at max HP.
-    /// As a trainer or Power it needs damage somewhere (an engine extension).
+    /// As a Gear card or Power it needs damage somewhere (an engine extension).
     HealAll(u16),
     /// Take a basic energy of this colour (`Colorless`: any) from the deck,
     /// picked by the player, attach it to self, then shuffle (R-ZONE-03).
-    /// As a trainer or Power it needs a match in the deck (an engine extension).
+    /// As a Gear card or Power it needs a match in the deck (an engine extension).
     AttachFromDeck(Color),
     /// The defender returns to its previous stage; the top card goes to its
     /// owner's hand (R-EVO-12).
     Devolve,
-    /// Trainer: put a Stage 2 from hand straight onto a settled Basic (R-EVO-10).
+    /// Gear: put a Stage 2 from hand straight onto a settled Basic (R-EVO-10).
     StageSkip,
 
     // ----- Cards -----
@@ -107,11 +107,11 @@ pub enum Effect {
     Search(Find),
     /// Put a matching card from the discard pile into the hand (R-ZONE-05).
     Recover(Find),
-    /// Trainer: this card stays attached to the own Active as a +10 trainer
-    /// (R-DMG-01, R-TRAINER-05).
+    /// Gear: this card stays attached to the own Active as a +10 Gear
+    /// (R-DMG-01, R-GEAR-05).
     AttachPlus10,
-    /// Trainer: this card stays attached to a creature the player picks as a
-    /// −20 trainer (R-DMG-01, R-TRAINER-05).
+    /// Gear: this card stays attached to a creature the player picks as a
+    /// −20 Gear (R-DMG-01, R-GEAR-05).
     AttachMinus20,
 
     // ----- Attack flags -----
@@ -131,7 +131,7 @@ pub enum Find {
     Basic,
     Creature,
     BasicEnergy,
-    Trainer,
+    Gear,
 }
 
 /// One option of a `PromptKind::Choose`.
@@ -174,7 +174,7 @@ impl Effect {
             | Protect { .. }
             | Place { .. }
             | DisableAttack
-            | TrainerLock => Phase::Before,
+            | GearLock => Phase::Before,
             _ => Phase::After,
         }
     }

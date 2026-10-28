@@ -137,7 +137,7 @@ pub fn Inspector() -> impl IntoView {
                                     {m.statuses.iter().map(|&s| view! {
                                         <span class=format!("badge status {}", status_class(s))>{s.to_string()}</span>
                                     }).collect_view()}
-                                    {m.trainers.iter().map(|&t| view! { <span class="badge tool">{card(t).label()}</span> }).collect_view()}
+                                    {m.gears.iter().map(|&t| view! { <span class="badge tool">{card(t).label()}</span> }).collect_view()}
                                 </div>
                                 {(!m.effects.is_empty()).then(|| view! {
                                     <ul class="effects">{m.effects.iter().map(|e| view! { <li>{e.clone()}</li> }).collect_view()}</ul>
@@ -361,7 +361,7 @@ pub fn GameOver() -> impl IntoView {
         .with_value(|s| s.as_ref().and_then(|s| s.face()))
         .and_then(campaign::opponent)
         .and_then(|o| o.lines.map(|l| (o.id, o.name, l)));
-    let duelist = opponent.and_then(sixfold_engine::trainers::trainer);
+    let duelist = opponent.and_then(sixfold_engine::duelists::duelist);
     let post = ctl.setup.with_value(|s| s.as_ref().and_then(|s| s.post));
     let back = ctl
         .setup

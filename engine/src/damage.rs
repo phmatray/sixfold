@@ -28,7 +28,7 @@ pub(crate) fn halve(d: i32) -> i32 {
 impl Game {
     /// What player `p`'s Active would do to the opposing Active with its attack
     /// `attack` right now (R-DMG-01): the printed damage with every coin tails,
-    /// weakness, resistance, trainers, shields, reduction Powers and whole-attack
+    /// weakness, resistance, Gear cards, shields, reduction Powers and whole-attack
     /// prevention, but no prevention coin. Ignores whose turn it is, so it also
     /// answers "what can the opponent do to me next turn". Reads only public
     /// board state. `None` when either Active is missing or there is no such attack.
@@ -79,11 +79,11 @@ impl Game {
     }
 
     /// R-DMG-03: the colour weakness and resistance are compared with. A
-    /// Power-made colour counts only while that Power works; a Trainer-as-Basic
+    /// Power-made colour counts only while that Power works; a Gear-as-Basic
     /// is colour index 6 (colorless).
     pub(crate) fn color_of(&self, p: usize, slot: usize) -> Color {
         let c = self.players[p].slot(slot).expect("in play");
-        if c.is_trainer_basic() {
+        if c.is_gear_basic() {
             return Color::Colorless;
         }
         match c.color_override {
@@ -215,7 +215,7 @@ impl Game {
     }
 
     /// R-DMG-04: effect damage from player `p` to (q, slot): never weakness or
-    /// resistance; +10 trainers on an Active target; −20 trainers except for
+    /// resistance; +10 Gear cards on an Active target; −20 Gear cards except for
     /// Power damage; the Active's reductions; the Bench's reduction Power after
     /// the clamp.
     pub(crate) fn effect_damage(
@@ -247,7 +247,7 @@ impl Game {
     }
 
     /// R-DMG-05: damage to its own Active (confusion, recoil): own weakness and
-    /// resistance against its own colour, own trainers, clamp. Never prevented.
+    /// resistance against its own colour, own Gear cards, clamp. Never prevented.
     pub(crate) fn self_damage(&self, p: usize, amount: u16) -> Hit {
         let mut hit = Hit::default();
         let mut d = amount as i32;
@@ -315,8 +315,8 @@ mod tests {
         main_phase(2)
     }
 
-    fn attach_trainer(g: &mut Game, p: usize, slot: usize, card: crate::CardId) {
-        g.players[p].slot_mut(slot).unwrap().trainers.push(card);
+    fn attach_gear(g: &mut Game, p: usize, slot: usize, card: crate::CardId) {
+        g.players[p].slot_mut(slot).unwrap().gears.push(card);
     }
 
     /// R-DMG-01, R-DMG-11, R-DMG-12: the public preview runs the same
@@ -324,7 +324,7 @@ mod tests {
     #[test]
     fn preview_attack_matches_dealt_damage() {
         let mut g = duel();
-        attach_trainer(&mut g, 0, 0, WHETSTONE);
+        attach_gear(&mut g, 0, 0, WHETSTONE);
         let hit = g.preview_attack(0, 0).unwrap();
         // Vine Poke 10 ×2 (Pebblet is weak to Grass) +10.
         assert_eq!(
@@ -343,11 +343,11 @@ mod tests {
 
     /// R-DMG-01
     #[test]
-    fn damage_order_weakness_then_resistance_then_trainers() {
+    fn damage_order_weakness_then_resistance_then_gears() {
         let mut g = duel();
         g.players[1].effects.resistance = Some(Grass);
-        attach_trainer(&mut g, 0, 0, WHETSTONE);
-        attach_trainer(&mut g, 1, 0, BUCKLER);
+        attach_gear(&mut g, 0, 0, WHETSTONE);
+        attach_gear(&mut g, 1, 0, BUCKLER);
         let ev = attack_with(&mut g, 30, &[]);
         // 30 ×2 = 60, −30 = 30, +10 = 40, −20 = 20.
         assert_eq!(damage_to(&ev, 1, 0), vec![20]);
@@ -360,7 +360,7 @@ mod tests {
         let mut g = duel();
         g.players[1].effects.weakness = Some(Water);
         g.players[1].effects.resistance = Some(Grass);
-        attach_trainer(&mut g, 0, 0, WHETSTONE);
+        attach_gear(&mut g, 0, 0, WHETSTONE);
         let ev = attack_with(&mut g, 10, &[]);
         assert_eq!(damage_to(&ev, 1, 0), vec![0]);
         assert_eq!(hp(&g, 1, 0), 60);
@@ -370,12 +370,12 @@ mod tests {
     #[test]
     fn zero_base_damage_ignores_weakness_and_plus10() {
         let mut g = duel();
-        attach_trainer(&mut g, 0, 0, WHETSTONE);
+        attach_gear(&mut g, 0, 0, WHETSTONE);
         let ev = attack_with(&mut g, 0, &[]);
         assert!(damage_to(&ev, 1, 0).is_empty(), "no direct damage at all");
         // The attacker step leaving it at 0 (all tails) also skips everything.
         let mut g = duel();
-        attach_trainer(&mut g, 0, 0, WHETSTONE);
+        attach_gear(&mut g, 0, 0, WHETSTONE);
         g.force_coins(&[false, false]);
         let ev = attack_with(&mut g, 0, &[AddPerHeads { coins: 2, per: 10 }]);
         assert_eq!(damage_to(&ev, 1, 0), vec![0]);
@@ -403,7 +403,7 @@ mod tests {
     }
 
     /// R-DMG-03: a Power-made colour counts only while that Power works, and a
-    /// Trainer-as-Basic is colorless.
+    /// Gear-as-Basic is colorless.
     #[test]
     fn changed_attacker_colour_needs_working_power() {
         let mut g = duel();
@@ -431,7 +431,7 @@ mod tests {
         let mut g = duel();
         g.players[1].bench.push(creature(PEBBLET, &[])); // weak to Grass
         g.players[0].bench.push(creature(EMBERKIT, &[]));
-        attach_trainer(&mut g, 0, 0, WHETSTONE);
+        attach_gear(&mut g, 0, 0, WHETSTONE);
         let ev = attack_with(
             &mut g,
             0,
@@ -452,10 +452,10 @@ mod tests {
 
     /// R-DMG-04
     #[test]
-    fn bench_minus20_trainer_reduces_effect_damage() {
+    fn bench_minus20_gear_reduces_effect_damage() {
         let mut g = duel();
         g.players[1].bench.push(creature(PEBBLET, &[]));
-        attach_trainer(&mut g, 1, 1, BUCKLER);
+        attach_gear(&mut g, 1, 1, BUCKLER);
         let ev = attack_with(
             &mut g,
             0,
@@ -474,7 +474,7 @@ mod tests {
     #[test]
     fn effect_damage_active_and_bench_rules() {
         let mut g = duel();
-        attach_trainer(&mut g, 0, 0, WHETSTONE);
+        attach_gear(&mut g, 0, 0, WHETSTONE);
         g.players[1].effects.shield = Some(Shield::Reduce(10));
         assert_eq!(
             g.effect_damage(0, 1, 0, 20, false).amount,
@@ -482,7 +482,7 @@ mod tests {
             "20 +10 −10, no weakness"
         );
         g.players[1].bench.push(creature(BULWARK, &[]));
-        attach_trainer(&mut g, 1, 1, BUCKLER);
+        attach_gear(&mut g, 1, 1, BUCKLER);
         assert_eq!(
             g.effect_damage(0, 1, 1, 50, false).amount,
             0,
@@ -520,12 +520,12 @@ mod tests {
         assert_eq!(damage_to(&ev, 0, 0), vec![0]);
     }
 
-    /// R-DMG-05: self-damage can't be prevented and uses its own trainers.
+    /// R-DMG-05: self-damage can't be prevented and uses its own Gear cards.
     #[test]
-    fn recoil_uses_own_trainers_and_ignores_shields() {
+    fn recoil_uses_own_gears_and_ignores_shields() {
         let mut g = duel();
         g.players[0].effects.shield = Some(Shield::PreventDamage);
-        attach_trainer(&mut g, 0, 0, WHETSTONE);
+        attach_gear(&mut g, 0, 0, WHETSTONE);
         let ev = attack_with(&mut g, 10, &[Recoil(20)]);
         assert_eq!(damage_to(&ev, 0, 0), vec![30]);
     }
@@ -623,7 +623,7 @@ mod tests {
     #[test]
     fn ignore_wr_flag_skips_weakness_keeps_plus10() {
         let mut g = duel();
-        attach_trainer(&mut g, 0, 0, WHETSTONE);
+        attach_gear(&mut g, 0, 0, WHETSTONE);
         let ev = attack_with(&mut g, 20, &[IgnoreWeaknessResistance]);
         assert_eq!(damage_to(&ev, 1, 0), vec![30]);
     }
@@ -888,7 +888,7 @@ mod tests {
     fn retaliation_power_deals_flat_10() {
         let mut g = duel();
         g.players[1].active = Some(creature(THORNBACK, &[]));
-        attach_trainer(&mut g, 1, 0, BUCKLER);
+        attach_gear(&mut g, 1, 0, BUCKLER);
         let ev = attack_with(&mut g, 30, &[]);
         assert_eq!(damage_to(&ev, 1, 0), vec![10]);
         assert_eq!(damage_to(&ev, 0, 0), vec![10]);

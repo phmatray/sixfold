@@ -67,10 +67,10 @@ pub fn RarityMark(rarity: Rarity) -> impl IntoView {
 pub enum Kind {
     All,
     Creature,
-    /// Basic Hexons only (Trainers-as-Basic aside): the deck editor's fix for
+    /// Basic Hexons only (Gear-as-Basic aside): the deck editor's fix for
     /// a deck with none.
     Basic,
-    Trainer,
+    Gear,
     Energy,
 }
 
@@ -115,8 +115,8 @@ impl Filters {
             .filter(|&id| {
                 let def = card(id);
                 let k = match def.kind {
-                    CardKind::Creature(_) | CardKind::TrainerBasic(_) => Kind::Creature,
-                    CardKind::Trainer(_) => Kind::Trainer,
+                    CardKind::Creature(_) | CardKind::GearBasic(_) => Kind::Creature,
+                    CardKind::Gear(_) => Kind::Gear,
                     CardKind::Energy(_) => Kind::Energy,
                 };
                 let has = owned.count(id) > 0;
@@ -169,7 +169,7 @@ pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView 
         Kind::All => "all",
         Kind::Creature => "creature",
         Kind::Basic => "basic",
-        Kind::Trainer => "trainer",
+        Kind::Gear => "gear",
         Kind::Energy => "energy",
     };
     let rarity_value = move || {
@@ -201,12 +201,12 @@ pub fn FilterBar(f: Filters, #[prop(optional)] show_own: bool) -> impl IntoView 
                 <label class="field">
                     <span>{tr("Kind", "Type")}</span>
                     <select name="kind" prop:value=kind_value on:change=move |e| f.kind.set(match event_target_value(&e).as_str() {
-                        "creature" => Kind::Creature, "basic" => Kind::Basic, "trainer" => Kind::Trainer, "energy" => Kind::Energy, _ => Kind::All,
+                        "creature" => Kind::Creature, "basic" => Kind::Basic, "gear" => Kind::Gear, "energy" => Kind::Energy, _ => Kind::All,
                     })>
                         <option value="all">{tr("All kinds", "Tous les types")}</option>
                         <option value="creature">{tr("Hexons", "Hexons")}</option>
                         <option value="basic">{tr("Basic Hexons", "Hexons de Base")}</option>
-                        <option value="trainer">{tr("Trainers", "Dresseurs")}</option>
+                        <option value="gear">{tr("Gear", "Objets")}</option>
                         <option value="energy">{tr("Energy", "Énergies")}</option>
                     </select>
                 </label>
@@ -690,8 +690,8 @@ fn Sheet(ids: Vec<CardId>, start: usize, open: Option<Callback<usize>>) -> impl 
 fn Tally(f: Filters) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
     let kind_of = |id: CardId| match card(id).kind {
-        CardKind::Creature(_) | CardKind::TrainerBasic(_) => Kind::Creature,
-        CardKind::Trainer(_) => Kind::Trainer,
+        CardKind::Creature(_) | CardKind::GearBasic(_) => Kind::Creature,
+        CardKind::Gear(_) => Kind::Gear,
         CardKind::Energy(_) => Kind::Energy,
     };
     let row = move |label: AnyView,
@@ -720,7 +720,7 @@ fn Tally(f: Filters) -> impl IntoView {
     };
     let kinds = [
         (Kind::Creature, tr("Hexons", "Hexons")),
-        (Kind::Trainer, tr("Trainers", "Dresseurs")),
+        (Kind::Gear, tr("Gear", "Objets")),
         (Kind::Energy, tr("Special energy", "Énergie spéciale")),
     ]
     .map(|(k, l)| {

@@ -1,4 +1,4 @@
-//! Main-phase actions (R-TURN-04): bench, evolve, attach, trainer, Power, attack.
+//! Main-phase actions (R-TURN-04): bench, evolve, attach, Gear, Power, attack.
 
 use crate::action::{Action, Event, RuleError};
 use crate::card::{can_pay, card, CardKind, EnergyCard, PowerKind, Stage};
@@ -13,9 +13,9 @@ impl Game {
         match action {
             Action::PlayBasic(h) => {
                 self.check_placeable(p, h)?;
-                // RULES: R-TRAINER-04 — a Trainer-as-Basic is still a trainer, so the lock applies.
-                if pl.trainer_locked && matches!(card(pl.hand[h]).kind, CardKind::TrainerBasic(_)) {
-                    return Err(RuleError::TrainerLocked);
+                // RULES: R-GEAR-04 — a Gear-as-Basic is still a Gear card, so the lock applies.
+                if pl.gear_locked && matches!(card(pl.hand[h]).kind, CardKind::GearBasic(_)) {
+                    return Err(RuleError::GearLocked);
                 }
                 if pl.bench.len() >= MAX_BENCH {
                     return Err(RuleError::BenchFull);
@@ -35,17 +35,17 @@ impl Game {
                 }
                 Ok(())
             }
-            // R-TRAINER-02 steps 1–3: lock, then each effect's phase-1 check.
-            Action::PlayTrainer(h) => {
-                let CardKind::Trainer(t) = &self.hand_card(p, h)?.kind else {
-                    return Err(RuleError::NotATrainer);
+            // R-GEAR-02 steps 1–3: lock, then each effect's phase-1 check.
+            Action::PlayGear(h) => {
+                let CardKind::Gear(t) = &self.hand_card(p, h)?.kind else {
+                    return Err(RuleError::NotGear);
                 };
-                if pl.trainer_locked {
-                    return Err(RuleError::TrainerLocked);
+                if pl.gear_locked {
+                    return Err(RuleError::GearLocked);
                 }
                 t.effects
                     .iter()
-                    .try_for_each(|e| self.effect_check(p, 0, e, Source::Trainer))
+                    .try_for_each(|e| self.effect_check(p, 0, e, Source::Gear))
             }
             Action::UsePower(slot) => self.check_power(p, slot),
             Action::Retreat => self.check_retreat(p),
@@ -70,7 +70,7 @@ impl Game {
                 }
             }
             Action::AttachEnergy { hand, slot } => self.attach(p, hand, slot, ev),
-            Action::PlayTrainer(h) => return self.play_trainer(p, h),
+            Action::PlayGear(h) => return self.play_gear(p, h),
             Action::UsePower(slot) => return self.use_power(p, slot),
             Action::Retreat => return self.start_retreat(p),
             Action::Attack(i) => return self.attack(p, i, ev),
@@ -170,20 +170,20 @@ impl Game {
         });
     }
 
-    /// R-TRAINER-02: the card waits in limbo while its effects resolve.
-    fn play_trainer(&mut self, p: usize, h: usize) {
+    /// R-GEAR-02: the card waits in limbo while its effects resolve.
+    fn play_gear(&mut self, p: usize, h: usize) {
         let id = self.players[p].hand.remove(h);
-        let CardKind::Trainer(t) = &card(id).kind else {
+        let CardKind::Gear(t) = &card(id).kind else {
             unreachable!("validated")
         };
-        self.begin(Source::Trainer, p, 0, t.effects, 0);
+        self.begin(Source::Gear, p, 0, t.effects, 0);
         let pd = self.pending.as_mut().expect("just begun");
         pd.card = Some(id);
         pd.hand_index = h;
     }
 
     /// Phase-1 check of one effect (R-EFFECT-01): failing refuses the play and
-    /// changes nothing. Trainers and Powers also need something to work on;
+    /// changes nothing. Gear and Powers also need something to work on;
     /// attacks just skip what they can't do.
     pub(crate) fn effect_check(
         &self,
@@ -203,7 +203,7 @@ impl Game {
             Search(_) if pl.deck.is_empty() => Err(RuleError::DeckEmpty),
             Recover(find) => need(pl.discard.iter().any(|&c| matches(find, c))),
             // RULES: R-EFFECT-04 — "requiring some damage" is a precondition for
-            // trainers and Powers; an attack's heal just does nothing.
+            // Gear cards and Powers; an attack's heal just does nothing.
             Heal(_) if !attack => need(pl.active.as_ref().is_some_and(|a| a.damage() > 0)),
             HealAll(_) if !attack => need(pl.in_play().any(|(_, c)| c.damage() > 0)),
             AttachFromDeck(color) if !attack => need(
@@ -558,20 +558,20 @@ mod tests {
         assert_eq!(g.players[0].active.as_ref().unwrap().hp, 60);
     }
 
-    /// R-EVO-07: energy and attached trainers stay, and the trainers keep
+    /// R-EVO-07: energy and attached Gear cards stay, and the Gear cards keep
     /// counting (evolve leaves `+DA/+E0` alone).
     #[test]
     fn evolve_keeps_attached_energy() {
         let mut g = main_phase(2);
         let a = g.players[0].active.as_mut().unwrap();
         a.energy = vec![GRASS_E, TWIN_E];
-        a.trainers = vec![WHETSTONE, BUCKLER];
+        a.gears = vec![WHETSTONE, BUCKLER];
         set_hand(&mut g, 0, &[MOSSBACK]);
         ok(&mut g, evolve(0));
         let a = g.players[0].active.as_ref().unwrap();
         assert_eq!(a.energy, vec![GRASS_E, TWIN_E]);
         assert_eq!(a.stack, vec![MOSSLING, MOSSBACK]);
-        assert_eq!(a.trainers, vec![WHETSTONE, BUCKLER]);
+        assert_eq!(a.gears, vec![WHETSTONE, BUCKLER]);
         assert_eq!(a.attached(crate::Effect::AttachPlus10), 1);
     }
 
@@ -662,12 +662,12 @@ mod tests {
         ok(&mut g, evolve(0));
     }
 
-    /// R-TRAINER-01 (core): trainers don't end the turn and go to the discard.
+    /// R-GEAR-01 (core): Gear cards don't end the turn and go to the discard.
     #[test]
-    fn trainer_resolves_then_discards() {
+    fn gear_resolves_then_discards() {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[FIELD_NOTES]);
-        let ev = ok(&mut g, Action::PlayTrainer(0));
+        let ev = ok(&mut g, Action::PlayGear(0));
         assert_eq!(
             ev.iter()
                 .filter(|e| matches!(e, Event::CardDrawn { .. }))
@@ -675,12 +675,9 @@ mod tests {
             2
         );
         assert_eq!(g.players[0].discard, vec![FIELD_NOTES]);
-        g.players[0].trainer_locked = true;
+        g.players[0].gear_locked = true;
         set_hand(&mut g, 0, &[FIELD_NOTES, STRAW_DECOY]);
-        assert_eq!(
-            err(&mut g, Action::PlayTrainer(0)),
-            RuleError::TrainerLocked
-        );
-        assert_eq!(err(&mut g, Action::PlayBasic(1)), RuleError::TrainerLocked);
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::GearLocked);
+        assert_eq!(err(&mut g, Action::PlayBasic(1)), RuleError::GearLocked);
     }
 }

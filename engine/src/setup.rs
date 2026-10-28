@@ -56,7 +56,7 @@ impl Game {
         }
     }
 
-    /// R-SETUP-04: only Basics or Trainer-as-Basic cards can be placed.
+    /// R-SETUP-04: only Basics or Gear-as-Basic cards can be placed.
     pub(crate) fn check_placeable(&self, p: usize, h: usize) -> Result<(), RuleError> {
         if self.hand_card(p, h)?.plays_as_basic() {
             Ok(())
@@ -195,7 +195,7 @@ mod tests {
 
     /// R-SETUP-03
     #[test]
-    fn mulligan_ignores_trainer_as_basic() {
+    fn mulligan_ignores_gear_as_basic() {
         let mut d = one_basic_deck();
         d[..4].fill(STRAW_DECOY);
         let g = find_seed([d, deck()], |g| {
@@ -217,7 +217,7 @@ mod tests {
         g.apply(Action::PlayBasic(0)).unwrap();
         assert_eq!(g.players[0].active.as_ref().unwrap().top(), MOSSLING);
         assert_eq!(g.prompt.as_ref().unwrap().kind, PromptKind::ChooseBench);
-        g.apply(Action::PlayBasic(1)).unwrap(); // the Trainer-as-Basic goes to the Bench
+        g.apply(Action::PlayBasic(1)).unwrap(); // the Gear-as-Basic goes to the Bench
         assert_eq!(g.players[0].bench.len(), 1);
         g.apply(Action::Done).unwrap();
         assert_eq!(g.prompt.as_ref().unwrap().player, 1);

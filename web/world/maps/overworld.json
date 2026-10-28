@@ -2732,7 +2732,7 @@
       "z": 27,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 2,
         "challenge": [
           "Hey! You've got a deck. I can tell by the way you walk.",

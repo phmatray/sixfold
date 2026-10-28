@@ -1,7 +1,7 @@
 // Loading, cached for the session: maps (./maps/<name>.json, `x_fr` swapped in
 // for `x` on a French page), the models a map uses, and the idle prefetch of the
 // maps next door. Map blocks that expand into plainer data before a build (a
-// `trainer` into dialogue branches, finds, waymarks) belong in `loadMap`, after `localize`.
+// `duelist` into dialogue branches, finds, waymarks) belong in `loadMap`, after `localize`.
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { groundLayers, layer } from "./ground.js";
 import { SUFFIX_ARMS } from "./props.js";
@@ -47,7 +47,7 @@ export const setMap = (name, raw) => maps.set(name, Promise.resolve(expand(local
 
 // Shorthand blocks become plain dialogue, so one grammar drives everything
 // (WORLD_DESIGN §4.1, §5.1; engine/tests/world_data.rs checks the same expansion).
-// A route duelist (`trainer`): won: -> `win`, lost: -> `lose`, then any hand-written
+// A route duelist (`duelist`): won: -> `win`, lost: -> `lose`, then any hand-written
 // `dialogue`, beat: -> `after`, else `challenge` and the duel offer.
 // A find (`kind: "find"`): `text` and its `give` once (flag found_<id>), a glint
 // until then unless `hidden`, and a shrug after.
@@ -55,7 +55,7 @@ export const setMap = (name, raw) => maps.set(name, Promise.resolve(expand(local
 // and every touch opens the world map to travel.
 export function expand(map) {
   for (const n of map.npcs ?? []) {
-    const t = n.trainer;
+    const t = n.duelist;
     if (!t) continue;
     const id = n.id, say = (lines, extra) => (lines?.length ? [{ ...extra, lines }] : []);
     n.dialogue = [

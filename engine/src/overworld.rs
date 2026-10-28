@@ -59,7 +59,7 @@ use crate::booster::BOOSTERS;
 use crate::campaign::{rival, seals, KEEPERS, RIVALS, VOUCHED};
 use crate::card::{card, CardId};
 use crate::clock::{self, Phase};
-use crate::trainers::trainer;
+use crate::duelists;
 
 /// Facets a new player starts with, and a save from before Facets.
 pub const STARTING_COINS: u32 = 100;
@@ -115,11 +115,15 @@ pub const TRACKS: [&str; 18] = [
 /// The longest `wait:` a cutscene may hold, in milliseconds.
 pub const MAX_WAIT: u16 = 5000;
 
-/// Flags named after an NPC who has since been renamed, and their new names.
-const RENAMED: [(&str, &str); 3] = [
+/// Flags named after something that has since been renamed, and their new
+/// names: NPCs (1.2), and the route duelists' achievements, which were
+/// `trainers_*` up to 1.10 (#192).
+const RENAMED: [(&str, &str); 5] = [
     ("juniper_gift", "wynne_gift"),
     ("talked_juniper", "talked_wynne"),
     ("talked_flint", "talked_tarn"),
+    ("ach_trainers_10", "ach_duelists_10"),
+    ("ach_trainers_all", "ach_duelists_all"),
 ];
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -316,7 +320,7 @@ fn parts(s: &str) -> Option<(&str, Vec<&str>)> {
 
 /// A rival or a route duelist.
 fn duelist(id: &str) -> bool {
-    rival(id).is_some() || trainer(id).is_some()
+    rival(id).is_some() || duelists::duelist(id).is_some()
 }
 
 /// A card's `card:` name: its English name in lowercase, other characters `_`.
@@ -1168,7 +1172,7 @@ mod tests {
         let mut p = Progress::default();
         assert_eq!(p.apply("duel:t_tobin"), Ok(Applied::Duel("t_tobin".into())));
         assert!(!p.check("beat:t_tobin") && p.check("!beat:t_tobin"));
-        crate::trainers::record(crate::trainers::trainer("t_tobin").unwrap(), true, &mut p);
+        crate::duelists::record(crate::duelists::duelist("t_tobin").unwrap(), true, &mut p);
         assert!(p.check("beat:t_tobin") && p.check("won:t_tobin") && !p.check("lost:t_tobin"));
         // A duelist has no seal gate.
         assert!(!p.check("open:t_tobin") && !p.check("!open:t_tobin"));

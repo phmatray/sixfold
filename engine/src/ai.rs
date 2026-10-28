@@ -9,8 +9,8 @@
 //!
 //! A main phase is answered one action per call. Every call walks the same
 //! fixed order (R-AI-02, `docs/RULES.md` §16) and takes the first step that
-//! applies: draw and search trainers, Powers, benching, evolving, support
-//! trainers, retreat, energy, pre-attack trainers, then the best attack or the
+//! applies: draw and search Gear cards, Powers, benching, evolving, support
+//! Gear cards, retreat, energy, pre-attack Gear cards, then the best attack or the
 //! end of the turn. Each step is a small additive score with a threshold.
 //!
 //! Use one [`Ai`] per AI player: it remembers a little about the current turn
@@ -30,7 +30,7 @@ use crate::view::{Side, View};
 /// How well the AI plays.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Difficulty {
-    /// R-AI-03: skips a valid trainer or Power play one time in four. On
+    /// R-AI-03: skips a valid Gear or Power play one time in four. On
     /// top of the handheld's mistakes, Sixfold's Easy picks any attack that
     /// does something rather than the best one, and retreats only to dodge
     /// a knock-out.
@@ -63,14 +63,14 @@ pub enum Style {
     BenchSniper,
 }
 
-/// A trainer card or a creature's Power (by uid), remembered for the turn.
+/// A Gear card or a creature's Power (by uid), remembered for the turn.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Play {
-    Trainer(CardId),
+    Gear(CardId),
     Power(u32),
 }
 
-/// The main-phase steps a trainer can be played in (R-AI-02).
+/// The main-phase steps a Gear card can be played in (R-AI-02).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Step {
     Draw,
@@ -88,9 +88,9 @@ pub struct Ai {
     turn: Option<u32>,
     actions: u32,
     retreated: bool,
-    /// Trainers and Powers not to try again this turn.
+    /// Gear and Powers not to try again this turn.
     done: Vec<Play>,
-    /// The last trainer or Power started, in case its choice is cancelled.
+    /// The last Gear or Power started, in case its choice is cancelled.
     last: Option<Play>,
     /// R-AI-18: my turns in a row that this Active (by uid) ended without a
     /// damaging attack, and whether this turn's attack does damage.
@@ -195,7 +195,7 @@ impl Ai {
 
     /// R-AI-02's fixed order of steps: the first that applies.
     fn heuristic(&mut self, x: &Ctx) -> Action {
-        if let Some(a) = self.trainer(x, Step::Draw) {
+        if let Some(a) = self.gear(x, Step::Draw) {
             return a;
         }
         if let Some(a) = self.power(x) {
@@ -204,7 +204,7 @@ impl Ai {
         if let Some(a) = bench(x).or_else(|| evolve(x)) {
             return a;
         }
-        if let Some(a) = self.trainer(x, Step::Support) {
+        if let Some(a) = self.gear(x, Step::Support) {
             return a;
         }
         if let Some(a) = self.retreat(x) {
@@ -213,7 +213,7 @@ impl Ai {
         if let Some(a) = attach(x) {
             return a;
         }
-        if let Some(a) = self.trainer(x, Step::PreAttack) {
+        if let Some(a) = self.gear(x, Step::PreAttack) {
             return a;
         }
         self.attack(x)
@@ -234,7 +234,7 @@ impl Ai {
         Action::Attack(i)
     }
 
-    /// R-AI-03: Easy skips a valid trainer or Power play one time in four,
+    /// R-AI-03: Easy skips a valid Gear or Power play one time in four,
     /// and then leaves it for the rest of the turn.
     fn skips(&mut self, play: Play) -> bool {
         let skip = self.difficulty == Difficulty::Easy && self.rng.below(4) == 0;
@@ -244,21 +244,21 @@ impl Ai {
         skip
     }
 
-    fn trainer(&mut self, x: &Ctx, step: Step) -> Option<Action> {
+    fn gear(&mut self, x: &Ctx, step: Step) -> Option<Action> {
         for &a in &x.legal {
-            let Action::PlayTrainer(h) = a else { continue };
+            let Action::PlayGear(h) = a else { continue };
             let id = x.v.hand[h];
-            let CardKind::Trainer(t) = &card(id).kind else {
+            let CardKind::Gear(t) = &card(id).kind else {
                 continue;
             };
-            let play = Play::Trainer(id);
-            if self.done.contains(&play) || trainer_step(x, t.effects) != Some(step) {
+            let play = Play::Gear(id);
+            if self.done.contains(&play) || gear_step(x, t.effects) != Some(step) {
                 continue;
             }
             if self.skips(play) {
                 continue;
             }
-            // R-AI-13: the force-switch trainer once per turn.
+            // R-AI-13: the force-switch Gear once per turn.
             if t.effects.contains(&Effect::SwitchDefender {
                 chooser_is_attacker: true,
             }) {
@@ -297,7 +297,7 @@ impl Ai {
     }
 
     /// R-AI-07, R-AI-08: retreat a creature in trouble, at most once per turn,
-    /// when a clearly better one waits on the Bench. A self-switch trainer is
+    /// when a clearly better one waits on the Bench. A self-switch Gear is
     /// used instead when the cost is 3 or more, or when retreat isn't possible
     /// (it also frees an Asleep or Paralyzed Active).
     fn retreat(&mut self, x: &Ctx) -> Option<Action> {
@@ -327,8 +327,8 @@ impl Ai {
             return None;
         }
         let switch = x.legal.iter().copied().find(|&a| {
-            matches!(a, Action::PlayTrainer(h)
-                if matches!(&card(x.v.hand[h]).kind, CardKind::Trainer(t) if t.effects == [Effect::SwitchSelf]))
+            matches!(a, Action::PlayGear(h)
+                if matches!(&card(x.v.hand[h]).kind, CardKind::Gear(t) if t.effects == [Effect::SwitchSelf]))
         });
         let can_retreat = x.has(Action::Retreat);
         let a = match switch {
@@ -460,8 +460,8 @@ impl Ai {
                     }
                     None
                 }
-                Action::PlayTrainer(h) => {
-                    if self.done.contains(&Play::Trainer(x.v.hand[h])) {
+                Action::PlayGear(h) => {
+                    if self.done.contains(&Play::Gear(x.v.hand[h])) {
                         continue;
                     }
                     Some((1, x.v.hand[h], 0))
@@ -495,9 +495,9 @@ impl Ai {
                     self.last = Some(Play::Power(c.uid));
                 }
             }
-            Action::PlayTrainer(h) => {
+            Action::PlayGear(h) => {
                 let id = x.v.hand[h];
-                if let CardKind::Trainer(t) = &card(id).kind {
+                if let CardKind::Gear(t) = &card(id).kind {
                     if t.effects.contains(&Effect::SwitchSelf) {
                         self.retreated = true;
                     }
@@ -505,10 +505,10 @@ impl Ai {
                         .iter()
                         .any(|e| matches!(e, Effect::SwitchDefender { .. }))
                     {
-                        self.done.push(Play::Trainer(id));
+                        self.done.push(Play::Gear(id));
                     }
                 }
-                self.last = Some(Play::Trainer(id));
+                self.last = Some(Play::Gear(id));
             }
             Action::Attack(i) => self.hit = outcomes(x, x.me, i).iter().any(|&(_, d)| d > 0),
             _ => {}
@@ -781,7 +781,7 @@ impl<'a> Ctx<'a> {
 
 // ----- Setup and promotion -----
 
-/// R-AI-14: every Basic, in hand order: real Basics before Trainer-as-Basics.
+/// R-AI-14: every Basic, in hand order: real Basics before Gear-as-Basics.
 fn setup(x: &Ctx) -> Action {
     let basic = |real: bool| {
         x.legal
@@ -836,7 +836,7 @@ fn bring_in_score(x: &Ctx, c: &InPlay) -> i32 {
         return i32::MIN;
     }
     let mut s = c.hp as i32;
-    if c.is_trainer_basic() {
+    if c.is_gear_basic() {
         s -= 100;
     }
     if let Some(def) = x.theirs().active {
@@ -1004,9 +1004,9 @@ fn attach_score(x: &Ctx, energy: CardId, slot: usize) -> Option<i32> {
     Some(s)
 }
 
-/// When a trainer is worth playing, and in which step (R-AI-11/12/13).
+/// When a Gear card is worth playing, and in which step (R-AI-11/12/13).
 /// `None` means not now.
-fn trainer_step(x: &Ctx, effects: &[Effect]) -> Option<Step> {
+fn gear_step(x: &Ctx, effects: &[Effect]) -> Option<Step> {
     use Effect::*;
     let active = x.mine().active?;
     let deck = x.mine().deck_count;
@@ -1122,7 +1122,7 @@ fn side_damage(side: &Side, n: u16) -> u16 {
         .sum()
 }
 
-/// R-AI-11: the +10 trainer turns a hit that falls 10 short into a knock-out.
+/// R-AI-11: the +10 Gear turns a hit that falls 10 short into a knock-out.
 fn plus10_makes_ko(x: &Ctx) -> bool {
     let Some(def) = x.theirs().active else {
         return false;
@@ -1324,7 +1324,7 @@ fn effect_value(x: &Ctx, me: &InPlay, def: &InPlay, e: &Effect) -> f32 {
                 2.0
             }
         }
-        TrainerLock => 5.0,
+        GearLock => 5.0,
         InflictSelf(_) => -30.0,
         _ => 0.0,
     };
@@ -1499,7 +1499,7 @@ fn card_score(x: &Ctx, id: CardId) -> i32 {
             }
         }
         CardKind::Creature(c) => 30 + if x.in_play() < 4 { 20 } else { 0 } + c.hp as i32 / 10,
-        CardKind::TrainerBasic(_) => 5,
+        CardKind::GearBasic(_) => 5,
         CardKind::Energy(EnergyCard::Basic(col)) => {
             let needed = in_play
                 .iter()
@@ -1511,7 +1511,7 @@ fn card_score(x: &Ctx, id: CardId) -> i32 {
             }
         }
         CardKind::Energy(EnergyCard::DoubleColorless) => 25,
-        CardKind::Trainer(_) => 15,
+        CardKind::Gear(_) => 15,
     }
 }
 
@@ -1564,9 +1564,9 @@ fn binomial(n: u32, k: u32) -> u32 {
 }
 
 /// A creature's colour for weakness and resistance (R-DMG-03), roughly: a
-/// Power-made colour counts, a Trainer-as-Basic is colorless.
+/// Power-made colour counts, a Gear-as-Basic is colorless.
 fn color(c: &InPlay) -> Color {
-    if c.is_trainer_basic() {
+    if c.is_gear_basic() {
         return Color::Colorless;
     }
     c.color_override.unwrap_or(c.creature().color)
@@ -1773,7 +1773,7 @@ mod tests {
     }
 
     /// R-AI-14: the first real Basic in hand order becomes the Active, then
-    /// every other Basic goes to the Bench, Trainer-as-Basics last.
+    /// every other Basic goes to the Bench, Gear-as-Basics last.
     #[test]
     fn ai_setup_first_basic_active() {
         let mut g = Game::new([deck(), deck()], 3, Config::default()).unwrap();
@@ -1952,8 +1952,8 @@ mod tests {
         a.hp -= 10;
         g.players[0].active = Some(a);
         set_hand(&mut g, 0, &[MOSS_POULTICE]);
-        assert_ne!(pick_styled(&g, Style::Balanced), Action::PlayTrainer(0));
-        assert_eq!(pick_styled(&g, Style::Stall), Action::PlayTrainer(0));
+        assert_ne!(pick_styled(&g, Style::Balanced), Action::PlayGear(0));
+        assert_eq!(pick_styled(&g, Style::Stall), Action::PlayGear(0));
     }
 
     /// Bench sniper: a 10-damage snipe that brings a hurt Benched creature
@@ -2027,17 +2027,17 @@ mod tests {
         assert_eq!(chosen, [Action::Done]);
     }
 
-    /// R-AI-08: with a retreat cost of 3, a self-switch trainer is used instead.
+    /// R-AI-08: with a retreat cost of 3, a self-switch Gear is used instead.
     #[test]
-    fn ai_uses_switch_trainer_for_cost_three() {
+    fn ai_uses_switch_gear_for_cost_three() {
         let mut g = threatened_active(true);
         g.players[0].condition.poison = Poison::Poisoned;
         set_hand(&mut g, 0, &[SWAP_ROPE]);
         assert_eq!(g.retreat_cost(0), 3);
-        assert_eq!(pick(&g), Action::PlayTrainer(0));
+        assert_eq!(pick(&g), Action::PlayGear(0));
     }
 
-    /// R-AI-11: the +10 trainer is played only when it makes the knock-out.
+    /// R-AI-11: the +10 Gear is played only when it makes the knock-out.
     #[test]
     fn ai_plays_plus10_only_for_ko() {
         let mut g = main_phase(2);
@@ -2046,7 +2046,7 @@ mod tests {
         for (hp, plays) in [(30, true), (60, false), (20, false)] {
             g.players[1].active.as_mut().unwrap().hp = hp;
             let expected = if plays {
-                Action::PlayTrainer(0)
+                Action::PlayGear(0)
             } else {
                 Action::Attack(0)
             };
@@ -2056,15 +2056,15 @@ mod tests {
 
     /// R-AI-12: draw-2 needs at least 10 cards left in the deck.
     #[test]
-    fn ai_skips_draw_trainer_on_small_deck() {
+    fn ai_skips_draw_gear_on_small_deck() {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[FIELD_NOTES]);
-        assert_eq!(pick(&g), Action::PlayTrainer(0));
+        assert_eq!(pick(&g), Action::PlayGear(0));
         g.players[0].deck.truncate(9);
-        assert_ne!(pick(&g), Action::PlayTrainer(0));
+        assert_ne!(pick(&g), Action::PlayGear(0));
     }
 
-    /// R-AI-13: the force-switch trainer pulls in a Benched creature the
+    /// R-AI-13: the force-switch Gear pulls in a Benched creature the
     /// Active can knock out, when it can't knock out the defender.
     #[test]
     fn ai_force_switches_ko_able_bench() {
@@ -2074,8 +2074,8 @@ mod tests {
         weak.hp = 10;
         g.players[1].bench = vec![creature(PEBBLET, &[]), weak];
         set_hand(&mut g, 0, &[GALE_FAN]);
-        assert_eq!(pick(&g), Action::PlayTrainer(0));
-        ok(&mut g, Action::PlayTrainer(0));
+        assert_eq!(pick(&g), Action::PlayGear(0));
+        ok(&mut g, Action::PlayGear(0));
         let Some(PromptKind::Choose { options, .. }) = g.prompt().map(|p| p.kind.clone()) else {
             panic!("a choice")
         };
@@ -2117,15 +2117,15 @@ mod tests {
         assert_ne!(pick(&g), Action::UsePower(0));
     }
 
-    /// R-AI-03: Easy skips a valid trainer play about one time in four;
+    /// R-AI-03: Easy skips a valid Gear play about one time in four;
     /// Normal never does.
     #[test]
-    fn ai_easy_skips_quarter_of_valid_trainer_plays() {
+    fn ai_easy_skips_quarter_of_valid_gear_plays() {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[FIELD_NOTES]);
         let plays = |d| {
             (0..400)
-                .filter(|&s| Ai::new(s, d).choose_action(&g, 0) == Action::PlayTrainer(0))
+                .filter(|&s| Ai::new(s, d).choose_action(&g, 0) == Action::PlayGear(0))
                 .count()
         };
         assert!((260..=340).contains(&plays(Difficulty::Easy)));
