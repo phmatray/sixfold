@@ -458,17 +458,20 @@ export async function build(map, got, reduced) {
         else (o.material = o.material.clone()), o.material.color.set(c);
       });
       if (p.glow) obj.traverse((o) => o.isMesh && /glow/i.test(o.material.name) && ((o.material = o.material.clone()), o.material.color.set(p.glow), o.material.emissive.set(p.glow).multiplyScalar(0.55))); // a waymark's region colour
+      // A house with its own hours (`lit`, #114): its panes on materials of their own, before the merge and the fade.
+      const panes = [];
+      if (p.lit) obj.traverse((o) => o.isMesh && WINDOW.test(o.material.name) && panes.push((o.material = o.material.clone())));
       // A static model (no clip but its door's, not afloat) is merged like the instanced ones: one
       // draw for its flat-coloured parts instead of one per material.
       if (got[p.asset] && got[p.asset].animations.every(doorOnly) && !BOB.has(p.asset)) obj = merged(obj);
+      obj.userData.panes = panes;
       if (tall(obj)) fadeAll(obj);
       root.add(obj);
       if (BLOB[p.asset] && !got[p.asset]) blobs.push([cx, cz, BLOB[p.asset]]);
     }
     const rec = { ...p, obj, cx, cz, y };
     props.push(rec);
-    // Its panes on materials of their own, so this house lights at its own hour.
-    if (p.lit && obj) obj.traverse((o) => o.isMesh && WINDOW.test(o.material.name) && ((o.material = o.material.clone()), (o.material.userData.litBy = rec))), lit.push(rec);
+    if (obj?.userData.panes?.length) obj.userData.panes.forEach((m) => (m.userData.litBy = rec)), lit.push(rec);
     for (const i of map.interactions) if (i.x >= p.x && i.x < p.x + fw && i.z >= p.z && i.z < p.z + fd) i.obj = obj;
     const deck = DECK[p.asset];
     const cond = p.if ? { p, obj, tiles: [] } : null;
