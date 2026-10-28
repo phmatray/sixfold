@@ -968,6 +968,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
   el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit });
+  // A map's ambient life (#115) as drawn last frame: critters per kind, leaves, embers, boats, the micro-event; null without any.
+  el.sixfoldLife = () => world?.life.stats?.() ?? null;
 
   // Item popup preview: the model turning in its own small canvas.
   let pv = null;

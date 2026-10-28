@@ -4,6 +4,30 @@
   "region": "stone",
   "kind": "route",
   "music": "stone",
+  "life": {
+    "critters": [
+      {
+        "kind": "goat",
+        "zone": [
+          13,
+          15,
+          21,
+          20
+        ],
+        "n": 2
+      },
+      {
+        "kind": "goat",
+        "zone": [
+          1,
+          1,
+          9,
+          6
+        ],
+        "n": 2
+      }
+    ]
+  },
   "width": 30,
   "height": 44,
   "tiles": [

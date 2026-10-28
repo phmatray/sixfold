@@ -4,6 +4,28 @@
   "region": "stone",
   "kind": "site",
   "music": "stone",
+  "life": {
+    "critters": [
+      {
+        "kind": "goat",
+        "zone": [
+          8,
+          18,
+          16,
+          23
+        ],
+        "n": 2
+      }
+    ]
+  },
+  "calm": [
+    [
+      14,
+      0,
+      24,
+      8
+    ]
+  ],
   "width": 42,
   "height": 32,
   "tiles": [

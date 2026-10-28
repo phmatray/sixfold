@@ -4,6 +4,14 @@
   "region": "storm",
   "kind": "site",
   "music": "storm",
+  "calm": [
+    [
+      13,
+      0,
+      23,
+      9
+    ]
+  ],
   "width": 40,
   "height": 32,
   "tiles": [

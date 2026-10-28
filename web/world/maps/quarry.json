@@ -4,6 +4,30 @@
   "region": "ember",
   "kind": "route",
   "music": "ember",
+  "life": {
+    "critters": [
+      {
+        "kind": "lizard",
+        "zone": [
+          17,
+          19,
+          25,
+          24
+        ],
+        "n": 3
+      },
+      {
+        "kind": "lizard",
+        "zone": [
+          4,
+          4,
+          12,
+          9
+        ],
+        "n": 2
+      }
+    ]
+  },
   "width": 30,
   "height": 44,
   "tiles": [

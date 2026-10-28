@@ -35,6 +35,19 @@ export function boatAt(every, t) {
   return { k: 1, on: false };
 }
 
+// The lane a boat docks along at a pier tile: the side with the longest run of open water (`~`), up to
+// 14 tiles. { x, z } is where it ties up (world units), { dx, dz } outwards, `len` how far out it sails.
+// null when no side has 4 tiles of water (check-maps fails such a pier).
+export function boatLane(map, [px, pz]) {
+  let best = null;
+  for (const [dx, dz] of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
+    let n = 0;
+    while (n < 14 && map.tiles[pz + dz * (n + 1)]?.[px + dx * (n + 1)] === "~") n++;
+    if (n >= 4 && (!best || n > best.n)) best = { n, dx, dz };
+  }
+  return best && { x: px + 0.5 + best.dx * 1.5, z: pz + 0.5 + best.dz * 1.5, dx: best.dx, dz: best.dz, len: best.n - 1.5 };
+}
+
 function setup(map, mem, t) {
   const open = mem.open ?? ((x, z) => openTile(map, x, z));
   mem.critters = (map.life.critters ?? []).flatMap((g, gi) => {

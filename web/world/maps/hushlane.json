@@ -4,6 +4,40 @@
   "region": "dream",
   "kind": "route",
   "music": "dream",
+  "life": {
+    "critters": [
+      {
+        "kind": "glowbeetle",
+        "zone": [
+          15,
+          35,
+          23,
+          40
+        ],
+        "n": 4
+      },
+      {
+        "kind": "glowbeetle",
+        "zone": [
+          16,
+          22,
+          24,
+          27
+        ],
+        "n": 4
+      },
+      {
+        "kind": "hedgehog",
+        "zone": [
+          1,
+          7,
+          9,
+          12
+        ],
+        "n": 1
+      }
+    ]
+  },
   "width": 28,
   "height": 44,
   "tiles": [

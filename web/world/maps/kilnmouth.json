@@ -4,6 +4,31 @@
   "region": "ember",
   "kind": "site",
   "music": "ember",
+  "life": {
+    "critters": [
+      {
+        "kind": "lizard",
+        "zone": [
+          22,
+          15,
+          30,
+          20
+        ],
+        "n": 2
+      }
+    ],
+    "embers": {
+      "from": "smoke"
+    }
+  },
+  "calm": [
+    [
+      14,
+      6,
+      24,
+      16
+    ]
+  ],
   "width": 40,
   "height": 30,
   "tiles": [

@@ -6,6 +6,7 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { windify, waterify, ambience } from "./life.js";
+import { boatLane } from "./life_schedule.js";
 import { grass } from "./grass.js";
 import { groundMesh } from "./ground.js";
 import { rng, mesh, group, toon, fadeable, PLACEHOLDER, FOOT, WALKABLE, DECK, LADDER, BOB, WIND_H, AUTOTILE, SUFFIX_ARMS, armsPiece, prep, placeholderBox, STOOP } from "./props.js";
@@ -765,7 +766,17 @@ export async function build(map, got, reduced) {
   }
   smoke.length = Math.min(smoke.length, SMOKE);
   const flowers = props.filter((p) => p.asset === "flowers").filter((_, i) => i % 3 === 0).map((p) => ({ x: p.cx, z: p.cz }));
-  const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0 }, reduced);
+  // A map's `life` (#115): critters on open ground off the paths, leaves under its named trees, embers
+  // from its kilns and vents, boats along the water from its piers.
+  const lv = map.life && {
+    map, floorAt,
+    open: (x, z) => !blocked(x, z) && !"prH=".includes(map.tiles[z][x]) && !"pr".includes(map.paint?.[z]?.[x] ?? "-"),
+    trees: props.filter((p) => map.life.leaves?.under?.includes(p.asset)).map((p) => ({ x: p.cx, z: p.cz })),
+    embers: map.life.embers ? smoke.filter((s) => s.kind !== "chimney") : [],
+    boats: (map.life.boats ?? []).map((b) => ({ ...boatLane(map, b.pier), every: b.every ?? 90 })).filter((b) => b.dx !== undefined),
+    boatModel: got.boat?.scene,
+  };
+  const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0, life: lv }, reduced);
   return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, doors, life, boats, glows, fireflies: flies,
     gates, gateAt, shown, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }

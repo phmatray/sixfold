@@ -4,6 +4,38 @@
   "region": "tide",
   "kind": "site",
   "music": "tide",
+  "life": {
+    "critters": [
+      {
+        "kind": "crab",
+        "zone": [
+          8,
+          16,
+          16,
+          21
+        ],
+        "n": 3
+      },
+      {
+        "kind": "crab",
+        "zone": [
+          24,
+          22,
+          32,
+          27
+        ],
+        "n": 2
+      }
+    ]
+  },
+  "calm": [
+    [
+      18,
+      8,
+      28,
+      18
+    ]
+  ],
   "width": 40,
   "height": 30,
   "tiles": [
