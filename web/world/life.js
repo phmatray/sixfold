@@ -370,6 +370,8 @@ function lively(scene, L) {
   for (const k of new Set([...(life.critters ?? []).map((c) => c.kind), ...((life.perch ?? []).length ? ["bird"] : [])])) {
     if (!MODELS[k]) continue;
     const mat = toon("#ffffff", { vertexColors: true, ...(k === "glowbeetle" ? { emissive: "#9fd34a" } : {}) });
+    // The glow lights a part by its own colour: the beetle's lantern belly shines, its dark shell barely.
+    if (k === "glowbeetle") mat.onBeforeCompile = (sh) => (sh.fragmentShader = sh.fragmentShader.replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\ntotalEmissiveRadiance *= vColor.rgb;"));
     const m = new THREE.InstancedMesh(mergeGeometries(MODELS[k]()).scale(1.6, 1.6, 1.6), mat, BUDGET); // storybook-sized next to the hero
     Object.assign(m, { count: 0, visible: false, frustumCulled: false });
     scene.add((kinds[k] = m));
@@ -403,7 +405,7 @@ function lively(scene, L) {
   const dress = (g, hull) => {
     prep(hull, true); // toon materials and shadows, like the moored boats
     hull.rotation.y = -Math.PI / 2;
-    g.traverse((o) => o.isMesh && o.material !== hullMat && o.material.dispose()); // the stand-in's toon copies (prep)
+    g.traverse((o) => o.isMesh && (o.material.dispose(), L.boatModel || o.geometry.dispose())); // the stand-in's (a rowing boat's geometry is the cache's)
     g.clear().add(hull);
   };
   const boats = (L.boats ?? []).map((b) => {
