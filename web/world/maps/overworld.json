@@ -2897,7 +2897,7 @@
         {
           "if": "seals:3",
           "say": "Three seals already? My beans are jealous.",
-          "say_fr": "Déjà trois sceaux ? Mes haricots sont jaloux."
+          "say_fr": "Déjà trois sceaux ? Mes haricots sont jaloux."
         }
       ],
       "routine": [
