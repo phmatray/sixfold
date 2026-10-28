@@ -23,7 +23,7 @@ const CUT_HOLD = 1.2; // s: under reduced motion, how long a cut to a shot holds
 // "seal" lights that colour's face for good),
 // moved() (the hero's tile is reported again), holds(cond), cb.
 export function scenes(env) {
-  let playing = false, cur = null, cam = null, caption = null;
+  let playing = false, cur = null, cam = null, caption = null, leaves = false;
   const actorOf = (id) => (id === "hero" ? env.hero() : env.world()?.npcs.find((n) => n.def.id === id && !n.hidden));
   const isHero = (a) => a === env.hero();
   // A `face` cue's direction: `hero` (or another actor's id) turns toward them (along the longer axis).
@@ -35,17 +35,26 @@ export function scenes(env) {
     return Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? "e" : "w") : dz > 0 ? "s" : "n";
   };
 
-  function start(s) {
+  // Play a scene of this map again from the seals screen (#177): its cues only, nothing it keeps.
+  function replay(id) {
+    const s = (env.world()?.map.scripts ?? []).find((x) => x.id === id);
+    return !playing && !!s && start(s, true);
+  }
+
+  function start(s, again = false) {
     const w = env.world();
     playing = true;
     cur = cam = null;
+    // `hold_music`: the scene's music outlasts it, until the next map tunes (#177: the sealed door's
+    // bells keep Sable's theme through the door, never the hall's track for a moment).
+    leaves = !!s.hold_music;
     caption = s.caption ? [s.caption, s.caption_fr ?? s.caption] : null; // said as the stone wakes (a reveal's, #155)
     w.path = [];
     // Each `say` carries its speaker's name (the hero's own lines have none).
     // Someone not out (Sable behind the sealed door, #154) still speaks under their own name.
     const named = (id) => actorOf(id)?.def.name ?? w.map.npcs?.find((n) => n.id === id)?.name ?? "";
     const steps = (s.steps ?? []).map((st) => (st.say ? { ...st, name: st.say === "hero" ? "" : named(st.say) } : st));
-    env.cb("script", s.id ?? "", JSON.stringify({ steps }));
+    env.cb("script", s.id ?? "", JSON.stringify(again ? { steps, replay: true } : { steps }));
     return true;
   }
   const on = (s, x, z) => s.at?.some(([ax, az]) => ax === x && az === z);
@@ -157,11 +166,11 @@ export function scenes(env) {
     playing = false;
     env.ended();
     env.stone(null);
-    env.tune();
+    if (!leaves) env.tune();
     env.moved();
   }
 
   // A `cam:<x>:<z>` shot holds (a place: a stone, a door), not a person or the hero.
   const onTile = () => playing && Array.isArray(cam);
-  return { get playing() { return playing; }, due, entered, stepped, play, update, aim, end, onTile };
+  return { get playing() { return playing; }, due, entered, stepped, play, replay, update, aim, end, onTile };
 }

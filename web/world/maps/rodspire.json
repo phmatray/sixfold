@@ -1086,14 +1086,56 @@
           ]
         },
         {
-          "if": "open:quill & !earned:quill & !beat:quill",
+          "if": "open:quill & !earned:quill & !beat:quill & bested:quill:3",
           "lines": [
             "Your page in my notebook is still blank.",
-            "Duel the Galewold's duelists first. I'll hear about it on the wind."
+            "Just one more of the Galewold's duelists. I'll hear about it on the wind."
           ],
           "lines_fr": [
             "Ta page dans mon carnet est encore blanche.",
-            "Affronte d'abord les duellistes des Hautes-Rafales. Le vent me le dira."
+            "Plus qu'un duelliste des Hautes-Rafales. Le vent me le dira."
+          ],
+          "do": [
+            "duel:quill"
+          ]
+        },
+        {
+          "if": "open:quill & !earned:quill & !beat:quill & bested:quill:2",
+          "lines": [
+            "Your page in my notebook is still blank.",
+            "Two more of the Galewold's duelists. I'll hear about it on the wind."
+          ],
+          "lines_fr": [
+            "Ta page dans mon carnet est encore blanche.",
+            "Encore deux duellistes des Hautes-Rafales. Le vent me le dira."
+          ],
+          "do": [
+            "duel:quill"
+          ]
+        },
+        {
+          "if": "open:quill & !earned:quill & !beat:quill & bested:quill:1",
+          "lines": [
+            "Your page in my notebook is still blank.",
+            "Three more of the Galewold's duelists. I'll hear about it on the wind."
+          ],
+          "lines_fr": [
+            "Ta page dans mon carnet est encore blanche.",
+            "Encore trois duellistes des Hautes-Rafales. Le vent me le dira."
+          ],
+          "do": [
+            "duel:quill"
+          ]
+        },
+        {
+          "if": "open:quill & !earned:quill & !beat:quill",
+          "lines": [
+            "Your page in my notebook is still blank.",
+            "Beat four of the Galewold's duelists first. I'll hear about it on the wind."
+          ],
+          "lines_fr": [
+            "Ta page dans mon carnet est encore blanche.",
+            "Bats d'abord quatre duellistes des Hautes-Rafales. Le vent me le dira."
           ],
           "do": [
             "duel:quill"

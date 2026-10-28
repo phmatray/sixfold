@@ -756,6 +756,7 @@
     {
       "id": "door_warden",
       "if": "seals:6 & !beat:warden & !flag:met_warden & !flag:door_warden",
+      "hold_music": true,
       "at": [
         [
           1,
