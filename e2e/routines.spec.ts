@@ -1,0 +1,52 @@
+import { expect, test, type Page } from "@playwright/test";
+import { menuItem, readSave, title } from "./helpers";
+
+/** People's routines (#113), through `sixfoldStats().people`: where each person is and what it does. */
+type Person = { id: string; x: number; z: number; do: string | null; away: boolean; walking: boolean };
+const people = (page: Page) => page.evaluate(() => (document.querySelector(".world-host") as any).sixfoldStats().people as Person[]);
+const who = async (page: Page, id: string) => (await people(page)).find((p) => p.id === id);
+const host = (page: Page, f: string, ...args: unknown[]) => page.evaluate(([f, args]) => (document.querySelector(".world-host") as any)[f as string](...(args as unknown[])), [f, args] as const);
+const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
+
+test("routines: on arrival everyone is already at the hour's place; when the hour turns they walk there", async ({ page }) => {
+  page.on("dialog", (d) => d.accept());
+  await title(page);
+  await menuItem(page, "Learn to play").click();
+  await page.getByRole("button", { name: "Skip the lesson" }).click();
+  await menuItem(page, "Continue").click();
+  await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
+  const skip = page.getByRole("button", { name: /^Skip/ });
+  await expect(skip).toBeVisible();
+  await page.waitForTimeout(450); // a scene ignores a skip in its first 400 ms (#155)
+  await page.keyboard.press("Escape");
+  await expect(skip).toBeHidden();
+
+  // AC3: entering Brightwell Square at 22:00, the night is already in place: Wendel has gone in, nobody walks.
+  await host(page, "sixfoldClock", 22 * 60);
+  await host(page, "sixfoldWarp", "square", 25, 10, "s");
+  await expect.poll(() => at(page)).toBe("square,25,10,s");
+  await expect.poll(async () => (await who(page, "wendel"))?.away).toBe(true);
+  const night = await people(page);
+  expect(night.filter((p) => p.walking).map((p) => p.id)).toEqual([]);
+  expect(night.find((p) => p.id === "tansy")).toMatchObject({ x: 33, z: 13, do: "sweep" });
+
+  // AC2: set to 17:59, the stalls are still open; at 18:00 Tansy and Odile walk to the fountain to talk,
+  // and Wendel leaves his bench for the inn.
+  await host(page, "sixfoldClock", 17 * 60 + 59.9); // a few frames before 18:00 (frames are slow on CI)
+  await expect.poll(async () => (await who(page, "wendel"))?.do).toBe("sit");
+  await expect.poll(async () => (await people(page)).filter((p) => p.walking).length, { timeout: 120_000 }).toBeGreaterThanOrEqual(2);
+  await expect.poll(async () => [(await who(page, "tansy"))?.x, (await who(page, "tansy"))?.z], { timeout: 120_000 }).toEqual([28, 18]);
+  await expect.poll(async () => [(await who(page, "odile"))?.x, (await who(page, "odile"))?.z], { timeout: 120_000 }).toEqual([29, 18]);
+  expect(await who(page, "tansy")).toMatchObject({ do: "talk", walking: false });
+  const wendel = await who(page, "wendel");
+  expect(wendel?.walking || wendel?.away, "Wendel has left his bench for the inn").toBe(true);
+
+  // AC7: a map not converted keeps its loops and its two-copies schedule: in the Downs by day the route walkers
+  // walk and the night copies are out of sight.
+  await host(page, "sixfoldClock", 12 * 60);
+  await host(page, "sixfoldWarp", "downs", 2, 12, "e");
+  await expect.poll(() => at(page)).toBe("downs,2,12,e");
+  const start = await people(page);
+  expect(start.map((p) => p.id)).not.toContain("biscuit_night");
+  await expect.poll(async () => (await who(page, "biscuit"))?.x !== 16 || (await who(page, "biscuit"))?.z !== 18, { timeout: 60_000 }).toBe(true);
+});
