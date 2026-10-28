@@ -110,6 +110,11 @@
   --danger-text: #ffb1aa;
   --bar-bg: rgba(8, 15, 28, 0.9);
   --scrim: rgba(4, 9, 18, 0.62);
+  /* A sunken tray or side panel: a dark wash on felt, a paper well on paper (the remap below). */
+  --well: rgba(6, 12, 22, 0.45);
+  /* The night's own ink, for a dark island on paper (the binder's sheet in the world's menu). */
+  --night-ink: #edf1f7;
+  --night-muted: #b4c0d1;
   /* Focus is a cream ring, held off the control; selection is brass: a
      brass-washed fill inside a brass line. Brass fill is for the primary action only. */
   --focus: #fbf6e9;
@@ -1909,7 +1914,7 @@ body > .title .settings-body .lang { display: none; }
   overflow: auto;
   padding: 18px 16px;
   border-left: 1px solid var(--line);
-  background: rgba(6, 12, 22, 0.45);
+  background: var(--well);
   min-height: calc(100dvh - 61px);
 }
 .side-panel .inspector { max-height: none; }
@@ -1918,7 +1923,7 @@ body > .title .settings-body .lang { display: none; }
 
 /* Filters */
 .filters { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; margin-bottom: 18px; }
-.chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: var(--radius-md); background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: var(--radius-md); background: var(--well); border: 1px solid var(--line); }
 .chip {
   display: grid;
   place-items: center;
@@ -1979,7 +1984,7 @@ body > .title .settings-body .lang { display: none; }
 /* The binder: one sheet of nine clear pockets at a time, ring holes down
    its spine, turned like a page (a cut under reduced motion). */
 .binder-view { container: binder / inline-size; }
-.shelf-switch { margin-left: auto; display: flex; gap: 4px; padding: 4px; border-radius: var(--radius-md); background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
+.shelf-switch { margin-left: auto; display: flex; gap: 4px; padding: 4px; border-radius: var(--radius-md); background: var(--well); border: 1px solid var(--line); }
 .shelf-switch button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
 .shelf-switch button:hover { color: var(--ink); }
 .shelf-switch button[aria-pressed="true"] { background: var(--sel-bg); border-color: var(--sel-line); color: var(--sel-ink); }
@@ -2007,6 +2012,10 @@ body > .title .settings-body .lang { display: none; }
 .binder-book { min-width: 0; display: grid; gap: 14px; }
 .sheets { container-type: inline-size; display: grid; justify-items: center; perspective: 2200px; touch-action: pan-y; }
 .binder.sheet {
+  /* A night-blue sheet, also on the world menu's paper: its own light ink for the counts under the pockets. */
+  --ink: var(--night-ink);
+  --muted: var(--night-muted);
+  --text-faint: var(--night-muted);
   /* A whole sheet in sight: as wide as the column allows, as tall as the screen does. */
   --w: clamp(92px, min(calc((100cqw - 130px) / 3), calc((100dvh - 400px) / 4.25)), 180px);
   grid-area: 1 / 1;
@@ -2049,7 +2058,7 @@ body > .title .settings-body .lang { display: none; }
 .page-of { min-width: 12ch; white-space: nowrap; font-size: var(--fs-md); color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; }
 
 /* The tally: owned of total, by kind, rarity and type; a row filters the binder. */
-.tally { padding: 6px 14px 14px; border-radius: var(--radius-md); background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
+.tally { padding: 6px 14px 14px; border-radius: var(--radius-md); background: var(--well); border: 1px solid var(--line); }
 .tally summary { display: flex; align-items: center; min-height: 44px; font-weight: 700; cursor: pointer; list-style: none; }
 .tally summary::-webkit-details-marker { display: none; }
 .tally summary::before { content: ""; width: 6px; height: 6px; margin: 0 12px 0 2px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; rotate: -45deg; transition: rotate 160ms ease; }
@@ -2541,7 +2550,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .pane-title { font-size: var(--type-menu-label); margin-bottom: 12px; }
 .pane-head { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .pane-head .pane-title { margin: 0; }
-.pane-deck { position: sticky; top: 76px; max-height: calc(100dvh - 92px); overflow: auto; padding: 14px; border-radius: var(--radius-lg); background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
+.pane-deck { position: sticky; top: 76px; max-height: calc(100dvh - 92px); overflow: auto; padding: 14px; border-radius: var(--radius-lg); background: var(--well); border: 1px solid var(--line); }
 .pick-grid { --w: 108px; gap: 14px 10px; }
 .pick-count { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
 .btn.add { display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: var(--w); padding: 4px 8px; font-weight: 700; }
@@ -2775,7 +2784,8 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .rival.beaten .rival-status { color: var(--heal); }
 /* Seals met, the region's duelists still to best: the challenge sheet's pips, in the reading ink. */
 .rival.earning .rival-status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; color: var(--muted); font-weight: 600; text-wrap: balance; }
-.rival.locked { opacity: 0.72; }
+/* Locked: its words keep their full ink (a faded row failed AA on paper), the face greys and the outline breaks. */
+.rival.locked { border-style: dashed; }
 .rival.champion { grid-column: 1 / -1; background: linear-gradient(120deg, rgba(138, 79, 201, 0.25), color-mix(in srgb, var(--panel) 75%, transparent)); }
 .world-sheet .roster { margin-top: 12px; }
 
@@ -2961,7 +2971,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .rival { grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; }
 .rival > .portrait { grid-row: 1 / span 4; align-self: start; }
 .rival > :not(.portrait) { grid-column: 2; }
-.rival.locked > .portrait { filter: grayscale(0.7); }
+.rival.locked > .portrait { filter: grayscale(0.7); opacity: 0.72; }
 
 /* The duel header's face, and the bubble that hangs under it over the
    opponent's half, never over the hand or the action bar. */
@@ -4738,6 +4748,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   --chip: var(--paper-lo);
   --deep: var(--paper-hi);
   --sheet-bg: var(--paper);
+  --well: var(--paper-lo);
   --brass-hi: var(--brass-ink);
   --brass-line: color-mix(in srgb, var(--brass-deep) 70%, transparent);
   --sel-bg: color-mix(in srgb, var(--brass) 32%, var(--paper-hi));
