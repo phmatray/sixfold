@@ -5,6 +5,29 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.10.0](https://github.com/phmatray/sixfold/compare/v1.9.1...v1.10.0) (2026-10-28)
+
+
+### Added
+
+* **campaign:** a seal keeper accepts only once you've beaten enough of their region's duelists ([#150](https://github.com/phmatray/sixfold/issues/150)) ([#169](https://github.com/phmatray/sixfold/issues/169)) ([8a4945f](https://github.com/phmatray/sixfold/commit/8a4945f6b3d528396111427623fa4759f9b0dd4d))
+* **duel:** a seal duel looks like one ([#151](https://github.com/phmatray/sixfold/issues/151)) ([#168](https://github.com/phmatray/sixfold/issues/168)) ([9524bc6](https://github.com/phmatray/sixfold/commit/9524bc693f3944bea7d1b1e582a209303a1dcf88))
+* **tools:** check-maps v2 — blocking and advisory level-design checks ([#110](https://github.com/phmatray/sixfold/issues/110)) ([#164](https://github.com/phmatray/sixfold/issues/164)) ([409958b](https://github.com/phmatray/sixfold/commit/409958bd8847bf688f69b4420ab75a5b361f30aa))
+* **tools:** world debug overlays ([#111](https://github.com/phmatray/sixfold/issues/111)) ([#165](https://github.com/phmatray/sixfold/issues/165)) ([238e0a0](https://github.com/phmatray/sixfold/commit/238e0a0c4415b3de322491c5f8dc087ad73fc7c3))
+* **world:** an arrival and an entrance at every seal site ([#152](https://github.com/phmatray/sixfold/issues/152)) ([#171](https://github.com/phmatray/sixfold/issues/171)) ([a14f983](https://github.com/phmatray/sixfold/commit/a14f983d57cac55fca3efdd53f2c4964b293b308))
+* **world:** Fernhollow Trail, the reference map ([#112](https://github.com/phmatray/sixfold/issues/112)) ([#170](https://github.com/phmatray/sixfold/issues/170)) ([cbaa825](https://github.com/phmatray/sixfold/commit/cbaa82518ae29436bf1be5d65e8cdbda0e2e70f8))
+* **world:** the seal is won on stage, and a defeat is met with respect ([#153](https://github.com/phmatray/sixfold/issues/153)) ([#172](https://github.com/phmatray/sixfold/issues/172)) ([7d7548d](https://github.com/phmatray/sixfold/commit/7d7548d4c6cde995c1ae715dcb9c8f73779ed7c9))
+* **world:** the six seal keepers stand at their seal sites ([#149](https://github.com/phmatray/sixfold/issues/149)) ([#163](https://github.com/phmatray/sixfold/issues/163)) ([00925d3](https://github.com/phmatray/sixfold/commit/00925d3f779d4265d4145e69c980c9bcb15d964a))
+* **world:** the Warden's duel is the grandest ([#154](https://github.com/phmatray/sixfold/issues/154)) ([#173](https://github.com/phmatray/sixfold/issues/173)) ([0242683](https://github.com/phmatray/sixfold/commit/024268321dbf9463d91ce66c64e75eb006d873e1))
+
+
+### Fixed
+
+* the 1.10 design audit ([#175](https://github.com/phmatray/sixfold/issues/175)) ([bf7930e](https://github.com/phmatray/sixfold/commit/bf7930ebf3d917fd38f713661344c27cfd8e020b))
+* **world:** an arrow pressed while a door fades in is no longer lost ([#174](https://github.com/phmatray/sixfold/issues/174)) ([862a27b](https://github.com/phmatray/sixfold/commit/862a27b68be91a980ce24a9fb9ebc6b65e21ca59))
+* **world:** the first talk on a map no longer freezes while the speaker's bust is drawn ([#159](https://github.com/phmatray/sixfold/issues/159)) ([#167](https://github.com/phmatray/sixfold/issues/167)) ([da83a28](https://github.com/phmatray/sixfold/commit/da83a285a0f52946da1038e211d08cfb8fc493f5))
+* **world:** the seal-duel staging, polished to an independent critique ([#155](https://github.com/phmatray/sixfold/issues/155)) ([#176](https://github.com/phmatray/sixfold/issues/176)) ([7c7c035](https://github.com/phmatray/sixfold/commit/7c7c0351466a2d824bd9b2f06f1b8ad82f227cfc))
+
 ## [1.9.1](https://github.com/phmatray/sixfold/compare/v1.9.0...v1.9.1) (2026-10-27)
 
 
