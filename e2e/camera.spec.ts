@@ -91,3 +91,41 @@ test("Options picks the camera angle, saved, and the title's Settings show it", 
   // The Controls list it too, bound to C (and R3 on a pad), and it can be rebound.
   await expect(settings.getByRole("button", { name: "Camera angle: C" })).toBeVisible();
 });
+
+test("indoors C changes nothing, and says nothing", async ({ page }) => {
+  await enterWorld(page);
+  await warp(page, "shop", 5, 7, "n");
+  await expect.poll(() => settled(page)).toBe("default 50");
+  await page.keyboard.press("c");
+  await frames(page);
+  expect(await settled(page)).toBe("default 50");
+  await expect(page.locator("p.sr-only[aria-live=polite]").filter({ hasText: "Camera:" })).toHaveCount(0);
+  expect((await readSave(page)).camera ?? []).not.toEqual(["higher"]);
+});
+
+test("a reset leaves the Options radio and the next C on the loaded save's angle", async ({ page }) => {
+  await enterWorld(page);
+  await frames(page);
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("tab", { name: "Options" }).click();
+  await page.getByRole("radio", { name: "Lower" }).check();
+  await expect.poll(() => settled(page)).toBe("lower 40");
+  // Same panel, still open: the reset loads a new player, whose angle is the default.
+  await page.getByRole("button", { name: "Reset progress…" }).click();
+  await page.getByRole("button", { name: "Reset progress", exact: true }).click();
+  await expect(page.getByRole("radio", { name: "Default" })).toBeChecked();
+  await expect.poll(() => settled(page)).toBe("default 50");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.keyboard.press("c");
+  await expect.poll(() => settled(page)).toBe("higher 60");
+  await expect.poll(async () => (await readSave(page)).camera).toEqual(["higher"]);
+});
+
+test("the title's Settings keep the angle in memory and create no save", async ({ page }) => {
+  await title(page);
+  await page.locator("summary", { hasText: "Settings" }).click();
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  await settings.getByRole("radio", { name: "Higher" }).check();
+  await expect(settings.getByRole("radio", { name: "Higher" })).toBeChecked();
+  expect(await page.evaluate(() => localStorage.getItem("sixfold.save.1"))).toBeNull();
+});
