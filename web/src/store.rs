@@ -38,6 +38,8 @@ thread_local! {
     static STEPS: Cell<u64> = const { Cell::new(0) };
     /// The stats signal, for the world's callbacks (which run outside any owner).
     static STATS: Cell<Option<RwSignal<Stats>>> = const { Cell::new(None) };
+    /// The current save's camera angle, for the Options radio (#183): every load and every change goes through it.
+    static CAMERA: Cell<Option<RwSignal<save::CameraAngle>>> = const { Cell::new(None) };
 }
 
 /// Steps reach the stats (and so the save) this many at a time.
@@ -298,9 +300,21 @@ pub fn camera() -> save::CameraAngle {
     CURRENT.with_borrow(|(_, s)| s.camera_angle())
 }
 
+/// The angle as a signal: it follows the current save through a reset, a slot switch and an import.
+pub fn camera_signal() -> RwSignal<save::CameraAngle> {
+    CAMERA.get().expect("store::provide ran")
+}
+
+/// Keep `angle` in the current save, tell the world, and move the signal. A slot that was never
+/// saved keeps it in memory only: the first real write carries it, so picking an angle on the
+/// title doesn't create a save (#183).
 pub fn set_camera(angle: save::CameraAngle) {
     edit(|s| s.set_camera_angle(angle));
-    write();
+    if CURRENT.with_borrow(|(n, _)| get(&slot_key(*n)).is_some()) {
+        write();
+    }
+    crate::world::world_camera(angle.code());
+    camera_signal().set(angle);
 }
 
 pub fn campaign_deck() -> Option<String> {
@@ -395,9 +409,17 @@ fn show_current() {
     progress.set(prog);
     expect_context::<RwSignal<Stats>>().set(st);
     saved.slot.set(n);
+    set_camera_shown();
     if let Some(note) = lost_note(&lost) {
         notice.set(Some(note));
     }
+}
+
+/// The loaded save's angle reaches the Options radio and the world.
+fn set_camera_shown() {
+    let angle = camera();
+    crate::world::world_camera(angle.code());
+    camera_signal().set(angle);
 }
 
 /// Play from slot `n` (a new player when it is empty).
@@ -498,6 +520,7 @@ pub fn provide() {
     let progress = RwSignal::new(prog);
     let stats = RwSignal::new(st);
     STATS.set(Some(stats));
+    CAMERA.set(Some(RwSignal::new(camera())));
     let saved = Saved {
         count: RwSignal::new(0),
         ok: RwSignal::new(true),

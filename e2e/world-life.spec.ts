@@ -37,9 +37,12 @@ test.describe("with motion", () => {
     await frames(page); // the new map compiled its shaders: the page takes clicks again
     await page.getByRole("button", { name: "Menu", exact: true }).click();
     await expect(page.getByRole("dialog", { name: "Menu" })).toBeVisible();
-    await page.waitForTimeout(500); // the frame that opened it is the last one drawn
+    // The world is paused before the dialog shows and draws one last frame on the next tick: two frames on,
+    // that frame is drawn however slow frames are (a fixed 500 ms lost that race on CI's ~1 fps).
+    await frames(page);
     const held = (await life(page))!.boats[0];
     await page.waitForTimeout(1500);
+    await frames(page); // and frames did tick meanwhile
     expect((await life(page))!.boats[0]).toEqual(held);
   });
 

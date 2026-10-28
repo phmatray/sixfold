@@ -345,7 +345,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     } else if (k === "g" && !e.repeat) {
       world.grid.visible = !world.grid.visible;
       legend.hidden = !world.grid.visible;
-    } else if (k === "c" && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) { // not a copy (Ctrl/Cmd+C)
+    } else if (k === "c" && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !world?.map.light.indoor) { // not a copy (Ctrl/Cmd+C); rooms keep their own view, so C changes nothing there (#183)
       setCamera(nextAngle(camAngle));
       cb("camera", camAngle, "");
     }
