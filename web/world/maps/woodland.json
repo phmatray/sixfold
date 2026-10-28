@@ -4,6 +4,67 @@
   "region": "grove",
   "kind": "route",
   "music": "grove",
+  "life": {
+    "critters": [
+      {
+        "kind": "rabbit",
+        "zone": [
+          40,
+          13,
+          56,
+          18
+        ],
+        "n": 3
+      },
+      {
+        "kind": "rabbit",
+        "zone": [
+          1,
+          11,
+          11,
+          18
+        ],
+        "n": 2
+      },
+      {
+        "kind": "squirrel",
+        "zone": [
+          5,
+          3,
+          10,
+          6
+        ],
+        "n": 2
+      },
+      {
+        "kind": "squirrel",
+        "zone": [
+          49,
+          3,
+          54,
+          6
+        ],
+        "n": 2
+      },
+      {
+        "kind": "hedgehog",
+        "zone": [
+          40,
+          13,
+          56,
+          18
+        ],
+        "n": 1
+      }
+    ],
+    "leaves": {
+      "under": [
+        "birch",
+        "tree"
+      ],
+      "rate": 0.3
+    }
+  },
   "level_design": 2,
   "width": 60,
   "height": 24,

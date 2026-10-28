@@ -31,6 +31,7 @@
 // map against the budgets in tools/level-design.json (`--budgets=<file>` for another), and never fails.
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "node:fs";
 import * as ld from "../web/world/ld.js";
+import { CRITTERS, boatLane, openTile } from "../web/world/life_schedule.js";
 import { minuteOf, plan, DOES } from "../web/world/routine.js";
 import { ANGLES, framing, lowestPitch } from "../web/world/camera.js";
 // The player picks the outdoor camera angle (#148): occlusion grows as the pitch drops, so the depth rule runs at
@@ -166,6 +167,7 @@ for (const [name, m] of Object.entries(maps)) {
     for (const p of m.props) if (["lantern", "lamp"].includes(p.asset)) fail.push(`${name}: a ${p.asset} at ${p.x},${p.z} in a cave; light it with glow_mushroom, glow_shelf or crystal_cluster`);
   open[name] = (x, z) => x >= 0 && z >= 0 && x < m.width && z < m.height && !solid.has(`${x},${z}`);
   rules(name, m, solid, all);
+  lifeRules(name, m, solid);
   const ids = (m.npcs ?? []).map((n) => n.id);
   ids.filter((id, i) => ids.indexOf(id) !== i).forEach((id) => fail.push(`${name}: two NPCs are called ${id}`));
   const spots = (m.interactions ?? []).map((i) => `${i.x},${i.z}`);
@@ -876,4 +878,49 @@ function exitSeen(name, e) {
     if (visibleAll(m, boxes, { x: hero[0], z: hero[1], y: height[`${hero[0]},${hero[1]}`] ?? 0 }, { x, z, y: (height[`${x},${z}`] ?? 0) + 1.45 })) n++;
   }
   return n;
+}
+
+// Ambient life (#115, WORLD_RULES §9): a map's `life` and `calm`. Always errors.
+function lifeRules(name, m, solid) {
+  const inside = (r) => Array.isArray(r) && r.length === 4 && r.every(Number.isInteger) && r[0] >= 0 && r[1] >= 0 && r[2] < m.width && r[3] < m.height && r[0] <= r[2] && r[1] <= r[3];
+  const rect = (r) => JSON.stringify(r);
+  for (const r of m.calm ?? []) if (!inside(r)) fail.push(`${name}: [calm] ${rect(r)} is not [x0, z0, x1, z1] inside the map`);
+  if (m.kind === "site")
+    for (const p of m.props.filter((p) => p.asset === "seal_stone"))
+      if (!(m.calm ?? []).some((r) => inside(r) && p.x >= r[0] && p.x <= r[2] && p.z >= r[1] && p.z <= r[3])) fail.push(`${name}: [calm] the seal stone at ${p.x},${p.z} needs a calm rect round it`);
+  const L = m.life;
+  if (!L) return;
+  const bad = (what) => fail.push(`${name}: [life] ${what}`);
+  if (m.light.indoor) bad("is for outdoor maps");
+  const open = (x, z) => !solid.has(`${x},${z}`) && openTile(m, x, z); // as build.js places them
+  for (const c of L.critters ?? []) {
+    const n = c.n ?? 1;
+    if (!CRITTERS[c.kind]) bad(`critter kind ${c.kind} is not one of ${Object.keys(CRITTERS).join(", ")}`);
+    if (!(Number.isInteger(n) && n >= 1 && n <= 6)) bad(`${c.kind}: n is 1 to 6`);
+    if (!inside(c.zone)) {
+      bad(`the ${c.kind} zone ${rect(c.zone)} is not [x0, z0, x1, z1] inside the map`);
+      continue;
+    }
+    let free = 0;
+    for (let x = c.zone[0]; x <= c.zone[2]; x++) for (let z = c.zone[1]; z <= c.zone[3]; z++) free += open(x, z) ? 1 : 0;
+    if (free < n) bad(`the ${c.kind} zone ${rect(c.zone)} has ${free} open tiles off the paths, fewer than its ${n} critters`);
+  }
+  const on = (x, z, ok) =>
+    m.props.some((p) => {
+      let [w, d] = FOOT[p.asset] ?? [1, 1];
+      if ((p.rot ?? 0) % 180 === 90) [w, d] = [d, w];
+      return ok(p) && x >= p.x && x < p.x + w && z >= p.z && z < p.z + d;
+    });
+  for (const g of L.perch ?? [])
+    for (const [x, z, y] of g.at ?? []) if (typeof y !== "number" || !on(x, z, (p) => !WALKABLE.has(p.asset) && !p.if)) bad(`perch ${x},${z} is on no prop (or has no height)`);
+  const l = L.leaves;
+  if (l && !(Array.isArray(l.under) && l.under.length && l.under.every((a) => m.props.some((p) => p.asset === a)) && l.rate > 0 && l.rate <= 1))
+    bad("leaves: under names trees on this map, and rate is above 0 and at most 1");
+  if (L.embers && L.embers.from !== "smoke") bad('embers: from is "smoke"');
+  for (const b of L.boats ?? []) {
+    const [x, z] = b.pier ?? [];
+    if (!("H=".includes(m.tiles[z]?.[x] ?? "-") || on(x, z, (p) => DECK[p.asset]))) bad(`boat pier ${x},${z} is not on a deck or a pier`);
+    else if (!boatLane(m, b.pier, (x, z) => on(x, z, (p) => !p.if))) bad(`boat pier ${x},${z} has no 4 tiles of open water beside it`);
+    if (b.every !== undefined && !(b.every >= 30)) bad("boats: every is 30 s at least");
+  }
 }

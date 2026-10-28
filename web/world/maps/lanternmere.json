@@ -4,6 +4,30 @@
   "region": "dream",
   "kind": "town",
   "music": "dream",
+  "life": {
+    "critters": [
+      {
+        "kind": "glowbeetle",
+        "zone": [
+          38,
+          11,
+          46,
+          16
+        ],
+        "n": 4
+      },
+      {
+        "kind": "glowbeetle",
+        "zone": [
+          3,
+          11,
+          11,
+          16
+        ],
+        "n": 3
+      }
+    ]
+  },
   "width": 52,
   "height": 36,
   "tiles": [

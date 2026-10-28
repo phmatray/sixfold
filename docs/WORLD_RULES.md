@@ -183,6 +183,24 @@ reward rules (6.3–6.5) apply to every screen. A screen with nothing to stop fo
   a rival. It replaces the old two-copies-with-`if` schedule.
 - `glow` (a glow prop): its hue, such as teal `#5fe0c8` on the coast, violet in the Hushlands or amber in the Stonebacks. `light: true` (indoors) gives the prop the room's point light, in that hue.
 
+Ambient life (`web/world/life_schedule.js`, drawn by `life.js`; off with reduced motion):
+
+- `life` (an outdoor map), every key optional. Without it, the map keeps only the shared particles.
+  - `critters`: `[{ "kind", "zone": [x0, z0, x1, z1], "n" }]`. `kind` is `rabbit`, `squirrel`, `duck`, `crab`, `lizard` or
+    `goat` (by day), `hedgehog` or `glowbeetle` (by night). They hop about open ground off the paths in their zone, bolt
+    when the hero comes within 2.5 tiles and come back 20 to 40 s later. The zone needs at least `n` (1 to 6) open tiles.
+  - `perch`: `[{ "at": [[x, z, y], …] }]`, a flock of birds, each on the prop at `x, z` at height `y` (a fence post, a
+    signpost, a roof). They lift off together when the hero comes within 3 tiles.
+  - `leaves`: `{ "under": [asset, …], "rate" }`: leaves fall under those trees (on this map), `rate` (0 to 1) a tree a
+    second, more in a gust.
+  - `embers`: `{ "from": "smoke" }`: embers rise from the map's kilns, furnaces and vents.
+  - `boats`: `[{ "pier": [x, z], "every" }]`: a boat sails in to the pier tile (a deck, `H` or `=`) along the side with
+    the most open water (4 tiles at least), ties up, and sails out, every `every` s (30 at least, 90 by default).
+- Micro-events, one at a time and 20 s apart at least, only near the hero: a critter darts across, a flock lifts, a gust.
+  At most 12 critters and birds are drawn at once.
+- `calm` (an outdoor map): `[[x0, z0, x1, z1], …]`, quiet places: no critter, perch bird or micro-event there, and the
+  particles are halved while the hero stands in one. Every seal site (`kind: "site"`) has one round its seal stone.
+
 Level design (§11):
 
 - `level_design: 2` (an outdoor map): the §11 rules are errors for this map. Without it they are only listed in the report.

@@ -4,6 +4,29 @@
   "region": "tide",
   "kind": "town",
   "music": "tide",
+  "life": {
+    "critters": [
+      {
+        "kind": "crab",
+        "zone": [
+          0,
+          20,
+          6,
+          35
+        ],
+        "n": 3
+      }
+    ],
+    "boats": [
+      {
+        "pier": [
+          19,
+          17
+        ],
+        "every": 90
+      }
+    ]
+  },
   "width": 52,
   "height": 36,
   "tiles": [

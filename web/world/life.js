@@ -3,8 +3,13 @@
 // (fireflies after dark), butterflies (roosting at night), moths round the lamps
 // at night, gulls over the sea by day, chimney smoke and footstep puffs. With
 // reduced motion, sway and particles are off.
+//
+// A map's `life` (#115) adds critters, perch birds, falling leaves, embers and docking boats, and
+// micro-events; life_schedule.js decides where and when, this file draws it, instanced, one draw per kind.
 import * as THREE from "three";
-import { toon } from "./props.js";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { toon, prep } from "./props.js";
+import { lifeSchedule, calmAt, boatAt, BUDGET } from "./life_schedule.js";
 
 export const U = { uTime: { value: 0 }, uSway: { value: 1 }, uDrift: { value: 0 } };
 
@@ -99,8 +104,36 @@ function softTexture(size, n, rMin, rMax, wrap) {
   return t;
 }
 
+// Critters and perch birds: a few primitives merged into one vertex-coloured mesh each (a few hundred
+// triangles, front +Z, feet at 0), drawn as one InstancedMesh per kind.
+const part = (g, color, at, s = [1, 1, 1]) => {
+  g.scale(...s).translate(...at);
+  const c = new THREE.Color(color).toArray(), n = g.attributes.position.count;
+  return g.setAttribute("color", new THREE.Float32BufferAttribute(Array.from({ length: n * 3 }, (_, i) => c[i % 3]), 3));
+};
+const ball = (r) => new THREE.SphereGeometry(r, 8, 6);
+const box = (x, y, z) => new THREE.BoxGeometry(x, y, z);
+const cone = (r, h, tilt) => new THREE.ConeGeometry(r, h, 6).rotateX(tilt);
+const pair = (f) => [f(1), f(-1)];
+const MODELS = {
+  rabbit: () => [part(ball(0.09), "#9b8a76", [0, 0.09, 0], [1, 0.85, 1.3]), part(ball(0.06), "#9b8a76", [0, 0.16, 0.1]),
+    ...pair((s) => part(box(0.02, 0.09, 0.035), "#c4b29c", [0.025 * s, 0.24, 0.09])), part(ball(0.03), "#f4f0e8", [0, 0.11, -0.12])],
+  squirrel: () => [part(ball(0.07), "#b0623a", [0, 0.07, 0], [1, 0.9, 1.4]), part(ball(0.045), "#b0623a", [0, 0.12, 0.08]), part(ball(0.07), "#c4784a", [0, 0.17, -0.1], [0.8, 1.6, 0.8])],
+  duck: () => [part(ball(0.1), "#8a6a4a", [0, 0.08, 0], [1, 0.75, 1.4]), part(ball(0.05), "#2f6b45", [0, 0.17, 0.1]), part(box(0.04, 0.015, 0.05), "#e8a23a", [0, 0.165, 0.155])],
+  crab: () => [part(ball(0.08), "#d8553a", [0, 0.05, 0], [1.4, 0.5, 1]), ...pair((s) => part(ball(0.035), "#e0664a", [0.11 * s, 0.05, 0.07])), ...pair((s) => part(box(0.012, 0.04, 0.012), "#2b2230", [0.025 * s, 0.1, 0.05]))],
+  lizard: () => [part(ball(0.05), "#6b8f3a", [0, 0.03, 0], [0.8, 0.5, 2.4]), part(ball(0.035), "#6b8f3a", [0, 0.04, 0.13], [1, 0.7, 1.3]), part(cone(0.025, 0.18, -Math.PI / 2), "#5a7a30", [0, 0.03, -0.2])],
+  goat: () => [part(box(0.22, 0.2, 0.4), "#e8e2d6", [0, 0.3, 0]), ...[-1, 1].flatMap((a) => pair((s) => part(box(0.05, 0.2, 0.05), "#cfc6b6", [0.07 * s, 0.1, 0.14 * a]))),
+    part(box(0.1, 0.12, 0.16), "#e8e2d6", [0, 0.45, 0.24]), ...pair((s) => part(cone(0.02, 0.1, -0.4), "#6b5a48", [0.03 * s, 0.55, 0.2]))],
+  hedgehog: () => [part(ball(0.09), "#5a4636", [0, 0.06, 0], [1, 0.7, 1.3]), part(ball(0.035), "#c9a98a", [0, 0.05, 0.12])],
+  glowbeetle: () => [part(ball(0.035), "#d9ff8a", [0, 0.03, 0], [1, 0.6, 1.3])],
+  bird: () => [part(ball(0.06), "#6d5f55", [0, 0.06, 0], [1, 0.9, 1.5]), part(ball(0.04), "#6d5f55", [0, 0.11, 0.07]), part(cone(0.012, 0.04, Math.PI / 2), "#e8a23a", [0, 0.11, 0.12]),
+    part(box(0.2, 0.01, 0.06), "#4d4038", [0, 0.08, -0.01])],
+};
+const LEAF = ["#c9a33a", "#d9772f", "#9bb84a", "#e6c25a", "#b5532f"];
+
 // Particles, added to `scene` (the map's root group). `spots.flowers` = flower
-// bed centres, `spots.smoke` = smoke sources (chimneys, kilns, vents).
+// bed centres, `spots.smoke` = smoke sources (chimneys, kilns, vents). `spots.life`
+// (a map with `life`, build.js): { map, open, floorAt, trees, embers, boats }.
 export function ambience(scene, spots, reduced) {
   if (reduced) return { update() {}, puff() {}, puffs() {} };
   const dot = softTexture(64, 1, 30, 30, false);
@@ -192,9 +225,11 @@ export function ambience(scene, spots, reduced) {
   });
   let next = 0;
 
+  const life = spots.life && lively(scene, spots.life);
   const day = new THREE.Color("#fff4c2"), fly = new THREE.Color("#d9ff8a");
   const mm = motes.material;
   return {
+    stats: () => life?.stats() ?? null,
     // Dust where a gate changed: a rubble pile falling, rafts drifting in.
     puffs(tiles) {
       for (const t of tiles.slice(0, 5)) this.puff(t.x + 0.5, t.z + 0.5);
@@ -216,6 +251,8 @@ export function ambience(scene, spots, reduced) {
         p.setXYZ(i, wrap(sx + Math.sin(t * 0.3 + ph) * 0.6 + t * drift, hx), sy * low + Math.sin(t * 0.7 + ph) * 0.25, wrap(sz + Math.cos(t * 0.25 + ph) * 0.6, hz));
       });
       p.needsUpdate = true;
+      life?.update(dt, t, hx, hz, night);
+      if (spots.calm) motes.geometry.setDrawRange(0, calmAt(spots, hx, hz) ? MOTES / 2 : MOTES); // halved in a calm place
       mm.color.lerpColors(day, fly, night);
       mm.size = 0.07 + 0.07 * night;
       // Each firefly glows and fades on its own beat (additive: dark is unseen).
@@ -302,6 +339,145 @@ export function ambience(scene, spots, reduced) {
         d.s.scale.setScalar(0.15 + d.age * 0.35);
         d.s.position.y += dt * 0.25;
         d.s.material.opacity = 0.55 * (1 - d.age);
+      }
+    },
+  };
+}
+
+// A map's `life` (#115): critters and perch birds where lifeSchedule puts them, leaves falling under
+// its trees (more in a gust), embers rising from its kilns and vents, boats docking at its piers.
+// `L`: { map, open(x, z), floorAt(x, z), trees: [{ x, z }], embers: smoke sources, boats: [{ x, z, dx, dz, len, every }] }.
+// Leaves and embers are halved while the hero stands in a calm place.
+function lively(scene, L) {
+  const life = L.map.life, mem = { open: L.open }, o = new THREE.Object3D();
+  const kinds = {};
+  for (const k of new Set([...(life.critters ?? []).map((c) => c.kind), ...((life.perch ?? []).length ? ["bird"] : [])])) {
+    if (!MODELS[k]) continue;
+    const mat = toon("#ffffff", { vertexColors: true, ...(k === "glowbeetle" ? { emissive: "#9fd34a" } : {}) });
+    const m = new THREE.InstancedMesh(mergeGeometries(MODELS[k]()).scale(1.6, 1.6, 1.6), mat, BUDGET); // storybook-sized next to the hero
+    Object.assign(m, { count: 0, visible: false, frustumCulled: false });
+    scene.add((kinds[k] = m));
+  }
+
+  // Leaves: one pool, each falling from a canopy near the hero to the ground, lying there a moment.
+  const leaves = life.leaves && L.trees.length ? Array.from({ length: 36 }, (_, i) => ({ age: 1, life: 1, x: 0, y: 0, z: 0, ph: i * 1.3 })) : [];
+  const leafMesh = leaves.length && new THREE.InstancedMesh(new THREE.PlaneGeometry(0.15, 0.1), toon("#ffffff", { side: THREE.DoubleSide }), leaves.length);
+  if (leafMesh) {
+    leaves.forEach((_, i) => leafMesh.setColorAt(i, new THREE.Color(LEAF[i % LEAF.length])));
+    Object.assign(leafMesh, { count: 0, visible: false, frustumCulled: false });
+    scene.add(leafMesh);
+  }
+
+  // Embers: additive points rising and fading over the kilns and vents.
+  const embers = life.embers && L.embers.length ? Array.from({ length: 30 }, (_, i) => ({ age: 1, life: 2.5, x: 0, y: -9, z: 0, ph: i * 2.1 })) : [];
+  const ember = embers.length && new THREE.Points(
+    new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(embers.length * 3), 3)),
+    new THREE.PointsMaterial({ size: 0.14, color: "#ffb04a", transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending }),
+  );
+  if (ember) (ember.frustumCulled = false), scene.add(ember);
+
+  // Boats: the map's own rowing boat model (long along +X, turned to run along +Z here), or a plain
+  // hull where the map has none, out along the lane from the pier and back.
+  const hullMat = toon("#7a5434");
+  const boats = (L.boats ?? []).map((b) => {
+    const g = new THREE.Group(), hull = L.boatModel?.clone(true) ?? new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.22, 0.55).translate(0, 0.08, 0), hullMat);
+    prep(hull, true); // toon materials and shadows, like the moored boats
+    hull.rotation.y = -Math.PI / 2;
+    g.add(hull);
+    scene.add(g);
+    return { ...b, g };
+  });
+
+  let acc = 0, emAcc = 0, near = [], srcs = [], pick = -1, last = null;
+  return {
+    stats: () => ({ critters: Object.fromEntries(Object.entries(kinds).map(([k, m]) => [k, m.count])), leaves: leafMesh ? leafMesh.count : 0, embers: embers.filter((e) => e.age < 1).length,
+      boats: boats.map((b) => ({ ...boatAt(b.every, last?.t ?? 0), x: +b.g.position.x.toFixed(2), z: +b.g.position.z.toFixed(2) })), event: last?.event?.kind ?? null, calm: !!last?.quiet }),
+    update(dt, t, hx, hz, night) {
+      const quiet = calmAt(L.map, hx, hz), { spawns, event } = lifeSchedule(L.map, t, { x: hx, z: hz, night }, mem);
+      last = { t, event, quiet };
+      for (const m of Object.values(kinds)) m.count = 0;
+      for (const s of spawns) {
+        const m = kinds[s.kind];
+        if (!m || m.count >= BUDGET) continue;
+        let y = (s.y ?? 0) + L.floorAt(Math.floor(s.x), Math.floor(s.z)), x = s.x, z = s.z, k = 1, roll = 0;
+        if (s.hop) y += Math.sin(s.hop * Math.PI) * 0.1;
+        if (s.bolt !== undefined && s.bolt > 0.6) k = (1 - s.bolt) / 0.4; // gone to ground
+        if (s.fly !== undefined) {
+          (y += s.fly * s.fly * 4), (x += Math.sin(s.face) * s.fly * 3), (z += Math.cos(s.face) * s.fly * 3);
+          roll = Math.sin(t * 22 + s.x) * 0.35;
+        }
+        o.position.set(x, y, z);
+        o.rotation.set(0, s.face, roll);
+        o.scale.setScalar(k);
+        o.updateMatrix();
+        m.setMatrixAt(m.count++, o.matrix);
+      }
+      for (const m of Object.values(kinds)) if ((m.visible = m.count > 0)) m.instanceMatrix.needsUpdate = true;
+
+      // The trees and kilns near the hero, re-picked each second.
+      if (t > pick) {
+        pick = t + 1;
+        near = L.trees.filter((p) => Math.hypot(p.x - hx, p.z - hz) < 12);
+        srcs = L.embers.filter((s) => Math.hypot(s.at.x - hx, s.at.z - hz) < 14);
+      }
+      const gust = event?.kind === "gust" ? 1 : 0, half = quiet ? 0.5 : 1;
+      if (leafMesh) {
+        acc += dt * life.leaves.rate * Math.min(near.length, 10) * half * (1 + gust * 3);
+        for (; acc >= 1 && near.length; acc--) {
+          const tr = near[Math.floor(Math.random() * near.length)];
+          // The 14 s gust front of the wind shader (windify) shakes a second leaf off.
+          const front = (t % 14) * 5 - 15, g = Math.exp(-((tr.x * 0.8 + tr.z * 0.6 - front) ** 2) / 10);
+          for (let i = g > 0.5 ? 2 : 1; i > 0; i--) {
+            const free = leaves.find((l) => l.age >= l.life);
+            if (free) Object.assign(free, { age: 0, x: tr.x + (Math.random() - 0.5) * 1.4, y: tr.y + 1.7 + Math.random() * 1.1, z: tr.z + (Math.random() - 0.5) * 1.4, g: Math.max(g, gust) });
+          }
+        }
+        let n = 0;
+        for (const l of leaves) {
+          if (l.age >= l.life) continue;
+          l.age += dt;
+          const ground = L.floorAt(Math.floor(l.x), Math.floor(l.z)) + 0.02;
+          if (l.y > ground) {
+            const push = 0.25 + l.g * 1.2;
+            (l.y = Math.max(ground, l.y - dt * 0.45)), (l.x += dt * (push * 0.8 + Math.sin(l.age * 3 + l.ph) * 0.3)), (l.z += dt * push * 0.6);
+            l.life = l.age + 1.5; // then lie a moment on the ground
+          }
+          o.position.set(l.x, l.y, l.z);
+          o.rotation.set(l.y > ground ? l.age * 4 + l.ph : -Math.PI / 2, l.age * 2.3 + l.ph, 0);
+          o.scale.setScalar(Math.min(1, (l.life - l.age) / 0.5));
+          o.updateMatrix();
+          leafMesh.setMatrixAt(n++, o.matrix);
+        }
+        leafMesh.count = n;
+        leafMesh.visible = n > 0;
+        leafMesh.instanceMatrix.needsUpdate = true;
+      }
+
+      if (ember) {
+        emAcc += dt * 8 * half * (1 + gust);
+        const pos = ember.geometry.attributes.position;
+        embers.forEach((e, i) => {
+          const s = e.age >= 1 && emAcc >= 1 && srcs.length && srcs[Math.floor(Math.random() * srcs.length)];
+          if (s && (!s.on || s.on())) {
+            emAcc -= 1;
+            Object.assign(e, { age: 0, x: s.at.x + (Math.random() - 0.5) * 0.3, y: s.at.y, z: s.at.z + (Math.random() - 0.5) * 0.3 });
+          }
+          if (e.age < 1) {
+            e.age += dt / e.life;
+            (e.y += dt * 0.9), (e.x += dt * (Math.sin(t * 2 + e.ph) * 0.25 + 0.15 + gust * 0.6)), (e.z += dt * Math.cos(t * 1.7 + e.ph) * 0.2);
+          }
+          pos.setXYZ(i, e.x, e.age < 1 ? e.y : -9, e.z);
+        });
+        emAcc = Math.min(emAcc, 2);
+        pos.needsUpdate = true;
+        ember.material.opacity = 0.9 - 0.4 * (1 - night);
+      }
+
+      for (const b of boats) {
+        const { k, on } = boatAt(b.every, t), out = ((t / b.every) % 1) >= 0.6;
+        b.g.visible = on;
+        b.g.position.set(b.x + b.dx * b.len * k, Math.sin(t * 1.4 + b.x) * 0.035, b.z + b.dz * b.len * k);
+        b.g.rotation.set(Math.sin(t * 1.1) * 0.03, Math.atan2(b.dx, b.dz) + (out ? 0 : Math.PI), 0);
       }
     },
   };
