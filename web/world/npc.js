@@ -16,6 +16,7 @@ const ROUTE_PAUSE = 2.5; // seconds at the end of a route's loop (x the person's
 const STUCK = 3; // seconds blocked on a routine walk before it re-plans
 const REPLANS = 3; // re-plans before it is simply placed there
 const WALKERS_MAX = 6; // people walking a routine at once, per map (`walkers_max`)
+const LEAVE_AFTER = 2.5; // seconds after the hour turns before a person sets off (x its own `pause`)
 const JUMP = 5; // game minutes: a clock that moves further in one frame was set (a rest, a save), not ticking
 const CW = { n: "e", e: "s", s: "w", w: "n" }, CCW = { n: "w", w: "s", s: "e", e: "n" };
 
@@ -63,7 +64,7 @@ const seatOf = (w, act) => (act.do === "sit" && act.at && w.seats?.get(key(act.a
 
 // Put `n` where its activity is, at once: on entering the map, when the clock was set, or when a walk can't get there.
 function settle(w, n, p) {
-  Object.assign(n, { act: p.act, walk: null, go: [], step: null, sit: null, pose: null });
+  Object.assign(n, { activity: p.act, walk: null, go: [], step: null, sit: null, pose: null, due: undefined });
   const to = seatOf(w, p.act) ? p.act.at : p.to;
   if (to) [n.x, n.z] = to;
   arrive(w, n, true);
@@ -71,12 +72,23 @@ function settle(w, n, p) {
 
 // At its activity: face its way, sit if it sits on a seat, or go in if it went home.
 function arrive(w, n, now = false) {
-  const act = n.act, seat = seatOf(w, act);
+  const act = n.activity, seat = seatOf(w, act);
   n.away = !!act.home;
   if (act.face) n.face = act.face;
   if (seat && n.x === act.at[0] && n.z === act.at[1]) sit(n, seat, w.reduced, now);
   if (now) n.obj.rotation.y = angle(n.face);
   n.lookT = n.seed.look * n.seed.pause;
+}
+
+// Walk the way `p` found (a seat is solid: the walk ends beside it, then steps onto it). `false` when `p` is
+// already there.
+function walkPlan(w, n, p, replans = 0) {
+  const seat = seatOf(w, p.act), [sx, sz] = p.act.at ?? [];
+  const onto = seat && Object.keys(DIR).find((f) => p.to[0] + DIR[f][0] === sx && p.to[1] + DIR[f][1] === sz);
+  if (!p.steps.length && !onto) return false;
+  n.go = onto ? [...p.steps, onto] : [...p.steps];
+  n.walk = { to: onto ? [sx, sz] : p.to, seat: onto ? key(sx, sz) : null, t: 0, replans };
+  return true;
 }
 
 // Leave for the activity in force, unless no walker is free or (coming out) its door is taken.
@@ -87,49 +99,50 @@ function leave(w, n, minute) {
   if (n.sit) return stand(n); // up first (seat.js), then off
   const p = plan(n, minute, gridOf(w));
   n.away = false;
+  n.due = undefined;
   if (!p.steps) return settle(w, n, p);
-  n.act = p.act;
-  // A seat is solid: the walk ends beside it, then steps onto it.
-  const seat = seatOf(w, p.act), [sx, sz] = p.act.at ?? [];
-  const onto = seat && Object.keys(DIR).find((f) => p.to[0] + DIR[f][0] === sx && p.to[1] + DIR[f][1] === sz);
-  if (!p.steps.length && !onto) return arrive(w, n);
-  n.go = onto ? [...p.steps, onto] : [...p.steps];
-  n.walk = { to: onto ? [sx, sz] : p.to, seat: onto ? key(sx, sz) : null, t: 0, replans: 0 };
+  n.activity = p.act;
+  if (!walkPlan(w, n, p)) arrive(w, n);
 }
 
-// A routine: placed on entering (or when the clock is set), walking when the activity changes while you watch.
-function routine(w, n, minute) {
+// A routine: placed on entering (or when the clock is set), walking when the activity changes while you watch,
+// each person after its own pause (seedOf), so a whole street doesn't set off on the same frame.
+function routine(w, n, dt, minute) {
   const d = (((minute - (n.min ?? minute)) % 1440) + 1440) % 1440;
   n.min = minute;
-  n.w = w;
-  if (n.act === undefined || d > JUMP) return settle(w, n, plan(n, minute, gridOf(w), true));
+  if (n.activity === undefined || d > JUMP) return settle(w, n, plan(n, minute, gridOf(w), true));
   if (n.walk && !n.step && !n.go?.length) {
     // The walk is over (or a scene took the person elsewhere): it is there.
     n.walk = null;
     return arrive(w, n);
   }
-  if (activityAt(n.def.routine, minute) !== n.act && !n.walk && !n.busy && !n.step && !n.go?.length) leave(w, n, minute);
+  if (activityAt(n.def.routine, minute) === n.activity || n.walk || n.busy || n.step || n.go?.length) return;
+  if ((n.due ??= LEAVE_AFTER * n.seed.pause) > 0) n.due -= dt;
+  else leave(w, n, minute);
 }
 
 // Stuck on a routine walk: after STUCK s, plan round the tile in the way; after REPLANS of those, just place it.
+// Its own place taken (the hero stands on it): it waits there for it.
 function unstick(w, n, dt, x, z, minute) {
   if ((n.walk.t += dt) < STUCK) return;
   n.walk.t = 0;
-  const p = ++n.walk.replans > REPLANS ? null : plan(n, minute, gridOf(w, [x, z]));
-  if (p?.steps?.length) return void (n.go = [...p.steps]);
   const h = w.hero, [tx, tz] = n.walk.to;
-  if ((h.x === tx && h.z === tz) || w.npcAt(tx, tz, n)) return; // its place is taken: wait it out
-  settle(w, n, { act: n.act, to: n.walk.to });
+  if ((h.x === tx && h.z === tz) || w.npcAt(tx, tz, n)) return;
+  const replans = n.walk.replans + 1;
+  const p = replans > REPLANS ? null : plan(n, minute, gridOf(w, [x, z]));
+  if (p?.steps && walkPlan(w, n, p, replans)) return;
+  settle(w, n, { act: n.activity, to: n.walk.to });
 }
 
 // NPCs idle, walk their `route` (one direction per step) when it is free, or keep their routine (above).
 export function updateNpc(w, n, dt, paused, minute = 480) {
   if (n.hidden) {
     n.obj.visible = n.blob.visible = false;
-    n.act = undefined; // back in view: placed where its routine puts it
+    n.activity = undefined; // back in view: placed where its routine puts it
+    if (n.walk) (n.walk = null), (n.go = []); // and its walker's place is free
     return;
   }
-  if (n.def.routine && !paused) routine(w, n, minute);
+  if (n.def.routine && !paused) routine(w, n, dt, minute);
   n.obj.visible = n.blob.visible = !n.away;
   if (n.away) return;
   if (n.step) {
@@ -171,12 +184,12 @@ export function updateNpc(w, n, dt, paused, minute = 480) {
     }
   }
   // A `look` list, or a routine's `look` activity (round about its facing); each at the person's own interval.
-  const act = !n.walk && n.act, f = act?.face ?? n.def.facing ?? "s";
+  const act = !n.walk && n.activity, f = act?.face ?? n.def.facing ?? "s";
   const look = n.def.trainer?.look ?? n.def.look ?? (act?.do === "look" ? [CCW[f], f, CW[f], f] : null);
   if (look?.length > 1 && !n.step && !n.go?.length && !n.busy && !paused && (n.lookT -= dt) <= 0) {
     n.lookT = n.seed.look;
-    n.ri = (n.ri + 1) % look.length;
-    n.face = look[n.def.routine ? n.ri : (look.indexOf(n.face) + 1) % look.length];
+    n.li = ((n.li ?? 0) + 1) % look.length; // a routine's list repeats its facing: counted, not looked up
+    n.face = look[n.def.routine ? n.li : (look.indexOf(n.face) + 1) % look.length];
   }
   if (act?.with && !n.busy && !n.step) {
     // Talking with someone: face them (along the longer way).

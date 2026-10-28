@@ -140,7 +140,7 @@ for (const [name, m] of Object.entries(maps)) {
       if (n.route) fail.push(`${name}: ${n.id} sits, so it can't walk a route`);
     } else if (solid.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} stands on a solid tile`);
   }
-  routines(name, m, solid, seatAt);
+  routines(name, m, solid, seatAt, height);
   const all = reach(name, m, solid, height);
   ctx[name] = { m, solid, all, height };
   const sittable = new Set();
@@ -294,11 +294,12 @@ function scripts(name, m, solid, inMap, reached) {
 // People's routines (web/world/routine.js, WORLD_RULES §9): valid times and activities, every place open and
 // walkable from where the person starts (a `sit` may name a seat: it walks up to it), every `home` a door on this
 // map. A duelist or a rival keeps still: its sight line and its story need it where the map puts it.
-function routines(name, m, solid, seatAt) {
+function routines(name, m, solid, seatAt, height) {
   if (m.walkers_max !== undefined && !(Number.isInteger(m.walkers_max) && m.walkers_max > 0)) fail.push(`${name}: walkers_max is a whole number above 0`);
   const doors = (m.warps ?? []).filter((w) => !w.dir);
   const grid = {
     width: m.width, height: m.height,
+    climb: (ax, az, bx, bz) => Math.abs((height[`${bx},${bz}`] ?? 0) - (height[`${ax},${az}`] ?? 0)) <= 0.6, // as build.js (ladders aside)
     open: (x, z) => x >= 0 && z >= 0 && x < m.width && z < m.height && !solid.has(`${x},${z}`),
     door: (to) => ((w) => w && [w.x, w.z])(doors.find((w) => w.to === to)),
   };
@@ -516,7 +517,8 @@ function rules(name, m, solid, all) {
   };
   const tall = (a) => HEIGHT[a] ?? TALL_OF(a);
   const ground = (p) => WALKABLE.has(p.asset) || DECK[p.asset]; // walked on: other props may stand on them
-  const npcs = (m.npcs ?? []).filter((n) => !n.route && !n.routine);
+  // People who stand still: where the map puts them, or (with a routine) at each of its places.
+  const npcs = (m.npcs ?? []).flatMap((n) => (n.route ? [] : n.routine ? n.routine.filter((a) => a.at).map((a) => ({ ...n, x: a.at[0], z: a.at[1] })) : [n]));
   const at = new Map(); // tile -> props standing on it (not decks or rugs)
   for (const p of m.props) if (!ground(p)) for (const [x, z] of foot(p)) (at.get(`${x},${z}`) ?? at.set(`${x},${z}`, []).get(`${x},${z}`)).push(p);
   const who = (p) => `${p.asset} ${p.x},${p.z}`;
@@ -548,7 +550,7 @@ function rules(name, m, solid, all) {
       const k = `${t.x},${t.z + d}`;
       if (mine.has(`${t.x},${t.z + d}`)) continue;
       const front = [...(at.get(k) ?? []).filter((p) => !p.if && !ACROSS.has(p.asset)).map((p) => ({ h: tall(p.asset), what: who(p), use: POST.has(p.asset) })),
-        ...npcs.filter((n) => n.x === t.x && n.z === t.z + d).map((n) => ({ h: 1.45, what: `npc ${n.id}`, use: true }))];
+        ...npcs.filter((n) => n.x === t.x && n.z === t.z + d && `npc ${n.id}` !== t.what).map((n) => ({ h: 1.45, what: `npc ${n.id}`, use: true }))]; // one person at two hours never hides itself
       for (const f of front) {
         const limit = [0, 0.95, 2.0, 3.0][d];
         if (f.h <= limit) continue;
