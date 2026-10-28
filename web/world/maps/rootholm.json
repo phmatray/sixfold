@@ -171,7 +171,8 @@
         "sx_roof_brown_dk": "#45602c",
         "sx_awning_red": "#8a5a2a",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:17-23"
     },
     {
       "asset": "inn_sign",
@@ -603,7 +604,8 @@
         "sx_awning_red": "#2f8a3a",
         "sx_board": "#5aa848",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:19-1"
     },
     {
       "asset": "bush",
@@ -713,7 +715,8 @@
       "recolor": {
         "sx_awning_red": "#4f8a3a",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:18-22"
     },
     {
       "asset": "bush",
@@ -737,7 +740,8 @@
         "sx_roof_brown_dk": "#8a6a2a",
         "sx_awning_red": "#e0b040",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:20-24"
     },
     {
       "asset": "beehive",
@@ -2161,7 +2165,10 @@
         "x": 5,
         "z": 7,
         "facing": "n"
-      }
+      },
+      "open": "hour:8-19",
+      "locked": "Closed. Back at eight.",
+      "locked_fr": "Fermé. Retour à huit heures."
     }
   ],
   "exits": [
@@ -2331,6 +2338,13 @@
             "Il faut quand même bien que quelqu'un taille. Fenna et Heath font le labyrinthe. Moi, je fais le ciel."
           ]
         }
+      ],
+      "barks": [
+        {
+          "if": "flag:agnes_done",
+          "say": "Agnes is baking honey cakes again!",
+          "say_fr": "Agnes refait des gâteaux au miel !"
+        }
       ]
     },
     {
@@ -2472,6 +2486,12 @@
             "Je fais la course autour du Moot. Quarante tours. Jory en a fait trente-neuf.",
             "Lui dis pas que j'en suis qu'à six."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Roots everywhere. Watch your feet.",
+          "say_fr": "Des racines partout. Attention aux pieds."
         }
       ]
     },

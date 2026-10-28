@@ -450,7 +450,7 @@ pub fn TitleScreen() -> impl IntoView {
                     <MenuItem icon="packs" label=tr("Open packs", "Ouvrir des boosters") sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
                     <MenuItem icon="decks" label=tr("My decks", "Mes decks") sub=Signal::derive(decks) to=Screen::Decks />
                     <MenuItem icon="collection" label="Collection" sub=Signal::derive(found) to=Screen::Collection />
-                    <MenuItem icon="records" label=tr("Records", "Palmarès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
+                    <MenuItem icon="records" label=tr("Records", "Succès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
                     {move || (!due.get()).then(|| view! { <LessonItem icon="howto" label=tr("How to play", "Comment jouer") sub=tr("Replay the guided first duel", "Rejouer le premier duel guidé") /> })}
                 </ul>
                 // Read out already: each entry's name carries its note.

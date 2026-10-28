@@ -42,6 +42,8 @@ const SIDES = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // N E S W, the mask bit order
 const TALL_FADE = 1.3;
 const tall = (o) => (o.userData.tall ??= new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()).y >= TALL_FADE);
 const fadeAll = (o) => o.traverse((m) => m.isMesh && !m.material.transparent && fadeable(m.material));
+// A window pane (`glass`, or a house's `window_glow`), not glassware or a lamp: a prop's `lit` (#114) lights its own.
+export const WINDOW = /window_glow|(^|_)glass$/i;
 
 const DOOR_SWING = THREE.MathUtils.degToRad(80); // a door opens inward this far about its hinge
 const DOOR = /^door(_r)?$/; // a door leaf hinged on its -X edge, or a double door's right leaf on its +X edge
@@ -72,6 +74,7 @@ export function refresh(w, holds, gate, animate = false) {
   for (const c of w.shown) c.obj.visible = holds(c.p.if);
   for (const o of w.openers) if (o.cond) o.want = holds(o.cond) ? 1 : 0;
   for (const p of w.pulses) p.on = holds(p.cond);
+  for (const p of w.lit) p.litWant = holds(p.lit) ? 1 : 0; // daylight.js fades the panes there
   for (const m of w.waymarks) {
     const lit = holds(`flag:way_${m.it.id}`);
     if (m.lit === false && lit && animate) m.flash = 1; // just touched: a burst of light
@@ -415,6 +418,7 @@ export async function build(map, got, reduced) {
   const props = [];
   const propAt = new Map();
   const shown = [];
+  const lit = []; // props whose windows keep their own hours (`lit`, #114): daylight.js fades each one's panes
   for (const p of map.props) {
     let [fw, fd] = FOOT[p.asset] ?? [1, 1];
     if (p.rot % 180 === 90) [fw, fd] = [fd, fw];
@@ -427,7 +431,7 @@ export async function build(map, got, reduced) {
       const set = blooms.get(p.open), m = at(cx, cz, THREE.MathUtils.degToRad(p.rot), 1, y);
       set.closed.add(p.asset, tpl(p.asset), m);
       set.opened.add(`${p.asset}#open`, tpl(`${p.asset}#open`, () => posed(got[p.asset].scene, clip)), m);
-    } else if (BATCHED.has(p.asset) && !p.if && !p.recolor) {
+    } else if (BATCHED.has(p.asset) && !p.if && !p.recolor && !p.lit) {
       // Trees vary in model, size, tint and turn; the ones on the map edge sit half a tile out.
       const isTree = TREES.has(p.asset);
       const kinds = variants(p.asset);
@@ -455,15 +459,20 @@ export async function build(map, got, reduced) {
         else (o.material = o.material.clone()), o.material.color.set(c);
       });
       if (p.glow) obj.traverse((o) => o.isMesh && /glow/i.test(o.material.name) && ((o.material = o.material.clone()), o.material.color.set(p.glow), o.material.emissive.set(p.glow).multiplyScalar(0.55))); // a waymark's region colour
+      // A house with its own hours (`lit`, #114): its panes on materials of their own, before the merge and the fade.
+      const panes = [];
+      if (p.lit) obj.traverse((o) => o.isMesh && WINDOW.test(o.material.name) && panes.push((o.material = o.material.clone())));
       // A static model (no clip but its door's, not afloat) is merged like the instanced ones: one
       // draw for its flat-coloured parts instead of one per material.
       if (got[p.asset] && got[p.asset].animations.every(doorOnly) && !BOB.has(p.asset)) obj = merged(obj);
+      obj.userData.panes = panes;
       if (tall(obj)) fadeAll(obj);
       root.add(obj);
       if (BLOB[p.asset] && !got[p.asset]) blobs.push([cx, cz, BLOB[p.asset]]);
     }
     const rec = { ...p, obj, cx, cz, y };
     props.push(rec);
+    if (obj?.userData.panes?.length) obj.userData.panes.forEach((m) => (m.userData.litBy = rec)), lit.push(rec);
     for (const i of map.interactions) if (i.x >= p.x && i.x < p.x + fw && i.z >= p.z && i.z < p.z + fd) i.obj = obj;
     const deck = DECK[p.asset];
     const cond = p.if ? { p, obj, tiles: [] } : null;
@@ -778,7 +787,7 @@ export async function build(map, got, reduced) {
   };
   const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0, life: lv, calm: map.calm }, reduced);
   return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, doors, life, boats, glows, fireflies: flies,
-    gates, gateAt, shown, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
+    gates, gateAt, shown, lit, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }
 
 // G toggles this: tile lines; red = blocked, gold = look/use, blue = door, green = person.
