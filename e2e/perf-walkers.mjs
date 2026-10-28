@@ -63,6 +63,15 @@ async function measure(browserType, launch) {
     await page.waitForTimeout(2000);
   }
   await page.waitForTimeout(3000); // shaders compiled, the warp's fade gone
+  // The world must be running (no scene, talk or sheet holding it): its clock moves.
+  const minute = () => page.evaluate(() => document.querySelector(".world-host").sixfoldStats().minute);
+  for (let t = 0, m = await minute(); ; t++) {
+    if (await skip.isVisible().catch(() => false)) await skip.click().catch(() => {});
+    await page.waitForTimeout(2500);
+    if (m !== (m = await minute())) break;
+    if (t > 10) await page.screenshot({ path: "perf-walkers-stuck.png" });
+    if (t > 10) throw new Error(`the world's clock stands still (perf-walkers-stuck.png): ${(await page.locator("body").innerText()).slice(0, 300)}`);
+  }
 
   // Chrome: the CPU slowed, and the main thread's busy time (CDP TaskDuration) read round each sample, since a
   // rAF delta only says whether a frame fit the 16.7 ms vsync, not how much room it had left.
