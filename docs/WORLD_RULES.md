@@ -33,7 +33,7 @@ at all three. "In front of" means south of, toward the camera. A prop's face is 
 | 1.3 | Nothing taller than 0.95 m stands on the tile in front of something you use: a spot, a find, a person, a door. Counters and stalls are the exception, because you speak across them. | error |
 | 1.4 | Nothing over 2 m stands two tiles in front of something you use, and nothing over 3 m (a tree, a house) three tiles in front. If the thing in front is itself a post or a person, it's an error at any of those distances. | warn / error |
 | 1.5 | A post keeps one clear tile between itself and any other interactable. Things you use are never side by side, and never stacked in depth. A shop's hanging sign or inn sign may stand beside its own door. | error |
-| 1.6 | People walk their `route` on open tiles only. | error |
+| 1.6 | People walk their `route` on open tiles only. Every place in a `routine` is open (or, for `sit`, a seat) and walkable from where the person starts, and every `home` is a door on the map. Duelists and rivals keep no routine. | error |
 | 1.7 | Coming out of a house puts you on the tile in front of the door that leads back in. | error |
 | 1.8 | Going in, the hero climbs a house's steps to its door and never wades through them: every prop a door warp sits on has a `STOOP` entry in `props.js` (how far in to walk, and the tread heights read off the model). | error |
 
@@ -173,6 +173,14 @@ reward rules (6.3–6.5) apply to every screen. A screen with nothing to stop fo
 - `wild` (optional): `[[x0, z0, x1, z1], …]`, rects of wilderness on a town or hub map, where lamps need a `why`.
 - `why` (lantern props): the reason a lamp stands where no street does.
 - `cave` (an interior): a cave room; no lamps (2.6).
+- `routine` (a person, `web/world/routine.js`): what it does from each time of day on, as
+  `[{ "from": "06:00", "at": [x, z], "face": "n", "do": "work" }, { "from": "dusk", "home": "inn_hub" }, …]`. `from` is
+  `HH:MM` or a phase (`dawn`, `day`, `dusk`, `night`); the last entry runs on past midnight. `do` is `idle`, `work`,
+  `sweep`, `read`, `look` (round about its facing), `talk` (facing the person named by `with`) or `sit` (`at` a seat:
+  walked onto last). `home` names where a door on the map leads: the person walks to it and goes in, and an interior
+  shows them with its own `if`. Entering a map, people are already where their hour puts them; they walk only when the
+  hour turns while you watch, at most `walkers_max` (a map, default 6) at once. Not with a `route`, nor on a duelist or
+  a rival. It replaces the old two-copies-with-`if` schedule.
 - `glow` (a glow prop): its hue, such as teal `#5fe0c8` on the coast, violet in the Hushlands or amber in the Stonebacks. `light: true` (indoors) gives the prop the room's point light, in that hue.
 
 Level design (§11):

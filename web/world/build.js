@@ -725,7 +725,7 @@ export async function build(map, got, reduced) {
     });
 
   const npcs = spawnNpcs(map, got, floorAt, root);
-  const npcAt = (x, z, except) => npcs.find((n) => n !== except && !n.hidden && ((n.x === x && n.z === z) || (n.step && n.step.x === x && n.step.z === z))) ?? null;
+  const npcAt = (x, z, except) => npcs.find((n) => n !== except && !n.hidden && !n.away && ((n.x === x && n.z === z) || (n.step && n.step.x === x && n.step.z === z))) ?? null;
 
   const grid = debugGrid(W, H, blocked, talk, warps, npcs);
   grid.visible = false;

@@ -2486,6 +2486,36 @@
       "x": 33,
       "z": 13,
       "facing": "s",
+      "routine": [
+        {
+          "from": "06:00",
+          "at": [
+            33,
+            13
+          ],
+          "face": "s",
+          "do": "work"
+        },
+        {
+          "from": "18:00",
+          "at": [
+            28,
+            18
+          ],
+          "face": "e",
+          "do": "talk",
+          "with": "odile"
+        },
+        {
+          "from": "21:00",
+          "at": [
+            33,
+            13
+          ],
+          "face": "s",
+          "do": "sweep"
+        }
+      ],
       "dialogue": [
         {
           "if": "beat:warden",
@@ -2530,6 +2560,36 @@
       "x": 36,
       "z": 19,
       "facing": "s",
+      "routine": [
+        {
+          "from": "06:00",
+          "at": [
+            36,
+            19
+          ],
+          "face": "s",
+          "do": "read"
+        },
+        {
+          "from": "18:00",
+          "at": [
+            29,
+            18
+          ],
+          "face": "w",
+          "do": "talk",
+          "with": "tansy"
+        },
+        {
+          "from": "21:00",
+          "at": [
+            36,
+            19
+          ],
+          "face": "s",
+          "do": "look"
+        }
+      ],
       "idle": "Idle",
       "dialogue": [
         {
@@ -2654,7 +2714,21 @@
       "z": 27,
       "facing": "s",
       "sit": true,
-      "if": "time:day",
+      "routine": [
+        {
+          "from": "day",
+          "at": [
+            18,
+            27
+          ],
+          "face": "s",
+          "do": "sit"
+        },
+        {
+          "from": "dusk",
+          "home": "inn_hub"
+        }
+      ],
       "dialogue": [
         {
           "lines": [

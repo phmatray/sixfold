@@ -285,3 +285,29 @@ function bubble(a, dt, reduced) {
   b.scale.setScalar(0.74 * pop);
   b.position.set(a.obj.position.x, a.obj.position.y + a.head + 0.42, a.obj.position.z);
 }
+
+// ---------- Occupations: a routine's `do` (npc.js), laid over the idle clip ----------
+// A small motion on the Torso and Head bones, as [pitch, yaw] radians: `work` bends to a task, `sweep` sways at
+// the waist, `read` looks down, `talk` nods. Called with no kind before the mixer poses the bones (it takes the
+// last frame's motion off, so a bone no clip animates never drifts) and with the kind after. Off under reduced motion.
+const OCCUPY = {
+  work: (t) => ({ Torso: [0.16 + 0.08 * Math.sin(t * 3.2), 0], Head: [0.2, 0] }),
+  sweep: (t) => ({ Torso: [0.2, 0.28 * Math.sin(t * 2.4)], Head: [0.15, 0] }),
+  read: (t) => ({ Torso: [0.06, 0], Head: [0.38 + 0.03 * Math.sin(t * 0.7), 0] }),
+  talk: (t) => ({ Head: [0.06 * Math.sin(t * 5.5), 0.12 * Math.sin(t * 1.3)] }),
+};
+const euler = new THREE.Euler();
+export function occupy(a, kind, reduced, phase = 0) {
+  const on = (a.occupied ??= []);
+  for (const [b, q] of on) b.quaternion.multiply(q.invert());
+  on.length = 0;
+  const f = kind && !reduced && a.mixer && !a.step && !a.sit && OCCUPY[kind];
+  if (!f) return;
+  for (const [name, [pitch, yaw]] of Object.entries(f(a.t + phase * 10))) {
+    const b = ((a.bones ??= {})[name] ??= a.obj.getObjectByName(name));
+    if (!b) continue;
+    const q = ((a.boneQ ??= {})[name] ??= new THREE.Quaternion()).setFromEuler(euler.set(pitch, yaw, 0));
+    b.quaternion.multiply(q);
+    on.push([b, q]);
+  }
+}

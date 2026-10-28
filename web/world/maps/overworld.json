@@ -2893,6 +2893,53 @@
       "x": 33,
       "z": 27,
       "facing": "w",
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            33,
+            26
+          ],
+          "face": "n",
+          "do": "work"
+        },
+        {
+          "from": "10:00",
+          "at": [
+            35,
+            28
+          ],
+          "face": "s",
+          "do": "work"
+        },
+        {
+          "from": "14:00",
+          "at": [
+            33,
+            27
+          ],
+          "face": "w",
+          "do": "idle"
+        },
+        {
+          "from": "dusk",
+          "at": [
+            37,
+            26
+          ],
+          "face": "w",
+          "do": "sweep"
+        },
+        {
+          "from": "night",
+          "at": [
+            33,
+            27
+          ],
+          "face": "w",
+          "do": "look"
+        }
+      ],
       "idle": "Idle",
       "dialogue": [
         {
