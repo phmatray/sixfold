@@ -367,7 +367,8 @@ impl Save {
     }
 
     pub fn progress(&self) -> Progress {
-        Progress::decode(self.get(PROGRESS).unwrap_or(""))
+        let map = self.get(WORLD_AT).and_then(|at| at.split(',').next());
+        Progress::decode_at(self.get(PROGRESS).unwrap_or(""), map)
     }
 
     pub fn set_progress(&mut self, p: &Progress) {

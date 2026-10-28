@@ -42,6 +42,22 @@ test("opening packs adds cards to the collection @phone", async ({ page }) => {
     await page.getByRole("button", { name: "Tear it open" }).click();
     // With reduced motion the cards turn over at once.
     await expect(page.getByRole("button", { name: "See the collection" })).toBeVisible();
+    // Nothing printed on a card spills past its edge, nor the attacks onto the weakness row.
+    const spills = await page.locator(".reveal .front-face .card").evaluateAll((cards) =>
+      cards.flatMap((card) => {
+        // In page pixels: a card still rising in is scaled.
+        const box = card.getBoundingClientRect();
+        const edge = box.bottom - parseFloat(getComputedStyle(card).borderBottomWidth) * (box.height / (card as HTMLElement).offsetHeight);
+        const name = card.querySelector(".card-name")?.textContent;
+        const shown = [...card.querySelectorAll(".face > *, .card-foot > *")].filter((e) => getComputedStyle(e).display !== "none");
+        const body = card.querySelector<HTMLElement>(".card-body");
+        return [
+          ...shown.filter((e) => e.getBoundingClientRect().bottom > edge + 0.5).map((e) => `${name}: ${e.className}`),
+          ...(body && body.scrollHeight > body.clientHeight + 1 ? [`${name}: attacks`] : []),
+        ];
+      }),
+    );
+    expect(spills).toEqual([]);
   };
   await open();
   const first = await readSave(page);

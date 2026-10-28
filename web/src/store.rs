@@ -396,6 +396,7 @@ fn lost_note(lost: &[&str]) -> Option<String> {
 
 /// Reloads the profile and progress signals from the current save.
 fn show_current() {
+    crate::world::forget_hero_bust(); // another save's hero (#177)
     let profile = expect_context::<RwSignal<Profile>>();
     let progress = expect_context::<RwSignal<Progress>>();
     let notice = expect_context::<Notice>().0;
