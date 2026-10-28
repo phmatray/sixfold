@@ -280,6 +280,34 @@ export const PLACEHOLDER = {
     return group(leaf, medal, spill, mesh(new THREE.BoxGeometry(1.0, 0.45, 0.4), stone, 0, 2.375, 0),
       mesh(new THREE.BoxGeometry(0.12, 2.15, 0.4), stone, -0.46, 1.075, 0), mesh(new THREE.BoxGeometry(0.12, 2.15, 0.4), stone, 0.46, 1.075, 0));
   },
+  // An inn's stairs up (#193), set in the north wall on a "#" tile like the sealed door: treads climbing
+  // toward −Z out of the room into a dark stairwell, under a lintel, a handrail on the left. Its warp is a
+  // door (STOOP): the hero climbs the first treads as the fade comes up. `wood`/`trim` take a `recolor`.
+  inn_stairs() {
+    const wood = toon("#a8764a", { name: "wood" }), trim = toon("#8a5f3c", { name: "trim" }), dark = toon("#20160f");
+    const g = group(mesh(new THREE.BoxGeometry(0.74, 2.4, 0.04), dark, 0, 1.2, -0.48));
+    for (let i = 0; i < 6; i++) {
+      const top = 0.17 * (i + 1), z = 0.5 - 0.17 * (i + 0.5);
+      g.add(mesh(new THREE.BoxGeometry(0.72, top, 0.17), wood, 0, top / 2, z), mesh(new THREE.BoxGeometry(0.74, 0.03, 0.18), trim, 0, top + 0.015, z + 0.005));
+    }
+    for (const x of [-0.43, 0.43]) g.add(mesh(new THREE.BoxGeometry(0.14, 2.5, 0.32), trim, x, 1.25, 0));
+    g.add(mesh(new THREE.BoxGeometry(1.0, 0.2, 0.36), trim, 0, 2.5, 0));
+    const rail = mesh(new THREE.BoxGeometry(0.06, 0.06, 1.27), trim, -0.33, 1.4, 0);
+    rail.rotation.x = Math.PI / 4; // down toward the room
+    g.add(rail, mesh(new THREE.BoxGeometry(0.08, 0.95, 0.08), trim, -0.33, 0.475, 0.42));
+    return g;
+  },
+  // Its top, upstairs: a stairwell in the floor, railed on three sides, open on the camera side. The
+  // treads painted in the opening darken as they go down; the hero sinks into it (STOOP) as the fade comes up.
+  inn_stairwell() {
+    const trim = toon("#8a5f3c", { name: "trim" });
+    const g = group(mesh(new THREE.BoxGeometry(0.84, 0.02, 0.9), toon("#20160f"), 0, 0.011, 0));
+    ["#7a5434", "#5a3c26", "#3d2a1a"].forEach((c, i) => g.add(mesh(new THREE.BoxGeometry(0.8, 0.012, 0.14), toon(c, { name: i ? "" : "wood" }), 0, 0.022, 0.36 - i * 0.2)));
+    for (const [x, z] of [[-0.45, 0.45], [0.45, 0.45], [-0.45, -0.45], [0.45, -0.45]]) g.add(mesh(new THREE.BoxGeometry(0.08, 0.95, 0.08), trim, x, 0.475, z));
+    for (const x of [-0.45, 0.45]) g.add(mesh(new THREE.BoxGeometry(0.07, 0.07, 0.98), trim, x, 0.92, 0), mesh(new THREE.BoxGeometry(0.04, 0.9, 0.04), trim, x, 0.45, 0));
+    g.add(mesh(new THREE.BoxGeometry(0.98, 0.07, 0.07), trim, 0, 0.92, -0.45), mesh(new THREE.BoxGeometry(0.04, 0.9, 0.04), trim, 0, 0.45, -0.45));
+    return g;
+  },
   exit_mat() {
     return group(mesh(new THREE.BoxGeometry(0.9, 0.02, 0.62), toon("#5d7a4a"), 0, 0.011, 0));
   },
@@ -363,7 +391,8 @@ export const STOOP = { house: { in: 0.5, steps: [0.14, 0.28, 0.28] }, cottage: {
   terrace_house: { in: 0.4, steps: [0.13, 0.13, 0.19] }, harbour_house: { in: 1.0, steps: [0.17, 0.34, 0.68] },
   lake_house: { in: 0.75, steps: [0, 0.3, 0.34] }, workshop: { in: 0.5, steps: [0, 0, 0.14] }, observatory: { in: 0.55, steps: [0, 0.28, 0.28] },
   moonwell: { in: 0.5, steps: [0.14, 0.14, 0.14] }, cave_mouth: { in: 0.5, steps: [0.05, 0.05, 0.05] }, cave_mouth_slate: { in: 0.5, steps: [0, 0, 0] },
-  fallen_trunk: { in: 0.5, steps: [0, 0, 0] }, seal_door: { in: 0.4, steps: [0, 0, 0] } };
+  fallen_trunk: { in: 0.5, steps: [0, 0, 0] }, seal_door: { in: 0.4, steps: [0, 0, 0] },
+  inn_stairs: { in: 0.55, steps: [0.17, 0.34, 0.51] }, inn_stairwell: { in: 0.5, steps: [-0.1, -0.25, -0.4] } };
 // Ladders join their front and back neighbours whatever the height (floor 0 in front, a 3 m deck behind).
 export const LADDER = new Set(["ladder"]);
 // Afloat: they bob on the water (never instanced).

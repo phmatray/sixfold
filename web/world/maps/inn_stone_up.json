@@ -1,0 +1,183 @@
+{
+  "width": 11,
+  "height": 7,
+  "tiles": [
+    "WWWWWWVWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "bed",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bed",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "inn_stairwell",
+      "x": 8,
+      "z": 1,
+      "rot": 0,
+      "recolor": {
+        "wood": "#9a7a5a",
+        "trim": "#5d5650"
+      }
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "rope_coil",
+      "x": 9,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 1,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 1,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 8,
+    "z": 2,
+    "facing": "s"
+  },
+  "interactions": [
+    {
+      "x": 2,
+      "z": 1,
+      "kind": "bed",
+      "id": "bed_stone_1",
+      "name": "A bed",
+      "name_fr": "Un lit",
+      "dialogue": [
+        {
+          "lines": [
+            "A hard mattress and a heavy blanket. Miners' beds: you sleep like a stone."
+          ],
+          "lines_fr": [
+            "Un matelas dur et une lourde couverture. Des lits de mineurs : on y dort comme une pierre."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 5,
+      "z": 1,
+      "kind": "bed",
+      "id": "bed_stone_2",
+      "name": "A bed",
+      "name_fr": "Un lit",
+      "dialogue": [
+        {
+          "lines": [
+            "A hard mattress and a heavy blanket. Miners' beds: you sleep like a stone."
+          ],
+          "lines_fr": [
+            "Un matelas dur et une lourde couverture. Des lits de mineurs : on y dort comme une pierre."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 9,
+      "z": 4,
+      "kind": "sign",
+      "id": "upstairs_stone",
+      "name": "A coil of rope",
+      "name_fr": "Un rouleau de corde",
+      "text": "A coil of rope and a miner's lamp on a peg, its wick trimmed for the dawn shift. The guests here go to bed early.",
+      "text_fr": "Un rouleau de corde et une lampe de mineur à une patère, la mèche taillée pour l'équipe de l'aube. Ici, les clients se couchent tôt."
+    }
+  ],
+  "warps": [
+    {
+      "x": 8,
+      "z": 1,
+      "to": "inn_stone",
+      "label": "Go downstairs",
+      "label_fr": "Descendre",
+      "spawn": {
+        "x": 8,
+        "z": 1,
+        "facing": "s"
+      }
+    }
+  ],
+  "exits": [],
+  "npcs": [],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#f4f6ff",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#e8ecf2",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb860",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

@@ -1,0 +1,180 @@
+{
+  "width": 11,
+  "height": 7,
+  "tiles": [
+    "WWWWWWVWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "bed",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bed",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "inn_stairwell",
+      "x": 8,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 9,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 1,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 1,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 8,
+    "z": 2,
+    "facing": "s"
+  },
+  "interactions": [
+    {
+      "x": 2,
+      "z": 1,
+      "kind": "bed",
+      "id": "bed_hub_1",
+      "name": "A bed",
+      "name_fr": "Un lit",
+      "dialogue": [
+        {
+          "lines": [
+            "Clean sheets, a patched quilt, and the square's bell muffled by the shutters."
+          ],
+          "lines_fr": [
+            "Des draps propres, un édredon rapiécé, et la cloche de la place étouffée par les volets."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 5,
+      "z": 1,
+      "kind": "bed",
+      "id": "bed_hub_2",
+      "name": "A bed",
+      "name_fr": "Un lit",
+      "dialogue": [
+        {
+          "lines": [
+            "Clean sheets, a patched quilt, and the square's bell muffled by the shutters."
+          ],
+          "lines_fr": [
+            "Des draps propres, un édredon rapiécé, et la cloche de la place étouffée par les volets."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 9,
+      "z": 4,
+      "kind": "sign",
+      "id": "upstairs_hub",
+      "name": "A crate of lost property",
+      "name_fr": "Une caisse d'objets trouvés",
+      "text": "Lost property, in a crate by the stairs: one glove, a deck box with no deck in it, and a letter addressed to \"whoever wins\".",
+      "text_fr": "Des objets trouvés, dans une caisse près de l'escalier : un gant, une boîte de deck sans deck dedans, et une lettre adressée « à qui gagnera »."
+    }
+  ],
+  "warps": [
+    {
+      "x": 8,
+      "z": 1,
+      "to": "inn_hub",
+      "label": "Go downstairs",
+      "label_fr": "Descendre",
+      "spawn": {
+        "x": 8,
+        "z": 1,
+        "facing": "s"
+      }
+    }
+  ],
+  "exits": [],
+  "npcs": [],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffe2bd",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffb257",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e",
+    "note": "Indoors the sun is the window light, placed from the room centre (not the hero); lamp lights sit on each lamp prop."
+  }
+}

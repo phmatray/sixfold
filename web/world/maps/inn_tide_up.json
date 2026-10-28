@@ -1,0 +1,183 @@
+{
+  "width": 11,
+  "height": 7,
+  "tiles": [
+    "WWWWWWVWWWW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "VwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WwwwwwwwwwW",
+    "WWWWWWWWWWW"
+  ],
+  "props": [
+    {
+      "asset": "bed",
+      "x": 1,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 3,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "bed",
+      "x": 4,
+      "z": 1,
+      "rot": 0
+    },
+    {
+      "asset": "inn_stairwell",
+      "x": 8,
+      "z": 1,
+      "rot": 0,
+      "recolor": {
+        "wood": "#a39a88",
+        "trim": "#6b6a62"
+      }
+    },
+    {
+      "asset": "rug",
+      "x": 4,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "net_locker",
+      "x": 9,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "plant",
+      "x": 1,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "lamp",
+      "x": 9,
+      "z": 1,
+      "rot": 0
+    }
+  ],
+  "spawn": {
+    "x": 8,
+    "z": 2,
+    "facing": "s"
+  },
+  "interactions": [
+    {
+      "x": 2,
+      "z": 1,
+      "kind": "bed",
+      "id": "bed_tide_1",
+      "name": "A bed",
+      "name_fr": "Un lit",
+      "dialogue": [
+        {
+          "lines": [
+            "The pillow smells of salt, and the gulls on the roof are already asleep."
+          ],
+          "lines_fr": [
+            "L'oreiller sent le sel, et les mouettes du toit dorment déjà."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 5,
+      "z": 1,
+      "kind": "bed",
+      "id": "bed_tide_2",
+      "name": "A bed",
+      "name_fr": "Un lit",
+      "dialogue": [
+        {
+          "lines": [
+            "The pillow smells of salt, and the gulls on the roof are already asleep."
+          ],
+          "lines_fr": [
+            "L'oreiller sent le sel, et les mouettes du toit dorment déjà."
+          ],
+          "do": [
+            "show:inn"
+          ]
+        }
+      ]
+    },
+    {
+      "x": 9,
+      "z": 4,
+      "kind": "sign",
+      "id": "upstairs_tide",
+      "name": "An oilskin locker",
+      "name_fr": "Un casier à cirés",
+      "text": "Oilskins dripping on their pegs, and a slate on the door: tomorrow's tide times, and three names, each with an hour to be woken.",
+      "text_fr": "Des cirés qui gouttent sur leurs patères, et une ardoise sur la porte : les marées de demain, et trois noms, chacun avec une heure de réveil."
+    }
+  ],
+  "warps": [
+    {
+      "x": 8,
+      "z": 1,
+      "to": "inn_tide",
+      "label": "Go downstairs",
+      "label_fr": "Descendre",
+      "spawn": {
+        "x": 8,
+        "z": 1,
+        "facing": "s"
+      }
+    }
+  ],
+  "exits": [],
+  "npcs": [],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 10,
+    "distancePortrait": 10,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#f2f8ff",
+      "intensity": 1.6,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#e8f2f8",
+      "ground": "#5a3d26",
+      "intensity": 1.5
+    },
+    "lamp": {
+      "color": "#ffbe70",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

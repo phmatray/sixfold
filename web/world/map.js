@@ -17,7 +17,7 @@ const assets = new Map();
 export const PERSON = /^(npc|rival)_/; // models in assets/npc/
 const WALL = /^wall(_low)?(|_corner|_end|_t|_window)$/; // the interior wall kit (not the outdoor `wall_dry` set)
 const folder = (n) => (INTERIOR.has(n) || WALL.test(n) ? "interior/" : PERSON.test(n) ? "npc/" : "");
-const BUILT = new Set(["seal_door"]); // drawn in code only (props.js PLACEHOLDER): nothing to fetch
+const BUILT = new Set(["seal_door", "inn_stairs", "inn_stairwell"]); // drawn in code only (props.js PLACEHOLDER): nothing to fetch
 export const loadAsset = (n) => {
   if (BUILT.has(n)) return Promise.resolve(null);
   if (!assets.has(n)) assets.set(n, loader.loadAsync(new URL(`assets/${folder(n)}${n}.glb`, BASE).href).catch(() => null));
