@@ -479,6 +479,17 @@ impl Talk {
 /// shows, and the bust follows (the "bust" event).
 const BUST_PENDING: &str = "pending";
 
+thread_local! {
+    /// The hero's bust, baked by world.js once a visit (#177), for the duel table.
+    static HERO_BUST: std::cell::RefCell<Option<String>> = const { std::cell::RefCell::new(None) };
+}
+
+/// The hero's face for the duel table: their bust in the outfit they wear,
+/// once the world has baked it.
+pub fn hero_bust() -> Option<String> {
+    HERO_BUST.with_borrow(Clone::clone)
+}
+
 /// The speaker's face: a rival's portrait, a person's bust, none for the hero
 /// or anything that isn't a person on this map.
 fn face_of(id: &str) -> Option<String> {
@@ -945,6 +956,7 @@ pub fn WorldScreen() -> impl IntoView {
                         }
                     })
                 }
+                "hero_bust" => HERO_BUST.set(Some(a)),
                 "area" => follow(a),
                 // A line said in passing (#114): "<name>: <line>", once per bark, after the area's name.
                 "bark" => follow(format!("{a}{} {b}", tr(":", "\u{a0}:"))),

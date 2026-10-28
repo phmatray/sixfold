@@ -4499,6 +4499,23 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.55));
   animation: seal-card-hex 620ms var(--ease-out) var(--dur-screen) both;
 }
+/* The region's own material behind the seal (#177): tide, wind, sparks, a still pool, leaves, strata. */
+.seal-card-motif {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(250%, calc(100vw - 32px));
+  translate: -50% -38%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--tint);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.34;
+  animation: fade-in 700ms ease-out calc(var(--dur-screen) + 220ms) both;
+}
+.seal-card-motif.filled { fill: var(--tint); stroke: none; }
 .seal-card-hex > i {
   position: absolute;
   inset: 0;

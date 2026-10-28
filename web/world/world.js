@@ -157,6 +157,9 @@ function burstStep(s, dt) {
 
 // Sounds come from web/audio/audio.js (loaded with the wasm), when it is there.
 const sound = (name, n = 0) => globalThis.sixfoldAudio?.sfx(name, n);
+// The hero's bust (an object URL), outliving the world it was baked in: the duel table shows it (#177).
+const HERO_BUST = "\u0000hero"; // its place in the bust queue, never an NPC's id
+let heroBust = "";
 
 export function mount(el, controls, cb, start, edit = false, debug = false) {
   const mq = matchMedia("(prefers-reduced-motion: reduce)");
@@ -1055,7 +1058,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // of time at idle once the map is up, the people nearest the hero first. A talk that comes
   // sooner shows a placeholder ("pending") and the bust follows (cb "bust", id, url).
   const BUST = 256;
-  let bustRT = null, busts = new Map(), bustsOf = null, bustQ = [], bustWant = new Set(), baking = false;
+  let bustRT = null, busts = new Map(), bustsOf = null, bustQ = [], bustWant = new Set(), baking = false, heroBaked = false;
   const idle = (f) => (globalThis.requestIdleCallback ?? ((g) => setTimeout(g, 50)))(f, { timeout: 1500 });
   const painted = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r))); // the next frame is on screen
   function bustsReset() {
@@ -1070,6 +1073,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     if (!renderer.extensions.has("KHR_parallel_shader_compile")) return;
     const far = (n) => (n.hidden ? 1e9 : Math.hypot(n.x - s.x, n.z - s.z));
     bustQ = world.npcs.filter((n) => n.obj).sort((a, b) => far(a) - far(b)).map((n) => n.def.id);
+    if (!heroBaked) (heroBaked = true), bustQ.push(HERO_BUST); // once a visit, after the people: the outfit worn now
     idle(bakeNext);
   }
   async function bakeNext() {
@@ -1078,13 +1082,17 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const w = world, id = bustQ.shift();
     let url = "";
     try {
-      url = await bake(w.npcs.find((p) => p.def.id === id));
+      url = await bake(id === HERO_BUST ? hero : w.npcs.find((p) => p.def.id === id));
     } catch (e) {
       console.warn("world: no bust for", id, e);
     }
     baking = false;
     if (!alive) return void (url && URL.revokeObjectURL(url));
-    if (bustsOf !== w) url && URL.revokeObjectURL(url); // baked for the map just left
+    if (id === HERO_BUST && url) {
+      // The hero's own face, for the duel table (#177): kept past the world, the last one let go.
+      if (heroBust) URL.revokeObjectURL(heroBust);
+      (heroBust = url), cb("hero_bust", url, "");
+    } else if (bustsOf !== w) url && URL.revokeObjectURL(url); // baked for the map just left
     else {
       if (url) busts.set(id, url);
       if (bustWant.delete(id) && url) cb("bust", id, url); // else the placeholder stays

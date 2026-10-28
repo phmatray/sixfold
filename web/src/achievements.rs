@@ -117,6 +117,43 @@ pub fn count_line(p: &Progress) -> String {
     )
 }
 
+/// A moment a toast must not show over. A world sheet is a modal <dialog>:
+/// everything outside it is inert, so a toast would be covered and never read
+/// out. A duel's result, a seal on its way to the HUD and a world scene (an
+/// arrival's reveal plays as the world loads) are their own moment (#155).
+fn covered() -> bool {
+    document()
+        .query_selector("dialog:modal, .scrim.end, .seal-card, .seal-flight, .world.in-scene, .world-loading, .world-fade.on")
+        .ok()
+        .flatten()
+        .is_some()
+}
+
+/// Keep the toast up for `left` ms more; if such a moment begins meanwhile (a
+/// toast from the title as the world loads into an arrival's scene, #177), it
+/// goes back to the front of the queue and shows again, whole, afterwards.
+fn hold(current: RwSignal<Option<Toast>>, toasts: RwSignal<VecDeque<Toast>>, left: u64) {
+    const TICK: u64 = 250;
+    set_timeout(
+        move || {
+            if current.with_untracked(Option::is_none) {
+                return;
+            }
+            if covered() {
+                if let Some(t) = current.get_untracked() {
+                    toasts.update(|q| q.push_front(t));
+                }
+                current.set(None);
+            } else if left <= TICK {
+                current.set(None);
+            } else {
+                hold(current, toasts, left - TICK);
+            }
+        },
+        std::time::Duration::from_millis(TICK),
+    );
+}
+
 /// One toast at a time, top centre (clear of the duel's controls), read out
 /// politely. Each stays [`TOAST_MS`]; the chime follows the sound settings.
 #[component]
@@ -129,16 +166,7 @@ pub fn Toaster() -> impl IntoView {
         if current.get().is_some() || toasts.with(VecDeque::is_empty) {
             return;
         }
-        // A world sheet is a modal <dialog>: everything outside it is inert, so a
-        // toast now would be covered and never read out. Wait until it closes.
-        // A duel's result, a seal on its way to the HUD and a world scene (an arrival's
-        // reveal plays as the world loads) are their own moment (#155): the toasts wait.
-        if document()
-            .query_selector("dialog:modal, .scrim.end, .seal-card, .seal-flight, .world.in-scene, .world-loading, .world-fade.on")
-            .ok()
-            .flatten()
-            .is_some()
-        {
+        if covered() {
             set_timeout(
                 move || retry.notify(),
                 std::time::Duration::from_millis(500),
@@ -149,10 +177,7 @@ pub fn Toaster() -> impl IntoView {
         toasts.update(|q| next = q.pop_front());
         current.set(next);
         crate::audio::sfx("progress", 0.0);
-        set_timeout(
-            move || current.set(None),
-            std::time::Duration::from_millis(TOAST_MS),
-        );
+        hold(current, toasts, TOAST_MS);
     });
     view! {
         <div class="ach-toast-region" role="status" aria-live="polite" aria-atomic="true">
