@@ -1791,14 +1791,42 @@
           ]
         },
         {
-          "if": "open:lumen & !earned:lumen & !beat:lumen",
+          "if": "open:lumen & !earned:lumen & !beat:lumen & bested:lumen:2",
           "lines": [
             "Not yet. The garden doesn't know your steps.",
-            "Duel the Hushlands' duelists first. They whisper to me at night."
+            "Just one more of the Hushlands' duelists. They whisper to me at night."
           ],
           "lines_fr": [
             "Pas encore. Le jardin ne connaît pas tes pas.",
-            "Affronte d'abord les duellistes des Terres du Murmure. Ils me le murmurent la nuit."
+            "Plus qu'un duelliste des Terres du Murmure. Ils me le murmurent la nuit."
+          ],
+          "do": [
+            "duel:lumen"
+          ]
+        },
+        {
+          "if": "open:lumen & !earned:lumen & !beat:lumen & bested:lumen:1",
+          "lines": [
+            "Not yet. The garden doesn't know your steps.",
+            "Two more of the Hushlands' duelists. They whisper to me at night."
+          ],
+          "lines_fr": [
+            "Pas encore. Le jardin ne connaît pas tes pas.",
+            "Encore deux duellistes des Terres du Murmure. Ils me le murmurent la nuit."
+          ],
+          "do": [
+            "duel:lumen"
+          ]
+        },
+        {
+          "if": "open:lumen & !earned:lumen & !beat:lumen",
+          "lines": [
+            "Not yet. The garden doesn't know your steps.",
+            "Beat three of the Hushlands' duelists first. They whisper to me at night."
+          ],
+          "lines_fr": [
+            "Pas encore. Le jardin ne connaît pas tes pas.",
+            "Bats d'abord trois duellistes des Terres du Murmure. Ils me le murmurent la nuit."
           ],
           "do": [
             "duel:lumen"

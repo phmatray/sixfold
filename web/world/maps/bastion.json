@@ -2201,14 +2201,42 @@
           ]
         },
         {
-          "if": "open:orla & !earned:orla & !beat:orla",
+          "if": "open:orla & !earned:orla & !beat:orla & bested:orla:2",
           "lines": [
             "Not on my quarry floor. Nobody's vouched for you yet.",
-            "Put in some shifts against the Stonebacks' duelists. The crews will tell me."
+            "One more shift against the Stonebacks' duelists. The crews will tell me."
           ],
           "lines_fr": [
             "Pas sur mon chantier. Personne ne s'est encore porté garant de toi.",
-            "Fais quelques quarts contre les duellistes des Échines de Pierre. Les équipes me le diront."
+            "Plus qu'un quart contre les duellistes des Échines de Pierre. Les équipes me le diront."
+          ],
+          "do": [
+            "duel:orla"
+          ]
+        },
+        {
+          "if": "open:orla & !earned:orla & !beat:orla & bested:orla:1",
+          "lines": [
+            "Not on my quarry floor. Nobody's vouched for you yet.",
+            "Two more shifts against the Stonebacks' duelists. The crews will tell me."
+          ],
+          "lines_fr": [
+            "Pas sur mon chantier. Personne ne s'est encore porté garant de toi.",
+            "Encore deux quarts contre les duellistes des Échines de Pierre. Les équipes me le diront."
+          ],
+          "do": [
+            "duel:orla"
+          ]
+        },
+        {
+          "if": "open:orla & !earned:orla & !beat:orla",
+          "lines": [
+            "Not on my quarry floor. Nobody's vouched for you yet.",
+            "Put in three shifts against the Stonebacks' duelists. The crews will tell me."
+          ],
+          "lines_fr": [
+            "Pas sur mon chantier. Personne ne s'est encore porté garant de toi.",
+            "Fais trois quarts contre les duellistes des Échines de Pierre. Les équipes me le diront."
           ],
           "do": [
             "duel:orla"

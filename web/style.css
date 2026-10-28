@@ -2695,6 +2695,8 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .rival-colors { display: flex; gap: 4px; margin-left: auto; }
 .rival-status { font-weight: 700; font-size: var(--fs-md); }
 .rival-meta, .rival-reward { color: var(--muted); font-size: var(--fs-sm); max-width: 75ch; }
+/* At a seal site: its arrival and its seal won, watched again (#177). */
+.rival .rival-replay { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .rival.open { border-color: color-mix(in srgb, var(--brass) 55%, transparent); }
 .rival.open .rival-status { color: var(--brass-hi); }
 .rival.beaten .rival-status { color: var(--heal); }
@@ -4510,6 +4512,25 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.55));
   animation: seal-card-hex 620ms var(--ease-out) var(--dur-screen) both;
 }
+/* The region's own material behind the seal (#177): tide, wind, sparks, a still pool, leaves, strata. */
+.seal-card-motif {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(250%, calc(100vw - 32px));
+  translate: -50% -38%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--tint);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.34;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  animation: fade-in 700ms ease-out calc(var(--dur-screen) + 220ms) both;
+}
+.seal-card-motif.filled { fill: var(--tint); stroke: none; }
 .seal-card-hex > i {
   position: absolute;
   inset: 0;

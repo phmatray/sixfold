@@ -44,6 +44,8 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   const offer = await talkToMarlo(page);
   await expect(offer.locator(".ch-say")).toHaveCount(0);
   await expect(offer).toContainText("One more Saltreach duelist, and Marlo will sit down.");
+  // #177: who is left, by name, and where.
+  await expect(offer).toContainText("Still to beat: Finch, Harrow, Mirela and Liesl on the Bellflats;");
   await expect(offer.getByRole("img", { name: "2 of 3" })).toBeVisible();
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toHaveCount(0);
   await expect(offer.getByRole("button", { name: /^Not now/ })).toBeFocused();
@@ -55,6 +57,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   const journal = page.getByRole("dialog", { name: "Journal" });
   await expect(journal).toContainText("Marlo's seal (the Tide): beat one more Saltreach duelist");
   await expect(journal).toContainText("2\u00a0of\u00a03");
+  await expect(journal).toContainText("Skye and Morrow on the Saltwind Boardwalk. Then Marlo");
   await page.keyboard.press("Escape");
   await expect(journal).toBeHidden();
   // The menu's Campaign roster counts them too.
@@ -146,6 +149,20 @@ test.describe(() => {
     await frames(page);
     await expect(skip).toBeHidden();
     expect(await walk(page, 9, 5), "no scene holds the hero").toBeGreaterThan(0);
+
+    // #177: from the seals screen, at the site, the arrival plays again, and keeps nothing.
+    const kept = async () => ((await readSave(page)).progress?.[0] ?? "").split(",").filter((t) => !t.startsWith("t:")).join(","); // the clock runs on
+    const before = await kept();
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
+    await page.getByRole("tab", { name: "Campaign" }).click();
+    const marlo = page.locator("li.rival").filter({ hasText: "Marlo" });
+    await expect(marlo.getByRole("button", { name: "Watch the seal won again" })).toHaveCount(0);
+    await marlo.getByRole("button", { name: "Watch the arrival again" }).click();
+    await expect(skip).toBeVisible();
+    await page.waitForTimeout(450);
+    await skip.click();
+    await expect(skip).toBeHidden();
+    expect(await kept()).toBe(before);
   });
 });
 

@@ -553,10 +553,15 @@ pub fn Station(player: usize) -> impl IntoView {
         })
     });
     let initial: String = name.chars().take(1).collect();
-    let portrait = match (me, face) {
-        (false, Some(id)) => {
+    // The hero's own face, as the world baked it (#177); the initial until then.
+    let hero = me.then(crate::world::hero_bust).flatten();
+    let portrait = match (me, face, hero) {
+        (false, Some(id), _) => {
             let n = sixfold_engine::campaign::opponent(id).map_or(id, |o| o.name);
             view! { <crate::campaign::Portrait id=id name=n /> }.into_any()
+        }
+        (true, _, Some(src)) => {
+            view! { <img class="portrait" src=src width="256" height="256" alt=tr("Your portrait", "Votre portrait") /> }.into_any()
         }
         _ => view! { <span class="portrait mono" aria-hidden="true">{initial}</span> }.into_any(),
     };

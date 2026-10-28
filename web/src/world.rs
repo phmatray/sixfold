@@ -55,6 +55,7 @@ export function world_clock(m) { minute = m; api?.setClock(m); }
 export function world_camera(a) { camera = a; api?.setCamera(a); }
 export function world_busy() { return !api || api.busy(); }
 export function world_portrait(id) { return api?.portrait(id) ?? ""; }
+export function world_replay(id) { return api?.replay(id) ?? false; }
 export function world_read(b) { api?.read(b); }
 export function world_page(n) { api?.page(n); }
 export function world_book_rect() { return api?.bookRect() ?? []; }
@@ -90,6 +91,9 @@ extern "C" {
     /// A person's bust, drawn from their own rig and colours (a data URL), or
     /// empty for anyone who isn't a person on this map (a sign, a gangway).
     fn world_portrait(id: &str) -> String;
+    /// Play this map's scene `id` again, keeping nothing (#177); false if it
+    /// isn't here or a scene is playing.
+    fn world_replay(id: &str) -> bool;
     /// Open a book in the scene (`reading::book_value`); `null` puts it back.
     fn world_read(book: &JsValue);
     /// Turn the open book to this spread.
@@ -479,6 +483,22 @@ impl Talk {
 /// shows, and the bust follows (the "bust" event).
 const BUST_PENDING: &str = "pending";
 
+thread_local! {
+    /// The hero's bust, baked by world.js once a visit (#177), for the duel table.
+    static HERO_BUST: std::cell::RefCell<Option<String>> = const { std::cell::RefCell::new(None) };
+}
+
+/// The hero's face for the duel table: their bust in the outfit they wear,
+/// once the world has baked it.
+pub fn hero_bust() -> Option<String> {
+    HERO_BUST.with_borrow(Clone::clone)
+}
+
+/// Another save is current: its hero isn't the one baked.
+pub fn forget_hero_bust() {
+    HERO_BUST.set(None);
+}
+
 /// The speaker's face: a rival's portrait, a person's bust, none for the hero
 /// or anything that isn't a person on this map.
 fn face_of(id: &str) -> Option<String> {
@@ -506,6 +526,8 @@ struct Scene {
     effects: Vec<String>,
     /// The id of the cue world.js is playing.
     waiting: Option<u32>,
+    /// Watched again from the seals screen (#177): no seal won, nothing kept.
+    replay: bool,
 }
 
 /// `{"steps": [{"say", "name", "lines"} | {"do": [...]}]}` as sent by world.js.
@@ -529,6 +551,7 @@ fn parse_scene(json: &str) -> Option<Scene> {
         cues: VecDeque::new(),
         effects: vec![],
         waiting: None,
+        replay: field(&v, "replay").as_bool() == Some(true),
     })
 }
 
@@ -946,6 +969,7 @@ pub fn WorldScreen() -> impl IntoView {
                         }
                     })
                 }
+                "hero_bust" => HERO_BUST.set(Some(a)),
                 "area" => follow(a),
                 // A line said in passing (#114): "<name>: <line>", once per bark, after the area's name.
                 "bark" => follow(format!("{a}{} {b}", tr(":", "\u{a0}:"))),
@@ -1296,9 +1320,14 @@ pub fn WorldScreen() -> impl IntoView {
         playing.set(false);
         // A scene plays instead of a post-duel line still pending (world.js `meet` stays
         // quiet while one is due, e.g. the finale after the Warden): it settles that duel.
-        progress.update(Progress::settle);
+        // One watched again keeps nothing.
+        if !s.replay {
+            progress.update(Progress::settle);
+        }
         world_cue(&format!(r#"{{"end":[{}]}}"#, rest.join(",")));
-        apply_effects(s.effects);
+        if !s.replay {
+            apply_effects(s.effects);
+        }
     };
     let next = move || {
         let mut taken = None;
@@ -1311,7 +1340,9 @@ pub fn WorldScreen() -> impl IntoView {
                     sheet.set(None);
                 }
                 if let Cue::Stone(StoneCue::Seal(r)) = &c {
-                    sealed(r, true);
+                    if !s.replay {
+                        sealed(r, true);
+                    }
                 }
                 let id = cue_done.get_untracked() + 1;
                 s.waiting = Some(id);
@@ -1353,7 +1384,7 @@ pub fn WorldScreen() -> impl IntoView {
             }
         }
         // A seal skipped past is still won out loud (its face lights with the flag).
-        for c in &rest {
+        for c in rest.iter().filter(|_| !s.replay) {
             if let Cue::Stone(StoneCue::Seal(r)) = c {
                 sealed(r, false);
             }
@@ -1372,11 +1403,13 @@ pub fn WorldScreen() -> impl IntoView {
         scene_in.set(None);
         match parse_scene(&json) {
             Some(s) => {
+                let asked = s.replay;
                 scene.set_value(Some(s));
                 playing.set(true);
                 scene_at.set_value(js_sys::Date::now());
-                // Options' "Skip every cutscene": skipped at once, its effects kept.
-                if store::skip_scenes() {
+                // Options' "Skip every cutscene": skipped at once, its effects kept (one
+                // asked for again from the seals screen still plays).
+                if store::skip_scenes() && !asked {
                     skip();
                 } else {
                     next();
@@ -2085,7 +2118,8 @@ fn GameMenu(
                     (MenuTab::Journal, _) => view! { <crate::journal::Journal /> }.into_any(),
                     (MenuTab::Map, _) => view! { <crate::worldmap::WorldMap here=here on_travel=on_travel /> }.into_any(),
                     (MenuTab::Campaign, _) => view! {
-                        <div class="campaign"><CampaignPanel back=Screen::World before=move || on_close.run(()) /></div>
+                        <div class="campaign"><CampaignPanel back=Screen::World before=move || on_close.run(())
+                            replay=Callback::new(move |id: String| { on_close.run(()); world_replay(&id); }) /></div>
                     }.into_any(),
                     (MenuTab::Options, _) => view! {
                         <p class="options-hint">{crate::input::world_hint}</p>

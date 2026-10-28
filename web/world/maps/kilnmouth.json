@@ -5045,14 +5045,42 @@
           ]
         },
         {
-          "if": "open:cinza & !earned:cinza & !beat:cinza",
+          "if": "open:cinza & !earned:cinza & !beat:cinza & bested:cinza:2",
           "lines": [
             "Whoa, not so fast. The kiln only lights for someone the Emberlands know.",
-            "Beat a few of their duelists first. Word runs faster than I do."
+            "Just one more of their duelists. Word runs faster than I do."
           ],
           "lines_fr": [
             "Doucement, pas si vite. Le four ne s'allume que pour quelqu'un que les Braisières connaissent.",
-            "Bats d'abord quelques-uns de leurs duellistes. Les nouvelles courent plus vite que moi."
+            "Plus qu'un de leurs duellistes. Les nouvelles courent plus vite que moi."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        },
+        {
+          "if": "open:cinza & !earned:cinza & !beat:cinza & bested:cinza:1",
+          "lines": [
+            "Whoa, not so fast. The kiln only lights for someone the Emberlands know.",
+            "Two more of their duelists, then. Word runs faster than I do."
+          ],
+          "lines_fr": [
+            "Doucement, pas si vite. Le four ne s'allume que pour quelqu'un que les Braisières connaissent.",
+            "Encore deux de leurs duellistes, alors. Les nouvelles courent plus vite que moi."
+          ],
+          "do": [
+            "duel:cinza"
+          ]
+        },
+        {
+          "if": "open:cinza & !earned:cinza & !beat:cinza",
+          "lines": [
+            "Whoa, not so fast. The kiln only lights for someone the Emberlands know.",
+            "Beat three of their duelists first. Word runs faster than I do."
+          ],
+          "lines_fr": [
+            "Doucement, pas si vite. Le four ne s'allume que pour quelqu'un que les Braisières connaissent.",
+            "Bats d'abord trois de leurs duellistes. Les nouvelles courent plus vite que moi."
           ],
           "do": [
             "duel:cinza"
