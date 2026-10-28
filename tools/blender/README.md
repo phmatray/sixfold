@@ -18,6 +18,7 @@ scene inside it and saves the file:
 | `Interior`| `build_interior_scene.py`| `web/world/maps/shop.json`: walls auto-tiled with the fence rules (cutaway `wall_low*` on the camera-side south row, `wall_window` on chosen straight tiles), wood floor, furniture, lamp light, hero |
 | `Areas`   | `build_area_props.py`    | the 0.7 outdoor-area props (woodland, seaside, quarry, square) side by side; imports `build_assets.py` for its helpers and exports only its own files |
 | `PropsV2` | `build_props_v2.py`      | 1.2 house furniture, signs, the curio cabinet and curios, the 1.3 shared kit (waymark, seal stone, cave mouth, climb wall, inn sign), the find hosts (stump, log); imports `build_area_props.py` for its helpers and exports only its own files |
+| `Critters` | `build_critters.py` | the ambient life a map's `life` spawns (critters, the perch bird, the docking fishing boat); imports `build_assets.py` for its helpers and exports only its own files |
 | `V13_<region>` | `build_regions_v13.py` | the 1.3 region props, one module per region (`v13_ember.py` … `v13_stone.py`) on the shared `v13_kit.py`; headless only (see `web/world/ASSETS_V13.md`) |
 
 ```bash
@@ -55,6 +56,10 @@ blender -b --factory-startup -P tools/blender/bake_ground_textures.py -- --out /
 blender -b --factory-startup -P tools/blender/build_characters.py -- --out web/world/assets
 blender -b --factory-startup -P tools/blender/npc_lineup.py -- --assets web/world/assets --out /tmp/lineup \
     [--names hero,rival_grass,rival_fire,rival_water,rival_lightning,rival_fighting,rival_psychic,rival_champion]
+
+# Ambient life -> assets/critter_{rabbit,squirrel,hedgehog,duck,crab,lizard,goat,glowbeetle,bird}.glb and fishing_boat.glb
+# (--only a,b; asserts each one's triangle budget)
+blender -b --factory-startup -P tools/blender/build_critters.py -- --out web/world/assets
 
 # 1.2 / 1.3 props -> assets/{interior/,}*.glb
 # (--only a,b; --check lists z-fighting faces on a y = 0 ground; --sheet front/back 3/4 tiles per model;

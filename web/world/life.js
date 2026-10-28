@@ -10,6 +10,7 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { toon, prep } from "./props.js";
 import { lifeSchedule, calmAt, boatAt, BUDGET } from "./life_schedule.js";
+import { loadAsset } from "./map.js";
 
 export const U = { uTime: { value: 0 }, uSway: { value: 1 }, uDrift: { value: 0 } };
 
@@ -104,8 +105,9 @@ function softTexture(size, n, rMin, rMax, wrap) {
   return t;
 }
 
-// Critters and perch birds: a few primitives merged into one vertex-coloured mesh each (a few hundred
-// triangles, front +Z, feet at 0), drawn as one InstancedMesh per kind.
+// Critters and perch birds: `critter_<kind>.glb` (build_critters.py) merged into one vertex-coloured mesh each
+// (front +Z, feet at 0), drawn as one InstancedMesh per kind. Until it loads, or if it is missing, a few
+// primitives merged the same way stand in.
 const part = (g, color, at, s = [1, 1, 1]) => {
   g.scale(...s).translate(...at);
   const c = new THREE.Color(color).toArray(), n = g.attributes.position.count;
@@ -129,6 +131,20 @@ const MODELS = {
   bird: () => [part(ball(0.06), "#6d5f55", [0, 0.06, 0], [1, 0.9, 1.5]), part(ball(0.04), "#6d5f55", [0, 0.11, 0.07]), part(cone(0.012, 0.04, Math.PI / 2), "#e8a23a", [0, 0.11, 0.12]),
     part(box(0.2, 0.01, 0.06), "#4d4038", [0, 0.08, -0.01])],
 };
+// A model's parts as one geometry, each part's colour in its vertices (as build.js flattens a prop).
+function flat(model) {
+  model.updateMatrixWorld(true);
+  const parts = [];
+  model.traverse((m) => {
+    if (!m.isMesh) return;
+    const src = m.geometry, n = src.attributes.position.count, c = m.material.color;
+    const g = new THREE.BufferGeometry().setAttribute("position", src.attributes.position.clone()).setAttribute("normal", src.attributes.normal.clone());
+    g.setIndex(src.index ? src.index.clone() : [...Array(n).keys()]);
+    g.setAttribute("color", new THREE.Float32BufferAttribute(Array.from({ length: n }, () => [c.r, c.g, c.b]).flat(), 3));
+    parts.push(g.applyMatrix4(m.matrixWorld));
+  });
+  return mergeGeometries(parts);
+}
 const LEAF = ["#c9a33a", "#d9772f", "#9bb84a", "#e6c25a", "#b5532f"];
 
 // Particles, added to `scene` (the map's root group). `spots.flowers` = flower
@@ -354,9 +370,16 @@ function lively(scene, L) {
   for (const k of new Set([...(life.critters ?? []).map((c) => c.kind), ...((life.perch ?? []).length ? ["bird"] : [])])) {
     if (!MODELS[k]) continue;
     const mat = toon("#ffffff", { vertexColors: true, ...(k === "glowbeetle" ? { emissive: "#9fd34a" } : {}) });
+    // The glow lights a part by its own colour: the beetle's lantern belly shines, its dark shell barely.
+    if (k === "glowbeetle") mat.onBeforeCompile = (sh) => (sh.fragmentShader = sh.fragmentShader.replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\ntotalEmissiveRadiance *= vColor.rgb;"));
     const m = new THREE.InstancedMesh(mergeGeometries(MODELS[k]()).scale(1.6, 1.6, 1.6), mat, BUDGET); // storybook-sized next to the hero
     Object.assign(m, { count: 0, visible: false, frustumCulled: false });
     scene.add((kinds[k] = m));
+    m.userData.wait = true; // no stand-in popping up for the moment the model takes to load
+    loadAsset(`critter_${k}`).then((g) => {
+      if (g) m.geometry.dispose(), (m.geometry = flat(g.scene)); // built at that size
+      m.userData.wait = false;
+    });
   }
 
   // Leaves: one pool, each falling from a canopy near the hero to the ground, lying there a moment.
@@ -376,17 +399,22 @@ function lively(scene, L) {
   );
   if (ember) (ember.frustumCulled = false), scene.add(ember);
 
-  // Boats: the map's own rowing boat model (long along +X, turned to run along +Z here), or a plain
-  // hull where the map has none, out along the lane from the pier and back.
+  // Boats: fishing_boat.glb (long along +X, turned to run along +Z here); until it loads, or if it is
+  // missing, the map's own rowing boat or a plain hull. Out along the lane from the pier and back.
   const hullMat = toon("#7a5434");
-  const boats = (L.boats ?? []).map((b) => {
-    const g = new THREE.Group(), hull = L.boatModel?.clone(true) ?? new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.22, 0.55).translate(0, 0.08, 0), hullMat);
+  const dress = (g, hull) => {
     prep(hull, true); // toon materials and shadows, like the moored boats
     hull.rotation.y = -Math.PI / 2;
-    g.add(hull);
+    g.traverse((o) => o.isMesh && (o.material.dispose(), L.boatModel || o.geometry.dispose())); // the stand-in's (a rowing boat's geometry is the cache's)
+    g.clear().add(hull);
+  };
+  const boats = (L.boats ?? []).map((b) => {
+    const g = new THREE.Group();
+    dress(g, L.boatModel?.clone(true) ?? new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.22, 0.55).translate(0, 0.08, 0), hullMat));
     scene.add(g);
     return { ...b, g };
   });
+  if (boats.length) loadAsset("fishing_boat").then((m) => m && boats.forEach((b) => dress(b.g, m.scene.clone(true))));
 
   let acc = 0, emAcc = 0, near = [], srcs = [], pick = -1, last = null;
   return {
@@ -398,7 +426,7 @@ function lively(scene, L) {
       for (const m of Object.values(kinds)) m.count = 0;
       for (const s of spawns) {
         const m = kinds[s.kind];
-        if (!m || m.count >= BUDGET) continue;
+        if (!m || m.userData.wait || m.count >= BUDGET) continue;
         let y = (s.y ?? 0) + L.floorAt(Math.floor(s.x), Math.floor(s.z)), x = s.x, z = s.z, k = 1, roll = 0;
         if (s.hop) y += Math.sin(s.hop * Math.PI) * 0.1;
         if (s.bolt !== undefined && s.bolt > 0.6) k = (1 - s.bolt) / 0.4; // gone to ground
