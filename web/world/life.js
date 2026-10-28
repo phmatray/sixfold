@@ -403,6 +403,7 @@ function lively(scene, L) {
   const dress = (g, hull) => {
     prep(hull, true); // toon materials and shadows, like the moored boats
     hull.rotation.y = -Math.PI / 2;
+    g.traverse((o) => o.isMesh && o.material !== hullMat && o.material.dispose()); // the stand-in's toon copies (prep)
     g.clear().add(hull);
   };
   const boats = (L.boats ?? []).map((b) => {
