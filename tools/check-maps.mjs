@@ -32,6 +32,7 @@
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "node:fs";
 import * as ld from "../web/world/ld.js";
 import { CRITTERS, boatLane, openTile } from "../web/world/life_schedule.js";
+import { minuteOf, plan, DOES } from "../web/world/routine.js";
 import { ANGLES, framing, lowestPitch } from "../web/world/camera.js";
 // The player picks the outdoor camera angle (#148): occlusion grows as the pitch drops, so the depth rule runs at
 // the lowest one, and the camera-ray test at every one.
@@ -147,6 +148,7 @@ for (const [name, m] of Object.entries(maps)) {
       if (n.route) fail.push(`${name}: ${n.id} sits, so it can't walk a route`);
     } else if (solid.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} stands on a solid tile`);
   }
+  routines(name, m, solid, seatAt, height);
   const all = reach(name, m, solid, height);
   ctx[name] = { m, solid, all, height };
   const sittable = new Set();
@@ -222,7 +224,7 @@ for (const [name, m] of Object.entries(maps)) {
 // stone; a `duel:` only in the last step (it ends the scene).
 // A seal site's staging (#152; engine/tests/world_data.rs holds the rest of its shape): `reveal_<map>` keeps to
 // 3 `cam` and 2 000 ms of `wait`; `entrance_<keeper>` starts on every reachable open tile two from the keeper (but
-// one where someone stands for good: no route), so nobody walks up to them without it; one that plays on arriving
+// one where someone stands for good: no route or routine), so nobody walks up to them without it; one that plays on arriving
 // anywhere (the Warden's, #154) needs no ring.
 function scripts(name, m, solid, inMap, reached) {
   const list = m.scripts ?? [];
@@ -246,7 +248,7 @@ function scripts(name, m, solid, inMap, reached) {
     }
     const keeper = s.id?.startsWith("entrance_") && !(s.on === "enter" && !s.at) && npcs[s.id.slice(9)];
     if (keeper) {
-      const others = new Set((m.npcs ?? []).filter((n) => n !== keeper && !n.route).map((n) => `${n.x},${n.z}`)), tiles = new Set((s.at ?? []).map((t) => `${t[0]},${t[1]}`));
+      const others = new Set((m.npcs ?? []).filter((n) => n !== keeper && !n.route && !n.routine).map((n) => `${n.x},${n.z}`)), tiles = new Set((s.at ?? []).map((t) => `${t[0]},${t[1]}`));
       for (let dx = -2; dx <= 2; dx++)
         for (let dz = -2; dz <= 2; dz++) {
           const k = `${keeper.x + dx},${keeper.z + dz}`;
@@ -298,6 +300,45 @@ function scripts(name, m, solid, inMap, reached) {
 // Gates and reachability: flood fill from the spawn over walkable tiles, a step at most 0.6 m up or
 // down (a ladder joins its front and back whatever the height), first with every gate shut, then open.
 // A lift's landings at height `y`: its open neighbours whose floor is within a step of the cage floor (y + 0.1).
+// People's routines (web/world/routine.js, WORLD_RULES §9): valid times and activities, every place open and
+// walkable from where the person starts (a `sit` may name a seat: it walks up to it), every `home` a door on this
+// map. A duelist or a rival keeps still: its sight line and its story need it where the map puts it.
+function routines(name, m, solid, seatAt, height) {
+  if (m.walkers_max !== undefined && !(Number.isInteger(m.walkers_max) && m.walkers_max > 0)) fail.push(`${name}: walkers_max is a whole number above 0`);
+  const doors = (m.warps ?? []).filter((w) => !w.dir);
+  const grid = {
+    width: m.width, height: m.height,
+    climb: (ax, az, bx, bz) => Math.abs((height[`${bx},${bz}`] ?? 0) - (height[`${ax},${az}`] ?? 0)) <= 0.6, // as build.js (ladders aside)
+    open: (x, z) => x >= 0 && z >= 0 && x < m.width && z < m.height && !solid.has(`${x},${z}`),
+    door: (to) => ((w) => w && [w.x, w.z])(doors.find((w) => w.to === to)),
+  };
+  for (const n of m.npcs ?? []) {
+    if (n.routine === undefined) continue;
+    const who = `${name}: ${n.id}'s routine`;
+    if (n.trainer || JSON.stringify(n.dialogue ?? "").includes("duel:")) fail.push(`${name}: ${n.id} duels, so it keeps no routine (it stands where the map puts it)`);
+    if (n.route) fail.push(`${name}: ${n.id} has a route and a routine; give it one or the other`);
+    if (!Array.isArray(n.routine) || !n.routine.length) {
+      fail.push(`${who} is a list of activities`);
+      continue;
+    }
+    for (const a of n.routine) {
+      const at = `${who} at ${a.from}`;
+      if (Number.isNaN(minuteOf(a.from))) fail.push(`${who}: "${a.from}" is not a time (HH:MM, or dawn, day, dusk, night)`);
+      if (a.do !== undefined && !DOES.includes(a.do)) fail.push(`${at}: "${a.do}" is not an activity (${DOES.join(", ")})`);
+      if (a.face !== undefined && !DIR[a.face]) fail.push(`${at} faces a way that is not n/e/s/w`);
+      if (a.with !== undefined && !(m.npcs ?? []).some((o) => o.id === a.with && o !== n)) fail.push(`${at} is with ${a.with}, who is not on this map`);
+      const [x, z] = a.at ?? [];
+      if (a.home !== undefined) {
+        if (!grid.door(a.home)) fail.push(`${at} goes home to ${a.home}, but no door here leads there`);
+      } else if (!(Number.isInteger(x) && Number.isInteger(z))) fail.push(`${at} needs \`at: [x, z]\` or \`home\``);
+      else if (!grid.open(x, z) && !(a.do === "sit" && seatAt.has(`${x},${z}`))) fail.push(`${at} stands on ${x},${z}, which is blocked or off the map`);
+      if (!(a.home !== undefined ? grid.door(a.home) : grid.open(x, z) || seatAt.has(`${x},${z}`))) continue;
+      const p = plan({ x: n.x, z: n.z, def: { routine: [a] } }, 0, grid);
+      if (!p.to || !p.steps) fail.push(`${at} can't be walked to from ${n.x},${n.z}`);
+    }
+  }
+}
+
 function liftLandings(l, y, solid, height) {
   return Object.values(DIR).map(([dx, dz]) => `${l.x + dx},${l.z + dz}`).filter((k) => !solid.has(k) && Math.abs((height[k] ?? 0) - (y + 0.1)) <= 0.6);
 }
@@ -486,7 +527,8 @@ function rules(name, m, solid, all) {
   };
   const tall = (a) => HEIGHT[a] ?? TALL_OF(a);
   const ground = (p) => WALKABLE.has(p.asset) || DECK[p.asset]; // walked on: other props may stand on them
-  const npcs = (m.npcs ?? []).filter((n) => !n.route);
+  // People who stand still: where the map puts them, or (with a routine) at each of its places.
+  const npcs = (m.npcs ?? []).flatMap((n) => (n.route ? [] : n.routine ? n.routine.filter((a) => a.at).map((a) => ({ ...n, x: a.at[0], z: a.at[1] })) : [n]));
   const at = new Map(); // tile -> props standing on it (not decks or rugs)
   for (const p of m.props) if (!ground(p)) for (const [x, z] of foot(p)) (at.get(`${x},${z}`) ?? at.set(`${x},${z}`, []).get(`${x},${z}`)).push(p);
   const who = (p) => `${p.asset} ${p.x},${p.z}`;
@@ -518,7 +560,7 @@ function rules(name, m, solid, all) {
       const k = `${t.x},${t.z + d}`;
       if (mine.has(`${t.x},${t.z + d}`)) continue;
       const front = [...(at.get(k) ?? []).filter((p) => !p.if && !ACROSS.has(p.asset)).map((p) => ({ h: tall(p.asset), what: who(p), use: POST.has(p.asset) })),
-        ...npcs.filter((n) => n.x === t.x && n.z === t.z + d).map((n) => ({ h: 1.45, what: `npc ${n.id}`, use: true }))];
+        ...npcs.filter((n) => n.x === t.x && n.z === t.z + d && `npc ${n.id}` !== t.what).map((n) => ({ h: 1.45, what: `npc ${n.id}`, use: true }))]; // one person at two hours never hides itself
       for (const f of front) {
         const limit = [0, 0.95, 2.0, 3.0][d] * (out ? DEPTH_SCALE : 1);
         if (f.h <= limit) continue;

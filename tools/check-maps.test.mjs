@@ -176,3 +176,18 @@ test("AC6: a changed budget changes the report, with no code change", () => {
   assert.match(after, /\[poi-budget\] \d+ secondary POIs \(9 for a route\)/);
   assert.match(after, /budget: secondary 9/);
 });
+
+test("AC5 (#113): a routine on a solid tile or on a duelist fails; a good one passes", () => {
+  const ann = (routine, more = {}) => (m) => m.vale.npcs.push({ id: "ann", name: "Ann", x: 12, z: 8, facing: "s", routine, ...more });
+  const good = [{ from: "06:00", at: [12, 12], face: "s", do: "work" }, { from: "night", home: "vale_in" }];
+  passes(world(ann(good)));
+  const bad = (change, msg) => {
+    const r = run(world(change), "--strict");
+    assert.notEqual(r.code, 0, r.out);
+    assert.match(r.out, msg, r.out);
+  };
+  bad(ann([{ from: "06:00", at: [14, 10], do: "work" }]), /vale: ann's routine at 06:00 stands on 14,10, which is blocked/);
+  bad(ann(good, { trainer: { sight: 2 } }), /vale: ann duels, so it keeps no routine/);
+  bad(ann([{ from: "25:00", at: [12, 12] }]), /"25:00" is not a time/);
+  bad(ann([{ from: "dusk", home: "nowhere" }]), /goes home to nowhere, but no door here leads there/);
+});
