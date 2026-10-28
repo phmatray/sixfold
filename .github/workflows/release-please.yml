@@ -3,8 +3,8 @@ name: release-please
 # Conventional-Commits-driven releases. On every push to main, release-please keeps a release PR up
 # to date (CHANGELOG.md, .release-please-manifest.json and the version fields listed in
 # release-please-config.json). Merging that PR tags vX.Y.Z and creates the GitHub Release; the
-# `release_created` output then gates the `ci` and `package` jobs in this same run (a tag pushed with
-# GITHUB_TOKEN never triggers another workflow).
+# `release_created` output then gates the `ci`, `package` and `desktop` jobs in this same run (a tag
+# pushed with GITHUB_TOKEN never triggers another workflow).
 
 on:
   push:
@@ -96,3 +96,13 @@ jobs:
           (cd web/dist && zip -r "$GITHUB_WORKSPACE/sixfold-web-${TAG}.zip" .)
           gh release upload "$TAG" "sixfold-web-${TAG}.zip" --clobber
           gh release edit "$TAG" --title "Sixfold ${TAG}"
+
+  # Attaches the desktop app (Windows installer, Linux AppImage) to the Release.
+  desktop:
+    needs: [release-please, ci]
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/desktop.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name }}
+    permissions:
+      contents: write

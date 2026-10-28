@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Sixfold",
+  "identifier": "com.atypicalplay.sixfold",
+  "build": {
+    "beforeDevCommand": { "script": "trunk serve", "cwd": "../web", "wait": false },
+    "beforeBuildCommand": { "script": "trunk build --release", "cwd": "../web" },
+    "devUrl": "http://localhost:8080",
+    "frontendDist": "../web/dist"
+  },
+  "app": {
+    "windows": [
+      { "title": "Sixfold", "width": 1280, "height": 800, "minWidth": 960, "minHeight": 600, "center": true }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "appimage"],
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
+  }
+}
