@@ -5,6 +5,49 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.11.0](https://github.com/phmatray/sixfold/compare/v1.10.0...v1.11.0) (2026-10-28)
+
+
+### Added
+
+* **desktop:** a desktop app with Tauri, ready for a Steam beta ([#185](https://github.com/phmatray/sixfold/issues/185)) ([#186](https://github.com/phmatray/sixfold/issues/186)) ([ef7040a](https://github.com/phmatray/sixfold/commit/ef7040a05d285c9a23df993e3ee04686cdcced58))
+* **duel:** a world duel won with packs offers Open it now ([#208](https://github.com/phmatray/sixfold/issues/208)) ([80a7e04](https://github.com/phmatray/sixfold/commit/80a7e04971ea69816cc97f43c8ff2705fd67fe43))
+* **world:** ambient life and micro-events ([#115](https://github.com/phmatray/sixfold/issues/115)) ([#182](https://github.com/phmatray/sixfold/issues/182)) ([890e5d6](https://github.com/phmatray/sixfold/commit/890e5d65f795d10da78d26d523bd428b5c0323a9))
+* **world:** Blender-built critter, bird and boat models replace the placeholders ([#189](https://github.com/phmatray/sixfold/issues/189)) ([#203](https://github.com/phmatray/sixfold/issues/203)) ([8c26097](https://github.com/phmatray/sixfold/commit/8c260976aa8669467464357ecca07e2e65d3505f))
+* **world:** every inn has an upstairs with its beds ([#193](https://github.com/phmatray/sixfold/issues/193)) ([#199](https://github.com/phmatray/sixfold/issues/199)) ([9adbf24](https://github.com/phmatray/sixfold/commit/9adbf24a0917247347377485b6c06726cd1962a8))
+* **world:** NPC routines ([#113](https://github.com/phmatray/sixfold/issues/113)) ([#181](https://github.com/phmatray/sixfold/issues/181)) ([db9228c](https://github.com/phmatray/sixfold/commit/db9228ccf674becd9b09e17e769dfcad3eec3454))
+* **world:** open your packs from the world, without going back to the title ([#194](https://github.com/phmatray/sixfold/issues/194)) ([#202](https://github.com/phmatray/sixfold/issues/202)) ([ac33a4e](https://github.com/phmatray/sixfold/commit/ac33a4ed99b90868d5557077bddd3634044406ee))
+* **world:** reactions and persistence ([#114](https://github.com/phmatray/sixfold/issues/114)) ([#188](https://github.com/phmatray/sixfold/issues/188)) ([8c7809d](https://github.com/phmatray/sixfold/commit/8c7809dab34ca766aec9d74e7d7aaa71cf9ed579))
+* **world:** three camera angles to choose from ([#148](https://github.com/phmatray/sixfold/issues/148)) ([#180](https://github.com/phmatray/sixfold/issues/180)) ([16f5130](https://github.com/phmatray/sixfold/commit/16f51303483363b4499b166179166f8713de6990))
+
+
+### Fixed
+
+* **cards:** a revealed card no longer shows through its turned-away side in WebKit ([#205](https://github.com/phmatray/sixfold/issues/205)) ([#207](https://github.com/phmatray/sixfold/issues/207)) ([d48f6ed](https://github.com/phmatray/sixfold/commit/d48f6ed7e9223c7a8270ced033a924239cc8c67a))
+* **cards:** nothing on a card face spills past its edge ([#195](https://github.com/phmatray/sixfold/issues/195)) ([14b9a68](https://github.com/phmatray/sixfold/commit/14b9a68057ec32be473edda132306aa5f88007e1))
+* the 1.11 design audit ([#211](https://github.com/phmatray/sixfold/issues/211)) ([b94a2e2](https://github.com/phmatray/sixfold/commit/b94a2e23eca614c782f0d956f774e71b88ade53d))
+* **title:** the way back to the title no longer freezes the page on a software renderer ([#214](https://github.com/phmatray/sixfold/issues/214)) ([4f8cdc4](https://github.com/phmatray/sixfold/commit/4f8cdc4b78279eb34803ffc405521de596b79243))
+* **ui:** achievements wear a faceted hex, not a six-pointed star, and are called Succès ([#197](https://github.com/phmatray/sixfold/issues/197)) ([53f253d](https://github.com/phmatray/sixfold/commit/53f253d5ca1894e5f6c691f8a51fce137110f802))
+* **ui:** the inn's rest panel reads, and its counter shows its packs and singles ([#196](https://github.com/phmatray/sixfold/issues/196)) ([92f054b](https://github.com/phmatray/sixfold/commit/92f054b7a5e981d6e56da367408b69129a1a7347))
+* **ui:** the title's signboards hold still and say their whole line ([#198](https://github.com/phmatray/sixfold/issues/198)) ([2df156a](https://github.com/phmatray/sixfold/commit/2df156af23f80c6778e6a5791a626e7e918eec5d))
+* **world:** one owner for the camera angle, and no C/R3 binding clash ([#191](https://github.com/phmatray/sixfold/issues/191)) ([a15ca9b](https://github.com/phmatray/sixfold/commit/a15ca9b06002608972d09900daebd391df5a0aeb))
+* **world:** the seal-duel arc's last polish ([#201](https://github.com/phmatray/sixfold/issues/201)) ([186a161](https://github.com/phmatray/sixfold/commit/186a16151569eb435c01033d528260e5eb3911e4))
+
+
+### Performance
+
+* **world:** hold a 16.7 ms frame with 6 routine walkers ([#187](https://github.com/phmatray/sixfold/issues/187)) ([#200](https://github.com/phmatray/sixfold/issues/200)) ([720fbe7](https://github.com/phmatray/sixfold/commit/720fbe7bb02b4f7e2843623a1f2706da83b2d2cf))
+
+
+### Changed
+
+* **cards:** Trainer cards become Gear (Objet), and nobody in Sixfold is a trainer ([#192](https://github.com/phmatray/sixfold/issues/192)) ([#204](https://github.com/phmatray/sixfold/issues/204)) ([7af3ed7](https://github.com/phmatray/sixfold/commit/7af3ed702e4a13f402366c9e26cec23767ed55df))
+
+
+### Documentation
+
+* refresh the README for 1.10, with a banner and screenshots ([#178](https://github.com/phmatray/sixfold/issues/178)) ([4dbcf5a](https://github.com/phmatray/sixfold/commit/4dbcf5a91f42d355dbf1dbfaf72e3bad5ebcf1bf))
+
 ## [1.10.0](https://github.com/phmatray/sixfold/compare/v1.9.1...v1.10.0) (2026-10-28)
 
 
