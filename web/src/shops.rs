@@ -289,8 +289,7 @@ pub fn InnCounter(stock: &'static InnStock) -> impl IntoView {
 #[component]
 fn PackItem(b: usize, said: RwSignal<String>) -> impl IntoView {
     let (progress, profile) = signals();
-    let buy = move |b: usize| match deal((progress, profile), |p, pr| shop::buy_pack(p, pr, b))
-    {
+    let buy = move |b: usize| match deal((progress, profile), |p, pr| shop::buy_pack(p, pr, b)) {
         Ok(()) => {
             crate::audio::sfx("reward", 0.0);
             said.set(
@@ -312,7 +311,10 @@ fn PackItem(b: usize, said: RwSignal<String>) -> impl IntoView {
     // A memo: a purchase changes the Facets, not the button.
     let price = Memo::new(move |_| progress.with(|p| shop::pack_price(b, p)));
     let held = move || profile.with(|p| p.wallet.packs(b));
-    let rival = RIVALS.iter().find(|r| r.booster == b).map_or("?", |r| r.name);
+    let rival = RIVALS
+        .iter()
+        .find(|r| r.booster == b)
+        .map_or("?", |r| r.name);
     view! {
         <li class="shelf-item" class:locked=move || price.get().is_none()>
             <crate::packs::PackArt b=b held=Signal::derive(held) />
