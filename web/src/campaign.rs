@@ -733,6 +733,35 @@ pub fn Challenge(
                 </div>
                 {quote.map(|q| view! { <blockquote class="ch-say"><p>{q}</p></blockquote> })}
             </header>
+            // Still to earn (#155): what is missing comes first, on screen and read out first (the dialog's
+            // description is this, then the terms), leading with how many more and where they wait.
+            {r.filter(|_| earning).map(|r| {
+                let (n, wait) = progress.with_untracked(|p| (r.bested(p), r.waiting_line(p).map(|w| format!(" {w}")).unwrap_or_default()));
+                let k = r.earn.saturating_sub(n);
+                let s = if k == 1 { "" } else { "s" };
+                let (en_k, fr_k) = match k {
+                    1 => ("One", "un"),
+                    2 => ("Two", "deux"),
+                    3 => ("Three", "trois"),
+                    4 => ("Four", "quatre"),
+                    _ => ("Several", "plusieurs"),
+                };
+                let of = tr(format!("{n} of {}", r.earn), format!("{n} sur {}", r.earn));
+                // Progress, not an error: the brass note, and pips in the region's colour.
+                let tone = r.colors.first().map_or("colorless", |&c| color_key(c));
+                view! { <div class="ch-note earn" id="ch-earn">
+                    <p>{tr(
+                        format!("{en_k} more {} duelist{s}, and {} will sit down.{wait}", r.region.en.trim_start_matches("the "), r.name),
+                        format!("Encore {fr_k} duelliste{s} {}, et {} s'assiéra face à vous.{wait}", r.region_de(), r.name),
+                    )}</p>
+                    <p class="ch-pips">
+                        <span class=format!("ch-earn t-{tone}") role="img" aria-label=of.clone()>
+                            {(0..r.earn).map(|i| view! { <i class:on=i < n></i> }).collect_view()}
+                        </span>
+                        <b aria-hidden="true">{of}</b>
+                    </p>
+                </div> }
+            })}
             // The dialog's description: what is at stake, read out as it opens.
             <dl class="ch-terms" id="world-sheet-desc">
                 <div class="ch-term">
@@ -773,23 +802,9 @@ pub fn Challenge(
                     format!("{} needs {} before accepting a duel. You hold {held}: beat the rivals of the other regions for theirs.", r.name, seals_n(r.needs)),
                     format!("{} exige {} avant d'accepter un duel. Vous en avez {held}\u{a0}: battez les rivaux des autres régions pour les leurs.", r.name, seals_n(r.needs)),
                 )}</p> }.into_any()
-            } else if let Some(r) = r.filter(|_| !accepted) {
-                let (n, wait) = progress.with_untracked(|p| (r.bested(p), r.waiting_line(p).map(|w| format!(" {w}")).unwrap_or_default()));
-                let of = tr(format!("{n} of {}", r.earn), format!("{n} sur {}", r.earn));
-                // Progress, not an error (#155): the brass note, and pips in the region's colour.
-                let tone = r.colors.first().map_or("colorless", |&c| color_key(c));
-                view! { <div class="ch-note earn">
-                    <p>{tr(
-                        format!("{} wants {} of {}'s duelists bested first. You've bested {n}.{wait}", r.name, r.earn, r.region.en),
-                        format!("{} veut que vous battiez d'abord {} duellistes {}. Vous en avez battu {n}.{wait}", r.name, r.earn, r.region_de()),
-                    )}</p>
-                    <p class="ch-pips">
-                        <span class=format!("ch-earn t-{tone}") role="img" aria-label=of.clone()>
-                            {(0..r.earn).map(|i| view! { <i class:on=i < n></i> }).collect_view()}
-                        </span>
-                        <b aria-hidden="true">{of}</b>
-                    </p>
-                </div> }.into_any()
+            } else if earning {
+                // Said first, above the terms (below).
+                ().into_any()
             } else if playable > 0 {
                 view! {
                     {rule.map(|r| view! {

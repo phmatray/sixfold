@@ -191,7 +191,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   let minute = 480, lastHour = -1, lastPhase = "", bgAt = 0;
   const clock = new THREE.Timer();
   const look = new THREE.Vector3(), lookVel = new THREE.Vector3(), aim = new THREE.Vector3();
-  let first = true, zoom = 1, readySent = false, drawnPaused = false, cover = 0;
+  let first = true, zoom = 1, readySent = false, drawnPaused = false, cover = 0, quiet = false;
   const resize = () => {
     const w = el.clientWidth || 1, h = el.clientHeight || 1;
     // The share of the view under the top bar: a room's back row must clear it.
@@ -696,7 +696,11 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     resize();
     first = true;
     await renderer.compileAsync(scene, camera).catch(() => {});
-    if (map.title && !L.indoor) showBanner(map.title), cb("area", map.title, "");
+    // The area's name, except back from a duel or when a scene is about to play on arrival (#155): the
+    // moment is the scene's, not the map's. The live region still says where you are.
+    if (map.title && !L.indoor && !quiet && !cut.due(world)) showBanner(map.title);
+    if (map.title && !L.indoor) cb("area", map.title, "");
+    quiet = false;
     preload(map, () => alive);
     bakeBusts(s);
   }
@@ -714,7 +718,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   }
 
   // Resume at a saved "map,x,z,facing"; a map that no longer loads falls back to the overworld.
-  const [sm, sx, sz, sf] = (start ?? "").split(",");
+  // A fifth field `back`: the world comes back from a duel (no area banner on that arrival).
+  const [sm, sx, sz, sf, back] = (start ?? "").split(",");
+  quiet = back === "back";
   const at = sm && DIR[sf] && Number.isInteger(+sx) && Number.isInteger(+sz) ? { x: +sx, z: +sz, facing: sf } : null;
   // The first build counts as a warp: travel or an edge warp while its materials compile would dispose them
   // mid-compile (three's compileAsync then never settles and the world stays on "Loading").
@@ -859,6 +865,16 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const shot = cut.aim(); // a cutscene's `cam` target
     if (shot) aim.set(shot[0] + off[0], off[1] + shot[1], shot[2] + off[2]);
     else aim.set(px + off[0] + DIR[h.face][0] * ahead, off[1] + h.fy, pz + off[2] + DIR[h.face][1] * ahead);
+    // A scene's line on screen (#155): the talk box covers the bottom of the frame, so the shot moves down the
+    // ground by as much, and whoever speaks and whoever listens both stand above it.
+    if (cut.playing) {
+      const box = el.closest(".world")?.querySelector(".talk-box")?.getBoundingClientRect();
+      const H = el.clientHeight;
+      if (box && H) {
+        const half = THREE.MathUtils.degToRad(camera.fov / 2), span = (2 * dist * zoom * Math.tan(half)) / Math.sin(pitch);
+        aim.z += (Math.max(0, H - box.top) / H) * span * 0.9;
+      }
+    }
     if (cam.clamp) {
       // Keep the view inside the room: the ground it shows spans [aim + top, aim + bottom]
       // along z (perspective makes the far side longer) and ±halfW along x.
@@ -875,7 +891,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       const fit = (v, lo, hi) => THREE.MathUtils.clamp(v, Math.min(lo, hi), Math.max(lo, hi));
       // A scene's shot of a tile by the wall (the sealed door) may take in the wall's own thickness, no more,
       // so what it shows isn't cut by the frame's edge (#155).
-      const wall = shot ? 0.6 : 0;
+      // An indoor place shot (the door) may show up to 1.2 m past the wall, so the place sits about a third in.
+      const wall = shot ? (cut.onTile() && w.map.light.indoor ? 1.2 : 0.6) : 0;
       aim.x = fit(aim.x, halfW - wall, w.map.width - halfW + wall);
       if (Number.isFinite(top)) {
         // A room deeper than the view leans to its back row (counters, shelves) as
@@ -895,7 +912,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     // In a scene (#155: a scene reads as one) the camera leans in; on a place indoors (the sealed door, a
     // stone) it comes close, so the place is the subject. Sitting or idle a while: in a little. Reduced motion
     // cuts to a scene's distance and skips the idle lean.
-    const lean = cut.playing ? (cut.onTile() && w.map.light.indoor ? 0.6 : 0.85) : !reduced && (h.sit || h.idle > FIDGET_AFTER) ? 0.88 : 1;
+    const lean = cut.playing ? (cut.onTile() && w.map.light.indoor ? 0.55 : 0.85) : !reduced && (h.sit || h.idle > FIDGET_AFTER) ? 0.88 : 1;
     zoom = reduced ? lean : zoom + (lean - zoom) * Math.min(1, dt * 1.5);
     const dz = dist * zoom;
     camera.position.set(look.x, look.y + Math.sin(pitch) * dz, look.z + Math.cos(pitch) * dz);

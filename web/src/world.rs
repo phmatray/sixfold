@@ -727,6 +727,7 @@ pub fn WorldScreen() -> impl IntoView {
     // A world duel just ended: once the scene is up, the hero (put back on its
     // tile) and the rival or duelist meet again so the post-duel line plays.
     let returning = progress.with_untracked(|p| p.last_duel().map(|(id, _)| id.to_string()));
+    let back = returning.is_some();
     let ui = expect_context::<Ui>();
     // The in-game menu's deck editor, open on this deck (Decks tab).
     let editing = RwSignal::new(None::<usize>);
@@ -946,6 +947,12 @@ pub fn WorldScreen() -> impl IntoView {
     let mount = move || {
         if let (Some(h), Some(c)) = (host.get_untracked(), controls.get_untracked()) {
             let start = store::world_at().unwrap_or_default();
+            // Back from a duel: the world says so, and shows no area banner on arrival (#155).
+            let start = if back && !start.is_empty() {
+                format!("{start},back")
+            } else {
+                start
+            };
             world_clock(progress.with_untracked(Progress::minute));
             cb.with_value(|cb| world_mount(&h, &c, cb, &start, cfg!(debug_assertions)));
         }
@@ -1620,7 +1627,8 @@ pub fn WorldScreen() -> impl IntoView {
             // Over a line the dialogue box has its own Skip.
             {move || (playing.get() && sheet.with(Option::is_none)).then(|| view! {
                 <button type="button" class="btn ghost world-skip" aria-keyshortcuts="Escape" on:click=move |_| skip()>
-                    {tr("Skip", "Passer")}
+                    // The same words as the talk box's (#155).
+                    {tr("Skip scene", "Passer la scène")}
                     <kbd>{move || input::prompt(Ctrl::Cancel)}</kbd>
                 </button>
             })}
@@ -1652,7 +1660,7 @@ pub fn WorldScreen() -> impl IntoView {
                 </div>
             })}
             <dialog class="world-sheet" node_ref=dlg aria-labelledby="world-sheet-title"
-                aria-describedby=move || sheet.with(|s| matches!(s, Some(Sheet::Challenge(_)))).then_some("world-sheet-desc")
+                aria-describedby=move || sheet.with(|s| matches!(s, Some(Sheet::Challenge(_)))).then_some("ch-earn world-sheet-desc")
                 class:reading-sheet=move || sheet.with(|s| matches!(s, Some(Sheet::Book(_))))
                 on:cancel=on_cancel on:keydown=on_key
                 // Should the browser close the dialog itself, the world must not stay paused

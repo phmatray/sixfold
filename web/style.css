@@ -959,7 +959,7 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
 
 .scrim.end { background: rgba(4, 9, 18, 0.75); }
 .dialog.result { max-width: 460px; text-align: center; padding: 34px 26px 26px; }
-.dialog.result h2 { font-size: clamp(44px, 9vw, 68px); font-weight: 800; letter-spacing: -0.04em; }
+.dialog.result h2 { font-size: clamp(44px, 9vw, 68px); font-weight: 800; letter-spacing: -0.04em; text-wrap: balance; }
 .dialog.result.won h2 { color: var(--brass-hi); text-shadow: 0 3px 0 #7b5a17; }
 .dialog.result .dialog-sub { margin: 12px auto 0; }
 .dialog.result .dialog-foot { justify-content: center; }
@@ -3618,7 +3618,9 @@ button.pile { cursor: pointer; }
 
 /* The game-over's "why", and Mags's reading. */
 .why { margin: 14px 0 0; padding: 14px 16px; border-radius: var(--r2); background: rgba(255, 255, 255, 0.04); text-align: left; }
-.why h3 { margin-bottom: 6px; font: 700 var(--type-duel-fine) var(--body); color: var(--muted); }
+/* "Why you lost" and "Next time": one heading style (#155: the h4 rendered bigger than its h3). */
+.why :is(h3, h4) { margin: 0 0 6px; font: 700 var(--type-duel-fine) var(--body); color: var(--muted); letter-spacing: 0.02em; }
+.why p + h4 { margin-top: 12px; }
 .why p { margin: 0 0 8px; }
 .why p:last-of-type { margin-bottom: 0; }
 .mags { margin: 10px 0 0; padding-left: 18px; color: var(--text-soft); display: grid; gap: 4px; }
@@ -4281,6 +4283,8 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 .duel[data-beat~="grand"] .mat { animation: seal-ring-grand calc(2200ms * var(--pace, 1)) var(--ease-out) both; }
 /* The seal itself answers on the table (#155): the hexagon pressed into the felt flares in the region's
    colour and the plaque pulses; at the champion's, the six inlays light in turn before the centre flares. */
+/* The seal's moment has the table to itself (#155): the attack panel, the callout and the seam's banner step away. */
+.duel[data-beat~="seal-final"] :is(.callout, .plates, .seam .banner) { opacity: 0; transition: opacity 160ms ease; pointer-events: none; }
 /* …and the region's seal stamps into the centre hexagon at full colour. */
 .duel[data-beat~="seal-final"] .mat::before { animation: seal-stamp calc(1600ms * var(--pace, 1)) var(--ease-out) both; }
 @keyframes seal-stamp {
@@ -4379,7 +4383,9 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
     radial-gradient(ellipse 80% 38% at 50% 100%, color-mix(in srgb, var(--c) 16%, transparent), transparent 72%),
     radial-gradient(ellipse 60% 22% at 50% 47%, color-mix(in srgb, var(--tint) 12%, transparent), transparent 70%),
     radial-gradient(ellipse 75% 70% at 50% 46%, color-mix(in srgb, var(--c) 30%, #1d3758) 0%, color-mix(in srgb, var(--c) 26%, #142944) 50%, color-mix(in srgb, var(--c) 18%, #0b1a2e) 82%, color-mix(in srgb, var(--c) 12%, #081320) 100%);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 60%, transparent), inset 0 40px 90px -40px rgba(0, 0, 0, 0.7), inset 0 0 140px rgba(0, 0, 0, 0.45);
+  /* A framed rim in the region's colour (a thick band, a dark line, a pale line), so even the Tide, blue on
+     blue, never reads as a route duel (#155). */
+  box-shadow: inset 0 0 0 4px var(--c), inset 0 0 0 6px color-mix(in srgb, var(--c2) 85%, transparent), inset 0 0 0 7.5px color-mix(in srgb, var(--tint) 55%, transparent), inset 0 40px 90px -40px rgba(0, 0, 0, 0.7), inset 0 0 140px rgba(0, 0, 0, 0.45);
 }
 /* The champion's table keeps the night felt (#155: brass mixed into navy went khaki): the brass is only
    on its rim, the seam, the plaque and the hexagon pressed into it. */
@@ -4402,7 +4408,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   width: min(300px, 60%);
   aspect-ratio: 1 / 1.1;
   clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--tint) 10%, transparent), color-mix(in srgb, var(--c) 13%, transparent) 70%);
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--tint) 18%, transparent), color-mix(in srgb, var(--c) 26%, transparent) 70%);
   pointer-events: none;
 }
 /* The champion's felt (#155): the six seals, small hexagons pressed in a ring round the centre one. */
@@ -4515,6 +4521,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 .seal-card-who span { font-size: var(--fs-lg); color: color-mix(in srgb, var(--tint) 70%, var(--ink)); }
 .seal-card-pips { display: flex; gap: var(--space-2); margin: var(--space-4) 0 0; animation: seal-card-rise 420ms var(--ease-out) calc(var(--dur-screen) + 360ms) both; }
 .seal-card-pips .pip { width: 26px; height: 26px; }
+.seal-card-stakes { margin: var(--space-3) 0 0; font-size: var(--fs-lg); font-weight: 600; color: color-mix(in srgb, var(--tint) 80%, var(--ink)); animation: seal-card-rise 420ms var(--ease-out) calc(var(--dur-screen) + 440ms) both; }
 /* How long it holds: a hairline that fills, then the duel begins. */
 .seal-card-hold {
   position: absolute;
@@ -4570,7 +4577,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   .duel[data-beat~="seal-final"] .mat { animation: seal-ring-calm 900ms ease both, felt-dim 900ms ease both !important; }
   .duel[data-beat~="seal-final"] .half.opp .portrait { animation: seal-portrait 900ms ease both !important; }
   /* A seal duel's card fades in place and holds as long; nothing grows or slides. */
-  .seal-card-hex, .seal-card h2, .seal-card-who, .seal-card-pips, .seal-card-seals > i { animation: fade-in var(--dur-panel) ease both; }
+  .seal-card-hex, .seal-card h2, .seal-card-who, .seal-card-pips, .seal-card-stakes, .seal-card-seals > i { animation: fade-in var(--dur-panel) ease both; }
   /* The champion's ring: no cycle through the colours, a brass ring that fades in, holds and fades. */
   .duel[data-beat~="grand"] .mat { animation: seal-ring-calm 1250ms ease both !important; }
   .duel[data-beat~="seal-final"] .mat::before { animation: seal-stamp-calm 900ms ease both !important; }
@@ -4994,8 +5001,9 @@ html.hand-cursor [data-hand], html.hand-cursor .seg label:has([data-hand]), html
 .ch-note.no { color: var(--danger-on-paper); font-weight: 700; border-color: color-mix(in srgb, var(--danger-on-paper) 55%, transparent); }
 .ch-note p { margin: 0; }
 /* On the way to a keeper's seal (#155): progress, so the brass of information, not the red of a refusal. */
-.ch-note.earn { font-weight: 600; border-style: solid; border-color: color-mix(in srgb, var(--brass) 60%, transparent); background: color-mix(in srgb, var(--brass) 12%, var(--paper)); }
+.ch-note.earn { font-weight: 400; border-style: solid; border-color: color-mix(in srgb, var(--brass) 60%, transparent); background: color-mix(in srgb, var(--brass) 12%, var(--paper)); }
 /* Duelists bested: round tokens in the region's colour, never the Temper's bronze hexes. */
+.ch-note.earn > p:first-child { max-width: 62ch; }
 .ch-earn { display: inline-flex; gap: 5px; }
 .ch-earn i { width: 16px; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--toon); background: var(--paper-hi); }
 .ch-earn i.on { background: radial-gradient(circle at 38% 34%, var(--tint), var(--c) 62%, var(--c2)); }

@@ -273,10 +273,20 @@ impl Objective {
                 // "The Bellflats, by the seal stone…": the keeper's spot, without the map's name.
                 let spot = |t: &'static str| t.split_once(", ").map_or(t, |(_, s)| s);
                 let de = if r.name.starts_with(['A', 'E', 'I', 'O', 'U']) { "d'" } else { "de " };
+                // The seal's own name, said once beside the keeper's (#155): "Marlo's seal (the Tide)".
+                let h = crate::campaign::SealDuel { rival: r, grand: false }.heading();
+                let face_en = h.en.strip_prefix("Seal of ").unwrap_or(h.en);
+                let face_fr = h.fr.strip_prefix("Sceau ").map_or(h.fr.to_string(), |f| {
+                    if let Some(x) = f.strip_prefix("du ") {
+                        format!("le {x}")
+                    } else {
+                        f.strip_prefix("de ").unwrap_or(f).to_string()
+                    }
+                });
                 // The goal first (#155), then who and where, then the keeper's spot.
                 tr(
                     format!(
-                        "{}'s seal: beat {en_k} more {} duelist{s} ({pips}\u{a0}{n}\u{a0}of\u{a0}{}){}. Then {}, {}.",
+                        "{}'s seal ({face_en}): beat {en_k} more {} duelist{s} ({pips}\u{a0}{n}\u{a0}of\u{a0}{}){}. Then {}, {}.",
                         r.name,
                         r.region.en.trim_start_matches("the "),
                         r.earn,
@@ -285,7 +295,7 @@ impl Objective {
                         spot(r.place.en)
                     ),
                     format!(
-                        "Le sceau {de}{}\u{a0}: battez encore {fr_k} duelliste{s} {} ({pips}\u{a0}{n}\u{a0}sur\u{a0}{}){}. Puis {}, {}.",
+                        "Le sceau {de}{} ({face_fr})\u{a0}: battez encore {fr_k} duelliste{s} {} ({pips}\u{a0}{n}\u{a0}sur\u{a0}{}){}. Puis {}, {}.",
                         r.name,
                         r.region_de(),
                         r.earn,
@@ -402,7 +412,7 @@ mod tests {
         let en = objective(&p).text(&p);
         assert!(
             en.starts_with(
-                "Marlo's seal: beat one more Saltreach duelist (●●○\u{a0}2\u{a0}of\u{a0}3), "
+                "Marlo's seal (the Tide): beat one more Saltreach duelist (●●○\u{a0}2\u{a0}of\u{a0}3), "
             ),
             "{en}"
         );
@@ -413,29 +423,29 @@ mod tests {
         let fr_none = objective(&none).text(&none);
         set_lang(Lang::En);
         assert!(
-            fr.starts_with("Le sceau de Marlo\u{a0}: battez encore un duelliste de la Côte Salée (●●○\u{a0}2\u{a0}sur\u{a0}3), "),
+            fr.starts_with("Le sceau de Marlo (la Marée)\u{a0}: battez encore un duelliste de la Côte Salée (●●○\u{a0}2\u{a0}sur\u{a0}3), "),
             "{fr}"
         );
         assert!(
             fr_none.starts_with(
-                "Le sceau de Marlo\u{a0}: battez encore trois duellistes de la Côte Salée"
+                "Le sceau de Marlo (la Marée)\u{a0}: battez encore trois duellistes de la Côte Salée"
             ),
             "{fr_none}"
         );
         let en_none = objective(&none).text(&none);
         assert!(
-            en_none.starts_with("Marlo's seal: beat three more Saltreach duelists"),
+            en_none.starts_with("Marlo's seal (the Tide): beat three more Saltreach duelists"),
             "{en_none}"
         );
         // Where the rest are (Pell and Nell are on the boardwalk, with two more), then the
         // keeper's spot, in two sentences (#155).
         assert_eq!(
             en,
-            "Marlo's seal: beat one more Saltreach duelist (●●○\u{a0}2\u{a0}of\u{a0}3), on the Bellflats, in Gullhaven or on the Saltwind Boardwalk. Then Marlo, by the seal stone on the bell-tower islet."
+            "Marlo's seal (the Tide): beat one more Saltreach duelist (●●○\u{a0}2\u{a0}of\u{a0}3), on the Bellflats, in Gullhaven or on the Saltwind Boardwalk. Then Marlo, by the seal stone on the bell-tower islet."
         );
         assert_eq!(
             fr,
-            "Le sceau de Marlo\u{a0}: battez encore un duelliste de la Côte Salée (●●○\u{a0}2\u{a0}sur\u{a0}3), sur les Grèves de la Cloche, à Havre-aux-Mouettes ou sur la Promenade de Ventsalé. Puis Marlo, près de la pierre de sceau sur l'îlot du clocher."
+            "Le sceau de Marlo (la Marée)\u{a0}: battez encore un duelliste de la Côte Salée (●●○\u{a0}2\u{a0}sur\u{a0}3), sur les Grèves de la Cloche, à Havre-aux-Mouettes ou sur la Promenade de Ventsalé. Puis Marlo, près de la pierre de sceau sur l'îlot du clocher."
         );
         // Hushwillow Lane done: two places left, in campaign order.
         let lumen = rival("lumen").unwrap();
@@ -479,7 +489,7 @@ mod tests {
         let fr = objective(&p).text(&p);
         set_lang(Lang::En);
         assert!(
-            fr.starts_with("Le sceau d'Orla\u{a0}: battez encore trois duellistes des Échines de Pierre (○○○\u{a0}0\u{a0}sur\u{a0}3)")
+            fr.starts_with("Le sceau d'Orla (le Roc)\u{a0}: battez encore trois duellistes des Échines de Pierre (○○○\u{a0}0\u{a0}sur\u{a0}3)")
                 && fr.contains(". Puis Orla, "),
             "{fr}"
         );
@@ -532,7 +542,7 @@ mod tests {
         // The Journal's count and the short one are the same number.
         assert!(objective(&p)
             .text(&p)
-            .starts_with("Marlo's seal: beat one more Saltreach duelist"));
+            .starts_with("Marlo's seal (the Tide): beat one more Saltreach duelist"));
         // Earned: just the name, as before.
         let p = with(&[
             "flag:beat_t_tobin",

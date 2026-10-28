@@ -43,7 +43,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   await atMarlo(page, ["f:keepers", "f:intro", "f:reveal_bellflats", "f:beat_t_tobin", "f:beat_bramble", "f:beat_t_pell", "f:beat_t_nell"]);
   const offer = await talkToMarlo(page);
   await expect(offer).toContainText("Come back with the flats behind you.");
-  await expect(offer).toContainText("Marlo wants 3 of the Saltreach's duelists bested first. You've bested 2.");
+  await expect(offer).toContainText("One more Saltreach duelist, and Marlo will sit down.");
   await expect(offer.getByRole("img", { name: "2 of 3" })).toBeVisible();
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toHaveCount(0);
   await expect(offer.getByRole("button", { name: /^Not now/ })).toBeFocused();
@@ -53,7 +53,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   // The Journal's next step names the duelists still needed.
   await page.keyboard.press("j");
   const journal = page.getByRole("dialog", { name: "Journal" });
-  await expect(journal).toContainText("Marlo's seal: beat one more Saltreach duelist (●●○\u00a02\u00a0of\u00a03),");
+  await expect(journal).toContainText("Marlo's seal (the Tide): beat one more Saltreach duelist (●●○\u00a02\u00a0of\u00a03),");
   await page.keyboard.press("Escape");
   await expect(journal).toBeHidden();
   // The menu's Campaign roster counts them too.
@@ -67,7 +67,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   await atMarlo(page, ["f:beat_t_skye"]);
   const again = await talkToMarlo(page);
   await expect(again.getByRole("button", { name: /^Challenge/ })).toBeVisible();
-  await expect(again).not.toContainText("bested first");
+  await expect(again).not.toContainText("will sit down");
 });
 
 /** A new game, its lesson skipped: a save to edit. */
@@ -264,7 +264,7 @@ test("after losing to Marlo, he encourages, and the challenge is still open", as
   expect(await walk(page, 22, 16)).toBeGreaterThan(0);
   const offer = await talkToMarlo(page);
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toBeEnabled();
-  await expect(offer).not.toContainText("bested first");
+  await expect(offer).not.toContainText("will sit down");
 });
 
 // #154: the Warden's duel is the grandest. With six seals the sealed door rings and Sable speaks through it,

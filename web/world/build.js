@@ -664,7 +664,8 @@ export async function build(map, got, reduced) {
     return glowAt.get(name);
   };
   const GLIMMER = { floating_lantern: ["#ffc98a", 1.3, 2.6], lantern_raft: ["#ffbcc0", 0.8, 1.1], moonflower: ["#cfdcff", 0.8, 2.2],
-    glow_mushroom: ["#8ff0d8", 0.7, 1.8], glow_mushroom_tall: ["#8ff0d8", 1.1, 2.8], glow_shelf: ["#8ff0d8", 0.8, 2.0] }; // a prop's `glow` overrides the colour
+    glow_mushroom: ["#8ff0d8", 0.7, 1.8], glow_mushroom_tall: ["#8ff0d8", 1.1, 2.8], glow_shelf: ["#8ff0d8", 0.8, 2.0],
+    lava_glass: ["#ff7a2e", 1.6, 3.4] }; // a prop's `glow` overrides the colour; the Kilnmouth's lava glows at night (#155)
   const glimmers = [];
   const spin = (v, deg) => v.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(deg));
   for (const p of props) {

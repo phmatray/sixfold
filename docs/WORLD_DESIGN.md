@@ -2018,7 +2018,9 @@ I played the design through on paper. Here is what was still hollow, and what th
    place comes in close), the lamp is gone from that wall, the room dims even under reduced motion, and the sixth
    bell swings the door open with its light. A seal won stamps its colour into the felt and the plaque reads "won";
    the victory frames stone and hero, and the seal flies from the stone to a seal count in the HUD that stays.
-   A fifth scored it TBD/40.
+   A fifth scored it 33/40 with nothing serious: scene shots now lift above the talk box, no area banner covers
+   an arrival's scene, the refusal is read out first, the regional felt has a framed rim, the door sits a third
+   in and holds on the open doorway, and the champion's result says "Champion of Sixfold". A sixth scored it TBD/40.
 9. **"The economy is a spreadsheet."** Facets with nothing exciting to buy feel like points. *Fixed*: each inn
    stocks one Rare to save up for, the Press can make the one card you need, the voucher is a real prize, and
    outfits give late Facets somewhere to go. The `economy_sim` keeps packs at about one per 12 minutes of

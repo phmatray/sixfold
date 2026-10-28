@@ -488,9 +488,9 @@ pub fn GameOver() -> impl IntoView {
                     <h2 id="result-title">{match (ctl.seal(), won) {
                         // With a verb, so it says you won and not only what was at stake (#155).
                         (Some(s), true) if !s.grand => won_heading(s.heading()),
-                        (Some(_), true) => tr("The title is yours", "Le titre est à vous").to_string(),
+                        (Some(_), true) => tr("Champion of Sixfold", "Champion de Sixfold").to_string(),
                         (Some(s), false) if !s.grand => tr("The seal holds", "Le sceau résiste").to_string(),
-                        (Some(_), false) => tr("The title holds", "Le titre résiste").to_string(),
+                        (Some(s), false) => tr(format!("The title stays with {}", s.rival.name), format!("Le titre reste à {}", s.rival.name)),
                         (None, true) => tr("You win", "Victoire !").to_string(),
                         (None, false) => tr("You lose", "Défaite").to_string(),
                     }}</h2>
@@ -928,10 +928,15 @@ pub fn SealCard(
                         </p>
                     }.into_any()
                 } else {
+                    // What is at stake, under the name (#155): the region's colours and the prizes to take.
                     view! {
                         <p class="seal-card-pips">
                             {r.colors.iter().map(|&c| view! { <Pip color=c /> }).collect_view()}
                         </p>
+                        <p class="seal-card-stakes">{tr(
+                            format!("{} prizes to take, and the seal is yours", r.prizes),
+                            format!("{} cartes Récompense à prendre, et le sceau est à vous", r.prizes),
+                        )}</p>
                     }.into_any()
                 }}
             </div>
