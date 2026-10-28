@@ -837,7 +837,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const [px, pz] = place(h, dt, w.floorAt);
     animateActor(h, dt, reduced);
     book.pose(h);
-    for (const n of w.npcs) updateNpc(w, n, dt, paused);
+    for (const n of w.npcs) updateNpc(w, n, dt, paused, minute);
     animateProps(w, dt, reduced);
     stoneStep(w.stone, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);
@@ -967,7 +967,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
-  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit });
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit,
+    people: world?.npcs.filter((n) => !n.hidden).map((n) => ({ id: n.def.id, x: n.x, z: n.z, do: n.act?.do ?? null, away: !!n.away, walking: !!n.walk })) ?? [] });
 
   // Item popup preview: the model turning in its own small canvas.
   let pv = null;

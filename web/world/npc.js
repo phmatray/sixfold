@@ -1,14 +1,23 @@
 // People on a map: placing them (`spawnNpcs`), walking their `route` or a path
 // they were sent on (`go`), turning between `look` directions (`updateNpc`), and
 // what the hero faces and can talk to or use (`facing`). An NPC with an `if` is
-// only there while it holds (`hidden` otherwise, set by build.js `refresh`).
-import { actor, place, animateActor, angle, key, DIR } from "./actors.js";
+// only there while it holds (`hidden` otherwise, set by build.js `refresh`). One with a
+// `routine` (routine.js) walks to each activity as the clock reaches it, and is `away`
+// while it is home.
+import { actor, place, animateActor, occupy, angle, key, DIR } from "./actors.js";
 import { ACROSS } from "./props.js";
 import { tr } from "./map.js";
+import { activityAt, plan, seedOf } from "./routine.js";
+import { sit, stand, update as seatUpdate } from "./seat.js";
 
 const NPC_STEP = 0.45; // seconds per tile
 const GO_STEP = 0.3; // walking somewhere on purpose (a duelist coming over)
-const LOOK_EVERY = 2.5; // seconds between turns of a `look` list
+const ROUTE_PAUSE = 2.5; // seconds at the end of a route's loop (x the person's own `pause`)
+const STUCK = 3; // seconds blocked on a routine walk before it re-plans
+const REPLANS = 3; // re-plans before it is simply placed there
+const WALKERS_MAX = 6; // people walking a routine at once, per map (`walkers_max`)
+const JUMP = 5; // game minutes: a clock that moves further in one frame was set (a rest, a save), not ticking
+const CW = { n: "e", e: "s", s: "w", w: "n" }, CCW = { n: "w", w: "s", s: "e", e: "n" };
 
 // What a person wears: the map's `wear` list, else for a route duelist one of its
 // model's accessories, picked by its id (so each looks its own on a shared model).
@@ -27,17 +36,102 @@ export function spawnNpcs(map, got, floorAt, root) {
   return (map.npcs ?? []).map((def) => {
     const own = got[def.model];
     const n = own ? actor(own, null, 1, def.idle, def.outfit, def.hair, wearOf(def, own)) : actor(got.hero, def.tint, def.scale ?? 1, def.idle);
-    Object.assign(n, { def, x: def.x, z: def.z, fy: floorAt(def.x, def.z), face: def.facing ?? "s", step: null, ri: 0, wait: 1.5, busy: false });
+    // Each person's own rhythm (routine.js seedOf): where its idle clip starts, how often it looks round.
+    const seed = seedOf(def.id);
+    Object.assign(n, { def, seed, x: def.x, z: def.z, fy: floorAt(def.x, def.z), face: def.facing ?? "s", step: null, ri: 0, wait: 1.5, busy: false, lookT: seed.look * (0.5 + seed.phase) });
+    const idle = n.actions[n.idleName];
+    if (idle) idle.time = seed.phase * idle.getClip().duration;
     n.obj.rotation.y = angle(n.face);
     root.add(n.obj, n.blob);
     return n;
   });
 }
 
-// NPCs idle, or walk their `route` (one direction per step) when it is free.
-export function updateNpc(w, n, dt, paused) {
-  n.obj.visible = n.blob.visible = !n.hidden;
-  if (n.hidden) return;
+// The map as routine.js plans on it: open tiles, heights, and doors by where they lead. `avoid`: a tile to
+// treat as solid (the one a walk was stuck on).
+const gridOf = (w, avoid) => ({
+  width: w.map.width, height: w.map.height, climb: w.climb,
+  open: (x, z) => !w.blocked(x, z) && !(avoid && avoid[0] === x && avoid[1] === z),
+  door: (to) => {
+    for (const wp of w.warps.values()) if (wp.to === to && !wp.dir) return [wp.x, wp.z];
+    return null;
+  },
+});
+
+// The seat a `sit` activity's `at` names (seat.js places), if it is one: walked onto last, then sat on.
+const seatOf = (w, act) => (act.do === "sit" && act.at && w.seats?.get(key(act.at[0], act.at[1]))) || null;
+
+// Put `n` where its activity is, at once: on entering the map, when the clock was set, or when a walk can't get there.
+function settle(w, n, p) {
+  Object.assign(n, { act: p.act, walk: null, go: [], step: null, sit: null, pose: null });
+  const to = seatOf(w, p.act) ? p.act.at : p.to;
+  if (to) [n.x, n.z] = to;
+  arrive(w, n, true);
+}
+
+// At its activity: face its way, sit if it sits on a seat, or go in if it went home.
+function arrive(w, n, now = false) {
+  const act = n.act, seat = seatOf(w, act);
+  n.away = !!act.home;
+  if (act.face) n.face = act.face;
+  if (seat && n.x === act.at[0] && n.z === act.at[1]) sit(n, seat, w.reduced, now);
+  if (now) n.obj.rotation.y = angle(n.face);
+  n.lookT = n.seed.look * n.seed.pause;
+}
+
+// Leave for the activity in force, unless no walker is free or (coming out) its door is taken.
+function leave(w, n, minute) {
+  if (w.npcs.filter((m) => m.walk).length >= (w.map.walkers_max ?? WALKERS_MAX)) return;
+  const h = w.hero;
+  if (n.away && ((h.x === n.x && h.z === n.z) || (h.step?.x === n.x && h.step?.z === n.z) || w.npcAt(n.x, n.z, n))) return;
+  if (n.sit) return stand(n); // up first (seat.js), then off
+  const p = plan(n, minute, gridOf(w));
+  n.away = false;
+  if (!p.steps) return settle(w, n, p);
+  n.act = p.act;
+  // A seat is solid: the walk ends beside it, then steps onto it.
+  const seat = seatOf(w, p.act), [sx, sz] = p.act.at ?? [];
+  const onto = seat && Object.keys(DIR).find((f) => p.to[0] + DIR[f][0] === sx && p.to[1] + DIR[f][1] === sz);
+  if (!p.steps.length && !onto) return arrive(w, n);
+  n.go = onto ? [...p.steps, onto] : [...p.steps];
+  n.walk = { to: onto ? [sx, sz] : p.to, seat: onto ? key(sx, sz) : null, t: 0, replans: 0 };
+}
+
+// A routine: placed on entering (or when the clock is set), walking when the activity changes while you watch.
+function routine(w, n, minute) {
+  const d = (((minute - (n.min ?? minute)) % 1440) + 1440) % 1440;
+  n.min = minute;
+  n.w = w;
+  if (n.act === undefined || d > JUMP) return settle(w, n, plan(n, minute, gridOf(w), true));
+  if (n.walk && !n.step && !n.go?.length) {
+    // The walk is over (or a scene took the person elsewhere): it is there.
+    n.walk = null;
+    return arrive(w, n);
+  }
+  if (activityAt(n.def.routine, minute) !== n.act && !n.walk && !n.busy && !n.step && !n.go?.length) leave(w, n, minute);
+}
+
+// Stuck on a routine walk: after STUCK s, plan round the tile in the way; after REPLANS of those, just place it.
+function unstick(w, n, dt, x, z, minute) {
+  if ((n.walk.t += dt) < STUCK) return;
+  n.walk.t = 0;
+  const p = ++n.walk.replans > REPLANS ? null : plan(n, minute, gridOf(w, [x, z]));
+  if (p?.steps?.length) return void (n.go = [...p.steps]);
+  const h = w.hero, [tx, tz] = n.walk.to;
+  if ((h.x === tx && h.z === tz) || w.npcAt(tx, tz, n)) return; // its place is taken: wait it out
+  settle(w, n, { act: n.act, to: n.walk.to });
+}
+
+// NPCs idle, walk their `route` (one direction per step) when it is free, or keep their routine (above).
+export function updateNpc(w, n, dt, paused, minute = 480) {
+  if (n.hidden) {
+    n.obj.visible = n.blob.visible = false;
+    n.act = undefined; // back in view: placed where its routine puts it
+    return;
+  }
+  if (n.def.routine && !paused) routine(w, n, minute);
+  n.obj.visible = n.blob.visible = !n.away;
+  if (n.away) return;
   if (n.step) {
     n.step.t += dt / n.step.dur;
     if (n.step.t >= 1) {
@@ -47,12 +141,17 @@ export function updateNpc(w, n, dt, paused) {
     }
   }
   const h = w.hero;
-  const free = (x, z) => !w.blocked(x, z) && w.climb(n.x, n.z, x, z) && !(h.x === x && h.z === z) && !(h.step?.x === x && h.step?.z === z) && !w.npcAt(x, z, n);
-  if (!n.step && n.go?.length && !paused) {
-    // Sent somewhere: one step at a time, waiting while the way is taken.
+  const heroSeat = h.sit && key(Math.floor(h.sit.ax), Math.floor(h.sit.az)); // a seat the hero sits on is taken
+  const free = (x, z) => (!w.blocked(x, z) || (n.walk?.seat === key(x, z) && heroSeat !== key(x, z))) && w.climb(n.x, n.z, x, z) && !(h.x === x && h.z === z) && !(h.step?.x === x && h.step?.z === z) && !w.npcAt(x, z, n);
+  if (!n.step && n.go?.length && !paused && !(n.walk && n.busy)) {
+    // Sent somewhere: one step at a time, waiting while the way is taken (talked to on a routine walk: stops).
     const f = n.go[0], x = n.x + DIR[f][0], z = n.z + DIR[f][1];
     n.face = f;
-    if (free(x, z)) (n.step = { x, z, t: 0, dur: GO_STEP }), n.go.shift();
+    if (free(x, z)) {
+      n.step = { x, z, t: 0, dur: n.walk ? NPC_STEP : GO_STEP };
+      n.go.shift();
+      if (n.walk) n.walk.t = 0;
+    } else if (n.walk) unstick(w, n, dt, x, z, minute);
   } else if (!n.step && n.faceAfter && !n.go?.length) {
     n.face = n.faceAfter; // arrived: face the way it was sent to face
     n.faceAfter = null;
@@ -67,17 +166,29 @@ export function updateNpc(w, n, dt, paused) {
       else {
         n.step = { x, z, t: 0, dur: NPC_STEP };
         n.ri++;
-        n.wait = n.ri % n.def.route.length === 0 ? 2.5 : 0.35;
+        n.wait = n.ri % n.def.route.length === 0 ? ROUTE_PAUSE * n.seed.pause : 0.35;
       }
     }
   }
-  const look = n.def.trainer?.look ?? n.def.look;
-  if (look?.length > 1 && !n.step && !n.go?.length && !n.busy && !paused && (n.lookT = (n.lookT ?? LOOK_EVERY) - dt) <= 0) {
-    n.lookT = LOOK_EVERY;
-    n.face = look[(look.indexOf(n.face) + 1) % look.length];
+  // A `look` list, or a routine's `look` activity (round about its facing); each at the person's own interval.
+  const act = !n.walk && n.act, f = act?.face ?? n.def.facing ?? "s";
+  const look = n.def.trainer?.look ?? n.def.look ?? (act?.do === "look" ? [CCW[f], f, CW[f], f] : null);
+  if (look?.length > 1 && !n.step && !n.go?.length && !n.busy && !paused && (n.lookT -= dt) <= 0) {
+    n.lookT = n.seed.look;
+    n.ri = (n.ri + 1) % look.length;
+    n.face = look[n.def.routine ? n.ri : (look.indexOf(n.face) + 1) % look.length];
   }
+  if (act?.with && !n.busy && !n.step) {
+    // Talking with someone: face them (along the longer way).
+    const o = w.npcs.find((m) => m.def.id === act.with && !m.hidden && !m.away);
+    const dx = o ? o.x - n.x : 0, dz = o ? o.z - n.z : 0;
+    if (dx || dz) n.face = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? "e" : "w") : dz > 0 ? "s" : "n";
+  }
+  if (n.sit) seatUpdate(n, dt, w.reduced);
   place(n, dt, w.floorAt);
+  occupy(n, null);
   animateActor(n, dt, false);
+  occupy(n, n.busy ? null : act?.do, w.reduced, n.seed.phase);
 }
 
 // What the hero faces: a person (also across a counter or a duel table), a
