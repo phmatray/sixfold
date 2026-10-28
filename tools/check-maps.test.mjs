@@ -122,6 +122,26 @@ test("AC4: a warp landing on its own way back fails; a moved landing tile passes
   fails(world((m) => (m.vale_in.warps[0].spawn = { x: 16, z: 13, facing: "s" })), "connection");
 });
 
+// Ambient life (#115): a map's `life` and `calm`.
+const lively = (life, calm) => (m) => Object.assign(m.vale, { life, ...(calm ? { calm } : {}) });
+const LIFE = { critters: [{ kind: "rabbit", zone: [2, 2, 8, 8], n: 2 }], perch: [{ at: [[15, 11, 2.5]] }], leaves: { under: ["tree"], rate: 0.3 } };
+const lifeFails = (dir, what) => {
+  const r = run(dir, "--strict");
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, new RegExp(`vale: \\[(life|calm)\\] ${what}`), r.out);
+};
+
+test("ambient life: a sound life block and calm rect pass", () => passes(world(lively(LIFE, [[2, 2, 5, 5]]))));
+
+test("AC6: ambient life fails a zone off the map, a perch on a missing prop and an unknown critter kind", () => {
+  lifeFails(world(lively({ critters: [{ kind: "rabbit", zone: [20, 2, 30, 8], n: 2 }] })), "the rabbit zone \\[20,2,30,8\\] is not");
+  lifeFails(world(lively({ perch: [{ at: [[6, 6, 1]] }] })), "perch 6,6 is on no prop");
+  lifeFails(world(lively({ critters: [{ kind: "dragon", zone: [2, 2, 8, 8] }] })), "critter kind dragon");
+  lifeFails(world(lively({ leaves: { under: ["birch"], rate: 0.3 } })), "leaves");
+  lifeFails(world(lively({ boats: [{ pier: [6, 6] }] })), "boat pier 6,6 is not on a deck");
+  lifeFails(world(lively({}, [[0, 0, 40, 4]])), "\\[0,0,40,4\\] is not");
+});
+
 test("a map without level_design only lists the rules (no error)", () => passes(world((m) => (delete m.vale.level_design, delete m.vale.props[1].landmark))));
 
 const outdoorMaps = readdirSync(join(WEB, "maps")).filter((f) => !JSON.parse(readFileSync(join(WEB, "maps", f), "utf8")).light.indoor);
@@ -155,4 +175,19 @@ test("AC6: a changed budget changes the report, with no code change", () => {
   const after = woodland(run(WEB, "--report", `--budgets=${file}`).stdout);
   assert.match(after, /\[poi-budget\] \d+ secondary POIs \(9 for a route\)/);
   assert.match(after, /budget: secondary 9/);
+});
+
+test("AC5 (#113): a routine on a solid tile or on a duelist fails; a good one passes", () => {
+  const ann = (routine, more = {}) => (m) => m.vale.npcs.push({ id: "ann", name: "Ann", x: 12, z: 8, facing: "s", routine, ...more });
+  const good = [{ from: "06:00", at: [12, 12], face: "s", do: "work" }, { from: "night", home: "vale_in" }];
+  passes(world(ann(good)));
+  const bad = (change, msg) => {
+    const r = run(world(change), "--strict");
+    assert.notEqual(r.code, 0, r.out);
+    assert.match(r.out, msg, r.out);
+  };
+  bad(ann([{ from: "06:00", at: [14, 10], do: "work" }]), /vale: ann's routine at 06:00 stands on 14,10, which is blocked/);
+  bad(ann(good, { trainer: { sight: 2 } }), /vale: ann duels, so it keeps no routine/);
+  bad(ann([{ from: "25:00", at: [12, 12] }]), /"25:00" is not a time/);
+  bad(ann([{ from: "dusk", home: "nowhere" }]), /goes home to nowhere, but no door here leads there/);
 });

@@ -4,6 +4,40 @@
   "region": "tide",
   "kind": "route",
   "music": "tide",
+  "life": {
+    "critters": [
+      {
+        "kind": "crab",
+        "zone": [
+          11,
+          14,
+          19,
+          19
+        ],
+        "n": 3
+      },
+      {
+        "kind": "duck",
+        "zone": [
+          36,
+          14,
+          44,
+          19
+        ],
+        "n": 3
+      },
+      {
+        "kind": "crab",
+        "zone": [
+          50,
+          14,
+          58,
+          19
+        ],
+        "n": 2
+      }
+    ]
+  },
   "width": 60,
   "height": 24,
   "tiles": [
