@@ -2068,15 +2068,15 @@ fn GameMenu(
                                 aria-selected=move || (tab.get() == t).to_string()
                                 tabindex=move || if tab.get() == t { "0" } else { "-1" }
                                 autofocus=t == first
-                                // The Packs tab: how many are left to open, as on the title's entry.
-                                aria-label=move || (t == MenuTab::Packs).then(|| tr(
-                                    format!("Packs, {} to open", unopened.get()),
-                                    format!("Boosters, {} à ouvrir", unopened.get()),
-                                ))
                                 on:click=move |_| select(t)>
                                 {t.label()}
-                                {move || (t == MenuTab::Packs && unopened.get() > 0).then(|| view! {
-                                    <span class="count-badge" aria-hidden="true">{unopened.get()}</span>
+                                // The Packs tab: how many are left to open, as on the title's entry;
+                                // read as "Packs (3 to open)" (the badge is the eyes' copy).
+                                {(t == MenuTab::Packs).then(|| view! {
+                                    <span class="sr-only">{move || tr(format!("({} to open)", unopened.get()), format!("({} à ouvrir)", unopened.get()))}</span>
+                                    {move || (unopened.get() > 0).then(|| view! {
+                                        <span class="count-badge" aria-hidden="true">{unopened.get()}</span>
+                                    })}
                                 })}
                             </button>
                         }).collect_view()}
