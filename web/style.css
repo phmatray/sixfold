@@ -4778,10 +4778,11 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 * { scrollbar-color: var(--wood) transparent; }
 
 /* ---------- The title: the sign, the planks, the world behind ---------- */
+/* One screen; taller only when a large text size needs it (the page scrolls then, nothing overlaps). */
 .title {
-  position: relative; max-width: none; margin: 0; height: 100dvh; overflow: hidden;
+  position: relative; max-width: none; margin: 0; min-height: 100dvh; overflow-x: clip;
   padding: clamp(20px, 4.5vh, 56px) clamp(16px, 4.5vw, 72px) clamp(14px, 2.5vh, 28px);
-  display: grid; grid-template-columns: minmax(0, 500px) 1fr; grid-template-rows: auto minmax(0, 1fr) auto;
+  display: grid; grid-template-columns: minmax(0, 500px) 1fr; grid-template-rows: auto 1fr auto;
   grid-template-areas: "brand brand" "menu ." "foot foot"; gap: clamp(12px, 2.5vh, 28px) 32px;
 }
 .title-backdrop::after { background: linear-gradient(0deg, color-mix(in srgb, var(--toon) 55%, transparent), transparent 22%), linear-gradient(90deg, color-mix(in srgb, var(--toon) 40%, transparent), transparent 42%); }
@@ -4826,7 +4827,7 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 /* Each entry's status on a paper tag nailed to its plank (dark ink: AA at a small size), the whole
    line: a long one (French, a large text size) goes on to a second line rather than being cut. */
 .title .menu-item:not(.primary) .menu-sub {
-  justify-self: end; max-width: 100%; text-align: right; text-wrap: balance; line-height: 1.25;
+  justify-self: end; max-width: 100%; text-align: center; text-wrap: balance; line-height: 1.25;
   padding: 2px 8px; border-radius: 6px; background: var(--paper); color: var(--toon); font-size: var(--fs-xs); font-weight: 700;
   box-shadow: 0 0 0 1.5px var(--toon); text-shadow: none;
 }
