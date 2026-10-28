@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { menuItem, readSave, title } from "./helpers";
+import { frames, menuItem, readSave, title } from "./helpers";
 
 // The outdoor camera angle (#148): C cycles it, Options picks it, the save keeps it per slot; rooms keep 50°.
 type Cam = { angle: string; pitch: number };
@@ -70,4 +70,24 @@ test("a new angle eases in, and cuts under reduced motion", async ({ page }) => 
   expect(mid).toBeLessThan(60);
   expect(mid).toBeGreaterThan(40);
   await expect.poll(() => settled(page)).toBe("lower 40");
+});
+
+test("Options picks the camera angle, saved, and the title's Settings show it", async ({ page }) => {
+  await enterWorld(page);
+  await frames(page);
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("tab", { name: "Options" }).click();
+  await expect(page.getByRole("radio", { name: "Default" })).toBeChecked();
+  await page.getByRole("radio", { name: "Higher" }).check();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await expect.poll(() => settled(page)).toBe("higher 60");
+  await expect.poll(async () => (await readSave(page)).camera).toEqual(["higher"]);
+
+  await page.reload();
+  await page.locator("summary", { hasText: "Settings" }).click();
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  await expect(settings.getByRole("group", { name: "Camera angle" })).toBeVisible();
+  await expect(settings.getByRole("radio", { name: "Higher" })).toBeChecked();
+  // The Controls list it too, bound to C (and R3 on a pad), and it can be rebound.
+  await expect(settings.getByRole("button", { name: "Camera angle: C" })).toBeVisible();
 });

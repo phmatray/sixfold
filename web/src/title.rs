@@ -191,6 +191,38 @@ fn TextSize() -> impl IntoView {
     }
 }
 
+/// The outdoor camera angle (#148): kept in the save, applied to the world at once.
+#[component]
+fn CameraAngleSetting() -> impl IntoView {
+    use sixfold_engine::save::CameraAngle;
+    let now = RwSignal::new(store::camera());
+    let option = move |a: CameraAngle, label: &'static str| {
+        view! {
+            <label class="seg">
+                <input type="radio" name="camera-angle" value=a.code()
+                    prop:checked=move || now.get() == a
+                    on:change=move |_| {
+                        store::set_camera(a);
+                        crate::world::world_camera(a.code());
+                        now.set(a);
+                    } />
+                <span>{label}</span>
+            </label>
+        }
+    };
+    view! {
+        <fieldset class="text-size" aria-describedby="camera-angle-hint">
+            <legend>{tr("Camera angle", "Angle de caméra")}</legend>
+            <div class="segs">
+                {option(CameraAngle::Lower, tr("Lower", "Plus basse"))}
+                {option(CameraAngle::Default, tr("Default", "Normale"))}
+                {option(CameraAngle::Higher, tr("Higher", "Plus haute"))}
+            </div>
+            <p class="note" id="camera-angle-hint">{tr("Outdoors. Rooms keep their own view.", "En extérieur. Les pièces gardent leur propre vue.")}</p>
+        </fieldset>
+    }
+}
+
 /// A title sheet's heading and Close: folding its <details> puts focus back on
 /// the button that opened it.
 #[component]
@@ -220,7 +252,7 @@ pub fn SheetHead(title: &'static str, id: &'static str) -> impl IntoView {
     }
 }
 
-/// The settings: language, text size, sound, saves and the reset. The title screen's
+/// The settings: language, text size, camera angle, sound, saves and the reset. The title screen's
 /// Settings menu and the world's in-game menu both show it.
 #[component]
 pub fn OptionsPanel(
@@ -241,6 +273,7 @@ pub fn OptionsPanel(
             {sheet.then(|| view! { <SheetHead title=tr("Settings", "Réglages") id="settings-title" /> })}
             <LangSwitch />
             <TextSize />
+            <CameraAngleSetting />
             <AudioSettings />
             <crate::input::ControlsSettings />
             <SaveSettings />
