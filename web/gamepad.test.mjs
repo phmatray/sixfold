@@ -1,7 +1,7 @@
 // node --test web/gamepad.test.mjs — the pure part of web/gamepad.js.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mapButtons, translateKey, checkBind, label, KEY_DEFAULTS, PAD_DEFAULTS } from "./gamepad.js";
+import { mapButtons, translateKey, checkBind, label, applySaved, KEY_DEFAULTS, PAD_DEFAULTS } from "./gamepad.js";
 
 const pad = (down = [], axes = [0, 0]) => ({ buttons: Array.from({ length: 17 }, (_, i) => ({ pressed: down.includes(i), value: down.includes(i) ? 1 : 0 })), axes });
 const sorted = (a) => [...a].sort();
@@ -91,4 +91,32 @@ test("prompts name the control for the device, in both languages", () => {
   const binds = { keys: { ...KEY_DEFAULTS, act: "f" }, pad: { ...PAD_DEFAULTS, act: 3 } };
   assert.equal(label("keys", "act", false, binds), "F");
   assert.equal(label("pad", "act", false, binds), "Y");
+});
+
+test("a saved C or R3 binding wins over the new camera default (#184)", () => {
+  const fresh = () => ({ keys: { ...KEY_DEFAULTS }, pad: { ...PAD_DEFAULTS } });
+  // Saved before the camera action: journal on C, map on R3.
+  const old = { keys: { act: "e", cancel: "Escape", run: "Shift", journal: "c", map: "m", menu: "Escape" }, pad: { act: 0, cancel: 1, run: 2, journal: 3, map: 11, menu: 9 } };
+  const b = fresh();
+  applySaved(b, old);
+  assert.equal(b.keys.camera, "");
+  assert.equal(b.pad.camera, -1);
+  // C only does the journal's thing (its default key), and R3 only the map.
+  assert.equal(translateKey("c", b.keys), KEY_DEFAULTS.journal);
+  assert.deepEqual(mapButtons(pad([11]), b.pad), ["map"]);
+  assert.equal(label("keys", "camera", false, b), "unbound");
+  // No collision: the camera keeps C and R3.
+  const ok = fresh();
+  applySaved(ok, { keys: { journal: "k" }, pad: { journal: 5 } });
+  assert.equal(ok.keys.camera, "c");
+  assert.equal(ok.pad.camera, 11);
+  assert.deepEqual(mapButtons(pad([11]), ok.pad), ["camera"]);
+  // A camera binding the player chose is theirs, even over a clash.
+  const own = fresh();
+  applySaved(own, { keys: { camera: "c", journal: "c" } });
+  assert.equal(own.keys.camera, "c");
+  // Garbage in storage changes nothing.
+  const junk = fresh();
+  applySaved(junk, null);
+  assert.deepEqual(junk, fresh());
 });

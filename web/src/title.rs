@@ -195,7 +195,7 @@ fn TextSize() -> impl IntoView {
 #[component]
 fn CameraAngleSetting() -> impl IntoView {
     use sixfold_engine::save::CameraAngle;
-    let now = RwSignal::new(store::camera());
+    let now = store::camera_signal();
     let option = move |a: CameraAngle, label: &'static str| {
         view! {
             <label class="seg">
@@ -203,8 +203,6 @@ fn CameraAngleSetting() -> impl IntoView {
                     prop:checked=move || now.get() == a
                     on:change=move |_| {
                         store::set_camera(a);
-                        crate::world::world_camera(a.code());
-                        now.set(a);
                     } />
                 <span>{label}</span>
             </label>
