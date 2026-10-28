@@ -749,7 +749,7 @@ pub fn DeckShelf() -> impl IntoView {
                                     view! {
                                         <p class="shelf-desc">{u.deck.description.to_string()}</p>
                                         <button type="button" class="btn" on:click=copy
-                                            aria-label=tr(format!("Copy {} to my decks", u.deck.name), format!("Copier {} dans mes decks", u.deck.name))>
+                                            aria-label=tr(format!("Copy to my decks: {}", u.deck.name), format!("Copier dans mes decks\u{a0}: {}", u.deck.name))>
                                             {tr("Copy to my decks", "Copier dans mes decks")}
                                         </button>
                                     }.into_any()
