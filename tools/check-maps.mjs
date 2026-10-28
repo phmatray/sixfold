@@ -31,7 +31,7 @@
 // map against the budgets in tools/level-design.json (`--budgets=<file>` for another), and never fails.
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "node:fs";
 import * as ld from "../web/world/ld.js";
-import { CRITTERS, boatLane } from "../web/world/life_schedule.js";
+import { CRITTERS, boatLane, openTile } from "../web/world/life_schedule.js";
 const dir = process.argv.slice(2).find((a) => !a.startsWith("--")) ?? "web/world";
 const src = readFileSync(`${dir}/props.js`, "utf8");
 const FOOT = eval(`(${src.match(/export const FOOT = (\{[\s\S]*?\});/)[1]})`);
@@ -842,7 +842,7 @@ function lifeRules(name, m, solid) {
   if (!L) return;
   const bad = (what) => fail.push(`${name}: [life] ${what}`);
   if (m.light.indoor) bad("is for outdoor maps");
-  const open = (x, z) => !solid.has(`${x},${z}`) && /[.0-9]/.test(m.tiles[z]?.[x] ?? "#") && !"pr".includes(m.paint?.[z]?.[x] ?? "-");
+  const open = (x, z) => !solid.has(`${x},${z}`) && openTile(m, x, z); // as build.js places them
   for (const c of L.critters ?? []) {
     const n = c.n ?? 1;
     if (!CRITTERS[c.kind]) bad(`critter kind ${c.kind} is not one of ${Object.keys(CRITTERS).join(", ")}`);
@@ -870,7 +870,7 @@ function lifeRules(name, m, solid) {
   for (const b of L.boats ?? []) {
     const [x, z] = b.pier ?? [];
     if (!("H=".includes(m.tiles[z]?.[x] ?? "-") || on(x, z, (p) => DECK[p.asset]))) bad(`boat pier ${x},${z} is not on a deck or a pier`);
-    else if (!boatLane(m, b.pier)) bad(`boat pier ${x},${z} has no 4 tiles of open water beside it`);
+    else if (!boatLane(m, b.pier, (x, z) => on(x, z, (p) => !p.if))) bad(`boat pier ${x},${z} has no 4 tiles of open water beside it`);
     if (b.every !== undefined && !(b.every >= 30)) bad("boats: every is 30 s at least");
   }
 }

@@ -22,8 +22,9 @@ const rnd = (a, b = 0) => {
 // A rect [x0, z0, x1, z1] in tiles, both ends included; x, z in world units (tile x covers [x, x + 1)).
 const inRect = ([x0, z0, x1, z1], x, z) => x >= Math.min(x0, x1) && x < Math.max(x0, x1) + 1 && z >= Math.min(z0, z1) && z < Math.max(z0, z1) + 1;
 export const calmAt = (map, x, z) => (map.calm ?? []).some((r) => inRect(r, x, z));
-// Open ground off the paths, by the tiles alone (build.js passes a better one, that knows the props).
-const openTile = (map, x, z) => /[.0-9]/.test(map.tiles[z]?.[x] ?? "#") && !"pr".includes(map.paint?.[z]?.[x] ?? "-");
+// Ground a critter may stand on, by the tiles: not a wall, water or a path, road, deck or quay. build.js
+// and check-maps add their own "and no prop stands there".
+export const openTile = (map, x, z) => !"#fWV~prH=".includes(map.tiles[z]?.[x] ?? "#") && !"pr".includes(map.paint?.[z]?.[x] ?? "-");
 
 // A boat on a `life.boats` cycle of `every` s: `k` is how far out along its lane it is (0 at the pier,
 // 1 at the far end); it sails in, waits, sails out, and is out of sight for the rest of the cycle.
@@ -37,12 +38,13 @@ export function boatAt(every, t) {
 
 // The lane a boat docks along at a pier tile: the side with the longest run of open water (`~`), up to
 // 14 tiles. { x, z } is where it ties up (world units), { dx, dz } outwards, `len` how far out it sails.
-// null when no side has 4 tiles of water (check-maps fails such a pier).
-export function boatLane(map, [px, pz]) {
+// null when no side has 4 tiles of water (check-maps fails such a pier). `solid(x, z)`: a prop afloat there.
+export function boatLane(map, [px, pz], solid = () => false) {
   let best = null;
   for (const [dx, dz] of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
     let n = 0;
-    while (n < 14 && map.tiles[pz + dz * (n + 1)]?.[px + dx * (n + 1)] === "~") n++;
+    const water = (k) => map.tiles[pz + dz * k]?.[px + dx * k] === "~" && !solid(px + dx * k, pz + dz * k);
+    while (n < 14 && water(n + 1)) n++;
     if (n >= 4 && (!best || n > best.n)) best = { n, dx, dz };
   }
   return best && { x: px + 0.5 + best.dx * 1.5, z: pz + 0.5 + best.dz * 1.5, dx: best.dx, dz: best.dz, len: best.n - 1.5 };
@@ -59,6 +61,8 @@ function setup(map, mem, t) {
     if (!spots.length) return [];
     return Array.from({ length: g.n ?? 1 }, (_, i) => {
       const id = gi * 100 + i, home = spots[Math.floor(rnd(id, 1) * spots.length)];
+      // ponytail: a hop is a straight line between two spots up to 6 tiles apart, so it may cut a fence
+      // corner; test the tiles along it if anyone sees one.
       const near = spots.filter(([x, z]) => Math.hypot(x - home[0], z - home[1]) <= 3);
       return { id, kind: g.kind, near, period: 6 + rnd(id, 2) * 6, off: rnd(id, 3) * 30 };
     });
@@ -137,7 +141,7 @@ export function lifeSchedule(map, t, hero, mem = {}) {
   }
 
   // Micro-events: one at a time, GAP s apart at least (and a random while more), never near a calm hero.
-  if (mem.ev && t >= mem.ev.t0 + mem.ev.dur) mem.ev = null;
+  if (mem.ev && (t >= mem.ev.t0 + mem.ev.dur || calmAt(map, hero.x, hero.z))) mem.ev = null; // calm ends it too
   if (!mem.ev && !calmAt(map, hero.x, hero.z) && t - mem.last >= GAP + mem.wait) {
     const s = mem.seq, kinds = [...new Set(mem.critters.map((c) => c.kind))].filter((k) => (CRITTERS[k].when === "night") === night);
     const pick = [];
@@ -146,7 +150,8 @@ export function lifeSchedule(map, t, hero, mem = {}) {
         // A critter darts across, three tiles from the hero, on open ground out of any calm.
         const a = (rnd(s, 10 + i) + i / 4) * 6.28, cx = hero.x + Math.cos(a) * 3, cz = hero.z + Math.sin(a) * 3;
         const ux = -Math.sin(a) * 2.5, uz = Math.cos(a) * 2.5;
-        if (![[cx, cz], [cx - ux, cz - uz], [cx + ux, cz + uz]].every(([x, z]) => mem.open(Math.floor(x), Math.floor(z)) && !calmAt(map, x, z))) continue;
+        const clear = Array.from({ length: 11 }, (_, j) => [cx + ux * (j / 5 - 1), cz + uz * (j / 5 - 1)]).every(([x, z]) => mem.open(Math.floor(x), Math.floor(z)) && !calmAt(map, x, z));
+        if (!clear) continue; // every half tile of the dash on open ground
         pick.push({ kind: "cross", critter: kinds[Math.floor(rnd(s, 20) * kinds.length)], dur: 2.5, x0: cx - ux, z0: cz - uz, x1: cx + ux, z1: cz + uz });
         break;
       }

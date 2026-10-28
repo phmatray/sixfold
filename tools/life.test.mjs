@@ -79,3 +79,10 @@ test("a boat comes in, waits at the pier and leaves, on its cycle", () => {
   assert.equal(boatAt(90, 85).on, false); // out of sight
   assert.equal(boatAt(90, 120).k, boatAt(90, 30).k); // the cycle repeats
 });
+
+test("a micro-event playing when the hero steps into a calm rect ends there", () => {
+  const mem = {}, out = { x: 25, z: 20, night: 0 }, calm = { x: 34, z: 6, night: 0 };
+  let t = 0;
+  while (!lifeSchedule(map(), t, out, mem).event) t += 0.25;
+  assert.equal(lifeSchedule(map(), t + 0.25, calm, mem).event, null);
+});

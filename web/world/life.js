@@ -8,7 +8,7 @@
 // micro-events; life_schedule.js decides where and when, this file draws it, instanced, one draw per kind.
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { toon } from "./props.js";
+import { toon, prep } from "./props.js";
 import { lifeSchedule, calmAt, boatAt, BUDGET } from "./life_schedule.js";
 
 export const U = { uTime: { value: 0 }, uSway: { value: 1 }, uDrift: { value: 0 } };
@@ -251,7 +251,8 @@ export function ambience(scene, spots, reduced) {
         p.setXYZ(i, wrap(sx + Math.sin(t * 0.3 + ph) * 0.6 + t * drift, hx), sy * low + Math.sin(t * 0.7 + ph) * 0.25, wrap(sz + Math.cos(t * 0.25 + ph) * 0.6, hz));
       });
       p.needsUpdate = true;
-      if (life) motes.geometry.setDrawRange(0, life.update(dt, t, hx, hz, night) ? MOTES / 2 : MOTES); // halved in a calm place
+      life?.update(dt, t, hx, hz, night);
+      if (spots.calm) motes.geometry.setDrawRange(0, calmAt(spots, hx, hz) ? MOTES / 2 : MOTES); // halved in a calm place
       mm.color.lerpColors(day, fly, night);
       mm.size = 0.07 + 0.07 * night;
       // Each firefly glows and fades on its own beat (additive: dark is unseen).
@@ -346,7 +347,7 @@ export function ambience(scene, spots, reduced) {
 // A map's `life` (#115): critters and perch birds where lifeSchedule puts them, leaves falling under
 // its trees (more in a gust), embers rising from its kilns and vents, boats docking at its piers.
 // `L`: { map, open(x, z), floorAt(x, z), trees: [{ x, z }], embers: smoke sources, boats: [{ x, z, dx, dz, len, every }] }.
-// `update` returns whether the hero stands in a calm place (particles there are halved).
+// Leaves and embers are halved while the hero stands in a calm place.
 function lively(scene, L) {
   const life = L.map.life, mem = { open: L.open }, o = new THREE.Object3D();
   const kinds = {};
@@ -359,37 +360,37 @@ function lively(scene, L) {
   }
 
   // Leaves: one pool, each falling from a canopy near the hero to the ground, lying there a moment.
-  const leafOn = life.leaves && L.trees.length;
-  const leafMesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.15, 0.1), toon("#ffffff", { side: THREE.DoubleSide }), leafOn ? 36 : 1);
-  const leaves = Array.from({ length: leafOn ? 36 : 0 }, (_, i) => (leafMesh.setColorAt(i, new THREE.Color(LEAF[i % LEAF.length])), { age: 1, life: 1, x: 0, y: 0, z: 0, ph: i * 1.3 }));
-  Object.assign(leafMesh, { count: 0, visible: false, frustumCulled: false });
-  scene.add(leafMesh);
+  const leaves = life.leaves && L.trees.length ? Array.from({ length: 36 }, (_, i) => ({ age: 1, life: 1, x: 0, y: 0, z: 0, ph: i * 1.3 })) : [];
+  const leafMesh = leaves.length && new THREE.InstancedMesh(new THREE.PlaneGeometry(0.15, 0.1), toon("#ffffff", { side: THREE.DoubleSide }), leaves.length);
+  if (leafMesh) {
+    leaves.forEach((_, i) => leafMesh.setColorAt(i, new THREE.Color(LEAF[i % LEAF.length])));
+    Object.assign(leafMesh, { count: 0, visible: false, frustumCulled: false });
+    scene.add(leafMesh);
+  }
 
   // Embers: additive points rising and fading over the kilns and vents.
-  const EMB = life.embers && L.embers.length ? 30 : 0;
-  const ember = new THREE.Points(
-    new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(Math.max(1, EMB) * 3), 3)),
+  const embers = life.embers && L.embers.length ? Array.from({ length: 30 }, (_, i) => ({ age: 1, life: 2.5, x: 0, y: -9, z: 0, ph: i * 2.1 })) : [];
+  const ember = embers.length && new THREE.Points(
+    new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(embers.length * 3), 3)),
     new THREE.PointsMaterial({ size: 0.14, color: "#ffb04a", transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending }),
   );
-  ember.frustumCulled = false;
-  ember.visible = EMB > 0;
-  scene.add(ember);
-  const embers = Array.from({ length: EMB }, (_, i) => ({ age: 1, life: 2.5, x: 0, y: -9, z: 0, ph: i * 2.1 }));
+  if (ember) (ember.frustumCulled = false), scene.add(ember);
 
   // Boats: the map's own rowing boat model (long along +X, turned to run along +Z here), or a plain
   // hull where the map has none, out along the lane from the pier and back.
   const hullMat = toon("#7a5434");
   const boats = (L.boats ?? []).map((b) => {
     const g = new THREE.Group(), hull = L.boatModel?.clone(true) ?? new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.22, 0.55).translate(0, 0.08, 0), hullMat);
+    prep(hull, true); // toon materials and shadows, like the moored boats
     hull.rotation.y = -Math.PI / 2;
     g.add(hull);
     scene.add(g);
     return { ...b, g };
   });
 
-  let acc = 0, emAcc = 0, near = [], pick = -1, last = null;
+  let acc = 0, emAcc = 0, near = [], srcs = [], pick = -1, last = null;
   return {
-    stats: () => ({ critters: Object.fromEntries(Object.entries(kinds).map(([k, m]) => [k, m.count])), leaves: leafMesh.count, embers: embers.filter((e) => e.age < 1).length,
+    stats: () => ({ critters: Object.fromEntries(Object.entries(kinds).map(([k, m]) => [k, m.count])), leaves: leafMesh ? leafMesh.count : 0, embers: embers.filter((e) => e.age < 1).length,
       boats: boats.map((b) => ({ ...boatAt(b.every, last?.t ?? 0), x: +b.g.position.x.toFixed(2), z: +b.g.position.z.toFixed(2) })), event: last?.event?.kind ?? null, calm: !!last?.quiet }),
     update(dt, t, hx, hz, night) {
       const quiet = calmAt(L.map, hx, hz), { spawns, event } = lifeSchedule(L.map, t, { x: hx, z: hz, night }, mem);
@@ -411,23 +412,25 @@ function lively(scene, L) {
         o.updateMatrix();
         m.setMatrixAt(m.count++, o.matrix);
       }
-      for (const m of Object.values(kinds)) (m.visible = m.count > 0), (m.instanceMatrix.needsUpdate = true);
+      for (const m of Object.values(kinds)) if ((m.visible = m.count > 0)) m.instanceMatrix.needsUpdate = true;
 
       // The trees and kilns near the hero, re-picked each second.
       if (t > pick) {
         pick = t + 1;
         near = L.trees.filter((p) => Math.hypot(p.x - hx, p.z - hz) < 12);
+        srcs = L.embers.filter((s) => Math.hypot(s.at.x - hx, s.at.z - hz) < 14);
       }
       const gust = event?.kind === "gust" ? 1 : 0, half = quiet ? 0.5 : 1;
-      if (leaves.length) {
+      if (leafMesh) {
         acc += dt * life.leaves.rate * Math.min(near.length, 10) * half * (1 + gust * 3);
-        while (acc >= 1 && near.length) {
-          acc -= 1;
-          const tr = near[Math.floor(Math.random() * near.length)], free = leaves.find((l) => l.age >= l.life);
-          // The 14 s gust front of the wind shader (windify) shakes more leaves off.
+        for (; acc >= 1 && near.length; acc--) {
+          const tr = near[Math.floor(Math.random() * near.length)];
+          // The 14 s gust front of the wind shader (windify) shakes a second leaf off.
           const front = (t % 14) * 5 - 15, g = Math.exp(-((tr.x * 0.8 + tr.z * 0.6 - front) ** 2) / 10);
-          if (free) Object.assign(free, { age: 0, x: tr.x + (Math.random() - 0.5) * 1.4, y: 1.7 + Math.random() * 1.1, z: tr.z + (Math.random() - 0.5) * 1.4, g: Math.max(g, gust) });
-          if (g > 0.5) acc += 1;
+          for (let i = g > 0.5 ? 2 : 1; i > 0; i--) {
+            const free = leaves.find((l) => l.age >= l.life);
+            if (free) Object.assign(free, { age: 0, x: tr.x + (Math.random() - 0.5) * 1.4, y: tr.y + 1.7 + Math.random() * 1.1, z: tr.z + (Math.random() - 0.5) * 1.4, g: Math.max(g, gust) });
+          }
         }
         let n = 0;
         for (const l of leaves) {
@@ -450,14 +453,13 @@ function lively(scene, L) {
         leafMesh.instanceMatrix.needsUpdate = true;
       }
 
-      if (EMB) {
-        const srcs = L.embers.filter((s) => (!s.on || s.on()) && Math.hypot(s.at.x - hx, s.at.z - hz) < 14);
+      if (ember) {
         emAcc += dt * 8 * half * (1 + gust);
         const pos = ember.geometry.attributes.position;
         embers.forEach((e, i) => {
-          if (e.age >= 1 && emAcc >= 1 && srcs.length) {
+          const s = e.age >= 1 && emAcc >= 1 && srcs.length && srcs[Math.floor(Math.random() * srcs.length)];
+          if (s && (!s.on || s.on())) {
             emAcc -= 1;
-            const s = srcs[Math.floor(Math.random() * srcs.length)];
             Object.assign(e, { age: 0, x: s.at.x + (Math.random() - 0.5) * 0.3, y: s.at.y, z: s.at.z + (Math.random() - 0.5) * 0.3 });
           }
           if (e.age < 1) {
@@ -477,7 +479,6 @@ function lively(scene, L) {
         b.g.position.set(b.x + b.dx * b.len * k, Math.sin(t * 1.4 + b.x) * 0.035, b.z + b.dz * b.len * k);
         b.g.rotation.set(Math.sin(t * 1.1) * 0.03, Math.atan2(b.dx, b.dz) + (out ? 0 : Math.PI), 0);
       }
-      return quiet;
     },
   };
 }
