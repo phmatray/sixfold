@@ -3075,7 +3075,8 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .world-rest { position: absolute; inset: 0; z-index: 3; background: #04060c; opacity: 0; pointer-events: none; transition: opacity 0.7s ease; }
 .world-rest.on { opacity: 1; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) { .world-rest { transition: none; } }
-.inn-rest { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+/* Two choices a row where they fit their names; else one under the other (a phone). */
+.inn-rest { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, max(13em, calc(50% - 5px))), 1fr)); gap: 10px; margin-top: 10px; }
 /* Each choice is a paper button (the kit's .btn) with a little window on its sky. */
 .btn.inn-choice { position: relative; display: grid; gap: 2px; justify-items: start; align-content: center; min-height: 64px; padding: 8px 14px 8px 56px; text-align: left; }
 .inn-choice::before {
