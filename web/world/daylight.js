@@ -219,7 +219,7 @@ export function daylight(w, reduced) {
       if (litDirty && own.size) {
         litDirty = false;
         for (const m of own) {
-          const k = m.userData.litBy.litLevel ?? 0;
+          const k = (m.userData.litBy.litLevel ?? 0) * cur.glass; // a lamp lit before dusk doesn't show in daylight
           if (/glow/i.test(m.name)) m.emissive?.copy(m.userData.base).multiplyScalar(0.1 + 1.25 * k);
           else m.color.lerpColors(m.userData.base, WARM, k * 0.9), m.emissive?.copy(WARM).multiplyScalar(0.95 * k);
         }
