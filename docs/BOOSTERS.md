@@ -20,7 +20,7 @@ cargo test --release -p sixfold-engine booster_report -- --ignored --nocapture
 - **No dead slot.** Basic energy is unlimited and never stored, so the old energy slot paid nothing. It
   is now a sixth Common.
 - **A themed pack is about its themes.** In the 1.x packs, Ember drew evenly from everything it held:
-  only 44 % of its Commons were Ember or Stone, and 70 % of its Rares were trainers. Now the share of
+  only 44 % of its Commons were Ember or Stone, and 70 % of its Rares were Gear cards. Now the share of
   each slot is chosen on purpose.
 - **A chase card.** Holo Rares (the Awaken 2 Hexons) are the cards a deck is built around. They turn up
   in three packs of five, with their own foil, so the Rare slot is a Hexon more often than not (it was
@@ -43,7 +43,7 @@ cargo test --release -p sixfold-engine booster_report -- --ignored --nocapture
 
 - **Holo Rare**: the 12 Awaken 2 Hexons. A themed pack only holds its own types' Holos; Wild holds
   all 12.
-- **Rare**: the 8 Rare trainers and the special energy (9 cards, the same in every pack).
+- **Rare**: the 8 Rare Gear cards and the special energy (9 cards, the same in every pack).
 - **Duplicate protection**: the Rare slot skips any card you already hold 4 of (a full playset) while
   another card of that slot is left. Rares can't be crafted until you've pulled one, so this slot must
   keep paying. Commons and Uncommons sell back and can be crafted, so they have no protection.
@@ -57,11 +57,11 @@ Every Common and Uncommon slot first picks a group:
 | Group | Share | What it holds |
 |---|---|---|
 | Own types | **60 %** | Hexons of the pack's two types |
-| Neutral | **35 %** | trainers, the special energy and Neutral Hexons |
+| Neutral | **35 %** | Gear cards, the special energy and Neutral Hexons |
 | Other types | **5 %** | Hexons of the four other types: a stray card, so a themed pack never fully locks you out |
 
-60 / 35 matches a deck: about 20 Hexons for 12–14 trainers. Stone's own types are Stone **and
-Neutral**, so its neutral group is trainers only.
+60 / 35 matches a deck: about 20 Hexons for 12–14 Gear cards. Stone's own types are Stone **and
+Neutral**, so its neutral group is Gear cards only.
 
 | Booster | Own types | Holo Rares |
 |---|---|---|
@@ -144,7 +144,7 @@ campaign playthrough and `economy_sim`.
   emplacement énergie ne rapportait rien. Il devient une sixième Commune.
 - **Un booster à thème parle de ses thèmes.** Dans les boosters 1.x, Braise tirait uniformément dans
   tout ce qu'il contenait : 44 % seulement de ses Communes étaient Braise ou Roc, et 70 % de ses Rares
-  des Dresseurs. La part de chaque emplacement est désormais choisie.
+  des Objets. La part de chaque emplacement est désormais choisie.
 - **Une carte à chasser.** Les Rares Holo (les Hexons d'Éveil 2) sont les cartes autour desquelles on
   construit un deck. Elles sortent dans trois boosters sur cinq, avec leur propre effet holographique :
   l'emplacement Rare est donc le plus souvent un Hexon (jusqu'à la 1.3, une Holo sortait un booster
@@ -167,7 +167,7 @@ campaign playthrough and `economy_sim`.
 
 - **Rare Holo** : les 12 Hexons d'Éveil 2. Un booster à thème ne contient que les Holo de ses types ;
   Sauvage contient les 12.
-- **Rare** : les 8 Dresseurs Rares et l'énergie spéciale (9 cartes, les mêmes dans tous les boosters).
+- **Rare** : les 8 Objets Rares et l'énergie spéciale (9 cartes, les mêmes dans tous les boosters).
 - **Protection anti-doublons** : l'emplacement Rare saute toute carte que vous avez déjà en 4
   exemplaires (un jeu complet), tant qu'il reste une autre carte possible. Une Rare ne se fabrique
   qu'après en avoir tiré une : cet emplacement doit donc toujours rapporter. Les Communes et Peu
@@ -183,11 +183,11 @@ Chaque emplacement Commune et Peu commune choisit d'abord un groupe :
 | Groupe | Part | Contenu |
 |---|---|---|
 | Types du booster | **60 %** | Hexons des deux types du booster |
-| Neutre | **35 %** | Dresseurs, énergie spéciale et Hexons Neutres |
+| Neutre | **35 %** | Objets, énergie spéciale et Hexons Neutres |
 | Autres types | **5 %** | Hexons des quatre autres types : une carte égarée, pour qu'un booster à thème ne ferme jamais tout à fait la porte |
 
-60 / 35 correspond à un deck : environ 20 Hexons pour 12 à 14 Dresseurs. Les types du booster Roc sont
-Roc **et Neutre**, son groupe neutre ne contient donc que des Dresseurs.
+60 / 35 correspond à un deck : environ 20 Hexons pour 12 à 14 Objets. Les types du booster Roc sont
+Roc **et Neutre**, son groupe neutre ne contient donc que des Objets.
 
 | Booster | Types | Rares Holo |
 |---|---|---|

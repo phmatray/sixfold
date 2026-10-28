@@ -27,7 +27,7 @@ The headline "228 cards" (102 + 64 + 62) overstates the design work:
 | **Distinct designs** | 102 | 48 | 47 | 110 |
 | Basic energy | 6 | 0 | 0 | 6 |
 | **Distinct playable designs** | 96 | 48 | 47 | **104** |
-| Creatures / trainers / special energy | 69 / 26 / 1 | 47 / 1 / 0 | 42 / 5 / 0 | 78 / 25 / 1 |
+| Creatures / Gear cards / special energy | 69 / 26 / 1 | 47 / 1 / 0 | 42 / 5 / 0 | 78 / 25 / 1 |
 
 So the classic pool is **191 distinct playable designs**, not 228, and 8 of the expansion creatures
 are a second card for a species already in the base set. Our 104 is 54% of it. Two
@@ -43,14 +43,14 @@ is the better deal for a digital collection.
 
 ### 2.1 The base set: everything, once
 
-- 69 creatures in seven colours (13/12/11/9/8/8/8), 26 trainers, one special energy.
+- 69 creatures in seven colours (13/12/11/9/8/8/8), 26 Gear cards, one special energy.
 - Stage mix 39 Basic / 22 Stage 1 / 8 Stage 2. HP medians 40 / 70 / 100.
 - 114 attacks, 1.65 a creature; cost 1 / 2 / 3 / 4 energy in 27 / 29 / 29 / 15%. 40% of all cost
   symbols colourless.
 - Coin flips in 36% of attacks; conditions in about 23%; bench damage in 6%.
 - 6 Powers (9% of creatures), five of them on Stage 2s, and four **unlimited per turn**.
-- Its trainers defined the metagame: a full-hand refresh, a search-anything for two discards, a
-  trainer recursion, cheap energy denial (one for one, and a two-for-one), a forced switch, a +10
+- Its Gear cards defined the metagame: a full-hand refresh, a search-anything for two discards, a
+  Gear recursion, cheap energy denial (one for one, and a two-for-one), a forced switch, a +10
   damage tool, a heal-everything-but-lose-energy, a skip-to-Stage-2, a hand-shuffle for the
   opponent.
 
@@ -71,7 +71,7 @@ Its role was to widen deck building rather than add rules:
 - **Efficient Basics.** Its Basics average 58 HP (base set 49), and five Basics are Rare. Several
   became tournament staples because a Basic that hits like a Stage 1 is the most efficient card in a
   game where evolution costs cards and turns.
-- One trainer only.
+- One Gear only.
 
 ### 2.3 The second expansion: Powers, lock and relics
 
@@ -81,7 +81,7 @@ Its role was to add new axes of interaction:
   blocker** (all other Powers stop), an **evolution lock**, a **revealed hand**, a damage-mover
   between the opponent's creatures, a **damage threshold wall**, a coin-flip immunity, a free switch
   from the Bench, and a creature that copies the defender.
-- **Relics.** A trainer played as a Basic creature (no prize, can't retreat) that evolves into
+- **Relics.** A Gear card played as a Basic creature (no prize, can't retreat) that evolves into
   three ancient lines.
 - **Legendary singletons.** Six Rare Basics with no line, three of them a matched trio.
 - **Bench damage** in 20% of attacks.
@@ -90,7 +90,7 @@ Its role was to add new axes of interaction:
 - **Line completion again**: six of its evolutions continue lines from the other two sets.
 - **Weaker Stage 2s.** Its Stage 2s average 79 HP (base set 95): they are Power engines, not
   beaters.
-- Five trainers: a Bench-to-deck reset, an energy search, a gamble refresh, a deck-top recursion and
+- Five Gear cards: a Bench-to-deck reset, an energy search, a gamble refresh, a deck-top recursion and
   the relic.
 
 ### 2.4 What made the classic metagame unhealthy
@@ -103,8 +103,8 @@ None of these should be copied. Most are already guarded against in `docs/BALANC
 | Unlimited-per-turn Powers | Unlimited energy attach, damage moving and energy moving turned one Stage 2 into the whole deck | Every activated Power is once a turn; Kindling Heart limited in 1.3. **Keep this rule for every new Power** |
 | Cheap energy denial | One-energy-for-one-card removal, and a two-for-one, at Common/Rare | Drain Brush is a Rare and one-for-one. No two-for-one, ever |
 | Gust + denial + +10 lock | Basic beatdown with forced switch and denial left the opponent no turn | Snare Hook and Drain Brush are Rares; first-turn attack barred since 1.3 |
-| Full-hand refresh at low rarity, search-anything, trainer recursion loops | Decks played the same 20 trainers, every game the same | Clean Slate is Rare; no search-anything; Scrap Ledger recovers one trainer |
-| Heal-all walls | A big Basic plus heal-all trainers plus damage moving stalled to deck-out | Heal effects priced in the value budget; HealAll capped at 20 |
+| Full-hand refresh at low rarity, search-anything, Gear recursion loops | Decks played the same 20 Gear cards, every game the same | Clean Slate is Rare; no search-anything; Scrap Ledger recovers one Gear |
+| Heal-all walls | A big Basic plus heal-all Gear cards plus damage moving stalled to deck-out | Heal effects priced in the value budget; HealAll capped at 20 |
 | Global locks at 4 copies | Power blocker or evolution lock shut off whole archetypes | **Rule (adopted): lock Powers only on one-per-deck cards** (§5.2) |
 | A second two-unit special energy | Made colourless attackers splashable at double speed | Twofold Energy stays the only one |
 | Coin flips everywhere | 36–41% of attacks; games decided by flips | Ours 17%, target 15–25% |
@@ -112,7 +112,7 @@ None of these should be copied. Most are already guarded against in `docs/BALANC
 
 ## 3. Sixfold set 1, measured the same way
 
-From `engine/src/set.rs` (78 Hexons including the 7 promos, 25 trainers, 7 energy):
+From `engine/src/set.rs` (78 Hexons including the 7 promos, 25 Gear cards, 7 energy):
 
 | Measure | Classic (all three) | Sixfold set 1 | Read |
 |---|---|---|---|
@@ -132,7 +132,7 @@ From `engine/src/set.rs` (78 Hexons including the 7 promos, 25 trainers, 7 energ
 | Resistance | 33% | 14% | Under the 15–25% target |
 | Retreat 0 | 9 / 22 / 14% | 9% | Fine |
 | Special energy | 1 | 1 | **Thin** |
-| Trainer-as-Basic | 2 | 0 | Engine supports it, no card uses it |
+| Gear-as-Basic | 2 | 0 | Engine supports it, no card uses it |
 
 **Engine hooks with no card.** The engine already implements and tests (with fixtures) mechanics
 that no card uses yet:
@@ -145,7 +145,7 @@ that no card uses yet:
 | `PowerKind::HalveDamage` | Damage to the holder is halved |
 | `PowerKind::ShieldFromEvolved` | Attacks by awakened Hexons do nothing to the holder |
 | `PowerKind::CoinPrevention` | Heads prevents attack damage to the holder |
-| `CardKind::TrainerBasic` | A trainer put into play as a Basic |
+| `CardKind::GearBasic` | A Gear card put into play as a Basic |
 | `Effect::IgnoreWeaknessResistance`, `OwnResistance`, `SetOwnColor` | Damage and colour tricks |
 | `Shield::PreventBelow`, `Shield::Halve` | Defensive attack shields |
 
@@ -164,7 +164,7 @@ classic pool had and we lack:
 |---|---|---|
 | Energy acceleration engine | Unlimited attach Powers | One limited free attach (Ember) |
 | Stall / wall | Damage-threshold walls, heal-all | None dedicated |
-| Lock | Power blocker, evolution lock, trainer lock | One trainer-lock attack |
+| Lock | Power blocker, evolution lock, Gear lock | One Gear-lock attack |
 | Bench spread | Spread and per-Bench attacks | 4 spread and 3 snipe attacks |
 | Colourless toolbox | Splashable attackers, special energy | Rook's list, one special energy |
 | Anti-evolution | Evolution lock, devolve, shield from evolved | Unwind Spray |
@@ -178,9 +178,9 @@ Small additions that fill gaps without moving the balance bands. Ids stay append
 |---|---|---|---|
 | Q1 | **Storm and Neutral get a second Awaken 2**, each extending an existing 2-stage line (the Grove, Storm and Stone packs gain a Holo) | +2 Hexons (Rare) | none |
 | Q2 | **Three singleton Basics get an Awaken 1** (lines of 1/2/3 move from 49/21/31% to about 43/28/29%) | +3 Hexons (Uncommon) | none |
-| Q3 | **A defensive trainer**: the opponent's Active does 20 less damage next turn (an existing placed effect) | +1 trainer | none |
-| Q4 | **Back to the Bench**: a Basic from the discard pile onto the Bench with half its HP in damage | +1 trainer | one effect |
-| Q5 | **Look ahead**: look at the top 4 cards of the deck and put them back in any order | +1 trainer | one effect, one prompt |
+| Q3 | **A defensive Gear**: the opponent's Active does 20 less damage next turn (an existing placed effect) | +1 Gear | none |
+| Q4 | **Back to the Bench**: a Basic from the discard pile onto the Bench with half its HP in damage | +1 Gear | one effect |
+| Q5 | **Look ahead**: look at the top 4 cards of the deck and put them back in any order | +1 Gear | one effect, one prompt |
 | Q6 | **Resistance errata**: give 5–6 Hexons a resistance that fits their grain (flyers to Stone, for instance), never to the colour they are weak to, to reach ~20% | stat edits | none |
 | Q7 | **Price the dormant hooks** in the value budget and in `effect_value`/`power_value`, so expansions start from real numbers | — | test-only |
 | Q8 | **Rarity rule** ready for Rare Basics (`rarity_follows_stage`, `is_holo`) and a **set mark** on every card (BALANCE "Set 2") | — | small |
@@ -222,7 +222,7 @@ the seventh face, and the question of whether a colour is found or chosen.
 
 | Breakdown | Count |
 |---|---|
-| Hexons / trainers / special energy | 52 / 8 / 4 |
+| Hexons / Gear cards / special energy | 52 / 8 / 4 |
 | Neutral / each of the six colours | 16 (incl. the branching Basic) / 6 each (incl. one face-taking Awaken 1) |
 | Basic / Awaken 1 / Awaken 2 | 24 / 24 / 4 |
 | Lines: branching / 3-stage / 2-stage / singleton / set-1 continuations | 1 / 1 / 14 / 8 / 6 |
@@ -230,7 +230,7 @@ the seventh face, and the question of whether a colour is found or chosen.
 | Hexons with a Power | 8 (15%) |
 | Attacks flipping coins | ≤ 20% |
 
-**Trainers (8).** Road-kit themed and filling roles set 1 lacks: put a Basic from the deck onto the
+**Gear (8).** Road-kit themed and filling roles set 1 lacks: put a Basic from the deck onto the
 Bench; trade a Hexon card in hand for one in the deck; return a Benched Hexon to the hand
 (attachments discarded); a comeback draw that draws more the more prizes the opponent has taken;
 a heal-and-cure; a search for an Awaken card; two more for the deck builder's needs after
@@ -265,7 +265,7 @@ and one sleeper under each seal.
 
 **Mechanical identity: Powers, lock and relics.**
 
-- **Seal shards (relics).** Two trainers played as a Basic (`TrainerBasic`, already in the engine):
+- **Seal shards (relics).** Two Gear cards played as a Basic (`GearBasic`, already in the engine):
   no prize, can't retreat, and they awaken into **three ancient lines** (two to Awaken 2).
 - **Sleepers.** Six legendary Rare Basics, one under each region's seal, **one per deck** (a new
   deck rule, "Sleeper"). They carry the strong passive Powers the engine already has: a Power
@@ -283,14 +283,14 @@ and one sleeper under each seal.
 
 | Breakdown | Count |
 |---|---|
-| Hexons / trainers / special energy | 47 / 12 / 3 |
+| Hexons / Gear cards / special energy | 47 / 12 / 3 |
 | Stone / Dream / Tide / Ember / Grove / Storm / Neutral | 10 / 9 / 8 / 5 / 5 / 5 / 5 |
 | Basic / Awaken 1 / Awaken 2 | 20 (incl. 6 Sleepers) / 19 / 8 |
 | Lines: relic / 3-stage / 2-stage / Sleepers / set-1 or A continuations | 3 / 4 / 10 / 6 / 4 |
 | Common / Uncommon / Rare (Holo) | 16 / 28 / 18 (14 Holo Hexons) |
 | Hexons with a Power | 12 (26%) |
 
-**Trainers (12).** Two seal shards; a one-turn Power hush on the opponent's Active; reveal the
+**Gear (12).** Two seal shards; a one-turn Power hush on the opponent's Active; reveal the
 opponent's hand; shuffle one of your Benched Hexons and its cards into the deck; look at the top 3
 and take one; move one energy between your Hexons; recover two basic energy for a discard; two
 defensive tools; two more after playtests. **Not included:** hand-shuffle for the opponent,

@@ -94,13 +94,13 @@ glow. Stone: a real mole or dog painted grey. Dream: a real glider or owl tinted
 ## 3. Illustration rules / Règles d'illustration
 
 **Style.** Painted creature-design illustration in gouache and watercolour on cold-press paper, with
-ink linework, matching the trainer and energy art: an invented species from a fantasy bestiary, never a
+ink linework, matching the Gear and energy art: an invented species from a fantasy bestiary, never a
 wildlife study. One Hexon per picture, a soft wash in the type's palette behind it, no text, no frame,
 no card border. Commons and uncommons stand in a three-quarter view in warm side light; **Awaken 2,
 rares and promos** get a low angle, backlight and a more dramatic pose.
 
 *Style : illustration peinte de création de créature, gouache et aquarelle sur papier à grain, trait
-d'encre, assortie aux dresseurs et aux énergies ; une espèce inventée d'un bestiaire fantastique, jamais
+d'encre, assortie aux Objets et aux énergies ; une espèce inventée d'un bestiaire fantastique, jamais
 une étude animalière. Un seul Hexon par image, un lavis dans la palette du type, ni texte, ni cadre, ni
 bord de carte. Les Éveils 2, rares et promos ont une contre-plongée, un contre-jour et une pose plus
 dramatique.*

@@ -12,12 +12,12 @@ the world. Three releases implement it:
 Hard constraints, restated so nobody has to look them up:
 
 - **Clean room.** Every name, place, Hexon, map layout and story beat here is original. Generic genre
-  mechanics (trainers with line of sight, item-gated paths, a day clock, fast travel) are fine; named
+  mechanics (duelists with line of sight, item-gated paths, a day clock, fast travel) are fine; named
   franchise structures are not. Vocabulary to use: *seal*, *seal site*, *rival*, *route duelist*,
   *waymark*. Vocabulary to avoid: gym, badge, league, elite, "pokécenter"-style heal houses, any
   monster-ball-like item.
 - **Engine owns the rules.** Anything that grants, spends, gates or counts lives in `engine/` with a
-  unit test: currency, prices, trainer decks, the clock, achievements, the dialogue grammar. `world.js`
+  unit test: currency, prices, duelist decks, the clock, achievements, the dialogue grammar. `world.js`
   only draws, moves and asks.
 - **Bilingual.** Every player-visible string has an English and a French form: map JSON fields get a
   `*_fr` sibling (`text_fr`, `lines_fr`, `label_fr`, `locked_fr`, `title_fr`, `name_fr`), engine text uses
@@ -38,7 +38,7 @@ Hard constraints, restated so nobody has to look them up:
    fastest way to earn is to explore something new; grinding works but pays less (§3).
 4. **Come back later.** Field items, the clock and seals each re-open places you've already been. Every
    region has something you can't reach on the first visit.
-5. **Small systems, lots of content.** One gate mechanism, one script runner, one trainer table, one
+5. **Small systems, lots of content.** One gate mechanism, one script runner, one duelist table, one
    condition language. New content is data; new code is rare.
 
 ---
@@ -240,13 +240,13 @@ exploring row is 5.2. No price changed.
 
 ### 4.1 Behaviour
 
-A route duelist is an NPC with a `trainer` block. While it is unbeaten, visible and not suppressed, it
+A route duelist is an NPC with a `duelist` block. While it is unbeaten, visible and not suppressed, it
 watches a straight line of tiles.
 
 ```jsonc
 { "id": "t_hazel", "name": "Hazel", "model": "npc_gardener", "tint": "#e8c33a",
   "x": 22, "z": 8, "facing": "w",
-  "trainer": {
+  "duelist": {
     "sight": 4,                  // 1–5 tiles, default 3
     "look": ["w", "s"],          // optional: turns between these every 2.5 s, watching each way
     "challenge": ["The bees say you walk like a duelist."], "challenge_fr": ["Les abeilles disent que tu marches comme un duelliste."],
@@ -256,7 +256,7 @@ watches a straight line of tiles.
   } }
 ```
 
-The loader expands `trainer` into ordinary dialogue branches, so one grammar still drives everything:
+The loader expands `duelist` into ordinary dialogue branches, so one grammar still drives everything:
 `won:t_hazel` → `win`, `lost:t_hazel` → `lose`, `beat:t_hazel` → `after`, else `challenge` + `do:
 ["duel:t_hazel"]`. Hand-written `dialogue` on the same NPC goes between the `won:`/`lost:` branches and
 `beat:` (for night lines, quests, Cole's ash), so it can be reached: after `beat:` and the catch-all challenge
@@ -287,12 +287,12 @@ Line of sight:
 check-maps refuses a sight line covering an exit edge tile, a warp's spawn tile or a waymark's front tile
 (§13.3), so a map never ambushes you as it fades in.
 
-### 4.2 Engine: the trainer table
+### 4.2 Engine: the duelist table
 
-`engine/src/trainers.rs`, alongside `RIVALS`:
+`engine/src/duelists.rs`, alongside `RIVALS`:
 
 ```rust
-pub struct Trainer {
+pub struct Duelist {
     pub id: &'static str,          // "t_hazel"; flags beat_t_hazel
     pub name: &'static str,        // proper name, same in both languages
     pub class: T,                  // T::new("Beekeeper", "Apicultrice")
@@ -306,15 +306,15 @@ pub struct Trainer {
 }
 ```
 
-`duel:<id>` resolves a rival first, then a trainer; `beat:`, `won:`, `lost:` work for both;
-`campaign::seals` and `champion` keep reading `RIVALS` only, so a trainer can never count as a seal.
+`duel:<id>` resolves a rival first, then a duelist; `beat:`, `won:`, `lost:` work for both;
+`campaign::seals` and `champion` keep reading `RIVALS` only, so a duelist can never count as a seal.
 A single `opponent(id) -> Opponent` view (name, title, deck, prizes, AI, style, portrait) feeds the
-challenge sheet and the duel screen for rivals, trainers and Rook alike.
+challenge sheet and the duel screen for rivals, duelists and Rook alike.
 
 ### 4.3 Deck kits
 
 Fifty hand-written 60-card lists is a maintenance trap. Duelists draw from **20 kits**: a short list of
-Hexons and trainers, padded to 60 with basic energy of the kit's colour(s) by `Kit::deck()` (which also
+Hexons and Gear cards, padded to 60 with basic energy of the kit's colour(s) by `Kit::deck()` (which also
 asserts the 4-copy limit). `Kit::Mix(a, b)` takes the first half of each list. Each duelist adds one **signature card** (Hazel always has
 two Hivevolt, Pell a Streamfin, Cole a Furnaceback …) so two duelists on the same kit still feel different;
 the signature is named in their `challenge` line. Tiers: **Sprout** (Basics
@@ -402,7 +402,7 @@ small scores with thresholds, so a style is a handful of extra weights, not a ne
 | Style | Leans toward | Concretely |
 |---|---|---|
 | Balanced | today's AI | no change (Sable, quick duels, route duelists) |
-| Aggressive | damage now | energy to the Active first; attacks whenever any attack is usable; retreats only to dodge a sure KO; draw trainers before setup trainers |
+| Aggressive | damage now | energy to the Active first; attacks whenever any attack is usable; retreats only to dodge a sure KO; draw Gear before setup Gear |
 | Stall | outlasting | heals and conditions score higher; retreats a damaged Active earlier; spreads energy over the Bench; prefers attacks that leave the defender Asleep/Paralysed over raw damage |
 | Bench sniper | the weakest target | attacks and effects that hit the Bench score by how close they bring a Benched Hexon to a KO; Snare Hook-style "bring up the opponent's Bench" scores the lowest-HP target; a Bench KO counts like an Active KO |
 
@@ -546,7 +546,7 @@ Facet balance. She keeps the running-shoes gift and the one-seal Wild pack.
 each piece of advice a `T` with a severity, and where possible a concrete swap from the player's own
 collection. Checks: fewer than 10 Basics (opening hands with no Basic); energy under 18 or over 28; a
 Awaken 1 or 2 without its line underneath; attack costs in a colour the deck carries no energy for; no
-draw/search trainers while owning Lucky Satchel or Trail Compass; four or more colours; a line of 4
+draw/search Gear while owning Lucky Satchel or Trail Compass; four or more colours; a line of 4
 Awaken 2 Hexons over 2 Basics. A deck with nothing to say gets "Clean bill of health" / "Rien à signaler".
 
 **The Press**: choose a card in the binder, see its craft price (owned / never owned, §3.2), confirm. The
@@ -705,7 +705,7 @@ achievements), so the story never blocks the campaign.
 
 ### 8.2 Encounters
 
-Rook is in `TRAINERS` (not `RIVALS`: he must never count as a seal or as the champion), four entries with a
+Rook is in `DUELISTS` (not `RIVALS`: he must never count as a seal or as the champion), four entries with a
 growing hand-written deck. Each later list is the one before plus the cards shown, with basic energy trimmed to
 keep 60; the last is given in full:
 
@@ -750,7 +750,7 @@ Scripts are map data (§9.1), triggered `on: "enter"` or by stepping on `at` til
 | Field | On | Release | Meaning |
 |---|---|---|---|
 | `*_fr` | any text field | 1.2 | French sibling (from the i18n PR) |
-| `trainer` | npc | 1.2 | route duelist block (§4.1) |
+| `duelist` | npc | 1.2 | route duelist block (§4.1) |
 | `if` | npc, interaction; prop (1.3) | 1.2 | only present while the condition holds (night NPCs, story NPCs, quest finds, the hub's seal dressing) |
 | `pulse` | prop | 1.3 | an arc of light at its `light_origin` while the condition holds; 1.8: without one it sits `pulse_at` m up (3), tinted `pulse_color`, lit at least `pulse_glow` (0..1) between arcs |
 | `kind: "find"` | interaction | 1.2 | hidden find shorthand (§5.1) |
@@ -797,7 +797,7 @@ The engine stays the only parser (`engine/src/overworld.rs`). Arguments are spli
 
 | Condition | Holds when | New in |
 |---|---|---|
-| `item:x`, `flag:x`, `seals:n`, `beat:id`, `open:id`, `won:id`, `lost:id` | as today; `beat/won/lost` now also take trainer ids | 1.2 |
+| `item:x`, `flag:x`, `seals:n`, `beat:id`, `open:id`, `won:id`, `lost:id` | as today; `beat/won/lost` now also take duelist ids | 1.2 |
 | `coins:n` | at least n Facets | 1.2 |
 | `count:<prefix>:n` | at least n flags or items start with `prefix` (`count:found_:30`, `count:curio_:6`, `count:beat_t_:20`) | 1.2 |
 | `time:<phase>` | the clock is in `dawn`/`day`/`dusk`/`night` | 1.3 |
@@ -806,7 +806,7 @@ The engine stays the only parser (`engine/src/overworld.rs`). Arguments are spli
 
 | Effect | Does | Applied | New in |
 |---|---|---|---|
-| `give:x`, `flag:x`, `duel:id`, `pack:b`, `show:panel` | as today; `duel:` takes trainer ids; `show:` gains `shop_hall`, `trader`, `press`, `doctor`, `curios`, `inn_shop`, `map`, `tailor` | state | 1.2 |
+| `give:x`, `flag:x`, `duel:id`, `pack:b`, `show:panel` | as today; `duel:` takes duelist ids; `show:` gains `shop_hall`, `trader`, `press`, `doctor`, `curios`, `inn_shop`, `map`, `tailor` | state | 1.2 |
 | `take:x` | remove an item (quest hand-ins) | state | 1.2 |
 | `coins:n` | gain n Facets | state | 1.2 |
 | `pay:n` | spend n Facets; **if short, this and every later effect in the list is skipped** and the UI says "Not enough Facets" | state | 1.2 |
@@ -817,7 +817,7 @@ The engine stays the only parser (`engine/src/overworld.rs`). Arguments are spli
 | `face:<actor>:<dir>` | turn; `dir` may be `hero` (toward where the hero stands, 1.10) | cue | 1.4 |
 | `cam:<actor>` / `cam:<x>:<z>` / `cam:hero` | ease the camera's look-at target (pitch never changes) | cue | 1.4 |
 | `wait:<ms>` | pause, 0–5000 | cue | 1.4 |
-| `emote:<actor>:<bang\|what\|dots\|heart\|note>` | bubble over a head (the trainer "!" uses this) | cue | 1.2 |
+| `emote:<actor>:<bang\|what\|dots\|heart\|note>` | bubble over a head (the duelist "!" uses this) | cue | 1.2 |
 | `sfx:<name>`, `music:<track>` | sound | cue | 1.4 |
 | `music:duel_rival_<region>` | a keeper's own duel theme (`ember`, `storm`, `tide`, `dream`, `grove`, `stone`), for their entrance; the map's music comes back when the scene ends | cue | 1.10 |
 | `stone:wake` | the map's seal stone wakes until the scene ends: its six coloured faces glow in the region's colour over 600 ms (a cut under reduced motion) with one live light at it (outdoors, made with the map: five point lights in all); only on a map with a `seal_stone` | cue | 1.10 |
@@ -841,7 +841,7 @@ that and say so in the changelog).
 | `[progress]` | `t:<minute>` | the clock | 1.3 |
 | `[stats]` (new section) | `s1;<key>=<n>,...` sorted | counters for stats and achievements (§12.2) | 1.4 |
 
-`last` (the last duel's result) already accepts any id; trainers reuse it. The world position stays in
+`last` (the last duel's result) already accepts any id; duelists reuse it. The world position stays in
 `[world_at]`.
 
 ### 9.4 One test that reads every map
@@ -850,8 +850,8 @@ that and say so in the changelog).
 `web/world/maps/*.json` and `atlas.json` and checks, with the engine's own parser:
 
 - every `if`, `glint`, gate `if`, script `if` parses as a condition; every `do` entry and script step parses as an
-  effect; expanded `trainer` and `find` blocks are checked as their expansions;
-- every `duel:` names a rival or a trainer; every trainer in `TRAINERS` is placed exactly once; every `card:`
+  effect; expanded `duelist` and `find` blocks are checked as their expansions;
+- every `duel:` names a rival or a duelist; every duelist in `DUELISTS` is placed exactly once; every `card:`
   slug resolves to a non-promo card; every `pack:` names a booster; every `show:` names a known panel;
 - every `found_` id and `way_` id is unique; every find `give` is one effect;
 - `walk:`/`face:`/`emote:` actors exist on that map (or `hero`).
@@ -883,12 +883,12 @@ legend   .  open ground      p  path          ~  water          #  wall / scree 
 
 Every region lists: identity (ground, palette, ring, music), new props, maps, people, duelists, finds, gates,
 shop stock. Duelists marked ☾ are night-only; ⚖ are challenge-rule duelists (deck rule checked by
-`engine::trainers::Rule`; decks that break it are greyed in the picker).
+`engine::duelists::Rule`; decks that break it are greyed in the picker).
 
 | Rule | Deck must… | Engine check |
 |---|---|---|
 | `BasicsOnly` | hold no Awaken 1 or Awaken 2 Hexon | stage of every Hexon card |
-| `NoTrainers` | hold Hexons and energy only | card kind |
+| `NoGear` | hold Hexons and energy only | card kind |
 | `MonoColour` | hold Hexons and basic energy of one colour (plus Neutral) | colours |
 | `LightEnergy` | hold at most 16 energy cards | count |
 | `NoRares` | hold no Rare (energy excepted) | rarity |
@@ -1221,7 +1221,7 @@ quay; route NPC; knows where the tide pools are). **Abel**, fishmonger (day at t
 | `t_liesl` | Liesl, Clam Digger / *Pêcheuse à pied* | bellflats flats (day) | Mix(Puddle, Pebble) | 2 | Normal | 45 |
 | `t_harrow` | Harrow, Bell Ringer / *Sonneur de cloche* | bellflats tower (talk) | Undertow | 3 | Normal | 60 |
 | `t_brann` ☾ | Brann, Night Fisher / *Pêcheur de nuit* | gullhaven pier (talk) | Undertow | 3 | Hard | 90 |
-| `t_mirela` ⚖ | Mirela, Tidecaller / *Appelle-marée* — `NoTrainers` | bellflats islet (talk) | Current | 3 | Normal | 120 + `gulfwyrm` |
+| `t_mirela` ⚖ | Mirela, Tidecaller / *Appelle-marée* — `NoGear` | bellflats islet (talk) | Current | 3 | Normal | 120 + `gulfwyrm` |
 
 **Finds (8).** `t_quay` gullhaven quay crates (hidden) ⬡ 50 · `t_market` market stall (hidden) card `streamfin` ·
 `t_pool_1` bellflats tide pool (day + boots) card `frosteel` · `t_pool_2` tide pool (day + boots) ⬡ 80 ·
@@ -1710,7 +1710,7 @@ winner, how it ended, prizes and KOs per side, Bench KOs, the biggest prize defi
 2s played, the longest run of heads) and by world events (steps in batches of 50, finds, Facets in and out,
 packs opened, crafts, sales, night phases seen).
 
-Counters: `duels`, `wins`, `quick_wins`, `quick_wins_hard`, `rival_wins`, `trainer_wins`, `prizes`, `kos`,
+Counters: `duels`, `wins`, `quick_wins`, `quick_wins_hard`, `rival_wins`, `duelist_wins`, `prizes`, `kos`,
 `bench_kos`, `stage2_played`, `heads_run_best`, `streak`, `streak_best`, `coins_in`, `coins_out`, `packs`,
 `crafts`, `sold`, `finds`, `steps`, `minutes`, `nights`, `daily_days`.
 
@@ -1731,8 +1731,8 @@ them, hidden ones as "???" until earned (marked H).
 | `rook_sweep` H | Blank Cheque / *Chèque en blanc* | win all four Rook duels, each at the first try | 150 |
 | `gauntlet` | Unbroken / *Invaincu* | clear the Gauntlet | 250 |
 | `daily_7` | Regular / *Habitué* | win the daily duel on 7 different days | 100 |
-| `trainers_10` | Waylaid / *Pris en embuscade* | beat 10 route duelists | 50 |
-| `trainers_all` | Nobody Left / *Plus personne* | beat every route duelist | 200 |
+| `duelists_10` | Waylaid / *Pris en embuscade* | beat 10 route duelists | 50 |
+| `duelists_all` | Nobody Left / *Plus personne* | beat every route duelist | 200 |
 | `night_owl` | Night Owl / *Oiseau de nuit* | beat the six night duelists | 150 |
 | `rules_all` | House Rules / *Règles maison* | beat the six challenge-rule duelists | 150 |
 | `finds_10` | Magpie / *Pie voleuse* | 10 finds | 50 |
@@ -1773,8 +1773,8 @@ so each gets a one-line unit test.
 | Module | Release | Holds |
 |---|---|---|
 | `overworld.rs` | 1.2 → 1.4 | grammar (§9.2): `parse_cond`, `parse_effect`, `apply_all`, `Applied::Cue`; Facets, clock minute, stock mask in `Progress` |
-| `trainers.rs` | 1.2 | `Trainer`, `TRAINERS`, `Kit` and the 20 kits, `Rule` (1.3), Rook's four entries (1.4) |
-| `campaign.rs` | 1.2 | `RivalLines`, `Style` per rival, `opponent(id)` for rivals/trainers, Facet rewards, champion rematch decks (1.3) |
+| `duelists.rs` | 1.2 | `Duelist`, `DUELISTS`, `Kit` and the 20 kits, `Rule` (1.3), Rook's four entries (1.4) |
+| `campaign.rs` | 1.2 | `RivalLines`, `Style` per rival, `opponent(id)` for rivals/duelists, Facet rewards, champion rematch decks (1.3) |
 | `ai.rs` | 1.2 | `Style` weights |
 | `shop.rs` | 1.2 | prices, `daily_stock(day)`, buy/sell/craft, voucher, `economy_sim` test |
 | `doctor.rs` | 1.2 | `diagnose` |
@@ -1794,11 +1794,11 @@ grow the pieces:
 | File | Does |
 |---|---|
 | `world.js` | `mount`/`unmount`, frame loop, input, camera, the bridge (events in, externs out) |
-| `map.js` | fetch, `localize` (`*_fr`), expand `trainer` / `find` / `waymark` blocks, idle prefetch of neighbours |
+| `map.js` | fetch, `localize` (`*_fr`), expand `duelist` / `find` / `waymark` blocks, idle prefetch of neighbours |
 | `build.js` | build a scene from a map (today's `build()`), gates and their props, `refresh()` |
 | `actors.js` | `actor()`, `place()`, `animateActor()` for the hero and NPC rigs, emote bubbles |
 | `npc.js` | routes, `look` turning, visibility `if`, day/night swaps, talk targeting |
-| `trainer.js` | sight scan, spot → "!" → approach → challenge, suppression |
+| `duelist.js` | sight scan, spot → "!" → approach → challenge, suppression |
 | `script.js` | cue player: walk / face / cam / wait / emote / fade / warp, input lock, skip |
 | `daylight.js` | clock tick, phase presets and cross-fade, lamp budget (6 live), `glow` materials, lightning |
 | `ground.js`, `life.js`, `props.js` | as today; `life.js` adds fireflies, moths, rain; `props.js` adds FOOT/DECK entries |
@@ -1900,10 +1900,10 @@ Since 1.3.0 a minor version ships after every three merged feat/fix PRs, and the
 in `docs/ROADMAP.md`; the 1.4 plan below is kept as the design's grouping, not as a release.
 
 **1.2 "The world comes alive"** (target: 4 PRs)
-1. `feat(engine): facets, shops, route duelists and rival styles` — grammar additions, `trainers.rs` + kits,
+1. `feat(engine): facets, shops, route duelists and rival styles` — grammar additions, `duelists.rs` + kits,
    `shop.rs`, `doctor.rs`, `RivalLines`, AI `Style`, reward changes, `economy_sim`, `world_data.rs`.
 2. `refactor(world): split world.js` — no behaviour change.
-3. `feat(world): line of sight, finds and houses` — `trainer.js`, expansion in `map.js`, emotes, check-maps
+3. `feat(world): line of sight, finds and houses` — `duelist.js`, expansion in `map.js`, emotes, check-maps
    extensions, editor.
 4. `feat(content): duelists, finds, quests and six houses` — the 14 duelists, 38 finds, 4 quests, journal,
    shop panels, portraits, all FR.

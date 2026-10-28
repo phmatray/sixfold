@@ -148,7 +148,7 @@ deck (`rival_strength_against_the_starter`, 60 games, the campaign's prizes and 
 
 ## 1.2: route duelists' kits
 
-`kit_sweep` plays each of the 20 kits (`engine/src/trainers.rs`) at 2 prizes, Normal against Normal,
+`kit_sweep` plays each of the 20 kits (`engine/src/duelists.rs`) at 2 prizes, Normal against Normal,
 40 games against each of the six prebuilts and the starter; no kit may win more than 60%:
 
 | Colour | Sprout | Bud | Bloom |
@@ -284,7 +284,7 @@ wins, no route duelists) the campaign took 31 rival duels.
 
 Every Hexon is held to the curves below. They come from two sources: our own pack set (71
 Hexons, promos left out) and, as an outside check, aggregate statistics of the three classic
-sets the handheld game was built on (159 distinct creatures, 32 trainers). Only rules and numbers
+sets the handheld game was built on (159 distinct creatures, 32 Gear cards). Only rules and numbers
 were taken from those sets, never a card. Our evolutions are deliberately stronger per energy than
 theirs. In the classic sets a Stage 2 dealt no more damage per energy than a Basic, so evolving
 rarely paid; our curve rewards the setup.
@@ -307,7 +307,7 @@ rarely paid; our curve rewards the setup.
 | Neutral share of attack costs | 29% | 31% | 25–35%; at most 2 in 3 attacks of 3+ energy carry one |
 | Lines of 1 / 2 / 3 stages | 31 / 48 / 21% | 49 / 21 / 31% | more 2-stage lines in set 2 |
 | Basics that are Common / Uncommon / Rare | 63 / 15 / 22% | 69 / 31 / 0% | allow a few Rare Basics |
-| Trainers: disruption, heal, draw, search, recovery, energy, switch | 28, 16, 12, 9, 9, 3, 6% | 28, 16, 12, 12, 8, 8, 4% (+12% boosts) | keep |
+| Gear: disruption, heal, draw, search, recovery, energy, switch | 28, 16, 12, 9, 9, 3, 6% | 28, 16, 12, 12, 8, 8, 4% (+12% boosts) | keep |
 
 The attack curve, as expected damage of an attack with no effect:
 
@@ -336,7 +336,7 @@ the classic sets and ours:
 | Paralysis or Double-poison | +20 |
 | Sleep, Confusion or Poison; a coin flip halves the value | +10 |
 | The opponent can't attack (coin) | +10 |
-| Weaken 20, Reduce 20, accuracy flip, trainer lock, disable an attack | +10 |
+| Weaken 20, Reduce 20, accuracy flip, Gear lock, disable an attack | +10 |
 | Prevent all damage (coin) | +15 |
 | The attacker picks the switch (a gust) | +20 |
 | The opponent picks the switch | +5 |
@@ -411,7 +411,7 @@ Kindling Heart's limit (see "1.3: rules and curve pass").
 | Prebuilt range | 42–58% | 42–59% | 42–57% | 42–56% |
 
 It also prints each card's play rate and win rate when played or not. Read that table with care.
-Evolutions and late cards are played in games that go well, and reactive trainers in games that go
+Evolutions and late cards are played in games that go well, and reactive Gear cards in games that go
 badly, so the gap measures timing as much as strength.
 
 The handheld gave the first player an attack on their first turn, and that turn was worth about 9
@@ -442,9 +442,9 @@ of cards held back from formats is the second.
 Three rules part from the handheld game on purpose (`docs/RULES.md`):
 
 - **No attack on the first player's first turn** (R-TURN-05). The first player can still bench, attach,
-  play trainers and use Powers. First player's win rate 58.8% → 53.4%.
+  play Gear cards and use Powers. First player's win rate 58.8% → 53.4%.
 - **One retreat a turn** (R-RETREAT-05), as in the physical game. The AI already retreated at most
-  once a turn, so the sweeps barely move: a switch trainer such as Relay Baton is now the only second
+  once a turn, so the sweeps barely move: a switch Gear such as Relay Baton is now the only second
   switch.
 - **Kindling Heart gives one extra Ember attachment a turn**, not unlimited ones (R-ENERGY-02). It was
   the one free-attach Power and the one off-budget card besides the champion's promo.
@@ -477,7 +477,7 @@ One kit list changed: Landslide carries one Spike Charm, not two (60.4% → 59%,
 
 ### The Easy AI and the difficulty slope
 
-Easy used to differ from Normal only by skipping a quarter of its trainer and Power plays, so the
+Easy used to differ from Normal only by skipping a quarter of its Gear and Power plays, so the
 campaign's Easy rivals played almost as well as the Normal ones: against the starter Bramble won 15%
 and then Marlo 66%, on Easy. 1.3's Easy also picks any attack that does something, not the best one,
 and retreats only to dodge a knock-out. Bramble moves to Normal (he would fall to 10% on the new
@@ -529,8 +529,8 @@ seeds it finished in 92, 83 and 71 duels (78, 92 and 80 before), inside its 98-d
 
 ## 1.7: Rook's story duels
 
-Rook's four duels (`rook_1` … `rook_4`, `engine/src/trainers.rs`, `docs/WORLD_DESIGN.md` §8.2) are in
-`TRAINERS` but never a seal, the champion or a route duelist. Each scene sets `flag:rook_<n>` before its
+Rook's four duels (`rook_1` … `rook_4`, `engine/src/duelists.rs`, `docs/WORLD_DESIGN.md` §8.2) are in
+`DUELISTS` but never a seal, the champion or a route duelist. Each scene sets `flag:rook_<n>` before its
 duel, so the story moves on whether the player wins or loses; a first win pays ⬡ 100 / 150 / 200 / 300
 and marks `beat:rook_<n>`, a loss pays the usual consolation, and the hall rematch (`rook_4`, after the
 Warden) pays ⬡ 60 a win, like a rival's rematch. The decks are §8.2's lists; Kit::deck pads a Neutral
@@ -561,13 +561,13 @@ four of them Rook's and the rest the seeds' usual swing.
 playthrough wins about half of them) plus a consolation: the first playthrough moves from 5.34 to **5.30
 packs an hour**; exploring stays at 5.23. The campaign playthrough meets Rook as each scene's seals are met
 (one duel, won or lost) and wins the first two, loses the last two, on all three pack seeds; it finishes in
-92, 92 and 80 duels (92, 83 and 71 before), inside its budget, now 102 duels (57 trainers plus 45).
+92, 92 and 80 duels (92, 83 and 71 before), inside its budget, now 102 duels (57 duelists plus 45).
 
 ## 1.9: the deck builder
 
 "Build for me" (`engine/src/builder.rs`, #102) builds from the player's own cards: whole Awaken lines of the
 chosen colours (4-3-2, never more of a stage than of the one below), at least 12 Basics when owned, draw and
-search trainers first, then the style's (Aggro: boosts and gusts; Control: healing, conditions and
+search Gear cards first, then the style's (Aggro: boosts and gusts; Control: healing, conditions and
 disruption), and energy shared by each Hexon's main attack cost. Hexons are ranked on the board rather than
 against their stage's curve: HP, twice what the main attack is worth (damage plus the value of its effects,
 from the table above) less 15 an energy, the Power and the rest of the value budget, less a setup cost per

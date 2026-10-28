@@ -31,9 +31,9 @@ from the old README or the changelog's wording:
 | Claim | Source |
 |---|---|
 | Engine test count ("450+") | `cargo test -p sixfold-engine 2>&1 \| grep '^test result'`, first line; round down to a tens |
-| Cards: total, Hexons, trainers, energies, promos | `engine/src/set.rs`; the Collection screen's "of N cards" and its per-kind progress |
+| Cards: total, Hexons, Gear cards, energies, promos | `engine/src/set.rs`; the Collection screen's "of N cards" and its per-kind progress |
 | Outdoor maps, waymarks, regions | `web/world/atlas.json` (`maps`, `waymarks`, `regions`) |
-| Route duelists | distinct `"t_…"` ids in `engine/src/trainers.rs` |
+| Route duelists | distinct `"t_…"` ids in `engine/src/duelists.rs` |
 | Seal keepers, Warden, unlock thresholds | `engine/src/campaign.rs`, `docs/WORLD_DESIGN.md` |
 | Achievements, books | the title menu ("0 of N achievements"), the Journal's Library |
 | Controls | `web/gamepad.js` header, the world's key hint line |

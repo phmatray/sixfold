@@ -512,10 +512,10 @@ riposter. **Fracas des abysses** : il laisse tomber ses anneaux sur la mer et to
 sur l'adversaire, emportant son énergie.*
 
 **11. People and duelists / Relations avec les humains.** EN: Mirela, the Tidecaller, waits at the end
-of the islet for duelists who play without trainer cards, and hands a Gulfwyrm card to the one who wins.
+of the islet for duelists who play without Gear cards, and hands a Gulfwyrm card to the one who wins.
 Harrow, the bell ringer, rings the bell when one coils around the tower, so the clam diggers come in off
 the flats. *FR : Mirela, l'Appelle-marée, attend au bout de l'îlot les duellistes qui jouent sans carte
-dresseur, et remet une carte Golfeguivre à qui l'emporte. Harrow, le sonneur, fait sonner la cloche quand
+Objet, et remet une carte Golfeguivre à qui l'emporte. Harrow, le sonneur, fait sonner la cloche quand
 l'un d'eux s'enroule autour du clocher, pour que les pêcheurs à pied quittent les grèves.*
 
 **12. Rarity and sightings / Rareté et observation.** EN: Rare. At dusk, when the tide returns to the

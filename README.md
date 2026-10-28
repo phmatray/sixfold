@@ -41,16 +41,16 @@ speaks English and French.
 ## What's in the game
 
 **The duel** (`engine/`). The whole duel, from setup and mulligans through
-attacks, conditions, Powers, trainers, knock-outs, prizes and sudden death, in pure
+attacks, conditions, Powers, Gear cards, knock-outs, prizes and sudden death, in pure
 Rust with no browser needed and 450+ unit tests. An AI opponent at three levels:
-Easy skips a trainer or Power play one time in four; Hard thinks a turn ahead, trying
+Easy skips a Gear card or Power play one time in four; Hard thinks a turn ahead, trying
 its candidate moves on copies of the game where every card it can't see and every
 coming coin are dealt anew. Every level sees only what its player may see. The
 duel has hit-stop, damage stamps, prize flights and a battle log; the seed fixes the
 shuffles and coin flips, so a seed replays the same duel.
 
 **The cards.** 110 original cards: 78 Hexons in Awakening lines across seven
-colours (Ember, Tide, Grove, Storm, Stone, Dream and Neutral), 25 trainers, 6 basic
+colours (Ember, Tide, Grove, Storm, Stone, Dream and Neutral), 25 Gear cards, 6 basic
 energies and a special energy, each with its own painted illustration and lore.
 Seven are promos you earn rather than pull. Booster packs (one per colour, plus
 Wild) have slot odds and holo foil. A balance sweep plays every deck against every
@@ -98,7 +98,7 @@ you your starter deck and three packs. **How to play** on the title replays it.
 1. **Setup.** Choose a Basic Hexon as your Active, put more Basics on your Bench, then
    press **Done**.
 2. **Your turn.** Click a card in your hand to see what it can do: place it, attach
-   energy (once per turn), awaken, or play a trainer.
+   energy (once per turn), awaken, or play a Gear card.
 3. **Act.** The action bar has your attacks (with the damage they would do now),
    Retreat, Powers and End turn. An attack ends your turn.
 4. **Win.** Take all your prizes, leave the opponent with no Hexon in play, or outlast
