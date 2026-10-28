@@ -19,6 +19,11 @@ const twoFrames = (page: Page): Promise<Cam> =>
 async function enterWorld(page: Page) {
   page.on("dialog", (d) => d.accept());
   await title(page);
+  await intoWorld(page);
+}
+
+/** From the title, a new player's way in: the lesson skipped, the opening scene skipped, at the meadow's bench. */
+async function intoWorld(page: Page) {
   await menuItem(page, "Learn to play").click();
   await page.getByRole("button", { name: "Skip the lesson" }).click();
   await menuItem(page, "Continue").click();
@@ -117,12 +122,17 @@ test("a reset leaves the Options radio and the next C on the loaded save's angle
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("tab", { name: "Options" }).click();
   await expect(page.getByRole("radio", { name: "Lower" })).toBeChecked();
-  // Same panel, still open: the reset loads a new player, whose angle is the default.
+  // The reset loads a new player, whose angle is the default.
   await page.getByRole("button", { name: "Reset progress…" }).click();
   await page.getByRole("button", { name: "Reset progress", exact: true }).click();
-  await expect(page.getByRole("radio", { name: "Default" })).toBeChecked();
-  await page.getByRole("button", { name: "Close", exact: true }).click();
-  await expect.poll(() => settled(page)).toBe("default 50");
+  // The reset takes the new player back to the title (no reload): its Settings show the default angle...
+  await expect(menuItem(page, "Learn to play")).toBeVisible({ timeout: 60_000 });
+  await page.locator("summary", { hasText: "Settings" }).click();
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  await expect(settings.getByRole("radio", { name: "Default" })).toBeChecked();
+  await settings.getByRole("button", { name: "Close", exact: true }).click();
+  // ...and back in the world, so does the camera, and the next C goes on from it.
+  await intoWorld(page);
   await page.keyboard.press("c");
   await expect.poll(() => settled(page)).toBe("higher 60");
   await expect.poll(async () => (await readSave(page)).camera).toEqual(["higher"]);
