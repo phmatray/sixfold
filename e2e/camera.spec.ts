@@ -19,6 +19,11 @@ const twoFrames = (page: Page): Promise<Cam> =>
 async function enterWorld(page: Page) {
   page.on("dialog", (d) => d.accept());
   await title(page);
+  await intoWorld(page);
+}
+
+/** From the title, a new player's way in: the lesson skipped, the opening scene skipped, at the meadow's bench. */
+async function intoWorld(page: Page) {
   await menuItem(page, "Learn to play").click();
   await page.getByRole("button", { name: "Skip the lesson" }).click();
   await menuItem(page, "Continue").click();
@@ -65,6 +70,7 @@ test("a new angle eases in, and cuts under reduced motion", async ({ page }) => 
   expect(Math.round((await twoFrames(page)).pitch)).toBe(60);
   // Without it, two frames in the pitch is on its way.
   await page.emulateMedia({ reducedMotion: "no-preference" });
+  await frames(page); // the world hears the media change on a frame: a C before it would still cut
   await page.keyboard.press("c");
   const mid = (await twoFrames(page)).pitch;
   expect(mid).toBeLessThan(60);
@@ -90,4 +96,53 @@ test("Options picks the camera angle, saved, and the title's Settings show it", 
   await expect(settings.getByRole("radio", { name: "Higher" })).toBeChecked();
   // The Controls list it too, bound to C (and R3 on a pad), and it can be rebound.
   await expect(settings.getByRole("button", { name: "Camera angle: C" })).toBeVisible();
+});
+
+test("indoors C changes nothing, and says nothing", async ({ page }) => {
+  await enterWorld(page);
+  await warp(page, "shop", 5, 7, "n");
+  await expect.poll(() => settled(page)).toBe("default 50");
+  await page.keyboard.press("c");
+  await frames(page);
+  expect(await settled(page)).toBe("default 50");
+  await expect(page.locator("p.sr-only[aria-live=polite]").filter({ hasText: "Camera:" })).toHaveCount(0);
+  expect((await readSave(page)).camera ?? []).not.toEqual(["higher"]);
+});
+
+test("a reset leaves the Options radio and the next C on the loaded save's angle", async ({ page }) => {
+  await enterWorld(page);
+  await frames(page);
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("tab", { name: "Options" }).click();
+  await page.getByRole("radio", { name: "Lower" }).check();
+  // The world is paused behind the menu and draws nothing: the pitch moves once it closes.
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await expect.poll(() => settled(page)).toBe("lower 40");
+  await frames(page);
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("tab", { name: "Options" }).click();
+  await expect(page.getByRole("radio", { name: "Lower" })).toBeChecked();
+  // The reset loads a new player, whose angle is the default.
+  await page.getByRole("button", { name: "Reset progress…" }).click();
+  await page.getByRole("button", { name: "Reset progress", exact: true }).click();
+  // The reset takes the new player back to the title (no reload): its Settings show the default angle...
+  await expect(menuItem(page, "Learn to play")).toBeVisible({ timeout: 60_000 });
+  await page.locator("summary", { hasText: "Settings" }).click();
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  await expect(settings.getByRole("radio", { name: "Default" })).toBeChecked();
+  await settings.getByRole("button", { name: "Close", exact: true }).click();
+  // ...and back in the world, so does the camera, and the next C goes on from it.
+  await intoWorld(page);
+  await page.keyboard.press("c");
+  await expect.poll(() => settled(page)).toBe("higher 60");
+  await expect.poll(async () => (await readSave(page)).camera).toEqual(["higher"]);
+});
+
+test("the title's Settings keep the angle in memory and create no save", async ({ page }) => {
+  await title(page);
+  await page.locator("summary", { hasText: "Settings" }).click();
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  await settings.getByRole("radio", { name: "Higher" }).check();
+  await expect(settings.getByRole("radio", { name: "Higher" })).toBeChecked();
+  expect(await page.evaluate(() => localStorage.getItem("sixfold.save.1"))).toBeNull();
 });
