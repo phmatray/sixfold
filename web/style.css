@@ -4708,6 +4708,8 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 .page-bar .btn.ghost { background: var(--paper-hi); color: var(--toon); border-color: var(--toon); box-shadow: 0 3px 0 var(--toon); }
 /* A scene's Skip sits over the world itself (sand, snow, felt): a paper plate like the HUD's, never see-through (#155). */
 .btn.ghost.world-skip { background: var(--paper-hi); color: var(--toon); border-color: var(--toon); box-shadow: 0 3px 0 var(--toon); }
+/* The reveal's Skip in the menu's Packs tab (#194): the paper turns ink dark, the bar under it stays night. */
+.world-sheet .reveal-actions.live .btn.ghost { background: var(--paper-hi); color: var(--toon); border-color: var(--toon); box-shadow: 0 3px 0 var(--toon); }
 .world-skip kbd { border-color: color-mix(in srgb, var(--toon) 40%, transparent); }
 .page-bar .btn.ghost:hover { background: var(--paint); }
 .page-bar .note, .page-bar .bar-actions { color: var(--paint); }
