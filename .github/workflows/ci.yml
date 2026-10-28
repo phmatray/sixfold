@@ -65,7 +65,7 @@ jobs:
     name: Browser tests (Playwright)
     needs: rust
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35 # a green run takes ~18 min on software GL; a red one's retries need room to report
     defaults:
       run:
         working-directory: e2e
