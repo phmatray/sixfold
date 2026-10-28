@@ -154,10 +154,25 @@ cd e2e && npm ci && npx playwright test   # browser journeys against web/dist
 In a debug build (`trunk serve`), adding `?autoplay` to the URL lets the Hard AI play
 your seat too, which is handy for watching whole duels or reaching the credits.
 
+### Desktop build
+
+The same game in a native window ([Tauri](https://tauri.app) v2, in `desktop/`). Run from
+the repository root; each command runs Trunk itself.
+
+```bash
+cargo install tauri-cli --version "^2" --locked
+
+cargo tauri dev                  # the game in a desktop window, served by trunk serve
+cargo tauri build                # Windows installer / Linux AppImage in target/release/bundle
+```
+
+Every GitHub Release carries the Windows installer and the Linux AppImage.
+
 | Path | What's there |
 |---|---|
 | [`engine/`](engine) | The rules core: duel, cards, AI, campaign, saves. Pure Rust, no WASM or UI dependency. |
 | [`web/`](web) | The Leptos app (built by Trunk from `web/index.html`), the three.js world, audio and the service worker. |
+| [`desktop/`](desktop) | The desktop app: the web build in a native window (Tauri v2). |
 | [`e2e/`](e2e) | Playwright journeys, axe-core checks, and `readme-shots.mjs`, which takes this README's screenshots. |
 | [`tools/`](tools) | Map and token checks, the card-art generator. |
 | [`docs/`](docs) | Rules, engine API, balance, set and world design, level design, roadmap. |
