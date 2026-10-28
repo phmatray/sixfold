@@ -61,6 +61,14 @@ const KEEPERS = ["bramble", "marlo", "cinza", "quill", "orla", "lumen"]; // the 
 const FENCES = new Set(["fence", "wall_dry", "hedge"]);
 const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/atlas.json`, "utf8")) : null;
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
+// Does a model have window panes (build.js WINDOW: `glass`, `window_glow`) for a `lit` (#114)? Read from its glTF's materials.
+const WINDOW = /window_glow|(^|_)glass$/i, ASSETS = new URL("../web/world/assets/", import.meta.url), panes = {};
+const windowed = (asset) => (panes[asset] ??= (() => {
+  const f = new URL(`${asset}.glb`, ASSETS);
+  if (!existsSync(f)) return false;
+  const b = readFileSync(f);
+  return (JSON.parse(b.subarray(20, 20 + b.readUInt32LE(12))).materials ?? []).some((m) => WINDOW.test(m.name ?? ""));
+})());
 const maps = Object.fromEntries(readdirSync(`${dir}/maps`).map((f) => [f.replace(".json", ""), JSON.parse(readFileSync(`${dir}/maps/${f}`, "utf8"))]));
 const fail = [], warn = [];
 // Level-design budgets, in one place (tools/level-design.json; --budgets=<file> reads another).
@@ -213,6 +221,9 @@ for (const [name, m] of Object.entries(maps)) {
   }
   scripts(name, m, solid, inMap, all);
   for (const t of [...(m.warps ?? []), ...(m.exits ?? [])]) if (!maps[t.to]) fail.push(`${name}: leads to missing map ${t.to}`);
+  // Hours (#114): `open` keeps a door's hours (an edge or a spot has none); `lit` lights a model's own windows.
+  for (const t of m.warps ?? []) if (t.open !== undefined && t.dir) fail.push(`${name}: the warp to ${t.to} at ${t.x},${t.z} has an open, but only a door keeps hours`);
+  for (const p of m.props ?? []) if (p.lit !== undefined && !windowed(p.asset)) fail.push(`${name}: ${p.asset} at ${p.x},${p.z} is lit, but has no windows`);
   for (const e of m.exits ?? []) {
     const back = maps[e.to]?.exits?.find((b) => b.side === BACK[e.side] && b.to === name);
     if (!back) fail.push(`${name}: exit ${e.side} to ${e.to} has no exit back`);

@@ -30,6 +30,7 @@ const C = (c) => new THREE.Color(c);
 const mix = (a, b, t) => C(a).lerp(C(b), t);
 const WARM = C("#ffc46e"); // a lit window
 const DARK_PANE = C("#1f2c4c"); // a window seen from inside at night
+const LIT_FADE = 2; // seconds a house's windows take to light or go dark at their own hour (`lit`, #114)
 
 // A `light` block (or part of one) over a preset.
 function over(p, L) {
@@ -144,11 +145,13 @@ export function daylight(w, reduced) {
   // Coloured glassware (`glass_teal`, `glass_amber` …: racks, cullet, the kiln's
   // wares) keeps its colour and catches the light softly after dark.
   const glows = new Set(), glass = new Set(), ware = new Set(), crystals = new Set(w.waymarks.flatMap((m) => m.mats));
+  const own = new Set(); // the panes of a house with its own hours (`lit`, build.js): lit by its level, not the phase's
   root.traverse((o) => {
     if (!o.isMesh || !o.material?.name) return;
     const m = o.material;
     if (crystals.has(m)) return;
-    if (/glow|lantern_glass/i.test(m.name)) glows.add(m);
+    if (m.userData.litBy) own.add(m);
+    else if (/glow|lantern_glass/i.test(m.name)) glows.add(m);
     else if (/glass_(teal|green|rose|amber|blue)/i.test(m.name)) ware.add(m);
     else if (/glass_crust/i.test(m.name)) return;
     else if (/glass/i.test(m.name)) glass.add(m);
@@ -156,7 +159,7 @@ export function daylight(w, reduced) {
   });
   for (const m of crystals) m.userData.base ??= m.color.clone();
 
-  let lastKey = "", pick = 0, near = [];
+  let lastKey = "", pick = 0, near = [], litDirty = true;
   const tmp = new THREE.Color();
   return {
     // The real point lights, read-only (the debug overlay draws them): the hero's lantern and the nearest lamps'.
@@ -198,12 +201,28 @@ export function daylight(w, reduced) {
           else m.color.lerpColors(m.userData.base, WARM, cur.glass * 0.9), m.emissive?.copy(WARM).multiplyScalar(0.95 * cur.glass);
         }
         for (const m of ware) m.emissive?.copy(m.userData.base).multiplyScalar(0.12 + 0.4 * cur.glow);
+        litDirty = true;
         for (const wm of w.waymarks)
           for (const m of wm.mats) {
             const on = wm.lit ? 1 : 0;
             m.color.copy(m.userData.base).multiplyScalar(0.45 + 0.55 * on);
             m.emissive?.copy(m.userData.base).multiplyScalar(0.1 + on * (0.6 + 0.8 * cur.glow) + wm.flash * 2.2);
           }
+      }
+
+      // A house with its own hours (#114): its panes cross-fade over LIT_FADE s as its `lit` turns (a cut with reduced motion).
+      for (const p of w.lit ?? []) {
+        const want = p.litWant ?? 0, was = p.litLevel;
+        p.litLevel = was === undefined || reduced ? want : was + Math.sign(want - was) * Math.min(Math.abs(want - was), dt / LIT_FADE);
+        if (p.litLevel !== was) litDirty = true;
+      }
+      if (litDirty && own.size) {
+        litDirty = false;
+        for (const m of own) {
+          const k = m.userData.litBy.litLevel ?? 0;
+          if (/glow/i.test(m.name)) m.emissive?.copy(m.userData.base).multiplyScalar(0.1 + 1.25 * k);
+          else m.color.lerpColors(m.userData.base, WARM, k * 0.9), m.emissive?.copy(WARM).multiplyScalar(0.95 * k);
+        }
       }
 
       // Halos and light pools by every lamp; real light on the nearest few.

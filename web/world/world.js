@@ -518,7 +518,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     minute = (minute + dt * CLOCK_RATE) % DAY;
     const hour = Math.floor(minute / 60), phase = phaseOf(minute);
     if (phase !== lastPhase || hour !== lastHour) cb("clock", String(Math.floor(minute)), "");
-    if (phase !== lastPhase && lastPhase) recheck(true), cut.playing || tune(); // a scene's `music:` holds until it ends
+    // At a new hour what is out may change too (`hour:`, #114: a shop shuts, a house lights its windows).
+    if ((phase !== lastPhase || hour !== lastHour) && lastPhase) recheck(true);
+    if (phase !== lastPhase && lastPhase) cut.playing || tune(); // a scene's `music:` holds until it ends
     lastHour = hour;
     lastPhase = phase;
   };
@@ -561,7 +563,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     settled: () => look.distanceTo(aim) < 0.12 && lookVel.lengthSq() < 0.04,
     moved: () => (lastHero = ""), // the hero's tile is saved again (not during a scene: a reload replays it)
   });
-  const opens = (wp) => holds(wp.if);
+  const opens = (wp) => holds(wp.if) && holds(wp.open); // `open`: a shop's hours (#114)
   // A find already taken on a seat (coins under a bench) gives the place back to sitting.
   const spent = (it) => it?.kind === "find" && holds(`flag:found_${it.id}`);
   const facing = () => {

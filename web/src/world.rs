@@ -671,7 +671,7 @@ fn prompt_label(kind: &str, text: &str) -> String {
         "npc" => tr(format!("Talk to {text}"), format!("Parler à {text}")),
         "warp" | "lift" | "seat" | "stand" => text.to_string(),
         "duel" => tr("Play a duel", "Jouer un duel").into(),
-        "locked" => tr("Try the door", "Essayer la porte").into(),
+        "locked" | "closed" => tr("Try the door", "Essayer la porte").into(),
         "sign" | "find" | "gate" if !text.is_empty() => {
             // "The rangers' plank" → "the rangers' plank"; a name that starts with a
             // possessive ("Gorse's workshop") keeps its capital.
@@ -910,6 +910,7 @@ pub fn WorldScreen() -> impl IntoView {
                         .map(|k| k.get.get().to_string());
                     let title = match kind {
                         "locked" => tr("Locked", "Fermé à clé"),
+                        "closed" => tr("Closed", "Fermé"),
                         "gate" => tr("No way through", "Pas de passage"),
                         _ => tr("It says", "On peut lire"),
                     };

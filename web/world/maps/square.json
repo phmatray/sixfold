@@ -2376,7 +2376,10 @@
         "x": 5,
         "z": 7,
         "facing": "n"
-      }
+      },
+      "open": "hour:8-19",
+      "locked": "Closed. Back at eight.",
+      "locked_fr": "Fermé. Retour à huit heures."
     },
     {
       "x": 13,

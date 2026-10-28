@@ -241,7 +241,7 @@ export function barkOf(w, n, holds) {
 
 // What the hero faces: a person (also across a counter or a duel table), a
 // sign or table, a shut gate (its `text`), or a door (a locked one reads like a sign). `opens(warp)`:
-// whether a gated door's `if` holds.
+// whether a gated door's `if` (and its hours, `open`) holds; one shut only by its hours reads "closed".
 export function facing(w, hero, opens) {
   const [dx, dz] = DIR[hero.face], fx = hero.x + dx, fz = hero.z + dz;
   const across = ACROSS.has(w.propAt.get(key(fx, fz))?.asset);
@@ -252,6 +252,8 @@ export function facing(w, hero, opens) {
   const gate = w.gateAt.get(key(fx, fz));
   if (gate && !gate.open) return { kind: "gate", name: gate.def.name, cond: gate.def.if, text: gate.def.text ?? tr("There's no way through here yet.", "Pas de passage ici, pour l'instant.") };
   const wp = w.warps.get(key(fx, fz));
-  if (wp && !wp.dir) return opens(wp) ? { kind: "warp", text: wp.label ?? tr("Go in", "Entrer"), warp: wp } : { kind: "locked", cond: wp.if, text: wp.locked ?? tr("It won't open.", "Ça ne s'ouvre pas.") };
+  if (wp && !wp.dir) return opens(wp) ? { kind: "warp", text: wp.label ?? tr("Go in", "Entrer"), warp: wp } : wp.open && opens({ if: wp.if }) // only its hours keep it shut: a shop after closing time (#114)
+      ? { kind: "closed", text: wp.locked ?? tr("Closed. Come back in the day.", "Fermé. Revenez dans la journée.") }
+      : { kind: "locked", cond: wp.if, text: wp.locked ?? tr("It won't open.", "Ça ne s'ouvre pas.") };
   return null;
 }
