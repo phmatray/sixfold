@@ -55,7 +55,8 @@ export const setMap = (name, raw) => maps.set(name, Promise.resolve(expand(local
 // and every touch opens the world map to travel.
 export function expand(map) {
   for (const n of map.npcs ?? []) {
-    const t = n.duelist;
+    // A map cached by an older build (the service worker keeps one) still names the block `trainer` (#192).
+    const t = (n.duelist ??= n.trainer);
     if (!t) continue;
     const id = n.id, say = (lines, extra) => (lines?.length ? [{ ...extra, lines }] : []);
     n.dialogue = [

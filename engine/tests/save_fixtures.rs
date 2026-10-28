@@ -312,4 +312,8 @@ fn a_1_10_save_keeps_its_duelist_wins_and_achievements() {
     let text = again.encode();
     assert!(!text.contains("trainer"), "{text}");
     assert_eq!(Save::decode(&text).unwrap().stats().get("duelist_wins"), 11);
+    // An old tab writing to the same save keeps both keys: the higher one counts.
+    old.set(STATS, "s1;duelist_wins=15,trainer_wins=11");
+    let s = Save::decode(&old.encode()).unwrap();
+    assert_eq!(s.stats().get("duelist_wins"), 15);
 }

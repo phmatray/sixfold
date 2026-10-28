@@ -101,14 +101,15 @@ impl Stats {
         let mut st = Stats::default();
         for part in s.trim().strip_prefix(PREFIX).unwrap_or("").split(',') {
             if let Some((k, n)) = part.split_once('=') {
-                // Up to 1.10 the route duelists' wins were `trainer_wins` (#192).
+                // Up to 1.10 the route duelists' wins were `trainer_wins` (#192);
+                // an old tab may write both, so the higher one wins.
                 let k = if k == "trainer_wins" {
                     "duelist_wins"
                 } else {
                     k
                 };
-                if let (true, Ok(n)) = (valid_key(k), n.parse()) {
-                    st.set(k, n);
+                if let (true, Ok(n)) = (valid_key(k), n.parse::<u64>()) {
+                    st.set(k, n.max(st.get(k)));
                 }
             }
         }
