@@ -9,6 +9,8 @@
 dist/
 pkg/
 *.wasm
+# Tauri's generated schemas (cargo tauri dev/build)
+desktop/gen/
 
 # Node (if a JS front-end is added)
 node_modules/

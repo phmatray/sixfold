@@ -1,0 +1,12 @@
+[package]
+name = "sixfold-desktop"
+description = "Sixfold as a desktop app: the web build in a native window (Tauri v2)."
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
