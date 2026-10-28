@@ -9,7 +9,7 @@ export const ANGLES = ["default", "higher", "lower"];
 /** Pitch in degrees and distance factor of each non-default angle. "default"
  * is the map's own camera (50°). The factors keep about 13 × 9 tiles on screen. */
 export const PRESETS = {
-  lower: { pitch: 40, scale: 0.92 },
+  lower: { pitch: 40, scale: 0.88 },
   higher: { pitch: 60, scale: 1.08 },
 };
 

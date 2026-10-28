@@ -17,6 +17,7 @@ use sixfold_engine::objective;
 use sixfold_engine::overworld::{
     parse_effect, Applied, CamTarget, Cue, Effect as Fx, Progress, StoneCue,
 };
+use sixfold_engine::save::CameraAngle;
 use sixfold_engine::{card, tr, CardId};
 use wasm_bindgen::prelude::*;
 
@@ -34,11 +35,11 @@ use crate::{store, Screen, Ui};
 // three.js comes from the import map in index.html and never touches the wasm.
 // Calls made before the module is in (items, pause) are replayed once it is.
 #[wasm_bindgen(inline_js = r#"
-let api = null, gen = 0, items = "", seals = "", paused = false, minute = 480;
+let api = null, gen = 0, items = "", seals = "", paused = false, minute = 480, camera = "default";
 export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setSeals(seals); api.setClock(minute); api.pause(paused); })
+    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setSeals(seals); api.setClock(minute); api.setCamera(camera); api.pause(paused); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "import", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
@@ -51,6 +52,7 @@ export function world_preview_stop() { api?.previewStop(); }
 export function world_meet(id) { api?.meet(id); }
 export function world_cue(json) { api?.cue(json); }
 export function world_clock(m) { minute = m; api?.setClock(m); }
+export function world_camera(a) { camera = a; api?.setCamera(a); }
 export function world_busy() { return !api || api.busy(); }
 export function world_portrait(id) { return api?.portrait(id) ?? ""; }
 export function world_read(b) { api?.read(b); }
@@ -81,6 +83,8 @@ extern "C" {
     fn world_cue(json: &str);
     /// Set the world's clock (the game minute): on mount, and after an inn's rest.
     fn world_clock(minute: u16);
+    /// The outdoor camera angle (`CameraAngle::code`): on mount, and when Options changes it.
+    pub(crate) fn world_camera(angle: &str);
     /// The scene is loading, warping (a fade), or a duelist is walking over.
     fn world_busy() -> bool;
     /// A person's bust, drawn from their own rig and colours (a data URL), or
@@ -938,6 +942,12 @@ pub fn WorldScreen() -> impl IntoView {
                     })
                 }
                 "area" => _ = announce.try_set(a),
+                // C (or a pad's R3) picked the next outdoor camera angle: saved, and said.
+                "camera" => {
+                    let angle = CameraAngle::from_code(&a);
+                    store::set_camera(angle);
+                    _ = announce.try_set(camera_said(angle).into());
+                }
                 "progress" => {
                     if let Some((d, t)) = a.split_once('/') {
                         _ = loaded.try_set((d.parse().unwrap_or(0), t.parse().unwrap_or(0)));
@@ -966,6 +976,7 @@ pub fn WorldScreen() -> impl IntoView {
                 start
             };
             world_clock(progress.with_untracked(Progress::minute));
+            world_camera(store::camera().code());
             cb.with_value(|cb| world_mount(&h, &c, cb, &start, cfg!(debug_assertions)));
         }
     };
@@ -2076,5 +2087,14 @@ fn GameMenu(
                 }}
             </div>
         </div>
+    }
+}
+
+/// What the live region says when the camera angle changes.
+fn camera_said(angle: CameraAngle) -> &'static str {
+    match angle {
+        CameraAngle::Lower => tr("Camera: lower", "Caméra : plus basse"),
+        CameraAngle::Default => tr("Camera: default", "Caméra : normale"),
+        CameraAngle::Higher => tr("Camera: higher", "Caméra : plus haute"),
     }
 }

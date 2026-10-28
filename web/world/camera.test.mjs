@@ -14,8 +14,8 @@ test("the default angle, an unknown one and rooms keep the map's own camera", ()
 test("the lower angle drops the pitch and pulls the camera in", () => {
   const c = framing(out, "lower", false);
   assert.equal(c.pitch, 40);
-  assert.ok(Math.abs(c.distance - 11.04) < 1e-9);
-  assert.ok(Math.abs(c.distancePortrait - 13.8) < 1e-9);
+  assert.ok(Math.abs(c.distance - 10.56) < 1e-9);
+  assert.ok(Math.abs(c.distancePortrait - 13.2) < 1e-9);
   assert.equal(c.fov, 40);
   assert.equal(c.fovPortrait, 50);
   assert.equal(c.lookAtOffset, out.lookAtOffset);
