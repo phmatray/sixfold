@@ -306,27 +306,24 @@ pub fn GameOver() -> impl IntoView {
                 .iter()
                 .any(|e| matches!(e, Event::DeckOut { player } if *player == loser));
             let why = match (deck_out, left[w] == 0, loser == HUMAN) {
-                (true, _, true) => tr("You couldn't draw a card.", "Vous ne pouviez plus piocher."),
+                (true, _, true) => tr("You couldn't draw a card.", "Vous ne pouviez plus piocher.").to_string(),
                 (true, _, false) => tr(
                     "Your opponent couldn't draw a card.",
                     "Votre adversaire ne pouvait plus piocher.",
-                ),
+                ).to_string(),
                 (false, true, false) => tr(
                     "You took every prize.",
                     "Vous avez pris toutes vos Récompenses.",
-                ),
-                (false, true, true) => tr(
-                    "Your opponent took every prize.",
-                    "Votre adversaire a pris toutes ses Récompenses.",
-                ),
+                ).to_string(),
+                (false, true, true) => prized_out(v.sides[w].prizes.len()).to_string(),
                 (false, false, true) => tr(
                     "You had no Hexon left in play.",
                     "Vous n'aviez plus d'Hexon en jeu.",
-                ),
+                ).to_string(),
                 (false, false, false) => tr(
                     "Your opponent had no Hexon left in play.",
                     "Votre adversaire n'avait plus d'Hexon en jeu.",
-                ),
+                ).to_string(),
             };
             // What the cause teaches, for the "why you lost" panel.
             let cause = match (deck_out, left[w] == 0) {
@@ -335,7 +332,11 @@ pub fn GameOver() -> impl IntoView {
                     "Votre pioche s'est vidée. Jouez moins de cartes qui font piocher, et gardez un deck complet.",
                 )
                 .to_string(),
-                (false, true) => prized_out(v.sides[w].prizes.len()),
+                (false, true) => tr(
+                    "Each knock-out gave them a prize. Spread energy over two Hexons, so one knock-out doesn't send you back to zero.",
+                    "Chaque K.O. leur a donné une Récompense. Répartissez l'énergie sur deux Hexons, pour qu'un K.O. ne vous ramène pas à zéro.",
+                )
+                .to_string(),
                 (false, false) => tr(
                     "Your Active was knocked out with no one on your Bench to take its place. Keep at least one Basic Hexon on your Bench.",
                     "Votre Actif a été mis K.O. sans personne sur le Banc pour le remplacer. Gardez toujours au moins un Hexon de Base sur le Banc.",
@@ -525,6 +526,8 @@ pub fn GameOver() -> impl IntoView {
                             <p><b>{counted(shown, facets_gain)}</b><span>{match (taken, fr()) {
                                 (0, false) => "For playing it out to the end.".to_string(),
                                 (0, true) => "Pour avoir joué jusqu'au bout.".to_string(),
+                                (1, false) => format!("{per} for playing it out, and {per} for the prize you took."),
+                                (1, true) => format!("{per} pour avoir joué jusqu'au bout, et {per} pour la Récompense prise."),
                                 (t, false) => format!("{per} for playing it out, and {per} for each of the {t} prizes you took."),
                                 (t, true) => format!("{per} pour avoir joué jusqu'au bout, et {per} pour chacune des {t} Récompenses prises."),
                             }}</span></p>
@@ -762,17 +765,11 @@ fn loss_lesson(ctl: Ctl) -> (Vec<String>, Vec<String>) {
             .next()
             .unwrap_or_default()
             .to_string();
-        hints.push(if mine == 0 {
-            tr(
-                format!("Most of {opp}'s Hexons are weak to {w}, and your deck has none: one {w} Hexon would double your damage."),
-                format!("La plupart des Hexons de {opp} sont faibles face à {w}, et votre deck n'en a aucun\u{a0}: un Hexon {w} doublerait vos dégâts."),
-            )
-        } else {
-            tr(
-                format!("Most of {opp}'s Hexons are weak to {w}: lead with your {w} Hexons ({mine} in your deck)."),
-                format!("La plupart des Hexons de {opp} sont faibles face à {w}\u{a0}: menez avec vos Hexons {w} ({mine} dans votre deck)."),
-            )
-        });
+        let all = setup.decks[0]
+            .iter()
+            .filter(|&&id| card(id).creature().is_some())
+            .count();
+        hints.extend(weakness_hint(&opp, &w.to_string(), mine, all));
     }
     let owned = expect_context::<RwSignal<sixfold_engine::profile::Profile>>()
         .with_untracked(|p| p.collection.clone());
@@ -1133,29 +1130,40 @@ fn won_heading(h: sixfold_engine::T) -> String {
     )
 }
 
-/// Why a prize-out loss happened, from the duel's own prize count (#155: it
-/// said "six" whatever the duel played to).
+/// The result's line for a prize-out loss, from the duel's own prize count
+/// (#155: it said "six" whatever the duel played to).
 fn prized_out(n: usize) -> String {
-    let hint = tr(
-        " Spread energy over two Hexons, so one knock-out doesn't send you back to zero.",
-        " Répartissez l'énergie sur deux Hexons, pour qu'un K.O. ne vous ramène pas à zéro.",
-    );
-    let took = match n {
+    match n {
         1 => tr(
-            "They took their one prize.".to_string(),
+            "Your opponent took their one prize.".to_string(),
             "Votre adversaire a pris son unique Récompense.".to_string(),
         ),
         n => tr(
-            format!("They took all {n} of their prizes."),
+            format!("Your opponent took all {n} of their prizes."),
             format!("Votre adversaire a pris ses {n} Récompenses."),
         ),
-    };
-    format!("{took}{hint}")
+    }
+}
+
+/// The type-weakness hint after a loss: `mine` of the player's `all` Hexons
+/// are of the colour the opponent is weak to. None when the whole deck is
+/// that colour already (#155): there is nothing to lead with instead.
+fn weakness_hint(opp: &str, w: &str, mine: usize, all: usize) -> Option<String> {
+    if mine == 0 {
+        return Some(tr(
+            format!("Most of {opp}'s Hexons are weak to {w}, and your deck has none: one {w} Hexon would double your damage."),
+            format!("La plupart des Hexons de {opp} sont faibles face à {w}, et votre deck n'en a aucun\u{a0}: un Hexon {w} doublerait vos dégâts."),
+        ));
+    }
+    (mine < all).then(|| tr(
+        format!("Most of {opp}'s Hexons are weak to {w}: lead with your {w} Hexons ({mine} in your deck)."),
+        format!("La plupart des Hexons de {opp} sont faibles face à {w}\u{a0}: menez avec vos Hexons {w} ({mine} dans votre deck)."),
+    ))
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{prized_out, won_heading};
+    use super::{prized_out, weakness_hint, won_heading};
     use sixfold_engine::T;
 
     #[test]
@@ -1172,9 +1180,16 @@ mod tests {
 
     #[test]
     fn a_prize_out_loss_counts_the_duels_own_prizes() {
-        assert!(prized_out(3).starts_with("They took all 3 of their prizes."));
-        assert!(prized_out(6).starts_with("They took all 6 of their prizes."));
-        assert!(prized_out(1).starts_with("They took their one prize."));
-        assert!(!prized_out(3).contains("six"));
+        assert_eq!(prized_out(3), "Your opponent took all 3 of their prizes.");
+        assert_eq!(prized_out(6), "Your opponent took all 6 of their prizes.");
+        assert_eq!(prized_out(1), "Your opponent took their one prize.");
+    }
+
+    #[test]
+    fn a_whole_deck_of_the_colour_gets_no_lead_with_hint() {
+        assert_eq!(weakness_hint("Marlo", "Storm", 20, 20), None);
+        assert!(weakness_hint("Marlo", "Storm", 4, 20)
+            .is_some_and(|h| h.contains("lead with your Storm Hexons (4")));
+        assert!(weakness_hint("Marlo", "Storm", 0, 20).is_some_and(|h| h.contains("has none")));
     }
 }

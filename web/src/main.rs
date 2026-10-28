@@ -752,7 +752,12 @@ fn MatchScreen() -> impl IntoView {
             style=move || format!("--pace:{}", ctl.pace_factor())>
             <main class="mat">
                 <h1 class="sr-only">{title}</h1>
-                {move || ctl.seal().map(|s| view! { <p class="seal-plaque" aria-hidden="true">{s.heading().get()}</p> })}
+                {move || ctl.seal().map(|s| view! {
+                    <p class="seal-plaque" aria-hidden="true"
+                        class:won=move || ctl.shown.with(|g| g.as_ref().and_then(|g| g.winner()) == Some(HUMAN))>
+                        {s.heading().get()}<span class="won">{tr(" · won", " · gagné")}</span>
+                    </p>
+                })}
                 // The champion's table (#155): the six seals pressed into the felt round the centre hexagon,
                 // in the campaign's order; the grand beat lights them in turn.
                 {move || ctl.seal().filter(|s| s.grand).map(|_| view! {

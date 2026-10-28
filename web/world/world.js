@@ -260,9 +260,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   };
   // A scene's caption (a reveal's line, the door's bells, #155): a paper plate, never mistaken for the area's
   // name on its dark pill.
-  // Up under where the area's name shows (a reveal: the keeper stands below their stone), low for the door's
-  // bells (the door is high on the wall), so it never sits on what it names; a talk box hides it
-  // (style.css `.scene-caption`).
+  // A talk box hides it (style.css `.scene-caption`).
   const caption = document.createElement("div");
   caption.className = "scene-caption";
   caption.setAttribute("aria-hidden", "true");
@@ -273,13 +271,29 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     width: "max-content", maxWidth: "calc(100% - 32px)", textAlign: "center", textWrap: "balance", opacity: 0, transition: "opacity 0.4s ease",
   });
   let captionTimer = 0;
-  const showCaption = (text, ms, low = false) => {
-    Object.assign(caption.style, low ? { top: "auto", bottom: "18%" } : { top: "calc(22% + 48px)", bottom: "auto" });
+  // Placed from what it names on screen (the seal stone, or the door's medallion): beside it, on the side
+  // with more room, never over it (#155).
+  const subjectY = () => {
+    const o = world?.root.getObjectByName("inlay_0") ?? null, s = world?.stone;
+    const p = o ? o.getWorldPosition(new THREE.Vector3()) : s ? world.root.localToWorld(s.at.clone()) : null;
+    if (!p) return null;
+    // Its top and its foot on screen (a stone stands about 2 m tall; the medallion is small).
+    const y = (q) => ((1 - q.project(camera).y) / 2) * el.clientHeight;
+    const [up, down] = o ? [0.5, 0.5] : [1.3, 1.0];
+    return { mid: y(p.clone()), top: y(p.clone().setY(p.y + up)), foot: y(p.clone().setY(p.y - down)) };
+  };
+  const showCaption = (text, ms) => {
+    const at = subjectY(), H = el.clientHeight, gap = 28;
+    if (!at) Object.assign(caption.style, { top: "auto", bottom: "18%" });
+    else if (at.mid > H / 2) Object.assign(caption.style, { top: "auto", bottom: `${Math.round(Math.max(16, H - at.top + gap))}px` });
+    else Object.assign(caption.style, { bottom: "auto", top: `${Math.round(Math.min(H * 0.85, at.foot + gap))}px` });
     caption.textContent = text;
     caption.style.opacity = 1;
     clearTimeout(captionTimer);
     captionTimer = setTimeout(() => (caption.style.opacity = 0), ms);
   };
+  // A scene's end takes its caption with it (a skip, a cut back under reduced motion).
+  const clearCaption = () => (clearTimeout(captionTimer), (caption.style.opacity = 0));
   el.append(fade, legend, banner, caption);
 
   // ---------- Input ----------
@@ -500,15 +514,23 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     },
     // The door's bells (#154), seen and read too (#155): an inlay lights per bell, and the count builds up on screen;
     // the live region gets the whole count once.
-    ended: () => dimLamps(1),
+    ended: () => (dimLamps(1), clearCaption()),
     bell: (n) => {
+      // The sixth bell (#155): the sealed door swings open and its light spills into the hall, for as long as
+      // the hall stays loaded (a cut under reduced motion, like any door).
+      if (n >= 5) {
+        const wp = [...(world?.warps.values() ?? [])].find((w) => w.to === "warden");
+        if (wp?.door) wp.door.held = true;
+        const spill = world?.root.getObjectByName("door_light");
+        if (spill) spill.intensity = 4;
+      }
       // Sable's own stone answers the door's bells (#155): each rings up a face of it, motes in that seal's colour.
       const door = world?.root.getObjectByName(`inlay_${n}`);
       if (!door && world?.stone) return void sealFace(world.stone, SEAL_KEYS[n], reduced);
-      if (n === 0) dimLamps(0.25);
+      if (n === 0) dimLamps(0.12);
       ringDoor(n);
       const text = tr("The door rings: ", "La porte sonne\u00a0: ") + BELLS.slice(0, n + 1).join("… ") + (n >= 5 ? "." : "…");
-      showCaption(text, n >= 5 ? 2600 : 1200, true);
+      showCaption(text, n >= 5 ? 2600 : 1200);
       if (n >= 5) cb("area", text, "");
     },
     stone: (state, face) => {
@@ -809,7 +831,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     stoneStep(w.stone, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);
     sky(lit);
-    w.life.update(dt, w.now, px, pz, lit.night);
+    w.life.update(dt, w.now, px, pz, lit.night, cut.playing);
     w.fireflies.update(dt, w.now, lit.night, reduced);
 
     const pos = `${h.x},${h.z},${h.face}`;
@@ -828,7 +850,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       w.nearKey = nk;
       cb("near", front?.kind ?? "", said ?? "");
     }
-    for (const d of w.doors) d.want = d === (front?.warp ?? h.step?.warp)?.door ? 1 : 0; // the door ahead opens
+    for (const d of w.doors) d.want = d.held || d === (front?.warp ?? h.step?.warp)?.door ? 1 : 0; // the door ahead opens (or one a scene holds open)
 
     // Camera: fixed pitch, on a soft spring behind a point a little ahead of a
     // walking hero; leans in after a while idle; indoors, kept inside the room.
@@ -870,9 +892,11 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     }
     first = false;
     if (!paused) cut.update(dt);
-    // Sitting, idle a while or in a scene (#155: a scene reads as one): in a little. Reduced motion stays put.
-    const lean = reduced ? 1 : cut.playing ? 0.85 : h.sit || h.idle > FIDGET_AFTER ? 0.88 : 1;
-    zoom += (lean - zoom) * Math.min(1, dt * 1.5);
+    // In a scene (#155: a scene reads as one) the camera leans in; on a place indoors (the sealed door, a
+    // stone) it comes close, so the place is the subject. Sitting or idle a while: in a little. Reduced motion
+    // cuts to a scene's distance and skips the idle lean.
+    const lean = cut.playing ? (cut.onTile() && w.map.light.indoor ? 0.6 : 0.85) : !reduced && (h.sit || h.idle > FIDGET_AFTER) ? 0.88 : 1;
+    zoom = reduced ? lean : zoom + (lean - zoom) * Math.min(1, dt * 1.5);
     const dz = dist * zoom;
     camera.position.set(look.x, look.y + Math.sin(pitch) * dz, look.z + Math.cos(pitch) * dz);
     camera.lookAt(look);
@@ -1138,6 +1162,13 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     // {"warp": {"map", "x", "z", "facing"}, "travel": true}: fade and load (a ferry, fast travel).
     // {"sfx": "spark"}: a sound. A cutscene's cues carry an `id` (script.js answers `cue_done`), and
     // {"end": [cues]} closes the scene, jumping over those cues (a skip).
+    // The map's seal stone on screen, [x, y] in CSS pixels: where a seal won on stage starts its flight (#155).
+    stoneAt() {
+      const s = world?.stone;
+      if (!s) return [];
+      const v = world.root.localToWorld(s.at.clone()).project(camera), r = el.getBoundingClientRect();
+      return [r.left + ((v.x + 1) / 2) * r.width, r.top + ((1 - v.y) / 2) * r.height];
+    },
     cue(json) {
       const c = JSON.parse(json);
       if (c.end) return void (world && cut.end(c.end));

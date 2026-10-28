@@ -4491,7 +4491,7 @@
           "do": [
             "walk:hero:s",
             "music:duel_rival_tide",
-            "cam:23:13",
+            "cam:23:15",
             "stone:wake",
             "wait:600",
             "sfx:seal",

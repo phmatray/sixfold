@@ -1304,7 +1304,7 @@
           "do": [
             "walk:hero:s",
             "music:duel_rival_storm",
-            "cam:18:4",
+            "cam:19:7",
             "stone:wake",
             "wait:600",
             "sfx:seal",

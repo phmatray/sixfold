@@ -272,7 +272,12 @@ export const PLACEHOLDER = {
       m.userData.lit = c;
       medal.add(m);
     });
-    return group(leaf, medal, mesh(new THREE.BoxGeometry(1.0, 0.45, 0.4), stone, 0, 2.375, 0),
+    // The light that spills through once it opens (world.js `bell`): made with the room, at 0, so lighting it
+    // never recompiles a shader.
+    const spill = new THREE.PointLight("#f3d589", 0, 5, 1.4);
+    spill.name = "door_light";
+    spill.position.set(0, 1.4, 0.35);
+    return group(leaf, medal, spill, mesh(new THREE.BoxGeometry(1.0, 0.45, 0.4), stone, 0, 2.375, 0),
       mesh(new THREE.BoxGeometry(0.12, 2.15, 0.4), stone, -0.46, 1.075, 0), mesh(new THREE.BoxGeometry(0.12, 2.15, 0.4), stone, 0.46, 1.075, 0));
   },
   exit_mat() {

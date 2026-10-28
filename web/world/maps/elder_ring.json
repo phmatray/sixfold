@@ -2270,7 +2270,7 @@
           "do": [
             "walk:hero:e",
             "music:duel_rival_grove",
-            "cam:20:15",
+            "cam:21:16",
             "stone:wake",
             "wait:600",
             "sfx:seal",

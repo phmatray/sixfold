@@ -5245,7 +5245,7 @@
           "do": [
             "walk:hero:s",
             "music:duel_rival_ember",
-            "cam:19:11",
+            "cam:20:13",
             "stone:wake",
             "wait:600",
             "sfx:seal",

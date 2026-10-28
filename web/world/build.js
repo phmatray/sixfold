@@ -209,7 +209,7 @@ function flatten(template) {
     if (!m.isMesh || !m.visible) return; // a part `recolor` hid
     const rel = new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld);
     // Textured, see-through, `glow` and `glass` parts (lit at night, by name) stay apart.
-    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass/i.test(m.material.name)) return keep.push([m, rel]);
+    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass|shade|bulb/i.test(m.material.name)) return keep.push([m, rel]); // a lamp's lit parts too: a scene dims them (#155)
     const src = m.geometry, n = src.attributes.position.count, c = m.material.color;
     // A seal stone's coloured faces are merged too, their vertices noted (`seal`: world.js wakes them in a scene
     // by recolouring them, which costs no draw call).

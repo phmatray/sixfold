@@ -2013,7 +2013,12 @@ I played the design through on paper. Here is what was still hollow, and what th
    nothing serious: its fixes make the Warden escalate (the hero walks in, her stone answers the six bells, her
    felt carries the six seals that light in turn at the grand beat), let the seal flare on the felt at every
    keeper's final beat, frame the sealed door with no void and the lamps dimmed, keep captions off what they name,
-   count the prizes a loss really took, and give scenes a lean-in and a letterbox. A fourth scored it TBD/40.
+   count the prizes a loss really took, and give scenes a lean-in and a letterbox. A fourth scored it 33/40, its
+   one serious finding the sealed door again: the six bells now play close on the medallion (an indoor shot of a
+   place comes in close), the lamp is gone from that wall, the room dims even under reduced motion, and the sixth
+   bell swings the door open with its light. A seal won stamps its colour into the felt and the plaque reads "won";
+   the victory frames stone and hero, and the seal flies from the stone to a seal count in the HUD that stays.
+   A fifth scored it TBD/40.
 9. **"The economy is a spreadsheet."** Facets with nothing exciting to buy feel like points. *Fixed*: each inn
    stocks one Rare to save up for, the Press can make the one card you need, the voucher is a real prize, and
    outfits give late Facets somewhere to go. The `economy_sim` keeps packs at about one per 12 minutes of

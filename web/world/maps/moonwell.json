@@ -2002,7 +2002,7 @@
           "do": [
             "walk:hero:e",
             "music:duel_rival_dream",
-            "cam:22:14",
+            "cam:23:15",
             "stone:wake",
             "wait:600",
             "sfx:seal",

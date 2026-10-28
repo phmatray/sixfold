@@ -6,7 +6,7 @@
   --panel: #13213a;
   --panel-2: #1b2c4a;
   --ink: #edf1f7;
-  --muted: #a8b5c8;
+  --muted: #b4c0d1; /* 4.7:1 on the duel mat (#155) */
   --line: rgba(255, 255, 255, 0.11);
   --stock: #ebe7de;
   --stock-ink: #1d2230;
@@ -27,7 +27,7 @@
   --steel-line: rgba(157, 183, 220, 0.42);
   --text-soft: #d7dfeb;
   --text-dim: #c6d0de;
-  --text-faint: #aeb9ca;
+  --text-faint: #b6c0d0; /* 4.7:1 on the duel mat (#155) */
   --on-brass: #2a1d02;
   --brass-light: #f6dc94;
   /* The six seals' colours (the .t-* swatches and the champion's ring read them). */
@@ -170,7 +170,8 @@
   /* For painted text on wood (AA): the plank's darker half only. */
   --plank-deep: var(--grain-wood), linear-gradient(180deg, var(--wood), var(--wood-lo));
   --plank-deep-lit: var(--grain-wood), linear-gradient(180deg, color-mix(in srgb, var(--wood) 80%, var(--wood-hi)), color-mix(in srgb, var(--wood-lo) 85%, var(--wood)));
-  --plank-brass: var(--grain-wood), linear-gradient(180deg, var(--brass-light), var(--brass) 60%, var(--brass-deep));
+  /* Its darkest stop stays 5:1 under the toon ink (#155: the act button's label). */
+  --plank-brass: var(--grain-wood), linear-gradient(180deg, var(--brass-light), var(--brass) 60%, color-mix(in srgb, var(--brass-deep) 80%, var(--brass)));
   --painted-text: 2px 0 0 var(--toon), -2px 0 0 var(--toon), 0 2px 0 var(--toon), 0 -2px 0 var(--toon), 0 4px 0 var(--toon);
 
   color-scheme: dark;
@@ -4264,7 +4265,9 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 /* A seal duel's winning prize (after a 240 ms hold, to the seal's sting): slower
    still, and a ring of the region's colour closes in on the table's edge. */
 .duel[data-beat~="seal-final"] .prize.taking { animation-duration: calc(1600ms * var(--pace, 1)); }
-.duel[data-beat~="seal-final"] .mat { animation: seal-ring calc(1600ms * var(--pace, 1)) var(--ease-out) both; }
+/* A seal won (#155): the felt dims round the seal, a step below the champion's six-colour beat. */
+.duel[data-beat~="seal-final"] .mat { animation: seal-ring calc(1600ms * var(--pace, 1)) var(--ease-out) both, felt-dim calc(1600ms * var(--pace, 1)) ease both; }
+@keyframes felt-dim { 25%, 70% { box-shadow: inset 0 0 0 100vmax color-mix(in srgb, var(--felt-deep) 55%, transparent); } }
 @keyframes seal-ring {
   0% { outline: 4px solid transparent; outline-offset: -36px; }
   35% { outline: 4px solid var(--tint); outline-offset: -6px; }
@@ -4278,7 +4281,13 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 .duel[data-beat~="grand"] .mat { animation: seal-ring-grand calc(2200ms * var(--pace, 1)) var(--ease-out) both; }
 /* The seal itself answers on the table (#155): the hexagon pressed into the felt flares in the region's
    colour and the plaque pulses; at the champion's, the six inlays light in turn before the centre flares. */
-.duel[data-beat~="seal-final"] .mat::before { animation: centre-flare calc(1600ms * var(--pace, 1)) var(--ease-out) both; }
+/* …and the region's seal stamps into the centre hexagon at full colour. */
+.duel[data-beat~="seal-final"] .mat::before { animation: seal-stamp calc(1600ms * var(--pace, 1)) var(--ease-out) both; }
+@keyframes seal-stamp {
+  0% { transform: scale(1.3); background: radial-gradient(circle at 40% 35%, var(--tint), var(--c) 60%, var(--c2)); opacity: 0; }
+  22%, 85% { transform: scale(1); background: radial-gradient(circle at 40% 35%, var(--tint), var(--c) 60%, var(--c2)); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
 .duel[data-beat~="seal-final"] .seal-plaque { animation: plaque-pulse calc(1600ms * var(--pace, 1)) var(--ease-out) both; }
 .duel[data-beat~="grand"] .mat::before { animation: centre-flare calc(2200ms * var(--pace, 1)) var(--ease-out) calc(900ms * var(--pace, 1)) both; }
 .duel[data-beat~="grand"] .grand-inlays i { animation: inlay-lit calc(1300ms * var(--pace, 1)) var(--ease-out) calc(var(--i) * 140ms * var(--pace, 1)) both; }
@@ -4348,7 +4357,12 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 .seal-flight { position: fixed; left: 50%; top: 50%; z-index: 4; pointer-events: none; translate: -50% -50%;
   animation: seal-fly 900ms cubic-bezier(0.5, 0, 0.2, 1) 650ms forwards, seal-out 300ms ease 1550ms forwards; }
 .seal-flight .seal-fill { display: block; width: 112px; }
-@keyframes seal-fly { to { transform: translate(var(--tx), var(--ty)) scale(0.3); } }
+/* It starts over the stone it was won at (#155) and lands on the HUD's seal count. */
+.seal-flight { transform: translate(var(--fx, 0px), var(--fy, 0px)); }
+@keyframes seal-fly { from { transform: translate(var(--fx, 0px), var(--fy, 0px)); } to { transform: translate(var(--tx), var(--ty)) scale(0.3); } }
+/* The seals held, beside the Facets: what a seal won on stage adds to, for good. */
+.hud-seals { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding-inline: 4px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.hud-seals i { width: 16px; aspect-ratio: 1 / 1.1; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: linear-gradient(160deg, var(--brass-light), var(--brass) 55%, var(--brass-deep)); }
 @keyframes seal-out { to { opacity: 0; } }
 .reward b { font-variant-numeric: tabular-nums; }
 
@@ -4413,7 +4427,10 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   background: color-mix(in srgb, var(--c) 28%, transparent);
   transform: translate(-50%, -50%) rotate(calc(var(--i) * 60deg)) translateY(-200%) rotate(calc(var(--i) * -60deg));
 }
-/* Its name on a small plaque at the felt's head, for the whole duel (the card says it once). */
+/* Its name on a small plaque at the felt's head, for the whole duel (the card says it once); "won" joins it
+   when the seal is taken (#155). */
+.seal-plaque .won { display: none; }
+.duel[data-beat~="seal-final"] .seal-plaque .won, .seal-plaque.won .won { display: inline; }
 .seal-plaque {
   position: absolute;
   z-index: 3;
@@ -4550,13 +4567,13 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   /* Beside the Menu button, fading in and out for its time (calm-show; the global rule would end it at once). */
   .seal-flight { transform: translate(var(--tx), calc(var(--ty) + 60px)) scale(0.5); animation: calm-show 1850ms linear forwards !important; }
   /* Inside the beat's own time under reduced motion (60% of 1 600 / 2 200 ms: 960 / 1 320 ms). */
-  .duel[data-beat~="seal-final"] .mat { animation: seal-ring-calm 900ms ease both !important; }
+  .duel[data-beat~="seal-final"] .mat { animation: seal-ring-calm 900ms ease both, felt-dim 900ms ease both !important; }
   .duel[data-beat~="seal-final"] .half.opp .portrait { animation: seal-portrait 900ms ease both !important; }
   /* A seal duel's card fades in place and holds as long; nothing grows or slides. */
   .seal-card-hex, .seal-card h2, .seal-card-who, .seal-card-pips, .seal-card-seals > i { animation: fade-in var(--dur-panel) ease both; }
   /* The champion's ring: no cycle through the colours, a brass ring that fades in, holds and fades. */
   .duel[data-beat~="grand"] .mat { animation: seal-ring-calm 1250ms ease both !important; }
-  .duel[data-beat~="seal-final"] .mat::before { animation: centre-flare 900ms ease both !important; }
+  .duel[data-beat~="seal-final"] .mat::before { animation: seal-stamp-calm 900ms ease both !important; }
   .duel[data-beat~="seal-final"] .seal-plaque { animation: plaque-pulse 900ms ease both !important; }
   .duel[data-beat~="grand"] .mat::before { animation: centre-flare 1250ms ease both !important; }
   .duel[data-beat~="grand"] .grand-inlays i { animation: inlay-lit 1250ms steps(1, start) both !important; }
@@ -4568,6 +4585,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
 @keyframes prize-fade { 30% { box-shadow: inset 0 0 0 1px var(--brass-hi), 0 0 10px var(--brass-hi); } 100% { opacity: 0; } }
 @keyframes spark-calm { from { opacity: 0.9; } to { opacity: 0; } }
 @keyframes face-calm { from { opacity: 0; } to { opacity: 1; } }
+@keyframes seal-stamp-calm { 15%, 85% { background: radial-gradient(circle at 40% 35%, var(--tint), var(--c) 60%, var(--c2)); } }
 @keyframes seal-ring-calm { 0%, 100% { outline: 6px solid transparent; outline-offset: -6px; } 40%, 70% { outline: 6px solid var(--c); outline-offset: -6px; } }
 /* A phone's energy column sits over the card's left edge: the number and its stamp
    lean right of centre, so the "−" stays clear of the pips. */
@@ -4721,6 +4739,9 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 :is(.menu-tabs, .editor-tabs) button[aria-selected="true"], .shelf-switch button[aria-pressed="true"], .seg label:has(:checked), .segs .seg input:checked + span, .lang-switch button[aria-pressed="true"], .chip:is([aria-pressed="true"], .on), .btn.speed[aria-pressed="true"] {
   background: var(--plank); color: var(--paint); border-color: var(--toon); text-shadow: 0 1px 0 var(--toon); box-shadow: 0 3px 0 var(--toon);
 }
+/* The plank is grain over a gradient: its own colour under it is the wood's, so the painted label reads
+   against it wherever the gradient isn't drawn (#155: it measured against the paper). */
+.lang-switch button[aria-pressed="true"] { background-color: var(--wood-lo); }
 .menu-tabs { gap: 8px; padding-bottom: 12px; }
 .segs, .shelf-switch { gap: 6px; padding: 0; border: 0; background: none; }
 .segs .seg span { border-radius: 10px; }
@@ -4842,6 +4863,8 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
   --bx: 5px; --by: 0px;
 }
 .focus-hand.on { opacity: 1; }
+/* Not left floating where a closed sheet's button was, into a screen change or under a seal duel's card (#155). */
+html[data-swap] .focus-hand, body:has(.seal-card) .focus-hand { visibility: hidden; }
 .focus-hand.fresh { transition: none; }
 /* The glyph points right; each side turns it toward the control. */
 .focus-hand::before {
@@ -5017,7 +5040,8 @@ button.ch-deck-now:active { transform: translateY(3px); box-shadow: 0 0 0 var(--
 /* While the offer is open the frozen scene slides up, so the hero and the
    duelist stay in view above the sheet. */
 .world-host { transition: transform var(--dur-screen) var(--ease-out); }
-.world:has(.world-sheet[open] > .challenge) .world-stage { background: var(--toon); }
+/* Dark under the scene at all times (#155): as the offer closes and the scene slides back, no pale band shows. */
+.world-stage { background: var(--toon); }
 .world:has(.world-sheet[open] > .challenge) .world-host {
   transform: translateY(min(-120px, -18vh));
   -webkit-mask-image: linear-gradient(0deg, transparent, #000 160px);

@@ -56,6 +56,7 @@ export function world_portrait(id) { return api?.portrait(id) ?? ""; }
 export function world_read(b) { api?.read(b); }
 export function world_page(n) { api?.page(n); }
 export function world_book_rect() { return api?.bookRect() ?? []; }
+export function world_stone_at() { return api?.stoneAt() ?? []; }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
@@ -91,6 +92,8 @@ extern "C" {
     fn world_page(n: usize);
     /// The open book on screen, `[left, top, right, bottom]` in CSS pixels (empty when none).
     pub(crate) fn world_book_rect() -> JsValue;
+    /// The map's seal stone on screen, `[x, y]` in CSS pixels (empty when none).
+    fn world_stone_at() -> JsValue;
 }
 
 const REOPEN: &str = "sixfold.reopen-world";
@@ -820,8 +823,10 @@ pub fn WorldScreen() -> impl IntoView {
     let cue_done = RwSignal::new(0u32);
     // The seal flying to the Menu button (#153): the keeper, the button's offset
     // from the stage's centre (px), and a count so an old timer can't clear a new one.
-    let flight = RwSignal::new(None::<(&'static campaign::Rival, (f64, f64), u32)>);
+    let flight = RwSignal::new(None::<(&'static campaign::Rival, (f64, f64), u32, (f64, f64))>);
     let menu_btn = NodeRef::<html::Button>::new();
+    // The HUD's seal count, where a seal won on stage lands (#155) and stays counted.
+    let seals_chip = NodeRef::<html::Span>::new();
 
     // ponytail: the callback is leaked once per visit (a few bytes); keep a handle if visits ever get frequent.
     let cb = Closure::<dyn Fn(String, String, String) -> bool>::new(
@@ -1188,17 +1193,36 @@ pub fn WorldScreen() -> impl IntoView {
         if !fly {
             return;
         }
-        let to = menu_btn.get_untracked().map(|b| {
-            let (b, w) = (b.get_bounding_client_rect(), window());
-            let half =
-                |v: Result<JsValue, JsValue>| v.ok().and_then(|v| v.as_f64()).unwrap_or(0.0) / 2.0;
+        // From the stone on screen (#155) to the HUD's seal count (or, before it shows, the Menu button),
+        // as offsets from the window's centre.
+        let w = window();
+        let half =
+            |v: Result<JsValue, JsValue>| v.ok().and_then(|v| v.as_f64()).unwrap_or(0.0) / 2.0;
+        let (cx, cy) = (half(w.inner_width()), half(w.inner_height()));
+        let rect = seals_chip
+            .get_untracked()
+            .map(|c| c.get_bounding_client_rect())
+            .or_else(|| {
+                menu_btn
+                    .get_untracked()
+                    .map(|b| b.get_bounding_client_rect())
+            });
+        let to = rect.map(|b| {
             (
-                b.left() + b.width() / 2.0 - half(w.inner_width()),
-                b.top() + b.height() / 2.0 - half(w.inner_height()),
+                b.left() + b.width() / 2.0 - cx,
+                b.top() + b.height() / 2.0 - cy,
             )
         });
+        let at: Vec<f64> = js_sys::Array::from(&world_stone_at())
+            .iter()
+            .filter_map(|v| v.as_f64())
+            .collect();
+        let from = match at[..] {
+            [x, y] => (x - cx, y - cy),
+            _ => (0.0, 0.0),
+        };
         let n = flight.with_untracked(|f| f.as_ref().map_or(0, |f| f.2)) + 1;
-        flight.set(Some((r, to.unwrap_or_default(), n)));
+        flight.set(Some((r, to.unwrap_or_default(), n, from)));
         // `try_`: the world may be gone by then (left for a duel or the title).
         set_timeout(
             move || {
@@ -1551,6 +1575,15 @@ pub fn WorldScreen() -> impl IntoView {
                 <div class="world-hud">
                     <crate::worldmap::DayDial />
                     <Facets />
+                    {move || {
+                        let n = progress.with(campaign::seals);
+                        (n > 0).then(|| view! {
+                            <span class="hud-seals" node_ref=seals_chip role="img"
+                                aria-label=tr(format!("{n} of 6 seals"), format!("{n} sceau{} sur 6", if n > 1 { "x" } else { "" }))>
+                                <i aria-hidden="true"></i><b aria-hidden="true">{n}</b>
+                            </span>
+                        })
+                    }}
                     // Until the scene is up the menu can't open: say so rather than ignore the press.
                     <button type="button" class="btn ghost menu-btn" node_ref=menu_btn aria-label="Menu" aria-haspopup="dialog"
                         aria-keyshortcuts="Escape"
@@ -1592,8 +1625,8 @@ pub fn WorldScreen() -> impl IntoView {
                 </button>
             })}
             <div class="world-rest" class:on=move || resting.get() aria-hidden="true"></div>
-            {move || flight.get().map(|(r, (x, y), _)| view! {
-                <div class="seal-flight" style=format!("--tx:{x:.0}px;--ty:{y:.0}px") aria-hidden="true">
+            {move || flight.get().map(|(r, (x, y), _, (fx, fy))| view! {
+                <div class="seal-flight" style=format!("--tx:{x:.0}px;--ty:{y:.0}px;--fx:{fx:.0}px;--fy:{fy:.0}px") aria-hidden="true">
                     <crate::campaign::SealFill r=r at=0 />
                 </div>
             })}

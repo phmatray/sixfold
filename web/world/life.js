@@ -207,7 +207,8 @@ export function ambience(scene, spots, reduced) {
       }
     },
     // `night` 0..1: motes turn into slow, low fireflies that pulse; butterflies go to roost.
-    update(dt, t, hx, hz, night = 0) {
+    // `scene`: a cutscene plays, and the gulls keep out of its frame (#155).
+    update(dt, t, hx, hz, night = 0, scene = false) {
       const p = motes.geometry.attributes.position;
       const drift = 0.15 * (1 - night * 0.7), low = 1 - night * 0.5;
       seeds.forEach(([sx, sy, sz, ph], i) => {
@@ -262,7 +263,7 @@ export function ambience(scene, spots, reduced) {
       }
 
       for (const gl of gulls) {
-        gl.g.visible = night < 0.5;
+        gl.g.visible = night < 0.5 && !scene;
         if (!gl.g.visible) continue;
         // The circle's centre trails the hero slowly, so the gulls stay in view without following.
         if (gl.cx === null) (gl.cx = hx + gl.ox), (gl.cz = hz + gl.oz);

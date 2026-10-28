@@ -168,7 +168,8 @@ impl Rival {
         let list = if rest.is_empty() {
             last.to_string()
         } else {
-            format!("{} {} {last}", rest.join(", "), crate::tr("and", "et"))
+            // "or", as the Journal says it (#155): any of them will do.
+            format!("{} {} {last}", rest.join(", "), crate::tr("or", "ou"))
         };
         Some(crate::tr(
             format!("Some still wait {list}."),

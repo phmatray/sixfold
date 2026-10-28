@@ -2409,7 +2409,7 @@
           "do": [
             "walk:hero:s",
             "music:duel_rival_stone",
-            "cam:19:3",
+            "cam:20:5",
             "stone:wake",
             "wait:600",
             "sfx:seal",

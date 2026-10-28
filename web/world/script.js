@@ -161,5 +161,7 @@ export function scenes(env) {
     env.moved();
   }
 
-  return { get playing() { return playing; }, due, entered, stepped, play, update, aim, end };
+  // A `cam:<x>:<z>` shot holds (a place: a stone, a door), not a person or the hero.
+  const onTile = () => playing && Array.isArray(cam);
+  return { get playing() { return playing; }, due, entered, stepped, play, update, aim, end, onTile };
 }
