@@ -4,6 +4,48 @@
   "region": "grove",
   "kind": "town",
   "music": "grove",
+  "life": {
+    "critters": [
+      {
+        "kind": "squirrel",
+        "zone": [
+          14,
+          3,
+          22,
+          8
+        ],
+        "n": 3
+      },
+      {
+        "kind": "rabbit",
+        "zone": [
+          29,
+          17,
+          37,
+          22
+        ],
+        "n": 3
+      },
+      {
+        "kind": "hedgehog",
+        "zone": [
+          39,
+          18,
+          47,
+          23
+        ],
+        "n": 2
+      }
+    ],
+    "leaves": {
+      "under": [
+        "birch",
+        "tree",
+        "willow"
+      ],
+      "rate": 0.25
+    }
+  },
   "width": 52,
   "height": 36,
   "tiles": [
