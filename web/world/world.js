@@ -854,10 +854,15 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     animateActor(h, dt, reduced);
     book.pose(h);
     for (const n of w.npcs) updateNpc(w, n, dt, paused, minute);
-    // A line said in passing (#114): never in a scene, a talk, a duel or with a sheet open (all `busy`).
-    if (!busy() && !editing()) for (const n of w.npcs) {
+    // A line said in passing (#114): never in a scene, a talk, a duel or with a sheet open (all `busy`);
+    // one at a time on a map, so two never talk over each other in the bubbles or the live region.
+    if (!busy() && !editing() && w.now >= (w.barkNext ?? 0)) for (const n of w.npcs) {
       const line = barkOf(w, n, holds);
-      if (line) say(n, line, BARK_HOLD), cb("bark", n.def.name, line);
+      if (line) {
+        say(n, line, BARK_HOLD), cb("bark", n.def.name, line);
+        w.barkNext = w.now + BARK_HOLD + 1;
+        break;
+      }
     }
     animateProps(w, dt, reduced);
     stoneStep(w.stone, dt, reduced);
