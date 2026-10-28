@@ -65,6 +65,7 @@ test("a new angle eases in, and cuts under reduced motion", async ({ page }) => 
   expect(Math.round((await twoFrames(page)).pitch)).toBe(60);
   // Without it, two frames in the pitch is on its way.
   await page.emulateMedia({ reducedMotion: "no-preference" });
+  await frames(page); // the world hears the media change on a frame: a C before it would still cut
   await page.keyboard.press("c");
   const mid = (await twoFrames(page)).pitch;
   expect(mid).toBeLessThan(60);
@@ -109,13 +110,19 @@ test("a reset leaves the Options radio and the next C on the loaded save's angle
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("tab", { name: "Options" }).click();
   await page.getByRole("radio", { name: "Lower" }).check();
+  // The world is paused behind the menu and draws nothing: the pitch moves once it closes.
+  await page.getByRole("button", { name: "Close", exact: true }).click();
   await expect.poll(() => settled(page)).toBe("lower 40");
+  await frames(page);
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("tab", { name: "Options" }).click();
+  await expect(page.getByRole("radio", { name: "Lower" })).toBeChecked();
   // Same panel, still open: the reset loads a new player, whose angle is the default.
   await page.getByRole("button", { name: "Reset progress…" }).click();
   await page.getByRole("button", { name: "Reset progress", exact: true }).click();
   await expect(page.getByRole("radio", { name: "Default" })).toBeChecked();
-  await expect.poll(() => settled(page)).toBe("default 50");
   await page.getByRole("button", { name: "Close", exact: true }).click();
+  await expect.poll(() => settled(page)).toBe("default 50");
   await page.keyboard.press("c");
   await expect.poll(() => settled(page)).toBe("higher 60");
   await expect.poll(async () => (await readSave(page)).camera).toEqual(["higher"]);
