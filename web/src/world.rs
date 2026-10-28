@@ -849,6 +849,11 @@ pub fn WorldScreen() -> impl IntoView {
         editing.set(None);
         sheet.set(Some(Sheet::Menu));
     })));
+    // Back from a duel that paid packs, "Open it now" was pressed on its result (#206).
+    if crate::packs::OPEN_ON_ENTRY.take() {
+        last_tab.set(MenuTab::Packs);
+        sheet.set(Some(Sheet::Menu));
+    }
     // Put back once its sheet is gone (closed, or replaced by another).
     Effect::new(move |was: Option<bool>| {
         let reading = sheet.with(|s| matches!(s, Some(Sheet::Book(_))));

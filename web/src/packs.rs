@@ -162,6 +162,11 @@ pub fn PacksPanel(
 #[derive(Clone, Copy)]
 pub struct OpenPacks(pub Callback<()>);
 
+thread_local! {
+    /// Set by the duel result's "Open it now": the world opens the Packs tab as it mounts.
+    pub static OPEN_ON_ENTRY: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
 /// "Open it now", where a pack is gained in the world: the menu's Packs tab.
 /// Nothing outside the world.
 #[component]

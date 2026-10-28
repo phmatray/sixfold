@@ -382,6 +382,33 @@ pub fn GameOver() -> impl IntoView {
     let rung_result = RwSignal::new(None::<RungResult>);
     // The daily duel's pack, if this win claimed it.
     let daily_pack = RwSignal::new(None::<usize>);
+    // "Open it now": a world duel that paid packs offers the reveal before the walk resumes (#206).
+    let open_now = move || {
+        let n = campaign_reward.get().map_or(0, |r| r.packs.1)
+            + rung_result.get().map_or(0, |r| r.packs.1)
+            + u32::from(daily_pack.get().is_some());
+        (back == Screen::World && n > 0).then(|| {
+            let label = if n > 1 {
+                tr("Open them now", "Les ouvrir maintenant")
+            } else {
+                tr("Open it now", "L'ouvrir maintenant")
+            };
+            let aria = tr(
+                format!("{label}: {n} new pack{}", if n > 1 { "s" } else { "" }),
+                format!(
+                    "{label} : {n} nouveau{} booster{}",
+                    if n > 1 { "x" } else { "" },
+                    if n > 1 { "s" } else { "" }
+                ),
+            );
+            view! {
+                <button class="btn" aria-label=aria on:click=move |_| {
+                    crate::packs::OPEN_ON_ENTRY.set(true);
+                    crate::go_with(Screen::World, move || ctl.stop())
+                }>{label}</button>
+            }
+        })
+    };
     Effect::new(move |_| {
         if let Some((winner, ..)) = result.get() {
             if !ctl.take_result() {
@@ -691,6 +718,7 @@ pub fn GameOver() -> impl IntoView {
                             <div class="dialog-foot">
                                 // The Warden's first win goes on in the world: the finale (#67).
                                 <button class="btn primary" autofocus on:click=move |_| { crate::go_with(Screen::World, move || ctl.stop()) }>{tr("Back to the world", "Retour au monde")}</button>
+                                {open_now}
                             </div>
                         }.into_any(),
                         (None, Some(p)) => view! {
@@ -708,6 +736,7 @@ pub fn GameOver() -> impl IntoView {
                                         <button class="btn" class:primary=!climbing autofocus=!climbing on:click=move |_| { crate::go_with(back, move || ctl.stop()) }>{tr("Back", "Retour")}</button>
                                     }
                                 }}
+                                {open_now}
                             </div>
                         }.into_any(),
                         (None, None) => view! {
