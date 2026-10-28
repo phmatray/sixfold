@@ -1599,7 +1599,6 @@ input, select { caret-color: var(--brass-hi); }
   color: var(--on-brass);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 10px 24px -10px color-mix(in srgb, var(--brass) 60%, transparent);
 }
-.menu-item.primary:hover { background: linear-gradient(180deg, #f8e2a6, var(--brass-hi)); }
 .menu-item.primary .menu-label { font-size: var(--fs-4xl); }
 .menu-item.primary .menu-sub { color: #4a3a12; }
 .menu-item.primary .menu-chev { stroke: #4a3a12; }
@@ -2955,13 +2954,10 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
   .sell-row .btn { grid-area: btn; }
 }
 
-/* Wynne: the pack shelf, smaller. */
-/* A regional inn's counter, under the rest choices. */
+/* A regional inn's counter, under the rest choices: Wynne's shelf, then Perrin's stock. */
 .inn-counter { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
-.inn-counter h3 { margin: 0 0 10px; }
-.inn-packs { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 18px; }
-.inn-pack { display: flex; align-items: center; gap: 10px; }
-.inn-pack .pack { --pw2: 44px; }
+.inn-counter h3 { margin: 0; }
+/* Wynne: the pack shelf, smaller. */
 .pack-counter { margin: 0; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
 .pack-counter .shelf-item { padding: 10px 12px; gap: 14px; }
 .pack-counter .pack { --pack-w: 72px; }
@@ -3078,22 +3074,20 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .world-rest { position: absolute; inset: 0; z-index: 3; background: #04060c; opacity: 0; pointer-events: none; transition: opacity 0.7s ease; }
 .world-rest.on { opacity: 1; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) { .world-rest { transition: none; } }
-.inn-rest { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
-.inn-choice {
-  display: grid; gap: 2px; justify-items: start; min-height: 64px; padding: 10px 14px 10px 50px; text-align: left; cursor: pointer;
-  border-radius: var(--radius-md); border: 1.5px solid var(--brass-line); color: var(--ink);
-  background: no-repeat 12px 50% / 26px 26px, linear-gradient(180deg, #1d3152, #152541);
-  transition: border-color 0.15s ease, transform 0.15s ease;
+/* Two choices a row where they fit their names; else one under the other (a phone). */
+.inn-rest { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, max(13em, calc(50% - 5px))), 1fr)); gap: 10px; margin-top: 10px; }
+/* Each choice is a paper button (the kit's .btn) with a little window on its sky. */
+.btn.inn-choice { position: relative; display: grid; gap: 2px; justify-items: start; align-content: center; min-height: 64px; padding: 8px 14px 8px 56px; text-align: left; }
+.inn-choice::before {
+  content: ""; position: absolute; left: 14px; top: 50%; width: 30px; height: 30px; translate: 0 -50%;
+  border-radius: 50%; border: 2px solid var(--toon); background: no-repeat center / 100% 100%, linear-gradient(180deg, #1d3152, #152541);
 }
-.inn-choice:hover:not(:disabled) { border-color: var(--brass-hi); transform: translateY(-1px); }
-.inn-choice:disabled { opacity: 0.5; cursor: default; }
 .inn-choice-name { font: 700 var(--fs-xl) var(--display); }
-.inn-choice-time { font-size: var(--fs-md); color: var(--muted); font-variant-numeric: tabular-nums; }
-.inn-choice[data-phase="dawn"] { background-image: radial-gradient(circle at 50% 72%, #ffc0a8 44%, transparent 47%), linear-gradient(180deg, #2a3150, #1e2742); }
-.inn-choice[data-phase="day"] { background-image: radial-gradient(circle, var(--brass-hi) 46%, transparent 49%), linear-gradient(180deg, #1d3152, #152541); }
-.inn-choice[data-phase="dusk"] { background-image: radial-gradient(circle at 50% 72%, #ff9e6b 44%, transparent 47%), linear-gradient(180deg, #2c2442, #1b1d36); }
-.inn-choice[data-phase="night"] { background-image: radial-gradient(circle at 66% 36%, transparent 33%, #d7defa 35% 47%, transparent 49%), linear-gradient(180deg, #141d36, #0f1629); }
-@media (prefers-reduced-motion: reduce) { .inn-choice { transition: none; } .inn-choice:hover:not(:disabled) { transform: none; } }
+.inn-choice-time { font: 400 var(--fs-md) var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
+.inn-choice[data-phase="dawn"]::before { background-image: radial-gradient(circle at 50% 78%, #ffc0a8 34%, transparent 37%), linear-gradient(180deg, #2a3150, #6b5a7a); }
+.inn-choice[data-phase="day"]::before { background-image: radial-gradient(circle, var(--brass) 36%, transparent 39%), linear-gradient(180deg, #4f86c6, #9cc3e6); }
+.inn-choice[data-phase="dusk"]::before { background-image: radial-gradient(circle at 50% 78%, #ff9e6b 34%, transparent 37%), linear-gradient(180deg, #2c2442, #7a3f4a); }
+.inn-choice[data-phase="night"]::before { background-image: radial-gradient(circle at 62% 40%, transparent 22%, #d7defa 24% 36%, transparent 38%), linear-gradient(180deg, #141d36, #0f1629); }
 
 /* The world map: a cartographer's chart on card stock, laid on the felt. */
 .world-sheet:has(.atlas) { width: min(820px, calc(100% - 32px)); }
@@ -3163,7 +3157,8 @@ p.atlas-pick { color: var(--muted); }
 @media (max-width: 520px) {
   .atlas-chart { transform: none; }
   .world-sheet:has(.atlas) .sheet-head { flex-wrap: wrap; }
-  .inn-choice { padding-left: 42px; min-height: 60px; }
+  .btn.inn-choice { padding-left: 50px; min-height: 60px; }
+  .inn-choice::before { left: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .atlas-you .ring { animation: none; opacity: 0.6; }
@@ -4779,17 +4774,18 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 * { scrollbar-color: var(--wood) transparent; }
 
 /* ---------- The title: the sign, the planks, the world behind ---------- */
+/* One screen; taller only when a large text size needs it (the page scrolls then, nothing overlaps). */
 .title {
-  position: relative; max-width: none; margin: 0; height: 100dvh; overflow: hidden;
+  position: relative; max-width: none; margin: 0; min-height: 100dvh; overflow-x: clip;
   padding: clamp(20px, 4.5vh, 56px) clamp(16px, 4.5vw, 72px) clamp(14px, 2.5vh, 28px);
-  display: grid; grid-template-columns: minmax(0, 420px) 1fr; grid-template-rows: auto minmax(0, 1fr) auto;
+  display: grid; grid-template-columns: minmax(0, 500px) 1fr; grid-template-rows: auto 1fr auto;
   grid-template-areas: "brand brand" "menu ." "foot foot"; gap: clamp(12px, 2.5vh, 28px) 32px;
 }
 .title-backdrop::after { background: linear-gradient(0deg, color-mix(in srgb, var(--toon) 55%, transparent), transparent 22%), linear-gradient(90deg, color-mix(in srgb, var(--toon) 40%, transparent), transparent 42%); }
 /* The name on a sign board (mounted: no ropes): the seal-stone and the lettered wordmark (web/brand/). */
 .title-brand {
   grid-area: brand; justify-self: start; display: flex; align-items: center; gap: clamp(8px, 1.2vw, 16px);
-  padding: 10px 28px 12px 18px; transform: rotate(-2deg);
+  padding: 10px 28px 12px 18px; transform: rotate(-2deg); will-change: transform; /* held on its layer, as a plank */
   background: var(--plank); border: 4px solid var(--toon); border-radius: 16px; box-shadow: 0 6px 0 var(--toon), 0 18px 30px -10px rgba(0, 0, 0, 0.7);
 }
 .title-brand .logo-mark { flex: none; width: clamp(52px, min(6.4vw, 9.5vh), 92px); filter: drop-shadow(0 3px 0 var(--toon)); }
@@ -4798,24 +4794,20 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 .title-notice { grid-area: brand; align-self: end; margin: 0; display: flex; gap: 8px; align-items: center; }
 .title-menu { grid-area: menu; align-self: center; position: relative; }
 .title .menu { margin: 0; max-width: none; gap: 8px; }
-/* The help line: a paper note pinned beside the plank under the cursor, the whole of its tag. */
-.title-help {
-  position: absolute; left: calc(100% + 20px); translate: 0 -50%; z-index: 1; width: max-content; max-width: min(36ch, 40vw); margin: 0;
-  padding: 6px 12px; border-radius: 8px; background: var(--paper); color: var(--toon); border: 2px solid var(--toon); box-shadow: 0 3px 0 var(--toon);
-  font-size: var(--fs-md); font-weight: 700; pointer-events: none;
-}
-.title-help::before { content: ""; position: absolute; right: 100%; top: 50%; translate: 0 -50%; border: 7px solid transparent; border-right-color: var(--toon); }
 .title-foot { grid-area: foot; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 24px; margin: 0; }
 .title-foot .foot-menus { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .title-legal { margin: 0; color: var(--paint); text-shadow: 0 1px 2px var(--toon); font-size: var(--fs-xs); max-width: 46ch; text-align: right; }
 .menu-icon { grid-area: icon; width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-/* A plank. */
+/* A plank. Tilted wood over the live world: on a layer of its own for good (will-change), so
+   WebKit never moves it between layers when the world's canvases change under it (a place's
+   cross-fade) or when a hover's lift starts and ends: each move redrew the fine grain at a new
+   angle and phase, and the planks blinked (Safari, the macOS app). */
 .menu-item {
   position: relative; min-height: 48px; padding: 4px 18px; border-radius: 10px;
   grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "icon label sub badge"; column-gap: 12px;
   background: var(--plank-deep); border: var(--toon-w) solid var(--toon); color: var(--paint);
   box-shadow: var(--edge), 0 12px 18px -8px rgba(0, 0, 0, 0.6), inset 0 2px 0 color-mix(in srgb, var(--paint) 30%, transparent);
-  transform: rotate(var(--tilt, 0deg));
+  transform: rotate(var(--tilt, 0deg)); will-change: transform;
   transition: transform var(--dur-panel) var(--ease-out), box-shadow var(--dur-quick) ease;
 }
 .menu li:nth-child(odd) .menu-item { --tilt: -0.7deg; }
@@ -4828,9 +4820,10 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 .menu-item.primary .menu-label { font-size: var(--fs-4xl); text-shadow: 0 2px 0 color-mix(in srgb, var(--paint) 60%, transparent); }
 .menu-item.primary .menu-sub { color: var(--toon); font-weight: 700; }
 .menu-item.primary .menu-icon { width: 34px; height: 34px; filter: none; }
-/* Each entry's status on a paper tag nailed to its plank (dark ink: AA at a small size). */
+/* Each entry's status on a paper tag nailed to its plank (dark ink: AA at a small size), the whole
+   line: a long one (French, a large text size) goes on to a second line rather than being cut. */
 .title .menu-item:not(.primary) .menu-sub {
-  justify-self: end; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  justify-self: end; max-width: 100%; text-align: center; text-wrap: balance; line-height: 1.25;
   padding: 2px 8px; border-radius: 6px; background: var(--paper); color: var(--toon); font-size: var(--fs-xs); font-weight: 700;
   box-shadow: 0 0 0 1.5px var(--toon); text-shadow: none;
 }
@@ -4841,7 +4834,7 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
 .title-legal { padding: 4px 10px; border-radius: 8px; background: color-mix(in srgb, var(--toon) 60%, transparent); text-shadow: none; }
 /* The place's card, like a film's. */
 .title-place { position: absolute; z-index: 1; right: clamp(16px, 4.5vw, 72px); bottom: clamp(96px, 13vh, 128px); margin: 0; display: grid; gap: 2px; padding: 8px 16px;
-  background: var(--paper); border: var(--toon-w) solid var(--toon); border-radius: 8px; box-shadow: var(--edge); transform: rotate(1.5deg); opacity: 0; transition: opacity 900ms ease; }
+  background: var(--paper); border: var(--toon-w) solid var(--toon); border-radius: 8px; box-shadow: var(--edge); transform: rotate(1.5deg); will-change: transform; opacity: 0; transition: opacity 900ms ease; }
 .title-backdrop.live .title-place { opacity: 1; }
 .title-place b { font: 800 var(--fs-xl)/1.1 var(--display); color: var(--toon); }
 .title-place span { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--paper-muted); }
@@ -4862,7 +4855,6 @@ input[type="checkbox"]:checked::before { translate: 24px 0; background: var(--pa
   .title-foot .btn { padding-inline: 10px; font-size: var(--fs-sm); white-space: nowrap; }
   /* A phone: the act item on its own, the rest a two-by-three grid of planks. */
   .title .menu { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .title-help { display: none; }
   .title .menu li:first-child, .title .menu li:last-child:nth-child(even) { grid-column: 1 / -1; }
   .title .menu-item:not(.primary) { min-height: 52px; padding: 6px 10px; column-gap: 8px; }
   .title .menu-item:not(.primary) .menu-label { font-size: var(--fs-md); line-height: 1.1; }

@@ -236,25 +236,6 @@ pub fn Trader() -> impl IntoView {
 pub fn InnCounter(stock: &'static InnStock) -> impl IntoView {
     let (progress, profile) = signals();
     let said = RwSignal::new(String::new());
-    let buy_pack = move |b: usize| match deal((progress, profile), |p, pr| shop::buy_pack(p, pr, b))
-    {
-        Ok(()) => {
-            crate::audio::sfx("reward", 0.0);
-            said.set(
-                tr(
-                    format!(
-                        "You bought {}. Open packs from the title screen.",
-                        packs_label(b, 1)
-                    ),
-                    format!(
-                        "Vous achetez {}. Ouvrez vos boosters depuis l'écran titre.",
-                        packs_label(b, 1)
-                    ),
-                ) + &balance(progress),
-            );
-        }
-        Err(e) => said.set(e.to_string()),
-    };
     let buy = move |slot: usize| match deal((progress, profile), |p, pr| {
         shop::buy_inn_single(p, pr, stock, slot)
     }) {
@@ -272,35 +253,12 @@ pub fn InnCounter(stock: &'static InnStock) -> impl IntoView {
         }
         Err(e) => said.set(e.to_string()),
     };
-    let packs = [stock.booster(), sixfold_engine::booster::WILD];
     view! {
         <section class="shop inn-counter" aria-labelledby="inn-counter-title">
             <h3 id="inn-counter-title">{tr("At the counter", "Au comptoir")}</h3>
-            <ul class="inn-packs">
-                {packs.into_iter().map(|i| {
-                    let b = &BOOSTERS[i];
-                    let price = Memo::new(move |_| progress.with(|p| shop::pack_price(i, p)));
-                    let rival = RIVALS.iter().find(|r| r.booster == i).map_or("?", |r| r.name);
-                    view! {
-                        <li class="inn-pack">
-                            <span class=format!("pack p-{}", crate::packs::pack_theme(i)) aria-hidden="true">
-                                <span class="pack-crimp"></span>
-                                <span class="pack-name">{b.name.get().trim_end_matches(" Pack").trim_start_matches("Booster ")}</span>
-                                <span class="pack-crimp bottom"></span>
-                            </span>
-                            {move || match price.get() {
-                                Some(n) => view! {
-                                    <button type="button" class="btn"
-                                        aria-label=tr(format!("Buy one {} for {n} Facets", b.name), format!("Acheter un {} pour {n} Facettes", b.name))
-                                        on:click=move |_| buy_pack(i)>
-                                        {format!("⬡ {n}")}
-                                    </button>
-                                }.into_any(),
-                                None => view! { <span class="shop-lock">{tr(format!("After {rival}"), format!("Après {rival}"))}</span> }.into_any(),
-                            }}
-                        </li>
-                    }
-                }).collect_view()}
+            <ul class="shelf pack-counter">
+                {[stock.booster(), sixfold_engine::booster::WILD].into_iter()
+                    .map(|b| view! { <PackItem b=b said=said /> }).collect_view()}
             </ul>
             <ul class="stock">
                 {stock.singles.into_iter().enumerate().map(|(slot, id)| {
@@ -326,11 +284,11 @@ pub fn InnCounter(stock: &'static InnStock) -> impl IntoView {
     }
 }
 
-/// `show:shop_hall`: Wynne's pack counter.
+/// One pack on a counter (Wynne's shelf, a regional inn's): its wrapper,
+/// what it holds, and its price or the rival who puts it on sale.
 #[component]
-pub fn PackCounter() -> impl IntoView {
+fn PackItem(b: usize, said: RwSignal<String>) -> impl IntoView {
     let (progress, profile) = signals();
-    let said = RwSignal::new(String::new());
     let buy = move |b: usize| match deal((progress, profile), |p, pr| shop::buy_pack(p, pr, b)) {
         Ok(()) => {
             crate::audio::sfx("reward", 0.0);
@@ -349,6 +307,42 @@ pub fn PackCounter() -> impl IntoView {
         }
         Err(e) => said.set(e.to_string()),
     };
+    let pack = &BOOSTERS[b];
+    // A memo: a purchase changes the Facets, not the button.
+    let price = Memo::new(move |_| progress.with(|p| shop::pack_price(b, p)));
+    let held = move || profile.with(|p| p.wallet.packs(b));
+    let rival = RIVALS
+        .iter()
+        .find(|r| r.booster == b)
+        .map_or("?", |r| r.name);
+    view! {
+        <li class="shelf-item" class:locked=move || price.get().is_none()>
+            <crate::packs::PackArt b=b held=Signal::derive(held) />
+            <div class="shelf-info">
+                <h3>{pack.name.get()}</h3>
+                <p>{pack.description.get()}</p>
+                <crate::packs::PackOdds b=b />
+                {move || match price.get() {
+                    Some(n) => view! {
+                        <button type="button" class="btn primary"
+                            aria-label=tr(format!("Buy one {} for {n} Facets", pack.name), format!("Acheter un {} pour {n} Facettes", pack.name))
+                            on:click=move |_| buy(b)>
+                            {tr(format!("Buy ⬡ {n}"), format!("Acheter ⬡ {n}"))}
+                        </button>
+                    }.into_any(),
+                    None => view! {
+                        <p class="shop-lock">{tr(format!("On sale after you beat {rival}."), format!("En vente quand vous aurez battu {rival}."))}</p>
+                    }.into_any(),
+                }}
+            </div>
+        </li>
+    }
+}
+
+/// `show:shop_hall`: Wynne's pack counter.
+#[component]
+pub fn PackCounter() -> impl IntoView {
+    let said = RwSignal::new(String::new());
     view! {
         <div class="shop">
             <p class="dialog-sub">{tr(
@@ -356,34 +350,7 @@ pub fn PackCounter() -> impl IntoView {
                 "Les boosters vont dans votre portefeuille\u{a0}: ouvrez-les depuis l'écran titre. D'autres thèmes arrivent en rayon à mesure que vous battez leurs rivaux.",
             )}</p>
             <ul class="shelf pack-counter">
-                {BOOSTERS.iter().enumerate().map(|(i, b)| {
-                    // A memo: a purchase changes the Facets, not the button.
-                    let price = Memo::new(move |_| progress.with(|p| shop::pack_price(i, p)));
-                    let held = move || profile.with(|p| p.wallet.packs(i));
-                    let rival = RIVALS.iter().find(|r| r.booster == i).map_or("?", |r| r.name);
-                    view! {
-                        <li class="shelf-item" class:locked=move || price.get().is_none()>
-                            <crate::packs::PackArt b=i held=Signal::derive(held) />
-                            <div class="shelf-info">
-                                <h3>{b.name.get()}</h3>
-                                <p>{b.description.get()}</p>
-                                <crate::packs::PackOdds b=i />
-                                {move || match price.get() {
-                                    Some(n) => view! {
-                                        <button type="button" class="btn primary"
-                                            aria-label=tr(format!("Buy one {} for {n} Facets", b.name), format!("Acheter un {} pour {n} Facettes", b.name))
-                                            on:click=move |_| buy(i)>
-                                            {tr(format!("Buy ⬡ {n}"), format!("Acheter ⬡ {n}"))}
-                                        </button>
-                                    }.into_any(),
-                                    None => view! {
-                                        <p class="shop-lock">{tr(format!("On sale after you beat {rival}."), format!("En vente quand vous aurez battu {rival}."))}</p>
-                                    }.into_any(),
-                                }}
-                            </div>
-                        </li>
-                    }
-                }).collect_view()}
+                {(0..BOOSTERS.len()).map(|b| view! { <PackItem b=b said=said /> }).collect_view()}
             </ul>
             <Said said=said node=NodeRef::new() />
         </div>
