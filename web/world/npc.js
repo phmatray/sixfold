@@ -221,8 +221,8 @@ function glance(w, n, paused) {
   const h = w.hero, dx = h.x - n.x, dz = h.z - n.z, [fx, fz] = DIR[n.face];
   const near = Math.abs(dx) + Math.abs(dz) <= GLANCE_NEAR && (dx || dz) && (n.glance || dx * fx + dz * fz >= 0); // not from behind
   if (!near || paused || n.busy || n.step || n.go?.length || n.walk || n.sit || n.def.route || n.def.glance === false || duels(n)) return void (n.glance = null);
-  if (w.now < (n.glanceNext ?? 0)) return; // too soon: keeps its last glance (or none)
-  n.glanceNext = w.now + GLANCE_EVERY;
+  if (!n.glance && w.now < (n.glanceNext ?? 0)) return; // too soon after its last glance
+  n.glanceNext = w.now + GLANCE_EVERY; // a glance follows the hero round; the wait is before the next one
   n.glance = Math.abs(dx) >= Math.abs(dz) ? (dx > 0 ? "e" : "w") : dz > 0 ? "s" : "n";
 }
 
