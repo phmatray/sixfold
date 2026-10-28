@@ -33,6 +33,10 @@ pub const VOUCHED: &str = "vouched";
 /// Every progress from this build on holds it: a save without it predates
 /// the threshold, and is vouched for on load if it already met a keeper.
 pub const KEEPERS: &str = "keepers";
+/// Every progress from #177 on holds it: a save without it may predate
+/// Sable's staged first meeting (#154), which set no flag before; one that
+/// had already met her is marked as such on load ([`Progress::decode_at`]).
+pub const STAGED: &str = "staged";
 
 /// Facets a rival's first win pays; the Warden's.
 pub const RIVAL_PURSE: u32 = 300;

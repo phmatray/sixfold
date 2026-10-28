@@ -15,7 +15,7 @@ use std::path::Path;
 use sixfold_engine::books::{is_read, read_count, read_flag, BOOKS};
 use sixfold_engine::campaign::{KEEPERS, RIVALS, VOUCHED};
 use sixfold_engine::overworld::STARTING_COINS;
-use sixfold_engine::save::{Save, Summary, CAMPAIGN_DECK, WORLD_AT};
+use sixfold_engine::save::{Save, Summary, CAMPAIGN_DECK, PROGRESS, WORLD_AT};
 
 fn fixture(name: &str) -> String {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -128,6 +128,33 @@ fn a_new_player_earns_the_keepers() {
     let p = Save::new_player("Ada").progress();
     assert!(p.has_flag(KEEPERS) && !p.has_flag(VOUCHED));
     assert!(RIVALS.iter().filter(|r| r.seal).all(|r| !r.earned(&p)));
+}
+
+/// #177: a save from before Sable's staged entrance (#154), saved in her room
+/// with the six seals (she had beaten the hero, the result since settled), has
+/// met her: the entrance and the door's bells don't replay. Saved anywhere
+/// else, they still play.
+#[test]
+fn a_pre_154_save_that_lost_to_sable_does_not_replay_her_entrance() {
+    let six: Vec<String> = RIVALS
+        .iter()
+        .filter(|r| r.seal)
+        .map(|r| format!("f:beat_{}", r.id))
+        .collect();
+    let mut s = Save::new_player("Ada");
+    s.set(
+        PROGRESS,
+        &format!("f:intro,f:keepers,{},c:900", six.join(",")),
+    );
+    s.set(WORLD_AT, "warden,5,7,n");
+    let p = Save::decode(&s.encode()).unwrap().progress();
+    assert!(p.has_flag("met_warden") && p.has_flag("door_warden"));
+    s.set(WORLD_AT, "shop,1,6,e");
+    let p = Save::decode(&s.encode()).unwrap().progress();
+    assert!(
+        !p.has_flag("met_warden"),
+        "never in her room: the door still rings"
+    );
 }
 
 /// 1.3 added the clock, waymarks and seen maps to the progress.

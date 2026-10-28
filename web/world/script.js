@@ -23,7 +23,7 @@ const CUT_HOLD = 1.2; // s: under reduced motion, how long a cut to a shot holds
 // "seal" lights that colour's face for good),
 // moved() (the hero's tile is reported again), holds(cond), cb.
 export function scenes(env) {
-  let playing = false, cur = null, cam = null, caption = null;
+  let playing = false, cur = null, cam = null, caption = null, leaves = false;
   const actorOf = (id) => (id === "hero" ? env.hero() : env.world()?.npcs.find((n) => n.def.id === id && !n.hidden));
   const isHero = (a) => a === env.hero();
   // A `face` cue's direction: `hero` (or another actor's id) turns toward them (along the longer axis).
@@ -39,6 +39,9 @@ export function scenes(env) {
     const w = env.world();
     playing = true;
     cur = cam = null;
+    // `hold_music`: the scene's music outlasts it, until the next map tunes (#177: the sealed door's
+    // bells keep Sable's theme through the door, never the hall's track for a moment).
+    leaves = !!s.hold_music;
     caption = s.caption ? [s.caption, s.caption_fr ?? s.caption] : null; // said as the stone wakes (a reveal's, #155)
     w.path = [];
     // Each `say` carries its speaker's name (the hero's own lines have none).
@@ -157,7 +160,7 @@ export function scenes(env) {
     playing = false;
     env.ended();
     env.stone(null);
-    env.tune();
+    if (!leaves) env.tune();
     env.moved();
   }
 

@@ -1552,6 +1552,11 @@ fn the_warden_is_staged_grandest() {
         "the door stays the way in"
     );
     assert_eq!(fx[fx.len() - 2..], ["cam:hero", "flag:door_warden"]);
+    // #177: her theme holds through the door, never the hall's track for a moment.
+    assert_eq!(
+        door["hold_music"], true,
+        "the door's music holds into her room"
+    );
     said(&door, "sable", 1);
 
     // The entrance.

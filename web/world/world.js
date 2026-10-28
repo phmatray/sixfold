@@ -707,10 +707,12 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     world.scriptsDue = true; // an `enter` cutscene starts once the map is on screen
     cb("clock", String(Math.floor(minute)), "");
     cb("seen", name, L.indoor ? "in" : "out");
-    tune();
     const s = spawn && !next.blocked(spawn.x, spawn.z) && !next.npcAt(spawn.x, spawn.z) ? spawn : map.spawn; // a stale saved tile falls back
     Object.assign(hero, { x: s.x, z: s.z, face: s.facing, step: null, idle: 0, turnedAt: -Infinity, sit: null, pose: null }); // a fresh map clock; standing
     hero.obj.rotation.y = angle(s.facing);
+    // A scene about to play on arrival that opens on its own music keeps what is playing until it
+    // starts: no flip to the map's track in between (#177: the sealed door's bells into Sable's room).
+    if (!cut.due(world)?.steps?.[0]?.do?.some((d) => d.startsWith("music:"))) tune();
     world.hero = hero;
     sky(world.day.update(minute, s.x + 0.5, s.z + 0.5, 0), true);
     cam = framing(map.camera, camAngle, !!map.light.indoor);
