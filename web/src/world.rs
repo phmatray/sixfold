@@ -27,6 +27,7 @@ use crate::ctl::Ctl;
 use crate::decks::{new_deck, DecksPanel, EditorPanel};
 use crate::input::{self, pad, titled, Ctrl};
 use crate::overlays::Inspector;
+use crate::packs::PacksPanel;
 use crate::title::OptionsPanel;
 use crate::worldmap::Waymark;
 use crate::{store, Screen, Ui};
@@ -561,6 +562,8 @@ enum Sheet {
     Note(&'static str, String, Option<String>),
     Talk(Talk),
     Item(String),
+    /// Packs given in the world (the line, how many): they can be opened now.
+    Gift(String, usize),
     /// A card found in the world, now in the collection.
     Card(CardId),
     /// A rival's or route duelist's duel offer, by id.
@@ -588,6 +591,7 @@ enum Sheet {
 pub enum MenuTab {
     Decks,
     Collection,
+    Packs,
     Journal,
     Map,
     Campaign,
@@ -597,11 +601,12 @@ pub enum MenuTab {
 impl MenuTab {
     // What a player in the world most often opens the menu for comes first: what to do
     // next (the Journal), where to go (the Map), then the decks for the next duel.
-    const ALL: [MenuTab; 6] = [
+    const ALL: [MenuTab; 7] = [
         MenuTab::Journal,
         MenuTab::Map,
         MenuTab::Decks,
         MenuTab::Collection,
+        MenuTab::Packs,
         MenuTab::Campaign,
         MenuTab::Options,
     ];
@@ -610,6 +615,7 @@ impl MenuTab {
         match self {
             MenuTab::Decks => "Decks",
             MenuTab::Collection => "Collection",
+            MenuTab::Packs => tr("Packs", "Boosters"),
             MenuTab::Journal => "Journal",
             MenuTab::Map => tr("Map", "Carte"),
             MenuTab::Campaign => tr("Campaign", "Campagne"),
@@ -621,6 +627,7 @@ impl MenuTab {
         match self {
             MenuTab::Decks => "menu-tab-decks",
             MenuTab::Collection => "menu-tab-collection",
+            MenuTab::Packs => "menu-tab-packs",
             MenuTab::Journal => "menu-tab-journal",
             MenuTab::Map => "menu-tab-map",
             MenuTab::Campaign => "menu-tab-campaign",
@@ -811,6 +818,12 @@ pub fn WorldScreen() -> impl IntoView {
     // The Journal's Library opens a book read before; it rises into view.
     provide_context(crate::journal::ReadBook(Callback::new(move |id| {
         open_book(id, false)
+    })));
+    // "Open it now" on a pack just gained (#194): the menu, on its Packs tab.
+    provide_context(crate::packs::OpenPacks(Callback::new(move |()| {
+        last_tab.set(MenuTab::Packs);
+        editing.set(None);
+        sheet.set(Some(Sheet::Menu));
     })));
     // Put back once its sheet is gone (closed, or replaced by another).
     Effect::new(move |was: Option<bool>| {
@@ -1166,20 +1179,10 @@ pub fn WorldScreen() -> impl IntoView {
                 .map(|&b| packs_label(b, packs.iter().filter(|&&p| p == b).count() as u32))
                 .collect();
             let text = tr(
-                format!(
-                    "You got {}. Open packs from the title screen.",
-                    names.join(" and ")
-                ),
-                format!(
-                    "Vous recevez {}. Ouvrez vos boosters depuis l'écran titre.",
-                    names.join(" et ")
-                ),
+                format!("You got {}.", names.join(" and ")),
+                format!("Vous recevez {}.", names.join(" et ")),
             );
-            next = next.or(Some(Sheet::Note(
-                tr("A gift", "Un cadeau"),
-                text.clone(),
-                None,
-            )));
+            next = next.or(Some(Sheet::Gift(text.clone(), packs.len())));
             announce.set(text);
         }
         if let Some(Sheet::Card(id)) = &next {
@@ -1838,6 +1841,14 @@ pub fn WorldScreen() -> impl IntoView {
                             <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
                         </div>
                     }.into_any(),
+                    Sheet::Gift(text, n) => view! {
+                        <h2 id="world-sheet-title">{tr("A gift", "Un cadeau")}</h2>
+                        <p class="dialog-sub note-text">{text}</p>
+                        <div class="dialog-foot">
+                            <crate::packs::OpenNow n=n />
+                            <button class="btn primary" autofocus on:click=close>{tr("Close", "Fermer")}</button>
+                        </div>
+                    }.into_any(),
                     Sheet::Challenge(id) => {
                         let face = face_of(&id).filter(|f| f != BUST_PENDING);
                         let quote = said.with_value(|s| s.clone().filter(|(who, _)| *who == id).map(|(_, l)| l));
@@ -1983,6 +1994,8 @@ fn GameMenu(
 ) -> impl IntoView {
     let tab = expect_context::<LastTab>().0;
     let ui = expect_context::<Ui>();
+    let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
+    let unopened = Memo::new(move |_| profile.with(|p| p.wallet.total()));
     let focus = |sel: &'static str| {
         request_animation_frame(move || {
             if let Some(el) = document()
@@ -2055,7 +2068,17 @@ fn GameMenu(
                                 aria-selected=move || (tab.get() == t).to_string()
                                 tabindex=move || if tab.get() == t { "0" } else { "-1" }
                                 autofocus=t == first
-                                on:click=move |_| select(t)>{t.label()}</button>
+                                // The Packs tab: how many are left to open, as on the title's entry.
+                                aria-label=move || (t == MenuTab::Packs).then(|| tr(
+                                    format!("Packs, {} to open", unopened.get()),
+                                    format!("Boosters, {} à ouvrir", unopened.get()),
+                                ))
+                                on:click=move |_| select(t)>
+                                {t.label()}
+                                {move || (t == MenuTab::Packs && unopened.get() > 0).then(|| view! {
+                                    <span class="count-badge" aria-hidden="true">{unopened.get()}</span>
+                                })}
+                            </button>
                         }).collect_view()}
                         {move || pad().then(|| view! { <kbd class="tab-key" aria-hidden="true">"R"</kbd> })}
                     </div>
@@ -2081,6 +2104,21 @@ fn GameMenu(
                             <div class="side-panel"><Inspector /></div>
                         </div>
                     }.into_any(),
+                    (MenuTab::Packs, _) => {
+                        // The reveal's ways out are the menu's own tabs.
+                        let to = Callback::new(move |s: Screen| {
+                            let (t, sel) = if s == Screen::Decks { (MenuTab::Decks, "#menu-tab-decks") } else { (MenuTab::Collection, "#menu-tab-collection") };
+                            select(t);
+                            focus(sel);
+                        });
+                        let opened = RwSignal::new(false);
+                        view! {
+                            <div class:menu-split=opened>
+                                <div><PacksPanel opened=opened to=to /></div>
+                                {move || opened.get().then(|| view! { <div class="side-panel"><Inspector /></div> })}
+                            </div>
+                        }.into_any()
+                    }
                     (MenuTab::Journal, _) => view! { <crate::journal::Journal /> }.into_any(),
                     (MenuTab::Map, _) => view! { <crate::worldmap::WorldMap here=here on_travel=on_travel /> }.into_any(),
                     (MenuTab::Campaign, _) => view! {

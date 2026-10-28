@@ -3188,6 +3188,8 @@ p.atlas-pick { color: var(--muted); }
 .menu-tabs button:hover { color: var(--ink); }
 /* Selected is the grammar's brass wash and line (an inset), so it never reads as the focus ring (an outline). */
 .menu-tabs button[aria-selected="true"] { background: var(--sel-bg); border-color: var(--sel-line); color: var(--sel-ink); }
+/* The Packs tab: how many are left to open, the title entry's badge at tab size. */
+.menu-tabs .count-badge { min-width: 22px; height: 22px; margin-left: 6px; padding: 0 6px; font-size: var(--fs-sm); vertical-align: 1px; }
 .menu-panel { flex: 1; min-width: 0; padding: 16px 20px 24px; }
 .menu-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
 .menu-actions.shelf-head { justify-content: space-between; align-items: center; }
