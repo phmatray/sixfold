@@ -235,7 +235,8 @@
             "Ma sœur garde le phare, sur la Promenade de Ventsalé. Elle ne vient jamais. Trop de marches, qu'elle dit."
           ]
         }
-      ]
+      ],
+      "if": "hour:7-20"
     }
   ],
   "ground": {

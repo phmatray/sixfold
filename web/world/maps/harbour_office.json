@@ -174,7 +174,8 @@
             "Tu ne les as pas. Reviens quand tu les auras. Je ferai chauffer le tampon."
           ]
         }
-      ]
+      ],
+      "if": "hour:6-19"
     }
   ],
   "ground": {
