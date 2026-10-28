@@ -562,9 +562,10 @@ pub fn GameOver() -> impl IntoView {
                             <div class="reward campaign-reward" role="status">
                                 {if rw.seal {
                                     view! { <crate::campaign::SealFill r=r /> }.into_any()
-                                } else if !rw.won && r.seal && ctl.seal().is_some() {
-                                    // The seal not won: its outline, empty, never a pack that wasn't given.
-                                    view! { <span class="seal-empty"><crate::campaign::Seal r=r earned=false /></span> }.into_any()
+                                } else if !rw.won && ctl.seal().is_some() {
+                                    // The seal (or the champion's crest, in brass) not won: its outline, empty, never
+                                    // a pack that wasn't given (#155).
+                                    view! { <span class="seal-empty" class:grand=!r.seal><crate::campaign::Seal r=r earned=false /></span> }.into_any()
                                 } else if let Some(c) = rw.promo {
                                     // The Warden's promo: show the card itself.
                                     view! { <span class="reward-card" aria-hidden="true"><crate::cards::CardFace id=c /></span> }.into_any()
@@ -845,6 +846,10 @@ pub fn RivalFace(
 /// out (not `t-{color_key}`) because a class that changes name in place must
 /// be a `&'static str`.
 pub fn seal_tone(s: &SealDuel) -> &'static str {
+    // The champion's duel wears brass, not her deck's first colour (#155: it carried t-water).
+    if s.grand {
+        return "t-brass";
+    }
     match s.rival.colors.first() {
         Some(Color::Grass) => "t-grass",
         Some(Color::Fire) => "t-fire",
@@ -926,6 +931,8 @@ pub fn SealCard(
                                 <i style=format!("--i:{i}")><crate::campaign::Seal r=k earned=true /></i>
                             }).collect_view()}
                         </p>
+                        // The stakes, as Marlo's card says his (#155).
+                        <p class="seal-card-stakes">{tr("Six prizes to take, and the title is yours", "Six cartes Récompense à prendre, et le titre est à vous")}</p>
                     }.into_any()
                 } else {
                     // What is at stake, under the name (#155): the region's colours and the prizes to take.

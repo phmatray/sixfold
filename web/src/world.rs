@@ -100,6 +100,8 @@ const REOPEN: &str = "sixfold.reopen-world";
 /// How long a seal won on stage shows (#153): it fills, flies to the Menu
 /// button and fades (`.seal-flight` in style.css).
 const SEAL_FLIGHT_MS: u64 = 1900;
+/// When the flying seal reaches the HUD's count (`.seal-flight`: 650 ms in, a 900 ms flight).
+const SEAL_LAND_MS: u64 = 1550;
 
 /// Retry after the scene's modules failed to load: the browser keeps a failed
 /// module import for the page's whole life, so reload and come back here.
@@ -819,6 +821,7 @@ pub fn WorldScreen() -> impl IntoView {
     // whether one plays (the Skip button, input), the latest one world.js asked
     // for, and a tick each time the cue under way has finished.
     let scene = StoredValue::new(None::<Scene>);
+    let scene_at = StoredValue::new(0.0_f64);
     let playing = RwSignal::new(false);
     let scene_in = RwSignal::new(None::<String>);
     let cue_done = RwSignal::new(0u32);
@@ -828,6 +831,15 @@ pub fn WorldScreen() -> impl IntoView {
     let menu_btn = NodeRef::<html::Button>::new();
     // The HUD's seal count, where a seal won on stage lands (#155) and stays counted.
     let seals_chip = NodeRef::<html::Span>::new();
+    // Back from a keeper's first win, before the scene that awards it on stage: the count shows the seal
+    // only when it lands (#155), so it starts one short.
+    let seal_lag = RwSignal::new(progress.with_untracked(|p| {
+        p.last_duel()
+            .filter(|(_, won)| *won)
+            .and_then(|(id, _)| campaign::rival(id))
+            .is_some_and(|r| r.seal && !p.has_flag(&format!("sealed_{}", r.id))) as usize
+    }));
+    let seal_bump = RwSignal::new(0u32);
 
     // ponytail: the callback is leaked once per visit (a few bytes); keep a handle if visits ever get frequent.
     let cb = Closure::<dyn Fn(String, String, String) -> bool>::new(
@@ -1197,9 +1209,27 @@ pub fn WorldScreen() -> impl IntoView {
             format!("{}'s seal!", r.name),
             format!("Le sceau de {}\u{202f}!", r.name),
         ));
-        if !fly {
-            return;
+        // Said on screen too (#155), with where it stands: "Marlo's seal · 2 of 6".
+        let held = progress.with_untracked(campaign::seals);
+        let line = tr(
+            format!("{}'s seal · {held} of 6", r.name),
+            format!("Le sceau {} · {held} sur 6", crate::decks::de(r.name)),
+        );
+        if let Some(json) = js_sys::JSON::stringify(&JsValue::from_str(&line))
+            .ok()
+            .and_then(|j| j.as_string())
+        {
+            world_cue(&format!(r#"{{"caption":{json}}}"#));
         }
+        // The HUD's count steps up when the seal lands on it, with a pulse (a cut under reduced motion).
+        let land = move || {
+            _ = seal_lag.try_set(0);
+            _ = seal_bump.try_update(|n| *n += 1);
+        };
+        if !fly {
+            return land();
+        }
+        set_timeout(land, Duration::from_millis(SEAL_LAND_MS));
         // From the stone on screen (#155) to the HUD's seal count (or, before it shows, the Menu button),
         // as offsets from the window's centre.
         let w = window();
@@ -1312,6 +1342,13 @@ pub fn WorldScreen() -> impl IntoView {
         }
         end_scene(s, rest.iter().map(cue_json).collect());
     };
+    // A player's skip (Escape, a tap, the buttons) is ignored in a scene's first 400 ms (#155): a press
+    // that was on its way, or a reflex, never loses a scene that only plays once.
+    let player_skip = move || {
+        if js_sys::Date::now() - scene_at.get_value() >= 400.0 {
+            skip();
+        }
+    };
     Effect::new(move |_| {
         let Some(json) = scene_in.get() else { return };
         scene_in.set(None);
@@ -1319,6 +1356,7 @@ pub fn WorldScreen() -> impl IntoView {
             Some(s) => {
                 scene.set_value(Some(s));
                 playing.set(true);
+                scene_at.set_value(js_sys::Date::now());
                 // Options' "Skip every cutscene": skipped at once, its effects kept.
                 if store::skip_scenes() {
                     skip();
@@ -1376,7 +1414,7 @@ pub fn WorldScreen() -> impl IntoView {
         e.prevent_default();
         match sheet.get_untracked() {
             // Escape in a cutscene's line skips the scene.
-            Some(Sheet::Talk(t)) if t.script => skip(),
+            Some(Sheet::Talk(t)) if t.script => player_skip(),
             Some(Sheet::Talk(t)) if typed.get_untracked() < t.line().chars().count() => {
                 typed.set(usize::MAX)
             }
@@ -1482,7 +1520,7 @@ pub fn WorldScreen() -> impl IntoView {
         // In a cutscene, Escape skips it (the menu waits).
         if k == "escape" && !e.repeat() && playing.get_untracked() {
             e.prevent_default();
-            skip();
+            player_skip();
             return;
         }
         if k == "escape" && !e.repeat() && sheet.with_untracked(Option::is_none) {
@@ -1583,9 +1621,12 @@ pub fn WorldScreen() -> impl IntoView {
                     <crate::worldmap::DayDial />
                     <Facets />
                     {move || {
-                        let n = progress.with(campaign::seals);
-                        (n > 0).then(|| view! {
-                            <span class="hud-seals" node_ref=seals_chip role="img"
+                        let total = progress.with(campaign::seals);
+                        let n = total.saturating_sub(seal_lag.get());
+                        // Keyed on the bump, so its pulse plays each time a seal lands.
+                        let bump = seal_bump.get() > 0;
+                        (total > 0).then(|| view! {
+                            <span class="hud-seals" class:bump=bump node_ref=seals_chip role="img"
                                 aria-label=tr(format!("{n} of 6 seals"), format!("{n} sceau{} sur 6", if n > 1 { "x" } else { "" }))>
                                 <i aria-hidden="true"></i><b aria-hidden="true">{n}</b>
                             </span>
@@ -1626,7 +1667,7 @@ pub fn WorldScreen() -> impl IntoView {
             })}
             // Over a line the dialogue box has its own Skip.
             {move || (playing.get() && sheet.with(Option::is_none)).then(|| view! {
-                <button type="button" class="btn ghost world-skip" aria-keyshortcuts="Escape" on:click=move |_| skip()>
+                <button type="button" class="btn ghost world-skip" aria-keyshortcuts="Escape" on:click=move |_| player_skip()>
                     // The same words as the talk box's (#155).
                     {tr("Skip scene", "Passer la scène")}
                     <kbd>{move || input::prompt(Ctrl::Cancel)}</kbd>
@@ -1719,7 +1760,7 @@ pub fn WorldScreen() -> impl IntoView {
                             </button>
                             // A cutscene's line: the scene can be skipped from here too (a tap on a phone).
                             {script.then(|| view! {
-                                <button type="button" class="btn ghost talk-skip" aria-keyshortcuts="Escape" on:click=move |_| skip()>
+                                <button type="button" class="btn ghost talk-skip" aria-keyshortcuts="Escape" on:click=move |_| player_skip()>
                                     {tr("Skip scene", "Passer la scène")}
                                     <kbd>{move || input::prompt(Ctrl::Cancel)}</kbd>
                                 </button>

@@ -696,7 +696,9 @@ pub fn Challenge(
     let accepted = accepts();
     let earning = r.is_some() && open() && !accepted;
     let quote = match r {
-        Some(r) if open() && !accepted => Some(r.lines.refuse.get().to_string()),
+        // Still to earn (#155): the keeper has just said it in the world and the note says what's missing, so
+        // no third refusal in the quote.
+        Some(_) if open() && !accepted => None,
         _ => quote.or_else(|| o.lines.map(|l| l.intro.get().to_string())),
     };
     let (win_label, wins) = progress.with_untracked(|p| winnings(&id, p));

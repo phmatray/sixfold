@@ -42,7 +42,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   // `f:reveal_bellflats`: the site has shown itself already (#152), so no scene covers the talk.
   await atMarlo(page, ["f:keepers", "f:intro", "f:reveal_bellflats", "f:beat_t_tobin", "f:beat_bramble", "f:beat_t_pell", "f:beat_t_nell"]);
   const offer = await talkToMarlo(page);
-  await expect(offer).toContainText("Come back with the flats behind you.");
+  await expect(offer.locator(".ch-say")).toHaveCount(0);
   await expect(offer).toContainText("One more Saltreach duelist, and Marlo will sit down.");
   await expect(offer.getByRole("img", { name: "2 of 3" })).toBeVisible();
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toHaveCount(0);
@@ -53,7 +53,8 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   // The Journal's next step names the duelists still needed.
   await page.keyboard.press("j");
   const journal = page.getByRole("dialog", { name: "Journal" });
-  await expect(journal).toContainText("Marlo's seal (the Tide): beat one more Saltreach duelist (●●○\u00a02\u00a0of\u00a03),");
+  await expect(journal).toContainText("Marlo's seal (the Tide): beat one more Saltreach duelist");
+  await expect(journal).toContainText("2\u00a0of\u00a03");
   await page.keyboard.press("Escape");
   await expect(journal).toBeHidden();
   // The menu's Campaign roster counts them too.
@@ -131,6 +132,7 @@ test.describe(() => {
     const skip = page.getByRole("button", { name: /^Skip/ });
     await expect(skip).toBeVisible();
     expect(await walk(page, 9, 4), "no walking while the site shows itself").toBe(0);
+    await page.waitForTimeout(450); // a scene ignores a skip in its first 400 ms (#155)
     await skip.click();
     await expect(skip).toBeHidden();
     expect((await readSave(page)).progress?.[0]).toContain("f:reveal_bellflats");

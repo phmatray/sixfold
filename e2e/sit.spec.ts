@@ -14,6 +14,8 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
   await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
   const skip = page.getByRole("button", { name: /^Skip/ });
   await expect(skip).toBeVisible();
+  // A scene ignores a skip in its first 400 ms (#155).
+  await page.waitForTimeout(450);
   await page.keyboard.press("Escape");
   await expect(skip).toBeHidden();
 
@@ -71,6 +73,8 @@ test("a find taken from under a bench gives the place back to sitting", async ({
   await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
   const skip = page.getByRole("button", { name: /^Skip/ });
   await expect(skip).toBeVisible();
+  // A scene ignores a skip in its first 400 ms (#155).
+  await page.waitForTimeout(450);
   await page.keyboard.press("Escape");
   await expect(skip).toBeHidden();
 

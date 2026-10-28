@@ -282,11 +282,16 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const [up, down] = o ? [0.5, 0.5] : [1.3, 1.0];
     return { mid: y(p.clone()), top: y(p.clone().setY(p.y + up)), foot: y(p.clone().setY(p.y - down)) };
   };
-  const showCaption = (text, ms) => {
+  // Placed again every frame while it shows (#155): the camera is often still moving onto what it names.
+  const placeCaption = (fresh = false) => {
     const at = subjectY(), H = el.clientHeight, gap = 28;
+    if (at && fresh) caption.above = at.mid > H / 2; // the side is picked once per caption: it never flips mid-move
     if (!at) Object.assign(caption.style, { top: "auto", bottom: "18%" });
-    else if (at.mid > H / 2) Object.assign(caption.style, { top: "auto", bottom: `${Math.round(Math.max(16, H - at.top + gap))}px` });
+    else if (caption.above) Object.assign(caption.style, { top: "auto", bottom: `${Math.round(Math.min(H * 0.85, Math.max(16, H - at.top + gap)))}px` });
     else Object.assign(caption.style, { bottom: "auto", top: `${Math.round(Math.min(H * 0.85, at.foot + gap))}px` });
+  };
+  const showCaption = (text, ms) => {
+    placeCaption(true);
     caption.textContent = text;
     caption.style.opacity = 1;
     clearTimeout(captionTimer);
@@ -901,6 +906,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
         aim.z = fit(aim.z, lo, lo < hi ? (shot ? hi : Math.max(lo, Math.min(hi, pz + 1.2 - bottom))) : hi);
       }
     }
+    if (caption.style.opacity === "1") placeCaption();
     if (first || reduced) look.copy(aim), lookVel.set(0, 0, 0);
     else {
       const k = cut.playing ? 10 : 28, c = 2 * Math.sqrt(k) * (cut.playing ? 1 : 0.85); // slightly under-damped; a scene pans slowly
@@ -912,7 +918,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     // In a scene (#155: a scene reads as one) the camera leans in; on a place indoors (the sealed door, a
     // stone) it comes close, so the place is the subject. Sitting or idle a while: in a little. Reduced motion
     // cuts to a scene's distance and skips the idle lean.
-    const lean = cut.playing ? (cut.onTile() && w.map.light.indoor ? 0.55 : 0.85) : !reduced && (h.sit || h.idle > FIDGET_AFTER) ? 0.88 : 1;
+    // A phone held upright already sees little across: it leans in less, so both people stay in frame (#155).
+    const tall = camera.aspect < 1;
+    const lean = cut.playing ? (cut.onTile() && w.map.light.indoor ? (tall ? 0.8 : 0.55) : tall ? 0.95 : 0.85) : !reduced && (h.sit || h.idle > FIDGET_AFTER) ? 0.88 : 1;
     zoom = reduced ? lean : zoom + (lean - zoom) * Math.min(1, dt * 1.5);
     const dz = dist * zoom;
     camera.position.set(look.x, look.y + Math.sin(pitch) * dz, look.z + Math.cos(pitch) * dz);
@@ -1189,6 +1197,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     cue(json) {
       const c = JSON.parse(json);
       if (c.end) return void (world && cut.end(c.end));
+      if (c.caption) return void showCaption(c.caption, 2800); // a seal won on stage, said on screen (#155)
       if (c.warp && c.id === undefined) {
         const { map, x, z, facing } = c.warp;
         if (world && !warping) warp({ to: map, spawn: { x, z, facing }, travel: !!c.travel });

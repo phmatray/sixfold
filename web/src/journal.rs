@@ -123,12 +123,44 @@ pub fn Journal() -> impl IntoView {
     });
     shown.sort_by_key(|(done, _)| *done);
     // The main thread, computed by the engine: always the first line.
-    let next = progress.with_untracked(|p| objective(p).text(p));
-    let goal = view! {
-        <p class="objective">
-            <span class="objective-label">{tr("Next", "À faire")}</span>
-            {next}
-        </p>
+    let (next, tone) = progress.with_untracked(|p| {
+        let o = objective(p);
+        let tone = match o {
+            sixfold_engine::objective::Objective::Rival(r) => {
+                r.colors.first().map(|&c| crate::art::color_key(c))
+            }
+            _ => None,
+        };
+        (o.text(p), tone)
+    });
+    // The count's ●●○ drawn as the challenge panel draws it (#155): the region's tinted dots.
+    let pips_at = next.find(['●', '○']);
+    let goal = match (pips_at, tone) {
+        (Some(i), Some(tone)) => {
+            let run: String = next[i..]
+                .chars()
+                .take_while(|c| matches!(c, '●' | '○'))
+                .collect();
+            let (before, after) = (next[..i].to_string(), next[i + run.len()..].to_string());
+            view! {
+                <p class="objective">
+                    <span class="objective-label">{tr("Next", "À faire")}</span>
+                    {before}
+                    <span class=format!("ch-earn t-{tone}") aria-hidden="true">
+                        {run.chars().map(|c| view! { <i class:on=c == '●'></i> }).collect_view()}
+                    </span>
+                    {after}
+                </p>
+            }
+            .into_any()
+        }
+        _ => view! {
+            <p class="objective">
+                <span class="objective-label">{tr("Next", "À faire")}</span>
+                {next}
+            </p>
+        }
+        .into_any(),
     };
     if shown.is_empty() {
         return view! {
