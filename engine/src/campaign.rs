@@ -160,20 +160,42 @@ impl Rival {
             .collect()
     }
 
-    /// Where the duelists still to best are, as a sentence: "Some still wait
-    /// on the Bellflats and in Gullhaven." None once earned.
+    /// Who is still to best, and where, as a sentence (#177): "Still to beat:
+    /// Finch and Harrow on the Bellflats; Vesper (at night) on Fernhollow
+    /// Trail." None once earned.
     pub fn waiting_line(&self, p: &Progress) -> Option<String> {
-        let at: Vec<&str> = self.waiting(p).iter().map(|g| g.at.get()).collect();
-        let (last, rest) = at.split_last()?;
-        let list = if rest.is_empty() {
-            last.to_string()
-        } else {
-            // "or", as the Journal says it (#155): any of them will do.
-            format!("{} {} {last}", rest.join(", "), crate::tr("or", "ou"))
-        };
+        let and = crate::tr("and", "et");
+        let groups: Vec<String> = self
+            .waiting(p)
+            .iter()
+            .map(|g| {
+                let who: Vec<String> = g
+                    .duelists
+                    .iter()
+                    .filter(|id| self.duelists.contains(id) && !p.has_flag(&format!("beat_{id}")))
+                    .filter_map(|id| trainer(id))
+                    .map(|t| {
+                        if t.night {
+                            format!("{} ({})", t.name, crate::tr("at night", "la nuit"))
+                        } else {
+                            t.name.to_string()
+                        }
+                    })
+                    .collect();
+                let names = match who.split_last() {
+                    Some((last, [])) => last.clone(),
+                    Some((last, rest)) => format!("{} {and} {last}", rest.join(", ")),
+                    None => String::new(),
+                };
+                format!("{names} {}", g.at.get())
+            })
+            .collect();
+        if groups.is_empty() {
+            return None;
+        }
         Some(crate::tr(
-            format!("Some still wait {list}."),
-            format!("Il en reste {list}."),
+            format!("Still to beat: {}.", groups.join("; ")),
+            format!("Restent à battre\u{a0}: {}.", groups.join("\u{a0}; ")),
         ))
     }
 

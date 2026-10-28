@@ -44,6 +44,8 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   const offer = await talkToMarlo(page);
   await expect(offer.locator(".ch-say")).toHaveCount(0);
   await expect(offer).toContainText("One more Saltreach duelist, and Marlo will sit down.");
+  // #177: who is left, by name, and where.
+  await expect(offer).toContainText("Still to beat: Finch, Harrow, Mirela and Liesl on the Bellflats;");
   await expect(offer.getByRole("img", { name: "2 of 3" })).toBeVisible();
   await expect(offer.getByRole("button", { name: /^Challenge/ })).toHaveCount(0);
   await expect(offer.getByRole("button", { name: /^Not now/ })).toBeFocused();
@@ -55,6 +57,7 @@ test("Marlo refuses until three of the Saltreach's duelists are bested, and the 
   const journal = page.getByRole("dialog", { name: "Journal" });
   await expect(journal).toContainText("Marlo's seal (the Tide): beat one more Saltreach duelist");
   await expect(journal).toContainText("2\u00a0of\u00a03");
+  await expect(journal).toContainText("Skye and Morrow on the Saltwind Boardwalk. Then Marlo");
   await page.keyboard.press("Escape");
   await expect(journal).toBeHidden();
   // The menu's Campaign roster counts them too.

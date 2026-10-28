@@ -1177,6 +1177,29 @@ fn staging_problems(site: &str, m: &Value) -> Vec<String> {
             "{site}: {id} has no not-yet branch ({unearned:?}) before the default"
         )),
     }
+    // #177: the keeper's "not yet" counts, like the bell-keeper's: one branch per
+    // number already bested, the most first, all before the plain not-yet.
+    let earn = rival(id).map_or(0, |r| r.earn);
+    let counted: Vec<usize> = (1..earn)
+        .rev()
+        .filter_map(|n| {
+            let want = conds(&format!(
+                "open:{id} & !earned:{id} & !beat:{id} & bested:{id}:{n}"
+            ));
+            branches
+                .iter()
+                .position(|b| conds(b["if"].as_str().unwrap_or("")) == want)
+        })
+        .collect();
+    if counted.len() + 1 != earn
+        || !counted.windows(2).all(|w| w[0] < w[1])
+        || not_yet.is_some_and(|i| counted.iter().any(|&c| c > i))
+    {
+        bad.push(format!(
+            "{site}: {id}'s not-yet says how many more, bested:{id}:{} down to 1, before the plain one",
+            earn.saturating_sub(1)
+        ));
+    }
     bad
 }
 
@@ -1228,6 +1251,20 @@ fn every_seal_site_reveals_itself_and_stages_its_keeper() {
         .push("wait:1500".into());
     let errors = staging_problems("bellflats", &m).join("\n");
     assert!(errors.contains("ms of waits"), "{errors}");
+    // #177: a keeper whose "not yet" doesn't count is refused.
+    let mut m = load("bellflats");
+    let marlo = m["npcs"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .find(|n| n["id"] == "marlo")
+        .unwrap();
+    marlo["dialogue"]
+        .as_array_mut()
+        .unwrap()
+        .retain(|b| b["if"] != "open:marlo & !earned:marlo & !beat:marlo & bested:marlo:2");
+    let errors = staging_problems("bellflats", &m).join("\n");
+    assert!(errors.contains("says how many more"), "{errors}");
 }
 
 /// #153: what is wrong with a seal site's stage victory, one line each. Its

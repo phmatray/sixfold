@@ -2119,14 +2119,42 @@
           ]
         },
         {
-          "if": "open:bramble & !earned:bramble & !beat:bramble",
+          "if": "open:bramble & !earned:bramble & !beat:bramble & bested:bramble:2",
           "lines": [
             "Not yet, dear. The hedges don't know you.",
-            "Duel a few of the Deepgrove's duelists. The roots carry word to me."
+            "Just one more of the Deepgrove's duelists. The roots carry word to me."
           ],
           "lines_fr": [
             "Pas encore, mon petit. Les haies ne te connaissent pas.",
-            "Affronte quelques duellistes du Bois-Profond. Les racines me feront passer le mot."
+            "Plus qu'un duelliste du Bois-Profond. Les racines me feront passer le mot."
+          ],
+          "do": [
+            "duel:bramble"
+          ]
+        },
+        {
+          "if": "open:bramble & !earned:bramble & !beat:bramble & bested:bramble:1",
+          "lines": [
+            "Not yet, dear. The hedges don't know you.",
+            "Two more of the Deepgrove's duelists, dear. The roots carry word to me."
+          ],
+          "lines_fr": [
+            "Pas encore, mon petit. Les haies ne te connaissent pas.",
+            "Encore deux duellistes du Bois-Profond, mon petit. Les racines me feront passer le mot."
+          ],
+          "do": [
+            "duel:bramble"
+          ]
+        },
+        {
+          "if": "open:bramble & !earned:bramble & !beat:bramble",
+          "lines": [
+            "Not yet, dear. The hedges don't know you.",
+            "Beat three of the Deepgrove's duelists. The roots carry word to me."
+          ],
+          "lines_fr": [
+            "Pas encore, mon petit. Les haies ne te connaissent pas.",
+            "Bats trois duellistes du Bois-Profond. Les racines me feront passer le mot."
           ],
           "do": [
             "duel:bramble"
