@@ -3,7 +3,7 @@
 // what the hero faces and can talk to or use (`facing`). An NPC with an `if` is
 // only there while it holds (`hidden` otherwise, set by build.js `refresh`). One with a
 // `routine` (routine.js) walks to each activity as the clock reaches it, and is `away`
-// while it is home.
+// while it is home. Idle people glance at a hero close by, and say their `barks` in passing (#114).
 import { actor, place, animateActor, occupy, angle, key, DIR } from "./actors.js";
 import { ACROSS } from "./props.js";
 import { tr } from "./map.js";
@@ -19,6 +19,9 @@ const WALKERS_MAX = 6; // people walking a routine at once, per map (`walkers_ma
 const LEAVE_AFTER = 2.5; // seconds after the hour turns before a person sets off (x its own `pause`)
 const JUMP = 5; // game minutes: a clock that moves further in one frame was set (a rest, a save), not ticking
 const CW = { n: "e", e: "s", s: "w", w: "n" }, CCW = { n: "w", w: "s", s: "e", e: "n" };
+const GLANCE_NEAR = 2, GLANCE_EVERY = 4; // tiles; seconds before a person glances anew (#114)
+const BARK_NEAR = 3, BARK_EVERY = 20; // tiles; seconds between two barks of one person
+export const BARK_HOLD = 2.5; // seconds a bark stays over the head
 
 // What a person wears: the map's `wear` list, else for a route duelist one of its
 // model's accessories, picked by its id (so each looks its own on a shared model).
@@ -198,10 +201,42 @@ export function updateNpc(w, n, dt, paused, minute = 480) {
     if (dx || dz) n.face = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? "e" : "w") : dz > 0 ? "s" : "n";
   }
   if (n.sit) seatUpdate(n, dt, w.reduced);
+  glance(w, n, paused);
+  const face = n.face; // a glance only turns the body: its own facing (a routine's, a look's) is kept for after
+  if (n.glance) n.face = n.glance;
   place(n, dt, w.floorAt);
+  if (w.reduced && n.glance !== n.glanced) n.obj.rotation.y = angle(n.face); // reduced motion: the turn is a cut
+  n.glanced = n.glance;
+  n.face = face;
   occupy(n, null);
-  animateActor(n, dt, false);
+  animateActor(n, dt, w.reduced);
   occupy(n, n.busy ? null : act?.do, w.reduced, n.seed.phase);
+}
+
+// Glances (#114): an idle person (not walking, sitting, talking or a duelist, which watches its line) turns to the
+// hero within GLANCE_NEAR tiles in front or beside it, at most every GLANCE_EVERY s; back to its own facing once the
+// hero has gone. `glance: false` opts out.
+const duels = (n) => (n.duels ??= !!n.def.trainer || JSON.stringify(n.def.dialogue ?? "").includes("duel:"));
+function glance(w, n, paused) {
+  const h = w.hero, dx = h.x - n.x, dz = h.z - n.z, [fx, fz] = DIR[n.face];
+  const near = Math.abs(dx) + Math.abs(dz) <= GLANCE_NEAR && (dx || dz) && (n.glance || dx * fx + dz * fz >= 0); // not from behind
+  if (!near || paused || n.busy || n.step || n.go?.length || n.walk || n.sit || n.def.route || n.def.glance === false || duels(n)) return void (n.glance = null);
+  if (w.now < (n.glanceNext ?? 0)) return; // too soon: keeps its last glance (or none)
+  n.glanceNext = w.now + GLANCE_EVERY;
+  n.glance = Math.abs(dx) >= Math.abs(dz) ? (dx > 0 ? "e" : "w") : dz > 0 ? "s" : "n";
+}
+
+// Barks (#114): within BARK_NEAR tiles, the first of a person's `barks` whose `if` holds and that it hasn't said
+// this session; then BARK_EVERY s before its next. world.js shows it and only asks when nothing else is going on.
+const barked = new Set(); // "map:id:i", never saved: barks don't fill the save
+export function barkOf(w, n, holds) {
+  const h = w.hero;
+  if (!n.def.barks || n.hidden || n.away || w.now < (n.barkNext ?? 0) || Math.abs(h.x - n.x) + Math.abs(h.z - n.z) > BARK_NEAR) return null;
+  const i = n.def.barks.findIndex((b, i) => !barked.has(`${w.name}:${n.def.id}:${i}`) && holds(b.if));
+  n.barkNext = w.now + (i < 0 ? 1 : BARK_EVERY); // none due: asked again in a second, not every frame
+  if (i < 0) return null;
+  barked.add(`${w.name}:${n.def.id}:${i}`);
+  return n.def.barks[i].say;
 }
 
 // What the hero faces: a person (also across a counter or a duel table), a

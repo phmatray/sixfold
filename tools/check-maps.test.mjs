@@ -171,3 +171,16 @@ test("AC5 (#113): a routine on a solid tile or on a duelist fails; a good one pa
   bad(ann([{ from: "25:00", at: [12, 12] }]), /"25:00" is not a time/);
   bad(ann([{ from: "dusk", home: "nowhere" }]), /goes home to nowhere, but no door here leads there/);
 });
+
+test("#114: a bark needs its say_fr, a condition string and 60 characters at most; a good one passes", () => {
+  const bark = (b) => (m) => m.vale.npcs.push({ id: "ann", name: "Ann", x: 12, z: 8, facing: "s", barks: [b] });
+  passes(world(bark({ if: "seals:3", say: "Three seals already!", say_fr: "Déjà trois sceaux !" })));
+  const bad = (change, msg) => {
+    const r = run(world(change), "--strict");
+    assert.notEqual(r.code, 0, r.out);
+    assert.match(r.out, msg, r.out);
+  };
+  bad(bark({ if: "seals:3", say: "Three seals already!" }), /vale: ann's bark 0 has no say_fr/);
+  bad(bark({ if: 3, say: "Hi.", say_fr: "Salut." }), /vale: ann's bark 0: its if is a condition string/);
+  bad(bark({ say: "x".repeat(61), say_fr: "Salut." }), /vale: ann's bark 0 is over 60 characters/);
+});

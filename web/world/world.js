@@ -19,6 +19,7 @@
 //   ("script", id, json)   a cutscene starts: {"steps"} for Leptos to run (script.js)
 //   ("cue_done", id, "")   a cutscene cue sent with an `id` has finished
 //   ("area", title, "")    entered an outdoor area that has a `title`
+//   ("bark", name, line)   a person said a line in passing (npc.js `barkOf`), for the live region
 //   ("camera", angle, "")  the C key (or a pad's R3) picked the next outdoor camera angle (camera.js)
 //   ("progress", "done/total", "") models loaded for the first map (the loading screen)
 //   ("ready", "", "")      first frame drawn;  ("error", "", message)
@@ -46,8 +47,8 @@ import { PLACEHOLDER, group, prep, CUTAWAY } from "./props.js";
 import { tr, loadMap, loadAsset, assetNames, preload, PERSON, OPTIONAL } from "./map.js";
 import { build, dispose, refresh, animateProps } from "./build.js";
 import { mote } from "./fireflies.js";
-import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route } from "./actors.js";
-import { updateNpc, facing as facingOf } from "./npc.js";
+import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route, say } from "./actors.js";
+import { updateNpc, barkOf, BARK_HOLD, facing as facingOf } from "./npc.js";
 import * as duelists from "./trainer.js";
 import * as lifts from "./lift.js";
 import * as seats from "./seat.js";
@@ -851,6 +852,11 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     animateActor(h, dt, reduced);
     book.pose(h);
     for (const n of w.npcs) updateNpc(w, n, dt, paused, minute);
+    // A line said in passing (#114): never in a scene, a talk, a duel or with a sheet open (all `busy`).
+    if (!busy() && !editing()) for (const n of w.npcs) {
+      const line = barkOf(w, n, holds);
+      if (line) say(n, line, BARK_HOLD), cb("bark", n.def.name, line);
+    }
     animateProps(w, dt, reduced);
     stoneStep(w.stone, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);
@@ -986,7 +992,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
   el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, camera: { angle: camAngle, pitch: pitchNow },
-    people: world?.npcs.filter((n) => !n.hidden).map((n) => ({ id: n.def.id, x: n.x, z: n.z, do: n.activity?.do ?? null, away: !!n.away, walking: !!n.walk, sitting: !!n.sit })) ?? [] });
+    people: world?.npcs.filter((n) => !n.hidden).map((n) => ({ id: n.def.id, x: n.x, z: n.z, face: n.glance ?? n.face, do: n.activity?.do ?? null, away: !!n.away, walking: !!n.walk, sitting: !!n.sit })) ?? [] });
 
   // Item popup preview: the model turning in its own small canvas.
   let pv = null;

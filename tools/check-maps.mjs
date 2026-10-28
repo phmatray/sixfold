@@ -146,6 +146,15 @@ for (const [name, m] of Object.entries(maps)) {
       if (!seatAt.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} sits where there is no seat`);
       if (n.route) fail.push(`${name}: ${n.id} sits, so it can't walk a route`);
     } else if (solid.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} stands on a solid tile`);
+    // Barks (#114): a line said in passing, short, in both languages; `if` is checked by the engine (world_data.rs).
+    if (n.glance !== undefined && typeof n.glance !== "boolean") fail.push(`${name}: ${n.id}'s glance is true or false`);
+    (n.barks ?? []).forEach((b, i) => {
+      const at = `${name}: ${n.id}'s bark ${i}`;
+      if (typeof b.say !== "string" || !b.say.trim()) fail.push(`${at} needs a say`);
+      if (!("say_fr" in b)) fail.push(`${at} has no say_fr`);
+      if (b.if !== undefined && typeof b.if !== "string") fail.push(`${at}: its if is a condition string`);
+      if (String(b.say).length > 60 || String(b.say_fr ?? "").length > 60) fail.push(`${at} is over 60 characters`);
+    });
   }
   routines(name, m, solid, seatAt, height);
   const all = reach(name, m, solid, height);

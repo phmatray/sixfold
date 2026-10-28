@@ -942,6 +942,8 @@ pub fn WorldScreen() -> impl IntoView {
                     })
                 }
                 "area" => _ = announce.try_set(a),
+                // A line said in passing (#114): "<name>: <line>", once per bark.
+                "bark" => _ = announce.try_set(format!("{a}{} {b}", tr(":", "\u{a0}:"))),
                 // C (or a pad's R3) picked the next outdoor camera angle: saved, and said.
                 "camera" => {
                     let angle = CameraAngle::from_code(&a);
