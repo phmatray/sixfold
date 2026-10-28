@@ -247,7 +247,8 @@
         "sx_sn_roof": "#3a3533",
         "sx_sn_roof_dk": "#2c2826",
         "sx_sn_door": "#2f6b6b"
-      }
+      },
+      "lit": "hour:17-23"
     },
     {
       "asset": "glass_furnace",
@@ -395,7 +396,8 @@
         "sx_sn_roof": "#3a3533",
         "sx_sn_roof_dk": "#2c2826",
         "sx_sn_door": "#b5462f"
-      }
+      },
+      "lit": "hour:19-1"
     },
     {
       "asset": "terrace_house",
@@ -407,7 +409,8 @@
         "sx_sn_masonry_dk": "#7c4535",
         "sx_sn_roof": "#3a3533",
         "sx_sn_roof_dk": "#2c2826"
-      }
+      },
+      "lit": "hour:18-22"
     },
     {
       "asset": "terrace_house",
@@ -420,7 +423,8 @@
         "sx_sn_roof": "#3a3533",
         "sx_sn_roof_dk": "#2c2826",
         "sx_sn_door": "#b5462f"
-      }
+      },
+      "lit": "hour:20-24"
     },
     {
       "asset": "crates",
@@ -481,7 +485,8 @@
         "sx_roof_brown_dk": "#3a2d2a",
         "sx_awning_red": "#d0692f",
         "sx_bread": "#d0692f"
-      }
+      },
+      "lit": "hour:17-21"
     },
     {
       "asset": "inn_sign",
@@ -3030,6 +3035,12 @@
             "Reviens après la tombée de la nuit si tu veux son histoire. Le jour, on attise."
           ]
         }
+      ],
+      "barks": [
+        {
+          "say": "Warm night, warm stones.",
+          "say_fr": "Nuit tiède, pierres tièdes."
+        }
       ]
     },
     {
@@ -3183,6 +3194,13 @@
             "Tout ce qui est ici sort de la Verrerie. Clio fait les pièces difficiles. Elle fredonne en fractions en travaillant."
           ]
         }
+      ],
+      "barks": [
+        {
+          "if": "flag:lantern_done",
+          "say": "Clio's lantern? I saw it glow from my step!",
+          "say_fr": "La lanterne de Clio ? Je l'ai vue briller d'ici !"
+        }
       ]
     },
     {
@@ -3219,6 +3237,13 @@
             "Elle court la route de la carrière tous les matins. Un jour, elle fera ses duels à la Gueule-du-Four, près de la grande pierre. Elle dit.",
             "C'est notre maison. Touche pas à ses chaussures de course, elle les compte."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "if": "flag:lens_returned",
+          "say": "Tarn found his lens! Now he squints at us.",
+          "say_fr": "Tarn a retrouvé sa lentille ! Il nous scrute, maintenant."
         }
       ]
     },

@@ -1647,7 +1647,10 @@
         "x": 5,
         "z": 7,
         "facing": "n"
-      }
+      },
+      "open": "hour:9-20",
+      "locked": "Closed. Back at nine.",
+      "locked_fr": "Fermé. Retour à neuf heures."
     }
   ],
   "exits": [
@@ -1976,6 +1979,13 @@
             "J'aime l'aube. Les lanternes rentrent, les belles-de-lune se ferment, et tout le lac est rose un moment."
           ]
         }
+      ],
+      "barks": [
+        {
+          "if": "flag:sealed_lumen",
+          "say": "Lumen's seal! The lanterns burn brighter.",
+          "say_fr": "Le sceau de Lumen ! Les lanternes brillent plus fort."
+        }
       ]
     },
     {
@@ -2001,6 +2011,12 @@
             "Je les compte, je ne les attrape pas. Enfin, je les attrape, je les compte, je les relâche. La phalène ne s'en formalise pas. Trop.",
             "Des indices, pour un ami des compteurs de phalènes : les lanternes du lac portent plus que des vœux. Les massifs de belles-de-lune du Puits-de-Lune cachent quelque chose, la nuit seulement. Et l'îlot : il te faudrait des bottes."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Shh. The willows are dreaming.",
+          "say_fr": "Chut. Les saules rêvent."
         }
       ]
     },

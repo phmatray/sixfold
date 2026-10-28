@@ -67,7 +67,8 @@
       "asset": "cottage",
       "x": 17,
       "z": 5,
-      "rot": 0
+      "rot": 0,
+      "lit": "hour:17-23"
     },
     {
       "asset": "workshop",
@@ -85,7 +86,8 @@
         "sx_roof_brown_dk": "#2c3f4c",
         "sx_awning_red": "#2f8a84",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:19-1"
     },
     {
       "asset": "cottage",
@@ -97,7 +99,8 @@
         "sx_roof_brown_dk": "#5f3449",
         "sx_awning_red": "#d6a84a",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:18-22"
     },
     {
       "asset": "flowers",
@@ -217,7 +220,8 @@
         "sx_roof_brown_dk": "#3b4f2c",
         "sx_awning_red": "#c98a2e",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:20-24"
     },
     {
       "asset": "inn_sign",
@@ -235,7 +239,8 @@
         "sx_roof_brown_dk": "#2c3f4c",
         "sx_awning_red": "#b9493a",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:17-21"
     },
     {
       "asset": "cottage",
@@ -247,7 +252,8 @@
         "sx_roof_brown_dk": "#5a3f28",
         "sx_awning_red": "#4f9fd6",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:18-23"
     },
     {
       "asset": "cottage",
@@ -259,7 +265,8 @@
         "sx_roof_brown_dk": "#3b4f2c",
         "sx_awning_red": "#e2b65a",
         "sx_bread": null
-      }
+      },
+      "lit": "hour:21-2"
     },
     {
       "asset": "flowers",
@@ -2391,7 +2398,10 @@
         "x": 5,
         "z": 7,
         "facing": "n"
-      }
+      },
+      "open": "hour:8-18",
+      "locked": "Closed. The presses rest until eight.",
+      "locked_fr": "Fermé. Les presses se reposent jusqu'à huit heures."
     },
     {
       "x": 33,
@@ -2478,6 +2488,13 @@
             "Aujourd'hui, je conseille le gâteau aux graines, les petits pains, et le banc près de la fontaine pour les manger."
           ]
         }
+      ],
+      "barks": [
+        {
+          "if": "flag:rye_done",
+          "say": "Hob's rye loaves sold out by noon!",
+          "say_fr": "Les pains de seigle de Hob, partis avant midi !"
+        }
       ]
     },
     {
@@ -2551,7 +2568,13 @@
           ]
         }
       ],
-      "idle": "Idle"
+      "idle": "Idle",
+      "barks": [
+        {
+          "say": "Mind the broom, dear.",
+          "say_fr": "Attention au balai, mon petit."
+        }
+      ]
     },
     {
       "id": "odile",

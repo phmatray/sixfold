@@ -146,7 +146,8 @@
             "Mina dit que je parle en tissu. Je dis que Mina parle en chuchotements. Nous sommes tous deux doublés de soie."
           ]
         }
-      ]
+      ],
+      "if": "hour:8-21"
     }
   ],
   "ground": {

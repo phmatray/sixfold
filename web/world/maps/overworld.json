@@ -79,7 +79,8 @@
       "asset": "house",
       "x": 22,
       "z": 7,
-      "rot": 0
+      "rot": 0,
+      "lit": "hour:17-23"
     },
     {
       "asset": "sign",
@@ -188,7 +189,8 @@
       "asset": "cottage",
       "x": 9,
       "z": 14,
-      "rot": 0
+      "rot": 0,
+      "lit": "hour:19-1"
     },
     {
       "asset": "hanging_sign",
@@ -2820,6 +2822,12 @@
             "Un jour, je battrai celui qui s'assoit à cette table de duel. Un jour."
           ]
         }
+      ],
+      "barks": [
+        {
+          "say": "Off to a duel? Mind the puddles!",
+          "say_fr": "En route pour un duel ? Gare aux flaques !"
+        }
       ]
     },
     {
@@ -2894,6 +2902,11 @@
       "z": 27,
       "facing": "w",
       "barks": [
+        {
+          "if": "flag:seeds_done",
+          "say": "The beans are over the fence. Thank you!",
+          "say_fr": "Les haricots dépassent la clôture. Merci !"
+        },
         {
           "if": "seals:3",
           "say": "Three seals already? My beans are jealous.",
