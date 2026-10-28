@@ -53,17 +53,29 @@ function weak(renderer) {
   return /swiftshader|llvmpipe|software|basic render/i.test(name) || navigator.deviceMemory < 4 || navigator.hardwareConcurrency < 4 || !!navigator.connection?.saveData;
 }
 
+// The device can't carry the backdrop (no WebGL, or `weak`): known from the first title,
+// so a later one (after the world, a reset, the lesson) goes flat without a new context.
+// Creating one waits on the GPU process: on a software renderer still busy with the
+// world's last frames, that froze the page for seconds on the way back to the title.
+let flatForGood = false;
+
 export function mount(el) {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const flat = () => el.classList.add("flat");
+  if (flatForGood) {
+    flat();
+    return { stop() {} };
+  }
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
   } catch {
+    flatForGood = true;
     flat();
     return { stop() {} };
   }
   if (weak(renderer)) {
+    flatForGood = true;
     renderer.forceContextLoss();
     renderer.dispose();
     flat();
