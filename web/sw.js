@@ -14,8 +14,8 @@
 //   maps. After the first launch the page asks for the rest ({type: "fill"}),
 //   and the worker downloads what is missing a few files at a time, posting
 //   {type: "fill", done, total} to the pages as it goes.
-// - Other same-origin files and the web fonts are cached the first time they
-//   are used, then served stale-while-revalidate.
+// - Other same-origin files are cached the first time they are used, then
+//   served stale-while-revalidate (the fonts are precached: web/fonts).
 // - Card art (cards/<slug>.webp?v=<hash>) is cached the first time a card
 //   shows it and served cache-first from a cache that outlives deploys: the
 //   URL changes when a picture does, and the older copy is dropped then.
@@ -24,9 +24,8 @@
 
 const SCOPE = self.registration.scope;
 const SHELL = `sixfold-shell-${VERSION}-${SCOPE}`;
-// Same-origin files cached on use belong to one build; font files are versioned by URL.
+// Same-origin files cached on use belong to one build.
 const RUNTIME = `sixfold-runtime-${VERSION}-${SCOPE}`;
-const CDN = `sixfold-cdn-${SCOPE}`;
 const ART = `sixfold-art-${SCOPE}`;
 const WORLD_CACHE = `sixfold-world-${SCOPE}`;
 const SUM = "x-sixfold-sum";
@@ -51,7 +50,8 @@ self.addEventListener("activate", (event) => {
           keys
             .filter(
               (k) =>
-                (k.startsWith("sixfold-shell-") || k.startsWith("sixfold-runtime-")) &&
+                // sixfold-cdn-: the web fonts, before they shipped with the game.
+                (k.startsWith("sixfold-shell-") || k.startsWith("sixfold-runtime-") || k.startsWith("sixfold-cdn-")) &&
                 k.endsWith(SCOPE) &&
                 k !== SHELL &&
                 k !== RUNTIME,
@@ -69,8 +69,6 @@ self.addEventListener("message", (event) => {
   if (event.data?.type === "fill") event.waitUntil((filling ??= fill().finally(() => (filling = null))));
 });
 
-const RUNTIME_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
-
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
@@ -87,8 +85,6 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(networkFirst(req));
   } else if (req.url.startsWith(SCOPE)) {
     event.respondWith(staleWhileRevalidate(event, req, RUNTIME));
-  } else if (RUNTIME_HOSTS.includes(url.hostname)) {
-    event.respondWith(staleWhileRevalidate(event, req, CDN));
   }
 });
 
