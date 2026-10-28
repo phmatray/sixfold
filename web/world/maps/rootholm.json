@@ -784,7 +784,7 @@
     {
       "asset": "signpost",
       "x": 29,
-      "z": 3,
+      "z": 4,
       "rot": 0
     },
     {
@@ -2075,7 +2075,7 @@
     },
     {
       "x": 29,
-      "z": 3,
+      "z": 4,
       "kind": "sign",
       "text": "North, through the Broken Elder: The Elder Ring, where Bramble keeps the seal. South: the Moot.",
       "text_fr": "Au nord, par le Vieil-Arbre brisé : Le Cercle des Anciens, où Bramble garde le sceau. Au sud : le Moot."

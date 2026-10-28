@@ -293,6 +293,16 @@ fn walked(was: &str, at: &str) {
     }
 }
 
+/// The outdoor camera angle this save's player picked (#148).
+pub fn camera() -> save::CameraAngle {
+    CURRENT.with_borrow(|(_, s)| s.camera_angle())
+}
+
+pub fn set_camera(angle: save::CameraAngle) {
+    edit(|s| s.set_camera_angle(angle));
+    write();
+}
+
 pub fn campaign_deck() -> Option<String> {
     CURRENT.with_borrow(|(_, s)| s.get(save::CAMPAIGN_DECK).map(str::to_string))
 }

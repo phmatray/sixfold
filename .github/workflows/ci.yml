@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - run: node --test web/gamepad.test.mjs tools/ld.test.mjs tools/check-maps.test.mjs tools/routine.test.mjs
+      - run: node --test web/gamepad.test.mjs web/world/camera.test.mjs tools/ld.test.mjs tools/check-maps.test.mjs tools/routine.test.mjs
       - run: node tools/check-maps.mjs web/world --strict && node tools/check-fence-table.mjs web/world/props.js
       - run: node --test tools/check-tokens.test.mjs && node tools/check-tokens.mjs web/style.css
 

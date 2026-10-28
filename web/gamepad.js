@@ -8,6 +8,7 @@
 //   cancel (B)     Escape, then close the open dialog, else the page's Back
 //   run (X), stick pushed all the way   Shift, held
 //   journal (Y), map (Select)           J, M
+//   camera (R3)    C: the next outdoor camera angle (#148)
 //   menu (Start)   a `sixfold-input` event the world takes (its in-game menu),
 //                  else Enter (the splash's "Press to start")
 //   L / R          the previous / next tab of the open tab list
@@ -20,11 +21,11 @@
 // The pure part (mapButtons, translateKey, checkBind, label) is tested with
 // `node --test web/gamepad.test.mjs`; the rest needs a browser.
 
-export const ACTIONS = ["act", "cancel", "run", "menu", "journal", "map"];
+export const ACTIONS = ["act", "cancel", "run", "menu", "journal", "map", "camera"];
 // The standard mapping: 0-3 face buttons (bottom, right, left, top), 4/5
 // shoulders, 6/7 triggers, 8 select, 9 start, 10/11 stick clicks, 12-15 D-pad.
-export const PAD_DEFAULTS = { act: 0, cancel: 1, run: 2, journal: 3, map: 8, menu: 9 };
-export const KEY_DEFAULTS = { act: "e", cancel: "Escape", run: "Shift", journal: "j", map: "m", menu: "Escape" };
+export const PAD_DEFAULTS = { act: 0, cancel: 1, run: 2, journal: 3, map: 8, menu: 9, camera: 11 };
+export const KEY_DEFAULTS = { act: "e", cancel: "Escape", run: "Shift", journal: "j", map: "m", menu: "Escape", camera: "c" };
 const PAD_FIXED = [4, 5, 12, 13, 14, 15]; // tabs and the D-pad always work
 const KEY_FIXED = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d", "z", "q", "g", "Tab", "Enter", " ", "Control", "Meta", "Alt"];
 const DEAD = 0.5, FULL = 0.9; // stick: past DEAD it walks, past FULL it runs
@@ -235,7 +236,7 @@ function press(a) {
   if (a === "act") activate();
   else if (a === "cancel") back();
   else if (a === "run") send("keydown", KEY_DEFAULTS.run);
-  else if (a === "journal" || a === "map") send("keydown", KEY_DEFAULTS[a]), send("keyup", KEY_DEFAULTS[a]);
+  else if (a === "journal" || a === "map" || a === "camera") send("keydown", KEY_DEFAULTS[a]), send("keyup", KEY_DEFAULTS[a]);
   else if (a === "menu") send("keydown", "Enter"); // off the world: the splash's "Press to start"
   else if (a === "tabPrev" || a === "tabNext") tab(a === "tabNext" ? 1 : -1);
 }
