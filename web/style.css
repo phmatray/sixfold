@@ -110,6 +110,11 @@
   --danger-text: #ffb1aa;
   --bar-bg: rgba(8, 15, 28, 0.9);
   --scrim: rgba(4, 9, 18, 0.62);
+  /* A sunken tray or side panel: a dark wash on felt, a paper well on paper (the remap below). */
+  --well: rgba(6, 12, 22, 0.45);
+  /* The night's own ink, for a dark island on paper (the binder's sheet in the world's menu). */
+  --night-ink: #edf1f7;
+  --night-muted: #b4c0d1;
   /* Focus is a cream ring, held off the control; selection is brass: a
      brass-washed fill inside a brass line. Brass fill is for the primary action only. */
   --focus: #fbf6e9;
@@ -1909,7 +1914,7 @@ body > .title .settings-body .lang { display: none; }
   overflow: auto;
   padding: 18px 16px;
   border-left: 1px solid var(--line);
-  background: rgba(6, 12, 22, 0.45);
+  background: var(--well);
   min-height: calc(100dvh - 61px);
 }
 .side-panel .inspector { max-height: none; }
@@ -1918,7 +1923,7 @@ body > .title .settings-body .lang { display: none; }
 
 /* Filters */
 .filters { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; margin-bottom: 18px; }
-.chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: var(--radius-md); background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: var(--radius-md); background: var(--well); border: 1px solid var(--line); }
 .chip {
   display: grid;
   place-items: center;
@@ -1979,7 +1984,7 @@ body > .title .settings-body .lang { display: none; }
 /* The binder: one sheet of nine clear pockets at a time, ring holes down
    its spine, turned like a page (a cut under reduced motion). */
 .binder-view { container: binder / inline-size; }
-.shelf-switch { margin-left: auto; display: flex; gap: 4px; padding: 4px; border-radius: var(--radius-md); background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
+.shelf-switch { margin-left: auto; display: flex; gap: 4px; padding: 4px; border-radius: var(--radius-md); background: var(--well); border: 1px solid var(--line); }
 .shelf-switch button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
 .shelf-switch button:hover { color: var(--ink); }
 .shelf-switch button[aria-pressed="true"] { background: var(--sel-bg); border-color: var(--sel-line); color: var(--sel-ink); }
@@ -2007,6 +2012,10 @@ body > .title .settings-body .lang { display: none; }
 .binder-book { min-width: 0; display: grid; gap: 14px; }
 .sheets { container-type: inline-size; display: grid; justify-items: center; perspective: 2200px; touch-action: pan-y; }
 .binder.sheet {
+  /* A night-blue sheet, also on the world menu's paper: its own light ink for the counts under the pockets. */
+  --ink: var(--night-ink);
+  --muted: var(--night-muted);
+  --text-faint: var(--night-muted);
   /* A whole sheet in sight: as wide as the column allows, as tall as the screen does. */
   --w: clamp(92px, min(calc((100cqw - 130px) / 3), calc((100dvh - 400px) / 4.25)), 180px);
   grid-area: 1 / 1;
@@ -2024,11 +2033,12 @@ body > .title .settings-body .lang { display: none; }
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 22px 40px -22px rgba(0, 0, 0, 0.9), 0 2px 0 #0b1426, 0 4px 0 #0e1a2f;
 }
 /* A clear pocket: a sleeve with a lip along its top. */
+.sheet .bind-slot { padding: 7px 7px 5px; border-radius: 8px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03) 18%, rgba(255, 255, 255, 0.045)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.35); }
+/* After the pocket's own padding, so the narrow one wins. */
 @container (max-width: 480px) {
   .binder.sheet { --w: clamp(80px, calc((100cqw - 96px) / 3), 160px); gap: 8px; padding: 10px 8px 10px 30px; background-position: -6px 0, -6px 0, -6px 0, 0 0, 0 0; }
   .sheet .bind-slot { padding: 5px 5px 3px; }
 }
-.sheet .bind-slot { padding: 7px 7px 5px; border-radius: 8px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03) 18%, rgba(255, 255, 255, 0.045)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.35); }
 .sheet .pocket-empty::before { content: ""; display: block; width: var(--w); aspect-ratio: 5 / 7; border-radius: calc(var(--w) * 0.075); }
 .sheet .pocket-empty::after { content: ""; display: block; height: 19px; }
 .sheet .bind-card:hover { transform: translateY(-3px); }
@@ -2047,9 +2057,11 @@ body > .title .settings-body .lang { display: none; }
 .pager .btn.icon svg, .viewer-nav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .page-range { flex: 0 1 240px; min-width: 80px; }
 .page-of { min-width: 12ch; white-space: nowrap; font-size: var(--fs-md); color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; }
+/* A phone at a large text size: the pager keeps to the screen (it pushed the binder sheet off its right edge). */
+@media (max-width: 520px) { .pager { gap: 8px; } .page-range { min-width: 56px; } .page-of { min-width: 0; font-size: var(--fs-sm); } }
 
 /* The tally: owned of total, by kind, rarity and type; a row filters the binder. */
-.tally { padding: 6px 14px 14px; border-radius: var(--radius-md); background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
+.tally { padding: 6px 14px 14px; border-radius: var(--radius-md); background: var(--well); border: 1px solid var(--line); }
 .tally summary { display: flex; align-items: center; min-height: 44px; font-weight: 700; cursor: pointer; list-style: none; }
 .tally summary::-webkit-details-marker { display: none; }
 .tally summary::before { content: ""; width: 6px; height: 6px; margin: 0 12px 0 2px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; rotate: -45deg; transition: rotate 160ms ease; }
@@ -2541,7 +2553,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .pane-title { font-size: var(--type-menu-label); margin-bottom: 12px; }
 .pane-head { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .pane-head .pane-title { margin: 0; }
-.pane-deck { position: sticky; top: 76px; max-height: calc(100dvh - 92px); overflow: auto; padding: 14px; border-radius: var(--radius-lg); background: rgba(6, 12, 22, 0.45); border: 1px solid var(--line); }
+.pane-deck { position: sticky; top: 76px; max-height: calc(100dvh - 92px); overflow: auto; padding: 14px; border-radius: var(--radius-lg); background: var(--well); border: 1px solid var(--line); }
 .pick-grid { --w: 108px; gap: 14px 10px; }
 .pick-count { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
 .btn.add { display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: var(--w); padding: 4px 8px; font-weight: 700; }
@@ -2775,7 +2787,8 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .rival.beaten .rival-status { color: var(--heal); }
 /* Seals met, the region's duelists still to best: the challenge sheet's pips, in the reading ink. */
 .rival.earning .rival-status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; color: var(--muted); font-weight: 600; text-wrap: balance; }
-.rival.locked { opacity: 0.72; }
+/* Locked: its words keep their full ink (a faded row failed AA on paper), the face greys and the outline breaks. */
+.rival.locked { border-style: dashed; }
 .rival.champion { grid-column: 1 / -1; background: linear-gradient(120deg, rgba(138, 79, 201, 0.25), color-mix(in srgb, var(--panel) 75%, transparent)); }
 .world-sheet .roster { margin-top: 12px; }
 
@@ -2805,6 +2818,9 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .world-sheet .ladder { margin-top: 12px; }
 
 .bind-count { white-space: nowrap; }
+/* Under a pocket, the line keeps to the card's width and wraps (FR "Manquante" at 150 % pushed a phone's sheet off screen). */
+.binder.sheet .bind-meta { max-width: var(--w); justify-content: center; text-align: center; }
+.binder.sheet .bind-count { white-space: normal; hyphens: auto; overflow-wrap: anywhere; }
 .promo-badge { padding: 1px 7px; border-radius: var(--radius-pill); font-size: var(--fs-2xs); font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--stock-ink); background: var(--brass-hi); }
 
 .credits { position: fixed; inset: 0; overflow: hidden; background: var(--grain), radial-gradient(ellipse 80% 70% at 50% 40%, var(--felt-hi), var(--felt-deep) 80%); z-index: 10; animation: credits-dawn 1400ms cubic-bezier(0.16, 1, 0.3, 1) both; }
@@ -2961,7 +2977,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .rival { grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; }
 .rival > .portrait { grid-row: 1 / span 4; align-self: start; }
 .rival > :not(.portrait) { grid-column: 2; }
-.rival.locked > .portrait { filter: grayscale(0.7); }
+.rival.locked > .portrait { filter: grayscale(0.7); opacity: 0.72; }
 
 /* The duel header's face, and the bubble that hangs under it over the
    opponent's half, never over the hand or the action bar. */
@@ -3152,6 +3168,7 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .day-dial .sun circle { fill: var(--sun); stroke: var(--sun-edge); stroke-width: 1.2; }
 .day-dial .sun path { fill: none; stroke: var(--sun); stroke-width: 1.8; stroke-linecap: round; }
 .day-dial .moon { fill: #d7defa; stroke: #8f9fd6; stroke-width: 1; display: none; }
+.day-dial .moon .sea { fill: #b4bfe6; stroke: none; }
 .day-dial[data-phase="dawn"] { --sun: #ffc0a8; --sun-edge: #e8846a; }
 .day-dial[data-phase="dusk"] { --sun: #ff9e6b; --sun-edge: #d0603a; }
 .day-dial[data-phase="dawn"] .sun, .day-dial[data-phase="dusk"] .sun { transform: translateY(3px); }
@@ -3297,7 +3314,8 @@ p.atlas-pick { color: var(--muted); }
    menu's own head takes room the sheet must leave for its pager. */
 .menu-split:has(.binder-view) { grid-template-columns: minmax(0, 1fr); }
 .menu-split:has(.binder-view) > .side-panel { display: none; }
-.menu-panel .binder.sheet { --w: clamp(84px, min(calc((100cqw - 130px) / 3), calc((100dvh - 470px) / 4.25)), 180px); }
+/* A whole sheet and its pager in sight at 1440 × 900; three pockets across a phone at 150 %. */
+.menu-panel .binder.sheet { --w: clamp(76px, min(calc((100cqw - 110px) / 3), calc((100dvh - 500px) / 4.25)), 180px); }
 .menu-panel .objective + .quests, .menu-panel .objective + .dialog-sub { margin-top: 12px; }
 /* The deck editor in the menu: its own bar replaces the menu's head. */
 .menu-panel:has(.editor) { padding: 0; }
@@ -3309,8 +3327,8 @@ p.atlas-pick { color: var(--muted); }
   .world-sheet:has(.game-menu) { inset: 0; width: 100%; border-radius: 0; border: 0; }
   .menu-head { padding: max(10px, env(safe-area-inset-top)) 16px 6px; }
   .menu-tabs, .menu-panel { padding-inline: 16px; }
-  /* Every tab in sight: two rows of three instead of a strip that scrolls. */
-  .menu-tabs { display: grid; grid-template-columns: repeat(3, 1fr); }
+  /* Every tab in sight, never a strip that scrolls: three a row, two once the text is larger (seven tabs, FR "Campagne" at 150 %). */
+  .menu-tabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(100px * var(--ts)), 1fr)); }
   .menu-tabs button { padding: 0 6px; }
   .menu-tabs .tab-key { display: none; }
 }
@@ -4738,6 +4756,7 @@ html[data-swap="duel-out"]::view-transition-new(root) { animation-name: duel-ret
   --chip: var(--paper-lo);
   --deep: var(--paper-hi);
   --sheet-bg: var(--paper);
+  --well: var(--paper-lo);
   --brass-hi: var(--brass-ink);
   --brass-line: color-mix(in srgb, var(--brass-deep) 70%, transparent);
   --sel-bg: color-mix(in srgb, var(--brass) 32%, var(--paper-hi));

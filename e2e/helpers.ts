@@ -96,3 +96,25 @@ export async function loaded(page: Page) {
   await expect(page.getByRole("button", { name: "Menu", exact: true })).toBeVisible();
   await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
 }
+
+/**
+ * Warp the hero (the world's `sixfoldWarp`) and wait until the save says it stands there. Asked again only while
+ * the world is not yet on that tile: a warp asked during another one is ignored, but one asked after it landed and
+ * before the save caught up (a frame or more, seconds on CI's software GL) loads the map a second time, and what
+ * the first arrival did (a bark said once a visit) is gone.
+ */
+export async function warpTo(page: Page, map: string, x: number, z: number, f: string) {
+  await expect
+    .poll(
+      async () => {
+        const there = await page.evaluate(([map, x, z]) => {
+          const s = (document.querySelector(".world-host") as any).sixfoldStats();
+          return s.area === map && s.at?.[0] === x && s.at?.[1] === z;
+        }, [map, x, z] as const);
+        if (!there) await page.evaluate(([map, x, z, f]) => (document.querySelector(".world-host") as any).sixfoldWarp(map, x, z, f), [map, x, z, f] as const);
+        return (await readSave(page)).world_at?.[0] ?? "";
+      },
+      { timeout: 60_000 },
+    )
+    .toBe(`${map},${x},${z},${f}`);
+}

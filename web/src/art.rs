@@ -250,8 +250,10 @@ fn gear_icon(t: &Gear) -> &'static str {
         Some(Effect::Search(_)) => "M10 4a6 6 0 1 0 0 12a6 6 0 1 0 0-12ZM14.5 14.5L20 20",
         // Draw: two cards.
         Some(Effect::Draw(_) | Effect::DiscardHand) => "M5 7h9v13H5ZM10 4h9v13",
-        // Heal: a cross.
-        Some(Effect::Heal(_) | Effect::HealAll(_)) => "M12 5v14M5 12h14",
+        // Heal: a heart (not a cross: no shape that reads as a faith's symbol).
+        Some(Effect::Heal(_) | Effect::HealAll(_)) => {
+            "M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"
+        }
         // Cure: a vial.
         Some(Effect::Cure { .. }) => {
             "M9 3h6M10 3v6l-4.5 9.5A2 2 0 0 0 7.3 21h9.4a2 2 0 0 0 1.8-2.5L14 9V3M7.5 15h9"

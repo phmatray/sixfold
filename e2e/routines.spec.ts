@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { menuItem, readSave, title } from "./helpers";
+import { menuItem, readSave, title, warpTo as warp } from "./helpers";
 
 /** People's routines (#113), through `sixfoldStats().people`: where each person is and what it does. */
 type Person = { id: string; x: number; z: number; do: string | null; away: boolean; walking: boolean; sitting: boolean };
@@ -24,8 +24,7 @@ test("routines: on arrival everyone is already at the hour's place; when the hou
 
   // AC3: entering Brightwell Square at 22:00, the night is already in place: Wendel has gone in, nobody walks.
   await host(page, "sixfoldClock", 22 * 60);
-  await host(page, "sixfoldWarp", "square", 25, 10, "s");
-  await expect.poll(() => at(page)).toBe("square,25,10,s");
+  await warp(page, "square", 25, 10, "s");
   await expect.poll(async () => (await who(page, "wendel"))?.away).toBe(true);
   const night = await people(page);
   expect(night.filter((p) => p.walking).map((p) => p.id)).toEqual([]);
@@ -35,8 +34,7 @@ test("routines: on arrival everyone is already at the hour's place; when the hou
   // counts at most 50 ms (world.js), and software GL on CI draws about one a second, so every game second is ~20
   // real ones and a walk across the square alone would eat most of the test's budget.
   const gone = night.find((p) => p.id === "wendel")!;
-  await host(page, "sixfoldWarp", "square", gone.x - 1, gone.z, "e");
-  await expect.poll(() => at(page)).toBe(`square,${gone.x - 1},${gone.z},e`);
+  await warp(page, "square", gone.x - 1, gone.z, "e");
   // (sixfoldWalk answers [] while the warp's fade is still up: asked until it walks.)
   await expect.poll(async () => ((await host(page, "sixfoldWalk", gone.x, gone.z)) as string[]).length).toBeGreaterThan(0);
   await expect.poll(() => at(page), { timeout: 60_000 }).toMatch(new RegExp(`^square,${gone.x},${gone.z},`));
@@ -59,8 +57,7 @@ test("routines: on arrival everyone is already at the hour's place; when the hou
   // AC7: a map not converted keeps its loops and its two-copies schedule: in the Downs by day the route walkers
   // walk and the night copies are out of sight.
   await host(page, "sixfoldClock", 12 * 60);
-  await host(page, "sixfoldWarp", "downs", 2, 12, "e");
-  await expect.poll(() => at(page)).toBe("downs,2,12,e");
+  await warp(page, "downs", 2, 12, "e");
   const start = await people(page);
   expect(start.map((p) => p.id)).not.toContain("biscuit_night");
   await expect.poll(async () => (await who(page, "biscuit"))?.x !== 16 || (await who(page, "biscuit"))?.z !== 18, { timeout: 60_000 }).toBe(true);
