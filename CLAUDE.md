@@ -30,10 +30,11 @@ cargo test -p sixfold-engine draw_moves_card_from_deck_to_hand
 
 ## Architecture
 
-Cargo workspace, two crates with a one-way dependency `web -> engine`:
+Cargo workspace, three crates with one-way dependencies `web -> engine` and `desktop -> web/dist`:
 
 - **`engine/`** — the rules core, **pure Rust with no WASM or UI dependencies**. This is the invariant that makes the game logic unit-testable on the host without a browser. Keep all game rules, state transitions, and card models here; never pull `leptos`, `wasm-bindgen`, or DOM concerns into this crate.
 - **`web/`** — the Leptos CSR app. Depends on `engine` by path and renders its types. Built by Trunk, whose entry point is `web/index.html` (not `main.rs` directly) — the `data-trunk` link tags there pull in `style.css` and the wasm bundle.
+- **`desktop/`** — the desktop app (Tauri v2): `web/dist` in a native window, no game code of its own. It needs a built `web/dist` (and WebKitGTK on Linux) to compile, so it is left out of `default-members` and of CI's workspace clippy; `.github/workflows/desktop.yml` builds and lints it. Run `cargo tauri dev` / `cargo tauri build` from the repo root.
 
 When adding game logic, the model lives in `engine` with a unit test; the UI in `web` consumes it. A change that needs a browser to verify belongs in `web`; a change you can assert with plain Rust belongs in `engine`.
 

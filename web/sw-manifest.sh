@@ -34,7 +34,8 @@ EOF_SW
   exit 0
 fi
 files=$(find . -type f \( ! -path './world/*' -o -name '*.js' \) ! -path './cards/*' ! -name 'social-preview.png' ! -name '.trunk-lock' ! -name 'sw.js' ! -name 'index.html' | sed 's|^\./||' | LC_ALL=C sort)
-version=$( (echo "$files"; cat index.html; find ./world ./vendor -name '*.js' | LC_ALL=C sort | xargs cat) | cksum | cut -d' ' -f1)
+# The fonts keep their names (copy-dir), so their contents count too: a new cut is a new version.
+version=$( (echo "$files"; cat index.html; find ./world ./vendor -name '*.js' | LC_ALL=C sort | xargs cat; find ./fonts -type f | LC_ALL=C sort | xargs cat) | cksum | cut -d' ' -f1)
 {
   echo "const VERSION = \"$version\";"
   printf 'const PRECACHE = ['

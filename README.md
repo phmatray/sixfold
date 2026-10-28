@@ -163,7 +163,8 @@ the repository root; each command runs Trunk itself.
 cargo install tauri-cli --version "^2" --locked
 
 cargo tauri dev                  # the game in a desktop window, served by trunk serve
-cargo tauri build                # Windows installer / Linux AppImage in target/release/bundle
+cargo tauri build                # on Windows / Linux: installer / AppImage in target/release/bundle
+cargo tauri build --bundles app  # on macOS: a Sixfold.app to try locally (not shipped yet)
 ```
 
 Every GitHub Release carries the Windows installer and the Linux AppImage.
