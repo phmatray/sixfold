@@ -1890,7 +1890,7 @@ pub fn WorldScreen() -> impl IntoView {
                                     let is_now = ph == current;
                                     let first = ph == current.next();
                                     view! {
-                                        <button type="button" class="inn-choice" data-phase=ph.name() disabled=is_now
+                                        <button type="button" class="btn inn-choice" data-phase=ph.name() disabled=is_now
                                             autofocus=first on:click=move |_| rest(ph)>
                                             <span class="inn-choice-name">{rest_label(ph)}</span>
                                             <span class="inn-choice-time">

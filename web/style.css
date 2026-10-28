@@ -2955,13 +2955,10 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
   .sell-row .btn { grid-area: btn; }
 }
 
-/* Wynne: the pack shelf, smaller. */
-/* A regional inn's counter, under the rest choices. */
+/* A regional inn's counter, under the rest choices: Wynne's shelf, then Perrin's stock. */
 .inn-counter { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
-.inn-counter h3 { margin: 0 0 10px; }
-.inn-packs { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 18px; }
-.inn-pack { display: flex; align-items: center; gap: 10px; }
-.inn-pack .pack { --pw2: 44px; }
+.inn-counter h3 { margin: 0; }
+/* Wynne: the pack shelf, smaller. */
 .pack-counter { margin: 0; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
 .pack-counter .shelf-item { padding: 10px 12px; gap: 14px; }
 .pack-counter .pack { --pack-w: 72px; }
@@ -3079,21 +3076,18 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .world-rest.on { opacity: 1; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) { .world-rest { transition: none; } }
 .inn-rest { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
-.inn-choice {
-  display: grid; gap: 2px; justify-items: start; min-height: 64px; padding: 10px 14px 10px 50px; text-align: left; cursor: pointer;
-  border-radius: var(--radius-md); border: 1.5px solid var(--brass-line); color: var(--ink);
-  background: no-repeat 12px 50% / 26px 26px, linear-gradient(180deg, #1d3152, #152541);
-  transition: border-color 0.15s ease, transform 0.15s ease;
+/* Each choice is a paper button (the kit's .btn) with a little window on its sky. */
+.btn.inn-choice { position: relative; display: grid; gap: 2px; justify-items: start; align-content: center; min-height: 64px; padding: 8px 14px 8px 56px; text-align: left; }
+.inn-choice::before {
+  content: ""; position: absolute; left: 14px; top: 50%; width: 30px; height: 30px; translate: 0 -50%;
+  border-radius: 50%; border: 2px solid var(--toon); background: no-repeat center / 100% 100%, linear-gradient(180deg, #1d3152, #152541);
 }
-.inn-choice:hover:not(:disabled) { border-color: var(--brass-hi); transform: translateY(-1px); }
-.inn-choice:disabled { opacity: 0.5; cursor: default; }
 .inn-choice-name { font: 700 var(--fs-xl) var(--display); }
-.inn-choice-time { font-size: var(--fs-md); color: var(--muted); font-variant-numeric: tabular-nums; }
-.inn-choice[data-phase="dawn"] { background-image: radial-gradient(circle at 50% 72%, #ffc0a8 44%, transparent 47%), linear-gradient(180deg, #2a3150, #1e2742); }
-.inn-choice[data-phase="day"] { background-image: radial-gradient(circle, var(--brass-hi) 46%, transparent 49%), linear-gradient(180deg, #1d3152, #152541); }
-.inn-choice[data-phase="dusk"] { background-image: radial-gradient(circle at 50% 72%, #ff9e6b 44%, transparent 47%), linear-gradient(180deg, #2c2442, #1b1d36); }
-.inn-choice[data-phase="night"] { background-image: radial-gradient(circle at 66% 36%, transparent 33%, #d7defa 35% 47%, transparent 49%), linear-gradient(180deg, #141d36, #0f1629); }
-@media (prefers-reduced-motion: reduce) { .inn-choice { transition: none; } .inn-choice:hover:not(:disabled) { transform: none; } }
+.inn-choice-time { font: 400 var(--fs-md) var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
+.inn-choice[data-phase="dawn"]::before { background-image: radial-gradient(circle at 50% 78%, #ffc0a8 34%, transparent 37%), linear-gradient(180deg, #2a3150, #6b5a7a); }
+.inn-choice[data-phase="day"]::before { background-image: radial-gradient(circle, var(--brass) 36%, transparent 39%), linear-gradient(180deg, #4f86c6, #9cc3e6); }
+.inn-choice[data-phase="dusk"]::before { background-image: radial-gradient(circle at 50% 78%, #ff9e6b 34%, transparent 37%), linear-gradient(180deg, #2c2442, #7a3f4a); }
+.inn-choice[data-phase="night"]::before { background-image: radial-gradient(circle at 62% 40%, transparent 22%, #d7defa 24% 36%, transparent 38%), linear-gradient(180deg, #141d36, #0f1629); }
 
 /* The world map: a cartographer's chart on card stock, laid on the felt. */
 .world-sheet:has(.atlas) { width: min(820px, calc(100% - 32px)); }
@@ -3163,7 +3157,8 @@ p.atlas-pick { color: var(--muted); }
 @media (max-width: 520px) {
   .atlas-chart { transform: none; }
   .world-sheet:has(.atlas) .sheet-head { flex-wrap: wrap; }
-  .inn-choice { padding-left: 42px; min-height: 60px; }
+  .btn.inn-choice { padding-left: 50px; min-height: 60px; }
+  .inn-choice::before { left: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .atlas-you .ring { animation: none; opacity: 0.6; }
