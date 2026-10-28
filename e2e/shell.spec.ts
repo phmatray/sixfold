@@ -9,7 +9,8 @@ import { expect, test } from "@playwright/test";
 test("both typefaces load from the game's own files", async ({ page }) => {
   const outside: string[] = [];
   page.on("request", (r) => {
-    if (!r.url().startsWith("http://127.0.0.1")) outside.push(r.url());
+    // Network requests only (blob: and data: URLs never leave the page).
+    if (/^https?:/.test(r.url()) && !r.url().startsWith("http://127.0.0.1")) outside.push(r.url());
   });
   await page.goto("/");
   const loaded = await page.evaluate(async () => [
