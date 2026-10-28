@@ -1790,9 +1790,9 @@ body > .title .settings-body .lang { display: none; }
 .ach-text span { color: var(--muted); font-size: var(--fs-md); }
 .ach-pay { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
 .ach-state { font-size: var(--fs-sm); color: var(--muted); min-width: 7ch; text-align: right; }
-.ach-medal { width: 30px; aspect-ratio: 1; flex: none; clip-path: polygon(50% 0, 64.4% 25%, 93.3% 25%, 78.9% 50%, 93.3% 75%, 64.4% 75%, 50% 100%, 35.6% 75%, 6.7% 75%, 21.1% 50%, 6.7% 25%, 35.6% 25%); background: color-mix(in srgb, var(--muted) 30%, var(--panel-2)); }
+.ach-medal { width: 28px; aspect-ratio: 1 / 1.1; flex: none; clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: conic-gradient(from 0deg at 50% 50%, color-mix(in srgb, var(--muted) 38%, var(--panel-2)) 0 60deg, color-mix(in srgb, var(--muted) 24%, var(--panel-2)) 60deg 120deg, color-mix(in srgb, var(--muted) 32%, var(--panel-2)) 120deg 180deg, color-mix(in srgb, var(--muted) 20%, var(--panel-2)) 180deg 240deg, color-mix(in srgb, var(--muted) 34%, var(--panel-2)) 240deg 300deg, color-mix(in srgb, var(--muted) 26%, var(--panel-2)) 300deg 360deg); }
 .ach.done { border-color: var(--brass-line); background: color-mix(in srgb, var(--brass) 8%, var(--panel)); }
-.ach.done .ach-medal, .ach-toast .ach-medal { background: linear-gradient(150deg, var(--brass-hi) 10%, var(--brass) 55%, #8a6421 95%); }
+.ach.done .ach-medal, .ach-toast .ach-medal { background: conic-gradient(from 0deg at 50% 50%, var(--brass-hi) 0 60deg, var(--brass) 60deg 120deg, #a97c2c 120deg 180deg, #8a6421 180deg 240deg, var(--brass) 240deg 300deg, var(--brass-hi) 300deg 360deg); }
 .ach.done .ach-pay, .ach.done .ach-state { color: var(--brass-hi); }
 .ach.secret .ach-text b { letter-spacing: 0.2em; color: var(--muted); }
 .stats { display: grid; gap: 22px; }

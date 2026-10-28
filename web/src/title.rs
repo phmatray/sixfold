@@ -195,7 +195,7 @@ fn TextSize() -> impl IntoView {
 #[component]
 fn CameraAngleSetting() -> impl IntoView {
     use sixfold_engine::save::CameraAngle;
-    let now = RwSignal::new(store::camera());
+    let now = store::camera_signal();
     let option = move |a: CameraAngle, label: &'static str| {
         view! {
             <label class="seg">
@@ -203,8 +203,6 @@ fn CameraAngleSetting() -> impl IntoView {
                     prop:checked=move || now.get() == a
                     on:change=move |_| {
                         store::set_camera(a);
-                        crate::world::world_camera(a.code());
-                        now.set(a);
                     } />
                 <span>{label}</span>
             </label>
@@ -429,7 +427,7 @@ pub fn TitleScreen() -> impl IntoView {
                     <MenuItem icon="packs" label=tr("Open packs", "Ouvrir des boosters") sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
                     <MenuItem icon="decks" label=tr("My decks", "Mes decks") sub=Signal::derive(decks) to=Screen::Decks />
                     <MenuItem icon="collection" label="Collection" sub=Signal::derive(found) to=Screen::Collection />
-                    <MenuItem icon="records" label=tr("Records", "Palmarès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
+                    <MenuItem icon="records" label=tr("Records", "Succès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
                     {move || (!due.get()).then(|| view! { <LessonItem icon="howto" label=tr("How to play", "Comment jouer") sub=tr("Replay the guided first duel", "Rejouer le premier duel guidé") /> })}
                 </ul>
             </nav>
