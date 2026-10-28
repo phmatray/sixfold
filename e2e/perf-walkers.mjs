@@ -7,28 +7,31 @@
 // Without `url` it serves ../web/dist itself (on PW_PORT, default 4402). It drives the installed Google Chrome
 // in a visible window (headless Chrome has no GPU here and draws the world blank). Six extra people with
 // placeholder ids are added to the square's map as it loads (nothing shipped changes); each walks across the
-// square at 21:00, so with Tansy and Odile eight want to walk and the per-map cap (`walkers_max`, 6) is full.
-// A run: the clock set to 20:59.5 (a jump, so everyone is placed at their evening spot), then every frame's
-// rAF delta while six walk. The baseline: 21:30, the same people, nobody walking. It prints and never asserts:
+// square at 21:40, deep in the night (the 20-minute cross-fade from dusk is over, no hour turns while they walk),
+// which fills the per-map cap (`walkers_max`, 6); nobody else changes activity then. A run: the clock set to
+// 21:39.5 (a jump, so everyone is placed where 21:00 puts them), then, once all six walk, every frame's rAF delta
+// until the first arrives. The baseline: 22:10, the same people, nobody walking. It prints and never asserts:
 // frame times are only worth comparing between runs on the same machine at the same load.
 import { chromium, webkit } from "@playwright/test";
 import { spawn } from "node:child_process";
 import { loadavg } from "node:os";
+import { fileURLToPath } from "node:url";
 
 const args = process.argv.slice(2);
 const opt = (name, def) => (args.includes(name) ? args[args.indexOf(name) + 1] : def);
 const RUNS = +opt("--runs", 5), THROTTLE = +opt("--throttle", 4), PORT = +(process.env.PW_PORT ?? 4402);
+if (!(RUNS >= 1 && THROTTLE >= 1)) throw new Error("--runs and --throttle take a number, at least 1");
 const given = args.find((a) => /^https?:/.test(a));
 const URL_ = given ?? `http://127.0.0.1:${PORT}/`;
 
-// Six walkers on the square's lanes: [evening spot, night spot], each walk long enough (20-34 tiles) to
+// Six walkers on the square's lanes: [spot from 06:00, spot from 21:40], each walk long enough (20-34 tiles) to
 // outlast the others setting off.
 const LANES = [[[25, 1], [25, 34]], [[27, 34], [27, 1]], [[6, 10], [45, 10]], [[17, 13], [36, 21]], [[36, 13], [17, 21]], [[4, 30], [26, 30]]];
 const MODELS = ["npc_kid", "npc_wanderer", "npc_gardener", "npc_elder"];
 const extras = LANES.map(([a, b], i) => ({
   id: `perf_${i + 1}`, name: `Walker ${i + 1}`, model: MODELS[i % MODELS.length], x: a[0], z: a[1], facing: "s",
   dialogue: ["…"], glance: false,
-  routine: [{ from: "06:00", at: a, face: "s", do: "idle" }, { from: "21:00", at: b, face: "s", do: "idle" }],
+  routine: [{ from: "06:00", at: a, face: "s", do: "idle" }, { from: "21:40", at: b, face: "s", do: "idle" }],
 }));
 
 const q = (xs, p) => xs.length ? [...xs].sort((a, b) => a - b)[Math.min(xs.length - 1, Math.floor(p * xs.length))] : NaN;
@@ -36,7 +39,7 @@ const f1 = (x) => x.toFixed(1);
 
 async function measure(browserType, launch) {
   const browser = await browserType.launch(launch);
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: browserType !== webkit || undefined, hasTouch: true, locale: "en-US", serviceWorkers: "block" });
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: "en-US", serviceWorkers: "block" });
   const page = await ctx.newPage();
   await page.route("**/maps/square.json", async (route) => {
     const map = await (await route.fetch()).json();
@@ -79,34 +82,41 @@ async function measure(browserType, launch) {
   if (cdp) await cdp.send("Performance.enable"), await cdp.send("Emulation.setCPUThrottlingRate", { rate: THROTTLE });
   const busy = async () => (await cdp?.send("Performance.getMetrics"))?.metrics.find((m) => m.name === "TaskDuration").value * 1000;
 
-  // Every frame's rAF delta, tagged with how many people walked when it was drawn (asked 5× a second, so the
-  // asking costs nothing measurable). Collected while at least `minWalking` walk, or for `ms` (wall time).
-  const frames = (minWalking, ms) => page.evaluate(([minWalking, ms]) => new Promise((done) => {
-    const el = document.querySelector(".world-host"), out = [];
-    let walking = 0, seen = false, last = performance.now();
-    const poll = setInterval(() => (walking = el.sixfoldStats().people.filter((p) => p.walking).length), 200);
-    const end = performance.now() + ms;
+  // Counted each frame: how many walk. `until(n, ms)`: true once at least n walk, false after `ms` without.
+  // `frames(n, ms)`: every frame's rAF delta while at least n walk (n = 0: for `ms` of wall time).
+  const until = (n, ms) => page.evaluate(([n, ms]) => new Promise((done) => {
+    const el = document.querySelector(".world-host"), end = performance.now() + ms;
     const frame = (now) => {
-      const ok = walking >= minWalking;
-      if (ok) (seen = true), out.push(now - last);
-      last = now;
-      if (now > end || (seen && !ok && minWalking > 0)) return clearInterval(poll), done(out);
+      if (el.sixfoldStats().people.filter((p) => p.walking).length >= n) return done(true);
+      if (now > end) return done(false);
       requestAnimationFrame(frame);
     };
     requestAnimationFrame(frame);
-  }), [minWalking, ms]);
-  const sample = async (minWalking, ms) => {
-    const b0 = await busy(), deltas = await frames(minWalking, ms), b1 = await busy();
+  }), [n, ms]);
+  const frames = (n, ms) => page.evaluate(([n, ms]) => new Promise((done) => {
+    const el = document.querySelector(".world-host"), out = [], end = performance.now() + ms;
+    let last = performance.now();
+    const frame = (now) => {
+      out.push(now - last);
+      last = now;
+      if (now > end || el.sixfoldStats().people.filter((p) => p.walking).length < n) return done(out);
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }), [n, ms]);
+  // The busy time is read right round the frames sampled, so it is theirs alone.
+  const sample = async (n, ms) => {
+    const b0 = await busy(), deltas = await frames(n, ms), b1 = await busy();
     return { deltas, busy: cdp ? (b1 - b0) / (deltas.length || 1) : NaN };
   };
 
   const runs = { walking: [], still: [] };
   for (let r = 0; r < RUNS; r++) {
-    await host("sixfoldClock", 21 * 60 + 30); // placed at the night spots, nobody walking
+    await host("sixfoldClock", 22 * 60 + 10); // placed at the 21:40 spots, nobody walking
     await page.waitForTimeout(1500);
     const still = await sample(0, 4000);
-    await host("sixfoldClock", 20 * 60 + 59.5); // a jump: placed at the evening spots; at 21:00 they set off
-    const walking = await sample(6, 90_000);
+    await host("sixfoldClock", 21 * 60 + 39.5); // a jump: placed at the 21:00 spots; at 21:40 they set off
+    const walking = (await until(6, 60_000)) ? await sample(6, 90_000) : { deltas: [], busy: NaN };
     runs.still.push(still);
     runs.walking.push(walking);
     const most = (await people()).filter((p) => p.id.startsWith("perf_")).map((p) => `${p.id}@${p.x},${p.z}`).join(" ");
@@ -132,7 +142,7 @@ function report(label, runs) {
 
 let server = null;
 if (!given) {
-  server = spawn(process.execPath, [new URL("serve.mjs", import.meta.url).pathname, String(PORT)], { stdio: "ignore" });
+  server = spawn(process.execPath, [fileURLToPath(new URL("serve.mjs", import.meta.url)), String(PORT)], { stdio: "ignore" });
   for (let i = 0; ; i++) {
     if (await fetch(URL_ + "index.html").then((r) => r.ok, () => false)) break;
     if (i > 50) throw new Error(`serve.mjs did not start on ${PORT} (built web/dist?)`);
