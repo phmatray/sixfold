@@ -3,9 +3,9 @@
 //!
 //! A pack is 6 Commons, 3 Uncommons and a Rare slot, in that (reveal)
 //! order, all distinct. The Rare slot holds a Holo Rare (an Awaken 2
-//! Hexon, [`is_holo`]) at the odds of [`HOLO_ODDS`]; otherwise a Rare trainer
+//! Hexon, [`is_holo`]) at the odds of [`HOLO_ODDS`]; otherwise a Rare Gear
 //! or the special energy. A themed pack fills each Common and Uncommon slot from its own
-//! types, trainers and Colorless Hexons, or the other types, by
+//! types, Gear cards and Colorless Hexons, or the other types, by
 //! [`SHARES`], and its Holo Rares are its own types; the Wild pack draws
 //! evenly from the whole set. The Rare slot skips cards the player already
 //! has [`MAX_COPIES`] of while any other is left. Basic energy is unlimited,
@@ -25,7 +25,7 @@ pub const UNCOMMONS: usize = 3;
 /// The Rare slot holds a Holo Rare in `HOLO_ODDS.0` packs of `HOLO_ODDS.1`.
 pub const HOLO_ODDS: (u32, u32) = (3, 5);
 /// A themed pack's Common and Uncommon slots, in percent: its own types,
-/// then trainers and Colorless Hexons, then the other types.
+/// then Gear cards and Colorless Hexons, then the other types.
 pub const SHARES: [u32; 3] = [60, 35, 5];
 
 #[derive(Debug)]
@@ -39,8 +39,8 @@ pub struct Booster {
 pub static EMBER_PACK: Booster = Booster {
     name: T::new("Ember Pack", "Booster Braise"),
     description: T::new(
-        "Ember and Stone Hexons, plus trainers.",
-        "Hexons Braise et Roc, plus des cartes Dresseur.",
+        "Ember and Stone Hexons, plus Gear cards.",
+        "Hexons Braise et Roc, plus des cartes Objet.",
     ),
     colors: &[Color::Fire, Color::Fighting],
 };
@@ -48,8 +48,8 @@ pub static EMBER_PACK: Booster = Booster {
 pub static TIDE_PACK: Booster = Booster {
     name: T::new("Tide Pack", "Booster Marée"),
     description: T::new(
-        "Tide and Dream Hexons, plus trainers.",
-        "Hexons Marée et Songe, plus des cartes Dresseur.",
+        "Tide and Dream Hexons, plus Gear cards.",
+        "Hexons Marée et Songe, plus des cartes Objet.",
     ),
     colors: &[Color::Water, Color::Psychic],
 };
@@ -66,8 +66,8 @@ pub static WILD_PACK: Booster = Booster {
 pub static GROVE_PACK: Booster = Booster {
     name: T::new("Grove Pack", "Booster Bosquet"),
     description: T::new(
-        "Grove and Storm Hexons, plus trainers.",
-        "Hexons Bosquet et Orage, plus des cartes Dresseur.",
+        "Grove and Storm Hexons, plus Gear cards.",
+        "Hexons Bosquet et Orage, plus des cartes Objet.",
     ),
     colors: &[Color::Grass, Color::Lightning],
 };
@@ -75,8 +75,8 @@ pub static GROVE_PACK: Booster = Booster {
 pub static STORM_PACK: Booster = Booster {
     name: T::new("Storm Pack", "Booster Orage"),
     description: T::new(
-        "Storm and Tide Hexons, plus trainers.",
-        "Hexons Orage et Marée, plus des cartes Dresseur.",
+        "Storm and Tide Hexons, plus Gear cards.",
+        "Hexons Orage et Marée, plus des cartes Objet.",
     ),
     colors: &[Color::Lightning, Color::Water],
 };
@@ -84,8 +84,8 @@ pub static STORM_PACK: Booster = Booster {
 pub static STONE_PACK: Booster = Booster {
     name: T::new("Stone Pack", "Booster Roc"),
     description: T::new(
-        "Stone and Neutral Hexons, plus trainers.",
-        "Hexons Roc et Neutres, plus des cartes Dresseur.",
+        "Stone and Neutral Hexons, plus Gear cards.",
+        "Hexons Roc et Neutres, plus des cartes Objet.",
     ),
     colors: &[Color::Fighting, Color::Colorless],
 };
@@ -93,8 +93,8 @@ pub static STONE_PACK: Booster = Booster {
 pub static DREAM_PACK: Booster = Booster {
     name: T::new("Dream Pack", "Booster Songe"),
     description: T::new(
-        "Dream and Grove Hexons, plus trainers.",
-        "Hexons Songe et Bosquet, plus des cartes Dresseur.",
+        "Dream and Grove Hexons, plus Gear cards.",
+        "Hexons Songe et Bosquet, plus des cartes Objet.",
     ),
     colors: &[Color::Psychic, Color::Grass],
 };
@@ -124,7 +124,7 @@ impl Booster {
     }
 
     /// Which [`SHARES`] group a card is in for this pack: 0 its own types,
-    /// 1 trainers, the special energy and (unless they are its own type)
+    /// 1 Gear cards, the special energy and (unless they are its own type)
     /// Colorless Hexons, 2 the other types. The Wild pack has one group.
     pub fn group(&self, id: CardId) -> usize {
         if self.is_wild() {

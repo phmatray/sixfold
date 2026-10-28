@@ -4,7 +4,7 @@
 
 use std::fmt::Write;
 
-use sixfold_engine::{CardDef, CardKind, Color, Creature, Effect, EnergyCard, Stage, Trainer};
+use sixfold_engine::{CardDef, CardKind, Color, Creature, Effect, EnergyCard, Gear, Stage};
 
 include!(concat!(env!("OUT_DIR"), "/art_files.rs"));
 
@@ -55,10 +55,10 @@ pub fn color_key(c: Color) -> &'static str {
 /// The colour a card is framed in.
 pub fn card_color(def: &CardDef) -> Option<Color> {
     match &def.kind {
-        CardKind::Creature(c) | CardKind::TrainerBasic(c) => Some(c.color),
+        CardKind::Creature(c) | CardKind::GearBasic(c) => Some(c.color),
         CardKind::Energy(EnergyCard::Basic(c)) => Some(*c),
         CardKind::Energy(EnergyCard::DoubleColorless) => Some(Color::Colorless),
-        CardKind::Trainer(_) => None,
+        CardKind::Gear(_) => None,
     }
 }
 
@@ -114,9 +114,9 @@ impl Seq {
 /// The picture window of any card.
 pub fn card_art(def: &CardDef) -> String {
     match &def.kind {
-        CardKind::Creature(c) | CardKind::TrainerBasic(c) => creature_art(def.name, c),
+        CardKind::Creature(c) | CardKind::GearBasic(c) => creature_art(def.name, c),
         CardKind::Energy(e) => energy_art(*e),
-        CardKind::Trainer(t) => trainer_art(def.name, t),
+        CardKind::Gear(t) => gear_art(def.name, t),
     }
 }
 
@@ -243,8 +243,8 @@ fn energy_art(e: EnergyCard) -> String {
     s
 }
 
-/// A trainer's emblem, from what its first effect does (24×24 strokes).
-fn trainer_icon(t: &Trainer) -> &'static str {
+/// A Gear card's emblem, from what its first effect does (24×24 strokes).
+fn gear_icon(t: &Gear) -> &'static str {
     match t.effects.first() {
         // Search: a magnifier.
         Some(Effect::Search(_)) => "M10 4a6 6 0 1 0 0 12a6 6 0 1 0 0-12ZM14.5 14.5L20 20",
@@ -277,8 +277,8 @@ fn trainer_icon(t: &Trainer) -> &'static str {
     }
 }
 
-/// Trainers: seeded arcs behind a brass medallion with the trainer's emblem.
-fn trainer_art(name: &str, t: &Trainer) -> String {
+/// Gear: seeded arcs behind a brass medallion with the Gear's emblem.
+fn gear_art(name: &str, t: &Gear) -> String {
     let mut r = Seq::of(name);
     let mut s = String::from(
         r#"<svg viewBox="0 0 100 70" preserveAspectRatio="xMidYMid slice" aria-hidden="true">"#,
@@ -296,7 +296,7 @@ fn trainer_art(name: &str, t: &Trainer) -> String {
     let _ = write!(
         s,
         r#"<circle class="medal" cx="50" cy="35" r="17"/><path class="emblem" transform="translate(38 23)" d="{}"/>"#,
-        trainer_icon(t)
+        gear_icon(t)
     );
     s.push_str("</svg>");
     s

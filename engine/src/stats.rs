@@ -15,12 +15,12 @@ use crate::ai::Difficulty;
 use crate::campaign::{champion, rival, seals, RIVALS, SEALS};
 use crate::card::{card, CardId, CardKind, EnergyCard};
 use crate::clock::{self, Phase};
+use crate::duelists::{duelist, Duelist, Rule, DUELISTS};
 use crate::game::{End, GameSummary};
 use crate::lang::T;
 use crate::overworld::Progress;
 use crate::profile::Profile;
 use crate::set::{self, PROMOS};
-use crate::trainers::{trainer, Rule, Trainer, TRAINERS};
 
 /// Hidden finds in the world's maps (`engine/tests/world_data.rs` counts them).
 pub const FINDS: usize = 101;
@@ -101,8 +101,15 @@ impl Stats {
         let mut st = Stats::default();
         for part in s.trim().strip_prefix(PREFIX).unwrap_or("").split(',') {
             if let Some((k, n)) = part.split_once('=') {
-                if let (true, Ok(n)) = (valid_key(k), n.parse()) {
-                    st.set(k, n);
+                // Up to 1.10 the route duelists' wins were `trainer_wins` (#192);
+                // an old tab may write both, so the higher one wins.
+                let k = if k == "trainer_wins" {
+                    "duelist_wins"
+                } else {
+                    k
+                };
+                if let (true, Ok(n)) = (valid_key(k), n.parse::<u64>()) {
+                    st.set(k, n.max(st.get(k)));
                 }
             }
         }
@@ -115,14 +122,14 @@ impl Stats {
         let n = |x: usize| x as u64;
         self.max("finds", n(p.count("found_")));
         self.max(
-            "trainer_wins",
-            n(TRAINERS.iter().filter(|t| t.beaten(p)).count()),
+            "duelist_wins",
+            n(DUELISTS.iter().filter(|t| t.beaten(p)).count()),
         );
         self.max(
             "rival_wins",
             n(RIVALS.iter().filter(|r| r.beaten(p)).count()),
         );
-        self.max("wins", self.get("trainer_wins") + self.get("rival_wins"));
+        self.max("wins", self.get("duelist_wins") + self.get("rival_wins"));
         self.max("duels", self.get("wins"));
     }
 
@@ -163,8 +170,8 @@ impl Stats {
                 );
             }
             Duel::World(id) => {
-                self.add("trainer_wins", one);
-                if trainer(id).is_some_and(Trainer::story) {
+                self.add("duelist_wins", one);
+                if duelist(id).is_some_and(Duelist::story) {
                     self.add("rook_lost", 1 - one);
                 }
             }
@@ -250,11 +257,11 @@ impl Achievement {
 }
 
 /// Route duelists (not Rook's story duels).
-fn route() -> impl Iterator<Item = &'static Trainer> {
-    TRAINERS.iter().filter(|t| !t.story())
+fn route() -> impl Iterator<Item = &'static Duelist> {
+    DUELISTS.iter().filter(|t| !t.story())
 }
 
-fn all_beaten(p: &Progress, keep: fn(&Trainer) -> bool) -> bool {
+fn all_beaten(p: &Progress, keep: fn(&Duelist) -> bool) -> bool {
     let mut some = route().filter(|t| keep(t)).peekable();
     some.peek().is_some() && some.all(|t| t.beaten(p))
 }
@@ -302,8 +309,8 @@ pub static ACHIEVEMENTS: [Achievement; 38] = [
         |s, p, _| s.get("rook_lost") == 0 && (1..=4).all(|n| p.has_flag(&format!("beat_rook_{n}")))),
     ach!("gauntlet", "Unbroken" / "Invaincu", "Clear the Gauntlet." / "Venir à bout de l'Épreuve.", 250, false, |_, p, _| p.has_flag(crate::endgame::CLEAR_FLAG)),
     ach!("daily_7", "Regular" / "Habitué", "Win the daily duel on seven different days." / "Gagner le duel du jour sept jours différents.", 100, false, |s, _, _| s.get("daily_days") >= 7),
-    ach!("trainers_10", "Waylaid" / "Pris en embuscade", "Beat ten route duelists." / "Battre dix duellistes des routes.", 50, false, |_, p, _| route().filter(|t| t.beaten(p)).count() >= 10),
-    ach!("trainers_all", "Nobody Left" / "Plus personne", "Beat every route duelist." / "Battre tous les duellistes des routes.", 200, false, |_, p, _| all_beaten(p, |_| true)),
+    ach!("duelists_10", "Waylaid" / "Pris en embuscade", "Beat ten route duelists." / "Battre dix duellistes des routes.", 50, false, |_, p, _| route().filter(|t| t.beaten(p)).count() >= 10),
+    ach!("duelists_all", "Nobody Left" / "Plus personne", "Beat every route duelist." / "Battre tous les duellistes des routes.", 200, false, |_, p, _| all_beaten(p, |_| true)),
     ach!("night_owl", "Night Owl" / "Oiseau de nuit", "Beat every night duelist." / "Battre tous les duellistes de la nuit.", 150, false, |_, p, _| all_beaten(p, |t| t.night)),
     ach!("rules_all", "House Rules" / "Règles maison", "Beat every challenge-rule duelist." / "Battre tous les duellistes à règle imposée.", 150, false, |_, p, _| all_beaten(p, |t| t.rule.is_some())),
     ach!("finds_10", "Magpie" / "Pie voleuse", "Make ten finds." / "Faire dix trouvailles.", 50, false, |_, p, _| p.count("found_") >= 10),
@@ -410,7 +417,7 @@ mod tests {
         let mut s = Stats::default();
         s.backfill(&p);
         assert_eq!(
-            (s.get("finds"), s.get("trainer_wins"), s.get("rival_wins")),
+            (s.get("finds"), s.get("duelist_wins"), s.get("rival_wins")),
             (2, 1, 1)
         );
         assert_eq!((s.get("wins"), s.get("duels")), (2, 2));
@@ -428,7 +435,7 @@ mod tests {
         s.record_duel(&won(End::NoCreatures), Duel::World("t_tobin"), &deck);
         assert_eq!((s.get("duels"), s.get("wins"), s.get("streak")), (2, 2, 2));
         assert_eq!((s.get("quick_wins"), s.get("quick_wins_hard")), (1, 1));
-        assert_eq!((s.get("trainer_wins"), s.get("rival_wins")), (1, 0));
+        assert_eq!((s.get("duelist_wins"), s.get("rival_wins")), (1, 0));
         assert_eq!((s.get("deck_out_wins"), s.get("empty_bench_wins")), (1, 1));
         assert_eq!(
             (s.get("prizes"), s.get("kos"), s.get("bench_kos")),
@@ -541,7 +548,7 @@ mod tests {
     fn reach(id: &str) -> (Stats, Progress, Profile) {
         let (mut s, mut p, mut pf) = (Stats::default(), Progress::default(), Profile::new_player());
         let flag = |p: &mut Progress, f: &str| _ = p.apply(&format!("flag:{f}")).unwrap();
-        let beat = |p: &mut Progress, keep: fn(&Trainer) -> bool, n: usize| {
+        let beat = |p: &mut Progress, keep: fn(&Duelist) -> bool, n: usize| {
             for t in route().filter(|t| keep(t)).take(n) {
                 p.apply(&format!("flag:{}", t.flag())).unwrap();
             }
@@ -561,8 +568,8 @@ mod tests {
             "rook_sweep" => (1..=4).for_each(|n| flag(&mut p, &format!("beat_rook_{n}"))),
             "gauntlet" => flag(&mut p, crate::endgame::CLEAR_FLAG),
             "daily_7" => s.add("daily_days", 7),
-            "trainers_10" => beat(&mut p, |_| true, 10),
-            "trainers_all" => beat(&mut p, |_| true, usize::MAX),
+            "duelists_10" => beat(&mut p, |_| true, 10),
+            "duelists_all" => beat(&mut p, |_| true, usize::MAX),
             "night_owl" => beat(&mut p, |t| t.night, usize::MAX),
             "rules_all" => beat(&mut p, |t| t.rule.is_some(), usize::MAX),
             "finds_10" => (0..10).for_each(|i| flag(&mut p, &format!("found_f{i}"))),
@@ -684,15 +691,15 @@ mod tests {
     }
 
     /// "All" means what the data holds: every route duelist, night duelist
-    /// and challenge-rule duelist in `TRAINERS`, every card in the set.
+    /// and challenge-rule duelist in `DUELISTS`, every card in the set.
     #[test]
     fn all_totals_come_from_the_data() {
         assert_eq!(route().filter(|t| t.night).count(), 6);
         assert_eq!(route().filter(|t| t.rule.is_some()).count(), 6);
-        let (s, mut p, pf) = reach("trainers_all");
+        let (s, mut p, pf) = reach("duelists_all");
         let last = route().last().unwrap();
         p = Progress::decode(&p.encode().replace(&format!("f:{},", last.flag()), ""));
-        assert!(!earned(&s, &p, &pf).iter().any(|a| a.id == "trainers_all"));
+        assert!(!earned(&s, &p, &pf).iter().any(|a| a.id == "duelists_all"));
         let (s, p, mut pf) = reach("cards_all");
         let one = collectable().last().unwrap();
         pf.collection.remove(one, 1);

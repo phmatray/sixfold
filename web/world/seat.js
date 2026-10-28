@@ -5,7 +5,7 @@
 // the hero is never left inside the furniture and a reload stands it in front of the seat.
 // A map's prop with `seat: false` is scenery; a person with `sit: true` on a place sits there.
 // Sitting: turn round, then SitDown while backing onto the seat; Sit loops; StandUp undoes it.
-// Reduced motion cuts straight to the end of each. Route duelists leave a sitting hero be (trainer.js).
+// Reduced motion cuts straight to the end of each. Route duelists leave a sitting hero be (duelist.js).
 import { DIR, key, angle } from "./actors.js";
 import { FOOT, SEAT } from "./props.js";
 import { tr } from "./map.js";

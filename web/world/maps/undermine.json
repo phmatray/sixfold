@@ -716,7 +716,7 @@
       "z": 5,
       "facing": "w",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Oi! You're on my rails. Well, Uncle Huw's rails. Same thing.",

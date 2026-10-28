@@ -33,7 +33,7 @@
 //   build.js   a map's scene (`build`), prop animation, `refresh`, `dispose`
 //   actors.js  hero and NPC rigs (`actor`, `place`, `animateActor`), grid helpers, `route`
 //   npc.js     placing NPCs, their routes, `facing` (what the hero can talk to or use)
-//   trainer.js route duelists: line of sight, the walk over, going quiet
+//   duelist.js route duelists: line of sight, the walk over, going quiet
 //   lift.js    cages that carry the hero between two heights (the Rodspire)
 //   seat.js    sitting on benches and chairs (the hero, and people placed sitting)
 //   script.js  cutscenes: a map's `scripts` start there, and it plays their cues one at a time
@@ -49,7 +49,7 @@ import { build, dispose, refresh, animateProps } from "./build.js";
 import { mote } from "./fireflies.js";
 import { DIR, BACK, angle, key, FIDGET_AFTER, actor, place, animateActor, route, say } from "./actors.js";
 import { updateNpc, barkOf, BARK_HOLD, facing as facingOf } from "./npc.js";
-import * as duelists from "./trainer.js";
+import * as duelists from "./duelist.js";
 import * as lifts from "./lift.js";
 import * as seats from "./seat.js";
 import { daylight, phaseOf, DAY } from "./daylight.js";

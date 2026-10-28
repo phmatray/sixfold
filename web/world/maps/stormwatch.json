@@ -1374,7 +1374,7 @@
       "z": 21,
       "facing": "w",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "Energy? I carry as little as I can. Sixteen cards, no more. Can you?",

@@ -33,8 +33,8 @@ pub enum PromptKind {
     /// The Active was knocked out: `Promote` a Benched creature. Can't be cancelled.
     ChooseReplacement,
     /// An effect needs a decision: answer `Choose(i)` with an index into
-    /// `options`, or `Cancel` when `can_cancel` (the attack, trainer or Power
-    /// is then abandoned at no cost, R-TRAINER-02).
+    /// `options`, or `Cancel` when `can_cancel` (the attack, Gear or Power
+    /// is then abandoned at no cost, R-GEAR-02).
     Choose {
         effect: Effect,
         options: Vec<Choice>,
@@ -44,7 +44,7 @@ pub enum PromptKind {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Action {
-    /// Put a Basic (or Trainer-as-Basic) from hand into play: the Active during
+    /// Put a Basic (or Gear-as-Basic) from hand into play: the Active during
     /// `ChooseActive`, otherwise the Bench.
     PlayBasic(usize),
     Evolve {
@@ -55,7 +55,7 @@ pub enum Action {
         hand: usize,
         slot: usize,
     },
-    PlayTrainer(usize),
+    PlayGear(usize),
     /// Start a retreat (main phase).
     Retreat,
     DiscardEnergy(usize),
@@ -76,7 +76,7 @@ pub enum Action {
 /// carries its `slot` at that moment, its `uid` (stable while it stays in play,
 /// see [`InPlay::uid`](crate::InPlay::uid)) and its top card: `card` for
 /// `Placed`, `Evolved` and `KnockedOut`, `creature` everywhere else (there
-/// `card` is the energy or trainer card that moved).
+/// `card` is the energy or Gear card that moved).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Event {
     Shuffled {
@@ -128,7 +128,7 @@ pub enum Event {
         uid: u32,
         card: CardId,
     },
-    TrainerPlayed {
+    GearPlayed {
         player: usize,
         card: CardId,
     },
@@ -182,7 +182,7 @@ pub enum Event {
         status: Status,
     },
     /// A lasting effect took hold on this player's Active (or on the player,
-    /// for a trainer lock).
+    /// for a Gear lock).
     EffectApplied {
         player: usize,
         effect: Effect,
@@ -210,14 +210,14 @@ pub enum Event {
         creature: CardId,
         card: CardId,
     },
-    TrainerAttached {
+    GearAttached {
         player: usize,
         slot: usize,
         uid: u32,
         creature: CardId,
         card: CardId,
     },
-    TrainerDiscarded {
+    GearDiscarded {
         player: usize,
         slot: usize,
         uid: u32,
@@ -297,8 +297,8 @@ pub enum RuleError {
     EvolutionLocked,
     NotEnergy,
     EnergyAlreadyAttached,
-    NotATrainer,
-    TrainerLocked,
+    NotGear,
+    GearLocked,
     DeckEmpty,
     /// An effect has nothing to work on (no damage to heal, no card to find…).
     NoTarget,
@@ -322,7 +322,7 @@ pub enum RuleError {
     AttackDisabled,
     CantRetreat,
     NoLiveBench,
-    TrainerBasicCantRetreat,
+    GearBasicCantRetreat,
     RetreatFailedThisTurn,
     /// R-RETREAT-05: one retreat a turn (Sixfold).
     AlreadyRetreated,

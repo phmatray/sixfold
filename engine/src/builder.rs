@@ -9,7 +9,7 @@
 
 use std::collections::BTreeMap;
 
-use crate::card::{card, card_id, CardDef, CardId, CardKind, Color, EnergyCard, Stage, Trainer};
+use crate::card::{card, card_id, CardDef, CardId, CardKind, Color, EnergyCard, Gear, Stage};
 use crate::collection::Collection;
 use crate::deck::{DeckList, DECK_SIZE, MAX_COPIES};
 use crate::doctor::{Issue, ENERGY};
@@ -57,7 +57,7 @@ impl Style {
         }
     }
 
-    /// Hexon cards the deck aims for (the trainers and energy share the rest).
+    /// Hexon cards the deck aims for (the Gear cards and energy share the rest).
     fn creatures(self) -> usize {
         match self {
             Style::Aggro => 22,
@@ -66,8 +66,8 @@ impl Style {
         }
     }
 
-    /// Trainers at most: past this, more Hexons or energy serve better.
-    fn trainers(self) -> usize {
+    /// Gear at most: past this, more Hexons or energy serve better.
+    fn gears(self) -> usize {
         match self {
             Style::Aggro => 12,
             Style::Balanced => 14,
@@ -105,7 +105,7 @@ pub struct Reason {
     pub why: Why,
 }
 
-/// What a trainer does for the deck.
+/// What a Gear card does for the deck.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Role {
     Draw,
@@ -128,7 +128,7 @@ pub enum Why {
     Basics(usize),
     /// What the deck's Awakenings awaken from.
     Under,
-    Trainer(Role),
+    Gear(Role),
     /// Basic energy for this colour's Hexons, whose main attacks cost this much.
     Energy(Color, usize),
     /// Twofold Energy for the Neutral symbols.
@@ -256,7 +256,7 @@ impl Reason {
                 format!("{l}: what your Awakenings awaken from."),
                 format!("{l} : ce dont vos Éveils ont besoin pour s'éveiller."),
             ),
-            Why::Trainer(r) => tr(
+            Why::Gear(r) => tr(
                 format!("{l}: {}.", r.text()),
                 format!("{l} : {}.", r.text()),
             ),
@@ -283,8 +283,8 @@ impl Reason {
     }
 }
 
-/// What a trainer is for, by its first effect.
-fn role(t: &Trainer) -> Role {
+/// What a Gear card is for, by its first effect.
+fn role(t: &Gear) -> Role {
     match t.effects.first() {
         Some(Effect::Draw(_) | Effect::DiscardHand) => Role::Draw,
         Some(Effect::Search(Find::BasicEnergy)) => Role::Setup,
@@ -312,7 +312,7 @@ fn controls(e: &Effect) -> bool {
             | Effect::Protect { .. }
             | Effect::DiscardDefenderEnergy
             | Effect::DisableAttack
-            | Effect::TrainerLock
+            | Effect::GearLock
     )
 }
 
@@ -355,9 +355,9 @@ fn power(id: CardId, style: Style) -> i32 {
     i32::from(cr.hp) + 2 * hit - 15 * cost + sc.power + sc.rest - setup + taste
 }
 
-/// A trainer's worth to a deck of this style.
-fn trainer_power(id: CardId, style: Style, stage2: bool) -> Option<i32> {
-    let CardKind::Trainer(t) = &card(id).kind else {
+/// A Gear card's worth to a deck of this style.
+fn gear_power(id: CardId, style: Style, stage2: bool) -> Option<i32> {
+    let CardKind::Gear(t) = &card(id).kind else {
         return None;
     };
     let (a, b, c) = match role(t) {
@@ -387,11 +387,11 @@ fn trainer_power(id: CardId, style: Style, stage2: bool) -> Option<i32> {
     Some(base + t.effects.iter().map(effect_value).sum::<i32>() / 2 + drawback)
 }
 
-/// Copies a trainer is worth: four of the plain draw, two of the rest.
-fn trainer_copies(id: CardId) -> usize {
+/// Copies a Gear card is worth: four of the plain draw, two of the rest.
+fn gear_copies(id: CardId) -> usize {
     match &card(id).kind {
-        CardKind::Trainer(t) if matches!(t.effects, [Effect::Draw(n)] if *n <= 2) => 4,
-        CardKind::Trainer(t) if t.effects.contains(&Effect::StageSkip) => 1,
+        CardKind::Gear(t) if matches!(t.effects, [Effect::Draw(n)] if *n <= 2) => 4,
+        CardKind::Gear(t) if t.effects.contains(&Effect::StageSkip) => 1,
         _ => 2,
     }
 }
@@ -641,8 +641,8 @@ impl Draft<'_> {
         ((12.0 + 5.0 * mean).round() as usize).clamp(20, *ENERGY.end())
     }
 
-    /// The best trainers, by the style, into `slots`.
-    fn take_trainers(&mut self, slots: usize) {
+    /// The best Gear cards, by the style, into `slots`.
+    fn take_gears(&mut self, slots: usize) {
         let stage2 = self.n.keys().any(|&id| {
             card(id)
                 .creature()
@@ -650,13 +650,13 @@ impl Draft<'_> {
         });
         let mut ranked: Vec<(i32, CardId)> = set::ids()
             .filter(|&id| self.room(id) > 0)
-            .filter_map(|id| Some((trainer_power(id, self.style, stage2)?, id)))
+            .filter_map(|id| Some((gear_power(id, self.style, stage2)?, id)))
             .collect();
         ranked.sort_by_key(|&(p, id)| (std::cmp::Reverse(p), id));
         let mut left = slots;
         let mut groups: BTreeMap<Role, Vec<(CardId, usize)>> = BTreeMap::new();
         for (_, id) in ranked {
-            let k = trainer_copies(id)
+            let k = gear_copies(id)
                 .saturating_sub(self.count(id))
                 .min(self.room(id))
                 .min(left);
@@ -665,14 +665,14 @@ impl Draft<'_> {
             }
             *self.n.entry(id).or_default() += k;
             left -= k;
-            if let CardKind::Trainer(t) = &card(id).kind {
+            if let CardKind::Gear(t) = &card(id).kind {
                 groups.entry(role(t)).or_default().push((id, k));
             }
         }
         for (r, cards) in groups {
             self.reasons.push(Reason {
                 cards,
-                why: Why::Trainer(r),
+                why: Why::Gear(r),
             });
         }
     }
@@ -772,15 +772,15 @@ fn fill(
     d.top_up_basics();
     let slots = DECK_SIZE
         .saturating_sub(d.creatures() + d.energy_target())
-        .min(style.trainers());
-    let trainers = d.total(|c| matches!(c.kind, CardKind::Trainer(_)));
-    d.take_trainers(
+        .min(style.gears());
+    let gears = d.total(|c| matches!(c.kind, CardKind::Gear(_)));
+    d.take_gears(
         slots
-            .saturating_sub(trainers)
+            .saturating_sub(gears)
             .min(DECK_SIZE.saturating_sub(d.len())),
     );
-    // Room past the energy the costs ask for (too few trainers owned):
-    // more Hexons, then trainers past the style's share.
+    // Room past the energy the costs ask for (too few Gear cards owned):
+    // more Hexons, then Gear cards past the style's share.
     let spare = |d: &Draft| {
         let energy = d.total(|c| matches!(c.kind, CardKind::Energy(_)));
         DECK_SIZE.saturating_sub(d.len() + d.energy_target().saturating_sub(energy))
@@ -792,7 +792,7 @@ fn fill(
     }
     if spare(&d) > 1 {
         let k = spare(&d) - 1;
-        d.take_trainers(k);
+        d.take_gears(k);
     }
     d.take_energy();
     // The picks a deck came with plus what its Awakenings need can pass 60:
@@ -819,7 +819,7 @@ fn fill(
 const BASICS: usize = 12;
 
 /// How strong a built deck looks, whatever its style (the style shapes
-/// the deck, not how its colours are judged): its Hexons' and trainers'
+/// the deck, not how its colours are judged): its Hexons' and Gear cards'
 /// worth, with Basic-less hands and energy out of the band counted against.
 fn rating(b: &Built) -> i32 {
     let style = Style::Balanced;
@@ -833,7 +833,7 @@ fn rating(b: &Built) -> i32 {
         .iter()
         .map(|&id| match card(id).kind {
             CardKind::Creature(_) => 40 + power(id, style),
-            _ => trainer_power(id, style, stage2).unwrap_or(0) / 2,
+            _ => gear_power(id, style, stage2).unwrap_or(0) / 2,
         })
         .sum();
     let basics = b.cards.iter().filter(|&&id| card(id).is_basic()).count();
@@ -883,7 +883,7 @@ fn ranked_builds(owned: &Collection, style: Style) -> Vec<(Vec<Color>, Built)> {
 
 /// Build a 60-card deck from the collection: complete Awaken lines of the
 /// chosen colours (best on the value budget, by the style), at least
-/// [`BASICS`] Basics when owned, draw and search trainers first, and
+/// [`BASICS`] Basics when owned, draw and search Gear cards first, and
 /// energy shared by the attack costs. Every card is owned. With no colour,
 /// or [`Pick::Surprise`], the builder picks among its three best colour
 /// choices by the seed.
@@ -962,8 +962,8 @@ fn weakest(n: &BTreeMap<CardId, usize>, style: Style) -> Option<CardId> {
         .filter(|&id| !card(id).is_basic_energy() && !needed(id))
         .min_by_key(|&id| {
             let w = match card(id).kind {
-                CardKind::Creature(_) | CardKind::TrainerBasic(_) => 40 + power(id, style),
-                CardKind::Trainer(_) => trainer_power(id, style, stage2).unwrap_or(0) / 2,
+                CardKind::Creature(_) | CardKind::GearBasic(_) => 40 + power(id, style),
+                CardKind::Gear(_) => gear_power(id, style, stage2).unwrap_or(0) / 2,
                 CardKind::Energy(_) => 30,
             };
             (w, id)
@@ -1167,7 +1167,7 @@ impl Suggestion {
                         "one more Basic to open with",
                         "un Hexon de Base de plus pour démarrer",
                     ),
-                    Why::Trainer(r) => r.text(),
+                    Why::Gear(r) => r.text(),
                     Why::Energy(..) | Why::Twofold => tr(
                         "your attacks need the energy",
                         "vos attaques ont besoin de cette énergie",

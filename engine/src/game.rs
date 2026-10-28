@@ -81,7 +81,7 @@ pub struct Game {
     pub(crate) retreated: bool,
     /// R-EFFECT-02: this turn's accuracy coin, once flipped.
     pub(crate) accuracy: Option<bool>,
-    /// The attack, trainer or Power being resolved.
+    /// The attack, Gear or Power being resolved.
     pub(crate) pending: Option<Pending>,
     pub(crate) prompt: Option<Prompt>,
     pub(crate) steps: VecDeque<Step>,
@@ -164,7 +164,7 @@ impl Game {
         let mut all = vec![Action::Done, Action::Retreat, Action::Cancel];
         for h in 0..pl.hand.len() {
             all.push(Action::PlayBasic(h));
-            all.push(Action::PlayTrainer(h));
+            all.push(Action::PlayGear(h));
             for slot in 0..=MAX_BENCH {
                 all.push(Action::Evolve { hand: h, slot });
                 all.push(Action::AttachEnergy { hand: h, slot });
@@ -634,7 +634,7 @@ mod tests {
         let pl = &g.players[p];
         let in_play: usize = pl
             .in_play()
-            .map(|(_, c)| c.stack.len() + c.energy.len() + c.trainers.len())
+            .map(|(_, c)| c.stack.len() + c.energy.len() + c.gears.len())
             .sum();
         let limbo = g
             .pending

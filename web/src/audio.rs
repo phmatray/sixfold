@@ -63,8 +63,8 @@ pub fn duel_event(e: &Event) {
     let (name, n) = match e {
         Event::CardDrawn { .. } | Event::CardToHand { .. } => ("draw", 0.0),
         Event::Placed { .. }
-        | Event::TrainerPlayed { .. }
-        | Event::TrainerAttached { .. }
+        | Event::GearPlayed { .. }
+        | Event::GearAttached { .. }
         | Event::Retreated { .. }
         | Event::Switched { .. }
         | Event::Promoted { .. } => ("place", 0.0),

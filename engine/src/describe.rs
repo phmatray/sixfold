@@ -54,7 +54,7 @@ impl fmt::Display for Find {
             Find::Basic => tr("a Basic Hexon", "une carte Hexon de Base"),
             Find::Creature => tr("a Hexon card", "une carte Hexon"),
             Find::BasicEnergy => tr("a basic energy", "une énergie de base"),
-            Find::Trainer => tr("a trainer", "une carte Dresseur"),
+            Find::Gear => tr("a Gear card", "une carte Objet"),
         })
     }
 }
@@ -261,7 +261,7 @@ impl fmt::Display for Effect {
                 f,
                 "Choose 1 of the defending Hexon's attacks. It can't be used during your opponent's next turn."
             ),
-            TrainerLock => write!(f, "Your opponent can't play trainers during their next turn."),
+            GearLock => write!(f, "Your opponent can't play Gear cards during their next turn."),
             DefenderWeakness(c) => write!(f, "The defending Hexon's weakness becomes {c}."),
             OwnResistance(c) => write!(f, "This Hexon's resistance becomes {c}."),
             DiscardEnergy {
@@ -414,9 +414,9 @@ fn effect_fr(e: &Effect, f: &mut fmt::Formatter) -> fmt::Result {
             f,
             "Choisissez 1 des attaques du Hexon en défense. Elle ne peut pas être utilisée pendant le prochain tour de votre adversaire."
         ),
-        TrainerLock => write!(
+        GearLock => write!(
             f,
-            "Votre adversaire ne peut pas jouer de cartes Dresseur pendant son prochain tour."
+            "Votre adversaire ne peut pas jouer de cartes Objet pendant son prochain tour."
         ),
         DefenderWeakness(c) => write!(f, "La Faiblesse du Hexon en défense devient {c}."),
         OwnResistance(c) => write!(f, "La Résistance de ce Hexon devient {c}."),
@@ -656,7 +656,7 @@ impl View<'_> {
                 self.creature_name(me, slot),
                 slot_label(slot)
             ),
-            Action::PlayTrainer(h) => format!("{} {}", tr("Play", "Jouer"), self.hand_name(h)),
+            Action::PlayGear(h) => format!("{} {}", tr("Play", "Jouer"), self.hand_name(h)),
             Action::Retreat => {
                 let cost = self.sides[me].retreat_cost;
                 tr(
@@ -835,7 +835,7 @@ impl Event {
                 };
                 format!("{} {at} awakened into {}", whose(*player), name(*card))
             }
-            Event::TrainerPlayed { player, card } => {
+            Event::GearPlayed { player, card } => {
                 format!("{} played {}", who(*player), name(*card))
             }
             Event::EnergyDiscarded {
@@ -912,8 +912,8 @@ impl Event {
                     Effect::DisableAttack => {
                         format!("{}, one of {active}'s attacks can't be used", next(p))
                     }
-                    Effect::TrainerLock => format!(
-                        "{} can't play trainer cards during {} next turn",
+                    Effect::GearLock => format!(
+                        "{} can't play Gear cards during {} next turn",
                         who(p),
                         their(p)
                     ),
@@ -958,7 +958,7 @@ impl Event {
                 name(*card),
                 name(*creature)
             ),
-            Event::TrainerAttached {
+            Event::GearAttached {
                 player,
                 creature,
                 card,
@@ -969,7 +969,7 @@ impl Event {
                 name(*card),
                 name(*creature)
             ),
-            Event::TrainerDiscarded {
+            Event::GearDiscarded {
                 player,
                 creature,
                 card,
@@ -1136,7 +1136,7 @@ impl Event {
                 card,
                 ..
             }
-            | Event::TrainerAttached {
+            | Event::GearAttached {
                 player,
                 creature,
                 card,
@@ -1160,7 +1160,7 @@ impl Event {
                 };
                 format!("{who} s'éveille en {}", name(*card))
             }
-            Event::TrainerPlayed { player, card } => pick(
+            Event::GearPlayed { player, card } => pick(
                 *player,
                 format!("Vous jouez {}", name(*card)),
                 format!("L'adversaire joue {}", name(*card)),
@@ -1254,16 +1254,14 @@ impl Event {
                             .replace("du Hexon en défense", &format!("de {}", active(p)))
                             .replace("le Hexon en défense", active(p))
                     ),
-                    Effect::DisableAttack => format!(
-                        "{}, une des attaques de {} est bloquée",
-                        next(p),
-                        active(p)
-                    ),
-                    Effect::TrainerLock => pick(
+                    Effect::DisableAttack => {
+                        format!("{}, une des attaques de {} est bloquée", next(p), active(p))
+                    }
+                    Effect::GearLock => pick(
                         p,
-                        "Vous ne pouvez pas jouer de cartes Dresseur pendant votre prochain tour"
+                        "Vous ne pouvez pas jouer de cartes Objet pendant votre prochain tour"
                             .into(),
-                        "L'adversaire ne peut pas jouer de cartes Dresseur pendant son prochain tour"
+                        "L'adversaire ne peut pas jouer de cartes Objet pendant son prochain tour"
                             .into(),
                     ),
                     Effect::DefenderWeakness(c) => {
@@ -1306,7 +1304,7 @@ impl Event {
                 card,
                 ..
             } => format!("{} régresse en {}", crea(*player, *card), name(*creature)),
-            Event::TrainerDiscarded {
+            Event::GearDiscarded {
                 player,
                 creature,
                 card,
@@ -1478,10 +1476,7 @@ mod tests {
             v.describe_action(Action::AttachEnergy { hand: 0, slot: 0 }),
             "Attach Grove Energy to Mossling (Active)"
         );
-        assert_eq!(
-            v.describe_action(Action::PlayTrainer(1)),
-            "Play Field Notes"
-        );
+        assert_eq!(v.describe_action(Action::PlayGear(1)), "Play Field Notes");
         assert_eq!(v.describe_action(Action::Attack(0)), "Vine Poke (10)");
         assert_eq!(v.describe_action(Action::Done), "End turn");
         assert_eq!(v.prompt.unwrap().kind.to_string(), "Your turn");
@@ -1519,11 +1514,11 @@ mod tests {
         );
         let lock = Event::EffectApplied {
             player: 0,
-            effect: Effect::TrainerLock,
+            effect: Effect::GearLock,
         };
         assert_eq!(
             lock.describe(0),
-            "You can't play trainer cards during your next turn"
+            "You can't play Gear cards during your next turn"
         );
     }
 
@@ -1696,7 +1691,7 @@ mod tests {
             player: 1,
             card: FIRE_E,
         };
-        let played = Event::TrainerPlayed {
+        let played = Event::GearPlayed {
             player: 1,
             card: FIELD_NOTES,
         };

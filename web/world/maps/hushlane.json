@@ -2092,7 +2092,7 @@
       "z": 8,
       "facing": "w",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 4,
         "challenge": [
           "Stop! Stay there. You've walked into a line. Of my poem. It's about willows.",
@@ -2158,7 +2158,7 @@
       "z": 24,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 2,
         "challenge": [
           "Mm... is it my turn? It's always my turn in the dream.",

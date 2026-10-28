@@ -5,7 +5,7 @@
 // no two spots share a tile. Every player-facing string (lines, text, label, locked, title,
 // a duelist's challenge / win / lose / after, and an interaction's speaker name) has a
 // French `x_fr` twin of the same shape.
-// Route duelists (`trainer`, WORLD_DESIGN §4.1): sight 0..5 (0: talk to duel, never watches), `look` directions valid, the
+// Route duelists (`duelist`, WORLD_DESIGN §4.1): sight 0..5 (0: talk to duel, never watches), `look` directions valid, the
 // first tile of each sight line walkable, and no sight line covering an exit's edge tile,
 // the map's spawn or a tile a warp from elsewhere lands on (nobody is ambushed as a map
 // fades in). Finds (`kind: "find"`): an id, a `give` and a `text`, on a solid tile
@@ -190,14 +190,14 @@ for (const [name, m] of Object.entries(maps)) {
   const spots = (m.interactions ?? []).map((i) => `${i.x},${i.z}`);
   spots.filter((k, i) => spots.indexOf(k) !== i).forEach((k) => fail.push(`${name}: two spots on tile ${k}`));
 
-  // Duelists' sight lines, cast the way trainer.js casts them (people block; routes are not followed).
+  // Duelists' sight lines, cast the way duelist.js casts them (people block; routes are not followed).
   const inMap = (x, z) => x >= 0 && z >= 0 && x < m.width && z < m.height;
   const people = new Set((m.npcs ?? []).map((n) => `${n.x},${n.z}`));
   const ambush = new Set([`${m.spawn.x},${m.spawn.z}`, ...(landing[name] ?? [])]);
   for (const e of m.exits ?? [])
     for (let c = e.span[0]; c <= e.span[1]; c++) ambush.add({ n: `${c},0`, s: `${c},${m.height - 1}`, w: `0,${c}`, e: `${m.width - 1},${c}` }[e.side]);
   for (const n of m.npcs ?? []) {
-    const t = n.trainer;
+    const t = n.duelist;
     if (!t) continue;
     if (t.sight !== undefined && !(Number.isInteger(t.sight) && t.sight >= 0 && t.sight <= 5)) fail.push(`${name}: ${n.id} sight ${t.sight} is not 0..5`);
     const dirs = t.look ?? [n.facing ?? "s"];
@@ -335,7 +335,7 @@ function routines(name, m, solid, seatAt, height) {
   for (const n of m.npcs ?? []) {
     if (n.routine === undefined) continue;
     const who = `${name}: ${n.id}'s routine`;
-    if (n.trainer || JSON.stringify(n.dialogue ?? "").includes("duel:")) fail.push(`${name}: ${n.id} duels, so it keeps no routine (it stands where the map puts it)`);
+    if (n.duelist || JSON.stringify(n.dialogue ?? "").includes("duel:")) fail.push(`${name}: ${n.id} duels, so it keeps no routine (it stands where the map puts it)`);
     if (n.route) fail.push(`${name}: ${n.id} has a route and a routine; give it one or the other`);
     if (!Array.isArray(n.routine) || !n.routine.length) {
       fail.push(`${who} is a list of activities`);

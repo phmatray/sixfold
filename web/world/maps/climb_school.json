@@ -113,7 +113,7 @@
       "z": 3,
       "facing": "s",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "Three points of contact! Always three points of contact. Two hands, one foot. Or one hand, two feet.",
@@ -181,7 +181,7 @@
       "z": 3,
       "facing": "s",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "...",

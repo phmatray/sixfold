@@ -32,7 +32,7 @@ pub struct Coin {
     pub decide: bool,
 }
 
-/// A big centred message: turn banner, attack name, trainer played.
+/// A big centred message: turn banner, attack name, Gear played.
 #[derive(Clone, PartialEq)]
 pub struct Callout {
     pub key: u32,
@@ -155,7 +155,7 @@ pub struct Play {
     pub side: usize,
     /// Counted from 1 for people.
     pub turn: u32,
-    /// attack, power, trainer, energy, awaken, retreat, bench or ko.
+    /// attack, power, Gear, energy, awaken, retreat, bench or ko.
     pub kind: &'static str,
     pub card: CardId,
     /// The Hexon it went to or hit.
@@ -877,8 +877,8 @@ impl Ctl {
                     .map_or(tr("Power", "Pouvoir"), |p| p.label())
                     .into(),
             )),
-            Event::TrainerPlayed { card: c, .. } => {
-                Some(play("trainer", *c, None, card(*c).label().into()))
+            Event::GearPlayed { card: c, .. } => {
+                Some(play("gear", *c, None, card(*c).label().into()))
             }
             Event::EnergyAttached {
                 creature, card: c, ..
@@ -1117,12 +1117,12 @@ impl Ctl {
                 );
                 1000
             }
-            Event::TrainerPlayed { player, card: c } => {
+            Event::GearPlayed { player, card: c } => {
                 let sub = match (you(*player), fr()) {
-                    (true, false) => "You played a trainer",
-                    (false, false) => "Opponent played a trainer",
-                    (true, true) => "Vous jouez une carte Dresseur",
-                    (false, true) => "L'adversaire joue une carte Dresseur",
+                    (true, false) => "You played a Gear card",
+                    (false, false) => "Opponent played a Gear card",
+                    (true, true) => "Vous jouez une carte Objet",
+                    (false, true) => "L'adversaire joue une carte Objet",
                 };
                 self.callout(card(*c).label().into(), sub.into(), Some(*c), you(*player));
                 if you(*player) {

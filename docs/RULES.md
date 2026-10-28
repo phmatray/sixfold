@@ -35,14 +35,14 @@ unit test that should cover it.
   - *Hexon* is a character card (type index < 8). Its *stage* is 0 for Basic, 1 for Awaken 1 and
     2 for Awaken 2.
   - *Energy* covers basic energy (one per colour) and one *special 2-unit Neutral energy*.
-  - *Trainer* is a one-shot card (type `$10`). Trainers have no subtypes.
+  - *Gear* is a one-shot card (type `$10`). Gear have no subtypes.
   - *Active* is slot 0. *Bench* is slots 1 to 5.
   - *Condition* means a special condition: Confused, Asleep, Paralyzed, Poisoned or Double-Poisoned.
   - *Power* is a Hexon ability stored in attack slot 1 with category 4. A Power is either
     *activated* (used from a menu) or *passive* (always on).
   - *Power blocker* is a passive Power that shuts down all other Powers.
-  - *+10 trainer* and *−20 trainer* are trainers that stay attached to a Hexon and change damage.
-  - *Trainer-as-Basic* is a trainer card that may be placed in play as a Basic Hexon.
+  - *+10 Gear* and *−20 Gear* are Gear cards that stay attached to a Hexon and change damage.
+  - *Gear-as-Basic* is a Gear card that may be placed in play as a Basic Hexon.
 
 ---
 
@@ -84,23 +84,23 @@ unit test that should cover it.
   - `01:4BB1-4BCC`: both sides lack a Basic. Both are reset and the code jumps to `4B5F` to restart.
 - **Test.** `mulligan_redraws_until_basic_without_bonus_cards`, `both_players_without_basic_restart_setup`
 
-### R-SETUP-03: Mulligan check ignores Trainer-as-Basic cards
-- **Rule.** The opening-hand Basic check does not count Trainer-as-Basic cards, even though setup
+### R-SETUP-03: Mulligan check ignores Gear-as-Basic cards
+- **Rule.** The opening-hand Basic check does not count Gear-as-Basic cards, even though setup
   placement accepts them. Deck validation does not count them either (R-DECK-02).
 - **Parameters.** The mulligan check enters at `01:4DDB` (type and stage only). The placement filter
-  enters at `01:4DD0`, which also accepts the two trainer IDs.
+  enters at `01:4DD0`, which also accepts the two Gear IDs.
 - **Status.** CONFIRMED. The verifier raised it to high confidence: in hand these cards stay type
   `$10`, and `01:6E31` turns them into Hexon data only while they are in play.
 - **Evidence.**
   - `01:4DC0`: `call 4DDB` from the hand scan.
   - `01:552A`: `call 4DD0`. This is the only caller of the ID-accepting entry.
   - `00:12E9 → 01:6E31`: Hexon data is substituted only while the card's location is in play.
-- **Test.** `mulligan_ignores_trainer_as_basic`
+- **Test.** `mulligan_ignores_gear_as_basic`
 
 ### R-SETUP-04: Placing Active and Bench
 - **Rule.** After the hands are settled, each player places exactly one Basic as Active. The human
   goes first, then the opponent. The Active choice cannot be cancelled. The player may then place 0
-  to 5 more Basics on the Bench and stop at any time. Only Basics (or Trainer-as-Basic cards) are
+  to 5 more Basics on the Bench and stop at any time. Only Basics (or Gear-as-Basic cards) are
   accepted. No confirmation prompt is shown in a normal duel.
 - **Parameters.** At most 6 in play (`+EF`, `cp 6`). The placement primitive is `00:13EA`.
 - **Status.** CONFIRMED
@@ -154,7 +154,7 @@ unit test that should cover it.
 - **Rule.** If the deck is empty at the turn draw, the turn player loses immediately, before taking
   any action. Draws caused by effects are capped at the cards left in the deck. Search effects (the
   callers of `0B:42E0`) are refused on an empty deck. Plain draw effects can still be played and draw
-  nothing (`01:4939` clamps, `01:4973` message); a discard-hand-then-draw trainer still discards the
+  nothing (`01:4939` clamps, `01:4973` message); a discard-hand-then-draw Gear still discards the
   hand. Running out because of an effect is **not** a loss. Only the turn player's own deck at their
   own draw is checked.
 - **Parameters.** A draw fails when cards drawn `[BA] ≥ 60`. The result becomes `cc07 = 2`
@@ -166,10 +166,10 @@ unit test that should cover it.
   - `01:4945-4973`: the draw-N screen clamps N.
   - `0B:6B46`, `0B:73B9`: effect draw loops stop on carry and set no result.
   - `0B:42E0` (CheckDeckNotEmpty): the empty-deck precondition. Its only 6 callers (`0B:484A`, `49DB`,
-    `4C40`, `4F5D`, `6100`, `6877`) are search-type effects. The draw-2 trainer (list `06:4FAC`), the
-    discard-hand-draw-7 trainer (`06:4F0F`) and the draw-1 attack (`06:4DC7`) have no phase-1 entry.
-  - Runtime: with `C2BA = $3C`, both draw trainers were played: `01:4973` was hit, the card (and for
-    the draw-7 trainer the whole hand) went to the discard, 0 cards were drawn, `cc07` stayed 0.
+    `4C40`, `4F5D`, `6100`, `6877`) are search-type effects. The draw-2 Gear (list `06:4FAC`), the
+    discard-hand-draw-7 Gear (`06:4F0F`) and the draw-1 attack (`06:4DC7`) have no phase-1 entry.
+  - Runtime: with `C2BA = $3C`, both draw Gear cards were played: `01:4973` was hit, the card (and for
+    the draw-7 Gear the whole hand) went to the discard, 0 cards were drawn, `cc07` stayed 0.
   - `cc07` is written only at `4092`, `4248`, `6F79` and `7158`.
 - **Test.** `empty_deck_at_turn_draw_loses`, `effect_draw_clamped_to_remaining_deck_no_loss`,
   `search_refused_on_empty_deck`
@@ -185,7 +185,7 @@ unit test that should cover it.
   5. Draw 1 card (deck-out ends the duel).
   6. Run the main phase.
   7. Check the result.
-  8. Clear end-of-turn effects: the turn player's trainer lock, `+E8`, and conditionally `+EB` bit 0.
+  8. Clear end-of-turn effects: the turn player's Gear lock, `+E8`, and conditionally `+EB` bit 0.
   9. Run between-turns processing.
   10. Check the result.
   11. Increment the turn counter.
@@ -197,7 +197,7 @@ unit test that should cover it.
   - `01:40F2-4128`: the main loop, checked call by call.
   - `01:4231-423B`: the Awakening gate and `7193`.
   - `00:359D`: clears `+E7`.
-  - `00:35B1`: clears the trainer lock and `+E8`.
+  - `00:35B1`: clears the Gear lock and `+E8`.
   - `01:7157`: `cc06 = 0` at duel start.
 - **Test.** `turn_sequence_resets_per_turn_flags`, `turn_counter_increments_after_between_turns`
 
@@ -205,7 +205,7 @@ unit test that should cover it.
 - **Rule.** The main phase is a loop. The turn player may repeat any of these, in any order and as
   often as allowed:
   - Play a card from hand. A Basic goes to the Bench if fewer than 6 Hexons are in play. An
-    Awakening card awakens a Hexon. Energy is attached, once per turn. A Trainer is played.
+    Awakening card awakens a Hexon. Energy is attached, once per turn. A Gear is played.
   - Use a Power.
   - Retreat.
   - Look at cards.
@@ -228,7 +228,7 @@ unit test that should cover it.
 
   **Sixfold departs from the handheld game here, on purpose.** The handheld lets the first player
   attack on turn 0. Sixfold doesn't: the player who goes first can't attack on their first turn
-  (turn 0). They can still place Basics, attach energy, play trainers and use Powers (Awakening is
+  (turn 0). They can still place Basics, attach energy, play Gear cards and use Powers (Awakening is
   already barred on that turn, R-EVO-02). The second player may attack on their first turn (turn 1)
   as usual. The physical card game made the same change in 2013 to offset the first player's
   advantage. Measured with the AI on both sides, that first attack was worth about 9 points of win
@@ -399,7 +399,7 @@ unit test that should cover it.
   1. The opponent's effect has set "can't retreat" on the Active.
   2. The Active is Asleep or Paralyzed.
   3. There is no Benched Hexon with HP above 0.
-  4. The Active is a Trainer-as-Basic card.
+  4. The Active is a Gear-as-Basic card.
   5. The attached units are fewer than the retreat cost.
 
   Poison and Confusion do not block the attempt.
@@ -445,8 +445,8 @@ unit test that should cover it.
   every attack-applied effect on the outgoing Active. That covers conditions, substatuses, changed
   weakness and resistance, the doubling flag, and last-attack data. Conditions are stored only for the
   Active, so a Benched Hexon never has one. These move with the Hexon: damage, attached cards,
-  stage, awaken and Power flags, the per-slot colour override and the attached-trainer counters. The
-  player-wide trainer lock is not cleared.
+  stage, awaken and Power flags, the per-slot colour override and the attached-Gear counters. The
+  player-wide Gear lock is not cleared.
 - **Parameters.** `00:13C6` zeroes `+F0`, `+E7`, `+E8`, `+E9`, `+EA`, `+EB` bit 0 and `+F2..F9`.
   `00:14A8` then swaps `+BB`, `+C8`, `+C2`, `+CE`, `+D4`, `+E0` and `+DA`, and rewrites the
   location bytes.
@@ -459,7 +459,7 @@ unit test that should cover it.
   that is not Confused retreat any number of times per turn, paying each time. Sixfold allows **one**
   retreat a turn, as the physical card game always has: once a retreat goes through, Retreat is
   refused for the rest of the turn (`RuleError::AlreadyRetreated`). A Confused retreat that fails its
-  coin doesn't use it up (R-RETREAT-03 still bars a retry while Confused), and a switch trainer is not
+  coin doesn't use it up (R-RETREAT-03 still bars a retry while Confused), and a switch Gear is not
   a retreat. Retreating does not end the turn, and the new Active may attack. Retreat is available on
   every turn, including first turns.
 - **Parameters.** The only per-turn retreat state for players is `cc0c` (R-RETREAT-03). The AI has
@@ -519,7 +519,7 @@ unit test that should cover it.
 - **Rule.** An attack's condition is decided, including its coin, before damage. It is queued and
   written only after damage and the after-damage effects. If the defender was protected from the
   attack's effects, conditions aimed at the defender are dropped, and conditions the attacker puts on
-  itself still apply. A Trainer-as-Basic Hexon can never receive a condition. A generic
+  itself still apply. A Gear-as-Basic Hexon can never receive a condition. A generic
   "condition immunity" Power protects its holder while that Power is usable. Immunity is decided
   when the condition is queued, against the defender at that moment. The queue entry names a side,
   not a card, so if a later effect of the same attack switches the defender, the condition lands on
@@ -533,7 +533,7 @@ unit test that should cover it.
   `ccca = $CB` queued nothing; with `ccca = $53` it queued `C2 F0 01`; after `00:14A8` switched in a
   `$CB` card, `01:6E9E` still confused it.
 - **Evidence.** `06:4765` (phase-3 entries), `00:1715`, `00:1770`, `0B:4035-4060`, `01:6EB4-6EDF`.
-- **Test.** `protected_defender_drops_status_but_attacker_self_status_applies`, `trainer_as_basic_immune_to_status`,
+- **Test.** `protected_defender_drops_status_but_attacker_self_status_applies`, `gear_as_basic_immune_to_status`,
   `immunity_decided_at_queue_time`
 
 ### R-STATUS-04: Asleep and Paralyzed block attacking and retreating
@@ -572,17 +572,17 @@ unit test that should cover it.
 - **Rule.** After the turn ends (with T = the player whose turn just ended), these steps run in order:
   1. T's Active: poison damage. If it survives, a sleep coin, then Paralysis is removed. A poison
      knock-out skips both.
-  2. T's +10 trainers are discarded.
+  2. T's +10 Gear cards are discarded.
   3. N's Active: poison damage, then a sleep coin if it survives. No Paralysis removal.
-  4. N's −20 trainers are discarded.
+  4. N's −20 Gear cards are discarded.
   5. Knock-outs are handled for both sides together.
 
   Confusion is never processed here. If nothing needs processing, the condition steps are skipped
-  silently and the knock-out check does not run. The trainer discards (steps 2 and 4) run on both
+  silently and the knock-out check does not run. The Gear discards (steps 2 and 4) run on both
   paths; only the condition steps and the knock-out check are skipped.
 - **Parameters.** `01:6C5C`. The skip test `6D15` returns carry for poison or nibble 2 on either
   side, and the caller tests nibble 3 for T only (`6C61`). So a Confused-only board, or one where only
-  N is Paralyzed, takes the fast path `01:6C70-6C79`, which still calls both trainer discards.
+  N is Paralyzed, takes the fast path `01:6C70-6C79`, which still calls both Gear discards.
   `01:6CA6`: a poison knock-out (carry) jumps to `6CC7`, past the sleep coin and the paralysis removal.
 - **Status.** CONFIRMED
 - **Evidence.** `01:410B`, `01:6C5C-6CF0`, `01:6D15`.
@@ -594,12 +594,12 @@ unit test that should cover it.
 
 ### R-STATUS-08: Poison damage
 - **Rule.** A Poisoned Active takes 10 damage at every between-turns step (after either player's
-  turn), or 20 if Double-Poisoned. This ignores weakness, resistance, trainers and every other
+  turn), or 20 if Double-Poisoned. This ignores weakness, resistance, Gear cards and every other
   modifier. Poison never wears off on its own. A knock-out from poison gives prizes as usual.
 - **Parameters.** `$0A` or `$14`, subtracted raw through `00:19F6`.
 - **Status.** CONFIRMED
 - **Evidence.** `01:6DEC-6E2F`, `00:19F6`.
-- **Test.** `poison_ignores_minus_20_trainer`, `double_poison_deals_20`
+- **Test.** `poison_ignores_minus_20_gear`, `double_poison_deals_20`
 
 ### R-STATUS-09: Sleep coin
 - **Rule.** At every between-turns step, each Asleep Active flips a coin, after its poison damage.
@@ -636,14 +636,14 @@ unit test that should cover it.
   - a Hexon is put into an empty Active spot, including replacement after a knock-out;
   - a card effect removes or replaces it.
 
-  Generic cure effects also exist: a trainer that requires the Active to have a condition and then
+  Generic cure effects also exist: a Gear card that requires the Active to have a condition and then
   clears it, and a once-per-turn Power that clears both Actives (usable when either Active has a
   condition).
 - **Parameters.** `00:13C6`, called from `00:14A8`, `00:134A`, `00:142E`, `01:6FD7`, `0B:4462`,
-  `0B:703A` and `0B:77F9`. Trainer cure at `0B:74C5/74D6`. Power cure at `0B:4E5C-4EAA`.
+  `0B:703A` and `0B:77F9`. Gear cure at `0B:74C5/74D6`. Power cure at `0B:4E5C-4EAA`.
 - **Status.** CONFIRMED
 - **Evidence.** As listed in Parameters.
-- **Test.** `evolving_active_clears_all_conditions`, `cure_trainer_requires_condition`, `cure_both_actives`,
+- **Test.** `evolving_active_clears_all_conditions`, `cure_gear_requires_condition`, `cure_both_actives`,
   `promotion_after_ko_has_clean_condition`
 
 ### R-STATUS-13: Record of the last inflicted conditions *(verifier-found)*
@@ -654,7 +654,7 @@ unit test that should cover it.
   (the attacker's is kept). Switching, awakening and a new Active also clear the record.
 - **Parameters.** Both `+F5` are zeroed at the start of `01:6E9E` (`6E9F-6EA2`), before the
   empty-queue test at `6EA8`. `01:6E9E` runs at the end of every completed attack (`00:1770`) and after
-  the paralysing Power (`0B:531D`); trainers never reach it. The defender's `+F2..F9`, which includes
+  the paralysing Power (`0B:531D`); Gear cards never reach it. The defender's `+F2..F9`, which includes
   `+F5`, is also zeroed by `01:7227`: at the start of every attack attempt (`00:1691 → 01:7236`), on
   confusion tails (`00:17A6`), on an accuracy miss (`00:1783`) and on Done. `00:13C6` clears `+F2..F9`
   on switch, awaken and new Active. The reader `0B:69F4-6A23` reads the turn duelist's own record
@@ -673,18 +673,18 @@ unit test that should cover it.
   but negation does not stop them. An attack may confuse both the defender and the attacker. The
   self copy skips the immunity checks and survives negation.
 - **Parameters.** `0B:7216` (DirectConfuseTurnActive) is the only phase-3 entry of list `06:4EE7`,
-  used by a trainer: playing it confuses the player's own Active at once (`+F0 = (old & $F0) | 1`),
+  used by a Gear card: playing it confuses the player's own Active at once (`+F0 = (old & $F0) | 1`),
   with the immunity checks (`$CB/$CC`, `$BE` through `34A7`) and without consulting `cccd`. The
   attack self-confusion is `0B:4793`: InflictConfusion after `SwapTurn`, so `hWhoseTurn ≠
   wTurnStartDuelist` at `0B:4035-403B` skips immunity, and the entry is queued.
-- **Status.** CONFIRMED (verifier-found). Runtime: playing the `$C8` trainer hit `0B:7216` with
+- **Status.** CONFIRMED (verifier-found). Runtime: playing the `$C8` Gear hit `0B:7216` with
   `ff98 = cc05 = $C2` and left `C2F0 = 1`, `C3F0 = 0`.
 - **Evidence.** `0B:7216-7251`, `06:4EE7`, `0B:4793-479C`, `0B:5300-531F` (paralysis plus an
   immediate apply).
 - **Test.** `self_confusion_survives_negation`
 
   The clean engine models queued conditions and the attack self-condition (`InflictSelf`, which
-  ignores immunity and negation). A direct-write "confuse your own Active" trainer is not modelled;
+  ignores immunity and negation). A direct-write "confuse your own Active" Gear is not modelled;
   an original card set that wants one needs a new effect that applies at once and checks immunity.
 
 ---
@@ -697,28 +697,28 @@ unit test that should cover it.
   2. The attacker's own doubling effect.
   3. Weakness: ×2.
   4. Resistance: −30.
-  5. +10 for each +10 trainer on the attacker.
-  6. −20 for each −20 trainer on the defender.
+  5. +10 for each +10 Gear on the attacker.
+  6. −20 for each −20 Gear on the defender.
   7. The defender's prevention and reduction (R-DMG-09).
   8. Clamp to 0.
 
   The value is clamped **only** at the end. The pipeline is wrapped by a prevention check before the
   calculation (R-DMG-12) and a coin hook after it (R-DMG-13).
-- **Parameters.** ×2 is one shift. −30 is `$FFE2`. The trainer counts are multiplied by 10 and by 20.
+- **Parameters.** ×2 is one shift. −30 is `$FFE2`. The Gear counts are multiplied by 10 and by 20.
   The clamp tests the 16-bit sign bit. Example: base 10, resisted, with +10 attached, gives
   10 → −20 → −10 → 0.
 - **Status.** CONFIRMED
 - **Evidence.** `00:18F4-196D` (the only caller is `00:171A`), `00:19C9-19F5`.
-- **Test.** `damage_order_weakness_then_resistance_then_trainers`, `resisted_10_with_plus10_is_zero`
+- **Test.** `damage_order_weakness_then_resistance_then_gears`, `resisted_10_with_plus10_is_zero`
 
 ### R-DMG-02: Zero base damage skips all modifiers
 - **Rule.** An attack whose damage word is 0 deals 0, with no modifiers. Only with the
-  ignore-weakness-and-resistance flag set would a 0 word still get the trainers and the defender's
+  ignore-weakness-and-resistance flag set would a 0 word still get the Gear cards and the defender's
   effects, which never occurs.
 - **Status.** CONFIRMED. The second zero check (`00:191B`) never fires on its own, because the
   doubling (`31D4`) only doubles a nonzero word (`31F2-31F4`). The real edge is the ignore flag: bit
   15 on a 0 word (`$8000`) passes the first test at `18FD`, and after `res 7` (`190D`) it jumps to
-  `1953`, so 0 base plus one +10 trainer would give 10. The only bit-15 setters (`0B:6758`,
+  `1953`, so 0 base plus one +10 Gear would give 10. The only bit-15 setters (`0B:6758`,
   `0B:6870`) belong to attacks with fixed damage. The clean engine returns 0 for every 0 base.
 - **Evidence.** `00:18F8-1902`, `00:191B-191D`.
 - **Test.** `zero_base_damage_ignores_weakness_and_plus10`
@@ -730,7 +730,7 @@ unit test that should cover it.
     Otherwise the printed value is used.
   - The attacker's changed colour (from a Power) is used only while that Power is working. If the
     attacking Active has a condition, or a power blocker is in play, its printed colour is used.
-  - A Trainer-as-Basic Hexon counts as colour index 6.
+  - A Gear-as-Basic Hexon counts as colour index 6.
 
   Weakness ×2 is applied before resistance −30.
 - **Parameters.** Type mask table `80 40 20 10 08 04 02 01`. Changed colour is `+D4` bit 7, gated by
@@ -742,8 +742,8 @@ unit test that should cover it.
 ### R-DMG-04: Weakness and resistance apply only to direct damage on the Active
 - **Rule.** Effect damage (to the Bench, or to either Active through an effect) never uses weakness
   or resistance.
-  - Effect damage to an **Active** adds the attacker's +10 trainers, even when it comes from a Power.
-  - Effect damage to **any** slot subtracts the −20 trainers on the damaged Hexon, except Power
+  - Effect damage to an **Active** adds the attacker's +10 Gear cards, even when it comes from a Power.
+  - Effect damage to **any** slot subtracts the −20 Gear cards on the damaged Hexon, except Power
     damage.
   - Effect damage to the Active also goes through the defender's reductions. It is cancelled
     entirely while the attack-prevention flag is set.
@@ -764,7 +764,7 @@ unit test that should cover it.
   `$96` with a heads coin gave `de = 0`, `cccd = 4`; a Bench `$A0` against an Awaken 1 attacker gave
   `de = 0`, `cccd = 5`, and against a Basic `de = 10`.
 - **Evidence.** `00:1A53-1AEC`, `00:32AE-32CD`, `00:3418-346D`, `0B:4117-412D` (the Bench helper).
-- **Test.** `bench_effect_damage_ignores_weakness`, `bench_minus20_trainer_reduces_effect_damage`,
+- **Test.** `bench_effect_damage_ignores_weakness`, `bench_minus20_gear_reduces_effect_damage`,
   `bench_power_hooks_on_effect_damage`
 
   The clean engine applies both Power checks. It sets the negation only when the defending Active
@@ -772,7 +772,7 @@ unit test that should cover it.
 
 ### R-DMG-05: Self-damage uses the attacker's own modifiers
 - **Rule.** Damage a Hexon deals to itself (the confusion hit, or recoil) uses its **own**
-  weakness and resistance against its **own** colour, then its own +10 and −20 trainers, then the
+  weakness and resistance against its **own** colour, then its own +10 and −20 Gear cards, then the
   clamp. Its substatus modifiers are skipped. The prevention flag is saved and forced to 0 during
   the self-hit, so self-damage cannot be prevented.
 - **Parameters.** Confusion hit base 20. `18BC → 1982`, with no turn swap.
@@ -824,7 +824,7 @@ unit test that should cover it.
   `double_next_attack_reused_on_doubled_turn`
 
 ### R-DMG-09: The defender's prevention and reduction
-- **Rule.** After weakness, resistance and both trainers, these steps run in order:
+- **Rule.** After weakness, resistance and both Gear cards, these steps run in order:
   1. If the attack-prevention flag is set, damage becomes 0.
   2. Otherwise the defender's single "until next turn" effect applies: full prevention, −10, −20,
      "prevent if below 40", or halve. These are one byte, so only one can be active.
@@ -842,7 +842,7 @@ unit test that should cover it.
 
 ### R-DMG-10: Ignoring weakness and resistance
 - **Rule.** An attack effect can mark its damage as unaffected by weakness and resistance. That
-  damage still gets the doubling, both trainers, the defender's effects and the clamp.
+  damage still gets the doubling, both Gear cards, the defender's effects and the clamp.
 - **Parameters.** Bit 15 of the damage word `ccbf/ccc0`.
 - **Status.** CONFIRMED
 - **Evidence.** `00:1909-1916`.
@@ -980,19 +980,19 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
 - **Test.** `evolve_keeps_damage`
 
 ### R-EVO-07: Attached cards and the Awakening stack stay
-- **Rule.** Attached energy and trainers stay with the Hexon. The earlier stage cards stay
+- **Rule.** Attached energy and Gear cards stay with the Hexon. The earlier stage cards stay
   underneath in the same slot and go to the discard pile with it. Awakening does not reset the
-  attached-trainer counters.
+  attached-Gear counters.
 - **Status.** CONFIRMED
 - **Evidence.** `00:1311-1327`, `00:1437`. The Bench path zeroes `E0/DA` at `00:1418`, and the awaken path
   does not.
-- **Test.** `evolve_keeps_attached_energy` (also checks the attached trainers and their count)
+- **Test.** `evolve_keeps_attached_energy` (also checks the attached Gear cards and their count)
 
 ### R-EVO-08: Awakening clears the slot's flags, and clears the Active's conditions
 - **Rule.** For any slot, awakening clears all the slot flags (settled, Power-used, once-while-in-play)
   and the changed colour, and writes the new stage. So a once-while-in-play attack (R-EFFECT-05) is
   usable again after awakening. For the Active only, all conditions and effects are cleared as well
-  (R-STATUS-12). The player-wide trainer lock is not cleared.
+  (R-STATUS-12). The player-wide Gear lock is not cleared.
 - **Parameters.** EvolveCreatureNoCheck zeroes the whole `+C2` byte (`00:133C`: bit 7 settled, bit 5
   Power used, bit 6 once-while-in-play) and `+D4` (`00:1342`).
 - **Status.** CONFIRMED
@@ -1001,7 +1001,7 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
 
 ### R-EVO-09: Awakening-lock Power
 - **Rule.** While a Hexon with a generic Awakening-lock Power is in play on either side, nobody
-  can awaken, whether from hand or through the stage-skip trainer. The holder counts as in play when
+  can awaken, whether from hand or through the stage-skip Gear. The holder counts as in play when
   it is on the Bench, or when it is the Active without Confused, Asleep or Paralyzed. The lock is
   lifted while a power blocker is in play, using the same counting rule. The "nothing to awaken" and
   "not this turn" errors take priority over the lock. That priority is judged over the whole play
@@ -1014,8 +1014,8 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
 - **Evidence.** `00:356E`, `00:34C0`, `00:34DC`, `01:455A`, `0B:76B8`.
 - **Test.** `evolution_lock_power_blocks_evolution`, `evolution_lock_inactive_when_holder_asleep`
 
-### R-EVO-10: Stage-skip trainer (optional effect)
-- **Rule.** A trainer effect may put an Awaken 2 from hand directly onto a settled Basic. The Basic's
+### R-EVO-10: Stage-skip Gear (optional effect)
+- **Rule.** A Gear card effect may put an Awaken 2 from hand directly onto a settled Basic. The Basic's
   name must match the awakens-from name of the Awaken 1 that the Awaken 2 awakens from. The usual
   eligibility rules and the Awakening lock still apply. The normal awaken body runs, and the stage is
   then recorded as 3. Stage value 3 means "a skipped Awaken 1": such a Hexon, when it falls back,
@@ -1023,7 +1023,7 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
 - **Status.** CONFIRMED
 - **Evidence.** `0B:76B3-7716`, `00:1390`, `00:2E84`, `01:70F2` / `01:713B` (the fall-back reads 1 and 3
   alike, see §15).
-- **Test.** `stage_skip_trainer_requires_settled_basic`
+- **Test.** `stage_skip_gear_requires_settled_basic`
 
 ### R-EVO-11: Awakening refreshes a once-per-turn Power *(verifier-found)*
 - **Rule.** Awakening zeroes the Power-used bit, so the newly awakened Hexon may use its own
@@ -1037,10 +1037,10 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
   lower stage, clears the Active's conditions, and clears the slot flags. A Hexon that fell back cannot
   awaken again that turn. Where the removed stage goes depends on the effect:
   - the fall-back **attack** (`0B:5D17-5D2E`) puts it into its owner's hand;
-  - the fall-back **trainer** (`0B:7C99-7CCC`) makes a Hexon fall back on the player's own side, puts the
+  - the fall-back **Gear** (`0B:7C99-7CCC`) makes a Hexon fall back on the player's own side, puts the
     removed stages into the discard pile, then runs the knock-out handler (`01:6EF6`).
 
-  The clean engine always returns the removed stage to its owner's hand, for attacks and trainers
+  The clean engine always returns the removed stage to its owner's hand, for attacks and Gear cards
   alike (an engine choice, marked by a `RULES: R-EVO-12` comment).
 - **Status.** CONFIRMED (verifier-found)
 - **Evidence.** `0B:4431-4475` (DevolveEffect `0B:4431`, DevolveClearSlotState `0B:445D`),
@@ -1060,13 +1060,13 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
 
 ### R-KO-01: One prize per knocked-out Hexon
 - **Rule.** For each of the opponent's in-play Hexons at 0 HP (Active or Bench), the player takes
-  one prize. A knocked-out Trainer-as-Basic gives no prize. A player cannot take more prizes than
+  one prize. A knocked-out Gear-as-Basic gives no prize. A player cannot take more prizes than
   remain. Prizes go to the hand one at a time. There are no multi-prize Hexons.
 - **Parameters.** The count goes to `ccce` (`01:7074`). The picking loop stops at count 0 or at
   `+EC == 0`.
 - **Status.** CONFIRMED
 - **Evidence.** `01:7074-70A3`, `01:5807-583C`, `02:4AAC-4B5A`.
-- **Test.** `double_ko_gives_two_prizes`, `prizes_capped_at_remaining`, `trainer_as_basic_ko_gives_no_prize`
+- **Test.** `double_ko_gives_two_prizes`, `prizes_capped_at_remaining`, `gear_as_basic_ko_gives_no_prize`
 
 ### R-KO-02: Choosing prizes
 - **Rule.** A human chooses **which** remaining face-down prize slots to take. The AI picks at random
@@ -1160,7 +1160,7 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
 - **Rule.** If N's Active was given a "counter-KO" effect during its own last turn and is knocked out
   during T's turn while T's Active survives, T's Active is knocked out too. This is checked in every
   knock-out check during a turn: after an attack, after a confusion self-hit, and after a damaging
-  Power or trainer. It is checked before prizes and is not checked between turns. The effect lasts
+  Power or Gear. It is checked before prizes and is not checked between turns. The effect lasts
   through the opponent's turn, because `+E7` is cleared at the start of its owner's turn. It hits T's
   Active, which is not necessarily the Power holder.
 - **Parameters.** N's `+E7 == $16`. HandleKnockOuts `01:6EF6` starts with HandleCounterKnockOut
@@ -1170,7 +1170,7 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
   to 0 at `00:3612`, caller `01:6EF9` inside the `01:6EF6` run.
 - **Evidence.** `00:35F2-362E`, `00:359D`, `0B:58FF`, `0B:6789`, `0B:7CCC`, `00:1779`, `00:17A3`
   (all → `01:6EF6`), `01:6CED` (→ `01:6EF9`).
-- **Test.** `counter_ko_effect_knocks_out_attacker`, `counter_ko_also_after_trainer_or_power_damage`
+- **Test.** `counter_ko_effect_knocks_out_attacker`, `counter_ko_also_after_gear_or_power_damage`
 
 ### R-KO-10: Knock-out clears linked effects
 - **Rule.** When one side's Active is knocked out, these values in the other side's `+E8` are
@@ -1193,14 +1193,14 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
 - **Test.** `deck_must_have_exactly_sixty`
 
 ### R-DECK-02: At least one Basic
-- **Rule.** A deck needs at least one Basic Hexon. Trainer-as-Basic cards do not count.
+- **Rule.** A deck needs at least one Basic Hexon. Gear-as-Basic cards do not count.
 - **Status.** CONFIRMED
 - **Evidence.** `02:5674`, `02:556F-557D`.
 - **Test.** `deck_without_basic_rejected`
 
 ### R-DECK-03: At most 4 cards with the same name
 - **Rule.** A deck may hold at most 4 cards that share a **name**. Different versions with the same
-  name count together. Basic energy is exempt. The special 2-unit energy, trainers and Hexons are
+  name count together. Basic energy is exempt. The special 2-unit energy, Gear cards and Hexons are
   limited.
 - **Parameters.** Limit `cfd9 = 4`. The exemption test is exactly: type `$0E` (the special energy)
   is counted; otherwise any type with bit 3 set is exempt, which is `$08-$0D` (basic energy) in
@@ -1225,7 +1225,7 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
   for playing from hand, for setup placement and for effects. A newly placed Hexon has full HP, its
   flags cleared (so it cannot awaken this turn), and its stage recorded. If it goes to slot 0, its
   conditions and Active effects are cleared (`00:13C6`: `+F0`, `+E7..+EA`, `+EB` bit 0, `+F2..+F9`;
-  the player-wide trainer lock stays). The new slot is the old in-play count (`+EF`), so slot 0 is
+  the player-wide Gear lock stays). The new slot is the old in-play count (`+EF`), so slot 0 is
   used only when nothing is in play.
 - **Status.** CONFIRMED
 - **Evidence.** `00:13EA` (`cp 6`), `00:142E → 00:13C6`, `01:44E5`, `01:4D68`, `0B:631C/6325/74B3`.
@@ -1258,16 +1258,16 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
 - **Status.** CONFIRMED. Runtime (the energy-search attack, list `06:4D67`, phase 5 `0B:687B`): with
   B forced at the deck list (`01:55F2` carry) and basic energy in the deck it never returned (the
   list reopened 76 times through `00:374B`); with no match it returned with `FFA1 = $FF` (nothing
-  taken). Other search trainers were not probed.
+  taken). Other search Gear cards were not probed.
 - **Evidence.** `00:1061`, `00:104D`, `00:1045`, `00:1071`, `00:1090`, `0B:42EC`, `0B:687B-68CD`.
 - **Test.** `search_deck_removes_exact_card`
 
 ### R-ZONE-05: Discard pile
 - **Rule.** The discard pile is an ordered public list, and new cards go on top. Only cards in hand
   can be discarded from hand. A knocked-out Hexon goes there with every card in its slot (all
-  stages, energy and trainers). In the source these are added in deck-index order (`00:1442-145C`
+  stages, energy and Gear cards). In the source these are added in deck-index order (`00:1442-145C`
   loops locations 0..`$3B`). The order within a single knock-out is not a rule; the clean engine
-  discards the stack, then energy, then trainers. The play area is then compacted, starting from
+  discards the stack, then energy, then Gear cards. The play area is then compacted, starting from
   slot 0. Effects can take specific cards back from the discard pile.
 - **Status.** CONFIRMED
 - **Evidence.** `00:10D2`, `00:10C5`, `00:1442-145C`, `00:1490`, `00:10E7`.
@@ -1275,17 +1275,17 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
 
 ---
 
-## 10. Trainers and the effect framework (R-TRAINER, R-EFFECT)
+## 10. Gear and the effect framework (R-GEAR, R-EFFECT)
 
-### R-TRAINER-01: No limit on trainers
-- **Rule.** Any number of trainers may be played in the main phase, on any turn including the first.
+### R-GEAR-01: No limit on Gear cards
+- **Rule.** Any number of Gear cards may be played in the main phase, on any turn including the first.
   The turn continues afterwards.
 - **Status.** CONFIRMED
 - **Evidence.** `01:4463-4478`, `01:7193`. `00:1859` never reads `cc06`.
-- **Test.** `three_trainers_same_turn_on_turn_zero`
+- **Test.** `three_gears_same_turn_on_turn_zero`
 
-### R-TRAINER-02: How a trainer is played
-- **Rule.** A trainer is played in this order:
+### R-GEAR-02: How a Gear card is played
+- **Rule.** A Gear card is played in this order:
   1. Lock check.
   2. Load the effect list.
   3. Phase 1 check. On failure an error is shown and the card stays in hand.
@@ -1296,35 +1296,35 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
   8. Discard the card.
 - **Status.** CONFIRMED
 - **Evidence.** `00:1859-18A3`, `00:18A4`.
-- **Test.** `trainer_failed_precondition_stays_in_hand`
+- **Test.** `gear_failed_precondition_stays_in_hand`
 
-### R-TRAINER-03: Discarded only if still in hand
-- **Rule.** After resolving, a trainer goes to the discard pile only if it is still in the hand. A
-  trainer that its own effect moved (for example a Trainer-as-Basic placed into play) stays where it
+### R-GEAR-03: Discarded only if still in hand
+- **Rule.** After resolving, a Gear card goes to the discard pile only if it is still in the hand. A
+  Gear that its own effect moved (for example a Gear-as-Basic placed into play) stays where it
   is.
 - **Status.** CONFIRMED
 - **Evidence.** `00:10C5`.
-- **Test.** `attached_trainer_skips_discard` (the card its own effect attached stays where it is).
-  `trainer_as_basic_stays_in_play_after_resolving` covers placement only: in the clean engine a
-  Trainer-as-Basic is placed by `PlayBasic`, outside the trainer pipeline.
+- **Test.** `attached_gear_skips_discard` (the card its own effect attached stays where it is).
+  `gear_as_basic_stays_in_play_after_resolving` covers placement only: in the clean engine a
+  Gear-as-Basic is placed by `PlayBasic`, outside the Gear pipeline.
 
-### R-TRAINER-04: Trainer lock
-- **Rule.** An attack effect can stop the defending **player** from playing trainers. It lasts through
+### R-GEAR-04: Gear lock
+- **Rule.** An attack effect can stop the defending **player** from playing Gear cards. It lasts through
   that player's next turn and is cleared at the end of it. The lock is set even when the defender's
   protection negated the attack. The lock belongs to the player, so switching does not remove it.
 - **Parameters.** N's `+EB` bit 1. Checked at `00:3560`. Cleared by `00:35B1` at `01:4108`.
 - **Status.** CONFIRMED
 - **Evidence.** `0B:500E`, `00:3560`, `00:35B1`, `05:437F`, `08:4139`.
-- **Test.** `trainer_lock_lasts_one_opponent_turn`
+- **Test.** `gear_lock_lasts_one_opponent_turn`
 
-### R-TRAINER-05: Attached damage-modifier trainers
-- **Rule.** The +10 and −20 trainers stay attached. They are counted per slot and move with the
-  Hexon. At every between-turns step, all of T's +10 trainers in play (Active and Bench) are
-  discarded, so they last for the turn they were played. Then all of N's −20 trainers in play are
+### R-GEAR-05: Attached damage-modifier Gear cards
+- **Rule.** The +10 and −20 Gear cards stay attached. They are counted per slot and move with the
+  Hexon. At every between-turns step, all of T's +10 Gear cards in play (Active and Bench) are
+  discarded, so they last for the turn they were played. Then all of N's −20 Gear cards in play are
   discarded, so a −20 its owner attached survives the owner's own turn end and lasts through the
   opponent's following turn. Both discards run on the full path and on the no-conditions fast path.
-- **Parameters.** DiscardPlusDamageTrainers `01:6CF1` zeroes T's `+E0..E5` and jumps to `00:1B73`
-  with `DE = $00D8`; DiscardMinusDamageTrainers `01:6D03` zeroes N's `+DA..DF` (after `SwapTurn`) and
+- **Parameters.** DiscardPlusDamageGear `01:6CF1` zeroes T's `+E0..E5` and jumps to `00:1B73`
+  with `DE = $00D8`; DiscardMinusDamageGear `01:6D03` zeroes N's `+DA..DF` (after `SwapTurn`) and
   jumps there with `DE = $00D9`. DiscardInPlayCardsWithId `00:1B73` scans all 60 card locations of
   that duelist and discards every in-play card (`loc & $10`) with that ID. Order: T poison / sleep /
   paralysis → T +10 → N poison / sleep → N −20 (`6CC7`, `6CE7`; fast path `6C70-6C79`).
@@ -1334,10 +1334,10 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
   second call with `ff98 = $C3` discarded the other two. The slow path (T paralysed) gave the same
   result through `6CC7 → 6CF1` and `6CE7 → 6D03`.
 - **Evidence.** `01:6CF1`, `01:6D03`, `00:1B73`, `01:6C70-6C79`, `01:6CC7`, `01:6CE7`, `00:19C9/19DE`.
-- **Test.** `plus10_trainer_discarded_end_of_turn` (also a Benched slot), `minus20_trainer_lasts_opponent_turn`
+- **Test.** `plus10_gear_discarded_end_of_turn` (also a Benched slot), `minus20_gear_lasts_opponent_turn`
 
 ### R-EFFECT-01: Effect-command framework
-- **Rule.** Every attack, Power and trainer has a list of entries, each a phase byte plus a handler,
+- **Rule.** Every attack, Power and Gear has a list of entries, each a phase byte plus a handler,
   ending with 0. The dispatcher runs the handler for the requested phase. A missing list or a
   missing phase counts as success. A handler signals failure or cancel with carry, optionally with an
   error.
@@ -1411,7 +1411,7 @@ Awakening was called evolution before the rename; the rule IDs keep the `R-EVO` 
   - search the deck, draw, or recover cards;
   - change weakness or resistance;
   - fall back to the previous stage;
-  - lock the opponent's trainers.
+  - lock the opponent's Gear cards.
 - **Engine extensions.** Built from the same helpers, for the original set: add damage per 10
   damage on the attacker or the defender; heal every own Hexon; attach a basic energy found in
   the deck to the acting Hexon, then shuffle (R-ZONE-03). Tests:
@@ -1550,19 +1550,19 @@ notes give the decision order and the weightings to copy where helpful.
 | ID | Rule (summary) | Status | Test |
 |---|---|---|---|
 | R-AI-01 | There are five entry points: take a turn, place at setup, choose a Hexon when forced to switch, choose a replacement after a knock-out, pick prizes. The AI acts only through the same action primitives as a human (`00:2B42-2B8A`, `05:4668`, `01:687E`). Some legality checks are done by the AI caller, not by the primitive, so the engine must validate every AI action. | CONFIRMED | `ai_never_emits_illegal_action` |
-| R-AI-02 | Turn order is fixed (see AI policy notes). The phase-14 trainers run inside attack selection, after the attack is chosen. The second pass stops at phase 13 (`05:468B-4785`, `05:6A48`). | CORRECTED | `ai_turn_benches_before_attach_before_attack` |
-| R-AI-03 | Random mistakes: weaker AIs skip a valid trainer or Power play with probability 1/4, and some with 1/2. Strong AIs never skip. Benching, awakening, energy, retreat and attacking are deterministic (`05:743B-7473`). The Powers step (`08:6386`) calls AIRandomSkipGate once and then skips **all** Powers for that pass; trainers are gated per card (`08:414A`); nothing is remembered across passes. Eligibility (`05:7426`, AIIsSkipEligible): SRAM `$A00A ≠ 0` turns the gate off for everyone, opponent indexes `$0C-$1B` never skip, and the 1/2 rate applies to indexes `$1C`, `$20`, `$22`, `$26`, `$2A`, `$33`. The clean AI gates each play and remembers a skip for the rest of the turn. **Sixfold's Easy** also picks any attack that does something instead of the best one, and retreats only to dodge a knock-out (the handheld's are deterministic). | CONFIRMED | `ai_easy_skips_quarter_of_valid_trainer_plays`, `ai_easy_attacks_at_random` |
+| R-AI-02 | Turn order is fixed (see AI policy notes). The phase-14 Gear cards run inside attack selection, after the attack is chosen. The second pass stops at phase 13 (`05:468B-4785`, `05:6A48`). | CORRECTED | `ai_turn_benches_before_attach_before_attack` |
+| R-AI-03 | Random mistakes: weaker AIs skip a valid Gear or Power play with probability 1/4, and some with 1/2. Strong AIs never skip. Benching, awakening, energy, retreat and attacking are deterministic (`05:743B-7473`). The Powers step (`08:6386`) calls AIRandomSkipGate once and then skips **all** Powers for that pass; Gear cards are gated per card (`08:414A`); nothing is remembered across passes. Eligibility (`05:7426`, AIIsSkipEligible): SRAM `$A00A ≠ 0` turns the gate off for everyone, opponent indexes `$0C-$1B` never skip, and the 1/2 rate applies to indexes `$1C`, `$20`, `$22`, `$26`, `$2A`, `$33`. The clean AI gates each play and remembers a skip for the rest of the turn. **Sixfold's Easy** also picks any attack that does something instead of the best one, and retreats only to dodge a knock-out (the handheld's are deterministic). | CONFIRMED | `ai_easy_skips_quarter_of_valid_gear_plays`, `ai_easy_attacks_at_random` |
 | R-AI-04 | Benching a Basic: score = 130; +50 if fewer than 4 in play, otherwise −20; +20 if the Active could be knocked out next turn; +20 if usable energy is in hand; +20 if the Awakening is in hand; +10 if the Awakening is in the deck. Bench at ≥180 and fewer than 6 in play (`05:5EAE-5F4B`). So with 4 or 5 in play it still benches when all four bonuses apply (110 + 70 = 180; runtime: the score went `$82 → $6E → … → $B4` and AIExecuteAction ran). The clean AI benches only below 4 in play. | CONFIRMED | `ai_benches_basic_under_four_in_play` |
 | R-AI-05 | Awakening: score = 128, awaken at ≥133. It weighs: can attack after awakening, a knock-out gained or lost, leaving knock-out range, a cure for the Active's condition, the next stage being available, damage taken, and a small per-card AI byte (`05:5F4C-611F`). | CONFIRMED | `ai_evolves_statused_active` |
 | R-AI-06 | Energy target: score = 128 for each Hexon, attach at ≥133, ties go to the lowest slot. A Hexon that can't use any energy in hand is never chosen. Only the Active gets the knock-out bonus for one missing energy (`05:64E8-67DF`, `05:653A`, `05:674E`). | CORRECTED | `ai_attaches_to_active_for_ko` |
 | R-AI-07 | Retreat: at most once per turn through wAIRetreatedThisTurn `$CE0A` (AIRetreatStep `05:4786`, cleared by `05:565A`), never after a failed confused retreat. Exception: the alternate turn routine `05:4078`, used only by opponent index `$35` (`05:406A`), has no `$CE0A` gate and may retreat twice. Score = 128, retreat at ≥131, built from poison, confusion, knock-out threat, weakness and resistance matchups, a better Hexon on the Bench, retreat cost, the prize race, and turns without dealing damage (`05:58B2-5B32`). | CORRECTED | `ai_retreats_threatened_poisoned_active` |
-| R-AI-08 | The AI plays a self-switch trainer instead of paying when the retreat cost is ≥3 or there isn't enough energy. In an urgent retreat only, and only if no energy was attached yet, it attaches one first when exactly 1 unit short (`08:462E`, `05:5D4F`). | CORRECTED | `ai_uses_switch_trainer_for_cost_three` |
+| R-AI-08 | The AI plays a self-switch Gear instead of paying when the retreat cost is ≥3 or there isn't enough energy. In an urgent retreat only, and only if no energy was attached yet, it attaches one first when exactly 1 unit short (`08:462E`, `05:5D4F`). | CORRECTED | `ai_uses_switch_gear_for_cost_three` |
 | R-AI-09 | Choosing a Hexon to bring in (retreat, forced switch, replacement after a knock-out): score = 50 plus knock-out potential, damage, weakness and resistance, retreat cost, threat and HP. A Hexon at 0 HP scores 0. The highest score wins, and ties go to the later slot (`05:5B72-5D4C`). | CORRECTED | `ai_promotes_creature_that_can_ko` |
 | R-AI-10 | Attack choice: score = 80 for each attack. An unusable attack scores 0. Adjustments include +20 for a knock-out, +damage/10, recoil, discard cost, condition value, and a prize-race check for Bench or self-knock-out effects. A tie goes to the 2nd attack. It attacks only if the best score is ≥80; otherwise it ends the turn (`05:69F8-6DCC`). | CORRECTED | `ai_picks_attack_that_kos`, `ai_ends_turn_with_useless_attack` |
-| R-AI-11 | The +10 trainer is played when it turns a non-knock-out into a knock-out, or 30% of the time afterwards. The −20 trainer is played when it prevents the Active being knocked out. The heal-20 trainer is played on the Active when it lets it survive and the AI isn't retreating (`08:4501`, `08:45A5`, `08:4406`, `08:41D1`, `08:4204`). | CORRECTED | `ai_plays_plus10_only_for_ko` |
-| R-AI-12 | Draw trainers: draw-2 needs ≥10 cards in the deck. Discard-hand-draw-7 needs ≥15 and a score ≥60. If it is played, the turn sequence runs again (`08:4878`, `08:4CC1-4D9B`). | CORRECTED | `ai_skips_draw_trainer_on_small_deck` |
-| R-AI-13 | Force-switch trainer: once per turn, only if the opponent has a Bench and the Active can't already knock out the defender. It prefers a Hexon it can knock out (`47A9`), then one weak to its colour (`46C3-46D9`), then one with no energy (`46E2-4704`), then the lowest HP (`4705-473E` via `4821`), so it is played even with no knock-out-able target (`08:467E-4821`). The clean AI plays it only when a Benched target can be knocked out. | CORRECTED | `ai_force_switches_ko_able_bench` |
-| R-AI-14 | Setup: the AI places every real Basic in hand order. The first becomes the Active, up to 6 in play. Trainer-as-Basic cards are never placed by setup or by the bench step: AIDefaultSetup (`05:4232-4240`) and the bench scorer (`05:5ECD-5ED8`) skip any hand card with type ≥ 8 or stage ≠ 0, and these cards are type `$10` in hand (runtime: `05:4226` placed the real Basic and left the `$CB` card in hand). The AI makes no mulligan choice (`05:4226-4249`). The clean AI places real Basics first and then Trainer-as-Basics; that is legal. | CONFIRMED | `ai_setup_first_basic_active` |
+| R-AI-11 | The +10 Gear is played when it turns a non-knock-out into a knock-out, or 30% of the time afterwards. The −20 Gear is played when it prevents the Active being knocked out. The heal-20 Gear is played on the Active when it lets it survive and the AI isn't retreating (`08:4501`, `08:45A5`, `08:4406`, `08:41D1`, `08:4204`). | CORRECTED | `ai_plays_plus10_only_for_ko` |
+| R-AI-12 | Draw Gear cards: draw-2 needs ≥10 cards in the deck. Discard-hand-draw-7 needs ≥15 and a score ≥60. If it is played, the turn sequence runs again (`08:4878`, `08:4CC1-4D9B`). | CORRECTED | `ai_skips_draw_gear_on_small_deck` |
+| R-AI-13 | Force-switch Gear: once per turn, only if the opponent has a Bench and the Active can't already knock out the defender. It prefers a Hexon it can knock out (`47A9`), then one weak to its colour (`46C3-46D9`), then one with no energy (`46E2-4704`), then the lowest HP (`4705-473E` via `4821`), so it is played even with no knock-out-able target (`08:467E-4821`). The clean AI plays it only when a Benched target can be knocked out. | CORRECTED | `ai_force_switches_ko_able_bench` |
+| R-AI-14 | Setup: the AI places every real Basic in hand order. The first becomes the Active, up to 6 in play. Gear-as-Basic cards are never placed by setup or by the bench step: AIDefaultSetup (`05:4232-4240`) and the bench scorer (`05:5ECD-5ED8`) skip any hand card with type ≥ 8 or stage ≠ 0, and these cards are type `$10` in hand (runtime: `05:4226` placed the real Basic and left the `$CB` card in hand). The AI makes no mulligan choice (`05:4226-4249`). The clean AI places real Basics first and then Gear-as-Basics; that is legal. | CONFIRMED | `ai_setup_first_basic_active` |
 | R-AI-15 | Strong AIs stack their opening by reshuffling until the hand and next draws are good. **Do not implement.** This is unfair. A disabled prize filter (`cp a`) is also present (`05:72AF-7377`). | CONFIRMED | n/a (not implemented) |
 | R-AI-16 | Prizes: picked at random among those remaining (`05:41E5-421D`). | CONFIRMED | `ai_prize_pick_is_remaining_slot` |
 | R-AI-17 | Powers: each Power has its own heuristic. All Powers are skipped while a blocker is in play or the random gate fires. A condition on the Active skips only the Active's own Power (`08:637F-6401`). | CORRECTED | `ai_skips_active_power_when_confused` |
@@ -1580,12 +1580,12 @@ notes give the decision order and the weightings to copy where helpful.
 | Confusion wearing off on its own | No nibble-1 handler between turns. | Omit. |
 | Coin flip to recover from Paralysis | Removed without a coin at `01:6CAB`. | Omit. |
 | First player skips the first draw | The draw at `01:4241` is unconditional. | Omit. A modern-rules variant could be optional. |
-| First player can't attack or play trainers on turn 0 | `cc06` is read only for the Awakening gate (`01:4231`) and practice scripts. | **Partly adopted:** Sixfold bars the first player's turn-0 attack (R-TURN-05) but not their trainers. |
+| First player can't attack or play Gear cards on turn 0 | `cc06` is read only for the Awakening gate (`01:4231`) and practice scripts. | **Partly adopted:** Sixfold bars the first player's turn-0 attack (R-TURN-05) but not their Gear cards. |
 | Choosing to go first or second | Heads or tails sets the turn directly (`01:4C41-4C46`). | Omit. |
 | Optional mulligan, or the opponent drawing extra cards on a mulligan | `01:4B8B-4BAF` jumps straight to placement with no prompt. | Omit. |
 | Retreat limited to once per turn, or retreat ending the turn | The non-confused path reads no flag and returns to the menu (`01:43F5-4420`). | Omit. |
 | Hand-size limit or discard at end of turn | `00:1088` has no bound. | Omit. |
-| Trainer subtypes (support, stadium, tool) or per-turn trainer limits | A single trainer type `$10` and no counter (`00:1859`, `01:7193`). | Omit. The attached ±damage trainers are the only trainers that stay in play. |
+| Gear subtypes (support, stadium, tool) or per-turn Gear limits | A single Gear type `$10` and no counter (`00:1859`, `01:7193`). | Omit. The attached ±damage Gear cards are the only Gear cards that stay in play. |
 | Hexons worth more than one prize | Exactly one `inc b` per knock-out (`01:7074`). | Omit. |
 | Turn or time limit in normal duels | The 15-turn exit `01:411E` needs `cc09 == $80` (a practice duel) and `cc13 ≠ 0` (the scripted tutorial, AI index 0 only). Normal AI duels have `cc09` = `$80` plus the opponent index, so `$81` or more. | Omit. |
 | Losing by deck-out through an effect | `cc07` is set only at `01:4248` and `01:6F79`. | Omit. |
@@ -1601,19 +1601,19 @@ notes give the decision order and the weightings to copy where helpful.
 
 ## 14. Engine spec summary (test-first checklist)
 
-1. Each deck must have exactly 60 cards, at least 1 Basic Hexon (Trainer-as-Basic does not count), and at most 4 cards per name (basic energy exempt; the special 2-unit energy is limited).
+1. Each deck must have exactly 60 cards, at least 1 Basic Hexon (Gear-as-Basic does not count), and at most 4 cards per name (basic energy exempt; the special 2-unit energy is limited).
 2. Setup: reset, shuffle, and draw 7 for each player.
-3. Mulligan: a hand without a Basic is revealed, reshuffled and redrawn until it has one. It is forced, with 0 bonus cards for the opponent. If neither player has a Basic, setup restarts for both. Trainer-as-Basic does not count.
-4. Placement: human first, then the opponent. Exactly 1 Basic as Active (it can't be cancelled), then 0 to 5 on the Bench. Only Basics or Trainer-as-Basic cards are allowed.
+3. Mulligan: a hand without a Basic is revealed, reshuffled and redrawn until it has one. It is forced, with 0 bonus cards for the opponent. If neither player has a Basic, setup restarts for both. Gear-as-Basic does not count.
+4. Placement: human first, then the opponent. Exactly 1 Basic as Active (it can't be cancelled), then 0 to 5 on the Bench. Only Basics or Gear-as-Basic cards are allowed.
 5. Prizes: N prize cards from the top of the deck, set after placement. N is configurable from 1 to 6 (default 6). Sudden death uses 1.
 6. First player: one coin after prizes. Heads means the flipper goes first. No choice is offered.
 7. Every turn starts with a draw of 1, including turn 0. An empty deck at that draw means the turn player loses immediately.
 8. Effect draws are capped at the cards left in the deck. Search effects (`0B:42E0` callers) are refused on an empty deck. Plain draw effects can still be played and draw nothing (`01:4939` clamps, `01:4973` message). Neither case is ever a loss.
 9. Turn start: clear own-turn substatus. If the turn counter ≥ 2, mark all of the turn player's in-play Hexons as settled and clear their Power-used flags. Reset energy-attached, retreat-failed and accuracy-cache. Then draw.
-10. Main phase: any number of actions in any order (bench, awaken, attach, trainer, Power, retreat). Only an attack or Done ends the turn.
+10. Main phase: any number of actions in any order (bench, awaken, attach, Gear, Power, retreat). Only an attack or Done ends the turn.
 11. Done ends the turn without a prompt and clears the opponent's last-attack and disabled-attack memory.
-12. Turn end: check the result, clear the trainer lock and `+E8`, run between-turns, check the result, increment the turn counter, swap.
-13. There is no first-turn restriction on attacking, trainers, energy, retreat or Powers (except settled-only Powers).
+12. Turn end: check the result, clear the Gear lock and `+E8`, run between-turns, check the result, increment the turn counter, swap.
+13. There is no first-turn restriction on attacking, Gear cards, energy, retreat or Powers (except settled-only Powers).
 14. Bench: at most 6 Hexons in play. A placed Hexon has full HP and cleared flags. Conditions are cleared when it lands in slot 0.
 15. There is no hand-size limit.
 16. Energy: one attachment per turn, to the Active or the Bench. Cancelling doesn't use it up.
@@ -1623,32 +1623,32 @@ notes give the decision order and the weightings to copy where helpful.
 20. An attack is blocked by, in this order: an attack-lock substatus, Asleep or Paralyzed, no attacks, not enough energy, or the specific disabled attack.
 21. A committed attack always ends the turn, including a confusion tails or an accuracy miss. Only cancelling or a failed precondition returns to the menu.
 22. Attack pipeline: check → accuracy coin (cached per turn) → select → costs → confusion coin → phase 5 → prevention check → before-damage → damage calc → coin prevention → apply → after-damage → retaliation → status queue → knock-out handler.
-23. Damage order: base → attacker double → weakness ×2 → resistance −30 → +10 per +10 trainer → −20 per −20 trainer on the defender → defender prevention/reduction → attacker-placed reduction → clamp to 0. Clamp only at the end.
+23. Damage order: base → attacker double → weakness ×2 → resistance −30 → +10 per +10 Gear → −20 per −20 Gear on the defender → defender prevention/reduction → attacker-placed reduction → clamp to 0. Clamp only at the end.
 24. Base damage 0 skips all modifiers.
-25. Weakness and resistance: use the defender's changed weakness or resistance if set. The attacker's changed colour applies only while its Power works (no condition, no blocker). Trainer-as-Basic is colour index 6.
+25. Weakness and resistance: use the defender's changed weakness or resistance if set. The attacker's changed colour applies only while its Power works (no condition, no blocker). Gear-as-Basic is colour index 6.
 26. Effect damage never uses weakness or resistance. +10 applies only when the target is the Active (including Power damage). −20 applies on any slot (except Power damage). The defender's reductions apply on the Active, and the whole-attack check runs again for it. After the clamp (not for Power damage, not under a blocker): the Bench reduction Power, then on any slot the awakened-attacker shield and the coin prevention.
 27. An ignore-weakness-and-resistance flag skips only those two steps.
 28. Defender reduction: the prevention flag, else one "until next turn" effect (0 / −10 / −20 / <40 → 0 / halve), else the defender's reduction Power (≥30 → 0, or halve). Then the attacker-placed −20/−10.
 29. Halving rounds down to a multiple of 10.
-30. Self-damage (confusion 20, recoil) uses its own weakness and resistance against its own colour, plus its own trainers, then the clamp. No substatus modifiers apply and it can't be prevented.
+30. Self-damage (confusion 20, recoil) uses its own weakness and resistance against its own colour, plus its own Gear cards, then the clamp. No substatus modifiers apply and it can't be prevented.
 31. HP is stored as remaining points and floored at 0. A knock-out happens exactly at HP 0.
 32. Report the weakness-applied and resistance-applied flags in the attack result.
 33. Conditions: one byte for the Active. Confused, Asleep and Paralyzed exclude each other. Poison or Double-Poison stacks with them. The Bench never has conditions.
 34. Applying a condition: the newest nibble condition replaces the old one and keeps poison. Poison overwrites the poison level.
-35. Conditions are queued before damage and applied after it, to the side's Active of that moment. A negated attack drops conditions on the defender but keeps the attacker's self-conditions. Trainer-as-Basic and immunity-Power holders are immune, decided when the condition is queued.
+35. Conditions are queued before damage and applied after it, to the side's Active of that moment. A negated attack drops conditions on the defender but keeps the attacker's self-conditions. Gear-as-Basic and immunity-Power holders are immune, decided when the condition is queued.
 36. Asleep or Paralyzed: can't attack or retreat. Confused may try both, with a coin.
 37. Confused, Asleep or Paralyzed disables the Active's Powers, including passive "in play" counting. Poison doesn't.
 38. Confused attack: costs are paid, then a coin. Tails means 20 self-damage, a knock-out check and the end of the turn.
-39. Between turns (T = the player who just ended): T's poison → sleep coin → paralysis cure → discard T's +10 trainers → N's poison → sleep coin → discard N's −20 trainers → knock-outs. Skip the condition steps if there is nothing to process.
+39. Between turns (T = the player who just ended): T's poison → sleep coin → paralysis cure → discard T's +10 Gear cards → N's poison → sleep coin → discard N's −20 Gear cards → knock-outs. Skip the condition steps if there is nothing to process.
 40. Poison: 10 (double: 20) at every between-turns step, raw with no modifiers. It never expires.
 41. Sleep: a coin at every between-turns step after poison. Heads wakes it.
 42. Paralysis: removed at the end of the owner's turn, with no coin.
 43. Confusion never expires on its own.
 44. All conditions and effects are cleared by switching, by the Active awakening, by placement into an empty Active spot, and by cure effects.
-45. Retreat preconditions in order: can't-retreat substatus, Asleep or Paralyzed, no live Bench, Active is Trainer-as-Basic, energy < cost. Poison and Confusion are OK.
+45. Retreat preconditions in order: can't-retreat substatus, Asleep or Paralyzed, no live Bench, Active is Gear-as-Basic, energy < cost. Poison and Confusion are OK.
 46. Retreat cost: printed cost minus own-Bench reducers (ignored with a blocker), floored at 0. The player chooses the energy. Stop once paid ≥ cost. Special energy counts 2 with no refund.
 47. Confused retreat: discard first, then a coin. Tails means it stays and the retreat-failed flag blocks confused retries this turn. The flip happens even at cost 0.
-48. A switch clears the outgoing Active's conditions and effects. Damage, cards, stage, flags, colour override and trainer counters move with the Hexon.
+48. A switch clears the outgoing Active's conditions and effects. Damage, cards, stage, flags, colour override and Gear counters move with the Hexon.
 49. No per-turn retreat limit. Retreating doesn't end the turn.
 50. Cancelling a retreat costs nothing.
 51. Awaken: the hand card's awakens-from name must match the in-play Hexon's name. There is no stage arithmetic.
@@ -1656,21 +1656,21 @@ notes give the decision order and the weightings to copy where helpful.
 53. Awaken keeps damage (HP += newMax − oldMax), attached cards and the lower stages underneath.
 54. Awaken clears the slot flags (including the Power-used flag) and the colour override. Awakening the Active also clears its conditions and effects.
 55. Awakening-lock Power (either side, counted by the in-play rule) blocks all Awakening unless a blocker is in play. "No target" and "not this turn" errors take priority.
-56. Optional stage-skip trainer and fall-back effects follow R-EVO-10 and R-EVO-12.
+56. Optional stage-skip Gear and fall-back effects follow R-EVO-10 and R-EVO-12.
 57. Knock-out check: runs once after the full attack, after the confusion self-hit, after damaging effects, and after between-turns.
 58. Knock-out handler order: counter-KO → clear linked effects → T takes prizes → (early win) → N takes prizes → (early loss) → N replaces, then T replaces → result table → always discard all 0-HP Hexons with their stacks, then compact.
-59. One prize per knocked-out non-Trainer-as-Basic Hexon, capped at the prizes left. A human picks the prize slot, the AI picks at random. Prizes go to the hand.
+59. One prize per knocked-out non-Gear-as-Basic Hexon, capped at the prizes left. A human picks the prize slot, the AI picks at random. Prizes go to the hand.
 60. Replacement: choose from the live Bench and it can't be cancelled. No live Bench means "no Hexons".
 61. Result = sign((T took last prize + N has no Hexons) − (N took last prize + T has no Hexons)). Positive means T wins, negative means T loses, equal and nonzero means a draw.
 62. A draw restarts as sudden death: 1 prize each, turn counter 0, full setup and a new coin flip. It can repeat.
 63. A result set mid-turn ends the turn at once and skips between-turns. A result set between turns ends the duel before the next turn.
-64. Counter-KO effect: if the defender with the effect is knocked out during the turn (attack, confusion self-hit, damaging Power or trainer), the turn player's Active is knocked out too (not between turns).
+64. Counter-KO effect: if the defender with the effect is knocked out during the turn (attack, confusion self-hit, damaging Power or Gear), the turn player's Active is knocked out too (not between turns).
 65. A knock-out clears effects (E8 ∈ {3,5,6,7,$12}) on the other side that were placed by the knocked-out Active.
 66. Shuffle permutes only the remaining deck. Searching removes one card. A card can be returned to the top.
 67. Discard pile: ordered, public, new cards on top. Only cards in hand can be discarded from hand.
-68. Trainers: unlimited per turn. Order is lock check → check → select (cancel keeps the card) → costs → effect → discard if still in hand.
-69. Trainer lock: set on the opponent player and lasts through their next turn. It survives switching and is set even if the attack was negated.
-70. Attached +10 and −20 trainers are counted per slot. +10 is discarded at the end of the owner's turn. −20 is discarded at the end of the opponent's following turn. Both are discarded from every in-play slot, Bench included.
+68. Gear: unlimited per turn. Order is lock check → check → select (cancel keeps the card) → costs → effect → discard if still in hand.
+69. Gear lock: set on the opponent player and lasts through their next turn. It survives switching and is set even if the attack was negated.
+70. Attached +10 and −20 Gear cards are counted per slot. +10 is discarded at the end of the owner's turn. −20 is discarded at the end of the opponent's following turn. Both are discarded from every in-play slot, Bench included.
 71. Effects are lists of (phase, handler). A missing phase counts as success. Handlers may fail with an error.
 72. Coins are 50/50. A multi-flip flips all N and returns the heads count. Use a seedable RNG.
 73. Powers: activated only (not passive). The flow is usability → select → effect. A Power doesn't end the turn and can be used on any turn before attacking.
@@ -1694,16 +1694,16 @@ notes give the decision order and the weightings to copy where helpful.
   on these hooks.
 - Which activated Powers skip the once-per-turn flag (only 6 set it; the colour-change Power is one
   of the six that do, R-POWER-04).
-- The remaining AI trainer checks (search, revive, energy removal) and the deck-specific AI turn
+- The remaining AI Gear checks (search, revive, energy removal) and the deck-specific AI turn
   routines.
-- The step between phases 2 and 6 in trainer play (`00:66FF` / link 6). It looks like link sync or a
+- The step between phases 2 and 6 in Gear play (`00:66FF` / link 6). It looks like link sync or a
   display step, not a rule.
 
 **Settled since the first pass** (details in the rules named):
 
-- When the attached ±damage trainers are discarded: R-TRAINER-05, now CONFIRMED at runtime.
+- When the attached ±damage Gear cards are discarded: R-GEAR-05, now CONFIRMED at runtime.
 - Bit 6 of a card's location byte is the limbo state (`00:1045`, `00:1071`, `00:1090`): R-ZONE-04.
-- Stage value 3, written by the stage-skip trainer (`0B:7716`), is read by the fall-back helper
+- Stage value 3, written by the stage-skip Gear (`0B:7716`), is read by the fall-back helper
   `01:70F2`: at `01:713B` it treats 1 and 3 alike and takes `ccd0`, the Basic underneath, so a
   stage-skipped Awaken 2 that falls back goes straight to its Basic (runtime: `C2CE = 3` gave the
   Basic, `C2CE = 2` the Awaken 1). Other `+CE` readers only test for zero (`00:334C`, `0B:7005`, `0B:5D59`);
@@ -1730,28 +1730,28 @@ candidate gets an additive score from a base, and the AI acts when the score cro
 threshold.
 
 1. Reset the per-turn AI flags.
-2. Play "hand reset or gamble draw" trainers.
+2. Play "hand reset or gamble draw" Gear cards.
 3. Use Powers. Each Power has its own heuristic. All are skipped if a blocker is in play.
-4. Play search and draw trainers.
+4. Play search and draw Gear cards.
 5. Bench Basics: always while fewer than 4 are in play, and at 4-5 in play only when every bonus applies (knock-out threat, usable energy, Awakening in hand and in deck).
 6. Awaken, where it helps (a knock-out, survival, a cure, attack readiness).
-7. Play disruption and support trainers: energy removal, revive, heal, force-switch, stage-skip.
-8. Decide whether to retreat, at most once per turn (one opponent's alternate routine may retreat twice). If so, use a self-switch trainer when paying is
+7. Play disruption and support Gear cards: energy removal, revive, heal, force-switch, stage-skip.
+8. Decide whether to retreat, at most once per turn (one opponent's alternate routine may retreat twice). If so, use a self-switch Gear when paying is
    expensive. The replacement is the best-scored Bench Hexon.
-9. Play more heal and force-switch trainers, then energy recovery or energy search trainers.
+9. Play more heal and force-switch Gear cards, then energy recovery or energy search Gear cards.
 10. Attach one energy, to the best target: the Active first when one more energy enables a knock-out.
 11. Bench and awaken again, then use Powers again.
-12. Play damage-buff and shield trainers, then (last) the discard-hand-draw-7 trainer. If that was
+12. Play damage-buff and shield Gear cards, then (last) the discard-hand-draw-7 Gear. If that was
     played, re-run steps 2-11 once.
-13. Score each attack. If the best is good enough (≥ base), play attack-dependent trainers, then
+13. Score each attack. If the best is good enough (≥ base), play attack-dependent Gear cards, then
     attack. Otherwise end the turn.
 
 **Difficulty levers** (optional in the clean-room AI):
-- A random 1/4 (or 1/2) skip on trainer and Power plays for weaker opponents.
+- A random 1/4 (or 1/2) skip on Gear and Power plays for weaker opponents.
 - Strong opponents get a few extra deterministic terms.
 - The stacked-opening cheat must **not** be copied.
 
-Prizes are picked at random. Setup places every real Basic in hand order (Trainer-as-Basics are never placed by setup or the bench step).
+Prizes are picked at random. Setup places every real Basic in hand order (Gear-as-Basics are never placed by setup or the bench step).
 
 **Styles** (R-AI-19, our own): a style changes a few weights of the steps above and nothing else.
 Aggressive adds 25 to an energy target on the Active, attacks unless the best attack would give a

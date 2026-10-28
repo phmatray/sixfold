@@ -419,8 +419,8 @@ enum Tab {
 /// Groups of the deck pane, in [`SortBy::Kind`] order.
 fn group_of(id: CardId) -> &'static str {
     match card(id).kind {
-        CardKind::Creature(_) | CardKind::TrainerBasic(_) => "Creatures",
-        CardKind::Trainer(_) => "Trainers",
+        CardKind::Creature(_) | CardKind::GearBasic(_) => "Creatures",
+        CardKind::Gear(_) => "Gear",
         CardKind::Energy(_) => "Energy",
     }
 }
@@ -429,7 +429,7 @@ fn group_of(id: CardId) -> &'static str {
 fn group_label(g: &str) -> &'static str {
     match g {
         "Creatures" => tr("Hexons", "Hexons"),
-        "Trainers" => tr("Trainers", "Dresseurs"),
+        "Gear" => tr("Gear", "Objets"),
         _ => tr("Energy", "Énergies"),
     }
 }
@@ -816,7 +816,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                             (h.basics, tr("Basic", "de Base")),
                             (h.stage1, tr("Awaken 1", "Éveil 1")),
                             (h.stage2, tr("Awaken 2", "Éveil 2")),
-                            (h.trainers, tr("Trainers", "Dresseurs")),
+                            (h.gears, tr("Gear", "Objets")),
                         ]
                         .into_iter()
                         .map(|(n, l)| view! { <li><b>{n}</b>" " {l}</li> }.into_any())
@@ -880,7 +880,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                     })}
                     {move || {
                         let rows = draft.with(|d| d.sorted(SortBy::Kind));
-                        ["Creatures", "Trainers", "Energy"].into_iter().filter_map(|g| {
+                        ["Creatures", "Gear", "Energy"].into_iter().filter_map(|g| {
                             let in_group: Vec<_> = rows.iter().copied().filter(|&(id, _)| group_of(id) == g).collect();
                             (!in_group.is_empty()).then(|| view! {
                                 <h3 class="deck-group">{group_label(g)}" " <span>{in_group.iter().map(|r| r.1).sum::<usize>()}</span></h3>
@@ -1024,7 +1024,7 @@ fn DeckLine(
             <span class="line-count">{format!("{n}×")}</span>
             {match card_color(def) {
                 Some(c) => view! { <Pip color=c /> }.into_any(),
-                None => view! { <span class="pip-trainer" aria-hidden="true"></span> }.into_any(),
+                None => view! { <span class="pip-gear" aria-hidden="true"></span> }.into_any(),
             }}
             <button type="button" class="line-name" on:click=move |_| open() on:mouseenter=move |_| peek() on:focus=move |_| peek()>
                 {def.label()}

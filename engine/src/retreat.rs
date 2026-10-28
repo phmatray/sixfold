@@ -39,8 +39,8 @@ impl Game {
         if !pl.has_live_bench() {
             return Err(RuleError::NoLiveBench);
         }
-        if active.is_trainer_basic() {
-            return Err(RuleError::TrainerBasicCantRetreat);
+        if active.is_gear_basic() {
+            return Err(RuleError::GearBasicCantRetreat);
         }
         if total_units(&active.units()) < self.retreat_cost(p) as u32 {
             return Err(RuleError::NotEnoughEnergy);
@@ -173,7 +173,7 @@ mod tests {
         g.players[0].active = Some(creature(STRAW_DECOY, &[GRASS_E]));
         assert_eq!(
             err(&mut g, Action::Retreat),
-            RuleError::TrainerBasicCantRetreat
+            RuleError::GearBasicCantRetreat
         );
         let mut g = with_bench();
         g.players[0].active.as_mut().unwrap().energy.clear();
@@ -325,7 +325,7 @@ mod tests {
         g.players[0].bench.push(creature(PEBBLET, &[]));
         assert_eq!(
             err(&mut g, Action::Retreat),
-            RuleError::TrainerBasicCantRetreat
+            RuleError::GearBasicCantRetreat
         );
         let mut g = with_bench();
         g.players[0].condition.apply_special(Special::Confused);
@@ -362,20 +362,20 @@ mod tests {
         let a = g.players[0].active.as_mut().unwrap();
         a.hp = 20;
         a.energy = vec![GRASS_E, FIRE_E];
-        a.trainers = vec![WHETSTONE];
+        a.gears = vec![WHETSTONE];
         g.players[0].condition.apply_poison(Poison::DoublePoisoned);
         g.players[0].effects.placed = Some(Placed::DisabledAttack(0));
-        g.players[0].trainer_locked = true;
+        g.players[0].gear_locked = true;
         ok(&mut g, Action::Retreat);
         ok(&mut g, Action::DiscardEnergy(0));
         ok(&mut g, Action::Promote(1));
         assert_eq!(g.players[0].condition, Default::default());
         assert_eq!(g.players[0].effects, Default::default());
-        assert!(g.players[0].trainer_locked, "the player-wide lock stays");
+        assert!(g.players[0].gear_locked, "the player-wide lock stays");
         let b = &g.players[0].bench[0];
         assert_eq!((b.top(), b.hp), (MOSSLING, 20));
         assert_eq!(
-            (b.energy.clone(), b.trainers.clone()),
+            (b.energy.clone(), b.gears.clone()),
             (vec![FIRE_E], vec![WHETSTONE])
         );
     }

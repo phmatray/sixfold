@@ -9,7 +9,7 @@
 //! Rook's four story duels (`rook_1` … `rook_4`, §8) sit here too, with
 //! hand-written decks of Neutral Hexons: they pay a purse like a duelist,
 //! never a seal, and a cutscene moves the story on whether the player wins or
-//! loses ([`Trainer::story`]).
+//! loses ([`Duelist::story`]).
 
 use crate::ai::Difficulty;
 use crate::card::{card, CardId, CardKind, Color, EnergyCard, Rarity, Stage};
@@ -102,7 +102,7 @@ impl Kit {
 
 /// A route duelist.
 #[derive(Debug)]
-pub struct Trainer {
+pub struct Duelist {
     /// `t_<name>`; used by dialogue (`duel:`, `beat:`) and the flag `beat_<id>`.
     pub id: &'static str,
     /// A proper name, the same in both languages.
@@ -129,7 +129,7 @@ pub enum Rule {
     /// No Stage 1 or Stage 2 creature.
     BasicsOnly,
     /// Creatures and energy only.
-    NoTrainers,
+    NoGear,
     /// Creatures and basic energy of one colour (plus Colorless creatures).
     MonoColour,
     /// At most 16 energy cards.
@@ -153,7 +153,7 @@ impl Rule {
             Rule::BasicsOnly => {
                 stage(Stage::Basic) == defs().filter(|c| c.creature().is_some()).count()
             }
-            Rule::NoTrainers => {
+            Rule::NoGear => {
                 defs().all(|c| matches!(c.kind, CardKind::Creature(_) | CardKind::Energy(_)))
             }
             Rule::MonoColour => {
@@ -185,9 +185,9 @@ impl Rule {
                 "Basic Hexons only: no Awaken 1 or Awaken 2.",
                 "Hexons de Base uniquement\u{a0}: ni Éveil 1 ni Éveil 2.",
             ),
-            Rule::NoTrainers => T::new(
-                "Hexons and energy only: no Trainers.",
-                "Hexons et énergies uniquement\u{a0}: aucun Dresseur.",
+            Rule::NoGear => T::new(
+                "Hexons and energy only: no Gear.",
+                "Hexons et énergies uniquement\u{a0}: aucun Objet.",
             ),
             Rule::MonoColour => T::new(
                 "One colour only, plus Neutral Hexons.",
@@ -207,7 +207,7 @@ impl Rule {
 pub const PURSE_BASE: u32 = 15;
 pub const PURSE_PER_PRIZE: u32 = 15;
 
-impl Trainer {
+impl Duelist {
     pub fn deck(&self) -> Vec<CardId> {
         self.kit.deck(self.signature)
     }
@@ -250,14 +250,14 @@ impl Trainer {
 }
 
 /// Route duelist by id.
-pub fn trainer(id: &str) -> Option<&'static Trainer> {
-    TRAINERS.iter().find(|t| t.id == id)
+pub fn duelist(id: &str) -> Option<&'static Duelist> {
+    DUELISTS.iter().find(|t| t.id == id)
 }
 
 /// Record a finished duel against `t`: remember the result for the post-duel
-/// line; a win pays [`Trainer::win_pays`] (returned), and the first one marks
+/// line; a win pays [`Duelist::win_pays`] (returned), and the first one marks
 /// the duelist beaten.
-pub fn record(t: &Trainer, won: bool, p: &mut Progress) -> u32 {
+pub fn record(t: &Duelist, won: bool, p: &mut Progress) -> u32 {
     let pays = if won { t.win_pays(p) } else { 0 };
     p.set_last_duel(t.id, won);
     if won && !t.beaten(p) {
@@ -274,7 +274,7 @@ macro_rules! recipe {
     };
 }
 
-// Sprout (Basics only), Bud (+ Stage 1, a draw and a search trainer), Bloom
+// Sprout (Basics only), Bud (+ Stage 1, a draw and a search Gear card), Bloom
 // (+ Stage 2), per colour.
 pub static KINDLING: Recipe = recipe!("Kindling", None, [CINDREL 4, ASHPAW 4, KILNBACK 3, WAXWICK 3, MOSS_POULTICE 2, DOWSING_ROD 2]);
 pub static BELLOWS: Recipe = recipe!("Bellows", Some(&KINDLING), [FLARROW 3, BLAZELYNX 2, FURNACEBACK 2, CINDERHORN 1, LUCKY_SATCHEL 2, TRAIL_COMPASS 1]);
@@ -331,7 +331,7 @@ pub static SPROUTS: [&Recipe; 7] = [
 
 macro_rules! duelist {
     ($id:literal, $name:literal, $en:literal / $fr:literal, $kit:expr, $sig:ident $n:literal, $prizes:literal, $level:ident) => {
-        Trainer {
+        Duelist {
             id: $id,
             name: $name,
             class: T::new($en, $fr),
@@ -353,7 +353,7 @@ pub const ROOK_SEALS: [(&str, usize); 4] =
 
 macro_rules! rook {
     ($id:literal, $kit:expr, $prizes:literal, $level:ident, $purse:literal) => {
-        Trainer {
+        Duelist {
             id: $id,
             name: "Rook",
             class: T::new("The Blank", "Le Sans-Couleur"),
@@ -376,7 +376,7 @@ use Kit::{Mix, One};
 /// Grove: rootholm, elder_ring, woodland (Vesper); Stone: undermine,
 /// screepass, climb_school, bastion, anvilstead. Last, Rook's four story
 /// duels (1.7): meadow, stormwatch, lanternmere, the duel hall.
-pub static TRAINERS: [Trainer; 57] = [
+pub static DUELISTS: [Duelist; 57] = [
     duelist!("t_tobin", "Tobin", "Junior Duelist" / "Duelliste en herbe", One(&SCRAP), WARRENBUCK 2, 1, Easy),
     duelist!("t_hazel", "Hazel", "Beekeeper" / "Apicultrice", Mix(&SEEDLING, &SPARK), HIVEVOLT 2, 2, Easy),
     duelist!("t_ossian", "Ossian", "Birdwatcher" / "Ornithologue", One(&SCRAP), GALEHERON 2, 1, Easy),
@@ -392,27 +392,27 @@ pub static TRAINERS: [Trainer; 57] = [
     duelist!("t_marigold", "Marigold", "Glass Gatherer" / "Cueilleuse de verre", One(&BELLOWS), CINDERHORN 2, 3, Normal),
     duelist!("t_lark", "Lark", "Busker" / "Musicienne de rue", Mix(&SCRAP, &MURMUR), ECHOPUP 2, 1, Easy),
     duelist!("t_tavish", "Tavish", "Glassblower" / "Souffleur de verre", One(&BELLOWS), WAXWICK 1, 2, Normal),
-    Trainer {
+    Duelist {
         rule: Some(Rule::BasicsOnly),
         purse: Some(120),
         ..duelist!("t_basil", "Basil", "Purist" / "Puriste", One(&KINDLING), CINDERHORN 2, 3, Normal)
     },
     duelist!("t_carys", "Carys", "Firewalker" / "Marcheuse de braise", One(&BELLOWS), BLAZELYNX 2, 3, Normal),
     duelist!("t_dunstan", "Dunstan", "Ash Sifter" / "Tamiseur de cendres", Mix(&KINDLING, &PEBBLE), ASH_SIFTER 2, 2, Normal),
-    Trainer {
+    Duelist {
         night: true,
         ..duelist!("t_vela", "Vela", "Kilnwatcher" / "Veilleuse de four", One(&FORGE), KILNBACK 1, 3, Hard)
     },
     duelist!("t_hew", "Hew", "Shepherd" / "Berger", Mix(&SPARK, &SCRAP), ECHOPUP 2, 1, Easy),
     duelist!("t_maren", "Maren", "Wind Surveyor" / "Arpenteuse des vents", One(&SPARK), FLASHFIN 1, 2, Normal),
     duelist!("t_tull", "Tull", "Chime Tuner" / "Accordeur de carillons", One(&STATIC), OHMRUNNER 1, 2, Normal),
-    Trainer {
+    Duelist {
         night: true,
         ..duelist!("t_odo", "Odo", "Storm Chaser" / "Chasseur d'orages", One(&TEMPEST), STORMOX 2, 3, Hard)
     },
     duelist!("t_corra", "Corra", "Lineworker" / "Monteuse de lignes", One(&STATIC), ARCFANG 1, 3, Normal),
     duelist!("t_ves", "Ves", "Signal Keeper" / "Gardienne des signaux", Mix(&STATIC, &CURRENT), STREAMFIN 1, 3, Normal),
-    Trainer {
+    Duelist {
         rule: Some(Rule::LightEnergy),
         purse: Some(120),
         ..duelist!("t_greer", "Greer", "Featherweight" / "Poids plume", One(&TEMPEST), ZIPPET 1, 3, Normal)
@@ -421,12 +421,12 @@ pub static TRAINERS: [Trainer; 57] = [
     duelist!("t_finch", "Finch", "Net Mender" / "Ramendeur", One(&CURRENT), KELPWARDEN 1, 2, Normal),
     duelist!("t_liesl", "Liesl", "Clam Digger" / "Pêcheuse à pied", Mix(&PUDDLE, &PEBBLE), SHELLMOTE 2, 2, Normal),
     duelist!("t_harrow", "Harrow", "Bell Ringer" / "Sonneur de cloche", One(&UNDERTOW), TIDEMAW 1, 3, Normal),
-    Trainer {
+    Duelist {
         night: true,
         ..duelist!("t_brann", "Brann", "Night Fisher" / "Pêcheur de nuit", One(&UNDERTOW), GULFWYRM 1, 3, Hard)
     },
-    Trainer {
-        rule: Some(Rule::NoTrainers),
+    Duelist {
+        rule: Some(Rule::NoGear),
         purse: Some(120),
         ..duelist!("t_mirela", "Mirela", "Tidecaller" / "Appelle-marée", One(&CURRENT), STREAMFIN 1, 3, Normal)
     },
@@ -435,11 +435,11 @@ pub static TRAINERS: [Trainer; 57] = [
     duelist!("t_clem", "Clem", "Lantern Carrier" / "Porteur de lanternes", One(&MURMUR), GLIMMOX 2, 2, Normal),
     duelist!("t_maud", "Maud", "Moth Catcher" / "Chasseuse de phalènes", One(&REVERIE), GLOAMOWL 1, 3, Normal),
     duelist!("t_noor", "Noor", "Dream Reader" / "Liseuse de rêves", Mix(&REVERIE, &SEEDLING), SOMNITAR 1, 3, Normal),
-    Trainer {
+    Duelist {
         night: true,
         ..duelist!("t_ambrose", "Ambrose", "Night Rower" / "Rameur de nuit", One(&TRANCE), HEXARCH 1, 3, Hard)
     },
-    Trainer {
+    Duelist {
         rule: Some(Rule::TwoStage2),
         purse: Some(120),
         ..duelist!("t_yara", "Yara", "Awakener" / "Éveilleuse", One(&TRANCE), WRAITHELLE 1, 3, Normal)
@@ -448,11 +448,11 @@ pub static TRAINERS: [Trainer; 57] = [
     duelist!("t_fenna", "Fenna", "Vine Trimmer" / "Élagueuse", One(&HEDGEROW), THORNBUCK 1, 2, Normal),
     duelist!("t_heath", "Heath", "Maze Runner" / "Coureur du labyrinthe", Mix(&HEDGEROW, &STATIC), HONEYMANE 1, 2, Normal),
     duelist!("t_rue", "Rue", "Herbalist" / "Herboriste", One(&HEDGEROW), BOGBLOSSOM 1, 3, Normal),
-    Trainer {
+    Duelist {
         night: true,
         ..duelist!("t_vesper", "Vesper", "Owl Keeper" / "Gardien des chouettes", One(&CANOPY), BOGCROWN 1, 3, Hard)
     },
-    Trainer {
+    Duelist {
         rule: Some(Rule::MonoColour),
         purse: Some(120),
         ..duelist!("t_linden", "Linden", "Monochrome" / "Monochrome", One(&CANOPY), ELDERHART 1, 3, Normal)
@@ -463,11 +463,11 @@ pub static TRAINERS: [Trainer; 57] = [
     duelist!("t_ida", "Ida", "Climbing Instructor" / "Monitrice d'escalade", One(&RUBBLE), IRONBRAWL 1, 2, Normal),
     duelist!("t_garth", "Garth", "Rope Instructor" / "Moniteur de corde", Mix(&RUBBLE, &FLOCK), HAULOX 1, 2, Normal),
     duelist!("t_petra", "Petra", "Quarrywoman" / "Ouvrière de carrière", One(&LANDSLIDE), KNOLLGRIM 1, 3, Normal),
-    Trainer {
+    Duelist {
         night: true,
         ..duelist!("t_morwen", "Morwen", "Night Shift" / "Équipe de nuit", One(&LANDSLIDE), CRAGMASTIFF 1, 3, Hard)
     },
-    Trainer {
+    Duelist {
         rule: Some(Rule::NoRares),
         purse: Some(120),
         ..duelist!("t_dov", "Dov", "Bare-Knuckle" / "Poings nus", One(&RUBBLE), KNOLLGRIM 1, 3, Normal)
@@ -492,7 +492,7 @@ mod tests {
         let decks = KITS
             .iter()
             .map(|r| (r.name, Kit::One(r).deck(None)))
-            .chain(TRAINERS.iter().map(|t| (t.name, t.deck())));
+            .chain(DUELISTS.iter().map(|t| (t.name, t.deck())));
         for (name, d) in decks {
             assert_eq!(validate_deck(&d), Ok(()), "{name}");
             for cr in d.iter().filter_map(|&id| card(id).creature()) {
@@ -540,7 +540,7 @@ mod tests {
 
     #[test]
     fn the_roster_is_well_formed() {
-        let route: Vec<&Trainer> = TRAINERS.iter().filter(|t| !t.story()).collect();
+        let route: Vec<&Duelist> = DUELISTS.iter().filter(|t| !t.story()).collect();
         for (i, t) in route.iter().enumerate() {
             assert!(
                 t.id.starts_with("t_") && t.id.bytes().all(|b| b.is_ascii_lowercase() || b == b'_'),
@@ -563,11 +563,11 @@ mod tests {
         );
         // A night duelist plays Hard; a rule duelist's own deck keeps its rule
         // when the rule can be kept by a kit.
-        for t in TRAINERS.iter() {
+        for t in DUELISTS.iter() {
             assert!(!t.night || t.difficulty == Difficulty::Hard, "{}", t.name);
         }
         for id in ["t_basil", "t_yara", "t_linden", "t_dov"] {
-            let t = trainer(id).unwrap();
+            let t = duelist(id).unwrap();
             assert!(t.rule.unwrap().allows(&t.deck()), "{id}");
         }
     }
@@ -576,7 +576,7 @@ mod tests {
     fn a_first_win_pays_the_purse_once_and_never_a_seal() {
         let mut p = Progress::default();
         let start = p.coins();
-        let hazel = trainer("t_hazel").unwrap();
+        let hazel = duelist("t_hazel").unwrap();
         assert_eq!(hazel.purse(), 45);
         assert_eq!(record(hazel, false, &mut p), 0);
         assert!(p.check("lost:t_hazel") && !p.check("beat:t_hazel"));
@@ -591,7 +591,7 @@ mod tests {
     /// the one before (the last its own list), with their prizes and AI.
     #[test]
     fn rooks_decks_are_neutral_and_grow() {
-        let rook: Vec<&Trainer> = TRAINERS.iter().filter(|t| t.story()).collect();
+        let rook: Vec<&Duelist> = DUELISTS.iter().filter(|t| t.story()).collect();
         let ids: Vec<&str> = rook.iter().map(|t| t.id).collect();
         assert_eq!(ids, ["rook_1", "rook_2", "rook_3", "rook_4"]);
         let shape: Vec<(u8, Difficulty, u32)> = rook
@@ -621,9 +621,9 @@ mod tests {
             assert!(t.name == "Rook" && t.rule.is_none() && !t.night);
             assert_eq!(t.class.fr, "Le Sans-Couleur");
         }
-        let n = |t: &Trainer, id| t.deck().iter().filter(|&&c| c == id).count();
+        let n = |t: &Duelist, id| t.deck().iter().filter(|&&c| c == id).count();
         // Blank Slate: 19 cards and 41 energy; Open Sky adds 12, Hollow Crown 7.
-        let energy = |t: &Trainer| n(t, FIRE_ENERGY) + n(t, WATER_ENERGY);
+        let energy = |t: &Duelist| n(t, FIRE_ENERGY) + n(t, WATER_ENERGY);
         assert_eq!(
             rook.iter().map(|t| energy(t)).collect::<Vec<_>>(),
             [41, 29, 22, 20]
@@ -649,10 +649,10 @@ mod tests {
     #[test]
     fn a_rook_win_pays_more_than_a_loss_and_a_rematch_pays_by_prizes() {
         let mut p = Progress::default();
-        let r1 = trainer("rook_1").unwrap();
+        let r1 = duelist("rook_1").unwrap();
         assert_eq!(record(r1, false, &mut p), 0);
         assert!(p.check("lost:rook_1") && !p.check("beat:rook_1"));
-        let r4 = trainer("rook_4").unwrap();
+        let r4 = duelist("rook_4").unwrap();
         assert_eq!(record(r4, true, &mut p), 300);
         assert!(p.check("won:rook_4") && p.has_flag("beat_rook_4"));
         assert_eq!(record(r4, true, &mut p), 60, "the rematch");
@@ -673,7 +673,7 @@ mod tests {
         let mono_fire: Vec<CardId> = [CINDREL; 4].into_iter().chain([FIRE_ENERGY; 56]).collect();
         let fire_and_scampit: Vec<CardId> = mono_fire.iter().copied().chain([SCAMPIT]).collect();
         assert!(Rule::BasicsOnly.allows(&kindling) && !Rule::BasicsOnly.allows(&bellows));
-        assert!(Rule::NoTrainers.allows(&mono_fire) && !Rule::NoTrainers.allows(&kindling));
+        assert!(Rule::NoGear.allows(&mono_fire) && !Rule::NoGear.allows(&kindling));
         assert!(Rule::MonoColour.allows(&mono_fire) && Rule::MonoColour.allows(&fire_and_scampit));
         assert!(
             !Rule::MonoColour.allows(&scrap),
@@ -687,13 +687,13 @@ mod tests {
         assert!(Rule::LightEnergy.allows(&light));
         assert!(Rule::NoRares.allows(&bellows) && !Rule::NoRares.allows(&forge));
         assert!(!Rule::TwoStage2.allows(&bellows) && Rule::TwoStage2.allows(&forge));
-        assert_eq!(trainer("t_greer").unwrap().rule, Some(Rule::LightEnergy));
+        assert_eq!(duelist("t_greer").unwrap().rule, Some(Rule::LightEnergy));
         assert!(!Rule::NoRares.text().fr.is_empty());
     }
 
     #[test]
     fn night_and_set_purses() {
-        let mut t = Trainer {
+        let mut t = Duelist {
             night: true,
             ..duelist!("t_x", "X", "a" / "b", One(&SCRAP), ECHOPUP 1, 2, Hard)
         };

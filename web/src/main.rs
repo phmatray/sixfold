@@ -404,7 +404,7 @@ fn MatchScreen() -> impl IntoView {
     let story = ctl
         .setup
         .with_value(|s| s.as_ref().and_then(|s| s.face()))
-        .and_then(sixfold_engine::trainers::trainer)
+        .and_then(sixfold_engine::duelists::duelist)
         .filter(|t| t.story())
         .map(|t| t.name);
     let asking = RwSignal::new(false);

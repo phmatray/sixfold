@@ -187,7 +187,7 @@ test("AC5 (#113): a routine on a solid tile or on a duelist fails; a good one pa
     assert.match(r.out, msg, r.out);
   };
   bad(ann([{ from: "06:00", at: [14, 10], do: "work" }]), /vale: ann's routine at 06:00 stands on 14,10, which is blocked/);
-  bad(ann(good, { trainer: { sight: 2 } }), /vale: ann duels, so it keeps no routine/);
+  bad(ann(good, { duelist: { sight: 2 } }), /vale: ann duels, so it keeps no routine/);
   bad(ann([{ from: "25:00", at: [12, 12] }]), /"25:00" is not a time/);
   bad(ann([{ from: "dusk", home: "nowhere" }]), /goes home to nowhere, but no door here leads there/);
 });

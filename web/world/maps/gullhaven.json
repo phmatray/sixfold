@@ -1778,7 +1778,7 @@
       "z": 24,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "You waiting on the ferry? Me too. Lou's still counting things three times.",
@@ -1842,7 +1842,7 @@
       "z": 14,
       "facing": "s",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "Night fishing's slow. Cards are quicker.",

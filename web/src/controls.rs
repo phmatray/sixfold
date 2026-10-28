@@ -29,7 +29,7 @@ pub(crate) fn reason(e: RuleError) -> &'static str {
             "Retraite déjà utilisée ce tour",
         ),
         RuleError::NoLiveBench => tr("No Benched Hexon to swap in", "Aucun Hexon sur le Banc"),
-        RuleError::CantRetreat | RuleError::TrainerBasicCantRetreat => {
+        RuleError::CantRetreat | RuleError::GearBasicCantRetreat => {
             tr("It can't retreat", "Il ne peut pas battre en retraite")
         }
         RuleError::RetreatFailedThisTurn => {
@@ -46,7 +46,7 @@ pub(crate) fn reason(e: RuleError) -> &'static str {
         ),
         RuleError::NoMatchingCreature => tr("No Hexon it awakens from", "Aucun Hexon à éveiller"),
         RuleError::EvolutionLocked => tr("Awakening is blocked", "L'Éveil est bloqué"),
-        RuleError::TrainerLocked => tr("Trainers are blocked", "Les Dresseurs sont bloqués"),
+        RuleError::GearLocked => tr("Gear is blocked", "Les Objets sont bloqués"),
         RuleError::PowerBlocked => tr("Its Power is blocked", "Son Pouvoir est bloqué"),
         RuleError::PowerAlreadyUsed => tr(
             "Power already used this turn",

@@ -59,7 +59,7 @@ fn why_not(g: Option<&Game>, hand: &[CardId], i: usize) -> String {
     let def = card(id);
     let try_play = |a: Action| g.clone().apply(a).err().map(crate::controls::reason);
     let r = match &def.kind {
-        sixfold_engine::CardKind::Trainer(_) => try_play(Action::PlayTrainer(i)),
+        sixfold_engine::CardKind::Gear(_) => try_play(Action::PlayGear(i)),
         sixfold_engine::CardKind::Energy(_) => try_play(Action::AttachEnergy { hand: i, slot: 0 }),
         _ if def.is_basic() => try_play(Action::PlayBasic(i)),
         _ => try_play(Action::Evolve { hand: i, slot: 0 }),
@@ -209,7 +209,7 @@ pub fn Hexon(
                 for e in &m.effects {
                     s.push_str(&format!(", {e}"));
                 }
-                for &t in &m.trainers {
+                for &t in &m.gears {
                     s.push_str(&format!(", {}", card(t).label()));
                 }
                 if m.power == Some(false) {
@@ -303,7 +303,7 @@ pub fn Hexon(
                 </Show>
                 {move || (!hidden()).then(|| mon.with(|m| m.as_ref().map(|m| {
                     let items: Vec<String> = m.effects.iter().cloned()
-                        .chain(m.trainers.iter().map(|&t| card(t).label().to_string()))
+                        .chain(m.gears.iter().map(|&t| card(t).label().to_string()))
                         .chain((m.power == Some(false)).then(|| tr("Power off", "Pouvoir bloqué").to_string()))
                         .collect();
                     // Two at most on the card (one on a phone), then "+N": the HP stays in sight, and
@@ -981,7 +981,7 @@ pub fn Seam() -> impl IntoView {
                         ),
                         play: None,
                     },
-                    Some(Action::PlayTrainer(_)) => Line::Hold {
+                    Some(Action::PlayGear(_)) => Line::Hold {
                         text: tr(format!("Play {name}?"), format!("Jouer {name}\u{202f}?")),
                         play: mine.first().copied(),
                     },
@@ -1098,7 +1098,7 @@ pub fn Seam() -> impl IntoView {
                                 | Action::Retreat
                                 | Action::UsePower(_)
                                 | Action::PlayBasic(_)
-                                | Action::PlayTrainer(_)
+                                | Action::PlayGear(_)
                                 | Action::AttachEnergy { .. }
                                 | Action::Evolve { .. }
                         )

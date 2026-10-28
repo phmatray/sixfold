@@ -1,5 +1,5 @@
-//! The effect pipeline (R-EFFECT-01/02, R-TRAINER-02, R-POWER-01): one
-//! attack, trainer or Power resolving, stage by stage.
+//! The effect pipeline (R-EFFECT-01/02, R-GEAR-02, R-POWER-01): one
+//! attack, Gear or Power resolving, stage by stage.
 //!
 //! The resolving item lives in `Game::pending`; `Step::Resolve` runs its next
 //! stage. A stage that needs a decision raises a `Choose` prompt and stops;
@@ -14,7 +14,7 @@ use crate::game::{Game, Step};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Source {
     Attack,
-    Trainer,
+    Gear,
     Power,
     /// R-POWER-06: an on-play Power firing by itself.
     OnPlay,
@@ -47,7 +47,7 @@ pub(crate) enum Stage {
 }
 
 impl Source {
-    /// R-EFFECT-02 (attack), R-TRAINER-02 (trainer), R-POWER-01 (Power).
+    /// R-EFFECT-02 (attack), R-GEAR-02 (Gear), R-POWER-01 (Power).
     fn stages(self) -> &'static [Stage] {
         use Stage::*;
         match self {
@@ -65,7 +65,7 @@ impl Source {
                 KnockOuts,
                 End,
             ],
-            Source::Trainer => &[
+            Source::Gear => &[
                 Select, Commit, Phase5, Before, After, Statuses, KnockOuts, End,
             ],
             Source::Power | Source::OnPlay => {
@@ -79,12 +79,12 @@ impl Source {
     }
 }
 
-/// An attack, trainer or Power being resolved.
+/// An attack, Gear or Power being resolved.
 #[derive(Debug, Clone)]
 pub(crate) struct Pending {
     pub source: Source,
     pub player: usize,
-    /// The acting creature: 0 for attacks and trainers, the holder for Powers.
+    /// The acting creature: 0 for attacks and Gear cards, the holder for Powers.
     pub slot: usize,
     pub effects: &'static [Effect],
     /// The attack's damage word: printed damage plus phase-3 changes.
@@ -103,7 +103,7 @@ pub(crate) struct Pending {
     pub choices: Vec<Option<Choice>>,
     /// Queued conditions `(target player, status)`, applied after damage.
     pub queue: Vec<(usize, Status)>,
-    /// The trainer card in limbo while it resolves (R-TRAINER-03), and where
+    /// The Gear card in limbo while it resolves (R-GEAR-03), and where
     /// it came from in the hand.
     pub card: Option<CardId>,
     pub hand_index: usize,
@@ -131,7 +131,7 @@ pub(crate) fn matches(find: Find, id: CardId) -> bool {
         Find::Basic => def.is_basic(),
         Find::Creature => matches!(def.kind, CardKind::Creature(_)),
         Find::BasicEnergy => matches!(def.kind, CardKind::Energy(EnergyCard::Basic(_))),
-        Find::Trainer => matches!(def.kind, CardKind::Trainer(_) | CardKind::TrainerBasic(_)),
+        Find::Gear => matches!(def.kind, CardKind::Gear(_) | CardKind::GearBasic(_)),
     }
 }
 
@@ -408,7 +408,7 @@ impl Game {
         self.steps.push_front(Step::Resolve);
     }
 
-    /// Cancel during selection: nothing was paid (R-TRAINER-02, R-EFFECT-02).
+    /// Cancel during selection: nothing was paid (R-GEAR-02, R-EFFECT-02).
     pub(crate) fn cancel_pending(&mut self) {
         let pd = self.pending.take().expect("resolving");
         if let Some(id) = pd.card {
@@ -431,9 +431,9 @@ impl Game {
                     creature: a.top(),
                 })
             }
-            Source::Trainer => {
+            Source::Gear => {
                 if let Some(card) = pd.card {
-                    ev.push(Event::TrainerPlayed { player: p, card });
+                    ev.push(Event::GearPlayed { player: p, card });
                 }
             }
             Source::Power | Source::OnPlay => {
@@ -662,9 +662,9 @@ impl Game {
                     mark(ev, q);
                 }
             }
-            // R-TRAINER-04: set even when the attack was negated.
-            TrainerLock => {
-                self.players[q].trainer_locked = true;
+            // R-GEAR-04: set even when the attack was negated.
+            GearLock => {
+                self.players[q].gear_locked = true;
                 mark(ev, q);
             }
             DefenderWeakness(color) => {
@@ -826,10 +826,10 @@ impl Game {
                     });
                 }
             }
-            AttachPlus10 => self.attach_trainer(p, 0, ev),
+            AttachPlus10 => self.attach_gear(p, 0, ev),
             AttachMinus20 => {
                 if let Some(Choice::Slot { slot: s, .. }) = choice {
-                    self.attach_trainer(p, s, ev);
+                    self.attach_gear(p, s, ev);
                 }
             }
             OnceWhileInPlay => {
@@ -930,16 +930,16 @@ impl Game {
         }
     }
 
-    /// R-TRAINER-03/05: the resolving trainer stays on (p, slot) instead of
+    /// R-GEAR-03/05: the resolving Gear stays on (p, slot) instead of
     /// going to the discard pile.
-    fn attach_trainer(&mut self, p: usize, slot: usize, ev: &mut Vec<Event>) {
+    fn attach_gear(&mut self, p: usize, slot: usize, ev: &mut Vec<Event>) {
         let Some(card) = self.pd_mut().card.take() else {
             return;
         };
         match self.players[p].slot_mut(slot) {
             Some(c) => {
-                c.trainers.push(card);
-                ev.push(Event::TrainerAttached {
+                c.gears.push(card);
+                ev.push(Event::GearAttached {
                     player: p,
                     slot,
                     uid: c.uid,
@@ -966,7 +966,7 @@ impl Game {
         c.clear_flags();
         let (uid, creature) = (c.uid, c.top());
         // RULES: R-EVO-12 — the removed stage goes to its owner's hand, for the
-        // trainer too (the source's devolve trainer discards it).
+        // Gear too (the source's devolve Gear discards it).
         pl.hand.push(card);
         if slot == 0 {
             pl.clear_active_state();
@@ -990,7 +990,7 @@ impl Game {
         let (p, negated) = (pd.player, pd.negated);
         // R-STATUS-13: both records are cleared before the queue is read, so
         // every completed attack clears them, even with nothing queued
-        // (01:6E9E). Trainers never get there, and Powers only to apply one.
+        // (01:6E9E). Gear never get there, and Powers only to apply one.
         if pd.source == Source::Attack || !queue.is_empty() {
             for pl in &mut self.players {
                 pl.effects.last_inflicted = Default::default();
@@ -1014,17 +1014,17 @@ impl Game {
         }
     }
 
-    /// R-STATUS-03: a Trainer-as-Basic, or a working immunity Power.
+    /// R-STATUS-03: a Gear-as-Basic, or a working immunity Power.
     fn status_immune(&self, p: usize) -> bool {
         self.players[p]
             .active
             .as_ref()
-            .is_some_and(|a| a.is_trainer_basic())
+            .is_some_and(|a| a.is_gear_basic())
             || self.passive(p, 0) == Some(PowerKind::StatusImmune)
     }
 
     /// The pipeline is done: an attack ends the turn; anything else goes back
-    /// to the main phase, a trainer to the discard pile if it is still in limbo.
+    /// to the main phase, a Gear card to the discard pile if it is still in limbo.
     fn finish(&mut self) {
         let pd = self.pending.take().expect("resolving");
         match pd.source {
@@ -1245,7 +1245,7 @@ mod tests {
 
     /// R-STATUS-03
     #[test]
-    fn trainer_as_basic_immune_to_status() {
+    fn gear_as_basic_immune_to_status() {
         let asleep = &[Inflict {
             status: Status::Asleep,
             coin: false,
@@ -1315,24 +1315,24 @@ mod tests {
         g.players[0].effects.weakness = Some(Water);
         g.players[0].effects.doubling_pending = true;
         g.players[0].effects.doubled = true;
-        g.players[0].trainer_locked = true;
+        g.players[0].gear_locked = true;
         set_hand(&mut g, 0, &[MOSSBACK]);
         ok(&mut g, Action::Evolve { hand: 0, slot: 0 });
         assert_eq!(g.players[0].condition, Condition::default());
         assert_eq!(g.players[0].effects, Default::default());
-        assert!(g.players[0].trainer_locked, "the player-wide lock stays");
+        assert!(g.players[0].gear_locked, "the player-wide lock stays");
     }
 
     /// R-STATUS-12
     #[test]
-    fn cure_trainer_requires_condition() {
+    fn cure_gear_requires_condition() {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[TONIC]);
-        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::NoTarget);
         assert_eq!(g.players[0].hand, vec![TONIC]);
         g.players[0].condition.apply(Status::Asleep);
         g.players[0].condition.apply(Status::Poisoned);
-        let ev = ok(&mut g, Action::PlayTrainer(0));
+        let ev = ok(&mut g, Action::PlayGear(0));
         assert!(ev.contains(&Event::ConditionRemoved {
             player: 0,
             status: Status::Poisoned
@@ -1347,7 +1347,7 @@ mod tests {
     fn cure_both_actives() {
         let mut g = main_phase(0);
         g.players[1].condition.apply(Status::Confused);
-        trainer_with(&mut g, &[Cure { both: true }]);
+        gear_with(&mut g, &[Cure { both: true }]);
         assert!(g.players[1].condition.is_empty());
         let mut g = main_phase(0);
         g.players[1].condition.apply(Status::Asleep);
@@ -1553,19 +1553,19 @@ mod tests {
         assert_eq!(hp(&g, 0, 0), 50);
     }
 
-    /// R-EFFECT-04 (extension): heal every own creature; as a trainer it
+    /// R-EFFECT-04 (extension): heal every own creature; as a Gear card it
     /// needs damage somewhere.
     #[test]
     fn heal_all_heals_every_own_creature() {
         let mut g = main_phase(0);
         g.players[0].bench = vec![creature(EMBERKIT, &[]), creature(PEBBLET, &[])];
         assert_eq!(
-            g.effect_check(0, 0, &HealAll(20), Source::Trainer),
+            g.effect_check(0, 0, &HealAll(20), Source::Gear),
             Err(RuleError::NoTarget)
         );
         g.players[0].active.as_mut().unwrap().hp = 20; // 30 damage
         g.players[0].bench[1].hp = 50; // 10 damage
-        let ev = trainer_with(&mut g, &[HealAll(20)]);
+        let ev = gear_with(&mut g, &[HealAll(20)]);
         assert_eq!((hp(&g, 0, 0), hp(&g, 0, 2)), (40, 60));
         let healed: Vec<(usize, u16)> = ev
             .iter()
@@ -1631,15 +1631,15 @@ mod tests {
         assert!(ev.contains(&Event::Shuffled { player: 0 }));
         assert_eq!(g.players[0].active.as_ref().unwrap().energy, [FIRE_E]);
         assert_eq!(g.players[0].deck.len(), 3);
-        // Only that colour; none in the deck refuses the trainer.
+        // Only that colour; none in the deck refuses the Gear.
         let mut g = main_phase(0);
         g.players[0].deck = vec![FIRE_E, MOSSLING];
         assert_eq!(
-            g.effect_check(0, 0, &AttachFromDeck(Grass), Source::Trainer),
+            g.effect_check(0, 0, &AttachFromDeck(Grass), Source::Gear),
             Err(RuleError::NoTarget)
         );
         assert_eq!(
-            g.effect_check(0, 0, &AttachFromDeck(Fire), Source::Trainer),
+            g.effect_check(0, 0, &AttachFromDeck(Fire), Source::Gear),
             Ok(())
         );
         // An attack without a match just goes on.
@@ -1753,25 +1753,22 @@ mod tests {
         assert_eq!(err(&mut g, Action::Attack(0)), RuleError::AttackDisabled);
     }
 
-    /// R-TRAINER-04
+    /// R-GEAR-04
     #[test]
-    fn trainer_lock_lasts_one_opponent_turn() {
+    fn gear_lock_lasts_one_opponent_turn() {
         let mut g = main_phase(0);
         g.players[1].effects.shield = Some(Shield::PreventAll);
-        let ev = attack_with(&mut g, 10, &[TrainerLock]);
+        let ev = attack_with(&mut g, 10, &[GearLock]);
         assert!(
             ev.contains(&Event::AttackNegated { player: 1 }),
             "set even when negated"
         );
         set_hand(&mut g, 1, &[FIELD_NOTES]);
-        assert_eq!(
-            err(&mut g, Action::PlayTrainer(0)),
-            RuleError::TrainerLocked
-        );
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::GearLocked);
         ok(&mut g, Action::Done);
         ok(&mut g, Action::Done);
         set_hand(&mut g, 1, &[FIELD_NOTES]);
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
     }
 
     /// R-DMG-03: changed weakness and resistance.
@@ -1882,28 +1879,28 @@ mod tests {
         );
     }
 
-    /// R-EFFECT-04, R-TRAINER-02: the player picks; cancelling keeps the card.
+    /// R-EFFECT-04, R-GEAR-02: the player picks; cancelling keeps the card.
     #[test]
-    fn gust_trainer_cancel_keeps_card_then_switches() {
+    fn gust_gear_cancel_keeps_card_then_switches() {
         let mut g = main_phase(0);
         g.players[1].bench.push(creature(EMBERKIT, &[]));
         set_hand(&mut g, 0, &[GRASS_E, GALE_FAN, FIRE_E]);
-        ok(&mut g, Action::PlayTrainer(1));
+        ok(&mut g, Action::PlayGear(1));
         assert_eq!(
             choose_options(&g),
             (0, vec![Choice::Slot { player: 1, slot: 1 }], true)
         );
         let ev = ok(&mut g, Action::Cancel);
-        assert!(!ev.iter().any(|e| matches!(e, Event::TrainerPlayed { .. })));
+        assert!(!ev.iter().any(|e| matches!(e, Event::GearPlayed { .. })));
         assert_eq!(g.players[0].hand, vec![GRASS_E, GALE_FAN, FIRE_E]);
-        ok(&mut g, Action::PlayTrainer(1));
+        ok(&mut g, Action::PlayGear(1));
         ok(&mut g, Action::Choose(0));
         assert_eq!(g.players[1].active.as_ref().unwrap().top(), EMBERKIT);
         assert_eq!(g.players[0].discard, vec![GALE_FAN]);
         // Nothing to switch with: refused.
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[GALE_FAN]);
-        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::NoTarget);
     }
 
     /// R-RETREAT-04: an effect switch clears the outgoing Active's state.
@@ -1937,7 +1934,7 @@ mod tests {
         g.players[1].active = Some(target);
         g.players[1].condition.apply(Status::Poisoned);
         set_hand(&mut g, 0, &[REWIND_MIST]);
-        let ev = ok(&mut g, Action::PlayTrainer(0));
+        let ev = ok(&mut g, Action::PlayGear(0));
         assert!(ev.iter().any(|e| matches!(
             e,
             Event::Devolved {
@@ -1957,7 +1954,7 @@ mod tests {
         assert_eq!(g.players[1].hand, vec![MOSSBACK]);
         // A Basic can't be devolved.
         set_hand(&mut g, 0, &[REWIND_MIST]);
-        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::NoTarget);
     }
 
     /// R-EVO-12: damage at least the lower stage's max knocks it out.
@@ -1983,11 +1980,11 @@ mod tests {
 
     /// R-EVO-10
     #[test]
-    fn stage_skip_trainer_requires_settled_basic() {
+    fn stage_skip_gear_requires_settled_basic() {
         let mut g = main_phase(2);
         g.players[0].active.as_mut().unwrap().hp = 40;
         set_hand(&mut g, 0, &[LEAP_SEED, MOSSGIANT]);
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
         assert_eq!(
             choose_options(&g).1,
             vec![Choice::Evolve { hand: 0, slot: 0 }]
@@ -2010,15 +2007,12 @@ mod tests {
         // Not settled (turn 1): nothing to evolve.
         let mut g = main_phase(1);
         set_hand(&mut g, 0, &[LEAP_SEED, MOSSGIANT]);
-        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::NoTarget);
         // The evolution lock still applies.
         let mut g = main_phase(2);
         g.players[1].bench.push(creature(STILLSTONE, &[]));
         set_hand(&mut g, 0, &[LEAP_SEED, MOSSGIANT]);
-        assert_eq!(
-            err(&mut g, Action::PlayTrainer(0)),
-            RuleError::EvolutionLocked
-        );
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::EvolutionLocked);
     }
 
     // ----- Cards -----
@@ -2029,7 +2023,7 @@ mod tests {
         let mut g = main_phase(0);
         g.players[0].deck = vec![GRASS_E, GRASS_E, MOSSLING, PEBBLET];
         set_hand(&mut g, 0, &[SCOUT_MAP]);
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
         assert_eq!(
             choose_options(&g).1,
             vec![Choice::Card(MOSSLING), Choice::Card(PEBBLET)]
@@ -2041,11 +2035,11 @@ mod tests {
         // No match: played anyway, the deck is shuffled.
         set_hand(&mut g, 0, &[SCOUT_MAP]);
         g.players[0].deck = vec![GRASS_E; 3];
-        let ev = ok(&mut g, Action::PlayTrainer(0));
+        let ev = ok(&mut g, Action::PlayGear(0));
         assert!(ev.contains(&Event::Shuffled { player: 0 }));
         g.players[0].deck.clear();
         set_hand(&mut g, 0, &[SCOUT_MAP]);
-        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::DeckEmpty);
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::DeckEmpty);
     }
 
     /// R-ZONE-05: taking a specific card back from the discard pile.
@@ -2054,9 +2048,9 @@ mod tests {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[OLD_BONES]);
         g.players[0].discard = vec![GRASS_E];
-        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::NoTarget);
         g.players[0].discard = vec![EMBERKIT, GRASS_E];
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
         assert_eq!(choose_options(&g).1, vec![Choice::Card(EMBERKIT)]);
         ok(&mut g, Action::Choose(0));
         assert_eq!(g.players[0].hand, vec![EMBERKIT]);
@@ -2068,7 +2062,7 @@ mod tests {
     fn discard_hand_then_draw_seven() {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[GRASS_E, FRESH_START, FIRE_E]);
-        ok(&mut g, Action::PlayTrainer(1));
+        ok(&mut g, Action::PlayGear(1));
         assert_eq!(g.players[0].discard, vec![GRASS_E, FIRE_E, FRESH_START]);
         assert_eq!(g.players[0].hand.len(), 7);
     }
@@ -2140,36 +2134,36 @@ mod tests {
         );
     }
 
-    // ----- Trainers -----
+    // ----- Gear -----
 
-    /// R-TRAINER-01
+    /// R-GEAR-01
     #[test]
-    fn three_trainers_same_turn_on_turn_zero() {
+    fn three_gears_same_turn_on_turn_zero() {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[FIELD_NOTES; 3]);
         for _ in 0..3 {
-            ok(&mut g, Action::PlayTrainer(0));
+            ok(&mut g, Action::PlayGear(0));
         }
         assert_eq!(prompt_of(&g), (0, PromptKind::MainPhase));
         assert_eq!(g.players[0].discard, vec![FIELD_NOTES; 3]);
         assert_eq!(g.turn(), 0);
     }
 
-    /// R-TRAINER-02
+    /// R-GEAR-02
     #[test]
-    fn trainer_failed_precondition_stays_in_hand() {
+    fn gear_failed_precondition_stays_in_hand() {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[SALVE]);
-        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::NoTarget);
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::NoTarget);
         assert_eq!(g.players[0].hand, vec![SALVE]);
         g.players[0].active.as_mut().unwrap().hp = 20;
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
         assert_eq!(hp(&g, 0, 0), 40);
     }
 
-    /// R-TRAINER-03
+    /// R-GEAR-03
     #[test]
-    fn trainer_as_basic_stays_in_play_after_resolving() {
+    fn gear_as_basic_stays_in_play_after_resolving() {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[STRAW_DECOY]);
         ok(&mut g, Action::PlayBasic(0));
@@ -2177,15 +2171,15 @@ mod tests {
         assert!(g.players[0].discard.is_empty());
     }
 
-    /// R-TRAINER-03, R-TRAINER-05: an attached trainer isn't discarded.
+    /// R-GEAR-03, R-GEAR-05: an attached Gear isn't discarded.
     #[test]
-    fn attached_trainer_skips_discard() {
+    fn attached_gear_skips_discard() {
         let mut g = main_phase(0);
         g.players[0].bench.push(creature(EMBERKIT, &[]));
         set_hand(&mut g, 0, &[BUCKLER]);
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
         ok(&mut g, Action::Choose(1));
-        assert_eq!(g.players[0].bench[0].trainers, vec![BUCKLER]);
+        assert_eq!(g.players[0].bench[0].gears, vec![BUCKLER]);
         assert!(g.players[0].discard.is_empty());
     }
 }

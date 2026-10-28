@@ -36,6 +36,7 @@ pub mod campaign;
 pub mod clock;
 pub mod decks;
 pub mod doctor;
+pub mod duelists;
 pub mod endgame;
 pub mod lore;
 pub mod objective;
@@ -45,7 +46,6 @@ pub mod save;
 pub mod set;
 pub mod shop;
 pub mod stats;
-pub mod trainers;
 pub mod tutorial;
 
 #[cfg(test)]
@@ -58,7 +58,7 @@ mod testkit;
 pub use action::{Action, Event, Prompt, PromptKind, RuleError};
 pub use card::{
     can_pay, card, card_id, energy_units, total_units, try_card, validate_cards, Attack, CardDef,
-    CardId, CardKind, Color, Creature, EnergyCard, Power, PowerKind, Rarity, Stage, Trainer, Units,
+    CardId, CardKind, Color, Creature, EnergyCard, Gear, Power, PowerKind, Rarity, Stage, Units,
 };
 pub use collection::{starter_collection, Collection, LoadError};
 pub use condition::{ActiveEffects, Condition, Placed, Poison, Shield, Special, Status};

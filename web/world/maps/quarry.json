@@ -2636,7 +2636,7 @@
       "x": 11,
       "z": 34,
       "facing": "e",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Hold still. I'm measuring you.",
@@ -2722,7 +2722,7 @@
       "x": 8,
       "z": 21,
       "facing": "e",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Don't ask about the crate.",
@@ -2765,7 +2765,7 @@
       "x": 19,
       "z": 19,
       "facing": "w",
-      "trainer": {
+      "duelist": {
         "sight": 4,
         "challenge": [
           "You there! Help me test the kiln? It's hot, I'm hot, and my Furnacebacks are very hot.",
@@ -2827,7 +2827,7 @@
       "x": 24,
       "z": 11,
       "facing": "w",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "See this bead? Melted glass. This whole quarry was a volcano once. Nobody believes me.",

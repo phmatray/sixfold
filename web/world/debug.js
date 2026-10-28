@@ -10,7 +10,7 @@ import * as THREE from "three";
 import * as ld from "./ld.js";
 import { FOOT, DECK, WALKABLE, TALL, LADDER } from "./props.js";
 import { DIR, key } from "./actors.js";
-import { sightLine } from "./trainer.js";
+import { sightLine } from "./duelist.js";
 
 export const LAYERS = ["collisions", "walkable", "circulation", "visibility", "pois", "npcs", "lights", "links"];
 const TITLES = ["Collisions", "Walkable", "Circulation", "Visibility", "POIs and secrets", "NPC zones", "Lights", "Map links"];
@@ -264,8 +264,8 @@ const layer = (count, ...kids) => {
   g.userData.count = count;
   return g;
 };
-// The tiles a route duelist watches (trainer.js), every way it looks.
-const sight = (c, n) => (n.def.trainer ? (n.def.trainer.look ?? [n.face]).flatMap((f) => sightLine(c.w, n, f).map(([x, z]) => at(c, x, z))) : []);
+// The tiles a route duelist watches (duelist.js), every way it looks.
+const sight = (c, n) => (n.def.duelist ? (n.def.duelist.look ?? [n.face]).flatMap((f) => sightLine(c.w, n, f).map(([x, z]) => at(c, x, z))) : []);
 const xz = (t) => t.split(",").map(Number);
 const at = (c, x, z) => [x, z, c.w.floorAt(x, z)];
 const mid = (c, x, z, up = 0) => [x + 0.5, c.w.floorAt(x, z) + up, z + 0.5];
@@ -400,7 +400,7 @@ const BUILD = {
         for (const f of n.def.route) (x += DIR[f][0]), (z += DIR[f][1]), (x0 = Math.min(x0, x)), (x1 = Math.max(x1, x)), (z0 = Math.min(z0, z)), (z1 = Math.max(z1, z));
         kids.push(lines(edges(x0, 0.1, z0, x1 + 1, 0.1, z1 + 1).slice(0, 8), COL.cyan));
       }
-      kids.push(label(n.def.id, ...mid(c, n.x, n.z, 2.1), n.def.trainer ? COL.orange : COL.green));
+      kids.push(label(n.def.id, ...mid(c, n.x, n.z, 2.1), n.def.duelist ? COL.orange : COL.green));
     }
     return layer(w.npcs.length, tiles(talk, COL.green, 0.3, 0.6), tiles(seen, COL.orange, 0.4), kids);
   },
@@ -436,7 +436,7 @@ const BUILD = {
 
 // The layers that follow what moves: a signature each frame, the layer redrawn when it changes.
 const DYNAMIC = {
-  visibility: (c) => c.w.npcs.filter((n) => n.def.trainer).map((n) => `${n.x},${n.z},${n.face}`).join(" "),
+  visibility: (c) => c.w.npcs.filter((n) => n.def.duelist).map((n) => `${n.x},${n.z},${n.face}`).join(" "),
   npcs: (c) => c.w.npcs.map((n) => `${n.x},${n.z},${n.face}`).join(" "),
   lights: (c) => (c.w.day.lamps ?? []).map((l) => (l.intensity > 0 ? `${Math.round(l.position.x)},${Math.round(l.position.z)}` : "-")).join(" "), // per tile
 };

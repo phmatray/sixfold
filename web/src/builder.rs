@@ -419,10 +419,10 @@ fn diff_line(from: &[CardId], to: &[CardId]) -> String {
     )
 }
 
-/// The group a reason belongs to in the preview: Hexons, trainers, energy.
+/// The group a reason belongs to in the preview: Hexons, Gear cards, energy.
 fn group(why: &Why) -> usize {
     match why {
-        Why::Trainer(_) => 1,
+        Why::Gear(_) => 1,
         Why::Energy(..) | Why::Twofold => 2,
         _ => 0,
     }
@@ -581,18 +581,18 @@ pub fn BuildSheet(
                         let asked = if surprise.get().is_none() { colours.get() } else { vec![] };
                         let count = |keep: fn(&sixfold_engine::CardDef) -> bool| b.cards.iter().filter(|&&id| keep(card(id))).count();
                         let hexons = count(|c| c.creature().is_some());
-                        let trainers = count(|c| matches!(c.kind, sixfold_engine::CardKind::Trainer(_)));
-                        let energy = b.cards.len() - hexons - trainers;
+                        let gears = count(|c| matches!(c.kind, sixfold_engine::CardKind::Gear(_)));
+                        let energy = b.cards.len() - hexons - gears;
                         let odds = builder::opening(&b.cards);
                         let colours = deck_colors(&b.cards);
                         let names: Vec<String> = colours.iter().map(|c| c.to_string()).collect();
                         let has = hexon_colours(&b.cards);
                         let missing: Vec<String> = asked.iter().filter(|c| !has.contains(c)).map(|c| c.to_string()).collect();
                         let summary = tr(
-                            format!("{hexons} Hexons · {trainers} trainers · {energy} energy · {} of opening hands lack a Basic ({})", pc(odds.mulligan), mulligan_word(odds.mulligan)),
-                            format!("{hexons} Hexons · {trainers} Dresseurs · {energy} énergies · {} des mains de départ sans Hexon de Base ({})", pc(odds.mulligan), mulligan_word(odds.mulligan)),
+                            format!("{hexons} Hexons · {gears} Gear cards · {energy} energy · {} of opening hands lack a Basic ({})", pc(odds.mulligan), mulligan_word(odds.mulligan)),
+                            format!("{hexons} Hexons · {gears} Objets · {energy} énergies · {} des mains de départ sans Hexon de Base ({})", pc(odds.mulligan), mulligan_word(odds.mulligan)),
                         );
-                        let groups = [tr("Hexons", "Hexons"), tr("Trainers", "Dresseurs"), tr("Energy", "Énergie")];
+                        let groups = [tr("Hexons", "Hexons"), tr("Gear", "Objets"), tr("Energy", "Énergie")];
                         view! {
                             <header class="preview-head">
                                 {deck_star(&b.cards).map(|s| view! { <span class="deck-star" aria-hidden="true"><CardFace id=s /></span> })}

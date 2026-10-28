@@ -78,12 +78,12 @@ pub struct CardDef {
 pub enum CardKind {
     Creature(Creature),
     Energy(EnergyCard),
-    Trainer(Trainer),
-    /// A trainer card that is put into play as a Basic creature. In hand it is a
-    /// trainer: it never counts as a Basic for mulligans or deck rules
+    Gear(Gear),
+    /// A Gear card that is put into play as a Basic creature. In hand it is a
+    /// Gear: it never counts as a Basic for mulligans or deck rules
     /// (R-SETUP-03, R-DECK-02), can't retreat (R-RETREAT-01) and gives no prize
     /// (R-KO-01). Played with `Action::PlayBasic`.
-    TrainerBasic(Creature),
+    GearBasic(Creature),
 }
 
 #[derive(Debug)]
@@ -166,16 +166,16 @@ pub enum EnergyCard {
 }
 
 #[derive(Debug)]
-pub struct Trainer {
+pub struct Gear {
     pub text: &'static str,
     pub effects: &'static [Effect],
 }
 
 impl CardDef {
-    /// The creature data of a creature or a Trainer-as-Basic.
+    /// The creature data of a creature or a Gear-as-Basic.
     pub fn creature(&self) -> Option<&Creature> {
         match &self.kind {
-            CardKind::Creature(c) | CardKind::TrainerBasic(c) => Some(c),
+            CardKind::Creature(c) | CardKind::GearBasic(c) => Some(c),
             _ => None,
         }
     }
@@ -190,9 +190,9 @@ impl CardDef {
         matches!(self.kind, CardKind::Energy(EnergyCard::Basic(_)))
     }
 
-    /// May be put into play as a Basic: a Basic or a Trainer-as-Basic (R-SETUP-04).
+    /// May be put into play as a Basic: a Basic or a Gear-as-Basic (R-SETUP-04).
     pub fn plays_as_basic(&self) -> bool {
-        self.is_basic() || matches!(self.kind, CardKind::TrainerBasic(_))
+        self.is_basic() || matches!(self.kind, CardKind::GearBasic(_))
     }
 }
 
@@ -230,8 +230,8 @@ impl Power {
     }
 }
 
-impl Trainer {
-    /// The trainer's rules text in the current language.
+impl Gear {
+    /// The Gear's rules text in the current language.
     pub fn rules(&self) -> &'static str {
         if !crate::lang::fr() {
             return self.text;
@@ -239,7 +239,7 @@ impl Trainer {
         crate::set::CARDS
             .iter()
             .zip(crate::set_fr::FR)
-            .find(|(c, _)| matches!(&c.kind, CardKind::Trainer(t) if std::ptr::eq(t, self)))
+            .find(|(c, _)| matches!(&c.kind, CardKind::Gear(t) if std::ptr::eq(t, self)))
             .map_or(self.text, |(_, r)| r.text)
     }
 }
@@ -317,7 +317,7 @@ pub fn card_id(name: &str) -> Option<CardId> {
 /// Integrity check for a card set, meant for a unit test next to the set:
 /// unique names; every evolution names a creature of the stage below in the
 /// same set; HP and damage in tens; no colorless basic energy, weakness or
-/// resistance; the attach and stage-skip effects only on trainers; rarity
+/// resistance; the attach and stage-skip effects only on Gear cards; rarity
 /// `Energy` on exactly the basic energy cards. Returns
 /// the first problem found.
 pub fn validate_cards(cards: &[CardDef]) -> Result<(), String> {
@@ -336,16 +336,16 @@ pub fn validate_cards(cards: &[CardDef]) -> Result<(), String> {
                 return Err(format!("{what}: basic energy can't be Colorless"))
             }
             CardKind::Energy(_) => vec![],
-            CardKind::Trainer(t) => {
+            CardKind::Gear(t) => {
                 if t.effects.is_empty() {
-                    return Err(format!("{what}: trainer without effects"));
+                    return Err(format!("{what}: Gear without effects"));
                 }
                 continue;
             }
-            CardKind::TrainerBasic(cr) | CardKind::Creature(cr) => {
+            CardKind::GearBasic(cr) | CardKind::Creature(cr) => {
                 check_creature(cr, cards).map_err(|e| format!("{what}: {e}"))?;
-                if matches!(c.kind, CardKind::TrainerBasic(_)) && cr.stage != Stage::Basic {
-                    return Err(format!("{what}: a Trainer-as-Basic must be Basic"));
+                if matches!(c.kind, CardKind::GearBasic(_)) && cr.stage != Stage::Basic {
+                    return Err(format!("{what}: a Gear-as-Basic must be Basic"));
                 }
                 let mut v: Vec<&[Effect]> = cr.attacks.iter().map(|a| a.effects).collect();
                 match cr.power.as_ref().map(|p| p.kind) {
@@ -356,14 +356,14 @@ pub fn validate_cards(cards: &[CardDef]) -> Result<(), String> {
                 v
             }
         };
-        let trainer_only = |e: &&Effect| {
+        let gear_only = |e: &&Effect| {
             matches!(
                 e,
                 Effect::AttachPlus10 | Effect::AttachMinus20 | Effect::StageSkip
             )
         };
-        if let Some(e) = effects.iter().flat_map(|l| l.iter()).find(trainer_only) {
-            return Err(format!("{what}: {e:?} only works on a trainer"));
+        if let Some(e) = effects.iter().flat_map(|l| l.iter()).find(gear_only) {
+            return Err(format!("{what}: {e:?} only works on a Gear card"));
         }
     }
     Ok(())
@@ -482,18 +482,16 @@ mod tests {
             rarity: Rarity::Common,
             kind: CardKind::Energy(EnergyCard::Basic(Fire)),
         }];
-        static ENERGY_TRAINER: [CardDef; 1] = [CardDef {
+        static ENERGY_GEAR: [CardDef; 1] = [CardDef {
             name: "Tool",
             rarity: Rarity::Energy,
-            kind: CardKind::Trainer(Trainer {
+            kind: CardKind::Gear(Gear {
                 text: "",
                 effects: &[Effect::Draw(1)],
             }),
         }];
         assert!(validate_cards(&COMMON_FIRE).unwrap_err().contains("rarity"));
-        assert!(validate_cards(&ENERGY_TRAINER)
-            .unwrap_err()
-            .contains("rarity"));
+        assert!(validate_cards(&ENERGY_GEAR).unwrap_err().contains("rarity"));
     }
 
     /// R-ENERGY-03

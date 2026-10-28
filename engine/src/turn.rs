@@ -46,7 +46,7 @@ impl Game {
     pub(crate) fn end_turn(&mut self, ev: &mut Vec<Event>) {
         let t = self.turn_player;
         let pl = &mut self.players[t];
-        pl.trainer_locked = false;
+        pl.gear_locked = false;
         pl.effects.placed = None;
         // R-TURN-03 step 8 "conditionally +EB bit 0": kept only when this turn
         // set the doubling again (00:35C6, R-DMG-08).
@@ -75,11 +75,11 @@ impl Game {
                 status: Status::Paralyzed,
             });
         }
-        // 2. T's +10 trainers. 3. N's poison and sleep coin. 4. N's −20 trainers.
-        // R-TRAINER-05: discarded from every slot (00:1B73), on both paths.
-        self.discard_trainers(t, Effect::AttachPlus10, ev);
+        // 2. T's +10 Gear cards. 3. N's poison and sleep coin. 4. N's −20 Gear cards.
+        // R-GEAR-05: discarded from every slot (00:1B73), on both paths.
+        self.discard_gears(t, Effect::AttachPlus10, ev);
         self.poison_and_sleep(n, ev);
-        self.discard_trainers(n, Effect::AttachMinus20, ev);
+        self.discard_gears(n, Effect::AttachMinus20, ev);
         self.steps.push_front(Step::NextTurn);
         // 5. Knock-outs for both sides together (R-KO-08); a no-op if none.
         self.knock_outs(false, ev);
@@ -109,24 +109,24 @@ impl Game {
         }
     }
 
-    /// R-TRAINER-05: discard every attached trainer of this kind on side `p`.
-    fn discard_trainers(&mut self, p: usize, kind: Effect, ev: &mut Vec<Event>) {
+    /// R-GEAR-05: discard every attached Gear of this kind on side `p`.
+    fn discard_gears(&mut self, p: usize, kind: Effect, ev: &mut Vec<Event>) {
         let pl = &mut self.players[p];
         let mut gone = Vec::new();
         for slot in 0..=pl.bench.len() {
             let Some(c) = pl.slot_mut(slot) else {
                 continue;
             };
-            let (drop, keep): (Vec<_>, Vec<_>) = c.trainers.iter().partition(|&&id| {
-                matches!(&crate::card::card(id).kind, crate::CardKind::Trainer(t) if t.effects.contains(&kind))
+            let (drop, keep): (Vec<_>, Vec<_>) = c.gears.iter().partition(|&&id| {
+                matches!(&crate::card::card(id).kind, crate::CardKind::Gear(t) if t.effects.contains(&kind))
             });
-            c.trainers = keep;
+            c.gears = keep;
             let (uid, creature) = (c.uid, c.top());
             gone.extend(drop.into_iter().map(|card| (slot, uid, creature, card)));
         }
         for (slot, uid, creature, card) in gone {
             pl.discard.push(card);
-            ev.push(Event::TrainerDiscarded {
+            ev.push(Event::GearDiscarded {
                 player: p,
                 slot,
                 uid,
@@ -178,16 +178,16 @@ mod tests {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[FIELD_NOTES, FIELD_NOTES]);
         g.players[0].deck = vec![FIRE_E];
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
         assert_eq!(g.players[0].hand, vec![FIELD_NOTES, FIRE_E]);
         assert_eq!(g.winner(), None);
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
         assert_eq!(g.players[0].hand, vec![FIRE_E]);
         assert_eq!(g.players[0].discard, vec![FIELD_NOTES, FIELD_NOTES]);
         assert_eq!(g.winner(), None);
-        // The discard-hand trainer still discards the hand.
+        // The discard-hand Gear still discards the hand.
         set_hand(&mut g, 0, &[FRESH_START, GRASS_E]);
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
         assert!(g.players[0].hand.is_empty());
         assert_eq!(g.winner(), None);
     }
@@ -198,7 +198,7 @@ mod tests {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[SCOUT_MAP]);
         g.players[0].deck.clear();
-        assert_eq!(err(&mut g, Action::PlayTrainer(0)), RuleError::DeckEmpty);
+        assert_eq!(err(&mut g, Action::PlayGear(0)), RuleError::DeckEmpty);
         assert_eq!(g.players[0].hand, vec![SCOUT_MAP]);
     }
 
@@ -239,7 +239,7 @@ mod tests {
         set_hand(&mut g, 0, &[EMBERKIT, GRASS_E, FIELD_NOTES]);
         ok(&mut g, Action::PlayBasic(0));
         ok(&mut g, Action::AttachEnergy { hand: 0, slot: 1 });
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
         assert_eq!(prompt_of(&g), (0, PromptKind::MainPhase));
         assert_eq!(g.turn(), 0);
         assert_eq!(g.players[0].hand.len(), 2);
@@ -481,10 +481,10 @@ mod tests {
 
     /// R-STATUS-08
     #[test]
-    fn poison_ignores_minus_20_trainer() {
+    fn poison_ignores_minus_20_gear() {
         let mut g = main_phase(0);
         g.players[1].condition.apply(Status::Poisoned);
-        g.players[1].active.as_mut().unwrap().trainers.push(BUCKLER);
+        g.players[1].active.as_mut().unwrap().gears.push(BUCKLER);
         g.players[1].effects.shield = Some(crate::Shield::PreventDamage);
         ok(&mut g, Action::Done);
         assert_eq!(hp(&g, 1, 0), 50);
@@ -554,23 +554,20 @@ mod tests {
         assert_eq!(g.turn(), 0);
     }
 
-    /// R-TRAINER-05: a +10 lasts for the turn it was played.
+    /// R-GEAR-05: a +10 lasts for the turn it was played.
     #[test]
-    fn plus10_trainer_discarded_end_of_turn() {
+    fn plus10_gear_discarded_end_of_turn() {
         let mut g = main_phase(2);
         set_hand(&mut g, 0, &[WHETSTONE]);
-        ok(&mut g, Action::PlayTrainer(0));
-        assert_eq!(
-            g.players[0].active.as_ref().unwrap().trainers,
-            vec![WHETSTONE]
-        );
+        ok(&mut g, Action::PlayGear(0));
+        assert_eq!(g.players[0].active.as_ref().unwrap().gears, vec![WHETSTONE]);
         assert!(g.players[0].discard.is_empty());
         g.players[0].active.as_mut().unwrap().energy = vec![GRASS_E];
         let ev = ok(&mut g, Action::Attack(0));
         assert_eq!(damage_to(&ev, 1, 0), vec![30], "10 ×2 +10");
         assert!(ev.iter().any(|e| matches!(
             e,
-            Event::TrainerDiscarded {
+            Event::GearDiscarded {
                 player: 0,
                 slot: 0,
                 card: WHETSTONE,
@@ -581,39 +578,36 @@ mod tests {
         // Benched slots too (any in-play location, 00:1B73).
         let mut g = main_phase(2);
         let mut ember = creature(EMBERKIT, &[]);
-        ember.trainers = vec![WHETSTONE];
+        ember.gears = vec![WHETSTONE];
         g.players[0].bench.push(ember);
         let ev = ok(&mut g, Action::Done);
         assert!(ev.iter().any(|e| matches!(
             e,
-            Event::TrainerDiscarded {
+            Event::GearDiscarded {
                 player: 0,
                 slot: 1,
                 card: WHETSTONE,
                 ..
             }
         )));
-        assert!(g.players[0].bench[0].trainers.is_empty());
+        assert!(g.players[0].bench[0].gears.is_empty());
     }
 
-    /// R-TRAINER-05: a −20 lasts through the opponent's following turn.
+    /// R-GEAR-05: a −20 lasts through the opponent's following turn.
     #[test]
-    fn minus20_trainer_lasts_opponent_turn() {
+    fn minus20_gear_lasts_opponent_turn() {
         let mut g = main_phase(0);
         set_hand(&mut g, 0, &[BUCKLER]);
-        ok(&mut g, Action::PlayTrainer(0));
+        ok(&mut g, Action::PlayGear(0));
         ok(&mut g, Action::Choose(0)); // the Active
         ok(&mut g, Action::Done);
-        assert_eq!(
-            g.players[0].active.as_ref().unwrap().trainers,
-            vec![BUCKLER]
-        );
+        assert_eq!(g.players[0].active.as_ref().unwrap().gears, vec![BUCKLER]);
         g.players[1].active.as_mut().unwrap().energy = vec![FIGHTING_E, FIGHTING_E];
         let ev = ok(&mut g, Action::Attack(0));
         assert_eq!(damage_to(&ev, 0, 0), vec![0], "20 −20");
         assert!(ev.iter().any(|e| matches!(
             e,
-            Event::TrainerDiscarded {
+            Event::GearDiscarded {
                 player: 0,
                 slot: 0,
                 card: BUCKLER,

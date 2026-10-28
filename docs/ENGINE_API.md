@@ -98,7 +98,7 @@ pub enum Action {                                         // Copy + Eq
     PlayBasic(usize),                 // hand index
     Evolve { hand: usize, slot: usize },
     AttachEnergy { hand: usize, slot: usize },
-    PlayTrainer(usize),               // hand index
+    PlayGear(usize),               // hand index
     Retreat,
     DiscardEnergy(usize),             // index into the Active's energy (retreat payment)
     Promote(usize),                   // Bench slot 1..=5
@@ -121,16 +121,16 @@ pub enum Choice {                                         // one option of Promp
 
 | Prompt | Accepted actions | Notes |
 |---|---|---|
-| `ChooseActive` | `PlayBasic(h)` | A Basic or a Trainer-as-Basic. This prompt can't be skipped. |
+| `ChooseActive` | `PlayBasic(h)` | A Basic or a Gear-as-Basic. This prompt can't be skipped. |
 | `ChooseBench` | `PlayBasic(h)`, `Done` | Asked again after each placement. |
-| `MainPhase` | `PlayBasic`, `Evolve`, `AttachEnergy`, `PlayTrainer`, `Retreat`, `UsePower`, `Attack`, `Done` | An attack ends the turn. `Done` ends the turn without attacking. A Power or a trainer never ends the turn. |
+| `MainPhase` | `PlayBasic`, `Evolve`, `AttachEnergy`, `PlayGear`, `Retreat`, `UsePower`, `Attack`, `Done` | An attack ends the turn. `Done` ends the turn without attacking. A Power or a Gear card never ends the turn. |
 | `ChooseRetreatEnergy` | `DiscardEnergy(i)`, `Cancel` | Asked again until the chosen units cover `cost`. |
 | `ChooseRetreatTarget` | `Promote(slot)`, `Cancel` | The energy is paid at this point. A Confused Hexon then flips a coin to retreat. |
 | `ChoosePrize` | `TakePrize(i)` | Repeats `count` times. |
 | `ChooseReplacement` | `Promote(slot)` | This can't be cancelled. |
-| `Choose` | `Choose(i)`, plus `Cancel` when `can_cancel` | Cancelling abandons the attack, trainer or Power at no cost, and a trainer goes back to its hand position. |
+| `Choose` | `Choose(i)`, plus `Cancel` when `can_cancel` | Cancelling abandons the attack, Gear or Power at no cost, and a Gear card goes back to its hand position. |
 
-**How `Choose` works.** The selections an attack, trainer or Power needs are asked *before* anything is paid or announced. Each of them is one `Choose` prompt with that effect. The effect tells you what the choice is for:
+**How `Choose` works.** The selections an attack, Gear or Power needs are asked *before* anything is paid or announced. Each of them is one `Choose` prompt with that effect. The effect tells you what the choice is for:
 
 | Effect | What is chosen |
 |---|---|
@@ -145,7 +145,7 @@ pub enum Choice {                                         // one option of Promp
 
 `SwitchDefender { chooser_is_attacker: false }` is the exception. It is asked *after* the announcement, to the **defender's owner**. In that case `can_cancel` is `false` and the defender's owner picks their own Benched Hexon. Effects without a decision never prompt.
 
-**When something is refused**, the action is simply not in `legal_actions()`, and `apply` returns `Err(RuleError::…)`. The variants are: `GameOver, NotNow, NoSuchCard, NoSuchSlot, NotABasic, BenchFull, NotAnEvolution, NoMatchingCreature, NotThisTurn, EvolutionLocked, NotEnergy, EnergyAlreadyAttached, NotATrainer, TrainerLocked, DeckEmpty, NoTarget, AlreadyUsed, NoPower, PassivePower, PowerBlocked, PowerAlreadyUsed, NoSuchChoice, AsleepOrParalyzed, CantAttack, NoAttacks, NoSuchAttack, NotEnoughEnergy, AttackDisabled, CantRetreat, NoLiveBench, TrainerBasicCantRetreat, RetreatFailedThisTurn, NoSuchEnergy, EnergyAlreadyChosen, NoSuchPrize, PrizeTaken`.
+**When something is refused**, the action is simply not in `legal_actions()`, and `apply` returns `Err(RuleError::…)`. The variants are: `GameOver, NotNow, NoSuchCard, NoSuchSlot, NotABasic, BenchFull, NotAnEvolution, NoMatchingCreature, NotThisTurn, EvolutionLocked, NotEnergy, EnergyAlreadyAttached, NotGear, GearLocked, DeckEmpty, NoTarget, AlreadyUsed, NoPower, PassivePower, PowerBlocked, PowerAlreadyUsed, NoSuchChoice, AsleepOrParalyzed, CantAttack, NoAttacks, NoSuchAttack, NotEnoughEnergy, AttackDisabled, CantRetreat, NoLiveBench, GearBasicCantRetreat, RetreatFailedThisTurn, NoSuchEnergy, EnergyAlreadyChosen, NoSuchPrize, PrizeTaken`.
 
 A UI that wants to grey out an action with a reason can call `game.clone().apply(a)` and read the error. Only do that for the human's own options, because it touches hidden state.
 
@@ -176,7 +176,7 @@ pub struct Side<'a> {
     pub bench: &'a [InPlay],             // bench[i] is slot i + 1
     pub condition: Condition,            // the Active's conditions
     pub effects: ActiveEffects,          // lasting effects on the Active
-    pub trainer_locked: bool,            // can't play trainers this turn
+    pub gear_locked: bool,            // can't play Gear cards this turn
     pub retreat_cost: u8,                // the Active's retreat cost now
 }
 pub struct InPlay {                      // a Hexon in play, all public
@@ -184,7 +184,7 @@ pub struct InPlay {                      // a Hexon in play, all public
     pub stack: Vec<CardId>,              // Basic first; last = current card
     pub hp: u16,                         // HP left; max is creature().hp
     pub energy: Vec<CardId>,             // attached energy cards, oldest first
-    pub trainers: Vec<CardId>,           // attached +10 / −20 trainers
+    pub gears: Vec<CardId>,           // attached +10 / −20 Gear cards
     pub settled: bool,                   // in play since its owner's turn began (may awaken)
     pub power_used: bool,                // a once-per-turn Power was used this turn
     pub once_used: bool,                 // its once-while-in-play attack was used
@@ -195,8 +195,8 @@ impl InPlay {
     pub fn creature(&self) -> &'static Creature;     // definition of the top card
     pub fn damage(&self) -> u16;                     // max HP − hp
     pub fn units(&self) -> Units;                    // attached energy units per colour
-    pub fn attached(&self, kind: Effect) -> usize;   // count of attached AttachPlus10 / AttachMinus20 trainers
-    pub fn is_trainer_basic(&self) -> bool;
+    pub fn attached(&self, kind: Effect) -> usize;   // count of attached AttachPlus10 / AttachMinus20 Gear cards
+    pub fn is_gear_basic(&self) -> bool;
 }
 pub struct Condition { pub special: Option<Special>, pub poison: Poison }
 pub enum Special { Confused, Asleep, Paralyzed }     // at most one
@@ -229,7 +229,7 @@ pub struct Hit { pub amount: u16, pub weakness: bool, pub resistance: bool }
 
 - **`game.preview_attack(p, i) -> Option<Hit>`**
   - The damage that player `p`'s Active would do *right now* to the opposing Active with attack `i`.
-  - It runs the real R-DMG pipeline: doubling, weakness ×2, resistance −30, +10 / −20 trainers, the defender's shield, reduction Powers, Weaken and whole-attack prevention.
+  - It runs the real R-DMG pipeline: doubling, weakness ×2, resistance −30, +10 / −20 Gear cards, the defender's shield, reduction Powers, Weaken and whole-attack prevention.
   - Every coin is treated as tails (`AddPerHeads` adds 0), and the defender's prevention-coin Power is not flipped.
   - It works for either player, whoever's turn it is. That gives "can I knock it out" and "can it knock me out next turn".
   - It returns `None` when either Active is missing or there is no attack `i`.
@@ -266,7 +266,7 @@ every call site carries both texts.
 | `Display` for `Color`, `Stage`, `Status`, `Find`, `Placed`, `Shield` | "Ember", "Awaken 1", "Double-poisoned", … |
 
 Card text comes from the card data itself. Show it through the localized accessors
-`CardDef::label()`, `Attack::label()` / `rules()`, `Power::label()` / `rules()` and `Trainer::rules()`
+`CardDef::label()`, `Attack::label()` / `rules()`, `Power::label()` / `rules()` and `Gear::rules()`
 (French from `engine/src/set_fr.rs`). The English `CardDef::name` stays the identity key that
 Awakenings, the 4-copy rule and saves use: compare names, display labels.
 
@@ -278,7 +278,7 @@ Awakenings, the 4-copy rule and saves use: compare names, display labels.
 
 - `player` and `slot`: its position **at that moment**.
 - `uid`: the identity to use as the DOM key and to find the node to animate.
-- Its top card. That is `card` in `Placed`, `Evolved` and `KnockedOut`, and `creature` in every other event. In the other events, `card` is the energy or trainer card that moved.
+- Its top card. That is `card` in `Placed`, `Evolved` and `KnockedOut`, and `creature` in every other event. In the other events, `card` is the energy or Gear card that moved.
 
 Slots can change within one batch: a switch, a promotion, or the Bench packing after a knock-out. So always find the node by `uid`, never by `slot`.
 
@@ -295,7 +295,7 @@ Slots can change within one batch: a switch, a promotion, or the Bench packing a
 | `TurnStarted { player, turn }` | Turn banner. A `CardDrawn` follows. |
 | `EnergyAttached { player, slot, uid, creature, card }` | Hand → Hexon. |
 | `Evolved { player, slot, uid, card }` | The Awakening card lands on top. The uid is kept. HP rises by the HP difference and the damage stays. |
-| `TrainerPlayed { player, card }` | Show the trainer. It goes to the discard pile when it has resolved; there is no event for that. It stays on a Hexon instead when `TrainerAttached` follows, and a Trainer-as-Basic is played with `Placed`. |
+| `GearPlayed { player, card }` | Show the Gear. It goes to the discard pile when it has resolved; there is no event for that. It stays on a Hexon instead when `GearAttached` follows, and a Gear-as-Basic is played with `Placed`. |
 | `EnergyDiscarded { player, slot, uid, creature, card }` | Hexon → discard pile. Caused by a cost, a retreat or an effect on the defender. |
 | `Retreated { player, slot, uid, creature }` | The Active and the Bench `slot` swap. `uid` is the Hexon that is now Active. |
 | `RetreatFailed { player }` | A confused retreat flipped tails. The energy stays spent. |
@@ -304,12 +304,12 @@ Slots can change within one batch: a switch, a promotion, or the Bench packing a
 | `AttackNegated { player }` | `player`'s Active is protected from this attack. |
 | `PowerUsed { player, slot, uid, creature }` | Power banner. This includes on-play Powers firing. |
 | `ConditionApplied { player, status }` / `ConditionRemoved { player, status }` | A badge on `player`'s Active. |
-| `EffectApplied { player, effect }` | A lasting effect on `player`'s Active or side: a shield, a placed effect, a weakness or resistance change, a trainer lock, the doubling, a colour change. Read the current state from `Side::effects`. |
+| `EffectApplied { player, effect }` | A lasting effect on `player`'s Active or side: a shield, a placed effect, a weakness or resistance change, a Gear lock, the doubling, a colour change. Read the current state from `Side::effects`. |
 | `Healed { player, slot, uid, creature, amount }` | Heal animation. |
 | `Switched { player, slot, uid, creature }` | An effect swapped the Active and the Bench `slot`. `uid` is now Active. |
 | `Devolved { player, slot, uid, creature, card }` | `card` goes from the Hexon to its owner's hand. `creature` is the new top card. |
-| `TrainerAttached { player, slot, uid, creature, card }` | The trainer stays on that Hexon. |
-| `TrainerDiscarded { player, slot, uid, creature, card }` | An attached trainer → discard pile (between turns). |
+| `GearAttached { player, slot, uid, creature, card }` | The Gear stays on that Hexon. |
+| `GearDiscarded { player, slot, uid, creature, card }` | An attached Gear → discard pile (between turns). |
 | `HandDiscarded { player, cards }` | Hand → discard pile. |
 | `CardToHand { player, card, from_deck }` | Deck or discard pile → hand. Private when `from_deck`. |
 | `Damage { player, slot, uid, creature, amount, hp, weakness, resistance }` | Damage number. `hp` is what is left, which drives the HP bar. `amount` can be 0 when prevented. This covers attacks, effects, recoil, confusion, poison and retaliation. |
@@ -323,8 +323,8 @@ Slots can change within one batch: a switch, a promotion, or the Bench packing a
 
 **Typical orders.**
 
-- **An attack:** any `Choose` prompts come first, then `AttackUsed`, then the costs (`EnergyDiscarded`). Then the confusion coin (`CoinFlip`, and on tails `AttackFailed` + `Damage` to itself). Then `AttackNegated` if the defender is protected, then the effect coins (`CoinFlip`…), then `Damage` on the defender. After that come the after-damage effects (`Damage` on the Bench, `Switched`, `Healed`, …), then `ConditionApplied`, `KnockedOut`, and the prompts for prizes and replacements. Last come `TurnEnded`, `BetweenTurns` (with poison `Damage`, sleep `CoinFlip` / `ConditionRemoved` and `TrainerDiscarded`), then `TurnStarted` and `CardDrawn` for the next player.
-- **A trainer:** `PlayTrainer` takes the card out of the hand. Any `Choose` prompts follow, and Cancel puts the card back at the same hand position. Then `TrainerPlayed`, then its effects.
+- **An attack:** any `Choose` prompts come first, then `AttackUsed`, then the costs (`EnergyDiscarded`). Then the confusion coin (`CoinFlip`, and on tails `AttackFailed` + `Damage` to itself). Then `AttackNegated` if the defender is protected, then the effect coins (`CoinFlip`…), then `Damage` on the defender. After that come the after-damage effects (`Damage` on the Bench, `Switched`, `Healed`, …), then `ConditionApplied`, `KnockedOut`, and the prompts for prizes and replacements. Last come `TurnEnded`, `BetweenTurns` (with poison `Damage`, sleep `CoinFlip` / `ConditionRemoved` and `GearDiscarded`), then `TurnStarted` and `CardDrawn` for the next player.
+- **A Gear card:** `PlayGear` takes the card out of the hand. Any `Choose` prompts follow, and Cancel puts the card back at the same hand position. Then `GearPlayed`, then its effects.
 
 **Animation recipe for the UI.**
 
@@ -347,8 +347,8 @@ pub enum Rarity { Energy, Common, Uncommon, Rare } // Energy = basic energy only
 pub enum CardKind {
     Creature(Creature),
     Energy(EnergyCard),
-    Trainer(Trainer),
-    TrainerBasic(Creature), // a trainer played as a Basic Hexon: never counts as a Basic for the
+    Gear(Gear),
+    GearBasic(Creature), // a Gear card played as a Basic Hexon: never counts as a Basic for the
                             // mulligan or deck rules, can't retreat, gives no prize
 }
 pub struct Creature {
@@ -370,10 +370,10 @@ pub struct Attack {
 }
 pub struct Power { pub name: &'static str, pub text: &'static str, pub kind: PowerKind }
 pub enum EnergyCard { Basic(Color) /* never Colorless */, DoubleColorless /* 2 colorless units */ }
-pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
+pub struct Gear { pub text: &'static str, pub effects: &'static [Effect] }
 ```
 
-**Rarity.** Every card has one. Basic energy is `Energy` (and nothing else is); Awaken 2 Hexons are always `Rare` and Awaken 1 at least `Uncommon` (both checked by the set's tests). In the shipped set the Basics and simple trainers are `Common`; Awaken 1 Hexons, the stronger Basics, and the draw, search, recover and attach trainers are `Uncommon`; Awaken 2 Hexons, the switch, energy-removal, stage-skip and fall-back trainers and the special energy are `Rare`. Rarity only drives boosters (§10).
+**Rarity.** Every card has one. Basic energy is `Energy` (and nothing else is); Awaken 2 Hexons are always `Rare` and Awaken 1 at least `Uncommon` (both checked by the set's tests). In the shipped set the Basics and simple Gear cards are `Common`; Awaken 1 Hexons, the stronger Basics, and the draw, search, recover and attach Gear cards are `Uncommon`; Awaken 2 Hexons, the switch, energy-removal, stage-skip and fall-back Gear cards and the special energy are `Rare`. Rarity only drives boosters (§10).
 
 **Deck rules.** A deck has exactly 60 cards and at least one real Basic. A deck may hold at most 4 cards with the same name, except basic energy, which is unlimited. The special energy counts toward that limit. Awakening matches `evolves_from` against the **name** of the card on top.
 
@@ -398,7 +398,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 
 **Effects (`Effect`).**
 
-- "Self" means the attacking or Power-using Hexon, which is your Active for attacks and trainers. "Defender" means the opponent's Active.
+- "Self" means the attacking or Power-using Hexon, which is your Active for attacks and Gear cards. "Defender" means the opponent's Active.
 - An effect that needs a decision prompts `Choose` before anything is paid.
 - Some effects have checks that run before anything happens. When a check fails, the card, attack or Power can't be used, and the action is missing from `legal_actions()`:
   - **Always checked:**
@@ -408,7 +408,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
     - A `DiscardEnergy` cost needs enough matching energy.
     - `OnceWhileInPlay` must not have been used yet.
     - `CopyAttack` needs an attack it can copy: not a copying attack, and one whose own checks pass for the copier.
-  - **Trainers and Powers only:**
+  - **Gear and Powers only:**
     - `Heal` needs damage on your Active; `HealAll` needs damage on one of your Hexons.
     - `AttachFromDeck` needs a matching basic energy in the deck.
     - `Cure` needs a condition to clear.
@@ -423,7 +423,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 | `AddPerDamage { per, own }` | +`per` damage for each 10 damage on self (`own`) or on the defender, counted before weakness. `preview_attack` includes it. |
 | `IgnoreWeaknessResistance` | The attack's damage skips weakness and resistance. |
 | `DoubleNextAttack` | Self's attacks on its owner's next turn do double damage. Using it again on that turn is doubled too and sets it again. |
-| `Recoil(n)` | n damage to self after the attack, using its own weakness, resistance and trainers. |
+| `Recoil(n)` | n damage to self after the attack, using its own weakness, resistance and Gear cards. |
 | `BenchDamage { amount, own, opponent }` | `amount` to every Benched Hexon on the chosen sides, with no weakness or resistance. |
 | `Snipe(n)` | n to one opposing Hexon the player picks. From a Power it counts as Power damage. |
 | `Inflict { status, coin }` | A condition on the defender, always or on heads. `Status` is `Confused`, `Asleep`, `Paralyzed`, `Poisoned` or `DoublePoisoned`. |
@@ -432,7 +432,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 | `Protect { shield: Shield, coin }` | Protects self until the end of the opponent's next turn. `PreventAll`: all of the attack's effects, damage included. `PreventDamage`: the damage only. `Reduce(n)`: n less damage. `PreventBelow(n)`: damage below n is prevented. `Halve`: half damage. `CounterKo`: if an attack knocks self out, the attacker is knocked out too. |
 | `Place { placed: Placed, coin }` | On the defender for its owner's next turn: `CantAttack`, `CantRetreat`, `Accuracy` (must flip heads to attack) or `Weaken(n)`. `DisabledAttack` is set through `DisableAttack`. |
 | `DisableAttack` | The player picks one of the defender's attacks; it can't be used next turn. |
-| `TrainerLock` | The opponent can't play trainers on their next turn. |
+| `GearLock` | The opponent can't play Gear cards on their next turn. |
 | `DefenderWeakness(Color)` / `OwnResistance(Color)` | Change the defender's weakness, or self's resistance. |
 | `DiscardEnergy { color, count }` | Cost: discard `count` of `color` from self. `Colorless` means any energy, newest first. |
 | `DiscardAllEnergy` | Cost: discard everything attached to self. |
@@ -441,14 +441,14 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 | `SwitchSelf` | Switch your Active with one of your Benched Hexons. |
 | `Heal(n)` | Remove up to n damage from your Active. |
 | `HealAll(n)` | Remove up to n damage from each of your Hexons. |
-| `AttachFromDeck(Color)` | The player picks a basic energy of that colour (`Colorless`: any) from the deck; it is attached to self (the holder for a Power, your Active for a trainer), then the deck is shuffled. It doesn't use up the turn's attachment. |
+| `AttachFromDeck(Color)` | The player picks a basic energy of that colour (`Colorless`: any) from the deck; it is attached to self (the holder for a Power, your Active for a Gear card), then the deck is shuffled. It doesn't use up the turn's attachment. |
 | `Devolve` | The defender returns to its previous stage; the top card goes to its owner's hand. |
-| `StageSkip` | Trainer only: put an Awaken 2 from the hand straight onto a matching settled Basic. |
+| `StageSkip` | Gear only: put an Awaken 2 from the hand straight onto a matching settled Basic. |
 | `Draw(n)`, `DiscardHand` | Draw, or discard the hand. Use `[DiscardHand, Draw(7)]` for "discard your hand and draw 7". |
-| `Search(Find)` | Take a matching card from the deck into the hand, then shuffle. `Find` is `Any`, `Basic`, `Creature`, `BasicEnergy` or `Trainer`. |
+| `Search(Find)` | Take a matching card from the deck into the hand, then shuffle. `Find` is `Any`, `Basic`, `Creature`, `BasicEnergy` or `Gear`. |
 | `Recover(Find)` | Take a matching card from the discard pile into the hand. |
-| `AttachPlus10` | Trainer only: stays on your Active; its attacks do +10 this turn. |
-| `AttachMinus20` | Trainer only: stays on a Hexon you pick; it takes −20 until the end of the opponent's next turn. |
+| `AttachPlus10` | Gear only: stays on your Active; its attacks do +10 this turn. |
+| `AttachMinus20` | Gear only: stays on a Hexon you pick; it takes −20 until the end of the opponent's next turn. |
 | `OnceWhileInPlay` | The attack can be used once while self stays in play. |
 | `CopyAttack` | Use one of the defender's attacks through the same pipeline. |
 | `SetOwnColor(Color)` | Power: self counts as this colour while the Power works. |
@@ -456,7 +456,7 @@ pub struct Trainer { pub text: &'static str, pub effects: &'static [Effect] }
 **Example** (original placeholder content; it compiles against the current API):
 
 ```rust
-use crate::card::{Attack, CardDef, CardId, CardKind, Color::*, Creature, EnergyCard, Power, PowerKind, Stage, Trainer};
+use crate::card::{Attack, CardDef, CardId, CardKind, Color::*, Creature, EnergyCard, Power, PowerKind, Stage, Gear};
 use crate::condition::{Shield, Status};
 use crate::effect::{Effect::*, Find};
 
@@ -504,7 +504,7 @@ pub static CARDS: &[CardDef] = &[
     CardDef { name: "Fire Energy", kind: CardKind::Energy(EnergyCard::Basic(Fire)) }, // 2
     CardDef { // 3
         name: "Trail Map",
-        kind: CardKind::Trainer(Trainer {
+        kind: CardKind::Gear(Gear {
             text: "Search your deck for a Basic Hexon, put it into your hand, then shuffle your deck.",
             effects: &[Search(Find::Basic)],
         }),
@@ -514,7 +514,7 @@ pub static CARDS: &[CardDef] = &[
 
 **Checks.**
 
-- `set.rs` already has `#[test] fn set_is_valid()`, which calls `validate_cards(CARDS)`. That checks for unique names, `evolves_from` naming a Hexon one stage below in the set, HP and damage in tens, no Neutral basic energy, weakness or resistance, trainers that have effects, and `AttachPlus10`, `AttachMinus20` and `StageSkip` used only on trainers.
+- `set.rs` already has `#[test] fn set_is_valid()`, which calls `validate_cards(CARDS)`. That checks for unique names, `evolves_from` naming a Hexon one stage below in the set, HP and damage in tens, no Neutral basic energy, weakness or resistance, Gear cards that have effects, and `AttachPlus10`, `AttachMinus20` and `StageSkip` used only on Gear cards.
 - Also add `assert_eq!(card_id("Blaze Hound"), Some(BLAZE_HOUND))` for every constant.
 - Don't reuse names from the test fixtures in `engine/src/fixtures.rs` ("Mossling", "Field Notes", …). The engine resolves Awakening chains by name, and in tests the fixture cards are looked up first.
 - Ids are positions: the set only grows at the end (old saves store ids). `every_colour_has_a_full_line` and `set_size_by_kind` check that each colour has a Basic → Awaken 1 → Awaken 2 line and the set's size.
@@ -545,13 +545,13 @@ impl Ai {
   - `Choose { effect: SwitchDefender { chooser_is_attacker: false } }` is the forced switch.
   - `ChooseReplacement` is the replacement after a knock-out.
   - `ChoosePrize` is the prize pick; pick at random among the remaining prizes (R-AI-16).
-  - Retreat payment and `Choose` prompts inside its own attacks, trainers and Powers also come to the AI.
+  - Retreat payment and `Choose` prompts inside its own attacks, Gear cards and Powers also come to the AI.
 - **Randomness** (R-AI-03 mistakes, R-AI-16): the AI lives inside the engine crate, so it may use `crate::rng::Rng` (PCG32: `new(seed)`, `next_u32`, `below(n)`, `coin`). Keep the AI deterministic for a given seed.
 - **Useful derived facts:**
   - "Can my Active knock out the defender with attack i": `preview_attack(me, i).amount >= defender.hp`.
   - "Can it knock me out next turn": `preview_attack(1 - me, j)`.
   - Energy needs: `can_pay(&active.units(), attack.cost)`.
-  - Whether a hand card is a usable Basic, Awakening or trainer: is it in `legal_actions()`.
+  - Whether a hand card is a usable Basic, Awakening or Gear: is it in `legal_actions()`.
   - Retreat is possible when `Action::Retreat` is listed.
 
 ---
@@ -589,9 +589,9 @@ The design and its odds are in `docs/BOOSTERS.md`.
 |---|---|---|
 | 1–6 | `COMMONS` = 6 `Common` | by `SHARES` (themed) or evenly (Wild) |
 | 7–9 | `UNCOMMONS` = 3 `Uncommon` | the same |
-| 10 | 1 `Rare` | a Holo Rare (`set::is_holo`: the Awaken 2 Hexons) in `HOLO_ODDS` = (3, 5), that is 3 packs in 5, else a Rare trainer or the special energy |
+| 10 | 1 `Rare` | a Holo Rare (`set::is_holo`: the Awaken 2 Hexons) in `HOLO_ODDS` = (3, 5), that is 3 packs in 5, else a Rare Gear or the special energy |
 
-`booster.open(seed, &collection) -> Vec<CardId>` always gives the same pack for the same seed and collection (the engine's PCG32); no card twice in a pack. `booster.group(id)` is the card's `SHARES` group in that pack (0 its own `colors`, 1 trainers, the special energy and Neutral Hexons, 2 the other types; always 0 in the Wild pack), and a themed pack's Common and Uncommon slots pick a group 60 / 35 / 5, then a card of it evenly. Ember is Ember / Stone, Tide is Tide / Dream, Grove is Grove / Storm, Storm is Storm / Tide, Stone is Stone / Neutral, Dream is Dream / Grove, Wild (`is_wild()`) is everything. A themed pack's Holo Rares are its own types only. The Rare slot leaves out cards the collection holds `MAX_COPIES` of while another is left. No pack holds basic energy (unlimited) or promos. `booster.holds(id)` and `booster.pool(rarity, holo) -> [Vec<CardId>; 3]` (by group) list what it can contain, for the odds the UI shows.
+`booster.open(seed, &collection) -> Vec<CardId>` always gives the same pack for the same seed and collection (the engine's PCG32); no card twice in a pack. `booster.group(id)` is the card's `SHARES` group in that pack (0 its own `colors`, 1 Gear cards, the special energy and Neutral Hexons, 2 the other types; always 0 in the Wild pack), and a themed pack's Common and Uncommon slots pick a group 60 / 35 / 5, then a card of it evenly. Ember is Ember / Stone, Tide is Tide / Dream, Grove is Grove / Storm, Storm is Storm / Tide, Stone is Stone / Neutral, Dream is Dream / Grove, Wild (`is_wild()`) is everything. A themed pack's Holo Rares are its own types only. The Rare slot leaves out cards the collection holds `MAX_COPIES` of while another is left. No pack holds basic energy (unlimited) or promos. `booster.holds(id)` and `booster.pool(rarity, holo) -> [Vec<CardId>; 3]` (by group) list what it can contain, for the odds the UI shows.
 
 **Deck lists.** `DeckList { pub name: String, pub cards: Vec<CardId> }`, for decks a player builds.
 
@@ -607,7 +607,7 @@ d.fill_energy() -> usize                        // pads to 60 with basic energy,
 d.validate(&owned) -> Result<(), DeckListError> // Illegal(DeckError), then NotOwned(first short card)
 ```
 
-- `SortBy::key(id)` sorts any card list (e.g. the collection) the same way: `v.sort_by_key(|&(id, _)| by.key(id))`. Colour puts each colour's Hexons then its basic energy, with trainers and the special energy last; Kind is Basics, Awaken 1, Awaken 2, trainers, special energy, basic energy; Rarity is rarest first. Ties go by id, which keeps Awakening lines together.
+- `SortBy::key(id)` sorts any card list (e.g. the collection) the same way: `v.sort_by_key(|&(id, _)| by.key(id))`. Colour puts each colour's Hexons then its basic energy, with Gear cards and the special energy last; Kind is Basics, Awaken 1, Awaken 2, Gear cards, special energy, basic energy; Rarity is rarest first. Ties go by id, which keeps Awakening lines together.
 - `fill_energy` shares the free slots between the colours of the deck's Hexons, in proportion to the number of Hexon cards of each colour (D'Hondt, counting the basic energy already in the deck). A deck with no coloured Hexon gets nothing.
 - `set::basic_energy(color) -> Option<CardId>` is the basic energy card of a colour.
 - `d.save()` gives `d1;<id>:<count>,...;<name>;<checksum>`, in the collection's style (ids ascending, FNV-1a over everything before the last `;`). Control characters in the name become spaces, so lists can be stored one per line; the name may contain `;`. `DeckList::load(&s) -> Result<(DeckList, Vec<(CardId, usize)>), LoadError>` gives the cards back in id order and drops (and reports) unknown ids. A collection string is refused with `LoadError::Version`.
@@ -707,18 +707,18 @@ arguments are split on `:`.
 | `p.encode()` / `Progress::decode(s)` | `i:<item>`, `f:<flag>`, `won:<id>` / `lost:<id>`, `g:<beaten>_<print>`, `d:<day>`, `c:<facets>`, `ps:<day>_<mask>` | Sorted and stable; junk tokens are skipped. A string without `g:` / `d:` / `ps:` reads as no Gauntlet run, no daily claim and nothing bought today; without `c:` as 100 Facets. Flags of renamed NPCs (`juniper_gift`, `talked_juniper`, `talked_flint`) read as their new names. |
 | `p.gauntlet() -> Option<(usize, u32)>` / `p.daily() -> Option<u32>` / `p.stock_bought(day) -> u8` | | The Gauntlet run (rungs beaten, deck fingerprint), the last day whose daily pack was claimed, the shop slots bought that day. Set only through `endgame::*` and `shop::*`. |
 
-### Route duelists (`trainers::*`)
+### Route duelists (`duelists::*`)
 
 ```rust
-pub struct Trainer { pub id: &'static str /* t_<name> */, pub name: &'static str, pub class: T, pub kit: Kit,
+pub struct Duelist { pub id: &'static str /* t_<name> */, pub name: &'static str, pub class: T, pub kit: Kit,
                      pub signature: Option<(CardId, u8)>, pub prizes: u8 /* 1..=3 */, pub difficulty: Difficulty,
                      pub night: bool, pub purse: Option<u32> }
-pub static TRAINERS: [Trainer; 14];       // the 1.2 roster, WORLD_DESIGN §4.4
-trainers::trainer(id) -> Option<&'static Trainer>
+pub static DUELISTS: [Duelist; 14];       // the 1.2 roster, WORLD_DESIGN §4.4
+duelists::duelist(id) -> Option<&'static Duelist>
 t.deck() -> Vec<CardId>                   // its kit padded to 60, plus the signature card
 t.purse() -> u32                          // purse, else 15 + 15 × prizes; × 1.5 at night
 t.beaten(&progress) -> bool               // flag beat_<id>; never a seal
-trainers::record(t, won, &mut progress) -> u32   // the first win pays the purse, once
+duelists::record(t, won, &mut progress) -> u32   // the first win pays the purse, once
 pub enum Kit { One(&'static Recipe), Mix(&'static Recipe, &'static Recipe) }   // Mix: the first half of each
 kit.deck(signature) -> Vec<CardId>        // pads with basic energy by the Hexons' colours; panics past 4 copies
 pub static KITS: [&Recipe; 20];           // 7 colours × Sprout / Bud / Bloom (Colorless has no Bloom)
@@ -726,7 +726,7 @@ pub static SPROUTS: [&Recipe; 7];
 ```
 
 Duels with them go through `campaign::opponent` and `campaign::record_opponent`; the map's
-`trainer` block (`WORLD_DESIGN` §4.1) expands to `won:`/`lost:`/`beat:` branches and `duel:<id>`.
+`duelist` block (`WORLD_DESIGN` §4.1) expands to `won:`/`lost:`/`beat:` branches and `duel:<id>`.
 
 ### Shops (`shop::*`)
 
@@ -756,14 +756,14 @@ The `economy_sim` test plays a scripted first playthrough from these tables and 
 ```rust
 doctor::diagnose(&deck, &collection) -> Vec<Advice>   // problems first; [Issue::Healthy] when nothing to say
 pub struct Advice { pub severity: Severity /* Problem | Tip */, pub issue: Issue, pub swap: Option<Swap> }
-pub enum Issue { Healthy, FewBasics(n), Energy(n), BrokenLine(id), NoEnergyFor(Color), NoDrawTrainers, TooManyColours(n), TopHeavy(id) }
+pub enum Issue { Healthy, FewBasics(n), Energy(n), BrokenLine(id), NoEnergyFor(Color), NoDrawGear, TooManyColours(n), TopHeavy(id) }
 pub struct Swap { pub out: CardId, pub into: CardId }  // one copy each way, only with copies the collection can spare
 advice.text() / swap.text() -> String                  // in the current language
 ```
 
 Checks: fewer than 10 Basics; energy outside 18–28; an Awakening with nothing to awaken from, or
 more copies than its line underneath; attack costs in a colour without energy; no draw or search
-trainer while the collection has a Lucky Satchel or Trail Compass to spare; more than 3 Hexon
+Gear while the collection has a Lucky Satchel or Trail Compass to spare; more than 3 Hexon
 colours.
 
 ### Post-game (`endgame::*`)
@@ -840,4 +840,4 @@ Save::from_legacy(name, |key| storage.get(key)) -> Option<Save>  // a 0.6 save, 
 - When an attack inflicts a condition and also force-switches, the condition lands on the new Active.
 - Nothing in the engine stops a caller from looping. Retreat has no per-turn limit (R-RETREAT-05), an Activated Power with `once_per_turn: false` can be used again and again, and cancelling a `Choose` goes back to exactly the same state. `ai::Ai` guards against all three itself (one retreat per turn, each Power once per turn, a cancelled play isn't retried that turn, and at most 100 main-phase answers per turn).
 - A `Choose` prompt doesn't say which card or Power started it; remember the last play you started.
-- The AI doesn't use R-AI-15 (stacked openings, unfair by design). Easy differs from Normal in R-AI-03's skipped trainer and Power plays and, since 1.3, picks any attack that does something rather than the best one and retreats only to dodge a knock-out. Hard's look-ahead covers only main-phase actions: its replacements, prize picks and `Choose` answers are Normal's, and its imagined opponent hand is drawn at random from the unseen cards (a real hand holds the cards its owner chose not to play).
+- The AI doesn't use R-AI-15 (stacked openings, unfair by design). Easy differs from Normal in R-AI-03's skipped Gear and Power plays and, since 1.3, picks any attack that does something rather than the best one and retreats only to dodge a knock-out. Hard's look-ahead covers only main-phase actions: its replacements, prize picks and `Choose` answers are Normal's, and its imagined opponent hand is drawn at random from the unseen cards (a real hand holds the cards its owner chose not to play).

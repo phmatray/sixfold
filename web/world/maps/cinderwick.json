@@ -3078,7 +3078,7 @@
       "z": 11,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "Awakenings? Crutches. A true duelist wins with Basics.",
@@ -3282,7 +3282,7 @@
       "z": 32,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 0,
         "challenge": [
           "A duel? I've a batch annealing, so I've exactly one hour. Two prizes.",

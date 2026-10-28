@@ -15,7 +15,7 @@ use std::path::Path;
 use sixfold_engine::books::{is_read, read_count, read_flag, BOOKS};
 use sixfold_engine::campaign::{KEEPERS, RIVALS, VOUCHED};
 use sixfold_engine::overworld::STARTING_COINS;
-use sixfold_engine::save::{Save, Summary, CAMPAIGN_DECK, PROGRESS, WORLD_AT};
+use sixfold_engine::save::{Save, Summary, CAMPAIGN_DECK, PROGRESS, STATS, WORLD_AT};
 
 fn fixture(name: &str) -> String {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -288,4 +288,32 @@ fn a_save_on_the_old_fernhollow_trail_keeps_its_finds_and_lands_on_open_ground()
         open(spawn.0, spawn.1),
         "the spawn {spawn:?} is not open ground"
     );
+}
+
+/// #192: up to 1.10 the route duelists' counter and achievements were spelled
+/// `trainer_wins` and `trainers_*`. A 1.10 save holding them reads them under
+/// the new names, and writes only the new ones back. (The old spellings below
+/// are the migration's input, the one place they stay.)
+#[test]
+fn a_1_10_save_keeps_its_duelist_wins_and_achievements() {
+    let mut old = Save::new_player("Ada");
+    old.set(STATS, "s1;duels=12,trainer_wins=11,wins=11");
+    old.set(
+        PROGRESS,
+        "f:ach_trainers_10,f:ach_trainers_all,f:keepers,c:100",
+    );
+    let s = Save::decode(&old.encode()).unwrap();
+    assert_eq!(s.stats().get("duelist_wins"), 11);
+    let p = s.progress();
+    assert!(p.has_flag("ach_duelists_10") && p.has_flag("ach_duelists_all"));
+    let mut again = s.clone();
+    again.set_stats(&s.stats());
+    again.set_progress(&p);
+    let text = again.encode();
+    assert!(!text.contains("trainer"), "{text}");
+    assert_eq!(Save::decode(&text).unwrap().stats().get("duelist_wins"), 11);
+    // An old tab writing to the same save keeps both keys: the higher one counts.
+    old.set(STATS, "s1;duelist_wins=15,trainer_wins=11");
+    let s = Save::decode(&old.encode()).unwrap();
+    assert_eq!(s.stats().get("duelist_wins"), 15);
 }

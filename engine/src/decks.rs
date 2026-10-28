@@ -190,7 +190,7 @@ pub static DREAM_VEIL: Prebuilt = Prebuilt {
 pub static STARTER: Prebuilt = Prebuilt {
     name: T::new("Trailhead", "Premiers pas"),
     description: T::new("Your first deck: Ember and Tide Hexons with simple attacks, \
-                  plus trainers to draw, heal and switch.", "Votre premier deck : des Hexons Braise et Marée aux attaques simples, plus des cartes Dresseur pour piocher, soigner et échanger."),
+                  plus Gear cards to draw, heal and switch.", "Votre premier deck : des Hexons Braise et Marée aux attaques simples, plus des cartes Objet pour piocher, soigner et échanger."),
     list: &[
         (CINDREL, 3),
         (FLARROW, 2),
@@ -289,7 +289,7 @@ pub static UNLOCKABLE: [Unlockable; 11] = [
     },
     Unlockable {
         deck: &TIDE_MIND,
-        flag: "ach_trainers_10",
+        flag: "ach_duelists_10",
         how: T::new(
             "Earn “Waylaid”: beat ten route duelists.",
             "Obtenez « Pris en embuscade » : battez dix duellistes des routes.",

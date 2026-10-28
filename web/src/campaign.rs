@@ -9,10 +9,10 @@ use leptos::prelude::*;
 use sixfold_engine::ai::Difficulty;
 use sixfold_engine::booster::{BOOSTERS, WILD};
 use sixfold_engine::campaign::{champion, opponent, rival, seals, title, Rival, RIVALS, SEALS};
+use sixfold_engine::duelists::{duelist, Rule};
 use sixfold_engine::endgame::{self, Rung, CLEAR_FLAG, CLEAR_PACKS, GAUNTLET};
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
-use sixfold_engine::trainers::{trainer, Rule};
 use sixfold_engine::{fr, tr, CardId};
 
 use crate::art::color_key;
@@ -114,7 +114,7 @@ pub fn portrait_url(id: &str) -> Option<String> {
         id
     } else if id == "sable" {
         "warden" // Sable outside her duels (the hall scene)
-    } else if trainer(id).is_some_and(|t| t.story()) {
+    } else if duelist(id).is_some_and(|t| t.story()) {
         "rook"
     } else {
         return None;
@@ -578,7 +578,7 @@ fn winnings(id: &str, p: &Progress) -> (&'static str, Vec<Win>) {
         ];
         return (first, wins);
     }
-    match trainer(id) {
+    match duelist(id) {
         Some(t) if !t.beaten(p) => (first, vec![Win::Facets(t.purse())]),
         Some(t) if t.win_pays(p) > 0 => (again, vec![Win::Facets(t.win_pays(p))]),
         _ => (tr("Rematch", "Revanche"), vec![]),
@@ -640,7 +640,7 @@ pub fn Challenge(
     let open = move || progress.with_untracked(|p| r.is_none_or(|r| r.open(p)));
     // #150: the seals met, the keeper also wants some of their region's duelists bested.
     let accepts = move || progress.with_untracked(|p| r.is_none_or(|r| r.accepts(p)));
-    let rule = trainer(&id).and_then(|t| t.rule);
+    let rule = duelist(&id).and_then(|t| t.rule);
     let (opts, pick) = profile.with_untracked(|p| deck_opts(p, rule));
     let playable = opts.iter().filter(|o| o.problem.is_none()).count();
     let left_out = opts.len() - playable;

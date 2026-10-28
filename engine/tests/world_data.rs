@@ -1,7 +1,7 @@
 //! The world's data, read with the engine's own parser (`docs/WORLD_DESIGN.md`
 //! §9.4): every map's conditions and effects parse, every duel names a rival
 //! or a route duelist, every `card:` a non-promo card, every `pack:` a
-//! booster, every `show:` a panel; `trainer` and `find` blocks are checked as
+//! booster, every `show:` a panel; `duelist` and `find` blocks are checked as
 //! the dialogue they expand to; find ids are unique and every route duelist
 //! is placed exactly once; emote actors stand on the map. The Journal
 //! (`web/world/quests.json`) only names flags and items some map sets.
@@ -23,15 +23,15 @@ use serde_json::Value;
 use sixfold_engine::books::{book, BOOKS};
 use sixfold_engine::campaign::{rival, GROUNDS, RIVALS};
 use sixfold_engine::doctor::APPLIED_FLAG;
+use sixfold_engine::duelists::{duelist, DUELISTS, ROOK_SEALS};
 use sixfold_engine::overworld::{parse_cond, parse_effect, CamTarget, Cue, Effect, Progress, Test};
 use sixfold_engine::stats::{CURIOS, FIELD_ITEMS, FINDS, SEAL_SITES, WAYMARKS};
-use sixfold_engine::trainers::{trainer, ROOK_SEALS, TRAINERS};
 
 /// What every map seen so far placed.
 #[derive(Default)]
 struct Seen {
     finds: HashMap<String, String>,
-    trainers: HashMap<String, String>,
+    duelists: HashMap<String, String>,
     /// `item:x` and `flag:x` for every item given and flag set.
     sets: HashSet<String>,
     /// (where, map) for every `warp:` effect.
@@ -137,11 +137,11 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
                 cond(&format!("{at}.barks[{j}].if"), c, &mut bad);
             }
         }
-        if let Some(t) = n.get("trainer") {
+        if let Some(t) = n.get("duelist") {
             // The loader expands the block to won:/lost:/beat: branches and a
             // challenge ending in duel:<id>.
-            match trainer(id) {
-                None => bad.push(format!("{name}: {at}: a trainer block on no route duelist")),
+            match duelist(id) {
+                None => bad.push(format!("{name}: {at}: a duelist block on no route duelist")),
                 Some(tr)
                     if tr.night && !n["if"].as_str().is_some_and(|c| c.contains("time:night")) =>
                 {
@@ -156,13 +156,13 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
                 format!("lost:{id}"),
                 format!("beat:{id}"),
             ] {
-                cond(&format!("{at}.trainer"), &c, &mut bad);
+                cond(&format!("{at}.duelist"), &c, &mut bad);
             }
-            effect(&format!("{at}.trainer"), &format!("duel:{id}"), &mut bad);
+            effect(&format!("{at}.duelist"), &format!("duel:{id}"), &mut bad);
             if strs(&t["challenge"]).is_empty() {
-                bad.push(format!("{name}: {at}: a trainer with no challenge line"));
+                bad.push(format!("{name}: {at}: a duelist with no challenge line"));
             }
-            if let Some(other) = seen.trainers.insert(id.to_string(), name.to_string()) {
+            if let Some(other) = seen.duelists.insert(id.to_string(), name.to_string()) {
                 bad.push(format!("{name}: {at}: also placed in {other}"));
             }
         }
@@ -246,7 +246,7 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
                 sets(e, seen);
                 // A story duel is placed by the scene that starts it.
                 if let Ok(Effect::Duel(id)) = parse_effect(e) {
-                    if trainer(&id).is_some_and(|t| t.story()) {
+                    if duelist(&id).is_some_and(|t| t.story()) {
                         seen.story.insert(id);
                     }
                 }
@@ -469,14 +469,14 @@ fn every_map_reads_with_the_engine_grammar() {
         maps += 1;
     }
     assert!(maps >= 7, "only {maps} maps found in {}", dir.display());
-    // Rook's story duels are started by his scenes, not a trainer block.
-    for t in TRAINERS.iter().filter(|t| t.story()) {
+    // Rook's story duels are started by his scenes, not a duelist block.
+    for t in DUELISTS.iter().filter(|t| t.story()) {
         if !seen.story.contains(t.id) {
             bad.push(format!("{} (Rook) is started by no cutscene", t.id));
         }
     }
-    for t in TRAINERS.iter().filter(|t| !t.story()) {
-        if !seen.trainers.contains_key(t.id) {
+    for t in DUELISTS.iter().filter(|t| !t.story()) {
+        if !seen.duelists.contains_key(t.id) {
             bad.push(format!("{} ({}) is on no map", t.id, t.name));
         }
     }
@@ -593,7 +593,7 @@ fn check_quests(q: &Value, seen: &Seen) -> Vec<String> {
                 let ok = match &t {
                     Test::Item(x) => seen.sets.contains(&format!("item:{x}")),
                     Test::Flag(x) => x == APPLIED_FLAG || seen.sets.contains(&format!("flag:{x}")),
-                    Test::Beat(x) => trainer(x).is_some() || rival(x).is_some(),
+                    Test::Beat(x) => duelist(x).is_some() || rival(x).is_some(),
                     _ => true,
                 };
                 if !ok {
@@ -607,11 +607,11 @@ fn check_quests(q: &Value, seen: &Seen) -> Vec<String> {
 
 /// The checker itself, on a small map using every 1.2 addition.
 #[test]
-fn the_checker_reads_trainer_and_find_blocks() {
+fn the_checker_reads_duelist_and_find_blocks() {
     let good: Value = serde_json::from_str(
         r#"{
         "npcs": [
-            { "id": "t_hazel", "trainer": { "sight": 4, "challenge": ["Buzz."] },
+            { "id": "t_hazel", "duelist": { "sight": 4, "challenge": ["Buzz."] },
               "dialogue": [{ "if": "beat:t_hazel & count:found_:2", "do": ["emote:t_hazel:heart", "coins:20"] }] },
             { "id": "perrin", "if": "seals:1", "dialogue": [{ "if": "coins:150", "do": ["pay:150", "pack:ember", "show:trader"] }] }
         ],
@@ -633,8 +633,8 @@ fn the_checker_reads_trainer_and_find_blocks() {
     let bad: Value = serde_json::from_str(
         r#"{
         "npcs": [
-            { "id": "t_hazel", "trainer": { "challenge": [] } },
-            { "id": "t_nobody", "trainer": { "challenge": ["Hi."] } },
+            { "id": "t_hazel", "duelist": { "challenge": [] } },
+            { "id": "t_nobody", "duelist": { "challenge": ["Hi."] } },
             { "id": "odd", "barks": [{ "if": "hour:x-2", "say": "Hi." }], "dialogue": [{ "if": "weather:sunny", "do": ["duel:nobody", "card:thistlewick", "emote:ghost:bang", "show:nowhere"] }] }
         ],
         "interactions": [
@@ -652,7 +652,7 @@ fn the_checker_reads_trainer_and_find_blocks() {
     for want in [
         "no challenge line",
         "also placed in woodland",
-        "a trainer block on no route duelist",
+        "a duelist block on no route duelist",
         "weather:sunny",
         "duel:nobody",
         "card:thistlewick",
@@ -849,7 +849,7 @@ fn the_finale_plays_after_the_warden_falls_once() {
 }
 
 /// #150: each seal keeper asks for some of their region's duelists: the
-/// trainers standing on the maps of their region and on those maps'
+/// duelists standing on the maps of their region and on those maps'
 /// interiors (a door's map with no region of its own, like the climbing
 /// school), never all of them, and no more than those out by day.
 #[test]
@@ -902,7 +902,7 @@ fn keepers_ask_for_some_of_their_regions_duelists() {
                 continue;
             }
             for n in m["npcs"].as_array().into_iter().flatten() {
-                if n.get("trainer").is_none() {
+                if n.get("duelist").is_none() {
                     continue;
                 }
                 let id = n["id"].as_str().unwrap();
@@ -918,7 +918,7 @@ fn keepers_ask_for_some_of_their_regions_duelists() {
         listed.sort_unstable();
         assert_eq!(listed, found, "{}'s duelists against the {want} maps", r.id);
         assert!(
-            r.duelists.iter().all(|id| trainer(id).is_some()),
+            r.duelists.iter().all(|id| duelist(id).is_some()),
             "{}: a duelist that is no route duelist",
             r.id
         );
@@ -1435,7 +1435,7 @@ fn grounds_name_the_maps_that_hold_each_regions_duelists() {
             .as_array()
             .into_iter()
             .flatten()
-            .filter(|n| n.get("trainer").is_some())
+            .filter(|n| n.get("duelist").is_some())
             .filter_map(|n| n["id"].as_str())
             .filter(|id| keepers.contains(id))
             .collect();

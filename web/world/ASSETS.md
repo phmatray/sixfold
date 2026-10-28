@@ -271,12 +271,12 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   Progress, and where the hero stands (`map,x,z,facing`), are saved in localStorage; the
   world resumes there, and after a world duel the hero, back on its tile, meets the rival or
   duelist again so the post-duel line plays.
-- **route duelists:** an NPC whose `id` is a duelist in `engine/src/trainers.rs` (`t_<name>`) with a
-  `trainer` block (WORLD_DESIGN §4.1). `web/world/trainer.js` runs it; `map.js` expands it to dialogue.
+- **route duelists:** an NPC whose `id` is a duelist in `engine/src/duelists.rs` (`t_<name>`) with a
+  `duelist` block (WORLD_DESIGN §4.1). `web/world/duelist.js` runs it; `map.js` expands it to dialogue.
 
   ```jsonc
   { "id": "t_hazel", "name": "Hazel", "model": "npc_gardener", "outfit": "#e8c33a", "x": 22, "z": 8, "facing": "w",
-    "trainer": {
+    "duelist": {
       "sight": 4,                 // tiles watched, 1..5 (default 3); 0: talk to duel, never watches
       "look": ["w", "s"],         // optional: turns between these every 2.5 s, watching each way
       "challenge": ["…"], "challenge_fr": ["…"],   // when it walks up: ends with the duel offer
@@ -353,7 +353,7 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   `!time:day & !time:dawn`); the effect `clock:<phase>` jumps to the start of a phase (the inn's panel
   uses it). Everything with an `if` (people, spots, finds, props, gates) is re-checked at each phase
   change, so **schedules are data**: duplicate a townsperson with `"if": "!time:night"` and
-  `"if": "time:night"` on two tiles. A night duelist (`night: true` in `trainers.rs`) must carry
+  `"if": "time:night"` on two tiles. A night duelist (`night: true` in `duelists.rs`) must carry
   `time:night` in its `if` (the data test checks). A night-only find is a find with `"if": "time:night"`.
 - **Light at night:** materials named `*glow*` shine brighter after dusk, and `*glass*` (windows) turns
   warm and lit outdoors, dark from inside. Every `light_origin` empty gets a halo and, below 3.2 m, a pool

@@ -1942,7 +1942,7 @@
       "z": 11,
       "facing": "s",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Snip! You're in my hedge. Well, between my hedges. Same thing.",
@@ -1982,7 +1982,7 @@
       "z": 19,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "Gotcha! Nobody comes down this end. Except me. And now you.",
@@ -2022,7 +2022,7 @@
       "z": 16,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 4,
         "challenge": [
           "Mind where you step. That's feverfew, and that's rue. Like me.",

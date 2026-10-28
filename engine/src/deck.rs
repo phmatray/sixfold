@@ -65,7 +65,7 @@ pub fn deck_errors(deck: &[CardId]) -> Vec<DeckError> {
 pub const FEW_BASICS: usize = 8;
 /// A 60-card deck with fewer energy cards than this stalls its attacks…
 pub const FEW_ENERGY: usize = 18;
-/// …and with more, draws too few Hexons and trainers.
+/// …and with more, draws too few Hexons and Gear cards.
 pub const MUCH_ENERGY: usize = 32;
 
 /// What a deck is made of, for the editor's composition hints.
@@ -76,8 +76,8 @@ pub struct Hints {
     pub basics: usize,
     pub stage1: usize,
     pub stage2: usize,
-    /// Trainers, Trainers-as-Basic included.
-    pub trainers: usize,
+    /// Gear, Gear-as-Basic included.
+    pub gears: usize,
     /// Energy cards, basic and special.
     pub energy: usize,
     /// Evolutions whose pre-evolution isn't in the deck, so they can never
@@ -121,7 +121,7 @@ pub fn hints(deck: &[CardId]) -> Hints {
                     h.stranded.push(id);
                 }
             }
-            CardKind::Trainer(_) | CardKind::TrainerBasic(_) => h.trainers += 1,
+            CardKind::Gear(_) | CardKind::GearBasic(_) => h.gears += 1,
             CardKind::Energy(_) => h.energy += 1,
         }
     }
@@ -180,9 +180,9 @@ pub enum AddError {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SortBy {
     /// Creatures and basic energy by colour (each colour's energy after its
-    /// creatures), then trainers and the special energy.
+    /// creatures), then Gear cards and the special energy.
     Color,
-    /// Basics, Stage 1, Stage 2, trainers, special energy, basic energy.
+    /// Basics, Stage 1, Stage 2, Gear cards, special energy, basic energy.
     Kind,
     /// Rare first, basic energy last.
     Rarity,
@@ -194,8 +194,8 @@ impl SortBy {
         let c = card(id);
         let (kind, color) = match &c.kind {
             CardKind::Creature(cr) => (cr.stage as u8, cr.color as u8),
-            CardKind::TrainerBasic(cr) => (3, cr.color as u8),
-            CardKind::Trainer(_) => (3, 7),
+            CardKind::GearBasic(cr) => (3, cr.color as u8),
+            CardKind::Gear(_) => (3, 7),
             CardKind::Energy(EnergyCard::DoubleColorless) => (4, 7),
             CardKind::Energy(EnergyCard::Basic(col)) => (5, *col as u8),
         };
@@ -390,7 +390,7 @@ impl DeckList {
         let (mut weight, mut have) = ([0usize; 6], [0usize; 6]);
         for d in self.cards.iter().filter_map(|&id| try_card(id)) {
             match &d.kind {
-                CardKind::Creature(cr) | CardKind::TrainerBasic(cr)
+                CardKind::Creature(cr) | CardKind::GearBasic(cr)
                     if cr.color != Color::Colorless =>
                 {
                     weight[cr.color as usize] += 1
@@ -438,7 +438,7 @@ mod tests {
         assert_eq!(validate_deck(&d), Err(DeckError::WrongSize(61)));
     }
 
-    /// R-DECK-02: a Trainer-as-Basic doesn't count.
+    /// R-DECK-02: a Gear-as-Basic doesn't count.
     #[test]
     fn deck_without_basic_rejected() {
         assert_eq!(
@@ -614,7 +614,7 @@ mod deck_list_tests {
         d.cards.iter().filter(|&&c| c == id).count()
     }
 
-    /// The editor flow: creatures and trainers by hand, energy auto-filled.
+    /// The editor flow: creatures and Gear cards by hand, energy auto-filled.
     #[test]
     fn prebuilt_without_energy_refills_to_a_legal_deck() {
         let mut d = list(&STARTER.cards());
@@ -694,7 +694,7 @@ mod hint_tests {
             TWIN_E,
         ]);
         assert_eq!(
-            (h.basics, h.stage1, h.stage2, h.trainers, h.energy),
+            (h.basics, h.stage1, h.stage2, h.gears, h.energy),
             (2, 1, 1, 2, 3)
         );
         // Mossgiant needs Mossback (absent); Greeter Elder needs Greeter.

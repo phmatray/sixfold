@@ -847,7 +847,7 @@
       "z": 12,
       "facing": "n",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "That pylon's mine to mind. Want the switch? Win it.",
@@ -887,7 +887,7 @@
       "z": 15,
       "facing": "e",
       "idle": "Idle",
-      "trainer": {
+      "duelist": {
         "sight": 3,
         "challenge": [
           "I keep the signals. Lamps for the ships, lightning for the spire. And duels for visitors.",
