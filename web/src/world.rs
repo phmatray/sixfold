@@ -723,7 +723,7 @@ pub fn WorldScreen() -> impl IntoView {
     // Some("import") when the scene's modules could not load, Some("") when the scene failed.
     let failed = RwSignal::new(None::<String>);
     let announce = RwSignal::new(String::new());
-    // When the live region last took a phase or a way opening (they can come together).
+    // When the live region last took a phase, an area, a way opening or a bark (they can come together).
     let said_at = StoredValue::new(0.0f64);
     let progress = expect_context::<RwSignal<Progress>>();
     // Where the hero is: (map, outdoors). Fast travel only leaves from outdoors.
@@ -848,6 +848,21 @@ pub fn WorldScreen() -> impl IntoView {
     // ponytail: the callback is leaked once per visit (a few bytes); keep a handle if visits ever get frequent.
     let cb = Closure::<dyn Fn(String, String, String) -> bool>::new(
         move |event: String, a: String, b: String| {
+            // Said in the live region after what it took less than a second ago (a phase, an
+            // area's name), rather than in its place before a screen reader has read it.
+            let follow = |line: String| {
+                let now = js_sys::Date::now();
+                let fresh = now - said_at.get_value() < 1000.0;
+                _ = announce.try_update(|s| {
+                    if fresh && !s.is_empty() {
+                        s.push(' ');
+                        s.push_str(&line);
+                    } else {
+                        *s = line;
+                    }
+                });
+                said_at.set_value(now);
+            };
             match event.as_str() {
                 // A gated warp asks whether its condition holds.
                 "check" => return progress.with_untracked(|p| p.check(&a)),
@@ -918,19 +933,7 @@ pub fn WorldScreen() -> impl IntoView {
                 }
                 // A gate on this map just opened: "A way opens: <name>", said once.
                 // A phase that just arrived (a time gate's reason) is kept in front.
-                "opened" => {
-                    let now = js_sys::Date::now();
-                    let fresh = now - said_at.get_value() < 1000.0;
-                    _ = announce.try_update(|s| {
-                        if fresh && !s.is_empty() {
-                            s.push(' ');
-                            s.push_str(&a);
-                        } else {
-                            *s = a;
-                        }
-                    });
-                    said_at.set_value(now);
-                }
+                "opened" => follow(a),
                 "talk" => start_talk(a, b),
                 // A bust baked: it takes the place of its placeholder in the talk on screen.
                 "bust" => {
@@ -942,9 +945,9 @@ pub fn WorldScreen() -> impl IntoView {
                         }
                     })
                 }
-                "area" => _ = announce.try_set(a),
-                // A line said in passing (#114): "<name>: <line>", once per bark.
-                "bark" => _ = announce.try_set(format!("{a}{} {b}", tr(":", "\u{a0}:"))),
+                "area" => follow(a),
+                // A line said in passing (#114): "<name>: <line>", once per bark, after the area's name.
+                "bark" => follow(format!("{a}{} {b}", tr(":", "\u{a0}:"))),
                 // C (or a pad's R3) picked the next outdoor camera angle: saved, and said.
                 "camera" => {
                     let angle = CameraAngle::from_code(&a);

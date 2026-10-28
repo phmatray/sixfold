@@ -60,7 +60,7 @@ test("AC3: with three seals, Moss says her line about them once as the hero pass
   // At 14:00 Moss stands idle at 33,27 facing west: the hero comes in at the garden gate, three tiles off, facing no one.
   await host(page, "sixfoldClock", 14 * 60);
   await warp(page, "overworld", 30, 27, "n");
-  await expect(live).toHaveText("Moss: Three seals already? My beans are jealous.");
+  await expect(live).toContainText("Moss: Three seals already? My beans are jealous."); // after the area's name, if just said
   // Away and back within the visit: not again.
   await warp(page, "square", 25, 10, "s");
   await warp(page, "overworld", 30, 27, "n");
