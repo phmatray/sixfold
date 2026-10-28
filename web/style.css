@@ -417,6 +417,10 @@ input[type="checkbox"]:checked::before { translate: 18px 0; background: var(--br
    floors where a compact card would otherwise drop below 11px. */
 .card {
   position: relative;
+  /* Its own stacking context: the HP badge, the gloss and the foil stack
+     inside the card, never over whatever lies above it (the binder's
+     turning leaf, a dealt card). */
+  isolation: isolate;
   container-type: inline-size;
   width: var(--w, 100px);
   aspect-ratio: 5 / 7;
