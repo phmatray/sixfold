@@ -70,10 +70,41 @@ struct Opened {
 
 #[component]
 pub fn PacksScreen() -> impl IntoView {
-    let profile = expect_context::<RwSignal<Profile>>();
     let ui = expect_context::<Ui>();
-    let opened = RwSignal::new(None::<Opened>);
+    let opened = RwSignal::new(false);
+    let on_key = move |e: leptos::ev::KeyboardEvent| {
+        // Closing the card sheet is this Escape's whole job (not the page's Back too).
+        if e.key() == "Escape" && ui.sheet.get_untracked() {
+            e.prevent_default();
+            ui.sheet.set(false);
+        }
+    };
+    view! {
+        // The card inspector only once there are cards to read: on the shelf, the packs take the room.
+        <div class="page" class:with-side=opened on:keydown=on_key>
+            <PageBar title=tr("Open packs", "Ouvrir des boosters") />
+            <main class="page-body"><PacksPanel opened=opened /></main>
+            {move || opened.get().then(|| view! { <div class="side-panel"><Inspector /></div> })}
+        </div>
+    }
+}
+
+/// The shelf and the reveal: the title's Packs screen, and the in-game menu's
+/// Packs tab over the paused world (#194). `opened` says a pack is being
+/// revealed. With `to`, the reveal's ways out (the collection, the decks)
+/// call it instead of changing screen, and the empty shelf offers no duel.
+#[component]
+pub fn PacksPanel(
+    opened: RwSignal<bool>,
+    #[prop(optional)] to: Option<Callback<Screen>>,
+) -> impl IntoView {
+    let profile = expect_context::<RwSignal<Profile>>();
+    let pack = RwSignal::new(None::<Opened>);
     let done = RwSignal::new(false);
+    let go = move |s: Screen| match to {
+        Some(f) => f.run(s),
+        None => crate::go(s),
+    };
     let counter = StoredValue::new(0u32);
     let actions = NodeRef::<leptos::html::Div>::new();
     let finish = move || {
@@ -105,34 +136,43 @@ pub fn PacksScreen() -> impl IntoView {
             return;
         };
         counter.update_value(|c| *c += 1);
-        opened.set(Some(Opened {
+        pack.set(Some(Opened {
             key: counter.get_value(),
             booster: b,
             cards,
         }));
+        opened.set(true);
         done.set(false);
     };
-    let on_key = move |e: leptos::ev::KeyboardEvent| {
-        // Closing the card sheet is this Escape's whole job (not the page's Back too).
-        if e.key() == "Escape" && ui.sheet.get_untracked() {
-            e.prevent_default();
-            ui.sheet.set(false);
-        }
+    let again = move || {
+        pack.set(None);
+        opened.set(false);
     };
     on_cleanup(|| crate::audio::sfx("packstop", 0.0));
-    view! {
-        // The card inspector only once there are cards to read: on the shelf, the packs take the room.
-        <div class="page" class:with-side=move || opened.with(Option::is_some) on:keydown=on_key>
-            <PageBar title=tr("Open packs", "Ouvrir des boosters") />
-            <main class="page-body">
-                {move || match opened.get() {
-                    None => view! { <Shelf open=open /> }.into_any(),
-                    Some(o) => view! { <Reveal o=o done=done finish=finish actions=actions again=move || opened.set(None) /> }.into_any(),
-                }}
-            </main>
-            {move || opened.with(Option::is_some).then(|| view! { <div class="side-panel"><Inspector /></div> })}
-        </div>
+    move || match pack.get() {
+        None => view! { <Shelf open=open duel=to.is_none() /> }.into_any(),
+        Some(o) => {
+            view! { <Reveal o=o done=done finish=finish actions=actions again=again go=go /> }
+                .into_any()
+        }
     }
+}
+
+/// Opens the in-game menu on its Packs tab: the world provides it (#194).
+#[derive(Clone, Copy)]
+pub struct OpenPacks(pub Callback<()>);
+
+/// "Open it now", where a pack is gained in the world: the menu's Packs tab.
+/// Nothing outside the world.
+#[component]
+pub fn OpenNow(#[prop(default = 1)] n: usize) -> impl IntoView {
+    use_context::<OpenPacks>().map(|o| {
+        view! {
+            <button type="button" class="btn open-now" on:click=move |_| o.0.run(())>
+                {if n > 1 { tr("Open them now", "Les ouvrir maintenant") } else { tr("Open it now", "L'ouvrir maintenant") }}
+            </button>
+        }
+    })
 }
 
 /// The CSS theme of booster `b`'s wrapper: `p-<theme>`.
@@ -296,7 +336,7 @@ pub fn PackOdds(b: usize) -> impl IntoView {
 
 /// Every booster, with how many of each the player holds.
 #[component]
-fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
+fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static, duel: bool) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
     let total = move || profile.with(|p| p.wallet.total());
     // One act on the shelf: the first pack the player holds is the brass one; the others are plain.
@@ -344,7 +384,7 @@ fn Shelf(open: impl Fn(usize) + Copy + Send + Sync + 'static) -> impl IntoView {
                 }
             }).collect_view()}
         </ul>
-        {move || (total() == 0).then(|| view! {
+        {move || (duel && total() == 0).then(|| view! {
             <button type="button" class="btn" on:click=move |_| crate::go(Screen::Duel)>{tr("Play a duel", "Jouer un duel")}</button>
         })}
     }
@@ -393,6 +433,7 @@ fn Reveal(
     finish: impl Fn() + Copy + Send + Sync + 'static,
     actions: NodeRef<leptos::html::Div>,
     again: impl Fn() + Copy + Send + Sync + 'static,
+    go: impl Fn(Screen) + Copy + Send + Sync + 'static,
 ) -> impl IntoView {
     let profile = expect_context::<RwSignal<Profile>>();
     let instant = RwSignal::new(false);
@@ -585,8 +626,8 @@ fn Reveal(
                             {tr(format!("Choose another ({} left)", more()), format!("En choisir un autre ({} restant{})", more(), if more() > 1 { "s" } else { "" }))}
                         </button>
                     })}
-                    <button type="button" class="btn" on:click=move |_| crate::go(Screen::Collection)>{tr("See the collection", "Voir la collection")}</button>
-                    <button type="button" class="btn ghost" on:click=move |_| crate::go(Screen::Decks)>{tr("Build a deck", "Construire un deck")}</button>
+                    <button type="button" class="btn" on:click=move |_| go(Screen::Collection)>{tr("See the collection", "Voir la collection")}</button>
+                    <button type="button" class="btn ghost" on:click=move |_| go(Screen::Decks)>{tr("Build a deck", "Construire un deck")}</button>
                 }.into_any()
             } else if open.get() {
                 view! {

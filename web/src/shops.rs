@@ -289,19 +289,15 @@ pub fn InnCounter(stock: &'static InnStock) -> impl IntoView {
 #[component]
 fn PackItem(b: usize, said: RwSignal<String>) -> impl IntoView {
     let (progress, profile) = signals();
+    let bought = RwSignal::new(false);
     let buy = move |b: usize| match deal((progress, profile), |p, pr| shop::buy_pack(p, pr, b)) {
         Ok(()) => {
             crate::audio::sfx("reward", 0.0);
+            bought.set(true);
             said.set(
                 tr(
-                    format!(
-                        "You bought {}. Open packs from the title screen.",
-                        packs_label(b, 1)
-                    ),
-                    format!(
-                        "Vous achetez {}. Ouvrez vos boosters depuis l'écran titre.",
-                        packs_label(b, 1)
-                    ),
+                    format!("You bought {}.", packs_label(b, 1)),
+                    format!("Vous achetez {}.", packs_label(b, 1)),
                 ) + &balance(progress),
             );
         }
@@ -334,6 +330,8 @@ fn PackItem(b: usize, said: RwSignal<String>) -> impl IntoView {
                         <p class="shop-lock">{tr(format!("On sale after you beat {rival}."), format!("En vente quand vous aurez battu {rival}."))}</p>
                     }.into_any(),
                 }}
+                // Bought here, opened here (#194): the menu's Packs tab, over the paused world.
+                {move || (bought.get() && held() > 0).then(|| view! { <crate::packs::OpenNow /> })}
             </div>
         </li>
     }
@@ -346,8 +344,8 @@ pub fn PackCounter() -> impl IntoView {
     view! {
         <div class="shop">
             <p class="dialog-sub">{tr(
-                "Packs go to your wallet: open them from the title screen. More themes go on sale as you beat their rivals.",
-                "Les boosters vont dans votre portefeuille\u{a0}: ouvrez-les depuis l'écran titre. D'autres thèmes arrivent en rayon à mesure que vous battez leurs rivaux.",
+                "Packs go to your wallet: open them from the menu's Packs tab. More themes go on sale as you beat their rivals.",
+                "Les boosters vont dans votre portefeuille\u{a0}: ouvrez-les depuis l'onglet Boosters du menu. D'autres thèmes arrivent en rayon à mesure que vous battez leurs rivaux.",
             )}</p>
             <ul class="shelf pack-counter">
                 {(0..BOOSTERS.len()).map(|b| view! { <PackItem b=b said=said /> }).collect_view()}
