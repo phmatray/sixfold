@@ -494,6 +494,11 @@ pub fn hero_bust() -> Option<String> {
     HERO_BUST.with_borrow(Clone::clone)
 }
 
+/// Another save is current: its hero isn't the one baked.
+pub fn forget_hero_bust() {
+    HERO_BUST.set(None);
+}
+
 /// The speaker's face: a rival's portrait, a person's bust, none for the hero
 /// or anything that isn't a person on this map.
 fn face_of(id: &str) -> Option<String> {

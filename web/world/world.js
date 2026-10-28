@@ -1073,7 +1073,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     if (!renderer.extensions.has("KHR_parallel_shader_compile")) return;
     const far = (n) => (n.hidden ? 1e9 : Math.hypot(n.x - s.x, n.z - s.z));
     bustQ = world.npcs.filter((n) => n.obj).sort((a, b) => far(a) - far(b)).map((n) => n.def.id);
-    if (!heroBaked) (heroBaked = true), bustQ.push(HERO_BUST); // once a visit, after the people: the outfit worn now
+    if (!heroBaked) bustQ.push(HERO_BUST); // once a visit, after the people: the outfit worn now
     idle(bakeNext);
   }
   async function bakeNext() {
@@ -1091,7 +1091,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     if (id === HERO_BUST && url) {
       // The hero's own face, for the duel table (#177): kept past the world, the last one let go.
       if (heroBust) URL.revokeObjectURL(heroBust);
-      (heroBust = url), cb("hero_bust", url, "");
+      (heroBust = url), (heroBaked = true), cb("hero_bust", url, "");
     } else if (bustsOf !== w) url && URL.revokeObjectURL(url); // baked for the map just left
     else {
       if (url) busts.set(id, url);
