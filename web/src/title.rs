@@ -389,27 +389,6 @@ pub fn TitleScreen() -> impl IntoView {
             format!("{n} boosters à ouvrir"),
         ),
     };
-    // The help line (DESIGN.md): the whole of an entry's note, on paper beside the plank under
-    // the pointer or the focus (its tag on the plank may be cut short). The act entry shows its own.
-    let help = RwSignal::new(None::<(String, i32)>);
-    let show = move |t: Option<web_sys::EventTarget>| {
-        use wasm_bindgen::JsCast;
-        let item = t
-            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
-            .and_then(|t| t.closest(".menu-item:not(.primary)").ok().flatten())
-            .and_then(|i| i.dyn_into::<web_sys::HtmlElement>().ok());
-        help.set(item.map(|i| {
-            let text = i
-                .query_selector(".menu-sub")
-                .ok()
-                .flatten()
-                .and_then(|s| s.text_content());
-            (
-                text.unwrap_or_default(),
-                i.offset_top() + i.offset_height() / 2,
-            )
-        }));
-    };
     if refocus_lang(false) {
         request_animation_frame(|| {
             crate::focus_first(&[".title-foot .lang-switch [aria-pressed=\"true\"]"])
@@ -430,9 +409,7 @@ pub fn TitleScreen() -> impl IntoView {
             })}
             // A new save starts with the lesson; after it, Continue leads
             // back into the world, and the lesson stays a menu away.
-            <nav class="title-menu" aria-label=tr("Main menu", "Menu principal")
-                on:mouseover=move |e| show(e.target()) on:focusin=move |e| show(e.target())
-                on:mouseleave=move |_| help.set(None) on:focusout=move |_| help.set(None)>
+            <nav class="title-menu" aria-label=tr("Main menu", "Menu principal")>
                 <ul class="menu">
                     // The world is the game (its campaign, duelists, seals and books): its entry
                     // leads, on the brass plank. A new save begins there; the guided duel comes next.
@@ -450,13 +427,9 @@ pub fn TitleScreen() -> impl IntoView {
                     <MenuItem icon="packs" label=tr("Open packs", "Ouvrir des boosters") sub=Signal::derive(pack_sub) to=Screen::Packs badge=packs />
                     <MenuItem icon="decks" label=tr("My decks", "Mes decks") sub=Signal::derive(decks) to=Screen::Decks />
                     <MenuItem icon="collection" label="Collection" sub=Signal::derive(found) to=Screen::Collection />
-                    <MenuItem icon="records" label=tr("Records", "Palmarès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
+                    <MenuItem icon="records" label=tr("Records", "Succès") sub=Signal::derive(records) to=Screen::Records(Origin::Title, Tab::Achievements) />
                     {move || (!due.get()).then(|| view! { <LessonItem icon="howto" label=tr("How to play", "Comment jouer") sub=tr("Replay the guided first duel", "Rejouer le premier duel guidé") /> })}
                 </ul>
-                // Read out already: each entry's name carries its note.
-                {move || help.get().map(|(text, y)| view! {
-                    <p class="title-help" aria-hidden="true" style=format!("top:{y}px")>{text}</p>
-                })}
             </nav>
             <footer class="title-foot foot">
                 <div class="foot-menus">

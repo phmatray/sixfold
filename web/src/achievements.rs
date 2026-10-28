@@ -161,7 +161,7 @@ pub fn Toaster() -> impl IntoView {
                     Toast::One(a) => (tr("Achievement", "Succès"), a.name.get().to_string(), Some(a.facets)),
                     Toast::Many(n, f) => (
                         tr("Achievements", "Succès"),
-                        tr(format!("{n} earned — see Records"), format!("{n} obtenus — voir le Palmarès")),
+                        tr(format!("{n} earned — see Records"), format!("{n} obtenus — voir les Succès")),
                         Some(f),
                     ),
                     Toast::Deck(u) => (
@@ -278,9 +278,9 @@ pub fn Records(from: Origin, tab: Tab) -> impl IntoView {
     };
     view! {
         <div class="page">
-            <PageBar title=tr("Records", "Palmarès") back=from.screen() />
+            <PageBar title=tr("Records", "Succès") back=from.screen() />
             <main class="page-body narrow records">
-                <div class="menu-tabs records-tabs" role="tablist" aria-label=tr("Records", "Palmarès") on:keydown=on_key>
+                <div class="menu-tabs records-tabs" role="tablist" aria-label=tr("Records", "Succès") on:keydown=on_key>
                     {tabs.into_iter().map(|(t, label, id)| view! {
                         <button type="button" role="tab" id=id aria-controls="records-panel"
                             aria-selected=move || (tab.get() == t).to_string()
@@ -314,7 +314,7 @@ pub fn RecordsLink(
     };
     view! {
         <section class="records-link" aria-labelledby="records-link-title">
-            <h2 id="records-link-title">{tr("Records", "Palmarès")}</h2>
+            <h2 id="records-link-title">{tr("Records", "Succès")}</h2>
             <p class="page-lead">{move || progress.with(count_line)}</p>
             <div class="row">
                 <button type="button" class="btn" on:click=move |_| go(Tab::Achievements)>{tr("Achievements", "Succès")}</button>

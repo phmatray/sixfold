@@ -116,7 +116,8 @@
         "sx_roof_brown": "#4f5a66",
         "sx_roof_brown_dk": "#3e4752",
         "sx_awning_red": "#2f6b8a"
-      }
+      },
+      "lit": "hour:17-23"
     },
     {
       "asset": "inn_sign",
@@ -133,7 +134,8 @@
         "sx_plaster": "#e7e2d8",
         "sx_roof_brown": "#5b6470",
         "sx_roof_brown_dk": "#48505a"
-      }
+      },
+      "lit": "hour:19-1"
     },
     {
       "asset": "cottage",
@@ -145,7 +147,8 @@
         "sx_roof_brown": "#6a5446",
         "sx_roof_brown_dk": "#554337",
         "sx_awning_red": "#e1ac1f"
-      }
+      },
+      "lit": "hour:18-22"
     },
     {
       "asset": "cottage",
@@ -156,7 +159,8 @@
         "sx_plaster": "#e7e2d8",
         "sx_roof_brown": "#5b6470",
         "sx_roof_brown_dk": "#48505a"
-      }
+      },
+      "lit": "hour:20-24"
     },
     {
       "asset": "cottage",
@@ -168,7 +172,8 @@
         "sx_roof_brown": "#6a5446",
         "sx_roof_brown_dk": "#554337",
         "sx_awning_red": "#e1ac1f"
-      }
+      },
+      "lit": "hour:17-21"
     },
     {
       "asset": "workshop",
@@ -1445,6 +1450,13 @@
             "Oh. Je n'étais pas censé dire ça. Oublie que j'ai dit ça."
           ]
         }
+      ],
+      "barks": [
+        {
+          "if": "flag:sealed_quill",
+          "say": "Quill's seal! The rods hum softer now.",
+          "say_fr": "Le sceau de Quill ! Les tiges bourdonnent plus bas."
+        }
       ]
     },
     {
@@ -1468,6 +1480,12 @@
             "Maquereau ! Crabe ! Un truc avec trop de pattes, demande-moi plus tard !",
             "Rhian m'achète la moitié de ma pêche pour le ragoût de la Girouette. L'autre moitié, Bo la mange en faisant semblant de la compter."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Hold your hat, the wind's up.",
+          "say_fr": "Tenez votre chapeau, le vent se lève."
         }
       ]
     },

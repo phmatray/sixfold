@@ -229,7 +229,8 @@
             "flag:boots_asked"
           ]
         }
-      ]
+      ],
+      "if": "hour:7-20"
     }
   ],
   "ground": {

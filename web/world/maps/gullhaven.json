@@ -84,7 +84,8 @@
       "asset": "harbour_house",
       "x": 6,
       "z": 3,
-      "rot": 0
+      "rot": 0,
+      "lit": "hour:17-23"
     },
     {
       "asset": "inn_sign",
@@ -114,7 +115,8 @@
         "sx_td_wall_dk": "#cfc7b5",
         "sx_td_roof": "#2f7f6f",
         "sx_td_roof_dk": "#25665a"
-      }
+      },
+      "lit": "hour:19-1"
     },
     {
       "asset": "flowers",
@@ -215,7 +217,8 @@
         "sx_td_wall_dk": "#d6d4ca",
         "sx_td_roof": "#2c4f7c",
         "sx_td_roof_dk": "#223d61"
-      }
+      },
+      "lit": "hour:18-22"
     },
     {
       "asset": "crates",
@@ -446,7 +449,8 @@
         "sx_td_wall_dk": "#b9862f",
         "sx_td_roof": "#b8483a",
         "sx_td_roof_dk": "#963a2f"
-      }
+      },
+      "lit": "hour:20-24"
     },
     {
       "asset": "harbour_house",
@@ -458,7 +462,8 @@
         "sx_td_wall_dk": "#768987",
         "sx_td_roof": "#5a4636",
         "sx_td_roof_dk": "#46362a"
-      }
+      },
+      "lit": "hour:17-21"
     },
     {
       "asset": "net_rack",
@@ -1607,7 +1612,10 @@
         "x": 5,
         "z": 7,
         "facing": "n"
-      }
+      },
+      "open": "hour:7-18",
+      "locked": "Closed. The office opens at seven.",
+      "locked_fr": "Fermé. Le bureau ouvre à sept heures."
     }
   ],
   "exits": [
@@ -1677,6 +1685,13 @@
             "Et la vieille tour de la cloche a une lampe que personne n'allume. Sauf qu'elle est allumée certaines nuits. Ça fait peur, hein ?"
           ]
         }
+      ],
+      "barks": [
+        {
+          "if": "flag:letter_delivered",
+          "say": "Hob wrote back to Ottilie, you know.",
+          "say_fr": "Hob a répondu à Ottilie, vous savez."
+        }
       ]
     },
     {
@@ -1745,6 +1760,13 @@
             "Le bac, le bac, le bac. Guette-Orage au nord, Lac-aux-Lanternes en bas de la côte, et retour.",
             "Les laissez-passer, à la Capitainerie, en haut du quai. Ines les tamponne. Deux fois. Deux fois ! Deux fois."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "if": "flag:kite_done",
+          "say": "Saw Dace's kite over the boardwalk!",
+          "say_fr": "J'ai vu le cerf-volant de Dace au-dessus des quais !"
         }
       ]
     },

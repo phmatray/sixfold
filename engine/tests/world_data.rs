@@ -132,6 +132,11 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
             cond(&format!("{at}.if"), c, &mut bad);
         }
         dialogue(&at, &n["dialogue"], &mut bad, &mut cond, &mut effect);
+        for (j, b) in n["barks"].as_array().into_iter().flatten().enumerate() {
+            if let Some(c) = b["if"].as_str() {
+                cond(&format!("{at}.barks[{j}].if"), c, &mut bad);
+            }
+        }
         if let Some(t) = n.get("trainer") {
             // The loader expands the block to won:/lost:/beat: branches and a
             // challenge ending in duel:<id>.
@@ -196,8 +201,10 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
         }
     }
     for (i, w) in m["warps"].as_array().into_iter().flatten().enumerate() {
-        if let Some(c) = w["if"].as_str() {
-            cond(&format!("warp {i}.if"), c, &mut bad);
+        for key in ["if", "open"] {
+            if let Some(c) = w[key].as_str() {
+                cond(&format!("warp {i}.{key}"), c, &mut bad);
+            }
         }
     }
     for (i, l) in m["lifts"].as_array().into_iter().flatten().enumerate() {
@@ -216,7 +223,7 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
         }
     }
     for (i, p) in m["props"].as_array().into_iter().flatten().enumerate() {
-        for key in ["if", "open", "pulse"] {
+        for key in ["if", "open", "pulse", "lit"] {
             if let Some(c) = p[key].as_str() {
                 cond(&format!("prop {i}.{key}"), c, &mut bad);
             }
@@ -612,7 +619,8 @@ fn the_checker_reads_trainer_and_find_blocks() {
             { "kind": "find", "id": "w_log", "give": "coins:50", "glint": "!flag:found_w_log" },
             { "kind": "find", "id": "w_reeds", "give": "card:clearwater_vial", "hidden": true }
         ],
-        "warps": [{ "if": "item:ferry_pass" }]
+        "warps": [{ "if": "item:ferry_pass", "open": "hour:8-19" }],
+        "props": [{ "asset": "house", "lit": "hour:17-23" }]
     }"#,
     )
     .unwrap();
@@ -627,7 +635,7 @@ fn the_checker_reads_trainer_and_find_blocks() {
         "npcs": [
             { "id": "t_hazel", "trainer": { "challenge": [] } },
             { "id": "t_nobody", "trainer": { "challenge": ["Hi."] } },
-            { "id": "odd", "dialogue": [{ "if": "weather:sunny", "do": ["duel:nobody", "card:thistlewick", "emote:ghost:bang", "show:nowhere"] }] }
+            { "id": "odd", "barks": [{ "if": "hour:x-2", "say": "Hi." }], "dialogue": [{ "if": "weather:sunny", "do": ["duel:nobody", "card:thistlewick", "emote:ghost:bang", "show:nowhere"] }] }
         ],
         "interactions": [
             { "kind": "find", "id": "w_log", "give": "coins:many" },
@@ -635,7 +643,8 @@ fn the_checker_reads_trainer_and_find_blocks() {
             { "kind": "find", "id": "w_ferry", "give": "warp:gullhaven:1:2:north" }
         ],
         "gates": [{ "id": "ford", "if": "time:noon" }, { "id": "vent" }],
-        "props": [{ "asset": "pylon", "open": "flag:Pylon" }]
+        "props": [{ "asset": "pylon", "open": "flag:Pylon" }, { "asset": "house", "lit": "hour:17-25" }],
+        "warps": [{ "open": "hour:9-9" }]
     }"#,
     )
     .unwrap();
@@ -656,6 +665,9 @@ fn the_checker_reads_trainer_and_find_blocks() {
         "time:noon",
         "gate vent: a gate needs an if",
         "flag:Pylon",
+        "hour:17-25",
+        "hour:9-9",
+        "barks[0].if",
     ] {
         assert!(
             errors.iter().any(|e| e.contains(want)),
