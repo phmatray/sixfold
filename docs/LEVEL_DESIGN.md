@@ -23,8 +23,8 @@ Every rule below uses these measures (WORLD_RULES §7–8).
 
 | Measure | Value |
 |---|---|
-| Camera | looks north and down at about **50°**; a prop hides what stands behind it up to about 0.85 × its height |
-| One screen | **13 × 9 tiles** on a 1440 × 900 desktop (a phone in portrait sees about 7 × 13) |
+| Camera | looks north and down at **40–60°** (the player's choice outdoors, 50° by default; rooms stay at 50°); a prop hides what stands behind it up to about 1.2 × its height at 40°, checked by check-maps at the lowest angle |
+| One screen | **13 × 9 tiles** at the default angle on a 1440 × 900 desktop (a phone in portrait sees about 7 × 13) |
 | Walking | **4 tiles/s**, so about 3 s per screen. Running is about 6 tiles/s |
 | 25 s of walking | about **100 tiles** |
 | Paths | 1 tile for a garden or goat track, **2** for a main road, **3** for a high street or a road into a plaza |
@@ -76,7 +76,7 @@ Every rule below uses these measures (WORLD_RULES §7–8).
 **Occlusion at our camera.** The camera looks north, so anything tall **south** of a goal, between it and the
 camera, is the danger. Rules:
 
-- Check at the real camera height, not from above.
+- Check at the real camera height, not from above, and at the lowest angle the player can pick (40°).
 - Keep a clear line of sight in front of every mandatory interaction.
 - Never draw the hero see-through or as a silhouette. Fade the static occluder (roof, arch, canopy) instead,
   and never fade for an NPC.

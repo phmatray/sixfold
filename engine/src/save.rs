@@ -70,6 +70,37 @@ pub const TUTORIAL: &str = "tutorial";
 /// Play counters (`docs/WORLD_DESIGN.md` §12.2), see [`Stats`]. A save from
 /// before 1.7 has none: it reads as zeros plus what its progress shows.
 pub const STATS: &str = "stats";
+/// The outdoor camera angle the player picked, see [`CameraAngle`]. A save
+/// from before 1.11 has none: it reads as the default angle.
+pub const CAMERA: &str = "camera";
+
+/// The outdoor camera angle (`web/world/camera.js` holds the pitches).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum CameraAngle {
+    Lower,
+    #[default]
+    Default,
+    Higher,
+}
+
+impl CameraAngle {
+    pub fn code(self) -> &'static str {
+        match self {
+            CameraAngle::Lower => "lower",
+            CameraAngle::Default => "default",
+            CameraAngle::Higher => "higher",
+        }
+    }
+
+    /// The angle a code names; anything unknown is the default.
+    pub fn from_code(code: &str) -> CameraAngle {
+        match code {
+            "lower" => CameraAngle::Lower,
+            "higher" => CameraAngle::Higher,
+            _ => CameraAngle::Default,
+        }
+    }
+}
 
 /// The localStorage keys of a 0.6 save (one per part), with the section each
 /// one becomes, for [`Save::from_legacy`].
@@ -164,6 +195,14 @@ impl Save {
     /// The guided duel was played or skipped.
     pub fn set_tutorial_done(&mut self) {
         self.set(TUTORIAL, "done");
+    }
+
+    pub fn camera_angle(&self) -> CameraAngle {
+        CameraAngle::from_code(self.get(CAMERA).unwrap_or(""))
+    }
+
+    pub fn set_camera_angle(&mut self, angle: CameraAngle) {
+        self.set(CAMERA, angle.code());
     }
 
     pub fn get(&self, section: &str) -> Option<&str> {
@@ -428,6 +467,17 @@ mod tests {
         let mut s = Save::default();
         s.set_profile(p);
         s
+    }
+
+    #[test]
+    fn camera_angle_defaults_and_round_trips() {
+        let mut s = Save::new_player("p");
+        assert_eq!(s.camera_angle(), CameraAngle::Default);
+        s.set_camera_angle(CameraAngle::Higher);
+        let back = Save::decode(&s.encode()).unwrap();
+        assert_eq!(back.camera_angle(), CameraAngle::Higher);
+        s.set(CAMERA, "sideways");
+        assert_eq!(s.camera_angle(), CameraAngle::Default);
     }
 
     fn sample() -> Save {

@@ -11,6 +11,15 @@ test("face buttons and Start map to their actions", () => {
   assert.deepEqual(mapButtons(pad([])), []);
 });
 
+test("R3 and C are the camera angle by default, remappable but never to a reserved key (#148)", () => {
+  assert.deepEqual(mapButtons(pad([11])), ["camera"]);
+  assert.equal(label("pad", "camera", false), "R3");
+  assert.equal(label("keys", "camera", false), "C");
+  assert.equal(translateKey("v", { ...KEY_DEFAULTS, camera: "v" }), "c");
+  assert.equal(checkBind({ keys: KEY_DEFAULTS, pad: PAD_DEFAULTS }, "keys", "camera", "Tab"), "reserved");
+  assert.equal(checkBind({ keys: KEY_DEFAULTS, pad: PAD_DEFAULTS }, "keys", "act", "c"), "taken:camera");
+});
+
 test("shoulders switch tabs, the D-pad gives directions", () => {
   assert.deepEqual(sorted(mapButtons(pad([4, 13]))), ["down", "tabPrev"]);
   assert.deepEqual(mapButtons(pad([5])), ["tabNext"]);

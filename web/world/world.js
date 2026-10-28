@@ -2,7 +2,7 @@
 // `mount(host, controls, cb, start, edit, debug)` builds it (at `start` = "map,x,z,facing"
 // when given; `edit`/`debug`: a debug build with ?edit loads the map editor, with ?debug
 // the level-design overlays, debug.js) and returns an
-// api for Leptos (stop, act, pause, setItems, setSeals, setClock, preview, previewStop, portrait, meet, cue, busy, read, page).
+// api for Leptos (stop, act, pause, setItems, setSeals, setClock, setCamera, preview, previewStop, portrait, meet, cue, busy, read, page).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
 //   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate; a gated
@@ -19,6 +19,7 @@
 //   ("script", id, json)   a cutscene starts: {"steps"} for Leptos to run (script.js)
 //   ("cue_done", id, "")   a cutscene cue sent with an `id` has finished
 //   ("area", title, "")    entered an outdoor area that has a `title`
+//   ("camera", angle, "")  the C key (or a pad's R3) picked the next outdoor camera angle (camera.js)
 //   ("progress", "done/total", "") models loaded for the first map (the loading screen)
 //   ("ready", "", "")      first frame drawn;  ("error", "", message)
 // Game rules (progression, dialogue effects) live in the engine crate; the world
@@ -53,6 +54,7 @@ import * as seats from "./seat.js";
 import { daylight, phaseOf, DAY } from "./daylight.js";
 import { scenes } from "./script.js";
 import { createBook } from "./book.js";
+import { ANGLES, framing, nextAngle } from "./camera.js";
 
 const STEP = 0.25, RUN_STEP = 0.17; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
@@ -184,6 +186,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   shadowEye.layers.enableAll();
   shadowEye.layers.disable(1);
   let cam = { fov: 40, fovPortrait: 50, pitch: 50, distance: 12, distancePortrait: 15, lookAtOffset: [0, 0.75, 0] };
+  // The outdoor angle the player picked (camera.js, #148), and the pitch and distance easing toward it
+  // (only after a new angle: a rotated phone or sixfoldCam still cut).
+  let camAngle = "default", pitchNow = 50, distNow = 12, camEase = false;
   let dist = 12, alive = true, raf = 0, paused = false, warping = false, world = null, hero = null;
   let canRun = false, runToggle = false, shift = false, lastHero = "";
   const sealsHeld = new Set(); // the seals held (setSeals): their stone faces stay lit
@@ -339,6 +344,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     } else if (k === "g" && !e.repeat) {
       world.grid.visible = !world.grid.visible;
       legend.hidden = !world.grid.visible;
+    } else if (k === "c" && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) { // not a copy (Ctrl/Cmd+C)
+      setCamera(nextAngle(camAngle));
+      cb("camera", camAngle, "");
     }
   };
   // Escape (or a pad's B) while sitting stands up, before it can open the menu.
@@ -347,6 +355,11 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     e.preventDefault();
     e.stopImmediatePropagation();
     seats.stand(hero);
+  };
+  // The outdoor camera angle (#148): rooms keep their own framing; the frame eases to it.
+  const setCamera = (a) => {
+    camAngle = ANGLES.includes(a) ? a : "default";
+    if (world) (cam = framing(world.map.camera, camAngle, !!world.map.light.indoor)), resize(), (camEase = true);
   };
   const clearHeld = () => ((held.length = 0), (shift = false));
   const padDir = (e) => e.target.closest?.("[data-dir]")?.dataset.dir;
@@ -697,7 +710,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     hero.obj.rotation.y = angle(s.facing);
     world.hero = hero;
     sky(world.day.update(minute, s.x + 0.5, s.z + 0.5, 0), true);
-    cam = map.camera;
+    cam = framing(map.camera, camAngle, !!map.light.indoor);
     resize();
     first = true;
     await renderer.compileAsync(scene, camera).catch(() => {});
@@ -865,7 +878,12 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
 
     // Camera: fixed pitch, on a soft spring behind a point a little ahead of a
     // walking hero; leans in after a while idle; indoors, kept inside the room.
-    const pitch = THREE.MathUtils.degToRad(cam.pitch), off = cam.lookAtOffset;
+    // A new angle (#148) eases the pitch and distance over about half a second (a cut on a new map or under reduced motion).
+    const ease = first || reduced || !camEase ? 1 : Math.min(1, dt * 6);
+    pitchNow += (cam.pitch - pitchNow) * ease;
+    distNow += (dist - distNow) * ease;
+    if (Math.abs(cam.pitch - pitchNow) < 0.01 && Math.abs(dist - distNow) < 0.001) camEase = false;
+    const pitch = THREE.MathUtils.degToRad(pitchNow), off = cam.lookAtOffset;
     const ahead = h.step && !reduced ? 0.7 : 0;
     const shot = cut.aim(); // a cutscene's `cam` target
     if (shot) aim.set(shot[0] + off[0], off[1] + shot[1], shot[2] + off[2]);
@@ -876,7 +894,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       const box = el.closest(".world")?.querySelector(".talk-box")?.getBoundingClientRect();
       const H = el.clientHeight;
       if (box && H) {
-        const half = THREE.MathUtils.degToRad(camera.fov / 2), span = (2 * dist * zoom * Math.tan(half)) / Math.sin(pitch);
+        const half = THREE.MathUtils.degToRad(camera.fov / 2), span = (2 * distNow * zoom * Math.tan(half)) / Math.sin(pitch);
         aim.z += (Math.max(0, H - box.top) / H) * span * 0.9;
       }
     }
@@ -885,7 +903,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       // along z (perspective makes the far side longer) and ±halfW along x.
       // The top edge is the top bar's lower edge, not the canvas's.
       // At the camera's real distance: a scene's lean-in (zoom) lets the shot go closer to a wall (#155).
-      const dzc = dist * zoom;
+      const dzc = distNow * zoom;
       const half = THREE.MathUtils.degToRad(camera.fov / 2), hc = dzc * Math.sin(pitch) + off[1], d0 = dzc * Math.cos(pitch);
       const halfTop = Math.atan((1 - 2 * cover) * Math.tan(half));
       const top = pitch > halfTop ? d0 - hc / Math.tan(pitch - halfTop) : -Infinity, bottom = d0 - hc / Math.tan(pitch + half);
@@ -922,7 +940,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const tall = camera.aspect < 1;
     const lean = cut.playing ? (cut.onTile() && w.map.light.indoor ? (tall ? 0.8 : 0.55) : tall ? 0.95 : 0.85) : !reduced && (h.sit || h.idle > FIDGET_AFTER) ? 0.88 : 1;
     zoom = reduced ? lean : zoom + (lean - zoom) * Math.min(1, dt * 1.5);
-    const dz = dist * zoom;
+    const dz = distNow * zoom;
     camera.position.set(look.x, look.y + Math.sin(pitch) * dz, look.z + Math.cos(pitch) * dz);
     camera.lookAt(look);
     // Outdoors the sun (and its shadow map) follows the hero a whole tile at a
@@ -967,7 +985,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
-  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit });
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, camera: { angle: camAngle, pitch: pitchNow } });
 
   // Item popup preview: the model turning in its own small canvas.
   let pv = null;
@@ -1147,6 +1165,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   return {
     stop,
     act,
+    setCamera,
     busy: () => warping || !world || !!world.engage || !!world.ride || cut.playing || book.live(), // the in-game menu waits for these
     // A book to read ({id, family, title, pages: [{heading, text, art}], shelf}): from the shelf
     // last used when `shelf` is true, else it rises into view. null puts it back ("book closed" after).
