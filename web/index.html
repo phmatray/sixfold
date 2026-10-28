@@ -68,9 +68,10 @@
       for (const t of ["gesturestart", "gesturechange"]) addEventListener(t, (e) => e.preventDefault(), { passive: false });
     </script>
     <script>
-      // Offline play: register the service worker, and offer a reload when a
-      // new version has installed (it waits until the player says so).
-      if ("serviceWorker" in navigator) {
+      // Offline play in a browser: register the service worker, and offer a reload
+      // when a new version has installed (it waits until the player says so).
+      // Not in the desktop app: its files are already local, and its updates come from the store.
+      if ("serviceWorker" in navigator && !("__TAURI_INTERNALS__" in window)) {
         addEventListener("load", async () => {
           // Reload only when the player asked for the new version (the first
           // install also changes the controller, and must not reload).
