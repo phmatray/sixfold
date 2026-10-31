@@ -405,9 +405,75 @@ impl Game {
     pub(crate) fn game_over(&mut self, winner: usize, ev: &mut Vec<Event>) {
         self.winner = Some(winner);
         self.prompt = None;
-        self.pending = None;
+        // A Gear card whose effect ended the game was played: it goes to the
+        // discard pile, as `finish` would have put it.
+        if let Some(pd) = self.pending.take() {
+            self.players[pd.player].discard.extend(pd.card);
+        }
         self.steps.clear();
         ev.push(Event::GameOver { winner });
+    }
+
+    /// What holds between any two actions; a broken one is an engine bug. The
+    /// AI playtests check it after every action, so each game they play is also
+    /// a fuzz run.
+    #[cfg(test)]
+    pub(crate) fn check_invariants(&self) -> Result<(), String> {
+        if self.winner.is_some() != self.prompt.is_none() {
+            return Err("a game waits on a prompt exactly while nobody has won".into());
+        }
+        for (p, pl) in self.players.iter().enumerate() {
+            if pl.bench.len() > MAX_BENCH {
+                return Err(format!("player {p} has {} on the Bench", pl.bench.len()));
+            }
+            for (slot, c) in pl.in_play() {
+                if c.hp > c.creature().hp {
+                    return Err(format!(
+                        "player {p} slot {slot}: {} HP over its {}",
+                        c.hp,
+                        c.creature().hp
+                    ));
+                }
+                if c.hp == 0
+                    && self
+                        .prompt
+                        .as_ref()
+                        .is_some_and(|q| q.kind == PromptKind::MainPhase)
+                {
+                    return Err(format!(
+                        "player {p} slot {slot}: knocked out but still in play"
+                    ));
+                }
+            }
+            // Every card stays its owner's and is somewhere: the zones hold
+            // exactly the deck list.
+            let mut held: Vec<CardId> = [&pl.deck, &pl.hand, &pl.discard]
+                .into_iter()
+                .flatten()
+                .copied()
+                .collect();
+            held.extend(pl.prizes.iter().flatten());
+            for (_, c) in pl.in_play() {
+                held.extend(c.stack.iter().chain(&c.energy).chain(&c.gears));
+            }
+            held.extend(
+                self.pending
+                    .iter()
+                    .filter(|q| q.player == p)
+                    .flat_map(|q| q.card),
+            );
+            let mut list = self.decks[p].clone();
+            held.sort_unstable();
+            list.sort_unstable();
+            if held != list {
+                return Err(format!(
+                    "player {p}'s zones hold {} cards, not their deck of {}",
+                    held.len(),
+                    list.len()
+                ));
+            }
+        }
+        Ok(())
     }
 }
 
@@ -629,30 +695,20 @@ mod tests {
         assert_eq!(g.players[0].active.as_ref().unwrap().uid, 41);
     }
 
-    /// Every card a player owns, wherever it is (60 for a legal deck).
-    fn cards_owned(g: &Game, p: usize) -> usize {
-        let pl = &g.players[p];
-        let in_play: usize = pl
-            .in_play()
-            .map(|(_, c)| c.stack.len() + c.energy.len() + c.gears.len())
-            .sum();
-        let limbo = g
-            .pending
-            .as_ref()
-            .filter(|pd| pd.player == p && pd.card.is_some())
-            .map_or(0, |_| 1);
-        pl.deck.len() + pl.hand.len() + pl.discard.len() + pl.prizes_left() + in_play + limbo
-    }
-
-    /// Random legal play: 300 seeded games with the fixture decks never panic,
-    /// never list an action `apply` refuses, keep every card, and always end.
+    /// Random legal play: 300 seeded games with the fixture and prebuilt decks
+    /// never panic, never list an action `apply` refuses, hold the invariants
+    /// after every action, and always end.
     #[test]
     fn random_legal_play_always_finishes() {
-        let decks = [power_deck(), attack_deck(), deck()];
+        let decks: Vec<Vec<CardId>> = [power_deck(), attack_deck(), deck()]
+            .into_iter()
+            .chain(crate::decks::PREBUILT.iter().map(|d| d.cards()))
+            .collect();
+        let n = decks.len();
         for seed in 0..300u64 {
             let pair = [
-                decks[seed as usize % 3].clone(),
-                decks[seed as usize / 3 % 3].clone(),
+                decks[seed as usize % n].clone(),
+                decks[seed as usize / n % n].clone(),
             ];
             let mut g = Game::new(pair, seed, Config::default()).unwrap();
             let mut pick = Rng::new(seed ^ 0x5eed);
@@ -685,12 +741,8 @@ mod tests {
                         e.describe(1);
                     });
                 }
-                for p in 0..2 {
-                    assert_eq!(
-                        cards_owned(&g, p),
-                        60,
-                        "seed {seed}: player {p} after {a:?}"
-                    );
+                if let Err(e) = g.check_invariants() {
+                    panic!("seed {seed}: after {a:?}: {e}");
                 }
                 let mut uids: Vec<u32> = (0..2)
                     .flat_map(|p| g.players[p].in_play().map(|(_, c)| c.uid))
