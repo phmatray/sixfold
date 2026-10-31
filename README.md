@@ -75,7 +75,7 @@ own deck, AI style, theme and entrance; a keeper accepts once you've beaten enou
 their region's duelists. Six seals open the sealed door to Sable, the Hex Warden.
 Beating Sable rolls the credits and makes you champion; then the **Gauntlet** (all six
 keepers in a row, sharper decks, one loss ends it) and a **daily duel** open up.
-Quests live in a Journal, and 38 achievements in Records.
+Quests live in a Journal, and 41 achievements in Records.
 
 **For everyone.** Keyboard, mouse, touch or gamepad (remappable); every screen works
 with the keyboard alone, a screen reader hears one summary of each turn, touch

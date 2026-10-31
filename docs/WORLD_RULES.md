@@ -237,10 +237,39 @@ Level design (§11):
 - `landmark: true` (a prop): the map's landmark. A big town may mark more than one.
 - `poi` (a prop, a spot, a person or a warp): its tier, `major`, `secondary`, `micro` or `secret`. Warps, waymarks, exit
   signposts and people who start a story duel (a rival, a seal keeper: a `duel:` cue in what they say) are `major` by default.
-- `clue` (on a `secret`): `[[x, z], …]`, the tiles that hint at it.
 - `view` (a map): `[x, z]` or `[[x, z], …]`, viewpoints. A path that ends within 2 tiles of one is not a dead end.
 - `vista` (a map): `[[x0, z0, x1, z1], …]`, open ground meant to be seen, not reached (an island seen early).
 - `optional: true` (a spot, a person or a warp): not a mandatory interaction.
+
+Secrets (#116; `docs/LEVEL_DESIGN.md` §3.3):
+
+- `secret` (a spot or a person with `poi: "secret"`, and only there):
+  `{ "id", "kind", "clue"?: [[x, z], …], "hint"?: "<npc id>" }`. `id` is `a-z`, `0-9` and `_`, unique across the maps.
+  `kind` is `spatial`, `environmental`, `progression` or `social`. `clue` lists the tiles that hint at it (a trail,
+  odd flowers). `hint` names a person, on any map, whose line sets `flag:heard_<id>`. A secret has a clue or a hint,
+  or both. (A top-level `clue` is an error: it lives in the block.)
+- `flag:secret_<id>`: set when the secret is found (`map.js` `expand`). A find sets it when it is taken, and again on
+  its "Nothing else here." line, so a save that looted it before secrets existed earns it by looking again. Any
+  other spot or person sets it on every line. The engine counts `secret_` flags (Records, achievements).
+- `flag:heard_<id>`: set by a person's line (a `do`) that tells of the secret. Any condition may read it, so a hint
+  can bring something out (`"if": "flag:heard_<id> & time:dusk"`).
+- `hedge_gap` (a prop, walked through): a break in a hedge, its two cut ends low either side of a trodden gap. Put
+  it where the hedge's `f` tile would be, turned along the hedge, with a trail of paint `s` or `r` on it or beside it.
+- `sound` (on an entry with a `secret`): `{ "at": [x, z], "sfx": "hum", "radius": 1..8 }`. A quiet drone that
+  swells as the hero comes within `radius` tiles of `at`, until the secret is found. `hum` is the only sound so far.
+- Opened variants: two props on one tile, each with an `if`. For a find, they key on its `found_<id>` (`crates` with
+  `"if": "!flag:found_<id>"`, `crates_open` with `"if": "flag:found_<id>"`), so an old save sees it opened. For a
+  secret that is not a find (a stone that moves), they key on `secret_<id>` (`stone_odd`, `stone_moved`).
+
+`tools/check-maps.mjs` (`secretRules`) checks them on every map. Each one is always an error:
+
+| Rule (`[name]` in the message) | Fails when |
+|---|---|
+| `secret` | `poi: "secret"` has no `secret` block, or a block has no `poi: "secret"`; a prop or a warp is a secret; the id or kind is malformed; the id is used twice; a clue tile is off the map; the secret has neither a clue nor a hint; a clue tile can't be seen at the real camera (every angle) from a tile you can reach within a screen (13 × 9) of it; the `hint` person never sets `flag:heard_<id>` |
+| `heard` | a condition anywhere on a map reads a `flag:heard_<x>` that no person's line sets, on any map |
+| `behind-secret` | a secret gives a field item (`kiln_lantern`, `ferry_pass`, `wading_boots`, `grip_gloves`, `running_shoes`) or an item a quest needs (`quests.json`); or, with every gate on a `secret_` flag shut and every `hedge_gap` solid, a warp, exit, waymark, rival or keeper, seal stone, or a giver of such an item can no longer be reached |
+| `hedge-gap` | a `hedge_gap` has no tile of paint `s` or `r` on it or beside it that is also a clue of a secret on the map |
+| `sound` | a `sound` is on an entry without a `secret`, or `at` is off the map, `sfx` isn't `hum`, or `radius` isn't 1..8 |
 
 ## 10. Method — *méthode*
 

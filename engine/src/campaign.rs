@@ -148,6 +148,15 @@ impl Rival {
         )
     }
 
+    /// One of this keeper's duelists, not yet beaten, and not a secret one
+    /// (#116): a secret is optional, and only at its hour on its map, so it is
+    /// never named or marked, told or not.
+    fn still_to_beat(&self, id: &str, p: &Progress) -> bool {
+        self.duelists.contains(&id)
+            && !p.has_flag(&format!("beat_{id}"))
+            && duelist(id).is_some_and(|t| t.heard.is_none())
+    }
+
     /// The maps that still hold a duelist of their region not yet beaten,
     /// none once earned.
     pub fn waiting(&self, p: &Progress) -> Vec<&'static Ground> {
@@ -156,11 +165,7 @@ impl Rival {
         }
         GROUNDS
             .iter()
-            .filter(|g| {
-                g.duelists
-                    .iter()
-                    .any(|id| self.duelists.contains(id) && !p.has_flag(&format!("beat_{id}")))
-            })
+            .filter(|g| g.duelists.iter().any(|id| self.still_to_beat(id, p)))
             .collect()
     }
 
@@ -176,7 +181,7 @@ impl Rival {
                 let who: Vec<String> = g
                     .duelists
                     .iter()
-                    .filter(|id| self.duelists.contains(id) && !p.has_flag(&format!("beat_{id}")))
+                    .filter(|id| self.still_to_beat(id, p))
                     .filter_map(|id| duelist(id))
                     .map(|t| {
                         if t.night {
@@ -288,7 +293,7 @@ pub static GROUNDS: [Ground; 20] = [
     Ground { map: "screepass", at: T::new("in Scree Pass", "au Col des Éboulis"), duelists: &["t_mica", "t_ulric"] },
     Ground { map: "undermine", at: T::new("in the Undermine", "dans les Galeries Basses"), duelists: &["t_jet"] },
     Ground { map: "hushlane", at: T::new("on Hushwillow Lane", "dans l'Allée des Saules-Murmures"), duelists: &["t_iver", "t_luce"] },
-    Ground { map: "lanternmere", at: T::new("in Lanternmere", "à Lac-aux-Lanternes"), duelists: &["t_yara", "t_ambrose", "t_clem"] },
+    Ground { map: "lanternmere", at: T::new("in Lanternmere", "à Lac-aux-Lanternes"), duelists: &["t_yara", "t_ambrose", "t_clem", "t_faye"] },
     Ground { map: "moonwell", at: T::new("in the Moonwell Garden", "au Jardin du Puits-de-Lune"), duelists: &["t_maud", "t_noor"] },
 ];
 
@@ -827,7 +832,7 @@ pub static RIVALS: [Rival; 7] = [
         needs: 5,
         seal: true,
         region: T::new("the Hushlands", "les Terres du Murmure"),
-        duelists: &["t_iver", "t_luce", "t_yara", "t_ambrose", "t_clem", "t_maud", "t_noor"],
+        duelists: &["t_iver", "t_luce", "t_yara", "t_ambrose", "t_clem", "t_faye", "t_maud", "t_noor"],
         earn: 3,
         booster: 6, // Dream
         packs: 2,

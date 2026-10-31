@@ -55,9 +55,9 @@
     "1111123444333333333333333333334443211111",
     "1111123334444333333333333333444333211111",
     "1222222233334444444444333333433322222221",
-    "2233333333344422222222222244433333333322",
-    "2334444444441111111111111111444444444332",
-    "2344................................4432",
+    "22333333r3344422222222222244433333333322",
+    "23344444r4441111111111111111444444444332",
+    "2344....r...........................4432",
     "234................pp................432",
     "234................ppp...............432",
     "234................ppp...............432",
@@ -3786,11 +3786,18 @@
       "y": 3
     },
     {
-      "asset": "rock",
+      "asset": "crates",
       "x": 8,
       "z": 23,
       "rot": 0,
-      "y": 3
+      "if": "!flag:found_e_cold_vent"
+    },
+    {
+      "asset": "crates_open",
+      "x": 8,
+      "z": 23,
+      "rot": 0,
+      "if": "flag:found_e_cold_vent"
     },
     {
       "asset": "rock",
@@ -3984,13 +3991,6 @@
     {
       "asset": "rock_basalt",
       "x": 7,
-      "z": 24,
-      "rot": 0,
-      "y": 4
-    },
-    {
-      "asset": "rock",
-      "x": 8,
       "z": 24,
       "rot": 0,
       "y": 4
@@ -4658,6 +4658,30 @@
       "text_fr": "Dans une fente du rocher, hors de portée de la vapeur : une carte dans une boîte en fer, aux coins tièdes."
     },
     {
+      "kind": "find",
+      "id": "e_cold_vent",
+      "x": 8,
+      "z": 23,
+      "give": "card:twofold_energy",
+      "text": "The vent has gone cold for the night. Tucked at its back, a kiln-keeper's old chest, the paint baked off it long ago and the hinges stiff. Inside, in a tin that never quite cooled: a card.",
+      "text_fr": "L'évent s'est refroidi pour la nuit. Calé tout au fond, le vieux coffre d'un gardien de four, la peinture cuite depuis longtemps et les charnières raides. Dedans, dans une boîte en fer jamais tout à fait refroidie : une carte.",
+      "poi": "secret",
+      "secret": {
+        "id": "cold_vent",
+        "kind": "progression",
+        "clue": [
+          [
+            8,
+            25
+          ],
+          [
+            8,
+            23
+          ]
+        ]
+      }
+    },
+    {
       "x": 16,
       "z": 5,
       "kind": "sign",
@@ -4755,6 +4779,21 @@
       "text_fr": "De la vapeur brûlante jaillit de la roche. Elle se calmera peut-être à la fraîche, la nuit."
     },
     {
+      "id": "cold_vent",
+      "name": "the vent at the foot of the rim",
+      "name_fr": "l'évent au pied de la lèvre",
+      "tiles": [
+        [
+          8,
+          24
+        ]
+      ],
+      "if": "!time:day & !time:dusk",
+      "prop_closed": "ember_vent",
+      "text": "Hot breath pours from a crack at the foot of the rim. Behind it, in the dark, something square. The steam might drop in the cool of the night.",
+      "text_fr": "Un souffle brûlant sort d'une fente au pied de la lèvre. Derrière, dans le noir, quelque chose de carré. La vapeur tombera peut-être à la fraîche, la nuit."
+    },
+    {
       "id": "rim_ledge",
       "name": "the ledge on the Kilnmouth's rim",
       "name_fr": "la corniche sur la lèvre de la Gueule-du-Four",
@@ -4790,11 +4829,13 @@
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
+            "Even the little one down on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
             "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
+            "Même le petit, en bas, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
             "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
           ]
         },
@@ -4838,10 +4879,12 @@
           "if": "!time:day & !time:dawn",
           "lines": [
             "Hear that? Nothing. The vents are asleep. Go on: the high terrace is yours till dawn.",
+            "Even the little one in the floor's far west corner, where the swept stones end, has gone quiet. Whatever the old kiln-keepers left behind it, nothing's guarding it tonight.",
             "Vela's up on the north rim, if you're looking for trouble. She usually is."
           ],
           "lines_fr": [
             "Tu entends ? Rien. Les évents dorment. Vas-y : la haute terrasse est à toi jusqu'à l'aube.",
+            "Même le petit, dans le coin ouest du fond, au bout des pierres balayées, s'est tu. Ce que les vieux gardiens du four ont laissé derrière, rien ne le garde cette nuit.",
             "Vela est sur le rebord nord, si tu cherches les ennuis. Elle, elle les cherche toujours."
           ]
         },
@@ -4849,11 +4892,13 @@
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
+            "Even the little one down on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
             "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
+            "Même le petit, en bas, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
             "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
           ]
         }
