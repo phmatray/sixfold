@@ -1,5 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
-import { menuItem, title } from "./helpers";
+import { expect, test, menuItem, title, type Page } from "./helpers";
 
 // The graphics tier (#225): the world draws through a post-processing composer picked from the
 // device (Low on CI's SwiftShader) or the player's choice (`sixfold.graphics`), in the one context it had.
