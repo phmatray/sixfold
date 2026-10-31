@@ -1672,6 +1672,13 @@
       "x": 43,
       "z": 33,
       "rot": 0
+    },
+    {
+      "asset": "heather",
+      "x": 29,
+      "z": 4,
+      "rot": 180,
+      "band": "bastion"
     }
   ],
   "spawn": {
@@ -2432,6 +2439,16 @@
             "cam:hero"
           ]
         }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "to": "bastion",
+      "depth": 5,
+      "scatter": [
+        "rock",
+        "heather"
       ]
     }
   ]

@@ -13,7 +13,8 @@ import { rng, mesh, group, toon, fadeable, PLACEHOLDER, FOOT, WALKABLE, DECK, LA
 import { key, glowTex, blobGeo, blobMat } from "./actors.js";
 import { spawnNpcs } from "./npc.js";
 import { fireflies } from "./fireflies.js";
-import { OPTIONAL, RING } from "./map.js";
+import { OPTIONAL, RING, loadMap } from "./map.js";
+import { bandOf, bandWeight } from "./ld.js";
 import { rise as riseOf } from "./terrain.js";
 
 // Instanced: static, never animated, never read like a sign (one draw per mesh of the model, not per prop).
@@ -400,7 +401,24 @@ export async function build(map, got, reduced) {
     return ladders.get(key(ax, az)) === axis || ladders.get(key(bx, bz)) === axis;
   };
 
-  const ground = await groundMesh(map, tile);
+  // Biome transitions (#118, WORLD_RULES 5.7): each band with the map next door, whose ground the band's
+  // tiles blend toward and whose light and ambience bed the hero leans into while walking in it (`lean`).
+  const bands = (await Promise.all((map.transitions ?? []).map(async (t) => {
+    const b = bandOf(map, t), next = b && (await loadMap(t.to).catch(() => null));
+    return next && { ...b, next };
+  }))).filter(Boolean);
+  let leanAt = null, leanWas = null; // the last lookup: daylight and world.js ask for the same spot every frame
+  const lean = (x, z) => {
+    if (leanAt && leanAt[0] === x && leanAt[1] === z) return leanWas;
+    let best = null;
+    for (const band of bands) {
+      const k = bandWeight(map, band, x, z);
+      if (k > (best?.k ?? 0)) best = { k, band };
+    }
+    leanAt = [x, z];
+    return (leanWas = best);
+  };
+  const ground = await groundMesh(map, tile, bands);
   root.add(ground);
 
   const batch = batcher();
@@ -792,7 +810,7 @@ export async function build(map, got, reduced) {
   };
   const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0, life: lv, calm: map.calm }, reduced);
   return { map, root, blocked, floorAt, climb, drop, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, doors, life, boats, glows, fireflies: flies,
-    gates, gateAt, shown, lit, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
+    gates, gateAt, shown, lit, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null, lean };
 }
 
 // G toggles this: tile lines; red = blocked, gold = look/use, blue = door, green = person.

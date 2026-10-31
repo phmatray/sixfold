@@ -536,6 +536,7 @@ else {
 honestWorld();
 oneWay();
 levelDesign();
+transitions();
 if (STRICT) fail.push(...rule);
 else warn.unshift(...rule);
 if (warn.length) console.warn(`${warn.length} placement warnings (docs/WORLD_RULES.md; judge each one):\n  ${warn.join("\n  ")}`);
@@ -696,6 +697,35 @@ function rules(name, m, solid, all) {
     let near = false;
     for (let dx = -3; dx <= 3; dx++) for (let dz = 0; dz <= 4; dz++) near ||= pathy(w.x + dx, w.z + dz);
     if (!near) warn.push(`${name}: the door to ${w.to} at ${w.x},${w.z} has no path in front of it`);
+  }
+}
+
+// Biome transitions (#118, WORLD_RULES 5.7): every edge exit into another region has a `transitions` band
+// (ld.bandOf), 4-6 tiles deep, holding at least 3 props of its `scatter` set, and the exit back has its own.
+// tools/transition.mjs writes them. A border with no band is an error with --strict.
+function transitions() {
+  for (const [name, m] of Object.entries(maps)) {
+    if (m.light.indoor) continue;
+    for (const e of m.exits ?? []) {
+      const o = maps[e.to];
+      if (o && o.region !== m.region && !(m.transitions ?? []).some((t) => t.to === e.to))
+        rule.push(`${name}: [transition] the ${e.side} exit to ${e.to} crosses into ${o.region} with no transition band (node tools/transition.mjs)`);
+    }
+    for (const t of m.transitions ?? []) {
+      const b = ld.bandOf(m, t), at = `${name}: [transition] the band to ${t.to}`;
+      if (!b) {
+        fail.push(`${at} matches no edge exit`);
+        continue;
+      }
+      if (m.exits.filter((e) => e.to === t.to).length > 1) fail.push(`${at} is ambiguous: two exits lead there`);
+      if (!(Number.isInteger(t.depth) && t.depth >= 4 && t.depth <= 6)) fail.push(`${at} is ${t.depth} tiles deep; make it 4-6`);
+      else {
+        const n = m.props.filter((p) => t.scatter?.includes(p.asset) && ld.bandWeight(m, b, p.x + 0.5, p.z + 0.5) > 0).length;
+        if (n < 3) fail.push(`${at} holds ${n} props of its scatter (${t.scatter}); it needs at least 3`);
+      }
+      if (!(maps[t.to]?.transitions ?? []).some((u) => u.to === name)) fail.push(`${at} has no band back on ${t.to}`);
+    }
+    for (const p of m.props) if (p.band && !(m.transitions ?? []).some((t) => t.to === p.band)) fail.push(`${name}: [transition] ${p.asset} ${p.x},${p.z} belongs to a band to ${p.band}, which the map no longer has`);
   }
 }
 

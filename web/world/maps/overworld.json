@@ -2561,6 +2561,34 @@
       "x": 41,
       "z": 34,
       "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 43,
+      "z": 2,
+      "rot": 0,
+      "band": "quarry"
+    },
+    {
+      "asset": "ash_pine",
+      "x": 33,
+      "z": 3,
+      "rot": 0,
+      "band": "quarry"
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 26,
+      "rot": 0,
+      "band": "seaside"
+    },
+    {
+      "asset": "reeds",
+      "x": 48,
+      "z": 27,
+      "rot": 270,
+      "band": "seaside"
     }
   ],
   "gates": [
@@ -3345,6 +3373,34 @@
         22
       ],
       "to": "woodland"
+    }
+  ],
+  "transitions": [
+    {
+      "to": "quarry",
+      "depth": 5,
+      "scatter": [
+        "rock_basalt",
+        "rock",
+        "ash_pine"
+      ]
+    },
+    {
+      "to": "seaside",
+      "depth": 5,
+      "scatter": [
+        "reeds",
+        "rock_sea"
+      ]
+    },
+    {
+      "to": "woodland",
+      "depth": 5,
+      "scatter": [
+        "birch",
+        "pine",
+        "bush_dark"
+      ]
     }
   ]
 }
