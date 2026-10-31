@@ -85,6 +85,10 @@ test("AC5: Quenby sits in the Undermine's crystal grotto only once Pike has told
   await talk(page, "Pike");
   await expect.poll(() => flags(page)).toContain("f:heard_grotto_collector");
   await expect.poll(() => people(page)).toContain("quenby");
+  // Every one of his branches sets the secret, the first hello too (map.js).
+  await warp(page, "undermine", 31, 10, "n");
+  await talk(page, "Quenby");
+  await expect.poll(() => flags(page)).toContain("f:secret_grotto_collector");
 });
 
 test("the strongbox hums near its wall until it is found", async ({ page }) => {
@@ -129,4 +133,21 @@ test("AC4: a secret found stays found: Teo's chest is opened after a reload, and
   await expect(look).toBeVisible();
   await page.keyboard.press("e");
   await expect(box).toContainText("Nothing else here.", { timeout: 60_000 });
+});
+
+test("a find looted before secrets earns its secret on a second look", async ({ page }) => {
+  test.slow();
+  await page.goto("/");
+  // Teo's chest taken by a save from before #116: found, but never counted a secret.
+  await into(page, "boathouse,2,2,w", ["heard_loft_chest", "found_i_loft_chest"]);
+  expect(await flags(page)).not.toContain("f:secret_loft_chest");
+  const box = page.locator(".talk-box");
+  await expect(page.getByRole("button", { name: /^Take a look/ })).toBeVisible();
+  await page.keyboard.press("e");
+  await expect(box).toContainText("Nothing else here.", { timeout: 60_000 });
+  while (await box.isVisible()) {
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(400);
+  }
+  await expect.poll(() => flags(page)).toContain("f:secret_loft_chest");
 });

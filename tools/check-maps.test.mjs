@@ -433,6 +433,16 @@ test("AC2 (#116): a field item behind a secret fails, as does an exit reached on
   secretFails((m) => (m.vale.gates = [gate]), /vale: \[behind-secret\] the exit n to fell is only reached through a secret/);
 });
 
+test("AC2 (#116): an exit reached only through a hedge_gap fails", () =>
+  secretFails((m) => {
+    m.vale.spawn = { x: 12, z: 14, facing: "n" };
+    m.vale.tiles[10] = "#".repeat(7) + "." + "#".repeat(18); // a wall across the vale, its one break the hedge_gap at 7,10
+    box(m).secret.clue = [[7, 10]];
+  }, /vale: \[behind-secret\] the exit n to fell is only reached through a secret/));
+
+test("#116: a clue tile the camera can't see from any reached tile fails", () =>
+  secretFails((m) => box(m).secret.clue.push([16, 9]), /vale: \[secret\] v_box's secret old_box: its clue at 16,9 can't be seen from any tile you reach/));
+
 test("AC2 (#116): a hedge gap with no trail fails", () => {
   secretFails((m) => (m.vale.paint[10] = ".".repeat(26)), /vale: \[hedge-gap\] the hedge_gap at 7,10 has no trail/);
 });
