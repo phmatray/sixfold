@@ -60,6 +60,12 @@ test("props.js knows every footprint larger than a tile", () => {
   for (const [name, wd] of Object.entries(want)) assert.deepEqual(FOOT[name], wd, name);
 });
 
+test("the hero walks under the bunting and over the litter", () => {
+  const src = readFileSync(new URL("../web/world/props.js", import.meta.url), "utf8");
+  const WALKABLE = eval(src.match(/export const WALKABLE = (new Set\(\[[\s\S]*?\]\));/)[1]);
+  for (const name of ["lantern_bunting", "leaf_litter"]) assert.ok(WALKABLE.has(name), name);
+});
+
 test("only the windmill carries a clip", () => {
   for (const name of PROPS.filter((n) => n !== "windmill")) assert.equal((gltf(name).j.animations ?? []).length, 0, name);
 });
