@@ -5,7 +5,7 @@
 use leptos::prelude::*;
 use sixfold_engine::overworld::Progress;
 use sixfold_engine::profile::Profile;
-use sixfold_engine::stats::{award, Duel, Stats};
+use sixfold_engine::stats::{award, Duel, Stats, SECRETS};
 use sixfold_engine::{fr, tr, Game};
 
 use crate::achievements::{thousands, Toasts};
@@ -144,6 +144,7 @@ pub fn StatsPanel() -> impl IntoView {
                     <div class="stat"><dt>{tr("Time in the world", "Temps dans le monde")}</dt><dd>{played}</dd></div>
                     {row(tr("Nights seen", "Nuits vues"), "nights")}
                     {row(tr("Finds", "Trouvailles"), "finds")}
+                    <div class="stat"><dt>{tr("Secrets", "Secrets")}</dt><dd>{move || format!("{} / {SECRETS}", n("secrets")())}</dd></div>
                     {row(tr("Facets earned", "Facettes gagnées"), "coins_in")}
                     {row(tr("Facets spent", "Facettes dépensées"), "coins_out")}
                     {row(tr("Packs opened", "Boosters ouverts"), "packs")}

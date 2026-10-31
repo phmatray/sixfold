@@ -3053,6 +3053,10 @@
       "text_fr": "Les belles-de-lune sont grandes ouvertes, elles brillent comme des lampes. Sous la plus lumineuse, là où une chouette laisse tomber des choses brillantes tout l'été : un petit tas de Facettes.",
       "if": "time:night",
       "poi": "secret",
+      "secret": {
+        "id": "moon_glade",
+        "kind": "environmental"
+      },
       "clue": [
         [
           6,
@@ -3121,6 +3125,10 @@
       "text": "In the hidden glade, an old ranger's box, its lid swollen with damp. Inside, wrapped in oilcloth: a card.",
       "text_fr": "Dans la clairière cachée, une vieille caisse de garde, au couvercle gonflé d'humidité. Dedans, enveloppée dans une toile cirée : une carte.",
       "poi": "secret",
+      "secret": {
+        "id": "fern_glade",
+        "kind": "spatial"
+      },
       "clue": [
         [
           7,

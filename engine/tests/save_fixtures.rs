@@ -16,6 +16,7 @@ use sixfold_engine::books::{is_read, read_count, read_flag, BOOKS};
 use sixfold_engine::campaign::{KEEPERS, RIVALS, VOUCHED};
 use sixfold_engine::overworld::STARTING_COINS;
 use sixfold_engine::save::{Save, Summary, CAMPAIGN_DECK, PROGRESS, STATS, WORLD_AT};
+use sixfold_engine::stats::Stats;
 
 fn fixture(name: &str) -> String {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -288,6 +289,22 @@ fn a_save_on_the_old_fernhollow_trail_keeps_its_finds_and_lands_on_open_ground()
         open(spawn.0, spawn.1),
         "the spawn {spawn:?} is not open ground"
     );
+}
+
+/// #116: secrets came after 1.9.1. The Fernhollow save had collected both of the trail's secret
+/// spots as finds; it loads with no secret discovered (no migration) and every find still counted.
+#[test]
+fn a_save_from_before_secrets_counts_none_and_keeps_its_finds() {
+    let p = Save::decode(&fixture("v1.9.1-fernhollow.txt"))
+        .unwrap()
+        .progress();
+    assert!(p.has_flag("found_w_corner") && p.has_flag("found_g_glade"));
+    assert_eq!(p.count("secret_"), 0);
+    let mut st = Stats::default();
+    st.backfill(&p);
+    assert_eq!(st.get("secrets"), 0);
+    assert_eq!(st.get("finds"), p.count("found_") as u64);
+    assert!(st.get("finds") >= 12);
 }
 
 /// #192: up to 1.10 the route duelists' counter and achievements were spelled

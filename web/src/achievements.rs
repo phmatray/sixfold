@@ -94,7 +94,7 @@ fn granted(p: &Progress) -> Vec<&'static Achievement> {
         .collect()
 }
 
-/// 3,975 (EN) or 3 975 (FR, a narrow no-break space).
+/// 4,350 (EN) or 4 350 (FR, a narrow no-break space).
 pub fn thousands(n: u64) -> String {
     let sep = tr(",", "\u{202f}");
     let d = n.to_string();
@@ -108,7 +108,7 @@ pub fn thousands(n: u64) -> String {
     out
 }
 
-/// "12 of 38 achievements", for menus.
+/// "12 of 41 achievements", for menus.
 pub fn count_line(p: &Progress) -> String {
     let n = granted(p).len();
     tr(

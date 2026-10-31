@@ -24,6 +24,8 @@ use crate::set::{self, PROMOS};
 
 /// Hidden finds in the world's maps (`engine/tests/world_data.rs` counts them).
 pub const FINDS: usize = 101;
+/// Secrets (`flag:secret_<id>`) in the world's maps (`engine/tests/world_data.rs` counts them).
+pub const SECRETS: usize = 2;
 /// Curios (`curio_<name>` items) the maps give.
 pub const CURIOS: usize = 12;
 /// Waymarks charted in `web/world/atlas.json`.
@@ -117,10 +119,11 @@ impl Stats {
     }
 
     /// A save from before stats: count what the progress already shows
-    /// (finds, duelists and rivals beaten). Never lowers a counter.
+    /// (finds, secrets, duelists and rivals beaten). Never lowers a counter.
     pub fn backfill(&mut self, p: &Progress) {
         let n = |x: usize| x as u64;
         self.max("finds", n(p.count("found_")));
+        self.max("secrets", n(p.count("secret_")));
         self.max(
             "duelist_wins",
             n(DUELISTS.iter().filter(|t| t.beaten(p)).count()),
@@ -192,7 +195,7 @@ impl Stats {
 
     /// Count what changed between two moments of the world: Facets in and
     /// out, packs opened, cards sold, game minutes and nightfalls, daily duels
-    /// won, finds.
+    /// won, finds, secrets.
     pub fn observe(&mut self, before: (&Progress, &Profile), after: (&Progress, &Profile)) {
         let ((p0, f0), (p1, f1)) = (before, after);
         let (c0, c1) = (u64::from(p0.coins()), u64::from(p1.coins()));
@@ -214,6 +217,7 @@ impl Stats {
             u64::from(p1.daily().is_some() && p1.daily() != p0.daily()),
         );
         self.max("finds", p1.count("found_") as u64);
+        self.max("secrets", p1.count("secret_") as u64);
     }
 
     /// The hero walked into a map: at a seal site, note the game minute (for
@@ -297,8 +301,8 @@ macro_rules! ach {
     };
 }
 
-/// The 38, in the order the page lists them.
-pub static ACHIEVEMENTS: [Achievement; 38] = [
+/// The 41, in the order the page lists them.
+pub static ACHIEVEMENTS: [Achievement; 41] = [
     ach!("first_win", "First Light" / "Première lueur", "Win any duel." / "Gagner un duel.", 25, false, |s, _, _| s.get("wins") >= 1),
     ach!("first_seal", "Hexed" / "Premier sceau", "Earn a seal." / "Gagner un sceau.", 50, false, |_, p, _| seals(p) >= 1),
     ach!("three_seals", "Halfway Round" / "À mi-chemin", "Earn three seals." / "Gagner trois sceaux.", 75, false, |_, p, _| seals(p) >= 3),
@@ -316,6 +320,9 @@ pub static ACHIEVEMENTS: [Achievement; 38] = [
     ach!("finds_10", "Magpie" / "Pie voleuse", "Make ten finds." / "Faire dix trouvailles.", 50, false, |_, p, _| p.count("found_") >= 10),
     ach!("finds_all", "Nothing Hidden" / "Rien de caché", "Make every find." / "Faire toutes les trouvailles.", 250, false, |_, p, _| p.count("found_") >= FINDS),
     ach!("curios_all", "Curator" / "Conservateur", "Collect every curio." / "Réunir toutes les curiosités.", 100, false, |_, p, _| p.count("curio_") >= CURIOS),
+    ach!("secrets_1", "Curious" / "Curieux", "Find a secret." / "Trouver un secret.", 25, false, |_, p, _| p.count("secret_") >= 1),
+    ach!("secrets_half", "Sleuth" / "Fin limier", "Find half the secrets." / "Trouver la moitié des secrets.", 100, false, |_, p, _| p.count("secret_") >= SECRETS.div_ceil(2)),
+    ach!("secrets_all", "Nothing Escapes You" / "Rien ne vous échappe", "Find every secret." / "Trouver tous les secrets.", 250, false, |_, p, _| p.count("secret_") >= SECRETS),
     ach!("waymarks", "Wayfarer" / "Grand voyageur", "Touch every waymark." / "Toucher toutes les bornes.", 75, false, |_, p, _| p.waymarks().count() >= WAYMARKS),
     ach!("ring_day", "Around the Ring" / "Le tour de l'anneau", "Visit all six seal sites within one game day." / "Visiter les six sites de sceau en une journée de jeu.", 150, true, |s, _, _| ring(s)),
     ach!("items_all", "Well Equipped" / "Bien équipé", "Own all four field items." / "Posséder les quatre objets de terrain.", 75, false, |_, p, _| FIELD_ITEMS.iter().all(|i| p.has_item(i))),
@@ -409,6 +416,7 @@ mod tests {
         for f in [
             "found_m_flowers",
             "found_w_lookout",
+            "secret_fern_glade",
             "beat_t_tobin",
             "beat_bramble",
         ] {
@@ -420,6 +428,7 @@ mod tests {
             (s.get("finds"), s.get("duelist_wins"), s.get("rival_wins")),
             (2, 1, 1)
         );
+        assert_eq!(s.get("secrets"), 1);
         assert_eq!((s.get("wins"), s.get("duels")), (2, 2));
         // Never lowers what was counted.
         s.add("wins", 10);
@@ -525,6 +534,11 @@ mod tests {
         assert_eq!(s.get("daily_days"), 1);
         s.observe((&p3, &pr), (&p3, &pr));
         assert_eq!(s.get("daily_days"), 1);
+        // A secret discovered.
+        let mut p4 = p3.clone();
+        p4.apply("flag:secret_moon_glade").unwrap();
+        s.observe((&p3, &pr), (&p4, &pr));
+        assert_eq!(s.get("secrets"), 1);
     }
 
     #[test]
@@ -577,6 +591,11 @@ mod tests {
             "curios_all" => {
                 (0..CURIOS).for_each(|i| _ = p.apply(&format!("give:curio_{i}")).unwrap())
             }
+            "secrets_1" => flag(&mut p, "secret_s0"),
+            "secrets_half" => {
+                (0..SECRETS.div_ceil(2)).for_each(|i| flag(&mut p, &format!("secret_s{i}")))
+            }
+            "secrets_all" => (0..SECRETS).for_each(|i| flag(&mut p, &format!("secret_s{i}"))),
             "waymarks" => (0..WAYMARKS).for_each(|i| flag(&mut p, &format!("way_w{i}"))),
             "ring_day" => {
                 for m in SEAL_SITES {
@@ -671,13 +690,17 @@ mod tests {
             s.visit(m);
         }
         assert!(ring(&s));
+        // Every secret but one.
+        let (s, mut p) = (Stats::default(), Progress::default());
+        (1..SECRETS).for_each(|i| _ = p.apply(&format!("flag:secret_s{i}")).unwrap());
+        assert!(!earned(&s, &p, &pf).iter().any(|a| a.id == "secrets_all"));
     }
 
     #[test]
-    fn achievements_are_38_unique_and_pay_3975() {
+    fn achievements_are_41_unique_and_pay_4350() {
         let ids: std::collections::HashSet<_> = ACHIEVEMENTS.iter().map(|a| a.id).collect();
-        assert_eq!(ids.len(), 38);
-        assert_eq!(ACHIEVEMENTS.iter().map(|a| a.facets).sum::<u32>(), 3975);
+        assert_eq!(ids.len(), 41);
+        assert_eq!(ACHIEVEMENTS.iter().map(|a| a.facets).sum::<u32>(), 4350);
         let hidden: Vec<_> = ACHIEVEMENTS
             .iter()
             .filter(|a| a.hidden)
