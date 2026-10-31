@@ -124,7 +124,7 @@ export function bandOf(m, t) {
 export function bandWeight(m, b, x, z) {
   const d = { n: z, s: m.height - z, w: x, e: m.width - x }[b.side], a = b.side === "n" || b.side === "s" ? x : z;
   const off = Math.max(0, b.span[0] - b.depth - a, a - (b.span[1] + 1 + b.depth));
-  return Math.max(0, 1 - d / b.depth) * Math.max(0, 1 - off / b.depth);
+  return Math.min(1, Math.max(0, 1 - d / b.depth)) * Math.max(0, 1 - off / b.depth);
 }
 // An exit's signpost: a sign within 6 tiles of the exit's edge naming `dest`, the map it leads to (WORLD_RULES 5).
 export function exitSign(m, e, dest) {

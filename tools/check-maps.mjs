@@ -706,6 +706,7 @@ function transitions() {
         fail.push(`${at} matches no edge exit`);
         continue;
       }
+      if (m.exits.filter((e) => e.to === t.to).length > 1) fail.push(`${at} is ambiguous: two exits lead there`);
       if (!(Number.isInteger(t.depth) && t.depth >= 4 && t.depth <= 6)) fail.push(`${at} is ${t.depth} tiles deep; make it 4-6`);
       else {
         const n = m.props.filter((p) => t.scatter?.includes(p.asset) && ld.bandWeight(m, b, p.x + 0.5, p.z + 0.5) > 0).length;
@@ -713,6 +714,7 @@ function transitions() {
       }
       if (!(maps[t.to]?.transitions ?? []).some((u) => u.to === name)) fail.push(`${at} has no band back on ${t.to}`);
     }
+    for (const p of m.props) if (p.band && !(m.transitions ?? []).some((t) => t.to === p.band)) fail.push(`${name}: [transition] ${p.asset} ${p.x},${p.z} belongs to a band to ${p.band}, which the map no longer has`);
   }
 }
 

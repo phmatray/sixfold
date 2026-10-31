@@ -29,17 +29,23 @@ const m = read(file);
 const exits = (m.exits ?? []).filter((e) => e.side === side && (!to || e.to === to));
 if (exits.length !== 1) throw new Error(`${name}: ${exits.length} exits on side ${side}${to ? ` to ${to}` : ""}; name the map it leads to`);
 const exit = exits[0], next = read(join(dir, `${exit.to}.json`));
+if (m.exits.filter((e) => e.to === exit.to).length > 1) throw new Error(`${name}: two exits lead to ${exit.to}; a band is named by the map it leads to`);
 
 // The props.js tables (props.js imports three, so read them the way check-maps does).
 const src = readFileSync(join(dir, "..", "props.js"), "utf8");
 const table = (re) => eval(`(${src.match(re)[1]})`);
 const FOOT = table(/export const FOOT = (\{[\s\S]*?\});/), DECK = table(/export const DECK = (\{[\s\S]*?\});/);
 const WALKABLE = new Set(table(/export const WALKABLE = new Set\((\[[\s\S]*?\])\);/));
+const LADDER = new Set(table(/export const LADDER = new Set\((\[[\s\S]*?\])\);/));
 
 m.transitions ??= [];
 let t = m.transitions.find((t) => t.to === exit.to);
 if (!t) m.transitions.push((t = { to: exit.to, depth: 5, scatter: SCATTER[next.region] ?? ["rock"] }));
+// The band's props go back where they were in the list, so a map with two bands re-runs byte for byte.
+const slot = m.props.slice(0, Math.max(0, m.props.findIndex((p) => p.band === exit.to))).filter((p) => p.band !== exit.to).length;
+const had = m.props.some((p) => p.band === exit.to);
 m.props = m.props.filter((p) => p.band !== exit.to);
+const fresh = [];
 const b = ld.bandOf(m, t);
 
 const key = (x, z) => `${x},${z}`;
@@ -51,7 +57,9 @@ const tilesOf = (p) => {
 const g = ld.grids(m, { FOOT, DECK, WALKABLE, tall: () => 1 });
 const open = new Set();
 for (let z = 0; z < m.height; z++) for (let x = 0; x < m.width; x++) if (!g.solid.has(key(x, z))) open.add(key(x, z));
-const step = (ax, az, bx, bz) => Math.abs((g.floor[key(ax, az)] ?? 0) - (g.floor[key(bx, bz)] ?? 0)) <= CLIMB;
+// A ladder joins any heights (leniently, either way: a tile it might reach counts as reached, so it stays free).
+const ladder = new Set(m.props.filter((p) => LADDER.has(p.asset)).flatMap(tilesOf).map(([x, z]) => key(x, z)));
+const step = (ax, az, bx, bz) => ladder.has(key(ax, az)) || ladder.has(key(bx, bz)) || Math.abs((g.floor[key(ax, az)] ?? 0) - (g.floor[key(bx, bz)] ?? 0)) <= CLIMB;
 const starts = [[m.spawn.x, m.spawn.z], ...(m.exits ?? []).flatMap((e) => ld.edgeTiles(m, e))];
 const reach = () => ld.bfs(open, starts, step).dist.size;
 
@@ -60,7 +68,7 @@ const used = [...(m.interactions ?? []), ...(m.npcs ?? []), ...(m.warps ?? []), 
 const near = (x, z, list, r) => list.some((p) => Math.abs(p.x - x) <= r && Math.abs(p.z - z) <= r);
 const pathNear = (x, z) => [-1, 0, 1].some((dx) => [-1, 0, 1].some((dz) => g.path.has(key(x + dx, z + dz))));
 const along = (x, z) => (side === "n" || side === "s" ? x : z);
-const taken = new Set(m.props.flatMap((p) => (WALKABLE.has(p.asset) ? [] : tilesOf(p))).map(([x, z]) => key(x, z)));
+const taken = new Set(m.props.flatMap(tilesOf).map(([x, z]) => key(x, z))); // rugs, tidepools and arches too
 const fits = (x, z, asset) => {
   const c = m.tiles[z]?.[x], wet = c === "~" && WET.has(asset), dry = c === "." && !AFLOAT.has(asset) && open.has(key(x, z));
   return (wet || dry) && !taken.has(key(x, z)) && !pathNear(x, z) && (along(x, z) < b.span[0] - 2 || along(x, z) > b.span[1] + 2) && !near(x, z, used, 2);
@@ -92,8 +100,9 @@ for (let z = 0; z < m.height; z++)
     }
     reached = now;
     for (const [a, c] of tiles) taken.add(key(a, c));
-    m.props.push(p);
+    fresh.push(p);
     placed++;
   }
+m.props.splice(had ? slot : m.props.length, 0, ...fresh);
 writeFileSync(file, JSON.stringify(m, null, 2) + "\n");
 console.log(`${name}: ${placed} props in the ${t.depth}-tile band to ${exit.to} (${t.scatter.join(", ")})`);

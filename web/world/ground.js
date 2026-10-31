@@ -135,8 +135,8 @@ const clouds = (() => {
 // "p" path (the map's `ground.path` layer), "s" and "=" sand, "r" stone,
 // "~" and "H" (a pier) water. Anything else shows the base layer. A map's optional
 // `paint` rows (same size as `tiles`) paint a layer on any tile, a raised one too.
-// `ground.sand` swaps the "s" layer's texture: a far bank borrowing the next region's
-// ground (WORLD_RULES 5.7) paints "s" with `"sand": "moss"`.
+// `ground.sand` swaps the "s" layer's texture (`"sand": "moss"`). A biome transition at an
+// exit (WORLD_RULES 5.7) is a `transitions` band instead (below), not paint.
 const CHANNEL = { p: 0, s: 1, "=": 1, r: 2, "~": 3, H: 3 };
 
 // Overlay textures a map uses (the base stands in for the unused ones).

@@ -402,13 +402,16 @@ export async function build(map, got, reduced) {
     const b = bandOf(map, t), next = b && (await loadMap(t.to).catch(() => null));
     return next && { ...b, next };
   }))).filter(Boolean);
+  let leanAt = null, leanWas = null; // the last lookup: daylight and world.js ask for the same spot every frame
   const lean = (x, z) => {
+    if (leanAt && leanAt[0] === x && leanAt[1] === z) return leanWas;
     let best = null;
     for (const band of bands) {
       const k = bandWeight(map, band, x, z);
       if (k > (best?.k ?? 0)) best = { k, band };
     }
-    return best;
+    leanAt = [x, z];
+    return (leanWas = best);
   };
   const ground = await groundMesh(map, tile, bands);
   root.add(ground);
