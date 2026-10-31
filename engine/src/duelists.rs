@@ -223,12 +223,6 @@ impl Duelist {
         p.has_flag(&self.flag())
     }
 
-    /// Whether the player knows of them: always, but a secret duelist
-    /// (`heard`) only once told.
-    pub fn told(&self, p: &Progress) -> bool {
-        self.heard.is_none_or(|s| p.has_flag(&format!("heard_{s}")))
-    }
-
     /// One of Rook's story duels (`rook_<n>`), not a route duelist.
     pub fn story(&self) -> bool {
         self.id.starts_with("rook_")
@@ -592,19 +586,15 @@ mod tests {
         }
     }
 
-    /// #116: two duelists wait only at dusk, and only once someone has told of
-    /// them (`flag:heard_<secret> & time:dusk` on their maps): day duelists
+    /// #116: two secret duelists wait only at dusk, and only once someone has
+    /// told of them (`flag:heard_<secret> & time:dusk` on their maps): day duelists
     /// in the table (a night one needs `time:night`), on kits that exist.
     #[test]
     fn the_dusk_duelists_play_existing_kits_by_day_rules() {
         for id in ["t_faye", "t_barnaby"] {
             let t = duelist(id).unwrap_or_else(|| panic!("{id} is not on the roster"));
             assert!(!t.night, "{id}: dusk is not night");
-            let mut p = Progress::default();
-            assert!(!t.told(&p), "{id}: nobody has told of them yet");
-            p.apply(&format!("flag:heard_{}", t.heard.unwrap()))
-                .unwrap();
-            assert!(t.told(&p), "{id}");
+            assert!(t.heard.is_some(), "{id}: a secret");
             let kits = match t.kit {
                 One(r) => vec![r],
                 Mix(a, b) => vec![a, b],

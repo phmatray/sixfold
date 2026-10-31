@@ -116,7 +116,7 @@ export function refresh(w, holds, gate, animate = false) {
 const reduced = (w) => w.reduced;
 // The secrets still to find that hum (#116): a spot's or a person's `sound`, until flag:secret_<id> is set.
 const hums = (map, holds) =>
-  [...map.interactions, ...(map.npcs ?? [])].filter((o) => o.sound?.sfx === "hum" && o.secret && holds(`!flag:secret_${o.secret.id}`)).map((o) => o.sound);
+  [...map.interactions, ...(map.npcs ?? [])].filter((o) => o.sound?.sfx === "hum" && o.secret && holds(o.if) && holds(`!flag:secret_${o.secret.id}`)).map((o) => o.sound);
 
 // Collision over the static map: shut gates block their tiles (open ones take
 // their own floor), and a prop with an `if` blocks its footprint while it is there.

@@ -447,22 +447,21 @@ mod tests {
             "Le sceau de Marlo (la Marée)\u{a0}: battez encore un duelliste de la Côte Salée (●●○\u{a0}2\u{a0}sur\u{a0}3). Restent à battre\u{a0}: Finch, Harrow, Mirela et Liesl sur les Grèves de la Cloche\u{a0}; Dorrit et Brann (la nuit) à Havre-aux-Mouettes\u{a0}; Skye et Morrow sur la Promenade de Ventsalé. Puis Marlo, près de la pierre de sceau sur l'îlot du clocher."
         );
         // Hushwillow Lane done: two places left, in campaign order. Faye, a secret
-        // (#116), is named only once someone has told of her.
+        // (#116), is never named, told of or not: she is optional, and only at dusk.
         let lumen = rival("lumen").unwrap();
-        let two = with(&["flag:beat_t_iver", "flag:beat_t_luce"]);
-        assert_eq!(
-            lumen.waiting_line(&two).as_deref(),
-            Some("Still to beat: Yara, Ambrose (at night) and Clem in Lanternmere; Maud and Noor in the Moonwell Garden.")
-        );
-        let told = with(&[
-            "flag:beat_t_iver",
-            "flag:beat_t_luce",
-            "flag:heard_willow_dusk",
-        ]);
-        assert_eq!(
-            lumen.waiting_line(&told).as_deref(),
-            Some("Still to beat: Yara, Ambrose (at night), Clem and Faye in Lanternmere; Maud and Noor in the Moonwell Garden.")
-        );
+        for p in [
+            with(&["flag:beat_t_iver", "flag:beat_t_luce"]),
+            with(&[
+                "flag:beat_t_iver",
+                "flag:beat_t_luce",
+                "flag:heard_willow_dusk",
+            ]),
+        ] {
+            assert_eq!(
+                lumen.waiting_line(&p).as_deref(),
+                Some("Still to beat: Yara, Ambrose (at night) and Clem in Lanternmere; Maud and Noor in the Moonwell Garden.")
+            );
+        }
         assert_eq!(
             lumen.waiting_line(&with(&["flag:vouched"])),
             None,

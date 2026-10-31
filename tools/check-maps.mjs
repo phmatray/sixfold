@@ -88,6 +88,9 @@ const rule = [];
 const SCREEN = [13, 9], MAX = [80, 72, 80 * 64];
 const SAID = ["lines", "text", "label", "locked", "title", "challenge", "win", "lose", "after"];
 const DIR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
+// A tile given as [x, z], and one on a map (levelDesign's views, secretRules' clues and sounds).
+const isTile = (t) => Array.isArray(t) && t.length === 2 && t.every(Number.isInteger);
+const onMap = (m, [x, z]) => x >= 0 && z >= 0 && x < m.width && z < m.height;
 // Tiles a warp from any map lands on, per map.
 const landing = {};
 for (const m of Object.values(maps)) for (const w of m.warps ?? []) (landing[w.to] ??= []).push(`${w.spawn.x},${w.spawn.z}`);
@@ -736,12 +739,10 @@ function transitions() {
 // with the browser overlays. The tags are checked on every map; the six blocking rules are errors (with --strict)
 // on maps with `"level_design": 2` and report lines on the rest.
 function levelDesign() {
-  const tile = (t) => Array.isArray(t) && t.length === 2 && t.every(Number.isInteger);
   for (const [name, m] of Object.entries(maps)) {
-    const inMap = ([x, z]) => x >= 0 && z >= 0 && x < m.width && z < m.height;
     if (m.level_design !== undefined && m.level_design !== 2) fail.push(`${name}: level_design is 2 (or left out)`);
     if (m.level_design === 2 && m.light.indoor) fail.push(`${name}: level_design 2 is for outdoor maps`);
-    for (const v of views(m)) if (!tile(v) || !inMap(v)) fail.push(`${name}: view ${JSON.stringify(v)} is not a tile on the map`);
+    for (const v of views(m)) if (!isTile(v) || !onMap(m, v)) fail.push(`${name}: view ${JSON.stringify(v)} is not a tile on the map`);
     if (m.vista !== undefined && !(Array.isArray(m.vista) && m.vista.every((r) => Array.isArray(r) && r.length === 4 && r.every(Number.isInteger))))
       fail.push(`${name}: vista is [[x0, z0, x1, z1], …]`);
     const tagged = [...m.props.map((p) => ["prop", p]), ...(m.interactions ?? []).map((i) => ["spot", i]), ...(m.npcs ?? []).map((n) => ["npc", n]), ...(m.warps ?? []).map((w) => ["warp", w])];
@@ -791,10 +792,12 @@ function secretRules() {
   const ids = new Map(), k = (x, z) => `${x},${z}`;
   for (const [name, m] of Object.entries(maps)) {
     const { all, height } = ctx[name], bad = (s) => fail.push(`${name}: ${s}`);
-    const inMap = (t) => Array.isArray(t) && t.length === 2 && t.every(Number.isInteger) && t[0] >= 0 && t[1] >= 0 && t[0] < m.width && t[1] < m.height;
-    const boxes = ld.grids(m, LD).boxes, reached = [...all].map((t) => t.split(",").map(Number));
-    // A clue tile is seen when its ground (or the top of what stands on it) is, from a tile within a screen.
+    // A clue tile is seen when its ground (or the top of what stands on it) is, from a tile within a screen. The
+    // boxes and the reached tiles are worked out only on a map with a clue.
+    let boxes, reached;
     const seen = (cx, cz) => {
+      boxes ??= (designed[name]?.g ?? ld.grids(m, LD)).boxes;
+      reached ??= [...all].map((t) => t.split(",").map(Number));
       const self = boxes.filter((b) => cx >= b.x0 && cx < b.x1 && cz >= b.z0 && cz < b.z1);
       const target = { x: cx, z: cz, y: Math.max((height[k(cx, cz)] ?? 0) + 0.1, ...self.map((b) => b.y1)), self };
       return reached.some(([x, z]) => Math.abs(x - cx) <= SCREEN[0] >> 1 && Math.abs(z - cz) <= SCREEN[1] >> 1 && visibleAll(m, boxes, { x, z, y: height[k(x, z)] ?? 0 }, target));
@@ -804,7 +807,7 @@ function secretRules() {
     for (const [who, o] of entries) {
       const s = o.secret, d = o.sound;
       if (d !== undefined && !s) bad(`[sound] ${who}'s sound goes only on a secret`);
-      else if (d !== undefined && !(inMap(d?.at) && d.sfx === "hum" && d.radius >= 1 && d.radius <= 8)) bad(`[sound] ${who}'s sound is { at: [x, z] on the map, sfx: "hum", radius: 1..8 }`);
+      else if (d !== undefined && !(isTile(d?.at) && onMap(m, d.at) && d.sfx === "hum" && d.radius >= 1 && d.radius <= 8)) bad(`[sound] ${who}'s sound is { at: [x, z] on the map, sfx: "hum", radius: 1..8 }`);
       if ((o.poi === "secret") !== !!s) bad(s ? `[secret] ${who} has a secret block, so it is poi: secret` : `[secret] ${who} is poi: secret but has no secret block`);
       if (!s) continue;
       const at = `${who}'s secret ${s.id}`;
@@ -812,7 +815,7 @@ function secretRules() {
       else if (ids.has(s.id)) bad(`[secret] ${at}: the id is taken on ${ids.get(s.id)}`);
       else ids.set(s.id, name);
       if (!KINDS.includes(s.kind)) bad(`[secret] ${at}: kind is ${KINDS.join(", ")}`);
-      if (s.clue !== undefined && !(Array.isArray(s.clue) && s.clue.every(inMap))) bad(`[secret] ${at}: clue is [[x, z], …] on the map`);
+      if (s.clue !== undefined && !(Array.isArray(s.clue) && s.clue.every((t) => isTile(t) && onMap(m, t)))) bad(`[secret] ${at}: clue is [[x, z], …] on the map`);
       else for (const [cx, cz] of s.clue ?? []) if (!seen(cx, cz)) bad(`[secret] ${at}: its clue at ${cx},${cz} can't be seen from any tile you reach within a screen of it`);
       if (!s.clue?.length && !s.hint) bad(`[secret] ${at} has no clue and no hint`);
       if (s.hint !== undefined && !npcs.some((n) => n.id === s.hint && effects(n).includes(`flag:heard_${s.id}`))) bad(`[secret] ${at}: its hint ${s.hint} never sets flag:heard_${s.id} (or is no one)`);

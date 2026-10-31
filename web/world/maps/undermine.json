@@ -889,6 +889,15 @@
           ]
         },
         {
+          "if": "count:quenby_:1",
+          "lines": [
+            "Back again? I'm still here, still looking. If you come across another of the three, bring it by."
+          ],
+          "lines_fr": [
+            "Te revoilà ? Je suis toujours là, à regarder. Si tu tombes sur une autre des trois, apporte-la-moi."
+          ]
+        },
+        {
           "lines": [
             "Pike said you might come. I'm Quenby. I collect curios, in a way: I look at them. I never take them.",
             "There are three I've always wanted to see: a ring of miner's tally tags, a fern in stone and a brass thimble. Show me one and I'll make the walk worth your while."

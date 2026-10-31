@@ -148,12 +148,13 @@ impl Rival {
         )
     }
 
-    /// One of this keeper's duelists, not yet beaten, that the player knows
-    /// of (a secret one only once told, #116).
+    /// One of this keeper's duelists, not yet beaten, and not a secret one
+    /// (#116): a secret is optional, and only at its hour on its map, so it is
+    /// never named or marked, told or not.
     fn still_to_beat(&self, id: &str, p: &Progress) -> bool {
         self.duelists.contains(&id)
             && !p.has_flag(&format!("beat_{id}"))
-            && duelist(id).is_some_and(|t| t.told(p))
+            && duelist(id).is_some_and(|t| t.heard.is_none())
     }
 
     /// The maps that still hold a duelist of their region not yet beaten,

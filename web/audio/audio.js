@@ -78,6 +78,7 @@ function unlock() {
     want = "";
     music(w);
     ambience(...wantBed);
+    if (humLevel) hum(humLevel); // a hum set before the first gesture (#116)
   }
   wake();
 }

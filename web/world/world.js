@@ -165,7 +165,7 @@ const humNear = (w, px, pz) => {
   let k = 0;
   for (const s of w?.hums ?? []) k = Math.max(k, 1 - Math.hypot(px - s.at[0] - 0.5, pz - s.at[1] - 0.5) / s.radius);
   k = Math.round(Math.max(0, k) * HUM_BASE * 50) / 50;
-  if (k !== humWas) globalThis.sixfoldAudio?.hum((humWas = k));
+  if (k !== humWas) globalThis.sixfoldAudio?.hum?.((humWas = k));
 };
 // A map's music track, and its ambience bed (the region's, unless the map names another with `ambience`).
 const trackOf = (m) => (m.light.indoor ? "interior" : m.dark ? "cave" : m.music ?? "overworld");
