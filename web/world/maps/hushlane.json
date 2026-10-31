@@ -1715,6 +1715,20 @@
       "x": 2,
       "z": 31,
       "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 19,
+      "z": 2,
+      "rot": 180,
+      "band": "square"
+    },
+    {
+      "asset": "bush_dark",
+      "x": 2,
+      "z": 34,
+      "rot": 90,
+      "band": "rootholm"
     }
   ],
   "spawn": {
@@ -2311,5 +2325,25 @@
     "............................",
     "............................",
     "............................"
+  ],
+  "transitions": [
+    {
+      "to": "square",
+      "depth": 5,
+      "scatter": [
+        "bush",
+        "flowers",
+        "rock"
+      ]
+    },
+    {
+      "to": "rootholm",
+      "depth": 5,
+      "scatter": [
+        "pine",
+        "bush_dark",
+        "stump"
+      ]
+    }
   ]
 }

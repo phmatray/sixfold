@@ -10,6 +10,7 @@ import * as THREE from "three";
 import { U } from "./life.js";
 import { grassTexture, rng, fadeInto } from "./props.js";
 import { raised, rise, rockOf, terrainGeometry } from "./terrain.js";
+import { bandWeight } from "./ld.js";
 
 const TEX = new URL("./textures/", import.meta.url);
 export const REPEAT = { grass: 6, dirt: 3, wood_floor: 2.4, sand: 5, stone: 2.5, // metres per texture tile
@@ -144,12 +145,25 @@ export const groundLayers = (map) => {
   return [g.base, g.path ?? g.base, /[s=]/.test(t) ? g.sand ?? "sand" : g.base, t.includes("r") ? "stone" : g.base];
 };
 
-// `tile(x, z)` is the map's tile character.
-export async function groundMesh(map, tile) {
+// `tile(x, z)` is the map's tile character. `bands` (build.js): the map's biome transitions (#118), each with the
+// map next door; the base blends toward that map's base across the band, half and half at the edge (so the two
+// sides meet), patchy through the noise. Up to three bands with a base of their own, each a channel of one more
+// per-tile mask and one more texture; a map without them pays nothing.
+export async function groundMesh(map, tile, bands = []) {
   const { width: W, height: H } = map;
   const gd = map.ground;
   const names = groundLayers(map);
   const [a, b, c, d] = await Promise.all(names.map(layer));
+  const blend = bands.filter((t) => t.next.ground.base !== gd.base).slice(0, 3);
+  const eTex = await Promise.all(blend.map((t) => layer(t.next.ground.base)));
+  let bandTex = null;
+  if (blend.length) {
+    const wts = new Uint8Array(W * H * 4);
+    for (let z = 0; z < H; z++) for (let x = 0; x < W; x++) blend.forEach((t, i) => (wts[(z * W + x) * 4 + i] = Math.round(bandWeight(map, t, x + 0.5, z + 0.5) * 255)));
+    bandTex = new THREE.DataTexture(wts, W, H, THREE.RGBAFormat, THREE.UnsignedByteType);
+    bandTex.magFilter = bandTex.minFilter = THREE.LinearFilter;
+    bandTex.needsUpdate = true;
+  }
   const data = new Uint8Array(W * H * 4);
   for (let z = 0; z < H; z++) for (let x = 0; x < W; x++) {
     for (const ch of [CHANNEL[tile(x, z)], CHANNEL[map.paint?.[z]?.[x]]]) if (ch !== undefined) data[(z * W + x) * 4 + ch] = 255;
@@ -176,7 +190,9 @@ export async function groundMesh(map, tile) {
       uRep: { value: new THREE.Vector4(...names.map((n) => REPEAT[n] ?? 4)) },
       uClouds: { value: map.light.indoor ? 0 : 1 },
       uLevel: { value: levelTex }, uRock: { value: rockOf(map).map((c) => new THREE.Color(c)) },
+      uBand: { value: bandTex }, uRepE: { value: new THREE.Vector3(...[0, 1, 2].map((i) => REPEAT[blend[i]?.next.ground.base] ?? 4)) },
     });
+    eTex.forEach((t, i) => (sh.uniforms[`uE${i}`] = { value: t }));
     sh.vertexShader = sh.vertexShader
       .replace("#include <common>", `#include <common>\nvarying vec2 vXZ;\nvarying float vY;${high ? "\nattribute vec2 aRim;\nvarying vec2 vRim;" : ""}`)
       .replace("#include <begin_vertex>", `#include <begin_vertex>\nvec4 wp4 = modelMatrix * vec4(position, 1.0);\nvXZ = wp4.xz;\nvY = wp4.y;${high ? "\nvRim = aRim;" : ""}`);
@@ -192,6 +208,7 @@ export async function groundMesh(map, tile) {
         uniform vec2 uSize;
         uniform vec4 uRep;
         uniform float uDrift, uClouds;
+        ${blend.length ? `uniform sampler2D uBand${blend.map((_, i) => `, uE${i}`).join("")};\n        uniform vec3 uRepE;` : ""}
         float h21(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
         float vnoise(vec2 p) {
           vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
@@ -209,6 +226,11 @@ export async function groundMesh(map, tile) {
           m *= 1.0 - smoothstep(0.15, 0.4, abs(vY - lvl));` : ""}
           vec4 k = smoothstep(0.4, 0.6, m + (n - 0.5) * 0.35);
           vec3 col = texture2D(uA, vXZ / uRep.x).rgb;
+          ${blend.length ? `
+          // Biome transitions: the next map's base, in patches that thin out from the edge.
+          vec4 tb = texture2D(uBand, (vXZ + warp * 0.55) / uSize);
+          float nb = vnoise(vXZ * 0.8 + 11.3) * 0.6 + n * 0.4;
+          ${blend.map((_, i) => `col = mix(col, texture2D(uE${i}, vXZ / uRepE.${"xyz"[i]}).rgb, smoothstep(0.25, 0.75, tb.${"rgb"[i]} * 0.5 + 0.5 - nb) * smoothstep(0.0, 0.15, tb.${"rgb"[i]}));`).join("\n          ")}` : ""}
           col = mix(col, texture2D(uC, vXZ / uRep.z).rgb, k.g);
           col = mix(col, texture2D(uB, vXZ / uRep.y).rgb, k.r);
           col = mix(col, texture2D(uD, vXZ / uRep.w).rgb, k.b);
@@ -247,7 +269,7 @@ export async function groundMesh(map, tile) {
       );
     if (high) fadeInto(sh); // a cliff lip between the camera and the hero thins out
   };
-  mat.customProgramCacheKey = () => (water ? "ground-w" : "ground") + (high ? "-h" : "");
+  mat.customProgramCacheKey = () => (water ? "ground-w" : "ground") + (high ? "-h" : "") + (blend.length ? `-b${blend.length}` : "");
   let ground;
   if (high) {
     // One mesh for the ground and every plateau (flat-shaded, so the walls facet like
@@ -266,7 +288,7 @@ export async function groundMesh(map, tile) {
     ground.position.set(W / 2, 0, H / 2);
   }
   ground.receiveShadow = true;
-  ground.userData.dispose = () => (maskTex.dispose(), levelTex.dispose());
+  ground.userData.dispose = () => (maskTex.dispose(), levelTex.dispose(), bandTex?.dispose());
   // The tide: these tiles' water, 0 (the flats bare) to 1 (under the sea).
   ground.userData.water = (tiles, level) => {
     const v = Math.round(level * 255);

@@ -872,6 +872,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     animateProps(w, dt, reduced);
     stoneStep(w.stone, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);
+    // In a biome transition band (#118) the next region's ambience bed rises under this one's, up to half.
+    const inBand = w.lean(px, pz), next = inBand?.band.next;
+    globalThis.sixfoldAudio?.lean?.(next ? next.ambience ?? next.music ?? "overworld" : "", phaseOf(minute), 0.5 * (inBand?.k ?? 0));
     sky(lit);
     w.life.update(dt, w.now, px, pz, lit.night, cut.playing);
     w.fireflies.update(dt, w.now, lit.night, reduced);

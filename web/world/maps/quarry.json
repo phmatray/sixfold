@@ -2397,6 +2397,62 @@
       "x": 29,
       "z": 43,
       "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 6,
+      "z": 39,
+      "rot": 180,
+      "band": "overworld"
+    },
+    {
+      "asset": "bush",
+      "x": 10,
+      "z": 39,
+      "rot": 180,
+      "band": "overworld"
+    },
+    {
+      "asset": "flowers",
+      "x": 6,
+      "z": 40,
+      "rot": 180,
+      "band": "overworld"
+    },
+    {
+      "asset": "flowers",
+      "x": 19,
+      "z": 40,
+      "rot": 180,
+      "band": "overworld"
+    },
+    {
+      "asset": "rock",
+      "x": 20,
+      "z": 40,
+      "rot": 270,
+      "band": "overworld"
+    },
+    {
+      "asset": "bush",
+      "x": 5,
+      "z": 41,
+      "rot": 180,
+      "band": "overworld"
+    },
+    {
+      "asset": "rock",
+      "x": 7,
+      "z": 41,
+      "rot": 180,
+      "band": "overworld"
+    },
+    {
+      "asset": "flowers",
+      "x": 23,
+      "z": 42,
+      "rot": 270,
+      "band": "overworld"
     }
   ],
   "spawn": {
@@ -2921,6 +2977,17 @@
       "prop": "climb_wall",
       "text": "Painted holds climb the face to a nook. You'd need a better grip than bare hands.",
       "text_fr": "Des prises peintes grimpent la paroi jusqu'à une niche. Il faudrait une meilleure prise qu'à mains nues."
+    }
+  ],
+  "transitions": [
+    {
+      "to": "overworld",
+      "depth": 5,
+      "scatter": [
+        "bush",
+        "flowers",
+        "rock"
+      ]
     }
   ]
 }
