@@ -44,15 +44,17 @@ function world(change = () => {}) {
     warps: [{ x: 5, z: 7, dir: "s", to: "vale", label: "Go out", label_fr: "Sortir", spawn: { x: 16, z: 14, facing: "s" } }],
   };
   const maps = { vale, fell, vale_in: room };
-  change(maps);
+  const atlas = {
+    regions: [{ id: "dale", name: "Dale", name_fr: "Vallon", color: "#557744" }, { id: "moor", name: "Moor", name_fr: "Lande", color: "#776655" }],
+    maps: [{ id: "vale", name: "Vale", name_fr: "Val", region: "dale", x: 1, y: 2 }, { id: "fell", name: "Fell Moor", name_fr: "Lande du Fell", region: "dale", x: 1, y: 1 }],
+    links: [{ a: "vale", b: "fell" }], waymarks: [],
+  };
+  change(maps, atlas);
+  for (const e of atlas.maps) if (maps[e.id]) e.region = maps[e.id].region;
   const dir = mkdtempSync(join(tmpdir(), "ld-"));
   mkdirSync(join(dir, "maps"));
   copyFileSync(join(WEB, "props.js"), join(dir, "props.js"));
-  writeFileSync(join(dir, "atlas.json"), JSON.stringify({
-    regions: [{ id: "dale", name: "Dale", name_fr: "Vallon", color: "#557744" }, { id: "moor", name: "Moor", name_fr: "Lande", color: "#776655" }],
-    maps: [{ id: "vale", name: "Vale", name_fr: "Val", region: vale.region, x: 1, y: 2 }, { id: "fell", name: "Fell Moor", name_fr: "Lande du Fell", region: fell.region, x: 1, y: 1 }],
-    links: [], waymarks: [],
-  }));
+  writeFileSync(join(dir, "atlas.json"), JSON.stringify(atlas));
   for (const [id, m] of Object.entries(maps)) writeFileSync(join(dir, "maps", `${id}.json`), JSON.stringify(m));
   return dir;
 }
@@ -214,6 +216,152 @@ test("AC7 (#114): an open on a warp that is no door, and a lit on a model withou
   };
   bad((m) => (m.vale_in.warps[0].open = "hour:8-19"), /vale_in: the warp to vale at 5,7 has an open, but only a door keeps hours/);
   bad((m) => (m.vale.props[1].lit = "hour:17-23"), /vale: tree at 4,4 is lit, but has no windows/);
+});
+
+// #117: the world map is checked against the real maps, and roads and rivers line up across an edge.
+const put = (row, x, s) => row.slice(0, x) + s + row.slice(x + s.length);
+// A third outdoor map, Tarn, behind the cottage's back door: a road vale - tarn through a room.
+const tarn = (cond) => (m, a) => {
+  const gate = cond ? { if: cond, locked: "Shut.", locked_fr: "Fermé." } : {};
+  m.tarn = outdoor({ title: "Tarn", title_fr: "Lac", width: 26, height: 18, spawn: { x: 12, z: 9, facing: "s" }, tiles: grid([]), props: [],
+    warps: [{ x: 12, z: 8, to: "vale_in", label: "Go in", label_fr: "Entrer", spawn: { x: 5, z: 2, facing: "s" }, ...gate }] });
+  m.vale_in.warps.push({ x: 5, z: 1, dir: "n", to: "tarn", label: "Go out", label_fr: "Sortir", spawn: { x: 12, z: 9, facing: "s" }, ...gate });
+  a.maps.push({ id: "tarn", name: "Tarn", name_fr: "Lac", region: "dale", x: 3, y: 1 });
+};
+const atlasSays = (dir) => run(dir).out.split("\n").filter((l) => l.includes("[atlas-"));
+
+test("AC1 (#117): an atlas without a real road names exactly that road; one with a road that isn't there fails", () => {
+  passes(world());
+  const missing = atlasSays(world(tarn()));
+  assert.equal(missing.length, 1, missing.join("\n"));
+  assert.match(missing[0], /atlas: \[atlas-links\] the road tarn - vale is in the maps but not in atlas.json/);
+  assert.deepEqual(atlasSays(world((m, a) => (tarn()(m, a), a.links.push({ a: "vale", b: "tarn" })))), []);
+  const extra = atlasSays(world((m, a) => (tarn()(m, a), a.links.push({ a: "vale", b: "tarn" }, { a: "fell", b: "tarn" }))));
+  assert.equal(extra.length, 1, extra.join("\n"));
+  assert.match(extra[0], /atlas: \[atlas-links\] the road fell - tarn is in atlas.json, but no exit, door or ferry joins them/);
+  assert.match(atlasSays(world((m, a) => a.links.push({ a: "fell", b: "vale" }))).join("\n"), /atlas: \[atlas-links\] the road fell - vale is listed twice/);
+});
+
+test("#117: a gated road's if and icon match the gate that holds it", () => {
+  const road = (l) => (m, a) => (tarn("item:wading_boots")(m, a), a.links.push({ a: "vale", b: "tarn", ...l }));
+  assert.deepEqual(atlasSays(world(road({ if: "item:wading_boots", icon: "boots" }))), []);
+  assert.match(atlasSays(world(road({})))[0], /\[atlas-gate\] the road vale - tarn has no if, but "item:wading_boots" holds it/);
+  assert.match(atlasSays(world(road({ if: "item:wading_boots", icon: "gloves" })))[0], /\[atlas-gate\] the road vale - tarn shows gloves, but its item wading_boots is drawn boots/);
+  assert.match(atlasSays(world((m, a) => Object.assign(a.links[0], { if: "item:ferry_pass", icon: "ferry" })))[0], /\[atlas-gate\] the road vale - fell has if "item:ferry_pass", but nothing holds it/);
+  assert.match(atlasSays(world((m, a) => (a.links[0].icon = "boots")))[0], /\[atlas-gate\] the road vale - fell shows boots, but no item holds it/);
+  // A second, lantern-locked door into the cottage: the free one still makes the road through it free.
+  const lantern = { x: 17, z: 13, to: "vale_in", label: "Go in", label_fr: "Entrer", spawn: { x: 5, z: 7, facing: "n" }, if: "item:kiln_lantern", locked: "Dark.", locked_fr: "Noir." };
+  assert.deepEqual(atlasSays(world((m, a) => (tarn()(m, a), m.vale.warps.unshift(lantern), a.links.push({ a: "vale", b: "tarn" })))), []);
+});
+
+test("AC2 (#117): a road that leaves an edge 3 tiles off from where it arrives fails; 1 tile off passes", () => {
+  const shift = (at) => (m) => {
+    m.vale.exits[0].span = m.fell.exits[0].span = [11, 16];
+    m.vale.tiles[0] = put(m.vale.tiles[0], 13, "....");
+    m.fell.tiles[17] = put(put(m.fell.tiles[17], 11, "......"), at, "pp");
+  };
+  fails(world(shift(14)), "road-offset");
+  passes(world(shift(12)));
+});
+
+test("AC2 (#117): a river that stops at an edge fails; one that runs on, or ends with a water_ends note, passes", () => {
+  const river = (m) => [0, 1, 2, 3].forEach((z) => (m.vale.tiles[z] = put(m.vale.tiles[z], 16, "~")));
+  fails(world(river), "water-edge");
+  passes(world((m) => (river(m), (m.vale.exits[0].water_ends = "a fall"))));
+  passes(world((m) => (river(m), [16, 17].forEach((z) => (m.fell.tiles[z] = put(m.fell.tiles[z], 16, "~"))))));
+});
+
+// #117: drops you can only go down, and shortcuts you open from the far side.
+const drop = (more = {}, cue = true) => (m, a) => {
+  m.vale.drops = [{ from: [8, 8], to: [8, 9], why: "a broken fence over the scree", ...more }];
+  if (cue) m.vale.props.push({ asset: "rock", x: 9, z: 8, rot: 0 });
+  (a.marks ??= []).push({ kind: "drop", map: "vale" });
+};
+const says = (dir, msg) => {
+  const r = run(dir, "--strict");
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, msg, r.out);
+};
+
+test("AC3 (#117): a good drop passes; one with no why, or no cue, fails", () => {
+  passes(world(drop()));
+  says(world(drop({ why: undefined })), /vale: \[drop\] the drop 8,8 > 8,9 needs a why/);
+  says(world(drop({}, false)), /vale: \[drop\] the drop 8,8 > 8,9 has no cue \(a prop or paint\) within 1 tile/);
+  // Path paint beside it is the path, no cue; a slide mark (sand paint) is.
+  const paint = (c) => (m, a) => (drop({}, false)(m, a), (m.vale.paint = m.vale.tiles.map((r, z) => (z === 8 ? put(".".repeat(r.length), 7, c) : ".".repeat(r.length)))));
+  says(world(paint("p")), /vale: \[drop\] the drop 8,8 > 8,9 has no cue/);
+  assert.doesNotMatch(run(world(paint("s")), "--strict").out, /has no cue/);
+  says(world((m, a) => (drop()(m, a), (m.vale_in.drops = [{ from: [3, 3], to: [3, 4], why: "a step" }]))), /vale_in: \[drop\] the drop 3,3 > 3,4 is indoors/);
+  says(world(drop({ to: [8, 10] })), /vale: \[drop\] the drop 8,8 > 8,10 must join two open tiles side by side/);
+});
+
+test("AC3 (#117): a drop that is the only way out of an area fails", () => {
+  // A walled pit below the drop: once down, nothing leads out.
+  const pit = (m, a) => {
+    drop()(m, a);
+    for (let z = 9; z <= 12; z++) for (let x = 6; x <= 10; x++) if (!(x === 8 && z === 9) && (x === 6 || x === 10 || z === 9 || z === 12)) m.vale.tiles[z] = put(m.vale.tiles[z], x, "#");
+  };
+  says(world(pit), /vale: \[drop\] below the drop 8,8 > 8,9, nothing reaches an exit, a warp or a waymark without it \(a soft-lock\)/);
+  // The pit's way out is a shortcut in its south wall: lifted from inside, it frees the pit; from outside (the far side,
+  // never reached from below), it doesn't.
+  const hatch = (from) => (m, a) => {
+    pit(m, a);
+    m.vale.tiles[12] = put(m.vale.tiles[12], 8, ".");
+    m.vale.gates = [{ id: "hatch", tiles: [[8, 12]], if: "flag:sc_vale_hatch", name: "the hatch", name_fr: "la trappe", text: "Barred.", text_fr: "Barré.",
+      shortcut: { id: "vale_hatch", from, label: "Lift the bar", label_fr: "Lever la barre" } }];
+    a.marks.push({ kind: "shortcut", map: "vale", id: "vale_hatch" });
+  };
+  assert.doesNotMatch(run(world(hatch([8, 11])), "--strict").out, /below the drop/);
+  says(world(hatch([8, 13])), /vale: \[drop\] below the drop 8,8 > 8,9, nothing reaches an exit, a warp or a waymark without it \(a soft-lock\)/);
+  // A walled pocket above the drop: its only way out is down.
+  const ledge = (m, a) => (drop()(m, a), [[7, 8], [8, 7], [9, 8]].forEach(([x, z]) => (m.vale.tiles[z] = put(m.vale.tiles[z], x, "#"))));
+  says(world(ledge), /vale: \[drop\] above the drop 8,8 > 8,9, nothing reaches an exit, a warp or a waymark without it \(a soft-lock\)/);
+});
+
+test("#117: when the hour shuts a gate, a drop is still a way out, taken downward", () => {
+  // The ledge's way in is a gate open by day; at night the hero on it still gets out, down the drop.
+  const day = (m, a) => {
+    drop()(m, a);
+    [[7, 8], [9, 8]].forEach(([x, z]) => (m.vale.tiles[z] = put(m.vale.tiles[z], x, "#")));
+    m.vale.gates = [{ id: "stile", tiles: [[8, 7]], if: "time:day", name: "the stile", name_fr: "l'échalier", text: "Shut at night.", text_fr: "Fermé la nuit." }];
+  };
+  assert.doesNotMatch(run(world(day), "--strict").out, /once the timed gates shut/);
+});
+
+test("#117: a shortcut gate is checked: its flag, its far-side tile and its labels", () => {
+  const bar = (sc = {}, more = {}) => (m, a) => {
+    m.vale.tiles[9] = put(m.vale.tiles[9], 1, "#".repeat(10));
+    m.vale.gates = [{ id: "bar", tiles: [[5, 9]], if: "flag:sc_vale_bar", name: "the barred gap", name_fr: "le passage barré",
+      text: "Barred from the other side.", text_fr: "Barré de l'autre côté.", ...more,
+      shortcut: { id: "vale_bar", from: [5, 10], label: "Lift the bar", label_fr: "Lever la barre", ...sc } }];
+    (a.marks ??= []).push({ kind: "shortcut", map: "vale", id: "vale_bar" });
+  };
+  passes(world(bar()));
+  says(world(bar({}, { if: "flag:vale_bar" })), /vale: \[shortcut\] gate bar opens on "flag:vale_bar", but its shortcut sets flag:sc_vale_bar/);
+  says(world(bar({ from: [5, 12] })), /vale: \[shortcut\] gate bar: its from 5,12 is not beside the gate/);
+  says(world(bar({ label_fr: undefined })), /vale: \[shortcut\] gate bar: its shortcut needs an id, a label and a label_fr/);
+  // The wall across the whole width: the far side can't be reached to lift the bar.
+  says(world((m, a) => (bar()(m, a), (m.vale.tiles[9] = put(m.vale.tiles[9], 1, "#".repeat(24))))), /vale: \[shortcut\] gate bar: its from 5,10 can't be reached the long way round/);
+});
+
+test("#117: the chart's marks match the maps' shortcuts and drops", () => {
+  const none = (m, a) => (drop()(m, a), (a.marks = []));
+  assert.match(atlasSays(world(none)).join("\n"), /atlas: \[atlas-marks\] vale has a drop, but atlas.json marks none/);
+  assert.match(atlasSays(world((m, a) => (drop()(m, a), a.marks.push({ kind: "drop", map: "fell" })))).join("\n"), /atlas: \[atlas-marks\] atlas.json marks a drop on fell, which has none/);
+});
+
+test("#117: the report says when a village has no loop through its main path, and stops once a path rings a block", () => {
+  const vale = (dir) => run(dir, "--report").stdout.split("\n## ").find((s) => s.startsWith("vale"));
+  assert.match(vale(world()), /\[loop\] no loop/);
+  // A lane round the grass east of the main street (x 13-16, z 4-9), through the main street.
+  const ring = (m) => {
+    m.vale.tiles[4] = put(m.vale.tiles[4], 13, "pppp");
+    m.vale.tiles[9] = put(m.vale.tiles[9], 13, "pppp");
+    for (let z = 5; z <= 8; z++) m.vale.tiles[z] = put(m.vale.tiles[z], 16, "p");
+  };
+  const s = vale(world(ring));
+  assert.doesNotMatch(s, /\[loop\]/);
+  assert.match(s, /- loop through the main path: \d+ tiles round 12 tiles of other ground/);
 });
 
 // Biome transitions (#118, WORLD_RULES 5.7): Fell Moor in another region, so the vale's north exit crosses a border.
