@@ -1,5 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-import { menuItem, readSave, title, warpTo as warp } from "./helpers";
+import { type Page } from "@playwright/test";
+import { expect, test, menuItem, readSave, title, warpTo as warp } from "./helpers";
 
 /** People's routines (#113), through `sixfoldStats().people`: where each person is and what it does. */
 type Person = { id: string; x: number; z: number; do: string | null; away: boolean; walking: boolean; sitting: boolean };

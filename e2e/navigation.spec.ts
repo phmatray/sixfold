@@ -1,5 +1,5 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
-import { menuItem, title, moveTo } from "./helpers";
+import { type Locator, type Page } from "@playwright/test";
+import { expect, test, menuItem, title, moveTo } from "./helpers";
 
 // #100: every menu is driven by the keys and by a pad. The painted hand points at
 // the focused control; the arrows (a pad's D-pad) move it; Enter (A) confirms;
@@ -28,7 +28,7 @@ async function pointsAt(page: Page, target: Locator) {
     .toMatch(/^(left|right|above|below|inside)$/);
 }
 
-test("keyboard: arrows move the hand through the title and two menu screens, Escape goes back", async ({ page }) => {
+test("keyboard: arrows move the hand through the title and two menu screens, Escape goes back @webkit", async ({ page }) => {
   await title(page);
   await page.keyboard.press("ArrowDown"); // nothing focused yet: the first control
   await moveTo(page, menuItem(page, "Play a duel"), "ArrowDown");

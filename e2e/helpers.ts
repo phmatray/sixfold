@@ -1,4 +1,49 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import { test as base, expect, type Locator, type Page } from "@playwright/test";
+
+export { expect };
+
+/**
+ * A frame that waits longer than this (`PW_STALL_MS`) fails the test. Off by default: on CI's
+ * software GL a passing journey can wait 13 s for its shaders. Set it on a machine with a GPU.
+ */
+const STALL_MS = Number(process.env.PW_STALL_MS) || Infinity;
+
+/**
+ * Every journey also fails when the page throws or logs an error (a Rust panic lands there too),
+ * and notes its longest frame in the report.
+ */
+export const test = base.extend<{ guard: void }>({
+  guard: [
+    async ({ page }, use, info) => {
+      const errors: string[] = [];
+      let worst = 0;
+      page.on("pageerror", (e) => {
+        // WebKit reports a fetch cut short by a reload as a page error, even one the game catches.
+        if (!e.message.endsWith("due to access control checks.")) errors.push(`page error: ${e.message}\n${e.stack}`);
+      });
+      page.on("console", (m) => {
+        if (m.type() === "error") errors.push(`console.error: ${m.text()}`);
+      });
+      await page.exposeFunction("__stall", (ms: number) => {
+        worst = Math.max(worst, ms);
+        if (ms > STALL_MS) errors.push(`no frame for ${Math.round(ms)} ms`);
+      });
+      await page.addInitScript(() => {
+        let last = 0;
+        const tick = (t: number) => {
+          if (last && t - last > 250) (window as unknown as { __stall(ms: number): void }).__stall(t - last);
+          last = t;
+          requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+      await use();
+      info.annotations.push({ type: "longest frame", description: `${Math.round(worst)} ms` });
+      expect(errors, "the page logged no error and never froze").toEqual([]);
+    },
+    { auto: true },
+  ],
+});
 
 /**
  * The save in slot `n` as the game stored it (`sixfold.save.<n>` in localStorage):

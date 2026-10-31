@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-import { menuItem, readSave, title } from "./helpers";
+import { expect, test, menuItem, readSave, title } from "./helpers";
 
 // A book from the duel hall's shelf, read with the keyboard only (#104): the prompt names it,
 // E opens it, the arrows turn its pages (the page's text is in the DOM for screen readers),

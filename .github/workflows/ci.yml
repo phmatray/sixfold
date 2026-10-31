@@ -88,6 +88,8 @@ jobs:
       - run: npm ci
       # The runner image already has the browser's system libraries (--with-deps spends minutes on apt).
       - run: npx playwright install --only-shell chromium
+      # WebKit needs its own system libraries, which the runner image lacks.
+      - run: npx playwright install --with-deps webkit
       - run: npx playwright test
       - uses: actions/upload-artifact@v7
         if: failure()

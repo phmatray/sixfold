@@ -31,6 +31,9 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true },
       grep: /@phone/,
     },
+    // The engine Safari and the macOS desktop app draw with: the journeys tagged @webkit
+    // (PW_WEBKIT_ALL=1: every journey, before a release).
+    { name: "webkit", use: { ...devices["Desktop Safari"] }, grep: process.env.PW_WEBKIT_ALL ? undefined : /@webkit/ },
   ],
   webServer: {
     command: `node serve.mjs ${PORT}`,

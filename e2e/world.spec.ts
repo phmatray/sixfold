@@ -1,5 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-import { frames, menuItem, readSave, skipSplash, title } from "./helpers";
+import { type Page } from "@playwright/test";
+import { expect, test, frames, menuItem, readSave, skipSplash, title } from "./helpers";
 
 /** Where the save says the hero stands: `map,x,z,facing`. */
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
@@ -36,7 +36,7 @@ async function loaded(page: Page) {
   await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
 }
 
-test("the world: walk, take a door and back, open the menu, and Continue resumes there", async ({ page }) => {
+test("the world: walk, take a door and back, open the menu, and Continue resumes there @webkit", async ({ page }) => {
   page.on("dialog", (d) => d.accept());
   await title(page);
   // Past the lesson, the title offers Continue.

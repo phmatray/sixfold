@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
-import { editSave, loaded, menuItem, readSave, title } from "./helpers";
+import { type Page } from "@playwright/test";
+import { expect, test, editSave, loaded, menuItem, readSave, title } from "./helpers";
 
 /** Talk to Wynne across her counter, through her lines. */
 async function talkToWynne(page: Page) {
