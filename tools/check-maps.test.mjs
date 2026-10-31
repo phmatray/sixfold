@@ -49,8 +49,8 @@ function world(change = () => {}) {
   mkdirSync(join(dir, "maps"));
   copyFileSync(join(WEB, "props.js"), join(dir, "props.js"));
   writeFileSync(join(dir, "atlas.json"), JSON.stringify({
-    regions: [{ id: "dale", name: "Dale", name_fr: "Vallon", color: "#557744" }],
-    maps: [{ id: "vale", name: "Vale", name_fr: "Val", region: "dale", x: 1, y: 2 }, { id: "fell", name: "Fell Moor", name_fr: "Lande du Fell", region: "dale", x: 1, y: 1 }],
+    regions: [{ id: "dale", name: "Dale", name_fr: "Vallon", color: "#557744" }, { id: "moor", name: "Moor", name_fr: "Lande", color: "#776655" }],
+    maps: [{ id: "vale", name: "Vale", name_fr: "Val", region: vale.region, x: 1, y: 2 }, { id: "fell", name: "Fell Moor", name_fr: "Lande du Fell", region: fell.region, x: 1, y: 1 }],
     links: [], waymarks: [],
   }));
   for (const [id, m] of Object.entries(maps)) writeFileSync(join(dir, "maps", `${id}.json`), JSON.stringify(m));
@@ -215,3 +215,39 @@ test("AC7 (#114): an open on a warp that is no door, and a lit on a model withou
   bad((m) => (m.vale_in.warps[0].open = "hour:8-19"), /vale_in: the warp to vale at 5,7 has an open, but only a door keeps hours/);
   bad((m) => (m.vale.props[1].lit = "hour:17-23"), /vale: tree at 4,4 is lit, but has no windows/);
 });
+
+// Biome transitions (#118, WORLD_RULES 5.7): Fell Moor in another region, so the vale's north exit crosses a border.
+const ROCKS = { vale: [[7, 2], [8, 3], [18, 2]], fell: [[7, 15], [8, 16], [18, 15]] };
+const border = (depth = 5, back = true) => (m) => {
+  m.fell.region = "moor";
+  for (const [id, to] of [["vale", "fell"], ["fell", "vale"]]) {
+    if (id === "fell" && !back) continue;
+    m[id].transitions = [{ to, depth, scatter: ["rock"] }];
+    for (const [x, z] of ROCKS[id]) m[id].props.push({ asset: "rock", x, z, rot: 0 });
+  }
+};
+
+test("AC1 (#118): a region border with a 5-tile band on both sides passes", () => passes(world(border())));
+
+// Each failure by its own message, so one rule can't pass on another's error.
+const bandFails = (change, msg) => {
+  const r = run(world(change), "--strict");
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, msg, r.out);
+};
+
+test("AC1 (#118): a region-border exit with no transition fails", () =>
+  bandFails((m) => (m.fell.region = "moor"), /vale: \[transition\] the n exit to fell crosses into moor with no transition band/));
+
+test("AC1 (#118): a band 3 tiles deep fails", () => bandFails(border(3), /vale: \[transition\] the band to fell is 3 tiles deep; make it 4-6/));
+
+test("AC1 (#118): a band whose exit back has none of its own fails", () => bandFails(border(5, false), /vale: \[transition\] the band to fell has no band back on fell/));
+
+test("AC1 (#118): a band with under 3 props of its scatter fails", () =>
+  bandFails((m) => (border()(m), m.vale.props.pop()), /vale: \[transition\] the band to fell holds 2 props of its scatter/));
+
+test("AC1 (#118): a band toward a map no edge exit leads to fails", () =>
+  bandFails((m) => (border()(m), m.vale.transitions.push({ to: "vale_in", depth: 5, scatter: ["rock"] })), /vale: \[transition\] the band to vale_in matches no edge exit/));
+
+test("#118: a prop left behind by a band the map no longer has fails", () =>
+  bandFails((m) => (border()(m), m.vale.props.push({ asset: "rock", x: 20, z: 8, rot: 0, band: "moor" })), /vale: \[transition\] rock 20,8 belongs to a band to moor, which the map no longer has/));

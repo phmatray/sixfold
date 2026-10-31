@@ -2817,6 +2817,48 @@
       "x": 49,
       "z": 23,
       "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 49,
+      "z": 10,
+      "rot": 180,
+      "band": "downs"
+    },
+    {
+      "asset": "rock",
+      "x": 49,
+      "z": 11,
+      "rot": 90,
+      "band": "downs"
+    },
+    {
+      "asset": "rock",
+      "x": 47,
+      "z": 12,
+      "rot": 90,
+      "band": "downs"
+    },
+    {
+      "asset": "rock",
+      "x": 50,
+      "z": 14,
+      "rot": 0,
+      "band": "downs"
+    },
+    {
+      "asset": "heather",
+      "x": 50,
+      "z": 25,
+      "rot": 180,
+      "band": "downs"
+    },
+    {
+      "asset": "heather",
+      "x": 48,
+      "z": 26,
+      "rot": 180,
+      "band": "downs"
     }
   ],
   "spawn": {
@@ -3377,5 +3419,15 @@
       "near": 16,
       "far": 34
     }
-  }
+  },
+  "transitions": [
+    {
+      "to": "downs",
+      "depth": 5,
+      "scatter": [
+        "heather",
+        "rock"
+      ]
+    }
+  ]
 }

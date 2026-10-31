@@ -1941,6 +1941,55 @@
       "x": 51,
       "z": 27,
       "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 49,
+      "z": 15,
+      "rot": 90,
+      "band": "woodland"
+    },
+    {
+      "asset": "stump",
+      "x": 50,
+      "z": 15,
+      "rot": 180,
+      "band": "woodland"
+    },
+    {
+      "asset": "bush_dark",
+      "x": 49,
+      "z": 18,
+      "rot": 90,
+      "band": "woodland"
+    },
+    {
+      "asset": "stump",
+      "x": 50,
+      "z": 18,
+      "rot": 90,
+      "band": "woodland"
+    },
+    {
+      "asset": "flowers",
+      "x": 47,
+      "z": 19,
+      "rot": 90,
+      "band": "woodland"
+    },
+    {
+      "asset": "reeds",
+      "x": 48,
+      "z": 24,
+      "rot": 180,
+      "band": "hushlane"
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 33,
+      "rot": 90,
+      "band": "hushlane"
     }
   ],
   "spawn": {
@@ -2636,5 +2685,25 @@
       "near": 14,
       "far": 30
     }
-  }
+  },
+  "transitions": [
+    {
+      "to": "hushlane",
+      "depth": 5,
+      "scatter": [
+        "moonflower",
+        "reeds",
+        "bush"
+      ]
+    },
+    {
+      "to": "woodland",
+      "depth": 5,
+      "scatter": [
+        "bush_dark",
+        "stump",
+        "flowers"
+      ]
+    }
+  ]
 }
