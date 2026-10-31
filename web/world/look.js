@@ -6,7 +6,7 @@
 //   low   the plain draw with the renderer's own neutral tone mapping and the grade's exposure
 //         (no saturation or contrast): no composer, no libraries, cheap
 //   off   today's plain frame: clear, draw
-// High waits on postprocessing and N8AO (mount stays synchronous) and is "off" until they are in;
+// High fetches postprocessing and N8AO when first asked for (mount stays synchronous) and is "off" until they are in;
 // `tier` is the one in force, `ready` settles once the tier asked for is (or can't be).
 import * as THREE from "three";
 
@@ -30,7 +30,7 @@ export function createLook(renderer, scene, camera) {
 
   const build = () => {
     drop();
-    tier = want === "high" && !lib ? "off" : want;
+    tier = want === "high" && !lib ? (load(), "off") : want;
     renderer.toneMapping = tier === "low" ? THREE.NeutralToneMapping : THREE.NoToneMapping; // three recompiles on a change
     if (tier !== "high") return apply();
     let ao = null;
@@ -59,14 +59,17 @@ export function createLook(renderer, scene, camera) {
     apply();
   };
 
-  const loaded = Promise.all([import("postprocessing"), import("n8ao")]).then(
-    ([pp, n8]) => {
-      if (lib === false) return; // disposed meanwhile
-      lib = { ...pp, N8AOPostPass: n8.N8AOPostPass };
-      if (want === "high") build();
-    },
-    (e) => warn("Graphics: post-processing unavailable, drawing plain", e),
-  );
+  // Fetched the first time High is asked for: Low and Off never parse the two libraries.
+  let loading = null;
+  const load = () =>
+    (loading ??= Promise.all([import("postprocessing"), import("n8ao")]).then(
+      ([pp, n8]) => {
+        if (lib === false) return; // disposed meanwhile
+        lib = { ...pp, N8AOPostPass: n8.N8AOPostPass };
+        if (want === "high") build();
+      },
+      (e) => warn("Graphics: post-processing unavailable, drawing plain", e),
+    ));
   build();
 
   return {
@@ -76,7 +79,7 @@ export function createLook(renderer, scene, camera) {
     },
     /** Settles once the tier asked for is in force, or can't be (the libraries failed). */
     get ready() {
-      return want === "high" && lib === null ? loaded : Promise.resolve();
+      return want === "high" && lib === null ? load() : Promise.resolve();
     },
     /** "high" | "low" | "off": rebuilt in the same context. */
     setTier(t) {

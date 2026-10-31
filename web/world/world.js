@@ -58,7 +58,7 @@ import { scenes } from "./script.js";
 import { createBook } from "./book.js";
 import { ANGLES, framing, nextAngle } from "./camera.js";
 import { createLook } from "./look.js";
-import { TIERS, pickTier, readSaved, weak } from "./tier.js";
+import { TIERS, pickTier, readSaved, weak, unsure } from "./tier.js";
 
 const STEP = 0.25, RUN_STEP = 0.17; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
@@ -207,7 +207,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   shadowEye.layers.disable(1);
   // The frame, through post-processing at the device's graphics tier or the one the player chose (#225).
   const post = createLook(renderer, scene, camera);
-  post.setTier(pickTier(readSaved(), weak(renderer)));
+  post.setTier(pickTier(readSaved(), weak(renderer) || unsure(renderer)));
   let cam = { fov: 40, fovPortrait: 50, pitch: 50, distance: 12, distancePortrait: 15, lookAtOffset: [0, 0.75, 0] };
   // The outdoor angle the player picked (camera.js, #148), and the pitch and distance easing toward it
   // (only after a new angle: a rotated phone or sixfoldCam still cut).
@@ -1243,7 +1243,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     // The Graphics setting (#225): "auto" (the device decides), "high", "low" or "off".
     setGraphics: (choice) => {
       if (choice !== chosen) (probeDone = true), (chosen = choice);
-      post.setTier(pickTier(choice, weak(renderer) || slow));
+      post.setTier(pickTier(choice, weak(renderer) || unsure(renderer) || slow));
     },
     busy: () => warping || !world || !!world.engage || !!world.ride || cut.playing || book.live(), // the in-game menu waits for these
     // A book to read ({id, family, title, pages: [{heading, text, art}], shelf}): from the shelf

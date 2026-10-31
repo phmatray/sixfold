@@ -30,7 +30,19 @@ export function readSaved() {
 /** A device that can't carry a whole map at a good frame rate, known before trying:
  * a software renderer, little memory or few cores, or data saving asked for. */
 export function weak(renderer) {
+  return /swiftshader|llvmpipe|software|basic render/i.test(gpu(renderer)) || navigator.deviceMemory < 4 || navigator.hardwareConcurrency < 4 || !!navigator.connection?.saveData;
+}
+
+/** A GPU Auto can't tell from a software one: it draws Low there (the player can still pick High). */
+export function unsure(renderer) {
+  return masked(gpu(renderer), globalThis.navigator?.platform ?? "");
+}
+
+/** WebKit names every GPU "Apple GPU". Off a Mac, iPhone or iPad that hides what draws: on Linux the
+ * desktop app's WebKitGTK, and CI's WebKit, draw with a software renderer under that name. */
+export const masked = (name, platform) => name === "Apple GPU" && !/^(Mac|iP)/.test(platform);
+
+function gpu(renderer) {
   const gl = renderer.getContext(), info = gl.getExtension("WEBGL_debug_renderer_info");
-  const name = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
-  return /swiftshader|llvmpipe|software|basic render/i.test(name) || navigator.deviceMemory < 4 || navigator.hardwareConcurrency < 4 || !!navigator.connection?.saveData;
+  return info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
 }

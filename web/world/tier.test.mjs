@@ -1,7 +1,15 @@
 // node --test web/world/tier.test.mjs — the graphics tier (#225).
 import test from "node:test";
 import assert from "node:assert/strict";
-import { TIERS, KEY, pickTier, downgrade, readSaved } from "./tier.js";
+import { TIERS, KEY, pickTier, downgrade, readSaved, masked } from "./tier.js";
+
+test("WebKit's \"Apple GPU\" hides the GPU off Apple devices only", () => {
+  assert.equal(masked("Apple GPU", "Linux x86_64"), true);
+  assert.equal(masked("Apple GPU", "Win32"), true);
+  assert.equal(masked("Apple GPU", "MacIntel"), false); // an iPad says MacIntel too
+  assert.equal(masked("Apple GPU", "iPhone"), false);
+  assert.equal(masked("ANGLE (Intel, Mesa Intel(R) UHD Graphics)", "Linux x86_64"), false);
+});
 
 test("Auto, nothing saved or an unknown choice: High, or Low on a weak device", () => {
   for (const saved of ["auto", null, "", "ultra"]) {

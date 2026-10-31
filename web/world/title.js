@@ -19,7 +19,7 @@ import { loadMap, loadAsset, assetNames, tr } from "./map.js";
 import { build, dispose, refresh, animateProps } from "./build.js";
 import { updateNpc } from "./npc.js";
 import { daylight, phaseOf } from "./daylight.js";
-import { weak, pickTier, readSaved, downgrade } from "./tier.js"; // weak: a device that can't carry a whole map, known before trying
+import { weak, unsure, pickTier, readSaved, downgrade } from "./tier.js"; // weak: a device that can't carry a whole map, known before trying
 import { createLook } from "./look.js";
 
 // A place: the map, the hour (game minute), what the camera looks at (tile x, z, and a
@@ -106,7 +106,7 @@ export function mount(el) {
   shadowEye.updateMatrixWorld();
   shadowEye.layers.enableAll();
   const post = createLook(renderer, scene, camera);
-  post.setTier(pickTier(readSaved(), false)); // the device already passed `weak`
+  post.setTier(pickTier(readSaved(), unsure(renderer))); // the device already passed `weak`
 
   let wide = true;
   const resize = () => {
@@ -232,7 +232,7 @@ export function mount(el) {
   };
 
   // The Graphics setting changed elsewhere (Settings over the title, world.rs): applied at once.
-  const onGraphics = (e) => post.setTier(pickTier(e.detail, false));
+  const onGraphics = (e) => post.setTier(pickTier(e.detail, unsure(renderer)));
   addEventListener("sixfold-graphics", onGraphics);
 
   const ro = new ResizeObserver(resize);

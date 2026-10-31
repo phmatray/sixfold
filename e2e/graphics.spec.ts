@@ -39,7 +39,9 @@ const choose = (page: Page, tier: string) => page.addInitScript((t) => localStor
 
 test.beforeEach(({ page }) => void page.on("dialog", (d) => d.accept()));
 
-test("with nothing saved, a software renderer draws the world on Low", async ({ page }) => {
+test("with nothing saved, a software renderer draws the world on Low, WebKit's masked one too @webkit", async ({ page, browserName }) => {
+  // WebKit names every GPU "Apple GPU"; on a Mac that one is real, so Auto draws High there.
+  test.skip(browserName === "webkit" && process.platform === "darwin", "a Mac's GPU is real");
   await title(page);
   await enterWorld(page);
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("low");
