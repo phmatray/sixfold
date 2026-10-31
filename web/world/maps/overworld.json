@@ -31,7 +31,7 @@
     "pppppppppppppppppppppppppppppppppppppppppppppppppppp",
     "pppp.....................pp................s....pppp",
     ".........................pp.................s...ss.s",
-    ".........................pp...ffffffffff............",
+    ".........................pp...fffff.ffff............",
     ".........................pp...f........f.......s.s..",
     ".........................pp...f........f.....sss..s.",
     ".........................ppppp.........f............",
@@ -2561,6 +2561,60 @@
       "x": 41,
       "z": 34,
       "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 43,
+      "z": 2,
+      "rot": 0,
+      "band": "quarry"
+    },
+    {
+      "asset": "ash_pine",
+      "x": 33,
+      "z": 3,
+      "rot": 0,
+      "band": "quarry"
+    },
+    {
+      "asset": "reeds",
+      "x": 49,
+      "z": 26,
+      "rot": 0,
+      "band": "seaside"
+    },
+    {
+      "asset": "reeds",
+      "x": 48,
+      "z": 27,
+      "rot": 270,
+      "band": "seaside"
+    }
+  ],
+  "gates": [
+    {
+      "id": "garden_gate",
+      "name": "the garden's back gate",
+      "name_fr": "la porte du fond du jardin",
+      "tiles": [
+        [
+          35,
+          24
+        ]
+      ],
+      "if": "flag:sc_garden_gate",
+      "prop_closed": "fence",
+      "text": "Tied shut from the other side. Moss keeps this gate knotted from inside the garden.",
+      "text_fr": "Nouée de l'autre côté. Moss garde cette barrière attachée depuis l'intérieur du jardin.",
+      "shortcut": {
+        "id": "garden_gate",
+        "from": [
+          35,
+          25
+        ],
+        "label": "Untie the gate",
+        "label_fr": "Dénouer la barrière"
+      }
     }
   ],
   "spawn": {
@@ -3380,6 +3434,34 @@
         22
       ],
       "to": "woodland"
+    }
+  ],
+  "transitions": [
+    {
+      "to": "quarry",
+      "depth": 5,
+      "scatter": [
+        "rock_basalt",
+        "rock",
+        "ash_pine"
+      ]
+    },
+    {
+      "to": "seaside",
+      "depth": 5,
+      "scatter": [
+        "reeds",
+        "rock_sea"
+      ]
+    },
+    {
+      "to": "woodland",
+      "depth": 5,
+      "scatter": [
+        "birch",
+        "pine",
+        "bush_dark"
+      ]
     }
   ]
 }

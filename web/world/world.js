@@ -167,6 +167,9 @@ const humNear = (w, px, pz) => {
   k = Math.round(Math.max(0, k) * HUM_BASE * 50) / 50;
   if (k !== humWas) globalThis.sixfoldAudio?.hum((humWas = k));
 };
+// A map's music track, and its ambience bed (the region's, unless the map names another with `ambience`).
+const trackOf = (m) => (m.light.indoor ? "interior" : m.dark ? "cave" : m.music ?? "overworld");
+const bedOf = (m) => m.ambience ?? trackOf(m);
 // The hero's bust (an object URL), outliving the world it was baked in: the duel table shows it (#177).
 const HERO_BUST = "\u0000hero"; // its place in the bust queue, never an NPC's id
 let heroBust = "";
@@ -522,9 +525,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // under it the region's ambience bed (a map may name another with `ambience`).
   const tune = () => {
     const m = world.map, phase = phaseOf(minute);
-    const track = m.light.indoor ? "interior" : m.dark ? "cave" : m.music ?? "overworld";
+    const track = trackOf(m);
     globalThis.sixfoldAudio?.music(!m.light.indoor && !m.dark && phase === "night" ? `${track}_night` : track);
-    globalThis.sixfoldAudio?.ambience(m.ambience ?? track, phase);
+    globalThis.sixfoldAudio?.ambience(bedOf(m), phase);
   };
   // Tell Rust the time (it saves it); at a new phase, what is out at this hour changes.
   const tick = (dt) => {
@@ -600,7 +603,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       warp({ to: exit.to, edge: true, spawn: arrival(w, exit, f) });
       return startStep(x, z, carry, null);
     }
-    if (w.blocked(x, z) || w.npcAt(x, z) || !w.climb(hero.x, hero.z, x, z)) {
+    if (w.blocked(x, z) || w.npcAt(x, z) || !(w.climb(hero.x, hero.z, x, z) || w.drop(hero.x, hero.z, x, z))) { // only this step hops a drop (#117)
       const here = free && w.warps.get(key(hero.x, hero.z));
       if (here?.dir === f) warp(here);
       return false;
@@ -611,7 +614,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const stoop = door?.stoop; // a house door: only as far as its door, up its steps (props.js STOOP)
     const run = canRun && (shift || runToggle) && !cut.playing; // a scene walks
     const dur = (run ? RUN_STEP : STEP) * (stoop ? 0.5 + stoop.in : 1);
-    hero.step = { x, z, t: carry / dur, dur, run, warp: door, stoop };
+    hero.step = { x, z, t: carry / dur, dur, run, warp: door, stoop, hop: world.drop(hero.x, hero.z, x, z) }; // a drop: a hop down (actors.js)
     return true;
   }
 
@@ -817,6 +820,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
         h.step = null;
         chained = true;
         w.calm = false; // a step taken: duelists may look again
+        if (done.hop) w.life.puff(h.x + 0.5, h.z + 0.5); // landed off a drop: a puff (none under reduced motion)
         // Off a gate that only stayed open for the hero (rafts at dawn): it may shut now.
         if (left?.open && w.gateAt.get(key(h.x, h.z)) !== left) recheck(true);
         const wp = done.warp ?? w.warps.get(key(h.x, h.z));
@@ -883,6 +887,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     animateProps(w, dt, reduced);
     stoneStep(w.stone, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);
+    // In a biome transition band (#118) the next region's ambience bed rises under this one's, up to half.
+    const inBand = w.lean(px, pz), next = inBand?.band.next;
+    globalThis.sixfoldAudio?.lean?.(next ? bedOf(next) : "", phaseOf(minute), 0.5 * (inBand?.k ?? 0));
     sky(lit);
     w.life.update(dt, w.now, px, pz, lit.night, cut.playing);
     humNear(w, px, pz);

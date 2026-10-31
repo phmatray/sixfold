@@ -543,12 +543,12 @@ const BED_VOICES = {
 };
 
 const beds = [];
-let bed = null;
+let bed = null, under = null; // under: the next region's bed, leaned into in a transition band (`lean`)
 
-function startBed(key, def, t) {
+function startBed(key, def, t, level = 1) {
   const out = ctx.createGain(), stop = [];
   out.gain.setValueAtTime(0, t);
-  out.gain.setTargetAtTime(1, t, 0.35);
+  out.gain.setTargetAtTime(level, t, 0.35);
   out.connect(ambBus);
   for (const L of def.layers) {
     const src = ctx.createBufferSource(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
@@ -574,7 +574,7 @@ function startBed(key, def, t) {
     }
   }
   const voices = (def.voices ?? []).map(([v, lo, hi]) => ({ v, lo, hi, next: t + rnd(0.5, hi) }));
-  const b = { key, out, stop, voices, endAt: 0 };
+  const b = { key, out, stop, voices, endAt: 0, level };
   beds.push(b);
   return b;
 }
@@ -591,7 +591,27 @@ export function ambience(name, phase = "day") {
     bed.out.gain.setTargetAtTime(0, t, 0.35);
     bed.endAt = t + 1.5;
   }
-  bed = set ? startBed(key, set[half], t) : null;
+  // Walking into the region whose bed was already leaned into: that bed comes up to full, no restart.
+  if (under?.key === key && key) bed = under, bed.out.gain.setTargetAtTime((bed.level = 1), t, 0.35);
+  else {
+    if (under) under.out.gain.setTargetAtTime(0, t, 0.35), (under.endAt = t + 1.5);
+    bed = set ? startBed(key, set[half], t) : null;
+  }
+  under = null;
+}
+
+/// A biome transition band (#118): the next region's bed `name` under this one at `k` (0 to 0.5, by how deep the
+/// hero stands in the band; 0 or "" for none). Called every frame; only a change does anything.
+export function lean(name, phase = "day", k = 0) {
+  if (!ctx) return;
+  const set = BEDS[name], half = phase === "night" && set?.night ? "night" : "day";
+  let key = set && k > 0.01 ? `${name}:${half}` : "";
+  if (key === bed?.key) key = ""; // the same bed as this region's: nothing to lean into
+  const t = ctx.currentTime;
+  if ((under?.key ?? "") !== key) {
+    if (under) under.out.gain.setTargetAtTime(0, t, 0.35), (under.endAt = t + 1.5);
+    under = key ? startBed(key, set[half], t, k) : null;
+  } else if (under && Math.abs(under.level - k) > 0.01) under.out.gain.setTargetAtTime((under.level = k), t, 0.2);
 }
 
 function tickBeds(now) {
@@ -1013,4 +1033,4 @@ function levels() {
   );
 }
 
-globalThis.sixfoldAudio = { sfx, music, ambience, intensity, hum, debug };
+globalThis.sixfoldAudio = { sfx, music, ambience, lean, intensity, hum, debug };

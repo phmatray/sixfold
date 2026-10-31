@@ -79,7 +79,15 @@ An exit should be obvious from a screen away.
 | 5.4 | The border elsewhere is **closed**: every other walkable edge tile is a tree, fence, cliff, rock, wall or water. There are no invisible walls. | error |
 | 5.5 | The opening reads as a gap: gateposts, a fence ending, a hedge arch, or a trail between two trees, with a signpost (3.1) and if possible a landmark that hints at the next region (a kiln chimney, masts, a standing stone). | eye |
 | 5.6 | You arrive facing into the map, on a walkable tile. `world.js` already turns you the way you walked, and check-maps checks the edge tiles. | error |
-| 5.7 | Biome transition: the 4–6 tiles by an exit borrow the next region's ground and scatter, such as ash and an ash pine toward the Emberlands, sand and reeds toward the coast, or heather toward the Downs. A region never changes in one tile. | eye |
+| 5.7 | Biome transition: the 4–6 tiles by an exit borrow the next region's ground and scatter, such as ash and an ash pine toward the Emberlands, sand and reeds toward the coast, or heather toward the Downs. A region never changes in one tile. Every exit into another region has a `transitions` band (§9), 4–6 tiles deep, with at least 3 props of its scatter, and so does the way back. `tools/transition.mjs` writes it. | error |
+| 5.8 | The world map is true. The roads in `atlas.json` are exactly the outdoor map pairs joined by an edge exit, a door, a `warp:` cue (a ferry, a punt), or a chain of them through rooms and caves. check-maps names each missing and each extra road (`atlas-links`). | error |
+| 5.9 | A gated road's `if` is the item condition that holds it: a door's or a cue's `if`, or an item gate that, shut on its own, cuts the exit, door or landing off from that map's spawn. Its `icon` draws that item (lantern, ferry, boots, gloves). A road with a free way both ways has neither. Time and flag gates never gate a road (`atlas-gate`). | error |
+| 5.10 | Roads line up across an edge. Along a pair of exits, every path tile on one edge has a path tile within 1 tile on the other, counted from the start of each span (`road-offset`). | error |
+| 5.11 | Water runs on across an edge. Water (`~`) on the edge within half a screen (6 tiles) of an exit continues on the paired edge within 1 tile, unless the exit says why it ends: `"water_ends": "a fall"` (a fall, a culvert, a weir) (`water-edge`). | error |
+| 5.12 | A drop (`drops`, outdoors only) is one way: the hero hops down from `from` to `to` and never climbs back. It is announced before you commit: it has a `why` and a cue, a prop (a broken fence) or `paint` (a slide mark) within 1 tile. It is never the only way out: without any drop, the tile above still reaches an exit, a warp or a waymark (every gate open, as the hero left them), and so does the tile below (only shortcut gates open: the hero may come down without the items the others need). Either way a shortcut opens only once its `from` is reached from that side (`drop`). Only the hero's own step hops a drop; tap-to-walk routes, people's walks and a duelist's sight treat it as a ledge both ways. | error |
+| 5.13 | A permanent shortcut is a gate with a `shortcut` block: facing the gate from its `from` tile (beside it, on the far side) offers its `label` ("Lift the bar" / « Lever la barre »), which sets `flag:sc_<id>` for good (saved); from anywhere else the gate reads its `text` ("Barred from the other side."). Its `if` is `flag:sc_<id>`, and `from` can be reached the long way round with the gate shut (`shortcut`). | error |
+| 5.14 | The world map marks every shortcut (shown once opened) and every map with a drop (shown once seen): `atlas.json` `marks` list exactly those (`atlas-marks`). | error |
+| 5.15 | Every route and town has a local loop, so the way back isn't the way there: a ring of path (gates open) of at least `loop_min` (12) tiles that passes within 2 tiles of the main path. `--report` prints the longest one per map, and `[loop] no loop` for a `route`, `town`, `hub` or `village` without one (`loop`). | advisory |
 
 ## 6. Districts and logic — *quartiers et logique*
 
@@ -180,6 +188,9 @@ reward rules (6.3–6.5) apply to every screen. A screen with nothing to stop fo
 - `kind` (outdoor maps): `village`, `town`, `hub`, `route`, `site` or `cave`.
 - `wild` (optional): `[[x0, z0, x1, z1], …]`, rects of wilderness on a town or hub map, where lamps need a `why`.
 - `why` (lantern props): the reason a lamp stands where no street does.
+- `water_ends` (an exit): why water that touches the edge by this exit stops there, such as `"a fall"` or `"a culvert"` (5.11).
+- `drops` (an outdoor map): `[{ "from": [x, z], "to": [x, z], "why": "a broken fence over the scree" }]`, one-way steps down (5.12).
+- `shortcut` (a gate): `{ "id", "from": [x, z], "label", "label_fr" }`, opened from `from` for good; the gate's `if` is `flag:sc_<id>` (5.13).
 - `cave` (an interior): a cave room; no lamps (2.6).
 - `routine` (a person, `web/world/routine.js`): what it does from each time of day on, as
   `[{ "from": "06:00", "at": [x, z], "face": "n", "do": "work" }, { "from": "dusk", "home": "inn_hub" }, …]`. `from` is
@@ -208,6 +219,17 @@ Ambient life (`web/world/life_schedule.js`, drawn by `life.js`; off with reduced
   At most 12 critters and birds are drawn at once.
 - `calm` (an outdoor map): `[[x0, z0, x1, z1], …]`, quiet places: no critter, perch bird or micro-event there, and the
   particles are halved while the hero stands in one. Every seal site (`kind: "site"`) has one round its seal stone.
+
+Biome transitions (5.7, #118):
+
+- `transitions` (an outdoor map): `[{ "to": "downs", "depth": 5, "scatter": ["heather", "rock"] }, …]`, one per edge exit
+  into another region (or onto a different ground), named by the map the exit leads to. The band hugs that exit: weight
+  1 at the edge down to 0 `depth` (4–6) tiles in, over the exit's span and `depth` tiles either side, fading out over
+  another `depth` (`web/world/ld.js` `bandWeight`). In it, the ground blends toward the next map's `ground.base` (half
+  and half at the edge, so the two sides meet), and while the hero walks in it the light leans up to 35 % toward the next
+  map's and its ambience bed rises to half under this one's. `scatter`: the plants and rocks it borrows.
+- `band` (a prop): the transition it was scattered for. `node tools/transition.mjs <map.json> <side> [<to>]` adds the
+  entry if missing and rewrites the props of that band (same output every run); check-maps then judges them like any other.
 
 Level design (§11):
 

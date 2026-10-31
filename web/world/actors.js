@@ -169,10 +169,10 @@ export function animateActor(a, dt, reduced) {
     l.rotation.x = swing;
     r.rotation.x = -swing;
   }
-  // A small bounce per tile, squashed at each footfall.
+  // A small bounce per tile, squashed at each footfall; off a drop (#117) a short hop (a plain step under reduced motion).
   const up = walking && !reduced ? Math.sin(Math.PI * a.step.t) : 0;
   const squash = walking && !reduced ? 1 - up : 0;
-  a.obj.position.y = a.fy + up * 0.05;
+  a.obj.position.y = a.fy + up * (a.step?.hop ? 0.45 : 0.05);
   if (a.bubble?.visible) bubble(a, dt, reduced);
   a.obj.scale.set(a.base * (1 + squash * 0.04), a.base * (1 - squash * 0.06 + up * 0.02), a.base * (1 + squash * 0.04));
 }

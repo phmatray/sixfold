@@ -1506,6 +1506,62 @@
       "x": 32,
       "z": 33,
       "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 37,
+      "z": 0,
+      "rot": 180,
+      "band": "bellflats"
+    },
+    {
+      "asset": "reeds",
+      "x": 38,
+      "z": 0,
+      "rot": 180,
+      "band": "bellflats"
+    },
+    {
+      "asset": "reeds",
+      "x": 51,
+      "z": 0,
+      "rot": 0,
+      "band": "bellflats"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 36,
+      "z": 1,
+      "rot": 180,
+      "band": "bellflats"
+    },
+    {
+      "asset": "reeds",
+      "x": 38,
+      "z": 2,
+      "rot": 180,
+      "band": "bellflats"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 47,
+      "z": 2,
+      "rot": 180,
+      "band": "bellflats"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 48,
+      "z": 2,
+      "rot": 90,
+      "band": "bellflats"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 38,
+      "z": 3,
+      "rot": 0,
+      "band": "bellflats"
     }
   ],
   "spawn": {
@@ -2465,6 +2521,16 @@
             "duel:rook_3"
           ]
         }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "to": "bellflats",
+      "depth": 5,
+      "scatter": [
+        "rock_sea",
+        "reeds"
       ]
     }
   ]
