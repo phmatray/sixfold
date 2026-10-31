@@ -51,6 +51,15 @@ test("the well stays instanced: no animated water in it", () => {
   assert.ok(!gltf("well").materials.some((m) => /water/.test(m)));
 });
 
+// The game's footprints (props.js FOOT, read the way tools/check-maps.mjs reads it): a missing entry makes a
+// prop block one tile and stand off-centre.
+test("props.js knows every footprint larger than a tile", () => {
+  const src = readFileSync(process.env.PROPS_JS ?? new URL("../web/world/props.js", import.meta.url), "utf8");
+  const FOOT = eval(`(${src.match(/export const FOOT = (\{[\s\S]*?\});/)[1]})`);
+  const want = { cliff_falls: [2, 1], lantern_bunting: [3, 1], washing_line: [3, 1], windmill: [3, 3], vegetable_patch: [3, 2], blossom_tree: [2, 2], well: [2, 2] };
+  for (const [name, wd] of Object.entries(want)) assert.deepEqual(FOOT[name], wd, name);
+});
+
 test("only the windmill carries a clip", () => {
   for (const name of PROPS.filter((n) => n !== "windmill")) assert.equal((gltf(name).j.animations ?? []).length, 0, name);
 });

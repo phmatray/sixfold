@@ -26,8 +26,9 @@ const BATCHED = new Set(["tree", "bush", "flowers", "rock", "pine", "birch", "re
   "willow", "wishing_tree", "ford_stones", "wisteria_arch", "hedge", "hedge_corner", "hedge_end", "hedge_t", // Dream (not moonflower: animated)
   "glow_mushroom", "glow_mushroom_tall", "glow_shelf", // cave light (a prop's `glow` tints a batch of its own)
   "standing_tree", "fallen_trunk", "canopy_deck", "rope_bridge", "ladder", "beehive", "climb_wall_root", // Grove
-  "cliff_slate", "cliff_slate_b", "stairs_slate", "rail", "cairn", "menhir", "rubble", "support_beam", "climb_wall_slate", "minecart", "anvil"]); // Stone
-const TREES = new Set(["tree", "pine", "birch", "ash_pine", "willow"]); // varied in size, turn and tint; half a tile out on the map edge
+  "cliff_slate", "cliff_slate_b", "stairs_slate", "rail", "cairn", "menhir", "rubble", "support_beam", "climb_wall_slate", "minecart", "anvil", // Stone
+  "lantern_bunting", "washing_line", "water_lilies", "leaf_litter", "vegetable_patch", "flower_planter", "blossom_tree", "well"]); // dressing (not windmill: its sails turn; not cliff_falls: its water runs)
+const TREES = new Set(["tree", "pine", "birch", "ash_pine", "willow", "blossom_tree"]); // varied in size, turn and tint; half a tile out on the map edge
 const SMOKY = { kiln: "soot", glass_furnace: "soot", ember_vent: "steam" }; // props whose smoke_origin smokes
 const BLOOMS = new Set(["moonflower"]); // with an `open` condition: instanced closed and open, cross-faded (build, refresh)
 const SMOKE = 8;
@@ -177,6 +178,7 @@ export function animateProps(w, dt, reduced) {
     o.action.time = o.open * o.length;
     o.mixer.update(0);
   }
+  if (!reduced) for (const m of w.loops ?? []) m.update(dt);
   for (const m of w.waymarks) if (m.flash) m.flash = Math.max(0, m.flash - dt * 0.8);
   for (const p of w.pulses) {
     // A crackle every ~3.5 s (steady with reduced motion), brighter in a lightning flash.
@@ -476,7 +478,7 @@ export async function build(map, got, reduced) {
       obj.position.set(cx, y, cz);
       obj.rotation.y = THREE.MathUtils.degToRad(p.rot);
       prep(obj, true);
-      obj.traverse((o) => o.isMesh && /water/i.test(o.material.name) && waterify(o.material)); // the fountain's pool
+      obj.traverse((o) => o.isMesh && /water/i.test(o.material.name) && waterify(o.material, /fall/i.test(o.material.name))); // the fountain's pool, a waterfall's sheet
       // A variant of a shared model: `recolor` maps a material name to a colour,
       // or to null to hide that part (the clinic is the bakery's cottage, re-dressed).
       if (p.recolor) obj.traverse((o) => {
@@ -536,6 +538,16 @@ export async function build(map, got, reduced) {
     action.play();
     action.paused = true;
     openers.push({ mixer, action, length: clip.duration || 1, open: 0, want: p.open ? 0 : undefined, cond: p.open ?? null });
+  }
+  // Props with a `Loop` clip (the windmill's sails) play it all the time; still with reduced motion.
+  const loops = [];
+  for (const p of props) {
+    const clip = p.obj && got[p.asset]?.animations.find((a) => a.name.toLowerCase() === "loop");
+    if (!clip) continue;
+    const mixer = new THREE.AnimationMixer(p.obj);
+    mixer.clipAction(clip).play();
+    mixer.update(p.cx * 0.37 + p.cz * 0.61); // two mills don't turn in step
+    loops.push(mixer);
   }
 
   // Deck tiles. (Raised ground, "1".."9", is part of the ground mesh: terrain.js.)
@@ -814,7 +826,7 @@ export async function build(map, got, reduced) {
   };
   const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0, life: lv, calm: map.calm }, reduced);
   return { map, root, blocked, floorAt, climb, drop, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, doors, life, boats, glows, fireflies: flies,
-    gates, gateAt, shown, lit, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null, lean };
+    gates, gateAt, shown, lit, openers, loops, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null, lean };
 }
 
 // G toggles this: tile lines; red = blocked, gold = look/use, blue = door, green = person.
