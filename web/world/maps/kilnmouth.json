@@ -4829,11 +4829,13 @@
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
+            "Even the little one at the foot of the west rim. The old kiln-keepers trusted it to mind what they couldn't carry home.",
             "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
+            "Même le petit, au pied de la lèvre ouest. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
             "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
           ]
         },
@@ -4877,10 +4879,12 @@
           "if": "!time:day & !time:dawn",
           "lines": [
             "Hear that? Nothing. The vents are asleep. Go on: the high terrace is yours till dawn.",
+            "Even the little one at the foot of the west rim has gone quiet. Whatever the old kiln-keepers left behind it, nothing's guarding it tonight.",
             "Vela's up on the north rim, if you're looking for trouble. She usually is."
           ],
           "lines_fr": [
             "Tu entends ? Rien. Les évents dorment. Vas-y : la haute terrasse est à toi jusqu'à l'aube.",
+            "Même le petit, au pied de la lèvre ouest, s'est tu. Ce que les vieux gardiens du four ont laissé derrière, rien ne le garde cette nuit.",
             "Vela est sur le rebord nord, si tu cherches les ennuis. Elle, elle les cherche toujours."
           ]
         },
@@ -4888,11 +4892,13 @@
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
+            "Even the little one at the foot of the west rim. The old kiln-keepers trusted it to mind what they couldn't carry home.",
             "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
+            "Même le petit, au pied de la lèvre ouest. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
             "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
           ]
         }

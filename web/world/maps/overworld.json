@@ -2953,23 +2953,16 @@
       ],
       "dialogue": [
         {
-          "if": "!flag:talked_wren",
-          "lines": [
-            "Lovely day for a walk. I do this loop a hundred times before lunch.",
-            "Some call it a rut. I call it a route."
-          ],
-          "lines_fr": [
-            "Belle journée pour marcher. Je fais cette boucle cent fois avant midi.",
-            "On dit que je tourne en rond. Moi, je dis que je fais ma ronde."
-          ]
-        },
-        {
           "if": "!flag:heard_orchard_dusk",
           "lines": [
+            "Lovely day for a walk. I do this loop a hundred times before lunch.",
+            "Some call it a rut. I call it a route.",
             "My last loop's at dusk, home through the orchard. Where the old tree came down, there's a fellow dealing cards on the stump.",
             "Every evening, same stump, same fellow, gone by dark. Never says a word to me. Might to you, if you carry a deck."
           ],
           "lines_fr": [
+            "Belle journée pour marcher. Je fais cette boucle cent fois avant midi.",
+            "On dit que je tourne en rond. Moi, je dis que je fais ma ronde.",
             "Ma dernière boucle, c'est au crépuscule, en rentrant par le verger. Là où le vieil arbre est tombé, il y a un bonhomme qui fait des cartes sur la souche.",
             "Tous les soirs, même souche, même bonhomme, parti à la nuit. Il ne me dit jamais un mot. À toi, peut-être, si tu as un deck."
           ],
