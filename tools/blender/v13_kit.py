@@ -217,6 +217,39 @@ def open_part(build, pivot, keys, name):
     return after
 
 
+def loop_part(build, pivot, axis, seconds, name):
+    """after() hook: a separately built part parented at `pivot`, turning one full turn about its local `axis`
+    ("X", "Y" or "Z") every `seconds`, as a clip named `Loop` (linear keys every quarter turn, seamless)."""
+    def after(ob, coll):
+        k = B.Kit(name)
+        build(k)
+        part = k.build(coll)
+        part.parent = ob
+        part.location = pivot
+        part.rotation_mode = "XYZ"
+        part.animation_data_create()
+        act = bpy.data.actions.new("Loop")
+        act.use_fake_user = True
+        part.animation_data.action = act
+        i = "XYZ".index(axis)
+        fps = bpy.context.scene.render.fps
+        for q in range(5):
+            r = [0.0, 0.0, 0.0]
+            r[i] = q * math.pi / 2
+            part.rotation_euler = r
+            part.keyframe_insert("rotation_euler", frame=1 + q * seconds * fps / 4)
+        for fc in B.fcurves(act):
+            for kp in fc.keyframe_points:
+                kp.interpolation = "LINEAR"
+        tr = part.animation_data.nla_tracks.new()
+        tr.name = "Loop"
+        tr.strips.new("Loop", 1, act)
+        part.animation_data.action = None
+        part.rotation_euler = (0, 0, 0)
+        return [part]
+    return after
+
+
 def along(p, n):
     """A matrix at p with its local +Z along n (things stuck on a curved surface, logs, handles)."""
     return Matrix.Translation(p) @ Vector(n).normalized().to_track_quat("Z", "Y").to_matrix().to_4x4()
@@ -621,17 +654,15 @@ def tile_sheet(scn, L, built, info, path, tile=360, cols=6, night=False, views=F
             cam.location = c + d * 40
             cam.rotation_euler = (-d).to_track_quat("-Z", "Y").to_euler()
             cam.data.clip_end = 100
-            lab = None
-            if vi == 0 or views is not FRONT_BACK:
-                lab = label(info[name] if vi == 0 else tag, cam.data.ortho_scale * 0.05, "#d8dcef" if night else "#2a2238")
-                scn.collection.objects.link(lab)
-                lab.parent = cam
-                lab.matrix_parent_inverse = Matrix.Identity(4)
-                s = cam.data.ortho_scale
-                lab.location = (-s / 2 + s * 0.03, -s / 2 + s * 0.03, -1.0)
+            # The first tile carries the info line, the others their view's tag.
+            lab = label(info[name] if vi == 0 else tag, cam.data.ortho_scale * 0.05, "#d8dcef" if night else "#2a2238")
+            scn.collection.objects.link(lab)
+            lab.parent = cam
+            lab.matrix_parent_inverse = Matrix.Identity(4)
+            s = cam.data.ortho_scale
+            lab.location = (-s / 2 + s * 0.03, -s / 2 + s * 0.03, -1.0)
             render(scn, tmp)
-            if lab:
-                bpy.data.objects.remove(lab)
+            bpy.data.objects.remove(lab)
             img = bpy.data.images.load(tmp)
             tiles.append(np.array(img.pixels[:], dtype=np.float32).reshape(tile, tile, 4))
             bpy.data.images.remove(img)

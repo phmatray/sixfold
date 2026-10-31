@@ -55,6 +55,7 @@ const leaves = (o) => {
   return out;
 };
 const doorOnly = (clip) => clip.tracks.every((t) => DOOR.test(t.name.split(".")[0])); // the hall's `Open` clip: the door swings without it
+const isLoop = (clip) => clip.name.toLowerCase() === "loop"; // plays all the time (the windmill's sails)
 
 // Re-check what a condition shows or hides (`holds(cond)`), after a map is built
 // and whenever the game state may have changed (a dialogue closed, the time of day
@@ -178,7 +179,7 @@ export function animateProps(w, dt, reduced) {
     o.action.time = o.open * o.length;
     o.mixer.update(0);
   }
-  if (!reduced) for (const m of w.loops ?? []) m.update(dt);
+  if (!reduced) for (const m of w.loops ?? []) if (m.getRoot().visible) m.update(dt); // a prop whose `if` fails is hidden
   for (const m of w.waymarks) if (m.flash) m.flash = Math.max(0, m.flash - dt * 0.8);
   for (const p of w.pulses) {
     // A crackle every ~3.5 s (steady with reduced motion), brighter in a lightning flash.
@@ -220,7 +221,7 @@ function flatten(template) {
     if (!m.isMesh || !m.visible) return; // a part `recolor` hid
     const rel = new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld);
     // Textured, see-through, `glow` and `glass` parts (lit at night, by name) stay apart.
-    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass|shade|bulb/i.test(m.material.name)) return keep.push([m, rel]); // a lamp's lit parts too: a scene dims them (#155)
+    if (m.material.map || m.material.transparent || m.isSkinnedMesh || /glow|glass|shade|bulb|water/i.test(m.material.name)) return keep.push([m, rel]); // water: its shader (waterify) lives on its material // a lamp's lit parts too: a scene dims them (#155)
     const src = m.geometry, n = src.attributes.position.count, c = m.material.color;
     // A seal stone's coloured faces are merged too, their vertices noted (`seal`: world.js wakes them in a scene
     // by recolouring them, which costs no draw call).
@@ -280,12 +281,15 @@ function glowing(template, color) {
 // One placed model, merged (`flatten`), keeping its named empties (light_origin,
 // smoke_origin) for the lamps and the smoke. Door leaves (nodes named `door`, `door_r`, their
 // origin on the hinge) are merged on their own under a pivot of that name, so they can still swing (animateProps).
-function merged(obj) {
+// `moving`: names of nodes a clip turns (the windmill's sails), kept apart like door leaves.
+function merged(obj, moving = []) {
   obj.updateMatrixWorld(true);
   const out = new THREE.Group();
   delete obj.userData.flat; // a clone carries a (JSON-copied) cache from its template
   const inv = new THREE.Matrix4().copy(obj.matrixWorld).invert();
-  for (const leaf of leaves(obj)) {
+  const parts = leaves(obj);
+  obj.traverse((n) => n !== obj && moving.includes(n.name) && !parts.includes(n) && parts.push(n));
+  for (const leaf of parts) {
     const hinge = new THREE.Group();
     hinge.name = leaf.name;
     new THREE.Matrix4().multiplyMatrices(inv, leaf.matrixWorld).decompose(hinge.position, hinge.quaternion, hinge.scale);
@@ -493,7 +497,10 @@ export async function build(map, got, reduced) {
       if (p.lit) obj.traverse((o) => o.isMesh && WINDOW.test(o.material.name) && panes.push((o.material = o.material.clone())));
       // A static model (no clip but its door's, not afloat) is merged like the instanced ones: one
       // draw for its flat-coloured parts instead of one per material.
-      if (got[p.asset] && got[p.asset].animations.every(doorOnly) && !BOB.has(p.asset)) obj = merged(obj);
+      // A `Loop` clip's nodes stay apart, so the windmill is two draws too.
+      const loop = got[p.asset]?.animations.find(isLoop);
+      if (got[p.asset] && got[p.asset].animations.every((c) => doorOnly(c) || c === loop) && !BOB.has(p.asset))
+        obj = merged(obj, loop ? loop.tracks.map((t) => t.name.split(".")[0]) : []);
       obj.userData.panes = panes;
       if (tall(obj)) fadeAll(obj);
       root.add(obj);
@@ -542,7 +549,7 @@ export async function build(map, got, reduced) {
   // Props with a `Loop` clip (the windmill's sails) play it all the time; still with reduced motion.
   const loops = [];
   for (const p of props) {
-    const clip = p.obj && got[p.asset]?.animations.find((a) => a.name.toLowerCase() === "loop");
+    const clip = p.obj && got[p.asset]?.animations.find(isLoop);
     if (!clip) continue;
     const mixer = new THREE.AnimationMixer(p.obj);
     mixer.clipAction(clip).play();

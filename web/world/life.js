@@ -55,11 +55,11 @@ export function windify(mesh, height) {
 // the fragment shader, on the shared clock (frozen with reduced motion). `fall`
 // (a waterfall's sheet): foamy streaks running down it instead.
 const FALL = `
-          vec2 q = vec2((vWP.x + vWP.z) * 9.0, vWP.y * 2.2 + uDrift * 2.6);
+          vec2 q = vec2((vWP.x + vWP.z) * 14.0, vWP.y * 3.3 + uDrift * 3.9);
           float streak = sin(q.x + sin(q.x * 0.37) * 2.0) * 0.5 + 0.5;
-          float run = fract(q.y + streak * 0.6);
-          diffuseColor.rgb *= 0.86 + 0.18 * streak;
-          diffuseColor.rgb += vec3(0.92, 0.98, 1.0) * 0.45 * smoothstep(0.78, 0.96, run) * (0.4 + 0.6 * streak);`;
+          float run = fract(q.y + streak * 1.7 + sin(q.x * 2.3) * 0.3); // each column its own phase: dashes, not rows
+          diffuseColor.rgb *= 0.88 + 0.16 * streak;
+          diffuseColor.rgb += vec3(0.92, 0.98, 1.0) * 0.5 * smoothstep(0.8, 0.97, run) * smoothstep(0.45, 0.9, streak);`;
 const RIPPLE = `
           vec2 p = vWP.xz * 3.0;
           float rip = sin(p.x * 1.7 + uDrift * 2.1) * sin(p.y * 1.3 - uDrift * 1.7) * 0.5 + 0.5;

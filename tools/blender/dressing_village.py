@@ -96,7 +96,7 @@ def cone_along(p, d, r, L, sides=4):
 
 # ---------------------------------------------------------------- lantern bunting (3 x 1, walked under)
 
-BX, BZ, BSAG = 1.40, 2.6, 0.42   # post x, rope tie height, sag (lowest 2.18 m)
+BX, BZ, BSAG, BY = 1.40, 2.6, 0.42, 0.36   # post x, rope tie height, sag (lowest 2.18 m), offset toward the back
 
 
 def bz(x):
@@ -151,6 +151,9 @@ def build_lantern_bunting(k):
             paper_lantern(k, x, sizes[i // 2], "lantern_glow" if (i // 2) % 2 == 0 else "lantern_glow_b")
         else:
             pennant(k, x, pen[(i // 2) % 3], rng)
+    # The hero walks the row's middle (and along it, from tile to tile): the posts stand toward its back edge.
+    for bm, *_ in k.parts:
+        bmesh.ops.translate(bm, vec=(0, BY, 0), verts=bm.verts)
 
 
 def bunting_wind(x, y, z, r):

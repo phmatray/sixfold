@@ -36,38 +36,6 @@ VIEWS = (((0, -1, 0.12), "front"), ((0, 1, 0.12), "back"), ((-1, 0, 0.12), "left
          ((0, -0.3, 1), "top"), ((0.55, -0.75, 0.75), "front 3/4"), ((0, -math.cos(P), math.sin(P)), "game"))
 
 
-def loop_part(build, pivot, axis, seconds, name):
-    """after() hook: a separately built part parented at `pivot`, turning one full turn about its local `axis`
-    ("X", "Y" or "Z") every `seconds`, as a clip named `Loop` (linear keys every quarter turn, seamless)."""
-    def after(ob, coll):
-        k = B.Kit(name)
-        build(k)
-        part = k.build(coll)
-        part.parent = ob
-        part.location = pivot
-        part.rotation_mode = "XYZ"
-        part.animation_data_create()
-        act = bpy.data.actions.new("Loop")
-        act.use_fake_user = True
-        part.animation_data.action = act
-        i = "XYZ".index(axis)
-        fps = bpy.context.scene.render.fps
-        for q in range(5):
-            r = [0.0, 0.0, 0.0]
-            r[i] = q * math.pi / 2
-            part.rotation_euler = r
-            part.keyframe_insert("rotation_euler", frame=1 + q * seconds * fps / 4)
-        for fc in B.fcurves(act):
-            for kp in fc.keyframe_points:
-                kp.interpolation = "LINEAR"
-        tr = part.animation_data.nla_tracks.new()
-        tr.name = "Loop"
-        tr.strips.new("Loop", 1, act)
-        part.animation_data.action = None
-        part.rotation_euler = (0, 0, 0)
-        return [part]
-    return after
-
 
 def build_group(mod, group, only):
     scn = B.fresh_scene("Dressing_" + group)

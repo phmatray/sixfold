@@ -6,8 +6,7 @@ import random
 
 import bmesh
 
-import build_dressing as D
-from v13_kit import (T, along, arch_pts, beam, box, clamp01, contact, cyl, ico, jitter, lathe, prism, ribbon,  # noqa: F401
+from v13_kit import (T, loop_part, along, arch_pts, beam, box, clamp01, contact, cyl, ico, jitter, lathe, prism, ribbon,  # noqa: F401
                      tube, FRONT)
 
 PALETTE = {
@@ -154,7 +153,7 @@ def build_windmill(k):
     k.add(cyl(0.075, 0.07, 0.8, 8), "dl_wood_dk", T((0, 1.36, 0.38)))
     k.add(cyl(0.085, 0.085, 0.09, 8), "dl_wood_lt", T((0, 1.36, 0.6)))   # a coil of rope round the post
     contact(k, 1.45)
-    return D.loop_part(build_sails, HUB, "Y", 14, "sails")
+    return loop_part(build_sails, HUB, "Y", 12, "sails")
 
 
 # ---------------------------------------------------------------- blossom tree
