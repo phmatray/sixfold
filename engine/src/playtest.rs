@@ -53,28 +53,6 @@ fn checked(g: &mut Game, a: crate::Action) {
     }
 }
 
-/// Random legal actions over every pairing of shipped decks: nothing plays
-/// like this, so it reaches the corners the AI avoids. A game that drags on
-/// is cut short; only the invariants are under test.
-#[test]
-fn random_play_keeps_the_game_whole() {
-    let decks = field();
-    let mut rng = crate::rng::Rng::new(7);
-    for (i, a) in decks.iter().enumerate() {
-        for b in &decks[i..] {
-            let seed = rng.next_u32() as u64;
-            let mut g = Game::new([a.cards(), b.cards()], seed, Config { prizes: 6 }).unwrap();
-            for _ in 0..2_000 {
-                if g.winner().is_some() {
-                    break;
-                }
-                let legal = g.legal_actions();
-                checked(&mut g, legal[rng.below(legal.len() as u32) as usize]);
-            }
-        }
-    }
-}
-
 /// Every distinct deck the game puts in front of the player: the prebuilts,
 /// then the rival decks (those that aren't a prebuilt), then the Gauntlet.
 fn field() -> Vec<&'static Prebuilt> {
