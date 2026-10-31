@@ -409,6 +409,71 @@ impl Game {
         self.steps.clear();
         ev.push(Event::GameOver { winner });
     }
+
+    /// What holds between any two actions; a broken one is an engine bug. The
+    /// AI playtests check it after every action, so each game they play is also
+    /// a fuzz run.
+    #[cfg(test)]
+    pub(crate) fn check_invariants(&self) -> Result<(), String> {
+        if self.winner.is_some() != self.prompt.is_none() {
+            return Err("a game waits on a prompt exactly while nobody has won".into());
+        }
+        for (p, pl) in self.players.iter().enumerate() {
+            if pl.bench.len() > MAX_BENCH {
+                return Err(format!("player {p} has {} on the Bench", pl.bench.len()));
+            }
+            for (slot, c) in pl.in_play() {
+                if c.hp > c.creature().hp {
+                    return Err(format!(
+                        "player {p} slot {slot}: {} HP over its {}",
+                        c.hp,
+                        c.creature().hp
+                    ));
+                }
+                if c.hp == 0
+                    && self
+                        .prompt
+                        .as_ref()
+                        .is_some_and(|q| q.kind == PromptKind::MainPhase)
+                {
+                    return Err(format!(
+                        "player {p} slot {slot}: knocked out but still in play"
+                    ));
+                }
+            }
+            // Every card stays its owner's and is somewhere: the zones hold
+            // exactly the deck list. (A game over drops a Gear in limbo.)
+            if self.winner.is_some() {
+                continue;
+            }
+            let mut held: Vec<CardId> = [&pl.deck, &pl.hand, &pl.discard]
+                .into_iter()
+                .flatten()
+                .copied()
+                .collect();
+            held.extend(pl.prizes.iter().flatten());
+            for (_, c) in pl.in_play() {
+                held.extend(c.stack.iter().chain(&c.energy).chain(&c.gears));
+            }
+            held.extend(
+                self.pending
+                    .iter()
+                    .filter(|q| q.player == p)
+                    .flat_map(|q| q.card),
+            );
+            let mut list = self.decks[p].clone();
+            held.sort_unstable();
+            list.sort_unstable();
+            if held != list {
+                return Err(format!(
+                    "player {p}'s zones hold {} cards, not their deck of {}",
+                    held.len(),
+                    list.len()
+                ));
+            }
+        }
+        Ok(())
+    }
 }
 
 /// How a finished duel was won (R-KO-06, R-TURN-02).
