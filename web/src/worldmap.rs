@@ -4,7 +4,9 @@
 //! maps, a gated one with its item's mark. Lit waymarks (`way_<id>`) are
 //! crystals to travel to: the arrow keys move between them, Enter travels; a
 //! tap picks one and Travel (or a second tap) goes. Travel leaves only from
-//! outdoors (the engine's progress decides what is seen and lit).
+//! outdoors (the engine's progress decides what is seen and lit). Small marks
+//! beside a place show a shortcut once opened (`sc_<id>`) and a drop once its
+//! map is seen (#117).
 
 use leptos::prelude::*;
 use leptos::web_sys;
@@ -32,6 +34,13 @@ pub(crate) struct Node {
     y: f64,
 }
 
+/// A shortcut (`id`) or a drop on a map, marked beside its place (check-maps keeps the list true).
+struct Mark {
+    kind: String,
+    map: String,
+    id: String,
+}
+
 struct Link {
     a: String,
     b: String,
@@ -53,6 +62,7 @@ pub(crate) struct Atlas {
     regions: Vec<Region>,
     maps: Vec<Node>,
     links: Vec<Link>,
+    marks: Vec<Mark>,
     pub waymarks: Vec<Waymark>,
 }
 
@@ -107,6 +117,14 @@ pub(crate) fn atlas() -> Atlas {
                 b: text(l, "b"),
                 cond: text(l, "if"),
                 icon: text(l, "icon"),
+            })
+            .collect(),
+        marks: list(&v, "marks")
+            .iter()
+            .map(|k| Mark {
+                kind: text(k, "kind"),
+                map: text(k, "map"),
+                id: text(k, "id"),
             })
             .collect(),
         waymarks: list(&v, "waymarks")
@@ -384,6 +402,30 @@ pub fn WorldMap(
             })
         })
         .collect_view();
+    // A place's marks, in a row beside it: a lifted bar for an opened shortcut, a ledge for a drop.
+    let marks = a
+        .maps
+        .iter()
+        .filter(|m| seen(&m.id))
+        .filter_map(|m| {
+            let shown: Vec<_> = a
+                .marks
+                .iter()
+                .filter(|k| k.map == m.id)
+                .filter(|k| k.kind == "drop" || p.check(&format!("flag:sc_{}", k.id)))
+                .map(|k| {
+                    let (d, title) = if k.kind == "drop" {
+                        ("M1.5 3.5h4.5v6h4.5M8.5 4v3.4M7.2 5.9l1.3 1.3 1.3-1.3", tr("A drop: one way down", "Une descente sans retour"))
+                    } else {
+                        ("M2.5 10.5v-8M9.5 10.5v-8M2.5 7.5l7-5", tr("A shortcut you opened", "Un raccourci que vous avez ouvert"))
+                    };
+                    view! { <span class="atlas-mark" data-mark=k.kind.clone() title=title><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5.6" /><path d=d /></svg></span> }
+                })
+                .collect();
+            let post = a.waymarks.iter().any(|w| w.map == m.id);
+            (!shown.is_empty()).then(|| view! { <span class="atlas-marks" class:post=post style=at(m.x, m.y)>{shown}</span> })
+        })
+        .collect_view();
     let nodes = a
         .maps
         .iter()
@@ -485,7 +527,7 @@ pub fn WorldMap(
                     </g>
                     <rect width="120" height="90" fill="url(#atlas-vignette)" />
                 </svg>
-                <div class="atlas-words" aria-hidden="true">{region_names}{map_names}</div>
+                <div class="atlas-words" aria-hidden="true">{region_names}{map_names}{marks}</div>
                 <div class="atlas-posts" role="group" aria-label=tr("Waymarks", "Bornes de voyage")>{posts}</div>
                 {you}
             </div>

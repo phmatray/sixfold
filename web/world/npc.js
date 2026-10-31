@@ -250,6 +250,10 @@ export function facing(w, hero, opens) {
   const it = w.talk.get(key(fx, fz));
   if (it) return it;
   const gate = w.gateAt.get(key(fx, fz));
+  // A shortcut (#117): from its far side (`from`) it opens, setting its flag (the engine saves it); elsewhere it reads its text.
+  const sc = gate && !gate.open && gate.def.shortcut;
+  if (sc && hero.x === sc.from[0] && hero.z === sc.from[1])
+    return { kind: "shortcut", id: `sc_${sc.id}`, name: "", text: sc.label, dialogue: [{ lines: [tr("Done. This way stays open from now on.", "Voilà. Ce passage restera ouvert désormais.")], do: [`flag:sc_${sc.id}`] }] };
   if (gate && !gate.open) return { kind: "gate", name: gate.def.name, cond: gate.def.if, text: gate.def.text ?? tr("There's no way through here yet.", "Pas de passage ici, pour l'instant.") };
   const wp = w.warps.get(key(fx, fz));
   if (wp && !wp.dir) return opens(wp) ? { kind: "warp", text: wp.label ?? tr("Go in", "Entrer"), warp: wp } : wp.open && opens({ if: wp.if }) // only its hours keep it shut: a shop after closing time (#114)

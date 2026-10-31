@@ -84,6 +84,9 @@ An exit should be obvious from a screen away.
 | 5.9 | A gated road's `if` is the item condition that holds it: a door's or a cue's `if`, or an item gate that, shut on its own, cuts the exit, door or landing off from that map's spawn. Its `icon` draws that item (lantern, ferry, boots, gloves). A road with a free way both ways has neither. Time and flag gates never gate a road (`atlas-gate`). | error |
 | 5.10 | Roads line up across an edge. Along a pair of exits, every path tile on one edge has a path tile within 1 tile on the other, counted from the start of each span (`road-offset`). | error |
 | 5.11 | Water runs on across an edge. Water (`~`) on the edge within half a screen (6 tiles) of an exit continues on the paired edge within 1 tile, unless the exit says why it ends: `"water_ends": "a fall"` (a fall, a culvert, a weir) (`water-edge`). | error |
+| 5.12 | A drop (`drops`, outdoors only) is one way: the hero hops down from `from` to `to` and never climbs back. It is announced before you commit: it has a `why` and a cue, a prop (a broken fence) or `paint` (a slide mark) within 1 tile. It is never the only way out: without any drop, the tile above still reaches an exit, a warp or a waymark (every gate open, as the hero left them), and so does the tile below (only shortcut gates open: the hero may come down without the items the others need) (`drop`). | error |
+| 5.13 | A permanent shortcut is a gate with a `shortcut` block: facing the gate from its `from` tile (beside it, on the far side) offers its `label` ("Lift the bar" / « Lever la barre »), which sets `flag:sc_<id>` for good (saved); from anywhere else the gate reads its `text` ("Barred from the other side."). Its `if` is `flag:sc_<id>`, and `from` can be reached the long way round with the gate shut (`shortcut`). | error |
+| 5.14 | The world map marks every shortcut (shown once opened) and every map with a drop (shown once seen): `atlas.json` `marks` list exactly those (`atlas-marks`). | error |
 
 ## 6. Districts and logic — *quartiers et logique*
 
@@ -185,6 +188,8 @@ reward rules (6.3–6.5) apply to every screen. A screen with nothing to stop fo
 - `wild` (optional): `[[x0, z0, x1, z1], …]`, rects of wilderness on a town or hub map, where lamps need a `why`.
 - `why` (lantern props): the reason a lamp stands where no street does.
 - `water_ends` (an exit): why water that touches the edge by this exit stops there, such as `"a fall"` or `"a culvert"` (5.11).
+- `drops` (an outdoor map): `[{ "from": [x, z], "to": [x, z], "why": "a broken fence over the scree" }]`, one-way steps down (5.12).
+- `shortcut` (a gate): `{ "id", "from": [x, z], "label", "label_fr" }`, opened from `from` for good; the gate's `if` is `flag:sc_<id>` (5.13).
 - `cave` (an interior): a cave room; no lamps (2.6).
 - `routine` (a person, `web/world/routine.js`): what it does from each time of day on, as
   `[{ "from": "06:00", "at": [x, z], "face": "n", "do": "work" }, { "from": "dusk", "home": "inn_hub" }, …]`. `from` is

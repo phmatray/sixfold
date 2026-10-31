@@ -387,9 +387,14 @@ export async function build(map, got, reduced) {
   const inMap = (x, z) => x >= 0 && z >= 0 && x < W && z < H;
   const blocked = (x, z) => !inMap(x, z) || solid[z * W + x] === 1;
   const floorAt = (x, z) => (inMap(x, z) ? floor[z * W + x] : 0);
-  // A ladder joins its front and back neighbours at any height (along its own axis).
+  // A ladder joins its front and back neighbours at any height (along its own axis). A drop (#117,
+  // outdoors) is one way: from `from` down to `to` at any height, never back up.
   const ladders = new Map();
+  const drops = new Set(L.indoor ? [] : (map.drops ?? []).map((d) => `${d.from},${d.to}`));
+  const drop = (ax, az, bx, bz) => drops.has(`${ax},${az},${bx},${bz}`);
   const climb = (ax, az, bx, bz) => {
+    if (drop(bx, bz, ax, az)) return false;
+    if (drop(ax, az, bx, bz)) return true;
     if (Math.abs(floorAt(bx, bz) - floorAt(ax, az)) <= CLIMB) return true;
     const axis = ax !== bx ? "x" : "z";
     return ladders.get(key(ax, az)) === axis || ladders.get(key(bx, bz)) === axis;
@@ -786,7 +791,7 @@ export async function build(map, got, reduced) {
     boatModel: got.boat?.scene,
   };
   const life = ambience(root, { flowers, smoke, lamps: [...lamps, ...glimmers.map((g) => g.at)], gulls: map.gulls ?? 0, life: lv, calm: map.calm }, reduced);
-  return { map, root, blocked, floorAt, climb, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, doors, life, boats, glows, fireflies: flies,
+  return { map, root, blocked, floorAt, climb, drop, levels, exitAt, npcAt, propAt, talk, warps, npcs, grid, sun, hemi, doors, life, boats, glows, fireflies: flies,
     gates, gateAt, shown, lit, openers, waymarks, lamps, glimmers, blooms: bloomSets, pulses, dynamic, grid0, reduced, spawnAt: map.spawn, path: [], now: 0, nearKey: null };
 }
 

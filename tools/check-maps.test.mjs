@@ -264,3 +264,53 @@ test("AC2 (#117): a river that stops at an edge fails; one that runs on, or ends
   passes(world((m) => (river(m), (m.vale.exits[0].water_ends = "a fall"))));
   passes(world((m) => (river(m), [16, 17].forEach((z) => (m.fell.tiles[z] = put(m.fell.tiles[z], 16, "~"))))));
 });
+
+// #117: drops you can only go down, and shortcuts you open from the far side.
+const drop = (more = {}, cue = true) => (m, a) => {
+  m.vale.drops = [{ from: [8, 8], to: [8, 9], why: "a broken fence over the scree", ...more }];
+  if (cue) m.vale.props.push({ asset: "rock", x: 9, z: 8, rot: 0 });
+  (a.marks ??= []).push({ kind: "drop", map: "vale" });
+};
+const says = (dir, msg) => {
+  const r = run(dir, "--strict");
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, msg, r.out);
+};
+
+test("AC3 (#117): a good drop passes; one with no why, or no cue, fails", () => {
+  passes(world(drop()));
+  says(world(drop({ why: undefined })), /vale: \[drop\] the drop 8,8 > 8,9 needs a why/);
+  says(world(drop({}, false)), /vale: \[drop\] the drop 8,8 > 8,9 has no cue \(a prop or paint\) within 1 tile/);
+  says(world(drop({ to: [8, 10] })), /vale: \[drop\] the drop 8,8 > 8,10 must join two open tiles side by side/);
+});
+
+test("AC3 (#117): a drop that is the only way out of an area fails", () => {
+  // A walled pit below the drop: once down, nothing leads out.
+  const pit = (m, a) => {
+    drop()(m, a);
+    for (let z = 9; z <= 12; z++) for (let x = 6; x <= 10; x++) if (!(x === 8 && z === 9) && (x === 6 || x === 10 || z === 9 || z === 12)) m.vale.tiles[z] = put(m.vale.tiles[z], x, "#");
+  };
+  says(world(pit), /vale: \[drop\] below the drop 8,8 > 8,9, nothing reaches an exit, a warp or a waymark without it \(a soft-lock\)/);
+});
+
+test("#117: a shortcut gate is checked: its flag, its far-side tile and its labels", () => {
+  const bar = (sc = {}, more = {}) => (m, a) => {
+    m.vale.tiles[9] = put(m.vale.tiles[9], 1, "#".repeat(10));
+    m.vale.gates = [{ id: "bar", tiles: [[5, 9]], if: "flag:sc_vale_bar", name: "the barred gap", name_fr: "le passage barré",
+      text: "Barred from the other side.", text_fr: "Barré de l'autre côté.", ...more,
+      shortcut: { id: "vale_bar", from: [5, 10], label: "Lift the bar", label_fr: "Lever la barre", ...sc } }];
+    (a.marks ??= []).push({ kind: "shortcut", map: "vale", id: "vale_bar" });
+  };
+  passes(world(bar()));
+  says(world(bar({}, { if: "flag:vale_bar" })), /vale: \[shortcut\] gate bar opens on "flag:vale_bar", but its shortcut sets flag:sc_vale_bar/);
+  says(world(bar({ from: [5, 12] })), /vale: \[shortcut\] gate bar: its from 5,12 is not beside the gate/);
+  says(world(bar({ label_fr: undefined })), /vale: \[shortcut\] gate bar: its shortcut needs an id, a label and a label_fr/);
+  // The wall across the whole width: the far side can't be reached to lift the bar.
+  says(world((m, a) => (bar()(m, a), (m.vale.tiles[9] = put(m.vale.tiles[9], 1, "#".repeat(24))))), /vale: \[shortcut\] gate bar: its from 5,10 can't be reached the long way round/);
+});
+
+test("#117: the chart's marks match the maps' shortcuts and drops", () => {
+  const none = (m, a) => (drop()(m, a), (a.marks = []));
+  assert.match(atlasSays(world(none)).join("\n"), /atlas: \[atlas-marks\] vale has a drop, but atlas.json marks none/);
+  assert.match(atlasSays(world((m, a) => (drop()(m, a), a.marks.push({ kind: "drop", map: "fell" })))).join("\n"), /atlas: \[atlas-marks\] atlas.json marks a drop on fell, which has none/);
+});

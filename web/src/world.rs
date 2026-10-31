@@ -699,7 +699,7 @@ fn rested_line(p: Phase) -> &'static str {
 fn prompt_label(kind: &str, text: &str) -> String {
     match kind {
         "npc" => tr(format!("Talk to {text}"), format!("Parler à {text}")),
-        "warp" | "lift" | "seat" | "stand" => text.to_string(),
+        "warp" | "lift" | "seat" | "stand" | "shortcut" => text.to_string(),
         "duel" => tr("Play a duel", "Jouer un duel").into(),
         "bed" => tr("Rest", "Se reposer").into(),
         "locked" | "closed" => tr("Try the door", "Essayer la porte").into(),
