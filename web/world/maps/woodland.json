@@ -2949,6 +2949,42 @@
       "z": 5,
       "rot": 0,
       "band": "overworld"
+    },
+    {
+      "asset": "leaf_litter",
+      "x": 5,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "leaf_litter",
+      "x": 10,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "leaf_litter",
+      "x": 30,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "leaf_litter",
+      "x": 42,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "asset": "leaf_litter",
+      "x": 39,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "leaf_litter",
+      "x": 56,
+      "z": 13,
+      "rot": 0
     }
   ],
   "spawn": {
