@@ -1,5 +1,4 @@
-import { type Page } from "@playwright/test";
-import { expect, test, frames, menuItem, readSave, title } from "./helpers";
+import { expect, test, frames, menuItem, readSave, title, type Page } from "./helpers";
 
 // The outdoor camera angle (#148): C cycles it, Options picks it, the save keeps it per slot; rooms keep 50°.
 type Cam = { angle: string; pitch: number };

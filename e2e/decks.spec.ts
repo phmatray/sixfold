@@ -1,5 +1,4 @@
-import { type Page } from "@playwright/test";
-import { expect, test, menuItem, readSave, title } from "./helpers";
+import { expect, test, menuItem, readSave, title, type Page } from "./helpers";
 
 /** From the title: edit the first deck, take one card out, fill back with energy, save. */
 async function editFirstDeck(page: Page) {

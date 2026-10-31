@@ -1,5 +1,4 @@
-import { type Page } from "@playwright/test";
-import { expect, test, frames, loaded, menuItem, title } from "./helpers";
+import { expect, test, frames, loaded, menuItem, title, type Page } from "./helpers";
 
 // A map's ambient life (#115), read through `el.sixfoldLife()`: what life.js drew last frame.
 type Life = { critters: Record<string, number>; leaves: number; embers: number; boats: { k: number; on: boolean; x: number; z: number }[]; event: string | null; calm: boolean } | null;

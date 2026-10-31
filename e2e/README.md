@@ -7,7 +7,7 @@ a release build. Assertions read what the player sees (roles, labels, live regio
 game saved (`sixfold.save.<n>` in localStorage). The journeys tagged `@webkit` also run in WebKit,
 the engine Safari and the macOS app draw with.
 
-Import `test` and `expect` from `./helpers`, not `@playwright/test`: every journey then fails when
+Specs import from `./helpers` only, never `@playwright/test` (CI checks): every journey then fails when
 the page throws or logs an error (a Rust panic included), and the report notes its longest frame.
 
 ```bash

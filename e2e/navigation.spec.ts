@@ -1,5 +1,4 @@
-import { type Locator, type Page } from "@playwright/test";
-import { expect, test, menuItem, title, moveTo } from "./helpers";
+import { expect, test, menuItem, title, moveTo, type Locator, type Page } from "./helpers";
 
 // #100: every menu is driven by the keys and by a pad. The painted hand points at
 // the focused control; the arrows (a pad's D-pad) move it; Enter (A) confirms;

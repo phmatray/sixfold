@@ -1,6 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { type Page } from "@playwright/test";
-import { expect, test, menuItem, title } from "./helpers";
+import { expect, test, menuItem, title, type Page } from "./helpers";
 
 /**
  * axe-core on every screen: no serious or critical WCAG 2.2 A/AA violation.

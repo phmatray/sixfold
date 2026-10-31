@@ -1,6 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { type Locator, type Page } from "@playwright/test";
-import { expect, test, menuItem, readSave, title, moveTo } from "./helpers";
+import { expect, test, menuItem, readSave, title, moveTo, type Locator, type Page } from "./helpers";
 
 /** From the title to the deck editor of the first deck (the starter). */
 async function editStarter(page: Page) {

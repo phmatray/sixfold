@@ -86,9 +86,9 @@ jobs:
           cache: npm
           cache-dependency-path: e2e/package-lock.json
       - run: npm ci
-      # A spec taking `test` from @playwright/test skips the error guard in helpers.ts.
-      - name: Every spec imports test and expect from ./helpers
-        run: "! grep -nE 'import \\{[^}]*\\b(test|expect)\\b[^}]*\\} from \"@playwright/test\"' *.spec.ts"
+      # A spec taking `test` from @playwright/test would skip the error guard in helpers.ts.
+      - name: Specs import from ./helpers only
+        run: "! grep -n @playwright/test *.spec.ts"
       # The runner image already has the browser's system libraries (--with-deps spends minutes on apt).
       - run: npx playwright install --only-shell chromium
       # WebKit needs its own system libraries, which the runner image lacks.
