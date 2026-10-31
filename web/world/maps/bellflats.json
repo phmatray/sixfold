@@ -39,16 +39,16 @@
   "width": 40,
   "height": 30,
   "tiles": [
-    "3332ssss===sssssssssssssssssssssssss~~~~",
+    "3332ssss===sss~~~sssssssssssssssssss~~~~",
     "3332ssss===sssssssssssssssssssssssss~~~~",
     "3332ssss===sssssssssssssssssssssssss~~~~",
     "3332ssss===sssssssssssssssssssssssss~~~~",
     "332221=============================~~~~~",
     "333211=============================~~~~~",
-    "333221==.........................==~~~~~",
-    "333211==~~.......................==~~~~~",
-    "332221==.~~~.....................==~~~~~",
-    "333211==...~~....................==HH~~~",
+    "333221==..........=..............==~~~~~",
+    "333211==~~........=..............==~~~~~",
+    "332221==.~~~......=..............==~~~~~",
+    "333211==...~~.....=..............==HH~~~",
     "332221==....~....ssssss..........==HH~~~",
     "332221==........ssssssss.........==HH~~~",
     "332sss==.......ssssssssss........==~~~~~",
@@ -166,7 +166,8 @@
       "asset": "bell_tower",
       "x": 19,
       "z": 10,
-      "rot": 0
+      "rot": 0,
+      "landmark": true
     },
     {
       "asset": "seal_stone",
@@ -1863,10 +1864,6 @@
           6
         ],
         [
-          18,
-          6
-        ],
-        [
           19,
           6
         ],
@@ -1955,10 +1952,6 @@
           7
         ],
         [
-          18,
-          7
-        ],
-        [
           19,
           7
         ],
@@ -2032,10 +2025,6 @@
         ],
         [
           16,
-          8
-        ],
-        [
-          18,
           8
         ],
         [
@@ -2124,10 +2113,6 @@
         ],
         [
           17,
-          9
-        ],
-        [
-          18,
           9
         ],
         [
@@ -3407,6 +3392,22 @@
           8
         ],
         [
+          18,
+          6
+        ],
+        [
+          18,
+          7
+        ],
+        [
+          18,
+          8
+        ],
+        [
+          18,
+          9
+        ],
+        [
           33,
           8
         ],
@@ -4012,6 +4013,30 @@
       "tide": true,
       "text": "The causeway to Lanternmere is under the sea. It comes back at low water, at eight in the morning.",
       "text_fr": "La chaussée de Lac-aux-Lanternes est sous la mer. Elle réapparaît à marée basse, à huit heures du matin."
+    },
+    {
+      "id": "bell_jetty",
+      "name": "the north jetty",
+      "name_fr": "la jetée nord",
+      "tiles": [
+        [
+          18,
+          6
+        ]
+      ],
+      "if": "flag:sc_bell_jetty",
+      "prop_closed": "fence",
+      "text": "A chain across the jetty, hooked from the islet end. Someone by the bell tower could unhook it.",
+      "text_fr": "Une chaîne barre la jetée, accrochée côté îlot. Quelqu'un près de la tour de la cloche pourrait la décrocher.",
+      "shortcut": {
+        "id": "bell_jetty",
+        "from": [
+          18,
+          7
+        ],
+        "label": "Unhook the chain",
+        "label_fr": "Décrocher la chaîne"
+      }
     }
   ],
   "npcs": [

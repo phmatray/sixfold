@@ -593,7 +593,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       warp({ to: exit.to, edge: true, spawn: arrival(w, exit, f) });
       return startStep(x, z, carry, null);
     }
-    if (w.blocked(x, z) || w.npcAt(x, z) || !w.climb(hero.x, hero.z, x, z)) {
+    if (w.blocked(x, z) || w.npcAt(x, z) || !(w.climb(hero.x, hero.z, x, z) || w.drop(hero.x, hero.z, x, z))) { // only this step hops a drop (#117)
       const here = free && w.warps.get(key(hero.x, hero.z));
       if (here?.dir === f) warp(here);
       return false;
@@ -604,7 +604,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const stoop = door?.stoop; // a house door: only as far as its door, up its steps (props.js STOOP)
     const run = canRun && (shift || runToggle) && !cut.playing; // a scene walks
     const dur = (run ? RUN_STEP : STEP) * (stoop ? 0.5 + stoop.in : 1);
-    hero.step = { x, z, t: carry / dur, dur, run, warp: door, stoop };
+    hero.step = { x, z, t: carry / dur, dur, run, warp: door, stoop, hop: world.drop(hero.x, hero.z, x, z) }; // a drop: a hop down (actors.js)
     return true;
   }
 
@@ -809,6 +809,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
         h.step = null;
         chained = true;
         w.calm = false; // a step taken: duelists may look again
+        if (done.hop) w.life.puff(h.x + 0.5, h.z + 0.5); // landed off a drop: a puff (none under reduced motion)
         // Off a gate that only stayed open for the hero (rafts at dawn): it may shut now.
         if (left?.open && w.gateAt.get(key(h.x, h.z)) !== left) recheck(true);
         const wp = done.warp ?? w.warps.get(key(h.x, h.z));
