@@ -55,9 +55,9 @@
     "1111123444333333333333333333334443211111",
     "1111123334444333333333333333444333211111",
     "1222222233334444444444333333433322222221",
-    "2233333333344422222222222244433333333322",
-    "2334444444441111111111111111444444444332",
-    "2344................................4432",
+    "22333333r3344422222222222244433333333322",
+    "23344444r4441111111111111111444444444332",
+    "2344....r...........................4432",
     "234................pp................432",
     "234................ppp...............432",
     "234................ppp...............432",
@@ -3786,11 +3786,18 @@
       "y": 3
     },
     {
-      "asset": "rock",
+      "asset": "crates",
       "x": 8,
       "z": 23,
       "rot": 0,
-      "y": 3
+      "if": "!flag:found_e_cold_vent"
+    },
+    {
+      "asset": "crates_open",
+      "x": 8,
+      "z": 23,
+      "rot": 0,
+      "if": "flag:found_e_cold_vent"
     },
     {
       "asset": "rock",
@@ -3984,13 +3991,6 @@
     {
       "asset": "rock_basalt",
       "x": 7,
-      "z": 24,
-      "rot": 0,
-      "y": 4
-    },
-    {
-      "asset": "rock",
-      "x": 8,
       "z": 24,
       "rot": 0,
       "y": 4
@@ -4658,6 +4658,30 @@
       "text_fr": "Dans une fente du rocher, hors de portée de la vapeur : une carte dans une boîte en fer, aux coins tièdes."
     },
     {
+      "kind": "find",
+      "id": "e_cold_vent",
+      "x": 8,
+      "z": 23,
+      "give": "card:twofold_energy",
+      "text": "The vent has gone cold for the night. Tucked at its back, a kiln-keeper's old chest, the paint baked off it long ago and the hinges stiff. Inside, in a tin that never quite cooled: a card.",
+      "text_fr": "L'évent s'est refroidi pour la nuit. Calé tout au fond, le vieux coffre d'un gardien de four, la peinture cuite depuis longtemps et les charnières raides. Dedans, dans une boîte en fer jamais tout à fait refroidie : une carte.",
+      "poi": "secret",
+      "secret": {
+        "id": "cold_vent",
+        "kind": "progression",
+        "clue": [
+          [
+            8,
+            25
+          ],
+          [
+            8,
+            23
+          ]
+        ]
+      }
+    },
+    {
       "x": 16,
       "z": 5,
       "kind": "sign",
@@ -4753,6 +4777,21 @@
       "prop_closed": "ember_vent",
       "text": "Scalding steam roars out of the rock. It might ease off in the cool of the night.",
       "text_fr": "De la vapeur brûlante jaillit de la roche. Elle se calmera peut-être à la fraîche, la nuit."
+    },
+    {
+      "id": "cold_vent",
+      "name": "the vent at the foot of the rim",
+      "name_fr": "l'évent au pied de la lèvre",
+      "tiles": [
+        [
+          8,
+          24
+        ]
+      ],
+      "if": "!time:day & !time:dusk",
+      "prop_closed": "ember_vent",
+      "text": "Hot breath pours from a crack at the foot of the rim. Behind it, in the dark, something square. The steam might drop in the cool of the night.",
+      "text_fr": "Un souffle brûlant sort d'une fente au pied de la lèvre. Derrière, dans le noir, quelque chose de carré. La vapeur tombera peut-être à la fraîche, la nuit."
     },
     {
       "id": "rim_ledge",

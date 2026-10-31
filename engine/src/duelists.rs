@@ -120,6 +120,9 @@ pub struct Duelist {
     pub purse: Option<u32>,
     /// A challenge rule the player's deck must keep (1.3).
     pub rule: Option<Rule>,
+    /// A secret's id (#116): out only once someone's line sets
+    /// `flag:heard_<id>` (the map's `if` says so), and named by no one before.
+    pub heard: Option<&'static str>,
 }
 
 /// A challenge-rule duelist's deck rule (`docs/WORLD_DESIGN.md` §10): decks
@@ -218,6 +221,12 @@ impl Duelist {
 
     pub fn beaten(&self, p: &Progress) -> bool {
         p.has_flag(&self.flag())
+    }
+
+    /// Whether the player knows of them: always, but a secret duelist
+    /// (`heard`) only once told.
+    pub fn told(&self, p: &Progress) -> bool {
+        self.heard.is_none_or(|s| p.has_flag(&format!("heard_{s}")))
     }
 
     /// One of Rook's story duels (`rook_<n>`), not a route duelist.
@@ -342,6 +351,7 @@ macro_rules! duelist {
             night: false,
             purse: None,
             rule: None,
+            heard: None,
         }
     };
 }
@@ -364,6 +374,7 @@ macro_rules! rook {
             night: false,
             purse: Some($purse),
             rule: None,
+            heard: None,
         }
     };
 }
@@ -376,7 +387,7 @@ use Kit::{Mix, One};
 /// Grove: rootholm, elder_ring, woodland (Vesper); Stone: undermine,
 /// screepass, climb_school, bastion, anvilstead. Last, Rook's four story
 /// duels (1.7): meadow, stormwatch, lanternmere, the duel hall.
-pub static DUELISTS: [Duelist; 57] = [
+pub static DUELISTS: [Duelist; 59] = [
     duelist!("t_tobin", "Tobin", "Junior Duelist" / "Duelliste en herbe", One(&SCRAP), WARRENBUCK 2, 1, Easy),
     duelist!("t_hazel", "Hazel", "Beekeeper" / "Apicultrice", Mix(&SEEDLING, &SPARK), HIVEVOLT 2, 2, Easy),
     duelist!("t_ossian", "Ossian", "Birdwatcher" / "Ornithologue", One(&SCRAP), GALEHERON 2, 1, Easy),
@@ -391,6 +402,10 @@ pub static DUELISTS: [Duelist; 57] = [
     duelist!("t_rusk", "Rusk", "Hauler" / "Porteur", Mix(&PEBBLE, &SCRAP), HAULOX 1, 1, Easy),
     duelist!("t_marigold", "Marigold", "Glass Gatherer" / "Cueilleuse de verre", One(&BELLOWS), CINDERHORN 2, 3, Normal),
     duelist!("t_lark", "Lark", "Busker" / "Musicienne de rue", Mix(&SCRAP, &MURMUR), ECHOPUP 2, 1, Easy),
+    Duelist {
+        heard: Some("orchard_dusk"),
+        ..duelist!("t_barnaby", "Barnaby", "Old Hand" / "Vieux briscard", One(&FLOCK), MENDLARK 1, 2, Normal)
+    },
     duelist!("t_tavish", "Tavish", "Glassblower" / "Souffleur de verre", One(&BELLOWS), WAXWICK 1, 2, Normal),
     Duelist {
         rule: Some(Rule::BasicsOnly),
@@ -433,6 +448,10 @@ pub static DUELISTS: [Duelist; 57] = [
     duelist!("t_luce", "Luce", "Sleepwalker" / "Somnambule", One(&MURMUR), GLOAMOWL 1, 1, Easy),
     duelist!("t_iver", "Iver", "Poet" / "Poète", One(&REVERIE), GLIMMOX 1, 2, Normal),
     duelist!("t_clem", "Clem", "Lantern Carrier" / "Porteur de lanternes", One(&MURMUR), GLIMMOX 2, 2, Normal),
+    Duelist {
+        heard: Some("willow_dusk"),
+        ..duelist!("t_faye", "Faye", "Dusk Dancer" / "Danseuse du crépuscule", One(&REVERIE), WISPELLE 1, 2, Normal)
+    },
     duelist!("t_maud", "Maud", "Moth Catcher" / "Chasseuse de phalènes", One(&REVERIE), GLOAMOWL 1, 3, Normal),
     duelist!("t_noor", "Noor", "Dream Reader" / "Liseuse de rêves", Mix(&REVERIE, &SEEDLING), SOMNITAR 1, 3, Normal),
     Duelist {
@@ -552,14 +571,15 @@ mod tests {
             assert!((1..=3).contains(&t.prizes), "{}", t.name);
             assert!(!t.class.en.is_empty() && !t.class.fr.is_empty());
         }
-        // §4.4: five 1-prize, seven 2-prize and two 3-prize duelists (585);
-        // §10.1-10.2: Ember 45 + 60 + 45 + 90 + 120, Storm 30 + 45 + 45 + 60
-        // + 60 + 90 + 120 (810); §10.3-10.4: Tide 30 + 45 + 45 + 60 + 90 + 120,
-        // Dream 30 + 45 + 45 + 60 + 60 + 90 + 120 (840); §10.5-10.6: Grove 30 + 45 + 45
-        // + 60 + 90 + 120, Stone 30 + 45 + 45 + 45 + 45 + 60 + 90 + 120 (870).
+        // §4.4: five 1-prize, seven 2-prize and two 3-prize duelists (585),
+        // and Barnaby at dusk (#116, 45); §10.1-10.2: Ember 45 + 60 + 45 + 90
+        // + 120, Storm 30 + 45 + 45 + 60 + 60 + 90 + 120 (810); §10.3-10.4:
+        // Tide 30 + 45 + 45 + 60 + 90 + 120, Dream 30 + 45 + 45 + 45 + 60 + 60
+        // + 90 + 120 (885, Faye at dusk the 45 since #116); §10.5-10.6: Grove 30 + 45
+        // + 45 + 60 + 90 + 120, Stone 30 + 45 + 45 + 45 + 45 + 60 + 90 + 120 (870).
         assert_eq!(
             route.iter().map(|t| t.purse()).sum::<u32>(),
-            585 + 360 + 450 + 390 + 450 + 390 + 480
+            630 + 360 + 450 + 390 + 495 + 390 + 480
         );
         // A night duelist plays Hard; a rule duelist's own deck keeps its rule
         // when the rule can be kept by a kit.
@@ -569,6 +589,31 @@ mod tests {
         for id in ["t_basil", "t_yara", "t_linden", "t_dov"] {
             let t = duelist(id).unwrap();
             assert!(t.rule.unwrap().allows(&t.deck()), "{id}");
+        }
+    }
+
+    /// #116: two duelists wait only at dusk, and only once someone has told of
+    /// them (`flag:heard_<secret> & time:dusk` on their maps): day duelists
+    /// in the table (a night one needs `time:night`), on kits that exist.
+    #[test]
+    fn the_dusk_duelists_play_existing_kits_by_day_rules() {
+        for id in ["t_faye", "t_barnaby"] {
+            let t = duelist(id).unwrap_or_else(|| panic!("{id} is not on the roster"));
+            assert!(!t.night, "{id}: dusk is not night");
+            let mut p = Progress::default();
+            assert!(!t.told(&p), "{id}: nobody has told of them yet");
+            p.apply(&format!("flag:heard_{}", t.heard.unwrap()))
+                .unwrap();
+            assert!(t.told(&p), "{id}");
+            let kits = match t.kit {
+                One(r) => vec![r],
+                Mix(a, b) => vec![a, b],
+            };
+            assert!(
+                kits.iter()
+                    .all(|r| KITS.iter().any(|k| std::ptr::eq(*k, *r))),
+                "{id}: a kit that is not in KITS"
+            );
         }
     }
 

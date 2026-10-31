@@ -28,15 +28,15 @@
     "f.ffffffff........rrrrrrrrrrrrrr............p....ppp",
     "f.f......f........rrrrrrrrrrrrrr............p......f",
     "f.f......f..............pp..................p......f",
-    "f.f......f..............pp........................~~",
-    "f.ffff.fff..............pp..............1111111111~~",
-    "f..ppppppppppppppppppppppp..............1111111111~~",
-    "f..ppppppppppppppppppppppp..............2222222222~~",
-    "f.......................pp..............2222222222~~",
-    "~~~~....................pp..............2222222222~~",
-    "~~~~rrrrrrrrrrrrrrrrrrrrpprrrrrrrrrrrrrr2222222222~~",
-    "~~~~rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr2222222222~~",
-    "~~~~ssssssssssssssssssssssssssssssssssss2222222222~~",
+    "f.f......f..............pp...................fffffr~",
+    "f.ffff.fff..............pp..............1111111111r~",
+    "f..ppppppppppppppppppppppp..............1111111111r~",
+    "f..ppppppppppppppppppppppp..............2222222222r~",
+    "f.......................pp..............2222222222r~",
+    "~~~~....................pp..............2222222222r~",
+    "~~~~rrrrrrrrrrrrrrrrrrrrpprrrrrrrrrrrrrr2222222222r~",
+    "~~~~rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr2222222222r~",
+    "~~~~ssssssssssssssssssssssssssssssssssss2222222222r~",
     "~~~~~~~~~~~~~~~~~~~~~~~HH~~~~~~~~~~~~~~~2222222222~~",
     "~~~~~~~~~~~~~~~~~~~~~~~HH~~~~~~~~~~~~~~~2222222222~~",
     "~~~~~~~~~~~~~~~~~~~~~~~HH~~~~~~~~~~~~~~~~~~~~~~~~~~~",
@@ -1014,12 +1014,6 @@
       "rot": 0
     },
     {
-      "asset": "heather",
-      "x": 48,
-      "z": 21,
-      "rot": 0
-    },
-    {
       "asset": "bush",
       "x": 40,
       "z": 19,
@@ -1065,12 +1059,6 @@
       "asset": "heather",
       "x": 19,
       "z": 4,
-      "rot": 0
-    },
-    {
-      "asset": "heather",
-      "x": 46,
-      "z": 21,
       "rot": 0
     },
     {
@@ -1204,12 +1192,6 @@
       "x": 47,
       "z": 13,
       "rot": 0
-    },
-    {
-      "asset": "heather",
-      "x": 49,
-      "z": 21,
-      "rot": 0
     }
   ],
   "spawn": {
@@ -1279,6 +1261,52 @@
       "text_fr": "Dans la fente du pin que la foudre a ouvert, soudées à l'écorce : quelques Facettes, encore un peu tièdes.",
       "x": 42,
       "z": 26
+    },
+    {
+      "kind": "sign",
+      "id": "odd_stone",
+      "x": 50,
+      "z": 21,
+      "name": "An odd stone",
+      "name_fr": "Une pierre singulière",
+      "if": "!flag:secret_storm_ledge",
+      "poi": "secret",
+      "secret": {
+        "id": "storm_ledge",
+        "kind": "environmental",
+        "clue": [
+          [
+            50,
+            21
+          ],
+          [
+            50,
+            22
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "lines": [
+            "The last stone of the wall, right at the water, doesn't match the rest: squarer, warmer, lichen only on its face, as if someone turned it round not long ago.",
+            "You lean on it. It grinds aside. Behind it, a ledge runs on along the foot of the headland, just above the waves."
+          ],
+          "lines_fr": [
+            "La dernière pierre du mur, juste au bord de l'eau, ne ressemble pas aux autres : plus carrée, plus chaude, du lichen sur sa seule face, comme si quelqu'un l'avait retournée il n'y a pas longtemps.",
+            "Vous vous appuyez dessus. Elle pivote en raclant. Derrière, une corniche court au pied du promontoire, juste au-dessus des vagues."
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "sign",
+      "x": 50,
+      "z": 30,
+      "name": "The open sea",
+      "name_fr": "La pleine mer",
+      "optional": true,
+      "text": "Past the lighthouse, the sea runs on to the edge of the sky. Far out, a storm walks along the horizon on legs of rain, and none of it can reach you here.",
+      "text_fr": "Passé le phare, la mer s'étend jusqu'au bord du ciel. Au loin, un orage marche le long de l'horizon sur des jambes de pluie, et rien de tout ça ne peut vous atteindre ici."
     }
   ],
   "warps": [
@@ -1324,6 +1352,30 @@
       ],
       "to": "rodspire"
     }
+  ],
+  "gates": [
+    {
+      "id": "storm_ledge",
+      "name": "the odd stone",
+      "name_fr": "la pierre singulière",
+      "tiles": [
+        [
+          50,
+          21
+        ]
+      ],
+      "if": "flag:secret_storm_ledge",
+      "prop_closed": "stone_odd",
+      "prop_open": "stone_moved",
+      "text": "The wall runs into the sea here. Its last stone doesn't quite match the others.",
+      "text_fr": "Le mur s'avance ici jusque dans la mer. Sa dernière pierre ne ressemble pas tout à fait aux autres."
+    }
+  ],
+  "view": [
+    [
+      50,
+      29
+    ]
   ],
   "npcs": [
     {
@@ -1679,10 +1731,6 @@
         [
           47,
           20
-        ],
-        [
-          47,
-          21
         ]
       ],
       "steps": [

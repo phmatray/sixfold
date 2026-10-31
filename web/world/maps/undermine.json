@@ -234,6 +234,26 @@
       "rot": 0
     },
     {
+      "asset": "crates",
+      "x": 9,
+      "z": 5,
+      "rot": 0,
+      "if": "!flag:found_sn_strongbox"
+    },
+    {
+      "asset": "crates_open",
+      "x": 9,
+      "z": 5,
+      "rot": 0,
+      "if": "flag:found_sn_strongbox"
+    },
+    {
+      "asset": "rock",
+      "x": 10,
+      "z": 5,
+      "rot": 0
+    },
+    {
       "asset": "support_beam",
       "x": 15,
       "z": 5,
@@ -548,6 +568,39 @@
       "text_fr": "Parmi les cristaux, une poche des gages des anciens mineurs, cachée là où seule une lampe la trouverait et où la lueur la cacherait de nouveau."
     },
     {
+      "kind": "find",
+      "id": "sn_strongbox",
+      "x": 9,
+      "z": 5,
+      "give": "card:charge_coil",
+      "hidden": true,
+      "text": "The hum comes from behind the wall: air moving through a crack, low and steady. Wedged at its foot, where stones have fallen out, a miner's strongbox, its lock rusted through. Inside, wrapped in oilcloth, a card.",
+      "text_fr": "Le bourdonnement vient de derrière la paroi : de l'air qui passe par une fissure, grave et régulier. Coincé à son pied, là où des pierres sont tombées, un coffre de mineur, la serrure rongée de rouille. Dedans, enveloppée dans une toile cirée, une carte.",
+      "poi": "secret",
+      "secret": {
+        "id": "strongbox_hum",
+        "kind": "environmental",
+        "clue": [
+          [
+            10,
+            5
+          ],
+          [
+            9,
+            6
+          ]
+        ]
+      },
+      "sound": {
+        "at": [
+          9,
+          4
+        ],
+        "sfx": "hum",
+        "radius": 5
+      }
+    },
+    {
       "x": 3,
       "z": 6,
       "kind": "sign",
@@ -704,6 +757,21 @@
           "lines_fr": [
             "On a creusé depuis l'autre côté. Ça nous a pris une saison. Orla voulait la route de la carrière, alors elle est ouverte.",
             "C'est ta lanterne qui t'empêche de foncer dans les murs, au fait. Ici, une lumière, c'est une amie."
+          ],
+          "more": true
+        },
+        {
+          "if": "!flag:heard_grotto_collector",
+          "lines": [
+            "One more thing. Carry any curios? Old trinkets with a story on them? There's a man who'd give a lot to look at one. Quenby.",
+            "He sits in the crystal grotto off the south track when he knows someone's coming. I'll send word you're about."
+          ],
+          "lines_fr": [
+            "Autre chose. Tu as des curiosités sur toi ? Des vieux bibelots avec une histoire dessus ? Il y a un homme qui donnerait cher pour en voir une. Quenby.",
+            "Il s'installe dans la grotte aux cristaux, au sud de la voie, quand il sait que quelqu'un vient. Je lui fais dire que tu es dans le coin."
+          ],
+          "do": [
+            "flag:heard_grotto_collector"
           ]
         }
       ]
@@ -747,6 +815,90 @@
       },
       "outfit": "#c87a3a",
       "hair": "#3a2a1a"
+    },
+    {
+      "id": "quenby",
+      "name": "Quenby",
+      "model": "npc_scholar",
+      "x": 31,
+      "z": 9,
+      "facing": "s",
+      "idle": "Idle",
+      "if": "flag:heard_grotto_collector",
+      "poi": "secret",
+      "secret": {
+        "id": "grotto_collector",
+        "kind": "social",
+        "hint": "pike"
+      },
+      "outfit": "#4a4258",
+      "hair": "#b8b0a0",
+      "dialogue": [
+        {
+          "if": "item:curio_miner_tally & !flag:quenby_tally",
+          "lines": [
+            "A ring of tally tags, from this very mine! May I? Look at the punch marks: someone counted every cart by hand, and one of them never came back for his count.",
+            "No, keep it. A curio belongs to whoever found it; I only look. But a look like that is worth a thank-you. Here."
+          ],
+          "lines_fr": [
+            "Un anneau de jetons de compte, de cette mine-ci ! Je peux ? Regarde les poinçons : quelqu'un a compté chaque wagonnet à la main, et l'un d'eux n'est jamais revenu chercher son compte.",
+            "Non, garde-le. Une curiosité appartient à qui l'a trouvée ; moi, je regarde. Mais un regard pareil mérite un merci. Tiens."
+          ],
+          "do": [
+            "card:warrenking",
+            "flag:quenby_tally"
+          ]
+        },
+        {
+          "if": "item:curio_fossil_fern & !flag:quenby_fern",
+          "lines": [
+            "A fern, in stone. It grew before the mountain had a name, and now it sits in your pocket. Hold it to the crystals... there. See the veins?",
+            "Keep it, keep it. I've seen it, and that's what I came down for. Take this for the trouble."
+          ],
+          "lines_fr": [
+            "Une fougère, dans la pierre. Elle a poussé avant que la montagne ait un nom, et la voilà dans ta poche. Approche-la des cristaux... là. Tu vois les nervures ?",
+            "Garde-la, garde-la. Je l'ai vue, c'est pour ça que je suis descendu. Prends ceci pour la peine."
+          ],
+          "do": [
+            "card:clean_slate",
+            "flag:quenby_fern"
+          ]
+        },
+        {
+          "if": "item:curio_brass_thimble & !flag:quenby_thimble",
+          "lines": [
+            "A brass thimble, worn smooth on one side. A thumb pushed a needle through a lot of cloth with that. Years of it.",
+            "It's yours; I'd never take it. But it made an old man's day. Here, something for your deck."
+          ],
+          "lines_fr": [
+            "Un dé à coudre en laiton, poli d'un côté. Un pouce a poussé une aiguille dans beaucoup de tissu, avec ça. Des années.",
+            "Il est à toi ; je ne le prendrais jamais. Mais il a fait la journée d'un vieil homme. Tiens, quelque chose pour ton deck."
+          ],
+          "do": [
+            "card:wide_satchel",
+            "flag:quenby_thimble"
+          ]
+        },
+        {
+          "if": "flag:quenby_tally & flag:quenby_fern & flag:quenby_thimble",
+          "lines": [
+            "You've shown me all three I hoped to see. I'll sit with the crystals a while longer. They like old things too."
+          ],
+          "lines_fr": [
+            "Tu m'as montré les trois que j'espérais voir. Je vais rester encore un peu avec les cristaux. Eux aussi aiment les vieilles choses."
+          ]
+        },
+        {
+          "lines": [
+            "Pike said you might come. I'm Quenby. I collect curios, in a way: I look at them. I never take them.",
+            "There are three I've always wanted to see: a ring of miner's tally tags, a fern in stone and a brass thimble. Show me one and I'll make the walk worth your while."
+          ],
+          "lines_fr": [
+            "Pike m'avait dit que tu viendrais peut-être. Je suis Quenby. Je collectionne les curiosités, à ma façon : je les regarde. Je ne les prends jamais.",
+            "Il y en a trois que j'ai toujours voulu voir : un anneau de jetons de mineur, une fougère dans la pierre et un dé à coudre en laiton. Montre-m'en une, et je te revaudrai le chemin."
+          ]
+        }
+      ]
     }
   ],
   "dark": true,

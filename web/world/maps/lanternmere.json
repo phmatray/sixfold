@@ -1953,6 +1953,21 @@
             "Du papier, du fil de fer, une goutte de cire, et un vœu plié dedans. C'est ça, une lanterne.",
             "J'en fais toute la journée. Au crépuscule, je les porte au ponton et je les lâche, et elles se retrouvent sur l'eau.",
             "La nuit, elles font un chemin tout droit à travers le lac. Marche dessus, si tu veux. Elles tiennent."
+          ],
+          "more": true
+        },
+        {
+          "if": "!flag:heard_willow_dusk",
+          "lines": [
+            "Oh, and a secret, since you're kind to lanterns. When I carry them down at dusk, someone is in the willows on the west shore, past Ambrose's old boat. Humming, and shuffling cards.",
+            "Only at dusk, never after. I've never dared look. You might."
+          ],
+          "lines_fr": [
+            "Oh, et un secret, puisque tu es gentil avec les lanternes. Quand je les porte au ponton, au crépuscule, il y a quelqu'un dans les saules de la rive ouest, après la vieille barque d'Ambrose. Quelqu'un qui fredonne, et qui bat des cartes.",
+            "Au crépuscule seulement, jamais après. Je n'ai jamais osé regarder. Toi, tu pourrais."
+          ],
+          "do": [
+            "flag:heard_willow_dusk"
           ]
         }
       ]
@@ -2182,6 +2197,53 @@
       },
       "outfit": "#c89b3c",
       "hair": "#4a3426"
+    },
+    {
+      "id": "t_faye",
+      "name": "Faye",
+      "model": "npc_wanderer",
+      "x": 6,
+      "z": 24,
+      "facing": "s",
+      "idle": "Idle",
+      "if": "flag:heard_willow_dusk & time:dusk",
+      "poi": "secret",
+      "secret": {
+        "id": "willow_dusk",
+        "kind": "social",
+        "hint": "lisette"
+      },
+      "duelist": {
+        "sight": 2,
+        "challenge": [
+          "Oh! Someone told you. Good. The willows like company at this hour, and so do I.",
+          "Dusk is the hinge of the day: one turn of light, one of dark. Two prizes, before the lanterns go down to the water?"
+        ],
+        "challenge_fr": [
+          "Oh ! Quelqu'un te l'a dit. Tant mieux. Les saules aiment la compagnie à cette heure-ci, et moi aussi.",
+          "Le crépuscule, c'est la charnière du jour : un tour de lumière, un tour d'ombre. Deux cartes Récompense, avant que les lanternes descendent sur l'eau ?"
+        ],
+        "win": [
+          "Ah. The light went out on my side first."
+        ],
+        "win_fr": [
+          "Ah. La lumière s'est éteinte de mon côté d'abord."
+        ],
+        "lose": [
+          "The willows saw that. They won't tell a soul. Come back another dusk."
+        ],
+        "lose_fr": [
+          "Les saules ont tout vu. Ils n'en diront rien à personne. Reviens un autre soir."
+        ],
+        "after": [
+          "I dance here between the day and the lanterns, then I go home and nobody knows. Well. You know."
+        ],
+        "after_fr": [
+          "Je danse ici entre le jour et les lanternes, puis je rentre, et personne n'en sait rien. Enfin. Toi, tu sais."
+        ]
+      },
+      "outfit": "#6a5a9a",
+      "hair": "#d8c8e8"
     },
     {
       "id": "rook_3",

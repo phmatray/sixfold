@@ -185,6 +185,17 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
                 }
                 Some(_) => {}
             }
+            // #116: a duelist the table keeps secret (`heard`) is that secret, out only once told.
+            if let Some(s) = duelist(id).and_then(|t| t.heard) {
+                let told = n["if"]
+                    .as_str()
+                    .is_some_and(|c| c.contains(&format!("flag:heard_{s}")));
+                if !told || n["secret"]["id"] != s {
+                    bad.push(format!(
+                        "{name}: {at}: a secret duelist is the secret {s}, out only once told (if: flag:heard_{s})"
+                    ));
+                }
+            }
             for c in [
                 format!("won:{id}"),
                 format!("lost:{id}"),

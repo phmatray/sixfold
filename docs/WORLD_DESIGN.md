@@ -357,7 +357,9 @@ Sight direction in brackets.
 | `t_marigold` | Marigold | Glass Gatherer / Cueilleuse de verre | quarry 18,5 (w, 3) on the first ledge (Orla's spot, 22,4, in 1.3) | Bellows | 3 | Normal | 60 | Collects melted glass beads; thinks the quarry was a volcano once (it was). |
 | `t_lark` | Lark | Busker / Musicienne de rue | square 9,10 (talk-to-duel) | Mix(Scrap, Murmur) | 1 | Easy | 30 | Plays a squeezebox badly and a deck well. |
 
-14 duelists, ⬡ 585 in purses (five 1-prize, seven 2-prize, two 3-prize).
+14 duelists, ⬡ 585 in purses (five 1-prize, seven 2-prize, two 3-prize). Since 1.12 (#116), a secret fifteenth:
+`t_barnaby`, Barnaby, Old Hand / *Vieux briscard*, overworld 11,6 by the orchard stump (talk), Flock + Mendlark 1,
+2 prizes, Normal, ⬡ 45; out only at dusk once Wren has told of him (`flag:heard_orchard_dusk`).
 
 **Balance (1.2 content PR).** `kit_sweep` plays each duelist as placed against the bare starter deck (a new
 player's): most sit at 3–47%. **Morrow** was at 80% on the Current kit (Tide against the Ember starter, three
@@ -1352,6 +1354,7 @@ each night find). **Esme**, a child who only appears at dawn ("Everyone's asleep
 | `t_luce` | Luce, Sleepwalker / *Somnambule* | hushlane | Murmur | 1 | Easy | 30 |
 | `t_iver` | Iver, Poet / *Poète* | hushlane | Reverie | 2 | Normal | 45 |
 | `t_clem` | Clem, Lantern Carrier / *Porteur de lanternes* | lanternmere east shore 31,18 (n, 4) | Murmur | 2 | Normal | 45 |
+| `t_faye` | Faye, Dusk Dancer / *Danseuse du crépuscule* — secret (#116): at dusk, once Lisette has told of her | lanternmere west-shore willows 6,24 (s, 2) | Reverie + Wispelle 1 | 2 | Normal | 45 |
 | `t_maud` | Maud, Moth Catcher / *Chasseuse de phalènes* | moonwell 22,4 (s, 3) | Reverie | 3 | Normal | 60 |
 | `t_noor` | Noor, Dream Reader / *Liseuse de rêves* | moonwell 4,12 (e, 4) | Mix(Reverie, Seedling) | 3 | Normal | 60 |
 | `t_ambrose` ☾ | Ambrose, Night Rower / *Rameur de nuit* | the lantern path, mid-lake (talk) | Trance | 3 | Hard | 90 |

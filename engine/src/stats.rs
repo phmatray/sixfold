@@ -23,9 +23,9 @@ use crate::profile::Profile;
 use crate::set::{self, PROMOS};
 
 /// Hidden finds in the world's maps (`engine/tests/world_data.rs` counts them).
-pub const FINDS: usize = 101;
+pub const FINDS: usize = 104;
 /// Secrets (`flag:secret_<id>`) in the world's maps (`engine/tests/world_data.rs` counts them).
-pub const SECRETS: usize = 2;
+pub const SECRETS: usize = 9;
 /// Curios (`curio_<name>` items) the maps give.
 pub const CURIOS: usize = 12;
 /// Waymarks charted in `web/world/atlas.json`.

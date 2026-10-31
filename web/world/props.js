@@ -357,16 +357,16 @@ export const PLACEHOLDER = {
     return group(shoe(-0.11), shoe(0.11));
   },
 };
-// The odd stone (granite of the dry-stone wall, warmer, a lichen patch on its face); `moved`: slid 0.3 m east and
-// turned a little, over a dark hollow.
+// The odd stone (granite of the dry-stone wall, warmer, a lichen patch on its face); `moved`: slid 0.55 m east (clear of the
+// hero walking through) and turned a little, off the dark hollow it hid.
 function oddStone(moved) {
   const stone = toon("#a99f90"), dk = toon("#6f716e"), lichen = toon("#c9c27a");
   const block = group(mesh(new THREE.BoxGeometry(0.72, 0.62, 0.62), stone, 0, 0.31, 0), mesh(new THREE.BoxGeometry(0.3, 0.2, 0.02), lichen, -0.1, 0.4, 0.315),
     mesh(new THREE.BoxGeometry(0.76, 0.06, 0.66), dk, 0, 0.03, 0));
   if (!moved) return group(block);
-  block.position.x = 0.3;
+  block.position.x = 0.55;
   block.rotation.y = -0.25;
-  return group(mesh(new THREE.BoxGeometry(0.5, 0.02, 0.5), toon("#20180f"), -0.18, 0.011, 0), block);
+  return group(mesh(new THREE.BoxGeometry(0.5, 0.02, 0.5), toon("#20180f"), -0.05, 0.011, 0), block);
 }
 
 // A post plus arms toward each neighbour ([dx, dz] in world space, so no rotation
