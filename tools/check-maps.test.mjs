@@ -49,8 +49,8 @@ function world(change = () => {}) {
   mkdirSync(join(dir, "maps"));
   copyFileSync(join(WEB, "props.js"), join(dir, "props.js"));
   writeFileSync(join(dir, "atlas.json"), JSON.stringify({
-    regions: [{ id: "dale", name: "Dale", name_fr: "Vallon", color: "#557744" }],
-    maps: [{ id: "vale", name: "Vale", name_fr: "Val", region: "dale", x: 1, y: 2 }, { id: "fell", name: "Fell Moor", name_fr: "Lande du Fell", region: "dale", x: 1, y: 1 }],
+    regions: [{ id: "dale", name: "Dale", name_fr: "Vallon", color: "#557744" }, { id: "moor", name: "Moor", name_fr: "Lande", color: "#776655" }],
+    maps: [{ id: "vale", name: "Vale", name_fr: "Val", region: vale.region, x: 1, y: 2 }, { id: "fell", name: "Fell Moor", name_fr: "Lande du Fell", region: fell.region, x: 1, y: 1 }],
     links: [], waymarks: [],
   }));
   for (const [id, m] of Object.entries(maps)) writeFileSync(join(dir, "maps", `${id}.json`), JSON.stringify(m));
@@ -215,3 +215,28 @@ test("AC7 (#114): an open on a warp that is no door, and a lit on a model withou
   bad((m) => (m.vale_in.warps[0].open = "hour:8-19"), /vale_in: the warp to vale at 5,7 has an open, but only a door keeps hours/);
   bad((m) => (m.vale.props[1].lit = "hour:17-23"), /vale: tree at 4,4 is lit, but has no windows/);
 });
+
+// Biome transitions (#118, WORLD_RULES 5.7): Fell Moor in another region, so the vale's north exit crosses a border.
+const ROCKS = { vale: [[7, 2], [8, 3], [18, 2]], fell: [[7, 15], [8, 16], [18, 15]] };
+const border = (depth = 5, back = true) => (m) => {
+  m.fell.region = "moor";
+  for (const [id, to] of [["vale", "fell"], ["fell", "vale"]]) {
+    if (id === "fell" && !back) continue;
+    m[id].transitions = [{ to, depth, scatter: ["rock"] }];
+    for (const [x, z] of ROCKS[id]) m[id].props.push({ asset: "rock", x, z, rot: 0 });
+  }
+};
+
+test("AC1 (#118): a region border with a 5-tile band on both sides passes", () => passes(world(border())));
+
+test("AC1 (#118): a region-border exit with no transition is reported", () => {
+  // A warning until every border of the real world has its band (#118 Task 3), then an error.
+  const r = run(world((m) => (m.fell.region = "moor")), "--strict");
+  assert.match(r.out, /vale: \[transition\] the n exit to fell crosses into moor with no transition band/, r.out);
+});
+
+test("AC1 (#118): a band 3 tiles deep fails", () => fails(world(border(3)), "transition"));
+
+test("AC1 (#118): a band whose exit back has none of its own fails", () => fails(world(border(5, false)), "transition"));
+
+test("AC1 (#118): a band with under 3 props of its scatter fails", () => fails(world((m) => (border()(m), m.vale.props.pop())), "transition"));

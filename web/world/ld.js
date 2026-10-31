@@ -112,6 +112,20 @@ export function approach(p, g, open, floor, FOOT) {
 // The tile on a map's edge at position c along an exit's side, and all of an exit's edge tiles.
 export const edgeTile = (m, side, c) => ({ n: [c, 0], s: [c, m.height - 1], w: [0, c], e: [m.width - 1, c] })[side];
 export const edgeTiles = (m, e) => Array.from({ length: e.span[1] - e.span[0] + 1 }, (_, c) => edgeTile(m, e.side, e.span[0] + c));
+// A biome transition (WORLD_RULES 5.7, #118): a map's `transitions` entry `{ to, depth, scatter }` shades the
+// ground, plants, light and ambience toward the map its edge exit to `to` leads to. Its band hugs that exit:
+// weight 1 at the edge down to 0 `depth` tiles in; along the edge it covers the exit's span and `depth` tiles
+// either side, then fades out over another `depth`. bandOf: the entry with its exit's side and span (or nothing).
+export function bandOf(m, t) {
+  const e = (m.exits ?? []).find((e) => e.to === t.to);
+  return e && { ...t, side: e.side, span: e.span };
+}
+// The band's weight at a point (x, z) in tiles (a tile's centre is x + 0.5, z + 0.5), 0..1.
+export function bandWeight(m, b, x, z) {
+  const d = { n: z, s: m.height - z, w: x, e: m.width - x }[b.side], a = b.side === "n" || b.side === "s" ? x : z;
+  const off = Math.max(0, b.span[0] - b.depth - a, a - (b.span[1] + 1 + b.depth));
+  return Math.max(0, 1 - d / b.depth) * Math.max(0, 1 - off / b.depth);
+}
 // An exit's signpost: a sign within 6 tiles of the exit's edge naming `dest`, the map it leads to (WORLD_RULES 5).
 export function exitSign(m, e, dest) {
   return dest?.title && (m.interactions ?? []).find((i) => i.kind === "sign" && String(i.text).includes(dest.title) && edgeTiles(m, e).some(([x, z]) => Math.abs(i.x - x) + Math.abs(i.z - z) <= 6));

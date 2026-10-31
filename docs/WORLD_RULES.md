@@ -79,7 +79,7 @@ An exit should be obvious from a screen away.
 | 5.4 | The border elsewhere is **closed**: every other walkable edge tile is a tree, fence, cliff, rock, wall or water. There are no invisible walls. | error |
 | 5.5 | The opening reads as a gap: gateposts, a fence ending, a hedge arch, or a trail between two trees, with a signpost (3.1) and if possible a landmark that hints at the next region (a kiln chimney, masts, a standing stone). | eye |
 | 5.6 | You arrive facing into the map, on a walkable tile. `world.js` already turns you the way you walked, and check-maps checks the edge tiles. | error |
-| 5.7 | Biome transition: the 4–6 tiles by an exit borrow the next region's ground and scatter, such as ash and an ash pine toward the Emberlands, sand and reeds toward the coast, or heather toward the Downs. A region never changes in one tile. | eye |
+| 5.7 | Biome transition: the 4–6 tiles by an exit borrow the next region's ground and scatter, such as ash and an ash pine toward the Emberlands, sand and reeds toward the coast, or heather toward the Downs. A region never changes in one tile. Every exit into another region has a `transitions` band (§9), 4–6 tiles deep, with at least 3 props of its scatter, and so does the way back. `tools/transition.mjs` writes it. | error |
 
 ## 6. Districts and logic — *quartiers et logique*
 
@@ -208,6 +208,17 @@ Ambient life (`web/world/life_schedule.js`, drawn by `life.js`; off with reduced
   At most 12 critters and birds are drawn at once.
 - `calm` (an outdoor map): `[[x0, z0, x1, z1], …]`, quiet places: no critter, perch bird or micro-event there, and the
   particles are halved while the hero stands in one. Every seal site (`kind: "site"`) has one round its seal stone.
+
+Biome transitions (5.7, #118):
+
+- `transitions` (an outdoor map): `[{ "to": "downs", "depth": 5, "scatter": ["heather", "rock"] }, …]`, one per edge exit
+  into another region (or onto a different ground), named by the map the exit leads to. The band hugs that exit: weight
+  1 at the edge down to 0 `depth` (4–6) tiles in, over the exit's span and `depth` tiles either side, fading out over
+  another `depth` (`web/world/ld.js` `bandWeight`). In it, the ground blends toward the next map's `ground.base` (half
+  and half at the edge, so the two sides meet), and while the hero walks in it the light leans up to 35 % toward the next
+  map's and its ambience bed rises to half under this one's. `scatter`: the plants and rocks it borrows.
+- `band` (a prop): the transition it was scattered for. `node tools/transition.mjs <map.json> <side> [<to>]` adds the
+  entry if missing and rewrites the props of that band (same output every run); check-maps then judges them like any other.
 
 Level design (§11):
 
