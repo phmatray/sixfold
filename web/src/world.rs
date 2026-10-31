@@ -54,7 +54,7 @@ export function world_meet(id) { api?.meet(id); }
 export function world_cue(json) { api?.cue(json); }
 export function world_clock(m) { minute = m; api?.setClock(m); }
 export function world_camera(a) { camera = a; api?.setCamera(a); }
-export function world_graphics(c) { graphics = c; api?.setGraphics(c); }
+export function world_graphics(c) { graphics = c; api?.setGraphics(c); dispatchEvent(new CustomEvent("sixfold-graphics", { detail: c })); } // the title listens too (title.js)
 export function world_busy() { return !api || api.busy(); }
 export function world_portrait(id) { return api?.portrait(id) ?? ""; }
 export function world_replay(id) { return api?.replay(id) ?? false; }

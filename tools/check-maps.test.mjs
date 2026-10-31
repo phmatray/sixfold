@@ -264,4 +264,9 @@ test("#225: a grade out of range, or not a number, fails even without --strict; 
   bad(grade("light", { saturation: 2 }));
   bad(grade("light_night", { exposure: 3 }));
   bad(grade("light_dusk", { contrast: "0.1" }));
+  for (const g of ["warm", 5, [1], null, { saturaton: 0.3 }, { bloom: 2 }]) {
+    const r = run(world(grade("light", g)));
+    assert.notEqual(r.code, 0, r.out);
+    assert.match(r.out, /vale: light\.grade is an object of exposure, saturation and contrast only/, r.out);
+  }
 });

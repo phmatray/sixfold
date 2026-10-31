@@ -148,7 +148,14 @@ export function mount(el) {
     t0 = performance.now() / 1000;
     place.innerHTML = `<b>${map.title ?? ""}</b><span>${HOURS[phaseOf(minute)]}</span>`;
     draw(0, 0);
-    // A still of the place, for the menu screens behind their panels (`--world-still`).
+    still();
+    await post.warm().catch(() => {});
+    globalThis.sixfoldAudio?.ambience(map.ambience ?? map.music ?? "overworld", phaseOf(minute));
+    return true;
+  }
+
+  // A still of the frame just drawn, for the menu screens behind their panels (`--world-still`).
+  const still = () =>
     canvas.toBlob((b) => {
       if (!b || !alive) return;
       const root = document.documentElement, old = root.dataset.worldStill, url = URL.createObjectURL(b);
@@ -156,10 +163,6 @@ export function mount(el) {
       root.style.setProperty("--world-still", `url("${url}")`);
       if (old) setTimeout(() => URL.revokeObjectURL(old), 1000);
     }, "image/jpeg", 0.8);
-    await renderer.compileAsync(scene, camera).catch(() => {});
-    globalThis.sixfoldAudio?.ambience(map.ambience ?? map.music ?? "overworld", phaseOf(minute));
-    return true;
-  }
 
   // One frame of the current place, `k` (0..1) of the way through its shot.
   function draw(k, dt = 0) {
@@ -174,10 +177,8 @@ export function mount(el) {
     if (!reduced) U.uDrift.value = w.now;
     for (const n of w.npcs) updateNpc(w, n, dt, false);
     animateProps(w, dt, reduced);
-    // As in world.js: lamps shine past the bloom threshold only on High; a tier change rewrites the glow materials.
-    if (w.glowBoost !== (post.tier === "high")) (w.glowBoost = post.tier === "high"), (w.lightDirty = true);
     const lit = w.day.update(minute, look.x, look.z, dt);
-    post.setGrade({ exposure: lit.exposure, saturation: lit.saturation, contrast: lit.contrast, bloom: lit.bloom });
+    post.follow(w, lit); // as in world.js
     w.life.update(dt, w.now, look.x, look.z, lit.night);
     w.fireflies.update(dt, w.now, lit.night, reduced, w.glowBoost);
     // The fog keeps the far ground soft without eating the place: kept past the camera's distance.
@@ -230,6 +231,10 @@ export function mount(el) {
     }
   };
 
+  // The Graphics setting changed elsewhere (Settings over the title, world.rs): applied at once.
+  const onGraphics = (e) => post.setTier(pickTier(e.detail, false));
+  addEventListener("sixfold-graphics", onGraphics);
+
   const ro = new ResizeObserver(resize);
   ro.observe(el);
   show(0)
@@ -237,8 +242,11 @@ export function mount(el) {
       if (!ok || !alive) return;
       resize();
       el.classList.add("live");
-      if (reduced) draw(0.5);
-      else raf = requestAnimationFrame(loop);
+      if (reduced) {
+        draw(0.5);
+        // Again once the look is in (High waits on its libraries), twice: the first re-lights the lamps for it.
+        post.ready.then(() => alive && (draw(0.5), draw(0.5), still()));
+      } else raf = requestAnimationFrame(loop);
       // The next place downloads while this one plays.
       if (!reduced) fetchShot(SHOTS[1]).catch(() => {});
     })
@@ -256,6 +264,7 @@ export function mount(el) {
       alive = false;
       cancelAnimationFrame(raf);
       ro.disconnect();
+      removeEventListener("sixfold-graphics", onGraphics);
       if (world) dispose(world.root);
       post.dispose();
       renderer.forceContextLoss(); // the world screen makes its own context next

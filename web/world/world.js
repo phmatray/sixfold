@@ -58,7 +58,7 @@ import { scenes } from "./script.js";
 import { createBook } from "./book.js";
 import { ANGLES, framing, nextAngle } from "./camera.js";
 import { createLook } from "./look.js";
-import { pickTier, readSaved, weak } from "./tier.js";
+import { TIERS, pickTier, readSaved, weak } from "./tier.js";
 
 const STEP = 0.25, RUN_STEP = 0.17; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
@@ -731,7 +731,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     cam = framing(map.camera, camAngle, !!map.light.indoor);
     resize();
     first = true;
-    await renderer.compileAsync(scene, camera).catch(() => {});
+    await post.warm().catch(() => {});
     // The area's name, except back from a duel or when a scene is about to play on arrival (#155): the
     // moment is the scene's, not the map's. The live region still says where you are.
     if (map.title && !L.indoor && !quiet && !cut.due(world)) showBanner(map.title);
@@ -785,17 +785,19 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   let stats = { calls: 0, triangles: 0 };
   // The frame-time probe (#225), the title's: frames 30 to 120 from the rAF clock (paused ones skipped),
   // counted again whenever the tier in force changes (the look loading). Its first full window on High
-  // decides: under 45 fps, Low for this visit, not saved. It never steps Low to Off (CI's Low stays put),
-  // and a High picked in Options after it has decided is the player's to keep.
+  // decides: under 45 fps, Low for this visit, not saved (and Auto then means Low: `slow`). It never steps
+  // Low to Off (CI's Low stays put), and a choice made in Options during the visit ends it: the player's to keep.
   const times = [];
-  let probed = post.tier, probeMs = 0, probeDone = false;
+  let probed = post.tier, probeMs = 0, probeDone = false, slow = false;
+  const saved = readSaved();
+  let chosen = TIERS.includes(saved) ? saved : "auto"; // what Rust replays after mount: that one isn't a new choice
   function probe(ms) {
     const dt = probeMs && !paused ? (ms - probeMs) / 1000 : 0;
     probeMs = ms;
     if (post.tier !== probed) (probed = post.tier), (times.length = 0);
     if (!dt || times.length >= 120 || times.push(dt) < 120 || post.tier !== "high") return;
     probeDone = true;
-    if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 45) post.setTier("low");
+    if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 45) (slow = true), post.setTier("low");
   }
   function frame(ms) {
     raf = requestAnimationFrame(frame);
@@ -896,10 +898,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     }
     animateProps(w, dt, reduced);
     stoneStep(w.stone, dt, reduced);
-    // Lamps shine past the bloom threshold only on High (#225); a tier change rewrites the glow materials.
-    if (w.glowBoost !== (post.tier === "high")) (w.glowBoost = post.tier === "high"), (w.lightDirty = true);
     const lit = w.day.update(minute, px, pz, dt);
-    post.setGrade({ exposure: lit.exposure, saturation: lit.saturation, contrast: lit.contrast, bloom: lit.bloom });
+    post.follow(w, lit); // the hour's grade, and lamps past the bloom threshold on High (#225)
     // In a biome transition band (#118) the next region's ambience bed rises under this one's, up to half.
     const inBand = w.lean(px, pz), next = inBand?.band.next;
     globalThis.sixfoldAudio?.lean?.(next ? bedOf(next) : "", phaseOf(minute), 0.5 * (inBand?.k ?? 0));
@@ -1227,7 +1227,10 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     act,
     setCamera,
     // The Graphics setting (#225): "auto" (the device decides), "high", "low" or "off".
-    setGraphics: (choice) => post.setTier(pickTier(choice, weak(renderer))),
+    setGraphics: (choice) => {
+      if (choice !== chosen) (probeDone = true), (chosen = choice);
+      post.setTier(pickTier(choice, weak(renderer) || slow));
+    },
     busy: () => warping || !world || !!world.engage || !!world.ride || cut.playing || book.live(), // the in-game menu waits for these
     // A book to read ({id, family, title, pages: [{heading, text, art}], shelf}): from the shelf
     // last used when `shelf` is true, else it rises into view. null puts it back ("book closed" after).
