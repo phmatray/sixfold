@@ -197,6 +197,33 @@ export function pathGraph(g) {
   return { junctions, deadEnds };
 }
 
+// The loops of the path (#117): each hole the walkable path rings round, a patch of other ground (8-connected, off
+// the map's edge) with at least one tile the path layout leaves out (a prop standing on a plaza is no loop), and its
+// ring, the walkable path tiles round it, whose count is the loop's length in tiles. open: the walkable path tiles.
+// ponytail: the ring ignores floor heights (a path over a cliff edge would read as joined); paths change height by
+// stairs, so it holds for now.
+export function loops(g, open) {
+  const holes = new Set(), out = [];
+  for (let x = 0; x < g.width; x++) for (let z = 0; z < g.height; z++) if (!open.has(key(x, z))) holes.add(key(x, z));
+  const ring8 = [...DIRS, [1, 1], [1, -1], [-1, 1], [-1, -1]];
+  for (const k0 of holes) {
+    const patch = [k0], ring = new Set();
+    holes.delete(k0);
+    let edge = false;
+    for (let i = 0; i < patch.length; i++) {
+      const [x, z] = patch[i].split(",").map(Number);
+      if (x === 0 || z === 0 || x === g.width - 1 || z === g.height - 1) edge = true;
+      for (const [dx, dz] of ring8) {
+        const k = key(x + dx, z + dz);
+        if (open.has(k)) ring.add(k);
+        else if (holes.delete(k)) patch.push(k);
+      }
+    }
+    if (!edge && patch.some((k) => !g.path.has(k))) out.push({ hole: patch, ring: [...ring] });
+  }
+  return out;
+}
+
 // Breadth-first search over a set of open tiles from one or more starts: tile -> steps, and each tile's parent.
 // `step(ax, az, bx, bz)`, when given, says whether the hero can step between two neighbours (a ledge can't be).
 export function bfs(open, starts, step = () => true) {

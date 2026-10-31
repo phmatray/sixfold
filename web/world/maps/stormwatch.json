@@ -17,12 +17,12 @@
     "f.......................pp.....22222222222222......f",
     "f...pppppppppppppppppppppp.....22222222222222......f",
     "f...pppppppppppppppppppppp.....11111111111111......f",
-    "f.......................pp.....11111111111111......f",
-    "f.......................pp.........................f",
-    "f.......................pp...........pp............f",
-    "f.......................pp...........pp............f",
-    "f......p..........rrrrrrrrrrrrrr.....pp............f",
-    "f......p..........rrrrrrrrrrrrrr.....pp............f",
+    "f.......................pp.....11111111111111......~",
+    "f.......................pp.........................~",
+    "f.......................pp...........pp............~",
+    "f.......................pp...........pp............~",
+    "f......p..........rrrrrrrrrrrrrr.....pp............~",
+    "f......p..........rrrrrrrrrrrrrr.....pp............~",
     "f..pppppppppppppppprrrrrrrrrrrrrpppppppppppppppppppp",
     "f..pppppppppppppppprrrrrrrrrrrrrpppppppppppppppppppp",
     "f.ffffffff........rrrrrrrrrrrrrr............p....ppp",
@@ -45,6 +45,20 @@
     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   ],
   "props": [
+    {
+      "asset": "fence_end",
+      "x": 31,
+      "z": 3,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "fence_end",
+      "x": 31,
+      "z": 5,
+      "rot": 0,
+      "y": 2
+    },
     {
       "asset": "signpost",
       "x": 27,
@@ -307,6 +321,12 @@
       "z": 8,
       "rot": 0,
       "y": 2
+    },
+    {
+      "asset": "stairs_heath",
+      "x": 39,
+      "z": 23,
+      "rot": 270
     },
     {
       "asset": "stall_b",
@@ -1210,6 +1230,46 @@
       "x": 49,
       "z": 21,
       "rot": 0
+    }
+  ],
+  "gates": [
+    {
+      "id": "light_stair",
+      "name": "the lighthouse stair",
+      "name_fr": "l'escalier du phare",
+      "tiles": [
+        [
+          40,
+          23
+        ]
+      ],
+      "if": "flag:sc_light_stair",
+      "prop_closed": "fence",
+      "rot": 90,
+      "text": "Barred from the other side. The keeper bars the net-yard stair from the lighthouse terrace.",
+      "text_fr": "Barré de l'autre côté. Le gardien barre l'escalier de la cour aux filets depuis la terrasse du phare.",
+      "shortcut": {
+        "id": "light_stair",
+        "from": [
+          41,
+          23
+        ],
+        "label": "Lift the bar",
+        "label_fr": "Lever la barre"
+      }
+    }
+  ],
+  "drops": [
+    {
+      "from": [
+        31,
+        4
+      ],
+      "to": [
+        30,
+        4
+      ],
+      "why": "a broken rail on the observatory ledge, the turf below worn by feet"
     }
   ],
   "spawn": {

@@ -1,7 +1,7 @@
 // node --test tools/ld.test.mjs — the level-design analysis (web/world/ld.js).
 import test from "node:test";
 import assert from "node:assert/strict";
-import { grids, visible, blocker, approach, pathGraph, walkTime, scatter, density, bandOf, bandWeight } from "../web/world/ld.js";
+import { grids, visible, blocker, approach, pathGraph, loops, walkTime, scatter, density, bandOf, bandWeight } from "../web/world/ld.js";
 
 const T = { FOOT: { cottage: [5, 4] }, DECK: {}, WALKABLE: new Set(), tall: (a) => ({ pine: 3.8, bush: 0.7, cottage: 4.5 })[a] ?? 1 };
 const blank = (w, h, rows = {}) => Array.from({ length: h }, (_, z) => rows[z] ?? ".".repeat(w));
@@ -41,6 +41,22 @@ test("a 1-wide dead-end branch is found, with its length back to the junction", 
   const piece = (n) => pathGraph(grids(map([], blank(20, 20, { 16: "..." + "p".repeat(n) + ".".repeat(17 - n) })), T)).deadEnds;
   assert.ok(piece(4).length && piece(4).every((d) => d.length <= 3), JSON.stringify(piece(4)));
   assert.ok(piece(8).some((d) => d.length === 7), JSON.stringify(piece(8)));
+});
+
+test("a path round a 3 x 3 patch of grass is a loop of 16 tiles; a U, or a prop standing on a plaza, is none", () => {
+  const rows = {};
+  for (let z = 4; z <= 8; z++) rows[z] = ".".repeat(4) + (z === 4 || z === 8 ? "ppppp" : "p...p") + ".".repeat(11);
+  const g = grids(map([], blank(20, 20, rows)), T);
+  const found = loops(g, g.path);
+  assert.equal(found.length, 1);
+  assert.deepEqual([found[0].ring.length, found[0].hole.length], [16, 9]);
+  // Open the top row: a U rings nothing.
+  const u = grids(map([], blank(20, 20, { ...rows, 4: ".".repeat(20) })), T);
+  assert.equal(loops(u, u.path).length, 0);
+  // A 5 x 5 plaza with a pine on its middle tile: the hole is path underneath, so no loop.
+  const plaza = grids(map([], blank(20, 20, Object.fromEntries([4, 5, 6, 7, 8].map((z) => [z, "....ppppp..........."])))), T);
+  const open = new Set([...plaza.path].filter((k) => k !== "6,6"));
+  assert.equal(loops(plaza, open).length, 0);
 });
 
 test("walking 40 tiles takes 10 s", () => assert.equal(walkTime(40), 10));

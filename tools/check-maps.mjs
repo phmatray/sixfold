@@ -76,6 +76,7 @@ const fail = [], warn = [];
 const BUDGET = JSON.parse(readFileSync(process.argv.find((a) => a.startsWith("--budgets="))?.slice(10) || new URL("./level-design.json", import.meta.url), "utf8"));
 const ctx = {}, designed = {}; // per map: what the level-design pass needs (solid, reachable, floor heights), and its findings
 const open = {}; // per map: is a tile open ground (for warp: cues from other maps)
+const floods = {}; // per map: reach()'s flood (gate) => tiles, for which gates hold a road (#117)
 // The placement rules (docs/WORLD_RULES.md) fail the build with --strict (as CI runs it); without it they are listed
 // as warnings, for a map in progress.
 const STRICT = process.argv.includes("--strict");
@@ -337,7 +338,8 @@ function routines(name, m, solid, seatAt, height) {
   const doors = (m.warps ?? []).filter((w) => !w.dir);
   const grid = {
     width: m.width, height: m.height,
-    climb: (ax, az, bx, bz) => Math.abs((height[`${bx},${bz}`] ?? 0) - (height[`${ax},${az}`] ?? 0)) <= 0.6, // as build.js (ladders aside)
+    // As build.js climb (ladders aside): a drop (#117) is a ledge both ways to a walk planned for someone.
+    climb: (ax, az, bx, bz) => !(m.drops ?? []).some((d) => [`${d.from},${d.to}`, `${d.to},${d.from}`].includes(`${ax},${az},${bx},${bz}`)) && Math.abs((height[`${bx},${bz}`] ?? 0) - (height[`${ax},${az}`] ?? 0)) <= 0.6,
     open: (x, z) => x >= 0 && z >= 0 && x < m.width && z < m.height && !solid.has(`${x},${z}`),
     door: (to) => ((w) => w && [w.x, w.z])(doors.find((w) => w.to === to)),
   };
@@ -399,7 +401,10 @@ function reach(name, m, solid0, height0) {
     if (!g.name) fail.push(`${name}: gate ${g.id} needs a name (announced when it opens)`);
     if (g.floor !== undefined && !(g.floor >= 0)) fail.push(`${name}: gate ${g.id} floor ${g.floor} is below the ground (it would hide the hero's feet)`);
   }
-  const flood = (open, starts = [[m.spawn.x, m.spawn.z]]) => {
+  // A drop (#117) is a one-way edge, `from` down to `to`, never back up; `down` false leaves every drop out, "back"
+  // floods backward (from the ways out: a tile escapes if it steps onto one that does, so a drop is taken `to` > `from`).
+  const drops = new Set((m.drops ?? []).map((d) => `${d.from},${d.to}`));
+  const flood = (open, starts = [[m.spawn.x, m.spawn.z]], down = true) => {
     const solid = new Set(solid0), h = { ...height };
     for (const g of gates)
       for (const [x, z, y] of g.tiles ?? []) {
@@ -414,6 +419,9 @@ function reach(name, m, solid0, height0) {
         h[k] = g.floor ?? (deck ? base + deck[0] : h[k] ?? 0);
       }
     const step = (ax, az, bx, bz) => {
+      if (down === "back") [ax, az, bx, bz] = [bx, bz, ax, az];
+      if (drops.has(`${bx},${bz},${ax},${az}`)) return false;
+      if (drops.has(`${ax},${az},${bx},${bz}`)) return !!down;
       if (Math.abs((h[`${bx},${bz}`] ?? 0) - (h[`${ax},${az}`] ?? 0)) <= 0.6) return true;
       const axis = ax !== bx ? "x" : "z";
       return ladders.get(`${ax},${az}`) === axis || ladders.get(`${bx},${bz}`) === axis;
@@ -477,13 +485,14 @@ function reach(name, m, solid0, height0) {
       return !term.startsWith("time:") || (term.slice(5) === ph) !== neg;
     });
     for (const ph of ["dawn", "day", "dusk", "night"]) {
-      const back = flood((g) => !/time:/.test(g.if) || at(g.if, ph), outs.filter(([x, z]) => inMap(x, z)));
+      const back = flood((g) => !/time:/.test(g.if) || at(g.if, ph), outs.filter(([x, z]) => inMap(x, z)), "back");
       const stuck = [...all].find((t) => !onGate.has(t) && !back.has(t));
       if (stuck) fail.push(`${name}: at ${ph}, once the timed gates shut, ${stuck} has no way out (give it one: a rope with a warp:, a door)`);
     }
   }
   for (const wm of atlas?.waymarks ?? [])
     if (wm.map === name && !all.has(`${wm.x},${wm.z}`)) fail.push(`${name}: waymark ${wm.id}'s tile ${wm.x},${wm.z} can't be reached`);
+  floods[name] = flood;
   return all;
 }
 
@@ -533,6 +542,8 @@ else {
       if (Math.hypot(a.x - b.x, a.y - b.y) < 1.7) fail.push(`atlas: waymarks ${atlas.waymarks[i].id} and ${atlas.waymarks[j].id} are under 1.7 squares apart on the chart`);
     }
 }
+honestWorld();
+oneWay();
 levelDesign();
 transitions();
 if (STRICT) fail.push(...rule);
@@ -806,6 +817,8 @@ function report(name) {
   const dn = ld.density(props, route, SCREEN);
   if (dn.curve.length > 1 && dn.cv < BUDGET.density_cv_min) advice.push(`[density] flat along the main path ${a} → ${b} (cv ${dn.cv.toFixed(2)}, ${BUDGET.density_cv_min} at least): add a breather or a dense patch`);
   for (const e of m.exits ?? []) if (e.span[1] - e.span[0] + 1 < BUDGET.exit_min) advice.push(`[exit] exit ${e.side} to ${e.to} is ${e.span[1] - e.span[0] + 1} wide (${BUDGET.exit_min} at least)`);
+  const loop = loopOf(m, d.g, all, route);
+  if (["route", "town", "hub", "village"].includes(m.kind) && !loop) advice.push(`[loop] no loop: no path of ${BUDGET.loop_min}+ tiles rings round other ground beside the main path ${a} → ${b}, so the way back is the way there`);
   const v2 = m.level_design === 2;
   return [
     `## ${name} — ${m.title} (${m.kind})`, "",
@@ -814,12 +827,24 @@ function report(name) {
     `- POIs: ${Object.entries(count).map(([t, n]) => `${n} ${t}`).join(", ")}${Object.keys(budget).length ? ` (budget: ${Object.entries(budget).map(([t, b]) => `${t} ${range(b)}`).join(", ")})` : ""}`,
     `- longest walk without a discovery: ${gapLine}`,
     `- crossroads over ${BUDGET.crossroads_max} ways: ${crossroads.join(", ") || "none"}`,
+    `- loop through the main path: ${loop ? `${loop.ring.length} tiles round ${loop.hole.length} tiles of other ground, by ${loop.ring.sort()[0]}` : "none"}`,
     `- scatter: ratio ${sc.ratio?.toFixed(2) ?? "–"} (${BUDGET.scatter_ratio_max} at most); dominant: ${sc.chunks.filter((c) => c.n >= 8).sort((a, b) => b.share - a.share).slice(0, 3).map((c) => `${c.asset} ${Math.round(c.share * 100)}% of chunk ${c.chunk}`).join(", ") || "–"}`,
     `- density along the main path, a screen at a time: ${dn.curve.join(" · ") || "–"} (cv ${dn.cv.toFixed(2)}, ${BUDGET.density_cv_min} at least)${dn.breathers.length ? `; breathers at screens ${dn.breathers.map((i) => i + 1).join(", ")}` : ""}`,
     `- advisories:${advice.length ? "" : " none"}`, ...advice.map((s) => `  - ${s}`),
     ...(v2 ? [] : [`- §11 findings:${d.blocking.length ? "" : " none"}`, ...d.blocking.map((s) => `  - ${s}`)]),
     "",
   ];
+}
+// The loop advisory (#117, LEVEL_DESIGN §4): the longest loop of the walkable path (ld.loops) at least loop_min tiles
+// round, one of whose tiles is within 2 of the main path (a 3-wide road's far lane), or null. A gate tile is path once open
+// (a plank laid over a stream).
+function loopOf(m, g, all, route) {
+  const walk = new Set([...g.path, ...(m.gates ?? []).flatMap((x) => (x.tiles ?? []).map((t) => `${t[0]},${t[1]}`))].filter((t) => all.has(t)));
+  const main = (t) => {
+    const [x, z] = t.split(",").map(Number);
+    return route.some(([rx, rz]) => Math.max(Math.abs(rx - x), Math.abs(rz - z)) <= 2);
+  };
+  return ld.loops(g, walk).filter((l) => l.ring.length >= BUDGET.loop_min && l.ring.some(main)).sort((p, q) => q.ring.length - p.ring.length)[0] ?? null;
 }
 // An exit's signpost (web/world/ld.js, with edgeTile and edgeTiles).
 function exitSign(m, e) {
@@ -984,4 +1009,153 @@ function lifeRules(name, m, solid) {
     else if (!boatLane(m, b.pier, (x, z) => on(x, z, (p) => !p.if))) bad(`boat pier ${x},${z} has no 4 tiles of open water beside it`);
     if (b.every !== undefined && !(b.every >= 30)) bad("boats: every is 30 s at least");
   }
+}
+
+// The honest world map and the seams between maps (#117, WORLD_RULES §5), always errors.
+// atlas-links: the atlas' roads are exactly the outdoor map pairs joined by an edge exit, a door, a `warp:` cue (a
+// ferry, a punt) or a chain of them through rooms and caves. atlas-gate: a road's `if` is the item condition that holds
+// one of its connections (a warp's or cue's `if`, and each item gate that, shut alone, cuts the exit, door or landing
+// off from that map's spawn; time and flag gates open on their own or in place, so they never gate a road), and its
+// `icon` draws that item. road-offset: across a paired exit, every path tile on the edge meets one within 1 tile on the
+// other side (offsets along the span). water-edge: water (`~`) on the edge within half a screen of an exit runs on
+// across it, within 1 tile, unless the exit says why it ends (`"water_ends": "a fall"`).
+function honestWorld() {
+  const ICON = { kiln_lantern: "lantern", ferry_pass: "ferry", wading_boots: "boots", grip_gloves: "gloves" }; // worldmap.rs icon()
+  const items = (c) => String(c ?? "").split("&").map((t) => t.trim()).filter((t) => t.startsWith("item:"));
+  const outdoor = (n) => !maps[n].light.indoor;
+  const near = (seen, [x, z], across) => seen.has(`${x},${z}`) || Object.values(DIR).some(([dx, dz]) => seen.has(`${x + dx},${z + dz}`) || (across && seen.has(`${x + 2 * dx},${z + 2 * dz}`)));
+  const fills = {};
+  const cut = (name, test) => {
+    const f = floods[name];
+    if (!f || !test((fills[name] ??= f(true)))) return [];
+    return (maps[name].gates ?? []).filter((g) => items(g.if).length && !test((fills[`${name}/${g.id}`] ??= f((h) => h !== g)))).flatMap((g) => items(g.if));
+  };
+  // A map's doors and `warp:` cues (under the nearest `if` of the spot or person that says them), to other maps.
+  const waysOut = (name) => {
+    const m = maps[name], out = (m.warps ?? []).map((w) => ({ to: w.to, at: [w.x, w.z], if: w.if, land: [w.spawn.x, w.spawn.z] }));
+    const cues = (o, at, cond) => {
+      const c = typeof o === "string" && o.match(/^warp:([a-z_]+):(\d+):(\d+):[nesw]$/);
+      if (c) out.push({ to: c[1], at, across: true, if: cond, land: [+c[2], +c[3]] });
+      else if (o && typeof o === "object") for (const v of Object.values(o)) cues(v, at, o.if ?? cond);
+    };
+    for (const s of [...(m.interactions ?? []), ...(m.npcs ?? [])]) cues(s, [s.x, s.z]);
+    return out.filter((w) => w.to !== name && maps[w.to]);
+  };
+  // "a - b" (sorted) -> per way ("a>b") the item condition of each connection ("" if none). A road is held by what holds
+  // a way with no free connection: the door into a cave holds its road, though the way back out is free.
+  const roads = new Map();
+  const join = (a, b, terms) => {
+    const k = [a, b].sort().join(" - "), ways = roads.get(k) ?? roads.set(k, {}).get(k);
+    (ways[`${a}>${b}`] ??= new Set()).add([...new Set(terms)].sort().join(" & "));
+  };
+  const holds = (ways) => new Set(Object.values(ways).filter((s) => !s.has("")).flatMap((s) => [...s]));
+  const pathAt = (n) => design(n).g.path, half = Math.floor(SCREEN[0] / 2); // design() caches the grids levelDesign() reads
+  for (const [name, m] of Object.entries(maps)) {
+    if (!outdoor(name)) continue;
+    for (const e of m.exits ?? []) {
+      const B = maps[e.to], b = B?.exits?.find((x) => x.side === BACK[e.side] && x.to === name);
+      if (!b || !outdoor(e.to)) continue;
+      const edge = (n, x) => (seen) => ld.edgeTiles(maps[n], x).some((t) => seen.has(`${t}`));
+      join(name, e.to, [...cut(name, edge(name, e)), ...cut(e.to, edge(e.to, b))]);
+      const offsets = (n, x) => ld.edgeTiles(maps[n], x).flatMap((t, i) => (pathAt(n).has(`${t}`) ? [i] : []));
+      const there = offsets(e.to, b), tile = (mm, x, i) => ld.edgeTile(mm, x.side, x.span[0] + i).join(",");
+      const off = offsets(name, e).find((i) => !there.some((j) => Math.abs(i - j) <= 1));
+      if (off !== undefined)
+        fail.push(`${name}: [road-offset] exit ${e.side} to ${e.to}: the path at ${tile(m, e, off)} meets none within 1 tile across the edge (on ${e.to} the path is at ${there.map((j) => tile(B, b, j)).join(" ") || "no tile"})`);
+      if (e.water_ends) continue;
+      const water = (mm, side, c) => ((t) => mm.tiles[t[1]]?.[t[0]] === "~")(ld.edgeTile(mm, side, c));
+      for (let c = e.span[0] - half; c <= e.span[1] + half; c++) {
+        const d = c - e.span[0] + b.span[0];
+        if (water(m, e.side, c) && ![d - 1, d, d + 1].some((x) => water(B, b.side, x))) {
+          fail.push(`${name}: [water-edge] exit ${e.side} to ${e.to}: the water at ${ld.edgeTile(m, e.side, c)} stops at the edge (none by ${ld.edgeTile(B, b.side, d)} on ${e.to}); run it on, or say why it ends ("water_ends": "a fall")`);
+          break;
+        }
+      }
+    }
+    // Doors and cues, on through rooms and caves to the next outdoor map.
+    const queue = waysOut(name).map((w) => ({ ...w, terms: [...cut(name, (s) => near(s, w.at, w.across)), ...items(w.if)] })), inside = new Set();
+    while (queue.length) {
+      // The way with the fewest item terms first, so a free door into a room wins over a lantern door into it.
+      const w = queue.sort((p, q) => p.terms.length - q.terms.length).shift(); // ponytail: a sort per step, a heap if chains grow
+      if (outdoor(w.to)) join(name, w.to, [...w.terms, ...cut(w.to, (s) => near(s, w.land))]);
+      else if (!inside.has(w.to)) inside.add(w.to), queue.push(...waysOut(w.to).filter((x) => x.to !== name).map((x) => ({ ...x, terms: [...w.terms, ...items(x.if)] })));
+    }
+  }
+  if (!atlas) return;
+  const listed = new Set();
+  for (const l of atlas.links) {
+    const k = [l.a, l.b].sort().join(" - "), road = `the road ${l.a} - ${l.b}`;
+    if (listed.has(k)) fail.push(`atlas: [atlas-links] ${road} is listed twice`);
+    listed.add(k);
+    if (!roads.has(k)) {
+      fail.push(`atlas: [atlas-links] ${road} is in atlas.json, but no exit, door or ferry joins them`);
+      continue;
+    }
+    const held = holds(roads.get(k)), ways = [...held].map((c) => `"${c}"`).join(" or ");
+    if (held.size ? !held.has(l.if) : l.if) fail.push(`atlas: [atlas-gate] ${road} ${l.if ? `has if "${l.if}", but ${held.size ? `${ways} holds it` : "nothing holds it"}` : `has no if, but ${ways} holds it`}`);
+    const item = items(l.if)[0]?.slice(5);
+    if (item && l.icon !== ICON[item]) fail.push(`atlas: [atlas-gate] ${road} shows ${l.icon ?? "no icon"}, but its item ${item} is drawn ${ICON[item] ?? "by no icon yet (worldmap.rs)"}`);
+    if (!item && l.icon) fail.push(`atlas: [atlas-gate] ${road} shows ${l.icon}, but no item holds it`);
+  }
+  for (const [k, ways] of roads) if (!listed.has(k)) fail.push(`atlas: [atlas-links] the road ${k} is in the maps but not in atlas.json${[...holds(ways)].map((c) => ` (if "${c}")`)[0] ?? ""}`);
+}
+
+// #117 (WORLD_RULES 5.12-5.14): drops, one way down, are announced and never the only way out of an area; a shortcut
+// gate opens from its far side on its own flag; the chart marks every shortcut and every map with a drop.
+function oneWay() {
+  const want = new Map(); // atlas mark key -> what the maps hold
+  for (const [name, m] of Object.entries(maps)) {
+    const f = floods[name], { solid } = ctx[name], at = (t) => `${t}`;
+    const near = (s, x, z) => [[0, 0], ...Object.values(DIR)].some(([dx, dz]) => s.has(`${x + dx},${z + dz}`));
+    const out = (s) => (m.exits ?? []).some((e) => ld.edgeTiles(m, e).some((t) => s.has(at(t)))) || (m.warps ?? []).some((w) => near(s, w.x, w.z)) ||
+      (m.interactions ?? []).some((i) => i.kind === "waymark" && near(s, i.x, i.z));
+    const free = ([x, z] = []) => x >= 0 && z >= 0 && x < m.width && z < m.height && !solid.has(`${x},${z}`);
+    for (const d of m.drops ?? []) {
+      const said = `${name}: [drop] the drop ${d.from} > ${d.to}`, ends = [d.from, d.to];
+      if (m.light.indoor) fail.push(`${said} is indoors; drops are for outdoor maps`);
+      if (typeof d.why !== "string" || !d.why.trim()) fail.push(`${said} needs a why (what you see: "a broken fence over the scree")`);
+      if (!ends.every(free) || Math.abs(d.from[0] - d.to[0]) + Math.abs(d.from[1] - d.to[1]) !== 1) {
+        fail.push(`${said} must join two open tiles side by side`);
+        continue;
+      }
+      const by = ([x, z], x0, z0, x1, z1) => x >= x0 - 1 && x <= x1 + 1 && z >= z0 - 1 && z <= z1 + 1;
+      const cue = m.props.some((p) => {
+        let [w, dd] = FOOT[p.asset] ?? [1, 1];
+        if (p.rot % 180 === 90) [w, dd] = [dd, w];
+        return ends.some((t) => by(t, p.x, p.z, p.x + w - 1, p.z + dd - 1));
+      }) || ends.some(([x, z]) => [-1, 0, 1].some((dx) => [-1, 0, 1].some((dz) => !".pr".includes(m.paint?.[z + dz]?.[x + dx] ?? ".")))); // path paint (ld.js) is no cue
+      if (!cue) fail.push(`${said} has no cue (a prop or paint) within 1 tile`);
+      // Above, every gate stays as the hero left it (open); below, only shortcuts open (the hero may come down without
+      // the items the others need). Either way a shortcut opens only once its `from` is reached on that side. Neither
+      // side may need a drop to get out.
+      const side = (start, others) => {
+        const lifted = new Set();
+        for (;;) {
+          const s = f((g) => (g.shortcut ? lifted.has(g) : others), [start], false);
+          const more = (m.gates ?? []).filter((g) => g.shortcut && !lifted.has(g) && s.has(at(g.shortcut.from)));
+          if (!more.length) return s;
+          more.forEach((g) => lifted.add(g));
+        }
+      };
+      if (!out(side(d.from, true))) fail.push(`${name}: [drop] above the drop ${d.from} > ${d.to}, nothing reaches an exit, a warp or a waymark without it (a soft-lock)`);
+      if (!out(side(d.to, false))) fail.push(`${name}: [drop] below the drop ${d.from} > ${d.to}, nothing reaches an exit, a warp or a waymark without it (a soft-lock)`);
+    }
+    if (m.drops?.length) want.set(`drop:${name}`, `${name} has a drop`);
+    for (const g of m.gates ?? []) {
+      const sc = g.shortcut;
+      if (!sc) continue;
+      const said = `${name}: [shortcut] gate ${g.id}`;
+      if (![sc.id, sc.label, sc.label_fr].every((s) => typeof s === "string" && s.trim())) fail.push(`${said}: its shortcut needs an id, a label and a label_fr`);
+      if (g.if !== `flag:sc_${sc.id}`) fail.push(`${said} opens on "${g.if}", but its shortcut sets flag:sc_${sc.id}`);
+      const on = (t) => (g.tiles ?? []).some(([x, z]) => x === t?.[0] && z === t?.[1]);
+      if (!free(sc.from) || on(sc.from) || !Object.values(DIR).some(([dx, dz]) => on([sc.from[0] + dx, sc.from[1] + dz]))) fail.push(`${said}: its from ${sc.from} is not beside the gate, on open ground`);
+      else if (!f((h) => h !== g).has(at(sc.from))) fail.push(`${said}: its from ${sc.from} can't be reached the long way round (with the gate shut), so it never opens`);
+      want.set(`shortcut:${name}:${sc.id}`, `${name} has the shortcut ${sc.id}`);
+    }
+  }
+  if (!atlas) return;
+  const marks = new Map((atlas.marks ?? []).map((k) => [k.kind === "drop" ? `drop:${k.map}` : `shortcut:${k.map}:${k.id}`, k]));
+  for (const [k, what] of want) if (!marks.has(k)) fail.push(`atlas: [atlas-marks] ${what}, but atlas.json marks ${k.startsWith("drop") ? "none" : "no such shortcut"}`);
+  for (const [k, l] of marks)
+    if (!want.has(k)) fail.push(`atlas: [atlas-marks] atlas.json marks ${l.kind === "drop" ? "a drop" : `the shortcut ${l.id}`} on ${l.map}, which has ${l.kind === "drop" ? "none" : "no such shortcut"}`);
 }

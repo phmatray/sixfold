@@ -4,6 +4,7 @@
   "discovery_gap_s": [20, 30],
   "exit_min": 3,
   "crossroads_max": 3,
+  "loop_min": 12,
   "scatter_ratio_max": 1.1,
   "dominant_share_max": 0.6,
   "density_cv_min": 0.25
