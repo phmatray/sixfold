@@ -7,8 +7,9 @@
 // It loads progressively: the flat CSS backdrop (`.title-backdrop.flat` look, under
 // the canvas) holds until the first place is built, and the next place loads while
 // the current one plays. It gives way to the flat backdrop for good when WebGL is
-// missing or the first frames come in under 45 fps. With reduced motion it is one
-// still frame of the first place.
+// missing or the first frames come in under 45 fps on the plainest look. It wears the
+// world's look (look.js, #225) at the saved tier, a step lower each time the frames come
+// in slow. With reduced motion it is one still frame of the first place.
 //
 // `el.sixfoldTitle` (for screenshots and the console): `.shot(i)` holds shot i,
 // `.play()` resumes the reel.
@@ -18,6 +19,8 @@ import { loadMap, loadAsset, assetNames, tr } from "./map.js";
 import { build, dispose, refresh, animateProps } from "./build.js";
 import { updateNpc } from "./npc.js";
 import { daylight, phaseOf } from "./daylight.js";
+import { weak, pickTier, readSaved, downgrade } from "./tier.js"; // weak: a device that can't carry a whole map, known before trying
+import { createLook } from "./look.js";
 
 // A place: the map, the hour (game minute), what the camera looks at (tile x, z, and a
 // height), and the camera's path round it: bearing (degrees, 0 = from the south, the
@@ -45,13 +48,6 @@ function fetchShot(s) {
   });
 }
 
-// A device that can't carry a whole map at a good frame rate, known before trying:
-// a software renderer, little memory or few cores, or data saving asked for.
-function weak(renderer) {
-  const gl = renderer.getContext(), info = gl.getExtension("WEBGL_debug_renderer_info");
-  const name = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
-  return /swiftshader|llvmpipe|software|basic render/i.test(name) || navigator.deviceMemory < 4 || navigator.hardwareConcurrency < 4 || !!navigator.connection?.saveData;
-}
 
 // The device can't carry the backdrop (no WebGL, or `weak`): known from the first title,
 // so a later one (after the world, a reset, the lesson) goes flat without a new context.
@@ -109,11 +105,14 @@ export function mount(el) {
   shadowEye.position.set(0, -1e4, 0);
   shadowEye.updateMatrixWorld();
   shadowEye.layers.enableAll();
+  const post = createLook(renderer, scene, camera);
+  post.setTier(pickTier(readSaved(), false)); // the device already passed `weak`
 
   let wide = true;
   const resize = () => {
     const w = el.clientWidth || 1, h = el.clientHeight || 1;
     renderer.setSize(w, h);
+    post.setSize(w, h);
     veil.width = canvas.width;
     veil.height = canvas.height;
     camera.aspect = w / h;
@@ -149,7 +148,14 @@ export function mount(el) {
     t0 = performance.now() / 1000;
     place.innerHTML = `<b>${map.title ?? ""}</b><span>${HOURS[phaseOf(minute)]}</span>`;
     draw(0, 0);
-    // A still of the place, for the menu screens behind their panels (`--world-still`).
+    still();
+    await post.warm().catch(() => {});
+    globalThis.sixfoldAudio?.ambience(map.ambience ?? map.music ?? "overworld", phaseOf(minute));
+    return true;
+  }
+
+  // A still of the frame just drawn, for the menu screens behind their panels (`--world-still`).
+  const still = () =>
     canvas.toBlob((b) => {
       if (!b || !alive) return;
       const root = document.documentElement, old = root.dataset.worldStill, url = URL.createObjectURL(b);
@@ -157,10 +163,6 @@ export function mount(el) {
       root.style.setProperty("--world-still", `url("${url}")`);
       if (old) setTimeout(() => URL.revokeObjectURL(old), 1000);
     }, "image/jpeg", 0.8);
-    await renderer.compileAsync(scene, camera).catch(() => {});
-    globalThis.sixfoldAudio?.ambience(map.ambience ?? map.music ?? "overworld", phaseOf(minute));
-    return true;
-  }
 
   // One frame of the current place, `k` (0..1) of the way through its shot.
   function draw(k, dt = 0) {
@@ -176,8 +178,9 @@ export function mount(el) {
     for (const n of w.npcs) updateNpc(w, n, dt, false);
     animateProps(w, dt, reduced);
     const lit = w.day.update(minute, look.x, look.z, dt);
+    post.follow(w, lit); // as in world.js
     w.life.update(dt, w.now, look.x, look.z, lit.night);
-    w.fireflies.update(dt, w.now, lit.night, reduced);
+    w.fireflies.update(dt, w.now, lit.night, reduced, w.glowBoost);
     // The fog keeps the far ground soft without eating the place: kept past the camera's distance.
     renderer.setClearColor(lit.color ?? lit.bg);
     scene.fog.color.copy(lit.color ?? lit.bg);
@@ -187,8 +190,7 @@ export function mount(el) {
     w.sun.target.position.set(look.x, 0, look.z);
     renderer.shadowMap.needsUpdate = true;
     renderer.render(scene, shadowEye);
-    renderer.clear();
-    renderer.render(scene, camera);
+    post.render(dt); // straight to the canvas, in this task: the veil and the still copy it next
   }
 
   // Hold the frame just drawn on the veil (same task as the render: the buffer is still there).
@@ -200,9 +202,10 @@ export function mount(el) {
   };
 
   // The frame-time probe: frames 30 to 120 of the first place. Under 45 fps (a weak
-  // GPU, a battery saver capping the page), the flat backdrop instead.
+  // GPU, a battery saver capping the page), a step down the look and probe again; on the
+  // plain frame already, the flat backdrop instead. A tier change (the look loading) re-probes.
   const times = [];
-  let switching = false;
+  let switching = false, probed = post.tier;
   const loop = (ms) => {
     if (!alive) return;
     raf = requestAnimationFrame(loop);
@@ -212,8 +215,12 @@ export function mount(el) {
     const age = t - t0, k = held >= 0 ? 0.5 : Math.min(1, age / HOLD);
     draw(k, dt);
     if (fade > 0) (fade = Math.max(0, fade - dt / FADE)), (veil.style.opacity = ease(fade));
+    if (post.tier !== probed) (probed = post.tier), (times.length = 0);
     if (times.length < 120 && dt && times.push(dt) === 120) {
-      if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 45) return void (api.stop(), flat());
+      if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 45) {
+        if (post.tier === "off") return void (api.stop(), flat());
+        post.setTier(downgrade(post.tier)); // and probed again, from the tier change above
+      }
     }
     if (held < 0 && age >= HOLD) {
       switching = true;
@@ -224,6 +231,10 @@ export function mount(el) {
     }
   };
 
+  // The Graphics setting changed elsewhere (Settings over the title, world.rs): applied at once.
+  const onGraphics = (e) => post.setTier(pickTier(e.detail, false));
+  addEventListener("sixfold-graphics", onGraphics);
+
   const ro = new ResizeObserver(resize);
   ro.observe(el);
   show(0)
@@ -231,8 +242,11 @@ export function mount(el) {
       if (!ok || !alive) return;
       resize();
       el.classList.add("live");
-      if (reduced) draw(0.5);
-      else raf = requestAnimationFrame(loop);
+      if (reduced) {
+        draw(0.5);
+        // Again once the look is in (High waits on its libraries), twice: the first re-lights the lamps for it.
+        post.ready.then(() => alive && (draw(0.5), draw(0.5), still()));
+      } else raf = requestAnimationFrame(loop);
       // The next place downloads while this one plays.
       if (!reduced) fetchShot(SHOTS[1]).catch(() => {});
     })
@@ -250,7 +264,9 @@ export function mount(el) {
       alive = false;
       cancelAnimationFrame(raf);
       ro.disconnect();
+      removeEventListener("sixfold-graphics", onGraphics);
       if (world) dispose(world.root);
+      post.dispose();
       renderer.forceContextLoss(); // the world screen makes its own context next
       renderer.dispose();
       canvas.remove();

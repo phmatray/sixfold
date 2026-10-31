@@ -44,40 +44,45 @@ function over(p, L) {
   if (L.hemisphere?.intensity !== undefined) q.hemiI = L.hemisphere.intensity;
   if (L.background) q.bg = C(L.background);
   if (L.fog) (q.near = L.fog.near), (q.far = L.fog.far);
+  for (const k of ["exposure", "saturation", "contrast"]) if (L.grade?.[k] !== undefined) q[k] = L.grade[k];
   return q;
 }
 
 // The four looks of a map.
 function presets(map) {
   const L = map.light;
-  const day = over({ lamps: 0, glow: 0, glass: 0, night: 0, near: 60, far: 90 }, L);
+  // The grade (#225, look.js; nothing on the "off" tier), tuned by eye on a real GPU against the plain frame: a little
+  // more exposure for what the tone mapping and AO take, a hair less saturation (the composed frame reads ~20% more
+  // colourful at 0), a touch of contrast; night a shade brighter and cooler. Bloom rises toward night (only what shines
+  // over 1.0 blooms: lamps, lit panes and fireflies on High). A map's `light.grade` sets the day's, which the phases follow.
+  const day = over({ lamps: 0, glow: 0, glass: 0, night: 0, near: 60, far: 90, exposure: 1.1, saturation: -0.05, contrast: 0.03, bloom: 0.3 }, L);
   if (L.indoor) {
     // The window light only: warm at dawn and dusk, moonlit at night; panes go dark.
     const tint = (c, k, i, glass = 0) => ({ ...day, sun: mix(day.sun, c, k), sunI: day.sunI * i, glass });
-    return { day, dawn: tint("#ffc8a0", 0.6, 0.85), dusk: tint("#ff9e6b", 0.6, 0.8, 0.5), night: tint("#7f95e0", 0.85, 0.55, 1) };
+    return { day, dawn: tint("#ffc8a0", 0.6, 0.85), dusk: tint("#ff9e6b", 0.6, 0.8, 0.5), night: { ...tint("#7f95e0", 0.85, 0.55, 1), bloom: 0.6 } };
   }
   if (map.dark) {
-    const cave = { ...day, sunI: 0, sky: C("#3b3a52"), ground: C("#0d0b12"), hemiI: 0.55, bg: C("#07060b"), near: 7, far: 20, lamps: 1, glow: 1, glass: 1, night: 0.6 };
+    const cave = { ...day, sunI: 0, sky: C("#3b3a52"), ground: C("#0d0b12"), hemiI: 0.55, bg: C("#07060b"), near: 7, far: 20, lamps: 1, glow: 1, glass: 1, night: 0.6, bloom: 1 };
     return { day: cave, dawn: cave, dusk: cave, night: cave };
   }
   // Dawn is cool and rosy (dusk is the warm one): a pink sun low in the east, lilac shadows.
   const dawn = { ...day, sun: C("#ffbfae"), sunI: day.sunI * 0.62, from: new THREE.Vector3(14, 8, 4),
     sky: mix(day.sky, "#d9c4ee", 0.65), ground: mix(day.ground, "#5a4a78", 0.5), hemiI: day.hemiI * 0.8,
-    bg: mix(day.bg, "#e8c6d8", 0.72), near: day.near * 0.9, far: day.far * 0.95, lamps: 0.2, glow: 0.3, glass: 0.25, night: 0.15 };
+    bg: mix(day.bg, "#e8c6d8", 0.72), near: day.near * 0.9, far: day.far * 0.95, lamps: 0.2, glow: 0.3, glass: 0.25, night: 0.15, bloom: 0.45 };
   const dusk = { ...day, sun: C("#ff9e6b"), sunI: day.sunI * 0.6, from: new THREE.Vector3(-14, 7, 4),
     sky: mix(day.sky, "#ffae8c", 0.55), ground: mix(day.ground, "#4a2f4c", 0.45), hemiI: day.hemiI * 0.78,
-    bg: mix(day.bg, "#e59a7a", 0.75), near: day.near * 0.85, far: day.far * 0.9, lamps: 0.6, glow: 0.75, glass: 0.7, night: 0.35 };
+    bg: mix(day.bg, "#e59a7a", 0.75), near: day.near * 0.85, far: day.far * 0.9, lamps: 0.6, glow: 0.75, glass: 0.7, night: 0.35, bloom: 0.6 };
   // The moon shines from the camera's side, so faces turned to the player stay lit.
   const night = { ...day, sun: C("#a9bcff"), sunI: day.sunI * 0.45, from: new THREE.Vector3(-7, 18, 10),
     sky: C("#6f83c4"), ground: C("#232a47"), hemiI: day.hemiI * 0.74,
-    bg: C("#1b2236"), near: 13, far: 33, lamps: 1, glow: 1, glass: 1, night: 1 };
+    bg: C("#1b2236"), near: 13, far: 33, lamps: 1, glow: 1, glass: 1, night: 1, exposure: day.exposure * 1.1, saturation: day.saturation - 0.05, bloom: 1 };
   return { day, dawn: over(dawn, map.light_dawn), dusk: over(dusk, map.light_dusk), night: over(night, map.light_night) };
 }
 
 function lerp(out, a, b, t) {
   for (const k of ["sun", "sky", "ground", "bg"]) out[k].lerpColors(a[k], b[k], t);
   out.from.lerpVectors(a.from, b.from, t);
-  for (const k of ["sunI", "hemiI", "near", "far", "lamps", "glow", "glass", "night"]) out[k] = a[k] + (b[k] - a[k]) * t;
+  for (const k of ["sunI", "hemiI", "near", "far", "lamps", "glow", "glass", "night", "exposure", "saturation", "contrast", "bloom"]) out[k] = a[k] + (b[k] - a[k]) * t;
 }
 
 // The light of a built map `w` (build.js), added to its root. `update(minute, hero)`
@@ -160,7 +165,7 @@ export function daylight(w, reduced) {
   });
   for (const m of crystals) m.userData.base ??= m.color.clone();
 
-  let lastKey = "", pick = 0, near = [], litDirty = true;
+  let lastKey = "", pick = 0, near = [], litDirty = true, boost = 1;
   const tmp = new THREE.Color();
   return {
     // The real point lights, read-only (the debug overlay draws them): the hero's lantern and the nearest lamps'.
@@ -203,10 +208,12 @@ export function daylight(w, reduced) {
       if (key !== lastKey || w.lightDirty) {
         lastKey = key;
         w.lightDirty = false;
-        for (const m of glows) m.emissive?.copy(m.userData.base).multiplyScalar(0.55 + 0.8 * cur.glow);
+        // On High (world.js sets `glowBoost`) lamps and lit panes shine past 1.0, ×2.5 at full glow, so they and only they bloom.
+        boost = w.glowBoost ? 1 + 1.5 * cur.glow : 1;
+        for (const m of glows) m.emissive?.copy(m.userData.base).multiplyScalar((0.55 + 0.8 * cur.glow) * boost);
         for (const m of glass) {
           if (indoor) m.color.lerpColors(m.userData.base, DARK_PANE, cur.glass * 0.85), m.emissive?.setScalar(0);
-          else m.color.lerpColors(m.userData.base, WARM, cur.glass * 0.9), m.emissive?.copy(WARM).multiplyScalar(0.95 * cur.glass);
+          else m.color.lerpColors(m.userData.base, WARM, cur.glass * 0.9), m.emissive?.copy(WARM).multiplyScalar(0.95 * cur.glass * boost);
         }
         for (const m of ware) m.emissive?.copy(m.userData.base).multiplyScalar(0.12 + 0.4 * cur.glow);
         litDirty = true;
@@ -228,8 +235,8 @@ export function daylight(w, reduced) {
         litDirty = false;
         for (const m of own) {
           const k = (m.userData.litBy.litLevel ?? 0) * cur.glass; // a lamp lit before dusk doesn't show in daylight
-          if (/glow/i.test(m.name)) m.emissive?.copy(m.userData.base).multiplyScalar(0.1 + 1.25 * k);
-          else m.color.lerpColors(m.userData.base, WARM, k * 0.9), m.emissive?.copy(WARM).multiplyScalar(0.95 * k);
+          if (/glow/i.test(m.name)) m.emissive?.copy(m.userData.base).multiplyScalar((0.1 + 1.25 * k) * boost);
+          else m.color.lerpColors(m.userData.base, WARM, k * 0.9), m.emissive?.copy(WARM).multiplyScalar(0.95 * k * boost);
         }
       }
 
@@ -278,7 +285,8 @@ export function daylight(w, reduced) {
           l.intensity = on ? 7 * cur.lamps * fade : 0;
         });
       }
-      return { bg: cur.bg, near: cur.near, far: cur.far, from: cur.from, night: cur.night, phase: p, color: tmp.copy(cur.bg).lerp(BOLT, (w.flash ?? 0) * 0.3) };
+      return { bg: cur.bg, near: cur.near, far: cur.far, from: cur.from, night: cur.night, phase: p, glow: cur.glow,
+        exposure: cur.exposure, saturation: cur.saturation, contrast: cur.contrast, bloom: cur.bloom, color: tmp.copy(cur.bg).lerp(BOLT, (w.flash ?? 0) * 0.3) };
     },
   };
 }

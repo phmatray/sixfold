@@ -2,7 +2,7 @@
 // `mount(host, controls, cb, start, edit, debug)` builds it (at `start` = "map,x,z,facing"
 // when given; `edit`/`debug`: a debug build with ?edit loads the map editor, with ?debug
 // the level-design overlays, debug.js) and returns an
-// api for Leptos (stop, act, pause, setItems, setSeals, setClock, setCamera, preview, previewStop, portrait, meet, cue, busy, read, page).
+// api for Leptos (stop, act, pause, setItems, setSeals, setClock, setCamera, setGraphics, preview, previewStop, portrait, meet, cue, busy, read, page).
 // `cb(event, a, b)` reports:
 //   ("near", kind, text)   what the hero now faces ("" when nothing)
 //   ("use", kind, text)    acted on a sign, the duel table, a locked door or a shut gate; a gated
@@ -38,6 +38,7 @@
 //   seat.js    sitting on benches and chairs (the hero, and people placed sitting)
 //   script.js  cutscenes: a map's `scripts` start there, and it plays their cues one at a time
 //   daylight.js the light at each minute of the day: sun, moon, sky, fog, lamps, glow
+//   look.js    the frame drawn through post-processing at the graphics tier (tier.js, #225)
 //   book.js    a book taken from a shelf: its flight, its pages, the hero's reach
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
 import * as THREE from "three";
@@ -56,6 +57,8 @@ import { daylight, phaseOf, DAY } from "./daylight.js";
 import { scenes } from "./script.js";
 import { createBook } from "./book.js";
 import { ANGLES, framing, nextAngle } from "./camera.js";
+import { createLook } from "./look.js";
+import { TIERS, pickTier, readSaved, weak } from "./tier.js";
 
 const STEP = 0.25, RUN_STEP = 0.17; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
@@ -192,6 +195,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   shadowEye.updateMatrixWorld();
   shadowEye.layers.enableAll();
   shadowEye.layers.disable(1);
+  // The frame, through post-processing at the device's graphics tier or the one the player chose (#225).
+  const post = createLook(renderer, scene, camera);
+  post.setTier(pickTier(readSaved(), weak(renderer)));
   let cam = { fov: 40, fovPortrait: 50, pitch: 50, distance: 12, distancePortrait: 15, lookAtOffset: [0, 0.75, 0] };
   // The outdoor angle the player picked (camera.js, #148), and the pitch and distance easing toward it
   // (only after a new angle: a rotated phone or sixfoldCam still cut).
@@ -210,6 +216,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const bar = document.querySelector(".world-top");
     cover = bar ? THREE.MathUtils.clamp((bar.getBoundingClientRect().bottom - el.getBoundingClientRect().top) / h, 0, 0.4) : 0;
     renderer.setSize(w, h);
+    post.setSize(w, h);
     camera.aspect = w / h;
     camera.fov = w < h ? cam.fovPortrait : cam.fov; // portrait phones: pull back and widen
     dist = w < h ? cam.distancePortrait : cam.distance;
@@ -724,7 +731,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     cam = framing(map.camera, camAngle, !!map.light.indoor);
     resize();
     first = true;
-    await renderer.compileAsync(scene, camera).catch(() => {});
+    await post.warm().catch(() => {});
     // The area's name, except back from a duel or when a scene is about to play on arrival (#155): the
     // moment is the scene's, not the map's. The live region still says where you are.
     if (map.title && !L.indoor && !quiet && !cut.due(world)) showBanner(map.title);
@@ -776,8 +783,25 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
 
   // ---------- Loop ----------
   let stats = { calls: 0, triangles: 0 };
-  function frame() {
+  // The frame-time probe (#225), the title's: frames 30 to 120 from the rAF clock (paused ones skipped),
+  // counted again whenever the tier in force changes (the look loading). Its first full window on High
+  // decides: under 45 fps, Low for this visit, not saved (and Auto then means Low: `slow`). It never steps
+  // Low to Off (CI's Low stays put), and a choice made in Options during the visit ends it: the player's to keep.
+  const times = [];
+  let probed = post.tier, probeMs = 0, probeDone = false, slow = false;
+  const saved = readSaved();
+  let chosen = TIERS.includes(saved) ? saved : "auto"; // what Rust replays after mount: that one isn't a new choice
+  function probe(ms) {
+    const dt = probeMs && !paused ? (ms - probeMs) / 1000 : 0;
+    probeMs = ms;
+    if (post.tier !== probed) (probed = post.tier), (times.length = 0);
+    if (!dt || times.length >= 120 || times.push(dt) < 120 || post.tier !== "high") return;
+    probeDone = true;
+    if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 45) (slow = true), post.setTier("low");
+  }
+  function frame(ms) {
     raf = requestAnimationFrame(frame);
+    if (!probeDone) probe(ms);
     const dt = Math.min(clock.update().getDelta(), 0.05);
     if (paused && !book.live()) {
       // A modal is open: draw one last frame, then nothing until it closes (a book being read draws on).
@@ -876,12 +900,13 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     animateProps(w, dt, reduced);
     stoneStep(w.stone, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);
+    post.follow(w, lit); // the hour's grade, and lamps past the bloom threshold on High (#225)
     // In a biome transition band (#118) the next region's ambience bed rises under this one's, up to half.
     const inBand = w.lean(px, pz), next = inBand?.band.next;
     globalThis.sixfoldAudio?.lean?.(next ? bedOf(next) : "", phaseOf(minute), 0.5 * (inBand?.k ?? 0));
     sky(lit);
     w.life.update(dt, w.now, px, pz, lit.night, cut.playing);
-    w.fireflies.update(dt, w.now, lit.night, reduced);
+    w.fireflies.update(dt, w.now, lit.night, reduced, w.glowBoost);
 
     const pos = `${h.x},${h.z},${h.face}`;
     const inside = h.x >= 0 && h.z >= 0 && h.x < w.map.width && h.z < w.map.height; // not mid-way off an edge
@@ -984,8 +1009,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     renderer.shadowMap.needsUpdate = true;
     renderer.info.reset();
     renderer.render(scene, shadowEye);
-    renderer.clear();
-    renderer.render(scene, camera);
+    post.render(dt);
     book.render(renderer, dt);
     stats = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles };
     if (!readySent) (readySent = true), cb("ready", "", "");
@@ -1010,7 +1034,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
-  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, camera: { angle: camAngle, pitch: pitchNow },
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, camera: { angle: camAngle, pitch: pitchNow }, graphics: post.tier,
     people: world?.npcs.filter((n) => !n.hidden).map((n) => ({ id: n.def.id, x: n.x, z: n.z, face: n.glance ?? n.face, do: n.activity?.do ?? null, away: !!n.away, walking: !!n.walk, sitting: !!n.sit })) ?? [] });
   // A map's ambient life (#115) as drawn last frame: critters per kind, leaves, embers, boats, the micro-event; null without any.
   el.sixfoldLife = () => world?.life.stats?.() ?? null;
@@ -1193,6 +1217,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     removeEventListener("keyup", onKey);
     removeEventListener("blur", clearHeld);
     dispose(scene);
+    post.dispose();
     renderer.dispose();
     renderer.domElement.remove();
     clearTimeout(bannerTimer);
@@ -1202,6 +1227,11 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     stop,
     act,
     setCamera,
+    // The Graphics setting (#225): "auto" (the device decides), "high", "low" or "off".
+    setGraphics: (choice) => {
+      if (choice !== chosen) (probeDone = true), (chosen = choice);
+      post.setTier(pickTier(choice, weak(renderer) || slow));
+    },
     busy: () => warping || !world || !!world.engage || !!world.ride || cut.playing || book.live(), // the in-game menu waits for these
     // A book to read ({id, family, title, pages: [{heading, text, art}], shelf}): from the shelf
     // last used when `shelf` is true, else it rises into view. null puts it back ("book closed" after).
