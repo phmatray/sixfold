@@ -1,5 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-import { loaded, menuItem, readSave, title, warpTo } from "./helpers";
+import { type Page } from "@playwright/test";
+import { expect, test, loaded, menuItem, readSave, title, warpTo } from "./helpers";
 
 // #117 on Scree Pass: the barred stair (gate scree_bar at 10,25, lifted from 10,24 above) and the drop at the broken
 // fence (18,18 down to 18,19).
