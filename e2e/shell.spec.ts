@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./helpers";
 
 /**
  * The shell around the game: the typefaces ship with it (web/fonts), and the

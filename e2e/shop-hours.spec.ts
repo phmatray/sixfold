@@ -1,5 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
-import { menuItem, readSave, title } from "./helpers";
+import { expect, test, menuItem, readSave, title, type Page } from "./helpers";
 
 /** Shop hours (#114): a door's `open` keeps it shut out of hours, with its closed text and no keeper inside. */
 const host = (page: Page, f: string, ...args: unknown[]) => page.evaluate(([f, args]) => (document.querySelector(".world-host") as any)[f as string](...(args as unknown[])), [f, args] as const);

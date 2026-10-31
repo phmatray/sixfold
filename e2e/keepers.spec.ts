@@ -1,5 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
-import { editSave, frames, loaded, menuItem, readSave, title } from "./helpers";
+import { expect, test, editSave, frames, loaded, menuItem, readSave, title, type Page } from "./helpers";
 
 /** Talk to Marlo from the tile south of him, through his lines, to his challenge sheet. */
 async function talkToMarlo(page: Page) {

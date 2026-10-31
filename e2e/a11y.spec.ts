@@ -1,6 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
-import { menuItem, title } from "./helpers";
+import { expect, test, menuItem, title, type Page } from "./helpers";
 
 /**
  * axe-core on every screen: no serious or critical WCAG 2.2 A/AA violation.
@@ -17,7 +16,7 @@ async function scan(page: Page, screen: string) {
   expect(bad, bad.join("\n")).toEqual([]);
 }
 
-test("title, settings, campaign, collection, records, packs and decks @phone", async ({ page }) => {
+test("title, settings, campaign, collection, records, packs and decks @phone @webkit", async ({ page }) => {
   await title(page);
   await scan(page, "title");
   // Settings opens as a sheet over the title (#100): its summary opens and closes it.

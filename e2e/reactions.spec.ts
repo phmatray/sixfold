@@ -1,5 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
-import { editSave, loaded, menuItem, title, warpTo as warp } from "./helpers";
+import { expect, test, editSave, loaded, menuItem, title, warpTo as warp, type Page } from "./helpers";
 
 /** Reactions (#114): people glance at the hero, and say a line in passing. Read through `sixfoldStats().people`. */
 type Person = { id: string; x: number; z: number; face: string };
