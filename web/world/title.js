@@ -18,6 +18,7 @@ import { loadMap, loadAsset, assetNames, tr } from "./map.js";
 import { build, dispose, refresh, animateProps } from "./build.js";
 import { updateNpc } from "./npc.js";
 import { daylight, phaseOf } from "./daylight.js";
+import { weak } from "./tier.js"; // a device that can't carry a whole map, known before trying
 
 // A place: the map, the hour (game minute), what the camera looks at (tile x, z, and a
 // height), and the camera's path round it: bearing (degrees, 0 = from the south, the
@@ -45,13 +46,6 @@ function fetchShot(s) {
   });
 }
 
-// A device that can't carry a whole map at a good frame rate, known before trying:
-// a software renderer, little memory or few cores, or data saving asked for.
-function weak(renderer) {
-  const gl = renderer.getContext(), info = gl.getExtension("WEBGL_debug_renderer_info");
-  const name = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
-  return /swiftshader|llvmpipe|software|basic render/i.test(name) || navigator.deviceMemory < 4 || navigator.hardwareConcurrency < 4 || !!navigator.connection?.saveData;
-}
 
 // The device can't carry the backdrop (no WebGL, or `weak`): known from the first title,
 // so a later one (after the world, a reset, the lesson) goes flat without a new context.
