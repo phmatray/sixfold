@@ -11,7 +11,7 @@
 // fades in). Finds (`kind: "find"`): an id, a `give` and a `text`, on a solid tile
 // (something to look in, never a featureless one).
 // 1.3 (WORLD_DESIGN §7, §13.3): outdoor maps have `title_fr`, a `region` and a `music` track (an optional `ambience` names a bed); `fence` and
-// `cliff` name known sets; optional `paint` rows (a ground layer on any tile, raised ones too) match `tiles`. Gates: tiles in bounds; with every gate shut the spawn still reaches an exit or
+// `cliff` name known sets; a `light` / `light_<phase>` block's `grade` (#225) keeps exposure 0.5..2, saturation and contrast -0.5..0.5; optional `paint` rows (a ground layer on any tile, raised ones too) match `tiles`. Gates: tiles in bounds; with every gate shut the spawn still reaches an exit or
 // a warp (no soft-lock), and with every gate open every person, spot, warp and waymark can be reached
 // (floor heights, the 0.6 m step and the ladder rule as build.js has them; a door warp to the same map
 // carries the fill to where it lands, and a lift (`lifts`, lift.js) joins its shaft and the landings at its
@@ -110,6 +110,11 @@ for (const [name, m] of Object.entries(maps)) {
     if (!m.title || !m.title_fr) fail.push(`${name}: an outdoor map needs a title and title_fr`);
     if (!atlas?.regions.some((r) => r.id === m.region)) fail.push(`${name}: region ${m.region} is not in atlas.json`);
     if (!TRACKS.has(m.music)) fail.push(`${name}: music ${m.music} is not a track (${[...TRACKS].join(", ")})`);
+  }
+  for (const k of ["light", "light_dawn", "light_dusk", "light_night"]) {
+    const g = m[k]?.grade, num = (v, lo, hi) => v === undefined || (typeof v === "number" && v >= lo && v <= hi);
+    if (g !== undefined && !(g && num(g.exposure, 0.5, 2) && num(g.saturation, -0.5, 0.5) && num(g.contrast, -0.5, 0.5)))
+      fail.push(`${name}: ${k}.grade saturation and contrast are -0.5 to 0.5, exposure 0.5 to 2`);
   }
   if (m.ambience !== undefined && !BEDS.has(m.ambience)) fail.push(`${name}: ambience ${m.ambience} is not a bed (${[...BEDS].join(", ")})`);
   if (m.fence !== undefined && !FENCES.has(m.fence)) fail.push(`${name}: fence ${m.fence} is not ${[...FENCES].join(" / ")}`);

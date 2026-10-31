@@ -881,13 +881,16 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     }
     animateProps(w, dt, reduced);
     stoneStep(w.stone, dt, reduced);
+    // Lamps shine past the bloom threshold only on High (#225); a tier change rewrites the glow materials.
+    if (w.glowBoost !== (post.tier === "high")) (w.glowBoost = post.tier === "high"), (w.lightDirty = true);
     const lit = w.day.update(minute, px, pz, dt);
+    post.setGrade({ exposure: lit.exposure, saturation: lit.saturation, contrast: lit.contrast, bloom: lit.bloom });
     // In a biome transition band (#118) the next region's ambience bed rises under this one's, up to half.
     const inBand = w.lean(px, pz), next = inBand?.band.next;
     globalThis.sixfoldAudio?.lean?.(next ? bedOf(next) : "", phaseOf(minute), 0.5 * (inBand?.k ?? 0));
     sky(lit);
     w.life.update(dt, w.now, px, pz, lit.night, cut.playing);
-    w.fireflies.update(dt, w.now, lit.night, reduced);
+    w.fireflies.update(dt, w.now, lit.night, reduced, w.glowBoost);
 
     const pos = `${h.x},${h.z},${h.face}`;
     const inside = h.x >= 0 && h.z >= 0 && h.x < w.map.width && h.z < w.map.height; // not mid-way off an edge
