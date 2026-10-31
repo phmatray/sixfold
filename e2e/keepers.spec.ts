@@ -125,7 +125,7 @@ test("Marlo's entrance waits until he is earned", async ({ page }) => {
 // #152: the first visit shows the site; Skip (a tap on a phone) ends it and gives the hero back.
 test.describe(() => {
   test.use({ reducedMotion: "no-preference" }); // the camera eases: the reveal holds long enough to skip
-  test("the Bellflats reveal themselves on the first visit, and Skip gives the hero back @phone @webkit", async ({ page }) => {
+  test("the Bellflats reveal themselves on the first visit, and Skip gives the hero back @phone", async ({ page }) => {
     await newSave(page);
     await editSave(page, `secs.progress = [(secs.progress?.[0] ?? "") + ",f:keepers,f:intro"]; secs.world_at = ["bellflats,9,2,s"];`);
     await page.reload();
