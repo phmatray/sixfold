@@ -402,8 +402,9 @@ pub fn WorldMap(
             })
         })
         .collect_view();
-    // A place's marks, in a row beside it: a lifted bar for an opened shortcut, a ledge for a drop.
-    let marks = a
+    // A place's marks, in a row beside it: a lifted bar for an opened shortcut, a ledge for a drop. Each is an
+    // image named for its place, so a screen reader hears them (the place names themselves are drawing).
+    let marks: Vec<_> = a
         .maps
         .iter()
         .filter(|m| seen(&m.id))
@@ -419,13 +420,14 @@ pub fn WorldMap(
                     } else {
                         ("M2.5 10.5v-8M9.5 10.5v-8M2.5 7.5l7-5", tr("A shortcut you opened", "Un raccourci que vous avez ouvert"))
                     };
-                    view! { <span class="atlas-mark" data-mark=k.kind.clone() title=title><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5.6" /><path d=d /></svg></span> }
+                    let label = format!("{}: {title}", m.name);
+                    view! { <span class="atlas-mark" data-mark=k.kind.clone() title=title role="img" aria-label=label><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.6" /><path d=d /></svg></span> }
                 })
                 .collect();
             let post = a.waymarks.iter().any(|w| w.map == m.id);
             (!shown.is_empty()).then(|| view! { <span class="atlas-marks" class:post=post style=at(m.x, m.y)>{shown}</span> })
         })
-        .collect_view();
+        .collect();
     let nodes = a
         .maps
         .iter()
@@ -527,7 +529,10 @@ pub fn WorldMap(
                     </g>
                     <rect width="120" height="90" fill="url(#atlas-vignette)" />
                 </svg>
-                <div class="atlas-words" aria-hidden="true">{region_names}{map_names}{marks}</div>
+                <div class="atlas-words" aria-hidden="true">{region_names}{map_names}</div>
+                {(!marks.is_empty()).then(|| view! {
+                    <div class="atlas-words" role="group" aria-label=tr("Shortcuts and drops", "Raccourcis et descentes")>{marks}</div>
+                })}
                 <div class="atlas-posts" role="group" aria-label=tr("Waymarks", "Bornes de voyage")>{posts}</div>
                 {you}
             </div>

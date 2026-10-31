@@ -238,6 +238,7 @@ test("AC1 (#117): an atlas without a real road names exactly that road; one with
   const extra = atlasSays(world((m, a) => (tarn()(m, a), a.links.push({ a: "vale", b: "tarn" }, { a: "fell", b: "tarn" }))));
   assert.equal(extra.length, 1, extra.join("\n"));
   assert.match(extra[0], /atlas: \[atlas-links\] the road fell - tarn is in atlas.json, but no exit, door or ferry joins them/);
+  assert.match(atlasSays(world((m, a) => a.links.push({ a: "fell", b: "vale" }))).join("\n"), /atlas: \[atlas-links\] the road fell - vale is listed twice/);
 });
 
 test("#117: a gated road's if and icon match the gate that holds it", () => {
@@ -246,6 +247,10 @@ test("#117: a gated road's if and icon match the gate that holds it", () => {
   assert.match(atlasSays(world(road({})))[0], /\[atlas-gate\] the road vale - tarn has no if, but "item:wading_boots" holds it/);
   assert.match(atlasSays(world(road({ if: "item:wading_boots", icon: "gloves" })))[0], /\[atlas-gate\] the road vale - tarn shows gloves, but its item wading_boots is drawn boots/);
   assert.match(atlasSays(world((m, a) => Object.assign(a.links[0], { if: "item:ferry_pass", icon: "ferry" })))[0], /\[atlas-gate\] the road vale - fell has if "item:ferry_pass", but nothing holds it/);
+  assert.match(atlasSays(world((m, a) => (a.links[0].icon = "boots")))[0], /\[atlas-gate\] the road vale - fell shows boots, but no item holds it/);
+  // A second, lantern-locked door into the cottage: the free one still makes the road through it free.
+  const lantern = { x: 17, z: 13, to: "vale_in", label: "Go in", label_fr: "Entrer", spawn: { x: 5, z: 7, facing: "n" }, if: "item:kiln_lantern", locked: "Dark.", locked_fr: "Noir." };
+  assert.deepEqual(atlasSays(world((m, a) => (tarn()(m, a), m.vale.warps.unshift(lantern), a.links.push({ a: "vale", b: "tarn" })))), []);
 });
 
 test("AC2 (#117): a road that leaves an edge 3 tiles off from where it arrives fails; 1 tile off passes", () => {
@@ -281,6 +286,11 @@ test("AC3 (#117): a good drop passes; one with no why, or no cue, fails", () => 
   passes(world(drop()));
   says(world(drop({ why: undefined })), /vale: \[drop\] the drop 8,8 > 8,9 needs a why/);
   says(world(drop({}, false)), /vale: \[drop\] the drop 8,8 > 8,9 has no cue \(a prop or paint\) within 1 tile/);
+  // Path paint beside it is the path, no cue; a slide mark (sand paint) is.
+  const paint = (c) => (m, a) => (drop({}, false)(m, a), (m.vale.paint = m.vale.tiles.map((r, z) => (z === 8 ? put(".".repeat(r.length), 7, c) : ".".repeat(r.length)))));
+  says(world(paint("p")), /vale: \[drop\] the drop 8,8 > 8,9 has no cue/);
+  assert.doesNotMatch(run(world(paint("s")), "--strict").out, /has no cue/);
+  says(world((m, a) => (drop()(m, a), (m.vale_in.drops = [{ from: [3, 3], to: [3, 4], why: "a step" }]))), /vale_in: \[drop\] the drop 3,3 > 3,4 is indoors/);
   says(world(drop({ to: [8, 10] })), /vale: \[drop\] the drop 8,8 > 8,10 must join two open tiles side by side/);
 });
 
@@ -291,6 +301,30 @@ test("AC3 (#117): a drop that is the only way out of an area fails", () => {
     for (let z = 9; z <= 12; z++) for (let x = 6; x <= 10; x++) if (!(x === 8 && z === 9) && (x === 6 || x === 10 || z === 9 || z === 12)) m.vale.tiles[z] = put(m.vale.tiles[z], x, "#");
   };
   says(world(pit), /vale: \[drop\] below the drop 8,8 > 8,9, nothing reaches an exit, a warp or a waymark without it \(a soft-lock\)/);
+  // The pit's way out is a shortcut in its south wall: lifted from inside, it frees the pit; from outside (the far side,
+  // never reached from below), it doesn't.
+  const hatch = (from) => (m, a) => {
+    pit(m, a);
+    m.vale.tiles[12] = put(m.vale.tiles[12], 8, ".");
+    m.vale.gates = [{ id: "hatch", tiles: [[8, 12]], if: "flag:sc_vale_hatch", name: "the hatch", name_fr: "la trappe", text: "Barred.", text_fr: "Barré.",
+      shortcut: { id: "vale_hatch", from, label: "Lift the bar", label_fr: "Lever la barre" } }];
+    a.marks.push({ kind: "shortcut", map: "vale", id: "vale_hatch" });
+  };
+  assert.doesNotMatch(run(world(hatch([8, 11])), "--strict").out, /below the drop/);
+  says(world(hatch([8, 13])), /vale: \[drop\] below the drop 8,8 > 8,9, nothing reaches an exit, a warp or a waymark without it \(a soft-lock\)/);
+  // A walled pocket above the drop: its only way out is down.
+  const ledge = (m, a) => (drop()(m, a), [[7, 8], [8, 7], [9, 8]].forEach(([x, z]) => (m.vale.tiles[z] = put(m.vale.tiles[z], x, "#"))));
+  says(world(ledge), /vale: \[drop\] above the drop 8,8 > 8,9, nothing reaches an exit, a warp or a waymark without it \(a soft-lock\)/);
+});
+
+test("#117: when the hour shuts a gate, a drop is still a way out, taken downward", () => {
+  // The ledge's way in is a gate open by day; at night the hero on it still gets out, down the drop.
+  const day = (m, a) => {
+    drop()(m, a);
+    [[7, 8], [9, 8]].forEach(([x, z]) => (m.vale.tiles[z] = put(m.vale.tiles[z], x, "#")));
+    m.vale.gates = [{ id: "stile", tiles: [[8, 7]], if: "time:day", name: "the stile", name_fr: "l'échalier", text: "Shut at night.", text_fr: "Fermé la nuit." }];
+  };
+  assert.doesNotMatch(run(world(day), "--strict").out, /once the timed gates shut/);
 });
 
 test("#117: a shortcut gate is checked: its flag, its far-side tile and its labels", () => {

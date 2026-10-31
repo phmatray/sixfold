@@ -329,7 +329,8 @@ function routines(name, m, solid, seatAt, height) {
   const doors = (m.warps ?? []).filter((w) => !w.dir);
   const grid = {
     width: m.width, height: m.height,
-    climb: (ax, az, bx, bz) => Math.abs((height[`${bx},${bz}`] ?? 0) - (height[`${ax},${az}`] ?? 0)) <= 0.6, // as build.js (ladders aside)
+    // As build.js climb (ladders aside): a drop (#117) is a ledge both ways to a walk planned for someone.
+    climb: (ax, az, bx, bz) => !(m.drops ?? []).some((d) => [`${d.from},${d.to}`, `${d.to},${d.from}`].includes(`${ax},${az},${bx},${bz}`)) && Math.abs((height[`${bx},${bz}`] ?? 0) - (height[`${ax},${az}`] ?? 0)) <= 0.6,
     open: (x, z) => x >= 0 && z >= 0 && x < m.width && z < m.height && !solid.has(`${x},${z}`),
     door: (to) => ((w) => w && [w.x, w.z])(doors.find((w) => w.to === to)),
   };
@@ -391,7 +392,8 @@ function reach(name, m, solid0, height0) {
     if (!g.name) fail.push(`${name}: gate ${g.id} needs a name (announced when it opens)`);
     if (g.floor !== undefined && !(g.floor >= 0)) fail.push(`${name}: gate ${g.id} floor ${g.floor} is below the ground (it would hide the hero's feet)`);
   }
-  // A drop (#117) is a one-way edge, `from` down to `to`, never back up; `down` false leaves every drop out.
+  // A drop (#117) is a one-way edge, `from` down to `to`, never back up; `down` false leaves every drop out, "back"
+  // floods backward (from the ways out: a tile escapes if it steps onto one that does, so a drop is taken `to` > `from`).
   const drops = new Set((m.drops ?? []).map((d) => `${d.from},${d.to}`));
   const flood = (open, starts = [[m.spawn.x, m.spawn.z]], down = true) => {
     const solid = new Set(solid0), h = { ...height };
@@ -408,8 +410,9 @@ function reach(name, m, solid0, height0) {
         h[k] = g.floor ?? (deck ? base + deck[0] : h[k] ?? 0);
       }
     const step = (ax, az, bx, bz) => {
+      if (down === "back") [ax, az, bx, bz] = [bx, bz, ax, az];
       if (drops.has(`${bx},${bz},${ax},${az}`)) return false;
-      if (drops.has(`${ax},${az},${bx},${bz}`)) return down;
+      if (drops.has(`${ax},${az},${bx},${bz}`)) return !!down;
       if (Math.abs((h[`${bx},${bz}`] ?? 0) - (h[`${ax},${az}`] ?? 0)) <= 0.6) return true;
       const axis = ax !== bx ? "x" : "z";
       return ladders.get(`${ax},${az}`) === axis || ladders.get(`${bx},${bz}`) === axis;
@@ -473,7 +476,7 @@ function reach(name, m, solid0, height0) {
       return !term.startsWith("time:") || (term.slice(5) === ph) !== neg;
     });
     for (const ph of ["dawn", "day", "dusk", "night"]) {
-      const back = flood((g) => !/time:/.test(g.if) || at(g.if, ph), outs.filter(([x, z]) => inMap(x, z)));
+      const back = flood((g) => !/time:/.test(g.if) || at(g.if, ph), outs.filter(([x, z]) => inMap(x, z)), "back");
       const stuck = [...all].find((t) => !onGate.has(t) && !back.has(t));
       if (stuck) fail.push(`${name}: at ${ph}, once the timed gates shut, ${stuck} has no way out (give it one: a rope with a warp:, a door)`);
     }
@@ -797,7 +800,7 @@ function report(name) {
 // round, one of whose tiles is within 2 of the main path (a 3-wide road's far lane), or null. A gate tile is path once open
 // (a plank laid over a stream).
 function loopOf(m, g, all, route) {
-  const walk = new Set([...g.path, ...(m.gates ?? []).flatMap((x) => (x.tiles ?? []).map((t) => `${t}`))].filter((t) => all.has(t)));
+  const walk = new Set([...g.path, ...(m.gates ?? []).flatMap((x) => (x.tiles ?? []).map((t) => `${t[0]},${t[1]}`))].filter((t) => all.has(t)));
   const main = (t) => {
     const [x, z] = t.split(",").map(Number);
     return route.some(([rx, rz]) => Math.max(Math.abs(rx - x), Math.abs(rz - z)) <= 2);
@@ -1007,7 +1010,7 @@ function honestWorld() {
     (ways[`${a}>${b}`] ??= new Set()).add([...new Set(terms)].sort().join(" & "));
   };
   const holds = (ways) => new Set(Object.values(ways).filter((s) => !s.has("")).flatMap((s) => [...s]));
-  const paths = {}, pathAt = (n) => (paths[n] ??= ld.grids(maps[n], LD).path), half = Math.floor(SCREEN[0] / 2);
+  const pathAt = (n) => design(n).g.path, half = Math.floor(SCREEN[0] / 2); // design() caches the grids levelDesign() reads
   for (const [name, m] of Object.entries(maps)) {
     if (!outdoor(name)) continue;
     for (const e of m.exits ?? []) {
@@ -1021,7 +1024,7 @@ function honestWorld() {
       if (off !== undefined)
         fail.push(`${name}: [road-offset] exit ${e.side} to ${e.to}: the path at ${tile(m, e, off)} meets none within 1 tile across the edge (on ${e.to} the path is at ${there.map((j) => tile(B, b, j)).join(" ") || "no tile"})`);
       if (e.water_ends) continue;
-      const water = (mm, side, c) => mm.tiles[ld.edgeTile(mm, side, c)[1]]?.[ld.edgeTile(mm, side, c)[0]] === "~";
+      const water = (mm, side, c) => ((t) => mm.tiles[t[1]]?.[t[0]] === "~")(ld.edgeTile(mm, side, c));
       for (let c = e.span[0] - half; c <= e.span[1] + half; c++) {
         const d = c - e.span[0] + b.span[0];
         if (water(m, e.side, c) && ![d - 1, d, d + 1].some((x) => water(B, b.side, x))) {
@@ -1033,7 +1036,8 @@ function honestWorld() {
     // Doors and cues, on through rooms and caves to the next outdoor map.
     const queue = waysOut(name).map((w) => ({ ...w, terms: [...cut(name, (s) => near(s, w.at, w.across)), ...items(w.if)] })), inside = new Set();
     while (queue.length) {
-      const w = queue.shift();
+      // The way with the fewest item terms first, so a free door into a room wins over a lantern door into it.
+      const w = queue.sort((p, q) => p.terms.length - q.terms.length).shift(); // ponytail: a sort per step, a heap if chains grow
       if (outdoor(w.to)) join(name, w.to, [...w.terms, ...cut(w.to, (s) => near(s, w.land))]);
       else if (!inside.has(w.to)) inside.add(w.to), queue.push(...waysOut(w.to).filter((x) => x.to !== name).map((x) => ({ ...x, terms: [...w.terms, ...items(x.if)] })));
     }
@@ -1080,12 +1084,22 @@ function oneWay() {
         let [w, dd] = FOOT[p.asset] ?? [1, 1];
         if (p.rot % 180 === 90) [w, dd] = [dd, w];
         return ends.some((t) => by(t, p.x, p.z, p.x + w - 1, p.z + dd - 1));
-      }) || ends.some(([x, z]) => [-1, 0, 1].some((dx) => [-1, 0, 1].some((dz) => (m.paint?.[z + dz]?.[x + dx] ?? ".") !== ".")));
+      }) || ends.some(([x, z]) => [-1, 0, 1].some((dx) => [-1, 0, 1].some((dz) => !".pr".includes(m.paint?.[z + dz]?.[x + dx] ?? ".")))); // path paint (ld.js) is no cue
       if (!cue) fail.push(`${said} has no cue (a prop or paint) within 1 tile`);
       // Above, every gate stays as the hero left it (open); below, only shortcuts open (the hero may come down without
-      // the items the others need). Neither side may need a drop to get out.
-      if (!out(f(true, [d.from], false))) fail.push(`${name}: [drop] above the drop ${d.from} > ${d.to}, nothing reaches an exit, a warp or a waymark without it (a soft-lock)`);
-      if (!out(f((g) => !!g.shortcut, [d.to], false))) fail.push(`${name}: [drop] below the drop ${d.from} > ${d.to}, nothing reaches an exit, a warp or a waymark without it (a soft-lock)`);
+      // the items the others need). Either way a shortcut opens only once its `from` is reached on that side. Neither
+      // side may need a drop to get out.
+      const side = (start, others) => {
+        const lifted = new Set();
+        for (;;) {
+          const s = f((g) => (g.shortcut ? lifted.has(g) : others), [start], false);
+          const more = (m.gates ?? []).filter((g) => g.shortcut && !lifted.has(g) && s.has(at(g.shortcut.from)));
+          if (!more.length) return s;
+          more.forEach((g) => lifted.add(g));
+        }
+      };
+      if (!out(side(d.from, true))) fail.push(`${name}: [drop] above the drop ${d.from} > ${d.to}, nothing reaches an exit, a warp or a waymark without it (a soft-lock)`);
+      if (!out(side(d.to, false))) fail.push(`${name}: [drop] below the drop ${d.from} > ${d.to}, nothing reaches an exit, a warp or a waymark without it (a soft-lock)`);
     }
     if (m.drops?.length) want.set(`drop:${name}`, `${name} has a drop`);
     for (const g of m.gates ?? []) {

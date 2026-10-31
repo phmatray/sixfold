@@ -51,6 +51,14 @@ test("AC4 (#117): a shortcut is barred from the near side, lifted from the far s
   await page.keyboard.press("Escape");
   await expect(note).toBeHidden();
 
+  // Not lifted yet: the world map marks the pass's drop (it is seen), but no shortcut.
+  await page.keyboard.press("m");
+  const chart = page.getByRole("dialog").filter({ hasText: "World map" });
+  await expect(chart.locator('.atlas-mark[data-mark="drop"]')).toBeVisible();
+  await expect(chart.locator('.atlas-mark[data-mark="shortcut"]')).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(chart).toBeHidden();
+
   // From the terrace above: lift the bar.
   await warpTo(page, "screepass", 10, 24, "s");
   await expect(page.getByRole("button", { name: /^Lift the bar/ })).toBeVisible();
@@ -72,7 +80,6 @@ test("AC4 (#117): a shortcut is barred from the near side, lifted from the far s
 
   // And the world map marks it, with the pass's drop.
   await page.keyboard.press("m");
-  const chart = page.getByRole("dialog").filter({ hasText: "World map" });
   await expect(chart.locator('.atlas-mark[data-mark="shortcut"]')).toBeVisible();
   await expect(chart.locator('.atlas-mark[data-mark="drop"]')).toBeVisible();
 });

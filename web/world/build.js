@@ -388,13 +388,13 @@ export async function build(map, got, reduced) {
   const blocked = (x, z) => !inMap(x, z) || solid[z * W + x] === 1;
   const floorAt = (x, z) => (inMap(x, z) ? floor[z * W + x] : 0);
   // A ladder joins its front and back neighbours at any height (along its own axis). A drop (#117,
-  // outdoors) is one way: from `from` down to `to` at any height, never back up.
+  // outdoors) is one way: only the hero's own step (world.js) hops it, from `from` down to `to`; to `climb`
+  // (tap-to-walk routes, people's walks, a duelist's sight) it is a ledge both ways.
   const ladders = new Map();
   const drops = new Set(L.indoor ? [] : (map.drops ?? []).map((d) => `${d.from},${d.to}`));
   const drop = (ax, az, bx, bz) => drops.has(`${ax},${az},${bx},${bz}`);
   const climb = (ax, az, bx, bz) => {
-    if (drop(bx, bz, ax, az)) return false;
-    if (drop(ax, az, bx, bz)) return true;
+    if (drop(ax, az, bx, bz) || drop(bx, bz, ax, az)) return false;
     if (Math.abs(floorAt(bx, bz) - floorAt(ax, az)) <= CLIMB) return true;
     const axis = ax !== bx ? "x" : "z";
     return ladders.get(key(ax, az)) === axis || ladders.get(key(bx, bz)) === axis;

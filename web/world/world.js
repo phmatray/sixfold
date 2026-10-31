@@ -590,7 +590,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       warp({ to: exit.to, edge: true, spawn: arrival(w, exit, f) });
       return startStep(x, z, carry, null);
     }
-    if (w.blocked(x, z) || w.npcAt(x, z) || !w.climb(hero.x, hero.z, x, z)) {
+    if (w.blocked(x, z) || w.npcAt(x, z) || !(w.climb(hero.x, hero.z, x, z) || w.drop(hero.x, hero.z, x, z))) { // only this step hops a drop (#117)
       const here = free && w.warps.get(key(hero.x, hero.z));
       if (here?.dir === f) warp(here);
       return false;
