@@ -17,7 +17,7 @@ const assets = new Map();
 export const PERSON = /^(npc|rival)_/; // models in assets/npc/
 const WALL = /^wall(_low)?(|_corner|_end|_t|_window)$/; // the interior wall kit (not the outdoor `wall_dry` set)
 const folder = (n) => (INTERIOR.has(n) || WALL.test(n) ? "interior/" : PERSON.test(n) ? "npc/" : "");
-const BUILT = new Set(["seal_door", "inn_stairs", "inn_stairwell"]); // drawn in code only (props.js PLACEHOLDER): nothing to fetch
+const BUILT = new Set(["seal_door", "inn_stairs", "inn_stairwell", "hedge_gap", "crates_open", "stone_odd", "stone_moved"]); // drawn in code only (props.js PLACEHOLDER): nothing to fetch
 export const loadAsset = (n) => {
   if (BUILT.has(n)) return Promise.resolve(null);
   if (!assets.has(n)) assets.set(n, loader.loadAsync(new URL(`assets/${folder(n)}${n}.glb`, BASE).href).catch(() => null));
@@ -53,7 +53,7 @@ export const setMap = (name, raw) => maps.set(name, Promise.resolve(expand(local
 // until then unless `hidden`, and a shrug after.
 // A waymark (`kind: "waymark"`, §7.3): the first touch lights it (flag way_<id>),
 // and every touch opens the world map to travel.
-// A `secret` block (#116) sets flag:secret_<id> on discovery: a find's first take, or
+// A `secret` block (#116) sets flag:secret_<id> on discovery: a find's take (and its shrug after), or
 // every branch of any other spot or NPC.
 export function expand(map) {
   for (const n of map.npcs ?? []) {
@@ -75,7 +75,8 @@ export function expand(map) {
     if (!i.hidden) i.glint = i.glint ? `${i.glint} & !flag:${flag}` : `!flag:${flag}`;
     i.name ??= "";
     const secret = i.secret ? [`flag:secret_${i.secret.id}`] : [];
-    i.dialogue = [{ if: `!flag:${flag}`, lines: [i.text], do: [i.give, `flag:${flag}`, ...secret] }, { lines: [tr("Nothing else here.", "Plus rien ici.")] }];
+    // The shrug sets it too: a save that looted the find before secrets existed earns it by looking again.
+    i.dialogue = [{ if: `!flag:${flag}`, lines: [i.text], do: [i.give, `flag:${flag}`, ...secret] }, { lines: [tr("Nothing else here.", "Plus rien ici.")], ...(i.secret && { do: secret }) }];
   }
   for (const i of map.interactions ?? []) {
     if (i.kind !== "waymark") continue;

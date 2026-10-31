@@ -762,6 +762,7 @@ Scripts are map data (§9.1), triggered `on: "enter"` or by stepping on `at` til
 | `ambience` | map | 1.9 | ambience bed (a track id or `interior`), default the map's track (`interior` indoors, `cave` in the dark) |
 | `region` | map | 1.3 | region id, for the world map and achievements |
 | `scripts` | map | 1.4 | cutscenes (below) |
+| `secret`, `sound`; prop `hedge_gap` | interaction, npc; prop | 1.12 | a secret (its clue, hint and hum) and a hedge break; the data and its rules are in `docs/WORLD_RULES.md` §9 |
 
 Scripts:
 

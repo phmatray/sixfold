@@ -614,6 +614,37 @@ function tickBeds(now) {
   }
 }
 
+// ---------- The hum: one quiet drone by a secret (#116) ----------
+//
+// A secret's `sound` (world.js): a low synthesised drone on the ambience bus, two detuned triangles beating slowly
+// under a soft octave, its level (0..1) set by world.js from the hero's distance. 0 fades it out and stops it.
+let humNode = null, humLevel = 0;
+export function hum(level) {
+  humLevel = Math.min(1, Math.max(0, Number(level) || 0));
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  if (humLevel && !humNode) {
+    const out = ctx.createGain(), flt = ctx.createBiquadFilter();
+    out.gain.setValueAtTime(0, t);
+    flt.type = "lowpass";
+    flt.frequency.value = 520;
+    flt.connect(out).connect(ambBus);
+    const oscs = [[98, "triangle", 0.5], [98.7, "triangle", 0.5], [196.4, "sine", 0.25]].map(([f, type, g]) => {
+      const o = ctx.createOscillator(), v = ctx.createGain();
+      Object.assign(o, { type }).frequency.setValueAtTime(f, t);
+      v.gain.value = g * 0.05;
+      o.connect(v).connect(flt);
+      o.start(t);
+      return o;
+    });
+    oscs[0].onended = () => out.disconnect();
+    humNode = { out, oscs };
+  }
+  if (!humNode) return;
+  humNode.out.gain.setTargetAtTime(humLevel, t, 0.4);
+  if (!humLevel) humNode.oscs.forEach((o) => o.stop(t + 2.5)), (humNode = null);
+}
+
 // ---------- Music: a tiny step sequencer ----------
 //
 // A track is 16 steps (sixteenth notes) per bar. `chords` holds the scale
@@ -963,6 +994,7 @@ function debug() {
     intense,
     prefs: { ...prefs },
     levels: levels(),
+    hum: humLevel,
     ...stats,
   };
 }
@@ -981,4 +1013,4 @@ function levels() {
   );
 }
 
-globalThis.sixfoldAudio = { sfx, music, ambience, intensity, debug };
+globalThis.sixfoldAudio = { sfx, music, ambience, intensity, hum, debug };

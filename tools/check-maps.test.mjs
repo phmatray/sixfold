@@ -215,3 +215,50 @@ test("AC7 (#114): an open on a warp that is no door, and a lit on a model withou
   bad((m) => (m.vale_in.warps[0].open = "hour:8-19"), /vale_in: the warp to vale at 5,7 has an open, but only a door keeps hours/);
   bad((m) => (m.vale.props[1].lit = "hour:17-23"), /vale: tree at 4,4 is lit, but has no windows/);
 });
+
+// Secrets (#116, WORLD_RULES §9): a well-formed one in the vale, a box on crates behind a hedge break, with a moss
+// trail through the break as its clue, a neighbour who hints at it, and a hum by the box.
+const secret = (m) => {
+  m.vale.paint = m.vale.tiles.map((r) => ".".repeat(r.length));
+  m.vale.paint[10] = m.vale.paint[10].slice(0, 7) + "ss" + m.vale.paint[10].slice(9);
+  m.vale.props.push({ asset: "crates", x: 5, z: 10, rot: 0 }, { asset: "hedge_gap", x: 7, z: 10, rot: 90 });
+  m.vale.npcs.push({ id: "ann", name: "Ann", x: 8, z: 6, facing: "s", dialogue: [{ lines: ["Old Tam hid a box west of here."], lines_fr: ["Le vieux Tam a caché une caisse à l'ouest."], do: ["flag:heard_old_box"] }] });
+  m.vale.interactions.push({
+    kind: "find", id: "v_box", x: 5, z: 10, give: "coins:10", hidden: true, text: "A box.", text_fr: "Une caisse.", poi: "secret",
+    secret: { id: "old_box", kind: "spatial", clue: [[7, 10], [8, 10]], hint: "ann" }, sound: { at: [5, 10], sfx: "hum", radius: 3 },
+  });
+};
+const box = (m) => m.vale.interactions.find((i) => i.id === "v_box");
+const secretFails = (change, msg) => {
+  const r = run(world((m) => (secret(m), change(m))), "--strict");
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, msg, r.out);
+};
+
+test("#116: a well-formed secret (clue, hint, fed hedge gap, hum) passes", () => passes(world(secret)));
+
+test("AC2 (#116): a secret with no clue and no hint fails", () => {
+  secretFails((m) => (delete box(m).secret.clue, delete box(m).secret.hint), /vale: \[secret\] v_box's secret old_box has no clue and no hint/);
+  secretFails((m) => (box(m).clue = [[7, 10]]), /vale: \[secret\] .*clue now lives in the secret block/);
+  secretFails((m) => delete box(m).secret, /vale: \[secret\] v_box is poi: secret but has no secret block/);
+});
+
+test("AC2 (#116): a field item behind a secret fails, as does an exit reached only through a secret gate", () => {
+  secretFails((m) => (box(m).give = "give:wading_boots"), /vale: \[behind-secret\] v_box's secret old_box gives wading_boots/);
+  const gate = { id: "tam_door", name: "Tam's door", name_fr: "La porte de Tam", tiles: [[11, 0], [12, 0], [13, 0]], if: "flag:secret_old_box", text: "Shut.", text_fr: "Fermé." };
+  secretFails((m) => (m.vale.gates = [gate]), /vale: \[behind-secret\] the exit n to fell is only reached through a secret/);
+});
+
+test("AC2 (#116): a hedge gap with no trail fails", () => {
+  secretFails((m) => (m.vale.paint[10] = ".".repeat(26)), /vale: \[hedge-gap\] the hedge_gap at 7,10 has no trail/);
+});
+
+test("AC2 (#116): a heard_ flag no NPC sets fails, as does a hint whose NPC never sets it", () => {
+  secretFails((m) => (m.vale.npcs[0].if = "flag:heard_nobody"), /vale: \[heard\] .*flag:heard_nobody is read, but no one's line sets it/);
+  secretFails((m) => (m.vale.npcs[0].dialogue[0].do = []), /vale: \[secret\] .*hint ann never sets flag:heard_old_box/);
+});
+
+test("#116: a sound needs a secret, a tile on the map, sfx hum and a radius of 1..8", () => {
+  secretFails((m) => (box(m).sound.radius = 12), /vale: \[sound\] v_box's sound/);
+  secretFails((m) => (m.vale.interactions[0].sound = { at: [5, 10], sfx: "hum", radius: 3 }), /vale: \[sound\] .*only on a secret/);
+});

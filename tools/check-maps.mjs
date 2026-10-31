@@ -29,6 +29,7 @@
 // exit-both-ways, unreachable, connection) for maps with `"level_design": 2`, errors with --strict; on other maps
 // they are only listed in the report. `--report` (or `--report=<file.md>`) prints an advisory section per outdoor
 // map against the budgets in tools/level-design.json (`--budgets=<file>` for another), and never fails.
+// Secrets (#116, WORLD_RULES §9, always errors): `secretRules()` below.
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "node:fs";
 import * as ld from "../web/world/ld.js";
 import { CRITTERS, boatLane, openTile } from "../web/world/life_schedule.js";
@@ -75,6 +76,7 @@ const fail = [], warn = [];
 // Level-design budgets, in one place (tools/level-design.json; --budgets=<file> reads another).
 const BUDGET = JSON.parse(readFileSync(process.argv.find((a) => a.startsWith("--budgets="))?.slice(10) || new URL("./level-design.json", import.meta.url), "utf8"));
 const ctx = {}, designed = {}; // per map: what the level-design pass needs (solid, reachable, floor heights), and its findings
+const floods = {}; // per map: reach()'s flood, for the secret rules
 const open = {}; // per map: is a tile open ground (for warp: cues from other maps)
 // The placement rules (docs/WORLD_RULES.md) fail the build with --strict (as CI runs it); without it they are listed
 // as warnings, for a map in progress.
@@ -390,8 +392,8 @@ function reach(name, m, solid0, height0) {
     if (!g.name) fail.push(`${name}: gate ${g.id} needs a name (announced when it opens)`);
     if (g.floor !== undefined && !(g.floor >= 0)) fail.push(`${name}: gate ${g.id} floor ${g.floor} is below the ground (it would hide the hero's feet)`);
   }
-  const flood = (open, starts = [[m.spawn.x, m.spawn.z]]) => {
-    const solid = new Set(solid0), h = { ...height };
+  const flood = (open, starts = [[m.spawn.x, m.spawn.z]], walls = []) => {
+    const solid = new Set([...solid0, ...walls]), h = { ...height };
     for (const g of gates)
       for (const [x, z, y] of g.tiles ?? []) {
         const k = `${x},${z}`, c = m.tiles[z]?.[x];
@@ -475,6 +477,7 @@ function reach(name, m, solid0, height0) {
   }
   for (const wm of atlas?.waymarks ?? [])
     if (wm.map === name && !all.has(`${wm.x},${wm.z}`)) fail.push(`${name}: waymark ${wm.id}'s tile ${wm.x},${wm.z} can't be reached`);
+  floods[name] = flood;
   return all;
 }
 
@@ -525,6 +528,7 @@ else {
     }
 }
 levelDesign();
+secretRules();
 if (STRICT) fail.push(...rule);
 else warn.unshift(...rule);
 if (warn.length) console.warn(`${warn.length} placement warnings (docs/WORLD_RULES.md; judge each one):\n  ${warn.join("\n  ")}`);
@@ -706,7 +710,7 @@ function levelDesign() {
       if (o.poi !== undefined && !TIERS.includes(o.poi)) fail.push(`${at}: poi is ${TIERS.join(" / ")}`);
       if (o.landmark !== undefined && (what !== "prop" || o.landmark !== true)) fail.push(`${at}: landmark is true, on a prop`);
       if (o.optional !== undefined && (what === "prop" || o.optional !== true)) fail.push(`${at}: optional is true, on a spot, a person or a warp`);
-      if (o.clue !== undefined && (o.poi !== "secret" || !Array.isArray(o.clue) || !o.clue.every((c) => tile(c) && inMap(c)))) fail.push(`${at}: clue is [[x, z], …] on a secret`);
+      if (o.clue !== undefined) fail.push(`${name}: [secret] the ${what} at ${o.x},${o.z}: clue now lives in the secret block (secret.clue)`);
     }
   }
   for (const [name, m] of Object.entries(maps)) {
@@ -719,6 +723,89 @@ function levelDesign() {
   const text = ["# Level design report", "", ...Object.keys(maps).filter((n) => !maps[n].light.indoor).flatMap(report)].join("\n");
   if (flag.includes("=")) writeFileSync(flag.slice(9), text + "\n");
   else console.log(text);
+}
+// Secrets (#116, docs/WORLD_RULES.md §9), always errors, on every map:
+// [secret] `poi: "secret"` on a spot or a person goes with a `secret` block and back: an id of a-z, 0-9 and _, unique
+//   across the maps, a kind, and a clue (each tile seen at the real camera from a tile you reach within a screen of
+//   it) or a hint (an NPC, on any map, whose line sets flag:heard_<id>).
+// [heard] every flag:heard_<x> read in a condition is set by some NPC's line, on any map.
+// [behind-secret] a secret gives no field item or quest item; with every gate on a `secret_` flag shut and every
+//   hedge_gap solid, each warp, exit, waymark, rival or keeper, seal stone and giver of such an item reached with every
+//   gate open is still reached.
+// [hedge-gap] a hedge_gap has a trail (paint s or r) on or beside it that is a clue of a secret on the map.
+// [sound] only on a secret: { at: [x, z] on the map, sfx: "hum", radius: 1..8 }.
+function secretRules() {
+  const KINDS = ["spatial", "environmental", "progression", "social"];
+  const quest = existsSync(`${dir}/quests.json`) ? [...readFileSync(`${dir}/quests.json`, "utf8").matchAll(/item:([a-z0-9_]+)/g)].map((x) => x[1]) : [];
+  const essential = new Set(["kiln_lantern", "ferry_pass", "wading_boots", "grip_gloves", "running_shoes", ...quest]);
+  const effects = (o) => [o.give, ...(o.dialogue ?? []).flatMap((b) => b.do ?? [])].filter((e) => typeof e === "string");
+  const gives = (o) => effects(o).map((e) => /^give:([a-z0-9_]+)$/.exec(e)?.[1]).filter((i) => essential.has(i));
+  const npcs = Object.values(maps).flatMap((m) => m.npcs ?? []);
+  const heard = new Set(npcs.flatMap(effects).map((e) => /^flag:(heard_[a-z0-9_]+)$/.exec(e)?.[1]).filter(Boolean));
+  // Flags read in conditions: every string in the map but the effects (`do`).
+  const reads = (o, out = new Set()) => {
+    if (typeof o === "string") for (const [, f] of o.matchAll(/flag:(heard_[a-z0-9_]+)/g)) out.add(f);
+    else if (o && typeof o === "object") for (const [key, v] of Object.entries(o)) key !== "do" && reads(v, out);
+    return out;
+  };
+  const ids = new Map(), k = (x, z) => `${x},${z}`;
+  for (const [name, m] of Object.entries(maps)) {
+    const { all, height } = ctx[name], bad = (s) => fail.push(`${name}: ${s}`);
+    const inMap = (t) => Array.isArray(t) && t.length === 2 && t.every(Number.isInteger) && t[0] >= 0 && t[1] >= 0 && t[0] < m.width && t[1] < m.height;
+    const boxes = ld.grids(m, LD).boxes, reached = [...all].map((t) => t.split(",").map(Number));
+    // A clue tile is seen when its ground (or the top of what stands on it) is, from a tile within a screen.
+    const seen = (cx, cz) => {
+      const self = boxes.filter((b) => cx >= b.x0 && cx < b.x1 && cz >= b.z0 && cz < b.z1);
+      const target = { x: cx, z: cz, y: Math.max((height[k(cx, cz)] ?? 0) + 0.1, ...self.map((b) => b.y1)), self };
+      return reached.some(([x, z]) => Math.abs(x - cx) <= SCREEN[0] >> 1 && Math.abs(z - cz) <= SCREEN[1] >> 1 && visibleAll(m, boxes, { x, z, y: height[k(x, z)] ?? 0 }, target));
+    };
+    for (const p of [...m.props, ...(m.warps ?? [])]) if (p.poi === "secret" || p.secret) bad(`[secret] the ${p.asset ?? "warp"} at ${p.x},${p.z}: a secret is a spot or a person, with a secret block`);
+    const entries = [...(m.interactions ?? []).map((o) => [o.id ?? `the ${o.kind} at ${o.x},${o.z}`, o]), ...(m.npcs ?? []).map((n) => [n.id, n])];
+    for (const [who, o] of entries) {
+      const s = o.secret, d = o.sound;
+      if (d !== undefined && !s) bad(`[sound] ${who}'s sound goes only on a secret`);
+      else if (d !== undefined && !(inMap(d?.at) && d.sfx === "hum" && d.radius >= 1 && d.radius <= 8)) bad(`[sound] ${who}'s sound is { at: [x, z] on the map, sfx: "hum", radius: 1..8 }`);
+      if ((o.poi === "secret") !== !!s) bad(s ? `[secret] ${who} has a secret block, so it is poi: secret` : `[secret] ${who} is poi: secret but has no secret block`);
+      if (!s) continue;
+      const at = `${who}'s secret ${s.id}`;
+      if (!/^[a-z0-9_]+$/.test(s.id ?? "")) bad(`[secret] ${at}: its id is a-z, 0-9 and _`);
+      else if (ids.has(s.id)) bad(`[secret] ${at}: the id is taken on ${ids.get(s.id)}`);
+      else ids.set(s.id, name);
+      if (!KINDS.includes(s.kind)) bad(`[secret] ${at}: kind is ${KINDS.join(", ")}`);
+      if (s.clue !== undefined && !(Array.isArray(s.clue) && s.clue.every(inMap))) bad(`[secret] ${at}: clue is [[x, z], …] on the map`);
+      else for (const [cx, cz] of s.clue ?? []) if (!seen(cx, cz)) bad(`[secret] ${at}: its clue at ${cx},${cz} can't be seen from any tile you reach within a screen of it`);
+      if (!s.clue?.length && !s.hint) bad(`[secret] ${at} has no clue and no hint`);
+      if (s.hint !== undefined && !npcs.some((n) => n.id === s.hint && effects(n).includes(`flag:heard_${s.id}`))) bad(`[secret] ${at}: its hint ${s.hint} never sets flag:heard_${s.id} (or is no one)`);
+      for (const i of gives(o)) bad(`[behind-secret] ${at} gives ${i}, which the way on needs; a secret's reward is never essential`);
+    }
+    for (const f of reads(m)) if (!heard.has(f)) bad(`[heard] flag:${f} is read, but no one's line sets it (flag:${f} in an NPC's dialogue do)`);
+    // Hedge gaps: fed by a trail you can read.
+    const gaps = m.props.filter((p) => p.asset === "hedge_gap");
+    const clues = new Set(entries.flatMap(([, o]) => (Array.isArray(o.secret?.clue) ? o.secret.clue : [])).map(([x, z]) => k(x, z)));
+    for (const p of gaps)
+      if (![[0, 0], ...Object.values(DIR)].some(([dx, dz]) => "sr".includes(m.paint?.[p.z + dz]?.[p.x + dx] || "-") && clues.has(k(p.x + dx, p.z + dz))))
+        bad(`[hedge-gap] the hedge_gap at ${p.x},${p.z} has no trail: paint s or r on it or beside it, a clue of a secret here`);
+    // Nothing essential behind a secret: shut the secret gates and the hedge gaps, and flood again.
+    if (!gaps.length && !(m.gates ?? []).some((g) => /secret_/.test(g.if ?? ""))) continue;
+    const cut = floods[name]((g) => !/secret_/.test(g.if ?? ""), undefined, gaps.map((p) => k(p.x, p.z)));
+    const near = (set, x, z, across = false) => set.has(k(x, z)) || Object.values(DIR).some(([dx, dz]) => set.has(k(x + dx, z + dz)) || (across && set.has(k(x + 2 * dx, z + 2 * dz))));
+    const lost = (x, z, across) => near(all, x, z, across) && !near(cut, x, z, across);
+    const behind = [];
+    for (const e of m.exits ?? []) {
+      const tiles = ld.edgeTiles(m, e);
+      if (tiles.some(([x, z]) => all.has(k(x, z))) && !tiles.some(([x, z]) => cut.has(k(x, z)))) behind.push(`the exit ${e.side} to ${e.to}`);
+    }
+    for (const w of m.warps ?? []) if (lost(w.x, w.z)) behind.push(`the warp to ${w.to} at ${w.x},${w.z}`);
+    for (const w of atlas?.waymarks ?? []) if (w.map === name && all.has(k(w.x, w.z)) && !cut.has(k(w.x, w.z))) behind.push(`waymark ${w.id}`);
+    for (const n of m.npcs ?? []) if ((n.model === "npc_rival" || /"duel:/.test(JSON.stringify(n.dialogue ?? [])) || gives(n).length) && lost(n.x, n.z, true)) behind.push(n.id);
+    for (const i of m.interactions ?? []) if (gives(i).length && lost(i.x, i.z, true)) behind.push(`the ${i.kind} ${i.id ?? ""} at ${i.x},${i.z}`.replace("  ", " "));
+    for (const p of m.props.filter((p) => p.asset === "seal_stone")) {
+      const [w, d] = ld.foot(p, FOOT), t = [];
+      for (let x = p.x; x < p.x + w; x++) for (let z = p.z; z < p.z + d; z++) t.push([x, z]);
+      if (t.some(([x, z]) => near(all, x, z)) && !t.some(([x, z]) => near(cut, x, z))) behind.push(`the seal stone at ${p.x},${p.z}`);
+    }
+    for (const b of behind) bad(`[behind-secret] ${b} is only reached through a secret (a gate on a secret_ flag, or a hedge_gap)`);
+  }
 }
 // One outdoor map's section of the advisory report (never a failure): what design() found, against the budgets.
 function report(name) {

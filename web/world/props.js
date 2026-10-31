@@ -322,12 +322,52 @@ export const PLACEHOLDER = {
     }
     return g;
   },
+  // ----- Secrets (#116): drawn in code only, from the looks they stand in for (map.js BUILT) -----
+  // A break in a hedge you can walk through (WALKABLE): the hedge's cut ends, low, either side of a trodden gap with
+  // a few snapped twigs in it. It runs along X at rot 0 like `hedge`; the trail paint under it is the ground.
+  hedge_gap() {
+    const dk = toon("#2c6930"), mid = toon("#4a9a40"), lt = toon("#58a647"), twig = toon("#6b4a2e");
+    const g = group();
+    for (const s of [-1, 1]) g.add(...blobs(mid, [[0.17, s * 0.4, 0.22, 0]]), ...blobs(dk, [[0.13, s * 0.42, 0.1, -0.14]]), ...blobs(lt, [[0.11, s * 0.37, 0.36, 0.1]]));
+    for (const [x, z, r] of [[-0.1, 0.12, 0.5], [0.07, -0.16, -0.4], [0.16, 0.22, 1.2]]) {
+      const t = mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.26, 4), twig, x, 0.02, z);
+      t.rotation.set(Math.PI / 2, 0, r);
+      g.add(t);
+    }
+    return g;
+  },
+  // The crates, looted (a find's opened variant, `if: "flag:found_<id>"`): the box open and empty, its lid leant
+  // against it. The crates' woods and iron.
+  crates_open() {
+    const wood = toon("#b07a46"), dk = toon("#8a5c34"), iron = toon("#30353b"), inside = toon("#3a2616");
+    const g = group(mesh(new THREE.BoxGeometry(0.6, 0.04, 0.6), inside, -0.08, 0.04, 0));
+    for (const [w, d, x, z] of [[0.68, 0.05, 0, 0.32], [0.68, 0.05, 0, -0.32], [0.05, 0.6, -0.32, 0], [0.05, 0.6, 0.32, 0]]) g.add(mesh(new THREE.BoxGeometry(w, 0.5, d), wood, x - 0.08, 0.25, z));
+    for (const x of [-0.42, 0.26]) for (const z of [-0.34, 0.34]) g.add(mesh(new THREE.BoxGeometry(0.07, 0.52, 0.07), iron, x, 0.26, z)); // corner straps
+    const lid = mesh(new THREE.BoxGeometry(0.05, 0.62, 0.66), dk, 0.33, 0.31, 0);
+    lid.rotation.z = 0.2;
+    return g.add(lid), g;
+  },
+  // A stone that differs (Task 3's Storm secret): a squarer block, warmer and lichened, in a dry-stone run; and the same
+  // block slid aside (`stone_moved`, `if: "flag:secret_<id>"`) over the dark hollow it hid.
+  stone_odd: () => oddStone(false),
+  stone_moved: () => oddStone(true),
   // ----- Items -----
   shoes() {
     const shoe = (x) => group(mesh(new THREE.BoxGeometry(0.16, 0.12, 0.34), toon("#e2553a"), 0, 0.08, 0), mesh(new THREE.BoxGeometry(0.17, 0.04, 0.36), toon("#f4efe2"), 0, 0.02, 0.01), mesh(new THREE.BoxGeometry(0.14, 0.03, 0.08), toon("#f3d589"), 0, 0.15, 0.06)).translateX(x);
     return group(shoe(-0.11), shoe(0.11));
   },
 };
+// The odd stone (granite of the dry-stone wall, warmer, a lichen patch on its face); `moved`: slid 0.3 m east and
+// turned a little, over a dark hollow.
+function oddStone(moved) {
+  const stone = toon("#a99f90"), dk = toon("#6f716e"), lichen = toon("#c9c27a");
+  const block = group(mesh(new THREE.BoxGeometry(0.72, 0.62, 0.62), stone, 0, 0.31, 0), mesh(new THREE.BoxGeometry(0.3, 0.2, 0.02), lichen, -0.1, 0.4, 0.315),
+    mesh(new THREE.BoxGeometry(0.76, 0.06, 0.66), dk, 0, 0.03, 0));
+  if (!moved) return group(block);
+  block.position.x = 0.3;
+  block.rotation.y = -0.25;
+  return group(mesh(new THREE.BoxGeometry(0.5, 0.02, 0.5), toon("#20180f"), -0.18, 0.011, 0), block);
+}
 
 // A post plus arms toward each neighbour ([dx, dz] in world space, so no rotation
 // needed): fence rails, or wall slabs (full height, or low on the camera side).
@@ -372,7 +412,7 @@ export const FOOT = {
   hold_wall: [2, 1], tally_board: [2, 1],
 };
 // Props the hero walks over; every other prop blocks its footprint.
-export const WALKABLE = new Set(["rug", "exit_mat", "tidepool", "wisteria_arch", "rail", "support_beam", "oil_lantern"]); // the arch and the mine frames: walked under
+export const WALKABLE = new Set(["rug", "exit_mat", "tidepool", "wisteria_arch", "rail", "support_beam", "oil_lantern", "hedge_gap"]); // the arch and the mine frames: walked under; a hedge's break: walked through
 // Seats (seat.js): [the seat's top, how far in front of each tile's centre the hips go (along the prop's
 // facing, +Z at rot 0)], in m. Every footprint tile is a place: a bench seats two. `seat: false` on a map's prop: scenery.
 export const SEAT = { bench: [0.47, 0.02], chair: [0.52, 0.06] };
@@ -412,7 +452,8 @@ export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0
   climb_wall_root: 1, campfire: 0.5,
   cliff_slate: 1, cliff_slate_b: 1, stairs_slate: 0.5, headframe: 6.1, terrace_house: 5, minecart: 1.1, menhir: 2.7, support_beam: 2.1, cave_mouth_slate: 2.2,
   rail: 0.07, cairn: 1.45, crystal_cluster: 1, climb_wall_slate: 1, oil_lantern: 2.1, oil_lantern_post: 1.75, anvil: 0.85,
-  cobbler_bench: 1, boot_rack: 2, hold_wall: 2.6, rope_coil: 0.9, tally_board: 2.2, soup_cauldron: 1.3 };
+  cobbler_bench: 1, boot_rack: 2, hold_wall: 2.6, rope_coil: 0.9, tally_board: 2.2, soup_cauldron: 1.3,
+  hedge_gap: 0.45, crates_open: 0.65, stone_odd: 0.65, stone_moved: 0.65 };
 
 // Auto-tiling for fences ("f") and walls ("W"): neighbour mask (N=1, E=2, S=4, W=8)
 // -> [piece suffix, rot]. At rot 0: "" = arms W+E, _corner = W+S, _end = W,

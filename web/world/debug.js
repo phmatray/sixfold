@@ -376,7 +376,7 @@ const BUILD = {
     for (const p of pois) {
       const col = TIER[p.tier] ?? COL.white, [x, y, z] = mid(c, p.x, p.z);
       kids.push(lines([[x, y, z], [x, y + 1.9, z]], col), label(`${p.tier} · ${p.what}`, x, y + 1.9, z, col));
-      for (const [cx, cz] of p.o?.clue ?? p.prop?.clue ?? []) kids.push(lines([[x, y + 0.1, z], mid(c, cx, cz, 0.1)], COL.violet, true), tiles([at(c, cx, cz)], COL.violet, 0.4));
+      for (const [cx, cz] of p.o?.secret?.clue ?? []) kids.push(lines([[x, y + 0.1, z], mid(c, cx, cz, 0.1)], COL.violet, true), tiles([at(c, cx, cz)], COL.violet, 0.4));
     }
     // As check-maps' report, but for the landings of warps from other maps (it reads every map; this reads one).
     const finds = ld.discoveries(m, pois, all, FOOT), entrances = [{ what: "the spawn", tiles: [key(m.spawn.x, m.spawn.z)] },
