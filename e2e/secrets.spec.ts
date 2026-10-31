@@ -1,5 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
-import { editSave, loaded, menuItem, readSave, title, warpTo as warp } from "./helpers";
+import { editSave, expect, loaded, menuItem, readSave, test, title, warpTo as warp, type Page } from "./helpers";
 
 /** Secrets (#116): people who come out only once someone has told of them, and the hum by a hidden find. */
 const host = (page: Page, f: string, ...args: unknown[]) => page.evaluate(([f, args]) => (document.querySelector(".world-host") as any)[f as string](...(args as unknown[])), [f, args] as const);
