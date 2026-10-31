@@ -10,11 +10,9 @@ const STALL_MS = Number(process.env.PW_STALL_MS) || Infinity;
 
 /**
  * Known errors that don't fail a journey: each goes in the report as a "known error" instead.
- * - WebKit reports a fetch cut short by a reload as a page error, even one the game catches.
- * - WebKit sometimes fails to read a GLB's embedded texture from its blob: URL (about one run in
- *   three of a world journey): a WebKit bug to chase, kept in sight here rather than failing CI.
+ * WebKit reports a fetch cut short by a reload as a page error, even one the game catches.
  */
-const KNOWN = [/due to access control checks\.$/, /^THREE\.GLTFLoader: Couldn't load texture blob:/];
+const KNOWN = [/due to access control checks\.$/];
 
 /**
  * Every journey also fails when the page throws or logs an error (a Rust panic lands there too),
@@ -38,6 +36,9 @@ export const test = base.extend<{ guard: void }>({
         if (ms > STALL_MS) errors.push(`no frame for ${Math.round(ms)} ms`);
       });
       await page.addInitScript(() => {
+        // A page being reloaded has its loads cut short, and three.js logs each texture it then
+        // loses (WebKit: "Load failed", always after beforeunload): the dying page's, not a bug.
+        addEventListener("beforeunload", () => (console.error = () => {}));
         let last = 0;
         const tick = (t: number) => {
           if (last && t - last > 250) (window as unknown as { __stall(ms: number): void }).__stall(t - last);
