@@ -783,8 +783,23 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
 
   // ---------- Loop ----------
   let stats = { calls: 0, triangles: 0 };
-  function frame() {
+  // The frame-time probe (#225), the title's: frames 30 to 120 from the rAF clock (paused ones skipped),
+  // counted again whenever the tier in force changes (the look loading). Its first full window on High
+  // decides: under 45 fps, Low for this visit, not saved. It never steps Low to Off (CI's Low stays put),
+  // and a High picked in Options after it has decided is the player's to keep.
+  const times = [];
+  let probed = post.tier, probeMs = 0, probeDone = false;
+  function probe(ms) {
+    const dt = probeMs && !paused ? (ms - probeMs) / 1000 : 0;
+    probeMs = ms;
+    if (post.tier !== probed) (probed = post.tier), (times.length = 0);
+    if (!dt || times.length >= 120 || times.push(dt) < 120 || post.tier !== "high") return;
+    probeDone = true;
+    if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 45) post.setTier("low");
+  }
+  function frame(ms) {
     raf = requestAnimationFrame(frame);
+    if (!probeDone) probe(ms);
     const dt = Math.min(clock.update().getDelta(), 0.05);
     if (paused && !book.live()) {
       // A modal is open: draw one last frame, then nothing until it closes (a book being read draws on).

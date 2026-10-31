@@ -2,7 +2,7 @@
 // phone viewport, the CPU slowed 4×, against the same scene with nobody walking.
 //
 //   cd web && trunk build --release
-//   cd ../e2e && npm ci && node perf-walkers.mjs [url] [--runs 5] [--throttle 4] [--webkit]
+//   cd ../e2e && npm ci && node perf-walkers.mjs [url] [--runs 5] [--throttle 4] [--graphics off|low|high] [--webkit]
 //
 // Without `url` it serves ../web/dist itself (on PW_PORT, default 4402). It drives the installed Google Chrome
 // in a visible window (headless Chrome has no GPU here and draws the world blank). Six extra people with
@@ -11,7 +11,9 @@
 // which fills the per-map cap (`walkers_max`, 6); nobody else changes activity then. A run: the clock set to
 // 21:39.5 (a jump, so everyone is placed where 21:00 puts them), then, once all six walk, every frame's rAF delta
 // until the first arrives. The baseline: 22:10, the same people, nobody walking. It prints and never asserts:
-// frame times are only worth comparing between runs on the same machine at the same load.
+// frame times are only worth comparing between runs on the same machine at the same load. `--graphics` saves that
+// tier (`sixfold.graphics`, #225) before the page loads (else Auto); each run prints the tier in force as it ends
+// (the world's frame-time probe may have stepped High down to Low).
 import { chromium, webkit } from "@playwright/test";
 import { spawn } from "node:child_process";
 import { loadavg } from "node:os";
@@ -21,6 +23,8 @@ const args = process.argv.slice(2);
 const opt = (name, def) => (args.includes(name) ? args[args.indexOf(name) + 1] : def);
 const RUNS = +opt("--runs", 5), THROTTLE = +opt("--throttle", 4), PORT = +(process.env.PW_PORT ?? 4402);
 if (!(RUNS >= 1 && THROTTLE >= 1)) throw new Error("--runs and --throttle take a number, at least 1");
+const GRAPHICS = opt("--graphics", null);
+if (GRAPHICS !== null && !["off", "low", "high"].includes(GRAPHICS)) throw new Error("--graphics takes off, low or high");
 const given = args.find((a) => /^https?:/.test(a));
 const URL_ = given ?? `http://127.0.0.1:${PORT}/`;
 
@@ -46,7 +50,10 @@ async function measure(browserType, launch) {
     map.npcs.push(...extras);
     await route.fulfill({ json: map });
   });
-  await page.addInitScript(() => sessionStorage.setItem("sixfold.splashed", "1"));
+  await page.addInitScript((g) => {
+    sessionStorage.setItem("sixfold.splashed", "1");
+    if (g) localStorage.setItem("sixfold.graphics", g);
+  }, GRAPHICS);
   await page.goto(URL_);
   await page.getByRole("navigation", { name: "Main menu" }).getByRole("button", { name: /^Explore the world/ }).click({ timeout: 120_000 });
   await page.getByRole("button", { name: "Menu", exact: true }).waitFor({ timeout: 120_000 });
@@ -121,7 +128,8 @@ async function measure(browserType, launch) {
     runs.walking.push(walking);
     const most = (await people()).filter((p) => p.id.startsWith("perf_")).map((p) => `${p.id}@${p.x},${p.z}`).join(" ");
     const line = (s) => `${s.deltas.length} frames, median ${f1(q(s.deltas, 0.5))} ms` + (cdp ? `, busy ${f1(s.busy)} ms/frame` : "");
-    console.log(`run ${r + 1}: 6 walking ${line(walking)} · nobody walking ${line(still)} · ${most}`);
+    const tier = await page.evaluate(() => document.querySelector(".world-host").sixfoldStats().graphics);
+    console.log(`run ${r + 1}: graphics ${tier} · 6 walking ${line(walking)} · nobody walking ${line(still)} · ${most}`);
   }
   await browser.close();
   return runs;
@@ -152,8 +160,9 @@ if (!given) {
 let ok = true;
 try {
   console.log(`load average ${loadavg().map((l) => l.toFixed(0)).join(" ")} · ${RUNS} runs · ${URL_}`);
-  ok = report(`Chrome, 390 × 844, CPU ${THROTTLE}× slower`, await measure(chromium, { channel: "chrome", headless: false }));
-  if (args.includes("--webkit")) ok = report("WebKit, 390 × 844, no CPU throttling (WebKit has none)", await measure(webkit, { headless: false })) && ok;
+  const asked = ` · graphics ${GRAPHICS ?? "auto"} asked`;
+  ok = report(`Chrome, 390 × 844, CPU ${THROTTLE}× slower${asked}`, await measure(chromium, { channel: "chrome", headless: false }));
+  if (args.includes("--webkit")) ok = report(`WebKit, 390 × 844, no CPU throttling (WebKit has none)${asked}`, await measure(webkit, { headless: false })) && ok;
 } finally {
   server?.kill();
 }

@@ -108,3 +108,25 @@ test("Options picks the graphics at once, the browser keeps it, and the title's 
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("low");
   expect(await page.evaluate(() => localStorage.getItem("sixfold.graphics"))).toBe("auto");
 });
+
+test("High saved, slow frames step the world down to Low for the visit, and the saved choice stays High", async ({ page }) => {
+  // The world's frame-time probe (#225): frames 30 to 120 at High, under 45 fps → Low, never saved.
+  // SwiftShader on High is far past that already (~380 ms a frame at 1280 × 720); the CPU slowed 20× keeps it
+  // so on a faster runner, and a small window keeps the 120 frames short.
+  await page.setViewportSize({ width: 640, height: 360 });
+  await choose(page, "high");
+  await title(page);
+  await enterWorld(page);
+  await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("high");
+  // The opening scene holds the world (paused frames aren't measured): skipped.
+  const skip = page.getByRole("button", { name: /^Skip/ });
+  await expect(skip).toBeVisible();
+  await page.waitForTimeout(450);
+  await page.keyboard.press("Escape");
+  await expect(skip).toBeHidden();
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 20 });
+  await expect.poll(() => graphics(page), { timeout: 150_000 }).toBe("low");
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+  expect(await page.evaluate(() => localStorage.getItem("sixfold.graphics"))).toBe("high");
+});
