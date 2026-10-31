@@ -45,22 +45,22 @@
     "331111111......pp....111111133",
     "331111111......pp....111111133",
     "331111111......pp......1111133",
-    "331111111......pp......1112233",
-    "331111.........pp......1112233",
-    "331111.........pp......1112233",
-    "331111.........pp......1112233",
-    "22222222.......pp......1112233",
-    "22222222.......pp......1112233",
-    "22222222.......pp......1112233",
-    "22222222.......pp......1112233",
-    "33.............pp......1112233",
-    "33.rr..........pp......1112233",
-    "33.rrrrrrrrrrrrpp......1112233",
-    "33.............pp......1112233",
-    "331111.........pp......1112233",
-    "331111.........pp......1111133",
-    "331111.........pp......1111133",
-    "331111.........pp......1111133",
+    "331111111......pp.....p1112233",
+    "331111.........pppppppp1112233",
+    "331111.........pp.....p1112233",
+    "331111.........pp.....p1112233",
+    "22222222.......pp.....p1112233",
+    "22222222.......pp.....p1112233",
+    "22222222.......pp.....p1112233",
+    "22222222.......pp.....p1112233",
+    "33.............pp.....p1112233",
+    "33.rr..........pp.....p1112233",
+    "33.rrrrrrrrrrrrpp.....p1112233",
+    "33.............pp.....p1112233",
+    "331111.........pp.....p1112233",
+    "331111.........pp.....p1111133",
+    "331111.........pp.....p1111133",
+    "331111.........pppppppp1111133",
     "331111.......pppp......1111133",
     "331111.......pppp...........33",
     "331111.......pp.............33",
@@ -77,6 +77,26 @@
     ".............ppp.............."
   ],
   "props": [
+    {
+      "asset": "fence_end",
+      "x": 5,
+      "z": 21,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "fence_end",
+      "x": 7,
+      "z": 21,
+      "rot": 0,
+      "y": 2
+    },
+    {
+      "asset": "stairs",
+      "x": 23,
+      "z": 31,
+      "rot": 0
+    },
     {
       "asset": "signpost",
       "x": 16,
@@ -2921,6 +2941,43 @@
       "prop": "climb_wall",
       "text": "Painted holds climb the face to a nook. You'd need a better grip than bare hands.",
       "text_fr": "Des prises peintes grimpent la paroi jusqu'à une niche. Il faudrait une meilleure prise qu'à mains nues."
+    },
+    {
+      "id": "quarry_stair",
+      "name": "the barred terrace stair",
+      "name_fr": "l'escalier barré de la terrasse",
+      "tiles": [
+        [
+          23,
+          30
+        ]
+      ],
+      "if": "flag:sc_quarry_stair",
+      "prop_closed": "fence",
+      "text": "Barred from the other side. The quarry folk drop this bar from the terrace whenever they blast.",
+      "text_fr": "Barré de l'autre côté. Les carriers baissent cette barre depuis la terrasse chaque fois qu'ils font sauter la roche.",
+      "shortcut": {
+        "id": "quarry_stair",
+        "from": [
+          23,
+          29
+        ],
+        "label": "Lift the bar",
+        "label_fr": "Lever la barre"
+      }
+    }
+  ],
+  "drops": [
+    {
+      "from": [
+        6,
+        21
+      ],
+      "to": [
+        6,
+        22
+      ],
+      "why": "a gap in the terrace rail, gravel spilled down to the cave floor"
     }
   ]
 }

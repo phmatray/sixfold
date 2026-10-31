@@ -775,6 +775,8 @@ function report(name) {
   const dn = ld.density(props, route, SCREEN);
   if (dn.curve.length > 1 && dn.cv < BUDGET.density_cv_min) advice.push(`[density] flat along the main path ${a} → ${b} (cv ${dn.cv.toFixed(2)}, ${BUDGET.density_cv_min} at least): add a breather or a dense patch`);
   for (const e of m.exits ?? []) if (e.span[1] - e.span[0] + 1 < BUDGET.exit_min) advice.push(`[exit] exit ${e.side} to ${e.to} is ${e.span[1] - e.span[0] + 1} wide (${BUDGET.exit_min} at least)`);
+  const loop = loopOf(m, d.g, all, route);
+  if (["route", "town", "hub", "village"].includes(m.kind) && !loop) advice.push(`[loop] no loop: no path of ${BUDGET.loop_min}+ tiles rings round other ground beside the main path ${a} → ${b}, so the way back is the way there`);
   const v2 = m.level_design === 2;
   return [
     `## ${name} — ${m.title} (${m.kind})`, "",
@@ -783,12 +785,24 @@ function report(name) {
     `- POIs: ${Object.entries(count).map(([t, n]) => `${n} ${t}`).join(", ")}${Object.keys(budget).length ? ` (budget: ${Object.entries(budget).map(([t, b]) => `${t} ${range(b)}`).join(", ")})` : ""}`,
     `- longest walk without a discovery: ${gapLine}`,
     `- crossroads over ${BUDGET.crossroads_max} ways: ${crossroads.join(", ") || "none"}`,
+    `- loop through the main path: ${loop ? `${loop.ring.length} tiles round ${loop.hole.length} tiles of other ground, by ${loop.ring.sort()[0]}` : "none"}`,
     `- scatter: ratio ${sc.ratio?.toFixed(2) ?? "–"} (${BUDGET.scatter_ratio_max} at most); dominant: ${sc.chunks.filter((c) => c.n >= 8).sort((a, b) => b.share - a.share).slice(0, 3).map((c) => `${c.asset} ${Math.round(c.share * 100)}% of chunk ${c.chunk}`).join(", ") || "–"}`,
     `- density along the main path, a screen at a time: ${dn.curve.join(" · ") || "–"} (cv ${dn.cv.toFixed(2)}, ${BUDGET.density_cv_min} at least)${dn.breathers.length ? `; breathers at screens ${dn.breathers.map((i) => i + 1).join(", ")}` : ""}`,
     `- advisories:${advice.length ? "" : " none"}`, ...advice.map((s) => `  - ${s}`),
     ...(v2 ? [] : [`- §11 findings:${d.blocking.length ? "" : " none"}`, ...d.blocking.map((s) => `  - ${s}`)]),
     "",
   ];
+}
+// The loop advisory (#117, LEVEL_DESIGN §4): the longest loop of the walkable path (ld.loops) at least loop_min tiles
+// round, one of whose tiles is within 2 of the main path (a 3-wide road's far lane), or null. A gate tile is path once open
+// (a plank laid over a stream).
+function loopOf(m, g, all, route) {
+  const walk = new Set([...g.path, ...(m.gates ?? []).flatMap((x) => (x.tiles ?? []).map((t) => `${t}`))].filter((t) => all.has(t)));
+  const main = (t) => {
+    const [x, z] = t.split(",").map(Number);
+    return route.some(([rx, rz]) => Math.max(Math.abs(rx - x), Math.abs(rz - z)) <= 2);
+  };
+  return ld.loops(g, walk).filter((l) => l.ring.length >= BUDGET.loop_min && l.ring.some(main)).sort((p, q) => q.ring.length - p.ring.length)[0] ?? null;
 }
 // An exit's signpost (web/world/ld.js, with edgeTile and edgeTiles).
 function exitSign(m, e) {

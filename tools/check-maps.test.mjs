@@ -314,3 +314,17 @@ test("#117: the chart's marks match the maps' shortcuts and drops", () => {
   assert.match(atlasSays(world(none)).join("\n"), /atlas: \[atlas-marks\] vale has a drop, but atlas.json marks none/);
   assert.match(atlasSays(world((m, a) => (drop()(m, a), a.marks.push({ kind: "drop", map: "fell" })))).join("\n"), /atlas: \[atlas-marks\] atlas.json marks a drop on fell, which has none/);
 });
+
+test("#117: the report says when a village has no loop through its main path, and stops once a path rings a block", () => {
+  const vale = (dir) => run(dir, "--report").stdout.split("\n## ").find((s) => s.startsWith("vale"));
+  assert.match(vale(world()), /\[loop\] no loop/);
+  // A lane round the grass east of the main street (x 13-16, z 4-9), through the main street.
+  const ring = (m) => {
+    m.vale.tiles[4] = put(m.vale.tiles[4], 13, "pppp");
+    m.vale.tiles[9] = put(m.vale.tiles[9], 13, "pppp");
+    for (let z = 5; z <= 8; z++) m.vale.tiles[z] = put(m.vale.tiles[z], 16, "p");
+  };
+  const s = vale(world(ring));
+  assert.doesNotMatch(s, /\[loop\]/);
+  assert.match(s, /- loop through the main path: \d+ tiles round 12 tiles of other ground/);
+});

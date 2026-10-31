@@ -61,7 +61,18 @@
   ],
   "marks": [
     { "kind": "shortcut", "map": "screepass", "id": "scree_bar" },
-    { "kind": "drop", "map": "screepass" }
+    { "kind": "drop", "map": "screepass" },
+    { "kind": "shortcut", "map": "quarry", "id": "quarry_stair" },
+    { "kind": "drop", "map": "quarry" },
+    { "kind": "shortcut", "map": "stormwatch", "id": "light_stair" },
+    { "kind": "drop", "map": "stormwatch" },
+    { "kind": "shortcut", "map": "bellflats", "id": "bell_jetty" },
+    { "kind": "drop", "map": "gullhaven" },
+    { "kind": "shortcut", "map": "hushlane", "id": "hush_plank" },
+    { "kind": "drop", "map": "hushlane" },
+    { "kind": "shortcut", "map": "elder_ring", "id": "elder_wicket" },
+    { "kind": "drop", "map": "rootholm" },
+    { "kind": "shortcut", "map": "overworld", "id": "garden_gate" }
   ],
   "waymarks": [
     { "id": "meadow", "map": "overworld", "x": 30, "z": 15, "facing": "n", "name": "Sixfold Meadow", "name_fr": "Pré de Sixfold" },

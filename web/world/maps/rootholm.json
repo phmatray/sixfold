@@ -162,6 +162,12 @@
       "y": 3
     },
     {
+      "asset": "log",
+      "x": 43,
+      "z": 4,
+      "rot": 0
+    },
+    {
       "asset": "cottage",
       "x": 3,
       "z": 4,
@@ -1941,6 +1947,19 @@
       "x": 51,
       "z": 27,
       "rot": 0
+    }
+  ],
+  "drops": [
+    {
+      "from": [
+        45,
+        3
+      ],
+      "to": [
+        44,
+        3
+      ],
+      "why": "the root mound's soft west bank, a log at its foot to land by"
     }
   ],
   "spawn": {

@@ -73,7 +73,7 @@
     ".........pp.f.....f.....f.....f.pp..........",
     ".........pp.fffff.f.....f.fff.f.pp..........",
     ".........pp.f.f...f.....f...f.f.pp..........",
-    ".........pp.f.f.fffffffffff.f.f.pp..........",
+    ".........pp.f.f.ffffff.ffff.f.f.pp..........",
     ".........pp.f.f.f...f...f...f.f.pp..........",
     ".........pp.f.f.f.f.f.f.fffff.f.pp..........",
     ".........pp.f.....f.f.f.......f.pp..........",
@@ -1845,6 +1845,30 @@
       "prop": "climb_wall_slate",
       "text": "The slate face of the Stonebacks, with old iron pegs hammered in a zigzag up to the ledge. Bare hands won't do; you'd need gloves with a grip.",
       "text_fr": "La paroi d'ardoise des Échines, avec de vieux pitons de fer plantés en zigzag jusqu'à la corniche. À mains nues, impossible ; il faudrait des gants qui accrochent."
+    },
+    {
+      "id": "elder_wicket",
+      "name": "the keepers' wicket",
+      "name_fr": "le portillon des gardiens",
+      "tiles": [
+        [
+          22,
+          18
+        ]
+      ],
+      "if": "flag:sc_elder_wicket",
+      "prop_closed": "hedge",
+      "text": "A wicket gate in the hedge, latched on the inside. Through the leaves you can just see the seal stone.",
+      "text_fr": "Un portillon dans la haie, verrouillé de l'intérieur. À travers les feuilles, on devine la pierre du sceau.",
+      "shortcut": {
+        "id": "elder_wicket",
+        "from": [
+          22,
+          17
+        ],
+        "label": "Lift the latch",
+        "label_fr": "Soulever le loquet"
+      }
     }
   ],
   "npcs": [

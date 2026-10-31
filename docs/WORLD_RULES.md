@@ -87,6 +87,7 @@ An exit should be obvious from a screen away.
 | 5.12 | A drop (`drops`, outdoors only) is one way: the hero hops down from `from` to `to` and never climbs back. It is announced before you commit: it has a `why` and a cue, a prop (a broken fence) or `paint` (a slide mark) within 1 tile. It is never the only way out: without any drop, the tile above still reaches an exit, a warp or a waymark (every gate open, as the hero left them), and so does the tile below (only shortcut gates open: the hero may come down without the items the others need) (`drop`). | error |
 | 5.13 | A permanent shortcut is a gate with a `shortcut` block: facing the gate from its `from` tile (beside it, on the far side) offers its `label` ("Lift the bar" / « Lever la barre »), which sets `flag:sc_<id>` for good (saved); from anywhere else the gate reads its `text` ("Barred from the other side."). Its `if` is `flag:sc_<id>`, and `from` can be reached the long way round with the gate shut (`shortcut`). | error |
 | 5.14 | The world map marks every shortcut (shown once opened) and every map with a drop (shown once seen): `atlas.json` `marks` list exactly those (`atlas-marks`). | error |
+| 5.15 | Every route and town has a local loop, so the way back isn't the way there: a ring of path (gates open) of at least `loop_min` (12) tiles that passes within 2 tiles of the main path. `--report` prints the longest one per map, and `[loop] no loop` for a `route`, `town`, `hub` or `village` without one (`loop`). | advisory |
 
 ## 6. Districts and logic — *quartiers et logique*
 

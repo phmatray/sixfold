@@ -1428,6 +1428,19 @@
       "rot": 0
     }
   ],
+  "drops": [
+    {
+      "from": [
+        46,
+        2
+      ],
+      "to": [
+        45,
+        2
+      ],
+      "why": "sea rocks stepping down off the lookout to the lane"
+    }
+  ],
   "spawn": {
     "x": 2,
     "z": 9,
