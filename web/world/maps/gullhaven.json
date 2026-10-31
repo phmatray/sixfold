@@ -30,14 +30,14 @@
   "width": 52,
   "height": 36,
   "tiles": [
-    "..............................................222222",
-    "..............................................222222",
-    "..............................................222222",
-    ".................rrrrrrrrrrrrrrrrr...........1111111",
-    ".................rrrrrrrrrrrrrrrrr...........1111111",
-    ".................rrrrrrrrrrrrrrrrr.............~~~~~",
-    "........p........rrrrrrrrrrrrrrrrr............~~~~~~",
-    "........p........rrrrrrrrrrrrrrrrrrrrrrrrrrr~~~~~~~~",
+    "~.............................................222222",
+    "~.............................................222222",
+    "~.............................................222222",
+    "~................rrrrrrrrrrrrrrrrr...........1111111",
+    "~................rrrrrrrrrrrrrrrrr...........1111111",
+    "~................rrrrrrrrrrrrrrrrr.............~~~~~",
+    "~.......p........rrrrrrrrrrrrrrrrr............~~~~~~",
+    "~.......p........rrrrrrrrrrrrrrrrrrrrrrrrrrr~~~~~~~~",
     "ppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrp~~~~~~~",
     "ppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrp~~~~~~~",
     "ppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrrrp~~~~~~~",
@@ -708,7 +708,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "reeds",
       "x": 0,
       "z": 0,
       "rot": 0
@@ -984,31 +984,31 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "reeds",
       "x": 0,
       "z": 1,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "reeds",
       "x": 0,
       "z": 2,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "reeds",
       "x": 0,
       "z": 3,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "reeds",
       "x": 0,
       "z": 4,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "reeds",
       "x": 0,
       "z": 5,
       "rot": 0
@@ -1020,7 +1020,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "reeds",
       "x": 0,
       "z": 7,
       "rot": 0

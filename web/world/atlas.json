@@ -54,7 +54,7 @@
     { "a": "rootholm", "b": "elder_ring" },
     { "a": "rootholm", "b": "hushlane", "if": "item:wading_boots", "icon": "boots" },
     { "a": "quarry", "b": "undermine", "if": "item:kiln_lantern", "icon": "lantern" },
-    { "a": "undermine", "b": "screepass" },
+    { "a": "undermine", "b": "screepass", "if": "item:kiln_lantern", "icon": "lantern" },
     { "a": "screepass", "b": "anvilstead" },
     { "a": "anvilstead", "b": "bastion" },
     { "a": "bastion", "b": "elder_ring", "if": "item:grip_gloves", "icon": "gloves" }

@@ -76,6 +76,7 @@ const fail = [], warn = [];
 const BUDGET = JSON.parse(readFileSync(process.argv.find((a) => a.startsWith("--budgets="))?.slice(10) || new URL("./level-design.json", import.meta.url), "utf8"));
 const ctx = {}, designed = {}; // per map: what the level-design pass needs (solid, reachable, floor heights), and its findings
 const open = {}; // per map: is a tile open ground (for warp: cues from other maps)
+const floods = {}; // per map: reach()'s flood (gate) => tiles, for which gates hold a road (#117)
 // The placement rules (docs/WORLD_RULES.md) fail the build with --strict (as CI runs it); without it they are listed
 // as warnings, for a map in progress.
 const STRICT = process.argv.includes("--strict");
@@ -475,6 +476,7 @@ function reach(name, m, solid0, height0) {
   }
   for (const wm of atlas?.waymarks ?? [])
     if (wm.map === name && !all.has(`${wm.x},${wm.z}`)) fail.push(`${name}: waymark ${wm.id}'s tile ${wm.x},${wm.z} can't be reached`);
+  floods[name] = flood;
   return all;
 }
 
@@ -524,6 +526,7 @@ else {
       if (Math.hypot(a.x - b.x, a.y - b.y) < 1.7) fail.push(`atlas: waymarks ${atlas.waymarks[i].id} and ${atlas.waymarks[j].id} are under 1.7 squares apart on the chart`);
     }
 }
+honestWorld();
 levelDesign();
 if (STRICT) fail.push(...rule);
 else warn.unshift(...rule);
@@ -945,4 +948,92 @@ function lifeRules(name, m, solid) {
     else if (!boatLane(m, b.pier, (x, z) => on(x, z, (p) => !p.if))) bad(`boat pier ${x},${z} has no 4 tiles of open water beside it`);
     if (b.every !== undefined && !(b.every >= 30)) bad("boats: every is 30 s at least");
   }
+}
+
+// The honest world map and the seams between maps (#117, WORLD_RULES §5), always errors.
+// atlas-links: the atlas' roads are exactly the outdoor map pairs joined by an edge exit, a door, a `warp:` cue (a
+// ferry, a punt) or a chain of them through rooms and caves. atlas-gate: a road's `if` is the item condition that holds
+// one of its connections (a warp's or cue's `if`, and each item gate that, shut alone, cuts the exit, door or landing
+// off from that map's spawn; time and flag gates open on their own or in place, so they never gate a road), and its
+// `icon` draws that item. road-offset: across a paired exit, every path tile on the edge meets one within 1 tile on the
+// other side (offsets along the span). water-edge: water (`~`) on the edge within half a screen of an exit runs on
+// across it, within 1 tile, unless the exit says why it ends (`"water_ends": "a fall"`).
+function honestWorld() {
+  const ICON = { kiln_lantern: "lantern", ferry_pass: "ferry", wading_boots: "boots", grip_gloves: "gloves" }; // worldmap.rs icon()
+  const items = (c) => String(c ?? "").split("&").map((t) => t.trim()).filter((t) => t.startsWith("item:"));
+  const outdoor = (n) => !maps[n].light.indoor;
+  const near = (seen, [x, z], across) => seen.has(`${x},${z}`) || Object.values(DIR).some(([dx, dz]) => seen.has(`${x + dx},${z + dz}`) || (across && seen.has(`${x + 2 * dx},${z + 2 * dz}`)));
+  const fills = {};
+  const cut = (name, test) => {
+    const f = floods[name];
+    if (!f || !test((fills[name] ??= f(true)))) return [];
+    return (maps[name].gates ?? []).filter((g) => items(g.if).length && !test((fills[`${name}/${g.id}`] ??= f((h) => h !== g)))).flatMap((g) => items(g.if));
+  };
+  // A map's doors and `warp:` cues (under the nearest `if` of the spot or person that says them), to other maps.
+  const waysOut = (name) => {
+    const m = maps[name], out = (m.warps ?? []).map((w) => ({ to: w.to, at: [w.x, w.z], if: w.if, land: [w.spawn.x, w.spawn.z] }));
+    const cues = (o, at, cond) => {
+      const c = typeof o === "string" && o.match(/^warp:([a-z_]+):(\d+):(\d+):[nesw]$/);
+      if (c) out.push({ to: c[1], at, across: true, if: cond, land: [+c[2], +c[3]] });
+      else if (o && typeof o === "object") for (const v of Object.values(o)) cues(v, at, o.if ?? cond);
+    };
+    for (const s of [...(m.interactions ?? []), ...(m.npcs ?? [])]) cues(s, [s.x, s.z]);
+    return out.filter((w) => w.to !== name && maps[w.to]);
+  };
+  // "a - b" (sorted) -> per way ("a>b") the item condition of each connection ("" if none). A road is held by what holds
+  // a way with no free connection: the door into a cave holds its road, though the way back out is free.
+  const roads = new Map();
+  const join = (a, b, terms) => {
+    const k = [a, b].sort().join(" - "), ways = roads.get(k) ?? roads.set(k, {}).get(k);
+    (ways[`${a}>${b}`] ??= new Set()).add([...new Set(terms)].sort().join(" & "));
+  };
+  const holds = (ways) => new Set(Object.values(ways).filter((s) => !s.has("")).flatMap((s) => [...s]));
+  const paths = {}, pathAt = (n) => (paths[n] ??= ld.grids(maps[n], LD).path), half = Math.floor(SCREEN[0] / 2);
+  for (const [name, m] of Object.entries(maps)) {
+    if (!outdoor(name)) continue;
+    for (const e of m.exits ?? []) {
+      const B = maps[e.to], b = B?.exits?.find((x) => x.side === BACK[e.side] && x.to === name);
+      if (!b || !outdoor(e.to)) continue;
+      const edge = (n, x) => (seen) => ld.edgeTiles(maps[n], x).some((t) => seen.has(`${t}`));
+      join(name, e.to, [...cut(name, edge(name, e)), ...cut(e.to, edge(e.to, b))]);
+      const offsets = (n, x) => ld.edgeTiles(maps[n], x).flatMap((t, i) => (pathAt(n).has(`${t}`) ? [i] : []));
+      const there = offsets(e.to, b), tile = (mm, x, i) => ld.edgeTile(mm, x.side, x.span[0] + i).join(",");
+      const off = offsets(name, e).find((i) => !there.some((j) => Math.abs(i - j) <= 1));
+      if (off !== undefined)
+        fail.push(`${name}: [road-offset] exit ${e.side} to ${e.to}: the path at ${tile(m, e, off)} meets none within 1 tile across the edge (on ${e.to} the path is at ${there.map((j) => tile(B, b, j)).join(" ") || "no tile"})`);
+      if (e.water_ends) continue;
+      const water = (mm, side, c) => mm.tiles[ld.edgeTile(mm, side, c)[1]]?.[ld.edgeTile(mm, side, c)[0]] === "~";
+      for (let c = e.span[0] - half; c <= e.span[1] + half; c++) {
+        const d = c - e.span[0] + b.span[0];
+        if (water(m, e.side, c) && ![d - 1, d, d + 1].some((x) => water(B, b.side, x))) {
+          fail.push(`${name}: [water-edge] exit ${e.side} to ${e.to}: the water at ${ld.edgeTile(m, e.side, c)} stops at the edge (none by ${ld.edgeTile(B, b.side, d)} on ${e.to}); run it on, or say why it ends ("water_ends": "a fall")`);
+          break;
+        }
+      }
+    }
+    // Doors and cues, on through rooms and caves to the next outdoor map.
+    const queue = waysOut(name).map((w) => ({ ...w, terms: [...cut(name, (s) => near(s, w.at, w.across)), ...items(w.if)] })), inside = new Set();
+    while (queue.length) {
+      const w = queue.shift();
+      if (outdoor(w.to)) join(name, w.to, [...w.terms, ...cut(w.to, (s) => near(s, w.land))]);
+      else if (!inside.has(w.to)) inside.add(w.to), queue.push(...waysOut(w.to).filter((x) => x.to !== name).map((x) => ({ ...x, terms: [...w.terms, ...items(x.if)] })));
+    }
+  }
+  if (!atlas) return;
+  const listed = new Set();
+  for (const l of atlas.links) {
+    const k = [l.a, l.b].sort().join(" - "), road = `the road ${l.a} - ${l.b}`;
+    if (listed.has(k)) fail.push(`atlas: [atlas-links] ${road} is listed twice`);
+    listed.add(k);
+    if (!roads.has(k)) {
+      fail.push(`atlas: [atlas-links] ${road} is in atlas.json, but no exit, door or ferry joins them`);
+      continue;
+    }
+    const held = holds(roads.get(k)), ways = [...held].map((c) => `"${c}"`).join(" or ");
+    if (held.size ? !held.has(l.if) : l.if) fail.push(`atlas: [atlas-gate] ${road} ${l.if ? `has if "${l.if}", but ${held.size ? `${ways} holds it` : "nothing holds it"}` : `has no if, but ${ways} holds it`}`);
+    const item = items(l.if)[0]?.slice(5);
+    if (item && l.icon !== ICON[item]) fail.push(`atlas: [atlas-gate] ${road} shows ${l.icon ?? "no icon"}, but its item ${item} is drawn ${ICON[item] ?? "by no icon yet (worldmap.rs)"}`);
+    if (!item && l.icon) fail.push(`atlas: [atlas-gate] ${road} shows ${l.icon}, but no item holds it`);
+  }
+  for (const [k, ways] of roads) if (!listed.has(k)) fail.push(`atlas: [atlas-links] the road ${k} is in the maps but not in atlas.json${[...holds(ways)].map((c) => ` (if "${c}")`)[0] ?? ""}`);
 }

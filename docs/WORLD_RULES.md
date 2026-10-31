@@ -80,6 +80,10 @@ An exit should be obvious from a screen away.
 | 5.5 | The opening reads as a gap: gateposts, a fence ending, a hedge arch, or a trail between two trees, with a signpost (3.1) and if possible a landmark that hints at the next region (a kiln chimney, masts, a standing stone). | eye |
 | 5.6 | You arrive facing into the map, on a walkable tile. `world.js` already turns you the way you walked, and check-maps checks the edge tiles. | error |
 | 5.7 | Biome transition: the 4–6 tiles by an exit borrow the next region's ground and scatter, such as ash and an ash pine toward the Emberlands, sand and reeds toward the coast, or heather toward the Downs. A region never changes in one tile. | eye |
+| 5.8 | The world map is true. The roads in `atlas.json` are exactly the outdoor map pairs joined by an edge exit, a door, a `warp:` cue (a ferry, a punt), or a chain of them through rooms and caves. check-maps names each missing and each extra road (`atlas-links`). | error |
+| 5.9 | A gated road's `if` is the item condition that holds it: a door's or a cue's `if`, or an item gate that, shut on its own, cuts the exit, door or landing off from that map's spawn. Its `icon` draws that item (lantern, ferry, boots, gloves). A road with a free way both ways has neither. Time and flag gates never gate a road (`atlas-gate`). | error |
+| 5.10 | Roads line up across an edge. Along a pair of exits, every path tile on one edge has a path tile within 1 tile on the other, counted from the start of each span (`road-offset`). | error |
+| 5.11 | Water runs on across an edge. Water (`~`) on the edge within half a screen (6 tiles) of an exit continues on the paired edge within 1 tile, unless the exit says why it ends: `"water_ends": "a fall"` (a fall, a culvert, a weir) (`water-edge`). | error |
 
 ## 6. Districts and logic — *quartiers et logique*
 
@@ -180,6 +184,7 @@ reward rules (6.3–6.5) apply to every screen. A screen with nothing to stop fo
 - `kind` (outdoor maps): `village`, `town`, `hub`, `route`, `site` or `cave`.
 - `wild` (optional): `[[x0, z0, x1, z1], …]`, rects of wilderness on a town or hub map, where lamps need a `why`.
 - `why` (lantern props): the reason a lamp stands where no street does.
+- `water_ends` (an exit): why water that touches the edge by this exit stops there, such as `"a fall"` or `"a culvert"` (5.11).
 - `cave` (an interior): a cave room; no lamps (2.6).
 - `routine` (a person, `web/world/routine.js`): what it does from each time of day on, as
   `[{ "from": "06:00", "at": [x, z], "face": "n", "do": "work" }, { "from": "dusk", "home": "inn_hub" }, …]`. `from` is

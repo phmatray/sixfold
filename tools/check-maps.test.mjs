@@ -44,15 +44,16 @@ function world(change = () => {}) {
     warps: [{ x: 5, z: 7, dir: "s", to: "vale", label: "Go out", label_fr: "Sortir", spawn: { x: 16, z: 14, facing: "s" } }],
   };
   const maps = { vale, fell, vale_in: room };
-  change(maps);
+  const atlas = {
+    regions: [{ id: "dale", name: "Dale", name_fr: "Vallon", color: "#557744" }],
+    maps: [{ id: "vale", name: "Vale", name_fr: "Val", region: "dale", x: 1, y: 2 }, { id: "fell", name: "Fell Moor", name_fr: "Lande du Fell", region: "dale", x: 1, y: 1 }],
+    links: [{ a: "vale", b: "fell" }], waymarks: [],
+  };
+  change(maps, atlas);
   const dir = mkdtempSync(join(tmpdir(), "ld-"));
   mkdirSync(join(dir, "maps"));
   copyFileSync(join(WEB, "props.js"), join(dir, "props.js"));
-  writeFileSync(join(dir, "atlas.json"), JSON.stringify({
-    regions: [{ id: "dale", name: "Dale", name_fr: "Vallon", color: "#557744" }],
-    maps: [{ id: "vale", name: "Vale", name_fr: "Val", region: "dale", x: 1, y: 2 }, { id: "fell", name: "Fell Moor", name_fr: "Lande du Fell", region: "dale", x: 1, y: 1 }],
-    links: [], waymarks: [],
-  }));
+  writeFileSync(join(dir, "atlas.json"), JSON.stringify(atlas));
   for (const [id, m] of Object.entries(maps)) writeFileSync(join(dir, "maps", `${id}.json`), JSON.stringify(m));
   return dir;
 }
@@ -214,4 +215,52 @@ test("AC7 (#114): an open on a warp that is no door, and a lit on a model withou
   };
   bad((m) => (m.vale_in.warps[0].open = "hour:8-19"), /vale_in: the warp to vale at 5,7 has an open, but only a door keeps hours/);
   bad((m) => (m.vale.props[1].lit = "hour:17-23"), /vale: tree at 4,4 is lit, but has no windows/);
+});
+
+// #117: the world map is checked against the real maps, and roads and rivers line up across an edge.
+const put = (row, x, s) => row.slice(0, x) + s + row.slice(x + s.length);
+// A third outdoor map, Tarn, behind the cottage's back door: a road vale - tarn through a room.
+const tarn = (cond) => (m, a) => {
+  const gate = cond ? { if: cond, locked: "Shut.", locked_fr: "Fermé." } : {};
+  m.tarn = outdoor({ title: "Tarn", title_fr: "Lac", width: 26, height: 18, spawn: { x: 12, z: 9, facing: "s" }, tiles: grid([]), props: [],
+    warps: [{ x: 12, z: 8, to: "vale_in", label: "Go in", label_fr: "Entrer", spawn: { x: 5, z: 2, facing: "s" }, ...gate }] });
+  m.vale_in.warps.push({ x: 5, z: 1, dir: "n", to: "tarn", label: "Go out", label_fr: "Sortir", spawn: { x: 12, z: 9, facing: "s" }, ...gate });
+  a.maps.push({ id: "tarn", name: "Tarn", name_fr: "Lac", region: "dale", x: 3, y: 1 });
+};
+const atlasSays = (dir) => run(dir).out.split("\n").filter((l) => l.includes("[atlas-"));
+
+test("AC1 (#117): an atlas without a real road names exactly that road; one with a road that isn't there fails", () => {
+  passes(world());
+  const missing = atlasSays(world(tarn()));
+  assert.equal(missing.length, 1, missing.join("\n"));
+  assert.match(missing[0], /atlas: \[atlas-links\] the road tarn - vale is in the maps but not in atlas.json/);
+  assert.deepEqual(atlasSays(world((m, a) => (tarn()(m, a), a.links.push({ a: "vale", b: "tarn" })))), []);
+  const extra = atlasSays(world((m, a) => (tarn()(m, a), a.links.push({ a: "vale", b: "tarn" }, { a: "fell", b: "tarn" }))));
+  assert.equal(extra.length, 1, extra.join("\n"));
+  assert.match(extra[0], /atlas: \[atlas-links\] the road fell - tarn is in atlas.json, but no exit, door or ferry joins them/);
+});
+
+test("#117: a gated road's if and icon match the gate that holds it", () => {
+  const road = (l) => (m, a) => (tarn("item:wading_boots")(m, a), a.links.push({ a: "vale", b: "tarn", ...l }));
+  assert.deepEqual(atlasSays(world(road({ if: "item:wading_boots", icon: "boots" }))), []);
+  assert.match(atlasSays(world(road({})))[0], /\[atlas-gate\] the road vale - tarn has no if, but "item:wading_boots" holds it/);
+  assert.match(atlasSays(world(road({ if: "item:wading_boots", icon: "gloves" })))[0], /\[atlas-gate\] the road vale - tarn shows gloves, but its item wading_boots is drawn boots/);
+  assert.match(atlasSays(world((m, a) => Object.assign(a.links[0], { if: "item:ferry_pass", icon: "ferry" })))[0], /\[atlas-gate\] the road vale - fell has if "item:ferry_pass", but nothing holds it/);
+});
+
+test("AC2 (#117): a road that leaves an edge 3 tiles off from where it arrives fails; 1 tile off passes", () => {
+  const shift = (at) => (m) => {
+    m.vale.exits[0].span = m.fell.exits[0].span = [11, 16];
+    m.vale.tiles[0] = put(m.vale.tiles[0], 13, "....");
+    m.fell.tiles[17] = put(put(m.fell.tiles[17], 11, "......"), at, "pp");
+  };
+  fails(world(shift(14)), "road-offset");
+  passes(world(shift(12)));
+});
+
+test("AC2 (#117): a river that stops at an edge fails; one that runs on, or ends with a water_ends note, passes", () => {
+  const river = (m) => [0, 1, 2, 3].forEach((z) => (m.vale.tiles[z] = put(m.vale.tiles[z], 16, "~")));
+  fails(world(river), "water-edge");
+  passes(world((m) => (river(m), (m.vale.exits[0].water_ends = "a fall"))));
+  passes(world((m) => (river(m), [16, 17].forEach((z) => (m.fell.tiles[z] = put(m.fell.tiles[z], 16, "~"))))));
 });
