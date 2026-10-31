@@ -110,6 +110,24 @@ pub fn apply_text_size() {
     }
 }
 
+const GRAPHICS: &str = "sixfold.graphics";
+
+/// The Graphics setting (#225): "auto", "high", "low" or "off" (a browser preference, like the
+/// text size; world/tier.js reads the same key).
+pub fn graphics() -> &'static str {
+    let saved = get(GRAPHICS);
+    ["auto", "high", "low", "off"]
+        .into_iter()
+        .find(|c| saved.as_deref() == Some(*c))
+        .unwrap_or("auto")
+}
+
+/// Keep the choice and apply it to the world at once.
+pub fn set_graphics(choice: &str) {
+    set(GRAPHICS, choice);
+    crate::world::world_graphics(choice);
+}
+
 const FAST: &str = "sixfold.fast";
 const TIPS: &str = "sixfold.tips";
 const HINT_SEEN: &str = "sixfold.hint-seen";

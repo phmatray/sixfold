@@ -68,3 +68,43 @@ test("High saved, the title's backdrop still goes flat on a weak device and open
   await expect(page.locator(".title-backdrop.flat")).toHaveCount(1);
   expect(await glMade(page)).toBe(made);
 });
+
+test("Options picks the graphics at once, the browser keeps it, and the title's Settings show it", async ({ page }) => {
+  await title(page);
+  await enterWorld(page);
+  // The opening scene: skipped, so the Menu answers (a scene ignores a skip in its first 400 ms, #155).
+  const skip = page.getByRole("button", { name: /^Skip/ });
+  await expect(skip).toBeVisible();
+  await page.waitForTimeout(450);
+  await page.keyboard.press("Escape");
+  await expect(skip).toBeHidden();
+  await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("low");
+
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("tab", { name: "Options" }).click();
+  const group = page.getByRole("group", { name: "Graphics" });
+  await expect(group).toBeVisible();
+  await expect(group.getByRole("radio", { name: "Auto", exact: true })).toBeChecked();
+  await group.getByRole("radio", { name: "Off", exact: true }).check();
+  await expect.poll(() => graphics(page)).toBe("off");
+  expect(await page.evaluate(() => localStorage.getItem("sixfold.graphics"))).toBe("off");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+
+  // A reload keeps it, in the title's Settings and in the world.
+  await page.reload();
+  await page.locator("summary", { hasText: "Settings" }).click();
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  await expect(settings.getByRole("group", { name: "Graphics" })).toBeVisible();
+  await expect(settings.getByRole("radio", { name: "Off", exact: true })).toBeChecked();
+  await settings.getByRole("button", { name: "Close", exact: true }).click();
+  await menuItem(page, "Continue").click();
+  await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
+  await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("off");
+
+  // Auto again: the device decides, Low on SwiftShader.
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("tab", { name: "Options" }).click();
+  await page.getByRole("group", { name: "Graphics" }).getByRole("radio", { name: "Auto", exact: true }).check();
+  await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("low");
+  expect(await page.evaluate(() => localStorage.getItem("sixfold.graphics"))).toBe("auto");
+});

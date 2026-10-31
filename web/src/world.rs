@@ -36,11 +36,11 @@ use crate::{store, Screen, Ui};
 // three.js comes from the import map in index.html and never touches the wasm.
 // Calls made before the module is in (items, pause) are replayed once it is.
 #[wasm_bindgen(inline_js = r#"
-let api = null, gen = 0, items = "", seals = "", paused = false, minute = 480, camera = "default";
+let api = null, gen = 0, items = "", seals = "", paused = false, minute = 480, camera = "default", graphics = "auto";
 export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setSeals(seals); api.setClock(minute); api.setCamera(camera); api.pause(paused); })
+    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setSeals(seals); api.setClock(minute); api.setCamera(camera); api.setGraphics(graphics); api.pause(paused); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "import", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
@@ -54,6 +54,7 @@ export function world_meet(id) { api?.meet(id); }
 export function world_cue(json) { api?.cue(json); }
 export function world_clock(m) { minute = m; api?.setClock(m); }
 export function world_camera(a) { camera = a; api?.setCamera(a); }
+export function world_graphics(c) { graphics = c; api?.setGraphics(c); }
 export function world_busy() { return !api || api.busy(); }
 export function world_portrait(id) { return api?.portrait(id) ?? ""; }
 export function world_replay(id) { return api?.replay(id) ?? false; }
@@ -87,6 +88,8 @@ extern "C" {
     fn world_clock(minute: u16);
     /// The outdoor camera angle (`CameraAngle::code`): on mount, and when Options changes it.
     pub(crate) fn world_camera(angle: &str);
+    /// The Graphics setting (#225): "auto", "high", "low" or "off"; on mount, and when Options changes it.
+    pub(crate) fn world_graphics(choice: &str);
     /// The scene is loading, warping (a fade), or a duelist is walking over.
     fn world_busy() -> bool;
     /// A person's bust, drawn from their own rig and colours (a data URL), or
@@ -1035,6 +1038,7 @@ pub fn WorldScreen() -> impl IntoView {
             };
             world_clock(progress.with_untracked(Progress::minute));
             world_camera(store::camera().code());
+            world_graphics(store::graphics());
             cb.with_value(|cb| world_mount(&h, &c, cb, &start, cfg!(debug_assertions)));
         }
     };
