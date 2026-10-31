@@ -23,7 +23,7 @@ PALETTE = {
     "dl_bark": "#6e4c40", "dl_bark_dk": "#563a31", "dl_bark_lt": "#8a6452",
     "dl_bloom_lt": "#fdeef2", "dl_bloom": "#f7d1dc", "dl_bloom_md": "#efb2c6", "dl_bloom_dk": "#d9849f",
     # leaf litter
-    "dl_ochre": "#d9a43a", "dl_rust": "#c0582e", "dl_brown": "#8d5c35", "dl_tan": "#bf9152", "dl_leaf_green": "#7aa043",
+    "dl_ochre": "#e6a41c", "dl_orange": "#e8701a", "dl_rust": "#c94c1e", "dl_red": "#a02c1f", "dl_brown": "#8d5530",
     "dl_twig": "#6b4a32", "dl_pebble": "#aaa396", "dl_pebble_dk": "#8d877b", "dl_pebble_lt": "#c4beb1",
 }
 
@@ -233,25 +233,58 @@ def leaf(L, w, h):
 
 
 def build_leaf_litter(k):
-    """1 x 1 ground scatter to walk over: two dozen fallen leaves in autumn colours (a few still green), three twigs
-    and five pebbles, all under 6 cm."""
+    """1 x 1 ground scatter to walk over: a loose drift of 36 fallen leaves in warm autumn tones (ochre, burnt orange,
+    rust, a little dark red and brown), heaped toward the middle so it reads from the game camera, three twigs and
+    five pebbles, all under 6 cm."""
     rng = random.Random(907)
-    cols = ["dl_ochre", "dl_rust", "dl_brown", "dl_tan", "dl_ochre", "dl_rust", "dl_leaf_green"]
-    n = 24
-    heights = [0.004 + 0.016 * i / (n - 1) for i in range(n)]
-    rng.shuffle(heights)
-    for i in range(n):
-        L = rng.uniform(0.08, 0.13)
-        w = L * rng.uniform(0.38, 0.6)
+    cols = ["dl_ochre"] * 6 + ["dl_orange"] * 5 + ["dl_rust"] * 5 + ["dl_red"] * 2 + ["dl_brown"] * 2
+    leaves = []
+    while len(leaves) < 36:   # clustered round the middle, a little longer across than deep
+        L = rng.uniform(0.12, 0.17)
+        cx, cy = rng.gauss(0, 0.17) * 1.15, rng.gauss(0, 0.17) * 0.85
+        if max(abs(cx), abs(cy)) + 0.6 * L <= 0.48:
+            leaves.append((L, cx, cy))
+    # lowest points staggered 4 to 26 mm, the middle of the drift on top
+    order = sorted(range(len(leaves)), key=lambda i: math.hypot(leaves[i][1], leaves[i][2]) + rng.uniform(0, 0.08), reverse=True)
+    heights = {i: 0.004 + 0.022 * n / (len(leaves) - 1) for n, i in enumerate(order)}
+    placed = []   # (unit normal, plane offset, bbox) of every leaf face so far
+
+    def planes(bm):
+        out = []
+        for f in bm.faces:
+            f.normal_update()
+            n = f.normal.copy()
+            if n.length > 0.5:
+                vs = [v.co for v in f.verts]
+                out.append((n, n.dot(f.calc_center_median()), [min(v[a] for v in vs) for a in range(3)], [max(v[a] for v in vs) for a in range(3)]))
+        return out
+
+    def clash(a, b):   # check_coplanar's test: parallel (either way) within 1 cm, boxes overlapping
+        (na, da, la, ha), (nb, db, lb, hb) = a, b
+        s = 1 if na.dot(nb) > 0 else -1
+        if (na - nb * s).length > 0.03 or abs(da - db * s) >= 0.012:
+            return False
+        return all(min(ha[x], hb[x]) - max(la[x], lb[x]) > 0.004 for x in range(3) if x != max(range(3), key=lambda q: abs(na[q])))
+
+    for i, (L, cx, cy) in enumerate(leaves):
+        w = L * rng.uniform(0.45, 0.65)
         yaw = rng.uniform(0, 360)
         ca, sa = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
-        cx, cy = rng.uniform(-0.48 + L * 0.6, 0.48 - L * 0.6), rng.uniform(-0.48 + L * 0.6, 0.48 - L * 0.6)
-        bm = leaf(L, w, rng.uniform(0.005, 0.009))
-        M = T((cx - ca * L / 2, cy - sa * L / 2, 0), (rng.choice((-1, 1)) * rng.uniform(3, 8), rng.choice((-1, 1)) * rng.uniform(2, 6), yaw))
-        bmesh.ops.transform(bm, matrix=M, verts=bm.verts)
-        lo = min(v.co.z for v in bm.verts)
-        bmesh.ops.translate(bm, vec=(0, 0, heights[i] - lo), verts=bm.verts)
-        k.add(bm, cols[i % len(cols)])
+        h = rng.uniform(0.006, 0.01)
+        for _ in range(40):   # re-roll the tilt until no face lies along one of an overlapping leaf's
+            bm = leaf(L, w, h)
+            M = T((cx - ca * L / 2, cy - sa * L / 2, 0), (rng.choice((-1, 1)) * rng.uniform(3, 8), rng.choice((-1, 1)) * rng.uniform(3, 7), yaw))
+            bmesh.ops.transform(bm, matrix=M, verts=bm.verts)
+            lo = min(v.co.z for v in bm.verts)
+            bmesh.ops.translate(bm, vec=(0, 0, heights[i] - lo), verts=bm.verts)
+            mine = planes(bm)
+            if not any(clash(a, b) for a in mine for b in placed):
+                break
+            bm.free()
+        else:
+            raise RuntimeError(f"leaf_litter: leaf {i} keeps lying along another")
+        placed += mine
+        k.add(bm, rng.choice(cols))
     for pts, r in (([(-0.36, 0.22), (-0.24, 0.26), (-0.1, 0.24)], 0.01),
                    ([(0.14, -0.3), (0.24, -0.24), (0.36, -0.26)], 0.008),
                    ([(-0.28, -0.14), (-0.23, -0.06), (-0.2, 0.02)], 0.007)):
