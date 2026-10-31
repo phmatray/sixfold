@@ -2685,8 +2685,8 @@
       "x": 13,
       "z": 18,
       "kind": "sign",
-      "text": "The Swap Shop. Cards bought, sold and swapped. Perrin never haggles.",
-      "text_fr": "La Bourse aux cartes. Cartes achetées, vendues, échangées. Perrin ne marchande jamais."
+      "text": "The Swap Shop. Cards bought, sold and swapped. Perrin never haggles. The old orchard runs out back.",
+      "text_fr": "La Bourse aux cartes. Cartes achetées, vendues, échangées. Perrin ne marchande jamais. Le vieux verger s'étend derrière."
     },
     {
       "kind": "find",
@@ -2957,13 +2957,13 @@
           "lines": [
             "Lovely day for a walk. I do this loop a hundred times before lunch.",
             "Some call it a rut. I call it a route.",
-            "My last loop's at dusk, home through the orchard. Where the old tree came down, there's a fellow dealing cards on the stump.",
+            "My last loop's at dusk, home through the old orchard behind the Swap Shop. Where the old tree came down, there's a fellow dealing cards on the stump.",
             "Every evening, same stump, same fellow, gone by dark. Never says a word to me. Might to you, if you carry a deck."
           ],
           "lines_fr": [
             "Belle journée pour marcher. Je fais cette boucle cent fois avant midi.",
             "On dit que je tourne en rond. Moi, je dis que je fais ma ronde.",
-            "Ma dernière boucle, c'est au crépuscule, en rentrant par le verger. Là où le vieil arbre est tombé, il y a un bonhomme qui fait des cartes sur la souche.",
+            "Ma dernière boucle, c'est au crépuscule, en rentrant par le vieux verger, derrière la Bourse aux cartes. Là où le vieil arbre est tombé, il y a un bonhomme qui fait des cartes sur la souche.",
             "Tous les soirs, même souche, même bonhomme, parti à la nuit. Il ne me dit jamais un mot. À toi, peut-être, si tu as un deck."
           ],
           "do": [
