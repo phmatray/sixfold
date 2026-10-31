@@ -1,7 +1,6 @@
-import { expect, test } from "@playwright/test";
-import { editSave, loaded, menuItem, readSave, title } from "./helpers";
+import { expect, test, editSave, loaded, menuItem, readSave, title } from "./helpers";
 
-test("the finale: back from the first Warden win, the scene, the credits, and the champion in the hall", async ({ page }) => {
+test("the finale: back from the first Warden win, the scene, the credits, and the champion in the hall @webkit", async ({ page }) => {
   page.on("dialog", (d) => d.accept());
   await title(page);
   await menuItem(page, "Learn to play").click();

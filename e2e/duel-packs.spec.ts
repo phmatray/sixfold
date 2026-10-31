@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-import { menuItem, owned, readSave, title } from "./helpers";
+import { expect, test, menuItem, owned, readSave, title } from "./helpers";
 
 test("a duel against the AI is played to the end", async ({ page }) => {
   await title(page);
@@ -31,7 +30,7 @@ test("a duel against the AI is played to the end", async ({ page }) => {
   await expect(result.getByRole("heading", { name: "Why you lost" })).toBeVisible();
 });
 
-test("opening packs adds cards to the collection @phone", async ({ page }) => {
+test("opening packs adds cards to the collection @phone @webkit", async ({ page }) => {
   await title(page);
   await menuItem(page, "Open packs").click();
   await expect(page.getByRole("heading", { level: 1, name: "Open packs" })).toBeVisible();
