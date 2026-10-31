@@ -40,9 +40,17 @@ fn play_styled(
         }
         let me = g.view(0).waiting_on.unwrap();
         let a = ais[me].choose_action(&g, me);
-        g.apply(a).unwrap();
+        checked(&mut g, a);
     }
     panic!("seed {seed}: the game never ended");
+}
+
+/// Apply an action the AI chose, then check the game still holds together.
+fn checked(g: &mut Game, a: crate::Action) {
+    g.apply(a).unwrap();
+    if let Err(e) = g.check_invariants() {
+        panic!("after {a:?} on turn {}: {e}", g.turn());
+    }
 }
 
 /// Every distinct deck the game puts in front of the player: the prebuilts,
@@ -704,7 +712,7 @@ fn a_french_game_has_no_english_left() {
             lines.extend(v.prompt.map(|p| p.kind.to_string()));
             lines.extend(g.legal_actions().into_iter().map(|a| v.describe_action(a)));
             let a = ais[me].choose_action(&g, me);
-            g.apply(a).unwrap();
+            checked(&mut g, a);
         }
         assert!(g.winner().is_some(), "seed {seed}: the game never ended");
         for viewer in 0..2 {
@@ -769,7 +777,7 @@ fn balance_indicators() {
                 while g.winner().is_none() {
                     let me = g.view(0).waiting_on.unwrap();
                     let a = ais[me].choose_action(&g, me);
-                    g.apply(a).unwrap();
+                    checked(&mut g, a);
                 }
                 let w = g.winner().unwrap();
                 let mut first = 0;
@@ -874,7 +882,7 @@ fn postgame_first_player_edge() {
                 while g.winner().is_none() {
                     let me = g.view(0).waiting_on.unwrap();
                     let a = ais[me].choose_action(&g, me);
-                    g.apply(a).unwrap();
+                    checked(&mut g, a);
                 }
                 let starter = g.log().iter().find_map(|e| match e {
                     Event::FirstPlayer { player, .. } => Some(*player),

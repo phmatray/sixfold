@@ -1,7 +1,6 @@
-import { expect, test } from "@playwright/test";
-import { menuItem, readSave } from "./helpers";
+import { expect, test, menuItem, readSave } from "./helpers";
 
-test("a new player opens the game, plays the guided duel and comes back to Continue", async ({ page }) => {
+test("a new player opens the game, plays the guided duel and comes back to Continue @webkit", async ({ page }) => {
   // A fresh browser: the studio opening first.
   await page.goto("/");
   // The prompt takes focus once the studio and the logo have played (a press before that only skips ahead).

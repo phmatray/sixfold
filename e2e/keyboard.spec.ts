@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-import { menuItem, title, moveTo } from "./helpers";
+import { expect, test, menuItem, title, moveTo } from "./helpers";
 
 test("keyboard only: title, duel setup, a duel started, then left", async ({ page }) => {
   await page.goto("/");
