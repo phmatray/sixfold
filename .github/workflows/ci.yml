@@ -54,6 +54,11 @@ jobs:
           if grep -q cdn.jsdelivr.net web/dist/index.html; then echo 'index.html still loads from a CDN'; exit 1; fi
           grep -q '"./vendor/three/build/three.module.min.js"' web/dist/sw.js
           grep -qx "$(sed -n 's/^THREE_VERSION=\${1:-\(.*\)}$/\1/p' tools/vendor-three.sh)" web/vendor/three/VERSION
+          # The world's post-processing (#225), shipped and precached the same way.
+          grep -q '"./vendor/postprocessing/index.js"' web/dist/sw.js
+          grep -q '"./vendor/n8ao/N8AO.js"' web/dist/sw.js
+          grep -qx "$(sed -n 's/^POSTPROCESSING_VERSION=\(.*\)$/\1/p' tools/vendor-three.sh)" web/vendor/postprocessing/VERSION
+          grep -qx "$(sed -n 's/^N8AO_VERSION=\(.*\)$/\1/p' tools/vendor-three.sh)" web/vendor/n8ao/VERSION
       - name: The typefaces ship with the game (no CDN) and are precached
         run: |
           if grep -q fonts.googleapis.com web/dist/index.html; then echo 'index.html still loads fonts from a CDN'; exit 1; fi

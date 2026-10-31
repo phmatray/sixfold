@@ -7,13 +7,17 @@
     <meta name="theme-color" content="#0d1a2c" />
     <title>Sixfold</title>
     <meta name="description" content="A Hexon card duel with the old handheld rules: collect original cards, build decks, duel rivals and explore the world. Plays offline." />
-    <!-- three.js for the world (web/world/world.js), shipped with the game (tools/vendor-three.sh)
-         so it is precached for offline play; must come before any module script. -->
+    <!-- three.js for the world (web/world/world.js), and its post-processing (#225: postprocessing,
+         N8AO, which imports three's Pass.js by its long path), shipped with the game
+         (tools/vendor-three.sh) so they are precached for offline play; must come before any module script. -->
     <script type="importmap">
       {
         "imports": {
           "three": "./vendor/three/build/three.module.min.js",
-          "three/addons/": "./vendor/three/examples/jsm/"
+          "three/addons/": "./vendor/three/examples/jsm/",
+          "three/examples/jsm/": "./vendor/three/examples/jsm/",
+          "postprocessing": "./vendor/postprocessing/index.js",
+          "n8ao": "./vendor/n8ao/N8AO.js"
         }
       }
     </script>

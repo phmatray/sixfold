@@ -11,6 +11,22 @@
       "matchStrings": ["THREE_VERSION=\\$\\{1:-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\}"],
       "depNameTemplate": "three",
       "datasourceTemplate": "npm"
+    },
+    {
+      "description": "postprocessing shipped in web/vendor/postprocessing (#225): bump the version, then re-run tools/vendor-three.sh",
+      "customType": "regex",
+      "managerFilePatterns": ["/^tools/vendor-three\\.sh$/"],
+      "matchStrings": ["POSTPROCESSING_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "postprocessing",
+      "datasourceTemplate": "npm"
+    },
+    {
+      "description": "N8AO shipped in web/vendor/n8ao (#225): bump the version, then re-run tools/vendor-three.sh",
+      "customType": "regex",
+      "managerFilePatterns": ["/^tools/vendor-three\\.sh$/"],
+      "matchStrings": ["N8AO_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "n8ao",
+      "datasourceTemplate": "npm"
     }
   ]
 }
