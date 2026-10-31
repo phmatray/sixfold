@@ -46,6 +46,7 @@ test("with nothing saved, a software renderer draws the world on Low", async ({ 
 });
 
 test("Auto on Low stays Low while the world runs: the probe never steps Low to Off", async ({ page }) => {
+  await page.setViewportSize({ width: 640, height: 360 }); // 150 software-GL frames, kept short
   await title(page);
   await enterWorld(page);
   await skipScene(page);
@@ -141,7 +142,7 @@ test("Options picks the graphics at once, the browser keeps it, and the title's 
 
 test("High saved, slow frames step the world down to Low for the visit, and the saved choice stays High", async ({ page }) => {
   // The world's frame-time probe (#225): frames 30 to 120 at High, under 45 fps → Low, never saved.
-  // SwiftShader on High is far past that already (~380 ms a frame at 1280 × 720); the CPU slowed 20× keeps it
+  // SwiftShader on High is far past that already (~380 ms a frame at 1280 × 720); the CPU slowed 4× keeps it
   // so on a faster runner, and a small window keeps the 120 frames short.
   test.setTimeout(360_000); // ~1.5 min locally: room for a slower CI runner
   await page.setViewportSize({ width: 640, height: 360 });
@@ -156,7 +157,7 @@ test("High saved, slow frames step the world down to Low for the visit, and the 
   await page.keyboard.press("Escape");
   await expect(skip).toBeHidden();
   const cdp = await page.context().newCDPSession(page);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 20 });
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   await expect.poll(() => graphics(page), { timeout: 150_000 }).toBe("low");
   expect(await page.evaluate(() => localStorage.getItem("sixfold.graphics"))).toBe("high");
 
@@ -181,7 +182,7 @@ test("High picked in Options before the probe has decided stays High, slow frame
   await skipScene(page);
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("low");
   const cdp = await page.context().newCDPSession(page);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 20 });
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   await pickGraphics(page, "High");
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("high");
   await frames(page, 150);
