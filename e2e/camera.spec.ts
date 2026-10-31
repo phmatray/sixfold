@@ -176,7 +176,8 @@ test("switching language in the world's Options comes back to the menu, on the s
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("tab", { name: "Options" }).click();
   const fr = page.locator(".world-sheet .lang-switch button[lang=fr]");
-  await fr.click();
+  // The click starts a reload; on CI's software renderer it outlasts the click's own wait (#223).
+  await fr.click({ noWaitAfter: true });
   await expect(fr).toHaveAttribute("aria-pressed", "true", { timeout: 60_000 });
   await expect(page.locator("#menu-tab-options")).toHaveAttribute("aria-selected", "true");
   await expect(fr).toBeFocused();
