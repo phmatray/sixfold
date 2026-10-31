@@ -157,6 +157,9 @@ function burstStep(s, dt) {
 
 // Sounds come from web/audio/audio.js (loaded with the wasm), when it is there.
 const sound = (name, n = 0) => globalThis.sixfoldAudio?.sfx(name, n);
+// A map's music track, and its ambience bed (the region's, unless the map names another with `ambience`).
+const trackOf = (m) => (m.light.indoor ? "interior" : m.dark ? "cave" : m.music ?? "overworld");
+const bedOf = (m) => m.ambience ?? trackOf(m);
 // The hero's bust (an object URL), outliving the world it was baked in: the duel table shows it (#177).
 const HERO_BUST = "\u0000hero"; // its place in the bust queue, never an NPC's id
 let heroBust = "";
@@ -512,9 +515,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // under it the region's ambience bed (a map may name another with `ambience`).
   const tune = () => {
     const m = world.map, phase = phaseOf(minute);
-    const track = m.light.indoor ? "interior" : m.dark ? "cave" : m.music ?? "overworld";
+    const track = trackOf(m);
     globalThis.sixfoldAudio?.music(!m.light.indoor && !m.dark && phase === "night" ? `${track}_night` : track);
-    globalThis.sixfoldAudio?.ambience(m.ambience ?? track, phase);
+    globalThis.sixfoldAudio?.ambience(bedOf(m), phase);
   };
   // Tell Rust the time (it saves it); at a new phase, what is out at this hour changes.
   const tick = (dt) => {
@@ -872,6 +875,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     animateProps(w, dt, reduced);
     stoneStep(w.stone, dt, reduced);
     const lit = w.day.update(minute, px, pz, dt);
+    // In a biome transition band (#118) the next region's ambience bed rises under this one's, up to half.
+    const inBand = w.lean(px, pz), next = inBand?.band.next;
+    globalThis.sixfoldAudio?.lean?.(next ? bedOf(next) : "", phaseOf(minute), 0.5 * (inBand?.k ?? 0));
     sky(lit);
     w.life.update(dt, w.now, px, pz, lit.night, cut.playing);
     w.fireflies.update(dt, w.now, lit.night, reduced);

@@ -1831,6 +1831,76 @@
       "z": 31,
       "rot": 0,
       "y": 6
+    },
+    {
+      "asset": "stump",
+      "x": 17,
+      "z": 28,
+      "rot": 90,
+      "band": "elder_ring"
+    },
+    {
+      "asset": "bush_dark",
+      "x": 31,
+      "z": 28,
+      "rot": 270,
+      "band": "elder_ring"
+    },
+    {
+      "asset": "flowers",
+      "x": 18,
+      "z": 29,
+      "rot": 0,
+      "band": "elder_ring"
+    },
+    {
+      "asset": "bush_dark",
+      "x": 28,
+      "z": 29,
+      "rot": 90,
+      "band": "elder_ring"
+    },
+    {
+      "asset": "bush_dark",
+      "x": 15,
+      "z": 30,
+      "rot": 0,
+      "band": "elder_ring"
+    },
+    {
+      "asset": "stump",
+      "x": 16,
+      "z": 30,
+      "rot": 90,
+      "band": "elder_ring"
+    },
+    {
+      "asset": "bush_dark",
+      "x": 17,
+      "z": 30,
+      "rot": 180,
+      "band": "elder_ring"
+    },
+    {
+      "asset": "flowers",
+      "x": 18,
+      "z": 30,
+      "rot": 90,
+      "band": "elder_ring"
+    },
+    {
+      "asset": "stump",
+      "x": 29,
+      "z": 30,
+      "rot": 270,
+      "band": "elder_ring"
+    },
+    {
+      "asset": "stump",
+      "x": 30,
+      "z": 30,
+      "rot": 270,
+      "band": "elder_ring"
     }
   ],
   "spawn": {
@@ -2521,6 +2591,17 @@
             "cam:hero"
           ]
         }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "to": "elder_ring",
+      "depth": 5,
+      "scatter": [
+        "bush_dark",
+        "stump",
+        "flowers"
       ]
     }
   ]

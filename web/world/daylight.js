@@ -88,6 +88,7 @@ export function daylight(w, reduced) {
   const indoor = !!w.map.light.indoor, dark = !!w.map.dark, storm = !!w.map.lightning && !indoor;
   let bolt = 6 + Math.random() * 10, strike = null;
   const cur = { ...P.day, sun: C(0), sky: C(0), ground: C(0), bg: C(0), from: new THREE.Vector3() };
+  const alt = { ...P.day, sun: C(0), sky: C(0), ground: C(0), bg: C(0), from: new THREE.Vector3() };
   const root = w.root;
 
   // The hero's lantern (outdoors and in caves), and a fixed few for the nearest lamps.
@@ -171,6 +172,13 @@ export function daylight(w, reduced) {
       const since = (((minute - START[p]) % DAY) + DAY) % DAY;
       const k = reduced ? 1 : Math.min(1, since / FADE);
       lerp(cur, P[prev], P[p], k * k * (3 - 2 * k));
+      // In a biome transition band (#118) the look leans toward the next map's at this hour, up to 35% at the edge.
+      const lean = w.lean?.(hx, hz);
+      if (lean) {
+        const N = (lean.band.looks ??= presets(lean.band.next));
+        lerp(alt, N[prev], N[p], k * k * (3 - 2 * k));
+        lerp(cur, cur, alt, 0.35 * lean.k);
+      }
 
       w.sun.color.copy(cur.sun);
       w.sun.intensity = cur.sunI;

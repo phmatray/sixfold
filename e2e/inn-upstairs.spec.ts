@@ -28,8 +28,8 @@ test("an inn's upstairs (#193): up the stairs, rest in a bed, a reload stays up,
   await expect.poll(() => at(page), { timeout: 60_000 }).toBe("inn_grove_up,8,2,s");
 
   // A bed upstairs: its line, then the inn's rest panel, without the counter (that stays downstairs).
-  await warp(page, "inn_grove_up", 2, 2, "n");
-  await expect.poll(() => at(page)).toBe("inn_grove_up,2,2,n");
+  await warp(page, "inn_grove_up", 9, 3, "w");
+  await expect.poll(() => at(page)).toBe("inn_grove_up,9,3,w");
   await expect(page.getByRole("button", { name: /^Rest/ })).toBeVisible();
   await page.keyboard.press("e");
   const talk = page.locator(".talk-box");

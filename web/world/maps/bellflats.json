@@ -1519,6 +1519,62 @@
       "x": 5,
       "z": 13,
       "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 39,
+      "z": 27,
+      "rot": 90,
+      "band": "lanternmere"
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 23,
+      "z": 28,
+      "rot": 0,
+      "band": "lanternmere"
+    },
+    {
+      "asset": "reeds",
+      "x": 36,
+      "z": 28,
+      "rot": 270,
+      "band": "lanternmere"
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 39,
+      "z": 28,
+      "rot": 90,
+      "band": "lanternmere"
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 23,
+      "z": 29,
+      "rot": 180,
+      "band": "lanternmere"
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 24,
+      "z": 29,
+      "rot": 0,
+      "band": "lanternmere"
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 25,
+      "z": 29,
+      "rot": 90,
+      "band": "lanternmere"
+    },
+    {
+      "asset": "floating_lantern",
+      "x": 37,
+      "z": 29,
+      "rot": 0,
+      "band": "lanternmere"
     }
   ],
   "spawn": {
@@ -4613,6 +4669,16 @@
             "cam:hero"
           ]
         }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "to": "lanternmere",
+      "depth": 5,
+      "scatter": [
+        "floating_lantern",
+        "reeds"
       ]
     }
   ]
