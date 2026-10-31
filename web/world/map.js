@@ -17,7 +17,7 @@ const assets = new Map();
 export const PERSON = /^(npc|rival)_/; // models in assets/npc/
 const WALL = /^wall(_low)?(|_corner|_end|_t|_window)$/; // the interior wall kit (not the outdoor `wall_dry` set)
 const folder = (n) => (INTERIOR.has(n) || WALL.test(n) ? "interior/" : PERSON.test(n) ? "npc/" : "");
-const BUILT = new Set(["seal_door", "inn_stairs", "inn_stairwell"]); // drawn in code only (props.js PLACEHOLDER): nothing to fetch
+const BUILT = new Set(["seal_door", "inn_stairs", "inn_stairwell", "hedge_gap", "crates_open", "stone_odd", "stone_moved"]); // drawn in code only (props.js PLACEHOLDER): nothing to fetch
 export const loadAsset = (n) => {
   if (BUILT.has(n)) return Promise.resolve(null);
   if (!assets.has(n)) assets.set(n, loader.loadAsync(new URL(`assets/${folder(n)}${n}.glb`, BASE).href).catch(() => null));
@@ -53,6 +53,8 @@ export const setMap = (name, raw) => maps.set(name, Promise.resolve(expand(local
 // until then unless `hidden`, and a shrug after.
 // A waymark (`kind: "waymark"`, §7.3): the first touch lights it (flag way_<id>),
 // and every touch opens the world map to travel.
+// A `secret` block (#116) sets flag:secret_<id> on discovery: a find's take (and its shrug after), or
+// every branch of any other spot or NPC.
 export function expand(map) {
   for (const n of map.npcs ?? []) {
     // A map cached by an older build (the service worker keeps one) still names the block `trainer` (#192).
@@ -72,7 +74,9 @@ export function expand(map) {
     const flag = `found_${i.id}`;
     if (!i.hidden) i.glint = i.glint ? `${i.glint} & !flag:${flag}` : `!flag:${flag}`;
     i.name ??= "";
-    i.dialogue = [{ if: `!flag:${flag}`, lines: [i.text], do: [i.give, `flag:${flag}`] }, { lines: [tr("Nothing else here.", "Plus rien ici.")] }];
+    const secret = i.secret ? [`flag:secret_${i.secret.id}`] : [];
+    // The shrug sets it too: a save that looted the find before secrets existed earns it by looking again.
+    i.dialogue = [{ if: `!flag:${flag}`, lines: [i.text], do: [i.give, `flag:${flag}`, ...secret] }, { lines: [tr("Nothing else here.", "Plus rien ici.")], ...(i.secret && { do: secret }) }];
   }
   for (const i of map.interactions ?? []) {
     if (i.kind !== "waymark") continue;
@@ -89,6 +93,12 @@ export function expand(map) {
       },
       { lines: [tr("The waymark hums. Where to?", "La borne bourdonne. Où aller\u202f?")], do: ["show:map"] },
     ];
+  }
+  // Any other spot or NPC with a `secret` block: meeting it is the discovery, so every branch sets it
+  // (first, so a short `pay:` can't skip it).
+  for (const o of [...(map.npcs ?? []), ...(map.interactions ?? [])]) {
+    if (!o.secret || o.kind === "find") continue;
+    for (const b of o.dialogue ?? []) b.do = [`flag:secret_${o.secret.id}`, ...[b.do ?? []].flat()];
   }
   return map;
 }

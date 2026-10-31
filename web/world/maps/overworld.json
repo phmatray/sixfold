@@ -2685,8 +2685,8 @@
       "x": 13,
       "z": 18,
       "kind": "sign",
-      "text": "The Swap Shop. Cards bought, sold and swapped. Perrin never haggles.",
-      "text_fr": "La Bourse aux cartes. Cartes achetées, vendues, échangées. Perrin ne marchande jamais."
+      "text": "The Swap Shop. Cards bought, sold and swapped. Perrin never haggles. The old orchard runs out back.",
+      "text_fr": "La Bourse aux cartes. Cartes achetées, vendues, échangées. Perrin ne marchande jamais. Le vieux verger s'étend derrière."
     },
     {
       "kind": "find",
@@ -2821,6 +2821,53 @@
       }
     },
     {
+      "id": "t_barnaby",
+      "name": "Barnaby",
+      "model": "npc_elder",
+      "x": 11,
+      "z": 6,
+      "facing": "w",
+      "idle": "Idle",
+      "if": "flag:heard_orchard_dusk & time:dusk",
+      "poi": "secret",
+      "secret": {
+        "id": "orchard_dusk",
+        "kind": "social",
+        "hint": "wren"
+      },
+      "duelist": {
+        "sight": 0,
+        "challenge": [
+          "Evening. Wren sent you, I'll bet. Wren tells everyone, and nobody comes.",
+          "I sat at every big table once. Now I deal patience on this stump till the light goes. Two prizes, for old times' sake?"
+        ],
+        "challenge_fr": [
+          "Bonsoir. C'est Wren qui t'envoie, je parie. Wren le dit à tout le monde, et personne ne vient.",
+          "Je me suis assis à toutes les grandes tables, autrefois. Maintenant, je fais des réussites sur cette souche jusqu'à ce que la lumière tombe. Deux cartes Récompense, en souvenir du bon vieux temps ?"
+        ],
+        "win": [
+          "Well played. The old hands still shake, but that wasn't them. That was you."
+        ],
+        "win_fr": [
+          "Bien joué. Les vieilles mains tremblent encore, mais ce n'était pas ça. C'était toi."
+        ],
+        "lose": [
+          "Patience. That's the game I deal here, and the one you need. Come back another dusk."
+        ],
+        "lose_fr": [
+          "La patience. C'est le jeu que je fais ici, et celui qu'il te faut. Reviens un autre soir."
+        ],
+        "after": [
+          "The tree that stood here was planted the year I won my first duel. A storm took it. I still come at dusk."
+        ],
+        "after_fr": [
+          "L'arbre qui était là a été planté l'année de mon premier duel gagné. Une tempête l'a emporté. Je viens toujours au crépuscule."
+        ]
+      },
+      "outfit": "#5a6a4a",
+      "hair": "#e0ddd4"
+    },
+    {
       "id": "pip",
       "name": "Pip",
       "model": "npc_kid",
@@ -2906,14 +2953,21 @@
       ],
       "dialogue": [
         {
-          "if": "!flag:talked_wren",
+          "if": "!flag:heard_orchard_dusk",
           "lines": [
             "Lovely day for a walk. I do this loop a hundred times before lunch.",
-            "Some call it a rut. I call it a route."
+            "Some call it a rut. I call it a route.",
+            "My last loop's at dusk, home through the old orchard behind the Swap Shop. Where the old tree came down, there's a fellow dealing cards on the stump.",
+            "Every evening, same stump, same fellow, gone by dark. Never says a word to me. Might to you, if you carry a deck."
           ],
           "lines_fr": [
             "Belle journée pour marcher. Je fais cette boucle cent fois avant midi.",
-            "On dit que je tourne en rond. Moi, je dis que je fais ma ronde."
+            "On dit que je tourne en rond. Moi, je dis que je fais ma ronde.",
+            "Ma dernière boucle, c'est au crépuscule, en rentrant par le vieux verger, derrière la Bourse aux cartes. Là où le vieil arbre est tombé, il y a un bonhomme qui fait des cartes sur la souche.",
+            "Tous les soirs, même souche, même bonhomme, parti à la nuit. Il ne me dit jamais un mot. À toi, peut-être, si tu as un deck."
+          ],
+          "do": [
+            "flag:heard_orchard_dusk"
           ]
         },
         {

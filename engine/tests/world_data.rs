@@ -15,6 +15,9 @@
 //! duels is started by some cutscene.
 //! 1.9: every `book` names one of the engine's books, and each book stands on
 //! exactly one shelf, across at least five houses.
+//! 1.12: a `secret` block (on a `poi: "secret"` interaction or NPC) has a
+//! `[a-z0-9_]` id unique across maps and one of the four kinds; the loader
+//! sets `flag:secret_<id>` on discovery, and the maps hold `SECRETS` of them.
 
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
@@ -25,12 +28,14 @@ use sixfold_engine::campaign::{rival, GROUNDS, RIVALS};
 use sixfold_engine::doctor::APPLIED_FLAG;
 use sixfold_engine::duelists::{duelist, DUELISTS, ROOK_SEALS};
 use sixfold_engine::overworld::{parse_cond, parse_effect, CamTarget, Cue, Effect, Progress, Test};
-use sixfold_engine::stats::{CURIOS, FIELD_ITEMS, FINDS, SEAL_SITES, WAYMARKS};
+use sixfold_engine::stats::{CURIOS, FIELD_ITEMS, FINDS, SEAL_SITES, SECRETS, WAYMARKS};
 
 /// What every map seen so far placed.
 #[derive(Default)]
 struct Seen {
     finds: HashMap<String, String>,
+    /// Secret ids, and the map each is on.
+    secrets: HashMap<String, String>,
     duelists: HashMap<String, String>,
     /// `item:x` and `flag:x` for every item given and flag set.
     sets: HashSet<String>,
@@ -124,6 +129,35 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
                 sets(&format!("flag:found_{id}"), seen);
             }
         }
+        // The loader adds flag:secret_<id> to the dialogue (map.js expand).
+        if let Some(id) = d["secret"]["id"].as_str() {
+            sets(&format!("flag:secret_{id}"), seen);
+        }
+    }
+    for d in m["npcs"]
+        .as_array()
+        .into_iter()
+        .chain(m["interactions"].as_array())
+        .flatten()
+    {
+        let Some(s) = d.get("secret") else { continue };
+        let at = format!("{}.secret", d["id"].as_str().unwrap_or("?"));
+        if d["poi"] != "secret" {
+            bad.push(format!("{name}: {at}: a secret block needs poi: secret"));
+        }
+        let id = s["id"].as_str().unwrap_or("");
+        if id.is_empty() || parse_effect(&format!("flag:secret_{id}")).is_err() {
+            bad.push(format!("{name}: {at}: secret id {id:?} is not [a-z0-9_]"));
+        }
+        let kind = s["kind"].as_str().unwrap_or("");
+        if !["spatial", "environmental", "progression", "social"].contains(&kind) {
+            bad.push(format!(
+                "{name}: {at}: secret kind {kind:?} is not spatial, environmental, progression or social"
+            ));
+        }
+        if let Some(other) = seen.secrets.insert(id.to_string(), name.to_string()) {
+            bad.push(format!("{name}: {at}: secret id also used in {other}"));
+        }
     }
     for n in m["npcs"].as_array().into_iter().flatten() {
         let id = n["id"].as_str().unwrap_or("?");
@@ -150,6 +184,17 @@ fn check_map(name: &str, m: &Value, seen: &mut Seen) -> Vec<String> {
                     ))
                 }
                 Some(_) => {}
+            }
+            // #116: a duelist the table keeps secret (`heard`) is that secret, out only once told.
+            if let Some(s) = duelist(id).and_then(|t| t.heard) {
+                let told = n["if"]
+                    .as_str()
+                    .is_some_and(|c| c.contains(&format!("flag:heard_{s}")));
+                if !told || n["secret"]["id"] != s {
+                    bad.push(format!(
+                        "{name}: {at}: a secret duelist is the secret {s}, out only once told (if: flag:heard_{s})"
+                    ));
+                }
             }
             for c in [
                 format!("won:{id}"),
@@ -509,6 +554,7 @@ fn every_map_reads_with_the_engine_grammar() {
         .count();
     let totals = [
         ("finds", seen.finds.len(), FINDS),
+        ("secrets", seen.secrets.len(), SECRETS),
         ("curios", curios, CURIOS),
         ("waymarks", charted.len(), WAYMARKS),
     ];
@@ -613,10 +659,12 @@ fn the_checker_reads_duelist_and_find_blocks() {
         "npcs": [
             { "id": "t_hazel", "duelist": { "sight": 4, "challenge": ["Buzz."] },
               "dialogue": [{ "if": "beat:t_hazel & count:found_:2", "do": ["emote:t_hazel:heart", "coins:20"] }] },
-            { "id": "perrin", "if": "seals:1", "dialogue": [{ "if": "coins:150", "do": ["pay:150", "pack:ember", "show:trader"] }] }
+            { "id": "perrin", "if": "seals:1", "dialogue": [{ "if": "coins:150", "do": ["pay:150", "pack:ember", "show:trader"] }],
+              "poi": "secret", "secret": { "id": "perrin_tip", "kind": "social" } }
         ],
         "interactions": [
-            { "kind": "find", "id": "w_log", "give": "coins:50", "glint": "!flag:found_w_log" },
+            { "kind": "find", "id": "w_log", "give": "coins:50", "glint": "!flag:found_w_log",
+              "poi": "secret", "secret": { "id": "fern_glade", "kind": "spatial" } },
             { "kind": "find", "id": "w_reeds", "give": "card:clearwater_vial", "hidden": true }
         ],
         "warps": [{ "if": "item:ferry_pass", "open": "hour:8-19" }],
@@ -629,6 +677,11 @@ fn the_checker_reads_duelist_and_find_blocks() {
         check_map("woodland", &good, &mut seen),
         Vec::<String>::new()
     );
+    assert_eq!(seen.secrets.len(), 2);
+    assert!(
+        seen.sets.contains("flag:secret_fern_glade")
+            && seen.sets.contains("flag:secret_perrin_tip")
+    );
     // The same duelist and find ids again elsewhere, and assorted bad data.
     let bad: Value = serde_json::from_str(
         r#"{
@@ -640,7 +693,10 @@ fn the_checker_reads_duelist_and_find_blocks() {
         "interactions": [
             { "kind": "find", "id": "w_log", "give": "coins:many" },
             { "kind": "find", "id": "w_new" },
-            { "kind": "find", "id": "w_ferry", "give": "warp:gullhaven:1:2:north" }
+            { "kind": "find", "id": "w_ferry", "give": "warp:gullhaven:1:2:north" },
+            { "id": "s_dup", "poi": "secret", "secret": { "id": "fern_glade", "kind": "spatial" } },
+            { "id": "s_odd", "poi": "secret", "secret": { "id": "Odd Glade", "kind": "hidden" } },
+            { "id": "s_untagged", "secret": { "id": "moss", "kind": "environmental" } }
         ],
         "gates": [{ "id": "ford", "if": "time:noon" }, { "id": "vent" }],
         "props": [{ "asset": "pylon", "open": "flag:Pylon" }, { "asset": "house", "lit": "hour:17-25" }],
@@ -668,6 +724,10 @@ fn the_checker_reads_duelist_and_find_blocks() {
         "hour:17-25",
         "hour:9-9",
         "barks[0].if",
+        "s_dup.secret: secret id also used in woodland",
+        "s_odd.secret: secret id \"Odd Glade\"",
+        "s_odd.secret: secret kind \"hidden\"",
+        "s_untagged.secret: a secret block needs poi: secret",
     ] {
         assert!(
             errors.iter().any(|e| e.contains(want)),

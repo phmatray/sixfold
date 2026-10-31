@@ -20,6 +20,28 @@
       "rot": 0
     },
     {
+      "asset": "net_locker",
+      "x": 1,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 2,
+      "rot": 0,
+      "y": 1.95,
+      "if": "!flag:found_i_loft_chest"
+    },
+    {
+      "asset": "crates_open",
+      "x": 1,
+      "z": 2,
+      "rot": 0,
+      "y": 1.95,
+      "if": "flag:found_i_loft_chest"
+    },
+    {
       "asset": "shelf",
       "x": 7,
       "z": 1,
@@ -102,6 +124,22 @@
       "give": "coins:40",
       "text": "In the net locker, under an oilskin that smells of tar: a purse of Facets, tied with a fisherman's knot.",
       "text_fr": "Dans le casier à filets, sous un ciré qui sent le goudron : une bourse de Facettes, fermée d'un nœud de pêcheur."
+    },
+    {
+      "kind": "find",
+      "id": "i_loft_chest",
+      "x": 1,
+      "z": 2,
+      "give": "card:tidemaw",
+      "if": "flag:heard_loft_chest",
+      "text": "You stand on tiptoe and drag Teo's sea chest to the edge of the locker. The lid gives with a puff of salt. Under a rolled-up oilskin and one odd boot: a card, kept flat between two charts.",
+      "text_fr": "Sur la pointe des pieds, vous tirez le coffre de marin de Teo jusqu'au bord du casier. Le couvercle cède dans un nuage de sel. Sous un ciré roulé et une botte dépareillée : une carte, gardée à plat entre deux cartes marines.",
+      "poi": "secret",
+      "secret": {
+        "id": "loft_chest",
+        "kind": "social",
+        "hint": "nettie"
+      }
     }
   ],
   "warps": [
@@ -143,6 +181,24 @@
             "Attention aux flotteurs, ils roulent.",
             "Je ramende les filets des bateaux qui restent. Il y avait un bac, autrefois, vers l'est le long de la côte, jusqu'à un port si plein de mouettes qu'on ne s'entendait pas crier.",
             "L'embarcadère est toujours là. Quelqu'un en voudra de nouveau, un jour."
+          ]
+        },
+        {
+          "if": "beat:marlo & !flag:heard_loft_chest",
+          "lines": [
+            "You beat Marlo? Then you've earned the rest of that story. The once the sea surprised us.",
+            "My brother Teo took his boat out on a flat calm morning, and a squall came out of nowhere. He swam home. The boat didn't.",
+            "He swore off the sea that same day and went inland to grow turnips. His sea chest's still up on top of the old net locker by the workbench, where he slung it.",
+            "Never came back for it. Go on, have a look. Whatever's in there has waited long enough."
+          ],
+          "lines_fr": [
+            "Tu as battu Marlo ? Alors tu as gagné la fin de l'histoire. La fois où la mer nous a surpris.",
+            "Mon frère Teo est sorti en bateau un matin de calme plat, et un grain est tombé de nulle part. Il est rentré à la nage. Le bateau, non.",
+            "Il a juré le jour même de ne plus jamais prendre la mer et il est parti cultiver des navets dans les terres. Son coffre de marin est toujours là-haut, sur le vieux casier à filets à côté de l'établi, là où il l'a jeté.",
+            "Il n'est jamais revenu le chercher. Vas-y, jette un œil. Ce qu'il y a dedans a assez attendu."
+          ],
+          "do": [
+            "flag:heard_loft_chest"
           ]
         },
         {

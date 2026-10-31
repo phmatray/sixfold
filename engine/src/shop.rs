@@ -637,8 +637,8 @@ mod tests {
         // 1.7 achievements (§12.3) a first playthrough earns on the way: the
         // first win and Awaken 2, the seals and the champion, ten duelists and
         // finds, 50 cards, 25 packs, the field items and an empty-bench win.
-        // The rest (⬡ 3,050 of the 3,975) are the long tail: the Gauntlet, the
-        // daily duel, every find, card and duelist, streaks and records.
+        // The rest (⬡ 3,425 of the 4,350) are the long tail: the Gauntlet, the
+        // daily duel, every find, secret, card and duelist, streaks and records.
         let on_the_way = [
             "first_win",
             "full_bloom",

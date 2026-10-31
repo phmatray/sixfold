@@ -160,6 +160,16 @@ function burstStep(s, dt) {
 
 // Sounds come from web/audio/audio.js (loaded with the wasm), when it is there.
 const sound = (name, n = 0) => globalThis.sixfoldAudio?.sfx(name, n);
+// A secret's hum (#116) swells as the hero comes within its radius (build.js `w.hums`, re-read on each refresh):
+// the nearest one's closeness times a quiet base, sent only when it moves by a step. No world: silence.
+const HUM_BASE = 0.5;
+let humWas = 0;
+const humNear = (w, px, pz) => {
+  let k = 0;
+  for (const s of w?.hums ?? []) k = Math.max(k, 1 - Math.hypot(px - s.at[0] - 0.5, pz - s.at[1] - 0.5) / s.radius);
+  k = Math.round(Math.max(0, k) * HUM_BASE * 50) / 50;
+  if (k !== humWas) globalThis.sixfoldAudio?.hum?.((humWas = k));
+};
 // A map's music track, and its ambience bed (the region's, unless the map names another with `ambience`).
 const trackOf = (m) => (m.light.indoor ? "interior" : m.dark ? "cave" : m.music ?? "overworld");
 const bedOf = (m) => m.ambience ?? trackOf(m);
@@ -710,6 +720,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     refresh(next, holds, gate);
     if (world) dispose(world.root);
     world = next;
+    humNear(null); // the last map's hum stops; this one's starts from where the hero lands
     world.hero = null;
     world.day = daylight(world, reduced);
     world.stone = stoneRig(world, sealsHeld);
@@ -906,6 +917,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     globalThis.sixfoldAudio?.lean?.(next ? bedOf(next) : "", phaseOf(minute), 0.5 * (inBand?.k ?? 0));
     sky(lit);
     w.life.update(dt, w.now, px, pz, lit.night, cut.playing);
+    humNear(w, px, pz);
     w.fireflies.update(dt, w.now, lit.night, reduced, w.glowBoost);
 
     const pos = `${h.x},${h.z},${h.face}`;
@@ -1203,6 +1215,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   const stop = () => {
     alive = false;
     globalThis.sixfoldAudio?.ambience("");
+    humNear(null);
     bustsReset();
     bustRT?.dispose();
     stopEditor();

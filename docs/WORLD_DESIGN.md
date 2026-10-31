@@ -7,7 +7,7 @@ the world. Three releases implement it:
 |---|---|---|
 | **1.2** | The world comes alive | The five existing areas fill with route duelists, a currency, shops, hidden finds and six houses; rivals get a face and a voice. |
 | **1.3** | Six regions | The world is re-laid as a hub and a ring of six colour regions (21 outdoor maps), with field items that gate paths, day and night, and fast travel. |
-| **1.4** | Story | An original recurring rival, six short cutscenes, duel juice, stats and 38 achievements. **Moved:** the story, cutscenes, stats and achievements ship in 1.7 and duel juice in 1.6 (`docs/ROADMAP.md`). |
+| **1.4** | Story | An original recurring rival, six short cutscenes, duel juice, stats and 38 achievements (41 since 1.12). **Moved:** the story, cutscenes, stats and achievements ship in 1.7 and duel juice in 1.6 (`docs/ROADMAP.md`). |
 
 Hard constraints, restated so nobody has to look them up:
 
@@ -357,7 +357,9 @@ Sight direction in brackets.
 | `t_marigold` | Marigold | Glass Gatherer / Cueilleuse de verre | quarry 18,5 (w, 3) on the first ledge (Orla's spot, 22,4, in 1.3) | Bellows | 3 | Normal | 60 | Collects melted glass beads; thinks the quarry was a volcano once (it was). |
 | `t_lark` | Lark | Busker / Musicienne de rue | square 9,10 (talk-to-duel) | Mix(Scrap, Murmur) | 1 | Easy | 30 | Plays a squeezebox badly and a deck well. |
 
-14 duelists, ⬡ 585 in purses (five 1-prize, seven 2-prize, two 3-prize).
+14 duelists, ⬡ 585 in purses (five 1-prize, seven 2-prize, two 3-prize). Since 1.12 (#116), a secret fifteenth:
+`t_barnaby`, Barnaby, Old Hand / *Vieux briscard*, overworld 11,6 by the orchard stump (talk), Flock + Mendlark 1,
+2 prizes, Normal, ⬡ 45; out only at dusk once Wren has told of him (`flag:heard_orchard_dusk`).
 
 **Balance (1.2 content PR).** `kit_sweep` plays each duelist as placed against the bare starter deck (a new
 player's): most sit at 3–47%. **Morrow** was at 80% on the Current kit (Tide against the Ember starter, three
@@ -762,6 +764,7 @@ Scripts are map data (§9.1), triggered `on: "enter"` or by stepping on `at` til
 | `ambience` | map | 1.9 | ambience bed (a track id or `interior`), default the map's track (`interior` indoors, `cave` in the dark) |
 | `region` | map | 1.3 | region id, for the world map and achievements |
 | `scripts` | map | 1.4 | cutscenes (below) |
+| `secret`, `sound`; prop `hedge_gap` | interaction, npc; prop | 1.12 | a secret (its clue, hint and hum) and a hedge break; the data and its rules are in `docs/WORLD_RULES.md` §9 |
 
 Scripts:
 
@@ -1351,6 +1354,7 @@ each night find). **Esme**, a child who only appears at dawn ("Everyone's asleep
 | `t_luce` | Luce, Sleepwalker / *Somnambule* | hushlane | Murmur | 1 | Easy | 30 |
 | `t_iver` | Iver, Poet / *Poète* | hushlane | Reverie | 2 | Normal | 45 |
 | `t_clem` | Clem, Lantern Carrier / *Porteur de lanternes* | lanternmere east shore 31,18 (n, 4) | Murmur | 2 | Normal | 45 |
+| `t_faye` | Faye, Dusk Dancer / *Danseuse du crépuscule* — secret (#116): at dusk, once Lisette has told of her | lanternmere west-shore willows 6,24 (s, 2) | Reverie + Wispelle 1 | 2 | Normal | 45 |
 | `t_maud` | Maud, Moth Catcher / *Chasseuse de phalènes* | moonwell 22,4 (s, 3) | Reverie | 3 | Normal | 60 |
 | `t_noor` | Noor, Dream Reader / *Liseuse de rêves* | moonwell 4,12 (e, 4) | Mix(Reverie, Seedling) | 3 | Normal | 60 |
 | `t_ambrose` ☾ | Ambrose, Night Rower / *Rameur de nuit* | the lantern path, mid-lake (talk) | Trance | 3 | Hard | 90 |
@@ -1714,7 +1718,7 @@ Counters: `duels`, `wins`, `quick_wins`, `quick_wins_hard`, `rival_wins`, `dueli
 `bench_kos`, `stage2_played`, `heads_run_best`, `streak`, `streak_best`, `coins_in`, `coins_out`, `packs`,
 `crafts`, `sold`, `finds`, `steps`, `minutes`, `nights`, `daily_days`.
 
-### 12.3 Achievements (38)
+### 12.3 Achievements (41)
 
 Checked by `stats::earned(&Stats, &Progress, &Profile) -> Vec<Achievement>` after every duel and world event;
 a newly earned one sets `flag:ach_<id>`, pays its Facets once and shows a toast. An **Achievements** page lists
@@ -1738,6 +1742,9 @@ them, hidden ones as "???" until earned (marked H).
 | `finds_10` | Magpie / *Pie voleuse* | 10 finds | 50 |
 | `finds_all` | Nothing Hidden / *Rien de caché* | every find (86) | 250 |
 | `curios_all` | Curator / *Conservateur* | all 12 curios | 100 |
+| `secrets_1` | Curious / *Curieux* | find a secret | 25 |
+| `secrets_half` | Sleuth / *Fin limier* | find half the secrets | 100 |
+| `secrets_all` | Nothing Escapes You / *Rien ne vous échappe* | find every secret | 250 |
 | `waymarks` | Wayfarer / *Grand voyageur* | touch all 13 waymarks | 75 |
 | `ring_day` H | Around the Ring / *Le tour de l'anneau* | visit all six seal sites within one game day | 150 |
 | `items_all` | Well Equipped / *Bien équipé* | own all four field items | 75 |
@@ -1761,7 +1768,7 @@ them, hidden ones as "???" until earned (marked H).
 | `mono_rival` | True Colours / *Haut en couleur* | beat a rival with a one-colour deck | 75 |
 | `streak_5` | On a Roll / *Sur une lancée* | win five duels in a row | 75 |
 
-Sum ⬡ 3,975 (§3.4 counts it under 1.4). Every condition is a pure function of stats, flags and the profile,
+Sum ⬡ 4,350: the 38 first shipped paid ⬡ 3,975 (§3.4 counts it under 1.4), and 1.12 added the three for secrets. Every condition is a pure function of stats, flags and the profile,
 so each gets a one-line unit test.
 
 ---
