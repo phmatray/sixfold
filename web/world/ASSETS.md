@@ -94,6 +94,16 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `inn_sign.glb` | Two posts, a board with a crescent moon and stars (both faces), a lantern (`lamp_glow`) | 1 × 1 | ~2.35 m |
 | `stump.glb` | Hollow stump: flared roots, a cut rim round a dark hollow, moss, two mushrooms (a find's host) | 1 × 1 | ~0.55 m |
 | `log.glb` | Fallen mossy log along X, a hollow end on +X, bracket fungus and mushrooms (a find's host) | 2 × 1 | ~0.55 m |
+| `cliff_falls.glb` | A waterfall from a 2 m ledge into a rock pool (#233): the sheet is `sx_fall_water` (streaks run down it), the pool `sx_water` (it ripples); its back is flush with the north edge, so it stands against a 2 m cliff on the row behind | 2 × 1 | ~2 m |
+| `lantern_bunting.glb` | Paper lanterns (`lantern_glow`, lit at night) and pennants on a sagging line between two posts at the ends; walked under (its lowest point is above 2 m), sways | 3 × 1 | ~2.7 m |
+| `washing_line.glb` | Two posts and a line of pegged cloths that move in the wind | 3 × 1 | ~1.9 m |
+| `water_lilies.glb` | Lily pads and flowers, on a water tile | 1 × 1 | ~0.1 m |
+| `leaf_litter.glb` | Fallen leaves, twigs and pebbles; walked over, never above 6 cm | 1 × 1 | ~0.05 m |
+| `windmill.glb` | A tower mill: the sails are a node `sails` turned by a `Loop` clip (one turn in 14 s) | 3 × 3 | ~7.5 m |
+| `vegetable_patch.glb` | Two raised beds, a bean wigwam and a scarecrow | 3 × 2 | ~1.7 m |
+| `flower_planter.glb` | A wooden planter of flowers for a doorstep | 1 × 1 | ~0.75 m |
+| `blossom_tree.glb` | A tree in pale pink blossom, fallen petals under it; varied like `tree` | 2 × 2 | ~3.6 m |
+| `well.glb` | A stone well with a little roof, winch and bucket (a dark disc inside, no animated water, so it stays instanced) | 2 × 2 | ~2.3 m |
 | `portraits/<rival id>.webp` | 512² bust portraits of the campaign rivals for the duel screen (`bramble`, `marlo`, `cinza`, `quill`, `orla`, `lumen`, `warden`), 3/4 view to each rival's own side and tilt, a rim light and a background motif in the rival's colour, ≤ 60 KB | — | — |
 
 The house is 7 wide so the door sits on the centre column: door tile = footprint
@@ -134,6 +144,11 @@ Rules for every model:
   `doorway` panel (near black) is the dark doorway it reveals. The leaf is merged on its own (one more draw), the rest
   of the model as usual. The hall's old `Open` clip is ignored. Chimneys: an empty `smoke_origin` at the top.
 - **Lamp:** an empty `light_origin` where the warm point light sits.
+- **Loop:** a clip named `Loop` (the windmill's sails) plays all the time, from a different point for each prop so
+  two never turn in step; it stops with reduced motion. Make it seamless (linear keys, the last pose the first).
+- **Water:** a material whose name contains `water` gets drifting ripples (the fountain's pool); `fall_water`
+  (a waterfall's sheet) gets streaks running down it instead. Both freeze with reduced motion. A prop with
+  either is never instanced, so keep them to the props that need them.
 - **Glow:** a material whose name contains `glow` (`oven_glow`, `lamp_glow`, `crystal_glow`, `lightbox_glow`) is
   the part that turns emissive at dusk and night; keep it out of the merged vertex-colour mesh so its name survives.
 - **Legal:** original designs only. No logos, characters, buildings or text from any
