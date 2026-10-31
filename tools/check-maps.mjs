@@ -691,14 +691,14 @@ function rules(name, m, solid, all) {
 
 // Biome transitions (#118, WORLD_RULES 5.7): every edge exit into another region has a `transitions` band
 // (ld.bandOf), 4-6 tiles deep, holding at least 3 props of its `scatter` set, and the exit back has its own.
-// tools/transition.mjs writes them. A border with no band is a warning until every border has one.
+// tools/transition.mjs writes them. A border with no band is an error with --strict.
 function transitions() {
   for (const [name, m] of Object.entries(maps)) {
     if (m.light.indoor) continue;
     for (const e of m.exits ?? []) {
       const o = maps[e.to];
       if (o && o.region !== m.region && !(m.transitions ?? []).some((t) => t.to === e.to))
-        warn.push(`${name}: [transition] the ${e.side} exit to ${e.to} crosses into ${o.region} with no transition band (node tools/transition.mjs)`);
+        rule.push(`${name}: [transition] the ${e.side} exit to ${e.to} crosses into ${o.region} with no transition band (node tools/transition.mjs)`);
     }
     for (const t of m.transitions ?? []) {
       const b = ld.bandOf(m, t), at = `${name}: [transition] the band to ${t.to}`;

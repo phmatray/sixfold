@@ -229,11 +229,7 @@ const border = (depth = 5, back = true) => (m) => {
 
 test("AC1 (#118): a region border with a 5-tile band on both sides passes", () => passes(world(border())));
 
-test("AC1 (#118): a region-border exit with no transition is reported", () => {
-  // A warning until every border of the real world has its band (#118 Task 3), then an error.
-  const r = run(world((m) => (m.fell.region = "moor")), "--strict");
-  assert.match(r.out, /vale: \[transition\] the n exit to fell crosses into moor with no transition band/, r.out);
-});
+test("AC1 (#118): a region-border exit with no transition fails", () => fails(world((m) => (m.fell.region = "moor")), "transition"));
 
 test("AC1 (#118): a band 3 tiles deep fails", () => fails(world(border(3)), "transition"));
 

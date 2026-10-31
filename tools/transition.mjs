@@ -5,7 +5,9 @@
 // props of that set over the band, thinning from the edge (ld.bandWeight). The props carry `"band": "<to>"`, so a
 // re-run replaces them; a fixed seed per map and side makes it write the same thing every time. It keeps off
 // paths and the tile round them, the exit's throat, 2 tiles round anything you use, and any tile whose loss
-// would cut the hero off from another. The ground, light and sound of the band need nothing more: the game reads
+// would cut the hero off from another (a tile already out of reach is fair game); reeds, sea rocks and floating
+// lanterns may stand in the water. Where the next region's usual plants can't fit (a border of trees, a causeway),
+// name what can in `scatter`: props of that set already in the band count too. The ground, light and sound of the band need nothing more: the game reads
 // them off the map next door. Then run check-maps (--strict).
 import { readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
