@@ -124,7 +124,7 @@ fn LessonItem(label: &'static str, sub: &'static str, icon: &'static str) -> imp
 
 /// Note (`set`) that the language switch should have focus after the reload, or take that
 /// note back and say whether it was there.
-fn refocus_lang(set: bool) -> bool {
+pub(crate) fn refocus_lang(set: bool) -> bool {
     const KEY: &str = "sixfold.refocus-lang";
     let Some(ss) = web_sys::window().and_then(|w| w.session_storage().ok().flatten()) else {
         return false;
@@ -144,8 +144,11 @@ fn LangSwitch() -> impl IntoView {
     // Switched from the world's menu, the reload lands back in the world.
     let screen = use_context::<RwSignal<Screen>>();
     let switch = move |l: Lang, keys: bool| {
-        if screen.is_some_and(|s| s.get_untracked() == Screen::World) {
+        let in_world = screen.is_some_and(|s| s.get_untracked() == Screen::World);
+        if in_world {
+            // The world mounts with its menu open on Options, the switch focused.
             crate::world::reopen_after_reload();
+            refocus_lang(true);
         } else if keys {
             // Pressed with the keys or a pad: after the reload, the cursor is back on the switch.
             refocus_lang(true);

@@ -699,7 +699,7 @@ fn rested_line(p: Phase) -> &'static str {
 fn prompt_label(kind: &str, text: &str) -> String {
     match kind {
         "npc" => tr(format!("Talk to {text}"), format!("Parler à {text}")),
-        "warp" | "lift" | "seat" | "stand" => text.to_string(),
+        "warp" | "lift" | "seat" | "stand" | "shortcut" => text.to_string(),
         "duel" => tr("Play a duel", "Jouer un duel").into(),
         "bed" => tr("Rest", "Se reposer").into(),
         "locked" | "closed" => tr("Try the door", "Essayer la porte").into(),
@@ -853,6 +853,15 @@ pub fn WorldScreen() -> impl IntoView {
     if crate::packs::OPEN_ON_ENTRY.take() {
         last_tab.set(MenuTab::Packs);
         sheet.set(Some(Sheet::Menu));
+    }
+    // The language was switched from this menu's Options: the reload puts the player back there.
+    if crate::title::refocus_lang(false) {
+        last_tab.set(MenuTab::Options);
+        sheet.set(Some(Sheet::Menu));
+        set_timeout(
+            || crate::focus_first(&[".world-sheet .lang-switch [aria-pressed=\"true\"]"]),
+            Duration::from_millis(100),
+        );
     }
     // Put back once its sheet is gone (closed, or replaced by another).
     Effect::new(move |was: Option<bool>| {

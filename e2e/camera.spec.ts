@@ -167,3 +167,18 @@ test("the title's Settings keep the angle in memory and create no save", async (
   await expect(settings.getByRole("radio", { name: "Higher" })).toBeChecked();
   expect(await page.evaluate(() => localStorage.getItem("sixfold.save.1"))).toBeNull();
 });
+
+// #212: switching language from the world's Options reloads the page; the menu comes back open on Options.
+test("switching language in the world's Options comes back to the menu, on the switch", async ({ page }) => {
+  test.slow();
+  await enterWorld(page);
+  await frames(page);
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("tab", { name: "Options" }).click();
+  const fr = page.locator(".world-sheet .lang-switch button[lang=fr]");
+  // The click starts a reload; on CI's software renderer it outlasts the click's own wait (#223).
+  await fr.click({ noWaitAfter: true });
+  await expect(fr).toHaveAttribute("aria-pressed", "true", { timeout: 60_000 });
+  await expect(page.locator("#menu-tab-options")).toHaveAttribute("aria-selected", "true");
+  await expect(fr).toBeFocused();
+});

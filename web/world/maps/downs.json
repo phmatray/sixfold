@@ -100,7 +100,7 @@
     "f............f..........fffffffffff..f...............ppp.~~~",
     "f............f.......................f...............ppp.~~~",
     "f............f.......................f...............ppp.~~~",
-    "fffffffffffffffffffffffffffffffffffffffffffffffffffffpppf~~~"
+    "fffffffffffffffffffffffffffffffffffffffffffffffffffffpppf###"
   ],
   "props": [
     {
@@ -1238,6 +1238,34 @@
       "x": 36,
       "z": 24,
       "rot": 0
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 1,
+      "z": 4,
+      "rot": 180,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "ash_pine",
+      "x": 1,
+      "z": 8,
+      "rot": 0,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock",
+      "x": 1,
+      "z": 18,
+      "rot": 270,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 1,
+      "z": 21,
+      "rot": 90,
+      "band": "cinderwick"
     }
   ],
   "spawn": {
@@ -1745,5 +1773,16 @@
       "near": 14,
       "far": 32
     }
-  }
+  },
+  "transitions": [
+    {
+      "to": "cinderwick",
+      "depth": 5,
+      "scatter": [
+        "rock_basalt",
+        "rock",
+        "ash_pine"
+      ]
+    }
+  ]
 }

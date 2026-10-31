@@ -1,5 +1,5 @@
 {
-  "note": "The world map (WORLD_DESIGN §7.3), drawn by web/src/worldmap.rs on a 12 x 9 grid (x east, y south). regions: the ring round the hub, each a land drawn round (x, y). maps: every outdoor map, its node on the chart; name / name_fr match the map's title. links: roads between maps, drawn once both ends are seen; `if` (a condition) and `icon` (lantern, ferry, boots, gloves) mark a gated one. waymarks: fast-travel posts; the hero lands on (x, z) facing `facing`, the post being the tile in front, with a `kind: waymark` interaction of the same id.",
+  "note": "The world map (WORLD_DESIGN §7.3), drawn by web/src/worldmap.rs on a 12 x 9 grid (x east, y south). regions: the ring round the hub, each a land drawn round (x, y). maps: every outdoor map, its node on the chart; name / name_fr match the map's title. links: roads between maps, drawn once both ends are seen; `if` (a condition) and `icon` (lantern, ferry, boots, gloves) mark a gated one. waymarks: fast-travel posts; the hero lands on (x, z) facing `facing`, the post being the tile in front, with a `kind: waymark` interaction of the same id. marks: small marks beside a map, a shortcut (its gate's `shortcut.id`, shown once flag:sc_<id> is set) or a drop (one per map that has any, shown once the map is seen).",
   "regions": [
     { "id": "hub", "name": "Sixfold", "name_fr": "Sixfold", "color": "#d6ac4a", "x": 6, "y": 4.6, "r": 1.25 },
     { "id": "ember", "name": "The Emberlands", "name_fr": "Les Braisières", "color": "#e1572f", "x": 6, "y": 1.55, "r": 1.35 },
@@ -54,10 +54,25 @@
     { "a": "rootholm", "b": "elder_ring" },
     { "a": "rootholm", "b": "hushlane", "if": "item:wading_boots", "icon": "boots" },
     { "a": "quarry", "b": "undermine", "if": "item:kiln_lantern", "icon": "lantern" },
-    { "a": "undermine", "b": "screepass" },
+    { "a": "undermine", "b": "screepass", "if": "item:kiln_lantern", "icon": "lantern" },
     { "a": "screepass", "b": "anvilstead" },
     { "a": "anvilstead", "b": "bastion" },
     { "a": "bastion", "b": "elder_ring", "if": "item:grip_gloves", "icon": "gloves" }
+  ],
+  "marks": [
+    { "kind": "shortcut", "map": "screepass", "id": "scree_bar" },
+    { "kind": "drop", "map": "screepass" },
+    { "kind": "shortcut", "map": "quarry", "id": "quarry_stair" },
+    { "kind": "drop", "map": "quarry" },
+    { "kind": "shortcut", "map": "stormwatch", "id": "light_stair" },
+    { "kind": "drop", "map": "stormwatch" },
+    { "kind": "shortcut", "map": "bellflats", "id": "bell_jetty" },
+    { "kind": "drop", "map": "gullhaven" },
+    { "kind": "shortcut", "map": "hushlane", "id": "hush_plank" },
+    { "kind": "drop", "map": "hushlane" },
+    { "kind": "shortcut", "map": "elder_ring", "id": "elder_wicket" },
+    { "kind": "drop", "map": "rootholm" },
+    { "kind": "shortcut", "map": "overworld", "id": "garden_gate" }
   ],
   "waymarks": [
     { "id": "meadow", "map": "overworld", "x": 30, "z": 15, "facing": "n", "name": "Sixfold Meadow", "name_fr": "Pré de Sixfold" },

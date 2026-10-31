@@ -2268,6 +2268,48 @@
       "x": 50,
       "z": 34,
       "rot": 0
+    },
+    {
+      "asset": "reeds",
+      "x": 32,
+      "z": 31,
+      "rot": 180,
+      "band": "hushlane"
+    },
+    {
+      "asset": "reeds",
+      "x": 33,
+      "z": 32,
+      "rot": 0,
+      "band": "hushlane"
+    },
+    {
+      "asset": "reeds",
+      "x": 18,
+      "z": 33,
+      "rot": 0,
+      "band": "hushlane"
+    },
+    {
+      "asset": "moonflower",
+      "x": 34,
+      "z": 33,
+      "rot": 270,
+      "band": "hushlane"
+    },
+    {
+      "asset": "moonflower",
+      "x": 22,
+      "z": 34,
+      "rot": 270,
+      "band": "hushlane"
+    },
+    {
+      "asset": "moonflower",
+      "x": 31,
+      "z": 34,
+      "rot": 0,
+      "band": "hushlane"
     }
   ],
   "spawn": {
@@ -2807,5 +2849,16 @@
       0
     ],
     "clamp": false
-  }
+  },
+  "transitions": [
+    {
+      "to": "hushlane",
+      "depth": 5,
+      "scatter": [
+        "moonflower",
+        "reeds",
+        "bush"
+      ]
+    }
+  ]
 }

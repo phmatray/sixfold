@@ -53,12 +53,12 @@
     ".......ssssssssssssssss===ssssssssssssssssssssrrssssssss~~~~",
     ".........===================================================",
     ".........===================================================",
-    ".........ppssssssssssssssssssssssssssssssssssssssssssss=====",
-    ".........ppsssssssssssssssssssssssssssssssssssssssssssssssss",
-    ".........pp.........ss.s.sss.ss.sssss.ss......sssss.s.ss..ss",
-    "ppppppppppp...s...s..s.s.s....ssss.sssss.....s.sss.s.ss.ssss",
-    "ppppppppppp.s...s.s.s.sss.s.s..ss.ss....ssss.ss.sss.s.s..s..",
-    "pppp.....pp........s.ss.ss..s.s.s..ss......sss.....s..ss....",
+    ".........ppsssssssssssssssssspsssssssssssssssssssssssss=====",
+    ".........ppsssssssssssssssssspssssssssssssssssssssssssssssss",
+    ".........pp.........ss.s.sss.ps.sssss.ss......sssss.s.ss..ss",
+    "ppppppppppp...s...s..s.s.s...pssss.sssss.....s.sss.s.ss.ssss",
+    "ppppppppppp.s...s.s.s.sss.s.sp.ss.ss....ssss.ss.sss.s.s..s..",
+    "pppp.....ppppppppppppppppppppps.s..ss......sss.....s..ss....",
     "..................s.s..........s.s.......s.ss..s..s..s......",
     "............................................................",
     "............................................................",
@@ -1599,6 +1599,20 @@
       "x": 51,
       "z": 22,
       "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 8,
+      "rot": 0,
+      "band": "overworld"
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 10,
+      "rot": 180,
+      "band": "overworld"
     }
   ],
   "spawn": {
@@ -2160,5 +2174,16 @@
       0
     ],
     "clamp": false
-  }
+  },
+  "transitions": [
+    {
+      "to": "overworld",
+      "depth": 5,
+      "scatter": [
+        "bush",
+        "flowers",
+        "rock"
+      ]
+    }
+  ]
 }
