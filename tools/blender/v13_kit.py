@@ -253,8 +253,11 @@ def chain(*hooks):
 # ---------------------------------------------------------------- export
 
 
-def export(name, objs, out_dir, animated=False):
-    """One prop -> <out_dir>/<name>.glb (Y-up, front +Z, roots at the origin). Returns (tris, bytes)."""
+def export(name, objs, out_dir, animated=False, clips=None):
+    """One prop -> <out_dir>/<name>.glb (Y-up, front +Z, roots at the origin). Returns (tris, bytes).
+    clips: the clip names the file must carry (default ["Open"] when animated, else none)."""
+    want = clips if clips is not None else (["Open"] if animated else [])
+    animated = bool(want)
     import json
     import struct
     for o in bpy.context.view_layer.objects:
@@ -287,7 +290,7 @@ def export(name, objs, out_dir, animated=False):
     problems = []
     if len(j.get("scenes", [])) != 1:
         problems.append(f"{len(j.get('scenes', []))} scenes")
-    if clips != (["Open"] if animated else []):
+    if sorted(clips) != sorted(want):
         problems.append(f"clips {clips}")
     if any(n.get("name", "").startswith("hero") for n in j["nodes"]) or j.get("skins"):
         problems.append("hero data or skin in a prop")
@@ -581,9 +584,13 @@ def render(scn, path):
     print("[v13] render ->", path)
 
 
-def tile_sheet(scn, L, built, info, path, tile=360, cols=6, night=False):
-    """One labelled tile per model and view (front 3/4 from the game pitch, then from behind), ortho, fitted.
-    night: the 1.3 night preset with glow parts lit."""
+FRONT_BACK = (((0.55, -0.75, 0.75), "front"), ((-0.55, 0.75, 0.75), "back"))
+
+
+def tile_sheet(scn, L, built, info, path, tile=360, cols=6, night=False, views=FRONT_BACK):
+    """One labelled tile per model and view (default: front 3/4 from the game pitch, then from behind), ortho,
+    fitted. views: [(direction toward the camera, tag)]; the first tile of each model carries its info line,
+    the others their tag. night: the 1.3 night preset with glow parts lit."""
     import numpy as np
     for ob in [o for o in scn.objects if o.type == "LIGHT" or o.name.startswith("v13_cam")]:
         bpy.data.objects.remove(ob)
@@ -594,7 +601,7 @@ def tile_sheet(scn, L, built, info, path, tile=360, cols=6, night=False):
     cam = stage(scn, L, (tile, tile))
     cam.data.type = "ORTHO"
     toonify(L, night=night)
-    tmp = os.path.join(os.path.dirname(os.path.abspath(path)), "_v13_tile.png")
+    tmp = os.path.join(os.path.dirname(os.path.abspath(path)), f"_v13_tile_{os.getpid()}.png")  # several runs may share a folder
     tiles = []
     meshes = [o for o in scn.objects if o.type == "MESH"]
     for name, objs in built.items():
@@ -608,15 +615,15 @@ def tile_sheet(scn, L, built, info, path, tile=360, cols=6, night=False):
         mine = {o for o in objs}
         for o in meshes:
             o.hide_render = o not in mine
-        for d, tag in (((0.55, -0.75, 0.75), "front"), ((-0.55, 0.75, 0.75), "back")):
+        for vi, (d, tag) in enumerate(views):
             d = Vector(d).normalized()
             cam.data.ortho_scale = size * 1.08
             cam.location = c + d * 40
             cam.rotation_euler = (-d).to_track_quat("-Z", "Y").to_euler()
             cam.data.clip_end = 100
             lab = None
-            if tag == "front":
-                lab = label(info[name], cam.data.ortho_scale * 0.05)
+            if vi == 0 or views is not FRONT_BACK:
+                lab = label(info[name] if vi == 0 else tag, cam.data.ortho_scale * 0.05, "#d8dcef" if night else "#2a2238")
                 scn.collection.objects.link(lab)
                 lab.parent = cam
                 lab.matrix_parent_inverse = Matrix.Identity(4)

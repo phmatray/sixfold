@@ -52,8 +52,21 @@ export function windify(mesh, height) {
 }
 
 // Still water in a model (the fountain's pool): drifting ripples and glints in
-// the fragment shader, on the shared clock (frozen with reduced motion).
-export function waterify(mat) {
+// the fragment shader, on the shared clock (frozen with reduced motion). `fall`
+// (a waterfall's sheet): foamy streaks running down it instead.
+const FALL = `
+          vec2 q = vec2((vWP.x + vWP.z) * 9.0, vWP.y * 2.2 + uDrift * 2.6);
+          float streak = sin(q.x + sin(q.x * 0.37) * 2.0) * 0.5 + 0.5;
+          float run = fract(q.y + streak * 0.6);
+          diffuseColor.rgb *= 0.86 + 0.18 * streak;
+          diffuseColor.rgb += vec3(0.92, 0.98, 1.0) * 0.45 * smoothstep(0.78, 0.96, run) * (0.4 + 0.6 * streak);`;
+const RIPPLE = `
+          vec2 p = vWP.xz * 3.0;
+          float rip = sin(p.x * 1.7 + uDrift * 2.1) * sin(p.y * 1.3 - uDrift * 1.7) * 0.5 + 0.5;
+          float rip2 = sin((p.x + p.y) * 2.3 - uDrift * 2.9) * 0.5 + 0.5;
+          diffuseColor.rgb *= 0.85 + 0.2 * rip;
+          diffuseColor.rgb += vec3(0.9, 0.97, 1.0) * 0.35 * smoothstep(0.82, 0.98, rip * rip2 + 0.25);`;
+export function waterify(mat, fall = false) {
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, U);
     sh.vertexShader = sh.vertexShader
@@ -64,16 +77,11 @@ export function waterify(mat) {
       .replace(
         "#include <map_fragment>",
         `#include <map_fragment>
-        {
-          vec2 p = vWP.xz * 3.0;
-          float rip = sin(p.x * 1.7 + uDrift * 2.1) * sin(p.y * 1.3 - uDrift * 1.7) * 0.5 + 0.5;
-          float rip2 = sin((p.x + p.y) * 2.3 - uDrift * 2.9) * 0.5 + 0.5;
-          diffuseColor.rgb *= 0.85 + 0.2 * rip;
-          diffuseColor.rgb += vec3(0.9, 0.97, 1.0) * 0.35 * smoothstep(0.82, 0.98, rip * rip2 + 0.25);
+        {${fall ? FALL : RIPPLE}
         }`,
       );
   };
-  mat.customProgramCacheKey = () => "water";
+  mat.customProgramCacheKey = () => (fall ? "water-fall" : "water");
 }
 
 // White blobs on black (or one soft dot when n = 1), tiling when `wrap`.
