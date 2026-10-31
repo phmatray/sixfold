@@ -13,20 +13,20 @@
   "props": [
     {
       "asset": "bed",
-      "x": 1,
-      "z": 1,
+      "x": 7,
+      "z": 3,
       "rot": 0
     },
     {
       "asset": "lamp",
-      "x": 3,
+      "x": 5,
       "z": 1,
       "rot": 0
     },
     {
       "asset": "bed",
-      "x": 4,
-      "z": 1,
+      "x": 7,
+      "z": 5,
       "rot": 0
     },
     {
@@ -40,7 +40,7 @@
     },
     {
       "asset": "rug",
-      "x": 4,
+      "x": 3,
       "z": 3,
       "rot": 0
     },
@@ -61,6 +61,12 @@
       "x": 9,
       "z": 1,
       "rot": 0
+    },
+    {
+      "asset": "cloth_rack",
+      "x": 6,
+      "z": 1,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -70,8 +76,8 @@
   },
   "interactions": [
     {
-      "x": 2,
-      "z": 1,
+      "x": 8,
+      "z": 3,
       "kind": "bed",
       "id": "bed_dream_1",
       "name": "A bed",
@@ -91,8 +97,8 @@
       ]
     },
     {
-      "x": 5,
-      "z": 1,
+      "x": 8,
+      "z": 5,
       "kind": "bed",
       "id": "bed_dream_2",
       "name": "A bed",
