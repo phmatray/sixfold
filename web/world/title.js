@@ -7,8 +7,9 @@
 // It loads progressively: the flat CSS backdrop (`.title-backdrop.flat` look, under
 // the canvas) holds until the first place is built, and the next place loads while
 // the current one plays. It gives way to the flat backdrop for good when WebGL is
-// missing or the first frames come in under 45 fps. With reduced motion it is one
-// still frame of the first place.
+// missing or the first frames come in under 45 fps on the plainest look. It wears the
+// world's look (look.js, #225) at the saved tier, a step lower each time the frames come
+// in slow. With reduced motion it is one still frame of the first place.
 //
 // `el.sixfoldTitle` (for screenshots and the console): `.shot(i)` holds shot i,
 // `.play()` resumes the reel.
@@ -18,7 +19,8 @@ import { loadMap, loadAsset, assetNames, tr } from "./map.js";
 import { build, dispose, refresh, animateProps } from "./build.js";
 import { updateNpc } from "./npc.js";
 import { daylight, phaseOf } from "./daylight.js";
-import { weak } from "./tier.js"; // a device that can't carry a whole map, known before trying
+import { weak, pickTier, readSaved, downgrade } from "./tier.js"; // weak: a device that can't carry a whole map, known before trying
+import { createLook } from "./look.js";
 
 // A place: the map, the hour (game minute), what the camera looks at (tile x, z, and a
 // height), and the camera's path round it: bearing (degrees, 0 = from the south, the
@@ -103,11 +105,14 @@ export function mount(el) {
   shadowEye.position.set(0, -1e4, 0);
   shadowEye.updateMatrixWorld();
   shadowEye.layers.enableAll();
+  const post = createLook(renderer, scene, camera);
+  post.setTier(pickTier(readSaved(), false)); // the device already passed `weak`
 
   let wide = true;
   const resize = () => {
     const w = el.clientWidth || 1, h = el.clientHeight || 1;
     renderer.setSize(w, h);
+    post.setSize(w, h);
     veil.width = canvas.width;
     veil.height = canvas.height;
     camera.aspect = w / h;
@@ -169,9 +174,12 @@ export function mount(el) {
     if (!reduced) U.uDrift.value = w.now;
     for (const n of w.npcs) updateNpc(w, n, dt, false);
     animateProps(w, dt, reduced);
+    // As in world.js: lamps shine past the bloom threshold only on High; a tier change rewrites the glow materials.
+    if (w.glowBoost !== (post.tier === "high")) (w.glowBoost = post.tier === "high"), (w.lightDirty = true);
     const lit = w.day.update(minute, look.x, look.z, dt);
+    post.setGrade({ exposure: lit.exposure, saturation: lit.saturation, contrast: lit.contrast, bloom: lit.bloom });
     w.life.update(dt, w.now, look.x, look.z, lit.night);
-    w.fireflies.update(dt, w.now, lit.night, reduced);
+    w.fireflies.update(dt, w.now, lit.night, reduced, w.glowBoost);
     // The fog keeps the far ground soft without eating the place: kept past the camera's distance.
     renderer.setClearColor(lit.color ?? lit.bg);
     scene.fog.color.copy(lit.color ?? lit.bg);
@@ -181,8 +189,7 @@ export function mount(el) {
     w.sun.target.position.set(look.x, 0, look.z);
     renderer.shadowMap.needsUpdate = true;
     renderer.render(scene, shadowEye);
-    renderer.clear();
-    renderer.render(scene, camera);
+    post.render(dt); // straight to the canvas, in this task: the veil and the still copy it next
   }
 
   // Hold the frame just drawn on the veil (same task as the render: the buffer is still there).
@@ -194,9 +201,10 @@ export function mount(el) {
   };
 
   // The frame-time probe: frames 30 to 120 of the first place. Under 45 fps (a weak
-  // GPU, a battery saver capping the page), the flat backdrop instead.
+  // GPU, a battery saver capping the page), a step down the look and probe again; on the
+  // plain frame already, the flat backdrop instead. A tier change (the look loading) re-probes.
   const times = [];
-  let switching = false;
+  let switching = false, probed = post.tier;
   const loop = (ms) => {
     if (!alive) return;
     raf = requestAnimationFrame(loop);
@@ -206,8 +214,12 @@ export function mount(el) {
     const age = t - t0, k = held >= 0 ? 0.5 : Math.min(1, age / HOLD);
     draw(k, dt);
     if (fade > 0) (fade = Math.max(0, fade - dt / FADE)), (veil.style.opacity = ease(fade));
+    if (post.tier !== probed) (probed = post.tier), (times.length = 0);
     if (times.length < 120 && dt && times.push(dt) === 120) {
-      if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 45) return void (api.stop(), flat());
+      if (times.slice(30).sort((a, b) => a - b)[45] > 1 / 45) {
+        if (post.tier === "off") return void (api.stop(), flat());
+        post.setTier(downgrade(post.tier)); // and probed again, from the tier change above
+      }
     }
     if (held < 0 && age >= HOLD) {
       switching = true;
@@ -245,6 +257,7 @@ export function mount(el) {
       cancelAnimationFrame(raf);
       ro.disconnect();
       if (world) dispose(world.root);
+      post.dispose();
       renderer.forceContextLoss(); // the world screen makes its own context next
       renderer.dispose();
       canvas.remove();

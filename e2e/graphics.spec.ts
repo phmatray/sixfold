@@ -32,9 +32,9 @@ test("Off saved draws the plain frame", async ({ page }) => {
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("off");
 });
 
-test("High saved is kept, even on a weak device, and the world makes one WebGL context only", async ({ page }) => {
-  await choose(page, "high");
-  await page.addInitScript(() => {
+/** Counts the WebGL contexts the page makes, in `window.glMade`. */
+const countContexts = (page: Page) =>
+  page.addInitScript(() => {
     const get = HTMLCanvasElement.prototype.getContext;
     (window as any).glMade = 0;
     HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, kind: string, ...rest: any[]) {
@@ -42,6 +42,10 @@ test("High saved is kept, even on a weak device, and the world makes one WebGL c
       return (get as any).call(this, kind, ...rest);
     } as any;
   });
+
+test("High saved is kept, even on a weak device, and the world makes one WebGL context only", async ({ page }) => {
+  await choose(page, "high");
+  await countContexts(page);
   await title(page);
   // SwiftShader: the title tries a context once, finds the device weak and goes flat.
   await expect(page.locator(".title-backdrop.flat")).toHaveCount(1);
@@ -49,4 +53,18 @@ test("High saved is kept, even on a weak device, and the world makes one WebGL c
   await enterWorld(page);
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("high");
   expect(await glMade(page)).toBe(before + 1);
+});
+
+test("High saved, the title's backdrop still goes flat on a weak device and opens no new context on a return", async ({ page }) => {
+  // The title draws through the same look, but only on a device that passed `weak` (#214):
+  // a saved High never brings a context back on SwiftShader.
+  await choose(page, "high");
+  await countContexts(page);
+  await title(page);
+  await expect(page.locator(".title-backdrop.flat")).toHaveCount(1);
+  const made = await glMade(page);
+  await menuItem(page, "Learn to play").click();
+  await page.getByRole("button", { name: "Skip the lesson" }).click();
+  await expect(page.locator(".title-backdrop.flat")).toHaveCount(1);
+  expect(await glMade(page)).toBe(made);
 });
