@@ -3530,7 +3530,7 @@ checksum = "33f4fe9184a62d842c9ef383018f3306d8ba224fd9d836f56d7288308847c256"
 
 [[package]]
 name = "sixfold-desktop"
-version = "1.11.0"
+version = "1.12.0"
 dependencies = [
  "tauri",
  "tauri-build",
@@ -3538,14 +3538,14 @@ dependencies = [
 
 [[package]]
 name = "sixfold-engine"
-version = "1.11.0"
+version = "1.12.0"
 dependencies = [
  "serde_json",
 ]
 
 [[package]]
 name = "sixfold-web"
-version = "1.11.0"
+version = "1.12.0"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",

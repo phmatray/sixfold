@@ -5,6 +5,29 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.12.0](https://github.com/phmatray/sixfold/compare/v1.11.0...v1.12.0) (2026-11-01)
+
+
+### Added
+
+* **world:** a post-processing pass — tone mapping, ambient occlusion, bloom and a colour grade ([#225](https://github.com/phmatray/sixfold/issues/225)) ([#227](https://github.com/phmatray/sixfold/issues/227)) ([10b31bf](https://github.com/phmatray/sixfold/commit/10b31bf2a9efd03bdf72ed76ac70dbc68897639a))
+* **world:** biome transitions on every border ([#118](https://github.com/phmatray/sixfold/issues/118)) ([#215](https://github.com/phmatray/sixfold/issues/215)) ([c626147](https://github.com/phmatray/sixfold/commit/c626147840854ac8a9a60a00f111b86e823a5862))
+* **world:** loops, shortcuts and an honest world map ([#117](https://github.com/phmatray/sixfold/issues/117)) ([#216](https://github.com/phmatray/sixfold/issues/216)) ([ea44f28](https://github.com/phmatray/sixfold/commit/ea44f28ff950caa65310c1854cb158aeba5d07b6))
+* **world:** secrets ([#116](https://github.com/phmatray/sixfold/issues/116)) ([#222](https://github.com/phmatray/sixfold/issues/222)) ([02fa7de](https://github.com/phmatray/sixfold/commit/02fa7de52bb13c93f22dff851c9b03c864d49d7d))
+* **world:** ten dressing props built in Blender ([#233](https://github.com/phmatray/sixfold/issues/233)) ([#234](https://github.com/phmatray/sixfold/issues/234)) ([91928a6](https://github.com/phmatray/sixfold/commit/91928a65463a99eaf2a74b3b1807611f3eaca31a))
+
+
+### Fixed
+
+* the 1.12 design audit ([#239](https://github.com/phmatray/sixfold/issues/239)) ([178a51c](https://github.com/phmatray/sixfold/commit/178a51cb0281ea7126f924d88bba3afecd9c45e0))
+* **world:** switching EN/FR in Options keeps the menu open ([#212](https://github.com/phmatray/sixfold/issues/212)) ([#217](https://github.com/phmatray/sixfold/issues/217)) ([c61bfcb](https://github.com/phmatray/sixfold/commit/c61bfcbb60b0160effd1780a2257c72603847cdd))
+* **world:** the beds upstairs at an inn are in frame on a phone ([#213](https://github.com/phmatray/sixfold/issues/213)) ([#218](https://github.com/phmatray/sixfold/issues/218)) ([930afb9](https://github.com/phmatray/sixfold/commit/930afb9683830ee3ef1bc6a4ef3845c615b5d091))
+
+
+### Documentation
+
+* **roadmap:** 1.13 takes the open issues the roadmap was missing ([#235](https://github.com/phmatray/sixfold/issues/235)) ([def74fe](https://github.com/phmatray/sixfold/commit/def74fe14df9ad142b087fc086651ac6e2c41662))
+
 ## [1.11.0](https://github.com/phmatray/sixfold/compare/v1.10.0...v1.11.0) (2026-10-28)
 
 
