@@ -410,9 +410,11 @@ export const FOOT = {
   cobbler_bench: [2, 1], boot_rack: [2, 1],
   headframe: [3, 3], terrace_house: [4, 3], minecart: [2, 1], // Stone
   hold_wall: [2, 1], tally_board: [2, 1],
+  cliff_falls: [2, 1], lantern_bunting: [3, 1], washing_line: [3, 1], windmill: [3, 3], vegetable_patch: [3, 2], // dressing (#233)
+  blossom_tree: [2, 2], well: [2, 2],
 };
 // Props the hero walks over; every other prop blocks its footprint.
-export const WALKABLE = new Set(["rug", "exit_mat", "tidepool", "wisteria_arch", "rail", "support_beam", "oil_lantern", "hedge_gap"]); // the arch and the mine frames: walked under; a hedge's break: walked through
+export const WALKABLE = new Set(["rug", "exit_mat", "tidepool", "wisteria_arch", "rail", "support_beam", "oil_lantern", "hedge_gap", "lantern_bunting", "leaf_litter"]); // the arch, the mine frames and the bunting: walked under; a hedge's break: walked through; leaf litter: walked over
 // Seats (seat.js): [the seat's top, how far in front of each tile's centre the hips go (along the prop's
 // facing, +Z at rot 0)], in m. Every footprint tile is a place: a bench seats two. `seat: false` on a map's prop: scenery.
 export const SEAT = { bench: [0.47, 0.02], chair: [0.52, 0.06] };
@@ -439,7 +441,8 @@ export const LADDER = new Set(["ladder"]);
 export const BOB = new Set(["boat", "ferry", "buoy", "floating_lantern", "lantern_raft"]);
 // Sway reference height per prop (life.js wind).
 export const WIND_H = { tree: 3.5, bush: 0.8, flowers: 0.4, pine: 3.8, birch: 3.6, reeds: 0.9, ash_pine: 3.1, heather: 0.55, chime_post: 2.3,
-  willow: 3.8, wishing_tree: 3.8, wisteria_arch: 2.3, standing_tree: 5.5, cairn: 1.2 };
+  willow: 3.8, wishing_tree: 3.8, wisteria_arch: 2.3, standing_tree: 5.5, cairn: 1.2,
+  lantern_bunting: 2.6, washing_line: 1.9, flower_planter: 0.75, vegetable_patch: 1.6, blossom_tree: 3.6 };
 // Rough height of a model, for the generic placeholder box of a model not yet built.
 export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0.24, stairs: 0.5, lighthouse: 7, cottage: 4.5, workshop: 3.8, pine: 3.8, birch: 3.6,
   waymark: 1.7, inn_sign: 1.9, ember_vent: 1.7, rubble: 1.4, ford_stones: 0.1, lantern_raft: 0.1, climb_wall: 1, climb_wall_basalt: 1, ladder: 3.4,
@@ -453,7 +456,9 @@ export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0
   cliff_slate: 1, cliff_slate_b: 1, stairs_slate: 0.5, headframe: 6.1, terrace_house: 5, minecart: 1.1, menhir: 2.7, support_beam: 2.1, cave_mouth_slate: 2.2,
   rail: 0.07, cairn: 1.45, crystal_cluster: 1, climb_wall_slate: 1, oil_lantern: 2.1, oil_lantern_post: 1.75, anvil: 0.85,
   cobbler_bench: 1, boot_rack: 2, hold_wall: 2.6, rope_coil: 0.9, tally_board: 2.2, soup_cauldron: 1.3,
-  hedge_gap: 0.45, crates_open: 0.65, stone_odd: 0.65, stone_moved: 0.65 };
+  hedge_gap: 0.45, crates_open: 0.65, stone_odd: 0.65, stone_moved: 0.65,
+  cliff_falls: 2, lantern_bunting: 2.7, washing_line: 1.9, water_lilies: 0.08, leaf_litter: 0.05, windmill: 7.5, vegetable_patch: 1.7, // dressing
+  flower_planter: 0.75, blossom_tree: 3.6, well: 2.3 };
 
 // Auto-tiling for fences ("f") and walls ("W"): neighbour mask (N=1, E=2, S=4, W=8)
 // -> [piece suffix, rot]. At rot 0: "" = arms W+E, _corner = W+S, _end = W,

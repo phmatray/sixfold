@@ -2310,6 +2310,66 @@
       "z": 34,
       "rot": 0,
       "band": "hushlane"
+    },
+    {
+      "asset": "lantern_bunting",
+      "x": 25,
+      "z": 23,
+      "rot": 0
+    },
+    {
+      "asset": "lantern_bunting",
+      "x": 25,
+      "z": 11,
+      "rot": 0
+    },
+    {
+      "asset": "well",
+      "x": 47,
+      "z": 25,
+      "rot": 0
+    },
+    {
+      "asset": "blossom_tree",
+      "x": 13,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "blossom_tree",
+      "x": 40,
+      "z": 22,
+      "rot": 0
+    },
+    {
+      "asset": "water_lilies",
+      "x": 41,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "water_lilies",
+      "x": 43,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "flower_planter",
+      "x": 6,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "flower_planter",
+      "x": 8,
+      "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "flower_planter",
+      "x": 15,
+      "z": 28,
+      "rot": 0
     }
   ],
   "spawn": {

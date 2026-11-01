@@ -2589,6 +2589,60 @@
       "z": 27,
       "rot": 270,
       "band": "seaside"
+    },
+    {
+      "asset": "windmill",
+      "x": 43,
+      "z": 3,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 44,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 45,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "water_lilies",
+      "x": 43,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "water_lilies",
+      "x": 45,
+      "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "water_lilies",
+      "x": 44,
+      "z": 10,
+      "rot": 0
+    },
+    {
+      "asset": "vegetable_patch",
+      "x": 3,
+      "z": 27,
+      "rot": 0
+    },
+    {
+      "asset": "flower_planter",
+      "x": 8,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "flower_planter",
+      "x": 12,
+      "z": 18,
+      "rot": 0
     }
   ],
   "gates": [

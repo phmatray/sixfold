@@ -20,6 +20,7 @@ scene inside it and saves the file:
 | `PropsV2` | `build_props_v2.py`      | 1.2 house furniture, signs, the curio cabinet and curios, the 1.3 shared kit (waymark, seal stone, cave mouth, climb wall, inn sign), the find hosts (stump, log); imports `build_area_props.py` for its helpers and exports only its own files |
 | `Critters` | `build_critters.py` | the ambient life a map's `life` spawns (critters, the perch bird, the docking fishing boat); imports `build_assets.py` for its helpers and exports only its own files |
 | `V13_<region>` | `build_regions_v13.py` | the 1.3 region props, one module per region (`v13_ember.py` … `v13_stone.py`) on the shared `v13_kit.py`; headless only (see `web/world/ASSETS_V13.md`) |
+| `Dressing_<group>` | `build_dressing.py` | the dressing props (#233), one module per group on `v13_kit.py`: `dressing_water.py` (cliff_falls, water_lilies, well), `dressing_village.py` (lantern_bunting, washing_line, flower_planter, vegetable_patch), `dressing_land.py` (windmill, blossom_tree, leaf_litter); headless only |
 
 ```bash
 # First time only: create the file
@@ -39,6 +40,11 @@ blender -b --factory-startup -P tools/blender/build_area_props.py -- --out web/w
 
 # Shop interior scene
 blender -b art/Sixfold.blend -P tools/blender/build_interior_scene.py -- --render /tmp/interior.png
+
+# Dressing props -> web/world/assets/*.glb, per group (water, village, land or all; --only a,b for some).
+# --sheets DIR writes dressing_<group>_day.png / _night.png: every prop from seven angles (front, back, left, right,
+# top, front 3/4, the game camera), toon-shaded like the game. Look at both before shipping. Checked by tools/dressing.test.mjs.
+blender -b --factory-startup -P tools/blender/build_dressing.py -- --out web/world/assets --sheets /tmp/dressing --check
 
 # 1.3 region props -> web/world/assets/*.glb, per region (ember, storm, tide, dream, grove, stone or all).
 # --sheets DIR writes <region>_tiles.png (every prop, front/back 3/4, labelled) and <region>_day.png / _night.png: a small

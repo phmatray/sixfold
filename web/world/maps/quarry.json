@@ -2473,6 +2473,12 @@
       "z": 42,
       "rot": 270,
       "band": "overworld"
+    },
+    {
+      "asset": "cliff_falls",
+      "x": 2,
+      "z": 38,
+      "rot": 0
     }
   ],
   "spawn": {
