@@ -310,3 +310,30 @@ discovery (a POI or a find) in seconds and tiles, crossroads with more than `cro
 scatter ratio (Clark–Evans: under 1 clumped, over `scatter_ratio_max` too even) and each 16 × 16 chunk's
 dominant asset, the density curve along the main path with its breathers, and the §11 findings of a map not yet
 on `level_design: 2`.
+
+## 12. Placement rules — *règles de placement*
+
+Sections 1–6 say where a thing may stand. Most props also have a reason of their own: a lantern lights a path, a
+planter dresses a doorstep, reeds grow at the waterline, a bookcase stands against a wall, a prop rests on the
+ground under it. Those rules live in `tools/placement.rules`, in a small DSL modelled on Minecraft's world
+generation, read backwards. Minecraft places a feature only where its placement modifiers hold (a biome filter, a
+heightmap, block predicates at an offset, a spacing) and a block only where it can survive. Here every prop already
+on a map is held to the rules written for its asset, and each rule it breaks is a finding:
+
+```
+tag path = tile:pr=H paint:pr deck
+
+rule lamp.path error "a street lantern lights a path or a plaza (2.1)"
+  for lantern
+  when outdoor
+  need near(2, #path)
+```
+
+The file's header is the full reference (`on`, `touches`, `near`, `front`, `behind`, `beside`, `count`, `dist`,
+`grounded`, `flat`, `is`, `has`, the biome filters and the builtins). Run it with `node tools/placement.mjs web/world`:
+it lists every finding, map by map, then a count per rule. `--map=<name>` also draws that map in the terminal with
+each finding lettered on it, `--rule=<id or prefix>` runs one rule or a family (`--rule=lamp`), `--json` feeds a
+script, and `--strict` exits 1 on an `error`.
+
+It is a diagnostic: CI runs only its tests (`tools/placement.test.mjs`, which also fail when a rule names an asset no
+map uses). A rule moves into CI once its findings are fixed or answered with a `why`.
