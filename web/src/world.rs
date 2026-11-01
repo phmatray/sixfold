@@ -897,9 +897,9 @@ pub fn WorldScreen() -> impl IntoView {
 
     // Apply effects in sixfold-meta (saved by the store), then show what follows:
     // a duel offer, a new item or a pack.
-    let apply_effects = move |effects: Vec<String>| {
+    let apply_effects = move |list: Vec<String>| {
         let mut o = effects::Outcome::default();
-        progress.update(|p| match p.apply_all(&effects) {
+        progress.update(|p| match p.apply_all(&list) {
             Ok(done) => o = effects::outcome(done, p.coins()),
             Err(err) => leptos::logging::warn!("world: {err}"),
         });
@@ -1250,6 +1250,7 @@ pub fn WorldScreen() -> impl IntoView {
         }
     };
     let close = move |_| sheet.set(None);
+    let close_sheet = Callback::new(move |()| sheet.set(None));
     // An inn's rest: the world fades to black, the clock jumps (the engine's
     // `clock:` effect, saved), and it fades back in at the new hour.
     let rest = move |ph: Phase| {
@@ -1517,10 +1518,10 @@ pub fn WorldScreen() -> impl IntoView {
                             skip=Callback::new(move |()| player_skip()) />
                     }.into_any(),
                     Sheet::Item(id) => view! {
-                        <sheets::ItemGot id=id preview=preview close=Callback::new(move |()| sheet.set(None)) />
+                        <sheets::ItemGot id=id preview=preview close=close_sheet />
                     }.into_any(),
                     Sheet::Card(id) => view! {
-                        <sheets::CardFound id=id close=Callback::new(move |()| sheet.set(None)) />
+                        <sheets::CardFound id=id close=close_sheet />
                     }.into_any(),
                     Sheet::Duel(text) => view! {
                         <h2 id="world-sheet-title">{tr("A practice duel?", "Un duel d'entraînement ?")}</h2>
@@ -1587,7 +1588,7 @@ pub fn WorldScreen() -> impl IntoView {
                         <crate::shops::Press />
                     }.into_any(),
                     Sheet::Inn => view! {
-                        <sheets::InnRest here=here rest=Callback::new(rest) close=Callback::new(move |()| sheet.set(None)) />
+                        <sheets::InnRest here=here rest=Callback::new(rest) close=close_sheet />
                     }.into_any(),
                     Sheet::Atlas => view! {
                         <div class="sheet-head">
@@ -1605,13 +1606,13 @@ pub fn WorldScreen() -> impl IntoView {
                                     left_at.update_value(|m| _ = m.insert(id, n));
                                     world_page(n);
                                 })
-                                close=Callback::new(move |()| sheet.set(None)) />
+                                close=close_sheet />
                         }.into_any(),
                         None => ().into_any(),
                     },
                     Sheet::Menu => view! {
                         <GameMenu editing=editing here=here on_travel=travel
-                            on_close=Callback::new(move |()| sheet.set(None)) />
+                            on_close=close_sheet />
                     }.into_any(),
                 })}
             </dialog>
