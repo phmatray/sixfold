@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "sixfold-placement": {
+      "command": "node",
+      "args": ["tools/placement-mcp.mjs", "web/world"]
+    }
+  }
+}

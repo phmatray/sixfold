@@ -3,7 +3,28 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { parseRules, world, check, evaluate, tables, proposals, findingId } from "./placement.mjs";
+
+test("the MCP server answers the handshake, lists its tools, and lists the findings (read only)", async () => {
+  const srv = spawn(process.execPath, [fileURLToPath(new URL("./placement-mcp.mjs", import.meta.url)), "web/world"], { stdio: ["pipe", "pipe", "ignore"] });
+  let buf = "";
+  const replies = [];
+  srv.stdout.on("data", (c) => { buf += c; let i; while ((i = buf.indexOf("\n")) >= 0) replies.push(JSON.parse(buf.slice(0, i))), (buf = buf.slice(i + 1)); });
+  const ask = (id, method, params) => srv.stdin.write(JSON.stringify({ jsonrpc: "2.0", id, method, params }) + "\n");
+  ask(1, "initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "test", version: "0" } });
+  ask(2, "tools/list", {});
+  ask(3, "tools/call", { name: "placement_findings", arguments: { limit: 1 } });
+  ask(4, "tools/call", { name: "placement_finding", arguments: { id: "nope0" } });
+  for (let t = 0; replies.length < 4 && t < 200; t++) await new Promise((r) => setTimeout(r, 50));
+  srv.kill();
+  const by = Object.fromEntries(replies.map((r) => [r.id, r]));
+  assert.equal(by[1].result.serverInfo.name, "sixfold-placement");
+  assert.ok(by[2].result.tools.some((t) => t.name === "placement_fix"));
+  assert.match(by[3].result.content[0].text, /finding\(s\) in \d+ block\(s\)/);
+  assert.equal(by[4].result.isError, true);
+});
 
 const T = { FOOT: { house: [2, 2] }, DECK: { boardwalk: [0.1], pier: [0.3], dock: [0.3] }, WALKABLE: new Set(["rug"]), tall: (a) => ({ house: 4, crates: 0.9 })[a] ?? 1 };
 // 6 x 5, a path down column 1, water in the east column, a 1 m ledge on the bottom row.

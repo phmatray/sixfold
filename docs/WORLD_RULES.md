@@ -339,15 +339,22 @@ script, and `--strict` exits 1 on an `error`.
 id (`#k3f9a`, the same from run to run while its prop stays put) to quote when talking about it; `--id=k3f9a` finds it
 on the command line, and the app's "Go to #id" box jumps to it. Findings of one rule on props 2 tiles or closer, chained,
 come as one block with one plan: each prop's best fix, found with the fixes before it in place, checked as a whole, each
-one ticked or not. The map round it shows from above or in a simple 3D built from the same data (tiles at their floor
-height, props as volumes of their size at their `y`; drag to turn, both views together), before and after a proposed fix: lift it onto the floor, turn it,
+one ticked or not. The map round it shows from above or in 3D (the game's own models, loaded and dressed by its
+map.js and props.js and placed as build.js places them, on blocks at each tile's floor height; drag to turn, both
+views together), before and after a proposed fix: lift it onto the floor, turn it,
 or move it to the nearest place (5 tiles round, then 10) where every rule for it holds and its neighbours break no
 more rules than before. Nothing is ever taken out. A sign's text moves with its sign, and a prop a door stands on is
 only ever lifted. Each fix is tried on a shadow copy of the world first, and only those that leave
 `check-maps --strict` passing are offered; when none does, the app names what the nearest one breaks. **Confirm** writes the
 fix to the map's JSON and runs `check-maps --strict` on the result, **Undo** puts the file back, and **It's fine**
 records the answer in `tools/placement.waivers.json`, which placement.mjs then skips. Keys: ← → to browse, 1–9 to pick
-a fix, Enter to confirm, R for "it's fine", U to undo.
+a fix, Enter to confirm, R for "it's fine", U to undo, V for 3D, G to go to an id.
+
+**Over MCP** (`tools/placement-mcp.mjs`, registered in `.mcp.json` as `sixfold-placement`) an agent does the same:
+`placement_findings` lists the blocks with their ids, `placement_finding` reads one (the rule, the map round it as text,
+and the fixes check-maps passes, or with `block: true` its block's plan), `placement_fix` applies one, `placement_waive`
+answers "fine" with a note, `placement_undo`, `placement_check_maps` and `placement_rules`. It writes the same files as
+the app.
 
 It is a diagnostic: CI runs only its tests (`tools/placement.test.mjs`, which also fail when a rule names an asset no
 map uses). A rule moves into CI once its findings are fixed or answered with a `why`.

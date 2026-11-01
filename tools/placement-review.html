@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Placement review</title>
-<script type="importmap">{ "imports": { "three": "/vendor/three/three.module.min.js" } }</script>
+<script type="importmap">{ "imports": { "three": "/vendor/three/build/three.module.min.js", "three/addons/": "/vendor/three/examples/jsm/" } }</script>
 <style>
   :root {
     --bg: #14161a; --panel: #1c1f25; --panel-2: #23272f; --line: #2f343e; --text: #e6e8ec; --dim: #9aa1ad; --faint: #6b7280;
@@ -465,22 +465,19 @@ function label(g, text, x, y, s, colour) {
   g.fillStyle = colour ?? "#e6e8ec"; g.textBaseline = "top"; g.fillText(text, x - w / 2 + 4, y + (h - size) / 2 - 1); g.textBaseline = "alphabetic";
 }
 
-// ---------- 3D: the same data in blocks, at the game's angle ----------
+// ---------- 3D: the game's models on the map's terrain, at the game's angle ----------
 // Terrain is a block per tile at its floor height (a digit is metres up, a boardwalk 0.1, a pier 0.3), water sits low,
-// walls stand 2.5 m; each prop is a simple volume of its footprint and height, at its `y`. The camera looks north and
+// walls stand 2.5 m; each prop is the game's own model, placed as build.js places it. The camera looks north and
 // down like the game's (50°); both views share it, so dragging one turns the other.
 
 const orbit = { yaw: 0, pitch: 50, zoom: 1 };
 const views = {}; // name -> { canvas, renderer, scene, camera, centre, radius }
-const shared = {
-  box: new THREE.BoxGeometry(1, 1, 1), sphere: new THREE.SphereGeometry(0.5, 12, 8), cone: new THREE.ConeGeometry(0.5, 1, 8),
-  cyl: new THREE.CylinderGeometry(0.5, 0.5, 1, 8), rock: new THREE.DodecahedronGeometry(0.5, 0), roof: new THREE.CylinderGeometry(0.5, 0.5, 1, 3).rotateY(Math.PI / 2), // a prism, its ridge up once turned
-};
+const shared = { box: new THREE.BoxGeometry(1, 1, 1), cyl: new THREE.CylinderGeometry(0.5, 0.5, 1, 8) };
 const mats = {};
 const mat = (colour, extra = {}) => (mats[colour + JSON.stringify(extra)] ??= new THREE.MeshStandardMaterial({ color: colour, roughness: 0.85, ...extra }));
 const TILE3 = { ".": "#5b8a40", p: "#c9a46c", r: "#a3a29b", s: "#dcc994", "=": "#8a5f37", H: "#74502f", f: "#5b8a40", w: "#7d5f40", "#": "#3a3c46", W: "#4a4d58", V: "#56647c" };
 
-function three(canvas, map, v, name) {
+async function three(canvas, map, v, name) {
   let view = views[name];
   if (!view || view.canvas !== canvas) {
     view?.renderer.forceContextLoss(), view?.renderer.dispose(); // canvases are redrawn with the card: free the old context
@@ -529,8 +526,13 @@ function three(canvas, map, v, name) {
     scene.add(sheet);
   }
   for (const [x, z, c] of tiles) if (c === "f") add(scene, shared.box, "#8a6338", x + 0.5, 0.5, z + 0.5, 0.18, 1, 0.18); // fence posts
-  const inView = (p) => p.x + p.w > v.x0 && p.x < v.x1 && p.z + p.d > v.z0 && p.z < v.z1;
-  for (const p of map.props) if (inView(p)) prop(scene, p);
+  // Props, as the map has them before any flag is set: of two props that take turns on a tile (`if`), the one that
+  // shows first (no `if`, or an `if` on a flag not yet set).
+  const inView = (p) => p.x + p.w > v.x0 && p.x < v.x1 && p.z + p.d > v.z0 && p.z < v.z1 && (!p.if || p.if.startsWith("!"));
+  const shown = map.props.filter(inView), token = (view.token = (view.token ?? 0) + 1);
+  const tpls = Object.fromEntries(await Promise.all([...new Set(shown.map((p) => p.asset))].map(async (n) => [n, await template(n)])));
+  if (view.token !== token || !canvas.isConnected) return; // a newer card or view took over meanwhile
+  for (const p of shown) prop(scene, p, tpls[p.asset]);
   for (const n of map.npcs) if (n.x >= v.x0 && n.x < v.x1 && n.z >= v.z0 && n.z < v.z1) add(scene, shared.cyl, "#c06cf0", n.x + 0.5, floorOf(map, n.x, n.z) + 0.72, n.z + 0.5, 0.45, 1.45, 0.45);
   for (const d of map.doors) if (d.x >= v.x0 && d.x < v.x1 && d.z >= v.z0 && d.z < v.z1) add(scene, shared.box, "#1b1b1f", d.x + 0.5, floorOf(map, d.x, d.z) + 0.05, d.z + 0.9, 0.5, 0.1, 0.2);
   // The finding (red), where a fix puts it (green), where it stood (white, faint).
@@ -550,26 +552,36 @@ function add(scene, geo, colour, x, y, z, sx, sy, sz, extra) {
   return mesh;
 }
 
-// A prop as a simple volume: a cone on a trunk for a tree, a post and a lit globe for a lantern, a body and a roof for
-// a house, a post and a board for a sign, a box with a dark face for the rest; all at its footprint, height and `y`.
-function prop(scene, p) {
-  const k = kindOf(p), cx = p.x + p.w / 2, cz = p.z + p.d / 2, y = p.y ?? 0, h = Math.max(0.08, p.tall), w = p.w, d = p.d;
-  const [fx, fz] = FACE[p.rot % 360] ?? [0, 1];
-  if (k === "deck") return add(scene, shared.box, COLOUR.deck, cx, y + 0.04, cz, w, 0.08, d);
-  if (k === "tree") { add(scene, shared.cyl, "#6b4a2a", cx, y + h * 0.18, cz, 0.22, h * 0.36, 0.22); return add(scene, shared.cone, COLOUR.tree, cx, y + h * 0.62, cz, Math.min(w, d) * 0.9, h * 0.76, Math.min(w, d) * 0.9); }
-  if (k === "light") { add(scene, shared.cyl, "#2b2b30", cx, y + h / 2, cz, 0.09, h, 0.09); return add(scene, shared.sphere, COLOUR.light, cx, y + h, cz, 0.32, 0.32, 0.32, { emissive: "#ffcc55", emissiveIntensity: 1.2 }); }
-  if (k === "plant") return add(scene, shared.sphere, COLOUR.plant, cx, y + h / 2, cz, 0.7 * w, Math.max(0.2, h), 0.7 * d);
-  if (k === "rock") return add(scene, shared.rock, COLOUR.rock, cx, y + h / 2, cz, 0.8 * w, Math.max(0.3, h), 0.8 * d);
-  if (k === "sign") { add(scene, shared.box, "#5b3f24", cx, y + h / 2, cz, 0.1, h, 0.1); return add(scene, shared.box, COLOUR.sign, cx + fx * 0.07, y + h * 0.78, cz + fz * 0.07, fx ? 0.05 : 0.7, h * 0.3, fz ? 0.05 : 0.7); }
-  if (k === "house") {
-    add(scene, shared.box, "#d9c6a4", cx, y + h * 0.3, cz, w - 0.15, h * 0.6, d - 0.15);
-    const roof = add(scene, shared.roof, "#8c4a3a", cx, y + h * 0.78, cz, h * 0.42, w - 0.05, d * 0.62);
-    roof.rotation.z = Math.PI / 2;
-    return roof;
-  }
-  const box = add(scene, shared.box, COLOUR[k], cx, y + h / 2, cz, w * 0.8, h, d * 0.8);
-  add(scene, shared.box, "#1b1b1f", cx + fx * w * 0.41, y + h * 0.5, cz + fz * d * 0.41, fx ? 0.04 : w * 0.4, h * 0.3, fz ? 0.04 : d * 0.4); // its face
-  return box;
+// The game's own models: loaded by its map.js (assets/, interior/ and npc/ folders, the code-drawn ones skipped) and
+// dressed by its props.js `prep` (toon materials, glow parts, contact shadows); a prop with no model is drawn by its
+// PLACEHOLDER, as the game does. One template per asset, cloned per prop.
+let game = null;
+const templates = new Map();
+const gameCode = () => (game ??= Promise.all([import("/world/map.js"), import("/world/props.js")]).then(([m, p]) => ({ loadAsset: m.loadAsset, PLACEHOLDER: p.PLACEHOLDER, placeholderBox: p.placeholderBox, prep: p.prep })));
+const template = (name) => {
+  if (!templates.has(name)) templates.set(name, gameCode().then(async (g) => {
+    const gltf = await g.loadAsset(name);
+    const obj = gltf ? gltf.scene.clone(true) : (g.PLACEHOLDER[name] ?? (() => g.placeholderBox(name)))();
+    g.prep(obj, true);
+    return obj;
+  }));
+  return templates.get(name);
+};
+
+// A prop as the game builds it (build.js): its model at its footprint's centre and its `y`, turned by `rot`, with its
+// `recolor` and `glow`.
+function prop(scene, p, tpl) {
+  const obj = tpl.clone(true);
+  obj.position.set(p.x + p.w / 2, p.y ?? 0, p.z + p.d / 2);
+  obj.rotation.y = THREE.MathUtils.degToRad(p.rot);
+  if (p.recolor) obj.traverse((o) => {
+    if (!o.isMesh || !(o.material.name in p.recolor)) return;
+    const c = p.recolor[o.material.name];
+    if (c === null) o.visible = false;
+    else (o.material = o.material.clone()), o.material.color.set(c);
+  });
+  if (p.glow) obj.traverse((o) => o.isMesh && /glow/i.test(o.material.name) && ((o.material = o.material.clone()), o.material.color.set(p.glow), o.material.emissive?.set(p.glow).multiplyScalar(0.55)));
+  scene.add(obj);
 }
 
 // A footprint's outline, standing from its base to its top, drawn over everything.
