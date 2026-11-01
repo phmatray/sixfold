@@ -71,12 +71,12 @@
     {
       "asset": "signpost",
       "x": 3,
-      "z": 6,
+      "z": 7,
       "rot": 0
     },
     {
       "asset": "signpost",
-      "x": 5,
+      "x": 6,
       "z": 31,
       "rot": 0
     },
@@ -89,8 +89,8 @@
     },
     {
       "asset": "inn_sign",
-      "x": 11,
-      "z": 6,
+      "x": 10,
+      "z": 7,
       "rot": 0
     },
     {
@@ -278,7 +278,7 @@
     },
     {
       "asset": "bench",
-      "x": 46,
+      "x": 47,
       "z": 1,
       "rot": 0,
       "y": 2
@@ -472,12 +472,12 @@
     {
       "asset": "net_rack",
       "x": 3,
-      "z": 12,
+      "z": 11,
       "rot": 0
     },
     {
       "asset": "crab_pots",
-      "x": 5,
+      "x": 6,
       "z": 20,
       "rot": 0
     },
@@ -1462,21 +1462,21 @@
   "interactions": [
     {
       "x": 3,
-      "z": 6,
+      "z": 7,
       "kind": "sign",
       "text": "West: the Saltwind Boardwalk, and the meadow beyond. South, through the dunes: the Bellflats.",
       "text_fr": "Ouest : la Promenade de Ventsalé, et le pré au-delà. Au sud, par les dunes : Les Grèves de la Cloche."
     },
     {
-      "x": 5,
+      "x": 6,
       "z": 31,
       "kind": "sign",
       "text": "South: The Bellflats. The tide goes out at eight in the morning and comes back at six. After dark, keep to the boardwalk.",
       "text_fr": "Sud : Les Grèves de la Cloche. La mer se retire à huit heures du matin et revient à six heures du soir. Une fois la nuit tombée, restez sur le ponton."
     },
     {
-      "x": 11,
-      "z": 6,
+      "x": 10,
+      "z": 7,
       "kind": "sign",
       "text": "The Dry Dock. Chowder, beds, and nobody asks about your boots.",
       "text_fr": "Le Bassin de radoub. De la chaudrée, des lits, et personne ne pose de questions sur vos bottes."
@@ -1535,7 +1535,7 @@
       "give": "coins:40",
       "text": "Under the lookout bench, behind a leg: a tin of Facets and a pencil stub. Somebody counts ships up here.",
       "text_fr": "Sous le banc du belvédère, derrière un pied : une boîte de Facettes et un bout de crayon. Quelqu'un compte les bateaux, ici.",
-      "x": 46,
+      "x": 47,
       "z": 1
     },
     {

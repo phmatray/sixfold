@@ -1902,6 +1902,12 @@
       "z": 30,
       "rot": 270,
       "band": "elder_ring"
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 23,
+      "z": 24,
+      "rot": 0
     }
   ],
   "spawn": {

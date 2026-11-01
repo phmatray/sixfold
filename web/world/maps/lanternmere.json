@@ -222,7 +222,7 @@
       "asset": "bench",
       "x": 29,
       "z": 11,
-      "rot": 0
+      "rot": 180
     },
     {
       "asset": "lantern",
@@ -394,7 +394,7 @@
     },
     {
       "asset": "boat",
-      "x": 3,
+      "x": 4,
       "z": 24,
       "rot": 180
     },
@@ -1631,7 +1631,7 @@
       "text_fr": "Sous le saule de l'îlot, enveloppé de toile cirée contre l'humidité : un booster scellé. Les lanternes doivent le voir toutes les nuits."
     },
     {
-      "x": 3,
+      "x": 4,
       "z": 24,
       "kind": "sign",
       "id": "old_boat",

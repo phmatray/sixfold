@@ -41,7 +41,7 @@
       "asset": "glass_rack",
       "x": 9,
       "z": 5,
-      "rot": 90
+      "rot": 270
     },
     {
       "asset": "crates",

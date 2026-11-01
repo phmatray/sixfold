@@ -201,13 +201,13 @@
     {
       "asset": "flowers",
       "x": 37,
-      "z": 22,
+      "z": 23,
       "rot": 0
     },
     {
       "asset": "flowers",
       "x": 16,
-      "z": 12,
+      "z": 11,
       "rot": 0
     },
     {
@@ -226,7 +226,7 @@
     {
       "asset": "inn_sign",
       "x": 37,
-      "z": 13,
+      "z": 14,
       "rot": 0
     },
     {
@@ -2429,7 +2429,7 @@
     },
     {
       "x": 37,
-      "z": 13,
+      "z": 14,
       "kind": "sign",
       "text": "The Hearth Rooms. Beds by the night or by the hour, soup always.",
       "text_fr": "Les Chambres de l'Âtre. Des lits à la nuit ou à l'heure, de la soupe toujours."
