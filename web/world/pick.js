@@ -38,7 +38,9 @@ export function tapped(w, canvas, camera, clientX, clientY) {
     const y = w.floorAt(x, z);
     box.min.set(cx - 0.5, y, cz - 0.5);
     box.max.set(cx + 0.5, y + top, cz + 0.5);
-    if (ray.ray.intersectBox(box, hit) && hit.distanceTo(ray.ray.origin) < bestD) (bestD = hit.distanceTo(ray.ray.origin)), (best = [x, z]);
+    if (!ray.ray.intersectBox(box, hit)) return;
+    const d = hit.distanceTo(ray.ray.origin);
+    if (d < bestD) (bestD = d), (best = [x, z]);
   };
   for (const n of w.npcs) test(n.x, n.z, n.obj.position.x, n.obj.position.z, 1.7);
   for (const i of w.talk.values()) test(i.x, i.z, i.x + 0.5, i.z + 0.5, 1.1);

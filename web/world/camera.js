@@ -37,7 +37,8 @@ export function lowestPitch() {
 }
 
 const DEG = Math.PI / 180;
-// `v` clamped between `lo` and `hi`, whichever way round they come.
+// `v` clamped between `lo` and `hi`, whichever way round they come. Not THREE.MathUtils.clamp: this file
+// imports nothing, so node runs its tests and check-maps.mjs reads it.
 const fit = (v, lo, hi) => Math.max(Math.min(lo, hi), Math.min(Math.max(lo, hi), v));
 
 /** Where the camera may look in a room (a map's `camera.clamp`): `[x, z]`, the aim kept so the view stays

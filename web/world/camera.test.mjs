@@ -74,3 +74,14 @@ test("the camera leans in for a scene, closer on an indoor place, less on a tall
   assert.equal(lean({ scene: true, place: true }), 0.55);
   assert.equal(lean({ scene: true, place: true, tall: true }), 0.8);
 });
+
+test("the more the top bar covers, the further back the view may aim, so the back row clears the bar", () => {
+  const z = (cover) => clampToRoom(15, -50, { ...room, cover })[1];
+  assert.ok(z(0) > z(0.1) && z(0.1) > z(0.2) && z(0.2) > z(0.3), `${z(0)} ${z(0.1)} ${z(0.2)} ${z(0.3)}`);
+});
+
+test("a pitch so low that the view's top never meets the ground leaves the depth alone", () => {
+  const low = { ...room, pitch: (15 * Math.PI) / 180 };
+  assert.deepEqual(clampToRoom(15, -50, low), [15, -50]);
+  assert.deepEqual(clampToRoom(15, 99, low), [15, 99]);
+});

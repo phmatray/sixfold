@@ -98,7 +98,8 @@ export function createHud(el, controls, subjectY) {
     follow: () => caption.style.opacity === "1" && placeCaption(),
     remove() {
       clearTimeout(bannerTimer);
-      for (const n of [pad, run, fade, legend, banner]) n.remove();
+      clearTimeout(captionTimer);
+      for (const n of [pad, run, fade, legend, banner, caption]) n.remove();
     },
   };
 }

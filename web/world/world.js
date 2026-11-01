@@ -255,7 +255,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     return { mid: y(p.clone()), top: y(p.clone().setY(p.y + up)), foot: y(p.clone().setY(p.y - down)) };
   };
   const hud = createHud(el, controls, subjectY);
-  const { pad, run, fade, legend, showBanner, showCaption, clearCaption } = hud;
+  const { pad, fade, legend, showBanner, showCaption, clearCaption } = hud;
 
   // ---------- Input ----------
   const held = []; // pressed inputs, newest last: key names or "pad-<dir>"
@@ -1178,7 +1178,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     },
     setItems(list) {
       canRun = list.split(",").includes("running_shoes");
-      run.hidden = !canRun;
+      hud.run.hidden = !canRun;
     },
     preview,
     previewStop,
