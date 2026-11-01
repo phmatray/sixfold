@@ -341,9 +341,11 @@ on the command line, and the app's "Go to #id" box jumps to it. Findings of one 
 come as one block with one plan: each prop's best fix, found with the fixes before it in place, checked as a whole, each
 one ticked or not. The map round it shows from above or in 3D (the game's own models, loaded and dressed by its
 map.js and props.js and placed as build.js places them, on blocks at each tile's floor height; drag to turn, both
-views together), before and after a proposed fix: lift it onto the floor, turn it,
-or move it to the nearest place (5 tiles round, then 10) where every rule for it holds and its neighbours break no
-more rules than before. Nothing is ever taken out. A sign's text moves with its sign, and a prop a door stands on is
+views together), before and after a proposed fix: lift it onto the floor, swap it for the model its rule names
+(`swap reeds -> bush`: reeds on a cliff top become a bush where they stand), re-lay the ground under it where its rule
+allows (`fill ~`: a tree with a foot in a pond gets its bank, from the land the rest of it stands on), turn it, or move
+it to the nearest place (5 tiles round, then 10) where every rule for it holds and its neighbours break no more rules
+than before. Nothing is ever taken out. A click on a finding's id (or C) copies it as text, to paste into a message. A sign's text moves with its sign, and a prop a door stands on is
 only ever lifted. Each fix is tried on a shadow copy of the world first, and only those that leave
 `check-maps --strict` passing are offered; when none does, the app names what the nearest one breaks. **Confirm** writes the
 fix to the map's JSON and runs `check-maps --strict` on the result, **Undo** puts the file back, and **It's fine**

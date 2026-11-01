@@ -104,6 +104,29 @@ test("check names the first need that fails", () => {
   assert.deepEqual(found.map((f) => [f.prop.x, f.prop.z, f.need]), [[2, 1, "near(1, tile:~)"], [3, 2, "near(1, tile:p)"]]);
 });
 
+test("fixes: swap gives the place another model, fill lays the land round it under the prop", () => {
+  const { rules } = parseRules(`
+    rule wet warn "by the water"
+      for reeds
+      need near(1, tile:~)
+      swap reeds -> rock | bush
+    rule dry warn "out of the water"
+      for crates
+      need not touches(tile:~)
+      fill ~`);
+  const m = structuredClone(MAP);
+  m.props.push({ asset: "reeds", x: 0, z: 0, rot: 0 }, { asset: "crates", x: 4, z: 2, rot: 0 });
+  m.tiles[2] = ".p..~~"; // the crates' tile is water now, the tile west of it grass
+  const v = world("test", m, T);
+  const reeds = proposals(v, m.props[5], rules);
+  assert.deepEqual([reeds[0].kind, reeds[0].patch], ["swap", { asset: "rock" }]);
+  const crates = proposals(v, m.props[6], rules);
+  assert.deepEqual([crates[0].kind, crates[0].patch], ["fill", { tiles: [[4, 2, "."]] }]);
+  assert.equal(m.tiles[2], ".p..~~", "trying a fill leaves the ground as it was");
+  assert.equal(m.props[5].asset, "reeds", "trying a swap leaves the model as it was");
+  assert.throws(() => parseRules(`rule a warn "x"\n for reeds\n need true\n swap reeds`), /swap is/);
+});
+
 test("fixes: a sunk prop is lifted, a stray one moved to the nearest place its rules hold", () => {
   const { rules } = parseRules(`
     rule ground warn "rests"

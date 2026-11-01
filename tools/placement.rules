@@ -20,6 +20,10 @@
 #     when <expr>                               only where this holds (repeatable; all must hold)
 #     unless <expr>                             not where this holds (repeatable)
 #     need <expr>                               must hold, else a finding (repeatable; the first that fails is named)
+#     swap <asset> -> <asset> | <asset>         a fix to offer when the rule fails: the same place, another model of the
+#                                               same footprint that keeps every rule (reeds on a cliff become a bush)
+#     fill <glyphs>                             a fix to offer: the tiles of these glyphs under the prop take the land the
+#                                               rest of it stands on (a tree with a foot in a pond gets its bank)
 #
 # An expression: predicates joined by `and`, `or`, `not` and ( ), and numbers compared with < <= > >= == !=.
 #
@@ -146,6 +150,7 @@ rule furniture.indoor error "room furniture stays indoors"
 rule crates.purpose warn "crates belong to a trade: a house, a stall, a pier, a cart, a workshop"
   for crates | crates_open
   when outdoor
+  unless touches(spot)                              # a find or a story in them: put there on purpose, often off the beaten track
   need near(3, #work)
 
 rule market.street warn "a stall opens onto a street or a square"
@@ -158,6 +163,7 @@ rule dry.land error "nothing stands in water but boats, buoys, lilies, sea rocks
   for *
   unless is(#afloat | deck) or on(deck)
   need not touches(#water)
+  fill ~                                            # or the bank comes out under it: the water under it becomes the land round it
 
 rule water.afloat error "a buoy, lilies or a floating lantern float on water"
   for buoy | water_lilies | floating_lantern
@@ -171,11 +177,13 @@ rule water.reeds warn "reeds grow at the waterline"
   for reeds
   unless has(band) or near(1, edge)
   need near(2, wet)
+  swap reeds -> bush | heather                      # away from the water, the dry-ground plant in its place
 
 rule water.sea-rock warn "sea rocks stand in or by the sea"
   for rock_sea | tidepool
   unless near(1, edge)
   need near(2, wet)
+  swap rock_sea -> rock
 
 rule harbour.gear warn "pots, nets and bollards stay by the water"
   for crab_pots | net_rack | bollard
@@ -193,32 +201,36 @@ rule fire.clear warn "no tree overhangs a campfire"
 rule tree.off-path error "a tree never grows on a path, a square or a deck"
   for #tree
   need not touches(#paved)
+  fill pr                                           # or a patch of grass at its foot (a square's tree)
 
 rule scatter.off-path warn "bushes, flowers, reeds and rocks never grow on a path, a square or a deck"
   for #scatter
   unless has(band)
   need not touches(#paved)
+  fill pr                                           # or a bed of grass under it, beside the path
 
 rule mine.cart warn "a minecart sits on its rails"
   for minecart
   when outdoor
   need near(1, rail)
 
-rule fence.end warn "a fence end finishes a fence"
+rule fence.end warn "a fence end finishes a fence, or two frame a gap like gateposts (5.5)"
   for fence_end | wall_dry_end
-  need near(1, tile:f)
+  need near(1, tile:f) or near(2, fence_end | wall_dry_end)
 
 rule biome.ember warn "ash pines, vents and cullet belong to the Emberlands (or a transition band toward them)"
   for ash_pine | ember_vent | cullet
   when outdoor
   unless has(band)
   need region(ember)
+  swap ash_pine -> pine
 
 rule biome.basalt warn "basalt belongs to the Emberlands and the Storm coast (or a band toward them)"
   for rock_basalt
   when outdoor
   unless has(band)
   need region(ember | storm)
+  swap rock_basalt -> rock
 
 rule biome.willow warn "willows belong to the Dreamwater (or a band toward it)"
   for willow

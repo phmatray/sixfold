@@ -75,13 +75,15 @@ export function desk(dir = "web/world") {
   // The prop at index, as the caller saw it (asset and tile), or null when the file moved on since.
   const propOf = (m, { index, asset, x, z }) => { const p = m.props[index]; return p && p.asset === asset && p.x === x && p.z === z ? p : null; };
 
-  // A fix on a map's JSON: the prop's new place, turn and height, the spots it carries moved with it, and its twins (a
-  // find's crates and opened crates, each with an `if`, on one tile) moved alongside.
+  // A fix on a map's JSON: the prop's new model, place, turn and height, the spots it carries moved with it, its twins
+  // (a find's crates and opened crates, each with an `if`, on one tile) moved alongside, and the ground re-laid.
   function patchMap(m, p, patch) {
     const dx = (patch.x ?? p.x) - p.x, dz = (patch.z ?? p.z) - p.z;
     const twins = p.if ? m.props.filter((q) => q !== p && q.if && q.x === p.x && q.z === p.z) : [];
     for (const i of patch.spots ?? []) (m.interactions[i].x += dx), (m.interactions[i].z += dz);
     for (const q of [p, ...twins]) for (const k of ["x", "z", "rot", "y"]) if (k in patch) patch[k] === undefined || patch[k] === null ? delete q[k] : (q[k] = patch[k]);
+    if (patch.asset) p.asset = patch.asset; // its own model only: a twin keeps its own
+    for (const [x, z, g] of patch.tiles ?? []) m.tiles[z] = m.tiles[z].slice(0, x) + g + m.tiles[z].slice(x + 1);
   }
 
   // check-maps over a world folder, as CI runs it (~0.3 s). Its findings are the lines naming a map (or the atlas).
@@ -111,12 +113,13 @@ export function desk(dir = "web/world") {
     try { return checkMaps(shadow); } finally { unlinkSync(link); symlinkSync(resolve(file(map)), link); }
   }
 
-  // The fixes worth offering for one prop: those check-maps still passes, at most one lift, one turn and two moves.
+  // The fixes worth offering for one prop: those check-maps still passes, at most one lift, swap, ground fill and turn,
+  // and two moves.
   function offered(map, { index, asset, x, z }) {
     known(map);
     const w = load(map), p = propOf(w.m, { index, asset, x, z });
     if (!p) throw new Error(`${map} changed since: no ${asset} at ${x},${z}. Reload.`);
-    const out = [], room = { lift: 1, turn: 1, move: 2 };
+    const out = [], room = { lift: 1, swap: 1, fill: 1, turn: 1, move: 2 };
     let blocked = null;
     for (const c of proposals(w, p, rules(), { max: 6 })) {
       if (!room[c.kind]) continue;

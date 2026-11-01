@@ -102,11 +102,20 @@ export function parseRules(text) {
     else if ((m = /^rule\s+([\w.-]+)\s+(\w+)\s+"([^"]*)"$/.exec(line))) {
       if (!SEVERITY.includes(m[2])) throw new Error(`${where}: severity is ${SEVERITY.join(", ")}`);
       if (rules.some((r) => r.id === m[1])) throw new Error(`${where}: rule ${m[1]} is defined twice`);
-      rules.push({ id: m[1], severity: m[2], why: m[3], for: null, when: [], need: [] });
-    } else if ((m = /^(for|when|unless|need)\s+(.+)$/.exec(line))) {
+      rules.push({ id: m[1], severity: m[2], why: m[3], for: null, when: [], need: [], swap: {} });
+    } else if ((m = /^(for|when|unless|need|swap|fill)\s+(.+)$/.exec(line))) {
       const r = rules.at(-1);
       if (!r) throw new Error(`${where}: ${m[1]} outside a rule`);
-      if (m[1] === "for") r.for = m[2].split(/[\s|]+/).flatMap((t) => expandTerm(t, tags, where));
+      if (m[1] === "fill") {
+        // fill <glyphs>: a fix may lay the land round it on the tiles of these glyphs under the prop.
+        if (/\s/.test(m[2].trim())) throw new Error(`${where}: fill is one run of tile glyphs (fill ~ or fill pr)`);
+        r.fill = m[2].trim();
+      } else if (m[1] === "swap") {
+        // swap <asset> -> <asset> | <asset>: the models this rule's fixes may put in a prop's place.
+        const s = /^([\w-]+)\s*->\s*([\w-]+(?:\s*\|\s*[\w-]+)*)$/.exec(m[2]);
+        if (!s) throw new Error(`${where}: swap is "<asset> -> <asset> | <asset>"`);
+        r.swap[s[1]] = s[2].split(/\s*\|\s*/);
+      } else if (m[1] === "for") r.for = m[2].split(/[\s|]+/).flatMap((t) => expandTerm(t, tags, where));
       else if (m[1] === "need") r.need.push({ src: m[2], e: parseExpr(m[2], tags, where) });
       else r.when.push(m[1] === "unless" ? { op: "not", a: parseExpr(m[2], tags, where) } : parseExpr(m[2], tags, where));
     } else throw new Error(`${where}: cannot read "${line}"`);
@@ -290,16 +299,18 @@ export function check(w, rules, waived = new Set()) {
 
 // ----- Fixes: where would the prop be right? -----
 
-// Run fn with prop p changed by patch ({ x, z, rot, y }), the index kept in step, then put it back.
+// Run fn with prop p changed by patch ({ asset, x, z, rot, y, tiles }), the index kept in step, then put it back.
 function trial(w, p, patch, fn) {
-  const old = { x: p.x, z: p.z, rot: p.rot, y: p.y };
+  const old = { asset: p.asset, x: p.x, z: p.z, rot: p.rot, y: p.y, tiles: (patch.tiles ?? []).map(([x, z]) => [x, z, w.m.tiles[z][x]]) };
   place(w, p, { ...patch, spots: undefined }); // the caller moves the spots of a trial (proposals' `better`)
   try { return fn(); } finally { place(w, p, old); }
 }
 
-// Change prop p by patch for good in w (its place, turn and height, the index kept in step, and with `spots`, the
-// spots it carries moved with it): how a plan for a block of findings builds on the fixes before it.
+// Change prop p by patch for good in w (its model, place, turn and height, the index kept in step; with `spots`, the
+// spots it carries moved with it; with `tiles` [[x, z, glyph]], the ground under it re-laid): how a plan for a block of
+// findings builds on the fixes before it.
 export function place(w, p, patch) {
+  for (const [x, z, g] of patch.tiles ?? []) w.m.tiles[z] = w.m.tiles[z].slice(0, x) + g + w.m.tiles[z].slice(x + 1);
   const index = (on) => { for (const [x, z] of w.tiles(p)) { const k = key(x, z), l = w.at.get(k) ?? w.at.set(k, []).get(k); on ? l.push(p) : l.splice(l.indexOf(p), 1); } };
   const dx = (patch.x ?? p.x) - p.x, dz = (patch.z ?? p.z) - p.z;
   for (const i of patch.spots ?? []) {
@@ -307,7 +318,7 @@ export function place(w, p, patch) {
     w.spots.delete(key(s.x, s.z)), (s.x += dx), (s.z += dz), w.spots.add(key(s.x, s.z));
   }
   index(false);
-  for (const k of ["x", "z", "rot", "y"]) if (k in patch) patch[k] === undefined ? delete p[k] : (p[k] = patch[k]);
+  for (const k of ["asset", "x", "z", "rot", "y"]) if (k in patch) patch[k] === undefined ? delete p[k] : (p[k] = patch[k]);
   index(true);
 }
 
@@ -322,6 +333,7 @@ function fits(w, p, from) {
   return f.every(([x, z]) => { const k = key(x, z); return !(w.at.get(k) ?? []).some((q) => q !== p && w.blocks(q)) && (from.host || from.own?.has(k) || ![w.doors, w.warps, w.spots, w.npcs, w.exits].some((s) => s.has(k))); });
 }
 
+const GROUND = { ".": "grass", s: "sand", p: "path", r: "plaza", "~": "water", "=": "boardwalk", H: "pier", ...Object.fromEntries([..."123456789"].map((d) => [d, `${d} m ground`])) };
 const highest = (w, p) => Math.max(...w.tiles(p).map(([x, z]) => w.floor(x, z)));
 const DIRS = { "0,-1": "north", "0,1": "south", "1,0": "east", "-1,0": "west" };
 function towards(dx, dz) {
@@ -331,8 +343,8 @@ function towards(dx, dz) {
   return parts.join(", ");
 }
 
-// Fixes for the rules prop p breaks, best first; nothing is ever taken out. Lift it onto the floor under it, or turn
-// it in place, or move it to the nearest spots (up to `max`) where every rule for it holds and its neighbours break no
+// Fixes for the rules prop p breaks, best first; nothing is ever taken out. Lift it onto the floor under it, swap it
+// for a model a rule names (`swap`), turn it in place, or move it to the nearest spots (up to `max`) where every rule for it holds and its neighbours break no
 // more rules than before (Minecraft's placement attempts round a point), searching `radius` tiles round it, then twice
 // that. The review app keeps only those that also leave check-maps passing. Each: { kind, label, patch }.
 export function proposals(w, p, rules, { radius = 5, max = 4 } = {}) {
@@ -368,6 +380,24 @@ export function proposals(w, p, rules, { radius = 5, max = 4 } = {}) {
   // Lift (or lower) it onto the floor under it.
   const floorY = highest(w, p);
   if (Math.abs(floorY - y0) > 0.05 && better({ y: floorY || undefined })) out.push({ kind: "lift", label: `${floorY > y0 ? "Lift" : "Lower"} it to y ${floorY} (the floor under it)`, patch: { y: floorY || undefined } });
+  // Swap it, where a rule it breaks names a model for its place (`swap`), of the same footprint, that keeps every rule.
+  const size = (a) => String(w.t.FOOT[a] ?? [1, 1]);
+  const swaps = host ? [] : [...new Set(broken(w, p, rules).flatMap(({ rule }) => rule.swap?.[p.asset] ?? []))].filter((a) => size(a) === size(p.asset));
+  const swap = swaps.find((a) => better({ asset: a }));
+  if (swap) out.push({ kind: "swap", label: `Swap it for ${swap.replace(/_/g, " ")}, where it stands`, patch: { asset: swap } });
+  // Re-lay the ground under it, where a rule it breaks allows it (`fill`): its tiles of those glyphs take the land the
+  // rest of its footprint stands on (or, if none, the land round it).
+  const fillable = [...new Set(broken(w, p, rules).flatMap(({ rule }) => [...(rule.fill ?? "")]))];
+  if (fillable.length && !host) {
+    const glyph = ([x, z]) => (w.inMap(x, z) ? w.m.tiles[z][x] : null), land = (c) => c && !fillable.includes(c) && !"#fWV~".includes(c);
+    const most = (cells) => Object.entries(cells.map(glyph).filter(land).reduce((n, c) => ((n[c] = (n[c] ?? 0) + 1), n), {})).sort((a, b) => b[1] - a[1])[0]?.[0];
+    const foot = w.tiles(p), mine = new Set(foot.map(([x, z]) => key(x, z)));
+    const rim = foot.flatMap(([x, z]) => [[x + 1, z], [x - 1, z], [x, z + 1], [x, z - 1]]).filter(([x, z]) => !mine.has(key(x, z)));
+    // With no land at all round it, grass, the ground every map starts from; never in water (an islet of one tile).
+    const to = most(foot) ?? most(rim) ?? (fillable.includes("~") ? undefined : "."), cells = foot.filter((t) => fillable.includes(glyph(t)));
+    const patch = { tiles: cells.map(([x, z]) => [x, z, to]) };
+    if (to && cells.length && better(patch)) out.push({ kind: "fill", label: `Lay ${GROUND[to] ?? to} on the ${cells.length} ${GROUND[glyph(cells[0])] ?? glyph(cells[0])} tile${cells.length > 1 ? "s" : ""} under it`, patch });
+  }
   // Turn it in place, then move it, nearest first.
   const rots = [p.rot ?? 0, ...[0, 90, 180, 270].filter((r) => r !== (p.rot ?? 0))];
   // Nearest first: square rings out to `radius`, then out to twice that if nothing near holds.
@@ -394,7 +424,7 @@ export function proposals(w, p, rules, { radius = 5, max = 4 } = {}) {
       }
     }
   };
-  if (!out.length && small) {
+  if (!out.some((o) => o.kind === "lift") && small) {
     search(ring(0, radius));
     if (!moves.length && !turned) search(ring(radius + 1, radius * 2));
   }

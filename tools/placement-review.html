@@ -124,7 +124,7 @@ const api = async (path, body) => {
   return j;
 };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-const icon = (k) => ({ lift: "⤒", turn: "↻", move: "➜" })[k] ?? "•";
+const icon = (k) => ({ lift: "⤒", turn: "↻", move: "➜", swap: "⇄", fill: "▦" })[k] ?? "•";
 const span = (m) => { const xs = m.map((p) => p.x), zs = m.map((p) => p.z); return `${Math.min(...xs)},${Math.min(...zs)} – ${Math.max(...xs)},${Math.max(...zs)}`; };
 
 // ---------- The list ----------
@@ -215,7 +215,7 @@ function render(b, map) {
   const moves = chosen().length;
   $("#main").innerHTML = `
     <div class="card-head">
-      <button class="idtag" id="copy-id" title="Copy the id, to quote it">#${b.id}</button>
+      <button class="idtag" id="copy-id" title="Copy this finding, to paste it (C)">#${b.id} ⧉</button>
       <span class="badge ${b.severity}">${b.severity}</span>
       <span class="mono">${b.rule}</span>
       <span class="meta">${map.title} · ${map.kind}${map.region ? ` · ${map.region}` : ""} · ${one ? `<span class="mono">${f.asset}</span> at <span class="mono">${f.x},${f.z}</span>${f.rot ? `, rot ${f.rot}` : ""}${f.y ? `, y ${f.y}` : ""}` : `a block of <b>${b.members.length}</b> props, ${span(b.members)}`}</span>
@@ -241,7 +241,7 @@ function render(b, map) {
   document.querySelectorAll(".plan input").forEach((el) => (el.onchange = () => { el.checked ? state.checked.add(+el.dataset.k) : state.checked.delete(+el.dataset.k); render(b, map); }));
   $("#all")?.addEventListener("click", () => { state.checked = state.checked.size === state.plan.length ? new Set() : new Set(state.plan.map((_, k) => k)); render(b, map); });
   document.querySelectorAll(".seg button").forEach((el) => (el.onclick = () => setMode(el.dataset.mode)));
-  $("#copy-id").onclick = () => { navigator.clipboard?.writeText(`#${b.id}`).catch(() => {}); $("#copy-id").textContent = "copied"; setTimeout(() => $("#copy-id") && ($("#copy-id").textContent = `#${b.id}`), 900); };
+  $("#copy-id").onclick = copyFinding;
   $("#confirm").onclick = confirmFix;
   $("#reject").onclick = rejectIt;
   $("#prev").onclick = () => select(Math.max(0, state.at - 1));
@@ -263,6 +263,18 @@ function planHtml() {
   const fixed = state.plan.filter((it) => it.fix).length, members = state.shown[state.at].members;
   return `<div class="plan"><div class="plan-head"><span><b>${fixed}</b> of ${state.plan.length} get a fix that keeps check-maps passing; untick any to leave it for now.</span><button id="all">${state.checked.size === state.plan.length ? "Untick all" : "Tick all"}</button></div><ul>${state.plan.map((it, k) =>
     `<li><label><input type="checkbox" data-k="${k}" ${state.checked.has(k) ? "checked" : ""}><span class="mono mid">#${members.find((m) => m.index === it.index)?.id ?? ""}</span><span class="mono">${it.asset} ${it.x},${it.z}</span>${it.fix ? `<span>${icon(it.fix.kind)} ${esc(it.fix.label)}</span>` : `<span class="none">no fix: ${esc(it.why ?? "")}</span>`}</label></li>`).join("")}</ul></div>`;
+}
+
+// The finding as text, to paste into a message: its id, map, prop, rule and why, and its block's members.
+function copyFinding() {
+  const b = state.shown[state.at], map = b && state.maps[b.map];
+  if (!b) return;
+  const m = b.members, one = m.length === 1;
+  const text = [`#${b.id} · ${map?.title ?? b.map} (${b.map}) · ${one ? `${m[0].asset} at ${m[0].x},${m[0].z}${m[0].rot ? `, rot ${m[0].rot}` : ""}${m[0].y ? `, y ${m[0].y}` : ""}` : `a block of ${m.length}`}`,
+    `[${b.severity}] ${b.rule}: ${b.why}`, `needs: ${b.need}`, ...(one ? [] : [m.map((x) => `#${x.id} ${x.asset} ${x.x},${x.z}`).join("; ")])].join("\n");
+  navigator.clipboard?.writeText(text).catch(() => {});
+  const el = $("#copy-id");
+  if (el) { el.textContent = "copied"; setTimeout(() => $("#copy-id") && ($("#copy-id").textContent = `#${b.id} ⧉`), 900); }
 }
 
 function pick(i) {
@@ -331,6 +343,7 @@ addEventListener("keydown", (e) => {
   else if (e.key === "r") rejectIt();
   else if (e.key === "u" && state.undo) undoLast();
   else if (e.key === "v") setMode(state.mode === "2d" ? "3d" : "2d");
+  else if (e.key === "c") copyFinding();
   else if (e.key === "g" || e.key === "/") { $("#goto").focus(); $("#goto").select(); }
   else if (/^[1-9]$/.test(e.key) && +e.key <= state.fixes.length) pick(+e.key - 1);
   else return;
@@ -348,10 +361,13 @@ function scenes(b, map) {
   const after = map.props.map((p, i) => {
     const patch = fixes.get(i);
     if (!patch) return p;
-    const q = { ...p, x: patch.x ?? p.x, z: patch.z ?? p.z, rot: patch.rot ?? p.rot, y: patch.y ?? 0 };
+    const q = { ...p, asset: patch.asset ?? p.asset, x: patch.x ?? p.x, z: patch.z ?? p.z, rot: patch.rot ?? p.rot, y: "y" in patch ? patch.y ?? 0 : p.y };
     if (q.rot % 180 !== p.rot % 180) [q.w, q.d] = [p.d, p.w];
     return q;
   });
+  // The ground a fix re-lays (`fill`).
+  const tilesAfter = [...map.tiles];
+  for (const patch of fixes.values()) for (const [x, z, g] of patch.tiles ?? []) tilesAfter[z] = tilesAfter[z].slice(0, x) + g + tilesAfter[z].slice(x + 1);
   const spotsAfter = map.spots.map((s, i) => {
     for (const [idx, patch] of fixes) if (patch.spots?.includes(i)) { const p = map.props[idx]; return { ...s, x: s.x + ((patch.x ?? p.x) - p.x), z: s.z + ((patch.z ?? p.z) - p.z) }; }
     return s;
@@ -367,7 +383,7 @@ function scenes(b, map) {
   return {
     view: { x0, z0, x1, z1 },
     before: { ...map, marks: subjects.map((i) => ({ p: map.props[i], colour: "#ff5c5c" })), ghosts: [] },
-    after: { ...map, props: after, spots: spotsAfter, marks: subjects.map((i) => ({ p: after[i], colour: fixes.has(i) ? "#4fdf8f" : "#ff5c5c" })), ghosts: [...fixes.keys()].map((i) => map.props[i]) },
+    after: { ...map, tiles: tilesAfter, props: after, spots: spotsAfter, marks: subjects.map((i) => ({ p: after[i], colour: fixes.has(i) ? "#4fdf8f" : "#ff5c5c" })), ghosts: [...fixes.keys()].map((i) => map.props[i]) },
   };
 }
 
