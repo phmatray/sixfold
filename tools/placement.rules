@@ -60,7 +60,8 @@ tag afloat    = reeds lake_house harbour_house boat buoy ferry water_lilies floa
 tag harbour   = tile:H= boardwalk ferry boat              # what gear serves (not the gear itself)
 tag indoors   = lamp plant chair bed bookcase shelf rug counter display_case oven cloth_rack dress_form workbench light_box net_locker boot_rack
 tag on_a_wall = bookcase shelf display_case net_locker boot_rack oven cloth_rack light_box workbench glass_rack tally_board hold_wall
-tag at_table  = duel_table chart_table workbench counter cobbler_bench soup_cauldron chowder_stove
+tag at_table  = duel_table chart_table workbench counter cobbler_bench soup_cauldron chowder_stove   # worked at, or spoken across
+tag sit_at    = duel_table chart_table workbench cobbler_bench                                     # what a chair is drawn up to (a shop counter is not)
 tag raised    = canopy_deck rope_bridge ladder               # held up by trees and posts, by design
 tag market    = stall stall_b curio_cabinet
 tag work      = #house #market #harbour #at_table minecart rail kiln glass_furnace glass_rack cullet anvil door net_rack crab_pots   # not crates: two stray crates don't make a trade
@@ -136,11 +137,11 @@ rule bench.seat warn "you sit on a bench from its front: that tile is open"
 
 rule chair.seat warn "a chair faces open floor or its table"
   for chair
-  need front(open | rug | deck | #at_table)
+  need front(open | rug | deck | #sit_at)
 
-rule chair.table info "a chair goes with a table, a desk or a counter"
+rule chair.table info "a chair is drawn up to a table, facing it, or stands back to a wall facing the room (a waiting chair)"
   for chair
-  need near(1, #at_table)
+  need front(#sit_at) or (behind(#wall | edge) and front(open | rug))
 
 rule furniture.wall warn "a bookcase, a shelf or a locker stands against a wall"
   for #on_a_wall
@@ -166,10 +167,10 @@ rule furniture.reach warn "you can step up to a bookcase, a shelf or a counter: 
   when indoor
   need front(open | rug)
 
-rule chair.faces warn "a chair at a table faces it"
+rule chair.faces warn "a chair at a table faces it, never sits side-on or back to it"
   for chair
-  when front(#at_table) or behind(#at_table) or beside(#at_table)
-  need front(#at_table)
+  when front(#sit_at) or behind(#sit_at) or beside(#sit_at)
+  need front(#sit_at)
 
 rule bed.wall warn "a bed stands against a wall, not in the middle of the room"
   for bed
