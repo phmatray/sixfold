@@ -335,8 +335,12 @@ it lists every finding, map by map, then a count per rule. `--map=<name>` also d
 each finding lettered on it, `--rule=<id or prefix>` runs one rule or a family (`--rule=lamp`), `--json` feeds a
 script, and `--strict` exits 1 on an `error`.
 
-**The review app** (`node tools/placement-review.mjs`, then http://localhost:8095) walks the findings one by one.
-Each one shows the map round the prop from above, before and after a proposed fix: lift it onto the floor, turn it,
+**The review app** (`node tools/placement-review.mjs`, then http://localhost:8095) walks the findings. Each has a short
+id (`#k3f9a`, the same from run to run while its prop stays put) to quote when talking about it; `--id=k3f9a` finds it
+on the command line, and the app's "Go to #id" box jumps to it. Findings of one rule on props 2 tiles or closer, chained,
+come as one block with one plan: each prop's best fix, found with the fixes before it in place, checked as a whole, each
+one ticked or not. The map round it shows from above or in a simple 3D built from the same data (tiles at their floor
+height, props as volumes of their size at their `y`; drag to turn, both views together), before and after a proposed fix: lift it onto the floor, turn it,
 or move it to the nearest place (5 tiles round, then 10) where every rule for it holds and its neighbours break no
 more rules than before. Nothing is ever taken out. A sign's text moves with its sign, and a prop a door stands on is
 only ever lifted. Each fix is tried on a shadow copy of the world first, and only those that leave

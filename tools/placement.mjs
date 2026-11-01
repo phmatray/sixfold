@@ -1,4 +1,4 @@
-// Run: node tools/placement.mjs [web/world] [--rules=<file>] [--map=<name>] [--rule=<id>] [--json] [--strict]
+// Run: node tools/placement.mjs [web/world] [--rules=<file>] [--map=<name>] [--rule=<id>] [--id=<finding id>] [--json] [--strict]
 // Placement diagnostics: does every prop stand where it makes sense? The rules are written in a small DSL
 // (tools/placement.rules, its reference at the top of that file), read the way Minecraft generates a world but
 // backwards: Minecraft places a feature only where its placement modifiers hold (a biome filter, a heightmap, block
@@ -265,17 +265,25 @@ function broken(w, p, rules) {
   return out;
 }
 
+// A finding's short id (5 letters and digits), the same from run to run while its prop stays put: what a person quotes
+// to talk about one finding ("#k3f9a: leave it, it's a ruin"). The review app shows it; `--id=<id>` finds it.
+export function findingId(map, rule, p) {
+  let h = 2166136261;
+  for (const c of `${map}|${rule}|${p.asset}|${p.x},${p.z}`) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return (h >>> 0).toString(36).padStart(7, "0").slice(-5);
+}
+
 // A finding a person answered "this is fine" (tools/placement.waivers.json, written by the review app).
 export const waiverKey = (map, rule, p) => `${map} ${rule} ${p.asset} ${p.x},${p.z}`;
 export const WAIVERS = fileURLToPath(new URL("./placement.waivers.json", import.meta.url));
 export const waivers = (file = WAIVERS) => new Set((existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : []).map((v) => waiverKey(v.map, v.rule, v)));
 
-// Every finding of a rule set on one map: { map, rule, severity, why, need, prop, index }, less the waived ones.
+// Every finding of a rule set on one map: { id, map, rule, severity, why, need, prop, index }, less the waived ones.
 export function check(w, rules, waived = new Set()) {
   const out = [];
   w.m.props.forEach((p, index) => {
     for (const { rule: r, need } of broken(w, p, rules))
-      if (!waived.has(waiverKey(w.name, r.id, p))) out.push({ map: w.name, rule: r.id, severity: r.severity, why: r.why, need, prop: p, index });
+      if (!waived.has(waiverKey(w.name, r.id, p))) out.push({ id: findingId(w.name, r.id, p), map: w.name, rule: r.id, severity: r.severity, why: r.why, need, prop: p, index });
   });
   return out;
 }
@@ -284,11 +292,23 @@ export function check(w, rules, waived = new Set()) {
 
 // Run fn with prop p changed by patch ({ x, z, rot, y }), the index kept in step, then put it back.
 function trial(w, p, patch, fn) {
-  const index = (on) => { for (const [x, z] of w.tiles(p)) { const k = key(x, z), l = w.at.get(k) ?? w.at.set(k, []).get(k); on ? l.push(p) : l.splice(l.indexOf(p), 1); } };
   const old = { x: p.x, z: p.z, rot: p.rot, y: p.y };
-  const set = (v) => { for (const k of ["x", "z", "rot", "y"]) if (k in v) v[k] === undefined ? delete p[k] : (p[k] = v[k]); };
-  index(false), set(patch), index(true);
-  try { return fn(); } finally { index(false), set(old), index(true); }
+  place(w, p, { ...patch, spots: undefined }); // the caller moves the spots of a trial (proposals' `better`)
+  try { return fn(); } finally { place(w, p, old); }
+}
+
+// Change prop p by patch for good in w (its place, turn and height, the index kept in step, and with `spots`, the
+// spots it carries moved with it): how a plan for a block of findings builds on the fixes before it.
+export function place(w, p, patch) {
+  const index = (on) => { for (const [x, z] of w.tiles(p)) { const k = key(x, z), l = w.at.get(k) ?? w.at.set(k, []).get(k); on ? l.push(p) : l.splice(l.indexOf(p), 1); } };
+  const dx = (patch.x ?? p.x) - p.x, dz = (patch.z ?? p.z) - p.z;
+  for (const i of patch.spots ?? []) {
+    const s = w.m.interactions[i];
+    w.spots.delete(key(s.x, s.z)), (s.x += dx), (s.z += dz), w.spots.add(key(s.x, s.z));
+  }
+  index(false);
+  for (const k of ["x", "z", "rot", "y"]) if (k in patch) patch[k] === undefined ? delete p[k] : (p[k] = patch[k]);
+  index(true);
 }
 
 // Can p stand where it is now: on the map, off walls and fences, out of the water unless it came from there, never on
@@ -403,12 +423,13 @@ function main(argv) {
   const rulesFile = opt("rules") ?? fileURLToPath(new URL("./placement.rules", import.meta.url));
   let { rules } = parseRules(readFileSync(rulesFile, "utf8"));
   if (opt("rule")) rules = rules.filter((r) => r.id === opt("rule") || r.id.startsWith(`${opt("rule")}.`));
+  const id = opt("id")?.replace(/^#/, "");
   const t = tables(dir), only = opt("map");
   const names = readdirSync(`${dir}/maps`).map((f) => f.replace(".json", "")).filter((n) => !only || n === only).sort();
   if (only && !names.length) throw new Error(`no map ${only}`);
   const found = [], waived = waivers();
   for (const name of names) {
-    const w = world(name, JSON.parse(readFileSync(`${dir}/maps/${name}.json`, "utf8")), t), mine = check(w, rules, waived);
+    const w = world(name, JSON.parse(readFileSync(`${dir}/maps/${name}.json`, "utf8")), t), mine = check(w, rules, waived).filter((f) => !id || f.id === id);
     found.push(...mine);
     if (only) console.log(`${draw(w, mine)}\n`);
   }
@@ -418,7 +439,7 @@ function main(argv) {
     for (const f of found) {
       if (f.map !== last) console.log(`\n${(last = f.map)}`);
       const tag = f.severity === "error" ? "\x1b[31merror\x1b[0m" : f.severity === "warn" ? "\x1b[33mwarn \x1b[0m" : "info ";
-      console.log(`  ${f.mark ? `${f.mark} ` : ""}${tag} ${f.prop.asset} ${f.prop.x},${f.prop.z}  [${f.rule}] ${f.why}  (needs: ${f.need})`);
+      console.log(`  ${f.mark ? `${f.mark} ` : ""}#${f.id} ${tag} ${f.prop.asset} ${f.prop.x},${f.prop.z}  [${f.rule}] ${f.why}  (needs: ${f.need})`);
     }
     const per = {};
     for (const f of found) per[f.rule] = (per[f.rule] ?? 0) + 1;

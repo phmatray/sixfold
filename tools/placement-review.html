@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Placement review</title>
+<script type="importmap">{ "imports": { "three": "/vendor/three/three.module.min.js" } }</script>
 <style>
   :root {
     --bg: #14161a; --panel: #1c1f25; --panel-2: #23272f; --line: #2f343e; --text: #e6e8ec; --dim: #9aa1ad; --faint: #6b7280;
@@ -20,13 +21,17 @@
   .counts b { color: var(--text); font-weight: 600; }
   .filters { display: flex; gap: 8px; margin-left: auto; }
   select, input[type=text] { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; font: inherit; }
+  #goto { width: 120px; font-family: ui-monospace, Menlo, monospace; }
   aside { border-right: 1px solid var(--line); overflow-y: auto; background: var(--panel); }
-  .group { padding: 10px 14px 4px; color: var(--faint); font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; position: sticky; top: 0; background: var(--panel); }
-  .item { display: grid; grid-template-columns: 10px 1fr; gap: 8px; align-items: baseline; width: 100%; text-align: left; padding: 6px 14px; border: 0; background: none; border-left: 3px solid transparent; }
+  .group { padding: 10px 14px 4px; color: var(--faint); font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; position: sticky; top: 0; background: var(--panel); z-index: 1; }
+  .item { display: grid; grid-template-columns: 10px 1fr auto; gap: 8px; align-items: baseline; width: 100%; text-align: left; padding: 6px 14px; border: 0; background: none; border-left: 3px solid transparent; }
   .item:hover { background: var(--panel-2); }
   .item.on { background: var(--panel-2); border-left-color: var(--accent); }
   .item .what { display: block; }
   .item .rule { display: block; color: var(--faint); font-size: 12px; }
+  .item .id { color: var(--faint); font-size: 11.5px; }
+  .count { display: inline-block; min-width: 22px; padding: 0 6px; margin-left: 4px; border-radius: 9px; background: var(--panel-2); border: 1px solid var(--line); color: var(--dim); font-size: 11.5px; text-align: center; }
+  .item.on .count { background: var(--bg); }
   .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; transform: translateY(-1px); }
   .dot.error { background: var(--error); } .dot.warn { background: var(--warn); } .dot.info { background: var(--info); }
   main { overflow-y: auto; padding: 18px 22px 28px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
@@ -35,21 +40,39 @@
   .badge.error { background: color-mix(in srgb, var(--error) 22%, transparent); color: var(--error); }
   .badge.warn { background: color-mix(in srgb, var(--warn) 22%, transparent); color: var(--warn); }
   .badge.info { background: color-mix(in srgb, var(--info) 22%, transparent); color: var(--info); }
+  .idtag { font: 600 13px ui-monospace, Menlo, monospace; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 5px; padding: 1px 7px; }
+  .idtag:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
   .why { font-size: 19px; font-weight: 600; margin: 2px 0 0; flex-basis: 100%; }
   .meta { color: var(--dim); }
   .needs { color: var(--dim); }
   .needs code { color: var(--text); background: var(--panel-2); padding: 1px 6px; border-radius: 4px; }
+  .viewbar { display: flex; align-items: center; gap: 10px; color: var(--faint); font-size: 12.5px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+  .seg button { border: 0; background: var(--panel); padding: 4px 12px; font-weight: 600; color: var(--dim); }
+  .seg button.on { background: var(--panel-2); color: var(--text); }
   .panes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .pane { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
-  .pane h2 { margin: 0; padding: 8px 12px; font-size: 12.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; }
-  .pane h2 span { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--faint); }
+  .pane h2 { margin: 0; padding: 8px 12px; font-size: 12.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 10px; }
+  .pane h2 span { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   canvas { display: block; width: 100%; aspect-ratio: 4 / 3; background: #0f1114; }
+  canvas.gl { cursor: grab; touch-action: none; }
+  canvas.gl:active { cursor: grabbing; }
   .hover { padding: 6px 12px; color: var(--faint); font-size: 12px; min-height: 30px; border-top: 1px solid var(--line); }
   .fixes { display: flex; flex-direction: column; gap: 6px; }
-  .fix { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+  .fix { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); text-align: left; }
   .fix:hover { border-color: #3b4250; }
   .fix.on { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 9%, var(--panel)); }
   .fix kbd, .actions kbd { margin-left: auto; }
+  .plan { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); overflow: hidden; }
+  .plan-head { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); color: var(--dim); }
+  .plan-head b { color: var(--text); }
+  .plan-head button { margin-left: auto; background: none; border: 0; color: var(--accent); padding: 0; }
+  .plan ul { list-style: none; margin: 0; padding: 4px 0; max-height: 240px; overflow-y: auto; }
+  .plan li label { display: grid; grid-template-columns: 18px 64px 150px 1fr; gap: 10px; align-items: baseline; padding: 4px 12px; cursor: pointer; }
+  .plan li label:hover { background: var(--panel-2); }
+  .plan li .none { color: var(--faint); padding: 0; }
+  .plan li .mid { color: var(--accent); }
+  .plan input { accent-color: var(--ok); }
   kbd { font: 11px ui-monospace, Menlo, monospace; color: var(--dim); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
   .none { color: var(--dim); padding: 8px 2px; }
   .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
@@ -78,6 +101,7 @@
     <h1>Placement review</h1>
     <div class="counts" id="counts"></div>
     <div class="filters">
+      <input type="text" id="goto" placeholder="Go to #id" aria-label="Go to a finding by its id">
       <select id="f-sev" aria-label="Severity"><option value="">All severities</option><option>error</option><option>warn</option><option>info</option></select>
       <select id="f-rule" aria-label="Rule"><option value="">All rules</option></select>
       <select id="f-map" aria-label="Map"><option value="">All maps</option></select>
@@ -87,61 +111,87 @@
   <main id="main"><p class="empty">Loading…</p></main>
 </div>
 <script type="module">
+import * as THREE from "three";
+
 const $ = (s) => document.querySelector(s);
-const state = { all: [], shown: [], at: 0, maps: {}, fixes: [], pick: 0, undo: null, status: null };
+const store = { get: (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+// fixes: one prop's alternatives; plan: a block's items; checked: the block's items ticked.
+const state = { all: [], shown: [], at: 0, maps: {}, fixes: [], pick: 0, plan: null, checked: new Set(), loading: false, undo: null, status: null, mode: store.get("placement.view", "2d") };
 const api = async (path, body) => {
   const r = await fetch(path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {});
   const j = await r.json();
   if (!r.ok) throw new Error(j.error ?? r.statusText);
   return j;
 };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const icon = (k) => ({ lift: "⤒", turn: "↻", move: "➜" })[k] ?? "•";
+const span = (m) => { const xs = m.map((p) => p.x), zs = m.map((p) => p.z); return `${Math.min(...xs)},${Math.min(...zs)} – ${Math.max(...xs)},${Math.max(...zs)}`; };
 
 // ---------- The list ----------
 
 async function refresh(keep) {
-  const { findings, undo } = await api("/api/findings");
-  state.all = findings;
+  const { blocks, undo } = await api("/api/blocks");
+  state.all = blocks;
   state.undo = undo;
   const opts = (sel, values) => { const cur = sel.value; sel.length = 1; for (const v of values) sel.add(new Option(v, v)); sel.value = values.includes(cur) ? cur : ""; };
-  opts($("#f-rule"), [...new Set(findings.map((f) => f.rule))].sort());
-  opts($("#f-map"), [...new Set(findings.map((f) => f.map))].sort());
+  opts($("#f-rule"), [...new Set(blocks.map((b) => b.rule))].sort());
+  opts($("#f-map"), [...new Set(blocks.map((b) => b.map))].sort());
   filter(keep);
 }
 
 function filter(keep) {
   const sev = $("#f-sev").value, rule = $("#f-rule").value, map = $("#f-map").value;
-  state.shown = state.all.filter((f) => (!sev || f.severity === sev) && (!rule || f.rule === rule) && (!map || f.map === map));
-  const c = (s) => state.all.filter((f) => f.severity === s).length;
-  $("#counts").innerHTML = `<span><b>${state.all.length}</b> open</span><span><span class="dot error"></span> <b>${c("error")}</b></span><span><span class="dot warn"></span> <b>${c("warn")}</b></span><span><span class="dot info"></span> <b>${c("info")}</b></span>`;
+  state.shown = state.all.filter((b) => (!sev || b.severity === sev) && (!rule || b.rule === rule) && (!map || b.map === map));
+  const n = (s) => state.all.filter((b) => !s || b.severity === s).reduce((k, b) => k + b.members.length, 0);
+  $("#counts").innerHTML = `<span><b>${n()}</b> findings in <b>${state.all.length}</b> blocks</span><span><span class="dot error"></span> <b>${n("error")}</b></span><span><span class="dot warn"></span> <b>${n("warn")}</b></span><span><span class="dot info"></span> <b>${n("info")}</b></span>`;
   const list = $("#list");
   list.innerHTML = "";
   let last = "";
-  state.shown.forEach((f, i) => {
-    if (f.map !== last) list.insertAdjacentHTML("beforeend", `<div class="group">${(last = f.map)}</div>`);
-    const b = document.createElement("button");
-    b.className = "item";
-    b.innerHTML = `<span class="dot ${f.severity}"></span><span><span class="what">${f.asset} <span class="mono">${f.x},${f.z}</span></span><span class="rule">${f.rule}</span></span>`;
-    b.onclick = () => select(i);
-    list.append(b);
+  state.shown.forEach((b, i) => {
+    if (b.map !== last) list.insertAdjacentHTML("beforeend", `<div class="group">${(last = b.map)}</div>`);
+    const el = document.createElement("button"), m = b.members, one = m.length === 1;
+    const assets = [...new Set(m.map((x) => x.asset))].join(", ");
+    el.className = "item";
+    el.innerHTML = `<span class="dot ${b.severity}"></span><span><span class="what">${assets}${one ? ` <span class="mono">${m[0].x},${m[0].z}</span>` : `<span class="count">${m.length}</span>`}</span><span class="rule">${b.rule}${one ? "" : ` · ${span(m)}`}</span></span><span class="id mono">#${b.id}</span>`;
+    el.onclick = () => select(i);
+    list.append(el);
   });
   select(Math.min(keep ?? 0, Math.max(0, state.shown.length - 1)));
+}
+
+// Go to the block holding a finding's id (filters cleared when they hide it).
+function goTo(raw) {
+  const id = raw.trim().replace(/^#/, "").toLowerCase();
+  if (!id) return;
+  const has = (b) => b.id === id || b.members.some((m) => m.id === id);
+  if (!state.shown.some(has) && state.all.some(has)) { $("#f-sev").value = $("#f-rule").value = $("#f-map").value = ""; filter(0); }
+  const i = state.shown.findIndex(has);
+  if (i < 0) { state.status = { text: `No open finding #${id} (fixed, answered, or its prop moved).` }; const b = state.shown[state.at]; return b ? render(b, state.maps[b.map]) : renderEmpty(); }
+  select(i);
 }
 
 async function select(i) {
   state.at = i;
   document.querySelectorAll(".item").forEach((el, j) => el.classList.toggle("on", j === i));
   document.querySelectorAll(".item")[i]?.scrollIntoView({ block: "nearest" });
-  const f = state.shown[i];
-  if (!f) return renderEmpty();
-  state.fixes = [];
-  state.pick = 0;
-  const map = await mapOf(f.map);
-  if (state.shown[state.at] !== f) return; // moved on meanwhile
-  render(f, map, null, { loading: true });
-  const fx = await api(`/api/proposals?map=${f.map}&index=${f.index}&asset=${f.asset}&x=${f.x}&z=${f.z}`).catch((e) => ({ proposals: [], error: e.message }));
-  if (state.shown[state.at] !== f) return;
-  state.fixes = fx.proposals;
-  render(f, map, fx.error, fx);
+  const b = state.shown[i];
+  if (!b) return renderEmpty();
+  Object.assign(state, { fixes: [], pick: 0, plan: null, checked: new Set(), loading: true, blocked: null, error: null });
+  const map = await mapOf(b.map);
+  if (state.shown[state.at] !== b) return; // moved on meanwhile
+  render(b, map);
+  try {
+    if (b.members.length === 1) {
+      const f = b.members[0], r = await api(`/api/proposals?map=${b.map}&index=${f.index}&asset=${f.asset}&x=${f.x}&z=${f.z}`);
+      state.fixes = r.proposals, state.blocked = r.blocked;
+    } else {
+      state.plan = (await api(`/api/plan?map=${b.map}&indices=${b.members.map((m) => m.index).join(",")}`)).items;
+      state.checked = new Set(state.plan.map((_, k) => k));
+    }
+  } catch (e) { state.error = e.message; }
+  if (state.shown[state.at] !== b) return;
+  state.loading = false;
+  render(b, map);
 }
 
 const mapOf = async (name) => (state.maps[name] ??= await api(`/api/map?name=${name}`));
@@ -153,50 +203,80 @@ function renderEmpty() {
   bindStatus();
 }
 
-function render(f, map, err, fx) {
-  const fixes = state.fixes;
+// What a fix does to each member: [{ index, patch }], from the alternative picked or the plan's ticked items.
+function chosen() {
+  if (state.plan) return state.plan.filter((it, k) => it.fix && state.checked.has(k)).map((it) => ({ index: it.index, patch: it.fix.patch }));
+  const f = state.shown[state.at]?.members[0], p = state.fixes[state.pick];
+  return f && p ? [{ index: f.index, patch: p.patch }] : [];
+}
+
+function render(b, map) {
+  const one = b.members.length === 1, f = b.members[0];
+  const moves = chosen().length;
   $("#main").innerHTML = `
     <div class="card-head">
-      <span class="badge ${f.severity}">${f.severity}</span>
-      <span class="mono">${f.rule}</span>
-      <span class="meta">${map.title} · ${map.kind}${map.region ? ` · ${map.region}` : ""} · <span class="mono">${f.asset}</span> at <span class="mono">${f.x},${f.z}</span>${f.rot ? `, rot ${f.rot}` : ""}${f.y ? `, y ${f.y}` : ""}</span>
-      <p class="why">${f.why}</p>
-      <span class="needs">It needs <code>${esc(f.need)}</code></span>
+      <button class="idtag" id="copy-id" title="Copy the id, to quote it">#${b.id}</button>
+      <span class="badge ${b.severity}">${b.severity}</span>
+      <span class="mono">${b.rule}</span>
+      <span class="meta">${map.title} · ${map.kind}${map.region ? ` · ${map.region}` : ""} · ${one ? `<span class="mono">${f.asset}</span> at <span class="mono">${f.x},${f.z}</span>${f.rot ? `, rot ${f.rot}` : ""}${f.y ? `, y ${f.y}` : ""}` : `a block of <b>${b.members.length}</b> props, ${span(b.members)}`}</span>
+      <p class="why">${b.why}</p>
+      <span class="needs">It needs <code>${esc(b.need)}</code></span>
     </div>
+    <div class="viewbar"><span class="seg"><button data-mode="2d" class="${state.mode === "2d" ? "on" : ""}">2D</button><button data-mode="3d" class="${state.mode === "3d" ? "on" : ""}">3D</button></span><kbd>V</kbd>${state.mode === "3d" ? "<span>Drag to turn, scroll to zoom, double-click to reset; both views move together.</span>" : ""}</div>
     <div class="panes">
-      <section class="pane"><h2>Before <span>as the map has it</span></h2><canvas id="before"></canvas><div class="hover" id="hover-before"></div></section>
-      <section class="pane"><h2>After <span id="after-label"></span></h2><canvas id="after"></canvas><div class="hover" id="hover-after"></div></section>
+      <section class="pane"><h2>Before <span>as the map has it</span></h2><canvas id="before" class="${state.mode === "3d" ? "gl" : ""}"></canvas><div class="hover" id="hover-before"></div></section>
+      <section class="pane"><h2>After <span id="after-label"></span></h2><canvas id="after" class="${state.mode === "3d" ? "gl" : ""}"></canvas><div class="hover" id="hover-after"></div></section>
     </div>
-    <div class="fixes" id="fixes">
-      ${fx?.loading ? `<p class="none">Looking for a better place, and running check-maps on each one…</p>` : fixes.length ? fixes.map((p, i) => `<button class="fix${i === state.pick ? " on" : ""}" data-i="${i}">${icon(p.kind)} ${p.label}<kbd>${i + 1}</kbd></button>`).join("")
-        : `<p class="none">${err ? `Could not propose a fix: ${esc(err)}` : `No placement within 10 tiles keeps every rule and check-maps passing${fx?.blocked ? ` (the nearest one fails: ${esc(fx.blocked)})` : ""}. Move it by hand in the map, or answer it below.`}</p>`}
-    </div>
+    ${one ? fixesHtml() : planHtml()}
     <div class="actions">
-      <button class="btn confirm" id="confirm" ${fixes.length ? "" : "disabled"}>Confirm fix <kbd>Enter</kbd></button>
-      <button class="btn reject" id="reject">It's fine, keep it <kbd>R</kbd></button>
+      <button class="btn confirm" id="confirm" ${moves ? "" : "disabled"}>${one ? "Confirm fix" : `Confirm ${moves} fix${moves === 1 ? "" : "es"}`} <kbd>Enter</kbd></button>
+      <button class="btn reject" id="reject">${one ? "It's fine, keep it" : `They're fine (${state.plan ? state.checked.size : b.members.length})`} <kbd>R</kbd></button>
       <input type="text" class="note" id="note" placeholder="Why it's fine (optional, saved with the answer)">
       <button class="btn" id="prev">Previous <kbd>←</kbd></button>
       <button class="btn" id="next">Skip <kbd>→</kbd></button>
     </div>
     ${statusHtml()}
-    <div class="legend">${LEGEND.map(([c, n]) => `<span><i style="background:${c}"></i>${n}</span>`).join("")}<span>Red outline: the finding · green: where the fix puts it · dashed: where it stood</span></div>`;
-  document.querySelectorAll(".fix").forEach((b) => (b.onclick = () => pick(+b.dataset.i)));
+    <div class="legend">${LEGEND.map(([c, n]) => `<span><i style="background:${c}"></i>${n}</span>`).join("")}<span>Red: the finding · green: where the fix puts it · dashed: where it stood</span></div>`;
+  document.querySelectorAll(".fix").forEach((el) => (el.onclick = () => pick(+el.dataset.i)));
+  document.querySelectorAll(".plan input").forEach((el) => (el.onchange = () => { el.checked ? state.checked.add(+el.dataset.k) : state.checked.delete(+el.dataset.k); render(b, map); }));
+  $("#all")?.addEventListener("click", () => { state.checked = state.checked.size === state.plan.length ? new Set() : new Set(state.plan.map((_, k) => k)); render(b, map); });
+  document.querySelectorAll(".seg button").forEach((el) => (el.onclick = () => setMode(el.dataset.mode)));
+  $("#copy-id").onclick = () => { navigator.clipboard?.writeText(`#${b.id}`).catch(() => {}); $("#copy-id").textContent = "copied"; setTimeout(() => $("#copy-id") && ($("#copy-id").textContent = `#${b.id}`), 900); };
   $("#confirm").onclick = confirmFix;
   $("#reject").onclick = rejectIt;
   $("#prev").onclick = () => select(Math.max(0, state.at - 1));
   $("#next").onclick = () => select(Math.min(state.shown.length - 1, state.at + 1));
   bindStatus();
-  draw(f, map);
+  draw(b, map);
+}
+
+function fixesHtml() {
+  if (state.loading) return `<p class="none">Looking for a better place, and running check-maps on each one…</p>`;
+  if (state.error) return `<p class="none">Could not propose a fix: ${esc(state.error)}</p>`;
+  if (!state.fixes.length) return `<p class="none">No placement within 10 tiles keeps every rule and check-maps passing${state.blocked ? ` (the nearest one fails: ${esc(state.blocked)})` : ""}. Move it by hand in the map, or answer it below.</p>`;
+  return `<div class="fixes">${state.fixes.map((p, i) => `<button class="fix${i === state.pick ? " on" : ""}" data-i="${i}">${icon(p.kind)} ${p.label}<kbd>${i + 1}</kbd></button>`).join("")}</div>`;
+}
+
+function planHtml() {
+  if (state.loading) return `<p class="none">Planning a fix for each prop, each built on the ones before, then running check-maps on the whole block…</p>`;
+  if (state.error) return `<p class="none">Could not plan the block: ${esc(state.error)}</p>`;
+  const fixed = state.plan.filter((it) => it.fix).length, members = state.shown[state.at].members;
+  return `<div class="plan"><div class="plan-head"><span><b>${fixed}</b> of ${state.plan.length} get a fix that keeps check-maps passing; untick any to leave it for now.</span><button id="all">${state.checked.size === state.plan.length ? "Untick all" : "Tick all"}</button></div><ul>${state.plan.map((it, k) =>
+    `<li><label><input type="checkbox" data-k="${k}" ${state.checked.has(k) ? "checked" : ""}><span class="mono mid">#${members.find((m) => m.index === it.index)?.id ?? ""}</span><span class="mono">${it.asset} ${it.x},${it.z}</span>${it.fix ? `<span>${icon(it.fix.kind)} ${esc(it.fix.label)}</span>` : `<span class="none">no fix: ${esc(it.why ?? "")}</span>`}</label></li>`).join("")}</ul></div>`;
 }
 
 function pick(i) {
   state.pick = i;
-  document.querySelectorAll(".fix").forEach((b, j) => b.classList.toggle("on", j === i));
-  draw(state.shown[state.at], state.maps[state.shown[state.at].map]);
+  const b = state.shown[state.at];
+  render(b, state.maps[b.map]);
 }
 
-const icon = (k) => ({ lift: "⤒", turn: "↻", move: "➜" })[k] ?? "•";
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+function setMode(mode) {
+  state.mode = mode;
+  store.set("placement.view", mode);
+  const b = state.shown[state.at];
+  if (b) render(b, state.maps[b.map]);
+}
 
 function statusHtml() {
   const s = state.status;
@@ -211,22 +291,24 @@ function bindStatus() { const u = $("#undo"); if (u) u.onclick = undoLast; }
 // ---------- Actions ----------
 
 async function confirmFix() {
-  const f = state.shown[state.at], p = state.fixes[state.pick];
-  if (!f || !p) return;
+  const b = state.shown[state.at], fixes = chosen();
+  if (!b || !fixes.length || state.loading) return;
+  const items = fixes.map(({ index, patch }) => { const m = b.members.find((x) => x.index === index); return { index, asset: m.asset, x: m.x, z: m.z, patch }; });
   try {
-    const r = await api("/api/apply", { map: f.map, index: f.index, asset: f.asset, x: f.x, z: f.z, patch: p.patch });
-    delete state.maps[f.map];
-    state.status = { text: `Applied: ${p.label.toLowerCase()} (${f.asset} on ${f.map})`, check: r.check };
-  } catch (e) { state.status = { text: `Not applied: ${e.message}` }; delete state.maps[f.map]; }
+    const r = await api("/api/apply", { map: b.map, items });
+    state.status = { text: `Applied ${items.length > 1 ? `${items.length} fixes` : (state.fixes[state.pick]?.label ?? "the fix").toLowerCase()} on ${b.map} (#${b.id})`, check: r.check };
+  } catch (e) { state.status = { text: `Not applied: ${e.message}` }; }
+  delete state.maps[b.map];
   await refresh(state.at);
 }
 
 async function rejectIt() {
-  const f = state.shown[state.at];
-  if (!f) return;
-  const note = $("#note")?.value.trim();
-  await api("/api/reject", { map: f.map, rule: f.rule, asset: f.asset, x: f.x, z: f.z, note });
-  state.status = { text: `Kept as it is: ${f.asset} ${f.x},${f.z} on ${f.map} (${f.rule})` };
+  const b = state.shown[state.at];
+  if (!b || state.loading) return;
+  const members = state.plan ? b.members.filter((_, k) => state.checked.has(k)) : b.members;
+  if (!members.length) return;
+  await api("/api/reject", { map: b.map, rule: b.rule, items: members.map(({ asset, x, z }) => ({ asset, x, z })), note: $("#note")?.value.trim() });
+  state.status = { text: `Kept as they are: ${members.length} ${members[0].asset} on ${b.map} (#${b.id}, ${b.rule})` };
   await refresh(state.at);
 }
 
@@ -240,63 +322,85 @@ async function undoLast() {
 }
 
 for (const id of ["#f-sev", "#f-rule", "#f-map"]) $(id).onchange = () => filter(0);
+$("#goto").addEventListener("keydown", (e) => { if (e.key === "Enter") { goTo(e.target.value); e.target.blur(); } });
 addEventListener("keydown", (e) => {
-  if (e.target.matches("input, select")) { if (e.key === "Escape") e.target.blur(); return; }
+  if (e.target.matches("input[type=text], select")) { if (e.key === "Escape") e.target.blur(); return; }
   if (e.key === "ArrowRight" || e.key === "j") select(Math.min(state.shown.length - 1, state.at + 1));
   else if (e.key === "ArrowLeft" || e.key === "k") select(Math.max(0, state.at - 1));
   else if (e.key === "Enter") confirmFix();
   else if (e.key === "r") rejectIt();
   else if (e.key === "u" && state.undo) undoLast();
+  else if (e.key === "v") setMode(state.mode === "2d" ? "3d" : "2d");
+  else if (e.key === "g" || e.key === "/") { $("#goto").focus(); $("#goto").select(); }
   else if (/^[1-9]$/.test(e.key) && +e.key <= state.fixes.length) pick(+e.key - 1);
   else return;
   e.preventDefault();
 });
 
-// ---------- Drawing the map from above ----------
+// ---------- What both views draw: the props before, and after the chosen fixes ----------
+
+const FACE = { 0: [0, 1], 90: [1, 0], 180: [0, -1], 270: [-1, 0] };
+const floorOf = (map, x, z) => { const c = map.tiles[z]?.[x]; return c >= "1" && c <= "9" ? +c : c === "=" ? 0.1 : c === "H" ? 0.3 : 0; };
+
+function scenes(b, map) {
+  const fixes = new Map(chosen().map((f) => [f.index, f.patch]));
+  const subjects = b.members.map((m) => m.index);
+  const after = map.props.map((p, i) => {
+    const patch = fixes.get(i);
+    if (!patch) return p;
+    const q = { ...p, x: patch.x ?? p.x, z: patch.z ?? p.z, rot: patch.rot ?? p.rot, y: patch.y ?? 0 };
+    if (q.rot % 180 !== p.rot % 180) [q.w, q.d] = [p.d, p.w];
+    return q;
+  });
+  const spotsAfter = map.spots.map((s, i) => {
+    for (const [idx, patch] of fixes) if (patch.spots?.includes(i)) { const p = map.props[idx]; return { ...s, x: s.x + ((patch.x ?? p.x) - p.x), z: s.z + ((patch.z ?? p.z) - p.z) }; }
+    return s;
+  });
+  // One window for both views: every member, where it stands and where it goes, with room round it; 4:3, on the map.
+  const boxes = [...subjects.map((i) => map.props[i]), ...[...fixes.keys()].map((i) => after[i])];
+  let x0 = Math.min(...boxes.map((p) => p.x)) - 6, x1 = Math.max(...boxes.map((p) => p.x + p.w)) + 6;
+  let z0 = Math.min(...boxes.map((p) => p.z)) - 5, z1 = Math.max(...boxes.map((p) => p.z + p.d)) + 5;
+  const want = Math.max(x1 - x0, (z1 - z0) * 4 / 3), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  x0 = Math.floor(cx - want / 2); x1 = Math.ceil(cx + want / 2); z0 = Math.floor(cz - want * 3 / 8); z1 = Math.ceil(cz + want * 3 / 8);
+  const slide = (a, c, size) => (a < 0 && c - a <= size ? [0, c - a] : c > size && c - a <= size ? [a - (c - size), size] : [a, c]);
+  [x0, x1] = slide(x0, x1, map.width); [z0, z1] = slide(z0, z1, map.height);
+  return {
+    view: { x0, z0, x1, z1 },
+    before: { ...map, marks: subjects.map((i) => ({ p: map.props[i], colour: "#ff5c5c" })), ghosts: [] },
+    after: { ...map, props: after, spots: spotsAfter, marks: subjects.map((i) => ({ p: after[i], colour: fixes.has(i) ? "#4fdf8f" : "#ff5c5c" })), ghosts: [...fixes.keys()].map((i) => map.props[i]) },
+  };
+}
+
+function draw(b, map) {
+  const s = scenes(b, map), one = b.members.length === 1, n = chosen().length;
+  $("#after-label").textContent = state.loading ? "working it out…" : one ? (state.fixes[state.pick]?.label.toLowerCase() ?? "no fix proposed") : `${n} of ${b.members.length} fixed`;
+  if (state.mode === "3d") { three($("#before"), s.before, s.view, "before"); three($("#after"), s.after, s.view, "after"); }
+  else { paint($("#before"), s.before, s.view, $("#hover-before")); paint($("#after"), s.after, s.view, $("#hover-after")); }
+}
+
+// ---------- 2D: the map from above ----------
 
 const TILE = { ".": "#4f7d39", p: "#c7a26b", r: "#9b9a93", "~": "#2f6fae", s: "#d8c58f", "=": "#8a5f37", H: "#74502f", f: "#6e4b2a", W: "#3a3c46", V: "#4a5770", "#": "#2d2f36", w: "#7d5f40" };
 const LEGEND = [["#4f7d39", "grass"], ["#c7a26b", "path"], ["#9b9a93", "plaza"], ["#2f6fae", "water"], ["#d8c58f", "sand"], ["#8a5f37", "boardwalk / pier"], ["#7a8a63", "raised ground (digit = metres)"], ["#3a3c46", "wall / fence"], ["#ffd25e", "light"], ["#2e5b2a", "tree"]];
 const tileColour = (c) => (c >= "1" && c <= "9" ? shade("#7a8a63", (+c - 1) * 0.07) : TILE[c] ?? "#555");
 function shade(hex, k) { const n = parseInt(hex.slice(1), 16), f = (v) => Math.round(Math.min(255, v + (255 - v) * k)); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; }
-function propColour(p) {
+// A prop's kind, for its colour and its 3D shape.
+function kindOf(p) {
   const a = p.asset;
-  if (/lantern|lamp/.test(a)) return "#ffd25e";
-  if (/(^|_)(tree|pine|birch|willow)$|standing_tree|blossom/.test(a)) return "#2e5b2a";
-  if (/bush|heather|flowers|reeds|moonflower|mushroom|plant|planter|lilies/.test(a)) return "#7fbf5a";
-  if (/rock|rubble|cairn|menhir|stone/.test(a)) return "#a7a59c";
-  if (/sign|waymark/.test(a)) return "#ff9f43";
-  if (/boat|buoy|ferry|bollard|net|crab/.test(a)) return "#7fc8f0";
-  if (/crate|cart|barrel|cullet/.test(a)) return "#c98b4a";
-  if (p.w * p.d >= 6) return "#8c6a55";
-  return "#b7a3d6";
+  if (p.ground) return "deck";
+  if (/lantern|lamp/.test(a)) return "light";
+  if (/(^|_)(tree|pine|birch|willow)$|standing_tree|blossom/.test(a)) return "tree";
+  if (/bush|heather|flowers|reeds|moonflower|mushroom|plant|planter|lilies/.test(a)) return "plant";
+  if (/rock|rubble|cairn|menhir|stone/.test(a)) return "rock";
+  if (/sign|waymark/.test(a)) return "sign";
+  if (/boat|buoy|ferry|bollard|net|crab/.test(a)) return "harbour";
+  if (/crate|cart|barrel|cullet/.test(a)) return "crate";
+  if (p.w * p.d >= 6) return "house";
+  return "thing";
 }
-const FACE = { 0: [0, 1], 90: [1, 0], 180: [0, -1], 270: [-1, 0] };
+const COLOUR = { light: "#ffd25e", tree: "#2e5b2a", plant: "#7fbf5a", rock: "#a7a59c", sign: "#ff9f43", harbour: "#7fc8f0", crate: "#c98b4a", house: "#8c6a55", thing: "#b7a3d6", deck: "#8c6239" };
 
-function draw(f, map) {
-  const fix = state.fixes[state.pick];
-  const subject = map.props.find((p, i) => i === f.index);
-  const moved = fix ? { ...subject, ...Object.fromEntries(Object.entries(fix.patch).filter(([k]) => ["x", "z", "rot", "y"].includes(k))) } : null;
-  if (moved) { if (moved.rot % 180 !== subject.rot % 180) [moved.w, moved.d] = [subject.d, subject.w]; moved.y = fix.patch.y ?? 0; }
-  // One window for both panes: the subject (both places) with 6 tiles round it, kept on the map.
-  const boxes = [subject, moved].filter(Boolean);
-  let x0 = Math.min(...boxes.map((b) => b.x)) - 6, x1 = Math.max(...boxes.map((b) => b.x + b.w)) + 6;
-  let z0 = Math.min(...boxes.map((b) => b.z)) - 5, z1 = Math.max(...boxes.map((b) => b.z + b.d)) + 5;
-  // Keep a 4:3 window.
-  const want = Math.max(x1 - x0, (z1 - z0) * 4 / 3);
-  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-  x0 = Math.floor(cx - want / 2); x1 = Math.ceil(cx + want / 2); z0 = Math.floor(cz - want * 3 / 8); z1 = Math.ceil(cz + want * 3 / 8);
-  // Slide it back onto the map where the map is big enough.
-  const slide = (a, b, size) => (a < 0 && b - a <= size ? [0, b - a] : b > size && b - a <= size ? [a - (b - size), size] : [a, b]);
-  [x0, x1] = slide(x0, x1, map.width); [z0, z1] = slide(z0, z1, map.height);
-  const view = { x0, z0, x1, z1 };
-  paint($("#before"), map, view, { subject, mark: "#ff5c5c" }, $("#hover-before"));
-  const afterProps = map.props.map((p, i) => (i === f.index ? moved : p)).filter(Boolean);
-  const spotsAfter = map.spots.map((s, i) => (fix?.patch.spots?.includes(i) ? { ...s, x: s.x + (fix.patch.x - f.x), z: s.z + (fix.patch.z - f.z) } : s));
-  paint($("#after"), { ...map, props: afterProps, spots: spotsAfter }, view, { subject: moved ?? subject, ghost: moved && subject, mark: moved ? "#4fdf8f" : "#ff5c5c" }, $("#hover-after"));
-  $("#after-label").textContent = fix ? fix.label.toLowerCase() : "no fix proposed";
-}
-
-function paint(canvas, map, v, o, hover) {
+function paint(canvas, map, v, hover) {
   const r = canvas.getBoundingClientRect(), dpr = devicePixelRatio || 1;
   canvas.width = r.width * dpr; canvas.height = r.height * dpr;
   const g = canvas.getContext("2d"), cols = v.x1 - v.x0, rows = v.z1 - v.z0, s = Math.min(canvas.width / cols, canvas.height / rows);
@@ -312,23 +416,20 @@ function paint(canvas, map, v, o, hover) {
     if (c >= "1" && c <= "9" && s > 18) { g.fillStyle = "rgba(255,255,255,.35)"; g.font = `${Math.round(s * 0.32)}px ui-monospace, Menlo, monospace`; g.fillText(c, X(x) + s * 0.08, Z(z) + s * 0.34); }
     if (c === "f") { g.strokeStyle = "#d9b98a"; g.lineWidth = Math.max(1, s * 0.08); g.strokeRect(X(x) + s * 0.3, Z(z) + s * 0.3, s * 0.4, s * 0.4); }
   }
-  // Grid and ruler.
   g.strokeStyle = "rgba(0,0,0,.18)"; g.lineWidth = 1;
   for (let x = v.x0; x <= v.x1; x++) { g.beginPath(); g.moveTo(X(x), Z(v.z0)); g.lineTo(X(x), Z(v.z1)); g.stroke(); }
   for (let z = v.z0; z <= v.z1; z++) { g.beginPath(); g.moveTo(X(v.x0), Z(z)); g.lineTo(X(v.x1), Z(z)); g.stroke(); }
   g.fillStyle = "rgba(255,255,255,.55)"; g.font = `${Math.round(Math.max(10, s * 0.3))}px ui-monospace, Menlo, monospace`;
-  for (let x = v.x0; x < v.x1; x++) if (x >= 0 && x % 5 === 0) g.fillText(x, X(x) + 2, Z(v.z0) + s * 0.3);
+  for (let x = v.x0; x < v.x1; x++) if (x >= 0 && x % 5 === 0) g.fillText(x, X(x) + 2, Z(v.z0) + Math.max(11, s * 0.3));
   for (let z = v.z0; z < v.z1; z++) if (z >= 0 && z % 5 === 0) g.fillText(z, X(v.x0) + 2, Z(z) + s * 0.62);
-  // Props: walked-on ones first, then by height.
   const props = [...map.props].sort((a, b) => (b.ground - a.ground) || a.tall - b.tall);
   for (const p of props) {
-    const x = X(p.x), z = Z(p.z), w = p.w * s, d = p.d * s, col = propColour(p);
-    if (p.ground) { g.fillStyle = "rgba(140,98,57,.55)"; g.fillRect(x, z, w, d); continue; }
+    const x = X(p.x), z = Z(p.z), w = p.w * s, d = p.d * s, k = kindOf(p), col = COLOUR[k];
+    if (k === "deck") { g.fillStyle = "rgba(140,98,57,.55)"; g.fillRect(x, z, w, d); continue; }
     const inset = p.w * p.d === 1 ? s * 0.16 : s * 0.06;
     g.fillStyle = col;
-    if (col === "#2e5b2a" || col === "#ffd25e" || col === "#7fbf5a") { g.beginPath(); g.arc(x + w / 2, z + d / 2, Math.min(w, d) / 2 - inset * (col === "#7fbf5a" ? 1.6 : 0.5), 0, 7); g.fill(); if (col === "#ffd25e") { g.strokeStyle = "rgba(255,210,94,.35)"; g.lineWidth = s * 0.12; g.beginPath(); g.arc(x + w / 2, z + d / 2, s * 0.6, 0, 7); g.stroke(); } }
+    if (k === "tree" || k === "light" || k === "plant") { g.beginPath(); g.arc(x + w / 2, z + d / 2, Math.max(1, Math.min(w, d) / 2 - inset * (k === "plant" ? 1.6 : 0.5)), 0, 7); g.fill(); if (k === "light") { g.strokeStyle = "rgba(255,210,94,.35)"; g.lineWidth = s * 0.12; g.beginPath(); g.arc(x + w / 2, z + d / 2, s * 0.6, 0, 7); g.stroke(); } }
     else { g.fillRect(x + inset, z + inset, w - 2 * inset, d - 2 * inset); g.strokeStyle = "rgba(0,0,0,.45)"; g.lineWidth = 1; g.strokeRect(x + inset, z + inset, w - 2 * inset, d - 2 * inset); }
-    // Its face.
     const [fx, fz] = FACE[p.rot % 360] ?? [0, 1];
     g.strokeStyle = "rgba(0,0,0,.6)"; g.lineWidth = Math.max(1.5, s * 0.07);
     g.beginPath(); g.moveTo(x + w / 2, z + d / 2); g.lineTo(x + w / 2 + fx * (w / 2 - inset), z + d / 2 + fz * (d / 2 - inset)); g.stroke();
@@ -337,16 +438,15 @@ function paint(canvas, map, v, o, hover) {
   for (const dr of map.doors) { g.fillStyle = "#1b1b1f"; g.fillRect(X(dr.x) + s * 0.3, Z(dr.z) + s * 0.55, s * 0.4, s * 0.45); g.strokeStyle = "#f1e3c2"; g.lineWidth = 1.5; g.strokeRect(X(dr.x) + s * 0.3, Z(dr.z) + s * 0.55, s * 0.4, s * 0.45); }
   for (const sp of map.spots) { g.fillStyle = "#fff"; g.beginPath(); g.arc(X(sp.x) + s * 0.82, Z(sp.z) + s * 0.18, s * 0.09, 0, 7); g.fill(); }
   for (const n of map.npcs) { g.fillStyle = "#c06cf0"; g.beginPath(); g.arc(X(n.x) + s / 2, Z(n.z) + s / 2, s * 0.28, 0, 7); g.fill(); g.strokeStyle = "#fff"; g.lineWidth = 1.5; g.stroke(); }
-  // Where it stood (dashed), and the subject.
-  const outline = (p, colour, dash) => { g.save(); g.setLineDash(dash ? [s * 0.18, s * 0.12] : []); g.strokeStyle = colour; g.lineWidth = Math.max(2.5, s * 0.1); g.strokeRect(X(p.x) + 1, Z(p.z) + 1, p.w * s - 2, p.d * s - 2); g.restore(); };
-  if (o.ghost) outline(o.ghost, "rgba(255,255,255,.8)", true);
-  if (o.subject) {
-    outline(o.subject, o.mark, false);
-    const floor = Math.max(...Array.from({ length: o.subject.w * o.subject.d }, (_, i) => { const c = map.tiles[o.subject.z + Math.floor(i / o.subject.w)]?.[o.subject.x + (i % o.subject.w)]; return c >= "1" && c <= "9" ? +c : c === "=" ? 0.1 : c === "H" ? 0.3 : 0; }));
-    label(g, `${o.subject.asset}  y ${+(o.subject.y ?? 0).toFixed(2)} · floor ${floor}`, X(o.subject.x) + o.subject.w * s / 2, Z(o.subject.z) - s * 0.5, s, o.mark);
+  const outline = (p, colour, dash) => { g.save(); g.setLineDash(dash ? [s * 0.18, s * 0.12] : []); g.strokeStyle = colour; g.lineWidth = Math.max(2, s * 0.1); g.strokeRect(X(p.x) + 1, Z(p.z) + 1, p.w * s - 2, p.d * s - 2); g.restore(); };
+  for (const p of map.ghosts) outline(p, "rgba(255,255,255,.8)", true);
+  for (const { p, colour } of map.marks) outline(p, colour, false);
+  if (map.marks.length === 1) {
+    const p = map.marks[0].p, floor = Math.max(...Array.from({ length: p.w * p.d }, (_, i) => floorOf(map, p.x + (i % p.w), p.z + Math.floor(i / p.w))));
+    label(g, `${p.asset}  y ${+(p.y ?? 0).toFixed(2)} · floor ${floor}`, X(p.x) + p.w * s / 2, Z(p.z) - s * 0.5, s, map.marks[0].colour);
   }
   canvas.onmousemove = (e) => {
-    const b = canvas.getBoundingClientRect(), x = Math.floor(((e.clientX - b.left) * dpr - ox) / s) + v.x0, z = Math.floor(((e.clientY - b.top) * dpr - oz) / s) + v.z0;
+    const bb = canvas.getBoundingClientRect(), x = Math.floor(((e.clientX - bb.left) * dpr - ox) / s) + v.x0, z = Math.floor(((e.clientY - bb.top) * dpr - oz) / s) + v.z0;
     const c = map.tiles[z]?.[x];
     if (c === undefined) return (hover.textContent = "");
     const here = map.props.filter((p) => x >= p.x && x < p.x + p.w && z >= p.z && z < p.z + p.d).map((p) => `${p.asset}${p.y ? ` (y ${p.y})` : ""}${p.rot ? ` rot ${p.rot}` : ""}`);
@@ -357,14 +457,155 @@ function paint(canvas, map, v, o, hover) {
 }
 
 function label(g, text, x, y, s, colour) {
-  g.font = `600 ${Math.round(Math.max(10, Math.min(15, s * 0.36)))}px ui-sans-serif, system-ui, sans-serif`;
+  const size = Math.round(Math.max(10, Math.min(15, s * 0.36)));
+  g.font = `600 ${size}px ui-sans-serif, system-ui, sans-serif`;
   const w = g.measureText(text).width + 8, h = Math.max(14, Math.min(20, s * 0.5));
   g.fillStyle = colour ? "rgba(10,12,15,.88)" : "rgba(10,12,15,.6)";
   g.fillRect(x - w / 2, y, w, h);
-  g.fillStyle = colour ?? "#e6e8ec"; g.textBaseline = "top"; g.fillText(text, x - w / 2 + 4, y + (h - Math.max(10, Math.min(15, s * 0.36))) / 2 - 1); g.textBaseline = "alphabetic";
+  g.fillStyle = colour ?? "#e6e8ec"; g.textBaseline = "top"; g.fillText(text, x - w / 2 + 4, y + (h - size) / 2 - 1); g.textBaseline = "alphabetic";
 }
 
-addEventListener("resize", () => { const f = state.shown[state.at]; if (f && state.maps[f.map]) draw(f, state.maps[f.map]); });
+// ---------- 3D: the same data in blocks, at the game's angle ----------
+// Terrain is a block per tile at its floor height (a digit is metres up, a boardwalk 0.1, a pier 0.3), water sits low,
+// walls stand 2.5 m; each prop is a simple volume of its footprint and height, at its `y`. The camera looks north and
+// down like the game's (50°); both views share it, so dragging one turns the other.
+
+const orbit = { yaw: 0, pitch: 50, zoom: 1 };
+const views = {}; // name -> { canvas, renderer, scene, camera, centre, radius }
+const shared = {
+  box: new THREE.BoxGeometry(1, 1, 1), sphere: new THREE.SphereGeometry(0.5, 12, 8), cone: new THREE.ConeGeometry(0.5, 1, 8),
+  cyl: new THREE.CylinderGeometry(0.5, 0.5, 1, 8), rock: new THREE.DodecahedronGeometry(0.5, 0), roof: new THREE.CylinderGeometry(0.5, 0.5, 1, 3).rotateY(Math.PI / 2), // a prism, its ridge up once turned
+};
+const mats = {};
+const mat = (colour, extra = {}) => (mats[colour + JSON.stringify(extra)] ??= new THREE.MeshStandardMaterial({ color: colour, roughness: 0.85, ...extra }));
+const TILE3 = { ".": "#5b8a40", p: "#c9a46c", r: "#a3a29b", s: "#dcc994", "=": "#8a5f37", H: "#74502f", f: "#5b8a40", w: "#7d5f40", "#": "#3a3c46", W: "#4a4d58", V: "#56647c" };
+
+function three(canvas, map, v, name) {
+  let view = views[name];
+  if (!view || view.canvas !== canvas) {
+    view?.renderer.forceContextLoss(), view?.renderer.dispose(); // canvases are redrawn with the card: free the old context
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    view = views[name] = { canvas, renderer, camera: new THREE.PerspectiveCamera(40, 4 / 3, 0.1, 400) };
+    bindOrbit(canvas);
+  }
+  const r = canvas.getBoundingClientRect();
+  view.renderer.setPixelRatio(devicePixelRatio || 1);
+  view.renderer.setSize(r.width, r.height, false);
+  view.camera.aspect = r.width / r.height;
+  view.camera.updateProjectionMatrix();
+  view.scene?.traverse((o) => { if (o.isInstancedMesh) o.dispose(); if (o.isLineSegments) o.geometry.dispose(); });
+  const scene = (view.scene = new THREE.Scene());
+  scene.background = new THREE.Color("#0f1114");
+  scene.add(new THREE.HemisphereLight("#fff6dc", "#3a4a2a", 1.4));
+  const sun = new THREE.DirectionalLight("#fff0cf", 2.4);
+  const cx = (v.x0 + v.x1) / 2, cz = (v.z0 + v.z1) / 2, size = Math.max(v.x1 - v.x0, v.z1 - v.z0);
+  sun.position.set(cx - size * 0.3, size * 0.9, cz + size * 0.5);
+  sun.target.position.set(cx, 0, cz);
+  sun.castShadow = true;
+  Object.assign(sun.shadow.camera, { left: -size, right: size, top: size, bottom: -size, near: 1, far: size * 3 });
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.bias = -0.0005;
+  scene.add(sun, sun.target);
+
+  // Terrain: one instanced box per tile, coloured per tile.
+  const tiles = [];
+  for (let z = v.z0; z < v.z1; z++) for (let x = v.x0; x < v.x1; x++) if (map.tiles[z]?.[x] !== undefined) tiles.push([x, z, map.tiles[z][x]]);
+  const ground = new THREE.InstancedMesh(shared.box, mat("#ffffff"), tiles.length), m4 = new THREE.Matrix4(), col = new THREE.Color();
+  ground.receiveShadow = true;
+  tiles.forEach(([x, z, c], i) => {
+    const top = c === "~" ? -0.25 : "#WV".includes(c) ? 2.5 : floorOf(map, x, z), bottom = -0.6;
+    m4.makeScale(1, top - bottom, 1).setPosition(x + 0.5, (top + bottom) / 2, z + 0.5);
+    ground.setMatrixAt(i, m4);
+    ground.setColorAt(i, col.set(c === "~" ? "#24527f" : c >= "1" && c <= "9" ? shade("#7a8a63", (+c - 1) * 0.06) : TILE3[c] ?? "#555"));
+  });
+  scene.add(ground);
+  // Water: a translucent sheet just under the ground.
+  const water = tiles.filter(([, , c]) => c === "~");
+  if (water.length) {
+    const sheet = new THREE.InstancedMesh(shared.box, mat("#3f86c8", { transparent: true, opacity: 0.55, roughness: 0.2 }), water.length);
+    water.forEach(([x, z], i) => sheet.setMatrixAt(i, m4.makeScale(1, 0.02, 1).setPosition(x + 0.5, -0.06, z + 0.5)));
+    scene.add(sheet);
+  }
+  for (const [x, z, c] of tiles) if (c === "f") add(scene, shared.box, "#8a6338", x + 0.5, 0.5, z + 0.5, 0.18, 1, 0.18); // fence posts
+  const inView = (p) => p.x + p.w > v.x0 && p.x < v.x1 && p.z + p.d > v.z0 && p.z < v.z1;
+  for (const p of map.props) if (inView(p)) prop(scene, p);
+  for (const n of map.npcs) if (n.x >= v.x0 && n.x < v.x1 && n.z >= v.z0 && n.z < v.z1) add(scene, shared.cyl, "#c06cf0", n.x + 0.5, floorOf(map, n.x, n.z) + 0.72, n.z + 0.5, 0.45, 1.45, 0.45);
+  for (const d of map.doors) if (d.x >= v.x0 && d.x < v.x1 && d.z >= v.z0 && d.z < v.z1) add(scene, shared.box, "#1b1b1f", d.x + 0.5, floorOf(map, d.x, d.z) + 0.05, d.z + 0.9, 0.5, 0.1, 0.2);
+  // The finding (red), where a fix puts it (green), where it stood (white, faint).
+  for (const p of map.ghosts) frame(scene, p, "#ffffff", 0.45);
+  for (const { p, colour } of map.marks) frame(scene, p, colour, 1);
+  view.centre = new THREE.Vector3(cx, Math.max(0, ...map.marks.map(({ p }) => p.y ?? 0)), cz);
+  view.radius = size * 0.95;
+  aim(name);
+}
+
+function add(scene, geo, colour, x, y, z, sx, sy, sz, extra) {
+  const mesh = new THREE.Mesh(geo, mat(colour, extra));
+  mesh.position.set(x, y, z);
+  mesh.scale.set(sx, sy, sz);
+  mesh.castShadow = mesh.receiveShadow = true;
+  scene.add(mesh);
+  return mesh;
+}
+
+// A prop as a simple volume: a cone on a trunk for a tree, a post and a lit globe for a lantern, a body and a roof for
+// a house, a post and a board for a sign, a box with a dark face for the rest; all at its footprint, height and `y`.
+function prop(scene, p) {
+  const k = kindOf(p), cx = p.x + p.w / 2, cz = p.z + p.d / 2, y = p.y ?? 0, h = Math.max(0.08, p.tall), w = p.w, d = p.d;
+  const [fx, fz] = FACE[p.rot % 360] ?? [0, 1];
+  if (k === "deck") return add(scene, shared.box, COLOUR.deck, cx, y + 0.04, cz, w, 0.08, d);
+  if (k === "tree") { add(scene, shared.cyl, "#6b4a2a", cx, y + h * 0.18, cz, 0.22, h * 0.36, 0.22); return add(scene, shared.cone, COLOUR.tree, cx, y + h * 0.62, cz, Math.min(w, d) * 0.9, h * 0.76, Math.min(w, d) * 0.9); }
+  if (k === "light") { add(scene, shared.cyl, "#2b2b30", cx, y + h / 2, cz, 0.09, h, 0.09); return add(scene, shared.sphere, COLOUR.light, cx, y + h, cz, 0.32, 0.32, 0.32, { emissive: "#ffcc55", emissiveIntensity: 1.2 }); }
+  if (k === "plant") return add(scene, shared.sphere, COLOUR.plant, cx, y + h / 2, cz, 0.7 * w, Math.max(0.2, h), 0.7 * d);
+  if (k === "rock") return add(scene, shared.rock, COLOUR.rock, cx, y + h / 2, cz, 0.8 * w, Math.max(0.3, h), 0.8 * d);
+  if (k === "sign") { add(scene, shared.box, "#5b3f24", cx, y + h / 2, cz, 0.1, h, 0.1); return add(scene, shared.box, COLOUR.sign, cx + fx * 0.07, y + h * 0.78, cz + fz * 0.07, fx ? 0.05 : 0.7, h * 0.3, fz ? 0.05 : 0.7); }
+  if (k === "house") {
+    add(scene, shared.box, "#d9c6a4", cx, y + h * 0.3, cz, w - 0.15, h * 0.6, d - 0.15);
+    const roof = add(scene, shared.roof, "#8c4a3a", cx, y + h * 0.78, cz, h * 0.42, w - 0.05, d * 0.62);
+    roof.rotation.z = Math.PI / 2;
+    return roof;
+  }
+  const box = add(scene, shared.box, COLOUR[k], cx, y + h / 2, cz, w * 0.8, h, d * 0.8);
+  add(scene, shared.box, "#1b1b1f", cx + fx * w * 0.41, y + h * 0.5, cz + fz * d * 0.41, fx ? 0.04 : w * 0.4, h * 0.3, fz ? 0.04 : d * 0.4); // its face
+  return box;
+}
+
+// A footprint's outline, standing from its base to its top, drawn over everything.
+function frame(scene, p, colour, opacity) {
+  const h = Math.max(0.3, p.tall), y = p.y ?? 0;
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(p.w, h, p.d)), new THREE.LineBasicMaterial({ color: colour, transparent: true, opacity, depthTest: false }));
+  edges.position.set(p.x + p.w / 2, y + h / 2, p.z + p.d / 2);
+  edges.renderOrder = 10;
+  scene.add(edges);
+}
+
+function aim(name) {
+  const view = views[name];
+  if (!view?.scene || !view.canvas.isConnected) return;
+  const pitch = THREE.MathUtils.degToRad(orbit.pitch), yaw = THREE.MathUtils.degToRad(orbit.yaw), dist = view.radius * 1.15 * orbit.zoom;
+  view.camera.position.set(view.centre.x + Math.sin(yaw) * Math.cos(pitch) * dist, view.centre.y + Math.sin(pitch) * dist, view.centre.z + Math.cos(yaw) * Math.cos(pitch) * dist);
+  view.camera.lookAt(view.centre);
+  view.renderer.render(view.scene, view.camera);
+}
+const aimAll = () => Object.keys(views).forEach(aim);
+
+function bindOrbit(canvas) {
+  let drag = null;
+  canvas.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, yaw: orbit.yaw, pitch: orbit.pitch }; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    orbit.yaw = drag.yaw - (e.clientX - drag.x) * 0.4;
+    orbit.pitch = Math.min(88, Math.max(12, drag.pitch + (e.clientY - drag.y) * 0.3));
+    aimAll();
+  });
+  canvas.addEventListener("pointerup", () => (drag = null));
+  canvas.addEventListener("dblclick", () => { Object.assign(orbit, { yaw: 0, pitch: 50, zoom: 1 }); aimAll(); });
+  canvas.addEventListener("wheel", (e) => { e.preventDefault(); orbit.zoom = Math.min(3, Math.max(0.25, orbit.zoom * Math.exp(e.deltaY * 0.001))); aimAll(); }, { passive: false });
+}
+
+addEventListener("resize", () => { const b = state.shown[state.at]; if (b && state.maps[b.map]) draw(b, state.maps[b.map]); });
 refresh(0).catch((e) => ($("#main").innerHTML = `<p class="empty">Could not load: ${esc(e.message)}</p>`));
 </script>
 </body>

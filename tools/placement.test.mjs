@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { parseRules, world, check, evaluate, tables, proposals } from "./placement.mjs";
+import { parseRules, world, check, evaluate, tables, proposals, findingId } from "./placement.mjs";
 
 const T = { FOOT: { house: [2, 2] }, DECK: { boardwalk: [0.1], pier: [0.3], dock: [0.3] }, WALKABLE: new Set(["rug"]), tall: (a) => ({ house: 4, crates: 0.9 })[a] ?? 1 };
 // 6 x 5, a path down column 1, water in the east column, a 1 m ledge on the bottom row.
@@ -100,6 +100,15 @@ test("fixes: a sunk prop is lifted, a stray one moved to the nearest place its r
   assert.ok(lamp.every((p) => p.kind !== "remove"), "nothing is ever taken out");
   assert.deepEqual(m, MAP, "trying fixes leaves the map as it was");
   assert.deepEqual(proposals(v, m.props[2], rules).map((p) => p.kind), [], "the house breaks nothing");
+});
+
+test("a finding's id is short, the same every run, and follows its prop", () => {
+  const p = { asset: "lantern", x: 2, z: 1 };
+  assert.match(findingId("square", "lamp.path", p), /^[0-9a-z]{5}$/);
+  assert.equal(findingId("square", "lamp.path", p), findingId("square", "lamp.path", { ...p }));
+  assert.notEqual(findingId("square", "lamp.path", p), findingId("square", "lamp.path", { ...p, x: 3 }));
+  const { rules } = parseRules(`rule lamp warn "x"\n for lantern\n need near(1, tile:~)`);
+  assert.deepEqual(check(w, rules).map((f) => f.id), [findingId("test", "lamp", lampA), findingId("test", "lamp", lampB)]);
 });
 
 test("the shipped rules parse and name only assets that exist", () => {
