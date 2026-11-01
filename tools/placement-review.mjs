@@ -324,7 +324,8 @@ function app(dir, port, cam) {
       json(res, e.status ?? (/no map|nothing to undo|changed since/.test(e.message) ? 400 : 500), { error: e.message });
     }
   }).listen(port, "127.0.0.1", () => console.log(`placement review: http://localhost:${port}`));
-  process.on("SIGINT", () => process.exit(0));
+  // Playwright's own signal handlers close its browser but leave the process running: exit on them ourselves.
+  for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(sig, () => process.exit(0));
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
