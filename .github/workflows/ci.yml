@@ -29,7 +29,7 @@ jobs:
       - run: node --test tools/check-tokens.test.mjs && node tools/check-tokens.mjs web/style.css
 
   rust:
-    name: Engine tests, lint and web build
+    name: Engine tests and lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -44,6 +44,17 @@ jobs:
       - run: cargo test -p sixfold-engine
       # The web crate's unit tests run on the host too (no browser, no wasm).
       - run: cargo test -p sixfold-web
+
+  # Its own job, beside the lint and tests rather than after them: the browser tests wait only on this.
+  web:
+    name: Web build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
       - name: Install Trunk
         run: curl -sSfL https://github.com/trunk-rs/trunk/releases/download/v0.22.0/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C /usr/local/bin
       - name: Build web app
@@ -71,11 +82,16 @@ jobs:
           include-hidden-files: true
           retention-days: 3
 
+  # Six machines, each a sixth of the journeys: on software GL they took ~38 min on one.
   e2e:
-    name: Browser tests (Playwright)
-    needs: rust
+    name: Browser tests (Playwright ${{ matrix.shard }}/6)
+    needs: web
     runs-on: ubuntu-latest
-    timeout-minutes: 45 # a green run takes ~25 min on software GL (WebKit adds ~7); a red one's retries need room to report
+    timeout-minutes: 30 # a green shard takes ~10 min; a red one's retries need room to report
+    strategy:
+      fail-fast: false # one red shard still lets the others report theirs
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
     defaults:
       run:
         working-directory: e2e
@@ -98,11 +114,11 @@ jobs:
       - run: npx playwright install --only-shell chromium
       # WebKit needs its own system libraries, which the runner image lacks.
       - run: npx playwright install --with-deps webkit
-      - run: npx playwright test
+      - run: npx playwright test --shard=${{ matrix.shard }}/6
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: e2e-report
+          name: e2e-report-${{ matrix.shard }}
           path: |
             e2e/playwright-report
             e2e/test-results
