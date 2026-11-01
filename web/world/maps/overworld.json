@@ -54,7 +54,7 @@
     {
       "asset": "signpost",
       "x": 48,
-      "z": 17,
+      "z": 19,
       "rot": 0
     },
     {
@@ -422,8 +422,8 @@
     },
     {
       "asset": "bench",
-      "x": 15,
-      "z": 28,
+      "x": 18,
+      "z": 22,
       "rot": 0
     },
     {
@@ -2689,7 +2689,7 @@
       "text": "East: Saltwind Boardwalk and the sea.",
       "text_fr": "Est : Promenade de Ventsalé et la mer.",
       "x": 48,
-      "z": 17
+      "z": 19
     },
     {
       "kind": "sign",

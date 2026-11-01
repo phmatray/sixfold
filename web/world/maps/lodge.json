@@ -17,7 +17,7 @@
       "asset": "bed",
       "x": 1,
       "z": 1,
-      "rot": 0
+      "rot": 180
     },
     {
       "asset": "workbench",
@@ -63,8 +63,8 @@
     },
     {
       "asset": "plant",
-      "x": 9,
-      "z": 7,
+      "x": 1,
+      "z": 2,
       "rot": 0
     },
     {

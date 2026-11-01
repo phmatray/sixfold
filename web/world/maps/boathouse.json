@@ -55,9 +55,9 @@
     },
     {
       "asset": "chair",
-      "x": 2,
-      "z": 2,
-      "rot": 180
+      "x": 3,
+      "z": 1,
+      "rot": 0
     },
     {
       "asset": "display_case",
