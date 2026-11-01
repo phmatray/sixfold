@@ -1,9 +1,9 @@
 // The placement DSL (tools/placement.mjs): it parses, its predicates read a map the way the rules mean, and the
-// shipped rules (tools/placement.rules) name only assets that exist.
+// fixes it proposes hold, and the shipped rules (tools/placement.rules) name only assets that exist.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { parseRules, world, check, evaluate, tables } from "./placement.mjs";
+import { parseRules, world, check, evaluate, tables, proposals } from "./placement.mjs";
 
 const T = { FOOT: { house: [2, 2] }, DECK: { boardwalk: [0.1], pier: [0.3], dock: [0.3] }, WALKABLE: new Set(["rug"]), tall: (a) => ({ house: 4, crates: 0.9 })[a] ?? 1 };
 // 6 x 5, a path down column 1, water in the east column, a 1 m ledge on the bottom row.
@@ -81,6 +81,25 @@ test("check names the first need that fails", () => {
   const { rules } = parseRules(`rule lamp.water warn "by the water"\n for lantern\n need near(1, tile:p)\n need near(1, tile:~)`);
   const found = check(w, rules);
   assert.deepEqual(found.map((f) => [f.prop.x, f.prop.z, f.need]), [[2, 1, "near(1, tile:~)"], [3, 2, "near(1, tile:p)"]]);
+});
+
+test("fixes: a sunk prop is lifted, a stray one moved to the nearest place its rules hold", () => {
+  const { rules } = parseRules(`
+    rule ground warn "rests"
+      for *
+      need grounded
+    rule lamp warn "by a path"
+      for lantern
+      need near(1, tile:p)`);
+  const m = structuredClone(MAP), v = world("test", m, T);
+  const [lift] = proposals(v, m.props[3], rules);
+  assert.deepEqual([lift.kind, lift.patch.y], ["lift", 1]);
+  const lamp = proposals(v, m.props[1], rules);
+  assert.equal(lamp[0].kind, "move");
+  assert.deepEqual([lamp[0].patch.x, lamp[0].patch.z], [2, 2], "one tile west, beside the path");
+  assert.equal(lamp.at(-1).kind, "remove");
+  assert.deepEqual(m, MAP, "trying fixes leaves the map as it was");
+  assert.deepEqual(proposals(v, m.props[2], rules).map((p) => p.kind), [], "the house breaks nothing");
 });
 
 test("the shipped rules parse and name only assets that exist", () => {

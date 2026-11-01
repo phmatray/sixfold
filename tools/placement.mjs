@@ -5,8 +5,9 @@
 // predicates at an offset, an environment scan, a rarity) and a block only where it `canSurvive`; here every prop
 // already on a map is held to its rules, and each one it breaks is a finding.
 // `--map=<name>` also draws that map in the terminal with each finding lettered on it. `--strict` exits 1 when a
-// rule of severity `error` fails. The geometry is web/world/ld.js and the tables are props.js, as check-maps reads them.
-import { readFileSync, readdirSync } from "node:fs";
+// rule of severity `error` fails. A finding answered "this is fine" in the review app (tools/placement-review.mjs) is
+// listed in tools/placement.waivers.json and skipped. The geometry is web/world/ld.js and the tables are props.js, as check-maps reads them.
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import * as ld from "../web/world/ld.js";
 
@@ -252,16 +253,129 @@ export function evaluate(w, p, e) {
   throw new Error(`cannot evaluate ${e.op}`);
 }
 
-// Every finding of a rule set on one map: { map, rule, severity, why, need, prop }.
-export function check(w, rules) {
+// The rules prop p breaks: [{ rule, need }].
+function broken(w, p, rules) {
   const out = [];
-  for (const p of w.m.props)
-    for (const r of rules) {
-      if (!r.for.some((t) => t.any || t.asset === p.asset)) continue;
-      if (!r.when.every((e) => evaluate(w, p, e))) continue;
-      const broken = r.need.find((n) => !evaluate(w, p, n.e));
-      if (broken) out.push({ map: w.name, rule: r.id, severity: r.severity, why: r.why, need: broken.src, prop: p });
+  for (const r of rules) {
+    if (!r.for.some((t) => t.any || t.asset === p.asset)) continue;
+    if (!r.when.every((e) => evaluate(w, p, e))) continue;
+    const n = r.need.find((n) => !evaluate(w, p, n.e));
+    if (n) out.push({ rule: r, need: n.src });
+  }
+  return out;
+}
+
+// A finding a person answered "this is fine" (tools/placement.waivers.json, written by the review app).
+export const waiverKey = (map, rule, p) => `${map} ${rule} ${p.asset} ${p.x},${p.z}`;
+export const WAIVERS = fileURLToPath(new URL("./placement.waivers.json", import.meta.url));
+export const waivers = (file = WAIVERS) => new Set((existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : []).map((v) => waiverKey(v.map, v.rule, v)));
+
+// Every finding of a rule set on one map: { map, rule, severity, why, need, prop, index }, less the waived ones.
+export function check(w, rules, waived = new Set()) {
+  const out = [];
+  w.m.props.forEach((p, index) => {
+    for (const { rule: r, need } of broken(w, p, rules))
+      if (!waived.has(waiverKey(w.name, r.id, p))) out.push({ map: w.name, rule: r.id, severity: r.severity, why: r.why, need, prop: p, index });
+  });
+  return out;
+}
+
+// ----- Fixes: where would the prop be right? -----
+
+// Run fn with prop p changed by patch ({ x, z, rot, y } or { remove: true }), the index kept in step, then put it back.
+function trial(w, p, patch, fn) {
+  const index = (on) => { for (const [x, z] of w.tiles(p)) { const k = key(x, z), l = w.at.get(k) ?? w.at.set(k, []).get(k); on ? l.push(p) : l.splice(l.indexOf(p), 1); } };
+  const old = { x: p.x, z: p.z, rot: p.rot, y: p.y }, i = w.m.props.indexOf(p);
+  const set = (v) => { for (const k of ["x", "z", "rot", "y"]) if (k in v) v[k] === undefined ? delete p[k] : (p[k] = v[k]); };
+  index(false);
+  if (patch.remove) w.m.props.splice(i, 1);
+  else set(patch), index(true);
+  try { return fn(); } finally {
+    if (patch.remove) w.m.props.splice(i, 0, p);
+    else index(false), set(old);
+    index(true);
+  }
+}
+
+// Can p stand where it is now: on the map, off walls and fences, out of the water unless it came from there, never on
+// another standing prop or on something you use, and off a path's walking line unless it stood on one already.
+function fits(w, p, from) {
+  const f = w.tiles(p), stands = w.blocks(p), c = ([x, z]) => w.m.tiles[z][x];
+  if (!f.every(([x, z]) => w.inMap(x, z))) return false;
+  if (f.some((t) => "#fWV".includes(c(t)) || (c(t) === "~" && !from.water))) return false;
+  if (!stands) return true;
+  if (f.some(([x, z]) => c([x, z]) === "p" && !from.trail)) return false;
+  return f.every(([x, z]) => { const k = key(x, z); return !(w.at.get(k) ?? []).some((q) => q !== p && w.blocks(q)) && (from.host || from.own?.has(k) || ![w.doors, w.warps, w.spots, w.npcs, w.exits].some((s) => s.has(k))); });
+}
+
+const highest = (w, p) => Math.max(...w.tiles(p).map(([x, z]) => w.floor(x, z)));
+const DIRS = { "0,-1": "north", "0,1": "south", "1,0": "east", "-1,0": "west" };
+function towards(dx, dz) {
+  const parts = [];
+  if (dz) parts.push(`${Math.abs(dz)} ${dz < 0 ? "north" : "south"}`);
+  if (dx) parts.push(`${Math.abs(dx)} ${dx < 0 ? "west" : "east"}`);
+  return parts.join(", ");
+}
+
+// Up to three fixes for the rules prop p breaks, best first: lift it onto the floor, turn or move it to the nearest
+// spot where every rule for it holds and its neighbours break no more rules than before (Minecraft's placement
+// attempts round a point), or take it out. Each: { kind, label, patch }.
+export function proposals(w, p, rules, radius = 5) {
+  const before = broken(w, p, rules).length;
+  if (!before) return [];
+  // A prop a door or a person stands on (a house's front row) is only ever lifted: moved, it would leave them behind.
+  // A spot on it (a sign's text, a find in the crates) moves with it.
+  const host = w.tiles(p).some(([x, z]) => [w.doors, w.warps, w.npcs].some((s) => s.has(key(x, z))));
+  const mine = new Set(w.tiles(p).map(([x, z]) => key(x, z)));
+  const spots = (w.m.interactions ?? []).flatMap((s, i) => (mine.has(key(s.x, s.z)) ? [i] : []));
+  const [fw, fd] = ld.foot(p, w.t.FOOT), small = fw * fd <= 4 && !host && !p.landmark && !p.poi;
+  const from = { host, water: w.tiles(p).some(([x, z]) => w.m.tiles[z]?.[x] === "~"), trail: w.tiles(p).some(([x, z]) => w.m.tiles[z]?.[x] === "p") };
+  // A fix holds when p breaks no rule after it, fits there, and the props round both places break no more rules than before.
+  const around = (x, z) => w.m.props.filter((o) => o !== p && Math.abs(o.x - x) <= 7 && Math.abs(o.z - z) <= 7);
+  const count = (list) => list.reduce((n, o) => n + broken(w, o, rules).length, 0);
+  const better = (patch) => {
+    if (spots.length && !patch.remove) {
+      // The spots move with it while it is tried there.
+      const moved = spots.map((i) => w.m.interactions[i]), dx = (patch.x ?? p.x) - p.x, dz = (patch.z ?? p.z) - p.z;
+      for (const s of moved) w.spots.delete(key(s.x, s.z));
+      for (const s of moved) w.spots.add(key(s.x + dx, s.z + dz));
+      from.own = new Set(moved.map((s) => key(s.x + dx, s.z + dz)));
+      try { return holds(patch); } finally { from.own = null; for (const s of moved) w.spots.delete(key(s.x + dx, s.z + dz)); for (const s of moved) w.spots.add(key(s.x, s.z)); }
     }
+    return holds(patch);
+  };
+  const holds = (patch) => {
+    const them = patch.remove ? around(p.x, p.z) : [...new Set([...around(p.x, p.z), ...around(patch.x ?? p.x, patch.z ?? p.z)])];
+    const was = count(them);
+    return trial(w, p, patch, () => !broken(w, p, rules).length && fits(w, p, from) && count(them) <= was);
+  };
+  const out = [], y0 = p.y ?? 0, rel = Math.max(0, y0 - highest(w, p));
+  // Lift (or lower) it onto the floor under it.
+  const floorY = highest(w, p);
+  if (Math.abs(floorY - y0) > 0.05 && better({ y: floorY || undefined })) out.push({ kind: "lift", label: `${floorY > y0 ? "Lift" : "Lower"} it to y ${floorY} (the floor under it)`, patch: { y: floorY || undefined } });
+  // Turn it in place, then move it, nearest first.
+  const rots = [p.rot ?? 0, ...[0, 90, 180, 270].filter((r) => r !== (p.rot ?? 0))];
+  const ring = [];
+  for (let dx = -radius; dx <= radius; dx++) for (let dz = -radius; dz <= radius; dz++) ring.push([dx, dz]);
+  ring.sort((a, b) => Math.max(Math.abs(a[0]), Math.abs(a[1])) - Math.max(Math.abs(b[0]), Math.abs(b[1])) || Math.hypot(...a) - Math.hypot(...b));
+  let moved = null, turned = null;
+  for (const [dx, dz] of out.length || !small ? [] : ring) {
+    if (moved) break;
+    for (const rot of rots) {
+      if (!dx && !dz && rot === (p.rot ?? 0)) continue;
+      const x = p.x + dx, z = p.z + dz;
+      if (!w.inMap(x, z)) continue;
+      const y = trial(w, p, { x, z, rot }, () => highest(w, p)) + rel, patch = { x, z, rot, y: y || undefined, ...(spots.length && { spots }) };
+      if (!better(patch)) continue;
+      if (!dx && !dz) { turned ??= { kind: "turn", label: `Turn it to face ${DIRS[[[0, 1], [1, 0], [0, -1], [-1, 0]][rot / 90].join()]}`, patch }; continue; }
+      moved = { kind: "move", label: `Move it ${towards(dx, dz)} to ${x},${z}${rot !== (p.rot ?? 0) ? `, facing ${DIRS[[[0, 1], [1, 0], [0, -1], [-1, 0]][rot / 90].join()]}` : ""}${Math.abs(y - y0) > 0.05 ? ` at y ${y}` : ""}`, patch };
+      break;
+    }
+  }
+  if (turned) out.push(turned);
+  if (moved) out.push(moved);
+  // Take it out: never a house, a landmark or a point of interest, nor anything a door, a spot or a person stands on.
+  if (small) out.push({ kind: "remove", label: spots.length ? "Take it out, with what it says" : "Take it out", patch: { remove: true, ...(spots.length && { spots }) } });
   return out;
 }
 
@@ -288,9 +402,9 @@ function main(argv) {
   const t = tables(dir), only = opt("map");
   const names = readdirSync(`${dir}/maps`).map((f) => f.replace(".json", "")).filter((n) => !only || n === only).sort();
   if (only && !names.length) throw new Error(`no map ${only}`);
-  const found = [];
+  const found = [], waived = waivers();
   for (const name of names) {
-    const w = world(name, JSON.parse(readFileSync(`${dir}/maps/${name}.json`, "utf8")), t), mine = check(w, rules);
+    const w = world(name, JSON.parse(readFileSync(`${dir}/maps/${name}.json`, "utf8")), t), mine = check(w, rules, waived);
     found.push(...mine);
     if (only) console.log(`${draw(w, mine)}\n`);
   }
@@ -304,7 +418,7 @@ function main(argv) {
     }
     const per = {};
     for (const f of found) per[f.rule] = (per[f.rule] ?? 0) + 1;
-    console.log(`\n${found.length} finding(s) on ${new Set(found.map((f) => f.map)).size} map(s), ${rules.length} rule(s):`);
+    console.log(`\n${found.length} finding(s) on ${new Set(found.map((f) => f.map)).size} map(s), ${rules.length} rule(s)${waived.size ? `, ${waived.size} answered "fine" in placement.waivers.json` : ""}:`);
     for (const r of rules) if (per[r.id]) console.log(`  ${String(per[r.id]).padStart(4)}  ${r.severity.padEnd(5)} ${r.id}`);
   }
   if (argv.includes("--strict") && found.some((f) => f.severity === "error")) process.exitCode = 1;

@@ -335,5 +335,13 @@ it lists every finding, map by map, then a count per rule. `--map=<name>` also d
 each finding lettered on it, `--rule=<id or prefix>` runs one rule or a family (`--rule=lamp`), `--json` feeds a
 script, and `--strict` exits 1 on an `error`.
 
+**The review app** (`node tools/placement-review.mjs`, then http://localhost:8095) walks the findings one by one.
+Each one shows the map round the prop from above, before and after a proposed fix: lift it onto the floor, turn it,
+move it to the nearest place where every rule for it holds and its neighbours break no more rules than before, or
+take it out. A sign's text moves with its sign, and a prop a door stands on is only ever lifted. **Confirm** writes the
+fix to the map's JSON and runs `check-maps --strict` on the result, **Undo** puts the file back, and **It's fine**
+records the answer in `tools/placement.waivers.json`, which placement.mjs then skips. Keys: ← → to browse, 1–9 to pick
+a fix, Enter to confirm, R for "it's fine", U to undo.
+
 It is a diagnostic: CI runs only its tests (`tools/placement.test.mjs`, which also fail when a rule names an asset no
 map uses). A rule moves into CI once its findings are fixed or answered with a `why`.
