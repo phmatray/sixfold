@@ -400,6 +400,25 @@ test("AC1 (#118): a band toward a map no edge exit leads to fails", () =>
 test("#118: a prop left behind by a band the map no longer has fails", () =>
   bandFails((m) => (border()(m), m.vale.props.push({ asset: "rock", x: 20, z: 8, rot: 0, band: "moor" })), /vale: \[transition\] rock 20,8 belongs to a band to moor, which the map no longer has/));
 
+test("#225: a grade out of range, or not a number, fails even without --strict; a gentle one passes", () => {
+  const grade = (k, g) => (m) => (m.vale[k] = { ...m.vale[k], grade: g });
+  passes(world(grade("light", { exposure: 1.05, saturation: 0.08, contrast: 0.05 })));
+  passes(world(grade("light_night", { exposure: 1.2 })));
+  const bad = (change) => {
+    const r = run(world(change));
+    assert.notEqual(r.code, 0, r.out);
+    assert.match(r.out, /vale: .*grade saturation and contrast are -0\.5 to 0\.5, exposure 0\.5 to 2/, r.out);
+  };
+  bad(grade("light", { saturation: 2 }));
+  bad(grade("light_night", { exposure: 3 }));
+  bad(grade("light_dusk", { contrast: "0.1" }));
+  for (const g of ["warm", 5, [1], null, { saturaton: 0.3 }, { bloom: 2 }]) {
+    const r = run(world(grade("light", g)));
+    assert.notEqual(r.code, 0, r.out);
+    assert.match(r.out, /vale: light\.grade is an object of exposure, saturation and contrast only/, r.out);
+  }
+});
+
 // Secrets (#116, WORLD_RULES §9): a well-formed one in the vale, a box on crates behind a hedge break, with a moss
 // trail through the break as its clue, a neighbour who hints at it, and a hum by the box.
 const secret = (m) => {

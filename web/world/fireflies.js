@@ -65,9 +65,9 @@ export function fireflies(interactions, floorAt, root) {
         s.on = on;
       }
     },
-    // Each frame: `t` the map's clock, `night` 0..1 (daylight.js).
-    update(dt, t, night, reduced) {
-      mat.color.lerpColors(DAY, NIGHT, night);
+    // Each frame: `t` the map's clock, `night` 0..1 (daylight.js); `boost` on High: past 1.0 after dark, so they bloom (#225).
+    update(dt, t, night, reduced, boost = false) {
+      mat.color.lerpColors(DAY, NIGHT, night).multiplyScalar(boost ? 1 + 1.5 * night : 1);
       mat.size = 0.22 + 0.28 * night;
       mat.blending = night > 0.5 ? THREE.AdditiveBlending : THREE.NormalBlending; // they glow after dark; by day, dark specks
       const p = geo.attributes.position, c = geo.attributes.color;

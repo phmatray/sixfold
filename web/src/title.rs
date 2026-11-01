@@ -224,6 +224,37 @@ fn CameraAngleSetting() -> impl IntoView {
     }
 }
 
+/// The world's post-processing (#225): Auto picks from the device; kept in the browser, applied at once.
+#[component]
+fn GraphicsSetting() -> impl IntoView {
+    let now = RwSignal::new(store::graphics());
+    let option = move |c: &'static str, label: &'static str| {
+        view! {
+            <label class="seg">
+                <input type="radio" name="graphics" value=c
+                    prop:checked=move || now.get() == c
+                    on:change=move |_| {
+                        store::set_graphics(c);
+                        now.set(c);
+                    } />
+                <span>{label}</span>
+            </label>
+        }
+    };
+    view! {
+        <fieldset class="text-size" aria-describedby="graphics-hint">
+            <legend>{tr("Graphics", "Graphismes")}</legend>
+            <div class="segs">
+                {option("auto", tr("Auto", "Auto"))}
+                {option("high", tr("High", "Élevés"))}
+                {option("low", tr("Low", "Simples"))}
+                {option("off", tr("Off", "Désactivés"))}
+            </div>
+            <p class="note" id="graphics-hint">{tr("Auto picks for this device. Low and Off are lighter on a phone's battery.", "Auto choisit selon l'appareil. Simples et Désactivés ménagent la batterie d'un téléphone.")}</p>
+        </fieldset>
+    }
+}
+
 /// A title sheet's heading and Close: folding its <details> puts focus back on
 /// the button that opened it.
 #[component]
@@ -253,7 +284,7 @@ pub fn SheetHead(title: &'static str, id: &'static str) -> impl IntoView {
     }
 }
 
-/// The settings: language, text size, camera angle, sound, saves and the reset. The title screen's
+/// The settings: language, text size, camera angle, graphics, sound, saves and the reset. The title screen's
 /// Settings menu and the world's in-game menu both show it.
 #[component]
 pub fn OptionsPanel(
@@ -275,6 +306,7 @@ pub fn OptionsPanel(
             <LangSwitch />
             <TextSize />
             <CameraAngleSetting />
+            <GraphicsSetting />
             <AudioSettings />
             <crate::input::ControlsSettings />
             <SaveSettings />
