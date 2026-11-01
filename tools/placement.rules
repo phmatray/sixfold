@@ -67,7 +67,7 @@ tag sit_at    = duel_table chart_table workbench cobbler_bench                  
 tag raised    = canopy_deck rope_bridge ladder               # held up by trees and posts, by design
 tag stairs    = stairs stairs_slate stairs_basalt stairs_heath
 tag market    = stall stall_b curio_cabinet
-tag work      = #house #market #harbour #at_table minecart rail kiln glass_furnace glass_rack cullet anvil door net_rack crab_pots   # not crates: two stray crates don't make a trade
+tag work      = #house #market #harbour #at_table minecart rail kiln glass_furnace glass_rack cullet anvil door net_rack crab_pots campfire   # not crates: two stray crates don't make a trade; a camp's fire does (its stores)
 
 # ---------- Light — l'éclairage suit l'usage (WORLD_RULES §2) ----------
 
@@ -117,7 +117,7 @@ rule sign.faces warn "a sign faces the path or the camera (3.3)"
 
 rule sign.shop warn "a shop's or an inn's sign hangs by its door (1.5)"
   for inn_sign | hanging_sign
-  need near(2, door)
+  need near(3, door)                                 # at the door, or at the front corner of a five-wide house
 
 # ---------- Dressing — props cluster by function (WORLD_RULES 6.3) ----------
 
@@ -215,11 +215,11 @@ rule mat.door warn "an exit mat lies at the door"
   for exit_mat
   need near(1, door | warp | exit)
 
-rule crates.purpose warn "crates belong to a trade: a house, a stall, a pier, a cart, a workshop"
+rule crates.purpose warn "crates belong to a trade: a house, a stall, a pier, a cart, a workshop, or the person standing by them"
   for crates | crates_open
   when outdoor
   unless touches(spot)                              # a find or a story in them: put there on purpose, often off the beaten track
-  need near(3, #work)
+  need near(3, #work) or near(2, npc)               # a fisher's or a quarryman's crates, at their feet
 
 rule market.street warn "a stall opens onto a street or a square"
   for #market
@@ -254,9 +254,14 @@ rule water.sea-rock warn "sea rocks stand in or by the sea"
   swap rock_sea -> rock
 
 rule harbour.gear warn "pots, nets and bollards stay by the water"
-  for crab_pots | net_rack | bollard
+  for crab_pots | bollard
   when outdoor
   need near(4, #water | #harbour)
+
+rule harbour.nets warn "nets dry on racks a few steps up from the shore"
+  for net_rack
+  when outdoor
+  need near(8, #water | #harbour)                   # on the grass behind the beach: no need to stand at the waterline
 
 rule bees.flowers warn "a beehive keeps within reach of flowers"
   for beehive
@@ -278,10 +283,11 @@ rule scatter.off-path warn "bushes, flowers, reeds and rocks never grow on a pat
   need not touches(#paved)
   fill pr                                           # or a bed of grass under it, beside the path
 
-rule mine.cart warn "a minecart sits on its rails"
+rule mine.cart warn "a minecart sits on its rails, or stands where ore or goods are loaded"
   for minecart
   when outdoor
-  need near(1, rail)
+  unless touches(spot)                              # a find in it: put there on purpose
+  need near(1, rail) or near(3, rubble | crates)    # a quarry with no track: the cart is filled at the rubble
 
 rule stairs.clear error "nothing stands at the foot or the top of a staircase: you step on and off it there"
   for #stairs
