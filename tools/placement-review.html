@@ -57,6 +57,8 @@
   canvas { display: block; width: 100%; aspect-ratio: 4 / 3; background: #0f1114; }
   canvas.gl { cursor: grab; touch-action: none; }
   canvas.gl:active { cursor: grabbing; }
+  .shot { aspect-ratio: 4 / 3; background: #0f1114; color: var(--faint); display: grid; place-items: center; padding: 16px; text-align: center; overflow: hidden; }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .hover { padding: 6px 12px; color: var(--faint); font-size: 12px; min-height: 30px; border-top: 1px solid var(--line); }
   .fixes { display: flex; flex-direction: column; gap: 6px; }
   .fix { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); text-align: left; }
@@ -222,10 +224,10 @@ function render(b, map) {
       <p class="why">${b.why}</p>
       <span class="needs">It needs <code>${esc(b.need)}</code></span>
     </div>
-    <div class="viewbar"><span class="seg"><button data-mode="2d" class="${state.mode === "2d" ? "on" : ""}">2D</button><button data-mode="3d" class="${state.mode === "3d" ? "on" : ""}">3D</button></span><kbd>V</kbd>${state.mode === "3d" ? "<span>Drag to turn, scroll to zoom, double-click to reset; both views move together.</span>" : ""}</div>
+    <div class="viewbar"><span class="seg">${["2d", "3d", "game"].map((m) => `<button data-mode="${m}" class="${state.mode === m ? "on" : ""}">${m === "game" ? "Game" : m.toUpperCase()}</button>`).join("")}</span><kbd>V</kbd>${state.mode === "3d" ? "<span>Drag to turn, scroll to zoom, double-click to reset; both views move together.</span>" : state.mode === "game" ? "<span>The running game (trunk serve), handed the map before and after, at noon.</span>" : ""}</div>
     <div class="panes">
-      <section class="pane"><h2>Before <span>as the map has it</span></h2><canvas id="before" class="${state.mode === "3d" ? "gl" : ""}"></canvas><div class="hover" id="hover-before"></div></section>
-      <section class="pane"><h2>After <span id="after-label"></span></h2><canvas id="after" class="${state.mode === "3d" ? "gl" : ""}"></canvas><div class="hover" id="hover-after"></div></section>
+      <section class="pane"><h2>Before <span>as the map has it</span></h2>${view("before")}<div class="hover" id="hover-before"></div></section>
+      <section class="pane"><h2>After <span id="after-label"></span></h2>${view("after")}<div class="hover" id="hover-after"></div></section>
     </div>
     ${one ? fixesHtml() : planHtml()}
     <div class="actions">
@@ -319,7 +321,7 @@ async function rejectIt() {
   if (!b || state.loading) return;
   const members = state.plan ? b.members.filter((_, k) => state.checked.has(k)) : b.members;
   if (!members.length) return;
-  await api("/api/reject", { map: b.map, rule: b.rule, items: members.map(({ asset, x, z }) => ({ asset, x, z })), note: $("#note")?.value.trim() });
+  await api("/api/reject", { map: b.map, rule: b.rule, items: members.map(({ asset, x, z }) => ({ asset, x, z })), note: $("#note")?.value.trim(), page: 2 });
   state.status = { text: `Kept as they are: ${members.length} ${members[0].asset} on ${b.map} (#${b.id}, ${b.rule})` };
   await refresh(state.at);
 }
@@ -336,13 +338,14 @@ async function undoLast() {
 for (const id of ["#f-sev", "#f-rule", "#f-map"]) $(id).onchange = () => filter(0);
 $("#goto").addEventListener("keydown", (e) => { if (e.key === "Enter") { goTo(e.target.value); e.target.blur(); } });
 addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return; // the browser's own shortcuts (⌘R reloads; it must never answer a finding)
   if (e.target.matches("input[type=text], select")) { if (e.key === "Escape") e.target.blur(); return; }
   if (e.key === "ArrowRight" || e.key === "j") select(Math.min(state.shown.length - 1, state.at + 1));
   else if (e.key === "ArrowLeft" || e.key === "k") select(Math.max(0, state.at - 1));
   else if (e.key === "Enter") confirmFix();
   else if (e.key === "r") rejectIt();
   else if (e.key === "u" && state.undo) undoLast();
-  else if (e.key === "v") setMode(state.mode === "2d" ? "3d" : "2d");
+  else if (e.key === "v") setMode({ "2d": "3d", "3d": "game", game: "2d" }[state.mode] ?? "2d");
   else if (e.key === "c") copyFinding();
   else if (e.key === "g" || e.key === "/") { $("#goto").focus(); $("#goto").select(); }
   else if (/^[1-9]$/.test(e.key) && +e.key <= state.fixes.length) pick(+e.key - 1);
@@ -390,8 +393,32 @@ function scenes(b, map) {
 function draw(b, map) {
   const s = scenes(b, map), one = b.members.length === 1, n = chosen().length;
   $("#after-label").textContent = state.loading ? "working it out…" : one ? (state.fixes[state.pick]?.label.toLowerCase() ?? "no fix proposed") : `${n} of ${b.members.length} fixed`;
-  if (state.mode === "3d") { three($("#before"), s.before, s.view, "before"); three($("#after"), s.after, s.view, "after"); }
+  if (state.mode === "game") { const at = focus(b, map); shoot($("#before"), b.map, [], at); if (!state.loading) shoot($("#after"), b.map, chosen(), at); else $("#after").textContent = "Waiting for the fixes…"; }
+  else if (state.mode === "3d") { three($("#before"), s.before, s.view, "before"); three($("#after"), s.after, s.view, "after"); }
   else { paint($("#before"), s.before, s.view, $("#hover-before")); paint($("#after"), s.after, s.view, $("#hover-after")); }
+}
+
+// ---------- Game: pictures from the running game ----------
+
+// A pane: a canvas for 2D and 3D, a frame for the game's picture.
+const view = (name) => (state.mode === "game" ? `<div id="${name}" class="shot">Rendering in the game…</div>` : `<canvas id="${name}" class="${state.mode === "3d" ? "gl" : ""}"></canvas>`);
+// Where the camera looks: the middle of the members, where they stand and where the fixes put them; and how far they spread.
+function focus(b, map) {
+  const fixes = new Map(chosen().map((f) => [f.index, f.patch]));
+  const pts = b.members.flatMap((m) => { const p = map.props[m.index], f = fixes.get(m.index); return [[p.x + p.w / 2, p.z + p.d / 2], ...(f && "x" in f ? [[f.x + p.w / 2, f.z + p.d / 2]] : [])]; });
+  const xs = pts.map((p) => p[0]), zs = pts.map((p) => p[1]);
+  return { at: [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...zs) + Math.max(...zs)) / 2], extent: Math.max(4, Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs)) + 2 };
+}
+const shots = new Map(); // key -> Promise<object URL>
+async function shoot(el, map, fixes, { at, extent }) {
+  const key = JSON.stringify([map, fixes, at, extent]);
+  if (!shots.has(key)) shots.set(key, fetch("/api/shot", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ map, fixes, at, extent }) })
+    .then(async (r) => { if (!r.ok) throw new Error((await r.json()).error); return URL.createObjectURL(await r.blob()); })
+    .catch((e) => { shots.delete(key); throw e; }));
+  try {
+    const src = await shots.get(key);
+    if (el.isConnected) el.innerHTML = `<img src="${src}" alt="The game, ${esc(map)}">`;
+  } catch (e) { if (el.isConnected) el.textContent = e.message; }
 }
 
 // ---------- 2D: the map from above ----------

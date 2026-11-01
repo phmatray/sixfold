@@ -19,7 +19,7 @@ const FUNCS = {
   count: ["n", "t"], dist: ["t"], is: ["t"], has: ["w"], kind: ["w"], region: ["w"], map: ["w"],
 };
 const NUMERIC = new Set(["count", "dist", "y", "height", "rot"]);
-const WORDS = new Set(["outdoor", "indoor", "cave", "wild", "grounded", "flat", "true", "false", "y", "height", "rot"]);
+const WORDS = new Set(["outdoor", "indoor", "cave", "wild", "banded", "grounded", "flat", "true", "false", "y", "height", "rot"]);
 const BUILTIN = new Set(["door", "warp", "npc", "spot", "exit", "solid", "open", "edge", "prop", "deck", "wet"]);
 
 // One expression, parsed by recursive descent straight off the string.
@@ -159,6 +159,8 @@ export function world(name, m, t) {
     warps: set((m.warps ?? []).map((w) => [w.x, w.z])),
     npcs: set(people), spots: set((m.interactions ?? []).map((i) => [i.x, i.z])), exits: set(exits),
     wild: (x, z) => ["route", "site", "cave"].includes(m.kind) || (m.wild ?? []).some(([x0, z0, x1, z1]) => x >= x0 && x <= x1 && z >= z0 && z <= z1),
+    // The transition bands (WORLD_RULES 5.7) whose scatter lists an asset and reach the point (x, z) in tiles.
+    banded: (asset, x, z) => (m.transitions ?? []).some((tr) => { const b = tr.scatter?.includes(asset) && ld.bandOf(m, tr); return b && ld.bandWeight(m, b, x, z) > 0; }),
   };
 }
 
@@ -227,6 +229,7 @@ export function evaluate(w, p, e) {
     case "indoor": return !!w.m.light?.indoor;
     case "cave": return w.cave;
     case "wild": return w.wild(p.x, p.z);
+    case "banded": { const [fw, fd] = ld.foot(p, w.t.FOOT); return w.banded(p.asset, p.x + fw / 2, p.z + fd / 2); }
     case "grounded": return grounded(w, p);
     case "flat": return new Set(w.tiles(p).map(([x, z]) => w.floor(x, z))).size === 1;
     case "y": return p.y ?? 0;

@@ -37,6 +37,7 @@
 #   grounded       rests on the floor, a deck or another prop's top, and no footprint tile rises over its base
 #   flat           its footprint is all one floor height         has(key)      the prop's JSON has that key
 #   outdoor  indoor  cave  wild   kind(a | b)  region(a | b)  map(a | b)
+#   banded         it stands in a transition band (5.7) whose scatter lists its asset: borrowed from the next region
 #
 # T (a target) is terms joined by `|`: an asset name, a #tag, tile:<glyphs> (tile:pr=H), paint:<glyphs>, or a
 # builtin: door, warp, npc, spot, exit, solid, open, edge (off the map), prop (any other prop), deck, wet (water,
@@ -175,13 +176,13 @@ rule water.boat error "a boat is on the water, or beached on the sand by it"
 
 rule water.reeds warn "reeds grow at the waterline"
   for reeds
-  unless has(band) or near(1, edge)
+  unless has(band) or banded or near(1, edge)
   need near(2, wet)
   swap reeds -> bush | heather                      # away from the water, the dry-ground plant in its place
 
 rule water.sea-rock warn "sea rocks stand in or by the sea"
   for rock_sea | tidepool
-  unless near(1, edge)
+  unless banded or near(1, edge)
   need near(2, wet)
   swap rock_sea -> rock
 
@@ -205,7 +206,7 @@ rule tree.off-path error "a tree never grows on a path, a square or a deck"
 
 rule scatter.off-path warn "bushes, flowers, reeds and rocks never grow on a path, a square or a deck"
   for #scatter
-  unless has(band)
+  unless has(band) or banded                         # a transition band toward the region it belongs to (5.7)
   need not touches(#paved)
   fill pr                                           # or a bed of grass under it, beside the path
 
@@ -221,21 +222,21 @@ rule fence.end warn "a fence end finishes a fence, or two frame a gap like gatep
 rule biome.ember warn "ash pines, vents and cullet belong to the Emberlands (or a transition band toward them)"
   for ash_pine | ember_vent | cullet
   when outdoor
-  unless has(band)
+  unless has(band) or banded                         # a transition band toward the region it belongs to (5.7)
   need region(ember)
   swap ash_pine -> pine
 
 rule biome.basalt warn "basalt belongs to the Emberlands and the Storm coast (or a band toward them)"
   for rock_basalt
   when outdoor
-  unless has(band)
+  unless has(band) or banded                         # a transition band toward the region it belongs to (5.7)
   need region(ember | storm)
   swap rock_basalt -> rock
 
 rule biome.willow warn "willows belong to the Dreamwater (or a band toward it)"
   for willow
   when outdoor
-  unless has(band)
+  unless has(band) or banded                         # a transition band toward the region it belongs to (5.7)
   need region(dream)
 
 # ---------- Ground — the heightmap ----------

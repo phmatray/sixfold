@@ -84,6 +84,15 @@ test("on, near, front and beside read tiles, props and builtins", () => {
   assert.equal(ask("is(lantern | crates)", house), false);
 });
 
+test("banded: a prop in a transition band whose scatter lists it", () => {
+  const m = { ...structuredClone(MAP), exits: [{ side: "s", span: [1, 3], to: "coast" }], transitions: [{ to: "coast", depth: 4, scatter: ["reeds"] }] };
+  m.props.push({ asset: "reeds", x: 2, z: 3, rot: 0 }, { asset: "reeds", x: 2, z: 0, rot: 0 }, { asset: "crates", x: 1, z: 3, rot: 0 });
+  const v = world("test", m, T), on = (p) => evaluate(v, p, parseRules(`rule r warn "r"\n for *\n need banded`).rules[0].need[0].e);
+  assert.equal(on(m.props[5]), true, "by the south exit, in the band");
+  assert.equal(on(m.props[6]), false, "beyond the band's depth");
+  assert.equal(on(m.props[7]), false, "crates are not in its scatter");
+});
+
 test("count counts a prop once, dist measures to the nearest", () => {
   assert.equal(ask("count(1, house) == 1", lampA), true);
   assert.equal(ask("count(2, lantern) == 1", lampA), true, "itself excluded");

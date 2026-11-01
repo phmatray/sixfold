@@ -188,8 +188,85 @@ export function desk(dir = "web/world") {
     return { undone: u.what, check: u.path === WAIVERS ? null : checkMaps() };
   }
 
-  return { dir, names, rules, blocks, find, mapView, offered, plan, apply, reject, undo: undoLast, lastUndo: () => undo.at(-1)?.what ?? null, checkMaps: () => checkMaps() };
+  // A map's JSON with some fixes applied ([{ index, patch }]), for the game view.
+  function patched(map, fixes = []) {
+    known(map);
+    const m = JSON.parse(readFileSync(file(map), "utf8"));
+    for (const f of fixes) patchMap(m, m.props[f.index], f.patch);
+    return m;
+  }
+
+  // Where the hero stands for a game shot: the nearest tile two rows south of [cx, cz] (the camera looks north) that no
+  // standing prop's footprint covers, off walls, fences and water.
+  function stand(m, [cx, cz]) {
+    const taken = new Set();
+    for (const p of m.props) {
+      if (t.WALKABLE.has(p.asset) || t.DECK[p.asset]) continue;
+      const [w, dd] = ld.foot(p, t.FOOT);
+      for (let x = p.x; x < p.x + w; x++) for (let z = p.z; z < p.z + dd; z++) taken.add(`${x},${z}`);
+    }
+    const open = (x, z) => m.tiles[z]?.[x] !== undefined && !"#fWV~".includes(m.tiles[z][x]) && !taken.has(`${x},${z}`);
+    const x0 = Math.round(cx), z0 = Math.round(cz) + 2;
+    for (let r = 0; r < 12; r++) for (let dz = -r; dz <= r; dz++) for (let dx = -r; dx <= r; dx++) if (Math.max(Math.abs(dx), Math.abs(dz)) === r && open(x0 + dx, z0 + dz)) return [x0 + dx, z0 + dz];
+    return [x0, z0];
+  }
+
+  return { dir, names, rules, blocks, find, mapView, offered, plan, apply, reject, patched, stand, undo: undoLast, lastUndo: () => undo.at(-1)?.what ?? null, checkMaps: () => checkMaps() };
 }
+
+// ----- The game view: the running game, driven headless, photographs a map before and after its fixes -----
+// The game (trunk serve) runs at `game`; Playwright (e2e's) drives one hidden page of it, booted into the world once.
+// Each shot hands the game the map as given (map.js setMap, as the editor previews a map), warps the hero just south
+// of the props, frames them and takes a picture. One shot at a time.
+export function camera({ game = "http://localhost:8080", playwright }) {
+  let page = null, queue = Promise.resolve();
+  const boot = async () => {
+    const pw = playwright ?? fileURLToPath(new URL("../e2e/node_modules/playwright/index.mjs", import.meta.url));
+    if (!existsSync(pw)) throw Object.assign(new Error(`the game view needs Playwright: run \`npm ci\` in e2e/ (or pass --playwright=<path to playwright/index.mjs>)`), { status: 503 });
+    const { chromium } = await import(pw);
+    const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+    const ctx = await browser.newContext({ viewport: { width: 1200, height: 900 }, serviceWorkers: "block", locale: "en-US", reducedMotion: "reduce" });
+    await ctx.addInitScript(() => sessionStorage.setItem("sixfold.splashed", "1"));
+    const p = await ctx.newPage();
+    process.on("exit", () => browser.close().catch(() => {}));
+    await enter(p);
+    return p;
+  };
+  // Into the world from the title (again, when trunk serve reloaded the page after a map changed).
+  const enter = async (p) => {
+    try { await p.goto(game, { timeout: 15_000 }); }
+    catch { throw Object.assign(new Error(`the game isn't running at ${game}: start it with \`cd web && trunk serve\` (or pass --game=<url>)`), { status: 503 }); }
+    await p.getByRole("navigation", { name: "Main menu" }).getByRole("button", { name: /^Explore the world/ }).click({ timeout: 240_000 });
+    await p.waitForFunction(() => document.querySelector(".world-host")?.sixfoldWarp, null, { timeout: 120_000 });
+  };
+  // raw: the map's JSON; [x, z]: where the hero stands; extent: how many tiles the props spread over.
+  const shoot = async (name, raw, [x, z], extent) => {
+    page ??= boot();
+    const p = await page.catch((e) => { page = null; throw e; }), host = (f, ...a) => p.evaluate(([f, a]) => document.querySelector(".world-host")[f](...a), [f, a]);
+    if (!(await p.evaluate(() => !!document.querySelector(".world-host")?.sixfoldWarp).catch(() => false))) await enter(p); // trunk serve reloads its pages when a file changes
+    await p.evaluate(async ([n, r]) => (await import("/world/map.js")).setMap(n, r), [name, raw]);
+    const skip = p.getByRole("button", { name: /^Skip/ });
+    // A warp rebuilds the map from the copy just handed over. Wait for the map and the hero (put on the nearest free
+    // tile, so within 2 of the one asked); warp again only if the map never came (one asked during a fade is ignored).
+    let there = false;
+    for (let tries = 0; tries < 3 && !there; tries++) {
+      for (let t = 0; t < 10 && (await skip.isVisible().catch(() => false)); t++) await skip.click().catch(() => {}), await p.waitForTimeout(600);
+      await host("sixfoldWarp", name, x, z, "n");
+      for (let t = 0; t < 12 && !there; t++) {
+        await p.waitForTimeout(500);
+        const st = await p.evaluate(() => document.querySelector(".world-host").sixfoldStats());
+        there = st.area === name && Math.abs(st.at?.[0] - x) <= 2 && Math.abs(st.at?.[1] - z) <= 2;
+      }
+    }
+    if (!there) throw new Error(`the game never reached ${name} ${x},${z}`);
+    await host("sixfoldClock", 12 * 60);
+    await host("sixfoldCam", { distance: Math.min(30, Math.max(12, extent * 1.3)), pitch: 50 });
+    await p.waitForTimeout(1500);
+    return p.screenshot({ type: "jpeg", quality: 82 });
+  };
+  return { shot: (...a) => (queue = queue.then(() => shoot(...a), () => shoot(...a))) };
+}
+
 
 // ----- The web app -----
 
@@ -205,7 +282,7 @@ function serve(res, root, rel) {
 const json = (res, status, body) => (res.writeHead(status, { "content-type": "application/json" }), res.end(JSON.stringify(body)));
 const read = (req) => new Promise((ok) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => ok(b ? JSON.parse(b) : {})); });
 
-function app(dir, port) {
+function app(dir, port, cam) {
   const d = desk(dir), WORLD = resolve(dir) + "/";
   createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost"), q = (k) => url.searchParams.get(k), get = req.method === "GET", post = req.method === "POST";
@@ -218,8 +295,18 @@ function app(dir, port) {
       if (get && url.pathname === "/api/proposals") return json(res, 200, d.offered(q("map"), { index: +q("index"), asset: q("asset"), x: +q("x"), z: +q("z") }));
       if (get && url.pathname === "/api/plan") return json(res, 200, d.plan(q("map"), q("indices").split(",").map(Number)));
       if (post && url.pathname === "/api/apply") return json(res, 200, d.apply(await read(req)));
-      if (post && url.pathname === "/api/reject") return json(res, 200, d.reject(await read(req)));
+      if (post && url.pathname === "/api/reject") {
+        // A page from before ⌘R was kept off the R key answered a finding on every reload: it sends no `page`.
+        const body = await read(req);
+        if (body.page !== 2) return json(res, 409, { error: "this page is out of date: reload it" });
+        return json(res, 200, d.reject(body));
+      }
       if (post && url.pathname === "/api/undo") return json(res, 200, d.undo());
+      if (post && url.pathname === "/api/shot") {
+        // { map, fixes: [{ index, patch }] (none: the map as it is), at: [x, z], extent }: a JPEG from the game.
+        const { map, fixes, at, extent } = await read(req), raw = d.patched(map, fixes), jpeg = await cam.shot(map, raw, d.stand(raw, at), extent ?? 6);
+        return res.writeHead(200, { "content-type": "image/jpeg" }), res.end(jpeg);
+      }
       json(res, 404, { error: "not found" });
     } catch (e) {
       json(res, e.status ?? (/no map|nothing to undo|changed since/.test(e.message) ? 400 : 500), { error: e.message });
@@ -229,6 +316,6 @@ function app(dir, port) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const argv = process.argv.slice(2);
-  app(argv.find((a) => !a.startsWith("--")) ?? "web/world", +(argv.find((a) => a.startsWith("--port="))?.slice(7) ?? 8095));
+  const argv = process.argv.slice(2), opt = (k) => argv.find((a) => a.startsWith(`--${k}=`))?.slice(k.length + 3);
+  app(argv.find((a) => !a.startsWith("--")) ?? "web/world", +(opt("port") ?? 8095), camera({ game: opt("game"), playwright: opt("playwright") }));
 }
