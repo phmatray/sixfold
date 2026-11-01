@@ -37,6 +37,7 @@
 #   grounded       rests on the floor, a deck or another prop's top, and no footprint tile rises over its base
 #   flat           its footprint is all one floor height         has(key)      the prop's JSON has that key
 #   outdoor  indoor  cave  wild   kind(a | b)  region(a | b)  map(a | b)
+#   toward(r, a | b)  an edge exit within r tiles leads to a map of region a or b (willows framing the road to the Dreamwater)
 #   banded         it stands in a transition band (5.7) whose scatter lists its asset: borrowed from the next region
 #
 # T (a target) is terms joined by `|`: an asset name, a #tag, tile:<glyphs> (tile:pr=H), paint:<glyphs>, or a
@@ -98,6 +99,7 @@ rule lamp.timber warn "a miner's oil lantern hangs on the mine's timbers"
 rule sign.by-path warn "a sign stands beside the path, at its edge (3.3)"
   for signpost | sign
   when outdoor
+  unless cave                                        # a cave lays no path on its floor
   need near(1, #path)
 
 rule sign.off-path error "a sign never stands on the path (3.3)"
@@ -283,10 +285,11 @@ rule biome.basalt warn "basalt belongs to the Emberlands and the Storm coast (or
   need region(ember | storm)
   swap rock_basalt -> rock
 
-rule biome.willow warn "willows belong to the Dreamwater (or a band toward it)"
+rule biome.willow warn "willows belong to the Dreamwater (or a band toward it, or a road out to it)"
   for willow
   when outdoor
   unless has(band) or banded                         # a transition band toward the region it belongs to (5.7)
+  unless toward(10, dream)                           # willows framing the road out to the Dreamwater hint at what's next (5.5)
   need region(dream)
 
 # ---------- Ground — the heightmap ----------

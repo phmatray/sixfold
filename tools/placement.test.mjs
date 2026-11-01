@@ -93,6 +93,15 @@ test("banded: a prop in a transition band whose scatter lists it", () => {
   assert.equal(on(m.props[7]), false, "crates are not in its scatter");
 });
 
+test("toward: an edge exit within r tiles leads to a map of that region", () => {
+  const m = { ...structuredClone(MAP), exits: [{ side: "s", span: [1, 3], to: "lake" }] };
+  m.props.push({ asset: "willow", x: 2, z: 3, rot: 0 });
+  const v = world("test", m, { ...T, REGION: { lake: "dream" } }), ask = (src) => evaluate(v, m.props[5], parseRules(`rule r warn "r"\n for *\n need ${src}`).rules[0].need[0].e);
+  assert.equal(ask("toward(1, dream)"), true, "the south exit's edge tiles are a tile away");
+  assert.equal(ask("toward(1, ember)"), false);
+  assert.equal(ask("toward(0, dream)"), false, "not on the exit itself");
+});
+
 test("count counts a prop once, dist measures to the nearest", () => {
   assert.equal(ask("count(1, house) == 1", lampA), true);
   assert.equal(ask("count(2, lantern) == 1", lampA), true, "itself excluded");

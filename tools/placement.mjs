@@ -16,7 +16,7 @@ import * as ld from "../web/world/ld.js";
 const FUNCS = {
   // name: argument kinds (n number, t target, w words); booleans unless listed in NUMERIC
   on: ["t"], touches: ["t"], near: ["n", "t"], front: ["n?", "t"], behind: ["n?", "t"], beside: ["t"],
-  count: ["n", "t"], dist: ["t"], is: ["t"], has: ["w"], kind: ["w"], region: ["w"], map: ["w"],
+  count: ["n", "t"], dist: ["t"], is: ["t"], has: ["w"], kind: ["w"], region: ["w"], map: ["w"], toward: ["n", "w"],
 };
 const NUMERIC = new Set(["count", "dist", "y", "height", "rot"]);
 const WORDS = new Set(["outdoor", "indoor", "cave", "wild", "banded", "grounded", "flat", "true", "false", "y", "height", "rot"]);
@@ -133,7 +133,9 @@ export function tables(dir = "web/world") {
   const FOOT = read(/export const FOOT = (\{[\s\S]*?\});/), DECK = read(/export const DECK = (\{[\s\S]*?\});/);
   const TALL = read(/export const TALL = (\{[\s\S]*?\});/);
   const WALKABLE = new Set(read(/export const WALKABLE = new Set\((\[[\s\S]*?\])\);/));
-  return { FOOT, DECK, WALKABLE, tall: (a) => ld.HEIGHT[a] ?? TALL[a] ?? 1 };
+  // Each map's region, for `toward` (where an exit leads).
+  const REGION = existsSync(`${dir}/maps`) ? Object.fromEntries(readdirSync(`${dir}/maps`).map((f) => [f.replace(".json", ""), JSON.parse(readFileSync(`${dir}/maps/${f}`, "utf8")).region ?? null])) : {};
+  return { FOOT, DECK, WALKABLE, REGION, tall: (a) => ld.HEIGHT[a] ?? TALL[a] ?? 1 };
 }
 
 const FACE = { 0: [0, 1], 90: [1, 0], 180: [0, -1], 270: [-1, 0] }; // a prop's face (+Z at rot 0), as check-maps reads it
@@ -158,6 +160,8 @@ export function world(name, m, t) {
     doors: set((m.warps ?? []).filter((w) => !w.dir).map((w) => [w.x, w.z])),
     warps: set((m.warps ?? []).map((w) => [w.x, w.z])),
     npcs: set(people), spots: set((m.interactions ?? []).map((i) => [i.x, i.z])), exits: set(exits),
+    // Each edge exit's tiles and the region of the map it leads to.
+    exitRegion: new Map((m.exits ?? []).flatMap((e) => ld.edgeTiles(m, e).map(([x, z]) => [key(x, z), t.REGION?.[e.to] ?? null]))),
     wild: (x, z) => ["route", "site", "cave"].includes(m.kind) || (m.wild ?? []).some(([x0, z0, x1, z1]) => x >= x0 && x <= x1 && z >= z0 && z <= z1),
     // The transition bands (WORLD_RULES 5.7) whose scatter lists an asset and reach the point (x, z) in tiles.
     banded: (asset, x, z) => (m.transitions ?? []).some((tr) => { const b = tr.scatter?.includes(asset) && ld.bandOf(m, tr); return b && ld.bandWeight(m, b, x, z) > 0; }),
@@ -239,6 +243,7 @@ export function evaluate(w, p, e) {
     case "has": return e.args[0].some((k) => p[k] !== undefined);
     case "kind": return e.args[0].includes(w.m.kind);
     case "region": return e.args[0].includes(w.m.region);
+    case "toward": return ring(w, p, e.args[0]).some(([x, z]) => e.args[1].includes(w.exitRegion.get(key(x, z))));
     case "map": return e.args[0].includes(w.name);
     case "on": return w.tiles(p).every(([x, z]) => any(w, e.args[0], x, z, p));
     case "touches": return w.tiles(p).some(([x, z]) => any(w, e.args[0], x, z, p));
