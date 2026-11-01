@@ -58,7 +58,7 @@ tag blooms    = flowers heather moonflower blossom_tree vegetable_patch wisteria
 tag afloat    = reeds lake_house harbour_house boat buoy ferry water_lilies floating_lantern rock_sea bridge rope_bridge boardwalk lighthouse bell_tower cliff_falls
 tag harbour   = tile:H= boardwalk ferry boat              # what gear serves (not the gear itself)
 tag indoors   = lamp plant chair bed bookcase shelf rug counter display_case oven cloth_rack dress_form workbench light_box net_locker boot_rack
-tag on_a_wall = bookcase shelf display_case net_locker boot_rack oven cloth_rack light_box
+tag on_a_wall = bookcase shelf display_case net_locker boot_rack oven cloth_rack light_box workbench glass_rack tally_board hold_wall
 tag at_table  = duel_table chart_table workbench counter cobbler_bench soup_cauldron chowder_stove
 tag raised    = canopy_deck rope_bridge ladder               # held up by trees and posts, by design
 tag market    = stall stall_b curio_cabinet
@@ -142,11 +142,61 @@ rule chair.table info "a chair goes with a table, a desk or a counter"
 
 rule furniture.wall warn "a bookcase, a shelf or a locker stands against a wall"
   for #on_a_wall
+  when indoor                                       # a glass yard's racks stand in the open
   need behind(#wall | edge) or beside(#wall | edge) or behind(#on_a_wall)
 
 rule furniture.indoor error "room furniture stays indoors"
   for #indoors
   need indoor
+
+# ---------- Rooms — furniture that makes sense indoors ----------
+
+tag seat      = chair bench bed
+tag bedside   = lamp plant crates shelf chair bookcase light_box boot_rack rope_coil display_case   # no nightstand model yet: what stands in for one
+
+rule furniture.facing error "a bookcase, a shelf or a locker faces into the room, never its own wall"
+  for #on_a_wall
+  when indoor
+  need not front(#wall | edge)
+
+rule furniture.reach warn "you can step up to a bookcase, a shelf or a counter: the tile in front of it is free"
+  for #on_a_wall | counter
+  when indoor
+  need front(open | rug)
+
+rule chair.faces warn "a chair at a table faces it"
+  for chair
+  when front(#at_table) or behind(#at_table) or beside(#at_table)
+  need front(#at_table)
+
+rule bed.wall warn "a bed stands against a wall, not in the middle of the room"
+  for bed
+  need near(1, #wall | edge)
+
+rule bed.side info "a bed has something at its side: a lamp, a crate, a shelf (stand-ins for a nightstand)"
+  for bed
+  need near(1, #bedside)
+
+rule chair.wall warn "a chair never faces a wall"
+  for chair | bench
+  need not front(#wall | edge | tile:f)
+
+rule fire.seat info "a campfire has somewhere to sit round it: a log, a stump, a bench or a rock"
+  for campfire
+  need near(2, log | stump | bench | rock | fallen_trunk)
+
+rule lamp.use info "a floor lamp lights somewhere people sit, sleep, work or read"
+  for lamp
+  need near(2, #seat | #at_table | bookcase | shelf | display_case)
+
+rule plant.wall info "a pot plant stands by a wall or in a corner, not in the middle of the floor"
+  for plant
+  when indoor
+  need near(1, #wall | edge)
+
+rule mat.door warn "an exit mat lies at the door"
+  for exit_mat
+  need near(1, door | warp | exit)
 
 rule crates.purpose warn "crates belong to a trade: a house, a stall, a pier, a cart, a workshop"
   for crates | crates_open
