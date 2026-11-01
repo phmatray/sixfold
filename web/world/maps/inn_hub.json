@@ -21,13 +21,13 @@
     },
     {
       "asset": "bookcase",
-      "x": 4,
+      "x": 5,
       "z": 1,
       "rot": 0
     },
     {
       "asset": "plant",
-      "x": 6,
+      "x": 3,
       "z": 1,
       "rot": 0
     },
@@ -93,14 +93,14 @@
   },
   "interactions": [
     {
-      "x": 4,
+      "x": 5,
       "z": 1,
       "kind": "sign",
       "text": "The guest book. The last line reads: \"Slept like a stone. Dreamt of a seventh colour. — R.\"",
       "text_fr": "Le livre d'or. La dernière ligne dit : « Dormi comme une pierre. Rêvé d'une septième couleur. — R. »"
     },
     {
-      "x": 5,
+      "x": 6,
       "z": 1,
       "kind": "book",
       "id": "duel_hall"
