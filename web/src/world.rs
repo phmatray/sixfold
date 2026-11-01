@@ -15,9 +15,7 @@ use sixfold_meta::books;
 use sixfold_meta::campaign;
 use sixfold_meta::clock::{self, Phase};
 use sixfold_meta::objective;
-use sixfold_meta::overworld::{
-    parse_effect, Applied, CamTarget, Cue, Effect as Fx, Progress, StoneCue,
-};
+use sixfold_meta::overworld::{parse_effect, CamTarget, Cue, Effect as Fx, Progress, StoneCue};
 use sixfold_meta::save::CameraAngle;
 use wasm_bindgen::prelude::*;
 
@@ -31,6 +29,11 @@ use crate::packs::PacksPanel;
 use crate::title::OptionsPanel;
 use crate::worldmap::Waymark;
 use crate::{store, Screen, Ui};
+
+mod effects;
+mod items;
+mod sheets;
+use items::item_info;
 
 // The scene module is loaded at runtime from the copied `world/` folder, so
 // three.js comes from the import map in index.html and never touches the wasm.
@@ -187,241 +190,6 @@ fn push_items(p: &Progress) {
         .map(crate::art::color_key)
         .collect();
     world_seals(&faces.join(","));
-}
-
-/// Display name, model and blurb of an item.
-fn item_info(id: &str) -> (String, &'static str, &'static str) {
-    match id {
-        "running_shoes" => (
-            tr("Running Shoes", "Chaussures de course").into(),
-            "shoes",
-            tr(
-                "Light soles, quick feet. Hold {run}, or switch on Run, to cover two tiles in the time of one.",
-                "Semelles légères, pas rapides. Maintenez {run}, ou activez Courir, pour franchir deux cases le temps d'une.",
-            ),
-        ),
-        "field_lens" => (
-            tr("Field Lens", "Longue-vue").into(),
-            "lens",
-            tr(
-                "A brass birdwatcher's lens with a scratched cap. Somebody on the woodland trail will want it back.",
-                "Une lunette d'ornithologue en laiton, au capuchon rayé. Quelqu'un, sur le sentier des bois, voudra la récupérer.",
-            ),
-        ),
-        "letter" => (
-            tr("Letter for Hob", "Lettre pour Hob").into(),
-            "letter",
-            tr(
-                "Sealed with a wax hexagon and smelling faintly of the sea. Hob bakes in Brightwell Square.",
-                "Scellée d'un hexagone de cire, elle sent vaguement la mer. Hob fait son pain sur la Place de Clairpuits.",
-            ),
-        ),
-        // The six 1.2 curios (WORLD_DESIGN §5.2): Odile in the square counts them.
-        "curio_brass_thimble" => (
-            tr("Brass Thimble", "Dé à coudre en laiton").into(),
-            "brass_thimble",
-            tr(
-                "Dented on one side, polished bright on the other. Somebody sewed a great deal with it. A curio: Odile in Brightwell Square collects them.",
-                "Cabossé d'un côté, poli à force de servir de l'autre. Quelqu'un a beaucoup cousu avec. Une curiosité\u{a0}: Odile, sur la Place de Clairpuits, les collectionne.",
-            ),
-        ),
-        "curio_heron_feather" => (
-            tr("Heron Feather", "Plume de héron").into(),
-            "heron_feather",
-            tr(
-                "Long, grey and perfect. The herons don't miss it. A curio for Odile's cabinet.",
-                "Longue, grise, parfaite. Les hérons ne s'en plaindront pas. Une curiosité pour la vitrine d'Odile.",
-            ),
-        ),
-        "curio_message_bottle" => (
-            tr("Message in a Bottle", "Bouteille à la mer").into(),
-            "message_bottle",
-            tr(
-                "The cork is waxed shut and the paper inside says, as far as you can read it, \"Wish you were here.\" A curio for Odile.",
-                "Le bouchon est scellé à la cire et le papier dit, autant qu'on puisse lire\u{a0}: « J'aurais aimé que tu sois là. » Une curiosité pour Odile.",
-            ),
-        ),
-        "curio_fossil_fern" => (
-            tr("Fossil Fern", "Fougère fossile").into(),
-            "fossil_fern",
-            tr(
-                "A fern pressed into stone long before the quarry had a name. A curio for Odile.",
-                "Une fougère pressée dans la pierre bien avant que la carrière ait un nom. Une curiosité pour Odile.",
-            ),
-        ),
-        "curio_tin_hex" => (
-            tr("Painted Tin Hex", "Hexagone en fer-blanc peint").into(),
-            "tin_hex",
-            tr(
-                "A toy seal, six colours flaking off a tin hexagon. Every child in Brightwell had one once. A curio for Odile.",
-                "Un sceau jouet\u{a0}: six couleurs qui s'écaillent sur un hexagone de fer-blanc. Tous les enfants de Clairpuits en ont eu un. Une curiosité pour Odile.",
-            ),
-        ),
-        "curio_lead_type" => (
-            tr("Lead Type \"S\"", "Caractère de plomb « S »").into(),
-            "lead_type",
-            tr(
-                "A single letter S, cast backwards in lead. Gus swears it isn't missing from anything. A curio for Odile.",
-                "Une lettre S, fondue à l'envers dans le plomb. Gus jure qu'elle ne manque nulle part. Une curiosité pour Odile.",
-            ),
-        ),
-        "seed_packet_1" | "seed_packet_2" | "seed_packet_3" => (
-            tr("Seed Packet", "Sachet de graines").into(),
-            "curio",
-            tr(
-                "A twist of paper with Moss's handwriting on it: \"Runner beans. Do NOT eat.\" Moss tends the garden in Sixfold Meadow.",
-                "Un cornet de papier, de l'écriture de Moss\u{a0}: « Haricots grimpants. NE PAS MANGER. » Moss soigne le potager du Pré des Six.",
-            ),
-        ),
-        "kite_line" => (
-            tr("Kite Line", "Ligne de cerf-volant").into(),
-            "curio",
-            tr(
-                "Skye's spare reel of waxed line, long enough to reach the top of a lighthouse. Dace on the boardwalk is waiting.",
-                "La bobine de secours de Skye, une ligne cirée assez longue pour atteindre le haut d'un phare. Dace attend sur la promenade.",
-            ),
-        ),
-        "kiln_ash" => (
-            tr("Kiln Ash", "Cendre de four").into(),
-            "curio",
-            tr(
-                "A pouch of fine grey ash from Cole's kiln, still faintly warm. Hob wants it for an ash-crust loaf.",
-                "Un sachet de cendre grise et fine, tiré du four de Cole, encore tiède. Hob la veut pour un pain en croûte de cendre.",
-            ),
-        ),
-        "press_voucher" => (
-            tr("Press Voucher", "Bon de l'Imprimerie").into(),
-            "letter",
-            tr(
-                "Good for one card, any card that isn't a promo, Rares included. Gus at Brightwell Press prints it while you wait.",
-                "Valable pour une carte, n'importe laquelle sauf une promo, Rares comprises. Gus, à l'Imprimerie de Clairpuits, l'imprime pendant que vous attendez.",
-            ),
-        ),
-        // 1.3 curios (Odile still counts them) and the Lantern quest's cullet.
-        "curio_glass_marble" => (
-            tr("Glass Marble", "Bille de verre").into(),
-            "glass_marble",
-            tr(
-                "As big as a plum, with a twist of ember caught inside. Cinderwick glass. A curio for Odile's cabinet.",
-                "Grosse comme une prune, avec une volute de braise prise dedans. Du verre de Mèche-Cendre. Une curiosité pour la vitrine d'Odile.",
-            ),
-        ),
-        "curio_bottled_spark" => (
-            tr("Bottled Spark", "Étincelle en bouteille").into(),
-            "bottled_spark",
-            tr(
-                "A stoppered bottle with a thread of lightning crawling about inside. It hums if you shake it. A curio for Odile.",
-                "Une bouteille bouchée où rampe un fil d'éclair. Elle bourdonne quand on la secoue. Une curiosité pour Odile.",
-            ),
-        ),
-        "curio_bell_clapper" => (
-            tr("Bell Clapper", "Battant de cloche").into(),
-            "bell_clapper",
-            tr(
-                "The drowned bell's tongue, green with the sea, its striking ball worn bright. Still rings if you knock it. A curio for Odile.",
-                "La langue de la cloche noyée, verdie par la mer, la boule polie à force de frapper. Elle tinte encore quand on la cogne. Une curiosité pour Odile.",
-            ),
-        ),
-        "curio_moth_brooch" => (
-            tr("Moth Brooch", "Broche phalène").into(),
-            "moth_brooch",
-            tr(
-                "A silver moth with two moon-eyes on its wings, which glow faintly in the dark. Someone lost it in the well stair long ago. A curio for Odile.",
-                "Une phalène d'argent, deux yeux de lune sur les ailes, qui luisent un peu dans le noir. Quelqu'un l'a perdue dans l'escalier du puits, il y a longtemps. Une curiosité pour Odile.",
-            ),
-        ),
-        "cullet_quarry" | "cullet_town" | "cullet_kiln" => (
-            tr("Cullet", "Calcin").into(),
-            "cullet",
-            tr(
-                "A shard of the old green glass, as thick as a thumb. Clio at the Cinderwick Glassworks wants three.",
-                "Un éclat de vieux verre vert, épais comme un pouce. Clio, à la Verrerie de Mèche-Cendre, en veut trois.",
-            ),
-        ),
-        // The 1.3 field items (WORLD_DESIGN §7.1): each opens gates in other regions.
-        "kiln_lantern" => (
-            tr("Kiln Lantern", "Lanterne de four").into(),
-            "kiln_lantern",
-            tr(
-                "Glass blown at Cinderwick round a coal that never quite goes out. Dark tunnels and caves light up around you.",
-                "Un verre soufflé à Mèche-Cendre autour d'une braise qui ne s'éteint jamais tout à fait. Les tunnels et les grottes s'éclairent autour de vous.",
-            ),
-        ),
-        "ferry_pass" => (
-            tr("Ferry Pass", "Laissez-passer du bac").into(),
-            "ferry_pass",
-            tr(
-                "Stamped by the Gullhaven Harbour Office. Show it on any jetty and the ferry takes you across.",
-                "Tamponné par la Capitainerie de Havre-aux-Mouettes. Montrez-le sur n'importe quel embarcadère et le bac vous fait traverser.",
-            ),
-        ),
-        "wading_boots" => (
-            tr("Wading Boots", "Bottes de gué").into(),
-            "wading_boots",
-            tr(
-                "Waxed reed and leather, laced to the knee. Fords and shallows are a path now.",
-                "Du roseau ciré et du cuir, lacés jusqu'au genou. Gués et hauts-fonds deviennent des chemins.",
-            ),
-        ),
-        "grip_gloves" => (
-            tr("Grip Gloves", "Gants d'escalade").into(),
-            "grip_gloves",
-            tr(
-                "Chalked palms, stitched fingertips. Walls with handholds can be climbed.",
-                "Paumes à la craie, bouts des doigts cousus. Les parois à prises s'escaladent.",
-            ),
-        ),
-        // 1.3 Grove and Stone: errands and curios.
-        "reed_fibre" => (
-            tr("Reed Fibre", "Fibres de roseau").into(),
-            "reed_fibre",
-            tr(
-                "Long pale reeds from the Fernhollow stream, stripped and tied. Tobiah the cobbler wants them for wading boots.",
-                "De longs roseaux pâles du ruisseau de Creuse-Fougère, effeuillés et liés. Tobiah le cordonnier les veut pour des bottes de gué.",
-            ),
-        ),
-        "honey_jar" => (
-            tr("Jar of Honey", "Pot de miel").into(),
-            "curio",
-            tr(
-                "Hazel's new honey, still warm from the comb. For her mother Agnes in Rootholm.",
-                "Le miel nouveau de Hazel, encore tiède du rayon. Pour sa mère Agnes, à Racinemont.",
-            ),
-        ),
-        "lunch_pail" => (
-            tr("Lunch Pail", "Gamelle").into(),
-            "lunch_pail",
-            tr(
-                "The crew's lunch from the Tally Room: four pasties, two apples, a flask of tea. Counted. For Ros at the Undermine's east cut.",
-                "Le déjeuner de l'équipe, de la Salle des Comptes\u{a0}: quatre chaussons, deux pommes, une gourde de thé. Compté. Pour Ros, à la saignée est des Galeries Basses.",
-            ),
-        ),
-        "lucky_pick" => (
-            tr("Lucky Pick", "Pioche porte-bonheur").into(),
-            "lucky_pick",
-            tr(
-                "Huw's pick, its handle wrapped in faded red cord, his initials burned into the wood. Forty years lucky.",
-                "La pioche de Huw, le manche entouré d'une cordelette rouge passée, ses initiales brûlées dans le bois. Quarante ans de chance.",
-            ),
-        ),
-        "curio_acorn_whistle" => (
-            tr("Acorn Whistle", "Sifflet-gland").into(),
-            "acorn_whistle",
-            tr(
-                "An acorn as big as a fist, hollowed and pierced. Blow into it and it hoots like an owl. A curio for Odile.",
-                "Un gland gros comme un poing, creusé et percé. On souffle dedans, il hulule comme une chouette. Une curiosité pour Odile.",
-            ),
-        ),
-        "curio_miner_tally" => (
-            tr("Miner's Tally", "Jetons de mineur").into(),
-            "miner_tally",
-            tr(
-                "A ring of brass tally tags from the old Undermine, one punched with a hexagon. A curio for Odile.",
-                "Un anneau de jetons de laiton des anciennes Galeries, l'un poinçonné d'un hexagone. Une curiosité pour Odile.",
-            ),
-        ),
-        other => (other.replace('_', " "), "", ""),
-    }
 }
 
 /// One dialogue branch from the map JSON: shown when `cond` holds; a `more`
@@ -1130,66 +898,21 @@ pub fn WorldScreen() -> impl IntoView {
     // Apply effects in sixfold-meta (saved by the store), then show what follows:
     // a duel offer, a new item or a pack.
     let apply_effects = move |effects: Vec<String>| {
-        let mut next = None;
-        let mut packs = vec![];
-        let mut cards = vec![];
-        let mut cues = vec![];
-        let mut gained = 0;
-        let mut warp = None;
-        let mut rested = None;
-        let mut credits = false;
-        progress.update(|p| {
-            match p.apply_all(&effects) {
-                Ok(done) => {
-                    for a in done {
-                        match a {
-                            Applied::GotItem(item) => next = Some(Sheet::Item(item)),
-                            Applied::Duel(id) => next = Some(Sheet::Challenge(id)),
-                            Applied::Pack(b) => packs.push(b),
-                            Applied::Card(id) => {
-                                cards.push(id);
-                                if next.is_none() {
-                                    next = Some(Sheet::Card(id));
-                                }
-                            }
-                            Applied::Coins(n) => gained += n,
-                            Applied::Cue(Cue::Warp { map, x, z, facing }) => {
-                                warp = Some((map, x, z, facing))
-                            }
-                            Applied::Cue(c) => cues.push(cue_json(&c)),
-                            Applied::Clock(phase) => rested = Some(phase),
-                            Applied::Show(panel) => match panel.as_str() {
-                                "ladder" => next = Some(Sheet::Ladder),
-                                "trader" => next = Some(Sheet::Trader),
-                                "shop_hall" => next = Some(Sheet::Packs),
-                                "doctor" => next = Some(Sheet::Doctor),
-                                "press" => next = Some(Sheet::Press),
-                                "inn" => next = Some(Sheet::Inn),
-                                "map" => next = Some(Sheet::Atlas),
-                                // The finale's last beat (#67): the seal stone, the title, the credits.
-                                "credits" => credits = true,
-                                // Odile works through dialogue; the rest are 1.3.
-                                "curios" => {}
-                                _ => leptos::logging::warn!("world: no panel {panel}"),
-                            },
-                            Applied::Short(_) => {
-                                next = Some(Sheet::Note(
-                                    tr("Not enough Facets", "Pas assez de Facettes"),
-                                    tr(
-                                        format!("You have ⬡ {}.", p.coins()),
-                                        format!("Vous avez ⬡ {}.", p.coins()),
-                                    ),
-                                    None,
-                                ))
-                            }
-                            // Facets show in the counter (it reads Progress).
-                            Applied::Paid(_) | Applied::Nothing => {}
-                        }
-                    }
-                }
-                Err(err) => leptos::logging::warn!("world: {err}"),
-            }
+        let mut o = effects::Outcome::default();
+        progress.update(|p| match p.apply_all(&effects) {
+            Ok(done) => o = effects::outcome(done, p.coins()),
+            Err(err) => leptos::logging::warn!("world: {err}"),
         });
+        let effects::Outcome {
+            mut next,
+            packs,
+            cards,
+            cues,
+            gained,
+            warp,
+            rested,
+            credits,
+        } = o;
         progress.with_untracked(push_items);
         cues.iter().for_each(|c| world_cue(c));
         if let Some(phase) = rested {
@@ -1789,91 +1512,15 @@ pub fn WorldScreen() -> impl IntoView {
                     _ => String::new(),
                 })}</p>
                 {move || sheet.get().map(|s| match s {
-                    Sheet::Talk(t) => {
-                        let line = t.line().to_string();
-                        let len = line.chars().count();
-                        let more = t.at + 1 < t.lines.len();
-                        // The hero's own lines (a sign, a thought) carry no name plate.
-                        let named = !t.name.is_empty();
-                        // The placeholder's monogram while the bust bakes.
-                        let initial: String = t.name.chars().take(1).collect();
-                        let script = t.script;
-                        view! {
-                            // Described by the live line, so the first line is read on focus (later ones as they come).
-                            <button class="talk-box" class:has-face=t.face.is_some() aria-describedby="talk-live" on:click=move |_| advance()>
-                                // The face slides in with the first line only; a bust still baking is
-                                // a placeholder, and the bust fades in over it.
-                                {t.face.clone().map(|src| if src == BUST_PENDING {
-                                    view! { <span class="talk-face" class:enter=t.at == 0 aria-hidden="true">{initial.clone()}</span> }.into_any()
-                                } else {
-                                    view! {
-                                        {t.fade.then(|| view! { <span class="talk-face" aria-hidden="true">{initial.clone()}</span> })}
-                                        <img class="talk-face" class:enter=t.at == 0 && !t.fade class:bust-in=t.fade src=src alt="" width="96" height="96" />
-                                    }.into_any()
-                                })}
-                                {if named {
-                                    view! { <span class="talk-name" id="world-sheet-title">{t.name.clone()}</span> }.into_any()
-                                } else {
-                                    view! { <span class="sr-only" id="world-sheet-title">{tr("A note", "Une note")}</span> }.into_any()
-                                }}
-                                <span class="talk-line" aria-hidden="true">
-                                    {move || line.chars().take(typed.get()).collect::<String>()}
-                                </span>
-                                // The line itself is read by the live line below; the button says what it does.
-                                <span class="sr-only">{if more { tr("Next line", "Réplique suivante") } else if script { tr("Continue", "Continuer") } else { tr("Close", "Fermer") }}</span>
-                                // Shown once the line is out: more to come, or the end.
-                                <svg class="talk-next" class:ready={move || typed.get() >= len} class:end=!more viewBox="0 0 12 12" aria-hidden="true">
-                                    {if more {
-                                        view! { <path d="M1 3h10l-5 6.5z" /> }.into_any()
-                                    } else {
-                                        view! { <rect x="2" y="2" width="8" height="8" rx="1.5" /> }.into_any()
-                                    }}
-                                </svg>
-                            </button>
-                            // A cutscene's line: the scene can be skipped from here too (a tap on a phone).
-                            {script.then(|| view! {
-                                <button type="button" class="btn ghost talk-skip" aria-keyshortcuts="Escape" on:click=move |_| player_skip()>
-                                    {tr("Skip scene", "Passer la scène")}
-                                    <kbd>{move || input::prompt(Ctrl::Cancel)}</kbd>
-                                </button>
-                            })}
-                        }.into_any()
-                    }
-                    Sheet::Item(id) => {
-                        let (name, _, blurb) = item_info(&id);
-                        // The run control, for the device in use (#69).
-                        let blurb = blurb.replace("{run}", &untrack(|| input::named(Ctrl::Run)));
-                        let opens = objective::opens_names(&id);
-                        view! {
-                            <div class="item-got">
-                                <div class="item-preview" node_ref=preview></div>
-                                <div>
-                                    <h2 id="world-sheet-title">{tr(format!("You got {name}!"), format!("Vous obtenez : {name} !"))}</h2>
-                                    <p class="dialog-sub">{blurb}</p>
-                                    {(!opens.is_empty()).then(|| view! {
-                                        <div class="item-opens">
-                                            <h3>{tr("Opens", "Ouvre")}</h3>
-                                            <ul>{opens.into_iter().map(|n| view! { <li>{n}</li> }).collect_view()}</ul>
-                                        </div>
-                                    })}
-                                    <div class="dialog-foot">
-                                        <button class="btn primary" autofocus on:click=close>{tr("Nice", "Super")}</button>
-                                    </div>
-                                </div>
-                            </div>
-                        }.into_any()
-                    }
+                    Sheet::Talk(t) => view! {
+                        <sheets::TalkBox t=t typed=typed advance=Callback::new(move |()| advance())
+                            skip=Callback::new(move |()| player_skip()) />
+                    }.into_any(),
+                    Sheet::Item(id) => view! {
+                        <sheets::ItemGot id=id preview=preview close=Callback::new(move |()| sheet.set(None)) />
+                    }.into_any(),
                     Sheet::Card(id) => view! {
-                        <div class="item-got">
-                            <span class="found-card" aria-hidden="true"><crate::cards::CardFace id=id /></span>
-                            <div>
-                                <h2 id="world-sheet-title">{tr(format!("You found {}!", card(id).label()), format!("Vous trouvez\u{a0}: {}\u{202f}!", card(id).label()))}</h2>
-                                <p class="dialog-sub">{tr("It's in your collection now.", "La carte rejoint votre collection.")}</p>
-                                <div class="dialog-foot">
-                                    <button class="btn primary" autofocus on:click=close>{tr("Nice", "Super")}</button>
-                                </div>
-                            </div>
-                        </div>
+                        <sheets::CardFound id=id close=Callback::new(move |()| sheet.set(None)) />
                     }.into_any(),
                     Sheet::Duel(text) => view! {
                         <h2 id="world-sheet-title">{tr("A practice duel?", "Un duel d'entraînement ?")}</h2>
@@ -1939,44 +1586,9 @@ pub fn WorldScreen() -> impl IntoView {
                         {head(tr("Brightwell Press", "L'Imprimerie de Clairpuits"), true)}
                         <crate::shops::Press />
                     }.into_any(),
-                    Sheet::Inn => {
-                        let now = progress.with_untracked(Progress::minute);
-                        let current = clock::phase(now);
-                        view! {
-                            <div class="sheet-head">
-                                <h2 id="world-sheet-title">{tr("Rest a while", "Se reposer")}</h2>
-                                <crate::worldmap::DayDial full=true />
-                                <button class="btn ghost" on:click=close>{tr("Close", "Fermer")}</button>
-                            </div>
-                            <p class="dialog-sub">{tr(
-                                "A warm bed, a candle, the house quiet. Sleep until…",
-                                "Un lit chaud, une bougie, la maison tranquille. Dormir…",
-                            )}</p>
-                            <div class="inn-rest" role="group" aria-label=tr("Rest until", "Dormir jusqu'à")>
-                                {Phase::ALL.into_iter().map(|ph| {
-                                    let wait = clock::until(now, ph);
-                                    let hours = wait.div_ceil(60);
-                                    let is_now = ph == current;
-                                    let first = ph == current.next();
-                                    view! {
-                                        <button type="button" class="btn inn-choice" data-phase=ph.name() disabled=is_now
-                                            autofocus=first on:click=move |_| rest(ph)>
-                                            <span class="inn-choice-name">{rest_label(ph)}</span>
-                                            <span class="inn-choice-time">
-                                                {clock::hhmm(ph.start())}
-                                                " · "
-                                                {if is_now { tr("now".to_string(), "maintenant".to_string()) }
-                                                 else { tr(format!("in {hours} h"), format!("dans {hours} h")) }}
-                                            </span>
-                                        </button>
-                                    }
-                                }).collect_view()}
-                            </div>
-                            // A regional inn also keeps a counter (§7.4); the hub's only rests.
-                            {here.with_untracked(|(map, _)| sixfold_meta::shop::inn_stock(map))
-                                .map(|stock| view! { <crate::shops::InnCounter stock=stock /> })}
-                        }.into_any()
-                    }
+                    Sheet::Inn => view! {
+                        <sheets::InnRest here=here rest=Callback::new(rest) close=Callback::new(move |()| sheet.set(None)) />
+                    }.into_any(),
                     Sheet::Atlas => view! {
                         <div class="sheet-head">
                             <h2 id="world-sheet-title">{tr("World map", "Carte du monde")}</h2>
