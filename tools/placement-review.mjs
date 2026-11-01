@@ -202,6 +202,25 @@ export function desk(dir = "web/world") {
     return { undone: u.what, check: u.path === WAIVERS ? null : checkMaps() };
   }
 
+  // A placement a person chose ({ x, z, rot, y }), judged like an offered fix: the spots on the prop go with it, its y
+  // follows the floor where it lands (as high above it as before), and the answer names the rules it still breaks
+  // there and whether check-maps passes without a new warning. { patch, broken: [rule ids], check: { ok, first } }.
+  function tryFix(map, { index, asset, x, z }, chosen) {
+    known(map);
+    const m = JSON.parse(readFileSync(file(map), "utf8")), p = propOf(m, { index, asset, x, z });
+    if (!p) throw Object.assign(new Error(`${map} changed since: no ${asset} at ${x},${z}. Reload.`), { status: 409 });
+    const [fw, fd] = ld.foot(p, t.FOOT), on = (px, pz, w, d, sx, sz) => sx >= px && sx < px + w && sz >= pz && sz < pz + d;
+    const spots = (m.interactions ?? []).flatMap((s, i) => (on(p.x, p.z, fw, fd, s.x, s.z) ? [i] : []));
+    const floor = (tx, tz) => { const c = m.tiles[tz]?.[tx]; return c >= "1" && c <= "9" ? +c : c === "=" ? t.DECK.boardwalk[0] : c === "H" ? t.DECK.pier[0] : 0; };
+    const patch = { x: chosen.x, z: chosen.z, rot: chosen.rot ?? p.rot ?? 0, ...(spots.length && { spots }) };
+    if (chosen.y !== undefined) patch.y = chosen.y || undefined;
+    else { const y = +(floor(chosen.x, chosen.z) + Math.max(0, (p.y ?? 0) - floor(p.x, p.z))).toFixed(2); patch.y = y || undefined; }
+    const after = patched(map, [{ index, patch }]), w = world(map, after, t);
+    const broken = check(w, rules()).filter((f) => f.index === index).map((f) => f.rule);
+    const r = holds(map, [{ index, patch }]);
+    return { patch, broken, check: { ok: r.ok, first: r.ok ? null : r.first } };
+  }
+
   // A map's JSON with some fixes applied ([{ index, patch }]), for the game view.
   function patched(map, fixes = []) {
     known(map);
@@ -225,7 +244,7 @@ export function desk(dir = "web/world") {
     return [x0, z0];
   }
 
-  return { dir, names, rules, blocks, find, mapView, offered, plan, apply, reject, patched, stand, undo: undoLast, lastUndo: () => undo.at(-1)?.what ?? null, checkMaps: () => checkMaps() };
+  return { dir, names, rules, blocks, find, mapView, offered, plan, apply, reject, patched, stand, tryFix, undo: undoLast, lastUndo: () => undo.at(-1)?.what ?? null, checkMaps: () => checkMaps() };
 }
 
 // ----- The game view: the running game, driven headless, photographs a map before and after its fixes -----
@@ -327,6 +346,7 @@ function app(dir, port, cam) {
       if (get && url.pathname === "/api/map") return json(res, 200, d.mapView(q("name")));
       if (get && url.pathname === "/api/proposals") return json(res, 200, d.offered(q("map"), { index: +q("index"), asset: q("asset"), x: +q("x"), z: +q("z") }));
       if (get && url.pathname === "/api/plan") return json(res, 200, d.plan(q("map"), q("indices").split(",").map(Number)));
+      if (post && url.pathname === "/api/try") { const b = await read(req); return json(res, 200, d.tryFix(b.map, b.member, b.place)); }
       if (post && url.pathname === "/api/apply") return json(res, 200, d.apply(await read(req)));
       if (post && url.pathname === "/api/reject") {
         // A page from before ⌘R was kept off the R key answered a finding on every reload: it sends no `page`.

@@ -64,6 +64,10 @@
   .fix { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); text-align: left; }
   .fix:hover { border-color: #3b4250; }
   .fix.on { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 9%, var(--panel)); }
+  .fix.blocked { border-color: color-mix(in srgb, var(--error) 55%, var(--line)); }
+  .own { color: var(--dim); margin: 2px 0 0; }
+  .own kbd { margin: 0 1px; }
+  #after.pick { cursor: crosshair; }
   .fix kbd, .actions kbd { margin-left: auto; }
   .plan { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); overflow: hidden; }
   .plan-head { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); color: var(--dim); }
@@ -126,7 +130,7 @@ const api = async (path, body) => {
   return j;
 };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-const icon = (k) => ({ lift: "⤒", turn: "↻", move: "➜", swap: "⇄", fill: "▦" })[k] ?? "•";
+const icon = (k) => ({ lift: "⤒", turn: "↻", move: "➜", swap: "⇄", fill: "▦", own: "✋" })[k] ?? "•";
 const span = (m) => { const xs = m.map((p) => p.x), zs = m.map((p) => p.z); return `${Math.min(...xs)},${Math.min(...zs)} – ${Math.max(...xs)},${Math.max(...zs)}`; };
 
 // ---------- The list ----------
@@ -231,7 +235,7 @@ function render(b, map) {
     </div>
     ${one ? fixesHtml() : planHtml()}
     <div class="actions">
-      <button class="btn confirm" id="confirm" ${moves ? "" : "disabled"}>${one ? "Confirm fix" : `Confirm ${moves} fix${moves === 1 ? "" : "es"}`} <kbd>Enter</kbd></button>
+      <button class="btn confirm" id="confirm" ${moves && !state.fixes[state.pick]?.blocked ? "" : "disabled"}>${one ? "Confirm fix" : `Confirm ${moves} fix${moves === 1 ? "" : "es"}`} <kbd>Enter</kbd></button>
       <button class="btn reject" id="reject">${one ? "It's fine, keep it" : `They're fine (${state.plan ? state.checked.size : b.members.length})`} <kbd>R</kbd></button>
       <input type="text" class="note" id="note" placeholder="Why it's fine (optional, saved with the answer)">
       <button class="btn" id="prev">Previous <kbd>←</kbd></button>
@@ -255,8 +259,28 @@ function render(b, map) {
 function fixesHtml() {
   if (state.loading) return `<p class="none">Looking for a better place, and running check-maps on each one…</p>`;
   if (state.error) return `<p class="none">Could not propose a fix: ${esc(state.error)}</p>`;
-  if (!state.fixes.length) return `<p class="none">No placement within 10 tiles keeps every rule and check-maps passing${state.blocked ? ` (the nearest one fails: ${esc(state.blocked)})` : ""}. Move it by hand in the map, or answer it below.</p>`;
-  return `<div class="fixes">${state.fixes.map((p, i) => `<button class="fix${i === state.pick ? " on" : ""}" data-i="${i}">${icon(p.kind)} ${p.label}<kbd>${i + 1}</kbd></button>`).join("")}</div>`;
+  const own = `<p class="own">✋ <b>Place it yourself:</b> ${state.mode === "2d" ? "click a tile in the <b>After</b> view" : "switch to 2D and click a tile in the <b>After</b> view"}, <kbd>[</kbd> <kbd>]</kbd> to turn it. Each try is checked against the rules and check-maps.</p>`;
+  const none = state.fixes.length ? "" : `<p class="none">No placement within 10 tiles keeps every rule and check-maps passing${state.blocked ? ` (the nearest one fails: ${esc(state.blocked)})` : ""}.</p>`;
+  return `${none}<div class="fixes">${state.fixes.map((p, i) => `<button class="fix${i === state.pick ? " on" : ""}${p.blocked ? " blocked" : ""}" data-i="${i}">${icon(p.kind)} ${esc(p.label)}<kbd>${i + 1}</kbd></button>`).join("")}</div>${own}`;
+}
+
+// Your own placement of the prop on screen ({ x, z, rot }): judged by the server like an offered fix, then listed with
+// the fixes (and picked), so Confirm writes it like any other.
+async function placeOwn(x, z, rot) {
+  const b = state.shown[state.at];
+  if (!b || b.members.length !== 1 || state.loading) return;
+  const m = b.members[0], prev = state.fixes.find((p) => p.kind === "own");
+  rot = rot ?? prev?.place.rot ?? m.rot ?? 0;
+  const place = { x, z, rot };
+  let r;
+  try { r = await api("/api/try", { map: b.map, member: m, place }); } catch (e) { state.status = { text: `Could not try it: ${e.message}` }; return render(b, state.maps[b.map]); }
+  if (state.shown[state.at] !== b) return;
+  const face = { 0: "south", 90: "east", 180: "north", 270: "west" }[rot];
+  const verdict = !r.check.ok ? `✗ check-maps: ${r.check.first}` : r.broken.length ? `still breaks ${r.broken.join(", ")}` : "✓ every rule holds";
+  const fix = { kind: "own", label: `Your place: ${x},${z}, facing ${face} — ${verdict}`, patch: r.patch, place, blocked: !r.check.ok };
+  state.fixes = [...state.fixes.filter((p) => p.kind !== "own"), fix];
+  state.pick = state.fixes.length - 1;
+  render(b, state.maps[b.map]);
 }
 
 function planHtml() {
@@ -347,6 +371,7 @@ addEventListener("keydown", (e) => {
   else if (e.key === "u" && state.undo) undoLast();
   else if (e.key === "v") setMode({ "2d": "3d", "3d": "game", game: "2d" }[state.mode] ?? "2d");
   else if (e.key === "c") copyFinding();
+  else if ((e.key === "[" || e.key === "]") && state.fixes.some((p) => p.kind === "own")) { const o = state.fixes.find((p) => p.kind === "own").place; placeOwn(o.x, o.z, (o.rot + (e.key === "]" ? 90 : 270)) % 360); }
   else if (e.key === "g" || e.key === "/") { $("#goto").focus(); $("#goto").select(); }
   else if (/^[1-9]$/.test(e.key) && +e.key <= state.fixes.length) pick(+e.key - 1);
   else return;
@@ -395,7 +420,7 @@ function draw(b, map) {
   $("#after-label").textContent = state.loading ? "working it out…" : one ? (state.fixes[state.pick]?.label.toLowerCase() ?? "no fix proposed") : `${n} of ${b.members.length} fixed`;
   if (state.mode === "game") { const at = focus(b, map); shoot($("#before"), b.map, [], at); if (!state.loading) shoot($("#after"), b.map, chosen(), at); else $("#after").textContent = "Waiting for the fixes…"; }
   else if (state.mode === "3d") { three($("#before"), s.before, s.view, "before"); three($("#after"), s.after, s.view, "after"); }
-  else { paint($("#before"), s.before, s.view, $("#hover-before")); paint($("#after"), s.after, s.view, $("#hover-after")); }
+  else { paint($("#before"), s.before, s.view, $("#hover-before")); paint($("#after"), s.after, s.view, $("#hover-after"), one && !state.loading ? placeOwn : null); }
 }
 
 // ---------- Game: pictures from the running game ----------
@@ -443,7 +468,7 @@ function kindOf(p) {
 }
 const COLOUR = { light: "#ffd25e", tree: "#2e5b2a", plant: "#7fbf5a", rock: "#a7a59c", sign: "#ff9f43", harbour: "#7fc8f0", crate: "#c98b4a", house: "#8c6a55", thing: "#b7a3d6", deck: "#8c6239" };
 
-function paint(canvas, map, v, hover) {
+function paint(canvas, map, v, hover, onTile) {
   const r = canvas.getBoundingClientRect(), dpr = devicePixelRatio || 1;
   canvas.width = r.width * dpr; canvas.height = r.height * dpr;
   const g = canvas.getContext("2d"), cols = v.x1 - v.x0, rows = v.z1 - v.z0, s = Math.min(canvas.width / cols, canvas.height / rows);
@@ -497,6 +522,9 @@ function paint(canvas, map, v, hover) {
     hover.innerHTML = `<span class="mono">${x},${z}</span> · tile <span class="mono">${esc(c)}</span>${map.paint?.[z]?.[x] && map.paint[z][x] !== "." ? ` · paint ${map.paint[z][x]}` : ""}${[...here, ...extra].length ? ` · ${esc([...here, ...extra].join(", "))}` : ""}`;
   };
   canvas.onmouseleave = () => (hover.textContent = "");
+  // Place it yourself: a click puts the prop with its corner on that tile.
+  canvas.classList.toggle("pick", !!onTile);
+  canvas.onclick = onTile ? (e) => { const bb = canvas.getBoundingClientRect(); onTile(Math.floor(((e.clientX - bb.left) * dpr - ox) / s) + v.x0, Math.floor(((e.clientY - bb.top) * dpr - oz) / s) + v.z0); } : null;
 }
 
 function label(g, text, x, y, s, colour) {

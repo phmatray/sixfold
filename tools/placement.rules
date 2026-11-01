@@ -60,7 +60,7 @@ tag blooms    = flowers heather moonflower blossom_tree vegetable_patch wisteria
 tag afloat    = reeds lake_house harbour_house boat buoy ferry water_lilies floating_lantern rock_sea bridge rope_bridge boardwalk lighthouse bell_tower cliff_falls
 tag harbour   = tile:H= boardwalk ferry boat              # what gear serves (not the gear itself)
 tag indoors   = lamp plant chair bed bookcase shelf rug counter display_case oven cloth_rack dress_form workbench light_box net_locker boot_rack
-tag on_a_wall = bookcase shelf display_case net_locker boot_rack oven cloth_rack light_box workbench glass_rack tally_board hold_wall
+tag on_a_wall = bookcase shelf net_locker boot_rack oven cloth_rack light_box workbench glass_rack tally_board hold_wall
 tag at_table  = duel_table chart_table workbench counter cobbler_bench soup_cauldron chowder_stove   # worked at, or spoken across
 tag sit_at    = duel_table chart_table workbench cobbler_bench                                     # what a chair is drawn up to (a shop counter is not)
 tag raised    = canopy_deck rope_bridge ladder               # held up by trees and posts, by design
@@ -103,7 +103,7 @@ rule sign.by-path warn "a sign stands beside the path, at its edge (3.3)"
   for signpost | sign
   when outdoor
   unless cave                                        # a cave lays no path on its floor
-  need near(1, #path)
+  need near(2, #path)                                # the path's ground blends half a tile into the grass: two tiles off still reads as its edge
 
 rule sign.off-path error "a sign never stands on the path (3.3)"
   for signpost | sign
@@ -128,10 +128,10 @@ rule planter.off-path warn "a planter stands beside the path, not on it"
   for flower_planter
   need not touches(#trail)
 
-rule bench.view warn "a bench looks onto something: a path, a square, water, a fountain"
+rule bench.view info "a bench looks onto something: a path, a square, water, a fountain, or an open view"
   for bench
   when outdoor
-  need front(3, #path | #water | fountain | well | waymark | seal_stone | campfire)
+  need front(3, #path | #water | fountain | well | waymark | seal_stone | campfire) or not front(3, solid)   # facing the camera over open ground is a view too; turned toward a path it shows its back
 
 rule bench.seat warn "you sit on a bench from its front: that tile is open"
   for bench
@@ -149,6 +149,11 @@ rule furniture.wall warn "a bookcase, a shelf or a locker stands with its back t
   for #on_a_wall
   when indoor                                       # a glass yard's racks stand in the open
   need behind(#wall | edge) or behind(#on_a_wall)
+
+rule display.place warn "a glass display case stands by the counter or against a wall, facing the room"
+  for display_case
+  when indoor
+  need (near(1, counter) or behind(#wall | edge)) and not front(#wall | edge)
 
 rule furniture.indoor error "room furniture stays indoors"
   for #indoors
@@ -268,6 +273,7 @@ rule tree.off-path error "a tree never grows on a path, a square or a deck"
 rule scatter.off-path warn "bushes, flowers, reeds and rocks never grow on a path, a square or a deck"
   for #scatter
   unless has(band) or banded                         # a transition band toward the region it belongs to (5.7)
+  unless is(flowers) and not touches(#trail) and near(1, tile:.)   # a flower bed at a square's edge, against the grass, is planted there
   need not touches(#paved)
   fill pr                                           # or a bed of grass under it, beside the path
 
