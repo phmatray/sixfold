@@ -40,6 +40,9 @@
 //   daylight.js the light at each minute of the day: sun, moon, sky, fog, lamps, glow
 //   look.js    the frame drawn through post-processing at the graphics tier (tier.js, #225)
 //   book.js    a book taken from a shelf: its flight, its pages, the hero's reach
+//   camera.js  the outdoor angles, a room's clamp and the lean-in
+//   hud.js     the D-pad, RUN, the fade, the grid legend, the area banner and a scene's caption
+//   pick.js    which tile a tap (or the editor's pointer) means
 //   ground.js, life.js, props.js  ground layers, ambient life and wind, shared building blocks
 import * as THREE from "three";
 import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
@@ -56,7 +59,9 @@ import * as seats from "./seat.js";
 import { daylight, phaseOf, DAY } from "./daylight.js";
 import { scenes } from "./script.js";
 import { createBook } from "./book.js";
-import { ANGLES, framing, nextAngle } from "./camera.js";
+import { createHud } from "./hud.js";
+import * as pick from "./pick.js";
+import { ANGLES, framing, nextAngle, clampToRoom, leanOf } from "./camera.js";
 import { createLook } from "./look.js";
 import { TIERS, pickTier, readSaved, weak, unsure } from "./tier.js";
 
@@ -213,7 +218,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // (only after a new angle: a rotated phone or sixfoldCam still cut).
   let camAngle = "default", pitchNow = 50, distNow = 12, camEase = false;
   let dist = 12, alive = true, raf = 0, paused = false, warping = false, world = null, hero = null;
-  let canRun = false, runToggle = false, shift = false, lastHero = "";
+  let canRun = false, shift = false, lastHero = "";
   const sealsHeld = new Set(); // the seals held (setSeals): their stone faces stay lit
   // The clock (the engine owns the saved minute; Rust hands it over with setClock).
   let minute = 480, lastHour = -1, lastPhase = "", bgAt = 0;
@@ -238,70 +243,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   const ro = new ResizeObserver(resize);
   ro.observe(el);
 
-  // ---------- DOM: D-pad and RUN (in `controls`, after the header), fade, grid legend ----------
-  const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5l8 11H4z" fill="currentColor"/></svg>';
-  const pad = document.createElement("div");
-  pad.className = "world-pad";
-  pad.setAttribute("role", "group");
-  pad.setAttribute("aria-label", tr("Walk", "Marcher"));
-  for (const [f, label] of [["n", tr("Up", "Haut")], ["w", tr("Left", "Gauche")], ["e", tr("Right", "Droite")], ["s", tr("Down", "Bas")]]) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.innerHTML = arrow;
-    b.className = `pad-${f}`;
-    b.setAttribute("aria-label", label);
-    b.dataset.dir = f;
-    pad.appendChild(b);
-  }
-  const run = document.createElement("button");
-  run.type = "button";
-  run.className = "world-run";
-  run.textContent = tr("Run", "Courir");
-  run.hidden = true;
-  run.setAttribute("aria-pressed", "false");
-  run.addEventListener("click", () => {
-    runToggle = !runToggle;
-    run.setAttribute("aria-pressed", String(runToggle));
-  });
-  controls.append(pad, run);
-  const fade = document.createElement("div");
-  fade.className = "world-fade";
-  const legend = document.createElement("div");
-  legend.className = "world-legend";
-  legend.hidden = true;
-  legend.innerHTML = tr('<span class="k-block">Blocked</span><span class="k-act">Look or use</span><span class="k-warp">Door</span><span class="k-npc">Person</span>',
-    '<span class="k-block">Bloqué</span><span class="k-act">Regarder ou utiliser</span><span class="k-warp">Porte</span><span class="k-npc">Personne</span>');
-  // The area's name, shown for a moment on the way in; also a gate that just opened.
-  const banner = document.createElement("div");
-  banner.setAttribute("aria-hidden", "true");
-  Object.assign(banner.style, {
-    position: "absolute", zIndex: 2, left: "50%", top: "22%", transform: "translateX(-50%)", pointerEvents: "none",
-    padding: "8px 18px", borderRadius: "999px", background: "rgba(13, 26, 44, 0.72)", color: "#f6ecd2",
-    font: "700 clamp(16px, 2.4vw, 22px) 'Bricolage Grotesque', system-ui, sans-serif", letterSpacing: "0.02em",
-    width: "max-content", maxWidth: "calc(100% - 32px)", textAlign: "center", opacity: 0, transition: "opacity 0.5s ease",
-  });
-  let bannerTimer = 0;
-  const showBanner = (text, ms = 2200) => {
-    banner.textContent = text;
-    banner.style.opacity = 1;
-    clearTimeout(bannerTimer);
-    bannerTimer = setTimeout(() => (banner.style.opacity = 0), ms);
-  };
-  // A scene's caption (a reveal's line, the door's bells, #155): a paper plate, never mistaken for the area's
-  // name on its dark pill.
-  // A talk box hides it (style.css `.scene-caption`).
-  const caption = document.createElement("div");
-  caption.className = "scene-caption";
-  caption.setAttribute("aria-hidden", "true");
-  Object.assign(caption.style, {
-    position: "absolute", zIndex: 2, left: "50%", bottom: "18%", transform: "translateX(-50%)", pointerEvents: "none",
-    padding: "10px 20px", borderRadius: "12px", background: "var(--paper)", color: "var(--toon)", border: "2.5px solid var(--toon)",
-    boxShadow: "0 3px 0 var(--toon)", font: "600 clamp(15px, 2vw, 19px) 'Bricolage Grotesque', system-ui, sans-serif",
-    width: "max-content", maxWidth: "calc(100% - 32px)", textAlign: "center", textWrap: "balance", opacity: 0, transition: "opacity 0.4s ease",
-  });
-  let captionTimer = 0;
-  // Placed from what it names on screen (the seal stone, or the door's medallion): beside it, on the side
-  // with more room, never over it (#155).
+  // ---------- DOM: the D-pad, RUN, the fade, the grid legend, the banner and a scene's caption (hud.js) ----------
+  // Where a scene's caption names on screen (the seal stone, or the door's medallion; hud.js places it beside).
   const subjectY = () => {
     const o = world?.root.getObjectByName("inlay_0") ?? null, s = world?.stone;
     const p = o ? o.getWorldPosition(new THREE.Vector3()) : s ? world.root.localToWorld(s.at.clone()) : null;
@@ -311,24 +254,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const [up, down] = o ? [0.5, 0.5] : [1.3, 1.0];
     return { mid: y(p.clone()), top: y(p.clone().setY(p.y + up)), foot: y(p.clone().setY(p.y - down)) };
   };
-  // Placed again every frame while it shows (#155): the camera is often still moving onto what it names.
-  const placeCaption = (fresh = false) => {
-    const at = subjectY(), H = el.clientHeight, gap = 28;
-    if (at && fresh) caption.above = at.mid > H / 2; // the side is picked once per caption: it never flips mid-move
-    if (!at) Object.assign(caption.style, { top: "auto", bottom: "18%" });
-    else if (caption.above) Object.assign(caption.style, { top: "auto", bottom: `${Math.round(Math.min(H * 0.85, Math.max(16, H - at.top + gap)))}px` });
-    else Object.assign(caption.style, { bottom: "auto", top: `${Math.round(Math.min(H * 0.85, at.foot + gap))}px` });
-  };
-  const showCaption = (text, ms) => {
-    placeCaption(true);
-    caption.textContent = text;
-    caption.style.opacity = 1;
-    clearTimeout(captionTimer);
-    captionTimer = setTimeout(() => (caption.style.opacity = 0), ms);
-  };
-  // A scene's end takes its caption with it (a skip, a cut back under reduced motion).
-  const clearCaption = () => (clearTimeout(captionTimer), (caption.style.opacity = 0));
-  el.append(fade, legend, banner, caption);
+  const hud = createHud(el, controls, subjectY);
+  const { pad, fade, legend, showBanner, showCaption, clearCaption } = hud;
 
   // ---------- Input ----------
   const held = []; // pressed inputs, newest last: key names or "pad-<dir>"
@@ -417,49 +344,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   pad.addEventListener("contextmenu", (e) => e.preventDefault());
 
   // Tap/click the ground: walk the shortest grid path there (BFS). Tap a person,
-  // a sign or a table: walk up to it, face it, then talk or use it (like E).
-  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), hit = new THREE.Vector3();
-  const floor = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  const box = new THREE.Box3();
-  // The tile under the ray: a person or something to use first (a standing box
-  // per tile, so tapping a head or a signboard counts), else the floor.
-  const tapped = () => {
-    const w = world;
-    let best = null, bestD = Infinity;
-    const test = (x, z, cx, cz, top) => {
-      const y = w.floorAt(x, z);
-      box.min.set(cx - 0.5, y, cz - 0.5);
-      box.max.set(cx + 0.5, y + top, cz + 0.5);
-      if (ray.ray.intersectBox(box, hit) && hit.distanceTo(ray.ray.origin) < bestD) (bestD = hit.distanceTo(ray.ray.origin)), (best = [x, z]);
-    };
-    for (const n of w.npcs) test(n.x, n.z, n.obj.position.x, n.obj.position.z, 1.7);
-    for (const i of w.talk.values()) test(i.x, i.z, i.x + 0.5, i.z + 0.5, 1.1);
-    for (const wp of w.warps.values()) if (!wp.dir) test(wp.x, wp.z, wp.x + 0.5, wp.z + 0.5, 2.2); // a door: walking into it enters
-    for (const l of w.lifts) test(l.x, l.z, l.x + 0.5, l.z + 0.5, 2.4); // a lift's cage: walk in and ride
-    if (best) return best;
-    // Raised ground first: the highest level whose tile under the ray stands at that height.
-    for (const y of w.levels) {
-      floor.constant = -y;
-      if (!ray.ray.intersectPlane(floor, hit)) continue;
-      const tx = Math.floor(hit.x), tz = Math.floor(hit.z);
-      if (y && Math.abs(w.floorAt(tx, tz) - y) > 0.3) continue;
-      return [tx, tz];
-    }
-    return null;
-  };
+  // a sign or a table: walk up to it, face it, then talk or use it (like E). Which tile a point means: pick.js.
   // The floor tile under a screen point (the editor's pointer).
-  const tileAt = (clientX, clientY) => {
-    const b = renderer.domElement.getBoundingClientRect();
-    ndc.set(((clientX - b.left) / b.width) * 2 - 1, -((clientY - b.top) / b.height) * 2 + 1);
-    ray.setFromCamera(ndc, camera);
-    for (const y of world.levels) {
-      floor.constant = -y;
-      if (!ray.ray.intersectPlane(floor, hit)) continue;
-      const tx = Math.floor(hit.x), tz = Math.floor(hit.z);
-      if (!y || Math.abs(world.floorAt(tx, tz) - y) <= 0.3) return [tx, tz];
-    }
-    return null;
-  };
+  const tileAt = (clientX, clientY) => pick.tileAt(world, renderer.domElement, camera, clientX, clientY);
   let stopEditor = () => {}, editing = () => false, stopDebug = () => {}; // the map editor (?edit) and overlays (?debug), when loaded
   // A finger walks by tapping only when the player chose it in Options (web/src/store.rs):
   // otherwise a tap that misses the pad's buttons would send the hero across the map.
@@ -473,10 +360,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   const onTap = (e) => {
     if (busy() || e.button || (e.pointerType !== "mouse" && !tapWalk())) return;
     if (hero.sit) return seats.stand(hero); // a tap stands up
-    const b = renderer.domElement.getBoundingClientRect();
-    ndc.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1);
-    ray.setFromCamera(ndc, camera);
-    const t = tapped();
+    const t = pick.tapped(world, renderer.domElement, camera, e.clientX, e.clientY);
     if (!t) return;
     world.path = walkTo(t[0], t[1], world.npcAt(...t));
   };
@@ -619,7 +503,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   }
   function startStep(x, z, carry, door) {
     const stoop = door?.stoop; // a house door: only as far as its door, up its steps (props.js STOOP)
-    const run = canRun && (shift || runToggle) && !cut.playing; // a scene walks
+    const run = canRun && (shift || hud.running) && !cut.playing; // a scene walks
     const dur = (run ? RUN_STEP : STEP) * (stoop ? 0.5 + stoop.in : 1);
     hero.step = { x, z, t: carry / dur, dur, run, warp: door, stoop, hop: world.drop(hero.x, hero.z, x, z) }; // a drop: a hop down (actors.js)
     return true;
@@ -961,32 +845,16 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       }
     }
     if (cam.clamp) {
-      // Keep the view inside the room: the ground it shows spans [aim + top, aim + bottom]
-      // along z (perspective makes the far side longer) and ±halfW along x.
-      // The top edge is the top bar's lower edge, not the canvas's.
-      // At the camera's real distance: a scene's lean-in (zoom) lets the shot go closer to a wall (#155).
-      const dzc = distNow * zoom;
-      const half = THREE.MathUtils.degToRad(camera.fov / 2), hc = dzc * Math.sin(pitch) + off[1], d0 = dzc * Math.cos(pitch);
-      const halfTop = Math.atan((1 - 2 * cover) * Math.tan(half));
-      const top = pitch > halfTop ? d0 - hc / Math.tan(pitch - halfTop) : -Infinity, bottom = d0 - hc / Math.tan(pitch + half);
-      const halfW = dzc * Math.tan(half) * camera.aspect;
-      // A room bigger than the view: the view stays inside it. Smaller: the
-      // camera still follows the hero, but only as far as keeps the whole room
-      // (and its back wall, about 1 m) in view.
-      const fit = (v, lo, hi) => THREE.MathUtils.clamp(v, Math.min(lo, hi), Math.max(lo, hi));
-      // A scene's shot of a tile by the wall (the sealed door) may take in the wall's own thickness, no more,
-      // so what it shows isn't cut by the frame's edge (#155).
-      // An indoor place shot (the door) may show up to 1.2 m past the wall, so the place sits about a third in.
+      // A scene's shot of a tile by the wall may take in the wall's own thickness, no more, so what it shows
+      // isn't cut by the frame's edge; an indoor place shot (the door) up to 1.2 m, so the place sits about
+      // a third in (#155).
       const wall = shot ? (cut.onTile() && w.map.light.indoor ? 1.2 : 0.6) : 0;
-      aim.x = fit(aim.x, halfW - wall, w.map.width - halfW + wall);
-      if (Number.isFinite(top)) {
-        // A room deeper than the view leans to its back row (counters, shelves) as
-        // long as the hero stays a little over the bottom edge; a scene's shot holds its own depth.
-        const lo = -top - 1, hi = w.map.height - bottom;
-        aim.z = fit(aim.z, lo, lo < hi ? (shot ? hi : Math.max(lo, Math.min(hi, pz + 1.2 - bottom))) : hi);
-      }
+      [aim.x, aim.z] = clampToRoom(aim.x, aim.z, {
+        dist: distNow * zoom, pitch, fov: camera.fov, aspect: camera.aspect, cover, offY: off[1],
+        width: w.map.width, height: w.map.height, heroZ: pz, wall, hold: !!shot,
+      });
     }
-    if (caption.style.opacity === "1") placeCaption();
+    hud.follow();
     if (first || reduced) look.copy(aim), lookVel.set(0, 0, 0);
     else {
       const k = cut.playing ? 10 : 28, c = 2 * Math.sqrt(k) * (cut.playing ? 1 : 0.85); // slightly under-damped; a scene pans slowly
@@ -995,12 +863,11 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     }
     first = false;
     if (!paused) cut.update(dt);
-    // In a scene (#155: a scene reads as one) the camera leans in; on a place indoors (the sealed door, a
-    // stone) it comes close, so the place is the subject. Sitting or idle a while: in a little. Reduced motion
-    // cuts to a scene's distance and skips the idle lean.
-    // A phone held upright already sees little across: it leans in less, so both people stay in frame (#155).
-    const tall = camera.aspect < 1;
-    const lean = cut.playing ? (cut.onTile() && w.map.light.indoor ? (tall ? 0.8 : 0.55) : tall ? 0.95 : 0.85) : !reduced && (h.sit || h.idle > FIDGET_AFTER) ? 0.88 : 1;
+    // Read again after `cut.update`, which may have moved the scene on. Reduced motion cuts to the lean.
+    const lean = leanOf({
+      scene: cut.playing, place: cut.onTile() && !!w.map.light.indoor, tall: camera.aspect < 1,
+      resting: !!h.sit || h.idle > FIDGET_AFTER, reduced,
+    });
     zoom = reduced ? lean : zoom + (lean - zoom) * Math.min(1, dt * 1.5);
     const dz = distNow * zoom;
     camera.position.set(look.x, look.y + Math.sin(pitch) * dz, look.z + Math.cos(pitch) * dz);
@@ -1233,8 +1100,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     post.dispose();
     renderer.dispose();
     renderer.domElement.remove();
-    clearTimeout(bannerTimer);
-    for (const n of [pad, run, fade, legend, banner]) n.remove();
+    hud.remove();
   };
   return {
     stop,
@@ -1312,7 +1178,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     },
     setItems(list) {
       canRun = list.split(",").includes("running_shoes");
-      run.hidden = !canRun;
+      hud.run.hidden = !canRun;
     },
     preview,
     previewStop,
