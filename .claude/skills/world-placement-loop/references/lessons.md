@@ -26,6 +26,17 @@ new and general (a taste call that surprised you, a trap that cost time).
 - **Deliberate design is not a finding.** Willows framing the road to the Dreamwater (`toward`), props borrowed from
   the next region in a transition band (`banded`), a switchback staircase in Kilnmouth: refine the rule or report
   it, don't flatten it.
+- **A chair never stands right in front of another piece of furniture** (the user's call): not at a workbench, a
+  shelf, a desk or a counter, even facing it — it bars the way. Chairs are drawn up only to tables you sit at (duel
+  table, chart table, cobbler's bench); elsewhere a chair stands back to a wall beside the furniture, facing the room
+  (`chair.clear`, predicate `blocking`). The engine had proposed exactly the wrong fix here: check its fixes against
+  this before applying one.
+- **A bed never stands against a table** (the user's call), nor a counter or a workbench (`bed.clear`). A bed's head
+  goes to the wall; its nightstand stand-in goes at the head's side.
+- **Patterns a room template repeats are deliberate**: every shop and inn frames its way in with two floor lamps
+  against the side walls; a lamp beside a rack or a locker lights it. When twenty findings share one composition and
+  the pictures look warm, the rule is missing the pattern.
+- **A bench at the street's edge, facing the camera, is a street bench**; one round a fire is a seat at the fire.
 - **What reads right that the rules didn't know**: crates at a camp's fire or at a standing person's feet; a
   minecart by the rubble of a quarry with no track; an inn sign at the front corner of a five-wide house; nets
   drying a few steps up from the beach; a locker against a cave's rock face.

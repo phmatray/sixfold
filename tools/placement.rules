@@ -32,6 +32,7 @@
 #   near(r, T)     some tile within r of the footprint (itself included; the prop never matches itself)
 #   front(T)       the row in front of its face (+Z at rot 0)    front(n, T)   any of the n rows in front
 #   behind(T)      the row behind it, behind(n, T) the n rows    beside(T)     the columns either side
+#   blocking(T)    it stands on the row in front of a T's face, where you would step up to use that T
 #   count(r, T)    how many within r (a prop counts once, a tile once per tile)
 #   dist(T)        tiles to the nearest T (0 under it)           y  height  rot   the prop's base, metres, turn
 #   grounded       rests on the floor, a deck or another prop's top, and no footprint tile rises over its base
@@ -63,7 +64,7 @@ tag harbour   = tile:H= boardwalk ferry boat              # what gear serves (no
 tag indoors   = lamp plant chair bed bookcase shelf rug counter display_case oven cloth_rack dress_form workbench light_box net_locker boot_rack
 tag on_a_wall = bookcase shelf net_locker boot_rack oven cloth_rack light_box workbench glass_rack tally_board hold_wall
 tag at_table  = duel_table chart_table workbench counter cobbler_bench soup_cauldron chowder_stove   # worked at, or spoken across
-tag sit_at    = duel_table chart_table workbench cobbler_bench                                     # what a chair is drawn up to (a shop counter is not)
+tag sit_at    = duel_table chart_table cobbler_bench                                               # what a chair is drawn up to (not a shop counter, nor a workbench: you stand at it)
 tag raised    = canopy_deck rope_bridge ladder               # held up by trees and posts, by design
 tag stairs    = stairs stairs_slate stairs_basalt stairs_heath
 tag market    = stall stall_b curio_cabinet
@@ -132,7 +133,7 @@ rule planter.off-path warn "a planter stands beside the path, not on it"
 rule bench.view info "a bench looks onto something: a path, a square, water, a fountain, or an open view"
   for bench
   when outdoor
-  need front(3, #path | #water | fountain | well | waymark | seal_stone | campfire) or not front(3, solid)   # facing the camera over open ground is a view too; turned toward a path it shows its back
+  need front(3, #path | #water | fountain | well | waymark | seal_stone | campfire) or not front(3, solid) or near(1, #path) or near(2, campfire)   # facing the camera over open ground is a view too; turned toward a path it shows its back, so a bench at the street's edge facing out is a street bench; round a fire it is a seat at the fire
 
 rule bench.seat warn "you sit on a bench from its front: that tile is open"
   for bench
@@ -179,7 +180,7 @@ rule furniture.window warn "tall wall furniture never stands against a window: i
 rule furniture.reach warn "you can step up to a bookcase, a workbench or a counter: every tile in front of it is free"
   for #on_a_wall | counter
   when indoor
-  need not front(solid except chair | bench)          # a chair drawn up to it is how you use it
+  need not front(solid except chair | bench)          # a chair there is chair.clear's to judge (one finding, not two)
 
 rule chair.faces warn "a chair at a table faces it, never sits side-on or back to it"
   for chair
@@ -189,6 +190,15 @@ rule chair.faces warn "a chair at a table faces it, never sits side-on or back t
 rule bed.wall warn "a bed stands against a wall, not in the middle of the room"
   for bed
   need near(1, #wall | edge)
+
+rule chair.clear warn "a chair never stands right in front of another piece of furniture: it bars the way to it"
+  for chair
+  when indoor
+  need not blocking(#indoors | #on_a_wall | #at_table except #sit_at)   # a table is sat at; a workbench, a shelf, a desk or a counter is stepped up to
+
+rule bed.clear warn "a bed never stands against a table, a counter or a workbench"
+  for bed
+  need not near(1, #at_table)
 
 rule bed.side info "a bed has something at its side: a lamp, a crate, a shelf (stand-ins for a nightstand)"
   for bed
@@ -204,7 +214,7 @@ rule fire.seat info "a campfire has somewhere to sit round it: a log, a stump, a
 
 rule lamp.use info "a floor lamp lights somewhere people sit, sleep, work or read"
   for lamp
-  need near(2, #seat | #at_table | bookcase | shelf | display_case)
+  need near(2, #seat | #at_table | #on_a_wall | display_case) or (near(5, exit_mat) and near(1, #wall))   # a rack or a shelf it lights; or one of the pair against the side walls that frames a room's way in
 
 rule plant.wall info "a pot plant stands by a wall or in a corner, not in the middle of the floor"
   for plant
@@ -219,7 +229,7 @@ rule crates.purpose warn "crates belong to a trade: a house, a stall, a pier, a 
   for crates | crates_open
   when outdoor
   unless touches(spot)                              # a find or a story in them: put there on purpose, often off the beaten track
-  need near(3, #work) or near(2, npc)               # a fisher's or a quarryman's crates, at their feet
+  need near(3, #work) or near(2, npc) or near(4, rail)   # a fisher's or a quarryman's crates, at their feet; freight waits a few steps from the track (Anvilstead, by the terrace wall)
 
 rule market.street warn "a stall opens onto a street or a square"
   for #market

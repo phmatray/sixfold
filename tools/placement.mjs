@@ -15,7 +15,7 @@ import * as ld from "../web/world/ld.js";
 
 const FUNCS = {
   // name: argument kinds (n number, t target, w words); booleans unless listed in NUMERIC
-  on: ["t"], touches: ["t"], near: ["n", "t"], front: ["n?", "t"], behind: ["n?", "t"], beside: ["t"],
+  on: ["t"], touches: ["t"], near: ["n", "t"], front: ["n?", "t"], behind: ["n?", "t"], beside: ["t"], blocking: ["t"],
   count: ["n", "t"], dist: ["t"], is: ["t"], has: ["w"], kind: ["w"], region: ["w"], map: ["w"], toward: ["n", "w"],
 };
 const NUMERIC = new Set(["count", "dist", "y", "height", "rot"]);
@@ -260,6 +260,8 @@ export function evaluate(w, p, e) {
     case "front": return rows(w, p, e.args[0], 1).some(([x, z]) => any(w, e.args[1], x, z, p));
     case "behind": return rows(w, p, e.args[0], -1).some(([x, z]) => any(w, e.args[1], x, z, p));
     case "beside": return sides(w, p).some(([x, z]) => any(w, e.args[0], x, z, p));
+    // It stands on the row in front of another prop's face, where you would step up to use that prop.
+    case "blocking": { const mine = new Set(w.tiles(p).map(([x, z]) => key(x, z))); const is = (terms, q) => terms.some((t) => t.any || t.asset === q.asset || t.builtin === "prop") && !(terms.except && is(terms.except, q)); return w.m.props.some((q) => q !== p && is(e.args[0], q) && rows(w, q, 1, 1).some(([x, z]) => mine.has(key(x, z)))); }
     case "count": {
       // Props count once each (a 3-tile house is one house), tiles once per tile.
       const isProp = (t) => t.asset || t.any || t.builtin === "prop", byProp = e.args[1].filter(isProp), byTile = e.args[1].filter((t) => !isProp(t));
