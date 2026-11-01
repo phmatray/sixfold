@@ -11,12 +11,12 @@
 //! never a seal, and a cutscene moves the story on whether the player wins or
 //! loses ([`Duelist::story`]).
 
-use crate::ai::Difficulty;
-use crate::card::{card, CardId, CardKind, Color, EnergyCard, Rarity, Stage};
-use crate::deck::{DECK_SIZE, MAX_COPIES};
-use crate::lang::T;
 use crate::overworld::Progress;
-use crate::set::*;
+use sixfold_engine::ai::Difficulty;
+use sixfold_engine::set::*;
+use sixfold_engine::T;
+use sixfold_engine::{card, CardId, CardKind, Color, EnergyCard, Rarity, Stage};
+use sixfold_engine::{DECK_SIZE, MAX_COPIES};
 
 /// A short deck list: the cards of a lower tier (`base`) plus its own.
 #[derive(Debug)]
@@ -351,7 +351,7 @@ macro_rules! duelist {
 }
 
 /// The seals each of Rook's scenes waits for (the maps' `scripts` say so too,
-/// and `engine/tests/world_data.rs` holds them to it).
+/// and `meta/tests/world_data.rs` holds them to it).
 pub const ROOK_SEALS: [(&str, usize); 4] =
     [("rook_1", 1), ("rook_2", 3), ("rook_3", 5), ("rook_4", 6)];
 
@@ -495,8 +495,8 @@ pub static DUELISTS: [Duelist; 59] = [
 mod tests {
     use super::*;
     use crate::campaign::{rival, seals};
-    use crate::card::Stage;
-    use crate::validate_deck;
+    use sixfold_engine::validate_deck;
+    use sixfold_engine::Stage;
 
     /// Every kit and every duelist's deck is a legal 60 whose evolutions all
     /// have their line underneath.

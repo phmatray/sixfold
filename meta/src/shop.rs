@@ -18,13 +18,13 @@ use std::fmt;
 
 use crate::booster::{BOOSTERS, WILD};
 use crate::campaign::RIVALS;
-use crate::card::{card, CardId, Rarity};
-use crate::deck::MAX_COPIES;
-use crate::lang::tr;
 use crate::overworld::Progress;
 use crate::profile::{Profile, STARTING_PACKS};
-use crate::rng::Rng;
-use crate::set::{self, is_promo};
+use sixfold_engine::set::{self, is_promo};
+use sixfold_engine::tr;
+use sixfold_engine::Rng;
+use sixfold_engine::MAX_COPIES;
+use sixfold_engine::{card, CardId, Rarity};
 
 pub const THEMED_PACK_PRICE: u32 = 150;
 pub const WILD_PACK_PRICE: u32 = 200;
@@ -315,7 +315,7 @@ mod tests {
     use super::*;
     use crate::campaign::{record, rival, CONSOLATION_PER_PRIZE, RIVAL_PURSE, WARDEN_PURSE};
     use crate::duelists::{DUELISTS, PURSE_BASE, PURSE_PER_PRIZE};
-    use crate::set::*;
+    use sixfold_engine::set::*;
 
     fn rich() -> (Progress, Profile) {
         let mut p = Progress::default();
@@ -476,7 +476,7 @@ mod tests {
 
     #[test]
     fn inn_counters_sell_their_region() {
-        use crate::card::Color;
+        use sixfold_engine::Color;
         for inn in &INNS {
             let b = &BOOSTERS[inn.booster()];
             let tiers: Vec<_> = inn.singles.iter().map(|&id| tier(id)).collect();
@@ -516,7 +516,7 @@ mod tests {
 
     #[test]
     fn shop_errors_read_in_both_languages() {
-        use crate::lang::{set_lang, Lang};
+        use sixfold_engine::{set_lang, Lang};
         assert_eq!(
             ShopError::Short(5).to_string(),
             "Not enough Facets: ⬡ 5 short."

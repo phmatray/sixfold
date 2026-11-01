@@ -1597,7 +1597,7 @@ span.talk-face.enter { animation: talk-face-in 260ms cubic-bezier(0.2, 0.8, 0.3,
 }
 .item-got { display: flex; gap: 16px; align-items: center; }
 .note-text { white-space: pre-line; }
-/* A field item's sheet: the places it opens (engine/src/objective.rs). */
+/* A field item's sheet: the places it opens (meta/src/objective.rs). */
 .item-opens { margin: 10px 0 4px; }
 .item-opens h3 { margin: 0 0 4px; font: 700 var(--fs-xs) var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass-hi); }
 .item-opens ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: var(--fs-base); }

@@ -23,12 +23,12 @@ use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 use serde_json::Value;
-use sixfold_engine::books::{book, BOOKS};
-use sixfold_engine::campaign::{rival, GROUNDS, RIVALS};
-use sixfold_engine::doctor::APPLIED_FLAG;
-use sixfold_engine::duelists::{duelist, DUELISTS, ROOK_SEALS};
-use sixfold_engine::overworld::{parse_cond, parse_effect, CamTarget, Cue, Effect, Progress, Test};
-use sixfold_engine::stats::{CURIOS, FIELD_ITEMS, FINDS, SEAL_SITES, SECRETS, WAYMARKS};
+use sixfold_meta::books::{book, BOOKS};
+use sixfold_meta::campaign::{rival, GROUNDS, RIVALS};
+use sixfold_meta::doctor::APPLIED_FLAG;
+use sixfold_meta::duelists::{duelist, DUELISTS, ROOK_SEALS};
+use sixfold_meta::overworld::{parse_cond, parse_effect, CamTarget, Cue, Effect, Progress, Test};
+use sixfold_meta::stats::{CURIOS, FIELD_ITEMS, FINDS, SEAL_SITES, SECRETS, WAYMARKS};
 
 /// What every map seen so far placed.
 #[derive(Default)]
@@ -769,7 +769,7 @@ fn needs(cond: &str, item: &str) -> bool {
 }
 
 /// The places on one map that a field item opens, by the rule of
-/// [`sixfold_engine::objective::Place`]: a gate (its id), a gated door (the map
+/// [`sixfold_meta::objective::Place`]: a gate (its id), a gated door (the map
 /// it leads to), a spot (its id), or a person or spot whose dialogue warps
 /// once the item is held (its id, a gangway). Gates also give their names.
 fn ways(m: &Value, item: &str) -> Vec<(String, Option<(String, String)>)> {
@@ -807,7 +807,7 @@ fn ways(m: &Value, item: &str) -> Vec<(String, Option<(String, String)>)> {
 /// ways the maps shut on that item, and a gate's name there is the map's own.
 #[test]
 fn every_way_a_field_item_opens_is_in_its_table() {
-    use sixfold_engine::objective::KEYS;
+    use sixfold_meta::objective::KEYS;
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
     let maps: Vec<(String, Value)> = std::fs::read_dir(&dir)
         .expect("the world's maps")
@@ -860,9 +860,9 @@ fn every_way_a_field_item_opens_is_in_its_table() {
 /// effect rolls the credits (`show:credits`). Its music is a known track.
 #[test]
 fn the_finale_plays_after_the_warden_falls_once() {
-    use sixfold_engine::campaign::{record, rival, RIVALS};
-    use sixfold_engine::overworld::Progress;
-    use sixfold_engine::profile::Profile;
+    use sixfold_meta::campaign::{record, rival, RIVALS};
+    use sixfold_meta::overworld::Progress;
+    use sixfold_meta::profile::Profile;
 
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
     let m: Value =
@@ -1535,8 +1535,8 @@ fn grounds_name_the_maps_that_hold_each_regions_duelists() {
 /// she says the same if talked to first, and the finale stays the victory.
 #[test]
 fn the_warden_is_staged_grandest() {
-    use sixfold_engine::campaign::record;
-    use sixfold_engine::profile::Profile;
+    use sixfold_meta::campaign::record;
+    use sixfold_meta::profile::Profile;
 
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world/maps");
     let load = |name: &str| -> Value {

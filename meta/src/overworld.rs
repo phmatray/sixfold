@@ -57,9 +57,9 @@ use std::collections::BTreeSet;
 
 use crate::booster::BOOSTERS;
 use crate::campaign::{rival, seals, KEEPERS, RIVALS, SEALS, STAGED, VOUCHED};
-use crate::card::{card, CardId};
 use crate::clock::{self, Phase};
 use crate::duelists;
+use sixfold_engine::{card, CardId};
 
 /// Facets a new player starts with, and a save from before Facets.
 pub const STARTING_COINS: u32 = 100;
@@ -340,7 +340,8 @@ pub fn card_slug(id: CardId) -> String {
 
 /// The card a `card:` slug names; never a promo.
 pub fn card_by_slug(slug: &str) -> Option<CardId> {
-    crate::set::ids().find(|&id| !crate::set::is_promo(id) && card_slug(id) == slug)
+    sixfold_engine::set::ids()
+        .find(|&id| !sixfold_engine::set::is_promo(id) && card_slug(id) == slug)
 }
 
 /// Parse a dialogue condition.
@@ -1169,7 +1170,7 @@ mod tests {
 
     #[test]
     fn card_effects_take_a_slug_and_refuse_promos() {
-        use crate::set::{MOSS_POULTICE, RECALL_HORN};
+        use sixfold_engine::set::{MOSS_POULTICE, RECALL_HORN};
         let mut p = Progress::default();
         assert_eq!(card_slug(MOSS_POULTICE), "moss_poultice");
         assert_eq!(p.apply("card:recall_horn"), Ok(Applied::Card(RECALL_HORN)));
@@ -1186,7 +1187,7 @@ mod tests {
             assert!(p.apply(bad).is_err(), "{bad:?}");
         }
         // Every non-promo card has a slug that finds it again.
-        for id in crate::set::ids().filter(|&id| !crate::set::is_promo(id)) {
+        for id in sixfold_engine::set::ids().filter(|&id| !sixfold_engine::set::is_promo(id)) {
             assert_eq!(card_by_slug(&card_slug(id)), Some(id));
         }
     }

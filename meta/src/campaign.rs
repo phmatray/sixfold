@@ -13,15 +13,15 @@
 //! (a rival or a route duelist, [`crate::duelists`]), and [`record_opponent`]
 //! the one way to record such a duel.
 
-use crate::ai::{Difficulty, Style};
 use crate::duelists::{self, duelist};
-use crate::lang::T;
+use sixfold_engine::ai::{Difficulty, Style};
+use sixfold_engine::T;
 
-use crate::card::{CardId, Color};
-use crate::decks::{Prebuilt, EMBER_RUSH, STORM_FRONT};
 use crate::overworld::Progress;
 use crate::profile::Profile;
-use crate::set::*;
+use sixfold_engine::decks::{Prebuilt, EMBER_RUSH, STORM_FRONT};
+use sixfold_engine::set::*;
+use sixfold_engine::{CardId, Color};
 
 /// Seals there are to earn: one per rival, the Warden excluded.
 pub const SEALS: usize = 6;
@@ -80,7 +80,7 @@ pub struct Rival {
     /// Warden.
     pub region: T,
     /// The route duelists of their region (its maps and its town's
-    /// interiors; `engine/tests/world_data.rs` holds the list to the maps).
+    /// interiors; `meta/tests/world_data.rs` holds the list to the maps).
     pub duelists: &'static [&'static str],
     /// How many of them must be bested before they accept a duel (never all).
     pub earn: usize,
@@ -139,7 +139,7 @@ impl Rival {
     pub fn bested_line(&self, p: &Progress) -> String {
         let (n, of) = (self.bested(p), self.earn);
         let region = self.region.en.trim_start_matches("the ");
-        crate::tr(
+        sixfold_engine::tr(
             format!("{region} duelists bested: {n}\u{a0}of\u{a0}{of}"),
             format!(
                 "Duellistes {} battus\u{a0}: {n}\u{a0}sur\u{a0}{of}",
@@ -173,7 +173,7 @@ impl Rival {
     /// Finch and Harrow on the Bellflats; Vesper (at night) on Fernhollow
     /// Trail." None once earned.
     pub fn waiting_line(&self, p: &Progress) -> Option<String> {
-        let and = crate::tr("and", "et");
+        let and = sixfold_engine::tr("and", "et");
         let groups: Vec<String> = self
             .waiting(p)
             .iter()
@@ -185,7 +185,7 @@ impl Rival {
                     .filter_map(|id| duelist(id))
                     .map(|t| {
                         if t.night {
-                            format!("{} ({})", t.name, crate::tr("at night", "la nuit"))
+                            format!("{} ({})", t.name, sixfold_engine::tr("at night", "la nuit"))
                         } else {
                             t.name.to_string()
                         }
@@ -202,7 +202,7 @@ impl Rival {
         if groups.is_empty() {
             return None;
         }
-        Some(crate::tr(
+        Some(sixfold_engine::tr(
             format!("Still to beat: {}.", groups.join("; ")),
             format!("Restent à battre\u{a0}: {}.", groups.join("\u{a0}; ")),
         ))
@@ -264,7 +264,7 @@ pub struct Reward {
 
 /// A map that holds route duelists of a keeper's region, and where that is,
 /// as a sentence says it ("on the Bellflats", "sur les Grèves de la
-/// Cloche"). `engine/tests/world_data.rs` holds it to the maps and their titles.
+/// Cloche"). `meta/tests/world_data.rs` holds it to the maps and their titles.
 #[derive(Debug)]
 pub struct Ground {
     pub map: &'static str,
@@ -898,10 +898,10 @@ pub static RIVALS: [Rival; 7] = [
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ai::Ai;
     use crate::booster::BOOSTERS;
-    use crate::decks::STARTER;
-    use crate::{validate_deck, Config, Game};
+    use sixfold_engine::ai::Ai;
+    use sixfold_engine::decks::STARTER;
+    use sixfold_engine::{validate_deck, Config, Game};
 
     /// The slope test's games per rival, the most a rival may sit below the
     /// one before (seeded noise at this sample), and the largest rise.

@@ -9,13 +9,14 @@
 
 use std::collections::BTreeMap;
 
-use crate::card::{card, card_id, CardDef, CardId, CardKind, Color, EnergyCard, Gear, Stage};
 use crate::collection::Collection;
-use crate::deck::{DeckList, DECK_SIZE, MAX_COPIES};
 use crate::doctor::{Issue, ENERGY};
-use crate::effect::{Effect, Find};
-use crate::lang::tr;
-use crate::set::{self, basic_energy, budget::effect_value};
+use crate::DeckList;
+use sixfold_engine::set::{self, basic_energy, budget::effect_value};
+use sixfold_engine::tr;
+use sixfold_engine::{card, card_id, CardDef, CardId, CardKind, Color, EnergyCard, Gear, Stage};
+use sixfold_engine::{Effect, Find};
+use sixfold_engine::{DECK_SIZE, MAX_COPIES};
 
 /// How the deck wants to win.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -149,7 +150,7 @@ fn list(cards: &[(CardId, usize)]) -> String {
 }
 
 /// The costliest attack of a Hexon (its main attack, as the value budget reads it).
-fn main_attack(id: CardId) -> Option<&'static crate::card::Attack> {
+fn main_attack(id: CardId) -> Option<&'static sixfold_engine::Attack> {
     card(id)
         .creature()?
         .attacks
@@ -866,7 +867,9 @@ fn ranked_builds(owned: &Collection, style: Style) -> Vec<(Vec<Color>, Built)> {
             let fresh = all
                 .iter()
                 .all(|(_, _, b): &(i32, Vec<Color>, Built)| b.cards != built.cards);
-            if fresh && crate::validate_deck(&built.cards).is_ok() && owned.can_build(&built.cards)
+            if fresh
+                && sixfold_engine::validate_deck(&built.cards).is_ok()
+                && owned.can_build(&built.cards)
             {
                 all.push((rating(&built), colors, built));
             }
@@ -980,7 +983,7 @@ pub fn complete(deck: &[CardId], owned: &Collection, style: Style) -> Built {
     let mut dropped: BTreeMap<CardId, usize> = BTreeMap::new();
     let mut names: BTreeMap<&str, usize> = BTreeMap::new();
     for &id in deck {
-        let Some(d) = crate::card::try_card(id) else {
+        let Some(d) = sixfold_engine::try_card(id) else {
             continue;
         };
         let named = names.entry(d.name).or_default();
@@ -1207,7 +1210,7 @@ pub fn suggestions(deck: &[CardId], owned: &Collection) -> Vec<Suggestion> {
     let mut n: BTreeMap<CardId, usize> = BTreeMap::new();
     for &id in deck
         .iter()
-        .filter(|&&id| crate::card::try_card(id).is_some())
+        .filter(|&&id| sixfold_engine::try_card(id).is_some())
     {
         *n.entry(id).or_default() += 1;
     }
@@ -1340,7 +1343,7 @@ fn alone(x: &Draft, id: CardId) -> bool {
 }
 
 /// The best Basic of the deck's colours that can go in and passes `keep`.
-fn best_basic(x: &Draft, keep: impl Fn(&crate::card::Creature) -> bool) -> Option<CardId> {
+fn best_basic(x: &Draft, keep: impl Fn(&sixfold_engine::Creature) -> bool) -> Option<CardId> {
     set::ids()
         .filter(|&id| card(id).is_basic() && x.fits(id) && x.room(id) > 0)
         .filter(|&id| card(id).creature().is_some_and(&keep))
@@ -1419,7 +1422,7 @@ pub fn opening(deck: &[CardId]) -> Opening {
     let n = deck.len();
     let count = |keep: fn(&CardDef) -> bool| {
         deck.iter()
-            .filter(|&&id| crate::card::try_card(id).is_some_and(keep))
+            .filter(|&&id| sixfold_engine::try_card(id).is_some_and(keep))
             .count()
     };
     let (b, e) = (
@@ -1441,7 +1444,7 @@ pub fn opening(deck: &[CardId]) -> Opening {
 /// deck test's sample hand. The same seed draws the same hand.
 pub fn sample_hand(deck: &[CardId], seed: u64) -> Vec<CardId> {
     let mut v = deck.to_vec();
-    crate::rng::Rng::new(seed).shuffle(&mut v);
+    sixfold_engine::Rng::new(seed).shuffle(&mut v);
     v.truncate(7);
     v
 }
@@ -1453,7 +1456,7 @@ pub fn sample_hand(deck: &[CardId], seed: u64) -> Vec<CardId> {
 pub fn energy_needs(deck: &[CardId]) -> Vec<(Color, usize, usize)> {
     let (mut have, mut want) = ([0usize; 6], [0usize; 6]);
     for &id in deck {
-        let Some(d) = crate::card::try_card(id) else {
+        let Some(d) = sixfold_engine::try_card(id) else {
             continue;
         };
         match &d.kind {
@@ -1473,10 +1476,10 @@ pub fn energy_needs(deck: &[CardId]) -> Vec<(Color, usize, usize)> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::decks::STARTER;
     use crate::doctor::{diagnose, Issue};
-    use crate::lang::{set_lang, Lang};
     use crate::starter_collection;
+    use sixfold_engine::decks::STARTER;
+    use sixfold_engine::{set_lang, Lang};
 
     fn everything() -> Collection {
         let mut c = Collection::new();
@@ -1683,7 +1686,11 @@ mod tests {
             sorted
         );
         // What isn't owned goes, with a reason.
-        let c = complete(&crate::decks::EMBER_RUSH.cards(), &starter, Style::Balanced);
+        let c = complete(
+            &sixfold_engine::decks::EMBER_RUSH.cards(),
+            &starter,
+            Style::Balanced,
+        );
         assert!(starter.can_build(&c.cards) && c.cards.len() == DECK_SIZE);
         assert!(c.reasons.iter().any(|r| r.why == Why::Dropped));
         // Over 60: cut down.
@@ -1743,8 +1750,10 @@ mod tests {
     fn applying_a_suggestion_never_breaks_a_rule_or_borrows_a_card() {
         let starter = starter_collection();
         let all = everything();
-        let mut decks: Vec<Vec<CardId>> =
-            crate::decks::PREBUILT.iter().map(|d| d.cards()).collect();
+        let mut decks: Vec<Vec<CardId>> = sixfold_engine::decks::PREBUILT
+            .iter()
+            .map(|d| d.cards())
+            .collect();
         decks.push(without(&STARTER.cards(), set::PUDDOCK));
         decks.push(STARTER.cards()[..40].to_vec());
         for owned in [&starter, &all] {
@@ -1821,7 +1830,7 @@ mod tests {
         d.extend(std::iter::repeat_n(set::FIRE_ENERGY, 56));
         let c = complete(&d, &all, Style::Balanced);
         assert_eq!(c.cards.len(), DECK_SIZE);
-        assert_eq!(crate::validate_deck(&c.cards), Ok(()));
+        assert_eq!(sixfold_engine::validate_deck(&c.cards), Ok(()));
         assert!(c.cards.contains(&set::CINDREL));
         // An Awaken 2 whose line has no owned Basic goes, and the deck is
         // built in colours the player can open with.
@@ -1831,7 +1840,7 @@ mod tests {
         poor.add(set::CINDREL, 4);
         poor.add(set::FLARROW, 3);
         let c = complete(&[set::GULFWYRM, set::GULFWYRM], &poor, Style::Balanced);
-        assert_eq!(crate::validate_deck(&c.cards), Ok(()));
+        assert_eq!(sixfold_engine::validate_deck(&c.cards), Ok(()));
         assert!(!c.cards.contains(&set::GULFWYRM));
     }
 }

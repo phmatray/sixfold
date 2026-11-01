@@ -3,12 +3,12 @@
 The creatures of Sixfold are **Hexons** (*un Hexon, des Hexons*, the same word in English and French).
 This file holds the world lore, the design language of each type and the rules for illustrating a
 Hexon. The species sheets themselves are in [`bestiary/`](bestiary/), one file per type, in evolution
-order. The short **dex line** of every sheet ships with the game in `engine/src/lore.rs`.
+order. The short **dex line** of every sheet ships with the game in `meta/src/lore.rs`.
 
 *Les créatures de Sixfold sont les **Hexons**. Ce fichier rassemble le contexte du monde, le langage
 visuel de chaque type et les règles d'illustration. Les fiches d'espèce sont dans
 [`bestiary/`](bestiary/), un fichier par type, dans l'ordre des lignées. La courte **ligne de
-registre** de chaque fiche est livrée avec le jeu dans `engine/src/lore.rs`.*
+registre** de chaque fiche est livrée avec le jeu dans `meta/src/lore.rs`.*
 
 ---
 
