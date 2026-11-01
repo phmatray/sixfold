@@ -57,9 +57,9 @@ const TIERS = ["major", "secondary", "micro", "secret"]; // points of interest (
 const LADDER = new Set(eval(`(${src.match(/export const LADDER = new Set\((\[[\s\S]*?\])\);/)[1]})`));
 const TRACKS = new Set(["overworld", "ember", "storm", "tide", "dream", "grove", "stone", "cave"]);
 const BEDS = new Set([...TRACKS, "interior"]); // audio.js BEDS
-// A scene's `music:` may also be a theme of its own (engine overworld::TRACKS): Rook's, the finale's, a keeper's or the Warden's duel theme.
+// A scene's `music:` may also be a theme of its own (sixfold-meta overworld::TRACKS): Rook's, the finale's, a keeper's or the Warden's duel theme.
 const THEMES = new Set([...BEDS, "rook", "finale", "duel_boss", ...["ember", "storm", "tide", "dream", "grove", "stone"].map((r) => `duel_rival_${r}`)]);
-const KEEPERS = ["bramble", "marlo", "cinza", "quill", "orla", "lumen"]; // the seal keepers (engine campaign::RIVALS with a seal)
+const KEEPERS = ["bramble", "marlo", "cinza", "quill", "orla", "lumen"]; // the seal keepers (sixfold-meta campaign::RIVALS with a seal)
 const FENCES = new Set(["fence", "wall_dry", "hedge"]);
 const atlas = existsSync(`${dir}/atlas.json`) ? JSON.parse(readFileSync(`${dir}/atlas.json`, "utf8")) : null;
 const BACK = { n: "s", s: "n", e: "w", w: "e" };
@@ -169,7 +169,7 @@ for (const [name, m] of Object.entries(maps)) {
       if (!seatAt.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} sits where there is no seat`);
       if (n.route) fail.push(`${name}: ${n.id} sits, so it can't walk a route`);
     } else if (solid.has(`${n.x},${n.z}`)) fail.push(`${name}: ${n.id} stands on a solid tile`);
-    // Barks (#114): a line said in passing, short, in both languages; `if` is checked by the engine (world_data.rs).
+    // Barks (#114): a line said in passing, short, in both languages; `if` is checked by sixfold-meta (meta/tests/world_data.rs).
     if (n.glance !== undefined && typeof n.glance !== "boolean") fail.push(`${name}: ${n.id}'s glance is true or false`);
     (n.barks ?? []).forEach((b, i) => {
       const at = `${name}: ${n.id}'s bark ${i}`;

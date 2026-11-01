@@ -1,6 +1,6 @@
 //! The deck builder's workbench (#102): "Build for me", "Complete my deck",
 //! the live advice, the test hand, undo, the energy readout, and the shelf of
-//! unlockable decks. The thinking is the engine's (`sixfold_meta::builder`,
+//! unlockable decks. The thinking is sixfold-meta's (`sixfold_meta::builder`,
 //! `sixfold_meta::unlock::UNLOCKABLE`); this shows it and applies it.
 
 use leptos::prelude::*;

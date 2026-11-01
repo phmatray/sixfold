@@ -106,7 +106,7 @@ test("Marlo's entrance plays as you step toward him, and Escape lands on his cha
   await expect(offer).toBeHidden();
   expect((await readSave(page)).progress?.[0]).toContain("f:met_marlo");
   // Input is back: a walk is taken (none is while a scene plays). Not waited out: on CI's software GL a
-  // step takes many seconds. `!flag:met_marlo` keeps the ring quiet from now on (engine/tests/world_data.rs).
+  // step takes many seconds. `!flag:met_marlo` keeps the ring quiet from now on (meta/tests/world_data.rs).
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
   expect(await walk(page, 22, 19)).toBeGreaterThan(0);
 });

@@ -2,7 +2,7 @@
 //! (three.js) from `world/maps/*.json`. Leptos owns everything that is not
 //! drawing: the prompt, the dialogs (a native modal `<dialog>`), NPC dialogue
 //! with a typewriter, the item popup, campaign duels, and progression, which
-//! is the engine's [`Progress`] (in context, saved by `store`).
+//! is sixfold-meta's [`Progress`] (in context, saved by `store`).
 
 use std::collections::VecDeque;
 use std::time::Duration;
@@ -1127,7 +1127,7 @@ pub fn WorldScreen() -> impl IntoView {
         }
     });
 
-    // Apply effects in the engine (saved by the store), then show what follows:
+    // Apply effects in sixfold-meta (saved by the store), then show what follows:
     // a duel offer, a new item or a pack.
     let apply_effects = move |effects: Vec<String>| {
         let mut next = None;

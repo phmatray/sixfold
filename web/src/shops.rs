@@ -1,7 +1,7 @@
 //! The world's shop panels (`docs/WORLD_DESIGN.md` §3 and §6): Perrin's Swap
 //! Shop, Wynne's pack counter, Mags's Deck Clinic and Gus's Press, and a
 //! regional inn's counter (§7.4) under its rest panel. They open
-//! as sheets in the world's dialog; the rules are the engine's (`shop`,
+//! as sheets in the world's dialog; the rules are sixfold-meta's (`shop`,
 //! `doctor`), these only show them and call them. Progress and the profile
 //! are context signals, saved by `store` whenever they change.
 

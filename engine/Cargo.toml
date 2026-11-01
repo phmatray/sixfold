@@ -8,7 +8,9 @@ description = "Pure-Rust rules engine for the trading card game: the duel, cards
 [dependencies]
 
 [features]
-# The test cards and helpers, for sixfold-meta's tests. Never in a shipped build.
+# The test cards and helpers, for sixfold-meta's tests (its dev-dependency turns it on). Never in a
+# shipped build: CI fails if sixfold-web's tree has it. A workspace-wide `cargo test` unifies features,
+# so the web tests then see the test cards too; CI runs `cargo test -p sixfold-web` on its own, without.
 testkit = []
 
 # Host-only: the French typography test reads the world's JSON. Never in the wasm build.

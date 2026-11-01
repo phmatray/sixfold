@@ -1,6 +1,6 @@
 //! Play stats: fed from what already happens (a duel's end, the progress and
 //! the profile changing) and shown on the Records page. The counting rules
-//! are the engine's (`sixfold_meta::stats`); this only watches and asks.
+//! are sixfold-meta's (`sixfold_meta::stats`); this only watches and asks.
 
 use leptos::prelude::*;
 use sixfold_engine::{fr, tr, Game};

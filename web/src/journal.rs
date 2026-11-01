@@ -1,6 +1,6 @@
 //! The Journal (`docs/WORLD_DESIGN.md` §5.4): the errands people gave, read
-//! from `world/quests.json` and ticked off by the engine's conditions, under
-//! the current objective (the engine's [`objective`]), then the Library: the
+//! from `world/quests.json` and ticked off by sixfold-meta's conditions, under
+//! the current objective (sixfold-meta's [`objective`]), then the Library: the
 //! books read on the world's shelves (#104), each opened again from here.
 
 use leptos::prelude::*;

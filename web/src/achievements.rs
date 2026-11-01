@@ -1,6 +1,6 @@
 //! Achievements: the list (hidden ones as "???" until earned), the toast that
 //! announces a new one, and the Records page that holds the list and the
-//! stats. What earns them is the engine's (`sixfold_meta::stats`).
+//! stats. What earns them is sixfold-meta's (`sixfold_meta::stats`).
 
 use std::collections::VecDeque;
 
