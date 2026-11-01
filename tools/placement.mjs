@@ -223,7 +223,7 @@ export function evaluate(w, p, e) {
     case "y": return p.y ?? 0;
     case "rot": return ((p.rot ?? 0) % 360 + 360) % 360;
     case "height": return w.t.tall(p.asset);
-    case "is": return e.args[0].some((t) => t.any || t.asset === p.asset);
+    case "is": return e.args[0].some((t) => t.any || t.asset === p.asset || (t.builtin === "deck" && !!w.t.DECK[p.asset]));
     case "has": return e.args[0].some((k) => p[k] !== undefined);
     case "kind": return e.args[0].includes(w.m.kind);
     case "region": return e.args[0].includes(w.m.region);
@@ -282,19 +282,13 @@ export function check(w, rules, waived = new Set()) {
 
 // ----- Fixes: where would the prop be right? -----
 
-// Run fn with prop p changed by patch ({ x, z, rot, y } or { remove: true }), the index kept in step, then put it back.
+// Run fn with prop p changed by patch ({ x, z, rot, y }), the index kept in step, then put it back.
 function trial(w, p, patch, fn) {
   const index = (on) => { for (const [x, z] of w.tiles(p)) { const k = key(x, z), l = w.at.get(k) ?? w.at.set(k, []).get(k); on ? l.push(p) : l.splice(l.indexOf(p), 1); } };
-  const old = { x: p.x, z: p.z, rot: p.rot, y: p.y }, i = w.m.props.indexOf(p);
+  const old = { x: p.x, z: p.z, rot: p.rot, y: p.y };
   const set = (v) => { for (const k of ["x", "z", "rot", "y"]) if (k in v) v[k] === undefined ? delete p[k] : (p[k] = v[k]); };
-  index(false);
-  if (patch.remove) w.m.props.splice(i, 1);
-  else set(patch), index(true);
-  try { return fn(); } finally {
-    if (patch.remove) w.m.props.splice(i, 0, p);
-    else index(false), set(old);
-    index(true);
-  }
+  index(false), set(patch), index(true);
+  try { return fn(); } finally { index(false), set(old), index(true); }
 }
 
 // Can p stand where it is now: on the map, off walls and fences, out of the water unless it came from there, never on
@@ -317,10 +311,11 @@ function towards(dx, dz) {
   return parts.join(", ");
 }
 
-// Up to three fixes for the rules prop p breaks, best first: lift it onto the floor, turn or move it to the nearest
-// spot where every rule for it holds and its neighbours break no more rules than before (Minecraft's placement
-// attempts round a point), or take it out. Each: { kind, label, patch }.
-export function proposals(w, p, rules, radius = 5) {
+// Fixes for the rules prop p breaks, best first; nothing is ever taken out. Lift it onto the floor under it, or turn
+// it in place, or move it to the nearest spots (up to `max`) where every rule for it holds and its neighbours break no
+// more rules than before (Minecraft's placement attempts round a point), searching `radius` tiles round it, then twice
+// that. The review app keeps only those that also leave check-maps passing. Each: { kind, label, patch }.
+export function proposals(w, p, rules, { radius = 5, max = 4 } = {}) {
   const before = broken(w, p, rules).length;
   if (!before) return [];
   // A prop a door or a person stands on (a house's front row) is only ever lifted: moved, it would leave them behind.
@@ -328,13 +323,13 @@ export function proposals(w, p, rules, radius = 5) {
   const host = w.tiles(p).some(([x, z]) => [w.doors, w.warps, w.npcs].some((s) => s.has(key(x, z))));
   const mine = new Set(w.tiles(p).map(([x, z]) => key(x, z)));
   const spots = (w.m.interactions ?? []).flatMap((s, i) => (mine.has(key(s.x, s.z)) ? [i] : []));
-  const [fw, fd] = ld.foot(p, w.t.FOOT), small = fw * fd <= 4 && !host && !p.landmark && !p.poi;
+  const [fw, fd] = ld.foot(p, w.t.FOOT), small = fw * fd <= 4 && !host && !p.landmark && !p.poi; // what may move
   const from = { host, water: w.tiles(p).some(([x, z]) => w.m.tiles[z]?.[x] === "~"), trail: w.tiles(p).some(([x, z]) => w.m.tiles[z]?.[x] === "p") };
   // A fix holds when p breaks no rule after it, fits there, and the props round both places break no more rules than before.
   const around = (x, z) => w.m.props.filter((o) => o !== p && Math.abs(o.x - x) <= 7 && Math.abs(o.z - z) <= 7);
   const count = (list) => list.reduce((n, o) => n + broken(w, o, rules).length, 0);
   const better = (patch) => {
-    if (spots.length && !patch.remove) {
+    if (spots.length) {
       // The spots move with it while it is tried there.
       const moved = spots.map((i) => w.m.interactions[i]), dx = (patch.x ?? p.x) - p.x, dz = (patch.z ?? p.z) - p.z;
       for (const s of moved) w.spots.delete(key(s.x, s.z));
@@ -345,7 +340,7 @@ export function proposals(w, p, rules, radius = 5) {
     return holds(patch);
   };
   const holds = (patch) => {
-    const them = patch.remove ? around(p.x, p.z) : [...new Set([...around(p.x, p.z), ...around(patch.x ?? p.x, patch.z ?? p.z)])];
+    const them = [...new Set([...around(p.x, p.z), ...around(patch.x ?? p.x, patch.z ?? p.z)])];
     const was = count(them);
     return trial(w, p, patch, () => !broken(w, p, rules).length && fits(w, p, from) && count(them) <= was);
   };
@@ -355,27 +350,36 @@ export function proposals(w, p, rules, radius = 5) {
   if (Math.abs(floorY - y0) > 0.05 && better({ y: floorY || undefined })) out.push({ kind: "lift", label: `${floorY > y0 ? "Lift" : "Lower"} it to y ${floorY} (the floor under it)`, patch: { y: floorY || undefined } });
   // Turn it in place, then move it, nearest first.
   const rots = [p.rot ?? 0, ...[0, 90, 180, 270].filter((r) => r !== (p.rot ?? 0))];
-  const ring = [];
-  for (let dx = -radius; dx <= radius; dx++) for (let dz = -radius; dz <= radius; dz++) ring.push([dx, dz]);
-  ring.sort((a, b) => Math.max(Math.abs(a[0]), Math.abs(a[1])) - Math.max(Math.abs(b[0]), Math.abs(b[1])) || Math.hypot(...a) - Math.hypot(...b));
-  let moved = null, turned = null;
-  for (const [dx, dz] of out.length || !small ? [] : ring) {
-    if (moved) break;
-    for (const rot of rots) {
-      if (!dx && !dz && rot === (p.rot ?? 0)) continue;
-      const x = p.x + dx, z = p.z + dz;
-      if (!w.inMap(x, z)) continue;
-      const y = trial(w, p, { x, z, rot }, () => highest(w, p)) + rel, patch = { x, z, rot, y: y || undefined, ...(spots.length && { spots }) };
-      if (!better(patch)) continue;
-      if (!dx && !dz) { turned ??= { kind: "turn", label: `Turn it to face ${DIRS[[[0, 1], [1, 0], [0, -1], [-1, 0]][rot / 90].join()]}`, patch }; continue; }
-      moved = { kind: "move", label: `Move it ${towards(dx, dz)} to ${x},${z}${rot !== (p.rot ?? 0) ? `, facing ${DIRS[[[0, 1], [1, 0], [0, -1], [-1, 0]][rot / 90].join()]}` : ""}${Math.abs(y - y0) > 0.05 ? ` at y ${y}` : ""}`, patch };
-      break;
+  // Nearest first: square rings out to `radius`, then out to twice that if nothing near holds.
+  const face = (rot) => DIRS[[[0, 1], [1, 0], [0, -1], [-1, 0]][rot / 90].join()];
+  const ring = (r0, r1) => {
+    const out = [];
+    for (let dx = -r1; dx <= r1; dx++) for (let dz = -r1; dz <= r1; dz++) if (Math.max(Math.abs(dx), Math.abs(dz)) >= r0) out.push([dx, dz]);
+    return out.sort((a, b) => Math.max(Math.abs(a[0]), Math.abs(a[1])) - Math.max(Math.abs(b[0]), Math.abs(b[1])) || Math.hypot(...a) - Math.hypot(...b));
+  };
+  const moves = [];
+  let turned = null;
+  const search = (tiles) => {
+    for (const [dx, dz] of tiles) {
+      if (moves.length >= max) return;
+      for (const rot of rots) {
+        if (!dx && !dz && rot === (p.rot ?? 0)) continue;
+        const x = p.x + dx, z = p.z + dz;
+        if (!w.inMap(x, z)) continue;
+        const y = trial(w, p, { x, z, rot }, () => highest(w, p)) + rel, patch = { x, z, rot, y: y || undefined, ...(spots.length && { spots }) };
+        if (!better(patch)) continue;
+        if (!dx && !dz) { turned ??= { kind: "turn", label: `Turn it to face ${face(rot)}`, patch }; continue; }
+        moves.push({ kind: "move", label: `Move it ${towards(dx, dz)} to ${x},${z}${rot !== (p.rot ?? 0) ? `, facing ${face(rot)}` : ""}${Math.abs(y - y0) > 0.05 ? ` at y ${y}` : ""}`, patch });
+        break; // one turn per tile is enough
+      }
     }
+  };
+  if (!out.length && small) {
+    search(ring(0, radius));
+    if (!moves.length && !turned) search(ring(radius + 1, radius * 2));
   }
   if (turned) out.push(turned);
-  if (moved) out.push(moved);
-  // Take it out: never a house, a landmark or a point of interest, nor anything a door, a spot or a person stands on.
-  if (small) out.push({ kind: "remove", label: spots.length ? "Take it out, with what it says" : "Take it out", patch: { remove: true, ...(spots.length && { spots }) } });
+  out.push(...moves);
   return out;
 }
 

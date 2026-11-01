@@ -1,11 +1,14 @@
 // Run: node tools/placement-review.mjs [web/world] [--port=8095]   then open http://localhost:8095
 // The placement review app: every finding of tools/placement.rules, the map round it drawn from above, before and
-// after a proposed fix (lift it onto the floor, turn it, move it to the nearest place where its rules hold, take it out).
+// after a proposed fix (lift it onto the floor, turn it, or move it to the nearest place where its rules hold; nothing is
+// ever taken out). Only fixes that leave `check-maps --strict` passing are offered.
 // Confirm, and the fix is written to the map's JSON and `check-maps --strict` runs on the result (Undo puts the file
 // back). Reject, and the finding is answered "this is fine" in tools/placement.waivers.json, which placement.mjs skips.
 // Dev tooling, local only: it writes into web/world/maps. Its labels are English, like the editor's.
 import { createServer } from "node:http";
-import { readFileSync, writeFileSync, readdirSync, existsSync, unlinkSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, unlinkSync, mkdtempSync, mkdirSync, symlinkSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parseRules, tables, world, check, proposals, waivers, WAIVERS } from "./placement.mjs";
@@ -47,14 +50,17 @@ function propOf(m, { index, asset, x, z }) {
   return p && p.asset === asset && p.x === x && p.z === z ? p : null;
 }
 
+// A fix on a map's JSON: the prop's new place, turn and height, and the spots it carries moved with it.
+function patchMap(m, p, patch) {
+  const dx = (patch.x ?? p.x) - p.x, dz = (patch.z ?? p.z) - p.z;
+  for (const i of patch.spots ?? []) (m.interactions[i].x += dx), (m.interactions[i].z += dz);
+  for (const k of ["x", "z", "rot", "y"]) if (k in patch) patch[k] === undefined || patch[k] === null ? delete p[k] : (p[k] = patch[k]);
+}
+
 function apply({ map, index, asset, x, z, patch }) {
   const path = file(map), text = readFileSync(path, "utf8"), m = JSON.parse(text), p = propOf(m, { index, asset, x, z });
   if (!p) return { status: 409, body: { error: `${map} changed since: no ${asset} at ${x},${z} (index ${index}). Reload.` } };
-  const dx = (patch.x ?? p.x) - p.x, dz = (patch.z ?? p.z) - p.z;
-  for (const i of patch.spots ?? []) if (patch.remove) m.interactions[i] = null; else (m.interactions[i].x += dx), (m.interactions[i].z += dz);
-  if (patch.spots && patch.remove) m.interactions = m.interactions.filter(Boolean);
-  if (patch.remove) m.props.splice(index, 1);
-  else for (const k of ["x", "z", "rot", "y"]) if (k in patch) patch[k] === undefined || patch[k] === null ? delete p[k] : (p[k] = patch[k]);
+  patchMap(m, p, patch);
   writeFileSync(path, JSON.stringify(m, null, 2) + "\n");
   undo.push({ path, text, what: `${asset} ${x},${z} on ${map}` });
   return { status: 200, body: { done: true, check: checkMaps() } };
@@ -69,11 +75,41 @@ function reject({ map, rule, asset, x, z, note }) {
   return { status: 200, body: { done: true } };
 }
 
-// check-maps over the whole world, as CI runs it (~0.3 s).
-function checkMaps() {
-  const r = spawnSync(process.execPath, [fileURLToPath(new URL("./check-maps.mjs", import.meta.url)), dir, "--strict"], { encoding: "utf8" });
+// check-maps over the whole world, as CI runs it (~0.3 s). Its findings are the lines naming a map (or the atlas).
+function checkMaps(at = dir) {
+  const r = spawnSync(process.execPath, [fileURLToPath(new URL("./check-maps.mjs", import.meta.url)), at, "--strict"], { encoding: "utf8" });
   const lines = `${r.stdout}${r.stderr}`.trim().split("\n").filter(Boolean);
-  return { ok: r.status === 0, lines: lines.slice(-12) };
+  const said = lines.filter((l) => /^(Error: )?\s*[a-z_]+: /.test(l) && !l.startsWith("maps ok")).map((l) => l.replace(/^Error: /, "").trim());
+  return { ok: r.status === 0, lines: lines.slice(-12), first: said[0] ?? lines.find((l) => l.startsWith("Error"))?.slice(7) ?? null };
+}
+
+// A world of links to the real one, where one map at a time is swapped for a fixed copy to see whether check-maps
+// still passes, before the fix is ever offered.
+const shadow = mkdtempSync(join(tmpdir(), "placement-review-"));
+mkdirSync(`${shadow}/maps`);
+for (const f of ["props.js", "atlas.json", "quests.json"]) if (existsSync(`${dir}/${f}`)) symlinkSync(resolve(`${dir}/${f}`), `${shadow}/${f}`);
+for (const name of names()) symlinkSync(resolve(file(name)), `${shadow}/maps/${name}.json`);
+process.on("exit", () => rmSync(shadow, { recursive: true, force: true }));
+process.on("SIGINT", () => process.exit(0));
+function holds(map, index, patch) {
+  const link = `${shadow}/maps/${map}.json`, m = JSON.parse(readFileSync(file(map), "utf8"));
+  patchMap(m, m.props[index], patch);
+  unlinkSync(link);
+  writeFileSync(link, JSON.stringify(m));
+  try { return checkMaps(shadow); } finally { unlinkSync(link); symlinkSync(resolve(file(map)), link); }
+}
+
+// The fixes worth offering: those check-maps still passes, at most one lift, one turn and two moves.
+function offered(map, index, w, p) {
+  const out = [], room = { lift: 1, turn: 1, move: 2 };
+  let blocked = null;
+  for (const c of proposals(w, p, rules(), { max: 6 })) {
+    if (!room[c.kind]) continue;
+    const r = holds(map, index, c.patch);
+    if (r.ok) out.push(c), room[c.kind]--;
+    else blocked ??= `${c.label.toLowerCase()}: ${r.first}`;
+  }
+  return { proposals: out, blocked: out.length ? null : blocked };
 }
 
 const json = (res, status, body) => (res.writeHead(status, { "content-type": "application/json" }), res.end(JSON.stringify(body)));
@@ -90,7 +126,7 @@ createServer(async (req, res) => {
     }
     if (req.method === "GET" && url.pathname === "/api/proposals") {
       const w = load(q("map")), p = propOf(w.m, { index: +q("index"), asset: q("asset"), x: +q("x"), z: +q("z") });
-      return p ? json(res, 200, { proposals: proposals(w, p, rules()) }) : json(res, 409, { error: "the map changed since; reload" });
+      return p ? json(res, 200, offered(q("map"), +q("index"), w, p)) : json(res, 409, { error: "the map changed since; reload" });
     }
     if (req.method === "POST" && url.pathname === "/api/apply") { const r = apply(await read(req)); return json(res, r.status, r.body); }
     if (req.method === "POST" && url.pathname === "/api/reject") { const r = reject(await read(req)); return json(res, r.status, r.body); }

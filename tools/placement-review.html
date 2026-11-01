@@ -135,10 +135,13 @@ async function select(i) {
   if (!f) return renderEmpty();
   state.fixes = [];
   state.pick = 0;
-  const [map, fx] = await Promise.all([mapOf(f.map), api(`/api/proposals?map=${f.map}&index=${f.index}&asset=${f.asset}&x=${f.x}&z=${f.z}`).catch((e) => ({ proposals: [], error: e.message }))]);
+  const map = await mapOf(f.map);
   if (state.shown[state.at] !== f) return; // moved on meanwhile
+  render(f, map, null, { loading: true });
+  const fx = await api(`/api/proposals?map=${f.map}&index=${f.index}&asset=${f.asset}&x=${f.x}&z=${f.z}`).catch((e) => ({ proposals: [], error: e.message }));
+  if (state.shown[state.at] !== f) return;
   state.fixes = fx.proposals;
-  render(f, map, fx.error);
+  render(f, map, fx.error, fx);
 }
 
 const mapOf = async (name) => (state.maps[name] ??= await api(`/api/map?name=${name}`));
@@ -150,7 +153,7 @@ function renderEmpty() {
   bindStatus();
 }
 
-function render(f, map, err) {
+function render(f, map, err, fx) {
   const fixes = state.fixes;
   $("#main").innerHTML = `
     <div class="card-head">
@@ -165,8 +168,8 @@ function render(f, map, err) {
       <section class="pane"><h2>After <span id="after-label"></span></h2><canvas id="after"></canvas><div class="hover" id="hover-after"></div></section>
     </div>
     <div class="fixes" id="fixes">
-      ${fixes.length ? fixes.map((p, i) => `<button class="fix${i === state.pick ? " on" : ""}" data-i="${i}">${icon(p.kind)} ${p.label}<kbd>${i + 1}</kbd></button>`).join("")
-        : `<p class="none">${err ? `Could not propose a fix: ${esc(err)}` : "No fix found within 5 tiles that keeps every rule. Fix it by hand in the map, or answer it below."}</p>`}
+      ${fx?.loading ? `<p class="none">Looking for a better place, and running check-maps on each one…</p>` : fixes.length ? fixes.map((p, i) => `<button class="fix${i === state.pick ? " on" : ""}" data-i="${i}">${icon(p.kind)} ${p.label}<kbd>${i + 1}</kbd></button>`).join("")
+        : `<p class="none">${err ? `Could not propose a fix: ${esc(err)}` : `No placement within 10 tiles keeps every rule and check-maps passing${fx?.blocked ? ` (the nearest one fails: ${esc(fx.blocked)})` : ""}. Move it by hand in the map, or answer it below.`}</p>`}
     </div>
     <div class="actions">
       <button class="btn confirm" id="confirm" ${fixes.length ? "" : "disabled"}>Confirm fix <kbd>Enter</kbd></button>
@@ -192,7 +195,7 @@ function pick(i) {
   draw(state.shown[state.at], state.maps[state.shown[state.at].map]);
 }
 
-const icon = (k) => ({ lift: "⤒", turn: "↻", move: "➜", remove: "✕" })[k] ?? "•";
+const icon = (k) => ({ lift: "⤒", turn: "↻", move: "➜" })[k] ?? "•";
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
 function statusHtml() {
@@ -272,7 +275,7 @@ const FACE = { 0: [0, 1], 90: [1, 0], 180: [0, -1], 270: [-1, 0] };
 function draw(f, map) {
   const fix = state.fixes[state.pick];
   const subject = map.props.find((p, i) => i === f.index);
-  const moved = fix && !fix.patch.remove ? { ...subject, ...Object.fromEntries(Object.entries(fix.patch).filter(([k]) => ["x", "z", "rot", "y"].includes(k))) } : null;
+  const moved = fix ? { ...subject, ...Object.fromEntries(Object.entries(fix.patch).filter(([k]) => ["x", "z", "rot", "y"].includes(k))) } : null;
   if (moved) { if (moved.rot % 180 !== subject.rot % 180) [moved.w, moved.d] = [subject.d, subject.w]; moved.y = fix.patch.y ?? 0; }
   // One window for both panes: the subject (both places) with 6 tiles round it, kept on the map.
   const boxes = [subject, moved].filter(Boolean);
@@ -288,8 +291,8 @@ function draw(f, map) {
   const view = { x0, z0, x1, z1 };
   paint($("#before"), map, view, { subject, mark: "#ff5c5c" }, $("#hover-before"));
   const afterProps = map.props.map((p, i) => (i === f.index ? moved : p)).filter(Boolean);
-  const spotsAfter = map.spots.map((s, i) => (fix?.patch.spots?.includes(i) ? (fix.patch.remove ? null : { ...s, x: s.x + (fix.patch.x - f.x), z: s.z + (fix.patch.z - f.z) }) : s)).filter(Boolean);
-  paint($("#after"), { ...map, props: afterProps, spots: spotsAfter }, view, { subject: moved, ghost: subject, mark: "#4fdf8f", removed: fix?.patch.remove }, $("#hover-after"));
+  const spotsAfter = map.spots.map((s, i) => (fix?.patch.spots?.includes(i) ? { ...s, x: s.x + (fix.patch.x - f.x), z: s.z + (fix.patch.z - f.z) } : s));
+  paint($("#after"), { ...map, props: afterProps, spots: spotsAfter }, view, { subject: moved ?? subject, ghost: moved && subject, mark: moved ? "#4fdf8f" : "#ff5c5c" }, $("#hover-after"));
   $("#after-label").textContent = fix ? fix.label.toLowerCase() : "no fix proposed";
 }
 
@@ -336,10 +339,7 @@ function paint(canvas, map, v, o, hover) {
   for (const n of map.npcs) { g.fillStyle = "#c06cf0"; g.beginPath(); g.arc(X(n.x) + s / 2, Z(n.z) + s / 2, s * 0.28, 0, 7); g.fill(); g.strokeStyle = "#fff"; g.lineWidth = 1.5; g.stroke(); }
   // Where it stood (dashed), and the subject.
   const outline = (p, colour, dash) => { g.save(); g.setLineDash(dash ? [s * 0.18, s * 0.12] : []); g.strokeStyle = colour; g.lineWidth = Math.max(2.5, s * 0.1); g.strokeRect(X(p.x) + 1, Z(p.z) + 1, p.w * s - 2, p.d * s - 2); g.restore(); };
-  if (o.ghost) {
-    outline(o.ghost, o.removed ? "#ff5c5c" : "rgba(255,255,255,.8)", true);
-    if (o.removed) { g.strokeStyle = "#ff5c5c"; g.lineWidth = Math.max(2, s * 0.08); const a = X(o.ghost.x) + s * 0.2, b = Z(o.ghost.z) + s * 0.2, c = X(o.ghost.x + o.ghost.w) - s * 0.2, e = Z(o.ghost.z + o.ghost.d) - s * 0.2; g.beginPath(); g.moveTo(a, b); g.lineTo(c, e); g.moveTo(c, b); g.lineTo(a, e); g.stroke(); }
-  }
+  if (o.ghost) outline(o.ghost, "rgba(255,255,255,.8)", true);
   if (o.subject) {
     outline(o.subject, o.mark, false);
     const floor = Math.max(...Array.from({ length: o.subject.w * o.subject.d }, (_, i) => { const c = map.tiles[o.subject.z + Math.floor(i / o.subject.w)]?.[o.subject.x + (i % o.subject.w)]; return c >= "1" && c <= "9" ? +c : c === "=" ? 0.1 : c === "H" ? 0.3 : 0; }));

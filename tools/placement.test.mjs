@@ -97,7 +97,7 @@ test("fixes: a sunk prop is lifted, a stray one moved to the nearest place its r
   const lamp = proposals(v, m.props[1], rules);
   assert.equal(lamp[0].kind, "move");
   assert.deepEqual([lamp[0].patch.x, lamp[0].patch.z], [2, 2], "one tile west, beside the path");
-  assert.equal(lamp.at(-1).kind, "remove");
+  assert.ok(lamp.every((p) => p.kind !== "remove"), "nothing is ever taken out");
   assert.deepEqual(m, MAP, "trying fixes leaves the map as it was");
   assert.deepEqual(proposals(v, m.props[2], rules).map((p) => p.kind), [], "the house breaks nothing");
 });

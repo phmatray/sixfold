@@ -23,7 +23,7 @@
 #
 # An expression: predicates joined by `and`, `or`, `not` and ( ), and numbers compared with < <= > >= == !=.
 #
-#   is(T)          the prop itself is one of T                   (unless is(#afloat))
+#   is(T)          the prop itself is one of T (an asset, a #tag, or deck)   (unless is(#afloat | deck))
 #   on(T)          every tile of the footprint matches T         touches(T)    some tile of it does
 #   near(r, T)     some tile within r of the footprint (itself included; the prop never matches itself)
 #   front(T)       the row in front of its face (+Z at rot 0)    front(n, T)   any of the n rows in front
@@ -42,7 +42,8 @@
 # ---------- Tags ----------
 
 tag path      = tile:pr=H paint:pr deck
-tag trail     = tile:p paint:p                      # a path's walking line (a plaza `r` is not one)
+tag trail     = tile:p paint:p                      # a path's walking line: posts and lamps keep off it (they may stand on a plaza or a deck)
+tag paved     = tile:pr=H paint:pr deck             # trodden, paved or built ground (paths, squares, boardwalks, piers, decks): nothing grows on it
 tag water     = tile:~
 tag wall      = tile:#WV
 tag house     = cottage workshop house terrace_house harbour_house lake_house treehouse kiln observatory lighthouse bell_tower headframe
@@ -50,13 +51,13 @@ tag tree      = tree pine birch willow ash_pine standing_tree blossom_tree wishi
 tag scatter   = bush bush_dark heather flowers rock rock_basalt reeds moonflower stump mushroom_ring
 tag blooms    = flowers heather moonflower blossom_tree vegetable_patch wisteria_arch flower_planter
 tag afloat    = reeds lake_house harbour_house boat buoy ferry water_lilies floating_lantern rock_sea bridge rope_bridge boardwalk lighthouse bell_tower cliff_falls
-tag harbour   = tile:H= boardwalk bollard ferry boat
+tag harbour   = tile:H= boardwalk ferry boat              # what gear serves (not the gear itself)
 tag indoors   = lamp plant chair bed bookcase shelf rug counter display_case oven cloth_rack dress_form workbench light_box net_locker boot_rack
 tag on_a_wall = bookcase shelf display_case net_locker boot_rack oven cloth_rack light_box
 tag at_table  = duel_table chart_table workbench counter cobbler_bench soup_cauldron chowder_stove
 tag raised    = canopy_deck rope_bridge ladder               # held up by trees and posts, by design
 tag market    = stall stall_b curio_cabinet
-tag work      = #house #market #harbour #at_table minecart rail kiln glass_furnace glass_rack cullet anvil door crates crates_open net_rack crab_pots
+tag work      = #house #market #harbour #at_table minecart rail kiln glass_furnace glass_rack cullet anvil door net_rack crab_pots   # not crates: two stray crates don't make a trade
 
 # ---------- Light — l'éclairage suit l'usage (WORLD_RULES §2) ----------
 
@@ -72,7 +73,7 @@ rule lamp.wild error "out of town, a lantern needs a reason: a door, a bridge, a
 
 rule lamp.clump warn "two street lanterns under 4 tiles apart are a clump; the rhythm is one every 5-7 (2.2)"
   for lantern
-  unless has(why)
+  unless has(why) or near(2, door)                  # a pair flanking a door is the rule, not a clump (2.2)
   need count(3, lantern) == 0
 
 rule lamp.edge warn "a lantern stands at the edge of the path, never in the walking line"
@@ -82,10 +83,6 @@ rule lamp.edge warn "a lantern stands at the edge of the path, never in the walk
 rule lamp.cave error "nothing underground could power a street lamp (2.6)"
   for lantern | lamp
   need not cave
-
-rule lamp.indoor error "a lamp is room furniture; outdoors the street light is a lantern"
-  for lamp
-  need indoor
 
 rule lamp.timber warn "a miner's oil lantern hangs on the mine's timbers"
   for oil_lantern
@@ -159,7 +156,7 @@ rule market.street warn "a stall opens onto a street or a square"
 
 rule dry.land error "nothing stands in water but boats, buoys, lilies, sea rocks and decks"
   for *
-  unless is(#afloat) or on(deck) or has(y)
+  unless is(#afloat | deck) or on(deck)
   need not touches(#water)
 
 rule water.afloat error "a buoy, lilies or a floating lantern float on water"
@@ -193,14 +190,14 @@ rule fire.clear warn "no tree overhangs a campfire"
   for campfire
   need count(1, #tree) == 0
 
-rule tree.off-path error "a tree never grows on a path"
+rule tree.off-path error "a tree never grows on a path, a square or a deck"
   for #tree
-  need not touches(#trail)
+  need not touches(#paved)
 
-rule scatter.off-path warn "bushes, flowers and rocks keep off the walking line"
+rule scatter.off-path warn "bushes, flowers, reeds and rocks never grow on a path, a square or a deck"
   for #scatter
   unless has(band)
-  need not touches(tile:pr)
+  need not touches(#paved)
 
 rule mine.cart warn "a minecart sits on its rails"
   for minecart
@@ -211,13 +208,21 @@ rule fence.end warn "a fence end finishes a fence"
   for fence_end | wall_dry_end
   need near(1, tile:f)
 
-rule biome.ember warn "ash pines and basalt belong to the Emberlands (or a transition band toward them)"
-  for ash_pine | rock_basalt | ember_vent | cullet
+rule biome.ember warn "ash pines, vents and cullet belong to the Emberlands (or a transition band toward them)"
+  for ash_pine | ember_vent | cullet
+  when outdoor
+  unless has(band)
+  need region(ember)
+
+rule biome.basalt warn "basalt belongs to the Emberlands and the Storm coast (or a band toward them)"
+  for rock_basalt
+  when outdoor
   unless has(band)
   need region(ember | storm)
 
 rule biome.willow warn "willows belong to the Dreamwater (or a band toward it)"
   for willow
+  when outdoor
   unless has(band)
   need region(dream)
 
