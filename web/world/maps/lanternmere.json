@@ -443,8 +443,8 @@
     },
     {
       "asset": "glow_mushroom_tall",
-      "x": 39,
-      "z": 23,
+      "x": 40,
+      "z": 24,
       "rot": 0,
       "glow": "#b48cff"
     },
@@ -1346,7 +1346,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 30,
       "z": 2,
       "rot": 0
@@ -1436,7 +1436,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 31,
       "z": 6,
       "rot": 0
@@ -1454,7 +1454,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 6,
       "z": 30,
       "rot": 0
@@ -1472,7 +1472,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 6,
       "z": 33,
       "rot": 0
@@ -1490,7 +1490,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 12,
       "z": 33,
       "rot": 0

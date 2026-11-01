@@ -491,7 +491,7 @@
       "y": 2
     },
     {
-      "asset": "ash_pine",
+      "asset": "pine",
       "x": 42,
       "z": 26,
       "rot": 0,
@@ -623,7 +623,8 @@
       "asset": "lantern",
       "x": 23,
       "z": 34,
-      "rot": 0
+      "rot": 0,
+      "y": 0.3
     },
     {
       "asset": "lantern",
