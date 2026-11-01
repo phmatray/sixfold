@@ -45,6 +45,17 @@ test.describe("with motion", () => {
     expect((await life(page))!.boats[0]).toEqual(held);
   });
 
+  test("the meadow's windmill turns; the quarry's waterfall draws", async ({ page }) => {
+    await enter(page);
+    await at(page, "overworld", 41, 6);
+    await expect.poll(async () => (await host(page, "sixfoldStats")).loops.length).toBe(1);
+    const t0 = (await host(page, "sixfoldStats")).loops[0];
+    await expect.poll(async () => (await host(page, "sixfoldStats")).loops[0]).toBeGreaterThan(t0);
+    // The falling-water shader compiles (the page-error guard fails the test on a shader error).
+    await at(page, "quarry", 3, 40);
+    await frames(page);
+  });
+
   test("a seal site's calm: nothing spawns round the seal stone", async ({ page }) => {
     await enter(page);
     await at(page, "elder_ring", 20, 17);
@@ -64,4 +75,12 @@ test("with reduced motion, none of the new life is drawn", async ({ page }) => {
   await at(page, "woodland", 45, 13);
   await page.waitForTimeout(1000);
   expect(await life(page)).toBeNull();
+
+  // The windmill's sails hold still.
+  await at(page, "overworld", 41, 6);
+  await expect.poll(async () => (await host(page, "sixfoldStats")).loops.length).toBe(1);
+  const t0 = (await host(page, "sixfoldStats")).loops[0];
+  await page.waitForTimeout(1000);
+  await frames(page);
+  expect((await host(page, "sixfoldStats")).loops[0]).toBe(t0);
 });
