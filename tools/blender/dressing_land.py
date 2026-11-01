@@ -53,15 +53,18 @@ HUB = (0, -1.29, 5.72)   # the sails' pivot, ahead of the cap's front
 
 
 def build_sails(k):
-    """Four lattice sails round a hub, in the XZ plane (they turn about Y): a whip, three hemlaths and eight sail
-    bars each, a cloth spread on the inner two thirds behind the lattice. Rest pose: a + (bars square to the axes, so
-    no two parallel bars share a bounding box). Depths (Y): whip +-0.045, hemlaths +-0.025, bars +-0.012, cloth behind.
+    """Five lattice sails round a hub, in the XZ plane (they turn about Y): a whip, three hemlaths and eight sail
+    bars each, a cloth spread on the inner two thirds behind the lattice. Five, as on the old five-sail tower mills,
+    never four: four sails make a cross at rest and at every quarter turn (the owner's rule: no religious shapes). Depths (Y): whip +-0.045, hemlaths +-0.025, bars +-0.012, cloth behind.
     S scales the sails in their plane only (3.0 m from the hub to the tips), so those depth gaps hold."""
     S = 1.32
     k.add(cyl(0.22, 0.22, 0.22, 8), "dl_wood_dk", T(rot=(90, 0, 0)))
     k.add(cyl(0.17, 0.06, 0.13, 8), "dl_iron", T((0, -0.145, 0), (90, 0, 0)))
-    for i in range(4):
-        R = T(rot=(0, 90 * i, 0))   # the arm runs along local +X, its lattice toward local +Z
+    for i in range(5):
+        # The arm runs along local +X, its lattice toward local +Z. An arm spans 51 deg at most (at the lattice's
+        # inner end), so neighbours 72 deg apart never touch; the z-fighting check's face boxes, axis-aligned, still
+        # overlap off the axes and list their shared depths as "same/exact": not real (no two faces overlap).
+        R = T(rot=(0, 72 * i, 0))
         k.add(box(2.15 * S, 0.09, 0.09 * S), "dl_wood_dk", R @ T((0.12 + 2.15 * S / 2, 0, 0)))
         for v in (-0.1, 0.16, 0.42):
             k.add(box(1.7 * S, 0.05, 0.04 * S), "dl_wood", R @ T((1.4 * S, 0, v * S)))

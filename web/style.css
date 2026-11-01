@@ -5238,6 +5238,8 @@ button.ch-deck-now:active { transform: translateY(3px); box-shadow: 0 0 0 var(--
   display: inline-flex; gap: 2px; padding: 3px; border: 2px solid var(--toon); border-radius: 12px;
   background: var(--paper-lo); box-shadow: 0 3px 0 var(--toon);
 }
+/* Four long choices (Graphics in FR at 150 % on a phone) wrap inside the tray, never past the sheet. */
+.segs { flex-wrap: wrap; max-width: 100%; }
 :is(.lang-switch, .shelf-switch) button, .segs .seg span, .seg-tray label { border: 0; box-shadow: none; background: transparent; border-radius: 8px; min-height: 40px; }
 :is(.lang-switch, .shelf-switch) button:hover, .segs .seg:hover span, .seg-tray label:hover { background: var(--paper-hi); }
 :is(.lang-switch button[aria-pressed="true"], .shelf-switch button[aria-pressed="true"], .segs .seg input:checked + span, .seg-tray label:has(:checked)) { background: var(--plank-deep); color: var(--paint); box-shadow: none; }
