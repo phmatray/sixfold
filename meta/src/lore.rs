@@ -645,7 +645,7 @@ pub fn lore(name: &str) -> Option<&'static Lore> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{set::CARDS, CardKind};
+    use sixfold_engine::{set::CARDS, CardKind};
 
     #[test]
     fn every_hexon_has_a_dex_line_in_both_languages() {

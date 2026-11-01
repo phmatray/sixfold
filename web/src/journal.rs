@@ -4,10 +4,10 @@
 //! books read on the world's shelves (#104), each opened again from here.
 
 use leptos::prelude::*;
-use sixfold_engine::books::{self, BOOKS};
-use sixfold_engine::objective::objective;
-use sixfold_engine::overworld::Progress;
 use sixfold_engine::{fr, tr};
+use sixfold_meta::books::{self, BOOKS};
+use sixfold_meta::objective::objective;
+use sixfold_meta::overworld::Progress;
 use wasm_bindgen::{JsCast, JsValue};
 
 use crate::world::field;
@@ -126,7 +126,7 @@ pub fn Journal() -> impl IntoView {
     let (next, tone) = progress.with_untracked(|p| {
         let o = objective(p);
         let tone = match o {
-            sixfold_engine::objective::Objective::Rival(r) => {
+            sixfold_meta::objective::Objective::Rival(r) => {
                 r.colors.first().map(|&c| crate::art::color_key(c))
             }
             _ => None,

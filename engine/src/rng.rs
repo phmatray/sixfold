@@ -1,7 +1,7 @@
 //! A tiny seedable PRNG (PCG32, O'Neill). Deterministic: same seed, same game.
 
 #[derive(Debug, Clone)]
-pub(crate) struct Rng {
+pub struct Rng {
     state: u64,
     inc: u64,
 }

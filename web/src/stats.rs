@@ -1,12 +1,12 @@
 //! Play stats: fed from what already happens (a duel's end, the progress and
 //! the profile changing) and shown on the Records page. The counting rules
-//! are the engine's (`sixfold_engine::stats`); this only watches and asks.
+//! are the engine's (`sixfold_meta::stats`); this only watches and asks.
 
 use leptos::prelude::*;
-use sixfold_engine::overworld::Progress;
-use sixfold_engine::profile::Profile;
-use sixfold_engine::stats::{award, Duel, Stats, SECRETS};
 use sixfold_engine::{fr, tr, Game};
+use sixfold_meta::overworld::Progress;
+use sixfold_meta::profile::Profile;
+use sixfold_meta::stats::{award, Duel, Stats, SECRETS};
 
 use crate::achievements::{thousands, Toasts};
 use crate::ctl::{Ctl, Post, HUMAN};
@@ -60,7 +60,7 @@ pub fn provide() {
         if let Some((m, p0, pf0)) = last.get_value() {
             if m == n {
                 stats.update(|s| s.observe((&p0, &pf0), (&p, &pf)));
-                toasts.decks(sixfold_engine::decks::newly_unlocked(&p0, &p));
+                toasts.decks(sixfold_meta::unlock::newly_unlocked(&p0, &p));
             }
         }
         last.set_value(Some((n, p, pf)));
@@ -71,7 +71,7 @@ pub fn provide() {
         let fresh = stats.with(|s| {
             progress.with(|p| {
                 profile.with(|pf| {
-                    sixfold_engine::stats::earned(s, p, pf)
+                    sixfold_meta::stats::earned(s, p, pf)
                         .into_iter()
                         .any(|a| !p.has_flag(&a.flag()))
                 })

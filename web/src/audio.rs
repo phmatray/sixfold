@@ -3,8 +3,8 @@
 //! volume controls.
 
 use leptos::prelude::*;
-use sixfold_engine::campaign::{stakes, Stakes};
 use sixfold_engine::{tr, Color, Event, Game, Status};
+use sixfold_meta::campaign::{stakes, Stakes};
 use wasm_bindgen::prelude::*;
 
 use crate::ctl::{Setup, HUMAN};

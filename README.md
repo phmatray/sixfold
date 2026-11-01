@@ -42,7 +42,7 @@ speaks English and French.
 
 **The duel** (`engine/`). The whole duel, from setup and mulligans through
 attacks, conditions, Powers, Gear cards, knock-outs, prizes and sudden death, in pure
-Rust with no browser needed and 450+ unit tests. An AI opponent at three levels:
+Rust with no browser needed and 270+ unit tests. An AI opponent at three levels:
 Easy skips a Gear card or Power play one time in four; Hard thinks a turn ahead, trying
 its candidate moves on copies of the game where every card it can't see and every
 coming coin are dealt anew. Every level sees only what its player may see. The
@@ -147,7 +147,7 @@ cargo install trunk
 cd web && trunk serve            # http://localhost:8080 (first build takes ~2 min)
 cd web && trunk build --release  # static site in web/dist
 
-cargo test -p sixfold-engine     # rules, card set, campaign and AI tests
+cargo test -p sixfold-engine -p sixfold-meta   # rules, card set, AI, campaign and save tests
 cd e2e && npm ci && npx playwright test   # browser journeys against web/dist
 ```
 
@@ -171,7 +171,8 @@ Every GitHub Release carries the Windows installer and the Linux AppImage.
 
 | Path | What's there |
 |---|---|
-| [`engine/`](engine) | The rules core: duel, cards, AI, campaign, saves. Pure Rust, no WASM or UI dependency. |
+| [`engine/`](engine) | The rules core: duel, cards, AI. Pure Rust, no WASM or UI dependency. |
+| [`meta/`](meta) | The game around the duel: campaign, world progress, shop, collection, saves. Pure Rust, depends on `engine/` only. |
 | [`web/`](web) | The Leptos app (built by Trunk from `web/index.html`), the three.js world, audio and the service worker. |
 | [`desktop/`](desktop) | The desktop app: the web build in a native window (Tauri v2). |
 | [`e2e/`](e2e) | Playwright journeys, axe-core checks, and `readme-shots.mjs`, which takes this README's screenshots. |

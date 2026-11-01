@@ -252,11 +252,11 @@ for (const [name, m] of Object.entries(maps)) {
 
 // Cutscenes (WORLD_DESIGN §9.1): a unique id, an `if`, `on: "enter"` and/or in-bounds `at` tiles, and steps that are each
 // a `say` (an actor on the map or the hero, with lines; lines_fr is checked with the other text) or a `do` list. The
-// cues' arguments as the engine reads them (engine/tests/world_data.rs parses every effect): walk paths of n/e/s/w
+// cues' arguments as the engine reads them (meta/tests/world_data.rs parses every effect): walk paths of n/e/s/w
 // that keep an NPC on open tiles, face directions, cam on an actor or an in-bounds tile, waits of 0..5000 ms, music
 // tracks, `stone:wake` only on a map with a seal stone, `stone:seal:<keeper>` (#153) only at that keeper's own seal
 // stone; a `duel:` only in the last step (it ends the scene).
-// A seal site's staging (#152; engine/tests/world_data.rs holds the rest of its shape): `reveal_<map>` keeps to
+// A seal site's staging (#152; meta/tests/world_data.rs holds the rest of its shape): `reveal_<map>` keeps to
 // 3 `cam` and 2 000 ms of `wait`; `entrance_<keeper>` starts on every reachable open tile two from the keeper (but
 // one where someone stands for good: no route or routine), so nobody walks up to them without it; one that plays on arriving
 // anywhere (the Warden's, #154) needs no ring.

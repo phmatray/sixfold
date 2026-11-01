@@ -3,12 +3,12 @@
 //! severity and, where the player's own collection allows, a concrete
 //! [`Swap`]. A deck with nothing to say gets [`Issue::Healthy`].
 
-use crate::card::{card, card_id, CardDef, CardId, CardKind, Color};
 use crate::collection::Collection;
-use crate::deck::MAX_COPIES;
-use crate::effect::Effect;
-use crate::lang::tr;
-use crate::set::{basic_energy, LUCKY_SATCHEL, TRAIL_COMPASS};
+use sixfold_engine::set::{basic_energy, LUCKY_SATCHEL, TRAIL_COMPASS};
+use sixfold_engine::tr;
+use sixfold_engine::Effect;
+use sixfold_engine::MAX_COPIES;
+use sixfold_engine::{card, card_id, CardDef, CardId, CardKind, Color};
 
 /// Fewer Basics than this and some opening hands have none.
 pub const MIN_BASICS: usize = 10;
@@ -197,14 +197,14 @@ impl Chart<'_> {
     /// The sturdiest Basic of the deck's colours (or colorless) that can go in.
     fn basic_to_add(&self) -> Option<CardId> {
         let colours = self.colours();
-        crate::set::ids()
+        sixfold_engine::set::ids()
             .filter(|&id| {
                 card(id).creature().is_some_and(|c| {
                     card(id).is_basic()
                         && (c.color == Color::Colorless || colours.contains(&c.color))
                 })
             })
-            .filter(|&id| self.can_add(id) && !crate::set::is_promo(id))
+            .filter(|&id| self.can_add(id) && !sixfold_engine::set::is_promo(id))
             .max_by_key(|&id| card(id).creature().map_or(0, |c| c.hp))
     }
 }
@@ -344,8 +344,8 @@ pub fn diagnose(deck: &[CardId], owned: &Collection) -> Vec<Advice> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::decks::{PREBUILT, STARTER};
-    use crate::set::*;
+    use sixfold_engine::decks::{PREBUILT, STARTER};
+    use sixfold_engine::set::*;
 
     fn issues(deck: &[CardId], owned: &Collection) -> Vec<Issue> {
         diagnose(deck, owned).into_iter().map(|a| a.issue).collect()
@@ -353,7 +353,7 @@ mod tests {
 
     fn all() -> Collection {
         let mut c = Collection::new();
-        crate::set::ids().for_each(|id| c.add(id, 8));
+        sixfold_engine::set::ids().for_each(|id| c.add(id, 8));
         c
     }
 
@@ -476,7 +476,7 @@ mod tests {
 
     #[test]
     fn advice_reads_in_french() {
-        use crate::lang::{set_lang, Lang};
+        use sixfold_engine::{set_lang, Lang};
         set_lang(Lang::Fr);
         let a = Advice {
             severity: Severity::Tip,

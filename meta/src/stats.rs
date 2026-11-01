@@ -1,5 +1,5 @@
 //! Play stats (`docs/WORLD_DESIGN.md` §12.2): named counters, fed by finished
-//! duels ([`Stats::record_duel`], from [`Game::summary`](crate::Game::summary))
+//! duels ([`Stats::record_duel`], from [`Game::summary`](sixfold_engine::Game::summary))
 //! and by the world ([`Stats::observe`] diffs the progress and the profile;
 //! steps and seal-site visits are reported as they happen). Saved as the
 //! `[stats]` section of the save: `s1;<key>=<n>,...`, sorted, zeros left out.
@@ -11,20 +11,20 @@
 
 use std::collections::BTreeMap;
 
-use crate::ai::Difficulty;
 use crate::campaign::{champion, rival, seals, RIVALS, SEALS};
-use crate::card::{card, CardId, CardKind, EnergyCard};
 use crate::clock::{self, Phase};
 use crate::duelists::{duelist, Duelist, Rule, DUELISTS};
-use crate::game::{End, GameSummary};
-use crate::lang::T;
 use crate::overworld::Progress;
 use crate::profile::Profile;
-use crate::set::{self, PROMOS};
+use sixfold_engine::ai::Difficulty;
+use sixfold_engine::set::{self, PROMOS};
+use sixfold_engine::T;
+use sixfold_engine::{card, CardId, CardKind, EnergyCard};
+use sixfold_engine::{End, GameSummary};
 
-/// Hidden finds in the world's maps (`engine/tests/world_data.rs` counts them).
+/// Hidden finds in the world's maps (`meta/tests/world_data.rs` counts them).
 pub const FINDS: usize = 104;
-/// Secrets (`flag:secret_<id>`) in the world's maps (`engine/tests/world_data.rs` counts them).
+/// Secrets (`flag:secret_<id>`) in the world's maps (`meta/tests/world_data.rs` counts them).
 pub const SECRETS: usize = 9;
 /// Curios (`curio_<name>` items) the maps give.
 pub const CURIOS: usize = 12;
@@ -371,7 +371,7 @@ pub fn award(s: &Stats, p: &mut Progress, pf: &Profile) -> Vec<&'static Achievem
 mod tests {
     use super::*;
     use crate::campaign::record;
-    use crate::fixtures::*;
+    use sixfold_engine::fixtures::*;
 
     fn won(end: End) -> GameSummary {
         GameSummary {
@@ -551,9 +551,9 @@ mod tests {
         s.observe((&before.0, &before.1), (&p, &pr));
         assert_eq!(s.get("coins_in"), u64::from(crate::campaign::RIVAL_PURSE));
         // A whole duel through the engine, won by deck-out.
-        let mut g = crate::testkit::main_phase(0);
-        g.players[1].deck.clear();
-        crate::testkit::ok(&mut g, crate::Action::Done);
+        let mut g = sixfold_engine::testkit::main_phase(0);
+        sixfold_engine::testkit::empty_deck(&mut g, 1);
+        sixfold_engine::testkit::ok(&mut g, sixfold_engine::Action::Done);
         s.record_duel(&g.summary(), Duel::World(r.id), &[GRASS_E]);
         assert_eq!((s.get("wins"), s.get("deck_out_wins")), (1, 1));
     }

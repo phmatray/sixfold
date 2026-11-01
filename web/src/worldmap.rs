@@ -10,9 +10,9 @@
 
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::clock;
-use sixfold_engine::overworld::Progress;
 use sixfold_engine::{fr, tr};
+use sixfold_meta::clock;
+use sixfold_meta::overworld::Progress;
 use wasm_bindgen::{JsCast, JsValue};
 
 use crate::world::field;

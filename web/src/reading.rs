@@ -6,9 +6,9 @@
 //! Escape (B) closes, through the dialog's own cancel.
 
 use leptos::prelude::*;
-use sixfold_engine::books::Book;
 use sixfold_engine::set::CARDS;
 use sixfold_engine::{tr, Color};
+use sixfold_meta::books::Book;
 use wasm_bindgen::JsValue;
 
 use crate::input::{self, Ctrl};

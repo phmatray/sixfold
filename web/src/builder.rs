@@ -1,15 +1,16 @@
 //! The deck builder's workbench (#102): "Build for me", "Complete my deck",
 //! the live advice, the test hand, undo, the energy readout, and the shelf of
-//! unlockable decks. The thinking is the engine's (`sixfold_engine::builder`,
-//! `sixfold_engine::decks::UNLOCKABLE`); this shows it and applies it.
+//! unlockable decks. The thinking is the engine's (`sixfold_meta::builder`,
+//! `sixfold_meta::unlock::UNLOCKABLE`); this shows it and applies it.
 
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::builder::{self, Pick, Plan, Style, Suggestion, Why};
-use sixfold_engine::decks::UNLOCKABLE;
-use sixfold_engine::overworld::Progress;
-use sixfold_engine::profile::Profile;
-use sixfold_engine::{card, fr, tr, CardId, Color, DeckList, DECK_SIZE};
+use sixfold_engine::{card, fr, tr, CardId, Color, DECK_SIZE};
+use sixfold_meta::builder::{self, Pick, Plan, Style, Suggestion, Why};
+use sixfold_meta::overworld::Progress;
+use sixfold_meta::profile::Profile;
+use sixfold_meta::unlock::UNLOCKABLE;
+use sixfold_meta::DeckList;
 use wasm_bindgen::{JsCast, JsValue};
 
 use crate::cards::{deck_colors, deck_star, CardFace, Pip};

@@ -7,13 +7,13 @@
 
 use leptos::html;
 use leptos::prelude::*;
-use sixfold_engine::booster::BOOSTERS;
-use sixfold_engine::campaign::RIVALS;
-use sixfold_engine::doctor::{self, Issue, Severity, Swap};
-use sixfold_engine::overworld::Progress;
-use sixfold_engine::profile::Profile;
-use sixfold_engine::shop::{self, InnStock, ShopError};
 use sixfold_engine::{card, tr, CardId};
+use sixfold_meta::booster::BOOSTERS;
+use sixfold_meta::campaign::RIVALS;
+use sixfold_meta::doctor::{self, Issue, Severity, Swap};
+use sixfold_meta::overworld::Progress;
+use sixfold_meta::profile::Profile;
+use sixfold_meta::shop::{self, InnStock, ShopError};
 
 use crate::binder::{FilterBar, Filters, Own, RarityMark};
 use crate::campaign::packs_label;
@@ -257,7 +257,7 @@ pub fn InnCounter(stock: &'static InnStock) -> impl IntoView {
         <section class="shop inn-counter" aria-labelledby="inn-counter-title">
             <h3 id="inn-counter-title">{tr("At the counter", "Au comptoir")}</h3>
             <ul class="shelf pack-counter">
-                {[stock.booster(), sixfold_engine::booster::WILD].into_iter()
+                {[stock.booster(), sixfold_meta::booster::WILD].into_iter()
                     .map(|b| view! { <PackItem b=b said=said /> }).collect_view()}
             </ul>
             <ul class="stock">
@@ -487,7 +487,7 @@ pub fn Press() -> impl IntoView {
     });
     let count = move |id: CardId| profile.with(|p| p.collection.count(id));
     let voucher = Memo::new(move |_| progress.with(|p| p.has_item(shop::VOUCHER)));
-    let stats = expect_context::<RwSignal<sixfold_engine::stats::Stats>>();
+    let stats = expect_context::<RwSignal<sixfold_meta::stats::Stats>>();
     let done = move |id: CardId, how: Result<(), ShopError>| match how {
         Ok(()) => {
             stats.update(|s| s.add("crafts", 1));

@@ -41,7 +41,7 @@ jobs:
       - run: cargo fmt --all --check
       # The desktop shell needs web/dist and WebKitGTK to compile; desktop.yml lints it.
       - run: cargo clippy --workspace --exclude sixfold-desktop --all-targets -- -D warnings
-      - run: cargo test -p sixfold-engine
+      - run: cargo test -p sixfold-engine -p sixfold-meta
       # The web crate's unit tests run on the host too (no browser, no wasm).
       - run: cargo test -p sixfold-web
       - name: Install Trunk
