@@ -43,7 +43,8 @@
 # `T except U`: a tile that matches T and not U (beside(#trail except #stairs): a path tile with no stairs on it).
 # T (a target) is terms joined by `|`: an asset name, a #tag, tile:<glyphs> (tile:pr=H), paint:<glyphs>, or a
 # builtin: door, warp, npc, spot, exit, solid, open, edge (off the map), prop (any other prop), deck, wet (water,
-# or flat ground the map lays as wet sand, mud or marsh). near(1, edge) means "on the map's border row".
+# or flat ground the map lays as wet sand, mud or marsh), cliff (ground a metre or more above the prop's: a rock
+# face). near(1, edge) means "on the map's border row".
 # `#` followed by a space starts a comment. Severity: `error` fails `--strict`, `warn` is for a person to judge.
 
 # ---------- Tags ----------
@@ -52,7 +53,7 @@ tag path      = tile:pr=H paint:pr deck
 tag trail     = tile:p paint:p                      # a path's walking line: posts and lamps keep off it (they may stand on a plaza or a deck)
 tag paved     = tile:pr=H paint:pr deck             # trodden, paved or built ground (paths, squares, boardwalks, piers, decks): nothing grows on it
 tag water     = tile:~
-tag wall      = tile:#WV
+tag wall      = tile:#WV cliff                       # a cave's rock face is a wall too
 tag house     = cottage workshop house terrace_house harbour_house lake_house treehouse kiln observatory lighthouse bell_tower headframe
 tag tree      = tree pine birch willow ash_pine standing_tree blossom_tree wishing_tree
 tag scatter   = bush bush_dark heather flowers rock rock_basalt reeds moonflower stump mushroom_ring

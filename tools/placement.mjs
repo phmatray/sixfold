@@ -20,7 +20,7 @@ const FUNCS = {
 };
 const NUMERIC = new Set(["count", "dist", "y", "height", "rot"]);
 const WORDS = new Set(["outdoor", "indoor", "cave", "wild", "banded", "climbs", "grounded", "flat", "true", "false", "y", "height", "rot"]);
-const BUILTIN = new Set(["door", "warp", "npc", "spot", "exit", "solid", "open", "edge", "prop", "deck", "wet"]);
+const BUILTIN = new Set(["door", "warp", "npc", "spot", "exit", "solid", "open", "edge", "prop", "deck", "wet", "cliff"]);
 
 // One expression, parsed by recursive descent straight off the string.
 function parseExpr(src, tags, where) {
@@ -187,6 +187,8 @@ function matches(w, term, x, z, self) {
     case "prop": return here().length > 0;
     case "deck": return here().some((q) => w.t.DECK[q.asset]);
     case "solid": return !w.inMap(x, z) || "#fWV~".includes(w.m.tiles[z][x]) || here().some(w.blocks);
+    // A rock face: ground a metre or more above the prop's own (a cave's wall, a terrace's riser).
+    case "cliff": return w.inMap(x, z) && w.floor(x, z) >= (self?.y ?? 0) + 1;
     // Wet ground: water, or flat ground (or sand) the map lays as wet sand, mud or marsh (`ground.base`, `ground.sand`).
     case "wet": { const c = w.inMap(x, z) && w.m.tiles[z][x]; return c === "~" || (c === "." && WET.test(w.m.ground?.base ?? "")) || (c === "s" && WET.test(w.m.ground?.sand ?? "")); }
     case "open": return w.inMap(x, z) && !"#fWV~".includes(w.m.tiles[z][x]) && !here().some(w.blocks) && !w.npcs.has(k);

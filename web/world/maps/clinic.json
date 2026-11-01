@@ -22,7 +22,7 @@
     {
       "asset": "bookcase",
       "x": 1,
-      "z": 3,
+      "z": 2,
       "rot": 90
     },
     {
@@ -91,7 +91,7 @@
       "kind": "find",
       "id": "i_clinic",
       "x": 1,
-      "z": 3,
+      "z": 2,
       "give": "card:trail_compass",
       "text": "Between two volumes of \"Common Ailments of the Sixty-Card Deck\": a card, used as a bookmark.",
       "text_fr": "Entre deux tomes des « Maux courants du deck de soixante cartes » : une carte, glissée en marque-page."

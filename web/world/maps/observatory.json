@@ -35,9 +35,9 @@
     },
     {
       "asset": "light_box",
-      "x": 10,
+      "x": 11,
       "z": 5,
-      "rot": 0
+      "rot": 270
     },
     {
       "asset": "workbench",
@@ -124,7 +124,7 @@
       ]
     },
     {
-      "x": 10,
+      "x": 11,
       "z": 5,
       "kind": "sign",
       "text": "A star chart glows on the light table, pinned with brass weights. Six bright stars are ringed in red ink, and a seventh, faint, has a question mark.",

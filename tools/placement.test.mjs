@@ -82,6 +82,9 @@ test("on, near, front and beside read tiles, props and builtins", () => {
   assert.equal(ask("touches(tile:~) or near(1, edge)", house), true);
   assert.equal(ask("front(open)", lampB), true);
   assert.equal(ask("is(lantern | crates)", house), false);
+  // cliff: ground a metre or more above the prop's own, so a rock face counts as a wall and a ledge's top does not.
+  assert.equal(ask("front(cliff)", { asset: "crates", x: 2, z: 3, rot: 0 }), true, "the 1 m ledge rises in front of it");
+  assert.equal(ask("near(1, cliff)", ledge), false, "on the ledge, nothing rises over it");
 });
 
 test("banded: a prop in a transition band whose scatter lists it", () => {
