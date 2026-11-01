@@ -8,10 +8,10 @@
 //! [`Wallet::save`] strings wherever it likes.
 
 use crate::booster::BOOSTERS;
-use crate::card::CardId;
 use crate::collection::{sign, starter_collection, unsign, Collection, LoadError};
-use crate::deck::DeckList;
-use crate::decks::STARTER;
+use crate::DeckList;
+use sixfold_engine::decks::STARTER;
+use sixfold_engine::CardId;
 
 /// The wallet save string version this build writes and reads.
 const VERSION: &str = "p1";
@@ -157,7 +157,7 @@ mod tests {
         assert_eq!(ids, BOOSTERS[2].open(42, &Collection::new()));
         let mut seen = vec![];
         for &(id, new) in &opened {
-            let basic_energy = crate::card::card(id).is_basic_energy();
+            let basic_energy = sixfold_engine::card(id).is_basic_energy();
             assert_eq!(new, !basic_energy && !seen.contains(&id), "{id:?}");
             seen.push(id);
         }

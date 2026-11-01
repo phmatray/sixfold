@@ -1,19 +1,19 @@
 //! The campaign in the UI: the seals, the rival roster (a screen from the
 //! title menu, and a sheet in the world), the pre-duel sheet that picks one of
 //! the player's decks and starts the duel, and the post-game ladder (the
-//! Gauntlet and the daily duel). Rules live in `sixfold_engine::campaign` and
-//! `sixfold_engine::endgame`; turning today's date into a day number is done
+//! Gauntlet and the daily duel). Rules live in `sixfold_meta::campaign` and
+//! `sixfold_meta::endgame`; turning today's date into a day number is done
 //! here.
 
 use leptos::prelude::*;
 use sixfold_engine::ai::Difficulty;
-use sixfold_engine::booster::{BOOSTERS, WILD};
-use sixfold_engine::campaign::{champion, opponent, rival, seals, title, Rival, RIVALS, SEALS};
-use sixfold_engine::duelists::{duelist, Rule};
-use sixfold_engine::endgame::{self, Rung, CLEAR_FLAG, CLEAR_PACKS, GAUNTLET};
-use sixfold_engine::overworld::Progress;
-use sixfold_engine::profile::Profile;
 use sixfold_engine::{fr, tr, CardId};
+use sixfold_meta::booster::{BOOSTERS, WILD};
+use sixfold_meta::campaign::{champion, opponent, rival, seals, title, Rival, RIVALS, SEALS};
+use sixfold_meta::duelists::{duelist, Rule};
+use sixfold_meta::endgame::{self, Rung, CLEAR_FLAG, CLEAR_PACKS, GAUNTLET};
+use sixfold_meta::overworld::Progress;
+use sixfold_meta::profile::Profile;
 
 use crate::art::color_key;
 use crate::binder::PageBar;

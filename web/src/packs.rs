@@ -7,10 +7,10 @@
 use std::time::Duration;
 
 use leptos::prelude::*;
-use sixfold_engine::booster::{Booster, BOOSTERS, COMMONS, HOLO_ODDS, SHARES, UNCOMMONS};
-use sixfold_engine::profile::Profile;
 use sixfold_engine::set::is_holo;
 use sixfold_engine::{card, tr, CardId, Color, Rarity};
+use sixfold_meta::booster::{Booster, BOOSTERS, COMMONS, HOLO_ODDS, SHARES, UNCOMMONS};
+use sixfold_meta::profile::Profile;
 
 use crate::art::{color_key, glyph_svg};
 use crate::binder::{inspect_handlers, PageBar};

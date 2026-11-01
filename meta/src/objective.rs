@@ -4,13 +4,13 @@
 //! champion) a field item that opens somewhere already seen, the Gauntlet,
 //! and last the finds still hidden. [`KEYS`] is §11.2's table: where each
 //! field item comes from and the places on the maps it opens, which
-//! `engine/tests/world_data.rs` checks against every map's gates, gated
+//! `meta/tests/world_data.rs` checks against every map's gates, gated
 //! doors and gangways, so the table can't drift from the world.
 
 use crate::campaign::{champion, next_rival, rival, seals, Rival};
 use crate::endgame::CLEAR_FLAG;
 use crate::overworld::{parse_cond, Progress, Test};
-use crate::{tr, T};
+use sixfold_engine::{tr, T};
 
 /// A place on a map that a field item opens: a gate (by its id), a gated
 /// door (by the map it leads to) or a gangway (by the spot or person whose
@@ -385,7 +385,7 @@ mod tests {
 
     #[test]
     fn a_keepers_objective_names_their_seal_site() {
-        use crate::lang::{set_lang, Lang};
+        use sixfold_engine::{set_lang, Lang};
         let p = with(&["flag:beat_t_tobin"]);
         let en = objective(&p).text(&p);
         set_lang(Lang::Fr);
@@ -401,7 +401,7 @@ mod tests {
     /// #150: a keeper whose region's duelists aren't bested yet: how many more.
     #[test]
     fn a_keepers_objective_counts_the_duelists_still_needed() {
-        use crate::lang::{set_lang, Lang};
+        use sixfold_engine::{set_lang, Lang};
         let p = with(&[
             "flag:beat_t_tobin",
             "flag:beat_bramble",
@@ -513,7 +513,7 @@ mod tests {
     /// a keeper still to earn is never named as if they would duel.
     #[test]
     fn the_short_step_and_the_roster_count_agree_with_the_journal() {
-        use crate::lang::{set_lang, Lang};
+        use sixfold_engine::{set_lang, Lang};
         assert_eq!(
             objective(&Progress::default())
                 .short(&Progress::default())

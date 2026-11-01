@@ -21,8 +21,8 @@ cd web && trunk serve
 # Production build -> web/dist
 cd web && trunk build --release
 
-# Test the rules engine (host-native, fast)
-cargo test -p sixfold-engine
+# Test the rules engine and the game around it (host-native, fast)
+cargo test -p sixfold-engine -p sixfold-meta
 
 # Run a single engine test by name
 cargo test -p sixfold-engine draw_moves_card_from_deck_to_hand
@@ -30,13 +30,14 @@ cargo test -p sixfold-engine draw_moves_card_from_deck_to_hand
 
 ## Architecture
 
-Cargo workspace, three crates with one-way dependencies `web -> engine` and `desktop -> web/dist`:
+Cargo workspace, four crates with one-way dependencies `web -> meta -> engine`, `web -> engine` and `desktop -> web/dist`:
 
-- **`engine/`** — the rules core, **pure Rust with no WASM or UI dependencies**. This is the invariant that makes the game logic unit-testable on the host without a browser. Keep all game rules, state transitions, and card models here; never pull `leptos`, `wasm-bindgen`, or DOM concerns into this crate.
-- **`web/`** — the Leptos CSR app. Depends on `engine` by path and renders its types. Built by Trunk, whose entry point is `web/index.html` (not `main.rs` directly) — the `data-trunk` link tags there pull in `style.css` and the wasm bundle.
+- **`engine/`** (`sixfold-engine`) — the rules core: the duel, the card set, the prebuilt decks, the AI and the scripted tutorial duel. **Pure Rust with no WASM or UI dependencies**. This is the invariant that makes the game logic unit-testable on the host without a browser. Keep all game rules, state transitions, and card models here; never pull `leptos`, `wasm-bindgen`, or DOM concerns into this crate. Its `testkit` feature exposes the test cards and helpers to `meta`'s tests only (a dev-dependency), never to a shipped build.
+- **`meta/`** (`sixfold-meta`) — the game around the duel: campaign, world progress (`overworld`), shop, boosters, collection and deck lists, deck builder and doctor, profile, stats and saves. Same rule: pure Rust, no WASM or UI dependencies. It uses the engine's public API only; never make `engine` depend on it.
+- **`web/`** — the Leptos CSR app. Depends on `engine` and `meta` by path and renders their types. Built by Trunk, whose entry point is `web/index.html` (not `main.rs` directly) — the `data-trunk` link tags there pull in `style.css` and the wasm bundle.
 - **`desktop/`** — the desktop app (Tauri v2): `web/dist` in a native window, no game code of its own. It needs a built `web/dist` (and WebKitGTK on Linux) to compile, so it is left out of `default-members` and of CI's workspace clippy; `.github/workflows/desktop.yml` builds and lints it. Run `cargo tauri dev` / `cargo tauri build` from the repo root.
 
-When adding game logic, the model lives in `engine` with a unit test; the UI in `web` consumes it. A change that needs a browser to verify belongs in `web`; a change you can assert with plain Rust belongs in `engine`.
+When adding game logic, the model lives in `engine` (a duel rule) or `meta` (campaign, world, economy, saves) with a unit test; the UI in `web` consumes it. A change that needs a browser to verify belongs in `web`; a change you can assert with plain Rust belongs in `engine` or `meta`.
 
 ## Releases
 

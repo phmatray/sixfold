@@ -3,19 +3,20 @@
 //! and the rivals' AI styles, and a full campaign playthrough from a new
 //! player's collection.
 
-use crate::ai::{Ai, Difficulty, Style};
 use crate::booster::BOOSTERS;
 use crate::campaign::{champion, record, rival, seals, RIVALS, SEALS};
-use crate::card::{card, CardId, CardKind, Color, Stage};
-use crate::decks::{Prebuilt, PREBUILT, STARTER};
 use crate::duelists::{self, Kit, DUELISTS, KITS, ROOK_SEALS, SPROUTS};
 use crate::endgame::GAUNTLET;
 use crate::overworld::Progress;
 use crate::profile::Profile;
-use crate::set::{self, basic_energy};
 use crate::shop::{buy_pack, pack_price};
 use crate::stats::{award, Stats};
-use crate::{card_id, validate_deck, Collection, Config, Game, DECK_SIZE, MAX_COPIES};
+use crate::Collection;
+use sixfold_engine::ai::{Ai, Difficulty, Style};
+use sixfold_engine::decks::{Prebuilt, PREBUILT, STARTER};
+use sixfold_engine::set::{self, basic_energy};
+use sixfold_engine::{card, CardId, CardKind, Color, Stage};
+use sixfold_engine::{card_id, validate_deck, Config, Game, DECK_SIZE, MAX_COPIES};
 
 /// Play one game to the end; returns the winner's seat.
 fn play(decks: [Vec<CardId>; 2], seed: u64, prizes: u8, levels: [Difficulty; 2]) -> usize {
@@ -46,7 +47,7 @@ fn play_styled(
 }
 
 /// Apply an action the AI chose, then check the game still holds together.
-fn checked(g: &mut Game, a: crate::Action) {
+fn checked(g: &mut Game, a: sixfold_engine::Action) {
     g.apply(a).unwrap();
     if let Err(e) = g.check_invariants() {
         panic!("after {a:?} on turn {}: {e}", g.turn());
@@ -690,7 +691,7 @@ fn english_in(line: &str) -> Option<&'static str> {
 /// review with `-- --nocapture`.
 #[test]
 fn a_french_game_has_no_english_left() {
-    use crate::lang::{set_lang, Lang};
+    use sixfold_engine::{set_lang, Lang};
     set_lang(Lang::Fr);
     let mut lines: Vec<String> = vec![];
     let mut sample: Vec<String> = vec![];
@@ -753,7 +754,7 @@ fn a_french_game_has_no_english_left() {
 #[ignore]
 #[allow(clippy::needless_range_loop)]
 fn balance_indicators() {
-    use crate::Event;
+    use sixfold_engine::Event;
     use std::collections::{BTreeMap, BTreeSet};
     let games = 100u64;
     let decks = field();
@@ -865,7 +866,7 @@ fn balance_indicators() {
 #[test]
 #[ignore]
 fn postgame_first_player_edge() {
-    use crate::Event;
+    use sixfold_engine::Event;
     let edge = |deck: &Prebuilt, prizes: u8, seat: (Difficulty, Style)| {
         let (mut first, mut all) = (0u32, 0u32);
         for (i, mine) in PREBUILT.iter().enumerate() {

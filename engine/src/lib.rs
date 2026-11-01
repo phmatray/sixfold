@@ -1,4 +1,6 @@
-//! Core rules engine for the trading card game.
+//! Core rules engine for the trading card game: the duel, the card set, the
+//! prebuilt decks and the AI. The rest of the game (campaign, world, shop,
+//! saves) is in `sixfold-meta`.
 //!
 //! Pure Rust with no WASM or UI dependencies, so every rule is unit-testable on
 //! the host. Rules follow `docs/RULES.md`; tests name the rule IDs they cover.
@@ -8,7 +10,6 @@
 
 mod action;
 mod card;
-mod collection;
 mod condition;
 mod damage;
 mod deck;
@@ -29,48 +30,34 @@ mod turn;
 mod view;
 
 pub mod ai;
-pub mod books;
-pub mod booster;
-pub mod builder;
-pub mod campaign;
-pub mod clock;
 pub mod decks;
-pub mod doctor;
-pub mod duelists;
-pub mod endgame;
-pub mod lore;
-pub mod objective;
-pub mod overworld;
-pub mod profile;
-pub mod save;
 pub mod set;
-pub mod shop;
-pub mod stats;
 pub mod tutorial;
 
-#[cfg(test)]
-mod fixtures;
-#[cfg(test)]
-mod playtest;
-#[cfg(test)]
-mod testkit;
+// The test cards and helpers, also for `sixfold-meta`'s tests (feature
+// `testkit`, a dev-dependency only).
+#[cfg(any(test, feature = "testkit"))]
+#[doc(hidden)]
+pub mod fixtures;
+#[cfg(any(test, feature = "testkit"))]
+#[doc(hidden)]
+pub mod testkit;
 
 pub use action::{Action, Event, Prompt, PromptKind, RuleError};
 pub use card::{
     can_pay, card, card_id, energy_units, total_units, try_card, validate_cards, Attack, CardDef,
     CardId, CardKind, Color, Creature, EnergyCard, Gear, Power, PowerKind, Rarity, Stage, Units,
 };
-pub use collection::{starter_collection, Collection, LoadError};
 pub use condition::{ActiveEffects, Condition, Placed, Poison, Shield, Special, Status};
 pub use damage::Hit;
 pub use deck::{
-    deck_errors, hints, validate_deck, AddError, Advice, DeckError, DeckList, DeckListError, Hints,
-    SortBy, DECK_SIZE, MAX_COPIES,
+    deck_errors, hints, validate_deck, Advice, DeckError, Hints, SortBy, DECK_SIZE, MAX_COPIES,
 };
 pub use describe::summarise_turn;
 pub use effect::{Choice, Effect, Find};
 pub use game::{Config, End, Game, GameSummary, SetupError, MAX_BENCH};
 pub use lang::{fr, lang, set_lang, tr, Lang, T};
 pub use player::InPlay;
+pub use rng::Rng;
 pub use setup::OPENING_HAND;
 pub use view::{Side, View};

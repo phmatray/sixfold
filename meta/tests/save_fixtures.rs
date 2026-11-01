@@ -1,4 +1,4 @@
-//! A save written by every released version still loads (`engine/src/save.rs`,
+//! A save written by every released version still loads (`meta/src/save.rs`,
 //! "Compatibility rules"). Each fixture in `tests/fixtures/saves/` was written
 //! by the engine *at that tag* (a throwaway example run in a worktree of the
 //! release), never by today's code: the same played game every time — a pack
@@ -12,11 +12,11 @@
 use std::collections::{BTreeMap, HashMap};
 use std::path::Path;
 
-use sixfold_engine::books::{is_read, read_count, read_flag, BOOKS};
-use sixfold_engine::campaign::{KEEPERS, RIVALS, VOUCHED};
-use sixfold_engine::overworld::STARTING_COINS;
-use sixfold_engine::save::{Save, Summary, CAMPAIGN_DECK, PROGRESS, STATS, WORLD_AT};
-use sixfold_engine::stats::Stats;
+use sixfold_meta::books::{is_read, read_count, read_flag, BOOKS};
+use sixfold_meta::campaign::{KEEPERS, RIVALS, VOUCHED};
+use sixfold_meta::overworld::STARTING_COINS;
+use sixfold_meta::save::{Save, Summary, CAMPAIGN_DECK, PROGRESS, STATS, WORLD_AT};
+use sixfold_meta::stats::Stats;
 
 fn fixture(name: &str) -> String {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))

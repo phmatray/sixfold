@@ -1,11 +1,11 @@
 //! My decks (list, create, duplicate, rename, delete) and the deck editor.
 
 use leptos::prelude::*;
-use sixfold_engine::profile::Profile;
 use sixfold_engine::{
-    card, card_id, fr, hints, tr, AddError, CardId, CardKind, Collection, DeckError, DeckList,
-    DeckListError, SortBy, DECK_SIZE, MAX_COPIES,
+    card, card_id, fr, hints, tr, CardId, CardKind, DeckError, SortBy, DECK_SIZE, MAX_COPIES,
 };
+use sixfold_meta::profile::Profile;
+use sixfold_meta::{AddError, Collection, DeckList, DeckListError};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -525,7 +525,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
                 sorted.sort();
                 (
                     sorted,
-                    sixfold_engine::builder::complete(&d.cards, &p.collection, Default::default()),
+                    sixfold_meta::builder::complete(&d.cards, &p.collection, Default::default()),
                 )
             })
         });
@@ -542,7 +542,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
         let kept = built
             .reasons
             .first()
-            .filter(|r| r.why == sixfold_engine::builder::Why::Kept)
+            .filter(|r| r.why == sixfold_meta::builder::Why::Kept)
             .map_or(0, |r| r.cards.iter().map(|c| c.1).sum::<usize>());
         draft.update(|d| d.cards = built.cards);
         crate::audio::sfx("place", 0.0);
@@ -575,7 +575,7 @@ pub fn EditorPanel(index: usize, on_done: Callback<()>) -> impl IntoView {
     let total = move || draft.with(|d| d.cards.len());
     let tips = Memo::new(move |_| {
         profile
-            .with(|p| draft.with(|d| sixfold_engine::builder::suggestions(&d.cards, &p.collection)))
+            .with(|p| draft.with(|d| sixfold_meta::builder::suggestions(&d.cards, &p.collection)))
     });
     // Bumped on every change to the deck's size: renders the counts (read
     // untracked there, so they render once) and replays their bump.

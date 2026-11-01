@@ -10,11 +10,11 @@
 use std::time::Duration;
 
 use leptos::prelude::*;
-use sixfold_engine::campaign::{self, Rival, RIVALS};
-use sixfold_engine::duelists::duelist;
-use sixfold_engine::overworld::Progress;
-use sixfold_engine::stats::{Stats, FINDS};
 use sixfold_engine::{card, tr, T};
+use sixfold_meta::campaign::{self, Rival, RIVALS};
+use sixfold_meta::duelists::duelist;
+use sixfold_meta::overworld::Progress;
+use sixfold_meta::stats::{Stats, FINDS};
 
 use crate::achievements::thousands;
 use crate::art::{art_src, color_key};
@@ -24,7 +24,7 @@ use crate::{store, Screen};
 
 /// Where the champion stands once the credits end: the duel hall, just out of
 /// the Warden's door (the way back's spawn in `web/world/maps/warden.json`;
-/// `engine/tests/world_data.rs` fails if it moves).
+/// `meta/tests/world_data.rs` fails if it moves).
 const HALL_DOOR: &str = "shop,1,6,e";
 
 /// The people of the world, as the credits list them.

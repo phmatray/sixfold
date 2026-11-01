@@ -2,11 +2,11 @@
 
 use leptos::html;
 use leptos::prelude::*;
-use sixfold_engine::campaign::{seals, RIVALS, SEALS};
-use sixfold_engine::objective::objective;
-use sixfold_engine::overworld::Progress;
-use sixfold_engine::profile::Profile;
 use sixfold_engine::{tr, Lang};
+use sixfold_meta::campaign::{seals, RIVALS, SEALS};
+use sixfold_meta::objective::objective;
+use sixfold_meta::overworld::Progress;
+use sixfold_meta::profile::Profile;
 use wasm_bindgen::prelude::*;
 
 use crate::achievements::{count_line, Origin, Tab};
@@ -197,7 +197,7 @@ fn TextSize() -> impl IntoView {
 /// The outdoor camera angle (#148): kept in the save, applied to the world at once.
 #[component]
 fn CameraAngleSetting() -> impl IntoView {
-    use sixfold_engine::save::CameraAngle;
+    use sixfold_meta::save::CameraAngle;
     let now = store::camera_signal();
     let option = move |a: CameraAngle, label: &'static str| {
         view! {

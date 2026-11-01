@@ -216,7 +216,7 @@ export function route(w, hero, tx, tz) {
 
 // ---------- Emotes: a bubble over a head ----------
 // "!" when a route duelist spots the hero, and the dialogue cue `emote:<actor>:<kind>`
-// (kinds as `EMOTES` in engine/src/overworld.rs). Drawn over everything, so scenery never hides it.
+// (kinds as `EMOTES` in meta/src/overworld.rs). Drawn over everything, so scenery never hides it.
 const INK = "#0d1a2c", GLYPH = { bang: "#e2553a", what: "#2d5fae", dots: INK, heart: "#e0457b", note: "#2f7175" };
 const bubbles = new Map();
 function bubbleTex(kind) {

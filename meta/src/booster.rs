@@ -1,4 +1,4 @@
-//! Boosters: 10-card packs drawn from [`crate::set`], deterministic from a
+//! Boosters: 10-card packs drawn from [`sixfold_engine::set`], deterministic from a
 //! seed. The design and its odds are in `docs/BOOSTERS.md`.
 //!
 //! A pack is 6 Commons, 3 Uncommons and a Rare slot, in that (reveal)
@@ -9,15 +9,15 @@
 //! [`SHARES`], and its Holo Rares are its own types; the Wild pack draws
 //! evenly from the whole set. The Rare slot skips cards the player already
 //! has [`MAX_COPIES`] of while any other is left. Basic energy is unlimited,
-//! so no slot holds it, and promos ([`crate::set::PROMOS`]) are campaign
+//! so no slot holds it, and promos ([`sixfold_engine::set::PROMOS`]) are campaign
 //! rewards that no pack holds.
 
-use crate::card::{card, CardId, CardKind, Color, Rarity};
 use crate::collection::Collection;
-use crate::deck::MAX_COPIES;
-use crate::lang::T;
-use crate::rng::Rng;
-use crate::set::{is_holo, is_promo};
+use sixfold_engine::set::{is_holo, is_promo};
+use sixfold_engine::Rng;
+use sixfold_engine::MAX_COPIES;
+use sixfold_engine::T;
+use sixfold_engine::{card, CardId, CardKind, Color, Rarity};
 
 pub const PACK_SIZE: usize = COMMONS + UNCOMMONS + 1;
 pub const COMMONS: usize = 6;
@@ -148,7 +148,7 @@ impl Booster {
     /// `holo` for the upgraded Rare slot.
     pub fn pool(&self, rarity: Rarity, holo: bool) -> Groups {
         let mut g = Groups::default();
-        for id in crate::set::ids().filter(|&id| {
+        for id in sixfold_engine::set::ids().filter(|&id| {
             card(id).rarity == rarity
                 && self.holds(id)
                 && (rarity != Rarity::Rare || is_holo(id) == holo)
@@ -206,7 +206,7 @@ fn draw(rng: &mut Rng, pool: &Groups, weights: [u32; 3], taken: &[CardId]) -> Ca
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::set::*;
+    use sixfold_engine::set::*;
     use std::collections::HashMap;
 
     fn fresh() -> Collection {
@@ -274,14 +274,16 @@ mod tests {
         assert!(DREAM_PACK.holds(HEXARCH) && !DREAM_PACK.holds(FULGUREX));
         assert!(EMBER_PACK.holds(PUDDOCK), "a stray off-type Common");
         assert!(BOOSTERS.iter().all(|b| !b.holds(FIRE_ENERGY)));
-        assert!(crate::set::ids()
+        assert!(sixfold_engine::set::ids()
             .all(|id| WILD_PACK.holds(id) == (!is_promo(id) && !card(id).is_basic_energy())));
         // Holo Rares are the Awaken 2 Hexons.
-        let holos: Vec<CardId> = crate::set::ids().filter(|&id| is_holo(id)).collect();
+        let holos: Vec<CardId> = sixfold_engine::set::ids()
+            .filter(|&id| is_holo(id))
+            .collect();
         assert_eq!(holos.len(), 12);
         assert!(holos
             .iter()
-            .all(|&id| card(id).creature().unwrap().stage == crate::card::Stage::Stage2));
+            .all(|&id| card(id).creature().unwrap().stage == sixfold_engine::Stage::Stage2));
     }
 
     #[test]
@@ -402,7 +404,7 @@ mod tests {
             }
             // Packs until one copy of every own-type and neutral card (all
             // of them for Wild), over 400 runs.
-            let goal: Vec<CardId> = crate::set::ids()
+            let goal: Vec<CardId> = sixfold_engine::set::ids()
                 .filter(|&id| b.holds(id) && b.group(id) < 2)
                 .collect();
             let mut runs: Vec<usize> = (0..400u64)

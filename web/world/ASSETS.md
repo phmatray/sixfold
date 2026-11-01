@@ -271,7 +271,7 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   `route` (optional) is a loop of one-tile steps. Speaking (E or tap while facing them, also
   across a counter or a duel table) turns them to the hero and runs `dialogue`: the first
   branch whose `if` holds plays its `lines`, then applies its `do` effects. Conditions and
-  effects are the engine's progression language (`engine/src/overworld.rs`):
+  effects are the engine's progression language (`meta/src/overworld.rs`):
   - conditions (negate with `!`, join with `&`): `item:x`, `flag:x`, `seals:n` (at least n seals),
     `beat:<id>`, `open:<rival>` (enough seals to duel them), `won:<id>` / `lost:<id>` (the last
     duel's result, until that rival or duelist is next talked to), `coins:n` (at least n Facets),
@@ -281,13 +281,13 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
     `card:<slug>` (one card, shown as found), `coins:n`, `pay:n` (short: the rest is skipped and
     "Not enough Facets" shows), `show:<panel>`, `emote:<actor>:<bang|what|dots|heart|note>` (a
     bubble over that NPC's head, or `hero`'s, once the dialog closes).
-  A campaign rival is an NPC whose `id` is the rival's id in `engine/src/campaign.rs`; its
+  A campaign rival is an NPC whose `id` is the rival's id in `meta/src/campaign.rs`; its
   branches go `won:` / `lost:` (post-duel lines), `!open:` (locked), `beat:` (rematch, with
   `duel:`), then the first meeting (with `duel:`). Talking also sets `flag:talked_<id>`.
   Progress, and where the hero stands (`map,x,z,facing`), are saved in localStorage; the
   world resumes there, and after a world duel the hero, back on its tile, meets the rival or
   duelist again so the post-duel line plays.
-- **route duelists:** an NPC whose `id` is a duelist in `engine/src/duelists.rs` (`t_<name>`) with a
+- **route duelists:** an NPC whose `id` is a duelist in `meta/src/duelists.rs` (`t_<name>`) with a
   `duelist` block (WORLD_DESIGN §4.1). `web/world/duelist.js` runs it; `map.js` expands it to dialogue.
 
   ```jsonc
@@ -324,7 +324,7 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   `text` and applies it (flag `found_<id>`, saved); later looks say "Nothing else here". Unless `hidden`, a
   glint marks it until found. Put it on a solid tile, a prop worth looking in (`stump`, `log`, `crates`, a
   bookcase…): check-maps refuses a find on an open tile. Ids are unique across all maps
-  (`engine/tests/world_data.rs`).
+  (`meta/tests/world_data.rs`).
 - **prop `glow`**: a colour for the prop's `*glow*` materials (a waymark's crystal in its region's colour).
 - **prop `recolor`**: `{ "<material name>": "#rrggbb" | null }`, a cheap variant of a shared model: each named
   material gets that colour, and `null` hides its parts. The Deck Clinic is the bakery's `cottage` with a slate
@@ -364,7 +364,7 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   - `dark: true`: a cave. No sun at any hour, a dim sky, and the hero's lantern lights the way; music `cave`;
   - `light_dawn` / `light_dusk` / `light_night`: any part of a `light` block, overriding that phase's
     derived look (`web/world/daylight.js`).
-- **The clock** (`engine/src/clock.rs`): a game minute a real second, saved as `t:<minute>`. Dawn 05:00,
+- **The clock** (`meta/src/clock.rs`): a game minute a real second, saved as `t:<minute>`. Dawn 05:00,
   day 08:00, dusk 18:00, night 21:00. Conditions `time:dawn|day|dusk|night` ("dark" is
   `!time:day & !time:dawn`); the effect `clock:<phase>` jumps to the start of a phase (the inn's panel
   uses it). Everything with an `if` (people, spots, finds, props, gates) is re-checked at each phase

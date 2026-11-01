@@ -14,15 +14,15 @@
 //!
 //! Both keep their state in the world's [`Progress`].
 
-use crate::ai::Difficulty;
 use crate::campaign::{champion, rival, Rival, RIVALS};
-use crate::card::CardId;
-use crate::decks::Prebuilt;
-use crate::lang::T;
 use crate::overworld::Progress;
 use crate::profile::Profile;
-use crate::rng::Rng;
-use crate::set::*;
+use sixfold_engine::ai::Difficulty;
+use sixfold_engine::decks::Prebuilt;
+use sixfold_engine::set::*;
+use sixfold_engine::CardId;
+use sixfold_engine::Rng;
+use sixfold_engine::T;
 
 /// Wild packs for clearing the whole Gauntlet.
 pub const CLEAR_PACKS: u32 = 3;
@@ -362,8 +362,8 @@ pub static GAUNTLET: [Rung; 6] = [
 mod tests {
     use super::*;
     use crate::campaign::record;
-    use crate::decks::{EMBER_RUSH, STORM_FRONT};
-    use crate::validate_deck;
+    use sixfold_engine::decks::{EMBER_RUSH, STORM_FRONT};
+    use sixfold_engine::validate_deck;
 
     fn champion_progress() -> (Progress, Profile) {
         let (mut p, mut pr) = (Progress::default(), Profile::new_player());

@@ -1,6 +1,6 @@
 # Engine API reference (`sixfold-engine`)
 
-This is the contract between the rules engine (`engine/`) and its three consumers: the card set (`engine/src/set.rs`, `engine/src/decks.rs`), the AI (`engine/src/ai.rs`) and the Leptos UI (`web/`). The rules themselves are in `docs/RULES.md`. Everything listed here is re-exported from the crate root (`use sixfold_engine::*;`).
+This is the contract between the rules engine (`engine/`) and its three consumers: the card set (`engine/src/set.rs`, `engine/src/decks.rs`), the AI (`engine/src/ai.rs`) and the Leptos UI (`web/`). The rules themselves are in `docs/RULES.md`. Everything in sections 1–9 is re-exported from the crate root (`use sixfold_engine::*;`). Sections 10–12 are the game around the duel, in the `sixfold-meta` crate (`meta/`), which builds on this one.
 
 **Legal scope:** only mechanics. Every card name, attack, Power and line of text must be original. Use the game's own words: "Hexon" (a name coined for Sixfold), "Awakening", "Power", "Basic / Awaken 1 / Awaken 2", and the colours Grove, Ember, Tide, Storm, Stone, Dream and Neutral.
 
@@ -558,7 +558,7 @@ impl Ai {
 
 ## 10. Collection, boosters and deck building
 
-Pure data and functions with no I/O: the UI decides where strings are stored and where booster seeds come from. `Collection`, `starter_collection`, `LoadError`, `DeckList`, `DeckListError`, `AddError` and `SortBy` are re-exported from the crate root; boosters live in `sixfold_engine::booster`.
+Pure data and functions with no I/O: the UI decides where strings are stored and where booster seeds come from. `Collection`, `starter_collection`, `LoadError`, `DeckList`, `DeckListError` and `AddError` are re-exported from the `sixfold_meta` root, and the unlockable decks are `sixfold_meta::unlock`; boosters live in `sixfold_meta::booster`. The deck rules (`validate_deck`, `deck_errors`, `hints`) and `SortBy` stay in `sixfold_engine`.
 
 **Collection.** Owned copies per `CardId`. Basic energy is unlimited: it is never stored, `count` reports `usize::MAX`, and `add` / `remove` on it are no-ops (`remove` returns true).
 
@@ -812,7 +812,7 @@ Save 1
 
 - The header is `sixfold-save;<version>;<checksum>`: `save::VERSION = 1`, and the checksum is FNV-1a (8 lowercase hex digits) over every line after the header, joined with `\n`.
 - A section is `[name]` (lowercase ASCII letters, digits and `_`) followed by its lines. A content line that is empty or starts with `[` or `\` is written with a `\` in front.
-- Sections this build reads: `name`, `collection` (`Collection::save`), `decks` (one `DeckList::save` per line), `wallet` (`Wallet::save`), `progress` (`Progress::encode`), `world_at` (`map,x,z,facing`), `campaign_deck` and `tutorial`. 1.2's Facets (`c:`) and the shop's daily purchases (`ps:`) are `progress` tokens, so the envelope stays version 1; the compatibility rules are in `engine/src/save.rs`, and `a_1_1_save_loads` decodes a save written by 1.1. The 0.9 endgame state needs no new section: the champion, the Gauntlet run and the daily claim are in `progress`, and promos are collection entries (ids 103–109, which an older build drops and reports as unknown). Any other section (from a newer build) is kept and written back unchanged.
+- Sections this build reads: `name`, `collection` (`Collection::save`), `decks` (one `DeckList::save` per line), `wallet` (`Wallet::save`), `progress` (`Progress::encode`), `world_at` (`map,x,z,facing`), `campaign_deck` and `tutorial`. 1.2's Facets (`c:`) and the shop's daily purchases (`ps:`) are `progress` tokens, so the envelope stays version 1; the compatibility rules are in `meta/src/save.rs`, and `a_1_1_save_loads` decodes a save written by 1.1. The 0.9 endgame state needs no new section: the champion, the Gauntlet run and the daily claim are in `progress`, and promos are collection entries (ids 103–109, which an older build drops and reports as unknown). Any other section (from a newer build) is kept and written back unchanged.
 
 ```rust
 let mut s = Save::new_player("Save 1");         // name + a new player's profile

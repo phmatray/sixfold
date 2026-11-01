@@ -18,11 +18,11 @@
 use std::cell::{Cell, RefCell};
 
 use leptos::prelude::*;
-use sixfold_engine::overworld::Progress;
-use sixfold_engine::profile::Profile;
-use sixfold_engine::save::{self, Save, SaveError, Source, Summary, LEGACY_KEYS};
-use sixfold_engine::stats::Stats;
 use sixfold_engine::tr;
+use sixfold_meta::overworld::Progress;
+use sixfold_meta::profile::Profile;
+use sixfold_meta::save::{self, Save, SaveError, Source, Summary, LEGACY_KEYS};
+use sixfold_meta::stats::Stats;
 
 pub const SLOTS: usize = 3;
 const SLOT: &str = "sixfold.slot";

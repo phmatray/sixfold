@@ -2,9 +2,9 @@
 //! battle log, discard viewer and the game-over screen.
 
 use leptos::prelude::*;
-use sixfold_engine::campaign::{self, SealDuel};
-use sixfold_engine::endgame::{self, RungResult, CLEAR_PACKS, GAUNTLET};
 use sixfold_engine::{card, fr, tr, Color, Event};
+use sixfold_meta::campaign::{self, SealDuel};
+use sixfold_meta::endgame::{self, RungResult, CLEAR_PACKS, GAUNTLET};
 
 use crate::art::glyph_svg;
 use crate::board::{find_mon, slot_name, status_class};
@@ -349,8 +349,8 @@ pub fn GameOver() -> impl IntoView {
     // The reward is granted once per match, when its result first shows: a
     // quick duel pays Facets by the AI's level, a campaign duel the rival's
     // reward.
-    let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
-    let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
+    let profile = expect_context::<RwSignal<sixfold_meta::profile::Profile>>();
+    let progress = expect_context::<RwSignal<sixfold_meta::overworld::Progress>>();
     let opponent = ctl
         .setup
         .with_value(|s| s.as_ref().and_then(|s| s.opponent));
@@ -361,7 +361,7 @@ pub fn GameOver() -> impl IntoView {
         .with_value(|s| s.as_ref().and_then(|s| s.face()))
         .and_then(campaign::opponent)
         .and_then(|o| o.lines.map(|l| (o.id, o.name, l)));
-    let duelist = opponent.and_then(sixfold_engine::duelists::duelist);
+    let duelist = opponent.and_then(sixfold_meta::duelists::duelist);
     let post = ctl.setup.with_value(|s| s.as_ref().and_then(|s| s.post));
     let back = ctl
         .setup
@@ -801,12 +801,12 @@ fn loss_lesson(ctl: Ctl) -> (Vec<String>, Vec<String>) {
             .count();
         hints.extend(weakness_hint(&opp, &w.to_string(), mine, all));
     }
-    let owned = expect_context::<RwSignal<sixfold_engine::profile::Profile>>()
+    let owned = expect_context::<RwSignal<sixfold_meta::profile::Profile>>()
         .with_untracked(|p| p.collection.clone());
-    let advice = sixfold_engine::doctor::diagnose(&setup.decks[0], &owned);
+    let advice = sixfold_meta::doctor::diagnose(&setup.decks[0], &owned);
     let reading: Vec<String> = advice
         .iter()
-        .filter(|a| a.issue != sixfold_engine::doctor::Issue::Healthy)
+        .filter(|a| a.issue != sixfold_meta::doctor::Issue::Healthy)
         .map(|a| match &a.swap {
             Some(sw) => format!("{} {}", a.text(), sw.text()),
             None => a.text(),

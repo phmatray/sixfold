@@ -4,7 +4,7 @@
 //! Four phases colour the world and gate content (`time:<phase>` conditions);
 //! `clock:<phase>` (an inn's rest) jumps to the start of one.
 
-use crate::lang::tr;
+use sixfold_engine::tr;
 
 /// Minutes in a day.
 pub const DAY: u16 = 24 * 60;

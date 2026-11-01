@@ -5,7 +5,7 @@
 //! read is the progress flag `read_<id>`, so the save needs nothing new.
 
 use crate::overworld::Progress;
-use crate::T;
+use sixfold_engine::T;
 
 /// Which shelf a book belongs on: it picks the cover.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -160,7 +160,7 @@ pub fn read_count(p: &Progress) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::set::CARDS;
+    use sixfold_engine::set::CARDS;
 
     fn texts(b: &Book) -> impl Iterator<Item = &'static str> + '_ {
         std::iter::once(b.title)
