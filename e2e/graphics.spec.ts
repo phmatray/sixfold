@@ -5,6 +5,9 @@ import { expect, test, menuItem, title, type Page } from "./helpers";
 const graphics = (page: Page): Promise<string | undefined> =>
   page.evaluate(() => (document.querySelector(".world-host") as any)?.sixfoldStats?.().graphics);
 const glMade = (page: Page): Promise<number> => page.evaluate(() => (window as any).glMade);
+/** Whether the world's frame-time probe is still measuring (it can still step High down). */
+const probing = (page: Page): Promise<boolean | undefined> =>
+  page.evaluate(() => (document.querySelector(".world-host") as any)?.sixfoldStats?.().probing);
 
 /** From the title, a new player's way in: the lesson skipped, the world loaded. */
 async function enterWorld(page: Page) {
@@ -35,6 +38,11 @@ async function pickGraphics(page: Page, name: string) {
   await page.getByRole("button", { name: "Close", exact: true }).click();
 }
 
+// High's frames on software GL are slow (~0.4 s at 320 × 180 on two cores): the probe's 120 run in a tiny window,
+// and the menus open in a roomier one.
+const tiny = (page: Page) => page.setViewportSize({ width: 320, height: 180 });
+const roomy = (page: Page) => page.setViewportSize({ width: 640, height: 360 });
+
 const choose = (page: Page, tier: string) => page.addInitScript((t) => localStorage.setItem("sixfold.graphics", t), tier);
 
 test.beforeEach(({ page }) => void page.on("dialog", (d) => d.accept()));
@@ -48,11 +56,12 @@ test("with nothing saved, a software renderer draws the world on Low, WebKit's m
 });
 
 test("Auto on Low stays Low while the world runs: the probe never steps Low to Off", async ({ page }) => {
-  await page.setViewportSize({ width: 640, height: 360 }); // 150 software-GL frames, kept short
+  await roomy(page);
   await title(page);
   await enterWorld(page);
   await skipScene(page);
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("low");
+  await tiny(page); // 150 software-GL frames, kept short
   await frames(page, 150);
   expect(await graphics(page)).toBe("low");
 });
@@ -144,50 +153,38 @@ test("Options picks the graphics at once, the browser keeps it, and the title's 
 
 test("High saved, slow frames step the world down to Low for the visit, and the saved choice stays High", async ({ page }) => {
   // The world's frame-time probe (#225): frames 30 to 120 at High, under 45 fps → Low, never saved.
-  // SwiftShader on High is far past that already (~380 ms a frame at 1280 × 720); the CPU slowed 4× keeps it
-  // so on a faster runner, and a small window keeps the 120 frames short.
-  test.setTimeout(360_000); // ~1.5 min locally: room for a slower CI runner
-  await page.setViewportSize({ width: 640, height: 360 });
+  // SwiftShader on High is far past that (~0.15 s a frame at 320 × 180 on a fast Mac, ~0.4 s on two CI cores).
+  test.setTimeout(360_000); // ~1 min locally, ~2.5 min on two slow cores
+  await roomy(page);
   await choose(page, "high");
   await title(page);
   await enterWorld(page);
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("high");
-  // The opening scene holds the world (paused frames aren't measured): skipped.
-  const skip = page.getByRole("button", { name: /^Skip/ });
-  await expect(skip).toBeVisible();
-  await page.waitForTimeout(450);
-  await page.keyboard.press("Escape");
-  await expect(skip).toBeHidden();
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
-  await expect.poll(() => graphics(page), { timeout: 150_000 }).toBe("low");
+  await skipScene(page); // the opening scene holds the world, and paused frames aren't measured
+  await tiny(page);
+  await expect.poll(() => graphics(page), { timeout: 240_000 }).toBe("low");
   expect(await page.evaluate(() => localStorage.getItem("sixfold.graphics"))).toBe("high");
 
   // A choice made in Options ends the probe: High picked again (Low first, High is still the checked one)
-  // stays High, slow frames or not.
+  // is the player's to keep, slow frames or not.
+  await roomy(page);
   await pickGraphics(page, "Low");
   await pickGraphics(page, "High");
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("high");
-  await frames(page, 150);
-  expect(await graphics(page)).toBe("high");
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+  expect(await probing(page)).toBe(false);
 });
 
-test("High picked in Options before the probe has decided stays High, slow frames or not", async ({ page }) => {
-  // Low saved: the probe never measures Low. High picked during the visit is the player's choice, not a tier
-  // to probe: without that, its first 120 slow frames would step it back to Low.
-  test.setTimeout(360_000); // ~1.1 min locally: room for a slower CI runner
-  await page.setViewportSize({ width: 640, height: 360 });
+test("High picked in Options before the probe has decided stays High: the choice ends the probe", async ({ page }) => {
+  // Low saved: the probe runs but never measures Low. High picked during the visit is the player's choice,
+  // not a tier to probe: without that, its first 120 slow frames would step it back to Low.
+  await roomy(page);
   await choose(page, "low");
   await title(page);
   await enterWorld(page);
   await skipScene(page);
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("low");
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+  expect(await probing(page)).toBe(true);
   await pickGraphics(page, "High");
   await expect.poll(() => graphics(page), { timeout: 30_000 }).toBe("high");
-  await frames(page, 150);
-  expect(await graphics(page)).toBe("high");
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+  expect(await probing(page)).toBe(false);
 });
