@@ -21,22 +21,22 @@
     },
     {
       "asset": "net_locker",
-      "x": 1,
-      "z": 2,
+      "x": 6,
+      "z": 1,
       "rot": 0
     },
     {
       "asset": "crates",
-      "x": 1,
-      "z": 2,
+      "x": 6,
+      "z": 1,
       "rot": 0,
       "y": 1.95,
       "if": "!flag:found_i_loft_chest"
     },
     {
       "asset": "crates_open",
-      "x": 1,
-      "z": 2,
+      "x": 6,
+      "z": 1,
       "rot": 0,
       "y": 1.95,
       "if": "flag:found_i_loft_chest"
@@ -51,19 +51,19 @@
       "asset": "net_locker",
       "x": 9,
       "z": 3,
-      "rot": 0
+      "rot": 270
     },
     {
       "asset": "chair",
-      "x": 5,
-      "z": 3,
-      "rot": 0
+      "x": 2,
+      "z": 2,
+      "rot": 180
     },
     {
       "asset": "display_case",
       "x": 1,
       "z": 4,
-      "rot": 0
+      "rot": 90
     },
     {
       "asset": "rug",
@@ -128,8 +128,8 @@
     {
       "kind": "find",
       "id": "i_loft_chest",
-      "x": 1,
-      "z": 2,
+      "x": 6,
+      "z": 1,
       "give": "card:tidemaw",
       "if": "flag:heard_loft_chest",
       "text": "You stand on tiptoe and drag Teo's sea chest to the edge of the locker. The lid gives with a puff of salt. Under a rolled-up oilskin and one odd boot: a card, kept flat between two charts.",

@@ -21,13 +21,13 @@
     },
     {
       "asset": "shelf",
-      "x": 3,
+      "x": 5,
       "z": 1,
       "rot": 0
     },
     {
       "asset": "plant",
-      "x": 6,
+      "x": 3,
       "z": 1,
       "rot": 0
     },
@@ -116,14 +116,14 @@
       "text_fr": "Un chaudron de quelque chose de vert et d'épais, qui bouillonne sur un feu doux. Ça sent l'ortie, le champignon et tout ce que Hester a trouvé ce matin."
     },
     {
-      "x": 3,
+      "x": 5,
       "z": 1,
       "kind": "sign",
       "text": "Jars of honey, pickled ferns, and a row of wooden cups, one carved with each regular's name. There's an empty one at the end.",
       "text_fr": "Des pots de miel, des fougères au vinaigre, et une rangée de tasses en bois, chacune gravée au nom d'un habitué. La dernière est vierge."
     },
     {
-      "x": 4,
+      "x": 6,
       "z": 1,
       "kind": "book",
       "id": "field_notes"

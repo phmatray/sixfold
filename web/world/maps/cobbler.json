@@ -53,7 +53,7 @@
       "asset": "chair",
       "x": 8,
       "z": 4,
-      "rot": 0
+      "rot": 180
     },
     {
       "asset": "lamp",

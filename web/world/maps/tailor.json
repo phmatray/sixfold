@@ -65,7 +65,7 @@
       "asset": "display_case",
       "x": 9,
       "z": 5,
-      "rot": 0
+      "rot": 270
     },
     {
       "asset": "exit_mat",

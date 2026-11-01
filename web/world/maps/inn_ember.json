@@ -21,13 +21,13 @@
     },
     {
       "asset": "bookcase",
-      "x": 4,
+      "x": 5,
       "z": 1,
       "rot": 0
     },
     {
       "asset": "plant",
-      "x": 6,
+      "x": 3,
       "z": 1,
       "rot": 0
     },
@@ -103,14 +103,14 @@
   },
   "interactions": [
     {
-      "x": 4,
+      "x": 5,
       "z": 1,
       "kind": "sign",
       "text": "A slate of chalked race times, the quarry road, top to bottom. Every line at the top says \"Cinza\".",
       "text_fr": "Une ardoise de temps de course à la craie, la route de la carrière, de haut en bas. Toutes les lignes du haut disent « Cinza »."
     },
     {
-      "x": 5,
+      "x": 6,
       "z": 1,
       "kind": "book",
       "id": "hearth_tales"

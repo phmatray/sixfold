@@ -16,13 +16,13 @@
     {
       "asset": "light_box",
       "x": 4,
-      "z": 3,
+      "z": 1,
       "rot": 0
     },
     {
       "asset": "bookcase",
       "x": 1,
-      "z": 3,
+      "z": 2,
       "rot": 90
     },
     {
@@ -39,15 +39,15 @@
     },
     {
       "asset": "chair",
-      "x": 8,
-      "z": 5,
-      "rot": 0
+      "x": 9,
+      "z": 4,
+      "rot": 270
     },
     {
       "asset": "chair",
       "x": 9,
       "z": 5,
-      "rot": 0,
+      "rot": 270,
       "seat": false
     },
     {
@@ -91,7 +91,7 @@
       "kind": "find",
       "id": "i_clinic",
       "x": 1,
-      "z": 3,
+      "z": 2,
       "give": "card:trail_compass",
       "text": "Between two volumes of \"Common Ailments of the Sixty-Card Deck\": a card, used as a bookmark.",
       "text_fr": "Entre deux tomes des « Maux courants du deck de soixante cartes » : une carte, glissée en marque-page."

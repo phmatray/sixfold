@@ -61,12 +61,12 @@
     ".p..ppppppppppppppp.......ppp.......................",
     ".p.........ppppppppppp.ppppppppp...........ppppppppp",
     ".p................pppppppppppppppppppppppppppppppppp",
-    ".p...................ppppppppppppppppppppppppppppppp",
-    ".p.....~~..~~.......ppppppppppppppppppppppppp.......",
-    ".p...~~~~...~~~~....ppppppppppppppp.......p.........",
-    ".p..~~~~~..~~~~~~....ppppppppppppp........p.........",
-    ".p.~~~~~~~~~~~~~~~....ppppppppppp.........p.........",
-    ".p.~~~~~~~~~~~~~~~......ppppppp...........p.........",
+    ".p...................ppppp...ppppppppppppppppppppppp",
+    ".p.....~~...~.......pppppp...pppppppppppppppp.......",
+    ".p....~~~...~~~~....pppppp...pppppp.......p.........",
+    ".p....~~~..~~~~~~....ppppppppppppp........p.........",
+    ".p....~~~~~~~~~~~~....ppppppppppp.........p.........",
+    ".p....~~~~~~~~~~~~......ppppppp...........p.........",
     "...~~~~~~~~~~~~~~~.........pp.............p.........",
     "...~~~~~~~~~~~~~~~.........pp.......................",
     "...~~~~~~~~~~~~~~~.........pp.......................",
@@ -75,7 +75,7 @@
     "......................~~~~~~~~~~~~.............~~~~~",
     "..................~~~~~~~~~~~~~~~~~~~~........~~~~~~",
     ".fffffff........~~~~~~.....pp.....~~~~~~~~~~~~~~~~~~",
-    ".f.....f........~~.........pp.........~~~~~~~~~~~~~~",
+    ".f.....f...................pp.........~~~~~~~~~~~~~~",
     ".f.....f...................pp.......................",
     ".f.....f...................pp....................ppp",
     ".f.....f...................pp..................ppppp",
@@ -511,7 +511,7 @@
     },
     {
       "asset": "signpost",
-      "x": 21,
+      "x": 19,
       "z": 12,
       "rot": 0
     },
@@ -523,19 +523,19 @@
     },
     {
       "asset": "flowers",
-      "x": 20,
+      "x": 19,
       "z": 14,
       "rot": 0
     },
     {
       "asset": "flowers",
-      "x": 34,
-      "z": 13,
+      "x": 35,
+      "z": 14,
       "rot": 0
     },
     {
       "asset": "flowers",
-      "x": 24,
+      "x": 23,
       "z": 17,
       "rot": 0
     },
@@ -2078,7 +2078,7 @@
       "z": 13
     },
     {
-      "x": 21,
+      "x": 19,
       "z": 12,
       "kind": "sign",
       "text": "The Moot of Rootholm. North, through the Broken Elder: the Elder Ring. East: Fernhollow Trail and the Meadow. South, over the brook: the cobbler's lane and the ford to Hushwillow Lane. West: the Knothole and the walkway.",

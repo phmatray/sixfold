@@ -299,31 +299,36 @@
       "asset": "rock",
       "x": 45,
       "z": 5,
-      "rot": 0
+      "rot": 0,
+      "y": 3
     },
     {
       "asset": "rock",
       "x": 46,
       "z": 5,
-      "rot": 0
+      "rot": 0,
+      "y": 3
     },
     {
       "asset": "rock",
       "x": 45,
       "z": 9,
-      "rot": 0
+      "rot": 0,
+      "y": 1
     },
     {
       "asset": "rock",
       "x": 47,
       "z": 9,
-      "rot": 0
+      "rot": 0,
+      "y": 1
     },
     {
       "asset": "rock",
       "x": 43,
       "z": 9,
-      "rot": 0
+      "rot": 0,
+      "y": 1
     },
     {
       "asset": "minecart",
@@ -339,8 +344,8 @@
     },
     {
       "asset": "minecart",
-      "x": 17,
-      "z": 4,
+      "x": 15,
+      "z": 6,
       "rot": 0
     },
     {
@@ -422,7 +427,8 @@
       "x": 24,
       "z": 5,
       "rot": 0,
-      "glow": "#f0a848"
+      "glow": "#f0a848",
+      "y": 3
     },
     {
       "asset": "glow_mushroom",
@@ -471,27 +477,29 @@
       "x": 32,
       "z": 10,
       "rot": 0,
-      "glow": "#8ad8f0"
+      "glow": "#8ad8f0",
+      "y": 1
     },
     {
       "asset": "glow_shelf",
       "x": 27,
       "z": 9,
       "rot": 0,
-      "glow": "#8ad8f0"
+      "glow": "#8ad8f0",
+      "y": 1
     },
     {
       "asset": "crystal_cluster",
       "x": 19,
       "z": 8,
-      "rot": 0,
-      "y": 1
+      "rot": 0
     },
     {
       "asset": "crystal_cluster",
       "x": 36,
       "z": 6,
-      "rot": 0
+      "rot": 0,
+      "y": 3
     },
     {
       "asset": "sign",

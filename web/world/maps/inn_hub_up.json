@@ -13,7 +13,7 @@
   "props": [
     {
       "asset": "bed",
-      "x": 7,
+      "x": 8,
       "z": 3,
       "rot": 0
     },
@@ -25,7 +25,7 @@
     },
     {
       "asset": "bed",
-      "x": 7,
+      "x": 8,
       "z": 5,
       "rot": 0
     },
@@ -43,8 +43,8 @@
     },
     {
       "asset": "crates",
-      "x": 9,
-      "z": 4,
+      "x": 7,
+      "z": 1,
       "rot": 0
     },
     {
@@ -56,12 +56,12 @@
     {
       "asset": "lamp",
       "x": 9,
-      "z": 1,
+      "z": 4,
       "rot": 0
     },
     {
       "asset": "bookcase",
-      "x": 6,
+      "x": 3,
       "z": 1,
       "rot": 0
     }
@@ -115,8 +115,8 @@
       ]
     },
     {
-      "x": 9,
-      "z": 4,
+      "x": 7,
+      "z": 1,
       "kind": "sign",
       "id": "upstairs_hub",
       "name": "A crate of lost property",

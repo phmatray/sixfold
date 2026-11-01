@@ -1,0 +1,338 @@
+# Sixfold placement rules — read by tools/placement.mjs (node tools/placement.mjs web/world [--map=<name>]).
+#
+# Minecraft places a feature only where its placement modifiers hold, and a block only where it can survive
+# (a torch needs a wall, sugar cane needs water beside it). These rules run that backwards: every prop already
+# on a map is checked against the rules written for its asset, and each rule it breaks is a finding.
+#
+#   Minecraft                              here
+#   #minecraft:logs (a tag)                tag tree = pine birch …          then #tree
+#   biome filter                           when region(ember) / kind(town) / outdoor / indoor / cave / wild
+#   heightmap                              need grounded                  (rests on the floor, a deck or a prop)
+#   block_predicate_filter + offset        on(…) touches(…) front(n, …) behind(n, …) beside(…)
+#   environment_scan / in_square           near(r, …)  dist(…) <= r
+#   count / rarity_filter (spacing)        count(r, …) == 0
+#   can_survive / would_survive            the whole rule
+#
+# A rule:
+#
+#   rule <id> <error|warn|info> "<why, in one line>"
+#     for <asset> | <asset> | #tag | *          the props it judges
+#     when <expr>                               only where this holds (repeatable; all must hold)
+#     unless <expr>                             not where this holds (repeatable)
+#     need <expr>                               must hold, else a finding (repeatable; the first that fails is named)
+#     swap <asset> -> <asset> | <asset>         a fix to offer when the rule fails: the same place, another model of the
+#                                               same footprint that keeps every rule (reeds on a cliff become a bush)
+#     fill <glyphs>                             a fix to offer: the tiles of these glyphs under the prop take the land the
+#                                               rest of it stands on (a tree with a foot in a pond gets its bank)
+#
+# An expression: predicates joined by `and`, `or`, `not` and ( ), and numbers compared with < <= > >= == !=.
+#
+#   is(T)          the prop itself is one of T (an asset, a #tag, or deck)   (unless is(#afloat | deck))
+#   on(T)          every tile of the footprint matches T         touches(T)    some tile of it does
+#   near(r, T)     some tile within r of the footprint (itself included; the prop never matches itself)
+#   front(T)       the row in front of its face (+Z at rot 0)    front(n, T)   any of the n rows in front
+#   behind(T)      the row behind it, behind(n, T) the n rows    beside(T)     the columns either side
+#   count(r, T)    how many within r (a prop counts once, a tile once per tile)
+#   dist(T)        tiles to the nearest T (0 under it)           y  height  rot   the prop's base, metres, turn
+#   grounded       rests on the floor, a deck or another prop's top, and no footprint tile rises over its base
+#   flat           its footprint is all one floor height         has(key)      the prop's JSON has that key
+#   outdoor  indoor  cave  wild   kind(a | b)  region(a | b)  map(a | b)
+#   toward(r, a | b)  an edge exit within r tiles leads to a map of region a or b (willows framing the road to the Dreamwater)
+#   banded         it stands in a transition band (5.7) whose scatter lists its asset: borrowed from the next region
+#
+# `T except U`: a tile that matches T and not U (beside(#trail except #stairs): a path tile with no stairs on it).
+# T (a target) is terms joined by `|`: an asset name, a #tag, tile:<glyphs> (tile:pr=H), paint:<glyphs>, or a
+# builtin: door, warp, npc, spot, exit, solid, open, edge (off the map), prop (any other prop), deck, wet (water,
+# or flat ground the map lays as wet sand, mud or marsh), cliff (ground a metre or more above the prop's: a rock
+# face). near(1, edge) means "on the map's border row".
+# `#` followed by a space starts a comment. Severity: `error` fails `--strict`, `warn` is for a person to judge.
+
+# ---------- Tags ----------
+
+tag path      = tile:pr=H paint:pr deck
+tag trail     = tile:p paint:p                      # a path's walking line: posts and lamps keep off it (they may stand on a plaza or a deck)
+tag paved     = tile:pr=H paint:pr deck             # trodden, paved or built ground (paths, squares, boardwalks, piers, decks): nothing grows on it
+tag water     = tile:~
+tag wall      = tile:#WV cliff                       # a cave's rock face is a wall too
+tag house     = cottage workshop house terrace_house harbour_house lake_house treehouse kiln observatory lighthouse bell_tower headframe
+tag tree      = tree pine birch willow ash_pine standing_tree blossom_tree wishing_tree
+tag scatter   = bush bush_dark heather flowers rock rock_basalt reeds moonflower stump mushroom_ring
+tag blooms    = flowers heather moonflower blossom_tree vegetable_patch wisteria_arch flower_planter
+tag afloat    = reeds lake_house harbour_house boat buoy ferry water_lilies floating_lantern rock_sea bridge rope_bridge boardwalk lighthouse bell_tower cliff_falls
+tag harbour   = tile:H= boardwalk ferry boat              # what gear serves (not the gear itself)
+tag indoors   = lamp plant chair bed bookcase shelf rug counter display_case oven cloth_rack dress_form workbench light_box net_locker boot_rack
+tag on_a_wall = bookcase shelf net_locker boot_rack oven cloth_rack light_box workbench glass_rack tally_board hold_wall
+tag at_table  = duel_table chart_table workbench counter cobbler_bench soup_cauldron chowder_stove   # worked at, or spoken across
+tag sit_at    = duel_table chart_table workbench cobbler_bench                                     # what a chair is drawn up to (a shop counter is not)
+tag raised    = canopy_deck rope_bridge ladder               # held up by trees and posts, by design
+tag stairs    = stairs stairs_slate stairs_basalt stairs_heath
+tag market    = stall stall_b curio_cabinet
+tag work      = #house #market #harbour #at_table minecart rail kiln glass_furnace glass_rack cullet anvil door net_rack crab_pots campfire   # not crates: two stray crates don't make a trade; a camp's fire does (its stores)
+
+# ---------- Light — l'éclairage suit l'usage (WORLD_RULES §2) ----------
+
+rule lamp.path error "a street lantern lights a path or a plaza (2.1)"
+  for lantern
+  when outdoor
+  need near(2, #path)
+
+rule lamp.wild error "out of town, a lantern needs a reason: a door, a bridge, a camp (2.3)"
+  for lantern
+  when wild
+  need has(why)
+
+rule lamp.clump warn "two street lanterns under 4 tiles apart are a clump; the rhythm is one every 5-7 (2.2)"
+  for lantern
+  unless has(why) or near(2, door)                  # a pair flanking a door is the rule, not a clump (2.2)
+  need count(3, lantern) == 0
+
+rule lamp.edge warn "a lantern stands at the edge of the path, never in the walking line"
+  for lantern
+  need not touches(#trail)
+
+rule lamp.cave error "nothing underground could power a street lamp (2.6)"
+  for lantern | lamp
+  need not cave
+
+rule lamp.timber warn "a miner's oil lantern hangs on the mine's timbers"
+  for oil_lantern
+  need near(1, support_beam | rail | headframe | cave_mouth | cave_mouth_slate)
+
+# ---------- Signs — panneaux (WORLD_RULES §3) ----------
+
+rule sign.by-path warn "a sign stands beside the path, at its edge (3.3)"
+  for signpost | sign
+  when outdoor
+  unless cave                                        # a cave lays no path on its floor
+  need near(2, #path)                                # the path's ground blends half a tile into the grass: two tiles off still reads as its edge
+
+rule sign.off-path error "a sign never stands on the path (3.3)"
+  for signpost | sign
+  need not touches(#trail)
+
+rule sign.faces warn "a sign faces the path or the camera (3.3)"
+  for signpost | sign
+  when outdoor
+  need rot == 0 or front(2, #path)
+
+rule sign.shop warn "a shop's or an inn's sign hangs by its door (1.5)"
+  for inn_sign | hanging_sign
+  need near(3, door)                                 # at the door, or at the front corner of a five-wide house
+
+# ---------- Dressing — props cluster by function (WORLD_RULES 6.3) ----------
+
+rule planter.doorstep warn "a planter dresses a doorstep or a house front"
+  for flower_planter
+  need near(2, door) or near(1, #house)
+
+rule planter.off-path warn "a planter stands beside the path, not on it"
+  for flower_planter
+  need not touches(#trail)
+
+rule bench.view info "a bench looks onto something: a path, a square, water, a fountain, or an open view"
+  for bench
+  when outdoor
+  need front(3, #path | #water | fountain | well | waymark | seal_stone | campfire) or not front(3, solid)   # facing the camera over open ground is a view too; turned toward a path it shows its back
+
+rule bench.seat warn "you sit on a bench from its front: that tile is open"
+  for bench
+  need front(open | rug | deck)
+
+rule chair.seat warn "a chair faces open floor or its table"
+  for chair
+  need front(open | rug | deck | #sit_at)
+
+rule chair.table info "a chair is drawn up to a table, facing it, or stands back to a wall facing the room (a waiting chair)"
+  for chair
+  need front(#sit_at) or (behind(#wall | edge) and front(open | rug))
+
+rule furniture.wall warn "a bookcase, a shelf or a locker stands with its back to a wall (side-on to it, it looks set down and forgotten)"
+  for #on_a_wall
+  when indoor                                       # a glass yard's racks stand in the open
+  need behind(#wall | edge) or behind(#on_a_wall)
+
+rule display.place warn "a glass display case stands by the counter or against a wall, facing the room"
+  for display_case
+  when indoor
+  need (near(1, counter) or behind(#wall | edge)) and not front(#wall | edge)
+
+rule furniture.indoor error "room furniture stays indoors"
+  for #indoors
+  need indoor
+
+# ---------- Rooms — furniture that makes sense indoors ----------
+
+tag seat      = chair bench bed
+tag bedside   = lamp plant crates shelf chair bookcase light_box boot_rack rope_coil display_case   # no nightstand model yet: what stands in for one
+
+rule furniture.facing error "a bookcase, a shelf or a locker faces into the room, never its own wall"
+  for #on_a_wall
+  when indoor
+  need not front(#wall | edge)
+
+rule furniture.window warn "tall wall furniture never stands against a window: it would block the light"
+  for #on_a_wall
+  when indoor
+  unless is(workbench | boot_rack) or height < 1.5  # low, or worked at: a bench or a glass case under a window is fine
+  need not behind(tile:V)
+
+rule furniture.reach warn "you can step up to a bookcase, a workbench or a counter: every tile in front of it is free"
+  for #on_a_wall | counter
+  when indoor
+  need not front(solid except chair | bench)          # a chair drawn up to it is how you use it
+
+rule chair.faces warn "a chair at a table faces it, never sits side-on or back to it"
+  for chair
+  when front(#sit_at) or behind(#sit_at) or beside(#sit_at)
+  need front(#sit_at)
+
+rule bed.wall warn "a bed stands against a wall, not in the middle of the room"
+  for bed
+  need near(1, #wall | edge)
+
+rule bed.side info "a bed has something at its side: a lamp, a crate, a shelf (stand-ins for a nightstand)"
+  for bed
+  need near(1, #bedside)
+
+rule chair.wall warn "a chair never faces a wall"
+  for chair | bench
+  need not front(#wall | edge | tile:f)
+
+rule fire.seat info "a campfire has somewhere to sit round it: a log, a stump, a bench or a rock"
+  for campfire
+  need near(2, log | stump | bench | rock | fallen_trunk)
+
+rule lamp.use info "a floor lamp lights somewhere people sit, sleep, work or read"
+  for lamp
+  need near(2, #seat | #at_table | bookcase | shelf | display_case)
+
+rule plant.wall info "a pot plant stands by a wall or in a corner, not in the middle of the floor"
+  for plant
+  when indoor
+  need near(1, #wall | edge)
+
+rule mat.door warn "an exit mat lies at the door"
+  for exit_mat
+  need near(1, door | warp | exit)
+
+rule crates.purpose warn "crates belong to a trade: a house, a stall, a pier, a cart, a workshop, or the person standing by them"
+  for crates | crates_open
+  when outdoor
+  unless touches(spot)                              # a find or a story in them: put there on purpose, often off the beaten track
+  need near(3, #work) or near(2, npc)               # a fisher's or a quarryman's crates, at their feet
+
+rule market.street warn "a stall opens onto a street or a square"
+  for #market
+  need front(2, #path) or near(1, #path)
+
+# ---------- Nature — biome rules (Minecraft's biome filter and can_survive) ----------
+
+rule dry.land error "nothing stands in water but boats, buoys, lilies, sea rocks and decks"
+  for *
+  unless is(#afloat | deck) or on(deck)
+  need not touches(#water)
+  fill ~                                            # or the bank comes out under it: the water under it becomes the land round it
+
+rule water.afloat error "a buoy, lilies or a floating lantern float on water"
+  for buoy | water_lilies | floating_lantern
+  need on(#water)
+
+rule water.boat error "a boat is on the water, or beached on the sand by it"
+  for boat | ferry
+  need near(1, #water) or (on(tile:s) and near(3, #water))
+
+rule water.reeds warn "reeds grow at the waterline"
+  for reeds
+  unless has(band) or banded or near(1, edge)
+  need near(2, wet)
+  swap reeds -> bush | heather                      # away from the water, the dry-ground plant in its place
+
+rule water.sea-rock warn "sea rocks stand in or by the sea"
+  for rock_sea | tidepool
+  unless banded or near(1, edge)
+  need near(2, wet)
+  swap rock_sea -> rock
+
+rule harbour.gear warn "pots, nets and bollards stay by the water"
+  for crab_pots | bollard
+  when outdoor
+  need near(4, #water | #harbour)
+
+rule harbour.nets warn "nets dry on racks a few steps up from the shore"
+  for net_rack
+  when outdoor
+  need near(8, #water | #harbour)                   # on the grass behind the beach: no need to stand at the waterline
+
+rule bees.flowers warn "a beehive keeps within reach of flowers"
+  for beehive
+  need near(4, #blooms)
+
+rule fire.clear warn "no tree overhangs a campfire"
+  for campfire
+  need count(1, #tree) == 0
+
+rule tree.off-path error "a tree never grows on a path, a square or a deck"
+  for #tree
+  need not touches(#paved)
+  fill pr                                           # or a patch of grass at its foot (a square's tree)
+
+rule scatter.off-path warn "bushes, flowers, reeds and rocks never grow on a path, a square or a deck"
+  for #scatter
+  unless has(band) or banded                         # a transition band toward the region it belongs to (5.7)
+  unless is(flowers) and not touches(#trail) and near(1, tile:.)   # a flower bed at a square's edge, against the grass, is planted there
+  need not touches(#paved)
+  fill pr                                           # or a bed of grass under it, beside the path
+
+rule mine.cart warn "a minecart sits on its rails, or stands where ore or goods are loaded"
+  for minecart
+  when outdoor
+  unless touches(spot)                              # a find in it: put there on purpose
+  need near(1, rail) or near(3, rubble | crates)    # a quarry with no track: the cart is filled at the rubble
+
+rule stairs.clear error "nothing stands at the foot or the top of a staircase: you step on and off it there"
+  for #stairs
+  need front(open | deck | rug | #water) and behind(open | deck | rug)   # a quay's steps come up out of the water
+
+rule stairs.climbs error "a staircase faces down the slope: its foot is lower than its top"
+  for #stairs
+  need climbs                                       # the review offers turning it round
+
+rule stairs.width warn "a staircase is as wide as the path that climbs it: no column of path runs into the cliff beside it"
+  for #stairs
+  need not beside(#trail except #stairs)
+
+rule fence.end warn "a fence end finishes a fence, or two frame a gap like gateposts (5.5)"
+  for fence_end | wall_dry_end
+  need near(1, tile:f) or near(2, fence_end | wall_dry_end)
+
+rule biome.ember warn "ash pines, vents and cullet belong to the Emberlands (or a transition band toward them)"
+  for ash_pine | ember_vent | cullet
+  when outdoor
+  unless has(band) or banded                         # a transition band toward the region it belongs to (5.7)
+  need region(ember)
+  swap ash_pine -> pine
+
+rule biome.basalt warn "basalt belongs to the Emberlands and the Storm coast (or a band toward them)"
+  for rock_basalt
+  when outdoor
+  unless has(band) or banded                         # a transition band toward the region it belongs to (5.7)
+  need region(ember | storm)
+  swap rock_basalt -> rock
+
+rule biome.willow warn "willows belong to the Dreamwater (or a band toward it, or a road out to it)"
+  for willow
+  when outdoor
+  unless has(band) or banded                         # a transition band toward the region it belongs to (5.7)
+  unless toward(10, dream)                           # willows framing the road out to the Dreamwater hint at what's next (5.5)
+  need region(dream)
+
+# ---------- Ground — the heightmap ----------
+
+rule ground.rest warn "a prop rests on the ground: its y is the floor under it (a digit tile is that many metres up)"
+  for *
+  unless is(#raised)
+  need grounded
+
+rule ground.flat info "a prop's footprint sits on one floor height, not across a cliff edge"
+  for #house | #market | bench | #at_table
+  need flat

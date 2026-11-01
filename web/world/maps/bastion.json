@@ -43,7 +43,7 @@
     "663333333333333333333333333333333333333336",
     "663333333333333333333333333333333333333336",
     "633333333333333333333333333322222233333366",
-    "633333322222222222233333322222222222233366",
+    "633322222222222222233333322222222222233366",
     "622222222222222222222222222222222222222222",
     "662222222222222222222222222222222222222222",
     "622222222222222222222222222222222222222222",
@@ -212,7 +212,8 @@
       "x": 27,
       "z": 5,
       "rot": 0,
-      "glow": "#a8642f"
+      "glow": "#a8642f",
+      "y": 4
     },
     {
       "asset": "rock",
@@ -531,7 +532,7 @@
       "x": 6,
       "z": 19,
       "rot": 0,
-      "y": 1
+      "y": 2
     },
     {
       "asset": "rubble",
@@ -614,7 +615,7 @@
     },
     {
       "asset": "signpost",
-      "x": 37,
+      "x": 36,
       "z": 14,
       "rot": 0,
       "y": 2
@@ -1901,6 +1902,12 @@
       "z": 30,
       "rot": 270,
       "band": "elder_ring"
+    },
+    {
+      "asset": "stairs_slate",
+      "x": 23,
+      "z": 24,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -2007,7 +2014,7 @@
       "text_fr": "Sud : Le Cercle des Anciens, au pied de la falaise. Il y a une paroi de vieux pitons pour descendre ; il faudrait des gants. Est : Bourg-l'Enclume."
     },
     {
-      "x": 37,
+      "x": 36,
       "z": 14,
       "kind": "sign",
       "text": "East: Anvilstead, along the rail road. Up the terraces: the stone ring and the seal.",

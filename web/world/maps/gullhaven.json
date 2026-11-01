@@ -71,12 +71,12 @@
     {
       "asset": "signpost",
       "x": 3,
-      "z": 6,
+      "z": 7,
       "rot": 0
     },
     {
       "asset": "signpost",
-      "x": 5,
+      "x": 6,
       "z": 31,
       "rot": 0
     },
@@ -89,8 +89,8 @@
     },
     {
       "asset": "inn_sign",
-      "x": 11,
-      "z": 6,
+      "x": 10,
+      "z": 7,
       "rot": 0
     },
     {
@@ -278,7 +278,7 @@
     },
     {
       "asset": "bench",
-      "x": 46,
+      "x": 47,
       "z": 1,
       "rot": 0,
       "y": 2
@@ -395,25 +395,29 @@
       "asset": "bollard",
       "x": 30,
       "z": 24,
-      "rot": 0
+      "rot": 0,
+      "y": 0.3
     },
     {
       "asset": "bollard",
       "x": 39,
       "z": 24,
-      "rot": 0
+      "rot": 0,
+      "y": 0.3
     },
     {
       "asset": "crab_pots",
       "x": 29,
       "z": 24,
-      "rot": 0
+      "rot": 0,
+      "y": 0.3
     },
     {
       "asset": "duel_table",
       "x": 18,
       "z": 15,
-      "rot": 0
+      "rot": 0,
+      "y": 0.3
     },
     {
       "asset": "boat",
@@ -468,12 +472,12 @@
     {
       "asset": "net_rack",
       "x": 3,
-      "z": 12,
+      "z": 11,
       "rot": 0
     },
     {
       "asset": "crab_pots",
-      "x": 5,
+      "x": 6,
       "z": 20,
       "rot": 0
     },
@@ -679,21 +683,24 @@
     },
     {
       "asset": "lantern",
-      "x": 44,
+      "x": 43,
       "z": 12,
-      "rot": 0
+      "rot": 0,
+      "y": 0.1
     },
     {
       "asset": "lantern",
       "x": 29,
       "z": 25,
-      "rot": 0
+      "rot": 0,
+      "y": 0.3
     },
     {
       "asset": "lantern",
       "x": 42,
       "z": 25,
-      "rot": 0
+      "rot": 0,
+      "y": 0.3
     },
     {
       "asset": "lantern",
@@ -1230,19 +1237,19 @@
       "rot": 0
     },
     {
-      "asset": "rock_sea",
+      "asset": "rock",
       "x": 4,
       "z": 22,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 1,
       "z": 26,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 1,
       "z": 19,
       "rot": 0
@@ -1254,37 +1261,37 @@
       "rot": 0
     },
     {
-      "asset": "rock_sea",
+      "asset": "rock",
       "x": 5,
       "z": 27,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 5,
       "z": 17,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 3,
       "z": 28,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 3,
       "z": 29,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 5,
       "z": 19,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 22,
       "rot": 0
@@ -1296,19 +1303,19 @@
       "rot": 0
     },
     {
-      "asset": "rock_sea",
+      "asset": "rock",
       "x": 5,
       "z": 28,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 4,
       "z": 30,
       "rot": 0
     },
     {
-      "asset": "rock_sea",
+      "asset": "rock",
       "x": 1,
       "z": 21,
       "rot": 0
@@ -1320,7 +1327,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 35,
       "z": 2,
       "rot": 0
@@ -1332,7 +1339,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 35,
       "z": 1,
       "rot": 0
@@ -1344,85 +1351,85 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 25,
       "z": 1,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 21,
       "z": 1,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 37,
       "z": 2,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 12,
       "z": 6,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 1,
       "z": 27,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 27,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 3,
       "z": 27,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 1,
       "z": 28,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 28,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 1,
       "z": 29,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 29,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 1,
       "z": 30,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 30,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 3,
       "z": 30,
       "rot": 0
@@ -1455,21 +1462,21 @@
   "interactions": [
     {
       "x": 3,
-      "z": 6,
+      "z": 7,
       "kind": "sign",
       "text": "West: the Saltwind Boardwalk, and the meadow beyond. South, through the dunes: the Bellflats.",
       "text_fr": "Ouest : la Promenade de Ventsalé, et le pré au-delà. Au sud, par les dunes : Les Grèves de la Cloche."
     },
     {
-      "x": 5,
+      "x": 6,
       "z": 31,
       "kind": "sign",
       "text": "South: The Bellflats. The tide goes out at eight in the morning and comes back at six. After dark, keep to the boardwalk.",
       "text_fr": "Sud : Les Grèves de la Cloche. La mer se retire à huit heures du matin et revient à six heures du soir. Une fois la nuit tombée, restez sur le ponton."
     },
     {
-      "x": 11,
-      "z": 6,
+      "x": 10,
+      "z": 7,
       "kind": "sign",
       "text": "The Dry Dock. Chowder, beds, and nobody asks about your boots.",
       "text_fr": "Le Bassin de radoub. De la chaudrée, des lits, et personne ne pose de questions sur vos bottes."
@@ -1528,7 +1535,7 @@
       "give": "coins:40",
       "text": "Under the lookout bench, behind a leg: a tin of Facets and a pencil stub. Somebody counts ships up here.",
       "text_fr": "Sous le banc du belvédère, derrière un pied : une boîte de Facettes et un bout de crayon. Quelqu'un compte les bateaux, ici.",
-      "x": 46,
+      "x": 47,
       "z": 1
     },
     {

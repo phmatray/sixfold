@@ -582,6 +582,9 @@ function rules(name, m, solid, all) {
   const free = (x, z) => inMap(x, z) && !solid.has(`${x},${z}`) && !(m.npcs ?? []).some((n) => n.x === x && n.z === z);
   const pathy = (x, z) => "pr=H".includes(tile(x, z) ?? "-") || "pr".includes(m.paint?.[z]?.[x] ?? "-") || m.props.some((p) => DECK[p.asset] && foot(p).some(([a, b]) => a === x && b === z));
 
+  // The game turns every prop by its rot (build.js, degToRad): without one the model gets NaN and is never drawn.
+  for (const p of m.props) if (typeof p.rot !== "number") fail.push(`${name}: ${who(p)} has no rot (0, 90, 180 or 270): the game would not draw it`);
+
   // 1. Clearance: no prop stands in another's footprint (props on decks and rugs, and `if` props
   // that take turns with another, excepted).
   for (const [k, list] of at) {

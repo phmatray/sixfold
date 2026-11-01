@@ -21,7 +21,7 @@
     },
     {
       "asset": "shelf",
-      "x": 3,
+      "x": 5,
       "z": 1,
       "rot": 0
     },
@@ -94,7 +94,7 @@
       "text_fr": "Sous la vitre, six cartes sur du velours vert, chacune avec son étiquette calligraphiée."
     },
     {
-      "x": 3,
+      "x": 5,
       "z": 1,
       "kind": "sign",
       "text": "Binders, floor to ceiling, sorted by colour. One just says \"Strays\".",
