@@ -35,6 +35,10 @@ pub fn set_hand(g: &mut Game, p: usize, cards: &[CardId]) {
     g.players[p].hand = cards.to_vec();
 }
 
+pub fn empty_deck(g: &mut Game, p: usize) {
+    g.players[p].deck.clear();
+}
+
 /// A settled creature (may evolve) with the given energy.
 pub fn creature(id: CardId, energy: &[CardId]) -> InPlay {
     let mut c = InPlay::new(id);

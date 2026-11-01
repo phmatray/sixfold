@@ -1,14 +1,14 @@
 //! Achievements: the list (hidden ones as "???" until earned), the toast that
 //! announces a new one, and the Records page that holds the list and the
-//! stats. What earns them is the engine's (`sixfold_engine::stats`).
+//! stats. What earns them is sixfold-meta's (`sixfold_meta::stats`).
 
 use std::collections::VecDeque;
 
 use leptos::prelude::*;
-use sixfold_engine::decks::Unlockable;
-use sixfold_engine::overworld::Progress;
-use sixfold_engine::stats::{Achievement, ACHIEVEMENTS};
 use sixfold_engine::tr;
+use sixfold_meta::overworld::Progress;
+use sixfold_meta::stats::{Achievement, ACHIEVEMENTS};
+use sixfold_meta::unlock::Unlockable;
 
 use crate::binder::PageBar;
 use crate::Screen;

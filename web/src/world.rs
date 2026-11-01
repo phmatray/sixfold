@@ -2,7 +2,7 @@
 //! (three.js) from `world/maps/*.json`. Leptos owns everything that is not
 //! drawing: the prompt, the dialogs (a native modal `<dialog>`), NPC dialogue
 //! with a typewriter, the item popup, campaign duels, and progression, which
-//! is the engine's [`Progress`] (in context, saved by `store`).
+//! is sixfold-meta's [`Progress`] (in context, saved by `store`).
 
 use std::collections::VecDeque;
 use std::time::Duration;
@@ -10,15 +10,15 @@ use std::time::Duration;
 use leptos::html;
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::books;
-use sixfold_engine::campaign;
-use sixfold_engine::clock::{self, Phase};
-use sixfold_engine::objective;
-use sixfold_engine::overworld::{
+use sixfold_engine::{card, tr, CardId};
+use sixfold_meta::books;
+use sixfold_meta::campaign;
+use sixfold_meta::clock::{self, Phase};
+use sixfold_meta::objective;
+use sixfold_meta::overworld::{
     parse_effect, Applied, CamTarget, Cue, Effect as Fx, Progress, StoneCue,
 };
-use sixfold_engine::save::CameraAngle;
-use sixfold_engine::{card, tr, CardId};
+use sixfold_meta::save::CameraAngle;
 use wasm_bindgen::prelude::*;
 
 use crate::binder::CollectionPanel;
@@ -737,7 +737,7 @@ fn prompt_label(kind: &str, text: &str) -> String {
 #[component]
 pub fn WorldScreen() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
-    let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
+    let profile = expect_context::<RwSignal<sixfold_meta::profile::Profile>>();
     let host = NodeRef::<html::Div>::new();
     let controls = NodeRef::<html::Div>::new();
     let stage = NodeRef::<html::Main>::new();
@@ -1127,7 +1127,7 @@ pub fn WorldScreen() -> impl IntoView {
         }
     });
 
-    // Apply effects in the engine (saved by the store), then show what follows:
+    // Apply effects in sixfold-meta (saved by the store), then show what follows:
     // a duel offer, a new item or a pack.
     let apply_effects = move |effects: Vec<String>| {
         let mut next = None;
@@ -1973,7 +1973,7 @@ pub fn WorldScreen() -> impl IntoView {
                                 }).collect_view()}
                             </div>
                             // A regional inn also keeps a counter (§7.4); the hub's only rests.
-                            {here.with_untracked(|(map, _)| sixfold_engine::shop::inn_stock(map))
+                            {here.with_untracked(|(map, _)| sixfold_meta::shop::inn_stock(map))
                                 .map(|stock| view! { <crate::shops::InnCounter stock=stock /> })}
                         }.into_any()
                     }
@@ -2046,7 +2046,7 @@ fn GameMenu(
 ) -> impl IntoView {
     let tab = expect_context::<LastTab>().0;
     let ui = expect_context::<Ui>();
-    let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
+    let profile = expect_context::<RwSignal<sixfold_meta::profile::Profile>>();
     let unopened = Memo::new(move |_| profile.with(|p| p.wallet.total()));
     let focus = |sel: &'static str| {
         request_animation_frame(move || {

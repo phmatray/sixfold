@@ -7,7 +7,7 @@ both sides. Rerun it with:
 cargo test --release -p sixfold-engine deck_sweep -- --ignored --nocapture
 ```
 
-`deck_sweep` (`engine/src/playtest.rs`) plays a Normal-vs-Normal round robin over every deck the
+`deck_sweep` (`meta/src/playtest.rs`) plays a Normal-vs-Normal round robin over every deck the
 game puts in front of the player: the six prebuilts, the five rival decks that aren't prebuilts
 (Cinza plays Ember Rush, Quill Storm Front) and the six Gauntlet decks. Each pairing is 100 seeded
 games with seats alternating, all at 6 prizes, so it compares decks, not campaign settings. It
@@ -148,7 +148,7 @@ deck (`rival_strength_against_the_starter`, 60 games, the campaign's prizes and 
 
 ## 1.2: route duelists' kits
 
-`kit_sweep` plays each of the 20 kits (`engine/src/duelists.rs`) at 2 prizes, Normal against Normal,
+`kit_sweep` plays each of the 20 kits (`meta/src/duelists.rs`) at 2 prizes, Normal against Normal,
 40 games against each of the six prebuilts and the starter; no kit may win more than 60%:
 
 | Colour | Sprout | Bud | Bloom |
@@ -192,7 +192,7 @@ and 53% with the 1.3 rules. The Ember and Storm duelists (12 more) run from 5% t
 
 ## 1.2: Facets
 
-`economy_sim` (`engine/src/shop.rs`, always on) scripts a first playthrough of the 1.2 world from
+`economy_sim` (`meta/src/shop.rs`, always on) scripts a first playthrough of the 1.2 world from
 the real tables: the 14 route duelists (5 min each, ⬡ 585), the six rivals and the Warden (two
 12-minute duels each, ⬡ 2,400), the finds met while exploring (⬡ 675 and 3 packs over 68 min) and the
 four quests (⬡ 370 and a pack, 20 min). Every Facet turned into ⬡ 150 themed packs, that is **5.7
@@ -396,7 +396,7 @@ The budget test asks a main attacker more than +20 over the curve to carry an at
 
 ### Indicators
 
-`balance_indicators` (`engine/src/playtest.rs`, ignored) plays the deck sweep's field and reports the
+`balance_indicators` (`meta/src/playtest.rs`, ignored) plays the deck sweep's field and reports the
 numbers below. "1.2" is main before this pass; "1.3 cards" is the curve pass alone (measured on
 the analysis branch); "1.3" is what shipped: the cards, the first-turn rule, one retreat a turn and
 Kindling Heart's limit (see "1.3: rules and curve pass").
@@ -517,7 +517,7 @@ order.
 
 ## 1.7: achievement Facets
 
-The 41 achievements (`engine/src/stats.rs`, `docs/WORLD_DESIGN.md` §12.3; 38 in 1.7, and 1.12 added
+The 41 achievements (`meta/src/stats.rs`, `docs/WORLD_DESIGN.md` §12.3; 38 in 1.7, and 1.12 added
 three for secrets) pay ⬡ 4,350 in all, each once. `economy_sim` counts the ⬡ 925 a first
 playthrough earns on the way (the first win and Awaken 2, the six seals and the champion, ten duelists and finds, 50 cards, 25 packs, the field items, an
 empty-bench win): the first playthrough goes from 4.85 to 5.28 packs an hour, still inside the
@@ -529,7 +529,7 @@ seeds it finished in 92, 83 and 71 duels (78, 92 and 80 before), inside its 98-d
 
 ## 1.7: Rook's story duels
 
-Rook's four duels (`rook_1` … `rook_4`, `engine/src/duelists.rs`, `docs/WORLD_DESIGN.md` §8.2) are in
+Rook's four duels (`rook_1` … `rook_4`, `meta/src/duelists.rs`, `docs/WORLD_DESIGN.md` §8.2) are in
 `DUELISTS` but never a seal, the champion or a route duelist. Each scene sets `flag:rook_<n>` before its
 duel, so the story moves on whether the player wins or loses; a first win pays ⬡ 100 / 150 / 200 / 300
 and marks `beat:rook_<n>`, a loss pays the usual consolation, and the hall rematch (`rook_4`, after the
@@ -565,7 +565,7 @@ packs an hour**; exploring stays at 5.23. The campaign playthrough meets Rook as
 
 ## 1.9: the deck builder
 
-"Build for me" (`engine/src/builder.rs`, #102) builds from the player's own cards: whole Awaken lines of the
+"Build for me" (`meta/src/builder.rs`, #102) builds from the player's own cards: whole Awaken lines of the
 chosen colours (4-3-2, never more of a stage than of the one below), at least 12 Basics when owned, draw and
 search Gear cards first, then the style's (Aggro: boosts and gusts; Control: healing, conditions and
 disruption), and energy shared by each Hexon's main attack cost. Hexons are ranked on the board rather than
@@ -593,7 +593,7 @@ collection.
 
 ### Unlockable decks: lent, not given
 
-The six prebuilts and the five rival decks that aren't one (`decks::UNLOCKABLE`) start locked and unlock with
+The six prebuilts and the five rival decks that aren't one (`unlock::UNLOCKABLE`) start locked and unlock with
 something the game already records: the rival who plays the deck (Cinza, Quill, Bramble, Marlo, Orla, Lumen),
 an achievement (*Full Bloom* for Grove Bloom, *Waylaid* for Tide Mind, *Halfway Round* for Stone Fist), the
 end of Rook's story (Dream Veil) or the Gauntlet (Sixfold Crown). The unlock state is read from those flags,
