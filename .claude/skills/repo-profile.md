@@ -44,7 +44,7 @@
 - `cargo test -p sixfold-web`
 - `cd web && trunk build --release`, then the precache greps on `web/dist/sw.js` (three.js,
   postprocessing, n8ao, fonts) in `.github/workflows/ci.yml`
-- `cd e2e && ! grep -n @playwright/test *.spec.ts` and `npx playwright test` (desktop, `@phone`, `@webkit`)
+- `cd e2e && ! grep -n @playwright/test *.spec.ts` and `npx playwright test --shard=<i>/6` on six parallel jobs (desktop, `@phone`, `@webkit`; ~11 min for a green run)
 - Desktop (`desktop.yml`): `cargo clippy -p sixfold-desktop -- -D warnings` and `cargo tauri build`
 
 ## Integration style
