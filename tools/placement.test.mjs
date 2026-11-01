@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { parseRules, world, check, evaluate, tables, proposals, findingId } from "./placement.mjs";
+import { parseRules, world, check, evaluate, tables, proposals, findingId, ridersOf, place } from "./placement.mjs";
 
 test("the MCP server answers the handshake, lists its tools, and lists the findings (read only)", async () => {
   const srv = spawn(process.execPath, [fileURLToPath(new URL("./placement-mcp.mjs", import.meta.url)), "web/world"], { stdio: ["pipe", "pipe", "ignore"] });
@@ -91,6 +91,19 @@ test("banded: a prop in a transition band whose scatter lists it", () => {
   assert.equal(on(m.props[5]), true, "by the south exit, in the band");
   assert.equal(on(m.props[6]), false, "beyond the band's depth");
   assert.equal(on(m.props[7]), false, "crates are not in its scatter");
+});
+
+test("what rests on a prop goes with it, and a trial puts everything back", () => {
+  const m = structuredClone(MAP);
+  m.props.push({ asset: "locker", x: 4, z: 3, rot: 0 }, { asset: "crates", x: 4, z: 3, rot: 0, y: 1 });
+  const v = world("test", m, T), [locker, onTop] = m.props.slice(-2);
+  assert.deepEqual(ridersOf(m.props, locker, T), [onTop]);
+  const { rules } = parseRules(`rule r warn "r"\n for locker\n need near(0, tile:p)`);
+  const before = structuredClone(m);
+  proposals(v, locker, rules);
+  assert.deepEqual(m, before, "trying moves leaves both where they were");
+  place(v, locker, { x: 1, z: 3 });
+  assert.deepEqual([onTop.x, onTop.z, onTop.y], [1, 3, 1], "the crates moved with the locker");
 });
 
 test("toward: an edge exit within r tiles leads to a map of that region", () => {

@@ -40,6 +40,7 @@
 #   toward(r, a | b)  an edge exit within r tiles leads to a map of region a or b (willows framing the road to the Dreamwater)
 #   banded         it stands in a transition band (5.7) whose scatter lists its asset: borrowed from the next region
 #
+# `T except U`: a tile that matches T and not U (beside(#trail except #stairs): a path tile with no stairs on it).
 # T (a target) is terms joined by `|`: an asset name, a #tag, tile:<glyphs> (tile:pr=H), paint:<glyphs>, or a
 # builtin: door, warp, npc, spot, exit, solid, open, edge (off the map), prop (any other prop), deck, wet (water,
 # or flat ground the map lays as wet sand, mud or marsh). near(1, edge) means "on the map's border row".
@@ -63,6 +64,7 @@ tag on_a_wall = bookcase shelf display_case net_locker boot_rack oven cloth_rack
 tag at_table  = duel_table chart_table workbench counter cobbler_bench soup_cauldron chowder_stove   # worked at, or spoken across
 tag sit_at    = duel_table chart_table workbench cobbler_bench                                     # what a chair is drawn up to (a shop counter is not)
 tag raised    = canopy_deck rope_bridge ladder               # held up by trees and posts, by design
+tag stairs    = stairs stairs_slate stairs_basalt stairs_heath
 tag market    = stall stall_b curio_cabinet
 tag work      = #house #market #harbour #at_table minecart rail kiln glass_furnace glass_rack cullet anvil door net_rack crab_pots   # not crates: two stray crates don't make a trade
 
@@ -143,10 +145,10 @@ rule chair.table info "a chair is drawn up to a table, facing it, or stands back
   for chair
   need front(#sit_at) or (behind(#wall | edge) and front(open | rug))
 
-rule furniture.wall warn "a bookcase, a shelf or a locker stands against a wall"
+rule furniture.wall warn "a bookcase, a shelf or a locker stands with its back to a wall (side-on to it, it looks set down and forgotten)"
   for #on_a_wall
   when indoor                                       # a glass yard's racks stand in the open
-  need behind(#wall | edge) or beside(#wall | edge) or behind(#on_a_wall)
+  need behind(#wall | edge) or behind(#on_a_wall)
 
 rule furniture.indoor error "room furniture stays indoors"
   for #indoors
@@ -162,10 +164,16 @@ rule furniture.facing error "a bookcase, a shelf or a locker faces into the room
   when indoor
   need not front(#wall | edge)
 
-rule furniture.reach warn "you can step up to a bookcase, a shelf or a counter: the tile in front of it is free"
+rule furniture.window warn "tall wall furniture never stands against a window: it would block the light"
+  for #on_a_wall
+  when indoor
+  unless is(workbench | boot_rack) or height < 1.5  # low, or worked at: a bench or a glass case under a window is fine
+  need not behind(tile:V)
+
+rule furniture.reach warn "you can step up to a bookcase, a workbench or a counter: every tile in front of it is free"
   for #on_a_wall | counter
   when indoor
-  need front(open | rug)
+  need not front(solid except chair | bench)          # a chair drawn up to it is how you use it
 
 rule chair.faces warn "a chair at a table faces it, never sits side-on or back to it"
   for chair
@@ -267,6 +275,18 @@ rule mine.cart warn "a minecart sits on its rails"
   for minecart
   when outdoor
   need near(1, rail)
+
+rule stairs.clear error "nothing stands at the foot or the top of a staircase: you step on and off it there"
+  for #stairs
+  need front(open | deck | rug | #water) and behind(open | deck | rug)   # a quay's steps come up out of the water
+
+rule stairs.climbs error "a staircase faces down the slope: its foot is lower than its top"
+  for #stairs
+  need climbs                                       # the review offers turning it round
+
+rule stairs.width warn "a staircase is as wide as the path that climbs it: no column of path runs into the cliff beside it"
+  for #stairs
+  need not beside(#trail except #stairs)
 
 rule fence.end warn "a fence end finishes a fence, or two frame a gap like gateposts (5.5)"
   for fence_end | wall_dry_end

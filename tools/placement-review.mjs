@@ -9,12 +9,12 @@
 // skips. `desk()` is all of that without the web page; tools/placement-mcp.mjs serves it to an agent over MCP.
 // Dev tooling, local only: it writes into web/world/maps. Its labels are English, like the editor's.
 import { createServer } from "node:http";
-import { readFileSync, writeFileSync, readdirSync, existsSync, unlinkSync, mkdtempSync, mkdirSync, symlinkSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, unlinkSync, mkdtempSync, mkdirSync, symlinkSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, normalize, extname } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { parseRules, tables, world, check, proposals, place, waivers, WAIVERS } from "./placement.mjs";
+import { parseRules, tables, world, check, proposals, place, ridersOf, waivers, WAIVERS } from "./placement.mjs";
 import * as ld from "../web/world/ld.js";
 
 const RULES = fileURLToPath(new URL("./placement.rules", import.meta.url));
@@ -80,8 +80,10 @@ export function desk(dir = "web/world") {
   function patchMap(m, p, patch) {
     const dx = (patch.x ?? p.x) - p.x, dz = (patch.z ?? p.z) - p.z;
     const twins = p.if ? m.props.filter((q) => q !== p && q.if && q.x === p.x && q.z === p.z) : [];
+    const riders = ridersOf(m.props, p, t), dy = ("y" in patch ? patch.y ?? 0 : p.y ?? 0) - (p.y ?? 0); // crates set on it go with it
     for (const i of patch.spots ?? []) (m.interactions[i].x += dx), (m.interactions[i].z += dz);
     for (const q of [p, ...twins]) for (const k of ["x", "z", "rot", "y"]) if (k in patch) patch[k] === undefined || patch[k] === null ? delete q[k] : (q[k] = patch[k]);
+    for (const q of riders) (q.x += dx), (q.z += dz), (q.y = +((q.y ?? 0) + dy).toFixed(2));
     if (patch.asset) p.asset = patch.asset; // its own model only: a twin keeps its own
     for (const [x, z, g] of patch.tiles ?? []) m.tiles[z] = m.tiles[z].slice(0, x) + g + m.tiles[z].slice(x + 1);
   }
@@ -91,8 +93,16 @@ export function desk(dir = "web/world") {
     const r = spawnSync(process.execPath, [fileURLToPath(new URL("./check-maps.mjs", import.meta.url)), at, "--strict"], { encoding: "utf8" });
     const lines = `${r.stdout}${r.stderr}`.trim().split("\n").filter(Boolean);
     const said = lines.filter((l) => /^(Error: )?\s*[a-z_]+: /.test(l) && !l.startsWith("maps ok")).map((l) => l.replace(/^Error: /, "").trim());
-    return { ok: r.status === 0, lines: lines.slice(-12), first: said[0] ?? lines.find((l) => l.startsWith("Error"))?.slice(7) ?? null };
+    const warnings = lines.filter((l) => /^ {2}[a-z_]+: /.test(l)).map((l) => l.trim()); // "N placement warnings …" then one indented line each
+    return { ok: r.status === 0, lines: lines.slice(-12), warnings, first: said[0] ?? lines.find((l) => l.startsWith("Error"))?.slice(7) ?? null };
   }
+  // The world's own warnings, so a fix is judged on the ones it adds (a sign moved behind a lamp, a pocket closed off).
+  let base = null;
+  const baseWarnings = () => {
+    const stamp = names().map((n) => statSync(file(n)).mtimeMs).join();
+    if (base?.stamp !== stamp) base = { stamp, warnings: new Set(checkMaps().warnings) };
+    return base.warnings;
+  };
 
   // A world of links to the real one, where one map at a time is swapped for a fixed copy to see whether check-maps
   // still passes, before a fix is ever offered. Made on first use, gone when the process ends.
@@ -106,11 +116,15 @@ export function desk(dir = "web/world") {
       const gone = shadow;
       process.on("exit", () => rmSync(gone, { recursive: true, force: true }));
     }
-    const link = `${shadow}/maps/${map}.json`, m = JSON.parse(readFileSync(file(map), "utf8"));
+    const known = baseWarnings(), link = `${shadow}/maps/${map}.json`, m = JSON.parse(readFileSync(file(map), "utf8"));
     for (const f of fixes) patchMap(m, m.props[f.index], f.patch);
     unlinkSync(link);
     writeFileSync(link, JSON.stringify(m));
-    try { return checkMaps(shadow); } finally { unlinkSync(link); symlinkSync(resolve(file(map)), link); }
+    try {
+      const r = checkMaps(shadow), added = r.warnings.filter((w) => !known.has(w));
+      // A fix that passes but adds a warning (hides a sign behind a lamp, closes off a pocket) is no fix.
+      return added.length ? { ...r, ok: false, first: `it adds a warning: ${added[0]}` } : r;
+    } finally { unlinkSync(link); symlinkSync(resolve(file(map)), link); }
   }
 
   // The fixes worth offering for one prop: those check-maps still passes, at most one lift, swap, ground fill and turn,
@@ -259,6 +273,13 @@ export function camera({ game = "http://localhost:8080", playwright }) {
       }
     }
     if (!there) throw new Error(`the game never reached ${name} ${x},${z}`);
+    // A site's arrival scene can start after the fade and take the camera: skip it, warp back, settle again.
+    await p.waitForTimeout(800);
+    for (let again = 0; again < 3 && (await skip.isVisible().catch(() => false)); again++) {
+      for (let t = 0; t < 10 && (await skip.isVisible().catch(() => false)); t++) await skip.click().catch(() => {}), await p.waitForTimeout(700);
+      await host("sixfoldWarp", name, x, z, "n");
+      await p.waitForTimeout(3000);
+    }
     await host("sixfoldClock", 12 * 60);
     await host("sixfoldCam", { distance: Math.min(30, Math.max(12, extent * 1.3)), pitch: 50 });
     await p.waitForTimeout(1500);

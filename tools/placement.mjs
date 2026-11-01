@@ -19,7 +19,7 @@ const FUNCS = {
   count: ["n", "t"], dist: ["t"], is: ["t"], has: ["w"], kind: ["w"], region: ["w"], map: ["w"], toward: ["n", "w"],
 };
 const NUMERIC = new Set(["count", "dist", "y", "height", "rot"]);
-const WORDS = new Set(["outdoor", "indoor", "cave", "wild", "banded", "grounded", "flat", "true", "false", "y", "height", "rot"]);
+const WORDS = new Set(["outdoor", "indoor", "cave", "wild", "banded", "climbs", "grounded", "flat", "true", "false", "y", "height", "rot"]);
 const BUILTIN = new Set(["door", "warp", "npc", "spot", "exit", "solid", "open", "edge", "prop", "deck", "wet"]);
 
 // One expression, parsed by recursive descent straight off the string.
@@ -31,13 +31,15 @@ function parseExpr(src, tags, where) {
   const eat = (re) => { const m = peek(re); if (m) i += m[0].length; return m; };
   const word = () => eat(/^[A-Za-z_][\w-]*/)?.[0];
   // A target: terms joined by `|` (an asset, a #tag, tile:<glyphs>, paint:<glyphs>, a builtin).
+  // `T except U`: a tile T matches and U doesn't (a path tile with no stairs on it).
   const target = () => {
     const terms = [];
     do {
-      const m = eat(/^(tile|paint):[^\s,|)]+|^#[\w-]+|^[A-Za-z_][\w-]*|^\*/);
+      const m = eat(/^(tile|paint):[^\s,|)]+|^#[\w-]+|^(?!except\b)[A-Za-z_][\w-]*|^\*/);
       if (!m) err("expected a target");
       terms.push(...expandTerm(m[0], tags, where));
     } while (eat(/^\|/));
+    if (eat(/^except\b/)) terms.except = target();
     return terms;
   };
   const words = () => { const w = []; do w.push(word() ?? err("expected a word")); while (eat(/^\|/) || peek(/^[A-Za-z_]/)); return w; };
@@ -191,7 +193,7 @@ function matches(w, term, x, z, self) {
   }
   return false;
 }
-const any = (w, terms, x, z, self) => terms.some((t) => matches(w, t, x, z, self));
+const any = (w, terms, x, z, self) => terms.some((t) => matches(w, t, x, z, self)) && !(terms.except && any(w, terms.except, x, z, self));
 
 // The tiles round a footprint within Chebyshev distance r (the footprint itself included).
 function ring(w, p, r) {
@@ -236,6 +238,11 @@ export function evaluate(w, p, e) {
     case "banded": { const [fw, fd] = ld.foot(p, w.t.FOOT); return w.banded(p.asset, p.x + fw / 2, p.z + fd / 2); }
     case "grounded": return grounded(w, p);
     case "flat": return new Set(w.tiles(p).map(([x, z]) => w.floor(x, z))).size === 1;
+    case "climbs": {
+      // Its foot (the row in front of its face) lies lower than its top (the row behind it): it faces down the slope.
+      const lo = rows(w, p, 1, 1).filter(([x, z]) => w.inMap(x, z)), hi = rows(w, p, 1, -1).filter(([x, z]) => w.inMap(x, z));
+      return !lo.length || !hi.length || Math.max(...lo.map(([x, z]) => w.floor(x, z))) < Math.min(...hi.map(([x, z]) => w.floor(x, z)));
+    }
     case "y": return p.y ?? 0;
     case "rot": return ((p.rot ?? 0) % 360 + 360) % 360;
     case "height": return w.t.tall(p.asset);
@@ -309,9 +316,17 @@ export function check(w, rules, waived = new Set()) {
 
 // Run fn with prop p changed by patch ({ asset, x, z, rot, y, tiles }), the index kept in step, then put it back.
 function trial(w, p, patch, fn) {
-  const old = { asset: p.asset, x: p.x, z: p.z, rot: p.rot, y: p.y, tiles: (patch.tiles ?? []).map(([x, z]) => [x, z, w.m.tiles[z][x]]) };
+  // What it changes, noted first and put back as it was (riders found again at the new place could be other props).
+  const saved = [p, ...ridersOf(w.m.props, p, w.t)].map((q) => ({ q, asset: q.asset, x: q.x, z: q.z, rot: q.rot, y: q.y }));
+  const tiles = (patch.tiles ?? []).map(([x, z]) => [x, z, w.m.tiles[z][x]]);
   place(w, p, { ...patch, spots: undefined }); // the caller moves the spots of a trial (proposals' `better`)
-  try { return fn(); } finally { place(w, p, old); }
+  try { return fn(); } finally {
+    const reindex = (q, on) => { for (const [x, z] of w.tiles(q)) { const k = key(x, z), l = w.at.get(k) ?? w.at.set(k, []).get(k); on ? l.push(q) : l.splice(l.indexOf(q), 1); } };
+    for (const { q } of saved) reindex(q, false);
+    for (const s of saved) for (const k of ["asset", "x", "z", "rot", "y"]) s[k] === undefined ? delete s.q[k] : (s.q[k] = s[k]);
+    for (const { q } of saved) reindex(q, true);
+    for (const [x, z, g] of tiles) w.m.tiles[z] = w.m.tiles[z].slice(0, x) + g + w.m.tiles[z].slice(x + 1);
+  }
 }
 
 // Change prop p by patch for good in w (its model, place, turn and height, the index kept in step; with `spots`, the
@@ -325,9 +340,23 @@ export function place(w, p, patch) {
     const s = w.m.interactions[i];
     w.spots.delete(key(s.x, s.z)), (s.x += dx), (s.z += dz), w.spots.add(key(s.x, s.z));
   }
+  // What rests on it (crates on a locker) goes with it, as high above it as before.
+  const riders = ridersOf(w.m.props, p, w.t), dy = ("y" in patch ? patch.y ?? 0 : p.y ?? 0) - (p.y ?? 0);
   index(false);
+  for (const q of riders) for (const [x, z] of w.tiles(q)) { const l = w.at.get(key(x, z)); l?.splice(l.indexOf(q), 1); }
   for (const k of ["asset", "x", "z", "rot", "y"]) if (k in patch) patch[k] === undefined ? delete p[k] : (p[k] = patch[k]);
+  for (const q of riders) {
+    q.x += dx, q.z += dz, q.y = +((q.y ?? 0) + dy).toFixed(2);
+    for (const [x, z] of w.tiles(q)) (w.at.get(key(x, z)) ?? w.at.set(key(x, z), []).get(key(x, z))).push(q);
+  }
   index(true);
+}
+
+// The props resting on p: standing within its footprint, their base at its top or above (crates set on a locker).
+export function ridersOf(props, p, t) {
+  const [w, d] = ld.foot(p, t.FOOT), top = (p.y ?? 0) + t.tall(p.asset);
+  if (t.WALKABLE.has(p.asset) || t.DECK[p.asset]) return [];
+  return props.filter((q) => q !== p && q.x >= p.x && q.x < p.x + w && q.z >= p.z && q.z < p.z + d && (q.y ?? 0) >= top - 0.3);
 }
 
 // Can p stand where it is now: on the map, off walls and fences, out of the water unless it came from there, never on
