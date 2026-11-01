@@ -234,7 +234,7 @@ export function camera({ game = "http://localhost:8080", playwright }) {
   };
   // Into the world from the title (again, when trunk serve reloaded the page after a map changed).
   const enter = async (p) => {
-    try { await p.goto(game, { timeout: 15_000 }); }
+    try { await p.goto(game, { timeout: 60_000, waitUntil: "domcontentloaded" }); } // a debug build loads slowly on a busy machine
     catch { throw Object.assign(new Error(`the game isn't running at ${game}: start it with \`cd web && trunk serve\` (or pass --game=<url>)`), { status: 503 }); }
     await p.getByRole("navigation", { name: "Main menu" }).getByRole("button", { name: /^Explore the world/ }).click({ timeout: 240_000 });
     await p.waitForFunction(() => document.querySelector(".world-host")?.sixfoldWarp, null, { timeout: 120_000 });
@@ -264,7 +264,19 @@ export function camera({ game = "http://localhost:8080", playwright }) {
     await p.waitForTimeout(1500);
     return p.screenshot({ type: "jpeg", quality: 82 });
   };
-  return { shot: (...a) => (queue = queue.then(() => shoot(...a), () => shoot(...a))) };
+  // One shot at a time; of those waiting, only the last two (the card on screen, before and after) are kept: a card
+  // left behind drops its shots instead of holding up the one now in view.
+  const waiting = [];
+  const shot = (...a) => new Promise((ok, no) => {
+    waiting.push({ a, ok, no });
+    while (waiting.length > 2) waiting.shift().no(Object.assign(new Error("superseded by a newer shot"), { status: 409 }));
+    queue = queue.then(async () => {
+      const job = waiting.shift();
+      if (!job) return;
+      try { job.ok(await shoot(...job.a)); } catch (e) { job.no(e); }
+    });
+  });
+  return { shot };
 }
 
 
