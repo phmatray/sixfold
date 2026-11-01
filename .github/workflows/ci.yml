@@ -23,7 +23,7 @@ jobs:
       - run: ./scripts/check-no-game-data.sh
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
       - run: node --test web/gamepad.test.mjs web/world/camera.test.mjs web/world/tier.test.mjs tools/ld.test.mjs tools/check-maps.test.mjs tools/life.test.mjs tools/routine.test.mjs tools/transition.test.mjs tools/dressing.test.mjs
       - run: node tools/check-maps.mjs web/world --strict && node tools/check-fence-table.mjs web/world/props.js
       - run: node --test tools/check-tokens.test.mjs && node tools/check-tokens.mjs web/style.css
@@ -89,7 +89,7 @@ jobs:
           path: web/dist
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
           cache: npm
           cache-dependency-path: e2e/package-lock.json
       - run: npm ci
