@@ -156,6 +156,7 @@ fn cue_json(c: &Cue) -> String {
     match c {
         Cue::Emote { actor, emote } => format!(r#"{{"actor":"{actor}","emote":"{emote}"}}"#),
         Cue::Sfx(name) => format!(r#"{{"sfx":"{name}"}}"#),
+        Cue::Shot(name) => format!(r#"{{"shot":"{name}"}}"#),
         Cue::Warp { map, x, z, facing } => {
             format!(r#"{{"warp":{{"map":"{map}","x":{x},"z":{z},"facing":"{facing}"}}}}"#)
         }

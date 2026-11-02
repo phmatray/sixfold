@@ -475,3 +475,41 @@ test("#116: a sound needs a secret, a tile on the map, sfx hum and a radius of 1
   secretFails((m) => (box(m).sound.radius = 12), /vale: \[sound\] v_box's sound/);
   secretFails((m) => (m.vale.interactions[0].sound = { at: [5, 10], sfx: "hum", radius: 3 }), /vale: \[sound\] .*only on a secret/);
 });
+
+// #255: a `shot:<name>` cue needs web/world/shots/<name>.json (Theatre 0.7 state), 4 s at most in a reveal_ script,
+// pitch 35-65 degrees and fov 30-55 at every keyframe.
+const shotWorld = (id, shot, file) => {
+  const dir = world((m) => {
+    m.vale.scripts = [{ id, if: "true", on: "enter", steps: [{ do: [`shot:${shot}`] }] }];
+  });
+  if (file) {
+    mkdirSync(join(dir, "shots"));
+    writeFileSync(join(dir, "shots", `${shot}.json`), JSON.stringify(file));
+  }
+  return dir;
+};
+const theatre = (shot, length, frames) => {
+  const props = ["x", "y", "z", "tx", "ty", "tz", "fov"];
+  const track = (p) => ({ type: "BasicKeyframedTrack", keyframes: frames.map((f) => ({ position: f.t, value: f[p] })) });
+  const camera = { trackIdByPropPath: Object.fromEntries(props.map((p) => [`["${p}"]`, p])), trackData: Object.fromEntries(props.map((p) => [p, track(p)])) };
+  return { sheetsById: { [shot]: { sequence: { length, tracksByObject: { camera } } } } };
+};
+// camera 5 up and 5 back from its target: pitch 45 degrees
+const ok = { t: 0, x: 0, y: 5, z: 5, tx: 0, ty: 0, tz: 0, fov: 40 };
+const shotFails = (dir, re) => {
+  const r = run(dir, "--strict");
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, re, r.out);
+};
+
+test("#255: a shot cue with no file fails", () => shotFails(shotWorld("scene", "nope"), /shot:nope: needs .*shots\/nope\.json/));
+test("#255: a shot name outside a-z, 0-9 and _ fails", () => shotFails(shotWorld("scene", "../maps/vale"), /is shot:<name> of a-z, 0-9 and _/));
+test("#255: a 5 s shot in a reveal_ script fails; 3.5 s passes, and so does 5 s elsewhere", () => {
+  shotFails(shotWorld("reveal_x", "s", theatre("s", 5, [ok])), /a reveal shot lasts at most 4 s/);
+  passes(shotWorld("reveal_x", "s", theatre("s", 3.5, [ok])));
+  passes(shotWorld("scene", "s", theatre("s", 5, [ok])));
+});
+test("#255: a keyframe pitched straight down, or with fov 70, fails", () => {
+  shotFails(shotWorld("scene", "s", theatre("s", 3, [ok, { ...ok, t: 2, z: 0 }])), /pitches 90 degrees at 2 s/);
+  shotFails(shotWorld("scene", "s", theatre("s", 3, [ok, { ...ok, t: 2, fov: 70 }])), /fov 70 at 2 s/);
+});
