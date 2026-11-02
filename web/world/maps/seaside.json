@@ -3,6 +3,7 @@
   "title_fr": "Promenade de Ventsalé",
   "region": "tide",
   "kind": "route",
+  "level_design": 2,
   "music": "tide",
   "life": {
     "critters": [
@@ -35,6 +36,36 @@
           19
         ],
         "n": 2
+      }
+    ],
+    "boats": [
+      {
+        "pier": [
+          23,
+          3
+        ],
+        "every": 80
+      }
+    ],
+    "perch": [
+      {
+        "at": [
+          [
+            50,
+            9,
+            0.7
+          ],
+          [
+            54,
+            9,
+            0.7
+          ],
+          [
+            4,
+            13,
+            1.2
+          ]
+        ]
       }
     ]
   },
@@ -83,24 +114,6 @@
       "asset": "crates",
       "x": 8,
       "z": 11,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 5,
-      "z": 18,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 7,
-      "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "bush",
-      "x": 11,
-      "z": 18,
       "rot": 0
     },
     {
@@ -250,26 +263,8 @@
     },
     {
       "asset": "flowers",
-      "x": 33,
-      "z": 16,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 43,
-      "z": 17,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
       "x": 25,
       "z": 18,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 16,
-      "z": 15,
       "rot": 0
     },
     {
@@ -300,7 +295,9 @@
       "asset": "lighthouse",
       "x": 47,
       "z": 1,
-      "rot": 0
+      "rot": 0,
+      "landmark": true,
+      "lit": "hour:17-7"
     },
     {
       "asset": "rock",
@@ -497,12 +494,6 @@
       "rot": 0
     },
     {
-      "asset": "tree",
-      "x": 0,
-      "z": 18,
-      "rot": 0
-    },
-    {
       "asset": "bush",
       "x": 59,
       "z": 18,
@@ -906,42 +897,6 @@
     },
     {
       "asset": "tree",
-      "x": 4,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 6,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 8,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 10,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 12,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 14,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
       "x": 16,
       "z": 20,
       "rot": 0
@@ -972,55 +927,7 @@
     },
     {
       "asset": "tree",
-      "x": 28,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 30,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 32,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 34,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 36,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 38,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 40,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
       "x": 42,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 44,
       "z": 20,
       "rot": 0
     },
@@ -1045,12 +952,6 @@
     {
       "asset": "tree",
       "x": 54,
-      "z": 20,
-      "rot": 0
-    },
-    {
-      "asset": "tree",
-      "x": 56,
       "z": 20,
       "rot": 0
     },
@@ -1493,12 +1394,6 @@
       "rot": 0
     },
     {
-      "asset": "bush",
-      "x": 28,
-      "z": 14,
-      "rot": 0
-    },
-    {
       "asset": "reeds",
       "x": 49,
       "z": 14,
@@ -1514,12 +1409,6 @@
       "asset": "rock",
       "x": 25,
       "z": 19,
-      "rot": 0
-    },
-    {
-      "asset": "rock",
-      "x": 55,
-      "z": 17,
       "rot": 0
     },
     {
@@ -1613,6 +1502,67 @@
       "z": 10,
       "rot": 180,
       "band": "overworld"
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 19,
+      "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 57,
+      "z": 3,
+      "rot": 180,
+      "band": "gullhaven"
+    },
+    {
+      "asset": "reeds",
+      "x": 59,
+      "z": 3,
+      "rot": 270,
+      "band": "gullhaven"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 56,
+      "z": 6,
+      "rot": 180,
+      "band": "gullhaven"
+    },
+    {
+      "asset": "reeds",
+      "x": 58,
+      "z": 6,
+      "rot": 270,
+      "band": "gullhaven"
+    },
+    {
+      "asset": "reeds",
+      "x": 58,
+      "z": 7,
+      "rot": 90,
+      "band": "gullhaven"
+    },
+    {
+      "asset": "reeds",
+      "x": 59,
+      "z": 7,
+      "rot": 270,
+      "band": "gullhaven"
+    },
+    {
+      "asset": "reeds",
+      "x": 57,
+      "z": 19,
+      "rot": 90,
+      "band": "gullhaven"
     }
   ],
   "spawn": {
@@ -1643,7 +1593,22 @@
       "hidden": true,
       "give": "coins:60",
       "text": "Under the boardwalk's first plank, out of the spray: a tin of Facets somebody never came back for.",
-      "text_fr": "Sous la première planche de la promenade, à l'abri des embruns : une boîte de Facettes que quelqu'un n'est jamais revenu chercher."
+      "text_fr": "Sous la première planche de la promenade, à l'abri des embruns : une boîte de Facettes que quelqu'un n'est jamais revenu chercher.",
+      "poi": "secret",
+      "secret": {
+        "id": "sea_plank",
+        "kind": "environmental",
+        "clue": [
+          [
+            9,
+            12
+          ],
+          [
+            9,
+            13
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -1662,7 +1627,8 @@
       "z": 6,
       "give": "card:shellmote",
       "text": "In the rock pool, a crab sits on a card in an oilskin sleeve. It lets go, eventually.",
-      "text_fr": "Dans la flaque entre les rochers, un crabe couve une carte dans une pochette cirée. Il finit par lâcher prise."
+      "text_fr": "Dans la flaque entre les rochers, un crabe couve une carte dans une pochette cirée. Il finit par lâcher prise.",
+      "poi": "secondary"
     },
     {
       "kind": "find",
@@ -1671,7 +1637,8 @@
       "z": 1,
       "give": "give:curio_message_bottle",
       "text": "Wedged between the crates at the end of the pier: a bottle, corked and waxed, a rolled note inside.",
-      "text_fr": "Coincée entre les caisses au bout de la jetée : une bouteille bouchée à la cire, un billet roulé à l'intérieur."
+      "text_fr": "Coincée entre les caisses au bout de la jetée : une bouteille bouchée à la cire, un billet roulé à l'intérieur.",
+      "poi": "secondary"
     },
     {
       "kind": "find",
@@ -1699,7 +1666,22 @@
       "hidden": true,
       "give": "coins:25",
       "text": "In the hollow of the driftwood, where the sea wore it out: a few Facets and a great deal of sand.",
-      "text_fr": "Dans le creux du bois flotté, là où la mer l'a usé : quelques Facettes et beaucoup de sable."
+      "text_fr": "Dans le creux du bois flotté, là où la mer l'a usé : quelques Facettes et beaucoup de sable.",
+      "poi": "secret",
+      "secret": {
+        "id": "sea_driftwood",
+        "kind": "spatial",
+        "clue": [
+          [
+            45,
+            14
+          ],
+          [
+            47,
+            16
+          ]
+        ]
+      }
     }
   ],
   "warps": [
@@ -1919,7 +1901,27 @@
           ]
         }
       ],
-      "idle": "Idle"
+      "idle": "Idle",
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            26,
+            7
+          ],
+          "face": "w",
+          "do": "look"
+        },
+        {
+          "from": "dusk",
+          "at": [
+            45,
+            10
+          ],
+          "face": "n",
+          "do": "look"
+        }
+      ]
     },
     {
       "idle": "Idle",
@@ -2043,7 +2045,38 @@
           ]
         }
       ],
-      "idle": "Idle"
+      "idle": "Idle",
+      "poi": "secondary",
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            48,
+            4
+          ],
+          "face": "s",
+          "do": "sweep"
+        },
+        {
+          "from": "dusk",
+          "at": [
+            47,
+            6
+          ],
+          "face": "e",
+          "do": "look"
+        }
+      ],
+      "barks": [
+        {
+          "say": "The steps are slick. Mind the spray.",
+          "say_fr": "Les marches sont glissantes. Gare aux embruns."
+        },
+        {
+          "say": "Lamp's lit by dusk. Always has been.",
+          "say_fr": "La lampe est allumée au crépuscule. Depuis toujours."
+        }
+      ]
     },
     {
       "id": "halvard",
@@ -2080,6 +2113,13 @@
             "Et cette lueur lilas, toute pâle, loin là-bas vers l'embouchure ? La vedette de Lac-aux-Lanternes. On dit que les lanternes de ce lac peuvent porter quelqu'un. Je n'ai jamais essayé.",
             "Soixante-treize navires nommés depuis cette marche. Jamais un salut en retour. Ça ne fait rien. La lumière est pour eux, pas pour moi."
           ]
+        }
+      ],
+      "poi": "secondary",
+      "barks": [
+        {
+          "say": "Seventy-three ships. Not one wave back.",
+          "say_fr": "Soixante-treize navires. Pas un salut en retour."
         }
       ]
     },
@@ -2184,6 +2224,24 @@
         "flowers",
         "rock"
       ]
+    },
+    {
+      "to": "gullhaven",
+      "depth": 5,
+      "scatter": [
+        "reeds",
+        "rock_sea"
+      ]
     }
+  ],
+  "view": [
+    [
+      24,
+      2
+    ],
+    [
+      48,
+      5
+    ]
   ]
 }

@@ -1,0 +1,346 @@
+{
+  "sheetsById": {
+    "reveal_cinderwick": {
+      "staticOverrides": {
+        "byObject": {}
+      },
+      "sequence": {
+        "subUnitsPerUnit": 30,
+        "length": 3.5,
+        "type": "PositionalSequence",
+        "tracksByObject": {
+          "camera": {
+            "trackData": {
+              "cam1": {
+                "type": "BasicKeyframedTrack",
+                "__debugName": "camera:[\"x\"]",
+                "keyframes": [
+                  {
+                    "id": "k1_0",
+                    "position": 0,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 25.5
+                  },
+                  {
+                    "id": "k1_1",
+                    "position": 1.8,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 26.5
+                  },
+                  {
+                    "id": "k1_2",
+                    "position": 3.5,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 25.5
+                  }
+                ]
+              },
+              "cam2": {
+                "type": "BasicKeyframedTrack",
+                "__debugName": "camera:[\"y\"]",
+                "keyframes": [
+                  {
+                    "id": "k2_0",
+                    "position": 0,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 8.463
+                  },
+                  {
+                    "id": "k2_1",
+                    "position": 1.8,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 17.383
+                  },
+                  {
+                    "id": "k2_2",
+                    "position": 3.5,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 9.943
+                  }
+                ]
+              },
+              "cam3": {
+                "type": "BasicKeyframedTrack",
+                "__debugName": "camera:[\"z\"]",
+                "keyframes": [
+                  {
+                    "id": "k3_0",
+                    "position": 0,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 39.693
+                  },
+                  {
+                    "id": "k3_1",
+                    "position": 1.8,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 30.972
+                  },
+                  {
+                    "id": "k3_2",
+                    "position": 3.5,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 38.213
+                  }
+                ]
+              },
+              "cam4": {
+                "type": "BasicKeyframedTrack",
+                "__debugName": "camera:[\"tx\"]",
+                "keyframes": [
+                  {
+                    "id": "k4_0",
+                    "position": 0,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 25.5
+                  },
+                  {
+                    "id": "k4_1",
+                    "position": 1.8,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 26.5
+                  },
+                  {
+                    "id": "k4_2",
+                    "position": 3.5,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 25.5
+                  }
+                ]
+              },
+              "cam5": {
+                "type": "BasicKeyframedTrack",
+                "__debugName": "camera:[\"ty\"]",
+                "keyframes": [
+                  {
+                    "id": "k5_0",
+                    "position": 0,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 0.75
+                  },
+                  {
+                    "id": "k5_1",
+                    "position": 1.8,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 1
+                  },
+                  {
+                    "id": "k5_2",
+                    "position": 3.5,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 0.75
+                  }
+                ]
+              },
+              "cam6": {
+                "type": "BasicKeyframedTrack",
+                "__debugName": "camera:[\"tz\"]",
+                "keyframes": [
+                  {
+                    "id": "k6_0",
+                    "position": 0,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 30.5
+                  },
+                  {
+                    "id": "k6_1",
+                    "position": 1.8,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 19.5
+                  },
+                  {
+                    "id": "k6_2",
+                    "position": 3.5,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 30.5
+                  }
+                ]
+              },
+              "cam7": {
+                "type": "BasicKeyframedTrack",
+                "__debugName": "camera:[\"fov\"]",
+                "keyframes": [
+                  {
+                    "id": "k7_0",
+                    "position": 0,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 40
+                  },
+                  {
+                    "id": "k7_1",
+                    "position": 1.8,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 46
+                  },
+                  {
+                    "id": "k7_2",
+                    "position": 3.5,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "type": "bezier",
+                    "value": 40
+                  }
+                ]
+              }
+            },
+            "trackIdByPropPath": {
+              "[\"x\"]": "cam1",
+              "[\"y\"]": "cam2",
+              "[\"z\"]": "cam3",
+              "[\"tx\"]": "cam4",
+              "[\"ty\"]": "cam5",
+              "[\"tz\"]": "cam6",
+              "[\"fov\"]": "cam7"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitionVersion": "0.4.0",
+  "revisionHistory": []
+}

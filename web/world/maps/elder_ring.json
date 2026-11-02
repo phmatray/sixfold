@@ -44,6 +44,7 @@
       "rate": 0.2
     }
   },
+  "level_design": 2,
   "calm": [
     [
       15,
@@ -315,7 +316,8 @@
       "x": 11,
       "z": 1,
       "rot": 0,
-      "y": 3
+      "y": 3,
+      "poi": "secondary"
     },
     {
       "asset": "rock",
@@ -329,7 +331,8 @@
       "x": 27,
       "z": 2,
       "rot": 0,
-      "y": 3
+      "y": 3,
+      "poi": "secondary"
     },
     {
       "asset": "rock",
@@ -343,7 +346,8 @@
       "x": 39,
       "z": 2,
       "rot": 0,
-      "y": 3
+      "y": 3,
+      "landmark": true
     },
     {
       "asset": "rock",
@@ -1723,7 +1727,22 @@
       "give": "coins:50",
       "hidden": true,
       "text": "Between two buttress roots of the old tree, where pilgrims have tucked their offerings for a hundred years: Facets, green with moss.",
-      "text_fr": "Entre deux racines-contreforts du vieil arbre, là où les pèlerins glissent leurs offrandes depuis cent ans : des Facettes, vertes de mousse."
+      "text_fr": "Entre deux racines-contreforts du vieil arbre, là où les pèlerins glissent leurs offrandes depuis cent ans : des Facettes, vertes de mousse.",
+      "poi": "secret",
+      "secret": {
+        "id": "buttress_roots",
+        "kind": "spatial",
+        "clue": [
+          [
+            3,
+            13
+          ],
+          [
+            4,
+            20
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -1732,7 +1751,22 @@
       "z": 8,
       "give": "card:briarhog",
       "text": "Deep in the hedge, where the clippers never reach, something has made a nest of dry leaves. In the middle of it, a card, curled up like a sleeping hedgehog.",
-      "text_fr": "Au fond de la haie, là où le sécateur ne va jamais, quelque chose s'est fait un nid de feuilles sèches. Au milieu, une carte, roulée comme un hérisson endormi."
+      "text_fr": "Au fond de la haie, là où le sécateur ne va jamais, quelque chose s'est fait un nid de feuilles sèches. Au milieu, une carte, roulée comme un hérisson endormi.",
+      "poi": "secret",
+      "secret": {
+        "id": "hedge_heart",
+        "kind": "environmental",
+        "clue": [
+          [
+            12,
+            17
+          ],
+          [
+            13,
+            9
+          ]
+        ]
+      }
     },
     {
       "x": 29,
@@ -1962,6 +1996,12 @@
             "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
             "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "One hand on the hedge, and you will always come out.",
+          "say_fr": "Une main sur la haie, et on finit toujours par sortir."
         }
       ]
     },
@@ -2232,6 +2272,12 @@
             "duel:bramble"
           ]
         }
+      ],
+      "barks": [
+        {
+          "say": "The stone keeps the Deepgrove. I keep the stone.",
+          "say_fr": "La pierre garde le Bois-Profond. Moi, je garde la pierre."
+        }
       ]
     }
   ],
@@ -2451,5 +2497,11 @@
         "heather"
       ]
     }
+  ],
+  "view": [
+    [
+      21,
+      4
+    ]
   ]
 }

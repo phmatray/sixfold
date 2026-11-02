@@ -46,6 +46,7 @@
       "rate": 0.25
     }
   },
+  "level_design": 2,
   "width": 52,
   "height": 36,
   "tiles": [
@@ -58,7 +59,7 @@
     "..........................ppp.......................",
     "..........................ppp.......................",
     "....pppppppp..............ppp.......................",
-    ".p..ppppppppppppppp.......ppp.......................",
+    ".pppppppppppppppppp.......ppp.......................",
     ".p.........ppppppppppp.ppppppppp...........ppppppppp",
     ".p................pppppppppppppppppppppppppppppppppp",
     ".p...................ppppppppppppppppppppppppppppppp",
@@ -67,8 +68,8 @@
     ".p..~~~~~..~~~~~~....ppppppppppppp........p.........",
     ".p.~~~~~~~~~~~~~~~....ppppppppppp.........p.........",
     ".p.~~~~~~~~~~~~~~~......ppppppp...........p.........",
-    "...~~~~~~~~~~~~~~~.........pp.............p.........",
-    "...~~~~~~~~~~~~~~~.........pp.......................",
+    ".p.~~~~~~~~~~~~~~~.pppppppppp.............p.........",
+    "...~~~~~~~~~~~~~~~.pppppppppp.......................",
     "...~~~~~~~~~~~~~~~.........pp.......................",
     "....~~~~~~~~~~~~~..........pp....................~~~",
     "......~~~~~~~~.............pp...................~~~~",
@@ -169,7 +170,7 @@
     },
     {
       "asset": "cottage",
-      "x": 3,
+      "x": 5,
       "z": 4,
       "rot": 0,
       "recolor": {
@@ -182,7 +183,7 @@
     },
     {
       "asset": "inn_sign",
-      "x": 8,
+      "x": 4,
       "z": 7,
       "rot": 0
     },
@@ -208,7 +209,8 @@
       "asset": "treehouse",
       "x": 2,
       "z": 14,
-      "rot": 0
+      "rot": 0,
+      "landmark": true
     },
     {
       "asset": "canopy_deck",
@@ -390,6 +392,15 @@
       "x": 16,
       "z": 22,
       "rot": 0,
+      "y": 3.1,
+      "if": "!flag:found_g_walkway"
+    },
+    {
+      "asset": "crates_open",
+      "x": 16,
+      "z": 22,
+      "rot": 0,
+      "if": "flag:found_g_walkway",
       "y": 3.1
     },
     {
@@ -577,7 +588,8 @@
       "recolor": {
         "sx_slate": "#7a5a34",
         "sx_slate_dk": "#5e4426"
-      }
+      },
+      "poi": "secondary"
     },
     {
       "asset": "log",
@@ -753,7 +765,8 @@
       "asset": "beehive",
       "x": 3,
       "z": 27,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "beehive",
@@ -825,7 +838,8 @@
       "asset": "great_root",
       "x": 15,
       "z": 26,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "signpost",
@@ -1996,6 +2010,120 @@
       "z": 33,
       "rot": 90,
       "band": "hushlane"
+    },
+    {
+      "asset": "crates",
+      "x": 46,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "log",
+      "x": 47,
+      "z": 14,
+      "rot": 90
+    },
+    {
+      "asset": "stump",
+      "x": 48,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 46,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 38,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 39,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 37,
+      "z": 14,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 36,
+      "z": 13,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 38,
+      "z": 15,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 3,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 4,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 3,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 38,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 39,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 41,
+      "z": 33,
+      "rot": 0
     }
   ],
   "drops": [
@@ -2042,7 +2170,22 @@
       "z": 1,
       "give": "give:curio_acorn_whistle",
       "text": "Wedged in a fork of the root plate, where the elder tore out of the earth: an acorn as big as a fist, hollowed and pierced. Blow into it and it hoots like an owl.",
-      "text_fr": "Coincé dans une fourche du plateau de racines, là où le vieil arbre s'est arraché à la terre : un gland gros comme un poing, creusé et percé. On souffle dedans, il hulule comme une chouette."
+      "text_fr": "Coincé dans une fourche du plateau de racines, là où le vieil arbre s'est arraché à la terre : un gland gros comme un poing, creusé et percé. On souffle dedans, il hulule comme une chouette.",
+      "poi": "secret",
+      "secret": {
+        "id": "root_plate",
+        "kind": "progression",
+        "clue": [
+          [
+            47,
+            6
+          ],
+          [
+            48,
+            5
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -2051,7 +2194,22 @@
       "z": 22,
       "give": "coins:60",
       "text": "At the far end of the walkway, over the brook mouth, a crate of pruning shears and twine. Under the twine: Facets, the kind people lose through the planks.",
-      "text_fr": "Au bout de la passerelle, au-dessus de l'embouchure du ruisseau, une caisse de sécateurs et de ficelle. Sous la ficelle : des Facettes, celles qu'on perd entre les planches."
+      "text_fr": "Au bout de la passerelle, au-dessus de l'embouchure du ruisseau, une caisse de sécateurs et de ficelle. Sous la ficelle : des Facettes, celles qu'on perd entre les planches.",
+      "poi": "secret",
+      "secret": {
+        "id": "brook_mouth",
+        "kind": "spatial",
+        "clue": [
+          [
+            16,
+            22
+          ],
+          [
+            18,
+            18
+          ]
+        ]
+      }
     },
     {
       "x": 4,
@@ -2212,7 +2370,7 @@
       "locked_fr": "Le bout cassé du vieil arbre bâille comme une grotte. Quelques pas plus loin, le noir est complet, et quelque chose goutte. Il faudrait une lumière."
     },
     {
-      "x": 5,
+      "x": 7,
       "z": 7,
       "to": "inn_grove",
       "label": "Go into the Knothole",
@@ -2475,7 +2633,6 @@
       "idle": "Idle",
       "outfit": "#7a5a3a",
       "hair": "#e8e0d0",
-      "if": "!time:night",
       "dialogue": [
         {
           "lines": [
@@ -2488,6 +2645,45 @@
             "Les gens ont bâti sous les racines parce que les racines étaient là. Puis la passerelle, parce que la tourbière était là. Racinemont est comme ça : on vit là où l'arbre a laissé de la place.",
             "Des bols, des cuillères, des tasses. Tout vient des racines. Soixante-dix ans, et je n'en ai pas usé une."
           ]
+        }
+      ],
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            31,
+            8
+          ],
+          "face": "s",
+          "do": "work"
+        },
+        {
+          "from": "13:00",
+          "at": [
+            29,
+            11
+          ],
+          "face": "s",
+          "do": "idle"
+        },
+        {
+          "from": "dusk",
+          "at": [
+            36,
+            11
+          ],
+          "face": "n",
+          "do": "look"
+        },
+        {
+          "from": "night",
+          "home": "inn_grove"
+        }
+      ],
+      "barks": [
+        {
+          "say": "Mind the roots. They were here first.",
+          "say_fr": "Attention aux racines. Elles étaient là avant nous."
         }
       ]
     },
@@ -2512,6 +2708,12 @@
             "Des girolles, des morilles, et quelques-unes que je ne nommerai pas devant les enfants. Tout cueilli ce matin sur les rives de Creuse-Fougère.",
             "Les pâles qui brillent la nuit ? Ne les mange pas. Suis-les. Elles poussent le long des vieux chemins ; les racines du vieil arbre les nourrissent."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Chanterelles, still damp from the banks.",
+          "say_fr": "Des girolles, encore humides des berges."
         }
       ]
     },
@@ -2724,5 +2926,11 @@
         "flowers"
       ]
     }
+  ],
+  "view": [
+    [
+      1,
+      9
+    ]
   ]
 }

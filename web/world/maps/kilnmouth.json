@@ -2,6 +2,7 @@
   "title": "The Kilnmouth",
   "title_fr": "La Gueule-du-Four",
   "region": "ember",
+  "level_design": 2,
   "kind": "site",
   "music": "ember",
   "life": {
@@ -15,6 +16,16 @@
           20
         ],
         "n": 2
+      },
+      {
+        "kind": "glowbeetle",
+        "zone": [
+          4,
+          25,
+          14,
+          28
+        ],
+        "n": 3
       }
     ],
     "embers": {
@@ -205,7 +216,8 @@
       "asset": "seal_stone",
       "x": 19,
       "z": 11,
-      "rot": 0
+      "rot": 0,
+      "landmark": true
     },
     {
       "asset": "lava_glass",
@@ -274,7 +286,9 @@
       "x": 13,
       "z": 15,
       "rot": 0,
-      "y": 1
+      "y": 1,
+      "poi": "secondary",
+      "why": "the watchers' bench over the bowl"
     },
     {
       "asset": "rock_basalt",
@@ -372,13 +386,6 @@
     },
     {
       "asset": "rock",
-      "x": 26,
-      "z": 4,
-      "rot": 0,
-      "y": 4
-    },
-    {
-      "asset": "rock",
       "x": 0,
       "z": 0,
       "rot": 0,
@@ -1381,13 +1388,6 @@
     {
       "asset": "rock",
       "x": 12,
-      "z": 4,
-      "rot": 0,
-      "y": 4
-    },
-    {
-      "asset": "rock_basalt",
-      "x": 27,
       "z": 4,
       "rot": 0,
       "y": 4
@@ -4537,6 +4537,48 @@
       "x": 36,
       "z": 29,
       "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 15,
+      "z": 26,
+      "rot": 180,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock",
+      "x": 16,
+      "z": 27,
+      "rot": 90,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 30,
+      "z": 27,
+      "rot": 90,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 11,
+      "z": 28,
+      "rot": 270,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock",
+      "x": 16,
+      "z": 28,
+      "rot": 0,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 26,
+      "z": 28,
+      "rot": 0,
+      "band": "cinderwick"
     }
   ],
   "spawn": {
@@ -4637,7 +4679,22 @@
       "give": "card:solarlynx",
       "text": "At the pool's edge the ash glows by night, and in the glow, half melted into the glass crust: a card, perfectly unburnt.",
       "text_fr": "Au bord du bassin, la cendre luit la nuit, et dans la lueur, à moitié prise dans la croûte de verre : une carte, intacte.",
-      "if": "time:night"
+      "if": "time:night",
+      "poi": "secret",
+      "secret": {
+        "id": "glow_ash",
+        "kind": "environmental",
+        "clue": [
+          [
+            23,
+            13
+          ],
+          [
+            26,
+            14
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -4709,7 +4766,8 @@
       "z": 3,
       "give": "pack:ember",
       "text": "On the crater's lip, tucked under a stone where only a climber would look: a sealed booster.",
-      "text_fr": "Sur la lèvre du cratère, glissé sous une pierre où seul un grimpeur regarderait : un booster scellé."
+      "text_fr": "Sur la lèvre du cratère, glissé sous une pierre où seul un grimpeur regarderait : un booster scellé.",
+      "poi": "secondary"
     }
   ],
   "warps": [],
@@ -4816,9 +4874,9 @@
       "id": "edda",
       "name": "Edda",
       "model": "npc_elder",
-      "x": 16,
-      "z": 21,
-      "facing": "n",
+      "x": 17,
+      "z": 25,
+      "facing": "e",
       "idle": "Idle",
       "outfit": "#5a3e36",
       "hair": "#e8e0d6",
@@ -4829,13 +4887,13 @@
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "Even the little one down on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
+            "Even the little one, here on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
             "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Même le petit, en bas, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
+            "Même le petit, ici, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
             "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
           ]
         },
@@ -4892,13 +4950,13 @@
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "Even the little one down on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
+            "Even the little one, here on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
             "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Même le petit, en bas, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
+            "Même le petit, ici, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
             "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
           ]
         }
@@ -5405,6 +5463,27 @@
             "cam:hero"
           ]
         }
+      ]
+    }
+  ],
+  "view": [
+    [
+      13,
+      3
+    ],
+    [
+      16,
+      5
+    ]
+  ],
+  "transitions": [
+    {
+      "to": "cinderwick",
+      "depth": 5,
+      "scatter": [
+        "rock_basalt",
+        "rock",
+        "ash_pine"
       ]
     }
   ]
