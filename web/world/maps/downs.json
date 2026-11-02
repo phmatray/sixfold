@@ -1514,6 +1514,35 @@
           "say": "The chimes go flat when the cloud comes low.",
           "say_fr": "Les carillons sonnent faux quand le ciel descend."
         }
+      ],
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            26,
+            16
+          ],
+          "face": "e",
+          "do": "look"
+        },
+        {
+          "from": "12:00",
+          "at": [
+            11,
+            17
+          ],
+          "face": "w",
+          "do": "look"
+        },
+        {
+          "from": "dusk",
+          "at": [
+            26,
+            16
+          ],
+          "face": "e",
+          "do": "look"
+        }
       ]
     },
     {
@@ -1603,7 +1632,7 @@
       "barks": [
         {
           "say": "Mind the fence: the ewes lean on it.",
-          "say_fr": "Attention à la clôture : les brebis s'y appuient."
+          "say_fr": "Attention à la clôture : les brebis s'y appuient."
         }
       ]
     },

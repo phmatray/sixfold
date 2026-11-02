@@ -27,7 +27,7 @@ const SPOTS = [
 const HOURS = { day: 12 * 60, night: 22 * 60 };
 const HIDE = ".world-top,.world-prompt,.world-controls,.world-legend,.world-pad,.world-run,.scene-caption,.coach-hint,.debug-panel{visibility:hidden!important}";
 
-const browser = await chromium.launch({ channel: "chrome", headless: false });
+const browser = await chromium.launch(process.env.HEADLESS ? { headless: true, args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] } : { channel: "chrome", headless: false });
 let failed = 0;
 for (const [device, opts] of Object.entries(DEVICES)) {
   const ctx = await browser.newContext({ ...opts, locale: "en-US", serviceWorkers: "block" });
