@@ -6,7 +6,7 @@ default-members = ["engine", "meta", "web"]
 
 [workspace.package]
 edition = "2021"
-version = "1.12.0"
+version = "1.13.0"
 license = "MIT"
 
 # WASM release builds: optimize for size.
