@@ -60,6 +60,9 @@ test("AC4 (#117): a shortcut is barred from the near side, lifted from the far s
   // each mark names its place for a screen reader, and keeps a hover hint.
   await expect(chart.locator('.atlas-mark[data-mark="drop"]').first()).toHaveAttribute("aria-label", /.+: A drop: one way down/);
   await expect(chart.locator('.atlas-mark[data-mark="drop"]').first()).toHaveAttribute("title", "A drop: one way down");
+  // ...and is in the accessibility tree (not inside the names' aria-hidden drawing), with the legend drawing it too.
+  await expect(chart.getByRole("img", { name: /^Scree Pass: A drop: one way down$/ })).toBeVisible();
+  await expect(chart.locator(".atlas-legend li svg")).toHaveCount(1);
   for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(vp);
     const hits = await chart.evaluate((root) => {
