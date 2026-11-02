@@ -5,8 +5,9 @@
 use std::time::Duration;
 
 use leptos::prelude::*;
-use sixfold_engine::profile::Profile;
-use sixfold_engine::{card, fr, set, tr, CardId, CardKind, Collection, Color, Rarity, SortBy};
+use sixfold_engine::{card, fr, set, tr, CardId, CardKind, Color, Rarity, SortBy};
+use sixfold_meta::profile::Profile;
+use sixfold_meta::Collection;
 use wasm_bindgen::JsCast;
 
 use crate::art::card_color;
@@ -291,8 +292,8 @@ fn showpiece(id: CardId) -> bool {
 }
 
 /// The rival whose first defeat earns this promo (None for any other card).
-fn promo_rival(id: CardId) -> Option<&'static sixfold_engine::campaign::Rival> {
-    sixfold_engine::campaign::RIVALS
+fn promo_rival(id: CardId) -> Option<&'static sixfold_meta::campaign::Rival> {
+    sixfold_meta::campaign::RIVALS
         .iter()
         .find(|r| set::is_promo(id) && r.promo() == id)
 }

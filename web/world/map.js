@@ -46,7 +46,7 @@ export const loadMap = (name) => {
 export const setMap = (name, raw) => maps.set(name, Promise.resolve(expand(localize(structuredClone(raw)))));
 
 // Shorthand blocks become plain dialogue, so one grammar drives everything
-// (WORLD_DESIGN §4.1, §5.1; engine/tests/world_data.rs checks the same expansion).
+// (WORLD_DESIGN §4.1, §5.1; meta/tests/world_data.rs checks the same expansion).
 // A route duelist (`duelist`): won: -> `win`, lost: -> `lose`, then any hand-written
 // `dialogue`, beat: -> `after`, else `challenge` and the duel offer.
 // A find (`kind: "find"`): `text` and its `give` once (flag found_<id>), a glint

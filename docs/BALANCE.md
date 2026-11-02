@@ -4,10 +4,10 @@ The 0.9.0 balance pass and the 1.3 rules and curve pass (at the end), measured w
 both sides. Rerun it with:
 
 ```bash
-cargo test --release -p sixfold-engine deck_sweep -- --ignored --nocapture
+cargo test --release -p sixfold-meta deck_sweep -- --ignored --nocapture
 ```
 
-`deck_sweep` (`engine/src/playtest.rs`) plays a Normal-vs-Normal round robin over every deck the
+`deck_sweep` (`meta/src/playtest.rs`) plays a Normal-vs-Normal round robin over every deck the
 game puts in front of the player: the six prebuilts, the five rival decks that aren't prebuilts
 (Cinza plays Ember Rush, Quill Storm Front) and the six Gauntlet decks. Each pairing is 100 seeded
 games with seats alternating, all at 6 prizes, so it compares decks, not campaign settings. It
@@ -110,7 +110,7 @@ deck Balanced, then with each rival's deck (campaign and Gauntlet) played in its
 requires a styled deck to stay inside 40–60% or no further outside than it was:
 
 ```bash
-cargo test --release -p sixfold-engine style_sweep -- --ignored --nocapture
+cargo test --release -p sixfold-meta style_sweep -- --ignored --nocapture
 ```
 
 | Deck | Style | Balanced | Styled | 1.3 balanced | 1.3 styled |
@@ -148,7 +148,7 @@ deck (`rival_strength_against_the_starter`, 60 games, the campaign's prizes and 
 
 ## 1.2: route duelists' kits
 
-`kit_sweep` plays each of the 20 kits (`engine/src/duelists.rs`) at 2 prizes, Normal against Normal,
+`kit_sweep` plays each of the 20 kits (`meta/src/duelists.rs`) at 2 prizes, Normal against Normal,
 40 games against each of the six prebuilts and the starter; no kit may win more than 60%:
 
 | Colour | Sprout | Bud | Bloom |
@@ -192,7 +192,7 @@ and 53% with the 1.3 rules. The Ember and Storm duelists (12 more) run from 5% t
 
 ## 1.2: Facets
 
-`economy_sim` (`engine/src/shop.rs`, always on) scripts a first playthrough of the 1.2 world from
+`economy_sim` (`meta/src/shop.rs`, always on) scripts a first playthrough of the 1.2 world from
 the real tables: the 14 route duelists (5 min each, ⬡ 585), the six rivals and the Warden (two
 12-minute duels each, ⬡ 2,400), the finds met while exploring (⬡ 675 and 3 packs over 68 min) and the
 four quests (⬡ 370 and a pack, 20 min). Every Facet turned into ⬡ 150 themed packs, that is **5.7
@@ -396,7 +396,7 @@ The budget test asks a main attacker more than +20 over the curve to carry an at
 
 ### Indicators
 
-`balance_indicators` (`engine/src/playtest.rs`, ignored) plays the deck sweep's field and reports the
+`balance_indicators` (`meta/src/playtest.rs`, ignored) plays the deck sweep's field and reports the
 numbers below. "1.2" is main before this pass; "1.3 cards" is the curve pass alone (measured on
 the analysis branch); "1.3" is what shipped: the cards, the first-turn rule, one retreat a turn and
 Kindling Heart's limit (see "1.3: rules and curve pass").
@@ -517,7 +517,7 @@ order.
 
 ## 1.7: achievement Facets
 
-The 41 achievements (`engine/src/stats.rs`, `docs/WORLD_DESIGN.md` §12.3; 38 in 1.7, and 1.12 added
+The 41 achievements (`meta/src/stats.rs`, `docs/WORLD_DESIGN.md` §12.3; 38 in 1.7, and 1.12 added
 three for secrets) pay ⬡ 4,350 in all, each once. `economy_sim` counts the ⬡ 925 a first
 playthrough earns on the way (the first win and Awaken 2, the six seals and the champion, ten duelists and finds, 50 cards, 25 packs, the field items, an
 empty-bench win): the first playthrough goes from 4.85 to 5.28 packs an hour, still inside the
@@ -529,7 +529,7 @@ seeds it finished in 92, 83 and 71 duels (78, 92 and 80 before), inside its 98-d
 
 ## 1.7: Rook's story duels
 
-Rook's four duels (`rook_1` … `rook_4`, `engine/src/duelists.rs`, `docs/WORLD_DESIGN.md` §8.2) are in
+Rook's four duels (`rook_1` … `rook_4`, `meta/src/duelists.rs`, `docs/WORLD_DESIGN.md` §8.2) are in
 `DUELISTS` but never a seal, the champion or a route duelist. Each scene sets `flag:rook_<n>` before its
 duel, so the story moves on whether the player wins or loses; a first win pays ⬡ 100 / 150 / 200 / 300
 and marks `beat:rook_<n>`, a loss pays the usual consolation, and the hall rematch (`rook_4`, after the
@@ -561,11 +561,19 @@ four of them Rook's and the rest the seeds' usual swing.
 playthrough wins about half of them) plus a consolation: the first playthrough moves from 5.34 to **5.30
 packs an hour**; exploring stays at 5.23. The campaign playthrough meets Rook as each scene's seals are met
 (one duel, won or lost) and wins the first two, loses the last two, on all three pack seeds; it finishes in
-92, 92 and 80 duels (92, 83 and 71 before), inside its budget, now 102 duels (57 duelists plus 45).
+92, 92 and 80 duels (92, 83 and 71 before), inside its budget, then 102 duels (57 duelists plus 45); see the re-measure below.
+
+**Re-measured for the two secret duelists (#230).** `t_faye` and `t_barnaby` are route duelists and
+`duelists_all` needs both, so the route is 59 duelists. Measured on `babb0c9` (main when #230 was cut; the
+Hard AI work in #232 may shift these): `campaign_sweep` plays 71-111 duels (median 90), 12-52 rival duels
+(median 31), 33-39 packs. The slowest seed (10, the Warden's wall: 26 losses, 4 rematches) needs 52 rival
+duels, over 45, so **the budget is raised to 52** (59 duelists plus 52 = 111 duels); the other 15 seeds
+fit 45 (next slowest 49). The always-on seeds 1, 2 and 3 finish in 89, 92 and 80 duels (30, 33 and 21
+rival duels, 35, 35 and 38 packs).
 
 ## 1.9: the deck builder
 
-"Build for me" (`engine/src/builder.rs`, #102) builds from the player's own cards: whole Awaken lines of the
+"Build for me" (`meta/src/builder.rs`, #102) builds from the player's own cards: whole Awaken lines of the
 chosen colours (4-3-2, never more of a stage than of the one below), at least 12 Basics when owned, draw and
 search Gear cards first, then the style's (Aggro: boosts and gusts; Control: healing, conditions and
 disruption), and energy shared by each Hexon's main attack cost. Hexons are ranked on the board rather than
@@ -593,7 +601,7 @@ collection.
 
 ### Unlockable decks: lent, not given
 
-The six prebuilts and the five rival decks that aren't one (`decks::UNLOCKABLE`) start locked and unlock with
+The six prebuilts and the five rival decks that aren't one (`unlock::UNLOCKABLE`) start locked and unlock with
 something the game already records: the rival who plays the deck (Cinza, Quill, Bramble, Marlo, Orla, Lumen),
 an achievement (*Full Bloom* for Grove Bloom, *Waylaid* for Tide Mind, *Halfway Round* for Stone Fist), the
 end of Rook's story (Dream Veil) or the Gauntlet (Sixfold Crown). The unlock state is read from those flags,
@@ -605,3 +613,52 @@ before 1.9, and where the starter is always on loan, so a duel is always possibl
 been a second, uncapped source of cards next to the packs: one rival win would hand over 30-odd cards and
 move `economy_sim` (packs an hour) and the campaign playthroughs, whose decks are built from the
 collection. As a loan it moves neither; a campaign duel still needs a deck the player owns.
+
+## Hard in the Dream Veil mirror
+
+Hard beats Normal in the mirrors (`hard_beats_normal_in_mirrors_big`), but after the #232 refit Dream
+Veil sat at 22/50 while the other five decks were ahead. `hard_deviations_dream_veil` (ignored, run
+with `--release`) replays that mirror with the same seeds and, at every Hard main-phase decision,
+asks a clone of Hard's own state what Normal would do. Each departure is counted as "Normal's kind
+-> Hard's kind", in games Hard won and lost.
+
+Findings (22 won out of 50): the departures are spread over every kind and lost games simply have
+more of them (they last longer). Two things stand out: Hard ends its turn instead of playing a
+Gear/Power more often than any other departure (`gear -> end` 30 times in won games, 13 in lost;
+`power -> end` 6 and 19), and the departures that start a retreat (`attach -> retreat` 0 won / 6
+lost games, `basic -> retreat` 1 / 3) cluster in lost games. Nothing points to one bad candidate
+kind; what none of them can see is the status plan: `evaluate` reads no Sleep, Confusion,
+Paralysis or poison, so a play-out cannot tell a stalled opponent from a healthy one. The fix goes
+in `evaluate`.
+
+### The fix and the result
+
+Two changes in `engine/src/ai.rs`. `evaluate` now adds `status_value`: the opponent Active's Special
+condition and poison count for Hard, its own count against it (Asleep 20, Paralyzed 15, Confused
+12, poison 5 per level, capped at 30 a side, so never more than a fraction of a prize). Alone it
+moved Dream Veil from 22 to 24 (weights 2 to 4 times larger made it worse, 17: a play-out already
+sees the stalled turn in the HP and prizes, so a heavy term double counts). The departures that
+the table above ties to lost games were then cut in `candidates()`: Hard no longer tries a retreat
+Normal does not pick, and no longer ends its turn when Normal would attack.
+
+Hard won against Normal, 50 games per deck, seeds `d * 1000 + n`, before (#316 on main) and after:
+
+| Deck | Before | After |
+|---|---|---|
+| Ember Rush | 35 | 35 |
+| Tide Mind | 30 | 29 |
+| Grove Bloom | 31 | 35 |
+| Storm Front | 29 | 31 |
+| Stone Fist | 31 | 29 |
+| Dream Veil | 22 | 26 |
+| All | 182/300 | 185/300 |
+
+`hard_beats_normal_in_mirrors_big` now asserts every deck above 25/50. The margin is thin (50 games
+carry about 7 points of noise) but the seeds are fixed, so the run is reproducible. The bar was not
+lowered.
+
+Caveats from review: the deviation counts compare Hard with a clone of itself taken before its
+decision, so a Normal tie-break that draws from the RNG can add a few departures that are not real;
+and the two `candidates()` cuts were tuned on this mirror's fixed seeds, so they are a measured
+improvement (182 to 185 of 300 overall, Dream Veil 22 to 26), not a proven one. If the mirrors slip
+again, rerun `hard_deviations_dream_veil` before touching the constants.

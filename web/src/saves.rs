@@ -1,10 +1,10 @@
 //! Save slots (on the title screen), Export / Import (in Settings) and the
 //! auto-save indicator. The storage itself is `store.rs`; the envelope and its
-//! checks are `sixfold_engine::save`.
+//! checks are `sixfold_meta::save`.
 
 use leptos::prelude::*;
-use sixfold_engine::save::{Save, SaveError, Summary};
 use sixfold_engine::{fr, tr};
+use sixfold_meta::save::{Save, SaveError, Summary};
 use wasm_bindgen::{JsCast, JsValue};
 
 use crate::store::{self, Saved, SLOTS};

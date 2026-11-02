@@ -4,7 +4,7 @@ Playwright drives Chromium through the main journeys (new game and the guided du
 the end, packs, deck editing, the world, the finale after the Warden, keyboard-only runs of each,
 axe-core on every screen, one journey at phone size) against
 a release build. Assertions read what the player sees (roles, labels, live regions) and what the
-game saved (`sixfold.save.<n>` in localStorage). The journeys tagged `@webkit` also run in WebKit,
+game saved (`sixfold.save.<n>` in localStorage). The journeys tagged `@webkit` also run in WebKit (on macOS its Tab reaches only text fields, so `moveTo` presses Option+Tab there, as Safari does),
 the engine Safari and the macOS app draw with.
 
 Specs import from `./helpers` only, never `@playwright/test` (CI checks): every journey then fails when
@@ -26,6 +26,12 @@ scene with nobody walking (#187). It opens installed Chrome in a visible window 
 `--webkit` adds a WebKit run, `--runs N` and `--throttle N` change the defaults (5, 4), and
 `--graphics off|low|high` saves that graphics tier first (#225; else Auto). Each run prints the tier
 actually in force, since the world's frame-time probe may step High down to Low.
+
+`node perf-night.mjs [url]` measures the same phone night frame on the Hub and Grove maps (`--ms`, `--graphics off|low|high`) (#259).
+`node perf-night-ember-stone.mjs [--maps a,b] [--runs N]` (after the release build) reports the frame time at night (22:00) on the phone viewport with the CPU slowed 4x on the busiest map of a region (default `kilnmouth`, `anvilstead`; #264), and exits 1 when the main thread is busy over 16.7 ms a frame.
+`node perf-night-tide-storm.mjs [url]` (after the release build) measures the phone night frame (390x844, CPU slowed 4x, 22:00) on the
+Tide and Storm maps, one after the other, and exits 1 when a map's median main-thread time per frame is over 16.7 ms
+(`--maps a,b`, `--runs N`, `--throttle N`, `--budget ms`; `PW_PORT` picks the port, so use a free one) (#268).
 
 `node life-clips.mjs [url]` records an ~8 s, 1920x1080, 60 fps MP4 of each region's ambient life (#190: critters,
 perching birds, leaves, embers, Gullhaven's docking boat, the seal-site calm) by day with the HUD hidden, into

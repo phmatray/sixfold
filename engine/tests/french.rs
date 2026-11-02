@@ -87,7 +87,7 @@ fn fr_texts(v: &Value, key: &str, out: &mut Vec<String>) {
 fn french_marks_keep_their_no_break_space() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
     let mut bad = vec![];
-    for dir in ["engine/src", "web/src"] {
+    for dir in ["engine/src", "meta/src", "web/src"] {
         for f in files(&root.join(dir), "rs") {
             let src = fs::read_to_string(&f).unwrap();
             for (i, line) in src.lines().enumerate() {

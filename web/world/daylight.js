@@ -1,4 +1,4 @@
-// Day and night (WORLD_DESIGN §7.2). The clock is the engine's (engine/src/clock.rs:
+// Day and night (WORLD_DESIGN §7.2). The clock is the engine's (meta/src/clock.rs:
 // dawn 05:00, day 08:00, dusk 18:00, night 21:00); world.js runs it, a game minute
 // per real second, and this module turns a minute into light. By day a map wears its
 // own `light` block; dawn, dusk and night are derived from it (a map may override any

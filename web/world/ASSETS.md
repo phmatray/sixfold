@@ -91,7 +91,7 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `seal_stone_carved.glb` | The duel hall's seal stone after the story's epilogue (1.7): the same stone, its top cut with a hexagon outline, still blank | 2 × 2 | ~1.9 m |
 | `cave_mouth.glb` | A rough arch of boulders round a black throat in a sandstone face, timber bracing, a lantern on the lintel (`lamp_glow`), roots and vines over the top, crystals glinting inside (`crystal_glow`); back flush with the north edge: put it against a cliff on the row behind (≥ 2 m); the door warp is its tile | 2 × 1 | ~2.1 m |
 | `climb_wall.glb` | Two rough steps (tops 0.5 m front, 1.0 m back) with painted holds, chalk, a knotted rope from an iron stake and vines; climbs toward −Z, floor 0.5 m, stacks with `y` like `stairs` | 1 × 1 | 1 m |
-| `inn_sign.glb` | Two posts, a board with a crescent moon and stars (both faces), a lantern (`lamp_glow`) | 1 × 1 | ~2.35 m |
+| `inn_sign.glb` | Two posts, a board with a bed and a faceted hexagon (both faces), a lantern (`lamp_glow`) | 1 × 1 | ~2.35 m |
 | `stump.glb` | Hollow stump: flared roots, a cut rim round a dark hollow, moss, two mushrooms (a find's host) | 1 × 1 | ~0.55 m |
 | `log.glb` | Fallen mossy log along X, a hollow end on +X, bracket fungus and mushrooms (a find's host) | 2 × 1 | ~0.55 m |
 | `cliff_falls.glb` | A waterfall from a 2 m ledge into a rock pool (#233): the sheet is `sx_fall_water` (streaks run down it), the pool `sx_water` (it ripples); its back is flush with the north edge, so it stands against a 2 m cliff on the row behind | 2 × 1 | ~2 m |
@@ -271,7 +271,7 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   `route` (optional) is a loop of one-tile steps. Speaking (E or tap while facing them, also
   across a counter or a duel table) turns them to the hero and runs `dialogue`: the first
   branch whose `if` holds plays its `lines`, then applies its `do` effects. Conditions and
-  effects are the engine's progression language (`engine/src/overworld.rs`):
+  effects are the engine's progression language (`meta/src/overworld.rs`):
   - conditions (negate with `!`, join with `&`): `item:x`, `flag:x`, `seals:n` (at least n seals),
     `beat:<id>`, `open:<rival>` (enough seals to duel them), `won:<id>` / `lost:<id>` (the last
     duel's result, until that rival or duelist is next talked to), `coins:n` (at least n Facets),
@@ -281,13 +281,13 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
     `card:<slug>` (one card, shown as found), `coins:n`, `pay:n` (short: the rest is skipped and
     "Not enough Facets" shows), `show:<panel>`, `emote:<actor>:<bang|what|dots|heart|note>` (a
     bubble over that NPC's head, or `hero`'s, once the dialog closes).
-  A campaign rival is an NPC whose `id` is the rival's id in `engine/src/campaign.rs`; its
+  A campaign rival is an NPC whose `id` is the rival's id in `meta/src/campaign.rs`; its
   branches go `won:` / `lost:` (post-duel lines), `!open:` (locked), `beat:` (rematch, with
   `duel:`), then the first meeting (with `duel:`). Talking also sets `flag:talked_<id>`.
   Progress, and where the hero stands (`map,x,z,facing`), are saved in localStorage; the
   world resumes there, and after a world duel the hero, back on its tile, meets the rival or
   duelist again so the post-duel line plays.
-- **route duelists:** an NPC whose `id` is a duelist in `engine/src/duelists.rs` (`t_<name>`) with a
+- **route duelists:** an NPC whose `id` is a duelist in `meta/src/duelists.rs` (`t_<name>`) with a
   `duelist` block (WORLD_DESIGN §4.1). `web/world/duelist.js` runs it; `map.js` expands it to dialogue.
 
   ```jsonc
@@ -324,7 +324,7 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   `text` and applies it (flag `found_<id>`, saved); later looks say "Nothing else here". Unless `hidden`, a
   glint marks it until found. Put it on a solid tile, a prop worth looking in (`stump`, `log`, `crates`, a
   bookcase…): check-maps refuses a find on an open tile. Ids are unique across all maps
-  (`engine/tests/world_data.rs`).
+  (`meta/tests/world_data.rs`).
 - **prop `glow`**: a colour for the prop's `*glow*` materials (a waymark's crystal in its region's colour).
 - **prop `recolor`**: `{ "<material name>": "#rrggbb" | null }`, a cheap variant of a shared model: each named
   material gets that colour, and `null` hides its parts. The Deck Clinic is the bakery's `cottage` with a slate
@@ -364,7 +364,7 @@ Mask bits: N (−Z) = 1, E (+X) = 2, S (+Z) = 4, W (−X) = 8. `rot` as for prop
   - `dark: true`: a cave. No sun at any hour, a dim sky, and the hero's lantern lights the way; music `cave`;
   - `light_dawn` / `light_dusk` / `light_night`: any part of a `light` block, overriding that phase's
     derived look (`web/world/daylight.js`).
-- **The clock** (`engine/src/clock.rs`): a game minute a real second, saved as `t:<minute>`. Dawn 05:00,
+- **The clock** (`meta/src/clock.rs`): a game minute a real second, saved as `t:<minute>`. Dawn 05:00,
   day 08:00, dusk 18:00, night 21:00. Conditions `time:dawn|day|dusk|night` ("dark" is
   `!time:day & !time:dawn`); the effect `clock:<phase>` jumps to the start of a phase (the inn's panel
   uses it). Everything with an `if` (people, spots, finds, props, gates) is re-checked at each phase

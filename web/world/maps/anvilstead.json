@@ -4,6 +4,7 @@
   "region": "stone",
   "kind": "town",
   "music": "stone",
+  "level_design": 2,
   "width": 52,
   "height": 36,
   "tiles": [
@@ -191,7 +192,8 @@
       "x": 24,
       "z": 5,
       "rot": 0,
-      "y": 2
+      "y": 2,
+      "landmark": true
     },
     {
       "asset": "crates",
@@ -2429,6 +2431,13 @@
       "rot": 0
     },
     {
+      "asset": "signpost",
+      "x": 26,
+      "z": 19,
+      "rot": 0,
+      "y": 1
+    },
+    {
       "asset": "stairs_slate",
       "x": 26,
       "z": 20,
@@ -2547,7 +2556,8 @@
             "L'équipe d'Orla range ici ses pioches, ses cordes et ses tours de garde. Le tableau de service est écrit à la craie sur la porte, et chaque nom a été barré une fois puis réécrit."
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 25,
@@ -2565,7 +2575,8 @@
             "Sous le chevalement, un carré de grille de fer au-dessus du noir. De l'air froid monte au travers, et très loin en dessous, de l'eau goutte. La cage ne descend plus depuis l'éboulement."
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "kind": "find",
@@ -2574,7 +2585,22 @@
       "z": 2,
       "give": "card:bouldergut",
       "text": "In the brake-man's box on the ledge, under a coil of greased cable: a card, left by whoever last worked the winding gear.",
-      "text_fr": "Dans la caisse du freineur, sur la corniche, sous une bobine de câble graissé : une carte, laissée par le dernier qui a fait tourner le treuil."
+      "text_fr": "Dans la caisse du freineur, sur la corniche, sous une bobine de câble graissé : une carte, laissée par le dernier qui a fait tourner le treuil.",
+      "poi": "secret",
+      "secret": {
+        "id": "brake_house",
+        "kind": "progression",
+        "clue": [
+          [
+            30,
+            5
+          ],
+          [
+            29,
+            5
+          ]
+        ]
+      }
     },
     {
       "x": 47,
@@ -2592,7 +2618,8 @@
             "D'ici, on voit toute la vallée : la rue des rails, la place, le torrent, et les lacets du Col des Éboulis qui descendent, descendent. À l'ouest, les gradins taillés du Bastion prennent la lumière."
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 16,
@@ -2659,7 +2686,8 @@
             "La forge rougeoie derrière la porte basse. Des pioches, des coins et des crampons de rail pendent en rangées, chacun numéroté au poinçon."
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 42,
@@ -2719,8 +2747,15 @@
       "x": 27,
       "z": 32,
       "kind": "sign",
-      "text": "South: Scree Pass, down to the Undermine and the Emberstep Quarry. North, up the steps: the rail street, the Tally Room and Ropes & Holds.",
-      "text_fr": "Sud : le Col des Éboulis, jusqu'aux Galeries Basses et la Carrière de Pas-de-Braise. Au nord, en haut des marches : la rue des rails, la Salle des Comptes et Cordes et Prises."
+      "text": "South: Scree Pass, down to the Undermine and the Emberstep Quarry. North, up the steps: the rail street, the Tally Room and Ropes & Holds. West along the rail street: the Bastion.",
+      "text_fr": "Sud : le Col des Éboulis, jusqu'aux Galeries Basses et la Carrière de Pas-de-Braise. Au nord, en haut des marches : la rue des rails, la Salle des Comptes et Cordes et Prises. À l'ouest, le long de la rue des rails : le Bastion."
+    },
+    {
+      "kind": "sign",
+      "x": 26,
+      "z": 19,
+      "text": "West, along the rails: the Bastion and the seal of the Stonebacks. South, down the steps: the plaza.",
+      "text_fr": "Ouest, le long des rails : le Bastion et le sceau des Échines. Sud, en bas des marches : la place."
     }
   ],
   "warps": [
@@ -3134,5 +3169,35 @@
       "near": 16,
       "far": 34
     }
+  },
+  "view": [
+    [
+      48,
+      16
+    ]
+  ],
+  "life": {
+    "critters": [
+      {
+        "kind": "goat",
+        "zone": [
+          2,
+          19,
+          10,
+          22
+        ],
+        "n": 2
+      },
+      {
+        "kind": "lizard",
+        "zone": [
+          30,
+          19,
+          40,
+          22
+        ],
+        "n": 2
+      }
+    ]
   }
 }

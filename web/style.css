@@ -1597,7 +1597,7 @@ span.talk-face.enter { animation: talk-face-in 260ms cubic-bezier(0.2, 0.8, 0.3,
 }
 .item-got { display: flex; gap: 16px; align-items: center; }
 .note-text { white-space: pre-line; }
-/* A field item's sheet: the places it opens (engine/src/objective.rs). */
+/* A field item's sheet: the places it opens (meta/src/objective.rs). */
 .item-opens { margin: 10px 0 4px; }
 .item-opens h3 { margin: 0 0 4px; font: 700 var(--fs-xs) var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass-hi); }
 .item-opens ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: var(--fs-base); }
@@ -3220,11 +3220,13 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .gate-mark.open path { stroke: var(--ink-map); }
 .atlas-node { fill: var(--ink-map); }
 /* A place's marks (an opened shortcut, a drop, #117): a row to its right, inked like the gate marks. */
-.atlas-marks { position: absolute; display: flex; gap: 2px; transform: translate(8px, -50%); pointer-events: auto; }
-.atlas-marks.post { transform: translate(clamp(22px, 2.1vw, 28px), -50%); } /* clear of the crystal */
-.atlas-mark svg { display: block; width: clamp(14px, 1.3vw, 18px); height: clamp(14px, 1.3vw, 18px); }
-.atlas-mark circle { fill: var(--paper); stroke: var(--ink-map); stroke-width: 0.8; }
-.atlas-mark path { fill: none; stroke: var(--ink-map); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.atlas-marks { display: flex; justify-content: center; gap: 2px; margin-top: 1px; } /* a row under the name */
+.atlas-mark { pointer-events: auto; } /* its hover hint, through the names' layer */
+.atlas-legend { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: var(--fs-sm); color: var(--muted); }
+.atlas-legend li { display: flex; align-items: center; gap: 6px; } /* each line led by the mark it explains */
+.atlas-mark svg, .atlas-legend svg { display: block; flex: none; width: clamp(14px, 1.3vw, 18px); height: clamp(14px, 1.3vw, 18px); }
+.atlas-mark circle, .atlas-legend circle { fill: var(--paper); stroke: var(--ink-map); stroke-width: 0.8; }
+.atlas-mark path, .atlas-legend path { fill: none; stroke: var(--ink-map); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
 .atlas-words, .atlas-posts { position: absolute; inset: 0; pointer-events: none; }
 .atlas-posts > * { pointer-events: auto; }
 /* Inked lettering, haloed in paper so it reads over lands and roads. */

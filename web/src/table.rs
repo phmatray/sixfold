@@ -557,7 +557,7 @@ pub fn Station(player: usize) -> impl IntoView {
     let hero = me.then(crate::world::hero_bust).flatten();
     let portrait = match (me, face, hero) {
         (false, Some(id), _) => {
-            let n = sixfold_engine::campaign::opponent(id).map_or(id, |o| o.name);
+            let n = sixfold_meta::campaign::opponent(id).map_or(id, |o| o.name);
             view! { <crate::campaign::Portrait id=id name=n /> }.into_any()
         }
         (true, _, Some(src)) => {

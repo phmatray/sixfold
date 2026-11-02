@@ -9,7 +9,7 @@ hat or hair, and framed low enough that the tallest hat or antenna still fits. E
 own way and tilts to its temper (`POSE`); a key light, a rim light in the rival's colour, then a
 background in that colour carrying a motif of its own (`MOTIF`: leaves, waves, flame rays, a
 lightning zigzag, strata, stars, the six-sided seal pattern for the Warden, chalk tally marks for Rook).
-Writes <out>/<rival id>.webp (cwebp, must be on PATH); ids as in engine/src/campaign.rs.
+Writes <out>/<rival id>.webp (cwebp, must be on PATH); ids as in meta/src/campaign.rs.
 """
 import json
 import math

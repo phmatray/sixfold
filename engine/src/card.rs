@@ -56,7 +56,7 @@ pub enum Stage {
     Stage2,
 }
 
-/// How often a card turns up in boosters (see [`crate::booster`]). Basic
+/// How often a card turns up in boosters (see `sixfold_meta::booster`). Basic
 /// energy has its own tier: it is never rare and a collection owns it without
 /// limit.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -295,7 +295,7 @@ pub fn card(id: CardId) -> &'static CardDef {
 
 /// A card with this name, for rules that follow "evolves from" names (R-EVO-10).
 pub(crate) fn find_named(name: &str) -> Option<&'static CardDef> {
-    #[cfg(test)]
+    #[cfg(any(test, feature = "testkit"))]
     if let Some(c) = crate::fixtures::CARDS.iter().find(|c| c.name == name) {
         return Some(c);
     }
@@ -307,7 +307,7 @@ pub fn card_id(name: &str) -> Option<CardId> {
     if let Some(i) = crate::set::CARDS.iter().position(|c| c.name == name) {
         return Some(CardId(i as u16));
     }
-    #[cfg(test)]
+    #[cfg(any(test, feature = "testkit"))]
     if let Some(i) = crate::fixtures::CARDS.iter().position(|c| c.name == name) {
         return Some(CardId(crate::fixtures::FIRST + i as u16));
     }
@@ -401,7 +401,7 @@ fn check_creature(cr: &Creature, cards: &[CardDef]) -> Result<(), String> {
 }
 
 pub fn try_card(id: CardId) -> Option<&'static CardDef> {
-    #[cfg(test)]
+    #[cfg(any(test, feature = "testkit"))]
     if id.0 >= crate::fixtures::FIRST {
         return crate::fixtures::CARDS.get((id.0 - crate::fixtures::FIRST) as usize);
     }

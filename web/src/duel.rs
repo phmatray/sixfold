@@ -2,10 +2,11 @@
 
 use leptos::prelude::*;
 use sixfold_engine::ai::Difficulty;
-use sixfold_engine::decks::{unlocked, PREBUILT, STARTER};
-use sixfold_engine::overworld::Progress;
-use sixfold_engine::profile::Profile;
+use sixfold_engine::decks::{PREBUILT, STARTER};
 use sixfold_engine::{card, tr, CardId};
+use sixfold_meta::overworld::Progress;
+use sixfold_meta::profile::Profile;
+use sixfold_meta::unlock::unlocked;
 
 use crate::binder::PageBar;
 use crate::cards::{deck_colors, deck_star, CardFace, Pip};
@@ -204,7 +205,7 @@ pub fn DuelSetup() -> impl IntoView {
                         <DeckPicker legend=tr("Your opponent plays", "Deck de l'adversaire") name="theirs" opts=theirs_opts choice=theirs />
                     </div>
                     <p class="note">{move || {
-                        let n = sixfold_engine::campaign::quick_duel_purse(difficulty.get());
+                        let n = sixfold_meta::campaign::quick_duel_purse(difficulty.get());
                         tr(format!("Win to earn ⬡ {n} (more against a tougher opponent)."), format!("Gagnez pour obtenir ⬡ {n} (davantage contre un adversaire plus coriace)."))
                     }}</p>
                     <div class="options">

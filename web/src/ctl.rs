@@ -12,12 +12,12 @@ use std::time::Duration;
 
 use leptos::prelude::*;
 use sixfold_engine::ai::{Ai, Difficulty, Style};
-use sixfold_engine::campaign::{self, RivalLines, SealDuel};
-use sixfold_engine::overworld::Progress;
 use sixfold_engine::tutorial;
 use sixfold_engine::{
     card, fr, summarise_turn, tr, Action, CardId, Config, Event, Game, PromptKind,
 };
+use sixfold_meta::campaign::{self, RivalLines, SealDuel};
+use sixfold_meta::overworld::Progress;
 
 pub const HUMAN: usize = 0;
 pub const AI: usize = 1;

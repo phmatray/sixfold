@@ -30,3 +30,6 @@ e2e/clips/
 # Source textures (the build ships the .webp conversions)
 web/world/textures/*.png
 __pycache__/
+
+# Theatre.js Studio dev bundle (AGPL-3.0, never committed or shipped): tools/vendor-theatre.sh core only
+/tools/theatre/

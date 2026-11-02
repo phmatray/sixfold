@@ -2,6 +2,7 @@
   "title": "The Kilnmouth",
   "title_fr": "La Gueule-du-Four",
   "region": "ember",
+  "level_design": 2,
   "kind": "site",
   "music": "ember",
   "life": {
@@ -15,6 +16,16 @@
           20
         ],
         "n": 2
+      },
+      {
+        "kind": "glowbeetle",
+        "zone": [
+          4,
+          25,
+          14,
+          28
+        ],
+        "n": 3
       }
     ],
     "embers": {
@@ -62,6 +73,38 @@
     "234................ppp...............432",
     "234................ppp...............432",
     "234................ppp...............432"
+  ],
+  "paint": [
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "....................p...................",
+    "....................pp..................",
+    "........................................",
+    "....................pp..................",
+    "........................................",
+    "....................pp..................",
+    "........................................",
+    "....................pp..................",
+    "....................pppp................",
+    ".......................p................",
+    ".....................pp.................",
+    "...................pp...................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................",
+    "........................................"
   ],
   "props": [
     {
@@ -121,6 +164,54 @@
       "y": 2
     },
     {
+      "asset": "stairs_basalt",
+      "x": 20,
+      "z": 19,
+      "rot": 180,
+      "y": 2
+    },
+    {
+      "asset": "stairs_basalt",
+      "x": 20,
+      "z": 17,
+      "rot": 180,
+      "y": 1
+    },
+    {
+      "asset": "stairs_basalt",
+      "x": 20,
+      "z": 15,
+      "rot": 180
+    },
+    {
+      "asset": "stairs_basalt",
+      "x": 21,
+      "z": 19,
+      "rot": 180,
+      "y": 2
+    },
+    {
+      "asset": "stairs_basalt",
+      "x": 21,
+      "z": 17,
+      "rot": 180,
+      "y": 1
+    },
+    {
+      "asset": "stairs_basalt",
+      "x": 21,
+      "z": 15,
+      "rot": 180
+    },
+    {
+      "asset": "lantern",
+      "x": 19,
+      "z": 20,
+      "rot": 0,
+      "y": 3,
+      "why": "the head of the front stair down to the bowl, lit so the way to the seal stone and the glowing glass reads at night"
+    },
+    {
       "asset": "waymark",
       "x": 25,
       "z": 21,
@@ -134,6 +225,48 @@
       "z": 18,
       "rot": 180,
       "y": 2
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 8,
+      "z": 19,
+      "rot": 0,
+      "y": 3
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 9,
+      "z": 19,
+      "rot": 90,
+      "y": 3
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 10,
+      "z": 19,
+      "rot": 180,
+      "y": 3
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 11,
+      "z": 19,
+      "rot": 270,
+      "y": 3
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 10,
+      "z": 20,
+      "rot": 90,
+      "y": 3
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 11,
+      "z": 20,
+      "rot": 0,
+      "y": 3
     },
     {
       "asset": "stairs_basalt",
@@ -191,8 +324,15 @@
       "x": 26,
       "z": 14,
       "rot": 0,
-      "glow": "#ffa64d",
+      "glow": "#6dff8a",
       "y": 1
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 25,
+      "z": 14,
+      "rot": 90,
+      "glow": "#6dff8a"
     },
     {
       "asset": "cullet",
@@ -205,7 +345,8 @@
       "asset": "seal_stone",
       "x": 19,
       "z": 11,
-      "rot": 0
+      "rot": 0,
+      "landmark": true
     },
     {
       "asset": "lava_glass",
@@ -265,15 +406,18 @@
     {
       "asset": "crates",
       "x": 25,
-      "z": 14,
-      "rot": 0
+      "z": 15,
+      "rot": 0,
+      "y": 1
     },
     {
       "asset": "bench",
       "x": 13,
       "z": 15,
       "rot": 0,
-      "y": 1
+      "y": 1,
+      "poi": "secondary",
+      "why": "the watchers' bench over the bowl"
     },
     {
       "asset": "rock_basalt",
@@ -371,13 +515,6 @@
     },
     {
       "asset": "rock",
-      "x": 26,
-      "z": 4,
-      "rot": 0,
-      "y": 4
-    },
-    {
-      "asset": "rock",
       "x": 0,
       "z": 0,
       "rot": 0,
@@ -1380,13 +1517,6 @@
     {
       "asset": "rock",
       "x": 12,
-      "z": 4,
-      "rot": 0,
-      "y": 4
-    },
-    {
-      "asset": "rock_basalt",
-      "x": 27,
       "z": 4,
       "rot": 0,
       "y": 4
@@ -3626,20 +3756,6 @@
     {
       "asset": "rock",
       "x": 19,
-      "z": 22,
-      "rot": 0,
-      "y": 4
-    },
-    {
-      "asset": "rock",
-      "x": 20,
-      "z": 22,
-      "rot": 0,
-      "y": 4
-    },
-    {
-      "asset": "rock_basalt",
-      "x": 21,
       "z": 22,
       "rot": 0,
       "y": 4
@@ -4536,6 +4652,55 @@
       "x": 36,
       "z": 29,
       "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 15,
+      "z": 26,
+      "rot": 180,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock",
+      "x": 16,
+      "z": 27,
+      "rot": 90,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 30,
+      "z": 27,
+      "rot": 90,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 11,
+      "z": 28,
+      "rot": 270,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock",
+      "x": 16,
+      "z": 28,
+      "rot": 0,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 26,
+      "z": 28,
+      "rot": 0,
+      "band": "cinderwick"
+    },
+    {
+      "asset": "lantern",
+      "x": 21,
+      "z": 25,
+      "rot": 0,
+      "why": "a lit way down the rim, so the bowl and the seal stone are hinted at night"
     }
   ],
   "spawn": {
@@ -4546,8 +4711,8 @@
   "interactions": [
     {
       "kind": "sign",
-      "text": "South: back down to Cinderwick. Up the steps and over the rim: the Kilnmouth floor and its seal stone. Keep to the stairs.",
-      "text_fr": "Sud : retour à Mèche-Cendre. Par les marches et par-dessus le bord : le fond de la Gueule-du-Four et sa pierre de sceau. Restez sur les marches.",
+      "text": "South: back down to Cinderwick. Up the steps, over the rim, then down the lit stair: the bowl and its seal stone.",
+      "text_fr": "Sud : retour à Mèche-Cendre. Par les marches, par-dessus le bord, puis l'escalier éclairé : la cuvette et sa pierre de sceau.",
       "x": 23,
       "z": 25
     },
@@ -4631,12 +4796,27 @@
     {
       "kind": "find",
       "id": "e_glowash",
-      "x": 23,
-      "z": 13,
+      "x": 24,
+      "z": 14,
       "give": "card:solarlynx",
       "text": "At the pool's edge the ash glows by night, and in the glow, half melted into the glass crust: a card, perfectly unburnt.",
       "text_fr": "Au bord du bassin, la cendre luit la nuit, et dans la lueur, à moitié prise dans la croûte de verre : une carte, intacte.",
-      "if": "time:night"
+      "if": "time:night",
+      "poi": "secret",
+      "secret": {
+        "id": "glow_ash",
+        "kind": "environmental",
+        "clue": [
+          [
+            24,
+            14
+          ],
+          [
+            26,
+            14
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -4708,7 +4888,8 @@
       "z": 3,
       "give": "pack:ember",
       "text": "On the crater's lip, tucked under a stone where only a climber would look: a sealed booster.",
-      "text_fr": "Sur la lèvre du cratère, glissé sous une pierre où seul un grimpeur regarderait : un booster scellé."
+      "text_fr": "Sur la lèvre du cratère, glissé sous une pierre où seul un grimpeur regarderait : un booster scellé.",
+      "poi": "secondary"
     }
   ],
   "warps": [],
@@ -4815,9 +4996,9 @@
       "id": "edda",
       "name": "Edda",
       "model": "npc_elder",
-      "x": 16,
-      "z": 21,
-      "facing": "n",
+      "x": 17,
+      "z": 25,
+      "facing": "e",
       "idle": "Idle",
       "outfit": "#5a3e36",
       "hair": "#e8e0d6",
@@ -4828,14 +5009,16 @@
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "Even the little one down on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
+            "Even the little one, here on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
+            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
+            "And on the bowl floor, east of the stone, the black glass glows green after dark, where the little caps grow. Dull as a bottle by day."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Même le petit, en bas, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
+            "Même le petit, ici, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
+            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
+            "Et au fond de la cuvette, à l'est de la pierre, le verre noir luit en vert à la nuit tombée, là où poussent les petits champignons. Terne comme une bouteille le jour."
           ]
         },
         {
@@ -4879,26 +5062,30 @@
           "lines": [
             "Hear that? Nothing. The vents are asleep. Go on: the high terrace is yours till dawn.",
             "Even the little one in the floor's far west corner, where the swept stones end, has gone quiet. Whatever the old kiln-keepers left behind it, nothing's guarding it tonight.",
-            "Vela's up on the north rim, if you're looking for trouble. She usually is."
+            "Vela's up on the north rim, if you're looking for trouble. She usually is.",
+            "And on the bowl floor, east of the stone, the black glass glows green after dark, where the little caps grow. Dull as a bottle by day."
           ],
           "lines_fr": [
             "Tu entends ? Rien. Les évents dorment. Vas-y : la haute terrasse est à toi jusqu'à l'aube.",
             "Même le petit, dans le coin ouest du fond, au bout des pierres balayées, s'est tu. Ce que les vieux gardiens du four ont laissé derrière, rien ne le garde cette nuit.",
-            "Vela est sur le rebord nord, si tu cherches les ennuis. Elle, elle les cherche toujours."
+            "Vela est sur le rebord nord, si tu cherches les ennuis. Elle, elle les cherche toujours.",
+            "Et au fond de la cuvette, à l'est de la pierre, le verre noir luit en vert à la nuit tombée, là où poussent les petits champignons. Terne comme une bouteille le jour."
           ]
         },
         {
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "Even the little one down on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
+            "Even the little one, here on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
+            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
+            "And on the bowl floor, east of the stone, the black glass glows green after dark, where the little caps grow. Dull as a bottle by day."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Même le petit, en bas, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
+            "Même le petit, ici, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
+            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
+            "Et au fond de la cuvette, à l'est de la pierre, le verre noir luit en vert à la nuit tombée, là où poussent les petits champignons. Terne comme une bouteille le jour."
           ]
         }
       ]
@@ -5404,6 +5591,27 @@
             "cam:hero"
           ]
         }
+      ]
+    }
+  ],
+  "view": [
+    [
+      13,
+      3
+    ],
+    [
+      16,
+      5
+    ]
+  ],
+  "transitions": [
+    {
+      "to": "cinderwick",
+      "depth": 5,
+      "scatter": [
+        "rock_basalt",
+        "rock",
+        "ash_pine"
       ]
     }
   ]

@@ -142,7 +142,7 @@ Sable, the Hex Warden, stays behind the sealed door of the duel hall. Seal thres
 first three seals.
 
 The move was planned for 1.3 but only landed in 1.10 (#149): each keeper stands within 3 tiles of their
-site's seal stone (held by `seal_keepers_stand_by_their_stones` in `engine/tests/world_data.rs`), and the
+site's seal stone (held by `seal_keepers_stand_by_their_stones` in `meta/tests/world_data.rs`), and the
 stewards who covered for them (Kessa, Elspeth, Nim) now say they are back.
 
 When a 1.3 save resumes on a tile that is now solid (the old rival spots were re-laid), the loader puts the
@@ -165,7 +165,7 @@ A new player starts with **⬡ 100** and the usual three packs. Old saves get �
 
 ### 3.2 Prices (sinks)
 
-All in `engine/src/shop.rs` as constants, with a test that the table below matches.
+All in `meta/src/shop.rs` as constants, with a test that the table below matches.
 
 | What | Where | Price | Notes |
 |---|---|---|---|
@@ -225,7 +225,7 @@ Totals across the game (one-time sources): 1.2 ≈ ⬡ 4,000 (purses 585, finds 
 1.4 ≈ ⬡ 4,700 (Rook 750, achievements 3,975). Crafting one copy of every non-promo card (33 C, 43 U, 20 R) costs about ⬡ 14,500,
 so the set is completed by play, packs and crafting together — never by one alone.
 
-`engine/src/shop.rs` gets an `economy_sim` test: a scripted first playthrough (a list of
+`meta/src/shop.rs` gets an `economy_sim` test: a scripted first playthrough (a list of
 `(minutes, source)` events built from the real tables) that asserts the packs-per-hour of the
 "exploring" row stays between 3.5 and 6. Change a price and the test tells you what it did.
 
@@ -289,7 +289,7 @@ check-maps refuses a sight line covering an exit edge tile, a warp's spawn tile 
 
 ### 4.2 Engine: the duelist table
 
-`engine/src/duelists.rs`, alongside `RIVALS`:
+`meta/src/duelists.rs`, alongside `RIVALS`:
 
 ```rust
 pub struct Duelist {
@@ -544,7 +544,7 @@ one find.
 **Wynne's counter** (duel hall) becomes the pack shop (`show:shop_hall`): buy packs (§3.2), see the
 Facet balance. She keeps the running-shoes gift and the one-seal Wild pack.
 
-**The deck doctor** is engine logic (`engine/src/doctor.rs`, `diagnose(deck, collection) -> Vec<Advice>`),
+**The deck doctor** is engine logic (`meta/src/doctor.rs`, `diagnose(deck, collection) -> Vec<Advice>`),
 each piece of advice a `T` with a severity, and where possible a concrete swap from the player's own
 collection. Checks: fewer than 10 Basics (opening hands with no Basic); energy under 18 or over 28; a
 Awaken 1 or 2 without its line underneath; attack costs in a colour the deck carries no energy for; no
@@ -575,7 +575,7 @@ one sends you back somewhere you've been. Running Shoes stay the hub's starter i
 ```jsonc
 "gates": [{
   "id": "hush_ford",
-  "name": "the ford on Hushwillow Lane",  // announced when it opens (#62); an item's gate matches engine/src/objective.rs
+  "name": "the ford on Hushwillow Lane",  // announced when it opens (#62); an item's gate matches meta/src/objective.rs
   "name_fr": "le gué de l'Allée des Saules-Murmures",
   "tiles": [[0,24],[1,24],[2,24],[0,25],[1,25],[2,25]],
   "if": "item:wading_boots",            // any condition: item, time, flags, seals
@@ -591,8 +591,8 @@ one sends you back somewhere you've been. Running Shoes stay the hub's starter i
   cliff digit); otherwise they are solid and facing one shows `text`, like a locked door.
 - `world.js` re-evaluates gates (and NPC/find `if`s, and glints) on every time-phase change and after every
   dialogue effect, via one `refresh()`. A gate that opens there is announced by its `name` (screen readers
-  hear it once). A field item's table in `engine/src/objective.rs` (§11.2) lists every gate, gated door and
-  gangway it opens; `engine/tests/world_data.rs` fails when the table and the maps disagree.
+  hear it once). A field item's table in `meta/src/objective.rs` (§11.2) lists every gate, gated door and
+  gangway it opens; `meta/tests/world_data.rs` fails when the table and the maps disagree.
 - **A gate never closes under the hero**: a closing gate the hero stands on stays open until the hero is
   off all its tiles. check-maps flood-fills each map with every gate closed and fails if the spawn can't
   reach at least one exit (no soft-lock), and with every gate open and fails if any NPC, find or warp is
@@ -603,7 +603,7 @@ one sends you back somewhere you've been. Running Shoes stay the hub's starter i
 
 ### 7.2 Day and night
 
-**Clock.** `engine/src/clock.rs`: the game minute (0–1439) is saved in `Progress` (`t:<minute>`, default
+**Clock.** `meta/src/clock.rs`: the game minute (0–1439) is saved in `Progress` (`t:<minute>`, default
 08:00). One real second in the world is one game minute, so a day is 24 real minutes. The clock stops in
 duels, menus and sheets. `world.js` advances it and reports it to Rust once per game hour and on every
 phase change (`cb("clock", minute)`).
@@ -792,7 +792,7 @@ is there for the scene and leaves afterwards (a final `walk` and `flag:rook_1_le
 
 ### 9.2 The grammar after 1.4
 
-The engine stays the only parser (`engine/src/overworld.rs`). Arguments are split on `:`; each is a name
+The engine stays the only parser (`meta/src/overworld.rs`). Arguments are split on `:`; each is a name
 (`[a-z0-9_]+`) or an integer, checked per kind. Two new pure functions, `parse_cond(&str) -> Result<Cond>` and
 `parse_effect(&str) -> Result<Effect>`, back `check`/`apply` and the data test (§9.4).
 
@@ -819,6 +819,7 @@ The engine stays the only parser (`engine/src/overworld.rs`). Arguments are spli
 | `walk:<actor>:<path>` | actor walks a path of `n/e/s/w` letters; waits until done | cue | 1.4 |
 | `face:<actor>:<dir>` | turn; `dir` may be `hero` (toward where the hero stands, 1.10) | cue | 1.4 |
 | `cam:<actor>` / `cam:<x>:<z>` / `cam:hero` | ease the camera's look-at target (pitch never changes) | cue | 1.4 |
+| `shot:<name>` | play the authored camera shot `web/world/shots/<name>.json` (a Theatre.js state, see "Authoring a shot" below); the camera takes the shot's pose whole, then hands back to the usual framing with no jump. Under reduced motion only its last framing is held. A `reveal_` script's shot lasts at most 4 s | cue | #253 |
 | `wait:<ms>` | pause, 0–5000 | cue | 1.4 |
 | `emote:<actor>:<bang\|what\|dots\|heart\|note>` | bubble over a head (the duelist "!" uses this) | cue | 1.2 |
 | `sfx:<name>`, `music:<track>` | sound | cue | 1.4 |
@@ -829,6 +830,27 @@ The engine stays the only parser (`engine/src/overworld.rs`). Arguments are spli
 `apply` returns `Applied::Cue(Cue)` for cue effects without touching state; `web/src/world.rs` forwards a cue
 to `world_cue(json)` and waits for `cb("cue_done")` before the next effect. `Progress::apply_all(&[&str])`
 pre-checks `pay` so a branch is all-or-nothing.
+
+**Exception to the fixed pitch.** `cam` keeps the camera's pitch fixed (only the look-at target moves). A `shot`
+may move the camera freely, within pitch 35–65° and fov 30–55 (`tools/check-maps.mjs` checks both at every
+keyframe time).
+
+**Authoring a shot (debug builds only).** A shot's sheet is named after the shot and has one object, `camera`, with
+`x`, `y`, `z` (where it stands), `tx`, `ty`, `tz` (what it looks at) and `fov`. Theatre Studio edits it:
+
+1. Once: `tools/theatre-dev.sh` bundles `@theatre/core` and Studio into the git-ignored `tools/theatre/dev.js`
+   (Studio is AGPL-3.0: it is never vendored, shipped or precached, and CI fails if a release build mentions it).
+2. `cd web && trunk serve` (a debug build; start it after step 1, the bundle is copied at build time), which serves
+   that bundle as `theatre-dev.js` in a debug build only. Without the bundle the shot plays and a warning says so.
+3. Open the map at `?edit&studio` and trigger the scene (a new game, then enter the map; `sixfoldWarp` in the console
+   skips the walk). Studio opens over the world, listing the project `sixfold-<name>`.
+4. Select `camera` in the sheet, keyframe its props on the timeline and scrub. A new shot starts from a copy of an
+   existing file whose sheet key is renamed to `<name>`.
+5. Studio's menu, Export project, downloads the state: save it as `web/world/shots/<name>.json` (the same shape the
+   player reads, nothing to convert) and reference it with a `shot:<name>` cue.
+6. `node tools/check-maps.mjs web/world --strict`, then play the scene in a normal build.
+
+Studio is not loaded without `?studio`, and a release build never asks for it, with or without it.
 
 ### 9.3 Save format
 
@@ -849,7 +871,7 @@ that and say so in the changelog).
 
 ### 9.4 One test that reads every map
 
-`engine/tests/world_data.rs` (dev-dependency `serde_json`, host-only, never in the wasm build) loads every
+`meta/tests/world_data.rs` (dev-dependency `serde_json`, host-only, never in the wasm build) loads every
 `web/world/maps/*.json` and `atlas.json` and checks, with the engine's own parser:
 
 - every `if`, `glint`, gate `if`, script `if` parses as a condition; every `do` entry and script step parses as an
@@ -861,7 +883,7 @@ that and say so in the changelog).
 - `web/world/quests.json` (the Journal): every `start`, `done` and step condition parses, and every flag or item
   it waits for is set by some map effect (or, for `consult_applied`, by the doctor's panel).
 
-It runs in `cargo test -p sixfold-engine`, so CI already runs it.
+It runs in `cargo test -p sixfold-meta`, so CI already runs it.
 
 ---
 
@@ -1708,7 +1730,7 @@ All in `web/` (the duel screen), all calmed by reduced motion (each line says wh
 
 ### 12.2 Stats
 
-`engine/src/stats.rs`: a `Stats` map of named counters, saved as the `[stats]` section (§9.3), shown on a
+`meta/src/stats.rs`: a `Stats` map of named counters, saved as the `[stats]` section (§9.3), shown on a
 **Stats** page off the title screen (and the Campaign page). Fed by `Game::summary()` (new, engine-side:
 winner, how it ended, prizes and KOs per side, Bench KOs, the biggest prize deficit you came back from, Stage
 2s played, the longest run of heads) and by world events (steps in batches of 50, finds, Facets in and out,
@@ -1740,7 +1762,7 @@ them, hidden ones as "???" until earned (marked H).
 | `night_owl` | Night Owl / *Oiseau de nuit* | beat the six night duelists | 150 |
 | `rules_all` | House Rules / *Règles maison* | beat the six challenge-rule duelists | 150 |
 | `finds_10` | Magpie / *Pie voleuse* | 10 finds | 50 |
-| `finds_all` | Nothing Hidden / *Rien de caché* | every find (86) | 250 |
+| `finds_all` | Nothing Hidden / *Rien de caché* | every find (104) | 250 |
 | `curios_all` | Curator / *Conservateur* | all 12 curios | 100 |
 | `secrets_1` | Curious / *Curieux* | find a secret | 25 |
 | `secrets_half` | Sleuth / *Fin limier* | find half the secrets | 100 |
@@ -1840,7 +1862,7 @@ builds (`trunk serve`, URL `?edit`), ~300 lines in `editor.js`:
 - names: no NPC or place name is on `tools/name-denylist.txt` (a short list of franchise character and place
   names, kept in the repo as plain words).
 
-**`engine/tests/world_data.rs`** (§9.4): the grammar check, run by `cargo test`.
+**`meta/tests/world_data.rs`** (§9.4): the grammar check, run by `cargo test`.
 
 **`tools/map-ascii.mjs <map>`**: prints a map as ASCII with prop footprints, NPCs, sight lines and gates, for
 PR descriptions and reviews.
@@ -2000,7 +2022,7 @@ I played the design through on paper. Here is what was still hollow, and what th
    two or three lines in their voice naming the region's seal, then `flag:met_<id>` and `duel:<id>` open the
    challenge panel (a skip still lands there). Talked to first, the keeper's dialogue says the same lines and
    does the same (a branch first after the duel results). The fixed pitch is kept; only the look-at target
-   moves, and reduced motion makes every move a cut. `engine/tests/world_data.rs` and `check-maps` hold the
+   moves, and reduced motion makes every move a cut. `meta/tests/world_data.rs` and `check-maps` hold the
    shape.
    *And the seal is won there (#153)*: back from a keeper's first win, `victory_<id>` (`on: enter`, `won:<id> &
    !flag:sealed_<id>`, instead of the post-duel line) wakes the stone, lights the keeper's face with the seal's

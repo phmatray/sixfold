@@ -4,6 +4,63 @@
   "region": "hub",
   "kind": "town",
   "music": "overworld",
+  "level_design": 2,
+  "life": {
+    "critters": [
+      {
+        "kind": "rabbit",
+        "zone": [
+          44,
+          13,
+          50,
+          21
+        ],
+        "n": 2
+      },
+      {
+        "kind": "squirrel",
+        "zone": [
+          41,
+          2,
+          50,
+          6
+        ],
+        "n": 2
+      },
+      {
+        "kind": "hedgehog",
+        "zone": [
+          44,
+          13,
+          50,
+          21
+        ],
+        "n": 1
+      }
+    ],
+    "perch": [
+      {
+        "at": [
+          [
+            23,
+            3,
+            1.6
+          ],
+          [
+            28,
+            30,
+            1.6
+          ]
+        ]
+      }
+    ],
+    "leaves": {
+      "under": [
+        "blossom_tree"
+      ],
+      "rate": 0.3
+    }
+  },
   "width": 52,
   "height": 36,
   "tiles": [
@@ -74,7 +131,8 @@
       "asset": "workshop",
       "x": 12,
       "z": 6,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "cottage",
@@ -148,7 +206,8 @@
       "asset": "fountain",
       "x": 25,
       "z": 16,
-      "rot": 0
+      "rot": 0,
+      "landmark": true
     },
     {
       "asset": "stall_b",
@@ -506,7 +565,8 @@
       "asset": "wisteria_arch",
       "x": 25,
       "z": 31,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "moonflower",
@@ -2327,7 +2387,8 @@
       "asset": "well",
       "x": 47,
       "z": 25,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "blossom_tree",
@@ -2345,7 +2406,8 @@
       "asset": "water_lilies",
       "x": 41,
       "z": 27,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "water_lilies",
@@ -2369,6 +2431,12 @@
       "asset": "flower_planter",
       "x": 15,
       "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 5,
+      "z": 9,
       "rot": 0
     }
   ],
@@ -2451,7 +2519,22 @@
       "hidden": true,
       "give": "give:curio_tin_hex",
       "text": "In the flowerbed, pressed into the soil: a little tin hexagon, its six colours flaking.",
-      "text_fr": "Dans le massif, enfoncé dans la terre : un petit hexagone de fer-blanc, ses six couleurs écaillées."
+      "text_fr": "Dans le massif, enfoncé dans la terre : un petit hexagone de fer-blanc, ses six couleurs écaillées.",
+      "poi": "secret",
+      "secret": {
+        "id": "sq_bed_pressed",
+        "kind": "environmental",
+        "clue": [
+          [
+            32,
+            28
+          ],
+          [
+            30,
+            26
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -2487,8 +2570,8 @@
         "facing": "n"
       },
       "open": "hour:8-19",
-      "locked": "Closed. Back at eight.",
-      "locked_fr": "Fermé. Retour à huit heures."
+      "locked": "Closed until eight in the morning.",
+      "locked_fr": "Fermé jusqu'à huit heures du matin."
     },
     {
       "x": 13,
@@ -2760,12 +2843,14 @@
           "lines": [
             "Curios! Bring me curios! Small, old, odd. A thimble. A feather. A bottle with a note in it.",
             "I don't keep them, mind; you do. I only need to see them.",
-            "Show me three and I'll pay you in packs. Six, and in something rarer."
+            "Show me three and I'll pay you in packs. Six, and in something rarer.",
+            "Start with the flowerbed east of the south road, a few steps past the lantern. The soil there is pressed flat, and it isn't from boots."
           ],
           "lines_fr": [
             "Des curiosités ! Apporte-moi des curiosités ! Petites, vieilles, bizarres. Un dé à coudre. Une plume. Une bouteille avec un billet dedans.",
             "Je ne les garde pas, note bien ; c'est toi qui les gardes. J'ai juste besoin de les voir.",
-            "Montre-m'en trois et je te paie en boosters. Six, et en quelque chose de plus rare."
+            "Montre-m'en trois et je te paie en boosters. Six, et en quelque chose de plus rare.",
+            "Commence par le massif à l'est de la route du sud, quelques pas après la lanterne. La terre y est tassée, et pas par des bottes."
           ]
         },
         {
@@ -2780,12 +2865,20 @@
         {
           "lines": [
             "Curios turn up where things wash ashore, fall off, or get forgotten.",
-            "A pier. A lookout. A quarry ledge. A flowerbed. A print shop. A field, if you're lucky."
+            "A pier. A lookout. A quarry ledge. A flowerbed. A print shop. A field, if you're lucky.",
+            "The flowerbed is east of the south road, a few steps past the lantern: look in the nearest clump of flowers, where the soil has been pressed flat. Something small and tin is pressed into it."
           ],
           "lines_fr": [
             "Les curiosités se trouvent là où les choses s'échouent, tombent ou s'oublient.",
-            "Une jetée. Un belvédère. Une corniche de carrière. Un massif de fleurs. Une imprimerie. Un champ, avec de la chance."
+            "Une jetée. Un belvédère. Une corniche de carrière. Un massif de fleurs. Une imprimerie. Un champ, avec de la chance.",
+            "Le massif est à l'est de la route du sud, quelques pas après la lanterne : cherche dans la touffe de fleurs la plus proche, où la terre est tassée. Quelque chose de petit, en fer-blanc, y est enfoncé."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Small, old, odd. That is the whole rule.",
+          "say_fr": "Petit, vieux, bizarre. Toute la règle est là."
         }
       ]
     },
@@ -2868,6 +2961,12 @@
             "Je viens pour la lumière. Au crépuscule, les lampes prennent le relais, et je vais chercher mon souper."
           ]
         }
+      ],
+      "barks": [
+        {
+          "say": "The bench is warm. The light is kind.",
+          "say_fr": "Le banc est tiède. La lumière est douce."
+        }
       ]
     }
   ],
@@ -2920,5 +3019,15 @@
         "bush"
       ]
     }
+  ],
+  "view": [
+    [
+      5,
+      9
+    ],
+    [
+      36,
+      25
+    ]
   ]
 }

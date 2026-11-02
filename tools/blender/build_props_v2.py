@@ -744,7 +744,10 @@ def build_climb_wall(k):
 
 
 def build_inn_sign(k):
-    """1 x 1 inn sign: two posts and a crossbar, a board with a crescent moon and stars hung on chains, a lantern."""
+    """1 x 1 inn sign: two posts and a crossbar, a board with a bed and a faceted hexagon hung on chains, a lantern.
+
+    (It was a crescent moon and stars until 1.13: a crescent beside a star is a religious symbol, which the game never
+    draws. A bed says "rooms" in any language.)"""
     for sx in (-1, 1):
         k.add(box(0.26, 0.26, 0.1, 0.03), "stone_dk", T((sx * 0.38, 0, 0.03)))
         k.add(box(0.1, 0.1, 2.26, 0.02), "wood_dk", T((sx * 0.38, 0, 1.11)))
@@ -757,20 +760,17 @@ def build_inn_sign(k):
     bz = 1.7
     k.add(box(0.6, 0.05, 0.42, 0.015), "inn_board", T((0, 0, bz)))
     frame = [(-0.29, -0.2), (0.29, -0.2), (0.29, 0.2), (-0.29, 0.2)]
-    outer = arc(-0.06, 0, 0.13, 70, 290, 12)               # crescent: outer arc, then the inner arc back
-    ix = outer[0][0] + 0.05
-    r_in = math.hypot(outer[0][0] - ix, outer[0][1])
-    a_in = math.degrees(math.atan2(outer[0][1], outer[0][0] - ix))
-    moon = outer + arc(ix, 0, r_in, 360 - a_in, a_in, 10)[1:-1]
-    stars = ((0.12, 0.08, 0.04), (0.19, -0.05, 0.03), (0.08, -0.11, 0.024))
+    bed = [  # one silhouette (no overlapping parts to fight): headboard, mattress with a pillow on it, footboard
+        (-0.21, -0.13), (-0.17, -0.13), (-0.17, -0.09), (0.16, -0.09), (0.16, -0.13), (0.19, -0.13), (0.19, -0.01),
+        (0.16, -0.01), (0.16, -0.03), (-0.07, -0.03), (-0.07, 0.01), (-0.15, 0.01), (-0.15, -0.03), (-0.17, -0.03),
+        (-0.17, 0.07), (-0.21, 0.07),
+    ]
+    hexagon = [(0.1 + 0.05 * math.cos(math.radians(90 + 60 * i)), 0.08 + 0.05 * math.sin(math.radians(90 + 60 * i))) for i in range(6)]
     for side in (-1, 1):   # front (-Y) and back (+Y) faces, the back mirrored so it reads from behind
         y = side * 0.025
         k.add(ribbon(frame, 0.025, 0.01, closed=True), "gold", T((0, y, bz), FRONT if side < 0 else BACK))
-        k.add(prism([(-side * x, z) for x, z in moon], 0.014), "gold", T((0, y + side * 0.005, bz)))
-        for cx, cz, r in stars:
-            star = [(-side * (cx + r * (1 if i % 2 == 0 else 0.42) * math.cos(math.radians(90 + 45 * i))),
-                     cz + r * (1 if i % 2 == 0 else 0.42) * math.sin(math.radians(90 + 45 * i))) for i in range(8)]
-            k.add(prism(star, 0.014), "hex_in", T((0, y + side * 0.005, bz)))
+        k.add(prism([(-side * x, z) for x, z in bed], 0.014), "gold", T((0, y + side * 0.005, bz)))
+        k.add(prism([(-side * x, z) for x, z in hexagon], 0.014), "hex_in", T((0, y + side * 0.005, bz)))
     # lantern hanging from the right end of the crossbar
     k.add(box(0.025, 0.025, 0.12), "iron", T((0.47, 0, 1.99)))
     k.add(box(0.13, 0.13, 0.16), "lamp_glow", T((0.47, 0, 1.84)))

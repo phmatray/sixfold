@@ -151,7 +151,7 @@ pub fn is_promo(id: CardId) -> bool {
 }
 
 /// A Holo Rare: a Rare Hexon (all 12 are Awaken 2s) found in a pack's
-/// upgraded Rare slot (see [`crate::booster`]). Promos are not.
+/// upgraded Rare slot (see `sixfold_meta::booster`). Promos are not.
 pub fn is_holo(id: CardId) -> bool {
     let c = &CARDS[id.0 as usize];
     c.rarity == Rare && matches!(c.kind, CardKind::Creature(_)) && !is_promo(id)
@@ -1366,7 +1366,7 @@ mod tests {
 /// for its stage, so a new or changed card can't drift off the curve. The
 /// deck builder ranks Hexons and Gear cards with it too.
 #[cfg_attr(not(test), allow(dead_code))]
-pub(crate) mod budget {
+pub mod budget {
     use super::*;
     use crate::condition::{Placed, Shield, Status};
     use crate::effect::Effect;
@@ -1397,7 +1397,7 @@ pub(crate) mod budget {
     }
 
     /// Damage-equivalent of one effect; drawbacks are negative.
-    pub(crate) fn effect_value(e: &Effect) -> i32 {
+    pub fn effect_value(e: &Effect) -> i32 {
         use Effect::*;
         let status = |s: &Status| match s {
             Status::Paralyzed | Status::DoublePoisoned => 20,
@@ -1485,7 +1485,7 @@ pub(crate) mod budget {
     }
 
     #[derive(Debug, PartialEq)]
-    pub(crate) enum Role {
+    pub enum Role {
         Attacker,
         Wall,
         Support,
@@ -1493,7 +1493,7 @@ pub(crate) mod budget {
         Tech,
     }
 
-    pub(crate) struct Score {
+    pub struct Score {
         pub hp: i32,
         pub attack: i32,
         pub power: i32,
@@ -1510,7 +1510,7 @@ pub(crate) mod budget {
 
     /// The score of one creature: HP, its best attack against the curve,
     /// its Power, retreat, weakness and resistance.
-    pub(crate) fn score(cr: &Creature) -> Score {
+    pub fn score(cr: &Creature) -> Score {
         let s = stage(cr.stage);
         let value = |a: &Attack| {
             i32::from(a.damage) + a.effects.iter().map(effect_value).sum::<i32>()

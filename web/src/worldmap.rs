@@ -10,9 +10,9 @@
 
 use leptos::prelude::*;
 use leptos::web_sys;
-use sixfold_engine::clock;
-use sixfold_engine::overworld::Progress;
 use sixfold_engine::{fr, tr};
+use sixfold_meta::clock;
+use sixfold_meta::overworld::Progress;
 use wasm_bindgen::{JsCast, JsValue};
 
 use crate::world::field;
@@ -24,6 +24,8 @@ pub(crate) struct Region {
     x: f64,
     y: f64,
     r: f64,
+    /// Where its name sits (y), when the default spot at the land's edge would sit on a place's name or marks.
+    label_y: Option<f64>,
 }
 
 pub(crate) struct Node {
@@ -46,6 +48,8 @@ struct Link {
     b: String,
     cond: String,
     icon: String,
+    /// How far from `a` its gate mark sits (0..1, default the middle), when the middle is beside a place's marks.
+    icon_at: f64,
 }
 
 #[derive(Clone)]
@@ -98,6 +102,7 @@ pub(crate) fn atlas() -> Atlas {
                 x: num(r, "x"),
                 y: num(r, "y"),
                 r: num(r, "r"),
+                label_y: field(r, "label_y").as_f64(),
             })
             .collect(),
         maps: list(&v, "maps")
@@ -117,6 +122,7 @@ pub(crate) fn atlas() -> Atlas {
                 b: text(l, "b"),
                 cond: text(l, "if"),
                 icon: text(l, "icon"),
+                icon_at: field(l, "icon_at").as_f64().unwrap_or(0.5),
             })
             .collect(),
         marks: list(&v, "marks")
@@ -192,8 +198,18 @@ fn icon(name: &str) -> &'static str {
         "boots" => "M4 1.5h3v5.5l3.5 1.5v2H4zM4 8.5h6.5",
         // a glove
         "gloves" => "M3.5 10.5V5.5l-1-2M5 5V2M7 5V1.8M9 5.2V2.6M9 5.2v3.3l-1.5 2H3.5",
-        _ => "M6 2v8M2 6h8",
+        // anything else: a plain diamond (never a plus, which reads as a cross)
+        _ => "M6 2.5l3.5 3.5-3.5 3.5-3.5-3.5z",
     }
+}
+
+/// A shortcut you opened: a lifted bar between two posts. A drop: a ledge with an arrow down.
+const CUT_GLYPH: &str = "M2.5 10.5v-8M9.5 10.5v-8M2.5 7.5l7-5";
+const DROP_GLYPH: &str = "M1.5 3.5h4.5v6h4.5M8.5 4v3.4M7.2 5.9l1.3 1.3 1.3-1.3";
+
+/// A chart mark's drawing (on the map, and beside its line in the legend).
+fn mark_glyph(d: &'static str) -> impl IntoView {
+    view! { <svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.6" /><path d=d /></svg> }
 }
 
 #[component]
@@ -338,7 +354,7 @@ pub fn WorldMap(
             // Along the land's outer edge (the top of a northern land, the foot of a
             // southern one), clear of the roads and places nearer the hub.
             let hy = a.regions.iter().find(|h| h.id == "hub").map_or(4.5, |h| h.y);
-            let (lx, ly) = (r.x, r.y + (r.y - hy).signum() * r.r * 0.72);
+            let (lx, ly) = (r.x, r.label_y.unwrap_or(r.y + (r.y - hy).signum() * r.r * 0.72));
             view! {
                 <span class="atlas-label region" class:known=known style=format!("{}; --rc: {}", at(lx, ly), r.color)>
                     {if known { r.name.clone() } else { tr("Uncharted", "Inexploré").to_string() }}
@@ -346,13 +362,52 @@ pub fn WorldMap(
             }
         })
         .collect_view();
+    // A place's marks, in a row under its name (so they can't cover it): a lifted bar for an opened shortcut, a ledge
+    // for a drop. The legend under the map says what they mean.
+    let marks: Vec<(String, AnyView)> = a
+        .maps
+        .iter()
+        .filter(|m| seen(&m.id))
+        .filter_map(|m| {
+            let shown: Vec<_> = a
+                .marks
+                .iter()
+                .filter(|k| k.map == m.id)
+                .filter(|k| k.kind == "drop" || p.check(&format!("flag:sc_{}", k.id)))
+                .map(|k| {
+                    let (d, title) = if k.kind == "drop" {
+                        (DROP_GLYPH, tr("A drop: one way down", "Une descente sans retour"))
+                    } else {
+                        (CUT_GLYPH, tr("A shortcut you opened", "Un raccourci que vous avez ouvert"))
+                    };
+                    let label = format!("{}{}{title}", m.name, tr(": ", "\u{a0}: "));
+                    view! { <span class="atlas-mark" data-mark=k.kind.clone() title=title role="img" aria-label=label>{mark_glyph(d)}</span> }
+                })
+                .collect();
+            (!shown.is_empty()).then(|| (m.id.clone(), view! { <span class="atlas-marks">{shown}</span> }.into_any()))
+        })
+        .collect();
+    let (has_drop, has_cut) = (
+        a.marks.iter().any(|k| k.kind == "drop" && seen(&k.map)),
+        a.marks
+            .iter()
+            .any(|k| k.kind != "drop" && seen(&k.map) && p.check(&format!("flag:sc_{}", k.id))),
+    );
+    let legend = (has_drop || has_cut).then(|| view! {
+        <ul class="atlas-legend">
+            {has_cut.then(|| view! { <li>{mark_glyph(CUT_GLYPH)}{tr("Lifted bar: a shortcut you opened", "Barre levée\u{a0}: un raccourci que vous avez ouvert")}</li> })}
+            {has_drop.then(|| view! { <li>{mark_glyph(DROP_GLYPH)}{tr("Ledge: a one-way drop", "Rebord\u{a0}: une descente sans retour")}</li> })}
+        </ul>
+    });
+    let mut marks = marks;
     let map_names = a
         .maps
         .iter()
         .filter(|m| seen(&m.id))
         .map(|m| {
             let post = a.waymarks.iter().any(|w| w.map == m.id);
-            view! { <span class="atlas-label place" class:post=post style=at(m.x, m.y)>{m.name.clone()}</span> }
+            let mk = marks.iter().position(|(id, _)| *id == m.id).map(|i| marks.swap_remove(i).1);
+            view! { <span class="atlas-label place" class:post=post style=at(m.x, m.y)><span aria-hidden="true">{m.name.clone()}</span>{mk}</span> }
         })
         .collect_view();
     let regions = a
@@ -388,7 +443,9 @@ pub fn WorldMap(
             let (x2, y2) = (x1 + (to.x * U - x1) * k, y1 + (to.y * U - y1) * k);
             let gated = !l.cond.is_empty();
             let open = gated && p.check(&l.cond);
-            let (mx, my) = ((x1 + x2) / 2.0, (y1 + y2) / 2.0);
+            // (from `a` when both ends are seen; a road half into the fog keeps its mark in the middle of what is drawn)
+            let t = if k < 1.0 { 0.5 } else { l.icon_at };
+            let (mx, my) = (x1 + (x2 - x1) * t, y1 + (y2 - y1) * t);
             Some(view! {
                 <g class="atlas-road" class:partial=k < 1.0>
                     <line x1=format!("{x1:.1}") y1=format!("{y1:.1}") x2=format!("{x2:.1}") y2=format!("{y2:.1}") />
@@ -402,32 +459,6 @@ pub fn WorldMap(
             })
         })
         .collect_view();
-    // A place's marks, in a row beside it: a lifted bar for an opened shortcut, a ledge for a drop. Each is an
-    // image named for its place, so a screen reader hears them (the place names themselves are drawing).
-    let marks: Vec<_> = a
-        .maps
-        .iter()
-        .filter(|m| seen(&m.id))
-        .filter_map(|m| {
-            let shown: Vec<_> = a
-                .marks
-                .iter()
-                .filter(|k| k.map == m.id)
-                .filter(|k| k.kind == "drop" || p.check(&format!("flag:sc_{}", k.id)))
-                .map(|k| {
-                    let (d, title) = if k.kind == "drop" {
-                        ("M1.5 3.5h4.5v6h4.5M8.5 4v3.4M7.2 5.9l1.3 1.3 1.3-1.3", tr("A drop: one way down", "Une descente sans retour"))
-                    } else {
-                        ("M2.5 10.5v-8M9.5 10.5v-8M2.5 7.5l7-5", tr("A shortcut you opened", "Un raccourci que vous avez ouvert"))
-                    };
-                    let label = format!("{}: {title}", m.name);
-                    view! { <span class="atlas-mark" data-mark=k.kind.clone() title=title role="img" aria-label=label><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.6" /><path d=d /></svg></span> }
-                })
-                .collect();
-            let post = a.waymarks.iter().any(|w| w.map == m.id);
-            (!shown.is_empty()).then(|| view! { <span class="atlas-marks" class:post=post style=at(m.x, m.y)>{shown}</span> })
-        })
-        .collect();
     let nodes = a
         .maps
         .iter()
@@ -529,13 +560,12 @@ pub fn WorldMap(
                     </g>
                     <rect width="120" height="90" fill="url(#atlas-vignette)" />
                 </svg>
-                <div class="atlas-words" aria-hidden="true">{region_names}{map_names}</div>
-                {(!marks.is_empty()).then(|| view! {
-                    <div class="atlas-words" role="group" aria-label=tr("Shortcuts and drops", "Raccourcis et descentes")>{marks}</div>
-                })}
+                // The names are drawing (the waymarks and the foot name places); only the marks under them are read.
+                <div class="atlas-words"><span aria-hidden="true">{region_names}</span>{map_names}</div>
                 <div class="atlas-posts" role="group" aria-label=tr("Waymarks", "Bornes de voyage")>{posts}</div>
                 {you}
             </div>
+            {legend}
             <div class="atlas-foot" aria-live="polite">
                 {move || match picked.get() {
                     None => view! {

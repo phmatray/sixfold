@@ -1,5 +1,5 @@
 {
-  "note": "The Journal (WORLD_DESIGN §5.4). A quest is listed once `start` holds and ticked off once `done` holds; a step is ticked once its `done` holds, or the quest is done. Conditions are the engine's (engine/tests/world_data.rs checks them, and that a map sets every flag and item they name).",
+  "note": "The Journal (WORLD_DESIGN §5.4). A quest is listed once `start` holds and ticked off once `done` holds; a step is ticked once its `done` holds, or the quest is done. Conditions are the engine's (meta/tests/world_data.rs checks them, and that a map sets every flag and item they name).",
   "quests": [
     {
       "id": "letter",

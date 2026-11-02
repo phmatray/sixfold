@@ -173,34 +173,35 @@ def build_heather(k):
 
 
 def build_chime_post(k):
-    """1 x 1 chime post (~2.3 m): a weathered post on a granite foot, a crossbar hung with copper, brass and
-    verdigris tubes, a wind sail under the striker, a copper cap and a pennant streaming downwind."""
+    """1 x 1 chime post (~2.3 m): a weathered post on a granite foot, one arm to the east hung with copper, brass
+    and verdigris tubes, a wind sail under the striker, a copper cap and a pennant streaming downwind.
+
+    (One arm, braced like a lamp bracket: until 1.13 it was a crossbar across the post near its top, which read as a
+    cross, a shape the game never draws.)"""
     rng = random.Random(421)
     k.add(stone(rng, 0.36, 0.36, 0.16, 0.02), "st_granite", T((0, 0, 0.06)))
     k.add(box(0.12, 0.12, 2.0, 0.015), "plank_grey", T((0, 0, 1.06)))
     for z in (0.5, 1.4):  # iron straps
         k.add(box(0.135, 0.135, 0.04), "iron", T((0, 0, z)))
-    k.add(box(0.9, 0.1, 0.09, 0.012), "plank_grey_dk", T((0, 0, 1.92)))
-    beam(k, (0, 0.01, 1.55), (-0.3, 0.01, 1.875), 0.05, 0.04, "plank_grey_dk")
-    beam(k, (0, -0.012, 1.55), (0.3, -0.012, 1.875), 0.05, 0.04, "plank_grey_dk")
+    k.add(box(0.62, 0.1, 0.09, 0.012), "plank_grey_dk", T((0.27, 0, 1.92)))
+    beam(k, (0, 0.01, 1.5), (0.4, 0.01, 1.875), 0.05, 0.04, "plank_grey_dk")
     k.add(cyl(0.12, 0.0, 0.16, 4), "copper", T((0, 0, 2.14), (0, 0, 45)))
     k.add(box(0.15, 0.15, 0.03), "copper_dk", T((0, 0, 2.065)))
     # pennant on a thin staff, streaming toward +X
     k.add(cyl(0.012, 0.012, 0.35, 4), "iron", T((0, 0, 2.38)))
     k.add(prism([(0, 0), (0.34, -0.05), (0.3, -0.07), (0.36, -0.11), (0, -0.16)], 0.012), "st_pennant", T((0.01, 0, 2.55)))
     k.add(prism([(0, -0.055), (0.2, -0.075), (0, -0.1)], 0.022), "st_pennant_lt", T((0.012, 0.001, 2.55)))
-    # chime tubes from both arms
-    for sx in (-1, 1):
-        for i, (L, m) in enumerate(((0.52, "copper"), (0.66, "brass"), (0.42, "st_verdigris"))):
-            x = sx * (0.18 + 0.1 * i)
-            y = (i - 1) * 0.035
-            k.add(box(0.008, 0.008, 0.08), "rope", T((x, y, 1.84)))
-            k.add(cyl(0.03, 0.03, L, 6), m, T((x, y, 1.8 - L / 2)), smooth=True)
-            k.add(cyl(0.034, 0.034, 0.024, 6), "copper_dk", T((x, y, 1.8 + 0.004)))
-        # striker disc and a little wind sail hanging under the tubes
-        k.add(box(0.006, 0.006, 0.5), "rope", T((sx * 0.28, 0.06, 1.6)))
-        k.add(cyl(0.07, 0.07, 0.025, 8), "wood", T((sx * 0.28, 0.06, 1.47)))
-        k.add(box(0.12, 0.012, 0.18), "st_porcelain", T((sx * 0.28, 0.06, 1.25), (0, 0, 15 * sx)))
+    # chime tubes along the arm, longest in the middle
+    for i, (L, m) in enumerate(((0.42, "st_verdigris"), (0.52, "copper"), (0.66, "brass"), (0.58, "copper"), (0.46, "st_verdigris"))):
+        x = 0.14 + 0.09 * i
+        y = 0.035 if i % 2 else -0.035
+        k.add(box(0.008, 0.008, 0.08), "rope", T((x, y, 1.84)))
+        k.add(cyl(0.03, 0.03, L, 6), m, T((x, y, 1.8 - L / 2)), smooth=True)
+        k.add(cyl(0.034, 0.034, 0.024, 6), "copper_dk", T((x, y, 1.8 + 0.004)))
+    # striker disc and a little wind sail hanging under the tubes
+    k.add(box(0.006, 0.006, 0.5), "rope", T((0.32, 0.075, 1.6)))
+    k.add(cyl(0.07, 0.07, 0.025, 8), "wood", T((0.32, 0.075, 1.47)))
+    k.add(box(0.12, 0.012, 0.18), "st_porcelain", T((0.32, 0.075, 1.25), (0, 0, 15)))
     contact(k, 0.3)
 
 

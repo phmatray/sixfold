@@ -5,9 +5,9 @@
 
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
-use sixfold_engine::profile::Profile;
 use sixfold_engine::tutorial::{self, Goal, Lesson, STEPS};
 use sixfold_engine::{card, fr, tr, Action, CardId, Game};
+use sixfold_meta::profile::Profile;
 
 use crate::ctl::{Ctl, Post, Setup, HUMAN};
 use crate::{Screen, Ui};
@@ -138,7 +138,7 @@ pub fn Coach() -> impl IntoView {
 pub fn Finish() -> impl IntoView {
     let ctl = expect_context::<Ctl>();
     let profile = expect_context::<RwSignal<Profile>>();
-    let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
+    let progress = expect_context::<RwSignal<sixfold_meta::overworld::Progress>>();
     // A replay (from the title or the duel page) gives nothing: say so.
     let first = expect_context::<crate::store::TutorialDue>()
         .0
@@ -174,7 +174,7 @@ pub fn Finish() -> impl IntoView {
             (n, true) => format!("Votre deck de départ, {deck}, et {n} boosters sont à vous."),
         };
         let open = packs > 0;
-        let rivals = &sixfold_engine::campaign::RIVALS;
+        let rivals = &sixfold_meta::campaign::RIVALS;
         let r = progress
             .with_untracked(|p| rivals.iter().find(|r| !r.beaten(p)))
             .unwrap_or(&rivals[0]);
@@ -182,7 +182,7 @@ pub fn Finish() -> impl IntoView {
             // The Journal's first objective, word for word, so the two agree.
             (true, true) => {
                 let goal =
-                    progress.with_untracked(|p| sixfold_engine::objective::objective(p).text(p));
+                    progress.with_untracked(|p| sixfold_meta::objective::objective(p).text(p));
                 tr(
                     format!("Open your packs, then head into the world. {goal}"),
                     format!("Ouvrez vos boosters, puis partez dans le monde. {goal}"),

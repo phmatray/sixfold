@@ -16,21 +16,26 @@ const TURN_SPEED = Math.PI / 2 / 0.12; // a quarter turn in 0.12 s
 const ONCE = new Set(["sitdown", "standup", "reach", "putback"]);
 export const FIDGET_AFTER = 6; // seconds idle before the hero fidgets and the camera leans in
 
-function radial(inner, outer) {
+// A round gradient on a square texture, transparent past its radius: `stops` are [offset, colour] pairs.
+function radial(...stops) {
   const c = document.createElement("canvas");
   c.width = c.height = 64;
   const g = c.getContext("2d");
   const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-  grd.addColorStop(0, inner);
-  grd.addColorStop(1, outer);
+  for (const [at, colour] of stops) grd.addColorStop(at, colour);
   g.fillStyle = grd;
   g.fillRect(0, 0, 64, 64);
   return new THREE.CanvasTexture(c);
 }
-const blobTex = radial("rgba(20,30,15,0.42)", "rgba(20,30,15,0)");
-export const glowTex = radial("rgba(255,255,255,0.9)", "rgba(255,255,255,0)");
+const blobTex = radial([0, "rgba(20,30,15,0.42)"], [1, "rgba(20,30,15,0)"]);
+// A person's own: darker, with a solid core, and wider than their feet (#340). The old one was the scenery's,
+// 0.8 of a tile: its dark middle sat under the body and only a faint rim showed, so the hero (left out of the
+// sun's shadows) looked shadowless and the cream soles floated on the ground.
+const footTex = radial([0, "rgba(22,17,14,0.7)"], [0.4, "rgba(22,17,14,0.58)"], [0.75, "rgba(22,17,14,0.22)"], [1, "rgba(22,17,14,0)"]);
+export const glowTex = radial([0, "rgba(255,255,255,0.9)"], [1, "rgba(255,255,255,0)"]);
 // Soft contact shadow, 1.5 cm above the floor and depth-offset (never coplanar).
-export const blobMat = () => new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+const shadowMat = (map) => new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+export const blobMat = () => shadowMat(blobTex);
 export const blobGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
 
 // `tint` lerps the stand-in hero toward a colour. On an NPC's own model, `outfit`
@@ -90,9 +95,9 @@ export function actor(src, tint, scale, idle, outfit = null, hair = null, wear =
     for (const p of mine) p.apply(o.material.color);
   });
   obj.scale.multiplyScalar(scale);
-  const blob = new THREE.Mesh(blobGeo, blobMat());
+  const blob = new THREE.Mesh(blobGeo, shadowMat(footTex));
   blob.userData.shared = true;
-  blob.scale.setScalar(0.8 * scale);
+  blob.scale.setScalar(1.35 * scale);
   const head = new THREE.Box3().setFromObject(obj).max.y;
   // `lap`: how high a seat is under a person sitting on it, from their hips (seat.js; the Sit clip's thighs rest there).
   obj.updateMatrixWorld(true);
@@ -216,7 +221,7 @@ export function route(w, hero, tx, tz) {
 
 // ---------- Emotes: a bubble over a head ----------
 // "!" when a route duelist spots the hero, and the dialogue cue `emote:<actor>:<kind>`
-// (kinds as `EMOTES` in engine/src/overworld.rs). Drawn over everything, so scenery never hides it.
+// (kinds as `EMOTES` in meta/src/overworld.rs). Drawn over everything, so scenery never hides it.
 const INK = "#0d1a2c", GLYPH = { bang: "#e2553a", what: "#2d5fae", dots: INK, heart: "#e0457b", note: "#2f7175" };
 const bubbles = new Map();
 function bubbleTex(kind) {

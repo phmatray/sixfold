@@ -338,8 +338,9 @@ impl Game {
     }
 
     /// Script the next coin results (tests and scripted scenarios).
-    #[cfg(test)]
-    pub(crate) fn force_coins(&mut self, coins: &[bool]) {
+    #[cfg(any(test, feature = "testkit"))]
+    #[doc(hidden)]
+    pub fn force_coins(&mut self, coins: &[bool]) {
         self.forced_coins.extend(coins);
     }
 
@@ -417,8 +418,9 @@ impl Game {
     /// What holds between any two actions; a broken one is an engine bug. The
     /// AI playtests check it after every action, so each game they play is also
     /// a fuzz run.
-    #[cfg(test)]
-    pub(crate) fn check_invariants(&self) -> Result<(), String> {
+    #[cfg(any(test, feature = "testkit"))]
+    #[doc(hidden)]
+    pub fn check_invariants(&self) -> Result<(), String> {
         if self.winner.is_some() != self.prompt.is_none() {
             return Err("a game waits on a prompt exactly while nobody has won".into());
         }

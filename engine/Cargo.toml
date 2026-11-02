@@ -3,10 +3,16 @@ name = "sixfold-engine"
 edition.workspace = true
 version.workspace = true
 license.workspace = true
-description = "Pure-Rust rules engine for the trading card game (no WASM/UI deps)."
+description = "Pure-Rust rules engine for the trading card game: the duel, cards and AI (no WASM/UI deps)."
 
 [dependencies]
 
-# Host-only: the map data test reads the world's JSON. Never in the wasm build.
+[features]
+# The test cards and helpers, for sixfold-meta's tests (its dev-dependency turns it on). Never in a
+# shipped build: CI fails if sixfold-web's tree has it. A workspace-wide `cargo test` unifies features,
+# so the web tests then see the test cards too; CI runs `cargo test -p sixfold-web` on its own, without.
+testkit = []
+
+# Host-only: the French typography test reads the world's JSON. Never in the wasm build.
 [dev-dependencies]
 serde_json = "1"

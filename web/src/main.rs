@@ -172,10 +172,10 @@ fn App() -> impl IntoView {
     stats::provide();
     input::provide();
     // A save from before promos: hand over those of rivals already beaten.
-    let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
-    let profile = expect_context::<RwSignal<sixfold_engine::profile::Profile>>();
+    let progress = expect_context::<RwSignal<sixfold_meta::overworld::Progress>>();
+    let profile = expect_context::<RwSignal<sixfold_meta::profile::Profile>>();
     profile.update(|pr| {
-        progress.with_untracked(|p| _ = sixfold_engine::campaign::backfill_promos(p, pr))
+        progress.with_untracked(|p| _ = sixfold_meta::campaign::backfill_promos(p, pr))
     });
     // Each screen starts with nothing selected in the inspector (and at the
     // top: no screen scrolls as a page, and its own scroller is new).
@@ -384,7 +384,7 @@ fn MatchScreen() -> impl IntoView {
         .setup
         .with_value(|s| s.as_ref().map_or(Screen::Title, |s| s.back));
     // Quitting a Gauntlet duel before it ends forfeits the run.
-    let progress = expect_context::<RwSignal<sixfold_engine::overworld::Progress>>();
+    let progress = expect_context::<RwSignal<sixfold_meta::overworld::Progress>>();
     let gauntlet = ctl.setup.with_value(|s| {
         s.as_ref()
             .is_some_and(|s| s.post == Some(ctl::Post::Gauntlet))
@@ -395,7 +395,7 @@ fn MatchScreen() -> impl IntoView {
     };
     let forfeit = move || {
         if gauntlet && !over() {
-            progress.update(sixfold_engine::endgame::abandon);
+            progress.update(sixfold_meta::endgame::abandon);
         }
     };
     // Leaving a duel under way asks first (it can't be resumed, and in the
@@ -404,7 +404,7 @@ fn MatchScreen() -> impl IntoView {
     let story = ctl
         .setup
         .with_value(|s| s.as_ref().and_then(|s| s.face()))
-        .and_then(sixfold_engine::duelists::duelist)
+        .and_then(sixfold_meta::duelists::duelist)
         .filter(|t| t.story())
         .map(|t| t.name);
     let asking = RwSignal::new(false);

@@ -1,0 +1,14 @@
+[package]
+name = "sixfold-meta"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+description = "The game around the duel: campaign, world, shop, collection, saves (pure Rust, no WASM/UI deps)."
+
+[dependencies]
+sixfold-engine = { path = "../engine" }
+
+# Host-only: the map data test reads the world's JSON. Never in the wasm build.
+[dev-dependencies]
+sixfold-engine = { path = "../engine", features = ["testkit"] }
+serde_json = "1"

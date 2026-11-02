@@ -106,7 +106,7 @@ test("Marlo's entrance plays as you step toward him, and Escape lands on his cha
   await expect(offer).toBeHidden();
   expect((await readSave(page)).progress?.[0]).toContain("f:met_marlo");
   // Input is back: a walk is taken (none is while a scene plays). Not waited out: on CI's software GL a
-  // step takes many seconds. `!flag:met_marlo` keeps the ring quiet from now on (engine/tests/world_data.rs).
+  // step takes many seconds. `!flag:met_marlo` keeps the ring quiet from now on (meta/tests/world_data.rs).
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
   expect(await walk(page, 22, 19)).toBeGreaterThan(0);
 });
@@ -226,6 +226,44 @@ test("a seal duel opens on its title card and wears its region's colour; a route
   await expect(page.getByRole("list", { name: /^Your hand/ }).getByRole("button", { name: /, playable$/ }).first()).toBeVisible();
   await expect(page.getByRole("dialog", { name: /^Seal of/ })).toHaveCount(0);
   await expect(page.locator(".duel")).not.toHaveClass(/seal-duel/);
+});
+
+// #241: the Enter that ended a duelist's lines, held or mashed, never also accepts the duel.
+test("holding Enter through a duelist's lines leaves the challenge card open", async ({ page }) => {
+  page.on("dialog", (d) => d.accept());
+  await title(page);
+  await menuItem(page, "Learn to play").click();
+  await page.getByRole("button", { name: "Skip the lesson" }).click();
+  await expect(menuItem(page, "Continue")).toBeVisible();
+  await editSave(
+    page,
+    `secs.progress = [(secs.progress?.[0] ?? "") + ",f:intro,f:vouched,f:reveal_bellflats"]; secs.world_at = ["overworld,23,28,n"];`,
+  );
+  await page.reload();
+  await menuItem(page, "Continue").click();
+  await loaded(page);
+  await expect(page.getByRole("button", { name: /^Talk to Tobin/ })).toBeVisible();
+  await page.keyboard.press("e");
+  const talk = page.locator(".talk-box");
+  await expect(talk).toBeVisible({ timeout: 60_000 });
+  // Key held down: Playwright sends auto-repeats (repeat: true) for every further down.
+  while (await talk.isVisible()) {
+    await page.keyboard.down("Enter");
+    await page.waitForTimeout(100);
+  }
+  const offer = page.getByRole("dialog", { name: "Challenge Tobin?" });
+  await expect(offer).toBeVisible();
+  for (let i = 0; i < 15; i++) {
+    await page.keyboard.down("Enter");
+    await page.waitForTimeout(100);
+  }
+  await expect(offer).toBeVisible();
+  await expect(page.locator(".duel")).toHaveCount(0);
+  await page.keyboard.up("Enter");
+  await page.waitForTimeout(600);
+  // A fresh press after the guard accepts.
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".duel")).toBeVisible();
 });
 
 // #153: back from the first win, the seal is won on stage; Escape keeps the seal, and it plays once.

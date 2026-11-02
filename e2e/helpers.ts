@@ -95,6 +95,8 @@ export function menuItem(page: Page, label: string) {
  * same control, nor a key land before the app moved focus itself.
  */
 export async function moveTo(page: Page, target: Locator, key = "Tab", tries = 60) {
+  // macOS WebKit's plain Tab reaches only text fields; Safari's Option+Tab reaches every control.
+  if (process.platform === "darwin" && page.context().browser()?.browserType().name() === "webkit") key = key.replace("Tab", "Alt+Tab").replace("Shift+Alt+Tab", "Alt+Shift+Tab");
   const here = () => target.evaluate((el) => el === document.activeElement, undefined, { timeout: 2_000 }).catch(() => false);
   for (let i = 0; i < tries; i++) {
     if (await here()) return;

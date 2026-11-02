@@ -32,7 +32,8 @@ test.describe("with motion", () => {
     await expect.poll(async () => (await life(page))?.leaves ?? 0).toBeGreaterThan(0);
 
     await at(page, "gullhaven", 19, 16);
-    await expect.poll(async () => (await life(page))?.boats.length).toBe(1);
+    // Two docking boats since the Tide pass (#266): the pier at 19,17 and the one at 36,24.
+    await expect.poll(async () => (await life(page))?.boats.length).toBe(2);
     await frames(page); // the new map compiled its shaders: the page takes clicks again
     await page.getByRole("button", { name: "Menu", exact: true }).click();
     await expect(page.getByRole("dialog", { name: "Menu" })).toBeVisible();

@@ -44,7 +44,7 @@ version=$( (echo "$files"; cat index.html; find ./world ./vendor -name '*.js' | 
   echo '];'
   printf 'const WORLD = {'
   sep=''
-  for d in maps textures assets; do find "./world/$d" -type f ! -name '.*' | LC_ALL=C sort; done | xargs cksum |
+  for d in maps shots textures assets; do find "./world/$d" -type f ! -name '.*' | LC_ALL=C sort; done | xargs cksum |
     while read -r sum size f; do printf '%s"%s":"%s-%s"' "$sep" "$f" "$sum" "$size"; sep=', '; done
   echo '};'
   cat "$TRUNK_SOURCE_DIR/sw.js"

@@ -1,7 +1,7 @@
 # Boosters / Boosters
 
 How a pack is built, what each booster favours, and the odds that follow. The code is
-`engine/src/booster.rs`. The tests there check this page: `slot_rates_match_the_design` opens 12,000
+`meta/src/booster.rs`. The tests there check this page: `slot_rates_match_the_design` opens 12,000
 seeded packs of every booster. The numbers below come from `booster_report`, which opens 40,000 packs per
 booster and completes each set 400 times:
 
@@ -116,7 +116,7 @@ too. That is the "play, packs and crafting together" of `docs/WORLD_DESIGN.md` �
 ### 6. Effect on the campaign
 
 The boosters made the campaign easier. Over 16 pack seeds with no duel budget, the automatic
-playthrough of `engine/src/playtest.rs` (`campaign_sweep`) took a median of 52 duels (40–105) with
+playthrough of `meta/src/playtest.rs` (`campaign_sweep`) took a median of 52 duels (40–105) with
 these packs, against 65 (44–100) with the 1.x packs: its greedy deck builder gets more cards of the
 types it buys. The 1.3 rules (`docs/BALANCE.md`) make rivals harder to beat and bring the median back
 to 62 (38–83). The 1.3 holo rate helps: with the old one pack in three, the same rules take a median of
@@ -243,7 +243,7 @@ ensemble » de `docs/WORLD_DESIGN.md` §3.4.
 ### 6. Effet sur la campagne
 
 Les boosters ont rendu la campagne plus facile. Sur 16 graines de boosters et sans plafond de duels,
-la partie automatique de `engine/src/playtest.rs` (`campaign_sweep`) demandait une médiane de 52
+la partie automatique de `meta/src/playtest.rs` (`campaign_sweep`) demandait une médiane de 52
 duels (40–105) avec ces boosters, contre 65 (44–100) avec ceux de la 1.x : son constructeur de deck
 glouton reçoit plus de cartes des types qu'il achète. Les règles de la 1.3 (`docs/BALANCE.md`)
 rendent les rivaux plus durs à battre et ramènent la médiane à 62 (38–83). Le taux de Holo de la 1.3

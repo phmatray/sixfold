@@ -5,7 +5,7 @@ import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = fileURLToPath(new URL("../web/dist/", import.meta.url));
+const root = process.env.DIST ? process.env.DIST.replace(/\/?$/, "/") : fileURLToPath(new URL("../web/dist/", import.meta.url)); // DIST: another build, e.g. a debug one for ?debug
 const types = {
   ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".wasm": "application/wasm",
   ".json": "application/json", ".webmanifest": "application/manifest+json", ".svg": "image/svg+xml",

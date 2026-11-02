@@ -3,6 +3,7 @@
   "title_fr": "Les Grèves de la Cloche",
   "region": "tide",
   "kind": "site",
+  "level_design": 2,
   "music": "tide",
   "life": {
     "critters": [
@@ -25,6 +26,22 @@
           27
         ],
         "n": 2
+      }
+    ],
+    "perch": [
+      {
+        "at": [
+          [
+            34,
+            25,
+            1.2
+          ],
+          [
+            28,
+            25,
+            1.2
+          ]
+        ]
       }
     ]
   },
@@ -1637,7 +1654,22 @@
       "give": "coins:100",
       "text": "The tower's lamp is lit tonight, though no one keeps it. Under it, in a tin box tied with tarred string: Facets, and a note: \"for whoever comes to look\".",
       "text_fr": "La lampe de la tour est allumée ce soir, alors que personne ne l'entretient. Dessous, dans une boîte en fer nouée de ficelle goudronnée : des Facettes, et un mot : « pour qui viendra voir ».",
-      "if": "time:night"
+      "if": "time:night",
+      "poi": "secret",
+      "secret": {
+        "id": "bell_lamp",
+        "kind": "environmental",
+        "clue": [
+          [
+            19,
+            13
+          ],
+          [
+            21,
+            13
+          ]
+        ]
+      }
     },
     {
       "x": 23,
@@ -1673,7 +1705,8 @@
       "give": "card:frosteel",
       "text": "You wade into the pool to the knee. On the bottom, among the anemones, a card in a glass jar, sealed with wax.",
       "text_fr": "Vous entrez dans la flaque jusqu'au genou. Au fond, parmi les anémones, une carte dans un bocal scellé à la cire.",
-      "if": "item:wading_boots"
+      "if": "item:wading_boots",
+      "poi": "secondary"
     },
     {
       "x": 11,
@@ -1695,10 +1728,10 @@
         },
         {
           "lines": [
-            "Anemones, a crab with opinions, and your reflection."
+            "Anemones, a crab with opinions, and your reflection. In those boots you can walk right in."
           ],
           "lines_fr": [
-            "Des anémones, un crabe qui a des opinions, et votre reflet."
+            "Des anémones, un crabe qui a des opinions, et votre reflet. Avec ces bottes, vous pouvez y entrer."
           ]
         }
       ]
@@ -1711,7 +1744,8 @@
       "give": "coins:80",
       "text": "Boots on, you wade out to the far side of the pool. Wedged under a ledge of weed: a pouch of Facets, crusted with tiny shells.",
       "text_fr": "Bottes aux pieds, vous traversez la flaque jusqu'au bord opposé. Coincée sous un rebord d'algues : une bourse de Facettes, couverte de minuscules coquillages.",
-      "if": "item:wading_boots"
+      "if": "item:wading_boots",
+      "poi": "secondary"
     },
     {
       "x": 28,
@@ -1733,10 +1767,10 @@
         },
         {
           "lines": [
-            "Anemones, a crab with opinions, and your reflection."
+            "Anemones, a crab with opinions, and your reflection. In those boots you can walk right in."
           ],
           "lines_fr": [
-            "Des anémones, un crabe qui a des opinions, et votre reflet."
+            "Des anémones, un crabe qui a des opinions, et votre reflet. Avec ces bottes, vous pouvez y entrer."
           ]
         }
       ]
@@ -1780,7 +1814,8 @@
             "warp:gullhaven:8:28:w"
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     }
   ],
   "warps": [
@@ -4254,11 +4289,13 @@
           "more": true,
           "lines": [
             "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
-            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables."
+            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
+            "Some nights the tower lamp lights itself. Stand on the sand below it and look up: it has been keeping something for years."
           ],
           "lines_fr": [
             "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
-            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées."
+            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées.",
+            "Certains soirs, la lampe de la tour s'allume toute seule. Place-toi sur le sable en dessous et lève les yeux : elle garde quelque chose depuis des années."
           ]
         },
         {
@@ -4300,12 +4337,34 @@
         {
           "lines": [
             "Hear the bell? It rings for the tide, for the boats, and for every duel by the stone.",
-            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables."
+            "I'm Gilda. I've kept this bell longer than anyone's printed tide tables.",
+            "Some nights the tower lamp lights itself. Stand on the sand below it and look up: it has been keeping something for years."
           ],
           "lines_fr": [
             "Tu entends la cloche ? Elle sonne pour la marée, pour les bateaux, et pour chaque duel près de la pierre.",
-            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées."
+            "Je suis Gilda. Je garde cette cloche depuis plus longtemps qu'on n'imprime des tables des marées.",
+            "Certains soirs, la lampe de la tour s'allume toute seule. Place-toi sur le sable en dessous et lève les yeux : elle garde quelque chose depuis des années."
           ]
+        }
+      ],
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            19,
+            17
+          ],
+          "face": "n",
+          "do": "look"
+        },
+        {
+          "from": "dusk",
+          "at": [
+            21,
+            17
+          ],
+          "face": "n",
+          "do": "look"
         }
       ]
     },
@@ -4706,6 +4765,20 @@
         "floating_lantern",
         "reeds"
       ]
+    },
+    {
+      "to": "gullhaven",
+      "depth": 5,
+      "scatter": [
+        "reeds",
+        "rock_sea"
+      ]
     }
+  ],
+  "view": [
+    [
+      36,
+      10
+    ]
   ]
 }

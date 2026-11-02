@@ -1,12 +1,12 @@
 [workspace]
 resolver = "2"
-members = ["engine", "web", "desktop"]
+members = ["engine", "meta", "web", "desktop"]
 # A bare `cargo test`/`cargo build` skips the desktop shell (it needs web/dist, and WebKitGTK on Linux).
-default-members = ["engine", "web"]
+default-members = ["engine", "meta", "web"]
 
 [workspace.package]
 edition = "2021"
-version = "1.12.0"
+version = "1.13.0"
 license = "MIT"
 
 # WASM release builds: optimize for size.

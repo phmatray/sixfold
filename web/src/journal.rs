@@ -1,13 +1,13 @@
 //! The Journal (`docs/WORLD_DESIGN.md` §5.4): the errands people gave, read
-//! from `world/quests.json` and ticked off by the engine's conditions, under
-//! the current objective (the engine's [`objective`]), then the Library: the
+//! from `world/quests.json` and ticked off by sixfold-meta's conditions, under
+//! the current objective (sixfold-meta's [`objective`]), then the Library: the
 //! books read on the world's shelves (#104), each opened again from here.
 
 use leptos::prelude::*;
-use sixfold_engine::books::{self, BOOKS};
-use sixfold_engine::objective::objective;
-use sixfold_engine::overworld::Progress;
 use sixfold_engine::{fr, tr};
+use sixfold_meta::books::{self, BOOKS};
+use sixfold_meta::objective::objective;
+use sixfold_meta::overworld::Progress;
 use wasm_bindgen::{JsCast, JsValue};
 
 use crate::world::field;
@@ -126,7 +126,7 @@ pub fn Journal() -> impl IntoView {
     let (next, tone) = progress.with_untracked(|p| {
         let o = objective(p);
         let tone = match o {
-            sixfold_engine::objective::Objective::Rival(r) => {
+            sixfold_meta::objective::Objective::Rival(r) => {
                 r.colors.first().map(|&c| crate::art::color_key(c))
             }
             _ => None,
