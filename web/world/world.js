@@ -62,7 +62,7 @@ import { playShot } from "./shot.js";
 import { createBook } from "./book.js";
 import { createHud } from "./hud.js";
 import * as pick from "./pick.js";
-import { ANGLES, framing, nextAngle, clampToRoom, leanOf } from "./camera.js";
+import { ANGLES, framing, nextAngle, clampToRoom, leanOf, easeStep } from "./camera.js";
 import { createLook } from "./look.js";
 import { TIERS, pickTier, readSaved, weak, unsure } from "./tier.js";
 
@@ -845,7 +845,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     // Camera: fixed pitch, on a soft spring behind a point a little ahead of a
     // walking hero; leans in after a while idle; indoors, kept inside the room.
     // A new angle (#148) eases the pitch and distance over about half a second (a cut on a new map or under reduced motion).
-    const ease = first || reduced || !camEase ? 1 : Math.min(1, dt * 6);
+    // easeStep caps the step per frame, so at any frame rate (a shot's hand-back on a slow machine too) it spans frames.
+    const ease = first || reduced || !camEase ? 1 : easeStep(dt);
     pitchNow += (cam.pitch - pitchNow) * ease;
     distNow += (dist - distNow) * ease;
     if (Math.abs(cam.pitch - pitchNow) < 0.01 && Math.abs(dist - distNow) < 0.001) camEase = false;
