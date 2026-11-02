@@ -1082,7 +1082,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   const stop = () => {
     alive = false;
     globalThis.sixfoldAudio?.ambience("");
-    humNear(null);
+    globalThis.sixfoldAudio?.hum?.((humWas = 0)); // whatever humNear last sent: the drone never outlives the world
     bustsReset();
     bustRT?.dispose();
     stopEditor();

@@ -104,6 +104,26 @@ test("the strongbox hums near its wall until it is found", async ({ page }) => {
   expect(await hum(page)).toBe(0);
 });
 
+test("the hum stops when the world unmounts", async ({ page }) => {
+  test.slow();
+  await page.goto("/");
+  await into(page, "undermine,2,7,e");
+  await warp(page, "undermine", 10, 6, "n");
+  await expect.poll(() => hum(page)).toBeGreaterThan(0.2);
+  // Out through the in-game menu to the title.
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Quit to title" }).click();
+  await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible();
+  await expect.poll(() => hum(page)).toBe(0);
+  // Back in, by the strongbox again; then another map replaces this one.
+  await menuItem(page, "Continue").click();
+  await loaded(page);
+  await warp(page, "undermine", 10, 6, "n");
+  await expect.poll(() => hum(page)).toBeGreaterThan(0.2);
+  await warp(page, "square", 25, 10, "s");
+  await expect.poll(() => hum(page)).toBe(0);
+});
+
 test("AC4: a secret found stays found: Teo's chest is opened after a reload, and Records counts it", async ({ page }) => {
   test.slow();
   await page.goto("/");
