@@ -76,6 +76,13 @@ test("AC1: the real world passes --strict unchanged", () => passes(WEB));
 
 test("the fixture world passes --strict", () => passes(world()));
 
+test("a prop with no rot fails --strict (the game would not draw it); the same prop turned passes", () => {
+  const r = run(world((m) => m.vale.props.push({ asset: "pine", x: 4, z: 12 })), "--strict");
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, /vale: pine 4,12 has no rot/, r.out);
+  passes(world((m) => m.vale.props.push({ asset: "pine", x: 4, z: 12, rot: 0 })));
+});
+
 test("AC2: a v2 map with no landmark fails; a visible one passes", () => {
   fails(world((m) => delete m.vale.props[1].landmark), "landmark");
   passes(world());

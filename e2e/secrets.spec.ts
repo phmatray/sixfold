@@ -127,8 +127,8 @@ test("the hum stops when the world unmounts", async ({ page }) => {
 test("AC4: a secret found stays found: Teo's chest is opened after a reload, and Records counts it", async ({ page }) => {
   test.slow();
   await page.goto("/");
-  // Nettie has told of her brother's sea chest, on top of the net locker the hero faces.
-  await into(page, "boathouse,2,2,w", ["heard_loft_chest"]);
+  // Nettie has told of her brother's sea chest, on top of the net locker the hero faces (north, by the back wall).
+  await into(page, "boathouse,6,2,n", ["heard_loft_chest"]);
   const look = page.getByRole("button", { name: /^Take a look/ });
   const box = page.locator(".talk-box");
   await expect(look).toBeVisible();
@@ -159,7 +159,7 @@ test("a find looted before secrets earns its secret on a second look", async ({ 
   test.slow();
   await page.goto("/");
   // Teo's chest taken by a save from before #116: found, but never counted a secret.
-  await into(page, "boathouse,2,2,w", ["heard_loft_chest", "found_i_loft_chest"]);
+  await into(page, "boathouse,6,2,n", ["heard_loft_chest", "found_i_loft_chest"]);
   expect(await flags(page)).not.toContain("f:secret_loft_chest");
   const box = page.locator(".talk-box");
   await expect(page.getByRole("button", { name: /^Take a look/ })).toBeVisible();
