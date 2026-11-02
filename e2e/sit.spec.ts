@@ -1,10 +1,8 @@
-import { expect, test, frames, menuItem, readSave, title, type Page } from "./helpers";
+import { expect, test, frames, menuItem, readSave, title, warpTo, type Page } from "./helpers";
 
 /** Where the save says the hero stands: `map,x,z,facing`. */
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
 const sitting = (page: Page) => page.evaluate(() => (document.querySelector(".world-host") as any)?.sixfoldStats?.().sitting);
-const warp = (page: Page, to: string, x: number, z: number, facing: string) =>
-  page.evaluate(([to, x, z, facing]) => (document.querySelector(".world-host") as any).sixfoldWarp(to, x, z, facing), [to, x, z, facing] as const);
 
 /** Past the lesson and the opening scene, into the world. */
 async function intoWorld(page: Page) {
@@ -42,7 +40,15 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
   await expect(page.getByRole("dialog", { name: "Menu" })).toBeHidden();
 
   // Facing away now: holding ArrowUp turns back and walks into the bench, which sits the hero, no E.
-  // That key points into the seat: still held, or pressed again, it leaves the hero sitting.
+  // Escape with that key still held stands up for good: the bench doesn't take the hero straight back.
+  await page.keyboard.down("ArrowUp");
+  await expect.poll(() => sitting(page)).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect.poll(() => sitting(page)).toBe(false);
+  await page.waitForTimeout(500); // well past the hold that walks
+  expect(await sitting(page)).toBe(false);
+  await page.keyboard.up("ArrowUp");
+  // Again (facing away once more): a key pointing into the seat, held or pressed again, leaves it sitting.
   await page.keyboard.down("ArrowUp");
   await expect.poll(() => sitting(page)).toBe(true);
   await frames(page);
@@ -51,11 +57,11 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
   await page.keyboard.press("ArrowUp");
   await frames(page);
   expect(await sitting(page)).toBe(true);
-  // Any other move stands up and walks on.
+  // Any other move stands up and walks on, off the tile in front of the bench.
   await page.keyboard.down("ArrowLeft");
   await expect.poll(() => sitting(page)).toBe(false);
+  await expect.poll(async () => Number((await at(page)).match(/^overworld,(\d+),17,w$/)?.[1] ?? 99)).toBeLessThan(22);
   await page.keyboard.up("ArrowLeft");
-  await expect.poll(() => at(page)).toMatch(/^overworld,\d+,17,w$/);
 
   // Seated, a reload stands the hero on the tile in front of the bench.
   await page.evaluate(() => (document.querySelector(".world-host") as any).sixfoldWarp("overworld", 22, 17, "n"));
@@ -81,6 +87,12 @@ test("a find taken from under a bench gives the place back to sitting", async ({
   await expect.poll(() => at(page)).toBe("square,21,19,s");
   const look = page.getByRole("button", { name: /^Take a look/ });
   await expect(look).toBeVisible();
+  // Walking into the bench offers the find, as the prompt does: it doesn't sit on it.
+  await page.keyboard.down("ArrowDown");
+  await page.waitForTimeout(500); // well past the hold that walks
+  await page.keyboard.up("ArrowDown");
+  expect(await sitting(page)).toBe(false);
+  await expect(look).toBeVisible();
   await page.keyboard.press("e");
   await expect(page.locator("#talk-live")).toHaveText(/stuck to the slats/);
   const note = page.getByRole("button", { name: /^A note/ });
@@ -97,7 +109,7 @@ test("a tap toward a seat only turns, and walking into one from behind doesn't s
   // In front of the meadow's first bench: sit (E) and stand up (Escape), so the hero faces away from it with no
   // warp fading. A tap: down, then up in the very next frame, once the game's own frame has seen it (well under
   // the hold that walks), whatever the frame rate.
-  await warp(page, "overworld", 22, 17, "n");
+  await warpTo(page, "overworld", 22, 17, "n");
   await expect(page.getByRole("button", { name: /^Sit/ })).toBeVisible();
   await page.keyboard.press("e");
   await expect.poll(() => sitting(page)).toBe(true);
@@ -113,14 +125,31 @@ test("a tap toward a seat only turns, and walking into one from behind doesn't s
   await frames(page);
   expect(await sitting(page)).toBe(false);
 
-  // Behind the bench (its back to the north): pushing into the backrest is just a wall.
-  await warp(page, "overworld", 22, 15, "s");
+  // Behind the bench (its back to the north), facing away: holding ArrowDown turns the hero (so the world took
+  // the key), then pushes into the backrest, which is just a wall.
+  await warpTo(page, "overworld", 22, 15, "n");
+  await page.keyboard.down("ArrowDown");
   await expect.poll(() => at(page)).toBe("overworld,22,15,s");
-  await page.keyboard.down("ArrowDown"); // kept through the warp's fade, then pushed for the rest
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(500); // well past the hold that walks
   await page.keyboard.up("ArrowDown");
   expect(await sitting(page)).toBe(false);
-  await expect.poll(() => at(page)).toBe("overworld,22,15,s");
+  expect(await at(page)).toBe("overworld,22,15,s");
+});
+
+test("on a phone, holding the pad into a seat sits, and another way stands up @phone", async ({ page }) => {
+  await intoWorld(page);
+  const pad = page.getByRole("group", { name: "Walk" });
+  const hold = (name: string, type: string) => pad.getByRole("button", { name }).dispatchEvent(type, { pointerId: 1, isPrimary: true });
+  // In front of the meadow's first bench, facing away: the pad's Up, held, turns back and sits.
+  await warpTo(page, "overworld", 22, 17, "s");
+  await hold("Up", "pointerdown");
+  await expect.poll(() => sitting(page)).toBe(true);
+  await frames(page);
+  expect(await sitting(page)).toBe(true);
+  await hold("Up", "pointerup");
+  await hold("Left", "pointerdown");
+  await expect.poll(() => sitting(page)).toBe(false);
+  await hold("Left", "pointerup");
 });
 
 test.describe("with motion", () => {
@@ -140,8 +169,7 @@ test.describe("with motion", () => {
       ["lodge", 3, 6, "n", "ArrowUp", "w"], // chair, rot 270
     ];
     for (const [map, x, z, facing, key, face] of seats) {
-      await warp(page, map, x, z, facing);
-      await expect.poll(() => at(page)).toBe(`${map},${x},${z},${facing}`);
+      await warpTo(page, map, x, z, facing);
       await page.keyboard.down(key); // kept through the warp's fade
       const want = Math.atan2(DIR[face][0], DIR[face][1]);
       await expect

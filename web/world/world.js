@@ -329,12 +329,12 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const f = padDir(e);
     if (f) release(`pad-${f}`);
   };
-  // Keyboard or switch activation of a pad button (a click with no pointer): one step.
+  // Keyboard or switch activation of a pad button (a click with no pointer): one step, or onto the seat it meets.
   const padClick = (e) => {
     const f = padDir(e);
     if (!f || e.detail !== 0 || busy() || hero.step) return;
     if (hero.sit) return seats.stand(hero);
-    tryStep(f, 0);
+    if (!tryStep(f, 0) && facing()?.kind === "seat") act();
   };
   addEventListener("keydown", onKey);
   addEventListener("keydown", onEsc, true);
@@ -777,10 +777,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
           h.face = f;
           h.turnedAt = w.now;
           if (chained) tryStep(f, carry); // already walking: turn and keep going
-        } else if ((chained || w.now - h.turnedAt >= TURN_HOLD) && !tryStep(f, carry) && !busy()) {
-          const it = seats.facing(w, h); // walked into a seat it may sit on: sit, as the Sit prompt would
-          if (it?.kind === "seat") (w.path = []), seats.sit(h, it.place, reduced);
-        }
+        } else if ((chained || w.now - h.turnedAt >= TURN_HOLD) && !tryStep(f, carry) && facing()?.kind === "seat") act(); // walked into a seat the prompt offers: sit (the held moves are let go, as E does)
       } else if (w.path.length) {
         const npc = w.path.npc, near = npc && Object.keys(DIR).find((d) => h.x + DIR[d][0] === npc.x && h.z + DIR[d][1] === npc.z);
         if (near) {
