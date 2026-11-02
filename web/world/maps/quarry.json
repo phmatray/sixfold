@@ -2747,6 +2747,21 @@
       "if": "item:kiln_lantern",
       "locked": "Pitch black inside, and a cold draught that smells of wet stone. Far off, picks are knocking. You'd need a light to go in.",
       "locked_fr": "Noir d'encre là-dedans, et un courant d'air froid qui sent la pierre mouillée. Au loin, des pioches cognent. Il faudrait une lumière pour entrer."
+    },
+    {
+      "x": 4,
+      "z": 22,
+      "to": "undermine",
+      "label": "Go into the Undermine",
+      "label_fr": "Entrer dans les Galeries Basses",
+      "spawn": {
+        "x": 47,
+        "z": 7,
+        "facing": "w"
+      },
+      "if": "item:kiln_lantern",
+      "locked": "Pitch black inside, and a cold draught that smells of wet stone. Far off, picks are knocking. You'd need a light to go in.",
+      "locked_fr": "Noir d'encre là-dedans, et un courant d'air froid qui sent la pierre mouillée. Au loin, des pioches cognent. Il faudrait une lumière pour entrer."
     }
   ],
   "exits": [
