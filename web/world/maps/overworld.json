@@ -2707,8 +2707,8 @@
     },
     {
       "kind": "sign",
-      "text": "Crossroads. North: the duel hall and the quarry road. West: Fernhollow Trail. East: Saltwind Boardwalk. South: Brightwell Square.",
-      "text_fr": "Carrefour. Nord : la salle des duels et la route de la carrière. Ouest : Sentier de Creuse-Fougère. Est : Promenade de Ventsalé. Sud : Place de Clairpuits.",
+      "text": "Crossroads. North: the duel hall and the quarry road. West: the Swap Shop and its old orchard, then Fernhollow Trail. East: Saltwind Boardwalk. South: Brightwell Square.",
+      "text_fr": "Carrefour. Nord : la salle des duels et la route de la carrière. Ouest : la Bourse aux cartes et son vieux verger, puis le Sentier de Creuse-Fougère. Est : Promenade de Ventsalé. Sud : Place de Clairpuits.",
       "x": 28,
       "z": 18
     },

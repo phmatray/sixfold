@@ -445,6 +445,9 @@ impl Ai {
 
     /// The main-phase actions worth trying: Normal's pick, attacks, then the
     /// rest, without plays the turn's memory rules out, one per distinct card.
+    /// A retreat is tried only when Normal itself picks it, and ending the
+    /// turn is not tried instead of an attack: in the Dream Veil mirror those
+    /// departures cost more games than the look-ahead could see they cost.
     fn candidates(&self, x: &Ctx, pick: Action) -> Vec<Action> {
         let mut seen = Vec::new();
         let mut out = vec![pick];
@@ -452,7 +455,8 @@ impl Ai {
         let rest = x.legal.iter().filter(|a| !matches!(a, Action::Attack(_)));
         for &a in attacks.chain(rest) {
             let key = match a {
-                Action::Retreat if self.retreated => continue,
+                Action::Retreat if self.retreated || pick != Action::Retreat => continue,
+                Action::Done if matches!(pick, Action::Attack(_)) => continue,
                 Action::UsePower(slot) => {
                     let used = x.at(x.me, slot).map(|c| Play::Power(c.uid));
                     if used.is_some_and(|p| self.done.contains(&p)) {
@@ -556,7 +560,37 @@ fn evaluate(g: &Game, me: usize) -> i32 {
         &WEIGHTS
     };
     let z: f32 = f.iter().zip(w).map(|(a, b)| a * b).sum();
-    (1000.0 / (1.0 + (-z).exp())) as i32
+    (1000.0 / (1.0 + (-z).exp())) as i32 + status_value(g, me)
+}
+
+/// What a stalled Active is worth, in thousandths of a win: a Special
+/// condition (the fitted model never sees one: it is rare in Normal
+/// self-play) and a poison level. Each side's total stays under
+/// `STATUS_CAP`, a small fraction of a prize, so it only tips close calls.
+const SPECIAL_VALUE: [(Special, i32); 3] = [
+    (Special::Asleep, 20),
+    (Special::Paralyzed, 15),
+    (Special::Confused, 12),
+];
+const POISON_VALUE: i32 = 5;
+const STATUS_CAP: i32 = 30;
+
+/// Conditions on the opponent's Active count for `me`, mine against me.
+fn status_value(g: &Game, me: usize) -> i32 {
+    let worth = |p: usize| {
+        let c = g.players[p].condition;
+        let special = SPECIAL_VALUE
+            .iter()
+            .find(|&&(s, _)| Some(s) == c.special)
+            .map_or(0, |&(_, v)| v);
+        let poison = match c.poison {
+            Poison::None => 0,
+            Poison::Poisoned => POISON_VALUE,
+            Poison::DoublePoisoned => 2 * POISON_VALUE,
+        };
+        (special + poison).min(STATUS_CAP)
+    };
+    worth(1 - me) - worth(me)
 }
 
 const FEATURES: usize = 27;
@@ -2227,10 +2261,11 @@ mod tests {
 
     /// Hard against Normal in mirror matches: each prebuilt deck against
     /// itself, `games` seeded games per deck, seats alternating. Returns
-    /// Hard's (wins, games) and the most look-ahead applies one decision used.
-    fn hard_vs_normal(games: u64) -> (u32, u32, u32) {
+    /// Hard's (wins, games), the most look-ahead applies one decision used and
+    /// Hard's wins per deck.
+    fn hard_vs_normal(games: u64) -> (u32, u32, u32, Vec<u32>) {
         use crate::decks::PREBUILT;
-        let (mut wins, mut played, mut most) = (0, 0, 0);
+        let (mut wins, mut played, mut most, mut per_deck) = (0, 0, 0, Vec::new());
         for (d, deck) in PREBUILT.iter().enumerate() {
             let mut deck_wins = 0;
             for n in 0..games {
@@ -2255,12 +2290,13 @@ mod tests {
                 }
                 deck_wins += u32::from(g.winner() == Some(hard));
             }
-            eprintln!("{:12} Hard won {deck_wins}/{games}", deck.name);
+            eprintln!("{:12} Hard won {deck_wins}/{games}", deck.name.en);
             wins += deck_wins;
             played += games as u32;
+            per_deck.push(deck_wins);
         }
         eprintln!("Hard vs Normal: {wins}/{played}, at most {most} applies per decision");
-        (wins, played, most)
+        (wins, played, most, per_deck)
     }
 
     /// Hard wins most mirror matches against Normal, and keeps to its
@@ -2268,7 +2304,7 @@ mod tests {
     /// check asks for 55%; the big run below holds Hard to 60%.
     #[test]
     fn hard_beats_normal_in_mirrors() {
-        let (wins, games, most) = hard_vs_normal(10);
+        let (wins, games, most, _) = hard_vs_normal(10);
         assert!(wins * 20 >= games * 11, "Hard won only {wins}/{games}");
         assert!(
             most <= NODE_BUDGET + CANDIDATES as u32 * ROLLOUT,
@@ -2282,9 +2318,117 @@ mod tests {
     #[ignore]
     fn hard_beats_normal_in_mirrors_big() {
         let start = std::time::Instant::now();
-        let (wins, games, _) = hard_vs_normal(50);
+        let (wins, games, _, per_deck) = hard_vs_normal(50);
         eprintln!("{:?} in all", start.elapsed());
         assert!(wins * 10 >= games * 6, "Hard won only {wins}/{games}");
+        for (deck, won) in crate::decks::PREBUILT.iter().zip(per_deck) {
+            assert!(
+                won > 25,
+                "Hard won only {won}/50 in the {} mirror",
+                deck.name.en
+            );
+        }
+    }
+
+    /// The stall plan is worth something: an asleep opponent Active scores
+    /// higher for me, an asleep Active of mine lower.
+    #[test]
+    fn evaluate_values_a_stalled_opponent() {
+        let mut g = main_phase(0);
+        let base = evaluate(&g, 0);
+        g.players[1].condition.special = Some(Special::Asleep);
+        assert!(evaluate(&g, 0) > base);
+        g.players[1].condition.special = None;
+        g.players[0].condition.special = Some(Special::Asleep);
+        assert!(evaluate(&g, 0) < base);
+    }
+
+    /// The family an action belongs to, for counting what Hard does.
+    fn action_kind(a: Action) -> &'static str {
+        match a {
+            Action::Attack(_) => "attack",
+            Action::Retreat => "retreat",
+            Action::AttachEnergy { .. } => "attach",
+            Action::Evolve { .. } => "evolve",
+            Action::PlayGear(_) => "gear",
+            Action::UsePower(_) => "power",
+            Action::PlayBasic(_) => "basic",
+            Action::Done => "end",
+            _ => "other",
+        }
+    }
+
+    #[test]
+    fn action_kind_names_each_action_family() {
+        assert_eq!(action_kind(Action::Retreat), "retreat");
+        assert_eq!(action_kind(Action::Attack(0)), "attack");
+        assert_eq!(
+            action_kind(Action::AttachEnergy { hand: 0, slot: 0 }),
+            "attach"
+        );
+    }
+
+    /// Where Hard departs from Normal in the Dream Veil mirror, by kind of
+    /// departure ("Normal's kind -> Hard's kind"), counted in games Hard won
+    /// and lost (run with `--release -- --ignored --nocapture`).
+    #[test]
+    #[ignore]
+    fn hard_deviations_dream_veil() {
+        use crate::decks::PREBUILT;
+        use std::collections::BTreeMap;
+        let (d, deck) = PREBUILT
+            .iter()
+            .enumerate()
+            .find(|(_, k)| k.name.en == "Dream Veil")
+            .unwrap();
+        // kind -> (deviations in won games, in lost games, won games with it, lost games with it)
+        let mut tally: BTreeMap<String, [u32; 4]> = BTreeMap::new();
+        let (mut won, mut games) = (0, 0u32);
+        for n in 0..50u64 {
+            let seed = d as u64 * 1000 + n;
+            let hard = (n % 2) as usize;
+            let mut g = Game::new([deck.cards(), deck.cards()], seed, Config::default()).unwrap();
+            let mut ais = [0, 1].map(|i| {
+                let level = if i == hard {
+                    Difficulty::Hard
+                } else {
+                    Difficulty::Normal
+                };
+                Ai::new(seed * 2 + i as u64, level)
+            });
+            let mut counts: BTreeMap<String, u32> = BTreeMap::new();
+            while g.winner().is_none() {
+                let p = g.prompt().unwrap().player;
+                // What Normal would do from Hard's own memory of the turn.
+                let mut normal = ais[p].clone();
+                normal.difficulty = Difficulty::Normal;
+                let a = ais[p].choose_action(&g, p);
+                if p == hard && g.prompt().unwrap().kind == PromptKind::MainPhase {
+                    let theirs = normal.choose_action(&g, p);
+                    if theirs != a {
+                        let key = format!("{} -> {}", action_kind(theirs), action_kind(a));
+                        *counts.entry(key).or_default() += 1;
+                    }
+                }
+                g.apply(a).unwrap();
+            }
+            let win = g.winner() == Some(hard);
+            won += u32::from(win);
+            games += 1;
+            for (k, c) in counts {
+                let t = tally.entry(k).or_default();
+                let i = if win { 0 } else { 1 };
+                t[i] += c;
+                t[2 + i] += 1;
+            }
+        }
+        eprintln!("Dream Veil: Hard won {won}/{games}");
+        for (k, t) in tally {
+            eprintln!(
+                "{k:18}: in {} won / {} lost games, {} + {} deviations",
+                t[2], t[3], t[0], t[1]
+            );
+        }
     }
 
     /// Hard's decision time on this machine: mean and worst over a few games.
