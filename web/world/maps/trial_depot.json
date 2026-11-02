@@ -143,107 +143,107 @@
         ]
       ],
       "if": "flag:trial_depot1",
-      "prop_closed": "crates",
+      "prop_closed": "crate_stack",
       "text": "Crates stacked to the lintel. Put the front room in order first.",
       "text_fr": "Des caisses empilées jusqu'au linteau. Rangez d'abord la première salle."
     }
   ],
   "props": [
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 2,
       "z": 2,
       "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 2,
       "z": 3,
-      "rot": 270
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 2,
       "z": 4,
-      "rot": 180
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 3,
       "z": 4,
-      "rot": 90
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 5,
       "z": 4,
-      "rot": 270
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 1,
       "z": 6,
-      "rot": 90
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 2,
       "z": 6,
       "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 5,
       "z": 6,
-      "rot": 90
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 6,
       "z": 6,
       "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 1,
       "z": 7,
       "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 1,
       "z": 8,
-      "rot": 270
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 3,
       "z": 8,
-      "rot": 90
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 5,
       "z": 8,
-      "rot": 270
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 6,
       "z": 8,
-      "rot": 180
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 1,
       "z": 9,
-      "rot": 180
+      "rot": 0
     },
     {
-      "asset": "crates",
+      "asset": "crate_stack",
       "x": 1,
       "z": 10,
-      "rot": 90
+      "rot": 0
     },
     {
       "asset": "exit_mat",

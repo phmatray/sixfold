@@ -25,7 +25,7 @@ const DECAL = { polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits
 
 // A wooden crate: planks, a darker frame round its top and foot, a cross brace on the side the camera sees.
 function crate() {
-  const wood = toon("#c39463"), frame = toon("#7d5634");
+  const wood = toon("#ddb077"), frame = toon("#8a5f38"); // warm and light: the crates that move (the walls are dark green stacks)
   const g = group(mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), wood, 0, 0.42, 0));
   // The frames stand proud of the box (its top at 0.82): no two faces share a plane, so nothing flickers.
   for (const y of [0.06, 0.8]) g.add(mesh(new THREE.BoxGeometry(0.86, 0.08, 0.86), frame, 0, y, 0));

@@ -111,6 +111,8 @@ if (!only || only === "logs") {
   await enter("trial_logs", 9, 4, "e");
   await shot("3-logs");
   await play(plan("trial_logs", "logs1"), "3-logs-first", "trial_logs");
+  await pad("n"); // up into the passage, where the second room starts
+  await at(...map("trial_logs").trials[1].start, "trial_logs");
   await play(plan("trial_logs", "logs2", map("trial_logs").trials[1].start), "3-logs-second", "trial_logs");
   await talk("3-logs-done");
 }
