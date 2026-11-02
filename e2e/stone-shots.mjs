@@ -18,7 +18,7 @@ const DEVICES = {
 };
 const SPOTS = [
   { map: "undermine", at: [3, 7], facing: "e" }, // the Scree Pass mouth, rails running east
-  { map: "undermine", at: [30, 9], facing: "n" }, // the crystal bed, the cave's landmark
+  { map: "undermine", at: [29, 9], facing: "n" }, // the crystal bed, the cave's landmark
   { map: "screepass", at: [21, 34], facing: "n" }, // the foot of the pass, the cave mouth
   { map: "screepass", at: [22, 22], facing: "w" }, // the prospectors' camp
   { map: "anvilstead", at: [25, 30], facing: "n" }, // the plaza and its fountain, the headframe beyond
