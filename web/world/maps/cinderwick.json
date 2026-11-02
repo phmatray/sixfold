@@ -3348,12 +3348,6 @@
             "sfx:chime"
           ]
         }
-      ],
-      "barks": [
-        {
-          "say": "Shh. The rack is singing.",
-          "say_fr": "Chut. Le séchoir chante."
-        }
       ]
     },
     {
@@ -3490,7 +3484,8 @@
         },
         {
           "say": "Cinza is already out on the quarry road!",
-          "say_fr": "Cinza est déjà sur la route de la carrière !"
+          "say_fr": "Cinza est déjà sur la route de la carrière !",
+          "if": "!beat:cinza"
         }
       ],
       "routine": [
