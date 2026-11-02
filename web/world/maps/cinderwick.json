@@ -2971,8 +2971,8 @@
     },
     {
       "kind": "sign",
-      "text": "North: Cinderwick. South: Emberstep Quarry, and the meadow beyond.",
-      "text_fr": "Nord : Mèche-Cendre. Sud : la Carrière de Pas-de-Braise, et le pré au-delà.",
+      "text": "North: Cinderwick, and past the plaza, up the Kiln road, the Kilnmouth. South: Emberstep Quarry, and the meadow beyond.",
+      "text_fr": "Nord : Mèche-Cendre, puis, après la place, par la route du Four, la Gueule-du-Four. Sud : la Carrière de Pas-de-Braise, et le pré au-delà.",
       "x": 22,
       "z": 31
     },
@@ -3119,7 +3119,7 @@
       "x": 27,
       "z": 12,
       "text": "The Kilnmouth: north, up the Kiln road.",
-      "text_fr": "Le Kilnmouth : au nord, par la route du Four.",
+      "text_fr": "La Gueule-du-Four : au nord, par la route du Four.",
       "name": "Kiln road",
       "name_fr": "Route du Four"
     }
