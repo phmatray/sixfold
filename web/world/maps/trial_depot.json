@@ -122,7 +122,7 @@
           "Four crates, four marks: the back store is in order. (Prototype: here the keeper would pay you.)"
         ],
         "lines_fr": [
-          "Quatre caisses, quatre marques : la réserve est en ordre. (Prototype : ici, le magasinier vous paierait.)"
+          "Quatre caisses, quatre marques : la réserve est en ordre. (Prototype : ici, le magasinier vous paierait.)"
         ],
         "do": [
           "flag:trial_depot2",
