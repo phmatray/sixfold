@@ -171,3 +171,50 @@ test("a find looted before secrets earns its secret on a second look", async ({ 
   }
   await expect.poll(() => flags(page)).toContain("f:secret_loft_chest");
 });
+
+/** Hold an arrow key until `done` holds. */
+async function hold(page: Page, key: string, done: () => Promise<boolean>) {
+  await page.keyboard.down(key);
+  try {
+    await expect.poll(done, { timeout: 30_000, intervals: [50] }).toBe(true);
+  } finally {
+    await page.keyboard.up(key);
+  }
+}
+
+test("AC2 (#228): Edda is met from the Cinderwick road, and her talk leads to the cold vent", async ({ page }) => {
+  test.slow();
+  await page.goto("/");
+  await into(page, "kilnmouth,20,27,n");
+  // The arrival scene holds the hero until it is skipped (it ignores a skip in its first 400 ms, #155).
+  const skip = page.getByRole("button", { name: /^Skip/ });
+  await expect(skip).toBeVisible();
+  await page.waitForTimeout(450);
+  await page.keyboard.press("Escape");
+  await expect(skip).toBeHidden();
+  const at = () => page.evaluate(() => (document.querySelector(".world-host") as any).sixfoldStats().at as number[]);
+  // West along the crater floor from the arrival path, then up to her: no terrace, no stairs.
+  await hold(page, "ArrowLeft", async () => (await at())[0] <= 18); // a held key runs one tile past its release
+  const edda = page.getByRole("button", { name: /^Talk to Edda/ });
+  await hold(page, "ArrowUp", async () => (await at())[1] <= 26);
+  await page.waitForTimeout(800);
+  await expect(edda).toBeVisible();
+  await talk(page, "Edda");
+  await expect.poll(() => flags(page)).toContain("f:talked_edda");
+
+  // Her words lead to the far west corner; at night the vent gives its card.
+  await host(page, "sixfoldClock", 23 * 60);
+  await warp(page, "kilnmouth", 8, 25, "n");
+  await hold(page, "ArrowUp", async () => (await at())[1] <= 24);
+  const look = page.getByRole("button", { name: /^Take a look/ });
+  await expect(look).toBeVisible();
+  await page.keyboard.press("e");
+  const box = page.locator(".talk-box");
+  await expect(box).toBeVisible({ timeout: 60_000 });
+  while (await box.isVisible()) {
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(400);
+  }
+  await expect.poll(() => flags(page)).toContain("f:found_e_cold_vent");
+  expect(await flags(page)).toContain("f:secret_cold_vent");
+});

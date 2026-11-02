@@ -4,6 +4,82 @@
   "region": "hub",
   "kind": "hub",
   "music": "overworld",
+  "level_design": 2,
+  "life": {
+    "critters": [
+      {
+        "kind": "rabbit",
+        "zone": [
+          4,
+          23,
+          14,
+          31
+        ],
+        "n": 3
+      },
+      {
+        "kind": "rabbit",
+        "zone": [
+          38,
+          26,
+          50,
+          32
+        ],
+        "n": 2
+      },
+      {
+        "kind": "squirrel",
+        "zone": [
+          0,
+          0,
+          16,
+          5
+        ],
+        "n": 2
+      },
+      {
+        "kind": "hedgehog",
+        "zone": [
+          38,
+          26,
+          50,
+          32
+        ],
+        "n": 1
+      }
+    ],
+    "perch": [
+      {
+        "at": [
+          [
+            40,
+            3,
+            1.6
+          ],
+          [
+            48,
+            17,
+            1.6
+          ]
+        ]
+      }
+    ],
+    "leaves": {
+      "under": [
+        "tree",
+        "birch"
+      ],
+      "rate": 0.2
+    }
+  },
+  "calm": [
+    [
+      9,
+      4,
+      13,
+      8
+    ]
+  ],
   "width": 52,
   "height": 36,
   "tiles": [
@@ -280,7 +356,8 @@
       "asset": "stump",
       "x": 10,
       "z": 6,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "log",
@@ -2594,7 +2671,8 @@
       "asset": "windmill",
       "x": 43,
       "z": 3,
-      "rot": 0
+      "rot": 0,
+      "landmark": true
     },
     {
       "asset": "bush",
@@ -2624,13 +2702,15 @@
       "asset": "water_lilies",
       "x": 44,
       "z": 10,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "vegetable_patch",
       "x": 3,
       "z": 27,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "flower_planter",
@@ -2642,7 +2722,8 @@
       "asset": "flower_planter",
       "x": 12,
       "z": 18,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     }
   ],
   "gates": [
@@ -2707,8 +2788,8 @@
     },
     {
       "kind": "sign",
-      "text": "Crossroads. North: the duel hall and the quarry road. West: Fernhollow Trail. East: Saltwind Boardwalk. South: Brightwell Square.",
-      "text_fr": "Carrefour. Nord : la salle des duels et la route de la carrière. Ouest : Sentier de Creuse-Fougère. Est : Promenade de Ventsalé. Sud : Place de Clairpuits.",
+      "text": "Crossroads. North: the duel hall and the quarry road. West: the Swap Shop and its old orchard, then Fernhollow Trail. East: Saltwind Boardwalk. South: Brightwell Square.",
+      "text_fr": "Carrefour. Nord : la salle des duels et la route de la carrière. Ouest : la Bourse aux cartes et son vieux verger, puis le Sentier de Creuse-Fougère. Est : Promenade de Ventsalé. Sud : Place de Clairpuits.",
       "x": 28,
       "z": 18
     },
@@ -3051,6 +3132,12 @@
           "lines_fr": [
             "Ça tourne, ça tourne. Toujours aussi joli."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Fifth lap before lunch. Lovely.",
+          "say_fr": "Cinquième tour avant midi. Charmant."
         }
       ]
     },
