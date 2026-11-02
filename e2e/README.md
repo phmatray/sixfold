@@ -27,7 +27,7 @@ scene with nobody walking (#187). It opens installed Chrome in a visible window 
 `--graphics off|low|high` saves that graphics tier first (#225; else Auto). Each run prints the tier
 actually in force, since the world's frame-time probe may step High down to Low.
 
-`node perf-night.mjs [--maps a,b] [--runs N]` (after the release build) reports the frame time at night (22:00) on the phone viewport with the CPU slowed 4x on the busiest map of a region (default `kilnmouth`, `anvilstead`; #264), and exits 1 when the main thread is busy over 16.7 ms a frame.
+`node perf-night-ember-stone.mjs [--maps a,b] [--runs N]` (after the release build) reports the frame time at night (22:00) on the phone viewport with the CPU slowed 4x on the busiest map of a region (default `kilnmouth`, `anvilstead`; #264), and exits 1 when the main thread is busy over 16.7 ms a frame.
 
 `node life-clips.mjs [url]` records an ~8 s, 1920x1080, 60 fps MP4 of each region's ambient life (#190: critters,
 perching birds, leaves, embers, Gullhaven's docking boat, the seal-site calm) by day with the HUD hidden, into

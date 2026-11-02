@@ -2,7 +2,7 @@
 // (390 x 844), the CPU slowed 4x, the hero standing in the middle of the map at 22:00. Modeled on perf-walkers.mjs.
 //
 //   cd web && trunk build --release
-//   cd ../e2e && npm ci && node perf-night.mjs [url] [--maps kilnmouth,anvilstead] [--runs 3] [--throttle 4] [--webkit]
+//   cd ../e2e && npm ci && node perf-night-ember-stone.mjs [url] [--maps kilnmouth,anvilstead] [--runs 3] [--throttle 4] [--webkit]
 //
 // Without `url` it serves ../web/dist itself (on PW_PORT, default 4403). It drives the installed Google Chrome in a
 // visible window (headless Chrome draws the world blank). Per map: warp (`el.sixfoldWarp`), hour 22:00
