@@ -3,6 +3,8 @@
 // tile in front of a place or beside it (never from behind), and that tile stays the hero's while it
 // sits: nobody walks onto it, it is what the game saves ("at"), and standing up lands back on it, so
 // the hero is never left inside the furniture and a reload stands it in front of the seat.
+// Walking into a place the Sit prompt offers (a held move past the turn, or a pad button) sits the hero too
+// (world.js); while it sits, a move pointing into its seat (`toward`) keeps it seated.
 // A map's prop with `seat: false` is scenery; a person with `sit: true` on a place sits there.
 // Sitting: turn round, then SitDown while backing onto the seat; Sit loops; StandUp undoes it.
 // Reduced motion cuts straight to the end of each. Route duelists leave a sitting hero be (duelist.js).
@@ -42,11 +44,14 @@ export function facing(w, hero) {
 // Sit `a` (the hero, or a person placed sitting: `now`) on place `pl`.
 export function sit(a, pl, reduced, now = false) {
   const cut = reduced || now;
-  a.sit = { ax: pl.ax, az: pl.az, y: pl.top - a.lap, face: pl.face, k: cut ? 1 : 0, s: cut ? 1 : 0, want: 1 };
+  a.sit = { x: pl.x, z: pl.z, ax: pl.ax, az: pl.az, y: pl.top - a.lap, face: pl.face, k: cut ? 1 : 0, s: cut ? 1 : 0, want: 1 };
   a.face = pl.face;
   if (cut) a.obj.rotation.y = angle(pl.face);
   a.pose = cut ? "sit" : null;
 }
+
+// The way from `a`'s tile into the place it sits on (in front or beside), or undefined when standing.
+export const toward = (a) => a.sit && Object.keys(DIR).find((f) => a.x + DIR[f][0] === a.sit.x && a.z + DIR[f][1] === a.sit.z);
 
 export function stand(a) {
   if (a.sit) a.sit.want = 0;
