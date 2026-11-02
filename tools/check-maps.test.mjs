@@ -503,6 +503,7 @@ const shotFails = (dir, re) => {
 };
 
 test("#255: a shot cue with no file fails", () => shotFails(shotWorld("scene", "nope"), /shot:nope: needs .*shots\/nope\.json/));
+test("#255: a shot name outside a-z, 0-9 and _ fails", () => shotFails(shotWorld("scene", "../maps/vale"), /is shot:<name> of a-z, 0-9 and _/));
 test("#255: a 5 s shot in a reveal_ script fails; 3.5 s passes, and so does 5 s elsewhere", () => {
   shotFails(shotWorld("reveal_x", "s", theatre("s", 5, [ok])), /a reveal shot lasts at most 4 s/);
   passes(shotWorld("reveal_x", "s", theatre("s", 3.5, [ok])));
