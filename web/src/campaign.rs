@@ -698,12 +698,24 @@ pub fn Challenge(
             choice.set(i as usize);
         })
     };
+    // A Space swallowed on keydown must not click on its keyup either (Firefox clicks anyway).
+    let space_held = StoredValue::new(false);
+    let on_key_up = move |e: leptos::ev::KeyboardEvent| {
+        if e.key() == " " && space_held.get_value() {
+            space_held.set_value(false);
+            e.prevent_default();
+        }
+    };
     let on_key = move |e: leptos::ev::KeyboardEvent| {
         let by = match e.key().as_str() {
-            // A held or too-early Confirm is swallowed: it must be released and pressed again.
+            // A held or too-early Confirm on Challenge is swallowed: release it, press again.
             "Enter" | " " => {
-                if !confirm_ready(js_sys::Date::now(), shown_at, e.repeat()) {
+                let on_go = event_target::<leptos::web_sys::Element>(&e)
+                    .class_list()
+                    .contains("ch-go");
+                if on_go && !confirm_ready(js_sys::Date::now(), shown_at, e.repeat()) {
                     e.prevent_default();
+                    space_held.set_value(e.key() == " ");
                 }
                 return;
             }
@@ -766,7 +778,7 @@ pub fn Challenge(
     };
     view! {
         // Still to earn (#155): what's missing comes right under their words, and the purse is one line.
-        <form class="challenge" class:earning=earning on:submit=move |e| { e.prevent_default(); start() } on:keydown=on_key>
+        <form class="challenge" class:earning=earning on:submit=move |e| { e.prevent_default(); start() } on:keydown=on_key on:keyup=on_key_up>
             <header class="ch-head">
                 <span class="ch-frame">
                     {match face {
