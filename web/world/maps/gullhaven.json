@@ -32,13 +32,6 @@
           24
         ],
         "every": 75
-      },
-      {
-        "pier": [
-          36,
-          24
-        ],
-        "every": 75
       }
     ],
     "perch": [
@@ -1802,6 +1795,11 @@
       ],
       "barks": [
         {
+          "if": "flag:letter_delivered",
+          "say": "Hob wrote back to Ottilie, you know.",
+          "say_fr": "Hob a répondu à Ottilie, vous savez."
+        },
+        {
           "say": "Race you to the rail!",
           "say_fr": "Le dernier arrivé à la rambarde !"
         }
@@ -1886,6 +1884,11 @@
         }
       ],
       "barks": [
+        {
+          "if": "flag:kite_done",
+          "say": "Saw Dace's kite over the boardwalk!",
+          "say_fr": "J'ai vu le cerf-volant de Dace au-dessus des quais !"
+        },
         {
           "say": "Last call, last call, last call!",
           "say_fr": "Dernier appel, dernier appel, dernier appel !"
