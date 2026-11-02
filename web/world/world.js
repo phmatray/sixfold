@@ -766,7 +766,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     }
     if (!paused) duelists.update(w, dt, talkTo);
     // Sitting: a move (key, stick, pad, a walk sent) or a scene stands the hero up; it walks on once up.
-    if (h.sit && (held.length || w.path.length || cut.playing)) (w.path = []), seats.stand(h);
+    // A move into the seat (the one that sat it down, still held or pressed again) keeps it seated.
+    if (h.sit && (held.some((k) => dirOf(k) !== seats.toward(h)) || w.path.length || cut.playing)) (w.path = []), seats.stand(h);
     seats.update(h, dt, reduced);
     if (!h.step && !warping && !paused && !w.engage && !h.sit) {
       const k = cut.playing ? null : held[held.length - 1]; // a cutscene walks the hero itself
@@ -776,7 +777,10 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
           h.face = f;
           h.turnedAt = w.now;
           if (chained) tryStep(f, carry); // already walking: turn and keep going
-        } else if (chained || w.now - h.turnedAt >= TURN_HOLD) tryStep(f, carry);
+        } else if ((chained || w.now - h.turnedAt >= TURN_HOLD) && !tryStep(f, carry) && !busy()) {
+          const it = seats.facing(w, h); // walked into a seat it may sit on: sit, as the Sit prompt would
+          if (it?.kind === "seat") (w.path = []), seats.sit(h, it.place, reduced);
+        }
       } else if (w.path.length) {
         const npc = w.path.npc, near = npc && Object.keys(DIR).find((d) => h.x + DIR[d][0] === npc.x && h.z + DIR[d][1] === npc.z);
         if (near) {

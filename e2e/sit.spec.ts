@@ -3,8 +3,11 @@ import { expect, test, frames, menuItem, readSave, title, type Page } from "./he
 /** Where the save says the hero stands: `map,x,z,facing`. */
 const at = async (page: Page) => (await readSave(page)).world_at?.[0] ?? "";
 const sitting = (page: Page) => page.evaluate(() => (document.querySelector(".world-host") as any)?.sixfoldStats?.().sitting);
+const warp = (page: Page, to: string, x: number, z: number, facing: string) =>
+  page.evaluate(([to, x, z, facing]) => (document.querySelector(".world-host") as any).sixfoldWarp(to, x, z, facing), [to, x, z, facing] as const);
 
-test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands in front of it", async ({ page }) => {
+/** Past the lesson and the opening scene, into the world. */
+async function intoWorld(page: Page) {
   page.on("dialog", (d) => d.accept());
   await title(page);
   await menuItem(page, "Learn to play").click();
@@ -17,6 +20,10 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
   await page.waitForTimeout(450);
   await page.keyboard.press("Escape");
   await expect(skip).toBeHidden();
+}
+
+test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands in front of it", async ({ page }) => {
+  await intoWorld(page);
 
   // In front of the meadow's first bench (22..23, 16), facing it.
   await page.evaluate(() => (document.querySelector(".world-host") as any).sixfoldWarp("overworld", 22, 17, "n"));
@@ -34,15 +41,17 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
   await expect.poll(() => sitting(page)).toBe(false);
   await expect(page.getByRole("dialog", { name: "Menu" })).toBeHidden();
 
-  // Facing away now: turn back (held until a frame sees it; the bench stops the step), sit with the prompt,
-  // and a move key stands up and walks on.
+  // Facing away now: holding ArrowUp turns back and walks into the bench, which sits the hero, no E.
+  // That key points into the seat: still held, or pressed again, it leaves the hero sitting.
   await page.keyboard.down("ArrowUp");
-  await expect.poll(() => at(page)).toBe("overworld,22,17,n");
-  await page.keyboard.up("ArrowUp");
-  await expect(sit).toBeVisible();
-  await frames(page);
-  await sit.click();
   await expect.poll(() => sitting(page)).toBe(true);
+  await frames(page);
+  expect(await sitting(page)).toBe(true);
+  await page.keyboard.up("ArrowUp");
+  await page.keyboard.press("ArrowUp");
+  await frames(page);
+  expect(await sitting(page)).toBe(true);
+  // Any other move stands up and walks on.
   await page.keyboard.down("ArrowLeft");
   await expect.poll(() => sitting(page)).toBe(false);
   await page.keyboard.up("ArrowLeft");
@@ -51,8 +60,9 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
   // Seated, a reload stands the hero on the tile in front of the bench.
   await page.evaluate(() => (document.querySelector(".world-host") as any).sixfoldWarp("overworld", 22, 17, "n"));
   await expect.poll(() => at(page)).toBe("overworld,22,17,n");
-  await expect(sit).toBeVisible(); // the warp has faded in: E acts again
-  await page.keyboard.press("e");
+  await expect(sit).toBeVisible(); // the warp has faded in: the prompt acts again
+  await frames(page);
+  await sit.click();
   await expect.poll(() => sitting(page)).toBe(true);
   // Sitting turns the hero at once, but the turn is saved on the next frame: wait for the save, then reload.
   await expect.poll(() => at(page)).toBe("overworld,22,17,s");
@@ -64,18 +74,7 @@ test("sit on a bench: Sit, stand up with Escape or a move, and a reload stands i
 });
 
 test("a find taken from under a bench gives the place back to sitting", async ({ page }) => {
-  page.on("dialog", (d) => d.accept());
-  await title(page);
-  await menuItem(page, "Learn to play").click();
-  await page.getByRole("button", { name: "Skip the lesson" }).click();
-  await menuItem(page, "Continue").click();
-  await expect(page.getByRole("status").filter({ hasText: "Loading the world" })).toBeHidden({ timeout: 60_000 });
-  const skip = page.getByRole("button", { name: /^Skip/ });
-  await expect(skip).toBeVisible();
-  // A scene ignores a skip in its first 400 ms (#155).
-  await page.waitForTimeout(450);
-  await page.keyboard.press("Escape");
-  await expect(skip).toBeHidden();
+  await intoWorld(page);
 
   // Brightwell Square: Facets stuck under the bench by the fountain (21, 20), faced from the north.
   await page.evaluate(() => (document.querySelector(".world-host") as any).sixfoldWarp("square", 21, 19, "s"));
@@ -91,4 +90,35 @@ test("a find taken from under a bench gives the place back to sitting", async ({
   await expect(page.getByRole("button", { name: /^Sit/ })).toBeVisible();
   await page.keyboard.press("e");
   await expect.poll(() => sitting(page)).toBe(true);
+});
+
+test("a tap toward a seat only turns, and walking into one from behind doesn't sit", async ({ page }) => {
+  await intoWorld(page);
+  // In front of the meadow's first bench: sit (E) and stand up (Escape), so the hero faces away from it with no
+  // warp fading. A tap: down, then up in the very next frame, once the game's own frame has seen it (well under
+  // the hold that walks), whatever the frame rate.
+  await warp(page, "overworld", 22, 17, "n");
+  await expect(page.getByRole("button", { name: /^Sit/ })).toBeVisible();
+  await page.keyboard.press("e");
+  await expect.poll(() => sitting(page)).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect.poll(() => sitting(page)).toBe(false);
+  await expect.poll(() => at(page)).toBe("overworld,22,17,s");
+  await page.evaluate(() => new Promise<void>((done) => {
+    const key = (type: string) => document.body.dispatchEvent(new KeyboardEvent(type, { key: "ArrowUp", bubbles: true }));
+    key("keydown");
+    requestAnimationFrame(() => (key("keyup"), done()));
+  }));
+  await expect.poll(() => at(page)).toBe("overworld,22,17,n");
+  await frames(page);
+  expect(await sitting(page)).toBe(false);
+
+  // Behind the bench (its back to the north): pushing into the backrest is just a wall.
+  await warp(page, "overworld", 22, 15, "s");
+  await expect.poll(() => at(page)).toBe("overworld,22,15,s");
+  await page.keyboard.down("ArrowDown"); // kept through the warp's fade, then pushed for the rest
+  await page.waitForTimeout(1500);
+  await page.keyboard.up("ArrowDown");
+  expect(await sitting(page)).toBe(false);
+  await expect.poll(() => at(page)).toBe("overworld,22,15,s");
 });
