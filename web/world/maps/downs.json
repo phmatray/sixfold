@@ -1292,6 +1292,12 @@
       "z": 21,
       "rot": 90,
       "band": "cinderwick"
+    },
+    {
+      "asset": "chime_post",
+      "x": 22,
+      "z": 9,
+      "rot": 0
     }
   ],
   "spawn": {
@@ -1500,12 +1506,14 @@
           "lines": [
             "Morning! Mind the flock, they've opinions about strangers.",
             "Hew's my grandson. Duels everyone on the north lane. Gets that from his grandmother.",
-            "When the wind comes off the sea, every chime post on the Downs hums at once. That's why they call them the Thrumming Downs."
+            "When the wind comes off the sea, every chime post on the Downs hums at once. That's why they call them the Thrumming Downs.",
+            "The old wall by the north lane ends in one stone that was never mortared. Shepherds have hidden their wages in it for generations."
           ],
           "lines_fr": [
             "Bonjour ! Attention au troupeau, ils ont un avis sur les étrangers.",
             "Hew, c'est mon petit-fils. Il défie tout le monde sur le chemin du nord. Ça lui vient de sa grand-mère.",
-            "Quand le vent vient du large, tous les poteaux à carillons des Landes bourdonnent en même temps. C'est pour ça qu'on les appelle les Landes Vibrantes."
+            "Quand le vent vient du large, tous les poteaux à carillons des Landes bourdonnent en même temps. C'est pour ça qu'on les appelle les Landes Vibrantes.",
+            "Le vieux mur du chemin du nord se finit sur une pierre jamais scellée. Les bergers y cachent leur paie depuis des générations."
           ]
         }
       ],

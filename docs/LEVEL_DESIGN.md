@@ -406,6 +406,6 @@ One advisory remains: the scatter ratio is about 1.25. Clark–Evans counts prop
 | Grove (reference) | `woodland` | #112 | done: `level_design: 2` |
 | Hub and Grove | `overworld`, `square`, `rootholm`, `elder_ring` | #119, #259 | done: `level_design: 2`, five-pass tested (#259, #336); phone-night frame time measured (`e2e/perf-night.mjs`), clues re-tested by a second explorer |
 | Ember and Stone | `quarry`, `cinderwick`, `kilnmouth`, `undermine`, `screepass`, `anvilstead`, `bastion` | #120 | done: `level_design: 2`, five-pass tested (#264; the Kilnmouth bowl approach and the glow ash clue are open in #339), phone night frame measured by `e2e/perf-night-ember-stone.mjs` |
-| Tide and Storm | `seaside`, `gullhaven`, `bellflats`, `downs`, `stormwatch`, `rodspire` | #121 | planned |
+| Tide and Storm | `seaside`, `gullhaven`, `bellflats`, `downs`, `stormwatch`, `rodspire` | #121 | done: `level_design: 2`, five-pass tested (#268); phone-night frame time measured (`e2e/perf-night-tide-storm.mjs`) |
 | Dream | `hushlane`, `lanternmere`, `moonwell` | #122 | planned |
 | The whole world | the five-pass playtest and the final audit | #124 | planned |
