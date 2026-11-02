@@ -1,6 +1,6 @@
 import { expect, test, menuItem, title, moveTo } from "./helpers";
 
-test("keyboard only: title, duel setup, a duel started, then left", async ({ page }) => {
+test("keyboard only: title, duel setup, a duel started, then left @webkit", async ({ page }) => {
   await page.goto("/");
   const press = page.getByRole("button", { name: "Press to start" });
   await expect(press).toBeFocused({ timeout: 30_000 });
@@ -43,7 +43,7 @@ test("keyboard only: title, duel setup, a duel started, then left", async ({ pag
   await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible();
 });
 
-test("keyboard only: packs, collection, decks, campaign and records", async ({ page }) => {
+test("keyboard only: packs, collection, decks, campaign and records @webkit", async ({ page }) => {
   await title(page);
   const go = async (label: string, heading: string | RegExp) => {
     await moveTo(page, menuItem(page, label));
@@ -98,7 +98,7 @@ test("keyboard only: packs, collection, decks, campaign and records", async ({ p
   await back();
 });
 
-test("keyboard only: the world, a cutscene and the in-game menu", async ({ page }) => {
+test("keyboard only: the world, a cutscene and the in-game menu @webkit", async ({ page }) => {
   page.on("dialog", (d) => d.accept());
   await title(page);
   await moveTo(page, menuItem(page, "Learn to play"));
