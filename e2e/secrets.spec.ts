@@ -145,7 +145,8 @@ test("AC4: a secret found stays found: Teo's chest is opened after a reload, and
   await page.reload();
   await menuItem(page, "Records").click();
   await page.getByRole("tab", { name: "Stats" }).click();
-  await expect(page.locator(".stat").filter({ hasText: "Secrets" })).toContainText("1 / 9");
+  // The total grows as regions add secrets (meta/src/stats.rs SECRETS, unit-tested there); this checks the found count.
+  await expect(page.locator(".stat").filter({ hasText: "Secrets" })).toContainText(/Secrets\s*1 \/ \d+/);
   await page.getByRole("button", { name: "Back", exact: true }).click();
   await menuItem(page, "Continue").click();
   await loaded(page);

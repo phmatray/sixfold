@@ -4,6 +4,63 @@
   "region": "hub",
   "kind": "town",
   "music": "overworld",
+  "level_design": 2,
+  "life": {
+    "critters": [
+      {
+        "kind": "rabbit",
+        "zone": [
+          44,
+          13,
+          50,
+          21
+        ],
+        "n": 2
+      },
+      {
+        "kind": "squirrel",
+        "zone": [
+          41,
+          2,
+          50,
+          6
+        ],
+        "n": 2
+      },
+      {
+        "kind": "hedgehog",
+        "zone": [
+          44,
+          13,
+          50,
+          21
+        ],
+        "n": 1
+      }
+    ],
+    "perch": [
+      {
+        "at": [
+          [
+            23,
+            3,
+            1.6
+          ],
+          [
+            28,
+            30,
+            1.6
+          ]
+        ]
+      }
+    ],
+    "leaves": {
+      "under": [
+        "blossom_tree"
+      ],
+      "rate": 0.3
+    }
+  },
   "width": 52,
   "height": 36,
   "tiles": [
@@ -74,7 +131,8 @@
       "asset": "workshop",
       "x": 12,
       "z": 6,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "cottage",
@@ -148,7 +206,8 @@
       "asset": "fountain",
       "x": 25,
       "z": 16,
-      "rot": 0
+      "rot": 0,
+      "landmark": true
     },
     {
       "asset": "stall_b",
@@ -506,7 +565,8 @@
       "asset": "wisteria_arch",
       "x": 25,
       "z": 31,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "moonflower",
@@ -2327,7 +2387,8 @@
       "asset": "well",
       "x": 47,
       "z": 25,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "blossom_tree",
@@ -2345,7 +2406,8 @@
       "asset": "water_lilies",
       "x": 41,
       "z": 27,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "water_lilies",
@@ -2369,6 +2431,12 @@
       "asset": "flower_planter",
       "x": 15,
       "z": 28,
+      "rot": 0
+    },
+    {
+      "asset": "bench",
+      "x": 5,
+      "z": 9,
       "rot": 0
     }
   ],
@@ -2451,7 +2519,22 @@
       "hidden": true,
       "give": "give:curio_tin_hex",
       "text": "In the flowerbed, pressed into the soil: a little tin hexagon, its six colours flaking.",
-      "text_fr": "Dans le massif, enfoncé dans la terre : un petit hexagone de fer-blanc, ses six couleurs écaillées."
+      "text_fr": "Dans le massif, enfoncé dans la terre : un petit hexagone de fer-blanc, ses six couleurs écaillées.",
+      "poi": "secret",
+      "secret": {
+        "id": "sq_bed_pressed",
+        "kind": "environmental",
+        "clue": [
+          [
+            32,
+            28
+          ],
+          [
+            30,
+            26
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -2787,6 +2870,12 @@
             "Une jetée. Un belvédère. Une corniche de carrière. Un massif de fleurs. Une imprimerie. Un champ, avec de la chance."
           ]
         }
+      ],
+      "barks": [
+        {
+          "say": "Small, old, odd. That is the whole rule.",
+          "say_fr": "Petit, vieux, bizarre. Toute la règle est là."
+        }
       ]
     },
     {
@@ -2868,6 +2957,12 @@
             "Je viens pour la lumière. Au crépuscule, les lampes prennent le relais, et je vais chercher mon souper."
           ]
         }
+      ],
+      "barks": [
+        {
+          "say": "The bench is warm. The light is kind.",
+          "say_fr": "Le banc est tiède. La lumière est douce."
+        }
       ]
     }
   ],
@@ -2920,5 +3015,15 @@
         "bush"
       ]
     }
+  ],
+  "view": [
+    [
+      5,
+      9
+    ],
+    [
+      36,
+      25
+    ]
   ]
 }
