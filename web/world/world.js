@@ -946,7 +946,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
-  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, loops: world?.loops?.map((m) => m.time) ?? [], camera: { angle: camAngle, pitch: pitchNow, shot: !!liveShot }, graphics: post.tier, probing: !probeDone,
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, seat: hero?.sit ? { face: hero.sit.face, k: hero.sit.k, yaw: hero.obj.rotation.y } : null, loops: world?.loops?.map((m) => m.time) ?? [], camera: { angle: camAngle, pitch: pitchNow, shot: !!liveShot }, graphics: post.tier, probing: !probeDone,
     people: world?.npcs.filter((n) => !n.hidden).map((n) => ({ id: n.def.id, x: n.x, z: n.z, face: n.glance ?? n.face, do: n.activity?.do ?? null, away: !!n.away, walking: !!n.walk, sitting: !!n.sit })) ?? [] });
   // Where a point near the hero's feet (dx, dz tiles from them, on the floor) is drawn, in CSS pixels: the e2e
   // probe of the contact shadow under them (#340) reads the screenshot there.

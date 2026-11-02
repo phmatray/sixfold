@@ -122,3 +122,41 @@ test("a tap toward a seat only turns, and walking into one from behind doesn't s
   expect(await sitting(page)).toBe(false);
   await expect.poll(() => at(page)).toBe("overworld,22,15,s");
 });
+
+test.describe("with motion", () => {
+  test.use({ reducedMotion: "no-preference" }); // the turn and the SitDown clip play out
+
+  test("walking into a seat sits, whatever way it faces @webkit", async ({ page }) => {
+    const seat = (page: Page) => page.evaluate(() => (document.querySelector(".world-host") as any)?.sixfoldStats?.().seat);
+    // The way a seat faces, as a yaw: atan2 of its direction (+z is south, toward the camera).
+    const DIR: Record<string, [number, number]> = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
+    await intoWorld(page);
+    // One seat per rotation, each walked into: [map, x, z, facing, key, the way the seat faces]. The two
+    // chairs at a duel table (rot 180, 270) are walked into from beside: the table fills their front.
+    const seats: [string, number, number, string, string, string][] = [
+      ["overworld", 22, 17, "n", "ArrowUp", "s"], // bench, rot 0
+      ["bakery", 2, 4, "w", "ArrowLeft", "e"], // chair, rot 90
+      ["inn_dream", 9, 6, "w", "ArrowLeft", "n"], // chair, rot 180
+      ["lodge", 3, 6, "n", "ArrowUp", "w"], // chair, rot 270
+    ];
+    for (const [map, x, z, facing, key, face] of seats) {
+      await warp(page, map, x, z, facing);
+      await expect.poll(() => at(page)).toBe(`${map},${x},${z},${facing}`);
+      await page.keyboard.down(key); // kept through the warp's fade
+      const want = Math.atan2(DIR[face][0], DIR[face][1]);
+      await expect
+        .poll(
+          async () => {
+            const s = await seat(page);
+            const off = s && Math.abs(Math.atan2(Math.sin(s.yaw - want), Math.cos(s.yaw - want)));
+            return s ? `${s.face} settled:${s.k === 1} turned:${off < 0.05}` : "standing";
+          },
+          { message: `${map} (${x},${z})` },
+        )
+        .toBe(`${face} settled:true turned:true`);
+      await page.keyboard.up(key);
+      await page.keyboard.press("Escape");
+      await expect.poll(() => seat(page)).toBeNull();
+    }
+  });
+});
