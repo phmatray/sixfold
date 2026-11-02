@@ -20,9 +20,13 @@ const intoCinderwick = (page: Page) => warpTo(page, "cinderwick", 25, 30);
 const revealed = async (page: Page) => (await readSave(page)).progress?.[0]?.split(",").includes("f:reveal_cinderwick");
 
 /** A new player in the world, then every drawn frame's camera is recorded into `window.__cam`. */
-async function intoWorld(page: Page) {
+async function intoWorld(page: Page, query = "") {
   page.on("dialog", (d) => d.accept());
   await title(page);
+  if (query) {
+    await page.goto("/" + query);
+    await expect(page.getByRole("navigation", { name: "Main menu" })).toBeVisible({ timeout: 30_000 });
+  }
   await menuItem(page, "Learn to play").click();
   await page.getByRole("button", { name: "Skip the lesson" }).click();
   await menuItem(page, "Continue").click();
@@ -105,4 +109,15 @@ test("a shot file that fails to load logs one warning and the scene goes on", as
   await page.keyboard.down("ArrowRight");
   await expect.poll(async () => (await stats(page)).at[0], { timeout: 15_000 }).not.toBe(before[0]);
   await page.keyboard.up("ArrowRight");
+});
+
+// Theatre Studio (AGPL, #269) is for authoring in a debug build only: a release build, even at ?edit&studio, never asks for it.
+test("a release build at ?edit&studio never requests Theatre Studio", async ({ page }) => {
+  const urls: string[] = [];
+  page.on("request", (r) => urls.push(r.url()));
+  await intoWorld(page, "?edit&studio");
+  await intoCinderwick(page);
+  await expect.poll(() => revealed(page), { timeout: 90_000 }).toBe(true);
+  expect(urls.filter((u) => /studio|theatre-dev/i.test(new URL(u).pathname))).toEqual([]);
+  expect(await page.locator("#theatrejs-studio-root").count()).toBe(0);
 });
