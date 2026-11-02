@@ -613,3 +613,52 @@ before 1.9, and where the starter is always on loan, so a duel is always possibl
 been a second, uncapped source of cards next to the packs: one rival win would hand over 30-odd cards and
 move `economy_sim` (packs an hour) and the campaign playthroughs, whose decks are built from the
 collection. As a loan it moves neither; a campaign duel still needs a deck the player owns.
+
+## Hard in the Dream Veil mirror
+
+Hard beats Normal in the mirrors (`hard_beats_normal_in_mirrors_big`), but after the #232 refit Dream
+Veil sat at 22/50 while the other five decks were ahead. `hard_deviations_dream_veil` (ignored, run
+with `--release`) replays that mirror with the same seeds and, at every Hard main-phase decision,
+asks a clone of Hard's own state what Normal would do. Each departure is counted as "Normal's kind
+-> Hard's kind", in games Hard won and lost.
+
+Findings (22 won out of 50): the departures are spread over every kind and lost games simply have
+more of them (they last longer). Two things stand out: Hard ends its turn instead of playing a
+Gear/Power more often than any other departure (`gear -> end` 30 times in won games, 13 in lost;
+`power -> end` 6 and 19), and the departures that start a retreat (`attach -> retreat` 0 won / 6
+lost games, `basic -> retreat` 1 / 3) cluster in lost games. Nothing points to one bad candidate
+kind; what none of them can see is the status plan: `evaluate` reads no Sleep, Confusion,
+Paralysis or poison, so a play-out cannot tell a stalled opponent from a healthy one. The fix goes
+in `evaluate`.
+
+### The fix and the result
+
+Two changes in `engine/src/ai.rs`. `evaluate` now adds `status_value`: the opponent Active's Special
+condition and poison count for Hard, its own count against it (Asleep 20, Paralyzed 15, Confused
+12, poison 5 per level, capped at 30 a side, so never more than a fraction of a prize). Alone it
+moved Dream Veil from 22 to 24 (weights 2 to 4 times larger made it worse, 17: a play-out already
+sees the stalled turn in the HP and prizes, so a heavy term double counts). The departures that
+the table above ties to lost games were then cut in `candidates()`: Hard no longer tries a retreat
+Normal does not pick, and no longer ends its turn when Normal would attack.
+
+Hard won against Normal, 50 games per deck, seeds `d * 1000 + n`, before (#316 on main) and after:
+
+| Deck | Before | After |
+|---|---|---|
+| Ember Rush | 35 | 35 |
+| Tide Mind | 30 | 29 |
+| Grove Bloom | 31 | 35 |
+| Storm Front | 29 | 31 |
+| Stone Fist | 31 | 29 |
+| Dream Veil | 22 | 26 |
+| All | 182/300 | 185/300 |
+
+`hard_beats_normal_in_mirrors_big` now asserts every deck above 25/50. The margin is thin (50 games
+carry about 7 points of noise) but the seeds are fixed, so the run is reproducible. The bar was not
+lowered.
+
+Caveats from review: the deviation counts compare Hard with a clone of itself taken before its
+decision, so a Normal tie-break that draws from the RNG can add a few departures that are not real;
+and the two `candidates()` cuts were tuned on this mirror's fixed seeds, so they are a measured
+improvement (182 to 185 of 300 overall, Dream Veil 22 to 26), not a proven one. If the mirrors slip
+again, rerun `hard_deviations_dream_veil` before touching the constants.
