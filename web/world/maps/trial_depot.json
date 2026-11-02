@@ -1,0 +1,314 @@
+{
+  "title": "The Depot",
+  "title_fr": "Le Dépôt",
+  "proto": "field puzzles (docs/PUZZLES.md), not yet placed in the world: open it with ?trials in a debug build",
+  "width": 8,
+  "height": 12,
+  "tiles": [
+    "WWWWWWWW",
+    "WwwwwwwW",
+    "WwwwwwwW",
+    "WwwwwwwW",
+    "WwwwwwwW",
+    "WwwwwwwW",
+    "WwwwwwwW",
+    "WwwwwwwW",
+    "WwwwwwwW",
+    "WwwwwwwW",
+    "WwwwwwwW",
+    "WWWwwWWW"
+  ],
+  "spawn": {
+    "x": 4,
+    "z": 11,
+    "facing": "n"
+  },
+  "trials": [
+    {
+      "id": "depot1",
+      "flag": "trial_depot1",
+      "look": "crate",
+      "crates": [
+        [
+          4,
+          10
+        ],
+        [
+          5,
+          10
+        ]
+      ],
+      "plates": [
+        [
+          2,
+          8
+        ],
+        [
+          2,
+          10
+        ]
+      ],
+      "reset": [
+        3,
+        11
+      ],
+      "start": [
+        4,
+        11
+      ],
+      "solved": {
+        "lines": [
+          "Both crates sit square on their chalk marks. The stack in the back doorway can come down now."
+        ],
+        "lines_fr": [
+          "Les deux caisses sont pile sur leurs marques à la craie. La pile qui bouche la porte du fond peut descendre."
+        ],
+        "do": [
+          "flag:trial_depot1",
+          "sfx:jingle"
+        ]
+      }
+    },
+    {
+      "id": "depot2",
+      "flag": "trial_depot2",
+      "look": "crate",
+      "crates": [
+        [
+          2,
+          1
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "plates": [
+        [
+          5,
+          1
+        ],
+        [
+          6,
+          2
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "reset": [
+        3,
+        6
+      ],
+      "start": [
+        4,
+        6
+      ],
+      "solved": {
+        "lines": [
+          "Four crates, four marks: the back store is in order. (Prototype: here the keeper would pay you.)"
+        ],
+        "lines_fr": [
+          "Quatre caisses, quatre marques : la réserve est en ordre. (Prototype : ici, le magasinier vous paierait.)"
+        ],
+        "do": [
+          "flag:trial_depot2",
+          "sfx:jingle"
+        ]
+      }
+    }
+  ],
+  "gates": [
+    {
+      "id": "depot_back",
+      "name": "the back store",
+      "name_fr": "la réserve",
+      "tiles": [
+        [
+          4,
+          6
+        ]
+      ],
+      "if": "flag:trial_depot1",
+      "prop_closed": "crates",
+      "text": "Crates stacked to the lintel. Put the front room in order first.",
+      "text_fr": "Des caisses empilées jusqu'au linteau. Rangez d'abord la première salle."
+    }
+  ],
+  "props": [
+    {
+      "asset": "crates",
+      "x": 2,
+      "z": 2,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 2,
+      "z": 3,
+      "rot": 270
+    },
+    {
+      "asset": "crates",
+      "x": 2,
+      "z": 4,
+      "rot": 180
+    },
+    {
+      "asset": "crates",
+      "x": 3,
+      "z": 4,
+      "rot": 90
+    },
+    {
+      "asset": "crates",
+      "x": 5,
+      "z": 4,
+      "rot": 270
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 6,
+      "rot": 90
+    },
+    {
+      "asset": "crates",
+      "x": 2,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 5,
+      "z": 6,
+      "rot": 90
+    },
+    {
+      "asset": "crates",
+      "x": 6,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 8,
+      "rot": 270
+    },
+    {
+      "asset": "crates",
+      "x": 3,
+      "z": 8,
+      "rot": 90
+    },
+    {
+      "asset": "crates",
+      "x": 5,
+      "z": 8,
+      "rot": 270
+    },
+    {
+      "asset": "crates",
+      "x": 6,
+      "z": 8,
+      "rot": 180
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 9,
+      "rot": 180
+    },
+    {
+      "asset": "crates",
+      "x": 1,
+      "z": 10,
+      "rot": 90
+    },
+    {
+      "asset": "exit_mat",
+      "x": 4,
+      "z": 11,
+      "rot": 0
+    }
+  ],
+  "interactions": [],
+  "warps": [
+    {
+      "x": 4,
+      "z": 11,
+      "to": "trials",
+      "label": "Back to the hall",
+      "label_fr": "Retour à la salle",
+      "spawn": {
+        "x": 2,
+        "z": 4,
+        "facing": "e"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [],
+  "ground": {
+    "base": "wood_floor",
+    "path": "wood_floor",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#fff1d6",
+      "intensity": 1.5,
+      "fromHero": [
+        -6,
+        10,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#ffe2bd",
+      "ground": "#5a3d26",
+      "intensity": 1.4
+    },
+    "lamp": {
+      "color": "#ffb257",
+      "intensity": 5,
+      "distance": 7
+    },
+    "background": "#1c140e"
+  }
+}

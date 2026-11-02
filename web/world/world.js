@@ -274,7 +274,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const i = held.indexOf(k);
     if (i >= 0) held.splice(i, 1);
   };
-  const busy = () => paused || warping || !world || !!world.engage || !!world.ride || cut.playing || book.live() || !!peek || !!world.trials?.busy(); // a duelist coming over, a lift ride, a cutscene, a book, a trial's reveal or Reach's hand lock input
+  const busy = () => paused || warping || !world || !!world.engage || !!world.ride || cut.playing || book.live() || !!peek; // a duelist coming over, a lift ride, a cutscene, a book, a trial's reveal lock input
   // A trial solved: the camera glides to the gate its flag opens and holds there while its lines are read and it
   // opens (`until`: game seconds, which stop while the lines are up), then eases back to the hero (`easeBack`).
   let peek = null, easeBack = 0;
@@ -514,11 +514,12 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const it = hero.sit ? null : lifts.facing(world, hero) ?? facingOf(world, hero, opens);
     // Taken, on a seat: the seat (or, from behind it, nothing) rather than "Nothing else here".
     if (spent(it) && world.seats.has(key(hero.x + DIR[hero.face][0], hero.z + DIR[hero.face][1]))) return seats.facing(world, hero);
-    return it ?? seats.facing(world, hero) ?? world.trials?.facing(hero) ?? null; // a rune stone, or a pillar for Reach
+    return it ?? seats.facing(world, hero) ?? world.trials?.facing(hero) ?? null; // a trial's rune stone
   };
-  // Where a pushed or shoved block may go: where the hero could step (no wall, person, door, edge or cliff), not onto the hero.
+  // Where a pushed block may go: where the hero could step (no wall, person, door, gate, edge or cliff), not onto the
+  // hero. (tools/puzzles.mjs `grid` holds the solver to the same.)
   const roomFor = (ax, az, bx, bz) =>
-    !world.blocked(bx, bz) && !world.npcAt(bx, bz) && world.climb(ax, az, bx, bz) && !world.warps.has(key(bx, bz)) && !world.exitAt(bx, bz) && !(hero.x === bx && hero.z === bz);
+    !world.blocked(bx, bz) && !world.npcAt(bx, bz) && world.climb(ax, az, bx, bz) && !world.warps.has(key(bx, bz)) && !world.gateAt.has(key(bx, bz)) && !world.exitAt(bx, bz) && !(hero.x === bx && hero.z === bz);
   const PUSH = 2; // a push takes this many steps' time
 
   // Start a step toward `f`. A door warp is entered even though its tile is solid;
@@ -567,7 +568,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       lifts.use(world, hero, it, { holds, reduced, sound, say: (t) => cb("use", "locked", t), fade: (on) => fade.classList.toggle("on", on), step: (f) => tryStep(f, 0) });
     }
     else if (it.kind === "seat") (world.path = []), seats.sit(hero, it.place, reduced);
-    else if (it.kind === "reach" || it.kind === "reset") world.trials.use(it, hero, roomFor);
+    else if (it.kind === "reset") world.trials.use(it);
     else if (it.kind === "stand") seats.stand(hero);
     else if (it.kind === "book") {
       shelf = it;
@@ -785,6 +786,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
         if (wp && !cut.playing) warp(wp);
         else if (!wp) cut.stepped(w, h.x, h.z);
         if (!wp && !cut.playing && w.trials?.iceAt(h.x, h.z)) slide = went;
+        else if (!wp && !cut.playing) w.trials?.reached(h.x, h.z); // come to rest on a trial's goal
       }
     }
     if (w.scriptsDue && !warping && !paused && !h.step && !cut.playing) (w.scriptsDue = false), cut.entered(w); // after a scene that warped here, too

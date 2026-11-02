@@ -1,0 +1,225 @@
+{
+  "title": "The Log Run",
+  "title_fr": "Le Flottage",
+  "proto": "field puzzles (docs/PUZZLES.md), not yet placed in the world: open it with ?trials in a debug build",
+  "width": 11,
+  "height": 20,
+  "tiles": [
+    "22222222222",
+    "2.........2",
+    "2.........2",
+    "2..11..1112",
+    "2.........2",
+    "2..1......2",
+    "2...1111112",
+    "2.........2",
+    "2.........2",
+    "21..11..112",
+    "2....1....2",
+    "2.....1...2",
+    "2222..22222",
+    "22..1....22",
+    "22.......22",
+    "22.......22",
+    "2211..11122",
+    "22.......22",
+    "22..1.1..22",
+    "2222..22222"
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 19,
+    "facing": "n"
+  },
+  "cave": true,
+  "trials": [
+    {
+      "id": "logs1",
+      "logs": [
+        [
+          4,
+          17,
+          "x"
+        ],
+        [
+          5,
+          15,
+          "x"
+        ],
+        [
+          3,
+          15,
+          "x"
+        ]
+      ],
+      "channel": [
+        [
+          4,
+          16,
+          5,
+          16
+        ]
+      ],
+      "reset": [
+        4,
+        19
+      ],
+      "start": [
+        5,
+        19
+      ],
+      "goal": [
+        5,
+        13
+      ]
+    },
+    {
+      "id": "logs2",
+      "flag": "trial_logs2",
+      "logs": [
+        [
+          2,
+          10,
+          "x"
+        ],
+        [
+          1,
+          5,
+          "x"
+        ],
+        [
+          2,
+          2,
+          "x"
+        ],
+        [
+          2,
+          8,
+          "x"
+        ],
+        [
+          8,
+          1,
+          "z"
+        ]
+      ],
+      "channel": [
+        [
+          1,
+          3,
+          2,
+          3
+        ],
+        [
+          5,
+          3,
+          6,
+          3
+        ],
+        [
+          1,
+          6,
+          3,
+          6
+        ],
+        [
+          2,
+          9,
+          3,
+          9
+        ],
+        [
+          6,
+          9,
+          7,
+          9
+        ]
+      ],
+      "reset": [
+        4,
+        12
+      ],
+      "start": [
+        5,
+        12
+      ],
+      "goal": [
+        3,
+        1
+      ],
+      "solved": {
+        "lines": [
+          "Across all three streams, dry-footed. (Prototype: here, what waits on the far bank.)"
+        ],
+        "lines_fr": [
+          "Les trois ruisseaux franchis, à pied sec. (Prototype : ici, ce qui attend sur l'autre rive.)"
+        ],
+        "do": [
+          "flag:trial_logs2",
+          "sfx:jingle"
+        ]
+      }
+    }
+  ],
+  "gates": [],
+  "props": [],
+  "interactions": [],
+  "warps": [
+    {
+      "x": 5,
+      "z": 19,
+      "to": "trials",
+      "label": "Back to the hall",
+      "label_fr": "Retour à la salle",
+      "spawn": {
+        "x": 8,
+        "z": 4,
+        "facing": "w"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [],
+  "ground": {
+    "base": "moss",
+    "path": "dirt",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#e8ffd8",
+      "intensity": 1.3,
+      "fromHero": [
+        -3,
+        8,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#7f9a78",
+      "ground": "#18200f",
+      "intensity": 1.3
+    },
+    "lamp": {
+      "color": "#d8ffc0",
+      "intensity": 3,
+      "distance": 6
+    },
+    "background": "#0b100a"
+  }
+}

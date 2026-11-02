@@ -1,121 +1,105 @@
-// node --test web/world/puzzle.test.mjs — the trials' rules, and the three trials of maps/trials.json solved by search.
+// node --test web/world/puzzle.test.mjs — the trials' rules, and every prototype level held to its numbers
+// (docs/PUZZLES.md): solvable, long enough, and as unforgiving (or as safe) as it was designed to be.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { trials, blockAt, shove, move, reachTarget, slide, DIRS } from "./puzzle.js";
+import { trials, blockAt, gapAt, shove, move, slide } from "./puzzle.js";
+import { measure, traps, walkable } from "../../tools/puzzles.mjs";
 
-const map = JSON.parse(readFileSync(new URL("./maps/trials.json", import.meta.url), "utf8"));
-const def = (id) => map.trials.find((t) => t.id === id);
-// The map's own collision (build.js): solid tiles, digit heights, a step climbs 0.6 at most. Gates stay shut.
-const tile = (x, z) => map.tiles[z]?.[x];
-const height = (x, z) => (tile(x, z) >= "1" && tile(x, z) <= "9" ? +tile(x, z) : 0);
-// Props and the rune stones stand on their tiles; a shut gate is a wall.
-const taken = new Set([...map.props.map((p) => `${p.x},${p.z}`), ...map.trials.filter((t) => t.reset).map((t) => String(t.reset)),
-  ...map.gates.flatMap((g) => g.tiles.map(String))]);
-const open = (ax, az, bx, bz) => tile(bx, bz) !== undefined && !"#fWV~".includes(tile(bx, bz)) && !taken.has(`${bx},${bz}`) && Math.abs(height(bx, bz) - height(ax, az)) <= 0.6;
-const see = (hx, hz) => (x, z) => tile(x, z) !== undefined && height(x, z) - height(hx, hz) <= 1.5; // world.js `see`
-const F = Object.keys(DIRS);
+const map = (name) => JSON.parse(readFileSync(new URL(`./maps/${name}.json`, import.meta.url), "utf8"));
+const free = () => true;
 
-// Breadth-first over whole states: `moves(state)` lists the next ones, `key` names a state. Returns the fewest
-// moves to a goal and the states seen.
-function search(start, moves, key, goal) {
-  const seen = new Map([[key(start), start]]);
-  let frontier = [start], depth = 0, best = null;
-  while (frontier.length && best === null) {
-    if (frontier.some(goal)) best = depth;
-    const next = [];
-    for (const s of frontier) for (const n of moves(s)) if (!seen.has(key(n))) seen.set(key(n), n), next.push(n);
-    (frontier = next), depth++;
-  }
-  return { best, seen };
-}
-// A state for one trial: the hero's tile and its blocks' tiles.
-const at = (s) => s.blocks.map((b) => [b.x, b.z]);
-const restore = (t, hero, blocks) => (t.blocks.forEach((b, i) => ([b.x, b.z] = blocks[i])), hero);
-const stateKey = ({ h, b }) => `${h}|${b.map(String).sort().join(";")}`;
-// Moves by hand: walk, or push a boulder ahead.
-const handMoves = (t) => ({ h, b }) => {
-  restore(t, h, b);
-  return F.flatMap((f) => {
-    const [dx, dz] = DIRS[f], x = h[0] + dx, z = h[1] + dz, rock = blockAt(t, x, z);
-    if (!rock) return open(h[0], h[1], x, z) ? [{ h: [x, z], b }] : [];
-    const to = rock.kind === "boulder" && shove(t, rock, f, open);
-    return to ? [{ h: [x, z], b: b.map((p) => (p[0] === x && p[1] === z ? to : p)) }] : [];
-  });
-};
-// Moves with Reach too: from where the hero stands, shove the pillar it faces.
-const reachMoves = (t) => (s) => {
-  const out = handMoves(t)(s);
-  restore(t, s.h, s.b);
-  for (const f of F) {
-    const p = reachTarget(t, s.h[0], s.h[1], f, see(...s.h));
-    const to = p && shove(t, p, f, open);
-    if (to) out.push({ h: s.h, b: s.b.map((q) => (q[0] === p.x && q[1] === p.z ? to : q)) });
-  }
-  return out;
-};
-const onPlates = (d) => ({ b }) => d.plates.every(([x, z]) => b.some((p) => p[0] === x && p[1] === z));
-
-test("a boulder is pushed one tile, never onto another or into a wall", () => {
-  const t = trials([{ id: "a", boulders: [[1, 1], [2, 1]], plates: [[1, 2]] }]);
-  const free = () => true;
-  assert.equal(shove(t, t.blocks[0], "e", free), null, "another boulder is there");
-  assert.deepEqual(shove(t, t.blocks[0], "s", free), [1, 2]);
+test("a crate moves one tile, never onto another or into a wall; on ice it slides until stopped", () => {
+  const t = trials([{ id: "a", crates: [[1, 1], [2, 1]], plates: [[1, 2]] }]);
+  assert.equal(shove(t, t.blocks[0], "e", free), null, "another crate is there");
+  assert.deepEqual(shove(t, t.blocks[0], "s", free), { x: 1, z: 2, sunk: false, n: 1 });
   assert.equal(shove(t, t.blocks[0], "s", () => false), null, "a wall");
-  assert.equal(move(t, t.blocks[1], 2, 2), null, "not on the plate");
-  assert.equal(move(t, t.blocks[0], 1, 2)?.id, "a", "every plate held: solved");
-  assert.equal(move(t, t.blocks[0], 1, 2), null, "solved once");
+  assert.equal(move(t, t.blocks[1], { x: 2, z: 2 }), null, "not on the mark");
+  assert.equal(move(t, t.blocks[0], { x: 1, z: 2 })?.id, "a", "every mark held: solved");
+  const i = trials([{ id: "i", crates: [[0, 0]], ice: [[1, 0, 5, 0]] }]);
+  assert.deepEqual(shove(i, i.blocks[0], "e", (ax, az, bx) => bx <= 4), { x: 4, z: 0, sunk: false, n: 4 }, "over the ice to the wall");
 });
 
-test("a solved trial starts solved, its blocks on its plates", () => {
-  const d = { id: "a", flag: "f", boulders: [[1, 1]], pillars: [[5, 5]], plates: [[3, 3], [4, 4]] };
+test("a solved trial starts solved, its crates on its marks", () => {
+  const d = { id: "a", flag: "f", crates: [[1, 1], [5, 5]], plates: [[3, 3], [4, 4]] };
   const t = trials([d], () => true);
-  assert.deepEqual(at(t), [[3, 3], [4, 4]]);
+  assert.deepEqual(t.blocks.map((b) => [b.x, b.z]), [[3, 3], [4, 4]]);
   assert.ok(t.solved.has(d));
 });
 
-test("Reach takes the first pillar in line within four tiles, through a ledge, not through a wall or a boulder", () => {
-  const t = trials([{ id: "a", pillars: [[4, 0]], boulders: [[0, 2]] }]);
-  const clear = () => true;
-  assert.equal(reachTarget(t, 0, 0, "e", clear)?.kind, "pillar");
-  assert.equal(reachTarget(t, -1, 0, "e", clear), null, "five tiles: too far");
-  assert.equal(reachTarget(t, 0, 0, "e", (x) => x !== 2), null, "a wall between");
-  assert.equal(reachTarget(t, 0, 0, "s", clear), null, "a boulder is not Reach's");
+test("a log rolls across its length until it stops, never along it", () => {
+  const t = trials([{ id: "l", logs: [[2, 2, "x"]] }]);
+  const log = t.blocks[0], room = (ax, az, bx, bz) => bz >= 0 && bz <= 6;
+  assert.equal(shove(t, log, "e", room), null, "along its length");
+  assert.deepEqual(shove(t, log, "s", room), { x: 2, z: 6, sunk: false, n: 4 }, "to the wall");
+  assert.ok(blockAt(t, 3, 2) === log, "it covers two tiles");
 });
 
-test("the hero slides over ice until a wall, a block or dry ground", () => {
-  const t = trials([{ id: "i", ice: [[1, 0, 5, 0]], boulders: [[4, 0]] }]);
-  const free = (ax, az, bx) => bx <= 6;
-  assert.deepEqual(slide(t, 0, 0, "e", free), [3, 0], "stops before the boulder");
+test("a log drops into a channel exactly under it and makes a bridge; it won't roll half over one", () => {
+  const t = trials([{ id: "l", logs: [[2, 0, "x"], [6, 0, "x"]], channel: [[2, 3, 3, 3], [7, 3, 8, 3]] }]);
+  const [a, b] = t.blocks;
+  const to = shove(t, a, "s", free);
+  assert.deepEqual(to, { x: 2, z: 3, sunk: true, n: 3 });
+  assert.ok(gapAt(t, 2, 3), "open before it lands");
+  move(t, a, to);
+  assert.ok(!gapAt(t, 2, 3) && !gapAt(t, 3, 3) && !blockAt(t, 2, 3), "a bridge: floor now");
+  assert.deepEqual(shove(t, b, "s", free), { x: 6, z: 2, sunk: false, n: 2 }, "half over the gap: it stops at its edge");
+  assert.deepEqual(slide(t, 2, 2, "s", free), [2, 3], "the hero walks onto the bridge");
+});
+
+test("the hero slides over ice until a wall, a block, an open channel or dry ground", () => {
+  const t = trials([{ id: "i", ice: [[1, 0, 5, 0]], crates: [[4, 0]] }]);
+  const open = (ax, az, bx) => bx <= 6;
+  assert.deepEqual(slide(t, 0, 0, "e", open), [3, 0], "stops before the crate");
   t.blocks.length = 0;
-  assert.deepEqual(slide(t, 0, 0, "e", free), [6, 0], "carries on to dry ground");
-  assert.deepEqual(slide(t, 0, 0, "e", (ax, az, bx) => bx <= 4), [4, 0], "stops at a wall");
+  assert.deepEqual(slide(t, 0, 0, "e", open), [6, 0], "carries on to dry ground");
 });
 
-test("the boulder trial is solvable and takes some thought", () => {
-  const d = def("push"), t = trials([d]);
-  const start = { h: map.spawn ? [map.spawn.x, map.spawn.z] : null, b: at(t) };
-  const { best } = search(start, handMoves(t), stateKey, onPlates(d));
-  assert.ok(best !== null, "no solution");
-  assert.ok(best >= 20, `solved in ${best} moves: too easy`);
+// ---------- The levels ----------
+
+// Solved, and the hero can still walk to every tile in `ways` (the way in, the next door): no soft-lock once done.
+const solvedAndFree = (m, id, ways) => (s, h) => s.plates.every((p) => blockAt(s, p.x, p.z)?.kind === "crate") && ways.every((w) => walkable(m, id, s, h, w));
+
+test("the depot's front room: a short lesson in getting stuck, and the way on stays open", () => {
+  const depot = map("trial_depot"), m = measure(depot, "depot1"), tr = traps(depot, "depot1");
+  assert.ok(m.solvable);
+  assert.ok(m.pushes >= 12, `${m.pushes} pushes`);
+  assert.ok(tr.traps >= 0.5, `only ${Math.round(tr.traps * 100)}% of states are dead ends`);
+  assert.ok(measure(depot, "depot1", { goal: solvedAndFree(depot, "depot1", [[4, 11], [4, 7]]) }).solvable, "solved, the hero is shut in");
 });
 
-test("the ice trial reaches the far side in a few slides, and never strands the hero", () => {
-  const d = def("ice"), t = trials([d]);
-  const [sx, sz] = d.start, [gx, gz] = d.goal;
-  const moves = ([x, z]) => F.map((f) => slide(t, x, z, f, open)).filter(Boolean);
-  const { best, seen } = search([sx, sz], moves, String, ([x, z]) => x === gx && z === gz);
-  assert.ok(best !== null, "no way across");
-  assert.ok(best >= 5, `across in ${best} slides: too easy`);
-  // From anywhere the ice can carry the hero, both the far side and the way back are still in reach.
-  for (const p of seen.values()) {
-    for (const [tx, tz] of [d.goal, d.start]) assert.ok(search(p, moves, String, ([x, z]) => x === tx && z === tz).best !== null, `stranded at ${p}`);
+test("the depot's back store: a real Sokoban (30 pushes), and the way out stays open", () => {
+  const depot = map("trial_depot"), m = measure(depot, "depot2");
+  assert.ok(m.solvable);
+  assert.ok(m.pushes >= 30, `${m.pushes} pushes`);
+  assert.ok(m.moves >= 100, `${m.moves} moves`);
+  assert.ok(measure(depot, "depot2", { goal: solvedAndFree(depot, "depot2", [[4, 6]]) }).solvable, "solved, the hero is shut in");
+});
+
+test("the rime cave's first cavern: a dozen slides, and the ice never strands the hero", () => {
+  const m = measure(map("trial_ice"), "ice1"), tr = traps(map("trial_ice"), "ice1");
+  assert.ok(m.solvable);
+  assert.ok(m.moves >= 12, `${m.moves} slides`);
+  assert.equal(tr.dead, 0, "a place the ice carries you to with no way on");
+});
+
+test("the rime cave's second cavern: the card is out of reach without sliding the crates, and you can always get back", () => {
+  const ice = map("trial_ice"), m = measure(ice, "ice2");
+  assert.ok(m.solvable);
+  assert.ok(m.pushes >= 3 && m.moves >= 35, `${m.pushes} pushes, ${m.moves} moves`);
+  const bare = { ...ice, trials: ice.trials.map((t) => (t.id === "ice2" ? { ...t, crates: [] } : t)) };
+  assert.ok(!measure(bare, "ice2").solvable, "solvable without the crates");
+  // From anywhere, crates wherever, the passage (and the rune stone beside it) is still in reach.
+  const home = traps(ice, "ice2", { goal: (s, h) => h[0] === 5 && h[1] === 8 });
+  assert.equal(home.dead, 0, "the hero can be stranded");
+});
+
+test("the log run: a log rolled the wrong way is lost (until the rune stone), in both rooms", () => {
+  const logs = map("trial_logs");
+  for (const id of ["logs1", "logs2"]) {
+    const m = measure(logs, id), tr = traps(logs, id);
+    assert.ok(m.solvable, `${id} unsolvable`);
+    assert.ok(m.pushes >= 3, `${id}: ${m.pushes} rolls`);
+    assert.ok(tr.traps >= 0.4, `${id}: only ${Math.round(tr.traps * 100)}% of states are dead ends`);
   }
-});
-
-test("the Reach trial is solvable with Reach and takes some thought", () => {
-  const d = def("reach"), t = trials([d]);
-  const { best } = search({ h: d.start, b: at(t) }, reachMoves(t), stateKey, onPlates(d));
-  assert.ok(best !== null, "no solution");
-  assert.ok(best >= 12, `solved in ${best} moves: too easy`);
 });

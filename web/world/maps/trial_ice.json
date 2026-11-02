@@ -1,0 +1,173 @@
+{
+  "title": "The Rime Cave",
+  "title_fr": "La Grotte de Givre",
+  "proto": "field puzzles (docs/PUZZLES.md), not yet placed in the world: open it with ?trials in a debug build",
+  "width": 11,
+  "height": 17,
+  "tiles": [
+    "22222222222",
+    "2..1.1....2",
+    "2......1..2",
+    "2...1.....2",
+    "2.1.......2",
+    "2.........2",
+    "2..1....1.2",
+    "2...1...1.2",
+    "22222.22222",
+    "2..1..1...2",
+    "2....11..12",
+    "2...1..1..2",
+    "21...1....2",
+    "2....1....2",
+    "2.......1.2",
+    "2.1.1.....2",
+    "22222.22222"
+  ],
+  "spawn": {
+    "x": 5,
+    "z": 16,
+    "facing": "n"
+  },
+  "cave": true,
+  "trials": [
+    {
+      "id": "ice1",
+      "ice": [
+        [
+          1,
+          9,
+          9,
+          15
+        ]
+      ],
+      "dry": [
+        [
+          5,
+          9
+        ]
+      ],
+      "start": [
+        5,
+        16
+      ],
+      "goal": [
+        5,
+        9
+      ]
+    },
+    {
+      "id": "ice2",
+      "flag": "trial_ice2",
+      "look": "stone",
+      "ice": [
+        [
+          1,
+          1,
+          9,
+          7
+        ]
+      ],
+      "dry": [
+        [
+          4,
+          1
+        ]
+      ],
+      "crates": [
+        [
+          7,
+          4
+        ],
+        [
+          7,
+          5
+        ]
+      ],
+      "reset": [
+        4,
+        8
+      ],
+      "start": [
+        5,
+        8
+      ],
+      "goal": [
+        4,
+        1
+      ],
+      "solved": {
+        "lines": [
+          "Wedged between two rocks, face down on the ice: a card. Someone dropped it sliding. (Prototype: here, Pip's lost card.)"
+        ],
+        "lines_fr": [
+          "Coincée entre deux rochers, face contre la glace : une carte. Quelqu'un l'a perdue en glissant. (Prototype : ici, la carte perdue de Pip.)"
+        ],
+        "do": [
+          "flag:trial_ice2",
+          "sfx:jingle"
+        ]
+      }
+    }
+  ],
+  "gates": [],
+  "props": [],
+  "interactions": [],
+  "warps": [
+    {
+      "x": 5,
+      "z": 16,
+      "to": "trials",
+      "label": "Back to the hall",
+      "label_fr": "Retour à la salle",
+      "spawn": {
+        "x": 5,
+        "z": 2,
+        "facing": "s"
+      },
+      "dir": "s"
+    }
+  ],
+  "exits": [],
+  "npcs": [],
+  "ground": {
+    "base": "cave",
+    "path": "stone",
+    "margin": 0
+  },
+  "camera": {
+    "fov": 40,
+    "fovPortrait": 50,
+    "pitch": 50,
+    "distance": 12,
+    "distancePortrait": 15,
+    "lookAtOffset": [
+      0,
+      0.75,
+      0
+    ],
+    "clamp": true
+  },
+  "light": {
+    "indoor": true,
+    "sun": {
+      "color": "#dff4ff",
+      "intensity": 1.2,
+      "fromHero": [
+        -3,
+        8,
+        4
+      ]
+    },
+    "hemisphere": {
+      "sky": "#7a93a8",
+      "ground": "#141a20",
+      "intensity": 1.2
+    },
+    "lamp": {
+      "color": "#bfe8ff",
+      "intensity": 3,
+      "distance": 6
+    },
+    "background": "#0a0e12"
+  }
+}

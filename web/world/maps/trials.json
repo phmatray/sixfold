@@ -1,132 +1,60 @@
 {
   "title": "The Trials",
   "title_fr": "Les Épreuves",
-  "proto": "field puzzles (Golden Sun-style), not yet placed in the world: open it with ?trials in a debug build",
-  "width": 31,
-  "height": 11,
+  "proto": "field puzzles (docs/PUZZLES.md), not yet placed in the world: open it with ?trials in a debug build",
+  "width": 11,
+  "height": 7,
   "tiles": [
-    "3333333333333333333333333333333",
-    "31..11111121......1.2......22.3",
-    "31..11....2.1.......2.........3",
-    "3......1..2.........2.122111..3",
-    "3..1.............1..2.111111..3",
-    "3.....11..2........12.111111..3",
-    "3.........2.........2.111111..3",
-    "3.11......2.......1.2..22.....3",
-    "3.........2.....11............3",
-    "3.........2..1......2.........3",
-    "3.........211111111121111111113"
+    "33333333333",
+    "3.........3",
+    "3.........3",
+    "3.........3",
+    "3.........3",
+    "3.........3",
+    "3.........3"
   ],
-  "spawn": { "x": 5, "z": 10, "facing": "n" },
-  "trials": [
-    {
-      "id": "push",
-      "flag": "trial_push",
-      "boulders": [[4, 3], [7, 4]],
-      "plates": [[2, 1], [7, 2]],
-      "reset": [9, 9],
-      "solved": {
-        "lines": ["Both plates sink under the boulders' weight. Somewhere to the east, stone grinds on stone."],
-        "lines_fr": ["Les deux dalles s'enfoncent sous le poids des rochers. Quelque part à l'est, la pierre racle la pierre."],
-        "do": ["flag:trial_push", "sfx:jingle"]
-      }
-    },
-    {
-      "id": "ice",
-      "ice": [[11, 1, 19, 9]],
-      "dry": [[11, 4], [19, 8]],
-      "start": [11, 4],
-      "goal": [19, 8]
-    },
-    {
-      "id": "reach",
-      "flag": "trial_reach",
-      "pillars": [[22, 5], [27, 6]],
-      "plates": [[26, 3], [26, 5]],
-      "dais": [[22, 3, 27, 6]],
-      "reset": [29, 9],
-      "start": [21, 8],
-      "solved": {
-        "lines": ["The pillars settle on their plates with a low hum. In the north-east corner, the sealed niche opens."],
-        "lines_fr": ["Les piliers se posent sur leurs dalles avec un bourdonnement sourd. Au nord-est, la niche scellée s'ouvre."],
-        "do": ["flag:trial_reach", "sfx:jingle"]
-      }
-    }
-  ],
-  "gates": [
-    {
-      "id": "trial_push",
-      "name": "the way to the ice",
-      "name_fr": "le passage vers la glace",
-      "tiles": [[10, 4]],
-      "if": "flag:trial_push",
-      "floor": 0,
-      "prop_closed": "trial_seal",
-      "text": "A stone block fills the gap. Two plates in this room are waiting for weight.",
-      "text_fr": "Un bloc de pierre bouche le passage. Deux dalles de cette salle attendent un poids."
-    },
-    {
-      "id": "trial_reach",
-      "name": "the sealed niche",
-      "name_fr": "la niche scellée",
-      "tiles": [[29, 2]],
-      "if": "flag:trial_reach",
-      "floor": 0,
-      "prop_closed": "trial_seal",
-      "text": "A stone block seals the niche. The two plates on the dais must both be held down.",
-      "text_fr": "Un bloc de pierre scelle la niche. Les deux dalles de l'estrade doivent être maintenues enfoncées."
-    }
-  ],
+  "spawn": { "x": 5, "z": 6, "facing": "n" },
+  "trials": [],
+  "gates": [],
   "props": [
-    { "asset": "sign", "x": 6, "z": 9, "rot": 0 },
-    { "asset": "sign", "x": 23, "z": 8, "rot": 0 },
-    { "asset": "glow_mushroom", "x": 1, "z": 9, "rot": 0, "glow": "#ffcf8a" },
-    { "asset": "glow_mushroom", "x": 28, "z": 9, "rot": 0, "glow": "#5fe0c8" }  ],
+    { "asset": "exit_mat", "x": 5, "z": 6, "rot": 0 },
+    { "asset": "exit_mat", "x": 1, "z": 4, "rot": 90 },
+    { "asset": "exit_mat", "x": 5, "z": 1, "rot": 0 },
+    { "asset": "exit_mat", "x": 9, "z": 4, "rot": 90 },
+    { "asset": "sign", "x": 2, "z": 3, "rot": 0 },
+    { "asset": "sign", "x": 4, "z": 1, "rot": 0 },
+    { "asset": "sign", "x": 8, "z": 3, "rot": 0 },
+    { "asset": "glow_mushroom", "x": 1, "z": 1, "rot": 0, "glow": "#ffcf8a" },
+    { "asset": "glow_mushroom", "x": 9, "z": 1, "rot": 0, "glow": "#9fe3ff" }
+  ],
   "interactions": [
     {
-      "kind": "sign",
-      "x": 6,
-      "z": 9,
-      "name": "The Trials",
-      "name_fr": "Les Épreuves",
-      "text": "Three rooms, three trials. Push the boulders onto the plates. Cross the ice: you won't stop until something stops you. Then Reach: face a humming pillar up to four tiles away and press E to shove it. Wedged? Touch the rune stone in the corner.",
-      "text_fr": "Trois salles, trois épreuves. Poussez les rochers sur les dalles. Traversez la glace : vous ne vous arrêterez que si quelque chose vous arrête. Puis l'Allonge : face à un pilier qui bourdonne, jusqu'à quatre cases, appuyez sur E pour le pousser. Coincé ? Touchez la pierre runique dans le coin."
+      "kind": "sign", "x": 2, "z": 3, "name": "The Depot", "name_fr": "Le Dépôt",
+      "text": "West: the depot. Push the crates onto the chalk marks. A crate pushed into a corner stays there: think before you push. Two rooms.",
+      "text_fr": "À l'ouest : le dépôt. Poussez les caisses sur les marques à la craie. Une caisse poussée dans un coin y reste : réfléchissez avant de pousser. Deux salles."
     },
     {
-      "kind": "sign",
-      "x": 23,
-      "z": 8,
-      "name": "Reach",
-      "name_fr": "L'Allonge",
-      "text": "The pillars are too heavy for hands and stand out of reach. Face one in a straight line, four tiles at most, nothing solid between, and press E: it slides one tile away from you.",
-      "text_fr": "Les piliers sont trop lourds pour des mains et hors d'atteinte. Placez-vous face à l'un d'eux, en ligne droite, à quatre cases au plus, sans obstacle, et appuyez sur E : il glisse d'une case en s'éloignant de vous."
+      "kind": "sign", "x": 4, "z": 1, "name": "The Rime Cave", "name_fr": "La Grotte de Givre",
+      "text": "North: the rime cave. On the ice you slide until something stops you; so does a crate. Something glints at the back. Two caverns.",
+      "text_fr": "Au nord : la grotte de givre. Sur la glace, on glisse jusqu'à ce que quelque chose nous arrête ; une caisse aussi. Quelque chose brille au fond. Deux cavernes."
+    },
+    {
+      "kind": "sign", "x": 8, "z": 3, "name": "The Log Run", "name_fr": "Le Flottage",
+      "text": "East: the log run. A log rolls across its length until it stops; rolled over a gap exactly its size, it drops in and makes a bridge. Two streams.",
+      "text_fr": "À l'est : le flottage. Un tronc roule en travers jusqu'à ce qu'il s'arrête ; roulé sur une brèche exactement à sa taille, il y tombe et fait un pont. Deux ruisseaux."
     }
   ],
   "warps": [
-    {
-      "x": 5,
-      "z": 10,
-      "to": "overworld",
-      "label": "Leave the trials",
-      "label_fr": "Quitter les épreuves",
-      "spawn": { "x": 25, "z": 15, "facing": "s" },
-      "dir": "s"
-    },
-    {
-      "x": 29,
-      "z": 1,
-      "to": "overworld",
-      "label": "Leave the trials",
-      "label_fr": "Quitter les épreuves",
-      "spawn": { "x": 25, "z": 15, "facing": "s" },
-      "dir": "n"
-    }
+    { "x": 5, "z": 6, "to": "overworld", "label": "Leave the trials", "label_fr": "Quitter les épreuves", "spawn": { "x": 25, "z": 15, "facing": "s" }, "dir": "s" },
+    { "x": 1, "z": 4, "to": "trial_depot", "label": "Enter the depot", "label_fr": "Entrer dans le dépôt", "spawn": { "x": 4, "z": 11, "facing": "n" }, "dir": "w" },
+    { "x": 5, "z": 1, "to": "trial_ice", "label": "Enter the rime cave", "label_fr": "Entrer dans la grotte de givre", "spawn": { "x": 5, "z": 16, "facing": "n" }, "dir": "n" },
+    { "x": 9, "z": 4, "to": "trial_logs", "label": "Enter the log run", "label_fr": "Entrer au flottage", "spawn": { "x": 5, "z": 19, "facing": "n" }, "dir": "e" }
   ],
   "exits": [],
   "npcs": [],
   "cave": true,
   "ground": { "base": "cave", "path": "stone", "margin": 0 },
-  "camera": { "fov": 40, "fovPortrait": 50, "pitch": 50, "distance": 12, "distancePortrait": 15, "lookAtOffset": [0, 0.75, 0], "clamp": true },
+  "camera": { "fov": 40, "fovPortrait": 50, "pitch": 50, "distance": 10, "distancePortrait": 12, "lookAtOffset": [0, 0.75, 0], "clamp": true },
   "light": {
     "indoor": true,
     "sun": { "color": "#ffe2b8", "intensity": 1.1, "fromHero": [-3, 8, 4] },

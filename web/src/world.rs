@@ -43,7 +43,7 @@ let api = null, gen = 0, items = "", seals = "", paused = false, minute = 480, c
 export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, edit && q.has("trials") ? "trials,5,10,n" : start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setSeals(seals); api.setClock(minute); api.setCamera(camera); api.setGraphics(graphics); api.pause(paused); })
+    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, edit && q.has("trials") ? "trials,5,6,n" : start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setSeals(seals); api.setClock(minute); api.setCamera(camera); api.setGraphics(graphics); api.pause(paused); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "import", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
