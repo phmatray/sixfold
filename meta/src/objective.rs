@@ -235,13 +235,13 @@ impl Objective {
         match self {
             // The intro sends the hero to Wynne's first (her running shoes).
             Objective::Lesson if !p.has_item("running_shoes") => tr(
-                "Drop in at Wynne's shop up the path, then duel Tobin in Sixfold Meadow: he'll show you how a duel goes.",
-                "Passez à la boutique de Wynne, en haut du chemin, puis défiez Tobin au Pré de Sixfold\u{a0}: il vous montrera comment se passe un duel.",
+                "Drop in at Wynne's shop up the path, then come back south and duel Tobin at the duel table in Sixfold Meadow: he'll show you how a duel goes.",
+                "Passez à la boutique de Wynne, en haut du chemin, puis revenez vers le sud et défiez Tobin à la table de duel du Pré de Sixfold\u{a0}: il vous montrera comment se passe un duel.",
             )
             .into(),
             Objective::Lesson => tr(
-                "Duel Tobin in Sixfold Meadow: he'll show you how a duel goes.",
-                "Défiez Tobin au Pré de Sixfold\u{a0}: il vous montrera comment se passe un duel.",
+                "Duel Tobin at the duel table in Sixfold Meadow, south of the waymark: he'll show you how a duel goes.",
+                "Défiez Tobin à la table de duel du Pré de Sixfold, au sud de la borne\u{a0}: il vous montrera comment se passe un duel.",
             )
             .into(),
             Objective::Rival(r) if !r.seal => tr(
@@ -368,6 +368,9 @@ mod tests {
         assert!(new.contains("Wynne") && new.contains("Tobin"), "{new}");
         let shod = Objective::Lesson.text(&with(&["give:running_shoes"]));
         assert!(!shod.contains("Wynne") && shod.contains("Tobin"), "{shod}");
+        for t in [&new, &shod] {
+            assert!(t.contains("duel table") && t.contains("south"), "{t}");
+        }
     }
 
     #[test]
