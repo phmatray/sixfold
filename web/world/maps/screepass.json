@@ -4,6 +4,7 @@
   "region": "stone",
   "kind": "route",
   "music": "stone",
+  "level_design": 2,
   "life": {
     "critters": [
       {
@@ -23,6 +24,26 @@
           1,
           9,
           6
+        ],
+        "n": 2
+      },
+      {
+        "kind": "hedgehog",
+        "zone": [
+          3,
+          36,
+          12,
+          41
+        ],
+        "n": 2
+      },
+      {
+        "kind": "lizard",
+        "zone": [
+          13,
+          36,
+          20,
+          41
         ],
         "n": 2
       }
@@ -181,7 +202,8 @@
       "asset": "cave_mouth_slate",
       "x": 21,
       "z": 33,
-      "rot": 0
+      "rot": 0,
+      "landmark": true
     },
     {
       "asset": "rail",
@@ -1761,6 +1783,13 @@
       "z": 18,
       "rot": 0,
       "y": 3
+    },
+    {
+      "asset": "cairn",
+      "x": 24,
+      "z": 4,
+      "rot": 0,
+      "y": 4
     }
   ],
   "gates": [
@@ -1824,7 +1853,22 @@
             "Un wagonnet à minerai, renversé au bout des rails, rouillé de la couleur des collines. Dedans, un nid d'herbe sèche, et une seule coquille bleue."
           ]
         }
-      ]
+      ],
+      "poi": "secret",
+      "secret": {
+        "id": "tipped_cart",
+        "kind": "environmental",
+        "clue": [
+          [
+            22,
+            36
+          ],
+          [
+            23,
+            38
+          ]
+        ]
+      }
     },
     {
       "x": 18,
@@ -1870,7 +1914,8 @@
             "flag:cairn_1"
           ]
         }
-      ]
+      ],
+      "poi": "micro"
     },
     {
       "x": 2,
@@ -1916,7 +1961,8 @@
             "flag:cairn_2"
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 26,
@@ -1962,7 +2008,8 @@
             "flag:cairn_3"
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 2,
@@ -2008,7 +2055,8 @@
             "flag:cairn_4"
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 26,
@@ -2054,7 +2102,8 @@
             "flag:cairn_5"
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 21,
@@ -2100,7 +2149,8 @@
             "flag:cairn_6"
           ]
         }
-      ]
+      ],
+      "poi": "micro"
     },
     {
       "x": 16,
@@ -2116,7 +2166,18 @@
       "z": 3,
       "give": "coins:60",
       "text": "At the top of the scree, wedged under a slab where the wind can't get it: a climber's purse, heavy with Facets.",
-      "text_fr": "En haut des éboulis, coincée sous une dalle à l'abri du vent : la bourse d'un grimpeur, lourde de Facettes."
+      "text_fr": "En haut des éboulis, coincée sous une dalle à l'abri du vent : la bourse d'un grimpeur, lourde de Facettes.",
+      "poi": "secret",
+      "secret": {
+        "id": "scree_purse",
+        "kind": "spatial",
+        "clue": [
+          [
+            24,
+            4
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -2383,5 +2444,19 @@
       "near": 16,
       "far": 34
     }
-  }
+  },
+  "view": [
+    [
+      24,
+      7
+    ],
+    [
+      4,
+      13
+    ],
+    [
+      3,
+      29
+    ]
+  ]
 }

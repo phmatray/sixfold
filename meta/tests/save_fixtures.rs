@@ -334,3 +334,112 @@ fn a_1_10_save_keeps_its_duelist_wins_and_achievements() {
     let s = Save::decode(&old.encode()).unwrap();
     assert_eq!(s.stats().get("duelist_wins"), 15);
 }
+
+/// #263: the Stone (`undermine`, `screepass`, `anvilstead`, `bastion`) was brought to the Fernhollow
+/// standard. A save with every Stone find and secret collected, the hero at the foot of Scree Pass (the
+/// fixture is the 1.9.1 game with the Stone's finds and maps added, written by the current encoder,
+/// whose format 1.12 shares), still loads: each find is still on its map and still collected, its
+/// secret flag is kept, and the saved tile, like the spawn of each map, is open ground.
+#[test]
+fn a_save_on_the_stone_keeps_its_finds_and_lands_on_open_ground() {
+    let s = Save::decode(&fixture("v1.12.0-stone.txt")).unwrap();
+    let p = s.progress();
+    let at: Vec<&str> = s.get(WORLD_AT).unwrap().split(',').collect();
+    assert_eq!(at[0], "screepass");
+    let web = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world");
+    let src = std::fs::read_to_string(web.join("props.js")).unwrap();
+    let foot: HashMap<String, Vec<f64>> = props_table(&src, "FOOT").into_iter().collect();
+    let mut walked: Vec<String> = props_table(&src, "DECK")
+        .into_iter()
+        .map(|(k, _)| k)
+        .collect();
+    let set = &src[src.find("export const WALKABLE = new Set([").unwrap()..];
+    walked.extend(
+        set[..set.find(']').unwrap()]
+            .split('"')
+            .skip(1)
+            .step_by(2)
+            .map(String::from),
+    );
+    for (name, finds, secrets) in [
+        (
+            "undermine",
+            &[
+                "sn_side_1",
+                "sn_side_2",
+                "sn_side_3",
+                "sn_crystal",
+                "sn_strongbox",
+            ][..],
+            &["strongbox_hum"][..],
+        ),
+        (
+            "screepass",
+            &["sn_scree"][..],
+            &["scree_purse", "tipped_cart"][..],
+        ),
+        ("anvilstead", &["sn_headframe"][..], &["brake_house"][..]),
+        (
+            "bastion",
+            &["sn_menhir", "sn_moon"][..],
+            &["menhir_step", "moon_seam"][..],
+        ),
+    ] {
+        let map: serde_json::Value = serde_json::from_str(
+            &std::fs::read_to_string(web.join(format!("maps/{name}.json"))).unwrap(),
+        )
+        .unwrap();
+        // Open ground: not water, rock, a fence or a wall, and under no prop but one walked on.
+        let open = |x: i64, z: i64| {
+            let row = map["tiles"][z as usize].as_str().unwrap().as_bytes();
+            !b"~#fWV".contains(&row[x as usize])
+                && !map["props"].as_array().unwrap().iter().any(|q| {
+                    let asset = q["asset"].as_str().unwrap();
+                    let (px, pz) = (q["x"].as_i64().unwrap(), q["z"].as_i64().unwrap());
+                    let (mut w, mut d) = foot
+                        .get(asset)
+                        .map_or((1, 1), |f| (f[0] as i64, f[1] as i64));
+                    if q["rot"].as_i64().unwrap_or(0) % 180 == 90 {
+                        (w, d) = (d, w);
+                    }
+                    q.get("if").is_none()
+                        && !walked.iter().any(|k| k == asset)
+                        && (px..px + w).contains(&x)
+                        && (pz..pz + d).contains(&z)
+                })
+        };
+        assert_eq!(map["level_design"], 2, "{name} is on level design 2");
+        let spawn = (
+            map["spawn"]["x"].as_i64().unwrap(),
+            map["spawn"]["z"].as_i64().unwrap(),
+        );
+        assert!(
+            open(spawn.0, spawn.1),
+            "the {name} spawn {spawn:?} is closed"
+        );
+        if name == "screepass" {
+            let (x, z) = (at[1].parse().unwrap(), at[2].parse().unwrap());
+            assert!(open(x, z), "the saved tile {x},{z} is not open ground");
+        }
+        let on_map = |id: &str| {
+            map["interactions"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|i| i["id"].as_str() == Some(id))
+        };
+        for id in finds {
+            assert!(
+                p.has_flag(&format!("found_{id}")),
+                "the save had collected {id}"
+            );
+            assert!(on_map(id), "{id} is no longer on {name}");
+        }
+        for id in secrets {
+            assert!(
+                p.has_flag(&format!("secret_{id}")),
+                "the save had found {id}"
+            );
+        }
+    }
+}
