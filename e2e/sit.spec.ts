@@ -152,24 +152,27 @@ test("on a phone, holding the pad into a seat sits, and another way stands up @p
   await hold("w", "pointerup");
 });
 
-test("with motion, walking into a seat sits, whatever way it faces @webkit", async ({ page }) => {
-  const seat = (page: Page) => page.evaluate(() => (document.querySelector(".world-host") as any)?.sixfoldStats?.().seat);
-  // The way a seat faces, as a yaw: atan2 of its direction (+z is south, toward the camera).
-  const DIR: Record<string, [number, number]> = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
-  // Through the title under reduced motion (its menu holds still for a click on WebKit), then motion on in the
-  // world, heard on a frame: the turn and the SitDown / StandUp clips play out.
-  await intoWorld(page);
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await frames(page);
-  // One seat per rotation, each walked into: [map, x, z, facing, key, the way the seat faces]. The two
-  // chairs at a duel table (rot 180, 270) are walked into from beside: the table fills their front.
-  const seats: [string, number, number, string, string, string][] = [
-    ["overworld", 22, 17, "n", "ArrowUp", "s"], // bench, rot 0
-    ["bakery", 2, 4, "w", "ArrowLeft", "e"], // chair, rot 90
-    ["inn_dream", 9, 6, "w", "ArrowLeft", "n"], // chair, rot 180
-    ["lodge", 3, 6, "n", "ArrowUp", "w"], // chair, rot 270
-  ];
-  for (const [map, x, z, facing, key, face] of seats) {
+// With motion, one test per seat rotation (each has the whole test budget: on CI's software GL a frame moves the
+// clock 50 ms at most, so a turn, a SitDown and a StandUp take many slow frames). Each seat is walked into:
+// [what, map, x, z, facing, key, the way the seat faces]. The two chairs at a duel table (rot 180, 270) are walked
+// into from beside: the table fills their front.
+const ROTATIONS: [string, string, number, number, string, string, string][] = [
+  ["bench, rot 0", "overworld", 22, 17, "n", "ArrowUp", "s"],
+  ["chair, rot 90", "bakery", 2, 4, "w", "ArrowLeft", "e"],
+  ["chair, rot 180", "inn_dream", 9, 6, "w", "ArrowLeft", "n"],
+  ["chair, rot 270", "lodge", 3, 6, "n", "ArrowUp", "w"],
+];
+// The way a seat faces, as a yaw: atan2 of its direction (+z is south, toward the camera).
+const DIR: Record<string, [number, number]> = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
+const seat = (page: Page) => page.evaluate(() => (document.querySelector(".world-host") as any)?.sixfoldStats?.().seat);
+
+for (const [what, map, x, z, facing, key, face] of ROTATIONS) {
+  test(`with motion, walking into a seat sits, whatever way it faces: ${what} @webkit`, async ({ page }) => {
+    // Through the title under reduced motion (its menu holds still for a click on WebKit), then motion on in the
+    // world, heard on a frame: the turn and the SitDown / StandUp clips play out.
+    await intoWorld(page);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await frames(page);
     await warpTo(page, map, x, z, facing);
     await page.keyboard.down(key); // kept through the warp's fade
     const want = Math.atan2(DIR[face][0], DIR[face][1]);
@@ -180,12 +183,11 @@ test("with motion, walking into a seat sits, whatever way it faces @webkit", asy
           const off = s && Math.abs(Math.atan2(Math.sin(s.yaw - want), Math.cos(s.yaw - want)));
           return s ? `${s.face} settled:${s.k === 1} turned:${off < 0.05}` : "standing";
         },
-        // A frame moves the clock 50 ms at most: on CI's software GL the turn and SitDown take many slow frames.
         { message: `${map} (${x},${z})`, timeout: 60_000 },
       )
       .toBe(`${face} settled:true turned:true`);
     await page.keyboard.up(key);
     await page.keyboard.press("Escape");
-    await expect.poll(() => seat(page), { message: `${map}: stood up`, timeout: 60_000 }).toBeNull(); // StandUp: slow frames too
-  }
-});
+    await expect.poll(() => seat(page), { message: `${map}: stood up`, timeout: 60_000 }).toBeNull();
+  });
+}
