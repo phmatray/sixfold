@@ -605,3 +605,20 @@ before 1.9, and where the starter is always on loan, so a duel is always possibl
 been a second, uncapped source of cards next to the packs: one rival win would hand over 30-odd cards and
 move `economy_sim` (packs an hour) and the campaign playthroughs, whose decks are built from the
 collection. As a loan it moves neither; a campaign duel still needs a deck the player owns.
+
+## Hard in the Dream Veil mirror
+
+Hard beats Normal in the mirrors (`hard_beats_normal_in_mirrors_big`), but after the #232 refit Dream
+Veil sat at 22/50 while the other five decks were ahead. `hard_deviations_dream_veil` (ignored, run
+with `--release`) replays that mirror with the same seeds and, at every Hard main-phase decision,
+asks a clone of Hard's own state what Normal would do. Each departure is counted as "Normal's kind
+-> Hard's kind", in games Hard won and lost.
+
+Findings (22 won out of 50): the departures are spread over every kind and lost games simply have
+more of them (they last longer). Two things stand out: Hard ends its turn instead of playing a
+Gear/Power more often than any other departure (`gear -> end` 30 times in won games, 13 in lost;
+`power -> end` 6 and 19), and the departures that start a retreat (`attach -> retreat` 0 won / 6
+lost games, `basic -> retreat` 1 / 3) cluster in lost games. Nothing points to one bad candidate
+kind; what none of them can see is the status plan: `evaluate` reads no Sleep, Confusion,
+Paralysis or poison, so a play-out cannot tell a stalled opponent from a healthy one. The fix goes
+in `evaluate`.

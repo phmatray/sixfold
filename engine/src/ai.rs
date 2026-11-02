@@ -2227,10 +2227,11 @@ mod tests {
 
     /// Hard against Normal in mirror matches: each prebuilt deck against
     /// itself, `games` seeded games per deck, seats alternating. Returns
-    /// Hard's (wins, games) and the most look-ahead applies one decision used.
-    fn hard_vs_normal(games: u64) -> (u32, u32, u32) {
+    /// Hard's (wins, games), the most look-ahead applies one decision used and
+    /// Hard's wins per deck.
+    fn hard_vs_normal(games: u64) -> (u32, u32, u32, Vec<u32>) {
         use crate::decks::PREBUILT;
-        let (mut wins, mut played, mut most) = (0, 0, 0);
+        let (mut wins, mut played, mut most, mut per_deck) = (0, 0, 0, Vec::new());
         for (d, deck) in PREBUILT.iter().enumerate() {
             let mut deck_wins = 0;
             for n in 0..games {
@@ -2255,12 +2256,13 @@ mod tests {
                 }
                 deck_wins += u32::from(g.winner() == Some(hard));
             }
-            eprintln!("{:12} Hard won {deck_wins}/{games}", deck.name);
+            eprintln!("{:12} Hard won {deck_wins}/{games}", deck.name.en);
             wins += deck_wins;
             played += games as u32;
+            per_deck.push(deck_wins);
         }
         eprintln!("Hard vs Normal: {wins}/{played}, at most {most} applies per decision");
-        (wins, played, most)
+        (wins, played, most, per_deck)
     }
 
     /// Hard wins most mirror matches against Normal, and keeps to its
@@ -2268,7 +2270,7 @@ mod tests {
     /// check asks for 55%; the big run below holds Hard to 60%.
     #[test]
     fn hard_beats_normal_in_mirrors() {
-        let (wins, games, most) = hard_vs_normal(10);
+        let (wins, games, most, _) = hard_vs_normal(10);
         assert!(wins * 20 >= games * 11, "Hard won only {wins}/{games}");
         assert!(
             most <= NODE_BUDGET + CANDIDATES as u32 * ROLLOUT,
@@ -2282,9 +2284,106 @@ mod tests {
     #[ignore]
     fn hard_beats_normal_in_mirrors_big() {
         let start = std::time::Instant::now();
-        let (wins, games, _) = hard_vs_normal(50);
+        let (wins, games, _, per_deck) = hard_vs_normal(50);
         eprintln!("{:?} in all", start.elapsed());
         assert!(wins * 10 >= games * 6, "Hard won only {wins}/{games}");
+        for (deck, won) in crate::decks::PREBUILT.iter().zip(per_deck) {
+            assert!(
+                won > 25,
+                "Hard won only {won}/50 in the {} mirror",
+                deck.name.en
+            );
+        }
+    }
+
+    /// The family an action belongs to, for counting what Hard does.
+    fn action_kind(a: Action) -> &'static str {
+        match a {
+            Action::Attack(_) => "attack",
+            Action::Retreat => "retreat",
+            Action::AttachEnergy { .. } => "attach",
+            Action::Evolve { .. } => "evolve",
+            Action::PlayGear(_) => "gear",
+            Action::UsePower(_) => "power",
+            Action::PlayBasic(_) => "basic",
+            Action::Done => "end",
+            _ => "other",
+        }
+    }
+
+    #[test]
+    fn action_kind_names_each_action_family() {
+        let g = main_phase(0);
+        assert_eq!(action_kind(Action::Retreat), "retreat");
+        assert_eq!(action_kind(Action::Attack(0)), "attack");
+        assert_eq!(
+            action_kind(Action::AttachEnergy { hand: 0, slot: 0 }),
+            "attach"
+        );
+        assert!(g.legal_actions().iter().all(|&a| action_kind(a) != ""));
+    }
+
+    /// Where Hard departs from Normal in the Dream Veil mirror, by kind of
+    /// departure ("Normal's kind -> Hard's kind"), counted in games Hard won
+    /// and lost (run with `--release -- --ignored --nocapture`).
+    #[test]
+    #[ignore]
+    fn hard_deviations_dream_veil() {
+        use crate::decks::PREBUILT;
+        use std::collections::BTreeMap;
+        let (d, deck) = PREBUILT
+            .iter()
+            .enumerate()
+            .find(|(_, k)| k.name.en == "Dream Veil")
+            .unwrap();
+        // kind -> (deviations in won games, in lost games, won games with it, lost games with it)
+        let mut tally: BTreeMap<String, [u32; 4]> = BTreeMap::new();
+        let (mut won, mut games) = (0, 0u32);
+        for n in 0..50u64 {
+            let seed = d as u64 * 1000 + n;
+            let hard = (n % 2) as usize;
+            let mut g = Game::new([deck.cards(), deck.cards()], seed, Config::default()).unwrap();
+            let mut ais = [0, 1].map(|i| {
+                let level = if i == hard {
+                    Difficulty::Hard
+                } else {
+                    Difficulty::Normal
+                };
+                Ai::new(seed * 2 + i as u64, level)
+            });
+            let mut counts: BTreeMap<String, u32> = BTreeMap::new();
+            while g.winner().is_none() {
+                let p = g.prompt().unwrap().player;
+                // What Normal would do from Hard's own memory of the turn.
+                let mut normal = ais[p].clone();
+                normal.difficulty = Difficulty::Normal;
+                let a = ais[p].choose_action(&g, p);
+                if p == hard && g.prompt().unwrap().kind == PromptKind::MainPhase {
+                    let theirs = normal.choose_action(&g, p);
+                    if theirs != a {
+                        let key = format!("{} -> {}", action_kind(theirs), action_kind(a));
+                        *counts.entry(key).or_default() += 1;
+                    }
+                }
+                g.apply(a).unwrap();
+            }
+            let win = g.winner() == Some(hard);
+            won += u32::from(win);
+            games += 1;
+            for (k, c) in counts {
+                let t = tally.entry(k).or_default();
+                let i = if win { 0 } else { 1 };
+                t[i] += c;
+                t[2 + i] += 1;
+            }
+        }
+        eprintln!("Dream Veil: Hard won {won}/{games}");
+        for (k, t) in tally {
+            eprintln!(
+                "{k:18}: in {} won / {} lost games, {} + {} deviations",
+                t[2], t[3], t[0], t[1]
+            );
+        }
     }
 
     /// Hard's decision time on this machine: mean and worst over a few games.
