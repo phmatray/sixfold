@@ -156,7 +156,8 @@ test("AC5: --report prints one section per outdoor map, with its measures, and e
   for (const s of sections)
     for (const line of ["- landmark:", "- POIs:", "- longest walk without a discovery:", "- scatter: ratio", "- density along the main path"]) assert.ok(s.includes(line), `${s.split("\n")[0]} lacks ${line}`);
   assert.match(r.stdout, /## woodland .*\n[\s\S]*?- POIs: \d+ major, \d+ secondary, \d+ micro, \d+ secret/);
-  assert.match(r.stdout, /\[poi-budget\]/);
+  // Every map meets its POI budget since the Dream pass (#271); AC6 below still proves [poi-budget] is reported.
+  assert.match(r.stdout, /- advisories:\n {2}- \[[a-z-]+\]/);
 });
 
 test("--report=<file> writes the report there", () => {

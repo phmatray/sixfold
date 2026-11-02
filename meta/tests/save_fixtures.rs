@@ -795,3 +795,62 @@ fn a_save_in_the_storm_keeps_its_finds_and_lands_on_open_ground() {
         }
     }
 }
+
+/// #271: the Dream (`hushlane`, `lanternmere`, `moonwell`) was brought to the Fernhollow standard. A
+/// save with every Dream find and the three new secrets collected, the hero on Hushwillow Lane (the
+/// fixture is the Tide fixture with the Dream's flags added, written by the current encoder), still
+/// loads: each find is still on its map and still collected, the secrets are counted, and the tile it
+/// stood on, like the spawns of all three maps, is open ground.
+#[test]
+fn a_save_in_the_dream_keeps_its_finds_and_lands_on_open_ground() {
+    let s = Save::decode(&fixture("v1.12.0-dream.txt")).unwrap();
+    let p = s.progress();
+    let at: Vec<&str> = s.get(WORLD_AT).unwrap().split(',').collect();
+    assert_eq!(at[0], "hushlane");
+    for (name, finds) in [
+        (
+            "hushlane",
+            &["d_tree", "d_willow", "d_ford", "d_nook_lane"][..],
+        ),
+        (
+            "lanternmere",
+            &["d_raft", "d_islet", "d_jetty", "d_inn_stump"][..],
+        ),
+        ("moonwell", &["d_bed", "d_hedge_nook"][..]),
+    ] {
+        let (map, open) = open_ground(name);
+        let on_map: Vec<&str> = map["interactions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|i| i["id"].as_str())
+            .collect();
+        for id in finds {
+            assert!(
+                p.has_flag(&format!("found_{id}")),
+                "the save had collected {id}"
+            );
+            assert!(on_map.contains(id), "{id} is no longer on {name}");
+        }
+        let spawn = (
+            map["spawn"]["x"].as_i64().unwrap(),
+            map["spawn"]["z"].as_i64().unwrap(),
+        );
+        assert!(
+            open(spawn.0, spawn.1),
+            "the {name} spawn {spawn:?} is not open ground"
+        );
+        if name == "hushlane" {
+            let (x, z) = (at[1].parse().unwrap(), at[2].parse().unwrap());
+            assert!(open(x, z), "the saved tile {x},{z} is not open ground");
+        }
+    }
+    for id in [
+        "lane_willow",
+        "lane_stump",
+        "moon_hedge_nook",
+        "willow_dusk",
+    ] {
+        assert!(p.has_flag(&format!("secret_{id}")), "secret {id}");
+    }
+}
