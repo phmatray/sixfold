@@ -840,7 +840,8 @@ keyframe time).
 
 1. Once: `tools/theatre-dev.sh` bundles `@theatre/core` and Studio into the git-ignored `tools/theatre/dev.js`
    (Studio is AGPL-3.0: it is never vendored, shipped or precached, and CI fails if a release build mentions it).
-2. `cd web && trunk serve`, which serves that bundle as `theatre-dev.js` in a debug build only.
+2. `cd web && trunk serve` (a debug build; start it after step 1, the bundle is copied at build time), which serves
+   that bundle as `theatre-dev.js` in a debug build only. Without the bundle the shot plays and a warning says so.
 3. Open the map at `?edit&studio` and trigger the scene (a new game, then enter the map; `sixfoldWarp` in the console
    skips the walk). Studio opens over the world, listing the project `sixfold-<name>`.
 4. Select `camera` in the sheet, keyframe its props on the timeline and scrub. A new shot starts from a copy of an

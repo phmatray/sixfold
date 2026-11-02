@@ -9,4 +9,4 @@ command_arguments = ["-c", "sh \"$TRUNK_SOURCE_DIR/sw-manifest.sh\""]
 [[hooks]]
 stage = "post_build"
 command = "sh"
-command_arguments = ["-c", "if [ \"$TRUNK_PROFILE\" = debug ] && [ -f \"$TRUNK_SOURCE_DIR/../tools/theatre/dev.js\" ]; then cp \"$TRUNK_SOURCE_DIR/../tools/theatre/dev.js\" \"$TRUNK_STAGING_DIR/theatre-dev.js\"; fi"]
+command_arguments = ["-c", "if [ \"$TRUNK_PROFILE\" = debug ] && [ -f \"$TRUNK_SOURCE_DIR/../tools/theatre/dev.js\" ]; then cp \"$TRUNK_SOURCE_DIR/../tools/theatre/dev.js\" \"$TRUNK_STAGING_DIR/theatre-dev.js\"; else rm -f \"$TRUNK_STAGING_DIR/theatre-dev.js\"; fi"]

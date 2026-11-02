@@ -11,7 +11,13 @@ const projects = {};
 // core's dataverse, so the vendored core cannot be driven by it (#254); tools/theatre-dev.sh bundles both together
 // (git-ignored, AGPL), and web/Trunk.toml serves it as theatre-dev.js under `trunk serve` only. That bundle is the core here.
 async function loadStudio() {
-  const dev = await import(new URL("theatre-dev.js", document.baseURI).href);
+  let dev;
+  try {
+    dev = await import(new URL("theatre-dev.js", document.baseURI).href);
+  } catch (e) {
+    console.warn("world: no Theatre Studio bundle; run tools/theatre-dev.sh, then restart trunk serve", e);
+    return import("@theatre/core"); // the shot still plays, without Studio
+  }
   dev.studio.initialize();
   return dev;
 }
