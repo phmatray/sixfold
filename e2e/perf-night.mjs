@@ -55,6 +55,8 @@ async function measure(browserType, launch) {
       await page.waitForTimeout(2000);
     }
     await page.waitForTimeout(4000);
+    await host("sixfoldClock", 22 * 60); // asked again after the warp, so the hour is the one measured
+    await page.waitForTimeout(1500);
     if (cdp) await cdp.send("Performance.enable"), await cdp.send("Emulation.setCPUThrottlingRate", { rate: THROTTLE });
     res[map] = [];
     for (let r = 0; r < RUNS; r++) {
