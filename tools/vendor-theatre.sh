@@ -23,7 +23,7 @@ export const { createRafDriver, getProject, notify, onChange, types, val } = cor
 export { core as default };
 JS
 npx esbuild entry.js --bundle --format=esm --minify --legal-comments=none \
-  --banner:js='/* @theatre/core (Apache-2.0, see LICENSE) bundled by tools/vendor-theatre.sh */' \
+  --banner:js='/* @theatre/core (Apache-2.0, see LICENSE) bundled by tools/vendor-theatre.sh. Modified: error-message strings naming the Studio package are reworded. */' \
   --define:process.env.NODE_ENV='"production"' --outfile="$out/core.js"
 # CI asserts the release build never mentions the AGPL studio package; core only names it
 # in a few error messages, so the name is reworded there.
