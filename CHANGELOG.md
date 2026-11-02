@@ -5,6 +5,16 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.14.0](https://github.com/phmatray/sixfold/compare/v1.13.0...v1.14.0) (2026-11-02)
+
+
+### Added
+
+* **tools:** a placement DSL that checks every prop has a reason to stand where it does ([#243](https://github.com/phmatray/sixfold/issues/243)) ([94a70d2](https://github.com/phmatray/sixfold/commit/94a70d29b04abad229a9953fb360f53702e5e971))
+* **world:** a field-puzzle prototype (depot, rime cave, log run) ([#346](https://github.com/phmatray/sixfold/issues/346)) ([9aa2c7c](https://github.com/phmatray/sixfold/commit/9aa2c7ce1f061034dd23d37596206781b2436d9c))
+* **world:** sit on a seat by walking into it, whatever way it faces ([#345](https://github.com/phmatray/sixfold/issues/345)) ([#347](https://github.com/phmatray/sixfold/issues/347)) ([2c82c66](https://github.com/phmatray/sixfold/commit/2c82c66687ced1a26aa98f177ce736f024aa9f6a))
+* **world:** the Dream maps (Hushwillow Lane, Lanternmere, Moonwell Garden) to the Fernhollow standard ([#271](https://github.com/phmatray/sixfold/issues/271)) ([#348](https://github.com/phmatray/sixfold/issues/348)) ([446fe16](https://github.com/phmatray/sixfold/commit/446fe167cb4386ef4190af8a90a8d6963cacf08f))
+
 ## [1.13.0](https://github.com/phmatray/sixfold/compare/v1.12.0...v1.13.0) (2026-11-02)
 
 
