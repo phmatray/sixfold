@@ -3221,10 +3221,12 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .atlas-node { fill: var(--ink-map); }
 /* A place's marks (an opened shortcut, a drop, #117): a row to its right, inked like the gate marks. */
 .atlas-marks { display: flex; justify-content: center; gap: 2px; margin-top: 1px; } /* a row under the name */
-.atlas-legend { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: var(--fs-sm); color: var(--muted); }
-.atlas-mark svg { display: block; width: clamp(14px, 1.3vw, 18px); height: clamp(14px, 1.3vw, 18px); }
-.atlas-mark circle { fill: var(--paper); stroke: var(--ink-map); stroke-width: 0.8; }
-.atlas-mark path { fill: none; stroke: var(--ink-map); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.atlas-mark { pointer-events: auto; } /* its hover hint, through the names' layer */
+.atlas-legend { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: var(--fs-sm); color: var(--muted); }
+.atlas-legend li { display: flex; align-items: center; gap: 6px; } /* each line led by the mark it explains */
+.atlas-mark svg, .atlas-legend svg { display: block; flex: none; width: clamp(14px, 1.3vw, 18px); height: clamp(14px, 1.3vw, 18px); }
+.atlas-mark circle, .atlas-legend circle { fill: var(--paper); stroke: var(--ink-map); stroke-width: 0.8; }
+.atlas-mark path, .atlas-legend path { fill: none; stroke: var(--ink-map); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
 .atlas-words, .atlas-posts { position: absolute; inset: 0; pointer-events: none; }
 .atlas-posts > * { pointer-events: auto; }
 /* Inked lettering, haloed in paper so it reads over lands and roads. */

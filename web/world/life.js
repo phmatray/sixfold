@@ -212,9 +212,12 @@ export function ambience(scene, spots, reduced) {
   // Gulls (`spots.gulls` of them, a map's `gulls`): wide glides high over the hero's
   // part of the map, a few lazy flaps, gone to roost at night.
   const gullMat = toon("#f7f7f2"), tipMat = toon("#3b4048");
-  const gullWing = new THREE.BoxGeometry(0.36, 0.015, 0.11).translate(0.18, 0, 0);
-  const gullTip = new THREE.BoxGeometry(0.1, 0.017, 0.09).translate(0.31, 0.002, 0);
+  // Wings swept back and a tail: seen from above, straight wings across a short body read as a cross (1.13 audit).
+  const SWEEP = 0.55;
+  const gullWing = new THREE.BoxGeometry(0.36, 0.015, 0.11).translate(0.18, 0, 0).rotateY(SWEEP);
+  const gullTip = new THREE.BoxGeometry(0.1, 0.017, 0.09).translate(0.31, 0.002, 0).rotateY(SWEEP);
   const gullBody = new THREE.CapsuleGeometry(0.045, 0.2, 2, 6).rotateX(Math.PI / 2);
+  const gullTail = new THREE.BoxGeometry(0.1, 0.012, 0.09).translate(0, 0, -0.18);
   const gulls = Array.from({ length: spots.gulls ?? 0 }, (_, i) => {
     const wing = (side) => {
       const w = new THREE.Group();
@@ -223,7 +226,7 @@ export function ambience(scene, spots, reduced) {
       return w;
     };
     const l = wing(1), r = wing(-1), g = new THREE.Group();
-    g.add(new THREE.Mesh(gullBody, gullMat), l, r);
+    g.add(new THREE.Mesh(gullBody, gullMat), new THREE.Mesh(gullTail, gullMat), l, r);
     scene.add(g);
     return { g, l, r, k: i * 2.1, rad: 3.5 + (i % 3) * 1.6, h: 5.2 + (i % 2) * 1.3, ox: ((i * 37) % 9) - 4.5, oz: ((i * 53) % 7) - 5, cx: null, cz: 0, last: new THREE.Vector3() };
   });
