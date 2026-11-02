@@ -3220,8 +3220,8 @@ button.tally-row:hover { background: rgba(255, 255, 255, 0.05); }
 .gate-mark.open path { stroke: var(--ink-map); }
 .atlas-node { fill: var(--ink-map); }
 /* A place's marks (an opened shortcut, a drop, #117): a row to its right, inked like the gate marks. */
-.atlas-marks { position: absolute; display: flex; gap: 2px; transform: translate(8px, -50%); pointer-events: auto; }
-.atlas-marks.post { transform: translate(clamp(22px, 2.1vw, 28px), -50%); } /* clear of the crystal */
+.atlas-marks { display: flex; justify-content: center; gap: 2px; margin-top: 1px; } /* a row under the name */
+.atlas-legend { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: var(--fs-sm); color: var(--muted); }
 .atlas-mark svg { display: block; width: clamp(14px, 1.3vw, 18px); height: clamp(14px, 1.3vw, 18px); }
 .atlas-mark circle { fill: var(--paper); stroke: var(--ink-map); stroke-width: 0.8; }
 .atlas-mark path { fill: none; stroke: var(--ink-map); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
