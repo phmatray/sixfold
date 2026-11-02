@@ -2570,8 +2570,8 @@
         "facing": "n"
       },
       "open": "hour:8-19",
-      "locked": "Closed. Back at eight.",
-      "locked_fr": "Fermé. Retour à huit heures."
+      "locked": "Closed until eight in the morning.",
+      "locked_fr": "Fermé jusqu'à huit heures du matin."
     },
     {
       "x": 13,

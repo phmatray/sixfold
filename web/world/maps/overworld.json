@@ -3020,7 +3020,7 @@
       ],
       "dialogue": [
         {
-          "if": "!flag:talked_pip",
+          "if": "!flag:talked_pip & !seals:1",
           "lines": [
             "I'm practising my shuffle. Watch! ...Okay, don't watch."
           ],

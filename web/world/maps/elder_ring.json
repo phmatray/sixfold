@@ -1703,8 +1703,8 @@
       "z": 18,
       "kind": "sign",
       "id": "fox_run",
-      "name": "A gap under the hedge",
-      "name_fr": "Un passage sous la haie",
+      "name": "Crawl out under the hedge",
+      "name_fr": "Ressortir sous la haie",
       "dialogue": [
         {
           "lines": [
@@ -1972,6 +1972,15 @@
           ],
           "lines_fr": [
             "Bramble ne taille pas une haie qu'il n'a pas vue pousser. Bats encore trois duellistes du Bois-Profond et il t'affrontera."
+          ]
+        },
+        {
+          "if": "beat:bramble",
+          "lines": [
+            "You took his seal, then. The hedges stand a little straighter for it, and so does he."
+          ],
+          "lines_fr": [
+            "Tu lui as pris son sceau, alors. Les haies se tiennent un peu plus droites, et lui aussi."
           ]
         },
         {
@@ -2275,8 +2284,14 @@
       ],
       "barks": [
         {
+          "if": "!beat:bramble",
           "say": "The stone keeps the Deepgrove. I keep the stone.",
           "say_fr": "La pierre garde le Bois-Profond. Moi, je garde la pierre."
+        },
+        {
+          "if": "beat:bramble",
+          "say": "Mind my hedges, seal-bearer.",
+          "say_fr": "Attention à mes haies, porteur de sceau."
         }
       ]
     }

@@ -31,10 +31,10 @@ test("AC5: at 21:00 the bakery door reads its closed text and Hob has gone home;
   await warp(page, "square", 19, 9, "n");
   await expect(page.getByRole("button", { name: "Try the door" })).toBeVisible();
   await page.keyboard.press("e");
-  await expect(page.getByText("Closed. Back at eight.")).toBeVisible();
+  await expect(page.getByText("Closed until eight in the morning.")).toBeVisible();
   expect(await at(page)).toBe("square,19,9,n");
   await page.keyboard.press("Escape");
-  await expect(page.getByText("Closed. Back at eight.")).toBeHidden();
+  await expect(page.getByText("Closed until eight in the morning.")).toBeHidden();
 
   // At 09:00 it opens, and Hob is in.
   await host(page, "sixfoldClock", 9 * 60);
