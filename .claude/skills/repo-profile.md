@@ -34,7 +34,7 @@
 
 ## CI gates (the exact commands CI fails on — satisfy these locally before ready/merge)
 - `./scripts/check-no-game-data.sh` (no ROM, save, state, archive, `.blend` or file over 2 MB tracked)
-- `node --test web/gamepad.test.mjs web/world/camera.test.mjs web/world/tier.test.mjs tools/ld.test.mjs tools/check-maps.test.mjs tools/life.test.mjs tools/routine.test.mjs tools/transition.test.mjs tools/dressing.test.mjs`
+- `node --test web/gamepad.test.mjs web/world/camera.test.mjs web/world/tier.test.mjs tools/ld.test.mjs tools/check-maps.test.mjs tools/life.test.mjs tools/routine.test.mjs tools/transition.test.mjs tools/dressing.test.mjs tools/map-clues.test.mjs`
 - `node tools/check-maps.mjs web/world --strict && node tools/check-fence-table.mjs web/world/props.js`
 - `node --test tools/check-tokens.test.mjs && node tools/check-tokens.mjs web/style.css`
 - `cargo fmt --all --check`
