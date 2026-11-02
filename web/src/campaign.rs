@@ -613,6 +613,12 @@ fn win_view(w: Win) -> impl IntoView {
     }
 }
 
+/// Whether a Confirm press may accept the duel: 500 ms after the card opened,
+/// and not an auto-repeat (the key that ended the lines, still held).
+fn confirm_ready(now: f64, shown_at: f64, repeat: bool) -> bool {
+    !repeat && now - shown_at >= 500.0
+}
+
 /// The duel offer (a rival, Rook or a route duelist): who, in their own words
 /// (`quote`, the line they just said, else a rival's opening line), the
 /// terms, the deck the player takes, and Challenge / Not now. `face` is their
@@ -651,7 +657,7 @@ pub fn Challenge(
     // The presses that ended the duelist's lines must not also accept the duel.
     let shown_at = js_sys::Date::now();
     let start = move || {
-        if js_sys::Date::now() - shown_at < 500.0 {
+        if !confirm_ready(js_sys::Date::now(), shown_at, false) {
             return;
         }
         let Some(mine) = opts.with_value(|o| o.get(choice.get_untracked()).cloned()) else {
@@ -692,8 +698,27 @@ pub fn Challenge(
             choice.set(i as usize);
         })
     };
+    // A Space swallowed on keydown must not click on its keyup either (Firefox clicks anyway).
+    let space_held = StoredValue::new(false);
+    let on_key_up = move |e: leptos::ev::KeyboardEvent| {
+        if e.key() == " " && space_held.get_value() {
+            space_held.set_value(false);
+            e.prevent_default();
+        }
+    };
     let on_key = move |e: leptos::ev::KeyboardEvent| {
         let by = match e.key().as_str() {
+            // A held or too-early Confirm on Challenge is swallowed: release it, press again.
+            "Enter" | " " => {
+                let on_go = event_target::<leptos::web_sys::Element>(&e)
+                    .class_list()
+                    .contains("ch-go");
+                if on_go && !confirm_ready(js_sys::Date::now(), shown_at, e.repeat()) {
+                    e.prevent_default();
+                    space_held.set_value(e.key() == " ");
+                }
+                return;
+            }
             "ArrowLeft" => -1,
             "ArrowRight" => 1,
             _ => return,
@@ -753,7 +778,7 @@ pub fn Challenge(
     };
     view! {
         // Still to earn (#155): what's missing comes right under their words, and the purse is one line.
-        <form class="challenge" class:earning=earning on:submit=move |e| { e.prevent_default(); start() } on:keydown=on_key>
+        <form class="challenge" class:earning=earning on:submit=move |e| { e.prevent_default(); start() } on:keydown=on_key on:keyup=on_key_up>
             <header class="ch-head">
                 <span class="ch-frame">
                     {match face {
@@ -931,4 +956,17 @@ pub fn Challenge(
         </form>
     }
     .into_any()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::confirm_ready;
+
+    #[test]
+    fn confirm_ready_waits_and_ignores_repeats() {
+        assert!(!confirm_ready(1000.0, 1000.0, false));
+        assert!(!confirm_ready(1499.0, 1000.0, false));
+        assert!(!confirm_ready(3000.0, 1000.0, true));
+        assert!(confirm_ready(1500.0, 1000.0, false));
+    }
 }
