@@ -5,6 +5,7 @@ import { CUT_HOLD } from "./script.js";
 
 const PROPS = { x: 0, y: 0, z: 0, tx: 0, ty: 0, tz: 0, fov: 40 };
 let core = null;
+const projects = {};
 
 // playShot(name, { reduced }) -> { pose(), done, finish() }.
 // pose(): the camera now ({ x, y, z, tx, ty, tz, fov }), null until the shot has loaded (or when it never will).
@@ -25,7 +26,8 @@ export function playShot(name, { reduced = false } = {}) {
       if (!res.ok) throw new Error("HTTP " + res.status);
       const state = await res.json();
       len = state.sheetsById[name].sequence.length;
-      const project = core.getProject("sixfold", { state });
+      // A project id lives once per page: a shot played again reuses its project.
+      const project = (projects[name] ??= core.getProject("sixfold-" + name, { state }));
       await project.ready; // a sequence plays only on a project that is ready
       const sheet = project.sheet(name);
       const o = sheet.object("camera", PROPS);
