@@ -819,6 +819,7 @@ The engine stays the only parser (`meta/src/overworld.rs`). Arguments are split 
 | `walk:<actor>:<path>` | actor walks a path of `n/e/s/w` letters; waits until done | cue | 1.4 |
 | `face:<actor>:<dir>` | turn; `dir` may be `hero` (toward where the hero stands, 1.10) | cue | 1.4 |
 | `cam:<actor>` / `cam:<x>:<z>` / `cam:hero` | ease the camera's look-at target (pitch never changes) | cue | 1.4 |
+| `shot:<name>` | play the authored camera shot `web/world/shots/<name>.json` (a Theatre.js state, see "Authoring a shot" below); the camera takes the shot's pose whole, then hands back to the usual framing with no jump. Under reduced motion only its last framing is held. A `reveal_` script's shot lasts at most 4 s | cue | #253 |
 | `wait:<ms>` | pause, 0–5000 | cue | 1.4 |
 | `emote:<actor>:<bang\|what\|dots\|heart\|note>` | bubble over a head (the duelist "!" uses this) | cue | 1.2 |
 | `sfx:<name>`, `music:<track>` | sound | cue | 1.4 |
@@ -829,6 +830,26 @@ The engine stays the only parser (`meta/src/overworld.rs`). Arguments are split 
 `apply` returns `Applied::Cue(Cue)` for cue effects without touching state; `web/src/world.rs` forwards a cue
 to `world_cue(json)` and waits for `cb("cue_done")` before the next effect. `Progress::apply_all(&[&str])`
 pre-checks `pay` so a branch is all-or-nothing.
+
+**Exception to the fixed pitch.** `cam` keeps the camera's pitch fixed (only the look-at target moves). A `shot`
+may move the camera freely, within pitch 35–65° and fov 30–55 (`tools/check-maps.mjs` checks both at every
+keyframe time).
+
+**Authoring a shot (debug builds only).** A shot's sheet is named after the shot and has one object, `camera`, with
+`x`, `y`, `z` (where it stands), `tx`, `ty`, `tz` (what it looks at) and `fov`. Theatre Studio edits it:
+
+1. Once: `tools/theatre-dev.sh` bundles `@theatre/core` and Studio into the git-ignored `tools/theatre/dev.js`
+   (Studio is AGPL-3.0: it is never vendored, shipped or precached, and CI fails if a release build mentions it).
+2. `cd web && trunk serve`, which serves that bundle as `theatre-dev.js` in a debug build only.
+3. Open the map at `?edit&studio` and trigger the scene (a new game, then enter the map; `sixfoldWarp` in the console
+   skips the walk). Studio opens over the world, listing the project `sixfold-<name>`.
+4. Select `camera` in the sheet, keyframe its props on the timeline and scrub. A new shot starts from a copy of an
+   existing file whose sheet key is renamed to `<name>`.
+5. Studio's menu, Export project, downloads the state: save it as `web/world/shots/<name>.json` (the same shape the
+   player reads, nothing to convert) and reference it with a `shot:<name>` cue.
+6. `node tools/check-maps.mjs web/world --strict`, then play the scene in a normal build.
+
+Studio is not loaded without `?studio`, and a release build never asks for it, with or without it.
 
 ### 9.3 Save format
 
