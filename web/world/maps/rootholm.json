@@ -459,7 +459,7 @@
     },
     {
       "asset": "standing_tree",
-      "x": 26,
+      "x": 22,
       "z": 12,
       "rot": 0
     },
@@ -2393,8 +2393,8 @@
         "facing": "n"
       },
       "open": "hour:8-19",
-      "locked": "Closed. Back at eight.",
-      "locked_fr": "Fermé. Retour à huit heures."
+      "locked": "Closed until eight in the morning.",
+      "locked_fr": "Fermé jusqu'à huit heures du matin."
     }
   ],
   "exits": [
@@ -2777,11 +2777,11 @@
         "sight": 0,
         "challenge": [
           "Halt! This is a toll walkway. The toll is one duel.",
-          "I made the rules. One prize, because you're new."
+          "I made the rules. One prize, house rules."
         ],
         "challenge_fr": [
           "Halte ! C'est une passerelle à péage. Le péage, c'est un duel.",
-          "C'est moi qui fais les règles. Une carte Récompense, parce que t'es nouveau."
+          "C'est moi qui fais les règles. Une carte Récompense, règlement maison."
         ],
         "win": [
           "Aw, rot. You can cross for free. Forever. That's the rule now."
