@@ -4,6 +4,7 @@
   "region": "storm",
   "kind": "route",
   "music": "storm",
+  "level_design": 2,
   "life": {
     "critters": [
       {
@@ -13,6 +14,26 @@
           13,
           48,
           18
+        ],
+        "n": 2
+      },
+      {
+        "kind": "goat",
+        "zone": [
+          15,
+          18,
+          22,
+          23
+        ],
+        "n": 2
+      },
+      {
+        "kind": "lizard",
+        "zone": [
+          43,
+          14,
+          50,
+          20
         ],
         "n": 2
       }
@@ -125,7 +146,9 @@
       "asset": "menhir",
       "x": 7,
       "z": 18,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary",
+      "why": "the standing stone and its chimes"
     },
     {
       "asset": "chime_post",
@@ -167,7 +190,9 @@
       "asset": "crates",
       "x": 36,
       "z": 23,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary",
+      "why": "the carters' stop"
     },
     {
       "asset": "crates",
@@ -208,7 +233,8 @@
         "sx_slate": "#5b6470",
         "sx_slate_dk": "#48505a",
         "sx_plank_grey": "#9a8f7c"
-      }
+      },
+      "landmark": true
     },
     {
       "asset": "crates",
@@ -1303,7 +1329,22 @@
       "give": "card:stormox",
       "text": "At night a hollow in the standing stone glows faintly blue. Inside, dry and humming: a card.",
       "text_fr": "La nuit, un creux de la pierre levée luit d'un bleu pâle. Dedans, sèche et bourdonnante : une carte.",
-      "if": "time:night"
+      "if": "time:night",
+      "poi": "secret",
+      "secret": {
+        "id": "chime_hollow",
+        "kind": "environmental",
+        "clue": [
+          [
+            5,
+            16
+          ],
+          [
+            9,
+            16
+          ]
+        ]
+      }
     },
     {
       "x": 4,
@@ -1333,7 +1374,8 @@
             "Six vieux poteaux autour d'une pierre levée. Les carillons s'entrechoquent dans le vent, sans mélodie le jour."
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "kind": "find",
@@ -1343,7 +1385,22 @@
       "give": "coins:50",
       "hidden": true,
       "text": "A loose stone at the end of the wall comes away in your hand. Behind it: Facets, wrapped in a shepherd's rag.",
-      "text_fr": "Une pierre branlante au bout du mur vient toute seule. Derrière : des Facettes, roulées dans un chiffon de berger."
+      "text_fr": "Une pierre branlante au bout du mur vient toute seule. Derrière : des Facettes, roulées dans un chiffon de berger.",
+      "poi": "secret",
+      "secret": {
+        "id": "wall_stone",
+        "kind": "spatial",
+        "clue": [
+          [
+            22,
+            8
+          ],
+          [
+            24,
+            8
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -1451,6 +1508,12 @@
             "Quand le vent vient du large, tous les poteaux à carillons des Landes bourdonnent en même temps. C'est pour ça qu'on les appelle les Landes Vibrantes."
           ]
         }
+      ],
+      "barks": [
+        {
+          "say": "The chimes go flat when the cloud comes low.",
+          "say_fr": "Les carillons sonnent faux quand le ciel descend."
+        }
       ]
     },
     {
@@ -1535,6 +1598,12 @@
           "lines_fr": [
             "Bêê."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Mind the fence: the ewes lean on it.",
+          "say_fr": "Attention à la clôture : les brebis s'y appuient."
         }
       ]
     },
