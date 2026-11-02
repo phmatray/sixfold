@@ -91,7 +91,7 @@ Outdoor models live in `assets/`, interior ones in `assets/interior/`, NPCs in
 | `seal_stone_carved.glb` | The duel hall's seal stone after the story's epilogue (1.7): the same stone, its top cut with a hexagon outline, still blank | 2 × 2 | ~1.9 m |
 | `cave_mouth.glb` | A rough arch of boulders round a black throat in a sandstone face, timber bracing, a lantern on the lintel (`lamp_glow`), roots and vines over the top, crystals glinting inside (`crystal_glow`); back flush with the north edge: put it against a cliff on the row behind (≥ 2 m); the door warp is its tile | 2 × 1 | ~2.1 m |
 | `climb_wall.glb` | Two rough steps (tops 0.5 m front, 1.0 m back) with painted holds, chalk, a knotted rope from an iron stake and vines; climbs toward −Z, floor 0.5 m, stacks with `y` like `stairs` | 1 × 1 | 1 m |
-| `inn_sign.glb` | Two posts, a board with a crescent moon and stars (both faces), a lantern (`lamp_glow`) | 1 × 1 | ~2.35 m |
+| `inn_sign.glb` | Two posts, a board with a bed and a faceted hexagon (both faces), a lantern (`lamp_glow`) | 1 × 1 | ~2.35 m |
 | `stump.glb` | Hollow stump: flared roots, a cut rim round a dark hollow, moss, two mushrooms (a find's host) | 1 × 1 | ~0.55 m |
 | `log.glb` | Fallen mossy log along X, a hollow end on +X, bracket fungus and mushrooms (a find's host) | 2 × 1 | ~0.55 m |
 | `cliff_falls.glb` | A waterfall from a 2 m ledge into a rock pool (#233): the sheet is `sx_fall_water` (streaks run down it), the pool `sx_water` (it ripples); its back is flush with the north edge, so it stands against a 2 m cliff on the row behind | 2 × 1 | ~2 m |

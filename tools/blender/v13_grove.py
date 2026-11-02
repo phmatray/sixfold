@@ -449,8 +449,8 @@ def build_treehouse(k):
     # round window in the gable, a square one on the right side, door with an arched top
     k.add(cyl(0.24, 0.24, 0.06, 12), "gv_wood_dk", T((cx, fy - 0.31, P + ch + 0.55), (90, 0, 0)))
     k.add(cyl(0.18, 0.18, 0.04, 12), "gv_window_glow", T((cx, fy - 0.33, P + ch + 0.55), (90, 0, 0)))
+    # one transom bar: a plus inside a ring reads as a cross, which the game never draws (1.13 audit)
     k.add(box(0.36, 0.03, 0.03), "gv_wood_dk", T((cx, fy - 0.36, P + ch + 0.55)))
-    k.add(box(0.03, 0.03, 0.36), "gv_wood_dk", T((cx, fy - 0.366, P + ch + 0.55)))
     k.add(box(0.08, 0.5, 0.5), "gv_wood_dk", T((cx + cw / 2 + 0.02, cy, P + 1.15)))
     k.add(box(0.04, 0.38, 0.38), "gv_window_glow", T((cx + cw / 2 + 0.05, cy, P + 1.15)))
     k.add(box(0.04, 0.42, 0.03), "gv_wood_dk", T((cx + cw / 2 + 0.07, cy, P + 1.15)))
