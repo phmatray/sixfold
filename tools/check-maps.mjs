@@ -250,12 +250,44 @@ for (const [name, m] of Object.entries(maps)) {
   }
 }
 
+// A `shot:<name>` cue (#255) plays web/world/shots/<name>.json, a Theatre.js 0.7 state: the sheet's sequence length
+// and the `camera` object's keyframed x, y, z (position), tx, ty, tz (target) and fov. The name is a-z, 0-9 and _ (as
+// parse_effect reads it), the file must exist, a shot in a `reveal_` script lasts at most 4 s, and at every keyframe time
+// (each prop's last keyframe at or before it) the camera pitches 35 to 65 degrees and the fov is 30 to 55. (`cam` cues
+// keep the fixed pitch; only a shot may move it.)
+// ponytail: sampled at keyframe times, not along the eased curve; sample between them if a shot overshoots in play.
+function shotRule(args, reveal, bad) {
+  const shot = args[0];
+  if (args.length !== 1 || !/^[a-z0-9_]+$/.test(shot)) return void bad("is shot:<name> of a-z, 0-9 and _");
+  const f = `${dir}/shots/${shot}.json`;
+  if (!existsSync(f)) return void bad(`needs ${f}`);
+  let sheet, cam;
+  try {
+    sheet = JSON.parse(readFileSync(f, "utf8")).sheetsById[shot].sequence;
+    cam = sheet.tracksByObject.camera;
+  } catch {
+    return void bad(`${f} is not a Theatre state with sheetsById.${shot}.sequence.tracksByObject.camera`);
+  }
+  if (!(sheet.length > 0)) return void bad(`${shot} has no sequence length`);
+  const keys = {};
+  for (const [path, id] of Object.entries(cam.trackIdByPropPath ?? {})) keys[path.replace(/^\["|"\]$/g, "")] = cam.trackData?.[id]?.keyframes ?? [];
+  const end = Math.max(sheet.length, ...Object.values(keys).flat().map((k) => k.position));
+  if (reveal && end > 4) bad(`a reveal shot lasts at most 4 s (${shot} lasts ${end})`);
+  const missing = ["x", "y", "z", "tx", "ty", "tz", "fov"].filter((p) => !keys[p]?.length);
+  if (missing.length) return void bad(`${shot} has no keyframes for ${missing.join(", ")}`);
+  const at = (p, t) => (keys[p].filter((k) => k.position <= t).pop() ?? keys[p][0]).value;
+  for (const t of [...new Set(Object.values(keys).flat().map((k) => k.position))].sort((p, q) => p - q)) {
+    const pitch = (Math.atan2(at("y", t) - at("ty", t), Math.hypot(at("x", t) - at("tx", t), at("z", t) - at("tz", t))) * 180) / Math.PI;
+    if (!(pitch >= 35 && pitch <= 65)) bad(`${shot} pitches ${pitch.toFixed(0)} degrees at ${t} s; a shot keeps 35 to 65`);
+    if (!(at("fov", t) >= 30 && at("fov", t) <= 55)) bad(`${shot} has fov ${at("fov", t)} at ${t} s; a shot keeps 30 to 55`);
+  }
+}
 // Cutscenes (WORLD_DESIGN §9.1): a unique id, an `if`, `on: "enter"` and/or in-bounds `at` tiles, and steps that are each
 // a `say` (an actor on the map or the hero, with lines; lines_fr is checked with the other text) or a `do` list. The
 // cues' arguments as the engine reads them (meta/tests/world_data.rs parses every effect): walk paths of n/e/s/w
 // that keep an NPC on open tiles, face directions, cam on an actor or an in-bounds tile, waits of 0..5000 ms, music
 // tracks, `stone:wake` only on a map with a seal stone, `stone:seal:<keeper>` (#153) only at that keeper's own seal
-// stone; a `duel:` only in the last step (it ends the scene).
+// stone; a `duel:` only in the last step (it ends the scene); a `shot:` per shotRule.
 // A seal site's staging (#152; meta/tests/world_data.rs holds the rest of its shape): `reveal_<map>` keeps to
 // 3 `cam` and 2 000 ms of `wait`; `entrance_<keeper>` starts on every reachable open tile two from the keeper (but
 // one where someone stands for good: no route or routine), so nobody walks up to them without it; one that plays on arriving
@@ -311,6 +343,7 @@ function scripts(name, m, solid, inMap, reached) {
         if (kind === "stone" && !((a.length === 1 && a[0] === "wake") || seal)) bad("is stone:wake or stone:seal:<keeper>");
         else if (kind === "stone" && seal && !(KEEPERS.includes(a[1]) && npcs[a[1]])) bad(`lights the seal of a keeper who stands here (${KEEPERS.join(", ")})`);
         else if (kind === "stone" && !(m.props ?? []).some((p) => p.asset === "seal_stone")) bad("this map has no seal_stone to wake");
+        if (kind === "shot") shotRule(a, s.id?.startsWith("reveal_"), bad);
         if (kind === "cam" && !(a.length === 1 ? actor(a[0]) : a.length === 2 && inMap(+a[0], +a[1]))) bad("looks at hero, an actor on this map or a tile on it");
         if (kind === "walk") {
           if (!/^[nesw]+$/.test(a[1] ?? "")) bad("walks a path of n, e, s and w");
