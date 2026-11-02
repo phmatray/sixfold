@@ -74,3 +74,11 @@ export function leanOf({ scene, place, tall, resting, reduced }) {
   if (scene) return place ? (tall ? 0.8 : 0.55) : tall ? 0.95 : 0.85;
   return !reduced && resting ? 0.88 : 1;
 }
+
+/** The share of the way the pitch and distance ease toward a new framing in a frame of `dt` seconds (about
+ * 0.095 at 60 fps, as at 30). Under 30 fps the step stays at 1/30 s, so no frame moves more than 0.18 of the
+ * way: a shot's hand-back (#332), whose last drawn pose is at most 5° off the rest pitch, moves under 1° a
+ * frame however slow the machine, and a new angle eases over several frames at any frame rate. */
+export function easeStep(dt) {
+  return 1 - Math.exp(-Math.min(dt, 1 / 30) * 6);
+}

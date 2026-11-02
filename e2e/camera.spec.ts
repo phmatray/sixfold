@@ -74,7 +74,7 @@ test("a new angle eases in, and cuts under reduced motion", async ({ page }) => 
   const mid = (await twoFrames(page)).pitch;
   expect(mid).toBeLessThan(60);
   expect(mid).toBeGreaterThan(40);
-  // The ease counts frames (dt is capped at 50 ms), about ten of them: on a busy runner's software GL a frame can take 3 s.
+  // The ease counts frames under 30 fps (easeStep caps a frame at 1/30 s), about twenty of them: on a busy runner's software GL a frame can take 3 s.
   await expect.poll(() => settled(page), { timeout: 60_000 }).toBe("lower 40");
 });
 

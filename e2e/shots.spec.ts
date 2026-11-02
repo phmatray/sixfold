@@ -58,7 +58,9 @@ test("the first entry to Cinderwick plays the reveal shot, hands back with no ju
   await intoCinderwick(page);
   await expect.poll(() => revealed(page), { timeout: 90_000 }).toBe(true);
   await expect.poll(async () => (await stats(page)).camera.shot).toBe(false);
-  await expect.poll(async () => Math.round((await stats(page)).camera.pitch)).toBe(50);
+  await expect.poll(async () => Math.round((await stats(page)).camera.pitch), { timeout: 60_000 }).toBe(50); // it eases at the frame rate there is
+  const backFrames = (c: Cam[]) => c.length - 1 - c.map((x) => x.shot).lastIndexOf(true);
+  await expect.poll(async () => backFrames(await log(page)), { timeout: 60_000 }).toBeGreaterThanOrEqual(3); // a short ease rounds to 50 sooner
   const cams = await log(page);
   // The pitch moves through the shot: how many distinct values are drawn depends on the runner's frame rate (a few
   // frames a second on software GL), so this asks for a handful, not one per frame.
@@ -67,6 +69,9 @@ test("the first entry to Cinderwick plays the reveal shot, hands back with no ju
   // No jump at the hand-back: the first frame after the shot is within a degree of the last frame of it.
   const last = cams.map((c) => c.shot).lastIndexOf(true);
   expect(Math.abs(cams[last + 1].pitch - cams[last].pitch)).toBeLessThan(1);
+  // And no cut after it (#332): over the first 3 frames back, none moves the pitch by half the gap to the rest pose.
+  const gap = Math.abs(cams[last].pitch - 50);
+  for (let i = last + 1; i <= last + 3; i++) expect(Math.abs(cams[i].pitch - cams[i - 1].pitch)).toBeLessThanOrEqual(gap / 2 + 1e-6);
   // A second entry plays nothing.
   await warpTo(page, "overworld", 22, 17);
   await expect.poll(async () => (await stats(page)).area).toBe("overworld");

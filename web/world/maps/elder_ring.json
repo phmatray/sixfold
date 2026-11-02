@@ -29,10 +29,10 @@
       {
         "kind": "hedgehog",
         "zone": [
-          1,
-          27,
-          9,
-          32
+          13,
+          25,
+          20,
+          29
         ],
         "n": 2
       }
@@ -1703,8 +1703,8 @@
       "z": 18,
       "kind": "sign",
       "id": "fox_run",
-      "name": "A gap under the hedge",
-      "name_fr": "Un passage sous la haie",
+      "name": "Crawl out under the hedge",
+      "name_fr": "Ressortir sous la haie",
       "dialogue": [
         {
           "lines": [
@@ -1837,8 +1837,8 @@
       "x": 24,
       "z": 24,
       "kind": "sign",
-      "text": "The Maze of the Elder Ring. Keep one hand on the hedge. Don't feed the hedgehogs. The seal is in the middle; so is Elspeth.",
-      "text_fr": "Le Labyrinthe du Cercle des Anciens. Gardez une main sur la haie. Ne nourrissez pas les hérissons. Le sceau est au milieu ; Elspeth aussi."
+      "text": "The Maze of the Elder Ring. Keep one hand on the hedge. Don't feed the hedgehogs; they come from the nest deep in the hedge, in the maze's north-west corner. The seal is in the middle; so is Elspeth.",
+      "text_fr": "Le Labyrinthe du Cercle des Anciens. Gardez une main sur la haie. Ne nourrissez pas les hérissons ; ils viennent du nid, tout au fond de la haie, dans le coin nord-ouest du labyrinthe. Le sceau est au milieu ; Elspeth aussi."
     }
   ],
   "warps": [],
@@ -1928,12 +1928,12 @@
           "if": "!beat:bramble & !flag:talked_elspeth",
           "more": true,
           "lines": [
-            "You found the middle. Most people find the hedgehogs first.",
+            "You found the middle. Most people find the hedgehogs first. They nest in the maze, deep in the hedge at its north-west corner. And out west, the pilgrims' tree: for a hundred years they have tucked offerings between its roots.",
             "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
             "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years."
           ],
           "lines_fr": [
-            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
+            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons. Ils nichent dans le labyrinthe, au fond de la haie, dans son coin nord-ouest. Et à l'ouest, l'arbre des pèlerins : depuis cent ans, on glisse des offrandes entre ses racines.",
             "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
             "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans."
           ]
@@ -1975,6 +1975,15 @@
           ]
         },
         {
+          "if": "beat:bramble",
+          "lines": [
+            "You took his seal, then. The hedges stand a little straighter for it, and so does he."
+          ],
+          "lines_fr": [
+            "Tu lui as pris son sceau, alors. Les haies se tiennent un peu plus droites, et lui aussi."
+          ]
+        },
+        {
           "if": "time:night",
           "lines": [
             "Out in the dark? Good. The trees talk more at night. Listen: that creak is the oldest one, turning over in its sleep.",
@@ -1987,12 +1996,12 @@
         },
         {
           "lines": [
-            "You found the middle. Most people find the hedgehogs first.",
+            "You found the middle. Most people find the hedgehogs first. They nest in the maze, deep in the hedge at its north-west corner. And out west, the pilgrims' tree: for a hundred years they have tucked offerings between its roots.",
             "Bramble's back from Fernhollow, done testing the newcomers for the year. He keeps his own seal again, there by the stone, and I'm back to the hedges. Not a day too soon.",
             "Seven trees, six colours, one stone. And a seventh face nobody can read. I've been looking at it for sixty years."
           ],
           "lines_fr": [
-            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons.",
+            "Tu as trouvé le milieu. La plupart des gens trouvent d'abord les hérissons. Ils nichent dans le labyrinthe, au fond de la haie, dans son coin nord-ouest. Et à l'ouest, l'arbre des pèlerins : depuis cent ans, on glisse des offrandes entre ses racines.",
             "Bramble est revenu de Creuse-Fougère, il a fini de mettre les nouveaux à l'épreuve pour l'année. Il garde de nouveau son sceau, là, près de la pierre, et moi je retourne à mes haies. Pas trop tôt.",
             "Sept arbres, six couleurs, une pierre. Et une septième face que personne ne sait lire. Je la regarde depuis soixante ans."
           ]
@@ -2275,8 +2284,14 @@
       ],
       "barks": [
         {
+          "if": "!beat:bramble",
           "say": "The stone keeps the Deepgrove. I keep the stone.",
           "say_fr": "La pierre garde le Bois-Profond. Moi, je garde la pierre."
+        },
+        {
+          "if": "beat:bramble",
+          "say": "Mind my hedges, seal-bearer.",
+          "say_fr": "Attention à mes haies, porteur de sceau."
         }
       ]
     }
