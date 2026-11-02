@@ -3,6 +3,7 @@
   "title_fr": "Havre-aux-Mouettes",
   "region": "tide",
   "kind": "town",
+  "level_design": 2,
   "music": "tide",
   "life": {
     "critters": [
@@ -24,6 +25,39 @@
           17
         ],
         "every": 90
+      },
+      {
+        "pier": [
+          36,
+          24
+        ],
+        "every": 75
+      }
+    ],
+    "perch": [
+      {
+        "at": [
+          [
+            43,
+            16,
+            0.7
+          ],
+          [
+            43,
+            22,
+            0.7
+          ],
+          [
+            30,
+            24,
+            0.7
+          ],
+          [
+            39,
+            24,
+            0.7
+          ]
+        ]
       }
     ]
   },
@@ -261,7 +295,8 @@
       "x": 49,
       "z": 0,
       "rot": 0,
-      "y": 2
+      "y": 2,
+      "landmark": true
     },
     {
       "asset": "stairs",
@@ -540,7 +575,7 @@
       "rot": 0
     },
     {
-      "asset": "rock_sea",
+      "asset": "buoy",
       "x": 18,
       "z": 30,
       "rot": 0
@@ -564,7 +599,7 @@
       "rot": 0
     },
     {
-      "asset": "rock_sea",
+      "asset": "reeds",
       "x": 22,
       "z": 30,
       "rot": 0
@@ -582,7 +617,7 @@
       "rot": 0
     },
     {
-      "asset": "rock_sea",
+      "asset": "buoy",
       "x": 26,
       "z": 30,
       "rot": 0
@@ -606,7 +641,7 @@
       "rot": 0
     },
     {
-      "asset": "rock_sea",
+      "asset": "reeds",
       "x": 30,
       "z": 30,
       "rot": 0
@@ -1432,6 +1467,41 @@
       "x": 42,
       "z": 5,
       "rot": 0
+    },
+    {
+      "asset": "rock_sea",
+      "x": 4,
+      "z": 13,
+      "rot": 270,
+      "band": "seaside"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 16,
+      "z": 32,
+      "rot": 180,
+      "band": "bellflats"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 17,
+      "z": 33,
+      "rot": 90,
+      "band": "bellflats"
+    },
+    {
+      "asset": "reeds",
+      "x": 14,
+      "z": 35,
+      "rot": 90,
+      "band": "bellflats"
+    },
+    {
+      "asset": "rock_sea",
+      "x": 15,
+      "z": 35,
+      "rot": 180,
+      "band": "bellflats"
     }
   ],
   "drops": [
@@ -1504,7 +1574,8 @@
             "« PLEINE MER de 18 h à 8 h. Grèves sous la mer, chaussée sous la mer. Prenez le ponton, ou le bac. »"
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "kind": "waymark",
@@ -1520,7 +1591,8 @@
       "give": "coins:50",
       "hidden": true,
       "text": "Wedged between two crates on the quay, where the gulls can't get at it: a little purse of Facets.",
-      "text_fr": "Coincée entre deux caisses sur le quai, là où les mouettes ne l'atteignent pas : une petite bourse de Facettes."
+      "text_fr": "Coincée entre deux caisses sur le quai, là où les mouettes ne l'atteignent pas : une petite bourse de Facettes.",
+      "poi": "secondary"
     },
     {
       "kind": "find",
@@ -1529,7 +1601,8 @@
       "text": "Under the lookout bench, behind a leg: a tin of Facets and a pencil stub. Somebody counts ships up here.",
       "text_fr": "Sous le banc du belvédère, derrière un pied : une boîte de Facettes et un bout de crayon. Quelqu'un compte les bateaux, ici.",
       "x": 46,
-      "z": 1
+      "z": 1,
+      "poi": "secondary"
     },
     {
       "x": 31,
@@ -1605,7 +1678,22 @@
       "z": 30,
       "give": "coins:40",
       "text": "In a crack of the old sea wall, behind the weed: Facets, green at the edges. Someone hid them here a long tide ago.",
-      "text_fr": "Dans une fente du vieux mur de mer, derrière les algues : des Facettes, vertes sur les bords. Quelqu'un les a cachées là il y a bien des marées."
+      "text_fr": "Dans une fente du vieux mur de mer, derrière les algues : des Facettes, vertes sur les bords. Quelqu'un les a cachées là il y a bien des marées.",
+      "poi": "secret",
+      "secret": {
+        "id": "harbour_wall",
+        "kind": "environmental",
+        "clue": [
+          [
+            12,
+            29
+          ],
+          [
+            11,
+            31
+          ]
+        ]
+      }
     }
   ],
   "warps": [
@@ -1710,6 +1798,10 @@
           "if": "flag:letter_delivered",
           "say": "Hob wrote back to Ottilie, you know.",
           "say_fr": "Hob a répondu à Ottilie, vous savez."
+        },
+        {
+          "say": "Race you to the rail!",
+          "say_fr": "Le dernier arrivé à la rambarde !"
         }
       ]
     },
@@ -1734,6 +1826,16 @@
             "Maquereau ce matin, crabe cet après-midi, et des ragots toute la journée, gratuitement.",
             "Hanne, au Bassin de radoub, prend le meilleur pour sa chaudrée. Elle fredonne en tournant la louche. Toujours le même air : l'air de la marée, qu'elle dit."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Mackerel! Fresh as the morning!",
+          "say_fr": "Du maquereau ! Frais du matin !"
+        },
+        {
+          "say": "Crab by the afternoon, if you ask nicely.",
+          "say_fr": "Du crabe l'après-midi, si on le demande gentiment."
         }
       ]
     },
@@ -1786,6 +1888,10 @@
           "if": "flag:kite_done",
           "say": "Saw Dace's kite over the boardwalk!",
           "say_fr": "J'ai vu le cerf-volant de Dace au-dessus des quais !"
+        },
+        {
+          "say": "Last call, last call, last call!",
+          "say_fr": "Dernier appel, dernier appel, dernier appel !"
         }
       ]
     },
@@ -1945,5 +2051,29 @@
       "near": 18,
       "far": 38
     }
-  }
+  },
+  "view": [
+    [
+      27,
+      18
+    ]
+  ],
+  "transitions": [
+    {
+      "to": "seaside",
+      "depth": 5,
+      "scatter": [
+        "reeds",
+        "rock_sea"
+      ]
+    },
+    {
+      "to": "bellflats",
+      "depth": 5,
+      "scatter": [
+        "reeds",
+        "rock_sea"
+      ]
+    }
+  ]
 }
