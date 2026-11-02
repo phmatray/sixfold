@@ -2076,7 +2076,6 @@
       "idle": "Idle",
       "outfit": "#f2c6a0",
       "hair": "#e8d080",
-      "if": "time:dawn",
       "dialogue": [
         {
           "lines": [
@@ -2094,6 +2093,30 @@
           "if": "flag:sealed_lumen",
           "say": "Lumen's seal! The lanterns burn brighter.",
           "say_fr": "Le sceau de Lumen ! Les lanternes brillent plus fort."
+        }
+      ],
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            15,
+            11
+          ],
+          "face": "s",
+          "do": "look"
+        },
+        {
+          "from": "06:30",
+          "at": [
+            17,
+            9
+          ],
+          "face": "n",
+          "do": "look"
+        },
+        {
+          "from": "day",
+          "home": "inn_dream"
         }
       ]
     },
