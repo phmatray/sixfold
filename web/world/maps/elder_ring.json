@@ -62,8 +62,8 @@
     "33333333333333333333333333333333333333333333",
     "...................2222.....................",
     "..................1111......................",
-    ".........pppppppppppppppppppppppppp.........",
-    ".........pppppppppppppppppppppppppp.........",
+    ".........ppppppppppppppppppppppppp..........",
+    ".........ppppppppppppppppppppppppp..........",
     ".........pp.fffffffffffffffffff.pp..........",
     ".........pp.f.f.........f...f.f.pp..........",
     ".........pp.f.f.fffff.f.f.f.f.f.pp..........",
@@ -196,7 +196,7 @@
     },
     {
       "asset": "mushroom_ring",
-      "x": 33,
+      "x": 34,
       "z": 17,
       "rot": 0
     },
@@ -379,7 +379,7 @@
     {
       "asset": "signpost",
       "x": 24,
-      "z": 24,
+      "z": 25,
       "rot": 0
     },
     {
@@ -1835,7 +1835,7 @@
     },
     {
       "x": 24,
-      "z": 24,
+      "z": 25,
       "kind": "sign",
       "text": "The Maze of the Elder Ring. Keep one hand on the hedge. Don't feed the hedgehogs; they come from the nest deep in the hedge, in the maze's north-west corner. The seal is in the middle; so is Elspeth.",
       "text_fr": "Le Labyrinthe du Cercle des Anciens. Gardez une main sur la haie. Ne nourrissez pas les hérissons ; ils viennent du nid, tout au fond de la haie, dans le coin nord-ouest du labyrinthe. Le sceau est au milieu ; Elspeth aussi."

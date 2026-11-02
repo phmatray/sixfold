@@ -4,6 +4,7 @@
   "region": "dream",
   "kind": "route",
   "music": "dream",
+  "level_design": 2,
   "life": {
     "critters": [
       {
@@ -35,6 +36,16 @@
           12
         ],
         "n": 1
+      },
+      {
+        "kind": "rabbit",
+        "zone": [
+          19,
+          11,
+          26,
+          14
+        ],
+        "n": 2
       }
     ]
   },
@@ -158,7 +169,8 @@
       "x": 3,
       "z": 7,
       "rot": 0,
-      "y": 1
+      "y": 1,
+      "landmark": true
     },
     {
       "asset": "flowers",
@@ -256,7 +268,8 @@
       "x": 22,
       "z": 10,
       "rot": 0,
-      "y": 0.06
+      "y": 0.06,
+      "poi": "secondary"
     },
     {
       "asset": "willow",
@@ -418,7 +431,8 @@
       "asset": "wisteria_arch",
       "x": 12,
       "z": 35,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "rock",
@@ -1545,7 +1559,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 8,
       "z": 2,
       "rot": 0
@@ -1563,7 +1577,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 16,
       "rot": 0
@@ -1617,7 +1631,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 3,
       "z": 17,
       "rot": 0
@@ -1671,7 +1685,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 38,
       "rot": 0
@@ -1689,7 +1703,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 3,
       "z": 41,
       "rot": 0
@@ -2029,7 +2043,22 @@
       "give": "card:dozel",
       "hidden": true,
       "text": "In a hollow of the old willow, behind the curtain of leaves: a card, curled up like something asleep.",
-      "text_fr": "Dans un creux du vieux saule, derrière le rideau de feuilles : une carte, enroulée comme une bête qui dort."
+      "text_fr": "Dans un creux du vieux saule, derrière le rideau de feuilles : une carte, enroulée comme une bête qui dort.",
+      "poi": "secret",
+      "secret": {
+        "id": "lane_willow",
+        "kind": "environmental",
+        "clue": [
+          [
+            21,
+            23
+          ],
+          [
+            22,
+            24
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -2056,7 +2085,8 @@
             "Une pantoufle brodée, trempée de rosée, à côté d'une pierre plate. L'autre est introuvable. La broderie dit « L »."
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "kind": "find",
@@ -2065,7 +2095,22 @@
       "text": "Inside the hollow stump, under a fall of willow leaves: a little pouch of Facets, damp but whole.",
       "text_fr": "Dans la souche creuse, sous une pluie de feuilles de saule : une petite bourse de Facettes, humide mais intacte.",
       "x": 20,
-      "z": 37
+      "z": 37,
+      "poi": "secret",
+      "secret": {
+        "id": "lane_stump",
+        "kind": "spatial",
+        "clue": [
+          [
+            19,
+            36
+          ],
+          [
+            21,
+            38
+          ]
+        ]
+      }
     }
   ],
   "warps": [],

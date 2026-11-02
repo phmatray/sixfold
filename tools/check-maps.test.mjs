@@ -76,6 +76,13 @@ test("AC1: the real world passes --strict unchanged", () => passes(WEB));
 
 test("the fixture world passes --strict", () => passes(world()));
 
+test("a prop with no rot fails --strict (the game would not draw it); the same prop turned passes", () => {
+  const r = run(world((m) => m.vale.props.push({ asset: "pine", x: 4, z: 12 })), "--strict");
+  assert.notEqual(r.code, 0, r.out);
+  assert.match(r.out, /vale: pine 4,12 has no rot/, r.out);
+  passes(world((m) => m.vale.props.push({ asset: "pine", x: 4, z: 12, rot: 0 })));
+});
+
 test("AC2: a v2 map with no landmark fails; a visible one passes", () => {
   fails(world((m) => delete m.vale.props[1].landmark), "landmark");
   passes(world());
@@ -156,7 +163,9 @@ test("AC5: --report prints one section per outdoor map, with its measures, and e
   for (const s of sections)
     for (const line of ["- landmark:", "- POIs:", "- longest walk without a discovery:", "- scatter: ratio", "- density along the main path"]) assert.ok(s.includes(line), `${s.split("\n")[0]} lacks ${line}`);
   assert.match(r.stdout, /## woodland .*\n[\s\S]*?- POIs: \d+ major, \d+ secondary, \d+ micro, \d+ secret/);
-  assert.match(r.stdout, /\[poi-budget\]/);
+  assert.match(r.stdout, /- advisories:\n {2}- \[[a-z-]+\]/);
+  // Every map meets its POI budget since the Dream pass (#271); AC6 below still proves [poi-budget] is reported.
+  assert.doesNotMatch(r.stdout, /\[poi-budget\]/);
 });
 
 test("--report=<file> writes the report there", () => {

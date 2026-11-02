@@ -346,12 +346,12 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const f = padDir(e);
     if (f) release(`pad-${f}`);
   };
-  // Keyboard or switch activation of a pad button (a click with no pointer): one step.
+  // Keyboard or switch activation of a pad button (a click with no pointer): one step, or onto the seat it meets.
   const padClick = (e) => {
     const f = padDir(e);
     if (!f || e.detail !== 0 || busy() || hero.step) return;
     if (hero.sit) return seats.stand(hero);
-    tryStep(f, 0);
+    if (!tryStep(f, 0) && facing()?.kind === "seat") act();
   };
   addEventListener("keydown", onKey);
   addEventListener("keydown", onEsc, true);
@@ -800,7 +800,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     }
     if (!paused) duelists.update(w, dt, talkTo);
     // Sitting: a move (key, stick, pad, a walk sent) or a scene stands the hero up; it walks on once up.
-    if (h.sit && (held.length || w.path.length || cut.playing)) (w.path = []), seats.stand(h);
+    // A move into the seat (the one that sat it down, still held or pressed again) keeps it seated.
+    if (h.sit && (held.some((k) => dirOf(k) !== seats.toward(h)) || w.path.length || cut.playing)) (w.path = []), seats.stand(h);
     seats.update(h, dt, reduced);
     if (!h.step && !warping && !paused && !w.engage && !h.sit) {
       const k = cut.playing ? null : held[held.length - 1]; // a cutscene walks the hero itself
@@ -811,7 +812,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
           h.face = f;
           h.turnedAt = w.now;
           if (chained) tryStep(f, carry); // already walking: turn and keep going
-        } else if (chained || w.now - h.turnedAt >= TURN_HOLD) tryStep(f, carry);
+        } else if ((chained || w.now - h.turnedAt >= TURN_HOLD) && !tryStep(f, carry) && facing()?.kind === "seat") act(); // walked into a seat the prompt offers: sit (the held moves are let go, as E does)
       } else if (w.path.length) {
         const npc = w.path.npc, near = npc && Object.keys(DIR).find((d) => h.x + DIR[d][0] === npc.x && h.z + DIR[d][1] === npc.z);
         if (near) {
@@ -984,7 +985,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
-  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, loops: world?.loops?.map((m) => m.time) ?? [], camera: { angle: camAngle, pitch: pitchNow, shot: !!liveShot }, graphics: post.tier, probing: !probeDone,
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, seat: hero?.sit ? { face: hero.sit.face, k: hero.sit.k, yaw: hero.obj.rotation.y } : null, loops: world?.loops?.map((m) => m.time) ?? [], camera: { angle: camAngle, pitch: pitchNow, shot: !!liveShot }, graphics: post.tier, probing: !probeDone,
     people: world?.npcs.filter((n) => !n.hidden).map((n) => ({ id: n.def.id, x: n.x, z: n.z, face: n.glance ?? n.face, do: n.activity?.do ?? null, away: !!n.away, walking: !!n.walk, sitting: !!n.sit })) ?? [] });
   // Where a point near the hero's feet (dx, dz tiles from them, on the floor) is drawn, in CSS pixels: the e2e
   // probe of the contact shadow under them (#340) reads the screenshot there.

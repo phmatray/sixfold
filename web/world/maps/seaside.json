@@ -256,7 +256,7 @@
       "why": "the kiosk"
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 39,
       "z": 16,
       "rot": 0
@@ -268,25 +268,25 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 41,
       "z": 16,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 38,
       "z": 18,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 30,
       "z": 17,
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 27,
       "z": 16,
       "rot": 0
@@ -386,10 +386,11 @@
     },
     {
       "asset": "lantern",
-      "x": 57,
-      "z": 9,
+      "x": 56,
+      "z": 10,
       "rot": 0,
-      "why": "the harbour road to Gullhaven"
+      "why": "the harbour road to Gullhaven",
+      "y": 0.1
     },
     {
       "asset": "rock_sea",
@@ -1346,7 +1347,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 18,
       "z": 18,
       "rot": 0
@@ -1358,7 +1359,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 14,
       "z": 16,
       "rot": 0
@@ -1394,7 +1395,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 49,
       "z": 14,
       "rot": 0

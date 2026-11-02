@@ -21,7 +21,7 @@
     },
     {
       "asset": "bookcase",
-      "x": 4,
+      "x": 5,
       "z": 1,
       "rot": 0
     },
@@ -65,7 +65,7 @@
       "asset": "net_locker",
       "x": 9,
       "z": 4,
-      "rot": 0
+      "rot": 270
     },
     {
       "asset": "rug",
@@ -100,7 +100,7 @@
       "text_fr": "La carte du port : la côte des falaises de Guette-Orage jusqu'à l'embouchure de la rivière du Lac, chaque rocher à l'encre, chaque bouée numérotée. Quelqu'un a écrit « thé ? » au crayon près du phare."
     },
     {
-      "x": 4,
+      "x": 5,
       "z": 1,
       "kind": "sign",
       "text": "Ledgers, by year and by boat. The spines are stamped. So are the shelves.",

@@ -58,7 +58,7 @@
           ],
           [
             48,
-            17,
+            19,
             1.6
           ]
         ]
@@ -130,7 +130,7 @@
     {
       "asset": "signpost",
       "x": 48,
-      "z": 17,
+      "z": 19,
       "rot": 0
     },
     {
@@ -420,13 +420,13 @@
       "rot": 0
     },
     {
-      "asset": "rock_basalt",
+      "asset": "rock",
       "x": 40,
       "z": 6,
       "rot": 0
     },
     {
-      "asset": "ash_pine",
+      "asset": "pine",
       "x": 34,
       "z": 5,
       "rot": 0
@@ -499,14 +499,14 @@
     },
     {
       "asset": "bench",
-      "x": 15,
-      "z": 28,
+      "x": 18,
+      "z": 22,
       "rot": 0
     },
     {
       "asset": "crates",
-      "x": 19,
-      "z": 29,
+      "x": 16,
+      "z": 19,
       "rot": 0
     },
     {
@@ -2770,7 +2770,7 @@
       "text": "East: Saltwind Boardwalk and the sea.",
       "text_fr": "Est : Promenade de Ventsalé et la mer.",
       "x": 48,
-      "z": 17
+      "z": 19
     },
     {
       "kind": "sign",

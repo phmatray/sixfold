@@ -15,7 +15,7 @@
   "props": [
     {
       "asset": "oven",
-      "x": 4,
+      "x": 5,
       "z": 1,
       "rot": 0
     },
@@ -41,7 +41,7 @@
       "asset": "display_case",
       "x": 9,
       "z": 3,
-      "rot": 0
+      "rot": 270
     },
     {
       "asset": "chair",

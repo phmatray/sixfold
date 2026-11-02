@@ -4,6 +4,7 @@
   "region": "dream",
   "kind": "site",
   "music": "dream",
+  "level_design": 2,
   "life": {
     "critters": [
       {
@@ -15,6 +16,26 @@
           7
         ],
         "n": 3
+      },
+      {
+        "kind": "glowbeetle",
+        "zone": [
+          6,
+          23,
+          13,
+          25
+        ],
+        "n": 3
+      },
+      {
+        "kind": "hedgehog",
+        "zone": [
+          34,
+          9,
+          36,
+          22
+        ],
+        "n": 1
       }
     ]
   },
@@ -103,7 +124,8 @@
       "asset": "moonwell",
       "x": 18,
       "z": 13,
-      "rot": 0
+      "rot": 0,
+      "landmark": true
     },
     {
       "asset": "seal_stone",
@@ -316,17 +338,17 @@
       "asset": "bench",
       "x": 8,
       "z": 25,
-      "rot": 0
+      "rot": 180
     },
     {
       "asset": "crates",
-      "x": 10,
+      "x": 12,
       "z": 25,
       "rot": 0
     },
     {
       "asset": "crates",
-      "x": 5,
+      "x": 7,
       "z": 24,
       "rot": 0
     },
@@ -1029,7 +1051,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 35,
       "z": 2,
       "rot": 0
@@ -1047,7 +1069,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 36,
       "z": 4,
       "rot": 0
@@ -1065,7 +1087,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 4,
       "z": 5,
       "rot": 0
@@ -1083,7 +1105,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 3,
       "z": 6,
       "rot": 0
@@ -1101,7 +1123,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 21,
       "rot": 0
@@ -1119,7 +1141,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 26,
       "rot": 0
@@ -1137,7 +1159,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 37,
       "z": 26,
       "rot": 0
@@ -1155,7 +1177,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 4,
       "z": 27,
       "rot": 0
@@ -1173,7 +1195,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 7,
       "z": 27,
       "rot": 0
@@ -1191,7 +1213,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 10,
       "z": 27,
       "rot": 0
@@ -1299,7 +1321,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 30,
       "z": 27,
       "rot": 0
@@ -1317,7 +1339,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 33,
       "z": 27,
       "rot": 0
@@ -1335,7 +1357,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 36,
       "z": 27,
       "rot": 0
@@ -1383,7 +1405,8 @@
             "Sept pierres plates, empilées avec soin devant le mur du jardin. Six portent une touche de couleur. Celle du dessus est vierge."
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 22,
@@ -1442,7 +1465,8 @@
             "warp:lanternmere:24:12:n"
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "kind": "find",
@@ -1451,7 +1475,22 @@
       "text": "Tucked in the stump behind the hedge, where Nim keeps her pruning knife: the knife, and a twist of Facets for seeds.",
       "text_fr": "Dans la souche, derrière la haie, là où Nim range son sécateur : le sécateur, et un cornet de Facettes pour les graines.",
       "x": 34,
-      "z": 7
+      "z": 7,
+      "poi": "secret",
+      "secret": {
+        "id": "moon_hedge_nook",
+        "kind": "spatial",
+        "clue": [
+          [
+            34,
+            8
+          ],
+          [
+            35,
+            6
+          ]
+        ]
+      }
     }
   ],
   "warps": [
@@ -2116,5 +2155,11 @@
         }
       ]
     }
+  ],
+  "view": [
+    [
+      25,
+      12
+    ]
   ]
 }

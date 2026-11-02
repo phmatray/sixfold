@@ -4,6 +4,7 @@
   "region": "dream",
   "kind": "town",
   "music": "dream",
+  "level_design": 2,
   "life": {
     "critters": [
       {
@@ -97,7 +98,8 @@
       "asset": "lake_house",
       "x": 4,
       "z": 4,
-      "rot": 0
+      "rot": 0,
+      "lit": "hour:18-5"
     },
     {
       "asset": "inn_sign",
@@ -124,7 +126,8 @@
         "sx_dr_roof": "#5a6fb0",
         "sx_dr_roof_dk": "#4a5c94",
         "sx_dr_roof_lt": "#7586c4"
-      }
+      },
+      "lit": "hour:19-4"
     },
     {
       "asset": "waymark",
@@ -222,7 +225,7 @@
       "asset": "bench",
       "x": 29,
       "z": 11,
-      "rot": 0
+      "rot": 180
     },
     {
       "asset": "lantern",
@@ -384,7 +387,9 @@
         "sx_dr_roof": "#c46a8a",
         "sx_dr_roof_dk": "#a35472",
         "sx_dr_roof_lt": "#d88aa4"
-      }
+      },
+      "landmark": true,
+      "lit": "hour:17-6"
     },
     {
       "asset": "willow",
@@ -394,7 +399,7 @@
     },
     {
       "asset": "boat",
-      "x": 3,
+      "x": 4,
       "z": 24,
       "rot": 180
     },
@@ -426,7 +431,8 @@
         "sx_dr_roof": "#4f8a8a",
         "sx_dr_roof_dk": "#3f7070",
         "sx_dr_roof_lt": "#6aa3a3"
-      }
+      },
+      "lit": "hour:20-3"
     },
     {
       "asset": "bridge",
@@ -443,8 +449,8 @@
     },
     {
       "asset": "glow_mushroom_tall",
-      "x": 39,
-      "z": 23,
+      "x": 40,
+      "z": 24,
       "rot": 0,
       "glow": "#b48cff"
     },
@@ -515,7 +521,8 @@
       "asset": "wisteria_arch",
       "x": 24,
       "z": 32,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "stump",
@@ -1346,7 +1353,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 30,
       "z": 2,
       "rot": 0
@@ -1436,7 +1443,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 31,
       "z": 6,
       "rot": 0
@@ -1454,7 +1461,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 6,
       "z": 30,
       "rot": 0
@@ -1472,7 +1479,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 6,
       "z": 33,
       "rot": 0
@@ -1490,7 +1497,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 12,
       "z": 33,
       "rot": 0
@@ -1631,7 +1638,7 @@
       "text_fr": "Sous le saule de l'îlot, enveloppé de toile cirée contre l'humidité : un booster scellé. Les lanternes doivent le voir toutes les nuits."
     },
     {
-      "x": 3,
+      "x": 4,
       "z": 24,
       "kind": "sign",
       "id": "old_boat",
@@ -1646,7 +1653,8 @@
             "Une vieille barque retournée sur la rive, de la mousse dans les joints. Peint sur la coque, presque effacé : « Ambrose ». Il rame dans une plus récente, maintenant. Dessous, quelqu'un garde au sec un bocal de mèches à lanterne."
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 38,
@@ -2050,6 +2058,12 @@
             "Le Jardin du Puits-de-Lune est là-bas : le jardin de Lumen. Lumen est rentrée, et Nim soigne les massifs. Les lanternes les aiment bien toutes les deux."
           ]
         }
+      ],
+      "barks": [
+        {
+          "say": "Make a wish. Then let it go.",
+          "say_fr": "Fais un vœu. Puis laisse-le partir."
+        }
       ]
     },
     {
@@ -2062,7 +2076,6 @@
       "idle": "Idle",
       "outfit": "#f2c6a0",
       "hair": "#e8d080",
-      "if": "time:dawn",
       "dialogue": [
         {
           "lines": [
@@ -2081,6 +2094,30 @@
           "say": "Lumen's seal! The lanterns burn brighter.",
           "say_fr": "Le sceau de Lumen ! Les lanternes brillent plus fort."
         }
+      ],
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            15,
+            11
+          ],
+          "face": "s",
+          "do": "look"
+        },
+        {
+          "from": "06:30",
+          "at": [
+            17,
+            9
+          ],
+          "face": "n",
+          "do": "look"
+        },
+        {
+          "from": "day",
+          "home": "inn_dream"
+        }
       ]
     },
     {
@@ -2093,7 +2130,6 @@
       "idle": "Idle",
       "outfit": "#3a3f6a",
       "hair": "#c8c0b0",
-      "if": "time:night",
       "dialogue": [
         {
           "lines": [
@@ -2112,6 +2148,39 @@
         {
           "say": "Shh. The willows are dreaming.",
           "say_fr": "Chut. Les saules rêvent."
+        }
+      ],
+      "routine": [
+        {
+          "from": "02:00",
+          "at": [
+            10,
+            9
+          ],
+          "face": "n",
+          "do": "look"
+        },
+        {
+          "from": "dawn",
+          "home": "inn_dream"
+        },
+        {
+          "from": "night",
+          "at": [
+            28,
+            9
+          ],
+          "face": "n",
+          "do": "look"
+        },
+        {
+          "from": "23:30",
+          "at": [
+            38,
+            9
+          ],
+          "face": "n",
+          "do": "look"
         }
       ]
     },
