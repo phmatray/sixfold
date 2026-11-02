@@ -217,7 +217,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   let cam = { fov: 40, fovPortrait: 50, pitch: 50, distance: 12, distancePortrait: 15, lookAtOffset: [0, 0.75, 0] };
   // The outdoor angle the player picked (camera.js, #148), and the pitch and distance easing toward it
   // (only after a new angle: a rotated phone or sixfoldCam still cut).
-  let camAngle = "default", pitchNow = 50, distNow = 12, camEase = false;
+  let camAngle = "default", pitchNow = 50, distNow = 12, camEase = false, handBack = false;
   let dist = 12, alive = true, raf = 0, paused = false, warping = false, world = null, hero = null;
   let canRun = false, shift = false, lastHero = "";
   const sealsHeld = new Set(); // the seals held (setSeals): their stone faces stay lit
@@ -450,7 +450,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
         look.set(p.tx, p.ty, p.tz), lookVel.set(0, 0, 0);
         camera.fov = el.clientWidth < el.clientHeight ? cam.fovPortrait : cam.fov;
         camera.updateProjectionMatrix();
-        camEase = true;
+        (camEase = true), (handBack = true);
       };
       s.done.then(over);
       return { done: s.done, finish: () => (s.finish(), over()) };
@@ -845,7 +845,9 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     // Camera: fixed pitch, on a soft spring behind a point a little ahead of a
     // walking hero; leans in after a while idle; indoors, kept inside the room.
     // A new angle (#148) eases the pitch and distance over about half a second (a cut on a new map or under reduced motion).
-    const ease = first || reduced || !camEase ? 1 : Math.min(1, dt * 6);
+    // The first frame after a shot repeats its last pose: at a few frames a second dt*6 would reach 1 and cut at once.
+    const ease = first || reduced || !camEase ? 1 : handBack ? 0 : Math.min(1, dt * 6);
+    handBack = false;
     pitchNow += (cam.pitch - pitchNow) * ease;
     distNow += (dist - distNow) * ease;
     if (Math.abs(cam.pitch - pitchNow) < 0.01 && Math.abs(dist - distNow) < 0.001) camEase = false;
