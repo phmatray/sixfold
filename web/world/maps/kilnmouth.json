@@ -132,6 +132,34 @@
       "y": 2
     },
     {
+      "asset": "stairs_basalt",
+      "x": 20,
+      "z": 19,
+      "rot": 180,
+      "y": 2
+    },
+    {
+      "asset": "stairs_basalt",
+      "x": 20,
+      "z": 17,
+      "rot": 180,
+      "y": 1
+    },
+    {
+      "asset": "stairs_basalt",
+      "x": 20,
+      "z": 15,
+      "rot": 180
+    },
+    {
+      "asset": "lantern",
+      "x": 21,
+      "z": 20,
+      "rot": 0,
+      "y": 3,
+      "why": "the head of the front stair down to the bowl, lit so the way to the seal stone and the glowing glass reads at night"
+    },
+    {
       "asset": "waymark",
       "x": 25,
       "z": 21,
