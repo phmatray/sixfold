@@ -51,6 +51,8 @@ for (const [device, opts] of Object.entries(DEVICES)) {
         }
         await host("sixfoldWarp", s.map, s.at[0], s.at[1], s.facing);
         await host("sixfoldClock", minute);
+        for (let t = 0; t < 6 && (await skip.isVisible().catch(() => false)); t++) await skip.click().catch(() => {}), await page.waitForTimeout(1200); // the intro scene
+        await host("sixfoldClock", minute);
         await page.waitForTimeout(3000); // shaders compiled, the fade gone
         await page.screenshot({ path: `${OUT}${s.map}-${i}-${hour}-${device}.jpg`, type: "jpeg", quality: 80 });
         console.log("ok  ", s.map, i, hour, device);
