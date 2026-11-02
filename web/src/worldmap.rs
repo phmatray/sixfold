@@ -346,13 +346,51 @@ pub fn WorldMap(
             }
         })
         .collect_view();
+    // A place's marks, in a row under its name (so they can't cover it): a lifted bar for an opened shortcut, a ledge
+    // for a drop. The legend under the map says what they mean.
+    let marks: Vec<(String, AnyView)> = a
+        .maps
+        .iter()
+        .filter(|m| seen(&m.id))
+        .filter_map(|m| {
+            let shown: Vec<_> = a
+                .marks
+                .iter()
+                .filter(|k| k.map == m.id)
+                .filter(|k| k.kind == "drop" || p.check(&format!("flag:sc_{}", k.id)))
+                .map(|k| {
+                    let (d, _title) = if k.kind == "drop" {
+                        ("M1.5 3.5h4.5v6h4.5M8.5 4v3.4M7.2 5.9l1.3 1.3 1.3-1.3", tr("A drop: one way down", "Une descente sans retour"))
+                    } else {
+                        ("M2.5 10.5v-8M9.5 10.5v-8M2.5 7.5l7-5", tr("A shortcut you opened", "Un raccourci que vous avez ouvert"))
+                    };
+                    view! { <span class="atlas-mark" data-mark=k.kind.clone() ><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.6" /><path d=d /></svg></span> }
+                })
+                .collect();
+            (!shown.is_empty()).then(|| (m.id.clone(), view! { <span class="atlas-marks">{shown}</span> }.into_any()))
+        })
+        .collect();
+    let (has_drop, has_cut) = (
+        a.marks.iter().any(|k| k.kind == "drop" && seen(&k.map)),
+        a.marks
+            .iter()
+            .any(|k| k.kind != "drop" && seen(&k.map) && p.check(&format!("flag:sc_{}", k.id))),
+    );
+    let legend = (has_drop || has_cut).then(|| view! {
+        <ul class="atlas-legend">
+            {has_cut.then(|| view! { <li>{tr("Lifted bar: a shortcut you opened", "Barre levée\u{a0}: un raccourci que vous avez ouvert")}</li> })}
+            {has_drop.then(|| view! { <li>{tr("Ledge: a one-way drop", "Rebord\u{a0}: une descente sans retour")}</li> })}
+        </ul>
+    });
+    let mut marks = marks;
     let map_names = a
         .maps
         .iter()
         .filter(|m| seen(&m.id))
         .map(|m| {
             let post = a.waymarks.iter().any(|w| w.map == m.id);
-            view! { <span class="atlas-label place" class:post=post style=at(m.x, m.y)>{m.name.clone()}</span> }
+            let mk = marks.iter().position(|(id, _)| *id == m.id).map(|i| marks.swap_remove(i).1);
+            view! { <span class="atlas-label place" class:post=post style=at(m.x, m.y)>{m.name.clone()}{mk}</span> }
         })
         .collect_view();
     let regions = a
@@ -402,32 +440,6 @@ pub fn WorldMap(
             })
         })
         .collect_view();
-    // A place's marks, in a row beside it: a lifted bar for an opened shortcut, a ledge for a drop. Each is an
-    // image named for its place, so a screen reader hears them (the place names themselves are drawing).
-    let marks: Vec<_> = a
-        .maps
-        .iter()
-        .filter(|m| seen(&m.id))
-        .filter_map(|m| {
-            let shown: Vec<_> = a
-                .marks
-                .iter()
-                .filter(|k| k.map == m.id)
-                .filter(|k| k.kind == "drop" || p.check(&format!("flag:sc_{}", k.id)))
-                .map(|k| {
-                    let (d, title) = if k.kind == "drop" {
-                        ("M1.5 3.5h4.5v6h4.5M8.5 4v3.4M7.2 5.9l1.3 1.3 1.3-1.3", tr("A drop: one way down", "Une descente sans retour"))
-                    } else {
-                        ("M2.5 10.5v-8M9.5 10.5v-8M2.5 7.5l7-5", tr("A shortcut you opened", "Un raccourci que vous avez ouvert"))
-                    };
-                    let label = format!("{}: {title}", m.name);
-                    view! { <span class="atlas-mark" data-mark=k.kind.clone() title=title role="img" aria-label=label><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.6" /><path d=d /></svg></span> }
-                })
-                .collect();
-            let post = a.waymarks.iter().any(|w| w.map == m.id);
-            (!shown.is_empty()).then(|| view! { <span class="atlas-marks" class:post=post style=at(m.x, m.y)>{shown}</span> })
-        })
-        .collect();
     let nodes = a
         .maps
         .iter()
@@ -530,12 +542,10 @@ pub fn WorldMap(
                     <rect width="120" height="90" fill="url(#atlas-vignette)" />
                 </svg>
                 <div class="atlas-words" aria-hidden="true">{region_names}{map_names}</div>
-                {(!marks.is_empty()).then(|| view! {
-                    <div class="atlas-words" role="group" aria-label=tr("Shortcuts and drops", "Raccourcis et descentes")>{marks}</div>
-                })}
                 <div class="atlas-posts" role="group" aria-label=tr("Waymarks", "Bornes de voyage")>{posts}</div>
                 {you}
             </div>
+            {legend}
             <div class="atlas-foot" aria-live="polite">
                 {move || match picked.get() {
                     None => view! {
