@@ -3,6 +3,7 @@
 // (one step a click), Reach with E. A debug build must be serving: `cd web && trunk serve`.
 //
 //   cd e2e && node trials-play.mjs http://localhost:8080/ [out-dir]   (out-dir: the system temp folder's sixfold-trials/)
+// With VIDEO=1 it also records the run (a .webm in out-dir).
 import { chromium } from "@playwright/test";
 import { mkdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -77,7 +78,8 @@ const reach = (() => {
 console.log(`solutions: push ${push.length} moves, ice ${ice.length} slides, reach ${reach.length} moves (${reach.filter((m) => m.reach).length} shoves)`);
 
 const browser = await chromium.launch({ channel: "chrome", headless: false });
-const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: "en-US", serviceWorkers: "block" });
+const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: "en-US", serviceWorkers: "block", ...(process.env.VIDEO && { recordVideo: { dir: OUT, size: { width: 1280, height: 800 } } }) });
+await ctx.routeWebSocket(/trunk\/ws/, () => {}); // trunk serve's live reload: never mid-run (an edit would restart the page)
 const page = await ctx.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
@@ -107,8 +109,10 @@ const talk = async (name) => {
   if (!(await box.isVisible().catch(() => false))) return console.log("  (no dialogue)");
   console.log("  says:", (await box.innerText()).replace(/\s+/g, " ").slice(0, 160));
   await shot(name);
-  for (let i = 0; i < 8 && (await box.isVisible().catch(() => false)); i++) await page.keyboard.press("Enter"), await page.waitForTimeout(700);
-  await page.waitForTimeout(1500); // the gate opens
+  for (let i = 0; i < 8 && (await box.isVisible().catch(() => false)); i++) await page.keyboard.press("Enter"), await page.waitForTimeout(i ? 700 : 0);
+  await page.waitForTimeout(450);
+  await shot(`${name}-reveal`); // the seal sinking, its column of light
+  await page.waitForTimeout(2800); // the camera watches the gate open, then comes back
   console.log("  focus after:", await page.evaluate(() => { const a = document.activeElement; return `${a?.tagName}.${a?.className} in dialog: ${!!a?.closest("dialog")}`; }));
 };
 const prompt = () => page.locator(".world-prompt").innerText().catch(() => "");
@@ -120,7 +124,7 @@ for (const [i, m] of push.entries()) {
   await at(...m.h);
   if (i === Math.floor(push.length / 2)) await shot("1-push-midway");
 }
-await page.waitForTimeout(700);
+await page.waitForTimeout(1200); // the last boulder settles; the camera glides to the gate
 await talk("1-push-solved");
 await shot("1-push-open");
 // Into the ice room: through the gate to its first tile.
@@ -156,8 +160,8 @@ for (const m of reach) {
   if (!shoves) console.log("  prompt before Reach:", p.replace(/\s+/g, " "));
   await page.keyboard.press("e");
   shoves++;
-  if (shoves === 1) await page.waitForTimeout(150), await shot("3-reach-beam");
-  await page.waitForTimeout(700);
+  if (shoves === 1) await page.waitForTimeout(260), await shot("3-reach-hand"); // the hand about to strike
+  await page.waitForTimeout(shoves === 1 ? 850 : 1100); // the hand flies, strikes and fades
 }
 await talk("3-reach-solved");
 await shot("3-reach-open");
@@ -168,4 +172,6 @@ await page.waitForFunction(() => document.querySelector(".world-host").sixfoldSt
 await page.waitForTimeout(2000);
 await shot("4-exit");
 console.log("errors:", errors.length ? errors : "none");
+await ctx.close(); // the video (VIDEO=1) is written now
+if (process.env.VIDEO) console.log("video:", await page.video().path());
 await browser.close();

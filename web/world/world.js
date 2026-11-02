@@ -274,7 +274,21 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const i = held.indexOf(k);
     if (i >= 0) held.splice(i, 1);
   };
-  const busy = () => paused || warping || !world || !!world.engage || !!world.ride || cut.playing || book.live(); // a duelist coming over, a lift ride, a cutscene, a book lock input
+  const busy = () => paused || warping || !world || !!world.engage || !!world.ride || cut.playing || book.live() || !!peek || !!world.trials?.busy(); // a duelist coming over, a lift ride, a cutscene, a book, a trial's reveal or Reach's hand lock input
+  // A trial solved: the camera glides to the gate its flag opens and holds there while its lines are read and it
+  // opens (`until`: game seconds, which stop while the lines are up), then eases back to the hero (`easeBack`).
+  let peek = null, easeBack = 0;
+  function reveal(d) {
+    const talk = () => cb("talk", `trial_${d.id}`, JSON.stringify({ name: world.map.title ?? "", dialogue: [d.solved] }));
+    const g = world.gates.find((g) => g.def.if === `flag:${d.flag}`);
+    if (!g || reduced) return talk();
+    const t = g.tiles[0], w = world;
+    peek = { w, x: t.x, z: t.z, until: w.now + 4 };
+    held.length = 0;
+    w.path = [];
+    globalThis.sixfoldAudio?.sfx("progress");
+    setTimeout(() => alive && world === w && talk(), 900);
+  }
   const onKey = (e) => {
     const k = e.key.toLowerCase();
     if (e.type === "keyup") {
@@ -414,6 +428,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       const list = names.join(tr(" and ", " et "));
       const text = names.length > 1 ? tr(`Ways open: ${list}`, `Des passages s'ouvrent\u00a0: ${list}`) : tr(`A way opens: ${list}`, `Un passage s'ouvre\u00a0: ${list}`);
       showBanner(text, 4000), cb("opened", text, "");
+      if (peek?.w === world) (peek.until = world.now + 1.8), world.trials?.burst(peek.x, peek.z); // a trial's reveal: watch it open, then back
     }
   };
   // The music for the map and the hour: a region's track, its night variant after dark;
@@ -630,7 +645,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     lifts.attach(next, got, spawn);
     seats.attach(next);
     // A trial solved runs its `solved` lines, whose `do` sets its flag (a gate on it then opens).
-    next.trials = attachTrials(next, holds, { reduced: () => reduced, sound, solved: (d) => cb("talk", `trial_${d.id}`, JSON.stringify({ name: next.map.title ?? "", dialogue: [d.solved] })) });
+    next.trials = attachTrials(next, holds, { reduced: () => reduced, sound, solved: reveal });
     next.name = name;
     duelists.enterMap(name);
     // Gates first see the hero where it arrives (a gate it stands on lets it stay).
@@ -815,7 +830,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     h.running = !!h.step?.run;
 
     lifts.update(w, dt);
-    w.trials?.update(dt);
+    w.trials?.update(dt, h);
+    if (peek && (peek.w !== w || w.now > peek.until)) (peek = null), (easeBack = w.now + 1.2);
     // Sliding over ice the hero stands still, carried (its idle clip held as a pose).
     if (!!h.step?.slide !== !!h.sliding) (h.sliding = !!h.step?.slide), (h.pose = h.sliding ? h.idleName : null);
     const [px, pz] = place(h, dt, w.floorAt);
@@ -872,7 +888,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     if (Math.abs(cam.pitch - pitchNow) < 0.01 && Math.abs(dist - distNow) < 0.001) camEase = false;
     const pitch = THREE.MathUtils.degToRad(pitchNow), off = cam.lookAtOffset;
     const ahead = h.step && !reduced ? 0.7 : 0;
-    const shot = cut.aim(); // a cutscene's `cam` target
+    const shot = cut.aim() ?? (peek && [peek.x + 0.5, w.floorAt(peek.x, peek.z), peek.z + 0.5]); // a cutscene's `cam` target, or a trial's gate
     if (shot) aim.set(shot[0] + off[0], off[1] + shot[1], shot[2] + off[2]);
     else aim.set(px + off[0] + DIR[h.face][0] * ahead, off[1] + h.fy, pz + off[2] + DIR[h.face][1] * ahead);
     // A scene's line on screen (#155): the talk box covers the bottom of the frame, so the shot moves down the
@@ -898,7 +914,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     hud.follow();
     if (first || reduced) look.copy(aim), lookVel.set(0, 0, 0);
     else {
-      const k = cut.playing ? 10 : 28, c = 2 * Math.sqrt(k) * (cut.playing ? 1 : 0.85); // slightly under-damped; a scene pans slowly
+      const slow = cut.playing || !!peek || w.now < easeBack; // a scene (and a trial's reveal, there and back) pans slowly
+      const k = slow ? 10 : 28, c = 2 * Math.sqrt(k) * (slow ? 1 : 0.85); // slightly under-damped
       lookVel.addScaledVector(aim.clone().sub(look), k * dt).addScaledVector(lookVel, -c * dt);
       look.addScaledVector(lookVel, dt);
     }
