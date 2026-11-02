@@ -1838,7 +1838,7 @@
   },
   "interactions": [
     {
-      "x": 25,
+      "x": 23,
       "z": 38,
       "kind": "sign",
       "id": "tipped_cart",
@@ -2187,7 +2187,8 @@
       "give": "give:lucky_pick",
       "text": "Half buried in the scree, its handle wrapped in faded red cord: a pick. Huw's, by the initials burned into the wood.",
       "text_fr": "À moitié enfouie dans les éboulis, le manche entouré d'une cordelette rouge passée : une pioche. Celle de Huw, d'après les initiales brûlées dans le bois.",
-      "if": "flag:pick_asked"
+      "if": "flag:pick_asked",
+      "glint": "flag:pick_asked & !item:lucky_pick"
     },
     {
       "x": 9,
@@ -2200,6 +2201,21 @@
   "warps": [
     {
       "x": 21,
+      "z": 33,
+      "to": "undermine",
+      "label": "Go into the Undermine",
+      "label_fr": "Entrer dans les Galeries Basses",
+      "spawn": {
+        "x": 2,
+        "z": 7,
+        "facing": "e"
+      },
+      "if": "item:kiln_lantern",
+      "locked": "The old haulage tunnel, black as a well. The rails run in and vanish. You'd want a light before following them.",
+      "locked_fr": "Le vieux tunnel de roulage, noir comme un puits. Les rails y entrent et disparaissent. Il faudrait une lumière avant de les suivre."
+    },
+    {
+      "x": 22,
       "z": 33,
       "to": "undermine",
       "label": "Go into the Undermine",
@@ -2353,8 +2369,8 @@
       "id": "shale",
       "name": "Shale",
       "model": "npc_sheep",
-      "x": 18,
-      "z": 28,
+      "x": 16,
+      "z": 31,
       "facing": "w",
       "idle": "Idle",
       "if": "!time:night",
