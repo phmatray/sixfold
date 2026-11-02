@@ -56,6 +56,7 @@ import { updateNpc, barkOf, BARK_HOLD, facing as facingOf } from "./npc.js";
 import * as duelists from "./duelist.js";
 import * as lifts from "./lift.js";
 import * as seats from "./seat.js";
+import { attach as attachTrials } from "./trials.js";
 import { daylight, phaseOf, DAY } from "./daylight.js";
 import { scenes } from "./script.js";
 import { playShot } from "./shot.js";
@@ -67,6 +68,7 @@ import { createLook } from "./look.js";
 import { TIERS, pickTier, readSaved, weak, unsure } from "./tier.js";
 
 const STEP = 0.25, RUN_STEP = 0.17; // seconds per tile: walk 4 tiles/s, run ~6 (controllable on a phone)
+const SLIDE = 0.7; // a slide over ice takes this share of a walking step
 const TURN_HOLD = 0.12; // a press shorter than this only turns the hero
 const FADE = 350; // ms, warp fade
 const KEYS = { w: "n", z: "n", arrowup: "n", s: "s", arrowdown: "s", a: "w", q: "w", arrowleft: "w", d: "e", arrowright: "e" }; // WASD and AZERTY ZQSD
@@ -272,7 +274,22 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const i = held.indexOf(k);
     if (i >= 0) held.splice(i, 1);
   };
-  const busy = () => paused || warping || !world || !!world.engage || !!world.ride || cut.playing || book.live(); // a duelist coming over, a lift ride, a cutscene, a book lock input
+  const busy = () => paused || warping || !world || !!world.engage || !!world.ride || cut.playing || book.live() || !!peek; // a duelist coming over, a lift ride, a cutscene, a book, a trial's reveal lock input
+  // A trial solved: the camera glides to the gate its flag opens and holds there while its lines are read and it
+  // opens, then eases back to the hero. Every time here is the map's own game clock (`w.now`, which stops while the
+  // game is paused and starts at 0 on each map): `talkAt` when the lines come up, `until` when the camera lets go,
+  // and `easeBack` (with the map it belongs to) how long it pans home slowly.
+  let peek = null, easeBack = null;
+  const talkOf = (d) => cb("talk", `trial_${d.id}`, JSON.stringify({ name: world.map.title ?? "", dialogue: [d.solved] }));
+  function reveal(d) {
+    const g = world.gates.find((g) => g.def.if === `flag:${d.flag}`);
+    if (!g || reduced) return talkOf(d);
+    const t = g.tiles[0], w = world;
+    peek = { w, x: t.x, z: t.z, until: w.now + 4, talkAt: w.now + 0.9, d };
+    held.length = 0;
+    w.path = [];
+    globalThis.sixfoldAudio?.sfx("progress");
+  }
   const onKey = (e) => {
     const k = e.key.toLowerCase();
     if (e.type === "keyup") {
@@ -412,6 +429,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       const list = names.join(tr(" and ", " et "));
       const text = names.length > 1 ? tr(`Ways open: ${list}`, `Des passages s'ouvrent\u00a0: ${list}`) : tr(`A way opens: ${list}`, `Un passage s'ouvre\u00a0: ${list}`);
       showBanner(text, 4000), cb("opened", text, "");
+      if (peek?.w === world) (peek.until = world.now + 1.8), world.trials?.burst(peek.x, peek.z); // a trial's reveal: watch it open, then back
     }
   };
   // The music for the map and the hour: a region's track, its night variant after dark;
@@ -497,15 +515,23 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const it = hero.sit ? null : lifts.facing(world, hero) ?? facingOf(world, hero, opens);
     // Taken, on a seat: the seat (or, from behind it, nothing) rather than "Nothing else here".
     if (spent(it) && world.seats.has(key(hero.x + DIR[hero.face][0], hero.z + DIR[hero.face][1]))) return seats.facing(world, hero);
-    return it ?? seats.facing(world, hero);
+    return it ?? seats.facing(world, hero) ?? world.trials?.facing(hero) ?? null; // a trial's rune stone
   };
+  // Where a pushed block may go: where the hero could step (no wall, person, door, gate, edge or cliff), not onto the
+  // hero. (tools/puzzles.mjs `grid` holds the solver to the same.)
+  const roomFor = (ax, az, bx, bz) =>
+    !world.blocked(bx, bz) && !world.npcAt(bx, bz) && world.climb(ax, az, bx, bz) && !world.warps.has(key(bx, bz)) && !world.gateAt.has(key(bx, bz)) && !world.exitAt(bx, bz) && !(hero.x === bx && hero.z === bz);
+  const PUSH = 2; // a push takes this many steps' time
 
   // Start a step toward `f`. A door warp is entered even though its tile is solid;
   // pushing against the wall from a warp tile with that `dir` leaves the room.
-  function tryStep(f, carry) {
+  // `sliding`: carried on over ice, so a boulder ahead stops the hero rather than being pushed.
+  function tryStep(f, carry, sliding = false) {
     const w = world, x = hero.x + DIR[f][0], z = hero.z + DIR[f][1];
     hero.face = f;
     const free = !cut.playing; // a cutscene's walk never leaves the map (a `warp:` cue does), so skipping lands the same
+    const rock = free && !sliding && w.trials?.blockAt(x, z);
+    if (rock) return w.trials.push(rock, f, roomFor, STEP * PUSH) && startStep(x, z, carry, null, PUSH);
     const door = free && w.warps.get(key(x, z));
     if (door && !door.dir && opens(door)) return startStep(x, z, carry, door);
     const exit = free && w.exitAt(x, z);
@@ -521,11 +547,13 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     }
     return startStep(x, z, carry, null);
   }
-  function startStep(x, z, carry, door) {
+  // `slow`: a push (PUSH steps' time, never a run). A step off ice is a slide: quicker, and standing still.
+  function startStep(x, z, carry, door, slow = 1) {
     const stoop = door?.stoop; // a house door: only as far as its door, up its steps (props.js STOOP)
-    const run = canRun && (shift || hud.running) && !cut.playing; // a scene walks
-    const dur = (run ? RUN_STEP : STEP) * (stoop ? 0.5 + stoop.in : 1);
-    hero.step = { x, z, t: carry / dur, dur, run, warp: door, stoop, hop: world.drop(hero.x, hero.z, x, z) }; // a drop: a hop down (actors.js)
+    const slide = !!world.trials?.iceAt(hero.x, hero.z);
+    const run = canRun && (shift || hud.running) && !cut.playing && slow === 1 && !slide; // a scene walks
+    const dur = (run ? RUN_STEP : STEP) * (stoop ? 0.5 + stoop.in : 1) * slow * (slide ? SLIDE : 1);
+    hero.step = { x, z, t: carry / dur, dur, run, warp: door, stoop, slide, hop: world.drop(hero.x, hero.z, x, z) }; // a drop: a hop down (actors.js)
     return true;
   }
 
@@ -541,6 +569,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       lifts.use(world, hero, it, { holds, reduced, sound, say: (t) => cb("use", "locked", t), fade: (on) => fade.classList.toggle("on", on), step: (f) => tryStep(f, 0) });
     }
     else if (it.kind === "seat") (world.path = []), seats.sit(hero, it.place, reduced);
+    else if (it.kind === "reset") world.trials.use(it, hero);
     else if (it.kind === "stand") seats.stand(hero);
     else if (it.kind === "book") {
       shelf = it;
@@ -617,6 +646,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     if (!alive) return;
     lifts.attach(next, got, spawn);
     seats.attach(next);
+    // A trial solved runs its `solved` lines, whose `do` sets its flag (a gate on it then opens).
+    next.trials = attachTrials(next, holds, { reduced: () => reduced, sound, solved: reveal });
     next.name = name;
     duelists.enterMap(name);
     // Gates first see the hero where it arrives (a gate it stands on lets it stay).
@@ -731,7 +762,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const prevStep = h.step;
 
     // Finish (or carry on) the current step.
-    let carry = 0, chained = false, spotted = null;
+    let carry = 0, chained = false, spotted = null, slide = null; // slide: carried on over ice this way
     if (h.step) {
       h.step.t += dt / h.step.dur;
       if (h.step.t >= 1 && h.step.stoop) {
@@ -742,6 +773,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
         if (!s.going) (s.going = true), warp(s.warp).finally(() => h.step === s && (h.step = null));
       } else if (h.step.t >= 1) {
         const done = h.step, left = w.gateAt.get(key(h.x, h.z));
+        const went = Object.keys(DIR).find((d) => DIR[d][0] === done.x - h.x && DIR[d][1] === done.z - h.z);
         carry = (done.t - 1) * done.dur;
         h.x = done.x;
         h.z = done.z;
@@ -754,6 +786,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
         const wp = done.warp ?? w.warps.get(key(h.x, h.z));
         if (wp && !cut.playing) warp(wp);
         else if (!wp) cut.stepped(w, h.x, h.z);
+        if (!wp && !cut.playing && w.trials?.iceAt(h.x, h.z)) slide = went;
+        else if (!wp && !cut.playing) w.trials?.reached(h.x, h.z); // come to rest on a trial's goal
       }
     }
     if (w.scriptsDue && !warping && !paused && !h.step && !cut.playing) (w.scriptsDue = false), cut.entered(w); // after a scene that warped here, too
@@ -771,7 +805,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     seats.update(h, dt, reduced);
     if (!h.step && !warping && !paused && !w.engage && !h.sit) {
       const k = cut.playing ? null : held[held.length - 1]; // a cutscene walks the hero itself
-      if (k) {
+      if (slide) (w.path = []), tryStep(slide, carry, true); // on ice, on the way it was going, whatever is pressed
+      else if (k) {
         const f = dirOf(k);
         if (f !== h.face) {
           h.face = f;
@@ -791,7 +826,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
         else if (f && !tryStep(f, carry) && w.path[0] !== "act" && !npc) w.path = [];
       }
     }
-    if (h.step && h.step !== prevStep) {
+    if (h.step && h.step !== prevStep && !h.step.slide) {
       w.life.puff(h.x + 0.5, h.z + 0.5); // footstep dust
       sound("step", w.map.tiles[h.step.z]?.[h.step.x] === "w" ? 1 : 0); // "w": a wooden floor
     }
@@ -799,6 +834,11 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     h.running = !!h.step?.run;
 
     lifts.update(w, dt);
+    w.trials?.update(dt, h);
+    if (!paused && peek?.w === w && peek.d && w.now >= peek.talkAt) talkOf(peek.d), (peek.d = null); // the lines, once the camera is there (never over a paused game)
+    if (peek && (peek.w !== w || w.now > peek.until)) (peek = null), (easeBack = { w, until: w.now + 1.2 });
+    // Sliding over ice the hero stands still, carried (its idle clip held as a pose).
+    if (!!h.step?.slide !== !!h.sliding) (h.sliding = !!h.step?.slide), (h.pose = h.sliding ? h.idleName : null);
     const [px, pz] = place(h, dt, w.floorAt);
     animateActor(h, dt, reduced);
     book.pose(h);
@@ -853,7 +893,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     if (Math.abs(cam.pitch - pitchNow) < 0.01 && Math.abs(dist - distNow) < 0.001) camEase = false;
     const pitch = THREE.MathUtils.degToRad(pitchNow), off = cam.lookAtOffset;
     const ahead = h.step && !reduced ? 0.7 : 0;
-    const shot = cut.aim(); // a cutscene's `cam` target
+    const shot = cut.aim() ?? (peek && [peek.x + 0.5, w.floorAt(peek.x, peek.z), peek.z + 0.5]); // a cutscene's `cam` target, or a trial's gate
     if (shot) aim.set(shot[0] + off[0], off[1] + shot[1], shot[2] + off[2]);
     else aim.set(px + off[0] + DIR[h.face][0] * ahead, off[1] + h.fy, pz + off[2] + DIR[h.face][1] * ahead);
     // A scene's line on screen (#155): the talk box covers the bottom of the frame, so the shot moves down the
@@ -879,7 +919,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     hud.follow();
     if (first || reduced) look.copy(aim), lookVel.set(0, 0, 0);
     else {
-      const k = cut.playing ? 10 : 28, c = 2 * Math.sqrt(k) * (cut.playing ? 1 : 0.85); // slightly under-damped; a scene pans slowly
+      const slow = cut.playing || !!peek || (easeBack?.w === w && w.now < easeBack.until); // a scene (and a trial's reveal, there and back) pans slowly
+      const k = slow ? 10 : 28, c = 2 * Math.sqrt(k) * (slow ? 1 : 0.85); // slightly under-damped
       lookVel.addScaledVector(aim.clone().sub(look), k * dt).addScaledVector(lookVel, -c * dt);
       look.addScaledVector(lookVel, dt);
     }
@@ -938,6 +979,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   el.sixfoldClock = (m) => (cb("clock", String(Math.floor(m)), ""), setClock(m));
   el.sixfoldWarp = (to, x, z, facing = "s") => warp({ to, spawn: { x, z, facing }, travel: true }); // and anywhere: `el.sixfoldWarp("square", 12, 8)`
   // Walks there as a tap would (the same route, collisions, heights, gates and ladders); `[]` when there's no way.
+  el.sixfoldFacing = () => (hero && world && !busy() ? (({ kind, text }) => ({ kind, text }))(facing() ?? {}) : null); // what E would use now
   el.sixfoldWalk = (x, z) => (busy() ? [] : [...(world.path = walkTo(x, z, world.npcAt(x, z)))]);
   // For measuring: draw calls and triangles of the last frame (shadows included), and the area.
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back

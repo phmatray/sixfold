@@ -39,6 +39,13 @@ Cargo workspace, four crates with one-way dependencies `web -> meta -> engine`, 
 
 When adding game logic, the model lives in `engine` (a duel rule) or `meta` (campaign, world, economy, saves) with a unit test; the UI in `web` consumes it. A change that needs a browser to verify belongs in `web`; a change you can assert with plain Rust belongs in `engine` or `meta`.
 
+## Game design reference
+
+The owner's design reference is Jesse Schell, **_The Art of Game Design: A Book of Lenses_**. Judge and explain design
+work (puzzles, the world, the duel, rewards, progression) through its lenses, naming the ones you use (e.g. the Lens of
+the Puzzle and its ten principles, Challenge, Flow, Curiosity, Reward, Visible Progress, Parallelism, the Pyramid).
+Level-design rules of our own are in `docs/LEVEL_DESIGN.md`; the field-puzzle prototype's in `docs/PUZZLES.md`.
+
 ## Releases
 
 Public repo `phmatray/sixfold`, deployed to https://phmatray.github.io/sixfold/ after CI passes on `main`.
