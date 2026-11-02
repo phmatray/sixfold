@@ -2,6 +2,7 @@
   "title": "Cinderwick",
   "title_fr": "Mèche-Cendre",
   "region": "ember",
+  "level_design": 2,
   "kind": "town",
   "music": "ember",
   "life": {
@@ -25,11 +26,37 @@
           19
         ],
         "n": 2
+      },
+      {
+        "kind": "glowbeetle",
+        "zone": [
+          35,
+          28,
+          43,
+          33
+        ],
+        "n": 2
       }
     ],
     "embers": {
       "from": "smoke"
-    }
+    },
+    "perch": [
+      {
+        "at": [
+          [
+            47,
+            23,
+            2.4
+          ],
+          [
+            36,
+            4,
+            5
+          ]
+        ]
+      }
+    ]
   },
   "width": 52,
   "height": 36,
@@ -169,7 +196,8 @@
       "asset": "chime_post",
       "x": 47,
       "z": 23,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "heather",
@@ -206,7 +234,8 @@
       "x": 24,
       "z": 10,
       "rot": 0,
-      "y": 1
+      "y": 1,
+      "landmark": true
     },
     {
       "asset": "stairs_basalt",
@@ -368,7 +397,8 @@
         "sx_fruit": "#f0a63d",
         "sx_bread": "#6fa7e7",
         "sx_fish": "#8ecf6a"
-      }
+      },
+      "poi": "secondary"
     },
     {
       "asset": "stall_b",
@@ -560,7 +590,8 @@
         "sx_slate": "#8a4b3a",
         "sx_slate_dk": "#6c3a2d"
       },
-      "y": 1
+      "y": 1,
+      "poi": "secondary"
     },
     {
       "asset": "glass_rack",
@@ -612,7 +643,8 @@
       "asset": "minecart",
       "x": 38,
       "z": 13,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "rubble",
@@ -2859,6 +2891,62 @@
       "z": 26,
       "rot": 180,
       "band": "downs"
+    },
+    {
+      "asset": "rock",
+      "x": 16,
+      "z": 33,
+      "rot": 0,
+      "band": "quarry"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 17,
+      "z": 33,
+      "rot": 90,
+      "band": "quarry"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 19,
+      "z": 33,
+      "rot": 90,
+      "band": "quarry"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 29,
+      "z": 33,
+      "rot": 0,
+      "band": "quarry"
+    },
+    {
+      "asset": "rock",
+      "x": 19,
+      "z": 34,
+      "rot": 90,
+      "band": "quarry"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 20,
+      "z": 34,
+      "rot": 270,
+      "band": "quarry"
+    },
+    {
+      "asset": "rock_basalt",
+      "x": 29,
+      "z": 34,
+      "rot": 270,
+      "band": "quarry"
+    },
+    {
+      "asset": "rock",
+      "x": 35,
+      "z": 3,
+      "rot": 90,
+      "band": "kilnmouth"
     }
   ],
   "spawn": {
@@ -2922,7 +3010,13 @@
       "give": "give:curio_glass_marble",
       "hidden": true,
       "text": "Behind the bottles on the bottom shelf, wrapped in a rag: a glass marble the size of a plum, with a twist of ember inside.",
-      "text_fr": "Derrière les bouteilles de l'étagère du bas, enveloppée dans un chiffon : une bille de verre grosse comme une prune, avec une volute de braise dedans."
+      "text_fr": "Derrière les bouteilles de l'étagère du bas, enveloppée dans un chiffon : une bille de verre grosse comme une prune, avec une volute de braise dedans.",
+      "poi": "secret",
+      "secret": {
+        "id": "singing_rack",
+        "kind": "social",
+        "hint": "wendell"
+      }
     },
     {
       "kind": "find",
@@ -2931,7 +3025,18 @@
       "z": 3,
       "give": "card:furnaceback",
       "text": "On the flue-watchers' perch, weighed down by a stone so the wind can't take it: a card, its edges a little scorched.",
-      "text_fr": "Sur le perchoir des guetteurs de cheminée, coincée sous une pierre pour que le vent ne l'emporte pas : une carte, aux bords un peu roussis."
+      "text_fr": "Sur le perchoir des guetteurs de cheminée, coincée sous une pierre pour que le vent ne l'emporte pas : une carte, aux bords un peu roussis.",
+      "poi": "secret",
+      "secret": {
+        "id": "flue_perch",
+        "kind": "progression",
+        "clue": [
+          [
+            18,
+            5
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -3110,6 +3215,35 @@
           "say": "Warm night, warm stones.",
           "say_fr": "Nuit tiède, pierres tièdes."
         }
+      ],
+      "routine": [
+        {
+          "from": "06:00",
+          "at": [
+            23,
+            13
+          ],
+          "face": "e",
+          "do": "work"
+        },
+        {
+          "from": "14:00",
+          "at": [
+            23,
+            15
+          ],
+          "face": "n",
+          "do": "look"
+        },
+        {
+          "from": "17:00",
+          "at": [
+            23,
+            13
+          ],
+          "face": "e",
+          "do": "work"
+        }
       ]
     },
     {
@@ -3197,7 +3331,8 @@
             "Ce séchoir-là chante faux, par contre. Un truc sur l'étagère du bas, emballé, trop lourd pour chanter. Va voir, si tu veux."
           ],
           "do": [
-            "sfx:chime"
+            "sfx:chime",
+            "flag:heard_singing_rack"
           ]
         },
         {
@@ -3269,6 +3404,39 @@
           "if": "flag:lantern_done",
           "say": "Clio's lantern? I saw it glow from my step!",
           "say_fr": "La lanterne de Clio ? Je l'ai vue briller d'ici !"
+        },
+        {
+          "say": "Mind the hot ones. The pale ones are cool.",
+          "say_fr": "Attention aux chaudes. Les pâles sont froides."
+        }
+      ],
+      "routine": [
+        {
+          "from": "06:00",
+          "at": [
+            18,
+            21
+          ],
+          "face": "e",
+          "do": "work"
+        },
+        {
+          "from": "12:00",
+          "at": [
+            18,
+            22
+          ],
+          "face": "e",
+          "do": "look"
+        },
+        {
+          "from": "15:00",
+          "at": [
+            18,
+            21
+          ],
+          "face": "e",
+          "do": "work"
         }
       ]
     },
@@ -3313,6 +3481,40 @@
           "if": "flag:lens_returned",
           "say": "Tarn found his lens! Now he squints at us.",
           "say_fr": "Tarn a retrouvé sa lentille ! Il nous scrute, maintenant."
+        },
+        {
+          "say": "Cinza is already out on the quarry road!",
+          "say_fr": "Cinza est déjà sur la route de la carrière !",
+          "if": "!beat:cinza"
+        }
+      ],
+      "routine": [
+        {
+          "from": "06:00",
+          "at": [
+            34,
+            8
+          ],
+          "face": "s",
+          "do": "idle"
+        },
+        {
+          "from": "11:00",
+          "at": [
+            37,
+            9
+          ],
+          "face": "w",
+          "do": "look"
+        },
+        {
+          "from": "15:00",
+          "at": [
+            34,
+            8
+          ],
+          "face": "s",
+          "do": "idle"
         }
       ]
     },
@@ -3428,8 +3630,36 @@
         "heather",
         "rock"
       ]
+    },
+    {
+      "to": "quarry",
+      "depth": 5,
+      "scatter": [
+        "rock_basalt",
+        "rock",
+        "ash_pine"
+      ]
+    },
+    {
+      "to": "kilnmouth",
+      "depth": 5,
+      "scatter": [
+        "rock_basalt",
+        "rock",
+        "ash_pine"
+      ]
     }
   ],
+  "view": [
+    [
+      45,
+      7
+    ],
+    [
+      34,
+      20
+    ]
+    ],
   "scripts": [
     {
       "id": "reveal_cinderwick",

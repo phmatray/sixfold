@@ -491,6 +491,128 @@ fn a_save_in_the_grove_keeps_its_finds_and_lands_on_open_ground() {
     }
 }
 
+/// #261: the Ember (`quarry`, `cinderwick`, `kilnmouth`) was brought to the Fernhollow standard. A save
+/// with every quarry and Cinderwick find collected, the hero on the quarry road (the fixture is the 1.9.1
+/// game with those finds added, written by the current encoder, whose format 1.12 shares), still loads:
+/// each find is still on its map and still collected, and the tile the hero stood on, like the spawn of
+/// each Ember map, is open ground.
+#[test]
+fn a_save_in_the_ember_keeps_its_finds_and_lands_on_open_ground() {
+    let s = Save::decode(&fixture("v1.12.0-ember.txt")).unwrap();
+    let p = s.progress();
+    let at: Vec<&str> = s.get(WORLD_AT).unwrap().split(',').collect();
+    assert_eq!(at[0], "quarry");
+    for (name, finds) in [
+        (
+            "quarry",
+            &[
+                "q_lantern",
+                "q_crates",
+                "q_southeast",
+                "q_rubble",
+                "q_cart",
+                "q_midledge",
+                "q_fern",
+                "e_quarry_nook",
+                "q_topledge",
+            ][..],
+        ),
+        (
+            "cinderwick",
+            &["e_rack", "e_catwalk", "e_pond", "e_coalcart"][..],
+        ),
+        ("kilnmouth", &[][..]),
+    ] {
+        let (map, open) = open_ground(name);
+        let on_map: Vec<&str> = map["interactions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|i| i["id"].as_str())
+            .collect();
+        for id in finds {
+            assert!(
+                p.has_flag(&format!("found_{id}")),
+                "the save had collected {id}"
+            );
+            assert!(on_map.contains(id), "{id} is no longer on {name}");
+        }
+        let spawn = (
+            map["spawn"]["x"].as_i64().unwrap(),
+            map["spawn"]["z"].as_i64().unwrap(),
+        );
+        assert!(
+            open(spawn.0, spawn.1),
+            "the {name} spawn {spawn:?} is not open ground"
+        );
+        if name == "quarry" {
+            let (x, z) = (at[1].parse().unwrap(), at[2].parse().unwrap());
+            assert!(open(x, z), "the saved tile {x},{z} is not open ground");
+        }
+    }
+}
+
+/// #266: the Tide (`seaside`, `gullhaven`) was brought to the Fernhollow standard. A save with every
+/// Tide find and the four new secrets collected, the hero on the boardwalk (the fixture is the Hub
+/// fixture with the Tide's flags added, written by the current encoder), still loads: each find is
+/// still on its map and still collected, the secrets are counted, and the tile it stood on, like the
+/// spawns of both maps, is open ground.
+#[test]
+fn a_save_on_the_tide_keeps_its_finds_and_lands_on_open_ground() {
+    let s = Save::decode(&fixture("v1.12.0-tide.txt")).unwrap();
+    let p = s.progress();
+    let at: Vec<&str> = s.get(WORLD_AT).unwrap().split(',').collect();
+    assert_eq!(at[0], "seaside");
+    for (name, finds) in [
+        (
+            "seaside",
+            &[
+                "s_under",
+                "s_boat",
+                "s_pools",
+                "s_pier",
+                "s_dunes",
+                "s_lighthouse",
+                "s_beach",
+            ][..],
+        ),
+        (
+            "gullhaven",
+            &["t_market", "t_quay", "t_lookout", "t_seawall"][..],
+        ),
+    ] {
+        let (map, open) = open_ground(name);
+        let on_map: Vec<&str> = map["interactions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|i| i["id"].as_str())
+            .collect();
+        for id in finds {
+            assert!(
+                p.has_flag(&format!("found_{id}")),
+                "the save had collected {id}"
+            );
+            assert!(on_map.contains(id), "{id} is no longer on {name}");
+        }
+        let spawn = (
+            map["spawn"]["x"].as_i64().unwrap(),
+            map["spawn"]["z"].as_i64().unwrap(),
+        );
+        assert!(
+            open(spawn.0, spawn.1),
+            "the {name} spawn {spawn:?} is not open ground"
+        );
+        if name == "seaside" {
+            let (x, z) = (at[1].parse().unwrap(), at[2].parse().unwrap());
+            assert!(open(x, z), "the saved tile {x},{z} is not open ground");
+        }
+    }
+    for id in ["sea_plank", "sea_driftwood", "harbour_wall", "bell_lamp"] {
+        assert!(p.has_flag(&format!("secret_{id}")), "secret {id}");
+    }
+}
+
 /// #263: the Stone (`undermine`, `screepass`, `anvilstead`, `bastion`) was brought to the Fernhollow
 /// standard. A save with every Stone find and secret collected, the hero at the foot of Scree Pass (the
 /// fixture is the 1.9.1 game with the Stone's finds and maps added, written by the current encoder,
