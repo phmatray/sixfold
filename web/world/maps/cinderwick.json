@@ -3429,5 +3429,21 @@
         "rock"
       ]
     }
+  ],
+  "scripts": [
+    {
+      "id": "reveal_cinderwick",
+      "if": "!flag:reveal_cinderwick",
+      "on": "enter",
+      "steps": [
+        {
+          "do": [
+            "shot:reveal_cinderwick",
+            "cam:hero",
+            "flag:reveal_cinderwick"
+          ]
+        }
+      ]
+    }
   ]
 }

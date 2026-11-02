@@ -58,6 +58,7 @@ import * as lifts from "./lift.js";
 import * as seats from "./seat.js";
 import { daylight, phaseOf, DAY } from "./daylight.js";
 import { scenes } from "./script.js";
+import { playShot } from "./shot.js";
 import { createBook } from "./book.js";
 import { createHud } from "./hud.js";
 import * as pick from "./pick.js";
@@ -224,6 +225,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   let minute = 480, lastHour = -1, lastPhase = "", bgAt = 0;
   const clock = new THREE.Timer();
   const look = new THREE.Vector3(), lookVel = new THREE.Vector3(), aim = new THREE.Vector3();
+  let liveShot = null, lastPose = null; // a scene's authored shot (script.js `shot`), and its camera as last drawn
   let first = true, zoom = 1, readySent = false, drawnPaused = false, cover = 0, quiet = false;
   const resize = () => {
     const w = el.clientWidth || 1, h = el.clientHeight || 1;
@@ -435,6 +437,24 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   const BELLS = tr(["one", "two", "three", "four", "five", "six"], ["un", "deux", "trois", "quatre", "cinq", "six"]);
   const cut = scenes({
     world: () => world, hero: () => hero, reduced: () => reduced, holds, cb, sound, tune, warp,
+    // An authored camera move (#253): its pose drives the camera while it lives; at its end the usual framing
+    // takes over from where it stopped (the spring starts at the shot's target, the pitch and distance ease).
+    shot: (name) => {
+      const s = playShot(name, { reduced });
+      (liveShot = s), (lastPose = null);
+      const over = () => {
+        if (liveShot !== s) return;
+        liveShot = null;
+        const p = lastPose;
+        if (!p) return;
+        look.set(p.tx, p.ty, p.tz), lookVel.set(0, 0, 0);
+        camera.fov = el.clientWidth < el.clientHeight ? cam.fovPortrait : cam.fov;
+        camera.updateProjectionMatrix();
+        camEase = true;
+      };
+      s.done.then(over);
+      return { done: s.done, finish: () => (s.finish(), over()) };
+    },
     caption: (en, fr) => {
       const text = tr(en, fr);
       showCaption(text, 3400);
@@ -872,6 +892,14 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     const dz = distNow * zoom;
     camera.position.set(look.x, look.y + Math.sin(pitch) * dz, look.z + Math.cos(pitch) * dz);
     camera.lookAt(look);
+    // A shot on screen takes the camera whole; pitch and distance follow it, so the hand-back eases from there.
+    const pose = liveShot?.pose();
+    if (pose) {
+      (lastPose = pose), camera.position.set(pose.x, pose.y, pose.z), camera.lookAt(pose.tx, pose.ty, pose.tz);
+      const dx = pose.x - pose.tx, dy = pose.y - pose.ty, dh = Math.hypot(dx, pose.z - pose.tz);
+      (pitchNow = THREE.MathUtils.radToDeg(Math.atan2(dy, dh))), (distNow = Math.hypot(dh, dy) / zoom);
+      if (camera.fov !== pose.fov) (camera.fov = pose.fov), camera.updateProjectionMatrix();
+    }
     // Outdoors the sun (and its shadow map) follows the hero a whole tile at a
     // time: following the tweened position makes shadow edges shimmer.
     if (!w.map.light.indoor) {
@@ -913,7 +941,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back
   // (no fog, a far plane to match) until the next map loads.
   el.sixfoldCam = (o) => (Object.assign((cam = { ...cam, ...o }), { distancePortrait: o.distance ?? cam.distancePortrait }), (camera.far = 200), (scene.fog = null), resize());
-  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, loops: world?.loops?.map((m) => m.time) ?? [], camera: { angle: camAngle, pitch: pitchNow }, graphics: post.tier, probing: !probeDone,
+  el.sixfoldStats = () => ({ ...stats, area: world?.name ?? "", minute: Math.floor(minute), phase: phaseOf(minute), at: hero && [hero.x, hero.z, hero.face], sitting: !!hero?.sit, loops: world?.loops?.map((m) => m.time) ?? [], camera: { angle: camAngle, pitch: pitchNow, shot: !!liveShot }, graphics: post.tier, probing: !probeDone,
     people: world?.npcs.filter((n) => !n.hidden).map((n) => ({ id: n.def.id, x: n.x, z: n.z, face: n.glance ?? n.face, do: n.activity?.do ?? null, away: !!n.away, walking: !!n.walk, sitting: !!n.sit })) ?? [] });
   // A map's ambient life (#115) as drawn last frame: critters per kind, leaves, embers, boats, the micro-event; null without any.
   el.sixfoldLife = () => world?.life.stats?.() ?? null;

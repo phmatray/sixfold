@@ -15,9 +15,9 @@ import { DIR, angle, emote } from "./actors.js";
 
 const EMOTE_HOLD = 600; // ms an emote holds the scene, so it reads
 const CAM_MAX = 2.5; // s: a pan longer than this is cut short
-const CUT_HOLD = 1.2; // s: under reduced motion, how long a cut to a shot holds before the scene goes on
+export const CUT_HOLD = 1.2; // s: under reduced motion, how long a cut to a shot holds before the scene goes on
 
-// env: world(), hero(), reduced(), settled() (the camera reached its target), warp(wp) -> Promise, bell(n) (the door's nth bell, seen),
+// env: world(), hero(), shot(name) -> { done, finish } (an authored camera move, shot.js), reduced(), settled() (the camera reached its target), warp(wp) -> Promise, bell(n) (the door's nth bell, seen),
 // caption(en, fr) (a reveal's line, on screen and to the live region),
 // sound(name, n), tune() (the map's music back), stone(state, colour) (the seal stone's look, null at rest;
 // "seal" lights that colour's face for good),
@@ -101,6 +101,9 @@ export function scenes(env) {
     } else if (c.face !== undefined) {
       if (a) a.face = toward(a, c.face);
       me.done();
+    } else if (c.shot !== undefined) {
+      me.shot = env.shot(c.shot);
+      me.shot.done.then(me.done); // update() leaves a shot to report itself
     } else if (c.cam !== undefined) {
       cam = c.cam === "hero" ? null : c.cam;
     } else if (c.wait !== undefined) setTimeout(me.done, c.wait);
@@ -133,7 +136,7 @@ export function scenes(env) {
       const a = me.a, moving = a.step || (isHero(a) ? env.world().path.length : a.go?.length);
       if (moving && me.t < me.limit) return;
       if (moving) arrive(a, isHero(a) ? env.world().path : a.go); // stuck: arrive anyway
-    } else if (me.c.cam === undefined) return;
+    } else if (me.c.cam === undefined) return; // (a shot too: its `done` ends it)
     // Under reduced motion a shot is a cut, held a beat so it still reads (#155); the way back to the hero isn't.
     // The hold is wall-clock time: frame time is capped (world.js), so on a slow machine it would stretch.
     // The way back to the hero is never waited for: the camera eases home while the scene goes on (#155:
@@ -156,6 +159,7 @@ export function scenes(env) {
   function end(rest = []) {
     const me = cur;
     cur = cam = null;
+    me?.shot?.finish(); // a skipped shot ends where it ends, and the camera eases back from there
     if (me?.c.walk !== undefined) arrive(me.a, isHero(me.a) ? env.world().path : me.a.go);
     for (const c of rest) {
       const a = c.actor !== undefined ? actorOf(c.actor) : null;
