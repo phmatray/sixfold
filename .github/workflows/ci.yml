@@ -73,6 +73,11 @@ jobs:
           grep -q '"./vendor/n8ao/N8AO.js"' web/dist/sw.js
           grep -qx "$(sed -n 's/^POSTPROCESSING_VERSION=\(.*\)$/\1/p' tools/vendor-three.sh)" web/vendor/postprocessing/VERSION
           grep -qx "$(sed -n 's/^N8AO_VERSION=\(.*\)$/\1/p' tools/vendor-three.sh)" web/vendor/n8ao/VERSION
+      - name: Theatre.js core ships with the game (no CDN), is precached, and Studio (AGPL) never ships
+        run: |
+          grep -q '"./vendor/theatre/core.js"' web/dist/sw.js
+          grep -qx "$(sed -n 's/^THEATRE_VERSION=\${1:-\(.*\)}$/\1/p' tools/vendor-theatre.sh)" web/vendor/theatre/VERSION
+          if grep -rq "@theatre/studio" web/dist; then echo 'web/dist mentions @theatre/studio (AGPL)'; exit 1; fi
       - name: The typefaces ship with the game (no CDN) and are precached
         run: |
           if grep -q fonts.googleapis.com web/dist/index.html; then echo 'index.html still loads fonts from a CDN'; exit 1; fi

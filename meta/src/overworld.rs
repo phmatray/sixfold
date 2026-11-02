@@ -39,7 +39,8 @@
 //!   letters), `face:<actor>:<dir>` (`dir` may be `hero`), `cam:<actor>` / `cam:<x>:<z>` / `cam:hero`
 //!   (the camera's look-at target), `wait:<ms>` (0 to [`MAX_WAIT`]),
 //!   `sfx:<sound>`, `sfx:bell:<0..5>` (#154: the finale's bell, climbing the
-//!   scale) and `music:<track>` (one of [`TRACKS`]); the actor `hero` is the
+//!   scale), `shot:<name>` (a camera move authored on a timeline, from
+//!   `web/world/shots/<name>.json`; `<name>` is `a-z`, `0-9` and `_`) and `music:<track>` (one of [`TRACKS`]); the actor `hero` is the
 //!   player
 //! - `stone:wake` (#152): the map's seal stone glows in the region's colour
 //!   until the scene ends; `stone:seal:<keeper>` (#153): the keeper's face of
@@ -223,6 +224,8 @@ pub enum Cue {
     },
     /// Play one of [`SOUNDS`].
     Sfx(String),
+    /// A camera move authored on a timeline (`web/world/shots/<name>.json`).
+    Shot(String),
     /// An actor walks a path of `n`/`e`/`s`/`w` letters, one tile each.
     Walk { actor: String, path: String },
     /// An actor turns to face `dir` (`n`/`e`/`s`/`w`, or `hero`: toward wherever the hero stands).
@@ -418,6 +421,14 @@ pub fn parse_effect(e: &str) -> Result<Effect, String> {
             actor: s(actor),
             emote: s(emote),
         }),
+        ("shot", [name])
+            if !name.is_empty()
+                && name
+                    .bytes()
+                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_') =>
+        {
+            Effect::Cue(Cue::Shot(s(name)))
+        }
         ("sfx", [name]) if SOUNDS.contains(name) => Effect::Cue(Cue::Sfx(s(name))),
         ("sfx", ["bell", n]) if matches!(*n, "0" | "1" | "2" | "3" | "4" | "5") => {
             Effect::Cue(Cue::Sfx(format!("bell:{n}")))
@@ -1379,6 +1390,10 @@ mod tests {
         assert_eq!(cue("cam:hero"), Cue::Cam(CamTarget::Hero));
         assert_eq!(cue("cam:rook"), Cue::Cam(CamTarget::Actor("rook".into())));
         assert_eq!(cue("cam:25:11"), Cue::Cam(CamTarget::Tile(25, 11)));
+        assert_eq!(
+            cue("shot:reveal_cinderwick"),
+            Cue::Shot("reveal_cinderwick".into())
+        );
         assert_eq!(cue("wait:0"), Cue::Wait(0));
         assert_eq!(cue("wait:5000"), Cue::Wait(5000));
         assert_eq!(cue("music:storm"), Cue::Music("storm".into()));
@@ -1399,6 +1414,9 @@ mod tests {
             "wait:soon",
             "music",
             "music:polka",
+            "shot",
+            "shot:",
+            "shot:Bad-Name",
         ] {
             let err = parse_effect(bad).expect_err(bad);
             assert!(err.contains(bad), "{bad:?}: {err}");
