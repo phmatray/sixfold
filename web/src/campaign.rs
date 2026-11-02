@@ -613,6 +613,12 @@ fn win_view(w: Win) -> impl IntoView {
     }
 }
 
+/// Whether a Confirm press may accept the duel: 500 ms after the card opened,
+/// and not an auto-repeat (the key that ended the lines, still held).
+fn confirm_ready(now: f64, shown_at: f64, repeat: bool) -> bool {
+    !repeat && now - shown_at >= 500.0
+}
+
 /// The duel offer (a rival, Rook or a route duelist): who, in their own words
 /// (`quote`, the line they just said, else a rival's opening line), the
 /// terms, the deck the player takes, and Challenge / Not now. `face` is their
@@ -651,7 +657,7 @@ pub fn Challenge(
     // The presses that ended the duelist's lines must not also accept the duel.
     let shown_at = js_sys::Date::now();
     let start = move || {
-        if js_sys::Date::now() - shown_at < 500.0 {
+        if !confirm_ready(js_sys::Date::now(), shown_at, false) {
             return;
         }
         let Some(mine) = opts.with_value(|o| o.get(choice.get_untracked()).cloned()) else {
@@ -694,6 +700,13 @@ pub fn Challenge(
     };
     let on_key = move |e: leptos::ev::KeyboardEvent| {
         let by = match e.key().as_str() {
+            // A held or too-early Confirm is swallowed: it must be released and pressed again.
+            "Enter" | " " => {
+                if !confirm_ready(js_sys::Date::now(), shown_at, e.repeat()) {
+                    e.prevent_default();
+                }
+                return;
+            }
             "ArrowLeft" => -1,
             "ArrowRight" => 1,
             _ => return,
@@ -931,4 +944,17 @@ pub fn Challenge(
         </form>
     }
     .into_any()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::confirm_ready;
+
+    #[test]
+    fn confirm_ready_waits_and_ignores_repeats() {
+        assert!(!confirm_ready(1000.0, 1000.0, false));
+        assert!(!confirm_ready(1499.0, 1000.0, false));
+        assert!(!confirm_ready(3000.0, 1000.0, true));
+        assert!(confirm_ready(1500.0, 1000.0, false));
+    }
 }
