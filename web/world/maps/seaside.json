@@ -497,12 +497,6 @@
       "rot": 0
     },
     {
-      "asset": "tree",
-      "x": 0,
-      "z": 18,
-      "rot": 0
-    },
-    {
       "asset": "bush",
       "x": 59,
       "z": 18,
@@ -1613,6 +1607,18 @@
       "z": 10,
       "rot": 180,
       "band": "overworld"
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 18,
+      "rot": 0
+    },
+    {
+      "asset": "rock",
+      "x": 0,
+      "z": 19,
+      "rot": 0
     }
   ],
   "spawn": {
