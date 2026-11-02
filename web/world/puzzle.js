@@ -60,10 +60,17 @@ export function shove(s, b, f, open) {
   return n ? { x, z, sunk: false, n } : null;
 }
 
+// Put a block on (x, z), sunk or standing: a sunk log fills the channel under it, one lifted out frees it again.
+// The one place that moves a block, so the game (`move`, a rune stone's reset) and the solver can't drift apart.
+export function place(s, b, x, z, sunk = false) {
+  if (b.sunk) cells(b).forEach(([cx, cz]) => s.filled.delete(k(cx, cz)));
+  (b.x = x), (b.z = z), (b.sunk = sunk);
+  if (sunk) cells(b).forEach(([cx, cz]) => s.filled.add(k(cx, cz)));
+}
+
 // Move it there (`to` from shove); returns its trial if that solved it (every plate holds a crate), else null.
 export function move(s, b, to) {
-  (b.x = to.x), (b.z = to.z);
-  if (to.sunk) (b.sunk = true), cells(b).forEach(([x, z]) => s.filled.add(k(x, z)));
+  place(s, b, to.x, to.z, to.sunk);
   const t = b.trial;
   if (s.solved.has(t) || !t.plates?.length || !t.plates.every(([px, pz]) => blockAt(s, px, pz)?.kind === "crate")) return null;
   s.solved.add(t);

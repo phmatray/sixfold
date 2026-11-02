@@ -194,14 +194,16 @@ export function attach(w, holds, { reduced, sound, solved }) {
       return r ? { kind: "reset", text: tr("Touch the rune stone", "Toucher la pierre runique"), rune: r } : null;
     },
     // Put a trial's blocks back where they started (unless it's solved), with a puff where each one was and is.
-    use(it) {
+    // It won't while one of them is still moving (a crate sliding onto the last mark would leave the trial solved
+    // with its lines never run), nor while the hero stands where a block would come back to, or on a log's bridge.
+    use(it, hero) {
+      const mine = s.blocks.filter((b) => b.trial === it.rune.d && !locked(b));
+      const on = ([x, z]) => x === hero.x && z === hero.z;
+      if (mine.some((b) => b.anim || P.cells({ ...b, x: b.home[0], z: b.home[1] }).some(on) || (b.sunk && P.cells(b).some(on)))) return void sound("refuse");
       sound("whoosh");
-      for (const b of s.blocks) {
-        if (b.trial !== it.rune.d || locked(b)) continue;
+      for (const b of mine) {
         w.life.puff(...placeOf(b, b.x, b.z).filter((_, i) => i !== 1));
-        if (b.sunk) P.cells(b).forEach(([x, z]) => s.filled.delete(`${x},${z}`));
-        [b.x, b.z] = b.home;
-        (b.sunk = false), (b.anim = null);
+        P.place(s, b, b.home[0], b.home[1]);
         if (b.kind === "log") b.obj.userData.roll.rotation.x = 0;
         w.life.puff(...placeOf(b, b.x, b.z).filter((_, i) => i !== 1));
       }
@@ -250,7 +252,6 @@ export function attach(w, holds, { reduced, sound, solved }) {
             if (m.done) solved(m.done);
           }
         } else if (b.sunk) y = -0.12;
-        if (b.shake) (b.shake = Math.max(0, b.shake - dt * 2.5)), (x += Math.sin(w.now * 40) * 0.04 * b.shake);
         b.obj.position.set(x, y, z);
       }
       // Marks: lit while held; pressed just now, a flash and a ring of light (and two bright notes).

@@ -4,9 +4,12 @@
 //
 //   node tools/puzzles.mjs web/world/maps/trial_depot.json     prints each trial's numbers
 import { readFileSync } from "node:fs";
-import { trials, cells, blockAt, iceAt, shove, move, slide, DIRS } from "../web/world/puzzle.js";
+import { trials, blockAt, iceAt, shove, move, place, slide, DIRS } from "../web/world/puzzle.js";
 
 export const F = Object.keys(DIRS);
+// A hand copy of the game's collision for what the trial maps hold, not all of it: props.js (WALKABLE, FOOT) can't be
+// imported here (it pulls in three.js), so multi-tile props and map-edge exits are not modelled. Keep both out of a
+// trial's room — every room is an interior with none — or teach this first.
 const WALKABLE = new Set(["rug", "exit_mat", "leaf_litter"]); // props.js WALKABLE (the ones the trials use)
 
 // A map's collision for trial `id`: solid tiles, digit heights (a step climbs 0.6 at most), props and rune stones on
@@ -44,22 +47,22 @@ export function play(s, h, f, open, blockOpen = open) {
 
 // A trial as a state machine: its blocks as [x, z, sunk] and the hero's tile.
 const snap = (s) => s.blocks.map((b) => [b.x, b.z, b.sunk ? 1 : 0]);
-function restore(s, blocks) {
-  s.filled.clear();
-  s.blocks.forEach((b, i) => {
-    [b.x, b.z] = blocks[i];
-    b.sunk = !!blocks[i][2];
-    if (b.sunk) cells(b).forEach(([x, z]) => s.filled.add(`${x},${z}`));
-  });
-}
+const restore = (s, blocks) => s.blocks.forEach((b, i) => place(s, b, blocks[i][0], blocks[i][1], !!blocks[i][2]));
 const key = (h, blocks) => `${h}|${blocks.map(String).join(";")}`;
 
-// Breadth-first over every (hero, blocks) state from `start`: the fewest moves to a state `goal(s, h)` holds in,
-// the moves themselves, and how many states were seen. `limit`: give up past this many states.
-export function solve(map, id, { start, goal, limit = 3e6 } = {}) {
+// A trial ready to search: its state, the map's collision, where play starts and what counts as done (every mark
+// held, or the hero on the goal tile) — unless the caller names its own.
+function setup(map, id, { start, goal }) {
   const def = map.trials.find((t) => t.id === id), s = trials([def]), { open, blockOpen } = grid(map, id);
   start ??= def.start ?? [map.spawn.x, map.spawn.z];
   goal ??= def.plates?.length ? (s) => s.plates.every((p) => blockAt(s, p.x, p.z)?.kind === "crate") : (s, h) => h[0] === def.goal[0] && h[1] === def.goal[1];
+  return { s, open, blockOpen, start, goal };
+}
+
+// Breadth-first over every (hero, blocks) state from `start`: the fewest moves to a state `goal(s, h)` holds in,
+// the moves themselves, and how many states were seen. `limit`: give up past this many states.
+export function solve(map, id, { limit = 3e6, ...opts } = {}) {
+  const { s, open, blockOpen, start, goal } = setup(map, id, opts);
   const b0 = snap(s), prev = new Map([[key(start, b0), null]]);
   let q = [[start, b0]];
   while (q.length) {
@@ -91,10 +94,8 @@ export function solve(map, id, { start, goal, limit = 3e6 } = {}) {
 // Every state the player can reach from the start, and which of them are dead ends: states from which no goal can
 // be reached any more (a crate in a corner, a log rolled to the wall, the hero carried off by the ice). `traps` is
 // their share of all reachable states: the Lens of Challenge's "how easily can I ruin this?".
-export function traps(map, id, { start, goal, limit = 3e5 } = {}) {
-  const def = map.trials.find((t) => t.id === id), s = trials([def]), { open, blockOpen } = grid(map, id);
-  start ??= def.start ?? [map.spawn.x, map.spawn.z];
-  goal ??= def.plates?.length ? (s) => s.plates.every((p) => blockAt(s, p.x, p.z)?.kind === "crate") : (s, h) => h[0] === def.goal[0] && h[1] === def.goal[1];
+export function traps(map, id, { limit = 3e5, ...opts } = {}) {
+  const { s, open, blockOpen, start, goal } = setup(map, id, opts);
   const b0 = snap(s), k0 = key(start, b0), into = new Map([[k0, []]]), goals = [];
   let q = [[start, b0, k0]];
   while (q.length && into.size < limit) {

@@ -276,18 +276,19 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   };
   const busy = () => paused || warping || !world || !!world.engage || !!world.ride || cut.playing || book.live() || !!peek; // a duelist coming over, a lift ride, a cutscene, a book, a trial's reveal lock input
   // A trial solved: the camera glides to the gate its flag opens and holds there while its lines are read and it
-  // opens (`until`: game seconds, which stop while the lines are up), then eases back to the hero (`easeBack`).
-  let peek = null, easeBack = 0;
+  // opens, then eases back to the hero. Every time here is the map's own game clock (`w.now`, which stops while the
+  // game is paused and starts at 0 on each map): `talkAt` when the lines come up, `until` when the camera lets go,
+  // and `easeBack` (with the map it belongs to) how long it pans home slowly.
+  let peek = null, easeBack = null;
+  const talkOf = (d) => cb("talk", `trial_${d.id}`, JSON.stringify({ name: world.map.title ?? "", dialogue: [d.solved] }));
   function reveal(d) {
-    const talk = () => cb("talk", `trial_${d.id}`, JSON.stringify({ name: world.map.title ?? "", dialogue: [d.solved] }));
     const g = world.gates.find((g) => g.def.if === `flag:${d.flag}`);
-    if (!g || reduced) return talk();
+    if (!g || reduced) return talkOf(d);
     const t = g.tiles[0], w = world;
-    peek = { w, x: t.x, z: t.z, until: w.now + 4 };
+    peek = { w, x: t.x, z: t.z, until: w.now + 4, talkAt: w.now + 0.9, d };
     held.length = 0;
     w.path = [];
     globalThis.sixfoldAudio?.sfx("progress");
-    setTimeout(() => alive && world === w && talk(), 900);
   }
   const onKey = (e) => {
     const k = e.key.toLowerCase();
@@ -568,7 +569,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
       lifts.use(world, hero, it, { holds, reduced, sound, say: (t) => cb("use", "locked", t), fade: (on) => fade.classList.toggle("on", on), step: (f) => tryStep(f, 0) });
     }
     else if (it.kind === "seat") (world.path = []), seats.sit(hero, it.place, reduced);
-    else if (it.kind === "reset") world.trials.use(it);
+    else if (it.kind === "reset") world.trials.use(it, hero);
     else if (it.kind === "stand") seats.stand(hero);
     else if (it.kind === "book") {
       shelf = it;
@@ -833,7 +834,8 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
 
     lifts.update(w, dt);
     w.trials?.update(dt, h);
-    if (peek && (peek.w !== w || w.now > peek.until)) (peek = null), (easeBack = w.now + 1.2);
+    if (!paused && peek?.w === w && peek.d && w.now >= peek.talkAt) talkOf(peek.d), (peek.d = null); // the lines, once the camera is there (never over a paused game)
+    if (peek && (peek.w !== w || w.now > peek.until)) (peek = null), (easeBack = { w, until: w.now + 1.2 });
     // Sliding over ice the hero stands still, carried (its idle clip held as a pose).
     if (!!h.step?.slide !== !!h.sliding) (h.sliding = !!h.step?.slide), (h.pose = h.sliding ? h.idleName : null);
     const [px, pz] = place(h, dt, w.floorAt);
@@ -916,7 +918,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     hud.follow();
     if (first || reduced) look.copy(aim), lookVel.set(0, 0, 0);
     else {
-      const slow = cut.playing || !!peek || w.now < easeBack; // a scene (and a trial's reveal, there and back) pans slowly
+      const slow = cut.playing || !!peek || (easeBack?.w === w && w.now < easeBack.until); // a scene (and a trial's reveal, there and back) pans slowly
       const k = slow ? 10 : 28, c = 2 * Math.sqrt(k) * (slow ? 1 : 0.85); // slightly under-damped
       lookVel.addScaledVector(aim.clone().sub(look), k * dt).addScaledVector(lookVel, -c * dt);
       look.addScaledVector(lookVel, dt);
