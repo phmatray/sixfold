@@ -57,6 +57,9 @@ test("AC4 (#117): a shortcut is barred from the near side, lifted from the far s
   await expect(chart.locator('.atlas-mark[data-mark="shortcut"]')).toHaveCount(0);
   // #240: what a mark means is written in the page, and no mark covers a name, a crystal or the pin.
   await expect(chart.locator(".atlas-legend")).toContainText("a one-way drop");
+  // each mark names its place for a screen reader, and keeps a hover hint.
+  await expect(chart.locator('.atlas-mark[data-mark="drop"]').first()).toHaveAttribute("aria-label", /.+: A drop: one way down/);
+  await expect(chart.locator('.atlas-mark[data-mark="drop"]').first()).toHaveAttribute("title", "A drop: one way down");
   for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(vp);
     const hits = await chart.evaluate((root) => {

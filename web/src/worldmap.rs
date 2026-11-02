@@ -359,8 +359,13 @@ pub fn WorldMap(
                 .filter(|k| k.map == m.id)
                 .filter(|k| k.kind == "drop" || p.check(&format!("flag:sc_{}", k.id)))
                 .map(|k| {
-                    let d = if k.kind == "drop" { "M1.5 3.5h4.5v6h4.5M8.5 4v3.4M7.2 5.9l1.3 1.3 1.3-1.3" } else { "M2.5 10.5v-8M9.5 10.5v-8M2.5 7.5l7-5" };
-                    view! { <span class="atlas-mark" data-mark=k.kind.clone() ><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.6" /><path d=d /></svg></span> }
+                    let (d, title) = if k.kind == "drop" {
+                        ("M1.5 3.5h4.5v6h4.5M8.5 4v3.4M7.2 5.9l1.3 1.3 1.3-1.3", tr("A drop: one way down", "Une descente sans retour"))
+                    } else {
+                        ("M2.5 10.5v-8M9.5 10.5v-8M2.5 7.5l7-5", tr("A shortcut you opened", "Un raccourci que vous avez ouvert"))
+                    };
+                    let label = format!("{}: {title}", m.name);
+                    view! { <span class="atlas-mark" data-mark=k.kind.clone() title=title role="img" aria-label=label><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.6" /><path d=d /></svg></span> }
                 })
                 .collect();
             (!shown.is_empty()).then(|| (m.id.clone(), view! { <span class="atlas-marks">{shown}</span> }.into_any()))
