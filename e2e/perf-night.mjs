@@ -34,6 +34,7 @@ if (!given) {
     await new Promise((r) => setTimeout(r, 200));
   }
 }
+process.on("exit", () => server?.kill()); // a throw mid-run must not leave serve.mjs holding PW_PORT
 const browser = await chromium.launch(process.env.HEADLESS ? { headless: true, args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] } : { channel: "chrome", headless: false });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: "en-US", serviceWorkers: "block" });
 const page = await ctx.newPage();
@@ -69,6 +70,7 @@ for (const map of MAPS) {
   await host("sixfoldClock", +(process.env.HOUR_MIN ?? 22 * 60));
   await page.waitForTimeout(3000);
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: THROTTLE });
+  await page.waitForTimeout(2000); // the first throttled frames (JIT, shader recompile) are not the sample
   for (let r = 0; r < RUNS; r++) {
     const b0 = await busy(), d = await frames(4000), b1 = await busy();
     deltas.push(...d);
