@@ -1,7 +1,7 @@
 // node --test web/world/camera.test.mjs — the camera presets, the room clamp and the lean-in.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ANGLES, PRESETS, framing, nextAngle, lowestPitch, clampToRoom, leanOf } from "./camera.js";
+import { ANGLES, PRESETS, framing, nextAngle, lowestPitch, clampToRoom, leanOf, easeStep } from "./camera.js";
 
 const out = { fov: 40, fovPortrait: 50, pitch: 50, distance: 12, distancePortrait: 15, lookAtOffset: [0, 0.75, 0], clamp: false };
 
@@ -84,4 +84,12 @@ test("a pitch so low that the view's top never meets the ground leaves the depth
   const low = { ...room, pitch: (15 * Math.PI) / 180 };
   assert.deepEqual(clampToRoom(15, -50, low), [15, -50]);
   assert.deepEqual(clampToRoom(15, 99, low), [15, 99]);
+});
+
+test("the ease toward a new framing keeps today's feel at 60 fps and never cuts on a slow frame (#332)", () => {
+  assert.ok(Math.abs(easeStep(1 / 60) - 0.095) < 0.001);
+  assert.ok(easeStep(1 / 2) < 0.5);
+  assert.ok(easeStep(1 / 2) * 5 < 1); // the reveal's 5° worst gap moves under a degree on the first frame back
+  assert.equal(easeStep(5), easeStep(1 / 30));
+  assert.equal(easeStep(0), 0);
 });
