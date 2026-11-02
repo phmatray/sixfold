@@ -7,27 +7,26 @@ import { expect, test, frames, loaded, menuItem, title, warpTo, type Page } from
 // with the hero two tiles away.
 const host = (page: Page, call: string, ...a: unknown[]) => page.evaluate(([c, a]) => (document.querySelector(".world-host") as any)[c as string](...(a as unknown[])), [call, a] as const);
 
-/** The mean luminance (0-255) of a 9 × 9 px patch of the page's screenshot, centred on (x, y) in CSS px. */
+/** The mean luminance (0-255) of a 9 × 9 px patch of the drawn page, centred on (x, y) in CSS px. Only the patch is
+ *  captured: a whole-page screenshot can take over 15 s on CI's software GL. */
 async function patch(page: Page, [x, y]: number[]) {
   await frames(page);
-  const png = (await page.screenshot({ scale: "css" })).toString("base64");
-  return page.evaluate(
-    async ([png, x, y]) => {
-      const img = new Image();
-      img.src = `data:image/png;base64,${png}`;
-      await img.decode();
-      const c = document.createElement("canvas");
-      c.width = img.width;
-      c.height = img.height;
-      const g = c.getContext("2d")!;
-      g.drawImage(img, 0, 0);
-      const d = g.getImageData(Math.round(x as number) - 4, Math.round(y as number) - 4, 9, 9).data;
-      let sum = 0;
-      for (let i = 0; i < d.length; i += 4) sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
-      return sum / (d.length / 4);
-    },
-    [png, x, y] as const,
-  );
+  const clip = { x: Math.round(x) - 4, y: Math.round(y) - 4, width: 9, height: 9 };
+  const png = (await page.screenshot({ scale: "css", clip, timeout: 60_000 })).toString("base64");
+  return page.evaluate(async (png) => {
+    const img = new Image();
+    img.src = `data:image/png;base64,${png}`;
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = img.width;
+    c.height = img.height;
+    const g = c.getContext("2d")!;
+    g.drawImage(img, 0, 0);
+    const d = g.getImageData(0, 0, img.width, img.height).data;
+    let sum = 0;
+    for (let i = 0; i < d.length; i += 4) sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+    return sum / (d.length / 4);
+  }, png);
 }
 
 test("@webkit @phone the hero stands on a dark contact shadow, not on bare ground (#340)", async ({ page }) => {
