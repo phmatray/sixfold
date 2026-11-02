@@ -3347,11 +3347,11 @@
         ],
         "challenge": [
           "The bees say you walk like a duelist.",
-          "Hear that hum? My Hivevolts want a match."
+          "See the hives? My Hivevolts want a match."
         ],
         "challenge_fr": [
           "Les abeilles disent que tu as une démarche de duelliste.",
-          "Tu entends ce bourdonnement ? Mes Ruchevolt veulent un duel."
+          "Tu vois les ruches ? Mes Ruchevolt veulent un duel."
         ],
         "win": [
           "Buzz off, then. Kindly.",
@@ -3370,10 +3370,10 @@
           "Les abeilles te pardonnent. Moi, je vais y réfléchir."
         ],
         "after": [
-          "Hivevolts hum at night. Listen, some time."
+          "Hivevolts settle into their combs by dusk. Come by in daylight, they like visitors."
         ],
         "after_fr": [
-          "Les Ruchevolt bourdonnent la nuit. Écoute, un de ces soirs."
+          "Les Ruchevolt rentrent dans leurs rayons au crépuscule. Passe de jour, ils aiment la visite."
         ]
       },
       "dialogue": [

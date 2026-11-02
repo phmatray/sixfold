@@ -1,0 +1,84 @@
+# repo-setup.yml — the labels the lifecycle skills (tagout) read. Converge with the kit's
+# skills/init/scripts/repo-setup.sh plan|apply. Additive: labels not listed here are left alone.
+labels:
+  # type: what kind of work it is
+  - name: "bug"
+    color: "d73a4a"
+    description: "Something isn't working"
+  - name: "enhancement"
+    color: "a2eeef"
+    description: "New feature or request"
+  - name: "documentation"
+    color: "0075ca"
+    description: "Improvements or additions to documentation"
+  - name: "accessibility"
+    color: "f143ab"
+    description: "Barrier affecting people with disabilities"
+  # priority: which tier to pull from next
+  - name: "priority: high"
+    color: "b60205"
+    description: "Blocks a release or players hit it"
+  - name: "priority: medium"
+    color: "d93f0b"
+    description: "Planned for the current milestone"
+  - name: "priority: low"
+    color: "fbca04"
+    description: "Nice to have; no milestone pressure"
+  # effort: how big the job is. Order matters: first = smallest tier (auto-dev sorts on it).
+  - name: "effort: small"
+    color: "c2e0c6"
+    description: "A few lines to a few files; one short PR"
+  - name: "effort: medium"
+    color: "bfd4f2"
+    description: "Several files or tasks; one PR"
+  - name: "effort: large"
+    color: "5319e7"
+    description: "Too big for one PR; split it into children"
+  # area: which part of the code (auto-dev keeps concurrent workers in different areas)
+  - name: "area: engine"
+    color: "c5def5"
+    description: "engine/ — duel rules, card model, tutorial"
+  - name: "area: ai"
+    color: "c5def5"
+    description: "engine/src/ai.rs — the duel opponent's play"
+  - name: "area: cards"
+    color: "c5def5"
+    description: "The card set, decks, sets and balance"
+  - name: "area: meta"
+    color: "c5def5"
+    description: "meta/ — campaign, shop, boosters, collection, saves, playtest sim"
+  - name: "area: world"
+    color: "c5def5"
+    description: "web/world/ — the three.js overworld, maps, props, camera"
+  - name: "area: web"
+    color: "c5def5"
+    description: "web/src/ — the Leptos screens and UI"
+  - name: "area: e2e"
+    color: "c5def5"
+    description: "e2e/ — Playwright browser journeys"
+  - name: "area: tools"
+    color: "c5def5"
+    description: "tools/ — check-maps, Blender drivers, build scripts"
+  - name: "area: ci"
+    color: "c5def5"
+    description: ".github/ — workflows, release, Renovate"
+  - name: "area: desktop"
+    color: "c5def5"
+    description: "desktop/ — the Tauri app"
+
+# Labels other tools own: never created here and never deleted, even with --prune.
+pruneKeep:
+  - "autorelease: *"   # release-please
+  - "dependencies"     # Renovate
+
+# Issue forms copied into .github/ISSUE_TEMPLATE/ when missing (an existing form is never overwritten).
+issueTemplates:
+  - feature_request.yml
+  - bug_report.yml
+
+# Squash-only: every subject on main is a Conventional Commit release-please can read.
+settings:
+  delete_branch_on_merge: true
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: false

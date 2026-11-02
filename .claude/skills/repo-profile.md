@@ -34,7 +34,7 @@
 
 ## CI gates (the exact commands CI fails on — satisfy these locally before ready/merge)
 - `./scripts/check-no-game-data.sh` (no ROM, save, state, archive, `.blend` or file over 2 MB tracked)
-- `node --test web/gamepad.test.mjs web/world/camera.test.mjs web/world/tier.test.mjs tools/ld.test.mjs tools/check-maps.test.mjs tools/life.test.mjs tools/routine.test.mjs tools/transition.test.mjs tools/dressing.test.mjs`
+- `node --test web/gamepad.test.mjs web/world/camera.test.mjs web/world/tier.test.mjs tools/ld.test.mjs tools/check-maps.test.mjs tools/life.test.mjs tools/routine.test.mjs tools/transition.test.mjs tools/dressing.test.mjs tools/map-clues.test.mjs`
 - `node tools/check-maps.mjs web/world --strict && node tools/check-fence-table.mjs web/world/props.js`
 - `node --test tools/check-tokens.test.mjs && node tools/check-tokens.mjs web/style.css`
 - `cargo fmt --all --check`
@@ -48,7 +48,7 @@
 - Desktop (`desktop.yml`): `cargo clippy -p sixfold-desktop -- -D warnings` and `cargo tauri build`
 
 ## Integration style
-- **Merge mode:** squash (linear `main`, every subject ends `(#PR)`; no branch protection or ruleset)
+- **Merge mode:** squash only — merge commits and rebase merges are disabled in the repo settings (`.github/repo-setup.yml` `settings:`); linear `main`, every subject ends `(#PR)`; no branch protection or ruleset
 - **PR title convention:** Conventional Commits `<type>(scope): subject` — release-please cuts
   releases from them, so the squash title must have that form. Scopes in use: `engine`, `world`,
   `cards`, `web`, `ai`, `e2e`, `roadmap`. When an issue is closed, the title ends `(#issue)` and the
@@ -59,18 +59,19 @@
   `refactor/world-camera-input`, `ci/faster-e2e`
 
 ## Labels (apply verbatim; read live before use, this is a snapshot)
-- **Type:** `bug`, `enhancement` (also `documentation`, `accessibility`)
-- **Priority tiers:** none — the repo has no priority axis.
-- **Effort sizes:** none — the repo has no effort axis.
-- **Scope/area:** none — scope lives in the Conventional Commits scope of the title.
+- **Type:** `bug`, `enhancement`, `documentation`, `accessibility`
+- **Priority tiers:** `priority: high`, `priority: medium`, `priority: low`
+- **Effort sizes (smallest first):** `effort: small`, `effort: medium`, `effort: large` (large means split into children)
+- **Scope/area:** `area: engine`, `area: ai`, `area: cards`, `area: meta`, `area: world`, `area: web`, `area: e2e`, `area: tools`, `area: ci`, `area: desktop`
+- Every issue carries one type, one priority, one effort and at least one area. The manifest is `.github/repo-setup.yml`, converged by the tagout kit's `skills/init/scripts/repo-setup.sh apply`.
 - **Bot-owned, never apply by hand:** `autorelease: pending`, `autorelease: tagged` (release-please),
   `dependencies` (Renovate)
 - **Triage:** `duplicate`, `invalid`, `wontfix`, `question`, `good first issue`, `help wanted`
 
 ## Issue templates
-- **Location:** none — the repo has no `.github/ISSUE_TEMPLATE/`.
-- **Forms:** none
-- **Default for ideas:** a plain issue (`enhancement`) · **for defects:** a plain issue (`bug`)
+- **Location:** `.github/ISSUE_TEMPLATE/`
+- **Forms:** `bug_report.yml` (labels `bug`; What happens / What should happen / Reproduction / Area), `feature_request.yml` (labels `enhancement`; Problem / Proposed solution / Area / Alternatives considered). Both carry an Area dropdown that matches the `area:` labels.
+- **Default for ideas:** `feature_request.yml` · **for defects:** `bug_report.yml`
 
 ## Tracker
 - **Tracker:** github (github.com)
