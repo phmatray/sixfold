@@ -1740,7 +1740,7 @@ them, hidden ones as "???" until earned (marked H).
 | `night_owl` | Night Owl / *Oiseau de nuit* | beat the six night duelists | 150 |
 | `rules_all` | House Rules / *Règles maison* | beat the six challenge-rule duelists | 150 |
 | `finds_10` | Magpie / *Pie voleuse* | 10 finds | 50 |
-| `finds_all` | Nothing Hidden / *Rien de caché* | every find (86) | 250 |
+| `finds_all` | Nothing Hidden / *Rien de caché* | every find (104) | 250 |
 | `curios_all` | Curator / *Conservateur* | all 12 curios | 100 |
 | `secrets_1` | Curious / *Curieux* | find a secret | 25 |
 | `secrets_half` | Sleuth / *Fin limier* | find half the secrets | 100 |
