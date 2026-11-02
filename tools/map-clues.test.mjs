@@ -19,7 +19,7 @@ test("Edda stands on the crater floor within 3 tiles of the arrival path", () =>
 
 test("Edda does not speak from above the crater floor", () => {
   const edda = map("kilnmouth").npcs.find((n) => n.id === "edda");
-  assert.doesNotMatch(strings(edda.dialogue).join("\n"), /down on the crater floor|en bas,/);
+  assert.doesNotMatch(strings(edda.dialogue).join("\n"), /\bdown\b|en bas/);
 });
 
 test("the crossroads signpost names the Swap Shop and its orchard", () => {
@@ -31,7 +31,7 @@ test("the crossroads signpost names the Swap Shop and its orchard", () => {
 });
 
 test("Hazel promises no hum", () => {
-  const hazel = map("woodland").npcs.find((n) => JSON.stringify(n.duelist ?? "").includes("Hivevolt"));
+  const hazel = map("woodland").npcs.find((n) => n.id === "t_hazel");
   assert.ok(hazel);
   assert.doesNotMatch(strings(hazel).join("\n"), /\bhum\b|bourdonn/i);
 });
