@@ -1,0 +1,138 @@
+{
+  "title": "The Trials",
+  "title_fr": "Les Épreuves",
+  "proto": "field puzzles (Golden Sun-style), not yet placed in the world: open it with ?trials in a debug build",
+  "width": 31,
+  "height": 11,
+  "tiles": [
+    "3333333333333333333333333333333",
+    "33..33333331......1.3......33.3",
+    "33..33....3.1.......3........33",
+    "3......3..3.........3.133111..3",
+    "3..3......3......1..3.111111..3",
+    "3.....33..3........13.111111..3",
+    "3.........3.........3.111111..3",
+    "3.33......3.......1.3..33.....3",
+    "3.........3.....11............3",
+    "3.........3..1......3.........3",
+    "3.........311111111131111111113"
+  ],
+  "spawn": { "x": 5, "z": 10, "facing": "n" },
+  "trials": [
+    {
+      "id": "push",
+      "flag": "trial_push",
+      "boulders": [[4, 3], [7, 4]],
+      "plates": [[2, 1], [7, 2]],
+      "reset": [9, 10],
+      "solved": {
+        "lines": ["Both plates sink under the boulders' weight. Somewhere to the east, stone grinds on stone."],
+        "lines_fr": ["Les deux dalles s'enfoncent sous le poids des rochers. Quelque part à l'est, la pierre racle la pierre."],
+        "do": ["flag:trial_push", "sfx:jingle"]
+      }
+    },
+    {
+      "id": "ice",
+      "ice": [[11, 1, 19, 9]],
+      "dry": [[11, 4], [19, 8]],
+      "start": [11, 4],
+      "goal": [19, 8]
+    },
+    {
+      "id": "reach",
+      "flag": "trial_reach",
+      "pillars": [[22, 5], [27, 6]],
+      "plates": [[26, 3], [26, 5]],
+      "reset": [29, 9],
+      "start": [21, 8],
+      "solved": {
+        "lines": ["The pillars settle on their plates with a low hum. In the north-east corner, the sealed niche opens."],
+        "lines_fr": ["Les piliers se posent sur leurs dalles avec un bourdonnement sourd. Au nord-est, la niche scellée s'ouvre."],
+        "do": ["flag:trial_reach", "sfx:jingle"]
+      }
+    }
+  ],
+  "gates": [
+    {
+      "id": "trial_push",
+      "name": "the way to the ice",
+      "name_fr": "le passage vers la glace",
+      "tiles": [[10, 4]],
+      "if": "flag:trial_push",
+      "floor": 0,
+      "prop_closed": "stone_odd",
+      "text": "A stone block fills the gap. Two plates in this room are waiting for weight.",
+      "text_fr": "Un bloc de pierre bouche le passage. Deux dalles de cette salle attendent un poids."
+    },
+    {
+      "id": "trial_reach",
+      "name": "the sealed niche",
+      "name_fr": "la niche scellée",
+      "tiles": [[29, 2]],
+      "if": "flag:trial_reach",
+      "floor": 0,
+      "prop_closed": "stone_odd",
+      "text": "A stone block seals the niche. The two plates on the dais must both be held down.",
+      "text_fr": "Un bloc de pierre scelle la niche. Les deux dalles de l'estrade doivent être maintenues enfoncées."
+    }
+  ],
+  "props": [
+    { "asset": "sign", "x": 6, "z": 9, "rot": 0 },
+    { "asset": "sign", "x": 23, "z": 8, "rot": 0 },
+    { "asset": "glow_mushroom", "x": 1, "z": 9, "rot": 0, "glow": "#ffcf8a" },
+    { "asset": "glow_mushroom", "x": 28, "z": 9, "rot": 0, "glow": "#5fe0c8" },
+    { "asset": "glow_mushroom_tall", "x": 29, "z": 1, "rot": 0, "glow": "#5fe0c8" }
+  ],
+  "interactions": [
+    {
+      "kind": "sign",
+      "x": 6,
+      "z": 9,
+      "name": "The Trials",
+      "name_fr": "Les Épreuves",
+      "text": "Three rooms, three trials. Push the boulders onto the plates. Cross the ice: you won't stop until something stops you. Then Reach: face a humming pillar up to four tiles away and press E to shove it. Wedged? Touch the rune stone in the corner.",
+      "text_fr": "Trois salles, trois épreuves. Poussez les rochers sur les dalles. Traversez la glace : vous ne vous arrêterez que si quelque chose vous arrête. Puis l'Allonge : face à un pilier qui bourdonne, jusqu'à quatre cases, appuyez sur E pour le pousser. Coincé ? Touchez la pierre runique dans le coin."
+    },
+    {
+      "kind": "sign",
+      "x": 23,
+      "z": 8,
+      "name": "Reach",
+      "name_fr": "L'Allonge",
+      "text": "The pillars are too heavy for hands and stand out of reach. Face one in a straight line, four tiles at most, nothing solid between, and press E: it slides one tile away from you.",
+      "text_fr": "Les piliers sont trop lourds pour des mains et hors d'atteinte. Placez-vous face à l'un d'eux, en ligne droite, à quatre cases au plus, sans obstacle, et appuyez sur E : il glisse d'une case en s'éloignant de vous."
+    }
+  ],
+  "warps": [
+    {
+      "x": 5,
+      "z": 10,
+      "to": "overworld",
+      "label": "Leave the trials",
+      "label_fr": "Quitter les épreuves",
+      "spawn": { "x": 25, "z": 15, "facing": "s" },
+      "dir": "s"
+    },
+    {
+      "x": 29,
+      "z": 1,
+      "to": "overworld",
+      "label": "Leave the trials",
+      "label_fr": "Quitter les épreuves",
+      "spawn": { "x": 25, "z": 15, "facing": "s" },
+      "dir": "n"
+    }
+  ],
+  "exits": [],
+  "npcs": [],
+  "cave": true,
+  "ground": { "base": "cave", "path": "stone", "margin": 0 },
+  "camera": { "fov": 40, "fovPortrait": 50, "pitch": 50, "distance": 12, "distancePortrait": 15, "lookAtOffset": [0, 0.75, 0], "clamp": true },
+  "light": {
+    "indoor": true,
+    "sun": { "color": "#ffe2b8", "intensity": 1.1, "fromHero": [-3, 8, 4] },
+    "hemisphere": { "sky": "#6a6458", "ground": "#1a1816", "intensity": 1.1 },
+    "lamp": { "color": "#ffd9a0", "intensity": 3, "distance": 6 },
+    "background": "#0d0c0b"
+  }
+}

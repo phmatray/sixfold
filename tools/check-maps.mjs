@@ -687,10 +687,10 @@ function rules(name, m, solid, all) {
       if (!free(x, z) && !(x === n.x && z === n.z)) rule.push(`${name}: ${n.id}'s route walks onto ${x},${z}, which is blocked`);
     }
   }
-  // A door you come out of lands in front of the door that leads back in.
+  // A door you come out of lands in front of the door that leads back in (a `proto` map has no door in yet).
   for (const w of m.warps ?? []) {
     const o = maps[w.to];
-    if (!o || o.light.indoor === m.light.indoor || !m.light.indoor) continue;
+    if (!o || o.light.indoor === m.light.indoor || !m.light.indoor || m.proto) continue;
     const s = w.spawn ?? o.spawn;
     if (!(o.warps ?? []).some((b) => b.to === name && Math.abs(b.x - s.x) + Math.abs(b.z - s.z) === 1)) rule.push(`${name}: the way out lands on ${w.to} ${s.x},${s.z}, not in front of the door back in`);
   }

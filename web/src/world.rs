@@ -43,7 +43,7 @@ let api = null, gen = 0, items = "", seals = "", paused = false, minute = 480, c
 export function world_mount(el, controls, cb, start, edit) {
   const g = ++gen;
   import(new URL("world/world.js", document.baseURI).href)
-    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setSeals(seals); api.setClock(minute); api.setCamera(camera); api.setGraphics(graphics); api.pause(paused); })
+    .then((m) => { if (g !== gen) return; const q = new URLSearchParams(location.search); api = m.mount(el, controls, cb, edit && q.has("trials") ? "trials,5,10,n" : start, edit && q.has("edit"), edit && q.has("debug")); api.setItems(items); api.setSeals(seals); api.setClock(minute); api.setCamera(camera); api.setGraphics(graphics); api.pause(paused); })
     .catch((e) => { console.error("world: could not load the scene", e); cb("error", "import", String(e)); });
 }
 export function world_unmount() { gen++; if (api) { api.stop(); api = null; } }
@@ -68,7 +68,8 @@ export function world_stone_at() { return api?.stoneAt() ?? []; }
 "#)]
 extern "C" {
     /// `start` is `map,x,z,facing` to resume there, or empty for the map's spawn.
-    /// `edit`: a debug build, where `?edit` in the URL loads the map editor and `?debug` the overlays.
+    /// `edit`: a debug build, where `?edit` in the URL loads the map editor, `?debug` the overlays and
+    /// `?trials` starts in the field-puzzle prototype (`maps/trials.json`).
     fn world_mount(el: &JsValue, controls: &JsValue, cb: &JsValue, start: &str, edit: bool);
     fn world_unmount();
     /// Act on the faced tile, as E does.
@@ -471,7 +472,7 @@ fn rested_line(p: Phase) -> &'static str {
 fn prompt_label(kind: &str, text: &str) -> String {
     match kind {
         "npc" => tr(format!("Talk to {text}"), format!("Parler à {text}")),
-        "warp" | "lift" | "seat" | "stand" | "shortcut" => text.to_string(),
+        "warp" | "lift" | "seat" | "stand" | "shortcut" | "reach" | "reset" => text.to_string(),
         "duel" => tr("Play a duel", "Jouer un duel").into(),
         "bed" => tr("Rest", "Se reposer").into(),
         "locked" | "closed" => tr("Try the door", "Essayer la porte").into(),
