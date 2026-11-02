@@ -155,19 +155,21 @@ test("on a phone, holding the pad into a seat sits, and another way stands up @p
 // With motion, one test per seat rotation (each has the whole test budget: on CI's software GL a frame moves the
 // clock 50 ms at most, so a turn, a SitDown and a StandUp take many slow frames). Each seat is walked into:
 // [what, map, x, z, facing, key, the way the seat faces]. The two chairs at a duel table (rot 180, 270) are walked
-// into from beside: the table fills their front.
+// into from beside: the table fills their front. The desktop project runs all four; the WebKit shard runs one turned
+// chair walked into from beside (`PW_WEBKIT_ALL=1` runs all four there): four minute-long motion journeys beside
+// the shard's other journeys starved them on CI's software GL.
 const ROTATIONS: [string, string, number, number, string, string, string][] = [
   ["bench, rot 0", "overworld", 22, 17, "n", "ArrowUp", "s"],
   ["chair, rot 90", "bakery", 2, 4, "w", "ArrowLeft", "e"],
   ["chair, rot 180", "inn_dream", 9, 6, "w", "ArrowLeft", "n"],
-  ["chair, rot 270", "lodge", 3, 6, "n", "ArrowUp", "w"],
+  ["chair, rot 270 @webkit", "lodge", 3, 6, "n", "ArrowUp", "w"],
 ];
 // The way a seat faces, as a yaw: atan2 of its direction (+z is south, toward the camera).
 const DIR: Record<string, [number, number]> = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 const seat = (page: Page) => page.evaluate(() => (document.querySelector(".world-host") as any)?.sixfoldStats?.().seat);
 
 for (const [what, map, x, z, facing, key, face] of ROTATIONS) {
-  test(`with motion, walking into a seat sits, whatever way it faces: ${what} @webkit`, async ({ page }) => {
+  test(`with motion, walking into a seat sits, whatever way it faces: ${what}`, async ({ page }) => {
     // Through the title under reduced motion (its menu holds still for a click on WebKit), then motion on in the
     // world, heard on a frame: the turn and the SitDown / StandUp clips play out.
     await intoWorld(page);
