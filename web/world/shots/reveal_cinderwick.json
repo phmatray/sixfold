@@ -129,7 +129,7 @@
                       0
                     ],
                     "type": "bezier",
-                    "value": 26.472
+                    "value": 24.472
                   },
                   {
                     "id": "k3_2",
@@ -264,7 +264,7 @@
                       0
                     ],
                     "type": "bezier",
-                    "value": 15
+                    "value": 13
                   },
                   {
                     "id": "k6_2",

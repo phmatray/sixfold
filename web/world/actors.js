@@ -31,7 +31,7 @@ const blobTex = radial([0, "rgba(20,30,15,0.42)"], [1, "rgba(20,30,15,0)"]);
 // A person's own: darker, with a solid core, and wider than their feet (#340). The old one was the scenery's,
 // 0.8 of a tile: its dark middle sat under the body and only a faint rim showed, so the hero (left out of the
 // sun's shadows) looked shadowless and the cream soles floated on the ground.
-const footTex = radial([0, "rgba(16,20,12,0.7)"], [0.4, "rgba(16,20,12,0.58)"], [0.75, "rgba(16,20,12,0.22)"], [1, "rgba(16,20,12,0)"]);
+const footTex = radial([0, "rgba(22,17,14,0.7)"], [0.4, "rgba(22,17,14,0.58)"], [0.75, "rgba(22,17,14,0.22)"], [1, "rgba(22,17,14,0)"]);
 export const glowTex = radial([0, "rgba(255,255,255,0.9)"], [1, "rgba(255,255,255,0)"]);
 // Soft contact shadow, 1.5 cm above the floor and depth-offset (never coplanar).
 const shadowMat = (map) => new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
