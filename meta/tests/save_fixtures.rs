@@ -721,3 +721,77 @@ fn a_save_on_the_stone_keeps_its_finds_and_lands_on_open_ground() {
         }
     }
 }
+
+/// #267: the Storm (`downs`, `stormwatch`, `rodspire`) was brought to the Fernhollow standard. A save with
+/// every Storm find and secret collected, the hero at the Stormwatch spawn (the 1.9.1 game with those flags
+/// added, run through the current encoder), still loads: each find is still on its map and collected, its
+/// secret flag is kept, and the saved tile, like the spawn of each Storm map, is open ground.
+#[test]
+fn a_save_in_the_storm_keeps_its_finds_and_lands_on_open_ground() {
+    let mut old = Save::decode(&fixture("v1.9.1-fernhollow.txt")).unwrap();
+    let storm = [
+        (
+            "downs",
+            &["st_chimes", "st_wall", "st_cliff"][..],
+            &["wall_stone", "chime_hollow"][..],
+        ),
+        (
+            "stormwatch",
+            &["st_garden", "st_dock", "st_struck"][..],
+            &["storm_ledge", "rosemary_corner"][..],
+        ),
+        (
+            "rodspire",
+            &["st_ledge", "st_islet", "st_wreck"][..],
+            &["islet_stone"][..],
+        ),
+    ];
+    let flags: Vec<String> = storm
+        .iter()
+        .flat_map(|(_, f, s)| {
+            f.iter()
+                .map(|i| format!("f:found_{i}"))
+                .chain(s.iter().map(|i| format!("f:secret_{i}")))
+        })
+        .collect();
+    old.set(PROGRESS, &flags.join(","));
+    old.set(WORLD_AT, "stormwatch,25,8,s");
+    let s = Save::decode(&old.encode()).unwrap();
+    let p = s.progress();
+    let at: Vec<&str> = s.get(WORLD_AT).unwrap().split(',').collect();
+    for (name, finds, secrets) in storm {
+        let (map, open) = open_ground(name);
+        assert_eq!(map["level_design"], 2, "{name} is on level design 2");
+        let on_map: Vec<&str> = map["interactions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|i| i["id"].as_str())
+            .collect();
+        for id in finds {
+            assert!(
+                p.has_flag(&format!("found_{id}")),
+                "the save had collected {id}"
+            );
+            assert!(on_map.contains(id), "{id} is no longer on {name}");
+        }
+        for id in secrets {
+            assert!(
+                p.has_flag(&format!("secret_{id}")),
+                "the save had found {id}"
+            );
+        }
+        let spawn = (
+            map["spawn"]["x"].as_i64().unwrap(),
+            map["spawn"]["z"].as_i64().unwrap(),
+        );
+        assert!(
+            open(spawn.0, spawn.1),
+            "the {name} spawn {spawn:?} is not open ground"
+        );
+        if name == "stormwatch" {
+            let (x, z) = (at[1].parse().unwrap(), at[2].parse().unwrap());
+            assert!(open(x, z), "the saved tile {x},{z} is not open ground");
+        }
+    }
+}

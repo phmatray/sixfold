@@ -4,6 +4,7 @@
   "region": "storm",
   "kind": "site",
   "music": "storm",
+  "level_design": 2,
   "calm": [
     [
       13,
@@ -72,9 +73,10 @@
     },
     {
       "asset": "lift_tower",
-      "x": 19,
+      "x": 22,
       "z": 12,
-      "rot": 0
+      "rot": 0,
+      "landmark": true
     },
     {
       "asset": "crates",
@@ -96,7 +98,9 @@
       "z": 3,
       "rot": 0,
       "y": 6,
-      "pulse": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3"
+      "pulse": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3",
+      "poi": "secondary",
+      "why": "the spire itself"
     },
     {
       "asset": "seal_stone",
@@ -235,7 +239,9 @@
       "recolor": {
         "sx_slate": "#3e5368",
         "sx_slate_dk": "#2f4052"
-      }
+      },
+      "poi": "secondary",
+      "why": "the relay keepers' shed"
     },
     {
       "asset": "crates",
@@ -780,7 +786,22 @@
       "z": 25,
       "give": "pack:storm",
       "text": "Under a stone on the lonely islet, tied up in a fishing net: a sealed booster.",
-      "text_fr": "Sous une pierre de l'îlot solitaire, ficelé dans un filet de pêche : un booster scellé."
+      "text_fr": "Sous une pierre de l'îlot solitaire, ficelé dans un filet de pêche : un booster scellé.",
+      "poi": "secret",
+      "secret": {
+        "id": "islet_stone",
+        "kind": "spatial",
+        "clue": [
+          [
+            4,
+            21
+          ],
+          [
+            5,
+            21
+          ]
+        ]
+      }
     },
     {
       "kind": "sign",
@@ -812,7 +833,7 @@
   "lifts": [
     {
       "id": "rodspire",
-      "x": 20,
+      "x": 23,
       "z": 12,
       "top": 6,
       "if": "flag:pylon_1 & flag:pylon_2 & flag:pylon_3",
@@ -1018,6 +1039,12 @@
             "Les monteurs de lignes des îlots ne laissent pas n'importe qui approcher leurs pylônes. Fraie-toi un chemin en duel, ou demande poliment.",
             "Poliment, ça ne marche jamais."
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Count the pylons. Then count them again.",
+          "say_fr": "Compte les pylônes. Puis recompte-les."
         }
       ]
     },
@@ -1418,5 +1445,33 @@
         }
       ]
     }
-  ]
+  ],
+  "view": [
+    [
+      13,
+      13
+    ],
+    [
+      22,
+      20
+    ],
+    [
+      28,
+      23
+    ]
+  ],
+  "life": {
+    "critters": [
+      {
+        "kind": "crab",
+        "zone": [
+          7,
+          10,
+          11,
+          13
+        ],
+        "n": 2
+      }
+    ]
+  }
 }

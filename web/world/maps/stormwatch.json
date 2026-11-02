@@ -4,6 +4,7 @@
   "region": "storm",
   "kind": "town",
   "music": "storm",
+  "level_design": 2,
   "width": 52,
   "height": 36,
   "tiles": [
@@ -178,7 +179,7 @@
     },
     {
       "asset": "cottage",
-      "x": 12,
+      "x": 9,
       "z": 18,
       "rot": 0,
       "recolor": {
@@ -197,7 +198,9 @@
       "recolor": {
         "sx_slate": "#4f5a66",
         "sx_slate_dk": "#3e4752"
-      }
+      },
+      "poi": "secondary",
+      "why": "the rod-smith's shed"
     },
     {
       "asset": "flowers",
@@ -258,7 +261,8 @@
       "x": 36,
       "z": 2,
       "rot": 0,
-      "y": 2
+      "y": 2,
+      "landmark": true
     },
     {
       "asset": "stairs_heath",
@@ -332,7 +336,9 @@
       "asset": "stall_b",
       "x": 20,
       "z": 27,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary",
+      "why": "the dock stall"
     },
     {
       "asset": "crates",
@@ -488,7 +494,9 @@
       "x": 46,
       "z": 27,
       "rot": 0,
-      "y": 2
+      "y": 2,
+      "poi": "secondary",
+      "why": "the lamp at the end of the causeway"
     },
     {
       "asset": "ash_pine",
@@ -1318,7 +1326,22 @@
       "give": "card:jolt_wire",
       "hidden": true,
       "text": "Under the rosemary, in the corner the wind never reaches: a card in an oilcloth wrap.",
-      "text_fr": "Sous le romarin, dans le coin que le vent n'atteint jamais : une carte dans un emballage de toile cirée."
+      "text_fr": "Sous le romarin, dans le coin que le vent n'atteint jamais : une carte dans un emballage de toile cirée.",
+      "poi": "secret",
+      "secret": {
+        "id": "rosemary_corner",
+        "kind": "spatial",
+        "clue": [
+          [
+            8,
+            18
+          ],
+          [
+            9,
+            18
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -1433,6 +1456,30 @@
     [
       50,
       29
+    ],
+    [
+      4,
+      8
+    ],
+    [
+      3,
+      23
+    ],
+    [
+      4,
+      27
+    ],
+    [
+      39,
+      27
+    ],
+    [
+      23,
+      31
+    ],
+    [
+      23,
+      33
     ]
   ],
   "npcs": [
@@ -1546,7 +1593,6 @@
       "idle": "Idle",
       "outfit": "#e2ad19",
       "hair": "#3a2a20",
-      "if": "!time:night",
       "dialogue": [
         {
           "lines": [
@@ -1567,6 +1613,39 @@
           "say": "Quill's seal! The rods hum softer now.",
           "say_fr": "Le sceau de Quill ! Les tiges bourdonnent plus bas."
         }
+      ],
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            39,
+            12
+          ],
+          "face": "w",
+          "do": "look"
+        },
+        {
+          "from": "12:00",
+          "at": [
+            26,
+            21
+          ],
+          "face": "n",
+          "do": "read"
+        },
+        {
+          "from": "dusk",
+          "at": [
+            39,
+            12
+          ],
+          "face": "w",
+          "do": "look"
+        },
+        {
+          "from": "night",
+          "home": "inn_storm"
+        }
       ]
     },
     {
@@ -1579,7 +1658,6 @@
       "idle": "Idle",
       "outfit": "#c0582d",
       "hair": "#d8c8a0",
-      "if": "!time:night",
       "dialogue": [
         {
           "lines": [
@@ -1598,6 +1676,39 @@
         {
           "say": "Hold your hat, the wind's up.",
           "say_fr": "Tenez votre chapeau, le vent se lève."
+        }
+      ],
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            26,
+            13
+          ],
+          "face": "w",
+          "do": "look"
+        },
+        {
+          "from": "12:00",
+          "at": [
+            30,
+            20
+          ],
+          "face": "s",
+          "do": "sit"
+        },
+        {
+          "from": "dusk",
+          "at": [
+            26,
+            13
+          ],
+          "face": "w",
+          "do": "look"
+        },
+        {
+          "from": "night",
+          "home": "inn_storm"
         }
       ]
     },
@@ -1647,6 +1758,45 @@
           "do": [
             "flag:bo_asked"
           ]
+        }
+      ],
+      "barks": [
+        {
+          "say": "Wind's from the west. Good for gulls.",
+          "say_fr": "Vent d'ouest. Bon pour les mouettes."
+        }
+      ],
+      "routine": [
+        {
+          "from": "dawn",
+          "at": [
+            22,
+            28
+          ],
+          "face": "s",
+          "do": "work"
+        },
+        {
+          "from": "12:00",
+          "at": [
+            33,
+            28
+          ],
+          "face": "n",
+          "do": "sit"
+        },
+        {
+          "from": "dusk",
+          "at": [
+            22,
+            28
+          ],
+          "face": "s",
+          "do": "look"
+        },
+        {
+          "from": "night",
+          "home": "inn_storm"
         }
       ]
     },
@@ -1830,5 +1980,19 @@
         }
       ]
     }
-  ]
+  ],
+  "life": {
+    "critters": [
+      {
+        "kind": "crab",
+        "zone": [
+          1,
+          25,
+          22,
+          26
+        ],
+        "n": 2
+      }
+    ]
+  }
 }
