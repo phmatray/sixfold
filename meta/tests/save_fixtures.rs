@@ -198,6 +198,50 @@ fn props_table(src: &str, name: &str) -> Vec<(String, Vec<f64>)> {
     out
 }
 
+/// A map of web/world/maps and a test for open ground on it: not water, rock, a fence or a wall,
+/// and under no prop but one walked on (a deck, or one of props.js WALKABLE: a rug, a mat, a rail...).
+fn open_ground(name: &str) -> (serde_json::Value, impl Fn(i64, i64) -> bool) {
+    let web = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/world");
+    let map: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(web.join(format!("maps/{name}.json"))).unwrap(),
+    )
+    .unwrap();
+    let src = std::fs::read_to_string(web.join("props.js")).unwrap();
+    let foot: HashMap<String, Vec<f64>> = props_table(&src, "FOOT").into_iter().collect();
+    let mut walked: Vec<String> = props_table(&src, "DECK")
+        .into_iter()
+        .map(|(k, _)| k)
+        .collect();
+    let set = &src[src.find("export const WALKABLE = new Set([").unwrap()..];
+    walked.extend(
+        set[..set.find(']').unwrap()]
+            .split('"')
+            .skip(1)
+            .step_by(2)
+            .map(String::from),
+    );
+    let m = map.clone();
+    let open = move |x: i64, z: i64| {
+        let row = m["tiles"][z as usize].as_str().unwrap().as_bytes();
+        !b"~#fWV".contains(&row[x as usize])
+            && !m["props"].as_array().unwrap().iter().any(|q| {
+                let asset = q["asset"].as_str().unwrap();
+                let (px, pz) = (q["x"].as_i64().unwrap(), q["z"].as_i64().unwrap());
+                let (mut w, mut d) = foot
+                    .get(asset)
+                    .map_or((1, 1), |f| (f[0] as i64, f[1] as i64));
+                if q["rot"].as_i64().unwrap_or(0) % 180 == 90 {
+                    (w, d) = (d, w);
+                }
+                q.get("if").is_none()
+                    && !walked.iter().any(|k| k == asset)
+                    && (px..px + w).contains(&x)
+                    && (pz..pz + d).contains(&z)
+            })
+    };
+    (map, open)
+}
+
 /// 1.10 (#112): Fernhollow Trail was re-laid. A save written on the old trail (by 1.9.1, every find
 /// collected, the hero halfway over the old bridge) still loads: each find it collected is still on
 /// the map and still collected, so none comes back; and the tile it stood on is in the stream now,
@@ -333,4 +377,65 @@ fn a_1_10_save_keeps_its_duelist_wins_and_achievements() {
     old.set(STATS, "s1;duelist_wins=15,trainer_wins=11");
     let s = Save::decode(&old.encode()).unwrap();
     assert_eq!(s.stats().get("duelist_wins"), 15);
+}
+
+/// #261: the Ember (`quarry`, `cinderwick`, `kilnmouth`) was brought to the Fernhollow standard. A save
+/// with every quarry and Cinderwick find collected, the hero on the quarry road (the fixture is the 1.9.1
+/// game with those finds added, written by the current encoder, whose format 1.12 shares), still loads:
+/// each find is still on its map and still collected, and the tile the hero stood on, like the spawn of
+/// each Ember map, is open ground.
+#[test]
+fn a_save_in_the_ember_keeps_its_finds_and_lands_on_open_ground() {
+    let s = Save::decode(&fixture("v1.12.0-ember.txt")).unwrap();
+    let p = s.progress();
+    let at: Vec<&str> = s.get(WORLD_AT).unwrap().split(',').collect();
+    assert_eq!(at[0], "quarry");
+    for (name, finds) in [
+        (
+            "quarry",
+            &[
+                "q_lantern",
+                "q_crates",
+                "q_southeast",
+                "q_rubble",
+                "q_cart",
+                "q_midledge",
+                "q_fern",
+                "e_quarry_nook",
+                "q_topledge",
+            ][..],
+        ),
+        (
+            "cinderwick",
+            &["e_rack", "e_catwalk", "e_pond", "e_coalcart"][..],
+        ),
+        ("kilnmouth", &[][..]),
+    ] {
+        let (map, open) = open_ground(name);
+        let on_map: Vec<&str> = map["interactions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|i| i["id"].as_str())
+            .collect();
+        for id in finds {
+            assert!(
+                p.has_flag(&format!("found_{id}")),
+                "the save had collected {id}"
+            );
+            assert!(on_map.contains(id), "{id} is no longer on {name}");
+        }
+        let spawn = (
+            map["spawn"]["x"].as_i64().unwrap(),
+            map["spawn"]["z"].as_i64().unwrap(),
+        );
+        assert!(
+            open(spawn.0, spawn.1),
+            "the {name} spawn {spawn:?} is not open ground"
+        );
+        if name == "quarry" {
+            let (x, z) = (at[1].parse().unwrap(), at[2].parse().unwrap());
+            assert!(open(x, z), "the saved tile {x},{z} is not open ground");
+        }
+    }
 }
