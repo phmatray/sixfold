@@ -114,9 +114,14 @@ test("keyboard only: the world, a cutscene and the in-game menu @webkit", async 
   await expect(scene.getByRole("button", { name: /Next line|Continue|Close/ })).toBeFocused({ timeout: 30_000 });
   const first = await scene.locator("[aria-live]").textContent();
   expect(first).toBeTruthy();
-  await page.keyboard.press("Enter");
-  await page.keyboard.press("Enter");
-  await expect(scene.locator("[aria-live]")).not.toHaveText(first!);
+  // Enter finishes a line still being typed before it goes on, so how many presses it takes depends
+  // on the machine's speed: press once, and again only while the line has not changed.
+  const live = scene.locator("[aria-live]");
+  for (let i = 0; i < 3 && (await live.textContent().catch(() => first)) === first; i++) {
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(300);
+  }
+  await expect(live).not.toHaveText(first!);
   await expect(scene.locator("[aria-live]")).not.toBeEmpty();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("button", { name: /^Skip/ })).toBeHidden();
