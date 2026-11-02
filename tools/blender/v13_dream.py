@@ -2,7 +2,7 @@
 fog and hush; busier at night than by day.
 
 Vocabulary: weeping curtains (willows, wisteria), round things (round lake houses, the moonwell's ring of stones,
-paper lanterns, lotus leaves), crescent moons in wrought iron, lavender stone and mauve wood, warm paper glow
+paper lanterns, lotus leaves), full moons in wrought iron, lavender stone and mauve wood, warm paper glow
 against cool teal leaves. Glow parts: dr_paper_glow / dr_rose_glow (paper lanterns), dr_window_glow (lake house
 windows and cupola), dr_moon_glow (moonflower petals), dr_moonpool_glow (the moonwell's pool).
 """
@@ -351,7 +351,7 @@ def build_wisteria_arch(k):
 
 def build_moonwell(k):
     """3 x 3 moonwell: a ring of lavender stone blocks on a round plinth, open at the front, steps winding down the
-    inside wall into the dark to a pale glowing pool; a wrought-iron arch with a crescent moon and a paper lantern
+    inside wall into the dark to a pale glowing pool; a wrought-iron arch with a full moon and a paper lantern
     over it. The Moonwell Garden's centrepiece; the well's stair is a door warp (lantern) at its front."""
     rng = random.Random(408)
     k.add(cyl(1.47, 1.5, 0.16, 16, 0.02), "dr_stone_dk", T((0, 0, 0.06), (0, 0, 11.25)))
@@ -390,14 +390,12 @@ def build_moonwell(k):
         k.add(box(0.3, 0.3, top - b0), m, T((0.82 * math.cos(ra), 0.82 * math.sin(ra), (top + b0) / 2), (0, 0, a + 90)))
     for x, y in ((-0.5, 0.95), (0.85, 0.55), (-0.95, -0.4)):  # moss on the blocks
         k.add(jitter(ico(0.1, 1), rng, 0.02), "dr_moss", T((x, y, 0.72), scale=(1.4, 1.0, 0.35)), smooth=True)
-    # wrought-iron arch over the well, crescent moon on top, a lantern hanging over the pool
+    # wrought-iron arch over the well, full moon disc on top, a lantern hanging over the pool
     for sx in (-1, 1):
         k.add(box(0.09, 0.09, 1.95, 0.01), "dr_iron", T((sx * 1.2, 0.0, 1.1)))
         k.add(sphere(0.06, 6, 4), "dr_brass", T((sx * 1.2, 0.0, 2.1)))
     k.add(ribbon(arc(0, 1.95, 1.2, 180, 0, 12), 0.07, 0.07), "dr_iron", T((0, 0.035, 0), FRONT))
-    outer = arc(0, 0, 0.26, 60, 300, 12)
-    inner = arc(0.12, 0, 0.22, 300, 60, 10)[1:-1]
-    k.add(prism([(x - 0.04, z + 3.45) for x, z in outer + inner], 0.05), "dr_brass", T())
+    k.add(cyl(0.22, 0.22, 0.05, 16), "dr_brass", T((0, 0, 3.45), (90, 0, 0)))  # full moon disc
     k.add(cyl(0.012, 0.012, 0.38, 4), "dr_iron", T((0, 0, 2.97)))
     paper_lantern(k, T((0, 0, 2.66)), r=0.13, h=0.24, mat="dr_paper_glow")
     contact(k, 1.5)
@@ -453,7 +451,7 @@ def build_lake_house(k):
         k.add(box(0.48, 0.03, 0.03), "dr_wood_lt", M @ T((0, -0.04, 0)))
         k.add(box(0.03, 0.03, 0.48), "dr_wood_lt", M @ T((0, -0.047, 0)))
         k.add(box(0.5, 0.16, 0.06, 0.01), "dr_wood", M @ T((0, -0.08, -0.29)))
-    # flared roof, cupola with a lantern, crescent finial, stovepipe
+    # flared roof, cupola with a lantern, faceted hexagon finial, stovepipe
     k.add(lathe([(1.98, 2.22), (1.72, 2.42), (1.2, 2.88), (0.55, 3.4), (0.28, 3.62)], 16), "dr_roof", T(), smooth=False)
     k.add(lathe([(2.02, 2.17), (2.02, 2.25), (1.95, 2.29)], 16), "dr_roof_dk", T())
     for z, r in ((2.6, 1.55), (3.05, 1.0)):
@@ -463,9 +461,7 @@ def build_lake_house(k):
         a = math.radians(i * 45 + 22.5)
         k.add(box(0.05, 0.05, 0.38), "dr_wood_dk", T((0.27 * math.cos(a), 0.27 * math.sin(a), 3.75)))
     k.add(cyl(0.4, 0.0, 0.42, 8), "dr_roof_dk", T((0, 0, 4.13)))
-    outer = arc(0, 0, 0.13, 60, 300, 8)
-    inner = arc(0.06, 0, 0.11, 300, 60, 6)[1:-1]
-    k.add(prism([(x, z + 4.5) for x, z in outer + inner], 0.03), "dr_brass", T())
+    k.add(cyl(0.13, 0.13, 0.04, 6), "dr_brass", T((0, 0, 4.5), (90, 0, 0)))  # faceted hexagon finial
     k.add(cyl(0.07, 0.07, 0.6, 6), "dr_iron", T((-0.9, 0.55, 3.0)))
     k.add(cyl(0.11, 0.11, 0.06, 6), "dr_iron", T((-0.9, 0.55, 3.32)))
     # a string of paper lanterns round the eaves

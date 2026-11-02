@@ -175,7 +175,7 @@ Sheets: `tide_tiles.png`, `tide_day.png`, `tide_night.png`.
 
 Willow country in a soft twilight tint; a lake of floating paper lanterns; busier at night than by day. Silhouettes:
 domed weeping willows trailing their locks, the pink wishing tree, round lilac-roofed houses on piles, lantern rafts in
-a line across the water, the moonwell's crescent arch. Ground `dusk_grass`, path `stone`. Glow: `dr_paper_glow`,
+a line across the water, the moonwell's full-moon arch. Ground `dusk_grass`, path `stone`. Glow: `dr_paper_glow`,
 `dr_rose_glow`, `dr_window_glow`, `dr_moon_glow` (moonflower petals), `dr_moonpool_glow` (the well's pool).
 
 | Asset | Foot | Collision | Height | Glow / empties / clip / wind | Tris | KB | Use |
@@ -187,7 +187,7 @@ a line across the water, the moonwell's crescent arch. Ground `dusk_grass`, path
 | `ford_stones` | 1×1 | over water, low | tops ≤ 0.1 m | — | 412 | 26 | the Hushwillow ford gate's `prop` (always shown): stepping stones, foam, reeds |
 | `moonflower` | 1×1 | solid | 0.5 m | `dr_moon_glow`; `Open` (buds `moonflower_bud0..6` shrink, blooms `moonflower_bloom0..6` grow and twist open) | 1574 | 60 | the Moonwell's beds and the Fernhollow glade: play `Open` at dusk, backwards at dawn (`d_bed`, `g_glade`) |
 | `wisteria_arch` | 2×1 | walk-under (posts at x ±0.9) | 2.7 m | wind | 2084 | 103 | arches over lanes and the Moonwell's paths: a true arch (2.15 m at the posts, 2.6 m at the crown) under leaves and blossom |
-| `moonwell` | 3×3 | solid | 3.7 m | `dr_moonpool_glow`, `dr_paper_glow`; `light_origin` | 2516 | 138 | the seal-site well: stone ring open at the front, steps down to a glowing pool, crescent arch and lantern. The 2×2 `seal_stone` stands beside it (it can't fit inside) |
+| `moonwell` | 3×3 | solid | 3.7 m | `dr_moonpool_glow`, `dr_paper_glow`; `light_origin` | 2516 | 138 | the seal-site well: stone ring open at the front, steps down to a glowing pool, full-moon arch and lantern. The 2×2 `seal_stone` stands beside it (it can't fit inside) |
 | `lake_house` | 4×4 | solid; door tile origin + (2, 3) | 4.6 m | `dr_window_glow`, `dr_paper_glow`, `dr_rose_glow`; `smoke_origin`, `door` | 2952 | 149 | Lanternmere's round houses on piles, the tailor's lake house |
 
 Suggested `props.js`:
