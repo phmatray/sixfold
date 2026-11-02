@@ -26,7 +26,7 @@ once moved), the depth-stacking check, and the traps (props with no `rot` vanish
   the scripts if it runs elsewhere). Check it answers before photographing.
 - **The MCP** `sixfold-placement` must be connected. After you change `tools/placement.mjs` or the rules, its
   process still runs the old code: ask the user to run `/mcp` to reconnect, or use the CLI meanwhile
-  (`node tools/placement.mjs web/world [--map m] [--rule r] [--id x] [--json]`).
+  (`node tools/placement.mjs web/world [--map=m] [--rule=r] [--id=x] [--json]`).
 - **The review app** (`node --watch tools/placement-review.mjs web/world --game=<url>`, port 8095) is the user's
   window on the same desk: if it runs, the user may confirm or reject findings there while you work; its watch mode
   reloads engine changes.
@@ -87,7 +87,7 @@ map) often says exactly where it belongs: "a crate of lost property by the stair
   `tiles` in the map JSON, then check.
 
 After any change: `node tools/check-maps.mjs web/world --strict` must pass with no new warning, and
-`node tools/placement.mjs web/world --map <m>` should show the finding gone without a new one appearing.
+`node tools/placement.mjs web/world --map=<m>` should show the finding gone without a new one appearing.
 
 ### 5. Look again, and keep or revert
 

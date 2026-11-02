@@ -50,8 +50,11 @@ function around(map, members, pad = 6) {
   for (const n of v.npcs) put(n.x, n.z, "n");
   for (const w of v.doors) put(w.x, w.z, "D");
   members.forEach((m, i) => { const p = v.props[m.index]; for (let x = p.x; x < p.x + p.w; x++) for (let z = p.z; z < p.z + p.d; z++) put(x, z, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i] ?? "*"); });
-  const ruler = Array.from({ length: x1 - x0 + 1 }, (_, i) => ((x0 + i) % 5 === 0 ? String((x0 + i) % 100).padEnd(5) : "")).join("").slice(0, x1 - x0 + 1);
-  return [`     ${ruler}`, ...grid.map((r, i) => `${String(z0 + i).padStart(4)} ${r.join("")}`),
+  // Each multiple of 5 labelled over its own column, whatever column the view starts at.
+  const ruler = Array(x1 - x0 + 1).fill(" ");
+  for (let i = 0; i < ruler.length; i++) if ((x0 + i) % 5 === 0) [...String((x0 + i) % 100)].forEach((c, j) => i + j < ruler.length && (ruler[i + j] = c));
+  const top = ruler.join("");
+  return [`     ${top}`, ...grid.map((r, i) => `${String(z0 + i).padStart(4)} ${r.join("")}`),
     `Tiles: . grass  p path  r plaza  s sand  ~ water  = boardwalk  H pier  1-9 raised (metres)  f fence  # W V walls; o a prop, _ a deck or rug, n a person, D a door.`].join("\n");
 }
 

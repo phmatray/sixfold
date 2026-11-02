@@ -111,7 +111,8 @@ export function desk(dir = "web/world") {
     if (!shadow) {
       shadow = mkdtempSync(join(tmpdir(), "placement-review-"));
       mkdirSync(`${shadow}/maps`);
-      for (const f of ["props.js", "atlas.json", "quests.json"]) if (existsSync(`${dir}/${f}`)) symlinkSync(resolve(`${dir}/${f}`), `${shadow}/${f}`);
+      // Everything check-maps may read beside the maps (props.js, atlas.json, quests.json, shots/ …), linked whole.
+      for (const f of readdirSync(dir)) if (f !== "maps") symlinkSync(resolve(`${dir}/${f}`), `${shadow}/${f}`);
       for (const name of names()) symlinkSync(resolve(file(name)), `${shadow}/maps/${name}.json`);
       const gone = shadow;
       process.on("exit", () => rmSync(gone, { recursive: true, force: true }));
@@ -332,13 +333,24 @@ function serve(res, root, rel) {
   res.end(readFileSync(path));
 }
 const json = (res, status, body) => (res.writeHead(status, { "content-type": "application/json" }), res.end(JSON.stringify(body)));
-const read = (req) => new Promise((ok) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => ok(b ? JSON.parse(b) : {})); });
+// A malformed body rejects (the route answers it) instead of throwing in the stream's callback, which killed the server.
+const read = (req) => new Promise((ok, no) => {
+  let b = "";
+  req.on("data", (c) => (b += c));
+  req.on("end", () => { try { ok(b ? JSON.parse(b) : {}); } catch (e) { no(Object.assign(e, { status: 400 })); } });
+});
 
 function app(dir, port, cam) {
   const d = desk(dir), WORLD = resolve(dir) + "/";
   createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost"), q = (k) => url.searchParams.get(k), get = req.method === "GET", post = req.method === "POST";
     try {
+      // Writes come from this page only: another site open in the browser could otherwise post a plain-text body here
+      // (no preflight) and rewrite a map. JSON forces a preflight this server never grants; the host and origin must be
+      // this server by its local name (which also turns away a DNS-rebound one).
+      const self = [`localhost:${port}`, `127.0.0.1:${port}`], origin = req.headers.origin;
+      if (post && (!/^application\/json\b/.test(req.headers["content-type"] ?? "") || !self.includes(req.headers.host) || (origin && !self.some((h) => origin === `http://${h}`))))
+        return json(res, 403, { error: "writes come from the review page only" });
       if (get && url.pathname === "/") return res.writeHead(200, { "content-type": "text/html; charset=utf-8" }), res.end(readFileSync(PAGE));
       if (get && url.pathname.startsWith("/vendor/three/")) return serve(res, VENDOR, url.pathname.slice("/vendor/three/".length));
       if (get && url.pathname.startsWith("/world/")) return serve(res, WORLD, url.pathname.slice("/world/".length));
