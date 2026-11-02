@@ -138,18 +138,18 @@ test("a tap toward a seat only turns, and walking into one from behind doesn't s
 
 test("on a phone, holding the pad into a seat sits, and another way stands up @phone", async ({ page }) => {
   await intoWorld(page);
-  const pad = page.getByRole("group", { name: "Walk" });
-  const hold = (name: string, type: string) => pad.getByRole("button", { name }).dispatchEvent(type, { pointerId: 1, isPrimary: true });
+  // By its direction rather than its role: off a phone (the desktop project runs this too) the pad is hidden.
+  const hold = (dir: string, type: string) => page.locator(`.world-pad button[data-dir="${dir}"]`).dispatchEvent(type, { pointerId: 1, isPrimary: true });
   // In front of the meadow's first bench, facing away: the pad's Up, held, turns back and sits.
   await warpTo(page, "overworld", 22, 17, "s");
-  await hold("Up", "pointerdown");
+  await hold("n", "pointerdown");
   await expect.poll(() => sitting(page)).toBe(true);
   await frames(page);
   expect(await sitting(page)).toBe(true);
-  await hold("Up", "pointerup");
-  await hold("Left", "pointerdown");
+  await hold("n", "pointerup");
+  await hold("w", "pointerdown");
   await expect.poll(() => sitting(page)).toBe(false);
-  await hold("Left", "pointerup");
+  await hold("w", "pointerup");
 });
 
 test.describe("with motion", () => {
@@ -179,12 +179,13 @@ test.describe("with motion", () => {
             const off = s && Math.abs(Math.atan2(Math.sin(s.yaw - want), Math.cos(s.yaw - want)));
             return s ? `${s.face} settled:${s.k === 1} turned:${off < 0.05}` : "standing";
           },
-          { message: `${map} (${x},${z})` },
+          // A frame moves the clock 50 ms at most: on CI's software GL the turn and SitDown take many slow frames.
+          { message: `${map} (${x},${z})`, timeout: 60_000 },
         )
         .toBe(`${face} settled:true turned:true`);
       await page.keyboard.up(key);
       await page.keyboard.press("Escape");
-      await expect.poll(() => seat(page)).toBeNull();
+      await expect.poll(() => seat(page), { message: `${map}: stood up`, timeout: 60_000 }).toBeNull(); // StandUp: slow frames too
     }
   });
 });
