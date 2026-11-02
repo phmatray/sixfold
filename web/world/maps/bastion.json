@@ -4,6 +4,7 @@
   "region": "stone",
   "kind": "site",
   "music": "stone",
+  "level_design": 2,
   "life": {
     "critters": [
       {
@@ -13,6 +14,16 @@
           18,
           16,
           23
+        ],
+        "n": 2
+      },
+      {
+        "kind": "hedgehog",
+        "zone": [
+          26,
+          24,
+          36,
+          30
         ],
         "n": 2
       }
@@ -156,7 +167,8 @@
       "x": 19,
       "z": 3,
       "rot": 120,
-      "y": 4
+      "y": 4,
+      "landmark": true
     },
     {
       "asset": "menhir",
@@ -1924,7 +1936,22 @@
       "give": "coins:50",
       "hidden": true,
       "text": "At the foot of the south menhir, under a flat stone the crew uses as a step: a little cache of Facets, wrapped in an oilcloth.",
-      "text_fr": "Au pied du menhir sud, sous une pierre plate dont l'équipe se sert comme marche : une petite réserve de Facettes, enveloppée dans une toile cirée."
+      "text_fr": "Au pied du menhir sud, sous une pierre plate dont l'équipe se sert comme marche : une petite réserve de Facettes, enveloppée dans une toile cirée.",
+      "poi": "secret",
+      "secret": {
+        "id": "menhir_step",
+        "kind": "spatial",
+        "clue": [
+          [
+            18,
+            9
+          ],
+          [
+            20,
+            9
+          ]
+        ]
+      }
     },
     {
       "kind": "waymark",
@@ -1940,7 +1967,22 @@
       "give": "card:cragmastiff",
       "text": "Moonlight falls on the cut slate and every seam shines like a vein of silver. In the brightest seam, wedged in a crack: a card, cold to the touch.",
       "text_fr": "La lune tombe sur l'ardoise taillée et chaque veine brille comme de l'argent. Dans la plus brillante, coincée dans une fente : une carte, froide au toucher.",
-      "if": "time:night"
+      "if": "time:night",
+      "poi": "secret",
+      "secret": {
+        "id": "moon_seam",
+        "kind": "environmental",
+        "clue": [
+          [
+            34,
+            3
+          ],
+          [
+            32,
+            4
+          ]
+        ]
+      }
     },
     {
       "x": 37,
@@ -1961,7 +2003,8 @@
             "warp:bastion:37:16:e"
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 5,
@@ -1979,7 +2022,8 @@
             "Un panneau sur la porte : « CHANTIER DU BASTION. Équipe de jour : Orla. Équipe de nuit : Morwen. Visiteurs : portez un chapeau. » Il y a un crochet avec un chapeau dessus."
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 30,
@@ -1997,7 +2041,8 @@
             "Un bloc d'ardoise gros comme un wagonnet, fendu à moitié le long d'une ligne de coins de fer. Les coins sont rouillés dedans. Celui qui le taillait s'est arrêté un matin et n'est jamais revenu."
           ]
         }
-      ]
+      ],
+      "poi": "secondary"
     },
     {
       "x": 25,

@@ -2,6 +2,7 @@
   "title": "Emberstep Quarry",
   "title_fr": "Carrière de Pas-de-Braise",
   "region": "ember",
+  "level_design": 2,
   "kind": "route",
   "music": "ember",
   "life": {
@@ -25,6 +26,32 @@
           9
         ],
         "n": 2
+      },
+      {
+        "kind": "goat",
+        "zone": [
+          5,
+          36,
+          11,
+          42
+        ],
+        "n": 2
+      }
+    ],
+    "perch": [
+      {
+        "at": [
+          [
+            13,
+            2,
+            2.3
+          ],
+          [
+            17,
+            2,
+            2.3
+          ]
+        ]
       }
     ]
   },
@@ -270,13 +297,15 @@
       "asset": "minecart",
       "x": 19,
       "z": 28,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "bench",
       "x": 20,
       "z": 34,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "cullet",
@@ -377,18 +406,13 @@
       "asset": "crates",
       "x": 20,
       "z": 18,
-      "rot": 0
+      "rot": 0,
+      "poi": "secondary"
     },
     {
       "asset": "rock_basalt",
       "x": 11,
       "z": 13,
-      "rot": 0
-    },
-    {
-      "asset": "rock",
-      "x": 19,
-      "z": 9,
       "rot": 0
     },
     {
@@ -2479,6 +2503,13 @@
       "x": 2,
       "z": 38,
       "rot": 0
+    },
+    {
+      "asset": "headframe",
+      "x": 20,
+      "z": 8,
+      "rot": 0,
+      "landmark": true
     }
   ],
   "spawn": {
@@ -2589,7 +2620,22 @@
       "hidden": true,
       "give": "coins:35",
       "text": "Under a loose stone on the quarry floor: Facets, warm from the sun.",
-      "text_fr": "Sous une pierre branlante, au fond de la carrière : des Facettes, tièdes de soleil."
+      "text_fr": "Sous une pierre branlante, au fond de la carrière : des Facettes, tièdes de soleil.",
+      "poi": "secret",
+      "secret": {
+        "id": "spilled_gravel",
+        "kind": "environmental",
+        "clue": [
+          [
+            8,
+            30
+          ],
+          [
+            7,
+            29
+          ]
+        ]
+      }
     },
     {
       "kind": "find",
@@ -2608,7 +2654,22 @@
       "hidden": true,
       "give": "card:spike_charm",
       "text": "Tucked behind the rocks on the first ledge, where the wind can't reach: a card.",
-      "text_fr": "Glissée derrière les rochers de la première corniche, là où le vent ne passe pas : une carte."
+      "text_fr": "Glissée derrière les rochers de la première corniche, là où le vent ne passe pas : une carte.",
+      "poi": "secret",
+      "secret": {
+        "id": "lit_ledge",
+        "kind": "spatial",
+        "clue": [
+          [
+            7,
+            15
+          ],
+          [
+            6,
+            16
+          ]
+        ]
+      }
     },
     {
       "x": 2,
@@ -3050,6 +3111,15 @@
         "bush",
         "flowers",
         "rock"
+      ]
+    },
+    {
+      "to": "cinderwick",
+      "depth": 5,
+      "scatter": [
+        "rock_basalt",
+        "rock",
+        "ash_pine"
       ]
     }
   ]
