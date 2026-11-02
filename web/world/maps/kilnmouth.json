@@ -4579,6 +4579,13 @@
       "z": 28,
       "rot": 0,
       "band": "cinderwick"
+    },
+    {
+      "asset": "lantern",
+      "x": 21,
+      "z": 25,
+      "rot": 0,
+      "why": "a lit way down the rim, so the bowl and the seal stone are hinted at night"
     }
   ],
   "spawn": {
@@ -4888,13 +4895,15 @@
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
             "Even the little one, here on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
-            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
+            "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night.",
+            "And on the bowl floor, the black glass glows green after dark. Dull as a bottle by day."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
             "Même le petit, ici, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
-            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
+            "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit.",
+            "Et sur le fond du cratère, le verre noir luit en vert après la nuit. Terne comme une bouteille le jour."
           ]
         },
         {

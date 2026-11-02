@@ -405,7 +405,7 @@ One advisory remains: the scatter ratio is about 1.25. Clark–Evans counts prop
 |---|---|---|---|
 | Grove (reference) | `woodland` | #112 | done: `level_design: 2` |
 | Hub and Grove | `overworld`, `square`, `rootholm`, `elder_ring` | #119 | planned |
-| Ember and Stone | `quarry`, `cinderwick`, `kilnmouth`, `undermine`, `screepass`, `anvilstead`, `bastion` | #120 | planned |
+| Ember and Stone | `quarry`, `cinderwick`, `kilnmouth`, `undermine`, `screepass`, `anvilstead`, `bastion` | #120 | done: `level_design: 2`, five-pass tested (#264), phone night frame measured by `e2e/perf-night.mjs` |
 | Tide and Storm | `seaside`, `gullhaven`, `bellflats`, `downs`, `stormwatch`, `rodspire` | #121 | planned |
 | Dream | `hushlane`, `lanternmere`, `moonwell` | #122 | planned |
 | The whole world | the five-pass playtest and the final audit | #124 | planned |

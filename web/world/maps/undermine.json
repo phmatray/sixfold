@@ -718,8 +718,8 @@
   "gates": [
     {
       "id": "rubble_1",
-      "name": "a tunnel Orla's crew cleared",
-      "name_fr": "une galerie dégagée par l'équipe d'Orla",
+      "name": "the fallen slate",
+      "name_fr": "l'éboulis d'ardoise",
       "tiles": [
         [
           12,
@@ -733,8 +733,8 @@
     },
     {
       "id": "rubble_2",
-      "name": "a tunnel Orla's crew cleared",
-      "name_fr": "une galerie dégagée par l'équipe d'Orla",
+      "name": "the fallen slate",
+      "name_fr": "l'éboulis d'ardoise",
       "tiles": [
         [
           26,
@@ -748,8 +748,8 @@
     },
     {
       "id": "rubble_3",
-      "name": "a tunnel Orla's crew cleared",
-      "name_fr": "une galerie dégagée par l'équipe d'Orla",
+      "name": "the fallen slate",
+      "name_fr": "l'éboulis d'ardoise",
       "tiles": [
         [
           38,

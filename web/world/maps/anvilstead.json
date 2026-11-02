@@ -2722,8 +2722,8 @@
       "x": 27,
       "z": 32,
       "kind": "sign",
-      "text": "South: Scree Pass, down to the Undermine and the Emberstep Quarry. North, up the steps: the rail street, the Tally Room and Ropes & Holds.",
-      "text_fr": "Sud : le Col des Éboulis, jusqu'aux Galeries Basses et la Carrière de Pas-de-Braise. Au nord, en haut des marches : la rue des rails, la Salle des Comptes et Cordes et Prises."
+      "text": "South: Scree Pass, down to the Undermine and the Emberstep Quarry. North, up the steps: the rail street, the Tally Room and Ropes & Holds. West along the rail street: the Bastion.",
+      "text_fr": "Sud : le Col des Éboulis, jusqu'aux Galeries Basses et la Carrière de Pas-de-Braise. Au nord, en haut des marches : la rue des rails, la Salle des Comptes et Cordes et Prises. À l'ouest, le long de la rue des rails : le Bastion."
     }
   ],
   "warps": [
