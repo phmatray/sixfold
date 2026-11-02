@@ -1559,7 +1559,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 8,
       "z": 2,
       "rot": 0
@@ -1577,7 +1577,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 16,
       "rot": 0
@@ -1631,7 +1631,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 3,
       "z": 17,
       "rot": 0
@@ -1685,7 +1685,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 2,
       "z": 38,
       "rot": 0
@@ -1703,7 +1703,7 @@
       "rot": 0
     },
     {
-      "asset": "reeds",
+      "asset": "bush",
       "x": 3,
       "z": 41,
       "rot": 0

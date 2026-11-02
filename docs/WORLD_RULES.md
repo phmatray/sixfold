@@ -310,3 +310,56 @@ discovery (a POI or a find) in seconds and tiles, crossroads with more than `cro
 scatter ratio (Clark–Evans: under 1 clumped, over `scatter_ratio_max` too even) and each 16 × 16 chunk's
 dominant asset, the density curve along the main path with its breathers, and the §11 findings of a map not yet
 on `level_design: 2`.
+
+## 12. Placement rules — *règles de placement*
+
+Sections 1–6 say where a thing may stand. Most props also have a reason of their own: a lantern lights a path, a
+planter dresses a doorstep, reeds grow at the waterline, a bookcase stands against a wall, a prop rests on the
+ground under it. Those rules live in `tools/placement.rules`, in a small DSL modelled on Minecraft's world
+generation, read backwards. Minecraft places a feature only where its placement modifiers hold (a biome filter, a
+heightmap, block predicates at an offset, a spacing) and a block only where it can survive. Here every prop already
+on a map is held to the rules written for its asset, and each rule it breaks is a finding:
+
+```
+tag path = tile:pr=H paint:pr deck
+
+rule lamp.path error "a street lantern lights a path or a plaza (2.1)"
+  for lantern
+  when outdoor
+  need near(2, #path)
+```
+
+The file's header is the full reference (`on`, `touches`, `near`, `front`, `behind`, `beside`, `count`, `dist`,
+`grounded`, `flat`, `is`, `has`, the biome filters and the builtins). Run it with `node tools/placement.mjs web/world`:
+it lists every finding, map by map, then a count per rule. `--map=<name>` also draws that map in the terminal with
+each finding lettered on it, `--rule=<id or prefix>` runs one rule or a family (`--rule=lamp`), `--json` feeds a
+script, and `--strict` exits 1 on an `error`.
+
+**The review app** (`node tools/placement-review.mjs`, then http://localhost:8095) walks the findings. Each has a short
+id (`#k3f9a`, the same from run to run while its prop stays put) to quote when talking about it; `--id=k3f9a` finds it
+on the command line, and the app's "Go to #id" box jumps to it. Findings of one rule on props 2 tiles or closer, chained,
+come as one block with one plan: each prop's best fix, found with the fixes before it in place, checked as a whole, each
+one ticked or not. The map round it shows from above or in 3D (the game's own models, loaded and dressed by its
+map.js and props.js and placed as build.js places them, on blocks at each tile's floor height; drag to turn, both
+views together), before and after a proposed fix: lift it onto the floor, swap it for the model its rule names
+(`swap reeds -> bush`: reeds on a cliff top become a bush where they stand), re-lay the ground under it where its rule
+allows (`fill ~`: a tree with a foot in a pond gets its bank, from the land the rest of it stands on), turn it, or move
+it to the nearest place (5 tiles round, then 10) where every rule for it holds and its neighbours break no more rules
+than before. Nothing is ever taken out. A click on a finding's id (or C) copies it as text, to paste into a message.
+The **Game** view shows the real thing: with the game running (`cd web && trunk serve`, or `--game=<url>`), the app
+drives a hidden copy of it with e2e's Playwright, hands it the map before and after the fix (`setMap`, as the editor
+does), warps the hero just south of the props and photographs them at noon. A sign's text moves with its sign, and a prop a door stands on is
+only ever lifted. Each fix is tried on a shadow copy of the world first, and only those that leave
+`check-maps --strict` passing are offered; when none does, the app names what the nearest one breaks. **Confirm** writes the
+fix to the map's JSON and runs `check-maps --strict` on the result, **Undo** puts the file back, and **It's fine**
+records the answer in `tools/placement.waivers.json`, which placement.mjs then skips. Keys: ← → to browse, 1–9 to pick
+a fix, Enter to confirm, R for "it's fine", U to undo, V for 3D, G to go to an id.
+
+**Over MCP** (`tools/placement-mcp.mjs`, registered in `.mcp.json` as `sixfold-placement`) an agent does the same:
+`placement_findings` lists the blocks with their ids, `placement_finding` reads one (the rule, the map round it as text,
+and the fixes check-maps passes, or with `block: true` its block's plan), `placement_fix` applies one, `placement_waive`
+answers "fine" with a note, `placement_undo`, `placement_check_maps` and `placement_rules`. It writes the same files as
+the app.
+
+It is a diagnostic: CI runs only its tests (`tools/placement.test.mjs`, which also fail when a rule names an asset no
+map uses). A rule moves into CI once its findings are fixed or answered with a `why`.
