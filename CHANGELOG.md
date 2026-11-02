@@ -5,6 +5,45 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/). Entries from 0.1.0 on are written by
 release-please from Conventional Commits.
 
+## [1.13.0](https://github.com/phmatray/sixfold/compare/v1.12.0...v1.13.0) (2026-11-02)
+
+
+### Added
+
+* **world:** a shot cue in the engine, guarded by check-maps ([#255](https://github.com/phmatray/sixfold/issues/255)) ([2d48998](https://github.com/phmatray/sixfold/commit/2d489981a611bd1452ace28aea086eec8e0a6215))
+* **world:** the Ember maps (quarry, Cinderwick, Kilnmouth) to the Fernhollow standard ([#261](https://github.com/phmatray/sixfold/issues/261)) ([0bc6079](https://github.com/phmatray/sixfold/commit/0bc6079aa436623297e0b08d893afc930c50063c))
+* **world:** the Grove maps (Rootholm, Elder Ring) to the Fernhollow standard ([#258](https://github.com/phmatray/sixfold/issues/258)) ([4e48c47](https://github.com/phmatray/sixfold/commit/4e48c47932f068d7f81303f5e3fc45d45aa62559))
+* **world:** the Hub maps (meadow, Brightwell Square) to the Fernhollow standard ([#257](https://github.com/phmatray/sixfold/issues/257)) ([c0b60cf](https://github.com/phmatray/sixfold/commit/c0b60cf5ff8998383bd83a6f32f450c69fbe5fea))
+* **world:** the shot player, and Cinderwick's reveal as the first authored shot ([#262](https://github.com/phmatray/sixfold/issues/262)) ([27aa42e](https://github.com/phmatray/sixfold/commit/27aa42ed0b3d80d1b368b1f31e2716c97b43196e))
+* **world:** the Stone maps (Undermine, Scree Pass, Anvilstead, Bastion) to the Fernhollow standard ([#263](https://github.com/phmatray/sixfold/issues/263)) ([c7c38d4](https://github.com/phmatray/sixfold/commit/c7c38d4926a31c13c8c43be181598402d1ade7ea))
+* **world:** the Storm maps (Downs, Stormwatch, Rodspire) to the Fernhollow standard ([#267](https://github.com/phmatray/sixfold/issues/267)) ([5974e01](https://github.com/phmatray/sixfold/commit/5974e011e146d2fc1e9ebb0a3eabd80e6f9dc433))
+* **world:** the Tide maps (seaside, Gullhaven, Bellflats) to the Fernhollow standard ([#266](https://github.com/phmatray/sixfold/issues/266)) ([561195a](https://github.com/phmatray/sixfold/commit/561195a6510b39088cc7b27c44ddaa4fc95816a9))
+* **world:** vendor Theatre.js core and settle how Studio drives it ([#254](https://github.com/phmatray/sixfold/issues/254)) ([98b8633](https://github.com/phmatray/sixfold/commit/98b863308b331ee257c9c5816f25829fb5d9996b))
+
+
+### Fixed
+
+* **ai:** Hard beats Normal in every mirror, Dream Veil included ([#315](https://github.com/phmatray/sixfold/issues/315)) ([e463cbc](https://github.com/phmatray/sixfold/commit/e463cbc405570c31405cd9faf3826d1bf51665b8))
+* **ai:** Hard beats Normal in the mirrors again (refit after the [#45](https://github.com/phmatray/sixfold/issues/45) rules) ([#232](https://github.com/phmatray/sixfold/issues/232)) ([27bcb1c](https://github.com/phmatray/sixfold/commit/27bcb1cd5555519035b9db2a0a55eff7db5416e8))
+* **web:** the secret hum is silenced whenever the world unmounts ([#229](https://github.com/phmatray/sixfold/issues/229)) ([f649aa2](https://github.com/phmatray/sixfold/commit/f649aa2d0a78cb88d647fa36716a609f61f7aab5))
+* **world:** a challenge card ignores the Enter that ended the duelist's lines ([#241](https://github.com/phmatray/sixfold/issues/241)) ([32b4216](https://github.com/phmatray/sixfold/commit/32b4216ccfb4be06a142380c25d77c2265f37d6e))
+* **world:** put the map's shortcut and drop marks under their place's name, and say what they mean ([#274](https://github.com/phmatray/sixfold/issues/274)) ([1b17dc9](https://github.com/phmatray/sixfold/commit/1b17dc9eb8041456c52869f87a5131d83ad0e6e6))
+* **world:** the first goal says where Tobin is ([#252](https://github.com/phmatray/sixfold/issues/252)) ([99f6391](https://github.com/phmatray/sixfold/commit/99f63915422c107c253e38baf911be1d548726b1)), closes [#242](https://github.com/phmatray/sixfold/issues/242)
+* **world:** the secret clues point at the right place ([#228](https://github.com/phmatray/sixfold/issues/228)) ([6c796e1](https://github.com/phmatray/sixfold/commit/6c796e1c9ada760258142c25becbdf2240e72ff6))
+
+
+### Changed
+
+* **engine:** split the game around the duel into a sixfold-meta crate ([#244](https://github.com/phmatray/sixfold/issues/244)) ([dd9a5b1](https://github.com/phmatray/sixfold/commit/dd9a5b15b555b4b691737a99e3f23cda84c22478))
+* run the browser tests on six machines, and the web build beside the lint ([#246](https://github.com/phmatray/sixfold/issues/246)) ([2600b24](https://github.com/phmatray/sixfold/commit/2600b24c8f9fb82f272fad40c1aa681d8474597b))
+* **web:** take the effect reading, the item table and four sheets out of WorldScreen ([#251](https://github.com/phmatray/sixfold/issues/251)) ([2dbd06b](https://github.com/phmatray/sixfold/commit/2dbd06b50cab2e24a5e6a0148e7d4910c43f8159))
+* **world:** take the camera math, the HUD and tile picking out of world.js ([#245](https://github.com/phmatray/sixfold/issues/245)) ([8a511f4](https://github.com/phmatray/sixfold/commit/8a511f4c11010c51f4dd8e22f832a0e46e87e6a5))
+
+
+### Documentation
+
+* **world:** re-measure the campaign for the two secret duelists ([#230](https://github.com/phmatray/sixfold/issues/230)) ([d7aea0c](https://github.com/phmatray/sixfold/commit/d7aea0c7ec79d5dbf5f2325be319cc9f7f33ba3f))
+
 ## [1.12.0](https://github.com/phmatray/sixfold/compare/v1.11.0...v1.12.0) (2026-11-01)
 
 
