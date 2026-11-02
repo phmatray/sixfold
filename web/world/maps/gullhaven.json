@@ -785,25 +785,25 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 7,
       "z": 0,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 8,
       "z": 0,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 9,
       "z": 0,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 10,
       "z": 0,
       "rot": 0
@@ -815,25 +815,25 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 12,
       "z": 0,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 13,
       "z": 0,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 14,
       "z": 0,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 15,
       "z": 0,
       "rot": 0
@@ -869,13 +869,13 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 21,
       "z": 0,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 22,
       "z": 0,
       "rot": 0
@@ -905,7 +905,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 27,
       "z": 0,
       "rot": 0
@@ -917,7 +917,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 29,
       "z": 0,
       "rot": 0
@@ -941,13 +941,13 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 33,
       "z": 0,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 34,
       "z": 0,
       "rot": 0
@@ -959,7 +959,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 36,
       "z": 0,
       "rot": 0
@@ -971,7 +971,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 38,
       "z": 0,
       "rot": 0
@@ -983,7 +983,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 40,
       "z": 0,
       "rot": 0
@@ -995,7 +995,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 42,
       "z": 0,
       "rot": 0
@@ -1079,7 +1079,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 14,
       "rot": 0
@@ -1097,13 +1097,13 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 17,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 18,
       "rot": 0
@@ -1121,19 +1121,19 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 21,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 22,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 23,
       "rot": 0
@@ -1145,19 +1145,19 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 25,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 26,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 27,
       "rot": 0
@@ -1169,25 +1169,25 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 29,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 30,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 31,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 32,
       "rot": 0
@@ -1199,7 +1199,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 0,
       "z": 34,
       "rot": 0
@@ -1211,13 +1211,13 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 1,
       "z": 35,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 2,
       "z": 35,
       "rot": 0
@@ -1235,13 +1235,13 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 5,
       "z": 35,
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 6,
       "z": 35,
       "rot": 0
@@ -1259,7 +1259,7 @@
       "rot": 0
     },
     {
-      "asset": "bush_dark",
+      "asset": "bush",
       "x": 12,
       "z": 35,
       "rot": 0
@@ -1626,10 +1626,10 @@
         },
         {
           "lines": [
-            "The gangway's chained. A tin plate on the chain: \"STORMWATCH. Passes only. Harbour Office, up the quay.\""
+            "The gangway's chained. A tin plate on the chain: \"STORMWATCH. Passes only. Harbour Office, up the quay (open by day).\""
           ],
           "lines_fr": [
-            "La passerelle est fermée par une chaîne. Une plaque de fer-blanc dessus : « GUETTE-ORAGE. Laissez-passer obligatoire. Capitainerie, en haut du quai. »"
+            "La passerelle est fermée par une chaîne. Une plaque de fer-blanc dessus : « GUETTE-ORAGE. Laissez-passer obligatoire. Capitainerie, en haut du quai (ouverte le jour). »"
           ]
         }
       ]
@@ -1656,10 +1656,10 @@
         },
         {
           "lines": [
-            "A lilac launch with a brass rail. The gangway's chained: \"LANTERNMERE. Passes only. Harbour Office, up the quay.\""
+            "A lilac launch with a brass rail. The gangway's chained: \"LANTERNMERE. Passes only. Harbour Office, up the quay (open by day).\""
           ],
           "lines_fr": [
-            "Une vedette lilas à la rambarde de laiton. La passerelle est fermée par une chaîne : « LAC-AUX-LANTERNES. Laissez-passer obligatoire. Capitainerie, en haut du quai. »"
+            "Une vedette lilas à la rambarde de laiton. La passerelle est fermée par une chaîne : « LAC-AUX-LANTERNES. Laissez-passer obligatoire. Capitainerie, en haut du quai (ouverte le jour). »"
           ]
         }
       ]

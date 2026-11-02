@@ -1292,6 +1292,12 @@
       "z": 21,
       "rot": 90,
       "band": "cinderwick"
+    },
+    {
+      "asset": "chime_post",
+      "x": 22,
+      "z": 9,
+      "rot": 0
     }
   ],
   "spawn": {
