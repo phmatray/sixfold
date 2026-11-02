@@ -116,7 +116,7 @@ fn sweep(games: u64, styled: bool) -> (Vec<&'static Prebuilt>, Vec<Vec<u32>>) {
 
 /// The deck sweep, 100 games per pair: prints the win table (percent of
 /// each pairing, row deck's wins) and each deck's overall rate. Tuning aid:
-/// `cargo test --release -p sixfold-engine deck_sweep -- --ignored --nocapture`.
+/// `cargo test --release -p sixfold-meta deck_sweep -- --ignored --nocapture`.
 /// Checks that each prebuilt wins 42–58% overall and that no pairing of two
 /// prebuilts is beyond 75/25. (Rival and Gauntlet decks may stray further:
 /// weakness ties some of them to one colour.)
@@ -188,7 +188,7 @@ fn rates(beat: &[Vec<u32>], games: u64) -> Vec<f32> {
 /// Risk G4: the deck sweep with and without the rivals' AI styles, 60 games
 /// per pair. A styled rival deck must stay inside 40–60% overall, or no
 /// further outside it than the same deck played Balanced. Tuning aid:
-/// `cargo test --release -p sixfold-engine style_sweep -- --ignored --nocapture`.
+/// `cargo test --release -p sixfold-meta style_sweep -- --ignored --nocapture`.
 #[test]
 #[ignore]
 fn style_sweep() {
@@ -223,7 +223,7 @@ fn style_sweep() {
 /// no kit may win more than 60% overall. Then each route duelist as it plays
 /// (its deck, prizes and AI) against the starter a new player holds, for the
 /// record. Tuning aid:
-/// `cargo test --release -p sixfold-engine kit_sweep -- --ignored --nocapture`.
+/// `cargo test --release -p sixfold-meta kit_sweep -- --ignored --nocapture`.
 #[test]
 #[ignore]
 fn kit_sweep() {
@@ -288,7 +288,7 @@ thread_local! {
 /// player holds, 60 games, and against the deck the campaign playthrough
 /// holds when it meets each scene (pack seeds 1, 2 and 3), 40 games each;
 /// the player on Normal, seats alternating; recorded in `docs/BALANCE.md`.
-/// `cargo test --release -p sixfold-engine rook_decks_sweep -- --ignored --nocapture`.
+/// `cargo test --release -p sixfold-meta rook_decks_sweep -- --ignored --nocapture`.
 #[test]
 #[ignore]
 fn rook_decks_sweep() {
@@ -456,7 +456,10 @@ fn shop_packs(progress: &mut Progress, profile: &mut Profile, bought: &mut [u32]
 /// it measured the same 14-54 and median 35 (seeds 11, 12 and 13 at 51, 54
 /// and 45: the Warden's wall, not the threshold). Stone and Dream were
 /// lowered from 4 to 3, which their rematches had pushed seeds 1 and 2 to 51.
-const RIVAL_DUELS: u64 = 45;
+/// Re-measured for the two secret duelists (#230, `t_faye` and `t_barnaby` on
+/// the route, 59 in all): 12-52 rival duels, median 31; seed 10 (the Warden's
+/// wall) takes 52, so the budget is raised from 45 to 52.
+const RIVAL_DUELS: u64 = 52;
 
 /// Open every pack, counting them for the stats.
 fn open_counted(stats: &mut Stats, profile: &mut Profile, pack_seed: &mut u64) {
@@ -749,7 +752,7 @@ fn a_french_game_has_no_english_left() {
 /// Balance indicators over the deck sweep's field (Normal vs Normal, 6
 /// prizes, seats alternating): first-player win rate, game length, each
 /// card's play rate and win rate when played, and deck diversity.
-/// `cargo test --release -p sixfold-engine balance_indicators -- --ignored --nocapture`
+/// `cargo test --release -p sixfold-meta balance_indicators -- --ignored --nocapture`
 #[test]
 #[ignore]
 #[allow(clippy::needless_range_loop)]
@@ -862,7 +865,7 @@ fn balance_indicators() {
 /// daily duel (a rival's campaign deck) as it plays (prizes, AI level and
 /// style) against each prebuilt played by the Normal AI, 40 games each with
 /// seats alternating. Prints the first player's win rate for each.
-/// `cargo test --release -p sixfold-engine postgame_first_player -- --ignored --nocapture`
+/// `cargo test --release -p sixfold-meta postgame_first_player -- --ignored --nocapture`
 #[test]
 #[ignore]
 fn postgame_first_player_edge() {
@@ -940,7 +943,7 @@ fn postgame_first_player_edge() {
 /// seeded run swings widely on its packs alone): prints each seed's duels,
 /// its rival duels (which must fit [`RIVAL_DUELS`]) and the rival it lost to most (the one that held it back),
 /// then the spread and the median.
-/// `cargo test --release -p sixfold-engine campaign_sweep -- --ignored --nocapture`
+/// `cargo test --release -p sixfold-meta campaign_sweep -- --ignored --nocapture`
 #[test]
 #[ignore]
 fn campaign_sweep() {
@@ -1021,7 +1024,7 @@ fn wins_vs_prebuilts(deck: &[CardId], games: u64, salt: u64) -> u64 {
 
 /// Tuning aid: the auto-built decks of each style against the starter, on
 /// grown collections, against the prebuilts.
-/// `cargo test --release -p sixfold-engine auto_build_sweep -- --ignored --nocapture`.
+/// `cargo test --release -p sixfold-meta auto_build_sweep -- --ignored --nocapture`.
 #[test]
 #[ignore]
 fn auto_build_sweep() {
