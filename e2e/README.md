@@ -4,7 +4,7 @@ Playwright drives Chromium through the main journeys (new game and the guided du
 the end, packs, deck editing, the world, the finale after the Warden, keyboard-only runs of each,
 axe-core on every screen, one journey at phone size) against
 a release build. Assertions read what the player sees (roles, labels, live regions) and what the
-game saved (`sixfold.save.<n>` in localStorage). The journeys tagged `@webkit` also run in WebKit,
+game saved (`sixfold.save.<n>` in localStorage). The journeys tagged `@webkit` also run in WebKit (on macOS its Tab reaches only text fields, so `moveTo` presses Option+Tab there, as Safari does),
 the engine Safari and the macOS app draw with.
 
 Specs import from `./helpers` only, never `@playwright/test` (CI checks): every journey then fails when
