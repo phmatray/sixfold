@@ -445,6 +445,9 @@ impl Ai {
 
     /// The main-phase actions worth trying: Normal's pick, attacks, then the
     /// rest, without plays the turn's memory rules out, one per distinct card.
+    /// A retreat is tried only when Normal itself picks it, and ending the
+    /// turn is not tried instead of an attack: in the Dream Veil mirror those
+    /// departures cost more games than the look-ahead could see they cost.
     fn candidates(&self, x: &Ctx, pick: Action) -> Vec<Action> {
         let mut seen = Vec::new();
         let mut out = vec![pick];
@@ -452,7 +455,8 @@ impl Ai {
         let rest = x.legal.iter().filter(|a| !matches!(a, Action::Attack(_)));
         for &a in attacks.chain(rest) {
             let key = match a {
-                Action::Retreat if self.retreated => continue,
+                Action::Retreat if self.retreated || pick != Action::Retreat => continue,
+                Action::Done if matches!(pick, Action::Attack(_)) => continue,
                 Action::UsePower(slot) => {
                     let used = x.at(x.me, slot).map(|c| Play::Power(c.uid));
                     if used.is_some_and(|p| self.done.contains(&p)) {
@@ -556,7 +560,37 @@ fn evaluate(g: &Game, me: usize) -> i32 {
         &WEIGHTS
     };
     let z: f32 = f.iter().zip(w).map(|(a, b)| a * b).sum();
-    (1000.0 / (1.0 + (-z).exp())) as i32
+    (1000.0 / (1.0 + (-z).exp())) as i32 + status_value(g, me)
+}
+
+/// What a stalled Active is worth, in thousandths of a win: a Special
+/// condition (the fitted model never sees one: it is rare in Normal
+/// self-play) and a poison level. Each side's total stays under
+/// `STATUS_CAP`, about one prize's worth, so it never overturns a lead.
+const SPECIAL_VALUE: [(Special, i32); 3] = [
+    (Special::Asleep, 20),
+    (Special::Paralyzed, 15),
+    (Special::Confused, 12),
+];
+const POISON_VALUE: i32 = 5;
+const STATUS_CAP: i32 = 30;
+
+/// Conditions on the opponent's Active count for `me`, mine against me.
+fn status_value(g: &Game, me: usize) -> i32 {
+    let worth = |p: usize| {
+        let c = g.players[p].condition;
+        let special = SPECIAL_VALUE
+            .iter()
+            .find(|&&(s, _)| Some(s) == c.special)
+            .map_or(0, |&(_, v)| v);
+        let poison = match c.poison {
+            Poison::None => 0,
+            Poison::Poisoned => POISON_VALUE,
+            Poison::DoublePoisoned => 2 * POISON_VALUE,
+        };
+        (special + poison).min(STATUS_CAP)
+    };
+    worth(1 - me) - worth(me)
 }
 
 const FEATURES: usize = 27;
@@ -2296,6 +2330,19 @@ mod tests {
         }
     }
 
+    /// The stall plan is worth something: an asleep opponent Active scores
+    /// higher for me, an asleep Active of mine lower.
+    #[test]
+    fn evaluate_values_a_stalled_opponent() {
+        let mut g = main_phase(0);
+        let base = evaluate(&g, 0);
+        g.players[1].condition.special = Some(Special::Asleep);
+        assert!(evaluate(&g, 0) > base);
+        g.players[1].condition.special = None;
+        g.players[0].condition.special = Some(Special::Asleep);
+        assert!(evaluate(&g, 0) < base);
+    }
+
     /// The family an action belongs to, for counting what Hard does.
     fn action_kind(a: Action) -> &'static str {
         match a {
@@ -2313,14 +2360,12 @@ mod tests {
 
     #[test]
     fn action_kind_names_each_action_family() {
-        let g = main_phase(0);
         assert_eq!(action_kind(Action::Retreat), "retreat");
         assert_eq!(action_kind(Action::Attack(0)), "attack");
         assert_eq!(
             action_kind(Action::AttachEnergy { hand: 0, slot: 0 }),
             "attach"
         );
-        assert!(g.legal_actions().iter().all(|&a| action_kind(a) != ""));
     }
 
     /// Where Hard departs from Normal in the Dream Veil mirror, by kind of

@@ -622,3 +622,29 @@ lost games, `basic -> retreat` 1 / 3) cluster in lost games. Nothing points to o
 kind; what none of them can see is the status plan: `evaluate` reads no Sleep, Confusion,
 Paralysis or poison, so a play-out cannot tell a stalled opponent from a healthy one. The fix goes
 in `evaluate`.
+
+### The fix and the result
+
+Two changes in `engine/src/ai.rs`. `evaluate` now adds `status_value`: the opponent Active's Special
+condition and poison count for Hard, its own count against it (Asleep 20, Paralyzed 15, Confused
+12, poison 5 per level, capped at 30 a side, so never more than a fraction of a prize). Alone it
+moved Dream Veil from 22 to 24 (weights 2 to 4 times larger made it worse, 17: a play-out already
+sees the stalled turn in the HP and prizes, so a heavy term double counts). The departures that
+the table above ties to lost games were then cut in `candidates()`: Hard no longer tries a retreat
+Normal does not pick, and no longer ends its turn when Normal would attack.
+
+Hard won against Normal, 50 games per deck, seeds `d * 1000 + n`, before (#316 on main) and after:
+
+| Deck | Before | After |
+|---|---|---|
+| Ember Rush | 35 | 35 |
+| Tide Mind | 30 | 29 |
+| Grove Bloom | 31 | 35 |
+| Storm Front | 29 | 31 |
+| Stone Fist | 31 | 29 |
+| Dream Veil | 22 | 26 |
+| All | 182/300 | 185/300 |
+
+`hard_beats_normal_in_mirrors_big` now asserts every deck above 25/50. The margin is thin (50 games
+carry about 7 points of noise) but the seeds are fixed, so the run is reproducible. The bar was not
+lowered.
