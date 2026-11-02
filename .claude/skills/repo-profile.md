@@ -59,10 +59,11 @@
   `refactor/world-camera-input`, `ci/faster-e2e`
 
 ## Labels (apply verbatim; read live before use, this is a snapshot)
-- **Type:** `bug`, `enhancement` (also `documentation`, `accessibility`)
-- **Priority tiers:** none — the repo has no priority axis.
-- **Effort sizes:** none — the repo has no effort axis.
-- **Scope/area:** none — scope lives in the Conventional Commits scope of the title.
+- **Type:** `bug`, `enhancement`, `documentation`, `accessibility`
+- **Priority tiers:** `priority: high`, `priority: medium`, `priority: low`
+- **Effort sizes (smallest first):** `effort: small`, `effort: medium`, `effort: large` (large means split into children)
+- **Scope/area:** `area: engine`, `area: ai`, `area: cards`, `area: meta`, `area: world`, `area: web`, `area: e2e`, `area: tools`, `area: ci`, `area: desktop`
+- Every issue carries one type, one priority, one effort and at least one area. The manifest is `.github/repo-setup.yml`, converged by the tagout kit's `skills/init/scripts/repo-setup.sh apply`.
 - **Bot-owned, never apply by hand:** `autorelease: pending`, `autorelease: tagged` (release-please),
   `dependencies` (Renovate)
 - **Triage:** `duplicate`, `invalid`, `wontfix`, `question`, `good first issue`, `help wanted`
