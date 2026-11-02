@@ -170,7 +170,7 @@
     },
     {
       "asset": "cottage",
-      "x": 3,
+      "x": 5,
       "z": 4,
       "rot": 0,
       "recolor": {
@@ -183,7 +183,7 @@
     },
     {
       "asset": "inn_sign",
-      "x": 8,
+      "x": 4,
       "z": 7,
       "rot": 0
     },
@@ -400,7 +400,8 @@
       "x": 16,
       "z": 22,
       "rot": 0,
-      "if": "flag:found_g_walkway"
+      "if": "flag:found_g_walkway",
+      "y": 3.1
     },
     {
       "asset": "ladder",
@@ -2066,68 +2067,62 @@
     },
     {
       "asset": "bush",
-      "x": 42,
-      "z": 29,
+      "x": 3,
+      "z": 4,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 4,
+      "z": 4,
       "rot": 0
     },
     {
       "asset": "flowers",
+      "x": 3,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 4,
+      "z": 5,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
+      "x": 3,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 4,
+      "z": 6,
+      "rot": 0
+    },
+    {
+      "asset": "flowers",
+      "x": 3,
+      "z": 7,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 38,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "crates",
+      "x": 39,
+      "z": 32,
+      "rot": 0
+    },
+    {
+      "asset": "bush",
       "x": 41,
-      "z": 28,
-      "rot": 0
-    },
-    {
-      "asset": "stump",
-      "x": 43,
-      "z": 29,
-      "rot": 0
-    },
-    {
-      "asset": "crates",
-      "x": 44,
-      "z": 28,
-      "rot": 0
-    },
-    {
-      "asset": "crates",
-      "x": 37,
-      "z": 27,
-      "rot": 0
-    },
-    {
-      "asset": "crates",
-      "x": 38,
-      "z": 27,
-      "rot": 0
-    },
-    {
-      "asset": "crates",
-      "x": 37,
-      "z": 28,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 39,
-      "z": 27,
-      "rot": 0
-    },
-    {
-      "asset": "stump",
-      "x": 40,
-      "z": 28,
-      "rot": 0
-    },
-    {
-      "asset": "flowers",
-      "x": 38,
-      "z": 28,
-      "rot": 0
-    },
-    {
-      "asset": "log",
-      "x": 39,
-      "z": 29,
+      "z": 33,
       "rot": 0
     }
   ],
