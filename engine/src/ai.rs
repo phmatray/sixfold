@@ -566,7 +566,7 @@ fn evaluate(g: &Game, me: usize) -> i32 {
 /// What a stalled Active is worth, in thousandths of a win: a Special
 /// condition (the fitted model never sees one: it is rare in Normal
 /// self-play) and a poison level. Each side's total stays under
-/// `STATUS_CAP`, about one prize's worth, so it never overturns a lead.
+/// `STATUS_CAP`, a small fraction of a prize, so it only tips close calls.
 const SPECIAL_VALUE: [(Special, i32); 3] = [
     (Special::Asleep, 20),
     (Special::Paralyzed, 15),

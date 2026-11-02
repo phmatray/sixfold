@@ -648,3 +648,9 @@ Hard won against Normal, 50 games per deck, seeds `d * 1000 + n`, before (#316 o
 `hard_beats_normal_in_mirrors_big` now asserts every deck above 25/50. The margin is thin (50 games
 carry about 7 points of noise) but the seeds are fixed, so the run is reproducible. The bar was not
 lowered.
+
+Caveats from review: the deviation counts compare Hard with a clone of itself taken before its
+decision, so a Normal tie-break that draws from the RNG can add a few departures that are not real;
+and the two `candidates()` cuts were tuned on this mirror's fixed seeds, so they are a measured
+improvement (182 to 185 of 300 overall, Dream Veil 22 to 26), not a proven one. If the mirrors slip
+again, rerun `hard_deviations_dream_veil` before touching the constants.
