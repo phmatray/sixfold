@@ -797,16 +797,19 @@ fn a_save_in_the_storm_keeps_its_finds_and_lands_on_open_ground() {
 }
 
 /// #271: the Dream (`hushlane`, `lanternmere`, `moonwell`) was brought to the Fernhollow standard. A
-/// save with every Dream find and the three new secrets collected, the hero on Hushwillow Lane (the
-/// fixture is the Tide fixture with the Dream's flags added, written by the current encoder), still
-/// loads: each find is still on its map and still collected, the secrets are counted, and the tile it
-/// stood on, like the spawns of all three maps, is open ground.
+/// 1.12 save with every Dream find collected, the hero on Hushwillow Lane (the fixture is the Tide
+/// fixture with the flags a 1.12 player could hold on the Dream added, written by the current
+/// encoder), still loads: each find is still on its map and still collected, and the tile it stood
+/// on, like the spawns of all three maps, is open ground. It predates the three secrets this pass
+/// turned three of those finds into, so it has not earned them; each of those finds now carries its
+/// `secret` block, which is what earns it on the find's "Nothing else here." line (WORLD_RULES §9).
 #[test]
 fn a_save_in_the_dream_keeps_its_finds_and_lands_on_open_ground() {
     let s = Save::decode(&fixture("v1.12.0-dream.txt")).unwrap();
     let p = s.progress();
     let at: Vec<&str> = s.get(WORLD_AT).unwrap().split(',').collect();
     assert_eq!(at[0], "hushlane");
+    let mut secret_of: HashMap<String, String> = HashMap::new();
     for (name, finds) in [
         (
             "hushlane",
@@ -832,6 +835,11 @@ fn a_save_in_the_dream_keeps_its_finds_and_lands_on_open_ground() {
             );
             assert!(on_map.contains(id), "{id} is no longer on {name}");
         }
+        for i in map["interactions"].as_array().unwrap() {
+            if let (Some(id), Some(secret)) = (i["id"].as_str(), i["secret"]["id"].as_str()) {
+                secret_of.insert(id.to_string(), secret.to_string());
+            }
+        }
         let spawn = (
             map["spawn"]["x"].as_i64().unwrap(),
             map["spawn"]["z"].as_i64().unwrap(),
@@ -845,12 +853,23 @@ fn a_save_in_the_dream_keeps_its_finds_and_lands_on_open_ground() {
             assert!(open(x, z), "the saved tile {x},{z} is not open ground");
         }
     }
-    for id in [
-        "lane_willow",
-        "lane_stump",
-        "moon_hedge_nook",
-        "willow_dusk",
+    for (find, secret) in [
+        ("d_willow", "lane_willow"),
+        ("d_nook_lane", "lane_stump"),
+        ("d_hedge_nook", "moon_hedge_nook"),
     ] {
-        assert!(p.has_flag(&format!("secret_{id}")), "secret {id}");
+        assert!(
+            !p.has_flag(&format!("secret_{secret}")),
+            "a 1.12 save has not earned {secret}"
+        );
+        assert_eq!(
+            secret_of.get(find).map(String::as_str),
+            Some(secret),
+            "the collected find {find} carries the secret {secret}, earned by looking again"
+        );
     }
+    assert!(
+        p.has_flag("secret_willow_dusk"),
+        "secret willow_dusk is kept"
+    );
 }

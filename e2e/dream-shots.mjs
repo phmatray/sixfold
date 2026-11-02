@@ -8,9 +8,11 @@
 // visible window: headless draws the world blank. HEADLESS=1 runs headless on SwiftShader instead (CI, no display).
 import { chromium } from "@playwright/test";
 import { mkdirSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const URL_ = process.argv[2] ?? "http://127.0.0.1:4410/";
-const OUT = process.argv[3] ?? new URL("./shots/", import.meta.url).pathname;
+const OUT = process.argv[3] ?? fileURLToPath(new URL("./shots/", import.meta.url));
 mkdirSync(OUT, { recursive: true });
 
 const DEVICES = {
@@ -23,7 +25,7 @@ const SPOTS = [
   { map: "hushlane", at: [19, 21], facing: "e" }, // the moonflowers opening toward the old willow
   { map: "hushlane", at: [13, 33], facing: "s" }, // the wisteria arch, Lanternmere beyond
   { map: "lanternmere", at: [26, 10], facing: "s" }, // the lake road, the lake house on its islet
-  { map: "lanternmere", at: [28, 9], facing: "n" }, // Ruben's first lamp, the moths at night
+  { map: "lanternmere", at: [27, 9], facing: "n" }, // beside Ruben at his first lamp (28,9 from 21:00), the moths at night
   { map: "moonwell", at: [19, 9], facing: "s" }, // the walled garden, the moonwell and the seal stone
   { map: "moonwell", at: [31, 12], facing: "w" }, // the east arch, looking across the garden
 ]
@@ -64,7 +66,7 @@ for (const [device, opts] of Object.entries(DEVICES)) {
         for (let t = 0; t < 6 && (await skip.isVisible().catch(() => false)); t++) await skip.click().catch(() => {}), await page.waitForTimeout(1200); // the intro scene
         await host("sixfoldClock", minute);
         await page.waitForTimeout(3000); // shaders compiled, the fade gone
-        await page.screenshot({ path: `${OUT}${s.map}-${i}-${hour}-${device}.jpg`, type: "jpeg", quality: 80 });
+        await page.screenshot({ path: join(OUT, `${s.map}-${i}-${hour}-${device}.jpg`), type: "jpeg", quality: 80 });
         console.log("ok  ", s.map, i, hour, device);
       } catch (e) {
         failed++;
