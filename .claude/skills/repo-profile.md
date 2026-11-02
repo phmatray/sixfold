@@ -48,7 +48,7 @@
 - Desktop (`desktop.yml`): `cargo clippy -p sixfold-desktop -- -D warnings` and `cargo tauri build`
 
 ## Integration style
-- **Merge mode:** squash (linear `main`, every subject ends `(#PR)`; no branch protection or ruleset)
+- **Merge mode:** squash only — merge commits and rebase merges are disabled in the repo settings (`.github/repo-setup.yml` `settings:`); linear `main`, every subject ends `(#PR)`; no branch protection or ruleset
 - **PR title convention:** Conventional Commits `<type>(scope): subject` — release-please cuts
   releases from them, so the squash title must have that form. Scopes in use: `engine`, `world`,
   `cards`, `web`, `ai`, `e2e`, `roadmap`. When an issue is closed, the title ends `(#issue)` and the
@@ -69,9 +69,9 @@
 - **Triage:** `duplicate`, `invalid`, `wontfix`, `question`, `good first issue`, `help wanted`
 
 ## Issue templates
-- **Location:** none — the repo has no `.github/ISSUE_TEMPLATE/`.
-- **Forms:** none
-- **Default for ideas:** a plain issue (`enhancement`) · **for defects:** a plain issue (`bug`)
+- **Location:** `.github/ISSUE_TEMPLATE/`
+- **Forms:** `bug_report.yml` (labels `bug`; What happens / What should happen / Reproduction / Area), `feature_request.yml` (labels `enhancement`; Problem / Proposed solution / Area / Alternatives considered). Both carry an Area dropdown that matches the `area:` labels.
+- **Default for ideas:** `feature_request.yml` · **for defects:** `bug_report.yml`
 
 ## Tracker
 - **Tracker:** github (github.com)

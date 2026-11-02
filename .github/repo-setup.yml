@@ -65,3 +65,20 @@ labels:
   - name: "area: desktop"
     color: "c5def5"
     description: "desktop/ — the Tauri app"
+
+# Labels other tools own: never created here and never deleted, even with --prune.
+pruneKeep:
+  - "autorelease: *"   # release-please
+  - "dependencies"     # Renovate
+
+# Issue forms copied into .github/ISSUE_TEMPLATE/ when missing (an existing form is never overwritten).
+issueTemplates:
+  - feature_request.yml
+  - bug_report.yml
+
+# Squash-only: every subject on main is a Conventional Commit release-please can read.
+settings:
+  delete_branch_on_merge: true
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: false
