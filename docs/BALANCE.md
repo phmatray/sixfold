@@ -4,7 +4,7 @@ The 0.9.0 balance pass and the 1.3 rules and curve pass (at the end), measured w
 both sides. Rerun it with:
 
 ```bash
-cargo test --release -p sixfold-engine deck_sweep -- --ignored --nocapture
+cargo test --release -p sixfold-meta deck_sweep -- --ignored --nocapture
 ```
 
 `deck_sweep` (`meta/src/playtest.rs`) plays a Normal-vs-Normal round robin over every deck the
@@ -110,7 +110,7 @@ deck Balanced, then with each rival's deck (campaign and Gauntlet) played in its
 requires a styled deck to stay inside 40–60% or no further outside than it was:
 
 ```bash
-cargo test --release -p sixfold-engine style_sweep -- --ignored --nocapture
+cargo test --release -p sixfold-meta style_sweep -- --ignored --nocapture
 ```
 
 | Deck | Style | Balanced | Styled | 1.3 balanced | 1.3 styled |
@@ -561,7 +561,15 @@ four of them Rook's and the rest the seeds' usual swing.
 playthrough wins about half of them) plus a consolation: the first playthrough moves from 5.34 to **5.30
 packs an hour**; exploring stays at 5.23. The campaign playthrough meets Rook as each scene's seals are met
 (one duel, won or lost) and wins the first two, loses the last two, on all three pack seeds; it finishes in
-92, 92 and 80 duels (92, 83 and 71 before), inside its budget, now 102 duels (57 duelists plus 45).
+92, 92 and 80 duels (92, 83 and 71 before), inside its budget, then 102 duels (57 duelists plus 45); see the re-measure below.
+
+**Re-measured for the two secret duelists (#230).** `t_faye` and `t_barnaby` are route duelists and
+`duelists_all` needs both, so the route is 59 duelists. Measured on `babb0c9` (main when #230 was cut; the
+Hard AI work in #232 may shift these): `campaign_sweep` plays 71-111 duels (median 90), 12-52 rival duels
+(median 31), 33-39 packs. The slowest seed (10, the Warden's wall: 26 losses, 4 rematches) needs 52 rival
+duels, over 45, so **the budget is raised to 52** (59 duelists plus 52 = 111 duels); the other 15 seeds
+fit 45 (next slowest 49). The always-on seeds 1, 2 and 3 finish in 89, 92 and 80 duels (30, 33 and 21
+rival duels, 35, 35 and 38 packs).
 
 ## 1.9: the deck builder
 
