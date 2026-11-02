@@ -15,7 +15,7 @@ const node = (...args) => spawnSync(process.execPath, args, { encoding: "utf8" }
 
 test("AC2: cinderwick east writes the same props twice, off paths and the throat, cuts nothing off, and passes --strict", () => {
   const dir = mkdtempSync(join(tmpdir(), "band-"));
-  for (const f of ["maps", "props.js", "atlas.json"]) cpSync(join(WEB, f), join(dir, f), { recursive: true });
+  for (const f of ["maps", "shots", "props.js", "atlas.json"]) cpSync(join(WEB, f), join(dir, f), { recursive: true });
   const cinder = join(dir, "maps", "cinderwick.json");
   const tool = (file, side) => {
     const r = node(TOOL, file, side);
