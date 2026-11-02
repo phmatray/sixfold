@@ -6,16 +6,16 @@
   "height": 11,
   "tiles": [
     "3333333333333333333333333333333",
-    "33..33333331......1.3......33.3",
-    "33..33....3.1.......3........33",
-    "3......3..3.........3.133111..3",
-    "3..3......3......1..3.111111..3",
-    "3.....33..3........13.111111..3",
-    "3.........3.........3.111111..3",
-    "3.33......3.......1.3..33.....3",
-    "3.........3.....11............3",
-    "3.........3..1......3.........3",
-    "3.........311111111131111111113"
+    "31..11111121......1.2......22.3",
+    "31..11....2.1.......2.........3",
+    "3......1..2.........2.122111..3",
+    "3..1.............1..2.111111..3",
+    "3.....11..2........12.111111..3",
+    "3.........2.........2.111111..3",
+    "3.11......2.......1.2..22.....3",
+    "3.........2.....11............3",
+    "3.........2..1......2.........3",
+    "3.........211111111121111111113"
   ],
   "spawn": { "x": 5, "z": 10, "facing": "n" },
   "trials": [
@@ -24,7 +24,7 @@
       "flag": "trial_push",
       "boulders": [[4, 3], [7, 4]],
       "plates": [[2, 1], [7, 2]],
-      "reset": [9, 10],
+      "reset": [9, 9],
       "solved": {
         "lines": ["Both plates sink under the boulders' weight. Somewhere to the east, stone grinds on stone."],
         "lines_fr": ["Les deux dalles s'enfoncent sous le poids des rochers. Quelque part à l'est, la pierre racle la pierre."],
@@ -43,6 +43,7 @@
       "flag": "trial_reach",
       "pillars": [[22, 5], [27, 6]],
       "plates": [[26, 3], [26, 5]],
+      "dais": [[22, 3, 27, 6]],
       "reset": [29, 9],
       "start": [21, 8],
       "solved": {
@@ -60,7 +61,7 @@
       "tiles": [[10, 4]],
       "if": "flag:trial_push",
       "floor": 0,
-      "prop_closed": "stone_odd",
+      "prop_closed": "trial_seal",
       "text": "A stone block fills the gap. Two plates in this room are waiting for weight.",
       "text_fr": "Un bloc de pierre bouche le passage. Deux dalles de cette salle attendent un poids."
     },
@@ -71,7 +72,7 @@
       "tiles": [[29, 2]],
       "if": "flag:trial_reach",
       "floor": 0,
-      "prop_closed": "stone_odd",
+      "prop_closed": "trial_seal",
       "text": "A stone block seals the niche. The two plates on the dais must both be held down.",
       "text_fr": "Un bloc de pierre scelle la niche. Les deux dalles de l'estrade doivent être maintenues enfoncées."
     }
@@ -80,9 +81,7 @@
     { "asset": "sign", "x": 6, "z": 9, "rot": 0 },
     { "asset": "sign", "x": 23, "z": 8, "rot": 0 },
     { "asset": "glow_mushroom", "x": 1, "z": 9, "rot": 0, "glow": "#ffcf8a" },
-    { "asset": "glow_mushroom", "x": 28, "z": 9, "rot": 0, "glow": "#5fe0c8" },
-    { "asset": "glow_mushroom_tall", "x": 29, "z": 1, "rot": 0, "glow": "#5fe0c8" }
-  ],
+    { "asset": "glow_mushroom", "x": 28, "z": 9, "rot": 0, "glow": "#5fe0c8" }  ],
   "interactions": [
     {
       "kind": "sign",

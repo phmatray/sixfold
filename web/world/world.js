@@ -630,7 +630,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     lifts.attach(next, got, spawn);
     seats.attach(next);
     // A trial solved runs its `solved` lines, whose `do` sets its flag (a gate on it then opens).
-    next.trials = attachTrials(next, holds, { reduced: () => reduced, sound, solved: (d) => cb("talk", `trial_${d.id}`, JSON.stringify({ name: "", dialogue: [d.solved] })) });
+    next.trials = attachTrials(next, holds, { reduced: () => reduced, sound, solved: (d) => cb("talk", `trial_${d.id}`, JSON.stringify({ name: next.map.title ?? "", dialogue: [d.solved] })) });
     next.name = name;
     duelists.enterMap(name);
     // Gates first see the hero where it arrives (a gate it stands on lets it stay).
@@ -957,6 +957,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
   el.sixfoldClock = (m) => (cb("clock", String(Math.floor(m)), ""), setClock(m));
   el.sixfoldWarp = (to, x, z, facing = "s") => warp({ to, spawn: { x, z, facing }, travel: true }); // and anywhere: `el.sixfoldWarp("square", 12, 8)`
   // Walks there as a tap would (the same route, collisions, heights, gates and ladders); `[]` when there's no way.
+  el.sixfoldFacing = () => (hero && world && !busy() ? (({ kind, text }) => ({ kind, text }))(facing() ?? {}) : null); // what E would use now
   el.sixfoldWalk = (x, z) => (busy() ? [] : [...(world.path = walkTo(x, z, world.npcAt(x, z)))]);
   // For measuring: draw calls and triangles of the last frame (shadows included), and the area.
   // For reviewing a whole map: `el.sixfoldCam({ distance: 40, pitch: 62 })` pulls the camera back

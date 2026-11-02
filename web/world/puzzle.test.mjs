@@ -9,8 +9,9 @@ const def = (id) => map.trials.find((t) => t.id === id);
 // The map's own collision (build.js): solid tiles, digit heights, a step climbs 0.6 at most. Gates stay shut.
 const tile = (x, z) => map.tiles[z]?.[x];
 const height = (x, z) => (tile(x, z) >= "1" && tile(x, z) <= "9" ? +tile(x, z) : 0);
-// Props and the rune stones stand on their tiles.
-const taken = new Set([...map.props.map((p) => `${p.x},${p.z}`), ...map.trials.filter((t) => t.reset).map((t) => String(t.reset))]);
+// Props and the rune stones stand on their tiles; a shut gate is a wall.
+const taken = new Set([...map.props.map((p) => `${p.x},${p.z}`), ...map.trials.filter((t) => t.reset).map((t) => String(t.reset)),
+  ...map.gates.flatMap((g) => g.tiles.map(String))]);
 const open = (ax, az, bx, bz) => tile(bx, bz) !== undefined && !"#fWV~".includes(tile(bx, bz)) && !taken.has(`${bx},${bz}`) && Math.abs(height(bx, bz) - height(ax, az)) <= 0.6;
 const see = (hx, hz) => (x, z) => tile(x, z) !== undefined && height(x, z) - height(hx, hz) <= 1.5; // world.js `see`
 const F = Object.keys(DIRS);

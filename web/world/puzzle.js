@@ -3,7 +3,8 @@
 // so node tests it (puzzle.test.mjs); trials.js draws it and world.js moves the hero through it.
 //
 // A map's `trials`: [{ "id", "flag", "boulders": [[x, z]], "pillars": [[x, z]], "plates": [[x, z]], "reset": [x, z],
-//   "ice": [[x0, z0, x1, z1]], "dry": [[x, z]], "solved": { "lines", "do" } }] (`start`, `goal`: where the tests
+//   "ice": [[x0, z0, x1, z1]], "dry": [[x, z]], "dais": [[x0, z0, x1, z1]], "solved": { "lines", "do" } }]
+//   (`dais`: flagstones drawn on raised ground, trials.js only; `start`, `goal`: where the tests
 //   begin and end a search). `reset`: a rune stone that puts the trial's blocks back. A trial with plates is solved when every plate
 // holds a block; its `solved` dialogue then runs (its `do` sets `flag`), and a solved trial is laid out solved.
 export const REACH = 4; // how many tiles Reach carries

@@ -349,6 +349,13 @@ export const PLACEHOLDER = {
   },
   // A stone that differs (Task 3's Storm secret): a squarer block, warmer and lichened, in a dry-stone run; and the same
   // block slid aside (`stone_moved`, `if: "flag:secret_<id>"`) over the dark hollow it hid.
+  // A trial's seal (maps/trials.json gates): a dressed slab filling the doorway, a ring cut in its face that
+  // glows Reach's teal; it sinks into the floor when the trial is solved.
+  trial_seal: () => group(
+    mesh(new THREE.BoxGeometry(0.96, 1.7, 0.5), toon("#8f877b"), 0, 0.85, 0),
+    mesh(new THREE.BoxGeometry(1.02, 0.12, 0.56), toon("#6c665d"), 0, 1.76, 0),
+    mesh(new THREE.TorusGeometry(0.22, 0.04, 6, 24), new THREE.MeshBasicMaterial({ color: "#5fe0c8" }), 0, 1.0, 0.26),
+  ),
   stone_odd: () => oddStone(false),
   stone_moved: () => oddStone(true),
   // ----- Items -----
@@ -456,7 +463,7 @@ export const TALL = { cliff: 1, cliff_b: 1, boardwalk: 0.1, pier: 0.3, bridge: 0
   cliff_slate: 1, cliff_slate_b: 1, stairs_slate: 0.5, headframe: 6.1, terrace_house: 5, minecart: 1.1, menhir: 2.7, support_beam: 2.1, cave_mouth_slate: 2.2,
   rail: 0.07, cairn: 1.45, crystal_cluster: 1, climb_wall_slate: 1, oil_lantern: 2.1, oil_lantern_post: 1.75, anvil: 0.85,
   cobbler_bench: 1, boot_rack: 2, hold_wall: 2.6, rope_coil: 0.9, tally_board: 2.2, soup_cauldron: 1.3,
-  hedge_gap: 0.45, crates_open: 0.65, stone_odd: 0.65, stone_moved: 0.65,
+  hedge_gap: 0.45, crates_open: 0.65, stone_odd: 0.65, stone_moved: 0.65, trial_seal: 1.8,
   cliff_falls: 2, lantern_bunting: 2.7, washing_line: 1.9, water_lilies: 0.08, leaf_litter: 0.05, windmill: 7.5, vegetable_patch: 1.7, // dressing
   flower_planter: 0.75, blossom_tree: 3.6, well: 2.3 };
 
