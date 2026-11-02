@@ -4816,9 +4816,9 @@
       "id": "edda",
       "name": "Edda",
       "model": "npc_elder",
-      "x": 16,
-      "z": 21,
-      "facing": "n",
+      "x": 17,
+      "z": 25,
+      "facing": "e",
       "idle": "Idle",
       "outfit": "#5a3e36",
       "hair": "#e8e0d6",
@@ -4829,13 +4829,13 @@
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "Even the little one down on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
+            "Even the little one, here on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
             "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Même le petit, en bas, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
+            "Même le petit, ici, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
             "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
           ]
         },
@@ -4892,13 +4892,13 @@
           "lines": [
             "Mind the vents on the high terrace. By day they'd boil an egg in your pocket.",
             "After dark the rock cools and they drop to a whisper. Then you can walk the high terrace all the way round, under the north rim.",
-            "Even the little one down on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
+            "Even the little one, here on the crater floor: walk west from the Cinderwick road to the far corner, where the swept stones run into the rock. The old kiln-keepers trusted it to mind what they couldn't carry home.",
             "I've read these vents for fifty years. They're like people: hot-headed by day, quiet at night."
           ],
           "lines_fr": [
             "Attention aux évents de la haute terrasse. Le jour, ils te cuiraient un œuf dans la poche.",
             "Après la tombée de la nuit, la roche refroidit et ils ne font plus qu'un murmure. Alors tu peux faire tout le tour, sous le rebord nord.",
-            "Même le petit, en bas, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
+            "Même le petit, ici, au fond du cratère : depuis la route de Mèche-Cendre, marche vers l'ouest jusqu'au coin, là où les pierres balayées butent contre la roche. Les vieux gardiens du four lui confiaient ce qu'ils ne pouvaient pas rapporter chez eux.",
             "Je lis ces évents depuis cinquante ans. Ils sont comme les gens : soupe au lait le jour, calmes la nuit."
           ]
         }

@@ -110,7 +110,7 @@ test("the deck shelf shows locked decks and how to unlock them", async ({ page }
   await scan(page, "the deck shelf");
 });
 
-test("keyboard only: build a deck for me, undo it, walk the cards, leave", async ({ page }) => {
+test("keyboard only: build a deck for me, undo it, walk the cards, leave @webkit", async ({ page }) => {
   await title(page);
   await menuItem(page, "My decks").focus();
   await page.keyboard.press("Enter");

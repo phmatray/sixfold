@@ -4,7 +4,7 @@ The 0.9.0 balance pass and the 1.3 rules and curve pass (at the end), measured w
 both sides. Rerun it with:
 
 ```bash
-cargo test --release -p sixfold-engine deck_sweep -- --ignored --nocapture
+cargo test --release -p sixfold-meta deck_sweep -- --ignored --nocapture
 ```
 
 `deck_sweep` (`meta/src/playtest.rs`) plays a Normal-vs-Normal round robin over every deck the
@@ -110,7 +110,7 @@ deck Balanced, then with each rival's deck (campaign and Gauntlet) played in its
 requires a styled deck to stay inside 40–60% or no further outside than it was:
 
 ```bash
-cargo test --release -p sixfold-engine style_sweep -- --ignored --nocapture
+cargo test --release -p sixfold-meta style_sweep -- --ignored --nocapture
 ```
 
 | Deck | Style | Balanced | Styled | 1.3 balanced | 1.3 styled |
@@ -561,7 +561,15 @@ four of them Rook's and the rest the seeds' usual swing.
 playthrough wins about half of them) plus a consolation: the first playthrough moves from 5.34 to **5.30
 packs an hour**; exploring stays at 5.23. The campaign playthrough meets Rook as each scene's seals are met
 (one duel, won or lost) and wins the first two, loses the last two, on all three pack seeds; it finishes in
-92, 92 and 80 duels (92, 83 and 71 before), inside its budget, now 102 duels (57 duelists plus 45).
+92, 92 and 80 duels (92, 83 and 71 before), inside its budget, then 102 duels (57 duelists plus 45); see the re-measure below.
+
+**Re-measured for the two secret duelists (#230).** `t_faye` and `t_barnaby` are route duelists and
+`duelists_all` needs both, so the route is 59 duelists. Measured on `babb0c9` (main when #230 was cut; the
+Hard AI work in #232 may shift these): `campaign_sweep` plays 71-111 duels (median 90), 12-52 rival duels
+(median 31), 33-39 packs. The slowest seed (10, the Warden's wall: 26 losses, 4 rematches) needs 52 rival
+duels, over 45, so **the budget is raised to 52** (59 duelists plus 52 = 111 duels); the other 15 seeds
+fit 45 (next slowest 49). The always-on seeds 1, 2 and 3 finish in 89, 92 and 80 duels (30, 33 and 21
+rival duels, 35, 35 and 38 packs).
 
 ## 1.9: the deck builder
 
@@ -605,3 +613,52 @@ before 1.9, and where the starter is always on loan, so a duel is always possibl
 been a second, uncapped source of cards next to the packs: one rival win would hand over 30-odd cards and
 move `economy_sim` (packs an hour) and the campaign playthroughs, whose decks are built from the
 collection. As a loan it moves neither; a campaign duel still needs a deck the player owns.
+
+## Hard in the Dream Veil mirror
+
+Hard beats Normal in the mirrors (`hard_beats_normal_in_mirrors_big`), but after the #232 refit Dream
+Veil sat at 22/50 while the other five decks were ahead. `hard_deviations_dream_veil` (ignored, run
+with `--release`) replays that mirror with the same seeds and, at every Hard main-phase decision,
+asks a clone of Hard's own state what Normal would do. Each departure is counted as "Normal's kind
+-> Hard's kind", in games Hard won and lost.
+
+Findings (22 won out of 50): the departures are spread over every kind and lost games simply have
+more of them (they last longer). Two things stand out: Hard ends its turn instead of playing a
+Gear/Power more often than any other departure (`gear -> end` 30 times in won games, 13 in lost;
+`power -> end` 6 and 19), and the departures that start a retreat (`attach -> retreat` 0 won / 6
+lost games, `basic -> retreat` 1 / 3) cluster in lost games. Nothing points to one bad candidate
+kind; what none of them can see is the status plan: `evaluate` reads no Sleep, Confusion,
+Paralysis or poison, so a play-out cannot tell a stalled opponent from a healthy one. The fix goes
+in `evaluate`.
+
+### The fix and the result
+
+Two changes in `engine/src/ai.rs`. `evaluate` now adds `status_value`: the opponent Active's Special
+condition and poison count for Hard, its own count against it (Asleep 20, Paralyzed 15, Confused
+12, poison 5 per level, capped at 30 a side, so never more than a fraction of a prize). Alone it
+moved Dream Veil from 22 to 24 (weights 2 to 4 times larger made it worse, 17: a play-out already
+sees the stalled turn in the HP and prizes, so a heavy term double counts). The departures that
+the table above ties to lost games were then cut in `candidates()`: Hard no longer tries a retreat
+Normal does not pick, and no longer ends its turn when Normal would attack.
+
+Hard won against Normal, 50 games per deck, seeds `d * 1000 + n`, before (#316 on main) and after:
+
+| Deck | Before | After |
+|---|---|---|
+| Ember Rush | 35 | 35 |
+| Tide Mind | 30 | 29 |
+| Grove Bloom | 31 | 35 |
+| Storm Front | 29 | 31 |
+| Stone Fist | 31 | 29 |
+| Dream Veil | 22 | 26 |
+| All | 182/300 | 185/300 |
+
+`hard_beats_normal_in_mirrors_big` now asserts every deck above 25/50. The margin is thin (50 games
+carry about 7 points of noise) but the seeds are fixed, so the run is reproducible. The bar was not
+lowered.
+
+Caveats from review: the deviation counts compare Hard with a clone of itself taken before its
+decision, so a Normal tie-break that draws from the RNG can add a few departures that are not real;
+and the two `candidates()` cuts were tuned on this mirror's fixed seeds, so they are a measured
+improvement (182 to 185 of 300 overall, Dream Veil 22 to 26), not a proven one. If the mirrors slip
+again, rerun `hard_deviations_dream_veil` before touching the constants.

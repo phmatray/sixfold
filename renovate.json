@@ -27,6 +27,14 @@
       "matchStrings": ["N8AO_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "n8ao",
       "datasourceTemplate": "npm"
+    },
+    {
+      "description": "Theatre.js core shipped in web/vendor/theatre: bump the version, then re-run tools/vendor-theatre.sh",
+      "customType": "regex",
+      "managerFilePatterns": ["/^tools/vendor-theatre\\.sh$/"],
+      "matchStrings": ["THEATRE_VERSION=\\$\\{1:-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\}"],
+      "depNameTemplate": "@theatre/core",
+      "datasourceTemplate": "npm"
     }
   ]
 }
