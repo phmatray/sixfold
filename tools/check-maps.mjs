@@ -260,6 +260,32 @@ for (const [name, m] of Object.entries(maps)) {
 // 3 `cam` and 2 000 ms of `wait`; `entrance_<keeper>` starts on every reachable open tile two from the keeper (but
 // one where someone stands for good: no route or routine), so nobody walks up to them without it; one that plays on arriving
 // anywhere (the Warden's, #154) needs no ring.
+// A `shot:<name>` cue (#253) plays web/world/shots/<name>.json, a Theatre.js 0.7 state: the sheet's sequence length
+// and the `camera` object's keyframed x, y, z (position), tx, ty, tz (target) and fov. The file must exist, a shot in a
+// `reveal_` script lasts at most 4 s, and at every keyframe time (each prop's last keyframe at or before it) the
+// camera pitches 35 to 65 degrees and the fov is 30 to 55. (`cam` cues keep the fixed pitch; only a shot may move it.)
+function shotRule(shot, reveal, bad) {
+  const f = `${dir}/shots/${shot}.json`;
+  if (!existsSync(f)) return void bad(`needs ${f}`);
+  let sheet, cam;
+  try {
+    sheet = JSON.parse(readFileSync(f, "utf8")).sheetsById[shot].sequence;
+    cam = sheet.tracksByObject.camera;
+  } catch {
+    return void bad(`${f} is not a Theatre state with sheetsById.${shot}.sequence.tracksByObject.camera`);
+  }
+  if (reveal && !(sheet.length <= 4)) bad(`a reveal shot lasts at most 4 s (${shot} lasts ${sheet.length})`);
+  const keys = {};
+  for (const [path, id] of Object.entries(cam.trackIdByPropPath ?? {})) keys[path.replace(/^\["|"\]$/g, "")] = cam.trackData?.[id]?.keyframes ?? [];
+  const missing = ["x", "y", "z", "tx", "ty", "tz", "fov"].filter((p) => !keys[p]?.length);
+  if (missing.length) return void bad(`${shot} has no keyframes for ${missing.join(", ")}`);
+  const at = (p, t) => (keys[p].filter((k) => k.position <= t).pop() ?? keys[p][0]).value;
+  for (const t of [...new Set(Object.values(keys).flat().map((k) => k.position))].sort((p, q) => p - q)) {
+    const pitch = (Math.atan2(at("y", t) - at("ty", t), Math.hypot(at("x", t) - at("tx", t), at("z", t) - at("tz", t))) * 180) / Math.PI;
+    if (!(pitch >= 35 && pitch <= 65)) bad(`${shot} pitches ${pitch.toFixed(0)} degrees at ${t} s; a shot keeps 35 to 65`);
+    if (!(at("fov", t) >= 30 && at("fov", t) <= 55)) bad(`${shot} has fov ${at("fov", t)} at ${t} s; a shot keeps 30 to 55`);
+  }
+}
 function scripts(name, m, solid, inMap, reached) {
   const list = m.scripts ?? [];
   if (!Array.isArray(list)) return void fail.push(`${name}: scripts is a list`);
@@ -311,7 +337,8 @@ function scripts(name, m, solid, inMap, reached) {
         if (kind === "stone" && !((a.length === 1 && a[0] === "wake") || seal)) bad("is stone:wake or stone:seal:<keeper>");
         else if (kind === "stone" && seal && !(KEEPERS.includes(a[1]) && npcs[a[1]])) bad(`lights the seal of a keeper who stands here (${KEEPERS.join(", ")})`);
         else if (kind === "stone" && !(m.props ?? []).some((p) => p.asset === "seal_stone")) bad("this map has no seal_stone to wake");
-        if (kind === "cam" && !(a.length === 1 ? actor(a[0]) : a.length === 2 && inMap(+a[0], +a[1]))) bad("looks at hero, an actor on this map or a tile on it");
+        if (kind === "shot") shotRule(a[0], s.id?.startsWith("reveal_"), bad);
+        if (kind === "cam" && !(a.length === 1? actor(a[0]) : a.length === 2 && inMap(+a[0], +a[1]))) bad("looks at hero, an actor on this map or a tile on it");
         if (kind === "walk") {
           if (!/^[nesw]+$/.test(a[1] ?? "")) bad("walks a path of n, e, s and w");
           else if (a[0] !== "hero" && npcs[a[0]]) {
