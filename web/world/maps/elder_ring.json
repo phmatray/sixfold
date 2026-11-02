@@ -29,10 +29,10 @@
       {
         "kind": "hedgehog",
         "zone": [
-          1,
-          27,
-          9,
-          32
+          13,
+          25,
+          20,
+          29
         ],
         "n": 2
       }
@@ -1837,8 +1837,8 @@
       "x": 24,
       "z": 24,
       "kind": "sign",
-      "text": "The Maze of the Elder Ring. Keep one hand on the hedge. Don't feed the hedgehogs. The seal is in the middle; so is Elspeth.",
-      "text_fr": "Le Labyrinthe du Cercle des Anciens. Gardez une main sur la haie. Ne nourrissez pas les hérissons. Le sceau est au milieu ; Elspeth aussi."
+      "text": "The Maze of the Elder Ring. Keep one hand on the hedge. Don't feed the hedgehogs; they come from the nest deep in the hedge, up the west side. The seal is in the middle; so is Elspeth.",
+      "text_fr": "Le Labyrinthe du Cercle des Anciens. Gardez une main sur la haie. Ne nourrissez pas les hérissons ; ils viennent du nid, tout au fond de la haie, côté ouest. Le sceau est au milieu ; Elspeth aussi."
     }
   ],
   "warps": [],
