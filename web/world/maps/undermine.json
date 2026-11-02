@@ -4,6 +4,31 @@
   "region": "stone",
   "kind": "cave",
   "music": "cave",
+  "life": {
+    "critters": [
+      {
+        "kind": "glowbeetle",
+        "zone": [
+          2,
+          6,
+          22,
+          8
+        ],
+        "n": 3
+      },
+      {
+        "kind": "glowbeetle",
+        "zone": [
+          28,
+          8,
+          40,
+          10
+        ],
+        "n": 3
+      }
+    ]
+  },
+  "level_design": 2,
   "width": 50,
   "height": 14,
   "tiles": [
@@ -471,7 +496,8 @@
       "x": 32,
       "z": 10,
       "rot": 0,
-      "glow": "#8ad8f0"
+      "glow": "#8ad8f0",
+      "landmark": true
     },
     {
       "asset": "glow_shelf",
@@ -503,6 +529,48 @@
       "asset": "sign",
       "x": 46,
       "z": 8,
+      "rot": 0
+    },
+    {
+      "asset": "crystal_cluster",
+      "x": 28,
+      "z": 9,
+      "rot": 90
+    },
+    {
+      "asset": "rock",
+      "x": 30,
+      "z": 9,
+      "rot": 270
+    },
+    {
+      "asset": "crystal_cluster",
+      "x": 33,
+      "z": 9,
+      "rot": 180
+    },
+    {
+      "asset": "rock",
+      "x": 27,
+      "z": 10,
+      "rot": 90
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 36,
+      "z": 9,
+      "rot": 90
+    },
+    {
+      "asset": "rock",
+      "x": 38,
+      "z": 9,
+      "rot": 270
+    },
+    {
+      "asset": "glow_mushroom",
+      "x": 39,
+      "z": 9,
       "rot": 0
     }
   ],
@@ -537,7 +605,8 @@
       "z": 1,
       "give": "card:shalehound",
       "text": "Behind the fall, a miners' cubby: a bench, a cold lamp, and in a tin box with a hexagon scratched on the lid, a card.",
-      "text_fr": "Derrière l'éboulis, un réduit de mineurs : un banc, une lampe froide, et dans une boîte en fer avec un hexagone gravé sur le couvercle, une carte."
+      "text_fr": "Derrière l'éboulis, un réduit de mineurs : un banc, une lampe froide, et dans une boîte en fer avec un hexagone gravé sur le couvercle, une carte.",
+      "poi": "secondary"
     },
     {
       "kind": "find",
@@ -546,7 +615,8 @@
       "z": 1,
       "give": "give:curio_miner_tally",
       "text": "An old ore cart, abandoned when the roof came down. Hooked on its rim, a ring of brass tally tags, one punched with a hexagon: the miner who never came back for them.",
-      "text_fr": "Un vieux wagonnet, abandonné quand le toit s'est effondré. Accroché à son rebord, un anneau de jetons de laiton, l'un poinçonné d'un hexagone : le mineur qui n'est jamais revenu les chercher."
+      "text_fr": "Un vieux wagonnet, abandonné quand le toit s'est effondré. Accroché à son rebord, un anneau de jetons de laiton, l'un poinçonné d'un hexagone : le mineur qui n'est jamais revenu les chercher.",
+      "poi": "secondary"
     },
     {
       "kind": "find",
@@ -555,7 +625,8 @@
       "z": 1,
       "give": "pack:stone",
       "text": "The crew's old store: rope, wedges, a crate of candles. At the bottom, still in its wax paper, a sealed Stone pack.",
-      "text_fr": "L'ancienne réserve de l'équipe : de la corde, des coins, une caisse de bougies. Au fond, encore dans son papier ciré, un booster Roc scellé."
+      "text_fr": "L'ancienne réserve de l'équipe : de la corde, des coins, une caisse de bougies. Au fond, encore dans son papier ciré, un booster Roc scellé.",
+      "poi": "secondary"
     },
     {
       "kind": "find",
