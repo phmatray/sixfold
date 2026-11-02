@@ -440,7 +440,7 @@ export function mount(el, controls, cb, start, edit = false, debug = false) {
     // An authored camera move (#253): its pose drives the camera while it lives; at its end the usual framing
     // takes over from where it stopped (the spring starts at the shot's target, the pitch and distance ease).
     shot: (name) => {
-      const s = playShot(name, { reduced });
+      const s = playShot(name, { reduced, studio: edit && new URLSearchParams(location.search).has("studio") });
       (liveShot = s), (lastPose = null);
       const over = () => {
         if (liveShot !== s) return;
