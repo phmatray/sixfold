@@ -5,7 +5,7 @@
 # default below; re-run the script to fetch the matching files (CI checks
 # web/vendor/three/VERSION against it).
 set -eu
-THREE_VERSION=${1:-0.186.1}
+THREE_VERSION=${1:-0.187.0}
 cd "$(dirname "$0")/../web"
 out=vendor/three
 rm -rf "$out"
@@ -25,7 +25,7 @@ echo "$THREE_VERSION" > "$out/VERSION"
 # The world's post-processing (#225): pmndrs postprocessing (Zlib) and N8AO (ISC),
 # one ES module each, importing the bare "three" / "postprocessing" the importmap
 # resolves. jsDelivr minifies them on request (.min.js), saved under the plain name.
-POSTPROCESSING_VERSION=6.39.5
+POSTPROCESSING_VERSION=6.39.6
 N8AO_VERSION=2.0.1
 rm -rf vendor/postprocessing vendor/n8ao
 mkdir -p vendor/postprocessing vendor/n8ao
